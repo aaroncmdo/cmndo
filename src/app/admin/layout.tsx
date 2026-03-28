@@ -42,7 +42,11 @@ export default async function AdminLayout({
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                item.href === '/admin/dispatch'
+                  ? 'text-blue-400 hover:text-blue-300 hover:bg-blue-950/50 font-semibold'
+                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/60'
+              }`}
             >
               <item.icon className="w-4 h-4" />
               {item.label}

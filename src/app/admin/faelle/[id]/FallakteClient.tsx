@@ -499,6 +499,17 @@ export default function FallakteClient({
                   </p>
                 )}
                 <p className="text-green-400 text-sm mt-4 font-medium">Fall wurde an Kanzlei übergeben</p>
+                <a
+                  href={`/api/pdf/kanzlei-paket/${fall.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-colors"
+                >
+                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Kanzlei-Paket PDF herunterladen
+                </a>
               </div>
             ) : (
               <div className="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
