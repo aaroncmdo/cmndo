@@ -11,10 +11,16 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/login)",
       "Bash(curl -s -o /dev/null -w \"/ → %{http_code}\\\\n\" http://localhost:3000)",
       "Bash(curl -s -o /dev/null -w \"/login → %{http_code}\\\\n\" http://localhost:3000/login)",
-      "Bash(find 'c:/Users/Aaron Sprafke/stampit-app/stampit-app/claimondo-v2/node_modules/next/dist/docs' -name *.md)"
+      "Bash(find 'c:/Users/Aaron Sprafke/stampit-app/stampit-app/claimondo-v2/node_modules/next/dist/docs' -name *.md)",
+      "mcp__claude_ai_Supabase__apply_migration",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://localhost:3000/flow/test-token-123\")",
+      "Skill(update-config)",
+      "Skill(update-config:*)"
     ],
     "additionalDirectories": [
-      "c:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\app"
+      "c:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\app",
+      "c:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\app\\flow",
+      "C:\\Users\\Aaron Sprafke\\.claude"
     ]
   }
 }
