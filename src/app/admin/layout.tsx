@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { LayoutDashboardIcon, FolderOpenIcon, UsersIcon, BadgeEuroIcon, ClipboardListIcon, HardHatIcon, LogOutIcon } from 'lucide-react'
+import { LayoutDashboardIcon, FolderOpenIcon, UsersIcon, BadgeEuroIcon, ClipboardListIcon, HardHatIcon, MapIcon, LogOutIcon } from 'lucide-react'
 import NotificationBell from './_components/NotificationBell'
 
 const NAV = [
@@ -9,6 +9,7 @@ const NAV = [
   { href: '/admin/faelle', label: 'Fälle', icon: FolderOpenIcon },
   { href: '/admin/leads', label: 'Leads', icon: UsersIcon },
   { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: HardHatIcon },
+  { href: '/admin/karte', label: 'Karte', icon: MapIcon },
   { href: '/admin/tasks', label: 'Tasks', icon: ClipboardListIcon },
   { href: '/admin/finance', label: 'Finanzen', icon: BadgeEuroIcon },
 ]

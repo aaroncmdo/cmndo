@@ -152,30 +152,54 @@ export default function FlowWizard({ token }: { token: string }) {
     const supabase = createClient()
 
     try {
-      // 1. Lead anlegen
-      const { data: lead, error: leadErr } = await supabase
+      let leadId: string
+
+      // Try to update existing lead (admin-sent flow where token = lead.id)
+      const { data: existingLead } = await supabase
         .from('leads')
-        .insert({
+        .update({
           vorname: data.vorname,
           nachname: data.nachname,
           email: data.email,
-          telefon: data.telefon,
-          source_channel: 'flow',
-          source_domain: token,
+          telefon: data.telefon || null,
           qualifizierung_data: {
             verursacher: data.verursacher,
             beweise: data.beweise,
           },
         })
+        .eq('id', token)
         .select('id')
-        .single()
-      if (leadErr) throw new Error(leadErr.message)
+        .maybeSingle()
 
-      // 2. Fall anlegen
+      if (existingLead) {
+        leadId = existingLead.id
+      } else {
+        // Create new lead (standalone flow / token is not a lead ID)
+        const { data: newLead, error: leadErr } = await supabase
+          .from('leads')
+          .insert({
+            vorname: data.vorname,
+            nachname: data.nachname,
+            email: data.email,
+            telefon: data.telefon || null,
+            source_channel: 'flow',
+            source_domain: token,
+            qualifizierung_data: {
+              verursacher: data.verursacher,
+              beweise: data.beweise,
+            },
+          })
+          .select('id')
+          .single()
+        if (leadErr) throw new Error(leadErr.message)
+        leadId = newLead.id
+      }
+
+      // Fall anlegen
       const { data: fall, error: fallErr } = await supabase
         .from('faelle')
         .insert({
-          lead_id: lead.id,
+          lead_id: leadId,
           schadens_ursache: data.schadens_ursache || null,
           schadens_entdeckt_am: data.schadens_datum || null,
           schadens_adresse: data.adresse,
@@ -193,7 +217,7 @@ export default function FlowWizard({ token }: { token: string }) {
         .single()
       if (fallErr) throw new Error(fallErr.message)
 
-      // 3. Schadenspositionen (eine pro Bereich)
+      // Schadenspositionen (eine pro Bereich)
       if (data.beschaedigte_bereiche.length > 0) {
         const { error: posErr } = await supabase
           .from('schadenspositionen')
@@ -208,7 +232,7 @@ export default function FlowWizard({ token }: { token: string }) {
         if (posErr) throw new Error(posErr.message)
       }
 
-      // 4. Fotos hochladen + Dokumente-Einträge
+      // Fotos hochladen + Dokumente-Einträge
       for (const foto of data.fotos) {
         const ext = foto.name.split('.').pop() ?? 'jpg'
         const path = `flow/${token}/${fall.id}/${Date.now()}_${Math.random()
@@ -245,24 +269,24 @@ export default function FlowWizard({ token }: { token: string }) {
   // ─── Shell ────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-zinc-950 flex flex-col">
       {/* Progress bar */}
-      <div className="fixed top-0 inset-x-0 z-10 h-1 bg-[#0D2B4E]/10">
+      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-zinc-800">
         <div
-          className="h-full bg-[#0D2B4E] transition-all duration-500 ease-out"
+          className="h-full bg-blue-500 transition-all duration-500 ease-out"
           style={{ width: `${progress}%` }}
         />
       </div>
 
       {/* Step counter */}
-      <div className="fixed top-3.5 right-4 z-10 text-xs text-[#6B7B8D] tabular-nums">
+      <div className="fixed top-4 right-4 z-10 text-xs text-zinc-500 tabular-nums">
         {step}&thinsp;/&thinsp;{TOTAL_STEPS}
       </div>
 
       {/* Content */}
       <div className="flex-1 flex flex-col px-5 pt-10 pb-8 max-w-lg mx-auto w-full">
         <div className="flex-1 flex flex-col justify-center py-4">
-          <div className="bg-white/60 backdrop-blur-xl border border-white/80 rounded-3xl px-6 py-7 shadow-xl shadow-[#0D2B4E]/6">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl px-6 py-7 shadow-xl shadow-black/20">
             {step === 1 && (
               <Step1 value={data.schadens_ursache} onChange={(v) => set('schadens_ursache', v)} />
             )}
@@ -296,7 +320,7 @@ export default function FlowWizard({ token }: { token: string }) {
         {/* Navigation */}
         <div className="space-y-3 pt-4">
           {error && (
-            <p className="text-sm text-red-600 text-center rounded-2xl bg-red-50 border border-red-100 px-4 py-3">
+            <p className="text-sm text-red-400 text-center rounded-2xl bg-red-500/10 border border-red-900/50 px-4 py-3">
               {error}
             </p>
           )}
@@ -304,15 +328,15 @@ export default function FlowWizard({ token }: { token: string }) {
             <button
               onClick={handleSubmit}
               disabled={submitting}
-              className="w-full py-4 rounded-full bg-[#0D2B4E] hover:bg-[#1A4A7A] text-white font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-lg shadow-[#0D2B4E]/20"
+              className="w-full min-h-14 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
             >
-              {submitting ? 'Wird gesendet …' : 'Schaden melden'}
+              {submitting ? 'Wird gesendet ...' : 'Schaden melden'}
             </button>
           ) : (
             <button
               onClick={() => setStep((s) => s + 1)}
               disabled={!canProceed(step, data)}
-              className="w-full py-4 rounded-full bg-[#0D2B4E] hover:bg-[#1A4A7A] text-white font-semibold text-base disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-lg shadow-[#0D2B4E]/20"
+              className="w-full min-h-14 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-base disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
             >
               Weiter
             </button>
@@ -320,7 +344,7 @@ export default function FlowWizard({ token }: { token: string }) {
           {step > 1 && (
             <button
               onClick={() => setStep((s) => s - 1)}
-              className="w-full py-3 text-sm text-[#6B7B8D] hover:text-[#0D2B4E] transition-colors"
+              className="w-full py-3 text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
             >
               Zurück
             </button>
@@ -336,8 +360,8 @@ export default function FlowWizard({ token }: { token: string }) {
 function StepHeader({ question, sub }: { question: string; sub?: string }) {
   return (
     <div className="mb-7">
-      <h1 className="text-2xl font-semibold text-[#0D2B4E] leading-snug">{question}</h1>
-      {sub && <p className="mt-2 text-sm text-[#6B7B8D]">{sub}</p>}
+      <h1 className="text-2xl font-semibold text-white leading-snug">{question}</h1>
+      {sub && <p className="mt-2 text-sm text-zinc-400">{sub}</p>}
     </div>
   )
 }
@@ -356,8 +380,8 @@ function SelectButton({
       onClick={onClick}
       className={`w-full text-left px-5 py-4 rounded-2xl border text-sm font-medium transition-all active:scale-[0.98] ${
         selected
-          ? 'border-[#0D2B4E] bg-[#0D2B4E]/[0.07] text-[#0D2B4E] font-semibold'
-          : 'border-[#0D2B4E]/10 bg-white/80 text-[#1E2D40] hover:border-[#0D2B4E]/30'
+          ? 'border-blue-500 bg-blue-500/10 text-blue-400 font-semibold'
+          : 'border-zinc-700 bg-zinc-800/50 text-zinc-200 hover:border-zinc-600'
       }`}
     >
       {children}
@@ -393,8 +417,8 @@ function Step2({ value, toggle }: { value: string[]; toggle: (v: string) => void
             onClick={() => toggle(opt.value)}
             className={`text-left px-4 py-4 rounded-2xl border text-sm font-medium transition-all active:scale-[0.97] ${
               value.includes(opt.value)
-                ? 'border-[#0D2B4E] bg-[#0D2B4E]/[0.07] text-[#0D2B4E] font-semibold'
-                : 'border-[#0D2B4E]/10 bg-white/80 text-[#1E2D40] hover:border-[#0D2B4E]/30'
+                ? 'border-blue-500 bg-blue-500/10 text-blue-400 font-semibold'
+                : 'border-zinc-700 bg-zinc-800/50 text-zinc-200 hover:border-zinc-600'
             }`}
           >
             {opt.label}
@@ -432,7 +456,7 @@ function Step4({ value, onChange }: { value: string; onChange: (v: string) => vo
         value={value}
         onChange={(e) => onChange(e.target.value)}
         max={new Date().toISOString().split('T')[0]}
-        className="w-full px-5 py-4 rounded-2xl border border-[#0D2B4E]/10 bg-white/80 text-[#1E2D40] text-base focus:outline-none focus:border-[#0D2B4E]/40 transition-colors"
+        className="w-full px-5 py-4 rounded-2xl border border-zinc-700 bg-zinc-800 text-zinc-100 text-base focus:outline-none focus:border-zinc-500 transition-colors [color-scheme:dark]"
       />
     </div>
   )
@@ -467,17 +491,17 @@ function Step5({
         onClick={() => fileInputRef.current?.click()}
         className={`flex flex-col items-center justify-center gap-3 px-6 py-10 rounded-2xl border-2 border-dashed cursor-pointer transition-all ${
           dragOver
-            ? 'border-[#0D2B4E] bg-[#0D2B4E]/5'
-            : 'border-[#0D2B4E]/15 bg-white/50 hover:border-[#0D2B4E]/35'
+            ? 'border-blue-500 bg-blue-500/5'
+            : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
         }`}
       >
-        <svg className="w-8 h-8 text-[#0D2B4E]/35" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-8 h-8 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
         </svg>
         <div className="text-center">
-          <p className="text-sm text-[#1E2D40]">Klicken oder Fotos reinziehen</p>
-          <p className="text-xs text-[#6B7B8D] mt-1">Kamera oder Galerie</p>
+          <p className="text-sm text-zinc-300">Klicken oder Fotos reinziehen</p>
+          <p className="text-xs text-zinc-500 mt-1">Kamera oder Galerie</p>
         </div>
         <input
           ref={fileInputRef}
@@ -500,7 +524,7 @@ function Step5({
               />
               <button
                 onClick={(e) => { e.stopPropagation(); onRemove(i) }}
-                className="absolute top-1 right-1 w-5 h-5 rounded-full bg-white/90 text-[#0D2B4E] shadow-sm flex items-center justify-center text-xs leading-none opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-1 right-1 w-6 h-6 rounded-full bg-zinc-900/90 text-zinc-300 shadow-sm flex items-center justify-center text-xs leading-none opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity"
               >
                 ×
               </button>
@@ -523,16 +547,16 @@ function Step6({ value, toggle }: { value: string[]; toggle: (v: string) => void
             onClick={() => toggle(opt.value)}
             className={`w-full flex items-center gap-3 text-left px-5 py-4 rounded-2xl border text-sm font-medium transition-all active:scale-[0.98] ${
               value.includes(opt.value)
-                ? 'border-[#0D2B4E] bg-[#0D2B4E]/[0.07] text-[#0D2B4E] font-semibold'
-                : 'border-[#0D2B4E]/10 bg-white/80 text-[#1E2D40] hover:border-[#0D2B4E]/30'
+                ? 'border-blue-500 bg-blue-500/10 text-blue-400 font-semibold'
+                : 'border-zinc-700 bg-zinc-800/50 text-zinc-200 hover:border-zinc-600'
             }`}
           >
             <div
-              className={`flex-shrink-0 w-4 h-4 rounded border flex items-center justify-center transition-all ${
-                value.includes(opt.value) ? 'border-[#0D2B4E] bg-[#0D2B4E]' : 'border-[#0D2B4E]/25'
+              className={`flex-shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-all ${
+                value.includes(opt.value) ? 'border-blue-500 bg-blue-500' : 'border-zinc-600'
               }`}
             >
-              {value.includes(opt.value) && <CheckIcon className="w-3 h-3 text-white" />}
+              {value.includes(opt.value) && <CheckIcon className="w-3.5 h-3.5 text-white" />}
             </div>
             {opt.label}
           </button>
@@ -550,7 +574,7 @@ function Step7({
   onChange: <K extends keyof FlowData>(key: K, value: FlowData[K]) => void
 }) {
   const inputCls =
-    'w-full px-5 py-3.5 rounded-2xl border border-[#0D2B4E]/10 bg-white/80 text-[#1E2D40] placeholder-[#A0ADB8] text-sm focus:outline-none focus:border-[#0D2B4E]/40 transition-colors'
+    'w-full px-5 py-4 rounded-2xl border border-zinc-700 bg-zinc-800 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 transition-colors'
 
   return (
     <div>
@@ -585,7 +609,7 @@ function Step7({
           className={inputCls}
         />
         <div className="pt-1">
-          <p className="text-xs text-[#6B7B8D] uppercase tracking-wider mb-3">Adresse des Schadens</p>
+          <p className="text-xs text-zinc-500 uppercase tracking-wider mb-3">Adresse des Schadens</p>
           <div className="space-y-3">
             <input
               value={data.adresse}
@@ -634,12 +658,12 @@ function Step8({ data }: { data: FlowData }) {
         <SummaryRow label="Datum" value={data.schadens_datum || '—'} />
         <SummaryRow label="Fotos" value={data.fotos.length > 0 ? `${data.fotos.length} Foto(s)` : 'Keine'} />
         <SummaryRow label="Beweise" value={beweiseLabel} />
-        <div className="h-px bg-[#0D2B4E]/8 my-1" />
+        <div className="h-px bg-zinc-700/50 my-1" />
         <SummaryRow label="Name" value={`${data.vorname} ${data.nachname}`.trim() || '—'} />
         <SummaryRow label="E-Mail" value={data.email || '—'} />
         <SummaryRow label="Telefon" value={data.telefon || '—'} />
         <SummaryRow
-          label="Schadens­adresse"
+          label="Schadensadresse"
           value={[data.adresse, `${data.plz} ${data.ort}`.trim()].filter(Boolean).join(', ') || '—'}
         />
       </div>
@@ -649,9 +673,9 @@ function Step8({ data }: { data: FlowData }) {
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-0.5 px-4 py-3 rounded-xl bg-white/60 border border-white/70">
-      <span className="text-xs text-[#6B7B8D]">{label}</span>
-      <span className="text-sm text-[#0D2B4E] break-words">{value}</span>
+    <div className="flex flex-col gap-0.5 px-4 py-3 rounded-xl bg-zinc-800/50 border border-zinc-700/50">
+      <span className="text-xs text-zinc-500">{label}</span>
+      <span className="text-sm text-zinc-200 break-words">{value}</span>
     </div>
   )
 }

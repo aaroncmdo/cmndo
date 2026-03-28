@@ -16,19 +16,7 @@ export async function sendFlowLink(leadId: string) {
 
   if (!lead) throw new Error('Lead nicht gefunden')
 
-  const token = crypto.randomUUID()
-
-  // Create faelle entry linked to this lead
-  const { error: fallErr } = await supabase
-    .from('faelle')
-    .insert({
-      lead_id: lead.id,
-      status: 'ersterfassung',
-    })
-
-  if (fallErr) throw new Error(`Fall erstellen fehlgeschlagen: ${fallErr.message}`)
-
-  // Update lead status + wa_gesendet
+  // Lead-ID IS the token – no random UUID needed
   const { error: leadErr } = await supabase
     .from('leads')
     .update({
@@ -42,5 +30,5 @@ export async function sendFlowLink(leadId: string) {
   revalidatePath(`/admin/leads/${leadId}`)
   revalidatePath('/admin/leads')
 
-  return { token }
+  return { token: lead.id }
 }
