@@ -1,0 +1,39 @@
+import { createClient } from '@/lib/supabase/server'
+import KanbanBoard from './KanbanBoard'
+
+export default async function TasksPage() {
+  const supabase = await createClient()
+
+  const [{ data: tasks }, { data: faelle }, { data: admins }] = await Promise.all([
+    supabase
+      .from('tasks')
+      .select('id, fall_id, typ, titel, beschreibung, status, faellig_am, erledigt_am, zugewiesen_an, created_at')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('faelle')
+      .select('id, fall_nummer')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('profiles')
+      .select('id, vorname, nachname')
+      .in('rolle', ['admin', 'kanzlei']),
+  ])
+
+  // Build lookup maps
+  const fallMap = Object.fromEntries(
+    (faelle ?? []).map(f => [f.id, f.fall_nummer ?? f.id.slice(0, 8)])
+  )
+  const adminMap = Object.fromEntries(
+    (admins ?? []).map(a => [a.id, `${a.vorname ?? ''} ${a.nachname ?? ''}`.trim() || a.id.slice(0, 8)])
+  )
+
+  return (
+    <KanbanBoard
+      tasks={tasks ?? []}
+      faelle={faelle ?? []}
+      fallMap={fallMap}
+      adminMap={adminMap}
+      admins={admins ?? []}
+    />
+  )
+}

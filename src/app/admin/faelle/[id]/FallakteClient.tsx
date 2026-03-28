@@ -47,7 +47,7 @@ type Lead = {
 type SV = {
   id: string
   paket: string
-  profile: { vorname: string | null; nachname: string | null; telefon: string | null } | null
+  profile: { vorname: string | null; nachname: string | null; telefon: string | null; email: string | null } | null
 } | null
 
 type Schadensposition = {
@@ -75,6 +75,15 @@ type Partei = {
   versicherung_nr: string | null
   telefon: string | null
   email: string | null
+}
+
+type TimelineEntry = {
+  id: string
+  typ: string
+  titel: string
+  beschreibung: string | null
+  metadata: Record<string, unknown> | null
+  created_at: string
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -126,12 +135,28 @@ const FILMCHECK_ITEMS = [
   { id: 'vollstaendig', label: 'Alle versicherungsrelevanten Unterlagen vollständig' },
 ]
 
+const TIMELINE_ICON: Record<string, { bg: string; color: string }> = {
+  'status-change': { bg: 'bg-blue-950', color: 'text-blue-400' },
+  upload: { bg: 'bg-violet-950', color: 'text-violet-400' },
+  notiz: { bg: 'bg-zinc-800', color: 'text-zinc-400' },
+  email: { bg: 'bg-green-950', color: 'text-green-400' },
+  anruf: { bg: 'bg-yellow-950', color: 'text-yellow-400' },
+  system: { bg: 'bg-zinc-800', color: 'text-zinc-500' },
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function fmt(dateStr: string | null) {
   if (!dateStr) return '—'
   return new Date(dateStr).toLocaleDateString('de-DE', {
     day: '2-digit', month: '2-digit', year: 'numeric',
+  })
+}
+
+function fmtDateTime(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('de-DE', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
   })
 }
 
@@ -160,7 +185,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
-type Tab = 'uebersicht' | 'dokumente' | 'filmcheck'
+type Tab = 'uebersicht' | 'dokumente' | 'filmcheck' | 'timeline'
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
@@ -171,6 +196,7 @@ export default function FallakteClient({
   schadenspositionen,
   dokumente,
   parteien,
+  timeline,
 }: {
   fall: Fall
   lead: Lead
@@ -178,6 +204,7 @@ export default function FallakteClient({
   schadenspositionen: Schadensposition[]
   dokumente: Dokument[]
   parteien: Partei[]
+  timeline: TimelineEntry[]
 }) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('uebersicht')
@@ -231,16 +258,17 @@ export default function FallakteClient({
         </div>
 
         {/* Tab Bar */}
-        <div className="flex gap-1 mb-6 bg-zinc-900 rounded-xl p-1 border border-zinc-800">
+        <div className="flex gap-1 mb-6 bg-zinc-900 rounded-xl p-1 border border-zinc-800 overflow-x-auto">
           {([
             ['uebersicht', 'Übersicht'],
             ['dokumente', `Dokumente (${dokumente.length})`],
             ['filmcheck', fall.filmcheck_ok ? '✓ Filmcheck' : 'Filmcheck'],
+            ['timeline', `Timeline (${timeline.length})`],
           ] as [Tab, string][]).map(([id, label]) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === id
                   ? 'bg-zinc-800 text-white'
                   : 'text-zinc-500 hover:text-zinc-300'
@@ -310,6 +338,12 @@ export default function FallakteClient({
                       </span>
                       <span className="text-zinc-200 text-sm">{p.name}</span>
                     </div>
+                    {(p.telefon || p.email) && (
+                      <div className="flex gap-4 mt-0.5 ml-26 text-xs text-zinc-500">
+                        {p.telefon && <span>Tel: {p.telefon}</span>}
+                        {p.email && <span>{p.email}</span>}
+                      </div>
+                    )}
                     {p.versicherung_name && (
                       <div className="flex gap-2 mt-0.5 ml-26">
                         <span className="text-zinc-500 text-xs">Versicherung: {p.versicherung_name}</span>
@@ -322,21 +356,7 @@ export default function FallakteClient({
             )}
 
             {/* Sachverständiger */}
-            <Section title="Sachverständiger">
-              {sv ? (
-                <>
-                  <InfoRow
-                    label="Name"
-                    value={sv.profile ? `${sv.profile.vorname ?? ''} ${sv.profile.nachname ?? ''}`.trim() : '—'}
-                  />
-                  <InfoRow label="Paket" value={sv.paket} />
-                  <InfoRow label="Zugewiesen am" value={fmt(fall.sv_zugewiesen_am)} />
-                  <InfoRow label="SV-Termin" value={fmt(fall.sv_termin)} />
-                </>
-              ) : (
-                <p className="text-zinc-600 text-sm">Noch kein SV zugewiesen.</p>
-              )}
-            </Section>
+            <SvSection fall={fall} sv={sv} onAssigned={() => router.refresh()} />
 
             {/* Gutachten */}
             <Section title="Gutachten">
@@ -532,7 +552,7 @@ export default function FallakteClient({
                   {submitting
                     ? 'Wird gespeichert...'
                     : allChecked
-                    ? 'Filmcheck abschließen & an Kanzlei übergeben'
+                    ? 'An Kanzlei übergeben'
                     : `Noch ${FILMCHECK_ITEMS.filter(i => !checks[i.id]).length} Punkt(e) offen`}
                 </button>
               </div>
@@ -540,7 +560,164 @@ export default function FallakteClient({
           </div>
         )}
 
+        {/* ── Timeline ── */}
+        {activeTab === 'timeline' && (
+          <div>
+            {timeline.length === 0 ? (
+              <div className="bg-zinc-900 rounded-2xl p-12 text-center border border-zinc-800">
+                <p className="text-zinc-500">Noch keine Aktivitäten vorhanden.</p>
+              </div>
+            ) : (
+              <div className="relative">
+                {/* Vertical line */}
+                <div className="absolute left-4 top-0 bottom-0 w-px bg-zinc-800" />
+
+                <div className="space-y-0">
+                  {timeline.map((entry, i) => {
+                    const style = TIMELINE_ICON[entry.typ] ?? TIMELINE_ICON.system
+                    return (
+                      <div key={entry.id} className="relative pl-11 pb-6 last:pb-0">
+                        {/* Dot */}
+                        <div className={`absolute left-2.5 top-1 w-3 h-3 rounded-full ring-2 ring-zinc-950 ${style.bg} ${style.color}`} />
+
+                        <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="text-sm text-white font-medium">{entry.titel}</p>
+                              {entry.beschreibung && (
+                                <p className="text-zinc-400 text-sm mt-1 whitespace-pre-wrap">{entry.beschreibung}</p>
+                              )}
+                            </div>
+                            <span className="text-zinc-600 text-xs whitespace-nowrap shrink-0">
+                              {fmtDateTime(entry.created_at)}
+                            </span>
+                          </div>
+
+                          {/* Type badge */}
+                          <div className="mt-2">
+                            <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${style.bg} ${style.color}`}>
+                              {entry.typ}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
       </div>
     </div>
+  )
+}
+
+// ─── SV Section with assignment ──────────────────────────────────────────────
+
+function SvSection({
+  fall,
+  sv: initialSv,
+  onAssigned,
+}: {
+  fall: Fall
+  sv: SV
+  onAssigned: () => void
+}) {
+  const [assigning, setAssigning] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [assignedSv, setAssignedSv] = useState<SV>(initialSv)
+  const [distanz, setDistanz] = useState<number | null>(null)
+
+  const sv = assignedSv
+
+  async function handleAssign() {
+    setAssigning(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/sv-zuweisung', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fall_id: fall.id }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error ?? 'Zuweisung fehlgeschlagen')
+        return
+      }
+      // Normalize profile from response
+      if (data.sv) {
+        const raw = data.sv
+        const profileRaw = raw.profiles
+        const profile = Array.isArray(profileRaw)
+          ? profileRaw[0] ?? null
+          : profileRaw ?? null
+        setAssignedSv({ id: raw.id, paket: raw.paket, profile })
+      }
+      if (data.distanz_km != null) setDistanz(data.distanz_km)
+      onAssigned()
+    } catch {
+      setError('Netzwerkfehler')
+    } finally {
+      setAssigning(false)
+    }
+  }
+
+  return (
+    <Section title="Sachverständiger">
+      {sv ? (
+        <>
+          <InfoRow
+            label="Name"
+            value={
+              sv.profile
+                ? `${sv.profile.vorname ?? ''} ${sv.profile.nachname ?? ''}`.trim() || '—'
+                : '—'
+            }
+          />
+          {sv.profile?.telefon && (
+            <InfoRow
+              label="Telefon"
+              value={
+                <a href={`tel:${sv.profile.telefon}`} className="text-blue-400 hover:text-blue-300">
+                  {sv.profile.telefon}
+                </a>
+              }
+            />
+          )}
+          {sv.profile?.email && (
+            <InfoRow
+              label="E-Mail"
+              value={
+                <a href={`mailto:${sv.profile.email}`} className="text-blue-400 hover:text-blue-300">
+                  {sv.profile.email}
+                </a>
+              }
+            />
+          )}
+          <InfoRow label="Paket" value={sv.paket} />
+          <InfoRow label="Zugewiesen am" value={fmt(fall.sv_zugewiesen_am)} />
+          {distanz != null && <InfoRow label="Entfernung" value={`${distanz} km`} />}
+          <InfoRow label="SV-Termin" value={fmt(fall.sv_termin)} />
+        </>
+      ) : (
+        <div className="space-y-3">
+          <p className="text-zinc-600 text-sm">Noch kein SV zugewiesen.</p>
+          {error && (
+            <p className="text-sm text-red-400 bg-red-500/10 border border-red-900/50 rounded-xl px-4 py-2.5">
+              {error}
+            </p>
+          )}
+          <button
+            onClick={handleAssign}
+            disabled={assigning}
+            className="w-full py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-blue-600 hover:bg-blue-500 text-white active:scale-[0.98]"
+          >
+            {assigning ? 'SV wird gesucht …' : 'SV automatisch zuweisen'}
+          </button>
+        </div>
+      )}
+    </Section>
   )
 }

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import LeadDetailClient from './LeadDetailClient'
+import FlowLinkSection from './FlowLinkSection'
 
 export default async function LeadDetailPage({
   params,
@@ -47,6 +48,18 @@ export default async function LeadDetailPage({
 
         {/* Status + Details */}
         <LeadDetailClient lead={lead} />
+
+        {/* Flow-Link senden */}
+        <FlowLinkSection
+          lead={{
+            id: lead.id,
+            vorname: lead.vorname,
+            nachname: lead.nachname,
+            telefon: lead.telefon,
+            wa_gesendet: lead.wa_gesendet ?? false,
+            status: lead.status,
+          }}
+        />
 
         {/* Kontakt */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-5">

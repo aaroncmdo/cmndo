@@ -24,6 +24,7 @@ export default async function FallaktePage({
     { data: schadenspositionen },
     { data: dokumente },
     { data: parteien },
+    { data: timeline },
     leadResult,
     svResult,
   ] = await Promise.all([
@@ -41,6 +42,11 @@ export default async function FallaktePage({
       .from('parteien')
       .select('id, rolle, name, versicherung_name, versicherung_nr, telefon, email')
       .eq('fall_id', id),
+    supabase
+      .from('timeline')
+      .select('id, typ, titel, beschreibung, metadata, created_at')
+      .eq('fall_id', id)
+      .order('created_at', { ascending: false }),
     fall.lead_id
       ? supabase
           .from('leads')
@@ -51,7 +57,7 @@ export default async function FallaktePage({
     fall.sv_id
       ? supabase
           .from('sachverstaendige')
-          .select('id, paket, profiles(vorname, nachname, telefon)')
+          .select('id, paket, profiles(vorname, nachname, telefon, email)')
           .eq('id', fall.sv_id)
           .single()
       : Promise.resolve({ data: null }),
@@ -74,6 +80,7 @@ export default async function FallaktePage({
       schadenspositionen={schadenspositionen ?? []}
       dokumente={dokumente ?? []}
       parteien={parteien ?? []}
+      timeline={timeline ?? []}
     />
   )
 }

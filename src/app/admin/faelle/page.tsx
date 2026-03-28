@@ -43,16 +43,8 @@ export default async function AdminFaellePage() {
 
   const { data: faelle } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, status, schadens_ursache, schadens_datum, schadens_ort, filmcheck_ok, created_at, lead_id')
+    .select('id, fall_nummer, status, schadens_ursache, schadens_ort, sv_id, created_at')
     .order('created_at', { ascending: false })
-
-  // Fetch lead names separately to avoid join complexity
-  const leadIds = (faelle ?? []).map(f => f.lead_id).filter(Boolean) as string[]
-  const { data: leads } = leadIds.length
-    ? await supabase.from('leads').select('id, vorname, nachname, email').in('id', leadIds)
-    : { data: [] }
-
-  const leadMap = Object.fromEntries((leads ?? []).map(l => [l.id, l]))
 
   return (
     <div className="px-4 py-8">
@@ -73,69 +65,54 @@ export default async function AdminFaellePage() {
                 <thead>
                   <tr className="border-b border-zinc-800">
                     <th className="text-left px-4 py-3 text-zinc-400 font-medium whitespace-nowrap">Fall-Nr.</th>
-                    <th className="text-left px-4 py-3 text-zinc-400 font-medium">Kunde</th>
-                    <th className="text-left px-4 py-3 text-zinc-400 font-medium whitespace-nowrap">Ursache</th>
-                    <th className="text-left px-4 py-3 text-zinc-400 font-medium">Ort</th>
                     <th className="text-left px-4 py-3 text-zinc-400 font-medium">Status</th>
-                    <th className="text-left px-4 py-3 text-zinc-400 font-medium whitespace-nowrap">Filmcheck</th>
-                    <th className="text-left px-4 py-3 text-zinc-400 font-medium whitespace-nowrap">Erstellt</th>
+                    <th className="text-left px-4 py-3 text-zinc-400 font-medium whitespace-nowrap">Schadensart</th>
+                    <th className="text-left px-4 py-3 text-zinc-400 font-medium">Ort</th>
+                    <th className="text-left px-4 py-3 text-zinc-400 font-medium whitespace-nowrap">SV zugewiesen</th>
+                    <th className="text-left px-4 py-3 text-zinc-400 font-medium whitespace-nowrap">Erstellt am</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {faelle.map((fall) => {
-                    const lead = fall.lead_id ? leadMap[fall.lead_id] : null
-                    const name = lead
-                      ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || lead.email
-                      : '—'
-                    return (
-                      <tr
-                        key={fall.id}
-                        className="border-b border-zinc-800/50 hover:bg-zinc-800/40 transition-colors"
-                      >
-                        <td className="px-4 py-3">
-                          <Link
-                            href={`/admin/faelle/${fall.id}`}
-                            className="text-blue-400 hover:text-blue-300 font-mono text-xs"
-                          >
-                            {fall.fall_nummer ?? fall.id.slice(0, 8)}
-                          </Link>
-                        </td>
-                        <td className="px-4 py-3">
-                          <Link href={`/admin/faelle/${fall.id}`} className="block">
-                            <span className="text-white hover:text-blue-300 transition-colors">{name}</span>
-                            {lead?.email && (
-                              <span className="text-zinc-500 text-xs block">{lead.email}</span>
-                            )}
-                          </Link>
-                        </td>
-                        <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">
-                          {URSACHE_LABEL[fall.schadens_ursache ?? ''] ?? '—'}
-                        </td>
-                        <td className="px-4 py-3 text-zinc-400 text-xs">{fall.schadens_ort ?? '—'}</td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
-                              STATUS_COLOR[fall.status] ?? 'bg-zinc-800 text-zinc-300'
-                            }`}
-                          >
-                            {STATUS_LABEL[fall.status] ?? fall.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          {fall.filmcheck_ok ? (
-                            <span className="text-green-400 text-xs font-medium">✓ OK</span>
-                          ) : (
-                            <span className="text-zinc-600 text-xs">—</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-zinc-500 text-xs whitespace-nowrap">
-                          {fall.created_at
-                            ? new Date(fall.created_at).toLocaleDateString('de-DE')
-                            : '—'}
-                        </td>
-                      </tr>
-                    )
-                  })}
+                  {faelle.map((fall) => (
+                    <tr
+                      key={fall.id}
+                      className="border-b border-zinc-800/50 hover:bg-zinc-800/40 transition-colors"
+                    >
+                      <td className="px-4 py-3">
+                        <Link
+                          href={`/admin/faelle/${fall.id}`}
+                          className="text-blue-400 hover:text-blue-300 font-mono text-xs"
+                        >
+                          {fall.fall_nummer ?? fall.id.slice(0, 8)}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
+                            STATUS_COLOR[fall.status] ?? 'bg-zinc-800 text-zinc-300'
+                          }`}
+                        >
+                          {STATUS_LABEL[fall.status] ?? fall.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-zinc-300 whitespace-nowrap">
+                        {URSACHE_LABEL[fall.schadens_ursache ?? ''] ?? '—'}
+                      </td>
+                      <td className="px-4 py-3 text-zinc-400 text-xs">{fall.schadens_ort ?? '—'}</td>
+                      <td className="px-4 py-3">
+                        {fall.sv_id ? (
+                          <span className="text-green-400 text-xs font-medium">Ja</span>
+                        ) : (
+                          <span className="text-zinc-600 text-xs">Nein</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-zinc-500 text-xs whitespace-nowrap">
+                        {fall.created_at
+                          ? new Date(fall.created_at).toLocaleDateString('de-DE')
+                          : '—'}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
