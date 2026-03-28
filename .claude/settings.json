@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__claude_ai_Notion__notion-search",
+      "mcp__claude_ai_Notion__notion-fetch",
+      "mcp__claude_ai_Notion__notion-update-page",
+      "Bash(find 'c:/Users/Aaron Sprafke/stampit-app/stampit-app/claimondo-v2' -name *.tsx -not -path */node_modules/* -not -path */.next/*)",
+      "Read(//temp/readonly/**)",
+      "Read(//c/Users/**)"
+    ],
+    "defaultMode": "bypassPermissions"
+  }
+}
