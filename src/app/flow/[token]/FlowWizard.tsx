@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { CheckIcon } from 'lucide-react'
+import { notifyNeuerFall } from './actions'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -83,6 +84,13 @@ const BEREICH_LABELS: Record<string, string> = Object.fromEntries(
   BEREICH_OPTIONS.map((o) => [o.value, o.label])
 )
 
+type InitialData = {
+  vorname: string
+  nachname: string
+  email: string
+  telefon: string
+}
+
 const TOTAL_STEPS = 8
 
 // ─── Validation ───────────────────────────────────────────────────────────────
@@ -102,10 +110,18 @@ function canProceed(step: number, data: FlowData): boolean {
 
 // ─── Wizard ───────────────────────────────────────────────────────────────────
 
-export default function FlowWizard({ token }: { token: string }) {
+export default function FlowWizard({ token, initialData }: { token: string; initialData?: InitialData }) {
   const router = useRouter()
   const [step, setStep] = useState(1)
-  const [data, setData] = useState<FlowData>(INITIAL)
+  const [data, setData] = useState<FlowData>(() => ({
+    ...INITIAL,
+    ...(initialData ? {
+      vorname: initialData.vorname,
+      nachname: initialData.nachname,
+      email: initialData.email,
+      telefon: initialData.telefon,
+    } : {}),
+  }))
   const [dragOver, setDragOver] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -135,16 +151,16 @@ export default function FlowWizard({ token }: { token: string }) {
     }))
   }
 
-  function addFiles(files: FileList | File[]) {
+  const addFiles = useCallback((files: FileList | File[]) => {
     const imgs = Array.from(files).filter((f) => f.type.startsWith('image/'))
     setData((d) => ({ ...d, fotos: [...d.fotos, ...imgs] }))
-  }
+  }, [])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     setDragOver(false)
     addFiles(e.dataTransfer.files)
-  }, [])
+  }, [addFiles])
 
   async function handleSubmit() {
     setSubmitting(true)
@@ -257,6 +273,9 @@ export default function FlowWizard({ token }: { token: string }) {
         })
         if (dokErr) throw new Error(dokErr.message)
       }
+
+      // E-Mail an Admin: Neuer Fall (fire & forget)
+      notifyNeuerFall(fall.id).catch(() => {})
 
       router.push(`/flow/signatur/${fall.id}`)
     } catch (err) {

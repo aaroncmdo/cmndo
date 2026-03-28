@@ -38,6 +38,7 @@ export default async function KundeFallPage({
   const [
     { data: dokumente },
     svResult,
+    { data: nachrichten },
   ] = await Promise.all([
     supabase
       .from('dokumente')
@@ -51,6 +52,12 @@ export default async function KundeFallPage({
           .eq('id', fall.sv_id)
           .single()
       : Promise.resolve({ data: null }),
+    supabase
+      .from('timeline')
+      .select('id, typ, titel, beschreibung, created_at')
+      .eq('fall_id', id)
+      .in('typ', ['kunde-nachricht', 'claimondo-antwort'])
+      .order('created_at', { ascending: true }),
   ])
 
   // Normalize SV profile join
@@ -71,6 +78,7 @@ export default async function KundeFallPage({
       fall={fall}
       dokumente={dokumente ?? []}
       sv={sv}
+      nachrichten={nachrichten ?? []}
     />
   )
 }

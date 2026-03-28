@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { emailSvZugewiesen } from '@/lib/email'
 
 // ─── Haversine (km) ──────────────────────────────────────────────────────────
 
@@ -160,6 +161,35 @@ export async function POST(request: Request) {
     .select('id, paket, profiles(vorname, nachname, telefon, email)')
     .eq('id', bestSv.id)
     .single()
+
+  // 9. E-Mail an SV senden (fire & forget)
+  if (svProfile) {
+    const p = Array.isArray(svProfile.profiles) ? svProfile.profiles[0] : svProfile.profiles
+    const svEmail = (p as { email?: string })?.email
+    if (svEmail) {
+      let kundenName = '—'
+      if (fall.schadens_plz) {
+        // Schadens-PLZ reicht als Adresse, Lead-Name holen
+      }
+      const { data: leadForEmail } = await supabase
+        .from('faelle')
+        .select('lead_id')
+        .eq('id', fallId)
+        .single()
+      if (leadForEmail?.lead_id) {
+        const { data: lead } = await supabase
+          .from('leads')
+          .select('vorname, nachname')
+          .eq('id', leadForEmail.lead_id)
+          .single()
+        if (lead) kundenName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—'
+      }
+      const fallData = await supabase.from('faelle').select('fall_nummer, schadens_adresse, schadens_plz, schadens_ort').eq('id', fallId).single()
+      const fallNr = fallData.data?.fall_nummer ?? fallId.slice(0, 8)
+      const adresse = [fallData.data?.schadens_adresse, fallData.data?.schadens_plz, fallData.data?.schadens_ort].filter(Boolean).join(', ') || '—'
+      emailSvZugewiesen(svEmail, fallNr, kundenName, adresse).catch(() => {})
+    }
+  }
 
   return NextResponse.json({
     success: true,

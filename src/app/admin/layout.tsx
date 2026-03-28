@@ -1,17 +1,20 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { LayoutDashboardIcon, FolderOpenIcon, UsersIcon, BadgeEuroIcon, ClipboardListIcon, HardHatIcon, MapIcon, LogOutIcon } from 'lucide-react'
+import { LayoutDashboardIcon, FolderOpenIcon, UsersIcon, BadgeEuroIcon, ClipboardListIcon, HardHatIcon, MapIcon, LogOutIcon, GitBranchIcon, CalendarIcon, BarChart3Icon } from 'lucide-react'
 import NotificationBell from './_components/NotificationBell'
 
 const NAV = [
+  { href: '/admin/dispatch', label: 'Dispatch', icon: GitBranchIcon },
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboardIcon },
   { href: '/admin/faelle', label: 'Fälle', icon: FolderOpenIcon },
   { href: '/admin/leads', label: 'Leads', icon: UsersIcon },
   { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: HardHatIcon },
   { href: '/admin/karte', label: 'Karte', icon: MapIcon },
+  { href: '/admin/kalender', label: 'Kalender', icon: CalendarIcon },
   { href: '/admin/tasks', label: 'Tasks', icon: ClipboardListIcon },
   { href: '/admin/finance', label: 'Finanzen', icon: BadgeEuroIcon },
+  { href: '/admin/statistiken', label: 'Statistiken', icon: BarChart3Icon },
 ]
 
 export default async function AdminLayout({

@@ -1,6 +1,18 @@
 'use client'
 
+import { useState, useRef } from 'react'
+import { useRouter } from 'next/navigation'
+import { uploadDokument, sendNachricht } from './actions'
+
 // ─── Types ──────────────────────────────────────────────────────────────────
+
+type Nachricht = {
+  id: string
+  typ: string
+  titel: string | null
+  beschreibung: string | null
+  created_at: string
+}
 
 type Fall = {
   id: string
@@ -146,11 +158,14 @@ export default function FallDetailClient({
   fall,
   dokumente,
   sv,
+  nachrichten,
 }: {
   fall: Fall
   dokumente: Dokument[]
   sv: SV
+  nachrichten: Nachricht[]
 }) {
+  const router = useRouter()
   const timeline = buildTimeline(fall)
   const isStorniert = fall.status === 'storniert'
   const fotos = dokumente.filter(d => d.typ.startsWith('foto'))
@@ -252,16 +267,16 @@ export default function FallDetailClient({
             </div>
           </div>
 
-          {/* ── Dokumente ── */}
+          {/* ── Dokumente + Upload ── */}
           <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
             <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">
               Dokumente
             </h3>
 
             {dokumente.length === 0 ? (
-              <p className="text-zinc-600 text-sm">Noch keine Dokumente vorhanden.</p>
+              <p className="text-zinc-600 text-sm mb-4">Noch keine Dokumente vorhanden.</p>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-4 mb-4">
                 {/* Fotos */}
                 {fotos.length > 0 && (
                   <div>
@@ -317,6 +332,17 @@ export default function FallDetailClient({
                 )}
               </div>
             )}
+
+            {/* Upload */}
+            <DokumentUpload fallId={fall.id} onDone={() => router.refresh()} />
+          </div>
+
+          {/* ── Nachrichten ── */}
+          <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
+            <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">
+              Nachrichten
+            </h3>
+            <NachrichtenBereich fallId={fall.id} nachrichten={nachrichten} onSend={() => router.refresh()} />
           </div>
 
           {/* ── Bearbeiter / Kontakt ── */}
@@ -326,12 +352,12 @@ export default function FallDetailClient({
             </h3>
 
             {sv?.profile ? (
-              <div className="space-y-0">
+              <div className="space-y-0 mb-4">
+                <p className="text-zinc-500 text-xs mb-2">Sachverständiger</p>
                 <InfoRow
                   label="Name"
                   value={`${sv.profile.vorname ?? ''} ${sv.profile.nachname ?? ''}`.trim() || '—'}
                 />
-                <InfoRow label="Rolle" value="Sachverständiger" />
                 {sv.profile.telefon && (
                   <InfoRow
                     label="Telefon"
@@ -344,15 +370,36 @@ export default function FallDetailClient({
                 )}
               </div>
             ) : (
-              <div className="text-center py-4">
+              <div className="text-center py-4 mb-4">
                 <p className="text-zinc-600 text-sm">
-                  Noch kein Bearbeiter zugewiesen.
+                  Noch kein Sachverständiger zugewiesen.
                 </p>
                 <p className="text-zinc-700 text-xs mt-1">
                   Sobald ein Sachverständiger zugewiesen wird, sehen Sie hier die Kontaktdaten.
                 </p>
               </div>
             )}
+
+            <div className="border-t border-zinc-800 pt-4">
+              <p className="text-zinc-500 text-xs mb-2">Kanzlei</p>
+              <InfoRow label="Kanzlei" value="Claimondo Partnerkanzlei" />
+              <InfoRow
+                label="E-Mail"
+                value={
+                  <a href="mailto:kanzlei@claimondo.de" className="text-blue-400 hover:text-blue-300">
+                    kanzlei@claimondo.de
+                  </a>
+                }
+              />
+              <InfoRow
+                label="Telefon"
+                value={
+                  <a href="tel:+4930123456789" className="text-blue-400 hover:text-blue-300">
+                    030 123 456 789
+                  </a>
+                }
+              />
+            </div>
           </div>
 
           {/* ── Fall-Info ── */}
@@ -406,6 +453,135 @@ function typLabel(typ: string): string {
     vollmacht: 'Vollmacht',
     rechnung: 'Rechnung',
     'foto-schaden': 'Schadensfoto',
+    'kunde-nachreichung': 'Nachreichung',
   }
   return map[typ] ?? typ
+}
+
+// ─── Dokument Upload ────────────────────────────────────────────────────────
+
+function DokumentUpload({ fallId, onDone }: { fallId: string; onDone: () => void }) {
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  async function handleUpload(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setError(null)
+    setUploading(true)
+    try {
+      const formData = new FormData(e.currentTarget)
+      await uploadDokument(fallId, formData)
+      if (fileRef.current) fileRef.current.value = ''
+      onDone()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload fehlgeschlagen')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="border-t border-zinc-800 pt-4">
+      <p className="text-zinc-500 text-xs mb-2">Dokument nachreichen</p>
+      <form onSubmit={handleUpload} className="flex items-center gap-2">
+        <input
+          ref={fileRef}
+          type="file"
+          name="file"
+          required
+          accept="image/*,.pdf,.doc,.docx"
+          className="flex-1 text-xs text-zinc-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-300 file:cursor-pointer hover:file:bg-zinc-700"
+        />
+        <button
+          type="submit"
+          disabled={uploading}
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-40"
+        >
+          {uploading ? 'Lädt...' : 'Hochladen'}
+        </button>
+      </form>
+      {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
+    </div>
+  )
+}
+
+// ─── Nachrichten ─────────────────────────────────────────────────────────────
+
+function NachrichtenBereich({
+  fallId,
+  nachrichten,
+  onSend,
+}: {
+  fallId: string
+  nachrichten: Nachricht[]
+  onSend: () => void
+}) {
+  const [text, setText] = useState('')
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleSend(e: React.FormEvent) {
+    e.preventDefault()
+    if (!text.trim()) return
+    setError(null)
+    setSending(true)
+    try {
+      await sendNachricht(fallId, text)
+      setText('')
+      onSend()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Fehler beim Senden')
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return (
+    <div>
+      {nachrichten.length === 0 ? (
+        <p className="text-zinc-600 text-sm mb-4">Noch keine Nachrichten. Stellen Sie hier Ihre Fragen.</p>
+      ) : (
+        <div className="space-y-3 mb-4 max-h-80 overflow-y-auto">
+          {nachrichten.map(msg => {
+            const isKunde = msg.typ === 'kunde-nachricht'
+            return (
+              <div key={msg.id} className={`flex ${isKunde ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
+                  isKunde
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-zinc-800 text-zinc-200'
+                }`}>
+                  <p className="text-sm whitespace-pre-wrap">{msg.beschreibung}</p>
+                  <p className={`text-[10px] mt-1 ${isKunde ? 'text-blue-200' : 'text-zinc-500'}`}>
+                    {new Date(msg.created_at).toLocaleString('de-DE', {
+                      day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+                    })}
+                  </p>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      <form onSubmit={handleSend} className="flex gap-2">
+        <input
+          type="text"
+          value={text}
+          onChange={e => setText(e.target.value)}
+          placeholder="Nachricht schreiben..."
+          className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600"
+        />
+        <button
+          type="submit"
+          disabled={sending || !text.trim()}
+          className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-40"
+        >
+          {sending ? '...' : 'Senden'}
+        </button>
+      </form>
+      {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
+    </div>
+  )
 }

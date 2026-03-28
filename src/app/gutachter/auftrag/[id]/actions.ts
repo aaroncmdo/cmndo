@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { emailGutachtenEingegangen } from '@/lib/email'
 
 export async function uploadGutachten(fallId: string, formData: FormData) {
   const supabase = await createClient()
@@ -70,6 +71,14 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
     .eq('id', fallId)
 
   if (updateError) throw new Error(`Status-Update fehlgeschlagen: ${updateError.message}`)
+
+  // E-Mail an Admin: Gutachten eingegangen
+  const { data: fallInfo } = await supabase.from('faelle').select('fall_nummer').eq('id', fallId).single()
+  const { data: admins } = await supabase.from('profiles').select('email').eq('rolle', 'admin')
+  const fallNr = fallInfo?.fall_nummer ?? fallId.slice(0, 8)
+  for (const admin of admins ?? []) {
+    if (admin.email) emailGutachtenEingegangen(admin.email, fallNr).catch(() => {})
+  }
 
   revalidatePath(`/gutachter/auftrag/${fallId}`)
   revalidatePath('/gutachter/auftraege')

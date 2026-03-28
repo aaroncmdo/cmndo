@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { emailFilmcheckBestanden } from '@/lib/email'
 
 export async function saveFilmcheck(fallId: string, notizen: string) {
   const supabase = await createClient()
@@ -19,6 +20,14 @@ export async function saveFilmcheck(fallId: string, notizen: string) {
     .eq('id', fallId)
 
   if (error) throw new Error(error.message)
+
+  // E-Mail an Kanzlei: Filmcheck bestanden
+  const { data: fallInfo } = await supabase.from('faelle').select('fall_nummer').eq('id', fallId).single()
+  const fallNr = fallInfo?.fall_nummer ?? fallId.slice(0, 8)
+  const { data: kanzleiUsers } = await supabase.from('profiles').select('email').eq('rolle', 'kanzlei')
+  for (const k of kanzleiUsers ?? []) {
+    if (k.email) emailFilmcheckBestanden(k.email, fallNr).catch(() => {})
+  }
 
   // Auto-create follow-up task: Anschlussschreiben an Kanzlei
   await supabase.from('tasks').insert({
