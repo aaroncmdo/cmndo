@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(claude:*)",
+      "mcp__claude_ai_Supabase__list_projects",
+      "mcp__claude_ai_Supabase__execute_sql",
+      "Bash(cp -r components src/components)",
+      "Bash(cp lib/utils.ts src/lib/utils.ts)",
+      "Bash(taskkill //PID 7912 //F)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/login)",
+      "Bash(curl -s -o /dev/null -w \"/ → %{http_code}\\\\n\" http://localhost:3000)",
+      "Bash(curl -s -o /dev/null -w \"/login → %{http_code}\\\\n\" http://localhost:3000/login)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\app"
+    ]
+  }
+}
