@@ -13,24 +13,42 @@ const ROLE_REDIRECT: Record<string, string> = {
 export async function login(formData: FormData) {
   const supabase = await createClient()
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-  })
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
 
-  if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`)
+  if (!email || !password) {
+    redirect('/login?error=E-Mail+und+Passwort+sind+erforderlich')
   }
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login?error=Kein+Benutzer+gefunden')
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
 
-  const { data: profile } = await supabase
+  if (signInError) {
+    redirect(`/login?error=${encodeURIComponent(signInError.message)}`)
+  }
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) {
+    redirect(`/login?error=${encodeURIComponent(userError?.message ?? 'Kein Benutzer gefunden')}`)
+  }
+
+  const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('rolle')
     .eq('id', user.id)
     .single()
 
-  const destination = (profile?.rolle && ROLE_REDIRECT[profile.rolle]) ?? '/admin'
+  if (profileError) {
+    console.error('Profile query failed:', profileError.message, '| User:', user.id)
+    redirect(`/login?error=${encodeURIComponent('Profil konnte nicht geladen werden: ' + profileError.message)}`)
+  }
+
+  if (!profile?.rolle) {
+    redirect('/login?error=Keine+Rolle+im+Profil+hinterlegt')
+  }
+
+  const destination = ROLE_REDIRECT[profile.rolle] ?? '/admin'
   redirect(destination)
 }

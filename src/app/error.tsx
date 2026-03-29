@@ -20,8 +20,11 @@ export default function Error({
         <h1 className="text-xl font-semibold text-white mb-2">
           Etwas ist schiefgelaufen
         </h1>
-        <p className="text-zinc-400 text-sm mb-6">
+        <p className="text-zinc-400 text-sm mb-4">
           Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.
+        </p>
+        <p className="text-zinc-500 text-xs mb-2 font-mono bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-left break-all">
+          {error.message || 'Unbekannter Fehler'}
         </p>
         {error.digest && (
           <p className="text-zinc-600 text-xs mb-4 font-mono">
