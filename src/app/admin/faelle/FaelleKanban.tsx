@@ -95,15 +95,15 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
   }, [router, startTransition])
 
   return (
-    <div className="px-3 py-2 flex flex-col" style={{ height: 'calc(100vh - 64px)' }}>
-      {/* Header */}
-      <div className="flex items-center justify-between gap-3 mb-2 shrink-0">
-        <div className="flex items-center gap-3">
-          <h1 className="text-base font-semibold text-gray-900">Fälle</h1>
-          <span className="text-gray-500 text-xs">{filtered.length} Fälle</span>
+    <div className="px-3 py-1 overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 120px)' }}>
+      {/* Header - compact 40px */}
+      <div className="flex items-center justify-between gap-3 mb-1 shrink-0" style={{ maxHeight: 40 }}>
+        <div className="flex items-center gap-2">
+          <h1 className="text-sm font-semibold text-gray-900">Fälle</h1>
+          <span className="text-gray-400 text-xs">{filtered.length}</span>
         </div>
         <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suche..."
-          className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 w-48" />
+          className="px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 w-40 h-7" />
       </div>
 
       {toast && (
@@ -120,13 +120,11 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
               const items = byColumn[col.key] ?? []
               return (
                 <div key={col.key} className="min-w-[170px] flex-1 flex flex-col h-full">
-                  <div className="mb-1 px-1 shrink-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className={`text-[10px] font-bold tracking-wide uppercase ${col.color}`}>{col.label}</span>
-                      <span className="text-gray-500 text-[10px] font-medium bg-gray-100 px-1.5 py-0.5 rounded-full ml-auto">{items.length}</span>
-                    </div>
+                  <div className="flex items-center gap-1 px-1 mb-1 shrink-0" style={{ maxHeight: 28 }}>
+                    <span className={`text-[10px] font-bold tracking-wider uppercase ${col.color}`}>{col.label}</span>
+                    <span className="text-gray-500 text-[9px] font-medium bg-gray-100 px-1 py-0.5 rounded-full ml-auto">{items.length}</span>
                   </div>
-                  <div className={`h-0.5 ${col.bg} rounded-full mb-1 opacity-40 shrink-0`} />
+                  <div className={`h-px ${col.bg} mb-1 opacity-40 shrink-0`} />
 
                   <Droppable droppableId={col.key}>
                     {(provided, snapshot) => (

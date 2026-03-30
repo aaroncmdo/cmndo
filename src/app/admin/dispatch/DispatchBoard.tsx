@@ -254,12 +254,12 @@ export default function DispatchBoard({
   }
 
   return (
-    <div className="px-3 py-2 overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 64px)' }}>
+    <div className="px-3 py-1 overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 120px)' }}>
       <div className="max-w-full mx-auto w-full flex flex-col flex-1 min-h-0">
-        {/* Header - compact */}
-        <div className="flex items-center justify-between gap-3 mb-2 shrink-0">
-          <div className="flex items-center gap-3">
-            <h1 className="text-base font-semibold text-gray-900">Dispatch</h1>
+        {/* Header - compact 40px */}
+        <div className="flex items-center justify-between gap-3 mb-1 shrink-0" style={{ maxHeight: 40 }}>
+          <div className="flex items-center gap-2">
+            <h1 className="text-sm font-semibold text-gray-900">Dispatch</h1>
             <span className="text-gray-500 text-xs">
               {pipelineLeads.length} Leads
               {disqualifiziertCount > 0 && (
@@ -272,13 +272,13 @@ export default function DispatchBoard({
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => setShowNewLead(!showNewLead)}
-              className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5">
-              <UserPlusIcon className="w-3.5 h-3.5" /> Neuer Lead
+              className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 h-7">
+              <UserPlusIcon className="w-3 h-3" /> Neu
             </button>
             <div className="relative">
-              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
+              <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
               <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suche..."
-                className="pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 w-48" />
+                className="pl-7 pr-2 py-1 bg-white border border-gray-200 rounded-lg text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 w-40 h-7" />
             </div>
           </div>
         </div>
