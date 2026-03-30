@@ -985,8 +985,104 @@ function TabUebersicht({
     fall.polizei_bericht_vorhanden && { label: 'Polizeibericht', color: 'emerald' },
   ].filter(Boolean) as { label: string; color: string }[]
 
+  // Gutachtertermin-Karte Logik
+  const svTermin = fall.sv_termin ? new Date(fall.sv_termin) : null
+  const svName = sv?.profile ? `${sv.profile.vorname ?? ''} ${sv.profile.nachname ?? ''}`.trim() : null
+  const showTerminKarte = svTermin && !['besichtigung', 'gutachten-eingegangen', 'filmcheck', 'kanzlei-uebergeben', 'anschlussschreiben', 'regulierung', 'abgeschlossen', 'storniert'].includes(fall.status)
+  const terminIsToday = svTermin && svTermin.toDateString() === new Date().toDateString()
+  const terminIsOverdue = svTermin && svTermin < new Date() && !terminIsToday
+  const terminCountdown = svTermin ? Math.ceil((svTermin.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0
+
+  // Dokumenten-Checkliste Logik
+  const pflichtDocsStatus = [
+    { name: 'Sicherungsabtretung', done: !!fall.abtretung_signiert_am, date: fall.abtretung_signiert_am },
+    { name: 'Vollmacht', done: !!fall.vollmacht_signiert_am, date: fall.vollmacht_signiert_am },
+    { name: 'Fahrzeugschein', done: dokumente.some(d => d.kategorie === 'fahrzeugschein'), date: null },
+    { name: 'Fuehrerschein', done: dokumente.some(d => d.kategorie === 'fuehrerschein'), date: null },
+    { name: 'Schadensfotos', done: dokumente.filter(d => d.kategorie === 'schadensfotos').length >= 4, date: null },
+  ]
+  const docsComplete = pflichtDocsStatus.filter(d => d.done).length
+  const docsTotal = pflichtDocsStatus.length
+  const docsPct = Math.round((docsComplete / docsTotal) * 100)
+
+  // FIN
+  const finVin = (fall as Record<string, unknown>).fin_vin as string | null
+  const vorschadenVorhanden = (fall as Record<string, unknown>).vorschaden_vorhanden as boolean | null
+  const vorschadenAnzahl = (fall as Record<string, unknown>).vorschaden_anzahl as number | null
+
   return (
     <div className="space-y-4">
+      {/* GUTACHTERTERMIN-KARTE (prominent, volle Breite) */}
+      {showTerminKarte && svTermin && (
+        <div className={`rounded-2xl p-5 border ${
+          terminIsToday ? 'border-green-600 bg-green-950/30' :
+          terminIsOverdue ? 'border-red-600 bg-red-950/30' :
+          'border-blue-600/40 bg-blue-950/20'
+        }`}>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <p className="text-xs text-zinc-400 uppercase tracking-wider mb-1">Gutachtertermin</p>
+              {svName && (
+                <p className="text-white text-sm font-medium mb-1">{svName}</p>
+              )}
+              <p className={`text-2xl font-bold ${terminIsToday ? 'text-green-400' : terminIsOverdue ? 'text-red-400' : 'text-white'}`}>
+                {svTermin.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
+                {' '}
+                {svTermin.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+              </p>
+              {fall.schadens_adresse && (
+                <p className="text-zinc-400 text-sm mt-1">{[fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ')}</p>
+              )}
+            </div>
+            <div className="text-right shrink-0">
+              {terminIsToday && (
+                <span className="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">HEUTE</span>
+              )}
+              {terminIsOverdue && (
+                <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full">UEBERFAELLIG</span>
+              )}
+              {!terminIsToday && !terminIsOverdue && (
+                <span className="bg-blue-600/20 text-blue-400 text-xs font-medium px-3 py-1 rounded-full">
+                  In {terminCountdown} Tagen
+                </span>
+              )}
+            </div>
+          </div>
+          {/* Warnung wenn Docs fehlen */}
+          {docsComplete < docsTotal && terminCountdown <= 2 && terminCountdown >= 0 && (
+            <div className="mt-3 px-3 py-2 rounded-lg bg-amber-950/50 border border-amber-800/40">
+              <p className="text-amber-400 text-xs font-semibold">
+                ACHTUNG: Gutachtertermin in {terminCountdown} Tagen aber {docsTotal - docsComplete} Pflichtdokumente fehlen noch!
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* DOKUMENTEN-CHECKLISTE (kompakt) */}
+      <Section title={`Pflichtdokumente (${docsComplete}/${docsTotal})`}>
+        <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden mb-3">
+          <div
+            className={`h-full rounded-full transition-all ${docsPct === 100 ? 'bg-emerald-500' : docsPct >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
+            style={{ width: `${docsPct}%` }}
+          />
+        </div>
+        <div className="space-y-1.5">
+          {pflichtDocsStatus.map(doc => (
+            <div key={doc.name} className="flex items-center gap-2">
+              <span className={`w-4 h-4 rounded flex items-center justify-center text-[10px] ${doc.done ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                {doc.done ? '\u2713' : '\u2717'}
+              </span>
+              <span className={`text-sm ${doc.done ? 'text-zinc-300' : 'text-red-400 font-medium'}`}>
+                {doc.name}
+                {doc.done && doc.date && <span className="text-zinc-600 text-xs ml-2">{new Date(doc.date).toLocaleDateString('de-DE')}</span>}
+                {!doc.done && <span className="text-red-500 text-xs ml-2">FEHLT</span>}
+              </span>
+            </div>
+          ))}
+        </div>
+      </Section>
+
       {/* Betreuer */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Section title="Kundenbetreuer">
@@ -1097,14 +1193,50 @@ function TabUebersicht({
         )}
       </Section>
 
-      {/* Fahrzeugdaten */}
+      {/* Fahrzeugdaten + FIN */}
       <Section title="Fahrzeugdaten">
-        <InfoRow label="Kennzeichen" value={fall.kennzeichen} />
-        <InfoRow label="Fahrzeug" value={
-          [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || '—'
-        } />
+        <div className="space-y-0">
+          {(fall.fahrzeug_hersteller || fall.fahrzeug_modell) && (
+            <p className="text-white text-lg font-medium mb-1">
+              {[fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ')}
+            </p>
+          )}
+          {fall.kennzeichen && (
+            <span className="inline-block bg-blue-950 text-blue-300 text-sm font-mono font-medium px-3 py-1 rounded-lg mb-2">
+              {fall.kennzeichen}
+            </span>
+          )}
+        </div>
         {fall.fahrzeug_baujahr && <InfoRow label="Baujahr" value={String(fall.fahrzeug_baujahr)} />}
         {fall.fahrzeug_typ && <InfoRow label="Typ" value={fall.fahrzeug_typ} />}
+        {fall.schadenhoehe_netto && (
+          <InfoRow label="Schadenhoehe" value={
+            <span className="text-amber-400 font-semibold">
+              {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(fall.schadenhoehe_netto)}
+            </span>
+          } />
+        )}
+
+        {/* FIN */}
+        <div className="border-t border-zinc-800/50 mt-2 pt-2">
+          {finVin ? (
+            <div>
+              <InfoRow label="FIN" value={<span className="font-mono text-sm">{finVin}</span>} />
+              {vorschadenVorhanden !== null && (
+                <InfoRow label="Vorschaden" value={
+                  vorschadenVorhanden
+                    ? <span className="text-red-400 font-medium">{vorschadenAnzahl ?? '?'} Vorschaeden gefunden</span>
+                    : <span className="text-emerald-400">Keine Vorschaeden</span>
+                } />
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="bg-amber-950 text-amber-400 text-xs font-medium px-2 py-0.5 rounded">FIN fehlt noch</span>
+              <span className="text-zinc-500 text-xs">Wird aus Fahrzeugschein extrahiert (OCR)</span>
+            </div>
+          )}
+        </div>
       </Section>
 
       {/* Gegner-Daten */}
