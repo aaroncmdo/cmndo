@@ -523,3 +523,61 @@ export async function saveKanzleiAnsprechpartner(
   revalidatePath(`/admin/faelle/${fallId}`)
   revalidatePath(`/kunde/fall/${fallId}`)
 }
+
+// ─── Tasks (KFZ-38) ────────────────────────────────────────────────────────
+
+export async function createFallTask(
+  fallId: string,
+  data: { titel: string; beschreibung: string | null; faellig_am: string | null; prioritaet: string },
+) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const { error } = await supabase.from('tasks').insert({
+    fall_id: fallId,
+    typ: 'manuell',
+    titel: data.titel,
+    beschreibung: data.beschreibung,
+    faellig_am: data.faellig_am,
+    prioritaet: data.prioritaet,
+    zugewiesen_an: user.id,
+    auto_erstellt: false,
+  })
+
+  if (error) throw new Error(error.message)
+
+  // Timeline-Eintrag
+  await supabase.from('timeline').insert({
+    fall_id: fallId,
+    typ: 'system',
+    titel: 'Task erstellt',
+    beschreibung: `Manueller Task: ${data.titel}`,
+    erstellt_von: user.id,
+  })
+
+  revalidatePath(`/admin/faelle/${fallId}`)
+}
+
+export async function updateTaskStatus(taskId: string, newStatus: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const updateData: Record<string, unknown> = { status: newStatus }
+  if (newStatus === 'erledigt') {
+    updateData.erledigt_am = new Date().toISOString()
+  } else {
+    updateData.erledigt_am = null
+  }
+
+  const { data: task, error } = await supabase
+    .from('tasks')
+    .update(updateData)
+    .eq('id', taskId)
+    .select('fall_id')
+    .single()
+
+  if (error) throw new Error(error.message)
+  if (task?.fall_id) revalidatePath(`/admin/faelle/${task.fall_id}`)
+}

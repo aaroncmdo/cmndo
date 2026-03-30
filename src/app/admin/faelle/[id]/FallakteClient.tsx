@@ -17,6 +17,8 @@ import {
   qcBestanden,
   qcNachbesserung,
   saveKanzleiAnsprechpartner,
+  createFallTask,
+  updateTaskStatus,
 } from './actions'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import {
@@ -463,7 +465,21 @@ function Badge({ children, color }: { children: React.ReactNode; color: string }
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
-type Tab = 'uebersicht' | 'dokumente' | 'dateien' | 'qc' | 'timeline' | 'kommunikation' | 'kanzlei' | 'chat'
+type Tab = 'uebersicht' | 'dokumente' | 'dateien' | 'qc' | 'timeline' | 'kommunikation' | 'kanzlei' | 'chat' | 'abrechnung' | 'tasks'
+
+type TaskItem = {
+  id: string
+  typ: string
+  titel: string
+  beschreibung: string | null
+  status: string
+  faellig_am: string | null
+  erledigt_am: string | null
+  zugewiesen_an: string | null
+  prioritaet: string | null
+  auto_erstellt: boolean | null
+  created_at: string
+}
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
@@ -491,12 +507,15 @@ export default function FallakteClient({
   pflichtdokumente: Pflichtdokument[]
   nachrichten: Nachricht[]
   qcCheckliste: QcCheckliste
+  tasks: TaskItem[]
 }) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('uebersicht')
   const [mapsReady, setMapsReady] = useState(
     typeof window !== 'undefined' && typeof google !== 'undefined' && !!google.maps?.places,
   )
+
+  const offeneTasks = tasks.filter(t => t.status !== 'erledigt').length
 
   const tabs: [Tab, string][] = [
     ['uebersicht', 'Uebersicht'],
@@ -507,6 +526,8 @@ export default function FallakteClient({
     ['kommunikation', 'Kommunikation'],
     ['kanzlei', 'Kanzlei'],
     ['chat', 'Chat'],
+    ['abrechnung', 'Abrechnung'],
+    ['tasks', `Tasks${offeneTasks > 0 ? ` (${offeneTasks})` : ''}`],
   ]
 
   return (
@@ -675,6 +696,16 @@ export default function FallakteClient({
           <TabChat
             fall={fall}
             nachrichten={nachrichten}
+            onRefresh={() => router.refresh()}
+          />
+        )}
+        {activeTab === 'abrechnung' && (
+          <TabAbrechnung fall={fall} />
+        )}
+        {activeTab === 'tasks' && (
+          <TabTasks
+            fall={fall}
+            tasks={tasks}
             onRefresh={() => router.refresh()}
           />
         )}
@@ -2366,6 +2397,288 @@ function TabChat({
             <p className="text-xs text-zinc-600 text-center">Dieser Kanal ist nur lesbar.</p>
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+// ─── TAB 9: Abrechnung ──────────────────────────────────────────────────────
+
+function TabAbrechnung({ fall }: { fall: Fall }) {
+  const gutachtenBetrag = fall.gutachten_betrag ?? 0
+  const schadenNetto = (fall as Record<string, unknown>).schadenhoehe_netto as number ?? 0
+  const regulierungBetrag = fall.regulierung_betrag ?? 0
+
+  // Typische Kalkulation
+  const nutzungsausfall = 0 // Could be from gutachten data
+  const gutachterkosten = Math.round(gutachtenBetrag * 0.12) // ~12% of damage
+  const anwaltskosten = Math.round(gutachtenBetrag * 0.08) // ~8% estimate
+  const gesamtforderung = gutachtenBetrag + nutzungsausfall + gutachterkosten + anwaltskosten
+
+  return (
+    <div className="space-y-6">
+      {/* Forderungsaufstellung */}
+      <Section title="Forderungsaufstellung">
+        <div className="space-y-2">
+          <AbrechnungRow label="Reparaturkosten (netto)" value={gutachtenBetrag} />
+          <AbrechnungRow label="Schadenhöhe (netto, Gutachten)" value={schadenNetto} />
+          <AbrechnungRow label="Nutzungsausfall" value={nutzungsausfall} />
+          <AbrechnungRow label="Gutachterkosten" value={gutachterkosten} />
+          <AbrechnungRow label="Anwaltskosten (RVG)" value={anwaltskosten} />
+          <div className="border-t border-zinc-700 pt-2 mt-3">
+            <AbrechnungRow label="Gesamtforderung" value={gesamtforderung} bold />
+          </div>
+        </div>
+      </Section>
+
+      {/* Zahlungseingang */}
+      <Section title="Zahlungseingang">
+        <div className="space-y-2">
+          <AbrechnungRow label="Regulierungsbetrag VS" value={regulierungBetrag} />
+          <AbrechnungRow label="Differenz" value={gesamtforderung - regulierungBetrag} />
+        </div>
+        {regulierungBetrag > 0 && regulierungBetrag < gesamtforderung && (
+          <div className="mt-3 bg-amber-950/40 border border-amber-800/40 rounded-xl p-3">
+            <p className="text-amber-400 text-xs font-medium">Kürzung erkannt — ggf. Restwertgutachten / Nachforderung prüfen</p>
+          </div>
+        )}
+        {regulierungBetrag >= gesamtforderung && regulierungBetrag > 0 && (
+          <div className="mt-3 bg-emerald-950/40 border border-emerald-800/40 rounded-xl p-3">
+            <p className="text-emerald-400 text-xs font-medium">Vollständig reguliert</p>
+          </div>
+        )}
+      </Section>
+
+      {/* Abrechnung Factoring */}
+      <Section title="Abrechnung / Factoring">
+        <div className="space-y-2 text-sm text-zinc-400">
+          <div className="flex justify-between">
+            <span>DSR24 Factoring</span>
+            <span className="text-zinc-300">{regulierungBetrag > 0 ? 'Aktiv' : 'Ausstehend'}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>RVG-Gebühren (Kanzlei)</span>
+            <span className="text-zinc-300">{fmtEur(anwaltskosten)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Restbetrag an Kunden</span>
+            <span className="text-zinc-300 font-medium">
+              {fmtEur(Math.max(0, regulierungBetrag - gutachterkosten - anwaltskosten))}
+            </span>
+          </div>
+        </div>
+      </Section>
+    </div>
+  )
+}
+
+function AbrechnungRow({ label, value, bold }: { label: string; value: number; bold?: boolean }) {
+  return (
+    <div className={`flex justify-between text-sm ${bold ? 'text-white font-semibold' : 'text-zinc-400'}`}>
+      <span>{label}</span>
+      <span className={bold ? 'text-white' : 'text-zinc-300'}>{fmtEur(value)}</span>
+    </div>
+  )
+}
+
+function fmtEur(v: number): string {
+  return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(v)
+}
+
+// ─── TAB 10: Tasks ──────────────────────────────────────────────────────────
+
+function TabTasks({
+  fall,
+  tasks,
+  onRefresh,
+}: {
+  fall: Fall
+  tasks: TaskItem[]
+  onRefresh: () => void
+}) {
+  const [adding, setAdding] = useState(false)
+  const [titel, setTitel] = useState('')
+  const [beschreibung, setBeschreibung] = useState('')
+  const [deadline, setDeadline] = useState('')
+  const [prio, setPrio] = useState('normal')
+  const [saving, setSaving] = useState(false)
+
+  const offene = tasks.filter(t => t.status !== 'erledigt')
+  const erledigte = tasks.filter(t => t.status === 'erledigt')
+
+  async function handleCreate() {
+    if (!titel.trim()) return
+    setSaving(true)
+    try {
+      await createFallTask(fall.id, {
+        titel: titel.trim(),
+        beschreibung: beschreibung.trim() || null,
+        faellig_am: deadline ? new Date(deadline).toISOString() : null,
+        prioritaet: prio,
+      })
+      setTitel('')
+      setBeschreibung('')
+      setDeadline('')
+      setPrio('normal')
+      setAdding(false)
+      onRefresh()
+    } catch { /* */ }
+    setSaving(false)
+  }
+
+  async function handleToggle(taskId: string, newStatus: string) {
+    try {
+      await updateTaskStatus(taskId, newStatus)
+      onRefresh()
+    } catch { /* */ }
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header + Add button */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-medium text-zinc-400">
+          {offene.length} offen · {erledigte.length} erledigt
+        </h3>
+        <button
+          onClick={() => setAdding(!adding)}
+          className="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg transition-colors"
+        >
+          + Task erstellen
+        </button>
+      </div>
+
+      {/* Create form */}
+      {adding && (
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 space-y-3">
+          <input
+            type="text"
+            value={titel}
+            onChange={e => setTitel(e.target.value)}
+            placeholder="Task-Titel..."
+            className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+          <textarea
+            value={beschreibung}
+            onChange={e => setBeschreibung(e.target.value)}
+            placeholder="Beschreibung (optional)"
+            rows={2}
+            className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+          />
+          <div className="flex gap-3">
+            <input
+              type="datetime-local"
+              value={deadline}
+              onChange={e => setDeadline(e.target.value)}
+              className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+            <select
+              value={prio}
+              onChange={e => setPrio(e.target.value)}
+              className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="normal">Normal</option>
+              <option value="dringend">Dringend</option>
+              <option value="kritisch">Kritisch</option>
+            </select>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={handleCreate}
+              disabled={saving || !titel.trim()}
+              className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm px-4 py-2 rounded-xl transition-colors"
+            >
+              {saving ? 'Erstellt...' : 'Erstellen'}
+            </button>
+            <button
+              onClick={() => setAdding(false)}
+              className="text-zinc-500 hover:text-zinc-300 text-sm px-3 py-2 transition-colors"
+            >
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Offene Tasks */}
+      {offene.length > 0 && (
+        <div className="space-y-2">
+          {offene.map(task => (
+            <TaskCard key={task.id} task={task} onToggle={handleToggle} />
+          ))}
+        </div>
+      )}
+
+      {offene.length === 0 && !adding && (
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 text-center">
+          <p className="text-zinc-500 text-sm">Keine offenen Tasks.</p>
+        </div>
+      )}
+
+      {/* Erledigte Tasks */}
+      {erledigte.length > 0 && (
+        <details className="group">
+          <summary className="text-xs text-zinc-600 cursor-pointer hover:text-zinc-400 transition-colors">
+            {erledigte.length} erledigte Tasks anzeigen
+          </summary>
+          <div className="space-y-2 mt-2 opacity-60">
+            {erledigte.map(task => (
+              <TaskCard key={task.id} task={task} onToggle={handleToggle} />
+            ))}
+          </div>
+        </details>
+      )}
+    </div>
+  )
+}
+
+function TaskCard({
+  task,
+  onToggle,
+}: {
+  task: TaskItem
+  onToggle: (id: string, status: string) => void
+}) {
+  const isErledigt = task.status === 'erledigt'
+  const isOverdue = !isErledigt && task.faellig_am && new Date(task.faellig_am) < new Date()
+
+  return (
+    <div className={`flex items-start gap-3 bg-zinc-900 border rounded-xl p-3 ${
+      isOverdue ? 'border-red-800/50' : 'border-zinc-800'
+    }`}>
+      <button
+        onClick={() => onToggle(task.id, isErledigt ? 'offen' : 'erledigt')}
+        className={`shrink-0 mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+          isErledigt
+            ? 'bg-emerald-600 border-emerald-600 text-white'
+            : 'border-zinc-600 hover:border-blue-500'
+        }`}
+      >
+        {isErledigt && <span className="text-[10px]">✓</span>}
+      </button>
+      <div className="min-w-0 flex-1">
+        <p className={`text-sm ${isErledigt ? 'text-zinc-500 line-through' : 'text-zinc-200'}`}>
+          {task.titel}
+        </p>
+        {task.beschreibung && (
+          <p className="text-xs text-zinc-600 mt-0.5 line-clamp-1">{task.beschreibung}</p>
+        )}
+        <div className="flex items-center gap-2 mt-1 text-[10px]">
+          {task.prioritaet === 'kritisch' && (
+            <span className="bg-red-950 text-red-400 px-1.5 py-0.5 rounded font-semibold">KRITISCH</span>
+          )}
+          {task.prioritaet === 'dringend' && (
+            <span className="bg-amber-950 text-amber-400 px-1.5 py-0.5 rounded font-semibold">DRINGEND</span>
+          )}
+          {task.faellig_am && (
+            <span className={`${isOverdue ? 'text-red-400' : 'text-zinc-600'}`}>
+              Fällig: {new Date(task.faellig_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+            </span>
+          )}
+          {task.auto_erstellt && (
+            <span className="text-zinc-700">Auto</span>
+          )}
+        </div>
       </div>
     </div>
   )
