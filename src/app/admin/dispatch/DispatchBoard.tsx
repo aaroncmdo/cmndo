@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
@@ -151,7 +151,7 @@ export default function DispatchBoard({
   currentUserId: string | null
 }) {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
+  const [localLeads, setLocalLeads] = useState(leads)
   const [search, setSearch] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
@@ -160,10 +160,13 @@ export default function DispatchBoard({
   const [newLeadSaving, setNewLeadSaving] = useState(false)
   const [showDisqualifiziert, setShowDisqualifiziert] = useState(false)
 
-  const disqualifiziertCount = useMemo(() => leads.filter(l => l.status === 'disqualifiziert' || l.qualifizierungs_phase === 'disqualifiziert').length, [leads])
+  // Sync props → local state when server data changes (e.g. after new lead creation)
+  useEffect(() => { setLocalLeads(leads) }, [leads])
+
+  const disqualifiziertCount = useMemo(() => localLeads.filter(l => l.status === 'disqualifiziert' || l.qualifizierungs_phase === 'disqualifiziert').length, [localLeads])
 
   const pipelineLeads = useMemo(() => {
-    return leads.filter(l => {
+    return localLeads.filter(l => {
       if (l.status === 'disqualifiziert' || l.status === 'kalt' || l.qualifizierungs_phase === 'disqualifiziert') return false
       if (search) {
         const q = search.toLowerCase()
@@ -172,7 +175,7 @@ export default function DispatchBoard({
       }
       return true
     })
-  }, [leads, search])
+  }, [localLeads, search])
 
   const disqualifiziertLeads = useMemo(() => {
     return leads.filter(l => l.status === 'disqualifiziert' || l.qualifizierungs_phase === 'disqualifiziert')
@@ -237,16 +240,17 @@ export default function DispatchBoard({
       }
     }
 
-    setError(null)
-    startTransition(async () => {
-      try {
-        await updateLeadStatus(draggableId, newPhase)
-        router.refresh()
-      } catch (e) {
-        setError(e instanceof Error ? e.message : 'Fehler')
-      }
+    // Optimistic update: move lead locally FIRST, then persist
+    const snapshot = [...localLeads]
+    setLocalLeads(prev => prev.map(l => l.id === draggableId ? { ...l, qualifizierungs_phase: newPhase } : l))
+
+    // Persist in background — NO router.refresh to avoid flicker
+    updateLeadStatus(draggableId, newPhase).catch(e => {
+      // Rollback on error
+      setLocalLeads(snapshot)
+      showToast(e instanceof Error ? e.message : 'Fehler beim Speichern')
     })
-  }, [pipelineLeads, router, startTransition])
+  }, [pipelineLeads, localLeads])
 
   function showToast(msg: string) {
     setToast(msg)

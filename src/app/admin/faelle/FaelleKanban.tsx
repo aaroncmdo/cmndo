@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useCallback, useState, useTransition } from 'react'
+import { useMemo, useCallback, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
@@ -52,22 +52,23 @@ function timeSince(d: string): string {
 }
 
 export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
-  const router = useRouter()
-  const [isPending, startTransition] = useTransition()
+  const [localFaelle, setLocalFaelle] = useState(faelle)
   const [toast, setToast] = useState<string | null>(null)
   const [search, setSearch] = useState('')
 
+  useEffect(() => { setLocalFaelle(faelle) }, [faelle])
+
   const filtered = useMemo(() => {
-    if (!search) return faelle.filter(f => f.status !== 'storniert')
+    if (!search) return localFaelle.filter(f => f.status !== 'storniert')
     const q = search.toLowerCase()
-    return faelle.filter(f => {
+    return localFaelle.filter(f => {
       if (f.status === 'storniert') return false
       return (f.kunde_name ?? '').toLowerCase().includes(q) ||
         (f.mandatsnummer ?? '').toLowerCase().includes(q) ||
         (f.kennzeichen ?? '').toLowerCase().includes(q) ||
         (f.fall_nummer ?? '').includes(q)
     })
-  }, [faelle, search])
+  }, [localFaelle, search])
 
   const byColumn = useMemo(() => {
     const map: Record<string, Fall[]> = {}
@@ -83,16 +84,16 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
     if (!destination || destination.droppableId === source.droppableId) return
     const newStatus = destination.droppableId
 
-    startTransition(async () => {
-      try {
-        await updateFallStatus(draggableId, newStatus)
-        router.refresh()
-      } catch (e) {
-        setToast(e instanceof Error ? e.message : 'Fehler')
-        setTimeout(() => setToast(null), 3000)
-      }
+    // Optimistic update
+    const snapshot = [...localFaelle]
+    setLocalFaelle(prev => prev.map(f => f.id === draggableId ? { ...f, status: newStatus } : f))
+
+    updateFallStatus(draggableId, newStatus).catch(e => {
+      setLocalFaelle(snapshot)
+      setToast(e instanceof Error ? e.message : 'Fehler')
+      setTimeout(() => setToast(null), 3000)
     })
-  }, [router, startTransition])
+  }, [localFaelle])
 
   return (
     <div className="px-3 py-1 overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 120px)' }}>

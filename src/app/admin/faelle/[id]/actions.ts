@@ -6,6 +6,7 @@ import { emailFilmcheckBestanden } from '@/lib/email'
 import { sendStatusWhatsApp } from '@/lib/whatsapp'
 import { triggerKanzleiPaketTask, triggerAsSendedatumTask, triggerArchivierungTask } from '@/lib/tasking'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
+import { checkFallAutoPhase } from '@/lib/autoPhase'
 
 export async function saveFilmcheck(fallId: string, notizen: string) {
   const supabase = await createClient()
@@ -68,6 +69,9 @@ export async function saveFilmcheck(fallId: string, notizen: string) {
       fall_nummer: fallForSv.fall_nummer ?? undefined,
     }).catch(() => {})
   }
+
+  // Auto-phase check
+  checkFallAutoPhase(fallId).catch(() => {})
 
   revalidatePath(`/admin/faelle/${fallId}`)
   revalidatePath('/admin/faelle')
