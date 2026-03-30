@@ -103,6 +103,19 @@ export default async function FallaktePage({
       : Promise.resolve({ data: null }),
   ])
 
+  // Fetch mitarbeiter for task assignment
+  const { data: mitarbeiterList } = await supabase
+    .from('profiles')
+    .select('id, vorname, nachname, rolle')
+    .in('rolle', ['admin', 'kundenbetreuer', 'leadbearbeiter', 'sachverstaendiger'])
+    .order('vorname')
+
+  const mitarbeiter = (mitarbeiterList ?? []).map(m => ({
+    id: m.id as string,
+    name: [m.vorname, m.nachname].filter(Boolean).join(' ') || m.id.slice(0, 8),
+    rolle: m.rolle as string,
+  }))
+
   // Normalize the SV profile join
   let sv = null
   if (svResult.data) {
@@ -127,6 +140,7 @@ export default async function FallaktePage({
       qcCheckliste={qcCheckliste ?? null}
       tasks={tasks ?? []}
       termine={termine ?? []}
+      mitarbeiter={mitarbeiter}
     />
   )
 }

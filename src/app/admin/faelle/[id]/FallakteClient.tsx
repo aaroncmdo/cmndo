@@ -484,6 +484,12 @@ type TaskItem = {
   created_at: string
 }
 
+type Mitarbeiter = {
+  id: string
+  name: string
+  rolle: string
+}
+
 type Termin = {
   id: string
   typ: string
@@ -513,6 +519,7 @@ export default function FallakteClient({
   qcCheckliste,
   tasks,
   termine,
+  mitarbeiter,
 }: {
   fall: Fall
   lead: Lead
@@ -527,6 +534,7 @@ export default function FallakteClient({
   qcCheckliste: QcCheckliste
   tasks: TaskItem[]
   termine: Termin[]
+  mitarbeiter: Mitarbeiter[]
 }) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('tasks')
@@ -729,6 +737,7 @@ export default function FallakteClient({
           <TabTasks
             fall={fall}
             tasks={tasks}
+            mitarbeiter={mitarbeiter}
             onRefresh={() => router.refresh()}
           />
         )}
@@ -2764,10 +2773,12 @@ function fmtEur(v: number): string {
 function TabTasks({
   fall,
   tasks,
+  mitarbeiter,
   onRefresh,
 }: {
   fall: Fall
   tasks: TaskItem[]
+  mitarbeiter: Mitarbeiter[]
   onRefresh: () => void
 }) {
   const [adding, setAdding] = useState(false)
@@ -2775,6 +2786,7 @@ function TabTasks({
   const [beschreibung, setBeschreibung] = useState('')
   const [deadline, setDeadline] = useState('')
   const [prio, setPrio] = useState('normal')
+  const [zuweisungId, setZuweisungId] = useState('')
   const [saving, setSaving] = useState(false)
 
   const offene = tasks.filter(t => t.status !== 'erledigt')
@@ -2855,6 +2867,14 @@ function TabTasks({
               <option value="dringend">Dringend</option>
               <option value="kritisch">Kritisch</option>
             </select>
+            <select
+              value={zuweisungId}
+              onChange={e => setZuweisungId(e.target.value)}
+              className="bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="">Zuweisen an...</option>
+              {mitarbeiter.map(m => <option key={m.id} value={m.id}>{m.name} ({m.rolle})</option>)}
+            </select>
           </div>
           <div className="flex gap-2">
             <button
@@ -2878,7 +2898,7 @@ function TabTasks({
       {offene.length > 0 && (
         <div className="space-y-2">
           {offene.map(task => (
-            <TaskCard key={task.id} task={task} onToggle={handleToggle} />
+            <TaskCard key={task.id} task={task} mitarbeiter={mitarbeiter} onToggle={handleToggle} onRefresh={onRefresh} />
           ))}
         </div>
       )}
@@ -2897,7 +2917,7 @@ function TabTasks({
           </summary>
           <div className="space-y-2 mt-2 opacity-60">
             {erledigte.map(task => (
-              <TaskCard key={task.id} task={task} onToggle={handleToggle} />
+              <TaskCard key={task.id} task={task} mitarbeiter={mitarbeiter} onToggle={handleToggle} onRefresh={onRefresh} />
             ))}
           </div>
         </details>
@@ -2908,23 +2928,39 @@ function TabTasks({
 
 function TaskCard({
   task,
+  mitarbeiter,
   onToggle,
+  onRefresh,
 }: {
   task: TaskItem
+  mitarbeiter: Mitarbeiter[]
   onToggle: (id: string, status: string) => void
+  onRefresh: () => void
 }) {
   const isErledigt = task.status === 'erledigt'
   const isOverdue = !isErledigt && task.faellig_am && new Date(task.faellig_am) < new Date()
+  const assignedName = mitarbeiter.find(m => m.id === task.zugewiesen_an)?.name
+
+  async function handleReassign(newUserId: string) {
+    try {
+      await updateTaskStatus(task.id, task.status) // no-op status but we need to call something
+      // Use a direct supabase call via action — for now update zugewiesen_an via the existing action pattern
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      await supabase.from('tasks').update({ zugewiesen_an: newUserId || null }).eq('id', task.id)
+      onRefresh()
+    } catch { /* */ }
+  }
 
   return (
     <div className={`flex items-start gap-3 bg-white border rounded-xl p-3 ${
-      isOverdue ? 'border-red-800/50' : 'border-gray-200'
+      isOverdue ? 'border-red-200' : 'border-gray-200'
     }`}>
       <button
         onClick={() => onToggle(task.id, isErledigt ? 'offen' : 'erledigt')}
         className={`shrink-0 mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
           isErledigt
-            ? 'bg-emerald-600 border-emerald-600 text-gray-900'
+            ? 'bg-emerald-600 border-emerald-600 text-white'
             : 'border-gray-300 hover:border-blue-500'
         }`}
       >
@@ -2937,21 +2973,30 @@ function TaskCard({
         {task.beschreibung && (
           <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{task.beschreibung}</p>
         )}
-        <div className="flex items-center gap-2 mt-1 text-[10px]">
+        <div className="flex items-center gap-2 mt-1 text-[10px] flex-wrap">
           {task.prioritaet === 'kritisch' && (
-            <span className="bg-red-50 text-red-400 px-1.5 py-0.5 rounded font-semibold">KRITISCH</span>
+            <span className="bg-red-50 text-red-500 px-1.5 py-0.5 rounded font-semibold">KRITISCH</span>
           )}
           {task.prioritaet === 'dringend' && (
-            <span className="bg-amber-50 text-amber-400 px-1.5 py-0.5 rounded font-semibold">DRINGEND</span>
+            <span className="bg-amber-50 text-amber-500 px-1.5 py-0.5 rounded font-semibold">DRINGEND</span>
           )}
           {task.faellig_am && (
-            <span className={`${isOverdue ? 'text-red-400' : 'text-gray-400'}`}>
+            <span className={`${isOverdue ? 'text-red-500' : 'text-gray-400'}`}>
               Fällig: {new Date(task.faellig_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
             </span>
           )}
           {task.auto_erstellt && (
             <span className="text-gray-300">Auto</span>
           )}
+          {/* Assigned person */}
+          <select
+            value={task.zugewiesen_an ?? ''}
+            onChange={e => handleReassign(e.target.value)}
+            className="text-[10px] bg-gray-50 border border-gray-200 rounded px-1 py-0.5 text-gray-600 cursor-pointer ml-auto"
+          >
+            <option value="">Nicht zugewiesen</option>
+            {mitarbeiter.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+          </select>
         </div>
       </div>
     </div>
