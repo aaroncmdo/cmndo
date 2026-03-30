@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import KundeBottomSheet from './KundeBottomSheet'
+import MeineAufgabenServer from '@/components/MeineAufgabenServer'
 
 const STATUS_STEPS = [
   { key: 'ersterfassung', label: 'Meldung' },
@@ -149,6 +150,11 @@ export default async function KundeDashboard() {
       <p className="text-xl font-bold text-white mb-5 kunde-animate kunde-animate-1" style={{ letterSpacing: '-0.03em' }}>
         Hallo {vorname}
       </p>
+
+      {/* Meine Aufgaben */}
+      {/* @ts-expect-error Async Server Component */}
+      <MeineAufgabenServer mode="user" rolle="kunde" title="Was Sie noch tun muessen" fallLinkPrefix="/kunde/fall/" />
+      <div className="mb-4" />
 
       {/* Hero Status Card */}
       <div className="kunde-animate kunde-animate-2">

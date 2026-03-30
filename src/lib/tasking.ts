@@ -9,6 +9,8 @@ type AutoTaskParams = {
   beschreibung: string
   deadline: Date
   prioritaet?: 'normal' | 'dringend' | 'kritisch'
+  phase?: string
+  task_code?: string
 }
 
 /**
@@ -18,7 +20,6 @@ type AutoTaskParams = {
 export async function createAutoTask(params: AutoTaskParams) {
   const supabase = createAdminClient()
 
-  // Use only one column name for each field to avoid schema mismatch errors
   const { error } = await supabase.from('tasks').insert({
     fall_id: params.fall_id,
     typ: params.task_typ,
@@ -26,9 +27,13 @@ export async function createAutoTask(params: AutoTaskParams) {
     beschreibung: params.beschreibung,
     status: 'offen',
     zugewiesen_an: params.empfaenger_id,
+    empfaenger_rolle: params.empfaenger_rolle,
+    empfaenger_user_id: params.empfaenger_id,
     faellig_am: params.deadline.toISOString(),
     auto_erstellt: true,
     prioritaet: params.prioritaet ?? 'normal',
+    phase: params.phase ?? null,
+    task_code: params.task_code ?? null,
   })
 
   if (error) {

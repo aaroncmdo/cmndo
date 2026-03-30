@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import StatusChart from './StatusChart'
+import MeineAufgabenServer from '@/components/MeineAufgabenServer'
 
 const STATUS_LABEL: Record<string, string> = {
   ersterfassung: 'Ersterfassung',
@@ -159,6 +160,11 @@ export default async function AdminPage() {
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-white mb-1">Dashboard</h1>
         </div>
+
+        {/* ── Meine Aufgaben (Admin sieht alle) ───────────────────────────── */}
+        {/* @ts-expect-error Async Server Component */}
+        <MeineAufgabenServer mode="admin" title="Alle offenen Aufgaben" />
+        <div className="mb-4" />
 
         {/* ── Row 1: Quick stats ──────────────────────────────────────────── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">

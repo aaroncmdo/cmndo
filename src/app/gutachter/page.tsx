@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import WeatherWidget from '@/components/WeatherWidget'
 import UeberfaelligeTasks from '@/components/UeberfaelligeTasks'
+import MeineAufgabenServer from '@/components/MeineAufgabenServer'
 
 // ─── Schadentyp helpers ─────────────────────────────────────────────────────
 
@@ -213,6 +214,10 @@ export default async function GutachterDashboard() {
           </div>
           <WeatherWidget lat={sv.standort_lat ?? null} lng={sv.standort_lng ?? null} />
         </div>
+
+        {/* ─── Meine Aufgaben ─────────────────────────────────────────── */}
+        {/* @ts-expect-error Async Server Component */}
+        <MeineAufgabenServer mode="user" rolle="sachverstaendiger" title="Meine offenen Aufgaben" fallLinkPrefix="/gutachter/fall/" />
 
         {/* ─── Überfällige Tasks ──────────────────────────────────────── */}
         {/* @ts-expect-error Async Server Component */}

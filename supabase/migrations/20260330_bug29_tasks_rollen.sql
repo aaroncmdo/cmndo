@@ -1,0 +1,7 @@
+-- BUG-29: Tasks in jeder Entitaet - Fehlende Spalten
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS lead_id UUID REFERENCES leads(id);
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS empfaenger_rolle TEXT;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS empfaenger_user_id UUID;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS phase TEXT;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS task_code TEXT;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS trigger_event TEXT;
