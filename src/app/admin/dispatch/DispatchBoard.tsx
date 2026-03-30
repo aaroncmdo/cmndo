@@ -8,27 +8,21 @@ import { VS_STUFEN_SHORT } from '@/lib/statusLabels'
 import {
   UserPlusIcon,
   PhoneCallIcon,
+  PhoneOffIcon,
   ClipboardListIcon,
   SendIcon,
   FileTextIcon,
-  UserCheckIcon,
-  CalendarIcon,
-  ClipboardCheckIcon,
-  ScaleIcon,
-  BadgeEuroIcon,
   CheckCircle2Icon,
-  DropletIcon,
-  FlameIcon,
-  ShieldAlertIcon,
-  CloudLightningIcon,
-  WrenchIcon,
-  HelpCircleIcon,
   SearchIcon,
   EyeIcon,
-  MapPinIcon,
-  ShieldCheckIcon,
+  UserCheckIcon,
   TimerIcon,
-  PackageCheckIcon,
+  ClockIcon,
+  PhoneIcon,
+  GlobeIcon,
+  MessageCircleIcon,
+  UsersIcon,
+  AlertTriangleIcon,
 } from 'lucide-react'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -52,6 +46,14 @@ type Lead = {
   rueckruf_datum: string | null
   rueckruf_notiz: string | null
   rueckruf_erledigt: boolean | null
+  anruf_versuche: number | null
+  letzter_anruf_am: string | null
+  letzter_anruf_status: string | null
+  flow_link_geoeffnet: boolean | null
+  flow_link_abgeschlossen: boolean | null
+  sa_unterschrieben: boolean | null
+  vollmacht_unterschrieben: boolean | null
+  leasing_flag: boolean | null
 }
 
 type Fall = {
@@ -72,117 +74,69 @@ type Fall = {
   anschlussschreiben_am: string | null
 }
 
-// ─── Pipeline columns (13 total) ────────────────────────────────────────────
+// ─── 7 Kanban-Spalten (BUG-27) ─────────────────────────────────────────────
 
-type PipelineColumn = {
-  key: string
-  label: string
-  sub: string
-  color: string
-  bg: string
-  icon: typeof FileTextIcon
-  type: 'lead' | 'fall'
-}
+type Column = { key: string; label: string; sub: string; color: string; bg: string; icon: typeof FileTextIcon }
 
-const COLUMNS: PipelineColumn[] = [
-  // Lead columns — Qualifizierungs-Phasen (KFZ-35/36)
-  { key: 'neu', label: 'NEU', sub: 'Lead eingegangen', color: 'text-sky-400', bg: 'bg-sky-500', icon: UserPlusIcon, type: 'lead' },
-  { key: 'erstkontakt', label: 'ERSTKONTAKT', sub: 'Angerufen', color: 'text-amber-400', bg: 'bg-amber-500', icon: PhoneCallIcon, type: 'lead' },
-  { key: 'schadentyp-erfasst', label: 'SCHADENTYP', sub: 'SF erfasst', color: 'text-orange-400', bg: 'bg-orange-500', icon: ClipboardListIcon, type: 'lead' },
-  { key: 'konstellation-erfasst', label: 'KONSTELLATION', sub: 'KK erfasst', color: 'text-yellow-400', bg: 'bg-yellow-500', icon: ClipboardListIcon, type: 'lead' },
-  { key: 'gegner-daten', label: 'GEGNER', sub: 'Daten erfasst', color: 'text-pink-400', bg: 'bg-pink-500', icon: ClipboardCheckIcon, type: 'lead' },
-  { key: 'gutachtertermin', label: 'TERMIN', sub: 'Vereinbart', color: 'text-teal-400', bg: 'bg-teal-500', icon: CalendarIcon, type: 'lead' },
-  { key: 'sa-unterschrieben', label: 'SA SIGNIERT', sub: 'SA + Vollmacht', color: 'text-green-400', bg: 'bg-green-500', icon: FileTextIcon, type: 'lead' },
-  { key: 'flow-gesendet', label: 'FLOW', sub: 'FlowLink verschickt', color: 'text-violet-400', bg: 'bg-violet-500', icon: SendIcon, type: 'lead' },
-  { key: 'abgeschlossen', label: 'KONVERTIERT', sub: 'Lead → Akte', color: 'text-emerald-400', bg: 'bg-emerald-500', icon: CheckCircle2Icon, type: 'lead' },
-  // Fall columns
-  { key: 'onboarding', label: 'ONBOARDING', sub: 'Kunde durchlaeuft', color: 'text-pink-400', bg: 'bg-pink-500', icon: PackageCheckIcon, type: 'fall' },
-  { key: 'ersterfassung', label: 'DISPATCH', sub: 'D-01 SV gesucht', color: 'text-blue-400', bg: 'bg-blue-500', icon: FileTextIcon, type: 'fall' },
-  { key: 'sv-termin', label: 'TERMIN', sub: 'D-02 Bestaetigt', color: 'text-yellow-400', bg: 'bg-yellow-500', icon: CalendarIcon, type: 'fall' },
-  { key: 'besichtigung', label: 'BESICHTIGUNG', sub: 'D-03 Vor Ort', color: 'text-teal-400', bg: 'bg-teal-500', icon: MapPinIcon, type: 'fall' },
-  { key: 'gutachten-eingegangen', label: 'GUTACHTEN', sub: 'D-04 Hochgeladen', color: 'text-orange-400', bg: 'bg-orange-500', icon: ClipboardCheckIcon, type: 'fall' },
-  { key: 'filmcheck', label: 'QC-PRUEFUNG', sub: 'E-Akte geprueft', color: 'text-purple-400', bg: 'bg-purple-500', icon: ShieldCheckIcon, type: 'fall' },
-  { key: 'kanzlei-uebergeben', label: 'KANZLEI', sub: 'Uebergeben', color: 'text-cyan-400', bg: 'bg-cyan-500', icon: ScaleIcon, type: 'fall' },
-  { key: 'regulierung', label: 'VS-REGULIERUNG', sub: 'VS bearbeitet', color: 'text-green-400', bg: 'bg-green-500', icon: TimerIcon, type: 'fall' },
-  { key: 'abgeschlossen', label: 'ABGESCHLOSSEN', sub: 'Zahlung da', color: 'text-zinc-400', bg: 'bg-zinc-500', icon: CheckCircle2Icon, type: 'fall' },
+const COLUMNS: Column[] = [
+  { key: 'neu',               label: 'NEU',              sub: 'Noch nicht angerufen',     color: 'text-sky-400',     bg: 'bg-sky-500',     icon: UserPlusIcon },
+  { key: 'nicht-erreicht',    label: 'NICHT ERREICHT',   sub: 'Angerufen, kein Kontakt',  color: 'text-red-400',     bg: 'bg-red-500',     icon: PhoneOffIcon },
+  { key: 'rueckruf',          label: 'RUECKRUF',         sub: 'Termin vereinbart',        color: 'text-amber-400',   bg: 'bg-amber-500',   icon: PhoneCallIcon },
+  { key: 'in-qualifizierung', label: 'IN QUALIFIZIERUNG',sub: 'Im Gespraech',             color: 'text-blue-400',    bg: 'bg-blue-500',    icon: ClipboardListIcon },
+  { key: 'flow-versendet',    label: 'FLOW VERSENDET',   sub: 'Wartet auf Kunde',         color: 'text-violet-400',  bg: 'bg-violet-500',  icon: SendIcon },
+  { key: 'sa-ausstehend',     label: 'SA AUSSTEHEND',    sub: 'Unterschriften fehlen',    color: 'text-orange-400',  bg: 'bg-orange-500',  icon: FileTextIcon },
+  { key: 'konvertiert',       label: 'KONVERTIERT',      sub: 'Lead -> Fallakte',         color: 'text-emerald-400', bg: 'bg-emerald-500', icon: CheckCircle2Icon },
 ]
 
-// Status values that map to each column (for faelle that use old status values)
-const STATUS_TO_COLUMN: Record<string, string> = {
-  ersterfassung: 'ersterfassung',
-  'sv-zugewiesen': 'ersterfassung',
-  'sv-termin': 'sv-termin',
-  besichtigung: 'besichtigung',
-  'gutachten-eingegangen': 'gutachten-eingegangen',
-  filmcheck: 'filmcheck',
-  'qc-pruefung': 'filmcheck',
-  'kanzlei-uebergeben': 'kanzlei-uebergeben',
-  anschlussschreiben: 'kanzlei-uebergeben',
-  regulierung: 'regulierung',
-  'vs-regulierung': 'regulierung',
-  abgeschlossen: 'abgeschlossen',
+// Map old phases to new columns
+function mapPhaseToColumn(phase: string | null): string {
+  switch (phase) {
+    case 'neu': return 'neu'
+    case 'nicht-erreicht': return 'nicht-erreicht'
+    case 'rueckruf': return 'rueckruf'
+    case 'erstkontakt':
+    case 'in-qualifizierung':
+    case 'schadentyp-erfasst':
+    case 'konstellation-erfasst':
+    case 'gegner-daten':
+    case 'gutachtertermin':
+      return 'in-qualifizierung'
+    case 'flow-versendet':
+    case 'flow-gesendet':
+      return 'flow-versendet'
+    case 'sa-ausstehend':
+    case 'sa-unterschrieben':
+      return 'sa-ausstehend'
+    case 'konvertiert':
+    case 'abgeschlossen':
+      return 'konvertiert'
+    default: return 'neu'
+  }
 }
 
-const LEAD_COLUMNS = COLUMNS.filter(c => c.type === 'lead')
-const FALL_COLUMNS = COLUMNS.filter(c => c.type === 'fall')
+const SOURCE_ICON: Record<string, typeof GlobeIcon> = {
+  website: GlobeIcon, 'google-ads': GlobeIcon,
+  telefon: PhoneIcon, email: GlobeIcon,
+  whatsapp: MessageCircleIcon, empfehlung: UsersIcon,
+}
 
 const SOURCE_LABEL: Record<string, string> = {
-  flow: 'Flow',
-  telefon: 'Telefon',
-  email: 'E-Mail',
-  website: 'Website',
-  empfehlung: 'Empfehlung',
+  website: 'Website', telefon: 'Telefon', email: 'E-Mail',
+  whatsapp: 'WhatsApp', empfehlung: 'Empfehlung', 'google-ads': 'Google',
 }
 
-const URSACHE_ICON: Record<string, typeof DropletIcon> = {
-  wasserschaden: DropletIcon,
-  brand: FlameIcon,
-  einbruch: ShieldAlertIcon,
-  sachbeschaedigung: WrenchIcon,
-  sturmschaden: CloudLightningIcon,
-  vandalismus: ShieldAlertIcon,
-  verschleiss: WrenchIcon,
+const SF_SHORT: Record<string, string> = {
+  'sf-01': 'SF-01', 'sf-02': 'SF-02', 'sf-03': 'SF-03',
+  'sf-04': 'SF-04', 'sf-05': 'SF-05', 'sf-06': 'SF-06',
 }
 
-const URSACHE_LABEL: Record<string, string> = {
-  wasserschaden: 'Wasser',
-  sachbeschaedigung: 'Sachbesch.',
-  brand: 'Brand',
-  einbruch: 'Einbruch',
-  sturmschaden: 'Sturm',
-  vandalismus: 'Vandalismus',
-  verschleiss: 'Verschleiss',
-  sonstiges: 'Sonstiges',
-}
-
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
-function daysSince(dateStr: string | null): number {
-  if (!dateStr) return 0
-  const diff = Date.now() - new Date(dateStr).getTime()
-  return Math.max(0, Math.floor(diff / 86400000))
-}
-
-function getColumnKey(fall: Fall): string {
-  // Onboarding column: case exists but onboarding not complete
-  if (fall.onboarding_complete === false && !['abgeschlossen', 'storniert'].includes(fall.status)) {
-    // Only show in onboarding if the status is still early
-    const earlyStatuses = ['ersterfassung', 'sv-zugewiesen']
-    if (earlyStatuses.includes(fall.status)) {
-      return 'onboarding'
-    }
-  }
-  return STATUS_TO_COLUMN[fall.status] ?? fall.status
-}
-
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .map(w => w[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
+function timeSince(dateStr: string | null): string {
+  if (!dateStr) return ''
+  const ms = Date.now() - new Date(dateStr).getTime()
+  const h = Math.floor(ms / 3600000)
+  if (h < 1) return `${Math.floor(ms / 60000)}min`
+  if (h < 24) return `${h}h`
+  return `${Math.floor(h / 24)}d`
 }
 
 // ─── Main ───────────────────────────────────────────────────────────────────
@@ -205,77 +159,51 @@ export default function DispatchBoard({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [search, setSearch] = useState('')
-  const [filterMode, setFilterMode] = useState<'alle' | 'meine'>('alle')
   const [error, setError] = useState<string | null>(null)
   const [showNewLead, setShowNewLead] = useState(false)
   const [newLead, setNewLead] = useState({ vorname: '', nachname: '', telefon: '+491633628571', email: '', source_channel: 'telefon', schadenfall_typ: '' })
   const [newLeadSaving, setNewLeadSaving] = useState(false)
 
-  // Pipeline leads: show by qualifizierungs_phase (KFZ-36)
-  const pipelineLeadPhases = new Set(LEAD_COLUMNS.map(c => c.key))
-
-  const filteredLeads = useMemo(() => {
+  // Filter leads: exclude terminal statuses
+  const pipelineLeads = useMemo(() => {
     return leads.filter(l => {
-      const phase = l.qualifizierungs_phase ?? 'neu'
-      // Exclude terminal statuses that aren't in the pipeline
       if (l.status === 'disqualifiziert' || l.status === 'kalt') return false
-      if (!pipelineLeadPhases.has(phase)) return false
       if (search) {
         const q = search.toLowerCase()
         const name = `${l.vorname ?? ''} ${l.nachname ?? ''}`.toLowerCase()
-        const email = (l.email ?? '').toLowerCase()
-        if (!name.includes(q) && !email.includes(q)) return false
+        if (!name.includes(q) && !(l.email ?? '').toLowerCase().includes(q) && !(l.telefon ?? '').includes(q)) return false
       }
       return true
     })
   }, [leads, search])
 
-  const filteredFaelle = useMemo(() => {
-    return faelle.filter(f => {
-      // "Meine Faelle" filter: only cases where I'm Kundenbetreuer
-      if (filterMode === 'meine' && f.kundenbetreuer_id !== currentUserId) return false
-      // Exclude storniert
-      if (f.status === 'storniert') return false
-      if (search) {
-        const q = search.toLowerCase()
-        const name = f.lead_id ? (leadNameMap[f.lead_id] ?? '').toLowerCase() : ''
-        const nr = (f.fall_nummer ?? '').toLowerCase()
-        if (!name.includes(q) && !nr.includes(q)) return false
-      }
-      return true
-    })
-  }, [faelle, search, filterMode, currentUserId, leadNameMap])
+  // Heutige Rueckrufe (ueber dem Board)
+  const now = Date.now()
+  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0)
+  const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999)
 
-  function handleLeadPhaseChange(leadId: string, newPhase: string) {
+  const heutigeRueckrufe = useMemo(() => {
+    return leads
+      .filter(l => {
+        if (!l.rueckruf_datum || l.rueckruf_erledigt) return false
+        const t = new Date(l.rueckruf_datum).getTime()
+        // Today or overdue (past days)
+        return t <= todayEnd.getTime()
+      })
+      .sort((a, b) => new Date(a.rueckruf_datum!).getTime() - new Date(b.rueckruf_datum!).getTime())
+  }, [leads, todayEnd])
+
+  function handlePhaseChange(leadId: string, newPhase: string) {
     setError(null)
     startTransition(async () => {
       try {
-        // Terminal statuses use updateLeadStatus
-        if (newPhase === 'disqualifiziert' || newPhase === 'kalt') {
-          await updateLeadStatus(leadId, newPhase)
-        } else {
-          await updateLeadStatus(leadId, newPhase)
-        }
+        await updateLeadStatus(leadId, newPhase)
         router.refresh()
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Fehler')
       }
     })
   }
-
-  function handleFallStatusChange(fallId: string, newStatus: string) {
-    setError(null)
-    startTransition(async () => {
-      try {
-        await updateFallStatus(fallId, newStatus)
-        router.refresh()
-      } catch (e) {
-        setError(e instanceof Error ? e.message : 'Fehler')
-      }
-    })
-  }
-
-  const totalPipeline = filteredLeads.length + filteredFaelle.length
 
   return (
     <div className="px-4 py-6 overflow-hidden">
@@ -285,58 +213,18 @@ export default function DispatchBoard({
           <div>
             <h1 className="text-xl font-semibold text-white">Dispatch</h1>
             <p className="text-zinc-500 text-sm mt-0.5">
-              {totalPipeline} in der Pipeline
-              <span className="text-zinc-600 mx-1.5">·</span>
-              <span className="text-sky-400">{filteredLeads.length} Leads</span>
-              <span className="text-zinc-600 mx-1.5">·</span>
-              <span className="text-blue-400">{filteredFaelle.length} Faelle</span>
+              {pipelineLeads.length} Leads in der Pipeline
             </p>
           </div>
-
           <div className="flex items-center gap-2">
-            {/* Neuer Lead */}
-            <button
-              onClick={() => setShowNewLead(!showNewLead)}
-              className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-3 py-2 rounded-xl transition-colors"
-            >
-              + Neuer Lead
+            <button onClick={() => setShowNewLead(!showNewLead)}
+              className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5">
+              <UserPlusIcon className="w-3.5 h-3.5" /> Neuer Lead
             </button>
-            {/* Search */}
             <div className="relative">
               <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
-              <input
-                type="text"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Suche..."
-                className="pl-9 pr-3 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600 w-48"
-              />
-            </div>
-
-            {/* Meine / Alle filter */}
-            <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-              <button
-                onClick={() => setFilterMode('alle')}
-                className={`px-3 py-2 text-xs font-medium transition-colors flex items-center gap-1.5 ${
-                  filterMode === 'alle'
-                    ? 'bg-zinc-700 text-white'
-                    : 'text-zinc-500 hover:text-zinc-300'
-                }`}
-              >
-                <EyeIcon className="w-3 h-3" />
-                Alle Faelle
-              </button>
-              <button
-                onClick={() => setFilterMode('meine')}
-                className={`px-3 py-2 text-xs font-medium transition-colors flex items-center gap-1.5 ${
-                  filterMode === 'meine'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-zinc-500 hover:text-zinc-300'
-                }`}
-              >
-                <UserCheckIcon className="w-3 h-3" />
-                Meine Faelle
-              </button>
+              <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suche..."
+                className="pl-9 pr-3 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600 w-48" />
             </div>
           </div>
         </div>
@@ -354,40 +242,34 @@ export default function DispatchBoard({
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
               <input placeholder="Vorname *" value={newLead.vorname} onChange={e => setNewLead(p => ({ ...p, vorname: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
               <input placeholder="Nachname *" value={newLead.nachname} onChange={e => setNewLead(p => ({ ...p, nachname: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-              <input placeholder="Telefon" value={newLead.telefon} onChange={e => setNewLead(p => ({ ...p, telefon: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              <input placeholder="Telefon *" value={newLead.telefon} onChange={e => setNewLead(p => ({ ...p, telefon: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
               <input placeholder="E-Mail" value={newLead.email} onChange={e => setNewLead(p => ({ ...p, email: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-              <select value={newLead.source_channel} onChange={e => setNewLead(p => ({ ...p, source_channel: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
+              <select value={newLead.source_channel} onChange={e => setNewLead(p => ({ ...p, source_channel: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2">
                 <option value="telefon">Telefon</option>
                 <option value="website">Website</option>
                 <option value="whatsapp">WhatsApp</option>
                 <option value="empfehlung">Empfehlung</option>
                 <option value="google-ads">Google Ads</option>
               </select>
-              <select value={newLead.schadenfall_typ} onChange={e => setNewLead(p => ({ ...p, schadenfall_typ: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
+              <select value={newLead.schadenfall_typ} onChange={e => setNewLead(p => ({ ...p, schadenfall_typ: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2">
                 <option value="">Schadentyp (optional)</option>
                 <option value="sf-01">SF-01 Unfall mit Gegner</option>
                 <option value="sf-02">SF-02 Teilschuld</option>
-                <option value="sf-03">SF-03 Parkschaden/Flucht</option>
-                <option value="sf-04">SF-04 Kasko ohne Gegner</option>
+                <option value="sf-03">SF-03 Parkschaden</option>
+                <option value="sf-04">SF-04 Kasko</option>
                 <option value="sf-05">SF-05 Personenschaden</option>
                 <option value="sf-06">SF-06 Nutzungsausfall</option>
               </select>
             </div>
             <div className="flex gap-2">
-              <button
-                disabled={newLeadSaving || !newLead.vorname.trim() || !newLead.nachname.trim()}
+              <button disabled={newLeadSaving || !newLead.vorname.trim() || !newLead.nachname.trim()}
                 onClick={async () => {
                   setNewLeadSaving(true)
-                  try {
-                    await createLead(newLead)
-                    setShowNewLead(false)
-                    setNewLead({ vorname: '', nachname: '', telefon: '+491633628571', email: '', source_channel: 'telefon', schadenfall_typ: '' })
-                    router.refresh()
-                  } catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }
+                  try { await createLead(newLead); setShowNewLead(false); setNewLead({ vorname: '', nachname: '', telefon: '+491633628571', email: '', source_channel: 'telefon', schadenfall_typ: '' }); router.refresh() }
+                  catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }
                   setNewLeadSaving(false)
                 }}
-                className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
-              >
+                className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors">
                 {newLeadSaving ? 'Erstellt...' : 'Lead erstellen'}
               </button>
               <button onClick={() => setShowNewLead(false)} className="text-zinc-500 hover:text-zinc-300 text-sm px-3 py-2">Abbrechen</button>
@@ -395,66 +277,84 @@ export default function DispatchBoard({
           </div>
         )}
 
-        {/* Anstehende Rückrufe (KFZ-37) */}
-        <AnstehendeRueckrufe leads={leads} />
+        {/* Heutige Rueckrufe */}
+        {heutigeRueckrufe.length > 0 && (
+          <div className="bg-amber-950/40 border border-amber-800/40 rounded-2xl p-4 mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <PhoneCallIcon className="w-4 h-4 text-amber-400" />
+              <h3 className="text-sm font-semibold text-amber-300">Heutige Rueckrufe ({heutigeRueckrufe.length})</h3>
+            </div>
+            <div className="space-y-2">
+              {heutigeRueckrufe.map(lead => {
+                const name = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '\u2014'
+                const time = new Date(lead.rueckruf_datum!)
+                const isOverdue = time.getTime() < now
+                const isToday = time >= todayStart && time <= todayEnd
+                const minutesUntil = Math.round((time.getTime() - now) / 60000)
 
-        {/* Pipeline columns - horizontal scroll */}
+                return (
+                  <Link key={lead.id} href={`/admin/dispatch/lead/${lead.id}`}
+                    className="flex items-center gap-3 bg-zinc-900/60 rounded-xl px-3 py-2.5 hover:bg-zinc-800/60 transition-colors">
+                    <span className={`text-xs font-bold tabular-nums shrink-0 w-20 ${isOverdue ? 'text-red-400' : 'text-amber-400'}`}>
+                      {isOverdue ? 'UEBERFAELLIG' : `${time.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`}
+                    </span>
+                    {!isOverdue && minutesUntil > 0 && minutesUntil < 120 && (
+                      <span className="text-[10px] text-amber-500 shrink-0">In {minutesUntil}min</span>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-zinc-200 text-sm truncate">{name}</p>
+                    </div>
+                    {lead.telefon && (
+                      <a href={`tel:${lead.telefon}`} onClick={e => e.stopPropagation()}
+                        className="flex items-center gap-1 px-2 py-1 rounded-lg bg-green-600/20 text-green-400 text-xs font-medium hover:bg-green-600/30 shrink-0">
+                        <PhoneIcon className="w-3 h-3" /> Anrufen
+                      </a>
+                    )}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Kanban-Board */}
         <div className="overflow-x-auto pb-4">
-          <div className="flex gap-2.5" style={{ minWidth: `${COLUMNS.length * 185}px` }}>
+          <div className="flex gap-2.5" style={{ minWidth: `${COLUMNS.length * 210}px` }}>
             {COLUMNS.map(col => {
               const Icon = col.icon
-              const isLeadCol = col.type === 'lead'
-              const items = isLeadCol
-                ? filteredLeads.filter(l => (l.qualifizierungs_phase ?? 'neu') === col.key)
-                : filteredFaelle.filter(f => getColumnKey(f) === col.key)
+              const items = pipelineLeads.filter(l => mapPhaseToColumn(l.qualifizierungs_phase) === col.key)
+
+              // Sort: konvertiert by newest, rueckruf by time, rest by oldest
+              const sorted = [...items].sort((a, b) => {
+                if (col.key === 'rueckruf') {
+                  return new Date(a.rueckruf_datum ?? '9999').getTime() - new Date(b.rueckruf_datum ?? '9999').getTime()
+                }
+                if (col.key === 'konvertiert') {
+                  return new Date(b.updated_at ?? '0').getTime() - new Date(a.updated_at ?? '0').getTime()
+                }
+                return new Date(a.created_at ?? '0').getTime() - new Date(b.created_at ?? '0').getTime()
+              })
 
               return (
-                <div key={col.key} className="min-w-[185px] w-[185px] flex-shrink-0">
-                  {/* Column header */}
+                <div key={col.key} className="min-w-[210px] w-[210px] flex-shrink-0">
                   <div className="mb-3 px-1">
                     <div className="flex items-center gap-2 mb-0.5">
                       <Icon className={`w-3.5 h-3.5 ${col.color}`} />
                       <span className={`text-[11px] font-bold tracking-wide ${col.color}`}>{col.label}</span>
-                      <span className="text-zinc-600 text-[10px] font-medium bg-zinc-800 px-1.5 py-0.5 rounded-full ml-auto">
-                        {items.length}
-                      </span>
+                      <span className="text-zinc-600 text-[10px] font-medium bg-zinc-800 px-1.5 py-0.5 rounded-full ml-auto">{sorted.length}</span>
                     </div>
                     <p className="text-zinc-600 text-[10px]">{col.sub}</p>
                   </div>
-
-                  {/* Divider line */}
                   <div className={`h-0.5 ${col.bg} rounded-full mb-3 opacity-40`} />
-
-                  {/* Cards */}
                   <div className="space-y-2 min-h-24">
-                    {items.length === 0 && (
+                    {sorted.length === 0 && (
                       <div className="rounded-xl border border-dashed border-zinc-800 p-4 text-center">
                         <p className="text-zinc-700 text-[10px]">Leer</p>
                       </div>
                     )}
-                    {isLeadCol
-                      ? (items as Lead[]).map(lead => (
-                          <LeadCard
-                            key={lead.id}
-                            lead={lead}
-                            onPhaseChange={handleLeadPhaseChange}
-                            betreuerMap={betreuerMap}
-                            isPending={isPending}
-                          />
-                        ))
-                      : (items as Fall[]).map(fall => (
-                          <FallCard
-                            key={fall.id}
-                            fall={fall}
-                            columnKey={col.key}
-                            leadNameMap={leadNameMap}
-                            svMap={svMap}
-                            betreuerMap={betreuerMap}
-                            onStatusChange={handleFallStatusChange}
-                            isPending={isPending}
-                          />
-                        ))
-                    }
+                    {sorted.map(lead => (
+                      <LeadCard key={lead.id} lead={lead} columnKey={col.key} onPhaseChange={handlePhaseChange} isPending={isPending} />
+                    ))}
                   </div>
                 </div>
               )
@@ -468,309 +368,102 @@ export default function DispatchBoard({
 
 // ─── Lead Card ─────────────────────────────────────────────────────────────
 
-const SF_BADGE: Record<string, string> = {
-  'sf-01': 'SF-01',
-  'sf-02': 'SF-02',
-  'sf-03': 'SF-03',
-  'sf-04': 'SF-04',
-  'sf-05': 'SF-05',
-  'sf-06': 'SF-06',
-}
-
-function LeadCard({
-  lead,
-  onPhaseChange,
-  betreuerMap,
-  isPending,
-}: {
-  lead: Lead
-  onPhaseChange: (leadId: string, phase: string) => void
-  betreuerMap: Record<string, string>
-  isPending: boolean
+function LeadCard({ lead, columnKey, onPhaseChange, isPending }: {
+  lead: Lead; columnKey: string; onPhaseChange: (id: string, phase: string) => void; isPending: boolean
 }) {
-  const days = daysSince(lead.updated_at ?? lead.created_at)
-  const name = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—'
-  const phase = lead.qualifizierungs_phase ?? 'neu'
-  const zugewiesen = lead.zugewiesen_an ? betreuerMap[lead.zugewiesen_an] ?? null : null
+  const name = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '\u2014'
+  const age = timeSince(lead.created_at)
+  const SourceIcon = SOURCE_ICON[lead.source_channel ?? ''] ?? GlobeIcon
 
-  // Rückruf-Badge (KFZ-37)
+  // Rueckruf badges
   const hasCallback = !!lead.rueckruf_datum && !lead.rueckruf_erledigt
   const callbackInPast = hasCallback && new Date(lead.rueckruf_datum!) < new Date()
-  const callbackTime = hasCallback
-    ? new Date(lead.rueckruf_datum!).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-    : null
 
   return (
     <div className="bg-zinc-900 rounded-xl p-3 border border-zinc-800 hover:border-zinc-700 transition-colors">
-      {/* Rückruf Badge */}
+      {/* Rueckruf Badge */}
       {hasCallback && (
         <div className={`text-[10px] font-semibold px-2 py-1 rounded-lg mb-2 ${
-          callbackInPast
-            ? 'bg-red-950 text-red-400'
-            : 'bg-amber-950 text-amber-400'
+          callbackInPast ? 'bg-red-950 text-red-400' : 'bg-amber-950 text-amber-400'
         }`}>
-          {callbackInPast ? 'ÜBERFÄLLIG' : `Rückruf ${callbackTime}`}
+          {callbackInPast ? 'UEBERFAELLIG' : `Rueckruf ${new Date(lead.rueckruf_datum!).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`}
         </div>
       )}
 
-      {/* Top row */}
-      <div className="flex items-center justify-between mb-1.5">
-        <Link
-          href={`/admin/dispatch/lead/${lead.id}`}
-          className="text-sky-400 hover:text-sky-300 text-[10px] font-semibold uppercase tracking-wide"
-        >
-          Lead
-        </Link>
-        <DaysBadge days={days} />
-      </div>
-
-      <Link href={`/admin/dispatch/lead/${lead.id}`}>
-        <p className="text-zinc-200 text-sm font-medium leading-snug mb-1 truncate hover:text-white transition-colors">
+      {/* Name + Age */}
+      <div className="flex items-center justify-between mb-1">
+        <Link href={`/admin/dispatch/lead/${lead.id}`} className="text-zinc-200 text-sm font-medium leading-snug truncate hover:text-white transition-colors flex-1 min-w-0">
           {name}
-        </p>
-      </Link>
+        </Link>
+        <span className="text-[10px] text-zinc-600 shrink-0 ml-1">{age}</span>
+      </div>
 
       {/* Telefon */}
       {lead.telefon && (
-        <a href={`tel:${lead.telefon}`} className="text-zinc-500 hover:text-blue-400 text-[11px] mb-1.5 truncate block transition-colors">{lead.telefon}</a>
+        <a href={`tel:${lead.telefon}`} className="text-blue-400 hover:text-blue-300 text-[11px] mb-1.5 block truncate transition-colors">
+          {lead.telefon}
+        </a>
       )}
 
-      {/* Schadentyp Badge + Flags */}
+      {/* Badges row */}
       <div className="flex flex-wrap gap-1 mb-1.5">
+        {/* Quelle */}
+        <span className="bg-zinc-800 text-zinc-500 text-[9px] font-medium px-1.5 py-0.5 rounded flex items-center gap-1">
+          <SourceIcon className="w-2.5 h-2.5" /> {SOURCE_LABEL[lead.source_channel ?? ''] ?? lead.source_channel}
+        </span>
+        {/* Schadentyp */}
         {lead.schadenfall_typ && (
-          <span className="bg-blue-950 text-blue-300 text-[10px] font-medium px-1.5 py-0.5 rounded">
-            {SF_BADGE[lead.schadenfall_typ] ?? lead.schadenfall_typ.toUpperCase()}
+          <span className="bg-blue-950 text-blue-300 text-[9px] font-medium px-1.5 py-0.5 rounded">
+            {SF_SHORT[lead.schadenfall_typ] ?? lead.schadenfall_typ}
           </span>
         )}
-        {lead.personenschaden_flag && (
-          <span className="bg-red-950 text-red-400 text-[10px] font-medium px-1.5 py-0.5 rounded">Personen</span>
-        )}
-        {lead.mietwagen_flag && (
-          <span className="bg-amber-950 text-amber-400 text-[10px] font-medium px-1.5 py-0.5 rounded">Mietwagen</span>
-        )}
+        {/* Flags */}
+        {lead.personenschaden_flag && <span className="bg-red-950 text-red-400 text-[9px] px-1 py-0.5 rounded">Pers.</span>}
+        {lead.mietwagen_flag && <span className="bg-amber-950 text-amber-400 text-[9px] px-1 py-0.5 rounded">MW</span>}
+        {lead.leasing_flag && <span className="bg-purple-950 text-purple-400 text-[9px] px-1 py-0.5 rounded">Leasing</span>}
       </div>
 
-      {/* Erstellt + Zugewiesen */}
-      <div className="text-[10px] text-zinc-600 mb-2 space-y-0.5">
-        <p>{lead.created_at ? new Date(lead.created_at).toLocaleDateString('de-DE') : ''}</p>
-        {zugewiesen && (
-          <div className="flex items-center gap-1.5">
-            <div className="w-4 h-4 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
-              <span className="text-blue-400 text-[7px] font-bold">{getInitials(zugewiesen)}</span>
-            </div>
-            <span className="text-zinc-500 truncate">{zugewiesen}</span>
-          </div>
-        )}
-      </div>
+      {/* Column-specific info */}
+      {columnKey === 'nicht-erreicht' && (
+        <div className="text-[10px] text-red-400 mb-1.5">
+          {lead.anruf_versuche ?? 0}x nicht erreicht
+          {lead.letzter_anruf_am && <span className="text-zinc-600"> &middot; {timeSince(lead.letzter_anruf_am)}</span>}
+        </div>
+      )}
+      {columnKey === 'rueckruf' && lead.rueckruf_notiz && (
+        <p className="text-[10px] text-zinc-500 truncate mb-1.5">{lead.rueckruf_notiz}</p>
+      )}
+      {columnKey === 'flow-versendet' && (
+        <div className="text-[10px] text-zinc-500 mb-1.5">
+          {lead.flow_link_abgeschlossen ? <span className="text-emerald-400">FlowLink abgeschlossen</span>
+            : lead.flow_link_geoeffnet ? <span className="text-blue-400">FlowLink geoeffnet</span>
+            : <span>Wartet seit {timeSince(lead.updated_at)}</span>}
+        </div>
+      )}
+      {columnKey === 'sa-ausstehend' && (
+        <div className="text-[10px] text-orange-400 mb-1.5">
+          {!lead.sa_unterschrieben && !lead.vollmacht_unterschrieben ? 'SA + Vollmacht fehlen'
+            : !lead.sa_unterschrieben ? 'SA fehlt'
+            : 'Vollmacht fehlt'}
+        </div>
+      )}
+      {columnKey === 'konvertiert' && lead.status === 'umgewandelt' && (
+        <div className="text-[10px] text-emerald-400 mb-1.5">Fallakte erstellt</div>
+      )}
 
       {/* Phase dropdown */}
       <div className="pt-2 border-t border-zinc-800/50">
         <select
-          value={phase}
+          value={mapPhaseToColumn(lead.qualifizierungs_phase)}
           disabled={isPending}
           onChange={e => onPhaseChange(lead.id, e.target.value)}
           className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1.5 text-[11px] text-zinc-300 focus:outline-none focus:ring-1 focus:ring-blue-600 cursor-pointer disabled:opacity-50"
         >
-          {LEAD_COLUMNS.map(col => (
-            <option key={col.key} value={col.key}>{col.label}</option>
-          ))}
+          {COLUMNS.map(col => <option key={col.key} value={col.key}>{col.label}</option>)}
           <option value="disqualifiziert">Disqualifiziert</option>
           <option value="kalt">Kalt</option>
         </select>
       </div>
     </div>
-  )
-}
-
-// ─── Fall Card ─────────────────────────────────────────────────────────────
-
-function FallCard({
-  fall,
-  columnKey,
-  leadNameMap,
-  svMap,
-  betreuerMap,
-  onStatusChange,
-  isPending,
-}: {
-  fall: Fall
-  columnKey: string
-  leadNameMap: Record<string, string>
-  svMap: Record<string, string>
-  betreuerMap: Record<string, string>
-  onStatusChange: (fallId: string, status: string) => void
-  isPending: boolean
-}) {
-  const days = daysSince(fall.status_changed_at ?? fall.updated_at ?? fall.created_at)
-  const UrsacheIcon = fall.schadens_ursache ? (URSACHE_ICON[fall.schadens_ursache] ?? HelpCircleIcon) : null
-  const kundeName = fall.lead_id ? leadNameMap[fall.lead_id] ?? '—' : '—'
-  const svName = fall.sv_id ? svMap[fall.sv_id] ?? null : null
-  const betreuerName = fall.kundenbetreuer_id ? betreuerMap[fall.kundenbetreuer_id] ?? null : null
-
-  // VS-Timer: show on any column when AS was sent
-  const hasAs = !!fall.anschlussschreiben_am
-  const vsDays = hasAs ? daysSince(fall.anschlussschreiben_am!) : 0
-  const vsStufe = fall.vs_eskalationsstufe ?? 'vs-01'
-  const vsOverdue = vsDays > 14
-
-  return (
-    <div className="bg-zinc-900 rounded-xl p-3 border border-zinc-800 hover:border-zinc-700 transition-colors">
-      {/* Top row: Fallnummer + days */}
-      <div className="flex items-center justify-between mb-1.5">
-        <Link
-          href={`/admin/faelle/${fall.id}`}
-          className="text-blue-400 hover:text-blue-300 text-xs font-mono font-medium"
-        >
-          {fall.fall_nummer ?? fall.id.slice(0, 8)}
-        </Link>
-        <DaysBadge days={days} />
-      </div>
-
-      {/* Kundenname + Vorschaden Warning */}
-      <div className="flex items-center gap-1.5 mb-1.5">
-        <p className="text-zinc-200 text-sm font-medium leading-snug truncate">{kundeName}</p>
-        {fall.vorschaden_vorhanden && (
-          <span title="Vorschaden bekannt" className="shrink-0">
-            <ShieldAlertIcon className="w-3.5 h-3.5 text-amber-400" />
-          </span>
-        )}
-      </div>
-
-      {/* Schadensart */}
-      {UrsacheIcon && (
-        <div className="flex items-center gap-1.5 mb-1">
-          <UrsacheIcon className="w-3 h-3 text-zinc-500" />
-          <span className="text-zinc-500 text-[11px]">
-            {URSACHE_LABEL[fall.schadens_ursache!] ?? fall.schadens_ursache}
-          </span>
-        </div>
-      )}
-
-      {/* SV */}
-      {svName && (
-        <div className="flex items-center gap-1.5 mb-1">
-          <UserCheckIcon className="w-3 h-3 text-zinc-600" />
-          <span className="text-zinc-500 text-[11px] truncate">{svName}</span>
-        </div>
-      )}
-
-      {/* VS-Eskalation Badge */}
-      {hasAs && (
-        <div className={`flex items-center gap-1.5 mb-1.5 px-2 py-1 rounded-lg text-[11px] font-medium ${
-          ['vs-06', 'vs-07'].includes(vsStufe)
-            ? 'bg-red-950 text-red-400'
-            : ['vs-04', 'vs-05'].includes(vsStufe)
-            ? 'bg-orange-950 text-orange-400'
-            : ['vs-02', 'vs-03'].includes(vsStufe)
-            ? 'bg-amber-950 text-amber-400'
-            : 'bg-green-950 text-green-400'
-        }`}>
-          <TimerIcon className="w-3 h-3" />
-          <span>{VS_STUFEN_SHORT[vsStufe] ?? vsStufe.toUpperCase()} · Tag {vsDays}</span>
-          {vsOverdue && <span className="ml-auto text-[10px]">ueberfaellig!</span>}
-        </div>
-      )}
-
-      {/* Kundenbetreuer */}
-      {betreuerName && (
-        <div className="flex items-center gap-2 mt-1.5 mb-2">
-          <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
-            <span className="text-blue-400 text-[8px] font-bold">{getInitials(betreuerName)}</span>
-          </div>
-          <span className="text-zinc-500 text-[11px] truncate">{betreuerName}</span>
-        </div>
-      )}
-
-      {/* Status dropdown */}
-      <div className="pt-2 border-t border-zinc-800/50">
-        <select
-          value={fall.status}
-          disabled={isPending}
-          onChange={e => onStatusChange(fall.id, e.target.value)}
-          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1.5 text-[11px] text-zinc-300 focus:outline-none focus:ring-1 focus:ring-blue-600 cursor-pointer disabled:opacity-50"
-        >
-          {FALL_COLUMNS.map(col => (
-            <option key={col.key} value={col.key}>{col.label}</option>
-          ))}
-          <option value="storniert">Storniert</option>
-        </select>
-      </div>
-    </div>
-  )
-}
-
-// ─── Anstehende Rückrufe (KFZ-37) ──────────────────────────────────────────
-
-function AnstehendeRueckrufe({ leads }: { leads: Lead[] }) {
-  const now = Date.now()
-  const twoHours = 2 * 60 * 60 * 1000
-
-  // Upcoming: rueckruf_datum in next 2h AND not erledigt
-  // Also show overdue callbacks
-  const upcoming = leads
-    .filter(l => {
-      if (!l.rueckruf_datum || l.rueckruf_erledigt) return false
-      const t = new Date(l.rueckruf_datum).getTime()
-      // Show if overdue or within next 2 hours
-      return t < now + twoHours
-    })
-    .sort((a, b) => new Date(a.rueckruf_datum!).getTime() - new Date(b.rueckruf_datum!).getTime())
-
-  if (upcoming.length === 0) return null
-
-  return (
-    <div className="bg-amber-950/40 border border-amber-800/40 rounded-2xl p-4 mb-4">
-      <div className="flex items-center gap-2 mb-3">
-        <PhoneCallIcon className="w-4 h-4 text-amber-400" />
-        <h3 className="text-sm font-semibold text-amber-300">Anstehende Rückrufe ({upcoming.length})</h3>
-      </div>
-      <div className="space-y-2">
-        {upcoming.map(lead => {
-          const name = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—'
-          const time = new Date(lead.rueckruf_datum!)
-          const isOverdue = time.getTime() < now
-          const timeStr = time.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-          const sf = lead.schadenfall_typ ? SF_BADGE[lead.schadenfall_typ] ?? lead.schadenfall_typ.toUpperCase() : null
-
-          return (
-            <Link
-              key={lead.id}
-              href={`/admin/dispatch/lead/${lead.id}`}
-              className="flex items-center gap-3 bg-zinc-900/60 rounded-xl px-3 py-2.5 hover:bg-zinc-800/60 transition-colors"
-            >
-              <span className={`text-xs font-bold tabular-nums shrink-0 ${isOverdue ? 'text-red-400' : 'text-amber-400'}`}>
-                {isOverdue ? 'ÜBERFÄLLIG' : timeStr}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-zinc-200 text-sm truncate">{name}</p>
-                <div className="flex items-center gap-2 text-[11px] text-zinc-500">
-                  {lead.telefon && (
-                    <a href={`tel:${lead.telefon}`} className="text-blue-400 hover:text-blue-300" onClick={e => e.stopPropagation()}>
-                      {lead.telefon}
-                    </a>
-                  )}
-                  {sf && <span className="bg-blue-950 text-blue-300 px-1 rounded">{sf}</span>}
-                </div>
-              </div>
-              {lead.rueckruf_notiz && (
-                <span className="text-zinc-600 text-[10px] truncate max-w-24 hidden sm:block">{lead.rueckruf_notiz}</span>
-              )}
-            </Link>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-// ─── Shared Components ──────────────────────────────────────────────────────
-
-function DaysBadge({ days }: { days: number }) {
-  return (
-    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
-      days >= 7 ? 'bg-red-950 text-red-400' : days >= 3 ? 'bg-amber-950 text-amber-400' : 'bg-zinc-800 text-zinc-500'
-    }`}>
-      {days}d
-    </span>
   )
 }

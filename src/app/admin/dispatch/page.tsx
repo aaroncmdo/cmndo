@@ -11,7 +11,7 @@ export default async function DispatchPage() {
   const [leadsResult, faelleResult] = await Promise.all([
     supabase
       .from('leads')
-      .select('id, vorname, nachname, email, telefon, status, source_channel, kontaktversuche, updated_at, created_at, qualifizierungs_phase, schadenfall_typ, personenschaden_flag, mietwagen_flag, zugewiesen_an, rueckruf_datum, rueckruf_notiz, rueckruf_erledigt')
+      .select('id, vorname, nachname, email, telefon, status, source_channel, kontaktversuche, updated_at, created_at, qualifizierungs_phase, schadenfall_typ, personenschaden_flag, mietwagen_flag, zugewiesen_an, rueckruf_datum, rueckruf_notiz, rueckruf_erledigt, anruf_versuche, letzter_anruf_am, letzter_anruf_status, flow_link_geoeffnet, flow_link_abgeschlossen, sa_unterschrieben, vollmacht_unterschrieben, leasing_flag')
       .order('created_at', { ascending: false }),
     supabase
       .from('faelle')

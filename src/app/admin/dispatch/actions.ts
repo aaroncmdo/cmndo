@@ -141,9 +141,12 @@ export async function createLead(data: {
   revalidatePath('/admin/dispatch')
 }
 
-// Valid qualification phases from KFZ-35
+// Valid qualification phases (BUG-27 new + old for backward compat)
 const QUALI_PHASES = new Set([
-  'neu', 'erstkontakt', 'schadentyp-erfasst', 'konstellation-erfasst',
+  'neu', 'nicht-erreicht', 'rueckruf', 'in-qualifizierung',
+  'flow-versendet', 'sa-ausstehend', 'konvertiert',
+  // old phases still valid
+  'erstkontakt', 'schadentyp-erfasst', 'konstellation-erfasst',
   'gegner-daten', 'gutachtertermin', 'sa-unterschrieben', 'flow-gesendet', 'abgeschlossen',
 ])
 
@@ -152,27 +155,39 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht angemeldet')
 
-  // Wenn Status → umgewandelt oder Phase → abgeschlossen: automatische Konversion
-  if (newStatus === 'umgewandelt' || newStatus === 'abgeschlossen') {
+  const now = new Date().toISOString()
+
+  // Konversion triggers
+  if (newStatus === 'umgewandelt' || newStatus === 'abgeschlossen' || newStatus === 'konvertiert') {
     const fallId = await convertLeadToFall(supabase, leadId, user.id)
-    // Also set phase to abgeschlossen
     await supabase.from('leads').update({
-      qualifizierungs_phase: 'abgeschlossen',
-      updated_at: new Date().toISOString(),
+      qualifizierungs_phase: 'konvertiert',
+      status: 'umgewandelt',
+      updated_at: now,
     }).eq('id', leadId)
     revalidatePath('/admin/dispatch')
     return { converted: true, fallId }
   }
 
-  // If it's a qualification phase, update that field
-  const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() }
+  const updateData: Record<string, unknown> = { updated_at: now }
+
   if (QUALI_PHASES.has(newStatus)) {
     updateData.qualifizierungs_phase = newStatus
-    // Map phase to appropriate lead status
-    if (newStatus === 'flow-gesendet') updateData.status = 'flow-gesendet'
-    else if (newStatus === 'neu') updateData.status = 'neu'
-    else if (newStatus === 'erstkontakt') updateData.status = 'rueckruf'
-    else updateData.status = 'quali-offen'
+
+    // Phase-specific side effects
+    if (newStatus === 'nicht-erreicht') {
+      // Increment anruf_versuche
+      const { data: lead } = await supabase.from('leads').select('anruf_versuche').eq('id', leadId).single()
+      updateData.anruf_versuche = ((lead?.anruf_versuche as number) ?? 0) + 1
+      updateData.letzter_anruf_am = now
+      updateData.letzter_anruf_status = 'nicht-erreicht'
+    } else if (newStatus === 'in-qualifizierung') {
+      updateData.letzter_anruf_am = now
+      updateData.letzter_anruf_status = 'erreicht'
+    } else if (newStatus === 'flow-versendet' || newStatus === 'flow-gesendet') {
+      updateData.status = 'flow-gesendet'
+      updateData.wa_gesendet = true
+    }
   } else {
     // Terminal statuses (disqualifiziert, kalt)
     updateData.status = newStatus
