@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import LeadDetailClient from './LeadDetailClient'
 import LeadQualifizierung from './LeadQualifizierung'
+import RueckrufSection from './RueckrufSection'
 import FlowLinkSection from './FlowLinkSection'
 import GutachterTermin from './GutachterTermin'
 
@@ -50,6 +51,16 @@ export default async function LeadDetailPage({
 
         {/* Status + Details */}
         <LeadDetailClient lead={lead} />
+
+        {/* Rückruftermin */}
+        <RueckrufSection
+          lead={{
+            id: lead.id,
+            rueckruf_datum: lead.rueckruf_datum ?? null,
+            rueckruf_notiz: lead.rueckruf_notiz ?? null,
+            rueckruf_erledigt: lead.rueckruf_erledigt ?? null,
+          }}
+        />
 
         {/* Lead-Qualifizierung */}
         <LeadQualifizierung

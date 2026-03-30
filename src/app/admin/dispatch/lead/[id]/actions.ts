@@ -189,6 +189,73 @@ export async function saveLeadQualifizierung(
   revalidatePath('/admin/dispatch')
 }
 
+// ─── Rückruftermin (KFZ-37) ─────────────────────────────────────────────────
+
+export async function saveRueckruf(
+  leadId: string,
+  datum: string | null,
+  notiz: string | null,
+) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const { error } = await supabase
+    .from('leads')
+    .update({
+      rueckruf_datum: datum,
+      rueckruf_notiz: notiz,
+      rueckruf_erledigt: false,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', leadId)
+
+  if (error) throw new Error(error.message)
+  revalidatePath(`/admin/dispatch/lead/${leadId}`)
+  revalidatePath('/admin/dispatch')
+}
+
+export async function markRueckrufErledigt(leadId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const now = new Date()
+  const zeitStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+
+  const { error } = await supabase
+    .from('leads')
+    .update({
+      rueckruf_erledigt: true,
+      updated_at: now.toISOString(),
+    })
+    .eq('id', leadId)
+
+  if (error) throw new Error(error.message)
+
+  // Timeline-Eintrag
+  const { data: fall } = await supabase
+    .from('faelle')
+    .select('id')
+    .eq('lead_id', leadId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (fall) {
+    await supabase.from('timeline').insert({
+      fall_id: fall.id,
+      typ: 'system',
+      titel: 'Rückruf durchgeführt',
+      beschreibung: `Rückruf durchgeführt um ${zeitStr}.`,
+      erstellt_von: user.id,
+    })
+  }
+
+  revalidatePath(`/admin/dispatch/lead/${leadId}`)
+  revalidatePath('/admin/dispatch')
+}
+
 export async function handleGegenvorschlag(
   leadId: string,
   terminId: string,

@@ -48,6 +48,9 @@ type Lead = {
   personenschaden_flag: boolean | null
   mietwagen_flag: boolean | null
   zugewiesen_an: string | null
+  rueckruf_datum: string | null
+  rueckruf_notiz: string | null
+  rueckruf_erledigt: boolean | null
 }
 
 type Fall = {
@@ -333,6 +336,9 @@ export default function DispatchBoard({
           </div>
         )}
 
+        {/* Anstehende Rückrufe (KFZ-37) */}
+        <AnstehendeRueckrufe leads={leads} />
+
         {/* Pipeline columns - horizontal scroll */}
         <div className="overflow-x-auto pb-4">
           <div className="flex gap-2.5" style={{ minWidth: `${COLUMNS.length * 185}px` }}>
@@ -428,8 +434,26 @@ function LeadCard({
   const phase = lead.qualifizierungs_phase ?? 'neu'
   const zugewiesen = lead.zugewiesen_an ? betreuerMap[lead.zugewiesen_an] ?? null : null
 
+  // Rückruf-Badge (KFZ-37)
+  const hasCallback = !!lead.rueckruf_datum && !lead.rueckruf_erledigt
+  const callbackInPast = hasCallback && new Date(lead.rueckruf_datum!) < new Date()
+  const callbackTime = hasCallback
+    ? new Date(lead.rueckruf_datum!).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+    : null
+
   return (
     <div className="bg-zinc-900 rounded-xl p-3 border border-zinc-800 hover:border-zinc-700 transition-colors">
+      {/* Rückruf Badge */}
+      {hasCallback && (
+        <div className={`text-[10px] font-semibold px-2 py-1 rounded-lg mb-2 ${
+          callbackInPast
+            ? 'bg-red-950 text-red-400'
+            : 'bg-amber-950 text-amber-400'
+        }`}>
+          {callbackInPast ? 'ÜBERFÄLLIG' : `Rückruf ${callbackTime}`}
+        </div>
+      )}
+
       {/* Top row */}
       <div className="flex items-center justify-between mb-1.5">
         <Link
@@ -611,6 +635,70 @@ function FallCard({
           ))}
           <option value="storniert">Storniert</option>
         </select>
+      </div>
+    </div>
+  )
+}
+
+// ─── Anstehende Rückrufe (KFZ-37) ──────────────────────────────────────────
+
+function AnstehendeRueckrufe({ leads }: { leads: Lead[] }) {
+  const now = Date.now()
+  const twoHours = 2 * 60 * 60 * 1000
+
+  // Upcoming: rueckruf_datum in next 2h AND not erledigt
+  // Also show overdue callbacks
+  const upcoming = leads
+    .filter(l => {
+      if (!l.rueckruf_datum || l.rueckruf_erledigt) return false
+      const t = new Date(l.rueckruf_datum).getTime()
+      // Show if overdue or within next 2 hours
+      return t < now + twoHours
+    })
+    .sort((a, b) => new Date(a.rueckruf_datum!).getTime() - new Date(b.rueckruf_datum!).getTime())
+
+  if (upcoming.length === 0) return null
+
+  return (
+    <div className="bg-amber-950/40 border border-amber-800/40 rounded-2xl p-4 mb-4">
+      <div className="flex items-center gap-2 mb-3">
+        <PhoneCallIcon className="w-4 h-4 text-amber-400" />
+        <h3 className="text-sm font-semibold text-amber-300">Anstehende Rückrufe ({upcoming.length})</h3>
+      </div>
+      <div className="space-y-2">
+        {upcoming.map(lead => {
+          const name = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—'
+          const time = new Date(lead.rueckruf_datum!)
+          const isOverdue = time.getTime() < now
+          const timeStr = time.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+          const sf = lead.schadenfall_typ ? SF_BADGE[lead.schadenfall_typ] ?? lead.schadenfall_typ.toUpperCase() : null
+
+          return (
+            <Link
+              key={lead.id}
+              href={`/admin/dispatch/lead/${lead.id}`}
+              className="flex items-center gap-3 bg-zinc-900/60 rounded-xl px-3 py-2.5 hover:bg-zinc-800/60 transition-colors"
+            >
+              <span className={`text-xs font-bold tabular-nums shrink-0 ${isOverdue ? 'text-red-400' : 'text-amber-400'}`}>
+                {isOverdue ? 'ÜBERFÄLLIG' : timeStr}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-zinc-200 text-sm truncate">{name}</p>
+                <div className="flex items-center gap-2 text-[11px] text-zinc-500">
+                  {lead.telefon && (
+                    <a href={`tel:${lead.telefon}`} className="text-blue-400 hover:text-blue-300" onClick={e => e.stopPropagation()}>
+                      {lead.telefon}
+                    </a>
+                  )}
+                  {sf && <span className="bg-blue-950 text-blue-300 px-1 rounded">{sf}</span>}
+                </div>
+              </div>
+              {lead.rueckruf_notiz && (
+                <span className="text-zinc-600 text-[10px] truncate max-w-24 hidden sm:block">{lead.rueckruf_notiz}</span>
+              )}
+            </Link>
+          )
+        })}
       </div>
     </div>
   )
