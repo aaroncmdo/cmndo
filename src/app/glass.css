@@ -231,3 +231,78 @@
 .glass-hover-transition:hover {
   transform: scale(1.02);
 }
+
+/* ─── Kunde Portal Animations ─── */
+
+/* Staggered card fade-in */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.kunde-animate {
+  animation: fadeSlideUp 0.5s ease-out both;
+}
+.kunde-animate-1 { animation-delay: 0ms; }
+.kunde-animate-2 { animation-delay: 80ms; }
+.kunde-animate-3 { animation-delay: 160ms; }
+.kunde-animate-4 { animation-delay: 240ms; }
+.kunde-animate-5 { animation-delay: 320ms; }
+
+/* Progress bar animation */
+@keyframes progressGrow {
+  from { width: 0; }
+}
+.kunde-progress-animate {
+  animation: progressGrow 0.8s ease-out 0.3s both;
+}
+
+/* Pulsing dot for active step */
+@keyframes kundeStepPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.6); }
+  50% { box-shadow: 0 0 0 6px rgba(59,130,246,0); }
+}
+.kunde-step-active {
+  animation: kundeStepPulse 2s ease-in-out infinite;
+}
+
+/* Bottom sheet */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.kunde-bottom-sheet {
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Chat bubble */
+.kunde-chat-own {
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  border-radius: 18px 18px 4px 18px;
+  color: #fff;
+}
+.kunde-chat-other {
+  background: rgba(255,255,255,0.06);
+  border-radius: 18px 18px 18px 4px;
+  color: rgba(255,255,255,0.9);
+}
+
+/* FAB button */
+.kunde-fab {
+  position: fixed;
+  bottom: calc(80px + env(safe-area-inset-bottom));
+  right: 20px;
+  z-index: 40;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  box-shadow: 0 4px 20px rgba(59,130,246,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.kunde-fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 30px rgba(59,130,246,0.5);
+}
