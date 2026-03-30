@@ -68,12 +68,12 @@ type LeadData = {
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 const SF_OPTIONS = [
-  { value: 'sf-01', label: 'SF-01 Unverschuldeter Kfz-Unfall (Haftpflicht Gegner)', pct: '~60%' },
+  { value: 'sf-01', label: 'SF-01 Unverschuldeter Unfall (Gegner ist schuld)', pct: '~60%' },
   { value: 'sf-02', label: 'SF-02 Teilschuld-Unfall', pct: '~10%' },
   { value: 'sf-03', label: 'SF-03 Parkschaden / Fahrerflucht', pct: '~8%' },
-  { value: 'sf-04', label: 'SF-04 Kaskoschaden ohne Gegner', pct: '~7%' },
-  { value: 'sf-05', label: 'SF-05 Personenschaden (Zusatz)', pct: '~10%' },
-  { value: 'sf-06', label: 'SF-06 Nutzungsausfall / Mietwagen (Flag)', pct: '' },
+  // SF-04 (Kasko) entfernt - ist Disqualifizierungsgrund
+  // SF-05 Personenschaden wird als Zusatz-Toggle angezeigt, nicht als eigener Typ
+  // SF-06 Nutzungsausfall gehoert in die Fallakte, nicht in den Lead
 ]
 
 const KK_OPTIONS = [
@@ -164,9 +164,9 @@ export default function LeadStepper({ lead }: { lead: LeadData }) {
   const [halterName, setHalterName] = useState(lead.halter_name ?? '')
 
   const needsGegner = sf === 'sf-01' || sf === 'sf-02' || (sf === 'sf-03' && sfVariante === 'a')
-  const needsEigeneVers = sf === 'sf-02' || (sf === 'sf-03' && sfVariante === 'b') || sf === 'sf-04'
+  const needsEigeneVers = sf === 'sf-02' || (sf === 'sf-03' && sfVariante === 'b')
   const needsPolizei = sf === 'sf-02' || sf === 'sf-03'
-  const needsUrsache = sf === 'sf-04'
+  const needsUrsache = false // SF-04 removed
 
   // Skip gegner step if not needed
   const gegnerStepVisible = needsGegner
@@ -188,8 +188,8 @@ export default function LeadStepper({ lead }: { lead: LeadData }) {
         eigene_policennr: needsEigeneVers ? eigenePolicennr || null : null,
         polizei_aktenzeichen: needsPolizei ? polizeiAktenzeichen || null : null,
         polizeibericht_pflicht: polizeibericht,
-        personenschaden_flag: personenschaden || sf === 'sf-05',
-        mietwagen_flag: mietwagen || sf === 'sf-06',
+        personenschaden_flag: personenschaden,
+        mietwagen_flag: mietwagen,
         schadensursache: needsUrsache ? schadensursache || null : null,
         leasing_geber: kk === 'kk-02' ? leasingGeber || null : null,
         leasing_flag: kk === 'kk-02',
@@ -449,8 +449,8 @@ function StepSchadentyp({
       )}
 
       <div className="flex flex-wrap gap-4">
-        <Checkbox label="Personenschaden (SF-05)" checked={personenschaden || sf === 'sf-05'} onChange={setPersonenschaden} disabled={sf === 'sf-05'} />
-        <Checkbox label="Mietwagen-Bedarf (SF-06)" checked={mietwagen || sf === 'sf-06'} onChange={setMietwagen} disabled={sf === 'sf-06'} />
+        <Checkbox label="Personenschaden vorhanden? (Zusatz)" checked={personenschaden} onChange={setPersonenschaden} />
+        <Checkbox label="Mietwagen gewuenscht?" checked={mietwagen} onChange={setMietwagen} />
       </div>
 
       <button

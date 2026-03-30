@@ -163,11 +163,15 @@ export default function DispatchBoard({
   const [showNewLead, setShowNewLead] = useState(false)
   const [newLead, setNewLead] = useState({ vorname: '', nachname: '', telefon: '+491633628571', email: '', source_channel: 'telefon', schadenfall_typ: '' })
   const [newLeadSaving, setNewLeadSaving] = useState(false)
+  const [showDisqualifiziert, setShowDisqualifiziert] = useState(false)
+
+  // Count disqualified leads
+  const disqualifiziertCount = useMemo(() => leads.filter(l => l.status === 'disqualifiziert' || l.qualifizierungs_phase === 'disqualifiziert').length, [leads])
 
   // Filter leads: exclude terminal statuses
   const pipelineLeads = useMemo(() => {
     return leads.filter(l => {
-      if (l.status === 'disqualifiziert' || l.status === 'kalt') return false
+      if (l.status === 'disqualifiziert' || l.status === 'kalt' || l.qualifizierungs_phase === 'disqualifiziert') return false
       if (search) {
         const q = search.toLowerCase()
         const name = `${l.vorname ?? ''} ${l.nachname ?? ''}`.toLowerCase()
@@ -176,6 +180,10 @@ export default function DispatchBoard({
       return true
     })
   }, [leads, search])
+
+  const disqualifiziertLeads = useMemo(() => {
+    return leads.filter(l => l.status === 'disqualifiziert' || l.qualifizierungs_phase === 'disqualifiziert')
+  }, [leads])
 
   // Heutige Rueckrufe (ueber dem Board)
   const now = Date.now()
@@ -214,6 +222,12 @@ export default function DispatchBoard({
             <h1 className="text-xl font-semibold text-white">Dispatch</h1>
             <p className="text-zinc-500 text-sm mt-0.5">
               {pipelineLeads.length} Leads in der Pipeline
+              {disqualifiziertCount > 0 && (
+                <button onClick={() => setShowDisqualifiziert(!showDisqualifiziert)}
+                  className="ml-3 text-red-400 hover:text-red-300 transition-colors">
+                  ({disqualifiziertCount} disqualifiziert)
+                </button>
+              )}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -256,9 +270,7 @@ export default function DispatchBoard({
                 <option value="sf-01">SF-01 Unfall mit Gegner</option>
                 <option value="sf-02">SF-02 Teilschuld</option>
                 <option value="sf-03">SF-03 Parkschaden</option>
-                <option value="sf-04">SF-04 Kasko</option>
                 <option value="sf-05">SF-05 Personenschaden</option>
-                <option value="sf-06">SF-06 Nutzungsausfall</option>
               </select>
             </div>
             <div className="flex gap-2">
@@ -313,6 +325,23 @@ export default function DispatchBoard({
                   </Link>
                 )
               })}
+            </div>
+          </div>
+        )}
+
+        {/* Disqualifizierte Leads (collapsed) */}
+        {showDisqualifiziert && disqualifiziertLeads.length > 0 && (
+          <div className="bg-red-950/20 border border-red-800/30 rounded-2xl p-4 mb-4">
+            <h3 className="text-sm font-semibold text-red-400 mb-3">Disqualifizierte Leads ({disqualifiziertLeads.length})</h3>
+            <div className="space-y-1.5">
+              {disqualifiziertLeads.map(lead => (
+                <Link key={lead.id} href={`/admin/dispatch/lead/${lead.id}`}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg bg-zinc-900/60 hover:bg-zinc-800/60 transition-colors">
+                  <span className="text-zinc-300 text-sm truncate flex-1">{`${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '\u2014'}</span>
+                  <span className="text-red-400/60 text-xs">{(lead as Record<string, unknown>).disqualifiziert_grund as string ?? ''}</span>
+                  <span className="text-zinc-600 text-xs">{lead.created_at ? new Date(lead.created_at).toLocaleDateString('de-DE') : ''}</span>
+                </Link>
+              ))}
             </div>
           </div>
         )}

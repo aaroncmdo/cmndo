@@ -4,6 +4,38 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { sendStatusWhatsApp } from '@/lib/whatsapp'
 
+// ─── Disqualifizierung (BUG-28) ─────────────────────────────────────────────
+
+export async function disqualifiziereLead(
+  leadId: string,
+  grund: string,
+  notiz: string | null,
+) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const now = new Date().toISOString()
+
+  const { error } = await supabase
+    .from('leads')
+    .update({
+      qualifizierungs_phase: 'disqualifiziert',
+      status: 'disqualifiziert',
+      disqualifiziert: true,
+      disqualifiziert_grund: grund,
+      disqualifiziert_notiz: notiz,
+      disqualifiziert_am: now,
+      updated_at: now,
+    })
+    .eq('id', leadId)
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath(`/admin/dispatch/lead/${leadId}`)
+  revalidatePath('/admin/dispatch')
+}
+
 export async function confirmGutachterTermin(
   leadId: string,
   svId: string,

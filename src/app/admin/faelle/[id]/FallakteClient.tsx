@@ -1282,6 +1282,33 @@ function TabUebersicht({
         </div>
       </Section>
 
+      {/* Nutzungsausfall (nach Gutachten sichtbar) */}
+      {fall.gutachten_eingegangen_am && (
+        <Section title="Nutzungsausfall">
+          <div className="grid grid-cols-2 gap-3">
+            <InfoRow label="Nutzungsausfall berechtigt" value={
+              (fall as Record<string, unknown>).nutzungsausfall_berechtigt
+                ? <span className="text-emerald-400">Ja</span>
+                : <span className="text-zinc-500">Nein / Nicht geprueft</span>
+            } />
+            <InfoRow label="Tage" value={String((fall as Record<string, unknown>).nutzungsausfall_tage ?? '\u2014')} />
+            <InfoRow label="Tagessatz" value={fmtCurrency((fall as Record<string, unknown>).nutzungsausfall_tagessatz as number | null)} />
+            <InfoRow label="Gesamt" value={
+              fmtCurrency(
+                ((fall as Record<string, unknown>).nutzungsausfall_tage as number ?? 0) *
+                ((fall as Record<string, unknown>).nutzungsausfall_tagessatz as number ?? 0) || null
+              )
+            } />
+          </div>
+          <div className="border-t border-zinc-800/50 mt-2 pt-2 grid grid-cols-2 gap-3">
+            <InfoRow label="Mietwagen genutzt" value={
+              (fall as Record<string, unknown>).mietwagen_genutzt ? <span className="text-blue-400">Ja</span> : <span className="text-zinc-500">Nein</span>
+            } />
+            <InfoRow label="Mietwagen-Kosten" value={fmtCurrency((fall as Record<string, unknown>).mietwagen_kosten as number | null)} />
+          </div>
+        </Section>
+      )}
+
       {/* KI-Schaetzung */}
       <KiSchaetzungSection fall={fall} dokumente={dokumente} onRefresh={onRefresh} />
 

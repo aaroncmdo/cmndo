@@ -5,6 +5,7 @@ import LeadStepper from './LeadStepper'
 import RueckrufSection from './RueckrufSection'
 import LeadNotizen from './LeadNotizen'
 import LeadTimeline from './LeadTimeline'
+import DisqualifizierungButton from './DisqualifizierungButton'
 
 export default async function LeadDetailPage({
   params,
@@ -53,9 +54,19 @@ export default async function LeadDetailPage({
 
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-white">
-            {lead.vorname ?? ''} {lead.nachname ?? ''}
-          </h1>
+          <div className="flex items-start justify-between">
+            <h1 className="text-2xl font-semibold text-white">
+              {lead.vorname ?? ''} {lead.nachname ?? ''}
+            </h1>
+            {lead.qualifizierungs_phase !== 'disqualifiziert' && lead.qualifizierungs_phase !== 'konvertiert' && (
+              <DisqualifizierungButton leadId={lead.id} />
+            )}
+            {lead.disqualifiziert && (
+              <span className="bg-red-950 text-red-400 text-xs font-bold px-3 py-1 rounded-full">
+                DISQUALIFIZIERT: {lead.disqualifiziert_grund ?? 'Unbekannt'}
+              </span>
+            )}
+          </div>
           <div className="flex flex-wrap items-center gap-3 mt-1 text-sm">
             {lead.telefon && (
               <a href={`tel:${lead.telefon}`} className="text-blue-400 hover:text-blue-300 transition-colors">
