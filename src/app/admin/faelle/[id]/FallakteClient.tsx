@@ -550,7 +550,7 @@ export default function FallakteClient({
   ]
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] px-4 py-8">
+    <div className="min-h-screen bg-[#f8f9fb] px-3 py-4">
       {process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY && (
         <Script
           src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}
@@ -558,17 +558,13 @@ export default function FallakteClient({
           onReady={() => setMapsReady(true)}
         />
       )}
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto">
 
-        {/* Header */}
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <a href="/admin/faelle" className="text-gray-500 hover:text-gray-700 text-sm transition-colors">
-                ← Alle Faelle
-              </a>
-            </div>
-            <h1 className="text-xl font-semibold text-gray-900">
+        {/* Header - compact */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <a href="/admin/faelle" className="text-gray-400 hover:text-gray-600 text-xs transition-colors">←</a>
+            <h1 className="text-base font-semibold text-gray-900">
               Kundenakte{fall.fall_nummer ? ` · ${fall.fall_nummer}` : ''}
             </h1>
             <p className="text-gray-500 text-sm mt-0.5">
@@ -639,24 +635,28 @@ export default function FallakteClient({
         {/* Nächster-Schritt Banner (KFZ-43) */}
         <NaechsterSchrittBanner fall={fall} tasks={tasks} />
 
-        {/* Tab Bar */}
-        <div className="flex gap-1 mb-6 bg-white rounded-xl p-1 border border-gray-200 overflow-x-auto">
-          {tabs.map(([id, label]) => (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-                activeTab === id
-                  ? 'bg-gray-100 text-gray-900'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        {/* 2-Column Layout: Tabs+Content left, Sidebar right */}
+        <div className="flex gap-4 items-start">
+          {/* LEFT: Tabs + Content (60% on xl) */}
+          <div className="flex-1 min-w-0">
+            {/* Tab Bar - compact */}
+            <div className="flex gap-0.5 mb-3 bg-white rounded-lg p-0.5 border border-gray-200 overflow-x-auto">
+              {tabs.map(([id, label]) => (
+                <button
+                  key={id}
+                  onClick={() => setActiveTab(id)}
+                  className={`py-1.5 px-2.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
+                    activeTab === id
+                      ? 'bg-gray-100 text-gray-900'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
 
-        {/* Tab Content */}
+            {/* Tab Content */}
         {activeTab === 'uebersicht' && (
           <TabUebersicht
             fall={fall}
@@ -732,6 +732,67 @@ export default function FallakteClient({
             onRefresh={() => router.refresh()}
           />
         )}
+          </div>
+
+          {/* RIGHT: Sticky Sidebar (hidden on mobile, 340px on xl) */}
+          <aside className="hidden xl:block w-[340px] shrink-0 sticky top-20 self-start space-y-3">
+            {/* Stammdaten */}
+            <div className="bg-white rounded-xl border border-gray-200 p-3">
+              <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Stammdaten</h3>
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between"><span className="text-gray-500">Kunde</span><span className="text-gray-800 font-medium">{lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—' : '—'}</span></div>
+                {lead?.telefon && <div className="flex justify-between"><span className="text-gray-500">Telefon</span><a href={`tel:${lead.telefon}`} className="text-blue-600">{lead.telefon}</a></div>}
+                {lead?.email && <div className="flex justify-between"><span className="text-gray-500">E-Mail</span><span className="text-gray-700 truncate ml-2">{lead.email}</span></div>}
+                {fall.schadens_adresse && <div className="flex justify-between"><span className="text-gray-500">Ort</span><span className="text-gray-700 truncate ml-2">{[fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(' ')}</span></div>}
+              </div>
+            </div>
+
+            {/* Fahrzeug */}
+            {(fall.kennzeichen || fall.fahrzeug_hersteller) && (
+              <div className="bg-white rounded-xl border border-gray-200 p-3">
+                <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Fahrzeug</h3>
+                <div className="space-y-1 text-xs">
+                  {fall.kennzeichen && <div className="flex justify-between"><span className="text-gray-500">Kennzeichen</span><span className="text-gray-800 font-mono font-medium">{fall.kennzeichen}</span></div>}
+                  {(fall.fahrzeug_hersteller || fall.fahrzeug_modell) && <div className="flex justify-between"><span className="text-gray-500">Fahrzeug</span><span className="text-gray-700">{[fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ')}</span></div>}
+                </div>
+              </div>
+            )}
+
+            {/* Flags */}
+            {[fall.personenschaden_flag, fall.mietwagen_flag, fall.leasing_flag, fall.finanzierung_flag, fall.gewerbe_flag].some(Boolean) && (
+              <div className="bg-white rounded-xl border border-gray-200 p-3">
+                <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Flags</h3>
+                <div className="flex flex-wrap gap-1">
+                  {fall.personenschaden_flag && <span className="bg-red-50 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-medium">Personenschaden</span>}
+                  {fall.mietwagen_flag && <span className="bg-blue-50 text-blue-600 text-[10px] px-2 py-0.5 rounded-full font-medium">Mietwagen</span>}
+                  {fall.leasing_flag && <span className="bg-purple-50 text-purple-600 text-[10px] px-2 py-0.5 rounded-full font-medium">Leasing</span>}
+                  {fall.finanzierung_flag && <span className="bg-orange-50 text-orange-600 text-[10px] px-2 py-0.5 rounded-full font-medium">Finanzierung</span>}
+                  {fall.gewerbe_flag && <span className="bg-amber-50 text-amber-600 text-[10px] px-2 py-0.5 rounded-full font-medium">Gewerbe</span>}
+                </div>
+              </div>
+            )}
+
+            {/* Ansprechpartner */}
+            <div className="bg-white rounded-xl border border-gray-200 p-3">
+              <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Ansprechpartner</h3>
+              <div className="space-y-2 text-xs">
+                {kundenbetreuer && (
+                  <div>
+                    <span className="text-gray-400 text-[10px]">Kundenbetreuer</span>
+                    <p className="text-gray-800 font-medium">{profileName(kundenbetreuer)}</p>
+                    {kundenbetreuer.telefon && <a href={`tel:${kundenbetreuer.telefon}`} className="text-blue-600 text-[11px]">{kundenbetreuer.telefon}</a>}
+                  </div>
+                )}
+                {sv?.profile && (
+                  <div>
+                    <span className="text-gray-400 text-[10px]">Gutachter</span>
+                    <p className="text-gray-800 font-medium">{sv.profile.vorname} {sv.profile.nachname}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </aside>
+        </div>
       </div>
     </div>
   )
