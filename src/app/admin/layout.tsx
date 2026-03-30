@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import AdminNav from './_components/AdminNav'
 import NotificationBell from './_components/NotificationBell'
+import Spotlight from '@/components/Spotlight'
 
 export default async function AdminLayout({
   children,
@@ -18,6 +19,9 @@ export default async function AdminLayout({
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] relative">
+      {/* Spotlight search (Cmd+K) */}
+      <Spotlight />
+
       {/* Client-side nav with usePathname for active state */}
       <AdminNav email={user.email ?? ''} initials={initials} />
 
