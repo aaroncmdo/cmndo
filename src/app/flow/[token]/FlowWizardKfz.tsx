@@ -389,11 +389,73 @@ export default function FlowWizardKfz({ token, lead }: { token: string; lead: Le
         if (pflichtErr) throw new Error(pflichtErr.message)
       }
 
-      // 4. Lead-Status updaten
+      // 4. Lead-Status + Qualifizierungs-Phase updaten
       await supabase
         .from('leads')
-        .update({ status: 'qualifiziert' })
+        .update({
+          status: 'umgewandelt',
+          qualifizierungs_phase: 'abgeschlossen',
+          updated_at: new Date().toISOString(),
+        })
         .eq('id', token)
+
+      // 5. Kundenbetreuer zuweisen (Load Balancing: wer hat am wenigsten aktive Faelle)
+      const { data: betreuer } = await supabase
+        .from('profiles')
+        .select('id')
+        .in('rolle', ['kundenbetreuer', 'admin'])
+        .limit(10)
+
+      if (betreuer && betreuer.length > 0) {
+        // Count active cases per betreuer
+        const counts: Record<string, number> = {}
+        for (const b of betreuer) {
+          const { count } = await supabase
+            .from('faelle')
+            .select('id', { count: 'exact', head: true })
+            .eq('kundenbetreuer_id', b.id)
+            .not('status', 'in', '("abgeschlossen","storniert")')
+          counts[b.id] = count ?? 0
+        }
+        const minBetreuer = betreuer.reduce((min, b) =>
+          (counts[b.id] ?? 0) < (counts[min.id] ?? 0) ? b : min
+        , betreuer[0])
+
+        await supabase
+          .from('faelle')
+          .update({ kundenbetreuer_id: minBetreuer.id })
+          .eq('id', fall.id)
+      }
+
+      // 6. Kunden-Account erstellen (wenn E-Mail vorhanden)
+      if (lead.email) {
+        try {
+          const { createKundeAccount } = await import('./actions')
+          await createKundeAccount(
+            fall.id,
+            lead.email,
+            lead.vorname ?? '',
+            lead.nachname ?? '',
+            lead.telefon ?? null,
+          )
+        } catch {
+          // Non-critical: account creation may fail if user already exists
+        }
+      }
+
+      // 7. Benachrichtigung + Timeline
+      try {
+        const { notifyNeuerFall } = await import('./actions')
+        await notifyNeuerFall(fall.id)
+      } catch { /* */ }
+
+      // Timeline-Eintrag
+      await supabase.from('timeline').insert({
+        fall_id: fall.id,
+        typ: 'system',
+        titel: 'FlowLink abgeschlossen - Lead konvertiert',
+        beschreibung: `Kunde hat alle Dokumente hochgeladen. Fall automatisch erstellt.`,
+      })
 
       setPortalUrl(`/portal/${token}`)
       setDone(true)
