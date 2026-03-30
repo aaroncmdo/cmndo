@@ -12,6 +12,23 @@ export async function saveFilmcheck(fallId: string, notizen: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht angemeldet')
 
+  // Generate Mandatsnummer (CLM-YYYY-XXXX)
+  const year = new Date().getFullYear()
+  const { data: maxRow } = await supabase
+    .from('faelle')
+    .select('mandatsnummer')
+    .like('mandatsnummer', `CLM-${year}-%`)
+    .order('mandatsnummer', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  let nextNum = 1
+  if (maxRow?.mandatsnummer) {
+    const match = maxRow.mandatsnummer.match(/(\d+)$/)
+    if (match) nextNum = parseInt(match[1], 10) + 1
+  }
+  const mandatsnummer = `CLM-${year}-${String(nextNum).padStart(4, '0')}`
+
   const { error } = await supabase
     .from('faelle')
     .update({
@@ -19,6 +36,8 @@ export async function saveFilmcheck(fallId: string, notizen: string) {
       filmcheck_am: new Date().toISOString(),
       filmcheck_notizen: notizen || null,
       status: 'kanzlei-uebergeben',
+      kanzlei_uebergeben_am: new Date().toISOString(),
+      mandatsnummer,
     })
     .eq('id', fallId)
 

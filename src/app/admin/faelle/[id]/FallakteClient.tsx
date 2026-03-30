@@ -122,6 +122,7 @@ type Fall = Record<string, unknown> & {
   kanzlei_ansprechpartner_email: string | null
   kanzlei_ansprechpartner_telefon: string | null
   kanzlei_ansprechpartner_position: string | null
+  mandatsnummer: string | null
 }
 
 type Lead = {
@@ -2067,8 +2068,17 @@ function TabKanzlei({
         </button>
       </Section>
 
+      {/* Mandatsnummer prominent */}
+      {fall.mandatsnummer && (
+        <div className="bg-gradient-to-r from-cyan-950/50 to-blue-950/50 border border-cyan-800/40 rounded-2xl p-5">
+          <p className="text-xs text-cyan-400 font-medium mb-1">Mandatsnummer</p>
+          <p className="text-2xl font-bold text-white font-mono tracking-wide">{fall.mandatsnummer}</p>
+        </div>
+      )}
+
       <Section title="Kanzlei-Status">
         <InfoRow label="Uebergeben am" value={fmt(fall.kanzlei_uebergeben_am)} />
+        {fall.mandatsnummer && <InfoRow label="Mandatsnummer" value={<span className="font-mono text-cyan-400">{fall.mandatsnummer}</span>} />}
         <InfoRow label="Filmcheck" value={
           fall.filmcheck_ok
             ? <span className="text-green-400">Bestanden ({fmt(fall.filmcheck_am)})</span>
@@ -2076,6 +2086,17 @@ function TabKanzlei({
         } />
         <InfoRow label="Versicherung" value={fall.versicherung_name} />
         <InfoRow label="Schadennummer" value={fall.versicherung_schaden_nr} />
+        {/* Kanzlei-Paket PDF Download */}
+        <div className="mt-3">
+          <a
+            href={`/api/pdf/kanzlei-paket/${fall.id}`}
+            target="_blank"
+            rel="noopener"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl text-sm text-white transition-colors"
+          >
+            Kanzlei-Paket PDF herunterladen
+          </a>
+        </div>
       </Section>
 
       <Section title="Anschlussschreiben (AS)">
