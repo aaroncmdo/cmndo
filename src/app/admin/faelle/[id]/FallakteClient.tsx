@@ -495,6 +495,7 @@ export default function FallakteClient({
   pflichtdokumente,
   nachrichten,
   qcCheckliste,
+  tasks,
 }: {
   fall: Fall
   lead: Lead
