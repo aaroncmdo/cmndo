@@ -59,6 +59,13 @@ const PAKET_LABEL: Record<string, string> = {
   'premium-50': 'Premium', premium: 'Premium',
 }
 
+// Paket → Radius in meters (with 0.7 correction factor: Luftlinie → Fahrstrecke)
+const PAKET_RADIUS_M: Record<string, number> = {
+  'starter-10': 14000, starter: 14000,
+  'standard-25': 28000, pro: 28000,
+  'premium-50': 70000, premium: 70000,
+}
+
 const ALL_QUALIFIKATIONEN = [
   'Haftpflichtschaden', 'Kaskoschaden', 'Leasingrueckgabe', 'Flottenmanagement',
   'Oldtimer', 'LKW/Nutzfahrzeuge', 'Motorrad', 'Wohnmobil',
@@ -189,21 +196,26 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
           if (!mapRef.current || !points.length) return
           const polygon = new google.maps.Polygon({
             paths: points, map: mapRef.current,
-            fillColor: color, fillOpacity: 0.12,
-            strokeColor: color, strokeOpacity: 0.4, strokeWeight: 1.5,
+            fillColor: color, fillOpacity: 0.2,
+            strokeColor: color, strokeOpacity: 0.6, strokeWeight: 2,
             clickable: true, geodesic: true,
           })
           polygon.addListener('click', () => setSelectedSV(sv))
+          polygon.addListener('mouseover', () => { polygon.setOptions({ fillOpacity: 0.35, strokeWeight: 3 }) })
+          polygon.addListener('mouseout', () => { polygon.setOptions({ fillOpacity: 0.2, strokeWeight: 2 }) })
           polygonsRef.current.push(polygon)
         })
       } else {
+        const radiusM = PAKET_RADIUS_M[sv.paket] ?? (sv.radiusKm || 20) * 700
         const circle = new google.maps.Circle({
-          center: pos, radius: (sv.radiusKm || 20) * 700, map: mapRef.current!,
-          fillColor: color, fillOpacity: 0.12,
-          strokeColor: color, strokeOpacity: 0.4, strokeWeight: 1.5,
+          center: pos, radius: radiusM, map: mapRef.current!,
+          fillColor: color, fillOpacity: 0.2,
+          strokeColor: color, strokeOpacity: 0.6, strokeWeight: 2,
           clickable: true,
         })
         circle.addListener('click', () => setSelectedSV(sv))
+        circle.addListener('mouseover', () => { circle.setOptions({ fillOpacity: 0.35, strokeWeight: 3 }) })
+        circle.addListener('mouseout', () => { circle.setOptions({ fillOpacity: 0.2, strokeWeight: 2 }) })
         circlesRef.current.push(circle)
       }
     })
@@ -295,6 +307,24 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
         {!mapReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/80 z-10">
             <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+
+        {/* ─── Legende ──────────────────────────────────────────────── */}
+        {mapReady && (
+          <div className="absolute bottom-4 left-4 z-10 bg-zinc-900/90 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-3 space-y-1.5">
+            <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mb-1">Legende</p>
+            {Object.entries(TYP_COLORS).map(([key, val]) => (
+              <div key={key} className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: val.fill, opacity: 0.7 }} />
+                <span className="text-[11px] text-zinc-300">{val.label}</span>
+              </div>
+            ))}
+            <div className="border-t border-zinc-700/50 pt-1.5 mt-1.5 space-y-0.5">
+              <p className="text-[10px] text-zinc-500">Starter: 14km</p>
+              <p className="text-[10px] text-zinc-500">Standard: 28km</p>
+              <p className="text-[10px] text-zinc-500">Premium: 70km</p>
+            </div>
           </div>
         )}
       </div>
