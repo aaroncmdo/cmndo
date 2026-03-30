@@ -253,8 +253,8 @@ export default function DispatchBoard({
   const totalPipeline = filteredLeads.length + filteredFaelle.length
 
   return (
-    <div className="px-4 py-6">
-      <div className="max-w-[2800px] mx-auto">
+    <div className="px-4 py-6 overflow-hidden">
+      <div className="max-w-full mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <div>
@@ -326,7 +326,7 @@ export default function DispatchBoard({
                 : filteredFaelle.filter(f => getColumnKey(f) === col.key)
 
               return (
-                <div key={col.key} className="flex-1 min-w-[175px]">
+                <div key={col.key} className="min-w-[185px] w-[185px] flex-shrink-0">
                   {/* Column header */}
                   <div className="mb-3 px-1">
                     <div className="flex items-center gap-2 mb-0.5">

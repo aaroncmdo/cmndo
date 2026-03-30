@@ -63,6 +63,7 @@ export default function FallDetailClient({
   parteien,
   timeline,
   nachrichten,
+  kundenbetreuer,
 }: {
   fall: Record<string, unknown>
   lead: { vorname: string | null; nachname: string | null; email: string | null; telefon: string | null } | null
@@ -71,6 +72,7 @@ export default function FallDetailClient({
   parteien: Record<string, unknown>[]
   timeline: Record<string, unknown>[]
   nachrichten: Record<string, unknown>[]
+  kundenbetreuer?: { vorname: string | null; nachname: string | null; email: string | null; telefon: string | null } | null
 }) {
   const [tab, setTab] = useState<TabKey>('uebersicht')
   const [uploading, setUploading] = useState(false)
@@ -311,6 +313,28 @@ export default function FallDetailClient({
                 {!fall.gegner_bekannt ? <Badge label="Gegner unbekannt" color="bg-zinc-800 text-zinc-400" /> : null}
               </div>
             </div>
+
+            {/* Ansprechpartner bei Claimondo */}
+            {kundenbetreuer && (
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+                <h2 className="text-sm font-medium text-zinc-400 mb-3">Ihr Ansprechpartner bei Claimondo</h2>
+                <div className="space-y-2">
+                  <p className="text-white text-sm font-medium">
+                    {`${kundenbetreuer.vorname ?? ''} ${kundenbetreuer.nachname ?? ''}`.trim() || '—'}
+                  </p>
+                  {kundenbetreuer.telefon && (
+                    <a href={`tel:${kundenbetreuer.telefon}`} className="flex items-center gap-2 text-blue-400 text-sm hover:text-blue-300">
+                      <span className="text-zinc-500 text-xs">Tel:</span> {kundenbetreuer.telefon}
+                    </a>
+                  )}
+                  {kundenbetreuer.email && (
+                    <a href={`mailto:${kundenbetreuer.email}`} className="flex items-center gap-2 text-blue-400 text-sm hover:text-blue-300 truncate">
+                      <span className="text-zinc-500 text-xs">Mail:</span> {kundenbetreuer.email}
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* FIN/VIN Eingabe */}
             {!(fall.fin_vin) && (

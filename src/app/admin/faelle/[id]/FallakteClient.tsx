@@ -16,6 +16,7 @@ import {
   upsertQcCheckliste,
   qcBestanden,
   qcNachbesserung,
+  saveKanzleiAnsprechpartner,
 } from './actions'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import {
@@ -115,6 +116,10 @@ type Fall = Record<string, unknown> & {
   ki_geschaetzte_kosten_max: number | null
   schadenhoehe_netto: number | null
   vs_eskalationsstufe: string | null
+  kanzlei_ansprechpartner_name: string | null
+  kanzlei_ansprechpartner_email: string | null
+  kanzlei_ansprechpartner_telefon: string | null
+  kanzlei_ansprechpartner_position: string | null
 }
 
 type Lead = {
@@ -1977,8 +1982,51 @@ function TabKanzlei({
     }
   }
 
+  const [kName, setKName] = useState(fall.kanzlei_ansprechpartner_name ?? '')
+  const [kEmail, setKEmail] = useState(fall.kanzlei_ansprechpartner_email ?? '')
+  const [kTelefon, setKTelefon] = useState(fall.kanzlei_ansprechpartner_telefon ?? '')
+  const [kPosition, setKPosition] = useState(fall.kanzlei_ansprechpartner_position ?? '')
+  const [kSaving, setKSaving] = useState(false)
+
+  async function handleSaveKanzlei() {
+    setKSaving(true)
+    try {
+      await saveKanzleiAnsprechpartner(fall.id, { name: kName, email: kEmail, telefon: kTelefon, position: kPosition })
+      onRefresh()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Fehler')
+    } finally {
+      setKSaving(false)
+    }
+  }
+
   return (
     <div className="space-y-4">
+      {/* Kanzlei-Ansprechpartner Formular */}
+      <Section title="Kanzlei-Ansprechpartner">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+          <div>
+            <label className="text-zinc-500 text-xs block mb-1">Name</label>
+            <input value={kName} onChange={e => setKName(e.target.value)} placeholder="z.B. RA Dr. Müller" className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+          </div>
+          <div>
+            <label className="text-zinc-500 text-xs block mb-1">Position</label>
+            <input value={kPosition} onChange={e => setKPosition(e.target.value)} placeholder="z.B. Rechtsanwalt" className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+          </div>
+          <div>
+            <label className="text-zinc-500 text-xs block mb-1">E-Mail</label>
+            <input value={kEmail} onChange={e => setKEmail(e.target.value)} type="email" placeholder="anwalt@kanzlei.de" className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+          </div>
+          <div>
+            <label className="text-zinc-500 text-xs block mb-1">Telefon</label>
+            <input value={kTelefon} onChange={e => setKTelefon(e.target.value)} type="tel" placeholder="+49 221 12345" className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+          </div>
+        </div>
+        <button onClick={handleSaveKanzlei} disabled={kSaving} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-40">
+          {kSaving ? 'Speichert...' : 'Speichern'}
+        </button>
+      </Section>
+
       <Section title="Kanzlei-Status">
         <InfoRow label="Uebergeben am" value={fmt(fall.kanzlei_uebergeben_am)} />
         <InfoRow label="Filmcheck" value={

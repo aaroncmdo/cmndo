@@ -257,53 +257,56 @@ async function convertLeadToFall(
   return fall.id
 }
 
-// ─── Kundenbetreuer Round-Robin ─────────────────────────────────────────────
+// ─── Kundenbetreuer Load Balancing ──────────────────────────────────────────
 
 async function findNextKundenbetreuer(
   supabase: Awaited<ReturnType<typeof createClient>>,
 ): Promise<string | null> {
-  // Alle Kundenbetreuer laden
   const { data: betreuer } = await supabase
     .from('profiles')
-    .select('id')
+    .select('id, kapazitaet_max')
     .eq('rolle', 'kundenbetreuer')
+    .eq('aktiv', true)
 
   if (!betreuer || betreuer.length === 0) {
-    // Fallback: Admin mit den wenigsten Fällen
     const { data: admins } = await supabase
       .from('profiles')
-      .select('id')
+      .select('id, kapazitaet_max')
       .eq('rolle', 'admin')
+      .eq('aktiv', true)
     if (!admins || admins.length === 0) return null
-    if (admins.length === 1) return admins[0].id
-
-    return await findLeastBusyProfile(supabase, admins.map(a => a.id))
+    return await findLeastBusyKundenbetreuer(supabase, admins)
   }
 
-  if (betreuer.length === 1) return betreuer[0].id
-
-  return await findLeastBusyProfile(supabase, betreuer.map(b => b.id))
+  return await findLeastBusyKundenbetreuer(supabase, betreuer)
 }
 
-async function findLeastBusyProfile(
+async function findLeastBusyKundenbetreuer(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  profileIds: string[],
-): Promise<string> {
-  // Offene Fälle pro Kundenbetreuer zählen
+  profiles: { id: string; kapazitaet_max: number | null }[],
+): Promise<string | null> {
+  if (profiles.length === 0) return null
+
+  const ids = profiles.map(p => p.id)
   const { data: faelle } = await supabase
     .from('faelle')
     .select('kundenbetreuer_id')
-    .in('kundenbetreuer_id', profileIds)
+    .in('kundenbetreuer_id', ids)
     .not('status', 'in', '("abgeschlossen","storniert")')
 
   const counts: Record<string, number> = {}
-  for (const id of profileIds) counts[id] = 0
+  for (const id of ids) counts[id] = 0
   for (const f of faelle ?? []) {
     if (f.kundenbetreuer_id) counts[f.kundenbetreuer_id] = (counts[f.kundenbetreuer_id] ?? 0) + 1
   }
 
-  // Der mit den wenigsten offenen Fällen
-  return profileIds.reduce((min, id) => (counts[id] < counts[min] ? id : min), profileIds[0])
+  // Nur Betreuer unter Kapazitaetsgrenze, dann wenigste offene Faelle
+  const eligible = profiles.filter(p => counts[p.id] < (p.kapazitaet_max ?? 100))
+  if (eligible.length === 0) {
+    // Fallback: der mit den wenigsten Faellen (auch ueber Kapazitaet)
+    return ids.reduce((min, id) => (counts[id] < counts[min] ? id : min), ids[0])
+  }
+  return eligible.reduce((min, p) => (counts[p.id] < counts[min.id] ? p : min), eligible[0]).id
 }
 
 // ─── Pflichtdokumente automatisch erstellen ─────────────────────────────────

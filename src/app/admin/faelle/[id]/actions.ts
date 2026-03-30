@@ -494,3 +494,32 @@ export async function uploadDatei(fallId: string, formData: FormData) {
   revalidatePath(`/admin/faelle/${fallId}`)
   revalidatePath('/admin/faelle')
 }
+
+export async function saveKanzleiAnsprechpartner(
+  fallId: string,
+  data: {
+    name: string
+    email: string
+    telefon: string
+    position: string
+  }
+) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const { error } = await supabase
+    .from('faelle')
+    .update({
+      kanzlei_ansprechpartner_name: data.name || null,
+      kanzlei_ansprechpartner_email: data.email || null,
+      kanzlei_ansprechpartner_telefon: data.telefon || null,
+      kanzlei_ansprechpartner_position: data.position || null,
+    })
+    .eq('id', fallId)
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/kunde/fall/${fallId}`)
+}

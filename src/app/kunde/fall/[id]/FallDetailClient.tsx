@@ -205,16 +205,30 @@ function fmtCurrency(val: number | null) {
 
 // ─── Main ───────────────────────────────────────────────────────────────────
 
+type Kundenbetreuer = {
+  vorname: string | null
+  nachname: string | null
+  email: string | null
+  telefon: string | null
+} | null
+
 export default function FallDetailClient({
   fall,
   dokumente,
   sv,
   nachrichten,
+  kundenbetreuer,
 }: {
-  fall: Fall
+  fall: Fall & {
+    kanzlei_ansprechpartner_name?: string | null
+    kanzlei_ansprechpartner_email?: string | null
+    kanzlei_ansprechpartner_telefon?: string | null
+    kanzlei_ansprechpartner_position?: string | null
+  }
   dokumente: Dokument[]
   sv: SV
   nachrichten: Nachricht[]
+  kundenbetreuer?: Kundenbetreuer
 }) {
   const router = useRouter()
   const timeline = buildTimeline(fall)
@@ -420,60 +434,93 @@ export default function FallDetailClient({
             <AuszahlungsUebersicht fall={fall} />
           )}
 
-          {/* ── Bearbeiter / Kontakt ── */}
-          <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
+          {/* ── Ansprechpartner (2 Karten nebeneinander) ── */}
+          <div>
             <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">
-              Ihr Ansprechpartner
+              Ihre Ansprechpartner
             </h3>
-
-            {sv?.profile ? (
-              <div className="space-y-0 mb-4">
-                <p className="text-zinc-500 text-xs mb-2">Sachverständiger</p>
-                <InfoRow
-                  label="Name"
-                  value={`${sv.profile.vorname ?? ''} ${sv.profile.nachname ?? ''}`.trim() || '—'}
-                />
-                {sv.profile.telefon && (
-                  <InfoRow
-                    label="Telefon"
-                    value={
-                      <a href={`tel:${sv.profile.telefon}`} className="text-blue-400 hover:text-blue-300">
-                        {sv.profile.telefon}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* KARTE 1: Kundenbetreuer bei Claimondo */}
+              <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
+                <p className="text-zinc-500 text-[10px] font-semibold uppercase tracking-wider mb-3">
+                  Ihr Kundenbetreuer bei Claimondo
+                </p>
+                {kundenbetreuer ? (
+                  <div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}>
+                        <span className="text-white text-sm font-bold">
+                          {(kundenbetreuer.vorname?.[0] ?? '').toUpperCase()}{(kundenbetreuer.nachname?.[0] ?? '').toUpperCase()}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-white text-sm font-medium">
+                          {`${kundenbetreuer.vorname ?? ''} ${kundenbetreuer.nachname ?? ''}`.trim() || '—'}
+                        </p>
+                        <p className="text-zinc-500 text-xs">Kundenbetreuer</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      {kundenbetreuer.telefon && (
+                        <a href={`tel:${kundenbetreuer.telefon}`} className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-xl text-sm text-blue-400 hover:bg-zinc-700 transition-colors">
+                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>
+                          Anrufen
+                        </a>
+                      )}
+                      {kundenbetreuer.email && (
+                        <a href={`mailto:${kundenbetreuer.email}`} className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-xl text-sm text-blue-400 hover:bg-zinc-700 transition-colors">
+                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
+                          E-Mail schreiben
+                        </a>
+                      )}
+                      <a href={`/kunde/fall/${fall.id}#nachrichten`} className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-xl text-sm text-emerald-400 hover:bg-zinc-700 transition-colors">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg>
+                        Chat öffnen
                       </a>
-                    }
-                  />
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-zinc-600 text-sm">Wird Ihnen in Kürze zugewiesen.</p>
                 )}
               </div>
-            ) : (
-              <div className="text-center py-4 mb-4">
-                <p className="text-zinc-600 text-sm">
-                  Noch kein Sachverständiger zugewiesen.
-                </p>
-                <p className="text-zinc-700 text-xs mt-1">
-                  Sobald ein Sachverständiger zugewiesen wird, sehen Sie hier die Kontaktdaten.
-                </p>
-              </div>
-            )}
 
-            <div className="border-t border-zinc-800 pt-4">
-              <p className="text-zinc-500 text-xs mb-2">Kanzlei</p>
-              <InfoRow label="Kanzlei" value="Claimondo Partnerkanzlei" />
-              <InfoRow
-                label="E-Mail"
-                value={
-                  <a href="mailto:kanzlei@claimondo.de" className="text-blue-400 hover:text-blue-300">
-                    kanzlei@claimondo.de
-                  </a>
-                }
-              />
-              <InfoRow
-                label="Telefon"
-                value={
-                  <a href="tel:+4930123456789" className="text-blue-400 hover:text-blue-300">
-                    030 123 456 789
-                  </a>
-                }
-              />
+              {/* KARTE 2: Kanzlei LexDrive */}
+              <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
+                <p className="text-zinc-500 text-[10px] font-semibold uppercase tracking-wider mb-3">
+                  Ihre Kanzlei LexDrive
+                </p>
+                {fall.kanzlei_ansprechpartner_name ? (
+                  <div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center shrink-0">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="text-cyan-400"><path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" /></svg>
+                      </div>
+                      <div>
+                        <p className="text-white text-sm font-medium">{fall.kanzlei_ansprechpartner_name}</p>
+                        <p className="text-zinc-500 text-xs">{fall.kanzlei_ansprechpartner_position ?? 'Rechtsanwalt'}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      {fall.kanzlei_ansprechpartner_telefon && (
+                        <a href={`tel:${fall.kanzlei_ansprechpartner_telefon}`} className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-xl text-sm text-blue-400 hover:bg-zinc-700 transition-colors">
+                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>
+                          Anrufen
+                        </a>
+                      )}
+                      {fall.kanzlei_ansprechpartner_email && (
+                        <a href={`mailto:${fall.kanzlei_ansprechpartner_email}`} className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-xl text-sm text-blue-400 hover:bg-zinc-700 transition-colors">
+                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
+                          E-Mail schreiben
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-zinc-600 text-sm">Wird nach Kanzlei-Übergabe zugewiesen.</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

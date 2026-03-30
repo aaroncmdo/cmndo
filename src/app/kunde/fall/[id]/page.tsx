@@ -41,6 +41,22 @@ export default async function KundeFallPage({
     redirect(`/kunde/onboarding/${fall.id}`)
   }
 
+  // Fetch kundenbetreuer profile
+  let kundenbetreuer: {
+    vorname: string | null
+    nachname: string | null
+    email: string | null
+    telefon: string | null
+  } | null = null
+  if (fall.kundenbetreuer_id) {
+    const { data: kbProfile } = await supabase
+      .from('profiles')
+      .select('vorname, nachname, email, telefon')
+      .eq('id', fall.kundenbetreuer_id as string)
+      .single()
+    kundenbetreuer = kbProfile
+  }
+
   // Fetch all related data in parallel
   const [
     { data: dokumente },
@@ -87,6 +103,7 @@ export default async function KundeFallPage({
       dokumente={dokumente ?? []}
       sv={sv}
       nachrichten={nachrichten ?? []}
+      kundenbetreuer={kundenbetreuer}
     />
   )
 }
