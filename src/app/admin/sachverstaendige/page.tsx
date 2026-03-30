@@ -83,8 +83,8 @@ export default async function SachverstaendigePage() {
                     const name = p ? `${p.vorname ?? ''} ${p.nachname ?? ''}`.trim() : ''
                     const typ = (sv as Record<string, unknown>).gutachter_typ as string ?? 'kfz-gutachter'
                     const quals = ((sv as Record<string, unknown>).qualifikationen as string[] | null) ?? []
-                    const genutzt = (sv as Record<string, unknown>).paket_faelle_genutzt as number ?? sv.offene_faelle ?? 0
-                    const gesamt = (sv as Record<string, unknown>).paket_faelle_gesamt as number ?? sv.max_faelle_monat ?? 10
+                    const genutzt = Number((sv as Record<string, unknown>).paket_faelle_genutzt) || Number(sv.offene_faelle) || 0
+                    const gesamt = Number((sv as Record<string, unknown>).paket_faelle_gesamt) || Number(sv.max_faelle_monat) || 10
                     const auslastung = gesamt > 0 ? Math.round((genutzt / gesamt) * 100) : 0
                     const anzahlungStatus = (sv as Record<string, unknown>).anzahlung_status as string ?? 'offen'
                     const onboardingDone = (sv as Record<string, unknown>).onboarding_abgeschlossen as boolean ?? false

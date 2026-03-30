@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import PerformanceClient from './PerformanceClient'
+import UeberfaelligeTasks from '@/components/UeberfaelligeTasks'
 
 export default async function MitarbeiterPerformancePage() {
   const supabase = await createClient()
@@ -57,14 +58,18 @@ export default async function MitarbeiterPerformancePage() {
   const fmt = (v: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(v)
 
   return (
-    <PerformanceClient
-      profile={profile}
-      stats={{ leadsTotal, leadsKonv, aktiveFaelle, abgeschlossen, isDispatch }}
-      performanceHistory={perf ?? []}
-      incentives={incentives ?? []}
-      leaderboard={leaderboardData}
-      monatLabel={monatLabel}
-      userId={user.id}
-    />
+    <>
+      {/* @ts-expect-error Async Server Component */}
+      <UeberfaelligeTasks mode="user" />
+      <PerformanceClient
+        profile={profile}
+        stats={{ leadsTotal, leadsKonv, aktiveFaelle, abgeschlossen, isDispatch }}
+        performanceHistory={perf ?? []}
+        incentives={incentives ?? []}
+        leaderboard={leaderboardData}
+        monatLabel={monatLabel}
+        userId={user.id}
+      />
+    </>
   )
 }

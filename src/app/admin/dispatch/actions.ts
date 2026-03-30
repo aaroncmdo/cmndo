@@ -110,21 +110,46 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
 
 // ─── Lead Status ────────────────────────────────────────────────────────────
 
+// Valid qualification phases from KFZ-35
+const QUALI_PHASES = new Set([
+  'neu', 'erstkontakt', 'schadentyp-erfasst', 'konstellation-erfasst',
+  'gegner-daten', 'gutachtertermin', 'sa-unterschrieben', 'flow-gesendet', 'abgeschlossen',
+])
+
 export async function updateLeadStatus(leadId: string, newStatus: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht angemeldet')
 
-  // Wenn Status → umgewandelt: automatische Konversion
-  if (newStatus === 'umgewandelt') {
+  // Wenn Status → umgewandelt oder Phase → abgeschlossen: automatische Konversion
+  if (newStatus === 'umgewandelt' || newStatus === 'abgeschlossen') {
     const fallId = await convertLeadToFall(supabase, leadId, user.id)
+    // Also set phase to abgeschlossen
+    await supabase.from('leads').update({
+      qualifizierungs_phase: 'abgeschlossen',
+      updated_at: new Date().toISOString(),
+    }).eq('id', leadId)
     revalidatePath('/admin/dispatch')
     return { converted: true, fallId }
   }
 
+  // If it's a qualification phase, update that field
+  const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() }
+  if (QUALI_PHASES.has(newStatus)) {
+    updateData.qualifizierungs_phase = newStatus
+    // Map phase to appropriate lead status
+    if (newStatus === 'flow-gesendet') updateData.status = 'flow-gesendet'
+    else if (newStatus === 'neu') updateData.status = 'neu'
+    else if (newStatus === 'erstkontakt') updateData.status = 'rueckruf'
+    else updateData.status = 'quali-offen'
+  } else {
+    // Terminal statuses (disqualifiziert, kalt)
+    updateData.status = newStatus
+  }
+
   const { error } = await supabase
     .from('leads')
-    .update({ status: newStatus, updated_at: new Date().toISOString() })
+    .update(updateData)
     .eq('id', leadId)
 
   if (error) throw new Error(error.message)

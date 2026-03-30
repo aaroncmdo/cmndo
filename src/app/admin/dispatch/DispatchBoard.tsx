@@ -43,6 +43,11 @@ type Lead = {
   kontaktversuche: number | null
   updated_at: string | null
   created_at: string | null
+  qualifizierungs_phase: string | null
+  schadenfall_typ: string | null
+  personenschaden_flag: boolean | null
+  mietwagen_flag: boolean | null
+  zugewiesen_an: string | null
 }
 
 type Fall = {
@@ -76,12 +81,17 @@ type PipelineColumn = {
 }
 
 const COLUMNS: PipelineColumn[] = [
-  // Lead columns (1-4)
-  { key: 'neu', label: 'NEU', sub: 'Neuer Lead', color: 'text-sky-400', bg: 'bg-sky-500', icon: UserPlusIcon, type: 'lead' },
-  { key: 'rueckruf', label: 'RUECKRUF', sub: 'Geplant', color: 'text-amber-400', bg: 'bg-amber-500', icon: PhoneCallIcon, type: 'lead' },
-  { key: 'quali-offen', label: 'QUALI', sub: 'In Qualifizierung', color: 'text-orange-400', bg: 'bg-orange-500', icon: ClipboardListIcon, type: 'lead' },
-  { key: 'flow-gesendet', label: 'FLOW-GESENDET', sub: 'FlowLink verschickt', color: 'text-violet-400', bg: 'bg-violet-500', icon: SendIcon, type: 'lead' },
-  // Fall columns (5-13)
+  // Lead columns — Qualifizierungs-Phasen (KFZ-35/36)
+  { key: 'neu', label: 'NEU', sub: 'Lead eingegangen', color: 'text-sky-400', bg: 'bg-sky-500', icon: UserPlusIcon, type: 'lead' },
+  { key: 'erstkontakt', label: 'ERSTKONTAKT', sub: 'Angerufen', color: 'text-amber-400', bg: 'bg-amber-500', icon: PhoneCallIcon, type: 'lead' },
+  { key: 'schadentyp-erfasst', label: 'SCHADENTYP', sub: 'SF erfasst', color: 'text-orange-400', bg: 'bg-orange-500', icon: ClipboardListIcon, type: 'lead' },
+  { key: 'konstellation-erfasst', label: 'KONSTELLATION', sub: 'KK erfasst', color: 'text-yellow-400', bg: 'bg-yellow-500', icon: ClipboardListIcon, type: 'lead' },
+  { key: 'gegner-daten', label: 'GEGNER', sub: 'Daten erfasst', color: 'text-pink-400', bg: 'bg-pink-500', icon: ClipboardCheckIcon, type: 'lead' },
+  { key: 'gutachtertermin', label: 'TERMIN', sub: 'Vereinbart', color: 'text-teal-400', bg: 'bg-teal-500', icon: CalendarIcon, type: 'lead' },
+  { key: 'sa-unterschrieben', label: 'SA SIGNIERT', sub: 'SA + Vollmacht', color: 'text-green-400', bg: 'bg-green-500', icon: FileTextIcon, type: 'lead' },
+  { key: 'flow-gesendet', label: 'FLOW', sub: 'FlowLink verschickt', color: 'text-violet-400', bg: 'bg-violet-500', icon: SendIcon, type: 'lead' },
+  { key: 'abgeschlossen', label: 'KONVERTIERT', sub: 'Lead → Akte', color: 'text-emerald-400', bg: 'bg-emerald-500', icon: CheckCircle2Icon, type: 'lead' },
+  // Fall columns
   { key: 'onboarding', label: 'ONBOARDING', sub: 'Kunde durchlaeuft', color: 'text-pink-400', bg: 'bg-pink-500', icon: PackageCheckIcon, type: 'fall' },
   { key: 'ersterfassung', label: 'DISPATCH', sub: 'D-01 SV gesucht', color: 'text-blue-400', bg: 'bg-blue-500', icon: FileTextIcon, type: 'fall' },
   { key: 'sv-termin', label: 'TERMIN', sub: 'D-02 Bestaetigt', color: 'text-yellow-400', bg: 'bg-yellow-500', icon: CalendarIcon, type: 'fall' },
@@ -194,12 +204,15 @@ export default function DispatchBoard({
   const [filterMode, setFilterMode] = useState<'alle' | 'meine'>('alle')
   const [error, setError] = useState<string | null>(null)
 
-  // Pipeline leads: only show active lead statuses
-  const pipelineLeadStatuses = new Set(LEAD_COLUMNS.map(c => c.key))
+  // Pipeline leads: show by qualifizierungs_phase (KFZ-36)
+  const pipelineLeadPhases = new Set(LEAD_COLUMNS.map(c => c.key))
 
   const filteredLeads = useMemo(() => {
     return leads.filter(l => {
-      if (!pipelineLeadStatuses.has(l.status)) return false
+      const phase = l.qualifizierungs_phase ?? 'neu'
+      // Exclude terminal statuses that aren't in the pipeline
+      if (l.status === 'disqualifiziert' || l.status === 'kalt') return false
+      if (!pipelineLeadPhases.has(phase)) return false
       if (search) {
         const q = search.toLowerCase()
         const name = `${l.vorname ?? ''} ${l.nachname ?? ''}`.toLowerCase()
@@ -226,11 +239,16 @@ export default function DispatchBoard({
     })
   }, [faelle, search, filterMode, currentUserId, leadNameMap])
 
-  function handleLeadStatusChange(leadId: string, newStatus: string) {
+  function handleLeadPhaseChange(leadId: string, newPhase: string) {
     setError(null)
     startTransition(async () => {
       try {
-        await updateLeadStatus(leadId, newStatus)
+        // Terminal statuses use updateLeadStatus
+        if (newPhase === 'disqualifiziert' || newPhase === 'kalt') {
+          await updateLeadStatus(leadId, newPhase)
+        } else {
+          await updateLeadStatus(leadId, newPhase)
+        }
         router.refresh()
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Fehler')
@@ -322,7 +340,7 @@ export default function DispatchBoard({
               const Icon = col.icon
               const isLeadCol = col.type === 'lead'
               const items = isLeadCol
-                ? filteredLeads.filter(l => l.status === col.key)
+                ? filteredLeads.filter(l => (l.qualifizierungs_phase ?? 'neu') === col.key)
                 : filteredFaelle.filter(f => getColumnKey(f) === col.key)
 
               return (
@@ -354,7 +372,8 @@ export default function DispatchBoard({
                           <LeadCard
                             key={lead.id}
                             lead={lead}
-                            onStatusChange={handleLeadStatusChange}
+                            onPhaseChange={handleLeadPhaseChange}
+                            betreuerMap={betreuerMap}
                             isPending={isPending}
                           />
                         ))
@@ -384,18 +403,30 @@ export default function DispatchBoard({
 
 // ─── Lead Card ─────────────────────────────────────────────────────────────
 
+const SF_BADGE: Record<string, string> = {
+  'sf-01': 'SF-01',
+  'sf-02': 'SF-02',
+  'sf-03': 'SF-03',
+  'sf-04': 'SF-04',
+  'sf-05': 'SF-05',
+  'sf-06': 'SF-06',
+}
+
 function LeadCard({
   lead,
-  onStatusChange,
+  onPhaseChange,
+  betreuerMap,
   isPending,
 }: {
   lead: Lead
-  onStatusChange: (leadId: string, status: string) => void
+  onPhaseChange: (leadId: string, phase: string) => void
+  betreuerMap: Record<string, string>
   isPending: boolean
 }) {
   const days = daysSince(lead.updated_at ?? lead.created_at)
   const name = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—'
-  const source = lead.source_channel ? (SOURCE_LABEL[lead.source_channel] ?? lead.source_channel) : null
+  const phase = lead.qualifizierungs_phase ?? 'neu'
+  const zugewiesen = lead.zugewiesen_an ? betreuerMap[lead.zugewiesen_an] ?? null : null
 
   return (
     <div className="bg-zinc-900 rounded-xl p-3 border border-zinc-800 hover:border-zinc-700 transition-colors">
@@ -411,37 +442,55 @@ function LeadCard({
       </div>
 
       <Link href={`/admin/dispatch/lead/${lead.id}`}>
-        <p className="text-zinc-200 text-sm font-medium leading-snug mb-1.5 truncate hover:text-white transition-colors">
+        <p className="text-zinc-200 text-sm font-medium leading-snug mb-1 truncate hover:text-white transition-colors">
           {name}
         </p>
       </Link>
 
-      {source && (
-        <div className="flex items-center gap-1.5 mb-1.5">
-          <HelpCircleIcon className="w-3 h-3 text-zinc-500" />
-          <span className="text-zinc-500 text-[11px]">{source}</span>
-        </div>
+      {/* Telefon */}
+      {lead.telefon && (
+        <p className="text-zinc-500 text-[11px] mb-1.5 truncate">{lead.telefon}</p>
       )}
 
-      {(lead.kontaktversuche ?? 0) > 0 && (
-        <div className="flex items-center gap-1.5 mb-2">
-          <PhoneCallIcon className="w-3 h-3 text-zinc-600" />
-          <span className="text-zinc-500 text-[11px]">{lead.kontaktversuche} Kontaktversuche</span>
-        </div>
-      )}
+      {/* Schadentyp Badge + Flags */}
+      <div className="flex flex-wrap gap-1 mb-1.5">
+        {lead.schadenfall_typ && (
+          <span className="bg-blue-950 text-blue-300 text-[10px] font-medium px-1.5 py-0.5 rounded">
+            {SF_BADGE[lead.schadenfall_typ] ?? lead.schadenfall_typ.toUpperCase()}
+          </span>
+        )}
+        {lead.personenschaden_flag && (
+          <span className="bg-red-950 text-red-400 text-[10px] font-medium px-1.5 py-0.5 rounded">Personen</span>
+        )}
+        {lead.mietwagen_flag && (
+          <span className="bg-amber-950 text-amber-400 text-[10px] font-medium px-1.5 py-0.5 rounded">Mietwagen</span>
+        )}
+      </div>
 
-      {/* Status dropdown */}
+      {/* Erstellt + Zugewiesen */}
+      <div className="text-[10px] text-zinc-600 mb-2 space-y-0.5">
+        <p>{lead.created_at ? new Date(lead.created_at).toLocaleDateString('de-DE') : ''}</p>
+        {zugewiesen && (
+          <div className="flex items-center gap-1.5">
+            <div className="w-4 h-4 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
+              <span className="text-blue-400 text-[7px] font-bold">{getInitials(zugewiesen)}</span>
+            </div>
+            <span className="text-zinc-500 truncate">{zugewiesen}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Phase dropdown */}
       <div className="pt-2 border-t border-zinc-800/50">
         <select
-          value={lead.status}
+          value={phase}
           disabled={isPending}
-          onChange={e => onStatusChange(lead.id, e.target.value)}
+          onChange={e => onPhaseChange(lead.id, e.target.value)}
           className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1.5 text-[11px] text-zinc-300 focus:outline-none focus:ring-1 focus:ring-blue-600 cursor-pointer disabled:opacity-50"
         >
           {LEAD_COLUMNS.map(col => (
             <option key={col.key} value={col.key}>{col.label}</option>
           ))}
-          <option value="umgewandelt">Umgewandelt</option>
           <option value="disqualifiziert">Disqualifiziert</option>
           <option value="kalt">Kalt</option>
         </select>

@@ -20,6 +20,7 @@ import {
   BellIcon,
 } from 'lucide-react'
 import WeatherWidget from '@/components/WeatherWidget'
+import UeberfaelligeTasks from '@/components/UeberfaelligeTasks'
 
 // ─── Schadentyp helpers ─────────────────────────────────────────────────────
 
@@ -212,6 +213,10 @@ export default async function GutachterDashboard() {
           </div>
           <WeatherWidget lat={sv.standort_lat ?? null} lng={sv.standort_lng ?? null} />
         </div>
+
+        {/* ─── Überfällige Tasks ──────────────────────────────────────── */}
+        {/* @ts-expect-error Async Server Component */}
+        <UeberfaelligeTasks mode="user" />
 
         {/* ─── KPI Cards ───────────────────────────────────────────────── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
