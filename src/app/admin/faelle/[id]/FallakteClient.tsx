@@ -636,6 +636,9 @@ export default function FallakteClient({
         {/* Pipeline Fortschrittsbalken */}
         <PipelineBar status={fall.status} />
 
+        {/* Nächster-Schritt Banner (KFZ-43) */}
+        <NaechsterSchrittBanner fall={fall} tasks={tasks} />
+
         {/* Tab Bar */}
         <div className="flex gap-1 mb-6 bg-white rounded-xl p-1 border border-gray-200 overflow-x-auto">
           {tabs.map(([id, label]) => (
@@ -3089,6 +3092,97 @@ function TerminModal({ fallId, onClose, onRefresh }: { fallId: string; onClose: 
           </button>
         </div>
       </div>
+    </div>
+  )
+}
+
+// ─── Nächster-Schritt Banner (KFZ-43) ────────────────────────────────────────
+
+const PHASE_ACTION: Record<string, { titel: string; beschreibung: string; action?: string; tab?: string }> = {
+  ersterfassung: { titel: 'Dokumente pruefen', beschreibung: 'FlowLink-Daten pruefen und fehlende Dokumente anfordern.', tab: 'dokumente' },
+  'sv-zugewiesen': { titel: 'Gutachter-Termin koordinieren', beschreibung: 'Termin mit Kunden und Gutachter abstimmen.', tab: 'uebersicht' },
+  'sv-termin': { titel: 'Auf Gutachten warten', beschreibung: 'Gutachten-Eingang ueberwachen.', tab: 'timeline' },
+  'gutachten-eingegangen': { titel: 'QC-Pruefung durchfuehren', beschreibung: 'Alle Unterlagen pruefen und Filmcheck abschliessen.', tab: 'qc' },
+  filmcheck: { titel: 'Filmcheck abschliessen', beschreibung: 'Qualitaetskontrolle aller Dokumente.', tab: 'qc' },
+  'kanzlei-uebergeben': { titel: 'AS-Sendedatum eintragen', beschreibung: 'Anschlussschreiben an Versicherung senden und Frist starten.', tab: 'kanzlei' },
+  anschlussschreiben: { titel: 'VS-Frist ueberwachen', beschreibung: 'Versicherungs-Frist laeuft. Ggf. eskalieren.', tab: 'kanzlei' },
+  regulierung: { titel: 'Zahlung pruefen', beschreibung: 'Zahlungseingang dokumentieren und Fall abschliessen.', tab: 'abrechnung' },
+}
+
+function NaechsterSchrittBanner({ fall, tasks: allTasks }: { fall: Fall; tasks: TaskItem[] }) {
+  if (fall.status === 'abgeschlossen' || fall.status === 'storniert') {
+    return (
+      <div className="mb-4 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 flex items-center gap-3">
+        <CheckIcon className="w-5 h-5 text-emerald-600 shrink-0" />
+        <p className="text-emerald-700 text-sm font-medium">Alle Aufgaben erledigt — Fall {fall.status === 'abgeschlossen' ? 'abgeschlossen' : 'storniert'}</p>
+      </div>
+    )
+  }
+
+  // Find next open task: highest priority, oldest deadline
+  const openTasks = allTasks
+    .filter(t => t.status === 'offen' || t.status === 'in-arbeit')
+    .sort((a, b) => {
+      const priOrder: Record<string, number> = { kritisch: 0, hoch: 1, normal: 2, '': 3 }
+      const pa = priOrder[a.prioritaet ?? ''] ?? 3
+      const pb = priOrder[b.prioritaet ?? ''] ?? 3
+      if (pa !== pb) return pa - pb
+      if (a.faellig_am && b.faellig_am) return new Date(a.faellig_am).getTime() - new Date(b.faellig_am).getTime()
+      if (a.faellig_am) return -1
+      if (b.faellig_am) return 1
+      return 0
+    })
+
+  const nextTask = openTasks[0]
+  const phaseAction = PHASE_ACTION[fall.status]
+
+  // Use task if available, otherwise use phase-based action
+  const titel = nextTask?.titel ?? phaseAction?.titel ?? 'Naechsten Schritt pruefen'
+  const beschreibung = nextTask?.beschreibung ?? phaseAction?.beschreibung ?? ''
+
+  const now = new Date()
+  const deadline = nextTask?.faellig_am ? new Date(nextTask.faellig_am) : null
+  const isOverdue = deadline ? deadline < now : false
+  const isKritisch = nextTask?.prioritaet === 'kritisch' || nextTask?.prioritaet === 'hoch'
+  const showRed = isOverdue || isKritisch
+
+  let deadlineText = ''
+  if (deadline) {
+    const diffMs = deadline.getTime() - now.getTime()
+    const diffH = Math.round(diffMs / 3600000)
+    if (isOverdue) {
+      const overH = Math.abs(diffH)
+      deadlineText = overH < 24 ? `Ueberfaellig seit ${overH}h` : `Ueberfaellig seit ${Math.floor(overH / 24)}d`
+    } else {
+      deadlineText = diffH < 24 ? `In ${diffH}h` : `In ${Math.floor(diffH / 24)}d`
+    }
+  }
+
+  return (
+    <div className={`mb-4 rounded-xl px-4 py-3 flex items-center gap-4 ${
+      showRed ? 'bg-red-50 border border-red-200' : 'bg-blue-50 border border-blue-200'
+    }`}>
+      <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
+        showRed ? 'bg-red-100' : 'bg-blue-100'
+      }`}>
+        {showRed
+          ? <AlertTriangleIcon className="w-4.5 h-4.5 text-red-600" />
+          : <ClockIcon className="w-4.5 h-4.5 text-blue-600" />
+        }
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className={`text-sm font-semibold ${showRed ? 'text-red-800' : 'text-blue-800'}`}>
+          {titel}
+        </p>
+        {beschreibung && <p className={`text-xs mt-0.5 ${showRed ? 'text-red-600' : 'text-blue-600'}`}>{beschreibung}</p>}
+      </div>
+      {deadlineText && (
+        <span className={`text-xs font-semibold px-2 py-1 rounded-lg shrink-0 ${
+          isOverdue ? 'bg-red-200 text-red-700' : 'bg-blue-200 text-blue-700'
+        }`}>
+          {deadlineText}
+        </span>
+      )}
     </div>
   )
 }
