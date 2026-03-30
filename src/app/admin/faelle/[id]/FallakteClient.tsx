@@ -529,7 +529,7 @@ export default function FallakteClient({
   termine: Termin[]
 }) {
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<Tab>('uebersicht')
+  const [activeTab, setActiveTab] = useState<Tab>('tasks')
   const [mapsReady, setMapsReady] = useState(
     typeof window !== 'undefined' && typeof google !== 'undefined' && !!google.maps?.places,
   )
@@ -537,16 +537,16 @@ export default function FallakteClient({
   const offeneTasks = tasks.filter(t => t.status !== 'erledigt').length
 
   const tabs: [Tab, string][] = [
+    ['tasks', `Tasks${offeneTasks > 0 ? ` (${offeneTasks})` : ''}`],
     ['uebersicht', 'Uebersicht'],
+    ['timeline', `Timeline (${timeline.length})`],
+    ['chat', 'Chat'],
     ['dokumente', `Dokumente (${pflichtdokumente.length})`],
     ['dateien', `Dateien (${dokumente.length})`],
     ['qc', `QC-Pruefung${qcCheckliste?.status === 'bestanden' ? ' ✓' : qcCheckliste?.status === 'nachbesserung' ? ' !' : ''}`],
-    ['timeline', `Timeline (${timeline.length})`],
     ['kommunikation', 'Kommunikation'],
     ['kanzlei', 'Kanzlei'],
-    ['chat', 'Chat'],
     ['abrechnung', 'Abrechnung'],
-    ['tasks', `Tasks${offeneTasks > 0 ? ` (${offeneTasks})` : ''}`],
   ]
 
   return (
