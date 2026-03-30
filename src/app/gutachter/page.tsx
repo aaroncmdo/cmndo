@@ -19,6 +19,7 @@ import {
   ExternalLinkIcon,
   BellIcon,
 } from 'lucide-react'
+import WeatherWidget from '@/components/WeatherWidget'
 
 // ─── Schadentyp helpers ─────────────────────────────────────────────────────
 
@@ -50,12 +51,19 @@ export default async function GutachterDashboard() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Get sachverstaendige record for this user
-  const { data: sv } = await supabase
-    .from('sachverstaendige')
-    .select('id, offene_faelle, max_faelle_monat, paket_faelle_genutzt, paket_faelle_gesamt, guthaben')
-    .eq('profile_id', user!.id)
-    .single()
+  // Get sachverstaendige record + profile name for this user
+  const [{ data: sv }, { data: profile }] = await Promise.all([
+    supabase
+      .from('sachverstaendige')
+      .select('id, offene_faelle, max_faelle_monat, paket_faelle_genutzt, paket_faelle_gesamt, guthaben, standort_lat, standort_lng')
+      .eq('profile_id', user!.id)
+      .single(),
+    supabase
+      .from('profiles')
+      .select('vorname')
+      .eq('id', user!.id)
+      .single(),
+  ])
 
   if (!sv) {
     return (
@@ -180,16 +188,29 @@ export default async function GutachterDashboard() {
   const maxFaelle = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10
   const guthaben = typeof sv.guthaben === 'number' ? sv.guthaben : 0
 
+  // ─── Greeting based on time of day ────────────────────────────────────────
+  const hour = now.getHours()
+  const greeting = hour < 12 ? 'Guten Morgen' : hour < 18 ? 'Guten Tag' : 'Guten Abend'
+  const vorname = profile?.vorname ?? ''
+
   return (
     <div className="px-4 py-6 sm:py-8">
       <div className="max-w-5xl mx-auto space-y-8">
 
-        {/* ─── Header ──────────────────────────────────────────────────── */}
-        <div>
-          <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
-          <p className="text-zinc-500 text-sm mt-0.5">
-            {now.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-          </p>
+        {/* ─── Greeting + Weather ──────────────────────────────────────── */}
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div>
+            <h1 className="text-[22px] font-bold text-white">
+              {greeting}{vorname ? ` ${vorname}` : ''}
+            </h1>
+            <p className="text-sm text-zinc-500 mt-0.5">
+              Claimondo wünscht gute Fahrt!
+            </p>
+            <p className="text-zinc-600 text-xs mt-1">
+              {now.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            </p>
+          </div>
+          <WeatherWidget lat={sv.standort_lat ?? null} lng={sv.standort_lng ?? null} />
         </div>
 
         {/* ─── KPI Cards ───────────────────────────────────────────────── */}
