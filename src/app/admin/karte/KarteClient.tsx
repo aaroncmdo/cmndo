@@ -18,6 +18,7 @@ interface SV {
   id: string
   name: string
   email: string
+  telefon?: string
   gebietPlz: string[]
   radiusKm: number
   paket: string
@@ -27,6 +28,10 @@ interface SV {
   standortLng: number | null
   organisationId: string | null
   gutachterTyp: string
+  standortAdresse?: string | null
+  guthaben?: number
+  qualifikationen?: string[]
+  anzahlungStatus?: string
 }
 
 interface Fall {
@@ -133,7 +138,7 @@ async function fetchIsochrone(lat: number, lng: number, radiusKm: number): Promi
   const key = `${lat.toFixed(4)},${lng.toFixed(4)},${radiusKm}`
   if (isochroneCache[key]) return isochroneCache[key]
   try {
-    const res = await fetch(`/api/isochrone?lat=${lat}&lng=${lng}&radius_km=${radiusKm}`)
+    const res = await fetch(`/api/isochrone?lat=${lat}&lng=${lng}&radius_km=${Math.round(radiusKm * 0.7)}`)
     if (!res.ok) return []
     const data = await res.json()
     if (data.polygon) {
@@ -150,7 +155,7 @@ function RadiusCircle({ center, radiusKm, color, opacity }: { center: { lat: num
   const map = useMap()
   useEffect(() => {
     if (!map) return
-    const circle = new google.maps.Circle({ map, center, radius: radiusKm * 1000, fillColor: color, fillOpacity: opacity ?? 0.08, strokeColor: color, strokeOpacity: 0.3, strokeWeight: 1 })
+    const circle = new google.maps.Circle({ map, center, radius: radiusKm * 0.7 * 1000, fillColor: color, fillOpacity: opacity ?? 0.2, strokeColor: color, strokeOpacity: 0.6, strokeWeight: 2 })
     return () => circle.setMap(null)
   }, [map, center, radiusKm, color, opacity])
   return null
@@ -174,10 +179,10 @@ function IsochronePolygon({ center, radiusKm, color, opacity }: { center: { lat:
         map,
         paths: path,
         fillColor: color,
-        fillOpacity: opacity ?? 0.08,
+        fillOpacity: opacity ?? 0.2,
         strokeColor: color,
-        strokeOpacity: 0.3,
-        strokeWeight: 1.5,
+        strokeOpacity: 0.6,
+        strokeWeight: 2,
         geodesic: true,
       })
     })
@@ -461,17 +466,7 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
                 <div className={`w-4 h-4 rounded-full border-2 border-white shadow-lg cursor-pointer transition-transform ${selectedFall?.id === f.id ? 'scale-150' : ''} ${unc ? 'bg-orange-500' : 'bg-red-500'}`} />
               </AdvancedMarker>
             })}
-            {selectedSV && <InfoWindow position={{ lat: selectedSV.lat, lng: selectedSV.lng }} onCloseClick={() => setSelectedSV(null)} pixelOffset={[0, -20]}>
-              <div className="p-1 min-w-[200px]">
-                <h3 className="font-semibold text-sm text-zinc-900 mb-1">{selectedSV.name}</h3>
-                <div className="space-y-1 text-xs text-zinc-600">
-                  <p><b>Paket:</b> {PAKET_COLORS[selectedSV.paket]?.label ?? selectedSV.paket}</p>
-                  <p><b>Auslastung:</b> {selectedSV.offeneFaelle}/{selectedSV.maxFaelleMonat}</p>
-                  <p><b>Radius:</b> {selectedSV.radiusKm} km</p>
-                </div>
-                <Link href={`/admin/sachverstaendige/${selectedSV.id}`} className="inline-block mt-2 text-xs text-blue-600 hover:text-blue-800 font-medium">Profil →</Link>
-              </div>
-            </InfoWindow>}
+            {/* SV InfoWindow removed — using Profil-Panel instead */}
             {selectedFall && <InfoWindow position={{ lat: selectedFall.lat, lng: selectedFall.lng }} onCloseClick={() => setSelectedFall(null)} pixelOffset={[0, -20]}>
               <div className="p-1 min-w-[200px]">
                 <h3 className="font-semibold text-sm text-zinc-900 font-mono mb-1">{selectedFall.fallNummer}</h3>
@@ -489,6 +484,139 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
 
       {/* Gutachter Onboarding Slide-Over */}
       <GutachterSlideOver open={showOnboarding} onClose={() => setShowOnboarding(false)} />
+
+      {/* SV Profil-Panel (Slide-Over) */}
+      {selectedSV && (
+        <div className="fixed top-0 right-0 h-screen w-80 z-50 bg-zinc-900 border-l border-zinc-800 shadow-2xl overflow-y-auto">
+          <div className="p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-white">Gutachter-Profil</h2>
+              <button onClick={() => setSelectedSV(null)} className="text-zinc-500 hover:text-white transition-colors">
+                <XIcon className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Name + Typ */}
+              <div>
+                <p className="text-white text-lg font-medium">{selectedSV.name}</p>
+                <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${TYP_COLORS[selectedSV.gutachterTyp]?.marker ?? 'bg-blue-500'} text-white`}>
+                  {TYP_COLORS[selectedSV.gutachterTyp]?.label ?? selectedSV.gutachterTyp}
+                </span>
+              </div>
+
+              {/* Standort */}
+              <div>
+                <p className="text-xs text-zinc-500 mb-0.5">Standort</p>
+                <p className="text-sm text-zinc-300">{selectedSV.standortAdresse ?? '—'}</p>
+              </div>
+
+              {/* Paket + Radius */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-zinc-500 mb-0.5">Paket</p>
+                  <p className="text-sm text-zinc-300">{PAKET_COLORS[selectedSV.paket]?.label ?? selectedSV.paket}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-500 mb-0.5">Radius</p>
+                  <p className="text-sm text-zinc-300">{selectedSV.radiusKm} km</p>
+                </div>
+              </div>
+
+              {/* Auslastung */}
+              <div>
+                <p className="text-xs text-zinc-500 mb-1">Auslastung</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-sm text-zinc-300 tabular-nums">{selectedSV.offeneFaelle}/{selectedSV.maxFaelleMonat}</span>
+                  <span className="text-zinc-600 text-xs">{selectedSV.maxFaelleMonat > 0 ? Math.round((selectedSV.offeneFaelle / selectedSV.maxFaelleMonat) * 100) : 0}%</span>
+                </div>
+                <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-blue-500 transition-all"
+                    style={{ width: `${Math.min(100, selectedSV.maxFaelleMonat > 0 ? (selectedSV.offeneFaelle / selectedSV.maxFaelleMonat) * 100 : 0)}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Guthaben */}
+              {selectedSV.guthaben !== undefined && (
+                <div>
+                  <p className="text-xs text-zinc-500 mb-0.5">Guthaben</p>
+                  <p className="text-sm text-zinc-300">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(selectedSV.guthaben)}</p>
+                </div>
+              )}
+
+              {/* Qualifikationen */}
+              {selectedSV.qualifikationen && selectedSV.qualifikationen.length > 0 && (
+                <div>
+                  <p className="text-xs text-zinc-500 mb-1">Qualifikationen</p>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedSV.qualifikationen.map(q => (
+                      <span key={q} className="bg-zinc-800 text-zinc-400 text-[10px] px-1.5 py-0.5 rounded">{q}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Kontakt */}
+              <div>
+                <p className="text-xs text-zinc-500 mb-1">Kontakt</p>
+                <div className="space-y-1.5">
+                  {selectedSV.email && (
+                    <a href={`mailto:${selectedSV.email}`} className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300">
+                      {selectedSV.email}
+                    </a>
+                  )}
+                  {selectedSV.telefon && (
+                    <a href={`tel:${selectedSV.telefon}`} className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300">
+                      {selectedSV.telefon}
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              {/* Anzahlung */}
+              {selectedSV.anzahlungStatus && (
+                <div>
+                  <p className="text-xs text-zinc-500 mb-0.5">Anzahlung</p>
+                  <span className={`text-xs font-medium ${
+                    selectedSV.anzahlungStatus === 'bezahlt' ? 'text-green-400' :
+                    selectedSV.anzahlungStatus === 'teilweise' ? 'text-amber-400' : 'text-red-400'
+                  }`}>
+                    {selectedSV.anzahlungStatus === 'bezahlt' ? 'Bezahlt' : selectedSV.anzahlungStatus === 'teilweise' ? 'Teilweise' : 'Offen'}
+                  </span>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-2 pt-2 border-t border-zinc-800">
+                <Link
+                  href={`/admin/sachverstaendige/${selectedSV.id}`}
+                  className="flex-1 text-center bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium py-2 rounded-xl transition-colors"
+                >
+                  Profil bearbeiten
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Legende */}
+      <div className="absolute bottom-4 left-4 bg-zinc-900/90 backdrop-blur-sm border border-zinc-800 rounded-xl p-3 text-[10px] z-10" style={{ pointerEvents: 'auto' }}>
+        <p className="text-zinc-400 font-semibold mb-1.5">Legende</p>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-blue-500" /><span className="text-zinc-400">KFZ-SV</span></div>
+          <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-orange-500" /><span className="text-zinc-400">DAT-SV</span></div>
+          <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-green-500" /><span className="text-zinc-400">Akademie</span></div>
+          <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-purple-500" /><span className="text-zinc-400">Buero</span></div>
+        </div>
+        <div className="border-t border-zinc-800 mt-1.5 pt-1.5 space-y-1">
+          <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-blue-500/40 rounded" /><span className="text-zinc-500">Starter 20km</span></div>
+          <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-green-500/40 rounded" /><span className="text-zinc-500">Standard 40km</span></div>
+          <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-yellow-500/40 rounded" /><span className="text-zinc-500">Premium 100km</span></div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -513,7 +641,7 @@ function LegPatterned({ color, label, dashed }: { color: string; label: string; 
 function SVMarker({ sv, isSelected, onSelect, coverageMode }: { sv: GeocodedSV; isSelected: boolean; onSelect: () => void; coverageMode: 'isochrone' | 'circle' }) {
   const pc = TYP_COLORS[sv.gutachterTyp] ?? DEFAULT_TYP_COLOR
   const full = sv.maxFaelleMonat > 0 && sv.offeneFaelle >= sv.maxFaelleMonat
-  const fillOpacity = full ? 0.03 : 0.08
+  const fillOpacity = full ? 0.1 : 0.2
 
   return <>
     {coverageMode === 'isochrone' ? (

@@ -13,7 +13,6 @@ const NAV_MAIN = [
   { href: '/admin/dispatch', label: 'Dispatch', icon: GitBranchIcon },
   { href: '/admin/faelle', label: 'Fälle', icon: FolderOpenIcon },
   { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: HardHatIcon },
-  { href: '/admin/karte', label: 'Karte', icon: MapIcon },
   { href: '/admin/kalender', label: 'Kalender', icon: CalendarIcon },
   { href: '/admin/tasks', label: 'Tasks', icon: ClipboardListIcon },
 ]
