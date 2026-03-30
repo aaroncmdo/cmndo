@@ -111,7 +111,7 @@ export default function AdminNav({ email, initials }: { email: string; initials:
           paddingBottom: 'calc(8px + env(safe-area-inset-bottom))',
         }}
       >
-        {[NAV_MAIN[0], NAV_MAIN[1], NAV_MAIN[2], NAV_MAIN[3], NAV_MAIN[6]].map((item) => {
+        {[NAV_MAIN[0], NAV_MAIN[1], NAV_MAIN[2], NAV_MAIN[3], NAV_MAIN[5]].map((item) => {
           const active = isActive(item.href, item.exact)
           return (
             <Link
