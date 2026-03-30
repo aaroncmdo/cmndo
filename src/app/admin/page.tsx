@@ -154,12 +154,64 @@ export default async function AdminPage() {
     )
   }
 
+  // ── Heutige Rückrufe ────────────────────────────────────────────────────
+  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0)
+  const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999)
+  const { data: rueckrufe } = await supabase
+    .from('leads')
+    .select('id, vorname, nachname, telefon, schadenfall_typ, rueckruf_datum, rueckruf_notiz, rueckruf_erledigt')
+    .not('rueckruf_datum', 'is', null)
+    .or(`rueckruf_erledigt.is.null,rueckruf_erledigt.eq.false`)
+    .lte('rueckruf_datum', todayEnd.toISOString())
+    .order('rueckruf_datum', { ascending: true })
+
+  const heutigeRueckrufe = (rueckrufe ?? []).filter(r => r.rueckruf_datum)
+  const nowMs = Date.now()
+
   return (
     <div className="px-4 py-8">
       <div className="max-w-5xl mx-auto">
-        <div className="mb-8">
+        <div className="mb-6">
           <h1 className="text-2xl font-semibold text-gray-900 mb-1">Dashboard</h1>
         </div>
+
+        {/* ── Heutige Rückrufe (KFZ-51) ──────────────────────────────────── */}
+        {heutigeRueckrufe.length > 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-amber-600 text-lg">📞</span>
+              <h2 className="text-sm font-semibold text-amber-700">Heutige Rückrufe ({heutigeRueckrufe.length})</h2>
+            </div>
+            <div className="space-y-2">
+              {heutigeRueckrufe.map(r => {
+                const name = [r.vorname, r.nachname].filter(Boolean).join(' ') || '—'
+                const time = new Date(r.rueckruf_datum!)
+                const isOverdue = time.getTime() < nowMs
+                return (
+                  <Link key={r.id} href={`/admin/dispatch/lead/${r.id}`}
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors ${
+                      isOverdue ? 'bg-red-50 border border-red-200' : 'bg-white border border-gray-100'
+                    } hover:shadow-sm`}>
+                    <span className={`text-sm font-bold tabular-nums shrink-0 w-20 ${isOverdue ? 'text-red-600' : 'text-amber-600'}`}>
+                      {isOverdue ? 'ÜBERFÄLLIG' : time.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-gray-800 text-sm font-medium truncate">{name}</p>
+                      {r.rueckruf_notiz && <p className="text-gray-400 text-xs truncate">{r.rueckruf_notiz}</p>}
+                    </div>
+                    {r.schadenfall_typ && <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded shrink-0">{r.schadenfall_typ.toUpperCase()}</span>}
+                    {r.telefon && (
+                      <a href={`tel:${r.telefon}`} onClick={e => e.stopPropagation()}
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-green-50 text-green-600 text-xs font-medium hover:bg-green-100 shrink-0">
+                        📞 Anrufen
+                      </a>
+                    )}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {/* ── Meine Aufgaben (Admin sieht alle) ───────────────────────────── */}
         {/* @ts-expect-error Async Server Component */}
