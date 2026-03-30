@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState, useRef, useCallback } from 'react'
-import { SearchIcon, XIcon, UserPlusIcon, PhoneIcon, MailIcon } from 'lucide-react'
+import { useEffect, useState, useRef } from 'react'
+import { SearchIcon, XIcon, UserPlusIcon, PhoneIcon, MailIcon, MapPinIcon, PencilIcon, CheckIcon, PowerOffIcon } from 'lucide-react'
 import Link from 'next/link'
 import GutachterSlideOver from './GutachterSlideOver'
+import { updateGutachterProfil } from './actions'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -42,7 +43,7 @@ interface Fall {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Constants
+// Constants (module-level, stable references, never re-created)
 // ═══════════════════════════════════════════════════════════════════════════
 
 const TYP_COLORS: Record<string, { fill: string; marker: string; label: string }> = {
@@ -58,155 +59,157 @@ const PAKET_LABEL: Record<string, string> = {
   'premium-50': 'Premium', premium: 'Premium',
 }
 
+const ALL_QUALIFIKATIONEN = [
+  'Haftpflichtschaden', 'Kaskoschaden', 'Leasingrueckgabe', 'Flottenmanagement',
+  'Oldtimer', 'LKW/Nutzfahrzeuge', 'Motorrad', 'Wohnmobil',
+  'Totalschaden-Bewertung', 'Wiederbeschaffungswert', 'Beweissicherung', 'Gerichtsgutachten',
+]
+
 const MAPS_SCRIPT_ID = 'google-maps-script'
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Load Google Maps script (once, globally)
-// ═══════════════════════════════════════════════════════════════════════════
+// Isochrone cache (module-level, persists across renders)
+const isoCache: Record<string, { lat: number; lng: number }[]> = {}
+
+async function fetchIsochrone(lat: number, lng: number, radiusKm: number): Promise<{ lat: number; lng: number }[]> {
+  const key = `${lat.toFixed(4)},${lng.toFixed(4)},${radiusKm}`
+  if (isoCache[key]) return isoCache[key]
+  try {
+    const r = await fetch(`/api/isochrone?lat=${lat}&lng=${lng}&radius_km=${Math.round(radiusKm * 0.7)}`)
+    if (!r.ok) return []
+    const d = await r.json()
+    if (d.polygon) { isoCache[key] = d.polygon; return d.polygon }
+  } catch { /* */ }
+  return []
+}
 
 function loadGoogleMaps(apiKey: string): Promise<void> {
   return new Promise((resolve, reject) => {
     if (typeof google !== 'undefined' && google.maps) { resolve(); return }
     if (document.getElementById(MAPS_SCRIPT_ID)) {
-      // Script tag exists, wait for it
       const check = setInterval(() => {
         if (typeof google !== 'undefined' && google.maps) { clearInterval(check); resolve() }
       }, 100)
       return
     }
-    const script = document.createElement('script')
-    script.id = MAPS_SCRIPT_ID
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`
-    script.async = true
-    script.defer = true
-    script.onload = () => resolve()
-    script.onerror = () => reject(new Error('Google Maps failed to load'))
-    document.head.appendChild(script)
+    const s = document.createElement('script')
+    s.id = MAPS_SCRIPT_ID
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`
+    s.async = true; s.defer = true
+    s.onload = () => resolve()
+    s.onerror = () => reject(new Error('Google Maps load failed'))
+    document.head.appendChild(s)
   })
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Main Component
-// Kein @vis.gl/react-google-maps - Native API mit useRef.
-// Marker + Circles werden EINMAL im useEffect erstellt (dep: [gutachter]).
-// State-Änderungen (selectedSV, showOnboarding) triggern KEIN Re-create.
+// Native Google Maps API. ALL map objects in useRef.
+// useEffect deps: [sachverstaendige, mapReady] only. NOT selectedSV.
 // ═══════════════════════════════════════════════════════════════════════════
 
 export default function KarteClient({ sachverstaendige, faelle }: { sachverstaendige: SV[]; faelle: Fall[] }) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''
 
-  // Refs für Google Maps Objekte (NICHT state - kein Re-render)
+  // Refs for Google Maps objects (NOT state)
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<google.maps.Map | null>(null)
   const markersRef = useRef<google.maps.Marker[]>([])
+  const polygonsRef = useRef<google.maps.Polygon[]>([])
   const circlesRef = useRef<google.maps.Circle[]>([])
-  const fallMarkersRef = useRef<google.maps.Marker[]>([])
 
-  // State NUR für UI-Overlays (Panel, Onboarding)
+  // State ONLY for UI overlays
   const [selectedSV, setSelectedSV] = useState<SV | null>(null)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [mapReady, setMapReady] = useState(false)
   const [search, setSearch] = useState('')
+  const [coverageMode, setCoverageMode] = useState<'isochrone' | 'circle'>('circle')
 
-  // ─── SCHRITT 1: Map einmalig erstellen ──────────────────────────
+  // ─── Map init (runs ONCE) ──────────────────────────────────────
   useEffect(() => {
     if (!apiKey || !mapContainerRef.current) return
     let cancelled = false
-
     loadGoogleMaps(apiKey).then(() => {
-      if (cancelled || !mapContainerRef.current) return
-      if (mapRef.current) return // already initialized
-
+      if (cancelled || !mapContainerRef.current || mapRef.current) return
       mapRef.current = new google.maps.Map(mapContainerRef.current, {
-        center: { lat: 51.1657, lng: 10.4515 },
-        zoom: 6,
-        mapId: 'claimondo-dark',
-        gestureHandling: 'greedy',
-        disableDefaultUI: false,
+        center: { lat: 51.1657, lng: 10.4515 }, zoom: 6,
+        mapId: 'claimondo-dark', gestureHandling: 'greedy', disableDefaultUI: false,
         styles: [
           { elementType: 'geometry', stylers: [{ color: '#212121' }] },
           { elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
           { elementType: 'labels.text.fill', stylers: [{ color: '#757575' }] },
           { elementType: 'labels.text.stroke', stylers: [{ color: '#212121' }] },
           { featureType: 'road', elementType: 'geometry.fill', stylers: [{ color: '#2c2c2c' }] },
+          { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#3c3c3c' }] },
           { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#000000' }] },
         ],
       })
-
       setMapReady(true)
-    }).catch(err => console.error('[KarteClient] Maps load failed:', err))
-
+    }).catch(err => console.error('[KarteClient]', err))
     return () => { cancelled = true }
-  }, [apiKey]) // runs ONCE
+  }, [apiKey])
 
-  // ─── SCHRITT 2: SV Marker + Circles erstellen ──────────────────
-  // Dependency: [sachverstaendige, mapReady] - NICHT selectedSV!
+  // ─── SV Markers (dep: [sachverstaendige, mapReady] ONLY) ──────
+  useEffect(() => {
+    if (!mapRef.current || !mapReady) return
+    // Cleanup old
+    markersRef.current.forEach(m => { google.maps.event.clearInstanceListeners(m); m.setMap(null) })
+    markersRef.current = []
+
+    sachverstaendige.forEach(sv => {
+      if (sv.standortLat == null || sv.standortLng == null) return
+      const pos = { lat: sv.standortLat, lng: sv.standortLng }
+      const color = TYP_COLORS[sv.gutachterTyp]?.fill ?? '#3b82f6'
+      const marker = new google.maps.Marker({
+        position: pos, map: mapRef.current!, title: sv.name,
+        icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: color, fillOpacity: 1, strokeColor: '#fff', strokeWeight: 2 },
+      })
+      marker.addListener('click', () => setSelectedSV(sv))
+      markersRef.current.push(marker)
+    })
+  }, [sachverstaendige, mapReady])
+
+  // ─── Coverage areas (dep: [sachverstaendige, mapReady, coverageMode] ONLY) ─
   useEffect(() => {
     if (!mapRef.current || !mapReady) return
 
-    // Alte Marker/Circles aufräumen
-    markersRef.current.forEach(m => m.setMap(null))
-    circlesRef.current.forEach(c => c.setMap(null))
-    markersRef.current = []
+    // Cleanup old polygons + circles
+    polygonsRef.current.forEach(p => { google.maps.event.clearInstanceListeners(p); p.setMap(null) })
+    circlesRef.current.forEach(c => { google.maps.event.clearInstanceListeners(c); c.setMap(null) })
+    polygonsRef.current = []
     circlesRef.current = []
 
     sachverstaendige.forEach(sv => {
       if (sv.standortLat == null || sv.standortLng == null) return
-
       const pos = { lat: sv.standortLat, lng: sv.standortLng }
       const color = TYP_COLORS[sv.gutachterTyp]?.fill ?? '#3b82f6'
 
-      // Circle (Coverage)
-      const circle = new google.maps.Circle({
-        center: pos,
-        radius: (sv.radiusKm || 20) * 700,
-        map: mapRef.current!,
-        fillColor: color,
-        fillOpacity: 0.12,
-        strokeColor: color,
-        strokeOpacity: 0.4,
-        strokeWeight: 1.5,
-        clickable: true,
-      })
-      circle.addListener('click', () => {
-        setSelectedSV(sv)
-      })
-      circlesRef.current.push(circle)
-
-      // Marker
-      const marker = new google.maps.Marker({
-        position: pos,
-        map: mapRef.current!,
-        title: sv.name,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 8,
-          fillColor: color,
-          fillOpacity: 1,
-          strokeColor: '#ffffff',
-          strokeWeight: 2,
-        },
-      })
-      marker.addListener('click', () => {
-        setSelectedSV(sv)
-      })
-      markersRef.current.push(marker)
+      if (coverageMode === 'isochrone') {
+        // Fetch isochrone async, create polygon when done
+        fetchIsochrone(sv.standortLat, sv.standortLng, sv.radiusKm).then(points => {
+          if (!mapRef.current || !points.length) return
+          const polygon = new google.maps.Polygon({
+            paths: points, map: mapRef.current,
+            fillColor: color, fillOpacity: 0.12,
+            strokeColor: color, strokeOpacity: 0.4, strokeWeight: 1.5,
+            clickable: true, geodesic: true,
+          })
+          polygon.addListener('click', () => setSelectedSV(sv))
+          polygonsRef.current.push(polygon)
+        })
+      } else {
+        const circle = new google.maps.Circle({
+          center: pos, radius: (sv.radiusKm || 20) * 700, map: mapRef.current!,
+          fillColor: color, fillOpacity: 0.12,
+          strokeColor: color, strokeOpacity: 0.4, strokeWeight: 1.5,
+          clickable: true,
+        })
+        circle.addListener('click', () => setSelectedSV(sv))
+        circlesRef.current.push(circle)
+      }
     })
-  }, [sachverstaendige, mapReady]) // NICHT selectedSV in den deps!
+  }, [sachverstaendige, mapReady, coverageMode])
 
-  // ─── SCHRITT 3: Fall Marker erstellen ──────────────────────────
-  useEffect(() => {
-    if (!mapRef.current || !mapReady) return
-
-    fallMarkersRef.current.forEach(m => m.setMap(null))
-    fallMarkersRef.current = []
-
-    // Nur Fälle mit Adresse geocoden wir hier NICHT (zu teuer).
-    // Fall-Marker werden nur angezeigt wenn sie Koordinaten hätten.
-    // Für jetzt: keine Fall-Marker auf der Karte (nur in der Sidebar).
-  }, [faelle, mapReady])
-
-  // ─── Sidebar Filter ────────────────────────────────────────────
+  // ─── Sidebar filter (no useEffect, just derived) ──────────────
   const filteredSVs = search
     ? sachverstaendige.filter(sv => sv.name.toLowerCase().includes(search.toLowerCase()))
     : sachverstaendige
@@ -245,6 +248,20 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
           </div>
         </div>
 
+        {/* Darstellung Toggle */}
+        <div className="px-4 pb-3">
+          <div className="flex rounded-lg overflow-hidden border border-zinc-800">
+            <button onClick={() => setCoverageMode('circle')}
+              className={`flex-1 px-3 py-1.5 text-xs font-medium transition-colors ${coverageMode === 'circle' ? 'bg-blue-600 text-white' : 'bg-zinc-900 text-zinc-400'}`}>
+              Kreise
+            </button>
+            <button onClick={() => setCoverageMode('isochrone')}
+              className={`flex-1 px-3 py-1.5 text-xs font-medium transition-colors ${coverageMode === 'isochrone' ? 'bg-blue-600 text-white' : 'bg-zinc-900 text-zinc-400'}`}>
+              Isochronen
+            </button>
+          </div>
+        </div>
+
         {/* SV Liste */}
         <div className="flex-1 overflow-y-auto px-2 py-2 border-t border-zinc-800">
           {filteredSVs.map(sv => {
@@ -253,7 +270,6 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
               <button key={sv.id}
                 onClick={() => {
                   setSelectedSV(sv)
-                  // Zoom zur Position
                   if (mapRef.current && sv.standortLat && sv.standortLng) {
                     mapRef.current.panTo({ lat: sv.standortLat, lng: sv.standortLng })
                     mapRef.current.setZoom(12)
@@ -273,7 +289,7 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
         </div>
       </aside>
 
-      {/* ─── Map Container (native div, KEIN React-Component) ──── */}
+      {/* ─── Map Container ────────────────────────────────────────── */}
       <div className="flex-1 relative">
         <div ref={mapContainerRef} className="w-full h-full" />
         {!mapReady && (
@@ -283,114 +299,248 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
         )}
       </div>
 
-      {/* ─── Onboarding Slide-Over (Portal, beeinflusst Map NICHT) */}
+      {/* ─── Onboarding (fixed overlay, does NOT affect map) ──────── */}
       <GutachterSlideOver open={showOnboarding} onClose={() => setShowOnboarding(false)} />
 
-      {/* ─── SV Profil-Panel (fixed overlay, beeinflusst Map NICHT) */}
+      {/* ─── Profil-Panel (fixed overlay, does NOT affect map) ────── */}
       {selectedSV && (
-        <div className="fixed top-0 right-0 h-screen w-[400px] z-50 backdrop-blur-xl bg-zinc-900/95 border-l border-zinc-700/50 shadow-2xl overflow-y-auto">
-          <div className="p-6">
-            <div className="flex items-start justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm ${TYP_COLORS[selectedSV.gutachterTyp]?.marker ?? 'bg-blue-500'}`}>
-                  {(selectedSV.name || '??').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-white">{selectedSV.name || 'Unbekannt'}</h2>
-                  <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white ${TYP_COLORS[selectedSV.gutachterTyp]?.marker ?? 'bg-blue-500'}`}>
-                    {TYP_COLORS[selectedSV.gutachterTyp]?.label ?? selectedSV.gutachterTyp}
-                  </span>
-                </div>
-              </div>
-              <button onClick={() => setSelectedSV(null)} className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800">
-                <XIcon className="w-5 h-5" />
-              </button>
+        <ProfilPanel sv={selectedSV} onClose={() => setSelectedSV(null)} />
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Editable Profil-Panel (separate component, pure overlay)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function ProfilPanel({ sv, onClose }: { sv: SV; onClose: () => void }) {
+  // Editable state
+  const [editField, setEditField] = useState<string | null>(null)
+  const [editValue, setEditValue] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [editingQual, setEditingQual] = useState(false)
+  const [quals, setQuals] = useState<string[]>(sv.qualifikationen ?? [])
+  const [notiz, setNotiz] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const auslPct = sv.maxFaelleMonat > 0 ? Math.round((sv.offeneFaelle / sv.maxFaelleMonat) * 100) : 0
+  const ti = TYP_COLORS[sv.gutachterTyp] ?? { fill: '#3b82f6', marker: 'bg-blue-500', label: sv.gutachterTyp }
+
+  useEffect(() => { if (editField) inputRef.current?.focus() }, [editField])
+
+  async function saveField(field: string, value: unknown) {
+    setSaving(true)
+    try { await updateGutachterProfil(sv.id, field, value) } catch { /* */ }
+    setSaving(false)
+    setEditField(null)
+  }
+
+  async function saveQuals() {
+    setSaving(true)
+    try { await updateGutachterProfil(sv.id, 'qualifikationen', quals) } catch { /* */ }
+    setSaving(false)
+    setEditingQual(false)
+  }
+
+  function startEdit(field: string, currentValue: string) {
+    setEditField(field)
+    setEditValue(currentValue)
+  }
+
+  return (
+    <div className="fixed top-0 right-0 h-screen w-[400px] z-50 backdrop-blur-xl bg-zinc-900/95 border-l border-zinc-700/50 shadow-2xl overflow-y-auto">
+      <div className="p-6">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm ${ti.marker}`}>
+              {(sv.name || '??').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
             </div>
-
-            <div className="space-y-5">
-              {/* Kontakt */}
-              <section>
-                <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Kontakt</h3>
-                {selectedSV.telefon && (
-                  <a href={`tel:${selectedSV.telefon}`} className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 mb-1">
-                    <PhoneIcon className="w-3.5 h-3.5" /> {selectedSV.telefon}
-                  </a>
-                )}
-                {selectedSV.email && (
-                  <a href={`mailto:${selectedSV.email}`} className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300">
-                    <MailIcon className="w-3.5 h-3.5" /> {selectedSV.email}
-                  </a>
-                )}
-              </section>
-
-              {/* Standort */}
-              <section>
-                <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Standort</h3>
-                <p className="text-sm text-zinc-300">{selectedSV.standortAdresse ?? '\u2014'}</p>
-              </section>
-
-              {/* Paket + Auslastung */}
-              <section>
-                <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Paket & Auslastung</h3>
-                <div className="grid grid-cols-3 gap-3 mb-3">
-                  <div className="bg-zinc-800/50 rounded-xl p-3 text-center">
-                    <p className="text-lg font-bold text-white">{PAKET_LABEL[selectedSV.paket] ?? selectedSV.paket ?? '\u2014'}</p>
-                    <p className="text-[10px] text-zinc-500">Paket</p>
-                  </div>
-                  <div className="bg-zinc-800/50 rounded-xl p-3 text-center">
-                    <p className="text-lg font-bold text-white">{selectedSV.radiusKm}km</p>
-                    <p className="text-[10px] text-zinc-500">Radius</p>
-                  </div>
-                  <div className="bg-zinc-800/50 rounded-xl p-3 text-center">
-                    <p className="text-lg font-bold text-white">{selectedSV.guthaben != null ? `${selectedSV.guthaben}\u20AC` : '\u2014'}</p>
-                    <p className="text-[10px] text-zinc-500">Guthaben</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-zinc-400">Faelle</span>
-                  <span className="text-xs text-zinc-300 tabular-nums">{selectedSV.offeneFaelle}/{selectedSV.maxFaelleMonat}</span>
-                </div>
-                <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-                  <div className="h-full rounded-full bg-blue-500"
-                    style={{ width: `${Math.min(100, selectedSV.maxFaelleMonat > 0 ? (selectedSV.offeneFaelle / selectedSV.maxFaelleMonat) * 100 : 0)}%` }} />
-                </div>
-              </section>
-
-              {/* Qualifikationen */}
-              {(selectedSV.qualifikationen ?? []).length > 0 && (
-                <section>
-                  <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Qualifikationen</h3>
-                  <div className="flex flex-wrap gap-1">
-                    {(selectedSV.qualifikationen ?? []).map(q => (
-                      <span key={q} className="bg-zinc-800 text-zinc-400 text-[10px] px-2 py-0.5 rounded-full">{q}</span>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* Aktionen */}
-              <section className="border-t border-zinc-800 pt-4 space-y-2">
-                <div className="flex gap-2">
-                  {selectedSV.telefon && (
-                    <a href={`tel:${selectedSV.telefon}`} className="flex-1 flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
-                      <PhoneIcon className="w-3.5 h-3.5" /> Anrufen
-                    </a>
-                  )}
-                  {selectedSV.email && (
-                    <a href={`mailto:${selectedSV.email}`} className="flex-1 flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
-                      <MailIcon className="w-3.5 h-3.5" /> E-Mail
-                    </a>
-                  )}
-                </div>
-                <Link href={`/admin/sachverstaendige/${selectedSV.id}`}
-                  className="block text-center bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
-                  Profil bearbeiten
-                </Link>
-              </section>
+            <div>
+              <h2 className="text-xl font-bold text-white">{sv.name || 'Unbekannt'}</h2>
+              <div className="flex items-center gap-2 mt-1">
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold text-white ${ti.marker}`}>{ti.label}</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-400">Aktiv</span>
+              </div>
             </div>
           </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800">
+            <XIcon className="w-5 h-5" />
+          </button>
         </div>
+
+        <div className="space-y-5">
+          {/* ─── Kontakt (bearbeitbar) ─────────────────────────────── */}
+          <section>
+            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Kontakt</h3>
+            <EditableRow label="Telefon" value={sv.telefon ?? ''} field="telefon" linkPrefix="tel:"
+              editField={editField} editValue={editValue} inputRef={inputRef} saving={saving}
+              onStartEdit={startEdit} onSave={saveField} onEditValueChange={setEditValue} onCancel={() => setEditField(null)} />
+            <EditableRow label="E-Mail" value={sv.email ?? ''} field="email" linkPrefix="mailto:" type="email"
+              editField={editField} editValue={editValue} inputRef={inputRef} saving={saving}
+              onStartEdit={startEdit} onSave={saveField} onEditValueChange={setEditValue} onCancel={() => setEditField(null)} />
+          </section>
+
+          {/* ─── Standort ─────────────────────────────────────────── */}
+          <section>
+            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Standort</h3>
+            <div className="flex items-start gap-2">
+              <MapPinIcon className="w-4 h-4 text-zinc-500 mt-0.5 shrink-0" />
+              <p className="text-sm text-zinc-300">{sv.standortAdresse ?? '\u2014'}</p>
+            </div>
+            {sv.standortLat != null && sv.standortLng != null && (
+              <p className="text-[10px] text-zinc-600 mt-1 ml-6">{sv.standortLat.toFixed(4)}, {sv.standortLng.toFixed(4)}</p>
+            )}
+          </section>
+
+          {/* ─── Paket + Auslastung ───────────────────────────────── */}
+          <section>
+            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Paket & Auslastung</h3>
+            <div className="grid grid-cols-3 gap-3 mb-3">
+              <div className="bg-zinc-800/50 rounded-xl p-3 text-center">
+                <p className="text-lg font-bold text-white">{PAKET_LABEL[sv.paket] ?? sv.paket ?? '\u2014'}</p>
+                <p className="text-[10px] text-zinc-500">Paket</p>
+              </div>
+              <div className="bg-zinc-800/50 rounded-xl p-3 text-center">
+                <p className="text-lg font-bold text-white">{sv.radiusKm}km</p>
+                <p className="text-[10px] text-zinc-500">Radius</p>
+              </div>
+              <div className="bg-zinc-800/50 rounded-xl p-3 text-center">
+                <p className="text-lg font-bold text-white">{sv.guthaben != null ? `${sv.guthaben}\u20AC` : '\u2014'}</p>
+                <p className="text-[10px] text-zinc-500">Guthaben</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs text-zinc-400">Faelle</span>
+              <span className="text-xs text-zinc-300 tabular-nums">{sv.offeneFaelle}/{sv.maxFaelleMonat} ({auslPct}%)</span>
+            </div>
+            <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+              <div className={`h-full rounded-full ${auslPct >= 90 ? 'bg-red-500' : auslPct >= 70 ? 'bg-amber-500' : 'bg-blue-500'}`}
+                style={{ width: `${Math.min(100, auslPct)}%` }} />
+            </div>
+            {sv.anzahlungStatus && (
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-xs text-zinc-500">Anzahlung</span>
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                  sv.anzahlungStatus === 'bezahlt' ? 'bg-emerald-500/20 text-emerald-400' :
+                  sv.anzahlungStatus === 'teilweise' ? 'bg-amber-500/20 text-amber-400' : 'bg-red-500/20 text-red-400'
+                }`}>
+                  {sv.anzahlungStatus === 'bezahlt' ? 'Bezahlt' : sv.anzahlungStatus === 'teilweise' ? 'Teilweise' : 'Offen'}
+                </span>
+              </div>
+            )}
+          </section>
+
+          {/* ─── Qualifikationen (bearbeitbar) ────────────────────── */}
+          <section>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Qualifikationen</h3>
+              <button onClick={() => editingQual ? saveQuals() : setEditingQual(true)} disabled={saving}
+                className="text-[10px] text-blue-400 hover:text-blue-300 font-medium">
+                {saving ? 'Speichert...' : editingQual ? 'Speichern' : 'Bearbeiten'}
+              </button>
+            </div>
+            {editingQual ? (
+              <div className="grid grid-cols-2 gap-1.5">
+                {ALL_QUALIFIKATIONEN.map(q => (
+                  <label key={q} className="flex items-center gap-1.5 text-xs text-zinc-300 cursor-pointer">
+                    <input type="checkbox" checked={quals.includes(q)}
+                      onChange={e => setQuals(prev => e.target.checked ? [...prev, q] : prev.filter(x => x !== q))}
+                      className="accent-blue-500 w-3.5 h-3.5 rounded" />
+                    {q}
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-1">
+                {(sv.qualifikationen ?? []).length > 0
+                  ? (sv.qualifikationen ?? []).map(q => <span key={q} className="bg-zinc-800 text-zinc-400 text-[10px] px-2 py-0.5 rounded-full">{q}</span>)
+                  : <span className="text-zinc-600 text-xs">Keine Qualifikationen</span>}
+              </div>
+            )}
+          </section>
+
+          {/* ─── Admin-Notizen ────────────────────────────────────── */}
+          <section>
+            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Admin-Notizen</h3>
+            <textarea value={notiz} onChange={e => setNotiz(e.target.value)}
+              onBlur={() => { if (notiz) updateGutachterProfil(sv.id, 'notizen', notiz).catch(() => {}) }}
+              placeholder="Interne Notizen..." rows={2}
+              className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-zinc-600 resize-y" />
+          </section>
+
+          {/* ─── Aktionen ─────────────────────────────────────────── */}
+          <section className="border-t border-zinc-800 pt-4 space-y-2">
+            <div className="flex gap-2">
+              {sv.telefon && (
+                <a href={`tel:${sv.telefon}`} className="flex-1 flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
+                  <PhoneIcon className="w-3.5 h-3.5" /> Anrufen
+                </a>
+              )}
+              {sv.email && (
+                <a href={`mailto:${sv.email}`} className="flex-1 flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
+                  <MailIcon className="w-3.5 h-3.5" /> E-Mail
+                </a>
+              )}
+            </div>
+            <Link href={`/admin/sachverstaendige/${sv.id}`}
+              className="block text-center bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
+              Vollstaendiges Profil
+            </Link>
+            <button onClick={async () => {
+              if (!confirm('Gutachter wirklich deaktivieren?')) return
+              await updateGutachterProfil(sv.id, 'ist_aktiv', false).catch(() => {})
+              onClose()
+            }} className="w-full flex items-center justify-center gap-2 text-red-400 hover:text-red-300 text-sm py-2 transition-colors">
+              <PowerOffIcon className="w-3.5 h-3.5" /> Deaktivieren
+            </button>
+          </section>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Inline-editable row (shared by telefon + email)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function EditableRow({ label, value, field, linkPrefix, type, editField, editValue, inputRef, saving, onStartEdit, onSave, onEditValueChange, onCancel }: {
+  label: string; value: string; field: string; linkPrefix?: string; type?: string
+  editField: string | null; editValue: string; inputRef: React.RefObject<HTMLInputElement | null>; saving: boolean
+  onStartEdit: (field: string, value: string) => void
+  onSave: (field: string, value: unknown) => void
+  onEditValueChange: (v: string) => void
+  onCancel: () => void
+}) {
+  if (editField === field) {
+    return (
+      <div className="flex items-center gap-1 mb-1.5">
+        <input ref={inputRef} type={type ?? 'text'} value={editValue} onChange={e => onEditValueChange(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') onSave(field, editValue); if (e.key === 'Escape') onCancel() }}
+          disabled={saving}
+          className="flex-1 bg-zinc-800 border border-blue-600 text-zinc-200 text-sm rounded-lg px-2 py-1.5 focus:outline-none" />
+        <button onClick={() => onSave(field, editValue)} disabled={saving} className="p-1 text-blue-400 hover:text-blue-300">
+          <CheckIcon className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    )
+  }
+  return (
+    <div className="flex items-center gap-2 mb-1.5 group">
+      {linkPrefix && value ? (
+        <a href={`${linkPrefix}${value}`} className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 flex-1 min-w-0 truncate">
+          {field === 'telefon' ? <PhoneIcon className="w-3.5 h-3.5 shrink-0" /> : <MailIcon className="w-3.5 h-3.5 shrink-0" />}
+          {value}
+        </a>
+      ) : (
+        <span className="text-sm text-zinc-300 flex-1">{value || '\u2014'}</span>
       )}
+      <button onClick={() => onStartEdit(field, value)}
+        className="p-1 text-zinc-600 hover:text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity">
+        <PencilIcon className="w-3 h-3" />
+      </button>
     </div>
   )
 }
