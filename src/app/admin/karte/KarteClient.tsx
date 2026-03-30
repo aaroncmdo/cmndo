@@ -73,6 +73,7 @@ const PAKET_LABEL: Record<string, string> = {
 
 const DARK_MAP_ID = 'claimondo-dark'
 const DEFAULT_CENTER = { lat: 51.1657, lng: 10.4515 }
+const MAPS_LIBRARIES: ('places')[] = ['places'] // module-level constant, stable reference
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Geocoding helpers (module-level, NOT re-created per render)
@@ -153,8 +154,11 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
     [selectedSvId, geocodedSVs]
   )
 
-  // ─── Geocoding (runs once on API load) ────────────────────────────
+  // ─── Geocoding (runs ONCE on API load, guarded by ref) ────────────
+  const geocodedRef = useRef(false)
   const handleApiLoad = useCallback(async () => {
+    if (geocodedRef.current) return // prevent double-fire
+    geocodedRef.current = true
     const g = new google.maps.Geocoder()
     const svR = await Promise.all(sachverstaendige.map(async sv => {
       if (sv.standortLat != null && sv.standortLng != null) return { ...sv, lat: sv.standortLat, lng: sv.standortLng } as GeocodedSV
@@ -262,7 +266,7 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
             <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
           </div>
         )}
-        <APIProvider apiKey={apiKey} onLoad={handleApiLoad} libraries={['places']}>
+        <APIProvider apiKey={apiKey} onLoad={handleApiLoad} libraries={MAPS_LIBRARIES}>
           <Map defaultCenter={DEFAULT_CENTER} defaultZoom={6} mapId={DARK_MAP_ID} gestureHandling="greedy" disableDefaultUI={false} className="w-full h-full">
 
             {/* Coverage circles (imperative, stable) */}
