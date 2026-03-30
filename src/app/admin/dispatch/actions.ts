@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import {
   emailSvZugewiesen,
@@ -16,6 +16,7 @@ import { createGutachterMitteilung } from '@/lib/mitteilungen'
 
 export async function updateFallStatus(fallId: string, newStatus: string) {
   const supabase = await createClient()
+  const serviceClient = createServiceClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht angemeldet')
 
@@ -37,7 +38,7 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
     updateData.abgeschlossen_am = now
   }
 
-  const { error } = await supabase
+  const { error } = await serviceClient
     .from('faelle')
     .update(updateData)
     .eq('id', fallId)
@@ -45,7 +46,7 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
   if (error) throw new Error(error.message)
 
   // Fire-and-forget email notifications on status change
-  triggerStatusEmail(supabase, fallId, newStatus).catch(() => {})
+  triggerStatusEmail(serviceClient, fallId, newStatus).catch(() => {})
 
   // Fire-and-forget WhatsApp notifications on status change
   if (newStatus === 'sv-zugewiesen') {
@@ -152,6 +153,7 @@ const QUALI_PHASES = new Set([
 
 export async function updateLeadStatus(leadId: string, newStatus: string) {
   const supabase = await createClient()
+  const svc = createServiceClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht angemeldet')
 
@@ -159,8 +161,8 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
 
   // Konversion triggers
   if (newStatus === 'umgewandelt' || newStatus === 'abgeschlossen' || newStatus === 'konvertiert') {
-    const fallId = await convertLeadToFall(supabase, leadId, user.id)
-    await supabase.from('leads').update({
+    const fallId = await convertLeadToFall(svc, leadId, user.id)
+    await svc.from('leads').update({
       qualifizierungs_phase: 'konvertiert',
       status: 'umgewandelt',
       updated_at: now,
@@ -193,7 +195,7 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
     updateData.status = newStatus
   }
 
-  const { error } = await supabase
+  const { error } = await svc
     .from('leads')
     .update(updateData)
     .eq('id', leadId)
