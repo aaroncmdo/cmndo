@@ -1,11 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import LeadDetailClient from './LeadDetailClient'
-import LeadQualifizierung from './LeadQualifizierung'
+import LeadStepper from './LeadStepper'
 import RueckrufSection from './RueckrufSection'
-import FlowLinkSection from './FlowLinkSection'
-import GutachterTermin from './GutachterTermin'
+import LeadNotizen from './LeadNotizen'
+import LeadTimeline from './LeadTimeline'
 
 export default async function LeadDetailPage({
   params,
@@ -23,12 +22,23 @@ export default async function LeadDetailPage({
 
   if (!lead) notFound()
 
-  // Zugehörige Fälle laden
+  // Zugehoerige Faelle laden
   const { data: faelle } = await supabase
     .from('faelle')
     .select('id, fall_nummer, status, schadens_ursache, created_at')
     .eq('lead_id', id)
     .order('created_at', { ascending: false })
+
+  // Timeline: aus Fall laden falls vorhanden
+  const fallId = faelle?.[0]?.id ?? null
+  const { data: timelineEntries } = fallId
+    ? await supabase
+        .from('timeline')
+        .select('id, typ, titel, beschreibung, created_at')
+        .eq('fall_id', fallId)
+        .order('created_at', { ascending: false })
+        .limit(30)
+    : { data: [] }
 
   return (
     <div className="px-4 py-8">
@@ -38,7 +48,7 @@ export default async function LeadDetailPage({
           href="/admin/dispatch"
           className="text-sm text-zinc-400 hover:text-white transition-colors mb-6 inline-block"
         >
-          ← Zurück zu Dispatch
+          &larr; Zurueck zu Dispatch
         </Link>
 
         {/* Header */}
@@ -64,10 +74,7 @@ export default async function LeadDetailPage({
         {/* Fortschrittsbalken */}
         <PhaseProgressBar phase={lead.qualifizierungs_phase ?? 'neu'} />
 
-        {/* Status + Details */}
-        <LeadDetailClient lead={lead} />
-
-        {/* Rückruftermin */}
+        {/* Rueckruftermin */}
         <RueckrufSection
           lead={{
             id: lead.id,
@@ -77,10 +84,15 @@ export default async function LeadDetailPage({
           }}
         />
 
-        {/* Lead-Qualifizierung */}
-        <LeadQualifizierung
+        {/* Qualifizierungs-Stepper (7 Schritte) */}
+        <LeadStepper
           lead={{
             id: lead.id,
+            vorname: lead.vorname,
+            nachname: lead.nachname,
+            telefon: lead.telefon,
+            email: lead.email,
+            status: lead.status,
             schadenfall_typ: lead.schadenfall_typ ?? null,
             kunden_konstellation: lead.kunden_konstellation ?? null,
             sf_variante: lead.sf_variante ?? null,
@@ -105,35 +117,16 @@ export default async function LeadDetailPage({
             halter_name: lead.halter_name ?? null,
             halter_ungleich_fahrer_flag: lead.halter_ungleich_fahrer_flag ?? null,
             qualifizierungs_phase: lead.qualifizierungs_phase ?? null,
-          }}
-        />
-
-        {/* Flow-Link senden */}
-        <FlowLinkSection
-          lead={{
-            id: lead.id,
-            vorname: lead.vorname,
-            nachname: lead.nachname,
-            telefon: lead.telefon,
-            wa_gesendet: lead.wa_gesendet ?? false,
-            status: lead.status,
-          }}
-        />
-
-        {/* Gutachter-Terminvergabe (after SA signed) */}
-        <GutachterTermin
-          lead={{
-            id: lead.id,
-            vorname: lead.vorname,
-            nachname: lead.nachname,
-            telefon: lead.telefon,
-            schadenfall_typ: lead.schadenfall_typ ?? null,
             fahrzeug_standort_plz: lead.fahrzeug_standort_plz ?? null,
             fahrzeug_standort_adresse: lead.fahrzeug_standort_adresse ?? null,
             gutachter_termin: lead.gutachter_termin ?? null,
             sa_unterschrieben: lead.sa_unterschrieben ?? false,
+            wa_gesendet: lead.wa_gesendet ?? false,
           }}
         />
+
+        {/* Notizen */}
+        <LeadNotizen leadId={lead.id} notiz={lead.notiz ?? ''} />
 
         {/* Kontakt */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-5">
@@ -148,38 +141,25 @@ export default async function LeadDetailPage({
           </div>
         </div>
 
-        {/* Timestamps */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-5">
-          <h2 className="text-sm font-medium text-zinc-400 mb-4">Zeitstempel</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <InfoRow
-              label="Erstellt am"
-              value={lead.created_at ? new Date(lead.created_at).toLocaleString('de-DE') : null}
-            />
-            <InfoRow
-              label="Aktualisiert am"
-              value={lead.updated_at ? new Date(lead.updated_at).toLocaleString('de-DE') : null}
-            />
-            <InfoRow
-              label="Rückruf-Termin"
-              value={lead.rueckruf_termin ? new Date(lead.rueckruf_termin).toLocaleString('de-DE') : null}
-            />
-          </div>
-        </div>
+        {/* Timeline */}
+        <LeadTimeline
+          lead={{
+            created_at: lead.created_at,
+            qualifizierungs_phase: lead.qualifizierungs_phase ?? 'neu',
+            rueckruf_datum: lead.rueckruf_datum ?? null,
+            rueckruf_erledigt: lead.rueckruf_erledigt ?? false,
+            sa_unterschrieben: lead.sa_unterschrieben ?? false,
+            gutachter_termin: lead.gutachter_termin ?? null,
+            wa_gesendet: lead.wa_gesendet ?? false,
+          }}
+          timelineEntries={timelineEntries ?? []}
+        />
 
-        {/* Notiz */}
-        {lead.notiz && (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-5">
-            <h2 className="text-sm font-medium text-zinc-400 mb-3">Notiz</h2>
-            <p className="text-sm text-zinc-300 whitespace-pre-wrap">{lead.notiz}</p>
-          </div>
-        )}
-
-        {/* Zugehörige Fälle */}
+        {/* Zugehoerige Faelle */}
         {faelle && faelle.length > 0 && (
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
             <h2 className="text-sm font-medium text-zinc-400 mb-4">
-              Zugehörige Fälle ({faelle.length})
+              Zugehoerige Faelle ({faelle.length})
             </h2>
             <div className="space-y-2">
               {faelle.map((fall) => (
@@ -193,7 +173,7 @@ export default async function LeadDetailPage({
                       {fall.fall_nummer ?? fall.id.slice(0, 8)}
                     </span>
                     <span className="text-zinc-400 text-xs ml-3">
-                      {fall.schadens_ursache ?? '—'}
+                      {fall.schadens_ursache ?? '\u2014'}
                     </span>
                   </div>
                   <span className="text-zinc-500 text-xs">
@@ -213,7 +193,7 @@ function InfoRow({ label, value }: { label: string; value: string | null | undef
   return (
     <div>
       <p className="text-xs text-zinc-500 mb-0.5">{label}</p>
-      <p className="text-sm text-zinc-200">{value || '—'}</p>
+      <p className="text-sm text-zinc-200">{value || '\u2014'}</p>
     </div>
   )
 }

@@ -256,6 +256,22 @@ export async function markRueckrufErledigt(leadId: string) {
   revalidatePath('/admin/dispatch')
 }
 
+// ─── Notiz speichern ────────────────────────────────────────────────────────
+
+export async function saveLeadNotiz(leadId: string, notiz: string | null) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const { error } = await supabase
+    .from('leads')
+    .update({ notiz, updated_at: new Date().toISOString() })
+    .eq('id', leadId)
+
+  if (error) throw new Error(error.message)
+  revalidatePath(`/admin/dispatch/lead/${leadId}`)
+}
+
 export async function handleGegenvorschlag(
   leadId: string,
   terminId: string,

@@ -531,7 +531,7 @@ function LeadCard({
 
       {/* Telefon */}
       {lead.telefon && (
-        <p className="text-zinc-500 text-[11px] mb-1.5 truncate">{lead.telefon}</p>
+        <a href={`tel:${lead.telefon}`} className="text-zinc-500 hover:text-blue-400 text-[11px] mb-1.5 truncate block transition-colors">{lead.telefon}</a>
       )}
 
       {/* Schadentyp Badge + Flags */}
