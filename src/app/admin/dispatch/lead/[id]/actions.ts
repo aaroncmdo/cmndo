@@ -168,6 +168,27 @@ export async function confirmGutachterTermin(
   revalidatePath('/admin/dispatch')
 }
 
+// ─── Lead-Qualifizierung speichern ─────────────────────────────────────────
+
+export async function saveLeadQualifizierung(
+  leadId: string,
+  data: Record<string, unknown>,
+) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const { error } = await supabase
+    .from('leads')
+    .update({ ...data, updated_at: new Date().toISOString() })
+    .eq('id', leadId)
+
+  if (error) throw new Error(`Qualifizierung fehlgeschlagen: ${error.message}`)
+
+  revalidatePath(`/admin/dispatch/lead/${leadId}`)
+  revalidatePath('/admin/dispatch')
+}
+
 export async function handleGegenvorschlag(
   leadId: string,
   terminId: string,

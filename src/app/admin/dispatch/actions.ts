@@ -215,6 +215,19 @@ async function convertLeadToFall(
       gewerbe_flag: lead.gewerbe_flag ?? false,
       halter_ungleich_fahrer_flag: lead.halter_ungleich_fahrer_flag ?? false,
       polizei_bericht_vorhanden: lead.polizeibericht_pflicht ?? false,
+      // KFZ-35: Erweiterte Qualifizierungsdaten
+      gegner_name: lead.gegner_name ?? null,
+      gegner_versicherung: lead.gegner_versicherung ?? null,
+      gegner_kennzeichen: lead.gegner_kennzeichen ?? null,
+      eigene_versicherung: lead.eigene_versicherung ?? null,
+      eigene_policennr: lead.eigene_policennr ?? null,
+      polizei_aktenzeichen: lead.polizei_aktenzeichen ?? null,
+      schadensursache: lead.schadensursache ?? null,
+      leasing_geber: lead.leasing_geber ?? null,
+      finanzierung_bank: lead.finanzierung_bank ?? null,
+      firma_name: lead.firma_name ?? null,
+      firma_ustid: lead.firma_ustid ?? null,
+      halter_name: lead.halter_name ?? null,
       // Konversions-Metadaten
       leadbearbeiter_id: userId,
       kundenbetreuer_id: kundenbetreuerId,
@@ -317,49 +330,79 @@ async function createPflichtdokumente(
   lead: Record<string, unknown>,
 ) {
   const docs: { fall_id: string; dokument_typ: string; pflicht: boolean }[] = []
+  const add = (typ: string, pflicht = true) => docs.push({ fall_id: fallId, dokument_typ: typ, pflicht })
 
-  // Immer Pflicht
-  docs.push({ fall_id: fallId, dokument_typ: 'fahrzeugschein', pflicht: true })
-  docs.push({ fall_id: fallId, dokument_typ: 'fuehrerschein', pflicht: true })
-  docs.push({ fall_id: fallId, dokument_typ: 'schadensfotos', pflicht: true })
+  const sf = String(lead.schadenfall_typ ?? '').toLowerCase()
+  const kk = String(lead.kunden_konstellation ?? 'kk-01').toLowerCase()
 
-  // Gegnerdaten wenn Gegner bekannt
-  if (lead.gegner_bekannt !== false) {
-    docs.push({ fall_id: fallId, dokument_typ: 'gegner_daten', pflicht: true })
+  // ─── Immer Pflicht ──────────────────────────────────────────────────────
+  add('fahrzeugschein')
+  add('fuehrerschein')
+  add('schadensfotos') // min 4
+
+  // ─── SF-abhängig ────────────────────────────────────────────────────────
+  // SF-01: Gegnerische Daten PFLICHT
+  if (sf === 'sf-01') {
+    add('gegner_daten')
   }
 
-  // Polizeibericht
-  if (lead.polizeibericht_pflicht) {
-    docs.push({ fall_id: fallId, dokument_typ: 'polizeibericht', pflicht: true })
+  // SF-02: Gegnerische + eigene Versicherungsdaten, Polizeibericht PFLICHT, Anwalt empfohlen
+  if (sf === 'sf-02') {
+    add('gegner_daten')
+    add('eigene_versicherung')
+    add('polizeibericht')
   }
 
-  // Leasing
-  if (lead.leasing_flag) {
-    docs.push({ fall_id: fallId, dokument_typ: 'leasingvertrag', pflicht: true })
+  // SF-03: variante-abhängig
+  if (sf === 'sf-03') {
+    if (lead.gegner_bekannt !== false) {
+      // Variante A: Gegner bekannt
+      add('gegner_daten')
+    } else {
+      // Variante B: Fahrerflucht — Polizeibericht + eigene Kasko PFLICHT
+      add('polizeibericht')
+      add('eigene_versicherung')
+    }
   }
 
-  // Finanzierung
-  if (lead.finanzierung_flag) {
-    docs.push({ fall_id: fallId, dokument_typ: 'finanzierungsvertrag', pflicht: true })
+  // SF-04: Eigene Versicherung PFLICHT
+  if (sf === 'sf-04') {
+    add('eigene_versicherung')
   }
 
-  // Gewerbe
-  if (lead.gewerbe_flag) {
-    docs.push({ fall_id: fallId, dokument_typ: 'gewerbenachweis', pflicht: true })
-    docs.push({ fall_id: fallId, dokument_typ: 'gf_vollmacht', pflicht: true })
+  // SF-05: Personenschaden — Med. Docs + Anwalt PFLICHT
+  if (sf === 'sf-05' || lead.personenschaden_flag) {
+    add('aerztliches_attest')
+    add('krankenhausbericht', false)
+    add('au_bescheinigung', false)
   }
 
-  // Halter ≠ Fahrer
-  if (lead.halter_ungleich_fahrer_flag) {
-    docs.push({ fall_id: fallId, dokument_typ: 'halter_vollmacht', pflicht: true })
-    docs.push({ fall_id: fallId, dokument_typ: 'halter_ausweis', pflicht: true })
+  // Extra: Polizeibericht wenn Flag gesetzt (unabhängig von SF)
+  if (lead.polizeibericht_pflicht && sf !== 'sf-02' && !(sf === 'sf-03' && lead.gegner_bekannt === false)) {
+    add('polizeibericht')
   }
 
-  // Personenschaden
-  if (lead.personenschaden_flag) {
-    docs.push({ fall_id: fallId, dokument_typ: 'aerztliches_attest', pflicht: true })
-    docs.push({ fall_id: fallId, dokument_typ: 'krankenhausbericht', pflicht: false })
-    docs.push({ fall_id: fallId, dokument_typ: 'au_bescheinigung', pflicht: false })
+  // ─── KK-abhängig ───────────────────────────────────────────────────────
+  // KK-02: Leasingvertrag, Leasinggeber-Info
+  if (kk === 'kk-02' || lead.leasing_flag) {
+    add('leasingvertrag')
+  }
+
+  // KK-03: Finanzierungsvertrag, Bank-Abtretung
+  if (kk === 'kk-03' || lead.finanzierung_flag) {
+    add('finanzierungsvertrag')
+  }
+
+  // KK-04: Gewerbenachweis, Vollmacht GF, USt-IdNr
+  if (kk === 'kk-04' || lead.gewerbe_flag) {
+    add('gewerbenachweis')
+    add('gf_vollmacht')
+  }
+
+  // KK-05: Vollmacht Halter, Ausweis Halter, SA vom HALTER
+  if (kk === 'kk-05' || lead.halter_ungleich_fahrer_flag) {
+    add('halter_vollmacht')
+    add('halter_ausweis')
   }
 
   if (docs.length > 0) {

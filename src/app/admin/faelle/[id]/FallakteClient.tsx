@@ -253,6 +253,14 @@ const SF_LABELS: Record<string, string> = {
   'SF-02': 'Teilschuld',
   'SF-03': 'Unfallflucht / Vandalismus',
   'SF-04': 'Selbstverschuldet',
+  'SF-05': 'Personenschaden (Zusatz)',
+  'SF-06': 'Nutzungsausfall / Mietwagen',
+  'sf-01': 'Unfall mit Gegner',
+  'sf-02': 'Teilschuld',
+  'sf-03': 'Unfallflucht / Vandalismus',
+  'sf-04': 'Selbstverschuldet',
+  'sf-05': 'Personenschaden (Zusatz)',
+  'sf-06': 'Nutzungsausfall / Mietwagen',
 }
 
 const KK_LABELS: Record<string, string> = {

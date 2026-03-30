@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import LeadDetailClient from './LeadDetailClient'
+import LeadQualifizierung from './LeadQualifizierung'
 import FlowLinkSection from './FlowLinkSection'
 import GutachterTermin from './GutachterTermin'
 
@@ -49,6 +50,37 @@ export default async function LeadDetailPage({
 
         {/* Status + Details */}
         <LeadDetailClient lead={lead} />
+
+        {/* Lead-Qualifizierung */}
+        <LeadQualifizierung
+          lead={{
+            id: lead.id,
+            schadenfall_typ: lead.schadenfall_typ ?? null,
+            kunden_konstellation: lead.kunden_konstellation ?? null,
+            sf_variante: lead.sf_variante ?? null,
+            gegner_name: lead.gegner_name ?? null,
+            gegner_versicherung: lead.gegner_versicherung ?? null,
+            gegner_kennzeichen: lead.gegner_kennzeichen ?? null,
+            gegner_bekannt: lead.gegner_bekannt ?? null,
+            eigene_versicherung: lead.eigene_versicherung ?? null,
+            eigene_policennr: lead.eigene_policennr ?? null,
+            polizei_aktenzeichen: lead.polizei_aktenzeichen ?? null,
+            polizeibericht_pflicht: lead.polizeibericht_pflicht ?? null,
+            personenschaden_flag: lead.personenschaden_flag ?? null,
+            mietwagen_flag: lead.mietwagen_flag ?? null,
+            schadensursache: lead.schadensursache ?? null,
+            leasing_geber: lead.leasing_geber ?? null,
+            leasing_flag: lead.leasing_flag ?? null,
+            finanzierung_bank: lead.finanzierung_bank ?? null,
+            finanzierung_flag: lead.finanzierung_flag ?? null,
+            firma_name: lead.firma_name ?? null,
+            firma_ustid: lead.firma_ustid ?? null,
+            gewerbe_flag: lead.gewerbe_flag ?? null,
+            halter_name: lead.halter_name ?? null,
+            halter_ungleich_fahrer_flag: lead.halter_ungleich_fahrer_flag ?? null,
+            qualifizierungs_phase: lead.qualifizierungs_phase ?? null,
+          }}
+        />
 
         {/* Flow-Link senden */}
         <FlowLinkSection
