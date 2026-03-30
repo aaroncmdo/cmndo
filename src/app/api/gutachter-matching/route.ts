@@ -116,10 +116,10 @@ export async function POST(request: Request) {
     // Priority score: lower = better
     let score = 0
 
-    // a) Capacity: prefer those with room in their package
+    // a) Capacity: skip those with no room in their package
     const maxFaelle = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10
     const genutztFaelle = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
-    if (genutztFaelle >= maxFaelle) score += 1000
+    if (genutztFaelle >= maxFaelle) continue // filter out full gutachter
 
     // b) partner_seit: earlier = better
     if (sv.partner_seit) {
