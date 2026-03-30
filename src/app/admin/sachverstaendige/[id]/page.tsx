@@ -2,32 +2,10 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import SvDetailClient from './SvDetailClient'
+import { FALL_STATUS_LABELS, FALL_STATUS_COLORS } from '@/lib/statusLabels'
 
-const STATUS_LABEL: Record<string, string> = {
-  ersterfassung: 'Ersterfassung',
-  'sv-zugewiesen': 'SV zugewiesen',
-  'sv-termin': 'SV Termin',
-  'gutachten-eingegangen': 'Gutachten eingeg.',
-  filmcheck: 'Filmcheck',
-  'kanzlei-uebergeben': 'Kanzlei übergeben',
-  anschlussschreiben: 'Anschlussschreiben',
-  regulierung: 'Regulierung',
-  abgeschlossen: 'Abgeschlossen',
-  storniert: 'Storniert',
-}
-
-const STATUS_COLOR: Record<string, string> = {
-  ersterfassung: 'bg-zinc-800 text-zinc-300',
-  'sv-zugewiesen': 'bg-blue-950 text-blue-300',
-  'sv-termin': 'bg-blue-900 text-blue-200',
-  'gutachten-eingegangen': 'bg-violet-950 text-violet-300',
-  filmcheck: 'bg-yellow-950 text-yellow-300',
-  'kanzlei-uebergeben': 'bg-green-950 text-green-300',
-  anschlussschreiben: 'bg-green-900 text-green-200',
-  regulierung: 'bg-emerald-950 text-emerald-300',
-  abgeschlossen: 'bg-emerald-900 text-emerald-200',
-  storniert: 'bg-red-950 text-red-300',
-}
+const STATUS_LABEL = FALL_STATUS_LABELS
+const STATUS_COLOR = FALL_STATUS_COLORS
 
 export default async function SvDetailPage({
   params,

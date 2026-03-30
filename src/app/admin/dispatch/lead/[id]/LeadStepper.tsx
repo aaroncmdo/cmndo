@@ -58,6 +58,10 @@ type LeadData = {
   fahrzeug_standort_adresse: string | null
   gutachter_termin: string | null
   sa_unterschrieben: boolean
+  sa_datum: string | null
+  vollmacht_unterschrieben: boolean
+  vollmacht_datum: string | null
+  mandatstyp: string | null
   wa_gesendet: boolean
 }
 
@@ -333,9 +337,9 @@ export default function LeadStepper({ lead }: { lead: LeadData }) {
                   )}
                   {step.key === 'sa' && (
                     <StepSA
-                      saUnterschrieben={lead.sa_unterschrieben}
+                      lead={lead}
                       saving={saving}
-                      onAdvance={(saChecked: boolean) => saveAndAdvance('sa-unterschrieben', { sa_unterschrieben: saChecked })}
+                      onAdvance={(data: Record<string, unknown>) => saveAndAdvance('sa-unterschrieben', data)}
                     />
                   )}
                   {step.key === 'flow' && (
@@ -705,22 +709,62 @@ function SlotCard({ slot, label, variant, onConfirm, confirming }: {
 
 // ─── Step 6: SA unterschrieben ──────────────────────────────────────────────
 
-function StepSA({ saUnterschrieben, saving, onAdvance }: {
-  saUnterschrieben: boolean; saving: boolean; onAdvance: (sa: boolean) => void
+function StepSA({ lead, saving, onAdvance }: {
+  lead: LeadData; saving: boolean; onAdvance: (data: Record<string, unknown>) => void
 }) {
-  const [sa, setSa] = useState(saUnterschrieben)
-  const [vollmacht, setVollmacht] = useState(saUnterschrieben) // linked for now
+  const [sa, setSa] = useState(lead.sa_unterschrieben)
+  const [vollmacht, setVollmacht] = useState(lead.vollmacht_unterschrieben)
+  const [mandatstyp, setMandatstyp] = useState(lead.mandatstyp ?? 'claimondo')
 
-  if (saUnterschrieben) {
-    return <p className="text-emerald-400 text-sm">SA + Vollmacht erhalten</p>
+  // Auto-set kanzlei-claimondo for SF-05 (Personenschaden) or SF-02 (Teilschuld)
+  const autoKanzlei = lead.schadenfall_typ === 'sf-05' || lead.schadenfall_typ === 'sf-02'
+
+  if (lead.sa_unterschrieben && lead.vollmacht_unterschrieben) {
+    return (
+      <div className="space-y-2">
+        <p className="text-emerald-400 text-sm">SA + Vollmacht erhalten</p>
+        {lead.sa_datum && <p className="text-zinc-500 text-xs">SA: {new Date(lead.sa_datum).toLocaleDateString('de-DE')}</p>}
+        {lead.vollmacht_datum && <p className="text-zinc-500 text-xs">Vollmacht: {new Date(lead.vollmacht_datum).toLocaleDateString('de-DE')}</p>}
+        <span className={`inline-block text-xs px-2 py-0.5 rounded-full ${mandatstyp === 'kanzlei-claimondo' ? 'bg-purple-950 text-purple-300' : 'bg-blue-950 text-blue-300'}`}>
+          {mandatstyp === 'kanzlei-claimondo' ? 'Kanzlei + Claimondo' : 'Nur Claimondo'}
+        </span>
+      </div>
+    )
   }
+
+  const now = new Date().toISOString()
 
   return (
     <div className="space-y-3">
       <Checkbox label="Sicherungsabtretung (SA) erhalten" checked={sa} onChange={setSa} />
       <Checkbox label="Vollmacht erhalten" checked={vollmacht} onChange={setVollmacht} />
+
+      <div>
+        <label className="text-xs text-zinc-500 mb-1.5 block">Mandatstyp</label>
+        <select
+          value={autoKanzlei ? 'kanzlei-claimondo' : mandatstyp}
+          onChange={e => setMandatstyp(e.target.value)}
+          disabled={autoKanzlei}
+          className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60"
+        >
+          <option value="claimondo">Nur Claimondo</option>
+          <option value="kanzlei-claimondo">Kanzlei + Claimondo</option>
+        </select>
+        {autoKanzlei && (
+          <p className="text-amber-400 text-[11px] mt-1">
+            Automatisch Kanzlei + Claimondo (bei {lead.schadenfall_typ === 'sf-05' ? 'Personenschaden' : 'Teilschuld'})
+          </p>
+        )}
+      </div>
+
       <button
-        onClick={() => onAdvance(sa && vollmacht)}
+        onClick={() => onAdvance({
+          sa_unterschrieben: sa,
+          sa_datum: sa ? now : null,
+          vollmacht_unterschrieben: vollmacht,
+          vollmacht_datum: vollmacht ? now : null,
+          mandatstyp: autoKanzlei ? 'kanzlei-claimondo' : mandatstyp,
+        })}
         disabled={saving || !sa || !vollmacht}
         className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
       >

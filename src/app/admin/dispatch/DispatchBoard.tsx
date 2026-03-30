@@ -4,6 +4,7 @@ import { useState, useTransition, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { updateFallStatus, updateLeadStatus, createLead } from './actions'
+import { VS_STUFEN_SHORT } from '@/lib/statusLabels'
 import {
   UserPlusIcon,
   PhoneCallIcon,
@@ -665,7 +666,7 @@ function FallCard({
             : 'bg-green-950 text-green-400'
         }`}>
           <TimerIcon className="w-3 h-3" />
-          <span>{vsStufe.toUpperCase()} · Tag {vsDays}</span>
+          <span>{VS_STUFEN_SHORT[vsStufe] ?? vsStufe.toUpperCase()} · Tag {vsDays}</span>
           {vsOverdue && <span className="ml-auto text-[10px]">ueberfaellig!</span>}
         </div>
       )}

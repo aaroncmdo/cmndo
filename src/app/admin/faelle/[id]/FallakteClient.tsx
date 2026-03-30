@@ -226,15 +226,15 @@ type QcCheckliste = {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PIPELINE_STEPS = [
-  { key: 'ersterfassung', label: 'ONBOARD' },
-  { key: 'sv-zugewiesen', label: 'DISPATCH' },
-  { key: 'sv-termin', label: 'D-02' },
-  { key: 'gutachten-eingegangen', label: 'D-03/04' },
-  { key: 'filmcheck', label: 'QC' },
-  { key: 'kanzlei-uebergeben', label: 'VS-01' },
-  { key: 'anschlussschreiben', label: 'VS-04' },
-  { key: 'regulierung', label: 'ZAHLUNG' },
-  { key: 'abgeschlossen', label: 'ABSCHLUSS' },
+  { key: 'ersterfassung', label: 'Ersterfassung' },
+  { key: 'sv-zugewiesen', label: 'Gutachter zugew.' },
+  { key: 'sv-termin', label: 'Termin vereinbart' },
+  { key: 'gutachten-eingegangen', label: 'Gutachten eing.' },
+  { key: 'filmcheck', label: 'QC-Pruefung' },
+  { key: 'kanzlei-uebergeben', label: 'Kanzlei uebergeben' },
+  { key: 'anschlussschreiben', label: 'AS gesendet' },
+  { key: 'regulierung', label: 'Regulierung' },
+  { key: 'abgeschlossen', label: 'Abgeschlossen' },
 ]
 
 const NEXT_ACTION: Record<string, { label: string; desc: string; color: string }> = {
@@ -1956,13 +1956,13 @@ function TabQcPruefung({
 }
 
 const ESKALATIONSSTUFEN_DETAIL = [
-  { key: 'vs-01', tage: 0,  label: 'AS gesendet',                        borderActive: 'border-green-800',  bgActive: 'bg-green-500/5',  textActive: 'text-green-400' },
-  { key: 'vs-02', tage: 7,  label: 'Schriftliche Erinnerung',            borderActive: 'border-yellow-800', bgActive: 'bg-yellow-500/5', textActive: 'text-yellow-400' },
-  { key: 'vs-03', tage: 14, label: 'Frist abgelaufen – Nachfrage',       borderActive: 'border-yellow-800', bgActive: 'bg-yellow-500/5', textActive: 'text-yellow-400' },
-  { key: 'vs-04', tage: 21, label: 'Telefonische Direktanfrage',         borderActive: 'border-orange-800', bgActive: 'bg-orange-500/5', textActive: 'text-orange-400' },
-  { key: 'vs-05', tage: 28, label: 'Mahnung mit Verzugszinsen',          borderActive: 'border-orange-800', bgActive: 'bg-orange-500/5', textActive: 'text-orange-400' },
-  { key: 'vs-06', tage: 42, label: 'Letzte Mahnung + Klageankuendigung', borderActive: 'border-red-800',    bgActive: 'bg-red-500/5',    textActive: 'text-red-400' },
-  { key: 'vs-07', tage: 60, label: 'Klage eingereicht',                  borderActive: 'border-red-800',    bgActive: 'bg-red-500/5',    textActive: 'text-red-400' },
+  { key: 'vs-01', tage: 0,  label: 'Anspruchsschreiben gesendet (14-Tage-Frist)', borderActive: 'border-green-800',  bgActive: 'bg-green-500/5',  textActive: 'text-green-400' },
+  { key: 'vs-02', tage: 7,  label: 'Schadensabfrage eingegangen',                 borderActive: 'border-yellow-800', bgActive: 'bg-yellow-500/5', textActive: 'text-yellow-400' },
+  { key: 'vs-03', tage: 14, label: 'Frist abgelaufen - Nachfrage',                borderActive: 'border-yellow-800', bgActive: 'bg-yellow-500/5', textActive: 'text-yellow-400' },
+  { key: 'vs-04', tage: 21, label: 'Regulierung angekuendigt',                    borderActive: 'border-orange-800', bgActive: 'bg-orange-500/5', textActive: 'text-orange-400' },
+  { key: 'vs-05', tage: 28, label: '1. Mahnung + Verzugszinsen',                  borderActive: 'border-orange-800', bgActive: 'bg-orange-500/5', textActive: 'text-orange-400' },
+  { key: 'vs-06', tage: 42, label: '2. Mahnung + Klageankuendigung',              borderActive: 'border-red-800',    bgActive: 'bg-red-500/5',    textActive: 'text-red-400' },
+  { key: 'vs-07', tage: 60, label: 'Klage-Entscheidung',                          borderActive: 'border-red-800',    bgActive: 'bg-red-500/5',    textActive: 'text-red-400' },
 ]
 
 // ─── TAB 5: Kanzlei ──────────────────────────────────────────────────────────

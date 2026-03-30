@@ -121,6 +121,10 @@ export default async function LeadDetailPage({
             fahrzeug_standort_adresse: lead.fahrzeug_standort_adresse ?? null,
             gutachter_termin: lead.gutachter_termin ?? null,
             sa_unterschrieben: lead.sa_unterschrieben ?? false,
+            sa_datum: lead.sa_datum ?? null,
+            vollmacht_unterschrieben: lead.vollmacht_unterschrieben ?? false,
+            vollmacht_datum: lead.vollmacht_datum ?? null,
+            mandatstyp: lead.mandatstyp ?? null,
             wa_gesendet: lead.wa_gesendet ?? false,
           }}
         />

@@ -51,11 +51,9 @@ interface GeocodedFall extends Fall { lat: number; lng: number }
 
 // ---------- Constants ----------
 
-const STATUS_LABEL: Record<string, string> = {
-  ersterfassung: 'Ersterfassung', 'sv-zugewiesen': 'SV zugewiesen', 'sv-termin': 'SV Termin',
-  'gutachten-eingegangen': 'Gutachten eingeg.', filmcheck: 'Filmcheck',
-  'kanzlei-uebergeben': 'Kanzlei übergeben', anschlussschreiben: 'Anschlussschreiben', regulierung: 'Regulierung',
-}
+import { FALL_STATUS_LABELS } from '@/lib/statusLabels'
+
+const STATUS_LABEL = FALL_STATUS_LABELS
 
 const URSACHE_LABEL: Record<string, string> = {
   wasserschaden: 'Wasserschaden', sachbeschaedigung: 'Sachbeschädigung', brand: 'Brand',
