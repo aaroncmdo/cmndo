@@ -30,10 +30,10 @@ const STATUS_CHART_COLOR: Record<string, string> = {
 }
 
 const TASK_STATUS_COLOR: Record<string, string> = {
-  offen: 'bg-blue-950 text-blue-300',
-  'in-bearbeitung': 'bg-amber-950 text-amber-300',
-  erledigt: 'bg-green-950 text-green-300',
-  blockiert: 'bg-red-950 text-red-300',
+  offen: 'bg-blue-50 text-blue-300',
+  'in-bearbeitung': 'bg-amber-50 text-amber-300',
+  erledigt: 'bg-green-50 text-green-300',
+  blockiert: 'bg-red-50 text-red-300',
 }
 
 const TASK_TYP_LABEL: Record<string, string> = {
@@ -158,7 +158,7 @@ export default async function AdminPage() {
     <div className="px-4 py-8">
       <div className="max-w-5xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-white mb-1">Dashboard</h1>
+          <h1 className="text-2xl font-semibold text-gray-900 mb-1">Dashboard</h1>
         </div>
 
         {/* ── Meine Aufgaben (Admin sieht alle) ───────────────────────────── */}
@@ -170,35 +170,35 @@ export default async function AdminPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
           <Link
             href="/admin/faelle"
-            className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 hover:border-zinc-600 transition-colors group"
+            className="bg-white border border-gray-200 rounded-2xl p-5 hover:border-gray-300 transition-colors group"
           >
-            <div className="text-3xl font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">
+            <div className="text-3xl font-bold text-gray-900 mb-1 group-hover:text-blue-400 transition-colors">
               {faelleCount ?? 0}
             </div>
-            <div className="text-zinc-400 text-sm font-medium">Fälle</div>
+            <div className="text-gray-500 text-sm font-medium">Fälle</div>
           </Link>
           <Link
             href="/admin/dispatch"
-            className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 hover:border-zinc-600 transition-colors group"
+            className="bg-white border border-gray-200 rounded-2xl p-5 hover:border-gray-300 transition-colors group"
           >
-            <div className="text-3xl font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">
+            <div className="text-3xl font-bold text-gray-900 mb-1 group-hover:text-blue-400 transition-colors">
               {leadsCount ?? 0}
             </div>
-            <div className="text-zinc-400 text-sm font-medium">Leads</div>
+            <div className="text-gray-500 text-sm font-medium">Leads</div>
           </Link>
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-            <div className={`text-3xl font-bold mb-1 ${conversionRate >= 50 ? 'text-green-400' : conversionRate >= 25 ? 'text-amber-400' : 'text-white'}`}>
+          <div className="bg-white border border-gray-200 rounded-2xl p-5">
+            <div className={`text-3xl font-bold mb-1 ${conversionRate >= 50 ? 'text-green-400' : conversionRate >= 25 ? 'text-amber-400' : 'text-gray-900'}`}>
               {conversionRate}%
             </div>
-            <div className="text-zinc-400 text-sm font-medium">Conversion</div>
-            <div className="text-zinc-600 text-xs mt-0.5">{convertedCount} von {totalLeads} Leads</div>
+            <div className="text-gray-500 text-sm font-medium">Conversion</div>
+            <div className="text-gray-400 text-xs mt-0.5">{convertedCount} von {totalLeads} Leads</div>
           </div>
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-            <div className="text-3xl font-bold text-white mb-1">
+          <div className="bg-white border border-gray-200 rounded-2xl p-5">
+            <div className="text-3xl font-bold text-gray-900 mb-1">
               {completed.length > 0 ? avgDays : '—'}
             </div>
-            <div className="text-zinc-400 text-sm font-medium">Ø Tage</div>
-            <div className="text-zinc-600 text-xs mt-0.5">
+            <div className="text-gray-500 text-sm font-medium">Ø Tage</div>
+            <div className="text-gray-400 text-xs mt-0.5">
               {completed.length > 0 ? `${completed.length} abgeschlossen` : 'Keine Daten'}
             </div>
           </div>
@@ -208,20 +208,20 @@ export default async function AdminPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
           {/* Donut chart */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-            <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-4">
+          <div className="bg-white border border-gray-200 rounded-2xl p-5">
+            <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-4">
               Fälle nach Status
             </h3>
             {chartData.length > 0 ? (
               <StatusChart data={chartData} total={faelleCount ?? 0} />
             ) : (
-              <p className="text-zinc-600 text-sm">Keine Fälle vorhanden.</p>
+              <p className="text-gray-400 text-sm">Keine Fälle vorhanden.</p>
             )}
           </div>
 
           {/* SV Auslastung */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-            <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-4">
+          <div className="bg-white border border-gray-200 rounded-2xl p-5">
+            <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-4">
               SV Auslastung (Top 3)
             </h3>
             {topSvIds.length > 0 ? (
@@ -232,14 +232,14 @@ export default async function AdminPage() {
                   return (
                     <div key={svId}>
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-zinc-200 text-sm font-medium truncate">
+                        <span className="text-gray-800 text-sm font-medium truncate">
                           {svProfiles[svId] ?? svId.slice(0, 8)}
                         </span>
-                        <span className="text-zinc-400 text-sm font-semibold tabular-nums ml-2">
+                        <span className="text-gray-500 text-sm font-semibold tabular-nums ml-2">
                           {count}
                         </span>
                       </div>
-                      <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full ${
                             i === 0 ? 'bg-blue-500' : i === 1 ? 'bg-blue-500/70' : 'bg-blue-500/40'
@@ -252,14 +252,14 @@ export default async function AdminPage() {
                 })}
               </div>
             ) : (
-              <p className="text-zinc-600 text-sm">Keine SVs zugewiesen.</p>
+              <p className="text-gray-400 text-sm">Keine SVs zugewiesen.</p>
             )}
           </div>
 
           {/* Letzte 5 Tasks */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+          <div className="bg-white border border-gray-200 rounded-2xl p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">
+              <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider">
                 Letzte Tasks
               </h3>
               <Link href="/admin/tasks" className="text-blue-400 hover:text-blue-300 text-xs transition-colors">
@@ -271,22 +271,22 @@ export default async function AdminPage() {
                 {tasks.map(task => (
                   <div
                     key={task.id}
-                    className="flex items-start gap-3 py-2 border-b border-zinc-800/50 last:border-0"
+                    className="flex items-start gap-3 py-2 border-b border-gray-200/50 last:border-0"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-zinc-200 text-sm leading-snug truncate">{task.titel}</p>
+                      <p className="text-gray-800 text-sm leading-snug truncate">{task.titel}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-zinc-600 text-xs font-mono">
+                        <span className="text-gray-400 text-xs font-mono">
                           {fallMap[task.fall_id] ?? '—'}
                         </span>
-                        <span className="text-zinc-700">·</span>
-                        <span className="text-zinc-500 text-xs">
+                        <span className="text-gray-300">·</span>
+                        <span className="text-gray-500 text-xs">
                           {TASK_TYP_LABEL[task.typ] ?? task.typ}
                         </span>
                       </div>
                     </div>
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium whitespace-nowrap shrink-0 ${
-                      TASK_STATUS_COLOR[task.status] ?? 'bg-zinc-800 text-zinc-300'
+                      TASK_STATUS_COLOR[task.status] ?? 'bg-gray-100 text-gray-700'
                     }`}>
                       {task.status}
                     </span>
@@ -294,7 +294,7 @@ export default async function AdminPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-zinc-600 text-sm">Keine Tasks vorhanden.</p>
+              <p className="text-gray-400 text-sm">Keine Tasks vorhanden.</p>
             )}
           </div>
         </div>

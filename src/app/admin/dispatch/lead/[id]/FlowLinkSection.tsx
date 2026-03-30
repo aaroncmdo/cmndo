@@ -54,11 +54,11 @@ export default function FlowLinkSection({
   }
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-5">
-      <h2 className="text-sm font-medium text-zinc-400 mb-4">Flow-Link</h2>
+    <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-5">
+      <h2 className="text-sm font-medium text-gray-500 mb-4">Flow-Link</h2>
 
       {alreadySent && !flowUrl && (
-        <div className="flex items-center gap-2 mb-4 px-3 py-2.5 rounded-xl bg-green-950/50 border border-green-900">
+        <div className="flex items-center gap-2 mb-4 px-3 py-2.5 rounded-xl bg-green-50/50 border border-green-900">
           <span className="text-green-400 text-sm">WhatsApp bereits gesendet</span>
         </div>
       )}
@@ -75,7 +75,7 @@ export default function FlowLinkSection({
 
       {flowUrl ? (
         <div className="space-y-3">
-          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-green-950/50 border border-green-900">
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-green-50/50 border border-green-900">
             <span className="text-green-400 text-sm font-medium">Link erstellt & WhatsApp geöffnet</span>
           </div>
 
@@ -84,11 +84,11 @@ export default function FlowLinkSection({
               type="text"
               readOnly
               value={flowUrl}
-              className="flex-1 px-3 py-2.5 rounded-xl bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 font-mono truncate focus:outline-none"
+              className="flex-1 px-3 py-2.5 rounded-xl bg-gray-100 border border-gray-300 text-sm text-gray-800 font-mono truncate focus:outline-none"
             />
             <button
               onClick={handleCopy}
-              className="px-4 py-2.5 rounded-xl text-sm font-medium bg-zinc-800 border border-zinc-700 text-zinc-200 hover:bg-zinc-700 transition-colors shrink-0"
+              className="px-4 py-2.5 rounded-xl text-sm font-medium bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 transition-colors shrink-0"
             >
               {copied ? 'Kopiert!' : 'Kopieren'}
             </button>

@@ -46,38 +46,38 @@ export default async function SvDetailPage({
       <div className="max-w-3xl mx-auto">
         <Link
           href="/admin/sachverstaendige"
-          className="text-sm text-zinc-400 hover:text-white transition-colors mb-6 inline-block"
+          className="text-sm text-gray-500 hover:text-gray-800 transition-colors mb-6 inline-block"
         >
           ← Zurück
         </Link>
 
         <div className="flex items-start justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-semibold text-white">{name || 'Sachverständiger'}</h1>
-            <p className="text-zinc-500 text-sm mt-0.5">{profile?.email ?? '—'}</p>
+            <h1 className="text-2xl font-semibold text-gray-900">{name || 'Sachverständiger'}</h1>
+            <p className="text-gray-500 text-sm mt-0.5">{profile?.email ?? '—'}</p>
           </div>
           {sv.ist_aktiv ? (
-            <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-950 text-green-300">Aktiv</span>
+            <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-green-300">Aktiv</span>
           ) : (
-            <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-950 text-red-300">Inaktiv</span>
+            <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-50 text-red-300">Inaktiv</span>
           )}
         </div>
 
         {/* Auslastung */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-5">
-          <h2 className="text-sm font-medium text-zinc-400 mb-3">Auslastung</h2>
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-5">
+          <h2 className="text-sm font-medium text-gray-500 mb-3">Auslastung</h2>
           <div className="flex items-baseline justify-between mb-2">
-            <span className="text-white text-2xl font-bold tabular-nums">
+            <span className="text-gray-900 text-2xl font-bold tabular-nums">
               {sv.offene_faelle ?? 0}
-              <span className="text-zinc-500 text-sm font-normal"> / {sv.max_faelle_monat}</span>
+              <span className="text-gray-500 text-sm font-normal"> / {sv.max_faelle_monat}</span>
             </span>
-            <span className="text-zinc-500 text-sm">
+            <span className="text-gray-500 text-sm">
               {sv.max_faelle_monat > 0
                 ? `${Math.round(((sv.offene_faelle ?? 0) / sv.max_faelle_monat) * 100)}%`
                 : '—'}
             </span>
           </div>
-          <div className="w-full h-3 bg-zinc-800 rounded-full overflow-hidden">
+          <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${
                 (sv.offene_faelle ?? 0) / sv.max_faelle_monat > 0.8
@@ -110,33 +110,33 @@ export default async function SvDetailPage({
         />
 
         {/* Zugewiesene Fälle */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mt-5">
-          <h2 className="text-sm font-medium text-zinc-400 mb-4">
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 mt-5">
+          <h2 className="text-sm font-medium text-gray-500 mb-4">
             Zugewiesene Fälle ({faelle?.length ?? 0})
           </h2>
           {!faelle?.length ? (
-            <p className="text-zinc-600 text-sm">Keine Fälle zugewiesen.</p>
+            <p className="text-gray-400 text-sm">Keine Fälle zugewiesen.</p>
           ) : (
             <div className="space-y-2">
               {faelle.map((fall) => (
                 <Link
                   key={fall.id}
                   href={`/admin/faelle/${fall.id}`}
-                  className="flex items-center justify-between px-4 py-3 rounded-xl bg-zinc-800/50 hover:bg-zinc-800 transition-colors"
+                  className="flex items-center justify-between px-4 py-3 rounded-xl bg-gray-100/50 hover:bg-gray-100 transition-colors"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <span className="text-blue-400 font-mono text-xs shrink-0">
                       {fall.fall_nummer ?? fall.id.slice(0, 8)}
                     </span>
-                    <span className="text-zinc-400 text-xs truncate">
+                    <span className="text-gray-500 text-xs truncate">
                       {fall.schadens_ursache ?? '—'} · {fall.schadens_ort ?? '—'}
                     </span>
                   </div>
                   <div className="flex items-center gap-3 shrink-0 ml-3">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLOR[fall.status] ?? 'bg-zinc-800 text-zinc-300'}`}>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLOR[fall.status] ?? 'bg-gray-100 text-gray-700'}`}>
                       {STATUS_LABEL[fall.status] ?? fall.status}
                     </span>
-                    <span className="text-zinc-600 text-xs hidden sm:block">
+                    <span className="text-gray-400 text-xs hidden sm:block">
                       {fall.created_at ? new Date(fall.created_at).toLocaleDateString('de-DE') : ''}
                     </span>
                   </div>

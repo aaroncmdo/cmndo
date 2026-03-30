@@ -39,7 +39,7 @@ export default function DisqualifizierungButton({ leadId }: { leadId: string }) 
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-red-400 border border-red-800/50 hover:bg-red-950/50 transition-colors"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-red-400 border border-red-800/50 hover:bg-red-50/50 transition-colors"
       >
         <XCircleIcon className="w-3.5 h-3.5" />
         Disqualifizieren
@@ -47,21 +47,21 @@ export default function DisqualifizierungButton({ leadId }: { leadId: string }) 
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-white">Lead disqualifizieren</h3>
-              <button onClick={() => setOpen(false)} className="text-zinc-500 hover:text-white">
+              <h3 className="text-lg font-semibold text-gray-900">Lead disqualifizieren</h3>
+              <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-gray-800">
                 <XIcon className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="text-xs text-zinc-500 mb-1.5 block">Grund *</label>
+                <label className="text-xs text-gray-500 mb-1.5 block">Grund *</label>
                 <select
                   value={grund}
                   onChange={e => setGrund(e.target.value)}
-                  className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-red-500"
+                  className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-red-500"
                 >
                   <option value="">Bitte waehlen...</option>
                   {GRUENDE.map(g => (
@@ -71,13 +71,13 @@ export default function DisqualifizierungButton({ leadId }: { leadId: string }) 
               </div>
 
               <div>
-                <label className="text-xs text-zinc-500 mb-1.5 block">Notiz (optional)</label>
+                <label className="text-xs text-gray-500 mb-1.5 block">Notiz (optional)</label>
                 <textarea
                   value={notiz}
                   onChange={e => setNotiz(e.target.value)}
                   placeholder="Zusaetzliche Informationen..."
                   rows={3}
-                  className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-red-500 placeholder-zinc-600 resize-y"
+                  className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-red-500 placeholder-gray-400 resize-y"
                 />
               </div>
 
@@ -91,7 +91,7 @@ export default function DisqualifizierungButton({ leadId }: { leadId: string }) 
                 </button>
                 <button
                   onClick={() => setOpen(false)}
-                  className="px-4 py-2.5 text-zinc-400 hover:text-zinc-200 text-sm rounded-xl transition-colors"
+                  className="px-4 py-2.5 text-gray-500 hover:text-gray-800 text-sm rounded-xl transition-colors"
                 >
                   Abbrechen
                 </button>

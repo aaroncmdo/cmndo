@@ -25,21 +25,21 @@ function GewinnverteilungSection({
   return (
     <div className="px-4 pb-8">
       <div className="max-w-5xl mx-auto">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">
+        <div className="bg-white border border-gray-200 rounded-2xl p-5">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
             Gewinnverteilung
           </h2>
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
-              <p className="text-zinc-500 text-xs mb-1">Gesamt Provision</p>
-              <p className="text-white text-xl font-bold tabular-nums">{eur(gesamtProvision)}</p>
+              <p className="text-gray-500 text-xs mb-1">Gesamt Provision</p>
+              <p className="text-gray-900 text-xl font-bold tabular-nums">{eur(gesamtProvision)}</p>
             </div>
             <div className="text-center">
-              <p className="text-zinc-500 text-xs mb-1">Claimondo (75%)</p>
+              <p className="text-gray-500 text-xs mb-1">Claimondo (75%)</p>
               <p className="text-emerald-400 text-xl font-bold tabular-nums">{eur(claimondoGewinn)}</p>
             </div>
             <div className="text-center">
-              <p className="text-zinc-500 text-xs mb-1">Kanzlei (25%)</p>
+              <p className="text-gray-500 text-xs mb-1">Kanzlei (25%)</p>
               <p className="text-blue-400 text-xl font-bold tabular-nums">{eur(kanzleiGewinn)}</p>
             </div>
           </div>
@@ -48,7 +48,7 @@ function GewinnverteilungSection({
             <div className="bg-emerald-500" style={{ width: '75%' }} />
             <div className="bg-blue-500" style={{ width: '25%' }} />
           </div>
-          <div className="flex justify-between mt-1 text-[10px] text-zinc-600">
+          <div className="flex justify-between mt-1 text-[10px] text-gray-400">
             <span>Claimondo 75%</span>
             <span>Kanzlei 25%</span>
           </div>
@@ -87,60 +87,60 @@ function MarketingMaikSection({ monatsberichte }: { monatsberichte: MonatsBerich
   return (
     <div className="px-4 pb-8">
       <div className="max-w-5xl mx-auto">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">
+        <div className="bg-white border border-gray-200 rounded-2xl p-5">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
             Marketing (Maik)
           </h2>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div>
-              <p className="text-zinc-500 text-xs mb-1">CPA fix</p>
-              <p className="text-white text-lg font-bold tabular-nums">{eur(cpaFix)}</p>
+              <p className="text-gray-500 text-xs mb-1">CPA fix</p>
+              <p className="text-gray-900 text-lg font-bold tabular-nums">{eur(cpaFix)}</p>
             </div>
             <div>
-              <p className="text-zinc-500 text-xs mb-1">Google CPL</p>
-              <p className={`text-lg font-bold tabular-nums ${cpl > 0 ? 'text-amber-400' : 'text-zinc-600'}`}>
+              <p className="text-gray-500 text-xs mb-1">Google CPL</p>
+              <p className={`text-lg font-bold tabular-nums ${cpl > 0 ? 'text-amber-400' : 'text-gray-400'}`}>
                 {cpl > 0 ? eur(cpl) : 'Nicht erfasst'}
               </p>
-              <p className="text-zinc-600 text-[10px]">Manuell oder Google Ads API</p>
+              <p className="text-gray-400 text-[10px]">Manuell oder Google Ads API</p>
             </div>
             <div>
-              <p className="text-zinc-500 text-xs mb-1">Maik Marge/Fall</p>
-              <p className={`text-lg font-bold tabular-nums ${marge > 0 ? 'text-emerald-400' : 'text-zinc-600'}`}>
+              <p className="text-gray-500 text-xs mb-1">Maik Marge/Fall</p>
+              <p className={`text-lg font-bold tabular-nums ${marge > 0 ? 'text-emerald-400' : 'text-gray-400'}`}>
                 {cpl > 0 ? eur(marge) : '—'}
               </p>
             </div>
             <div>
-              <p className="text-zinc-500 text-xs mb-1">Maik Provision</p>
-              <p className={`text-lg font-bold tabular-nums ${provision > 0 ? 'text-emerald-400' : 'text-zinc-600'}`}>
+              <p className="text-gray-500 text-xs mb-1">Maik Provision</p>
+              <p className={`text-lg font-bold tabular-nums ${provision > 0 ? 'text-emerald-400' : 'text-gray-400'}`}>
                 {provision > 0 ? eur(provision) : '—'}
               </p>
-              <p className="text-zinc-600 text-[10px]">Auszahlung Mitte Folgemonat</p>
+              <p className="text-gray-400 text-[10px]">Auszahlung Mitte Folgemonat</p>
             </div>
           </div>
 
           {/* Monatliche CPL-Tabelle */}
           {monatsberichte.length > 0 && (
-            <div className="overflow-x-auto border-t border-zinc-800 pt-4">
+            <div className="overflow-x-auto border-t border-gray-200 pt-4">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b border-zinc-800">
-                    <th className="text-left px-3 py-2 text-zinc-500">Monat</th>
-                    <th className="text-right px-3 py-2 text-zinc-500">Google CPL</th>
-                    <th className="text-right px-3 py-2 text-zinc-500">Faelle</th>
-                    <th className="text-right px-3 py-2 text-zinc-500">Budget netto</th>
-                    <th className="text-right px-3 py-2 text-zinc-500">Maik Provision</th>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left px-3 py-2 text-gray-500">Monat</th>
+                    <th className="text-right px-3 py-2 text-gray-500">Google CPL</th>
+                    <th className="text-right px-3 py-2 text-gray-500">Faelle</th>
+                    <th className="text-right px-3 py-2 text-gray-500">Budget netto</th>
+                    <th className="text-right px-3 py-2 text-gray-500">Maik Provision</th>
                   </tr>
                 </thead>
                 <tbody>
                   {monatsberichte.slice(-6).map(mb => (
-                    <tr key={mb.id} className="border-b border-zinc-800/50">
-                      <td className="px-3 py-2 text-zinc-300">{mb.monat}/{mb.jahr}</td>
-                      <td className="px-3 py-2 text-right text-zinc-300 tabular-nums">
+                    <tr key={mb.id} className="border-b border-gray-200/50">
+                      <td className="px-3 py-2 text-gray-700">{mb.monat}/{mb.jahr}</td>
+                      <td className="px-3 py-2 text-right text-gray-700 tabular-nums">
                         {Number(mb.maik_google_cpl ?? 0) > 0 ? eur(Number(mb.maik_google_cpl)) : '—'}
                       </td>
-                      <td className="px-3 py-2 text-right text-zinc-300 tabular-nums">{mb.neue_faelle ?? 0}</td>
-                      <td className="px-3 py-2 text-right text-zinc-300 tabular-nums">
+                      <td className="px-3 py-2 text-right text-gray-700 tabular-nums">{mb.neue_faelle ?? 0}</td>
+                      <td className="px-3 py-2 text-right text-gray-700 tabular-nums">
                         {Number(mb.marketing_budget_netto ?? 0) > 0 ? eur(Number(mb.marketing_budget_netto)) : '—'}
                       </td>
                       <td className="px-3 py-2 text-right text-emerald-400 tabular-nums">
@@ -153,10 +153,10 @@ function MarketingMaikSection({ monatsberichte }: { monatsberichte: MonatsBerich
             </div>
           )}
 
-          <div className="mt-4 p-3 bg-zinc-800/50 rounded-xl">
-            <p className="text-zinc-500 text-xs">
+          <div className="mt-4 p-3 bg-gray-100/50 rounded-xl">
+            <p className="text-gray-500 text-xs">
               Google Ads CPL-Werte koennen manuell in der Datenbank erfasst werden.
-              API-Endpoint <code className="text-zinc-400">/api/google-ads/sync</code> ist vorbereitet.
+              API-Endpoint <code className="text-gray-500">/api/google-ads/sync</code> ist vorbereitet.
             </p>
           </div>
         </div>
@@ -171,28 +171,28 @@ function InvestitionProFallSection() {
   return (
     <div className="px-4 pb-8">
       <div className="max-w-5xl mx-auto">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">
+        <div className="bg-white border border-gray-200 rounded-2xl p-5">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
             Investition pro Fall
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 bg-zinc-800/50 rounded-xl text-center">
-              <p className="text-zinc-500 text-xs mb-2">Marketing-Investition / Fall</p>
-              <p className="text-white text-2xl font-bold">150,00 &euro;</p>
-              <p className="text-zinc-600 text-xs mt-1">CPA fix an Maik</p>
+            <div className="p-4 bg-gray-100/50 rounded-xl text-center">
+              <p className="text-gray-500 text-xs mb-2">Marketing-Investition / Fall</p>
+              <p className="text-gray-900 text-2xl font-bold">150,00 &euro;</p>
+              <p className="text-gray-400 text-xs mt-1">CPA fix an Maik</p>
             </div>
-            <div className="p-4 bg-zinc-800/50 rounded-xl text-center">
-              <p className="text-zinc-500 text-xs mb-2">Ausloeser</p>
+            <div className="p-4 bg-gray-100/50 rounded-xl text-center">
+              <p className="text-gray-500 text-xs mb-2">Ausloeser</p>
               <p className="text-amber-400 text-sm font-medium">Unterschriebene SA</p>
-              <p className="text-zinc-600 text-xs mt-1">Nur Faelle mit Schadensanzeige</p>
+              <p className="text-gray-400 text-xs mt-1">Nur Faelle mit Schadensanzeige</p>
             </div>
-            <div className="p-4 bg-zinc-800/50 rounded-xl text-center">
-              <p className="text-zinc-500 text-xs mb-2">Maik-Provision</p>
+            <div className="p-4 bg-gray-100/50 rounded-xl text-center">
+              <p className="text-gray-500 text-xs mb-2">Maik-Provision</p>
               <p className="text-emerald-400 text-sm font-medium">CPA (150&euro;) - Google CPL</p>
-              <p className="text-zinc-600 text-xs mt-1">Differenz = seine Marge</p>
+              <p className="text-gray-400 text-xs mt-1">Differenz = seine Marge</p>
             </div>
           </div>
-          <div className="mt-4 p-3 bg-blue-950/30 border border-blue-800/30 rounded-xl">
+          <div className="mt-4 p-3 bg-blue-50/30 border border-blue-800/30 rounded-xl">
             <p className="text-blue-300 text-xs">
               Lexoffice-Abgleich vorbereitet: <code className="text-blue-400">/api/lexoffice/sync</code> —
               Zahlungseingaenge werden spaeter automatisch abgeglichen.
@@ -217,50 +217,50 @@ function GutachterAbrechnungen({ svRows, gutachterAnzahlungenGesamt }: {
   return (
     <div className="px-4 pb-8">
       <div className="max-w-5xl mx-auto">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
-          <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">
+        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
               Gutachter-Zahlungen
             </h2>
-            <span className="text-xs text-zinc-500">
+            <span className="text-xs text-gray-500">
               Anzahlungen gesamt: <span className="text-emerald-400 font-medium">{eur(gutachterAnzahlungenGesamt)}</span>
             </span>
           </div>
 
           {svRows.length === 0 ? (
             <div className="p-12 text-center">
-              <p className="text-zinc-600 text-sm">Keine aktiven Gutachter.</p>
+              <p className="text-gray-400 text-sm">Keine aktiven Gutachter.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-800">
-                    <th className="text-left px-5 py-3 text-zinc-500 font-medium">Gutachter</th>
-                    <th className="text-left px-5 py-3 text-zinc-500 font-medium">Paket</th>
-                    <th className="text-right px-5 py-3 text-zinc-500 font-medium">Guthaben</th>
-                    <th className="text-center px-5 py-3 text-zinc-500 font-medium">Faelle</th>
-                    <th className="text-right px-5 py-3 text-zinc-500 font-medium">Leadkosten Monat</th>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left px-5 py-3 text-gray-500 font-medium">Gutachter</th>
+                    <th className="text-left px-5 py-3 text-gray-500 font-medium">Paket</th>
+                    <th className="text-right px-5 py-3 text-gray-500 font-medium">Guthaben</th>
+                    <th className="text-center px-5 py-3 text-gray-500 font-medium">Faelle</th>
+                    <th className="text-right px-5 py-3 text-gray-500 font-medium">Leadkosten Monat</th>
                   </tr>
                 </thead>
                 <tbody>
                   {svRows.map(sv => {
                     const guthabenColor = sv.guthaben <= 0 ? 'text-red-400' : sv.guthaben < 500 ? 'text-amber-400' : 'text-emerald-400'
                     return (
-                      <tr key={sv.id} className="border-b border-zinc-800/50 hover:bg-zinc-800/40 transition-colors">
-                        <td className="px-5 py-3 text-zinc-200">{sv.name}</td>
+                      <tr key={sv.id} className="border-b border-gray-200/50 hover:bg-gray-100/40 transition-colors">
+                        <td className="px-5 py-3 text-gray-800">{sv.name}</td>
                         <td className="px-5 py-3">
-                          <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-zinc-800 text-zinc-300">
+                          <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700">
                             {sv.paket}
                           </span>
                         </td>
                         <td className={`px-5 py-3 text-right tabular-nums font-medium ${guthabenColor}`}>
                           {eur(sv.guthaben)}
                         </td>
-                        <td className="px-5 py-3 text-center text-zinc-300 tabular-nums">
+                        <td className="px-5 py-3 text-center text-gray-700 tabular-nums">
                           {sv.faelleGenutzt} / {sv.faelleGesamt}
                         </td>
-                        <td className="px-5 py-3 text-right tabular-nums text-zinc-300">
+                        <td className="px-5 py-3 text-right tabular-nums text-gray-700">
                           {sv.leadkostenMonat > 0 ? eur(sv.leadkostenMonat) : '—'}
                         </td>
                       </tr>

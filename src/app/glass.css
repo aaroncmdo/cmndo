@@ -1,77 +1,49 @@
-/* Glass Design System - iOS Glassmorphism Premium */
+/* Light Design System - Clean & Modern */
 
 /* Background */
 .glass-bg {
-  background: #080c18;
+  background: #f8f9fb;
 }
 
-/* Ambient light overlays - add to body or root layout */
+/* Ambient light overlays - invisible in light theme */
 .glass-ambient {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
+  display: none;
 }
-.glass-ambient::before {
-  content: '';
-  position: absolute;
-  top: -20%;
-  right: -10%;
-  width: 60%;
-  height: 60%;
-  background: radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%);
-}
-.glass-ambient::after {
-  content: '';
-  position: absolute;
-  bottom: -10%;
-  left: -10%;
-  width: 50%;
-  height: 50%;
-  background: radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%);
-}
-
-/* Indigo middle glow - extra element via box-shadow on ambient */
 .glass-ambient-indigo {
-  position: fixed;
-  top: 30%;
-  left: 30%;
-  width: 40%;
-  height: 40%;
-  background: radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
+  display: none;
 }
 
 /* Card styles */
 .glass-card {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.05);
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 18px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
 .glass-card-hover:hover {
-  border-color: rgba(255,255,255,0.1);
-  transition: border-color 0.2s ease;
+  border-color: #d1d5db;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
 }
 
-/* KPI Card glows */
-.glass-glow-blue { background: radial-gradient(ellipse at top right, rgba(59,130,246,0.1) 0%, transparent 60%), rgba(255,255,255,0.03); }
-.glass-glow-green { background: radial-gradient(ellipse at top right, rgba(16,185,129,0.1) 0%, transparent 60%), rgba(255,255,255,0.03); }
-.glass-glow-indigo { background: radial-gradient(ellipse at top right, rgba(99,102,241,0.1) 0%, transparent 60%), rgba(255,255,255,0.03); }
-.glass-glow-rose { background: radial-gradient(ellipse at top right, rgba(244,63,94,0.1) 0%, transparent 60%), rgba(255,255,255,0.03); }
-.glass-glow-amber { background: radial-gradient(ellipse at top right, rgba(245,158,11,0.1) 0%, transparent 60%), rgba(255,255,255,0.03); }
+/* KPI Card accents */
+.glass-glow-blue { background: linear-gradient(135deg, rgba(59,130,246,0.06) 0%, #ffffff 60%); border: 1px solid #e5e7eb; }
+.glass-glow-green { background: linear-gradient(135deg, rgba(16,185,129,0.06) 0%, #ffffff 60%); border: 1px solid #e5e7eb; }
+.glass-glow-indigo { background: linear-gradient(135deg, rgba(99,102,241,0.06) 0%, #ffffff 60%); border: 1px solid #e5e7eb; }
+.glass-glow-rose { background: linear-gradient(135deg, rgba(244,63,94,0.06) 0%, #ffffff 60%); border: 1px solid #e5e7eb; }
+.glass-glow-amber { background: linear-gradient(135deg, rgba(245,158,11,0.06) 0%, #ffffff 60%); border: 1px solid #e5e7eb; }
 
 /* Sidebar */
 .glass-sidebar {
-  background: rgba(255,255,255,0.02);
-  border-right: 1px solid rgba(255,255,255,0.05);
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
 }
 
 /* Active nav item */
 .glass-nav-active {
-  background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(99,102,241,0.1));
-  border: 1px solid rgba(59,130,246,0.15);
-  color: #93bbfc;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
 }
 
 /* Buttons */
@@ -89,8 +61,8 @@
 
 /* Inputs */
 .glass-input {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: #ffffff;
+  border: 1px solid #d1d5db;
   border-radius: 12px;
   transition: all 0.2s ease;
 }
@@ -105,13 +77,13 @@
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: rgba(255,255,255,0.3);
+  color: #9ca3af;
 }
 .glass-table tr {
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid #f3f4f6;
 }
 .glass-table tr:hover {
-  background: rgba(255,255,255,0.02);
+  background: #f9fafb;
 }
 
 /* Labels */
@@ -119,51 +91,52 @@
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(255,255,255,0.3);
+  color: #9ca3af;
 }
 
 /* Badges */
-.glass-badge-blue { background: rgba(59,130,246,0.12); color: #93bbfc; }
-.glass-badge-green { background: rgba(16,185,129,0.12); color: #6ee7b7; }
-.glass-badge-amber { background: rgba(245,158,11,0.12); color: #fcd34d; }
-.glass-badge-red { background: rgba(244,63,94,0.12); color: #fda4af; }
-.glass-badge-indigo { background: rgba(99,102,241,0.12); color: #a5b4fc; }
-.glass-badge-cyan { background: rgba(6,182,212,0.12); color: #67e8f9; }
+.glass-badge-blue { background: #eff6ff; color: #1d4ed8; }
+.glass-badge-green { background: #ecfdf5; color: #059669; }
+.glass-badge-amber { background: #fffbeb; color: #d97706; }
+.glass-badge-red { background: #fef2f2; color: #dc2626; }
+.glass-badge-indigo { background: #eef2ff; color: #4338ca; }
+.glass-badge-cyan { background: #ecfeff; color: #0891b2; }
 
 /* Task priority indicators */
 .glass-task-critical {
-  background: rgba(244,63,94,0.05);
-  border: 1px solid rgba(244,63,94,0.1);
+  background: #fef2f2;
+  border: 1px solid #fecaca;
 }
 .glass-task-urgent {
-  background: rgba(245,158,11,0.04);
-  border: 1px solid rgba(245,158,11,0.08);
+  background: #fffbeb;
+  border: 1px solid #fde68a;
 }
 
 /* Scrollbars */
 .glass-scroll::-webkit-scrollbar { width: 6px; }
 .glass-scroll::-webkit-scrollbar-track { background: transparent; }
-.glass-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
-.glass-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+.glass-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
+.glass-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.25); }
 
 /* Pipeline card with status border */
 .glass-pipeline-card {
   border-radius: 14px;
   border-left: 3px solid;
-  background: rgba(255,255,255,0.03);
-  border-top: 1px solid rgba(255,255,255,0.05);
-  border-right: 1px solid rgba(255,255,255,0.05);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 
 /* Notification bell */
 .glass-bell {
   border-radius: 12px;
-  background: rgba(255,255,255,0.04);
+  background: #f3f4f6;
   transition: background 0.2s ease;
 }
 .glass-bell:hover {
-  background: rgba(255,255,255,0.08);
+  background: #e5e7eb;
 }
 
 /* Mobile bottom nav */
@@ -174,10 +147,8 @@
     left: 0;
     right: 0;
     z-index: 50;
-    background: rgba(8,12,24,0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255,255,255,0.05);
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
     padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
     display: flex;
     justify-content: space-around;
@@ -192,7 +163,7 @@
     align-items: center;
     justify-content: center;
     gap: 2px;
-    color: rgba(255,255,255,0.4);
+    color: #9ca3af;
     font-size: 9px;
     letter-spacing: 0.02em;
     border-radius: 10px;
@@ -201,10 +172,9 @@
   }
   .glass-bottom-nav a.active,
   .glass-bottom-nav button.active {
-    color: #93bbfc;
-    background: rgba(59,130,246,0.1);
+    color: #2563eb;
+    background: #eff6ff;
   }
-  /* Add padding to main content so bottom nav doesn't overlap */
   .glass-mobile-padded {
     padding-bottom: calc(72px + env(safe-area-inset-bottom));
   }
@@ -234,7 +204,6 @@
 
 /* ─── Kunde Portal Animations ─── */
 
-/* Staggered card fade-in */
 @keyframes fadeSlideUp {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
@@ -248,7 +217,6 @@
 .kunde-animate-4 { animation-delay: 240ms; }
 .kunde-animate-5 { animation-delay: 320ms; }
 
-/* Progress bar animation */
 @keyframes progressGrow {
   from { width: 0; }
 }
@@ -256,7 +224,6 @@
   animation: progressGrow 0.8s ease-out 0.3s both;
 }
 
-/* Pulsing dot for active step */
 @keyframes kundeStepPulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.6); }
   50% { box-shadow: 0 0 0 6px rgba(59,130,246,0); }
@@ -265,7 +232,6 @@
   animation: kundeStepPulse 2s ease-in-out infinite;
 }
 
-/* Bottom sheet */
 @keyframes slideUp {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
@@ -281,9 +247,9 @@
   color: #fff;
 }
 .kunde-chat-other {
-  background: rgba(255,255,255,0.06);
+  background: #f3f4f6;
   border-radius: 18px 18px 18px 4px;
-  color: rgba(255,255,255,0.9);
+  color: #111827;
 }
 
 /* FAB button */

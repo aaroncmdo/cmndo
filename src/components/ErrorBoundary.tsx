@@ -29,11 +29,11 @@ export default class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="flex items-center justify-center min-h-[400px] p-8">
           <div className="text-center max-w-sm">
-            <div className="w-14 h-14 rounded-2xl bg-red-950 flex items-center justify-center mx-auto mb-4">
+            <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-4">
               <AlertTriangleIcon className="w-7 h-7 text-red-400" />
             </div>
-            <h2 className="text-white font-semibold text-lg mb-2">Etwas ist schiefgelaufen</h2>
-            <p className="text-zinc-500 text-sm mb-4">
+            <h2 className="text-gray-900 font-semibold text-lg mb-2">Etwas ist schiefgelaufen</h2>
+            <p className="text-gray-500 text-sm mb-4">
               {this.state.error?.message || 'Ein unerwarteter Fehler ist aufgetreten.'}
             </p>
             <button
@@ -41,7 +41,7 @@ export default class ErrorBoundary extends Component<Props, State> {
                 this.setState({ hasError: false, error: null })
                 window.location.reload()
               }}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-900 transition-colors"
               style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}
             >
               <RefreshCwIcon className="w-4 h-4" />

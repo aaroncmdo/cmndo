@@ -470,13 +470,13 @@ export default function FlowWizardKfz({ token, lead }: { token: string; lead: Le
 
   if (done) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-5">
-        <div className="max-w-lg w-full bg-zinc-900 border border-zinc-800 rounded-3xl px-6 py-10 shadow-xl shadow-black/20 text-center">
+      <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center px-5">
+        <div className="max-w-lg w-full bg-white border border-gray-200 rounded-3xl px-6 py-10 shadow-xl shadow-black/20 text-center">
           <div className="w-16 h-16 rounded-full bg-green-500/10 border-2 border-green-500 flex items-center justify-center mx-auto mb-6">
             <CheckIcon className="w-8 h-8 text-green-400" />
           </div>
-          <h1 className="text-2xl font-semibold text-white mb-3">Vielen Dank!</h1>
-          <p className="text-zinc-400 text-sm mb-8">
+          <h1 className="text-2xl font-semibold text-gray-900 mb-3">Vielen Dank!</h1>
+          <p className="text-gray-500 text-sm mb-8">
             Ihre Unterlagen wurden erfolgreich uebermittelt. Falls noch Dokumente fehlen, koennen Sie diese ueber Ihr Kundenportal nachreichen.
           </p>
           {portalUrl && (
@@ -496,9 +496,9 @@ export default function FlowWizardKfz({ token, lead }: { token: string; lead: Le
   // ─── Shell ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col">
+    <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
       {/* Progress bar */}
-      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-zinc-800">
+      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-gray-100">
         <div
           className="h-full bg-blue-500 transition-all duration-500 ease-out"
           style={{ width: `${progress}%` }}
@@ -506,14 +506,14 @@ export default function FlowWizardKfz({ token, lead }: { token: string; lead: Le
       </div>
 
       {/* Step counter */}
-      <div className="fixed top-4 right-4 z-10 text-xs text-zinc-500 tabular-nums">
+      <div className="fixed top-4 right-4 z-10 text-xs text-gray-500 tabular-nums">
         {stepIndex + 1}&thinsp;/&thinsp;{totalSteps}
       </div>
 
       {/* Content */}
       <div className="flex-1 flex flex-col px-5 pt-10 pb-8 max-w-lg mx-auto w-full">
         <div className="flex-1 flex flex-col justify-center py-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl px-6 py-7 shadow-xl shadow-black/20">
+          <div className="bg-white border border-gray-200 rounded-3xl px-6 py-7 shadow-xl shadow-black/20">
             {currentStep === 'willkommen' && (
               <PageWillkommen lead={lead} />
             )}
@@ -562,7 +562,7 @@ export default function FlowWizardKfz({ token, lead }: { token: string; lead: Le
           {stepIndex > 0 && (
             <button
               onClick={() => setStepIndex((s) => s - 1)}
-              className="w-full py-3 text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+              className="w-full py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors"
             >
               Zurueck
             </button>
@@ -579,8 +579,8 @@ function StepHeader({ question, sub, icon }: { question: string; sub?: string; i
   return (
     <div className="mb-7">
       {icon && <div className="mb-3">{icon}</div>}
-      <h1 className="text-2xl font-semibold text-white leading-snug">{question}</h1>
-      {sub && <p className="mt-2 text-sm text-zinc-400">{sub}</p>}
+      <h1 className="text-2xl font-semibold text-gray-900 leading-snug">{question}</h1>
+      {sub && <p className="mt-2 text-sm text-gray-500">{sub}</p>}
     </div>
   )
 }
@@ -604,7 +604,7 @@ function FileUploadField({
 
   return (
     <div>
-      <label className="block text-xs text-zinc-500 uppercase tracking-wider mb-2">
+      <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">
         {label} {required && <span className="text-red-400">*</span>}
       </label>
       {file ? (
@@ -613,7 +613,7 @@ function FileUploadField({
           <span className="text-sm text-green-300 truncate flex-1">{file.name}</span>
           <button
             onClick={() => { onFile(null); if (ref.current) ref.current.value = '' }}
-            className="text-xs text-zinc-500 hover:text-zinc-300 flex-shrink-0"
+            className="text-xs text-gray-500 hover:text-gray-700 flex-shrink-0"
           >
             Entfernen
           </button>
@@ -621,10 +621,10 @@ function FileUploadField({
       ) : (
         <button
           onClick={() => ref.current?.click()}
-          className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl border-2 border-dashed border-zinc-700 bg-zinc-800/50 hover:border-zinc-600 transition-all active:scale-[0.98]"
+          className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100/50 hover:border-gray-300 transition-all active:scale-[0.98]"
         >
-          <UploadIcon className="w-5 h-5 text-zinc-500" />
-          <span className="text-sm text-zinc-300">Datei auswaehlen</span>
+          <UploadIcon className="w-5 h-5 text-gray-500" />
+          <span className="text-sm text-gray-700">Datei auswaehlen</span>
         </button>
       )}
       <input
@@ -659,15 +659,15 @@ function InfoBox({ children, variant = 'info' }: { children: React.ReactNode; va
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-0.5 px-4 py-3 rounded-xl bg-zinc-800/50 border border-zinc-700/50">
-      <span className="text-xs text-zinc-500">{label}</span>
-      <span className="text-sm text-zinc-200 break-words">{value}</span>
+    <div className="flex flex-col gap-0.5 px-4 py-3 rounded-xl bg-gray-100/50 border border-gray-300/50">
+      <span className="text-xs text-gray-500">{label}</span>
+      <span className="text-sm text-gray-800 break-words">{value}</span>
     </div>
   )
 }
 
 const inputCls =
-  'w-full px-5 py-4 rounded-2xl border border-zinc-700 bg-zinc-800 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 transition-colors'
+  'w-full px-5 py-4 rounded-2xl border border-gray-300 bg-gray-100 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 transition-colors'
 
 // ─── SEITE 1: Willkommen ──────────────────────────────────────────────────────
 
@@ -699,10 +699,10 @@ function PageWillkommen({ lead }: { lead: LeadData }) {
       />
 
       {(fahrzeug || lead.kennzeichen) && (
-        <div className="mb-5 px-4 py-3 rounded-2xl border border-zinc-700/50 bg-zinc-800/30">
-          <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Ihr Fahrzeug</p>
-          {fahrzeug && <p className="text-sm text-zinc-200">{fahrzeug}</p>}
-          {lead.kennzeichen && <p className="text-sm text-zinc-400">{lead.kennzeichen}</p>}
+        <div className="mb-5 px-4 py-3 rounded-2xl border border-gray-300/50 bg-gray-100/30">
+          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Ihr Fahrzeug</p>
+          {fahrzeug && <p className="text-sm text-gray-800">{fahrzeug}</p>}
+          {lead.kennzeichen && <p className="text-sm text-gray-500">{lead.kennzeichen}</p>}
         </div>
       )}
 
@@ -717,13 +717,13 @@ function PageWillkommen({ lead }: { lead: LeadData }) {
       )}
 
       <div className="space-y-1">
-        <p className="text-xs text-zinc-500 uppercase tracking-wider mb-3">Das wird benoetigt:</p>
+        <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Das wird benoetigt:</p>
         {checklist.map((item, i) => (
           <div key={i} className="flex items-center gap-3 px-4 py-2.5 rounded-xl">
-            <div className="w-5 h-5 rounded border border-zinc-600 flex items-center justify-center flex-shrink-0">
-              <FileTextIcon className="w-3 h-3 text-zinc-500" />
+            <div className="w-5 h-5 rounded border border-gray-300 flex items-center justify-center flex-shrink-0">
+              <FileTextIcon className="w-3 h-3 text-gray-500" />
             </div>
-            <span className="text-sm text-zinc-300">{item}</span>
+            <span className="text-sm text-gray-700">{item}</span>
           </div>
         ))}
       </div>
@@ -779,9 +779,9 @@ function PageBasis({
         />
 
         <div>
-          <label className="block text-xs text-zinc-500 uppercase tracking-wider mb-2">
+          <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">
             Schadensfotos <span className="text-red-400">*</span>
-            <span className="text-zinc-600 normal-case ml-1">(min. 4 Perspektiven)</span>
+            <span className="text-gray-400 normal-case ml-1">(min. 4 Perspektiven)</span>
           </label>
           <div
             onDrop={handleDrop}
@@ -791,13 +791,13 @@ function PageBasis({
             className={`flex flex-col items-center justify-center gap-3 px-6 py-8 rounded-2xl border-2 border-dashed cursor-pointer transition-all ${
               dragOver
                 ? 'border-blue-500 bg-blue-500/5'
-                : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
+                : 'border-gray-300 bg-gray-100/50 hover:border-gray-300'
             }`}
           >
-            <CameraIcon className="w-8 h-8 text-zinc-500" />
+            <CameraIcon className="w-8 h-8 text-gray-500" />
             <div className="text-center">
-              <p className="text-sm text-zinc-300">Fotos aufnehmen oder hochladen</p>
-              <p className="text-xs text-zinc-500 mt-1">Vorne, hinten, links, rechts + Detailaufnahmen</p>
+              <p className="text-sm text-gray-700">Fotos aufnehmen oder hochladen</p>
+              <p className="text-xs text-gray-500 mt-1">Vorne, hinten, links, rechts + Detailaufnahmen</p>
             </div>
             <input
               ref={fileInputRef}
@@ -828,7 +828,7 @@ function PageBasis({
                         e.stopPropagation()
                         setState('schadensfotos', state.schadensfotos.filter((_, idx) => idx !== i))
                       }}
-                      className="absolute top-1 right-1 w-6 h-6 rounded-full bg-zinc-900/90 text-zinc-300 shadow-sm flex items-center justify-center text-xs leading-none opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity"
+                      className="absolute top-1 right-1 w-6 h-6 rounded-full bg-white/90 text-gray-700 shadow-sm flex items-center justify-center text-xs leading-none opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity"
                     >
                       x
                     </button>
@@ -874,7 +874,7 @@ function PageSchadenfall({
         {(sf === 'SF-01' || sf === 'SF-02') && (
           <>
             <div>
-              <p className="text-xs text-zinc-500 uppercase tracking-wider mb-3">Unfallgegner</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Unfallgegner</p>
               <div className="space-y-3">
                 <input
                   value={state.gegner_name}
@@ -902,7 +902,7 @@ function PageSchadenfall({
         {/* SF-02: Zusaetzlich eigene Versicherung */}
         {sf === 'SF-02' && (
           <div>
-            <p className="text-xs text-zinc-500 uppercase tracking-wider mb-3">Ihre Versicherung</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Ihre Versicherung</p>
             <div className="space-y-3">
               <input
                 value={state.eigene_versicherung}
@@ -1061,7 +1061,7 @@ function PageKonstellation({
               required
             />
             <div>
-              <label className="block text-xs text-zinc-500 uppercase tracking-wider mb-2">
+              <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">
                 USt-IdNr <span className="text-red-400">*</span>
               </label>
               <input
@@ -1134,12 +1134,12 @@ function PageZusatz({
             <a
               href="/downloads/schmerzenstagebuch.pdf"
               target="_blank"
-              className="flex items-center gap-3 px-5 py-4 rounded-2xl border border-zinc-700 bg-zinc-800/50 hover:border-zinc-600 transition-all active:scale-[0.98]"
+              className="flex items-center gap-3 px-5 py-4 rounded-2xl border border-gray-300 bg-gray-100/50 hover:border-gray-300 transition-all active:scale-[0.98]"
             >
               <DownloadIcon className="w-5 h-5 text-blue-400" />
               <div>
-                <p className="text-sm text-zinc-200">Schmerzenstagebuch-Vorlage</p>
-                <p className="text-xs text-zinc-500">PDF herunterladen</p>
+                <p className="text-sm text-gray-800">Schmerzenstagebuch-Vorlage</p>
+                <p className="text-xs text-gray-500">PDF herunterladen</p>
               </div>
             </a>
           </div>
@@ -1153,14 +1153,14 @@ function PageZusatz({
             </InfoBox>
 
             <div>
-              <p className="text-xs text-zinc-500 uppercase tracking-wider mb-3">Haben Sie bereits einen Mietwagen?</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Haben Sie bereits einen Mietwagen?</p>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => setState('hat_mietwagen', true)}
                   className={`px-5 py-4 rounded-2xl border text-sm font-medium transition-all active:scale-[0.98] ${
                     state.hat_mietwagen === true
                       ? 'border-blue-500 bg-blue-500/10 text-blue-400 font-semibold'
-                      : 'border-zinc-700 bg-zinc-800/50 text-zinc-200 hover:border-zinc-600'
+                      : 'border-gray-300 bg-gray-100/50 text-gray-800 hover:border-gray-300'
                   }`}
                 >
                   Ja
@@ -1170,7 +1170,7 @@ function PageZusatz({
                   className={`px-5 py-4 rounded-2xl border text-sm font-medium transition-all active:scale-[0.98] ${
                     state.hat_mietwagen === false
                       ? 'border-blue-500 bg-blue-500/10 text-blue-400 font-semibold'
-                      : 'border-zinc-700 bg-zinc-800/50 text-zinc-200 hover:border-zinc-600'
+                      : 'border-gray-300 bg-gray-100/50 text-gray-800 hover:border-gray-300'
                   }`}
                 >
                   Nein
@@ -1252,7 +1252,7 @@ function PageZusammenfassung({ lead, state }: { lead: LeadData; state: FlowState
         {/* Uploaded */}
         {uploadedDocs.length > 0 && (
           <div>
-            <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2">Hochgeladen</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Hochgeladen</p>
             <div className="space-y-1.5">
               {uploadedDocs.map((d) => (
                 <div key={d.typ} className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-green-500/5 border border-green-800/30">
@@ -1267,13 +1267,13 @@ function PageZusammenfassung({ lead, state }: { lead: LeadData; state: FlowState
         {/* Missing pflicht */}
         {missingDocs.length > 0 && (
           <div>
-            <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2">Noch ausstehend (Pflicht)</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Noch ausstehend (Pflicht)</p>
             <div className="space-y-1.5">
               {missingDocs.map((d) => (
                 <div key={d.typ} className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-amber-500/5 border border-amber-800/30">
                   <AlertTriangleIcon className="w-4 h-4 text-amber-400 flex-shrink-0" />
                   <span className="text-sm text-amber-300">{LABELS[d.typ] ?? d.typ}</span>
-                  <span className="text-xs text-zinc-500 ml-auto">im Portal nachreichen</span>
+                  <span className="text-xs text-gray-500 ml-auto">im Portal nachreichen</span>
                 </div>
               ))}
             </div>
@@ -1283,12 +1283,12 @@ function PageZusammenfassung({ lead, state }: { lead: LeadData; state: FlowState
         {/* Optional missing */}
         {optionalMissing.length > 0 && (
           <div>
-            <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2">Optional (nicht hochgeladen)</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Optional (nicht hochgeladen)</p>
             <div className="space-y-1.5">
               {optionalMissing.map((d) => (
-                <div key={d.typ} className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-zinc-800/50 border border-zinc-700/50">
-                  <div className="w-4 h-4 rounded border border-zinc-600 flex-shrink-0" />
-                  <span className="text-sm text-zinc-400">{LABELS[d.typ] ?? d.typ}</span>
+                <div key={d.typ} className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-gray-100/50 border border-gray-300/50">
+                  <div className="w-4 h-4 rounded border border-gray-300 flex-shrink-0" />
+                  <span className="text-sm text-gray-500">{LABELS[d.typ] ?? d.typ}</span>
                 </div>
               ))}
             </div>

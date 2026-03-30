@@ -29,30 +29,25 @@ export default function KundeShell({
     window.location.href = '/login'
   }
 
-  // Check if the current path is a specific fall detail (keep bottom nav visible)
   function isActive(href: string) {
     if (href === '/kunde') return pathname === '/kunde' || pathname?.startsWith('/kunde/fall/')
     return pathname?.startsWith(href)
   }
 
   return (
-    <div className="min-h-screen glass-bg flex flex-col relative">
-      {/* Ambient overlays */}
-      <div className="glass-ambient" aria-hidden="true" />
-      <div className="glass-ambient-indigo" aria-hidden="true" />
-
+    <div className="min-h-screen bg-[#f8f9fb] flex flex-col relative">
       {/* Header */}
-      <header className="relative z-10 flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+      <header className="relative z-10 flex items-center justify-between px-5 py-3 bg-white border-b border-gray-200">
         <Link href="/kunde">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}>
               <span className="text-white text-xs font-bold">C</span>
             </div>
-            <span className="text-white font-semibold text-base tracking-tight">Claimondo</span>
+            <span className="text-gray-900 font-semibold text-base tracking-tight">Claimondo</span>
           </div>
         </Link>
-        <button className="relative p-2.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)' }}>
-          <BellIcon className="w-5 h-5" style={{ color: 'rgba(255,255,255,0.4)' }} />
+        <button className="relative p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors">
+          <BellIcon className="w-5 h-5 text-gray-400" />
         </button>
       </header>
 
@@ -62,12 +57,8 @@ export default function KundeShell({
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center"
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center bg-white border-t border-gray-200"
         style={{
-          background: 'rgba(8,12,24,0.95)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
           paddingTop: '8px',
           paddingBottom: 'calc(8px + env(safe-area-inset-bottom))',
         }}
@@ -78,8 +69,9 @@ export default function KundeShell({
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center justify-center gap-0.5 min-w-[48px] min-h-[48px] px-3 py-1 rounded-xl transition-all"
-              style={active ? { color: '#93bbfc', background: 'rgba(59,130,246,0.1)' } : { color: 'rgba(255,255,255,0.35)' }}
+              className={`flex flex-col items-center justify-center gap-0.5 min-w-[48px] min-h-[48px] px-3 py-1 rounded-xl transition-all ${
+                active ? 'text-blue-600 bg-blue-50' : 'text-gray-400'
+              }`}
             >
               <item.icon className="w-5 h-5" />
               <span className="text-[10px] font-medium">{item.label}</span>

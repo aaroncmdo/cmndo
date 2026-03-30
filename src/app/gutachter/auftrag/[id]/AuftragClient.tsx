@@ -111,17 +111,17 @@ function fmtCurrency(val: number | null) {
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex gap-2 py-1.5 border-b border-zinc-800/50 last:border-0">
-      <span className="text-zinc-500 text-sm w-36 shrink-0">{label}</span>
-      <span className="text-zinc-200 text-sm">{value || '—'}</span>
+    <div className="flex gap-2 py-1.5 border-b border-gray-200/50 last:border-0">
+      <span className="text-gray-500 text-sm w-36 shrink-0">{label}</span>
+      <span className="text-gray-800 text-sm">{value || '—'}</span>
     </div>
   )
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
-      <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">{title}</h3>
+    <div className="bg-white rounded-2xl p-5 border border-gray-200">
+      <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">{title}</h3>
       {children}
     </div>
   )
@@ -176,21 +176,21 @@ export default function AuftragClient({
           <div>
             <a
               href="/gutachter/auftraege"
-              className="text-zinc-500 hover:text-zinc-300 text-sm transition-colors"
+              className="text-gray-500 hover:text-gray-700 text-sm transition-colors"
             >
               ← Alle Aufträge
             </a>
-            <h1 className="text-xl font-semibold text-white mt-1">
+            <h1 className="text-xl font-semibold text-gray-900 mt-1">
               Auftrag{fall.fall_nummer ? ` · ${fall.fall_nummer}` : ''}
             </h1>
-            <p className="text-zinc-500 text-sm mt-0.5">
+            <p className="text-gray-500 text-sm mt-0.5">
               {lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || lead.email : '—'}
             </p>
           </div>
           <span className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap mt-1 ${
             gutachtenAlreadySubmitted
-              ? 'bg-green-950 text-green-300'
-              : 'bg-blue-950 text-blue-300'
+              ? 'bg-green-50 text-green-300'
+              : 'bg-blue-50 text-blue-300'
           }`}>
             {STATUS_LABEL[fall.status] ?? fall.status}
           </span>
@@ -222,7 +222,7 @@ export default function AuftragClient({
             <InfoRow
               label="Adresse"
               value={
-                <span className="font-medium text-white">
+                <span className="font-medium text-gray-900">
                   {[fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') || '—'}
                 </span>
               }
@@ -239,7 +239,7 @@ export default function AuftragClient({
           {/* Schadensbeschreibung */}
           {fall.schadens_beschreibung && (
             <Section title="Schadensbeschreibung">
-              <p className="text-zinc-300 text-sm whitespace-pre-wrap leading-relaxed">
+              <p className="text-gray-700 text-sm whitespace-pre-wrap leading-relaxed">
                 {fall.schadens_beschreibung}
               </p>
             </Section>
@@ -249,21 +249,21 @@ export default function AuftragClient({
           {parteien.length > 0 && (
             <Section title="Beteiligte Parteien">
               {parteien.map(p => (
-                <div key={p.id} className="py-2 border-b border-zinc-800/50 last:border-0">
+                <div key={p.id} className="py-2 border-b border-gray-200/50 last:border-0">
                   <div className="flex gap-2 items-baseline">
-                    <span className="text-xs text-zinc-500 uppercase tracking-wider w-24 shrink-0">
+                    <span className="text-xs text-gray-500 uppercase tracking-wider w-24 shrink-0">
                       {p.rolle === 'geschaedigter' ? 'Geschädigter' : 'Schädiger'}
                     </span>
-                    <span className="text-zinc-200 text-sm">{p.name}</span>
+                    <span className="text-gray-800 text-sm">{p.name}</span>
                   </div>
                   {(p.telefon || p.email) && (
-                    <div className="flex gap-4 mt-0.5 ml-26 text-xs text-zinc-500">
+                    <div className="flex gap-4 mt-0.5 ml-26 text-xs text-gray-500">
                       {p.telefon && <span>Tel: {p.telefon}</span>}
                       {p.email && <span>{p.email}</span>}
                     </div>
                   )}
                   {p.versicherung_name && (
-                    <div className="flex gap-2 mt-0.5 ml-26 text-xs text-zinc-500">
+                    <div className="flex gap-2 mt-0.5 ml-26 text-xs text-gray-500">
                       <span>Versicherung: {p.versicherung_name}</span>
                       {p.versicherung_nr && <span>Nr. {p.versicherung_nr}</span>}
                     </div>
@@ -278,24 +278,24 @@ export default function AuftragClient({
             <Section title={`Schadenspositionen (${schadenspositionen.length})`}>
               <div className="space-y-2">
                 {schadenspositionen.map(pos => (
-                  <div key={pos.id} className="flex items-start justify-between py-1.5 border-b border-zinc-800/50 last:border-0">
+                  <div key={pos.id} className="flex items-start justify-between py-1.5 border-b border-gray-200/50 last:border-0">
                     <div>
-                      <span className="text-zinc-300 text-sm">{pos.bezeichnung}</span>
-                      <span className="text-zinc-600 text-xs ml-2">
+                      <span className="text-gray-700 text-sm">{pos.bezeichnung}</span>
+                      <span className="text-gray-400 text-xs ml-2">
                         {KATEGORIE_LABEL[pos.kategorie] ?? pos.kategorie}
                       </span>
                       {pos.beschreibung && (
-                        <p className="text-zinc-500 text-xs mt-0.5">{pos.beschreibung}</p>
+                        <p className="text-gray-500 text-xs mt-0.5">{pos.beschreibung}</p>
                       )}
                     </div>
                     <div className="text-right shrink-0 ml-4">
                       {pos.geschaetzter_wert != null && (
-                        <span className="text-zinc-400 text-xs block">
+                        <span className="text-gray-500 text-xs block">
                           Wert: {fmtCurrency(pos.geschaetzter_wert)}
                         </span>
                       )}
                       {pos.reparaturkosten != null && (
-                        <span className="text-zinc-300 text-sm">{fmtCurrency(pos.reparaturkosten)}</span>
+                        <span className="text-gray-700 text-sm">{fmtCurrency(pos.reparaturkosten)}</span>
                       )}
                     </div>
                   </div>
@@ -314,7 +314,7 @@ export default function AuftragClient({
                     href={doc.datei_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block aspect-square rounded-xl overflow-hidden bg-zinc-800 hover:opacity-80 transition-opacity"
+                    className="block aspect-square rounded-xl overflow-hidden bg-gray-100 hover:opacity-80 transition-opacity"
                   >
                     <img
                       src={doc.datei_url}
@@ -330,14 +330,14 @@ export default function AuftragClient({
           {/* Vor-Ort-Checkliste */}
           {!gutachtenAlreadySubmitted && (
             <Section title="Checkliste Vor-Ort-Besichtigung">
-              <p className="text-zinc-500 text-xs mb-4">
+              <p className="text-gray-500 text-xs mb-4">
                 Was bei der Besichtigung noch eingeholt/geprüft werden muss:
               </p>
               <div className="space-y-2">
                 {VOR_ORT_CHECKLISTE.map(item => (
                   <label
                     key={item.id}
-                    className="flex items-start gap-3 p-3 rounded-xl border border-zinc-800 hover:border-zinc-700 cursor-pointer transition-colors"
+                    className="flex items-start gap-3 p-3 rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-colors"
                   >
                     <input
                       type="checkbox"
@@ -348,7 +348,7 @@ export default function AuftragClient({
                       className="mt-0.5 w-5 h-5 rounded accent-blue-600 shrink-0 cursor-pointer"
                     />
                     <span className={`text-sm leading-snug ${
-                      checks[item.id] ? 'text-zinc-500 line-through' : 'text-zinc-200'
+                      checks[item.id] ? 'text-gray-500 line-through' : 'text-gray-800'
                     }`}>
                       {item.label}
                     </span>
@@ -360,10 +360,10 @@ export default function AuftragClient({
 
           {/* Bericht hochladen */}
           {gutachtenAlreadySubmitted || success ? (
-            <div className="bg-zinc-900 rounded-2xl p-8 border border-green-900 text-center">
+            <div className="bg-white rounded-2xl p-8 border border-green-900 text-center">
               <div className="text-green-400 text-4xl mb-3">✓</div>
-              <h3 className="text-white font-semibold text-lg mb-1">Gutachten eingereicht</h3>
-              <p className="text-zinc-400 text-sm">
+              <h3 className="text-gray-900 font-semibold text-lg mb-1">Gutachten eingereicht</h3>
+              <p className="text-gray-500 text-sm">
                 Eingereicht am {fmt(fall.gutachten_eingegangen_am)} · Betrag: {fmtCurrency(fall.gutachten_betrag)}
               </p>
             </div>
@@ -372,7 +372,7 @@ export default function AuftragClient({
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* PDF Upload */}
                 <div>
-                  <label className="block text-zinc-400 text-sm mb-2">
+                  <label className="block text-gray-500 text-sm mb-2">
                     Gutachten (PDF)
                   </label>
                   <input
@@ -380,13 +380,13 @@ export default function AuftragClient({
                     name="datei"
                     accept="application/pdf"
                     required
-                    className="w-full text-sm text-zinc-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-zinc-800 file:text-zinc-200 hover:file:bg-zinc-700 file:cursor-pointer file:transition-colors"
+                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-800 hover:file:bg-zinc-700 file:cursor-pointer file:transition-colors"
                   />
                 </div>
 
                 {/* Betrag */}
                 <div>
-                  <label className="block text-zinc-400 text-sm mb-2">
+                  <label className="block text-gray-500 text-sm mb-2">
                     Schadenssumme (Gutachten-Betrag)
                   </label>
                   <div className="relative">
@@ -397,9 +397,9 @@ export default function AuftragClient({
                       min="0.01"
                       required
                       placeholder="0,00"
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 pr-12 text-white text-sm placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 pr-12 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
                     />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">EUR</span>
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">EUR</span>
                   </div>
                 </div>
 

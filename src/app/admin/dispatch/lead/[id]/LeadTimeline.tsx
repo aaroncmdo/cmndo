@@ -119,7 +119,7 @@ export default function LeadTimeline({
   for (const entry of timelineEntries) {
     events.push({
       icon: ClockIcon,
-      color: 'text-zinc-400',
+      color: 'text-gray-500',
       title: entry.titel,
       detail: entry.beschreibung ?? undefined,
       time: entry.created_at,
@@ -132,10 +132,10 @@ export default function LeadTimeline({
   if (events.length === 0) return null
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-5">
+    <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-5">
       <div className="flex items-center gap-2 mb-4">
-        <ClockIcon className="w-4 h-4 text-zinc-400" />
-        <h2 className="text-sm font-medium text-zinc-400">Timeline ({events.length})</h2>
+        <ClockIcon className="w-4 h-4 text-gray-500" />
+        <h2 className="text-sm font-medium text-gray-500">Timeline ({events.length})</h2>
       </div>
 
       <div className="space-y-0">
@@ -145,17 +145,17 @@ export default function LeadTimeline({
             <div key={i} className="flex gap-3 relative">
               {/* Line */}
               {i < events.length - 1 && (
-                <div className="absolute left-[13px] top-7 bottom-0 w-px bg-zinc-800" />
+                <div className="absolute left-[13px] top-7 bottom-0 w-px bg-gray-100" />
               )}
               {/* Icon */}
-              <div className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center shrink-0 z-10">
+              <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center shrink-0 z-10">
                 <Icon className={`w-3.5 h-3.5 ${ev.color}`} />
               </div>
               {/* Content */}
               <div className="pb-4 min-w-0">
-                <p className="text-sm text-zinc-200">{ev.title}</p>
-                {ev.detail && <p className="text-xs text-zinc-500 mt-0.5">{ev.detail}</p>}
-                <p className="text-[10px] text-zinc-600 mt-0.5">
+                <p className="text-sm text-gray-800">{ev.title}</p>
+                {ev.detail && <p className="text-xs text-gray-500 mt-0.5">{ev.detail}</p>}
+                <p className="text-[10px] text-gray-400 mt-0.5">
                   {new Date(ev.time).toLocaleString('de-DE', {
                     day: '2-digit', month: '2-digit', year: 'numeric',
                     hour: '2-digit', minute: '2-digit',

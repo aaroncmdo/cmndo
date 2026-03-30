@@ -118,19 +118,19 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
 
       {/* Slide-Over Panel */}
       <div className="fixed top-0 right-0 h-full w-full max-w-[400px] z-50 flex flex-col"
-        style={{ background: '#0d1225', borderLeft: '1px solid rgba(255,255,255,0.06)' }}>
+        style={{ background: '#ffffff', borderLeft: '1px solid #e5e7eb' }}>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-          <h2 className="text-white font-semibold">Neuer Gutachter</h2>
-          <button onClick={handleClose} className="p-1.5 text-zinc-400 hover:text-white"><XIcon className="w-5 h-5" /></button>
+        <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid #e5e7eb' }}>
+          <h2 className="text-gray-900 font-semibold">Neuer Gutachter</h2>
+          <button onClick={handleClose} className="p-1.5 text-gray-500 hover:text-gray-800"><XIcon className="w-5 h-5" /></button>
         </div>
 
         {/* Step indicator */}
         <div className="flex gap-1 px-5 py-3">
           {STEPS.map((s, i) => (
             <div key={s} className="flex-1">
-              <div className={`h-1 rounded-full ${i <= step ? 'bg-blue-500' : 'bg-zinc-800'}`} />
+              <div className={`h-1 rounded-full ${i <= step ? 'bg-blue-500' : 'bg-gray-100'}`} />
               <span className="text-[9px] mt-0.5 block" style={{ color: i === step ? '#93bbfc' : 'rgba(255,255,255,0.2)' }}>{s}</span>
             </div>
           ))}
@@ -143,10 +143,10 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
               <div className="w-14 h-14 bg-green-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <CheckIcon className="w-7 h-7 text-green-400" />
               </div>
-              <h3 className="text-white font-semibold text-lg mb-2">Gutachter angelegt</h3>
-              <p className="text-zinc-400 text-sm mb-1">{success.email}</p>
-              <p className="text-zinc-500 text-xs mb-4">Einmalpasswort: <code className="text-blue-400">{success.password}</code></p>
-              <button onClick={handleClose} className="px-6 py-2.5 rounded-xl text-sm font-medium text-white" style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}>
+              <h3 className="text-gray-900 font-semibold text-lg mb-2">Gutachter angelegt</h3>
+              <p className="text-gray-500 text-sm mb-1">{success.email}</p>
+              <p className="text-gray-500 text-xs mb-4">Einmalpasswort: <code className="text-blue-400">{success.password}</code></p>
+              <button onClick={handleClose} className="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-900" style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}>
                 Schließen
               </button>
             </div>
@@ -157,11 +157,11 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
                 <div className="space-y-3">
                   <p className="glass-label mb-3">Persönliche Daten</p>
                   <div className="grid grid-cols-2 gap-3">
-                    <div><label className="text-zinc-400 text-xs mb-1 block">Vorname *</label><input value={vorname} onChange={e => setVorname(e.target.value)} className="w-full glass-input px-3 py-2.5 text-sm text-white" /></div>
-                    <div><label className="text-zinc-400 text-xs mb-1 block">Nachname *</label><input value={nachname} onChange={e => setNachname(e.target.value)} className="w-full glass-input px-3 py-2.5 text-sm text-white" /></div>
+                    <div><label className="text-gray-500 text-xs mb-1 block">Vorname *</label><input value={vorname} onChange={e => setVorname(e.target.value)} className="w-full glass-input px-3 py-2.5 text-sm text-gray-900" /></div>
+                    <div><label className="text-gray-500 text-xs mb-1 block">Nachname *</label><input value={nachname} onChange={e => setNachname(e.target.value)} className="w-full glass-input px-3 py-2.5 text-sm text-gray-900" /></div>
                   </div>
-                  <div><label className="text-zinc-400 text-xs mb-1 block">E-Mail *</label><input value={email} onChange={e => setEmail(e.target.value)} type="email" className="w-full glass-input px-3 py-2.5 text-sm text-white" /></div>
-                  <div><label className="text-zinc-400 text-xs mb-1 block">Telefon *</label><input value={telefon} onChange={e => setTelefon(e.target.value)} type="tel" className="w-full glass-input px-3 py-2.5 text-sm text-white" /></div>
+                  <div><label className="text-gray-500 text-xs mb-1 block">E-Mail *</label><input value={email} onChange={e => setEmail(e.target.value)} type="email" className="w-full glass-input px-3 py-2.5 text-sm text-gray-900" /></div>
+                  <div><label className="text-gray-500 text-xs mb-1 block">Telefon *</label><input value={telefon} onChange={e => setTelefon(e.target.value)} type="tel" className="w-full glass-input px-3 py-2.5 text-sm text-gray-900" /></div>
                 </div>
               )}
 
@@ -171,13 +171,13 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
                   <p className="glass-label mb-3">Gutachter-Typ</p>
                   {TYPEN.map(t => (
                     <button key={t.key} onClick={() => setTyp(t.key)}
-                      className={`w-full text-left p-4 rounded-xl border transition-colors ${typ === t.key ? 'border-blue-500/40' : 'border-zinc-800 hover:border-zinc-700'}`}
-                      style={typ === t.key ? { background: 'rgba(59,130,246,0.08)' } : { background: 'rgba(255,255,255,0.03)' }}>
+                      className={`w-full text-left p-4 rounded-xl border transition-colors ${typ === t.key ? 'border-blue-500/40' : 'border-gray-200 hover:border-gray-300'}`}
+                      style={typ === t.key ? { background: 'rgba(59,130,246,0.08)' } : { background: '#ffffff' }}>
                       <div className="flex items-center gap-3">
                         <div className="w-3 h-3 rounded-full" style={{ background: t.color }} />
-                        <span className="text-white font-medium text-sm">{t.label}</span>
+                        <span className="text-gray-900 font-medium text-sm">{t.label}</span>
                       </div>
-                      <p className="text-zinc-500 text-xs mt-1 ml-6">{t.desc}</p>
+                      <p className="text-gray-500 text-xs mt-1 ml-6">{t.desc}</p>
                     </button>
                   ))}
                 </div>
@@ -188,18 +188,18 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
                 <div className="space-y-3">
                   <p className="glass-label mb-3">Standort</p>
                   <div>
-                    <label className="text-zinc-400 text-xs mb-1 block">Adresse *</label>
+                    <label className="text-gray-500 text-xs mb-1 block">Adresse *</label>
                     <input value={adresse} onChange={e => setAdresse(e.target.value)} onBlur={handleAdresseBlur}
                       placeholder="Strasse + Hausnummer, PLZ Ort"
-                      className="w-full glass-input px-3 py-2.5 text-sm text-white" />
-                    <p className="text-zinc-600 text-xs mt-1">Google Places Autocomplete aktiv wenn API Key gesetzt</p>
+                      className="w-full glass-input px-3 py-2.5 text-sm text-gray-900" />
+                    <p className="text-gray-400 text-xs mt-1">Google Places Autocomplete aktiv wenn API Key gesetzt</p>
                   </div>
                   <div>
-                    <label className="text-zinc-400 text-xs mb-1 block">PLZ</label>
-                    <input value={plz} onChange={e => setPlz(e.target.value)} className="w-full glass-input px-3 py-2.5 text-sm text-white" />
+                    <label className="text-gray-500 text-xs mb-1 block">PLZ</label>
+                    <input value={plz} onChange={e => setPlz(e.target.value)} className="w-full glass-input px-3 py-2.5 text-sm text-gray-900" />
                   </div>
                   {lat && lng && (
-                    <div className="flex items-center gap-2 text-xs text-zinc-500">
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
                       <MapPinIcon className="w-3.5 h-3.5" />
                       <span>{lat.toFixed(4)}, {lng.toFixed(4)}</span>
                     </div>
@@ -213,13 +213,13 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
                   <p className="glass-label mb-3">Paket wählen</p>
                   {PAKETE.map(p => (
                     <button key={p.key} onClick={() => handlePaketChange(p.key)}
-                      className={`w-full text-left p-4 rounded-xl border transition-colors ${paket === p.key ? 'border-blue-500/40' : 'border-zinc-800 hover:border-zinc-700'}`}
-                      style={paket === p.key ? { background: 'rgba(59,130,246,0.08)' } : { background: 'rgba(255,255,255,0.03)' }}>
+                      className={`w-full text-left p-4 rounded-xl border transition-colors ${paket === p.key ? 'border-blue-500/40' : 'border-gray-200 hover:border-gray-300'}`}
+                      style={paket === p.key ? { background: 'rgba(59,130,246,0.08)' } : { background: '#ffffff' }}>
                       <div className="flex items-center justify-between">
-                        <span className="text-white font-medium text-sm">{p.label}</span>
+                        <span className="text-gray-900 font-medium text-sm">{p.label}</span>
                         <span className="text-blue-400 font-semibold text-sm">{p.preis.toLocaleString('de-DE')} €</span>
                       </div>
-                      <p className="text-zinc-500 text-xs mt-1">{p.faelle} Fälle · {p.km} km Radius</p>
+                      <p className="text-gray-500 text-xs mt-1">{p.faelle} Fälle · {p.km} km Radius</p>
                     </button>
                   ))}
                 </div>
@@ -233,9 +233,9 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
                     {QUALIFIKATIONEN.map(q => (
                       <button key={q} onClick={() => setQuals(prev => prev.includes(q) ? prev.filter(x => x !== q) : [...prev, q])}
                         className={`text-left px-3 py-2.5 rounded-xl text-xs font-medium border transition-colors ${
-                          quals.includes(q) ? 'border-blue-500/40 text-blue-300' : 'border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                          quals.includes(q) ? 'border-blue-500/40 text-blue-300' : 'border-gray-200 text-gray-500 hover:border-gray-300'
                         }`}
-                        style={quals.includes(q) ? { background: 'rgba(59,130,246,0.08)' } : { background: 'rgba(255,255,255,0.03)' }}>
+                        style={quals.includes(q) ? { background: 'rgba(59,130,246,0.08)' } : { background: '#ffffff' }}>
                         {q}
                       </button>
                     ))}
@@ -247,7 +247,7 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
               {step === 5 && (
                 <div className="space-y-3">
                   <p className="glass-label mb-3">Zusammenfassung</p>
-                  <div className="rounded-xl p-4 space-y-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div className="rounded-xl p-4 space-y-2" style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}>
                     <Row label="Name" value={`${vorname} ${nachname}`} />
                     <Row label="E-Mail" value={email} />
                     <Row label="Telefon" value={telefon} />
@@ -257,7 +257,7 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
                     <Row label="Anzahlung" value={`${selectedPaket.preis.toLocaleString('de-DE')} €`} />
                     <Row label="Qualifikationen" value={quals.length > 0 ? quals.join(', ') : '—'} />
                   </div>
-                  {error && <p className="text-red-400 text-sm bg-red-950/50 border border-red-900 px-4 py-3 rounded-xl">{error}</p>}
+                  {error && <p className="text-red-400 text-sm bg-red-50/50 border border-red-900 px-4 py-3 rounded-xl">{error}</p>}
                 </div>
               )}
             </>
@@ -266,23 +266,23 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
 
         {/* Footer */}
         {!success && (
-          <div className="px-5 py-4 flex gap-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="px-5 py-4 flex gap-3" style={{ borderTop: '1px solid #e5e7eb' }}>
             {step > 0 && (
               <button onClick={() => setStep(s => s - 1)}
-                className="flex items-center gap-1 px-4 py-2.5 rounded-xl text-sm font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 transition-colors">
+                className="flex items-center gap-1 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">
                 <ChevronLeftIcon className="w-4 h-4" /> Zurück
               </button>
             )}
             <div className="flex-1" />
             {step < 5 ? (
               <button onClick={() => setStep(s => s + 1)} disabled={!canNext}
-                className="flex items-center gap-1 px-4 py-2.5 rounded-xl text-sm font-medium text-white transition-colors disabled:opacity-40"
+                className="flex items-center gap-1 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-900 transition-colors disabled:opacity-40"
                 style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}>
                 Weiter <ChevronRightIcon className="w-4 h-4" />
               </button>
             ) : (
               <button onClick={handleSubmit} disabled={saving}
-                className="flex items-center gap-1 px-6 py-2.5 rounded-xl text-sm font-medium text-white transition-colors disabled:opacity-40"
+                className="flex items-center gap-1 px-6 py-2.5 rounded-xl text-sm font-medium text-gray-900 transition-colors disabled:opacity-40"
                 style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}>
                 {saving ? 'Erstelle...' : 'Gutachter anlegen'}
               </button>
@@ -297,8 +297,8 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between text-sm">
-      <span className="text-zinc-500">{label}</span>
-      <span className="text-zinc-200 text-right max-w-[60%] truncate">{value}</span>
+      <span className="text-gray-500">{label}</span>
+      <span className="text-gray-800 text-right max-w-[60%] truncate">{value}</span>
     </div>
   )
 }

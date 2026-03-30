@@ -119,13 +119,13 @@ export default function SignaturPage({ fallId }: { fallId: string }) {
 
 function SuccessScreen() {
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-5">
+    <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center px-5">
       <div className="text-center max-w-xs">
         <div className="mx-auto mb-6 w-16 h-16 rounded-full bg-green-500/15 flex items-center justify-center">
           <CheckIcon className="w-8 h-8 text-green-400" />
         </div>
-        <h1 className="text-2xl font-semibold text-white mb-3">Vielen Dank!</h1>
-        <p className="text-zinc-400 text-sm leading-relaxed">
+        <h1 className="text-2xl font-semibold text-gray-900 mb-3">Vielen Dank!</h1>
+        <p className="text-gray-500 text-sm leading-relaxed">
           Wir melden uns innerhalb von 24 Stunden bei dir. Deine Dokumente wurden sicher übermittelt.
         </p>
       </div>
@@ -168,9 +168,9 @@ function SignatureStep({
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col">
+    <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
       {/* Progress bar */}
-      <div className="fixed top-0 inset-x-0 z-10 h-1 bg-zinc-800">
+      <div className="fixed top-0 inset-x-0 z-10 h-1 bg-gray-100">
         <div
           className="h-full bg-blue-500 transition-all duration-500"
           style={{ width: step === 1 ? '50%' : '100%' }}
@@ -180,27 +180,27 @@ function SignatureStep({
       <div className="flex-1 flex flex-col px-5 pt-10 pb-8 max-w-lg mx-auto w-full">
         {/* Header */}
         <div className="pt-2 mb-5">
-          <p className="text-xs text-zinc-500 mb-1 tabular-nums">{step}&thinsp;/&thinsp;2</p>
-          <h1 className="text-xl font-semibold text-white">{title}</h1>
+          <p className="text-xs text-gray-500 mb-1 tabular-nums">{step}&thinsp;/&thinsp;2</p>
+          <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
         </div>
 
         {/* Rechtstext */}
-        <div className="mb-5 px-4 py-4 rounded-xl bg-zinc-900 border border-zinc-800 max-h-52 overflow-y-auto">
-          <pre className="text-xs text-zinc-400 whitespace-pre-wrap font-sans leading-relaxed">
+        <div className="mb-5 px-4 py-4 rounded-xl bg-white border border-gray-200 max-h-52 overflow-y-auto">
+          <pre className="text-xs text-gray-500 whitespace-pre-wrap font-sans leading-relaxed">
             {text}
           </pre>
         </div>
 
         {/* Unterschrift Canvas */}
-        <p className="text-sm text-zinc-400 mb-2">Ihre Unterschrift</p>
-        <div className="relative rounded-xl overflow-hidden border-2 border-zinc-700 bg-zinc-900 mb-2">
+        <p className="text-sm text-gray-500 mb-2">Ihre Unterschrift</p>
+        <div className="relative rounded-xl overflow-hidden border-2 border-gray-300 bg-white mb-2">
           <SignatureCanvas
             padRef={padRef}
             onStroke={() => setIsEmpty(false)}
           />
           {isEmpty && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-              <p className="text-xs text-zinc-600">Hier unterschreiben</p>
+              <p className="text-xs text-gray-400">Hier unterschreiben</p>
             </div>
           )}
         </div>
@@ -208,7 +208,7 @@ function SignatureStep({
         <div className="flex justify-end mb-5">
           <button
             onClick={handleClear}
-            className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors py-1"
+            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors py-1"
           >
             <RotateCcwIcon className="w-3 h-3" />
             Löschen
@@ -232,7 +232,7 @@ function SignatureStep({
           {onBack && !submitting && (
             <button
               onClick={onBack}
-              className="w-full py-3 text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+              className="w-full py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors"
             >
               Zurück
             </button>

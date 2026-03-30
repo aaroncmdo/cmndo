@@ -15,8 +15,8 @@ export default async function TagesroutePage() {
     return (
       <div className="px-4 py-8">
         <div className="max-w-3xl mx-auto">
-          <div className="bg-zinc-900 rounded-2xl p-12 text-center border border-zinc-800">
-            <p className="text-zinc-500">Kein Sachverstaendigen-Profil gefunden.</p>
+          <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
+            <p className="text-gray-500">Kein Sachverstaendigen-Profil gefunden.</p>
           </div>
         </div>
       </div>

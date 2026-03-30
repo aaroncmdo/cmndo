@@ -150,12 +150,12 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
   const currentIdx = PHASES.indexOf(phase)
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-5 space-y-5">
-      <h2 className="text-sm font-medium text-zinc-400">Lead-Qualifizierung</h2>
+    <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-5 space-y-5">
+      <h2 className="text-sm font-medium text-gray-500">Lead-Qualifizierung</h2>
 
       {/* ─── Phase Progress ───────────────────────────────────────── */}
       <div>
-        <label className="text-xs text-zinc-500 mb-2 block">Qualifizierungs-Phase</label>
+        <label className="text-xs text-gray-500 mb-2 block">Qualifizierungs-Phase</label>
         <div className="flex flex-wrap gap-1.5">
           {PHASES.map((p, i) => (
             <button
@@ -163,10 +163,10 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
               onClick={() => setPhase(p)}
               className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
                 p === phase
-                  ? 'bg-blue-600 border-blue-500 text-white font-medium'
+                  ? 'bg-blue-600 border-blue-500 text-gray-900 font-medium'
                   : i < currentIdx
-                    ? 'bg-emerald-950 border-emerald-800 text-emerald-400'
-                    : 'bg-zinc-800 border-zinc-700 text-zinc-500 hover:border-zinc-600'
+                    ? 'bg-emerald-50 border-emerald-800 text-emerald-400'
+                    : 'bg-gray-100 border-gray-300 text-gray-500 hover:border-gray-300'
               }`}
             >
               {PHASE_LABELS[p]}
@@ -177,11 +177,11 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
 
       {/* ─── Schadentyp ───────────────────────────────────────────── */}
       <div>
-        <label className="text-xs text-zinc-500 mb-1.5 block">Schadentyp *</label>
+        <label className="text-xs text-gray-500 mb-1.5 block">Schadentyp *</label>
         <select
           value={sf}
           onChange={e => setSf(e.target.value)}
-          className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
         >
           <option value="">— Bitte wählen —</option>
           {SF_OPTIONS.map(o => (
@@ -195,9 +195,9 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
       {/* SF-03: Variante A/B */}
       {sf === 'sf-03' && (
         <div>
-          <label className="text-xs text-zinc-500 mb-1.5 block">SF-03 Variante</label>
+          <label className="text-xs text-gray-500 mb-1.5 block">SF-03 Variante</label>
           <div className="flex gap-3">
-            <label className="flex items-center gap-2 text-sm text-zinc-300 cursor-pointer">
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
               <input
                 type="radio" name="sf03var" value="a" checked={sfVariante === 'a'}
                 onChange={() => setSfVariante('a')}
@@ -205,7 +205,7 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
               />
               A — Gegner bekannt
             </label>
-            <label className="flex items-center gap-2 text-sm text-zinc-300 cursor-pointer">
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
               <input
                 type="radio" name="sf03var" value="b" checked={sfVariante === 'b'}
                 onChange={() => setSfVariante('b')}
@@ -219,7 +219,7 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
 
       {/* ─── Gegner-Daten (SF-01, SF-02, SF-03A) ─────────────────── */}
       {needsGegner && (
-        <fieldset className="border border-zinc-800 rounded-xl p-4 space-y-3">
+        <fieldset className="border border-gray-200 rounded-xl p-4 space-y-3">
           <legend className="text-xs text-amber-400 font-medium px-2">Gegnerische Daten (Pflicht)</legend>
           <Input label="Name Gegner" value={gegnerName} onChange={setGegnerName} />
           <Input label="Versicherung Gegner" value={gegnerVersicherung} onChange={setGegnerVersicherung} />
@@ -229,7 +229,7 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
 
       {/* ─── Eigene Versicherung (SF-02, SF-03B, SF-04) ──────────── */}
       {needsEigeneVers && (
-        <fieldset className="border border-zinc-800 rounded-xl p-4 space-y-3">
+        <fieldset className="border border-gray-200 rounded-xl p-4 space-y-3">
           <legend className="text-xs text-amber-400 font-medium px-2">Eigene Versicherung (Pflicht)</legend>
           <Input label="Versicherung" value={eigeneVersicherung} onChange={setEigeneVersicherung} />
           <Input label="Policennummer" value={eigenePolicennr} onChange={setEigenePolicennr} />
@@ -238,7 +238,7 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
 
       {/* ─── Polizei (SF-02, SF-03) ──────────────────────────────── */}
       {needsPolizei && (
-        <fieldset className="border border-zinc-800 rounded-xl p-4 space-y-3">
+        <fieldset className="border border-gray-200 rounded-xl p-4 space-y-3">
           <legend className="text-xs text-orange-400 font-medium px-2">Polizei {sf === 'sf-02' ? '(Pflicht)' : ''}</legend>
           <Input label="Aktenzeichen" value={polizeiAktenzeichen} onChange={setPolizeiAktenzeichen} />
           <Checkbox label="Polizeibericht vorhanden" checked={polizeibericht} onChange={setPolizeibericht} />
@@ -248,11 +248,11 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
       {/* ─── SF-04: Schadensursache ──────────────────────────────── */}
       {needsUrsache && (
         <div>
-          <label className="text-xs text-zinc-500 mb-1.5 block">Schadensursache (SF-04)</label>
+          <label className="text-xs text-gray-500 mb-1.5 block">Schadensursache (SF-04)</label>
           <select
             value={schadensursache}
             onChange={e => setSchadensursache(e.target.value)}
-            className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="">— Bitte wählen —</option>
             {SF04_URSACHEN.map(o => (
@@ -280,11 +280,11 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
 
       {/* ─── Kunden-Konstellation ─────────────────────────────────── */}
       <div>
-        <label className="text-xs text-zinc-500 mb-1.5 block">Kunden-Konstellation *</label>
+        <label className="text-xs text-gray-500 mb-1.5 block">Kunden-Konstellation *</label>
         <select
           value={kk}
           onChange={e => setKk(e.target.value)}
-          className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
         >
           {KK_OPTIONS.map(o => (
             <option key={o.value} value={o.value}>{o.label}</option>
@@ -294,7 +294,7 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
 
       {/* ─── KK-02: Leasing ──────────────────────────────────────── */}
       {kk === 'kk-02' && (
-        <fieldset className="border border-zinc-800 rounded-xl p-4 space-y-3">
+        <fieldset className="border border-gray-200 rounded-xl p-4 space-y-3">
           <legend className="text-xs text-cyan-400 font-medium px-2">Leasing-Daten</legend>
           <Input label="Leasinggeber" value={leasingGeber} onChange={setLeasingGeber} />
         </fieldset>
@@ -302,7 +302,7 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
 
       {/* ─── KK-03: Finanzierung ─────────────────────────────────── */}
       {kk === 'kk-03' && (
-        <fieldset className="border border-zinc-800 rounded-xl p-4 space-y-3">
+        <fieldset className="border border-gray-200 rounded-xl p-4 space-y-3">
           <legend className="text-xs text-cyan-400 font-medium px-2">Finanzierungs-Daten</legend>
           <Input label="Bank" value={finanzierungBank} onChange={setFinanzierungBank} />
         </fieldset>
@@ -310,7 +310,7 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
 
       {/* ─── KK-04: Firma ────────────────────────────────────────── */}
       {kk === 'kk-04' && (
-        <fieldset className="border border-zinc-800 rounded-xl p-4 space-y-3">
+        <fieldset className="border border-gray-200 rounded-xl p-4 space-y-3">
           <legend className="text-xs text-cyan-400 font-medium px-2">Firmen-Daten</legend>
           <Input label="Firmenname" value={firmaName} onChange={setFirmaName} />
           <Input label="USt-IdNr" value={firmaUstid} onChange={setFirmaUstid} />
@@ -319,7 +319,7 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
 
       {/* ─── KK-05: Halter ───────────────────────────────────────── */}
       {kk === 'kk-05' && (
-        <fieldset className="border border-zinc-800 rounded-xl p-4 space-y-3">
+        <fieldset className="border border-gray-200 rounded-xl p-4 space-y-3">
           <legend className="text-xs text-cyan-400 font-medium px-2">Halter-Daten (SA vom Halter!)</legend>
           <Input label="Name Halter" value={halterName} onChange={setHalterName} />
         </fieldset>
@@ -330,7 +330,7 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
+          className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
         >
           {saving ? 'Speichert ...' : 'Qualifizierung speichern'}
         </button>
@@ -345,12 +345,12 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
 function Input({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <div>
-      <label className="text-xs text-zinc-500 mb-1 block">{label}</label>
+      <label className="text-xs text-gray-500 mb-1 block">{label}</label>
       <input
         type="text"
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
       />
     </div>
   )
@@ -358,7 +358,7 @@ function Input({ label, value, onChange }: { label: string; value: string; onCha
 
 function Checkbox({ label, checked, onChange, disabled }: { label: string; checked: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
   return (
-    <label className={`flex items-center gap-2 text-sm ${disabled ? 'text-zinc-500' : 'text-zinc-300 cursor-pointer'}`}>
+    <label className={`flex items-center gap-2 text-sm ${disabled ? 'text-gray-500' : 'text-gray-700 cursor-pointer'}`}>
       <input
         type="checkbox"
         checked={checked}

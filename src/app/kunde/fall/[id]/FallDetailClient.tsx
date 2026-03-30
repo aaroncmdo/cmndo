@@ -250,16 +250,16 @@ export default function FallDetailClient({
         <div className="mb-6">
           <a
             href="/kunde"
-            className="text-zinc-500 hover:text-zinc-300 text-sm transition-colors"
+            className="text-gray-500 hover:text-gray-700 text-sm transition-colors"
           >
             ← Meine Fälle
           </a>
           <div className="flex items-start justify-between mt-2">
             <div>
-              <h1 className="text-xl font-semibold text-white">
+              <h1 className="text-xl font-semibold text-gray-900">
                 {URSACHE_LABEL[fall.schadens_ursache ?? ''] ?? 'Schadensfall'}
               </h1>
-              <p className="text-zinc-500 text-sm mt-0.5">
+              <p className="text-gray-500 text-sm mt-0.5">
                 Fall {fall.fall_nummer ?? fall.id.slice(0, 8)}
                 {' · '}
                 {[fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') || 'Keine Adresse'}
@@ -272,14 +272,14 @@ export default function FallDetailClient({
 
           {/* Storniert banner */}
           {isStorniert && (
-            <div className="bg-red-950 border border-red-800 rounded-2xl p-5">
+            <div className="bg-red-50 border border-red-800 rounded-2xl p-5">
               <p className="text-red-300 font-medium text-sm">Dieser Fall wurde storniert.</p>
             </div>
           )}
 
           {/* ── Status-Timeline ── */}
-          <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
-            <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-5">
+          <div className="bg-white rounded-2xl p-5 border border-gray-200">
+            <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-5">
               Status-Verlauf
             </h3>
 
@@ -296,7 +296,7 @@ export default function FallDetailClient({
                             ? 'border-blue-500 bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]'
                             : step.reached
                             ? 'border-blue-500/60 bg-blue-500/60'
-                            : 'border-zinc-700 bg-zinc-800'
+                            : 'border-gray-300 bg-gray-100'
                         }`}
                       />
                       {!isLast && (
@@ -304,7 +304,7 @@ export default function FallDetailClient({
                           className={`w-0.5 flex-1 min-h-8 ${
                             step.reached && timeline[i + 1]?.reached
                               ? 'bg-blue-500/40'
-                              : 'bg-zinc-800'
+                              : 'bg-gray-100'
                           }`}
                         />
                       )}
@@ -314,20 +314,20 @@ export default function FallDetailClient({
                     <div className={`pb-6 ${isLast ? 'pb-0' : ''}`}>
                       <p className={`text-sm font-medium leading-tight ${
                         step.active
-                          ? 'text-white'
+                          ? 'text-gray-900'
                           : step.reached
-                          ? 'text-zinc-300'
-                          : 'text-zinc-600'
+                          ? 'text-gray-700'
+                          : 'text-gray-400'
                       }`}>
                         {step.label}
                       </p>
                       <p className={`text-xs mt-0.5 ${
-                        step.reached ? 'text-zinc-500' : 'text-zinc-700'
+                        step.reached ? 'text-gray-500' : 'text-gray-300'
                       }`}>
                         {step.description}
                       </p>
                       {step.date && (
-                        <p className="text-zinc-600 text-xs mt-1">
+                        <p className="text-gray-400 text-xs mt-1">
                           {fmt(step.date)}
                         </p>
                       )}
@@ -339,13 +339,13 @@ export default function FallDetailClient({
           </div>
 
           {/* ── Dateien ── */}
-          <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
-            <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">
+          <div className="bg-white rounded-2xl p-5 border border-gray-200">
+            <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">
               Dateien
             </h3>
 
             {dokumente.length === 0 ? (
-              <p className="text-zinc-600 text-sm mb-4">Noch keine Dateien vorhanden.</p>
+              <p className="text-gray-400 text-sm mb-4">Noch keine Dateien vorhanden.</p>
             ) : (
               <div className="space-y-5 mb-4">
                 {KATEGORIE_ORDER.filter(k => grouped[k]?.length).map(kat => {
@@ -354,7 +354,7 @@ export default function FallDetailClient({
 
                   return (
                     <div key={kat}>
-                      <p className="text-zinc-500 text-xs font-medium mb-2">
+                      <p className="text-gray-500 text-xs font-medium mb-2">
                         {KATEGORIE_LABEL[kat] ?? kat} ({docs.length})
                       </p>
 
@@ -366,7 +366,7 @@ export default function FallDetailClient({
                               href={doc.datei_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="block aspect-square rounded-xl overflow-hidden bg-zinc-800 hover:opacity-80 transition-opacity"
+                              className="block aspect-square rounded-xl overflow-hidden bg-gray-100 hover:opacity-80 transition-opacity"
                             >
                               <img
                                 src={doc.datei_url}
@@ -384,19 +384,19 @@ export default function FallDetailClient({
                               href={doc.datei_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-zinc-800 transition-colors group"
+                              className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-gray-100 transition-colors group"
                             >
                               <DocIcon />
                               <div className="min-w-0 flex-1">
-                                <span className="text-zinc-200 text-sm block truncate">
+                                <span className="text-gray-800 text-sm block truncate">
                                   {doc.datei_name ?? doc.datei_url.split('/').pop()}
                                 </span>
-                                <span className="text-zinc-600 text-xs flex items-center gap-1.5 flex-wrap">
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 text-[10px] font-medium">
+                                <span className="text-gray-400 text-xs flex items-center gap-1.5 flex-wrap">
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 text-[10px] font-medium">
                                     {KATEGORIE_LABEL[doc.kategorie ?? ''] ?? doc.kategorie ?? doc.typ}
                                   </span>
                                   {doc.quelle && (
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-zinc-800/60 text-zinc-500 text-[10px]">
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-gray-100/60 text-gray-500 text-[10px]">
                                       {QUELLE_LABEL[doc.quelle] ?? doc.quelle}
                                     </span>
                                   )}
@@ -404,7 +404,7 @@ export default function FallDetailClient({
                                 </span>
                               </div>
                               {/* Download indicator */}
-                              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} className="text-zinc-600 group-hover:text-zinc-400 shrink-0 transition-colors">
+                              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} className="text-gray-400 group-hover:text-gray-500 shrink-0 transition-colors">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                               </svg>
                             </a>
@@ -422,8 +422,8 @@ export default function FallDetailClient({
           </div>
 
           {/* ── Nachrichten ── */}
-          <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
-            <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">
+          <div className="bg-white rounded-2xl p-5 border border-gray-200">
+            <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">
               Nachrichten
             </h3>
             <NachrichtenBereich fallId={fall.id} nachrichten={nachrichten} onSend={() => router.refresh()} />
@@ -436,57 +436,57 @@ export default function FallDetailClient({
 
           {/* ── Ansprechpartner (2 Karten nebeneinander) ── */}
           <div>
-            <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">
+            <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">
               Ihre Ansprechpartner
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* KARTE 1: Kundenbetreuer bei Claimondo */}
-              <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
-                <p className="text-zinc-500 text-[10px] font-semibold uppercase tracking-wider mb-3">
+              <div className="bg-white rounded-2xl p-5 border border-gray-200">
+                <p className="text-gray-500 text-[10px] font-semibold uppercase tracking-wider mb-3">
                   Ihr Kundenbetreuer bei Claimondo
                 </p>
                 {kundenbetreuer ? (
                   <div>
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}>
-                        <span className="text-white text-sm font-bold">
+                        <span className="text-gray-900 text-sm font-bold">
                           {(kundenbetreuer.vorname?.[0] ?? '').toUpperCase()}{(kundenbetreuer.nachname?.[0] ?? '').toUpperCase()}
                         </span>
                       </div>
                       <div>
-                        <p className="text-white text-sm font-medium">
+                        <p className="text-gray-900 text-sm font-medium">
                           {`${kundenbetreuer.vorname ?? ''} ${kundenbetreuer.nachname ?? ''}`.trim() || '—'}
                         </p>
-                        <p className="text-zinc-500 text-xs">Kundenbetreuer</p>
+                        <p className="text-gray-500 text-xs">Kundenbetreuer</p>
                       </div>
                     </div>
                     <div className="space-y-2">
                       {kundenbetreuer.telefon && (
-                        <a href={`tel:${kundenbetreuer.telefon}`} className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-xl text-sm text-blue-400 hover:bg-zinc-700 transition-colors">
+                        <a href={`tel:${kundenbetreuer.telefon}`} className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-xl text-sm text-blue-400 hover:bg-gray-200 transition-colors">
                           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>
                           Anrufen
                         </a>
                       )}
                       {kundenbetreuer.email && (
-                        <a href={`mailto:${kundenbetreuer.email}`} className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-xl text-sm text-blue-400 hover:bg-zinc-700 transition-colors">
+                        <a href={`mailto:${kundenbetreuer.email}`} className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-xl text-sm text-blue-400 hover:bg-gray-200 transition-colors">
                           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
                           E-Mail schreiben
                         </a>
                       )}
-                      <a href={`/kunde/fall/${fall.id}#nachrichten`} className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-xl text-sm text-emerald-400 hover:bg-zinc-700 transition-colors">
+                      <a href={`/kunde/fall/${fall.id}#nachrichten`} className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-xl text-sm text-emerald-400 hover:bg-gray-200 transition-colors">
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg>
                         Chat öffnen
                       </a>
                     </div>
                   </div>
                 ) : (
-                  <p className="text-zinc-600 text-sm">Wird Ihnen in Kürze zugewiesen.</p>
+                  <p className="text-gray-400 text-sm">Wird Ihnen in Kürze zugewiesen.</p>
                 )}
               </div>
 
               {/* KARTE 2: Kanzlei LexDrive */}
-              <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
-                <p className="text-zinc-500 text-[10px] font-semibold uppercase tracking-wider mb-3">
+              <div className="bg-white rounded-2xl p-5 border border-gray-200">
+                <p className="text-gray-500 text-[10px] font-semibold uppercase tracking-wider mb-3">
                   Ihre Kanzlei LexDrive
                 </p>
                 {fall.kanzlei_ansprechpartner_name ? (
@@ -496,19 +496,19 @@ export default function FallDetailClient({
                         <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="text-cyan-400"><path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" /></svg>
                       </div>
                       <div>
-                        <p className="text-white text-sm font-medium">{fall.kanzlei_ansprechpartner_name}</p>
-                        <p className="text-zinc-500 text-xs">{fall.kanzlei_ansprechpartner_position ?? 'Rechtsanwalt'}</p>
+                        <p className="text-gray-900 text-sm font-medium">{fall.kanzlei_ansprechpartner_name}</p>
+                        <p className="text-gray-500 text-xs">{fall.kanzlei_ansprechpartner_position ?? 'Rechtsanwalt'}</p>
                       </div>
                     </div>
                     <div className="space-y-2">
                       {fall.kanzlei_ansprechpartner_telefon && (
-                        <a href={`tel:${fall.kanzlei_ansprechpartner_telefon}`} className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-xl text-sm text-blue-400 hover:bg-zinc-700 transition-colors">
+                        <a href={`tel:${fall.kanzlei_ansprechpartner_telefon}`} className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-xl text-sm text-blue-400 hover:bg-gray-200 transition-colors">
                           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>
                           Anrufen
                         </a>
                       )}
                       {fall.kanzlei_ansprechpartner_email && (
-                        <a href={`mailto:${fall.kanzlei_ansprechpartner_email}`} className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-xl text-sm text-blue-400 hover:bg-zinc-700 transition-colors">
+                        <a href={`mailto:${fall.kanzlei_ansprechpartner_email}`} className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-xl text-sm text-blue-400 hover:bg-gray-200 transition-colors">
                           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
                           E-Mail schreiben
                         </a>
@@ -517,7 +517,7 @@ export default function FallDetailClient({
                   </div>
                 ) : (
                   <div className="text-center py-4">
-                    <p className="text-zinc-600 text-sm">Wird nach Kanzlei-Übergabe zugewiesen.</p>
+                    <p className="text-gray-400 text-sm">Wird nach Kanzlei-Übergabe zugewiesen.</p>
                   </div>
                 )}
               </div>
@@ -525,8 +525,8 @@ export default function FallDetailClient({
           </div>
 
           {/* ── Fall-Info ── */}
-          <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
-            <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">
+          <div className="bg-white rounded-2xl p-5 border border-gray-200">
+            <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">
               Fall-Details
             </h3>
             <InfoRow label="Fallnummer" value={fall.fall_nummer ?? fall.id.slice(0, 8)} />
@@ -537,9 +537,9 @@ export default function FallDetailClient({
               value={[fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') || '—'}
             />
             {fall.schadens_beschreibung && (
-              <div className="mt-3 pt-3 border-t border-zinc-800/50">
-                <p className="text-zinc-500 text-xs mb-1">Beschreibung</p>
-                <p className="text-zinc-300 text-sm whitespace-pre-wrap">{fall.schadens_beschreibung}</p>
+              <div className="mt-3 pt-3 border-t border-gray-200/50">
+                <p className="text-gray-500 text-xs mb-1">Beschreibung</p>
+                <p className="text-gray-700 text-sm whitespace-pre-wrap">{fall.schadens_beschreibung}</p>
               </div>
             )}
           </div>
@@ -553,16 +553,16 @@ export default function FallDetailClient({
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex gap-2 py-1.5 border-b border-zinc-800/50 last:border-0">
-      <span className="text-zinc-500 text-sm w-32 shrink-0">{label}</span>
-      <span className="text-zinc-200 text-sm">{value || '—'}</span>
+    <div className="flex gap-2 py-1.5 border-b border-gray-200/50 last:border-0">
+      <span className="text-gray-500 text-sm w-32 shrink-0">{label}</span>
+      <span className="text-gray-800 text-sm">{value || '—'}</span>
     </div>
   )
 }
 
 function DocIcon() {
   return (
-    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} className="text-zinc-500 shrink-0">
+    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} className="text-gray-500 shrink-0">
       <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
     </svg>
   )
@@ -592,8 +592,8 @@ function DokumentUpload({ fallId, onDone }: { fallId: string; onDone: () => void
   }
 
   return (
-    <div className="border-t border-zinc-800 pt-4">
-      <p className="text-zinc-500 text-xs mb-2">Dokument nachreichen</p>
+    <div className="border-t border-gray-200 pt-4">
+      <p className="text-gray-500 text-xs mb-2">Dokument nachreichen</p>
       <form onSubmit={handleUpload} className="flex items-center gap-2">
         <input
           ref={fileRef}
@@ -601,7 +601,7 @@ function DokumentUpload({ fallId, onDone }: { fallId: string; onDone: () => void
           name="file"
           required
           accept="image/*,.pdf,.doc,.docx"
-          className="flex-1 text-xs text-zinc-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-300 file:cursor-pointer hover:file:bg-zinc-700"
+          className="flex-1 text-xs text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-gray-100 file:text-gray-700 file:cursor-pointer hover:file:bg-zinc-700"
         />
         <button
           type="submit"
@@ -631,11 +631,11 @@ function AuszahlungsUebersicht({ fall }: { fall: Fall }) {
   }
 
   return (
-    <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
-      <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-4">Voraussichtliche Auszahlung</h3>
+    <div className="bg-white rounded-2xl p-5 border border-gray-200">
+      <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-4">Voraussichtliche Auszahlung</h3>
       <div className="text-center mb-5">
         <p className="text-3xl font-bold text-emerald-400 tabular-nums">{fmtCurrency(fall.regulierung_betrag ?? total)}</p>
-        <p className="text-zinc-500 text-xs mt-1">{fall.regulierung_betrag ? 'Reguliert' : 'Geschaetzter Anspruch'}</p>
+        <p className="text-gray-500 text-xs mt-1">{fall.regulierung_betrag ? 'Reguliert' : 'Geschaetzter Anspruch'}</p>
       </div>
       <div className="space-y-2 mb-4">
         <AuszahlungsRow label="Reparaturkosten (netto)" value={fall.schadenhoehe_netto} />
@@ -648,25 +648,25 @@ function AuszahlungsUebersicht({ fall }: { fall: Fall }) {
         {nutzungsausfall > 0 && <AuszahlungsRow label={`Nutzungsausfall (${fall.nutzungsausfall_tage} Tage)`} value={nutzungsausfall} />}
         {fall.gutachter_honorar != null && <AuszahlungsRow label="Gutachterkosten" value={fall.gutachter_honorar} />}
         <AuszahlungsRow label="Anwaltskosten (ca.)" value={anwaltskosten} />
-        <div className="border-t border-zinc-700 pt-2 flex justify-between">
-          <span className="text-white text-sm font-semibold">Gesamt</span>
-          <span className="text-white text-sm font-semibold tabular-nums">{fmtCurrency(total)}</span>
+        <div className="border-t border-gray-300 pt-2 flex justify-between">
+          <span className="text-gray-900 text-sm font-semibold">Gesamt</span>
+          <span className="text-gray-900 text-sm font-semibold tabular-nums">{fmtCurrency(total)}</span>
         </div>
       </div>
       {fall.totalschaden && (
-        <div className="bg-amber-950/50 border border-amber-800/30 rounded-xl p-3 mb-3">
+        <div className="bg-amber-50/50 border border-amber-800/30 rounded-xl p-3 mb-3">
           <p className="text-amber-300 text-xs font-medium">Totalschaden festgestellt</p>
           <p className="text-amber-400/70 text-xs mt-0.5">Die Reparaturkosten uebersteigen den Wiederbeschaffungswert.</p>
         </div>
       )}
       {fall.ki_geschaetzte_kosten_min != null && fall.ki_geschaetzte_kosten_max != null && (
-        <div className="bg-violet-950/30 border border-violet-800/30 rounded-xl p-3 mb-3">
+        <div className="bg-violet-50/30 border border-violet-800/30 rounded-xl p-3 mb-3">
           <p className="text-violet-300 text-xs font-medium">KI-Vorabschaetzung</p>
           <p className="text-violet-400 text-sm font-semibold mt-1 tabular-nums">
             {fmtCurrency(fall.ki_geschaetzte_kosten_min)} — {fmtCurrency(fall.ki_geschaetzte_kosten_max)}
           </p>
           {fall.schadenhoehe_netto != null && (
-            <p className="text-zinc-500 text-xs mt-1">
+            <p className="text-gray-500 text-xs mt-1">
               Gutachten-Wert: {fmtCurrency(fall.schadenhoehe_netto)} (Abweichung:{' '}
               {(() => {
                 const avg = (fall.ki_geschaetzte_kosten_min! + fall.ki_geschaetzte_kosten_max!) / 2
@@ -675,13 +675,13 @@ function AuszahlungsUebersicht({ fall }: { fall: Fall }) {
               })()})
             </p>
           )}
-          <p className="text-zinc-600 text-[10px] mt-1">Dies ist eine automatische Vorabschaetzung. Der verbindliche Wert stammt aus dem Gutachten.</p>
+          <p className="text-gray-400 text-[10px] mt-1">Dies ist eine automatische Vorabschaetzung. Der verbindliche Wert stammt aus dem Gutachten.</p>
         </div>
       )}
       {fall.schadenfall_typ && SF_LABELS[fall.schadenfall_typ] && (
-        <div className="bg-zinc-800/50 rounded-xl p-3">
-          <p className="text-zinc-300 text-xs font-medium">Ihre Schadenskonstellation</p>
-          <p className="text-zinc-500 text-xs mt-0.5">{SF_LABELS[fall.schadenfall_typ]}</p>
+        <div className="bg-gray-100/50 rounded-xl p-3">
+          <p className="text-gray-700 text-xs font-medium">Ihre Schadenskonstellation</p>
+          <p className="text-gray-500 text-xs mt-0.5">{SF_LABELS[fall.schadenfall_typ]}</p>
         </div>
       )}
     </div>
@@ -693,8 +693,8 @@ function AuszahlungsRow({ label, value }: { label: string; value: number | null 
   const negative = value < 0
   return (
     <div className="flex justify-between text-sm">
-      <span className="text-zinc-400">{label}</span>
-      <span className={`tabular-nums ${negative ? 'text-red-400' : 'text-zinc-200'}`}>{fmtCurrency(value)}</span>
+      <span className="text-gray-500">{label}</span>
+      <span className={`tabular-nums ${negative ? 'text-red-400' : 'text-gray-800'}`}>{fmtCurrency(value)}</span>
     </div>
   )
 }
@@ -757,7 +757,7 @@ function NachrichtenBereich({
             className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
               activeKanal === tab.key
                 ? 'bg-emerald-600 text-white'
-                : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-300'
+                : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700'
             }`}
           >
             {tab.label}
@@ -767,7 +767,7 @@ function NachrichtenBereich({
 
       {/* Messages area */}
       {filtered.length === 0 ? (
-        <p className="text-zinc-600 text-sm mb-4">
+        <p className="text-gray-400 text-sm mb-4">
           Noch keine Nachrichten. Stellen Sie hier Ihre Fragen.
         </p>
       ) : (
@@ -778,12 +778,12 @@ function NachrichtenBereich({
               <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
                   isOwn
-                    ? 'bg-emerald-600/90 text-white'
-                    : 'bg-zinc-800 text-zinc-200'
+                    ? 'bg-emerald-600/90 text-gray-900'
+                    : 'bg-gray-100 text-gray-800'
                 }`}>
                   {/* Sender badge */}
                   <p className={`text-[10px] font-semibold uppercase tracking-wide mb-0.5 ${
-                    isOwn ? 'text-emerald-200' : 'text-zinc-500'
+                    isOwn ? 'text-emerald-200' : 'text-gray-500'
                   }`}>
                     {ROLLE_LABEL[msg.sender_rolle] ?? msg.sender_rolle}
                   </p>
@@ -805,7 +805,7 @@ function NachrichtenBereich({
                     </a>
                   )}
                   {/* Timestamp */}
-                  <p className={`text-[10px] mt-1 ${isOwn ? 'text-emerald-200/70' : 'text-zinc-500'}`}>
+                  <p className={`text-[10px] mt-1 ${isOwn ? 'text-emerald-200/70' : 'text-gray-500'}`}>
                     {new Date(msg.created_at).toLocaleString('de-DE', {
                       day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
                     })}
@@ -825,7 +825,7 @@ function NachrichtenBereich({
           value={text}
           onChange={e => setText(e.target.value)}
           placeholder="Nachricht schreiben..."
-          className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-600"
+          className="flex-1 bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-600"
         />
         <button
           type="submit"

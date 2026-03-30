@@ -23,18 +23,18 @@ export default async function MitarbeiterLayout({
   const displayName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || user.email || ''
 
   return (
-    <div className="min-h-screen bg-zinc-950">
-      <header className="border-b border-zinc-800 px-4 py-3 flex items-center justify-between">
+    <div className="min-h-screen bg-[#f8f9fb]">
+      <header className="border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="text-white font-semibold">Claimondo</h1>
-          <Link href="/mitarbeiter/performance" className="flex items-center gap-1.5 text-zinc-400 hover:text-white text-sm transition-colors">
+          <h1 className="text-gray-900 font-semibold">Claimondo</h1>
+          <Link href="/mitarbeiter/performance" className="flex items-center gap-1.5 text-gray-500 hover:text-gray-800 text-sm transition-colors">
             <BarChart3Icon className="w-4 h-4" /> Meine Performance
           </Link>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-zinc-500 text-sm">{displayName}</span>
+          <span className="text-gray-500 text-sm">{displayName}</span>
           <form action="/api/auth/logout" method="POST">
-            <button type="button" className="text-zinc-500 hover:text-zinc-300 transition-colors">
+            <button type="button" className="text-gray-500 hover:text-gray-700 transition-colors">
               <LogOutIcon className="w-4 h-4" />
             </button>
           </form>

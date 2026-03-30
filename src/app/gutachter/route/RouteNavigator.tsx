@@ -177,11 +177,11 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
       <div className="fixed inset-0 z-50 bg-[#080c18] flex items-center justify-center p-6">
         <div className="text-center max-w-sm">
           <CheckCircle2Icon className="w-16 h-16 text-green-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Route beendet</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Route beendet</h2>
           <div className="space-y-2 mb-6">
-            <div className="flex justify-between text-sm"><span className="text-zinc-400">Besichtigungen</span><span className="text-white font-semibold">{doneCount}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-zinc-400">Übersprungen</span><span className="text-amber-400 font-semibold">{skippedCount}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-zinc-400">Fotos hochgeladen</span><span className="text-white font-semibold">{photos.length}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-gray-500">Besichtigungen</span><span className="text-gray-900 font-semibold">{doneCount}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-gray-500">Übersprungen</span><span className="text-amber-400 font-semibold">{skippedCount}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-gray-500">Fotos hochgeladen</span><span className="text-gray-900 font-semibold">{photos.length}</span></div>
           </div>
           <button onClick={handleEnd} className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-2xl transition-colors">
             Zurück zum Dashboard
@@ -196,7 +196,7 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
       <div className="fixed inset-0 z-50 flex flex-col bg-[#080c18]">
         {/* Progress bar */}
         <div className="flex items-center gap-1.5 px-4 py-2 bg-[#080c18]/90 backdrop-blur-sm border-b border-white/5">
-          <button onClick={handleEnd} className="p-1.5 text-zinc-400 hover:text-white"><XIcon className="w-5 h-5" /></button>
+          <button onClick={handleEnd} className="p-1.5 text-gray-500 hover:text-gray-800"><XIcon className="w-5 h-5" /></button>
           <div className="flex-1 flex items-center gap-1 px-2">
             {stops.map((_, i) => (
               <div key={i} className="flex items-center flex-1">
@@ -204,13 +204,13 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
                   statuses[i] === 'done' ? 'bg-green-500 border-green-500' :
                   statuses[i] === 'skipped' ? 'bg-red-500 border-red-500' :
                   statuses[i] === 'active' ? 'bg-blue-500 border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]' :
-                  'bg-zinc-800 border-zinc-700'
+                  'bg-gray-100 border-gray-300'
                 }`} />
-                {i < stops.length - 1 && <div className={`flex-1 h-0.5 ${statuses[i] === 'done' || statuses[i] === 'skipped' ? 'bg-green-500/40' : 'bg-zinc-800'}`} />}
+                {i < stops.length - 1 && <div className={`flex-1 h-0.5 ${statuses[i] === 'done' || statuses[i] === 'skipped' ? 'bg-green-500/40' : 'bg-gray-100'}`} />}
               </div>
             ))}
           </div>
-          <span className="text-zinc-400 text-xs tabular-nums shrink-0">{doneCount}/{stops.length}</span>
+          <span className="text-gray-500 text-xs tabular-nums shrink-0">{doneCount}/{stops.length}</span>
         </div>
 
         {/* Map area */}
@@ -270,7 +270,7 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
 
           {/* Nearby alert */}
           {nearbyAlert && !inspecting && (
-            <div className="absolute top-4 left-4 right-4 bg-green-600/90 backdrop-blur-sm text-white text-sm font-medium px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-pulse">
+            <div className="absolute top-4 left-4 right-4 bg-green-600/90 backdrop-blur-sm text-gray-900 text-sm font-medium px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-pulse">
               <MapPinIcon className="w-5 h-5" />
               Sie sind angekommen bei {nearbyAlert}
             </div>
@@ -302,15 +302,15 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
           <div className="px-4 pb-6">
             {/* Skip Dialog */}
             {showSkipDialog && (
-              <div className="mb-4 bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
-                <p className="text-white font-medium text-sm mb-3">Grund für Überspringen?</p>
+              <div className="mb-4 bg-white border border-gray-200 rounded-2xl p-4">
+                <p className="text-gray-900 font-medium text-sm mb-3">Grund für Überspringen?</p>
                 <div className="space-y-2">
                   {SKIP_REASONS.map(r => (
                     <button key={r} onClick={() => handleSkip(r)} disabled={saving}
-                      className="w-full text-left px-3 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm rounded-xl transition-colors disabled:opacity-40">{r}</button>
+                      className="w-full text-left px-3 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm rounded-xl transition-colors disabled:opacity-40">{r}</button>
                   ))}
                 </div>
-                <button onClick={() => setShowSkipDialog(false)} className="w-full mt-2 text-zinc-500 text-sm py-2">Abbrechen</button>
+                <button onClick={() => setShowSkipDialog(false)} className="w-full mt-2 text-gray-500 text-sm py-2">Abbrechen</button>
               </div>
             )}
 
@@ -322,13 +322,13 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
                     <CheckCircle2Icon className="w-5 h-5 text-green-400" />
                   </div>
                   <div>
-                    <p className="text-white font-semibold">{currentStop.name}</p>
-                    <p className="text-zinc-500 text-xs">{currentStop.fallNummer} · {currentStop.fahrzeug ?? ''} {currentStop.kennzeichen ?? ''}</p>
+                    <p className="text-gray-900 font-semibold">{currentStop.name}</p>
+                    <p className="text-gray-500 text-xs">{currentStop.fallNummer} · {currentStop.fahrzeug ?? ''} {currentStop.kennzeichen ?? ''}</p>
                   </div>
                 </div>
 
                 {currentStop.vorschaden && (
-                  <div className="bg-red-950/50 border border-red-800/30 rounded-xl p-3 mb-4 flex items-center gap-2">
+                  <div className="bg-red-50/50 border border-red-800/30 rounded-xl p-3 mb-4 flex items-center gap-2">
                     <AlertTriangleIcon className="w-4 h-4 text-red-400 shrink-0" />
                     <p className="text-red-300 text-sm font-medium">Vorschaden bekannt!</p>
                   </div>
@@ -337,14 +337,14 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
                 {/* Action buttons */}
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <button onClick={() => fileRef.current?.click()}
-                    className="flex flex-col items-center gap-2 py-4 bg-zinc-800 hover:bg-zinc-700 rounded-2xl transition-colors min-h-[56px]">
+                    className="flex flex-col items-center gap-2 py-4 bg-gray-100 hover:bg-gray-200 rounded-2xl transition-colors min-h-[56px]">
                     <CameraIcon className="w-6 h-6 text-blue-400" />
-                    <span className="text-zinc-300 text-xs font-medium">Foto aufnehmen</span>
+                    <span className="text-gray-700 text-xs font-medium">Foto aufnehmen</span>
                   </button>
                   <button onClick={() => {}}
-                    className="flex flex-col items-center gap-2 py-4 bg-zinc-800 hover:bg-zinc-700 rounded-2xl transition-colors min-h-[56px]">
+                    className="flex flex-col items-center gap-2 py-4 bg-gray-100 hover:bg-gray-200 rounded-2xl transition-colors min-h-[56px]">
                     <FileTextIcon className="w-6 h-6 text-violet-400" />
-                    <span className="text-zinc-300 text-xs font-medium">Dokument scannen</span>
+                    <span className="text-gray-700 text-xs font-medium">Dokument scannen</span>
                   </button>
                 </div>
                 <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handlePhoto} className="hidden" />
@@ -353,7 +353,7 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
                 {photos.length > 0 && (
                   <div className="grid grid-cols-4 gap-2 mb-4">
                     {photos.map((url, i) => (
-                      <div key={i} className="aspect-square rounded-xl overflow-hidden bg-zinc-800">
+                      <div key={i} className="aspect-square rounded-xl overflow-hidden bg-gray-100">
                         <img src={url} alt="" className="w-full h-full object-cover" />
                       </div>
                     ))}
@@ -363,13 +363,13 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
                 {/* FIN + Schaetzung */}
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div>
-                    <label className="text-zinc-500 text-xs mb-1 block flex items-center gap-1"><HashIcon className="w-3 h-3" />FIN (17 Zeichen)</label>
-                    <input value={fin} onChange={e => setFin(e.target.value.toUpperCase())} maxLength={17} placeholder="WBA..." className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white font-mono placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                    <label className="text-gray-500 text-xs mb-1 block flex items-center gap-1"><HashIcon className="w-3 h-3" />FIN (17 Zeichen)</label>
+                    <input value={fin} onChange={e => setFin(e.target.value.toUpperCase())} maxLength={17} placeholder="WBA..." className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 font-mono placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
                     {fin.length > 0 && fin.length !== 17 && <span className="text-red-400 text-xs mt-0.5 block">{fin.length}/17</span>}
                   </div>
                   <div>
-                    <label className="text-zinc-500 text-xs mb-1 block flex items-center gap-1"><CalculatorIcon className="w-3 h-3" />Schaetzung EUR</label>
-                    <input value={schaetzung} onChange={e => setSchaetzung(e.target.value)} type="number" step="100" placeholder="z.B. 3500" className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                    <label className="text-gray-500 text-xs mb-1 block flex items-center gap-1"><CalculatorIcon className="w-3 h-3" />Schaetzung EUR</label>
+                    <input value={schaetzung} onChange={e => setSchaetzung(e.target.value)} type="number" step="100" placeholder="z.B. 3500" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
                   </div>
                 </div>
 
@@ -379,7 +379,7 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
                   onChange={e => setNotizen(e.target.value)}
                   placeholder="Notizen vor Ort..."
                   rows={2}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-600 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none"
+                  className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none"
                 />
 
                 <button onClick={handleComplete} disabled={saving}
@@ -395,36 +395,36 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
                     <span className="text-blue-400 font-bold">{activeIdx + 1}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-semibold truncate">{currentStop.name}</p>
-                    <p className="text-zinc-500 text-xs">{currentStop.time} · {currentStop.fallNummer}</p>
+                    <p className="text-gray-900 font-semibold truncate">{currentStop.name}</p>
+                    <p className="text-gray-500 text-xs">{currentStop.time} · {currentStop.fallNummer}</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-2 mb-1 text-sm">
-                  <MapPinIcon className="w-4 h-4 text-zinc-500 mt-0.5 shrink-0" />
-                  <span className="text-zinc-400">{currentStop.address}</span>
+                  <MapPinIcon className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
+                  <span className="text-gray-500">{currentStop.address}</span>
                 </div>
                 {currentStop.ursache && (
                   <div className="flex items-center gap-2 mb-3 text-sm">
-                    <span className="text-zinc-500 text-xs">Schaden:</span>
-                    <span className="text-zinc-300 text-xs">{currentStop.ursache}</span>
-                    {currentStop.fahrzeug && <span className="text-zinc-500 text-xs">· {currentStop.fahrzeug}</span>}
+                    <span className="text-gray-500 text-xs">Schaden:</span>
+                    <span className="text-gray-700 text-xs">{currentStop.ursache}</span>
+                    {currentStop.fahrzeug && <span className="text-gray-500 text-xs">· {currentStop.fahrzeug}</span>}
                   </div>
                 )}
 
                 {panelExpanded && (
-                  <div className="mb-4 bg-zinc-900/50 rounded-xl p-3 space-y-1.5">
-                    <p className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-2">Alle Stops</p>
+                  <div className="mb-4 bg-white/50 rounded-xl p-3 space-y-1.5">
+                    <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">Alle Stops</p>
                     {stops.map((s, i) => (
-                      <div key={s.id} className={`flex items-center gap-2 py-1.5 text-sm ${i === activeIdx ? 'text-white' : 'text-zinc-500'}`}>
+                      <div key={s.id} className={`flex items-center gap-2 py-1.5 text-sm ${i === activeIdx ? 'text-gray-900' : 'text-gray-500'}`}>
                         <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
-                          statuses[i] === 'done' ? 'bg-green-500 text-white' :
-                          statuses[i] === 'skipped' ? 'bg-red-500 text-white' :
-                          statuses[i] === 'active' ? 'bg-blue-500 text-white' :
-                          'bg-zinc-700 text-zinc-400'
+                          statuses[i] === 'done' ? 'bg-green-500 text-gray-900' :
+                          statuses[i] === 'skipped' ? 'bg-red-500 text-gray-900' :
+                          statuses[i] === 'active' ? 'bg-blue-500 text-gray-900' :
+                          'bg-zinc-700 text-gray-500'
                         }`}>{i + 1}</div>
                         <span className="truncate">{s.name}</span>
-                        <span className="text-zinc-600 text-xs ml-auto shrink-0">{s.time}</span>
+                        <span className="text-gray-400 text-xs ml-auto shrink-0">{s.time}</span>
                       </div>
                     ))}
                   </div>
@@ -439,12 +439,12 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
                   </button>
                   <div className="grid grid-cols-2 gap-2">
                     <button onClick={() => setShowSkipDialog(true)}
-                      className="py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium rounded-xl transition-colors flex items-center justify-center gap-2 min-h-[48px] text-sm">
+                      className="py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors flex items-center justify-center gap-2 min-h-[48px] text-sm">
                       <SkipForwardIcon className="w-4 h-4" /> Überspringen
                     </button>
                     {currentStop.telefon && (
                       <a href={`tel:${currentStop.telefon}`}
-                        className="py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium rounded-xl transition-colors flex items-center justify-center gap-2 min-h-[48px] text-sm">
+                        className="py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors flex items-center justify-center gap-2 min-h-[48px] text-sm">
                         <PhoneIcon className="w-4 h-4" /> Anrufen
                       </a>
                     )}

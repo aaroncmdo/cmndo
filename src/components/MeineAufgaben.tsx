@@ -58,18 +58,18 @@ export default function MeineAufgaben({
 
   if (offene.length === 0) {
     return (
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-        <h2 className="text-sm font-medium text-zinc-400 mb-3">{title}</h2>
-        <p className="text-zinc-600 text-sm">Keine offenen Aufgaben</p>
+      <div className="bg-white border border-gray-200 rounded-2xl p-5">
+        <h2 className="text-sm font-medium text-gray-500 mb-3">{title}</h2>
+        <p className="text-gray-400 text-sm">Keine offenen Aufgaben</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+    <div className="bg-white border border-gray-200 rounded-2xl p-5">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-medium text-zinc-400">{title}</h2>
-        <span className="text-xs text-zinc-500">{offene.length} offen</span>
+        <h2 className="text-sm font-medium text-gray-500">{title}</h2>
+        <span className="text-xs text-gray-500">{offene.length} offen</span>
       </div>
 
       {/* Ueberfaellig */}
@@ -95,7 +95,7 @@ export default function MeineAufgaben({
       {/* Rest */}
       {rest.length > 0 && (
         <div>
-          <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider mb-1.5">Spaeter ({rest.length})</p>
+          <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mb-1.5">Spaeter ({rest.length})</p>
           <div className="space-y-1.5">
             {rest.map(t => <TaskRow key={t.id} task={t} fallLinkPrefix={fallLinkPrefix} showKunde={showKunde} variant="normal" />)}
           </div>
@@ -108,25 +108,25 @@ export default function MeineAufgaben({
 function TaskRow({ task, fallLinkPrefix, showKunde, variant }: {
   task: Task; fallLinkPrefix: string; showKunde: boolean; variant: 'overdue' | 'today' | 'normal'
 }) {
-  const borderColor = variant === 'overdue' ? 'border-red-800/50' : variant === 'today' ? 'border-amber-800/50' : 'border-zinc-800'
+  const borderColor = variant === 'overdue' ? 'border-red-800/50' : variant === 'today' ? 'border-amber-800/50' : 'border-gray-200'
   const Icon = variant === 'overdue' ? AlertTriangleIcon : variant === 'today' ? ClockIcon : CheckCircle2Icon
-  const iconColor = variant === 'overdue' ? 'text-red-400' : variant === 'today' ? 'text-amber-400' : 'text-zinc-500'
+  const iconColor = variant === 'overdue' ? 'text-red-400' : variant === 'today' ? 'text-amber-400' : 'text-gray-500'
   const prioColors: Record<string, string> = {
-    kritisch: 'bg-red-950 text-red-400',
-    dringend: 'bg-amber-950 text-amber-400',
-    hoch: 'bg-amber-950 text-amber-400',
+    kritisch: 'bg-red-50 text-red-400',
+    dringend: 'bg-amber-50 text-amber-400',
+    hoch: 'bg-amber-50 text-amber-400',
   }
 
   return (
     <Link href={`${fallLinkPrefix}${task.fall_id}`}
-      className={`flex items-start gap-2.5 px-3 py-2.5 rounded-xl border ${borderColor} bg-zinc-800/30 hover:bg-zinc-800/60 transition-colors`}>
+      className={`flex items-start gap-2.5 px-3 py-2.5 rounded-xl border ${borderColor} bg-gray-100/30 hover:bg-gray-100/60 transition-colors`}>
       <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${iconColor}`} />
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-zinc-200 leading-snug">{task.titel}</p>
+        <p className="text-sm text-gray-800 leading-snug">{task.titel}</p>
         <div className="flex items-center gap-2 mt-0.5 text-[10px]">
-          {showKunde && task.kunde_name && <span className="text-zinc-500">{task.kunde_name}</span>}
+          {showKunde && task.kunde_name && <span className="text-gray-500">{task.kunde_name}</span>}
           {task.fall_nummer && <span className="text-blue-400 font-mono">{task.fall_nummer}</span>}
-          <span className={variant === 'overdue' ? 'text-red-400 font-semibold' : 'text-zinc-500'}>{fmtDeadline(task.faellig_am)}</span>
+          <span className={variant === 'overdue' ? 'text-red-400 font-semibold' : 'text-gray-500'}>{fmtDeadline(task.faellig_am)}</span>
           {task.prioritaet && prioColors[task.prioritaet] && (
             <span className={`px-1.5 py-0 rounded ${prioColors[task.prioritaet]}`}>{task.prioritaet}</span>
           )}

@@ -26,10 +26,10 @@ const STEPS = [
 ]
 
 const TYPEN = [
-  { value: 'kfz-gutachter', label: 'KFZ-Gutachter', desc: 'Freier KFZ-Sachverstaendiger (Einzelperson)', color: 'border-blue-500 bg-blue-950/30' },
-  { value: 'dat-gutachter', label: 'DAT-Gutachter', desc: 'DAT-zertifizierter Gutachter (DAT-Kalkulationssystem)', color: 'border-orange-500 bg-orange-950/30' },
-  { value: 'akademie', label: 'Akademie', desc: 'Akademie-ausgebildeter Gutachter (hoehere Qualifikation)', color: 'border-green-500 bg-green-950/30' },
-  { value: 'gutachterbuero', label: 'Gutachterbuero', desc: 'Gutachterbuero mit mehreren Standorten', color: 'border-purple-500 bg-purple-950/30' },
+  { value: 'kfz-gutachter', label: 'KFZ-Gutachter', desc: 'Freier KFZ-Sachverstaendiger (Einzelperson)', color: 'border-blue-500 bg-blue-50/30' },
+  { value: 'dat-gutachter', label: 'DAT-Gutachter', desc: 'DAT-zertifizierter Gutachter (DAT-Kalkulationssystem)', color: 'border-orange-500 bg-orange-50/30' },
+  { value: 'akademie', label: 'Akademie', desc: 'Akademie-ausgebildeter Gutachter (hoehere Qualifikation)', color: 'border-green-500 bg-green-50/30' },
+  { value: 'gutachterbuero', label: 'Gutachterbuero', desc: 'Gutachterbuero mit mehreren Standorten', color: 'border-purple-500 bg-purple-50/30' },
 ]
 
 const QUALIFIKATIONEN = [
@@ -110,14 +110,14 @@ export default function OnboardingClient() {
   return (
     <div className="px-4 py-8">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-xl font-semibold text-white mb-6">Neuer Gutachter – Onboarding</h1>
+        <h1 className="text-xl font-semibold text-gray-900 mb-6">Neuer Gutachter – Onboarding</h1>
 
         {/* Progress */}
         {step < 6 && (
           <div className="flex items-center gap-1 mb-8">
             {STEPS.map((s, i) => (
               <div key={i} className="flex-1 flex items-center gap-1">
-                <div className={`h-1.5 flex-1 rounded-full transition-colors ${i <= step ? 'bg-blue-500' : 'bg-zinc-800'}`} />
+                <div className={`h-1.5 flex-1 rounded-full transition-colors ${i <= step ? 'bg-blue-500' : 'bg-gray-100'}`} />
               </div>
             ))}
           </div>
@@ -126,31 +126,31 @@ export default function OnboardingClient() {
         {/* Step 0: Persoenliche Daten */}
         {step === 0 && (
           <div className="space-y-4">
-            <h2 className="text-lg text-white font-medium">Persoenliche Daten</h2>
+            <h2 className="text-lg text-gray-900 font-medium">Persoenliche Daten</h2>
             <div className="grid grid-cols-2 gap-4">
-              <input className="bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm" placeholder="Vorname" value={form.vorname} onChange={e => update({ vorname: e.target.value })} />
-              <input className="bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm" placeholder="Nachname" value={form.nachname} onChange={e => update({ nachname: e.target.value })} />
+              <input className="bg-white border border-gray-300 rounded-xl px-4 py-3 text-gray-900 text-sm" placeholder="Vorname" value={form.vorname} onChange={e => update({ vorname: e.target.value })} />
+              <input className="bg-white border border-gray-300 rounded-xl px-4 py-3 text-gray-900 text-sm" placeholder="Nachname" value={form.nachname} onChange={e => update({ nachname: e.target.value })} />
             </div>
-            <input className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm" placeholder="E-Mail" type="email" value={form.email} onChange={e => update({ email: e.target.value })} />
-            <input className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm" placeholder="Telefon" type="tel" value={form.telefon} onChange={e => update({ telefon: e.target.value })} />
+            <input className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-gray-900 text-sm" placeholder="E-Mail" type="email" value={form.email} onChange={e => update({ email: e.target.value })} />
+            <input className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-gray-900 text-sm" placeholder="Telefon" type="tel" value={form.telefon} onChange={e => update({ telefon: e.target.value })} />
           </div>
         )}
 
         {/* Step 1: Typ */}
         {step === 1 && (
           <div className="space-y-4">
-            <h2 className="text-lg text-white font-medium">Gutachter-Typ</h2>
+            <h2 className="text-lg text-gray-900 font-medium">Gutachter-Typ</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {TYPEN.map(t => (
                 <button
                   key={t.value}
                   onClick={() => update({ gutachter_typ: t.value })}
                   className={`text-left p-4 rounded-xl border-2 transition-colors ${
-                    form.gutachter_typ === t.value ? t.color : 'border-zinc-800 bg-zinc-900'
+                    form.gutachter_typ === t.value ? t.color : 'border-gray-200 bg-white'
                   }`}
                 >
-                  <p className="text-white text-sm font-medium">{t.label}</p>
-                  <p className="text-zinc-400 text-xs mt-1">{t.desc}</p>
+                  <p className="text-gray-900 text-sm font-medium">{t.label}</p>
+                  <p className="text-gray-500 text-xs mt-1">{t.desc}</p>
                 </button>
               ))}
             </div>
@@ -160,8 +160,8 @@ export default function OnboardingClient() {
         {/* Step 2: Qualifikationen */}
         {step === 2 && (
           <div className="space-y-4">
-            <h2 className="text-lg text-white font-medium">Qualifikationen</h2>
-            <p className="text-zinc-400 text-sm">Waehlen Sie alle zutreffenden Qualifikationen.</p>
+            <h2 className="text-lg text-gray-900 font-medium">Qualifikationen</h2>
+            <p className="text-gray-500 text-sm">Waehlen Sie alle zutreffenden Qualifikationen.</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {QUALIFIKATIONEN.map(q => (
                 <button
@@ -170,7 +170,7 @@ export default function OnboardingClient() {
                   className={`px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
                     form.qualifikationen.includes(q)
                       ? 'bg-blue-600 text-white'
-                      : 'bg-zinc-900 border border-zinc-700 text-zinc-300 hover:border-zinc-600'
+                      : 'bg-white border border-gray-300 text-gray-700 hover:border-gray-300'
                   }`}
                 >
                   {q}
@@ -183,13 +183,13 @@ export default function OnboardingClient() {
         {/* Step 3: Standort */}
         {step === 3 && (
           <div className="space-y-4">
-            <h2 className="text-lg text-white font-medium">Standort</h2>
+            <h2 className="text-lg text-gray-900 font-medium">Standort</h2>
             <GooglePlaceAutocomplete onSelect={handlePlaceSelect} />
             {form.standort_adresse && (
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-                <p className="text-white text-sm">{form.standort_adresse}</p>
-                {form.standort_plz && <p className="text-zinc-500 text-xs mt-1">PLZ: {form.standort_plz}</p>}
-                {form.standort_lat && <p className="text-zinc-600 text-xs">Koordinaten: {form.standort_lat.toFixed(4)}, {form.standort_lng?.toFixed(4)}</p>}
+              <div className="bg-white border border-gray-200 rounded-xl p-4">
+                <p className="text-gray-900 text-sm">{form.standort_adresse}</p>
+                {form.standort_plz && <p className="text-gray-500 text-xs mt-1">PLZ: {form.standort_plz}</p>}
+                {form.standort_lat && <p className="text-gray-400 text-xs">Koordinaten: {form.standort_lat.toFixed(4)}, {form.standort_lng?.toFixed(4)}</p>}
               </div>
             )}
           </div>
@@ -198,25 +198,25 @@ export default function OnboardingClient() {
         {/* Step 4: Paket */}
         {step === 4 && (
           <div className="space-y-4">
-            <h2 className="text-lg text-white font-medium">Paket waehlen</h2>
+            <h2 className="text-lg text-gray-900 font-medium">Paket waehlen</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {PAKETE.map(p => (
                 <button
                   key={p.value}
                   onClick={() => update({ paket: p.value })}
                   className={`text-left p-5 rounded-xl border-2 transition-colors ${
-                    form.paket === p.value ? 'border-blue-500 bg-blue-950/20' : 'border-zinc-800 bg-zinc-900'
+                    form.paket === p.value ? 'border-blue-500 bg-blue-50/20' : 'border-gray-200 bg-white'
                   }`}
                 >
-                  <p className="text-white font-semibold">{p.label}</p>
-                  <p className="text-zinc-400 text-sm mt-2">{p.faelle} Faelle</p>
-                  <p className="text-zinc-400 text-sm">{p.km} km Umkreis</p>
+                  <p className="text-gray-900 font-semibold">{p.label}</p>
+                  <p className="text-gray-500 text-sm mt-2">{p.faelle} Faelle</p>
+                  <p className="text-gray-500 text-sm">{p.km} km Umkreis</p>
                   <p className="text-blue-400 text-lg font-bold mt-3">{p.preis.toLocaleString('de-DE')} EUR</p>
                 </button>
               ))}
             </div>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-              <p className="text-zinc-400 text-sm">Anzahlung faellig: <span className="text-white font-semibold">{selectedPaket.preis.toLocaleString('de-DE')} EUR</span></p>
+            <div className="bg-white border border-gray-200 rounded-xl p-4">
+              <p className="text-gray-500 text-sm">Anzahlung faellig: <span className="text-gray-900 font-semibold">{selectedPaket.preis.toLocaleString('de-DE')} EUR</span></p>
             </div>
           </div>
         )}
@@ -224,15 +224,15 @@ export default function OnboardingClient() {
         {/* Step 5: Zusammenfassung */}
         {step === 5 && (
           <div className="space-y-4">
-            <h2 className="text-lg text-white font-medium">Zusammenfassung</h2>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl divide-y divide-zinc-800">
-              <div className="p-4"><span className="text-zinc-500 text-xs">Name</span><p className="text-white text-sm">{form.vorname} {form.nachname}</p></div>
-              <div className="p-4"><span className="text-zinc-500 text-xs">E-Mail</span><p className="text-white text-sm">{form.email}</p></div>
-              <div className="p-4"><span className="text-zinc-500 text-xs">Telefon</span><p className="text-white text-sm">{form.telefon || '—'}</p></div>
-              <div className="p-4"><span className="text-zinc-500 text-xs">Typ</span><p className="text-white text-sm">{TYPEN.find(t => t.value === form.gutachter_typ)?.label}</p></div>
-              <div className="p-4"><span className="text-zinc-500 text-xs">Qualifikationen</span><div className="flex flex-wrap gap-1 mt-1">{form.qualifikationen.map(q => <span key={q} className="bg-zinc-800 text-zinc-300 text-xs px-2 py-0.5 rounded">{q}</span>)}</div></div>
-              <div className="p-4"><span className="text-zinc-500 text-xs">Standort</span><p className="text-white text-sm">{form.standort_adresse || '—'}</p></div>
-              <div className="p-4"><span className="text-zinc-500 text-xs">Paket</span><p className="text-white text-sm">{selectedPaket.label} – {selectedPaket.faelle} Faelle, {selectedPaket.km}km, {selectedPaket.preis.toLocaleString('de-DE')} EUR</p></div>
+            <h2 className="text-lg text-gray-900 font-medium">Zusammenfassung</h2>
+            <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-200">
+              <div className="p-4"><span className="text-gray-500 text-xs">Name</span><p className="text-gray-900 text-sm">{form.vorname} {form.nachname}</p></div>
+              <div className="p-4"><span className="text-gray-500 text-xs">E-Mail</span><p className="text-gray-900 text-sm">{form.email}</p></div>
+              <div className="p-4"><span className="text-gray-500 text-xs">Telefon</span><p className="text-gray-900 text-sm">{form.telefon || '—'}</p></div>
+              <div className="p-4"><span className="text-gray-500 text-xs">Typ</span><p className="text-gray-900 text-sm">{TYPEN.find(t => t.value === form.gutachter_typ)?.label}</p></div>
+              <div className="p-4"><span className="text-gray-500 text-xs">Qualifikationen</span><div className="flex flex-wrap gap-1 mt-1">{form.qualifikationen.map(q => <span key={q} className="bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded">{q}</span>)}</div></div>
+              <div className="p-4"><span className="text-gray-500 text-xs">Standort</span><p className="text-gray-900 text-sm">{form.standort_adresse || '—'}</p></div>
+              <div className="p-4"><span className="text-gray-500 text-xs">Paket</span><p className="text-gray-900 text-sm">{selectedPaket.label} – {selectedPaket.faelle} Faelle, {selectedPaket.km}km, {selectedPaket.preis.toLocaleString('de-DE')} EUR</p></div>
             </div>
           </div>
         )}
@@ -241,11 +241,11 @@ export default function OnboardingClient() {
         {step === 6 && result && (
           <div className="text-center py-12">
             <CheckCircle2Icon className="w-16 h-16 text-green-400 mx-auto mb-4" />
-            <h2 className="text-xl text-white font-semibold mb-2">Gutachter erfolgreich angelegt!</h2>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 text-left max-w-md mx-auto mt-6">
-              <p className="text-zinc-400 text-sm mb-2">Zugangsdaten (Einmalpasswort):</p>
-              <p className="text-white text-sm"><b>E-Mail:</b> {result.email}</p>
-              <p className="text-white text-sm"><b>Passwort:</b> <code className="bg-zinc-800 px-2 py-0.5 rounded">{result.tempPassword}</code></p>
+            <h2 className="text-xl text-gray-900 font-semibold mb-2">Gutachter erfolgreich angelegt!</h2>
+            <div className="bg-white border border-gray-200 rounded-xl p-6 text-left max-w-md mx-auto mt-6">
+              <p className="text-gray-500 text-sm mb-2">Zugangsdaten (Einmalpasswort):</p>
+              <p className="text-gray-900 text-sm"><b>E-Mail:</b> {result.email}</p>
+              <p className="text-gray-900 text-sm"><b>Passwort:</b> <code className="bg-gray-100 px-2 py-0.5 rounded">{result.tempPassword}</code></p>
             </div>
             <button
               onClick={() => router.push('/admin/sachverstaendige')}
@@ -258,7 +258,7 @@ export default function OnboardingClient() {
 
         {/* Error */}
         {error && (
-          <div className="mt-4 bg-red-950 border border-red-800 rounded-xl p-4">
+          <div className="mt-4 bg-red-50 border border-red-800 rounded-xl p-4">
             <p className="text-red-300 text-sm">{error}</p>
           </div>
         )}
@@ -269,7 +269,7 @@ export default function OnboardingClient() {
             <button
               onClick={() => setStep(s => s - 1)}
               disabled={step === 0}
-              className="flex items-center gap-2 text-zinc-400 hover:text-white text-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 text-gray-500 hover:text-gray-800 text-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <ArrowLeftIcon className="w-4 h-4" /> Zurueck
             </button>
@@ -278,7 +278,7 @@ export default function OnboardingClient() {
               <button
                 onClick={() => setStep(s => s + 1)}
                 disabled={!canNext()}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 disabled:cursor-not-allowed text-gray-900 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
               >
                 Weiter <ArrowRightIcon className="w-4 h-4" />
               </button>
@@ -286,7 +286,7 @@ export default function OnboardingClient() {
               <button
                 onClick={handleSubmit}
                 disabled={isPending}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-500 disabled:opacity-60 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-500 disabled:opacity-60 text-gray-900 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
               >
                 {isPending && <LoaderIcon className="w-4 h-4 animate-spin" />}
                 Gutachter anlegen

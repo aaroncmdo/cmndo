@@ -14,7 +14,7 @@ export default async function MitteilungenPage() {
   if (!sv) {
     return (
       <div className="px-4 py-8">
-        <div className="max-w-3xl mx-auto bg-yellow-950 border border-yellow-800 rounded-2xl p-6">
+        <div className="max-w-3xl mx-auto bg-yellow-50 border border-yellow-800 rounded-2xl p-6">
           <p className="text-yellow-300 text-sm">Sachverstaendigen-Profil nicht gefunden.</p>
         </div>
       </div>

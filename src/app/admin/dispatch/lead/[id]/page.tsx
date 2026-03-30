@@ -47,7 +47,7 @@ export default async function LeadDetailPage({
         {/* Back */}
         <Link
           href="/admin/dispatch"
-          className="text-sm text-zinc-400 hover:text-white transition-colors mb-6 inline-block"
+          className="text-sm text-gray-500 hover:text-gray-800 transition-colors mb-6 inline-block"
         >
           &larr; Zurueck zu Dispatch
         </Link>
@@ -55,14 +55,14 @@ export default async function LeadDetailPage({
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-start justify-between">
-            <h1 className="text-2xl font-semibold text-white">
+            <h1 className="text-2xl font-semibold text-gray-900">
               {lead.vorname ?? ''} {lead.nachname ?? ''}
             </h1>
             {lead.qualifizierungs_phase !== 'disqualifiziert' && lead.qualifizierungs_phase !== 'konvertiert' && (
               <DisqualifizierungButton leadId={lead.id} />
             )}
             {lead.disqualifiziert && (
-              <span className="bg-red-950 text-red-400 text-xs font-bold px-3 py-1 rounded-full">
+              <span className="bg-red-50 text-red-400 text-xs font-bold px-3 py-1 rounded-full">
                 DISQUALIFIZIERT: {lead.disqualifiziert_grund ?? 'Unbekannt'}
               </span>
             )}
@@ -73,9 +73,9 @@ export default async function LeadDetailPage({
                 {lead.telefon}
               </a>
             )}
-            {lead.email && <span className="text-zinc-500">{lead.email}</span>}
+            {lead.email && <span className="text-gray-500">{lead.email}</span>}
             {lead.created_at && (
-              <span className="text-zinc-600 text-xs">
+              <span className="text-gray-400 text-xs">
                 Erstellt: {new Date(lead.created_at).toLocaleDateString('de-DE')}
               </span>
             )}
@@ -144,8 +144,8 @@ export default async function LeadDetailPage({
         <LeadNotizen leadId={lead.id} notiz={lead.notiz ?? ''} />
 
         {/* Kontakt */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-5">
-          <h2 className="text-sm font-medium text-zinc-400 mb-4">Kontaktdaten</h2>
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-5">
+          <h2 className="text-sm font-medium text-gray-500 mb-4">Kontaktdaten</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <InfoRow label="E-Mail" value={lead.email} />
             <InfoRow label="Telefon" value={lead.telefon} />
@@ -172,8 +172,8 @@ export default async function LeadDetailPage({
 
         {/* Zugehoerige Faelle */}
         {faelle && faelle.length > 0 && (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-            <h2 className="text-sm font-medium text-zinc-400 mb-4">
+          <div className="bg-white border border-gray-200 rounded-2xl p-5">
+            <h2 className="text-sm font-medium text-gray-500 mb-4">
               Zugehoerige Faelle ({faelle.length})
             </h2>
             <div className="space-y-2">
@@ -181,17 +181,17 @@ export default async function LeadDetailPage({
                 <Link
                   key={fall.id}
                   href={`/admin/faelle/${fall.id}`}
-                  className="flex items-center justify-between px-4 py-3 rounded-xl bg-zinc-800/50 hover:bg-zinc-800 transition-colors"
+                  className="flex items-center justify-between px-4 py-3 rounded-xl bg-gray-100/50 hover:bg-gray-100 transition-colors"
                 >
                   <div>
                     <span className="text-blue-400 font-mono text-xs">
                       {fall.fall_nummer ?? fall.id.slice(0, 8)}
                     </span>
-                    <span className="text-zinc-400 text-xs ml-3">
+                    <span className="text-gray-500 text-xs ml-3">
                       {fall.schadens_ursache ?? '\u2014'}
                     </span>
                   </div>
-                  <span className="text-zinc-500 text-xs">
+                  <span className="text-gray-500 text-xs">
                     {fall.created_at ? new Date(fall.created_at).toLocaleDateString('de-DE') : ''}
                   </span>
                 </Link>
@@ -207,8 +207,8 @@ export default async function LeadDetailPage({
 function InfoRow({ label, value }: { label: string; value: string | null | undefined }) {
   return (
     <div>
-      <p className="text-xs text-zinc-500 mb-0.5">{label}</p>
-      <p className="text-sm text-zinc-200">{value || '\u2014'}</p>
+      <p className="text-xs text-gray-500 mb-0.5">{label}</p>
+      <p className="text-sm text-gray-800">{value || '\u2014'}</p>
     </div>
   )
 }
@@ -228,14 +228,14 @@ const PHASES = [
 function PhaseProgressBar({ phase }: { phase: string }) {
   const currentIdx = PHASES.findIndex(p => p.key === phase)
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 mb-5">
+    <div className="bg-white border border-gray-200 rounded-2xl p-4 mb-5">
       <div className="flex items-center gap-1">
         {PHASES.map((p, i) => (
           <div key={p.key} className="flex-1 flex flex-col items-center gap-1">
             <div className={`w-full h-1.5 rounded-full ${
-              i <= currentIdx ? 'bg-blue-500' : 'bg-zinc-800'
+              i <= currentIdx ? 'bg-blue-500' : 'bg-gray-100'
             }`} />
-            <span className={`text-[9px] ${i <= currentIdx ? 'text-blue-400' : 'text-zinc-600'}`}>
+            <span className={`text-[9px] ${i <= currentIdx ? 'text-blue-400' : 'text-gray-400'}`}>
               {p.label}
             </span>
           </div>

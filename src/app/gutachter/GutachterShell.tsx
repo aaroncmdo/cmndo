@@ -79,7 +79,7 @@ export default function GutachterShell({
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex">
+    <div className="min-h-screen bg-[#f8f9fb] flex">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -90,13 +90,13 @@ export default function GutachterShell({
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="px-5 py-5 border-b border-zinc-800">
-          <h2 className="text-white font-semibold text-lg">Claimondo</h2>
-          <p className="text-zinc-500 text-xs mt-0.5">Gutachter-Portal</p>
+        <div className="px-5 py-5 border-b border-gray-200">
+          <h2 className="text-gray-900 font-semibold text-lg">Claimondo</h2>
+          <p className="text-gray-500 text-xs mt-0.5">Gutachter-Portal</p>
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1">
@@ -107,8 +107,8 @@ export default function GutachterShell({
               onClick={() => setSidebarOpen(false)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                 isActive(href)
-                  ? 'bg-zinc-800 text-white'
-                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                  ? 'bg-gray-100 text-gray-900'
+                  : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100/50'
               }`}
             >
               <Icon className="w-5 h-5" />
@@ -122,14 +122,14 @@ export default function GutachterShell({
           ))}
         </nav>
 
-        <div className="px-3 py-4 border-t border-zinc-800">
+        <div className="px-3 py-4 border-t border-gray-200">
           <div className="px-3 mb-3">
-            <p className="text-zinc-300 text-sm font-medium truncate">{displayName}</p>
-            <p className="text-zinc-600 text-xs">Sachverstaendiger</p>
+            <p className="text-gray-700 text-sm font-medium truncate">{displayName}</p>
+            <p className="text-gray-400 text-xs">Sachverstaendiger</p>
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-500 hover:text-red-400 hover:bg-zinc-800/50 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:text-red-400 hover:bg-gray-100/50 transition-colors"
           >
             <LogOutIcon className="w-5 h-5" />
             Abmelden
@@ -138,17 +138,17 @@ export default function GutachterShell({
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-zinc-800 bg-zinc-900">
+        <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-2 -ml-2 text-zinc-400 hover:text-white transition-colors"
+            className="p-2 -ml-2 text-gray-500 hover:text-gray-800 transition-colors"
             aria-label="Menu oeffnen"
           >
             <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <span className="text-white font-semibold text-sm">Claimondo</span>
+          <span className="text-gray-900 font-semibold text-sm">Claimondo</span>
           <div className="w-10" />
         </header>
 

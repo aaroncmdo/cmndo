@@ -103,11 +103,11 @@ export default function ProfilClient({
       )}
       <div className="max-w-xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-semibold text-white">Mein Profil</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Mein Profil</h1>
           {!editing && (
             <button
               onClick={() => { setEditing(true); setSuccess(false) }}
-              className="px-4 py-2 text-xs font-medium text-blue-400 hover:text-blue-300 hover:bg-zinc-800 rounded-xl transition-colors"
+              className="px-4 py-2 text-xs font-medium text-blue-400 hover:text-blue-300 hover:bg-gray-100 rounded-xl transition-colors"
             >
               Bearbeiten
             </button>
@@ -115,21 +115,21 @@ export default function ProfilClient({
         </div>
 
         {success && (
-          <div className="bg-green-950 border border-green-800 rounded-xl p-3 mb-4">
+          <div className="bg-green-50 border border-green-800 rounded-xl p-3 mb-4">
             <p className="text-green-300 text-sm">Profil gespeichert.</p>
           </div>
         )}
 
         <form onSubmit={handleSave}>
-          <div className="bg-zinc-900 rounded-2xl p-6 border border-zinc-800 space-y-4">
+          <div className="bg-white rounded-2xl p-6 border border-gray-200 space-y-4">
             {/* Avatar */}
-            <div className="flex items-center gap-4 pb-4 border-b border-zinc-800">
-              <div className="w-14 h-14 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 text-xl font-semibold">
+            <div className="flex items-center gap-4 pb-4 border-b border-gray-200">
+              <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-xl font-semibold">
                 {initials}
               </div>
               <div>
-                <p className="text-white font-medium text-lg">{fullName}</p>
-                <p className="text-zinc-500 text-sm">Sachverständiger</p>
+                <p className="text-gray-900 font-medium text-lg">{fullName}</p>
+                <p className="text-gray-500 text-sm">Sachverständiger</p>
               </div>
             </div>
 
@@ -143,15 +143,15 @@ export default function ProfilClient({
                   <EditRow label="Nachname" name="nachname" defaultValue={profile.nachname ?? ''} />
                   <EditRow label="Telefon" name="telefon" defaultValue={profile.telefon ?? ''} type="tel" />
                   <EditRow label="Gebiet (PLZ)" name="gebiet_plz" defaultValue={sv.gebiet_plz ?? ''} placeholder="z.B. 10115,10117,10119" />
-                  <div className="flex gap-2 py-2 border-b border-zinc-800/50">
-                    <span className="text-zinc-500 text-sm w-36 shrink-0 pt-2">Standort</span>
+                  <div className="flex gap-2 py-2 border-b border-gray-200/50">
+                    <span className="text-gray-500 text-sm w-36 shrink-0 pt-2">Standort</span>
                     <div className="flex-1 space-y-2">
                       {mapsReady ? (
                         <GooglePlaceAutocomplete
                           defaultValue={standort.adresse}
                           placeholder="Büro-/Wohnadresse eingeben"
                           onSelect={onPlaceSelect}
-                          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                          className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
                         />
                       ) : (
                         <input
@@ -159,7 +159,7 @@ export default function ProfilClient({
                           value={standort.adresse}
                           onChange={e => setStandort(prev => ({ ...prev, adresse: e.target.value }))}
                           placeholder="Büro-/Wohnadresse eingeben"
-                          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                          className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
                         />
                       )}
                       {standort.lat != null && (
@@ -170,16 +170,16 @@ export default function ProfilClient({
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-2 py-2.5 border-b border-zinc-800/50">
-                    <span className="text-zinc-500 text-sm w-36 shrink-0">Verfügbar</span>
+                  <div className="flex gap-2 py-2.5 border-b border-gray-200/50">
+                    <span className="text-gray-500 text-sm w-36 shrink-0">Verfügbar</span>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
                         name="verfuegbar"
                         defaultChecked={sv.ist_aktiv}
-                        className="w-4 h-4 rounded bg-zinc-800 border-zinc-600 text-blue-600 focus:ring-blue-600 focus:ring-offset-0"
+                        className="w-4 h-4 rounded bg-gray-100 border-gray-300 text-blue-600 focus:ring-blue-600 focus:ring-offset-0"
                       />
-                      <span className="text-zinc-300 text-sm">Neue Aufträge annehmen</span>
+                      <span className="text-gray-700 text-sm">Neue Aufträge annehmen</span>
                     </label>
                   </div>
                 </>
@@ -201,11 +201,11 @@ export default function ProfilClient({
 
             {/* Actions */}
             {editing && (
-              <div className="flex gap-2 pt-4 border-t border-zinc-800">
+              <div className="flex gap-2 pt-4 border-t border-gray-200">
                 <button
                   type="button"
                   onClick={() => setEditing(false)}
-                  className="flex-1 py-2.5 rounded-xl text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                  className="flex-1 py-2.5 rounded-xl text-sm text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
                 >
                   Abbrechen
                 </button>
@@ -224,18 +224,18 @@ export default function ProfilClient({
         </form>
 
         {/* Kalender-Verbindung */}
-        <div className="bg-zinc-900 rounded-2xl p-6 border border-zinc-800 mt-5">
-          <h2 className="text-sm font-medium text-zinc-400 mb-4">Kalender verbinden</h2>
+        <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-5">
+          <h2 className="text-sm font-medium text-gray-500 mb-4">Kalender verbinden</h2>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-zinc-200 text-sm font-medium">
+                <p className="text-gray-800 text-sm font-medium">
                   {sv.kalender_sync_aktiv
                     ? `${sv.kalender_typ === 'google' ? 'Google' : 'Outlook'} Kalender verbunden`
                     : 'Nicht verbunden'}
                 </p>
                 {sv.kalender_sync_letzte && (
-                  <p className="text-zinc-500 text-xs mt-0.5">
+                  <p className="text-gray-500 text-xs mt-0.5">
                     Letzte Sync: {new Date(sv.kalender_sync_letzte).toLocaleString('de-DE')}
                   </p>
                 )}
@@ -247,35 +247,35 @@ export default function ProfilClient({
               <div className="flex gap-2">
                 <button
                   onClick={() => alert('Google OAuth2 wird konfiguriert. Bitte Admin kontaktieren.')}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition-colors"
+                  className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-300 transition-colors"
                 >
                   Google Kalender
                 </button>
                 <button
                   onClick={() => alert('Outlook OAuth2 wird konfiguriert. Bitte Admin kontaktieren.')}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition-colors"
+                  className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-300 transition-colors"
                 >
                   Outlook Kalender
                 </button>
               </div>
             )}
 
-            <p className="text-zinc-600 text-xs">
+            <p className="text-gray-400 text-xs">
               Ohne Kalender-Sync keine automatische Terminvergabe möglich.
             </p>
           </div>
         </div>
 
         {/* Qualifikationen */}
-        <div className="bg-zinc-900 rounded-2xl p-6 border border-zinc-800 mt-5">
-          <h2 className="text-sm font-medium text-zinc-400 mb-4">Qualifikationen</h2>
+        <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-5">
+          <h2 className="text-sm font-medium text-gray-500 mb-4">Qualifikationen</h2>
           <QualifikationenSection svId={sv.id} initialQualifikationen={sv.qualifikationen ?? []} />
         </div>
 
         {/* Offene Terminanfragen */}
         {pendingTermine.length > 0 && (
-          <div className="bg-zinc-900 rounded-2xl p-6 border border-zinc-800 mt-5">
-            <h2 className="text-sm font-medium text-zinc-400 mb-4">
+          <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-5">
+            <h2 className="text-sm font-medium text-gray-500 mb-4">
               Offene Terminanfragen ({pendingTermine.length})
             </h2>
             <div className="space-y-3">
@@ -326,16 +326,16 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
   const end = new Date(termin.end_zeit)
 
   return (
-    <div className="bg-zinc-800/50 rounded-xl p-4 border border-zinc-700">
+    <div className="bg-gray-100/50 rounded-xl p-4 border border-gray-300">
       <div className="flex items-center justify-between mb-2">
-        <p className="text-zinc-200 text-sm font-medium">
+        <p className="text-gray-800 text-sm font-medium">
           {start.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}
           {' '}
           {start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
           –
           {end.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
         </p>
-        <span className="text-amber-400 text-[10px] font-medium bg-amber-950 px-2 py-0.5 rounded-full">Anfrage</span>
+        <span className="text-amber-400 text-[10px] font-medium bg-amber-50 px-2 py-0.5 rounded-full">Anfrage</span>
       </div>
 
       {!showReject ? (
@@ -362,20 +362,20 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
             value={ablehnungsgrund}
             onChange={e => setAblehnungsgrund(e.target.value)}
             placeholder="Grund (optional)"
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-blue-600"
+            className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-600"
           />
           <input
             type="datetime-local"
             value={gegenvorschlag}
             onChange={e => setGegenvorschlag(e.target.value)}
             required
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-blue-600"
+            className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-600"
           />
-          <p className="text-zinc-500 text-xs">Gegenvorschlag ist Pflicht</p>
+          <p className="text-gray-500 text-xs">Gegenvorschlag ist Pflicht</p>
           <div className="flex gap-2">
             <button
               onClick={() => setShowReject(false)}
-              className="flex-1 py-2 rounded-lg text-xs text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+              className="flex-1 py-2 rounded-lg text-xs text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
             >
               Zurück
             </button>
@@ -425,14 +425,14 @@ function QualifikationenSection({ svId, initialQualifikationen }: { svId: string
             className={`w-full flex items-center gap-3 text-left px-4 py-3 rounded-xl border text-sm transition-all ${
               active
                 ? 'border-blue-500/50 bg-blue-500/10 text-blue-400'
-                : 'border-zinc-700 bg-zinc-800/50 text-zinc-400 hover:border-zinc-600'
+                : 'border-gray-300 bg-gray-100/50 text-gray-500 hover:border-gray-300'
             }`}
           >
             <div className={`w-4 h-4 rounded border flex items-center justify-center ${
-              active ? 'border-blue-500 bg-blue-500' : 'border-zinc-600'
+              active ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
             }`}>
               {active && (
-                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <svg className="w-3 h-3 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
               )}
@@ -441,16 +441,16 @@ function QualifikationenSection({ svId, initialQualifikationen }: { svId: string
           </button>
         )
       })}
-      {saving && <p className="text-zinc-500 text-xs">Wird gespeichert...</p>}
+      {saving && <p className="text-gray-500 text-xs">Wird gespeichert...</p>}
     </div>
   )
 }
 
 function FieldRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex gap-2 py-2.5 border-b border-zinc-800/50 last:border-0">
-      <span className="text-zinc-500 text-sm w-36 shrink-0">{label}</span>
-      <span className="text-zinc-200 text-sm">{value}</span>
+    <div className="flex gap-2 py-2.5 border-b border-gray-200/50 last:border-0">
+      <span className="text-gray-500 text-sm w-36 shrink-0">{label}</span>
+      <span className="text-gray-800 text-sm">{value}</span>
     </div>
   )
 }
@@ -459,14 +459,14 @@ function EditRow({ label, name, defaultValue, type = 'text', placeholder }: {
   label: string; name: string; defaultValue: string; type?: string; placeholder?: string
 }) {
   return (
-    <div className="flex gap-2 py-2 border-b border-zinc-800/50">
-      <span className="text-zinc-500 text-sm w-36 shrink-0 pt-2">{label}</span>
+    <div className="flex gap-2 py-2 border-b border-gray-200/50">
+      <span className="text-gray-500 text-sm w-36 shrink-0 pt-2">{label}</span>
       <input
         type={type}
         name={name}
         defaultValue={defaultValue}
         placeholder={placeholder}
-        className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-600"
+        className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
       />
     </div>
   )

@@ -77,19 +77,19 @@ export default function OnboardingClient({
 
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-white mb-1">Onboarding</h1>
-          <p className="text-zinc-500 text-sm">
+          <h1 className="text-2xl font-semibold text-gray-900 mb-1">Onboarding</h1>
+          <p className="text-gray-500 text-sm">
             Fall {fallNummer ?? fallId.slice(0, 8)} - Bitte laden Sie die erforderlichen Dokumente hoch.
           </p>
         </div>
 
         {/* Progress bar */}
-        <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800 mb-4">
+        <div className="bg-white rounded-2xl p-5 border border-gray-200 mb-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Fortschritt</span>
-            <span className="text-zinc-300 text-sm font-medium">{uploadedCount} von {totalPflicht} Dokumente</span>
+            <span className="text-gray-500 text-xs font-semibold uppercase tracking-wider">Fortschritt</span>
+            <span className="text-gray-700 text-sm font-medium">{uploadedCount} von {totalPflicht} Dokumente</span>
           </div>
-          <div className="h-2.5 bg-zinc-800 rounded-full overflow-hidden">
+          <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
             <div
               className="h-full bg-blue-500 rounded-full transition-all duration-500 ease-out"
               style={{ width: `${progress}%` }}
@@ -99,7 +99,7 @@ export default function OnboardingClient({
 
         {/* Urgent banner: Gutachtertermin < 48h */}
         {svTerminSoon && docsStillMissing && (
-          <div className="bg-amber-950/50 border border-amber-800 rounded-2xl p-4 mb-4 flex items-start gap-3">
+          <div className="bg-amber-50/50 border border-amber-800 rounded-2xl p-4 mb-4 flex items-start gap-3">
             <svg className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
             </svg>
@@ -114,18 +114,18 @@ export default function OnboardingClient({
 
         {/* Already uploaded flow docs */}
         {existingDocs.length > 0 && (
-          <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800 mb-4">
-            <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">
+          <div className="bg-white rounded-2xl p-5 border border-gray-200 mb-4">
+            <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">
               Bereits hochgeladene Dokumente
             </h3>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {existingDocs.map(doc => (
-                <div key={doc.id} className="relative aspect-square rounded-xl overflow-hidden bg-zinc-800">
+                <div key={doc.id} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
                   {doc.typ.startsWith('foto') ? (
                     <img src={doc.datei_url} alt={doc.datei_name ?? ''} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} className="text-zinc-500">
+                      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} className="text-gray-500">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                       </svg>
                     </div>
@@ -149,7 +149,7 @@ export default function OnboardingClient({
         {/* Pflichtdokumente */}
         {pflicht.length > 0 && (
           <div className="space-y-3 mb-4">
-            <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">
+            <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider">
               Pflichtdokumente
             </h3>
             {pflicht.map(doc => (
@@ -166,7 +166,7 @@ export default function OnboardingClient({
         {/* Optional documents */}
         {optional.length > 0 && (
           <div className="space-y-3 mb-6">
-            <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">
+            <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider">
               Optionale Dokumente
             </h3>
             {optional.map(doc => (
@@ -177,20 +177,20 @@ export default function OnboardingClient({
                 onUploaded={handleDocUploaded}
               />
             ))}
-            <p className="text-zinc-600 text-xs">Optionale Dokumente konnen ubersprungen werden.</p>
+            <p className="text-gray-400 text-xs">Optionale Dokumente konnen ubersprungen werden.</p>
           </div>
         )}
 
         {/* No pflichtdokumente → can complete immediately */}
         {pflicht.length === 0 && optional.length === 0 && (
-          <div className="bg-zinc-900 rounded-2xl p-8 border border-zinc-800 mb-4 text-center">
+          <div className="bg-white rounded-2xl p-8 border border-gray-200 mb-4 text-center">
             <div className="text-green-400 text-3xl mb-3">
               <svg className="w-10 h-10 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 className="text-white font-medium mb-1">Alle Dokumente vorhanden</h3>
-            <p className="text-zinc-500 text-sm">Sie konnen das Onboarding jetzt abschliessen.</p>
+            <h3 className="text-gray-900 font-medium mb-1">Alle Dokumente vorhanden</h3>
+            <p className="text-gray-500 text-sm">Sie konnen das Onboarding jetzt abschliessen.</p>
           </div>
         )}
 
@@ -210,7 +210,7 @@ export default function OnboardingClient({
           {completing ? 'Wird abgeschlossen...' : 'Onboarding abschliessen'}
         </button>
         {!allPflichtDone && (
-          <p className="text-zinc-600 text-xs text-center mt-2">
+          <p className="text-gray-400 text-xs text-center mt-2">
             Bitte laden Sie alle Pflichtdokumente hoch, um fortzufahren.
           </p>
         )}
@@ -265,39 +265,39 @@ function DokumentCard({
   }
 
   return (
-    <div className={`bg-zinc-900 rounded-2xl p-5 border transition-colors ${
-      isUploaded ? 'border-green-800/50' : 'border-zinc-800'
+    <div className={`bg-white rounded-2xl p-5 border transition-colors ${
+      isUploaded ? 'border-green-800/50' : 'border-gray-200'
     }`}>
       <div className="flex items-start justify-between mb-2">
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h4 className="text-white text-sm font-medium">{doc.titel}</h4>
+            <h4 className="text-gray-900 text-sm font-medium">{doc.titel}</h4>
             {doc.pflicht ? (
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 font-medium">Pflicht</span>
             ) : (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-700 text-zinc-400 font-medium">Optional</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-700 text-gray-500 font-medium">Optional</span>
             )}
           </div>
           {doc.beschreibung && (
-            <p className="text-zinc-500 text-xs mt-1">{doc.beschreibung}</p>
+            <p className="text-gray-500 text-xs mt-1">{doc.beschreibung}</p>
           )}
         </div>
         {/* Status badge */}
         <div className={`shrink-0 ml-3 px-2.5 py-1 rounded-lg text-xs font-medium ${
           isUploaded
             ? 'bg-green-500/20 text-green-400'
-            : 'bg-zinc-800 text-zinc-500'
+            : 'bg-gray-100 text-gray-500'
         }`}>
           {isUploaded ? 'Hochgeladen' : 'Ausstehend'}
         </div>
       </div>
 
       {isUploaded ? (
-        <div className="flex items-center gap-2 mt-3 px-3 py-2 bg-zinc-800/50 rounded-xl">
+        <div className="flex items-center gap-2 mt-3 px-3 py-2 bg-gray-100/50 rounded-xl">
           <svg className="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
-          <span className="text-zinc-300 text-xs truncate">{doc.datei_name}</span>
+          <span className="text-gray-700 text-xs truncate">{doc.datei_name}</span>
         </div>
       ) : (
         <div
@@ -308,20 +308,20 @@ function DokumentCard({
           className={`mt-3 flex flex-col items-center justify-center gap-2 px-4 py-6 rounded-xl border-2 border-dashed cursor-pointer transition-all ${
             dragOver
               ? 'border-blue-500 bg-blue-500/5'
-              : 'border-zinc-700 bg-zinc-800/30 hover:border-zinc-600'
+              : 'border-gray-300 bg-gray-100/30 hover:border-gray-300'
           }`}
         >
           {uploading ? (
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-              <span className="text-zinc-400 text-sm">Wird hochgeladen...</span>
+              <span className="text-gray-500 text-sm">Wird hochgeladen...</span>
             </div>
           ) : (
             <>
-              <svg className="w-6 h-6 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg className="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
               </svg>
-              <p className="text-zinc-400 text-xs text-center">
+              <p className="text-gray-500 text-xs text-center">
                 Datei hierher ziehen oder klicken
               </p>
             </>

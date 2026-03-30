@@ -17,19 +17,15 @@ export default async function AdminLayout({
     : 'U'
 
   return (
-    <div className="min-h-screen glass-bg relative">
-      {/* Ambient light overlays */}
-      <div className="glass-ambient" aria-hidden="true" />
-      <div className="glass-ambient-indigo" aria-hidden="true" />
-
+    <div className="min-h-screen bg-[#f8f9fb] relative">
       {/* Client-side nav with usePathname for active state */}
       <AdminNav email={user.email ?? ''} initials={initials} />
 
       {/* Main content area — offset by sidebar width on desktop */}
       <div className="md:ml-56 min-h-screen flex flex-col relative z-10">
         {/* Mobile header */}
-        <header className="md:hidden flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-          <h2 className="text-base font-semibold text-white tracking-tight">Claimondo</h2>
+        <header className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
+          <h2 className="text-base font-semibold text-gray-900 tracking-tight">Claimondo</h2>
           <NotificationBell />
         </header>
 

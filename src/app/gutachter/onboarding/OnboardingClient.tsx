@@ -150,7 +150,7 @@ export default function OnboardingClient({
     : true
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-start justify-center px-4 py-10">
+    <div className="min-h-screen bg-[#f8f9fb] flex items-start justify-center px-4 py-10">
       {process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY && (
         <Script
           src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}
@@ -161,8 +161,8 @@ export default function OnboardingClient({
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold text-white">Gutachter-Onboarding</h1>
-          <p className="text-zinc-500 text-sm mt-1">Schritt {step + 1} von {STEPS.length}</p>
+          <h1 className="text-2xl font-semibold text-gray-900">Gutachter-Onboarding</h1>
+          <p className="text-gray-500 text-sm mt-1">Schritt {step + 1} von {STEPS.length}</p>
         </div>
 
         {/* Stepper */}
@@ -172,12 +172,12 @@ export default function OnboardingClient({
             return (
               <div key={s.key} className="flex items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                  i < step ? 'bg-green-600' : i === step ? 'bg-blue-600' : 'bg-zinc-800'
+                  i < step ? 'bg-green-600' : i === step ? 'bg-blue-600' : 'bg-gray-100'
                 }`}>
-                  <Icon className="w-4 h-4 text-white" />
+                  <Icon className="w-4 h-4 text-gray-900" />
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div className={`w-8 h-0.5 ${i < step ? 'bg-green-600' : 'bg-zinc-800'}`} />
+                  <div className={`w-8 h-0.5 ${i < step ? 'bg-green-600' : 'bg-gray-100'}`} />
                 )}
               </div>
             )
@@ -185,8 +185,8 @@ export default function OnboardingClient({
         </div>
 
         {/* Content */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold text-white mb-5">{currentStep.label}</h2>
+        <div className="bg-white border border-gray-200 rounded-2xl p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-5">{currentStep.label}</h2>
 
           {/* Step 1: Persönliche Daten */}
           {step === 0 && (
@@ -196,7 +196,7 @@ export default function OnboardingClient({
               <InputField label="E-Mail" value={email} onChange={() => {}} disabled />
               <InputField label="Telefon" value={data.telefon} onChange={v => updateField('telefon', v)} type="tel" />
               <div>
-                <label className="text-sm text-zinc-400 mb-2 block">Qualifikationen</label>
+                <label className="text-sm text-gray-500 mb-2 block">Qualifikationen</label>
                 <div className="flex flex-wrap gap-2">
                   {QUALIFIKATIONEN.map(q => (
                     <button
@@ -206,7 +206,7 @@ export default function OnboardingClient({
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                         data.qualifikationen.includes(q)
                           ? 'bg-blue-600 text-white'
-                          : 'bg-zinc-800 text-zinc-400 hover:text-zinc-200'
+                          : 'bg-gray-100 text-gray-500 hover:text-gray-800'
                       }`}
                     >
                       {q}
@@ -227,12 +227,12 @@ export default function OnboardingClient({
                   onClick={() => updateField('gutachter_typ', t.key)}
                   className={`p-5 rounded-xl border-2 text-left transition-all ${
                     data.gutachter_typ === t.key
-                      ? `${t.color} bg-zinc-800`
-                      : 'border-zinc-700 hover:border-zinc-600'
+                      ? `${t.color} bg-gray-100`
+                      : 'border-gray-300 hover:border-gray-300'
                   }`}
                 >
-                  <p className="text-white font-semibold">{t.label}</p>
-                  <p className="text-zinc-500 text-xs mt-1">{t.desc}</p>
+                  <p className="text-gray-900 font-semibold">{t.label}</p>
+                  <p className="text-gray-500 text-xs mt-1">{t.desc}</p>
                 </button>
               ))}
             </div>
@@ -243,12 +243,12 @@ export default function OnboardingClient({
             <div className="space-y-4">
               {mapsReady ? (
                 <div>
-                  <label className="text-sm text-zinc-400 mb-1.5 block">Adresse (Büro/Wohnsitz)</label>
+                  <label className="text-sm text-gray-500 mb-1.5 block">Adresse (Büro/Wohnsitz)</label>
                   <GooglePlaceAutocomplete
                     defaultValue={data.standort_adresse}
                     placeholder="Musterstraße 1, 10115 Berlin"
                     onSelect={onPlaceSelect}
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
                   />
                 </div>
               ) : (
@@ -271,7 +271,7 @@ export default function OnboardingClient({
                   Koordinaten erfasst ({data.standort_lat.toFixed(4)}, {data.standort_lng?.toFixed(4)})
                 </p>
               )}
-              <p className="text-zinc-600 text-xs">
+              <p className="text-gray-400 text-xs">
                 Der Standort bestimmt Ihren Einsatzradius.{' '}
                 {!mapsReady && 'Adress-Vorschläge werden geladen oder sind nicht verfügbar.'}
               </p>
@@ -288,18 +288,18 @@ export default function OnboardingClient({
                   onClick={() => updateField('paket', p.key)}
                   className={`p-5 rounded-xl border-2 text-left transition-all ${
                     data.paket === p.key
-                      ? `${p.color} bg-zinc-800`
-                      : 'border-zinc-700 hover:border-zinc-600'
+                      ? `${p.color} bg-gray-100`
+                      : 'border-gray-300 hover:border-gray-300'
                   }`}
                 >
-                  <p className="text-white font-semibold text-lg mb-1">{p.label}</p>
-                  <p className="text-zinc-400 text-sm">{p.faelle} Fälle/Monat</p>
-                  <p className="text-zinc-400 text-sm">{p.km} km Radius</p>
-                  <p className="text-zinc-500 text-xs mt-2">150 € pro Fall</p>
-                  <p className="text-white font-bold text-xl mt-3">
+                  <p className="text-gray-900 font-semibold text-lg mb-1">{p.label}</p>
+                  <p className="text-gray-500 text-sm">{p.faelle} Fälle/Monat</p>
+                  <p className="text-gray-500 text-sm">{p.km} km Radius</p>
+                  <p className="text-gray-500 text-xs mt-2">150 € pro Fall</p>
+                  <p className="text-gray-900 font-bold text-xl mt-3">
                     {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(p.preis)}
                   </p>
-                  <p className="text-zinc-600 text-xs">Anzahlung</p>
+                  <p className="text-gray-400 text-xs">Anzahlung</p>
                 </button>
               ))}
             </div>
@@ -308,7 +308,7 @@ export default function OnboardingClient({
           {/* Step 5: Kalender */}
           {step === 4 && (
             <div className="space-y-4">
-              <p className="text-zinc-300 text-sm mb-4">
+              <p className="text-gray-700 text-sm mb-4">
                 Verbinden Sie Ihren Kalender für die automatische Terminvergabe.
               </p>
               <div className="flex flex-col gap-3">
@@ -319,14 +319,14 @@ export default function OnboardingClient({
                     onClick={() => updateField('kalender_typ', typ)}
                     className={`p-4 rounded-xl border text-left transition-all ${
                       data.kalender_typ === typ
-                        ? 'border-blue-500 bg-zinc-800'
-                        : 'border-zinc-700 hover:border-zinc-600'
+                        ? 'border-blue-500 bg-gray-100'
+                        : 'border-gray-300 hover:border-gray-300'
                     }`}
                   >
-                    <p className="text-white font-medium">
+                    <p className="text-gray-900 font-medium">
                       {typ === 'google' ? 'Google Kalender' : typ === 'outlook' ? 'Outlook Kalender' : 'Später verbinden'}
                     </p>
-                    <p className="text-zinc-500 text-xs mt-0.5">
+                    <p className="text-gray-500 text-xs mt-0.5">
                       {typ === 'keiner' ? 'Ohne Kalender-Sync keine automatische Terminvergabe' : 'OAuth2 Verbindung wird nach Abschluss eingerichtet'}
                     </p>
                   </button>
@@ -353,12 +353,12 @@ export default function OnboardingClient({
           )}
 
           {/* Navigation */}
-          <div className="flex gap-3 mt-8 pt-5 border-t border-zinc-800">
+          <div className="flex gap-3 mt-8 pt-5 border-t border-gray-200">
             {step > 0 && (
               <button
                 type="button"
                 onClick={() => setStep(s => s - 1)}
-                className="flex-1 py-3 rounded-xl text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                className="flex-1 py-3 rounded-xl text-sm text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
               >
                 Zurück
               </button>
@@ -394,14 +394,14 @@ function InputField({ label, value, onChange, type = 'text', placeholder, disabl
 }) {
   return (
     <div>
-      <label className="text-sm text-zinc-400 mb-1.5 block">{label}</label>
+      <label className="text-sm text-gray-500 mb-1.5 block">{label}</label>
       <input
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+        className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
       />
     </div>
   )
@@ -409,9 +409,9 @@ function InputField({ label, value, onChange, type = 'text', placeholder, disabl
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between py-2.5 border-b border-zinc-800/50 last:border-0">
-      <span className="text-zinc-500 text-sm">{label}</span>
-      <span className="text-zinc-200 text-sm font-medium">{value}</span>
+    <div className="flex justify-between py-2.5 border-b border-gray-200/50 last:border-0">
+      <span className="text-gray-500 text-sm">{label}</span>
+      <span className="text-gray-800 text-sm font-medium">{value}</span>
     </div>
   )
 }

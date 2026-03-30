@@ -59,7 +59,7 @@ export default function GutachterTermin({
   if (!lead.sa_unterschrieben) return null
   if (confirmed) {
     return (
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-5">
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-5">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
             <CheckCircle2Icon className="w-4 h-4 text-green-400" />
@@ -67,7 +67,7 @@ export default function GutachterTermin({
           <div>
             <h2 className="text-sm font-medium text-green-400">Gutachter-Termin bestaetigt</h2>
             {lead.gutachter_termin && (
-              <p className="text-zinc-400 text-xs mt-0.5">
+              <p className="text-gray-500 text-xs mt-0.5">
                 {new Date(lead.gutachter_termin).toLocaleString('de-DE', {
                   weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
                   hour: '2-digit', minute: '2-digit',
@@ -135,11 +135,11 @@ export default function GutachterTermin({
     }
   }
 
-  const inputCls = 'w-full px-4 py-3 rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 transition-colors'
+  const inputCls = 'w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-100 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 transition-colors'
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-5">
-      <h2 className="text-sm font-medium text-zinc-400 mb-4 flex items-center gap-2">
+    <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-5">
+      <h2 className="text-sm font-medium text-gray-500 mb-4 flex items-center gap-2">
         <CalendarIcon className="w-4 h-4" />
         Gutachter-Termin vereinbaren
       </h2>
@@ -147,10 +147,10 @@ export default function GutachterTermin({
       {/* Inputs */}
       <div className="space-y-3 mb-4">
         <div>
-          <label className="text-xs text-zinc-500 mb-1 block">Standort des Fahrzeugs</label>
+          <label className="text-xs text-gray-500 mb-1 block">Standort des Fahrzeugs</label>
           <div className="grid grid-cols-2 gap-2">
             <div className="relative">
-              <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+              <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
               <input
                 type="text"
                 value={plz}
@@ -170,7 +170,7 @@ export default function GutachterTermin({
         </div>
 
         <div>
-          <label className="text-xs text-zinc-500 mb-1 block">Wunschtermin</label>
+          <label className="text-xs text-gray-500 mb-1 block">Wunschtermin</label>
           <input
             type="datetime-local"
             value={wunschtermin}
@@ -247,7 +247,7 @@ export default function GutachterTermin({
           {!showAltPicker ? (
             <button
               onClick={() => { setResult(null); setShowAltPicker(true) }}
-              className="w-full py-2.5 text-center text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+              className="w-full py-2.5 text-center text-sm text-gray-500 hover:text-gray-800 transition-colors"
             >
               Anderen Termin pruefen
             </button>
@@ -279,8 +279,8 @@ function SlotCard({
   return (
     <div className={`rounded-xl p-4 border ${
       isEmpfohlen
-        ? 'bg-green-950/30 border-green-800/50'
-        : 'bg-blue-950/30 border-blue-800/50'
+        ? 'bg-green-50/30 border-green-800/50'
+        : 'bg-blue-50/30 border-blue-800/50'
     }`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
@@ -302,29 +302,29 @@ function SlotCard({
           <UserCheckIcon className={`w-4 h-4 ${isEmpfohlen ? 'text-green-400' : 'text-blue-400'}`} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-white text-sm font-medium">{slot.name}</p>
+          <p className="text-gray-900 text-sm font-medium">{slot.name}</p>
           <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
             {slot.entfernung_km != null && (
-              <span className="text-zinc-500 text-[11px] flex items-center gap-1">
+              <span className="text-gray-500 text-[11px] flex items-center gap-1">
                 <MapPinIcon className="w-3 h-3" />
                 {slot.entfernung_km} km
               </span>
             )}
-            <span className="text-zinc-500 text-[11px] flex items-center gap-1">
+            <span className="text-gray-500 text-[11px] flex items-center gap-1">
               <ClockIcon className="w-3 h-3" />
               Auslastung {slot.auslastung}
             </span>
             {slot.paket && (
-              <span className="text-zinc-500 text-[11px]">{slot.paket}</span>
+              <span className="text-gray-500 text-[11px]">{slot.paket}</span>
             )}
           </div>
         </div>
       </div>
 
       {/* Termin */}
-      <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-zinc-800/50">
-        <CalendarIcon className="w-3.5 h-3.5 text-zinc-500" />
-        <span className="text-zinc-200 text-sm">
+      <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-gray-100/50">
+        <CalendarIcon className="w-3.5 h-3.5 text-gray-500" />
+        <span className="text-gray-800 text-sm">
           {terminDate.toLocaleString('de-DE', {
             weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric',
             hour: '2-digit', minute: '2-digit',

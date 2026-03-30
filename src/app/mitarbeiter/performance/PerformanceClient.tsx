@@ -7,7 +7,7 @@ type Perf = { monat: string; jahr: number; leads_qualifiziert: number; leads_kon
 type Incentive = { id: string; titel: string; beschreibung: string | null; kategorie: string; typ: string; bedingung: string; wert: number }
 type TimelineItem = { zeit: string; typ: string; label: string; detail: string; color: string; link?: string; meetLink?: string }
 
-const MEDAL = ['text-amber-300', 'text-zinc-400', 'text-orange-400']
+const MEDAL = ['text-amber-300', 'text-gray-500', 'text-orange-400']
 
 const TL_COLORS: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
   telefon: { bg: 'bg-blue-500/20', text: 'text-blue-400', icon: <PhoneIcon className="w-4 h-4" /> },
@@ -34,17 +34,17 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
   return (
     <div className="px-4 py-8"><div className="max-w-4xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-white flex items-center gap-2"><BarChart3Icon className="w-5 h-5 text-blue-400" />Meine Performance</h1>
-        <p className="text-zinc-500 text-sm mt-0.5">{name} · {monatLabel}</p>
+        <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2"><BarChart3Icon className="w-5 h-5 text-blue-400" />Meine Performance</h1>
+        <p className="text-gray-500 text-sm mt-0.5">{name} · {monatLabel}</p>
       </div>
 
       {/* ─── TAGES-TIMELINE (KFZ-41) ──────────────────────── */}
       {timeline && timeline.length > 0 && (
-        <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-5 mb-6">
+        <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-6">
           {/* Tages-Zusammenfassung */}
           {tagesSummary && (
-            <div className="flex items-center gap-4 mb-4 pb-3 border-b border-zinc-800">
-              <h2 className="text-white font-semibold flex items-center gap-2"><CalendarIcon className="w-4 h-4 text-blue-400" />Heute</h2>
+            <div className="flex items-center gap-4 mb-4 pb-3 border-b border-gray-200">
+              <h2 className="text-gray-900 font-semibold flex items-center gap-2"><CalendarIcon className="w-4 h-4 text-blue-400" />Heute</h2>
               <div className="flex gap-3 text-xs">
                 <span className="text-blue-400 font-medium">{tagesSummary.termine} Termine</span>
                 <span className="text-amber-400 font-medium">{tagesSummary.offeneTasks} Tasks</span>
@@ -60,14 +60,14 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
               const zeit = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
               const style = TL_COLORS[item.typ] ?? TL_COLORS.task
               const content = (
-                <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-xl hover:bg-zinc-800/50 transition-colors">
-                  <span className="text-zinc-400 text-sm font-semibold tabular-nums w-12 shrink-0">{zeit}</span>
+                <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-xl hover:bg-gray-100/50 transition-colors">
+                  <span className="text-gray-500 text-sm font-semibold tabular-nums w-12 shrink-0">{zeit}</span>
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${style.bg} ${style.text} shrink-0`}>
                     {style.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-medium truncate">{item.label}</p>
-                    {item.detail && <p className="text-zinc-500 text-xs truncate">{item.detail}</p>}
+                    <p className="text-gray-900 text-sm font-medium truncate">{item.label}</p>
+                    {item.detail && <p className="text-gray-500 text-xs truncate">{item.detail}</p>}
                   </div>
                   {item.meetLink && (
                     <a href={item.meetLink} target="_blank" rel="noopener noreferrer"
@@ -85,9 +85,9 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
       )}
 
       {timeline && timeline.length === 0 && tagesSummary && (
-        <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-5 mb-6 text-center">
-          <CalendarIcon className="w-8 h-8 text-zinc-700 mx-auto mb-2" />
-          <p className="text-zinc-500 text-sm">Keine Termine oder Tasks fuer heute</p>
+        <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-6 text-center">
+          <CalendarIcon className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+          <p className="text-gray-500 text-sm">Keine Termine oder Tasks fuer heute</p>
         </div>
       )}
 
@@ -107,64 +107,64 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Leaderboard meiner Kategorie */}
-        <div className="bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden">
-          <div className="px-5 py-4 border-b border-zinc-800">
-            <h2 className="text-white font-semibold flex items-center gap-2"><TrophyIcon className="w-4 h-4 text-amber-400" />{stats.isDispatch ? 'Dispatch' : 'Kundenbetreuer'}-Ranking</h2>
+        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-200">
+            <h2 className="text-gray-900 font-semibold flex items-center gap-2"><TrophyIcon className="w-4 h-4 text-amber-400" />{stats.isDispatch ? 'Dispatch' : 'Kundenbetreuer'}-Ranking</h2>
           </div>
-          <div className="divide-y divide-zinc-800/50">
+          <div className="divide-y divide-gray-200/50">
             {leaderboard.map((entry, i) => (
-              <div key={entry.id} className={`px-5 py-3 flex items-center justify-between ${entry.id === userId ? 'bg-blue-950/30 border-l-2 border-blue-500' : ''}`}>
+              <div key={entry.id} className={`px-5 py-3 flex items-center justify-between ${entry.id === userId ? 'bg-blue-50/30 border-l-2 border-blue-500' : ''}`}>
                 <div className="flex items-center gap-3">
-                  <span className={`text-sm font-bold w-6 ${i < 3 ? MEDAL[i] : 'text-zinc-500'}`}>{i + 1}</span>
-                  <span className={`text-sm ${entry.id === userId ? 'text-white font-semibold' : 'text-zinc-300'}`}>{entry.name}{entry.id === userId ? ' (Du)' : ''}</span>
+                  <span className={`text-sm font-bold w-6 ${i < 3 ? MEDAL[i] : 'text-gray-500'}`}>{i + 1}</span>
+                  <span className={`text-sm ${entry.id === userId ? 'text-gray-900 font-semibold' : 'text-gray-700'}`}>{entry.name}{entry.id === userId ? ' (Du)' : ''}</span>
                 </div>
-                <span className="text-sm text-zinc-400 tabular-nums font-semibold">{entry.value}</span>
+                <span className="text-sm text-gray-500 tabular-nums font-semibold">{entry.value}</span>
               </div>
             ))}
-            {leaderboard.length === 0 && <div className="px-5 py-8 text-center text-zinc-500">Keine Daten</div>}
+            {leaderboard.length === 0 && <div className="px-5 py-8 text-center text-gray-500">Keine Daten</div>}
           </div>
         </div>
 
         {/* Erreichbare Incentives */}
-        <div className="bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden">
-          <div className="px-5 py-4 border-b border-zinc-800">
-            <h2 className="text-white font-semibold flex items-center gap-2"><GiftIcon className="w-4 h-4 text-violet-400" />Erreichbare Incentives</h2>
+        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-200">
+            <h2 className="text-gray-900 font-semibold flex items-center gap-2"><GiftIcon className="w-4 h-4 text-violet-400" />Erreichbare Incentives</h2>
           </div>
-          <div className="divide-y divide-zinc-800/50">
+          <div className="divide-y divide-gray-200/50">
             {incentives.map(inc => (
               <div key={inc.id} className="px-5 py-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-zinc-200 text-sm font-medium">{inc.titel}</span>
+                  <span className="text-gray-800 text-sm font-medium">{inc.titel}</span>
                   <span className="text-green-400 text-sm font-semibold">{fmt(inc.wert)}</span>
                 </div>
-                <p className="text-zinc-500 text-xs mt-0.5">{inc.bedingung}</p>
-                {inc.beschreibung && <p className="text-zinc-600 text-xs mt-0.5">{inc.beschreibung}</p>}
+                <p className="text-gray-500 text-xs mt-0.5">{inc.bedingung}</p>
+                {inc.beschreibung && <p className="text-gray-400 text-xs mt-0.5">{inc.beschreibung}</p>}
               </div>
             ))}
-            {incentives.length === 0 && <div className="px-5 py-8 text-center text-zinc-500">Keine Incentives verfuegbar</div>}
+            {incentives.length === 0 && <div className="px-5 py-8 text-center text-gray-500">Keine Incentives verfuegbar</div>}
           </div>
         </div>
       </div>
 
       {/* Performance-Verlauf */}
       {performanceHistory.length > 0 && (
-        <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-5 mt-6">
-          <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">Monatsvergleich</h3>
+        <div className="bg-white rounded-2xl border border-gray-200 p-5 mt-6">
+          <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Monatsvergleich</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-zinc-800">
-                <th className="text-left px-3 py-2 text-zinc-400 font-medium">Monat</th>
-                <th className="text-right px-3 py-2 text-zinc-400 font-medium">{stats.isDispatch ? 'Leads' : 'Aktiv'}</th>
-                <th className="text-right px-3 py-2 text-zinc-400 font-medium">{stats.isDispatch ? 'Konvertiert' : 'Abgeschl.'}</th>
-                <th className="text-right px-3 py-2 text-zinc-400 font-medium">Umsatz</th>
+              <thead><tr className="border-b border-gray-200">
+                <th className="text-left px-3 py-2 text-gray-500 font-medium">Monat</th>
+                <th className="text-right px-3 py-2 text-gray-500 font-medium">{stats.isDispatch ? 'Leads' : 'Aktiv'}</th>
+                <th className="text-right px-3 py-2 text-gray-500 font-medium">{stats.isDispatch ? 'Konvertiert' : 'Abgeschl.'}</th>
+                <th className="text-right px-3 py-2 text-gray-500 font-medium">Umsatz</th>
               </tr></thead>
               <tbody>
                 {performanceHistory.map(p => (
-                  <tr key={`${p.monat}-${p.jahr}`} className="border-b border-zinc-800/50">
-                    <td className="px-3 py-2 text-zinc-300">{p.monat} {p.jahr}</td>
-                    <td className="px-3 py-2 text-right text-zinc-300 tabular-nums">{stats.isDispatch ? p.leads_qualifiziert : p.aktive_faelle}</td>
+                  <tr key={`${p.monat}-${p.jahr}`} className="border-b border-gray-200/50">
+                    <td className="px-3 py-2 text-gray-700">{p.monat} {p.jahr}</td>
+                    <td className="px-3 py-2 text-right text-gray-700 tabular-nums">{stats.isDispatch ? p.leads_qualifiziert : p.aktive_faelle}</td>
                     <td className="px-3 py-2 text-right text-green-400 tabular-nums">{stats.isDispatch ? p.leads_konvertiert : p.faelle_abgeschlossen}</td>
-                    <td className="px-3 py-2 text-right text-zinc-300 tabular-nums">{fmt(p.umsatz_generiert ?? 0)}</td>
+                    <td className="px-3 py-2 text-right text-gray-700 tabular-nums">{fmt(p.umsatz_generiert ?? 0)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -178,9 +178,9 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
 
 function KPI({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
-      <div className="flex items-center gap-2 mb-1">{icon}<span className="text-zinc-500 text-xs">{label}</span></div>
-      <div className="text-xl font-bold text-white">{value}</div>
+    <div className="bg-white border border-gray-200 rounded-2xl p-4">
+      <div className="flex items-center gap-2 mb-1">{icon}<span className="text-gray-500 text-xs">{label}</span></div>
+      <div className="text-xl font-bold text-gray-900">{value}</div>
     </div>
   )
 }

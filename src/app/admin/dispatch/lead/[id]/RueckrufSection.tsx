@@ -46,36 +46,36 @@ export default function RueckrufSection({
   }
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-5">
+    <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-5">
       <div className="flex items-center gap-2 mb-4">
         <PhoneCallIcon className="w-4 h-4 text-amber-400" />
-        <h2 className="text-sm font-medium text-zinc-400">Rückruftermin</h2>
+        <h2 className="text-sm font-medium text-gray-500">Rückruftermin</h2>
         {isErledigt && (
-          <span className="ml-auto bg-emerald-950 text-emerald-400 text-xs px-2 py-0.5 rounded-full">Erledigt</span>
+          <span className="ml-auto bg-emerald-50 text-emerald-400 text-xs px-2 py-0.5 rounded-full">Erledigt</span>
         )}
         {!isErledigt && hasDatum && inPast && (
-          <span className="ml-auto bg-red-950 text-red-400 text-xs font-semibold px-2 py-0.5 rounded-full">ÜBERFÄLLIG</span>
+          <span className="ml-auto bg-red-50 text-red-400 text-xs font-semibold px-2 py-0.5 rounded-full">ÜBERFÄLLIG</span>
         )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
         <div>
-          <label className="text-xs text-zinc-500 mb-1 block">Datum & Uhrzeit</label>
+          <label className="text-xs text-gray-500 mb-1 block">Datum & Uhrzeit</label>
           <input
             type="datetime-local"
             value={datum}
             onChange={e => setDatum(e.target.value)}
-            className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
         <div>
-          <label className="text-xs text-zinc-500 mb-1 block">Notiz</label>
+          <label className="text-xs text-gray-500 mb-1 block">Notiz</label>
           <input
             type="text"
             value={notiz}
             onChange={e => setNotiz(e.target.value)}
             placeholder="z.B. Kunde ab 14 Uhr erreichbar"
-            className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-zinc-600"
+            className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-400"
           />
         </div>
       </div>
@@ -84,7 +84,7 @@ export default function RueckrufSection({
         <button
           onClick={handleSave}
           disabled={saving}
-          className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl px-4 py-2 transition-colors"
+          className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-4 py-2 transition-colors"
         >
           {saving ? 'Speichert ...' : 'Termin speichern'}
         </button>

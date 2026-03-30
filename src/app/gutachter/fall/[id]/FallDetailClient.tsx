@@ -40,10 +40,10 @@ const DOKUMENT_TYP_LABEL: Record<string, string> = {
 }
 
 const STATUS_BADGE: Record<string, string> = {
-  ausstehend: 'bg-red-950 text-red-300',
-  hochgeladen: 'bg-green-950 text-green-300',
-  geprueft: 'bg-blue-950 text-blue-300',
-  abgelehnt: 'bg-amber-950 text-amber-300',
+  ausstehend: 'bg-red-50 text-red-300',
+  hochgeladen: 'bg-green-50 text-green-300',
+  geprueft: 'bg-blue-50 text-blue-300',
+  abgelehnt: 'bg-amber-50 text-amber-300',
 }
 
 const KANZLEI_STEPS = [
@@ -204,25 +204,25 @@ export default function FallDetailClient({
   return (
     <div className="px-4 py-8">
       <div className="max-w-4xl mx-auto">
-        <Link href="/gutachter/faelle" className="text-sm text-zinc-400 hover:text-white transition-colors mb-6 inline-block">
+        <Link href="/gutachter/faelle" className="text-sm text-gray-500 hover:text-gray-800 transition-colors mb-6 inline-block">
           ← Zurueck zu Faelle
         </Link>
 
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-xl font-semibold text-white">
+            <h1 className="text-xl font-semibold text-gray-900">
               {(fall.fall_nummer as string) ?? (fall.id as string).slice(0, 8)}
             </h1>
-            <p className="text-zinc-500 text-sm mt-0.5">{kundenName}</p>
+            <p className="text-gray-500 text-sm mt-0.5">{kundenName}</p>
           </div>
-          <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-950 text-blue-300">
+          <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-300">
             {fall.status as string}
           </span>
         </div>
 
         {/* Vorschaden Warning */}
         {(fall.vorschaden_vorhanden as boolean) && (
-          <div className="bg-red-950 border border-red-800 rounded-xl p-4 mb-5 flex items-center gap-3">
+          <div className="bg-red-50 border border-red-800 rounded-xl p-4 mb-5 flex items-center gap-3">
             <AlertTriangleIcon className="w-5 h-5 text-red-400 shrink-0" />
             <div>
               <p className="text-red-300 font-medium text-sm">VORSCHADEN GEFUNDEN</p>
@@ -235,26 +235,26 @@ export default function FallDetailClient({
 
         {/* Feedback messages */}
         {error && (
-          <div className="bg-red-950 border border-red-800 rounded-xl p-3 mb-4 flex items-center gap-2">
+          <div className="bg-red-50 border border-red-800 rounded-xl p-3 mb-4 flex items-center gap-2">
             <XCircleIcon className="w-4 h-4 text-red-400 shrink-0" />
             <p className="text-red-300 text-sm">{error}</p>
           </div>
         )}
         {success && (
-          <div className="bg-green-950 border border-green-800 rounded-xl p-3 mb-4 flex items-center gap-2">
+          <div className="bg-green-50 border border-green-800 rounded-xl p-3 mb-4 flex items-center gap-2">
             <CheckCircle2Icon className="w-4 h-4 text-green-400 shrink-0" />
             <p className="text-green-300 text-sm">{success}</p>
           </div>
         )}
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 bg-zinc-900 rounded-xl p-1 border border-zinc-800 overflow-x-auto">
+        <div className="flex gap-1 mb-6 bg-white rounded-xl p-1 border border-gray-200 overflow-x-auto">
           {tabs.map(t => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
               className={`flex-1 py-2 px-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
-                tab === t.key ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'
+                tab === t.key ? 'bg-zinc-700 text-gray-900' : 'text-gray-500 hover:text-gray-700'
               }`}
             >
               {t.label}
@@ -266,8 +266,8 @@ export default function FallDetailClient({
         {tab === 'uebersicht' && (
           <div className="space-y-5">
             {/* Stammdaten */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-              <h2 className="text-sm font-medium text-zinc-400 mb-4">Stammdaten</h2>
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <h2 className="text-sm font-medium text-gray-500 mb-4">Stammdaten</h2>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <InfoRow label="Kunde" value={kundenName} />
                 <InfoRow label="Telefon" value={lead?.telefon ?? '—'} />
@@ -282,8 +282,8 @@ export default function FallDetailClient({
 
             {/* Schadensfotos */}
             {fotos.length > 0 && (
-              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-                <h2 className="text-sm font-medium text-zinc-400 mb-3">Schadensfotos</h2>
+              <div className="bg-white border border-gray-200 rounded-2xl p-5">
+                <h2 className="text-sm font-medium text-gray-500 mb-3">Schadensfotos</h2>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                   {fotos.map(foto => (
                     <a
@@ -291,9 +291,9 @@ export default function FallDetailClient({
                       href={foto.datei_url as string}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="aspect-square bg-zinc-800 rounded-xl overflow-hidden hover:opacity-80 transition-opacity flex items-center justify-center"
+                      className="aspect-square bg-gray-100 rounded-xl overflow-hidden hover:opacity-80 transition-opacity flex items-center justify-center"
                     >
-                      <ImageIcon className="w-8 h-8 text-zinc-600" />
+                      <ImageIcon className="w-8 h-8 text-gray-400" />
                     </a>
                   ))}
                 </div>
@@ -301,35 +301,35 @@ export default function FallDetailClient({
             )}
 
             {/* Flags */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-              <h2 className="text-sm font-medium text-zinc-400 mb-3">Flags</h2>
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <h2 className="text-sm font-medium text-gray-500 mb-3">Flags</h2>
               <div className="flex flex-wrap gap-2">
-                {fall.personenschaden_flag ? <Badge label="Personenschaden" color="bg-red-950 text-red-300" /> : null}
-                {fall.mietwagen_flag ? <Badge label="Mietwagen" color="bg-blue-950 text-blue-300" /> : null}
-                {fall.leasing_flag ? <Badge label="Leasing" color="bg-violet-950 text-violet-300" /> : null}
-                {fall.finanzierung_flag ? <Badge label="Finanzierung" color="bg-amber-950 text-amber-300" /> : null}
-                {fall.gewerbe_flag ? <Badge label="Gewerbe" color="bg-cyan-950 text-cyan-300" /> : null}
-                {fall.halter_ungleich_fahrer_flag ? <Badge label="Halter != Fahrer" color="bg-orange-950 text-orange-300" /> : null}
-                {!fall.gegner_bekannt ? <Badge label="Gegner unbekannt" color="bg-zinc-800 text-zinc-400" /> : null}
+                {fall.personenschaden_flag ? <Badge label="Personenschaden" color="bg-red-50 text-red-300" /> : null}
+                {fall.mietwagen_flag ? <Badge label="Mietwagen" color="bg-blue-50 text-blue-300" /> : null}
+                {fall.leasing_flag ? <Badge label="Leasing" color="bg-violet-50 text-violet-300" /> : null}
+                {fall.finanzierung_flag ? <Badge label="Finanzierung" color="bg-amber-50 text-amber-300" /> : null}
+                {fall.gewerbe_flag ? <Badge label="Gewerbe" color="bg-cyan-50 text-cyan-300" /> : null}
+                {fall.halter_ungleich_fahrer_flag ? <Badge label="Halter != Fahrer" color="bg-orange-50 text-orange-300" /> : null}
+                {!fall.gegner_bekannt ? <Badge label="Gegner unbekannt" color="bg-gray-100 text-gray-500" /> : null}
               </div>
             </div>
 
             {/* Ansprechpartner bei Claimondo */}
             {kundenbetreuer && (
-              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-                <h2 className="text-sm font-medium text-zinc-400 mb-3">Ihr Ansprechpartner bei Claimondo</h2>
+              <div className="bg-white border border-gray-200 rounded-2xl p-5">
+                <h2 className="text-sm font-medium text-gray-500 mb-3">Ihr Ansprechpartner bei Claimondo</h2>
                 <div className="space-y-2">
-                  <p className="text-white text-sm font-medium">
+                  <p className="text-gray-900 text-sm font-medium">
                     {`${kundenbetreuer.vorname ?? ''} ${kundenbetreuer.nachname ?? ''}`.trim() || '—'}
                   </p>
                   {kundenbetreuer.telefon && (
                     <a href={`tel:${kundenbetreuer.telefon}`} className="flex items-center gap-2 text-blue-400 text-sm hover:text-blue-300">
-                      <span className="text-zinc-500 text-xs">Tel:</span> {kundenbetreuer.telefon}
+                      <span className="text-gray-500 text-xs">Tel:</span> {kundenbetreuer.telefon}
                     </a>
                   )}
                   {kundenbetreuer.email && (
                     <a href={`mailto:${kundenbetreuer.email}`} className="flex items-center gap-2 text-blue-400 text-sm hover:text-blue-300 truncate">
-                      <span className="text-zinc-500 text-xs">Mail:</span> {kundenbetreuer.email}
+                      <span className="text-gray-500 text-xs">Mail:</span> {kundenbetreuer.email}
                     </a>
                   )}
                 </div>
@@ -338,9 +338,9 @@ export default function FallDetailClient({
 
             {/* FIN/VIN Eingabe */}
             {!(fall.fin_vin) && (
-              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-                <h2 className="text-sm font-medium text-zinc-400 mb-3">FIN / VIN eingeben</h2>
-                <p className="text-zinc-500 text-xs mb-3">
+              <div className="bg-white border border-gray-200 rounded-2xl p-5">
+                <h2 className="text-sm font-medium text-gray-500 mb-3">FIN / VIN eingeben</h2>
+                <p className="text-gray-500 text-xs mb-3">
                   Fahrzeug-Identifikationsnummer (17 Zeichen) fuer Vorschaden-Pruefung
                 </p>
                 <div className="flex gap-2">
@@ -349,7 +349,7 @@ export default function FallDetailClient({
                     onChange={(e) => setFinInput(e.target.value.toUpperCase())}
                     placeholder="WBA1234567890ABCD"
                     maxLength={17}
-                    className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    className="flex-1 bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-blue-600"
                   />
                   <button
                     onClick={async () => {
@@ -366,7 +366,7 @@ export default function FallDetailClient({
                       }
                     }}
                     disabled={finSaving || finInput.length !== 17}
-                    className="bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
+                    className="bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 disabled:text-gray-500 text-gray-900 text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
                   >
                     {finSaving ? '...' : 'Speichern'}
                   </button>
@@ -376,10 +376,10 @@ export default function FallDetailClient({
 
             {/* FIN vorhanden */}
             {!!(fall.fin_vin) && (
-              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-                <h2 className="text-sm font-medium text-zinc-400 mb-2">FIN / VIN</h2>
-                <p className="text-white font-mono tracking-wider text-sm">{String(fall.fin_vin)}</p>
-                <p className="text-zinc-600 text-xs mt-1">
+              <div className="bg-white border border-gray-200 rounded-2xl p-5">
+                <h2 className="text-sm font-medium text-gray-500 mb-2">FIN / VIN</h2>
+                <p className="text-gray-900 font-mono tracking-wider text-sm">{String(fall.fin_vin)}</p>
+                <p className="text-gray-400 text-xs mt-1">
                   Quelle: {String(fall.fin_quelle ?? '—')}
                   {fall.vorschaden_geprueft
                     ? fall.vorschaden_vorhanden
@@ -391,9 +391,9 @@ export default function FallDetailClient({
             )}
 
             {/* Aktueller Status */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-              <h2 className="text-sm font-medium text-zinc-400 mb-3">Aktueller Status</h2>
-              <div className="text-sm text-zinc-200">
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <h2 className="text-sm font-medium text-gray-500 mb-3">Aktueller Status</h2>
+              <div className="text-sm text-gray-800">
                 <InfoRow label="Status" value={(fall.status as string) ?? '—'} />
                 <div className="mt-2">
                   <InfoRow label="SV-Termin" value={fall.sv_termin ? new Date(fall.sv_termin as string).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'} />
@@ -420,7 +420,7 @@ export default function FallDetailClient({
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {missingDocs.map(doc => (
-                    <div key={doc.id as string} className="bg-red-950/30 border border-red-900/50 rounded-xl p-4">
+                    <div key={doc.id as string} className="bg-red-50/30 border border-red-900/50 rounded-xl p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <FileTextIcon className="w-4 h-4 text-red-400" />
                         <span className="text-red-300 text-sm font-medium">
@@ -449,25 +449,25 @@ export default function FallDetailClient({
             {/* Uploaded docs */}
             {uploadedDocs.length > 0 && (
               <div>
-                <h3 className="text-sm font-medium text-zinc-400 mb-3">Vorhandene Dokumente ({uploadedDocs.length})</h3>
+                <h3 className="text-sm font-medium text-gray-500 mb-3">Vorhandene Dokumente ({uploadedDocs.length})</h3>
                 <div className="space-y-2">
                   {uploadedDocs.map(doc => (
-                    <div key={doc.id as string} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center justify-between">
+                    <div key={doc.id as string} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <FileTextIcon className="w-4 h-4 text-zinc-500" />
+                        <FileTextIcon className="w-4 h-4 text-gray-500" />
                         <div>
-                          <p className="text-zinc-200 text-sm font-medium">
+                          <p className="text-gray-800 text-sm font-medium">
                             {DOKUMENT_TYP_LABEL[doc.dokument_typ as string] ?? doc.dokument_typ}
                           </p>
                           {doc.hochgeladen_am ? (
-                            <p className="text-zinc-600 text-xs">{new Date(doc.hochgeladen_am as string).toLocaleDateString('de-DE')}</p>
+                            <p className="text-gray-400 text-xs">{new Date(doc.hochgeladen_am as string).toLocaleDateString('de-DE')}</p>
                           ) : null}
                           {doc.quelle ? (
-                            <span className="text-zinc-600 text-xs">Quelle: {String(doc.quelle)}</span>
+                            <span className="text-gray-400 text-xs">Quelle: {String(doc.quelle)}</span>
                           ) : null}
                         </div>
                       </div>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${STATUS_BADGE[doc.status as string] ?? 'bg-zinc-800 text-zinc-400'}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${STATUS_BADGE[doc.status as string] ?? 'bg-gray-100 text-gray-500'}`}>
                         {doc.status as string}
                       </span>
                     </div>
@@ -477,11 +477,11 @@ export default function FallDetailClient({
             )}
 
             {/* Upload additional document */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-              <h3 className="text-sm font-medium text-zinc-400 mb-3">Dokument hochladen (vor Ort eingesammelt)</h3>
-              <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-zinc-700 hover:border-zinc-500 rounded-xl p-6 cursor-pointer transition-colors">
-                <UploadIcon className="w-6 h-6 text-zinc-500" />
-                <span className="text-zinc-400 text-sm">{uploadingDoc ? 'Wird hochgeladen...' : 'Datei auswaehlen oder hierher ziehen'}</span>
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <h3 className="text-sm font-medium text-gray-500 mb-3">Dokument hochladen (vor Ort eingesammelt)</h3>
+              <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-300 hover:border-zinc-500 rounded-xl p-6 cursor-pointer transition-colors">
+                <UploadIcon className="w-6 h-6 text-gray-500" />
+                <span className="text-gray-500 text-sm">{uploadingDoc ? 'Wird hochgeladen...' : 'Datei auswaehlen oder hierher ziehen'}</span>
                 <input
                   ref={docInputRef}
                   type="file"
@@ -493,7 +493,7 @@ export default function FallDetailClient({
             </div>
 
             {pflichtdokumente.length === 0 && uploadedDocs.length === 0 && (
-              <p className="text-zinc-500 text-sm text-center py-8">Keine Pflichtdokumente vorhanden.</p>
+              <p className="text-gray-500 text-sm text-center py-8">Keine Pflichtdokumente vorhanden.</p>
             )}
           </div>
         )}
@@ -502,24 +502,24 @@ export default function FallDetailClient({
         {tab === 'dateien' && (
           <div className="space-y-5">
             {/* Upload section */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
               <div className="flex items-center gap-2 mb-3">
-                <UploadIcon className="w-4 h-4 text-zinc-400" />
-                <h3 className="text-sm font-medium text-zinc-400">Datei hochladen</h3>
+                <UploadIcon className="w-4 h-4 text-gray-500" />
+                <h3 className="text-sm font-medium text-gray-500">Datei hochladen</h3>
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
                 <select
                   value={dateiKategorie}
                   onChange={(e) => setDateiKategorie(e.target.value)}
-                  className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  className="bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
                 >
                   <option value="gutachter-foto">Gutachter-Foto</option>
                   <option value="gutachten">Gutachten</option>
                   <option value="sonstiges">Sonstiges</option>
                 </select>
-                <label className="flex-1 flex items-center justify-center gap-2 border-2 border-dashed border-zinc-700 hover:border-zinc-500 rounded-xl p-4 cursor-pointer transition-colors">
-                  <UploadIcon className="w-5 h-5 text-zinc-500" />
-                  <span className="text-zinc-400 text-sm">{dateiUploading ? 'Wird hochgeladen...' : 'Datei auswaehlen'}</span>
+                <label className="flex-1 flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 hover:border-zinc-500 rounded-xl p-4 cursor-pointer transition-colors">
+                  <UploadIcon className="w-5 h-5 text-gray-500" />
+                  <span className="text-gray-500 text-sm">{dateiUploading ? 'Wird hochgeladen...' : 'Datei auswaehlen'}</span>
                   <input
                     ref={dateiInputRef}
                     type="file"
@@ -545,23 +545,23 @@ export default function FallDetailClient({
               }
 
               const KATEGORIE_COLOR: Record<string, string> = {
-                'kundendokument': 'bg-blue-950 text-blue-300',
-                'schadensfoto': 'bg-amber-950 text-amber-300',
-                'gutachten': 'bg-violet-950 text-violet-300',
-                'kanzlei': 'bg-cyan-950 text-cyan-300',
-                'gutachter-foto': 'bg-green-950 text-green-300',
+                'kundendokument': 'bg-blue-50 text-blue-300',
+                'schadensfoto': 'bg-amber-50 text-amber-300',
+                'gutachten': 'bg-violet-50 text-violet-300',
+                'kanzlei': 'bg-cyan-50 text-cyan-300',
+                'gutachter-foto': 'bg-green-50 text-green-300',
                 'unterschrift': 'bg-pink-950 text-pink-300',
-                'whatsapp-foto': 'bg-emerald-950 text-emerald-300',
-                'sonstiges': 'bg-zinc-800 text-zinc-400',
+                'whatsapp-foto': 'bg-emerald-50 text-emerald-300',
+                'sonstiges': 'bg-gray-100 text-gray-500',
               }
 
               const QUELLE_COLOR: Record<string, string> = {
-                'flowlink': 'bg-blue-950 text-blue-400',
-                'portal': 'bg-violet-950 text-violet-400',
-                'whatsapp': 'bg-emerald-950 text-emerald-400',
-                'gutachter': 'bg-green-950 text-green-400',
-                'admin': 'bg-amber-950 text-amber-400',
-                'kanzlei': 'bg-cyan-950 text-cyan-400',
+                'flowlink': 'bg-blue-50 text-blue-400',
+                'portal': 'bg-violet-50 text-violet-400',
+                'whatsapp': 'bg-emerald-50 text-emerald-400',
+                'gutachter': 'bg-green-50 text-green-400',
+                'admin': 'bg-amber-50 text-amber-400',
+                'kanzlei': 'bg-cyan-50 text-cyan-400',
               }
 
               // Group documents by kategorie
@@ -580,15 +580,15 @@ export default function FallDetailClient({
               if (dokumente.length === 0) {
                 return (
                   <div className="text-center py-12">
-                    <FolderOpenIcon className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
-                    <p className="text-zinc-500 text-sm">Noch keine Dateien vorhanden.</p>
+                    <FolderOpenIcon className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500 text-sm">Noch keine Dateien vorhanden.</p>
                   </div>
                 )
               }
 
               return sortedKeys.map(kat => (
                 <div key={kat}>
-                  <h3 className="text-sm font-medium text-zinc-400 mb-3 flex items-center gap-2">
+                  <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
                     <FolderOpenIcon className="w-4 h-4" />
                     {KATEGORIE_LABEL[kat] ?? kat} ({grouped[kat].length})
                   </h3>
@@ -596,22 +596,22 @@ export default function FallDetailClient({
                     {grouped[kat].map(doc => (
                       <div
                         key={doc.id as string}
-                        className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center justify-between gap-3"
+                        className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between gap-3"
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          <FileTextIcon className="w-4 h-4 text-zinc-500 shrink-0" />
+                          <FileTextIcon className="w-4 h-4 text-gray-500 shrink-0" />
                           <div className="min-w-0">
-                            <p className="text-zinc-200 text-sm font-medium truncate">{doc.datei_name as string}</p>
+                            <p className="text-gray-800 text-sm font-medium truncate">{doc.datei_name as string}</p>
                             <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${KATEGORIE_COLOR[(doc.kategorie as string) ?? 'sonstiges'] ?? 'bg-zinc-800 text-zinc-400'}`}>
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${KATEGORIE_COLOR[(doc.kategorie as string) ?? 'sonstiges'] ?? 'bg-gray-100 text-gray-500'}`}>
                                 {KATEGORIE_LABEL[(doc.kategorie as string) ?? 'sonstiges'] ?? doc.kategorie ?? 'Sonstiges'}
                               </span>
                               {!!(doc.quelle) && (
-                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${QUELLE_COLOR[doc.quelle as string] ?? 'bg-zinc-800 text-zinc-400'}`}>
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${QUELLE_COLOR[doc.quelle as string] ?? 'bg-gray-100 text-gray-500'}`}>
                                   {String(doc.quelle)}
                                 </span>
                               )}
-                              <span className="text-zinc-600 text-[10px]">
+                              <span className="text-gray-400 text-[10px]">
                                 {new Date(doc.created_at as string).toLocaleDateString('de-DE')}
                               </span>
                             </div>
@@ -621,7 +621,7 @@ export default function FallDetailClient({
                           href={doc.datei_url as string}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="shrink-0 flex items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium px-3 py-2 rounded-lg transition-colors"
+                          className="shrink-0 flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium px-3 py-2 rounded-lg transition-colors"
                         >
                           <DownloadIcon className="w-3.5 h-3.5" />
                           <span className="hidden sm:inline">Download</span>
@@ -641,7 +641,7 @@ export default function FallDetailClient({
             {hasGutachten ? (
               <>
                 {/* Already submitted */}
-                <div className="bg-green-950/30 border border-green-900/50 rounded-2xl p-6 flex items-center gap-4">
+                <div className="bg-green-50/30 border border-green-900/50 rounded-2xl p-6 flex items-center gap-4">
                   <CheckCircle2Icon className="w-8 h-8 text-green-400 shrink-0" />
                   <div>
                     <p className="text-green-300 font-medium">Gutachten eingereicht</p>
@@ -656,12 +656,12 @@ export default function FallDetailClient({
 
                 {/* Gutachten documents */}
                 {dokumente.filter(d => (d.typ as string) === 'gutachten').map(doc => (
-                  <div key={doc.id as string} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center justify-between">
+                  <div key={doc.id as string} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <FileTextIcon className="w-4 h-4 text-zinc-500" />
+                      <FileTextIcon className="w-4 h-4 text-gray-500" />
                       <div>
-                        <p className="text-zinc-200 text-sm font-medium">{doc.datei_name as string}</p>
-                        <p className="text-zinc-600 text-xs">{new Date(doc.created_at as string).toLocaleDateString('de-DE')}</p>
+                        <p className="text-gray-800 text-sm font-medium">{doc.datei_name as string}</p>
+                        <p className="text-gray-400 text-xs">{new Date(doc.created_at as string).toLocaleDateString('de-DE')}</p>
                       </div>
                     </div>
                     <a
@@ -678,33 +678,33 @@ export default function FallDetailClient({
             ) : (
               <>
                 {/* Upload form */}
-                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+                <div className="bg-white border border-gray-200 rounded-2xl p-6">
                   <div className="flex items-center gap-3 mb-5">
-                    <div className="w-10 h-10 rounded-xl bg-violet-950 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
                       <ScaleIcon className="w-5 h-5 text-violet-400" />
                     </div>
                     <div>
-                      <h2 className="text-white font-medium">Gutachten hochladen</h2>
-                      <p className="text-zinc-500 text-xs">PDF-Datei mit Ihrem Gutachten und Schadenhoehe</p>
+                      <h2 className="text-gray-900 font-medium">Gutachten hochladen</h2>
+                      <p className="text-gray-500 text-xs">PDF-Datei mit Ihrem Gutachten und Schadenhoehe</p>
                     </div>
                   </div>
 
                   <form ref={gutachtenFormRef} onSubmit={handleGutachtenSubmit} className="space-y-4">
                     {/* PDF Upload */}
                     <div>
-                      <label className="text-sm text-zinc-400 mb-2 block">Gutachten-PDF *</label>
+                      <label className="text-sm text-gray-500 mb-2 block">Gutachten-PDF *</label>
                       <input
                         type="file"
                         name="datei"
                         accept="application/pdf"
                         required
-                        className="w-full text-sm text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-zinc-800 file:text-zinc-300 file:font-medium hover:file:bg-zinc-700 file:cursor-pointer file:transition-colors"
+                        className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-700 file:font-medium hover:file:bg-zinc-700 file:cursor-pointer file:transition-colors"
                       />
                     </div>
 
                     {/* Schadenhöhe */}
                     <div>
-                      <label className="text-sm text-zinc-400 mb-2 block">Schadenhoehe (Netto-RK) *</label>
+                      <label className="text-sm text-gray-500 mb-2 block">Schadenhoehe (Netto-RK) *</label>
                       <div className="relative">
                         <input
                           type="number"
@@ -713,16 +713,16 @@ export default function FallDetailClient({
                           min="0"
                           required
                           placeholder="0,00"
-                          className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+                          className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
                         />
-                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">EUR</span>
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">EUR</span>
                       </div>
                     </div>
 
                     <button
                       type="submit"
                       disabled={uploading}
-                      className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 disabled:text-zinc-500 text-white font-medium py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2"
+                      className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 disabled:text-gray-500 text-gray-900 font-medium py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2"
                     >
                       <UploadIcon className="w-4 h-4" />
                       {uploading ? 'Wird hochgeladen...' : 'Gutachten einreichen'}
@@ -733,15 +733,15 @@ export default function FallDetailClient({
             )}
 
             {/* Vor-Ort Fotos upload */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
               <div className="flex items-center gap-2 mb-3">
-                <CameraIcon className="w-4 h-4 text-zinc-400" />
-                <h3 className="text-sm font-medium text-zinc-400">Vor-Ort Fotos hochladen</h3>
+                <CameraIcon className="w-4 h-4 text-gray-500" />
+                <h3 className="text-sm font-medium text-gray-500">Vor-Ort Fotos hochladen</h3>
               </div>
-              <p className="text-zinc-600 text-xs mb-3">Fotos die Sie bei der Besichtigung vor Ort gemacht haben</p>
-              <label className="flex items-center justify-center gap-2 border-2 border-dashed border-zinc-700 hover:border-zinc-500 rounded-xl p-4 cursor-pointer transition-colors">
-                <CameraIcon className="w-5 h-5 text-zinc-500" />
-                <span className="text-zinc-400 text-sm">{uploadingDoc ? 'Wird hochgeladen...' : 'Fotos auswaehlen'}</span>
+              <p className="text-gray-400 text-xs mb-3">Fotos die Sie bei der Besichtigung vor Ort gemacht haben</p>
+              <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 hover:border-zinc-500 rounded-xl p-4 cursor-pointer transition-colors">
+                <CameraIcon className="w-5 h-5 text-gray-500" />
+                <span className="text-gray-500 text-sm">{uploadingDoc ? 'Wird hochgeladen...' : 'Fotos auswaehlen'}</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -758,14 +758,14 @@ export default function FallDetailClient({
         {/* Tab: Kanzlei-Status */}
         {tab === 'kanzlei' && (
           <div className="space-y-5">
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-cyan-950 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center">
                   <GavelIcon className="w-5 h-5 text-cyan-400" />
                 </div>
                 <div>
-                  <h2 className="text-white font-medium">Kanzlei-Bearbeitung</h2>
-                  <p className="text-zinc-500 text-xs">Aktueller Stand der rechtlichen Bearbeitung</p>
+                  <h2 className="text-gray-900 font-medium">Kanzlei-Bearbeitung</h2>
+                  <p className="text-gray-500 text-xs">Aktueller Stand der rechtlichen Bearbeitung</p>
                 </div>
               </div>
 
@@ -784,7 +784,7 @@ export default function FallDetailClient({
                             ? 'bg-green-600 text-white'
                             : isCurrent
                               ? 'bg-blue-600 text-white'
-                              : 'bg-zinc-800 text-zinc-600'
+                              : 'bg-gray-100 text-gray-400'
                         }`}>
                           {isCompleted ? (
                             <CheckCircle2Icon className="w-4 h-4" />
@@ -793,18 +793,18 @@ export default function FallDetailClient({
                           )}
                         </div>
                         {idx < KANZLEI_STEPS.length - 1 && (
-                          <div className={`w-px h-8 mt-1 ${isCompleted ? 'bg-green-700' : 'bg-zinc-800'}`} />
+                          <div className={`w-px h-8 mt-1 ${isCompleted ? 'bg-green-700' : 'bg-gray-100'}`} />
                         )}
                       </div>
 
                       {/* Step content */}
                       <div className="pt-1">
                         <p className={`text-sm font-medium ${
-                          isCompleted ? 'text-green-300' : isCurrent ? 'text-blue-300' : 'text-zinc-500'
+                          isCompleted ? 'text-green-300' : isCurrent ? 'text-blue-300' : 'text-gray-500'
                         }`}>
                           {step.label}
                         </p>
-                        <p className="text-zinc-600 text-xs mt-0.5">{step.desc}</p>
+                        <p className="text-gray-400 text-xs mt-0.5">{step.desc}</p>
                         {isCurrent && step.key === 'regulierung' && !!fall.regulierung_am && (
                           <p className="text-amber-400 text-xs mt-1">
                             Seit {new Date(fall.regulierung_am as string).toLocaleDateString('de-DE')}
@@ -819,8 +819,8 @@ export default function FallDetailClient({
               </div>
 
               {currentStatusIndex < 0 && (
-                <div className="mt-6 bg-zinc-800 rounded-xl p-4">
-                  <p className="text-zinc-400 text-sm">
+                <div className="mt-6 bg-gray-100 rounded-xl p-4">
+                  <p className="text-gray-500 text-sm">
                     Die Kanzlei-Bearbeitung hat noch nicht begonnen. Der Fall wird nach erfolgreichem Filmcheck an die Kanzlei uebergeben.
                   </p>
                 </div>
@@ -828,8 +828,8 @@ export default function FallDetailClient({
             </div>
 
             {/* Financial info for gutachter */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-              <h3 className="text-sm font-medium text-zinc-400 mb-3">Ihre Abrechnung fuer diesen Fall</h3>
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <h3 className="text-sm font-medium text-gray-500 mb-3">Ihre Abrechnung fuer diesen Fall</h3>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <InfoRow label="Gutachten-Betrag" value={fall.gutachten_betrag != null ? `${Number(fall.gutachten_betrag).toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR` : '—'} />
                 <InfoRow label="Leadpreis" value={
@@ -847,39 +847,39 @@ export default function FallDetailClient({
         {tab === 'timeline' && (
           <div className="space-y-3">
             {timeline.map(entry => (
-              <div key={entry.id as string} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+              <div key={entry.id as string} className="bg-white border border-gray-200 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-1">
-                  <p className="text-zinc-200 text-sm font-medium">{entry.titel as string}</p>
-                  <span className="text-zinc-600 text-xs">
+                  <p className="text-gray-800 text-sm font-medium">{entry.titel as string}</p>
+                  <span className="text-gray-400 text-xs">
                     {new Date(entry.created_at as string).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
-                {entry.beschreibung ? <p className="text-zinc-500 text-xs">{String(entry.beschreibung)}</p> : null}
+                {entry.beschreibung ? <p className="text-gray-500 text-xs">{String(entry.beschreibung)}</p> : null}
               </div>
             ))}
             {timeline.length === 0 && (
-              <p className="text-zinc-500 text-sm text-center py-8">Keine Eintraege.</p>
+              <p className="text-gray-500 text-sm text-center py-8">Keine Eintraege.</p>
             )}
           </div>
         )}
 
         {/* Tab: Chat */}
         {tab === 'chat' && (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col" style={{ height: '70vh' }}>
+          <div className="bg-white border border-gray-200 rounded-2xl flex flex-col" style={{ height: '70vh' }}>
             {/* Chat header */}
-            <div className="px-5 py-3 border-b border-zinc-800 flex items-center gap-2">
-              <MessageSquareIcon className="w-4 h-4 text-zinc-400" />
-              <h2 className="text-sm font-medium text-zinc-400">Kunde-Gutachter Chat</h2>
-              <span className="text-zinc-600 text-xs ml-auto">{nachrichten.length} Nachrichten</span>
+            <div className="px-5 py-3 border-b border-gray-200 flex items-center gap-2">
+              <MessageSquareIcon className="w-4 h-4 text-gray-500" />
+              <h2 className="text-sm font-medium text-gray-500">Kunde-Gutachter Chat</h2>
+              <span className="text-gray-400 text-xs ml-auto">{nachrichten.length} Nachrichten</span>
             </div>
 
             {/* Messages area */}
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
               {nachrichten.length === 0 && (
                 <div className="flex flex-col items-center justify-center h-full text-center">
-                  <MessageSquareIcon className="w-10 h-10 text-zinc-700 mb-3" />
-                  <p className="text-zinc-500 text-sm">Noch keine Nachrichten.</p>
-                  <p className="text-zinc-600 text-xs mt-1">Schreiben Sie die erste Nachricht an den Kunden.</p>
+                  <MessageSquareIcon className="w-10 h-10 text-gray-300 mb-3" />
+                  <p className="text-gray-500 text-sm">Noch keine Nachrichten.</p>
+                  <p className="text-gray-400 text-xs mt-1">Schreiben Sie die erste Nachricht an den Kunden.</p>
                 </div>
               )}
               {nachrichten.map(msg => {
@@ -901,8 +901,8 @@ export default function FallDetailClient({
                       <div
                         className={`rounded-2xl px-4 py-2.5 ${
                           isOwn
-                            ? 'bg-blue-950 border border-blue-900/50 text-blue-100'
-                            : 'bg-zinc-800 border border-zinc-700 text-zinc-200'
+                            ? 'bg-blue-50 border border-blue-900/50 text-blue-100'
+                            : 'bg-gray-100 border border-gray-300 text-gray-800'
                         }`}
                       >
                         <p className="text-sm whitespace-pre-wrap break-words">{msg.nachricht as string}</p>
@@ -912,7 +912,7 @@ export default function FallDetailClient({
                             target="_blank"
                             rel="noopener noreferrer"
                             className={`inline-flex items-center gap-1 mt-1.5 text-xs ${
-                              isOwn ? 'text-blue-300 hover:text-blue-200' : 'text-zinc-400 hover:text-zinc-300'
+                              isOwn ? 'text-blue-300 hover:text-blue-200' : 'text-gray-500 hover:text-gray-700'
                             }`}
                           >
                             <FileTextIcon className="w-3 h-3" />
@@ -923,12 +923,12 @@ export default function FallDetailClient({
                       <div className={`flex items-center gap-2 mt-1 ${isOwn ? 'justify-end' : 'justify-start'}`}>
                         <span
                           className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
-                            isOwn ? 'bg-blue-950/50 text-blue-400' : 'bg-zinc-800 text-zinc-500'
+                            isOwn ? 'bg-blue-50/50 text-blue-400' : 'bg-gray-100 text-gray-500'
                           }`}
                         >
                           {rolleLabel}
                         </span>
-                        <span className="text-zinc-600 text-[10px]">{time}</span>
+                        <span className="text-gray-400 text-[10px]">{time}</span>
                       </div>
                     </div>
                   </div>
@@ -938,7 +938,7 @@ export default function FallDetailClient({
             </div>
 
             {/* Input area */}
-            <div className="px-5 py-3 border-t border-zinc-800">
+            <div className="px-5 py-3 border-t border-gray-200">
               <div className="flex gap-2">
                 <input
                   value={chatInput}
@@ -951,12 +951,12 @@ export default function FallDetailClient({
                   }}
                   placeholder="Nachricht schreiben..."
                   disabled={chatSending}
-                  className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+                  className="flex-1 bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
                 />
                 <button
                   onClick={handleChatSend}
                   disabled={chatSending || !chatInput.trim()}
-                  className="bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 disabled:text-zinc-500 text-white px-4 py-2.5 rounded-xl transition-colors flex items-center gap-2"
+                  className="bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 disabled:text-gray-500 text-gray-900 px-4 py-2.5 rounded-xl transition-colors flex items-center gap-2"
                 >
                   <SendIcon className="w-4 h-4" />
                   <span className="text-sm font-medium hidden sm:inline">{chatSending ? 'Senden...' : 'Senden'}</span>
@@ -973,8 +973,8 @@ export default function FallDetailClient({
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs text-zinc-500 mb-0.5">{label}</p>
-      <p className="text-zinc-200 text-sm">{value}</p>
+      <p className="text-xs text-gray-500 mb-0.5">{label}</p>
+      <p className="text-gray-800 text-sm">{value}</p>
     </div>
   )
 }

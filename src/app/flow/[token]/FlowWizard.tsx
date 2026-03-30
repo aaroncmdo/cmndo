@@ -304,34 +304,34 @@ export default function FlowWizard({ token, initialData }: { token: string; init
 
   if (credentials) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex flex-col">
+      <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
         <div className="flex-1 flex flex-col px-5 pt-10 pb-8 max-w-lg mx-auto w-full">
           <div className="flex-1 flex flex-col justify-center py-4">
-            <div className="bg-zinc-900 border border-zinc-800 rounded-3xl px-6 py-7 shadow-xl shadow-black/20">
+            <div className="bg-white border border-gray-200 rounded-3xl px-6 py-7 shadow-xl shadow-black/20">
               <div className="text-center mb-6">
                 <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center">
                   <svg className="w-7 h-7 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
                 </div>
-                <h1 className="text-2xl font-semibold text-white">Schadensfall gemeldet!</h1>
-                <p className="text-zinc-400 text-sm mt-2">
+                <h1 className="text-2xl font-semibold text-gray-900">Schadensfall gemeldet!</h1>
+                <p className="text-gray-500 text-sm mt-2">
                   Ihr Fall wurde erfolgreich aufgenommen. Nutzen Sie die folgenden Zugangsdaten, um den Fortschritt in Ihrem Kundenportal zu verfolgen.
                 </p>
               </div>
 
               <div className="space-y-3 mb-6">
-                <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-3">
-                  <span className="text-xs text-zinc-500 block mb-0.5">E-Mail</span>
-                  <span className="text-zinc-200 text-sm font-mono">{credentials.email}</span>
+                <div className="bg-gray-100/50 border border-gray-300/50 rounded-xl px-4 py-3">
+                  <span className="text-xs text-gray-500 block mb-0.5">E-Mail</span>
+                  <span className="text-gray-800 text-sm font-mono">{credentials.email}</span>
                 </div>
-                <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-3">
-                  <span className="text-xs text-zinc-500 block mb-0.5">Passwort</span>
-                  <span className="text-zinc-200 text-sm font-mono">{credentials.password}</span>
+                <div className="bg-gray-100/50 border border-gray-300/50 rounded-xl px-4 py-3">
+                  <span className="text-xs text-gray-500 block mb-0.5">Passwort</span>
+                  <span className="text-gray-800 text-sm font-mono">{credentials.password}</span>
                 </div>
               </div>
 
-              <p className="text-zinc-500 text-xs text-center mb-4">
+              <p className="text-gray-500 text-xs text-center mb-4">
                 Bitte notieren Sie sich Ihre Zugangsdaten. Sie erhalten diese auch per E-Mail.
               </p>
             </div>
@@ -346,7 +346,7 @@ export default function FlowWizard({ token, initialData }: { token: string; init
             </button>
             <a
               href="/login"
-              className="block w-full py-3 text-center text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+              className="block w-full py-3 text-center text-sm text-gray-500 hover:text-gray-800 transition-colors"
             >
               Zum Kundenportal
             </a>
@@ -359,9 +359,9 @@ export default function FlowWizard({ token, initialData }: { token: string; init
   // ─── Shell ────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col">
+    <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
       {/* Progress bar */}
-      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-zinc-800">
+      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-gray-100">
         <div
           className="h-full bg-blue-500 transition-all duration-500 ease-out"
           style={{ width: `${progress}%` }}
@@ -369,14 +369,14 @@ export default function FlowWizard({ token, initialData }: { token: string; init
       </div>
 
       {/* Step counter */}
-      <div className="fixed top-4 right-4 z-10 text-xs text-zinc-500 tabular-nums">
+      <div className="fixed top-4 right-4 z-10 text-xs text-gray-500 tabular-nums">
         {step}&thinsp;/&thinsp;{TOTAL_STEPS}
       </div>
 
       {/* Content */}
       <div className="flex-1 flex flex-col px-5 pt-10 pb-8 max-w-lg mx-auto w-full">
         <div className="flex-1 flex flex-col justify-center py-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl px-6 py-7 shadow-xl shadow-black/20">
+          <div className="bg-white border border-gray-200 rounded-3xl px-6 py-7 shadow-xl shadow-black/20">
             {step === 1 && (
               <Step1 value={data.schadens_ursache} onChange={(v) => set('schadens_ursache', v)} />
             )}
@@ -434,7 +434,7 @@ export default function FlowWizard({ token, initialData }: { token: string; init
           {step > 1 && (
             <button
               onClick={() => setStep((s) => s - 1)}
-              className="w-full py-3 text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+              className="w-full py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors"
             >
               Zurück
             </button>
@@ -450,8 +450,8 @@ export default function FlowWizard({ token, initialData }: { token: string; init
 function StepHeader({ question, sub }: { question: string; sub?: string }) {
   return (
     <div className="mb-7">
-      <h1 className="text-2xl font-semibold text-white leading-snug">{question}</h1>
-      {sub && <p className="mt-2 text-sm text-zinc-400">{sub}</p>}
+      <h1 className="text-2xl font-semibold text-gray-900 leading-snug">{question}</h1>
+      {sub && <p className="mt-2 text-sm text-gray-500">{sub}</p>}
     </div>
   )
 }
@@ -471,7 +471,7 @@ function SelectButton({
       className={`w-full text-left px-5 py-4 rounded-2xl border text-sm font-medium transition-all active:scale-[0.98] ${
         selected
           ? 'border-blue-500 bg-blue-500/10 text-blue-400 font-semibold'
-          : 'border-zinc-700 bg-zinc-800/50 text-zinc-200 hover:border-zinc-600'
+          : 'border-gray-300 bg-gray-100/50 text-gray-800 hover:border-gray-300'
       }`}
     >
       {children}
@@ -508,7 +508,7 @@ function Step2({ value, toggle }: { value: string[]; toggle: (v: string) => void
             className={`text-left px-4 py-4 rounded-2xl border text-sm font-medium transition-all active:scale-[0.97] ${
               value.includes(opt.value)
                 ? 'border-blue-500 bg-blue-500/10 text-blue-400 font-semibold'
-                : 'border-zinc-700 bg-zinc-800/50 text-zinc-200 hover:border-zinc-600'
+                : 'border-gray-300 bg-gray-100/50 text-gray-800 hover:border-gray-300'
             }`}
           >
             {opt.label}
@@ -546,7 +546,7 @@ function Step4({ value, onChange }: { value: string; onChange: (v: string) => vo
         value={value}
         onChange={(e) => onChange(e.target.value)}
         max={new Date().toISOString().split('T')[0]}
-        className="w-full px-5 py-4 rounded-2xl border border-zinc-700 bg-zinc-800 text-zinc-100 text-base focus:outline-none focus:border-zinc-500 transition-colors [color-scheme:dark]"
+        className="w-full px-5 py-4 rounded-2xl border border-gray-300 bg-gray-100 text-zinc-100 text-base focus:outline-none focus:border-zinc-500 transition-colors [color-scheme:dark]"
       />
     </div>
   )
@@ -582,16 +582,16 @@ function Step5({
         className={`flex flex-col items-center justify-center gap-3 px-6 py-10 rounded-2xl border-2 border-dashed cursor-pointer transition-all ${
           dragOver
             ? 'border-blue-500 bg-blue-500/5'
-            : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
+            : 'border-gray-300 bg-gray-100/50 hover:border-gray-300'
         }`}
       >
-        <svg className="w-8 h-8 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-8 h-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
             d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
         </svg>
         <div className="text-center">
-          <p className="text-sm text-zinc-300">Klicken oder Fotos reinziehen</p>
-          <p className="text-xs text-zinc-500 mt-1">Kamera oder Galerie</p>
+          <p className="text-sm text-gray-700">Klicken oder Fotos reinziehen</p>
+          <p className="text-xs text-gray-500 mt-1">Kamera oder Galerie</p>
         </div>
         <input
           ref={fileInputRef}
@@ -614,7 +614,7 @@ function Step5({
               />
               <button
                 onClick={(e) => { e.stopPropagation(); onRemove(i) }}
-                className="absolute top-1 right-1 w-6 h-6 rounded-full bg-zinc-900/90 text-zinc-300 shadow-sm flex items-center justify-center text-xs leading-none opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity"
+                className="absolute top-1 right-1 w-6 h-6 rounded-full bg-white/90 text-gray-700 shadow-sm flex items-center justify-center text-xs leading-none opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity"
               >
                 ×
               </button>
@@ -638,15 +638,15 @@ function Step6({ value, toggle }: { value: string[]; toggle: (v: string) => void
             className={`w-full flex items-center gap-3 text-left px-5 py-4 rounded-2xl border text-sm font-medium transition-all active:scale-[0.98] ${
               value.includes(opt.value)
                 ? 'border-blue-500 bg-blue-500/10 text-blue-400 font-semibold'
-                : 'border-zinc-700 bg-zinc-800/50 text-zinc-200 hover:border-zinc-600'
+                : 'border-gray-300 bg-gray-100/50 text-gray-800 hover:border-gray-300'
             }`}
           >
             <div
               className={`flex-shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-all ${
-                value.includes(opt.value) ? 'border-blue-500 bg-blue-500' : 'border-zinc-600'
+                value.includes(opt.value) ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
               }`}
             >
-              {value.includes(opt.value) && <CheckIcon className="w-3.5 h-3.5 text-white" />}
+              {value.includes(opt.value) && <CheckIcon className="w-3.5 h-3.5 text-gray-900" />}
             </div>
             {opt.label}
           </button>
@@ -664,7 +664,7 @@ function Step7({
   onChange: <K extends keyof FlowData>(key: K, value: FlowData[K]) => void
 }) {
   const inputCls =
-    'w-full px-5 py-4 rounded-2xl border border-zinc-700 bg-zinc-800 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 transition-colors'
+    'w-full px-5 py-4 rounded-2xl border border-gray-300 bg-gray-100 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 transition-colors'
 
   return (
     <div>
@@ -699,7 +699,7 @@ function Step7({
           className={inputCls}
         />
         <div className="pt-1">
-          <p className="text-xs text-zinc-500 uppercase tracking-wider mb-3">Adresse des Schadens</p>
+          <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Adresse des Schadens</p>
           <div className="space-y-3">
             <input
               value={data.adresse}
@@ -763,9 +763,9 @@ function Step8({ data }: { data: FlowData }) {
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-0.5 px-4 py-3 rounded-xl bg-zinc-800/50 border border-zinc-700/50">
-      <span className="text-xs text-zinc-500">{label}</span>
-      <span className="text-sm text-zinc-200 break-words">{value}</span>
+    <div className="flex flex-col gap-0.5 px-4 py-3 rounded-xl bg-gray-100/50 border border-gray-300/50">
+      <span className="text-xs text-gray-500">{label}</span>
+      <span className="text-sm text-gray-800 break-words">{value}</span>
     </div>
   )
 }

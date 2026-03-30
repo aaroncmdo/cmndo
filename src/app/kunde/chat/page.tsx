@@ -34,9 +34,9 @@ export default async function KundeChatPage() {
 
   return (
     <div className="px-5 py-8">
-      <h1 className="text-xl font-bold text-white mb-4" style={{ letterSpacing: '-0.03em' }}>Chat</h1>
-      <div className="rounded-3xl p-8 text-center" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <p style={{ color: 'rgba(255,255,255,0.4)' }} className="text-sm">Noch keine Nachrichten vorhanden.</p>
+      <h1 className="text-xl font-bold text-gray-900 mb-4" style={{ letterSpacing: '-0.03em' }}>Chat</h1>
+      <div className="rounded-3xl p-8 text-center" style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}>
+        <p style={{ color: '#6b7280' }} className="text-sm">Noch keine Nachrichten vorhanden.</p>
       </div>
     </div>
   )

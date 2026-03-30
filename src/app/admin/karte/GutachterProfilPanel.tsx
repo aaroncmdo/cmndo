@@ -97,7 +97,7 @@ function EditableField({
   if (editing) {
     return (
       <div>
-        <p className="text-xs text-zinc-500 mb-1">{label}</p>
+        <p className="text-xs text-gray-500 mb-1">{label}</p>
         <div className="flex items-center gap-1">
           <input
             ref={inputRef}
@@ -107,7 +107,7 @@ function EditableField({
             onBlur={handleSave}
             onKeyDown={e => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') { setVal(value); setEditing(false) } }}
             disabled={saving}
-            className="flex-1 bg-zinc-800 border border-blue-600 text-zinc-200 text-sm rounded-lg px-2 py-1.5 focus:outline-none"
+            className="flex-1 bg-gray-100 border border-blue-600 text-gray-800 text-sm rounded-lg px-2 py-1.5 focus:outline-none"
           />
           <button onClick={handleSave} disabled={saving} className="p-1 text-blue-400 hover:text-blue-300">
             <CheckIcon className="w-3.5 h-3.5" />
@@ -119,16 +119,16 @@ function EditableField({
 
   return (
     <div>
-      <p className="text-xs text-zinc-500 mb-0.5">{label}</p>
+      <p className="text-xs text-gray-500 mb-0.5">{label}</p>
       <div className="flex items-center gap-2 group">
         {linkPrefix && val ? (
           <a href={`${linkPrefix}${val}`} className="text-sm text-blue-400 hover:text-blue-300 truncate">{val}</a>
         ) : (
-          <span className="text-sm text-zinc-300 truncate">{val || '\u2014'}</span>
+          <span className="text-sm text-gray-700 truncate">{val || '\u2014'}</span>
         )}
         <button
           onClick={() => setEditing(true)}
-          className="p-1 text-zinc-600 hover:text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="p-1 text-gray-400 hover:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity"
         >
           <PencilIcon className="w-3 h-3" />
         </button>
@@ -184,19 +184,19 @@ export default function GutachterProfilPanel({
   }
 
   return (
-    <div className="fixed top-0 right-0 h-screen w-[400px] z-50 backdrop-blur-xl bg-zinc-900/95 border-l border-zinc-700/50 shadow-2xl shadow-black/40 overflow-y-auto">
+    <div className="fixed top-0 right-0 h-screen w-[400px] z-50 backdrop-blur-xl bg-white/95 border-l border-gray-300/50 shadow-2xl shadow-black/40 overflow-y-auto">
       <div className="p-6">
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-3">
             {/* Avatar */}
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm ${typColor?.marker ?? 'bg-blue-500'}`}>
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-gray-900 font-bold text-sm ${typColor?.marker ?? 'bg-blue-500'}`}>
               {getInitials(sv.name || '??')}
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white leading-tight">{sv.name || 'Unbekannt'}</h2>
+              <h2 className="text-xl font-bold text-gray-900 leading-tight">{sv.name || 'Unbekannt'}</h2>
               <div className="flex items-center gap-2 mt-1">
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold text-white ${typColor?.marker ?? 'bg-blue-500'}`}>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold text-gray-900 ${typColor?.marker ?? 'bg-blue-500'}`}>
                   {typColor?.label ?? sv.gutachterTyp ?? '\u2014'}
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-400">
@@ -205,7 +205,7 @@ export default function GutachterProfilPanel({
               </div>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors">
+          <button onClick={onClose} className="p-1.5 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors">
             <XIcon className="w-5 h-5" />
           </button>
         </div>
@@ -213,7 +213,7 @@ export default function GutachterProfilPanel({
         <div className="space-y-5">
           {/* Kontaktdaten */}
           <section>
-            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Kontakt</h3>
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Kontakt</h3>
             <div className="space-y-2.5">
               <EditableField label="Telefon" value={sv.telefon ?? ''} svId={sv.id} field="telefon" type="tel" linkPrefix="tel:" />
               <EditableField label="E-Mail" value={sv.email ?? ''} svId={sv.id} field="email" type="email" linkPrefix="mailto:" />
@@ -222,41 +222,41 @@ export default function GutachterProfilPanel({
 
           {/* Standort */}
           <section>
-            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Standort</h3>
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Standort</h3>
             <div className="flex items-start gap-2">
-              <MapPinIcon className="w-4 h-4 text-zinc-500 mt-0.5 shrink-0" />
-              <p className="text-sm text-zinc-300">{sv.standortAdresse ?? '\u2014'}</p>
+              <MapPinIcon className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
+              <p className="text-sm text-gray-700">{sv.standortAdresse ?? '\u2014'}</p>
             </div>
             {sv.standortLat != null && sv.standortLng != null && (
-              <p className="text-[10px] text-zinc-600 mt-1 ml-6">{sv.standortLat.toFixed(4)}, {sv.standortLng.toFixed(4)}</p>
+              <p className="text-[10px] text-gray-400 mt-1 ml-6">{sv.standortLat.toFixed(4)}, {sv.standortLng.toFixed(4)}</p>
             )}
           </section>
 
           {/* Paket + Auslastung */}
           <section>
-            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Paket & Auslastung</h3>
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Paket & Auslastung</h3>
             <div className="grid grid-cols-3 gap-3 mb-3">
-              <div className="bg-zinc-800/50 rounded-xl p-3 text-center">
-                <p className="text-lg font-bold text-white">{PAKET_LABELS[sv.paket] ?? sv.paket ?? '\u2014'}</p>
-                <p className="text-[10px] text-zinc-500">Paket</p>
+              <div className="bg-gray-100/50 rounded-xl p-3 text-center">
+                <p className="text-lg font-bold text-gray-900">{PAKET_LABELS[sv.paket] ?? sv.paket ?? '\u2014'}</p>
+                <p className="text-[10px] text-gray-500">Paket</p>
               </div>
-              <div className="bg-zinc-800/50 rounded-xl p-3 text-center">
-                <p className="text-lg font-bold text-white">{sv.radiusKm}</p>
-                <p className="text-[10px] text-zinc-500">km Radius</p>
+              <div className="bg-gray-100/50 rounded-xl p-3 text-center">
+                <p className="text-lg font-bold text-gray-900">{sv.radiusKm}</p>
+                <p className="text-[10px] text-gray-500">km Radius</p>
               </div>
-              <div className="bg-zinc-800/50 rounded-xl p-3 text-center">
-                <p className="text-lg font-bold text-white">{sv.guthaben != null ? `${sv.guthaben}\u20AC` : '\u2014'}</p>
-                <p className="text-[10px] text-zinc-500">Guthaben</p>
+              <div className="bg-gray-100/50 rounded-xl p-3 text-center">
+                <p className="text-lg font-bold text-gray-900">{sv.guthaben != null ? `${sv.guthaben}\u20AC` : '\u2014'}</p>
+                <p className="text-[10px] text-gray-500">Guthaben</p>
               </div>
             </div>
 
             {/* Auslastung Bar */}
             <div className="mb-2">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-zinc-400">Faelle</span>
-                <span className="text-xs text-zinc-300 tabular-nums">{sv.offeneFaelle}/{sv.maxFaelleMonat} ({auslastungPct}%)</span>
+                <span className="text-xs text-gray-500">Faelle</span>
+                <span className="text-xs text-gray-700 tabular-nums">{sv.offeneFaelle}/{sv.maxFaelleMonat} ({auslastungPct}%)</span>
               </div>
-              <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all ${auslastungPct >= 90 ? 'bg-red-500' : auslastungPct >= 70 ? 'bg-amber-500' : 'bg-blue-500'}`}
                   style={{ width: `${Math.min(100, auslastungPct)}%` }}
@@ -266,7 +266,7 @@ export default function GutachterProfilPanel({
 
             {/* Anzahlung */}
             <div className="flex items-center justify-between">
-              <span className="text-xs text-zinc-500">Anzahlung</span>
+              <span className="text-xs text-gray-500">Anzahlung</span>
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                 sv.anzahlungStatus === 'bezahlt' ? 'bg-emerald-500/20 text-emerald-400' :
                 sv.anzahlungStatus === 'teilweise' ? 'bg-amber-500/20 text-amber-400' :
@@ -280,7 +280,7 @@ export default function GutachterProfilPanel({
           {/* Qualifikationen */}
           <section>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Qualifikationen</h3>
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Qualifikationen</h3>
               <button
                 onClick={() => editingQual ? handleQualSave() : setEditingQual(true)}
                 disabled={savingQual}
@@ -293,7 +293,7 @@ export default function GutachterProfilPanel({
             {editingQual ? (
               <div className="grid grid-cols-2 gap-1.5">
                 {ALL_QUALIFIKATIONEN.map(q => (
-                  <label key={q} className="flex items-center gap-1.5 text-xs text-zinc-300 cursor-pointer">
+                  <label key={q} className="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={quals.includes(q)}
@@ -308,10 +308,10 @@ export default function GutachterProfilPanel({
               <div className="flex flex-wrap gap-1">
                 {(sv.qualifikationen ?? []).length > 0 ? (
                   (sv.qualifikationen ?? []).map(q => (
-                    <span key={q} className="bg-zinc-800 text-zinc-400 text-[10px] px-2 py-0.5 rounded-full">{q}</span>
+                    <span key={q} className="bg-gray-100 text-gray-500 text-[10px] px-2 py-0.5 rounded-full">{q}</span>
                   ))
                 ) : (
-                  <span className="text-zinc-600 text-xs">Keine Qualifikationen</span>
+                  <span className="text-gray-400 text-xs">Keine Qualifikationen</span>
                 )}
               </div>
             )}
@@ -319,33 +319,33 @@ export default function GutachterProfilPanel({
 
           {/* Performance */}
           <section>
-            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Performance</h3>
-            <p className="text-zinc-600 text-xs">Noch keine Daten</p>
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Performance</h3>
+            <p className="text-gray-400 text-xs">Noch keine Daten</p>
           </section>
 
           {/* Notizen */}
           <section>
-            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Admin-Notizen</h3>
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Admin-Notizen</h3>
             <textarea
               value={notiz}
               onChange={e => setNotiz(e.target.value)}
               onBlur={handleNotizSave}
               placeholder="Interne Notizen..."
               rows={2}
-              className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-zinc-600 resize-y"
+              className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-400 resize-y"
             />
           </section>
 
           {/* Aktionen */}
-          <section className="border-t border-zinc-800 pt-4 space-y-2">
+          <section className="border-t border-gray-200 pt-4 space-y-2">
             <div className="flex gap-2">
               {sv.telefon && (
-                <a href={`tel:${sv.telefon}`} className="flex-1 flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
+                <a href={`tel:${sv.telefon}`} className="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-900 text-sm font-medium py-2.5 rounded-xl transition-colors">
                   <PhoneIcon className="w-3.5 h-3.5" /> Anrufen
                 </a>
               )}
               {sv.email && (
-                <a href={`mailto:${sv.email}`} className="flex-1 flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
+                <a href={`mailto:${sv.email}`} className="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-900 text-sm font-medium py-2.5 rounded-xl transition-colors">
                   <MailIcon className="w-3.5 h-3.5" /> E-Mail
                 </a>
               )}

@@ -7,9 +7,9 @@ type StatusData = { name: string; value: number; color: string }
 const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: { name: string; value: number }[] }) => {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-xs shadow-lg">
-      <span className="text-zinc-200">{payload[0].name}: </span>
-      <span className="text-white font-semibold">{payload[0].value}</span>
+    <div className="bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-xs shadow-lg">
+      <span className="text-gray-800">{payload[0].name}: </span>
+      <span className="text-gray-900 font-semibold">{payload[0].value}</span>
     </div>
   )
 }
@@ -42,8 +42,8 @@ export default function StatusChart({ data, total }: { data: StatusData[]; total
         {data.map(d => (
           <div key={d.name} className="flex items-center gap-2 text-xs">
             <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: d.color }} />
-            <span className="text-zinc-400 truncate flex-1">{d.name}</span>
-            <span className="text-zinc-200 font-medium tabular-nums">{d.value}</span>
+            <span className="text-gray-500 truncate flex-1">{d.name}</span>
+            <span className="text-gray-800 font-medium tabular-nums">{d.value}</span>
           </div>
         ))}
       </div>

@@ -12,10 +12,10 @@ export default function AdminError({
   return (
     <div className="px-4 py-8">
       <div className="max-w-2xl mx-auto">
-        <div className="bg-zinc-900 rounded-2xl p-12 text-center border border-red-900/30">
+        <div className="bg-white rounded-2xl p-12 text-center border border-red-900/30">
           <AlertTriangleIcon className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <h2 className="text-white text-lg font-semibold mb-2">Etwas ist schiefgelaufen</h2>
-          <p className="text-zinc-400 text-sm mb-2">
+          <h2 className="text-gray-900 text-lg font-semibold mb-2">Etwas ist schiefgelaufen</h2>
+          <p className="text-gray-500 text-sm mb-2">
             Die Seite konnte nicht geladen werden.
           </p>
           {error.message && (

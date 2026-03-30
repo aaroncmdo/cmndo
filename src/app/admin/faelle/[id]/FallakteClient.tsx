@@ -324,13 +324,13 @@ const WA_TEMPLATES: Record<string, { label: string; text: string }> = {
 }
 
 const TIMELINE_ICON: Record<string, { bg: string; color: string }> = {
-  'status-change': { bg: 'bg-blue-950', color: 'text-blue-400' },
-  upload: { bg: 'bg-violet-950', color: 'text-violet-400' },
-  notiz: { bg: 'bg-zinc-800', color: 'text-zinc-400' },
-  email: { bg: 'bg-green-950', color: 'text-green-400' },
-  anruf: { bg: 'bg-yellow-950', color: 'text-yellow-400' },
-  whatsapp: { bg: 'bg-emerald-950', color: 'text-emerald-400' },
-  system: { bg: 'bg-zinc-800', color: 'text-zinc-500' },
+  'status-change': { bg: 'bg-blue-50', color: 'text-blue-400' },
+  upload: { bg: 'bg-violet-50', color: 'text-violet-400' },
+  notiz: { bg: 'bg-gray-100', color: 'text-gray-500' },
+  email: { bg: 'bg-green-50', color: 'text-green-400' },
+  anruf: { bg: 'bg-yellow-50', color: 'text-yellow-400' },
+  whatsapp: { bg: 'bg-emerald-50', color: 'text-emerald-400' },
+  system: { bg: 'bg-gray-100', color: 'text-gray-500' },
 }
 
 const KANAL_ICON: Record<string, typeof PhoneIcon> = {
@@ -432,17 +432,17 @@ function daysBetween(from: string, to: Date) {
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex gap-2 py-1.5 border-b border-zinc-800/50 last:border-0">
-      <span className="text-zinc-500 text-sm w-40 shrink-0">{label}</span>
-      <span className="text-zinc-200 text-sm">{value || '—'}</span>
+    <div className="flex gap-2 py-1.5 border-b border-gray-200/50 last:border-0">
+      <span className="text-gray-500 text-sm w-40 shrink-0">{label}</span>
+      <span className="text-gray-800 text-sm">{value || '—'}</span>
     </div>
   )
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
-      <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">{title}</h3>
+    <div className="bg-white rounded-2xl p-5 border border-gray-200">
+      <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">{title}</h3>
       {children}
     </div>
   )
@@ -456,7 +456,7 @@ function Badge({ children, color }: { children: React.ReactNode; color: string }
     yellow: 'bg-yellow-500/10 text-yellow-400 border-yellow-800/30',
     orange: 'bg-orange-500/10 text-orange-400 border-orange-800/30',
     purple: 'bg-purple-500/10 text-purple-400 border-purple-800/30',
-    zinc: 'bg-zinc-800 text-zinc-400 border-zinc-700',
+    zinc: 'bg-gray-100 text-gray-500 border-gray-300',
     emerald: 'bg-emerald-500/10 text-emerald-400 border-emerald-800/30',
   }
   return (
@@ -550,7 +550,7 @@ export default function FallakteClient({
   ]
 
   return (
-    <div className="min-h-screen bg-zinc-950 px-4 py-8">
+    <div className="min-h-screen bg-[#f8f9fb] px-4 py-8">
       {process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY && (
         <Script
           src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}
@@ -564,16 +564,16 @@ export default function FallakteClient({
         <div className="flex items-start justify-between mb-6">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <a href="/admin/faelle" className="text-zinc-500 hover:text-zinc-300 text-sm transition-colors">
+              <a href="/admin/faelle" className="text-gray-500 hover:text-gray-700 text-sm transition-colors">
                 ← Alle Faelle
               </a>
             </div>
-            <h1 className="text-xl font-semibold text-white">
+            <h1 className="text-xl font-semibold text-gray-900">
               Kundenakte{fall.fall_nummer ? ` · ${fall.fall_nummer}` : ''}
             </h1>
-            <p className="text-zinc-500 text-sm mt-0.5">
+            <p className="text-gray-500 text-sm mt-0.5">
               {lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || lead.email : '—'}
-              {fall.kennzeichen && <span className="ml-2 text-zinc-600">· {fall.kennzeichen}</span>}
+              {fall.kennzeichen && <span className="ml-2 text-gray-400">· {fall.kennzeichen}</span>}
             </p>
           </div>
           <div className="flex items-center gap-2 mt-1">
@@ -584,7 +584,7 @@ export default function FallakteClient({
 
         {/* Vorschaden-Banner */}
         {(fall as Record<string, unknown>).vorschaden_vorhanden === true && (
-          <div className="mb-4 bg-amber-950 border border-amber-800 rounded-2xl p-4 flex items-center gap-3">
+          <div className="mb-4 bg-amber-50 border border-amber-800 rounded-2xl p-4 flex items-center gap-3">
             <AlertTriangleIcon className="w-5 h-5 text-amber-400 shrink-0" />
             <div>
               <p className="text-amber-300 font-medium text-sm">
@@ -603,10 +603,10 @@ export default function FallakteClient({
         {fall.anschlussschreiben_am && fall.vs_eskalationsstufe && fall.vs_eskalationsstufe !== 'vs-01' && (
           <div className={`mb-4 rounded-2xl p-4 flex items-center gap-3 border ${
             ['vs-06', 'vs-07'].includes(fall.vs_eskalationsstufe)
-              ? 'bg-red-950 border-red-800'
+              ? 'bg-red-50 border-red-800'
               : ['vs-04', 'vs-05'].includes(fall.vs_eskalationsstufe)
-              ? 'bg-orange-950 border-orange-800'
-              : 'bg-yellow-950 border-yellow-800'
+              ? 'bg-orange-50 border-orange-800'
+              : 'bg-yellow-50 border-yellow-800'
           }`}>
             <TimerIcon className={`w-5 h-5 shrink-0 ${
               ['vs-06', 'vs-07'].includes(fall.vs_eskalationsstufe) ? 'text-red-400' :
@@ -637,15 +637,15 @@ export default function FallakteClient({
         <PipelineBar status={fall.status} />
 
         {/* Tab Bar */}
-        <div className="flex gap-1 mb-6 bg-zinc-900 rounded-xl p-1 border border-zinc-800 overflow-x-auto">
+        <div className="flex gap-1 mb-6 bg-white rounded-xl p-1 border border-gray-200 overflow-x-auto">
           {tabs.map(([id, label]) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
               className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === id
-                  ? 'bg-zinc-800 text-white'
-                  : 'text-zinc-500 hover:text-zinc-300'
+                  ? 'bg-gray-100 text-gray-900'
+                  : 'text-gray-500 hover:text-gray-700'
               }`}
             >
               {label}
@@ -752,7 +752,7 @@ function StatusBadge({ status }: { status: string }) {
       color === 'blue' ? 'bg-blue-500/10 text-blue-400 border-blue-800/30' :
       color === 'orange' ? 'bg-orange-500/10 text-orange-400 border-orange-800/30' :
       color === 'purple' ? 'bg-purple-500/10 text-purple-400 border-purple-800/30' :
-      'bg-zinc-800 text-zinc-400 border-zinc-700'
+      'bg-gray-100 text-gray-500 border-gray-300'
     }`}>
       {label}
     </span>
@@ -765,7 +765,7 @@ function PipelineBar({ status }: { status: string }) {
   const currentIdx = PIPELINE_STEPS.findIndex((s) => s.key === status)
 
   return (
-    <div className="mb-6 bg-zinc-900 rounded-2xl p-4 border border-zinc-800">
+    <div className="mb-6 bg-white rounded-2xl p-4 border border-gray-200">
       <div className="flex items-center gap-1">
         {PIPELINE_STEPS.map((step, i) => {
           const isActive = i === currentIdx
@@ -776,13 +776,13 @@ function PipelineBar({ status }: { status: string }) {
                 className={`w-full h-2 rounded-full transition-all ${
                   isPast ? 'bg-blue-500' :
                   isActive ? 'bg-blue-400 animate-pulse' :
-                  'bg-zinc-800'
+                  'bg-gray-100'
                 }`}
               />
               <span className={`text-[10px] font-medium tracking-wider ${
                 isActive ? 'text-blue-400' :
-                isPast ? 'text-zinc-400' :
-                'text-zinc-600'
+                isPast ? 'text-gray-500' :
+                'text-gray-400'
               }`}>
                 {step.label}
               </span>
@@ -858,25 +858,25 @@ function KiSchaetzungSection({ fall, dokumente, onRefresh }: { fall: Fall; dokum
               {ki.schweregrad}
             </span>
             {abweichung !== null && (
-              <span className={`text-xs ${Math.abs(abweichung) > 20 ? 'text-red-400' : 'text-zinc-500'}`}>
+              <span className={`text-xs ${Math.abs(abweichung) > 20 ? 'text-red-400' : 'text-gray-500'}`}>
                 Abw. {abweichung > 0 ? '+' : ''}{abweichung}%
               </span>
             )}
           </div>
           <div className="flex flex-wrap gap-1.5">
             {ki.beschaedigte_teile.map(t => (
-              <span key={t} className="px-2 py-0.5 bg-zinc-800 text-zinc-300 rounded-full text-xs border border-zinc-700">{t}</span>
+              <span key={t} className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full text-xs border border-gray-300">{t}</span>
             ))}
           </div>
-          <p className="text-zinc-400 text-xs">{ki.beschreibung}</p>
-          <p className="text-zinc-600 text-xs">Geschaetzt am {fmt(fall.ki_kalkulation_am)}</p>
+          <p className="text-gray-500 text-xs">{ki.beschreibung}</p>
+          <p className="text-gray-400 text-xs">Geschaetzt am {fmt(fall.ki_kalkulation_am)}</p>
           {fall.schadenhoehe_netto && (
-            <div className="border-t border-zinc-800/50 pt-2 mt-2">
+            <div className="border-t border-gray-200/50 pt-2 mt-2">
               <InfoRow label="Gutachten (real)" value={fmtCurrency(fall.schadenhoehe_netto)} />
               <InfoRow label="KI-Schaetzung" value={`${fmtCurrency(ki.geschaetzte_kosten_min)} — ${fmtCurrency(ki.geschaetzte_kosten_max)}`} />
             </div>
           )}
-          <p className="text-zinc-600 text-[10px] mt-1">Dies ist eine KI-Schaetzung. Der endgueltige Wert wird durch das Gutachten bestimmt.</p>
+          <p className="text-gray-400 text-[10px] mt-1">Dies ist eine KI-Schaetzung. Der endgueltige Wert wird durch das Gutachten bestimmt.</p>
           <button
             onClick={() => runEstimate(schadensfotos.length > 0 ? 'fotos' : 'text')}
             disabled={loading}
@@ -887,7 +887,7 @@ function KiSchaetzungSection({ fall, dokumente, onRefresh }: { fall: Fall; dokum
         </div>
       ) : (
         <div className="space-y-3">
-          <p className="text-zinc-500 text-sm">Noch keine KI-Schaetzung vorhanden.</p>
+          <p className="text-gray-500 text-sm">Noch keine KI-Schaetzung vorhanden.</p>
           {error && <p className="text-red-400 text-xs">{error}</p>}
 
           {schadensfotos.length > 0 && (
@@ -904,7 +904,7 @@ function KiSchaetzungSection({ fall, dokumente, onRefresh }: { fall: Fall; dokum
           {!textMode ? (
             <button
               onClick={() => setTextMode(true)}
-              className="text-xs text-zinc-400 hover:text-zinc-300"
+              className="text-xs text-gray-500 hover:text-gray-700"
             >
               Oder: Aus Beschreibung schaetzen
             </button>
@@ -914,7 +914,7 @@ function KiSchaetzungSection({ fall, dokumente, onRefresh }: { fall: Fall; dokum
                 value={beschreibung}
                 onChange={e => setBeschreibung(e.target.value)}
                 placeholder="Schadensbeschreibung eingeben..."
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-200 placeholder:text-zinc-600 resize-none"
+                className="w-full bg-gray-100 border border-gray-300 rounded-lg p-2 text-sm text-gray-800 placeholder:text-gray-400 resize-none"
                 rows={3}
               />
               <button
@@ -1036,23 +1036,23 @@ function TabUebersicht({
       {/* GUTACHTERTERMIN-KARTE (prominent, volle Breite) */}
       {showTerminKarte && svTermin && (
         <div className={`rounded-2xl p-5 border ${
-          terminIsToday ? 'border-green-600 bg-green-950/30' :
-          terminIsOverdue ? 'border-red-600 bg-red-950/30' :
-          'border-blue-600/40 bg-blue-950/20'
+          terminIsToday ? 'border-green-600 bg-green-50/30' :
+          terminIsOverdue ? 'border-red-600 bg-red-50/30' :
+          'border-blue-600/40 bg-blue-50/20'
         }`}>
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
-              <p className="text-xs text-zinc-400 uppercase tracking-wider mb-1">Gutachtertermin</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Gutachtertermin</p>
               {svName && (
-                <p className="text-white text-sm font-medium mb-1">{svName}</p>
+                <p className="text-gray-900 text-sm font-medium mb-1">{svName}</p>
               )}
-              <p className={`text-2xl font-bold ${terminIsToday ? 'text-green-400' : terminIsOverdue ? 'text-red-400' : 'text-white'}`}>
+              <p className={`text-2xl font-bold ${terminIsToday ? 'text-green-400' : terminIsOverdue ? 'text-red-400' : 'text-gray-900'}`}>
                 {svTermin.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
                 {' '}
                 {svTermin.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
               </p>
               {fall.schadens_adresse && (
-                <p className="text-zinc-400 text-sm mt-1">{[fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ')}</p>
+                <p className="text-gray-500 text-sm mt-1">{[fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ')}</p>
               )}
             </div>
             <div className="text-right shrink-0">
@@ -1071,7 +1071,7 @@ function TabUebersicht({
           </div>
           {/* Warnung wenn Docs fehlen */}
           {docsComplete < docsTotal && terminCountdown <= 2 && terminCountdown >= 0 && (
-            <div className="mt-3 px-3 py-2 rounded-lg bg-amber-950/50 border border-amber-800/40">
+            <div className="mt-3 px-3 py-2 rounded-lg bg-amber-50/50 border border-amber-800/40">
               <p className="text-amber-400 text-xs font-semibold">
                 ACHTUNG: Gutachtertermin in {terminCountdown} Tagen aber {docsTotal - docsComplete} Pflichtdokumente fehlen noch!
               </p>
@@ -1090,7 +1090,7 @@ function TabUebersicht({
 
       {/* DOKUMENTEN-CHECKLISTE (kompakt) */}
       <Section title={`Pflichtdokumente (${docsComplete}/${docsTotal})`}>
-        <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden mb-3">
+        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-3">
           <div
             className={`h-full rounded-full transition-all ${docsPct === 100 ? 'bg-emerald-500' : docsPct >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
             style={{ width: `${docsPct}%` }}
@@ -1102,9 +1102,9 @@ function TabUebersicht({
               <span className={`w-4 h-4 rounded flex items-center justify-center text-[10px] ${doc.done ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
                 {doc.done ? '\u2713' : '\u2717'}
               </span>
-              <span className={`text-sm ${doc.done ? 'text-zinc-300' : 'text-red-400 font-medium'}`}>
+              <span className={`text-sm ${doc.done ? 'text-gray-700' : 'text-red-400 font-medium'}`}>
                 {doc.name}
-                {doc.done && doc.date && <span className="text-zinc-600 text-xs ml-2">{new Date(doc.date).toLocaleDateString('de-DE')}</span>}
+                {doc.done && doc.date && <span className="text-gray-400 text-xs ml-2">{new Date(doc.date).toLocaleDateString('de-DE')}</span>}
                 {!doc.done && <span className="text-red-500 text-xs ml-2">FEHLT</span>}
               </span>
             </div>
@@ -1117,7 +1117,7 @@ function TabUebersicht({
         <Section title="Kundenbetreuer">
           {kundenbetreuer ? (
             <div className="space-y-1">
-              <p className="text-white text-sm font-medium">{profileName(kundenbetreuer)}</p>
+              <p className="text-gray-900 text-sm font-medium">{profileName(kundenbetreuer)}</p>
               {kundenbetreuer.telefon && (
                 <a href={`tel:${kundenbetreuer.telefon}`} className="flex items-center gap-2 text-blue-400 text-sm hover:text-blue-300">
                   <PhoneIcon className="w-3.5 h-3.5" /> {kundenbetreuer.telefon}
@@ -1130,15 +1130,15 @@ function TabUebersicht({
               )}
             </div>
           ) : (
-            <p className="text-zinc-600 text-sm">Nicht zugewiesen</p>
+            <p className="text-gray-400 text-sm">Nicht zugewiesen</p>
           )}
         </Section>
 
         <Section title="Leadbearbeiter">
           {leadbearbeiter ? (
-            <p className="text-zinc-400 text-sm">{profileName(leadbearbeiter)}</p>
+            <p className="text-gray-500 text-sm">{profileName(leadbearbeiter)}</p>
           ) : (
-            <p className="text-zinc-600 text-sm">—</p>
+            <p className="text-gray-400 text-sm">—</p>
           )}
         </Section>
       </div>
@@ -1153,7 +1153,7 @@ function TabUebersicht({
           action.color === 'yellow' ? 'border-yellow-800/50 bg-yellow-500/5' :
           'border-blue-800/50 bg-blue-500/5'
         }`}>
-          <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Naechste Aktion</p>
+          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Naechste Aktion</p>
           <p className={`text-base font-semibold ${
             action.color === 'red' ? 'text-red-400' :
             action.color === 'orange' ? 'text-orange-400' :
@@ -1162,7 +1162,7 @@ function TabUebersicht({
             action.color === 'yellow' ? 'text-yellow-400' :
             'text-blue-400'
           }`}>{action.label}</p>
-          <p className="text-sm text-zinc-400 mt-1">{action.desc}</p>
+          <p className="text-sm text-gray-500 mt-1">{action.desc}</p>
         </div>
       )}
 
@@ -1192,28 +1192,28 @@ function TabUebersicht({
                 onSelect={handlePlaceSelect}
               />
             ) : (
-              <p className="text-zinc-500 text-sm">Google Maps wird geladen...</p>
+              <p className="text-gray-500 text-sm">Google Maps wird geladen...</p>
             )}
-            {savingAdresse && <p className="text-zinc-500 text-xs">Speichert...</p>}
+            {savingAdresse && <p className="text-gray-500 text-xs">Speichert...</p>}
             {adresseError && <p className="text-red-400 text-xs">{adresseError}</p>}
             <button
               onClick={() => { setEditingAdresse(false); setAdresseError(null) }}
-              className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-300 text-xs transition-colors"
+              className="flex items-center gap-1.5 text-gray-500 hover:text-gray-700 text-xs transition-colors"
             >
               <XIcon className="w-3 h-3" /> Abbrechen
             </button>
           </div>
         ) : (
           <div className="flex items-start gap-2">
-            <MapPinIcon className="w-4 h-4 text-zinc-500 mt-0.5 shrink-0" />
+            <MapPinIcon className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-zinc-200 text-sm">
+              <p className="text-gray-800 text-sm">
                 {[fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') || '—'}
               </p>
             </div>
             <button
               onClick={() => setEditingAdresse(true)}
-              className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors shrink-0"
+              className="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors shrink-0"
               title="Adresse bearbeiten"
             >
               <PencilIcon className="w-3.5 h-3.5" />
@@ -1226,12 +1226,12 @@ function TabUebersicht({
       <Section title="Fahrzeugdaten">
         <div className="space-y-0">
           {(fall.fahrzeug_hersteller || fall.fahrzeug_modell) && (
-            <p className="text-white text-lg font-medium mb-1">
+            <p className="text-gray-900 text-lg font-medium mb-1">
               {[fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ')}
             </p>
           )}
           {fall.kennzeichen && (
-            <span className="inline-block bg-blue-950 text-blue-300 text-sm font-mono font-medium px-3 py-1 rounded-lg mb-2">
+            <span className="inline-block bg-blue-50 text-blue-300 text-sm font-mono font-medium px-3 py-1 rounded-lg mb-2">
               {fall.kennzeichen}
             </span>
           )}
@@ -1247,7 +1247,7 @@ function TabUebersicht({
         )}
 
         {/* FIN */}
-        <div className="border-t border-zinc-800/50 mt-2 pt-2">
+        <div className="border-t border-gray-200/50 mt-2 pt-2">
           {finVin ? (
             <div>
               <InfoRow label="FIN" value={<span className="font-mono text-sm">{finVin}</span>} />
@@ -1261,8 +1261,8 @@ function TabUebersicht({
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <span className="bg-amber-950 text-amber-400 text-xs font-medium px-2 py-0.5 rounded">FIN fehlt noch</span>
-              <span className="text-zinc-500 text-xs">Wird aus Fahrzeugschein extrahiert (OCR)</span>
+              <span className="bg-amber-50 text-amber-400 text-xs font-medium px-2 py-0.5 rounded">FIN fehlt noch</span>
+              <span className="text-gray-500 text-xs">Wird aus Fahrzeugschein extrahiert (OCR)</span>
             </div>
           )}
         </div>
@@ -1303,9 +1303,9 @@ function TabUebersicht({
             <InfoRow label="SV-Termin" value={fmt(fall.sv_termin)} />
           </>
         ) : (
-          <p className="text-zinc-600 text-sm">Noch kein SV zugewiesen</p>
+          <p className="text-gray-400 text-sm">Noch kein SV zugewiesen</p>
         )}
-        <div className="border-t border-zinc-800/50 mt-2 pt-2">
+        <div className="border-t border-gray-200/50 mt-2 pt-2">
           <InfoRow label="Gutachten am" value={fmt(fall.gutachten_eingegangen_am)} />
           <InfoRow label="Gutachten-Betrag" value={fmtCurrency(fall.gutachten_betrag)} />
         </div>
@@ -1318,7 +1318,7 @@ function TabUebersicht({
             <InfoRow label="Nutzungsausfall berechtigt" value={
               (fall as Record<string, unknown>).nutzungsausfall_berechtigt
                 ? <span className="text-emerald-400">Ja</span>
-                : <span className="text-zinc-500">Nein / Nicht geprueft</span>
+                : <span className="text-gray-500">Nein / Nicht geprueft</span>
             } />
             <InfoRow label="Tage" value={String((fall as Record<string, unknown>).nutzungsausfall_tage ?? '\u2014')} />
             <InfoRow label="Tagessatz" value={fmtCurrency((fall as Record<string, unknown>).nutzungsausfall_tagessatz as number | null)} />
@@ -1329,9 +1329,9 @@ function TabUebersicht({
               )
             } />
           </div>
-          <div className="border-t border-zinc-800/50 mt-2 pt-2 grid grid-cols-2 gap-3">
+          <div className="border-t border-gray-200/50 mt-2 pt-2 grid grid-cols-2 gap-3">
             <InfoRow label="Mietwagen genutzt" value={
-              (fall as Record<string, unknown>).mietwagen_genutzt ? <span className="text-blue-400">Ja</span> : <span className="text-zinc-500">Nein</span>
+              (fall as Record<string, unknown>).mietwagen_genutzt ? <span className="text-blue-400">Ja</span> : <span className="text-gray-500">Nein</span>
             } />
             <InfoRow label="Mietwagen-Kosten" value={fmtCurrency((fall as Record<string, unknown>).mietwagen_kosten as number | null)} />
           </div>
@@ -1346,19 +1346,19 @@ function TabUebersicht({
         <InfoRow label="Abtretung" value={
           fall.abtretung_signiert_am
             ? <span className="text-green-400">Signiert am {fmt(fall.abtretung_signiert_am)}</span>
-            : <span className="text-zinc-600">Ausstehend</span>
+            : <span className="text-gray-400">Ausstehend</span>
         } />
         <InfoRow label="Vollmacht" value={
           fall.vollmacht_signiert_am
             ? <span className="text-green-400">Signiert am {fmt(fall.vollmacht_signiert_am)}</span>
-            : <span className="text-zinc-600">Ausstehend</span>
+            : <span className="text-gray-400">Ausstehend</span>
         } />
       </Section>
 
       {/* Notizen */}
       {fall.notizen && (
         <Section title="Notizen">
-          <p className="text-zinc-300 text-sm whitespace-pre-wrap">{fall.notizen}</p>
+          <p className="text-gray-700 text-sm whitespace-pre-wrap">{fall.notizen}</p>
         </Section>
       )}
     </div>
@@ -1426,13 +1426,13 @@ function TabDokumente({
     <div className="space-y-4">
       <Section title="Pflichtdokumente">
         {pflichtdokumente.length === 0 ? (
-          <p className="text-zinc-600 text-sm">Keine Pflichtdokumente angelegt.</p>
+          <p className="text-gray-400 text-sm">Keine Pflichtdokumente angelegt.</p>
         ) : (
           <div className="space-y-2">
             {pflichtdokumente.map((dok) => {
               const sc = statusColors[dok.status] ?? statusColors.ausstehend
               return (
-                <div key={dok.id} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-zinc-800/30 border border-zinc-800">
+                <div key={dok.id} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-100/30 border border-gray-200">
                   {dok.status === 'hochgeladen' || dok.status === 'geprueft' ? (
                     <CheckIcon className={`w-4 h-4 flex-shrink-0 ${sc.color}`} />
                   ) : (
@@ -1440,11 +1440,11 @@ function TabDokumente({
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-zinc-200">{DOK_LABELS[dok.dokument_typ] ?? dok.dokument_typ}</span>
+                      <span className="text-sm text-gray-800">{DOK_LABELS[dok.dokument_typ] ?? dok.dokument_typ}</span>
                       {dok.pflicht && <span className="text-[10px] text-red-400">PFLICHT</span>}
                     </div>
                     {dok.hochgeladen_am && (
-                      <p className="text-xs text-zinc-600 mt-0.5">Hochgeladen am {fmt(dok.hochgeladen_am)}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">Hochgeladen am {fmt(dok.hochgeladen_am)}</p>
                     )}
                   </div>
                   <Badge color={sc.badge}>{dok.status}</Badge>
@@ -1467,10 +1467,10 @@ function TabDokumente({
         <Section title="Gutachten-PDF">
           {gutachtenDoks.map((d) => (
             <a key={d.id} href={d.datei_url} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl bg-zinc-800/30 border border-zinc-800 hover:border-zinc-700 transition-colors">
+              className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-100/30 border border-gray-200 hover:border-gray-300 transition-colors">
               <FileTextIcon className="w-5 h-5 text-blue-400" />
-              <span className="text-sm text-zinc-200">{d.datei_name ?? 'Gutachten'}</span>
-              <span className="text-xs text-zinc-600 ml-auto">{fmt(d.created_at)}</span>
+              <span className="text-sm text-gray-800">{d.datei_name ?? 'Gutachten'}</span>
+              <span className="text-xs text-gray-400 ml-auto">{fmt(d.created_at)}</span>
             </a>
           ))}
         </Section>
@@ -1491,17 +1491,17 @@ function TabDokumente({
           <div className="space-y-1">
             {dokumente.map((d) => (
               <a key={d.id} href={d.datei_url} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-zinc-800 transition-colors">
+                className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-100 transition-colors">
                 {d.typ.startsWith('foto') || d.typ === 'schadensfoto' ? (
                   <img src={d.datei_url} alt="" className="w-8 h-8 rounded object-cover flex-shrink-0" />
                 ) : (
-                  <FileTextIcon className="w-4 h-4 text-zinc-500 flex-shrink-0" />
+                  <FileTextIcon className="w-4 h-4 text-gray-500 flex-shrink-0" />
                 )}
-                <span className="text-zinc-400 text-xs uppercase tracking-wider w-28 shrink-0">
+                <span className="text-gray-500 text-xs uppercase tracking-wider w-28 shrink-0">
                   {DOK_LABELS[d.typ] ?? d.typ}
                 </span>
-                <span className="text-zinc-200 text-sm truncate">{d.datei_name ?? d.datei_url.split('/').pop()}</span>
-                <span className="text-zinc-600 text-xs ml-auto shrink-0">{fmt(d.created_at)}</span>
+                <span className="text-gray-800 text-sm truncate">{d.datei_name ?? d.datei_url.split('/').pop()}</span>
+                <span className="text-gray-400 text-xs ml-auto shrink-0">{fmt(d.created_at)}</span>
               </a>
             ))}
           </div>
@@ -1589,13 +1589,13 @@ function TabDateien({
   return (
     <div className="space-y-4">
       {/* Upload */}
-      <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
+      <div className="bg-white rounded-2xl p-5 border border-gray-200">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Datei hochladen</h3>
+          <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider">Datei hochladen</h3>
         </div>
-        <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-zinc-700 hover:border-zinc-500 rounded-xl p-6 cursor-pointer transition-colors">
-          <UploadIcon className="w-6 h-6 text-zinc-500" />
-          <span className="text-zinc-400 text-sm">{uploading ? 'Wird hochgeladen...' : 'Datei auswaehlen oder hierher ziehen'}</span>
+        <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-300 hover:border-zinc-500 rounded-xl p-6 cursor-pointer transition-colors">
+          <UploadIcon className="w-6 h-6 text-gray-500" />
+          <span className="text-gray-500 text-sm">{uploading ? 'Wird hochgeladen...' : 'Datei auswaehlen oder hierher ziehen'}</span>
           <input
             ref={fileRef}
             type="file"
@@ -1609,9 +1609,9 @@ function TabDateien({
 
       {/* Grouped by Kategorie */}
       {dokumente.length === 0 ? (
-        <div className="bg-zinc-900 rounded-2xl p-8 border border-zinc-800 text-center">
-          <FolderOpenIcon className="w-8 h-8 text-zinc-700 mx-auto mb-2" />
-          <p className="text-zinc-600 text-sm">Noch keine Dateien vorhanden.</p>
+        <div className="bg-white rounded-2xl p-8 border border-gray-200 text-center">
+          <FolderOpenIcon className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+          <p className="text-gray-400 text-sm">Noch keine Dateien vorhanden.</p>
         </div>
       ) : (
         KATEGORIE_ORDER.filter((k) => grouped[k]?.length).map((kat) => (
@@ -1623,36 +1623,36 @@ function TabDateien({
                   href={d.datei_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-zinc-800/60 transition-colors group"
+                  className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-gray-100/60 transition-colors group"
                 >
                   {/* Thumbnail or Icon */}
                   {isImage(d) ? (
-                    <img src={d.datei_url} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0 border border-zinc-700" />
+                    <img src={d.datei_url} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0 border border-gray-300" />
                   ) : (
-                    <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0">
-                      <FileTextIcon className="w-4 h-4 text-zinc-500" />
+                    <div className="w-10 h-10 rounded-lg bg-gray-100 border border-gray-300 flex items-center justify-center flex-shrink-0">
+                      <FileTextIcon className="w-4 h-4 text-gray-500" />
                     </div>
                   )}
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-zinc-200 text-sm truncate">{d.datei_name ?? d.datei_url.split('/').pop()}</p>
+                    <p className="text-gray-800 text-sm truncate">{d.datei_name ?? d.datei_url.split('/').pop()}</p>
                     <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                       <Badge color={KATEGORIE_COLORS[d.kategorie ?? 'sonstiges'] ?? 'zinc'}>
                         {DOK_LABELS[d.typ] ?? d.typ}
                       </Badge>
                       {d.hochgeladen_von_rolle && (
-                        <span className="text-zinc-600 text-xs">von {d.hochgeladen_von_rolle}</span>
+                        <span className="text-gray-400 text-xs">von {d.hochgeladen_von_rolle}</span>
                       )}
                       {d.quelle && (
-                        <span className="text-zinc-600 text-xs">· {QUELLE_LABELS[d.quelle] ?? d.quelle}</span>
+                        <span className="text-gray-400 text-xs">· {QUELLE_LABELS[d.quelle] ?? d.quelle}</span>
                       )}
-                      <span className="text-zinc-700 text-xs">· {fmt(d.created_at)}</span>
+                      <span className="text-gray-300 text-xs">· {fmt(d.created_at)}</span>
                     </div>
                     {d.sichtbar_fuer && d.sichtbar_fuer.length > 0 && (
                       <div className="flex gap-1 mt-1 flex-wrap">
                         {d.sichtbar_fuer.map((r) => (
-                          <span key={r} className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-500 border border-zinc-700/50">
+                          <span key={r} className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 border border-gray-300/50">
                             {r}
                           </span>
                         ))}
@@ -1661,7 +1661,7 @@ function TabDateien({
                   </div>
 
                   {/* Download */}
-                  <DownloadIcon className="w-4 h-4 text-zinc-600 group-hover:text-zinc-300 transition-colors flex-shrink-0" />
+                  <DownloadIcon className="w-4 h-4 text-gray-400 group-hover:text-gray-700 transition-colors flex-shrink-0" />
                 </a>
               ))}
             </div>
@@ -1714,30 +1714,30 @@ function TabTimeline({
 
   return (
     <div className="space-y-4">
-      <div className="bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
         <button onClick={() => setShowForm(!showForm)}
-          className="w-full flex items-center gap-2 px-5 py-3 text-sm text-zinc-400 hover:text-zinc-200 transition-colors">
+          className="w-full flex items-center gap-2 px-5 py-3 text-sm text-gray-500 hover:text-gray-800 transition-colors">
           <PlusIcon className="w-4 h-4" /> Eintrag hinzufuegen
         </button>
         {showForm && (
-          <div className="px-5 pb-5 space-y-3 border-t border-zinc-800 pt-4">
+          <div className="px-5 pb-5 space-y-3 border-t border-gray-200 pt-4">
             <div className="flex gap-2 flex-wrap">
               {['notiz', 'anruf', 'email', 'whatsapp', 'system'].map((t) => (
                 <button key={t} onClick={() => setNewTyp(t)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    newTyp === t ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-zinc-200'
+                    newTyp === t ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500 hover:text-gray-800'
                   }`}>
                   {t}
                 </button>
               ))}
             </div>
             <input value={newTitel} onChange={(e) => setNewTitel(e.target.value)} placeholder="Titel"
-              className="w-full px-4 py-3 rounded-xl bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-zinc-500" />
+              className="w-full px-4 py-3 rounded-xl bg-gray-100 border border-gray-300 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:border-zinc-500" />
             <textarea value={newBeschreibung} onChange={(e) => setNewBeschreibung(e.target.value)}
               placeholder="Beschreibung (optional)" rows={2}
-              className="w-full px-4 py-3 rounded-xl bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-zinc-500 resize-none" />
+              className="w-full px-4 py-3 rounded-xl bg-gray-100 border border-gray-300 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:border-zinc-500 resize-none" />
             <select value={newKanal} onChange={(e) => setNewKanal(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm focus:outline-none focus:border-zinc-500">
+              className="w-full px-4 py-3 rounded-xl bg-gray-100 border border-gray-300 text-gray-700 text-sm focus:outline-none focus:border-zinc-500">
               <option value="">Kanal (optional)</option>
               <option value="whatsapp">WhatsApp</option>
               <option value="email">E-Mail</option>
@@ -1752,12 +1752,12 @@ function TabTimeline({
       </div>
 
       {timeline.length === 0 ? (
-        <div className="bg-zinc-900 rounded-2xl p-12 text-center border border-zinc-800">
-          <p className="text-zinc-500">Noch keine Aktivitaeten vorhanden.</p>
+        <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
+          <p className="text-gray-500">Noch keine Aktivitaeten vorhanden.</p>
         </div>
       ) : (
         <div className="relative">
-          <div className="absolute left-4 top-0 bottom-0 w-px bg-zinc-800" />
+          <div className="absolute left-4 top-0 bottom-0 w-px bg-gray-100" />
           <div className="space-y-0">
             {timeline.map((entry) => {
               const style = TIMELINE_ICON[entry.typ] ?? TIMELINE_ICON.system
@@ -1766,22 +1766,22 @@ function TabTimeline({
               return (
                 <div key={entry.id} className="relative pl-11 pb-6 last:pb-0">
                   <div className={`absolute left-2.5 top-1 w-3 h-3 rounded-full ring-2 ring-zinc-950 ${style.bg} ${style.color}`} />
-                  <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
+                  <div className="bg-white rounded-xl p-4 border border-gray-200">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-sm text-white font-medium">{entry.titel}</p>
+                        <p className="text-sm text-gray-900 font-medium">{entry.titel}</p>
                         {entry.beschreibung && (
-                          <p className="text-zinc-400 text-sm mt-1 whitespace-pre-wrap">{entry.beschreibung}</p>
+                          <p className="text-gray-500 text-sm mt-1 whitespace-pre-wrap">{entry.beschreibung}</p>
                         )}
                       </div>
-                      <span className="text-zinc-600 text-xs whitespace-nowrap shrink-0">{fmtDateTime(entry.created_at)}</span>
+                      <span className="text-gray-400 text-xs whitespace-nowrap shrink-0">{fmtDateTime(entry.created_at)}</span>
                     </div>
                     <div className="mt-2 flex items-center gap-2">
                       <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${style.bg} ${style.color}`}>
                         {entry.typ}
                       </span>
                       {KanalIcon && (
-                        <span className="flex items-center gap-1 text-xs text-zinc-500">
+                        <span className="flex items-center gap-1 text-xs text-gray-500">
                           <KanalIcon className="w-3 h-3" /> {kanal}
                         </span>
                       )}
@@ -1839,38 +1839,38 @@ function TabKommunikation({
                 <MessageSquareIcon className="w-5 h-5 text-emerald-400" />
                 <div className="text-left">
                   <p className="text-sm text-emerald-300 font-medium">{template.label}</p>
-                  <p className="text-xs text-zinc-500 mt-0.5">WhatsApp-Vorlage fuer aktuelle Phase</p>
+                  <p className="text-xs text-gray-500 mt-0.5">WhatsApp-Vorlage fuer aktuelle Phase</p>
                 </div>
                 <SendIcon className="w-4 h-4 text-emerald-400 ml-auto" />
               </button>
             )}
-            <p className="text-xs text-zinc-500 uppercase tracking-wider mt-4 mb-2">Alle Vorlagen</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider mt-4 mb-2">Alle Vorlagen</p>
             {Object.entries(WA_TEMPLATES).map(([key, tpl]) => (
               <button key={key} onClick={() => openWhatsApp(tpl.text)}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-zinc-800 hover:border-zinc-700 transition-colors text-left">
-                <MessageSquareIcon className="w-4 h-4 text-zinc-500" />
-                <span className="text-sm text-zinc-300">{tpl.label}</span>
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors text-left">
+                <MessageSquareIcon className="w-4 h-4 text-gray-500" />
+                <span className="text-sm text-gray-700">{tpl.label}</span>
                 <Badge color={key === fall.status ? 'emerald' : 'zinc'}>{key}</Badge>
               </button>
             ))}
           </div>
         ) : (
-          <p className="text-zinc-600 text-sm">Keine Telefonnummer vorhanden.</p>
+          <p className="text-gray-400 text-sm">Keine Telefonnummer vorhanden.</p>
         )}
       </Section>
 
       <Section title={`WhatsApp-Verlauf (${waMessages.length})`}>
         {waMessages.length === 0 ? (
-          <p className="text-zinc-600 text-sm">Keine WhatsApp-Nachrichten protokolliert.</p>
+          <p className="text-gray-400 text-sm">Keine WhatsApp-Nachrichten protokolliert.</p>
         ) : (
           <div className="space-y-2">
             {waMessages.map((msg) => (
-              <div key={msg.id} className="px-4 py-3 rounded-xl bg-zinc-800/30 border border-zinc-800">
+              <div key={msg.id} className="px-4 py-3 rounded-xl bg-gray-100/30 border border-gray-200">
                 <div className="flex items-start justify-between gap-3">
-                  <p className="text-sm text-zinc-200">{msg.titel}</p>
-                  <span className="text-xs text-zinc-600 shrink-0">{fmtDateTime(msg.created_at)}</span>
+                  <p className="text-sm text-gray-800">{msg.titel}</p>
+                  <span className="text-xs text-gray-400 shrink-0">{fmtDateTime(msg.created_at)}</span>
                 </div>
-                {msg.beschreibung && <p className="text-xs text-zinc-400 mt-1">{msg.beschreibung}</p>}
+                {msg.beschreibung && <p className="text-xs text-gray-500 mt-1">{msg.beschreibung}</p>}
               </div>
             ))}
           </div>
@@ -2014,13 +2014,13 @@ function TabQcPruefung({
             }`}>
               {qcCheckliste?.status === 'bestanden' ? 'QC bestanden' : 'Nachbesserung angefordert'}
               {qcCheckliste?.geprueft_am && (
-                <span className="text-zinc-500 ml-2 font-normal">
+                <span className="text-gray-500 ml-2 font-normal">
                   {new Date(qcCheckliste.geprueft_am).toLocaleDateString('de-DE')}
                 </span>
               )}
             </p>
             {qcCheckliste?.kommentar && (
-              <p className="text-zinc-400 text-xs mt-0.5">{qcCheckliste.kommentar}</p>
+              <p className="text-gray-500 text-xs mt-0.5">{qcCheckliste.kommentar}</p>
             )}
           </div>
         </div>
@@ -2028,7 +2028,7 @@ function TabQcPruefung({
 
       <Section title={`Checkliste (${checkedCount}/${totalCount})`}>
         <div className="mb-4">
-          <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${allChecked ? 'bg-green-500' : 'bg-blue-500'}`}
               style={{ width: `${(checkedCount / totalCount) * 100}%` }}
@@ -2043,7 +2043,7 @@ function TabQcPruefung({
               className={`flex items-start gap-3 px-4 py-3 rounded-xl border transition-colors cursor-pointer ${
                 checks[item.key]
                   ? 'bg-green-500/5 border-green-800/30'
-                  : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700'
+                  : 'bg-white border-gray-200 hover:border-gray-300'
               } ${isDone ? 'pointer-events-none opacity-75' : ''}`}
             >
               <input
@@ -2051,22 +2051,22 @@ function TabQcPruefung({
                 checked={checks[item.key]}
                 onChange={() => toggleCheck(item.key)}
                 disabled={isDone}
-                className="mt-0.5 w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-green-500 focus:ring-0 focus:ring-offset-0 accent-green-500"
+                className="mt-0.5 w-4 h-4 rounded border-gray-300 bg-gray-100 text-green-500 focus:ring-0 focus:ring-offset-0 accent-green-500"
               />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className={`text-sm font-medium ${checks[item.key] ? 'text-green-300' : 'text-zinc-300'}`}>
+                  <span className={`text-sm font-medium ${checks[item.key] ? 'text-green-300' : 'text-gray-700'}`}>
                     {item.label}
                   </span>
                   {autoDefaults[item.key] !== undefined && autoDefaults[item.key] && (
                     <span className="text-[10px] uppercase tracking-wider text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded">auto</span>
                   )}
                 </div>
-                <p className="text-xs text-zinc-500 mt-0.5">{item.desc}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
               </div>
               {checks[item.key]
                 ? <CheckIcon className="w-4 h-4 text-green-400 mt-0.5 shrink-0" />
-                : <XIcon className="w-4 h-4 text-zinc-700 mt-0.5 shrink-0" />}
+                : <XIcon className="w-4 h-4 text-gray-300 mt-0.5 shrink-0" />}
             </label>
           ))}
 
@@ -2083,7 +2083,7 @@ function TabQcPruefung({
                 checked={vorschaedenOk}
                 onChange={() => !isDone && setVorschaedenOk(!vorschaedenOk)}
                 disabled={isDone}
-                className="mt-0.5 w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-green-500 focus:ring-0 focus:ring-offset-0 accent-green-500"
+                className="mt-0.5 w-4 h-4 rounded border-gray-300 bg-gray-100 text-green-500 focus:ring-0 focus:ring-offset-0 accent-green-500"
               />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
@@ -2092,7 +2092,7 @@ function TabQcPruefung({
                   </span>
                   <Badge color="orange">Vorschaden</Badge>
                 </div>
-                <p className="text-xs text-zinc-500 mt-0.5">
+                <p className="text-xs text-gray-500 mt-0.5">
                   Gutachten beruecksichtigt die {String((fall as Record<string, unknown>).vorschaden_anzahl ?? '')} bekannten Vorschaeden
                 </p>
               </div>
@@ -2111,7 +2111,7 @@ function TabQcPruefung({
           disabled={isDone}
           placeholder="Anmerkungen zur QC-Pruefung..."
           rows={3}
-          className="w-full px-4 py-3 rounded-xl bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-zinc-500 resize-none disabled:opacity-60"
+          className="w-full px-4 py-3 rounded-xl bg-gray-100 border border-gray-300 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:border-zinc-500 resize-none disabled:opacity-60"
         />
       </Section>
 
@@ -2120,14 +2120,14 @@ function TabQcPruefung({
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 py-3 rounded-xl border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium disabled:opacity-40 transition-all"
+            className="flex-1 py-3 rounded-xl border border-gray-300 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium disabled:opacity-40 transition-all"
           >
             {saving ? 'Speichern ...' : 'Zwischenspeichern'}
           </button>
           <button
             onClick={handleNachbesserung}
             disabled={saving}
-            className="flex-1 py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold disabled:opacity-40 transition-all"
+            className="flex-1 py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-gray-900 text-sm font-semibold disabled:opacity-40 transition-all"
           >
             Nachbesserung
           </button>
@@ -2235,20 +2235,20 @@ function TabKanzlei({
       <Section title="Kanzlei-Ansprechpartner">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
           <div>
-            <label className="text-zinc-500 text-xs block mb-1">Name</label>
-            <input value={kName} onChange={e => setKName(e.target.value)} placeholder="z.B. RA Dr. Müller" className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+            <label className="text-gray-500 text-xs block mb-1">Name</label>
+            <input value={kName} onChange={e => setKName(e.target.value)} placeholder="z.B. RA Dr. Müller" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
           </div>
           <div>
-            <label className="text-zinc-500 text-xs block mb-1">Position</label>
-            <input value={kPosition} onChange={e => setKPosition(e.target.value)} placeholder="z.B. Rechtsanwalt" className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+            <label className="text-gray-500 text-xs block mb-1">Position</label>
+            <input value={kPosition} onChange={e => setKPosition(e.target.value)} placeholder="z.B. Rechtsanwalt" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
           </div>
           <div>
-            <label className="text-zinc-500 text-xs block mb-1">E-Mail</label>
-            <input value={kEmail} onChange={e => setKEmail(e.target.value)} type="email" placeholder="anwalt@kanzlei.de" className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+            <label className="text-gray-500 text-xs block mb-1">E-Mail</label>
+            <input value={kEmail} onChange={e => setKEmail(e.target.value)} type="email" placeholder="anwalt@kanzlei.de" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
           </div>
           <div>
-            <label className="text-zinc-500 text-xs block mb-1">Telefon</label>
-            <input value={kTelefon} onChange={e => setKTelefon(e.target.value)} type="tel" placeholder="+49 221 12345" className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+            <label className="text-gray-500 text-xs block mb-1">Telefon</label>
+            <input value={kTelefon} onChange={e => setKTelefon(e.target.value)} type="tel" placeholder="+49 221 12345" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
           </div>
         </div>
         <button onClick={handleSaveKanzlei} disabled={kSaving} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-40">
@@ -2260,7 +2260,7 @@ function TabKanzlei({
       {fall.mandatsnummer && (
         <div className="bg-gradient-to-r from-cyan-950/50 to-blue-950/50 border border-cyan-800/40 rounded-2xl p-5">
           <p className="text-xs text-cyan-400 font-medium mb-1">Mandatsnummer</p>
-          <p className="text-2xl font-bold text-white font-mono tracking-wide">{fall.mandatsnummer}</p>
+          <p className="text-2xl font-bold text-gray-900 font-mono tracking-wide">{fall.mandatsnummer}</p>
         </div>
       )}
 
@@ -2270,7 +2270,7 @@ function TabKanzlei({
         <InfoRow label="Filmcheck" value={
           fall.filmcheck_ok
             ? <span className="text-green-400">Bestanden ({fmt(fall.filmcheck_am)})</span>
-            : <span className="text-zinc-600">Ausstehend</span>
+            : <span className="text-gray-400">Ausstehend</span>
         } />
         <InfoRow label="Versicherung" value={fall.versicherung_name} />
         <InfoRow label="Schadennummer" value={fall.versicherung_schaden_nr} />
@@ -2280,7 +2280,7 @@ function TabKanzlei({
             href={`/api/pdf/kanzlei-paket/${fall.id}`}
             target="_blank"
             rel="noopener"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl text-sm text-white transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-xl text-sm text-gray-900 transition-colors"
           >
             Kanzlei-Paket PDF herunterladen
           </a>
@@ -2292,9 +2292,9 @@ function TabKanzlei({
           <div>
             <InfoRow label="AS gesendet am" value={fmt(asDate)} />
             <div className="mt-3">
-              <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2">VS-Timer</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">VS-Timer</p>
               <div className="flex items-center gap-3">
-                <div className="flex-1 h-3 bg-zinc-800 rounded-full overflow-hidden">
+                <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${
                       vsFristAbgelaufen ? 'bg-red-500' :
@@ -2322,7 +2322,7 @@ function TabKanzlei({
           </div>
         ) : (
           <div className="space-y-3">
-            <p className="text-zinc-600 text-sm">Noch kein Anschlussschreiben gesendet.</p>
+            <p className="text-gray-400 text-sm">Noch kein Anschlussschreiben gesendet.</p>
             {fall.filmcheck_ok && (
               <button onClick={handleAS} disabled={saving}
                 className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold disabled:opacity-40 transition-all">
@@ -2345,17 +2345,17 @@ function TabKanzlei({
                     isActive
                       ? `${stufe.borderActive} ${stufe.bgActive}`
                       : isPast
-                      ? 'border-zinc-700 bg-zinc-800/30'
-                      : 'border-zinc-800/50 bg-transparent'
+                      ? 'border-gray-300 bg-gray-100/30'
+                      : 'border-gray-200/50 bg-transparent'
                   }`}
                 >
-                  <span className={`text-xs font-bold w-12 ${isActive ? stufe.textActive : isPast ? 'text-zinc-500' : 'text-zinc-700'}`}>
+                  <span className={`text-xs font-bold w-12 ${isActive ? stufe.textActive : isPast ? 'text-gray-500' : 'text-gray-300'}`}>
                     {stufe.key.toUpperCase()}
                   </span>
-                  <span className={`text-sm flex-1 ${isActive ? 'text-zinc-200' : isPast ? 'text-zinc-500' : 'text-zinc-700'}`}>
+                  <span className={`text-sm flex-1 ${isActive ? 'text-gray-800' : isPast ? 'text-gray-500' : 'text-gray-300'}`}>
                     {stufe.label}
                   </span>
-                  <span className={`text-xs ${isActive ? 'text-zinc-400' : 'text-zinc-700'}`}>Tag {stufe.tage}</span>
+                  <span className={`text-xs ${isActive ? 'text-gray-500' : 'text-gray-300'}`}>Tag {stufe.tage}</span>
                   {isActive && <span className="w-2 h-2 rounded-full bg-current animate-pulse" />}
                 </div>
               )
@@ -2384,10 +2384,10 @@ function TabKanzlei({
           <div className="space-y-3">
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <BanknoteIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <BanknoteIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                 <input type="text" inputMode="decimal" value={betrag} onChange={(e) => setBetrag(e.target.value)}
                   placeholder="Betrag in EUR"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-zinc-500" />
+                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-100 border border-gray-300 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:border-zinc-500" />
               </div>
               <button onClick={handleZahlung} disabled={saving || !betrag.trim()}
                 className="px-5 py-3 rounded-xl bg-green-600 hover:bg-green-500 text-white text-sm font-semibold disabled:opacity-40 transition-all">
@@ -2476,7 +2476,7 @@ function TabChat({
       kanzlei: 'bg-orange-500/10 text-orange-400 border-orange-800/30',
       sv: 'bg-purple-500/10 text-purple-400 border-purple-800/30',
     }
-    return colors[rolle ?? ''] ?? 'bg-zinc-800 text-zinc-400 border-zinc-700'
+    return colors[rolle ?? ''] ?? 'bg-gray-100 text-gray-500 border-gray-300'
   }
 
   // Track last rendered date for date separators
@@ -2485,7 +2485,7 @@ function TabChat({
   return (
     <div className="space-y-4">
       {/* Channel Sub-Tabs */}
-      <div className="flex gap-1 bg-zinc-900 rounded-xl p-1 border border-zinc-800">
+      <div className="flex gap-1 bg-white rounded-xl p-1 border border-gray-200">
         {CHAT_CHANNELS.map((ch) => {
           const count = nachrichten.filter((n) => n.kanal === ch.key).length
           return (
@@ -2494,13 +2494,13 @@ function TabChat({
               onClick={() => setActiveChannel(ch.key)}
               className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                 activeChannel === ch.key
-                  ? 'bg-zinc-800 text-white'
-                  : 'text-zinc-500 hover:text-zinc-300'
+                  ? 'bg-gray-100 text-gray-900'
+                  : 'text-gray-500 hover:text-gray-700'
               }`}
             >
               {ch.label}
               {count > 0 && (
-                <span className="ml-1.5 text-xs text-zinc-500">({count})</span>
+                <span className="ml-1.5 text-xs text-gray-500">({count})</span>
               )}
             </button>
           )
@@ -2516,12 +2516,12 @@ function TabChat({
       )}
 
       {/* Chat Messages Area */}
-      <div className="bg-zinc-900 rounded-2xl border border-zinc-800 flex flex-col" style={{ height: '500px' }}>
+      <div className="bg-white rounded-2xl border border-gray-200 flex flex-col" style={{ height: '500px' }}>
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {channelMessages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
-              <p className="text-zinc-600 text-sm">Keine Nachrichten in diesem Kanal.</p>
+              <p className="text-gray-400 text-sm">Keine Nachrichten in diesem Kanal.</p>
             </div>
           ) : (
             <>
@@ -2538,9 +2538,9 @@ function TabChat({
                   <div key={msg.id}>
                     {showDateSep && (
                       <div className="flex items-center gap-3 my-3">
-                        <div className="flex-1 h-px bg-zinc-800" />
-                        <span className="text-xs text-zinc-600 shrink-0">{msgDate}</span>
-                        <div className="flex-1 h-px bg-zinc-800" />
+                        <div className="flex-1 h-px bg-gray-100" />
+                        <span className="text-xs text-gray-400 shrink-0">{msgDate}</span>
+                        <div className="flex-1 h-px bg-gray-100" />
                       </div>
                     )}
                     <div className={`flex ${isOwnSide ? 'justify-end' : 'justify-start'}`}>
@@ -2550,13 +2550,13 @@ function TabChat({
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border ${rolleColor(msg.sender_rolle)}`}>
                             {rolleLabel(msg.sender_rolle)}
                           </span>
-                          <span className="text-[10px] text-zinc-600">{fmtChatTime(msg.created_at)}</span>
+                          <span className="text-[10px] text-gray-400">{fmtChatTime(msg.created_at)}</span>
                         </div>
                         {/* Bubble */}
                         <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                           isOwnSide
                             ? 'bg-blue-600/20 text-blue-100 border border-blue-800/30 rounded-tr-md'
-                            : 'bg-zinc-800/60 text-zinc-200 border border-zinc-700/50 rounded-tl-md'
+                            : 'bg-gray-100/60 text-gray-800 border border-gray-300/50 rounded-tl-md'
                         }`}>
                           <p className="whitespace-pre-wrap break-words">{msg.nachricht}</p>
                           {msg.hat_anhang && msg.anhang_url && (
@@ -2583,7 +2583,7 @@ function TabChat({
 
         {/* Input Area */}
         {!channel.readonly ? (
-          <div className="p-3 border-t border-zinc-800">
+          <div className="p-3 border-t border-gray-200">
             <div className="flex gap-2">
               <textarea
                 value={text}
@@ -2591,7 +2591,7 @@ function TabChat({
                 onKeyDown={handleKeyDown}
                 placeholder="Nachricht schreiben..."
                 rows={1}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-zinc-500 resize-none"
+                className="flex-1 px-4 py-2.5 rounded-xl bg-gray-100 border border-gray-300 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:border-zinc-500 resize-none"
               />
               <button
                 onClick={handleSend}
@@ -2603,8 +2603,8 @@ function TabChat({
             </div>
           </div>
         ) : (
-          <div className="p-3 border-t border-zinc-800">
-            <p className="text-xs text-zinc-600 text-center">Dieser Kanal ist nur lesbar.</p>
+          <div className="p-3 border-t border-gray-200">
+            <p className="text-xs text-gray-400 text-center">Dieser Kanal ist nur lesbar.</p>
           </div>
         )}
       </div>
@@ -2635,7 +2635,7 @@ function TabAbrechnung({ fall }: { fall: Fall }) {
           <AbrechnungRow label="Nutzungsausfall" value={nutzungsausfall} />
           <AbrechnungRow label="Gutachterkosten" value={gutachterkosten} />
           <AbrechnungRow label="Anwaltskosten (RVG)" value={anwaltskosten} />
-          <div className="border-t border-zinc-700 pt-2 mt-3">
+          <div className="border-t border-gray-300 pt-2 mt-3">
             <AbrechnungRow label="Gesamtforderung" value={gesamtforderung} bold />
           </div>
         </div>
@@ -2648,12 +2648,12 @@ function TabAbrechnung({ fall }: { fall: Fall }) {
           <AbrechnungRow label="Differenz" value={gesamtforderung - regulierungBetrag} />
         </div>
         {regulierungBetrag > 0 && regulierungBetrag < gesamtforderung && (
-          <div className="mt-3 bg-amber-950/40 border border-amber-800/40 rounded-xl p-3">
+          <div className="mt-3 bg-amber-50/40 border border-amber-800/40 rounded-xl p-3">
             <p className="text-amber-400 text-xs font-medium">Kürzung erkannt — ggf. Restwertgutachten / Nachforderung prüfen</p>
           </div>
         )}
         {regulierungBetrag >= gesamtforderung && regulierungBetrag > 0 && (
-          <div className="mt-3 bg-emerald-950/40 border border-emerald-800/40 rounded-xl p-3">
+          <div className="mt-3 bg-emerald-50/40 border border-emerald-800/40 rounded-xl p-3">
             <p className="text-emerald-400 text-xs font-medium">Vollständig reguliert</p>
           </div>
         )}
@@ -2661,18 +2661,18 @@ function TabAbrechnung({ fall }: { fall: Fall }) {
 
       {/* Abrechnung Factoring */}
       <Section title="Abrechnung / Factoring">
-        <div className="space-y-2 text-sm text-zinc-400">
+        <div className="space-y-2 text-sm text-gray-500">
           <div className="flex justify-between">
             <span>DSR24 Factoring</span>
-            <span className="text-zinc-300">{regulierungBetrag > 0 ? 'Aktiv' : 'Ausstehend'}</span>
+            <span className="text-gray-700">{regulierungBetrag > 0 ? 'Aktiv' : 'Ausstehend'}</span>
           </div>
           <div className="flex justify-between">
             <span>RVG-Gebühren (Kanzlei)</span>
-            <span className="text-zinc-300">{fmtEur(anwaltskosten)}</span>
+            <span className="text-gray-700">{fmtEur(anwaltskosten)}</span>
           </div>
           <div className="flex justify-between">
             <span>Restbetrag an Kunden</span>
-            <span className="text-zinc-300 font-medium">
+            <span className="text-gray-700 font-medium">
               {fmtEur(Math.max(0, regulierungBetrag - gutachterkosten - anwaltskosten))}
             </span>
           </div>
@@ -2684,9 +2684,9 @@ function TabAbrechnung({ fall }: { fall: Fall }) {
 
 function AbrechnungRow({ label, value, bold }: { label: string; value: number; bold?: boolean }) {
   return (
-    <div className={`flex justify-between text-sm ${bold ? 'text-white font-semibold' : 'text-zinc-400'}`}>
+    <div className={`flex justify-between text-sm ${bold ? 'text-gray-900 font-semibold' : 'text-gray-500'}`}>
       <span>{label}</span>
-      <span className={bold ? 'text-white' : 'text-zinc-300'}>{fmtEur(value)}</span>
+      <span className={bold ? 'text-gray-900' : 'text-gray-700'}>{fmtEur(value)}</span>
     </div>
   )
 }
@@ -2747,7 +2747,7 @@ function TabTasks({
     <div className="space-y-6">
       {/* Header + Add button */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-zinc-400">
+        <h3 className="text-sm font-medium text-gray-500">
           {offene.length} offen · {erledigte.length} erledigt
         </h3>
         <button
@@ -2760,32 +2760,32 @@ function TabTasks({
 
       {/* Create form */}
       {adding && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 space-y-3">
+        <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
           <input
             type="text"
             value={titel}
             onChange={e => setTitel(e.target.value)}
             placeholder="Task-Titel..."
-            className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
           <textarea
             value={beschreibung}
             onChange={e => setBeschreibung(e.target.value)}
             placeholder="Beschreibung (optional)"
             rows={2}
-            className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+            className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
           />
           <div className="flex gap-3">
             <input
               type="datetime-local"
               value={deadline}
               onChange={e => setDeadline(e.target.value)}
-              className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
             <select
               value={prio}
               onChange={e => setPrio(e.target.value)}
-              className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="normal">Normal</option>
               <option value="dringend">Dringend</option>
@@ -2796,13 +2796,13 @@ function TabTasks({
             <button
               onClick={handleCreate}
               disabled={saving || !titel.trim()}
-              className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm px-4 py-2 rounded-xl transition-colors"
+              className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-gray-900 text-sm px-4 py-2 rounded-xl transition-colors"
             >
               {saving ? 'Erstellt...' : 'Erstellen'}
             </button>
             <button
               onClick={() => setAdding(false)}
-              className="text-zinc-500 hover:text-zinc-300 text-sm px-3 py-2 transition-colors"
+              className="text-gray-500 hover:text-gray-700 text-sm px-3 py-2 transition-colors"
             >
               Abbrechen
             </button>
@@ -2820,15 +2820,15 @@ function TabTasks({
       )}
 
       {offene.length === 0 && !adding && (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 text-center">
-          <p className="text-zinc-500 text-sm">Keine offenen Tasks.</p>
+        <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center">
+          <p className="text-gray-500 text-sm">Keine offenen Tasks.</p>
         </div>
       )}
 
       {/* Erledigte Tasks */}
       {erledigte.length > 0 && (
         <details className="group">
-          <summary className="text-xs text-zinc-600 cursor-pointer hover:text-zinc-400 transition-colors">
+          <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-500 transition-colors">
             {erledigte.length} erledigte Tasks anzeigen
           </summary>
           <div className="space-y-2 mt-2 opacity-60">
@@ -2853,40 +2853,40 @@ function TaskCard({
   const isOverdue = !isErledigt && task.faellig_am && new Date(task.faellig_am) < new Date()
 
   return (
-    <div className={`flex items-start gap-3 bg-zinc-900 border rounded-xl p-3 ${
-      isOverdue ? 'border-red-800/50' : 'border-zinc-800'
+    <div className={`flex items-start gap-3 bg-white border rounded-xl p-3 ${
+      isOverdue ? 'border-red-800/50' : 'border-gray-200'
     }`}>
       <button
         onClick={() => onToggle(task.id, isErledigt ? 'offen' : 'erledigt')}
         className={`shrink-0 mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
           isErledigt
-            ? 'bg-emerald-600 border-emerald-600 text-white'
-            : 'border-zinc-600 hover:border-blue-500'
+            ? 'bg-emerald-600 border-emerald-600 text-gray-900'
+            : 'border-gray-300 hover:border-blue-500'
         }`}
       >
         {isErledigt && <span className="text-[10px]">✓</span>}
       </button>
       <div className="min-w-0 flex-1">
-        <p className={`text-sm ${isErledigt ? 'text-zinc-500 line-through' : 'text-zinc-200'}`}>
+        <p className={`text-sm ${isErledigt ? 'text-gray-500 line-through' : 'text-gray-800'}`}>
           {task.titel}
         </p>
         {task.beschreibung && (
-          <p className="text-xs text-zinc-600 mt-0.5 line-clamp-1">{task.beschreibung}</p>
+          <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{task.beschreibung}</p>
         )}
         <div className="flex items-center gap-2 mt-1 text-[10px]">
           {task.prioritaet === 'kritisch' && (
-            <span className="bg-red-950 text-red-400 px-1.5 py-0.5 rounded font-semibold">KRITISCH</span>
+            <span className="bg-red-50 text-red-400 px-1.5 py-0.5 rounded font-semibold">KRITISCH</span>
           )}
           {task.prioritaet === 'dringend' && (
-            <span className="bg-amber-950 text-amber-400 px-1.5 py-0.5 rounded font-semibold">DRINGEND</span>
+            <span className="bg-amber-50 text-amber-400 px-1.5 py-0.5 rounded font-semibold">DRINGEND</span>
           )}
           {task.faellig_am && (
-            <span className={`${isOverdue ? 'text-red-400' : 'text-zinc-600'}`}>
+            <span className={`${isOverdue ? 'text-red-400' : 'text-gray-400'}`}>
               Fällig: {new Date(task.faellig_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
             </span>
           )}
           {task.auto_erstellt && (
-            <span className="text-zinc-700">Auto</span>
+            <span className="text-gray-300">Auto</span>
           )}
         </div>
       </div>
@@ -2927,7 +2927,7 @@ function TermineKarte({ termine, fallId, onOpenModal, onRefresh }: { termine: Te
           const isToday = d.toDateString() === now.toDateString()
           const isOverdue = d < now && !isToday
           return (
-            <div className={`rounded-xl p-4 border ${isToday ? 'border-green-600 bg-green-950/30' : isOverdue ? 'border-red-600 bg-red-950/30' : 'border-blue-600/40 bg-blue-950/20'}`}>
+            <div className={`rounded-xl p-4 border ${isToday ? 'border-green-600 bg-green-50/30' : isOverdue ? 'border-red-600 bg-red-50/30' : 'border-blue-600/40 bg-blue-50/20'}`}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
@@ -2939,12 +2939,12 @@ function TermineKarte({ termine, fallId, onOpenModal, onRefresh }: { termine: Te
                     {isToday && <span className="bg-green-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">HEUTE</span>}
                     {isOverdue && <span className="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">UEBERFAELLIG</span>}
                   </div>
-                  <p className="text-white font-semibold text-lg">
+                  <p className="text-gray-900 font-semibold text-lg">
                     {d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}{' '}
                     {d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
                   </p>
-                  {nextTermin.betreff && <p className="text-zinc-400 text-sm mt-0.5">{nextTermin.betreff}</p>}
-                  <p className="text-zinc-600 text-xs mt-1">{nextTermin.dauer_minuten} Min</p>
+                  {nextTermin.betreff && <p className="text-gray-500 text-sm mt-0.5">{nextTermin.betreff}</p>}
+                  <p className="text-gray-400 text-xs mt-1">{nextTermin.dauer_minuten} Min</p>
                 </div>
                 <div className="flex flex-col gap-1.5 shrink-0">
                   {nextTermin.meet_link && (
@@ -2956,15 +2956,15 @@ function TermineKarte({ termine, fallId, onOpenModal, onRefresh }: { termine: Te
                   {closingId === nextTermin.id ? (
                     <div className="space-y-1.5">
                       <input value={closeNotiz} onChange={e => setCloseNotiz(e.target.value)} placeholder="Notiz..."
-                        className="w-32 bg-zinc-800 border border-zinc-700 text-xs text-white rounded px-2 py-1" />
+                        className="w-32 bg-gray-100 border border-gray-300 text-xs text-gray-900 rounded px-2 py-1" />
                       <div className="flex gap-1">
                         <button onClick={() => closeTermin(nextTermin.id, 'durchgefuehrt')} className="flex-1 text-[10px] bg-emerald-600 text-white px-2 py-1 rounded">Erledigt</button>
                         <button onClick={() => closeTermin(nextTermin.id, 'nicht-erschienen')} className="flex-1 text-[10px] bg-red-600 text-white px-2 py-1 rounded">N/E</button>
                       </div>
-                      <button onClick={() => setClosingId(null)} className="text-[10px] text-zinc-500 w-full text-center">Abbrechen</button>
+                      <button onClick={() => setClosingId(null)} className="text-[10px] text-gray-500 w-full text-center">Abbrechen</button>
                     </div>
                   ) : (
-                    <button onClick={() => setClosingId(nextTermin.id)} className="text-[10px] bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-lg font-medium">
+                    <button onClick={() => setClosingId(nextTermin.id)} className="text-[10px] bg-gray-100 hover:bg-gray-200 text-gray-900 px-3 py-1.5 rounded-lg font-medium">
                       Abschliessen
                     </button>
                   )}
@@ -2977,15 +2977,15 @@ function TermineKarte({ termine, fallId, onOpenModal, onRefresh }: { termine: Te
         {/* Vergangene Termine */}
         {past.length > 0 && (
           <div className="space-y-1">
-            <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider">Vergangene Termine</p>
+            <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider">Vergangene Termine</p>
             {past.slice(0, 5).map(t => {
               const d = new Date(t.datum)
               return (
-                <div key={t.id} className="flex items-center gap-3 py-1.5 px-2 rounded-lg bg-zinc-900/50">
+                <div key={t.id} className="flex items-center gap-3 py-1.5 px-2 rounded-lg bg-white/50">
                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${t.status === 'durchgefuehrt' ? 'bg-emerald-500' : t.status === 'nicht-erschienen' ? 'bg-red-500' : 'bg-zinc-600'}`} />
-                  <span className="text-zinc-400 text-xs tabular-nums shrink-0">{d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}</span>
-                  <span className="text-zinc-300 text-xs truncate flex-1">{t.betreff ?? (t.typ === 'video-call' ? 'Video-Call' : 'Telefonat')}</span>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${t.status === 'durchgefuehrt' ? 'bg-emerald-500/20 text-emerald-400' : t.status === 'nicht-erschienen' ? 'bg-red-500/20 text-red-400' : 'bg-zinc-800 text-zinc-500'}`}>
+                  <span className="text-gray-500 text-xs tabular-nums shrink-0">{d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}</span>
+                  <span className="text-gray-700 text-xs truncate flex-1">{t.betreff ?? (t.typ === 'video-call' ? 'Video-Call' : 'Telefonat')}</span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${t.status === 'durchgefuehrt' ? 'bg-emerald-500/20 text-emerald-400' : t.status === 'nicht-erschienen' ? 'bg-red-500/20 text-red-400' : 'bg-gray-100 text-gray-500'}`}>
                     {t.status === 'durchgefuehrt' ? 'Erledigt' : t.status === 'nicht-erschienen' ? 'Nicht ersch.' : t.status}
                   </span>
                 </div>
@@ -3021,23 +3021,23 @@ function TerminModal({ fallId, onClose, onRefresh }: { fallId: string; onClose: 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-zinc-900 border border-zinc-700 rounded-2xl w-full max-w-md p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+      <div className="bg-white border border-gray-300 rounded-2xl w-full max-w-md p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-white font-semibold text-lg">Termin vereinbaren</h3>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white"><XIcon className="w-5 h-5" /></button>
+          <h3 className="text-gray-900 font-semibold text-lg">Termin vereinbaren</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><XIcon className="w-5 h-5" /></button>
         </div>
 
         <div className="space-y-4">
           {/* Typ */}
           <div>
-            <label className="text-xs text-zinc-400 font-medium block mb-1">Typ</label>
+            <label className="text-xs text-gray-500 font-medium block mb-1">Typ</label>
             <div className="flex gap-2">
               <button onClick={() => setTyp('telefonat')}
-                className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${typ === 'telefonat' ? 'bg-blue-600/20 border-blue-600 text-blue-400' : 'bg-zinc-800 border-zinc-700 text-zinc-400'}`}>
+                className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${typ === 'telefonat' ? 'bg-blue-600/20 border-blue-600 text-blue-400' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>
                 Telefonat
               </button>
               <button onClick={() => setTyp('video-call')}
-                className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${typ === 'video-call' ? 'bg-purple-600/20 border-purple-600 text-purple-400' : 'bg-zinc-800 border-zinc-700 text-zinc-400'}`}>
+                className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${typ === 'video-call' ? 'bg-purple-600/20 border-purple-600 text-purple-400' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>
                 Video-Call
               </button>
             </div>
@@ -3045,18 +3045,18 @@ function TerminModal({ fallId, onClose, onRefresh }: { fallId: string; onClose: 
 
           {/* Datum + Uhrzeit */}
           <div>
-            <label className="text-xs text-zinc-400 font-medium block mb-1">Datum & Uhrzeit</label>
+            <label className="text-xs text-gray-500 font-medium block mb-1">Datum & Uhrzeit</label>
             <input type="datetime-local" value={datum} onChange={e => setDatum(e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="w-full bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
           </div>
 
           {/* Dauer */}
           <div>
-            <label className="text-xs text-zinc-400 font-medium block mb-1">Dauer</label>
+            <label className="text-xs text-gray-500 font-medium block mb-1">Dauer</label>
             <div className="flex gap-2">
               {[15, 30, 60].map(d => (
                 <button key={d} onClick={() => setDauer(d)}
-                  className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${dauer === d ? 'bg-blue-600/20 border-blue-600 text-blue-400' : 'bg-zinc-800 border-zinc-700 text-zinc-400'}`}>
+                  className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${dauer === d ? 'bg-blue-600/20 border-blue-600 text-blue-400' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>
                   {d} Min
                 </button>
               ))}
@@ -3065,16 +3065,16 @@ function TerminModal({ fallId, onClose, onRefresh }: { fallId: string; onClose: 
 
           {/* Betreff */}
           <div>
-            <label className="text-xs text-zinc-400 font-medium block mb-1">Betreff</label>
+            <label className="text-xs text-gray-500 font-medium block mb-1">Betreff</label>
             <input type="text" value={betreff} onChange={e => setBetreff(e.target.value)} placeholder="z.B. Rueckfragen zum Gutachten"
-              className="w-full bg-zinc-800 border border-zinc-700 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-600" />
+              className="w-full bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-gray-400" />
           </div>
 
           {/* Notiz */}
           <div>
-            <label className="text-xs text-zinc-400 font-medium block mb-1">Notiz (optional)</label>
+            <label className="text-xs text-gray-500 font-medium block mb-1">Notiz (optional)</label>
             <textarea value={notiz} onChange={e => setNotiz(e.target.value)} rows={2} placeholder="Interne Notiz..."
-              className="w-full bg-zinc-800 border border-zinc-700 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-600 resize-y" />
+              className="w-full bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-gray-400 resize-y" />
           </div>
 
           {typ === 'video-call' && (

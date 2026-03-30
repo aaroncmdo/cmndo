@@ -69,9 +69,9 @@ export default async function GutachterDashboard() {
 
   if (!sv) {
     return (
-      <div className="min-h-screen bg-zinc-950 px-4 py-8">
+      <div className="min-h-screen bg-[#f8f9fb] px-4 py-8">
         <div className="max-w-5xl mx-auto">
-          <div className="bg-yellow-950 border border-yellow-800 rounded-2xl p-6">
+          <div className="bg-yellow-50 border border-yellow-800 rounded-2xl p-6">
             <p className="text-yellow-300 text-sm">
               Ihr Sachverständigen-Profil wurde noch nicht angelegt. Bitte kontaktieren Sie den Administrator.
             </p>
@@ -202,13 +202,13 @@ export default async function GutachterDashboard() {
         {/* ─── Greeting + Weather ──────────────────────────────────────── */}
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <h1 className="text-[22px] font-bold text-white">
+            <h1 className="text-[22px] font-bold text-gray-900">
               {greeting}{vorname ? ` ${vorname}` : ''}
             </h1>
-            <p className="text-sm text-zinc-500 mt-0.5">
+            <p className="text-sm text-gray-500 mt-0.5">
               Claimondo wünscht gute Fahrt!
             </p>
-            <p className="text-zinc-600 text-xs mt-1">
+            <p className="text-gray-400 text-xs mt-1">
               {now.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
             </p>
           </div>
@@ -225,39 +225,39 @@ export default async function GutachterDashboard() {
 
         {/* ─── KPI Cards ───────────────────────────────────────────────── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+          <div className="bg-white border border-gray-200 rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
-              <FolderOpenIcon className="w-4 h-4 text-zinc-500" />
-              <span className="text-zinc-500 text-xs font-medium uppercase tracking-wide">Offene Fälle</span>
+              <FolderOpenIcon className="w-4 h-4 text-gray-500" />
+              <span className="text-gray-500 text-xs font-medium uppercase tracking-wide">Offene Fälle</span>
             </div>
-            <div className="text-3xl font-bold text-white tabular-nums">{offeneFaelle}</div>
+            <div className="text-3xl font-bold text-gray-900 tabular-nums">{offeneFaelle}</div>
           </div>
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+          <div className="bg-white border border-gray-200 rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
               <CheckCircle2Icon className="w-4 h-4 text-emerald-500" />
-              <span className="text-zinc-500 text-xs font-medium uppercase tracking-wide">Erledigt (Monat)</span>
+              <span className="text-gray-500 text-xs font-medium uppercase tracking-wide">Erledigt (Monat)</span>
             </div>
             <div className="text-3xl font-bold text-emerald-400 tabular-nums">{erledigtCount}</div>
           </div>
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+          <div className="bg-white border border-gray-200 rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
-              <WalletIcon className="w-4 h-4 text-zinc-500" />
-              <span className="text-zinc-500 text-xs font-medium uppercase tracking-wide">Guthaben</span>
+              <WalletIcon className="w-4 h-4 text-gray-500" />
+              <span className="text-gray-500 text-xs font-medium uppercase tracking-wide">Guthaben</span>
             </div>
-            <div className="text-3xl font-bold text-white tabular-nums">{guthaben.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-lg text-zinc-500">EUR</span></div>
+            <div className="text-3xl font-bold text-gray-900 tabular-nums">{guthaben.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-lg text-gray-500">EUR</span></div>
           </div>
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+          <div className="bg-white border border-gray-200 rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
-              <GaugeIcon className="w-4 h-4 text-zinc-500" />
-              <span className="text-zinc-500 text-xs font-medium uppercase tracking-wide">Auslastung</span>
+              <GaugeIcon className="w-4 h-4 text-gray-500" />
+              <span className="text-gray-500 text-xs font-medium uppercase tracking-wide">Auslastung</span>
             </div>
-            <div className="text-3xl font-bold text-white tabular-nums">
-              {offeneFaelle}<span className="text-lg text-zinc-500">/{maxFaelle}</span>
+            <div className="text-3xl font-bold text-gray-900 tabular-nums">
+              {offeneFaelle}<span className="text-lg text-gray-500">/{maxFaelle}</span>
             </div>
-            <div className="mt-2 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+            <div className="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all ${
                   maxFaelle > 0 && offeneFaelle / maxFaelle > 0.8
@@ -277,13 +277,13 @@ export default async function GutachterDashboard() {
           <section>
             <div className="flex items-center gap-2 mb-4">
               <BellIcon className="w-5 h-5 text-red-400" />
-              <h2 className="text-lg font-semibold text-white">Neue Mitteilungen</h2>
-              <span className="ml-auto bg-red-950 text-red-300 text-xs font-medium px-2.5 py-0.5 rounded-full">
+              <h2 className="text-lg font-semibold text-gray-900">Neue Mitteilungen</h2>
+              <span className="ml-auto bg-red-50 text-red-300 text-xs font-medium px-2.5 py-0.5 rounded-full">
                 {mitteilungen.length}
               </span>
               <Link
                 href="/gutachter/mitteilungen"
-                className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+                className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
               >
                 Alle anzeigen
               </Link>
@@ -293,17 +293,17 @@ export default async function GutachterDashboard() {
                 <Link
                   key={m.id}
                   href={m.link ?? '/gutachter/mitteilungen'}
-                  className="flex items-start gap-3 bg-zinc-900 border border-zinc-700 rounded-2xl p-4 hover:border-zinc-600 transition-colors"
+                  className="flex items-start gap-3 bg-white border border-gray-300 rounded-2xl p-4 hover:border-gray-300 transition-colors"
                 >
-                  <div className={`shrink-0 p-2 rounded-xl ${m.dringend ? 'bg-red-950' : 'bg-zinc-800'}`}>
-                    <BellIcon className={`w-4 h-4 ${m.dringend ? 'text-red-400' : 'text-zinc-400'}`} />
+                  <div className={`shrink-0 p-2 rounded-xl ${m.dringend ? 'bg-red-50' : 'bg-gray-100'}`}>
+                    <BellIcon className={`w-4 h-4 ${m.dringend ? 'text-red-400' : 'text-gray-500'}`} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-white text-sm font-medium">
+                    <p className="text-gray-900 text-sm font-medium">
                       {m.titel}
                       {m.dringend && <span className="ml-2 text-xs text-red-400 font-semibold">DRINGEND</span>}
                     </p>
-                    <p className="text-zinc-500 text-xs mt-0.5 line-clamp-1">{m.nachricht}</p>
+                    <p className="text-gray-500 text-xs mt-0.5 line-clamp-1">{m.nachricht}</p>
                   </div>
                 </Link>
               ))}
@@ -315,17 +315,17 @@ export default async function GutachterDashboard() {
         <section>
           <div className="flex items-center gap-2 mb-4">
             <UserPlusIcon className="w-5 h-5 text-blue-400" />
-            <h2 className="text-lg font-semibold text-white">Neue Kunden</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Neue Kunden</h2>
             {neueFaelle.length > 0 && (
-              <span className="ml-auto bg-blue-950 text-blue-300 text-xs font-medium px-2.5 py-0.5 rounded-full">
+              <span className="ml-auto bg-blue-50 text-blue-300 text-xs font-medium px-2.5 py-0.5 rounded-full">
                 {neueFaelle.length}
               </span>
             )}
           </div>
 
           {neueFaelle.length === 0 ? (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 text-center">
-              <p className="text-zinc-500 text-sm">Keine neuen Zuweisungen vorhanden.</p>
+            <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center">
+              <p className="text-gray-500 text-sm">Keine neuen Zuweisungen vorhanden.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -334,19 +334,19 @@ export default async function GutachterDashboard() {
                 return (
                   <div
                     key={fall.id}
-                    className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col gap-3"
+                    className="bg-white border border-gray-200 rounded-2xl p-5 flex flex-col gap-3"
                   >
                     <div className="flex items-start justify-between">
                       <div className="min-w-0">
-                        <p className="text-white font-medium truncate">{leadName(fall.lead_id)}</p>
-                        <p className="text-zinc-500 text-xs mt-0.5 truncate">{formatAdresse(fall)}</p>
+                        <p className="text-gray-900 font-medium truncate">{leadName(fall.lead_id)}</p>
+                        <p className="text-gray-500 text-xs mt-0.5 truncate">{formatAdresse(fall)}</p>
                       </div>
-                      <div className="shrink-0 ml-2 p-1.5 rounded-lg bg-zinc-800">
-                        <UrsacheIcon className="w-4 h-4 text-zinc-400" />
+                      <div className="shrink-0 ml-2 p-1.5 rounded-lg bg-gray-100">
+                        <UrsacheIcon className="w-4 h-4 text-gray-500" />
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-zinc-400">
-                      <span className="bg-zinc-800 px-2 py-0.5 rounded-full">
+                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                      <span className="bg-gray-100 px-2 py-0.5 rounded-full">
                         {URSACHE_LABEL[fall.schadens_ursache ?? ''] ?? 'Sonstiges'}
                       </span>
                       <span>{formatDate(fall.schadens_datum)}</span>
@@ -369,17 +369,17 @@ export default async function GutachterDashboard() {
         <section>
           <div className="flex items-center gap-2 mb-4">
             <MapPinIcon className="w-5 h-5 text-green-400" />
-            <h2 className="text-lg font-semibold text-white">Tagesroute</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Tagesroute</h2>
             {todayFaelle.length > 0 && (
-              <span className="ml-auto bg-green-950 text-green-300 text-xs font-medium px-2.5 py-0.5 rounded-full">
+              <span className="ml-auto bg-green-50 text-green-300 text-xs font-medium px-2.5 py-0.5 rounded-full">
                 {todayFaelle.length} Termine
               </span>
             )}
           </div>
 
           {todayFaelle.length === 0 ? (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 text-center">
-              <p className="text-zinc-500 text-sm">Keine Termine für heute geplant.</p>
+            <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center">
+              <p className="text-gray-500 text-sm">Keine Termine für heute geplant.</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -397,18 +397,18 @@ export default async function GutachterDashboard() {
               )}
 
               {/* Appointment cards */}
-              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden divide-y divide-zinc-800">
+              <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden divide-y divide-gray-200">
                 {todayFaelle.map((fall, idx) => {
                   const UrsacheIcon = URSACHE_ICON[fall.schadens_ursache ?? ''] ?? PackageIcon
                   return (
                     <Link
                       key={fall.id}
                       href={`/gutachter/fall/${fall.id}`}
-                      className="flex items-center gap-4 p-4 hover:bg-zinc-800/50 transition-colors"
+                      className="flex items-center gap-4 p-4 hover:bg-gray-100/50 transition-colors"
                     >
                       {/* Time pill */}
                       <div className="shrink-0 flex flex-col items-center w-16">
-                        <span className="text-xs text-zinc-500 font-medium">Stop {idx + 1}</span>
+                        <span className="text-xs text-gray-500 font-medium">Stop {idx + 1}</span>
                         <div className="flex items-center gap-1 mt-0.5">
                           <ClockIcon className="w-3.5 h-3.5 text-green-400" />
                           <span className="text-green-400 text-sm font-semibold tabular-nums">
@@ -419,14 +419,14 @@ export default async function GutachterDashboard() {
 
                       {/* Details */}
                       <div className="min-w-0 flex-1">
-                        <p className="text-white text-sm font-medium truncate">{leadName(fall.lead_id)}</p>
-                        <p className="text-zinc-500 text-xs truncate mt-0.5">{formatAdresse(fall)}</p>
+                        <p className="text-gray-900 text-sm font-medium truncate">{leadName(fall.lead_id)}</p>
+                        <p className="text-gray-500 text-xs truncate mt-0.5">{formatAdresse(fall)}</p>
                       </div>
 
                       {/* Schadentyp */}
-                      <div className="shrink-0 hidden sm:flex items-center gap-1.5 bg-zinc-800 px-2.5 py-1 rounded-full">
-                        <UrsacheIcon className="w-3.5 h-3.5 text-zinc-400" />
-                        <span className="text-zinc-400 text-xs">
+                      <div className="shrink-0 hidden sm:flex items-center gap-1.5 bg-gray-100 px-2.5 py-1 rounded-full">
+                        <UrsacheIcon className="w-3.5 h-3.5 text-gray-500" />
+                        <span className="text-gray-500 text-xs">
                           {URSACHE_LABEL[fall.schadens_ursache ?? ''] ?? 'Sonstiges'}
                         </span>
                       </div>
@@ -442,17 +442,17 @@ export default async function GutachterDashboard() {
         <section>
           <div className="flex items-center gap-2 mb-4">
             <AlertTriangleIcon className="w-5 h-5 text-amber-400" />
-            <h2 className="text-lg font-semibold text-white">Handlungsbedarf</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Handlungsbedarf</h2>
             {actionFaelle.length > 0 && (
-              <span className="ml-auto bg-amber-950 text-amber-300 text-xs font-medium px-2.5 py-0.5 rounded-full">
+              <span className="ml-auto bg-amber-50 text-amber-300 text-xs font-medium px-2.5 py-0.5 rounded-full">
                 {actionFaelle.length}
               </span>
             )}
           </div>
 
           {actionFaelle.length === 0 ? (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 text-center">
-              <p className="text-zinc-500 text-sm">Alle Gutachten sind auf dem aktuellen Stand.</p>
+            <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center">
+              <p className="text-gray-500 text-sm">Alle Gutachten sind auf dem aktuellen Stand.</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -464,15 +464,15 @@ export default async function GutachterDashboard() {
                   <Link
                     key={fall.id}
                     href={`/gutachter/fall/${fall.id}`}
-                    className="flex items-center gap-4 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 hover:border-amber-800/50 transition-colors"
+                    className="flex items-center gap-4 bg-white border border-gray-200 rounded-2xl p-4 hover:border-amber-800/50 transition-colors"
                   >
-                    <div className="shrink-0 p-2 rounded-xl bg-amber-950">
+                    <div className="shrink-0 p-2 rounded-xl bg-amber-50">
                       <AlertTriangleIcon className="w-4 h-4 text-amber-400" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-white text-sm font-medium truncate">
+                      <p className="text-gray-900 text-sm font-medium truncate">
                         {leadName(fall.lead_id)}
-                        <span className="text-zinc-500 font-normal ml-2">
+                        <span className="text-gray-500 font-normal ml-2">
                           {fall.fall_nummer ? `#${fall.fall_nummer}` : ''}
                         </span>
                       </p>
@@ -481,7 +481,7 @@ export default async function GutachterDashboard() {
                         {daysSinceTermin > 0 && ` · Termin vor ${daysSinceTermin} ${daysSinceTermin === 1 ? 'Tag' : 'Tagen'}`}
                       </p>
                     </div>
-                    <div className="shrink-0 text-zinc-600 text-xs hidden sm:block">
+                    <div className="shrink-0 text-gray-400 text-xs hidden sm:block">
                       {fall.schadens_ort ?? ''}
                     </div>
                   </Link>

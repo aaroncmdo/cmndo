@@ -42,13 +42,13 @@ const TYP_LABEL: Record<string, string> = {
 }
 
 const TYP_COLOR: Record<string, string> = {
-  filmcheck: 'bg-yellow-950 text-yellow-300',
-  'kanzlei-anschlussschreiben': 'bg-green-950 text-green-300',
-  'kanzlei-nachfrage': 'bg-emerald-950 text-emerald-300',
-  'versicherung-kontakt': 'bg-blue-950 text-blue-300',
-  'kunde-rueckfrage': 'bg-violet-950 text-violet-300',
-  'sv-termin': 'bg-cyan-950 text-cyan-300',
-  'zahlung-pruefen': 'bg-amber-950 text-amber-300',
+  filmcheck: 'bg-yellow-50 text-yellow-300',
+  'kanzlei-anschlussschreiben': 'bg-green-50 text-green-300',
+  'kanzlei-nachfrage': 'bg-emerald-50 text-emerald-300',
+  'versicherung-kontakt': 'bg-blue-50 text-blue-300',
+  'kunde-rueckfrage': 'bg-violet-50 text-violet-300',
+  'sv-termin': 'bg-cyan-50 text-cyan-300',
+  'zahlung-pruefen': 'bg-amber-50 text-amber-300',
 }
 
 const TASK_TYPES = [
@@ -144,8 +144,8 @@ export default function KanbanBoard({
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-xl font-semibold text-white">Tasks</h1>
-            <p className="text-zinc-500 text-sm mt-0.5">{tasks.length} Aufgaben</p>
+            <h1 className="text-xl font-semibold text-gray-900">Tasks</h1>
+            <p className="text-gray-500 text-sm mt-0.5">{tasks.length} Aufgaben</p>
           </div>
           <button
             onClick={() => setDialogOpen(true)}
@@ -156,7 +156,7 @@ export default function KanbanBoard({
         </div>
 
         {error && (
-          <div className="bg-red-950 border border-red-800 rounded-xl p-3 mb-4">
+          <div className="bg-red-50 border border-red-800 rounded-xl p-3 mb-4">
             <p className="text-red-300 text-sm">{error}</p>
           </div>
         )}
@@ -169,10 +169,10 @@ export default function KanbanBoard({
               <div key={col.key} className="min-w-0">
                 {/* Column header */}
                 <div className="flex items-center gap-2 mb-3 px-1">
-                  <span className={`text-sm font-semibold ${COLUMN_HEADER_COLOR[col.key] ?? 'text-zinc-400'}`}>
+                  <span className={`text-sm font-semibold ${COLUMN_HEADER_COLOR[col.key] ?? 'text-gray-500'}`}>
                     {col.label}
                   </span>
-                  <span className="text-zinc-600 text-xs font-medium bg-zinc-800 px-2 py-0.5 rounded-full">
+                  <span className="text-gray-400 text-xs font-medium bg-gray-100 px-2 py-0.5 rounded-full">
                     {colTasks.length}
                   </span>
                 </div>
@@ -180,8 +180,8 @@ export default function KanbanBoard({
                 {/* Cards */}
                 <div className="space-y-2 min-h-24">
                   {colTasks.length === 0 && (
-                    <div className="rounded-xl border border-dashed border-zinc-800 p-6 text-center">
-                      <p className="text-zinc-700 text-xs">Keine Tasks</p>
+                    <div className="rounded-xl border border-dashed border-gray-200 p-6 text-center">
+                      <p className="text-gray-300 text-xs">Keine Tasks</p>
                     </div>
                   )}
                   {colTasks.map(task => (
@@ -238,19 +238,19 @@ function TaskCard({
   const overdue = isOverdue(task.faellig_am) && task.status !== 'erledigt'
 
   return (
-    <div className={`bg-zinc-900 rounded-xl p-4 border transition-colors ${
-      overdue ? 'border-red-800/60' : 'border-zinc-800'
+    <div className={`bg-white rounded-xl p-4 border transition-colors ${
+      overdue ? 'border-red-800/60' : 'border-gray-200'
     }`}>
       {/* Typ badge + delete */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium whitespace-nowrap ${
-          TYP_COLOR[task.typ] ?? 'bg-zinc-800 text-zinc-300'
+          TYP_COLOR[task.typ] ?? 'bg-gray-100 text-gray-700'
         }`}>
           {TYP_LABEL[task.typ] ?? task.typ}
         </span>
         <button
           onClick={() => onDelete(task.id)}
-          className="text-zinc-700 hover:text-red-400 transition-colors p-0.5 -mr-1 -mt-0.5"
+          className="text-gray-300 hover:text-red-400 transition-colors p-0.5 -mr-1 -mt-0.5"
           title="Löschen"
         >
           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -260,21 +260,21 @@ function TaskCard({
       </div>
 
       {/* Title */}
-      <p className="text-zinc-200 text-sm font-medium leading-snug mb-2">{task.titel}</p>
+      <p className="text-gray-800 text-sm font-medium leading-snug mb-2">{task.titel}</p>
 
       {/* Fall number */}
       <div className="flex items-center gap-1.5 mb-2">
-        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="text-zinc-600">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="text-gray-400">
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
         </svg>
-        <span className="text-zinc-500 text-xs font-mono">{fallMap[task.fall_id] ?? '—'}</span>
+        <span className="text-gray-500 text-xs font-mono">{fallMap[task.fall_id] ?? '—'}</span>
       </div>
 
       {/* Meta row: due date + assignee */}
       <div className="flex items-center justify-between gap-2 text-xs">
         <div className="flex items-center gap-3">
           {task.faellig_am && (
-            <span className={`flex items-center gap-1 ${overdue ? 'text-red-400' : 'text-zinc-500'}`}>
+            <span className={`flex items-center gap-1 ${overdue ? 'text-red-400' : 'text-gray-500'}`}>
               <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
@@ -282,7 +282,7 @@ function TaskCard({
             </span>
           )}
           {task.zugewiesen_an && (
-            <span className="text-zinc-600 truncate max-w-24">
+            <span className="text-gray-400 truncate max-w-24">
               {adminMap[task.zugewiesen_an] ?? '—'}
             </span>
           )}
@@ -290,12 +290,12 @@ function TaskCard({
       </div>
 
       {/* Status dropdown */}
-      <div className="mt-3 pt-3 border-t border-zinc-800/50">
+      <div className="mt-3 pt-3 border-t border-gray-200/50">
         <select
           value={task.status}
           disabled={isPending}
           onChange={e => onStatusChange(task.id, e.target.value)}
-          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-xs text-zinc-300 focus:outline-none focus:ring-1 focus:ring-blue-600 cursor-pointer disabled:opacity-50"
+          className="w-full bg-gray-100 border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-600 cursor-pointer disabled:opacity-50"
         >
           {COLUMNS.map(col => (
             <option key={col.key} value={col.key}>{col.label}</option>
@@ -345,12 +345,12 @@ function NewTaskDialog({
       {/* Dialog */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+          className="bg-white border border-gray-200 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
           onClick={e => e.stopPropagation()}
         >
-          <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
-            <h2 className="text-white font-semibold">Neuer Task</h2>
-            <button onClick={onClose} className="text-zinc-500 hover:text-zinc-300 transition-colors">
+          <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+            <h2 className="text-gray-900 font-semibold">Neuer Task</h2>
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
               <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -360,11 +360,11 @@ function NewTaskDialog({
           <form onSubmit={handleSubmit} className="p-5 space-y-4">
             {/* Typ */}
             <div>
-              <label className="block text-zinc-400 text-sm mb-1.5">Typ</label>
+              <label className="block text-gray-500 text-sm mb-1.5">Typ</label>
               <select
                 name="typ"
                 required
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
               >
                 <option value="">Bitte wählen...</option>
                 {TASK_TYPES.map(t => (
@@ -375,11 +375,11 @@ function NewTaskDialog({
 
             {/* Fall */}
             <div>
-              <label className="block text-zinc-400 text-sm mb-1.5">Fall</label>
+              <label className="block text-gray-500 text-sm mb-1.5">Fall</label>
               <select
                 name="fall_id"
                 required
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
               >
                 <option value="">Fall auswählen...</option>
                 {faelle.map(f => (
@@ -392,43 +392,43 @@ function NewTaskDialog({
 
             {/* Titel */}
             <div>
-              <label className="block text-zinc-400 text-sm mb-1.5">Titel</label>
+              <label className="block text-gray-500 text-sm mb-1.5">Titel</label>
               <input
                 type="text"
                 name="titel"
                 required
                 placeholder="Aufgabe beschreiben..."
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
               />
             </div>
 
             {/* Beschreibung */}
             <div>
-              <label className="block text-zinc-400 text-sm mb-1.5">Beschreibung (optional)</label>
+              <label className="block text-gray-500 text-sm mb-1.5">Beschreibung (optional)</label>
               <textarea
                 name="beschreibung"
                 rows={3}
                 placeholder="Details..."
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none"
+                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none"
               />
             </div>
 
             {/* Fällig am */}
             <div>
-              <label className="block text-zinc-400 text-sm mb-1.5">Fällig am (optional)</label>
+              <label className="block text-gray-500 text-sm mb-1.5">Fällig am (optional)</label>
               <input
                 type="date"
                 name="faellig_am"
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
               />
             </div>
 
             {/* Zugewiesen an */}
             <div>
-              <label className="block text-zinc-400 text-sm mb-1.5">Zugewiesen an (optional)</label>
+              <label className="block text-gray-500 text-sm mb-1.5">Zugewiesen an (optional)</label>
               <select
                 name="zugewiesen_an"
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
               >
                 <option value="">Nicht zugewiesen</option>
                 {admins.map(a => (

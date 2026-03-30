@@ -232,21 +232,21 @@ export default function StatistikenClient({
       <div className="max-w-[1400px] mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-          <h1 className="text-xl font-semibold text-white">Statistiken</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Statistiken</h1>
           <div className="flex items-center gap-2">
             <input
               type="date"
               value={von}
               onChange={e => setVon(e.target.value)}
-              className="px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-blue-600 [color-scheme:dark]"
+              className="px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-600 [color-scheme:dark]"
               placeholder="Von"
             />
-            <span className="text-zinc-600 text-sm">—</span>
+            <span className="text-gray-400 text-sm">—</span>
             <input
               type="date"
               value={bis}
               onChange={e => setBis(e.target.value)}
-              className="px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-blue-600 [color-scheme:dark]"
+              className="px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-600 [color-scheme:dark]"
               placeholder="Bis"
             />
           </div>
@@ -296,23 +296,23 @@ export default function StatistikenClient({
           {/* 4. SV-Performance */}
           <ChartCard title="SV-Performance">
             {svPerf.length === 0 ? (
-              <p className="text-zinc-600 text-sm py-10 text-center">Keine Daten</p>
+              <p className="text-gray-400 text-sm py-10 text-center">Keine Daten</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-zinc-800">
-                      <th className="text-left text-zinc-500 font-medium py-2 px-2 text-xs">Name</th>
-                      <th className="text-right text-zinc-500 font-medium py-2 px-2 text-xs">Fälle</th>
-                      <th className="text-right text-zinc-500 font-medium py-2 px-2 text-xs">Ø Betrag</th>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left text-gray-500 font-medium py-2 px-2 text-xs">Name</th>
+                      <th className="text-right text-gray-500 font-medium py-2 px-2 text-xs">Fälle</th>
+                      <th className="text-right text-gray-500 font-medium py-2 px-2 text-xs">Ø Betrag</th>
                     </tr>
                   </thead>
                   <tbody>
                     {svPerf.map((s, i) => (
-                      <tr key={i} className="border-b border-zinc-800/50">
-                        <td className="py-2.5 px-2 text-zinc-200">{s.name}</td>
-                        <td className="py-2.5 px-2 text-zinc-400 text-right tabular-nums">{s.faelle}</td>
-                        <td className="py-2.5 px-2 text-zinc-400 text-right tabular-nums">{s.avgBetrag > 0 ? `${s.avgBetrag.toLocaleString('de-DE')} €` : '—'}</td>
+                      <tr key={i} className="border-b border-gray-200/50">
+                        <td className="py-2.5 px-2 text-gray-800">{s.name}</td>
+                        <td className="py-2.5 px-2 text-gray-500 text-right tabular-nums">{s.faelle}</td>
+                        <td className="py-2.5 px-2 text-gray-500 text-right tabular-nums">{s.avgBetrag > 0 ? `${s.avgBetrag.toLocaleString('de-DE')} €` : '—'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -330,10 +330,10 @@ export default function StatistikenClient({
                 return (
                   <div key={f.step}>
                     <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="text-zinc-400">{f.step}</span>
-                      <span className="text-zinc-300 tabular-nums font-medium">{f.count}</span>
+                      <span className="text-gray-500">{f.step}</span>
+                      <span className="text-gray-700 tabular-nums font-medium">{f.count}</span>
                     </div>
-                    <div className="h-6 bg-zinc-800 rounded-lg overflow-hidden">
+                    <div className="h-6 bg-gray-100 rounded-lg overflow-hidden">
                       <div
                         className="h-full rounded-lg transition-all"
                         style={{
@@ -371,8 +371,8 @@ export default function StatistikenClient({
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-      <h2 className="text-sm font-medium text-zinc-400 mb-4">{title}</h2>
+    <div className="bg-white border border-gray-200 rounded-2xl p-5">
+      <h2 className="text-sm font-medium text-gray-500 mb-4">{title}</h2>
       {children}
     </div>
   )

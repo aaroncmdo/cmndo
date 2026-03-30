@@ -121,17 +121,17 @@ export default function KalenderClient({
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <div>
-            <h1 className="text-xl font-semibold text-white">Kalender</h1>
-            <p className="text-zinc-500 text-sm mt-0.5">SV-Termine & Task-Fälligkeiten</p>
+            <h1 className="text-xl font-semibold text-gray-900">Kalender</h1>
+            <p className="text-gray-500 text-sm mt-0.5">SV-Termine & Task-Fälligkeiten</p>
           </div>
 
           <div className="flex items-center gap-2">
             {/* View toggle */}
-            <div className="flex bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+            <div className="flex bg-white border border-gray-200 rounded-xl overflow-hidden">
               <button
                 onClick={() => setViewMode('month')}
                 className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                  viewMode === 'month' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'
+                  viewMode === 'month' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-gray-800'
                 }`}
               >
                 Monat
@@ -139,7 +139,7 @@ export default function KalenderClient({
               <button
                 onClick={() => setViewMode('week')}
                 className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                  viewMode === 'week' ? 'bg-blue-600 text-white' : 'text-zinc-400 hover:text-white'
+                  viewMode === 'week' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-gray-800'
                 }`}
               >
                 Woche
@@ -150,25 +150,25 @@ export default function KalenderClient({
             <div className="flex items-center gap-1">
               <button
                 onClick={() => navigate('prev')}
-                className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                className="p-2 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
               >
                 <ChevronLeftIcon className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setCurrentDate(new Date())}
-                className="px-3 py-1.5 text-xs font-medium text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+                className="px-3 py-1.5 text-xs font-medium text-gray-700 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 Heute
               </button>
               <button
                 onClick={() => navigate('next')}
-                className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                className="p-2 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
               >
                 <ChevronRightIcon className="w-4 h-4" />
               </button>
             </div>
 
-            <span className="text-white text-sm font-medium ml-2">
+            <span className="text-gray-900 text-sm font-medium ml-2">
               {format(currentDate, viewMode === 'month' ? 'MMMM yyyy' : "'KW' w, MMMM yyyy", { locale: de })}
             </span>
           </div>
@@ -178,24 +178,24 @@ export default function KalenderClient({
         <div className="flex items-center gap-4 mb-4">
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-            <span className="text-zinc-400 text-xs">SV-Termin</span>
+            <span className="text-gray-500 text-xs">SV-Termin</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-orange-500" />
-            <span className="text-zinc-400 text-xs">Task</span>
+            <span className="text-gray-500 text-xs">Task</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
-            <span className="text-zinc-400 text-xs">Überfällig</span>
+            <span className="text-gray-500 text-xs">Überfällig</span>
           </div>
         </div>
 
         {/* Calendar grid */}
-        <div className="bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
           {/* Weekday headers */}
-          <div className="grid grid-cols-7 border-b border-zinc-800">
+          <div className="grid grid-cols-7 border-b border-gray-200">
             {WEEKDAYS.map(d => (
-              <div key={d} className="px-2 py-2.5 text-center text-zinc-500 text-xs font-medium">
+              <div key={d} className="px-2 py-2.5 text-center text-gray-500 text-xs font-medium">
                 {d}
               </div>
             ))}
@@ -211,12 +211,12 @@ export default function KalenderClient({
               return (
                 <div
                   key={i}
-                  className={`border-b border-r border-zinc-800/50 p-1.5 ${
+                  className={`border-b border-r border-gray-200/50 p-1.5 ${
                     viewMode === 'week' ? 'min-h-48' : 'min-h-24'
-                  } ${!isCurrentMonth && viewMode === 'month' ? 'bg-zinc-950/50' : ''}`}
+                  } ${!isCurrentMonth && viewMode === 'month' ? 'bg-[#f8f9fb]/50' : ''}`}
                 >
                   <div className={`text-xs font-medium mb-1 w-6 h-6 flex items-center justify-center rounded-full ${
-                    today ? 'bg-blue-600 text-white' : isCurrentMonth ? 'text-zinc-300' : 'text-zinc-700'
+                    today ? 'bg-blue-600 text-white' : isCurrentMonth ? 'text-gray-700' : 'text-gray-300'
                   }`}>
                     {format(day, 'd')}
                   </div>
@@ -228,10 +228,10 @@ export default function KalenderClient({
                         href={entry.href}
                         className={`block px-1.5 py-0.5 rounded text-[10px] leading-tight truncate transition-colors ${
                           entry.overdue
-                            ? 'bg-red-950/80 text-red-300 hover:bg-red-900/80'
+                            ? 'bg-red-50/80 text-red-300 hover:bg-red-900/80'
                             : entry.type === 'sv-termin'
-                              ? 'bg-blue-950/80 text-blue-300 hover:bg-blue-900/80'
-                              : 'bg-orange-950/80 text-orange-300 hover:bg-orange-900/80'
+                              ? 'bg-blue-50/80 text-blue-300 hover:bg-blue-900/80'
+                              : 'bg-orange-50/80 text-orange-300 hover:bg-orange-900/80'
                         }`}
                       >
                         <div className="flex items-center gap-1">
@@ -247,7 +247,7 @@ export default function KalenderClient({
                       </Link>
                     ))}
                     {dayEntries.length > (viewMode === 'week' ? 10 : 3) && (
-                      <span className="text-zinc-600 text-[10px] px-1.5">
+                      <span className="text-gray-400 text-[10px] px-1.5">
                         +{dayEntries.length - (viewMode === 'week' ? 10 : 3)} mehr
                       </span>
                     )}

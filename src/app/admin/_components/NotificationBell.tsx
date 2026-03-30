@@ -92,12 +92,12 @@ export default function NotificationBell() {
       {/* Bell button */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="relative p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors"
+        className="relative p-2 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100/60 transition-colors"
         aria-label="Benachrichtigungen"
       >
         <BellIcon className="w-4 h-4" />
         {unread > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-blue-600 text-[10px] font-bold text-white leading-none">
+          <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-blue-600 text-[10px] font-bold text-gray-900 leading-none">
             {unread > 99 ? '99+' : unread}
           </span>
         )}
@@ -105,10 +105,10 @@ export default function NotificationBell() {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 max-h-[28rem] bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl shadow-black/40 z-50 flex flex-col overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-80 max-h-[28rem] bg-white border border-gray-200 rounded-xl shadow-2xl shadow-black/40 z-50 flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
-            <span className="text-sm font-semibold text-white">Benachrichtigungen</span>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+            <span className="text-sm font-semibold text-gray-900">Benachrichtigungen</span>
             {unread > 0 && (
               <button
                 onClick={markAllRead}
@@ -123,15 +123,15 @@ export default function NotificationBell() {
           <div className="flex-1 overflow-y-auto">
             {items.length === 0 ? (
               <div className="px-4 py-8 text-center">
-                <p className="text-zinc-600 text-sm">Keine Benachrichtigungen</p>
+                <p className="text-gray-400 text-sm">Keine Benachrichtigungen</p>
               </div>
             ) : (
               items.map(item => (
                 <button
                   key={item.id}
                   onClick={() => handleClick(item)}
-                  className={`w-full text-left px-4 py-3 border-b border-zinc-800/50 hover:bg-zinc-800/50 transition-colors ${
-                    !item.gelesen ? 'bg-zinc-800/30' : ''
+                  className={`w-full text-left px-4 py-3 border-b border-gray-200/50 hover:bg-gray-100/50 transition-colors ${
+                    !item.gelesen ? 'bg-gray-100/30' : ''
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -140,13 +140,13 @@ export default function NotificationBell() {
                       <div className={`w-2 h-2 rounded-full ${item.gelesen ? 'bg-transparent' : 'bg-blue-500'}`} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className={`text-sm leading-snug ${item.gelesen ? 'text-zinc-400' : 'text-white font-medium'}`}>
+                      <p className={`text-sm leading-snug ${item.gelesen ? 'text-gray-500' : 'text-gray-900 font-medium'}`}>
                         {item.titel}
                       </p>
                       {item.nachricht && (
-                        <p className="text-xs text-zinc-500 mt-0.5 line-clamp-2">{item.nachricht}</p>
+                        <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{item.nachricht}</p>
                       )}
-                      <p className="text-[11px] text-zinc-600 mt-1">{timeAgo(item.created_at)}</p>
+                      <p className="text-[11px] text-gray-400 mt-1">{timeAgo(item.created_at)}</p>
                     </div>
                   </div>
                 </button>

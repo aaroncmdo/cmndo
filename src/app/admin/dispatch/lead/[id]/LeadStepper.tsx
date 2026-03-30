@@ -228,8 +228,8 @@ export default function LeadStepper({ lead }: { lead: LeadData }) {
   }
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-5">
-      <h2 className="text-sm font-medium text-zinc-400 mb-4">Qualifizierungs-Stepper</h2>
+    <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-5">
+      <h2 className="text-sm font-medium text-gray-500 mb-4">Qualifizierungs-Stepper</h2>
       {saved && <p className="text-emerald-400 text-xs mb-3">Gespeichert</p>}
 
       <div className="space-y-2">
@@ -244,9 +244,9 @@ export default function LeadStepper({ lead }: { lead: LeadData }) {
 
           return (
             <div key={step.key} className={`rounded-xl border ${
-              done ? 'border-emerald-800/50 bg-emerald-950/20' :
-              current ? 'border-blue-800/50 bg-blue-950/20' :
-              'border-zinc-800 bg-zinc-800/30'
+              done ? 'border-emerald-800/50 bg-emerald-50/20' :
+              current ? 'border-blue-800/50 bg-blue-50/20' :
+              'border-gray-200 bg-gray-100/30'
             }`}>
               {/* Step header */}
               <button
@@ -259,20 +259,20 @@ export default function LeadStepper({ lead }: { lead: LeadData }) {
                   {done ? (
                     <CheckCircle2Icon className="w-4 h-4 text-emerald-400" />
                   ) : (
-                    <Icon className={`w-3.5 h-3.5 ${current ? 'text-blue-400' : 'text-zinc-500'}`} />
+                    <Icon className={`w-3.5 h-3.5 ${current ? 'text-blue-400' : 'text-gray-500'}`} />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className={`text-sm font-medium ${
-                    done ? 'text-emerald-400' : current ? 'text-blue-400' : 'text-zinc-400'
+                    done ? 'text-emerald-400' : current ? 'text-blue-400' : 'text-gray-500'
                   }`}>
                     Schritt {idx + 1}: {step.label}
                   </span>
                 </div>
                 {isOpen ? (
-                  <ChevronDownIcon className="w-4 h-4 text-zinc-500" />
+                  <ChevronDownIcon className="w-4 h-4 text-gray-500" />
                 ) : (
-                  <ChevronRightIcon className="w-4 h-4 text-zinc-500" />
+                  <ChevronRightIcon className="w-4 h-4 text-gray-500" />
                 )}
               </button>
 
@@ -363,13 +363,13 @@ function StepErstkontakt({ done, saving, onAdvance }: { done: boolean; saving: b
   }
   return (
     <div>
-      <p className="text-zinc-400 text-sm mb-3">
+      <p className="text-gray-500 text-sm mb-3">
         Rufen Sie den Lead an und stellen Sie den Erstkontakt her.
       </p>
       <button
         onClick={onAdvance}
         disabled={saving}
-        className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl px-5 py-2.5 transition-colors flex items-center gap-2"
+        className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors flex items-center gap-2"
       >
         <PhoneCallIcon className="w-4 h-4" />
         {saving ? 'Speichert...' : 'Erstkontakt hergestellt'}
@@ -402,7 +402,7 @@ function StepSchadentyp({
   return (
     <div className="space-y-3">
       <div>
-        <label className="text-xs text-zinc-500 mb-1.5 block">Schadentyp *</label>
+        <label className="text-xs text-gray-500 mb-1.5 block">Schadentyp *</label>
         <select value={sf} onChange={e => setSf(e.target.value)} className={selectCls}>
           <option value="">Bitte waehlen</option>
           {SF_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label} {o.pct}</option>)}
@@ -411,11 +411,11 @@ function StepSchadentyp({
 
       {sf === 'sf-03' && (
         <div className="flex gap-3">
-          <label className="flex items-center gap-2 text-sm text-zinc-300 cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
             <input type="radio" name="sf03var" value="a" checked={sfVariante === 'a'} onChange={() => setSfVariante('a')} className="accent-blue-500" />
             A - Gegner bekannt
           </label>
-          <label className="flex items-center gap-2 text-sm text-zinc-300 cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
             <input type="radio" name="sf03var" value="b" checked={sfVariante === 'b'} onChange={() => setSfVariante('b')} className="accent-blue-500" />
             B - Fahrerflucht
           </label>
@@ -423,7 +423,7 @@ function StepSchadentyp({
       )}
 
       {needsEigeneVers && (
-        <fieldset className="border border-zinc-700 rounded-xl p-3 space-y-2">
+        <fieldset className="border border-gray-300 rounded-xl p-3 space-y-2">
           <legend className="text-xs text-amber-400 font-medium px-2">Eigene Versicherung</legend>
           <Input label="Versicherung" value={eigeneVersicherung} onChange={setEigeneVersicherung} />
           <Input label="Policennummer" value={eigenePolicennr} onChange={setEigenePolicennr} />
@@ -431,7 +431,7 @@ function StepSchadentyp({
       )}
 
       {needsPolizei && (
-        <fieldset className="border border-zinc-700 rounded-xl p-3 space-y-2">
+        <fieldset className="border border-gray-300 rounded-xl p-3 space-y-2">
           <legend className="text-xs text-orange-400 font-medium px-2">Polizei</legend>
           <Input label="Aktenzeichen" value={polizeiAktenzeichen} onChange={setPolizeiAktenzeichen} />
           <Checkbox label="Polizeibericht vorhanden" checked={polizeibericht} onChange={setPolizeibericht} />
@@ -440,7 +440,7 @@ function StepSchadentyp({
 
       {needsUrsache && (
         <div>
-          <label className="text-xs text-zinc-500 mb-1.5 block">Schadensursache (SF-04)</label>
+          <label className="text-xs text-gray-500 mb-1.5 block">Schadensursache (SF-04)</label>
           <select value={schadensursache} onChange={e => setSchadensursache(e.target.value)} className={selectCls}>
             <option value="">Bitte waehlen</option>
             {SF04_URSACHEN.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -456,7 +456,7 @@ function StepSchadentyp({
       <button
         onClick={onAdvance}
         disabled={saving || !sf}
-        className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
+        className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
       >
         {saving ? 'Speichert...' : 'Schadentyp bestaetigen'}
       </button>
@@ -485,33 +485,33 @@ function StepKonstellation({
   return (
     <div className="space-y-3">
       <div>
-        <label className="text-xs text-zinc-500 mb-1.5 block">Kunden-Konstellation *</label>
+        <label className="text-xs text-gray-500 mb-1.5 block">Kunden-Konstellation *</label>
         <select value={kk} onChange={e => setKk(e.target.value)} className={selectCls}>
           {KK_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       </div>
 
       {kk === 'kk-02' && (
-        <fieldset className="border border-zinc-700 rounded-xl p-3 space-y-2">
+        <fieldset className="border border-gray-300 rounded-xl p-3 space-y-2">
           <legend className="text-xs text-cyan-400 font-medium px-2">Leasing-Daten</legend>
           <Input label="Leasinggeber" value={leasingGeber} onChange={setLeasingGeber} />
         </fieldset>
       )}
       {kk === 'kk-03' && (
-        <fieldset className="border border-zinc-700 rounded-xl p-3 space-y-2">
+        <fieldset className="border border-gray-300 rounded-xl p-3 space-y-2">
           <legend className="text-xs text-cyan-400 font-medium px-2">Finanzierungs-Daten</legend>
           <Input label="Bank" value={finanzierungBank} onChange={setFinanzierungBank} />
         </fieldset>
       )}
       {kk === 'kk-04' && (
-        <fieldset className="border border-zinc-700 rounded-xl p-3 space-y-2">
+        <fieldset className="border border-gray-300 rounded-xl p-3 space-y-2">
           <legend className="text-xs text-cyan-400 font-medium px-2">Firmen-Daten</legend>
           <Input label="Firmenname" value={firmaName} onChange={setFirmaName} />
           <Input label="USt-IdNr" value={firmaUstid} onChange={setFirmaUstid} />
         </fieldset>
       )}
       {kk === 'kk-05' && (
-        <fieldset className="border border-zinc-700 rounded-xl p-3 space-y-2">
+        <fieldset className="border border-gray-300 rounded-xl p-3 space-y-2">
           <legend className="text-xs text-cyan-400 font-medium px-2">Halter-Daten (SA vom Halter!)</legend>
           <Input label="Name Halter" value={halterName} onChange={setHalterName} />
         </fieldset>
@@ -520,7 +520,7 @@ function StepKonstellation({
       <button
         onClick={onAdvance}
         disabled={saving}
-        className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
+        className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
       >
         {saving ? 'Speichert...' : 'Konstellation bestaetigen'}
       </button>
@@ -550,7 +550,7 @@ function StepGegner({
       <button
         onClick={onAdvance}
         disabled={saving}
-        className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
+        className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
       >
         {saving ? 'Speichert...' : 'Gegner-Daten bestaetigen'}
       </button>
@@ -582,7 +582,7 @@ function StepGutachterTermin({
         <CheckCircle2Icon className="w-4 h-4 text-green-400" />
         <div>
           <p className="text-green-400 text-sm">Termin bestaetigt</p>
-          <p className="text-zinc-400 text-xs">
+          <p className="text-gray-500 text-xs">
             {new Date(lead.gutachter_termin).toLocaleString('de-DE', {
               weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
               hour: '2-digit', minute: '2-digit',
@@ -620,19 +620,19 @@ function StepGutachterTermin({
     }
   }
 
-  const inputCls = 'w-full px-3 py-2.5 rounded-xl border border-zinc-700 bg-zinc-800 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 transition-colors'
+  const inputCls = 'w-full px-3 py-2.5 rounded-xl border border-gray-300 bg-gray-100 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 transition-colors'
 
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-2">
         <div className="relative">
-          <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+          <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
           <input type="text" value={plz} onChange={e => setPlz(e.target.value)} placeholder="PLZ" className={`${inputCls} pl-9`} />
         </div>
         <input type="text" value={adresse} onChange={e => setAdresse(e.target.value)} placeholder="Adresse (optional)" className={inputCls} />
       </div>
       <div>
-        <label className="text-xs text-zinc-500 mb-1 block">Wunschtermin</label>
+        <label className="text-xs text-gray-500 mb-1 block">Wunschtermin</label>
         <input type="datetime-local" value={wunschtermin} onChange={e => setWunschtermin(e.target.value)}
           min={new Date().toISOString().slice(0, 16)} className={`${inputCls} [color-scheme:dark]`} />
       </div>
@@ -665,7 +665,7 @@ function StepGutachterTermin({
               confirming={parentSaving}
             />
           ))}
-          <button onClick={() => setResult(null)} className="w-full py-2 text-sm text-zinc-400 hover:text-zinc-200">
+          <button onClick={() => setResult(null)} className="w-full py-2 text-sm text-gray-500 hover:text-gray-800">
             Anderen Termin pruefen
           </button>
         </div>
@@ -680,21 +680,21 @@ function SlotCard({ slot, label, variant, onConfirm, confirming }: {
 }) {
   const isEmpf = variant === 'empfohlen'
   return (
-    <div className={`rounded-xl p-3 border ${isEmpf ? 'bg-green-950/30 border-green-800/50' : 'bg-blue-950/30 border-blue-800/50'}`}>
+    <div className={`rounded-xl p-3 border ${isEmpf ? 'bg-green-50/30 border-green-800/50' : 'bg-blue-50/30 border-blue-800/50'}`}>
       <div className="flex items-center justify-between mb-2">
         <span className={`text-xs font-semibold uppercase ${isEmpf ? 'text-green-400' : 'text-blue-400'}`}>{label}</span>
       </div>
       <div className="flex items-center gap-2 mb-2">
         <UserCheckIcon className={`w-3.5 h-3.5 ${isEmpf ? 'text-green-400' : 'text-blue-400'}`} />
-        <span className="text-white text-sm font-medium">{slot.name}</span>
+        <span className="text-gray-900 text-sm font-medium">{slot.name}</span>
         {slot.entfernung_km != null && (
-          <span className="text-zinc-500 text-[11px] flex items-center gap-1"><MapPinIcon className="w-3 h-3" />{slot.entfernung_km} km</span>
+          <span className="text-gray-500 text-[11px] flex items-center gap-1"><MapPinIcon className="w-3 h-3" />{slot.entfernung_km} km</span>
         )}
-        <span className="text-zinc-500 text-[11px] flex items-center gap-1"><ClockIcon className="w-3 h-3" />Auslastung {slot.auslastung}</span>
+        <span className="text-gray-500 text-[11px] flex items-center gap-1"><ClockIcon className="w-3 h-3" />Auslastung {slot.auslastung}</span>
       </div>
-      <div className="flex items-center gap-2 mb-2 px-2 py-1.5 rounded-lg bg-zinc-800/50">
-        <CalendarIcon className="w-3 h-3 text-zinc-500" />
-        <span className="text-zinc-200 text-sm">
+      <div className="flex items-center gap-2 mb-2 px-2 py-1.5 rounded-lg bg-gray-100/50">
+        <CalendarIcon className="w-3 h-3 text-gray-500" />
+        <span className="text-gray-800 text-sm">
           {new Date(slot.termin).toLocaleString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
         </span>
       </div>
@@ -723,9 +723,9 @@ function StepSA({ lead, saving, onAdvance }: {
     return (
       <div className="space-y-2">
         <p className="text-emerald-400 text-sm">SA + Vollmacht erhalten</p>
-        {lead.sa_datum && <p className="text-zinc-500 text-xs">SA: {new Date(lead.sa_datum).toLocaleDateString('de-DE')}</p>}
-        {lead.vollmacht_datum && <p className="text-zinc-500 text-xs">Vollmacht: {new Date(lead.vollmacht_datum).toLocaleDateString('de-DE')}</p>}
-        <span className={`inline-block text-xs px-2 py-0.5 rounded-full ${mandatstyp === 'kanzlei-claimondo' ? 'bg-purple-950 text-purple-300' : 'bg-blue-950 text-blue-300'}`}>
+        {lead.sa_datum && <p className="text-gray-500 text-xs">SA: {new Date(lead.sa_datum).toLocaleDateString('de-DE')}</p>}
+        {lead.vollmacht_datum && <p className="text-gray-500 text-xs">Vollmacht: {new Date(lead.vollmacht_datum).toLocaleDateString('de-DE')}</p>}
+        <span className={`inline-block text-xs px-2 py-0.5 rounded-full ${mandatstyp === 'kanzlei-claimondo' ? 'bg-purple-50 text-purple-300' : 'bg-blue-50 text-blue-300'}`}>
           {mandatstyp === 'kanzlei-claimondo' ? 'Kanzlei + Claimondo' : 'Nur Claimondo'}
         </span>
       </div>
@@ -740,12 +740,12 @@ function StepSA({ lead, saving, onAdvance }: {
       <Checkbox label="Vollmacht erhalten" checked={vollmacht} onChange={setVollmacht} />
 
       <div>
-        <label className="text-xs text-zinc-500 mb-1.5 block">Mandatstyp</label>
+        <label className="text-xs text-gray-500 mb-1.5 block">Mandatstyp</label>
         <select
           value={autoKanzlei ? 'kanzlei-claimondo' : mandatstyp}
           onChange={e => setMandatstyp(e.target.value)}
           disabled={autoKanzlei}
-          className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60"
+          className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60"
         >
           <option value="claimondo">Nur Claimondo</option>
           <option value="kanzlei-claimondo">Kanzlei + Claimondo</option>
@@ -766,7 +766,7 @@ function StepSA({ lead, saving, onAdvance }: {
           mandatstyp: autoKanzlei ? 'kanzlei-claimondo' : mandatstyp,
         })}
         disabled={saving || !sa || !vollmacht}
-        className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
+        className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
       >
         {saving ? 'Speichert...' : 'SA + Vollmacht bestaetigen'}
       </button>
@@ -813,10 +813,10 @@ function StepFlowLink({ lead }: { lead: LeadData }) {
       <div className="space-y-2">
         <p className="text-green-400 text-sm font-medium">Link erstellt & WhatsApp geoeffnet</p>
         <div className="flex items-stretch gap-2">
-          <input type="text" readOnly value={flowUrl} className="flex-1 px-3 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 font-mono truncate" />
+          <input type="text" readOnly value={flowUrl} className="flex-1 px-3 py-2 rounded-xl bg-gray-100 border border-gray-300 text-sm text-gray-800 font-mono truncate" />
           <button
             onClick={async () => { await navigator.clipboard.writeText(flowUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
-            className="px-3 py-2 rounded-xl text-sm bg-zinc-800 border border-zinc-700 text-zinc-200 hover:bg-zinc-700 shrink-0"
+            className="px-3 py-2 rounded-xl text-sm bg-gray-100 border border-gray-300 text-gray-800 hover:bg-gray-200 shrink-0"
           >
             {copied ? 'Kopiert!' : 'Kopieren'}
           </button>
@@ -843,21 +843,21 @@ function StepFlowLink({ lead }: { lead: LeadData }) {
 
 // ─── Shared Helpers ─────────────────────────────────────────────────────────
 
-const selectCls = 'w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500'
+const selectCls = 'w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500'
 
 function Input({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <div>
-      <label className="text-xs text-zinc-500 mb-1 block">{label}</label>
+      <label className="text-xs text-gray-500 mb-1 block">{label}</label>
       <input type="text" value={value} onChange={e => onChange(e.target.value)}
-        className="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+        className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
     </div>
   )
 }
 
 function Checkbox({ label, checked, onChange, disabled }: { label: string; checked: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
   return (
-    <label className={`flex items-center gap-2 text-sm ${disabled ? 'text-zinc-500' : 'text-zinc-300 cursor-pointer'}`}>
+    <label className={`flex items-center gap-2 text-sm ${disabled ? 'text-gray-500' : 'text-gray-700 cursor-pointer'}`}>
       <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} disabled={disabled} className="accent-blue-500 rounded" />
       {label}
     </label>

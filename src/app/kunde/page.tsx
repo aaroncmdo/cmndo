@@ -100,13 +100,13 @@ export default async function KundeDashboard() {
   if (!fall) {
     return (
       <div className="px-5 py-8">
-        <p className="text-white text-xl font-bold mb-1" style={{ letterSpacing: '-0.03em' }}>
+        <p className="text-gray-900 text-xl font-bold mb-1" style={{ letterSpacing: '-0.03em' }}>
           Hallo {vorname}
         </p>
-        <div className="mt-8 rounded-3xl p-8 text-center" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="mt-8 rounded-3xl p-8 text-center" style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}>
           <div className="text-4xl mb-3">📋</div>
-          <p className="text-white font-semibold">Noch kein Schadensfall</p>
-          <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          <p className="text-gray-900 font-semibold">Noch kein Schadensfall</p>
+          <p className="text-sm mt-1" style={{ color: '#6b7280' }}>
             Sobald ein Fall für Sie angelegt wird, erscheint er hier.
           </p>
         </div>
@@ -158,7 +158,7 @@ export default async function KundeDashboard() {
   return (
     <div className="px-5 py-6">
       {/* Greeting */}
-      <p className="text-xl font-bold text-white mb-5 kunde-animate kunde-animate-1" style={{ letterSpacing: '-0.03em' }}>
+      <p className="text-xl font-bold text-gray-900 mb-5 kunde-animate kunde-animate-1" style={{ letterSpacing: '-0.03em' }}>
         Hallo {vorname}
       </p>
 
@@ -173,7 +173,7 @@ export default async function KundeDashboard() {
         const betreuerName = betreuer ? [betreuer.vorname, betreuer.nachname].filter(Boolean).join(' ') : 'Ihr Betreuer'
         return (
           <div className="mb-5 rounded-3xl p-5 kunde-animate kunde-animate-2" style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.15)' }}>
-            <p className="text-[10px] font-medium uppercase mb-2" style={{ color: 'rgba(255,255,255,0.3)', letterSpacing: '0.05em' }}>
+            <p className="text-[10px] font-medium uppercase mb-2" style={{ color: '#9ca3af', letterSpacing: '0.05em' }}>
               Naechster Termin mit {betreuerName}
             </p>
             <div className="flex items-center gap-3">
@@ -185,10 +185,10 @@ export default async function KundeDashboard() {
                 )}
               </div>
               <div className="flex-1">
-                <p className="text-white font-semibold text-sm">
+                <p className="text-gray-900 font-semibold text-sm">
                   {d.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' })}, {d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
                 </p>
-                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                <p className="text-xs mt-0.5" style={{ color: '#6b7280' }}>
                   {nextTermin.typ === 'video-call' ? 'Video-Call' : 'Telefonat'} · {nextTermin.dauer_minuten} Min
                   {nextTermin.betreff ? ` · ${nextTermin.betreff}` : ''}
                 </p>
@@ -213,30 +213,30 @@ export default async function KundeDashboard() {
 
           {total != null ? (
             <>
-              <p className="text-white/70 text-xs font-medium uppercase tracking-wider mb-1" style={{ letterSpacing: '0.05em' }}>
+              <p className="text-gray-900/70 text-xs font-medium uppercase tracking-wider mb-1" style={{ letterSpacing: '0.05em' }}>
                 Voraussichtliche Auszahlung
               </p>
-              <p className="text-white font-extrabold tabular-nums mb-1" style={{ fontSize: 36, letterSpacing: '-0.03em' }}>
+              <p className="text-gray-900 font-extrabold tabular-nums mb-1" style={{ fontSize: 36, letterSpacing: '-0.03em' }}>
                 {fmtCurrency(total)}
               </p>
               {gutachtenDatum && (
-                <p className="text-white/50 text-xs mb-3">Basierend auf Gutachten vom {gutachtenDatum}</p>
+                <p className="text-gray-900/50 text-xs mb-3">Basierend auf Gutachten vom {gutachtenDatum}</p>
               )}
               {/* Bottom sheet trigger - sits above the Link */}
               <KundeBottomSheet breakdown={breakdown!} />
             </>
           ) : (
             <>
-              <p className="text-white/70 text-xs font-medium uppercase tracking-wider mb-1" style={{ letterSpacing: '0.05em' }}>
+              <p className="text-gray-900/70 text-xs font-medium uppercase tracking-wider mb-1" style={{ letterSpacing: '0.05em' }}>
                 Ihr Schadensfall
               </p>
-              <p className="text-white font-bold text-lg mb-4">
+              <p className="text-gray-900 font-bold text-lg mb-4">
                 {fall.fall_nummer as string}
               </p>
             </>
           )}
 
-          <p className="text-white/80 text-sm font-medium relative">
+          <p className="text-gray-900/80 text-sm font-medium relative">
             {NEXT_STEP_TEXT[status] ?? 'Ihr Fall wird bearbeitet.'}
           </p>
         </div>
@@ -244,8 +244,8 @@ export default async function KundeDashboard() {
 
       {/* Progress Stepper */}
       {status !== 'storniert' && (
-        <div className="mb-5 rounded-3xl p-5 kunde-animate kunde-animate-3" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          <p className="text-xs font-medium uppercase mb-4" style={{ color: 'rgba(255,255,255,0.3)', letterSpacing: '0.05em' }}>
+        <div className="mb-5 rounded-3xl p-5 kunde-animate kunde-animate-3" style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}>
+          <p className="text-xs font-medium uppercase mb-4" style={{ color: '#9ca3af', letterSpacing: '0.05em' }}>
             Fortschritt
           </p>
           <div className="flex items-center gap-0">
@@ -259,10 +259,10 @@ export default async function KundeDashboard() {
                       ? 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.6)]'
                       : reached
                       ? 'bg-blue-500/60'
-                      : 'bg-zinc-800'
+                      : 'bg-gray-100'
                   }`} className={isCurrent ? 'kunde-step-active' : ''} />
                   {i < STATUS_STEPS.length - 1 && (
-                    <div className={`flex-1 h-0.5 mx-0.5 ${i < stepIdx ? 'bg-blue-500/40' : 'bg-zinc-800'}`} />
+                    <div className={`flex-1 h-0.5 mx-0.5 ${i < stepIdx ? 'bg-blue-500/40' : 'bg-gray-100'}`} />
                   )}
                 </div>
               )
@@ -284,11 +284,11 @@ export default async function KundeDashboard() {
       )}
 
       {/* Next Step Card */}
-      <div className="mb-5 rounded-3xl p-5 kunde-animate kunde-animate-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <p className="text-xs font-medium uppercase mb-2" style={{ color: 'rgba(255,255,255,0.3)', letterSpacing: '0.05em' }}>
+      <div className="mb-5 rounded-3xl p-5 kunde-animate kunde-animate-4" style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}>
+        <p className="text-xs font-medium uppercase mb-2" style={{ color: '#9ca3af', letterSpacing: '0.05em' }}>
           Was passiert als nächstes?
         </p>
-        <p className="text-white text-sm leading-relaxed">
+        <p className="text-gray-900 text-sm leading-relaxed">
           {NEXT_STEP_TEXT[status] ?? 'Ihr Fall wird bearbeitet. Wir melden uns bei Neuigkeiten.'}
         </p>
       </div>
@@ -296,19 +296,19 @@ export default async function KundeDashboard() {
       {/* Ansprechpartner */}
       <div className="grid grid-cols-2 gap-3 mb-5 kunde-animate kunde-animate-5">
         {/* Kundenbetreuer */}
-        <div className="rounded-3xl p-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          <p className="text-[10px] font-medium uppercase mb-3" style={{ color: 'rgba(255,255,255,0.25)', letterSpacing: '0.06em' }}>
+        <div className="rounded-3xl p-4" style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}>
+          <p className="text-[10px] font-medium uppercase mb-3" style={{ color: '#9ca3af', letterSpacing: '0.06em' }}>
             Ihr Betreuer
           </p>
           {betreuer ? (
             <>
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}>
-                  <span className="text-white text-[10px] font-bold">
+                  <span className="text-gray-900 text-[10px] font-bold">
                     {(betreuer.vorname?.[0] ?? '').toUpperCase()}{(betreuer.nachname?.[0] ?? '').toUpperCase()}
                   </span>
                 </div>
-                <p className="text-white text-xs font-medium truncate">
+                <p className="text-gray-900 text-xs font-medium truncate">
                   {[betreuer.vorname, betreuer.nachname].filter(Boolean).join(' ')}
                 </p>
               </div>
@@ -326,13 +326,13 @@ export default async function KundeDashboard() {
               </div>
             </>
           ) : (
-            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>Wird zugewiesen</p>
+            <p className="text-xs" style={{ color: '#9ca3af' }}>Wird zugewiesen</p>
           )}
         </div>
 
         {/* Kanzlei */}
-        <div className="rounded-3xl p-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          <p className="text-[10px] font-medium uppercase mb-3" style={{ color: 'rgba(255,255,255,0.25)', letterSpacing: '0.06em' }}>
+        <div className="rounded-3xl p-4" style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}>
+          <p className="text-[10px] font-medium uppercase mb-3" style={{ color: '#9ca3af', letterSpacing: '0.06em' }}>
             Ihre Kanzlei
           </p>
           {(fall.kanzlei_ansprechpartner_name as string) ? (
@@ -341,7 +341,7 @@ export default async function KundeDashboard() {
                 <div className="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center shrink-0">
                   <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="text-cyan-400"><path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" /></svg>
                 </div>
-                <p className="text-white text-xs font-medium truncate">
+                <p className="text-gray-900 text-xs font-medium truncate">
                   {fall.kanzlei_ansprechpartner_name as string}
                 </p>
               </div>
@@ -353,7 +353,7 @@ export default async function KundeDashboard() {
               )}
             </>
           ) : (
-            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>Nach Kanzlei-Übergabe</p>
+            <p className="text-xs" style={{ color: '#9ca3af' }}>Nach Kanzlei-Übergabe</p>
           )}
         </div>
       </div>
@@ -362,15 +362,15 @@ export default async function KundeDashboard() {
       <div className="grid grid-cols-2 gap-3">
         <Link href={`/kunde/fall/${fallId}`}
           className="rounded-3xl p-4 text-center transition-all hover:scale-[1.02]"
-          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} className="mx-auto mb-2" style={{ color: 'rgba(255,255,255,0.4)' }}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
-          <p className="text-white text-xs font-medium">Alle Details</p>
+          style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}>
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} className="mx-auto mb-2" style={{ color: '#6b7280' }}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+          <p className="text-gray-900 text-xs font-medium">Alle Details</p>
         </Link>
         <Link href="/kunde/dokumente"
           className="rounded-3xl p-4 text-center transition-all hover:scale-[1.02]"
-          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} className="mx-auto mb-2" style={{ color: 'rgba(255,255,255,0.4)' }}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
-          <p className="text-white text-xs font-medium">Dokument hochladen</p>
+          style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}>
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} className="mx-auto mb-2" style={{ color: '#6b7280' }}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+          <p className="text-gray-900 text-xs font-medium">Dokument hochladen</p>
         </Link>
       </div>
     </div>

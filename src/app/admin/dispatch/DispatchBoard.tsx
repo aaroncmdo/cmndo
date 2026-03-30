@@ -219,8 +219,8 @@ export default function DispatchBoard({
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <div>
-            <h1 className="text-xl font-semibold text-white">Dispatch</h1>
-            <p className="text-zinc-500 text-sm mt-0.5">
+            <h1 className="text-xl font-semibold text-gray-900">Dispatch</h1>
+            <p className="text-gray-500 text-sm mt-0.5">
               {pipelineLeads.length} Leads in der Pipeline
               {disqualifiziertCount > 0 && (
                 <button onClick={() => setShowDisqualifiziert(!showDisqualifiziert)}
@@ -236,36 +236,36 @@ export default function DispatchBoard({
               <UserPlusIcon className="w-3.5 h-3.5" /> Neuer Lead
             </button>
             <div className="relative">
-              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
               <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suche..."
-                className="pl-9 pr-3 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600 w-48" />
+                className="pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 w-48" />
             </div>
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-950 border border-red-800 rounded-xl p-3 mb-4">
+          <div className="bg-red-50 border border-red-800 rounded-xl p-3 mb-4">
             <p className="text-red-300 text-sm">{error}</p>
           </div>
         )}
 
         {/* Neuer Lead Formular */}
         {showNewLead && (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 mb-4">
-            <h3 className="text-sm font-semibold text-white mb-3">Neuer Lead</h3>
+          <div className="bg-white border border-gray-200 rounded-2xl p-4 mb-4">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Neuer Lead</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
-              <input placeholder="Vorname *" value={newLead.vorname} onChange={e => setNewLead(p => ({ ...p, vorname: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-              <input placeholder="Nachname *" value={newLead.nachname} onChange={e => setNewLead(p => ({ ...p, nachname: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-              <input placeholder="Telefon *" value={newLead.telefon} onChange={e => setNewLead(p => ({ ...p, telefon: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-              <input placeholder="E-Mail" value={newLead.email} onChange={e => setNewLead(p => ({ ...p, email: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-              <select value={newLead.source_channel} onChange={e => setNewLead(p => ({ ...p, source_channel: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2">
+              <input placeholder="Vorname *" value={newLead.vorname} onChange={e => setNewLead(p => ({ ...p, vorname: e.target.value }))} className="bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              <input placeholder="Nachname *" value={newLead.nachname} onChange={e => setNewLead(p => ({ ...p, nachname: e.target.value }))} className="bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              <input placeholder="Telefon *" value={newLead.telefon} onChange={e => setNewLead(p => ({ ...p, telefon: e.target.value }))} className="bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              <input placeholder="E-Mail" value={newLead.email} onChange={e => setNewLead(p => ({ ...p, email: e.target.value }))} className="bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              <select value={newLead.source_channel} onChange={e => setNewLead(p => ({ ...p, source_channel: e.target.value }))} className="bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2">
                 <option value="telefon">Telefon</option>
                 <option value="website">Website</option>
                 <option value="whatsapp">WhatsApp</option>
                 <option value="empfehlung">Empfehlung</option>
                 <option value="google-ads">Google Ads</option>
               </select>
-              <select value={newLead.schadenfall_typ} onChange={e => setNewLead(p => ({ ...p, schadenfall_typ: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2">
+              <select value={newLead.schadenfall_typ} onChange={e => setNewLead(p => ({ ...p, schadenfall_typ: e.target.value }))} className="bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2">
                 <option value="">Schadentyp (optional)</option>
                 <option value="sf-01">SF-01 Unfall mit Gegner</option>
                 <option value="sf-02">SF-02 Teilschuld</option>
@@ -281,17 +281,17 @@ export default function DispatchBoard({
                   catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }
                   setNewLeadSaving(false)
                 }}
-                className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors">
+                className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-gray-900 text-sm font-medium px-4 py-2 rounded-xl transition-colors">
                 {newLeadSaving ? 'Erstellt...' : 'Lead erstellen'}
               </button>
-              <button onClick={() => setShowNewLead(false)} className="text-zinc-500 hover:text-zinc-300 text-sm px-3 py-2">Abbrechen</button>
+              <button onClick={() => setShowNewLead(false)} className="text-gray-500 hover:text-gray-700 text-sm px-3 py-2">Abbrechen</button>
             </div>
           </div>
         )}
 
         {/* Heutige Rueckrufe */}
         {heutigeRueckrufe.length > 0 && (
-          <div className="bg-amber-950/40 border border-amber-800/40 rounded-2xl p-4 mb-4">
+          <div className="bg-amber-50/40 border border-amber-800/40 rounded-2xl p-4 mb-4">
             <div className="flex items-center gap-2 mb-3">
               <PhoneCallIcon className="w-4 h-4 text-amber-400" />
               <h3 className="text-sm font-semibold text-amber-300">Heutige Rueckrufe ({heutigeRueckrufe.length})</h3>
@@ -306,7 +306,7 @@ export default function DispatchBoard({
 
                 return (
                   <Link key={lead.id} href={`/admin/dispatch/lead/${lead.id}`}
-                    className="flex items-center gap-3 bg-zinc-900/60 rounded-xl px-3 py-2.5 hover:bg-zinc-800/60 transition-colors">
+                    className="flex items-center gap-3 bg-white/60 rounded-xl px-3 py-2.5 hover:bg-gray-100/60 transition-colors">
                     <span className={`text-xs font-bold tabular-nums shrink-0 w-20 ${isOverdue ? 'text-red-400' : 'text-amber-400'}`}>
                       {isOverdue ? 'UEBERFAELLIG' : `${time.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`}
                     </span>
@@ -314,7 +314,7 @@ export default function DispatchBoard({
                       <span className="text-[10px] text-amber-500 shrink-0">In {minutesUntil}min</span>
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className="text-zinc-200 text-sm truncate">{name}</p>
+                      <p className="text-gray-800 text-sm truncate">{name}</p>
                     </div>
                     {lead.telefon && (
                       <a href={`tel:${lead.telefon}`} onClick={e => e.stopPropagation()}
@@ -331,15 +331,15 @@ export default function DispatchBoard({
 
         {/* Disqualifizierte Leads (collapsed) */}
         {showDisqualifiziert && disqualifiziertLeads.length > 0 && (
-          <div className="bg-red-950/20 border border-red-800/30 rounded-2xl p-4 mb-4">
+          <div className="bg-red-50/20 border border-red-800/30 rounded-2xl p-4 mb-4">
             <h3 className="text-sm font-semibold text-red-400 mb-3">Disqualifizierte Leads ({disqualifiziertLeads.length})</h3>
             <div className="space-y-1.5">
               {disqualifiziertLeads.map(lead => (
                 <Link key={lead.id} href={`/admin/dispatch/lead/${lead.id}`}
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg bg-zinc-900/60 hover:bg-zinc-800/60 transition-colors">
-                  <span className="text-zinc-300 text-sm truncate flex-1">{`${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '\u2014'}</span>
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/60 hover:bg-gray-100/60 transition-colors">
+                  <span className="text-gray-700 text-sm truncate flex-1">{`${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '\u2014'}</span>
                   <span className="text-red-400/60 text-xs">{(lead as Record<string, unknown>).disqualifiziert_grund as string ?? ''}</span>
-                  <span className="text-zinc-600 text-xs">{lead.created_at ? new Date(lead.created_at).toLocaleDateString('de-DE') : ''}</span>
+                  <span className="text-gray-400 text-xs">{lead.created_at ? new Date(lead.created_at).toLocaleDateString('de-DE') : ''}</span>
                 </Link>
               ))}
             </div>
@@ -370,15 +370,15 @@ export default function DispatchBoard({
                     <div className="flex items-center gap-2 mb-0.5">
                       <Icon className={`w-3.5 h-3.5 ${col.color}`} />
                       <span className={`text-[11px] font-bold tracking-wide ${col.color}`}>{col.label}</span>
-                      <span className="text-zinc-600 text-[10px] font-medium bg-zinc-800 px-1.5 py-0.5 rounded-full ml-auto">{sorted.length}</span>
+                      <span className="text-gray-400 text-[10px] font-medium bg-gray-100 px-1.5 py-0.5 rounded-full ml-auto">{sorted.length}</span>
                     </div>
-                    <p className="text-zinc-600 text-[10px]">{col.sub}</p>
+                    <p className="text-gray-400 text-[10px]">{col.sub}</p>
                   </div>
                   <div className={`h-0.5 ${col.bg} rounded-full mb-3 opacity-40`} />
                   <div className="space-y-2 min-h-24">
                     {sorted.length === 0 && (
-                      <div className="rounded-xl border border-dashed border-zinc-800 p-4 text-center">
-                        <p className="text-zinc-700 text-[10px]">Leer</p>
+                      <div className="rounded-xl border border-dashed border-gray-200 p-4 text-center">
+                        <p className="text-gray-300 text-[10px]">Leer</p>
                       </div>
                     )}
                     {sorted.map(lead => (
@@ -409,11 +409,11 @@ function LeadCard({ lead, columnKey, onPhaseChange, isPending }: {
   const callbackInPast = hasCallback && new Date(lead.rueckruf_datum!) < new Date()
 
   return (
-    <div className="bg-zinc-900 rounded-xl p-3 border border-zinc-800 hover:border-zinc-700 transition-colors">
+    <div className="bg-white rounded-xl p-3 border border-gray-200 hover:border-gray-300 transition-colors">
       {/* Rueckruf Badge */}
       {hasCallback && (
         <div className={`text-[10px] font-semibold px-2 py-1 rounded-lg mb-2 ${
-          callbackInPast ? 'bg-red-950 text-red-400' : 'bg-amber-950 text-amber-400'
+          callbackInPast ? 'bg-red-50 text-red-400' : 'bg-amber-50 text-amber-400'
         }`}>
           {callbackInPast ? 'UEBERFAELLIG' : `Rueckruf ${new Date(lead.rueckruf_datum!).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`}
         </div>
@@ -421,10 +421,10 @@ function LeadCard({ lead, columnKey, onPhaseChange, isPending }: {
 
       {/* Name + Age */}
       <div className="flex items-center justify-between mb-1">
-        <Link href={`/admin/dispatch/lead/${lead.id}`} className="text-zinc-200 text-sm font-medium leading-snug truncate hover:text-white transition-colors flex-1 min-w-0">
+        <Link href={`/admin/dispatch/lead/${lead.id}`} className="text-gray-800 text-sm font-medium leading-snug truncate hover:text-gray-800 transition-colors flex-1 min-w-0">
           {name}
         </Link>
-        <span className="text-[10px] text-zinc-600 shrink-0 ml-1">{age}</span>
+        <span className="text-[10px] text-gray-400 shrink-0 ml-1">{age}</span>
       </div>
 
       {/* Telefon */}
@@ -437,33 +437,33 @@ function LeadCard({ lead, columnKey, onPhaseChange, isPending }: {
       {/* Badges row */}
       <div className="flex flex-wrap gap-1 mb-1.5">
         {/* Quelle */}
-        <span className="bg-zinc-800 text-zinc-500 text-[9px] font-medium px-1.5 py-0.5 rounded flex items-center gap-1">
+        <span className="bg-gray-100 text-gray-500 text-[9px] font-medium px-1.5 py-0.5 rounded flex items-center gap-1">
           <SourceIcon className="w-2.5 h-2.5" /> {SOURCE_LABEL[lead.source_channel ?? ''] ?? lead.source_channel}
         </span>
         {/* Schadentyp */}
         {lead.schadenfall_typ && (
-          <span className="bg-blue-950 text-blue-300 text-[9px] font-medium px-1.5 py-0.5 rounded">
+          <span className="bg-blue-50 text-blue-300 text-[9px] font-medium px-1.5 py-0.5 rounded">
             {SF_SHORT[lead.schadenfall_typ] ?? lead.schadenfall_typ}
           </span>
         )}
         {/* Flags */}
-        {lead.personenschaden_flag && <span className="bg-red-950 text-red-400 text-[9px] px-1 py-0.5 rounded">Pers.</span>}
-        {lead.mietwagen_flag && <span className="bg-amber-950 text-amber-400 text-[9px] px-1 py-0.5 rounded">MW</span>}
-        {lead.leasing_flag && <span className="bg-purple-950 text-purple-400 text-[9px] px-1 py-0.5 rounded">Leasing</span>}
+        {lead.personenschaden_flag && <span className="bg-red-50 text-red-400 text-[9px] px-1 py-0.5 rounded">Pers.</span>}
+        {lead.mietwagen_flag && <span className="bg-amber-50 text-amber-400 text-[9px] px-1 py-0.5 rounded">MW</span>}
+        {lead.leasing_flag && <span className="bg-purple-50 text-purple-400 text-[9px] px-1 py-0.5 rounded">Leasing</span>}
       </div>
 
       {/* Column-specific info */}
       {columnKey === 'nicht-erreicht' && (
         <div className="text-[10px] text-red-400 mb-1.5">
           {lead.anruf_versuche ?? 0}x nicht erreicht
-          {lead.letzter_anruf_am && <span className="text-zinc-600"> &middot; {timeSince(lead.letzter_anruf_am)}</span>}
+          {lead.letzter_anruf_am && <span className="text-gray-400"> &middot; {timeSince(lead.letzter_anruf_am)}</span>}
         </div>
       )}
       {columnKey === 'rueckruf' && lead.rueckruf_notiz && (
-        <p className="text-[10px] text-zinc-500 truncate mb-1.5">{lead.rueckruf_notiz}</p>
+        <p className="text-[10px] text-gray-500 truncate mb-1.5">{lead.rueckruf_notiz}</p>
       )}
       {columnKey === 'flow-versendet' && (
-        <div className="text-[10px] text-zinc-500 mb-1.5">
+        <div className="text-[10px] text-gray-500 mb-1.5">
           {lead.flow_link_abgeschlossen ? <span className="text-emerald-400">FlowLink abgeschlossen</span>
             : lead.flow_link_geoeffnet ? <span className="text-blue-400">FlowLink geoeffnet</span>
             : <span>Wartet seit {timeSince(lead.updated_at)}</span>}
@@ -481,12 +481,12 @@ function LeadCard({ lead, columnKey, onPhaseChange, isPending }: {
       )}
 
       {/* Phase dropdown */}
-      <div className="pt-2 border-t border-zinc-800/50">
+      <div className="pt-2 border-t border-gray-200/50">
         <select
           value={mapPhaseToColumn(lead.qualifizierungs_phase)}
           disabled={isPending}
           onChange={e => onPhaseChange(lead.id, e.target.value)}
-          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1.5 text-[11px] text-zinc-300 focus:outline-none focus:ring-1 focus:ring-blue-600 cursor-pointer disabled:opacity-50"
+          className="w-full bg-gray-100 border border-gray-300 rounded-lg px-2 py-1.5 text-[11px] text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-600 cursor-pointer disabled:opacity-50"
         >
           {COLUMNS.map(col => <option key={col.key} value={col.key}>{col.label}</option>)}
           <option value="disqualifiziert">Disqualifiziert</option>
