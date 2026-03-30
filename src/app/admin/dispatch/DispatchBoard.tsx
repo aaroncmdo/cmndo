@@ -3,7 +3,7 @@
 import { useState, useTransition, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { updateFallStatus, updateLeadStatus } from './actions'
+import { updateFallStatus, updateLeadStatus, createLead } from './actions'
 import {
   UserPlusIcon,
   PhoneCallIcon,
@@ -206,6 +206,9 @@ export default function DispatchBoard({
   const [search, setSearch] = useState('')
   const [filterMode, setFilterMode] = useState<'alle' | 'meine'>('alle')
   const [error, setError] = useState<string | null>(null)
+  const [showNewLead, setShowNewLead] = useState(false)
+  const [newLead, setNewLead] = useState({ vorname: '', nachname: '', telefon: '+491633628571', email: '', source_channel: 'telefon', schadenfall_typ: '' })
+  const [newLeadSaving, setNewLeadSaving] = useState(false)
 
   // Pipeline leads: show by qualifizierungs_phase (KFZ-36)
   const pipelineLeadPhases = new Set(LEAD_COLUMNS.map(c => c.key))
@@ -290,6 +293,13 @@ export default function DispatchBoard({
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Neuer Lead */}
+            <button
+              onClick={() => setShowNewLead(!showNewLead)}
+              className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-3 py-2 rounded-xl transition-colors"
+            >
+              + Neuer Lead
+            </button>
             {/* Search */}
             <div className="relative">
               <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
@@ -333,6 +343,54 @@ export default function DispatchBoard({
         {error && (
           <div className="bg-red-950 border border-red-800 rounded-xl p-3 mb-4">
             <p className="text-red-300 text-sm">{error}</p>
+          </div>
+        )}
+
+        {/* Neuer Lead Formular */}
+        {showNewLead && (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 mb-4">
+            <h3 className="text-sm font-semibold text-white mb-3">Neuer Lead</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
+              <input placeholder="Vorname *" value={newLead.vorname} onChange={e => setNewLead(p => ({ ...p, vorname: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              <input placeholder="Nachname *" value={newLead.nachname} onChange={e => setNewLead(p => ({ ...p, nachname: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              <input placeholder="Telefon" value={newLead.telefon} onChange={e => setNewLead(p => ({ ...p, telefon: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              <input placeholder="E-Mail" value={newLead.email} onChange={e => setNewLead(p => ({ ...p, email: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              <select value={newLead.source_channel} onChange={e => setNewLead(p => ({ ...p, source_channel: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                <option value="telefon">Telefon</option>
+                <option value="website">Website</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="empfehlung">Empfehlung</option>
+                <option value="google-ads">Google Ads</option>
+              </select>
+              <select value={newLead.schadenfall_typ} onChange={e => setNewLead(p => ({ ...p, schadenfall_typ: e.target.value }))} className="bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                <option value="">Schadentyp (optional)</option>
+                <option value="sf-01">SF-01 Unfall mit Gegner</option>
+                <option value="sf-02">SF-02 Teilschuld</option>
+                <option value="sf-03">SF-03 Parkschaden/Flucht</option>
+                <option value="sf-04">SF-04 Kasko ohne Gegner</option>
+                <option value="sf-05">SF-05 Personenschaden</option>
+                <option value="sf-06">SF-06 Nutzungsausfall</option>
+              </select>
+            </div>
+            <div className="flex gap-2">
+              <button
+                disabled={newLeadSaving || !newLead.vorname.trim() || !newLead.nachname.trim()}
+                onClick={async () => {
+                  setNewLeadSaving(true)
+                  try {
+                    await createLead(newLead)
+                    setShowNewLead(false)
+                    setNewLead({ vorname: '', nachname: '', telefon: '+491633628571', email: '', source_channel: 'telefon', schadenfall_typ: '' })
+                    router.refresh()
+                  } catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }
+                  setNewLeadSaving(false)
+                }}
+                className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
+              >
+                {newLeadSaving ? 'Erstellt...' : 'Lead erstellen'}
+              </button>
+              <button onClick={() => setShowNewLead(false)} className="text-zinc-500 hover:text-zinc-300 text-sm px-3 py-2">Abbrechen</button>
+            </div>
           </div>
         )}
 

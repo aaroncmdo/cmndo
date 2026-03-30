@@ -110,6 +110,37 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
 
 // ─── Lead Status ────────────────────────────────────────────────────────────
 
+// ─── Neuen Lead erstellen (BUG-14) ─────────────────────────────────────────
+
+export async function createLead(data: {
+  vorname: string
+  nachname: string
+  telefon: string
+  email: string
+  source_channel: string
+  schadenfall_typ?: string
+}) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const { error } = await supabase.from('leads').insert({
+    vorname: data.vorname,
+    nachname: data.nachname,
+    telefon: data.telefon || '+491633628571',
+    email: data.email || null,
+    source_channel: data.source_channel || 'telefon',
+    schadenfall_typ: data.schadenfall_typ || null,
+    status: 'neu',
+    qualifizierungs_phase: 'neu',
+    kunden_konstellation: 'kk-01',
+    zugewiesen_an: user.id,
+  })
+
+  if (error) throw new Error(error.message)
+  revalidatePath('/admin/dispatch')
+}
+
 // Valid qualification phases from KFZ-35
 const QUALI_PHASES = new Set([
   'neu', 'erstkontakt', 'schadentyp-erfasst', 'konstellation-erfasst',

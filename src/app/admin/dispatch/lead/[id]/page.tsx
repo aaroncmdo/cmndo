@@ -42,12 +42,27 @@ export default async function LeadDetailPage({
         </Link>
 
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <h1 className="text-2xl font-semibold text-white">
             {lead.vorname ?? ''} {lead.nachname ?? ''}
           </h1>
-          <p className="text-zinc-500 text-sm mt-0.5">{lead.email ?? '—'}</p>
+          <div className="flex flex-wrap items-center gap-3 mt-1 text-sm">
+            {lead.telefon && (
+              <a href={`tel:${lead.telefon}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                {lead.telefon}
+              </a>
+            )}
+            {lead.email && <span className="text-zinc-500">{lead.email}</span>}
+            {lead.created_at && (
+              <span className="text-zinc-600 text-xs">
+                Erstellt: {new Date(lead.created_at).toLocaleDateString('de-DE')}
+              </span>
+            )}
+          </div>
         </div>
+
+        {/* Fortschrittsbalken */}
+        <PhaseProgressBar phase={lead.qualifizierungs_phase ?? 'neu'} />
 
         {/* Status + Details */}
         <LeadDetailClient lead={lead} />
@@ -199,6 +214,38 @@ function InfoRow({ label, value }: { label: string; value: string | null | undef
     <div>
       <p className="text-xs text-zinc-500 mb-0.5">{label}</p>
       <p className="text-sm text-zinc-200">{value || '—'}</p>
+    </div>
+  )
+}
+
+const PHASES = [
+  { key: 'neu', label: 'Neu' },
+  { key: 'erstkontakt', label: 'Kontakt' },
+  { key: 'schadentyp-erfasst', label: 'Schadentyp' },
+  { key: 'konstellation-erfasst', label: 'Konstell.' },
+  { key: 'gegner-daten', label: 'Gegner' },
+  { key: 'gutachtertermin', label: 'Termin' },
+  { key: 'sa-unterschrieben', label: 'SA' },
+  { key: 'flow-gesendet', label: 'Flow' },
+  { key: 'abgeschlossen', label: 'Fertig' },
+]
+
+function PhaseProgressBar({ phase }: { phase: string }) {
+  const currentIdx = PHASES.findIndex(p => p.key === phase)
+  return (
+    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 mb-5">
+      <div className="flex items-center gap-1">
+        {PHASES.map((p, i) => (
+          <div key={p.key} className="flex-1 flex flex-col items-center gap-1">
+            <div className={`w-full h-1.5 rounded-full ${
+              i <= currentIdx ? 'bg-blue-500' : 'bg-zinc-800'
+            }`} />
+            <span className={`text-[9px] ${i <= currentIdx ? 'text-blue-400' : 'text-zinc-600'}`}>
+              {p.label}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

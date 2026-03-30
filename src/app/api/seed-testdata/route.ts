@@ -241,85 +241,101 @@ export async function POST() {
     // ═══════════════════════════════════════════════════════════════════
     const daysAgo = (d: number) => new Date(now.getTime() - d * 86400000).toISOString()
 
+    const hoursFromNow = (h: number) => new Date(now.getTime() + h * 3600000).toISOString()
+
     const leadDefs = [
       {
         vorname: 'Max', nachname: 'Mustermann', telefon: '+491633628571', email: 'max@email.de',
         fahrzeug_hersteller: 'BMW', fahrzeug_modell: '3er',
         schadenfall_typ: 'sf-01', kunden_konstellation: 'kk-01',
-        status: 'neu' as const, created_at: daysAgo(2),
+        status: 'neu' as const, qualifizierungs_phase: 'neu', created_at: daysAgo(2),
       },
       {
         vorname: 'Anna', nachname: 'Klein', telefon: '+491633628571', email: 'anna@email.de',
         fahrzeug_hersteller: 'VW', fahrzeug_modell: 'Golf',
         schadenfall_typ: 'sf-01', kunden_konstellation: 'kk-01',
-        status: 'quali-offen' as const, mietwagen_flag: true, created_at: daysAgo(5),
+        status: 'quali-offen' as const, qualifizierungs_phase: 'schadentyp-erfasst',
+        mietwagen_flag: true, created_at: daysAgo(5),
+        rueckruf_datum: hoursFromNow(1), rueckruf_notiz: 'Kunde ab 14 Uhr erreichbar',
       },
       {
         vorname: 'Peter', nachname: 'Gross', telefon: '+491633628571', email: 'peter@email.de',
         fahrzeug_hersteller: 'Audi', fahrzeug_modell: 'A4',
         schadenfall_typ: 'sf-02', kunden_konstellation: 'kk-01',
-        status: 'flow-gesendet' as const, sa_unterschrieben: true, created_at: daysAgo(8),
+        status: 'flow-gesendet' as const, qualifizierungs_phase: 'sa-unterschrieben',
+        sa_unterschrieben: true, created_at: daysAgo(8),
       },
       {
         vorname: 'Julia', nachname: 'Braun', telefon: '+491633628571', email: 'julia@email.de',
         fahrzeug_hersteller: 'Mercedes', fahrzeug_modell: 'C-Klasse',
         schadenfall_typ: 'sf-01', kunden_konstellation: 'kk-02',
-        status: 'umgewandelt' as const, leasing_flag: true, personenschaden_flag: true, created_at: daysAgo(15),
+        status: 'umgewandelt' as const, qualifizierungs_phase: 'abgeschlossen',
+        leasing_flag: true, personenschaden_flag: true, created_at: daysAgo(15),
       },
       {
         vorname: 'Thomas', nachname: 'Neumann', telefon: '+491633628571', email: 'thomas.n@email.de',
         fahrzeug_hersteller: 'Ford', fahrzeug_modell: 'Focus',
         schadenfall_typ: 'sf-01', kunden_konstellation: 'kk-01',
-        status: 'neu' as const, created_at: daysAgo(1),
+        status: 'neu' as const, qualifizierungs_phase: 'erstkontakt', created_at: daysAgo(1),
+        rueckruf_datum: hoursFromNow(0.5), rueckruf_notiz: 'Dringend - Unfall gestern',
       },
       {
         vorname: 'Sandra', nachname: 'Hoffmann', telefon: '+491633628571', email: 'sandra@email.de',
         fahrzeug_hersteller: 'Opel', fahrzeug_modell: 'Astra',
         schadenfall_typ: 'sf-03', kunden_konstellation: 'kk-01',
-        status: 'rueckruf' as const, polizeibericht_pflicht: true, created_at: daysAgo(3),
+        status: 'rueckruf' as const, qualifizierungs_phase: 'gegner-daten',
+        polizeibericht_pflicht: true, created_at: daysAgo(3),
       },
       {
         vorname: 'Michael', nachname: 'Richter', telefon: '+491633628571', email: 'michael@email.de',
         fahrzeug_hersteller: 'Toyota', fahrzeug_modell: 'Corolla',
         schadenfall_typ: 'sf-01', kunden_konstellation: 'kk-01',
-        status: 'quali-offen' as const, created_at: daysAgo(4),
+        status: 'quali-offen' as const, qualifizierungs_phase: 'konstellation-erfasst',
+        created_at: daysAgo(4),
       },
       {
         vorname: 'Laura', nachname: 'Bauer', telefon: '+491633628571', email: 'laura@email.de',
         fahrzeug_hersteller: 'Skoda', fahrzeug_modell: 'Octavia',
         schadenfall_typ: 'sf-04', kunden_konstellation: 'kk-01',
-        status: 'disqualifiziert' as const,
+        status: 'disqualifiziert' as const, qualifizierungs_phase: 'schadentyp-erfasst',
         disqualifizierung_grund: 'Kein Anspruch - Eigenverschulden', created_at: daysAgo(10),
       },
       {
         vorname: 'Stefan', nachname: 'Koch', telefon: '+491633628571', email: 'stefan@email.de',
         fahrzeug_hersteller: 'Hyundai', fahrzeug_modell: 'i30',
         schadenfall_typ: 'sf-01', kunden_konstellation: 'kk-04',
-        status: 'flow-gesendet' as const, gewerbe_flag: true, created_at: daysAgo(6),
+        status: 'flow-gesendet' as const, qualifizierungs_phase: 'flow-gesendet',
+        gewerbe_flag: true, created_at: daysAgo(6),
       },
       {
         vorname: 'Martina', nachname: 'Wolf', telefon: '+491633628571', email: 'martina@email.de',
         fahrzeug_hersteller: 'Renault', fahrzeug_modell: 'Clio',
         schadenfall_typ: 'sf-01', kunden_konstellation: 'kk-01',
-        status: 'kalt' as const, created_at: daysAgo(20),
+        status: 'kalt' as const, qualifizierungs_phase: 'gutachtertermin',
+        created_at: daysAgo(20),
       },
     ]
 
     const leadIds: string[] = []
     for (const l of leadDefs) {
+      const lx = l as Record<string, unknown>
       const insertData: Record<string, unknown> = {
         vorname: l.vorname, nachname: l.nachname, telefon: l.telefon, email: l.email,
         fahrzeug_hersteller: l.fahrzeug_hersteller, fahrzeug_modell: l.fahrzeug_modell,
         schadenfall_typ: l.schadenfall_typ, kunden_konstellation: l.kunden_konstellation,
         status: l.status, created_at: l.created_at, updated_at: l.created_at,
         source_channel: 'google-ads',
-        mietwagen_flag: (l as Record<string, unknown>).mietwagen_flag ?? false,
-        leasing_flag: (l as Record<string, unknown>).leasing_flag ?? false,
-        personenschaden_flag: (l as Record<string, unknown>).personenschaden_flag ?? false,
-        gewerbe_flag: (l as Record<string, unknown>).gewerbe_flag ?? false,
-        sa_unterschrieben: (l as Record<string, unknown>).sa_unterschrieben ?? false,
-        polizeibericht_pflicht: (l as Record<string, unknown>).polizeibericht_pflicht ?? false,
-        disqualifizierung_grund: (l as Record<string, unknown>).disqualifizierung_grund ?? null,
+        qualifizierungs_phase: lx.qualifizierungs_phase ?? 'neu',
+        mietwagen_flag: lx.mietwagen_flag ?? false,
+        leasing_flag: lx.leasing_flag ?? false,
+        personenschaden_flag: lx.personenschaden_flag ?? false,
+        gewerbe_flag: lx.gewerbe_flag ?? false,
+        sa_unterschrieben: lx.sa_unterschrieben ?? false,
+        polizeibericht_pflicht: lx.polizeibericht_pflicht ?? false,
+        disqualifizierung_grund: lx.disqualifizierung_grund ?? null,
+        rueckruf_datum: lx.rueckruf_datum ?? null,
+        rueckruf_notiz: lx.rueckruf_notiz ?? null,
+        rueckruf_erledigt: false,
         fahrzeug_standort_plz: '50667',
         zugewiesen_an: teamIds['lisa@claimondo.de'],
       }
