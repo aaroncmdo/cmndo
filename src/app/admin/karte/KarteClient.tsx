@@ -8,8 +8,9 @@ import {
   InfoWindow,
   useMap,
 } from '@vis.gl/react-google-maps'
-import { SearchIcon, XIcon, AlertTriangleIcon } from 'lucide-react'
+import { SearchIcon, XIcon, AlertTriangleIcon, UserPlusIcon } from 'lucide-react'
 import Link from 'next/link'
+import GutachterSlideOver from './GutachterSlideOver'
 
 // ---------- Types ----------
 
@@ -279,6 +280,7 @@ function OrgLine({ from, to }: { from: { lat: number; lng: number }; to: { lat: 
 export default function KarteClient({ sachverstaendige, faelle }: { sachverstaendige: SV[]; faelle: Fall[] }) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''
 
+  const [showOnboarding, setShowOnboarding] = useState(false)
   const [geocodedSVs, setGeocodedSVs] = useState<GeocodedSV[]>([])
   const [geocodedFaelle, setGeocodedFaelle] = useState<GeocodedFall[]>([])
   const [selectedSV, setSelectedSV] = useState<GeocodedSV | null>(null)
@@ -366,8 +368,15 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
     <div className="flex h-[calc(100vh-0px)] md:h-screen">
       <aside className="w-72 shrink-0 border-r border-zinc-800 bg-zinc-950 flex flex-col overflow-hidden">
         <div className="px-4 pt-6 pb-4">
-          <h1 className="text-lg font-semibold text-white">Karte</h1>
-          <p className="text-zinc-500 text-xs mt-0.5">{sachverstaendige.length} SV &middot; {faelle.length} Faelle</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-lg font-semibold text-white">Karte</h1>
+              <p className="text-zinc-500 text-xs mt-0.5">{sachverstaendige.length} SV &middot; {faelle.length} Faelle</p>
+            </div>
+            <button onClick={() => setShowOnboarding(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-white transition-colors" style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}>
+              <UserPlusIcon className="w-3.5 h-3.5" /> Neu
+            </button>
+          </div>
         </div>
         <div className="px-4 pb-3">
           <div className="relative">
@@ -477,6 +486,9 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
           </Map>
         </APIProvider>
       </div>
+
+      {/* Gutachter Onboarding Slide-Over */}
+      <GutachterSlideOver open={showOnboarding} onClose={() => setShowOnboarding(false)} />
     </div>
   )
 }
