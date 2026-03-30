@@ -152,18 +152,25 @@ async function fetchIsochrone(lat: number, lng: number, radiusKm: number): Promi
 
 function RadiusCircle({ center, radiusKm, color, opacity, onClick }: { center: { lat: number; lng: number }; radiusKm: number; color: string; opacity?: number; onClick?: () => void }) {
   const map = useMap()
+  // Store onClick in ref to avoid re-creating the circle when the callback identity changes
+  const onClickRef = useRef(onClick)
+  onClickRef.current = onClick
+
   useEffect(() => {
     if (!map) return
-    const circle = new google.maps.Circle({ map, center, radius: radiusKm * 0.7 * 1000, fillColor: color, fillOpacity: opacity ?? 0.2, strokeColor: color, strokeOpacity: 0.6, strokeWeight: 2, clickable: !!onClick })
-    if (onClick) circle.addListener('click', onClick)
-    return () => { google.maps.event.clearInstanceListeners(circle); circle.setMap(null) }
-  }, [map, center, radiusKm, color, opacity, onClick])
+    const circle = new google.maps.Circle({ map, center, radius: radiusKm * 0.7 * 1000, fillColor: color, fillOpacity: opacity ?? 0.2, strokeColor: color, strokeOpacity: 0.6, strokeWeight: 2, clickable: true })
+    circle.addListener('click', () => onClickRef.current?.())
+    return () => { try { google.maps.event.clearInstanceListeners(circle) } catch {} circle.setMap(null) }
+  }, [map, center.lat, center.lng, radiusKm, color, opacity])
   return null
 }
 
 function IsochronePolygon({ center, radiusKm, color, opacity, onClick }: { center: { lat: number; lng: number }; radiusKm: number; color: string; opacity?: number; onClick?: () => void }) {
   const map = useMap()
   const polygonRef = useRef<google.maps.Polygon | null>(null)
+  // Store onClick in ref to avoid re-creating the polygon when the callback identity changes
+  const onClickRef = useRef(onClick)
+  onClickRef.current = onClick
 
   useEffect(() => {
     if (!map) return
@@ -184,20 +191,20 @@ function IsochronePolygon({ center, radiusKm, color, opacity, onClick }: { cente
         strokeOpacity: 0.6,
         strokeWeight: 2,
         geodesic: true,
-        clickable: !!onClick,
+        clickable: true,
       })
-      if (onClick) polygonRef.current.addListener('click', onClick)
+      polygonRef.current.addListener('click', () => onClickRef.current?.())
     })
 
     return () => {
       cancelled = true
       if (polygonRef.current) {
-        google.maps.event.clearInstanceListeners(polygonRef.current)
+        try { google.maps.event.clearInstanceListeners(polygonRef.current) } catch {}
         polygonRef.current.setMap(null)
         polygonRef.current = null
       }
     }
-  }, [map, center.lat, center.lng, radiusKm, color, opacity, onClick])
+  }, [map, center.lat, center.lng, radiusKm, color, opacity])
 
   return null
 }
