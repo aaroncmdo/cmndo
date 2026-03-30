@@ -17,7 +17,7 @@ const STUFEN: Stufe[] = [
   { key: 'vs-03', tage: 14, titel: 'Frist abgelaufen – Nachfrage senden',   taskTyp: 'versicherung-kontakt',    taskTitel: 'VS-Frist abgelaufen: Nachfrage senden',     whatsapp: true  },
   { key: 'vs-04', tage: 21, titel: 'Telefonische Direktanfrage',            taskTyp: 'versicherung-kontakt',    taskTitel: 'Versicherung anrufen (Pflicht!)',            whatsapp: false },
   { key: 'vs-05', tage: 28, titel: 'Mahnung mit Verzugszinsen',             taskTyp: 'versicherung-kontakt',    taskTitel: 'Mahnung mit Verzugszinsen senden',          whatsapp: true  },
-  { key: 'vs-06', tage: 42, titel: 'Letzte Mahnung + Klageankuendigung',    taskTyp: 'kunde-rueckfrage',        taskTitel: 'Kunden anrufen: Klageankuendigung',         whatsapp: false },
+  { key: 'vs-06', tage: 42, titel: 'Letzte Mahnung + Klageankuendigung',    taskTyp: 'kunde-rueckfrage',        taskTitel: 'Kunden anrufen: Klageankuendigung',         whatsapp: true  },
   { key: 'vs-07', tage: 60, titel: 'Klage eingereicht',                     taskTyp: 'versicherung-kontakt',    taskTitel: 'Klage eingereicht – Dokumentation',         whatsapp: false },
 ]
 
@@ -89,13 +89,16 @@ export async function GET(request: Request) {
       beschreibung: `${stufeDef.titel} (Tag ${tage} seit AS).`,
     })
 
-    // WhatsApp at vs-03 and vs-05
+    // WhatsApp at vs-03, vs-05, and vs-06 with specific escalation messages
     if (stufeDef.whatsapp) {
       if (neueStufe === 'vs-03') {
-        sendStatusWhatsApp(fall.id, 'nach_anspruchsschreiben').catch(() => {})
+        sendStatusWhatsApp(fall.id, 'eskalation_vs03').catch(() => {})
       }
       if (neueStufe === 'vs-05') {
-        sendStatusWhatsApp(fall.id, 'nach_regulierung').catch(() => {})
+        sendStatusWhatsApp(fall.id, 'eskalation_vs05').catch(() => {})
+      }
+      if (neueStufe === 'vs-06') {
+        sendStatusWhatsApp(fall.id, 'eskalation_vs06').catch(() => {})
       }
     }
 

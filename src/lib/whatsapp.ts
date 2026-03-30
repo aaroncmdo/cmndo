@@ -12,6 +12,9 @@ type NachrichtTyp =
   | 'nach_regulierung'
   | 'nach_zahlung'
   | 'nach_abschluss'
+  | 'eskalation_vs03'
+  | 'eskalation_vs05'
+  | 'eskalation_vs06'
 
 type FallContext = {
   fall_nummer?: string
@@ -60,6 +63,15 @@ function buildNachricht(typ: NachrichtTyp, ctx: FallContext): string {
 
     case 'nach_abschluss':
       return `Hallo ${name}, Ihr Fall ${ctx.fall_nummer ?? ''} wurde erfolgreich abgeschlossen! Wir freuen uns, dass wir Ihnen helfen konnten. Wenn Sie zufrieden waren, wuerden wir uns ueber eine Google-Bewertung freuen: https://g.page/claimondo/review`
+
+    case 'eskalation_vs03':
+      return `Hallo ${name}, wir haben die gegnerische Versicherung erneut kontaktiert, da die 14-Tage-Frist abgelaufen ist. Wir halten Sie auf dem Laufenden.`
+
+    case 'eskalation_vs05':
+      return `Hallo ${name}, die Versicherung hat auf unsere Anfragen nicht reagiert. Eine Mahnung mit Verzugszinsen wurde verschickt. Wir setzen alle Hebel in Bewegung.`
+
+    case 'eskalation_vs06':
+      return `Hallo ${name}, Ihr Kundenbetreuer wird Sie in Kuerze anrufen, um die naechsten Schritte mit Ihnen zu besprechen.`
   }
 }
 
@@ -76,6 +88,9 @@ function titelFuerTyp(typ: NachrichtTyp): string {
     nach_regulierung: 'Regulierung angekuendigt',
     nach_zahlung: 'Zahlung eingegangen',
     nach_abschluss: 'Fall abgeschlossen',
+    eskalation_vs03: 'Eskalation: Frist abgelaufen',
+    eskalation_vs05: 'Eskalation: Mahnung + Verzugszinsen',
+    eskalation_vs06: 'Eskalation: Kundenrueckruf',
   }
   return map[typ]
 }
