@@ -172,7 +172,7 @@ export default async function AdminPage() {
             <div className="text-zinc-400 text-sm font-medium">Fälle</div>
           </Link>
           <Link
-            href="/admin/leads"
+            href="/admin/dispatch"
             className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 hover:border-zinc-600 transition-colors group"
           >
             <div className="text-3xl font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">

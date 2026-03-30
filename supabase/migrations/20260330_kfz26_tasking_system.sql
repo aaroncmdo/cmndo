@@ -1,0 +1,5 @@
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS task_typ TEXT;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS deadline TIMESTAMPTZ;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS auto_erstellt BOOLEAN DEFAULT false;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS erinnerung_gesendet BOOLEAN DEFAULT false;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS prioritaet TEXT DEFAULT 'normal' CHECK (prioritaet IN ('normal','dringend','kritisch'));

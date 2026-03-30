@@ -8,9 +8,12 @@ import { uploadDokument, sendNachricht } from './actions'
 
 type Nachricht = {
   id: string
-  typ: string
-  titel: string | null
-  beschreibung: string | null
+  kanal: string
+  sender_id: string
+  sender_rolle: string
+  nachricht: string
+  hat_anhang: boolean | null
+  anhang_url: string | null
   created_at: string
 }
 
@@ -32,6 +35,19 @@ type Fall = {
   regulierung_betrag: number | null
   regulierung_am: string | null
   created_at: string
+  // OCR-extrahierte Felder
+  schadenhoehe_netto: number | null
+  wiederbeschaffungswert: number | null
+  restwert: number | null
+  nutzungsausfall_tage: number | null
+  nutzungsausfall_tagessatz: number | null
+  reparaturdauer_tage: number | null
+  totalschaden: boolean | null
+  gutachter_honorar: number | null
+  schadenfall_typ: string | null
+  kunden_konstellation: string | null
+  ki_geschaetzte_kosten_min: number | null
+  ki_geschaetzte_kosten_max: number | null
 }
 
 type Dokument = {
@@ -40,6 +56,10 @@ type Dokument = {
   datei_url: string
   datei_name: string | null
   created_at: string
+  kategorie: string | null
+  quelle: string | null
+  sichtbar_fuer: string[] | null
+  hochgeladen_von_rolle: string | null
 }
 
 type SV = {
@@ -59,6 +79,37 @@ const URSACHE_LABEL: Record<string, string> = {
   vandalismus: 'Vandalismus',
   verschleiss: 'Verschleiß',
   sonstiges: 'Sonstiges',
+}
+
+const KATEGORIE_LABEL: Record<string, string> = {
+  kundendokument: 'Ihre Dokumente',
+  schadensfoto: 'Schadensfotos',
+  gutachten: 'Gutachten',
+  kanzlei: 'Kanzlei-Dokumente',
+  unterschrift: 'Unterschriften',
+  sonstiges: 'Sonstige Dokumente',
+  'whatsapp-foto': 'WhatsApp-Fotos',
+  'gutachter-foto': 'Gutachter-Fotos',
+}
+
+const KATEGORIE_ORDER = [
+  'schadensfoto',
+  'whatsapp-foto',
+  'gutachter-foto',
+  'gutachten',
+  'kanzlei',
+  'kundendokument',
+  'unterschrift',
+  'sonstiges',
+]
+
+const QUELLE_LABEL: Record<string, string> = {
+  flowlink: 'Flow-Link',
+  portal: 'Portal',
+  whatsapp: 'WhatsApp',
+  gutachter: 'Gutachter',
+  admin: 'Admin',
+  kanzlei: 'Kanzlei',
 }
 
 // Timeline steps derived from the case data
@@ -168,8 +219,14 @@ export default function FallDetailClient({
   const router = useRouter()
   const timeline = buildTimeline(fall)
   const isStorniert = fall.status === 'storniert'
-  const fotos = dokumente.filter(d => d.typ.startsWith('foto'))
-  const andereDokumente = dokumente.filter(d => !d.typ.startsWith('foto'))
+
+  // Group documents by kategorie
+  const grouped = dokumente.reduce<Record<string, Dokument[]>>((acc, doc) => {
+    const key = doc.kategorie ?? 'sonstiges'
+    if (!acc[key]) acc[key] = []
+    acc[key].push(doc)
+    return acc
+  }, {})
 
   return (
     <div className="px-4 py-8">
@@ -267,73 +324,86 @@ export default function FallDetailClient({
             </div>
           </div>
 
-          {/* ── Dokumente + Upload ── */}
+          {/* ── Dateien ── */}
           <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
             <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">
-              Dokumente
+              Dateien
             </h3>
 
             {dokumente.length === 0 ? (
-              <p className="text-zinc-600 text-sm mb-4">Noch keine Dokumente vorhanden.</p>
+              <p className="text-zinc-600 text-sm mb-4">Noch keine Dateien vorhanden.</p>
             ) : (
-              <div className="space-y-4 mb-4">
-                {/* Fotos */}
-                {fotos.length > 0 && (
-                  <div>
-                    <p className="text-zinc-500 text-xs mb-2">Schadensfotos ({fotos.length})</p>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                      {fotos.map(doc => (
-                        <a
-                          key={doc.id}
-                          href={doc.datei_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block aspect-square rounded-xl overflow-hidden bg-zinc-800 hover:opacity-80 transition-opacity"
-                        >
-                          <img
-                            src={doc.datei_url}
-                            alt={doc.datei_name ?? 'Foto'}
-                            className="w-full h-full object-cover"
-                          />
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
+              <div className="space-y-5 mb-4">
+                {KATEGORIE_ORDER.filter(k => grouped[k]?.length).map(kat => {
+                  const docs = grouped[kat]
+                  const isPhoto = kat === 'schadensfoto' || kat === 'whatsapp-foto' || kat === 'gutachter-foto'
 
-                {/* Other documents */}
-                {andereDokumente.length > 0 && (
-                  <div>
-                    {fotos.length > 0 && (
-                      <p className="text-zinc-500 text-xs mb-2">Weitere Dokumente</p>
-                    )}
-                    <div className="space-y-1">
-                      {andereDokumente.map(doc => (
-                        <a
-                          key={doc.id}
-                          href={doc.datei_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-zinc-800 transition-colors"
-                        >
-                          <DocIcon />
-                          <div className="min-w-0 flex-1">
-                            <span className="text-zinc-200 text-sm block truncate">
-                              {doc.datei_name ?? doc.datei_url.split('/').pop()}
-                            </span>
-                            <span className="text-zinc-600 text-xs">
-                              {typLabel(doc.typ)} · {fmt(doc.created_at)}
-                            </span>
-                          </div>
-                        </a>
-                      ))}
+                  return (
+                    <div key={kat}>
+                      <p className="text-zinc-500 text-xs font-medium mb-2">
+                        {KATEGORIE_LABEL[kat] ?? kat} ({docs.length})
+                      </p>
+
+                      {isPhoto ? (
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                          {docs.map(doc => (
+                            <a
+                              key={doc.id}
+                              href={doc.datei_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block aspect-square rounded-xl overflow-hidden bg-zinc-800 hover:opacity-80 transition-opacity"
+                            >
+                              <img
+                                src={doc.datei_url}
+                                alt={doc.datei_name ?? 'Foto'}
+                                className="w-full h-full object-cover"
+                              />
+                            </a>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="space-y-1">
+                          {docs.map(doc => (
+                            <a
+                              key={doc.id}
+                              href={doc.datei_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-zinc-800 transition-colors group"
+                            >
+                              <DocIcon />
+                              <div className="min-w-0 flex-1">
+                                <span className="text-zinc-200 text-sm block truncate">
+                                  {doc.datei_name ?? doc.datei_url.split('/').pop()}
+                                </span>
+                                <span className="text-zinc-600 text-xs flex items-center gap-1.5 flex-wrap">
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 text-[10px] font-medium">
+                                    {KATEGORIE_LABEL[doc.kategorie ?? ''] ?? doc.kategorie ?? doc.typ}
+                                  </span>
+                                  {doc.quelle && (
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-zinc-800/60 text-zinc-500 text-[10px]">
+                                      {QUELLE_LABEL[doc.quelle] ?? doc.quelle}
+                                    </span>
+                                  )}
+                                  <span>{fmt(doc.created_at)}</span>
+                                </span>
+                              </div>
+                              {/* Download indicator */}
+                              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} className="text-zinc-600 group-hover:text-zinc-400 shrink-0 transition-colors">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                              </svg>
+                            </a>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                )}
+                  )
+                })}
               </div>
             )}
 
-            {/* Upload */}
+            {/* Upload Nachreichung */}
             <DokumentUpload fallId={fall.id} onDone={() => router.refresh()} />
           </div>
 
@@ -344,6 +414,11 @@ export default function FallDetailClient({
             </h3>
             <NachrichtenBereich fallId={fall.id} nachrichten={nachrichten} onSend={() => router.refresh()} />
           </div>
+
+          {/* ── Auszahlung / Schadensdetails ── */}
+          {fall.schadenhoehe_netto != null && (
+            <AuszahlungsUebersicht fall={fall} />
+          )}
 
           {/* ── Bearbeiter / Kontakt ── */}
           <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
@@ -446,18 +521,6 @@ function DocIcon() {
   )
 }
 
-function typLabel(typ: string): string {
-  const map: Record<string, string> = {
-    gutachten: 'Gutachten',
-    abtretung: 'Abtretung',
-    vollmacht: 'Vollmacht',
-    rechnung: 'Rechnung',
-    'foto-schaden': 'Schadensfoto',
-    'kunde-nachreichung': 'Nachreichung',
-  }
-  return map[typ] ?? typ
-}
-
 // ─── Dokument Upload ────────────────────────────────────────────────────────
 
 function DokumentUpload({ fallId, onDone }: { fallId: string; onDone: () => void }) {
@@ -506,7 +569,102 @@ function DokumentUpload({ fallId, onDone }: { fallId: string; onDone: () => void
   )
 }
 
+// ─── Auszahlungs-Übersicht ──────────────────────────────────────────────────
+
+function AuszahlungsUebersicht({ fall }: { fall: Fall }) {
+  const nutzungsausfall = (fall.nutzungsausfall_tage ?? 0) * (fall.nutzungsausfall_tagessatz ?? 0)
+  const anwaltskosten = (fall.schadenhoehe_netto ?? 0) * 0.13
+  const total = (fall.schadenhoehe_netto ?? 0) + nutzungsausfall + (fall.gutachter_honorar ?? 0) + anwaltskosten
+
+  const SF_LABELS: Record<string, string> = {
+    'SF-01': 'Unverschuldeter Unfall — die gegnerische Versicherung zahlt.',
+    'SF-02': 'Teilschuld — anteilige Regulierung durch beide Versicherungen.',
+    'SF-03': 'Vandalismus/Diebstahl — Ihre Kaskoversicherung reguliert.',
+    'SF-04': 'Eigenverschulden — Regulierung ueber Ihre Vollkasko.',
+  }
+
+  return (
+    <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
+      <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-4">Voraussichtliche Auszahlung</h3>
+      <div className="text-center mb-5">
+        <p className="text-3xl font-bold text-emerald-400 tabular-nums">{fmtCurrency(fall.regulierung_betrag ?? total)}</p>
+        <p className="text-zinc-500 text-xs mt-1">{fall.regulierung_betrag ? 'Reguliert' : 'Geschaetzter Anspruch'}</p>
+      </div>
+      <div className="space-y-2 mb-4">
+        <AuszahlungsRow label="Reparaturkosten (netto)" value={fall.schadenhoehe_netto} />
+        {fall.totalschaden && fall.wiederbeschaffungswert != null && (
+          <>
+            <AuszahlungsRow label="Wiederbeschaffungswert" value={fall.wiederbeschaffungswert} />
+            {fall.restwert != null && <AuszahlungsRow label="Abzgl. Restwert" value={-fall.restwert} />}
+          </>
+        )}
+        {nutzungsausfall > 0 && <AuszahlungsRow label={`Nutzungsausfall (${fall.nutzungsausfall_tage} Tage)`} value={nutzungsausfall} />}
+        {fall.gutachter_honorar != null && <AuszahlungsRow label="Gutachterkosten" value={fall.gutachter_honorar} />}
+        <AuszahlungsRow label="Anwaltskosten (ca.)" value={anwaltskosten} />
+        <div className="border-t border-zinc-700 pt-2 flex justify-between">
+          <span className="text-white text-sm font-semibold">Gesamt</span>
+          <span className="text-white text-sm font-semibold tabular-nums">{fmtCurrency(total)}</span>
+        </div>
+      </div>
+      {fall.totalschaden && (
+        <div className="bg-amber-950/50 border border-amber-800/30 rounded-xl p-3 mb-3">
+          <p className="text-amber-300 text-xs font-medium">Totalschaden festgestellt</p>
+          <p className="text-amber-400/70 text-xs mt-0.5">Die Reparaturkosten uebersteigen den Wiederbeschaffungswert.</p>
+        </div>
+      )}
+      {fall.ki_geschaetzte_kosten_min != null && fall.ki_geschaetzte_kosten_max != null && (
+        <div className="bg-violet-950/30 border border-violet-800/30 rounded-xl p-3 mb-3">
+          <p className="text-violet-300 text-xs font-medium">KI-Vorabschaetzung</p>
+          <p className="text-violet-400 text-sm font-semibold mt-1 tabular-nums">
+            {fmtCurrency(fall.ki_geschaetzte_kosten_min)} — {fmtCurrency(fall.ki_geschaetzte_kosten_max)}
+          </p>
+          {fall.schadenhoehe_netto != null && (
+            <p className="text-zinc-500 text-xs mt-1">
+              Gutachten-Wert: {fmtCurrency(fall.schadenhoehe_netto)} (Abweichung:{' '}
+              {(() => {
+                const avg = (fall.ki_geschaetzte_kosten_min! + fall.ki_geschaetzte_kosten_max!) / 2
+                const diff = Math.round(((fall.schadenhoehe_netto! - avg) / fall.schadenhoehe_netto!) * 100)
+                return `${diff > 0 ? '+' : ''}${diff}%`
+              })()})
+            </p>
+          )}
+          <p className="text-zinc-600 text-[10px] mt-1">Dies ist eine automatische Vorabschaetzung. Der verbindliche Wert stammt aus dem Gutachten.</p>
+        </div>
+      )}
+      {fall.schadenfall_typ && SF_LABELS[fall.schadenfall_typ] && (
+        <div className="bg-zinc-800/50 rounded-xl p-3">
+          <p className="text-zinc-300 text-xs font-medium">Ihre Schadenskonstellation</p>
+          <p className="text-zinc-500 text-xs mt-0.5">{SF_LABELS[fall.schadenfall_typ]}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function AuszahlungsRow({ label, value }: { label: string; value: number | null }) {
+  if (value == null) return null
+  const negative = value < 0
+  return (
+    <div className="flex justify-between text-sm">
+      <span className="text-zinc-400">{label}</span>
+      <span className={`tabular-nums ${negative ? 'text-red-400' : 'text-zinc-200'}`}>{fmtCurrency(value)}</span>
+    </div>
+  )
+}
+
 // ─── Nachrichten ─────────────────────────────────────────────────────────────
+
+const KANAL_TABS = [
+  { key: 'portal-kunde-claimondo' as const, label: 'Mein Berater' },
+  { key: 'portal-kunde-gutachter' as const, label: 'Mein Gutachter' },
+]
+
+const ROLLE_LABEL: Record<string, string> = {
+  kunde: 'Sie',
+  admin: 'Claimondo',
+  gutachter: 'Gutachter',
+  system: 'System',
+}
 
 function NachrichtenBereich({
   fallId,
@@ -517,9 +675,13 @@ function NachrichtenBereich({
   nachrichten: Nachricht[]
   onSend: () => void
 }) {
+  const [activeKanal, setActiveKanal] = useState<'portal-kunde-claimondo' | 'portal-kunde-gutachter'>('portal-kunde-claimondo')
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const filtered = nachrichten.filter(m => m.kanal === activeKanal)
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault()
@@ -527,7 +689,7 @@ function NachrichtenBereich({
     setError(null)
     setSending(true)
     try {
-      await sendNachricht(fallId, text)
+      await sendNachricht(fallId, text, activeKanal)
       setText('')
       onSend()
     } catch (err) {
@@ -539,21 +701,64 @@ function NachrichtenBereich({
 
   return (
     <div>
-      {nachrichten.length === 0 ? (
-        <p className="text-zinc-600 text-sm mb-4">Noch keine Nachrichten. Stellen Sie hier Ihre Fragen.</p>
+      {/* Channel tabs */}
+      <div className="flex gap-1 mb-4">
+        {KANAL_TABS.map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => { setActiveKanal(tab.key); setError(null) }}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+              activeKanal === tab.key
+                ? 'bg-emerald-600 text-white'
+                : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-300'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Messages area */}
+      {filtered.length === 0 ? (
+        <p className="text-zinc-600 text-sm mb-4">
+          Noch keine Nachrichten. Stellen Sie hier Ihre Fragen.
+        </p>
       ) : (
-        <div className="space-y-3 mb-4 max-h-80 overflow-y-auto">
-          {nachrichten.map(msg => {
-            const isKunde = msg.typ === 'kunde-nachricht'
+        <div className="space-y-3 mb-4 max-h-96 overflow-y-auto pr-1">
+          {filtered.map(msg => {
+            const isOwn = msg.sender_rolle === 'kunde'
             return (
-              <div key={msg.id} className={`flex ${isKunde ? 'justify-end' : 'justify-start'}`}>
+              <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
-                  isKunde
-                    ? 'bg-blue-600 text-white'
+                  isOwn
+                    ? 'bg-emerald-600/90 text-white'
                     : 'bg-zinc-800 text-zinc-200'
                 }`}>
-                  <p className="text-sm whitespace-pre-wrap">{msg.beschreibung}</p>
-                  <p className={`text-[10px] mt-1 ${isKunde ? 'text-blue-200' : 'text-zinc-500'}`}>
+                  {/* Sender badge */}
+                  <p className={`text-[10px] font-semibold uppercase tracking-wide mb-0.5 ${
+                    isOwn ? 'text-emerald-200' : 'text-zinc-500'
+                  }`}>
+                    {ROLLE_LABEL[msg.sender_rolle] ?? msg.sender_rolle}
+                  </p>
+                  <p className="text-sm whitespace-pre-wrap">{msg.nachricht}</p>
+                  {/* Attachment indicator */}
+                  {msg.hat_anhang && msg.anhang_url && (
+                    <a
+                      href={msg.anhang_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`inline-flex items-center gap-1 mt-1 text-xs underline ${
+                        isOwn ? 'text-emerald-200' : 'text-blue-400'
+                      }`}
+                    >
+                      <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                      </svg>
+                      Anhang
+                    </a>
+                  )}
+                  {/* Timestamp */}
+                  <p className={`text-[10px] mt-1 ${isOwn ? 'text-emerald-200/70' : 'text-zinc-500'}`}>
                     {new Date(msg.created_at).toLocaleString('de-DE', {
                       day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
                     })}
@@ -562,21 +767,23 @@ function NachrichtenBereich({
               </div>
             )
           })}
+          <div ref={messagesEndRef} />
         </div>
       )}
 
+      {/* Input */}
       <form onSubmit={handleSend} className="flex gap-2">
         <input
           type="text"
           value={text}
           onChange={e => setText(e.target.value)}
           placeholder="Nachricht schreiben..."
-          className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600"
+          className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-600"
         />
         <button
           type="submit"
           disabled={sending || !text.trim()}
-          className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-40"
+          className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-40"
         >
           {sending ? '...' : 'Senden'}
         </button>

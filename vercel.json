@@ -1,0 +1,20 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/whatsapp-erinnerungen",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/vs-timer",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/termin-erinnerungen",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/task-erinnerungen",
+      "schedule": "0 * * * *"
+    }
+  ]
+}

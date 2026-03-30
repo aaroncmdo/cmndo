@@ -7,7 +7,7 @@ export default async function KartePage() {
   const { data: svList } = await supabase
     .from('sachverstaendige')
     .select(
-      'id, gebiet_plz, radius_km, paket, offene_faelle, max_faelle_monat, ist_aktiv, profiles(vorname, nachname, email)'
+      'id, gebiet_plz, radius_km, paket, offene_faelle, max_faelle_monat, ist_aktiv, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_lat, standort_lng, standort_adresse, lat, lng, organisation_id, gutachter_typ, profiles(vorname, nachname, email)'
     )
     .eq('ist_aktiv', true)
 
@@ -18,7 +18,6 @@ export default async function KartePage() {
     )
     .not('status', 'in', '("abgeschlossen","storniert")')
 
-  // Normalize profile joins
   const sachverstaendige = (svList ?? []).map((sv) => {
     const profileRaw = sv.profiles as unknown
     const profile = (Array.isArray(profileRaw) ? profileRaw[0] : profileRaw) as {
@@ -33,10 +32,14 @@ export default async function KartePage() {
         : 'Unbekannt',
       email: profile?.email ?? '',
       gebietPlz: (sv.gebiet_plz ?? []) as string[],
-      radiusKm: (sv.radius_km as number) ?? 40,
+      radiusKm: (sv.paket_umkreis_km as number) ?? (sv.radius_km as number) ?? 40,
       paket: sv.paket as string,
-      offeneFaelle: (sv.offene_faelle as number) ?? 0,
-      maxFaelleMonat: sv.max_faelle_monat as number,
+      offeneFaelle: (sv.paket_faelle_genutzt as number) ?? (sv.offene_faelle as number) ?? 0,
+      maxFaelleMonat: (sv.paket_faelle_gesamt as number) ?? (sv.max_faelle_monat as number) ?? 10,
+      standortLat: sv.standort_lat != null ? Number(sv.standort_lat) : (sv.lat != null ? Number(sv.lat) : null),
+      standortLng: sv.standort_lng != null ? Number(sv.standort_lng) : (sv.lng != null ? Number(sv.lng) : null),
+      organisationId: sv.organisation_id as string | null,
+      gutachterTyp: (sv.gutachter_typ as string) ?? 'kfz-gutachter',
     }
   })
 

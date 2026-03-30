@@ -21,21 +21,20 @@ export default async function FallaktePage({
   if (!fall) notFound()
 
   const [
-    { data: schadenspositionen },
     { data: dokumente },
     { data: parteien },
     { data: timeline },
+    { data: pflichtdokumente },
+    { data: nachrichten },
+    { data: qcCheckliste },
     leadResult,
     svResult,
+    kundenbetreuerResult,
+    leadbearbeiterResult,
   ] = await Promise.all([
     supabase
-      .from('schadenspositionen')
-      .select('id, kategorie, bezeichnung, beschreibung, geschaetzter_wert, reparaturkosten, sort_order')
-      .eq('fall_id', id)
-      .order('sort_order'),
-    supabase
       .from('dokumente')
-      .select('id, typ, datei_url, datei_name, created_at')
+      .select('id, typ, datei_url, datei_name, datei_groesse, created_at, kategorie, hochgeladen_von, hochgeladen_von_rolle, quelle, sichtbar_fuer')
       .eq('fall_id', id)
       .order('created_at'),
     supabase
@@ -44,13 +43,28 @@ export default async function FallaktePage({
       .eq('fall_id', id),
     supabase
       .from('timeline')
-      .select('id, typ, titel, beschreibung, metadata, created_at')
+      .select('id, typ, titel, beschreibung, erstellt_von, metadata, created_at')
       .eq('fall_id', id)
       .order('created_at', { ascending: false }),
+    supabase
+      .from('pflichtdokumente')
+      .select('id, dokument_typ, status, pflicht, quelle, dokument_url, hochgeladen_am, created_at')
+      .eq('fall_id', id)
+      .order('created_at'),
+    supabase
+      .from('nachrichten')
+      .select('id, kanal, sender_id, sender_rolle, nachricht, hat_anhang, anhang_url, created_at')
+      .eq('fall_id', id)
+      .order('created_at', { ascending: true }),
+    supabase
+      .from('qc_checkliste')
+      .select('*')
+      .eq('fall_id', id)
+      .maybeSingle(),
     fall.lead_id
       ? supabase
           .from('leads')
-          .select('vorname, nachname, email, telefon')
+          .select('id, vorname, nachname, email, telefon, schadenfall_typ, kunden_konstellation, personenschaden_flag, mietwagen_flag, polizeibericht_pflicht, gutachter_termin, kennzeichen, fahrzeug_hersteller, fahrzeug_modell')
           .eq('id', fall.lead_id)
           .single()
       : Promise.resolve({ data: null }),
@@ -61,9 +75,23 @@ export default async function FallaktePage({
           .eq('id', fall.sv_id)
           .single()
       : Promise.resolve({ data: null }),
+    fall.kundenbetreuer_id
+      ? supabase
+          .from('profiles')
+          .select('id, vorname, nachname, email, telefon')
+          .eq('id', fall.kundenbetreuer_id)
+          .single()
+      : Promise.resolve({ data: null }),
+    fall.leadbearbeiter_id
+      ? supabase
+          .from('profiles')
+          .select('id, vorname, nachname, email, telefon')
+          .eq('id', fall.leadbearbeiter_id)
+          .single()
+      : Promise.resolve({ data: null }),
   ])
 
-  // Normalize the SV profile join (Supabase may return array or object)
+  // Normalize the SV profile join
   let sv = null
   if (svResult.data) {
     const raw = svResult.data as Record<string, unknown>
@@ -77,10 +105,14 @@ export default async function FallaktePage({
       fall={fall}
       lead={leadResult.data}
       sv={sv}
-      schadenspositionen={schadenspositionen ?? []}
+      kundenbetreuer={kundenbetreuerResult.data}
+      leadbearbeiter={leadbearbeiterResult.data}
       dokumente={dokumente ?? []}
       parteien={parteien ?? []}
       timeline={timeline ?? []}
+      pflichtdokumente={pflichtdokumente ?? []}
+      nachrichten={nachrichten ?? []}
+      qcCheckliste={qcCheckliste ?? null}
     />
   )
 }

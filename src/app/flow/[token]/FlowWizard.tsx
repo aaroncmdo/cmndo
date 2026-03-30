@@ -4,7 +4,7 @@ import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { CheckIcon } from 'lucide-react'
-import { notifyNeuerFall } from './actions'
+import { notifyNeuerFall, createKundeAccount } from './actions'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -125,6 +125,7 @@ export default function FlowWizard({ token, initialData }: { token: string; init
   const [dragOver, setDragOver] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [credentials, setCredentials] = useState<{ email: string; password: string; fallId: string } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const progress = Math.round((step / TOTAL_STEPS) * 100)
@@ -277,12 +278,82 @@ export default function FlowWizard({ token, initialData }: { token: string; init
       // E-Mail an Admin: Neuer Fall (fire & forget)
       notifyNeuerFall(fall.id).catch(() => {})
 
-      router.push(`/flow/signatur/${fall.id}`)
+      // Create Kunde auth account and show credentials
+      try {
+        const { password } = await createKundeAccount(
+          fall.id,
+          data.email,
+          data.vorname,
+          data.nachname,
+          data.telefon || null,
+        )
+        setCredentials({ email: data.email, password, fallId: fall.id })
+      } catch {
+        // Even if account creation fails, continue to signature
+        router.push(`/flow/signatur/${fall.id}`)
+        return
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unbekannter Fehler')
     } finally {
       setSubmitting(false)
     }
+  }
+
+  // ─── Credentials Success Screen ────────────────────────────────────────────
+
+  if (credentials) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex flex-col">
+        <div className="flex-1 flex flex-col px-5 pt-10 pb-8 max-w-lg mx-auto w-full">
+          <div className="flex-1 flex flex-col justify-center py-4">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-3xl px-6 py-7 shadow-xl shadow-black/20">
+              <div className="text-center mb-6">
+                <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <svg className="w-7 h-7 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <h1 className="text-2xl font-semibold text-white">Schadensfall gemeldet!</h1>
+                <p className="text-zinc-400 text-sm mt-2">
+                  Ihr Fall wurde erfolgreich aufgenommen. Nutzen Sie die folgenden Zugangsdaten, um den Fortschritt in Ihrem Kundenportal zu verfolgen.
+                </p>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-3">
+                  <span className="text-xs text-zinc-500 block mb-0.5">E-Mail</span>
+                  <span className="text-zinc-200 text-sm font-mono">{credentials.email}</span>
+                </div>
+                <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-3">
+                  <span className="text-xs text-zinc-500 block mb-0.5">Passwort</span>
+                  <span className="text-zinc-200 text-sm font-mono">{credentials.password}</span>
+                </div>
+              </div>
+
+              <p className="text-zinc-500 text-xs text-center mb-4">
+                Bitte notieren Sie sich Ihre Zugangsdaten. Sie erhalten diese auch per E-Mail.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3 pt-4">
+            <button
+              onClick={() => router.push(`/flow/signatur/${credentials.fallId}`)}
+              className="w-full min-h-14 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-base active:scale-[0.98] transition-all"
+            >
+              Weiter zur Unterschrift
+            </button>
+            <a
+              href="/login"
+              className="block w-full py-3 text-center text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+            >
+              Zum Kundenportal
+            </a>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   // ─── Shell ────────────────────────────────────────────────────────────────────

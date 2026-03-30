@@ -22,12 +22,24 @@ export async function updateProfil(formData: FormData) {
   // Update sachverstaendige fields
   const gebiet_plz = (formData.get('gebiet_plz') as string)?.trim() || null
   const verfuegbar = formData.get('verfuegbar') === 'on'
+  const standort_adresse = (formData.get('standort_adresse') as string)?.trim() || null
+  const standort_plz = (formData.get('standort_plz') as string)?.trim() || null
+  const standort_lat_raw = formData.get('standort_lat') as string
+  const standort_lng_raw = formData.get('standort_lng') as string
+  const standort_place_id = (formData.get('standort_place_id') as string)?.trim() || null
+  const standort_lat = standort_lat_raw ? parseFloat(standort_lat_raw) : null
+  const standort_lng = standort_lng_raw ? parseFloat(standort_lng_raw) : null
 
   const { error: svErr } = await supabase
     .from('sachverstaendige')
     .update({
       gebiet_plz,
       ist_aktiv: verfuegbar,
+      standort_adresse,
+      standort_plz,
+      standort_lat: isNaN(standort_lat as number) ? null : standort_lat,
+      standort_lng: isNaN(standort_lng as number) ? null : standort_lng,
+      standort_place_id,
     })
     .eq('profile_id', user.id)
 

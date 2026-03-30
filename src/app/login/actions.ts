@@ -36,7 +36,7 @@ export async function login(formData: FormData) {
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('rolle')
+    .select('rolle, force_password_change, auth_provider')
     .eq('id', user.id)
     .single()
 
@@ -47,6 +47,12 @@ export async function login(formData: FormData) {
 
   if (!profile?.rolle) {
     redirect('/login?error=Keine+Rolle+im+Profil+hinterlegt')
+  }
+
+  // Check if password change is required (only for email auth)
+  const authProvider = profile.auth_provider ?? 'email'
+  if (profile.force_password_change && authProvider === 'email') {
+    redirect('/passwort-aendern')
   }
 
   const destination = ROLE_REDIRECT[profile.rolle] ?? '/admin'

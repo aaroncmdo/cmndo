@@ -12,7 +12,7 @@ export default async function KundeFallPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Verify this fall belongs to the logged-in kunde (via lead email)
+  // Fetch the case
   const { data: fall } = await supabase
     .from('faelle')
     .select('*')
@@ -21,17 +21,24 @@ export default async function KundeFallPage({
 
   if (!fall) notFound()
 
-  // Check ownership: lead email must match user email
-  if (fall.lead_id) {
+  // Check ownership: primary via kunde_id, fallback via lead email
+  const ownedByKundeId = fall.kunde_id === user.id
+  let ownedByLeadEmail = false
+
+  if (!ownedByKundeId && fall.lead_id) {
     const { data: lead } = await supabase
       .from('leads')
       .select('email')
       .eq('id', fall.lead_id)
       .single()
+    ownedByLeadEmail = lead?.email === user.email
+  }
 
-    if (lead?.email !== user.email) notFound()
-  } else {
-    notFound()
+  if (!ownedByKundeId && !ownedByLeadEmail) notFound()
+
+  // Redirect to onboarding if not completed
+  if (fall.onboarding_complete === false && ownedByKundeId) {
+    redirect(`/kunde/onboarding/${fall.id}`)
   }
 
   // Fetch all related data in parallel
@@ -42,8 +49,9 @@ export default async function KundeFallPage({
   ] = await Promise.all([
     supabase
       .from('dokumente')
-      .select('id, typ, datei_url, datei_name, created_at')
+      .select('id, typ, datei_url, datei_name, created_at, kategorie, quelle, sichtbar_fuer, hochgeladen_von_rolle')
       .eq('fall_id', id)
+      .contains('sichtbar_fuer', ['kunde'])
       .order('created_at'),
     fall.sv_id
       ? supabase
@@ -53,10 +61,10 @@ export default async function KundeFallPage({
           .single()
       : Promise.resolve({ data: null }),
     supabase
-      .from('timeline')
-      .select('id, typ, titel, beschreibung, created_at')
+      .from('nachrichten')
+      .select('id, kanal, sender_id, sender_rolle, nachricht, hat_anhang, anhang_url, created_at')
       .eq('fall_id', id)
-      .in('typ', ['kunde-nachricht', 'claimondo-antwort'])
+      .in('kanal', ['portal-kunde-claimondo', 'portal-kunde-gutachter'])
       .order('created_at', { ascending: true }),
   ])
 

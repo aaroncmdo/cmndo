@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import LeadDetailClient from './LeadDetailClient'
 import FlowLinkSection from './FlowLinkSection'
+import GutachterTermin from './GutachterTermin'
 
 export default async function LeadDetailPage({
   params,
@@ -32,10 +33,10 @@ export default async function LeadDetailPage({
       <div className="max-w-3xl mx-auto">
         {/* Back */}
         <Link
-          href="/admin/leads"
+          href="/admin/dispatch"
           className="text-sm text-zinc-400 hover:text-white transition-colors mb-6 inline-block"
         >
-          ← Zurück zu Leads
+          ← Zurück zu Dispatch
         </Link>
 
         {/* Header */}
@@ -58,6 +59,21 @@ export default async function LeadDetailPage({
             telefon: lead.telefon,
             wa_gesendet: lead.wa_gesendet ?? false,
             status: lead.status,
+          }}
+        />
+
+        {/* Gutachter-Terminvergabe (after SA signed) */}
+        <GutachterTermin
+          lead={{
+            id: lead.id,
+            vorname: lead.vorname,
+            nachname: lead.nachname,
+            telefon: lead.telefon,
+            schadenfall_typ: lead.schadenfall_typ ?? null,
+            fahrzeug_standort_plz: lead.fahrzeug_standort_plz ?? null,
+            fahrzeug_standort_adresse: lead.fahrzeug_standort_adresse ?? null,
+            gutachter_termin: lead.gutachter_termin ?? null,
+            sa_unterschrieben: lead.sa_unterschrieben ?? false,
           }}
         />
 

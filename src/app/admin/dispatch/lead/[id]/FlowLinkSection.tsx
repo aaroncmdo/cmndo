@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { sendFlowLink } from './actions'
+import { sendFlowLink } from '../../actions'
 
 export default function FlowLinkSection({
   lead,

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { updateLeadStatus } from '../../actions'
 
 const STATUS_OPTIONS = [
   { value: 'neu', label: 'Neu' },
@@ -38,8 +38,11 @@ export default function LeadDetailClient({
   async function handleChange(newStatus: string) {
     setStatus(newStatus)
     setSaving(true)
-    const supabase = createClient()
-    await supabase.from('leads').update({ status: newStatus }).eq('id', lead.id)
+    try {
+      await updateLeadStatus(lead.id, newStatus)
+    } catch {
+      setStatus(lead.status)
+    }
     setSaving(false)
     router.refresh()
   }

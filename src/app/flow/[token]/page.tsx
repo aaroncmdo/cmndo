@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import FlowWizard from './FlowWizard'
+import { notFound } from 'next/navigation'
+import FlowWizardKfz from './FlowWizardKfz'
 
 export default async function FlowPage({
   params,
@@ -9,22 +10,38 @@ export default async function FlowPage({
   const { token } = await params
   const supabase = await createClient()
 
-  // Try to load existing lead data (admin-sent flow)
   const { data: lead } = await supabase
     .from('leads')
-    .select('vorname, nachname, email, telefon')
+    .select(`
+      id, vorname, nachname, email, telefon,
+      schadenfall_typ, kunden_konstellation,
+      personenschaden_flag, mietwagen_flag,
+      polizeibericht_pflicht, gutachter_termin,
+      kennzeichen, fahrzeug_hersteller, fahrzeug_modell
+    `)
     .eq('id', token)
     .maybeSingle()
 
+  if (!lead) return notFound()
+
   return (
-    <FlowWizard
+    <FlowWizardKfz
       token={token}
-      initialData={lead ? {
+      lead={{
         vorname: lead.vorname ?? '',
         nachname: lead.nachname ?? '',
         email: lead.email ?? '',
         telefon: lead.telefon ?? '',
-      } : undefined}
+        schadenfall_typ: lead.schadenfall_typ ?? 'SF-01',
+        kunden_konstellation: lead.kunden_konstellation ?? 'KK-01',
+        personenschaden_flag: lead.personenschaden_flag ?? false,
+        mietwagen_flag: lead.mietwagen_flag ?? false,
+        polizeibericht_pflicht: lead.polizeibericht_pflicht ?? false,
+        gutachter_termin: lead.gutachter_termin ?? null,
+        kennzeichen: lead.kennzeichen ?? '',
+        fahrzeug_hersteller: lead.fahrzeug_hersteller ?? '',
+        fahrzeug_modell: lead.fahrzeug_modell ?? '',
+      }}
     />
   )
 }

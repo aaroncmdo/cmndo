@@ -34,7 +34,7 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // Öffentliche Routen – kein Login nötig
-  const publicPaths = ['/login', '/flow', '/api']
+  const publicPaths = ['/login', '/flow', '/api', '/passwort-aendern']
   const isPublic = publicPaths.some(path => 
     request.nextUrl.pathname.startsWith(path)
   )

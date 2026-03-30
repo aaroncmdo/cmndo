@@ -1,111 +1,465 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import {
+  UserPlusIcon,
+  MapPinIcon,
+  AlertTriangleIcon,
+  FolderOpenIcon,
+  CheckCircle2Icon,
+  WalletIcon,
+  GaugeIcon,
+  ClockIcon,
+  NavigationIcon,
+  DropletIcon,
+  FlameIcon,
+  ShieldAlertIcon,
+  WindIcon,
+  WrenchIcon,
+  PackageIcon,
+  ExternalLinkIcon,
+  BellIcon,
+} from 'lucide-react'
+
+// ─── Schadentyp helpers ─────────────────────────────────────────────────────
+
+const URSACHE_LABEL: Record<string, string> = {
+  wasserschaden: 'Wasserschaden',
+  sachbeschaedigung: 'Sachbeschädigung',
+  brand: 'Brand',
+  einbruch: 'Einbruch',
+  sturmschaden: 'Sturmschaden',
+  vandalismus: 'Vandalismus',
+  verschleiss: 'Verschleiß',
+  sonstiges: 'Sonstiges',
+}
+
+const URSACHE_ICON: Record<string, typeof DropletIcon> = {
+  wasserschaden: DropletIcon,
+  brand: FlameIcon,
+  einbruch: ShieldAlertIcon,
+  sturmschaden: WindIcon,
+  sachbeschaedigung: WrenchIcon,
+  vandalismus: ShieldAlertIcon,
+  verschleiss: WrenchIcon,
+  sonstiges: PackageIcon,
+}
+
+// ─── Page ───────────────────────────────────────────────────────────────────
 
 export default async function GutachterDashboard() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Find the sachverstaendige record for this user
+  // Get sachverstaendige record for this user
   const { data: sv } = await supabase
     .from('sachverstaendige')
-    .select('id')
-    .eq('id', user!.id)
+    .select('id, offene_faelle, max_faelle_monat, paket_faelle_genutzt, paket_faelle_gesamt, guthaben')
+    .eq('profile_id', user!.id)
     .single()
 
-  const svId = sv?.id
-
-  // Parallel queries for dashboard metrics
-  const now = new Date()
-  const weekStart = new Date(now)
-  weekStart.setDate(now.getDate() - now.getDay() + 1) // Monday
-  weekStart.setHours(0, 0, 0, 0)
-  const weekEnd = new Date(weekStart)
-  weekEnd.setDate(weekStart.getDate() + 6)
-  weekEnd.setHours(23, 59, 59, 999)
-
-  const [neueRes, termineRes, offeneRes] = await Promise.all([
-    // Neue Aufträge: assigned but no gutachten submitted yet
-    svId
-      ? supabase
-          .from('faelle')
-          .select('id', { count: 'exact', head: true })
-          .eq('sv_id', svId)
-          .in('status', ['sv-zugewiesen', 'sv-termin'])
-      : Promise.resolve({ count: 0 }),
-
-    // Termine diese Woche
-    svId
-      ? supabase
-          .from('faelle')
-          .select('id', { count: 'exact', head: true })
-          .eq('sv_id', svId)
-          .gte('sv_termin', weekStart.toISOString())
-          .lte('sv_termin', weekEnd.toISOString())
-      : Promise.resolve({ count: 0 }),
-
-    // Offene Berichte: appointment done but no gutachten submitted
-    svId
-      ? supabase
-          .from('faelle')
-          .select('id', { count: 'exact', head: true })
-          .eq('sv_id', svId)
-          .not('sv_termin', 'is', null)
-          .is('gutachten_eingegangen_am', null)
-          .not('status', 'in', '("abgeschlossen","storniert")')
-      : Promise.resolve({ count: 0 }),
-  ])
-
-  const neueCount = neueRes.count ?? 0
-  const termineCount = termineRes.count ?? 0
-  const offeneCount = offeneRes.count ?? 0
-
-  return (
-    <div className="px-4 py-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-white mb-1">Dashboard</h1>
-          <p className="text-zinc-500 text-sm">Ihre aktuelle Auftragsübersicht</p>
-        </div>
-
-        {!svId && (
-          <div className="bg-yellow-950 border border-yellow-800 rounded-2xl p-6 mb-6">
+  if (!sv) {
+    return (
+      <div className="min-h-screen bg-zinc-950 px-4 py-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-yellow-950 border border-yellow-800 rounded-2xl p-6">
             <p className="text-yellow-300 text-sm">
               Ihr Sachverständigen-Profil wurde noch nicht angelegt. Bitte kontaktieren Sie den Administrator.
             </p>
           </div>
-        )}
+        </div>
+      </div>
+    )
+  }
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Link
-            href="/gutachter/auftraege?filter=neu"
-            className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-zinc-600 transition-colors group"
-          >
-            <div className="text-3xl font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">
-              {neueCount}
-            </div>
-            <div className="text-zinc-400 text-sm font-medium">Neue Aufträge</div>
-            <div className="text-zinc-600 text-xs mt-1">Zugewiesene Fälle →</div>
-          </Link>
+  // ─── Date boundaries ──────────────────────────────────────────────────────
+  const now = new Date()
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
+  const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).toISOString()
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-            <div className="text-3xl font-bold text-white mb-1">
-              {termineCount}
+  // ─── Parallel data fetching ───────────────────────────────────────────────
+  const [neueRes, todayRes, actionRes, erledigtRes, mitteilungenRes] = await Promise.all([
+    // 1. Neue Kunden: sv-zugewiesen (not yet confirmed)
+    supabase
+      .from('faelle')
+      .select('id, fall_nummer, status, schadens_ursache, schadens_datum, schadens_adresse, schadens_plz, schadens_ort, created_at, lead_id')
+      .eq('sv_id', sv.id)
+      .eq('status', 'sv-zugewiesen')
+      .order('created_at', { ascending: false }),
+
+    // 2. Tagesroute: appointments today
+    supabase
+      .from('faelle')
+      .select('id, fall_nummer, status, schadens_ursache, schadens_adresse, schadens_plz, schadens_ort, sv_termin, lead_id')
+      .eq('sv_id', sv.id)
+      .gte('sv_termin', todayStart)
+      .lte('sv_termin', todayEnd)
+      .order('sv_termin', { ascending: true }),
+
+    // 3. Handlungsbedarf: past sv-termin but no gutachten submitted
+    supabase
+      .from('faelle')
+      .select('id, fall_nummer, status, schadens_ursache, schadens_ort, sv_termin, gutachten_eingegangen_am, lead_id')
+      .eq('sv_id', sv.id)
+      .is('gutachten_eingegangen_am', null)
+      .not('sv_termin', 'is', null)
+      .lt('sv_termin', now.toISOString())
+      .not('status', 'in', '("abgeschlossen","storniert")')
+      .order('sv_termin', { ascending: true }),
+
+    // 4. Erledigt diesen Monat: gutachten-eingegangen this month
+    supabase
+      .from('faelle')
+      .select('id', { count: 'exact', head: true })
+      .eq('sv_id', sv.id)
+      .gte('gutachten_eingegangen_am', monthStart),
+
+    // 5. Letzte 5 ungelesene Mitteilungen
+    supabase
+      .from('gutachter_mitteilungen')
+      .select('id, typ, titel, nachricht, dringend, link, created_at')
+      .eq('sv_id', sv.id)
+      .eq('gelesen', false)
+      .order('created_at', { ascending: false })
+      .limit(5),
+  ])
+
+  const neueFaelle = neueRes.data ?? []
+  const todayFaelle = todayRes.data ?? []
+  const actionFaelle = actionRes.data ?? []
+  const erledigtCount = erledigtRes.count ?? 0
+  const mitteilungen = mitteilungenRes.data ?? []
+
+  // ─── Resolve lead names ───────────────────────────────────────────────────
+  const allLeadIds = [
+    ...new Set(
+      [...neueFaelle, ...todayFaelle, ...actionFaelle]
+        .map(f => f.lead_id)
+        .filter(Boolean) as string[]
+    ),
+  ]
+  const { data: leads } = allLeadIds.length > 0
+    ? await supabase.from('leads').select('id, vorname, nachname').in('id', allLeadIds)
+    : { data: [] }
+  const leadMap: Record<string, string> = {}
+  for (const l of leads ?? []) {
+    leadMap[l.id] = `${l.vorname ?? ''} ${l.nachname ?? ''}`.trim() || '—'
+  }
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+  function leadName(leadId: string | null) {
+    return leadId ? (leadMap[leadId] ?? '—') : '—'
+  }
+
+  function formatAdresse(f: { schadens_adresse?: string | null; schadens_plz?: string | null; schadens_ort?: string | null }) {
+    return [f.schadens_adresse, f.schadens_plz, f.schadens_ort].filter(Boolean).join(', ') || '—'
+  }
+
+  function formatDate(d: string | null) {
+    if (!d) return '—'
+    return new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  }
+
+  function formatTime(d: string | null) {
+    if (!d) return '—'
+    return new Date(d).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  }
+
+  // Build Google Maps route URL from today's appointments
+  function buildRouteUrl() {
+    const stops = todayFaelle
+      .map(f => [f.schadens_adresse, f.schadens_plz, f.schadens_ort].filter(Boolean).join(', '))
+      .filter(Boolean)
+    if (stops.length === 0) return null
+    const encoded = stops.map(s => encodeURIComponent(s)).join('/')
+    return `https://www.google.com/maps/dir/${encoded}`
+  }
+
+  const routeUrl = buildRouteUrl()
+  const offeneFaelle = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
+  const maxFaelle = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10
+  const guthaben = typeof sv.guthaben === 'number' ? sv.guthaben : 0
+
+  return (
+    <div className="px-4 py-6 sm:py-8">
+      <div className="max-w-5xl mx-auto space-y-8">
+
+        {/* ─── Header ──────────────────────────────────────────────────── */}
+        <div>
+          <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
+          <p className="text-zinc-500 text-sm mt-0.5">
+            {now.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          </p>
+        </div>
+
+        {/* ─── KPI Cards ───────────────────────────────────────────────── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <FolderOpenIcon className="w-4 h-4 text-zinc-500" />
+              <span className="text-zinc-500 text-xs font-medium uppercase tracking-wide">Offene Fälle</span>
             </div>
-            <div className="text-zinc-400 text-sm font-medium">Termine diese Woche</div>
-            <div className="text-zinc-600 text-xs mt-1">Vor-Ort-Besichtigungen</div>
+            <div className="text-3xl font-bold text-white tabular-nums">{offeneFaelle}</div>
           </div>
 
-          <Link
-            href="/gutachter/auftraege?filter=offen"
-            className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-zinc-600 transition-colors group"
-          >
-            <div className={`text-3xl font-bold mb-1 transition-colors ${offeneCount > 0 ? 'text-amber-400 group-hover:text-amber-300' : 'text-white group-hover:text-blue-400'}`}>
-              {offeneCount}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <CheckCircle2Icon className="w-4 h-4 text-emerald-500" />
+              <span className="text-zinc-500 text-xs font-medium uppercase tracking-wide">Erledigt (Monat)</span>
             </div>
-            <div className="text-zinc-400 text-sm font-medium">Offene Berichte</div>
-            <div className="text-zinc-600 text-xs mt-1">Gutachten ausstehend →</div>
-          </Link>
+            <div className="text-3xl font-bold text-emerald-400 tabular-nums">{erledigtCount}</div>
+          </div>
+
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <WalletIcon className="w-4 h-4 text-zinc-500" />
+              <span className="text-zinc-500 text-xs font-medium uppercase tracking-wide">Guthaben</span>
+            </div>
+            <div className="text-3xl font-bold text-white tabular-nums">{guthaben.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-lg text-zinc-500">EUR</span></div>
+          </div>
+
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <GaugeIcon className="w-4 h-4 text-zinc-500" />
+              <span className="text-zinc-500 text-xs font-medium uppercase tracking-wide">Auslastung</span>
+            </div>
+            <div className="text-3xl font-bold text-white tabular-nums">
+              {offeneFaelle}<span className="text-lg text-zinc-500">/{maxFaelle}</span>
+            </div>
+            <div className="mt-2 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${
+                  maxFaelle > 0 && offeneFaelle / maxFaelle > 0.8
+                    ? 'bg-red-500'
+                    : maxFaelle > 0 && offeneFaelle / maxFaelle > 0.5
+                      ? 'bg-amber-500'
+                      : 'bg-emerald-500'
+                }`}
+                style={{ width: `${Math.min(100, maxFaelle > 0 ? (offeneFaelle / maxFaelle) * 100 : 0)}%` }}
+              />
+            </div>
+          </div>
         </div>
+
+        {/* ─── Mitteilungen ────────────────────────────────────────────── */}
+        {mitteilungen.length > 0 && (
+          <section>
+            <div className="flex items-center gap-2 mb-4">
+              <BellIcon className="w-5 h-5 text-red-400" />
+              <h2 className="text-lg font-semibold text-white">Neue Mitteilungen</h2>
+              <span className="ml-auto bg-red-950 text-red-300 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                {mitteilungen.length}
+              </span>
+              <Link
+                href="/gutachter/mitteilungen"
+                className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                Alle anzeigen
+              </Link>
+            </div>
+            <div className="space-y-2">
+              {mitteilungen.map(m => (
+                <Link
+                  key={m.id}
+                  href={m.link ?? '/gutachter/mitteilungen'}
+                  className="flex items-start gap-3 bg-zinc-900 border border-zinc-700 rounded-2xl p-4 hover:border-zinc-600 transition-colors"
+                >
+                  <div className={`shrink-0 p-2 rounded-xl ${m.dringend ? 'bg-red-950' : 'bg-zinc-800'}`}>
+                    <BellIcon className={`w-4 h-4 ${m.dringend ? 'text-red-400' : 'text-zinc-400'}`} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-white text-sm font-medium">
+                      {m.titel}
+                      {m.dringend && <span className="ml-2 text-xs text-red-400 font-semibold">DRINGEND</span>}
+                    </p>
+                    <p className="text-zinc-500 text-xs mt-0.5 line-clamp-1">{m.nachricht}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ─── Neue Kunden ─────────────────────────────────────────────── */}
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <UserPlusIcon className="w-5 h-5 text-blue-400" />
+            <h2 className="text-lg font-semibold text-white">Neue Kunden</h2>
+            {neueFaelle.length > 0 && (
+              <span className="ml-auto bg-blue-950 text-blue-300 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                {neueFaelle.length}
+              </span>
+            )}
+          </div>
+
+          {neueFaelle.length === 0 ? (
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 text-center">
+              <p className="text-zinc-500 text-sm">Keine neuen Zuweisungen vorhanden.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {neueFaelle.map(fall => {
+                const UrsacheIcon = URSACHE_ICON[fall.schadens_ursache ?? ''] ?? PackageIcon
+                return (
+                  <div
+                    key={fall.id}
+                    className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col gap-3"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="min-w-0">
+                        <p className="text-white font-medium truncate">{leadName(fall.lead_id)}</p>
+                        <p className="text-zinc-500 text-xs mt-0.5 truncate">{formatAdresse(fall)}</p>
+                      </div>
+                      <div className="shrink-0 ml-2 p-1.5 rounded-lg bg-zinc-800">
+                        <UrsacheIcon className="w-4 h-4 text-zinc-400" />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-zinc-400">
+                      <span className="bg-zinc-800 px-2 py-0.5 rounded-full">
+                        {URSACHE_LABEL[fall.schadens_ursache ?? ''] ?? 'Sonstiges'}
+                      </span>
+                      <span>{formatDate(fall.schadens_datum)}</span>
+                    </div>
+                    <Link
+                      href={`/gutachter/fall/${fall.id}`}
+                      className="mt-auto inline-flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl px-4 py-2.5 transition-colors"
+                    >
+                      Fall ansehen
+                      <ExternalLinkIcon className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </section>
+
+        {/* ─── Tagesroute ──────────────────────────────────────────────── */}
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <MapPinIcon className="w-5 h-5 text-green-400" />
+            <h2 className="text-lg font-semibold text-white">Tagesroute</h2>
+            {todayFaelle.length > 0 && (
+              <span className="ml-auto bg-green-950 text-green-300 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                {todayFaelle.length} Termine
+              </span>
+            )}
+          </div>
+
+          {todayFaelle.length === 0 ? (
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 text-center">
+              <p className="text-zinc-500 text-sm">Keine Termine für heute geplant.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {/* Route button */}
+              {routeUrl && (
+                <a
+                  href={routeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white font-medium rounded-2xl px-5 py-3 transition-colors w-full sm:w-auto sm:inline-flex"
+                >
+                  <NavigationIcon className="w-4 h-4" />
+                  Route starten ({todayFaelle.length} Stops)
+                </a>
+              )}
+
+              {/* Appointment cards */}
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden divide-y divide-zinc-800">
+                {todayFaelle.map((fall, idx) => {
+                  const UrsacheIcon = URSACHE_ICON[fall.schadens_ursache ?? ''] ?? PackageIcon
+                  return (
+                    <Link
+                      key={fall.id}
+                      href={`/gutachter/fall/${fall.id}`}
+                      className="flex items-center gap-4 p-4 hover:bg-zinc-800/50 transition-colors"
+                    >
+                      {/* Time pill */}
+                      <div className="shrink-0 flex flex-col items-center w-16">
+                        <span className="text-xs text-zinc-500 font-medium">Stop {idx + 1}</span>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <ClockIcon className="w-3.5 h-3.5 text-green-400" />
+                          <span className="text-green-400 text-sm font-semibold tabular-nums">
+                            {formatTime(fall.sv_termin)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Details */}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-white text-sm font-medium truncate">{leadName(fall.lead_id)}</p>
+                        <p className="text-zinc-500 text-xs truncate mt-0.5">{formatAdresse(fall)}</p>
+                      </div>
+
+                      {/* Schadentyp */}
+                      <div className="shrink-0 hidden sm:flex items-center gap-1.5 bg-zinc-800 px-2.5 py-1 rounded-full">
+                        <UrsacheIcon className="w-3.5 h-3.5 text-zinc-400" />
+                        <span className="text-zinc-400 text-xs">
+                          {URSACHE_LABEL[fall.schadens_ursache ?? ''] ?? 'Sonstiges'}
+                        </span>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* ─── Handlungsbedarf ─────────────────────────────────────────── */}
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <AlertTriangleIcon className="w-5 h-5 text-amber-400" />
+            <h2 className="text-lg font-semibold text-white">Handlungsbedarf</h2>
+            {actionFaelle.length > 0 && (
+              <span className="ml-auto bg-amber-950 text-amber-300 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                {actionFaelle.length}
+              </span>
+            )}
+          </div>
+
+          {actionFaelle.length === 0 ? (
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 text-center">
+              <p className="text-zinc-500 text-sm">Alle Gutachten sind auf dem aktuellen Stand.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {actionFaelle.map(fall => {
+                const daysSinceTermin = fall.sv_termin
+                  ? Math.floor((now.getTime() - new Date(fall.sv_termin).getTime()) / (1000 * 60 * 60 * 24))
+                  : 0
+                return (
+                  <Link
+                    key={fall.id}
+                    href={`/gutachter/fall/${fall.id}`}
+                    className="flex items-center gap-4 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 hover:border-amber-800/50 transition-colors"
+                  >
+                    <div className="shrink-0 p-2 rounded-xl bg-amber-950">
+                      <AlertTriangleIcon className="w-4 h-4 text-amber-400" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-white text-sm font-medium truncate">
+                        {leadName(fall.lead_id)}
+                        <span className="text-zinc-500 font-normal ml-2">
+                          {fall.fall_nummer ? `#${fall.fall_nummer}` : ''}
+                        </span>
+                      </p>
+                      <p className="text-amber-400/80 text-xs mt-0.5">
+                        Gutachten fehlt
+                        {daysSinceTermin > 0 && ` · Termin vor ${daysSinceTermin} ${daysSinceTermin === 1 ? 'Tag' : 'Tagen'}`}
+                      </p>
+                    </div>
+                    <div className="shrink-0 text-zinc-600 text-xs hidden sm:block">
+                      {fall.schadens_ort ?? ''}
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
+        </section>
+
       </div>
     </div>
   )

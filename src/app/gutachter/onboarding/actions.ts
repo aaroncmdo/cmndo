@@ -1,0 +1,102 @@
+'use server'
+
+import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
+
+const PAKET_CONFIG: Record<string, { faelle: number; km: number; preis: number }> = {
+  'starter-10': { faelle: 10, km: 20, preis: 1500 },
+  'standard-25': { faelle: 25, km: 40, preis: 3750 },
+  'premium-50': { faelle: 50, km: 100, preis: 7500 },
+}
+
+export async function completeOnboarding(data: {
+  userId: string
+  existingSvId: string | null
+  vorname: string
+  nachname: string
+  telefon: string
+  gutachter_typ: string
+  qualifikationen: string[]
+  standort_adresse: string
+  standort_plz: string
+  standort_lat: number | null
+  standort_lng: number | null
+  standort_place_id: string
+  paket: string
+  kalender_typ: string
+}) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const paketConfig = PAKET_CONFIG[data.paket] ?? PAKET_CONFIG['starter-10']
+
+  // Update profile
+  const { error: profileErr } = await supabase
+    .from('profiles')
+    .update({
+      vorname: data.vorname,
+      nachname: data.nachname,
+      telefon: data.telefon,
+      rolle: 'sachverstaendiger',
+    })
+    .eq('id', data.userId)
+
+  if (profileErr) throw new Error(`Profil-Update fehlgeschlagen: ${profileErr.message}`)
+
+  // Create or update sachverstaendige
+  if (data.existingSvId) {
+    const { error } = await supabase
+      .from('sachverstaendige')
+      .update({
+        paket: data.paket,
+        gebiet_plz: data.standort_plz,
+        max_faelle_monat: paketConfig.faelle,
+        paket_faelle_gesamt: paketConfig.faelle,
+        paket_umkreis_km: paketConfig.km,
+        anzahlung_faellig: paketConfig.preis,
+        gutachter_typ: data.gutachter_typ,
+        standort_adresse: data.standort_adresse,
+        standort_plz: data.standort_plz,
+        standort_lat: data.standort_lat,
+        standort_lng: data.standort_lng,
+        standort_place_id: data.standort_place_id || null,
+        kalender_typ: data.kalender_typ,
+        qualifikationen: data.qualifikationen,
+        onboarding_abgeschlossen: true,
+        ist_aktiv: true,
+      })
+      .eq('id', data.existingSvId)
+
+    if (error) throw new Error(`SV-Update fehlgeschlagen: ${error.message}`)
+  } else {
+    const { error } = await supabase
+      .from('sachverstaendige')
+      .insert({
+        profile_id: data.userId,
+        paket: data.paket,
+        gebiet_plz: data.standort_plz,
+        max_faelle_monat: paketConfig.faelle,
+        paket_faelle_gesamt: paketConfig.faelle,
+        paket_faelle_genutzt: 0,
+        paket_umkreis_km: paketConfig.km,
+        anzahlung_faellig: paketConfig.preis,
+        gutachter_typ: data.gutachter_typ,
+        offene_faelle: 0,
+        standort_adresse: data.standort_adresse,
+        standort_plz: data.standort_plz,
+        standort_lat: data.standort_lat,
+        standort_lng: data.standort_lng,
+        standort_place_id: data.standort_place_id || null,
+        kalender_typ: data.kalender_typ,
+        qualifikationen: data.qualifikationen,
+        onboarding_abgeschlossen: true,
+        ist_aktiv: true,
+      })
+
+    if (error) throw new Error(`SV-Erstellung fehlgeschlagen: ${error.message}`)
+  }
+
+  revalidatePath('/gutachter')
+  revalidatePath('/gutachter/profil')
+}

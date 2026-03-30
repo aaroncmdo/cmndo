@@ -111,7 +111,7 @@ export default function SVKalenderClient({
                       return (
                         <Link
                           key={fall.id}
-                          href={`/gutachter/auftrag/${fall.id}`}
+                          href={`/gutachter/fall/${fall.id}`}
                           className={`block px-2 py-1.5 rounded-lg text-[10px] leading-tight transition-colors ${
                             overdue
                               ? 'bg-red-950/80 text-red-300 hover:bg-red-900/80'
@@ -143,7 +143,7 @@ export default function SVKalenderClient({
               {ohneTermin.map(fall => (
                 <div key={fall.id} className="flex items-center justify-between gap-3 py-2.5 px-3 rounded-xl bg-zinc-800/40">
                   <div className="min-w-0">
-                    <Link href={`/gutachter/auftrag/${fall.id}`} className="text-blue-400 hover:text-blue-300 text-xs font-mono">
+                    <Link href={`/gutachter/fall/${fall.id}`} className="text-blue-400 hover:text-blue-300 text-xs font-mono">
                       {fall.fall_nummer ?? fall.id.slice(0, 8)}
                     </Link>
                     <p className="text-zinc-400 text-xs truncate">

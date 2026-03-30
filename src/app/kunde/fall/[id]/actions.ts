@@ -27,24 +27,35 @@ export async function uploadDokument(fallId: string, formData: FormData) {
     typ: 'kunde-nachreichung',
     datei_url: urlData.publicUrl,
     datei_name: file.name,
+    datei_groesse: file.size,
+    kategorie: 'kundendokument',
+    quelle: 'portal',
+    hochgeladen_von: user.id,
+    hochgeladen_von_rolle: 'kunde',
+    sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
   })
 
   if (insertErr) throw new Error(insertErr.message)
   revalidatePath(`/kunde/fall/${fallId}`)
 }
 
-export async function sendNachricht(fallId: string, nachricht: string) {
+export async function sendNachricht(
+  fallId: string,
+  nachricht: string,
+  kanal: 'portal-kunde-claimondo' | 'portal-kunde-gutachter' = 'portal-kunde-claimondo',
+) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht angemeldet')
 
   if (!nachricht.trim()) throw new Error('Nachricht darf nicht leer sein')
 
-  const { error } = await supabase.from('timeline').insert({
+  const { error } = await supabase.from('nachrichten').insert({
     fall_id: fallId,
-    typ: 'kunde-nachricht',
-    titel: 'Nachricht vom Kunden',
-    beschreibung: nachricht.trim(),
+    kanal,
+    sender_id: user.id,
+    sender_rolle: 'kunde',
+    nachricht: nachricht.trim(),
   })
 
   if (error) throw new Error(error.message)

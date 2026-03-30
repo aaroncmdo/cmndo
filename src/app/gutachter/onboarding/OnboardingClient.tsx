@@ -1,0 +1,417 @@
+'use client'
+
+import { useCallback, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Script from 'next/script'
+import { completeOnboarding } from './actions'
+import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
+import {
+  UserIcon,
+  MapPinIcon,
+  PackageIcon,
+  CalendarIcon,
+  CheckCircle2Icon,
+  ShieldCheckIcon,
+} from 'lucide-react'
+
+const STEPS = [
+  { key: 'person', label: 'Persönliche Daten', icon: UserIcon },
+  { key: 'typ', label: 'Gutachter-Typ', icon: ShieldCheckIcon },
+  { key: 'standort', label: 'Standort', icon: MapPinIcon },
+  { key: 'paket', label: 'Paket wählen', icon: PackageIcon },
+  { key: 'kalender', label: 'Kalender', icon: CalendarIcon },
+  { key: 'zusammenfassung', label: 'Zusammenfassung', icon: CheckCircle2Icon },
+] as const
+
+const GUTACHTER_TYPEN = [
+  { key: 'kfz-gutachter', label: 'KFZ-Gutachter', desc: 'Freier KFZ-Sachverständiger (Einzelperson)', color: 'border-blue-500' },
+  { key: 'dat-gutachter', label: 'DAT-Gutachter', desc: 'DAT-zertifizierter Gutachter (DAT-Kalkulationssystem)', color: 'border-orange-500' },
+  { key: 'akademie', label: 'Akademie', desc: 'Akademie-ausgebildeter Gutachter (höhere Qualifikation)', color: 'border-green-500' },
+  { key: 'gutachterbuero', label: 'Gutachterbüro', desc: 'Gutachterbüro mit mehreren Standorten', color: 'border-purple-500' },
+] as const
+
+const PAKETE = [
+  { key: 'starter-10', label: 'Starter', faelle: 10, km: 20, preis: 1500, color: 'border-blue-500' },
+  { key: 'standard-25', label: 'Pro', faelle: 25, km: 40, preis: 3750, color: 'border-green-500' },
+  { key: 'premium-50', label: 'Premium', faelle: 50, km: 100, preis: 7500, color: 'border-amber-500' },
+] as const
+
+const QUALIFIKATIONEN = [
+  'KFZ-Schäden',
+  'Motorrad',
+  'LKW/Nutzfahrzeuge',
+  'Oldtimer',
+  'Elektrofahrzeuge',
+  'Totalschaden-Bewertung',
+  'Unfallrekonstruktion',
+]
+
+type FormData = {
+  vorname: string
+  nachname: string
+  telefon: string
+  gutachter_typ: string
+  qualifikationen: string[]
+  standort_adresse: string
+  standort_plz: string
+  standort_lat: number | null
+  standort_lng: number | null
+  standort_place_id: string
+  paket: string
+  kalender_typ: string
+}
+
+export default function OnboardingClient({
+  userId,
+  email,
+  existingProfile,
+  existingSvId,
+}: {
+  userId: string
+  email: string
+  existingProfile: { vorname: string | null; nachname: string | null; email: string | null; telefon: string | null }
+  existingSvId: string | null
+}) {
+  const router = useRouter()
+  const [step, setStep] = useState(0)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [data, setData] = useState<FormData>({
+    vorname: existingProfile.vorname ?? '',
+    nachname: existingProfile.nachname ?? '',
+    telefon: existingProfile.telefon ?? '',
+    gutachter_typ: 'kfz-gutachter',
+    qualifikationen: [],
+    standort_adresse: '',
+    standort_plz: '',
+    standort_lat: null,
+    standort_lng: null,
+    standort_place_id: '',
+    paket: 'starter-10',
+    kalender_typ: 'keiner',
+  })
+
+  const currentStep = STEPS[step]
+  const selectedPaket = PAKETE.find(p => p.key === data.paket) ?? PAKETE[0]
+
+  function updateField<K extends keyof FormData>(key: K, value: FormData[K]) {
+    setData(prev => ({ ...prev, [key]: value }))
+  }
+
+  function toggleQualifikation(q: string) {
+    setData(prev => ({
+      ...prev,
+      qualifikationen: prev.qualifikationen.includes(q)
+        ? prev.qualifikationen.filter(x => x !== q)
+        : [...prev.qualifikationen, q],
+    }))
+  }
+
+  const [mapsReady, setMapsReady] = useState(
+    typeof window !== 'undefined' && typeof google !== 'undefined' && !!google.maps?.places,
+  )
+
+  const onPlaceSelect = useCallback((result: PlaceResult) => {
+    setData(prev => ({
+      ...prev,
+      standort_adresse: result.adresse,
+      standort_plz: result.plz,
+      standort_lat: result.lat,
+      standort_lng: result.lng,
+      standort_place_id: result.place_id,
+    }))
+  }, [])
+
+  async function handleComplete() {
+    setSaving(true)
+    setError(null)
+    try {
+      await completeOnboarding({
+        ...data,
+        userId,
+        existingSvId,
+      })
+      router.push('/gutachter')
+      router.refresh()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Fehler')
+      setSaving(false)
+    }
+  }
+
+  const canNext = step === 0
+    ? data.vorname && data.nachname
+    : step === 1
+    ? data.gutachter_typ
+    : step === 2
+    ? data.standort_plz
+    : step === 3
+    ? data.paket
+    : true
+
+  return (
+    <div className="min-h-screen bg-zinc-950 flex items-start justify-center px-4 py-10">
+      {process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY && (
+        <Script
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}
+          strategy="lazyOnload"
+          onReady={() => setMapsReady(true)}
+        />
+      )}
+      <div className="w-full max-w-2xl">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-semibold text-white">Gutachter-Onboarding</h1>
+          <p className="text-zinc-500 text-sm mt-1">Schritt {step + 1} von {STEPS.length}</p>
+        </div>
+
+        {/* Stepper */}
+        <div className="flex items-center justify-center gap-1 mb-8">
+          {STEPS.map((s, i) => {
+            const Icon = s.icon
+            return (
+              <div key={s.key} className="flex items-center">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                  i < step ? 'bg-green-600' : i === step ? 'bg-blue-600' : 'bg-zinc-800'
+                }`}>
+                  <Icon className="w-4 h-4 text-white" />
+                </div>
+                {i < STEPS.length - 1 && (
+                  <div className={`w-8 h-0.5 ${i < step ? 'bg-green-600' : 'bg-zinc-800'}`} />
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Content */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <h2 className="text-lg font-semibold text-white mb-5">{currentStep.label}</h2>
+
+          {/* Step 1: Persönliche Daten */}
+          {step === 0 && (
+            <div className="space-y-4">
+              <InputField label="Vorname" value={data.vorname} onChange={v => updateField('vorname', v)} />
+              <InputField label="Nachname" value={data.nachname} onChange={v => updateField('nachname', v)} />
+              <InputField label="E-Mail" value={email} onChange={() => {}} disabled />
+              <InputField label="Telefon" value={data.telefon} onChange={v => updateField('telefon', v)} type="tel" />
+              <div>
+                <label className="text-sm text-zinc-400 mb-2 block">Qualifikationen</label>
+                <div className="flex flex-wrap gap-2">
+                  {QUALIFIKATIONEN.map(q => (
+                    <button
+                      key={q}
+                      type="button"
+                      onClick={() => toggleQualifikation(q)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                        data.qualifikationen.includes(q)
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-zinc-800 text-zinc-400 hover:text-zinc-200'
+                      }`}
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Gutachter-Typ */}
+          {step === 1 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {GUTACHTER_TYPEN.map(t => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => updateField('gutachter_typ', t.key)}
+                  className={`p-5 rounded-xl border-2 text-left transition-all ${
+                    data.gutachter_typ === t.key
+                      ? `${t.color} bg-zinc-800`
+                      : 'border-zinc-700 hover:border-zinc-600'
+                  }`}
+                >
+                  <p className="text-white font-semibold">{t.label}</p>
+                  <p className="text-zinc-500 text-xs mt-1">{t.desc}</p>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Step 3: Standort */}
+          {step === 2 && (
+            <div className="space-y-4">
+              {mapsReady ? (
+                <div>
+                  <label className="text-sm text-zinc-400 mb-1.5 block">Adresse (Büro/Wohnsitz)</label>
+                  <GooglePlaceAutocomplete
+                    defaultValue={data.standort_adresse}
+                    placeholder="Musterstraße 1, 10115 Berlin"
+                    onSelect={onPlaceSelect}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
+              ) : (
+                <InputField
+                  label="Adresse (Büro/Wohnsitz)"
+                  value={data.standort_adresse}
+                  onChange={v => updateField('standort_adresse', v)}
+                  placeholder="Musterstraße 1, 10115 Berlin"
+                />
+              )}
+              <InputField
+                label="PLZ"
+                value={data.standort_plz}
+                onChange={v => updateField('standort_plz', v)}
+                placeholder="10115"
+              />
+              {data.standort_lat != null && (
+                <p className="text-green-500 text-xs flex items-center gap-1">
+                  <MapPinIcon className="w-3 h-3" />
+                  Koordinaten erfasst ({data.standort_lat.toFixed(4)}, {data.standort_lng?.toFixed(4)})
+                </p>
+              )}
+              <p className="text-zinc-600 text-xs">
+                Der Standort bestimmt Ihren Einsatzradius.{' '}
+                {!mapsReady && 'Adress-Vorschläge werden geladen oder sind nicht verfügbar.'}
+              </p>
+            </div>
+          )}
+
+          {/* Step 4: Paket */}
+          {step === 3 && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {PAKETE.map(p => (
+                <button
+                  key={p.key}
+                  type="button"
+                  onClick={() => updateField('paket', p.key)}
+                  className={`p-5 rounded-xl border-2 text-left transition-all ${
+                    data.paket === p.key
+                      ? `${p.color} bg-zinc-800`
+                      : 'border-zinc-700 hover:border-zinc-600'
+                  }`}
+                >
+                  <p className="text-white font-semibold text-lg mb-1">{p.label}</p>
+                  <p className="text-zinc-400 text-sm">{p.faelle} Fälle/Monat</p>
+                  <p className="text-zinc-400 text-sm">{p.km} km Radius</p>
+                  <p className="text-zinc-500 text-xs mt-2">150 € pro Fall</p>
+                  <p className="text-white font-bold text-xl mt-3">
+                    {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(p.preis)}
+                  </p>
+                  <p className="text-zinc-600 text-xs">Anzahlung</p>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Step 5: Kalender */}
+          {step === 4 && (
+            <div className="space-y-4">
+              <p className="text-zinc-300 text-sm mb-4">
+                Verbinden Sie Ihren Kalender für die automatische Terminvergabe.
+              </p>
+              <div className="flex flex-col gap-3">
+                {(['google', 'outlook', 'keiner'] as const).map(typ => (
+                  <button
+                    key={typ}
+                    type="button"
+                    onClick={() => updateField('kalender_typ', typ)}
+                    className={`p-4 rounded-xl border text-left transition-all ${
+                      data.kalender_typ === typ
+                        ? 'border-blue-500 bg-zinc-800'
+                        : 'border-zinc-700 hover:border-zinc-600'
+                    }`}
+                  >
+                    <p className="text-white font-medium">
+                      {typ === 'google' ? 'Google Kalender' : typ === 'outlook' ? 'Outlook Kalender' : 'Später verbinden'}
+                    </p>
+                    <p className="text-zinc-500 text-xs mt-0.5">
+                      {typ === 'keiner' ? 'Ohne Kalender-Sync keine automatische Terminvergabe' : 'OAuth2 Verbindung wird nach Abschluss eingerichtet'}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 6: Zusammenfassung */}
+          {step === 5 && (
+            <div className="space-y-4">
+              <SummaryRow label="Name" value={`${data.vorname} ${data.nachname}`} />
+              <SummaryRow label="E-Mail" value={email} />
+              <SummaryRow label="Telefon" value={data.telefon || '—'} />
+              <SummaryRow label="Typ" value={GUTACHTER_TYPEN.find(t => t.key === data.gutachter_typ)?.label ?? data.gutachter_typ} />
+              <SummaryRow label="Qualifikationen" value={data.qualifikationen.join(', ') || '—'} />
+              <SummaryRow label="Standort" value={data.standort_adresse || data.standort_plz || '—'} />
+              <SummaryRow label="Paket" value={`${selectedPaket.label} (${selectedPaket.faelle} Fälle, ${selectedPaket.km}km)`} />
+              <SummaryRow label="Anzahlung" value={new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(selectedPaket.preis)} />
+              <SummaryRow label="Kalender" value={data.kalender_typ === 'google' ? 'Google' : data.kalender_typ === 'outlook' ? 'Outlook' : 'Noch nicht verbunden'} />
+
+              {error && <p className="text-red-400 text-sm">{error}</p>}
+            </div>
+          )}
+
+          {/* Navigation */}
+          <div className="flex gap-3 mt-8 pt-5 border-t border-zinc-800">
+            {step > 0 && (
+              <button
+                type="button"
+                onClick={() => setStep(s => s - 1)}
+                className="flex-1 py-3 rounded-xl text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+              >
+                Zurück
+              </button>
+            )}
+            {step < STEPS.length - 1 ? (
+              <button
+                type="button"
+                onClick={() => setStep(s => s + 1)}
+                disabled={!canNext}
+                className="flex-1 py-3 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-colors disabled:opacity-40"
+              >
+                Weiter
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleComplete}
+                disabled={saving}
+                className="flex-1 py-3 rounded-xl text-sm font-semibold bg-green-600 hover:bg-green-500 text-white transition-colors disabled:opacity-40"
+              >
+                {saving ? 'Wird gespeichert...' : 'Onboarding abschließen'}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function InputField({ label, value, onChange, type = 'text', placeholder, disabled }: {
+  label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string; disabled?: boolean
+}) {
+  return (
+    <div>
+      <label className="text-sm text-zinc-400 mb-1.5 block">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        disabled={disabled}
+        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+      />
+    </div>
+  )
+}
+
+function SummaryRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between py-2.5 border-b border-zinc-800/50 last:border-0">
+      <span className="text-zinc-500 text-sm">{label}</span>
+      <span className="text-zinc-200 text-sm font-medium">{value}</span>
+    </div>
+  )
+}
