@@ -11,6 +11,7 @@ import {
 import { SearchIcon, XIcon, AlertTriangleIcon, UserPlusIcon } from 'lucide-react'
 import Link from 'next/link'
 import GutachterSlideOver from './GutachterSlideOver'
+import GutachterProfilPanel from './GutachterProfilPanel'
 
 // ---------- Types ----------
 
@@ -149,17 +150,18 @@ async function fetchIsochrone(lat: number, lng: number, radiusKm: number): Promi
 
 // ---------- Map sub-components ----------
 
-function RadiusCircle({ center, radiusKm, color, opacity }: { center: { lat: number; lng: number }; radiusKm: number; color: string; opacity?: number }) {
+function RadiusCircle({ center, radiusKm, color, opacity, onClick }: { center: { lat: number; lng: number }; radiusKm: number; color: string; opacity?: number; onClick?: () => void }) {
   const map = useMap()
   useEffect(() => {
     if (!map) return
-    const circle = new google.maps.Circle({ map, center, radius: radiusKm * 0.7 * 1000, fillColor: color, fillOpacity: opacity ?? 0.2, strokeColor: color, strokeOpacity: 0.6, strokeWeight: 2 })
-    return () => circle.setMap(null)
-  }, [map, center, radiusKm, color, opacity])
+    const circle = new google.maps.Circle({ map, center, radius: radiusKm * 0.7 * 1000, fillColor: color, fillOpacity: opacity ?? 0.2, strokeColor: color, strokeOpacity: 0.6, strokeWeight: 2, clickable: !!onClick })
+    if (onClick) circle.addListener('click', onClick)
+    return () => { google.maps.event.clearInstanceListeners(circle); circle.setMap(null) }
+  }, [map, center, radiusKm, color, opacity, onClick])
   return null
 }
 
-function IsochronePolygon({ center, radiusKm, color, opacity }: { center: { lat: number; lng: number }; radiusKm: number; color: string; opacity?: number }) {
+function IsochronePolygon({ center, radiusKm, color, opacity, onClick }: { center: { lat: number; lng: number }; radiusKm: number; color: string; opacity?: number; onClick?: () => void }) {
   const map = useMap()
   const polygonRef = useRef<google.maps.Polygon | null>(null)
 
@@ -182,17 +184,20 @@ function IsochronePolygon({ center, radiusKm, color, opacity }: { center: { lat:
         strokeOpacity: 0.6,
         strokeWeight: 2,
         geodesic: true,
+        clickable: !!onClick,
       })
+      if (onClick) polygonRef.current.addListener('click', onClick)
     })
 
     return () => {
       cancelled = true
       if (polygonRef.current) {
+        google.maps.event.clearInstanceListeners(polygonRef.current)
         polygonRef.current.setMap(null)
         polygonRef.current = null
       }
     }
-  }, [map, center.lat, center.lng, radiusKm, color, opacity])
+  }, [map, center.lat, center.lng, radiusKm, color, opacity, onClick])
 
   return null
 }
@@ -485,119 +490,7 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
 
       {/* SV Profil-Panel (Slide-Over) */}
       {selectedSV && (
-        <div className="fixed top-0 right-0 h-screen w-80 z-50 bg-zinc-900 border-l border-zinc-800 shadow-2xl overflow-y-auto">
-          <div className="p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">Gutachter-Profil</h2>
-              <button onClick={() => setSelectedSV(null)} className="text-zinc-500 hover:text-white transition-colors">
-                <XIcon className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {/* Name + Typ */}
-              <div>
-                <p className="text-white text-lg font-medium">{selectedSV.name}</p>
-                <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${TYP_COLORS[selectedSV.gutachterTyp]?.marker ?? 'bg-blue-500'} text-white`}>
-                  {TYP_COLORS[selectedSV.gutachterTyp]?.label ?? selectedSV.gutachterTyp}
-                </span>
-              </div>
-
-              {/* Standort */}
-              <div>
-                <p className="text-xs text-zinc-500 mb-0.5">Standort</p>
-                <p className="text-sm text-zinc-300">{selectedSV.standortAdresse ?? '—'}</p>
-              </div>
-
-              {/* Paket + Radius */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <p className="text-xs text-zinc-500 mb-0.5">Paket</p>
-                  <p className="text-sm text-zinc-300">{PAKET_COLORS[selectedSV.paket]?.label ?? selectedSV.paket}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-zinc-500 mb-0.5">Radius</p>
-                  <p className="text-sm text-zinc-300">{selectedSV.radiusKm} km</p>
-                </div>
-              </div>
-
-              {/* Auslastung */}
-              <div>
-                <p className="text-xs text-zinc-500 mb-1">Auslastung</p>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm text-zinc-300 tabular-nums">{selectedSV.offeneFaelle}/{selectedSV.maxFaelleMonat}</span>
-                  <span className="text-zinc-600 text-xs">{selectedSV.maxFaelleMonat > 0 ? Math.round((selectedSV.offeneFaelle / selectedSV.maxFaelleMonat) * 100) : 0}%</span>
-                </div>
-                <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-blue-500 transition-all"
-                    style={{ width: `${Math.min(100, selectedSV.maxFaelleMonat > 0 ? (selectedSV.offeneFaelle / selectedSV.maxFaelleMonat) * 100 : 0)}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Guthaben */}
-              {selectedSV.guthaben !== undefined && (
-                <div>
-                  <p className="text-xs text-zinc-500 mb-0.5">Guthaben</p>
-                  <p className="text-sm text-zinc-300">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(selectedSV.guthaben)}</p>
-                </div>
-              )}
-
-              {/* Qualifikationen */}
-              {selectedSV.qualifikationen && selectedSV.qualifikationen.length > 0 && (
-                <div>
-                  <p className="text-xs text-zinc-500 mb-1">Qualifikationen</p>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedSV.qualifikationen.map(q => (
-                      <span key={q} className="bg-zinc-800 text-zinc-400 text-[10px] px-1.5 py-0.5 rounded">{q}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Kontakt */}
-              <div>
-                <p className="text-xs text-zinc-500 mb-1">Kontakt</p>
-                <div className="space-y-1.5">
-                  {selectedSV.email && (
-                    <a href={`mailto:${selectedSV.email}`} className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300">
-                      {selectedSV.email}
-                    </a>
-                  )}
-                  {selectedSV.telefon && (
-                    <a href={`tel:${selectedSV.telefon}`} className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300">
-                      {selectedSV.telefon}
-                    </a>
-                  )}
-                </div>
-              </div>
-
-              {/* Anzahlung */}
-              {selectedSV.anzahlungStatus && (
-                <div>
-                  <p className="text-xs text-zinc-500 mb-0.5">Anzahlung</p>
-                  <span className={`text-xs font-medium ${
-                    selectedSV.anzahlungStatus === 'bezahlt' ? 'text-green-400' :
-                    selectedSV.anzahlungStatus === 'teilweise' ? 'text-amber-400' : 'text-red-400'
-                  }`}>
-                    {selectedSV.anzahlungStatus === 'bezahlt' ? 'Bezahlt' : selectedSV.anzahlungStatus === 'teilweise' ? 'Teilweise' : 'Offen'}
-                  </span>
-                </div>
-              )}
-
-              {/* Actions */}
-              <div className="flex gap-2 pt-2 border-t border-zinc-800">
-                <Link
-                  href={`/admin/sachverstaendige/${selectedSV.id}`}
-                  className="flex-1 text-center bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium py-2 rounded-xl transition-colors"
-                >
-                  Profil bearbeiten
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
+        <GutachterProfilPanel sv={selectedSV} onClose={() => setSelectedSV(null)} />
       )}
 
       {/* Legende */}
@@ -639,18 +532,19 @@ function LegPatterned({ color, label, dashed }: { color: string; label: string; 
 function SVMarker({ sv, isSelected, onSelect, coverageMode }: { sv: GeocodedSV; isSelected: boolean; onSelect: () => void; coverageMode: 'isochrone' | 'circle' }) {
   const pc = TYP_COLORS[sv.gutachterTyp] ?? DEFAULT_TYP_COLOR
   const full = sv.maxFaelleMonat > 0 && sv.offeneFaelle >= sv.maxFaelleMonat
-  const fillOpacity = full ? 0.1 : 0.2
+  const fillOpacity = full ? 0.1 : isSelected ? 0.35 : 0.2
+  const firstName = (sv.name ?? '').split(' ')[0] || '?'
 
   return <>
     {coverageMode === 'isochrone' ? (
-      <IsochronePolygon center={{ lat: sv.lat, lng: sv.lng }} radiusKm={sv.radiusKm} color={pc.fill} opacity={fillOpacity} />
+      <IsochronePolygon center={{ lat: sv.lat, lng: sv.lng }} radiusKm={sv.radiusKm} color={pc.fill} opacity={fillOpacity} onClick={onSelect} />
     ) : (
-      <RadiusCircle center={{ lat: sv.lat, lng: sv.lng }} radiusKm={sv.radiusKm} color={pc.fill} opacity={fillOpacity} />
+      <RadiusCircle center={{ lat: sv.lat, lng: sv.lng }} radiusKm={sv.radiusKm} color={pc.fill} opacity={fillOpacity} onClick={onSelect} />
     )}
     <AdvancedMarker position={{ lat: sv.lat, lng: sv.lng }} onClick={onSelect}>
       <div className="relative flex items-center justify-center">
         <div className={`w-5 h-5 rounded-full border-2 border-white shadow-lg cursor-pointer transition-transform ${isSelected ? 'scale-150' : ''} ${full ? 'opacity-50' : ''} ${pc.marker}`} />
-        <span className="absolute -bottom-5 text-[10px] font-medium text-white bg-zinc-900/80 px-1.5 py-0.5 rounded whitespace-nowrap">{sv.name.split(' ')[0]}</span>
+        <span className="absolute -bottom-5 text-[10px] font-medium text-white bg-zinc-900/80 px-1.5 py-0.5 rounded whitespace-nowrap">{firstName}</span>
       </div>
     </AdvancedMarker>
   </>
