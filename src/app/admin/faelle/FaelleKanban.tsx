@@ -96,9 +96,9 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
   }, [localFaelle])
 
   return (
-    <div className="px-3 py-1 overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 120px)' }}>
-      {/* Header - compact 40px */}
-      <div className="flex items-center justify-between gap-3 mb-1 shrink-0" style={{ maxHeight: 40 }}>
+    <div style={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      {/* Header: exactly 40px */}
+      <div className="flex items-center justify-between px-4 py-2 h-10 flex-shrink-0">
         <div className="flex items-center gap-2">
           <h1 className="text-sm font-semibold text-gray-900">Fälle</h1>
           <span className="text-gray-400 text-xs">{filtered.length}</span>
@@ -113,28 +113,30 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
         </div>
       )}
 
-      {/* Kanban */}
+      {/* Kanban Board: fills remaining space */}
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex-1 min-h-0 overflow-x-auto">
-          <div className="flex gap-1.5 h-full">
+        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', gap: 4, padding: '0 8px 8px 8px', minHeight: 0 }}>
+          {/* overflow-x-auto wrapper for 12 columns */}
+          <div style={{ display: 'flex', gap: 4, height: '100%', overflowX: 'auto', flex: 1 }}>
             {COLUMNS.map(col => {
               const items = byColumn[col.key] ?? []
               return (
-                <div key={col.key} className="min-w-[170px] flex-1 flex flex-col h-full">
-                  <div className="flex items-center gap-1 px-1 mb-1 shrink-0" style={{ maxHeight: 28 }}>
-                    <span className={`text-[10px] font-bold tracking-wider uppercase ${col.color}`}>{col.label}</span>
-                    <span className="text-gray-500 text-[9px] font-medium bg-gray-100 px-1 py-0.5 rounded-full ml-auto">{items.length}</span>
+                <div key={col.key} style={{ minWidth: 150, maxWidth: 200, flexShrink: 0, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  {/* Column header: 28px */}
+                  <div className="flex items-center gap-1 px-1 flex-shrink-0" style={{ height: 28 }}>
+                    <span className={`text-[11px] font-medium tracking-wider uppercase ${col.color}`}>{col.label}</span>
+                    <span className="text-gray-500 text-[10px] font-medium bg-gray-100 px-1 py-0.5 rounded-full ml-auto">{items.length}</span>
                   </div>
-                  <div className={`h-px ${col.bg} mb-1 opacity-40 shrink-0`} />
+                  <div className={`h-px ${col.bg} opacity-40 flex-shrink-0`} />
 
+                  {/* Column body: scrollable */}
                   <Droppable droppableId={col.key}>
                     {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={`space-y-1.5 flex-1 overflow-y-auto rounded-lg p-0.5 transition-colors ${
-                          snapshot.isDraggingOver ? 'bg-blue-50 border-2 border-dashed border-blue-300' : ''
-                        }`}
+                        style={{ flex: 1, overflowY: 'auto', padding: 4, display: 'flex', flexDirection: 'column', gap: 4 }}
+                        className={`transition-colors ${snapshot.isDraggingOver ? 'bg-blue-50 border-2 border-dashed border-blue-300 rounded-lg' : ''}`}
                       >
                         {items.map((fall, i) => (
                           <Draggable key={fall.id} draggableId={fall.id} index={i}>
@@ -164,7 +166,8 @@ function FallCard({ fall }: { fall: Fall }) {
   const label = fall.mandatsnummer ?? fall.fall_nummer ?? fall.id.slice(0, 8)
   return (
     <Link href={`/admin/faelle/${fall.id}`}
-      className="block bg-white rounded-lg p-2 border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all cursor-grab active:cursor-grabbing"
+      className="block bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all cursor-grab active:cursor-grabbing"
+      style={{ padding: '6px 8px' }}
       onClick={e => e.stopPropagation()}>
       <div className="flex items-center justify-between mb-0.5">
         <span className="text-xs font-mono text-blue-600 truncate">{label}</span>

@@ -258,10 +258,10 @@ export default function DispatchBoard({
   }
 
   return (
-    <div className="px-3 py-1 overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 120px)' }}>
-      <div className="max-w-full mx-auto w-full flex flex-col flex-1 min-h-0">
-        {/* Header - compact 40px */}
-        <div className="flex items-center justify-between gap-3 mb-1 shrink-0" style={{ maxHeight: 40 }}>
+    <div style={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <div className="w-full flex flex-col flex-1 min-h-0">
+        {/* Header: exactly 40px */}
+        <div className="flex items-center justify-between px-4 py-2 h-10 flex-shrink-0">
           <div className="flex items-center gap-2">
             <h1 className="text-sm font-semibold text-gray-900">Dispatch</h1>
             <span className="text-gray-500 text-xs">
@@ -385,34 +385,33 @@ export default function DispatchBoard({
           </div>
         )}
 
-        {/* Kanban-Board with Drag-and-Drop - fills remaining height */}
+        {/* Kanban-Board: fills remaining space, no page scroll */}
         <DragDropContext onDragEnd={onDragEnd}>
-          <div className="flex-1 min-h-0 overflow-x-auto">
-            <div className="flex gap-1.5 h-full">
-              {COLUMNS.map(col => {
-                const Icon = col.icon
-                const sorted = sortedByColumn[col.key] ?? []
+          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', gap: 4, padding: '0 8px 8px 8px', minHeight: 0 }}>
+            {/* 7 columns: flex-1 each, no horizontal scroll on 1920px */}
+            {COLUMNS.map(col => {
+              const Icon = col.icon
+              const sorted = sortedByColumn[col.key] ?? []
 
-                return (
-                  <div key={col.key} className="min-w-[160px] flex-1 flex flex-col h-full">
-                    <div className="mb-1.5 px-1 shrink-0">
-                      <div className="flex items-center gap-1.5">
-                        <Icon className={`w-3 h-3 ${col.color}`} />
-                        <span className={`text-[10px] font-bold tracking-wide uppercase ${col.color}`}>{col.label}</span>
-                        <span className="text-gray-500 text-[10px] font-medium bg-gray-100 px-1.5 py-0.5 rounded-full ml-auto">{sorted.length}</span>
-                      </div>
-                    </div>
-                    <div className={`h-0.5 ${col.bg} rounded-full mb-1.5 opacity-40 shrink-0`} />
+              return (
+                <div key={col.key} style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                  {/* Column header: 28px */}
+                  <div className="flex items-center gap-1 px-1 flex-shrink-0" style={{ height: 28 }}>
+                    <Icon className={`w-3 h-3 ${col.color}`} />
+                    <span className={`text-[11px] font-medium tracking-wider uppercase ${col.color}`}>{col.label}</span>
+                    <span className="text-gray-500 text-[10px] font-medium bg-gray-100 px-1 py-0.5 rounded-full ml-auto">{sorted.length}</span>
+                  </div>
+                  <div className={`h-px ${col.bg} opacity-40 flex-shrink-0`} />
 
-                    <Droppable droppableId={col.key}>
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          className={`space-y-1.5 flex-1 overflow-y-auto rounded-lg p-1 transition-colors ${
-                            snapshot.isDraggingOver ? 'bg-blue-50 border-2 border-dashed border-blue-300' : ''
-                          }`}
-                        >
+                  {/* Column body: only scroll area */}
+                  <Droppable droppableId={col.key}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        style={{ flex: 1, overflowY: 'auto', padding: 4, display: 'flex', flexDirection: 'column', gap: 4 }}
+                        className={`transition-colors ${snapshot.isDraggingOver ? 'bg-blue-50 border-2 border-dashed border-blue-300 rounded-lg' : ''}`}
+                      >
                           {sorted.length === 0 && !snapshot.isDraggingOver && (
                             <div className="rounded-xl border border-dashed border-gray-200 p-4 text-center">
                               <p className="text-gray-300 text-[10px]">Leer</p>
@@ -439,7 +438,6 @@ export default function DispatchBoard({
                   </div>
                 )
               })}
-            </div>
           </div>
         </DragDropContext>
       </div>
@@ -458,7 +456,7 @@ function LeadCard({ lead, columnKey }: { lead: Lead; columnKey: string }) {
   const callbackInPast = hasCallback && new Date(lead.rueckruf_datum!) < new Date()
 
   return (
-    <div className="bg-white rounded-lg p-2 border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all cursor-grab active:cursor-grabbing">
+    <div className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all cursor-grab active:cursor-grabbing" style={{ padding: '6px 8px' }}>
       {/* Rueckruf Badge */}
       {hasCallback && (
         <div className={`text-[9px] font-semibold px-1.5 py-0.5 rounded mb-1 ${
