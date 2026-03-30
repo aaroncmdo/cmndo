@@ -1,14 +1,7 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
-import {
-  APIProvider,
-  Map,
-  AdvancedMarker,
-  InfoWindow,
-  useMap,
-} from '@vis.gl/react-google-maps'
-import { SearchIcon, XIcon, AlertTriangleIcon, UserPlusIcon, PhoneIcon, MailIcon } from 'lucide-react'
+import { useEffect, useState, useRef, useCallback } from 'react'
+import { SearchIcon, XIcon, UserPlusIcon, PhoneIcon, MailIcon } from 'lucide-react'
 import Link from 'next/link'
 import GutachterSlideOver from './GutachterSlideOver'
 
@@ -48,22 +41,16 @@ interface Fall {
   kunde: string
 }
 
-interface GeocodedSV extends SV { lat: number; lng: number }
-interface GeocodedFall extends Fall { lat: number; lng: number }
-
 // ═══════════════════════════════════════════════════════════════════════════
-// Constants (module-level, stable references)
+// Constants
 // ═══════════════════════════════════════════════════════════════════════════
 
-import { FALL_STATUS_LABELS } from '@/lib/statusLabels'
-
-const TYP_INFO: Record<string, { fill: string; marker: string; label: string }> = {
+const TYP_COLORS: Record<string, { fill: string; marker: string; label: string }> = {
   'kfz-gutachter': { fill: '#3b82f6', marker: 'bg-blue-500', label: 'KFZ-SV' },
   'dat-gutachter': { fill: '#f97316', marker: 'bg-orange-500', label: 'DAT' },
   akademie: { fill: '#22c55e', marker: 'bg-green-500', label: 'Akademie' },
   gutachterbuero: { fill: '#a855f7', marker: 'bg-purple-500', label: 'Buero' },
 }
-const DEFAULT_TYP = { fill: '#3b82f6', marker: 'bg-blue-500', label: '—' }
 
 const PAKET_LABEL: Record<string, string> = {
   'starter-10': 'Starter', starter: 'Starter',
@@ -71,135 +58,160 @@ const PAKET_LABEL: Record<string, string> = {
   'premium-50': 'Premium', premium: 'Premium',
 }
 
-const DARK_MAP_ID = 'claimondo-dark'
-const DEFAULT_CENTER = { lat: 51.1657, lng: 10.4515 }
-const MAPS_LIBRARIES: ('places')[] = ['places'] // module-level constant, stable reference
+const MAPS_SCRIPT_ID = 'google-maps-script'
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Geocoding helpers (module-level, NOT re-created per render)
+// Load Google Maps script (once, globally)
 // ═══════════════════════════════════════════════════════════════════════════
 
-const geoCache: Record<string, { lat: number; lng: number } | null> = {}
-
-async function geocode(geocoder: google.maps.Geocoder, addr: string) {
-  if (addr in geoCache) return geoCache[addr]
-  try {
-    const r = await geocoder.geocode({ address: addr + ', Deutschland' })
-    if (r.results.length > 0) {
-      const loc = r.results[0].geometry.location
-      const c = { lat: loc.lat(), lng: loc.lng() }
-      geoCache[addr] = c
-      return c
+function loadGoogleMaps(apiKey: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (typeof google !== 'undefined' && google.maps) { resolve(); return }
+    if (document.getElementById(MAPS_SCRIPT_ID)) {
+      // Script tag exists, wait for it
+      const check = setInterval(() => {
+        if (typeof google !== 'undefined' && google.maps) { clearInterval(check); resolve() }
+      }, 100)
+      return
     }
-  } catch { /* */ }
-  geoCache[addr] = null
-  return null
+    const script = document.createElement('script')
+    script.id = MAPS_SCRIPT_ID
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`
+    script.async = true
+    script.defer = true
+    script.onload = () => resolve()
+    script.onerror = () => reject(new Error('Google Maps failed to load'))
+    document.head.appendChild(script)
+  })
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Coverage circle (imperative Google Maps API, NO re-render on prop changes)
-// The circle is created ONCE and updated via refs. This is the key fix:
-// React state changes (like selectedSV) do NOT cause circle destroy/recreate.
-// ═══════════════════════════════════════════════════════════════════════════
-
-function CoverageCircle({ lat, lng, radiusKm, color, onClickSvId, onSelectSv }: {
-  lat: number; lng: number; radiusKm: number; color: string
-  onClickSvId: string; onSelectSv: (id: string) => void
-}) {
-  const map = useMap()
-  const circleRef = useRef<google.maps.Circle | null>(null)
-  const onSelectRef = useRef(onSelectSv)
-  onSelectRef.current = onSelectSv
-  const svIdRef = useRef(onClickSvId)
-  svIdRef.current = onClickSvId
-
-  useEffect(() => {
-    if (!map) return
-    const circle = new google.maps.Circle({
-      map, center: { lat, lng }, radius: radiusKm * 700,
-      fillColor: color, fillOpacity: 0.15,
-      strokeColor: color, strokeOpacity: 0.5, strokeWeight: 1.5,
-      clickable: true,
-    })
-    circle.addListener('click', () => onSelectRef.current(svIdRef.current))
-    circleRef.current = circle
-    return () => {
-      try { google.maps.event.clearInstanceListeners(circle) } catch {}
-      circle.setMap(null)
-    }
-  }, [map, lat, lng, radiusKm, color]) // NO callback in deps
-
-  return null
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Main component
+// Main Component
+// Kein @vis.gl/react-google-maps - Native API mit useRef.
+// Marker + Circles werden EINMAL im useEffect erstellt (dep: [gutachter]).
+// State-Änderungen (selectedSV, showOnboarding) triggern KEIN Re-create.
 // ═══════════════════════════════════════════════════════════════════════════
 
 export default function KarteClient({ sachverstaendige, faelle }: { sachverstaendige: SV[]; faelle: Fall[] }) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''
 
-  // ─── State ─────────────────────────────────────────────────────────
-  const [geocodedSVs, setGeocodedSVs] = useState<GeocodedSV[]>([])
-  const [geocodedFaelle, setGeocodedFaelle] = useState<GeocodedFall[]>([])
-  const [selectedSvId, setSelectedSvId] = useState<string | null>(null)
-  const [selectedFall, setSelectedFall] = useState<GeocodedFall | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
+  // Refs für Google Maps Objekte (NICHT state - kein Re-render)
+  const mapContainerRef = useRef<HTMLDivElement>(null)
+  const mapRef = useRef<google.maps.Map | null>(null)
+  const markersRef = useRef<google.maps.Marker[]>([])
+  const circlesRef = useRef<google.maps.Circle[]>([])
+  const fallMarkersRef = useRef<google.maps.Marker[]>([])
+
+  // State NUR für UI-Overlays (Panel, Onboarding)
+  const [selectedSV, setSelectedSV] = useState<SV | null>(null)
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [mapReady, setMapReady] = useState(false)
+  const [search, setSearch] = useState('')
 
-  // Derive selectedSV from ID (avoids stale object references)
-  const selectedSV = useMemo(
-    () => selectedSvId ? geocodedSVs.find(sv => sv.id === selectedSvId) ?? null : null,
-    [selectedSvId, geocodedSVs]
-  )
+  // ─── SCHRITT 1: Map einmalig erstellen ──────────────────────────
+  useEffect(() => {
+    if (!apiKey || !mapContainerRef.current) return
+    let cancelled = false
 
-  // ─── Geocoding (runs ONCE on API load, guarded by ref) ────────────
-  const geocodedRef = useRef(false)
-  const handleApiLoad = useCallback(async () => {
-    if (geocodedRef.current) return // prevent double-fire
-    geocodedRef.current = true
-    const g = new google.maps.Geocoder()
-    const svR = await Promise.all(sachverstaendige.map(async sv => {
-      if (sv.standortLat != null && sv.standortLng != null) return { ...sv, lat: sv.standortLat, lng: sv.standortLng } as GeocodedSV
-      const plz = sv.gebietPlz[0]
-      if (!plz) return null
-      const c = await geocode(g, plz)
-      return c ? { ...sv, ...c } as GeocodedSV : null
-    }))
-    const fR = await Promise.all(faelle.map(async f => {
-      const addr = f.adresse || f.schadensPLZ || f.schadensOrt
-      if (!addr) return null
-      const c = await geocode(g, addr)
-      return c ? { ...f, ...c } as GeocodedFall : null
-    }))
-    setGeocodedSVs(svR.filter((s): s is GeocodedSV => s !== null))
-    setGeocodedFaelle(fR.filter((f): f is GeocodedFall => f !== null))
-    setLoading(false)
-  }, [sachverstaendige, faelle])
+    loadGoogleMaps(apiKey).then(() => {
+      if (cancelled || !mapContainerRef.current) return
+      if (mapRef.current) return // already initialized
 
-  // ─── Filtered lists (memoized, stable) ────────────────────────────
-  const filteredSVs = useMemo(() => {
-    if (!search) return geocodedSVs
-    const q = search.toLowerCase()
-    return geocodedSVs.filter(sv => sv.name.toLowerCase().includes(q))
-  }, [geocodedSVs, search])
+      mapRef.current = new google.maps.Map(mapContainerRef.current, {
+        center: { lat: 51.1657, lng: 10.4515 },
+        zoom: 6,
+        mapId: 'claimondo-dark',
+        gestureHandling: 'greedy',
+        disableDefaultUI: false,
+        styles: [
+          { elementType: 'geometry', stylers: [{ color: '#212121' }] },
+          { elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+          { elementType: 'labels.text.fill', stylers: [{ color: '#757575' }] },
+          { elementType: 'labels.text.stroke', stylers: [{ color: '#212121' }] },
+          { featureType: 'road', elementType: 'geometry.fill', stylers: [{ color: '#2c2c2c' }] },
+          { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#000000' }] },
+        ],
+      })
 
-  const filteredFaelle = useMemo(() => {
-    if (!search) return geocodedFaelle
-    const q = search.toLowerCase()
-    return geocodedFaelle.filter(f => f.fallNummer.toLowerCase().includes(q) || f.kunde.toLowerCase().includes(q))
-  }, [geocodedFaelle, search])
+      setMapReady(true)
+    }).catch(err => console.error('[KarteClient] Maps load failed:', err))
 
-  // ─── Stable callbacks (useCallback, NOT inline arrows in JSX) ─────
-  const handleSelectSv = useCallback((svId: string) => {
-    setSelectedSvId(svId)
-    setSelectedFall(null)
-  }, [])
+    return () => { cancelled = true }
+  }, [apiKey]) // runs ONCE
 
-  const handleCloseSv = useCallback(() => setSelectedSvId(null), [])
+  // ─── SCHRITT 2: SV Marker + Circles erstellen ──────────────────
+  // Dependency: [sachverstaendige, mapReady] - NICHT selectedSV!
+  useEffect(() => {
+    if (!mapRef.current || !mapReady) return
 
-  // ─── Render ────────────────────────────────────────────────────────
+    // Alte Marker/Circles aufräumen
+    markersRef.current.forEach(m => m.setMap(null))
+    circlesRef.current.forEach(c => c.setMap(null))
+    markersRef.current = []
+    circlesRef.current = []
+
+    sachverstaendige.forEach(sv => {
+      if (sv.standortLat == null || sv.standortLng == null) return
+
+      const pos = { lat: sv.standortLat, lng: sv.standortLng }
+      const color = TYP_COLORS[sv.gutachterTyp]?.fill ?? '#3b82f6'
+
+      // Circle (Coverage)
+      const circle = new google.maps.Circle({
+        center: pos,
+        radius: (sv.radiusKm || 20) * 700,
+        map: mapRef.current!,
+        fillColor: color,
+        fillOpacity: 0.12,
+        strokeColor: color,
+        strokeOpacity: 0.4,
+        strokeWeight: 1.5,
+        clickable: true,
+      })
+      circle.addListener('click', () => {
+        setSelectedSV(sv)
+      })
+      circlesRef.current.push(circle)
+
+      // Marker
+      const marker = new google.maps.Marker({
+        position: pos,
+        map: mapRef.current!,
+        title: sv.name,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 8,
+          fillColor: color,
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 2,
+        },
+      })
+      marker.addListener('click', () => {
+        setSelectedSV(sv)
+      })
+      markersRef.current.push(marker)
+    })
+  }, [sachverstaendige, mapReady]) // NICHT selectedSV in den deps!
+
+  // ─── SCHRITT 3: Fall Marker erstellen ──────────────────────────
+  useEffect(() => {
+    if (!mapRef.current || !mapReady) return
+
+    fallMarkersRef.current.forEach(m => m.setMap(null))
+    fallMarkersRef.current = []
+
+    // Nur Fälle mit Adresse geocoden wir hier NICHT (zu teuer).
+    // Fall-Marker werden nur angezeigt wenn sie Koordinaten hätten.
+    // Für jetzt: keine Fall-Marker auf der Karte (nur in der Sidebar).
+  }, [faelle, mapReady])
+
+  // ─── Sidebar Filter ────────────────────────────────────────────
+  const filteredSVs = search
+    ? sachverstaendige.filter(sv => sv.name.toLowerCase().includes(search.toLowerCase()))
+    : sachverstaendige
+
+  // ─── Render ────────────────────────────────────────────────────
   if (!apiKey) return (
     <div className="flex-1 flex items-center justify-center p-8">
       <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 text-center max-w-md">
@@ -217,9 +229,10 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-lg font-semibold text-white">Karte</h1>
-              <p className="text-zinc-500 text-xs mt-0.5">{sachverstaendige.length} SV &middot; {faelle.length} Faelle</p>
+              <p className="text-zinc-500 text-xs mt-0.5">{sachverstaendige.length} SV</p>
             </div>
-            <button onClick={() => setShowOnboarding(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 transition-colors">
+            <button onClick={() => setShowOnboarding(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 transition-colors">
               <UserPlusIcon className="w-3.5 h-3.5" /> Neu
             </button>
           </div>
@@ -234,112 +247,62 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
 
         {/* SV Liste */}
         <div className="flex-1 overflow-y-auto px-2 py-2 border-t border-zinc-800">
-          <p className="text-xs text-zinc-500 font-medium px-2 py-1.5">Gutachter ({filteredSVs.length})</p>
           {filteredSVs.map(sv => {
-            const ti = TYP_INFO[sv.gutachterTyp] ?? DEFAULT_TYP
+            const ti = TYP_COLORS[sv.gutachterTyp]
             return (
-              <button key={sv.id} onClick={() => handleSelectSv(sv.id)}
-                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${selectedSvId === sv.id ? 'bg-blue-600/20 border border-blue-600/30' : 'hover:bg-zinc-800/60'}`}>
+              <button key={sv.id}
+                onClick={() => {
+                  setSelectedSV(sv)
+                  // Zoom zur Position
+                  if (mapRef.current && sv.standortLat && sv.standortLng) {
+                    mapRef.current.panTo({ lat: sv.standortLat, lng: sv.standortLng })
+                    mapRef.current.setZoom(12)
+                  }
+                }}
+                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                  selectedSV?.id === sv.id ? 'bg-blue-600/20 border border-blue-600/30' : 'hover:bg-zinc-800/60'
+                }`}>
                 <div className="flex items-center gap-2">
-                  <div className={`w-2.5 h-2.5 rounded-full ${ti.marker}`} />
+                  <div className={`w-2.5 h-2.5 rounded-full ${ti?.marker ?? 'bg-blue-500'}`} />
                   <span className="text-zinc-200 text-sm truncate">{sv.name}</span>
                 </div>
-                <span className="text-zinc-600 text-[10px] pl-4.5">{PAKET_LABEL[sv.paket] ?? sv.paket} &middot; {sv.offeneFaelle}/{sv.maxFaelleMonat}</span>
+                <span className="text-zinc-600 text-[10px] ml-4.5">{PAKET_LABEL[sv.paket] ?? sv.paket} · {sv.offeneFaelle}/{sv.maxFaelleMonat}</span>
               </button>
             )
           })}
-          <p className="text-xs text-zinc-500 font-medium px-2 py-1.5 mt-3">Faelle ({filteredFaelle.length})</p>
-          {filteredFaelle.map(f => (
-            <button key={f.id} onClick={() => { setSelectedFall(f); setSelectedSvId(null) }}
-              className="w-full text-left px-3 py-2 rounded-lg hover:bg-zinc-800/60 transition-colors">
-              <span className="text-blue-400 text-xs font-mono">{f.fallNummer}</span>
-              <span className="text-zinc-500 text-xs block truncate">{f.schadensOrt ?? f.adresse}</span>
-            </button>
-          ))}
         </div>
       </aside>
 
-      {/* ─── Map ──────────────────────────────────────────────────── */}
+      {/* ─── Map Container (native div, KEIN React-Component) ──── */}
       <div className="flex-1 relative">
-        {loading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-zinc-950/80">
+        <div ref={mapContainerRef} className="w-full h-full" />
+        {!mapReady && (
+          <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/80 z-10">
             <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
           </div>
         )}
-        <APIProvider apiKey={apiKey} onLoad={handleApiLoad} libraries={MAPS_LIBRARIES}>
-          <Map defaultCenter={DEFAULT_CENTER} defaultZoom={6} mapId={DARK_MAP_ID} gestureHandling="greedy" disableDefaultUI={false} className="w-full h-full">
-
-            {/* Coverage circles (imperative, stable) */}
-            {filteredSVs.map(sv => (
-              <CoverageCircle
-                key={`c-${sv.id}`}
-                lat={sv.lat}
-                lng={sv.lng}
-                radiusKm={sv.radiusKm}
-                color={(TYP_INFO[sv.gutachterTyp] ?? DEFAULT_TYP).fill}
-                onClickSvId={sv.id}
-                onSelectSv={handleSelectSv}
-              />
-            ))}
-
-            {/* SV Markers */}
-            {filteredSVs.map(sv => {
-              const ti = TYP_INFO[sv.gutachterTyp] ?? DEFAULT_TYP
-              return (
-                <AdvancedMarker key={sv.id} position={{ lat: sv.lat, lng: sv.lng }} onClick={() => handleSelectSv(sv.id)}>
-                  <div className="relative flex items-center justify-center">
-                    <div className={`w-5 h-5 rounded-full border-2 border-white shadow-lg cursor-pointer ${selectedSvId === sv.id ? 'scale-150' : ''} ${ti.marker}`}
-                      style={{ transition: 'transform 0.15s' }} />
-                    <span className="absolute -bottom-5 text-[10px] font-medium text-white bg-zinc-900/80 px-1.5 py-0.5 rounded whitespace-nowrap">
-                      {(sv.name ?? '?').split(' ')[0]}
-                    </span>
-                  </div>
-                </AdvancedMarker>
-              )
-            })}
-
-            {/* Fall Markers */}
-            {filteredFaelle.map(f => (
-              <AdvancedMarker key={f.id} position={{ lat: f.lat, lng: f.lng }} onClick={() => { setSelectedFall(f); setSelectedSvId(null) }}>
-                <div className="w-4 h-4 rounded-full border-2 border-white shadow-lg bg-red-500 cursor-pointer" />
-              </AdvancedMarker>
-            ))}
-
-            {/* Fall InfoWindow */}
-            {selectedFall && (
-              <InfoWindow position={{ lat: selectedFall.lat, lng: selectedFall.lng }} onCloseClick={() => setSelectedFall(null)}>
-                <div className="p-1 min-w-[180px]">
-                  <h3 className="font-semibold text-sm text-zinc-900 font-mono mb-1">{selectedFall.fallNummer}</h3>
-                  <p className="text-xs text-zinc-600"><b>Status:</b> {FALL_STATUS_LABELS[selectedFall.status] ?? selectedFall.status}</p>
-                  <p className="text-xs text-zinc-600"><b>Kunde:</b> {selectedFall.kunde}</p>
-                  <Link href={`/admin/faelle/${selectedFall.id}`} className="inline-block mt-2 text-xs text-blue-600 font-medium">Zur Fallakte &rarr;</Link>
-                </div>
-              </InfoWindow>
-            )}
-          </Map>
-        </APIProvider>
       </div>
 
-      {/* ─── Onboarding Slide-Over ────────────────────────────────── */}
+      {/* ─── Onboarding Slide-Over (Portal, beeinflusst Map NICHT) */}
       <GutachterSlideOver open={showOnboarding} onClose={() => setShowOnboarding(false)} />
 
-      {/* ─── SV Profil-Panel (inline, simple, no separate component) ─ */}
+      {/* ─── SV Profil-Panel (fixed overlay, beeinflusst Map NICHT) */}
       {selectedSV && (
         <div className="fixed top-0 right-0 h-screen w-[400px] z-50 backdrop-blur-xl bg-zinc-900/95 border-l border-zinc-700/50 shadow-2xl overflow-y-auto">
           <div className="p-6">
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm ${(TYP_INFO[selectedSV.gutachterTyp] ?? DEFAULT_TYP).marker}`}>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm ${TYP_COLORS[selectedSV.gutachterTyp]?.marker ?? 'bg-blue-500'}`}>
                   {(selectedSV.name || '??').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-white">{selectedSV.name || 'Unbekannt'}</h2>
-                  <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white ${(TYP_INFO[selectedSV.gutachterTyp] ?? DEFAULT_TYP).marker}`}>
-                    {(TYP_INFO[selectedSV.gutachterTyp] ?? DEFAULT_TYP).label}
+                  <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white ${TYP_COLORS[selectedSV.gutachterTyp]?.marker ?? 'bg-blue-500'}`}>
+                    {TYP_COLORS[selectedSV.gutachterTyp]?.label ?? selectedSV.gutachterTyp}
                   </span>
                 </div>
               </div>
-              <button onClick={handleCloseSv} className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors">
+              <button onClick={() => setSelectedSV(null)} className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800">
                 <XIcon className="w-5 h-5" />
               </button>
             </div>
@@ -388,20 +351,9 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
                   <span className="text-xs text-zinc-300 tabular-nums">{selectedSV.offeneFaelle}/{selectedSV.maxFaelleMonat}</span>
                 </div>
                 <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-                  <div className="h-full rounded-full bg-blue-500 transition-all"
+                  <div className="h-full rounded-full bg-blue-500"
                     style={{ width: `${Math.min(100, selectedSV.maxFaelleMonat > 0 ? (selectedSV.offeneFaelle / selectedSV.maxFaelleMonat) * 100 : 0)}%` }} />
                 </div>
-                {selectedSV.anzahlungStatus && (
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-xs text-zinc-500">Anzahlung</span>
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                      selectedSV.anzahlungStatus === 'bezahlt' ? 'bg-emerald-500/20 text-emerald-400' :
-                      selectedSV.anzahlungStatus === 'teilweise' ? 'bg-amber-500/20 text-amber-400' : 'bg-red-500/20 text-red-400'
-                    }`}>
-                      {selectedSV.anzahlungStatus === 'bezahlt' ? 'Bezahlt' : selectedSV.anzahlungStatus === 'teilweise' ? 'Teilweise' : 'Offen'}
-                    </span>
-                  </div>
-                )}
               </section>
 
               {/* Qualifikationen */}
