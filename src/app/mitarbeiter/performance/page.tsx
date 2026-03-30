@@ -55,7 +55,81 @@ export default async function MitarbeiterPerformancePage() {
   }
 
   const monatLabel = now.toLocaleString('de-DE', { month: 'long' }) + ' ' + now.getFullYear()
-  const fmt = (v: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(v)
+
+  // Heute-Timeline: Termine + Tasks fuer heute
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
+  const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString()
+
+  const [{ data: heuteTermine }, { data: heuteTasks }, { data: heuteGutachterTermine }] = await Promise.all([
+    supabase.from('termine')
+      .select('id, fall_id, typ, datum, dauer_minuten, betreff, meet_link, status, faelle(fall_nummer, leads(vorname, nachname))')
+      .eq('betreuer_user_id', user.id)
+      .gte('datum', todayStart)
+      .lt('datum', todayEnd)
+      .in('status', ['geplant', 'bestaetigt'])
+      .order('datum', { ascending: true }),
+    supabase.from('tasks')
+      .select('id, titel, status, prioritaet, faellig_am, fall_id, faelle(fall_nummer)')
+      .or(`zugewiesen_an.eq.${user.id}`)
+      .in('status', ['offen', 'in-arbeit'])
+      .lte('faellig_am', todayEnd)
+      .order('faellig_am', { ascending: true })
+      .limit(20),
+    supabase.from('gutachter_termine')
+      .select('id, fall_id, start_zeit, end_zeit, status, faelle(fall_nummer, sv_id, sachverstaendige(profiles(vorname, nachname)))')
+      .gte('start_zeit', todayStart)
+      .lt('start_zeit', todayEnd)
+      .in('status', ['bestaetigt'])
+      .order('start_zeit', { ascending: true }),
+  ])
+
+  // Build timeline items
+  const timelineItems: { zeit: string; typ: string; label: string; detail: string; color: string; link?: string; meetLink?: string }[] = []
+
+  for (const t of heuteTermine ?? []) {
+    const fallRaw = t.faelle as Record<string, unknown> | null
+    const leadRaw = fallRaw?.leads as { vorname: string | null; nachname: string | null } | { vorname: string | null; nachname: string | null }[] | null
+    const lead = Array.isArray(leadRaw) ? leadRaw[0] : leadRaw
+    const kundeName = lead ? [lead?.vorname, lead?.nachname].filter(Boolean).join(' ') : 'Kunde'
+    timelineItems.push({
+      zeit: t.datum,
+      typ: t.typ === 'video-call' ? 'video' : 'telefon',
+      label: t.betreff ?? (t.typ === 'video-call' ? 'Video-Call' : 'Telefonat'),
+      detail: `${kundeName} · ${t.dauer_minuten} Min`,
+      color: t.typ === 'video-call' ? 'purple' : 'blue',
+      link: t.fall_id ? `/admin/faelle/${t.fall_id}` : undefined,
+      meetLink: t.meet_link ?? undefined,
+    })
+  }
+
+  for (const t of heuteTasks ?? []) {
+    const fallRaw = t.faelle as Record<string, unknown> | null
+    timelineItems.push({
+      zeit: t.faellig_am ?? todayStart,
+      typ: 'task',
+      label: t.titel,
+      detail: fallRaw?.fall_nummer ? `Fall ${fallRaw.fall_nummer}` : '',
+      color: t.prioritaet === 'kritisch' || t.prioritaet === 'hoch' ? 'red' : 'amber',
+      link: t.fall_id ? `/admin/faelle/${t.fall_id}` : undefined,
+    })
+  }
+
+  for (const t of heuteGutachterTermine ?? []) {
+    timelineItems.push({
+      zeit: t.start_zeit,
+      typ: 'gutachter',
+      label: 'Gutachtertermin',
+      detail: `Fall ${(t.faelle as Record<string, unknown>)?.fall_nummer ?? ''}`,
+      color: 'orange',
+      link: t.fall_id ? `/admin/faelle/${t.fall_id}` : undefined,
+    })
+  }
+
+  timelineItems.sort((a, b) => new Date(a.zeit).getTime() - new Date(b.zeit).getTime())
+
+  const ueberfaelligeTasks = (heuteTasks ?? []).filter(t => t.faellig_am && new Date(t.faellig_am) < now).length
+  const terminCount = (heuteTermine ?? []).length + (heuteGutachterTermine ?? []).length
+  const offeneTaskCount = (heuteTasks ?? []).length
 
   return (
     <>
@@ -69,6 +143,8 @@ export default async function MitarbeiterPerformancePage() {
         leaderboard={leaderboardData}
         monatLabel={monatLabel}
         userId={user.id}
+        timeline={timelineItems}
+        tagesSummary={{ termine: terminCount, offeneTasks: offeneTaskCount, ueberfaellig: ueberfaelligeTasks }}
       />
     </>
   )

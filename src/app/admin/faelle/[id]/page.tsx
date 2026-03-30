@@ -28,6 +28,7 @@ export default async function FallaktePage({
     { data: nachrichten },
     { data: qcCheckliste },
     { data: tasks },
+    { data: termine },
     leadResult,
     svResult,
     kundenbetreuerResult,
@@ -67,6 +68,11 @@ export default async function FallaktePage({
       .select('id, typ, titel, beschreibung, status, faellig_am, erledigt_am, zugewiesen_an, prioritaet, auto_erstellt, created_at')
       .eq('fall_id', id)
       .order('created_at', { ascending: false }),
+    supabase
+      .from('termine')
+      .select('id, typ, datum, dauer_minuten, betreff, notiz, meet_link, status, ergebnis_notiz, erstellt_am')
+      .eq('fall_id', id)
+      .order('datum', { ascending: true }),
     fall.lead_id
       ? supabase
           .from('leads')
@@ -120,6 +126,7 @@ export default async function FallaktePage({
       nachrichten={nachrichten ?? []}
       qcCheckliste={qcCheckliste ?? null}
       tasks={tasks ?? []}
+      termine={termine ?? []}
     />
   )
 }

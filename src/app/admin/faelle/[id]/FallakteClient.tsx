@@ -19,6 +19,8 @@ import {
   saveKanzleiAnsprechpartner,
   createFallTask,
   updateTaskStatus,
+  createTermin,
+  updateTerminStatus,
 } from './actions'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import {
@@ -482,6 +484,19 @@ type TaskItem = {
   created_at: string
 }
 
+type Termin = {
+  id: string
+  typ: string
+  datum: string
+  dauer_minuten: number
+  betreff: string | null
+  notiz: string | null
+  meet_link: string | null
+  status: string
+  ergebnis_notiz: string | null
+  erstellt_am: string
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function FallakteClient({
@@ -497,6 +512,7 @@ export default function FallakteClient({
   nachrichten,
   qcCheckliste,
   tasks,
+  termine,
 }: {
   fall: Fall
   lead: Lead
@@ -510,6 +526,7 @@ export default function FallakteClient({
   nachrichten: Nachricht[]
   qcCheckliste: QcCheckliste
   tasks: TaskItem[]
+  termine: Termin[]
 }) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('uebersicht')
@@ -646,6 +663,7 @@ export default function FallakteClient({
             leadbearbeiter={leadbearbeiter}
             parteien={parteien}
             dokumente={dokumente}
+            termine={termine}
             mapsReady={mapsReady}
             onRefresh={() => router.refresh()}
           />
@@ -925,6 +943,7 @@ function TabUebersicht({
   leadbearbeiter,
   parteien,
   dokumente,
+  termine,
   mapsReady,
   onRefresh,
 }: {
@@ -935,12 +954,14 @@ function TabUebersicht({
   leadbearbeiter: Profile
   parteien: Partei[]
   dokumente: Dokument[]
+  termine: Termin[]
   mapsReady: boolean
   onRefresh: () => void
 }) {
   const [editingAdresse, setEditingAdresse] = useState(false)
   const [savingAdresse, setSavingAdresse] = useState(false)
   const [adresseError, setAdresseError] = useState<string | null>(null)
+  const [showTerminModal, setShowTerminModal] = useState(false)
 
   const handlePlaceSelect = useCallback(async (result: PlaceResult) => {
     setSavingAdresse(true)
@@ -1057,6 +1078,14 @@ function TabUebersicht({
             </div>
           )}
         </div>
+      )}
+
+      {/* KUNDENBETREUER-TERMINE */}
+      <TermineKarte termine={termine} fallId={fall.id} onOpenModal={() => setShowTerminModal(true)} onRefresh={onRefresh} />
+
+      {/* Termin-Modal */}
+      {showTerminModal && (
+        <TerminModal fallId={fall.id} onClose={() => setShowTerminModal(false)} onRefresh={onRefresh} />
       )}
 
       {/* DOKUMENTEN-CHECKLISTE (kompakt) */}
@@ -2859,6 +2888,205 @@ function TaskCard({
           {task.auto_erstellt && (
             <span className="text-zinc-700">Auto</span>
           )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Termine Karte (KFZ-41) ──────────────────────────────────────────────────
+
+function TermineKarte({ termine, fallId, onOpenModal, onRefresh }: { termine: Termin[]; fallId: string; onOpenModal: () => void; onRefresh: () => void }) {
+  const [closingId, setClosingId] = useState<string | null>(null)
+  const [closeNotiz, setCloseNotiz] = useState('')
+
+  const now = new Date()
+  const upcoming = termine.filter(t => t.status === 'geplant' || t.status === 'bestaetigt')
+  const past = termine.filter(t => t.status === 'durchgefuehrt' || t.status === 'abgesagt' || t.status === 'nicht-erschienen')
+  const nextTermin = upcoming.length > 0 ? upcoming.reduce((a, b) => new Date(a.datum) < new Date(b.datum) ? a : b) : null
+
+  async function closeTermin(id: string, status: string) {
+    await updateTerminStatus(id, status, closeNotiz || undefined)
+    setClosingId(null)
+    setCloseNotiz('')
+    onRefresh()
+  }
+
+  return (
+    <Section title="Kundentermine">
+      <div className="space-y-3">
+        {/* Button: Termin vereinbaren */}
+        <button onClick={onOpenModal}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-colors">
+          <ClockIcon className="w-4 h-4" /> Termin vereinbaren
+        </button>
+
+        {/* Nächster Termin */}
+        {nextTermin && (() => {
+          const d = new Date(nextTermin.datum)
+          const isToday = d.toDateString() === now.toDateString()
+          const isOverdue = d < now && !isToday
+          return (
+            <div className={`rounded-xl p-4 border ${isToday ? 'border-green-600 bg-green-950/30' : isOverdue ? 'border-red-600 bg-red-950/30' : 'border-blue-600/40 bg-blue-950/20'}`}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    {nextTermin.typ === 'video-call' ? (
+                      <span className="text-purple-400 text-xs font-medium px-2 py-0.5 rounded-full bg-purple-500/20">Video-Call</span>
+                    ) : (
+                      <span className="text-blue-400 text-xs font-medium px-2 py-0.5 rounded-full bg-blue-500/20">Telefonat</span>
+                    )}
+                    {isToday && <span className="bg-green-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">HEUTE</span>}
+                    {isOverdue && <span className="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">UEBERFAELLIG</span>}
+                  </div>
+                  <p className="text-white font-semibold text-lg">
+                    {d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}{' '}
+                    {d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                  {nextTermin.betreff && <p className="text-zinc-400 text-sm mt-0.5">{nextTermin.betreff}</p>}
+                  <p className="text-zinc-600 text-xs mt-1">{nextTermin.dauer_minuten} Min</p>
+                </div>
+                <div className="flex flex-col gap-1.5 shrink-0">
+                  {nextTermin.meet_link && (
+                    <a href={nextTermin.meet_link} target="_blank" rel="noopener noreferrer"
+                      className="text-[10px] bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded-lg font-medium text-center">
+                      Meet beitreten
+                    </a>
+                  )}
+                  {closingId === nextTermin.id ? (
+                    <div className="space-y-1.5">
+                      <input value={closeNotiz} onChange={e => setCloseNotiz(e.target.value)} placeholder="Notiz..."
+                        className="w-32 bg-zinc-800 border border-zinc-700 text-xs text-white rounded px-2 py-1" />
+                      <div className="flex gap-1">
+                        <button onClick={() => closeTermin(nextTermin.id, 'durchgefuehrt')} className="flex-1 text-[10px] bg-emerald-600 text-white px-2 py-1 rounded">Erledigt</button>
+                        <button onClick={() => closeTermin(nextTermin.id, 'nicht-erschienen')} className="flex-1 text-[10px] bg-red-600 text-white px-2 py-1 rounded">N/E</button>
+                      </div>
+                      <button onClick={() => setClosingId(null)} className="text-[10px] text-zinc-500 w-full text-center">Abbrechen</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => setClosingId(nextTermin.id)} className="text-[10px] bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-lg font-medium">
+                      Abschliessen
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* Vergangene Termine */}
+        {past.length > 0 && (
+          <div className="space-y-1">
+            <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider">Vergangene Termine</p>
+            {past.slice(0, 5).map(t => {
+              const d = new Date(t.datum)
+              return (
+                <div key={t.id} className="flex items-center gap-3 py-1.5 px-2 rounded-lg bg-zinc-900/50">
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${t.status === 'durchgefuehrt' ? 'bg-emerald-500' : t.status === 'nicht-erschienen' ? 'bg-red-500' : 'bg-zinc-600'}`} />
+                  <span className="text-zinc-400 text-xs tabular-nums shrink-0">{d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}</span>
+                  <span className="text-zinc-300 text-xs truncate flex-1">{t.betreff ?? (t.typ === 'video-call' ? 'Video-Call' : 'Telefonat')}</span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${t.status === 'durchgefuehrt' ? 'bg-emerald-500/20 text-emerald-400' : t.status === 'nicht-erschienen' ? 'bg-red-500/20 text-red-400' : 'bg-zinc-800 text-zinc-500'}`}>
+                    {t.status === 'durchgefuehrt' ? 'Erledigt' : t.status === 'nicht-erschienen' ? 'Nicht ersch.' : t.status}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </Section>
+  )
+}
+
+// ─── Termin-Modal (KFZ-41) ───────────────────────────────────────────────────
+
+function TerminModal({ fallId, onClose, onRefresh }: { fallId: string; onClose: () => void; onRefresh: () => void }) {
+  const [typ, setTyp] = useState('telefonat')
+  const [datum, setDatum] = useState('')
+  const [dauer, setDauer] = useState(30)
+  const [betreff, setBetreff] = useState('')
+  const [notiz, setNotiz] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  async function handleSave() {
+    if (!datum || !betreff) return
+    setSaving(true)
+    try {
+      await createTermin(fallId, { typ, datum, dauer_minuten: dauer, betreff, notiz: notiz || undefined })
+      onRefresh()
+      onClose()
+    } catch { /* */ }
+    setSaving(false)
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-zinc-900 border border-zinc-700 rounded-2xl w-full max-w-md p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="text-white font-semibold text-lg">Termin vereinbaren</h3>
+          <button onClick={onClose} className="text-zinc-500 hover:text-white"><XIcon className="w-5 h-5" /></button>
+        </div>
+
+        <div className="space-y-4">
+          {/* Typ */}
+          <div>
+            <label className="text-xs text-zinc-400 font-medium block mb-1">Typ</label>
+            <div className="flex gap-2">
+              <button onClick={() => setTyp('telefonat')}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${typ === 'telefonat' ? 'bg-blue-600/20 border-blue-600 text-blue-400' : 'bg-zinc-800 border-zinc-700 text-zinc-400'}`}>
+                Telefonat
+              </button>
+              <button onClick={() => setTyp('video-call')}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${typ === 'video-call' ? 'bg-purple-600/20 border-purple-600 text-purple-400' : 'bg-zinc-800 border-zinc-700 text-zinc-400'}`}>
+                Video-Call
+              </button>
+            </div>
+          </div>
+
+          {/* Datum + Uhrzeit */}
+          <div>
+            <label className="text-xs text-zinc-400 font-medium block mb-1">Datum & Uhrzeit</label>
+            <input type="datetime-local" value={datum} onChange={e => setDatum(e.target.value)}
+              className="w-full bg-zinc-800 border border-zinc-700 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          </div>
+
+          {/* Dauer */}
+          <div>
+            <label className="text-xs text-zinc-400 font-medium block mb-1">Dauer</label>
+            <div className="flex gap-2">
+              {[15, 30, 60].map(d => (
+                <button key={d} onClick={() => setDauer(d)}
+                  className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${dauer === d ? 'bg-blue-600/20 border-blue-600 text-blue-400' : 'bg-zinc-800 border-zinc-700 text-zinc-400'}`}>
+                  {d} Min
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Betreff */}
+          <div>
+            <label className="text-xs text-zinc-400 font-medium block mb-1">Betreff</label>
+            <input type="text" value={betreff} onChange={e => setBetreff(e.target.value)} placeholder="z.B. Rueckfragen zum Gutachten"
+              className="w-full bg-zinc-800 border border-zinc-700 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-600" />
+          </div>
+
+          {/* Notiz */}
+          <div>
+            <label className="text-xs text-zinc-400 font-medium block mb-1">Notiz (optional)</label>
+            <textarea value={notiz} onChange={e => setNotiz(e.target.value)} rows={2} placeholder="Interne Notiz..."
+              className="w-full bg-zinc-800 border border-zinc-700 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-600 resize-y" />
+          </div>
+
+          {typ === 'video-call' && (
+            <p className="text-purple-400 text-xs bg-purple-500/10 rounded-lg px-3 py-2">
+              Ein Google Meet Link wird automatisch generiert.
+            </p>
+          )}
+
+          <button onClick={handleSave} disabled={saving || !datum || !betreff}
+            className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50">
+            {saving ? 'Speichert...' : 'Termin erstellen'}
+          </button>
         </div>
       </div>
     </div>

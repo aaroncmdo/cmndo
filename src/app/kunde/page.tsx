@@ -126,6 +126,17 @@ export default async function KundeDashboard() {
     betreuer = data
   }
 
+  // Fetch termine for this customer
+  const { data: termine } = await supabase
+    .from('termine')
+    .select('id, typ, datum, dauer_minuten, betreff, meet_link, status')
+    .eq('fall_id', fallId)
+    .in('status', ['geplant', 'bestaetigt'])
+    .order('datum', { ascending: true })
+    .limit(3)
+
+  const nextTermin = (termine ?? [])[0] ?? null
+
   // Estimate total
   const schadenhoehe = (fall.schadenhoehe_netto as number) ?? null
   const nutzungsausfall = ((fall.nutzungsausfall_tage as number) ?? 0) * ((fall.nutzungsausfall_tagessatz as number) ?? 0)
@@ -155,6 +166,43 @@ export default async function KundeDashboard() {
       {/* @ts-expect-error Async Server Component */}
       <MeineAufgabenServer mode="user" rolle="kunde" title="Was Sie noch tun muessen" fallLinkPrefix="/kunde/fall/" />
       <div className="mb-4" />
+
+      {/* Nächster Termin mit Betreuer */}
+      {nextTermin && (() => {
+        const d = new Date(nextTermin.datum as string)
+        const betreuerName = betreuer ? [betreuer.vorname, betreuer.nachname].filter(Boolean).join(' ') : 'Ihr Betreuer'
+        return (
+          <div className="mb-5 rounded-3xl p-5 kunde-animate kunde-animate-2" style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.15)' }}>
+            <p className="text-[10px] font-medium uppercase mb-2" style={{ color: 'rgba(255,255,255,0.3)', letterSpacing: '0.05em' }}>
+              Naechster Termin mit {betreuerName}
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: nextTermin.typ === 'video-call' ? 'rgba(168,85,247,0.2)' : 'rgba(59,130,246,0.2)' }}>
+                {nextTermin.typ === 'video-call' ? (
+                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="text-purple-400"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" /></svg>
+                ) : (
+                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="text-blue-400"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>
+                )}
+              </div>
+              <div className="flex-1">
+                <p className="text-white font-semibold text-sm">
+                  {d.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' })}, {d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                  {nextTermin.typ === 'video-call' ? 'Video-Call' : 'Telefonat'} · {nextTermin.dauer_minuten} Min
+                  {nextTermin.betreff ? ` · ${nextTermin.betreff}` : ''}
+                </p>
+              </div>
+            </div>
+            {nextTermin.meet_link && (
+              <a href={nextTermin.meet_link as string} target="_blank" rel="noopener noreferrer"
+                className="mt-3 block text-center bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
+                Google Meet beitreten
+              </a>
+            )}
+          </div>
+        )
+      })()}
 
       {/* Hero Status Card */}
       <div className="kunde-animate kunde-animate-2">

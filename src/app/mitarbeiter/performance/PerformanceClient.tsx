@@ -1,13 +1,22 @@
 'use client'
 
-import { BarChart3Icon, BriefcaseIcon, TrophyIcon, GiftIcon, ClockIcon } from 'lucide-react'
+import Link from 'next/link'
+import { BarChart3Icon, BriefcaseIcon, TrophyIcon, GiftIcon, ClockIcon, PhoneIcon, VideoIcon, AlertTriangleIcon, CalendarIcon } from 'lucide-react'
 
 type Perf = { monat: string; jahr: number; leads_qualifiziert: number; leads_konvertiert: number; faelle_abgeschlossen: number; aktive_faelle: number; umsatz_generiert: number }
 type Incentive = { id: string; titel: string; beschreibung: string | null; kategorie: string; typ: string; bedingung: string; wert: number }
+type TimelineItem = { zeit: string; typ: string; label: string; detail: string; color: string; link?: string; meetLink?: string }
 
 const MEDAL = ['text-amber-300', 'text-zinc-400', 'text-orange-400']
 
-export default function PerformanceClient({ profile, stats, performanceHistory, incentives, leaderboard, monatLabel, userId }: {
+const TL_COLORS: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
+  telefon: { bg: 'bg-blue-500/20', text: 'text-blue-400', icon: <PhoneIcon className="w-4 h-4" /> },
+  video: { bg: 'bg-purple-500/20', text: 'text-purple-400', icon: <VideoIcon className="w-4 h-4" /> },
+  task: { bg: 'bg-amber-500/20', text: 'text-amber-400', icon: <AlertTriangleIcon className="w-4 h-4" /> },
+  gutachter: { bg: 'bg-orange-500/20', text: 'text-orange-400', icon: <CalendarIcon className="w-4 h-4" /> },
+}
+
+export default function PerformanceClient({ profile, stats, performanceHistory, incentives, leaderboard, monatLabel, userId, timeline, tagesSummary }: {
   profile: { vorname: string | null; nachname: string | null; kategorie: string | null; kapazitaet_max: number | null }
   stats: { leadsTotal: number; leadsKonv: number; aktiveFaelle: number; abgeschlossen: number; isDispatch: boolean }
   performanceHistory: Perf[]
@@ -15,6 +24,8 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
   leaderboard: { id: string; name: string; value: number }[]
   monatLabel: string
   userId: string
+  timeline?: TimelineItem[]
+  tagesSummary?: { termine: number; offeneTasks: number; ueberfaellig: number }
 }) {
   const name = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || '—'
   const fmt = (v: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(v)
@@ -26,6 +37,59 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
         <h1 className="text-xl font-semibold text-white flex items-center gap-2"><BarChart3Icon className="w-5 h-5 text-blue-400" />Meine Performance</h1>
         <p className="text-zinc-500 text-sm mt-0.5">{name} · {monatLabel}</p>
       </div>
+
+      {/* ─── TAGES-TIMELINE (KFZ-41) ──────────────────────── */}
+      {timeline && timeline.length > 0 && (
+        <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-5 mb-6">
+          {/* Tages-Zusammenfassung */}
+          {tagesSummary && (
+            <div className="flex items-center gap-4 mb-4 pb-3 border-b border-zinc-800">
+              <h2 className="text-white font-semibold flex items-center gap-2"><CalendarIcon className="w-4 h-4 text-blue-400" />Heute</h2>
+              <div className="flex gap-3 text-xs">
+                <span className="text-blue-400 font-medium">{tagesSummary.termine} Termine</span>
+                <span className="text-amber-400 font-medium">{tagesSummary.offeneTasks} Tasks</span>
+                {tagesSummary.ueberfaellig > 0 && <span className="text-red-400 font-semibold">{tagesSummary.ueberfaellig} ueberfaellig</span>}
+              </div>
+            </div>
+          )}
+
+          {/* Timeline */}
+          <div className="space-y-2">
+            {timeline.map((item, i) => {
+              const d = new Date(item.zeit)
+              const zeit = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+              const style = TL_COLORS[item.typ] ?? TL_COLORS.task
+              const content = (
+                <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-xl hover:bg-zinc-800/50 transition-colors">
+                  <span className="text-zinc-400 text-sm font-semibold tabular-nums w-12 shrink-0">{zeit}</span>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${style.bg} ${style.text} shrink-0`}>
+                    {style.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm font-medium truncate">{item.label}</p>
+                    {item.detail && <p className="text-zinc-500 text-xs truncate">{item.detail}</p>}
+                  </div>
+                  {item.meetLink && (
+                    <a href={item.meetLink} target="_blank" rel="noopener noreferrer"
+                      className="text-[10px] bg-purple-600 hover:bg-purple-500 text-white px-2.5 py-1 rounded-lg font-medium shrink-0"
+                      onClick={e => e.stopPropagation()}>
+                      Meet
+                    </a>
+                  )}
+                </div>
+              )
+              return item.link ? <Link key={i} href={item.link}>{content}</Link> : content
+            })}
+          </div>
+        </div>
+      )}
+
+      {timeline && timeline.length === 0 && tagesSummary && (
+        <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-5 mb-6 text-center">
+          <CalendarIcon className="w-8 h-8 text-zinc-700 mx-auto mb-2" />
+          <p className="text-zinc-500 text-sm">Keine Termine oder Tasks fuer heute</p>
+        </div>
+      )}
 
       {/* KPI Karten */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">

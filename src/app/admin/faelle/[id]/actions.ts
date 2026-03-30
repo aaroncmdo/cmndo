@@ -600,3 +600,89 @@ export async function updateTaskStatus(taskId: string, newStatus: string) {
   if (error) throw new Error(error.message)
   if (task?.fall_id) revalidatePath(`/admin/faelle/${task.fall_id}`)
 }
+
+// ─── Termine (KFZ-41) ────────────────────────────────────────────────────────
+
+export async function createTermin(
+  fallId: string,
+  data: { typ: string; datum: string; dauer_minuten: number; betreff: string; notiz?: string },
+) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht angemeldet')
+
+  // Get the fall to find kunde_id
+  const { data: fall } = await supabase.from('faelle').select('kunde_id').eq('id', fallId).single()
+
+  const meetLink = data.typ === 'video-call'
+    ? `https://meet.google.com/new` // placeholder — real integration needs Google Calendar API
+    : null
+
+  const { error } = await supabase.from('termine').insert({
+    fall_id: fallId,
+    kunde_user_id: fall?.kunde_id ?? null,
+    betreuer_user_id: user.id,
+    typ: data.typ,
+    datum: data.datum,
+    dauer_minuten: data.dauer_minuten,
+    betreff: data.betreff,
+    notiz: data.notiz || null,
+    meet_link: meetLink,
+    status: 'geplant',
+  })
+
+  if (error) throw new Error(error.message)
+
+  // Timeline-Eintrag
+  await supabase.from('timeline').insert({
+    fall_id: fallId,
+    typ: 'system',
+    titel: `Termin vereinbart: ${data.betreff}`,
+    beschreibung: `${data.typ === 'video-call' ? 'Video-Call' : 'Telefonat'} am ${new Date(data.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} (${data.dauer_minuten} Min)`,
+    erstellt_von: user.id,
+  })
+
+  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath('/mitarbeiter/performance')
+  revalidatePath('/kunde')
+}
+
+export async function updateTerminStatus(
+  terminId: string,
+  status: string,
+  ergebnisNotiz?: string,
+) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const updateData: Record<string, unknown> = { status }
+  if (ergebnisNotiz) updateData.ergebnis_notiz = ergebnisNotiz
+
+  const { data: termin, error } = await supabase
+    .from('termine')
+    .update(updateData)
+    .eq('id', terminId)
+    .select('fall_id, betreff, typ')
+    .single()
+
+  if (error) throw new Error(error.message)
+
+  if (termin?.fall_id) {
+    const label = status === 'durchgefuehrt' ? 'Termin durchgefuehrt' :
+                  status === 'abgesagt' ? 'Termin abgesagt' :
+                  status === 'nicht-erschienen' ? 'Termin: Nicht erschienen' : `Termin: ${status}`
+
+    await supabase.from('timeline').insert({
+      fall_id: termin.fall_id,
+      typ: 'system',
+      titel: `${label}: ${termin.betreff ?? ''}`,
+      beschreibung: ergebnisNotiz || null,
+      erstellt_von: user.id,
+    })
+
+    revalidatePath(`/admin/faelle/${termin.fall_id}`)
+  }
+  revalidatePath('/mitarbeiter/performance')
+  revalidatePath('/kunde')
+}
