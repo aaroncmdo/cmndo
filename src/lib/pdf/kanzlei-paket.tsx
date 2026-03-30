@@ -5,6 +5,7 @@ import { Document, Page, Text, View, Image, StyleSheet, Font } from '@react-pdf/
 
 export type KanzleiPaketData = {
   fallNummer: string
+  mandatsnummer: string | null
   datum: string
   status: string
   // Parteien
@@ -85,6 +86,7 @@ export function KanzleiPaketPDF({ data }: { data: KanzleiPaketData }) {
       <Page size="A4" style={s.coverPage}>
         <Text style={s.logo}>Claimondo</Text>
         <Text style={s.coverSub}>Kanzlei-Paket</Text>
+        {data.mandatsnummer && <Text style={{ fontSize: 16, fontFamily: 'Helvetica-Bold', color: '#09090b', marginBottom: 4 }}>{data.mandatsnummer}</Text>}
         <Text style={s.coverFall}>Fall {data.fallNummer}</Text>
         <Text style={s.coverDatum}>{data.datum}</Text>
         <View style={s.footer}>
