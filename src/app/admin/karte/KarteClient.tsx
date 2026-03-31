@@ -356,7 +356,13 @@ function ProfilPanel({ sv, onClose }: { sv: SV; onClose: () => void }) {
             <div>
               <h2 className="text-xl font-bold text-gray-900">{sv.name || 'Unbekannt'}</h2>
               <div className="flex items-center gap-2 mt-1">
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold text-gray-900 ${ti.marker}`}>{ti.label}</span>
+                <select value={sv.gutachterTyp} onChange={e => saveField('gutachter_typ', e.target.value)}
+                  className="text-[10px] font-semibold bg-blue-50 text-blue-600 border-0 rounded-full px-2 py-0.5 cursor-pointer">
+                  <option value="kfz-gutachter">KFZ-SV</option>
+                  <option value="dat-gutachter">DAT</option>
+                  <option value="akademie">Akademie</option>
+                  <option value="gutachterbuero">Büro</option>
+                </select>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-400">Aktiv</span>
               </div>
             </div>
@@ -394,15 +400,20 @@ function ProfilPanel({ sv, onClose }: { sv: SV; onClose: () => void }) {
           <section>
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Paket & Auslastung</h3>
             <div className="grid grid-cols-3 gap-3 mb-3">
-              <div className="bg-gray-100/50 rounded-xl p-3 text-center">
-                <p className="text-lg font-bold text-gray-900">{PAKET_LABEL[sv.paket] ?? sv.paket ?? '\u2014'}</p>
+              <div className="bg-gray-50 rounded-xl p-3 text-center">
+                <select value={sv.paket} onChange={e => saveField('paket', e.target.value)}
+                  className="text-sm font-bold text-gray-900 bg-transparent border-0 text-center cursor-pointer w-full">
+                  <option value="starter-10">Starter</option>
+                  <option value="standard-25">Standard</option>
+                  <option value="premium-50">Premium</option>
+                </select>
                 <p className="text-[10px] text-gray-500">Paket</p>
               </div>
-              <div className="bg-gray-100/50 rounded-xl p-3 text-center">
+              <div className="bg-gray-50 rounded-xl p-3 text-center">
                 <p className="text-lg font-bold text-gray-900">{sv.radiusKm}km</p>
                 <p className="text-[10px] text-gray-500">Radius</p>
               </div>
-              <div className="bg-gray-100/50 rounded-xl p-3 text-center">
+              <div className="bg-gray-50 rounded-xl p-3 text-center">
                 <p className="text-lg font-bold text-gray-900">{sv.guthaben != null ? `${sv.guthaben}\u20AC` : '\u2014'}</p>
                 <p className="text-[10px] text-gray-500">Guthaben</p>
               </div>
@@ -415,17 +426,18 @@ function ProfilPanel({ sv, onClose }: { sv: SV; onClose: () => void }) {
               <div className={`h-full rounded-full ${auslPct >= 90 ? 'bg-red-500' : auslPct >= 70 ? 'bg-amber-500' : 'bg-blue-500'}`}
                 style={{ width: `${Math.min(100, auslPct)}%` }} />
             </div>
-            {sv.anzahlungStatus && (
-              <div className="flex items-center justify-between mt-2">
-                <span className="text-xs text-gray-500">Anzahlung</span>
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                  sv.anzahlungStatus === 'bezahlt' ? 'bg-emerald-500/20 text-emerald-400' :
-                  sv.anzahlungStatus === 'teilweise' ? 'bg-amber-500/20 text-amber-400' : 'bg-red-500/20 text-red-400'
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-xs text-gray-500">Anzahlung</span>
+              <select value={sv.anzahlungStatus ?? 'offen'} onChange={e => saveField('anzahlung_status', e.target.value)}
+                className={`text-xs font-semibold px-2 py-0.5 rounded-full border-0 cursor-pointer ${
+                  sv.anzahlungStatus === 'bezahlt' ? 'bg-emerald-50 text-emerald-600' :
+                  sv.anzahlungStatus === 'teilweise' ? 'bg-amber-50 text-amber-600' : 'bg-red-50 text-red-600'
                 }`}>
-                  {sv.anzahlungStatus === 'bezahlt' ? 'Bezahlt' : sv.anzahlungStatus === 'teilweise' ? 'Teilweise' : 'Offen'}
-                </span>
-              </div>
-            )}
+                <option value="offen">Offen</option>
+                <option value="teilweise">Teilweise</option>
+                <option value="bezahlt">Bezahlt</option>
+              </select>
+            </div>
           </section>
 
           {/* ─── Qualifikationen (bearbeitbar) ────────────────────── */}
