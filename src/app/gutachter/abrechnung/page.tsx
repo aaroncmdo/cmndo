@@ -28,7 +28,7 @@ export default async function AbrechnungPage() {
 
   if (!sv) {
     return (
-      <div className="px-4 py-8">
+      <div className="h-full flex flex-col overflow-hidden px-4 py-2">
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
             <p className="text-gray-500">Kein Sachverstaendigen-Profil gefunden.</p>
@@ -92,7 +92,7 @@ export default async function AbrechnungPage() {
   }
 
   return (
-    <div className="px-4 py-8">
+    <div className="h-full flex flex-col overflow-hidden px-4 py-2">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">

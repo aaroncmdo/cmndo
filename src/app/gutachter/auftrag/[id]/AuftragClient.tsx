@@ -168,7 +168,7 @@ export default function AuftragClient({
   }
 
   return (
-    <div className="px-4 py-8">
+    <div className="h-full flex flex-col overflow-hidden px-4 py-2">
       <div className="max-w-3xl mx-auto">
 
         {/* Header */}

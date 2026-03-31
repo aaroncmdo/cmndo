@@ -69,7 +69,7 @@ export default async function GutachterFaellePage({
 
   if (!sv) {
     return (
-      <div className="px-4 py-8">
+      <div className="h-full flex flex-col overflow-hidden px-4 py-2">
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
             <p className="text-gray-500">Kein Sachverstaendigen-Profil gefunden.</p>
@@ -108,15 +108,15 @@ export default async function GutachterFaellePage({
   const leadMap = Object.fromEntries((leads ?? []).map(l => [l.id, l]))
 
   return (
-    <div className="px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">Meine Faelle</h1>
-          <p className="text-gray-500 text-sm mt-0.5">{faelle?.length ?? 0} Faelle</p>
+    <div className="h-full flex flex-col overflow-hidden">
+      {/* Sticky Topbar */}
+      <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200 shrink-0">
+        <div>
+          <h1 className="text-sm font-semibold text-gray-900">Meine Fälle</h1>
+          <p className="text-gray-500 text-xs">{faelle?.length ?? 0} Fälle</p>
         </div>
 
-        {/* Filter tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+        <div className="flex gap-2 overflow-x-auto">
           {FILTER_TABS.map(([key, label]) => (
             <Link
               key={key}
@@ -131,7 +131,10 @@ export default async function GutachterFaellePage({
             </Link>
           ))}
         </div>
+      </div>
 
+      {/* Scrollable Content */}
+      <div className="flex-1 min-h-0 overflow-y-auto p-4">
         {!faelle?.length ? (
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
             <p className="text-gray-500">Keine Faelle gefunden.</p>
