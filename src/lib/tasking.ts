@@ -227,6 +227,58 @@ export async function triggerOnboardingTasks(fallId: string, kbId: string | null
 
 // ─── Gate-Logik ─────────────────────────────────────────────────────────────
 
+// ─── Auto-Complete Tasks (KFZ-70) ───────────────────────────────────────────
+
+const EVENT_TO_TASK: Record<string, string[]> = {
+  'gutachter_termin_bestaetigt': ['G-01'],
+  'status_besichtigung': ['G-05'],
+  'gutachten_hochgeladen': ['G-07'],
+  'qc_bestanden': ['Q-01'],
+  'qc_fehlgeschlagen': ['Q-01'],
+  'status_kanzlei_uebergeben': ['Q-03'],
+  'as_sendedatum_gesetzt': ['V-01', 'V-02'],
+  'flow_link_abgeschlossen': ['O-01'],
+  'erster_kontakt': ['O-05'],
+  'schadentyp_gesetzt': ['L-01'],
+  'gutachter_termin_gesetzt': ['L-05'],
+  'lead_konvertiert': ['L-06'],
+}
+
+export async function autoCompleteTask(fallId: string, eventType: string) {
+  const taskCodes = EVENT_TO_TASK[eventType]
+  if (!taskCodes?.length) return
+
+  const supabase = createAdminClient()
+
+  for (const code of taskCodes) {
+    const { data: task } = await supabase
+      .from('tasks')
+      .select('id, titel')
+      .eq('fall_id', fallId)
+      .eq('task_code', code)
+      .in('status', ['offen', 'in-arbeit', 'blockiert'])
+      .limit(1)
+      .maybeSingle()
+
+    if (!task) continue
+
+    await supabase.from('tasks').update({
+      status: 'erledigt',
+      erledigt_am: new Date().toISOString(),
+    }).eq('id', task.id)
+
+    await supabase.from('timeline').insert({
+      fall_id: fallId,
+      typ: 'system',
+      titel: `Task automatisch erledigt: ${task.titel}`,
+      beschreibung: `Ausgelöst durch: ${eventType}`,
+    })
+
+    // Resolve gates for downstream tasks
+    await resolveGates(task.id)
+  }
+}
+
 /** Nach Task-Erledigen: Blockierte Folge-Tasks freischalten */
 export async function resolveGates(taskId: string) {
   const supabase = createAdminClient()

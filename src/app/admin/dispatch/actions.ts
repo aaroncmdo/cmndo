@@ -10,7 +10,7 @@ import {
   emailFallAbgeschlossen,
 } from '@/lib/email'
 import { sendStatusWhatsApp } from '@/lib/whatsapp'
-import { triggerKonversionTasks, triggerGutachterTerminTask, triggerGutachtenUploadTask, triggerQcTask, triggerLeadTasks, triggerOnboardingTasks, resolveGates } from '@/lib/tasking'
+import { triggerKonversionTasks, triggerGutachterTerminTask, triggerGutachtenUploadTask, triggerQcTask, triggerLeadTasks, triggerOnboardingTasks, resolveGates, autoCompleteTask } from '@/lib/tasking'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 
 // ─── Fall Status ────────────────────────────────────────────────────────────

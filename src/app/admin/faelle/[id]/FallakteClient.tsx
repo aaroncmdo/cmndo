@@ -483,6 +483,7 @@ type TaskItem = {
   prioritaet: string | null
   auto_erstellt: boolean | null
   created_at: string
+  task_code: string | null
 }
 
 type Mitarbeiter = {
@@ -606,7 +607,7 @@ export default function FallakteClient({
           <PipelineBar status={fall.status} />
 
           {/* Zeile 3: Nächster Schritt (kompakt) */}
-          <NaechsterSchrittBanner fall={fall} tasks={tasks} />
+          <NaechsterSchrittBanner fall={fall} tasks={tasks} onAction={(tab) => { setActiveTab(tab as Tab); setTimeout(() => { const el = document.querySelector('[data-task-target]'); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('blink-highlight'); setTimeout(() => el.classList.remove('blink-highlight'), 2000) } }, 150) }} />
 
           {/* Zeile 4: Tab-Leiste */}
           <div className="flex gap-0.5 py-1 overflow-x-auto">
@@ -3339,7 +3340,15 @@ const PHASE_ACTION: Record<string, { titel: string; beschreibung: string; action
   regulierung: { titel: 'Zahlung pruefen', beschreibung: 'Zahlungseingang dokumentieren und Fall abschliessen.', tab: 'abrechnung' },
 }
 
-function NaechsterSchrittBanner({ fall, tasks: allTasks }: { fall: Fall; tasks: TaskItem[] }) {
+const TASK_TAB_MAP: Record<string, string> = {
+  'Q-01': 'qc', 'Q-02': 'kanzlei', 'Q-03': 'kanzlei',
+  'V-01': 'kanzlei', 'V-02': 'kanzlei', 'V-03': 'kanzlei',
+  'G-07': 'dokumente', 'O-04': 'dokumente', 'O-06': 'dokumente',
+  'A-01': 'abrechnung', 'A-02': 'abrechnung',
+  'K-01': 'uebersicht', 'O-05': 'uebersicht',
+}
+
+function NaechsterSchrittBanner({ fall, tasks: allTasks, onAction }: { fall: Fall; tasks: TaskItem[]; onAction?: (tab: string) => void }) {
   if (fall.status === 'abgeschlossen' || fall.status === 'storniert') {
     return (
       <div className="mb-4 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 flex items-center gap-3">
@@ -3412,6 +3421,20 @@ function NaechsterSchrittBanner({ fall, tasks: allTasks }: { fall: Fall; tasks: 
         }`}>
           {deadlineText}
         </span>
+      )}
+      {onAction && nextTask?.task_code && (
+        <button onClick={() => onAction(TASK_TAB_MAP[nextTask.task_code ?? ''] ?? phaseAction?.tab ?? 'uebersicht')}
+          className={`text-xs font-medium px-3 py-1.5 rounded-lg shrink-0 transition-colors ${
+            showRed ? 'bg-red-600 hover:bg-red-500 text-white' : 'bg-blue-600 hover:bg-blue-500 text-white'
+          }`}>
+          Jetzt erledigen
+        </button>
+      )}
+      {onAction && !nextTask?.task_code && phaseAction?.tab && (
+        <button onClick={() => onAction(phaseAction.tab!)}
+          className="text-xs font-medium px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white shrink-0 transition-colors">
+          Öffnen
+        </button>
       )}
     </div>
   )

@@ -7,7 +7,7 @@ import { sendStatusWhatsApp } from '@/lib/whatsapp'
 import { triggerKanzleiPaketTask, triggerAsSendedatumTask, triggerArchivierungTask } from '@/lib/tasking'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { checkFallAutoPhase } from '@/lib/autoPhase'
-import { resolveGates } from '@/lib/tasking'
+import { resolveGates, autoCompleteTask } from '@/lib/tasking'
 import { createNotification } from '@/lib/notifications'
 
 export async function saveFilmcheck(fallId: string, notizen: string) {
@@ -72,7 +72,8 @@ export async function saveFilmcheck(fallId: string, notizen: string) {
     }).catch(() => {})
   }
 
-  // Auto-phase check
+  // Auto-complete + auto-phase
+  autoCompleteTask(fallId, 'qc_bestanden').catch(() => {})
   checkFallAutoPhase(fallId).catch(() => {})
 
   revalidatePath(`/admin/faelle/${fallId}`)
@@ -150,6 +151,7 @@ export async function setAnschlussschreibenDatum(fallId: string) {
 
   // WhatsApp: Anspruchsschreiben gesendet, 14 Tage Frist
   sendStatusWhatsApp(fallId, 'nach_anspruchsschreiben').catch(() => {})
+  autoCompleteTask(fallId, 'as_sendedatum_gesetzt').catch(() => {})
 
   // Gutachter-Mitteilung: AS gesendet
   const { data: fallForAs } = await supabase.from('faelle').select('sv_id, fall_nummer').eq('id', fallId).single()

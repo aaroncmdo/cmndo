@@ -1,5 +1,14 @@
 /* Light Design System - Clean & Modern */
 
+/* Blink highlight animation (KFZ-70) */
+@keyframes blink-highlight {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: rgba(59,130,246,0.15); }
+}
+.blink-highlight {
+  animation: blink-highlight 0.6s ease-in-out 3;
+}
+
 /* Background */
 .glass-bg {
   background: #f8f9fb;
