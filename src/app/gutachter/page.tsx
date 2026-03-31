@@ -363,9 +363,9 @@ export default async function GutachterDashboard() {
 
         {/* ─── Tagesroute ──────────────────────────────────────────────── */}
         <section>
-          <div className="flex items-center gap-2 mb-4">
-            <MapPinIcon className="w-5 h-5 text-green-400" />
-            <h2 className="text-lg font-semibold text-gray-900">Tagesroute</h2>
+          <div className="flex items-center gap-2 mb-2">
+            <MapPinIcon className="w-4 h-4 text-green-500" />
+            <h2 className="text-sm font-semibold text-gray-900">Tagesroute</h2>
             {todayFaelle.length > 0 && (
               <span className="ml-auto bg-green-50 text-green-300 text-xs font-medium px-2.5 py-0.5 rounded-full">
                 {todayFaelle.length} Termine

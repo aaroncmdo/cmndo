@@ -18,13 +18,11 @@ import {
 
 const NAV_ITEMS = [
   { href: '/gutachter', label: 'Dashboard', icon: LayoutDashboardIcon },
-  { href: '/gutachter/route', label: 'Tagesroute', icon: MapIcon },
-  { href: '/gutachter/faelle', label: 'Faelle', icon: FolderOpenIcon },
-  { href: '/gutachter/tasks', label: 'Meine Tasks', icon: ClipboardListIcon },
-  { href: '/gutachter/mitteilungen', label: 'Mitteilungen', icon: BellIcon },
+  { href: '/gutachter/faelle', label: 'Meine Fälle', icon: FolderOpenIcon },
   { href: '/gutachter/kalender', label: 'Kalender', icon: CalendarIcon },
-  { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
   { href: '/gutachter/profil', label: 'Profil', icon: UserIcon },
+  { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
+  { href: '/gutachter/mitteilungen', label: 'Mitteilungen', icon: BellIcon },
 ]
 
 export default function GutachterShell({
