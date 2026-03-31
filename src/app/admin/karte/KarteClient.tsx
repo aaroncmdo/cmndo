@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { SearchIcon, XIcon, UserPlusIcon, PhoneIcon, MailIcon, MapPinIcon, PencilIcon, CheckIcon, PowerOffIcon } from 'lucide-react'
+import { SearchIcon, XIcon, UserPlusIcon, PhoneIcon, MailIcon, MapPinIcon, PencilIcon, CheckIcon, PowerOffIcon, Trash2Icon, RefreshCwIcon, AlertTriangleIcon } from 'lucide-react'
 import Link from 'next/link'
 import GutachterSlideOver from './GutachterSlideOver'
-import { updateGutachterProfil } from './actions'
+import { updateGutachterProfil, reactivateGutachter, deactivateGutachter, softDeleteGutachter, reassignCases, getOpenCasesCount } from './actions'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -28,6 +28,9 @@ interface SV {
   guthaben?: number
   qualifikationen?: string[]
   anzahlungStatus?: string
+  istAktiv?: boolean
+  deaktiviertGrund?: string | null
+  deaktiviertAm?: string | null
 }
 
 interface Fall {
@@ -129,6 +132,7 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [mapReady, setMapReady] = useState(false)
   const [search, setSearch] = useState('')
+  const [svFilter, setSvFilter] = useState<'aktive' | 'deaktivierte' | 'alle'>('aktive')
 
   // ─── Map init (runs ONCE) ──────────────────────────────────────
   useEffect(() => {
@@ -152,25 +156,33 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
     return () => { cancelled = true }
   }, [apiKey])
 
-  // ─── SV Markers (dep: [sachverstaendige, mapReady] ONLY) ──────
+  // ─── Filtered SVs ──────────────────────────────────────────────
+  const filteredByStatus = sachverstaendige.filter(sv => {
+    if (svFilter === 'aktive') return sv.istAktiv !== false
+    if (svFilter === 'deaktivierte') return sv.istAktiv === false
+    return true
+  })
+
+  // ─── SV Markers (dep: [sachverstaendige, mapReady, svFilter] ) ──
   useEffect(() => {
     if (!mapRef.current || !mapReady) return
     // Cleanup old
     markersRef.current.forEach(m => { google.maps.event.clearInstanceListeners(m); m.setMap(null) })
     markersRef.current = []
 
-    sachverstaendige.forEach(sv => {
+    filteredByStatus.forEach(sv => {
       if (sv.standortLat == null || sv.standortLng == null) return
       const pos = { lat: sv.standortLat, lng: sv.standortLng }
-      const color = TYP_COLORS[sv.gutachterTyp]?.fill ?? '#3b82f6'
+      const isDeactivated = sv.istAktiv === false
+      const color = isDeactivated ? '#9ca3af' : (TYP_COLORS[sv.gutachterTyp]?.fill ?? '#3b82f6')
       const marker = new google.maps.Marker({
         position: pos, map: mapRef.current!, title: sv.name,
-        icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: color, fillOpacity: 1, strokeColor: '#fff', strokeWeight: 2 },
+        icon: { path: google.maps.SymbolPath.CIRCLE, scale: isDeactivated ? 6 : 8, fillColor: color, fillOpacity: isDeactivated ? 0.5 : 1, strokeColor: '#fff', strokeWeight: 2 },
       })
       marker.addListener('click', () => setSelectedSV(sv))
       markersRef.current.push(marker)
     })
-  }, [sachverstaendige, mapReady])
+  }, [sachverstaendige, mapReady, svFilter])
 
   // ─── Coverage areas: Isochronen-Polygone (OSRM) ──────────────
   useEffect(() => {
@@ -180,16 +192,17 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
     polygonsRef.current.forEach(p => { google.maps.event.clearInstanceListeners(p); p.setMap(null) })
     polygonsRef.current = []
 
-    sachverstaendige.forEach(sv => {
+    filteredByStatus.forEach(sv => {
       if (sv.standortLat == null || sv.standortLng == null) return
-      const color = TYP_COLORS[sv.gutachterTyp]?.fill ?? '#3b82f6'
+      const isDeactivated = sv.istAktiv === false
+      const color = isDeactivated ? '#9ca3af' : (TYP_COLORS[sv.gutachterTyp]?.fill ?? '#3b82f6')
 
       fetchIsochrone(sv.standortLat, sv.standortLng, sv.radiusKm).then(points => {
         if (!mapRef.current || !points.length) return
         const polygon = new google.maps.Polygon({
           paths: points, map: mapRef.current,
-          fillColor: color, fillOpacity: 0.12,
-          strokeColor: color, strokeOpacity: 0.5, strokeWeight: 2,
+          fillColor: color, fillOpacity: isDeactivated ? 0.05 : 0.12,
+          strokeColor: color, strokeOpacity: isDeactivated ? 0.2 : 0.5, strokeWeight: isDeactivated ? 1 : 2,
           clickable: true, geodesic: true,
         })
         polygon.addListener('click', () => setSelectedSV(sv))
@@ -198,12 +211,12 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
         polygonsRef.current.push(polygon)
       })
     })
-  }, [sachverstaendige, mapReady])
+  }, [sachverstaendige, mapReady, svFilter])
 
   // ─── Sidebar filter (no useEffect, just derived) ──────────────
-  const filteredSVs = search
-    ? sachverstaendige.filter(sv => sv.name.toLowerCase().includes(search.toLowerCase()))
-    : sachverstaendige
+  const filteredSVs = filteredByStatus.filter(sv =>
+    !search || sv.name.toLowerCase().includes(search.toLowerCase())
+  )
 
   // ─── Render ────────────────────────────────────────────────────
   if (!apiKey) return (
@@ -223,7 +236,7 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-lg font-semibold text-gray-900">Karte</h1>
-              <p className="text-gray-500 text-xs mt-0.5">{sachverstaendige.length} SV</p>
+              <p className="text-gray-500 text-xs mt-0.5">{filteredSVs.length} von {sachverstaendige.length} SV</p>
             </div>
             <button onClick={() => setShowOnboarding(true)}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-gray-900 bg-blue-600 hover:bg-blue-500 transition-colors">
@@ -236,6 +249,14 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
             <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suche..."
               className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-300" />
+          </div>
+          <div className="flex gap-1 mt-2">
+            {(['aktive', 'deaktivierte', 'alle'] as const).map(f => (
+              <button key={f} onClick={() => setSvFilter(f)}
+                className={`flex-1 text-[10px] font-medium py-1.5 rounded-lg transition-colors ${svFilter === f ? 'bg-blue-600 text-white' : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300'}`}>
+                {f === 'aktive' ? 'Aktive' : f === 'deaktivierte' ? 'Deaktiv.' : 'Alle'}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -258,8 +279,9 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
                   selectedSV?.id === sv.id ? 'bg-blue-600/20 border border-blue-600/30' : 'hover:bg-gray-100/60'
                 }`}>
                 <div className="flex items-center gap-2">
-                  <div className={`w-2.5 h-2.5 rounded-full ${ti?.marker ?? 'bg-blue-500'}`} />
-                  <span className="text-gray-800 text-sm truncate">{sv.name}</span>
+                  <div className={`w-2.5 h-2.5 rounded-full ${sv.istAktiv === false ? 'bg-gray-400' : (ti?.marker ?? 'bg-blue-500')}`} />
+                  <span className={`text-sm truncate ${sv.istAktiv === false ? 'text-gray-400' : 'text-gray-800'}`}>{sv.name}</span>
+                  {sv.istAktiv === false && <span className="text-[8px] bg-red-50 text-red-500 px-1 py-0.5 rounded font-medium shrink-0">Deaktiviert</span>}
                 </div>
                 <span className="text-gray-400 text-[10px] ml-4.5">{PAKET_LABEL[sv.paket] ?? sv.paket} · {sv.offeneFaelle}/{sv.maxFaelleMonat}</span>
               </button>
@@ -479,6 +501,19 @@ function ProfilPanel({ sv, onClose }: { sv: SV; onClose: () => void }) {
               className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-400 resize-y" />
           </section>
 
+          {/* ─── Deaktiviert-Warnung ──────────────────────────────── */}
+          {sv.istAktiv === false && (
+            <section className="bg-red-50 border border-red-200 rounded-xl p-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangleIcon className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-red-700 text-xs font-semibold">Deaktiviert{sv.deaktiviertAm ? ` seit ${new Date(sv.deaktiviertAm).toLocaleDateString('de-DE')}` : ''}</p>
+                  {sv.deaktiviertGrund && <p className="text-red-600 text-[10px] mt-0.5">Grund: {sv.deaktiviertGrund}</p>}
+                </div>
+              </div>
+            </section>
+          )}
+
           {/* ─── Aktionen ─────────────────────────────────────────── */}
           <section className="border-t border-gray-200 pt-4 space-y-2">
             <div className="flex gap-2">
@@ -497,13 +532,42 @@ function ProfilPanel({ sv, onClose }: { sv: SV; onClose: () => void }) {
               className="block text-center bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
               Vollstaendiges Profil
             </Link>
-            <button onClick={async () => {
-              if (!confirm('Gutachter wirklich deaktivieren?')) return
-              await updateGutachterProfil(sv.id, 'ist_aktiv', false).catch(() => {})
-              onClose()
-            }} className="w-full flex items-center justify-center gap-2 text-red-400 hover:text-red-300 text-sm py-2 transition-colors">
-              <PowerOffIcon className="w-3.5 h-3.5" /> Deaktivieren
-            </button>
+            {sv.istAktiv === false ? (
+              <>
+                <button onClick={async () => {
+                  if (!confirm('Gutachter wieder aktivieren?')) return
+                  await reactivateGutachter(sv.id).catch(() => {})
+                  onClose()
+                }} className="w-full flex items-center justify-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 text-sm font-medium py-2.5 rounded-xl transition-colors">
+                  <RefreshCwIcon className="w-3.5 h-3.5" /> Wieder aktivieren
+                </button>
+                <button onClick={async () => {
+                  const openCount = await getOpenCasesCount(sv.id)
+                  if (openCount > 0) {
+                    alert(`Noch ${openCount} offene Fälle. Bitte zuerst an einen anderen Gutachter umverteilen.`)
+                    return
+                  }
+                  const name = prompt(`Zum Löschen bitte "${sv.name}" eingeben:`)
+                  if (name !== sv.name) { alert('Name stimmt nicht überein.'); return }
+                  try {
+                    await softDeleteGutachter(sv.id)
+                    alert('Gutachter wurde gelöscht.')
+                    onClose()
+                  } catch (e) { alert(e instanceof Error ? e.message : 'Fehler beim Löschen') }
+                }} className="w-full flex items-center justify-center gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 text-sm py-2 rounded-xl transition-colors">
+                  <Trash2Icon className="w-3.5 h-3.5" /> Komplett löschen
+                </button>
+              </>
+            ) : (
+              <button onClick={async () => {
+                if (!confirm('Gutachter wirklich deaktivieren? Er erhält keine neuen Aufträge mehr.')) return
+                const grund = prompt('Grund der Deaktivierung (optional):') ?? 'Manuell deaktiviert'
+                await deactivateGutachter(sv.id, grund).catch(() => {})
+                onClose()
+              }} className="w-full flex items-center justify-center gap-2 text-red-400 hover:text-red-300 text-sm py-2 transition-colors">
+                <PowerOffIcon className="w-3.5 h-3.5" /> Deaktivieren
+              </button>
+            )}
           </section>
         </div>
       </div>

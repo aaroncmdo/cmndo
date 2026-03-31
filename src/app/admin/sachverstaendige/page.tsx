@@ -4,17 +4,17 @@ import KarteClient from '../karte/KarteClient'
 export default async function SachverstaendigePage() {
   const supabase = await createClient()
 
-  // Fetch SVs with all fields needed for both map and table
+  // Fetch ALL SVs (active + deactivated, but not soft-deleted)
   const { data: svList } = await supabase
     .from('sachverstaendige')
     .select(
-      'id, profile_id, gebiet_plz, paket, offene_faelle, max_faelle_monat, ist_aktiv, gutachter_typ, qualifikationen, onboarding_abgeschlossen, anzahlung_status, standort_adresse, standort_lat, standort_lng, lat, lng, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, radius_km, guthaben, organisation_id, profiles(vorname, nachname, email, telefon)'
+      'id, profile_id, gebiet_plz, paket, offene_faelle, max_faelle_monat, ist_aktiv, gutachter_typ, qualifikationen, onboarding_abgeschlossen, anzahlung_status, standort_adresse, standort_lat, standort_lng, lat, lng, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, radius_km, guthaben, organisation_id, deaktiviert_grund, deaktiviert_am, geloescht_am, profiles(vorname, nachname, email, telefon)'
     )
+    .is('geloescht_am', null)
     .order('created_at', { ascending: false })
 
-  // Active SVs for map
+  // All SVs for map (including deactivated)
   const sachverstaendige = (svList ?? [])
-    .filter(sv => sv.ist_aktiv)
     .map((sv) => {
       const profileRaw = sv.profiles as unknown
       const profile = (Array.isArray(profileRaw) ? profileRaw[0] : profileRaw) as {
@@ -38,6 +38,9 @@ export default async function SachverstaendigePage() {
         guthaben: Number((sv as Record<string, unknown>).guthaben) || 0,
         qualifikationen: ((sv as Record<string, unknown>).qualifikationen as string[] | null) ?? [],
         anzahlungStatus: (sv as Record<string, unknown>).anzahlung_status as string ?? 'offen',
+        istAktiv: sv.ist_aktiv !== false,
+        deaktiviertGrund: (sv as Record<string, unknown>).deaktiviert_grund as string | null ?? null,
+        deaktiviertAm: (sv as Record<string, unknown>).deaktiviert_am as string | null ?? null,
       }
     })
 
