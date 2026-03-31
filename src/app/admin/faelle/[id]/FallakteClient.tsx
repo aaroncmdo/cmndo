@@ -558,7 +558,7 @@ export default function FallakteClient({
   ]
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] px-3 py-4">
+    <div style={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }} className="bg-[#f8f9fb]">
       {process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY && (
         <Script
           src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}
@@ -566,103 +566,59 @@ export default function FallakteClient({
           onReady={() => setMapsReady(true)}
         />
       )}
-      <div className="max-w-7xl mx-auto">
 
-        {/* Header - compact */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <a href="/admin/faelle" className="text-gray-400 hover:text-gray-600 text-xs transition-colors">←</a>
-            <h1 className="text-base font-semibold text-gray-900">
-              Kundenakte{fall.fall_nummer ? ` · ${fall.fall_nummer}` : ''}
-            </h1>
-            <p className="text-gray-500 text-sm mt-0.5">
-              {lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || lead.email : '—'}
-              {fall.kennzeichen && <span className="ml-2 text-gray-400">· {fall.kennzeichen}</span>}
-            </p>
+      {/* ─── STICKY HEADER (fest oben, scrollt NICHT mit) ─── */}
+      <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Zeile 1: Name + Status */}
+          <div className="flex items-center justify-between py-2">
+            <div className="flex items-center gap-3">
+              <a href="/admin/faelle" className="text-gray-400 hover:text-gray-600 text-xs transition-colors">←</a>
+              <h1 className="text-sm font-semibold text-gray-900">
+                {fall.mandatsnummer ?? fall.fall_nummer ?? 'Kundenakte'}
+              </h1>
+              <span className="text-gray-500 text-xs">
+                {lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || lead.email : '—'}
+                {fall.kennzeichen && <span className="ml-1 text-gray-400">· {fall.kennzeichen}</span>}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              {fall.prioritaet === 'hoch' && <Badge color="red">Prioritaet</Badge>}
+              <StatusBadge status={fall.status} />
+            </div>
           </div>
-          <div className="flex items-center gap-2 mt-1">
-            {fall.prioritaet === 'hoch' && <Badge color="red">Prioritaet</Badge>}
-            <StatusBadge status={fall.status} />
+
+          {/* Zeile 2: Pipeline */}
+          <PipelineBar status={fall.status} />
+
+          {/* Zeile 3: Nächster Schritt (kompakt) */}
+          <NaechsterSchrittBanner fall={fall} tasks={tasks} />
+
+          {/* Zeile 4: Tab-Leiste */}
+          <div className="flex gap-0.5 py-1 overflow-x-auto">
+            {tabs.map(([id, label]) => (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                className={`py-1.5 px-2.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
+                  activeTab === id
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
         </div>
+      </div>
 
-        {/* Vorschaden-Banner */}
-        {(fall as Record<string, unknown>).vorschaden_vorhanden === true && (
-          <div className="mb-4 bg-amber-50 border border-amber-800 rounded-2xl p-4 flex items-center gap-3">
-            <AlertTriangleIcon className="w-5 h-5 text-amber-400 shrink-0" />
-            <div>
-              <p className="text-amber-300 font-medium text-sm">
-                VORSCHADEN GEFUNDEN — {String((fall as Record<string, unknown>).vorschaden_anzahl ?? '?')} Vorschaeden bekannt
-              </p>
-              {String((fall as Record<string, unknown>).vorschaden_letzter_datum ?? '') && (
-                <p className="text-amber-500 text-xs mt-0.5">
-                  Letzter Vorschaden: {new Date(String((fall as Record<string, unknown>).vorschaden_letzter_datum)).toLocaleDateString('de-DE')}
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* VS-Eskalations-Banner */}
-        {fall.anschlussschreiben_am && fall.vs_eskalationsstufe && fall.vs_eskalationsstufe !== 'vs-01' && (
-          <div className={`mb-4 rounded-2xl p-4 flex items-center gap-3 border ${
-            ['vs-06', 'vs-07'].includes(fall.vs_eskalationsstufe)
-              ? 'bg-red-50 border-red-800'
-              : ['vs-04', 'vs-05'].includes(fall.vs_eskalationsstufe)
-              ? 'bg-orange-50 border-orange-800'
-              : 'bg-yellow-50 border-yellow-800'
-          }`}>
-            <TimerIcon className={`w-5 h-5 shrink-0 ${
-              ['vs-06', 'vs-07'].includes(fall.vs_eskalationsstufe) ? 'text-red-400' :
-              ['vs-04', 'vs-05'].includes(fall.vs_eskalationsstufe) ? 'text-orange-400' :
-              'text-yellow-400'
-            }`} />
-            <div className="flex-1">
-              <p className={`font-medium text-sm ${
-                ['vs-06', 'vs-07'].includes(fall.vs_eskalationsstufe) ? 'text-red-300' :
-                ['vs-04', 'vs-05'].includes(fall.vs_eskalationsstufe) ? 'text-orange-300' :
-                'text-yellow-300'
-              }`}>
-                VS-ESKALATION {fall.vs_eskalationsstufe.toUpperCase()} —{' '}
-                {daysBetween(fall.anschlussschreiben_am, new Date())} Tage seit AS
-              </p>
-            </div>
-            <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
-              ['vs-06', 'vs-07'].includes(fall.vs_eskalationsstufe) ? 'bg-red-500/20 text-red-400' :
-              ['vs-04', 'vs-05'].includes(fall.vs_eskalationsstufe) ? 'bg-orange-500/20 text-orange-400' :
-              'bg-yellow-500/20 text-yellow-400'
-            }`}>
-              {fall.vs_eskalationsstufe.toUpperCase()}
-            </span>
-          </div>
-        )}
-
-        {/* Pipeline Fortschrittsbalken */}
-        <PipelineBar status={fall.status} />
-
-        {/* Nächster-Schritt Banner (KFZ-43) */}
-        <NaechsterSchrittBanner fall={fall} tasks={tasks} />
-
-        {/* 2-Column Layout: Tabs+Content left, Sidebar right */}
-        <div className="flex gap-4 items-start">
-          {/* LEFT: Tabs + Content (60% on xl) */}
-          <div className="flex-1 min-w-0">
-            {/* Tab Bar - compact */}
-            <div className="flex gap-0.5 mb-3 bg-white rounded-lg p-0.5 border border-gray-200 overflow-x-auto">
-              {tabs.map(([id, label]) => (
-                <button
-                  key={id}
-                  onClick={() => setActiveTab(id)}
-                  className={`py-1.5 px-2.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-                    activeTab === id
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+      {/* ─── SCROLLABLE CONTENT ─── */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex gap-4 items-start">
+            {/* LEFT: Tab Content */}
+            <div className="flex-1 min-w-0">
 
             {/* Tab Content */}
         {activeTab === 'uebersicht' && (
@@ -802,6 +758,7 @@ export default function FallakteClient({
             </div>
           </aside>
         </div>
+      </div>
       </div>
     </div>
   )
