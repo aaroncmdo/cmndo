@@ -4,17 +4,18 @@ import KarteClient from '../karte/KarteClient'
 export default async function SachverstaendigePage() {
   const supabase = await createClient()
 
-  // Fetch ALL SVs (active + deactivated, but not soft-deleted)
+  // Fetch ALL SVs (active + deactivated)
+  // Note: deaktiviert_grund, deaktiviert_am, geloescht_am may not exist yet if migration hasn't run
   const { data: svList } = await supabase
     .from('sachverstaendige')
     .select(
-      'id, profile_id, gebiet_plz, paket, offene_faelle, max_faelle_monat, ist_aktiv, gutachter_typ, qualifikationen, onboarding_abgeschlossen, anzahlung_status, standort_adresse, standort_lat, standort_lng, lat, lng, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, radius_km, guthaben, organisation_id, deaktiviert_grund, deaktiviert_am, geloescht_am, profiles(vorname, nachname, email, telefon)'
+      'id, profile_id, gebiet_plz, paket, offene_faelle, max_faelle_monat, ist_aktiv, gutachter_typ, qualifikationen, onboarding_abgeschlossen, anzahlung_status, standort_adresse, standort_lat, standort_lng, lat, lng, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, radius_km, guthaben, organisation_id, profiles(vorname, nachname, email, telefon)'
     )
-    .is('geloescht_am', null)
     .order('created_at', { ascending: false })
 
-  // All SVs for map (including deactivated)
+  // All SVs for map (including deactivated, excluding soft-deleted)
   const sachverstaendige = (svList ?? [])
+    .filter(sv => !(sv as Record<string, unknown>).geloescht_am)
     .map((sv) => {
       const profileRaw = sv.profiles as unknown
       const profile = (Array.isArray(profileRaw) ? profileRaw[0] : profileRaw) as {
@@ -39,8 +40,9 @@ export default async function SachverstaendigePage() {
         qualifikationen: ((sv as Record<string, unknown>).qualifikationen as string[] | null) ?? [],
         anzahlungStatus: (sv as Record<string, unknown>).anzahlung_status as string ?? 'offen',
         istAktiv: sv.ist_aktiv !== false,
-        deaktiviertGrund: (sv as Record<string, unknown>).deaktiviert_grund as string | null ?? null,
-        deaktiviertAm: (sv as Record<string, unknown>).deaktiviert_am as string | null ?? null,
+        deaktiviertGrund: ((sv as Record<string, unknown>).deaktiviert_grund as string | null) ?? null,
+        deaktiviertAm: ((sv as Record<string, unknown>).deaktiviert_am as string | null) ?? null,
+        geloeschtAm: ((sv as Record<string, unknown>).geloescht_am as string | null) ?? null,
       }
     })
 

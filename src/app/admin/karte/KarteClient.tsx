@@ -31,6 +31,7 @@ interface SV {
   istAktiv?: boolean
   deaktiviertGrund?: string | null
   deaktiviertAm?: string | null
+  geloeschtAm?: string | null
 }
 
 interface Fall {
