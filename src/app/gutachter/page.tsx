@@ -37,7 +37,7 @@ export default function GutachterDashboard() {
   const [gutachtenFaellig, setGutachtenFaellig] = useState<{ id: string; kunde: string } | null>(null)
   const [svLat, setSvLat] = useState<number | null>(null)
   const [svLng, setSvLng] = useState<number | null>(null)
-  const [weather, setWeather] = useState<{ temp: number; code: number } | null>(null)
+  const [weather, setWeather] = useState<{ temp: number; code: number; hourly: { hour: number; temp: number; code: number }[]; tip: string } | null>(null)
 
   const [mode, setMode] = useState<Mode>('overview')
   const [activeFall, setActiveFall] = useState<Termin | null>(null)
@@ -104,8 +104,14 @@ export default function GutachterDashboard() {
 
     // Weather
     if (sv.standort_lat && sv.standort_lng) {
-      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${sv.standort_lat}&longitude=${sv.standort_lng}&current=temperature_2m,weathercode&timezone=Europe/Berlin`)
-        .then(r => r.json()).then(d => { if (d.current) setWeather({ temp: Math.round(d.current.temperature_2m), code: d.current.weathercode }) }).catch(() => {})
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${sv.standort_lat}&longitude=${sv.standort_lng}&current=temperature_2m,weathercode&hourly=temperature_2m,weathercode&timezone=Europe/Berlin&forecast_days=1`)
+        .then(r => r.json()).then(d => {
+          if (!d.current) return
+          const hourly = (d.hourly?.time ?? []).map((t: string, i: number) => ({ hour: new Date(t).getHours(), temp: Math.round(d.hourly.temperature_2m[i]), code: d.hourly.weathercode[i] })).filter((h: { hour: number }) => h.hour >= 8 && h.hour <= 18)
+          const c = d.current.weathercode
+          const tip = c >= 95 ? 'Vorsicht, Gewitter möglich!' : c >= 71 ? 'Straßen können glatt sein!' : c >= 61 ? 'Regenjacke einpacken!' : d.current.temperature_2m > 30 ? 'Wasser mitnehmen!' : d.current.temperature_2m < 5 ? 'Warm anziehen!' : 'Perfektes Gutachter-Wetter!'
+          setWeather({ temp: Math.round(d.current.temperature_2m), code: c, hourly, tip })
+        }).catch(() => {})
     }
 
     setLoading(false)
@@ -163,6 +169,32 @@ export default function GutachterDashboard() {
 
       {/* Mobile tabs */}
       {mode !== 'overview' && <div className="flex lg:hidden border-b border-gray-200 flex-shrink-0">{(['route', 'kunde', 'uploads'] as const).map(t => <button key={t} onClick={() => setMobileTab(t)} className={`flex-1 py-2 text-xs font-medium border-b-2 ${mobileTab === t ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-400'}`}>{t === 'route' ? (mode === 'onsite' ? 'Erfassung' : 'Route') : t === 'kunde' ? 'Kunde' : 'Uploads'}</button>)}</div>}
+
+      {/* ═══ WETTER-BANNER ═══ */}
+      {weather && mode === 'overview' && (
+        <div className={`flex-shrink-0 px-4 py-3 flex items-center gap-4 ${weather.code >= 61 ? 'bg-gradient-to-r from-gray-600 to-gray-500 text-white' : weather.code >= 45 ? 'bg-gradient-to-r from-gray-400 to-gray-300 text-white' : 'bg-gradient-to-r from-blue-500 to-sky-400 text-white'}`}>
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="text-4xl">{weather.code === 0 ? '☀️' : weather.code <= 3 ? '☁️' : weather.code <= 48 ? '🌫️' : weather.code <= 67 ? '🌧️' : weather.code <= 77 ? '❄️' : weather.code <= 82 ? '🌦️' : '⛈️'}</span>
+            <div>
+              <p className="text-2xl font-bold">{weather.temp}°C</p>
+              <p className="text-xs opacity-80">{weather.code === 0 ? 'Sonnig' : weather.code <= 3 ? 'Bewölkt' : weather.code <= 48 ? 'Nebel' : weather.code <= 67 ? 'Regen' : weather.code <= 77 ? 'Schnee' : weather.code <= 82 ? 'Schauer' : 'Gewitter'}</p>
+            </div>
+          </div>
+          {/* Stunden-Leiste */}
+          <div className="flex-1 flex items-center gap-1 overflow-x-auto min-w-0">
+            {weather.hourly.filter((_, i) => i % 2 === 0).map(h => (
+              <div key={h.hour} className="text-center shrink-0 px-1">
+                <p className="text-[9px] opacity-60">{String(h.hour).padStart(2, '0')}:00</p>
+                <p className="text-xs font-semibold">{h.temp}°</p>
+              </div>
+            ))}
+          </div>
+          <div className="shrink-0 text-right hidden sm:block">
+            <p className="text-sm font-medium">Gute Fahrt!</p>
+            <p className="text-[10px] opacity-80">{weather.tip}</p>
+          </div>
+        </div>
+      )}
 
       {/* ═══ HAUPTBEREICH ═══ */}
       <div className="flex-1 min-h-0">
