@@ -23,11 +23,11 @@ export default async function GutachterLayout({
 
   let { data: sv } = await supabase
     .from('sachverstaendige')
-    .select('logo_url, brand_primary, brand_secondary, vertrag_unterschrieben, anzahlung_status, freigeschaltet')
+    .select('logo_url, brand_primary, brand_secondary, vertrag_unterschrieben, anzahlung_status, freigeschaltet, standort_lat, standort_lng')
     .eq('profile_id', user.id)
     .single()
   if (!sv) {
-    const r = await supabase.from('sachverstaendige').select('logo_url, brand_primary, brand_secondary, vertrag_unterschrieben, anzahlung_status, freigeschaltet').eq('user_id', user.id).single()
+    const r = await supabase.from('sachverstaendige').select('logo_url, brand_primary, brand_secondary, vertrag_unterschrieben, anzahlung_status, freigeschaltet, standort_lat, standort_lng').eq('user_id', user.id).single()
     sv = r.data
   }
 
@@ -40,6 +40,8 @@ export default async function GutachterLayout({
       logoUrl={sv?.logo_url ?? null}
       brandPrimary={sv?.brand_primary ?? null}
       brandSecondary={sv?.brand_secondary ?? null}
+      standortLat={sv?.standort_lat ? Number(sv.standort_lat) : null}
+      standortLng={sv?.standort_lng ? Number(sv.standort_lng) : null}
     >
       {/* Anzahlung-Banner */}
       {sv?.vertrag_unterschrieben && sv?.anzahlung_status !== 'bezahlt' && (

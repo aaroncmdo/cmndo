@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -20,15 +20,22 @@ type Fall = {
   lead_id: string | null
 }
 
+type DailyW = { date: string; tempMax: number; tempMin: number; code: number }
+function wEmoji(c: number) { return c === 0 ? '☀️' : c <= 3 ? '☁️' : c <= 48 ? '🌫️' : c <= 67 ? '🌧️' : c <= 77 ? '❄️' : c <= 82 ? '🌦️' : '⛈️' }
+
 export default function SVKalenderClient({
   faelle,
   leadMap,
   gcalConnected,
+  standortLat,
+  standortLng,
 }: {
   faelle: Fall[]
   leadMap: Record<string, string>
   svId: string
   gcalConnected: boolean
+  standortLat?: number | null
+  standortLng?: number | null
 }) {
   const router = useRouter()
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -37,6 +44,21 @@ export default function SVKalenderClient({
   const [terminTime, setTerminTime] = useState('10:00')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [dailyWeather, setDailyWeather] = useState<Record<string, DailyW>>({})
+
+  // Fetch 7-day weather forecast
+  useEffect(() => {
+    if (!standortLat || !standortLng) return
+    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${standortLat}&longitude=${standortLng}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Europe/Berlin&forecast_days=7`)
+      .then(r => r.json()).then(d => {
+        if (!d.daily?.time) return
+        const map: Record<string, DailyW> = {}
+        for (let i = 0; i < d.daily.time.length; i++) {
+          map[d.daily.time[i]] = { date: d.daily.time[i], tempMax: Math.round(d.daily.temperature_2m_max[i]), tempMin: Math.round(d.daily.temperature_2m_min[i]), code: d.daily.weathercode[i] }
+        }
+        setDailyWeather(map)
+      }).catch(() => {})
+  }, [standortLat, standortLng])
 
   const weekDays = useMemo(() => {
     const start = startOfWeek(currentDate, { weekStartsOn: 1 })
@@ -105,6 +127,8 @@ export default function SVKalenderClient({
             {weekDays.map((day, i) => {
               const entries = getEntriesForDay(day)
               const today = isToday(day)
+              const dayKey = format(day, 'yyyy-MM-dd')
+              const dayW = dailyWeather[dayKey]
               return (
                 <div key={i} className={`border-r border-gray-200/50 last:border-r-0 min-h-48 ${today ? 'bg-gray-100/30' : ''}`}>
                   {/* Day header */}
@@ -115,6 +139,12 @@ export default function SVKalenderClient({
                     }`}>
                       {format(day, 'd')}
                     </div>
+                    {dayW && (
+                      <div className="mt-0.5">
+                        <span className="text-xs">{wEmoji(dayW.code)}</span>
+                        <span className="text-[9px] text-gray-500 ml-0.5">{dayW.tempMax}°</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Entries */}

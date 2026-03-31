@@ -10,7 +10,7 @@ export default async function SVKalenderPage() {
   // Get the SV's sachverstaendige ID
   const { data: sv } = await supabase
     .from('sachverstaendige')
-    .select('id, gcal_connected')
+    .select('id, gcal_connected, standort_lat, standort_lng')
     .eq('profile_id', user.id)
     .single()
 
@@ -41,6 +41,8 @@ export default async function SVKalenderPage() {
       leadMap={leadMap}
       svId={sv.id}
       gcalConnected={!!sv.gcal_connected}
+      standortLat={sv.standort_lat ? Number(sv.standort_lat) : null}
+      standortLng={sv.standort_lng ? Number(sv.standort_lng) : null}
     />
   )
 }

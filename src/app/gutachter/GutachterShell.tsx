@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -12,8 +12,6 @@ import {
   ReceiptIcon,
   UserIcon,
   LogOutIcon,
-  ClipboardListIcon,
-  BellIcon,
 } from 'lucide-react'
 import NotificationBell from '@/app/admin/_components/NotificationBell'
 
@@ -23,8 +21,15 @@ const NAV_ITEMS = [
   { href: '/gutachter/gebiet', label: 'Mein Gebiet', icon: MapIcon },
   { href: '/gutachter/kalender', label: 'Kalender', icon: CalendarIcon },
   { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
-  { href: '/gutachter/mitteilungen', label: 'Mitteilungen', icon: BellIcon },
 ]
+
+type HourW = { hour: number; temp: number; code: number }
+type DailyW = { date: string; tempMax: number; tempMin: number; code: number }
+
+function wEmoji(c: number) { return c === 0 ? '☀️' : c <= 3 ? '☁️' : c <= 48 ? '🌫️' : c <= 67 ? '🌧️' : c <= 77 ? '❄️' : c <= 82 ? '🌦️' : '⛈️' }
+function wGrad(c: number) { return c >= 61 ? 'from-gray-700 to-gray-500' : c >= 45 ? 'from-gray-500 to-gray-400' : c <= 3 ? 'from-blue-500 to-sky-400' : 'from-gray-400 to-gray-300' }
+function wTip(c: number, t: number) { return c >= 95 ? 'Vorsicht, Gewitter!' : c >= 71 ? 'Straßen können glatt sein!' : c >= 61 ? 'Regenjacke einpacken!' : t > 30 ? 'Wasser mitnehmen!' : t < 5 ? 'Warm anziehen!' : 'Perfektes Gutachter-Wetter!' }
+function wLabel(c: number) { return c === 0 ? 'Sonnig' : c <= 3 ? 'Bewölkt' : c <= 48 ? 'Nebel' : c <= 67 ? 'Regen' : c <= 77 ? 'Schnee' : c <= 82 ? 'Schauer' : 'Gewitter' }
 
 export default function GutachterShell({
   displayName,
@@ -32,17 +37,22 @@ export default function GutachterShell({
   logoUrl,
   brandPrimary,
   brandSecondary,
+  standortLat,
+  standortLng,
 }: {
   displayName: string
   children: React.ReactNode
   logoUrl?: string | null
   brandPrimary?: string | null
   brandSecondary?: string | null
+  standortLat?: number | null
+  standortLng?: number | null
 }) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [weather, setWeather] = useState<{ temp: number; code: number; hourly: Record<string, HourW[]>; daily: DailyW[] } | null>(null)
 
-  // Apply brand colors as CSS custom properties
+  // Apply brand colors
   useEffect(() => {
     if (brandPrimary) document.documentElement.style.setProperty('--brand-primary', brandPrimary)
     if (brandSecondary) document.documentElement.style.setProperty('--brand-secondary', brandSecondary)
@@ -51,6 +61,33 @@ export default function GutachterShell({
       document.documentElement.style.removeProperty('--brand-secondary')
     }
   }, [brandPrimary, brandSecondary])
+
+  // Fetch 7-day weather
+  useEffect(() => {
+    if (!standortLat || !standortLng) return
+    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${standortLat}&longitude=${standortLng}&current=temperature_2m,weathercode&hourly=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Europe/Berlin&forecast_days=7`)
+      .then(r => r.json()).then(d => {
+        if (!d.current) return
+        // Group hourly data by date
+        const hourlyByDate: Record<string, HourW[]> = {}
+        for (let i = 0; i < (d.hourly?.time ?? []).length; i++) {
+          const t = d.hourly.time[i]
+          const dateKey = t.split('T')[0]
+          const h: HourW = { hour: new Date(t).getHours(), temp: Math.round(d.hourly.temperature_2m[i]), code: d.hourly.weathercode[i] }
+          if (!hourlyByDate[dateKey]) hourlyByDate[dateKey] = []
+          hourlyByDate[dateKey].push(h)
+        }
+        // Daily data
+        const daily: DailyW[] = (d.daily?.time ?? []).map((t: string, i: number) => ({
+          date: t,
+          tempMax: Math.round(d.daily.temperature_2m_max[i]),
+          tempMin: Math.round(d.daily.temperature_2m_min[i]),
+          code: d.daily.weathercode[i],
+        }))
+        setWeather({ temp: Math.round(d.current.temperature_2m), code: d.current.weathercode, hourly: hourlyByDate, daily })
+      }).catch(() => {})
+  }, [standortLat, standortLng])
+
   const [unreadCount, setUnreadCount] = useState(0)
 
   const loadUnread = useCallback(async () => {
@@ -93,14 +130,16 @@ export default function GutachterShell({
     return pathname.startsWith(href)
   }
 
+  // Get today's hourly weather for the banner
+  const todayKey = new Date().toISOString().split('T')[0]
+  const todayHourly = weather?.hourly?.[todayKey]?.filter(h => h.hour >= 8 && h.hour <= 18) ?? []
+  const tomorrowDaily = weather?.daily?.[1] ?? null
+
   return (
     <div className="h-screen bg-[#f8f9fb] flex overflow-hidden">
       {/* Mobile overlay */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Sidebar */}
@@ -132,17 +171,11 @@ export default function GutachterShell({
             >
               <Icon className="w-5 h-5" />
               {label}
-              {href === '/gutachter/mitteilungen' && unreadCount > 0 && (
-                <span className="ml-auto bg-red-600 text-white text-xs font-bold min-w-[1.25rem] h-5 flex items-center justify-center rounded-full px-1.5">
-                  {unreadCount > 99 ? '99+' : unreadCount}
-                </span>
-              )}
             </Link>
           ))}
         </nav>
 
         <div className="mt-auto px-3 py-3 border-t border-gray-200 space-y-2">
-          {/* Klickbarer Profil-Bereich */}
           <Link href="/gutachter/profil" onClick={() => setSidebarOpen(false)}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-100 transition-colors group">
             <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
@@ -162,24 +195,50 @@ export default function GutachterShell({
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0 h-screen">
+        {/* Mobile Header */}
         <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white shrink-0">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 -ml-2 text-gray-500 hover:text-gray-800 transition-colors"
-            aria-label="Menu oeffnen"
-          >
-            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+          <button onClick={() => setSidebarOpen(true)} className="p-2 -ml-2 text-gray-500 hover:text-gray-800 transition-colors" aria-label="Menu oeffnen">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
           </button>
           <span className="text-gray-900 font-semibold text-sm">Claimondo</span>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+          </div>
+        </header>
+
+        {/* Desktop Navbar */}
+        <header className="hidden lg:flex items-center justify-end px-4 py-2 border-b border-gray-200 bg-white shrink-0 h-12 gap-3">
+          {unreadCount > 0 && (
+            <Link href="/gutachter/mitteilungen" className="text-xs text-gray-500 hover:text-blue-600 bg-gray-100 px-2.5 py-1 rounded-full">
+              {unreadCount} ungelesen
+            </Link>
+          )}
           <NotificationBell />
         </header>
 
-        {/* Desktop bell top-right */}
-        <div className="hidden lg:block fixed top-3 right-4 z-30"><NotificationBell /></div>
+        {/* Wetter-Banner (auf ALLEN Seiten sichtbar) */}
+        {weather && (
+          <div className={`flex-shrink-0 px-4 py-2.5 flex items-center gap-4 bg-gradient-to-r ${wGrad(weather.code)} text-white`} style={{ minHeight: 64 }}>
+            <div className="flex items-center gap-2.5 shrink-0">
+              <span className="text-3xl">{wEmoji(weather.code)}</span>
+              <div><p className="text-xl font-bold">{weather.temp}°C</p><p className="text-[10px] opacity-80">{wLabel(weather.code)}</p></div>
+            </div>
+            <div className="flex-1 flex items-center gap-1 overflow-x-auto min-w-0">
+              {todayHourly.filter((_, i) => i % 2 === 0).map(h => (
+                <div key={h.hour} className="text-center shrink-0 px-1"><p className="text-[9px] opacity-60">{String(h.hour).padStart(2, '0')}h</p><p className="text-[10px]">{wEmoji(h.code)}</p><p className="text-xs font-semibold">{h.temp}°</p></div>
+              ))}
+            </div>
+            <div className="shrink-0 text-right hidden sm:block">
+              <p className="text-sm font-medium">Gute Fahrt!</p>
+              <p className="text-[10px] opacity-80">{wTip(weather.code, weather.temp)}</p>
+              {tomorrowDaily && (
+                <p className="text-[10px] opacity-70 mt-0.5">Morgen: {wEmoji(tomorrowDaily.code)} {tomorrowDaily.tempMax}°/{tomorrowDaily.tempMin}° {wLabel(tomorrowDaily.code)}</p>
+              )}
+            </div>
+          </div>
+        )}
 
-        <main className="h-[calc(100vh-64px)] overflow-hidden">{children}</main>
+        <main className="flex-1 overflow-hidden">{children}</main>
       </div>
     </div>
   )

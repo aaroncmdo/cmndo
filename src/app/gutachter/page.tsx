@@ -3,20 +3,16 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { NavigationIcon, PhoneIcon, CameraIcon, CheckIcon, MapPinIcon, ArrowLeftIcon, SunIcon, CloudIcon, CloudRainIcon, SnowflakeIcon, CloudLightningIcon, CloudFogIcon } from 'lucide-react'
+import { NavigationIcon, PhoneIcon, CameraIcon, CheckIcon, MapPinIcon, ArrowLeftIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 type Termin = { id: string; uhrzeit: string; kunde: string; telefon: string | null; email: string | null; adresse: string; kennzeichen: string | null; fahrzeug: string | null; schadentyp: string | null }
 type Auftrag = { id: string; kunde: string; kennzeichen: string | null; schadentyp: string | null; datum: string }
-type Task = { id: string; titel: string; fallId: string | null }
+type Task = { id: string; titel: string; fallId: string | null; faelligAm: string | null }
+type DoneTask = { id: string; titel: string }
 type Mode = 'overview' | 'navigation' | 'onsite'
-type HourW = { hour: number; temp: number; code: number }
 
 const FOTO = ['Vorne', 'Hinten', 'Links', 'Rechts']
-function wEmoji(c: number) { return c === 0 ? '☀️' : c <= 3 ? '☁️' : c <= 48 ? '🌫️' : c <= 67 ? '🌧️' : c <= 77 ? '❄️' : c <= 82 ? '🌦️' : '⛈️' }
-function wGrad(c: number) { return c >= 61 ? 'from-gray-700 to-gray-500' : c >= 45 ? 'from-gray-500 to-gray-400' : c <= 3 ? 'from-blue-500 to-sky-400' : 'from-gray-400 to-gray-300' }
-function wTip(c: number, t: number) { return c >= 95 ? 'Vorsicht, Gewitter!' : c >= 71 ? 'Straßen können glatt sein!' : c >= 61 ? 'Regenjacke einpacken!' : t > 30 ? 'Wasser mitnehmen!' : t < 5 ? 'Warm anziehen!' : 'Perfektes Gutachter-Wetter!' }
-function wLabel(c: number) { return c === 0 ? 'Sonnig' : c <= 3 ? 'Bewölkt' : c <= 48 ? 'Nebel' : c <= 67 ? 'Regen' : c <= 77 ? 'Schnee' : c <= 82 ? 'Schauer' : 'Gewitter' }
 
 export default function GutachterCockpit() {
   const router = useRouter()
@@ -29,8 +25,8 @@ export default function GutachterCockpit() {
   const [faellig, setFaellig] = useState<{ id: string; kunde: string } | null>(null)
   const [finanz, setFinanz] = useState({ eingegangen: 0, offen: 0, leadpreise: 0 })
   const [svLat, setSvLat] = useState<number | null>(null); const [svLng, setSvLng] = useState<number | null>(null)
-  const [weather, setWeather] = useState<{ temp: number; code: number; hourly: HourW[] } | null>(null)
   const [selectedDate, setSelectedDate] = useState(new Date())
+  const [doneTasks, setDoneTasks] = useState<DoneTask[]>([]); const [showDone, setShowDone] = useState(false)
   const [mode, setMode] = useState<Mode>('overview'); const [active, setActive] = useState<Termin | null>(null)
   const [fotos, setFotos] = useState<Record<string, boolean>>({}); const [fin, setFin] = useState(''); const [km, setKm] = useState(''); const [notizen, setNotizen] = useState('')
   const [uploading, setUploading] = useState(false); const [completing, setCompleting] = useState(false)
@@ -52,11 +48,12 @@ export default function GutachterCockpit() {
     const ds = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString()
     const de = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + 1).toISOString()
 
-    const [tR, nR, tkR, fR] = await Promise.all([
+    const [tR, nR, tkR, fR, doneR] = await Promise.all([
       supabase.from('faelle').select('id, fall_nummer, schadens_adresse, schadens_plz, schadens_ort, sv_termin, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadenfall_typ').eq('sv_id', sv.id).gte('sv_termin', ds).lt('sv_termin', de).not('status', 'in', '("abgeschlossen","storniert")').order('sv_termin', { ascending: true }),
       supabase.from('faelle').select('id, lead_id, kennzeichen, schadenfall_typ, created_at').eq('sv_id', sv.id).is('sv_termin', null).not('status', 'in', '("abgeschlossen","storniert")').limit(10),
-      supabase.from('tasks').select('id, titel, fall_id').or(`zugewiesen_an.eq.${user.id},empfaenger_user_id.eq.${user.id}`).in('status', ['offen', 'in-arbeit']).lte('faellig_am', de).limit(15),
+      supabase.from('tasks').select('id, titel, fall_id, faellig_am').or(`zugewiesen_an.eq.${user.id},empfaenger_user_id.eq.${user.id}`).in('status', ['offen', 'in-arbeit']).lte('faellig_am', de).limit(15),
       supabase.from('faelle').select('id, lead_id').eq('sv_id', sv.id).not('sv_termin', 'is', null).lt('sv_termin', now.toISOString()).is('gutachten_eingegangen_am', null).not('status', 'in', '("abgeschlossen","storniert")').limit(1),
+      supabase.from('tasks').select('id, titel').or(`zugewiesen_an.eq.${user.id},empfaenger_user_id.eq.${user.id}`).eq('status', 'erledigt').gte('updated_at', ds).lt('updated_at', de).limit(10),
     ])
 
     const ids = [...new Set([...(tR.data ?? []), ...(nR.data ?? []), ...(fR.data ?? [])].map(f => f.lead_id).filter(Boolean) as string[])]
@@ -65,7 +62,8 @@ export default function GutachterCockpit() {
 
     setTermine((tR.data ?? []).map(f => ({ id: f.id, uhrzeit: f.sv_termin ? new Date(f.sv_termin).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '—', kunde: lm[f.lead_id ?? '']?.n ?? '—', telefon: lm[f.lead_id ?? '']?.t ?? null, email: lm[f.lead_id ?? '']?.e ?? null, adresse: [f.schadens_adresse, f.schadens_plz, f.schadens_ort].filter(Boolean).join(', '), kennzeichen: f.kennzeichen ?? null, fahrzeug: [f.fahrzeug_hersteller, f.fahrzeug_modell].filter(Boolean).join(' ') || null, schadentyp: f.schadenfall_typ ?? null })))
     setAuftraege((nR.data ?? []).map(f => ({ id: f.id, kunde: lm[f.lead_id ?? '']?.n ?? '—', kennzeichen: f.kennzeichen ?? null, schadentyp: f.schadenfall_typ ?? null, datum: f.created_at ? new Date(f.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) : '' })))
-    setTasks((tkR.data ?? []).map(t => ({ id: t.id, titel: t.titel, fallId: t.fall_id })))
+    setTasks((tkR.data ?? []).map(t => ({ id: t.id, titel: t.titel, fallId: t.fall_id, faelligAm: t.faellig_am ?? null })))
+    setDoneTasks((doneR.data ?? []).map(t => ({ id: t.id, titel: t.titel })))
     const ff = (fR.data ?? [])[0]; setFaellig(ff ? { id: ff.id, kunde: lm[ff.lead_id ?? '']?.n ?? '—' } : null)
 
     const stops = (tR.data ?? []).map(f => [f.schadens_adresse, f.schadens_plz, f.schadens_ort].filter(Boolean).join(', ')).filter(Boolean)
@@ -77,11 +75,6 @@ export default function GutachterCockpit() {
     const off = (cf ?? []).filter(f => !['abgeschlossen', 'storniert'].includes(f.status)).reduce((s, f) => s + Number(f.gutachten_betrag ?? 0) * 0.12, 0)
     setFinanz({ eingegangen: Math.round(ein), offen: Math.round(off), leadpreise: 0 })
 
-    // Weather
-    if (sv.standort_lat && sv.standort_lng) {
-      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${sv.standort_lat}&longitude=${sv.standort_lng}&current=temperature_2m,weathercode&hourly=temperature_2m,weathercode&timezone=Europe/Berlin&forecast_days=1`)
-        .then(r => r.json()).then(d => { if (!d.current) return; const hr = (d.hourly?.time ?? []).map((t: string, i: number) => ({ hour: new Date(t).getHours(), temp: Math.round(d.hourly.temperature_2m[i]), code: d.hourly.weathercode[i] })).filter((h: HourW) => h.hour >= 8 && h.hour <= 18); setWeather({ temp: Math.round(d.current.temperature_2m), code: d.current.weathercode, hourly: hr }) }).catch(() => {})
-    }
     setLoading(false)
   }, [supabase, selectedDate])
 
@@ -99,26 +92,10 @@ export default function GutachterCockpit() {
   const embed = active && mk && svLat && svLng ? `https://www.google.com/maps/embed/v1/directions?key=${mk}&origin=${svLat},${svLng}&destination=${encodeURIComponent(active.adresse)}&mode=driving` : null
   const navUrl = active ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(active.adresse)}` : null
 
-  if (loading) return <div className="h-[calc(100vh-64px)] flex items-center justify-center"><div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
+  if (loading) return <div className="h-full flex items-center justify-center"><div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
 
   return (
-    <div style={{ height: 'calc(100vh - 64px)' }} className="overflow-hidden flex flex-col">
-
-      {/* ═══ WETTER-BANNER ═══ */}
-      {weather && (
-        <div className={`flex-shrink-0 px-4 py-3 flex items-center gap-4 bg-gradient-to-r ${wGrad(weather.code)} text-white`} style={{ minHeight: 80 }}>
-          <div className="flex items-center gap-3 shrink-0">
-            <span className="text-4xl">{wEmoji(weather.code)}</span>
-            <div><p className="text-2xl font-bold">{weather.temp}°C</p><p className="text-xs opacity-80">{wLabel(weather.code)}</p></div>
-          </div>
-          <div className="flex-1 flex items-center gap-1 overflow-x-auto min-w-0">
-            {weather.hourly.filter((_, i) => i % 2 === 0).map(h => (
-              <div key={h.hour} className="text-center shrink-0 px-1"><p className="text-[9px] opacity-60">{String(h.hour).padStart(2, '0')}h</p><p className="text-[10px]">{wEmoji(h.code)}</p><p className="text-xs font-semibold">{h.temp}°</p></div>
-            ))}
-          </div>
-          <div className="shrink-0 text-right hidden sm:block"><p className="text-sm font-medium">Gute Fahrt!</p><p className="text-[10px] opacity-80">{wTip(weather.code, weather.temp)}</p></div>
-        </div>
-      )}
+    <div className="h-full overflow-hidden flex flex-col">
 
       {/* ═══ STATS-LEISTE ═══ */}
       <div className="h-10 flex items-center justify-between px-4 bg-white border-b border-gray-200 flex-shrink-0">
@@ -165,7 +142,8 @@ export default function GutachterCockpit() {
           </div>
           <div className="overflow-y-auto p-4 space-y-3 hidden lg:block">
             {auftraege.length > 0 && <div className="bg-white border border-gray-200 rounded-lg p-3"><p className="text-sm font-semibold text-gray-800 mb-2">Neue Aufträge ({auftraege.length})</p>{auftraege.map(a => <div key={a.id} onClick={() => router.push(`/gutachter/fall/${a.id}`)} className="flex items-center gap-2 p-2 rounded hover:bg-gray-50 cursor-pointer"><div className="flex-1 min-w-0"><p className="text-sm text-gray-900 truncate">{a.kunde}</p><div className="flex gap-1 mt-0.5">{a.kennzeichen && <span className="text-[9px] bg-gray-100 text-gray-600 px-1 py-0.5 rounded">{a.kennzeichen}</span>}{a.schadentyp && <span className="text-[9px] bg-blue-50 text-blue-600 px-1 py-0.5 rounded">{a.schadentyp.toUpperCase()}</span>}</div></div></div>)}</div>}
-            {tasks.length > 0 && <div className="bg-white border border-gray-200 rounded-lg p-3"><p className="text-sm font-semibold text-gray-800 mb-2">Heutige Aufgaben ({tasks.length})</p>{tasks.slice(0, 5).map(t => <div key={t.id} onClick={() => t.fallId && router.push(`/gutachter/fall/${t.fallId}`)} className="text-xs text-gray-700 hover:text-blue-600 py-1.5 cursor-pointer truncate border-b border-gray-50 last:border-0">{t.titel}</div>)}</div>}
+            {tasks.length > 0 && <div className="bg-white border border-gray-200 rounded-lg p-3"><p className="text-sm font-semibold text-gray-800 mb-2">Heutige Aufgaben ({tasks.length})</p>{tasks.slice(0, 8).map(t => { const overdue = t.faelligAm && new Date(t.faelligAm) < new Date(new Date().toDateString()); return <div key={t.id} onClick={() => t.fallId && router.push(`/gutachter/fall/${t.fallId}`)} className="flex items-center gap-2 py-1.5 cursor-pointer border-b border-gray-50 last:border-0 hover:bg-gray-50 rounded px-1"><span className="text-xs text-gray-700 truncate flex-1">{t.titel}</span>{overdue ? <span className="text-[9px] bg-red-50 text-red-600 px-1.5 py-0.5 rounded-full font-medium shrink-0">Überfällig</span> : <span className="text-[9px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded-full font-medium shrink-0">Heute</span>}</div> })}</div>}
+            {doneTasks.length > 0 && <div className="bg-white border border-gray-200 rounded-lg p-3"><button onClick={() => setShowDone(!showDone)} className="flex items-center gap-2 text-sm font-semibold text-gray-600 w-full"><CheckIcon className="w-4 h-4 text-green-500" /><span>Am {selectedDate.toLocaleDateString('de-DE')} erledigt ({doneTasks.length})</span><span className="ml-auto text-gray-400 text-xs">{showDone ? '▲' : '▼'}</span></button>{showDone && <div className="mt-2 space-y-1">{doneTasks.map(t => <p key={t.id} className="text-xs text-gray-500 flex items-center gap-1.5"><CheckIcon className="w-3 h-3 text-green-400 shrink-0" /><span className="line-through">{t.titel}</span></p>)}</div>}</div>}
             <div className="grid grid-cols-2 gap-2">
               <Link href="/gutachter/faelle" className="bg-white border border-gray-200 rounded-lg p-3 text-center hover:border-blue-300"><p className="text-lg font-bold text-gray-900">{stats.faelle}/{stats.max}</p><p className="text-[10px] text-gray-500">Fälle</p></Link>
               <Link href="/gutachter/abrechnung" className="bg-white border border-gray-200 rounded-lg p-3 text-center hover:border-blue-300"><p className="text-lg font-bold text-gray-900">{stats.guthaben}€</p><p className="text-[10px] text-gray-500">Guthaben</p></Link>
