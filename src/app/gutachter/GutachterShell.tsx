@@ -170,7 +170,7 @@ export default function GutachterShell({
           <div className="w-10" />
         </header>
 
-        <main className="flex-1 min-h-0 overflow-hidden">{children}</main>
+        <main className="h-[calc(100vh-64px)] overflow-hidden">{children}</main>
       </div>
     </div>
   )
