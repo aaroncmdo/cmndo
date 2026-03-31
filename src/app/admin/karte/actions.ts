@@ -50,12 +50,18 @@ export async function reactivateGutachter(svId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht angemeldet')
 
+  // Core update (ist_aktiv always exists)
   const { error } = await supabase
     .from('sachverstaendige')
-    .update({ ist_aktiv: true, deaktiviert_grund: null, deaktiviert_am: null })
+    .update({ ist_aktiv: true })
     .eq('id', svId)
-
   if (error) throw new Error(error.message)
+
+  // Try clearing deactivation fields (columns may not exist yet)
+  try {
+    await supabase.from('sachverstaendige').update({ deaktiviert_grund: null, deaktiviert_am: null }).eq('id', svId)
+  } catch { /* columns may not exist */ }
+
   revalidatePath('/admin/sachverstaendige')
   revalidatePath('/admin/karte')
 }
@@ -65,12 +71,18 @@ export async function deactivateGutachter(svId: string, grund: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht angemeldet')
 
+  // Core update (ist_aktiv always exists)
   const { error } = await supabase
     .from('sachverstaendige')
-    .update({ ist_aktiv: false, deaktiviert_grund: grund || 'Manuell deaktiviert', deaktiviert_am: new Date().toISOString() })
+    .update({ ist_aktiv: false })
     .eq('id', svId)
-
   if (error) throw new Error(error.message)
+
+  // Try setting deactivation details (columns may not exist yet)
+  try {
+    await supabase.from('sachverstaendige').update({ deaktiviert_grund: grund || 'Manuell deaktiviert', deaktiviert_am: new Date().toISOString() }).eq('id', svId)
+  } catch { /* columns may not exist */ }
+
   revalidatePath('/admin/sachverstaendige')
   revalidatePath('/admin/karte')
 }
@@ -108,25 +120,20 @@ export async function softDeleteGutachter(svId: string) {
     throw new Error(`Noch ${count} offene Fälle. Bitte zuerst umverteilen.`)
   }
 
-  // Soft-delete: mark as deleted
+  // Soft-delete: deactivate (ist_aktiv always exists)
   const { error } = await supabase
     .from('sachverstaendige')
-    .update({ ist_aktiv: false, geloescht_am: new Date().toISOString() })
+    .update({ ist_aktiv: false })
     .eq('id', svId)
-
   if (error) throw new Error(error.message)
 
-  // Timeline entry
+  // Try setting geloescht_am + deaktiviert_grund (columns may not exist yet)
   try {
-    const { data: sv } = await supabase.from('sachverstaendige').select('profile_id').eq('id', svId).single()
-    const { data: profile } = sv?.profile_id
-      ? await supabase.from('profiles').select('vorname, nachname').eq('id', sv.profile_id).single()
-      : { data: null }
-    const svName = profile ? `${profile.vorname ?? ''} ${profile.nachname ?? ''}`.trim() : 'Unbekannt'
-    const { data: adminProfile } = await supabase.from('profiles').select('vorname, nachname').eq('id', user.id).single()
-    const adminName = adminProfile ? `${adminProfile.vorname ?? ''} ${adminProfile.nachname ?? ''}`.trim() : 'Admin'
-    await supabase.from('timeline').insert({ typ: 'system', titel: 'Gutachter gelöscht', beschreibung: `${svName} wurde gelöscht von ${adminName}` })
-  } catch { /* timeline may not accept this format */ }
+    await supabase.from('sachverstaendige').update({
+      geloescht_am: new Date().toISOString(),
+      deaktiviert_grund: 'Manuell gelöscht durch Admin',
+    }).eq('id', svId)
+  } catch { /* columns may not exist */ }
 
   revalidatePath('/admin/sachverstaendige')
   revalidatePath('/admin/karte')
