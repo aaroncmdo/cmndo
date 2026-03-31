@@ -9,7 +9,7 @@ import {
   emailFallAbgeschlossen,
 } from '@/lib/email'
 import { sendStatusWhatsApp } from '@/lib/whatsapp'
-import { triggerKonversionTasks, triggerGutachterTerminTask, triggerGutachtenUploadTask, triggerQcTask } from '@/lib/tasking'
+import { triggerKonversionTasks, triggerGutachterTerminTask, triggerGutachtenUploadTask, triggerQcTask, triggerLeadTasks, triggerOnboardingTasks, resolveGates } from '@/lib/tasking'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 
 // ─── Fall Status ────────────────────────────────────────────────────────────
@@ -139,6 +139,12 @@ export async function createLead(data: {
   })
 
   if (error) throw new Error(error.message)
+
+  // Phase 1: Lead-Tasks erstellen
+  // Get the inserted lead ID
+  const { data: newLead } = await supabase.from('leads').select('id').eq('telefon', data.telefon || '+491633628571').order('created_at', { ascending: false }).limit(1).single()
+  if (newLead) triggerLeadTasks(newLead.id, user.id).catch(() => {})
+
   revalidatePath('/admin/dispatch')
 }
 

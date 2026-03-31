@@ -201,3 +201,46 @@ export async function triggerArchivierungTask(fallId: string, kundenbetreuerIds:
     deadline,
   })
 }
+
+// ─── Phase 1: Lead-Tasks ────────────────────────────────────────────────────
+
+export async function triggerLeadTasks(leadId: string, zugewiesenAn: string | null) {
+  const d30m = new Date(Date.now() + 30 * 60 * 1000)
+  const d2h = new Date(Date.now() + 2 * 60 * 60 * 1000)
+
+  // L-01 sofort
+  await createAutoTask({ fall_id: leadId, empfaenger_id: zugewiesenAn, empfaenger_rolle: 'leadbearbeiter', task_typ: 'lead-qualifizieren', titel: 'Lead qualifizieren', beschreibung: 'Neuer Lead eingegangen. Bitte innerhalb von 30 Min qualifizieren.', deadline: d30m, prioritaet: 'dringend', phase: 'lead', task_code: 'L-01' })
+  // L-04 parallel (KI-Schätzung)
+  await createAutoTask({ fall_id: leadId, empfaenger_id: null, empfaenger_rolle: 'system', task_typ: 'ki-schaetzung', titel: 'KI-Schadenschaetzung durchfuehren', beschreibung: 'Automatische Schaetzung basierend auf Schadensbeschreibung.', deadline: d2h, phase: 'lead', task_code: 'L-04' })
+}
+
+// ─── Phase 3: Onboarding-Tasks ──────────────────────────────────────────────
+
+export async function triggerOnboardingTasks(fallId: string, kbId: string | null, kundeId: string | null) {
+  const d24h = new Date(Date.now() + 24 * 60 * 60 * 1000)
+  const d48h = new Date(Date.now() + 48 * 60 * 60 * 1000)
+
+  await createAutoTask({ fall_id: fallId, empfaenger_id: kundeId, empfaenger_rolle: 'kunde', task_typ: 'flowlink-durchlaufen', titel: 'FlowLink durchlaufen', beschreibung: 'Bitte alle Schritte ausfuellen und Dokumente hochladen.', deadline: d48h, phase: 'onboarding', task_code: 'O-01' })
+  await createAutoTask({ fall_id: fallId, empfaenger_id: kbId, empfaenger_rolle: 'kundenbetreuer', task_typ: 'erster-kontakt-kb', titel: 'Erster Kontakt mit Kunde', beschreibung: 'Bitte innerhalb von 24h den Kunden kontaktieren.', deadline: d24h, prioritaet: 'dringend', phase: 'onboarding', task_code: 'O-05' })
+  await createAutoTask({ fall_id: fallId, empfaenger_id: kbId, empfaenger_rolle: 'kundenbetreuer', task_typ: 'docs-nachhalten', titel: 'Fehlende Dokumente nachhalten', beschreibung: 'Laufend pruefen ob alle Pflichtdokumente vorhanden sind.', deadline: d48h, phase: 'onboarding', task_code: 'O-06' })
+}
+
+// ─── Gate-Logik ─────────────────────────────────────────────────────────────
+
+/** Nach Task-Erledigen: Blockierte Folge-Tasks freischalten */
+export async function resolveGates(taskId: string) {
+  const supabase = createAdminClient()
+
+  // Find tasks that are blocked by this task
+  const { data: blocked } = await supabase
+    .from('tasks')
+    .select('id, titel')
+    .eq('gate_task_id', taskId)
+    .eq('status', 'blockiert')
+
+  if (!blocked?.length) return
+
+  for (const t of blocked) {
+    await supabase.from('tasks').update({ status: 'offen' }).eq('id', t.id)
+  }
+}

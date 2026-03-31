@@ -7,6 +7,7 @@ import { sendStatusWhatsApp } from '@/lib/whatsapp'
 import { triggerKanzleiPaketTask, triggerAsSendedatumTask, triggerArchivierungTask } from '@/lib/tasking'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { checkFallAutoPhase } from '@/lib/autoPhase'
+import { resolveGates } from '@/lib/tasking'
 
 export async function saveFilmcheck(fallId: string, notizen: string) {
   const supabase = await createClient()
@@ -602,6 +603,10 @@ export async function updateTaskStatus(taskId: string, newStatus: string) {
     .single()
 
   if (error) throw new Error(error.message)
+
+  // Gate-Logik: Blockierte Folge-Tasks freischalten
+  if (newStatus === 'erledigt') resolveGates(taskId).catch(() => {})
+
   if (task?.fall_id) revalidatePath(`/admin/faelle/${task.fall_id}`)
 }
 
