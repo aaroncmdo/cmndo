@@ -71,7 +71,7 @@ export default function GooglePlaceAutocomplete({
     return () => clearInterval(interval)
   }, [onSelect])
 
-  const defaultCls = 'w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-100 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 transition-colors'
+  const defaultCls = 'w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-blue-500 transition-colors'
 
   return (
     <input

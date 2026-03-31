@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { XIcon, ChevronRightIcon, ChevronLeftIcon, CheckIcon, MapPinIcon } from 'lucide-react'
 import { onboardGutachter } from '../sachverstaendige/actions'
+import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 
 const TYPEN = [
   { key: 'kfz-gutachter', label: 'KFZ-Gutachter', desc: 'Freier Sachverständiger', color: '#3b82f6' },
@@ -189,10 +190,18 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
                   <p className="glass-label mb-3">Standort</p>
                   <div>
                     <label className="text-gray-500 text-xs mb-1 block">Adresse *</label>
-                    <input value={adresse} onChange={e => setAdresse(e.target.value)} onBlur={handleAdresseBlur}
+                    <GooglePlaceAutocomplete
+                      defaultValue={adresse}
                       placeholder="Strasse + Hausnummer, PLZ Ort"
-                      className="w-full glass-input px-3 py-2.5 text-sm text-gray-900" />
-                    <p className="text-gray-400 text-xs mt-1">Google Places Autocomplete aktiv wenn API Key gesetzt</p>
+                      className="w-full bg-white border border-gray-300 px-3 py-2.5 text-sm text-gray-900 rounded-xl focus:outline-none focus:border-blue-500 transition-colors"
+                      onSelect={(result: PlaceResult) => {
+                        setAdresse(result.adresse)
+                        setPlz(result.plz)
+                        setLat(result.lat)
+                        setLng(result.lng)
+                        if (onLocationChange) onLocationChange(result.lat, result.lng, selectedPaket.km, selectedTyp.color)
+                      }}
+                    />
                   </div>
                   <div>
                     <label className="text-gray-500 text-xs mb-1 block">PLZ</label>
