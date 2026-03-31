@@ -451,6 +451,9 @@ export async function qcNachbesserung(fallId: string, kommentar: string) {
     }).catch(() => {})
   }
 
+  // WhatsApp: Nachbesserung nötig
+  sendStatusWhatsApp(fallId, 'nachbesserung_gutachten').catch(() => {})
+
   revalidatePath(`/admin/faelle/${fallId}`)
   revalidatePath('/admin/tasks')
 }
@@ -717,6 +720,15 @@ export async function createTermin(
     beschreibung: `${data.typ === 'video-call' ? 'Video-Call' : 'Telefonat'} am ${new Date(data.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} (${data.dauer_minuten} Min)`,
     erstellt_von: user.id,
   })
+
+  // WhatsApp: Termin vereinbart
+  const terminDate = new Date(data.datum)
+  sendStatusWhatsApp(fallId, 'termin_vereinbart_kb', {
+    termin_typ: data.typ,
+    termin_datum: terminDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+    termin_uhrzeit: terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+    meet_link: meetLink ?? undefined,
+  }).catch(() => {})
 
   revalidatePath(`/admin/faelle/${fallId}`)
   revalidatePath('/mitarbeiter/performance')

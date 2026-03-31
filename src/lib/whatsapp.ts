@@ -45,6 +45,15 @@ type NachrichtTyp =
   | 'eskalation_vs03'
   | 'eskalation_vs05'
   | 'eskalation_vs06'
+  | 'zahlung_teilweise'
+  | 'kuerzung_ruege'
+  | 'kuerzung_akzeptiert'
+  | 'auszahlung'
+  | 'dokument_fehlt'
+  | 'termin_vereinbart_kb'
+  | 'termin_erinnerung_kb'
+  | 'nachbesserung_gutachten'
+  | 'status_update'
 
 type FallContext = {
   fall_nummer?: string
@@ -55,6 +64,13 @@ type FallContext = {
   termin_uhrzeit?: string
   termin_ort?: string
   betrag?: string
+  kb_name?: string
+  dokument_name?: string
+  portal_link?: string
+  termin_typ?: string
+  meet_link?: string
+  kuerzung_betrag?: string
+  status_text?: string
 }
 
 function buildNachricht(typ: NachrichtTyp, ctx: FallContext): string {
@@ -102,6 +118,33 @@ function buildNachricht(typ: NachrichtTyp, ctx: FallContext): string {
 
     case 'eskalation_vs06':
       return `Hallo ${name}, Ihr Kundenbetreuer wird Sie in Kuerze anrufen, um die naechsten Schritte mit Ihnen zu besprechen.`
+
+    case 'zahlung_teilweise':
+      return `Hallo ${name}, wir haben eine Teilzahlung der Versicherung erhalten. Leider wurden einige Positionen gekuerzt. Ihr Kundenbetreuer ${ctx.kb_name ?? ''} wird Sie in Kuerze anrufen um die naechsten Schritte zu besprechen. Ihr Claimondo-Team.`
+
+    case 'kuerzung_ruege':
+      return `Hallo ${name}, die Versicherung hat Ihren Anspruch um ${ctx.kuerzung_betrag ?? '—'} gekuerzt. Wir akzeptieren das nicht und haben unsere Partnerkanzlei beauftragt ein Ruegeschreiben zu verfassen. Sie muessen nichts weiter tun - wir kaempfen fuer Ihr Recht. Ihr Claimondo-Team.`
+
+    case 'kuerzung_akzeptiert':
+      return `Hallo ${name}, nach Pruefung der Zahlung der Versicherung wird Ihr Fall jetzt mit dem eingegangenen Betrag von ${ctx.betrag ?? '—'} abgerechnet. Die Auszahlung erfolgt in den naechsten 2-5 Werktagen. Ihr Claimondo-Team.`
+
+    case 'auszahlung':
+      return `Hallo ${name}, die Auszahlung in Hoehe von ${ctx.betrag ?? '—'} wurde veranlasst. Der Betrag sollte innerhalb von 2-3 Werktagen auf Ihrem Konto eingehen. Ihr Claimondo-Team.`
+
+    case 'dokument_fehlt':
+      return `Hallo ${name}, fuer Ihren Fall fehlt noch: ${ctx.dokument_name ?? 'ein Dokument'}. Bitte laden Sie es in Ihrem Portal hoch oder senden Sie es hier per WhatsApp.${ctx.portal_link ? ` Link: ${ctx.portal_link}` : ''} Ihr Claimondo-Team.`
+
+    case 'termin_vereinbart_kb':
+      return `Hallo ${name}, Ihr Kundenbetreuer ${ctx.kb_name ?? ''} hat einen Termin mit Ihnen vereinbart: ${ctx.termin_typ === 'video-call' ? 'Video-Call' : 'Telefonat'} am ${ctx.termin_datum ?? '—'} um ${ctx.termin_uhrzeit ?? '—'}.${ctx.meet_link ? ` Link: ${ctx.meet_link}` : ''} Ihr Claimondo-Team.`
+
+    case 'termin_erinnerung_kb':
+      return `Hallo ${name}, zur Erinnerung: Heute um ${ctx.termin_uhrzeit ?? '—'} haben Sie einen ${ctx.termin_typ === 'video-call' ? 'Video-Call' : 'Telefonat'} mit Ihrem Kundenbetreuer ${ctx.kb_name ?? ''}.${ctx.meet_link ? ` Link: ${ctx.meet_link}` : ''} Ihr Claimondo-Team.`
+
+    case 'nachbesserung_gutachten':
+      return `Hallo ${name}, bei der Pruefung Ihres Gutachtens sind kleine Nachbesserungen noetig. Wir kuemmern uns darum - Sie muessen nichts tun. Ihr Claimondo-Team.`
+
+    case 'status_update':
+      return `Hallo ${name}, es gibt ein Update zu Ihrem Fall: ${ctx.status_text ?? 'Status geaendert'}. Bei Fragen koennen Sie uns jederzeit hier antworten. Ihr Claimondo-Team.`
   }
 }
 
@@ -121,6 +164,15 @@ function titelFuerTyp(typ: NachrichtTyp): string {
     eskalation_vs03: 'Eskalation: Frist abgelaufen',
     eskalation_vs05: 'Eskalation: Mahnung + Verzugszinsen',
     eskalation_vs06: 'Eskalation: Kundenrueckruf',
+    zahlung_teilweise: 'Teilzahlung eingegangen',
+    kuerzung_ruege: 'Kürzung - Rügeschreiben',
+    kuerzung_akzeptiert: 'Kürzung akzeptiert',
+    auszahlung: 'Auszahlung veranlasst',
+    dokument_fehlt: 'Dokument fehlt',
+    termin_vereinbart_kb: 'Termin vereinbart',
+    termin_erinnerung_kb: 'Termin-Erinnerung',
+    nachbesserung_gutachten: 'Nachbesserung nötig',
+    status_update: 'Status-Update',
   }
   return map[typ]
 }
