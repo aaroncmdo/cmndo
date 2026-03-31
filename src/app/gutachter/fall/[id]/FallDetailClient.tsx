@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { uploadGutachten, uploadDokument, uploadDatei, saveFinVinGutachter, sendChatNachricht } from './actions'
 import VorOrtPanel from '@/components/VorOrtPanel'
+import ChatChannel from '@/components/ChatChannel'
 
 const DOKUMENT_TYP_LABEL: Record<string, string> = {
   fahrzeugschein: 'Fahrzeugschein',
@@ -894,105 +895,7 @@ export default function FallDetailClient({
 
         {/* Tab: Chat */}
         {tab === 'chat' && (
-          <div className="bg-white border border-gray-200 rounded-2xl flex flex-col" style={{ height: '70vh' }}>
-            {/* Chat header */}
-            <div className="px-5 py-3 border-b border-gray-200 flex items-center gap-2">
-              <MessageSquareIcon className="w-4 h-4 text-gray-500" />
-              <h2 className="text-sm font-medium text-gray-500">Kunde-Gutachter Chat</h2>
-              <span className="text-gray-400 text-xs ml-auto">{nachrichten.length} Nachrichten</span>
-            </div>
-
-            {/* Messages area */}
-            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
-              {nachrichten.length === 0 && (
-                <div className="flex flex-col items-center justify-center h-full text-center">
-                  <MessageSquareIcon className="w-10 h-10 text-gray-300 mb-3" />
-                  <p className="text-gray-500 text-sm">Noch keine Nachrichten.</p>
-                  <p className="text-gray-400 text-xs mt-1">Schreiben Sie die erste Nachricht an den Kunden.</p>
-                </div>
-              )}
-              {nachrichten.map(msg => {
-                const isOwn = (msg.sender_rolle as string) === 'sachverstaendiger'
-                const rolleLabel = isOwn ? 'Gutachter' : 'Kunde'
-                const time = new Date(msg.created_at as string).toLocaleString('de-DE', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })
-
-                return (
-                  <div
-                    key={msg.id as string}
-                    className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div className={`max-w-[75%] ${isOwn ? 'order-last' : ''}`}>
-                      <div
-                        className={`rounded-2xl px-4 py-2.5 ${
-                          isOwn
-                            ? 'bg-blue-50 border border-blue-900/50 text-blue-100'
-                            : 'bg-gray-100 border border-gray-300 text-gray-800'
-                        }`}
-                      >
-                        <p className="text-sm whitespace-pre-wrap break-words">{msg.nachricht as string}</p>
-                        {!!(msg.hat_anhang) && !!(msg.anhang_url) && (
-                          <a
-                            href={msg.anhang_url as string}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`inline-flex items-center gap-1 mt-1.5 text-xs ${
-                              isOwn ? 'text-blue-300 hover:text-blue-200' : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                          >
-                            <FileTextIcon className="w-3 h-3" />
-                            Anhang oeffnen
-                          </a>
-                        )}
-                      </div>
-                      <div className={`flex items-center gap-2 mt-1 ${isOwn ? 'justify-end' : 'justify-start'}`}>
-                        <span
-                          className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
-                            isOwn ? 'bg-blue-50/50 text-blue-400' : 'bg-gray-100 text-gray-500'
-                          }`}
-                        >
-                          {rolleLabel}
-                        </span>
-                        <span className="text-gray-400 text-[10px]">{time}</span>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-              <div ref={chatEndRef} />
-            </div>
-
-            {/* Input area */}
-            <div className="px-5 py-3 border-t border-gray-200">
-              <div className="flex gap-2">
-                <input
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault()
-                      handleChatSend()
-                    }
-                  }}
-                  placeholder="Nachricht schreiben..."
-                  disabled={chatSending}
-                  className="flex-1 bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
-                />
-                <button
-                  onClick={handleChatSend}
-                  disabled={chatSending || !chatInput.trim()}
-                  className="bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 disabled:text-gray-500 text-gray-900 px-4 py-2.5 rounded-xl transition-colors flex items-center gap-2"
-                >
-                  <SendIcon className="w-4 h-4" />
-                  <span className="text-sm font-medium hidden sm:inline">{chatSending ? 'Senden...' : 'Senden'}</span>
-                </button>
-              </div>
-            </div>
-          </div>
+          <GutachterChatTabs fallId={fallId} />
         )}
       </div>
     </div>
@@ -1010,4 +913,22 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 function Badge({ label, color }: { label: string; color: string }) {
   return <span className={`px-2.5 py-1 rounded-full text-[10px] font-medium ${color}`}>{label}</span>
+}
+
+function GutachterChatTabs({ fallId }: { fallId: string }) {
+  const [ch, setCh] = useState<'claimondo-gutachter' | 'kunde-gutachter'>('claimondo-gutachter')
+  const [userId, setUserId] = useState('')
+  useEffect(() => { createClient().auth.getUser().then(({ data: { user } }) => { if (user) setUserId(user.id) }) }, [])
+  if (!userId) return null
+  return (
+    <div className="bg-white border border-gray-200 rounded-2xl flex flex-col" style={{ height: '70vh' }}>
+      <div className="flex border-b border-gray-200 shrink-0">
+        <button onClick={() => setCh('claimondo-gutachter')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'claimondo-gutachter' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-400'}`}>Claimondo</button>
+        <button onClick={() => setCh('kunde-gutachter')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'kunde-gutachter' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-400'}`}>Kunde</button>
+      </div>
+      <div className="flex-1 min-h-0">
+        <ChatChannel fallId={fallId} kanal={ch} currentUserId={userId} />
+      </div>
+    </div>
+  )
 }

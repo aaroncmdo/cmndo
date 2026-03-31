@@ -15,6 +15,7 @@ import {
   ClipboardListIcon,
   BellIcon,
 } from 'lucide-react'
+import NotificationBell from '@/app/admin/_components/NotificationBell'
 
 const NAV_ITEMS = [
   { href: '/gutachter', label: 'Dashboard', icon: LayoutDashboardIcon },
@@ -172,8 +173,11 @@ export default function GutachterShell({
             </svg>
           </button>
           <span className="text-gray-900 font-semibold text-sm">Claimondo</span>
-          <div className="w-10" />
+          <NotificationBell />
         </header>
+
+        {/* Desktop bell top-right */}
+        <div className="hidden lg:block fixed top-3 right-4 z-30"><NotificationBell /></div>
 
         <main className="h-[calc(100vh-64px)] overflow-hidden">{children}</main>
       </div>
