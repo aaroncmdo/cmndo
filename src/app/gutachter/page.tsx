@@ -196,35 +196,31 @@ export default async function GutachterDashboard() {
   const vorname = profile?.vorname ?? ''
 
   return (
-    <div className="px-4 py-6 sm:py-8">
-      <div className="max-w-5xl mx-auto space-y-8">
+    <div style={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }} className="px-3">
+      <div className="max-w-5xl mx-auto w-full flex flex-col flex-1 min-h-0 gap-3 py-2">
 
-        {/* ─── Greeting + Weather ──────────────────────────────────────── */}
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div>
-            <h1 className="text-[22px] font-bold text-gray-900">
+        {/* ─── Greeting (compact) ──────────────────────────────────────── */}
+        <div className="flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-3">
+            <h1 className="text-sm font-semibold text-gray-900">
               {greeting}{vorname ? ` ${vorname}` : ''}
             </h1>
-            <p className="text-sm text-gray-500 mt-0.5">
-              Claimondo wünscht gute Fahrt!
-            </p>
-            <p className="text-gray-400 text-xs mt-1">
-              {now.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-            </p>
+            <span className="text-gray-400 text-xs">
+              {now.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
+            </span>
           </div>
           <WeatherWidget lat={sv.standort_lat ?? null} lng={sv.standort_lng ?? null} />
         </div>
+
+        {/* ─── Main content: scrollable ─────────────────────────────── */}
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-3">
 
         {/* ─── Meine Aufgaben ─────────────────────────────────────────── */}
         {/* @ts-expect-error Async Server Component */}
         <MeineAufgabenServer mode="user" rolle="sachverstaendiger" title="Meine offenen Aufgaben" fallLinkPrefix="/gutachter/fall/" />
 
-        {/* ─── Überfällige Tasks ──────────────────────────────────────── */}
-        {/* @ts-expect-error Async Server Component */}
-        <UeberfaelligeTasks mode="user" />
-
         {/* ─── KPI Cards ───────────────────────────────────────────────── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
           <div className="bg-white border border-gray-200 rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
               <FolderOpenIcon className="w-4 h-4 text-gray-500" />
@@ -491,6 +487,7 @@ export default async function GutachterDashboard() {
           )}
         </section>
 
+        </div>
       </div>
     </div>
   )

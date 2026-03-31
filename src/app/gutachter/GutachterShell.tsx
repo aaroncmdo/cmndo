@@ -79,7 +79,7 @@ export default function GutachterShell({
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] flex">
+    <div className="h-screen bg-[#f8f9fb] flex overflow-hidden">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -137,8 +137,8 @@ export default function GutachterShell({
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white">
+      <div className="flex-1 flex flex-col min-w-0 h-screen">
+        <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-2 -ml-2 text-gray-500 hover:text-gray-800 transition-colors"
@@ -152,7 +152,7 @@ export default function GutachterShell({
           <div className="w-10" />
         </header>
 
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 min-h-0">{children}</main>
       </div>
     </div>
   )
