@@ -165,6 +165,79 @@ function MarketingMaikSection({ monatsberichte }: { monatsberichte: MonatsBerich
   )
 }
 
+// ── Individuelle Anfragen (KFZ-94) ──
+
+type IndividuelleAnfrage = {
+  id: string
+  sv_id: string
+  sv_name: string
+  gewuenschte_faelle: number | null
+  gewuenschter_radius_km: number | null
+  nachricht: string | null
+  status: string
+  erstellt_am: string
+}
+
+function IndividuelleAnfragenSection({ anfragen }: { anfragen: IndividuelleAnfrage[] }) {
+  const statusColors: Record<string, string> = {
+    neu: 'bg-blue-50 text-blue-600',
+    'in-bearbeitung': 'bg-amber-50 text-amber-600',
+    angeboten: 'bg-purple-50 text-purple-600',
+    angenommen: 'bg-emerald-50 text-emerald-600',
+    abgelehnt: 'bg-red-50 text-red-600',
+  }
+
+  return (
+    <div className="px-4 pb-8">
+      <div className="max-w-5xl mx-auto">
+        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-200">
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+              Individuelle Anfragen
+            </h2>
+          </div>
+          {anfragen.length === 0 ? (
+            <div className="p-8 text-center"><p className="text-gray-400 text-sm">Keine Anfragen vorhanden.</p></div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left px-5 py-3 text-gray-500 font-medium">Gutachter</th>
+                    <th className="text-center px-5 py-3 text-gray-500 font-medium">Fälle</th>
+                    <th className="text-center px-5 py-3 text-gray-500 font-medium">Radius</th>
+                    <th className="text-left px-5 py-3 text-gray-500 font-medium">Nachricht</th>
+                    <th className="text-center px-5 py-3 text-gray-500 font-medium">Status</th>
+                    <th className="text-right px-5 py-3 text-gray-500 font-medium">Datum</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {anfragen.map(a => (
+                    <tr key={a.id} className="border-b border-gray-200/50 hover:bg-gray-50 transition-colors">
+                      <td className="px-5 py-3 text-gray-800">{a.sv_name}</td>
+                      <td className="px-5 py-3 text-center text-gray-700">{a.gewuenschte_faelle ?? '—'}/Mo</td>
+                      <td className="px-5 py-3 text-center text-gray-700">{a.gewuenschter_radius_km ?? '—'}km</td>
+                      <td className="px-5 py-3 text-gray-600 text-xs max-w-[200px] truncate">{a.nachricht ?? '—'}</td>
+                      <td className="px-5 py-3 text-center">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[a.status] ?? 'bg-gray-100 text-gray-500'}`}>
+                          {a.status}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-right text-gray-500 text-xs tabular-nums">
+                        {new Date(a.erstellt_am).toLocaleDateString('de-DE')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Investition pro Fall ──
 
 function InvestitionProFallSection() {
@@ -450,6 +523,31 @@ export default async function FinancePage() {
     .select('betrag')
   const gutachterAnzahlungenGesamt = (allEinzahlungen ?? []).reduce((s, e) => s + Number(e.betrag), 0)
 
+  // ── Individuelle Anfragen ──
+  let individuelleAnfragen: IndividuelleAnfrage[] = []
+  try {
+    const { data: anfragen } = await supabase
+      .from('individuelle_anfragen')
+      .select('id, sv_id, gewuenschte_faelle, gewuenschter_radius_km, nachricht, status, erstellt_am')
+      .order('erstellt_am', { ascending: false })
+      .limit(50)
+    if (anfragen && anfragen.length > 0) {
+      const anfSvIds = [...new Set(anfragen.map(a => a.sv_id))]
+      const { data: anfSvs } = await supabase.from('sachverstaendige').select('id, profile_id').in('id', anfSvIds)
+      const anfProfileIds = (anfSvs ?? []).map(s => s.profile_id).filter(Boolean)
+      const { data: anfProfiles } = anfProfileIds.length > 0
+        ? await supabase.from('profiles').select('id, vorname, nachname').in('id', anfProfileIds)
+        : { data: [] }
+      const anfSvMap = Object.fromEntries((anfSvs ?? []).map(s => [s.id, s]))
+      const anfProfileMap = Object.fromEntries((anfProfiles ?? []).map(p => [p.id, p]))
+      individuelleAnfragen = anfragen.map(a => {
+        const sv = anfSvMap[a.sv_id]
+        const profile = sv ? anfProfileMap[sv.profile_id] : null
+        return { ...a, sv_name: profile ? `${profile.vorname ?? ''} ${profile.nachname ?? ''}`.trim() || '—' : '—' }
+      })
+    }
+  } catch { /* table may not exist yet */ }
+
   return (
     <>
       <FinanceClient
@@ -468,6 +566,7 @@ export default async function FinancePage() {
       />
       <MarketingMaikSection monatsberichte={monatsberichte ?? []} />
       <GutachterAbrechnungen svRows={svRows} gutachterAnzahlungenGesamt={gutachterAnzahlungenGesamt} />
+      <IndividuelleAnfragenSection anfragen={individuelleAnfragen} />
       <InvestitionProFallSection />
     </>
   )
