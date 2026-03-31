@@ -203,18 +203,27 @@ export default function GebietPage() {
     if (!svData) return; setUpgrading(true)
     const altInfo = getPaket(svData.paket)
     const neuInfo = getPaket(neuPaket)
-    const differenz = (neuInfo.anzahlung) - svData.anzahlungBezahlt
+    const differenz = neuInfo.anzahlung - altInfo.anzahlung
 
     await supabase.from('paket_upgrades').insert({
       sv_id: svData.id, altes_paket: svData.paket, neues_paket: neuPaket,
       differenz_anzahlung: Math.max(0, differenz),
     })
-    alert(`Upgrade-Anfrage gesendet! Differenz-Anzahlung: ${Math.max(0, differenz)}€`)
+    alert(`Upgrade-Anfrage gesendet! Differenz-Anzahlung: ${Math.max(0, differenz).toLocaleString('de-DE')}€`)
     setUpgrading(false)
   }
 
   if (loading) return <div className="h-full flex items-center justify-center"><div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
-  if (!svData) return <div className="h-full flex items-center justify-center text-gray-400">Kein Profil gefunden</div>
+  if (!svData) return (
+    <div className="h-full flex items-center justify-center p-8">
+      <div className="bg-white border border-amber-200 rounded-2xl p-8 text-center max-w-md">
+        <MapPinIcon className="w-10 h-10 text-amber-400 mx-auto mb-3" />
+        <p className="text-gray-900 font-semibold mb-2">Standort nicht hinterlegt</p>
+        <p className="text-gray-500 text-sm mb-4">Bitte hinterlegen Sie Ihren Standort im Profil, damit wir Ihr Einsatzgebiet berechnen können.</p>
+        <a href="/gutachter/profil" className="inline-block bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-6 py-2.5 rounded-xl transition-colors">Zum Profil</a>
+      </div>
+    </div>
+  )
 
   const currentPaket = getPaket(svData.paket)
   const ownPoly = svData.iso && Array.isArray(svData.iso) ? svData.iso as { lat: number; lng: number }[] : []
@@ -245,9 +254,9 @@ export default function GebietPage() {
       </div>
 
       {/* Map + Sidebar */}
-      <div className="flex-1 min-h-0 flex">
-        <div className="flex-1 relative">
-          <div ref={mapRef} className="w-full h-full" />
+      <div className="flex-1 min-h-0 flex" style={{ minHeight: 0 }}>
+        <div className="flex-1 relative" style={{ minHeight: 0 }}>
+          <div ref={mapRef} className="absolute inset-0" />
 
           {/* Stats Box */}
           {mapReady && (
@@ -292,42 +301,76 @@ export default function GebietPage() {
           )}
         </div>
 
-        {/* Upgrade Panel */}
-        <div className="w-72 hidden lg:block overflow-y-auto p-3 space-y-2 border-l border-gray-200 bg-white">
-          <p className="text-sm font-semibold text-gray-800">Paket-Upgrade</p>
-          <div className="border-2 border-blue-500 rounded-xl p-3">
-            <p className="text-xs font-semibold text-blue-600">Aktuell: {currentPaket.name}</p>
-            <p className="text-[10px] text-gray-500">{currentPaket.faelle} Fälle · {currentPaket.radius_km}km · {currentPaket.preis}€/Monat</p>
+        {/* Info + Upgrade Sidebar */}
+        <div className="w-80 hidden lg:block overflow-y-auto p-3 space-y-3 border-l border-gray-200 bg-white">
+
+          {/* ─── Gebiets-Info ─── */}
+          <div>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Ihr Gebiet</p>
+            <div className="border-2 border-blue-500 rounded-xl p-3 mb-2">
+              <p className="text-sm font-semibold text-blue-600">{currentPaket.name}</p>
+              <p className="text-[10px] text-gray-500">{currentPaket.faelle} Fälle/Mo · {currentPaket.radius_km}km · {currentPaket.preis}€/Mo</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-gray-50 rounded-lg p-2 text-center">
+                <p className="text-sm font-bold text-gray-900">{currentPaket.radius_km} km</p>
+                <p className="text-[9px] text-gray-500">Einsatzradius</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-2 text-center">
+                <p className="text-sm font-bold text-gray-900">{areaKm2.toFixed(0)} km²</p>
+                <p className="text-[9px] text-gray-500">Gebietsfläche</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-2 text-center">
+                <p className="text-sm font-bold text-gray-900">{touchingNeighbors.length}</p>
+                <p className="text-[9px] text-gray-500">Nachbar-SV</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-2 text-center">
+                <p className="text-sm font-bold text-amber-600">~{overlapPct}%</p>
+                <p className="text-[9px] text-gray-500">Überlappung</p>
+              </div>
+            </div>
           </div>
 
-          {PAKET_ORDER.filter(k => PAKET_ORDER.indexOf(k) > PAKET_ORDER.indexOf(svData.paket)).map(key => {
-            const info = getPaket(key)
-            const differenz = Math.max(0, info.anzahlung - svData.anzahlungBezahlt)
-            const isPreview = previewPaket === key
-            return (
-              <div key={key} className={`border rounded-xl p-3 transition-colors ${isPreview ? 'border-blue-400 bg-blue-50/30' : 'border-gray-200 hover:border-blue-300'}`}>
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm font-semibold text-gray-900">{info.name}</p>
-                  {key === 'pro' && <span className="text-[9px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded-full">Empfohlen</span>}
-                </div>
-                <p className="text-[10px] text-gray-500 mb-2">{info.faelle} Fälle · {info.radius_km}km · {info.preis}€/Mo</p>
-                <p className="text-xs text-gray-700">Differenz-Anzahlung: <span className="font-semibold">{differenz}€</span></p>
-                <div className="flex gap-1.5 mt-2">
-                  <button onClick={() => { setPreviewPaket(isPreview ? null : key); setLayers(p => ({ ...p, vorschau: true })) }}
-                    className={`flex-1 flex items-center justify-center gap-1 text-xs font-medium py-2 rounded-lg border ${isPreview ? 'border-blue-400 text-blue-600 bg-blue-50' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}>
-                    <EyeIcon className="w-3 h-3" /> Vorschau
-                  </button>
-                  <button onClick={() => requestUpgrade(key)} disabled={upgrading}
-                    className="flex-1 flex items-center justify-center gap-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium py-2 rounded-lg">
-                    <ArrowUpIcon className="w-3 h-3" /> Upgrade
-                  </button>
-                </div>
-              </div>
-            )
-          })}
+          {/* ─── Upgrade-Bereich ─── */}
+          {PAKET_ORDER.indexOf(svData.paket) < PAKET_ORDER.length - 1 && (
+            <div>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Paket-Upgrade</p>
+              {PAKET_ORDER.filter(k => PAKET_ORDER.indexOf(k) > PAKET_ORDER.indexOf(svData.paket)).map(key => {
+                const info = getPaket(key)
+                const alteAnzahlung = currentPaket.anzahlung
+                const neueAnzahlung = info.anzahlung
+                const differenz = neueAnzahlung - alteAnzahlung
+                const isPreview = previewPaket === key
+                return (
+                  <div key={key} className={`border rounded-xl p-3 mb-2 transition-colors ${isPreview ? 'border-blue-400 bg-blue-50/30' : 'border-gray-200 hover:border-blue-300'}`}>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-sm font-semibold text-gray-900">{info.name}</p>
+                      {key === 'pro' && <span className="text-[9px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded-full">Empfohlen</span>}
+                    </div>
+                    <p className="text-[10px] text-gray-500 mb-1">{info.faelle} Fälle · {info.radius_km}km · {info.preis}€/Mo</p>
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 mb-2">
+                      <p className="text-[10px] text-gray-600">Neue Anzahlung: <span className="font-medium">{neueAnzahlung.toLocaleString('de-DE')}€</span></p>
+                      <p className="text-[10px] text-gray-600">Bereits bezahlt: <span className="font-medium">{alteAnzahlung.toLocaleString('de-DE')}€</span></p>
+                      <p className="text-xs font-bold text-amber-700 mt-0.5">Differenz: {differenz.toLocaleString('de-DE')}€</p>
+                    </div>
+                    <div className="flex gap-1.5">
+                      <button onClick={() => { setPreviewPaket(isPreview ? null : key); setLayers(p => ({ ...p, vorschau: true })) }}
+                        className={`flex-1 flex items-center justify-center gap-1 text-xs font-medium py-2 rounded-lg border ${isPreview ? 'border-blue-400 text-blue-600 bg-blue-50' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}>
+                        <EyeIcon className="w-3 h-3" /> Vorschau
+                      </button>
+                      <button onClick={() => requestUpgrade(key)} disabled={upgrading}
+                        className="flex-1 flex items-center justify-center gap-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium py-2 rounded-lg">
+                        <ArrowUpIcon className="w-3 h-3" /> Upgrade
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
 
           {/* Individuelles Angebot */}
-          <div className="border-t border-gray-200 pt-3 mt-3">
+          <div className="border-t border-gray-200 pt-3">
             <button onClick={() => setShowAnfrageModal(true)}
               className="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium py-3 rounded-xl transition-colors">
               <SendIcon className="w-3.5 h-3.5" /> Individuelles Angebot anfragen
