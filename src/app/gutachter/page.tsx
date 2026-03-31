@@ -215,56 +215,84 @@ export default async function GutachterDashboard() {
         {/* ─── 2-Column Layout ─────────────────────────────────────── */}
         <div className="flex-1 min-h-0 flex gap-4">
 
-          {/* LEFT: Tagesroute + Termine (60%, scrollable) */}
-          <div className="flex-[3] min-w-0 overflow-y-auto space-y-3">
-            {/* Zusammenfassung */}
-            <div className="flex items-center gap-3 text-xs text-gray-500 bg-white border border-gray-200 rounded-lg px-3 py-2">
-              <span className="font-semibold text-gray-900">{todayFaelle.length} Termine heute</span>
-              {todayFaelle.length > 0 && <span>·</span>}
-              {actionFaelle.length > 0 && <span className="text-red-500 font-medium">{actionFaelle.length} überfällig</span>}
+          {/* LEFT: Tages-Timeline Google Calendar Style (55%, scrollable) */}
+          <div className="flex-[55] min-w-0 bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col">
+            {/* Calendar Header */}
+            <div className="px-4 py-2 border-b border-gray-100 flex items-center justify-between shrink-0">
+              <div>
+                <p className="text-sm font-semibold text-gray-900">
+                  {now.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {todayFaelle.length} Termine · {actionFaelle.length > 0 ? <span className="text-red-500">{actionFaelle.length} überfällig</span> : 'Kein Handlungsbedarf'}
+                </p>
+              </div>
               {routeUrl && (
                 <a href={routeUrl} target="_blank" rel="noopener noreferrer"
-                  className="ml-auto flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-600 text-xs font-medium px-2.5 py-1 rounded-lg transition-colors">
-                  <NavigationIcon className="w-3 h-3" /> Alle navigieren
+                  className="flex items-center gap-1.5 bg-green-600 hover:bg-green-500 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
+                  <NavigationIcon className="w-3.5 h-3.5" /> Alle navigieren
                 </a>
               )}
             </div>
 
-            {/* Tagesroute Cards */}
-            {todayFaelle.length === 0 ? (
-              <div className="bg-white border border-gray-200 rounded-xl p-6 text-center">
-                <p className="text-gray-400 text-sm">Keine Termine für heute</p>
-                {neueFaelle.length > 0 && <p className="text-gray-500 text-xs mt-1">{neueFaelle.length} neue Aufträge warten</p>}
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {todayFaelle.map((fall, idx) => {
-                  const addr = formatAdresse(fall)
-                  return (
-                    <div key={fall.id} className="bg-white border border-gray-200 rounded-xl p-3 hover:shadow-sm transition-shadow">
-                      <div className="flex items-start gap-3">
-                        <div className="shrink-0 text-center w-14">
-                          <span className="text-[10px] text-gray-400">Stop {idx + 1}</span>
-                          <p className="text-green-600 text-sm font-bold tabular-nums">{formatTime(fall.sv_termin)}</p>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <Link href={`/gutachter/fall/${fall.id}`} className="text-sm font-medium text-gray-900 hover:text-blue-600 truncate block">{leadName(fall.lead_id)}</Link>
-                          <p className="text-xs text-gray-500 truncate">{addr}</p>
-                        </div>
-                        <div className="shrink-0 flex gap-1.5">
-                          <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}`}
-                            target="_blank" rel="noopener noreferrer"
-                            className="flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-600 text-[10px] font-medium px-2 py-1.5 rounded-lg">
-                            <NavigationIcon className="w-3 h-3" /> Nav
-                          </a>
-                          {(() => { const leadId = fall.lead_id; const phone = leadId ? (leadMap[leadId]?.includes('@') ? null : leads?.find(l => l.id === leadId)) : null; return null })()}
+            {/* Timeline Grid */}
+            <div className="flex-1 overflow-y-auto relative">
+              {todayFaelle.length === 0 ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center py-12">
+                    <p className="text-gray-400 text-sm">Keine Termine für heute</p>
+                    {neueFaelle.length > 0 && <p className="text-gray-500 text-xs mt-1">{neueFaelle.length} neue Aufträge warten</p>}
+                  </div>
+                </div>
+              ) : (
+                <div className="relative px-2 py-1">
+                  {/* Hour slots 08:00 - 18:00 */}
+                  {Array.from({ length: 11 }, (_, i) => {
+                    const hour = 8 + i
+                    const slot = `${String(hour).padStart(2, '0')}:00`
+                    // Find appointments in this hour
+                    const slotTermine = todayFaelle.filter(f => {
+                      if (!f.sv_termin) return false
+                      const h = new Date(f.sv_termin).getHours()
+                      return h === hour
+                    })
+                    return (
+                      <div key={slot} className="flex border-b border-gray-50" style={{ minHeight: slotTermine.length > 0 ? 72 : 36 }}>
+                        <span className="text-[10px] text-gray-300 font-mono w-10 pt-1 shrink-0 text-right pr-2">{slot}</span>
+                        <div className="flex-1 pl-2 border-l border-gray-100 py-1 space-y-1">
+                          {slotTermine.map(fall => {
+                            const addr = formatAdresse(fall)
+                            return (
+                              <div key={fall.id} className="bg-blue-50 border-l-3 border-blue-500 rounded-r-lg px-3 py-2 hover:bg-blue-100 transition-colors" style={{ borderLeftWidth: 3 }}>
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-blue-700 text-xs font-bold tabular-nums">{formatTime(fall.sv_termin)}</span>
+                                      <Link href={`/gutachter/fall/${fall.id}`} className="text-sm font-medium text-gray-900 hover:text-blue-600 truncate">{leadName(fall.lead_id)}</Link>
+                                    </div>
+                                    <p className="text-xs text-gray-500 truncate mt-0.5">{addr}</p>
+                                  </div>
+                                  <div className="flex gap-1 shrink-0">
+                                    <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}`}
+                                      target="_blank" rel="noopener noreferrer"
+                                      className="bg-green-100 hover:bg-green-200 text-green-700 text-[10px] font-medium px-2 py-1 rounded transition-colors">
+                                      Nav
+                                    </a>
+                                    <Link href={`/gutachter/fall/${fall.id}`}
+                                      className="bg-blue-100 hover:bg-blue-200 text-blue-700 text-[10px] font-medium px-2 py-1 rounded transition-colors">
+                                      Öffnen
+                                    </Link>
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          })}
                         </div>
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+                    )
+                  })}
+                </div>
+              )}
 
             {/* Neue Aufträge */}
             {neueFaelle.length > 0 && (
@@ -306,8 +334,34 @@ export default async function GutachterDashboard() {
             )}
           </div>
 
-          {/* RIGHT: Tasks + Stats (40%, sticky) */}
-          <div className="flex-[2] min-w-0 overflow-y-auto space-y-3">
+          {/* RIGHT: Widgets (45%, sticky) */}
+          <div className="flex-[45] min-w-0 overflow-y-auto space-y-2">
+
+            {/* Nächster Termin */}
+            {todayFaelle.length > 0 && (() => {
+              const next = todayFaelle.find(f => f.sv_termin && new Date(f.sv_termin) > now) ?? todayFaelle[0]
+              if (!next) return null
+              const nextTime = next.sv_termin ? new Date(next.sv_termin) : null
+              const minutesUntil = nextTime ? Math.round((nextTime.getTime() - now.getTime()) / 60000) : 0
+              const addr = formatAdresse(next)
+              return (
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <ClockIcon className="w-4 h-4 text-blue-600" />
+                    <span className="text-xs font-semibold text-blue-700">
+                      {minutesUntil > 0 ? `In ${minutesUntil} Min` : 'Jetzt'}: {formatTime(next.sv_termin)}
+                    </span>
+                  </div>
+                  <p className="text-sm font-medium text-gray-900">{leadName(next.lead_id)}</p>
+                  <p className="text-xs text-gray-500 truncate">{addr}</p>
+                  <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="mt-2 flex items-center justify-center gap-1.5 bg-green-600 hover:bg-green-500 text-white text-xs font-medium py-2 rounded-lg transition-colors w-full">
+                    <NavigationIcon className="w-3.5 h-3.5" /> Jetzt navigieren
+                  </a>
+                </div>
+              )
+            })()}
 
             {/* Meine Aufgaben */}
             {/* @ts-expect-error Async Server Component */}
@@ -401,62 +455,11 @@ export default async function GutachterDashboard() {
           </section>
         )}
 
-        {/* ─── Neue Kunden ─────────────────────────────────────────────── */}
-        <section>
-          <div className="flex items-center gap-2 mb-4">
-            <UserPlusIcon className="w-5 h-5 text-blue-400" />
-            <h2 className="text-lg font-semibold text-gray-900">Neue Kunden</h2>
-            {neueFaelle.length > 0 && (
-              <span className="ml-auto bg-blue-50 text-blue-300 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                {neueFaelle.length}
-              </span>
-            )}
           </div>
-
-          {neueFaelle.length === 0 ? (
-            <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center">
-              <p className="text-gray-500 text-sm">Keine neuen Zuweisungen vorhanden.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {neueFaelle.map(fall => {
-                const UrsacheIcon = URSACHE_ICON[fall.schadens_ursache ?? ''] ?? PackageIcon
-                return (
-                  <div
-                    key={fall.id}
-                    className="bg-white border border-gray-200 rounded-2xl p-5 flex flex-col gap-3"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="min-w-0">
-                        <p className="text-gray-900 font-medium truncate">{leadName(fall.lead_id)}</p>
-                        <p className="text-gray-500 text-xs mt-0.5 truncate">{formatAdresse(fall)}</p>
-                      </div>
-                      <div className="shrink-0 ml-2 p-1.5 rounded-lg bg-gray-100">
-                        <UrsacheIcon className="w-4 h-4 text-gray-500" />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
-                      <span className="bg-gray-100 px-2 py-0.5 rounded-full">
-                        {URSACHE_LABEL[fall.schadens_ursache ?? ''] ?? 'Sonstiges'}
-                      </span>
-                      <span>{formatDate(fall.schadens_datum)}</span>
-                    </div>
-                    <Link
-                      href={`/gutachter/fall/${fall.id}`}
-                      className="mt-auto inline-flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl px-4 py-2.5 transition-colors"
-                    >
-                      Fall ansehen
-                      <ExternalLinkIcon className="w-3.5 h-3.5" />
-                    </Link>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </section>
-
-          </div>
+          {/* /RIGHT */}
         </div>
+        {/* /2-col */}
+      </div>
       </div>
     </div>
   )
