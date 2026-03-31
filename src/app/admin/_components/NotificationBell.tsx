@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { BellIcon, MessageSquareIcon, ActivityIcon } from 'lucide-react'
@@ -26,7 +26,7 @@ const TYP_ICONS: Record<string, string> = {
 
 export default function NotificationBell() {
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<Tab>('updates')
   const [items, setItems] = useState<Notification[]>([])
