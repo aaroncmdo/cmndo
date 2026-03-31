@@ -7,12 +7,13 @@ const EXTENDED_SELECT = BASE_SELECT.replace('organisation_id,', 'organisation_id
 export default async function SachverstaendigePage() {
   const supabase = await createClient()
 
-  // Try with extended columns first; fall back to base if columns don't exist yet
+  // Try with extended columns + geloescht_am IS NULL filter; fall back if columns don't exist
   let svList: Record<string, unknown>[] | null = null
-  const extended = await supabase.from('sachverstaendige').select(EXTENDED_SELECT).order('created_at', { ascending: false })
+  const extended = await supabase.from('sachverstaendige').select(EXTENDED_SELECT).is('geloescht_am', null).order('created_at', { ascending: false })
   if (!extended.error) {
     svList = extended.data as Record<string, unknown>[] | null
   } else {
+    // Columns don't exist yet — load all, no geloescht_am filter possible
     const base = await supabase.from('sachverstaendige').select(BASE_SELECT).order('created_at', { ascending: false })
     svList = base.data as Record<string, unknown>[] | null
   }

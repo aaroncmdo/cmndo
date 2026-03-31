@@ -133,7 +133,7 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [mapReady, setMapReady] = useState(false)
   const [search, setSearch] = useState('')
-  const [svFilter, setSvFilter] = useState<'aktive' | 'deaktivierte' | 'archiv'>('aktive')
+  const [svFilter, setSvFilter] = useState<'aktive' | 'deaktivierte' | 'alle'>('aktive')
 
   // ─── Map init (runs ONCE) ──────────────────────────────────────
   useEffect(() => {
@@ -157,13 +157,11 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
     return () => { cancelled = true }
   }, [apiKey])
 
-  // ─── Filtered SVs (3 states: aktiv, deaktiviert, gelöscht/archiv) ──
+  // ─── Filtered SVs (gelöschte sind bereits durch DB-Query ausgeschlossen) ──
   const filteredByStatus = sachverstaendige.filter(sv => {
-    const isDeleted = !!sv.geloeschtAm
-    if (svFilter === 'aktive') return sv.istAktiv !== false && !isDeleted
-    if (svFilter === 'deaktivierte') return sv.istAktiv === false && !isDeleted
-    if (svFilter === 'archiv') return isDeleted
-    return !isDeleted // default: exclude deleted
+    if (svFilter === 'aktive') return sv.istAktiv !== false
+    if (svFilter === 'deaktivierte') return sv.istAktiv === false
+    return true // 'alle'
   })
 
   // ─── SV Markers (dep: [sachverstaendige, mapReady, svFilter] ) ──
@@ -254,10 +252,10 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
               className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-300" />
           </div>
           <div className="flex gap-1 mt-2">
-            {(['aktive', 'deaktivierte', 'archiv'] as const).map(f => (
+            {(['aktive', 'deaktivierte', 'alle'] as const).map(f => (
               <button key={f} onClick={() => setSvFilter(f)}
                 className={`flex-1 text-[10px] font-medium py-1.5 rounded-lg transition-colors ${svFilter === f ? 'bg-blue-600 text-white' : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300'}`}>
-                {f === 'aktive' ? 'Aktive' : f === 'deaktivierte' ? 'Deaktiv.' : 'Archiv'}
+                {f === 'aktive' ? 'Aktive' : f === 'deaktivierte' ? 'Deaktiv.' : 'Alle'}
               </button>
             ))}
           </div>
@@ -282,10 +280,9 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
                   selectedSV?.id === sv.id ? 'bg-blue-600/20 border border-blue-600/30' : 'hover:bg-gray-100/60'
                 }`}>
                 <div className="flex items-center gap-2">
-                  <div className={`w-2.5 h-2.5 rounded-full ${sv.geloeschtAm ? 'bg-gray-300' : sv.istAktiv === false ? 'bg-gray-400' : (ti?.marker ?? 'bg-blue-500')}`} />
-                  <span className={`text-sm truncate ${sv.istAktiv === false || sv.geloeschtAm ? 'text-gray-400' : 'text-gray-800'}`}>{sv.name}</span>
-                  {sv.geloeschtAm ? <span className="text-[8px] bg-gray-100 text-gray-500 px-1 py-0.5 rounded font-medium shrink-0">Gelöscht</span>
-                    : sv.istAktiv === false && <span className="text-[8px] bg-red-50 text-red-500 px-1 py-0.5 rounded font-medium shrink-0">Deaktiviert</span>}
+                  <div className={`w-2.5 h-2.5 rounded-full ${sv.istAktiv === false ? 'bg-gray-400' : (ti?.marker ?? 'bg-blue-500')}`} />
+                  <span className={`text-sm truncate ${sv.istAktiv === false ? 'text-gray-400' : 'text-gray-800'}`}>{sv.name}</span>
+                  {sv.istAktiv === false && <span className="text-[8px] bg-red-50 text-red-500 px-1 py-0.5 rounded font-medium shrink-0">Deaktiviert</span>}
                 </div>
                 <span className="text-gray-400 text-[10px] ml-4.5">{PAKET_LABEL[sv.paket] ?? sv.paket} · {sv.offeneFaelle}/{sv.maxFaelleMonat}</span>
               </button>
