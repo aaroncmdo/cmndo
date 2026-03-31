@@ -1,15 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
+import { getGutachterForUser } from '@/lib/gutachter'
 import MitteilungenClient from './MitteilungenClient'
 
 export default async function MitteilungenPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: sv } = await supabase
-    .from('sachverstaendige')
-    .select('id')
-    .eq('profile_id', user!.id)
-    .single()
+  const sv = await getGutachterForUser(supabase, user!.id, 'id')
 
   if (!sv) {
     return (

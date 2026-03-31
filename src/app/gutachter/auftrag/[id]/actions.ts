@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
 import { emailGutachtenEingegangen } from '@/lib/email'
 
@@ -17,11 +18,7 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
   if (file.type !== 'application/pdf') throw new Error('Nur PDF-Dateien sind erlaubt')
 
   // Verify the case belongs to this gutachter
-  const { data: sv } = await supabase
-    .from('sachverstaendige')
-    .select('id')
-    .eq('id', user.id)
-    .single()
+  const sv = await getGutachterForUser(supabase, user.id, 'id')
 
   if (!sv) throw new Error('Kein Sachverständigen-Profil gefunden')
 

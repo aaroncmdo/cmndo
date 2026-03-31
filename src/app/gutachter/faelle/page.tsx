@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
@@ -60,12 +61,8 @@ export default async function GutachterFaellePage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Fetch SV profile by profile_id (user.id)
-  const { data: sv } = await supabase
-    .from('sachverstaendige')
-    .select('id')
-    .eq('profile_id', user.id)
-    .single()
+  // Fetch SV profile
+  const sv = await getGutachterForUser(supabase, user.id, 'id')
 
   if (!sv) {
     return (

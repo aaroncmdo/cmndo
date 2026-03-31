@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getGutachterForUser } from '@/lib/gutachter'
 import { WalletIcon, PackageIcon, FileTextIcon, DownloadIcon } from 'lucide-react'
 
 const PAKET_LABELS: Record<string, string> = {
@@ -20,11 +21,7 @@ export default async function AbrechnungPage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   // Get the SV record
-  const { data: sv } = await supabase
-    .from('sachverstaendige')
-    .select('id, paket, offene_faelle, max_faelle_monat, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, guthaben, guthaben_initial, anzahlung_betrag, anzahlung_bezahlt, sv_paket')
-    .eq('profile_id', user!.id)
-    .single()
+  const sv = await getGutachterForUser(supabase, user!.id, 'id, paket, offene_faelle, max_faelle_monat, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, guthaben, guthaben_initial, anzahlung_betrag, anzahlung_bezahlt, sv_paket')
 
   if (!sv) {
     return (

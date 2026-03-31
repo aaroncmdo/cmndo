@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
 
 export async function markAnkunft(fallId: string, lat: number, lng: number) {
@@ -8,7 +9,7 @@ export async function markAnkunft(fallId: string, lat: number, lng: number) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht angemeldet')
 
-  const { data: sv } = await supabase.from('sachverstaendige').select('id').eq('profile_id', user.id).single()
+  const sv = await getGutachterForUser(supabase, user.id, 'id')
   if (!sv) throw new Error('Kein SV-Profil')
 
   // Find today's termin for this fall
@@ -53,7 +54,7 @@ export async function skipStop(fallId: string, grund: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht angemeldet')
 
-  const { data: sv } = await supabase.from('sachverstaendige').select('id').eq('profile_id', user.id).single()
+  const sv = await getGutachterForUser(supabase, user.id, 'id')
   if (!sv) throw new Error('Kein SV-Profil')
 
   const today = new Date()
@@ -92,7 +93,7 @@ export async function completeBesichtigung(fallId: string, notizen: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht angemeldet')
 
-  const { data: sv } = await supabase.from('sachverstaendige').select('id').eq('profile_id', user.id).single()
+  const sv = await getGutachterForUser(supabase, user.id, 'id')
   if (!sv) throw new Error('Kein SV-Profil')
 
   const today = new Date()

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import OnboardingClient from './OnboardingClient'
 
@@ -8,11 +9,7 @@ export default async function GutachterOnboardingPage() {
   if (!user) redirect('/login')
 
   // Check if SV already exists and is fully onboarded
-  const { data: sv } = await supabase
-    .from('sachverstaendige')
-    .select('id, ist_aktiv')
-    .eq('profile_id', user.id)
-    .single()
+  const sv = await getGutachterForUser(supabase, user.id, 'id, ist_aktiv')
 
   const { data: profile } = await supabase
     .from('profiles')

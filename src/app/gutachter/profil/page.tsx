@@ -1,21 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
+import { getGutachterForUser } from '@/lib/gutachter'
 import ProfilClient from './ProfilClient'
 
 export default async function ProfilPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const [{ data: profile }, { data: sv }, faelleResult] = await Promise.all([
+  const [{ data: profile }, sv, faelleResult] = await Promise.all([
     supabase
       .from('profiles')
       .select('vorname, nachname, telefon, rolle')
       .eq('id', user!.id)
       .single(),
-    supabase
-      .from('sachverstaendige')
-      .select('id, paket, gebiet_plz, ist_aktiv, max_faelle_monat, offene_faelle, kalender_typ, kalender_sync_aktiv, kalender_sync_letzte, qualifikationen, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id')
-      .eq('profile_id', user!.id)
-      .single(),
+    getGutachterForUser(supabase, user!.id, 'id, paket, gebiet_plz, ist_aktiv, max_faelle_monat, offene_faelle, kalender_typ, kalender_sync_aktiv, kalender_sync_letzte, qualifikationen, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id'),
     supabase
       .from('faelle')
       .select('id', { count: 'exact', head: true })

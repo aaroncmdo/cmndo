@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import SVKalenderClient from './SVKalenderClient'
 
@@ -8,11 +9,7 @@ export default async function SVKalenderPage() {
   if (!user) redirect('/login')
 
   // Get the SV's sachverstaendige ID
-  const { data: sv } = await supabase
-    .from('sachverstaendige')
-    .select('id, gcal_connected, standort_lat, standort_lng')
-    .eq('profile_id', user.id)
-    .single()
+  const sv = await getGutachterForUser(supabase, user.id, 'id, gcal_connected, standort_lat, standort_lng')
 
   if (!sv) redirect('/login')
 

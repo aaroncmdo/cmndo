@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect, notFound } from 'next/navigation'
 import FallDetailClient from './FallDetailClient'
 
@@ -13,11 +14,7 @@ export default async function GutachterFallPage({
   if (!user) redirect('/login')
 
   // Verify this gutachter has an SV profile
-  const { data: sv } = await supabase
-    .from('sachverstaendige')
-    .select('id')
-    .eq('profile_id', user.id)
-    .single()
+  const sv = await getGutachterForUser(supabase, user.id, 'id')
 
   if (!sv) notFound()
 

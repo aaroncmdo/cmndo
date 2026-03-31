@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getGutachterForUser } from '@/lib/gutachter'
 import Link from 'next/link'
 
 const STATUS_LABEL: Record<string, string> = {
@@ -45,11 +46,7 @@ export default async function AuftraegePage({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: sv } = await supabase
-    .from('sachverstaendige')
-    .select('id')
-    .eq('id', user!.id)
-    .single()
+  const sv = await getGutachterForUser(supabase, user!.id, 'id')
 
   if (!sv) {
     return (

@@ -97,7 +97,7 @@ export default function GutachterShell({
     const { data: sv } = await supabase
       .from('sachverstaendige')
       .select('id')
-      .eq('profile_id', user.id)
+      .or(`profile_id.eq.${user.id},user_id.eq.${user.id}`)
       .single()
     if (!sv) return
     const { count } = await supabase

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
 import { emailGutachtenEingegangen } from '@/lib/email'
 import { sendStatusWhatsApp } from '@/lib/whatsapp'
@@ -19,11 +20,7 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
   if (file.type !== 'application/pdf') throw new Error('Nur PDF-Dateien sind erlaubt')
 
   // Verify the case belongs to this gutachter
-  const { data: sv } = await supabase
-    .from('sachverstaendige')
-    .select('id')
-    .eq('profile_id', user.id)
-    .single()
+  const sv = await getGutachterForUser(supabase, user.id, 'id')
 
   if (!sv) throw new Error('Kein Sachverstaendigen-Profil gefunden')
 
@@ -159,11 +156,7 @@ export async function uploadDokument(fallId: string, formData: FormData) {
   if (!file || file.size === 0) throw new Error('Keine Datei ausgewaehlt')
 
   // Verify the case belongs to this gutachter
-  const { data: sv } = await supabase
-    .from('sachverstaendige')
-    .select('id')
-    .eq('profile_id', user.id)
-    .single()
+  const sv = await getGutachterForUser(supabase, user.id, 'id')
 
   if (!sv) throw new Error('Kein Sachverstaendigen-Profil gefunden')
 
@@ -265,11 +258,7 @@ export async function saveFinVinGutachter(fallId: string, finVin: string) {
   if (!user) throw new Error('Nicht angemeldet')
 
   // Verify this gutachter owns the case
-  const { data: sv } = await supabase
-    .from('sachverstaendige')
-    .select('id')
-    .eq('profile_id', user.id)
-    .single()
+  const sv = await getGutachterForUser(supabase, user.id, 'id')
   if (!sv) throw new Error('Kein Sachverstaendigen-Profil gefunden')
 
   const { data: fall } = await supabase
@@ -324,11 +313,7 @@ export async function uploadDatei(fallId: string, formData: FormData) {
   if (!kategorie) throw new Error('Keine Kategorie angegeben')
 
   // Verify the case belongs to this gutachter
-  const { data: sv } = await supabase
-    .from('sachverstaendige')
-    .select('id')
-    .eq('profile_id', user.id)
-    .single()
+  const sv = await getGutachterForUser(supabase, user.id, 'id')
 
   if (!sv) throw new Error('Kein Sachverstaendigen-Profil gefunden')
 
@@ -400,11 +385,7 @@ export async function sendChatNachricht(fallId: string, nachricht: string) {
   if (!trimmed) throw new Error('Nachricht darf nicht leer sein')
 
   // Verify gutachter has SV profile
-  const { data: sv } = await supabase
-    .from('sachverstaendige')
-    .select('id')
-    .eq('profile_id', user.id)
-    .single()
+  const sv = await getGutachterForUser(supabase, user.id, 'id')
 
   if (!sv) throw new Error('Kein Sachverstaendigen-Profil gefunden')
 

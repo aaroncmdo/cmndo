@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect, notFound } from 'next/navigation'
 import AuftragClient from './AuftragClient'
 
@@ -13,11 +14,7 @@ export default async function AuftragPage({
   if (!user) redirect('/login')
 
   // Verify this case belongs to the gutachter
-  const { data: sv } = await supabase
-    .from('sachverstaendige')
-    .select('id')
-    .eq('id', user.id)
-    .single()
+  const sv = await getGutachterForUser(supabase, user.id, 'id')
 
   const { data: fall } = await supabase
     .from('faelle')
