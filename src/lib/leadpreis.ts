@@ -85,3 +85,10 @@ export function berechneLeadpreis(schadenhoehe: number, hatPaket: boolean): numb
   const pct = hatPaket ? 0.25 : 0.30
   return Math.max(200, Math.round(schadenhoehe * pct))
 }
+
+/** Convenience wrapper: returns preis + typ */
+export function getLeadpreis(schadenshoehe: number, istImPaket: boolean): { preis: number; typ: 'paket' | 'einzel' } {
+  return { preis: berechneLeadpreis(schadenshoehe, istImPaket), typ: istImPaket ? 'paket' : 'einzel' }
+}
+
+export { PREIS_TABELLE }
