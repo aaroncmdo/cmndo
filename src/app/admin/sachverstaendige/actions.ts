@@ -122,6 +122,7 @@ export async function onboardGutachter(data: OnboardingData) {
   // 4. SV-Eintrag mit allen neuen Feldern
   const { data: svEntry, error: svErr } = await admin.from('sachverstaendige').insert({
     profile_id: authUser.user.id,
+    user_id: authUser.user.id,
     paket: data.paket,
     gutachter_typ: data.gutachter_typ,
     qualifikationen: data.qualifikationen,

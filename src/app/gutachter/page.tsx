@@ -37,7 +37,8 @@ export default function GutachterCockpit() {
 
   const load = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser(); if (!user) return
-    const { data: sv } = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, guthaben, offene_faelle, max_faelle_monat').eq('profile_id', user.id).single()
+    let { data: sv } = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, guthaben, offene_faelle, max_faelle_monat').eq('profile_id', user.id).single()
+    if (!sv) { const r = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, guthaben, offene_faelle, max_faelle_monat').eq('user_id', user.id).single(); sv = r.data }
     if (!sv) { setLoading(false); return }
     const { data: p } = await supabase.from('profiles').select('vorname').eq('id', user.id).single()
     const now = new Date(); const h = now.getHours()

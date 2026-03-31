@@ -22,11 +22,15 @@ export default async function GutachterLayout({
   const displayName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || user.email || ''
 
   // Fetch brand colors + logo
-  const { data: sv } = await supabase
+  let { data: sv } = await supabase
     .from('sachverstaendige')
     .select('logo_url, brand_primary, brand_secondary')
     .eq('profile_id', user.id)
     .single()
+  if (!sv) {
+    const r = await supabase.from('sachverstaendige').select('logo_url, brand_primary, brand_secondary').eq('user_id', user.id).single()
+    sv = r.data
+  }
 
   return (
     <GutachterShell
