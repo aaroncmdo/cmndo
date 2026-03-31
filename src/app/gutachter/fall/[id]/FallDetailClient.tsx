@@ -20,6 +20,7 @@ import {
   FolderOpenIcon,
 } from 'lucide-react'
 import { uploadGutachten, uploadDokument, uploadDatei, saveFinVinGutachter, sendChatNachricht } from './actions'
+import VorOrtPanel from '@/components/VorOrtPanel'
 
 const DOKUMENT_TYP_LABEL: Record<string, string> = {
   fahrzeugschein: 'Fahrzeugschein',
@@ -85,6 +86,7 @@ export default function FallDetailClient({
   const [chatSending, setChatSending] = useState(false)
   const [dateiUploading, setDateiUploading] = useState(false)
   const [dateiKategorie, setDateiKategorie] = useState<string>('gutachter-foto')
+  const [showVorOrt, setShowVorOrt] = useState(false)
   const gutachtenFormRef = useRef<HTMLFormElement>(null)
   const docInputRef = useRef<HTMLInputElement>(null)
   const dateiInputRef = useRef<HTMLInputElement>(null)
@@ -219,6 +221,33 @@ export default function FallDetailClient({
             {fall.status as string}
           </span>
         </div>
+
+        {/* Vor-Ort Button */}
+        {fall.sv_termin && !hasGutachten && (fall.status === 'sv-termin' || fall.status === 'sv-zugewiesen') && (
+          <div className="flex gap-2 mb-4">
+            <button onClick={() => setShowVorOrt(true)}
+              className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
+              <CameraIcon className="w-4 h-4" /> Bin angekommen — Vor-Ort Erfassung
+            </button>
+            <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent([fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', '))}`}
+              target="_blank" rel="noopener noreferrer"
+              className="bg-green-600 hover:bg-green-500 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2">
+              Navigieren
+            </a>
+          </div>
+        )}
+
+        {/* VorOrt Panel */}
+        {showVorOrt && (
+          <VorOrtPanel
+            fallId={fallId}
+            kundeName={kundenName}
+            kennzeichen={(fall.kennzeichen as string) ?? null}
+            adresse={[fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') || null}
+            onClose={() => setShowVorOrt(false)}
+            onComplete={() => { setShowVorOrt(false); router.refresh() }}
+          />
+        )}
 
         {/* Vorschaden Warning */}
         {(fall.vorschaden_vorhanden as boolean) && (

@@ -419,12 +419,14 @@ export default async function GutachterDashboard() {
                         <p className="text-gray-500 text-xs truncate mt-0.5">{formatAdresse(fall)}</p>
                       </div>
 
-                      {/* Schadentyp */}
-                      <div className="shrink-0 hidden sm:flex items-center gap-1.5 bg-gray-100 px-2.5 py-1 rounded-full">
-                        <UrsacheIcon className="w-3.5 h-3.5 text-gray-500" />
-                        <span className="text-gray-500 text-xs">
-                          {URSACHE_LABEL[fall.schadens_ursache ?? ''] ?? 'Sonstiges'}
-                        </span>
+                      {/* Navigation + Schadentyp */}
+                      <div className="shrink-0 flex items-center gap-2">
+                        <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent([fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', '))}`}
+                          target="_blank" rel="noopener noreferrer"
+                          onClick={e => e.stopPropagation()}
+                          className="flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-600 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors">
+                          <NavigationIcon className="w-3 h-3" /> Nav
+                        </a>
                       </div>
                     </Link>
                   )
