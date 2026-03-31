@@ -2,6 +2,7 @@
 
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { createNotification } from '@/lib/notifications'
 import {
   emailSvZugewiesen,
   emailGutachtenEingegangen,
@@ -140,10 +141,12 @@ export async function createLead(data: {
 
   if (error) throw new Error(error.message)
 
-  // Phase 1: Lead-Tasks erstellen
-  // Get the inserted lead ID
+  // Phase 1: Lead-Tasks + Notification
   const { data: newLead } = await supabase.from('leads').select('id').eq('telefon', data.telefon || '+491633628571').order('created_at', { ascending: false }).limit(1).single()
-  if (newLead) triggerLeadTasks(newLead.id, user.id).catch(() => {})
+  if (newLead) {
+    triggerLeadTasks(newLead.id, user.id).catch(() => {})
+    createNotification(user.id, 'neuer-lead', `Neuer Lead: ${data.vorname} ${data.nachname}`, `${data.source_channel} · ${data.schadenfall_typ || 'Kein Typ'}`, `/admin/dispatch/lead/${newLead.id}`).catch(() => {})
+  }
 
   revalidatePath('/admin/dispatch')
 }

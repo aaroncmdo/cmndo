@@ -8,6 +8,7 @@ import { triggerKanzleiPaketTask, triggerAsSendedatumTask, triggerArchivierungTa
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { checkFallAutoPhase } from '@/lib/autoPhase'
 import { resolveGates } from '@/lib/tasking'
+import { createNotification } from '@/lib/notifications'
 
 export async function saveFilmcheck(fallId: string, notizen: string) {
   const supabase = await createClient()
