@@ -20,7 +20,6 @@ const NAV_ITEMS = [
   { href: '/gutachter', label: 'Dashboard', icon: LayoutDashboardIcon },
   { href: '/gutachter/faelle', label: 'Meine Fälle', icon: FolderOpenIcon },
   { href: '/gutachter/kalender', label: 'Kalender', icon: CalendarIcon },
-  { href: '/gutachter/profil', label: 'Profil', icon: UserIcon },
   { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
   { href: '/gutachter/mitteilungen', label: 'Mitteilungen', icon: BellIcon },
 ]
@@ -140,17 +139,22 @@ export default function GutachterShell({
           ))}
         </nav>
 
-        <div className="px-3 py-4 border-t border-gray-200">
-          <div className="px-3 mb-3">
-            <p className="text-gray-700 text-sm font-medium truncate">{displayName}</p>
-            <p className="text-gray-400 text-xs">Sachverstaendiger</p>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:text-red-400 hover:bg-gray-100/50 transition-colors"
-          >
-            <LogOutIcon className="w-5 h-5" />
-            Abmelden
+        <div className="mt-auto px-3 py-3 border-t border-gray-200 space-y-2">
+          {/* Klickbarer Profil-Bereich */}
+          <Link href="/gutachter/profil" onClick={() => setSidebarOpen(false)}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-100 transition-colors group">
+            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+              {displayName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-gray-800 text-sm font-semibold truncate">{displayName}</p>
+              <p className="text-gray-400 text-xs">Sachverständiger</p>
+            </div>
+            <UserIcon className="w-4 h-4 text-gray-300 group-hover:text-gray-500 shrink-0" />
+          </Link>
+          <button onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-gray-400 hover:text-red-500 hover:bg-gray-50 transition-colors">
+            <LogOutIcon className="w-4 h-4" /> Abmelden
           </button>
         </div>
       </aside>
