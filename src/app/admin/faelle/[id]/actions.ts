@@ -610,6 +610,73 @@ export async function updateTaskStatus(taskId: string, newStatus: string) {
   if (task?.fall_id) revalidatePath(`/admin/faelle/${task.fall_id}`)
 }
 
+// ─── Zahlungseingang (KFZ-65) ─────────────────────────────────────────────
+
+export async function erfasseZahlungseingang(
+  fallId: string,
+  data: { zahlungsdatum: string; gesamtbetrag: number; referenz?: string; positionen: { position: string; gefordert: number; gezahlt: number; notiz?: string }[] },
+) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht angemeldet')
+
+  // Insert Zahlungseingang
+  const { data: zahlung, error: zErr } = await supabase.from('zahlungseingaenge').insert({
+    fall_id: fallId,
+    zahlungsdatum: data.zahlungsdatum,
+    gesamtbetrag: data.gesamtbetrag,
+    referenz: data.referenz || null,
+    erfasst_von: user.id,
+  }).select('id').single()
+
+  if (zErr || !zahlung) throw new Error(zErr?.message ?? 'Zahlungseingang konnte nicht erstellt werden')
+
+  // Insert Positionen
+  for (const pos of data.positionen) {
+    await supabase.from('zahlungspositionen').insert({
+      zahlung_id: zahlung.id,
+      fall_id: fallId,
+      position: pos.position,
+      gefordert: pos.gefordert,
+      gezahlt: pos.gezahlt,
+      notiz: pos.notiz || null,
+    })
+  }
+
+  // Update Fall
+  await supabase.from('faelle').update({
+    regulierung_betrag: data.gesamtbetrag,
+    regulierung_am: new Date().toISOString(),
+    zahlung_eingegangen_am: new Date().toISOString(),
+  }).eq('id', fallId)
+
+  // Kürzung erkennen
+  const gesamtGefordert = data.positionen.reduce((s, p) => s + p.gefordert, 0)
+  const gesamtGezahlt = data.positionen.reduce((s, p) => s + p.gezahlt, 0)
+  const kuerzung = gesamtGefordert - gesamtGezahlt
+  const gekuerztePositionen = data.positionen.filter(p => p.gezahlt < p.gefordert).length
+
+  // Timeline
+  await supabase.from('timeline').insert({
+    fall_id: fallId,
+    typ: 'system',
+    titel: `Zahlungseingang: ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(data.gesamtbetrag)}`,
+    beschreibung: kuerzung > 0
+      ? `Kürzung bei ${gekuerztePositionen} Position(en): ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(kuerzung)}`
+      : 'Vollständig reguliert',
+    erstellt_von: user.id,
+  })
+
+  // WhatsApp
+  sendStatusWhatsApp(fallId, 'nach_zahlung').catch(() => {})
+
+  // Auto-Phase
+  checkFallAutoPhase(fallId).catch(() => {})
+
+  revalidatePath(`/admin/faelle/${fallId}`)
+  return { kuerzung, gekuerztePositionen }
+}
+
 // ─── Termine (KFZ-41) ────────────────────────────────────────────────────────
 
 export async function createTermin(

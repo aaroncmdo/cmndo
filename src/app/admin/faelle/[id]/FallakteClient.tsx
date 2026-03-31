@@ -21,6 +21,7 @@ import {
   updateTaskStatus,
   createTermin,
   updateTerminStatus,
+  erfasseZahlungseingang,
 } from './actions'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import {
@@ -700,7 +701,7 @@ export default function FallakteClient({
           />
         )}
         {activeTab === 'abrechnung' && (
-          <TabAbrechnung fall={fall} forderungspositionen={forderungspositionen} />
+          <TabAbrechnung fall={fall} forderungspositionen={forderungspositionen} onRefresh={() => router.refresh()} />
         )}
         {activeTab === 'tasks' && (
           <TabTasks
@@ -2657,8 +2658,14 @@ function TabChat({
 
 // ─── TAB 9: Abrechnung ──────────────────────────────────────────────────────
 
-function TabAbrechnung({ fall, forderungspositionen }: { fall: Fall; forderungspositionen: Forderungsposition[] }) {
+function TabAbrechnung({ fall, forderungspositionen, onRefresh }: { fall: Fall; forderungspositionen: Forderungsposition[]; onRefresh: () => void }) {
   const regulierungBetrag = fall.regulierung_betrag ?? 0
+  const [showZahlung, setShowZahlung] = useState(false)
+  const [zDatum, setZDatum] = useState(new Date().toISOString().slice(0, 10))
+  const [zBetrag, setZBetrag] = useState('')
+  const [zRef, setZRef] = useState('')
+  const [zPositionen, setZPositionen] = useState<{ position: string; gefordert: number; gezahlt: string }[]>([])
+  const [zSaving, setZSaving] = useState(false)
 
   // OCR-Positionen oder Fallback-Kalkulation
   const hasOcrPositionen = forderungspositionen.length > 0
@@ -2759,16 +2766,115 @@ function TabAbrechnung({ fall, forderungspositionen }: { fall: Fall; forderungsp
 
       {/* Zahlungseingang */}
       <Section title="Zahlungseingang">
-        <div className="space-y-2">
-          <AbrechnungRow label="Regulierungsbetrag VS" value={regulierungBetrag} />
-          <AbrechnungRow label="Differenz zur Forderung" value={(hasOcrPositionen ? gesamtGefordert : fallbackGesamt) - regulierungBetrag} />
-        </div>
-        {regulierungBetrag > 0 && regulierungBetrag < (hasOcrPositionen ? gesamtGefordert : fallbackGesamt) && (
-          <div className="mt-3 bg-amber-50 border border-amber-200 rounded-xl p-3">
-            <p className="text-amber-600 text-xs font-medium">Kürzung erkannt — ggf. Nachforderung prüfen</p>
+        {regulierungBetrag > 0 ? (
+          <div className="space-y-2">
+            <AbrechnungRow label="Regulierungsbetrag VS" value={regulierungBetrag} />
+            <AbrechnungRow label="Differenz" value={(hasOcrPositionen ? gesamtGefordert : fallbackGesamt) - regulierungBetrag} />
+            {regulierungBetrag < (hasOcrPositionen ? gesamtGefordert : fallbackGesamt) && (
+              <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg p-2">
+                <p className="text-amber-600 text-xs font-medium">Kürzung erkannt — ggf. Nachforderung prüfen</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div>
+            <button onClick={() => {
+              // Prefill positionen from forderungspositionen
+              setZPositionen(
+                hasOcrPositionen
+                  ? forderungspositionen.map(p => ({ position: p.bezeichnung, gefordert: p.betrag_gefordert ?? 0, gezahlt: '' }))
+                  : [
+                    { position: 'Reparaturkosten', gefordert: fall.gutachten_betrag ?? 0, gezahlt: '' },
+                    { position: 'Gutachterkosten', gefordert: Math.round((fall.gutachten_betrag ?? 0) * 0.12), gezahlt: '' },
+                    { position: 'Anwaltskosten', gefordert: Math.round((fall.gutachten_betrag ?? 0) * 0.08), gezahlt: '' },
+                    { position: 'Kostenpauschale', gefordert: 25, gezahlt: '' },
+                  ]
+              )
+              setShowZahlung(true)
+            }}
+              className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
+              Zahlungseingang erfassen
+            </button>
+            <p className="text-gray-400 text-[10px] mt-1">Noch kein Zahlungseingang dokumentiert</p>
           </div>
         )}
       </Section>
+
+      {/* Zahlungseingang Modal */}
+      {showZahlung && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowZahlung(false)}>
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 p-5 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <h3 className="text-base font-semibold text-gray-900 mb-4">Zahlungseingang erfassen</h3>
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Zahlungsdatum</label>
+                <input type="date" value={zDatum} onChange={e => setZDatum(e.target.value)}
+                  className="w-full bg-white border border-gray-300 text-sm rounded-lg px-3 py-2" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Gesamtbetrag (EUR)</label>
+                <input type="number" step="0.01" value={zBetrag} onChange={e => setZBetrag(e.target.value)} placeholder="0,00"
+                  className="w-full bg-white border border-gray-300 text-sm rounded-lg px-3 py-2" />
+              </div>
+            </div>
+            <div className="mb-4">
+              <label className="text-xs text-gray-500 block mb-1">Referenz / Aktenzeichen (optional)</label>
+              <input type="text" value={zRef} onChange={e => setZRef(e.target.value)}
+                className="w-full bg-white border border-gray-300 text-sm rounded-lg px-3 py-2" />
+            </div>
+
+            <p className="text-xs font-semibold text-gray-700 mb-2">Positionen abgleichen</p>
+            <table className="w-full text-xs mb-4">
+              <thead><tr className="border-b border-gray-200 text-gray-500">
+                <th className="text-left py-1">Position</th>
+                <th className="text-right py-1">Gefordert</th>
+                <th className="text-right py-1 w-24">Gezahlt</th>
+                <th className="text-right py-1">Diff</th>
+              </tr></thead>
+              <tbody>
+                {zPositionen.map((p, i) => {
+                  const gezahlt = parseFloat(p.gezahlt) || 0
+                  const diff = p.gefordert - gezahlt
+                  return (
+                    <tr key={i} className="border-b border-gray-100">
+                      <td className="py-1.5 text-gray-800">{p.position}</td>
+                      <td className="py-1.5 text-right text-gray-500 tabular-nums">{fmtEur(p.gefordert)}</td>
+                      <td className="py-1.5 text-right">
+                        <input type="number" step="0.01" value={p.gezahlt}
+                          onChange={e => setZPositionen(prev => prev.map((pp, j) => j === i ? { ...pp, gezahlt: e.target.value } : pp))}
+                          className="w-20 bg-white border border-gray-300 text-xs rounded px-2 py-1 text-right tabular-nums" />
+                      </td>
+                      <td className={`py-1.5 text-right tabular-nums font-medium ${diff > 0 ? 'text-red-500' : diff === 0 ? 'text-green-600' : 'text-gray-500'}`}>
+                        {p.gezahlt ? fmtEur(diff) : '—'}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+
+            <div className="flex gap-2">
+              <button disabled={zSaving || !zDatum || !zBetrag} onClick={async () => {
+                setZSaving(true)
+                try {
+                  await erfasseZahlungseingang(fall.id, {
+                    zahlungsdatum: zDatum,
+                    gesamtbetrag: parseFloat(zBetrag),
+                    referenz: zRef || undefined,
+                    positionen: zPositionen.map(p => ({ position: p.position, gefordert: p.gefordert, gezahlt: parseFloat(p.gezahlt) || 0 })),
+                  })
+                  setShowZahlung(false)
+                  onRefresh()
+                } catch { /* */ }
+                setZSaving(false)
+              }} className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-lg">
+                {zSaving ? 'Speichert...' : 'Zahlungseingang speichern'}
+              </button>
+              <button onClick={() => setShowZahlung(false)} className="px-4 text-gray-500 text-sm">Abbrechen</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
