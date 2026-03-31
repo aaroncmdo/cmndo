@@ -39,9 +39,9 @@ const QUALIFIKATIONEN = [
 ]
 
 const PAKETE = [
-  { value: 'starter-10', label: 'Starter', faelle: 10, km: 20, preis: 1500 },
-  { value: 'standard-25', label: 'Pro', faelle: 25, km: 40, preis: 3750 },
-  { value: 'premium-50', label: 'Premium', faelle: 50, km: 100, preis: 7500 },
+  { value: 'standard', label: 'Standard', faelle: 10, km: 15, preis: 1500 },
+  { value: 'pro', label: 'Pro', faelle: 25, km: 40, preis: 3750 },
+  { value: 'premium', label: 'Premium', faelle: 50, km: 70, preis: 7500 },
 ]
 
 export default function OnboardingClient() {
@@ -57,7 +57,7 @@ export default function OnboardingClient() {
     qualifikationen: [],
     standort_adresse: '', standort_plz: '',
     standort_lat: null, standort_lng: null, standort_place_id: null,
-    paket: 'starter-10',
+    paket: 'standard',
   })
 
   function update(patch: Partial<OnboardingData>) {

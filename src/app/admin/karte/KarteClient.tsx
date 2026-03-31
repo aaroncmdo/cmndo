@@ -54,17 +54,18 @@ const TYP_COLORS: Record<string, { fill: string; marker: string; label: string }
 }
 
 const PAKET_LABEL: Record<string, string> = {
-  'starter-10': 'Starter', starter: 'Starter',
-  'standard-25': 'Standard', pro: 'Standard',
+  'starter-10': 'Standard', standard: 'Standard',
+  'standard-25': 'Pro', pro: 'Pro',
   'premium-50': 'Premium', premium: 'Premium',
 }
 
 // Paket → Radius in meters (with 0.7 correction factor: Luftlinie → Fahrstrecke)
 const PAKET_RADIUS_M: Record<string, number> = {
-  'starter-10': 14000, starter: 14000,
+  'starter-10': 10500, standard: 10500,
   'standard-25': 28000, pro: 28000,
-  'premium-50': 70000, premium: 70000,
+  'premium-50': 49000, premium: 49000,
 }
+// Note: legacy keys (starter-10 etc.) kept for backward compatibility with existing DB entries
 
 const ALL_QUALIFIKATIONEN = [
   'Haftpflichtschaden', 'Kaskoschaden', 'Leasingrueckgabe', 'Flottenmanagement',
@@ -287,8 +288,8 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
               </div>
             ))}
             <div className="border-t border-gray-300/50 pt-1.5 mt-1.5 space-y-0.5">
-              <p className="text-[10px] text-gray-500">Starter: 14km</p>
-              <p className="text-[10px] text-gray-500">Standard: 28km</p>
+              <p className="text-[10px] text-gray-500">Standard: 15km</p>
+              <p className="text-[10px] text-gray-500">Pro: 40km</p>
               <p className="text-[10px] text-gray-500">Premium: 70km</p>
             </div>
           </div>
@@ -403,9 +404,9 @@ function ProfilPanel({ sv, onClose }: { sv: SV; onClose: () => void }) {
               <div className="bg-gray-50 rounded-xl p-3 text-center">
                 <select value={sv.paket} onChange={e => saveField('paket', e.target.value)}
                   className="text-sm font-bold text-gray-900 bg-transparent border-0 text-center cursor-pointer w-full">
-                  <option value="starter-10">Starter</option>
-                  <option value="standard-25">Standard</option>
-                  <option value="premium-50">Premium</option>
+                  <option value="standard">Standard</option>
+                  <option value="pro">Pro</option>
+                  <option value="premium">Premium</option>
                 </select>
                 <p className="text-[10px] text-gray-500">Paket</p>
               </div>

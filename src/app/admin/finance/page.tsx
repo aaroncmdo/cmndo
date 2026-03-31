@@ -2,9 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import FinanceClient from './FinanceClient'
 
 const PAKET_PREIS: Record<string, number> = {
-  'starter-10': 500,
-  'standard-25': 1000,
-  'premium-50': 1800,
+  standard: 750, 'starter-10': 750,
+  pro: 1875, 'standard-25': 1875,
+  premium: 3750, 'premium-50': 3750,
 }
 
 // ── Gewinnverteilung 75/25 ──

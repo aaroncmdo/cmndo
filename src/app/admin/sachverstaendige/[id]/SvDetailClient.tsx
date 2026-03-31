@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation'
 import { updateSvProfile } from './actions'
 
 const PAKET_OPTIONS = [
-  { value: 'starter-10', label: 'Starter (10)' },
-  { value: 'standard-25', label: 'Standard (25)' },
-  { value: 'premium-50', label: 'Premium (50)' },
+  { value: 'standard', label: 'Standard (10)' },
+  { value: 'pro', label: 'Pro (25)' },
+  { value: 'premium', label: 'Premium (50)' },
 ]
 
 type SvData = {

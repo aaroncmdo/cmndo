@@ -14,9 +14,9 @@ const TYPEN = [
 ]
 
 const PAKETE = [
-  { key: 'starter-10', label: 'Starter', faelle: 10, km: 20, preis: 1500 },
-  { key: 'standard-25', label: 'Pro', faelle: 25, km: 40, preis: 3750 },
-  { key: 'premium-50', label: 'Premium', faelle: 50, km: 100, preis: 7500 },
+  { key: 'standard', label: 'Standard', faelle: 10, km: 15, preis: 1500 },
+  { key: 'pro', label: 'Pro', faelle: 25, km: 40, preis: 3750 },
+  { key: 'premium', label: 'Premium', faelle: 50, km: 70, preis: 7500 },
 ]
 
 const QUALIFIKATIONEN = [
@@ -47,7 +47,7 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
   const [plz, setPlz] = useState('')
   const [lat, setLat] = useState<number | null>(null)
   const [lng, setLng] = useState<number | null>(null)
-  const [paket, setPaket] = useState('standard-25')
+  const [paket, setPaket] = useState('pro')
   const [quals, setQuals] = useState<string[]>([])
 
   const selectedPaket = PAKETE.find(p => p.key === paket)!
@@ -78,7 +78,7 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
       const result = await onboardGutachter({
         vorname, nachname, email, telefon,
         gutachter_typ: typ,
-        paket: paket as 'starter-10' | 'standard-25' | 'premium-50',
+        paket: paket as 'standard' | 'pro' | 'premium',
         qualifikationen: quals,
         standort_adresse: adresse,
         standort_plz: plz,

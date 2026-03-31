@@ -45,8 +45,8 @@ const TYP_COLORS: Record<string, { marker: string; label: string }> = {
 }
 
 const PAKET_LABELS: Record<string, string> = {
-  'starter-10': 'Starter', starter: 'Starter',
-  'standard-25': 'Standard', pro: 'Standard',
+  'starter-10': 'Standard', standard: 'Standard',
+  'standard-25': 'Pro', pro: 'Pro',
   'premium-50': 'Premium', premium: 'Premium',
 }
 

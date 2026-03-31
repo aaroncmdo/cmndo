@@ -5,9 +5,12 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 const PAKET_CONFIG: Record<string, { faelle: number; km: number; preis: number }> = {
-  'starter-10': { faelle: 10, km: 20, preis: 1500 },
+  standard: { faelle: 10, km: 15, preis: 1500 },
+  'starter-10': { faelle: 10, km: 15, preis: 1500 },
+  pro: { faelle: 25, km: 40, preis: 3750 },
   'standard-25': { faelle: 25, km: 40, preis: 3750 },
-  'premium-50': { faelle: 50, km: 100, preis: 7500 },
+  premium: { faelle: 50, km: 70, preis: 7500 },
+  'premium-50': { faelle: 50, km: 70, preis: 7500 },
 }
 
 export type OnboardingData = {
@@ -34,7 +37,7 @@ export async function createSachverstaendiger(formData: FormData) {
   const vorname = (formData.get('vorname') as string)?.trim() || null
   const nachname = (formData.get('nachname') as string)?.trim() || null
   const telefon = (formData.get('telefon') as string)?.trim() || null
-  const paket = (formData.get('paket') as string) || 'starter-10'
+  const paket = (formData.get('paket') as string) || 'standard'
   const gebietPlzRaw = (formData.get('gebiet_plz') as string)?.trim() || ''
   const maxFaelle = parseInt(formData.get('max_faelle_monat') as string) || 10
 
@@ -117,7 +120,7 @@ export async function onboardGutachter(data: OnboardingData) {
   if (profileErr) throw new Error(`Profil erstellen fehlgeschlagen: ${profileErr.message}`)
 
   // 3. Paket-Config ableiten
-  const paketCfg = PAKET_CONFIG[data.paket] ?? PAKET_CONFIG['starter-10']
+  const paketCfg = PAKET_CONFIG[data.paket] ?? PAKET_CONFIG['standard']
 
   // 4. SV-Eintrag mit allen neuen Feldern
   const { data: svEntry, error: svErr } = await admin.from('sachverstaendige').insert({

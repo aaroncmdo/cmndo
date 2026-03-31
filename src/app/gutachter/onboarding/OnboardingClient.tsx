@@ -31,9 +31,9 @@ const GUTACHTER_TYPEN = [
 ] as const
 
 const PAKETE = [
-  { key: 'starter-10', label: 'Starter', faelle: 10, km: 20, preis: 1500, color: 'border-blue-500' },
-  { key: 'standard-25', label: 'Pro', faelle: 25, km: 40, preis: 3750, color: 'border-green-500' },
-  { key: 'premium-50', label: 'Premium', faelle: 50, km: 100, preis: 7500, color: 'border-amber-500' },
+  { key: 'standard', label: 'Standard', faelle: 10, km: 15, preis: 1500, color: 'border-blue-500' },
+  { key: 'pro', label: 'Pro', faelle: 25, km: 40, preis: 3750, color: 'border-green-500' },
+  { key: 'premium', label: 'Premium', faelle: 50, km: 70, preis: 7500, color: 'border-amber-500' },
 ] as const
 
 const QUALIFIKATIONEN = [
@@ -87,7 +87,7 @@ export default function OnboardingClient({
     standort_lat: null,
     standort_lng: null,
     standort_place_id: '',
-    paket: 'starter-10',
+    paket: 'standard',
     kalender_typ: 'keiner',
   })
 

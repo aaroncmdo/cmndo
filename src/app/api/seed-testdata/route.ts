@@ -170,7 +170,7 @@ export async function POST() {
         gutachter_typ: 'dat-gutachter',
         standort_adresse: 'Muensterplatz 5, 53111 Bonn', standort_plz: '53111',
         standort_lat: 50.7374, standort_lng: 7.0982,
-        paket: 'starter-10' as const, paket_faelle_gesamt: 10, paket_umkreis_km: 20,
+        paket: 'standard' as const, paket_faelle_gesamt: 10, paket_umkreis_km: 15,
         guthaben: 1500, anzahlung_status: 'bezahlt' as const,
         onboarding_abgeschlossen: true, ist_parent_account: false,
         qualifikationen: ['Haftpflichtschaden', 'Kaskoschaden'],
@@ -840,7 +840,7 @@ export async function POST() {
     const einzahlungen = [
       { sv_id: sv1Id, betrag: 3750, typ: 'anzahlung', beschreibung: 'Anzahlung Standard-25 Paket', eingezahlt_am: daysAgo(30) },
       { sv_id: sv2Id, betrag: 7500, typ: 'anzahlung', beschreibung: 'Anzahlung Premium-50 Paket', eingezahlt_am: daysAgo(28) },
-      { sv_id: sv3Id, betrag: 1500, typ: 'anzahlung', beschreibung: 'Anzahlung Starter-10 Paket', eingezahlt_am: daysAgo(25) },
+      { sv_id: sv3Id, betrag: 750, typ: 'anzahlung', beschreibung: 'Anzahlung Standard Paket', eingezahlt_am: daysAgo(25) },
       { sv_id: sv4Id, betrag: 3750, typ: 'anzahlung', beschreibung: 'Anzahlung Standard-25 Paket', eingezahlt_am: daysAgo(20) },
     ]
     for (const e of einzahlungen) {

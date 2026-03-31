@@ -21,9 +21,9 @@ const QUALIFIKATION_OPTIONS = [
 ]
 
 const PAKET_LABELS: Record<string, string> = {
-  'starter-10': 'Starter (10 Faelle/Monat)',
-  'standard-25': 'Standard (25 Faelle/Monat)',
-  'premium-50': 'Premium (50 Faelle/Monat)',
+  standard: 'Standard (10 Faelle/Monat)', 'starter-10': 'Standard (10 Faelle/Monat)',
+  pro: 'Pro (25 Faelle/Monat)', 'standard-25': 'Pro (25 Faelle/Monat)',
+  premium: 'Premium (50 Faelle/Monat)', 'premium-50': 'Premium (50 Faelle/Monat)',
 }
 type PendingTermin = { id: string; fall_id: string; start_zeit: string; end_zeit: string; fall_nummer?: string }
 

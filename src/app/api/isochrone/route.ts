@@ -100,7 +100,7 @@ function generateFallbackPolygon(lat: number, lng: number, radiusKm: number): { 
 export async function GET(req: NextRequest) {
   const lat = parseFloat(req.nextUrl.searchParams.get('lat') ?? '')
   const lng = parseFloat(req.nextUrl.searchParams.get('lng') ?? '')
-  const radiusKm = parseFloat(req.nextUrl.searchParams.get('radius_km') ?? '20')
+  const radiusKm = parseFloat(req.nextUrl.searchParams.get('radius_km') ?? '15')
 
   if (isNaN(lat) || isNaN(lng)) {
     return NextResponse.json({ error: 'lat und lng erforderlich' }, { status: 400 })

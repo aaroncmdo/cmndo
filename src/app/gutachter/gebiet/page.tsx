@@ -5,9 +5,12 @@ import { createClient } from '@/lib/supabase/client'
 import { MapPinIcon, UsersIcon, FlameIcon, ArrowUpIcon } from 'lucide-react'
 
 const PAKET_INFO: Record<string, { label: string; faelle: number; km: number; preis: number }> = {
-  'starter-10': { label: 'Starter', faelle: 10, km: 20, preis: 1500 },
+  standard: { label: 'Standard', faelle: 10, km: 15, preis: 1500 },
+  'starter-10': { label: 'Standard', faelle: 10, km: 15, preis: 1500 },
+  pro: { label: 'Pro', faelle: 25, km: 40, preis: 3750 },
   'standard-25': { label: 'Pro', faelle: 25, km: 40, preis: 3750 },
-  'premium-50': { label: 'Premium', faelle: 50, km: 100, preis: 7500 },
+  premium: { label: 'Premium', faelle: 50, km: 70, preis: 7500 },
+  'premium-50': { label: 'Premium', faelle: 50, km: 70, preis: 7500 },
 }
 const PAKETE = Object.entries(PAKET_INFO)
 const MAPS_ID = 'gebiet-maps-script'
@@ -25,7 +28,7 @@ export default function GebietPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     const { data: sv } = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket, isochrone_polygon, anzahlung_faellig').or(`profile_id.eq.${user.id},user_id.eq.${user.id}`).single()
-    if (sv?.standort_lat) setSvData({ id: sv.id, lat: Number(sv.standort_lat), lng: Number(sv.standort_lng), paket: sv.paket ?? 'starter-10', iso: sv.isochrone_polygon, anzahlungBezahlt: Number(sv.anzahlung_faellig ?? 750) })
+    if (sv?.standort_lat) setSvData({ id: sv.id, lat: Number(sv.standort_lat), lng: Number(sv.standort_lng), paket: sv.paket ?? 'standard', iso: sv.isochrone_polygon, anzahlungBezahlt: Number(sv.anzahlung_faellig ?? 750) })
     setLoading(false)
   }, [supabase])
 
@@ -90,7 +93,7 @@ export default function GebietPage() {
   if (loading) return <div className="h-full flex items-center justify-center"><div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
   if (!svData) return <div className="h-full flex items-center justify-center text-gray-400">Kein Profil gefunden</div>
 
-  const currentPaket = PAKET_INFO[svData.paket] ?? PAKET_INFO['starter-10']
+  const currentPaket = PAKET_INFO[svData.paket] ?? PAKET_INFO['standard']
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
@@ -120,7 +123,7 @@ export default function GebietPage() {
           </div>
 
           {PAKETE.filter(([k]) => {
-            const order = ['starter-10', 'standard-25', 'premium-50']
+            const order = ['standard', 'pro', 'premium']
             return order.indexOf(k) > order.indexOf(svData.paket)
           }).map(([key, info]) => {
             const differenz = Math.max(0, (info.preis * 0.5) - svData.anzahlungBezahlt)
@@ -128,7 +131,7 @@ export default function GebietPage() {
               <div key={key} className="border border-gray-200 rounded-xl p-3 hover:border-blue-300 transition-colors">
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-sm font-semibold text-gray-900">{info.label}</p>
-                  {key === 'standard-25' && <span className="text-[9px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded-full">Empfohlen</span>}
+                  {key === 'pro' && <span className="text-[9px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded-full">Empfohlen</span>}
                 </div>
                 <p className="text-[10px] text-gray-500 mb-2">{info.faelle} Fälle · {info.km}km · {info.preis}€/Mo</p>
                 <p className="text-xs text-gray-700">Differenz-Anzahlung: <span className="font-semibold">{differenz}€</span></p>

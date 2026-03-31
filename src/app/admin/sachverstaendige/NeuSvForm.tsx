@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation'
 import { createSachverstaendiger } from './actions'
 
 const PAKET_OPTIONS = [
-  { value: 'starter-10', label: 'Starter (10)' },
-  { value: 'standard-25', label: 'Standard (25)' },
-  { value: 'premium-50', label: 'Premium (50)' },
+  { value: 'standard', label: 'Standard (10)' },
+  { value: 'pro', label: 'Pro (25)' },
+  { value: 'premium', label: 'Premium (50)' },
 ]
 
 export default function NeuSvForm() {
@@ -125,7 +125,7 @@ export default function NeuSvForm() {
             <label className="block text-gray-500 text-sm mb-1.5">Paket</label>
             <select
               name="paket"
-              defaultValue="starter-10"
+              defaultValue="standard"
               className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
             >
               {PAKET_OPTIONS.map((opt) => (

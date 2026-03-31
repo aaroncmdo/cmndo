@@ -2,9 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { WalletIcon, PackageIcon, FileTextIcon, DownloadIcon } from 'lucide-react'
 
 const PAKET_LABELS: Record<string, string> = {
-  'starter-10': 'Starter (10 Faelle/Monat)',
-  'standard-25': 'Standard (25 Faelle/Monat)',
-  'premium-50': 'Premium (50 Faelle/Monat)',
+  standard: 'Standard (10 Faelle/Monat)', 'starter-10': 'Standard (10 Faelle/Monat)',
+  pro: 'Pro (25 Faelle/Monat)', 'standard-25': 'Pro (25 Faelle/Monat)',
+  premium: 'Premium (50 Faelle/Monat)', 'premium-50': 'Premium (50 Faelle/Monat)',
 }
 
 const COMPLETED_STATUSES = [

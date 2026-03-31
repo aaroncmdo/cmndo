@@ -4,9 +4,12 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 const PAKET_CONFIG: Record<string, { faelle: number; km: number; preis: number }> = {
-  'starter-10': { faelle: 10, km: 20, preis: 1500 },
+  standard: { faelle: 10, km: 15, preis: 1500 },
+  'starter-10': { faelle: 10, km: 15, preis: 1500 },
+  pro: { faelle: 25, km: 40, preis: 3750 },
   'standard-25': { faelle: 25, km: 40, preis: 3750 },
-  'premium-50': { faelle: 50, km: 100, preis: 7500 },
+  premium: { faelle: 50, km: 70, preis: 7500 },
+  'premium-50': { faelle: 50, km: 70, preis: 7500 },
 }
 
 export async function completeOnboarding(data: {
@@ -29,7 +32,7 @@ export async function completeOnboarding(data: {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht angemeldet')
 
-  const paketConfig = PAKET_CONFIG[data.paket] ?? PAKET_CONFIG['starter-10']
+  const paketConfig = PAKET_CONFIG[data.paket] ?? PAKET_CONFIG['standard']
 
   // Update profile
   const { error: profileErr } = await supabase

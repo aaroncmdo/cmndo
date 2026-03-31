@@ -21,7 +21,7 @@ export default function VertragPage() {
       if (!user) return
       const { data: sv } = await supabase.from('sachverstaendige').select('id, paket, paket_faelle_gesamt, anzahlung_faellig').or(`profile_id.eq.${user.id},user_id.eq.${user.id}`).single()
       const { data: p } = await supabase.from('profiles').select('vorname, nachname').eq('id', user.id).single()
-      if (sv) setSvData({ id: sv.id, paket: sv.paket ?? 'starter-10', name: [p?.vorname, p?.nachname].filter(Boolean).join(' ') || '', anzahlung: Number(sv.anzahlung_faellig ?? 750) })
+      if (sv) setSvData({ id: sv.id, paket: sv.paket ?? 'standard', name: [p?.vorname, p?.nachname].filter(Boolean).join(' ') || '', anzahlung: Number(sv.anzahlung_faellig ?? 750) })
     }
     load()
   }, [supabase])
@@ -76,7 +76,7 @@ export default function VertragPage() {
     setSaving(false)
   }
 
-  const PAKET_LABEL: Record<string, string> = { 'starter-10': 'Starter (10 Fälle/Monat)', 'standard-25': 'Pro (25 Fälle/Monat)', 'premium-50': 'Premium (50 Fälle/Monat)' }
+  const PAKET_LABEL: Record<string, string> = { standard: 'Standard (10 Fälle/Monat)', 'starter-10': 'Standard (10 Fälle/Monat)', pro: 'Pro (25 Fälle/Monat)', 'standard-25': 'Pro (25 Fälle/Monat)', premium: 'Premium (50 Fälle/Monat)', 'premium-50': 'Premium (50 Fälle/Monat)' }
 
   if (!svData) return <div className="flex items-center justify-center h-screen"><div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
 
