@@ -195,25 +195,13 @@ export default function GutachterShell({
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0 h-screen">
-        {/* Mobile Header */}
+        {/* Mobile Header (nur Hamburger + Logo, Glocke ist im Wetter-Banner) */}
         <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white shrink-0">
           <button onClick={() => setSidebarOpen(true)} className="p-2 -ml-2 text-gray-500 hover:text-gray-800 transition-colors" aria-label="Menu oeffnen">
             <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
           </button>
           <span className="text-gray-900 font-semibold text-sm">Claimondo</span>
-          <div className="flex items-center gap-2">
-            <NotificationBell />
-          </div>
-        </header>
-
-        {/* Desktop Navbar */}
-        <header className="hidden lg:flex items-center justify-end px-4 py-2 border-b border-gray-200 bg-white shrink-0 h-12 gap-3">
-          {unreadCount > 0 && (
-            <Link href="/gutachter/mitteilungen" className="text-xs text-gray-500 hover:text-blue-600 bg-gray-100 px-2.5 py-1 rounded-full">
-              {unreadCount} ungelesen
-            </Link>
-          )}
-          <NotificationBell />
+          <div className="w-8" />
         </header>
 
         {/* Wetter-Banner (auf ALLEN Seiten sichtbar) */}
@@ -228,12 +216,18 @@ export default function GutachterShell({
                 <div key={h.hour} className="text-center shrink-0 px-1"><p className="text-[9px] opacity-60">{String(h.hour).padStart(2, '0')}h</p><p className="text-[10px]">{wEmoji(h.code)}</p><p className="text-xs font-semibold">{h.temp}°</p></div>
               ))}
             </div>
-            <div className="shrink-0 text-right hidden sm:block">
-              <p className="text-sm font-medium">Gute Fahrt!</p>
-              <p className="text-[10px] opacity-80">{wTip(weather.code, weather.temp)}</p>
-              {tomorrowDaily && (
-                <p className="text-[10px] opacity-70 mt-0.5">Morgen: {wEmoji(tomorrowDaily.code)} {tomorrowDaily.tempMax}°/{tomorrowDaily.tempMin}° {wLabel(tomorrowDaily.code)}</p>
-              )}
+            {/* Mobile: nur Glocke */}
+            <div className="shrink-0 sm:hidden"><NotificationBell /></div>
+            {/* Desktop: Gute Fahrt + Glocke */}
+            <div className="shrink-0 text-right hidden sm:flex sm:items-center sm:gap-3">
+              <div>
+                <p className="text-sm font-medium">Gute Fahrt!</p>
+                <p className="text-[10px] opacity-80">{wTip(weather.code, weather.temp)}</p>
+                {tomorrowDaily && (
+                  <p className="text-[10px] opacity-70 mt-0.5">Morgen: {wEmoji(tomorrowDaily.code)} {tomorrowDaily.tempMax}°/{tomorrowDaily.tempMin}° {wLabel(tomorrowDaily.code)}</p>
+                )}
+              </div>
+              <NotificationBell />
             </div>
           </div>
         )}
