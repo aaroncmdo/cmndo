@@ -10,7 +10,7 @@ export default function GutachterError({
   reset: () => void
 }) {
   return (
-    <div className="h-full flex flex-col overflow-hidden px-4 py-2">
+    <div className="h-full flex flex-col">
       <div className="max-w-2xl mx-auto">
         <div className="bg-white rounded-2xl p-12 text-center border border-red-900/30">
           <AlertTriangleIcon className="w-12 h-12 text-red-400 mx-auto mb-4" />

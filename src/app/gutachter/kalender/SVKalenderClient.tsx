@@ -68,8 +68,8 @@ export default function SVKalenderClient({
   const HOURS = Array.from({ length: 11 }, (_, i) => i + 7) // 7:00-17:00
 
   return (
-    <div className="h-full flex flex-col overflow-hidden px-4 py-2">
-      <div className="max-w-5xl mx-auto">
+    <div className="h-full flex flex-col">
+      <div className="w-full">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <div>

@@ -204,8 +204,8 @@ export default function FallDetailClient({
   }, [tab, nachrichten.length])
 
   return (
-    <div className="h-full flex flex-col overflow-hidden px-4 py-2">
-      <div className="max-w-4xl mx-auto">
+    <div className="h-full flex flex-col">
+      <div className="w-full">
         <Link href="/gutachter/faelle" className="text-sm text-gray-500 hover:text-gray-800 transition-colors mb-6 inline-block">
           ← Zurueck zu Faelle
         </Link>

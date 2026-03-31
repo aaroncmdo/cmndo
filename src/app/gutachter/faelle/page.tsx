@@ -69,8 +69,8 @@ export default async function GutachterFaellePage({
 
   if (!sv) {
     return (
-      <div className="h-full flex flex-col overflow-hidden px-4 py-2">
-        <div className="max-w-4xl mx-auto">
+      <div className="h-full flex flex-col">
+        <div className="w-full">
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
             <p className="text-gray-500">Kein Sachverstaendigen-Profil gefunden.</p>
           </div>
@@ -108,7 +108,7 @@ export default async function GutachterFaellePage({
   const leadMap = Object.fromEntries((leads ?? []).map(l => [l.id, l]))
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div className="h-full flex flex-col">
       {/* Sticky Topbar */}
       <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200 shrink-0">
         <div>

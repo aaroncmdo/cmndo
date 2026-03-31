@@ -93,7 +93,7 @@ export default function ProfilClient({
   const fullName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || '—'
 
   return (
-    <div className="h-full flex flex-col overflow-hidden px-4 py-2">
+    <div className="h-full flex flex-col">
       {process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY && (
         <Script
           src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}

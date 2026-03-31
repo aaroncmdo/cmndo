@@ -28,8 +28,8 @@ export default async function AbrechnungPage() {
 
   if (!sv) {
     return (
-      <div className="h-full flex flex-col overflow-hidden px-4 py-2">
-        <div className="max-w-4xl mx-auto">
+      <div className="h-full flex flex-col">
+        <div className="w-full">
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
             <p className="text-gray-500">Kein Sachverstaendigen-Profil gefunden.</p>
           </div>
@@ -92,14 +92,12 @@ export default async function AbrechnungPage() {
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden px-4 py-2">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900">Abrechnung</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Uebersicht Ihrer Abrechnungen und Pakete</p>
-        </div>
-
+    <div className="h-full flex flex-col">
+      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-2">
+        <h1 className="text-sm font-semibold text-gray-900">Abrechnung</h1>
+        <p className="text-gray-500 text-xs">Übersicht Ihrer Abrechnungen und Pakete</p>
+      </div>
+      <div className="flex-1 min-h-0 overflow-y-auto p-4">
         {/* Top cards grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           {/* Guthaben */}
