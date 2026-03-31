@@ -33,6 +33,11 @@ export default async function AdminLayout({
           <NotificationBell />
         </header>
 
+        {/* Desktop: Notification bell top-right */}
+        <div className="hidden md:block fixed top-3 right-4 z-30">
+          <NotificationBell />
+        </div>
+
         {/* Content — each page decides its own scroll behavior */}
         <main className="flex-1 min-h-0 pb-16 md:pb-0">{children}</main>
       </div>
