@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import RueckrufModal from '@/components/RueckrufModal'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import { updateFallStatus, updateLeadStatus, createLead } from './actions'
 import {
@@ -159,6 +160,7 @@ export default function DispatchBoard({
   const [newLead, setNewLead] = useState({ vorname: '', nachname: '', telefon: '+491633628571', email: '', source_channel: 'telefon', schadenfall_typ: '' })
   const [newLeadSaving, setNewLeadSaving] = useState(false)
   const [showDisqualifiziert, setShowDisqualifiziert] = useState(false)
+  const [rueckrufModalLead, setRueckrufModalLead] = useState<Lead | null>(null)
 
   // Sync props → local state when server data changes (e.g. after new lead creation)
   useEffect(() => { setLocalLeads(leads) }, [leads])
@@ -234,10 +236,9 @@ export default function DispatchBoard({
       }
     }
     if (newPhase === 'rueckruf') {
-      if (!lead.rueckruf_datum) {
-        showToast('Bitte zuerst Rueckruf-Datum im Lead-Detail setzen')
-        return
-      }
+      // Open modal to set rueckruf date — don't move yet
+      setRueckrufModalLead(lead)
+      return
     }
 
     // Optimistic update: move lead locally FIRST, then persist
@@ -292,6 +293,33 @@ export default function DispatchBoard({
           <div className="fixed top-4 right-4 z-50 bg-red-50 border border-red-200 rounded-xl px-4 py-3 shadow-lg animate-fade-in-up">
             <p className="text-red-700 text-sm font-medium">{toast}</p>
           </div>
+        )}
+
+        {/* Rückruf-Modal */}
+        {rueckrufModalLead && (
+          <RueckrufModal
+            leadId={rueckrufModalLead.id}
+            leadName={`${rueckrufModalLead.vorname ?? ''} ${rueckrufModalLead.nachname ?? ''}`.trim() || '—'}
+            defaultDatum={rueckrufModalLead.rueckruf_datum ? new Date(rueckrufModalLead.rueckruf_datum).toISOString().slice(0, 10) : undefined}
+            onSave={async (leadId, datum, uhrzeit, notiz) => {
+              const rueckrufDatum = new Date(`${datum}T${uhrzeit}:00`).toISOString()
+              // Optimistic: move lead + set rueckruf data
+              const snapshot = [...localLeads]
+              setLocalLeads(prev => prev.map(l => l.id === leadId ? { ...l, qualifizierungs_phase: 'rueckruf', rueckruf_datum: rueckrufDatum, rueckruf_notiz: notiz, rueckruf_erledigt: false } : l))
+              setRueckrufModalLead(null)
+              // Persist: set rueckruf fields then move phase
+              try {
+                const { createClient } = await import('@/lib/supabase/client')
+                const supabase = createClient()
+                await supabase.from('leads').update({ rueckruf_datum: rueckrufDatum, rueckruf_notiz: notiz || null, rueckruf_erledigt: false }).eq('id', leadId)
+                await updateLeadStatus(leadId, 'rueckruf')
+              } catch (e) {
+                setLocalLeads(snapshot)
+                showToast(e instanceof Error ? e.message : 'Fehler')
+              }
+            }}
+            onCancel={() => setRueckrufModalLead(null)}
+          />
         )}
 
         {error && (
