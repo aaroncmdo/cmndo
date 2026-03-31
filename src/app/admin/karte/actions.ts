@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 export async function updateGutachterProfil(
@@ -134,6 +135,19 @@ export async function softDeleteGutachter(svId: string) {
       deaktiviert_grund: 'Manuell gelöscht durch Admin',
     }).eq('id', svId)
   } catch { /* columns may not exist */ }
+
+  // Ban the auth user so they can no longer log in
+  try {
+    const { data: svData } = await supabase.from('sachverstaendige').select('user_id, profile_id').eq('id', svId).single()
+    const authUserId = svData?.user_id ?? svData?.profile_id
+    if (authUserId) {
+      const admin = createAdminClient()
+      await admin.auth.admin.updateUserById(authUserId, {
+        ban_duration: '876000h', // ~100 years
+        user_metadata: { deactivated: true, deleted_at: new Date().toISOString() },
+      })
+    }
+  } catch { /* service role key may not be set */ }
 
   revalidatePath('/admin/sachverstaendige')
   revalidatePath('/admin/karte')
