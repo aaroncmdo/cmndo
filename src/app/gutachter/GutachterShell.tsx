@@ -28,12 +28,28 @@ const NAV_ITEMS = [
 export default function GutachterShell({
   displayName,
   children,
+  logoUrl,
+  brandPrimary,
+  brandSecondary,
 }: {
   displayName: string
   children: React.ReactNode
+  logoUrl?: string | null
+  brandPrimary?: string | null
+  brandSecondary?: string | null
 }) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  // Apply brand colors as CSS custom properties
+  useEffect(() => {
+    if (brandPrimary) document.documentElement.style.setProperty('--brand-primary', brandPrimary)
+    if (brandSecondary) document.documentElement.style.setProperty('--brand-secondary', brandSecondary)
+    return () => {
+      document.documentElement.style.removeProperty('--brand-primary')
+      document.documentElement.style.removeProperty('--brand-secondary')
+    }
+  }, [brandPrimary, brandSecondary])
   const [unreadCount, setUnreadCount] = useState(0)
 
   const loadUnread = useCallback(async () => {
@@ -93,7 +109,11 @@ export default function GutachterShell({
         }`}
       >
         <div className="px-5 py-5 border-b border-gray-200">
-          <h2 className="text-gray-900 font-semibold text-lg">Claimondo</h2>
+          {logoUrl ? (
+            <Link href="/gutachter"><img src={logoUrl} alt="Logo" className="h-8 w-auto max-w-36 object-contain" /></Link>
+          ) : (
+            <h2 className="text-gray-900 font-semibold text-lg">Claimondo</h2>
+          )}
           <p className="text-gray-500 text-xs mt-0.5">Gutachter-Portal</p>
         </div>
 
