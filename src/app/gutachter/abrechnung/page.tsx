@@ -91,6 +91,13 @@ export default async function AbrechnungPage() {
     progressColor = 'bg-amber-500'
   }
 
+  // Einnahmen-Dashboard Daten (KFZ-88)
+  const totalLeadpreise = (abrechnungen ?? []).reduce((s, a) => s + Number(a.leadpreis ?? 0), 0)
+  const faelleAbgerechnet = (completedFaelle ?? []).filter(f => f.gutachten_betrag).length
+  const totalEingegangen = (completedFaelle ?? []).filter(f => ['abgeschlossen', 'regulierung'].includes(f.status)).reduce((s, f) => s + Number(f.gutachten_betrag ?? 0) * 0.12, 0) // ~12% Gutachterhonorar
+  const totalOffen = (completedFaelle ?? []).filter(f => !['abgeschlossen', 'storniert'].includes(f.status) && f.gutachten_betrag).reduce((s, f) => s + Number(f.gutachten_betrag ?? 0) * 0.12, 0)
+  const faelleOffen = (completedFaelle ?? []).filter(f => !['abgeschlossen', 'storniert'].includes(f.status) && f.gutachten_betrag).length
+
   return (
     <div className="h-full flex flex-col">
       <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-2">
@@ -98,6 +105,25 @@ export default async function AbrechnungPage() {
         <p className="text-gray-500 text-xs">Übersicht Ihrer Abrechnungen und Pakete</p>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto p-4">
+        {/* Einnahmen-Dashboard (KFZ-88) */}
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          <div className="bg-white border border-green-200 rounded-xl p-4 text-center">
+            <p className="text-2xl font-bold text-green-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalEingegangen)}</p>
+            <p className="text-[10px] text-gray-500 mt-1">Eingegangen</p>
+            <p className="text-[9px] text-gray-400">{faelleAbgerechnet} Fälle</p>
+          </div>
+          <div className="bg-white border border-amber-200 rounded-xl p-4 text-center">
+            <p className="text-2xl font-bold text-amber-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalOffen)}</p>
+            <p className="text-[10px] text-gray-500 mt-1">Offen</p>
+            <p className="text-[9px] text-gray-400">{faelleOffen} Fälle in Regulierung</p>
+          </div>
+          <div className="bg-white border border-blue-200 rounded-xl p-4 text-center">
+            <p className="text-2xl font-bold text-blue-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalEingegangen - totalLeadpreise)}</p>
+            <p className="text-[10px] text-gray-500 mt-1">Netto-Verdienst</p>
+            <p className="text-[9px] text-gray-400">Ø {faelleAbgerechnet > 0 ? Math.round(totalEingegangen / faelleAbgerechnet) : 0}€/Fall</p>
+          </div>
+        </div>
+
         {/* Top cards grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           {/* Guthaben */}
