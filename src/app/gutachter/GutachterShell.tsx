@@ -19,6 +19,7 @@ import {
 const NAV_ITEMS = [
   { href: '/gutachter', label: 'Dashboard', icon: LayoutDashboardIcon },
   { href: '/gutachter/faelle', label: 'Meine Fälle', icon: FolderOpenIcon },
+  { href: '/gutachter/gebiet', label: 'Mein Gebiet', icon: MapIcon },
   { href: '/gutachter/kalender', label: 'Kalender', icon: CalendarIcon },
   { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
   { href: '/gutachter/mitteilungen', label: 'Mitteilungen', icon: BellIcon },
