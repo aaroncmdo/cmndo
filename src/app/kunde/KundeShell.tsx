@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { HomeIcon, FolderOpenIcon, MessageSquareIcon, UserIcon, BellIcon } from 'lucide-react'
+import { HomeIcon, FolderOpenIcon, MessageSquareIcon, UserIcon, BellIcon, HelpCircleIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import ProblemMeldenModal from '@/components/ProblemMeldenModal'
 
 const NAV_ITEMS = [
   { href: '/kunde', label: 'Start', icon: HomeIcon },
@@ -28,6 +30,8 @@ export default function KundeShell({
     await supabase.auth.signOut()
     window.location.href = '/login'
   }
+
+  const [showProblem, setShowProblem] = useState(false)
 
   function isActive(href: string) {
     if (href === '/kunde') return pathname === '/kunde' || pathname?.startsWith('/kunde/fall/')
@@ -79,6 +83,15 @@ export default function KundeShell({
           )
         })}
       </nav>
+
+      {/* Floating Help Button */}
+      <button onClick={() => setShowProblem(true)}
+        className="fixed bottom-24 right-4 z-40 w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-500 flex items-center justify-center shadow-md transition-colors"
+        aria-label="Problem melden">
+        <HelpCircleIcon className="w-5 h-5" />
+      </button>
+
+      {showProblem && <ProblemMeldenModal onClose={() => setShowProblem(false)} />}
     </div>
   )
 }
