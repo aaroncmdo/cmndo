@@ -122,14 +122,12 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
   const mapRef = useRef<google.maps.Map | null>(null)
   const markersRef = useRef<google.maps.Marker[]>([])
   const polygonsRef = useRef<google.maps.Polygon[]>([])
-  const circlesRef = useRef<google.maps.Circle[]>([])
 
   // State ONLY for UI overlays
   const [selectedSV, setSelectedSV] = useState<SV | null>(null)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [mapReady, setMapReady] = useState(false)
   const [search, setSearch] = useState('')
-  const [coverageMode, setCoverageMode] = useState<'isochrone' | 'circle'>('circle')
 
   // ─── Map init (runs ONCE) ──────────────────────────────────────
   useEffect(() => {
@@ -173,51 +171,33 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
     })
   }, [sachverstaendige, mapReady])
 
-  // ─── Coverage areas (dep: [sachverstaendige, mapReady, coverageMode] ONLY) ─
+  // ─── Coverage areas: Isochronen-Polygone (OSRM) ──────────────
   useEffect(() => {
     if (!mapRef.current || !mapReady) return
 
-    // Cleanup old polygons + circles
+    // Cleanup old polygons
     polygonsRef.current.forEach(p => { google.maps.event.clearInstanceListeners(p); p.setMap(null) })
-    circlesRef.current.forEach(c => { google.maps.event.clearInstanceListeners(c); c.setMap(null) })
     polygonsRef.current = []
-    circlesRef.current = []
 
     sachverstaendige.forEach(sv => {
       if (sv.standortLat == null || sv.standortLng == null) return
-      const pos = { lat: sv.standortLat, lng: sv.standortLng }
       const color = TYP_COLORS[sv.gutachterTyp]?.fill ?? '#3b82f6'
 
-      if (coverageMode === 'isochrone') {
-        // Fetch isochrone async, create polygon when done
-        fetchIsochrone(sv.standortLat, sv.standortLng, sv.radiusKm).then(points => {
-          if (!mapRef.current || !points.length) return
-          const polygon = new google.maps.Polygon({
-            paths: points, map: mapRef.current,
-            fillColor: color, fillOpacity: 0.2,
-            strokeColor: color, strokeOpacity: 0.6, strokeWeight: 2,
-            clickable: true, geodesic: true,
-          })
-          polygon.addListener('click', () => setSelectedSV(sv))
-          polygon.addListener('mouseover', () => { polygon.setOptions({ fillOpacity: 0.35, strokeWeight: 3 }) })
-          polygon.addListener('mouseout', () => { polygon.setOptions({ fillOpacity: 0.2, strokeWeight: 2 }) })
-          polygonsRef.current.push(polygon)
+      fetchIsochrone(sv.standortLat, sv.standortLng, sv.radiusKm).then(points => {
+        if (!mapRef.current || !points.length) return
+        const polygon = new google.maps.Polygon({
+          paths: points, map: mapRef.current,
+          fillColor: color, fillOpacity: 0.12,
+          strokeColor: color, strokeOpacity: 0.5, strokeWeight: 2,
+          clickable: true, geodesic: true,
         })
-      } else {
-        const radiusM = PAKET_RADIUS_M[sv.paket] ?? (sv.radiusKm || 20) * 700
-        const circle = new google.maps.Circle({
-          center: pos, radius: radiusM, map: mapRef.current!,
-          fillColor: color, fillOpacity: 0.2,
-          strokeColor: color, strokeOpacity: 0.6, strokeWeight: 2,
-          clickable: true,
-        })
-        circle.addListener('click', () => setSelectedSV(sv))
-        circle.addListener('mouseover', () => { circle.setOptions({ fillOpacity: 0.35, strokeWeight: 3 }) })
-        circle.addListener('mouseout', () => { circle.setOptions({ fillOpacity: 0.2, strokeWeight: 2 }) })
-        circlesRef.current.push(circle)
-      }
+        polygon.addListener('click', () => setSelectedSV(sv))
+        polygon.addListener('mouseover', () => { polygon.setOptions({ fillOpacity: 0.25, strokeWeight: 3 }) })
+        polygon.addListener('mouseout', () => { polygon.setOptions({ fillOpacity: 0.12, strokeWeight: 2 }) })
+        polygonsRef.current.push(polygon)
+      })
     })
-  }, [sachverstaendige, mapReady, coverageMode])
+  }, [sachverstaendige, mapReady])
 
   // ─── Sidebar filter (no useEffect, just derived) ──────────────
   const filteredSVs = search
@@ -258,19 +238,7 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
           </div>
         </div>
 
-        {/* Darstellung Toggle */}
-        <div className="px-4 pb-3">
-          <div className="flex rounded-lg overflow-hidden border border-gray-200">
-            <button onClick={() => setCoverageMode('circle')}
-              className={`flex-1 px-3 py-1.5 text-xs font-medium transition-colors ${coverageMode === 'circle' ? 'bg-blue-600 text-white' : 'bg-white text-gray-500'}`}>
-              Kreise
-            </button>
-            <button onClick={() => setCoverageMode('isochrone')}
-              className={`flex-1 px-3 py-1.5 text-xs font-medium transition-colors ${coverageMode === 'isochrone' ? 'bg-blue-600 text-white' : 'bg-white text-gray-500'}`}>
-              Isochronen
-            </button>
-          </div>
-        </div>
+        {/* Isochronen werden automatisch als Polygone angezeigt */}
 
         {/* SV Liste */}
         <div className="flex-1 overflow-y-auto px-2 py-2 border-t border-gray-200">
