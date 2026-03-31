@@ -3,6 +3,7 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { createNotification } from '@/lib/notifications'
+import { triggerSV01 } from '@/lib/gutachterTasking'
 import {
   emailSvZugewiesen,
   emailGutachtenEingegangen,
@@ -55,6 +56,15 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
     // Auto-Task: Gutachter soll Termin bestaetigen
     const { data: fallInfo } = await supabase.from('faelle').select('sv_id, fall_nummer, schadens_ursache, schadens_adresse, schadens_plz, schadens_ort, lead_id').eq('id', fallId).single()
     triggerGutachterTerminTask(fallId, fallInfo?.sv_id ?? null).catch(() => {})
+    // SV-01: Neuer Auftrag Task für Gutachter
+    if (fallInfo?.sv_id) {
+      const { data: svData } = await serviceClient.from('sachverstaendige').select('profile_id').eq('id', fallInfo.sv_id).single()
+      if (svData?.profile_id) {
+        let kundeName2 = ''; let addr = [fallInfo.schadens_adresse, fallInfo.schadens_plz, fallInfo.schadens_ort].filter(Boolean).join(', ')
+        if (fallInfo.lead_id) { const { data: ld } = await serviceClient.from('leads').select('vorname, nachname').eq('id', fallInfo.lead_id).single(); kundeName2 = [ld?.vorname, ld?.nachname].filter(Boolean).join(' ') }
+        triggerSV01(fallId, svData.profile_id, kundeName2, addr, '', fallInfo.schadens_ursache ?? '', null).catch(() => {})
+      }
+    }
     // Gutachter-Mitteilung: Neuer Auftrag
     if (fallInfo?.sv_id) {
       let kundeName = ''

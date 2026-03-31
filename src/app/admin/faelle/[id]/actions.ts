@@ -8,6 +8,7 @@ import { triggerKanzleiPaketTask, triggerAsSendedatumTask, triggerArchivierungTa
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { checkFallAutoPhase } from '@/lib/autoPhase'
 import { resolveGates, autoCompleteTask } from '@/lib/tasking'
+import { completeSVTask, triggerSV04, triggerSV05, deductLeadpreis } from '@/lib/gutachterTasking'
 import { createNotification } from '@/lib/notifications'
 
 export async function saveFilmcheck(fallId: string, notizen: string) {
@@ -456,6 +457,12 @@ export async function qcNachbesserung(fallId: string, kommentar: string) {
 
   // WhatsApp: Nachbesserung nötig
   sendStatusWhatsApp(fallId, 'nachbesserung_gutachten').catch(() => {})
+
+  // SV-05: Nachbesserung Task für Gutachter
+  if (fallInfo?.sv_id) {
+    const { data: svd } = await supabase.from('sachverstaendige').select('profile_id').eq('id', fallInfo.sv_id).single()
+    if (svd?.profile_id) triggerSV05(fallId, svd.profile_id, kommentar || 'Nachbesserung erforderlich').catch(() => {})
+  }
 
   revalidatePath(`/admin/faelle/${fallId}`)
   revalidatePath('/admin/tasks')
