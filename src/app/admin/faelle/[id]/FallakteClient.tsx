@@ -490,6 +490,17 @@ type Mitarbeiter = {
   rolle: string
 }
 
+type Forderungsposition = {
+  id: string
+  typ: string
+  bezeichnung: string
+  betrag_gefordert: number | null
+  betrag_reguliert: number | null
+  betrag_gekuerzt: number | null
+  quelle: string | null
+  erstellt_am: string
+}
+
 type Termin = {
   id: string
   typ: string
@@ -520,6 +531,7 @@ export default function FallakteClient({
   tasks,
   termine,
   mitarbeiter,
+  forderungspositionen,
 }: {
   fall: Fall
   lead: Lead
@@ -535,6 +547,7 @@ export default function FallakteClient({
   tasks: TaskItem[]
   termine: Termin[]
   mitarbeiter: Mitarbeiter[]
+  forderungspositionen: Forderungsposition[]
 }) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('tasks')
@@ -687,7 +700,7 @@ export default function FallakteClient({
           />
         )}
         {activeTab === 'abrechnung' && (
-          <TabAbrechnung fall={fall} />
+          <TabAbrechnung fall={fall} forderungspositionen={forderungspositionen} />
         )}
         {activeTab === 'tasks' && (
           <TabTasks
@@ -2644,69 +2657,117 @@ function TabChat({
 
 // ─── TAB 9: Abrechnung ──────────────────────────────────────────────────────
 
-function TabAbrechnung({ fall }: { fall: Fall }) {
-  const gutachtenBetrag = fall.gutachten_betrag ?? 0
-  const schadenNetto = (fall as Record<string, unknown>).schadenhoehe_netto as number ?? 0
+function TabAbrechnung({ fall, forderungspositionen }: { fall: Fall; forderungspositionen: Forderungsposition[] }) {
   const regulierungBetrag = fall.regulierung_betrag ?? 0
 
-  // Typische Kalkulation
-  const nutzungsausfall = 0 // Could be from gutachten data
-  const gutachterkosten = Math.round(gutachtenBetrag * 0.12) // ~12% of damage
-  const anwaltskosten = Math.round(gutachtenBetrag * 0.08) // ~8% estimate
-  const gesamtforderung = gutachtenBetrag + nutzungsausfall + gutachterkosten + anwaltskosten
+  // OCR-Positionen oder Fallback-Kalkulation
+  const hasOcrPositionen = forderungspositionen.length > 0
+
+  const gesamtGefordert = forderungspositionen.reduce((s, p) => s + (p.betrag_gefordert ?? 0), 0)
+  const gesamtReguliert = forderungspositionen.reduce((s, p) => s + (p.betrag_reguliert ?? 0), 0)
+  const gesamtGekuerzt = forderungspositionen.reduce((s, p) => {
+    if (p.betrag_gefordert != null && p.betrag_reguliert != null) return s + (p.betrag_gefordert - p.betrag_reguliert)
+    return s + (p.betrag_gekuerzt ?? 0)
+  }, 0)
+
+  // Fehlende Positionen prüfen
+  const existingTypes = new Set(forderungspositionen.map(p => p.typ))
+  const fehlend: { typ: string; label: string; grund: string }[] = []
+  if (!existingTypes.has('nutzungsausfall') && (fall as Record<string, unknown>).nutzungsausfall_berechtigt) {
+    fehlend.push({ typ: 'nutzungsausfall', label: 'Nutzungsausfall', grund: 'Gutachten sagt Berechtigung besteht' })
+  }
+  if (!existingTypes.has('schmerzensgeld') && fall.personenschaden_flag) {
+    fehlend.push({ typ: 'schmerzensgeld', label: 'Schmerzensgeld', grund: 'Personenschaden-Flag ist gesetzt' })
+  }
+  if (!existingTypes.has('wertminderung') && (fall.fahrzeug_baujahr ?? 0) > new Date().getFullYear() - 5) {
+    fehlend.push({ typ: 'wertminderung', label: 'Wertminderung', grund: 'Fahrzeug jünger als 5 Jahre' })
+  }
+
+  // Fallback without OCR
+  const gutachtenBetrag = fall.gutachten_betrag ?? 0
+  const fallbackGesamt = gutachtenBetrag + Math.round(gutachtenBetrag * 0.12) + Math.round(gutachtenBetrag * 0.08)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Forderungsaufstellung */}
-      <Section title="Forderungsaufstellung">
-        <div className="space-y-2">
-          <AbrechnungRow label="Reparaturkosten (netto)" value={gutachtenBetrag} />
-          <AbrechnungRow label="Schadenhöhe (netto, Gutachten)" value={schadenNetto} />
-          <AbrechnungRow label="Nutzungsausfall" value={nutzungsausfall} />
-          <AbrechnungRow label="Gutachterkosten" value={gutachterkosten} />
-          <AbrechnungRow label="Anwaltskosten (RVG)" value={anwaltskosten} />
-          <div className="border-t border-gray-300 pt-2 mt-3">
-            <AbrechnungRow label="Gesamtforderung" value={gesamtforderung} bold />
+      <Section title={`Forderungsaufstellung${hasOcrPositionen ? ' (OCR)' : ''}`}>
+        {hasOcrPositionen ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 text-[10px] text-gray-500 uppercase">
+                  <th className="text-left py-1.5 pr-3">Position</th>
+                  <th className="text-right py-1.5 px-2">Gefordert</th>
+                  <th className="text-right py-1.5 px-2">Reguliert</th>
+                  <th className="text-right py-1.5 px-2">Differenz</th>
+                  <th className="text-right py-1.5 pl-2">Quelle</th>
+                </tr>
+              </thead>
+              <tbody>
+                {forderungspositionen.map(p => {
+                  const diff = (p.betrag_gefordert ?? 0) - (p.betrag_reguliert ?? 0)
+                  const color = p.betrag_reguliert == null ? 'text-gray-700' : diff === 0 ? 'text-green-600' : diff > 0 ? 'text-red-500' : 'text-gray-700'
+                  return (
+                    <tr key={p.id} className="border-b border-gray-100">
+                      <td className="py-2 pr-3 text-gray-800">{p.bezeichnung}</td>
+                      <td className="py-2 px-2 text-right tabular-nums text-gray-700">{p.betrag_gefordert != null ? fmtEur(p.betrag_gefordert) : '—'}</td>
+                      <td className="py-2 px-2 text-right tabular-nums text-gray-700">{p.betrag_reguliert != null ? fmtEur(p.betrag_reguliert) : '—'}</td>
+                      <td className={`py-2 px-2 text-right tabular-nums font-medium ${color}`}>{p.betrag_reguliert != null ? fmtEur(diff) : '—'}</td>
+                      <td className="py-2 pl-2 text-right"><span className="text-[9px] bg-gray-100 text-gray-500 px-1 py-0.5 rounded">{p.quelle ?? '—'}</span></td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+              <tfoot>
+                <tr className="border-t-2 border-gray-300 font-semibold">
+                  <td className="py-2 pr-3 text-gray-900">Gesamt</td>
+                  <td className="py-2 px-2 text-right tabular-nums text-gray-900">{fmtEur(gesamtGefordert)}</td>
+                  <td className="py-2 px-2 text-right tabular-nums text-gray-900">{gesamtReguliert > 0 ? fmtEur(gesamtReguliert) : '—'}</td>
+                  <td className={`py-2 px-2 text-right tabular-nums ${gesamtGekuerzt > 0 ? 'text-red-600' : 'text-gray-900'}`}>{gesamtGekuerzt > 0 ? fmtEur(gesamtGekuerzt) : '—'}</td>
+                  <td />
+                </tr>
+              </tfoot>
+            </table>
           </div>
-        </div>
+        ) : (
+          <div className="space-y-2">
+            <AbrechnungRow label="Reparaturkosten (Gutachten)" value={gutachtenBetrag} />
+            <AbrechnungRow label="Gutachterkosten (~12%)" value={Math.round(gutachtenBetrag * 0.12)} />
+            <AbrechnungRow label="Anwaltskosten (~8%)" value={Math.round(gutachtenBetrag * 0.08)} />
+            <div className="border-t border-gray-300 pt-2 mt-3">
+              <AbrechnungRow label="Gesamtforderung (geschätzt)" value={fallbackGesamt} bold />
+            </div>
+            <p className="text-[10px] text-gray-400 mt-1">Laden Sie ein Anspruchsschreiben hoch für automatische OCR-Erkennung.</p>
+          </div>
+        )}
       </Section>
+
+      {/* Fehlende Positionen */}
+      {fehlend.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+          <p className="text-xs font-semibold text-amber-700 mb-2">Möglicherweise fehlende Positionen</p>
+          {fehlend.map(f => (
+            <div key={f.typ} className="flex items-center justify-between py-1">
+              <div>
+                <span className="text-sm text-amber-800 font-medium">{f.label}</span>
+                <span className="text-xs text-amber-600 ml-2">— {f.grund}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Zahlungseingang */}
       <Section title="Zahlungseingang">
         <div className="space-y-2">
           <AbrechnungRow label="Regulierungsbetrag VS" value={regulierungBetrag} />
-          <AbrechnungRow label="Differenz" value={gesamtforderung - regulierungBetrag} />
+          <AbrechnungRow label="Differenz zur Forderung" value={(hasOcrPositionen ? gesamtGefordert : fallbackGesamt) - regulierungBetrag} />
         </div>
-        {regulierungBetrag > 0 && regulierungBetrag < gesamtforderung && (
-          <div className="mt-3 bg-amber-50/40 border border-amber-800/40 rounded-xl p-3">
-            <p className="text-amber-400 text-xs font-medium">Kürzung erkannt — ggf. Restwertgutachten / Nachforderung prüfen</p>
+        {regulierungBetrag > 0 && regulierungBetrag < (hasOcrPositionen ? gesamtGefordert : fallbackGesamt) && (
+          <div className="mt-3 bg-amber-50 border border-amber-200 rounded-xl p-3">
+            <p className="text-amber-600 text-xs font-medium">Kürzung erkannt — ggf. Nachforderung prüfen</p>
           </div>
         )}
-        {regulierungBetrag >= gesamtforderung && regulierungBetrag > 0 && (
-          <div className="mt-3 bg-emerald-50/40 border border-emerald-800/40 rounded-xl p-3">
-            <p className="text-emerald-400 text-xs font-medium">Vollständig reguliert</p>
-          </div>
-        )}
-      </Section>
-
-      {/* Abrechnung Factoring */}
-      <Section title="Abrechnung / Factoring">
-        <div className="space-y-2 text-sm text-gray-500">
-          <div className="flex justify-between">
-            <span>DSR24 Factoring</span>
-            <span className="text-gray-700">{regulierungBetrag > 0 ? 'Aktiv' : 'Ausstehend'}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>RVG-Gebühren (Kanzlei)</span>
-            <span className="text-gray-700">{fmtEur(anwaltskosten)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Restbetrag an Kunden</span>
-            <span className="text-gray-700 font-medium">
-              {fmtEur(Math.max(0, regulierungBetrag - gutachterkosten - anwaltskosten))}
-            </span>
-          </div>
-        </div>
       </Section>
     </div>
   )
