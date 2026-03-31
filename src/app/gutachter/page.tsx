@@ -30,6 +30,7 @@ export default function GutachterCockpit() {
   const [finanz, setFinanz] = useState({ eingegangen: 0, offen: 0, leadpreise: 0 })
   const [svLat, setSvLat] = useState<number | null>(null); const [svLng, setSvLng] = useState<number | null>(null)
   const [weather, setWeather] = useState<{ temp: number; code: number; hourly: HourW[] } | null>(null)
+  const [selectedDate, setSelectedDate] = useState(new Date())
   const [mode, setMode] = useState<Mode>('overview'); const [active, setActive] = useState<Termin | null>(null)
   const [fotos, setFotos] = useState<Record<string, boolean>>({}); const [fin, setFin] = useState(''); const [km, setKm] = useState(''); const [notizen, setNotizen] = useState('')
   const [uploading, setUploading] = useState(false); const [completing, setCompleting] = useState(false)
@@ -43,12 +44,13 @@ export default function GutachterCockpit() {
     const { data: p } = await supabase.from('profiles').select('vorname').eq('id', user.id).single()
     const now = new Date(); const h = now.getHours()
     setGreeting(`${h < 12 ? 'Guten Morgen' : h < 18 ? 'Guten Tag' : 'Guten Abend'}${p?.vorname ? ` ${p.vorname}` : ''}`)
-    setDatum(`HEUTE ${now.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}`)
+    const isToday = selectedDate.toDateString() === now.toDateString()
+    setDatum(isToday ? `HEUTE ${selectedDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}` : selectedDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }))
     setSvLat(sv.standort_lat ? Number(sv.standort_lat) : null); setSvLng(sv.standort_lng ? Number(sv.standort_lng) : null)
     setStats({ faelle: sv.offene_faelle ?? sv.paket_faelle_genutzt ?? 0, max: sv.max_faelle_monat ?? sv.paket_faelle_gesamt ?? 25, guthaben: typeof sv.guthaben === 'number' ? sv.guthaben : 0, monat: 0 })
 
-    const ds = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
-    const de = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString()
+    const ds = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString()
+    const de = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + 1).toISOString()
 
     const [tR, nR, tkR, fR] = await Promise.all([
       supabase.from('faelle').select('id, fall_nummer, schadens_adresse, schadens_plz, schadens_ort, sv_termin, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadenfall_typ').eq('sv_id', sv.id).gte('sv_termin', ds).lt('sv_termin', de).not('status', 'in', '("abgeschlossen","storniert")').order('sv_termin', { ascending: true }),
@@ -81,11 +83,12 @@ export default function GutachterCockpit() {
         .then(r => r.json()).then(d => { if (!d.current) return; const hr = (d.hourly?.time ?? []).map((t: string, i: number) => ({ hour: new Date(t).getHours(), temp: Math.round(d.hourly.temperature_2m[i]), code: d.hourly.weathercode[i] })).filter((h: HourW) => h.hour >= 8 && h.hour <= 18); setWeather({ temp: Math.round(d.current.temperature_2m), code: d.current.weathercode, hourly: hr }) }).catch(() => {})
     }
     setLoading(false)
-  }, [supabase])
+  }, [supabase, selectedDate])
 
   useEffect(() => { load() }, [load])
 
-  function startNav(t: Termin) { setActive(t); setMode('navigation'); setFotos({}); setFin(''); setKm(''); setNotizen(''); setMTab('route') }
+  const isToday = selectedDate.toDateString() === new Date().toDateString()
+  function startNav(t: Termin) { if (!isToday) return; setActive(t); setMode('navigation'); setFotos({}); setFin(''); setKm(''); setNotizen(''); setMTab('route') }
 
   async function handleFoto(slot: string, file: File) { if (!active) return; setUploading(true); try { const ext = file.name.split('.').pop() ?? 'jpg'; const path = `${active.id}/gutachter-fotos/${slot.toLowerCase()}_${Date.now()}.${ext}`; await supabase.storage.from('dokumente').upload(path, file, { contentType: file.type }); const { data: { publicUrl } } = supabase.storage.from('dokumente').getPublicUrl(path); await supabase.from('dokumente').insert({ fall_id: active.id, typ: 'schadensfoto', datei_url: publicUrl, datei_name: `${slot}.${ext}`, datei_groesse: file.size, kategorie: 'schadensfotos', hochgeladen_von_rolle: 'sachverstaendiger', quelle: 'gutachter-app' }); setFotos(p => ({ ...p, [slot]: true })) } catch { /* */ } setUploading(false) }
 
@@ -122,7 +125,12 @@ export default function GutachterCockpit() {
         <div className="flex items-center gap-2">
           {mode !== 'overview' && <button onClick={() => { setMode('overview'); setActive(null) }} className="text-gray-400 hover:text-gray-600 mr-1"><ArrowLeftIcon className="w-4 h-4" /></button>}
           <span className="text-sm font-semibold text-gray-900">{greeting}</span>
-          <span className="text-xs text-gray-400 hidden sm:inline">{datum}</span>
+          {/* Tages-Navigation */}
+          <div className="flex items-center gap-1">
+            <button onClick={() => setSelectedDate(d => new Date(d.getTime() - 86400000))} className="text-gray-400 hover:text-gray-700 px-1 py-0.5 rounded hover:bg-gray-100 text-xs">◀</button>
+            <button onClick={() => setSelectedDate(new Date())} className="text-xs text-gray-500 hover:text-gray-800 px-1.5 py-0.5 rounded hover:bg-gray-100">{datum}</button>
+            <button onClick={() => setSelectedDate(d => new Date(d.getTime() + 86400000))} className="text-gray-400 hover:text-gray-700 px-1 py-0.5 rounded hover:bg-gray-100 text-xs">▶</button>
+          </div>
         </div>
         <div className="flex items-center gap-2 text-[10px] font-medium">
           <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">{termine.length} Termine</span>
