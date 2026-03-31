@@ -1,5 +1,35 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 
+// ─── Twilio WhatsApp ────────────────────────────────────────────────────────
+
+export async function sendWhatsApp(to: string, message: string): Promise<{ success: boolean; sid?: string; error?: string }> {
+  const sid = process.env.TWILIO_ACCOUNT_SID
+  const token = process.env.TWILIO_AUTH_TOKEN
+  const from = process.env.TWILIO_WHATSAPP_FROM || 'whatsapp:+14155238886'
+
+  if (!sid || !token) {
+    console.warn('[whatsapp] TWILIO credentials not set — message not sent')
+    return { success: false, error: 'TWILIO_AUTH_TOKEN nicht konfiguriert' }
+  }
+
+  try {
+    const twilio = (await import('twilio')).default
+    const client = twilio(sid, token)
+    const cleanTo = to.replace(/[^0-9+]/g, '')
+    const result = await client.messages.create({
+      from,
+      to: cleanTo.startsWith('whatsapp:') ? cleanTo : `whatsapp:${cleanTo}`,
+      body: message,
+    })
+    console.log('[whatsapp] Gesendet:', result.sid)
+    return { success: true, sid: result.sid }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Unbekannter Fehler'
+    console.error('[whatsapp] Twilio Fehler:', msg)
+    return { success: false, error: msg }
+  }
+}
+
 type NachrichtTyp =
   | 'nach_sa_unterschrift'
   | 'nach_gutachter_dispatch'
@@ -204,8 +234,18 @@ export async function sendStatusWhatsApp(
         : 'Keine Telefonnummer hinterlegt – Nachricht nur protokolliert.',
     })
 
-    // TODO: WhatsApp Business API integration
-    // When API is connected, send actual WhatsApp here using telefon number
+    // Send via Twilio WhatsApp
+    if (telefon) {
+      await sendWhatsApp(telefon, nachricht).catch(err => {
+        console.error(`[whatsapp] Twilio send failed:`, err)
+        // Timeline vermerk
+        supabase.from('timeline').insert({
+          fall_id: fallId, typ: 'system',
+          titel: 'WhatsApp-Versand fehlgeschlagen',
+          beschreibung: `Nachricht an ${telefon} konnte nicht gesendet werden.`,
+        }).then(() => {})
+      })
+    }
 
     // Set google_review_gesendet flag on case close
     if (nachrichtTyp === 'nach_abschluss') {
