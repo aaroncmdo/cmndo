@@ -103,6 +103,115 @@ export async function addTimelineEntry(
   revalidatePath(`/admin/faelle/${fallId}`)
 }
 
+// ─── AS Upload + OCR (KFZ-113) ──────────────────────────────────────────────
+
+export async function uploadAnschlussschreiben(fallId: string, fileUrl: string, fileName: string) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  // 1. Speichere URL in faelle
+  await supabase.from('faelle').update({
+    anschlussschreiben_url: fileUrl,
+    updated_at: new Date().toISOString(),
+  }).eq('id', fallId)
+
+  // 2. Dokument-Eintrag erstellen
+  await supabase.from('dokumente').insert({
+    fall_id: fallId,
+    typ: 'anschlussschreiben',
+    datei_url: fileUrl,
+    datei_name: fileName,
+    kategorie: 'kanzlei',
+    quelle: 'admin-upload',
+    hochgeladen_von: user.id,
+    hochgeladen_von_rolle: 'admin',
+    sichtbar_fuer: ['admin', 'kundenbetreuer', 'kanzlei'],
+  })
+
+  // 3. OCR-Extraktion (Sendedatum + Unterschrift)
+  try {
+    const pdfResponse = await fetch(fileUrl)
+    if (pdfResponse.ok) {
+      const buffer = Buffer.from(await pdfResponse.arrayBuffer())
+      const pdfParse = (await import('pdf-parse')).default
+      const parsed = await pdfParse(buffer)
+      const text = parsed.text
+
+      // Sendedatum extrahieren
+      const sendedatum = extractSendedatum(text)
+      // Unterschrift prüfen (Keyword-basiert)
+      const hatUnterschrift = checkUnterschrift(text)
+
+      await supabase.from('faelle').update({
+        anschlussschreiben_sendedatum: sendedatum,
+        anschlussschreiben_unterschrift: hatUnterschrift,
+        anschlussschreiben_ocr_am: new Date().toISOString(),
+      }).eq('id', fallId)
+    }
+  } catch {
+    // OCR ist nicht kritisch
+  }
+
+  // 4. Timeline
+  await supabase.from('timeline').insert({
+    fall_id: fallId,
+    typ: 'system',
+    titel: 'Anschlussschreiben hochgeladen',
+    beschreibung: `Datei: ${fileName}. OCR-Extraktion durchgefuehrt.`,
+    erstellt_von: user.id,
+  })
+
+  revalidatePath(`/admin/faelle/${fallId}`)
+}
+
+function extractSendedatum(text: string): string | null {
+  // Deutsche Datumsformate: 01.04.2026, 1. April 2026, 01/04/2026
+  const patterns = [
+    /(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/,  // DD.MM.YYYY
+    /(\d{1,2})\.\s*(Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\s+(\d{4})/i,
+  ]
+  const monateMap: Record<string, string> = {
+    januar: '01', februar: '02', 'märz': '03', april: '04', mai: '05', juni: '06',
+    juli: '07', august: '08', september: '09', oktober: '10', november: '11', dezember: '12',
+  }
+
+  // Suche nach Datum in der Nähe von Schlüsselwörtern
+  const keywords = ['datum', 'sendedatum', 'gesendet am', 'versandt am', 'unser zeichen', 'ihr zeichen', 'berlin', 'münchen', 'köln', 'hamburg']
+  for (const kw of keywords) {
+    const idx = text.toLowerCase().indexOf(kw)
+    if (idx === -1) continue
+    const window = text.slice(Math.max(0, idx - 50), idx + 200)
+    for (const pattern of patterns) {
+      const match = window.match(pattern)
+      if (match) {
+        if (match[2] && monateMap[match[2].toLowerCase()]) {
+          return `${match[3]}-${monateMap[match[2].toLowerCase()]}-${match[1].padStart(2, '0')}`
+        }
+        return `${match[3]}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}`
+      }
+    }
+  }
+
+  // Fallback: Erstes Datum im Dokument
+  for (const pattern of patterns) {
+    const match = text.match(pattern)
+    if (match) {
+      if (match[2] && monateMap[match[2].toLowerCase()]) {
+        return `${match[3]}-${monateMap[match[2].toLowerCase()]}-${match[1].padStart(2, '0')}`
+      }
+      return `${match[3]}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}`
+    }
+  }
+  return null
+}
+
+function checkUnterschrift(text: string): boolean {
+  const keywords = ['unterschrift', 'unterzeichnet', 'gez.', 'mit freundlichen', 'hochachtungsvoll', 'rechtsanwalt', 'rechtsanwältin']
+  const lower = text.toLowerCase()
+  return keywords.some(kw => lower.includes(kw))
+}
+
 export async function uploadPflichtdokument(
   fallId: string,
   pflichtdokumentId: string,

@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Script from 'next/script'
+import DokumenteTab from './DokumenteTab'
 import { createClient } from '@/lib/supabase/client'
 import {
   addTimelineEntry,
@@ -695,23 +696,19 @@ export default function FallakteClient({
           </div>
           </div>
         )}
-        {activeTab === 'dokumente' && (
+        {(activeTab === 'dokumente' || activeTab === 'dateien') && (
           <div id="sa-section">
-          <TabDokumente
-            fall={fall}
-            pflichtdokumente={pflichtdokumente}
-            dokumente={dokumente}
-            onRefresh={() => router.refresh()}
-          />
-          </div>
-        )}
-        {activeTab === 'dateien' && (
-          <div id="upload-section">
-          <TabDateien
-            fall={fall}
-            dokumente={dokumente}
-            onRefresh={() => router.refresh()}
-          />
+            <DokumenteTab
+              fallId={fall.id}
+              pflichtdokumente={pflichtdokumente}
+              dokumente={dokumente}
+              fallAS={{
+                anschlussschreiben_url: (fall as Record<string, unknown>).anschlussschreiben_url as string | null ?? null,
+                anschlussschreiben_sendedatum: (fall as Record<string, unknown>).anschlussschreiben_sendedatum as string | null ?? null,
+                anschlussschreiben_unterschrift: (fall as Record<string, unknown>).anschlussschreiben_unterschrift as boolean | null ?? null,
+                anschlussschreiben_ocr_am: (fall as Record<string, unknown>).anschlussschreiben_ocr_am as string | null ?? null,
+              }}
+            />
           </div>
         )}
         {activeTab === 'qc' && (
