@@ -2,9 +2,8 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  })
+  // Collect cookies that need to be set on the response
+  const cookiesToUpdate: { name: string; value: string; options: Record<string, unknown> }[] = []
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -15,39 +14,43 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            request.cookies.set(name, value)
-          )
-          supabaseResponse = NextResponse.next({
-            request,
-          })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
+          // CRITICAL FIX: Do NOT call request.cookies.set() — it corrupts
+          // the cookie store in Next.js 16 proxy and causes TypeError.
+          // Instead, collect cookies and apply them only to the response.
+          cookiesToUpdate.push(...cookiesToSet.map(c => ({
+            name: c.name,
+            value: c.value,
+            options: c.options ?? {},
+          })))
         },
       },
     }
   )
 
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  // CRITICAL: getUser() kann bei korrupten Cookies intern crashen.
+  let user = null
+  try {
+    const result = await supabase.auth.getUser()
+    user = result?.data?.user ?? null
+  } catch {
+    user = null
+  }
 
-  // Öffentliche Routen – kein Login nötig
+  // Build response
+  const response = !user && !isPublicPath(request.nextUrl.pathname)
+    ? NextResponse.redirect(new URL('/login', request.url))
+    : NextResponse.next({ request })
+
+  // Apply collected cookie updates to response
+  for (const cookie of cookiesToUpdate) {
+    response.cookies.set(cookie.name, cookie.value, cookie.options)
+  }
+
+  return response
+}
+
+function isPublicPath(pathname: string): boolean {
+  if (pathname === '/') return true
   const publicPaths = ['/login', '/flow', '/api', '/passwort-aendern']
-  const isPublic = publicPaths.some(path => 
-    request.nextUrl.pathname.startsWith(path)
-  )
-
-  // Root ist auch öffentlich
-  if (request.nextUrl.pathname === '/') {
-    return supabaseResponse
-  }
-
-  // Nicht eingeloggt und geschützte Route → redirect to login
-  if (!user && !isPublic) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
-  }
-
-  return supabaseResponse
+  return publicPaths.some(path => pathname.startsWith(path))
 }
