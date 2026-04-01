@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { KeyIcon, CheckCircle2Icon } from 'lucide-react'
 
@@ -66,7 +67,7 @@ export default function PasswortAendernPage() {
     <div className="flex min-h-screen items-center justify-center bg-[#f8f9fb] px-5">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Claimondo</h1>
+          <Image src="/claimondo-logo.svg" alt="Claimondo" width={180} height={50} className="mx-auto" unoptimized />
           <p className="mt-1 text-sm text-gray-500">Bitte aendern Sie Ihr Passwort</p>
         </div>
 

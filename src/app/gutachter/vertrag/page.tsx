@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { CheckIcon } from 'lucide-react'
@@ -85,8 +86,8 @@ export default function VertragPage() {
       <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6 text-white text-center">
-          <h1 className="text-2xl font-bold">Willkommen bei Claimondo</h1>
-          <p className="text-blue-200 text-sm mt-1">Kooperationsvereinbarung</p>
+          <Image src="/claimondo-logo.svg" alt="Claimondo GmbH" width={200} height={56} className="mx-auto mb-3 brightness-0 invert" unoptimized />
+          <p className="text-blue-200 text-sm">Kooperationsvereinbarung</p>
         </div>
 
         {/* Contract Text */}

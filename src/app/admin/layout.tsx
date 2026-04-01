@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import AdminNav from './_components/AdminNav'
@@ -29,7 +30,7 @@ export default async function AdminLayout({
       <div className="md:ml-56 h-screen flex flex-col relative z-10">
         {/* Mobile header */}
         <header className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200 shrink-0">
-          <h2 className="text-base font-semibold text-gray-900 tracking-tight">Claimondo</h2>
+          <Image src="/claimondo-logo.svg" alt="Claimondo" width={120} height={34} unoptimized priority />
           <NotificationBell />
         </header>
 

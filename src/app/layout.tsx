@@ -11,7 +11,10 @@ const montserrat = Montserrat({
 
 export const metadata: Metadata = {
   title: "Claimondo",
-  description: "Claimondo Schadenmanagement Plattform",
+  description: "Claimondo KFZ-Schadensmanagement",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

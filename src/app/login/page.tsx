@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { login } from './actions'
 import LoginClient from './LoginClient'
 
@@ -10,7 +11,7 @@ export default function LoginPage({
     <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden bg-[#f8f9fb]">
       <div className="w-full max-w-sm relative z-10">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Claimondo</h1>
+          <Image src="/claimondo-logo.svg" alt="Claimondo" width={250} height={70} className="mx-auto mb-4" unoptimized priority />
           <p className="mt-2 text-sm text-gray-500">Melde dich mit deinem Konto an</p>
         </div>
 
@@ -20,7 +21,7 @@ export default function LoginPage({
           <ErrorMessage searchParams={searchParams} />
         </div>
 
-        <p className="text-center text-gray-400 text-xs mt-6">&copy; 2026 Claimondo GmbH</p>
+        <p className="text-center text-gray-500 text-xs mt-6">&copy; 2026 Claimondo GmbH</p>
       </div>
     </div>
   )

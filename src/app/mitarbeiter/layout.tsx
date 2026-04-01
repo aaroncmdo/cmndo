@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -26,7 +27,7 @@ export default async function MitarbeiterLayout({
     <div className="min-h-screen bg-[#f8f9fb]">
       <header className="border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="text-gray-900 font-semibold">Claimondo</h1>
+          <Image src="/claimondo-logo.svg" alt="Claimondo" width={130} height={36} unoptimized priority />
           <Link href="/mitarbeiter/performance" className="flex items-center gap-1.5 text-gray-500 hover:text-gray-800 text-sm transition-colors">
             <BarChart3Icon className="w-4 h-4" /> Meine Performance
           </Link>

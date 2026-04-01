@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { HomeIcon, FolderOpenIcon, MessageSquareIcon, UserIcon, BellIcon, HelpCircleIcon } from 'lucide-react'
@@ -43,12 +44,7 @@ export default function KundeShell({
       {/* Header */}
       <header className="relative z-10 flex items-center justify-between px-5 py-3 bg-white border-b border-gray-200">
         <Link href="/kunde">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}>
-              <span className="text-white text-xs font-bold">C</span>
-            </div>
-            <span className="text-gray-900 font-semibold text-base tracking-tight">Claimondo</span>
-          </div>
+          <Image src="/claimondo-logo.svg" alt="Claimondo Logo" width={130} height={36} unoptimized priority />
         </Link>
         <button aria-label="Benachrichtigungen" className="relative p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors">
           <BellIcon className="w-5 h-5 text-gray-600" aria-hidden="true" />
