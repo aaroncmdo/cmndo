@@ -8,17 +8,27 @@ export async function sendWhatsApp(to: string, message: string): Promise<{ succe
   const from = process.env.TWILIO_WHATSAPP_FROM || 'whatsapp:+14155238886'
 
   if (!sid || !token) {
-    console.warn('[whatsapp] TWILIO credentials not set — message not sent')
-    return { success: false, error: 'TWILIO_AUTH_TOKEN nicht konfiguriert' }
+    console.error('[whatsapp] TWILIO_ACCOUNT_SID oder TWILIO_AUTH_TOKEN FEHLT — Nachricht wird NICHT gesendet. Bitte in Vercel Environment setzen.')
+    return { success: false, error: 'Twilio-Credentials fehlen' }
   }
+
+  // Telefonnummer normalisieren: 0163... → +49163..., 0049... → +49...
+  let cleanTo = to.replace(/[^0-9+]/g, '')
+  if (cleanTo.startsWith('00')) cleanTo = '+' + cleanTo.slice(2)
+  if (cleanTo.startsWith('0')) cleanTo = '+49' + cleanTo.slice(1)
+  if (!cleanTo.startsWith('+')) cleanTo = '+49' + cleanTo
+
+  const whatsappTo = cleanTo.startsWith('whatsapp:') ? cleanTo : `whatsapp:${cleanTo}`
+  const whatsappFrom = from.startsWith('whatsapp:') ? from : `whatsapp:${from}`
+
+  console.log(`[whatsapp] Sende an ${whatsappTo} von ${whatsappFrom}`)
 
   try {
     const twilio = (await import('twilio')).default
     const client = twilio(sid, token)
-    const cleanTo = to.replace(/[^0-9+]/g, '')
     const result = await client.messages.create({
-      from,
-      to: cleanTo.startsWith('whatsapp:') ? cleanTo : `whatsapp:${cleanTo}`,
+      from: whatsappFrom,
+      to: whatsappTo,
       body: message,
     })
     console.log('[whatsapp] Gesendet:', result.sid)
@@ -182,7 +192,9 @@ function titelFuerTyp(typ: NachrichtTyp): string {
  * Send a manual WhatsApp message via Twilio (replaces wa.me links).
  */
 export async function sendManualWhatsApp(telefon: string, message: string, fallId?: string): Promise<{ success: boolean; error?: string }> {
+  if (!telefon) return { success: false, error: 'Keine Telefonnummer' }
   const result = await sendWhatsApp(telefon, message)
+  console.log(`[whatsapp:manual] ${telefon} → success=${result.success}${result.error ? ` error=${result.error}` : ''}`)
 
   // Store in nachrichten if fall context
   if (fallId) {

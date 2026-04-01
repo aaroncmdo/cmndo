@@ -7,7 +7,12 @@ import { sendStatusWhatsApp, sendManualWhatsApp } from '@/lib/whatsapp'
 // ─── Manuelle WhatsApp (KFZ-114) ────────────────────────────────────────────
 
 export async function sendWhatsAppFromLead(telefon: string, message: string) {
-  await sendManualWhatsApp(telefon, message)
+  if (!telefon) throw new Error('Keine Telefonnummer vorhanden')
+  const result = await sendManualWhatsApp(telefon, message)
+  if (!result.success) {
+    console.error('[sendWhatsAppFromLead] Fehler:', result.error)
+  }
+  return result
 }
 
 // ─── Disqualifizierung (BUG-28) ─────────────────────────────────────────────
