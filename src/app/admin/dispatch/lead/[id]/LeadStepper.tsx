@@ -63,6 +63,13 @@ type LeadData = {
   mandatstyp: string | null
   wa_gesendet: boolean
   unfallhergang?: string | null
+  kennzeichen?: string | null
+  fahrzeug_hersteller?: string | null
+  fahrzeug_modell?: string | null
+  fahrzeug_farbe?: string | null
+  erstzulassung?: string | null
+  fin?: string | null
+  kilometerstand?: number | null
 }
 
 // ─── Constants ──────────────────────────────────────────────────────────────
@@ -136,6 +143,15 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
   const [halterName, setHalterName] = useState(lead.halter_name ?? '')
   const [unfallhergang, setUnfallhergang] = useState(lead.unfallhergang ?? '')
 
+  // Fahrzeugdaten
+  const [kennzeichen, setKennzeichen] = useState(lead.kennzeichen ?? '')
+  const [fzHersteller, setFzHersteller] = useState(lead.fahrzeug_hersteller ?? '')
+  const [fzModell, setFzModell] = useState(lead.fahrzeug_modell ?? '')
+  const [fzFarbe, setFzFarbe] = useState(lead.fahrzeug_farbe ?? '')
+  const [erstzulassung, setErstzulassung] = useState(lead.erstzulassung ?? '')
+  const [fin, setFin] = useState(lead.fin ?? '')
+  const [kilometerstand, setKilometerstand] = useState(lead.kilometerstand ?? '')
+
   const needsGegner = sf === 'sf-01' || sf === 'sf-02' || (sf === 'sf-03' && sfVariante === 'a')
   const needsEigeneVers = sf === 'sf-02' || (sf === 'sf-03' && sfVariante === 'b')
   const needsPolizei = sf === 'sf-02' || sf === 'sf-03'
@@ -157,6 +173,10 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
         polizei_aktenzeichen: needsPolizei ? polizeiAktenzeichen || null : null,
         polizeibericht_pflicht: polizeibericht, personenschaden_flag: personenschaden, mietwagen_flag: mietwagen,
         schadensursache: schadensursache || null, unfallhergang: unfallhergang || null,
+        kennzeichen: kennzeichen || null, fahrzeug_hersteller: fzHersteller || null,
+        fahrzeug_modell: fzModell || null, fahrzeug_farbe: fzFarbe || null,
+        erstzulassung: erstzulassung || null, fin: fin || null,
+        kilometerstand: kilometerstand ? Number(kilometerstand) : null,
         leasing_geber: kk === 'kk-02' ? leasingGeber || null : null, leasing_flag: kk === 'kk-02',
         finanzierung_bank: kk === 'kk-03' ? finanzierungBank || null : null, finanzierung_flag: kk === 'kk-03',
         firma_name: kk === 'kk-04' ? firmaName || null : null, firma_ustid: kk === 'kk-04' ? firmaUstid || null : null, gewerbe_flag: kk === 'kk-04',
@@ -243,6 +263,13 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
               personenschaden={personenschaden} setPersonenschaden={setPersonenschaden}
               mietwagen={mietwagen} setMietwagen={setMietwagen}
               unfallhergang={unfallhergang} setUnfallhergang={setUnfallhergang}
+              kennzeichen={kennzeichen} setKennzeichen={setKennzeichen}
+              fzHersteller={fzHersteller} setFzHersteller={setFzHersteller}
+              fzModell={fzModell} setFzModell={setFzModell}
+              fzFarbe={fzFarbe} setFzFarbe={setFzFarbe}
+              erstzulassung={erstzulassung} setErstzulassung={setErstzulassung}
+              fin={fin} setFin={setFin}
+              kilometerstand={kilometerstand} setKilometerstand={setKilometerstand}
               saving={saving} onAdvance={() => saveAndAdvance('schadentyp-erfasst')}
             />
           )}
@@ -307,6 +334,10 @@ function StepSchadentyp({
   needsPolizei, polizeiAktenzeichen, setPolizeiAktenzeichen, polizeibericht, setPolizeibericht,
   personenschaden, setPersonenschaden, mietwagen, setMietwagen,
   unfallhergang, setUnfallhergang,
+  kennzeichen, setKennzeichen, fzHersteller, setFzHersteller,
+  fzModell, setFzModell, fzFarbe, setFzFarbe,
+  erstzulassung, setErstzulassung, fin, setFin,
+  kilometerstand, setKilometerstand,
   saving, onAdvance,
 }: {
   sf: string; setSf: (v: string) => void; sfVariante: string; setSfVariante: (v: string) => void
@@ -317,10 +348,31 @@ function StepSchadentyp({
   personenschaden: boolean; setPersonenschaden: (v: boolean) => void
   mietwagen: boolean; setMietwagen: (v: boolean) => void
   unfallhergang: string; setUnfallhergang: (v: string) => void
+  kennzeichen: string; setKennzeichen: (v: string) => void
+  fzHersteller: string; setFzHersteller: (v: string) => void
+  fzModell: string; setFzModell: (v: string) => void
+  fzFarbe: string; setFzFarbe: (v: string) => void
+  erstzulassung: string; setErstzulassung: (v: string) => void
+  fin: string; setFin: (v: string) => void
+  kilometerstand: string | number; setKilometerstand: (v: string | number) => void
   saving: boolean; onAdvance: () => void
 }) {
   return (
     <div className="space-y-3">
+      {/* Fahrzeugdaten */}
+      <fieldset className="border border-gray-200 rounded-xl p-3 space-y-2">
+        <legend className="text-xs text-[#4573A2] font-medium px-2">Fahrzeugdaten</legend>
+        <div className="grid grid-cols-2 gap-2">
+          <Input label="Kennzeichen *" value={kennzeichen} onChange={setKennzeichen} />
+          <Input label="Marke / Hersteller" value={fzHersteller} onChange={setFzHersteller} />
+          <Input label="Modell" value={fzModell} onChange={setFzModell} />
+          <Input label="Farbe" value={fzFarbe} onChange={setFzFarbe} />
+          <Input label="Erstzulassung (MM/YYYY)" value={erstzulassung} onChange={setErstzulassung} />
+          <Input label="FIN / Fahrgestellnr." value={fin} onChange={setFin} />
+          <Input label="Kilometerstand" value={String(kilometerstand)} onChange={v => setKilometerstand(v)} />
+        </div>
+      </fieldset>
+
       <div>
         <label className="text-xs text-gray-500 mb-1.5 block">Schadentyp *</label>
         <select value={sf} onChange={e => setSf(e.target.value)} className={selectCls}>

@@ -149,6 +149,13 @@ export default async function LeadDetailPage({
                 vollmacht_datum: lead.vollmacht_datum ?? null,
                 mandatstyp: lead.mandatstyp ?? null,
                 wa_gesendet: lead.wa_gesendet ?? false,
+                kennzeichen: lead.kennzeichen ?? null,
+                fahrzeug_hersteller: lead.fahrzeug_hersteller ?? null,
+                fahrzeug_modell: lead.fahrzeug_modell ?? null,
+                fahrzeug_farbe: lead.fahrzeug_farbe ?? null,
+                erstzulassung: lead.erstzulassung ?? null,
+                fin: lead.fin ?? null,
+                kilometerstand: lead.kilometerstand ?? null,
               }}
               rightSidebar={
                 <>
@@ -224,6 +231,10 @@ export default async function LeadDetailPage({
               kennzeichen: lead.kennzeichen ?? null,
               fahrzeug_hersteller: lead.fahrzeug_hersteller ?? null,
               fahrzeug_modell: lead.fahrzeug_modell ?? null,
+              fahrzeug_farbe: lead.fahrzeug_farbe ?? null,
+              erstzulassung: lead.erstzulassung ?? null,
+              fin: lead.fin ?? null,
+              kilometerstand: lead.kilometerstand ?? null,
               kontaktversuche: lead.kontaktversuche ?? null,
               verpasste_anrufe: lead.verpasste_anrufe ?? null,
               firma_name: lead.firma_name ?? null,
