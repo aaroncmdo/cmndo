@@ -238,6 +238,81 @@ function IndividuelleAnfragenSection({ anfragen }: { anfragen: IndividuelleAnfra
   )
 }
 
+// ── Kanzlei-Provision (150€ pro Vollmacht) ──
+
+function KanzleiProvisionSection({
+  vollmachtenGesamt,
+  vollmachtenMonat,
+  provisionGesamt,
+  provisionMonat,
+  letzteVollmachten,
+}: {
+  vollmachtenGesamt: number
+  vollmachtenMonat: number
+  provisionGesamt: number
+  provisionMonat: number
+  letzteVollmachten: { id: string; name: string; datum: string }[]
+}) {
+  function eur(val: number) {
+    return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(val)
+  }
+
+  return (
+    <div className="px-4 pb-8">
+      <div className="max-w-5xl mx-auto">
+        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+              Kanzlei-Provision (150&euro; / Vollmacht)
+            </h2>
+            <span className="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full font-medium">
+              Nur mandatstyp: kanzlei-claimondo
+            </span>
+          </div>
+
+          <div className="p-5">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div className="text-center p-3 bg-gray-50 rounded-xl">
+                <p className="text-gray-500 text-xs mb-1">Vollmachten gesamt</p>
+                <p className="text-gray-900 text-2xl font-bold tabular-nums">{vollmachtenGesamt}</p>
+              </div>
+              <div className="text-center p-3 bg-gray-50 rounded-xl">
+                <p className="text-gray-500 text-xs mb-1">Provision gesamt</p>
+                <p className="text-purple-600 text-2xl font-bold tabular-nums">{eur(provisionGesamt)}</p>
+              </div>
+              <div className="text-center p-3 bg-purple-50 rounded-xl">
+                <p className="text-gray-500 text-xs mb-1">Dieser Monat</p>
+                <p className="text-gray-900 text-2xl font-bold tabular-nums">{vollmachtenMonat}</p>
+              </div>
+              <div className="text-center p-3 bg-purple-50 rounded-xl">
+                <p className="text-gray-500 text-xs mb-1">Provision Monat</p>
+                <p className="text-purple-600 text-2xl font-bold tabular-nums">{eur(provisionMonat)}</p>
+              </div>
+            </div>
+
+            {letzteVollmachten.length > 0 && (
+              <div className="border-t border-gray-200 pt-4">
+                <p className="text-xs text-gray-500 font-medium mb-2">Letzte Vollmachten (Kanzlei)</p>
+                <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
+                  {letzteVollmachten.map(v => (
+                    <div key={v.id} className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg text-xs">
+                      <span className="text-gray-800 font-medium">{v.name}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-purple-600 font-semibold tabular-nums">150,00 &euro;</span>
+                        <span className="text-gray-400 tabular-nums">{v.datum}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Investition pro Fall ──
 
 function InvestitionProFallSection() {
@@ -523,6 +598,28 @@ export default async function FinancePage() {
     .select('betrag')
   const gutachterAnzahlungenGesamt = (allEinzahlungen ?? []).reduce((s, e) => s + Number(e.betrag), 0)
 
+  // ── Kanzlei-Provision: 150€ pro unterschriebene Vollmacht (mandatstyp=kanzlei-claimondo) ──
+  const [{ data: kanzleiVollmachtenGesamt }, { data: kanzleiVollmachtenMonat }] = await Promise.all([
+    supabase
+      .from('leads')
+      .select('id, vorname, nachname, vollmacht_datum, created_at')
+      .eq('vollmacht_unterschrieben', true)
+      .eq('mandatstyp', 'kanzlei-claimondo')
+      .order('vollmacht_datum', { ascending: false }),
+    supabase
+      .from('leads')
+      .select('id')
+      .eq('vollmacht_unterschrieben', true)
+      .eq('mandatstyp', 'kanzlei-claimondo')
+      .gte('vollmacht_datum', monatStart)
+      .lte('vollmacht_datum', monatEnde),
+  ])
+
+  const kanzleiVollmachtenTotal = (kanzleiVollmachtenGesamt ?? []).length
+  const kanzleiVollmachtenDiesenMonat = (kanzleiVollmachtenMonat ?? []).length
+  const kanzleiProvisionGesamt = kanzleiVollmachtenTotal * 150
+  const kanzleiProvisionMonat = kanzleiVollmachtenDiesenMonat * 150
+
   // ── Individuelle Anfragen ──
   let individuelleAnfragen: IndividuelleAnfrage[] = []
   try {
@@ -565,6 +662,17 @@ export default async function FinancePage() {
         kanzleiGewinn={kanzleiGewinn}
       />
       <MarketingMaikSection monatsberichte={monatsberichte ?? []} />
+      <KanzleiProvisionSection
+        vollmachtenGesamt={kanzleiVollmachtenTotal}
+        vollmachtenMonat={kanzleiVollmachtenDiesenMonat}
+        provisionGesamt={kanzleiProvisionGesamt}
+        provisionMonat={kanzleiProvisionMonat}
+        letzteVollmachten={(kanzleiVollmachtenGesamt ?? []).slice(0, 20).map(l => ({
+          id: l.id,
+          name: `${l.vorname ?? ''} ${l.nachname ?? ''}`.trim() || '\u2014',
+          datum: l.vollmacht_datum ? new Date(l.vollmacht_datum).toLocaleDateString('de-DE') : l.created_at ? new Date(l.created_at).toLocaleDateString('de-DE') : '\u2014',
+        }))}
+      />
       <GutachterAbrechnungen svRows={svRows} gutachterAnzahlungenGesamt={gutachterAnzahlungenGesamt} />
       <IndividuelleAnfragenSection anfragen={individuelleAnfragen} />
       <InvestitionProFallSection />
