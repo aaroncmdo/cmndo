@@ -147,17 +147,17 @@ export default function GutachterShell({
       <aside
         role="navigation"
         aria-label="Gutachter-Navigation"
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0D1B3E] flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="px-5 py-5 border-b border-gray-200">
+        <div className="px-5 py-5 border-b border-white/10">
           {logoUrl ? (
-            <Link href="/gutachter"><img src={logoUrl} alt="Claimondo Logo" className="h-8 w-auto max-w-36 object-contain" /></Link>
+            <Link href="/gutachter"><img src={logoUrl} alt="Claimondo Logo" className="h-8 w-auto max-w-36 object-contain brightness-0 invert" /></Link>
           ) : (
-            <Link href="/gutachter"><Image src="/claimondo-logo.svg" alt="Claimondo Logo" width={140} height={40} unoptimized priority /></Link>
+            <Link href="/gutachter"><Image src="/claimondo-logo.svg" alt="Claimondo Logo" width={140} height={40} className="brightness-0 invert" unoptimized priority /></Link>
           )}
-          <p className="text-gray-600 text-xs mt-0.5">Gutachter-Portal</p>
+          <p className="text-[#7BA3CC] text-xs mt-0.5">Gutachter-Portal</p>
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1">
@@ -168,8 +168,8 @@ export default function GutachterShell({
               onClick={() => setSidebarOpen(false)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                 isActive(href)
-                  ? 'bg-gray-100 text-gray-900'
-                  : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100/50'
+                  ? 'bg-[#1E3A5F] text-white'
+                  : 'text-[#7BA3CC] hover:text-white hover:bg-white/5'
               }`}
             >
               <Icon className="w-5 h-5" />
@@ -178,20 +178,20 @@ export default function GutachterShell({
           ))}
         </nav>
 
-        <div className="mt-auto px-3 py-3 border-t border-gray-200 space-y-2">
+        <div className="mt-auto px-3 py-3 border-t border-white/10 space-y-2">
           <Link href="/gutachter/profil" onClick={() => setSidebarOpen(false)}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-100 transition-colors group">
-            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-colors group">
+            <div className="w-10 h-10 rounded-full bg-[#4573A2] flex items-center justify-center text-white text-xs font-bold shrink-0">
               {displayName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-gray-800 text-sm font-semibold truncate">{displayName}</p>
-              <p className="text-gray-500 text-xs">Sachverständiger</p>
+              <p className="text-white text-sm font-semibold truncate">{displayName}</p>
+              <p className="text-[#7BA3CC] text-xs">Sachverständiger</p>
             </div>
-            <UserIcon className="w-4 h-4 text-gray-300 group-hover:text-gray-500 shrink-0" />
+            <UserIcon className="w-4 h-4 text-[#7BA3CC] group-hover:text-white shrink-0" />
           </Link>
           <button onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-gray-500 hover:text-red-500 hover:bg-gray-50 transition-colors">
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#7BA3CC] hover:text-red-400 hover:bg-white/5 transition-colors">
             <LogOutIcon className="w-4 h-4" /> Abmelden
           </button>
         </div>

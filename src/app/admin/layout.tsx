@@ -29,8 +29,8 @@ export default async function AdminLayout({
       {/* Main content area — offset by sidebar width on desktop */}
       <div className="md:ml-56 h-screen flex flex-col relative z-10">
         {/* Mobile header */}
-        <header className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200 shrink-0">
-          <Image src="/claimondo-logo.svg" alt="Claimondo" width={120} height={34} unoptimized priority />
+        <header className="md:hidden flex items-center justify-between px-4 py-3 bg-[#0D1B3E] shrink-0">
+          <Image src="/claimondo-logo.svg" alt="Claimondo" width={120} height={34} className="brightness-0 invert" unoptimized priority />
           <NotificationBell />
         </header>
 

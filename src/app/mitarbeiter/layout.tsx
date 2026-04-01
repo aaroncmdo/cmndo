@@ -25,17 +25,17 @@ export default async function MitarbeiterLayout({
 
   return (
     <div className="min-h-screen bg-[#f8f9fb]">
-      <header className="border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+      <header className="bg-[#0D1B3E] px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Image src="/claimondo-logo.svg" alt="Claimondo" width={130} height={36} unoptimized priority />
-          <Link href="/mitarbeiter/performance" className="flex items-center gap-1.5 text-gray-500 hover:text-gray-800 text-sm transition-colors">
+          <Image src="/claimondo-logo.svg" alt="Claimondo" width={130} height={36} className="brightness-0 invert" unoptimized priority />
+          <Link href="/mitarbeiter/performance" className="flex items-center gap-1.5 text-[#7BA3CC] hover:text-white text-sm transition-colors">
             <BarChart3Icon className="w-4 h-4" /> Meine Performance
           </Link>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-gray-500 text-sm">{displayName}</span>
+          <span className="text-[#7BA3CC] text-sm">{displayName}</span>
           <form action="/api/auth/logout" method="POST">
-            <button type="button" className="text-gray-500 hover:text-gray-700 transition-colors">
+            <button type="button" className="text-[#7BA3CC] hover:text-white transition-colors">
               <LogOutIcon className="w-4 h-4" />
             </button>
           </form>

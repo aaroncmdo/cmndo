@@ -85,7 +85,7 @@ export default function VertragPage() {
     <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6 text-white text-center">
+        <div className="bg-gradient-to-r from-[#0D1B3E] to-[#1E3A5F] px-8 py-6 text-white text-center">
           <Image src="/claimondo-logo.svg" alt="Claimondo GmbH" width={200} height={56} className="mx-auto mb-3 brightness-0 invert" unoptimized />
           <p className="text-blue-200 text-sm">Kooperationsvereinbarung</p>
         </div>

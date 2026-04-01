@@ -42,12 +42,12 @@ export default function KundeShell({
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex flex-col relative">
       {/* Header */}
-      <header className="relative z-10 flex items-center justify-between px-5 py-3 bg-white border-b border-gray-200">
+      <header className="relative z-10 flex items-center justify-between px-5 py-3 bg-[#0D1B3E]">
         <Link href="/kunde">
-          <Image src="/claimondo-logo.svg" alt="Claimondo Logo" width={130} height={36} unoptimized priority />
+          <Image src="/claimondo-logo.svg" alt="Claimondo Logo" width={130} height={36} className="brightness-0 invert" unoptimized priority />
         </Link>
-        <button aria-label="Benachrichtigungen" className="relative p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors">
-          <BellIcon className="w-5 h-5 text-gray-600" aria-hidden="true" />
+        <button aria-label="Benachrichtigungen" className="relative p-2.5 rounded-xl bg-white/10 hover:bg-white/20 transition-colors">
+          <BellIcon className="w-5 h-5 text-white" aria-hidden="true" />
         </button>
       </header>
 
@@ -57,7 +57,7 @@ export default function KundeShell({
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center bg-white border-t border-gray-200"
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center bg-[#0D1B3E]"
         style={{
           paddingTop: '8px',
           paddingBottom: 'calc(8px + env(safe-area-inset-bottom))',
@@ -70,7 +70,7 @@ export default function KundeShell({
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center justify-center gap-0.5 min-w-[48px] min-h-[48px] px-3 py-1 rounded-xl transition-all ${
-                active ? 'text-blue-600 bg-blue-50' : 'text-gray-500'
+                active ? 'text-white bg-[#1E3A5F]' : 'text-[#7BA3CC]'
               }`}
             >
               <item.icon className="w-5 h-5" />
