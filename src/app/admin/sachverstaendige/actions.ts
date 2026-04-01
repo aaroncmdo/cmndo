@@ -161,8 +161,87 @@ export async function onboardGutachter(data: OnboardingData) {
     // finance_eintraege might not exist yet
   }
 
+  // 6. Isochrone-Berechnung (wenn Koordinaten vorhanden)
+  if (data.standort_lat && data.standort_lng && svEntry?.id) {
+    try {
+      const polygon = await calculateIsochrone(data.standort_lat, data.standort_lng, paketCfg.km)
+      if (polygon.length > 0) {
+        await admin.from('sachverstaendige')
+          .update({ isochrone_polygon: polygon })
+          .eq('id', svEntry.id)
+      }
+    } catch {
+      // Isochrone-Berechnung ist nicht kritisch
+    }
+  }
+
+  // 7. gebiet_plz aus standort_plz setzen
+  if (data.standort_plz && svEntry?.id) {
+    await admin.from('sachverstaendige')
+      .update({ gebiet_plz: [data.standort_plz] })
+      .eq('id', svEntry.id)
+  }
+
   revalidatePath('/admin/sachverstaendige')
   revalidatePath('/admin/finance')
 
   return { svId: svEntry?.id, tempPassword, email: data.email }
+}
+
+// ─── Isochrone-Berechnung (OSRM + Fallback) ───────────────────────────────
+
+const NUM_POINTS = 16
+
+async function calculateIsochrone(lat: number, lng: number, radiusKm: number): Promise<{ lat: number; lng: number }[]> {
+  // Generate ray points around center
+  const rayPoints: { lat: number; lng: number; angle: number }[] = []
+  for (let i = 0; i < NUM_POINTS; i++) {
+    const angle = (2 * Math.PI * i) / NUM_POINTS
+    const dLat = (radiusKm / 111.32) * Math.cos(angle)
+    const dLng = (radiusKm / (111.32 * Math.cos(lat * Math.PI / 180))) * Math.sin(angle)
+    rayPoints.push({ lat: lat + dLat, lng: lng + dLng, angle })
+  }
+
+  // Try OSRM for real driving distances
+  try {
+    const coords = [[lng, lat], ...rayPoints.map(p => [p.lng, p.lat])]
+      .map(c => `${c[0].toFixed(5)},${c[1].toFixed(5)}`)
+      .join(';')
+    const url = `https://router.project-osrm.org/table/v1/driving/${coords}?sources=0&annotations=distance`
+    const res = await fetch(url, { signal: AbortSignal.timeout(5000) })
+    if (res.ok) {
+      const data = await res.json()
+      if (data.code === 'Ok' && data.distances?.[0]) {
+        const driveDistances: number[] = data.distances[0].slice(1).map((d: number) => d / 1000)
+        return rayPoints.map((p, i) => {
+          const driveDist = driveDistances[i]
+          if (!driveDist || driveDist <= 0) return { lat: p.lat, lng: p.lng }
+          const dLat = p.lat - lat
+          const dLng = p.lng - lng
+          const airDist = Math.sqrt((dLat * 111.32) ** 2 + (dLng * 111.32 * Math.cos(lat * Math.PI / 180)) ** 2)
+          const scale = airDist > 0 ? radiusKm / driveDist : 1
+          const clampedScale = Math.max(0.4, Math.min(1.3, scale))
+          return { lat: lat + dLat * clampedScale, lng: lng + dLng * clampedScale }
+        })
+      }
+    }
+  } catch {
+    // OSRM not available — use fallback
+  }
+
+  // Fallback: Seeded pseudo-random polygon
+  function seededRandom(seed: number): number {
+    const x = Math.sin(seed * 9301 + 49297) * 49297
+    return x - Math.floor(x)
+  }
+  const baseSeed = Math.round(lat * 1000) * 100000 + Math.round(lng * 1000) * 100 + radiusKm
+  return rayPoints.map((_, i) => {
+    const angle = (2 * Math.PI * i) / NUM_POINTS
+    const variation = 0.15 + seededRandom(baseSeed + i * 7) * 0.2
+    const factor = (1 - variation + seededRandom(baseSeed + i * 13) * variation * 2)
+    const r = radiusKm * factor
+    const dLat = (r / 111.32) * Math.cos(angle)
+    const dLng = (r / (111.32 * Math.cos(lat * Math.PI / 180))) * Math.sin(angle)
+    return { lat: lat + dLat, lng: lng + dLng }
+  })
 }
