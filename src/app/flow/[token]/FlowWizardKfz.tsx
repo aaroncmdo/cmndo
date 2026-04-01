@@ -20,6 +20,7 @@ import {
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type LeadData = {
+  id: string
   vorname: string
   nachname: string
   email: string
@@ -29,6 +30,7 @@ export type LeadData = {
   personenschaden_flag: boolean
   mietwagen_flag: boolean
   polizeibericht_pflicht: boolean
+  polizei_vor_ort: boolean
   gutachter_termin: string | null
   kennzeichen: string
   fahrzeug_hersteller: string
@@ -68,6 +70,8 @@ type FlowState = {
   aerztliches_attest: File | null
   hat_mietwagen: boolean | null
   mietwagenvertrag: File | null
+  // Unfallmitteilung (wenn polizei_vor_ort)
+  unfallmitteilung: File | null
 }
 
 const INITIAL_STATE: FlowState = {
@@ -94,6 +98,7 @@ const INITIAL_STATE: FlowState = {
   aerztliches_attest: null,
   hat_mietwagen: null,
   mietwagenvertrag: null,
+  unfallmitteilung: null,
 }
 
 // ─── Step definitions ─────────────────────────────────────────────────────────
@@ -240,7 +245,7 @@ function canProceed(stepId: StepId, state: FlowState, lead: LeadData): boolean {
 
 // ─── Wizard ───────────────────────────────────────────────────────────────────
 
-export default function FlowWizardKfz({ token, lead }: { token: string; lead: LeadData }) {
+export default function FlowWizardKfz({ token, flowLinkId, lead }: { token: string; flowLinkId?: string | null; lead: LeadData }) {
   const [stepIndex, setStepIndex] = useState(0)
   const [state, setState] = useState<FlowState>(INITIAL_STATE)
   const [submitting, setSubmitting] = useState(false)
@@ -287,7 +292,7 @@ export default function FlowWizardKfz({ token, lead }: { token: string; lead: Le
       const { data: fall, error: fallErr } = await supabase
         .from('faelle')
         .insert({
-          lead_id: token,
+          lead_id: lead.id,
           schadens_ursache: `kfz-${lead.schadenfall_typ.toLowerCase()}`,
           status: 'ersterfassung',
           notizen: [
@@ -324,6 +329,7 @@ export default function FlowWizardKfz({ token, lead }: { token: string; lead: Le
       if (state.halter_ausweis) uploads.push({ file: state.halter_ausweis, category: 'halter-ausweis' })
       if (state.aerztliches_attest) uploads.push({ file: state.aerztliches_attest, category: 'aerztliches-attest' })
       if (state.mietwagenvertrag) uploads.push({ file: state.mietwagenvertrag, category: 'mietwagenvertrag' })
+      if (state.unfallmitteilung) uploads.push({ file: state.unfallmitteilung, category: 'unfallmitteilung' })
 
       const uploadedCategories = new Set<string>()
 
@@ -340,6 +346,7 @@ export default function FlowWizardKfz({ token, lead }: { token: string; lead: Le
         'halter-ausweis': 'kundendokument',
         'aerztliches-attest': 'kundendokument',
         mietwagenvertrag: 'kundendokument',
+        unfallmitteilung: 'kundendokument',
       }
       const sichtbarMap: Record<string, string[]> = {
         kundendokument: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
@@ -389,15 +396,25 @@ export default function FlowWizardKfz({ token, lead }: { token: string; lead: Le
         if (pflichtErr) throw new Error(pflichtErr.message)
       }
 
-      // 4. Lead-Status + Qualifizierungs-Phase updaten
+      // 4. Lead-Status + Qualifizierungs-Phase updaten + flow_link_abgeschlossen
       await supabase
         .from('leads')
         .update({
           status: 'umgewandelt',
           qualifizierungs_phase: 'abgeschlossen',
+          flow_link_abgeschlossen: true,
+          unfallmitteilung_hochgeladen: !!state.unfallmitteilung,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', token)
+        .eq('id', lead.id)
+
+      // 4b. Update flow_links entry
+      if (flowLinkId) {
+        await supabase
+          .from('flow_links')
+          .update({ abgeschlossen_am: new Date().toISOString(), status: 'abgeschlossen', fall_id: fall.id })
+          .eq('id', flowLinkId)
+      }
 
       // 5. Kundenbetreuer zuweisen (Load Balancing: wer hat am wenigsten aktive Faelle)
       const { data: betreuer } = await supabase
@@ -456,6 +473,14 @@ export default function FlowWizardKfz({ token, lead }: { token: string; lead: Le
         titel: 'FlowLink abgeschlossen - Lead konvertiert',
         beschreibung: `Kunde hat alle Dokumente hochgeladen. Fall automatisch erstellt.`,
       })
+
+      // 8. Onboarding-Tasks + Reminder automatisch erstellen
+      try {
+        const { triggerOnboardingTasks } = await import('@/lib/tasking')
+        const kbId = (await supabase.from('faelle').select('kundenbetreuer_id').eq('id', fall.id).single()).data?.kundenbetreuer_id ?? null
+        const kundeId = (await supabase.from('faelle').select('kunde_id').eq('id', fall.id).single()).data?.kunde_id ?? null
+        await triggerOnboardingTasks(fall.id, kbId, kundeId)
+      } catch { /* Non-critical */ }
 
       setPortalUrl(`/portal/${token}`)
       setDone(true)
@@ -977,6 +1002,19 @@ function PageSchadenfall({
             onFile={(f) => setState('polizeibericht', f)}
             required
           />
+        )}
+
+        {/* Unfallmitteilung Upload (wenn polizei_vor_ort=true) */}
+        {lead.polizei_vor_ort && (
+          <div className="mt-4 p-3 rounded-xl border border-amber-200 bg-amber-50">
+            <p className="text-xs text-amber-700 font-medium mb-2">Polizei war vor Ort — Bitte Unfallmitteilung hochladen</p>
+            <FileUploadField
+              label="Unfallmitteilung / Polizeiprotokoll"
+              accept="image/*,.pdf"
+              file={state.unfallmitteilung}
+              onFile={(f) => setState('unfallmitteilung', f)}
+            />
+          </div>
         )}
       </div>
     </div>

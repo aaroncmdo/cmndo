@@ -240,10 +240,20 @@ export async function sendFlowLink(leadId: string) {
 
   if (!lead) throw new Error('Lead nicht gefunden')
 
+  // Create flow_links entry with unique token
+  const { data: flowLink, error: flowErr } = await supabase
+    .from('flow_links')
+    .insert({ lead_id: leadId })
+    .select('token')
+    .single()
+
+  if (flowErr) throw new Error(`Flow-Link Erstellung fehlgeschlagen: ${flowErr.message}`)
+
   const { error: leadErr } = await supabase
     .from('leads')
     .update({
       status: 'flow-gesendet',
+      qualifizierungs_phase: 'flow-versendet',
       wa_gesendet: true,
     })
     .eq('id', leadId)
@@ -253,7 +263,7 @@ export async function sendFlowLink(leadId: string) {
   revalidatePath('/admin/dispatch')
   revalidatePath(`/admin/dispatch/lead/${leadId}`)
 
-  return { token: lead.id }
+  return { token: flowLink.token }
 }
 
 // ─── Lead → Kundenakte Konversion ───────────────────────────────────────────
