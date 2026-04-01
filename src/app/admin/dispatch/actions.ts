@@ -139,7 +139,7 @@ export async function createLead(data: {
   const { error } = await supabase.from('leads').insert({
     vorname: data.vorname,
     nachname: data.nachname,
-    telefon: data.telefon || '+491633628571',
+    telefon: data.telefon || null,
     email: data.email || null,
     source_channel: data.source_channel || 'telefon',
     schadenfall_typ: data.schadenfall_typ || null,
@@ -152,7 +152,7 @@ export async function createLead(data: {
   if (error) throw new Error(error.message)
 
   // Phase 1: Lead-Tasks + Notification
-  const { data: newLead } = await supabase.from('leads').select('id').eq('telefon', data.telefon || '+491633628571').order('created_at', { ascending: false }).limit(1).single()
+  const { data: newLead } = await supabase.from('leads').select('id').eq('vorname', data.vorname).eq('nachname', data.nachname).order('created_at', { ascending: false }).limit(1).single()
   if (newLead) {
     triggerLeadTasks(newLead.id, user.id).catch(() => {})
     createNotification(user.id, 'neuer-lead', `Neuer Lead: ${data.vorname} ${data.nachname}`, `${data.source_channel} · ${data.schadenfall_typ || 'Kein Typ'}`, `/admin/dispatch/lead/${newLead.id}`).catch(() => {})

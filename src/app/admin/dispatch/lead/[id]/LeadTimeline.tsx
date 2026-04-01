@@ -1,5 +1,7 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import {
   ClockIcon,
   PhoneCallIcon,
@@ -8,6 +10,8 @@ import {
   CalendarIcon,
   FileTextIcon,
   UserPlusIcon,
+  PencilIcon,
+  RefreshCwIcon,
 } from 'lucide-react'
 
 type TimelineEntry = {
@@ -18,26 +22,47 @@ type TimelineEntry = {
   created_at: string
 }
 
-type LeadInfo = {
-  created_at: string | null
-  qualifizierungs_phase: string
-  rueckruf_datum: string | null
-  rueckruf_erledigt: boolean
-  sa_unterschrieben: boolean
-  gutachter_termin: string | null
-  wa_gesendet: boolean
+type HistorieEntry = {
+  id: string
+  feld: string
+  alter_wert: string | null
+  neuer_wert: string | null
+  geaendert_am: string
 }
 
-const PHASE_LABELS: Record<string, string> = {
-  neu: 'Neu',
-  erstkontakt: 'Erstkontakt hergestellt',
-  'schadentyp-erfasst': 'Schadentyp erfasst',
-  'konstellation-erfasst': 'Kunden-Konstellation erfasst',
-  'gegner-daten': 'Gegner-Daten erfasst',
-  gutachtertermin: 'Gutachtertermin vereinbart',
-  'sa-unterschrieben': 'SA + Vollmacht unterschrieben',
-  'flow-gesendet': 'FlowLink versendet',
-  abgeschlossen: 'Lead abgeschlossen / konvertiert',
+type LeadInfo = {
+  id: string
+  created_at: string | null
+  qualifizierungs_phase: string
+}
+
+const FELD_LABELS: Record<string, string> = {
+  vorname: 'Vorname', nachname: 'Nachname', email: 'E-Mail', telefon: 'Telefon',
+  status: 'Status', qualifizierungs_phase: 'Phase', schadenfall_typ: 'Schadenfall-Typ',
+  kunden_konstellation: 'Konstellation', source_channel: 'Quelle',
+  personenschaden_flag: 'Personenschaden', mietwagen_flag: 'Mietwagen', leasing_flag: 'Leasing',
+  gegner_name: 'Gegner', gegner_versicherung: 'Gegner-Vers.', gegner_kennzeichen: 'Gegner-Kennz.',
+  sa_unterschrieben: 'SA', vollmacht_unterschrieben: 'Vollmacht',
+  gutachter_termin: 'SV-Termin', rueckruf_datum: 'Rückruf',
+  rueckruf_erledigt: 'RR erledigt', wa_gesendet: 'WA gesendet',
+  notiz: 'Notiz', unfallhergang: 'Unfallhergang', mandatstyp: 'Mandatstyp',
+}
+
+function formatVal(val: string | null): string {
+  if (val === null || val === '') return '—'
+  if (val === 'true') return 'Ja'
+  if (val === 'false') return 'Nein'
+  return val
+}
+
+// Map feld changes to icons
+function getIcon(feld: string) {
+  if (feld === 'qualifizierungs_phase' || feld === 'status') return { icon: RefreshCwIcon, color: 'text-[#4573A2]' }
+  if (feld === 'rueckruf_datum' || feld === 'rueckruf_erledigt') return { icon: PhoneCallIcon, color: 'text-amber-500' }
+  if (feld === 'sa_unterschrieben' || feld === 'vollmacht_unterschrieben') return { icon: FileTextIcon, color: 'text-emerald-500' }
+  if (feld === 'gutachter_termin') return { icon: CalendarIcon, color: 'text-teal-500' }
+  if (feld === 'wa_gesendet') return { icon: SendIcon, color: 'text-violet-500' }
+  return { icon: PencilIcon, color: 'text-gray-400' }
 }
 
 export default function LeadTimeline({
@@ -47,87 +72,69 @@ export default function LeadTimeline({
   lead: LeadInfo
   timelineEntries: TimelineEntry[]
 }) {
-  // Build combined timeline from lead state + fall timeline entries
-  const events: { icon: typeof ClockIcon; color: string; title: string; detail?: string; time: string }[] = []
+  const [historieEvents, setHistorieEvents] = useState<HistorieEntry[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase
+      .from('lead_historie')
+      .select('id, feld, alter_wert, neuer_wert, geaendert_am')
+      .eq('lead_id', lead.id)
+      .order('geaendert_am', { ascending: false })
+      .limit(50)
+      .then(({ data }) => {
+        setHistorieEvents(data ?? [])
+        setLoading(false)
+      })
+  }, [lead.id])
+
+  // Build combined timeline: lead_historie + fall timeline entries + lead creation
+  type Event = { icon: typeof ClockIcon; color: string; title: string; detail?: string; time: string }
+  const events: Event[] = []
 
   // Lead created
   if (lead.created_at) {
-    events.push({
-      icon: UserPlusIcon,
-      color: 'text-sky-400',
-      title: 'Lead erstellt',
-      time: lead.created_at,
-    })
+    events.push({ icon: UserPlusIcon, color: 'text-sky-500', title: 'Lead erstellt', time: lead.created_at })
   }
 
-  // Current phase
-  const phase = lead.qualifizierungs_phase
-  if (phase && phase !== 'neu') {
+  // lead_historie entries (from DB trigger)
+  for (const h of historieEvents) {
+    const { icon, color } = getIcon(h.feld)
+    const label = FELD_LABELS[h.feld] ?? h.feld
     events.push({
-      icon: CheckCircle2Icon,
-      color: 'text-[#7BA3CC]',
-      title: `Phase: ${PHASE_LABELS[phase] ?? phase}`,
-      time: lead.created_at ?? new Date().toISOString(), // approximation
-    })
-  }
-
-  // Rueckruf
-  if (lead.rueckruf_datum) {
-    events.push({
-      icon: PhoneCallIcon,
-      color: lead.rueckruf_erledigt ? 'text-emerald-400' : 'text-amber-400',
-      title: lead.rueckruf_erledigt ? 'Rueckruf durchgefuehrt' : 'Rueckruf geplant',
-      detail: new Date(lead.rueckruf_datum).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }),
-      time: lead.rueckruf_datum,
-    })
-  }
-
-  // SA
-  if (lead.sa_unterschrieben) {
-    events.push({
-      icon: FileTextIcon,
-      color: 'text-emerald-400',
-      title: 'SA + Vollmacht erhalten',
-      time: lead.created_at ?? new Date().toISOString(),
-    })
-  }
-
-  // Gutachter-Termin
-  if (lead.gutachter_termin) {
-    events.push({
-      icon: CalendarIcon,
-      color: 'text-teal-400',
-      title: 'Gutachter-Termin bestaetigt',
-      detail: new Date(lead.gutachter_termin).toLocaleString('de-DE', {
-        weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
-      }),
-      time: lead.gutachter_termin,
-    })
-  }
-
-  // FlowLink
-  if (lead.wa_gesendet) {
-    events.push({
-      icon: SendIcon,
-      color: 'text-violet-400',
-      title: 'FlowLink per WhatsApp gesendet',
-      time: lead.created_at ?? new Date().toISOString(),
+      icon, color,
+      title: `${label} geaendert`,
+      detail: `${formatVal(h.alter_wert)} → ${formatVal(h.neuer_wert)}`,
+      time: h.geaendert_am,
     })
   }
 
   // Fall timeline entries
   for (const entry of timelineEntries) {
     events.push({
-      icon: ClockIcon,
-      color: 'text-gray-500',
+      icon: ClockIcon, color: 'text-gray-500',
       title: entry.titel,
       detail: entry.beschreibung ?? undefined,
       time: entry.created_at,
     })
   }
 
-  // Sort by time descending (newest first)
   events.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+
+  if (loading) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-5">
+        <div className="flex items-center gap-2 mb-4">
+          <ClockIcon className="w-4 h-4 text-gray-500" />
+          <h2 className="text-sm font-medium text-gray-500">Timeline</h2>
+        </div>
+        <div className="flex justify-center py-4">
+          <div className="w-4 h-4 border-2 border-gray-300 border-t-[#4573A2] rounded-full animate-spin" />
+        </div>
+      </div>
+    )
+  }
 
   if (events.length === 0) return null
 
@@ -143,23 +150,17 @@ export default function LeadTimeline({
           const Icon = ev.icon
           return (
             <div key={i} className="flex gap-3 relative">
-              {/* Line */}
               {i < events.length - 1 && (
                 <div className="absolute left-[13px] top-7 bottom-0 w-px bg-gray-100" />
               )}
-              {/* Icon */}
-              <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center shrink-0 z-10">
+              <div className="w-7 h-7 rounded-full bg-gray-50 flex items-center justify-center shrink-0 z-10">
                 <Icon className={`w-3.5 h-3.5 ${ev.color}`} />
               </div>
-              {/* Content */}
               <div className="pb-4 min-w-0">
                 <p className="text-sm text-gray-800">{ev.title}</p>
-                {ev.detail && <p className="text-xs text-gray-500 mt-0.5">{ev.detail}</p>}
+                {ev.detail && <p className="text-xs text-gray-500 mt-0.5 truncate">{ev.detail}</p>}
                 <p className="text-[10px] text-gray-400 mt-0.5">
-                  {new Date(ev.time).toLocaleString('de-DE', {
-                    day: '2-digit', month: '2-digit', year: 'numeric',
-                    hour: '2-digit', minute: '2-digit',
-                  })}
+                  {new Date(ev.time).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
             </div>

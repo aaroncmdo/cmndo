@@ -155,13 +155,9 @@ export default async function LeadDetailPage({
                   <LeadNotizen leadId={lead.id} notiz={lead.notiz ?? ''} />
                   <LeadTimeline
                     lead={{
+                      id: lead.id,
                       created_at: lead.created_at,
                       qualifizierungs_phase: lead.qualifizierungs_phase ?? 'neu',
-                      rueckruf_datum: lead.rueckruf_datum ?? null,
-                      rueckruf_erledigt: lead.rueckruf_erledigt ?? false,
-                      sa_unterschrieben: lead.sa_unterschrieben ?? false,
-                      gutachter_termin: lead.gutachter_termin ?? null,
-                      wa_gesendet: lead.wa_gesendet ?? false,
                     }}
                     timelineEntries={timelineEntries ?? []}
                   />

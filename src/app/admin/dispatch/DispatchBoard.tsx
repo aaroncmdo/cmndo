@@ -222,7 +222,7 @@ export default function DispatchBoard({
   const [error, setError] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [showNewLead, setShowNewLead] = useState(false)
-  const [newLead, setNewLead] = useState({ vorname: '', nachname: '', telefon: '+491633628571', email: '', source_channel: 'telefon', schadenfall_typ: '' })
+  const [newLead, setNewLead] = useState({ vorname: '', nachname: '', telefon: '', email: '', source_channel: 'telefon', schadenfall_typ: '' })
   const [newLeadSaving, setNewLeadSaving] = useState(false)
   const [showDisqualifiziert, setShowDisqualifiziert] = useState(false)
   const [rueckrufModalLead, setRueckrufModalLead] = useState<Lead | null>(null)
@@ -518,7 +518,7 @@ export default function DispatchBoard({
               <button disabled={newLeadSaving || !newLead.vorname.trim() || !newLead.nachname.trim()}
                 onClick={async () => {
                   setNewLeadSaving(true)
-                  try { await createLead(newLead); setShowNewLead(false); setNewLead({ vorname: '', nachname: '', telefon: '+491633628571', email: '', source_channel: 'telefon', schadenfall_typ: '' }); router.refresh() }
+                  try { await createLead(newLead); setShowNewLead(false); setNewLead({ vorname: '', nachname: '', telefon: '', email: '', source_channel: 'telefon', schadenfall_typ: '' }); router.refresh() }
                   catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }
                   setNewLeadSaving(false)
                 }}
