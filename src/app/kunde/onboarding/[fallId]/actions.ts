@@ -9,7 +9,7 @@ export async function uploadPflichtdokument(
   formData: FormData
 ): Promise<{ dateiUrl: string; dateiName: string }> {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   // Verify ownership
@@ -66,7 +66,7 @@ export async function uploadPflichtdokument(
 
 export async function completeOnboarding(fallId: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   // Verify ownership

@@ -29,7 +29,7 @@ export async function completeOnboarding(data: {
   kalender_typ: string
 }) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const paketConfig = PAKET_CONFIG[data.paket] ?? PAKET_CONFIG['standard']

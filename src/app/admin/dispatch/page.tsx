@@ -5,7 +5,7 @@ export default async function DispatchPage() {
   const supabase = await createClient()
 
   // Current user for "Meine Faelle" filter
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
 
   // Fetch leads and faelle in parallel
   const [leadsResult, faelleResult] = await Promise.all([

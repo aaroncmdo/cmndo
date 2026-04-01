@@ -17,7 +17,7 @@ function generatePassword(length = 12): string {
 
 async function requireAdmin() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
   const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
   if (profile?.rolle !== 'admin') throw new Error('Nur Admins')

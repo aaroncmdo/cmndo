@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 
 export async function updateSvProfile(svId: string, profileId: string, formData: FormData) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const vorname = (formData.get('vorname') as string)?.trim() || null

@@ -10,7 +10,7 @@ export async function GET(
   const { id } = await params
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 })
 
   // Load fall

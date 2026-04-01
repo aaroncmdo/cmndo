@@ -13,7 +13,7 @@ async function handleTestWhatsApp() {
 
   // Auth check
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return NextResponse.json({ success: false, error: 'Nicht angemeldet — bitte zuerst einloggen.' }, { status: 401 })
 
   const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()

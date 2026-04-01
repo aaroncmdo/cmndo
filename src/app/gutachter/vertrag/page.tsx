@@ -17,7 +17,7 @@ export default function VertragPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = (await supabase.auth.getUser())?.data?.user ?? null
       if (!user) return
       const { data: sv } = await supabase.from('sachverstaendige').select('id, paket, paket_faelle_gesamt, anzahlung_faellig').or(`profile_id.eq.${user.id},user_id.eq.${user.id}`).single()
       const { data: p } = await supabase.from('profiles').select('vorname, nachname').eq('id', user.id).single()

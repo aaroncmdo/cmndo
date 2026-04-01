@@ -41,7 +41,7 @@ export default function LoginClient({
       const { error } = await supabase.auth.verifyOtp({ phone, token: otp, type: 'sms' })
       if (error) throw error
       // Check role and redirect
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = (await supabase.auth.getUser())?.data?.user ?? null
       if (user) {
         // Update auth_provider
         await supabase.from('profiles').update({ auth_provider: 'phone', force_password_change: false }).eq('id', user.id)

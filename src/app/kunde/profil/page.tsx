@@ -4,7 +4,7 @@ import KundeProfilClient from './KundeProfilClient'
 
 export default async function KundeProfilPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase

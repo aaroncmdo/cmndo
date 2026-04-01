@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (!error) {
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = (await supabase.auth.getUser())?.data?.user ?? null
       if (user) {
         // Update auth_provider to google and disable force_password_change
         await supabase

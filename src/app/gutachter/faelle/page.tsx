@@ -58,7 +58,7 @@ export default async function GutachterFaellePage({
 }) {
   const { filter } = await searchParams
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
   // Fetch SV profile

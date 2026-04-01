@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 
 export default async function KundeChatPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
   // Find the user's case

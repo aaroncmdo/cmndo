@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 
     // Get user
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = (await supabase.auth.getUser())?.data?.user ?? null
     if (!user) return NextResponse.redirect(new URL('/login', req.url))
 
     // Save tokens

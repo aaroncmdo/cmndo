@@ -32,7 +32,7 @@ export default function PasswortAendernPage() {
       if (updateError) throw updateError
 
       // Get current user
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = (await supabase.auth.getUser())?.data?.user ?? null
       if (user) {
         // Set force_password_change to false
         await supabase

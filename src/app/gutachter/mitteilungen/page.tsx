@@ -4,7 +4,7 @@ import MitteilungenClient from './MitteilungenClient'
 
 export default async function MitteilungenPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
 
   const sv = await getGutachterForUser(supabase, user!.id, 'id')
 

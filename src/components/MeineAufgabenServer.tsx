@@ -15,7 +15,7 @@ export default async function MeineAufgabenServer({
   limit?: number
 }) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return null
 
   let query = supabase

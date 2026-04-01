@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   const supabase = await createClient()
 
   // Auth
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) {
     return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 })
   }

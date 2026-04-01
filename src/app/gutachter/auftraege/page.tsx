@@ -44,7 +44,7 @@ export default async function AuftraegePage({
 }) {
   const { filter } = await searchParams
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
 
   const sv = await getGutachterForUser(supabase, user!.id, 'id')
 

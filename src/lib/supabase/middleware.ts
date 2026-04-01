@@ -29,9 +29,7 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
 
   // Öffentliche Routen – kein Login nötig
   const publicPaths = ['/login', '/flow', '/api', '/passwort-aendern']

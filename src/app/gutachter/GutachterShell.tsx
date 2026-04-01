@@ -92,7 +92,7 @@ export default function GutachterShell({
 
   const loadUnread = useCallback(async () => {
     const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = (await supabase.auth.getUser())?.data?.user ?? null
     if (!user) return
     const { data: sv } = await supabase
       .from('sachverstaendige')

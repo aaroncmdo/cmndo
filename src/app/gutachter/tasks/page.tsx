@@ -23,7 +23,7 @@ const PRIO_LABELS: Record<string, string> = {
 
 export default async function GutachterTasksPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
   const now = new Date()

@@ -9,7 +9,7 @@ export default async function FallaktePage({
 }) {
   const { id } = await params
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
   const { data: fall } = await supabase

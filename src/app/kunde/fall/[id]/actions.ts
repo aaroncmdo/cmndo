@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 
 export async function uploadDokument(fallId: string, formData: FormData) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const file = formData.get('file') as File
@@ -45,7 +45,7 @@ export async function sendNachricht(
   kanal: 'portal-kunde-claimondo' | 'portal-kunde-gutachter' = 'portal-kunde-claimondo',
 ) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   if (!nachricht.trim()) throw new Error('Nachricht darf nicht leer sein')

@@ -22,7 +22,7 @@ export default function ProblemMeldenModal({ fallId, onClose }: { fallId?: strin
     if (!kategorie || beschreibung.length < 10) return
     setSaving(true)
     const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = (await supabase.auth.getUser())?.data?.user ?? null
     if (!user) { setSaving(false); return }
 
     await supabase.from('technische_probleme').insert({

@@ -7,7 +7,7 @@ import { emailGutachtenEingegangen } from '@/lib/email'
 
 export async function uploadGutachten(fallId: string, formData: FormData) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const file = formData.get('datei') as File

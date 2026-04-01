@@ -4,7 +4,7 @@ import ProfilClient from './ProfilClient'
 
 export default async function ProfilPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
 
   const [{ data: profile }, sv, faelleResult] = await Promise.all([
     supabase

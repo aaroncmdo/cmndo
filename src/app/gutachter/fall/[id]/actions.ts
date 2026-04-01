@@ -9,7 +9,7 @@ import { berechneLeadpreis } from '@/lib/leadpreis'
 
 export async function uploadGutachten(fallId: string, formData: FormData) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const file = formData.get('datei') as File
@@ -148,7 +148,7 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
 
 export async function uploadDokument(fallId: string, formData: FormData) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const file = formData.get('file') as File
@@ -254,7 +254,7 @@ export async function uploadDokument(fallId: string, formData: FormData) {
 
 export async function saveFinVinGutachter(fallId: string, finVin: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   // Verify this gutachter owns the case
@@ -304,7 +304,7 @@ export async function saveFinVinGutachter(fallId: string, finVin: string) {
 
 export async function uploadDatei(fallId: string, formData: FormData) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const file = formData.get('file') as File
@@ -378,7 +378,7 @@ export async function uploadDatei(fallId: string, formData: FormData) {
 
 export async function sendChatNachricht(fallId: string, nachricht: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const trimmed = nachricht.trim()

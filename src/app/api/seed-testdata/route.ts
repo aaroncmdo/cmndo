@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 export async function POST() {
   // Auth check: only admins
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) {
     return Response.json({ error: 'Nicht eingeloggt' }, { status: 401 })
   }

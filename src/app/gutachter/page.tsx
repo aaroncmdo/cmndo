@@ -35,7 +35,7 @@ export default function GutachterCockpit() {
   const [mTab, setMTab] = useState<'route' | 'kunde' | 'uploads'>('route')
 
   const load = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser(); if (!user) return
+    const user = (await supabase.auth.getUser())?.data?.user ?? null; if (!user) return
     let { data: sv } = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, guthaben, offene_faelle, max_faelle_monat').eq('profile_id', user.id).single()
     if (!sv) { const r = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, guthaben, offene_faelle, max_faelle_monat').eq('user_id', user.id).single(); sv = r.data }
     if (!sv) { setLoading(false); return }

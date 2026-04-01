@@ -4,7 +4,7 @@ import DashboardClient from './DashboardClient'
 
 export default async function AdminPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
   return <DashboardClient userId={user.id} />

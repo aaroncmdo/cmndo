@@ -12,7 +12,7 @@ export async function disqualifiziereLead(
   notiz: string | null,
 ) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const now = new Date().toISOString()
@@ -44,7 +44,7 @@ export async function confirmGutachterTermin(
   fahrzeugAdresse: string,
 ) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const now = new Date().toISOString()
@@ -207,7 +207,7 @@ export async function saveLeadQualifizierung(
   data: Record<string, unknown>,
 ) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const { error } = await supabase
@@ -229,7 +229,7 @@ export async function saveRueckruf(
   notiz: string | null,
 ) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const { error } = await supabase
@@ -249,7 +249,7 @@ export async function saveRueckruf(
 
 export async function markRueckrufErledigt(leadId: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const now = new Date()
@@ -292,7 +292,7 @@ export async function markRueckrufErledigt(leadId: string) {
 
 export async function saveLeadNotiz(leadId: string, notiz: string | null) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const { error } = await supabase
@@ -311,7 +311,7 @@ export async function handleGegenvorschlag(
   neuerTermin?: string,
 ) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   if (action === 'accept' && neuerTermin) {

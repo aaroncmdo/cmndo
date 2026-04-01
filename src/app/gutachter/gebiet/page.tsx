@@ -65,7 +65,7 @@ export default function GebietPage() {
 
   // Load own data + all neighbors
   const load = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = (await supabase.auth.getUser())?.data?.user ?? null
     if (!user) return
     const { data: sv } = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket, isochrone_polygon, anzahlung_faellig, radius_km').or(`profile_id.eq.${user.id},user_id.eq.${user.id}`).single()
     if (sv?.standort_lat) {

@@ -46,7 +46,7 @@ const BLOCK_MINUTES = 120
 export async function POST(request: Request) {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) {
     return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 })
   }

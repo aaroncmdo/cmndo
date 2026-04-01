@@ -13,7 +13,7 @@ import { createNotification } from '@/lib/notifications'
 
 export async function saveFilmcheck(fallId: string, notizen: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   // Generate Mandatsnummer (CLM-YYYY-XXXX)
@@ -87,7 +87,7 @@ export async function addTimelineEntry(
   data: { typ: string; titel: string; beschreibung?: string; kanal?: string },
 ) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const { error } = await supabase.from('timeline').insert({
@@ -109,7 +109,7 @@ export async function uploadPflichtdokument(
   url: string,
 ) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const { error } = await supabase
@@ -127,7 +127,7 @@ export async function uploadPflichtdokument(
 
 export async function setAnschlussschreibenDatum(fallId: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const now = new Date().toISOString()
@@ -167,7 +167,7 @@ export async function setAnschlussschreibenDatum(fallId: string) {
 
 export async function recordZahlung(fallId: string, betrag: number) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const now = new Date().toISOString()
@@ -214,7 +214,7 @@ export async function updateSchadensAdresse(
   data: { adresse: string; plz: string; ort?: string },
 ) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const { error } = await supabase
@@ -241,7 +241,7 @@ export async function updateSchadensAdresse(
 
 export async function saveFinVin(fallId: string, finVin: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   // Validate FIN format (17 alphanumeric, no I/O/Q)
@@ -282,7 +282,7 @@ export async function saveFinVin(fallId: string, finVin: string) {
 
 export async function sendChatNachricht(fallId: string, kanal: string, nachricht: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const { data: profile } = await supabase
@@ -307,7 +307,7 @@ export async function sendChatNachricht(fallId: string, kanal: string, nachricht
 
 export async function eskalation(fallId: string, stufe: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   // Update vs_eskalationsstufe on the case
@@ -335,7 +335,7 @@ export async function upsertQcCheckliste(
   checks: Record<string, boolean | null>,
 ) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const { data: existing } = await supabase
@@ -362,7 +362,7 @@ export async function upsertQcCheckliste(
 
 export async function qcBestanden(fallId: string, kommentar: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const now = new Date().toISOString()
@@ -398,7 +398,7 @@ export async function qcBestanden(fallId: string, kommentar: string) {
 
 export async function qcNachbesserung(fallId: string, kommentar: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const now = new Date().toISOString()
@@ -481,7 +481,7 @@ const KATEGORIE_SICHTBARKEIT: Record<string, string[]> = {
 
 export async function uploadDatei(fallId: string, formData: FormData) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const file = formData.get('file') as File | null
@@ -542,7 +542,7 @@ export async function saveKanzleiAnsprechpartner(
   }
 ) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const { error } = await supabase
@@ -568,7 +568,7 @@ export async function createFallTask(
   data: { titel: string; beschreibung: string | null; faellig_am: string | null; prioritaet: string },
 ) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const { error } = await supabase.from('tasks').insert({
@@ -598,7 +598,7 @@ export async function createFallTask(
 
 export async function updateTaskStatus(taskId: string, newStatus: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const updateData: Record<string, unknown> = { status: newStatus }
@@ -630,7 +630,7 @@ export async function erfasseZahlungseingang(
   data: { zahlungsdatum: string; gesamtbetrag: number; referenz?: string; positionen: { position: string; gefordert: number; gezahlt: number; notiz?: string }[] },
 ) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   // Insert Zahlungseingang
@@ -697,7 +697,7 @@ export async function createTermin(
   data: { typ: string; datum: string; dauer_minuten: number; betreff: string; notiz?: string },
 ) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   // Get the fall to find kunde_id
@@ -751,7 +751,7 @@ export async function updateTerminStatus(
   ergebnisNotiz?: string,
 ) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const updateData: Record<string, unknown> = { status }

@@ -18,7 +18,7 @@ const COMPLETED_STATUSES = [
 
 export default async function AbrechnungPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
 
   // Get the SV record
   const sv = await getGutachterForUser(supabase, user!.id, 'id, paket, offene_faelle, max_faelle_monat, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, guthaben, guthaben_initial, anzahlung_betrag, anzahlung_bezahlt, sv_paket')

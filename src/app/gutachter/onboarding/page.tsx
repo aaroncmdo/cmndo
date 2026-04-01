@@ -5,7 +5,7 @@ import OnboardingClient from './OnboardingClient'
 
 export default async function GutachterOnboardingPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
   // Check if SV already exists and is fully onboarded

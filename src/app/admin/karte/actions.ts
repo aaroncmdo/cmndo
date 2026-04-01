@@ -10,7 +10,7 @@ export async function updateGutachterProfil(
   value: unknown,
 ) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   // Fields that live on the profiles table (via profile_id)
@@ -48,7 +48,7 @@ export async function updateGutachterProfil(
 
 export async function reactivateGutachter(svId: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   // Core update (ist_aktiv always exists)
@@ -69,7 +69,7 @@ export async function reactivateGutachter(svId: string) {
 
 export async function deactivateGutachter(svId: string, grund: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   // Core update (ist_aktiv always exists)
@@ -90,7 +90,7 @@ export async function deactivateGutachter(svId: string, grund: string) {
 
 export async function reassignCases(fromSvId: string, toSvId: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const { data, error } = await supabase
@@ -107,7 +107,7 @@ export async function reassignCases(fromSvId: string, toSvId: string) {
 
 export async function softDeleteGutachter(svId: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   // Check for open cases

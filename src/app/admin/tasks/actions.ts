@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 
 export async function createTask(formData: FormData) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const fallId = formData.get('fall_id') as string
@@ -35,7 +35,7 @@ export async function createTask(formData: FormData) {
 
 export async function updateTaskStatus(taskId: string, newStatus: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const updateData: Record<string, unknown> = { status: newStatus }
@@ -75,7 +75,7 @@ export async function updateTaskStatus(taskId: string, newStatus: string) {
 
 export async function deleteTask(taskId: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const { error } = await supabase.from('tasks').delete().eq('id', taskId)

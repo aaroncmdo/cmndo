@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 
 export async function markAnkunft(fallId: string, lat: number, lng: number) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const sv = await getGutachterForUser(supabase, user.id, 'id')
@@ -51,7 +51,7 @@ export async function markAnkunft(fallId: string, lat: number, lng: number) {
 
 export async function skipStop(fallId: string, grund: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const sv = await getGutachterForUser(supabase, user.id, 'id')
@@ -90,7 +90,7 @@ export async function skipStop(fallId: string, grund: string) {
 
 export async function completeBesichtigung(fallId: string, notizen: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const sv = await getGutachterForUser(supabase, user.id, 'id')
@@ -132,7 +132,7 @@ export async function completeBesichtigung(fallId: string, notizen: string) {
 
 export async function uploadFotoVorOrt(fallId: string, formData: FormData) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const file = formData.get('file') as File

@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 
 export async function setTermin(fallId: string, termin: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const { error } = await supabase

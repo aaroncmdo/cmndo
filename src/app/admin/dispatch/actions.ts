@@ -19,7 +19,7 @@ import { createGutachterMitteilung } from '@/lib/mitteilungen'
 export async function updateFallStatus(fallId: string, newStatus: string) {
   const supabase = await createClient()
   const serviceClient = createServiceClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const now = new Date().toISOString()
@@ -133,7 +133,7 @@ export async function createLead(data: {
   schadenfall_typ?: string
 }) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const { error } = await supabase.from('leads').insert({
@@ -173,7 +173,7 @@ const QUALI_PHASES = new Set([
 export async function updateLeadStatus(leadId: string, newStatus: string) {
   const supabase = await createClient()
   const svc = createServiceClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const now = new Date().toISOString()
@@ -229,7 +229,7 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
 
 export async function sendFlowLink(leadId: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
   const { data: lead } = await supabase
