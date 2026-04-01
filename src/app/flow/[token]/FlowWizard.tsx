@@ -646,7 +646,7 @@ function Step6({ value, toggle }: { value: string[]; toggle: (v: string) => void
                 value.includes(opt.value) ? 'border-[#4573A2] bg-[#4573A2]' : 'border-gray-300'
               }`}
             >
-              {value.includes(opt.value) && <CheckIcon className="w-3.5 h-3.5 text-gray-900" />}
+              {value.includes(opt.value) && <CheckIcon className="w-3.5 h-3.5 text-white" />}
             </div>
             {opt.label}
           </button>

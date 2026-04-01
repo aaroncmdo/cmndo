@@ -432,7 +432,7 @@ function QualifikationenSection({ svId, initialQualifikationen }: { svId: string
               active ? 'border-[#4573A2] bg-[#4573A2]' : 'border-gray-300'
             }`}>
               {active && (
-                <svg className="w-3 h-3 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
               )}
