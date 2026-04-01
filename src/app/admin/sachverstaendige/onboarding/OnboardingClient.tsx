@@ -286,7 +286,7 @@ export default function OnboardingClient() {
               <button
                 onClick={handleSubmit}
                 disabled={isPending}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-500 disabled:opacity-60 text-gray-900 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-500 disabled:opacity-60 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
               >
                 {isPending && <LoaderIcon className="w-4 h-4 animate-spin" />}
                 Gutachter anlegen

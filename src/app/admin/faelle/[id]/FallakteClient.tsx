@@ -2228,7 +2228,7 @@ function TabQcPruefung({
           <button
             onClick={handleNachbesserung}
             disabled={saving}
-            className="flex-1 py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-gray-900 text-sm font-semibold disabled:opacity-40 transition-all"
+            className="flex-1 py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold disabled:opacity-40 transition-all"
           >
             Nachbesserung
           </button>

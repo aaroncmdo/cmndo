@@ -270,7 +270,7 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
 
           {/* Nearby alert */}
           {nearbyAlert && !inspecting && (
-            <div className="absolute top-4 left-4 right-4 bg-green-600/90 backdrop-blur-sm text-gray-900 text-sm font-medium px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-pulse">
+            <div className="absolute top-4 left-4 right-4 bg-green-600/90 backdrop-blur-sm text-white text-sm font-medium px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-pulse">
               <MapPinIcon className="w-5 h-5" />
               Sie sind angekommen bei {nearbyAlert}
             </div>
@@ -418,8 +418,8 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
                     {stops.map((s, i) => (
                       <div key={s.id} className={`flex items-center gap-2 py-1.5 text-sm ${i === activeIdx ? 'text-gray-900' : 'text-gray-500'}`}>
                         <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
-                          statuses[i] === 'done' ? 'bg-green-500 text-gray-900' :
-                          statuses[i] === 'skipped' ? 'bg-red-500 text-gray-900' :
+                          statuses[i] === 'done' ? 'bg-green-500 text-white' :
+                          statuses[i] === 'skipped' ? 'bg-red-500 text-white' :
                           statuses[i] === 'active' ? 'bg-[#4573A2] text-white' :
                           'bg-zinc-700 text-gray-500'
                         }`}>{i + 1}</div>
