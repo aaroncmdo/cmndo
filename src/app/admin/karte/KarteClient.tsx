@@ -51,7 +51,7 @@ interface Fall {
 // ═══════════════════════════════════════════════════════════════════════════
 
 const TYP_COLORS: Record<string, { fill: string; marker: string; label: string }> = {
-  'kfz-gutachter': { fill: '#3b82f6', marker: 'bg-blue-500', label: 'KFZ-SV' },
+  'kfz-gutachter': { fill: '#3b82f6', marker: 'bg-[#4573A2]', label: 'KFZ-SV' },
   'dat-gutachter': { fill: '#f97316', marker: 'bg-orange-500', label: 'DAT' },
   akademie: { fill: '#22c55e', marker: 'bg-green-500', label: 'Akademie' },
   gutachterbuero: { fill: '#a855f7', marker: 'bg-purple-500', label: 'Buero' },
@@ -240,7 +240,7 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
               <p className="text-gray-500 text-xs mt-0.5">{filteredSVs.length} von {sachverstaendige.length} SV</p>
             </div>
             <button onClick={() => setShowOnboarding(true)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-gray-900 bg-blue-600 hover:bg-blue-500 transition-colors">
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-gray-900 bg-[#1E3A5F] hover:bg-[#4573A2] transition-colors">
               <UserPlusIcon className="w-3.5 h-3.5" /> Neu
             </button>
           </div>
@@ -254,7 +254,7 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
           <div className="flex gap-1 mt-2">
             {(['aktive', 'deaktivierte', 'alle'] as const).map(f => (
               <button key={f} onClick={() => setSvFilter(f)}
-                className={`flex-1 text-[10px] font-medium py-1.5 rounded-lg transition-colors ${svFilter === f ? 'bg-blue-600 text-white' : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300'}`}>
+                className={`flex-1 text-[10px] font-medium py-1.5 rounded-lg transition-colors ${svFilter === f ? 'bg-[#1E3A5F] text-white' : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300'}`}>
                 {f === 'aktive' ? 'Aktive' : f === 'deaktivierte' ? 'Deaktiv.' : 'Alle'}
               </button>
             ))}
@@ -277,10 +277,10 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
                   }
                 }}
                 className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                  selectedSV?.id === sv.id ? 'bg-blue-600/20 border border-blue-600/30' : 'hover:bg-gray-100/60'
+                  selectedSV?.id === sv.id ? 'bg-[#1E3A5F]/20 border border-[#1E3A5F]/30' : 'hover:bg-gray-100/60'
                 }`}>
                 <div className="flex items-center gap-2">
-                  <div className={`w-2.5 h-2.5 rounded-full ${sv.istAktiv === false ? 'bg-gray-400' : (ti?.marker ?? 'bg-blue-500')}`} />
+                  <div className={`w-2.5 h-2.5 rounded-full ${sv.istAktiv === false ? 'bg-gray-400' : (ti?.marker ?? 'bg-[#4573A2]')}`} />
                   <span className={`text-sm truncate ${sv.istAktiv === false ? 'text-gray-400' : 'text-gray-800'}`}>{sv.name}</span>
                   {sv.istAktiv === false && <span className="text-[8px] bg-red-50 text-red-500 px-1 py-0.5 rounded font-medium shrink-0">Deaktiviert</span>}
                 </div>
@@ -296,7 +296,7 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
         <div ref={mapContainerRef} className="w-full h-full" />
         {!mapReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-[#f8f9fb]/80 z-10">
-            <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[#4573A2] border-t-transparent rounded-full animate-spin" />
           </div>
         )}
 
@@ -345,7 +345,7 @@ function ProfilPanel({ sv, onClose }: { sv: SV; onClose: () => void }) {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const auslPct = sv.maxFaelleMonat > 0 ? Math.round((sv.offeneFaelle / sv.maxFaelleMonat) * 100) : 0
-  const ti = TYP_COLORS[sv.gutachterTyp] ?? { fill: '#3b82f6', marker: 'bg-blue-500', label: sv.gutachterTyp }
+  const ti = TYP_COLORS[sv.gutachterTyp] ?? { fill: '#3b82f6', marker: 'bg-[#4573A2]', label: sv.gutachterTyp }
 
   useEffect(() => { if (editField) inputRef.current?.focus() }, [editField])
 
@@ -381,7 +381,7 @@ function ProfilPanel({ sv, onClose }: { sv: SV; onClose: () => void }) {
               <h2 className="text-xl font-bold text-gray-900">{sv.name || 'Unbekannt'}</h2>
               <div className="flex items-center gap-2 mt-1">
                 <select value={sv.gutachterTyp} onChange={e => saveField('gutachter_typ', e.target.value)}
-                  className="text-[10px] font-semibold bg-blue-50 text-blue-600 border-0 rounded-full px-2 py-0.5 cursor-pointer">
+                  className="text-[10px] font-semibold bg-[#4573A2]/5 text-[#4573A2] border-0 rounded-full px-2 py-0.5 cursor-pointer">
                   <option value="kfz-gutachter">KFZ-SV</option>
                   <option value="dat-gutachter">DAT</option>
                   <option value="akademie">Akademie</option>
@@ -447,7 +447,7 @@ function ProfilPanel({ sv, onClose }: { sv: SV; onClose: () => void }) {
               <span className="text-xs text-gray-700 tabular-nums">{sv.offeneFaelle}/{sv.maxFaelleMonat} ({auslPct}%)</span>
             </div>
             <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div className={`h-full rounded-full ${auslPct >= 90 ? 'bg-red-500' : auslPct >= 70 ? 'bg-amber-500' : 'bg-blue-500'}`}
+              <div className={`h-full rounded-full ${auslPct >= 90 ? 'bg-red-500' : auslPct >= 70 ? 'bg-amber-500' : 'bg-[#4573A2]'}`}
                 style={{ width: `${Math.min(100, auslPct)}%` }} />
             </div>
             <div className="flex items-center justify-between mt-2">
@@ -469,7 +469,7 @@ function ProfilPanel({ sv, onClose }: { sv: SV; onClose: () => void }) {
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Qualifikationen</h3>
               <button onClick={() => editingQual ? saveQuals() : setEditingQual(true)} disabled={saving}
-                className="text-[10px] text-blue-400 hover:text-blue-300 font-medium">
+                className="text-[10px] text-[#7BA3CC] hover:text-[#7BA3CC] font-medium">
                 {saving ? 'Speichert...' : editingQual ? 'Speichern' : 'Bearbeiten'}
               </button>
             </div>
@@ -479,7 +479,7 @@ function ProfilPanel({ sv, onClose }: { sv: SV; onClose: () => void }) {
                   <label key={q} className="flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
                     <input type="checkbox" checked={quals.includes(q)}
                       onChange={e => setQuals(prev => e.target.checked ? [...prev, q] : prev.filter(x => x !== q))}
-                      className="accent-blue-500 w-3.5 h-3.5 rounded" />
+                      className="accent-[#4573A2] w-3.5 h-3.5 rounded" />
                     {q}
                   </label>
                 ))}
@@ -499,7 +499,7 @@ function ProfilPanel({ sv, onClose }: { sv: SV; onClose: () => void }) {
             <textarea value={notiz} onChange={e => setNotiz(e.target.value)}
               onBlur={() => { if (notiz) updateGutachterProfil(sv.id, 'notizen', notiz).catch(() => {}) }}
               placeholder="Interne Notizen..." rows={2}
-              className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-400 resize-y" />
+              className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2] placeholder-gray-400 resize-y" />
           </section>
 
           {/* ─── Deaktiviert-Warnung ──────────────────────────────── */}
@@ -530,7 +530,7 @@ function ProfilPanel({ sv, onClose }: { sv: SV; onClose: () => void }) {
               )}
             </div>
             <Link href={`/admin/sachverstaendige/${sv.id}`}
-              className="block text-center bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
+              className="block text-center bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
               Vollstaendiges Profil
             </Link>
             {sv.istAktiv === false ? (
@@ -594,8 +594,8 @@ function EditableRow({ label, value, field, linkPrefix, type, editField, editVal
         <input ref={inputRef} type={type ?? 'text'} value={editValue} onChange={e => onEditValueChange(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') onSave(field, editValue); if (e.key === 'Escape') onCancel() }}
           disabled={saving}
-          className="flex-1 bg-gray-100 border border-blue-600 text-gray-800 text-sm rounded-lg px-2 py-1.5 focus:outline-none" />
-        <button onClick={() => onSave(field, editValue)} disabled={saving} className="p-1 text-blue-400 hover:text-blue-300">
+          className="flex-1 bg-gray-100 border border-[#1E3A5F] text-gray-800 text-sm rounded-lg px-2 py-1.5 focus:outline-none" />
+        <button onClick={() => onSave(field, editValue)} disabled={saving} className="p-1 text-[#7BA3CC] hover:text-[#7BA3CC]">
           <CheckIcon className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -604,7 +604,7 @@ function EditableRow({ label, value, field, linkPrefix, type, editField, editVal
   return (
     <div className="flex items-center gap-2 mb-1.5 group">
       {linkPrefix && value ? (
-        <a href={`${linkPrefix}${value}`} className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 flex-1 min-w-0 truncate">
+        <a href={`${linkPrefix}${value}`} className="flex items-center gap-2 text-sm text-[#7BA3CC] hover:text-[#7BA3CC] flex-1 min-w-0 truncate">
           {field === 'telefon' ? <PhoneIcon className="w-3.5 h-3.5 shrink-0" /> : <MailIcon className="w-3.5 h-3.5 shrink-0" />}
           {value}
         </a>

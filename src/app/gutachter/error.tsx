@@ -19,7 +19,7 @@ export default function GutachterError({
           {error.message && (
             <p className="text-red-400/70 text-xs mb-6 font-mono break-all max-w-md mx-auto">{error.message}</p>
           )}
-          <button onClick={reset} className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-6 py-2.5 rounded-xl transition-colors">
+          <button onClick={reset} className="inline-flex items-center gap-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium px-6 py-2.5 rounded-xl transition-colors">
             <RefreshCcwIcon className="w-4 h-4" /> Seite neu laden
           </button>
         </div>

@@ -45,7 +45,7 @@ const TYP_COLOR: Record<string, string> = {
   filmcheck: 'bg-yellow-50 text-yellow-300',
   'kanzlei-anschlussschreiben': 'bg-green-50 text-green-300',
   'kanzlei-nachfrage': 'bg-emerald-50 text-emerald-300',
-  'versicherung-kontakt': 'bg-blue-50 text-blue-300',
+  'versicherung-kontakt': 'bg-[#4573A2]/5 text-[#7BA3CC]',
   'kunde-rueckfrage': 'bg-violet-50 text-violet-300',
   'sv-termin': 'bg-cyan-50 text-cyan-300',
   'zahlung-pruefen': 'bg-amber-50 text-amber-300',
@@ -62,7 +62,7 @@ const TASK_TYPES = [
 ] as const
 
 const COLUMN_HEADER_COLOR: Record<string, string> = {
-  offen: 'text-blue-400',
+  offen: 'text-[#7BA3CC]',
   'in-bearbeitung': 'text-amber-400',
   erledigt: 'text-green-400',
   blockiert: 'text-red-400',
@@ -149,7 +149,7 @@ export default function KanbanBoard({
           </div>
           <button
             onClick={() => setDialogOpen(true)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-colors"
+            className="px-4 py-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium rounded-xl transition-colors"
           >
             + Neuer Task
           </button>
@@ -295,7 +295,7 @@ function TaskCard({
           value={task.status}
           disabled={isPending}
           onChange={e => onStatusChange(task.id, e.target.value)}
-          className="w-full bg-gray-100 border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-600 cursor-pointer disabled:opacity-50"
+          className="w-full bg-gray-100 border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#1E3A5F] cursor-pointer disabled:opacity-50"
         >
           {COLUMNS.map(col => (
             <option key={col.key} value={col.key}>{col.label}</option>
@@ -364,7 +364,7 @@ function NewTaskDialog({
               <select
                 name="typ"
                 required
-                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               >
                 <option value="">Bitte wählen...</option>
                 {TASK_TYPES.map(t => (
@@ -379,7 +379,7 @@ function NewTaskDialog({
               <select
                 name="fall_id"
                 required
-                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               >
                 <option value="">Fall auswählen...</option>
                 {faelle.map(f => (
@@ -398,7 +398,7 @@ function NewTaskDialog({
                 name="titel"
                 required
                 placeholder="Aufgabe beschreiben..."
-                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               />
             </div>
 
@@ -409,7 +409,7 @@ function NewTaskDialog({
                 name="beschreibung"
                 rows={3}
                 placeholder="Details..."
-                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none"
+                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] resize-none"
               />
             </div>
 
@@ -419,7 +419,7 @@ function NewTaskDialog({
               <input
                 type="date"
                 name="faellig_am"
-                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               />
             </div>
 
@@ -428,7 +428,7 @@ function NewTaskDialog({
               <label className="block text-gray-500 text-sm mb-1.5">Zugewiesen an (optional)</label>
               <select
                 name="zugewiesen_an"
-                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               >
                 <option value="">Nicht zugewiesen</option>
                 {admins.map(a => (
@@ -444,7 +444,7 @@ function NewTaskDialog({
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-3 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full py-3 rounded-xl text-sm font-semibold bg-[#1E3A5F] hover:bg-[#4573A2] text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {submitting ? 'Wird erstellt...' : 'Task erstellen'}
             </button>

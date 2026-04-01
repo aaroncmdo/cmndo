@@ -14,7 +14,7 @@ const URSACHE_LABEL: Record<string, string> = {
   verschleiss: 'Verschleiss', sonstiges: 'Sonstiges',
 }
 const URSACHE_COLOR: Record<string, string> = {
-  wasserschaden: 'bg-blue-50 text-blue-300', sachbeschaedigung: 'bg-orange-50 text-orange-300',
+  wasserschaden: 'bg-[#4573A2]/5 text-[#7BA3CC]', sachbeschaedigung: 'bg-orange-50 text-orange-300',
   brand: 'bg-red-50 text-red-300', einbruch: 'bg-purple-50 text-purple-300',
   sturmschaden: 'bg-cyan-50 text-cyan-300', vandalismus: 'bg-pink-950 text-pink-300',
   verschleiss: 'bg-amber-50 text-amber-300', sonstiges: 'bg-gray-100 text-gray-700',
@@ -46,7 +46,7 @@ const STATUS_ICON: Record<string, typeof CheckCircle2Icon> = {
 const STATUS_COLOR: Record<string, string> = {
   erledigt: 'text-green-400',
   uebersprungen: 'text-red-400',
-  'vor-ort': 'text-blue-400',
+  'vor-ort': 'text-[#7BA3CC]',
   ausstehend: 'text-gray-400',
 }
 
@@ -159,7 +159,7 @@ export default function RouteClient({
                 <div className={`bg-white rounded-2xl border p-4 transition-colors ${
                   stop.status === 'erledigt' ? 'border-green-800/30' :
                   stop.status === 'uebersprungen' ? 'border-red-800/30 opacity-60' :
-                  stop.status === 'vor-ort' ? 'border-blue-800/30' :
+                  stop.status === 'vor-ort' ? 'border-[#1E3A5F]/30' :
                   'border-gray-200'
                 }`}>
                   <div className="flex items-start gap-3">

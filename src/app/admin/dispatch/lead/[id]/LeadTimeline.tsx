@@ -65,7 +65,7 @@ export default function LeadTimeline({
   if (phase && phase !== 'neu') {
     events.push({
       icon: CheckCircle2Icon,
-      color: 'text-blue-400',
+      color: 'text-[#7BA3CC]',
       title: `Phase: ${PHASE_LABELS[phase] ?? phase}`,
       time: lead.created_at ?? new Date().toISOString(), // approximation
     })

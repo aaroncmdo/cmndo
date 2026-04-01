@@ -25,9 +25,9 @@ type Fall = {
 
 const COLUMNS = [
   { key: 'ersterfassung', label: 'Ersterfassung', color: 'text-gray-600', bg: 'bg-gray-400' },
-  { key: 'sv-zugewiesen', label: 'SV zugew.', color: 'text-blue-600', bg: 'bg-blue-500' },
-  { key: 'sv-termin', label: 'Termin', color: 'text-blue-600', bg: 'bg-blue-400' },
-  { key: 'besichtigung', label: 'Besicht.', color: 'text-indigo-600', bg: 'bg-indigo-500' },
+  { key: 'sv-zugewiesen', label: 'SV zugew.', color: 'text-[#4573A2]', bg: 'bg-[#4573A2]' },
+  { key: 'sv-termin', label: 'Termin', color: 'text-[#4573A2]', bg: 'bg-[#4573A2]' },
+  { key: 'besichtigung', label: 'Besicht.', color: 'text-[#1E3A5F]', bg: 'bg-[#4573A2]' },
   { key: 'gutachten-eingegangen', label: 'Gutachten', color: 'text-violet-600', bg: 'bg-violet-500' },
   { key: 'filmcheck', label: 'QC', color: 'text-amber-600', bg: 'bg-amber-500' },
   { key: 'kanzlei-uebergeben', label: 'Kanzlei', color: 'text-green-600', bg: 'bg-green-500' },
@@ -104,7 +104,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
           <span className="text-gray-400 text-xs">{filtered.length}</span>
         </div>
         <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suche..."
-          className="px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 w-40 h-7" />
+          className="px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#4573A2] w-40 h-7" />
       </div>
 
       {toast && (
@@ -136,7 +136,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
                         ref={provided.innerRef}
                         {...provided.droppableProps}
                         style={{ flex: 1, overflowY: 'auto', padding: 4, display: 'flex', flexDirection: 'column', gap: 4 }}
-                        className={`transition-colors ${snapshot.isDraggingOver ? 'bg-blue-50 border-2 border-dashed border-blue-300 rounded-lg' : ''}`}
+                        className={`transition-colors ${snapshot.isDraggingOver ? 'bg-[#4573A2]/5 border-2 border-dashed border-[#4573A2]/30 rounded-lg' : ''}`}
                       >
                         {items.map((fall, i) => (
                           <Draggable key={fall.id} draggableId={fall.id} index={i}>
@@ -170,13 +170,13 @@ function FallCard({ fall }: { fall: Fall }) {
       style={{ padding: '6px 8px' }}
       onClick={e => e.stopPropagation()}>
       <div className="flex items-center justify-between mb-0.5">
-        <span className="text-xs font-mono text-blue-600 truncate">{label}</span>
+        <span className="text-xs font-mono text-[#4573A2] truncate">{label}</span>
         <span className="text-[9px] text-gray-400 shrink-0 ml-1">{timeSince(fall.created_at)}</span>
       </div>
       {fall.kunde_name && <p className="text-xs font-medium text-gray-800 truncate">{fall.kunde_name}</p>}
       <div className="flex flex-wrap gap-1 mt-1">
         {fall.kennzeichen && <span className="bg-gray-100 text-gray-600 text-[9px] px-1 py-0.5 rounded">{fall.kennzeichen}</span>}
-        {fall.schadenfall_typ && <span className="bg-blue-50 text-blue-600 text-[9px] px-1 py-0.5 rounded">{SF_SHORT[fall.schadenfall_typ] ?? fall.schadenfall_typ}</span>}
+        {fall.schadenfall_typ && <span className="bg-[#4573A2]/5 text-[#4573A2] text-[9px] px-1 py-0.5 rounded">{SF_SHORT[fall.schadenfall_typ] ?? fall.schadenfall_typ}</span>}
       </div>
       {(fall.betreuer_name || fall.sv_name) && (
         <div className="flex gap-2 mt-1 text-[9px] text-gray-400 truncate">

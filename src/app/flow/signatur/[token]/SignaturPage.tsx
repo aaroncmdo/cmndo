@@ -172,7 +172,7 @@ function SignatureStep({
       {/* Progress bar */}
       <div className="fixed top-0 inset-x-0 z-10 h-1 bg-gray-100">
         <div
-          className="h-full bg-blue-500 transition-all duration-500"
+          className="h-full bg-[#4573A2] transition-all duration-500"
           style={{ width: step === 1 ? '50%' : '100%' }}
         />
       </div>
@@ -225,7 +225,7 @@ function SignatureStep({
           <button
             onClick={handleSubmit}
             disabled={isEmpty || submitting}
-            className="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+            className="w-full py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
           >
             {submitting ? 'Wird übermittelt …' : buttonLabel}
           </button>

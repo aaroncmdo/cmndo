@@ -325,7 +325,7 @@ const WA_TEMPLATES: Record<string, { label: string; text: string }> = {
 }
 
 const TIMELINE_ICON: Record<string, { bg: string; color: string }> = {
-  'status-change': { bg: 'bg-blue-50', color: 'text-blue-400' },
+  'status-change': { bg: 'bg-[#4573A2]/5', color: 'text-[#7BA3CC]' },
   upload: { bg: 'bg-violet-50', color: 'text-violet-400' },
   notiz: { bg: 'bg-gray-100', color: 'text-gray-500' },
   email: { bg: 'bg-green-50', color: 'text-green-400' },
@@ -453,7 +453,7 @@ function Badge({ children, color }: { children: React.ReactNode; color: string }
   const colors: Record<string, string> = {
     red: 'bg-red-500/10 text-red-400 border-red-800/30',
     green: 'bg-green-500/10 text-green-400 border-green-800/30',
-    blue: 'bg-blue-500/10 text-blue-400 border-blue-800/30',
+    blue: 'bg-[#4573A2]/10 text-[#7BA3CC] border-[#1E3A5F]/30',
     yellow: 'bg-yellow-500/10 text-yellow-400 border-yellow-800/30',
     orange: 'bg-orange-500/10 text-orange-400 border-orange-800/30',
     purple: 'bg-purple-500/10 text-purple-400 border-purple-800/30',
@@ -721,7 +721,7 @@ export default function FallakteClient({
               <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Stammdaten</h3>
               <div className="space-y-1 text-xs">
                 <div className="flex justify-between"><span className="text-gray-500">Kunde</span><span className="text-gray-800 font-medium">{lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—' : '—'}</span></div>
-                {lead?.telefon && <div className="flex justify-between"><span className="text-gray-500">Telefon</span><a href={`tel:${lead.telefon}`} className="text-blue-600">{lead.telefon}</a></div>}
+                {lead?.telefon && <div className="flex justify-between"><span className="text-gray-500">Telefon</span><a href={`tel:${lead.telefon}`} className="text-[#4573A2]">{lead.telefon}</a></div>}
                 {lead?.email && <div className="flex justify-between"><span className="text-gray-500">E-Mail</span><span className="text-gray-700 truncate ml-2">{lead.email}</span></div>}
                 {fall.schadens_adresse && <div className="flex justify-between"><span className="text-gray-500">Ort</span><span className="text-gray-700 truncate ml-2">{[fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(' ')}</span></div>}
               </div>
@@ -744,7 +744,7 @@ export default function FallakteClient({
                 <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Flags</h3>
                 <div className="flex flex-wrap gap-1">
                   {fall.personenschaden_flag && <span className="bg-red-50 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-medium">Personenschaden</span>}
-                  {fall.mietwagen_flag && <span className="bg-blue-50 text-blue-600 text-[10px] px-2 py-0.5 rounded-full font-medium">Mietwagen</span>}
+                  {fall.mietwagen_flag && <span className="bg-[#4573A2]/5 text-[#4573A2] text-[10px] px-2 py-0.5 rounded-full font-medium">Mietwagen</span>}
                   {fall.leasing_flag && <span className="bg-purple-50 text-purple-600 text-[10px] px-2 py-0.5 rounded-full font-medium">Leasing</span>}
                   {fall.finanzierung_flag && <span className="bg-orange-50 text-orange-600 text-[10px] px-2 py-0.5 rounded-full font-medium">Finanzierung</span>}
                   {fall.gewerbe_flag && <span className="bg-amber-50 text-amber-600 text-[10px] px-2 py-0.5 rounded-full font-medium">Gewerbe</span>}
@@ -760,7 +760,7 @@ export default function FallakteClient({
                   <div>
                     <span className="text-gray-400 text-[10px]">Kundenbetreuer</span>
                     <p className="text-gray-800 font-medium">{profileName(kundenbetreuer)}</p>
-                    {kundenbetreuer.telefon && <a href={`tel:${kundenbetreuer.telefon}`} className="text-blue-600 text-[11px]">{kundenbetreuer.telefon}</a>}
+                    {kundenbetreuer.telefon && <a href={`tel:${kundenbetreuer.telefon}`} className="text-[#4573A2] text-[11px]">{kundenbetreuer.telefon}</a>}
                   </div>
                 )}
                 {sv?.profile && (
@@ -794,7 +794,7 @@ function StatusBadge({ status }: { status: string }) {
   return (
     <span className={`px-3 py-1.5 rounded-full text-sm font-semibold border ${
       color === 'green' ? 'bg-green-500/10 text-green-400 border-green-800/30' :
-      color === 'blue' ? 'bg-blue-500/10 text-blue-400 border-blue-800/30' :
+      color === 'blue' ? 'bg-[#4573A2]/10 text-[#7BA3CC] border-[#1E3A5F]/30' :
       color === 'orange' ? 'bg-orange-500/10 text-orange-400 border-orange-800/30' :
       color === 'purple' ? 'bg-purple-500/10 text-purple-400 border-purple-800/30' :
       'bg-gray-100 text-gray-500 border-gray-300'
@@ -819,13 +819,13 @@ function PipelineBar({ status }: { status: string }) {
             <div key={step.key} className="flex-1 flex flex-col items-center gap-1.5">
               <div
                 className={`w-full h-2 rounded-full transition-all ${
-                  isPast ? 'bg-blue-500' :
-                  isActive ? 'bg-blue-400 animate-pulse' :
+                  isPast ? 'bg-[#4573A2]' :
+                  isActive ? 'bg-[#4573A2] animate-pulse' :
                   'bg-gray-100'
                 }`}
               />
               <span className={`text-[10px] font-medium tracking-wider ${
-                isActive ? 'text-blue-400' :
+                isActive ? 'text-[#7BA3CC]' :
                 isPast ? 'text-gray-500' :
                 'text-gray-400'
               }`}>
@@ -1083,7 +1083,7 @@ function TabUebersicht({
         <div className={`rounded-2xl p-5 border ${
           terminIsToday ? 'border-green-600 bg-green-50/30' :
           terminIsOverdue ? 'border-red-600 bg-red-50/30' :
-          'border-blue-600/40 bg-blue-50/20'
+          'border-[#1E3A5F]/40 bg-[#4573A2]/10'
         }`}>
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
@@ -1108,7 +1108,7 @@ function TabUebersicht({
                 <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full">UEBERFAELLIG</span>
               )}
               {!terminIsToday && !terminIsOverdue && (
-                <span className="bg-blue-600/20 text-blue-400 text-xs font-medium px-3 py-1 rounded-full">
+                <span className="bg-[#1E3A5F]/20 text-[#7BA3CC] text-xs font-medium px-3 py-1 rounded-full">
                   In {terminCountdown} Tagen
                 </span>
               )}
@@ -1164,12 +1164,12 @@ function TabUebersicht({
             <div className="space-y-1">
               <p className="text-gray-900 text-sm font-medium">{profileName(kundenbetreuer)}</p>
               {kundenbetreuer.telefon && (
-                <a href={`tel:${kundenbetreuer.telefon}`} className="flex items-center gap-2 text-blue-400 text-sm hover:text-blue-300">
+                <a href={`tel:${kundenbetreuer.telefon}`} className="flex items-center gap-2 text-[#7BA3CC] text-sm hover:text-[#7BA3CC]">
                   <PhoneIcon className="w-3.5 h-3.5" /> {kundenbetreuer.telefon}
                 </a>
               )}
               {kundenbetreuer.email && (
-                <a href={`mailto:${kundenbetreuer.email}`} className="flex items-center gap-2 text-blue-400 text-sm hover:text-blue-300">
+                <a href={`mailto:${kundenbetreuer.email}`} className="flex items-center gap-2 text-[#7BA3CC] text-sm hover:text-[#7BA3CC]">
                   <MailIcon className="w-3.5 h-3.5" /> {kundenbetreuer.email}
                 </a>
               )}
@@ -1196,7 +1196,7 @@ function TabUebersicht({
           action.color === 'purple' ? 'border-purple-800/50 bg-purple-500/5' :
           action.color === 'green' ? 'border-green-800/50 bg-green-500/5' :
           action.color === 'yellow' ? 'border-yellow-800/50 bg-yellow-500/5' :
-          'border-blue-800/50 bg-blue-500/5'
+          'border-[#1E3A5F]/50 bg-[#4573A2]/5'
         }`}>
           <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Naechste Aktion</p>
           <p className={`text-base font-semibold ${
@@ -1205,7 +1205,7 @@ function TabUebersicht({
             action.color === 'purple' ? 'text-purple-400' :
             action.color === 'green' ? 'text-green-400' :
             action.color === 'yellow' ? 'text-yellow-400' :
-            'text-blue-400'
+            'text-[#7BA3CC]'
           }`}>{action.label}</p>
           <p className="text-sm text-gray-500 mt-1">{action.desc}</p>
         </div>
@@ -1276,7 +1276,7 @@ function TabUebersicht({
             </p>
           )}
           {fall.kennzeichen && (
-            <span className="inline-block bg-blue-50 text-blue-300 text-sm font-mono font-medium px-3 py-1 rounded-lg mb-2">
+            <span className="inline-block bg-[#4573A2]/5 text-[#7BA3CC] text-sm font-mono font-medium px-3 py-1 rounded-lg mb-2">
               {fall.kennzeichen}
             </span>
           )}
@@ -1376,7 +1376,7 @@ function TabUebersicht({
           </div>
           <div className="border-t border-gray-200/50 mt-2 pt-2 grid grid-cols-2 gap-3">
             <InfoRow label="Mietwagen genutzt" value={
-              (fall as Record<string, unknown>).mietwagen_genutzt ? <span className="text-blue-400">Ja</span> : <span className="text-gray-500">Nein</span>
+              (fall as Record<string, unknown>).mietwagen_genutzt ? <span className="text-[#7BA3CC]">Ja</span> : <span className="text-gray-500">Nein</span>
             } />
             <InfoRow label="Mietwagen-Kosten" value={fmtCurrency((fall as Record<string, unknown>).mietwagen_kosten as number | null)} />
           </div>
@@ -1464,7 +1464,7 @@ function TabDokumente({
   const statusColors: Record<string, { badge: string; color: string }> = {
     ausstehend: { badge: 'red', color: 'text-red-400' },
     hochgeladen: { badge: 'green', color: 'text-green-400' },
-    geprueft: { badge: 'blue', color: 'text-blue-400' },
+    geprueft: { badge: 'blue', color: 'text-[#7BA3CC]' },
   }
 
   return (
@@ -1494,7 +1494,7 @@ function TabDokumente({
                   </div>
                   <Badge color={sc.badge}>{dok.status}</Badge>
                   {dok.dokument_url && (
-                    <a href={dok.dokument_url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300">
+                    <a href={dok.dokument_url} target="_blank" rel="noopener noreferrer" className="text-[#7BA3CC] hover:text-[#7BA3CC]">
                       <ExternalLinkIcon className="w-4 h-4" />
                     </a>
                   )}
@@ -1513,7 +1513,7 @@ function TabDokumente({
           {gutachtenDoks.map((d) => (
             <a key={d.id} href={d.datei_url} target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-100/30 border border-gray-200 hover:border-gray-300 transition-colors">
-              <FileTextIcon className="w-5 h-5 text-blue-400" />
+              <FileTextIcon className="w-5 h-5 text-[#7BA3CC]" />
               <span className="text-sm text-gray-800">{d.datei_name ?? 'Gutachten'}</span>
               <span className="text-xs text-gray-400 ml-auto">{fmt(d.created_at)}</span>
             </a>
@@ -1524,9 +1524,9 @@ function TabDokumente({
       {fall.filmcheck_ok && (
         <Section title="Kanzlei-Paket">
           <a href={`/api/pdf/kanzlei-paket/${fall.id}`} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/5 border border-blue-800/30 hover:border-blue-700/50 transition-colors">
-            <FileTextIcon className="w-5 h-5 text-blue-400" />
-            <span className="text-sm text-blue-300">Kanzlei-Paket PDF herunterladen</span>
+            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#4573A2]/5 border border-[#1E3A5F]/30 hover:border-[#1E3A5F] transition-colors">
+            <FileTextIcon className="w-5 h-5 text-[#7BA3CC]" />
+            <span className="text-sm text-[#7BA3CC]">Kanzlei-Paket PDF herunterladen</span>
           </a>
         </Section>
       )}
@@ -1561,7 +1561,7 @@ function FileUploadButton({ loading, onFile }: { loading: boolean; onFile: (f: F
   return (
     <>
       <button onClick={() => ref.current?.click()} disabled={loading}
-        className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium disabled:opacity-40 transition-colors">
+        className="px-3 py-1.5 rounded-lg bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-xs font-medium disabled:opacity-40 transition-colors">
         {loading ? '...' : <UploadIcon className="w-3.5 h-3.5" />}
       </button>
       <input ref={ref} type="file" accept="image/*,.pdf"
@@ -1770,7 +1770,7 @@ function TabTimeline({
               {['notiz', 'anruf', 'email', 'whatsapp', 'system'].map((t) => (
                 <button key={t} onClick={() => setNewTyp(t)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    newTyp === t ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500 hover:text-gray-800'
+                    newTyp === t ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-gray-500 hover:text-gray-800'
                   }`}>
                   {t}
                 </button>
@@ -1789,7 +1789,7 @@ function TabTimeline({
               <option value="anruf">Anruf</option>
             </select>
             <button onClick={handleAdd} disabled={saving || !newTitel.trim()}
-              className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold disabled:opacity-40 transition-all">
+              className="w-full py-3 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold disabled:opacity-40 transition-all">
               {saving ? 'Speichere ...' : 'Hinzufuegen'}
             </button>
           </div>
@@ -2075,7 +2075,7 @@ function TabQcPruefung({
         <div className="mb-4">
           <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all ${allChecked ? 'bg-green-500' : 'bg-blue-500'}`}
+              className={`h-full rounded-full transition-all ${allChecked ? 'bg-green-500' : 'bg-[#4573A2]'}`}
               style={{ width: `${(checkedCount / totalCount) * 100}%` }}
             />
           </div>
@@ -2104,7 +2104,7 @@ function TabQcPruefung({
                     {item.label}
                   </span>
                   {autoDefaults[item.key] !== undefined && autoDefaults[item.key] && (
-                    <span className="text-[10px] uppercase tracking-wider text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded">auto</span>
+                    <span className="text-[10px] uppercase tracking-wider text-[#4573A2] bg-[#4573A2]/10 px-1.5 py-0.5 rounded">auto</span>
                   )}
                 </div>
                 <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
@@ -2281,22 +2281,22 @@ function TabKanzlei({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
           <div>
             <label className="text-gray-500 text-xs block mb-1">Name</label>
-            <input value={kName} onChange={e => setKName(e.target.value)} placeholder="z.B. RA Dr. Müller" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+            <input value={kName} onChange={e => setKName(e.target.value)} placeholder="z.B. RA Dr. Müller" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" />
           </div>
           <div>
             <label className="text-gray-500 text-xs block mb-1">Position</label>
-            <input value={kPosition} onChange={e => setKPosition(e.target.value)} placeholder="z.B. Rechtsanwalt" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+            <input value={kPosition} onChange={e => setKPosition(e.target.value)} placeholder="z.B. Rechtsanwalt" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" />
           </div>
           <div>
             <label className="text-gray-500 text-xs block mb-1">E-Mail</label>
-            <input value={kEmail} onChange={e => setKEmail(e.target.value)} type="email" placeholder="anwalt@kanzlei.de" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+            <input value={kEmail} onChange={e => setKEmail(e.target.value)} type="email" placeholder="anwalt@kanzlei.de" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" />
           </div>
           <div>
             <label className="text-gray-500 text-xs block mb-1">Telefon</label>
-            <input value={kTelefon} onChange={e => setKTelefon(e.target.value)} type="tel" placeholder="+49 221 12345" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+            <input value={kTelefon} onChange={e => setKTelefon(e.target.value)} type="tel" placeholder="+49 221 12345" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" />
           </div>
         </div>
-        <button onClick={handleSaveKanzlei} disabled={kSaving} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-40">
+        <button onClick={handleSaveKanzlei} disabled={kSaving} className="px-4 py-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-40">
           {kSaving ? 'Speichert...' : 'Speichern'}
         </button>
       </Section>
@@ -2344,7 +2344,7 @@ function TabKanzlei({
                     className={`h-full rounded-full transition-all ${
                       vsFristAbgelaufen ? 'bg-red-500' :
                       (vsTage ?? 0) > 10 ? 'bg-orange-500' :
-                      'bg-blue-500'
+                      'bg-[#4573A2]'
                     }`}
                     style={{ width: `${Math.min(((vsTage ?? 0) / 14) * 100, 100)}%` }}
                   />
@@ -2352,7 +2352,7 @@ function TabKanzlei({
                 <span className={`text-sm font-semibold tabular-nums ${
                   vsFristAbgelaufen ? 'text-red-400' :
                   (vsTage ?? 0) > 10 ? 'text-orange-400' :
-                  'text-blue-400'
+                  'text-[#7BA3CC]'
                 }`}>
                   Tag {vsTage} / 14
                 </span>
@@ -2515,7 +2515,7 @@ function TabChat({
 
   function rolleColor(rolle: string | null) {
     const colors: Record<string, string> = {
-      admin: 'bg-blue-500/10 text-blue-400 border-blue-800/30',
+      admin: 'bg-[#4573A2]/10 text-[#7BA3CC] border-[#1E3A5F]/30',
       kunde: 'bg-emerald-500/10 text-emerald-400 border-emerald-800/30',
       gutachter: 'bg-purple-500/10 text-purple-400 border-purple-800/30',
       kanzlei: 'bg-orange-500/10 text-orange-400 border-orange-800/30',
@@ -2600,7 +2600,7 @@ function TabChat({
                         {/* Bubble */}
                         <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                           isOwnSide
-                            ? 'bg-blue-600/20 text-blue-100 border border-blue-800/30 rounded-tr-md'
+                            ? 'bg-[#1E3A5F]/20 text-[#7BA3CC] border border-[#1E3A5F]/30 rounded-tr-md'
                             : 'bg-gray-100/60 text-gray-800 border border-gray-300/50 rounded-tl-md'
                         }`}>
                           <p className="whitespace-pre-wrap break-words">{msg.nachricht}</p>
@@ -2609,7 +2609,7 @@ function TabChat({
                               href={msg.anhang_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 mt-2 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                              className="inline-flex items-center gap-1.5 mt-2 text-xs text-[#7BA3CC] hover:text-[#7BA3CC] transition-colors"
                             >
                               <FileTextIcon className="w-3.5 h-3.5" />
                               Anhang oeffnen
@@ -2641,7 +2641,7 @@ function TabChat({
               <button
                 onClick={handleSend}
                 disabled={sending || !text.trim()}
-                className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40 transition-all shrink-0"
+                className="px-4 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white disabled:opacity-40 transition-all shrink-0"
               >
                 <SendIcon className="w-4 h-4" />
               </button>
@@ -2793,7 +2793,7 @@ function TabAbrechnung({ fall, forderungspositionen, onRefresh }: { fall: Fall; 
               )
               setShowZahlung(true)
             }}
-              className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
+              className="bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
               Zahlungseingang erfassen
             </button>
             <p className="text-gray-400 text-[10px] mt-1">Noch kein Zahlungseingang dokumentiert</p>
@@ -2868,7 +2868,7 @@ function TabAbrechnung({ fall, forderungspositionen, onRefresh }: { fall: Fall; 
                   onRefresh()
                 } catch { /* */ }
                 setZSaving(false)
-              }} className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-lg">
+              }} className="flex-1 bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-lg">
                 {zSaving ? 'Speichert...' : 'Zahlungseingang speichern'}
               </button>
               <button onClick={() => setShowZahlung(false)} className="px-4 text-gray-500 text-sm">Abbrechen</button>
@@ -2953,7 +2953,7 @@ function TabTasks({
         </h3>
         <button
           onClick={() => setAdding(!adding)}
-          className="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg transition-colors"
+          className="text-xs bg-[#1E3A5F] hover:bg-[#4573A2] text-white px-3 py-1.5 rounded-lg transition-colors"
         >
           + Task erstellen
         </button>
@@ -2967,26 +2967,26 @@ function TabTasks({
             value={titel}
             onChange={e => setTitel(e.target.value)}
             placeholder="Task-Titel..."
-            className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
           />
           <textarea
             value={beschreibung}
             onChange={e => setBeschreibung(e.target.value)}
             placeholder="Beschreibung (optional)"
             rows={2}
-            className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+            className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2] resize-none"
           />
           <div className="flex gap-3">
             <input
               type="datetime-local"
               value={deadline}
               onChange={e => setDeadline(e.target.value)}
-              className="bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
             />
             <select
               value={prio}
               onChange={e => setPrio(e.target.value)}
-              className="bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
             >
               <option value="normal">Normal</option>
               <option value="dringend">Dringend</option>
@@ -2995,7 +2995,7 @@ function TabTasks({
             <select
               value={zuweisungId}
               onChange={e => setZuweisungId(e.target.value)}
-              className="bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
             >
               <option value="">Zuweisen an...</option>
               {mitarbeiter.map(m => <option key={m.id} value={m.id}>{m.name} ({m.rolle})</option>)}
@@ -3005,7 +3005,7 @@ function TabTasks({
             <button
               onClick={handleCreate}
               disabled={saving || !titel.trim()}
-              className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-gray-900 text-sm px-4 py-2 rounded-xl transition-colors"
+              className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-gray-900 text-sm px-4 py-2 rounded-xl transition-colors"
             >
               {saving ? 'Erstellt...' : 'Erstellen'}
             </button>
@@ -3086,7 +3086,7 @@ function TaskCard({
         className={`shrink-0 mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
           isErledigt
             ? 'bg-emerald-600 border-emerald-600 text-white'
-            : 'border-gray-300 hover:border-blue-500'
+            : 'border-gray-300 hover:border-[#4573A2]'
         }`}
       >
         {isErledigt && <span className="text-[10px]">✓</span>}
@@ -3151,7 +3151,7 @@ function TermineKarte({ termine, fallId, onOpenModal, onRefresh }: { termine: Te
       <div className="space-y-3">
         {/* Button: Termin vereinbaren */}
         <button onClick={onOpenModal}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-colors">
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium rounded-xl transition-colors">
           <ClockIcon className="w-4 h-4" /> Termin vereinbaren
         </button>
 
@@ -3161,14 +3161,14 @@ function TermineKarte({ termine, fallId, onOpenModal, onRefresh }: { termine: Te
           const isToday = d.toDateString() === now.toDateString()
           const isOverdue = d < now && !isToday
           return (
-            <div className={`rounded-xl p-4 border ${isToday ? 'border-green-600 bg-green-50/30' : isOverdue ? 'border-red-600 bg-red-50/30' : 'border-blue-600/40 bg-blue-50/20'}`}>
+            <div className={`rounded-xl p-4 border ${isToday ? 'border-green-600 bg-green-50/30' : isOverdue ? 'border-red-600 bg-red-50/30' : 'border-[#1E3A5F]/40 bg-[#4573A2]/10'}`}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     {nextTermin.typ === 'video-call' ? (
                       <span className="text-purple-400 text-xs font-medium px-2 py-0.5 rounded-full bg-purple-500/20">Video-Call</span>
                     ) : (
-                      <span className="text-blue-400 text-xs font-medium px-2 py-0.5 rounded-full bg-blue-500/20">Telefonat</span>
+                      <span className="text-[#7BA3CC] text-xs font-medium px-2 py-0.5 rounded-full bg-[#4573A2]/20">Telefonat</span>
                     )}
                     {isToday && <span className="bg-green-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">HEUTE</span>}
                     {isOverdue && <span className="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">UEBERFAELLIG</span>}
@@ -3267,7 +3267,7 @@ function TerminModal({ fallId, onClose, onRefresh }: { fallId: string; onClose: 
             <label className="text-xs text-gray-500 font-medium block mb-1">Typ</label>
             <div className="flex gap-2">
               <button onClick={() => setTyp('telefonat')}
-                className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${typ === 'telefonat' ? 'bg-blue-600/20 border-blue-600 text-blue-400' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>
+                className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${typ === 'telefonat' ? 'bg-[#1E3A5F]/20 border-[#1E3A5F] text-[#7BA3CC]' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>
                 Telefonat
               </button>
               <button onClick={() => setTyp('video-call')}
@@ -3281,7 +3281,7 @@ function TerminModal({ fallId, onClose, onRefresh }: { fallId: string; onClose: 
           <div>
             <label className="text-xs text-gray-500 font-medium block mb-1">Datum & Uhrzeit</label>
             <input type="datetime-local" value={datum} onChange={e => setDatum(e.target.value)}
-              className="w-full bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="w-full bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2]" />
           </div>
 
           {/* Dauer */}
@@ -3290,7 +3290,7 @@ function TerminModal({ fallId, onClose, onRefresh }: { fallId: string; onClose: 
             <div className="flex gap-2">
               {[15, 30, 60].map(d => (
                 <button key={d} onClick={() => setDauer(d)}
-                  className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${dauer === d ? 'bg-blue-600/20 border-blue-600 text-blue-400' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>
+                  className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${dauer === d ? 'bg-[#1E3A5F]/20 border-[#1E3A5F] text-[#7BA3CC]' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>
                   {d} Min
                 </button>
               ))}
@@ -3301,14 +3301,14 @@ function TerminModal({ fallId, onClose, onRefresh }: { fallId: string; onClose: 
           <div>
             <label className="text-xs text-gray-500 font-medium block mb-1">Betreff</label>
             <input type="text" value={betreff} onChange={e => setBetreff(e.target.value)} placeholder="z.B. Rueckfragen zum Gutachten"
-              className="w-full bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-gray-400" />
+              className="w-full bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2] placeholder:text-gray-400" />
           </div>
 
           {/* Notiz */}
           <div>
             <label className="text-xs text-gray-500 font-medium block mb-1">Notiz (optional)</label>
             <textarea value={notiz} onChange={e => setNotiz(e.target.value)} rows={2} placeholder="Interne Notiz..."
-              className="w-full bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-gray-400 resize-y" />
+              className="w-full bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2] placeholder:text-gray-400 resize-y" />
           </div>
 
           {typ === 'video-call' && (
@@ -3318,7 +3318,7 @@ function TerminModal({ fallId, onClose, onRefresh }: { fallId: string; onClose: 
           )}
 
           <button onClick={handleSave} disabled={saving || !datum || !betreff}
-            className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50">
+            className="w-full py-2.5 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50">
             {saving ? 'Speichert...' : 'Termin erstellen'}
           </button>
         </div>
@@ -3399,25 +3399,25 @@ function NaechsterSchrittBanner({ fall, tasks: allTasks, onAction }: { fall: Fal
 
   return (
     <div className={`mb-4 rounded-xl px-4 py-3 flex items-center gap-4 ${
-      showRed ? 'bg-red-50 border border-red-200' : 'bg-blue-50 border border-blue-200'
+      showRed ? 'bg-red-50 border border-red-200' : 'bg-[#4573A2]/5 border border-[#4573A2]/20'
     }`}>
       <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
-        showRed ? 'bg-red-100' : 'bg-blue-100'
+        showRed ? 'bg-red-100' : 'bg-[#4573A2]/10'
       }`}>
         {showRed
           ? <AlertTriangleIcon className="w-4.5 h-4.5 text-red-600" />
-          : <ClockIcon className="w-4.5 h-4.5 text-blue-600" />
+          : <ClockIcon className="w-4.5 h-4.5 text-[#4573A2]" />
         }
       </div>
       <div className="flex-1 min-w-0">
-        <p className={`text-sm font-semibold ${showRed ? 'text-red-800' : 'text-blue-800'}`}>
+        <p className={`text-sm font-semibold ${showRed ? 'text-red-800' : 'text-[#1E3A5F]'}`}>
           {titel}
         </p>
-        {beschreibung && <p className={`text-xs mt-0.5 ${showRed ? 'text-red-600' : 'text-blue-600'}`}>{beschreibung}</p>}
+        {beschreibung && <p className={`text-xs mt-0.5 ${showRed ? 'text-red-600' : 'text-[#4573A2]'}`}>{beschreibung}</p>}
       </div>
       {deadlineText && (
         <span className={`text-xs font-semibold px-2 py-1 rounded-lg shrink-0 ${
-          isOverdue ? 'bg-red-200 text-red-700' : 'bg-blue-200 text-blue-700'
+          isOverdue ? 'bg-red-200 text-red-700' : 'bg-[#4573A2]/20 text-[#1E3A5F]'
         }`}>
           {deadlineText}
         </span>
@@ -3425,14 +3425,14 @@ function NaechsterSchrittBanner({ fall, tasks: allTasks, onAction }: { fall: Fal
       {onAction && nextTask?.task_code && (
         <button onClick={() => onAction(TASK_TAB_MAP[nextTask.task_code ?? ''] ?? phaseAction?.tab ?? 'uebersicht')}
           className={`text-xs font-medium px-3 py-1.5 rounded-lg shrink-0 transition-colors ${
-            showRed ? 'bg-red-600 hover:bg-red-500 text-white' : 'bg-blue-600 hover:bg-blue-500 text-white'
+            showRed ? 'bg-red-600 hover:bg-red-500 text-white' : 'bg-[#1E3A5F] hover:bg-[#4573A2] text-white'
           }`}>
           Jetzt erledigen
         </button>
       )}
       {onAction && !nextTask?.task_code && phaseAction?.tab && (
         <button onClick={() => onAction(phaseAction.tab!)}
-          className="text-xs font-medium px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white shrink-0 transition-colors">
+          className="text-xs font-medium px-3 py-1.5 rounded-lg bg-[#1E3A5F] hover:bg-[#4573A2] text-white shrink-0 transition-colors">
           Öffnen
         </button>
       )}

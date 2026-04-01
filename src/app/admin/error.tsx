@@ -23,7 +23,7 @@ export default function AdminError({
           )}
           <button
             onClick={reset}
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-6 py-2.5 rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium px-6 py-2.5 rounded-xl transition-colors"
           >
             <RefreshCcwIcon className="w-4 h-4" />
             Seite neu laden

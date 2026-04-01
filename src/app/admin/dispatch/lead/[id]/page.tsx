@@ -69,7 +69,7 @@ export default async function LeadDetailPage({
           </div>
           <div className="flex flex-wrap items-center gap-3 mt-1 text-sm">
             {lead.telefon && (
-              <a href={`tel:${lead.telefon}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+              <a href={`tel:${lead.telefon}`} className="text-[#7BA3CC] hover:text-[#7BA3CC] transition-colors">
                 {lead.telefon}
               </a>
             )}
@@ -184,7 +184,7 @@ export default async function LeadDetailPage({
                   className="flex items-center justify-between px-4 py-3 rounded-xl bg-gray-100/50 hover:bg-gray-100 transition-colors"
                 >
                   <div>
-                    <span className="text-blue-400 font-mono text-xs">
+                    <span className="text-[#7BA3CC] font-mono text-xs">
                       {fall.fall_nummer ?? fall.id.slice(0, 8)}
                     </span>
                     <span className="text-gray-500 text-xs ml-3">
@@ -233,9 +233,9 @@ function PhaseProgressBar({ phase }: { phase: string }) {
         {PHASES.map((p, i) => (
           <div key={p.key} className="flex-1 flex flex-col items-center gap-1">
             <div className={`w-full h-1.5 rounded-full ${
-              i <= currentIdx ? 'bg-blue-500' : 'bg-gray-100'
+              i <= currentIdx ? 'bg-[#4573A2]' : 'bg-gray-100'
             }`} />
-            <span className={`text-[9px] ${i <= currentIdx ? 'text-blue-400' : 'text-gray-400'}`}>
+            <span className={`text-[9px] ${i <= currentIdx ? 'text-[#7BA3CC]' : 'text-gray-400'}`}>
               {p.label}
             </span>
           </div>

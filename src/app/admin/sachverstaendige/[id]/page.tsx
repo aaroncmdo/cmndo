@@ -84,7 +84,7 @@ export default async function SvDetailPage({
                   ? 'bg-red-500'
                   : (sv.offene_faelle ?? 0) / sv.max_faelle_monat > 0.5
                   ? 'bg-yellow-500'
-                  : 'bg-blue-500'
+                  : 'bg-[#4573A2]'
               }`}
               style={{
                 width: `${Math.min(100, sv.max_faelle_monat > 0 ? ((sv.offene_faelle ?? 0) / sv.max_faelle_monat) * 100 : 0)}%`,
@@ -125,7 +125,7 @@ export default async function SvDetailPage({
                   className="flex items-center justify-between px-4 py-3 rounded-xl bg-gray-100/50 hover:bg-gray-100 transition-colors"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-blue-400 font-mono text-xs shrink-0">
+                    <span className="text-[#7BA3CC] font-mono text-xs shrink-0">
                       {fall.fall_nummer ?? fall.id.slice(0, 8)}
                     </span>
                     <span className="text-gray-500 text-xs truncate">

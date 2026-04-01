@@ -126,7 +126,7 @@ export default function LogoUpload({ svId, currentLogoUrl, currentPrimary, curre
         )}
         <div>
           <button onClick={() => fileRef.current?.click()} disabled={uploading}
-            className="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg disabled:opacity-50">
+            className="text-xs bg-[#1E3A5F] hover:bg-[#4573A2] text-white px-3 py-1.5 rounded-lg disabled:opacity-50">
             {uploading ? 'Hochladen...' : logoUrl ? 'Logo ändern' : 'Logo hochladen'}
           </button>
           <p className="text-[10px] text-gray-400 mt-0.5">PNG, JPG, SVG · Max 2MB</p>
@@ -148,7 +148,7 @@ export default function LogoUpload({ svId, currentLogoUrl, currentPrimary, curre
             className="w-7 h-7 rounded border border-gray-300 cursor-pointer p-0" />
         </div>
         <button onClick={handleColorSave} disabled={saving}
-          className="text-[10px] text-blue-600 hover:text-blue-500 font-medium ml-auto">
+          className="text-[10px] text-[#4573A2] hover:text-[#4573A2] font-medium ml-auto">
           {saving ? '...' : 'Speichern'}
         </button>
         <button onClick={handleReset} className="text-[10px] text-gray-400 hover:text-gray-600">Reset</button>

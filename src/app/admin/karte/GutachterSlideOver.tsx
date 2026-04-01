@@ -131,7 +131,7 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
         <div className="flex gap-1 px-5 py-3">
           {STEPS.map((s, i) => (
             <div key={s} className="flex-1">
-              <div className={`h-1 rounded-full ${i <= step ? 'bg-blue-500' : 'bg-gray-100'}`} />
+              <div className={`h-1 rounded-full ${i <= step ? 'bg-[#4573A2]' : 'bg-gray-100'}`} />
               <span className="text-[9px] mt-0.5 block" style={{ color: i === step ? '#93bbfc' : 'rgba(255,255,255,0.2)' }}>{s}</span>
             </div>
           ))}
@@ -146,7 +146,7 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
               </div>
               <h3 className="text-gray-900 font-semibold text-lg mb-2">Gutachter angelegt</h3>
               <p className="text-gray-500 text-sm mb-1">{success.email}</p>
-              <p className="text-gray-500 text-xs mb-4">Einmalpasswort: <code className="text-blue-400">{success.password}</code></p>
+              <p className="text-gray-500 text-xs mb-4">Einmalpasswort: <code className="text-[#7BA3CC]">{success.password}</code></p>
               <button onClick={handleClose} className="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-900" style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}>
                 Schließen
               </button>
@@ -172,7 +172,7 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
                   <p className="glass-label mb-3">Gutachter-Typ</p>
                   {TYPEN.map(t => (
                     <button key={t.key} onClick={() => setTyp(t.key)}
-                      className={`w-full text-left p-4 rounded-xl border transition-colors ${typ === t.key ? 'border-blue-500/40' : 'border-gray-200 hover:border-gray-300'}`}
+                      className={`w-full text-left p-4 rounded-xl border transition-colors ${typ === t.key ? 'border-[#4573A2]/40' : 'border-gray-200 hover:border-gray-300'}`}
                       style={typ === t.key ? { background: 'rgba(59,130,246,0.08)' } : { background: '#ffffff' }}>
                       <div className="flex items-center gap-3">
                         <div className="w-3 h-3 rounded-full" style={{ background: t.color }} />
@@ -193,7 +193,7 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
                     <GooglePlaceAutocomplete
                       defaultValue={adresse}
                       placeholder="Strasse + Hausnummer, PLZ Ort"
-                      className="w-full bg-white border border-gray-300 px-3 py-2.5 text-sm text-gray-900 rounded-xl focus:outline-none focus:border-blue-500 transition-colors"
+                      className="w-full bg-white border border-gray-300 px-3 py-2.5 text-sm text-gray-900 rounded-xl focus:outline-none focus:border-[#4573A2] transition-colors"
                       onSelect={(result: PlaceResult) => {
                         setAdresse(result.adresse)
                         setPlz(result.plz)
@@ -222,11 +222,11 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
                   <p className="glass-label mb-3">Paket wählen</p>
                   {PAKETE.map(p => (
                     <button key={p.key} onClick={() => handlePaketChange(p.key)}
-                      className={`w-full text-left p-4 rounded-xl border transition-colors ${paket === p.key ? 'border-blue-500/40' : 'border-gray-200 hover:border-gray-300'}`}
+                      className={`w-full text-left p-4 rounded-xl border transition-colors ${paket === p.key ? 'border-[#4573A2]/40' : 'border-gray-200 hover:border-gray-300'}`}
                       style={paket === p.key ? { background: 'rgba(59,130,246,0.08)' } : { background: '#ffffff' }}>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-900 font-medium text-sm">{p.label}</span>
-                        <span className="text-blue-400 font-semibold text-sm">{p.preis.toLocaleString('de-DE')} €</span>
+                        <span className="text-[#7BA3CC] font-semibold text-sm">{p.preis.toLocaleString('de-DE')} €</span>
                       </div>
                       <p className="text-gray-500 text-xs mt-1">{p.faelle} Fälle · {p.km} km Radius</p>
                     </button>
@@ -242,7 +242,7 @@ export default function GutachterSlideOver({ open, onClose, onLocationChange }: 
                     {QUALIFIKATIONEN.map(q => (
                       <button key={q} onClick={() => setQuals(prev => prev.includes(q) ? prev.filter(x => x !== q) : [...prev, q])}
                         className={`text-left px-3 py-2.5 rounded-xl text-xs font-medium border transition-colors ${
-                          quals.includes(q) ? 'border-blue-500/40 text-blue-300' : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                          quals.includes(q) ? 'border-[#4573A2]/40 text-[#7BA3CC]' : 'border-gray-200 text-gray-500 hover:border-gray-300'
                         }`}
                         style={quals.includes(q) ? { background: 'rgba(59,130,246,0.08)' } : { background: '#ffffff' }}>
                         {q}

@@ -197,7 +197,7 @@ export default function KundeProfilClient({ profile }: { profile: Profile }) {
                     <button
                       onClick={handleSendPhoneCode}
                       disabled={loading || !phone}
-                      className="flex-1 py-2 rounded-xl text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white transition-colors disabled:opacity-40"
+                      className="flex-1 py-2 rounded-xl text-sm font-medium bg-[#1E3A5F] hover:bg-[#4573A2] text-white transition-colors disabled:opacity-40"
                     >
                       {loading ? 'Sende...' : 'Code senden'}
                     </button>
@@ -227,7 +227,7 @@ export default function KundeProfilClient({ profile }: { profile: Profile }) {
                     <button
                       onClick={handleVerifyPhone}
                       disabled={loading || otp.length < 6}
-                      className="flex-1 py-2 rounded-xl text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white transition-colors disabled:opacity-40"
+                      className="flex-1 py-2 rounded-xl text-sm font-medium bg-[#1E3A5F] hover:bg-[#4573A2] text-white transition-colors disabled:opacity-40"
                     >
                       {loading ? 'Pruefe...' : 'Bestaetigen'}
                     </button>

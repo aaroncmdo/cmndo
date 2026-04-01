@@ -107,7 +107,7 @@ export default function ProfilClient({
           {!editing && (
             <button
               onClick={() => { setEditing(true); setSuccess(false) }}
-              className="px-4 py-2 text-xs font-medium text-blue-400 hover:text-blue-300 hover:bg-gray-100 rounded-xl transition-colors"
+              className="px-4 py-2 text-xs font-medium text-[#7BA3CC] hover:text-[#7BA3CC] hover:bg-gray-100 rounded-xl transition-colors"
             >
               Bearbeiten
             </button>
@@ -151,7 +151,7 @@ export default function ProfilClient({
                           defaultValue={standort.adresse}
                           placeholder="Büro-/Wohnadresse eingeben"
                           onSelect={onPlaceSelect}
-                          className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                          className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
                         />
                       ) : (
                         <input
@@ -159,7 +159,7 @@ export default function ProfilClient({
                           value={standort.adresse}
                           onChange={e => setStandort(prev => ({ ...prev, adresse: e.target.value }))}
                           placeholder="Büro-/Wohnadresse eingeben"
-                          className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                          className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
                         />
                       )}
                       {standort.lat != null && (
@@ -177,7 +177,7 @@ export default function ProfilClient({
                         type="checkbox"
                         name="verfuegbar"
                         defaultChecked={sv.ist_aktiv}
-                        className="w-4 h-4 rounded bg-gray-100 border-gray-300 text-blue-600 focus:ring-blue-600 focus:ring-offset-0"
+                        className="w-4 h-4 rounded bg-gray-100 border-gray-300 text-[#4573A2] focus:ring-[#1E3A5F] focus:ring-offset-0"
                       />
                       <span className="text-gray-700 text-sm">Neue Aufträge annehmen</span>
                     </label>
@@ -212,7 +212,7 @@ export default function ProfilClient({
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-colors disabled:opacity-40"
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[#1E3A5F] hover:bg-[#4573A2] text-white transition-colors disabled:opacity-40"
                 >
                   {saving ? 'Wird gespeichert...' : 'Speichern'}
                 </button>
@@ -362,14 +362,14 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
             value={ablehnungsgrund}
             onChange={e => setAblehnungsgrund(e.target.value)}
             placeholder="Grund (optional)"
-            className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-600"
+            className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#1E3A5F]"
           />
           <input
             type="datetime-local"
             value={gegenvorschlag}
             onChange={e => setGegenvorschlag(e.target.value)}
             required
-            className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-600"
+            className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#1E3A5F]"
           />
           <p className="text-gray-500 text-xs">Gegenvorschlag ist Pflicht</p>
           <div className="flex gap-2">
@@ -424,12 +424,12 @@ function QualifikationenSection({ svId, initialQualifikationen }: { svId: string
             disabled={saving}
             className={`w-full flex items-center gap-3 text-left px-4 py-3 rounded-xl border text-sm transition-all ${
               active
-                ? 'border-blue-500/50 bg-blue-500/10 text-blue-400'
+                ? 'border-[#4573A2]/50 bg-[#4573A2]/10 text-[#7BA3CC]'
                 : 'border-gray-300 bg-gray-100/50 text-gray-500 hover:border-gray-300'
             }`}
           >
             <div className={`w-4 h-4 rounded border flex items-center justify-center ${
-              active ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
+              active ? 'border-[#4573A2] bg-[#4573A2]' : 'border-gray-300'
             }`}>
               {active && (
                 <svg className="w-3 h-3 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -466,7 +466,7 @@ function EditRow({ label, name, defaultValue, type = 'text', placeholder }: {
         name={name}
         defaultValue={defaultValue}
         placeholder={placeholder}
-        className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
+        className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
       />
     </div>
   )

@@ -37,7 +37,7 @@ export default function NeuSvForm() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-colors"
+        className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-[#1E3A5F] hover:bg-[#4573A2] text-white transition-colors"
       >
         + Neuer Sachverständiger
       </button>
@@ -85,7 +85,7 @@ export default function NeuSvForm() {
             <label className="block text-gray-500 text-sm mb-1.5">Vorname</label>
             <input
               name="vorname"
-              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               placeholder="Max"
             />
           </div>
@@ -93,7 +93,7 @@ export default function NeuSvForm() {
             <label className="block text-gray-500 text-sm mb-1.5">Nachname</label>
             <input
               name="nachname"
-              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               placeholder="Mustermann"
             />
           </div>
@@ -105,7 +105,7 @@ export default function NeuSvForm() {
             name="email"
             type="email"
             required
-            className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+            className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
             placeholder="sv@example.com"
           />
         </div>
@@ -115,7 +115,7 @@ export default function NeuSvForm() {
           <input
             name="telefon"
             type="tel"
-            className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+            className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
             placeholder="+49 ..."
           />
         </div>
@@ -126,7 +126,7 @@ export default function NeuSvForm() {
             <select
               name="paket"
               defaultValue="standard"
-              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
             >
               {PAKET_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -140,7 +140,7 @@ export default function NeuSvForm() {
               type="number"
               min="1"
               defaultValue="10"
-              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
             />
           </div>
         </div>
@@ -149,7 +149,7 @@ export default function NeuSvForm() {
           <label className="block text-gray-500 text-sm mb-1.5">Gebiet (PLZ, kommagetrennt)</label>
           <input
             name="gebiet_plz"
-            className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+            className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
             placeholder="10115, 10117, 10119 ..."
           />
         </div>
@@ -159,7 +159,7 @@ export default function NeuSvForm() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-blue-600 hover:bg-blue-500 text-white"
+          className="w-full py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-[#1E3A5F] hover:bg-[#4573A2] text-white"
         >
           {submitting ? 'Wird erstellt ...' : 'Sachverständiger anlegen'}
         </button>

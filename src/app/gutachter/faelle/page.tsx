@@ -17,9 +17,9 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 const STATUS_COLOR: Record<string, string> = {
-  'sv-zugewiesen': 'bg-blue-50 text-blue-300',
-  'sv-termin': 'bg-blue-900 text-blue-200',
-  besichtigung: 'bg-indigo-50 text-indigo-300',
+  'sv-zugewiesen': 'bg-[#4573A2]/5 text-[#7BA3CC]',
+  'sv-termin': 'bg-[#0D1B3E] text-[#7BA3CC]',
+  besichtigung: 'bg-[#4573A2]/5 text-[#7BA3CC]',
   'gutachten-eingegangen': 'bg-violet-50 text-violet-300',
   filmcheck: 'bg-yellow-50 text-yellow-300',
   'kanzlei-uebergeben': 'bg-green-50 text-green-300',
@@ -166,7 +166,7 @@ export default async function GutachterFaellePage({
                           <td className="px-4 py-3">
                             <Link
                               href={`/gutachter/fall/${fall.id}`}
-                              className="text-blue-400 hover:text-blue-300 font-mono text-xs"
+                              className="text-[#7BA3CC] hover:text-[#7BA3CC] font-mono text-xs"
                             >
                               {fall.fall_nummer ?? fall.id.slice(0, 8)}
                             </Link>
@@ -215,7 +215,7 @@ export default async function GutachterFaellePage({
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <span className="text-blue-400 font-mono text-xs">
+                        <span className="text-[#7BA3CC] font-mono text-xs">
                           {fall.fall_nummer ?? fall.id.slice(0, 8)}
                         </span>
                         <p className="text-gray-900 text-sm font-medium mt-0.5">{name}</p>

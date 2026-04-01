@@ -46,9 +46,9 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
         {stats.isDispatch ? (<>
           <KPI icon={<BarChart3Icon className="w-4 h-4 text-amber-400" />} label="Leads" value={stats.leadsTotal} />
           <KPI icon={<BriefcaseIcon className="w-4 h-4 text-green-400" />} label="Konvertiert" value={stats.leadsKonvertiert} />
-          <KPI icon={<BarChart3Icon className="w-4 h-4 text-blue-400" />} label="Conv. Rate" value={stats.leadsTotal > 0 ? `${Math.round((stats.leadsKonvertiert / stats.leadsTotal) * 100)}%` : '—'} />
+          <KPI icon={<BarChart3Icon className="w-4 h-4 text-[#7BA3CC]" />} label="Conv. Rate" value={stats.leadsTotal > 0 ? `${Math.round((stats.leadsKonvertiert / stats.leadsTotal) * 100)}%` : '—'} />
         </>) : (<>
-          <KPI icon={<BriefcaseIcon className="w-4 h-4 text-blue-400" />} label="Aktive Faelle" value={stats.aktiveFaelle} />
+          <KPI icon={<BriefcaseIcon className="w-4 h-4 text-[#7BA3CC]" />} label="Aktive Faelle" value={stats.aktiveFaelle} />
           <KPI icon={<BarChart3Icon className="w-4 h-4 text-green-400" />} label="Abgeschlossen" value={stats.abgeschlossen} />
           <KPI icon={<ClockIcon className="w-4 h-4 text-amber-400" />} label="Avg. Tage" value={stats.avgDays || '—'} />
         </>)}
@@ -100,7 +100,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="text-sm text-gray-500 mb-1 block">Kategorie</label>
-              <select name="kategorie" defaultValue={(m.kategorie as string) ?? ''} className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
+              <select name="kategorie" defaultValue={(m.kategorie as string) ?? ''} className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]">
                 <option value="">—</option><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="admin">Admin</option><option value="entwicklung">Entwicklung</option>
               </select>
             </div>
@@ -112,13 +112,13 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
             <Field label="Eingestellt am" name="eingestellt_am" type="date" defaultValue={(m.eingestellt_am as string) ?? ''} />
             <div>
               <label className="text-sm text-gray-500 mb-1 block">Aktiv</label>
-              <select name="aktiv" defaultValue={String(m.aktiv ?? true)} className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
+              <select name="aktiv" defaultValue={String(m.aktiv ?? true)} className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]">
                 <option value="true">Ja</option><option value="false">Nein</option>
               </select>
             </div>
           </div>
           {msg && <p className={`text-sm px-4 py-2 rounded-xl ${msg === 'Gespeichert' ? 'bg-green-50 text-green-300' : 'bg-red-50 text-red-300'}`}>{msg}</p>}
-          <button type="submit" disabled={saving} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 text-gray-900 text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
+          <button type="submit" disabled={saving} className="flex items-center gap-2 bg-[#1E3A5F] hover:bg-[#4573A2] disabled:bg-zinc-700 text-gray-900 text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
             <SaveIcon className="w-4 h-4" />{saving ? 'Speichere...' : 'Speichern'}
           </button>
         </form>
@@ -140,7 +140,7 @@ function Field({ label, name, defaultValue, type = 'text' }: { label: string; na
   return (
     <div>
       <label className="text-sm text-gray-500 mb-1 block">{label}</label>
-      <input name={name} type={type} defaultValue={defaultValue} step={type === 'number' ? 'any' : undefined} className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600" />
+      <input name={name} type={type} defaultValue={defaultValue} step={type === 'number' ? 'any' : undefined} className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" />
     </div>
   )
 }

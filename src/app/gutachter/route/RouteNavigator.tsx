@@ -183,7 +183,7 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
             <div className="flex justify-between text-sm"><span className="text-gray-500">Übersprungen</span><span className="text-amber-400 font-semibold">{skippedCount}</span></div>
             <div className="flex justify-between text-sm"><span className="text-gray-500">Fotos hochgeladen</span><span className="text-gray-900 font-semibold">{photos.length}</span></div>
           </div>
-          <button onClick={handleEnd} className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-2xl transition-colors">
+          <button onClick={handleEnd} className="w-full py-3.5 bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold rounded-2xl transition-colors">
             Zurück zum Dashboard
           </button>
         </div>
@@ -203,7 +203,7 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
                 <div className={`w-3 h-3 rounded-full border-2 shrink-0 ${
                   statuses[i] === 'done' ? 'bg-green-500 border-green-500' :
                   statuses[i] === 'skipped' ? 'bg-red-500 border-red-500' :
-                  statuses[i] === 'active' ? 'bg-blue-500 border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]' :
+                  statuses[i] === 'active' ? 'bg-[#4573A2] border-[#4573A2] shadow-[0_0_8px_rgba(59,130,246,0.6)]' :
                   'bg-gray-100 border-gray-300'
                 }`} />
                 {i < stops.length - 1 && <div className={`flex-1 h-0.5 ${statuses[i] === 'done' || statuses[i] === 'skipped' ? 'bg-green-500/40' : 'bg-gray-100'}`} />}
@@ -282,7 +282,7 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
               href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(currentStop.address)}&travelmode=driving`}
               target="_blank"
               rel="noopener noreferrer"
-              className="absolute bottom-4 right-4 flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl shadow-lg"
+              className="absolute bottom-4 right-4 flex items-center gap-2 px-4 py-2.5 bg-[#1E3A5F] text-white text-sm font-medium rounded-xl shadow-lg"
             >
               <NavigationIcon className="w-4 h-4" />
               Navigation
@@ -338,7 +338,7 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <button onClick={() => fileRef.current?.click()}
                     className="flex flex-col items-center gap-2 py-4 bg-gray-100 hover:bg-gray-200 rounded-2xl transition-colors min-h-[56px]">
-                    <CameraIcon className="w-6 h-6 text-blue-400" />
+                    <CameraIcon className="w-6 h-6 text-[#7BA3CC]" />
                     <span className="text-gray-700 text-xs font-medium">Foto aufnehmen</span>
                   </button>
                   <button onClick={() => {}}
@@ -364,12 +364,12 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div>
                     <label className="text-gray-500 text-xs mb-1 block flex items-center gap-1"><HashIcon className="w-3 h-3" />FIN (17 Zeichen)</label>
-                    <input value={fin} onChange={e => setFin(e.target.value.toUpperCase())} maxLength={17} placeholder="WBA..." className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 font-mono placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                    <input value={fin} onChange={e => setFin(e.target.value.toUpperCase())} maxLength={17} placeholder="WBA..." className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 font-mono placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" />
                     {fin.length > 0 && fin.length !== 17 && <span className="text-red-400 text-xs mt-0.5 block">{fin.length}/17</span>}
                   </div>
                   <div>
                     <label className="text-gray-500 text-xs mb-1 block flex items-center gap-1"><CalculatorIcon className="w-3 h-3" />Schaetzung EUR</label>
-                    <input value={schaetzung} onChange={e => setSchaetzung(e.target.value)} type="number" step="100" placeholder="z.B. 3500" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                    <input value={schaetzung} onChange={e => setSchaetzung(e.target.value)} type="number" step="100" placeholder="z.B. 3500" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" />
                   </div>
                 </div>
 
@@ -379,7 +379,7 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
                   onChange={e => setNotizen(e.target.value)}
                   placeholder="Notizen vor Ort..."
                   rows={2}
-                  className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none"
+                  className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 mb-4 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] resize-none"
                 />
 
                 <button onClick={handleComplete} disabled={saving}
@@ -391,8 +391,8 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
               /* ─── Stop Details ─── */
               <div>
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center">
-                    <span className="text-blue-400 font-bold">{activeIdx + 1}</span>
+                  <div className="w-10 h-10 bg-[#4573A2]/20 rounded-full flex items-center justify-center">
+                    <span className="text-[#7BA3CC] font-bold">{activeIdx + 1}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-gray-900 font-semibold truncate">{currentStop.name}</p>
@@ -420,7 +420,7 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
                         <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
                           statuses[i] === 'done' ? 'bg-green-500 text-gray-900' :
                           statuses[i] === 'skipped' ? 'bg-red-500 text-gray-900' :
-                          statuses[i] === 'active' ? 'bg-blue-500 text-gray-900' :
+                          statuses[i] === 'active' ? 'bg-[#4573A2] text-gray-900' :
                           'bg-zinc-700 text-gray-500'
                         }`}>{i + 1}</div>
                         <span className="truncate">{s.name}</span>
@@ -433,7 +433,7 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
                 {/* Action buttons */}
                 <div className="space-y-2">
                   <button onClick={handleArrive} disabled={saving}
-                    className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-2xl transition-colors disabled:opacity-40 flex items-center justify-center gap-2 min-h-[56px]">
+                    className="w-full py-3.5 bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold rounded-2xl transition-colors disabled:opacity-40 flex items-center justify-center gap-2 min-h-[56px]">
                     <CheckCircle2Icon className="w-5 h-5" />
                     {saving ? 'Speichert...' : 'Angekommen'}
                   </button>

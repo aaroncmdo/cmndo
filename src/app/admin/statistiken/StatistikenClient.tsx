@@ -238,7 +238,7 @@ export default function StatistikenClient({
               type="date"
               value={von}
               onChange={e => setVon(e.target.value)}
-              className="px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-600 [color-scheme:dark]"
+              className="px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#1E3A5F] [color-scheme:dark]"
               placeholder="Von"
             />
             <span className="text-gray-400 text-sm">—</span>
@@ -246,7 +246,7 @@ export default function StatistikenClient({
               type="date"
               value={bis}
               onChange={e => setBis(e.target.value)}
-              className="px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-600 [color-scheme:dark]"
+              className="px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#1E3A5F] [color-scheme:dark]"
               placeholder="Bis"
             />
           </div>

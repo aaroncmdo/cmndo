@@ -45,7 +45,7 @@ export default function ProblemMeldenModal({ fallId, onClose }: { fallId?: strin
           <p className="text-2xl mb-2">✅</p>
           <p className="text-gray-900 font-semibold">Vielen Dank!</p>
           <p className="text-gray-500 text-sm mt-1">Wir kümmern uns darum.</p>
-          <button onClick={onClose} className="mt-4 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-6 py-2 rounded-lg">OK</button>
+          <button onClick={onClose} className="mt-4 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium px-6 py-2 rounded-lg">OK</button>
         </div>
       </div>
     )
@@ -75,7 +75,7 @@ export default function ProblemMeldenModal({ fallId, onClose }: { fallId?: strin
               className="w-full bg-white border border-gray-300 text-gray-800 text-sm rounded-lg px-3 py-2 placeholder-gray-400 resize-none" />
           </div>
           <button onClick={handleSubmit} disabled={saving || !kategorie || beschreibung.length < 10}
-            className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-lg transition-colors">
+            className="w-full bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-lg transition-colors">
             {saving ? 'Wird gesendet...' : 'Problem melden'}
           </button>
         </div>

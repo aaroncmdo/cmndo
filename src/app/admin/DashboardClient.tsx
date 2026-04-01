@@ -10,9 +10,9 @@ type Fall = { id: string; fallNr: string; kundeName: string | null; status: stri
 
 const PHASE_COLOR: Record<string, string> = {
   ersterfassung: 'bg-gray-100 text-gray-600',
-  'sv-zugewiesen': 'bg-blue-50 text-blue-600',
-  'sv-termin': 'bg-blue-50 text-blue-500',
-  besichtigung: 'bg-indigo-50 text-indigo-600',
+  'sv-zugewiesen': 'bg-[#4573A2]/5 text-[#4573A2]',
+  'sv-termin': 'bg-[#4573A2]/5 text-[#4573A2]',
+  besichtigung: 'bg-[#4573A2]/5 text-[#1E3A5F]',
   'gutachten-eingegangen': 'bg-violet-50 text-violet-600',
   filmcheck: 'bg-amber-50 text-amber-600',
   'kanzlei-uebergeben': 'bg-green-50 text-green-600',
@@ -22,7 +22,7 @@ const PHASE_COLOR: Record<string, string> = {
 }
 
 const TYP_STYLE: Record<string, { bg: string; text: string }> = {
-  telefonat: { bg: 'bg-blue-100', text: 'text-blue-700' },
+  telefonat: { bg: 'bg-[#4573A2]/10', text: 'text-[#1E3A5F]' },
   'video-call': { bg: 'bg-purple-100', text: 'text-purple-700' },
   gutachter: { bg: 'bg-orange-100', text: 'text-orange-700' },
   rueckruf: { bg: 'bg-amber-100', text: 'text-amber-700' },
@@ -53,7 +53,7 @@ export default function DashboardClient({
           <span className="text-gray-400 text-xs">{datumLabel}</span>
         </div>
         <div className="flex gap-3 text-xs">
-          <span className="text-blue-600 font-medium">{stats.faelleCount} Fälle</span>
+          <span className="text-[#4573A2] font-medium">{stats.faelleCount} Fälle</span>
           <span className="text-green-600 font-medium">{stats.leads} Leads</span>
           {stats.ueberfaellig > 0 && <span className="text-red-600 font-semibold">{stats.ueberfaellig} überfällig</span>}
         </div>
@@ -91,7 +91,7 @@ export default function DashboardClient({
         <div className="flex-[3] min-w-0 bg-white border border-gray-200 rounded-xl overflow-y-auto">
           <div className="px-3 py-2 border-b border-gray-100 sticky top-0 bg-white z-10">
             <div className="flex items-center gap-2">
-              <ClockIcon className="w-3.5 h-3.5 text-blue-600" />
+              <ClockIcon className="w-3.5 h-3.5 text-[#4573A2]" />
               <span className="text-xs font-semibold text-gray-900">Tages-Timeline</span>
               <span className="text-[10px] text-gray-400 ml-auto">{timeline.length} Einträge</span>
             </div>
@@ -153,7 +153,7 @@ export default function DashboardClient({
               <span className="text-xs font-semibold text-gray-900 flex items-center gap-1.5">
                 <AlertTriangleIcon className="w-3.5 h-3.5 text-amber-500" /> Offene Tasks ({tasks.length})
               </span>
-              <Link href="/admin/tasks" className="text-[10px] text-blue-600 hover:text-blue-500">Alle →</Link>
+              <Link href="/admin/tasks" className="text-[10px] text-[#4573A2] hover:text-[#4573A2]">Alle →</Link>
             </div>
             <div className="flex-1 overflow-y-auto">
               {tasks.length === 0 ? (
@@ -179,9 +179,9 @@ export default function DashboardClient({
           <div className="bg-white border border-gray-200 rounded-xl flex-1 min-h-0 flex flex-col overflow-hidden">
             <div className="px-3 py-2 border-b border-gray-100 flex items-center justify-between shrink-0">
               <span className="text-xs font-semibold text-gray-900 flex items-center gap-1.5">
-                <FolderOpenIcon className="w-3.5 h-3.5 text-blue-500" /> Meine Fälle ({faelle.length})
+                <FolderOpenIcon className="w-3.5 h-3.5 text-[#4573A2]" /> Meine Fälle ({faelle.length})
               </span>
-              <Link href="/admin/faelle" className="text-[10px] text-blue-600 hover:text-blue-500">Alle →</Link>
+              <Link href="/admin/faelle" className="text-[10px] text-[#4573A2] hover:text-[#4573A2]">Alle →</Link>
             </div>
             <div className="flex-1 overflow-y-auto">
               {faelle.length === 0 ? (

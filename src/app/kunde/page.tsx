@@ -181,7 +181,7 @@ export default async function KundeDashboard() {
                 {nextTermin.typ === 'video-call' ? (
                   <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="text-purple-400"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" /></svg>
                 ) : (
-                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="text-blue-400"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>
+                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="text-[#7BA3CC]"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>
                 )}
               </div>
               <div className="flex-1">
@@ -256,13 +256,13 @@ export default async function KundeDashboard() {
                 <div key={step.key} className="flex items-center flex-1 last:flex-none">
                   <div className={`w-2.5 h-2.5 rounded-full shrink-0 transition-all ${
                     isCurrent
-                      ? 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.6)]'
+                      ? 'bg-[#4573A2] shadow-[0_0_10px_rgba(59,130,246,0.6)]'
                       : reached
-                      ? 'bg-blue-500/60'
+                      ? 'bg-[#4573A2]/60'
                       : 'bg-gray-100'
                   }`} className={isCurrent ? 'kunde-step-active' : ''} />
                   {i < STATUS_STEPS.length - 1 && (
-                    <div className={`flex-1 h-0.5 mx-0.5 ${i < stepIdx ? 'bg-blue-500/40' : 'bg-gray-100'}`} />
+                    <div className={`flex-1 h-0.5 mx-0.5 ${i < stepIdx ? 'bg-[#4573A2]/40' : 'bg-gray-100'}`} />
                   )}
                 </div>
               )
@@ -314,7 +314,7 @@ export default async function KundeDashboard() {
               </div>
               <div className="space-y-1.5">
                 {betreuer.telefon && (
-                  <a href={`tel:${betreuer.telefon}`} className="flex items-center gap-1.5 text-blue-400 text-[11px] hover:text-blue-300">
+                  <a href={`tel:${betreuer.telefon}`} className="flex items-center gap-1.5 text-[#7BA3CC] text-[11px] hover:text-[#7BA3CC]">
                     <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>
                     Anrufen
                   </a>
@@ -346,7 +346,7 @@ export default async function KundeDashboard() {
                 </p>
               </div>
               {(fall.kanzlei_ansprechpartner_telefon as string) && (
-                <a href={`tel:${fall.kanzlei_ansprechpartner_telefon}`} className="flex items-center gap-1.5 text-blue-400 text-[11px] hover:text-blue-300">
+                <a href={`tel:${fall.kanzlei_ansprechpartner_telefon}`} className="flex items-center gap-1.5 text-[#7BA3CC] text-[11px] hover:text-[#7BA3CC]">
                   <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>
                   Anrufen
                 </a>

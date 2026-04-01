@@ -67,7 +67,7 @@ export default async function GutachterTasksPage() {
     <div className="px-4 py-6 sm:py-8">
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
-          <ClipboardListIcon className="w-6 h-6 text-blue-400" />
+          <ClipboardListIcon className="w-6 h-6 text-[#7BA3CC]" />
           <h1 className="text-2xl font-semibold text-gray-900">Meine Tasks</h1>
           <span className="ml-auto bg-gray-100 text-gray-700 text-xs font-medium px-2.5 py-1 rounded-full">
             {offeneTasks.length} offen
@@ -117,7 +117,7 @@ export default async function GutachterTasksPage() {
                         {task.fall_id && fallMap[task.fall_id] && (
                           <Link
                             href={`/gutachter/fall/${task.fall_id}`}
-                            className="text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                            className="text-[#7BA3CC] hover:text-[#7BA3CC] flex items-center gap-1"
                           >
                             #{fallMap[task.fall_id]}
                             <ExternalLinkIcon className="w-3 h-3" />

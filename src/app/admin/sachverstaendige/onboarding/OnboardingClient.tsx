@@ -26,7 +26,7 @@ const STEPS = [
 ]
 
 const TYPEN = [
-  { value: 'kfz-gutachter', label: 'KFZ-Gutachter', desc: 'Freier KFZ-Sachverstaendiger (Einzelperson)', color: 'border-blue-500 bg-blue-50/30' },
+  { value: 'kfz-gutachter', label: 'KFZ-Gutachter', desc: 'Freier KFZ-Sachverstaendiger (Einzelperson)', color: 'border-[#4573A2] bg-[#4573A2]/10' },
   { value: 'dat-gutachter', label: 'DAT-Gutachter', desc: 'DAT-zertifizierter Gutachter (DAT-Kalkulationssystem)', color: 'border-orange-500 bg-orange-50/30' },
   { value: 'akademie', label: 'Akademie', desc: 'Akademie-ausgebildeter Gutachter (hoehere Qualifikation)', color: 'border-green-500 bg-green-50/30' },
   { value: 'gutachterbuero', label: 'Gutachterbuero', desc: 'Gutachterbuero mit mehreren Standorten', color: 'border-purple-500 bg-purple-50/30' },
@@ -117,7 +117,7 @@ export default function OnboardingClient() {
           <div className="flex items-center gap-1 mb-8">
             {STEPS.map((s, i) => (
               <div key={i} className="flex-1 flex items-center gap-1">
-                <div className={`h-1.5 flex-1 rounded-full transition-colors ${i <= step ? 'bg-blue-500' : 'bg-gray-100'}`} />
+                <div className={`h-1.5 flex-1 rounded-full transition-colors ${i <= step ? 'bg-[#4573A2]' : 'bg-gray-100'}`} />
               </div>
             ))}
           </div>
@@ -169,7 +169,7 @@ export default function OnboardingClient() {
                   onClick={() => toggleQual(q)}
                   className={`px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
                     form.qualifikationen.includes(q)
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-[#1E3A5F] text-white'
                       : 'bg-white border border-gray-300 text-gray-700 hover:border-gray-300'
                   }`}
                 >
@@ -205,13 +205,13 @@ export default function OnboardingClient() {
                   key={p.value}
                   onClick={() => update({ paket: p.value })}
                   className={`text-left p-5 rounded-xl border-2 transition-colors ${
-                    form.paket === p.value ? 'border-blue-500 bg-blue-50/20' : 'border-gray-200 bg-white'
+                    form.paket === p.value ? 'border-[#4573A2] bg-[#4573A2]/10' : 'border-gray-200 bg-white'
                   }`}
                 >
                   <p className="text-gray-900 font-semibold">{p.label}</p>
                   <p className="text-gray-500 text-sm mt-2">{p.faelle} Faelle</p>
                   <p className="text-gray-500 text-sm">{p.km} km Umkreis</p>
-                  <p className="text-blue-400 text-lg font-bold mt-3">{p.preis.toLocaleString('de-DE')} EUR</p>
+                  <p className="text-[#7BA3CC] text-lg font-bold mt-3">{p.preis.toLocaleString('de-DE')} EUR</p>
                 </button>
               ))}
             </div>
@@ -249,7 +249,7 @@ export default function OnboardingClient() {
             </div>
             <button
               onClick={() => router.push('/admin/sachverstaendige')}
-              className="mt-6 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl text-sm font-medium transition-colors"
+              className="mt-6 bg-[#1E3A5F] hover:bg-[#4573A2] text-white px-6 py-3 rounded-xl text-sm font-medium transition-colors"
             >
               Zur Uebersicht
             </button>
@@ -278,7 +278,7 @@ export default function OnboardingClient() {
               <button
                 onClick={() => setStep(s => s + 1)}
                 disabled={!canNext()}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 disabled:cursor-not-allowed text-gray-900 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                className="flex items-center gap-2 bg-[#1E3A5F] hover:bg-[#4573A2] disabled:bg-zinc-700 disabled:cursor-not-allowed text-gray-900 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
               >
                 Weiter <ArrowRightIcon className="w-4 h-4" />
               </button>

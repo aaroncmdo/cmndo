@@ -482,7 +482,7 @@ export default function FlowWizardKfz({ token, lead }: { token: string; lead: Le
           {portalUrl && (
             <a
               href={portalUrl}
-              className="inline-flex items-center gap-2 w-full justify-center min-h-14 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-base active:scale-[0.98] transition-all"
+              className="inline-flex items-center gap-2 w-full justify-center min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
             >
               <ExternalLinkIcon className="w-5 h-5" />
               Zum Kundenportal
@@ -500,7 +500,7 @@ export default function FlowWizardKfz({ token, lead }: { token: string; lead: Le
       {/* Progress bar */}
       <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-gray-100">
         <div
-          className="h-full bg-blue-500 transition-all duration-500 ease-out"
+          className="h-full bg-[#4573A2] transition-all duration-500 ease-out"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -546,7 +546,7 @@ export default function FlowWizardKfz({ token, lead }: { token: string; lead: Le
             <button
               onClick={handleSubmit}
               disabled={submitting}
-              className="w-full min-h-14 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+              className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
             >
               {submitting ? 'Wird gesendet ...' : 'Absenden'}
             </button>
@@ -554,7 +554,7 @@ export default function FlowWizardKfz({ token, lead }: { token: string; lead: Le
             <button
               onClick={() => setStepIndex((s) => s + 1)}
               disabled={!canProceed(currentStep, state, lead)}
-              className="w-full min-h-14 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-base disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+              className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
             >
               Weiter
             </button>
@@ -645,7 +645,7 @@ function FileUploadField({
 function InfoBox({ children, variant = 'info' }: { children: React.ReactNode; variant?: 'info' | 'warning' }) {
   const colors = variant === 'warning'
     ? 'border-amber-800/50 bg-amber-500/5 text-amber-300'
-    : 'border-blue-800/50 bg-blue-500/5 text-blue-300'
+    : 'border-[#1E3A5F]/50 bg-[#4573A2]/5 text-[#7BA3CC]'
   return (
     <div className={`flex items-start gap-3 px-4 py-3 rounded-2xl border text-sm ${colors}`}>
       {variant === 'warning'
@@ -695,7 +695,7 @@ function PageWillkommen({ lead }: { lead: LeadData }) {
       <StepHeader
         question={`Hallo ${lead.vorname}!`}
         sub="Wir benoetigen einige Unterlagen, um Ihren Schadensfall schnellstmoeglich zu bearbeiten."
-        icon={<CarIcon className="w-8 h-8 text-blue-400" />}
+        icon={<CarIcon className="w-8 h-8 text-[#7BA3CC]" />}
       />
 
       {(fahrzeug || lead.kennzeichen) && (
@@ -707,11 +707,11 @@ function PageWillkommen({ lead }: { lead: LeadData }) {
       )}
 
       {termin && (
-        <div className="mb-5 flex items-center gap-3 px-4 py-3 rounded-2xl border border-blue-800/50 bg-blue-500/5">
-          <CalendarIcon className="w-5 h-5 text-blue-400 flex-shrink-0" />
+        <div className="mb-5 flex items-center gap-3 px-4 py-3 rounded-2xl border border-[#1E3A5F]/50 bg-[#4573A2]/5">
+          <CalendarIcon className="w-5 h-5 text-[#7BA3CC] flex-shrink-0" />
           <div>
-            <p className="text-xs text-blue-400">Gutachtertermin</p>
-            <p className="text-sm text-blue-200">{termin}</p>
+            <p className="text-xs text-[#7BA3CC]">Gutachtertermin</p>
+            <p className="text-sm text-[#7BA3CC]">{termin}</p>
           </div>
         </div>
       )}
@@ -790,7 +790,7 @@ function PageBasis({
             onClick={() => fileInputRef.current?.click()}
             className={`flex flex-col items-center justify-center gap-3 px-6 py-8 rounded-2xl border-2 border-dashed cursor-pointer transition-all ${
               dragOver
-                ? 'border-blue-500 bg-blue-500/5'
+                ? 'border-[#4573A2] bg-[#4573A2]/5'
                 : 'border-gray-300 bg-gray-100/50 hover:border-gray-300'
             }`}
           >
@@ -1136,7 +1136,7 @@ function PageZusatz({
               target="_blank"
               className="flex items-center gap-3 px-5 py-4 rounded-2xl border border-gray-300 bg-gray-100/50 hover:border-gray-300 transition-all active:scale-[0.98]"
             >
-              <DownloadIcon className="w-5 h-5 text-blue-400" />
+              <DownloadIcon className="w-5 h-5 text-[#7BA3CC]" />
               <div>
                 <p className="text-sm text-gray-800">Schmerzenstagebuch-Vorlage</p>
                 <p className="text-xs text-gray-500">PDF herunterladen</p>
@@ -1159,7 +1159,7 @@ function PageZusatz({
                   onClick={() => setState('hat_mietwagen', true)}
                   className={`px-5 py-4 rounded-2xl border text-sm font-medium transition-all active:scale-[0.98] ${
                     state.hat_mietwagen === true
-                      ? 'border-blue-500 bg-blue-500/10 text-blue-400 font-semibold'
+                      ? 'border-[#4573A2] bg-[#4573A2]/10 text-[#7BA3CC] font-semibold'
                       : 'border-gray-300 bg-gray-100/50 text-gray-800 hover:border-gray-300'
                   }`}
                 >
@@ -1169,7 +1169,7 @@ function PageZusatz({
                   onClick={() => { setState('hat_mietwagen', false); setState('mietwagenvertrag', null) }}
                   className={`px-5 py-4 rounded-2xl border text-sm font-medium transition-all active:scale-[0.98] ${
                     state.hat_mietwagen === false
-                      ? 'border-blue-500 bg-blue-500/10 text-blue-400 font-semibold'
+                      ? 'border-[#4573A2] bg-[#4573A2]/10 text-[#7BA3CC] font-semibold'
                       : 'border-gray-300 bg-gray-100/50 text-gray-800 hover:border-gray-300'
                   }`}
                 >

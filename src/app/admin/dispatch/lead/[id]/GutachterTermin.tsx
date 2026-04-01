@@ -192,7 +192,7 @@ export default function GutachterTermin({
         <button
           onClick={handleSearch}
           disabled={searching || !plz || !wunschtermin}
-          className="w-full py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-blue-600 hover:bg-blue-500 text-white active:scale-[0.98] flex items-center justify-center gap-2"
+          className="w-full py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-[#1E3A5F] hover:bg-[#4573A2] text-white active:scale-[0.98] flex items-center justify-center gap-2"
         >
           {searching ? (
             <>
@@ -280,12 +280,12 @@ function SlotCard({
     <div className={`rounded-xl p-4 border ${
       isEmpfohlen
         ? 'bg-green-50/30 border-green-800/50'
-        : 'bg-blue-50/30 border-blue-800/50'
+        : 'bg-[#4573A2]/10 border-[#1E3A5F]/50'
     }`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <span className={`text-xs font-semibold uppercase tracking-wide ${
-          isEmpfohlen ? 'text-green-400' : 'text-blue-400'
+          isEmpfohlen ? 'text-green-400' : 'text-[#7BA3CC]'
         }`}>
           {isEmpfohlen ? 'Empfohlen' : label ?? 'Alternative'}
           {isEmpfohlen && slot.wunschtermin_moeglich && (
@@ -297,9 +297,9 @@ function SlotCard({
       {/* Gutachter info */}
       <div className="flex items-start gap-3 mb-3">
         <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
-          isEmpfohlen ? 'bg-green-500/20' : 'bg-blue-500/20'
+          isEmpfohlen ? 'bg-green-500/20' : 'bg-[#4573A2]/20'
         }`}>
-          <UserCheckIcon className={`w-4 h-4 ${isEmpfohlen ? 'text-green-400' : 'text-blue-400'}`} />
+          <UserCheckIcon className={`w-4 h-4 ${isEmpfohlen ? 'text-green-400' : 'text-[#7BA3CC]'}`} />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-gray-900 text-sm font-medium">{slot.name}</p>
@@ -339,7 +339,7 @@ function SlotCard({
         className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-[0.98] disabled:opacity-50 ${
           isEmpfohlen
             ? 'bg-green-600 hover:bg-green-500 text-white'
-            : 'bg-blue-600 hover:bg-blue-500 text-white'
+            : 'bg-[#1E3A5F] hover:bg-[#4573A2] text-white'
         }`}
       >
         {confirming ? 'Wird bestaetigt...' : 'Diesen Termin bestaetigen'}

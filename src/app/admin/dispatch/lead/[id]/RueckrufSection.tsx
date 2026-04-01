@@ -65,7 +65,7 @@ export default function RueckrufSection({
             type="datetime-local"
             value={datum}
             onChange={e => setDatum(e.target.value)}
-            className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
           />
         </div>
         <div>
@@ -75,7 +75,7 @@ export default function RueckrufSection({
             value={notiz}
             onChange={e => setNotiz(e.target.value)}
             placeholder="z.B. Kunde ab 14 Uhr erreichbar"
-            className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-400"
+            className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2] placeholder-gray-400"
           />
         </div>
       </div>
@@ -84,7 +84,7 @@ export default function RueckrufSection({
         <button
           onClick={handleSave}
           disabled={saving}
-          className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-4 py-2 transition-colors"
+          className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-4 py-2 transition-colors"
         >
           {saving ? 'Speichert ...' : 'Termin speichern'}
         </button>

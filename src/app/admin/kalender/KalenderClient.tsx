@@ -131,7 +131,7 @@ export default function KalenderClient({
               <button
                 onClick={() => setViewMode('month')}
                 className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                  viewMode === 'month' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-gray-800'
+                  viewMode === 'month' ? 'bg-[#1E3A5F] text-white' : 'text-gray-500 hover:text-gray-800'
                 }`}
               >
                 Monat
@@ -139,7 +139,7 @@ export default function KalenderClient({
               <button
                 onClick={() => setViewMode('week')}
                 className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                  viewMode === 'week' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-gray-800'
+                  viewMode === 'week' ? 'bg-[#1E3A5F] text-white' : 'text-gray-500 hover:text-gray-800'
                 }`}
               >
                 Woche
@@ -177,7 +177,7 @@ export default function KalenderClient({
         {/* Legend */}
         <div className="flex items-center gap-4 mb-4">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#4573A2]" />
             <span className="text-gray-500 text-xs">SV-Termin</span>
           </div>
           <div className="flex items-center gap-1.5">
@@ -216,7 +216,7 @@ export default function KalenderClient({
                   } ${!isCurrentMonth && viewMode === 'month' ? 'bg-[#f8f9fb]/50' : ''}`}
                 >
                   <div className={`text-xs font-medium mb-1 w-6 h-6 flex items-center justify-center rounded-full ${
-                    today ? 'bg-blue-600 text-white' : isCurrentMonth ? 'text-gray-700' : 'text-gray-300'
+                    today ? 'bg-[#1E3A5F] text-white' : isCurrentMonth ? 'text-gray-700' : 'text-gray-300'
                   }`}>
                     {format(day, 'd')}
                   </div>
@@ -230,7 +230,7 @@ export default function KalenderClient({
                           entry.overdue
                             ? 'bg-red-50/80 text-red-300 hover:bg-red-900/80'
                             : entry.type === 'sv-termin'
-                              ? 'bg-blue-50/80 text-blue-300 hover:bg-blue-900/80'
+                              ? 'bg-[#4573A2]/10 text-[#7BA3CC] hover:bg-[#0D1B3E]/80'
                               : 'bg-orange-50/80 text-orange-300 hover:bg-orange-900/80'
                         }`}
                       >

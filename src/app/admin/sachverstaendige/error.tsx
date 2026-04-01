@@ -20,7 +20,7 @@ export default function SachverstaendigeError({
           </p>
           <button
             onClick={reset}
-            className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-6 py-2.5 rounded-xl transition-colors"
+            className="bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium px-6 py-2.5 rounded-xl transition-colors"
           >
             Erneut versuchen
           </button>

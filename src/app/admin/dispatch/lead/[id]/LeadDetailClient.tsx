@@ -16,7 +16,7 @@ const STATUS_OPTIONS = [
 ] as const
 
 const STATUS_COLOR: Record<string, string> = {
-  neu: 'bg-blue-50 text-blue-300 border-blue-800',
+  neu: 'bg-[#4573A2]/5 text-[#7BA3CC] border-[#1E3A5F]',
   rueckruf: 'bg-yellow-50 text-yellow-300 border-yellow-800',
   'quali-offen': 'bg-orange-50 text-orange-300 border-orange-800',
   'flow-gesendet': 'bg-violet-50 text-violet-300 border-violet-800',

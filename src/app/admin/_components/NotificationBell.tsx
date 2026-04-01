@@ -113,7 +113,7 @@ export default function NotificationBell() {
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-semibold text-gray-900">Benachrichtigungen</span>
               {unread > 0 && (
-                <button onClick={markAllRead} className="text-[11px] text-blue-600 hover:text-blue-500 transition-colors">
+                <button onClick={markAllRead} className="text-[11px] text-[#4573A2] hover:text-[#4573A2] transition-colors">
                   Alle gelesen
                 </button>
               )}
@@ -121,13 +121,13 @@ export default function NotificationBell() {
             <div className="flex gap-4">
               <button onClick={() => setTab('updates')}
                 className={`pb-2 text-xs font-medium border-b-2 transition-colors flex items-center gap-1.5 ${
-                  tab === 'updates' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-400 hover:text-gray-600'
+                  tab === 'updates' ? 'border-[#4573A2] text-[#4573A2]' : 'border-transparent text-gray-400 hover:text-gray-600'
                 }`}>
                 <ActivityIcon className="w-3.5 h-3.5" /> Updates
               </button>
               <button onClick={() => setTab('nachrichten')}
                 className={`pb-2 text-xs font-medium border-b-2 transition-colors flex items-center gap-1.5 ${
-                  tab === 'nachrichten' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-400 hover:text-gray-600'
+                  tab === 'nachrichten' ? 'border-[#4573A2] text-[#4573A2]' : 'border-transparent text-gray-400 hover:text-gray-600'
                 }`}>
                 <MessageSquareIcon className="w-3.5 h-3.5" /> Nachrichten
               </button>
@@ -143,9 +143,9 @@ export default function NotificationBell() {
             ) : (
               visibleItems.map(item => (
                 <button key={item.id} onClick={() => handleClick(item)}
-                  className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors ${!item.gelesen ? 'bg-blue-50/30' : ''}`}>
+                  className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors ${!item.gelesen ? 'bg-[#4573A2]/10' : ''}`}>
                   <div className="flex items-start gap-3">
-                    {!item.gelesen && <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />}
+                    {!item.gelesen && <div className="w-2 h-2 rounded-full bg-[#4573A2] mt-1.5 shrink-0" />}
                     {item.gelesen && <div className="w-2 shrink-0" />}
                     <div className="w-6 h-6 flex items-center justify-center text-sm shrink-0">
                       {TYP_ICONS[item.typ] ?? '🔔'}

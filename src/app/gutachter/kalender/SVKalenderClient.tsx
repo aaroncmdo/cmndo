@@ -135,7 +135,7 @@ export default function SVKalenderClient({
                   <div className="px-2 py-2 border-b border-gray-200/50 text-center">
                     <span className="text-gray-500 text-[10px] uppercase">{format(day, 'EEE', { locale: de })}</span>
                     <div className={`text-sm font-medium mt-0.5 w-7 h-7 mx-auto flex items-center justify-center rounded-full ${
-                      today ? 'bg-blue-600 text-white' : 'text-gray-700'
+                      today ? 'bg-[#1E3A5F] text-white' : 'text-gray-700'
                     }`}>
                       {format(day, 'd')}
                     </div>
@@ -159,7 +159,7 @@ export default function SVKalenderClient({
                           className={`block px-2 py-1.5 rounded-lg text-[10px] leading-tight transition-colors ${
                             overdue
                               ? 'bg-red-50/80 text-red-300 hover:bg-red-900/80'
-                              : 'bg-blue-50/80 text-blue-300 hover:bg-blue-900/80'
+                              : 'bg-[#4573A2]/10 text-[#7BA3CC] hover:bg-[#0D1B3E]/80'
                           }`}
                         >
                           <div className="font-medium">{time}</div>
@@ -187,7 +187,7 @@ export default function SVKalenderClient({
               {ohneTermin.map(fall => (
                 <div key={fall.id} className="flex items-center justify-between gap-3 py-2.5 px-3 rounded-xl bg-gray-100/40">
                   <div className="min-w-0">
-                    <Link href={`/gutachter/fall/${fall.id}`} className="text-blue-400 hover:text-blue-300 text-xs font-mono">
+                    <Link href={`/gutachter/fall/${fall.id}`} className="text-[#7BA3CC] hover:text-[#7BA3CC] text-xs font-mono">
                       {fall.fall_nummer ?? fall.id.slice(0, 8)}
                     </Link>
                     <p className="text-gray-500 text-xs truncate">
@@ -196,7 +196,7 @@ export default function SVKalenderClient({
                   </div>
                   <button
                     onClick={() => { setDialogFall(fall); setTerminDate(''); setTerminTime('10:00') }}
-                    className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap"
+                    className="px-3 py-1.5 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap"
                   >
                     Termin setzen
                   </button>
@@ -224,7 +224,7 @@ export default function SVKalenderClient({
                       type="date"
                       value={terminDate}
                       onChange={e => setTerminDate(e.target.value)}
-                      className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
                     />
                   </div>
                   <div>
@@ -233,7 +233,7 @@ export default function SVKalenderClient({
                       type="time"
                       value={terminTime}
                       onChange={e => setTerminTime(e.target.value)}
-                      className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
                     />
                   </div>
                 </div>
@@ -247,7 +247,7 @@ export default function SVKalenderClient({
                   <button
                     onClick={handleSetTermin}
                     disabled={saving || !terminDate}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-colors disabled:opacity-40"
+                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[#1E3A5F] hover:bg-[#4573A2] text-white transition-colors disabled:opacity-40"
                   >
                     {saving ? 'Wird gesetzt...' : 'Speichern'}
                   </button>

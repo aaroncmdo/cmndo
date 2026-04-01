@@ -245,7 +245,7 @@ export default function LeadStepper({ lead }: { lead: LeadData }) {
           return (
             <div key={step.key} className={`rounded-xl border ${
               done ? 'border-emerald-800/50 bg-emerald-50/20' :
-              current ? 'border-blue-800/50 bg-blue-50/20' :
+              current ? 'border-[#1E3A5F]/50 bg-[#4573A2]/10' :
               'border-gray-200 bg-gray-100/30'
             }`}>
               {/* Step header */}
@@ -254,17 +254,17 @@ export default function LeadStepper({ lead }: { lead: LeadData }) {
                 className="w-full flex items-center gap-3 p-3 text-left"
               >
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
-                  done ? 'bg-emerald-500/20' : current ? 'bg-blue-500/20' : 'bg-zinc-700/50'
+                  done ? 'bg-emerald-500/20' : current ? 'bg-[#4573A2]/20' : 'bg-zinc-700/50'
                 }`}>
                   {done ? (
                     <CheckCircle2Icon className="w-4 h-4 text-emerald-400" />
                   ) : (
-                    <Icon className={`w-3.5 h-3.5 ${current ? 'text-blue-400' : 'text-gray-500'}`} />
+                    <Icon className={`w-3.5 h-3.5 ${current ? 'text-[#7BA3CC]' : 'text-gray-500'}`} />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className={`text-sm font-medium ${
-                    done ? 'text-emerald-400' : current ? 'text-blue-400' : 'text-gray-500'
+                    done ? 'text-emerald-400' : current ? 'text-[#7BA3CC]' : 'text-gray-500'
                   }`}>
                     Schritt {idx + 1}: {step.label}
                   </span>
@@ -369,7 +369,7 @@ function StepErstkontakt({ done, saving, onAdvance }: { done: boolean; saving: b
       <button
         onClick={onAdvance}
         disabled={saving}
-        className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors flex items-center gap-2"
+        className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors flex items-center gap-2"
       >
         <PhoneCallIcon className="w-4 h-4" />
         {saving ? 'Speichert...' : 'Erstkontakt hergestellt'}
@@ -412,11 +412,11 @@ function StepSchadentyp({
       {sf === 'sf-03' && (
         <div className="flex gap-3">
           <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-            <input type="radio" name="sf03var" value="a" checked={sfVariante === 'a'} onChange={() => setSfVariante('a')} className="accent-blue-500" />
+            <input type="radio" name="sf03var" value="a" checked={sfVariante === 'a'} onChange={() => setSfVariante('a')} className="accent-[#4573A2]" />
             A - Gegner bekannt
           </label>
           <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-            <input type="radio" name="sf03var" value="b" checked={sfVariante === 'b'} onChange={() => setSfVariante('b')} className="accent-blue-500" />
+            <input type="radio" name="sf03var" value="b" checked={sfVariante === 'b'} onChange={() => setSfVariante('b')} className="accent-[#4573A2]" />
             B - Fahrerflucht
           </label>
         </div>
@@ -456,7 +456,7 @@ function StepSchadentyp({
       <button
         onClick={onAdvance}
         disabled={saving || !sf}
-        className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
+        className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
       >
         {saving ? 'Speichert...' : 'Schadentyp bestaetigen'}
       </button>
@@ -520,7 +520,7 @@ function StepKonstellation({
       <button
         onClick={onAdvance}
         disabled={saving}
-        className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
+        className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
       >
         {saving ? 'Speichert...' : 'Konstellation bestaetigen'}
       </button>
@@ -550,7 +550,7 @@ function StepGegner({
       <button
         onClick={onAdvance}
         disabled={saving}
-        className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
+        className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
       >
         {saving ? 'Speichert...' : 'Gegner-Daten bestaetigen'}
       </button>
@@ -643,7 +643,7 @@ function StepGutachterTermin({
         <button
           onClick={handleSearch}
           disabled={searching || !plz || !wunschtermin || parentSaving}
-          className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center gap-2"
+          className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 bg-[#1E3A5F] hover:bg-[#4573A2] text-white flex items-center justify-center gap-2"
         >
           {searching ? (
             <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Suche Gutachter...</>
@@ -680,12 +680,12 @@ function SlotCard({ slot, label, variant, onConfirm, confirming }: {
 }) {
   const isEmpf = variant === 'empfohlen'
   return (
-    <div className={`rounded-xl p-3 border ${isEmpf ? 'bg-green-50/30 border-green-800/50' : 'bg-blue-50/30 border-blue-800/50'}`}>
+    <div className={`rounded-xl p-3 border ${isEmpf ? 'bg-green-50/30 border-green-800/50' : 'bg-[#4573A2]/10 border-[#1E3A5F]/50'}`}>
       <div className="flex items-center justify-between mb-2">
-        <span className={`text-xs font-semibold uppercase ${isEmpf ? 'text-green-400' : 'text-blue-400'}`}>{label}</span>
+        <span className={`text-xs font-semibold uppercase ${isEmpf ? 'text-green-400' : 'text-[#7BA3CC]'}`}>{label}</span>
       </div>
       <div className="flex items-center gap-2 mb-2">
-        <UserCheckIcon className={`w-3.5 h-3.5 ${isEmpf ? 'text-green-400' : 'text-blue-400'}`} />
+        <UserCheckIcon className={`w-3.5 h-3.5 ${isEmpf ? 'text-green-400' : 'text-[#7BA3CC]'}`} />
         <span className="text-gray-900 text-sm font-medium">{slot.name}</span>
         {slot.entfernung_km != null && (
           <span className="text-gray-500 text-[11px] flex items-center gap-1"><MapPinIcon className="w-3 h-3" />{slot.entfernung_km} km</span>
@@ -699,7 +699,7 @@ function SlotCard({ slot, label, variant, onConfirm, confirming }: {
         </span>
       </div>
       <button onClick={onConfirm} disabled={confirming}
-        className={`w-full py-2 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 ${isEmpf ? 'bg-green-600 hover:bg-green-500 text-white' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
+        className={`w-full py-2 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 ${isEmpf ? 'bg-green-600 hover:bg-green-500 text-white' : 'bg-[#1E3A5F] hover:bg-[#4573A2] text-white'}`}
       >
         {confirming ? 'Wird bestaetigt...' : 'Diesen Termin bestaetigen'}
       </button>
@@ -725,7 +725,7 @@ function StepSA({ lead, saving, onAdvance }: {
         <p className="text-emerald-400 text-sm">SA + Vollmacht erhalten</p>
         {lead.sa_datum && <p className="text-gray-500 text-xs">SA: {new Date(lead.sa_datum).toLocaleDateString('de-DE')}</p>}
         {lead.vollmacht_datum && <p className="text-gray-500 text-xs">Vollmacht: {new Date(lead.vollmacht_datum).toLocaleDateString('de-DE')}</p>}
-        <span className={`inline-block text-xs px-2 py-0.5 rounded-full ${mandatstyp === 'kanzlei-claimondo' ? 'bg-purple-50 text-purple-300' : 'bg-blue-50 text-blue-300'}`}>
+        <span className={`inline-block text-xs px-2 py-0.5 rounded-full ${mandatstyp === 'kanzlei-claimondo' ? 'bg-purple-50 text-purple-300' : 'bg-[#4573A2]/5 text-[#7BA3CC]'}`}>
           {mandatstyp === 'kanzlei-claimondo' ? 'Kanzlei + Claimondo' : 'Nur Claimondo'}
         </span>
       </div>
@@ -745,7 +745,7 @@ function StepSA({ lead, saving, onAdvance }: {
           value={autoKanzlei ? 'kanzlei-claimondo' : mandatstyp}
           onChange={e => setMandatstyp(e.target.value)}
           disabled={autoKanzlei}
-          className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60"
+          className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#4573A2] disabled:opacity-60"
         >
           <option value="claimondo">Nur Claimondo</option>
           <option value="kanzlei-claimondo">Kanzlei + Claimondo</option>
@@ -766,7 +766,7 @@ function StepSA({ lead, saving, onAdvance }: {
           mandatstyp: autoKanzlei ? 'kanzlei-claimondo' : mandatstyp,
         })}
         disabled={saving || !sa || !vollmacht}
-        className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
+        className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
       >
         {saving ? 'Speichert...' : 'SA + Vollmacht bestaetigen'}
       </button>
@@ -843,14 +843,14 @@ function StepFlowLink({ lead }: { lead: LeadData }) {
 
 // ─── Shared Helpers ─────────────────────────────────────────────────────────
 
-const selectCls = 'w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500'
+const selectCls = 'w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#4573A2]'
 
 function Input({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <div>
       <label className="text-xs text-gray-500 mb-1 block">{label}</label>
       <input type="text" value={value} onChange={e => onChange(e.target.value)}
-        className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+        className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2]" />
     </div>
   )
 }
@@ -858,7 +858,7 @@ function Input({ label, value, onChange }: { label: string; value: string; onCha
 function Checkbox({ label, checked, onChange, disabled }: { label: string; checked: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
   return (
     <label className={`flex items-center gap-2 text-sm ${disabled ? 'text-gray-500' : 'text-gray-700 cursor-pointer'}`}>
-      <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} disabled={disabled} className="accent-blue-500 rounded" />
+      <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} disabled={disabled} className="accent-[#4573A2] rounded" />
       {label}
     </label>
   )

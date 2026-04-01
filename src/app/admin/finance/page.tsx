@@ -40,13 +40,13 @@ function GewinnverteilungSection({
             </div>
             <div className="text-center">
               <p className="text-gray-500 text-xs mb-1">Kanzlei (25%)</p>
-              <p className="text-blue-400 text-xl font-bold tabular-nums">{eur(kanzleiGewinn)}</p>
+              <p className="text-[#7BA3CC] text-xl font-bold tabular-nums">{eur(kanzleiGewinn)}</p>
             </div>
           </div>
           {/* Visual bar */}
           <div className="mt-4 flex h-3 rounded-full overflow-hidden">
             <div className="bg-emerald-500" style={{ width: '75%' }} />
-            <div className="bg-blue-500" style={{ width: '25%' }} />
+            <div className="bg-[#4573A2]" style={{ width: '25%' }} />
           </div>
           <div className="flex justify-between mt-1 text-[10px] text-gray-400">
             <span>Claimondo 75%</span>
@@ -180,7 +180,7 @@ type IndividuelleAnfrage = {
 
 function IndividuelleAnfragenSection({ anfragen }: { anfragen: IndividuelleAnfrage[] }) {
   const statusColors: Record<string, string> = {
-    neu: 'bg-blue-50 text-blue-600',
+    neu: 'bg-[#4573A2]/5 text-[#4573A2]',
     'in-bearbeitung': 'bg-amber-50 text-amber-600',
     angeboten: 'bg-purple-50 text-purple-600',
     angenommen: 'bg-emerald-50 text-emerald-600',
@@ -265,9 +265,9 @@ function InvestitionProFallSection() {
               <p className="text-gray-400 text-xs mt-1">Differenz = seine Marge</p>
             </div>
           </div>
-          <div className="mt-4 p-3 bg-blue-50/30 border border-blue-800/30 rounded-xl">
-            <p className="text-blue-300 text-xs">
-              Lexoffice-Abgleich vorbereitet: <code className="text-blue-400">/api/lexoffice/sync</code> —
+          <div className="mt-4 p-3 bg-[#4573A2]/10 border border-[#1E3A5F]/30 rounded-xl">
+            <p className="text-[#7BA3CC] text-xs">
+              Lexoffice-Abgleich vorbereitet: <code className="text-[#7BA3CC]">/api/lexoffice/sync</code> —
               Zahlungseingaenge werden spaeter automatisch abgeglichen.
             </p>
           </div>

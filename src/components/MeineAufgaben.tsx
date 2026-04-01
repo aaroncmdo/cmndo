@@ -125,7 +125,7 @@ function TaskRow({ task, fallLinkPrefix, showKunde, variant }: {
         <p className="text-sm text-gray-800 leading-snug">{task.titel}</p>
         <div className="flex items-center gap-2 mt-0.5 text-[10px]">
           {showKunde && task.kunde_name && <span className="text-gray-500">{task.kunde_name}</span>}
-          {task.fall_nummer && <span className="text-blue-400 font-mono">{task.fall_nummer}</span>}
+          {task.fall_nummer && <span className="text-[#7BA3CC] font-mono">{task.fall_nummer}</span>}
           <span className={variant === 'overdue' ? 'text-red-400 font-semibold' : 'text-gray-500'}>{fmtDeadline(task.faellig_am)}</span>
           {task.prioritaet && prioColors[task.prioritaet] && (
             <span className={`px-1.5 py-0 rounded ${prioColors[task.prioritaet]}`}>{task.prioritaet}</span>

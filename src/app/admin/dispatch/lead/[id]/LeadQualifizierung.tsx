@@ -163,7 +163,7 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
               onClick={() => setPhase(p)}
               className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
                 p === phase
-                  ? 'bg-blue-600 border-blue-500 text-gray-900 font-medium'
+                  ? 'bg-[#1E3A5F] border-[#4573A2] text-gray-900 font-medium'
                   : i < currentIdx
                     ? 'bg-emerald-50 border-emerald-800 text-emerald-400'
                     : 'bg-gray-100 border-gray-300 text-gray-500 hover:border-gray-300'
@@ -181,7 +181,7 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
         <select
           value={sf}
           onChange={e => setSf(e.target.value)}
-          className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
         >
           <option value="">— Bitte wählen —</option>
           {SF_OPTIONS.map(o => (
@@ -201,7 +201,7 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
               <input
                 type="radio" name="sf03var" value="a" checked={sfVariante === 'a'}
                 onChange={() => setSfVariante('a')}
-                className="accent-blue-500"
+                className="accent-[#4573A2]"
               />
               A — Gegner bekannt
             </label>
@@ -209,7 +209,7 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
               <input
                 type="radio" name="sf03var" value="b" checked={sfVariante === 'b'}
                 onChange={() => setSfVariante('b')}
-                className="accent-blue-500"
+                className="accent-[#4573A2]"
               />
               B — Fahrerflucht
             </label>
@@ -252,7 +252,7 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
           <select
             value={schadensursache}
             onChange={e => setSchadensursache(e.target.value)}
-            className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
           >
             <option value="">— Bitte wählen —</option>
             {SF04_URSACHEN.map(o => (
@@ -284,7 +284,7 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
         <select
           value={kk}
           onChange={e => setKk(e.target.value)}
-          className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
         >
           {KK_OPTIONS.map(o => (
             <option key={o.value} value={o.value}>{o.label}</option>
@@ -330,7 +330,7 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
+          className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
         >
           {saving ? 'Speichert ...' : 'Qualifizierung speichern'}
         </button>
@@ -350,7 +350,7 @@ function Input({ label, value, onChange }: { label: string; value: string; onCha
         type="text"
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
       />
     </div>
   )
@@ -364,7 +364,7 @@ function Checkbox({ label, checked, onChange, disabled }: { label: string; check
         checked={checked}
         onChange={e => onChange(e.target.checked)}
         disabled={disabled}
-        className="accent-blue-500 rounded"
+        className="accent-[#4573A2] rounded"
       />
       {label}
     </label>

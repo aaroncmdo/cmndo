@@ -190,7 +190,7 @@ export default function AuftragClient({
           <span className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap mt-1 ${
             gutachtenAlreadySubmitted
               ? 'bg-green-50 text-green-300'
-              : 'bg-blue-50 text-blue-300'
+              : 'bg-[#4573A2]/5 text-[#7BA3CC]'
           }`}>
             {STATUS_LABEL[fall.status] ?? fall.status}
           </span>
@@ -204,12 +204,12 @@ export default function AuftragClient({
               <InfoRow label="Name" value={`${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim()} />
               <InfoRow label="E-Mail" value={
                 lead.email ? (
-                  <a href={`mailto:${lead.email}`} className="text-blue-400 hover:text-blue-300">{lead.email}</a>
+                  <a href={`mailto:${lead.email}`} className="text-[#7BA3CC] hover:text-[#7BA3CC]">{lead.email}</a>
                 ) : null
               } />
               <InfoRow label="Telefon" value={
                 lead.telefon ? (
-                  <a href={`tel:${lead.telefon}`} className="text-blue-400 hover:text-blue-300">{lead.telefon}</a>
+                  <a href={`tel:${lead.telefon}`} className="text-[#7BA3CC] hover:text-[#7BA3CC]">{lead.telefon}</a>
                 ) : null
               } />
             </Section>
@@ -345,7 +345,7 @@ export default function AuftragClient({
                       onChange={e =>
                         setChecks(prev => ({ ...prev, [item.id]: e.target.checked }))
                       }
-                      className="mt-0.5 w-5 h-5 rounded accent-blue-600 shrink-0 cursor-pointer"
+                      className="mt-0.5 w-5 h-5 rounded accent-[#4573A2] shrink-0 cursor-pointer"
                     />
                     <span className={`text-sm leading-snug ${
                       checks[item.id] ? 'text-gray-500 line-through' : 'text-gray-800'
@@ -397,7 +397,7 @@ export default function AuftragClient({
                       min="0.01"
                       required
                       placeholder="0,00"
-                      className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 pr-12 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 pr-12 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">EUR</span>
                   </div>
@@ -410,7 +410,7 @@ export default function AuftragClient({
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-blue-600 hover:bg-blue-500 text-white"
+                  className="w-full py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-[#1E3A5F] hover:bg-[#4573A2] text-white"
                 >
                   {submitting ? 'Wird hochgeladen...' : 'Gutachten einreichen'}
                 </button>

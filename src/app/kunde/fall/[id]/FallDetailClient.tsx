@@ -293,9 +293,9 @@ export default function FallDetailClient({
                       <div
                         className={`w-4 h-4 rounded-full border-2 shrink-0 z-10 ${
                           step.active
-                            ? 'border-blue-500 bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]'
+                            ? 'border-[#4573A2] bg-[#4573A2] shadow-[0_0_8px_rgba(59,130,246,0.5)]'
                             : step.reached
-                            ? 'border-blue-500/60 bg-blue-500/60'
+                            ? 'border-[#4573A2]/60 bg-[#4573A2]/60'
                             : 'border-gray-300 bg-gray-100'
                         }`}
                       />
@@ -303,7 +303,7 @@ export default function FallDetailClient({
                         <div
                           className={`w-0.5 flex-1 min-h-8 ${
                             step.reached && timeline[i + 1]?.reached
-                              ? 'bg-blue-500/40'
+                              ? 'bg-[#4573A2]/40'
                               : 'bg-gray-100'
                           }`}
                         />
@@ -462,13 +462,13 @@ export default function FallDetailClient({
                     </div>
                     <div className="space-y-2">
                       {kundenbetreuer.telefon && (
-                        <a href={`tel:${kundenbetreuer.telefon}`} className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-xl text-sm text-blue-400 hover:bg-gray-200 transition-colors">
+                        <a href={`tel:${kundenbetreuer.telefon}`} className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-xl text-sm text-[#7BA3CC] hover:bg-gray-200 transition-colors">
                           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>
                           Anrufen
                         </a>
                       )}
                       {kundenbetreuer.email && (
-                        <a href={`mailto:${kundenbetreuer.email}`} className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-xl text-sm text-blue-400 hover:bg-gray-200 transition-colors">
+                        <a href={`mailto:${kundenbetreuer.email}`} className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-xl text-sm text-[#7BA3CC] hover:bg-gray-200 transition-colors">
                           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
                           E-Mail schreiben
                         </a>
@@ -502,13 +502,13 @@ export default function FallDetailClient({
                     </div>
                     <div className="space-y-2">
                       {fall.kanzlei_ansprechpartner_telefon && (
-                        <a href={`tel:${fall.kanzlei_ansprechpartner_telefon}`} className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-xl text-sm text-blue-400 hover:bg-gray-200 transition-colors">
+                        <a href={`tel:${fall.kanzlei_ansprechpartner_telefon}`} className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-xl text-sm text-[#7BA3CC] hover:bg-gray-200 transition-colors">
                           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>
                           Anrufen
                         </a>
                       )}
                       {fall.kanzlei_ansprechpartner_email && (
-                        <a href={`mailto:${fall.kanzlei_ansprechpartner_email}`} className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-xl text-sm text-blue-400 hover:bg-gray-200 transition-colors">
+                        <a href={`mailto:${fall.kanzlei_ansprechpartner_email}`} className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-xl text-sm text-[#7BA3CC] hover:bg-gray-200 transition-colors">
                           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
                           E-Mail schreiben
                         </a>
@@ -606,7 +606,7 @@ function DokumentUpload({ fallId, onDone }: { fallId: string; onDone: () => void
         <button
           type="submit"
           disabled={uploading}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-40"
+          className="px-4 py-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-40"
         >
           {uploading ? 'Lädt...' : 'Hochladen'}
         </button>
@@ -795,7 +795,7 @@ function NachrichtenBereich({
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`inline-flex items-center gap-1 mt-1 text-xs underline ${
-                        isOwn ? 'text-emerald-200' : 'text-blue-400'
+                        isOwn ? 'text-emerald-200' : 'text-[#7BA3CC]'
                       }`}
                     >
                       <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

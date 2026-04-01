@@ -72,12 +72,12 @@ export default function RueckrufModal({ leadId, leadName, defaultDatum, defaultU
             <div>
               <label className="text-xs text-gray-500 font-medium block mb-1">Datum</label>
               <input type="date" value={datum} onChange={e => setDatum(e.target.value)} min={todayStr()}
-                className="w-full bg-white border border-gray-300 text-gray-800 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                className="w-full bg-white border border-gray-300 text-gray-800 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2]" />
             </div>
             <div>
               <label className="text-xs text-gray-500 font-medium block mb-1">Uhrzeit</label>
               <select ref={inputRef} value={uhrzeit} onChange={e => setUhrzeit(e.target.value)}
-                className="w-full bg-white border border-gray-300 text-gray-800 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                className="w-full bg-white border border-gray-300 text-gray-800 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2]">
                 {ZEITEN.map(z => <option key={z} value={z}>{z}</option>)}
               </select>
             </div>
@@ -86,14 +86,14 @@ export default function RueckrufModal({ leadId, leadName, defaultDatum, defaultU
           <div>
             <label className="text-xs text-gray-500 font-medium block mb-1">Notiz (optional)</label>
             <textarea value={notiz} onChange={e => setNotiz(e.target.value)} rows={2} placeholder="z.B. Kunde wünscht Rückruf nach 14 Uhr"
-              className="w-full bg-white border border-gray-300 text-gray-800 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-400 resize-none" />
+              className="w-full bg-white border border-gray-300 text-gray-800 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2] placeholder-gray-400 resize-none" />
           </div>
 
           {error && <p className="text-red-600 text-xs bg-red-50 rounded-lg px-3 py-2">{error}</p>}
 
           <div className="flex gap-2 pt-1">
             <button onClick={handleSave} disabled={saving}
-              className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-lg transition-colors">
+              className="flex-1 bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-lg transition-colors">
               {saving ? 'Speichert...' : 'Rückruf speichern'}
             </button>
             <button onClick={onCancel} className="px-4 py-2.5 text-gray-500 hover:text-gray-700 text-sm transition-colors">

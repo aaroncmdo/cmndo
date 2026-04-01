@@ -86,7 +86,7 @@ export default function FinanceClient({
             label="Provision"
             value={eur(provisionMonat)}
             sub="10 % — dieser Monat"
-            accent="text-blue-400"
+            accent="text-[#7BA3CC]"
           />
         </div>
 
@@ -166,7 +166,7 @@ export default function FinanceClient({
                         <td className="px-5 py-3">
                           <Link
                             href={`/admin/faelle/${row.id}`}
-                            className="text-blue-400 hover:text-blue-300 font-mono text-xs"
+                            className="text-[#7BA3CC] hover:text-[#7BA3CC] font-mono text-xs"
                           >
                             {row.fall_nummer ?? row.id.slice(0, 8)}
                           </Link>
@@ -203,7 +203,7 @@ export default function FinanceClient({
                   >
                     <div className="flex items-start justify-between mb-1">
                       <div>
-                        <span className="text-blue-400 font-mono text-xs">
+                        <span className="text-[#7BA3CC] font-mono text-xs">
                           {row.fall_nummer ?? row.id.slice(0, 8)}
                         </span>
                         <p className="text-gray-800 text-sm mt-0.5">{row.kunde}</p>

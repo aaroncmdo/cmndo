@@ -24,14 +24,14 @@ const STEPS = [
 ] as const
 
 const GUTACHTER_TYPEN = [
-  { key: 'kfz-gutachter', label: 'KFZ-Gutachter', desc: 'Freier KFZ-Sachverständiger (Einzelperson)', color: 'border-blue-500' },
+  { key: 'kfz-gutachter', label: 'KFZ-Gutachter', desc: 'Freier KFZ-Sachverständiger (Einzelperson)', color: 'border-[#4573A2]' },
   { key: 'dat-gutachter', label: 'DAT-Gutachter', desc: 'DAT-zertifizierter Gutachter (DAT-Kalkulationssystem)', color: 'border-orange-500' },
   { key: 'akademie', label: 'Akademie', desc: 'Akademie-ausgebildeter Gutachter (höhere Qualifikation)', color: 'border-green-500' },
   { key: 'gutachterbuero', label: 'Gutachterbüro', desc: 'Gutachterbüro mit mehreren Standorten', color: 'border-purple-500' },
 ] as const
 
 const PAKETE = [
-  { key: 'standard', label: 'Standard', faelle: 10, km: 15, preis: 1500, color: 'border-blue-500' },
+  { key: 'standard', label: 'Standard', faelle: 10, km: 15, preis: 1500, color: 'border-[#4573A2]' },
   { key: 'pro', label: 'Pro', faelle: 25, km: 40, preis: 3750, color: 'border-green-500' },
   { key: 'premium', label: 'Premium', faelle: 50, km: 70, preis: 7500, color: 'border-amber-500' },
 ] as const
@@ -172,7 +172,7 @@ export default function OnboardingClient({
             return (
               <div key={s.key} className="flex items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                  i < step ? 'bg-green-600' : i === step ? 'bg-blue-600' : 'bg-gray-100'
+                  i < step ? 'bg-green-600' : i === step ? 'bg-[#1E3A5F]' : 'bg-gray-100'
                 }`}>
                   <Icon className="w-4 h-4 text-gray-900" />
                 </div>
@@ -205,7 +205,7 @@ export default function OnboardingClient({
                       onClick={() => toggleQualifikation(q)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                         data.qualifikationen.includes(q)
-                          ? 'bg-blue-600 text-white'
+                          ? 'bg-[#1E3A5F] text-white'
                           : 'bg-gray-100 text-gray-500 hover:text-gray-800'
                       }`}
                     >
@@ -248,7 +248,7 @@ export default function OnboardingClient({
                     defaultValue={data.standort_adresse}
                     placeholder="Musterstraße 1, 10115 Berlin"
                     onSelect={onPlaceSelect}
-                    className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
                   />
                 </div>
               ) : (
@@ -319,7 +319,7 @@ export default function OnboardingClient({
                     onClick={() => updateField('kalender_typ', typ)}
                     className={`p-4 rounded-xl border text-left transition-all ${
                       data.kalender_typ === typ
-                        ? 'border-blue-500 bg-gray-100'
+                        ? 'border-[#4573A2] bg-gray-100'
                         : 'border-gray-300 hover:border-gray-300'
                     }`}
                   >
@@ -368,7 +368,7 @@ export default function OnboardingClient({
                 type="button"
                 onClick={() => setStep(s => s + 1)}
                 disabled={!canNext}
-                className="flex-1 py-3 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-colors disabled:opacity-40"
+                className="flex-1 py-3 rounded-xl text-sm font-semibold bg-[#1E3A5F] hover:bg-[#4573A2] text-white transition-colors disabled:opacity-40"
               >
                 Weiter
               </button>
@@ -401,7 +401,7 @@ function InputField({ label, value, onChange, type = 'text', placeholder, disabl
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+        className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] disabled:opacity-50"
       />
     </div>
   )

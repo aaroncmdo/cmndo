@@ -38,7 +38,7 @@ interface SV {
 }
 
 const TYP_COLORS: Record<string, { marker: string; label: string }> = {
-  'kfz-gutachter': { marker: 'bg-blue-500', label: 'KFZ-Gutachter' },
+  'kfz-gutachter': { marker: 'bg-[#4573A2]', label: 'KFZ-Gutachter' },
   'dat-gutachter': { marker: 'bg-orange-500', label: 'DAT-Gutachter' },
   akademie: { marker: 'bg-green-500', label: 'Akademie' },
   gutachterbuero: { marker: 'bg-purple-500', label: 'Gutachterbuero' },
@@ -107,9 +107,9 @@ function EditableField({
             onBlur={handleSave}
             onKeyDown={e => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') { setVal(value); setEditing(false) } }}
             disabled={saving}
-            className="flex-1 bg-gray-100 border border-blue-600 text-gray-800 text-sm rounded-lg px-2 py-1.5 focus:outline-none"
+            className="flex-1 bg-gray-100 border border-[#1E3A5F] text-gray-800 text-sm rounded-lg px-2 py-1.5 focus:outline-none"
           />
-          <button onClick={handleSave} disabled={saving} className="p-1 text-blue-400 hover:text-blue-300">
+          <button onClick={handleSave} disabled={saving} className="p-1 text-[#7BA3CC] hover:text-[#7BA3CC]">
             <CheckIcon className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -122,7 +122,7 @@ function EditableField({
       <p className="text-xs text-gray-500 mb-0.5">{label}</p>
       <div className="flex items-center gap-2 group">
         {linkPrefix && val ? (
-          <a href={`${linkPrefix}${val}`} className="text-sm text-blue-400 hover:text-blue-300 truncate">{val}</a>
+          <a href={`${linkPrefix}${val}`} className="text-sm text-[#7BA3CC] hover:text-[#7BA3CC] truncate">{val}</a>
         ) : (
           <span className="text-sm text-gray-700 truncate">{val || '\u2014'}</span>
         )}
@@ -190,13 +190,13 @@ export default function GutachterProfilPanel({
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-3">
             {/* Avatar */}
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-gray-900 font-bold text-sm ${typColor?.marker ?? 'bg-blue-500'}`}>
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-gray-900 font-bold text-sm ${typColor?.marker ?? 'bg-[#4573A2]'}`}>
               {getInitials(sv.name || '??')}
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900 leading-tight">{sv.name || 'Unbekannt'}</h2>
               <div className="flex items-center gap-2 mt-1">
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold text-gray-900 ${typColor?.marker ?? 'bg-blue-500'}`}>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold text-gray-900 ${typColor?.marker ?? 'bg-[#4573A2]'}`}>
                   {typColor?.label ?? sv.gutachterTyp ?? '\u2014'}
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-400">
@@ -258,7 +258,7 @@ export default function GutachterProfilPanel({
               </div>
               <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all ${auslastungPct >= 90 ? 'bg-red-500' : auslastungPct >= 70 ? 'bg-amber-500' : 'bg-blue-500'}`}
+                  className={`h-full rounded-full transition-all ${auslastungPct >= 90 ? 'bg-red-500' : auslastungPct >= 70 ? 'bg-amber-500' : 'bg-[#4573A2]'}`}
                   style={{ width: `${Math.min(100, auslastungPct)}%` }}
                 />
               </div>
@@ -284,7 +284,7 @@ export default function GutachterProfilPanel({
               <button
                 onClick={() => editingQual ? handleQualSave() : setEditingQual(true)}
                 disabled={savingQual}
-                className="text-[10px] text-blue-400 hover:text-blue-300 font-medium"
+                className="text-[10px] text-[#7BA3CC] hover:text-[#7BA3CC] font-medium"
               >
                 {savingQual ? 'Speichert...' : editingQual ? 'Speichern' : 'Bearbeiten'}
               </button>
@@ -298,7 +298,7 @@ export default function GutachterProfilPanel({
                       type="checkbox"
                       checked={quals.includes(q)}
                       onChange={e => setQuals(prev => e.target.checked ? [...prev, q] : prev.filter(x => x !== q))}
-                      className="accent-blue-500 w-3.5 h-3.5 rounded"
+                      className="accent-[#4573A2] w-3.5 h-3.5 rounded"
                     />
                     {q}
                   </label>
@@ -332,7 +332,7 @@ export default function GutachterProfilPanel({
               onBlur={handleNotizSave}
               placeholder="Interne Notizen..."
               rows={2}
-              className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-400 resize-y"
+              className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2] placeholder-gray-400 resize-y"
             />
           </section>
 
@@ -352,7 +352,7 @@ export default function GutachterProfilPanel({
             </div>
             <Link
               href={`/admin/sachverstaendige/${sv.id}`}
-              className="block text-center bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium py-2.5 rounded-xl transition-colors"
+              className="block text-center bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium py-2.5 rounded-xl transition-colors"
             >
               Vollstaendiges Profil
             </Link>

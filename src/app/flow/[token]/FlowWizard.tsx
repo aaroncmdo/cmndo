@@ -340,7 +340,7 @@ export default function FlowWizard({ token, initialData }: { token: string; init
           <div className="space-y-3 pt-4">
             <button
               onClick={() => router.push(`/flow/signatur/${credentials.fallId}`)}
-              className="w-full min-h-14 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-base active:scale-[0.98] transition-all"
+              className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
             >
               Weiter zur Unterschrift
             </button>
@@ -363,7 +363,7 @@ export default function FlowWizard({ token, initialData }: { token: string; init
       {/* Progress bar */}
       <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-gray-100">
         <div
-          className="h-full bg-blue-500 transition-all duration-500 ease-out"
+          className="h-full bg-[#4573A2] transition-all duration-500 ease-out"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -418,7 +418,7 @@ export default function FlowWizard({ token, initialData }: { token: string; init
             <button
               onClick={handleSubmit}
               disabled={submitting}
-              className="w-full min-h-14 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+              className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
             >
               {submitting ? 'Wird gesendet ...' : 'Schaden melden'}
             </button>
@@ -426,7 +426,7 @@ export default function FlowWizard({ token, initialData }: { token: string; init
             <button
               onClick={() => setStep((s) => s + 1)}
               disabled={!canProceed(step, data)}
-              className="w-full min-h-14 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-base disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+              className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
             >
               Weiter
             </button>
@@ -470,7 +470,7 @@ function SelectButton({
       onClick={onClick}
       className={`w-full text-left px-5 py-4 rounded-2xl border text-sm font-medium transition-all active:scale-[0.98] ${
         selected
-          ? 'border-blue-500 bg-blue-500/10 text-blue-400 font-semibold'
+          ? 'border-[#4573A2] bg-[#4573A2]/10 text-[#7BA3CC] font-semibold'
           : 'border-gray-300 bg-gray-100/50 text-gray-800 hover:border-gray-300'
       }`}
     >
@@ -507,7 +507,7 @@ function Step2({ value, toggle }: { value: string[]; toggle: (v: string) => void
             onClick={() => toggle(opt.value)}
             className={`text-left px-4 py-4 rounded-2xl border text-sm font-medium transition-all active:scale-[0.97] ${
               value.includes(opt.value)
-                ? 'border-blue-500 bg-blue-500/10 text-blue-400 font-semibold'
+                ? 'border-[#4573A2] bg-[#4573A2]/10 text-[#7BA3CC] font-semibold'
                 : 'border-gray-300 bg-gray-100/50 text-gray-800 hover:border-gray-300'
             }`}
           >
@@ -581,7 +581,7 @@ function Step5({
         onClick={() => fileInputRef.current?.click()}
         className={`flex flex-col items-center justify-center gap-3 px-6 py-10 rounded-2xl border-2 border-dashed cursor-pointer transition-all ${
           dragOver
-            ? 'border-blue-500 bg-blue-500/5'
+            ? 'border-[#4573A2] bg-[#4573A2]/5'
             : 'border-gray-300 bg-gray-100/50 hover:border-gray-300'
         }`}
       >
@@ -637,13 +637,13 @@ function Step6({ value, toggle }: { value: string[]; toggle: (v: string) => void
             onClick={() => toggle(opt.value)}
             className={`w-full flex items-center gap-3 text-left px-5 py-4 rounded-2xl border text-sm font-medium transition-all active:scale-[0.98] ${
               value.includes(opt.value)
-                ? 'border-blue-500 bg-blue-500/10 text-blue-400 font-semibold'
+                ? 'border-[#4573A2] bg-[#4573A2]/10 text-[#7BA3CC] font-semibold'
                 : 'border-gray-300 bg-gray-100/50 text-gray-800 hover:border-gray-300'
             }`}
           >
             <div
               className={`flex-shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-all ${
-                value.includes(opt.value) ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
+                value.includes(opt.value) ? 'border-[#4573A2] bg-[#4573A2]' : 'border-gray-300'
               }`}
             >
               {value.includes(opt.value) && <CheckIcon className="w-3.5 h-3.5 text-gray-900" />}

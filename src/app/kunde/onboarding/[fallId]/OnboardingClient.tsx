@@ -91,7 +91,7 @@ export default function OnboardingClient({
           </div>
           <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-blue-500 rounded-full transition-all duration-500 ease-out"
+              className="h-full bg-[#4573A2] rounded-full transition-all duration-500 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -205,7 +205,7 @@ export default function OnboardingClient({
         <button
           onClick={handleComplete}
           disabled={!allPflichtDone || completing}
-          className="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-base disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+          className="w-full py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
         >
           {completing ? 'Wird abgeschlossen...' : 'Onboarding abschliessen'}
         </button>
@@ -307,13 +307,13 @@ function DokumentCard({
           onClick={() => fileRef.current?.click()}
           className={`mt-3 flex flex-col items-center justify-center gap-2 px-4 py-6 rounded-xl border-2 border-dashed cursor-pointer transition-all ${
             dragOver
-              ? 'border-blue-500 bg-blue-500/5'
+              ? 'border-[#4573A2] bg-[#4573A2]/5'
               : 'border-gray-300 bg-gray-100/30 hover:border-gray-300'
           }`}
         >
           {uploading ? (
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-[#4573A2] border-t-transparent rounded-full animate-spin" />
               <span className="text-gray-500 text-sm">Wird hochgeladen...</span>
             </div>
           ) : (

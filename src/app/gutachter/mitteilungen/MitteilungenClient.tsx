@@ -47,7 +47,7 @@ const TYP_ICON: Record<string, typeof BellIcon> = {
 }
 
 const TYP_COLOR: Record<string, string> = {
-  neuer_auftrag: 'text-blue-400 bg-blue-50',
+  neuer_auftrag: 'text-[#7BA3CC] bg-[#4573A2]/5',
   termin_bestaetigt: 'text-green-400 bg-green-50',
   termin_geaendert: 'text-amber-400 bg-amber-50',
   kunde_dokument_hochgeladen: 'text-sky-400 bg-sky-950',
@@ -185,7 +185,7 @@ export default function MitteilungenClient({ mitteilungen: initial }: { mitteilu
                   </div>
                   {!m.gelesen && (
                     <div className="shrink-0 mt-1.5">
-                      <div className="w-2 h-2 rounded-full bg-blue-500" />
+                      <div className="w-2 h-2 rounded-full bg-[#4573A2]" />
                     </div>
                   )}
                 </div>

@@ -44,7 +44,7 @@ const DOKUMENT_TYP_LABEL: Record<string, string> = {
 const STATUS_BADGE: Record<string, string> = {
   ausstehend: 'bg-red-50 text-red-300',
   hochgeladen: 'bg-green-50 text-green-300',
-  geprueft: 'bg-blue-50 text-blue-300',
+  geprueft: 'bg-[#4573A2]/5 text-[#7BA3CC]',
   abgelehnt: 'bg-amber-50 text-amber-300',
 }
 
@@ -218,7 +218,7 @@ export default function FallDetailClient({
             </h1>
             <p className="text-gray-500 text-sm mt-0.5">{kundenName}</p>
           </div>
-          <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-300">
+          <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#4573A2]/5 text-[#7BA3CC]">
             {fall.status as string}
           </span>
         </div>
@@ -227,7 +227,7 @@ export default function FallDetailClient({
         {fall.sv_termin && !hasGutachten && (fall.status === 'sv-termin' || fall.status === 'sv-zugewiesen') && (
           <div className="flex gap-2 mb-4">
             <button onClick={() => setShowVorOrt(true)}
-              className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
+              className="flex-1 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
               <CameraIcon className="w-4 h-4" /> Bin angekommen — Vor-Ort Erfassung
             </button>
             <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent([fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', '))}`}
@@ -335,7 +335,7 @@ export default function FallDetailClient({
               <h2 className="text-sm font-medium text-gray-500 mb-3">Flags</h2>
               <div className="flex flex-wrap gap-2">
                 {fall.personenschaden_flag ? <Badge label="Personenschaden" color="bg-red-50 text-red-300" /> : null}
-                {fall.mietwagen_flag ? <Badge label="Mietwagen" color="bg-blue-50 text-blue-300" /> : null}
+                {fall.mietwagen_flag ? <Badge label="Mietwagen" color="bg-[#4573A2]/5 text-[#7BA3CC]" /> : null}
                 {fall.leasing_flag ? <Badge label="Leasing" color="bg-violet-50 text-violet-300" /> : null}
                 {fall.finanzierung_flag ? <Badge label="Finanzierung" color="bg-amber-50 text-amber-300" /> : null}
                 {fall.gewerbe_flag ? <Badge label="Gewerbe" color="bg-cyan-50 text-cyan-300" /> : null}
@@ -353,12 +353,12 @@ export default function FallDetailClient({
                     {`${kundenbetreuer.vorname ?? ''} ${kundenbetreuer.nachname ?? ''}`.trim() || '—'}
                   </p>
                   {kundenbetreuer.telefon && (
-                    <a href={`tel:${kundenbetreuer.telefon}`} className="flex items-center gap-2 text-blue-400 text-sm hover:text-blue-300">
+                    <a href={`tel:${kundenbetreuer.telefon}`} className="flex items-center gap-2 text-[#7BA3CC] text-sm hover:text-[#7BA3CC]">
                       <span className="text-gray-500 text-xs">Tel:</span> {kundenbetreuer.telefon}
                     </a>
                   )}
                   {kundenbetreuer.email && (
-                    <a href={`mailto:${kundenbetreuer.email}`} className="flex items-center gap-2 text-blue-400 text-sm hover:text-blue-300 truncate">
+                    <a href={`mailto:${kundenbetreuer.email}`} className="flex items-center gap-2 text-[#7BA3CC] text-sm hover:text-[#7BA3CC] truncate">
                       <span className="text-gray-500 text-xs">Mail:</span> {kundenbetreuer.email}
                     </a>
                   )}
@@ -379,7 +379,7 @@ export default function FallDetailClient({
                     onChange={(e) => setFinInput(e.target.value.toUpperCase())}
                     placeholder="WBA1234567890ABCD"
                     maxLength={17}
-                    className="flex-1 bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    className="flex-1 bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
                   />
                   <button
                     onClick={async () => {
@@ -396,7 +396,7 @@ export default function FallDetailClient({
                       }
                     }}
                     disabled={finSaving || finInput.length !== 17}
-                    className="bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 disabled:text-gray-500 text-gray-900 text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
+                    className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:bg-zinc-700 disabled:text-gray-500 text-gray-900 text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
                   >
                     {finSaving ? '...' : 'Speichern'}
                   </button>
@@ -541,7 +541,7 @@ export default function FallDetailClient({
                 <select
                   value={dateiKategorie}
                   onChange={(e) => setDateiKategorie(e.target.value)}
-                  className="bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  className="bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
                 >
                   <option value="gutachter-foto">Gutachter-Foto</option>
                   <option value="gutachten">Gutachten</option>
@@ -575,7 +575,7 @@ export default function FallDetailClient({
               }
 
               const KATEGORIE_COLOR: Record<string, string> = {
-                'kundendokument': 'bg-blue-50 text-blue-300',
+                'kundendokument': 'bg-[#4573A2]/5 text-[#7BA3CC]',
                 'schadensfoto': 'bg-amber-50 text-amber-300',
                 'gutachten': 'bg-violet-50 text-violet-300',
                 'kanzlei': 'bg-cyan-50 text-cyan-300',
@@ -586,7 +586,7 @@ export default function FallDetailClient({
               }
 
               const QUELLE_COLOR: Record<string, string> = {
-                'flowlink': 'bg-blue-50 text-blue-400',
+                'flowlink': 'bg-[#4573A2]/5 text-[#7BA3CC]',
                 'portal': 'bg-violet-50 text-violet-400',
                 'whatsapp': 'bg-emerald-50 text-emerald-400',
                 'gutachter': 'bg-green-50 text-green-400',
@@ -698,7 +698,7 @@ export default function FallDetailClient({
                       href={doc.datei_url as string}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-400 hover:text-blue-300 text-xs"
+                      className="text-[#7BA3CC] hover:text-[#7BA3CC] text-xs"
                     >
                       Oeffnen
                     </a>
@@ -743,7 +743,7 @@ export default function FallDetailClient({
                           min="0"
                           required
                           placeholder="0,00"
-                          className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+                          className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm pr-12 focus:outline-none focus:ring-2 focus:ring-[#4573A2]/50 focus:border-[#4573A2]"
                         />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">EUR</span>
                       </div>
@@ -752,7 +752,7 @@ export default function FallDetailClient({
                     <button
                       type="submit"
                       disabled={uploading}
-                      className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 disabled:text-gray-500 text-gray-900 font-medium py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2"
+                      className="w-full bg-[#1E3A5F] hover:bg-[#4573A2] disabled:bg-zinc-700 disabled:text-gray-500 text-gray-900 font-medium py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2"
                     >
                       <UploadIcon className="w-4 h-4" />
                       {uploading ? 'Wird hochgeladen...' : 'Gutachten einreichen'}
@@ -813,7 +813,7 @@ export default function FallDetailClient({
                           isCompleted
                             ? 'bg-green-600 text-white'
                             : isCurrent
-                              ? 'bg-blue-600 text-white'
+                              ? 'bg-[#1E3A5F] text-white'
                               : 'bg-gray-100 text-gray-400'
                         }`}>
                           {isCompleted ? (
@@ -830,7 +830,7 @@ export default function FallDetailClient({
                       {/* Step content */}
                       <div className="pt-1">
                         <p className={`text-sm font-medium ${
-                          isCompleted ? 'text-green-300' : isCurrent ? 'text-blue-300' : 'text-gray-500'
+                          isCompleted ? 'text-green-300' : isCurrent ? 'text-[#7BA3CC]' : 'text-gray-500'
                         }`}>
                           {step.label}
                         </p>
@@ -923,7 +923,7 @@ function GutachterChatTabs({ fallId }: { fallId: string }) {
   return (
     <div className="bg-white border border-gray-200 rounded-2xl flex flex-col" style={{ height: '70vh' }}>
       <div className="flex border-b border-gray-200 shrink-0">
-        <button onClick={() => setCh('claimondo-gutachter')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'claimondo-gutachter' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-400'}`}>Claimondo</button>
+        <button onClick={() => setCh('claimondo-gutachter')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'claimondo-gutachter' ? 'border-[#4573A2] text-[#4573A2]' : 'border-transparent text-gray-400'}`}>Claimondo</button>
         <button onClick={() => setCh('kunde-gutachter')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'kunde-gutachter' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-400'}`}>Kunde</button>
       </div>
       <div className="flex-1 min-h-0">

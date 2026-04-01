@@ -25,10 +25,10 @@ export const FALL_STATUS_LABELS: Record<string, string> = {
 }
 
 export const FALL_STATUS_COLORS: Record<string, string> = {
-  ersterfassung: 'bg-blue-950 text-blue-300 border-blue-800',
+  ersterfassung: 'bg-blue-950 text-[#7BA3CC] border-[#1E3A5F]',
   'flow-gesendet': 'bg-violet-950 text-violet-300 border-violet-800',
   onboarding: 'bg-pink-950 text-pink-300 border-pink-800',
-  'sv-zugewiesen': 'bg-blue-950 text-blue-300 border-blue-800',
+  'sv-zugewiesen': 'bg-blue-950 text-[#7BA3CC] border-[#1E3A5F]',
   'sv-termin': 'bg-yellow-950 text-yellow-300 border-yellow-800',
   besichtigung: 'bg-teal-950 text-teal-300 border-teal-800',
   'gutachten-eingegangen': 'bg-orange-950 text-orange-300 border-orange-800',
@@ -119,7 +119,7 @@ export const MANDATSTYP_LABELS: Record<string, string> = {
 }
 
 export const MANDATSTYP_COLORS: Record<string, string> = {
-  claimondo: 'bg-blue-950 text-blue-300',
+  claimondo: 'bg-blue-950 text-[#7BA3CC]',
   'kanzlei-claimondo': 'bg-purple-950 text-purple-300',
 }
 

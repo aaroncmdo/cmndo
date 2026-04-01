@@ -78,7 +78,7 @@ const COLUMNS: Column[] = [
   { key: 'neu',               label: 'NEU',              sub: 'Noch nicht angerufen',     color: 'text-sky-600',     bg: 'bg-sky-500',     icon: UserPlusIcon },
   { key: 'nicht-erreicht',    label: 'NICHT ERREICHT',   sub: 'Angerufen, kein Kontakt',  color: 'text-red-500',     bg: 'bg-red-500',     icon: PhoneOffIcon },
   { key: 'rueckruf',          label: 'RUECKRUF',         sub: 'Termin vereinbart',        color: 'text-amber-500',   bg: 'bg-amber-500',   icon: PhoneCallIcon },
-  { key: 'in-qualifizierung', label: 'IN QUALIFIZIERUNG',sub: 'Im Gespraech',             color: 'text-blue-600',    bg: 'bg-blue-500',    icon: ClipboardListIcon },
+  { key: 'in-qualifizierung', label: 'IN QUALIFIZIERUNG',sub: 'Im Gespraech',             color: 'text-[#4573A2]',    bg: 'bg-[#4573A2]',    icon: ClipboardListIcon },
   { key: 'flow-versendet',    label: 'FLOW VERSENDET',   sub: 'Wartet auf Kunde',         color: 'text-violet-500',  bg: 'bg-violet-500',  icon: SendIcon },
   { key: 'sa-ausstehend',     label: 'SA AUSSTEHEND',    sub: 'Unterschriften fehlen',    color: 'text-orange-500',  bg: 'bg-orange-500',  icon: FileTextIcon },
   { key: 'konvertiert',       label: 'KONVERTIERT',      sub: 'Lead -> Fallakte',         color: 'text-emerald-600', bg: 'bg-emerald-500', icon: CheckCircle2Icon },
@@ -277,13 +277,13 @@ export default function DispatchBoard({
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => setShowNewLead(!showNewLead)}
-              className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 h-7">
+              className="bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-xs font-medium px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 h-7">
               <UserPlusIcon className="w-3 h-3" /> Neu
             </button>
             <div className="relative">
               <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
               <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suche..."
-                className="pl-7 pr-2 py-1 bg-white border border-gray-200 rounded-lg text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 w-40 h-7" />
+                className="pl-7 pr-2 py-1 bg-white border border-gray-200 rounded-lg text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#4573A2] w-40 h-7" />
             </div>
           </div>
         </div>
@@ -333,10 +333,10 @@ export default function DispatchBoard({
           <div className="bg-white border border-gray-200 rounded-2xl p-4 mb-4 shadow-sm">
             <h3 className="text-sm font-semibold text-gray-900 mb-3">Neuer Lead</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
-              <input placeholder="Vorname *" value={newLead.vorname} onChange={e => setNewLead(p => ({ ...p, vorname: e.target.value }))} className="bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-              <input placeholder="Nachname *" value={newLead.nachname} onChange={e => setNewLead(p => ({ ...p, nachname: e.target.value }))} className="bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-              <input placeholder="Telefon *" value={newLead.telefon} onChange={e => setNewLead(p => ({ ...p, telefon: e.target.value }))} className="bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-              <input placeholder="E-Mail" value={newLead.email} onChange={e => setNewLead(p => ({ ...p, email: e.target.value }))} className="bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              <input placeholder="Vorname *" value={newLead.vorname} onChange={e => setNewLead(p => ({ ...p, vorname: e.target.value }))} className="bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2]" />
+              <input placeholder="Nachname *" value={newLead.nachname} onChange={e => setNewLead(p => ({ ...p, nachname: e.target.value }))} className="bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2]" />
+              <input placeholder="Telefon *" value={newLead.telefon} onChange={e => setNewLead(p => ({ ...p, telefon: e.target.value }))} className="bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2]" />
+              <input placeholder="E-Mail" value={newLead.email} onChange={e => setNewLead(p => ({ ...p, email: e.target.value }))} className="bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2]" />
               <select value={newLead.source_channel} onChange={e => setNewLead(p => ({ ...p, source_channel: e.target.value }))} className="bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2">
                 <option value="telefon">Telefon</option><option value="website">Website</option><option value="whatsapp">WhatsApp</option><option value="empfehlung">Empfehlung</option><option value="google-ads">Google Ads</option>
               </select>
@@ -352,7 +352,7 @@ export default function DispatchBoard({
                   catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }
                   setNewLeadSaving(false)
                 }}
-                className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors">
+                className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors">
                 {newLeadSaving ? 'Erstellt...' : 'Lead erstellen'}
               </button>
               <button onClick={() => setShowNewLead(false)} className="text-gray-500 hover:text-gray-700 text-sm px-3 py-2">Abbrechen</button>
@@ -438,7 +438,7 @@ export default function DispatchBoard({
                         ref={provided.innerRef}
                         {...provided.droppableProps}
                         style={{ flex: 1, overflowY: 'auto', padding: 4, display: 'flex', flexDirection: 'column', gap: 4 }}
-                        className={`transition-colors ${snapshot.isDraggingOver ? 'bg-blue-50 border-2 border-dashed border-blue-300 rounded-lg' : ''}`}
+                        className={`transition-colors ${snapshot.isDraggingOver ? 'bg-[#4573A2]/5 border-2 border-dashed border-[#4573A2]/30 rounded-lg' : ''}`}
                       >
                           {sorted.length === 0 && !snapshot.isDraggingOver && (
                             <div className="rounded-xl border border-dashed border-gray-200 p-4 text-center">
@@ -496,7 +496,7 @@ function LeadCard({ lead, columnKey }: { lead: Lead; columnKey: string }) {
 
       {/* Name + Age */}
       <div className="flex items-center justify-between mb-0.5">
-        <Link href={`/admin/dispatch/lead/${lead.id}`} className="text-gray-800 text-sm font-medium leading-snug truncate hover:text-blue-600 transition-colors flex-1 min-w-0"
+        <Link href={`/admin/dispatch/lead/${lead.id}`} className="text-gray-800 text-sm font-medium leading-snug truncate hover:text-[#4573A2] transition-colors flex-1 min-w-0"
           onClick={e => e.stopPropagation()}>
           {name}
         </Link>
@@ -506,7 +506,7 @@ function LeadCard({ lead, columnKey }: { lead: Lead; columnKey: string }) {
       {/* Telefon */}
       {lead.telefon && (
         <a href={`tel:${lead.telefon}`} onClick={e => e.stopPropagation()}
-          className="text-blue-500 hover:text-blue-600 text-[11px] mb-1.5 block truncate transition-colors">
+          className="text-[#4573A2] hover:text-[#4573A2] text-[11px] mb-1.5 block truncate transition-colors">
           {lead.telefon}
         </a>
       )}
@@ -517,7 +517,7 @@ function LeadCard({ lead, columnKey }: { lead: Lead; columnKey: string }) {
           <SourceIcon className="w-2.5 h-2.5" /> {SOURCE_LABEL[lead.source_channel ?? ''] ?? lead.source_channel}
         </span>
         {lead.schadenfall_typ && (
-          <span className="bg-blue-50 text-blue-600 text-[9px] font-medium px-1.5 py-0.5 rounded">
+          <span className="bg-[#4573A2]/5 text-[#4573A2] text-[9px] font-medium px-1.5 py-0.5 rounded">
             {SF_SHORT[lead.schadenfall_typ] ?? lead.schadenfall_typ}
           </span>
         )}
@@ -539,7 +539,7 @@ function LeadCard({ lead, columnKey }: { lead: Lead; columnKey: string }) {
       {columnKey === 'flow-versendet' && (
         <div className="text-[10px] text-gray-500 mb-1">
           {lead.flow_link_abgeschlossen ? <span className="text-emerald-600">FlowLink abgeschlossen</span>
-            : lead.flow_link_geoeffnet ? <span className="text-blue-500">FlowLink geoeffnet</span>
+            : lead.flow_link_geoeffnet ? <span className="text-[#4573A2]">FlowLink geoeffnet</span>
             : <span>Wartet seit {timeSince(lead.updated_at)}</span>}
         </div>
       )}

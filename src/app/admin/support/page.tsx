@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 
 const STATUS_COLOR: Record<string, string> = {
-  neu: 'bg-blue-50 text-blue-600',
+  neu: 'bg-[#4573A2]/5 text-[#4573A2]',
   'in-bearbeitung': 'bg-amber-50 text-amber-600',
   geloest: 'bg-green-50 text-green-600',
   geschlossen: 'bg-gray-100 text-gray-500',

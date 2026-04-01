@@ -58,7 +58,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
             <input
               name="vorname"
               defaultValue={sv.vorname}
-              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
             />
           </div>
           <div>
@@ -66,7 +66,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
             <input
               name="nachname"
               defaultValue={sv.nachname}
-              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
             />
           </div>
         </div>
@@ -76,7 +76,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
           <input
             name="telefon"
             defaultValue={sv.telefon}
-            className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+            className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
           />
         </div>
 
@@ -86,7 +86,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
             <select
               name="paket"
               defaultValue={sv.paket}
-              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
             >
               {PAKET_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -100,7 +100,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
               type="number"
               min="1"
               defaultValue={sv.maxFaelleMonat}
-              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
             />
           </div>
         </div>
@@ -110,7 +110,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
           <input
             name="gebiet_plz"
             defaultValue={sv.gebietPlz.join(', ')}
-            className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+            className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
             placeholder="10115, 10117, 10119 ..."
           />
         </div>
@@ -120,7 +120,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
           <select
             name="ist_aktiv"
             defaultValue={sv.istAktiv ? 'true' : 'false'}
-            className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+            className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
           >
             <option value="true">Aktiv</option>
             <option value="false">Inaktiv</option>
@@ -133,7 +133,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
             name="notizen"
             defaultValue={sv.notizen}
             rows={3}
-            className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none"
+            className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] resize-none"
             placeholder="Interne Notizen ..."
           />
         </div>
@@ -144,7 +144,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
         <button
           type="submit"
           disabled={saving}
-          className="w-full py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-blue-600 hover:bg-blue-500 text-white"
+          className="w-full py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-[#1E3A5F] hover:bg-[#4573A2] text-white"
         >
           {saving ? 'Speichert ...' : 'Änderungen speichern'}
         </button>

@@ -10,7 +10,7 @@ type TimelineItem = { zeit: string; typ: string; label: string; detail: string; 
 const MEDAL = ['text-amber-300', 'text-gray-500', 'text-orange-400']
 
 const TL_COLORS: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
-  telefon: { bg: 'bg-blue-500/20', text: 'text-blue-400', icon: <PhoneIcon className="w-4 h-4" /> },
+  telefon: { bg: 'bg-[#4573A2]/20', text: 'text-[#7BA3CC]', icon: <PhoneIcon className="w-4 h-4" /> },
   video: { bg: 'bg-purple-500/20', text: 'text-purple-400', icon: <VideoIcon className="w-4 h-4" /> },
   task: { bg: 'bg-amber-500/20', text: 'text-amber-400', icon: <AlertTriangleIcon className="w-4 h-4" /> },
   gutachter: { bg: 'bg-orange-500/20', text: 'text-orange-400', icon: <CalendarIcon className="w-4 h-4" /> },
@@ -34,7 +34,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
   return (
     <div className="px-4 py-8"><div className="max-w-4xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2"><BarChart3Icon className="w-5 h-5 text-blue-400" />Meine Performance</h1>
+        <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2"><BarChart3Icon className="w-5 h-5 text-[#7BA3CC]" />Meine Performance</h1>
         <p className="text-gray-500 text-sm mt-0.5">{name} · {monatLabel}</p>
       </div>
 
@@ -44,9 +44,9 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
           {/* Tages-Zusammenfassung */}
           {tagesSummary && (
             <div className="flex items-center gap-4 mb-4 pb-3 border-b border-gray-200">
-              <h2 className="text-gray-900 font-semibold flex items-center gap-2"><CalendarIcon className="w-4 h-4 text-blue-400" />Heute</h2>
+              <h2 className="text-gray-900 font-semibold flex items-center gap-2"><CalendarIcon className="w-4 h-4 text-[#7BA3CC]" />Heute</h2>
               <div className="flex gap-3 text-xs">
-                <span className="text-blue-400 font-medium">{tagesSummary.termine} Termine</span>
+                <span className="text-[#7BA3CC] font-medium">{tagesSummary.termine} Termine</span>
                 <span className="text-amber-400 font-medium">{tagesSummary.offeneTasks} Tasks</span>
                 {tagesSummary.ueberfaellig > 0 && <span className="text-red-400 font-semibold">{tagesSummary.ueberfaellig} ueberfaellig</span>}
               </div>
@@ -96,9 +96,9 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
         {stats.isDispatch ? (<>
           <KPI icon={<BarChart3Icon className="w-4 h-4 text-amber-400" />} label="Leads qualifiziert" value={stats.leadsTotal} />
           <KPI icon={<BriefcaseIcon className="w-4 h-4 text-green-400" />} label="Konvertiert" value={stats.leadsKonv} />
-          <KPI icon={<BarChart3Icon className="w-4 h-4 text-blue-400" />} label="Conv. Rate" value={stats.leadsTotal > 0 ? `${Math.round((stats.leadsKonv / stats.leadsTotal) * 100)}%` : '—'} />
+          <KPI icon={<BarChart3Icon className="w-4 h-4 text-[#7BA3CC]" />} label="Conv. Rate" value={stats.leadsTotal > 0 ? `${Math.round((stats.leadsKonv / stats.leadsTotal) * 100)}%` : '—'} />
         </>) : (<>
-          <KPI icon={<BriefcaseIcon className="w-4 h-4 text-blue-400" />} label="Aktive Faelle" value={stats.aktiveFaelle} />
+          <KPI icon={<BriefcaseIcon className="w-4 h-4 text-[#7BA3CC]" />} label="Aktive Faelle" value={stats.aktiveFaelle} />
           <KPI icon={<BarChart3Icon className="w-4 h-4 text-green-400" />} label="Abgeschlossen" value={stats.abgeschlossen} />
           <KPI icon={<ClockIcon className="w-4 h-4 text-amber-400" />} label="Kapazitaet" value={`${stats.aktiveFaelle}/${profile.kapazitaet_max ?? 100}`} />
         </>)}
@@ -113,7 +113,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
           </div>
           <div className="divide-y divide-gray-200/50">
             {leaderboard.map((entry, i) => (
-              <div key={entry.id} className={`px-5 py-3 flex items-center justify-between ${entry.id === userId ? 'bg-blue-50/30 border-l-2 border-blue-500' : ''}`}>
+              <div key={entry.id} className={`px-5 py-3 flex items-center justify-between ${entry.id === userId ? 'bg-[#4573A2]/10 border-l-2 border-[#4573A2]' : ''}`}>
                 <div className="flex items-center gap-3">
                   <span className={`text-sm font-bold w-6 ${i < 3 ? MEDAL[i] : 'text-gray-500'}`}>{i + 1}</span>
                   <span className={`text-sm ${entry.id === userId ? 'text-gray-900 font-semibold' : 'text-gray-700'}`}>{entry.name}{entry.id === userId ? ' (Du)' : ''}</span>
