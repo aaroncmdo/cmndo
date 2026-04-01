@@ -64,7 +64,7 @@ export default async function GutachterTasksPage() {
   }
 
   return (
-    <div className="px-4 py-6 sm:py-8">
+    <div className="h-full overflow-y-auto px-4 py-6 sm:py-8">
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
           <ClipboardListIcon className="w-6 h-6 text-[#7BA3CC]" />

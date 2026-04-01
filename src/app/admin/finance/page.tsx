@@ -646,7 +646,7 @@ export default async function FinancePage() {
   } catch { /* table may not exist yet */ }
 
   return (
-    <>
+    <div className="h-full overflow-y-auto">
       <FinanceClient
         mrr={mrr}
         aktiveSvCount={(aktiveSvs ?? []).length}
@@ -676,6 +676,6 @@ export default async function FinancePage() {
       <GutachterAbrechnungen svRows={svRows} gutachterAnzahlungenGesamt={gutachterAnzahlungenGesamt} />
       <IndividuelleAnfragenSection anfragen={individuelleAnfragen} />
       <InvestitionProFallSection />
-    </>
+    </div>
   )
 }

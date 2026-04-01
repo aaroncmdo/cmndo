@@ -138,7 +138,7 @@ export default function KanbanBoard({
   }
 
   return (
-    <div className="px-4 py-8">
+    <div className="h-full overflow-y-auto px-4 py-8">
       <div className="max-w-[1400px] mx-auto">
 
         {/* Header */}

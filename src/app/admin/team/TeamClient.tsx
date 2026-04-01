@@ -48,7 +48,7 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
   const name = (m: Mitarbeiter) => [m.vorname, m.nachname].filter(Boolean).join(' ') || '—'
 
   return (
-    <div className="px-4 py-8"><div className="max-w-5xl mx-auto">
+    <div className="h-full overflow-y-auto px-4 py-8"><div className="max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2"><UsersIcon className="w-5 h-5 text-gray-500" />Personal</h1>

@@ -128,7 +128,7 @@ export default function SvKalenderModal({ svId, svName, onClose }: { svId: strin
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden" style={{ width: 'min(95vw, 900px)', maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
+      <div className="bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden" style={{ width: '90vw', height: '85vh' }} onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 flex-shrink-0">
           <div>
