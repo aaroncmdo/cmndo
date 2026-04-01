@@ -2,7 +2,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Script from 'next/script'
 import { updateSvProfile } from './actions'
+import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
+import { MapPinIcon } from 'lucide-react'
 
 const PAKET_OPTIONS = [
   { value: 'standard', label: 'Standard (10 Fälle, 15km)' },
@@ -20,6 +23,12 @@ type SvData = {
   maxFaelleMonat: number
   istAktiv: boolean
   notizen: string
+  standortAdresse: string
+  standortPlz: string
+  standortLat: number | null
+  standortLng: number | null
+  standortPlaceId: string
+  paketUmkreisKm: number
 }
 
 export default function SvDetailClient({ sv }: { sv: SvData }) {
@@ -28,6 +37,25 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
+  // Standort state (updated by Google Places)
+  const [standort, setStandort] = useState({
+    adresse: sv.standortAdresse,
+    plz: sv.standortPlz,
+    lat: sv.standortLat,
+    lng: sv.standortLng,
+    place_id: sv.standortPlaceId,
+  })
+
+  function handlePlaceSelect(result: PlaceResult) {
+    setStandort({
+      adresse: result.adresse,
+      plz: result.plz,
+      lat: result.lat,
+      lng: result.lng,
+      place_id: result.place_id,
+    })
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setSaving(true)
@@ -35,6 +63,12 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
     setSuccess(false)
     try {
       const formData = new FormData(e.currentTarget)
+      // Inject standort data into FormData
+      formData.set('standort_adresse', standort.adresse)
+      formData.set('standort_plz', standort.plz)
+      formData.set('standort_lat', standort.lat != null ? String(standort.lat) : '')
+      formData.set('standort_lng', standort.lng != null ? String(standort.lng) : '')
+      formData.set('standort_place_id', standort.place_id)
       await updateSvProfile(sv.id, sv.profileId, formData)
       setSuccess(true)
       router.refresh()
@@ -50,6 +84,11 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-5">
+      <Script
+        src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}
+        strategy="lazyOnload"
+      />
+
       <h2 className="text-sm font-medium text-gray-500 mb-4">Profil bearbeiten</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -69,6 +108,28 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
           <input name="telefon" defaultValue={sv.telefon} className={inputCls} />
         </div>
 
+        {/* Standort mit Google Places Autocomplete */}
+        <div className="border border-gray-200 rounded-xl p-4 bg-gray-50/50">
+          <label className="flex items-center gap-1.5 text-gray-500 text-xs mb-2">
+            <MapPinIcon className="w-3.5 h-3.5" /> Standort (Google Places)
+          </label>
+          <GooglePlaceAutocomplete
+            defaultValue={standort.adresse}
+            placeholder="Adresse eingeben..."
+            onSelect={handlePlaceSelect}
+            className={inputCls}
+          />
+          {standort.lat != null && standort.lng != null && (
+            <div className="flex items-center gap-3 mt-2 text-[10px] text-gray-400">
+              <span>PLZ: {standort.plz || '—'}</span>
+              <span>Lat: {standort.lat.toFixed(4)}</span>
+              <span>Lng: {standort.lng.toFixed(4)}</span>
+              <span>Radius: {sv.paketUmkreisKm} km</span>
+            </div>
+          )}
+          <p className="text-[10px] text-gray-400 mt-1">Einsatzgebiet wird automatisch per Isochrone berechnet</p>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-gray-500 text-xs mb-1">Paket</label>
@@ -81,8 +142,6 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
             <input name="max_faelle_monat" type="number" min="1" defaultValue={sv.maxFaelleMonat} className={inputCls} />
           </div>
         </div>
-
-        {/* PLZ-Einsatzgebiet ENTFERNT — Dispatching per Isochrone */}
 
         <div>
           <label className="block text-gray-500 text-xs mb-1">Status</label>
@@ -98,11 +157,11 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
         </div>
 
         {error && <p className="text-red-500 text-sm">{error}</p>}
-        {success && <p className="text-emerald-500 text-sm">Gespeichert!</p>}
+        {success && <p className="text-emerald-500 text-sm">Gespeichert! Isochrone wird neu berechnet.</p>}
 
         <button type="submit" disabled={saving}
           className="w-full py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 bg-[#1E3A5F] hover:bg-[#4573A2] text-white">
-          {saving ? 'Speichert ...' : 'Änderungen speichern'}
+          {saving ? 'Speichert + berechnet Isochrone ...' : 'Änderungen speichern'}
         </button>
       </form>
     </div>
