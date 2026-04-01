@@ -50,13 +50,13 @@ export default function KundeShell({
             <span className="text-gray-900 font-semibold text-base tracking-tight">Claimondo</span>
           </div>
         </Link>
-        <button className="relative p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors">
-          <BellIcon className="w-5 h-5 text-gray-400" />
+        <button aria-label="Benachrichtigungen" className="relative p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors">
+          <BellIcon className="w-5 h-5 text-gray-600" aria-hidden="true" />
         </button>
       </header>
 
       {/* Content */}
-      <main className="flex-1 relative z-10 overflow-y-auto pb-20">
+      <main id="main-content" role="main" className="flex-1 relative z-10 overflow-y-auto pb-20">
         {children}
       </main>
 
@@ -74,7 +74,7 @@ export default function KundeShell({
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center justify-center gap-0.5 min-w-[48px] min-h-[48px] px-3 py-1 rounded-xl transition-all ${
-                active ? 'text-blue-600 bg-blue-50' : 'text-gray-400'
+                active ? 'text-blue-600 bg-blue-50' : 'text-gray-500'
               }`}
             >
               <item.icon className="w-5 h-5" />

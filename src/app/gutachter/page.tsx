@@ -147,9 +147,9 @@ export default function GutachterCockpit() {
           <span className="text-sm font-semibold text-gray-900">{greeting}</span>
           {/* Tages-Navigation */}
           <div className="flex items-center gap-1">
-            <button onClick={() => setSelectedDate(d => new Date(d.getTime() - 86400000))} className="text-gray-400 hover:text-gray-700 px-1 py-0.5 rounded hover:bg-gray-100 text-xs">◀</button>
-            <button onClick={() => setSelectedDate(new Date())} className="text-xs text-gray-500 hover:text-gray-800 px-1.5 py-0.5 rounded hover:bg-gray-100">{datum}</button>
-            <button onClick={() => setSelectedDate(d => new Date(d.getTime() + 86400000))} className="text-gray-400 hover:text-gray-700 px-1 py-0.5 rounded hover:bg-gray-100 text-xs">▶</button>
+            <button onClick={() => setSelectedDate(d => new Date(d.getTime() - 86400000))} aria-label="Vorheriger Tag" className="text-gray-500 hover:text-gray-700 px-1 py-0.5 rounded hover:bg-gray-100 text-xs">◀</button>
+            <button onClick={() => setSelectedDate(new Date())} aria-label="Zurück zu heute" className="text-xs text-gray-600 hover:text-gray-800 px-1.5 py-0.5 rounded hover:bg-gray-100">{datum}</button>
+            <button onClick={() => setSelectedDate(d => new Date(d.getTime() + 86400000))} aria-label="Nächster Tag" className="text-gray-500 hover:text-gray-700 px-1 py-0.5 rounded hover:bg-gray-100 text-xs">▶</button>
           </div>
         </div>
         <div className="flex items-center gap-2 text-[10px] font-medium">

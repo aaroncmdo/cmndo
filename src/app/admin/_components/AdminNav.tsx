@@ -34,14 +34,14 @@ export default function AdminNav({ email, initials }: { email: string; initials:
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col fixed top-0 left-0 h-screen w-56 z-40 bg-white border-r border-gray-200">
+      <aside role="navigation" aria-label="Admin-Navigation" className="hidden md:flex flex-col fixed top-0 left-0 h-screen w-56 z-40 bg-white border-r border-gray-200">
         <div className="px-5 py-5">
           <h2 className="text-lg font-semibold text-gray-900 tracking-tight">Claimondo</h2>
-          <p className="text-xs mt-0.5 text-gray-400">{email}</p>
+          <p className="text-xs mt-0.5 text-gray-500">{email}</p>
         </div>
 
         <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
-          <p className="text-[10px] uppercase tracking-wider text-gray-400 px-3 pt-4 pb-2">Navigation</p>
+          <p className="text-[10px] uppercase tracking-wider text-gray-500 px-3 pt-4 pb-2">Navigation</p>
           {NAV_MAIN.map((item) => {
             const active = isActive(item.href, item.exact)
             return (
@@ -58,7 +58,7 @@ export default function AdminNav({ email, initials }: { email: string; initials:
             )
           })}
 
-          <p className="text-[10px] uppercase tracking-wider text-gray-400 px-3 pt-5 pb-2">Verwaltung</p>
+          <p className="text-[10px] uppercase tracking-wider text-gray-500 px-3 pt-5 pb-2">Verwaltung</p>
           {NAV_SECONDARY.map((item) => {
             const active = isActive(item.href)
             return (
@@ -88,7 +88,7 @@ export default function AdminNav({ email, initials }: { email: string; initials:
           <form action="/api/auth/logout" method="POST">
             <button
               type="submit"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors w-full text-gray-400 hover:bg-gray-50 hover:text-gray-600"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors w-full text-gray-500 hover:bg-gray-50 hover:text-gray-600"
             >
               <LogOutIcon style={{ width: 17, height: 17 }} />
               Abmelden

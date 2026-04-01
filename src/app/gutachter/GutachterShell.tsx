@@ -144,17 +144,19 @@ export default function GutachterShell({
 
       {/* Sidebar */}
       <aside
+        role="navigation"
+        aria-label="Gutachter-Navigation"
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="px-5 py-5 border-b border-gray-200">
           {logoUrl ? (
-            <Link href="/gutachter"><img src={logoUrl} alt="Logo" className="h-8 w-auto max-w-36 object-contain" /></Link>
+            <Link href="/gutachter"><img src={logoUrl} alt="Claimondo Logo" className="h-8 w-auto max-w-36 object-contain" /></Link>
           ) : (
             <h2 className="text-gray-900 font-semibold text-lg">Claimondo</h2>
           )}
-          <p className="text-gray-500 text-xs mt-0.5">Gutachter-Portal</p>
+          <p className="text-gray-600 text-xs mt-0.5">Gutachter-Portal</p>
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1">
@@ -183,12 +185,12 @@ export default function GutachterShell({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-gray-800 text-sm font-semibold truncate">{displayName}</p>
-              <p className="text-gray-400 text-xs">Sachverständiger</p>
+              <p className="text-gray-500 text-xs">Sachverständiger</p>
             </div>
             <UserIcon className="w-4 h-4 text-gray-300 group-hover:text-gray-500 shrink-0" />
           </Link>
           <button onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-gray-400 hover:text-red-500 hover:bg-gray-50 transition-colors">
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-gray-500 hover:text-red-500 hover:bg-gray-50 transition-colors">
             <LogOutIcon className="w-4 h-4" /> Abmelden
           </button>
         </div>
@@ -232,7 +234,7 @@ export default function GutachterShell({
           </div>
         )}
 
-        <main className="flex-1 overflow-hidden">{children}</main>
+        <main id="main-content" role="main" className="flex-1 overflow-hidden">{children}</main>
       </div>
     </div>
   )
