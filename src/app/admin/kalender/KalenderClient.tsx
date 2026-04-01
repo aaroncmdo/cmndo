@@ -78,7 +78,7 @@ export default function KalenderClient({
         label: t.titel,
         sublabel: t.fall_id ? fallMap[t.fall_id] ?? null : null,
         type: 'task',
-        href: '/admin/tasks',
+        href: t.fall_id ? `/admin/faelle/${t.fall_id}` : '/admin/tasks',
         overdue: isBefore(new Date(t.faellig_am), now) && t.status !== 'erledigt',
       })
     }

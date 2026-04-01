@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -155,7 +154,7 @@ export default function GutachterShell({
           {logoUrl ? (
             <Link href="/gutachter"><img src={logoUrl} alt="Claimondo Logo" className="h-8 w-auto max-w-36 object-contain brightness-0 invert" /></Link>
           ) : (
-            <Link href="/gutachter"><Image src="/claimondo-logo.svg" alt="Claimondo Logo" width={140} height={40} className="brightness-0 invert" unoptimized priority /></Link>
+            <Link href="/gutachter" className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></Link>
           )}
           <p className="text-[#7BA3CC] text-xs mt-0.5">Gutachter-Portal</p>
         </div>
@@ -203,7 +202,7 @@ export default function GutachterShell({
           <button onClick={() => setSidebarOpen(true)} className="p-2 -ml-2 text-gray-500 hover:text-gray-800 transition-colors" aria-label="Menu oeffnen">
             <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
           </button>
-          <Image src="/claimondo-logo.svg" alt="Claimondo" width={110} height={30} unoptimized />
+          <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
           <div className="w-8" />
         </header>
 

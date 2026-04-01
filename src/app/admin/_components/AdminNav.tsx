@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -37,7 +36,7 @@ export default function AdminNav({ email, initials }: { email: string; initials:
       {/* Desktop Sidebar — Navy */}
       <aside role="navigation" aria-label="Admin-Navigation" className="hidden md:flex flex-col fixed top-0 left-0 h-screen w-56 z-40 bg-[#0D1B3E]">
         <div className="px-5 py-5">
-          <Image src="/claimondo-logo.svg" alt="Claimondo Logo" width={140} height={40} className="brightness-0 invert" unoptimized priority />
+          <span className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
           <p className="text-xs mt-0.5 text-[#7BA3CC]">{email}</p>
         </div>
 

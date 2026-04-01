@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import { login } from './actions'
 import LoginClient from './LoginClient'
 
@@ -11,7 +10,7 @@ export default function LoginPage({
     <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden bg-[#f8f9fb]">
       <div className="w-full max-w-sm relative z-10">
         <div className="mb-8 text-center">
-          <Image src="/claimondo-logo.svg" alt="Claimondo" width={250} height={70} className="mx-auto mb-4" unoptimized priority />
+          <h1 className="text-4xl font-bold tracking-tight"><span className="text-[#0D1B3E]">Claim</span><span className="text-[#4573A2]">ondo</span></h1>
           <p className="mt-2 text-sm text-gray-500">Melde dich mit deinem Konto an</p>
         </div>
 
