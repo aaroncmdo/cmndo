@@ -127,8 +127,7 @@ export default function SvKalenderModal({ svId, svName, onClose }: { svId: strin
   const weekLabel = `${weekDays[0].toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })} \u2013 ${weekDays[4].toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}`
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden" style={{ width: '90vw', height: '85vh' }} onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 bg-white flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 flex-shrink-0">
           <div>
@@ -271,7 +270,6 @@ export default function SvKalenderModal({ svId, svName, onClose }: { svId: strin
             </div>
           </div>
         )}
-      </div>
     </div>
   )
 }
