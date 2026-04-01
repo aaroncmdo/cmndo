@@ -13,7 +13,7 @@ import { createClient } from '@/lib/supabase/client'
 type Termin = { id: string; fallId: string; zeit: string; uhrzeit: string; svName: string; kunde: string; kennzeichen: string | null; adresse: string; status: string }
 type Rueckruf = { id: string; name: string; telefon: string | null; datum: string; notiz: string | null }
 type TLEvent = { zeit: string; uhrzeit: string; typ: 'termin' | 'task-done' | 'task-offen' | 'nachricht' | 'system' | 'zahlung' | 'fall-neu'; titel: string; detail: string; fallId?: string; link?: string }
-type Task = { id: string; titel: string; fallNr: string; fallId: string | null; deadline: string | null; prioritaet: string | null }
+type Task = { id: string; titel: string; fallNr: string; fallId: string | null; deadline: string | null; prioritaet: string | null; typ: string | null }
 type Fall = { id: string; fallNr: string; kunde: string; schadentyp: string | null; datum: string }
 
 const TL_CFG: Record<string, { dot: string; fg: string }> = {
@@ -133,7 +133,7 @@ export default function DashboardClient({ userId }: { userId: string }) {
 
     // ── Always-current queries (right column) ──
     const [tasksR, neueR, leadsC, faelleC, konvR] = await Promise.all([
-      supabase.from('tasks').select('id, titel, fall_id, faellig_am, prioritaet, faelle(fall_nummer)').in('status', ['offen', 'in-bearbeitung']).order('faellig_am', { ascending: true }).limit(25),
+      supabase.from('tasks').select('id, titel, typ, fall_id, faellig_am, prioritaet, faelle(fall_nummer)').in('status', ['offen', 'in-bearbeitung']).order('faellig_am', { ascending: true }).limit(25),
       supabase.from('faelle').select('id, fall_nummer, lead_id, schadenfall_typ, created_at').is('sv_id', null).not('status', 'in', '("abgeschlossen","storniert")').order('created_at', { ascending: false }).limit(10),
       supabase.from('leads').select('id', { count: 'exact', head: true }).not('status', 'in', '("disqualifiziert","kalt")'),
       supabase.from('faelle').select('id', { count: 'exact', head: true }).not('status', 'in', '("abgeschlossen","storniert")'),
@@ -150,7 +150,7 @@ export default function DashboardClient({ userId }: { userId: string }) {
 
     setTasks((tasksR.data ?? []).map(t => {
       const fr = t.faelle as Record<string, unknown> | null
-      return { id: t.id, titel: t.titel, fallNr: (fr?.fall_nummer as string) ?? '—', fallId: t.fall_id, deadline: t.faellig_am, prioritaet: t.prioritaet }
+      return { id: t.id, titel: t.titel, fallNr: (fr?.fall_nummer as string) ?? '—', fallId: t.fall_id, deadline: t.faellig_am, prioritaet: t.prioritaet, typ: t.typ ?? null }
     }))
     setNeueFaelle((neueR.data ?? []).map(f => ({
       id: f.id, fallNr: f.fall_nummer ?? f.id.slice(0, 8), kunde: neuLeadMap[f.lead_id ?? ''] ?? '—',
@@ -313,7 +313,7 @@ export default function DashboardClient({ userId }: { userId: string }) {
           ) : tasks.map(t => {
             const overdue = t.deadline && new Date(t.deadline) < new Date()
             return (
-              <Link key={t.id} href={t.fallId ? `/admin/faelle/${t.fallId}` : '#'}
+              <Link key={t.id} href={t.fallId ? `/admin/faelle/${t.fallId}${t.typ ? `?highlight=${t.typ}` : ''}` : '#'}
                 className={`block px-3 py-2 border-b border-gray-50 hover:bg-gray-50 transition-colors ${overdue ? 'bg-red-50/30' : ''}`}>
                 <p className="text-xs text-[#0D1B3E] font-medium truncate">{t.titel}</p>
                 <div className="flex items-center gap-2 mt-0.5 text-[10px]">

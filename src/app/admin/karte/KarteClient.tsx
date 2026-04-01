@@ -240,7 +240,7 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
               <p className="text-gray-500 text-xs mt-0.5">{filteredSVs.length} von {sachverstaendige.length} SV</p>
             </div>
             <button onClick={() => setShowOnboarding(true)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-gray-900 bg-[#1E3A5F] hover:bg-[#4573A2] transition-colors">
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-white bg-[#4573A2] hover:bg-[#4573A2] transition-colors">
               <UserPlusIcon className="w-3.5 h-3.5" /> Neu
             </button>
           </div>

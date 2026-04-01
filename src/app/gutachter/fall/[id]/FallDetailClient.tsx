@@ -396,7 +396,7 @@ export default function FallDetailClient({
                       }
                     }}
                     disabled={finSaving || finInput.length !== 17}
-                    className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:bg-zinc-700 disabled:text-gray-500 text-gray-900 text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
+                    className="bg-[#4573A2] hover:bg-[#4573A2] disabled:bg-zinc-700 disabled:text-gray-500 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
                   >
                     {finSaving ? '...' : 'Speichern'}
                   </button>
@@ -752,7 +752,7 @@ export default function FallDetailClient({
                     <button
                       type="submit"
                       disabled={uploading}
-                      className="w-full bg-[#1E3A5F] hover:bg-[#4573A2] disabled:bg-zinc-700 disabled:text-gray-500 text-gray-900 font-medium py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2"
+                      className="w-full bg-[#4573A2] hover:bg-[#4573A2] disabled:bg-zinc-700 disabled:text-gray-500 text-white font-medium py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2"
                     >
                       <UploadIcon className="w-4 h-4" />
                       {uploading ? 'Wird hochgeladen...' : 'Gutachten einreichen'}

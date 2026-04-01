@@ -420,7 +420,7 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
                         <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
                           statuses[i] === 'done' ? 'bg-green-500 text-gray-900' :
                           statuses[i] === 'skipped' ? 'bg-red-500 text-gray-900' :
-                          statuses[i] === 'active' ? 'bg-[#4573A2] text-gray-900' :
+                          statuses[i] === 'active' ? 'bg-[#4573A2] text-white' :
                           'bg-zinc-700 text-gray-500'
                         }`}>{i + 1}</div>
                         <span className="truncate">{s.name}</span>

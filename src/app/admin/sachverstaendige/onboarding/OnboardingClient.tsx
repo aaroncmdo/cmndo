@@ -278,7 +278,7 @@ export default function OnboardingClient() {
               <button
                 onClick={() => setStep(s => s + 1)}
                 disabled={!canNext()}
-                className="flex items-center gap-2 bg-[#1E3A5F] hover:bg-[#4573A2] disabled:bg-zinc-700 disabled:cursor-not-allowed text-gray-900 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                className="flex items-center gap-2 bg-[#4573A2] hover:bg-[#4573A2] disabled:bg-zinc-700 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
               >
                 Weiter <ArrowRightIcon className="w-4 h-4" />
               </button>

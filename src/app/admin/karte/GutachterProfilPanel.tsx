@@ -190,13 +190,13 @@ export default function GutachterProfilPanel({
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-3">
             {/* Avatar */}
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-gray-900 font-bold text-sm ${typColor?.marker ?? 'bg-[#4573A2]'}`}>
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm ${typColor?.marker ?? 'bg-[#4573A2]'}`}>
               {getInitials(sv.name || '??')}
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900 leading-tight">{sv.name || 'Unbekannt'}</h2>
               <div className="flex items-center gap-2 mt-1">
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold text-gray-900 ${typColor?.marker ?? 'bg-[#4573A2]'}`}>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold text-white ${typColor?.marker ?? 'bg-[#4573A2]'}`}>
                   {typColor?.label ?? sv.gutachterTyp ?? '\u2014'}
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-400">

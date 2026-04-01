@@ -369,7 +369,7 @@ function StepErstkontakt({ done, saving, onAdvance }: { done: boolean; saving: b
       <button
         onClick={onAdvance}
         disabled={saving}
-        className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors flex items-center gap-2"
+        className="bg-[#4573A2] hover:bg-[#4573A2] disabled:opacity-50 text-white text-sm font-medium rounded-xl px-5 py-2.5 transition-colors flex items-center gap-2"
       >
         <PhoneCallIcon className="w-4 h-4" />
         {saving ? 'Speichert...' : 'Erstkontakt hergestellt'}
@@ -456,7 +456,7 @@ function StepSchadentyp({
       <button
         onClick={onAdvance}
         disabled={saving || !sf}
-        className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
+        className="bg-[#4573A2] hover:bg-[#4573A2] disabled:opacity-50 text-white text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
       >
         {saving ? 'Speichert...' : 'Schadentyp bestaetigen'}
       </button>
@@ -520,7 +520,7 @@ function StepKonstellation({
       <button
         onClick={onAdvance}
         disabled={saving}
-        className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
+        className="bg-[#4573A2] hover:bg-[#4573A2] disabled:opacity-50 text-white text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
       >
         {saving ? 'Speichert...' : 'Konstellation bestaetigen'}
       </button>
@@ -550,7 +550,7 @@ function StepGegner({
       <button
         onClick={onAdvance}
         disabled={saving}
-        className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
+        className="bg-[#4573A2] hover:bg-[#4573A2] disabled:opacity-50 text-white text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
       >
         {saving ? 'Speichert...' : 'Gegner-Daten bestaetigen'}
       </button>
@@ -766,7 +766,7 @@ function StepSA({ lead, saving, onAdvance }: {
           mandatstyp: autoKanzlei ? 'kanzlei-claimondo' : mandatstyp,
         })}
         disabled={saving || !sa || !vollmacht}
-        className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
+        className="bg-[#4573A2] hover:bg-[#4573A2] disabled:opacity-50 text-white text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
       >
         {saving ? 'Speichert...' : 'SA + Vollmacht bestaetigen'}
       </button>

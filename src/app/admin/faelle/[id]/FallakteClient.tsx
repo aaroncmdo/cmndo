@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useRef, useCallback, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Script from 'next/script'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -552,10 +552,49 @@ export default function FallakteClient({
   forderungspositionen: Forderungsposition[]
 }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState<Tab>('tasks')
   const [mapsReady, setMapsReady] = useState(
     typeof window !== 'undefined' && typeof google !== 'undefined' && !!google.maps?.places,
   )
+
+  // Task-Typ → Tab + Element-ID mapping for blink navigation
+  const TASK_TARGET_MAP: Record<string, { tab: Tab; elementId: string }> = {
+    'qc-pruefen': { tab: 'qc', elementId: 'qc-section' },
+    'qc_bestanden': { tab: 'qc', elementId: 'qc-section' },
+    'qc_nachbesserung': { tab: 'qc', elementId: 'qc-section' },
+    'filmcheck': { tab: 'qc', elementId: 'qc-section' },
+    'termin-vereinbaren': { tab: 'uebersicht', elementId: 'termin-section' },
+    'sv-termin': { tab: 'uebersicht', elementId: 'termin-section' },
+    'gutachten-hochladen': { tab: 'dateien', elementId: 'upload-section' },
+    'gutachten-erstellen': { tab: 'dateien', elementId: 'upload-section' },
+    'sa-unterschreiben': { tab: 'dokumente', elementId: 'sa-section' },
+    'dokument-hochladen': { tab: 'dateien', elementId: 'upload-section' },
+    'kanzlei-anschlussschreiben': { tab: 'kanzlei', elementId: 'kanzlei-section' },
+    'kanzlei-nachfrage': { tab: 'kanzlei', elementId: 'kanzlei-section' },
+    'rueckruf': { tab: 'uebersicht', elementId: 'kontakt-section' },
+    'zahlung-pruefen': { tab: 'abrechnung', elementId: 'abrechnung-section' },
+    'manuell': { tab: 'tasks', elementId: 'tasks-section' },
+  }
+
+  // Handle ?highlight= query param from dashboard navigation
+  useEffect(() => {
+    const hl = searchParams.get('highlight')
+    if (!hl) return
+    const target = TASK_TARGET_MAP[hl]
+    if (target) {
+      setActiveTab(target.tab)
+      setTimeout(() => {
+        const el = document.getElementById(target.elementId)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          el.classList.remove('blink-highlight')
+          void el.offsetWidth
+          el.classList.add('blink-highlight')
+        }
+      }, 300)
+    }
+  }, [searchParams])
 
   const offeneTasks = tasks.filter(t => t.status !== 'erledigt').length
 
@@ -637,6 +676,8 @@ export default function FallakteClient({
 
             {/* Tab Content */}
         {activeTab === 'uebersicht' && (
+          <div id="termin-section">
+          <div id="kontakt-section">
           <TabUebersicht
             fall={fall}
             lead={lead}
@@ -649,23 +690,30 @@ export default function FallakteClient({
             mapsReady={mapsReady}
             onRefresh={() => router.refresh()}
           />
+          </div>
+          </div>
         )}
         {activeTab === 'dokumente' && (
+          <div id="sa-section">
           <TabDokumente
             fall={fall}
             pflichtdokumente={pflichtdokumente}
             dokumente={dokumente}
             onRefresh={() => router.refresh()}
           />
+          </div>
         )}
         {activeTab === 'dateien' && (
+          <div id="upload-section">
           <TabDateien
             fall={fall}
             dokumente={dokumente}
             onRefresh={() => router.refresh()}
           />
+          </div>
         )}
         {activeTab === 'qc' && (
+          <div id="qc-section">
           <TabQcPruefung
             fall={fall}
             qcCheckliste={qcCheckliste}
@@ -673,6 +721,7 @@ export default function FallakteClient({
             pflichtdokumente={pflichtdokumente}
             onRefresh={() => router.refresh()}
           />
+          </div>
         )}
         {activeTab === 'timeline' && (
           <TabTimeline
@@ -689,10 +738,12 @@ export default function FallakteClient({
           />
         )}
         {activeTab === 'kanzlei' && (
+          <div id="kanzlei-section">
           <TabKanzlei
             fall={fall}
             onRefresh={() => router.refresh()}
           />
+          </div>
         )}
         {activeTab === 'chat' && (
           <TabChat
@@ -702,17 +753,22 @@ export default function FallakteClient({
           />
         )}
         {activeTab === 'abrechnung' && (
+          <div id="abrechnung-section">
           <TabAbrechnung fall={fall} forderungspositionen={forderungspositionen} onRefresh={() => router.refresh()} />
+          </div>
         )}
         {activeTab === 'tasks' && (
+          <div id="tasks-section">
           <TabTasks
             fall={fall}
             tasks={tasks}
             mitarbeiter={mitarbeiter}
             onRefresh={() => router.refresh()}
           />
-        )}
           </div>
+        )}
+
+          </div>{/* close flex-1 min-w-0 */}
 
           {/* RIGHT: Sticky Sidebar (hidden on mobile, 340px on xl) */}
           <aside className="hidden xl:block w-[340px] shrink-0 sticky top-20 self-start space-y-3">
@@ -3005,7 +3061,7 @@ function TabTasks({
             <button
               onClick={handleCreate}
               disabled={saving || !titel.trim()}
-              className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-gray-900 text-sm px-4 py-2 rounded-xl transition-colors"
+              className="bg-[#4573A2] hover:bg-[#4573A2] disabled:opacity-50 text-white text-sm px-4 py-2 rounded-xl transition-colors"
             >
               {saving ? 'Erstellt...' : 'Erstellen'}
             </button>

@@ -163,7 +163,7 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
               onClick={() => setPhase(p)}
               className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
                 p === phase
-                  ? 'bg-[#1E3A5F] border-[#4573A2] text-gray-900 font-medium'
+                  ? 'bg-[#4573A2] border-[#4573A2] text-white font-medium'
                   : i < currentIdx
                     ? 'bg-emerald-50 border-emerald-800 text-emerald-400'
                     : 'bg-gray-100 border-gray-300 text-gray-500 hover:border-gray-300'
@@ -330,7 +330,7 @@ export default function LeadQualifizierung({ lead }: { lead: LeadData }) {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-gray-900 text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
+          className="bg-[#4573A2] hover:bg-[#4573A2] disabled:opacity-50 text-white text-sm font-medium rounded-xl px-5 py-2.5 transition-colors"
         >
           {saving ? 'Speichert ...' : 'Qualifizierung speichern'}
         </button>
