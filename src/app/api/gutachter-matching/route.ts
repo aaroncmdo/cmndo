@@ -139,37 +139,90 @@ export async function POST(request: Request) {
 
     if (!inRange) continue
 
-    // Priority score: lower = better
-    let score = 0
-
-    // a) Capacity: skip those with no room in their package
+    // Capacity: skip full gutachter
     const maxFaelle = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10
     const genutztFaelle = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
-    if (genutztFaelle >= maxFaelle) continue // filter out full gutachter
+    if (genutztFaelle >= maxFaelle) continue
 
-    // b) partner_seit: earlier = better
+    // ── KFZ-116 Prio-Scoring (lower = better) ──
+    let score = 0
+
+    // 1. ÄLTESTER VERTRAG ZUERST (stärkstes Signal: -100 bis 0)
     if (sv.partner_seit) {
       const years = (Date.now() - new Date(sv.partner_seit).getTime()) / (365.25 * 86400000)
-      score -= years * 10
+      score -= Math.min(years, 10) * 10 // max -100 für 10+ Jahre
     }
 
-    // c) Qualifications matching schadenfall_typ
+    // 2. KAPAZITÄT: Je weniger belegt, desto besser (-30 bis 0)
+    const kapazitaetFrei = maxFaelle > 0 ? 1 - (genutztFaelle / maxFaelle) : 0.5
+    score -= kapazitaetFrei * 30
+
+    // 3. QUALIFIKATION: Matching Bonus (-50)
     if (schadenfallTyp && Array.isArray(sv.qualifikationen)) {
-      if (sv.qualifikationen.includes(schadenfallTyp)) {
-        score -= 50
-      }
+      if (sv.qualifikationen.includes(schadenfallTyp)) score -= 50
     }
 
-    // d) Distance: closer = better
-    if (distanz != null) {
-      score += distanz
-    }
+    // 4. DISTANZ: Näher = besser (0 bis +maxRadius)
+    if (distanz != null) score += distanz
 
     candidates.push({ ...sv, distanz_km: distanz, score })
   }
 
   if (candidates.length === 0) {
     return NextResponse.json({ error: 'Kein Gutachter im Umkreis gefunden' }, { status: 404 })
+  }
+
+  // ── KFZ-116: Route vom LETZTEN TERMIN (nicht vom Büro) ──
+  // Lade den letzten Termin-Ort jedes Kandidaten am Wunschtag
+  if (plzGeo) {
+    const svIds = candidates.map(c => c.id)
+    const wDate = new Date(wunschtermin)
+    const dayStart = new Date(wDate); dayStart.setHours(0, 0, 0, 0)
+
+    // Finde den letzten Termin VOR dem Wunschtermin fuer jeden SV
+    const { data: vorherigeTermine } = await supabase
+      .from('faelle')
+      .select('sv_id, schadens_adresse, schadens_plz, schadens_ort, sv_termin')
+      .in('sv_id', svIds)
+      .not('sv_termin', 'is', null)
+      .gte('sv_termin', dayStart.toISOString())
+      .lt('sv_termin', wDate.toISOString())
+      .order('sv_termin', { ascending: false })
+
+    // PLZ-Koordinaten der letzten Termine laden
+    if (vorherigeTermine && vorherigeTermine.length > 0) {
+      const letzterTerminPlz: Record<string, string> = {}
+      for (const t of vorherigeTermine) {
+        if (t.sv_id && t.schadens_plz && !letzterTerminPlz[t.sv_id]) {
+          letzterTerminPlz[t.sv_id] = t.schadens_plz
+        }
+      }
+
+      // PLZ → Koordinaten
+      const uniquePlzs = [...new Set(Object.values(letzterTerminPlz))]
+      if (uniquePlzs.length > 0) {
+        const { data: plzCoords } = await supabase
+          .from('plz_geo')
+          .select('plz, lat, lng')
+          .in('plz', uniquePlzs)
+
+        const plzMap: Record<string, { lat: number; lng: number }> = {}
+        for (const p of plzCoords ?? []) plzMap[p.plz] = { lat: Number(p.lat), lng: Number(p.lng) }
+
+        // Distanz vom letzten Termin-Ort zum Schadensort berechnen
+        for (const c of candidates) {
+          const lastPlz = letzterTerminPlz[c.id]
+          if (lastPlz && plzMap[lastPlz]) {
+            const routeDistanz = haversineKm(plzMap[lastPlz].lat, plzMap[lastPlz].lng, Number(plzGeo.lat), Number(plzGeo.lng))
+            // Ersetze Büro-Distanz durch Route-Distanz (wenn kürzer = Bonus)
+            if (c.distanz_km != null && routeDistanz < c.distanz_km) {
+              c.score -= (c.distanz_km - routeDistanz) // Bonus für kürzere Route
+              c.distanz_km = routeDistanz
+            }
+          }
+        }
+      }
+    }
   }
 
   candidates.sort((a, b) => a.score - b.score)
