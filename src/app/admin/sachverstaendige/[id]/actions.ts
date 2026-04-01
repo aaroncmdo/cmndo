@@ -81,7 +81,7 @@ export async function updateSvProfile(svId: string, profileId: string, formData:
 
 // ─── Isochrone-Berechnung (OSRM + Fallback) ───────────────────────────────
 
-const NUM_POINTS = 16
+const NUM_POINTS = 60
 
 async function calculateIsochrone(lat: number, lng: number, radiusKm: number): Promise<{ lat: number; lng: number }[]> {
   const rayPoints: { lat: number; lng: number; angle: number }[] = []

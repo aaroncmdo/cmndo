@@ -190,7 +190,7 @@ export async function onboardGutachter(data: OnboardingData) {
 
 // ─── Isochrone-Berechnung (OSRM + Fallback) ───────────────────────────────
 
-const NUM_POINTS = 16
+const NUM_POINTS = 60
 
 async function calculateIsochrone(lat: number, lng: number, radiusKm: number): Promise<{ lat: number; lng: number }[]> {
   // Generate ray points around center

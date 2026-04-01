@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const cache = new Map<string, { lat: number; lng: number }[]>()
 
-const NUM_POINTS = 16
+const NUM_POINTS = 60
 
 /**
  * Generate points around a center at given radius (in km) for each compass direction.
