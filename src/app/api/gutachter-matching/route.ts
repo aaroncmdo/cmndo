@@ -70,17 +70,25 @@ export async function POST(request: Request) {
   const plz: string | undefined = body?.plz
   const wunschtermin: string | undefined = body?.wunschtermin
   const schadenfallTyp: string | undefined = body?.schadenfall_typ
+  const directLat: number | undefined = body?.lat
+  const directLng: number | undefined = body?.lng
 
   if (!plz || !wunschtermin) {
     return NextResponse.json({ error: 'plz und wunschtermin sind erforderlich' }, { status: 400 })
   }
 
-  // 1. PLZ geo lookup
-  const { data: plzGeo } = await supabase
-    .from('plz_geo')
-    .select('lat, lng')
-    .eq('plz', plz)
-    .single()
+  // 1. Use direct coordinates from Google Places, or fallback to PLZ geo lookup
+  let plzGeo: { lat: number; lng: number } | null = null
+  if (directLat != null && directLng != null) {
+    plzGeo = { lat: directLat, lng: directLng }
+  } else {
+    const { data } = await supabase
+      .from('plz_geo')
+      .select('lat, lng')
+      .eq('plz', plz)
+      .single()
+    plzGeo = data
+  }
 
   // 2. Load all active SVs with kalender_sync
   const { data: svList } = await supabase

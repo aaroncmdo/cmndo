@@ -19,6 +19,7 @@ import {
   UserCheckIcon,
   AlertCircleIcon,
 } from 'lucide-react'
+import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -498,10 +499,19 @@ function StepGutachterTermin({ lead, saving: parentSaving, onAdvance }: {
 }) {
   const [plz, setPlz] = useState(lead.fahrzeug_standort_plz ?? '')
   const [adresse, setAdresse] = useState(lead.fahrzeug_standort_adresse ?? '')
+  const [lat, setLat] = useState<number | null>(null)
+  const [lng, setLng] = useState<number | null>(null)
   const [wunschtermin, setWunschtermin] = useState('')
   const [searching, setSearching] = useState(false)
   const [result, setResult] = useState<MatchResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  function handlePlaceSelect(result: PlaceResult) {
+    setAdresse(result.adresse)
+    setPlz(result.plz)
+    setLat(result.lat)
+    setLng(result.lng)
+  }
 
   if (lead.gutachter_termin) {
     return (
@@ -519,7 +529,7 @@ function StepGutachterTermin({ lead, saving: parentSaving, onAdvance }: {
     if (!plz || !wunschtermin) return
     setSearching(true); setError(null); setResult(null)
     try {
-      const res = await fetch('/api/gutachter-matching', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plz, wunschtermin: new Date(wunschtermin).toISOString(), schadenfall_typ: lead.schadenfall_typ }) })
+      const res = await fetch('/api/gutachter-matching', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plz, lat, lng, wunschtermin: new Date(wunschtermin).toISOString(), schadenfall_typ: lead.schadenfall_typ }) })
       if (!res.ok) { const data = await res.json(); throw new Error(data.error ?? 'Suche fehlgeschlagen') }
       setResult(await res.json())
     } catch (err) { setError(err instanceof Error ? err.message : 'Fehler') }
@@ -528,12 +538,21 @@ function StepGutachterTermin({ lead, saving: parentSaving, onAdvance }: {
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-2">
-        <div className="relative">
-          <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-          <input type="text" value={plz} onChange={e => setPlz(e.target.value)} placeholder="PLZ" className={`${inputCls} pl-9`} />
-        </div>
-        <input type="text" value={adresse} onChange={e => setAdresse(e.target.value)} placeholder="Adresse (optional)" className={inputCls} />
+      <div>
+        <label className="text-xs text-gray-500 mb-1 flex items-center gap-1"><MapPinIcon className="w-3 h-3" /> Fahrzeug-Standort (Google Places)</label>
+        <GooglePlaceAutocomplete
+          defaultValue={adresse}
+          placeholder="Adresse eingeben..."
+          onSelect={handlePlaceSelect}
+          className={inputCls}
+        />
+        {plz && (
+          <div className="flex items-center gap-3 mt-1.5 text-[10px] text-gray-400">
+            <span>PLZ: {plz}</span>
+            {lat != null && <span>Lat: {lat.toFixed(4)}</span>}
+            {lng != null && <span>Lng: {lng.toFixed(4)}</span>}
+          </div>
+        )}
       </div>
       <div>
         <label className="text-xs text-gray-500 mb-1 block">Wunschtermin</label>
