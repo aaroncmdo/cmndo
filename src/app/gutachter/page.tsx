@@ -3,13 +3,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { NavigationIcon, PhoneIcon, CameraIcon, CheckIcon, MapPinIcon, ArrowLeftIcon } from 'lucide-react'
+import { NavigationIcon, PhoneIcon, CameraIcon, CheckIcon, MapPinIcon, ArrowLeftIcon, CalendarIcon, ClipboardCheckIcon, MessageCircleIcon, BanknoteIcon, InfoIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 type Termin = { id: string; uhrzeit: string; kunde: string; telefon: string | null; email: string | null; adresse: string; kennzeichen: string | null; fahrzeug: string | null; schadentyp: string | null }
 type Auftrag = { id: string; kunde: string; kennzeichen: string | null; schadentyp: string | null; datum: string }
 type Task = { id: string; titel: string; fallId: string | null; faelligAm: string | null }
 type DoneTask = { id: string; titel: string }
+type TLEvent = { zeit: string; uhrzeit: string; typ: 'termin' | 'task-offen' | 'task-done' | 'nachricht' | 'system' | 'zahlung'; titel: string; detail: string; fallId?: string }
 type Mode = 'overview' | 'navigation' | 'onsite'
 
 const FOTO = ['Vorne', 'Hinten', 'Links', 'Rechts']
@@ -27,6 +28,7 @@ export default function GutachterCockpit() {
   const [svLat, setSvLat] = useState<number | null>(null); const [svLng, setSvLng] = useState<number | null>(null)
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [doneTasks, setDoneTasks] = useState<DoneTask[]>([]); const [showDone, setShowDone] = useState(false)
+  const [tlEvents, setTlEvents] = useState<TLEvent[]>([])
   const [mode, setMode] = useState<Mode>('overview'); const [active, setActive] = useState<Termin | null>(null)
   const [fotos, setFotos] = useState<Record<string, boolean>>({}); const [fin, setFin] = useState(''); const [km, setKm] = useState(''); const [notizen, setNotizen] = useState('')
   const [uploading, setUploading] = useState(false); const [completing, setCompleting] = useState(false)
@@ -53,7 +55,7 @@ export default function GutachterCockpit() {
       supabase.from('faelle').select('id, lead_id, kennzeichen, schadenfall_typ, created_at').eq('sv_id', sv.id).is('sv_termin', null).not('status', 'in', '("abgeschlossen","storniert")').limit(10),
       supabase.from('tasks').select('id, titel, fall_id, faellig_am').or(`zugewiesen_an.eq.${user.id},empfaenger_user_id.eq.${user.id}`).in('status', ['offen', 'in-bearbeitung']).lte('faellig_am', de).limit(15),
       supabase.from('faelle').select('id, lead_id').eq('sv_id', sv.id).not('sv_termin', 'is', null).lt('sv_termin', now.toISOString()).is('gutachten_eingegangen_am', null).not('status', 'in', '("abgeschlossen","storniert")').limit(1),
-      supabase.from('tasks').select('id, titel').or(`zugewiesen_an.eq.${user.id},empfaenger_user_id.eq.${user.id}`).eq('status', 'erledigt').gte('updated_at', ds).lt('updated_at', de).limit(10),
+      supabase.from('tasks').select('id, titel, updated_at').or(`zugewiesen_an.eq.${user.id},empfaenger_user_id.eq.${user.id}`).eq('status', 'erledigt').gte('updated_at', ds).lt('updated_at', de).limit(10),
     ])
 
     const ids = [...new Set([...(tR.data ?? []), ...(nR.data ?? []), ...(fR.data ?? [])].map(f => f.lead_id).filter(Boolean) as string[])]
@@ -74,6 +76,47 @@ export default function GutachterCockpit() {
     const ein = (cf ?? []).filter(f => ['abgeschlossen', 'regulierung'].includes(f.status)).reduce((s, f) => s + Number(f.gutachten_betrag ?? 0) * 0.12, 0)
     const off = (cf ?? []).filter(f => !['abgeschlossen', 'storniert'].includes(f.status)).reduce((s, f) => s + Number(f.gutachten_betrag ?? 0) * 0.12, 0)
     setFinanz({ eingegangen: Math.round(ein), offen: Math.round(off), leadpreise: 0 })
+
+    // ─── Tages-Timeline ───
+    const allFallIds = [...new Set([...(tR.data ?? []), ...(nR.data ?? [])].map(f => f.id))]
+    const tl: TLEvent[] = []
+
+    // Termine → Timeline
+    for (const f of tR.data ?? []) {
+      const t = f.sv_termin ? new Date(f.sv_termin) : null
+      tl.push({ zeit: f.sv_termin ?? ds, uhrzeit: t ? t.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '—', typ: 'termin', titel: `Termin bei ${lm[f.lead_id ?? '']?.n ?? '—'}`, detail: [f.kennzeichen, [f.schadens_adresse, f.schadens_plz].filter(Boolean).join(' ')].filter(Boolean).join(', '), fallId: f.id })
+    }
+    // Tasks fällig → Timeline
+    for (const t of tkR.data ?? []) {
+      tl.push({ zeit: t.faellig_am ?? de, uhrzeit: t.faellig_am ? new Date(t.faellig_am).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '—', typ: 'task-offen', titel: t.titel, detail: 'Fällig', fallId: t.fall_id ?? undefined })
+    }
+    // Tasks erledigt → Timeline
+    for (const t of doneR.data ?? []) {
+      tl.push({ zeit: (t as Record<string, unknown>).updated_at as string ?? ds, uhrzeit: (t as Record<string, unknown>).updated_at ? new Date((t as Record<string, unknown>).updated_at as string).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '—', typ: 'task-done', titel: t.titel, detail: 'Erledigt' })
+    }
+
+    // Nachrichten + Timeline-Events + Zahlungen (parallel, nur wenn FallIDs vorhanden)
+    if (allFallIds.length > 0) {
+      const [msgR, tlR, zahlR] = await Promise.all([
+        supabase.from('nachrichten').select('id, fall_id, nachricht, sender_rolle, created_at').in('fall_id', allFallIds).gte('created_at', ds).lt('created_at', de).order('created_at', { ascending: true }).limit(20),
+        supabase.from('timeline').select('id, fall_id, typ, titel, beschreibung, created_at').in('fall_id', allFallIds).gte('created_at', ds).lt('created_at', de).order('created_at', { ascending: true }).limit(20),
+        supabase.from('gutachter_abrechnungen').select('id, fall_id, schadenhoehe, leadpreis, abgerechnet_am').eq('sv_id', sv.id).gte('abgerechnet_am', ds).lt('abgerechnet_am', de).limit(10),
+      ])
+      for (const m of msgR.data ?? []) {
+        const ca = m.created_at ? new Date(m.created_at) : null
+        tl.push({ zeit: m.created_at ?? ds, uhrzeit: ca ? ca.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '—', typ: 'nachricht', titel: `Nachricht von ${m.sender_rolle === 'sachverstaendiger' ? 'Dir' : m.sender_rolle ?? 'KB'}`, detail: ((m.nachricht as string) ?? '').slice(0, 60), fallId: m.fall_id ?? undefined })
+      }
+      for (const e of tlR.data ?? []) {
+        const ca = e.created_at ? new Date(e.created_at) : null
+        tl.push({ zeit: e.created_at ?? ds, uhrzeit: ca ? ca.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '—', typ: 'system', titel: e.titel ?? 'System', detail: ((e.beschreibung as string) ?? '').slice(0, 60), fallId: e.fall_id ?? undefined })
+      }
+      for (const z of zahlR.data ?? []) {
+        const ca = z.abgerechnet_am ? new Date(z.abgerechnet_am) : null
+        tl.push({ zeit: z.abgerechnet_am ?? ds, uhrzeit: ca ? ca.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '—', typ: 'zahlung', titel: `Leadpreis ${Number(z.leadpreis ?? 0)}€`, detail: `Schadenhöhe: ${Number(z.schadenhoehe ?? 0)}€`, fallId: z.fall_id ?? undefined })
+      }
+    }
+    tl.sort((a, b) => new Date(a.zeit).getTime() - new Date(b.zeit).getTime())
+    setTlEvents(tl.slice(0, 50))
 
     setLoading(false)
   }, [supabase, selectedDate])
@@ -139,6 +182,87 @@ export default function GutachterCockpit() {
                 {i < termine.length - 1 && <p className="text-[10px] text-gray-400 text-center py-1">↓</p>}
               </div>
             ))}
+
+            {/* ═══ TAGES-TIMELINE ═══ */}
+            {tlEvents.length > 0 && (() => {
+              const nowMs = Date.now()
+              const isPast = selectedDate < new Date(new Date().toDateString())
+              const isFuture = selectedDate > new Date(new Date(new Date().toDateString()).getTime() + 86400000 - 1)
+              const TL_STYLE: Record<string, { dot: string; icon: typeof CalendarIcon; label: string }> = {
+                termin: { dot: 'bg-blue-500', icon: CalendarIcon, label: 'Termin' },
+                'task-offen': { dot: 'bg-amber-500', icon: ClipboardCheckIcon, label: 'Task' },
+                'task-done': { dot: 'bg-green-500', icon: CheckIcon, label: 'Erledigt' },
+                nachricht: { dot: 'bg-purple-500', icon: MessageCircleIcon, label: 'Nachricht' },
+                system: { dot: 'bg-gray-400', icon: InfoIcon, label: 'System' },
+                zahlung: { dot: 'bg-emerald-500', icon: BanknoteIcon, label: 'Zahlung' },
+              }
+              // Find JETZT insert position
+              let jetztIdx = -1
+              if (isToday) {
+                jetztIdx = tlEvents.findIndex(e => new Date(e.zeit).getTime() > nowMs)
+                if (jetztIdx === -1) jetztIdx = tlEvents.length
+              }
+              return (
+                <div className="mt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-semibold text-gray-800">Tagesverlauf</span>
+                    {isPast && <span className="text-[9px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Vergangen</span>}
+                    {isFuture && <span className="text-[9px] bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full">Geplant</span>}
+                  </div>
+                  <div className="relative pl-6">
+                    {/* Vertical line */}
+                    <div className="absolute left-[11px] top-0 bottom-0 w-0.5 bg-gray-200" />
+                    {tlEvents.map((ev, idx) => {
+                      const s = TL_STYLE[ev.typ] ?? TL_STYLE.system
+                      const Icon = s.icon
+                      const past = isToday ? new Date(ev.zeit).getTime() < nowMs : isPast
+                      return (
+                        <div key={`${ev.typ}-${idx}`}>
+                          {/* JETZT marker */}
+                          {isToday && idx === jetztIdx && (
+                            <div className="relative flex items-center -ml-6 my-2">
+                              <div className="absolute left-[7px] w-2 h-2 rounded-full bg-red-500 ring-2 ring-red-200 z-10" />
+                              <div className="ml-6 flex-1 h-px bg-red-400" />
+                              <span className="text-[9px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded ml-1 shrink-0">JETZT</span>
+                            </div>
+                          )}
+                          <div className={`relative flex items-start gap-2 pb-3 group ${past ? 'opacity-50' : ''}`}
+                            onClick={() => ev.fallId && router.push(`/gutachter/fall/${ev.fallId}`)}
+                            style={{ cursor: ev.fallId ? 'pointer' : 'default' }}>
+                            {/* Dot */}
+                            <div className={`absolute -left-6 top-1 w-[9px] h-[9px] rounded-full ${s.dot} ring-2 ring-white z-10`} />
+                            {/* Time */}
+                            <span className="text-[10px] text-gray-400 tabular-nums w-10 shrink-0 pt-0.5">{ev.uhrzeit}</span>
+                            {/* Card */}
+                            <div className="flex-1 min-w-0 bg-white border border-gray-100 rounded-lg px-2.5 py-1.5 group-hover:shadow-sm transition-shadow">
+                              <div className="flex items-center gap-1.5">
+                                <Icon className={`w-3 h-3 shrink-0 ${past ? 'text-gray-400' : s.dot.replace('bg-', 'text-')}`} />
+                                <span className="text-xs font-medium text-gray-900 truncate">{ev.titel}</span>
+                              </div>
+                              {ev.detail && <p className="text-[10px] text-gray-500 truncate mt-0.5 ml-[18px]">{ev.detail}</p>}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                    {/* JETZT at end if all events are past */}
+                    {isToday && jetztIdx === tlEvents.length && (
+                      <div className="relative flex items-center -ml-6 my-2">
+                        <div className="absolute left-[7px] w-2 h-2 rounded-full bg-red-500 ring-2 ring-red-200 z-10" />
+                        <div className="ml-6 flex-1 h-px bg-red-400" />
+                        <span className="text-[9px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded ml-1 shrink-0">JETZT</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )
+            })()}
+            {tlEvents.length === 0 && !loading && (
+              <div className="mt-4 bg-gray-50 rounded-xl p-6 text-center">
+                <p className="text-gray-400 text-sm">Heute passiert noch nichts</p>
+                {termine.length > 0 && <p className="text-[10px] text-gray-400 mt-1">Erster Termin um {termine[0].uhrzeit}</p>}
+              </div>
+            )}
           </div>
           <div className="overflow-y-auto p-4 space-y-3 hidden lg:block">
             {auftraege.length > 0 && <div className="bg-white border border-gray-200 rounded-lg p-3"><p className="text-sm font-semibold text-gray-800 mb-2">Neue Aufträge ({auftraege.length})</p>{auftraege.map(a => <div key={a.id} onClick={() => router.push(`/gutachter/fall/${a.id}`)} className="flex items-center gap-2 p-2 rounded hover:bg-gray-50 cursor-pointer"><div className="flex-1 min-w-0"><p className="text-sm text-gray-900 truncate">{a.kunde}</p><div className="flex gap-1 mt-0.5">{a.kennzeichen && <span className="text-[9px] bg-gray-100 text-gray-600 px-1 py-0.5 rounded">{a.kennzeichen}</span>}{a.schadentyp && <span className="text-[9px] bg-blue-50 text-blue-600 px-1 py-0.5 rounded">{a.schadentyp.toUpperCase()}</span>}</div></div></div>)}</div>}
