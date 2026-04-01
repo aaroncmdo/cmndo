@@ -136,6 +136,8 @@ type Lead = {
   telefon: string | null
   schadenfall_typ: string | null
   kunden_konstellation: string | null
+  mandatstyp: string | null
+  vollmacht_unterschrieben: boolean | null
 } | null
 
 type Profile = {
@@ -805,6 +807,18 @@ export default function FallakteClient({
                   {fall.finanzierung_flag && <span className="bg-orange-50 text-orange-600 text-[10px] px-2 py-0.5 rounded-full font-medium">Finanzierung</span>}
                   {fall.gewerbe_flag && <span className="bg-amber-50 text-amber-600 text-[10px] px-2 py-0.5 rounded-full font-medium">Gewerbe</span>}
                 </div>
+              </div>
+            )}
+
+            {/* Kanzlei-Provision */}
+            {lead?.mandatstyp === 'kanzlei-claimondo' && lead?.vollmacht_unterschrieben && (
+              <div className="bg-purple-50 rounded-xl border border-purple-200 p-3">
+                <h3 className="text-[10px] font-semibold text-purple-500 uppercase tracking-wider mb-1">Kanzlei-Provision</h3>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-purple-700 font-semibold">150,00 &euro; netto</span>
+                  <span className="text-[10px] text-purple-500 bg-purple-100 px-2 py-0.5 rounded-full">Vollmacht unterschrieben</span>
+                </div>
+                <p className="text-[10px] text-purple-400 mt-1">Mandatstyp: Kanzlei + Claimondo</p>
               </div>
             )}
 

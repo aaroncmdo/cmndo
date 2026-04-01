@@ -82,7 +82,7 @@ export default async function FallaktePage({
     fall.lead_id
       ? supabase
           .from('leads')
-          .select('id, vorname, nachname, email, telefon, schadenfall_typ, kunden_konstellation, personenschaden_flag, mietwagen_flag, polizeibericht_pflicht, gutachter_termin, kennzeichen, fahrzeug_hersteller, fahrzeug_modell')
+          .select('id, vorname, nachname, email, telefon, schadenfall_typ, kunden_konstellation, personenschaden_flag, mietwagen_flag, polizeibericht_pflicht, gutachter_termin, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, mandatstyp, vollmacht_unterschrieben')
           .eq('id', fall.lead_id)
           .single()
       : Promise.resolve({ data: null }),
