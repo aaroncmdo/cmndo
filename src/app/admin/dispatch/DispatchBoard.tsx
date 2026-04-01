@@ -19,6 +19,13 @@ import {
   GlobeIcon,
   MessageCircleIcon,
   UsersIcon,
+  XIcon,
+  FilterIcon,
+  ExternalLinkIcon,
+  MailIcon,
+  ClockIcon,
+  AlertTriangleIcon,
+  CarIcon,
 } from 'lucide-react'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -111,7 +118,7 @@ function mapPhaseToColumn(phase: string | null): string {
 
 const SOURCE_ICON: Record<string, typeof GlobeIcon> = {
   website: GlobeIcon, 'google-ads': GlobeIcon,
-  telefon: PhoneIcon, email: GlobeIcon,
+  telefon: PhoneIcon, email: MailIcon,
   whatsapp: MessageCircleIcon, empfehlung: UsersIcon,
 }
 
@@ -125,6 +132,15 @@ const SF_SHORT: Record<string, string> = {
   'sf-04': 'SF-04', 'sf-05': 'SF-05', 'sf-06': 'SF-06',
 }
 
+const SF_LABELS: Record<string, string> = {
+  'sf-01': 'Unfall mit Gegner',
+  'sf-02': 'Teilschuld',
+  'sf-03': 'Parkschaden',
+  'sf-04': 'Eigenverschulden',
+  'sf-05': 'Personenschaden',
+  'sf-06': 'Sonstiges',
+}
+
 function timeSince(dateStr: string | null): string {
   if (!dateStr) return ''
   const ms = Date.now() - new Date(dateStr).getTime()
@@ -132,6 +148,51 @@ function timeSince(dateStr: string | null): string {
   if (h < 1) return `${Math.floor(ms / 60000)}min`
   if (h < 24) return `${h}h`
   return `${Math.floor(h / 24)}d`
+}
+
+// ─── Filter Chip ────────────────────────────────────────────────────────────
+
+function FilterChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`text-[11px] font-medium px-2 py-0.5 rounded-full border transition-colors whitespace-nowrap ${
+        active
+          ? 'bg-[#4573A2] text-white border-[#4573A2]'
+          : 'bg-white text-gray-600 border-gray-200 hover:border-[#4573A2]/40 hover:text-[#4573A2]'
+      }`}
+    >
+      {label}
+    </button>
+  )
+}
+
+// ─── Phase Progress Mini ────────────────────────────────────────────────────
+
+const PHASES = [
+  { key: 'neu', label: 'Neu' },
+  { key: 'erstkontakt', label: 'Kontakt' },
+  { key: 'schadentyp-erfasst', label: 'Typ' },
+  { key: 'konstellation-erfasst', label: 'Konst.' },
+  { key: 'gegner-daten', label: 'Gegner' },
+  { key: 'gutachtertermin', label: 'Termin' },
+  { key: 'sa-unterschrieben', label: 'SA' },
+  { key: 'flow-gesendet', label: 'Flow' },
+  { key: 'abgeschlossen', label: 'Fertig' },
+]
+
+function PhaseProgressMini({ phase }: { phase: string }) {
+  const idx = PHASES.findIndex(p => p.key === phase)
+  return (
+    <div className="flex items-center gap-0.5">
+      {PHASES.map((p, i) => (
+        <div key={p.key} className="flex-1 flex flex-col items-center gap-0.5">
+          <div className={`w-full h-1 rounded-full ${i <= idx ? 'bg-[#4573A2]' : 'bg-gray-100'}`} />
+          <span className={`text-[8px] ${i <= idx ? 'text-[#4573A2]' : 'text-gray-300'}`}>{p.label}</span>
+        </div>
+      ))}
+    </div>
+  )
 }
 
 // ─── Main ───────────────────────────────────────────────────────────────────
@@ -162,22 +223,49 @@ export default function DispatchBoard({
   const [showDisqualifiziert, setShowDisqualifiziert] = useState(false)
   const [rueckrufModalLead, setRueckrufModalLead] = useState<Lead | null>(null)
 
-  // Sync props → local state when server data changes (e.g. after new lead creation)
+  // Split-View state
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
+
+  // Live-Filter state
+  const [showFilters, setShowFilters] = useState(false)
+  const [filterSources, setFilterSources] = useState<string[]>([])
+  const [filterSchadenTyp, setFilterSchadenTyp] = useState<string[]>([])
+  const [filterPersonenschaden, setFilterPersonenschaden] = useState(false)
+  const [filterMietwagen, setFilterMietwagen] = useState(false)
+  const [filterLeasing, setFilterLeasing] = useState(false)
+
+  const hasActiveFilters = filterSources.length > 0 || filterSchadenTyp.length > 0 || filterPersonenschaden || filterMietwagen || filterLeasing
+
+  // Sync props → local state when server data changes
   useEffect(() => { setLocalLeads(leads) }, [leads])
+
+  const selectedLead = useMemo(() => {
+    if (!selectedLeadId) return null
+    return localLeads.find(l => l.id === selectedLeadId) ?? null
+  }, [selectedLeadId, localLeads])
 
   const disqualifiziertCount = useMemo(() => localLeads.filter(l => l.status === 'disqualifiziert' || l.qualifizierungs_phase === 'disqualifiziert').length, [localLeads])
 
   const pipelineLeads = useMemo(() => {
     return localLeads.filter(l => {
       if (l.status === 'disqualifiziert' || l.status === 'kalt' || l.qualifizierungs_phase === 'disqualifiziert') return false
+      // Text search
       if (search) {
         const q = search.toLowerCase()
         const name = `${l.vorname ?? ''} ${l.nachname ?? ''}`.toLowerCase()
         if (!name.includes(q) && !(l.email ?? '').toLowerCase().includes(q) && !(l.telefon ?? '').includes(q)) return false
       }
+      // Source filter
+      if (filterSources.length > 0 && !filterSources.includes(l.source_channel ?? '')) return false
+      // Schadentyp filter
+      if (filterSchadenTyp.length > 0 && !filterSchadenTyp.includes(l.schadenfall_typ ?? '')) return false
+      // Flag filters
+      if (filterPersonenschaden && !l.personenschaden_flag) return false
+      if (filterMietwagen && !l.mietwagen_flag) return false
+      if (filterLeasing && !l.leasing_flag) return false
       return true
     })
-  }, [localLeads, search])
+  }, [localLeads, search, filterSources, filterSchadenTyp, filterPersonenschaden, filterMietwagen, filterLeasing])
 
   const disqualifiziertLeads = useMemo(() => {
     return leads.filter(l => l.status === 'disqualifiziert' || l.qualifizierungs_phase === 'disqualifiziert')
@@ -185,7 +273,6 @@ export default function DispatchBoard({
 
   // Heutige Rueckrufe
   const now = Date.now()
-  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0)
   const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999)
 
   const heutigeRueckrufe = useMemo(() => {
@@ -222,7 +309,6 @@ export default function DispatchBoard({
     const lead = pipelineLeads.find(l => l.id === draggableId)
     if (!lead) return
 
-    // Validation
     if (newPhase === 'konvertiert') {
       if (!lead.sa_unterschrieben || !lead.vollmacht_unterschrieben) {
         showToast('SA und Vollmacht muessen zuerst unterschrieben sein')
@@ -236,18 +322,14 @@ export default function DispatchBoard({
       }
     }
     if (newPhase === 'rueckruf') {
-      // Open modal to set rueckruf date — don't move yet
       setRueckrufModalLead(lead)
       return
     }
 
-    // Optimistic update: move lead locally FIRST, then persist
     const snapshot = [...localLeads]
     setLocalLeads(prev => prev.map(l => l.id === draggableId ? { ...l, qualifizierungs_phase: newPhase } : l))
 
-    // Persist in background — NO router.refresh to avoid flicker
     updateLeadStatus(draggableId, newPhase).catch(e => {
-      // Rollback on error
       setLocalLeads(snapshot)
       showToast(e instanceof Error ? e.message : 'Fehler beim Speichern')
     })
@@ -258,34 +340,97 @@ export default function DispatchBoard({
     setTimeout(() => setToast(null), 3000)
   }
 
+  function toggleFilter<T>(arr: T[], item: T): T[] {
+    return arr.includes(item) ? arr.filter(x => x !== item) : [...arr, item]
+  }
+
+  function clearAllFilters() {
+    setFilterSources([])
+    setFilterSchadenTyp([])
+    setFilterPersonenschaden(false)
+    setFilterMietwagen(false)
+    setFilterLeasing(false)
+  }
+
   return (
     <div style={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
       <div className="w-full flex flex-col flex-1 min-h-0">
-        {/* Header: exactly 40px */}
-        <div className="flex items-center justify-between px-4 py-2 h-10 flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <h1 className="text-sm font-semibold text-gray-900">Dispatch</h1>
-            <span className="text-gray-500 text-xs">
-              {pipelineLeads.length} Leads
-              {disqualifiziertCount > 0 && (
-                <button onClick={() => setShowDisqualifiziert(!showDisqualifiziert)}
-                  className="ml-2 text-red-500 hover:text-red-400 transition-colors">
-                  ({disqualifiziertCount} disq.)
-                </button>
-              )}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => setShowNewLead(!showNewLead)}
-              className="bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-xs font-medium px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 h-7">
-              <UserPlusIcon className="w-3 h-3" /> Neu
-            </button>
-            <div className="relative">
-              <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
-              <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suche..."
-                className="pl-7 pr-2 py-1 bg-white border border-gray-200 rounded-lg text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#4573A2] w-40 h-7" />
+        {/* ─── Sticky Header ─────────────────────────────────────────── */}
+        <div className="sticky top-0 z-20 bg-white border-b border-gray-100 flex-shrink-0">
+          {/* Row 1: Title + Actions */}
+          <div className="flex items-center justify-between px-4 py-2 h-10">
+            <div className="flex items-center gap-2">
+              <h1 className="text-sm font-semibold text-gray-900">Dispatch</h1>
+              <span className="text-gray-500 text-xs">
+                {pipelineLeads.length} Leads
+                {disqualifiziertCount > 0 && (
+                  <button onClick={() => setShowDisqualifiziert(!showDisqualifiziert)}
+                    className="ml-2 text-red-500 hover:text-red-400 transition-colors">
+                    ({disqualifiziertCount} disq.)
+                  </button>
+                )}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`text-xs font-medium px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 h-7 border ${
+                  hasActiveFilters
+                    ? 'bg-[#4573A2]/10 text-[#4573A2] border-[#4573A2]/30'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <FilterIcon className="w-3 h-3" />
+                Filter
+                {hasActiveFilters && (
+                  <span className="bg-[#4573A2] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center">
+                    {filterSources.length + filterSchadenTyp.length + (filterPersonenschaden ? 1 : 0) + (filterMietwagen ? 1 : 0) + (filterLeasing ? 1 : 0)}
+                  </span>
+                )}
+              </button>
+              <button onClick={() => setShowNewLead(!showNewLead)}
+                className="bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-xs font-medium px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 h-7">
+                <UserPlusIcon className="w-3 h-3" /> Neu
+              </button>
+              <div className="relative">
+                <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
+                <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suche..."
+                  className="pl-7 pr-2 py-1 bg-white border border-gray-200 rounded-lg text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#4573A2] w-40 h-7" />
+              </div>
             </div>
           </div>
+
+          {/* Row 2: Live-Filter Chips */}
+          {showFilters && (
+            <div className="px-4 pb-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-gray-50 pt-2">
+              {/* Source */}
+              <div className="flex items-center gap-1">
+                <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mr-1">Quelle</span>
+                {Object.entries(SOURCE_LABEL).map(([key, label]) => (
+                  <FilterChip key={key} label={label} active={filterSources.includes(key)} onClick={() => setFilterSources(prev => toggleFilter(prev, key))} />
+                ))}
+              </div>
+              {/* Schadentyp */}
+              <div className="flex items-center gap-1">
+                <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mr-1">Typ</span>
+                {Object.entries(SF_SHORT).map(([key, label]) => (
+                  <FilterChip key={key} label={label} active={filterSchadenTyp.includes(key)} onClick={() => setFilterSchadenTyp(prev => toggleFilter(prev, key))} />
+                ))}
+              </div>
+              {/* Flags */}
+              <div className="flex items-center gap-1">
+                <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mr-1">Flags</span>
+                <FilterChip label="Personenschaden" active={filterPersonenschaden} onClick={() => setFilterPersonenschaden(!filterPersonenschaden)} />
+                <FilterChip label="Mietwagen" active={filterMietwagen} onClick={() => setFilterMietwagen(!filterMietwagen)} />
+                <FilterChip label="Leasing" active={filterLeasing} onClick={() => setFilterLeasing(!filterLeasing)} />
+              </div>
+              {hasActiveFilters && (
+                <button onClick={clearAllFilters} className="text-[11px] text-red-500 hover:text-red-400 font-medium flex items-center gap-0.5">
+                  <XIcon className="w-3 h-3" /> Alle entfernen
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Toast */}
@@ -303,11 +448,9 @@ export default function DispatchBoard({
             defaultDatum={rueckrufModalLead.rueckruf_datum ? new Date(rueckrufModalLead.rueckruf_datum).toISOString().slice(0, 10) : undefined}
             onSave={async (leadId, datum, uhrzeit, notiz) => {
               const rueckrufDatum = new Date(`${datum}T${uhrzeit}:00`).toISOString()
-              // Optimistic: move lead + set rueckruf data
               const snapshot = [...localLeads]
               setLocalLeads(prev => prev.map(l => l.id === leadId ? { ...l, qualifizierungs_phase: 'rueckruf', rueckruf_datum: rueckrufDatum, rueckruf_notiz: notiz, rueckruf_erledigt: false } : l))
               setRueckrufModalLead(null)
-              // Persist: set rueckruf fields then move phase
               try {
                 const { createClient } = await import('@/lib/supabase/client')
                 const supabase = createClient()
@@ -330,7 +473,7 @@ export default function DispatchBoard({
 
         {/* Neuer Lead Formular */}
         {showNewLead && (
-          <div className="bg-white border border-gray-200 rounded-2xl p-4 mb-4 shadow-sm">
+          <div className="bg-white border border-gray-200 rounded-2xl p-4 mb-4 mx-4 shadow-sm">
             <h3 className="text-sm font-semibold text-gray-900 mb-3">Neuer Lead</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
               <input placeholder="Vorname *" value={newLead.vorname} onChange={e => setNewLead(p => ({ ...p, vorname: e.target.value }))} className="bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2]" />
@@ -362,7 +505,7 @@ export default function DispatchBoard({
 
         {/* Heutige Rueckrufe - compact */}
         {heutigeRueckrufe.length > 0 && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-2 mb-2 shrink-0">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-2 mb-2 mx-2 shrink-0">
             <div className="flex items-center gap-2 mb-1.5">
               <PhoneCallIcon className="w-3.5 h-3.5 text-amber-600" />
               <h3 className="text-xs font-semibold text-amber-700">Rueckrufe heute ({heutigeRueckrufe.length})</h3>
@@ -374,8 +517,8 @@ export default function DispatchBoard({
                 const isOverdue = time.getTime() < now
                 const minutesUntil = Math.round((time.getTime() - now) / 60000)
                 return (
-                  <Link key={lead.id} href={`/admin/dispatch/lead/${lead.id}`}
-                    className="flex items-center gap-3 bg-white rounded-xl px-3 py-2.5 hover:bg-gray-50 transition-colors border border-gray-100">
+                  <button key={lead.id} onClick={() => setSelectedLeadId(lead.id)}
+                    className="flex items-center gap-3 bg-white rounded-xl px-3 py-2.5 hover:bg-gray-50 transition-colors border border-gray-100 text-left">
                     <span className={`text-xs font-bold tabular-nums shrink-0 w-20 ${isOverdue ? 'text-red-500' : 'text-amber-600'}`}>
                       {isOverdue ? 'UEBERFAELLIG' : time.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
                     </span>
@@ -389,7 +532,7 @@ export default function DispatchBoard({
                         <PhoneIcon className="w-3 h-3" /> Anrufen
                       </a>
                     )}
-                  </Link>
+                  </button>
                 )
               })}
             </div>
@@ -398,76 +541,254 @@ export default function DispatchBoard({
 
         {/* Disqualifizierte Leads */}
         {showDisqualifiziert && disqualifiziertLeads.length > 0 && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-4">
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-4 mx-4">
             <h3 className="text-sm font-semibold text-red-600 mb-3">Disqualifizierte Leads ({disqualifiziertLeads.length})</h3>
             <div className="space-y-1.5">
               {disqualifiziertLeads.map(lead => (
-                <Link key={lead.id} href={`/admin/dispatch/lead/${lead.id}`}
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white hover:bg-gray-50 transition-colors border border-gray-100">
+                <button key={lead.id} onClick={() => setSelectedLeadId(lead.id)}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white hover:bg-gray-50 transition-colors border border-gray-100 w-full text-left">
                   <span className="text-gray-700 text-sm truncate flex-1">{`${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '\u2014'}</span>
                   <span className="text-red-400 text-xs">{(lead as Record<string, unknown>).disqualifiziert_grund as string ?? ''}</span>
                   <span className="text-gray-400 text-xs">{lead.created_at ? new Date(lead.created_at).toLocaleDateString('de-DE') : ''}</span>
-                </Link>
+                </button>
               ))}
             </div>
           </div>
         )}
 
-        {/* Kanban-Board: fills remaining space, no page scroll */}
-        <DragDropContext onDragEnd={onDragEnd}>
-          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', gap: 4, padding: '0 8px 8px 8px', minHeight: 0 }}>
-            {/* 7 columns: flex-1 each, no horizontal scroll on 1920px */}
-            {COLUMNS.map(col => {
-              const Icon = col.icon
-              const sorted = sortedByColumn[col.key] ?? []
+        {/* ─── Split-View: Kanban + Detail Panel ─────────────────────── */}
+        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', minHeight: 0 }}>
+          {/* LEFT: Kanban-Board */}
+          <DragDropContext onDragEnd={onDragEnd}>
+            <div style={{ flex: 1, overflow: 'hidden', display: 'flex', gap: 4, padding: '0 8px 8px 8px', minHeight: 0 }}>
+              {COLUMNS.map(col => {
+                const Icon = col.icon
+                const sorted = sortedByColumn[col.key] ?? []
 
-              return (
-                <div key={col.key} style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                  {/* Column header: 28px */}
-                  <div className="flex items-center gap-1 px-1 flex-shrink-0" style={{ height: 28 }}>
-                    <Icon className={`w-3 h-3 ${col.color}`} />
-                    <span className={`text-[11px] font-medium tracking-wider uppercase ${col.color}`}>{col.label}</span>
-                    <span className="text-gray-500 text-[10px] font-medium bg-gray-100 px-1 py-0.5 rounded-full ml-auto">{sorted.length}</span>
-                  </div>
-                  <div className={`h-px ${col.bg} opacity-40 flex-shrink-0`} />
+                return (
+                  <div key={col.key} style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                    {/* Column header: 28px */}
+                    <div className="flex items-center gap-1 px-1 flex-shrink-0" style={{ height: 28 }}>
+                      <Icon className={`w-3 h-3 ${col.color}`} />
+                      <span className={`text-[11px] font-medium tracking-wider uppercase ${col.color}`}>{col.label}</span>
+                      <span className="text-gray-500 text-[10px] font-medium bg-gray-100 px-1 py-0.5 rounded-full ml-auto">{sorted.length}</span>
+                    </div>
+                    <div className={`h-px ${col.bg} opacity-40 flex-shrink-0`} />
 
-                  {/* Column body: only scroll area */}
-                  <Droppable droppableId={col.key}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        style={{ flex: 1, overflowY: 'auto', padding: 4, display: 'flex', flexDirection: 'column', gap: 4 }}
-                        className={`transition-colors ${snapshot.isDraggingOver ? 'bg-[#4573A2]/5 border-2 border-dashed border-[#4573A2]/30 rounded-lg' : ''}`}
-                      >
-                          {sorted.length === 0 && !snapshot.isDraggingOver && (
-                            <div className="rounded-xl border border-dashed border-gray-200 p-4 text-center">
-                              <p className="text-gray-300 text-[10px]">Leer</p>
-                            </div>
-                          )}
-                          {sorted.map((lead, index) => (
-                            <Draggable key={lead.id} draggableId={lead.id} index={index}>
-                              {(dragProvided, dragSnapshot) => (
-                                <div
-                                  ref={dragProvided.innerRef}
-                                  {...dragProvided.draggableProps}
-                                  {...dragProvided.dragHandleProps}
-                                  className={`transition-shadow ${dragSnapshot.isDragging ? 'opacity-80 shadow-xl' : ''}`}
-                                >
-                                  <LeadCard lead={lead} columnKey={col.key} />
-                                </div>
-                              )}
-                            </Draggable>
-                          ))}
-                          {provided.placeholder}
-                        </div>
+                    {/* Column body */}
+                    <Droppable droppableId={col.key}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          style={{ flex: 1, overflowY: 'auto', padding: 4, display: 'flex', flexDirection: 'column', gap: 4 }}
+                          className={`transition-colors ${snapshot.isDraggingOver ? 'bg-[#4573A2]/5 border-2 border-dashed border-[#4573A2]/30 rounded-lg' : ''}`}
+                        >
+                            {sorted.length === 0 && !snapshot.isDraggingOver && (
+                              <div className="rounded-xl border border-dashed border-gray-200 p-4 text-center">
+                                <p className="text-gray-300 text-[10px]">Leer</p>
+                              </div>
+                            )}
+                            {sorted.map((lead, index) => (
+                              <Draggable key={lead.id} draggableId={lead.id} index={index}>
+                                {(dragProvided, dragSnapshot) => (
+                                  <div
+                                    ref={dragProvided.innerRef}
+                                    {...dragProvided.draggableProps}
+                                    {...dragProvided.dragHandleProps}
+                                    className={`transition-shadow ${dragSnapshot.isDragging ? 'opacity-80 shadow-xl' : ''}`}
+                                    onClick={() => setSelectedLeadId(lead.id)}
+                                  >
+                                    <LeadCard lead={lead} columnKey={col.key} isSelected={lead.id === selectedLeadId} />
+                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+                    </div>
+                  )
+                })}
+            </div>
+          </DragDropContext>
+
+          {/* RIGHT: Split-View Detail Panel */}
+          {selectedLead && (
+            <div className="w-[340px] flex-shrink-0 border-l border-gray-200 bg-white flex flex-col overflow-hidden">
+              {/* Panel Header */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
+                <h2 className="text-sm font-semibold text-gray-900 truncate">
+                  {selectedLead.vorname ?? ''} {selectedLead.nachname ?? ''}
+                </h2>
+                <div className="flex items-center gap-1">
+                  <Link href={`/admin/dispatch/lead/${selectedLead.id}`}
+                    className="text-[#4573A2] hover:text-[#1E3A5F] transition-colors p-1 rounded-lg hover:bg-gray-50" title="Vollansicht">
+                    <ExternalLinkIcon className="w-4 h-4" />
+                  </Link>
+                  <button onClick={() => setSelectedLeadId(null)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-50">
+                    <XIcon className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Panel Body */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {/* Contact Info */}
+                <div className="space-y-2">
+                  {selectedLead.telefon && (
+                    <a href={`tel:${selectedLead.telefon}`}
+                      className="flex items-center gap-2 text-sm text-[#4573A2] hover:text-[#1E3A5F] transition-colors">
+                      <PhoneIcon className="w-3.5 h-3.5" />
+                      {selectedLead.telefon}
+                    </a>
+                  )}
+                  {selectedLead.email && (
+                    <a href={`mailto:${selectedLead.email}`}
+                      className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 transition-colors">
+                      <MailIcon className="w-3.5 h-3.5" />
+                      {selectedLead.email}
+                    </a>
+                  )}
+                  {selectedLead.created_at && (
+                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                      <ClockIcon className="w-3.5 h-3.5" />
+                      Erstellt: {new Date(selectedLead.created_at).toLocaleDateString('de-DE')} ({timeSince(selectedLead.created_at)})
+                    </div>
+                  )}
+                </div>
+
+                {/* Phase Progress */}
+                <div className="bg-gray-50 rounded-xl p-3">
+                  <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-2">Qualifizierung</p>
+                  <PhaseProgressMini phase={selectedLead.qualifizierungs_phase ?? 'neu'} />
+                </div>
+
+                {/* Badges */}
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedLead.source_channel && (() => {
+                    const SrcIcon = SOURCE_ICON[selectedLead.source_channel] ?? GlobeIcon
+                    return (
+                      <span className="bg-gray-100 text-gray-600 text-[10px] font-medium px-2 py-1 rounded-lg flex items-center gap-1">
+                        <SrcIcon className="w-3 h-3" /> {SOURCE_LABEL[selectedLead.source_channel] ?? selectedLead.source_channel}
+                      </span>
+                    )
+                  })()}
+                  {selectedLead.schadenfall_typ && (
+                    <span className="bg-[#4573A2]/10 text-[#4573A2] text-[10px] font-medium px-2 py-1 rounded-lg">
+                      {SF_SHORT[selectedLead.schadenfall_typ] ?? selectedLead.schadenfall_typ}
+                      {SF_LABELS[selectedLead.schadenfall_typ] && (
+                        <span className="text-[#4573A2]/60 ml-1">{SF_LABELS[selectedLead.schadenfall_typ]}</span>
                       )}
-                    </Droppable>
+                    </span>
+                  )}
+                  {selectedLead.personenschaden_flag && (
+                    <span className="bg-red-50 text-red-500 text-[10px] font-medium px-2 py-1 rounded-lg flex items-center gap-1">
+                      <AlertTriangleIcon className="w-3 h-3" /> Personenschaden
+                    </span>
+                  )}
+                  {selectedLead.mietwagen_flag && (
+                    <span className="bg-amber-50 text-amber-600 text-[10px] font-medium px-2 py-1 rounded-lg flex items-center gap-1">
+                      <CarIcon className="w-3 h-3" /> Mietwagen
+                    </span>
+                  )}
+                  {selectedLead.leasing_flag && (
+                    <span className="bg-purple-50 text-purple-500 text-[10px] font-medium px-2 py-1 rounded-lg">Leasing</span>
+                  )}
+                </div>
+
+                {/* Callback Info */}
+                {selectedLead.rueckruf_datum && !selectedLead.rueckruf_erledigt && (
+                  <div className={`rounded-xl p-3 ${
+                    new Date(selectedLead.rueckruf_datum).getTime() < Date.now()
+                      ? 'bg-red-50 border border-red-200'
+                      : 'bg-amber-50 border border-amber-200'
+                  }`}>
+                    <p className="text-[10px] text-gray-500 font-medium uppercase tracking-wider mb-1">Rueckruf</p>
+                    <p className={`text-sm font-semibold ${
+                      new Date(selectedLead.rueckruf_datum).getTime() < Date.now() ? 'text-red-600' : 'text-amber-700'
+                    }`}>
+                      {new Date(selectedLead.rueckruf_datum).toLocaleDateString('de-DE')} um {new Date(selectedLead.rueckruf_datum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                    {selectedLead.rueckruf_notiz && (
+                      <p className="text-xs text-gray-500 mt-1">{selectedLead.rueckruf_notiz}</p>
+                    )}
                   </div>
-                )
-              })}
-          </div>
-        </DragDropContext>
+                )}
+
+                {/* Status Details */}
+                <div className="bg-gray-50 rounded-xl p-3 space-y-2">
+                  <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Details</p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <p className="text-gray-400">Anrufversuche</p>
+                      <p className="text-gray-700 font-medium">{selectedLead.anruf_versuche ?? 0}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400">Kontaktversuche</p>
+                      <p className="text-gray-700 font-medium">{selectedLead.kontaktversuche ?? 0}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400">Letzter Anruf</p>
+                      <p className="text-gray-700 font-medium">{selectedLead.letzter_anruf_am ? timeSince(selectedLead.letzter_anruf_am) + ' ago' : '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400">Anruf-Status</p>
+                      <p className="text-gray-700 font-medium">{selectedLead.letzter_anruf_status ?? '—'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Signatures */}
+                <div className="bg-gray-50 rounded-xl p-3 space-y-2">
+                  <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Unterschriften</p>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-500">Schadensanzeige</span>
+                      <span className={selectedLead.sa_unterschrieben ? 'text-emerald-600 font-medium' : 'text-gray-400'}>
+                        {selectedLead.sa_unterschrieben ? 'Unterschrieben' : 'Ausstehend'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-500">Vollmacht</span>
+                      <span className={selectedLead.vollmacht_unterschrieben ? 'text-emerald-600 font-medium' : 'text-gray-400'}>
+                        {selectedLead.vollmacht_unterschrieben ? 'Unterschrieben' : 'Ausstehend'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Flow Link Status */}
+                {(selectedLead.flow_link_geoeffnet || selectedLead.flow_link_abgeschlossen) && (
+                  <div className="bg-gray-50 rounded-xl p-3">
+                    <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-1">Flow Link</p>
+                    <p className={`text-xs font-medium ${
+                      selectedLead.flow_link_abgeschlossen ? 'text-emerald-600' : 'text-[#4573A2]'
+                    }`}>
+                      {selectedLead.flow_link_abgeschlossen ? 'Abgeschlossen' : 'Geoeffnet'}
+                    </p>
+                  </div>
+                )}
+
+                {/* Quick Actions */}
+                <div className="flex flex-col gap-2 pt-2">
+                  {selectedLead.telefon && (
+                    <a href={`tel:${selectedLead.telefon}`}
+                      className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium px-4 py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
+                      <PhoneIcon className="w-3.5 h-3.5" /> Jetzt anrufen
+                    </a>
+                  )}
+                  <Link href={`/admin/dispatch/lead/${selectedLead.id}`}
+                    className="bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-xs font-medium px-4 py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
+                    <ExternalLinkIcon className="w-3.5 h-3.5" /> Vollansicht oeffnen
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -475,7 +796,7 @@ export default function DispatchBoard({
 
 // ─── Lead Card (no dropdown, drag-only) ──────────────────────────────────────
 
-function LeadCard({ lead, columnKey }: { lead: Lead; columnKey: string }) {
+function LeadCard({ lead, columnKey, isSelected }: { lead: Lead; columnKey: string; isSelected?: boolean }) {
   const name = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '\u2014'
   const age = timeSince(lead.created_at)
   const SourceIcon = SOURCE_ICON[lead.source_channel ?? ''] ?? GlobeIcon
@@ -484,7 +805,9 @@ function LeadCard({ lead, columnKey }: { lead: Lead; columnKey: string }) {
   const callbackInPast = hasCallback && new Date(lead.rueckruf_datum!) < new Date()
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all cursor-grab active:cursor-grabbing" style={{ padding: '6px 8px' }}>
+    <div className={`bg-white rounded-lg border hover:shadow-sm transition-all cursor-grab active:cursor-grabbing ${
+      isSelected ? 'border-[#4573A2] ring-1 ring-[#4573A2]/30 shadow-sm' : 'border-gray-200 hover:border-gray-300'
+    }`} style={{ padding: '6px 8px' }}>
       {/* Rueckruf Badge */}
       {hasCallback && (
         <div className={`text-[9px] font-semibold px-1.5 py-0.5 rounded mb-1 ${
@@ -496,10 +819,9 @@ function LeadCard({ lead, columnKey }: { lead: Lead; columnKey: string }) {
 
       {/* Name + Age */}
       <div className="flex items-center justify-between mb-0.5">
-        <Link href={`/admin/dispatch/lead/${lead.id}`} className="text-gray-800 text-sm font-medium leading-snug truncate hover:text-[#4573A2] transition-colors flex-1 min-w-0"
-          onClick={e => e.stopPropagation()}>
+        <span className="text-gray-800 text-sm font-medium leading-snug truncate flex-1 min-w-0">
           {name}
-        </Link>
+        </span>
         <span className="text-[10px] text-gray-400 shrink-0 ml-1">{age}</span>
       </div>
 
