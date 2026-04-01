@@ -50,7 +50,7 @@ export default async function AdminPage() {
     // Offene Tasks
     supabase.from('tasks')
       .select('id, titel, status, prioritaet, faellig_am, fall_id, faelle(fall_nummer)')
-      .in('status', ['offen', 'in-arbeit'])
+      .in('status', ['offen', 'in-bearbeitung'])
       .order('faellig_am', { ascending: true })
       .limit(20),
     // Aktive Fälle

@@ -3360,7 +3360,7 @@ function NaechsterSchrittBanner({ fall, tasks: allTasks, onAction }: { fall: Fal
 
   // Find next open task: highest priority, oldest deadline
   const openTasks = allTasks
-    .filter(t => t.status === 'offen' || t.status === 'in-arbeit')
+    .filter(t => t.status === 'offen' || t.status === 'in-bearbeitung')
     .sort((a, b) => {
       const priOrder: Record<string, number> = { kritisch: 0, hoch: 1, normal: 2, '': 3 }
       const pa = priOrder[a.prioritaet ?? ''] ?? 3

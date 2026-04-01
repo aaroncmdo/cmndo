@@ -256,7 +256,7 @@ export async function autoCompleteTask(fallId: string, eventType: string) {
       .select('id, titel')
       .eq('fall_id', fallId)
       .eq('task_code', code)
-      .in('status', ['offen', 'in-arbeit', 'blockiert'])
+      .in('status', ['offen', 'in-bearbeitung', 'blockiert'])
       .limit(1)
       .maybeSingle()
 

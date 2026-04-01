@@ -99,7 +99,7 @@ export async function triggerSV05(fallId: string, svUserId: string, kommentare: 
  */
 export async function completeSVTask(fallId: string, taskCode: string) {
   const db = createAdminClient()
-  const { data: task } = await db.from('tasks').select('id').eq('fall_id', fallId).eq('task_code', taskCode).in('status', ['offen', 'in-arbeit']).limit(1).maybeSingle()
+  const { data: task } = await db.from('tasks').select('id').eq('fall_id', fallId).eq('task_code', taskCode).in('status', ['offen', 'in-bearbeitung']).limit(1).maybeSingle()
   if (task) {
     await db.from('tasks').update({ status: 'erledigt', erledigt_am: new Date().toISOString() }).eq('id', task.id)
     await resolveGates(task.id)

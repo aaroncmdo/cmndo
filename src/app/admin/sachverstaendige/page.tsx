@@ -52,7 +52,7 @@ export default async function SachverstaendigePage() {
   // Cases for map
   const { data: faelle } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, status, schadens_ursache, schadens_adresse, schadens_plz, schadens_ort, sv_id, leads(vorname, nachname)')
+    .select('id, fall_nummer, status, schadens_ursache, schadens_adresse, schadens_plz, schadens_ort, sv_id, leads!faelle_lead_id_fkey(vorname, nachname)')
     .not('status', 'in', '("abgeschlossen","storniert")')
 
   const offeneFaelle = (faelle ?? []).map((f) => {

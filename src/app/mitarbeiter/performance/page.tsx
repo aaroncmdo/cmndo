@@ -62,7 +62,7 @@ export default async function MitarbeiterPerformancePage() {
 
   const [{ data: heuteTermine }, { data: heuteTasks }, { data: heuteGutachterTermine }] = await Promise.all([
     supabase.from('termine')
-      .select('id, fall_id, typ, datum, dauer_minuten, betreff, meet_link, status, faelle(fall_nummer, leads(vorname, nachname))')
+      .select('id, fall_id, typ, datum, dauer_minuten, betreff, meet_link, status, faelle(fall_nummer, leads!faelle_lead_id_fkey(vorname, nachname))')
       .eq('betreuer_user_id', user.id)
       .gte('datum', todayStart)
       .lt('datum', todayEnd)
@@ -71,7 +71,7 @@ export default async function MitarbeiterPerformancePage() {
     supabase.from('tasks')
       .select('id, titel, status, prioritaet, faellig_am, fall_id, faelle(fall_nummer)')
       .or(`zugewiesen_an.eq.${user.id}`)
-      .in('status', ['offen', 'in-arbeit'])
+      .in('status', ['offen', 'in-bearbeitung'])
       .lte('faellig_am', todayEnd)
       .order('faellig_am', { ascending: true })
       .limit(20),
