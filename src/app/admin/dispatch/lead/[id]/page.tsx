@@ -6,6 +6,9 @@ import RueckrufSection from './RueckrufSection'
 import LeadNotizen from './LeadNotizen'
 import LeadTimeline from './LeadTimeline'
 import DisqualifizierungButton from './DisqualifizierungButton'
+import LeadHistorie from './LeadHistorie'
+import LeadInlineFields from './LeadInlineFields'
+import LeadDetailTabs from './LeadDetailTabs'
 
 export default async function LeadDetailPage({
   params,
@@ -42,173 +45,203 @@ export default async function LeadDetailPage({
     : { data: [] }
 
   return (
-    <div className="px-4 py-8">
-      <div className="max-w-3xl mx-auto">
-        {/* Back */}
-        <Link
-          href="/admin/dispatch"
-          className="text-sm text-gray-500 hover:text-gray-800 transition-colors mb-6 inline-block"
-        >
-          &larr; Zurueck zu Dispatch
-        </Link>
+    <div className="h-full flex flex-col overflow-hidden">
+      {/* ── Sticky Header ──────────────────────────────────────────── */}
+      <div className="sticky top-0 z-20 bg-white border-b border-gray-200 flex-shrink-0 px-4 py-3">
+        <div className="max-w-4xl mx-auto">
+          <Link
+            href="/admin/dispatch"
+            className="text-xs text-gray-400 hover:text-gray-600 transition-colors mb-2 inline-block"
+          >
+            &larr; Dispatch
+          </Link>
 
-        {/* Header */}
-        <div className="mb-6">
           <div className="flex items-start justify-between">
-            <h1 className="text-2xl font-semibold text-gray-900">
-              {lead.vorname ?? ''} {lead.nachname ?? ''}
-            </h1>
-            {lead.qualifizierungs_phase !== 'disqualifiziert' && lead.qualifizierungs_phase !== 'konvertiert' && (
-              <DisqualifizierungButton leadId={lead.id} />
-            )}
-            {lead.disqualifiziert && (
-              <span className="bg-red-50 text-red-400 text-xs font-bold px-3 py-1 rounded-full">
-                DISQUALIFIZIERT: {lead.disqualifiziert_grund ?? 'Unbekannt'}
-              </span>
-            )}
-          </div>
-          <div className="flex flex-wrap items-center gap-3 mt-1 text-sm">
-            {lead.telefon && (
-              <a href={`tel:${lead.telefon}`} className="text-[#7BA3CC] hover:text-[#7BA3CC] transition-colors">
-                {lead.telefon}
-              </a>
-            )}
-            {lead.email && <span className="text-gray-500">{lead.email}</span>}
-            {lead.created_at && (
-              <span className="text-gray-400 text-xs">
-                Erstellt: {new Date(lead.created_at).toLocaleDateString('de-DE')}
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Fortschrittsbalken */}
-        <PhaseProgressBar phase={lead.qualifizierungs_phase ?? 'neu'} />
-
-        {/* Rueckruftermin */}
-        <RueckrufSection
-          lead={{
-            id: lead.id,
-            rueckruf_datum: lead.rueckruf_datum ?? null,
-            rueckruf_notiz: lead.rueckruf_notiz ?? null,
-            rueckruf_erledigt: lead.rueckruf_erledigt ?? null,
-          }}
-        />
-
-        {/* Qualifizierungs-Stepper (7 Schritte) */}
-        <LeadStepper
-          lead={{
-            id: lead.id,
-            vorname: lead.vorname,
-            nachname: lead.nachname,
-            telefon: lead.telefon,
-            email: lead.email,
-            status: lead.status,
-            schadenfall_typ: lead.schadenfall_typ ?? null,
-            kunden_konstellation: lead.kunden_konstellation ?? null,
-            sf_variante: lead.sf_variante ?? null,
-            gegner_name: lead.gegner_name ?? null,
-            gegner_versicherung: lead.gegner_versicherung ?? null,
-            gegner_kennzeichen: lead.gegner_kennzeichen ?? null,
-            gegner_bekannt: lead.gegner_bekannt ?? null,
-            eigene_versicherung: lead.eigene_versicherung ?? null,
-            eigene_policennr: lead.eigene_policennr ?? null,
-            polizei_aktenzeichen: lead.polizei_aktenzeichen ?? null,
-            polizeibericht_pflicht: lead.polizeibericht_pflicht ?? null,
-            personenschaden_flag: lead.personenschaden_flag ?? null,
-            mietwagen_flag: lead.mietwagen_flag ?? null,
-            schadensursache: lead.schadensursache ?? null,
-            leasing_geber: lead.leasing_geber ?? null,
-            leasing_flag: lead.leasing_flag ?? null,
-            finanzierung_bank: lead.finanzierung_bank ?? null,
-            finanzierung_flag: lead.finanzierung_flag ?? null,
-            firma_name: lead.firma_name ?? null,
-            firma_ustid: lead.firma_ustid ?? null,
-            gewerbe_flag: lead.gewerbe_flag ?? null,
-            halter_name: lead.halter_name ?? null,
-            halter_ungleich_fahrer_flag: lead.halter_ungleich_fahrer_flag ?? null,
-            qualifizierungs_phase: lead.qualifizierungs_phase ?? null,
-            fahrzeug_standort_plz: lead.fahrzeug_standort_plz ?? null,
-            fahrzeug_standort_adresse: lead.fahrzeug_standort_adresse ?? null,
-            gutachter_termin: lead.gutachter_termin ?? null,
-            sa_unterschrieben: lead.sa_unterschrieben ?? false,
-            sa_datum: lead.sa_datum ?? null,
-            vollmacht_unterschrieben: lead.vollmacht_unterschrieben ?? false,
-            vollmacht_datum: lead.vollmacht_datum ?? null,
-            mandatstyp: lead.mandatstyp ?? null,
-            wa_gesendet: lead.wa_gesendet ?? false,
-          }}
-        />
-
-        {/* Notizen */}
-        <LeadNotizen leadId={lead.id} notiz={lead.notiz ?? ''} />
-
-        {/* Kontakt */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-5">
-          <h2 className="text-sm font-medium text-gray-500 mb-4">Kontaktdaten</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <InfoRow label="E-Mail" value={lead.email} />
-            <InfoRow label="Telefon" value={lead.telefon} />
-            <InfoRow label="Quelle" value={lead.source_channel} />
-            <InfoRow label="Domain" value={lead.source_domain} />
-            <InfoRow label="Kontaktversuche" value={String(lead.kontaktversuche ?? 0)} />
-            <InfoRow label="Verpasste Anrufe" value={String(lead.verpasste_anrufe ?? 0)} />
-          </div>
-        </div>
-
-        {/* Timeline */}
-        <LeadTimeline
-          lead={{
-            created_at: lead.created_at,
-            qualifizierungs_phase: lead.qualifizierungs_phase ?? 'neu',
-            rueckruf_datum: lead.rueckruf_datum ?? null,
-            rueckruf_erledigt: lead.rueckruf_erledigt ?? false,
-            sa_unterschrieben: lead.sa_unterschrieben ?? false,
-            gutachter_termin: lead.gutachter_termin ?? null,
-            wa_gesendet: lead.wa_gesendet ?? false,
-          }}
-          timelineEntries={timelineEntries ?? []}
-        />
-
-        {/* Zugehoerige Faelle */}
-        {faelle && faelle.length > 0 && (
-          <div className="bg-white border border-gray-200 rounded-2xl p-5">
-            <h2 className="text-sm font-medium text-gray-500 mb-4">
-              Zugehoerige Faelle ({faelle.length})
-            </h2>
-            <div className="space-y-2">
-              {faelle.map((fall) => (
-                <Link
-                  key={fall.id}
-                  href={`/admin/faelle/${fall.id}`}
-                  className="flex items-center justify-between px-4 py-3 rounded-xl bg-gray-100/50 hover:bg-gray-100 transition-colors"
-                >
-                  <div>
-                    <span className="text-[#7BA3CC] font-mono text-xs">
-                      {fall.fall_nummer ?? fall.id.slice(0, 8)}
-                    </span>
-                    <span className="text-gray-500 text-xs ml-3">
-                      {fall.schadens_ursache ?? '\u2014'}
-                    </span>
-                  </div>
-                  <span className="text-gray-500 text-xs">
-                    {fall.created_at ? new Date(fall.created_at).toLocaleDateString('de-DE') : ''}
+            <div>
+              <h1 className="text-xl font-semibold text-gray-900">
+                {lead.vorname ?? ''} {lead.nachname ?? ''}
+              </h1>
+              <div className="flex flex-wrap items-center gap-3 mt-1 text-sm">
+                {lead.telefon && (
+                  <a href={`tel:${lead.telefon}`} className="text-[#4573A2] hover:text-[#1E3A5F] transition-colors font-mono text-xs">
+                    {lead.telefon}
+                  </a>
+                )}
+                {lead.email && <span className="text-gray-500 text-xs">{lead.email}</span>}
+                {lead.created_at && (
+                  <span className="text-gray-400 text-[10px]">
+                    Erstellt: {new Date(lead.created_at).toLocaleDateString('de-DE')}
                   </span>
-                </Link>
-              ))}
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {lead.qualifizierungs_phase !== 'disqualifiziert' && lead.qualifizierungs_phase !== 'konvertiert' && (
+                <DisqualifizierungButton leadId={lead.id} />
+              )}
+              {lead.disqualifiziert && (
+                <span className="bg-red-50 text-red-400 text-xs font-bold px-3 py-1 rounded-full">
+                  DISQUALIFIZIERT: {lead.disqualifiziert_grund ?? 'Unbekannt'}
+                </span>
+              )}
             </div>
           </div>
-        )}
-      </div>
-    </div>
-  )
-}
 
-function InfoRow({ label, value }: { label: string; value: string | null | undefined }) {
-  return (
-    <div>
-      <p className="text-xs text-gray-500 mb-0.5">{label}</p>
-      <p className="text-sm text-gray-800">{value || '\u2014'}</p>
+          {/* Phase Progress */}
+          <PhaseProgressBar phase={lead.qualifizierungs_phase ?? 'neu'} />
+        </div>
+      </div>
+
+      {/* ── Tabs + Content ─────────────────────────────────────────── */}
+      <LeadDetailTabs
+        uebersichtContent={
+          <div className="max-w-4xl mx-auto space-y-0">
+            {/* Rueckruftermin */}
+            <RueckrufSection
+              lead={{
+                id: lead.id,
+                rueckruf_datum: lead.rueckruf_datum ?? null,
+                rueckruf_notiz: lead.rueckruf_notiz ?? null,
+                rueckruf_erledigt: lead.rueckruf_erledigt ?? null,
+              }}
+            />
+
+            {/* Qualifizierungs-Stepper (7 Schritte) */}
+            <LeadStepper
+              lead={{
+                id: lead.id,
+                vorname: lead.vorname,
+                nachname: lead.nachname,
+                telefon: lead.telefon,
+                email: lead.email,
+                status: lead.status,
+                schadenfall_typ: lead.schadenfall_typ ?? null,
+                kunden_konstellation: lead.kunden_konstellation ?? null,
+                sf_variante: lead.sf_variante ?? null,
+                gegner_name: lead.gegner_name ?? null,
+                gegner_versicherung: lead.gegner_versicherung ?? null,
+                gegner_kennzeichen: lead.gegner_kennzeichen ?? null,
+                gegner_bekannt: lead.gegner_bekannt ?? null,
+                eigene_versicherung: lead.eigene_versicherung ?? null,
+                eigene_policennr: lead.eigene_policennr ?? null,
+                polizei_aktenzeichen: lead.polizei_aktenzeichen ?? null,
+                polizeibericht_pflicht: lead.polizeibericht_pflicht ?? null,
+                personenschaden_flag: lead.personenschaden_flag ?? null,
+                mietwagen_flag: lead.mietwagen_flag ?? null,
+                schadensursache: lead.schadensursache ?? null,
+                leasing_geber: lead.leasing_geber ?? null,
+                leasing_flag: lead.leasing_flag ?? null,
+                finanzierung_bank: lead.finanzierung_bank ?? null,
+                finanzierung_flag: lead.finanzierung_flag ?? null,
+                firma_name: lead.firma_name ?? null,
+                firma_ustid: lead.firma_ustid ?? null,
+                gewerbe_flag: lead.gewerbe_flag ?? null,
+                halter_name: lead.halter_name ?? null,
+                halter_ungleich_fahrer_flag: lead.halter_ungleich_fahrer_flag ?? null,
+                qualifizierungs_phase: lead.qualifizierungs_phase ?? null,
+                fahrzeug_standort_plz: lead.fahrzeug_standort_plz ?? null,
+                fahrzeug_standort_adresse: lead.fahrzeug_standort_adresse ?? null,
+                gutachter_termin: lead.gutachter_termin ?? null,
+                sa_unterschrieben: lead.sa_unterschrieben ?? false,
+                sa_datum: lead.sa_datum ?? null,
+                vollmacht_unterschrieben: lead.vollmacht_unterschrieben ?? false,
+                vollmacht_datum: lead.vollmacht_datum ?? null,
+                mandatstyp: lead.mandatstyp ?? null,
+                wa_gesendet: lead.wa_gesendet ?? false,
+              }}
+            />
+
+            {/* Notizen */}
+            <LeadNotizen leadId={lead.id} notiz={lead.notiz ?? ''} />
+
+            {/* Timeline */}
+            <LeadTimeline
+              lead={{
+                created_at: lead.created_at,
+                qualifizierungs_phase: lead.qualifizierungs_phase ?? 'neu',
+                rueckruf_datum: lead.rueckruf_datum ?? null,
+                rueckruf_erledigt: lead.rueckruf_erledigt ?? false,
+                sa_unterschrieben: lead.sa_unterschrieben ?? false,
+                gutachter_termin: lead.gutachter_termin ?? null,
+                wa_gesendet: lead.wa_gesendet ?? false,
+              }}
+              timelineEntries={timelineEntries ?? []}
+            />
+
+            {/* Zugehoerige Faelle */}
+            {faelle && faelle.length > 0 && (
+              <div className="bg-white border border-gray-200 rounded-2xl p-5">
+                <h2 className="text-sm font-medium text-gray-500 mb-4">
+                  Zugehoerige Faelle ({faelle.length})
+                </h2>
+                <div className="space-y-2">
+                  {faelle.map((fall) => (
+                    <Link
+                      key={fall.id}
+                      href={`/admin/faelle/${fall.id}`}
+                      className="flex items-center justify-between px-4 py-3 rounded-xl bg-gray-100/50 hover:bg-gray-100 transition-colors"
+                    >
+                      <div>
+                        <span className="text-[#7BA3CC] font-mono text-xs">
+                          {fall.fall_nummer ?? fall.id.slice(0, 8)}
+                        </span>
+                        <span className="text-gray-500 text-xs ml-3">
+                          {fall.schadens_ursache ?? '\u2014'}
+                        </span>
+                      </div>
+                      <span className="text-gray-500 text-xs">
+                        {fall.created_at ? new Date(fall.created_at).toLocaleDateString('de-DE') : ''}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        }
+        felderContent={
+          <div className="max-w-4xl mx-auto">
+            <LeadInlineFields lead={{
+              id: lead.id,
+              vorname: lead.vorname ?? null,
+              nachname: lead.nachname ?? null,
+              telefon: lead.telefon ?? null,
+              email: lead.email ?? null,
+              source_channel: lead.source_channel ?? null,
+              source_domain: lead.source_domain ?? null,
+              schadenfall_typ: lead.schadenfall_typ ?? null,
+              kunden_konstellation: lead.kunden_konstellation ?? null,
+              gegner_name: lead.gegner_name ?? null,
+              gegner_versicherung: lead.gegner_versicherung ?? null,
+              gegner_kennzeichen: lead.gegner_kennzeichen ?? null,
+              gegner_bekannt: lead.gegner_bekannt ?? null,
+              eigene_versicherung: lead.eigene_versicherung ?? null,
+              eigene_policennr: lead.eigene_policennr ?? null,
+              polizei_aktenzeichen: lead.polizei_aktenzeichen ?? null,
+              personenschaden_flag: lead.personenschaden_flag ?? null,
+              mietwagen_flag: lead.mietwagen_flag ?? null,
+              leasing_flag: lead.leasing_flag ?? null,
+              finanzierung_flag: lead.finanzierung_flag ?? null,
+              gewerbe_flag: lead.gewerbe_flag ?? null,
+              halter_ungleich_fahrer_flag: lead.halter_ungleich_fahrer_flag ?? null,
+              kennzeichen: lead.kennzeichen ?? null,
+              fahrzeug_hersteller: lead.fahrzeug_hersteller ?? null,
+              fahrzeug_modell: lead.fahrzeug_modell ?? null,
+              kontaktversuche: lead.kontaktversuche ?? null,
+              verpasste_anrufe: lead.verpasste_anrufe ?? null,
+              firma_name: lead.firma_name ?? null,
+              halter_name: lead.halter_name ?? null,
+              leasing_geber: lead.leasing_geber ?? null,
+              finanzierung_bank: lead.finanzierung_bank ?? null,
+            }} />
+          </div>
+        }
+        historieContent={
+          <div className="max-w-4xl mx-auto">
+            <LeadHistorie leadId={lead.id} />
+          </div>
+        }
+      />
     </div>
   )
 }
@@ -228,19 +261,17 @@ const PHASES = [
 function PhaseProgressBar({ phase }: { phase: string }) {
   const currentIdx = PHASES.findIndex(p => p.key === phase)
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-4 mb-5">
-      <div className="flex items-center gap-1">
-        {PHASES.map((p, i) => (
-          <div key={p.key} className="flex-1 flex flex-col items-center gap-1">
-            <div className={`w-full h-1.5 rounded-full ${
-              i <= currentIdx ? 'bg-[#4573A2]' : 'bg-gray-100'
-            }`} />
-            <span className={`text-[9px] ${i <= currentIdx ? 'text-[#7BA3CC]' : 'text-gray-400'}`}>
-              {p.label}
-            </span>
-          </div>
-        ))}
-      </div>
+    <div className="flex items-center gap-1 mt-3">
+      {PHASES.map((p, i) => (
+        <div key={p.key} className="flex-1 flex flex-col items-center gap-0.5">
+          <div className={`w-full h-1 rounded-full ${
+            i <= currentIdx ? 'bg-[#4573A2]' : 'bg-gray-100'
+          }`} />
+          <span className={`text-[8px] ${i <= currentIdx ? 'text-[#4573A2]' : 'text-gray-300'}`}>
+            {p.label}
+          </span>
+        </div>
+      ))}
     </div>
   )
 }
