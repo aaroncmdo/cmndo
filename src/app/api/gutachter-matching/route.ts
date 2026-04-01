@@ -18,6 +18,21 @@ function haversineKm(
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
+// ─── Point-in-Polygon (Ray Casting) ─────────────────────────────────────────
+
+function pointInPolygon(point: { lat: number; lng: number }, polygon: { lat: number; lng: number }[]): boolean {
+  let inside = false
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].lat, yi = polygon[i].lng
+    const xj = polygon[j].lat, yj = polygon[j].lng
+    if ((yi > point.lng) !== (yj > point.lng) &&
+        point.lat < (xj - xi) * (point.lng - yi) / (yj - yi) + xi) {
+      inside = !inside
+    }
+  }
+  return inside
+}
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type MatchResult = {
@@ -71,11 +86,11 @@ export async function POST(request: Request) {
   const { data: svList } = await supabase
     .from('sachverstaendige')
     .select(`
-      id, gebiet_plz, lat, lng, partner_seit,
+      id, lat, lng, partner_seit,
       offene_faelle, max_faelle_monat, paket, qualifikationen,
       ist_aktiv, profile_id, kalender_sync_aktiv,
       paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km,
-      standort_lat, standort_lng
+      standort_lat, standort_lng, isochrone_polygon
     `)
     .eq('ist_aktiv', true)
 
@@ -104,10 +119,13 @@ export async function POST(request: Request) {
       inRange = distanz <= maxRadius
     }
 
-    if (!inRange && Array.isArray(sv.gebiet_plz)) {
-      if (sv.gebiet_plz.includes(plz)) {
+    // Isochrone Point-in-Polygon check (replaces PLZ matching)
+    if (!inRange && plzGeo && sv.isochrone_polygon && Array.isArray(sv.isochrone_polygon)) {
+      if (pointInPolygon({ lat: Number(plzGeo.lat), lng: Number(plzGeo.lng) }, sv.isochrone_polygon as { lat: number; lng: number }[])) {
         inRange = true
-        distanz = 0
+        if (distanz === null && svLat != null && svLng != null) {
+          distanz = haversineKm(Number(plzGeo.lat), Number(plzGeo.lng), Number(svLat), Number(svLng))
+        }
       }
     }
 

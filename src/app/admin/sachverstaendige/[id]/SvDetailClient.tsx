@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation'
 import { updateSvProfile } from './actions'
 
 const PAKET_OPTIONS = [
-  { value: 'standard', label: 'Standard (10)' },
-  { value: 'pro', label: 'Pro (25)' },
-  { value: 'premium', label: 'Premium (50)' },
+  { value: 'standard', label: 'Standard (10 Fälle, 15km)' },
+  { value: 'pro', label: 'Pro (25 Fälle, 40km)' },
+  { value: 'premium', label: 'Premium (50 Fälle, 70km)' },
 ]
 
 type SvData = {
@@ -19,7 +19,6 @@ type SvData = {
   paket: string
   maxFaelleMonat: number
   istAktiv: boolean
-  gebietPlz: string[]
   notizen: string
 }
 
@@ -47,6 +46,8 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
     }
   }
 
+  const inputCls = 'w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#4573A2]'
+
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-5">
       <h2 className="text-sm font-medium text-gray-500 mb-4">Profil bearbeiten</h2>
@@ -54,98 +55,53 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-gray-500 text-sm mb-1.5">Vorname</label>
-            <input
-              name="vorname"
-              defaultValue={sv.vorname}
-              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
-            />
+            <label className="block text-gray-500 text-xs mb-1">Vorname</label>
+            <input name="vorname" defaultValue={sv.vorname} className={inputCls} />
           </div>
           <div>
-            <label className="block text-gray-500 text-sm mb-1.5">Nachname</label>
-            <input
-              name="nachname"
-              defaultValue={sv.nachname}
-              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
-            />
+            <label className="block text-gray-500 text-xs mb-1">Nachname</label>
+            <input name="nachname" defaultValue={sv.nachname} className={inputCls} />
           </div>
         </div>
 
         <div>
-          <label className="block text-gray-500 text-sm mb-1.5">Telefon</label>
-          <input
-            name="telefon"
-            defaultValue={sv.telefon}
-            className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
-          />
+          <label className="block text-gray-500 text-xs mb-1">Telefon</label>
+          <input name="telefon" defaultValue={sv.telefon} className={inputCls} />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-gray-500 text-sm mb-1.5">Paket</label>
-            <select
-              name="paket"
-              defaultValue={sv.paket}
-              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
-            >
-              {PAKET_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
+            <label className="block text-gray-500 text-xs mb-1">Paket</label>
+            <select name="paket" defaultValue={sv.paket} className={inputCls}>
+              {PAKET_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-gray-500 text-sm mb-1.5">Max Fälle / Monat</label>
-            <input
-              name="max_faelle_monat"
-              type="number"
-              min="1"
-              defaultValue={sv.maxFaelleMonat}
-              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
-            />
+            <label className="block text-gray-500 text-xs mb-1">Max Fälle / Monat</label>
+            <input name="max_faelle_monat" type="number" min="1" defaultValue={sv.maxFaelleMonat} className={inputCls} />
           </div>
         </div>
 
-        <div>
-          <label className="block text-gray-500 text-sm mb-1.5">Gebiet (PLZ, kommagetrennt)</label>
-          <input
-            name="gebiet_plz"
-            defaultValue={sv.gebietPlz.join(', ')}
-            className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
-            placeholder="10115, 10117, 10119 ..."
-          />
-        </div>
+        {/* PLZ-Einsatzgebiet ENTFERNT — Dispatching per Isochrone */}
 
         <div>
-          <label className="block text-gray-500 text-sm mb-1.5">Status</label>
-          <select
-            name="ist_aktiv"
-            defaultValue={sv.istAktiv ? 'true' : 'false'}
-            className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
-          >
+          <label className="block text-gray-500 text-xs mb-1">Status</label>
+          <select name="ist_aktiv" defaultValue={sv.istAktiv ? 'true' : 'false'} className={inputCls}>
             <option value="true">Aktiv</option>
             <option value="false">Inaktiv</option>
           </select>
         </div>
 
         <div>
-          <label className="block text-gray-500 text-sm mb-1.5">Notizen</label>
-          <textarea
-            name="notizen"
-            defaultValue={sv.notizen}
-            rows={3}
-            className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] resize-none"
-            placeholder="Interne Notizen ..."
-          />
+          <label className="block text-gray-500 text-xs mb-1">Notizen</label>
+          <textarea name="notizen" defaultValue={sv.notizen} rows={3} className={`${inputCls} resize-none`} placeholder="Interne Notizen ..." />
         </div>
 
-        {error && <p className="text-red-400 text-sm">{error}</p>}
-        {success && <p className="text-green-400 text-sm">Gespeichert!</p>}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {success && <p className="text-emerald-500 text-sm">Gespeichert!</p>}
 
-        <button
-          type="submit"
-          disabled={saving}
-          className="w-full py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-[#1E3A5F] hover:bg-[#4573A2] text-white"
-        >
+        <button type="submit" disabled={saving}
+          className="w-full py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 bg-[#1E3A5F] hover:bg-[#4573A2] text-white">
           {saving ? 'Speichert ...' : 'Änderungen speichern'}
         </button>
       </form>
