@@ -106,7 +106,7 @@ export default async function LeadDetailPage({
               }}
             />
 
-            {/* Qualifizierungs-Stepper (7 Schritte) */}
+            {/* Qualifizierungs-Stepper mit Notizen/Timeline rechts */}
             <LeadStepper
               lead={{
                 id: lead.id,
@@ -135,6 +135,7 @@ export default async function LeadDetailPage({
                 finanzierung_flag: lead.finanzierung_flag ?? null,
                 firma_name: lead.firma_name ?? null,
                 firma_ustid: lead.firma_ustid ?? null,
+                unfallhergang: lead.unfallhergang ?? null,
                 gewerbe_flag: lead.gewerbe_flag ?? null,
                 halter_name: lead.halter_name ?? null,
                 halter_ungleich_fahrer_flag: lead.halter_ungleich_fahrer_flag ?? null,
@@ -149,23 +150,23 @@ export default async function LeadDetailPage({
                 mandatstyp: lead.mandatstyp ?? null,
                 wa_gesendet: lead.wa_gesendet ?? false,
               }}
-            />
-
-            {/* Notizen */}
-            <LeadNotizen leadId={lead.id} notiz={lead.notiz ?? ''} />
-
-            {/* Timeline */}
-            <LeadTimeline
-              lead={{
-                created_at: lead.created_at,
-                qualifizierungs_phase: lead.qualifizierungs_phase ?? 'neu',
-                rueckruf_datum: lead.rueckruf_datum ?? null,
-                rueckruf_erledigt: lead.rueckruf_erledigt ?? false,
-                sa_unterschrieben: lead.sa_unterschrieben ?? false,
-                gutachter_termin: lead.gutachter_termin ?? null,
-                wa_gesendet: lead.wa_gesendet ?? false,
-              }}
-              timelineEntries={timelineEntries ?? []}
+              rightSidebar={
+                <>
+                  <LeadNotizen leadId={lead.id} notiz={lead.notiz ?? ''} />
+                  <LeadTimeline
+                    lead={{
+                      created_at: lead.created_at,
+                      qualifizierungs_phase: lead.qualifizierungs_phase ?? 'neu',
+                      rueckruf_datum: lead.rueckruf_datum ?? null,
+                      rueckruf_erledigt: lead.rueckruf_erledigt ?? false,
+                      sa_unterschrieben: lead.sa_unterschrieben ?? false,
+                      gutachter_termin: lead.gutachter_termin ?? null,
+                      wa_gesendet: lead.wa_gesendet ?? false,
+                    }}
+                    timelineEntries={timelineEntries ?? []}
+                  />
+                </>
+              }
             />
 
             {/* Zugehoerige Faelle */}
