@@ -2,7 +2,13 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { sendStatusWhatsApp } from '@/lib/whatsapp'
+import { sendStatusWhatsApp, sendManualWhatsApp } from '@/lib/whatsapp'
+
+// ─── Manuelle WhatsApp (KFZ-114) ────────────────────────────────────────────
+
+export async function sendWhatsAppFromLead(telefon: string, message: string) {
+  await sendManualWhatsApp(telefon, message)
+}
 
 // ─── Disqualifizierung (BUG-28) ─────────────────────────────────────────────
 

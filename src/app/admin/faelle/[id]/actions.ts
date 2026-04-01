@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { emailFilmcheckBestanden } from '@/lib/email'
-import { sendStatusWhatsApp } from '@/lib/whatsapp'
+import { sendStatusWhatsApp, sendManualWhatsApp } from '@/lib/whatsapp'
 import { triggerKanzleiPaketTask, triggerAsSendedatumTask, triggerArchivierungTask } from '@/lib/tasking'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { checkFallAutoPhase } from '@/lib/autoPhase'
@@ -101,6 +101,15 @@ export async function addTimelineEntry(
 
   if (error) throw new Error(error.message)
   revalidatePath(`/admin/faelle/${fallId}`)
+}
+
+// ─── Manuelle WhatsApp-Nachricht senden (KFZ-114) ───────────────────────────
+
+export async function sendManualWhatsAppAction(fallId: string, telefon: string, message: string) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+  await sendManualWhatsApp(telefon, message, fallId)
 }
 
 // ─── AS Upload + OCR (KFZ-113) ──────────────────────────────────────────────

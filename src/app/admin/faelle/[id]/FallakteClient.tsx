@@ -1927,15 +1927,15 @@ function TabKommunikation({
   const telefon = lead?.telefon
   const kundenName = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : ''
 
-  function openWhatsApp(text: string) {
+  async function openWhatsApp(text: string) {
     if (!telefon) return
-    const nr = telefon.replace(/[^0-9+]/g, '').replace(/^0/, '49')
-    const encoded = encodeURIComponent(
-      text
-        .replace('{name}', kundenName || 'Kunde')
-        .replace('{flowlink}', `${window.location.origin}/flow/${fall.lead_id}`),
-    )
-    window.open(`https://wa.me/${nr}?text=${encoded}`, '_blank')
+    const msg = text
+      .replace('{name}', kundenName || 'Kunde')
+      .replace('{flowlink}', `${window.location.origin}/flow/${fall.lead_id}`)
+    try {
+      const { sendManualWhatsAppAction } = await import('./actions')
+      await sendManualWhatsAppAction(fall.id, telefon, msg)
+    } catch { /* fallback: do nothing */ }
   }
 
   const template = WA_TEMPLATES[fall.status]

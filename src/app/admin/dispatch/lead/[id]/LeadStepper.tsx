@@ -587,9 +587,12 @@ function StepFlowLink({ lead }: { lead: LeadData }) {
       const { token } = await sendFlowLink(lead.id)
       const url = `${window.location.origin}/flow/${token}`
       setFlowUrl(url)
-      const phone = (lead.telefon ?? '').replace(/[^0-9+]/g, '')
-      const msg = `Hallo ${name}, hier ist Ihr Link zur Schadensaufnahme: ${url}. Ihr Claimondo-Team`
-      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank')
+      // Send via Twilio WhatsApp API
+      if (lead.telefon) {
+        const { sendWhatsAppFromLead } = await import('./actions')
+        const msg = `Hallo ${name}, hier ist Ihr Link zur Schadensaufnahme: ${url}\n\nIhr Claimondo-Team`
+        await sendWhatsAppFromLead(lead.telefon, msg)
+      }
       router.refresh()
     } catch (err) { setError(err instanceof Error ? err.message : 'Fehler') }
     finally { setSending(false) }
@@ -600,7 +603,7 @@ function StepFlowLink({ lead }: { lead: LeadData }) {
   if (flowUrl) {
     return (
       <div className="space-y-2">
-        <p className="text-green-600 text-sm font-medium">Link erstellt & WhatsApp geoeffnet</p>
+        <p className="text-green-600 text-sm font-medium">Link erstellt & WhatsApp gesendet</p>
         <div className="flex items-stretch gap-2">
           <input type="text" readOnly value={flowUrl} className="flex-1 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-sm text-gray-700 font-mono truncate" />
           <button onClick={async () => { await navigator.clipboard.writeText(flowUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }}

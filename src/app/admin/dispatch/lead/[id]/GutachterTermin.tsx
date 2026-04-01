@@ -124,7 +124,8 @@ export default function GutachterTermin({
           hour: '2-digit', minute: '2-digit',
         })
         const msg = `Hallo ${name}, Ihr Gutachtertermin wurde bestaetigt:\n\nGutachter: ${slot.name}\nDatum: ${terminStr}\nAdresse: ${adresse || plz}\n\nIhr Claimondo-Team`
-        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank')
+        const { sendWhatsAppFromLead } = await import('./actions')
+        await sendWhatsAppFromLead(phone, msg).catch(() => {})
       }
 
       router.refresh()
