@@ -176,10 +176,10 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
       if (sv.standortLat == null || sv.standortLng == null) return
       const pos = { lat: sv.standortLat, lng: sv.standortLng }
       const isDeactivated = sv.istAktiv === false
-      const color = isDeactivated ? '#9ca3af' : (TYP_COLORS[sv.gutachterTyp]?.fill ?? '#3b82f6')
+      const color = isDeactivated ? '#ef4444' : (TYP_COLORS[sv.gutachterTyp]?.fill ?? '#3b82f6')
       const marker = new google.maps.Marker({
         position: pos, map: mapRef.current!, title: sv.name,
-        icon: { path: google.maps.SymbolPath.CIRCLE, scale: isDeactivated ? 6 : 8, fillColor: color, fillOpacity: isDeactivated ? 0.5 : 1, strokeColor: '#fff', strokeWeight: 2 },
+        icon: { path: google.maps.SymbolPath.CIRCLE, scale: isDeactivated ? 5 : 8, fillColor: color, fillOpacity: isDeactivated ? 0.4 : 1, strokeColor: '#fff', strokeWeight: 2 },
       })
       marker.addListener('click', () => setSelectedSV(sv))
       markersRef.current.push(marker)
@@ -197,7 +197,7 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
     filteredByStatus.forEach(sv => {
       if (sv.standortLat == null || sv.standortLng == null) return
       const isDeactivated = sv.istAktiv === false
-      const color = isDeactivated ? '#9ca3af' : (TYP_COLORS[sv.gutachterTyp]?.fill ?? '#3b82f6')
+      const color = isDeactivated ? '#ef4444' : (TYP_COLORS[sv.gutachterTyp]?.fill ?? '#3b82f6')
 
       fetchIsochrone(sv.standortLat, sv.standortLng, sv.radiusKm).then(points => {
         if (!mapRef.current || !points.length) return
@@ -278,11 +278,12 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
                   }
                 }}
                 className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                  selectedSV?.id === sv.id ? 'bg-[#1E3A5F]/20 border border-[#1E3A5F]/30' : 'hover:bg-gray-100/60'
+                  selectedSV?.id === sv.id ? 'bg-[#1E3A5F]/20 border border-[#1E3A5F]/30' :
+                  sv.istAktiv === false ? 'bg-red-50/60 hover:bg-red-50' : 'hover:bg-gray-100/60'
                 }`}>
                 <div className="flex items-center gap-2">
-                  <div className={`w-2.5 h-2.5 rounded-full ${sv.istAktiv === false ? 'bg-gray-400' : (ti?.marker ?? 'bg-[#4573A2]')}`} />
-                  <span className={`text-sm truncate ${sv.istAktiv === false ? 'text-gray-400' : 'text-gray-800'}`}>{sv.name}</span>
+                  <div className={`w-2.5 h-2.5 rounded-full ${sv.istAktiv === false ? 'bg-red-400' : (ti?.marker ?? 'bg-[#4573A2]')}`} />
+                  <span className={`text-sm truncate ${sv.istAktiv === false ? 'text-gray-400 line-through' : 'text-gray-800'}`}>{sv.name}</span>
                   {sv.istAktiv === false && <span className="text-[8px] bg-red-50 text-red-500 px-1 py-0.5 rounded font-medium shrink-0">Deaktiviert</span>}
                 </div>
                 <span className="text-gray-400 text-[10px] ml-4.5">{PAKET_LABEL[sv.paket] ?? sv.paket} · {sv.offeneFaelle}/{sv.maxFaelleMonat}</span>

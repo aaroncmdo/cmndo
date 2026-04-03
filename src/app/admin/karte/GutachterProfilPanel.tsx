@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { updateGutachterProfil } from './actions'
+import { updateGutachterProfil, reactivateGutachter } from './actions'
 import SvKalenderModal from './SvKalenderModal'
 import {
   XIcon,
@@ -13,6 +13,8 @@ import {
   CheckIcon,
   CalendarIcon,
   PowerOffIcon,
+  RefreshCwIcon,
+  AlertTriangleIcon,
 } from 'lucide-react'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -35,6 +37,9 @@ interface SV {
   guthaben?: number
   qualifikationen?: string[]
   anzahlungStatus?: string
+  istAktiv?: boolean
+  deaktiviertAm?: string | null
+  deaktiviertGrund?: string | null
 }
 
 const TYP_COLORS: Record<string, { marker: string; label: string }> = {
@@ -174,6 +179,8 @@ export default function GutachterProfilPanel({
     setSavingNotiz(false)
   }
 
+  const isDeactivated = sv.istAktiv === false
+
   async function handleDeactivate() {
     if (!confirm('Gutachter wirklich deaktivieren? Er erhaelt keine neuen Auftraege mehr.')) return
     setDeactivating(true)
@@ -184,25 +191,53 @@ export default function GutachterProfilPanel({
     setDeactivating(false)
   }
 
+  async function handleReactivate() {
+    setDeactivating(true)
+    try {
+      await reactivateGutachter(sv.id)
+      onClose()
+    } catch { /* */ }
+    setDeactivating(false)
+  }
+
   return (
     <div className="fixed top-0 right-0 h-screen w-[400px] z-50 backdrop-blur-xl bg-white/95 border-l border-gray-300/50 shadow-2xl shadow-black/40 overflow-y-auto">
-      <div className="p-6">
+      {/* Roter Deaktiviert-Banner */}
+      {isDeactivated && (
+        <div className="bg-red-500 text-white px-4 py-3 flex items-center gap-2">
+          <AlertTriangleIcon className="w-4 h-4 shrink-0" />
+          <div className="text-xs font-medium">
+            <p className="font-bold">DEAKTIVIERT</p>
+            <p className="opacity-90">
+              {sv.deaktiviertAm ? `seit ${new Date(sv.deaktiviertAm).toLocaleDateString('de-DE')}` : ''}
+              {sv.deaktiviertGrund ? ` — Grund: ${sv.deaktiviertGrund}` : ''}
+            </p>
+          </div>
+        </div>
+      )}
+      <div className={`p-6 ${isDeactivated ? 'opacity-60' : ''}`}>
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-3">
             {/* Avatar */}
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm ${typColor?.marker ?? 'bg-[#4573A2]'}`}>
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm ${isDeactivated ? 'bg-gray-400' : (typColor?.marker ?? 'bg-[#4573A2]')}`}>
               {getInitials(sv.name || '??')}
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900 leading-tight">{sv.name || 'Unbekannt'}</h2>
+              <h2 className={`text-xl font-bold leading-tight ${isDeactivated ? 'text-gray-400 line-through' : 'text-gray-900'}`}>{sv.name || 'Unbekannt'}</h2>
               <div className="flex items-center gap-2 mt-1">
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold text-white ${typColor?.marker ?? 'bg-[#4573A2]'}`}>
                   {typColor?.label ?? sv.gutachterTyp ?? '\u2014'}
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-400">
-                  Aktiv
-                </span>
+                {isDeactivated ? (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-500/20 text-red-500">
+                    Deaktiviert
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-400">
+                    Aktiv
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -357,14 +392,25 @@ export default function GutachterProfilPanel({
             >
               Vollstaendiges Profil
             </Link>
-            <button
-              onClick={handleDeactivate}
-              disabled={deactivating}
-              className="w-full flex items-center justify-center gap-2 text-red-400 hover:text-red-300 text-sm py-2 transition-colors disabled:opacity-50"
-            >
-              <PowerOffIcon className="w-3.5 h-3.5" />
-              {deactivating ? 'Wird deaktiviert...' : 'Deaktivieren'}
-            </button>
+            {isDeactivated ? (
+              <button
+                onClick={handleReactivate}
+                disabled={deactivating}
+                className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium py-2.5 rounded-xl transition-colors disabled:opacity-50"
+              >
+                <RefreshCwIcon className="w-3.5 h-3.5" />
+                {deactivating ? 'Wird reaktiviert...' : 'Reaktivieren'}
+              </button>
+            ) : (
+              <button
+                onClick={handleDeactivate}
+                disabled={deactivating}
+                className="w-full flex items-center justify-center gap-2 text-red-400 hover:text-red-300 text-sm py-2 transition-colors disabled:opacity-50"
+              >
+                <PowerOffIcon className="w-3.5 h-3.5" />
+                {deactivating ? 'Wird deaktiviert...' : 'Deaktivieren'}
+              </button>
+            )}
           </section>
         </div>
       </div>
