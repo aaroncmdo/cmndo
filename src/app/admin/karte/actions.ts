@@ -160,3 +160,39 @@ export async function getOpenCasesCount(svId: string): Promise<number> {
     .not('status', 'in', '("abgeschlossen","storniert")')
   return count ?? 0
 }
+
+// ─── KFZ-122: Gutachter endgültig löschen (NUR deaktivierte) ─────────────
+
+export async function deleteGutachter(svId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (!svId || typeof svId !== 'string' || svId.length < 10) {
+      return { success: false, error: 'Ungültige SV-ID' }
+    }
+
+    const supabase = await createClient()
+    const user = (await supabase.auth.getUser())?.data?.user ?? null
+    if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+    // Nur Admins dürfen löschen
+    const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
+    if (profile?.rolle !== 'admin') return { success: false, error: 'Nur Admins können Gutachter löschen' }
+
+    // Existenz + Deaktiviert prüfen
+    const { data: sv } = await supabase.from('sachverstaendige').select('id, ist_aktiv').eq('id', svId).single()
+    if (!sv) return { success: false, error: 'Gutachter nicht gefunden' }
+    if (sv.ist_aktiv !== false) return { success: false, error: 'Nur deaktivierte Gutachter können gelöscht werden' }
+
+    const { error } = await supabase.rpc('delete_gutachter_komplett', { p_sv_id: svId })
+    if (error) {
+      console.error('[deleteGutachter] RPC error:', error)
+      return { success: false, error: error.message }
+    }
+
+    revalidatePath('/admin/sachverstaendige')
+    revalidatePath('/admin/karte')
+    return { success: true }
+  } catch (err) {
+    console.error('[deleteGutachter] Fehler:', err)
+    return { success: false, error: String(err) }
+  }
+}

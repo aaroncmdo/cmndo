@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { updateGutachterProfil, reactivateGutachter } from './actions'
+import { updateGutachterProfil, reactivateGutachter, deleteGutachter } from './actions'
 import SvKalenderModal from './SvKalenderModal'
 import {
   XIcon,
@@ -15,6 +15,7 @@ import {
   PowerOffIcon,
   RefreshCwIcon,
   AlertTriangleIcon,
+  Trash2Icon,
 } from 'lucide-react'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -158,6 +159,9 @@ export default function GutachterProfilPanel({
   const [savingNotiz, setSavingNotiz] = useState(false)
   const [deactivating, setDeactivating] = useState(false)
   const [showKalender, setShowKalender] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
 
   const typColor = TYP_COLORS[sv.gutachterTyp]
   const auslastungPct = sv.maxFaelleMonat > 0 ? Math.round((sv.offeneFaelle / sv.maxFaelleMonat) * 100) : 0
@@ -393,14 +397,23 @@ export default function GutachterProfilPanel({
               Vollstaendiges Profil
             </Link>
             {isDeactivated ? (
-              <button
-                onClick={handleReactivate}
-                disabled={deactivating}
-                className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium py-2.5 rounded-xl transition-colors disabled:opacity-50"
-              >
-                <RefreshCwIcon className="w-3.5 h-3.5" />
-                {deactivating ? 'Wird reaktiviert...' : 'Reaktivieren'}
-              </button>
+              <>
+                <button
+                  onClick={handleReactivate}
+                  disabled={deactivating}
+                  className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium py-2.5 rounded-xl transition-colors disabled:opacity-50"
+                >
+                  <RefreshCwIcon className="w-3.5 h-3.5" />
+                  {deactivating ? 'Wird reaktiviert...' : 'Reaktivieren'}
+                </button>
+                <button
+                  onClick={() => { setShowDeleteModal(true); setDeleteError('') }}
+                  className="w-full flex items-center justify-center gap-2 text-red-500 hover:bg-red-50 text-sm py-2 rounded-xl border border-red-200 transition-colors"
+                >
+                  <Trash2Icon className="w-3.5 h-3.5" />
+                  Endgültig löschen
+                </button>
+              </>
             ) : (
               <button
                 onClick={handleDeactivate}
@@ -417,6 +430,33 @@ export default function GutachterProfilPanel({
 
       {/* Kalender-Modal */}
       {showKalender && <SvKalenderModal svId={sv.id} svName={sv.name} onClose={() => setShowKalender(false)} />}
+
+      {/* KFZ-122: Löschen Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-[60] bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-lg font-semibold text-red-600 mb-2">Gutachter endgültig löschen?</h3>
+            <div className="bg-red-50 border border-red-100 rounded-xl p-3 mb-4 text-sm text-red-700">
+              <p className="font-medium mb-1">UNWIDERRUFLICH!</p>
+              <p>Alle Daten, Termine und Abrechnungen werden entfernt. Zugewiesene Fälle werden freigegeben.</p>
+            </div>
+            <p className="text-sm text-gray-700 mb-1"><strong>{sv.name}</strong></p>
+            <p className="text-sm text-gray-500 mb-4">{sv.email}</p>
+            {deleteError && <p className="text-sm text-red-500 mb-3">{deleteError}</p>}
+            <div className="flex gap-2">
+              <button onClick={() => setShowDeleteModal(false)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200">Abbrechen</button>
+              <button disabled={deleting} onClick={async () => {
+                setDeleting(true); setDeleteError('')
+                const result = await deleteGutachter(sv.id)
+                if (result.success) { onClose() }
+                else { setDeleteError(result.error ?? 'Fehler'); setDeleting(false) }
+              }} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 disabled:opacity-40">
+                {deleting ? 'Löscht...' : 'Endgültig löschen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
