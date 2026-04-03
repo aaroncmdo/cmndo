@@ -49,7 +49,7 @@ export default function ChatClient({
     setSending(true)
     setError(null)
 
-    const { sendNachricht } = await import('@/app/kunde/fall/[id]/actions')
+    const { sendNachricht } = await import('@/app/kunde/faelle/[id]/actions')
     try {
       await sendNachricht(fallId, text.trim(), 'portal-kunde-claimondo')
       // Optimistic: add message locally
