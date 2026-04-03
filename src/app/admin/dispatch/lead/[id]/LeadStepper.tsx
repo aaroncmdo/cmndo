@@ -386,6 +386,8 @@ function StepSchadentyp({
   fzModell, setFzModell, fzFarbe, setFzFarbe,
   erstzulassung, setErstzulassung, fin, setFin,
   kilometerstand, setKilometerstand,
+  unfallort, onUnfallortChange,
+  unfalldatum, setUnfalldatum,
   saving, onAdvance,
 }: {
   sf: string; setSf: (v: string) => void; sfVariante: string; setSfVariante: (v: string) => void
