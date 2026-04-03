@@ -42,6 +42,13 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       }
     }
 
+    // KB-Daten laden
+    let kbName: string | null = null
+    if (fall.kundenbetreuer_id) {
+      const { data: kb } = await admin.from('profiles').select('vorname, nachname').eq('id', fall.kundenbetreuer_id).single()
+      if (kb) kbName = [kb.vorname, kb.nachname].filter(Boolean).join(' ') || null
+    }
+
     // Dokumente laden
     const { data: dokumente } = await admin.from('dokumente')
       .select('id, typ, datei_url, datei_name, created_at')
@@ -97,6 +104,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           fall={fall as Record<string, unknown>}
           svName={svName}
           svTelefon={svTelefon}
+          kbName={kbName}
           dokumente={dokumente ?? []}
           nachrichten={nachrichten ?? []}
           userId={user.id}

@@ -30,11 +30,12 @@ type TabKey = (typeof TABS)[number]['key']
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export default function FallDetailSections({
-  fall, svName, svTelefon, dokumente, nachrichten, userId,
+  fall, svName, svTelefon, kbName, dokumente, nachrichten, userId,
 }: {
   fall: Record<string, unknown>
   svName: string | null
   svTelefon: string | null
+  kbName?: string | null
   dokumente: Dokument[]
   nachrichten: Nachricht[]
   userId: string
@@ -63,6 +64,7 @@ export default function FallDetailSections({
           <Section title="Aktueller Status">
             <InfoRow label="Fallnummer" value={(fall.fall_nummer as string) ?? (fall.id as string)?.slice(0, 8)} />
             <InfoRow label="Status" value={(fall.status as string) ?? '—'} />
+            {kbName && <InfoRow label="Ihr Ansprechpartner" value={kbName} />}
             {fall.sv_termin && <InfoRow label="Naechster Termin" value={fmtDateTime(fall.sv_termin as string)} />}
           </Section>
 
