@@ -146,15 +146,8 @@ export default function FlowWizardKfz({
     }
   }
 
-  // ─── Redirect zum Portal nach Account ────────────────────────────────────
-
-  function redirectToPortal() {
-    if (fallId) {
-      window.location.href = `/kunde/onboarding/${fallId}`
-    } else {
-      window.location.href = '/kunde'
-    }
-  }
+  // ─── BUG-59: States fuer Abschluss ──────────────────────────────────────
+  const [skipped, setSkipped] = useState(false)
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
@@ -309,7 +302,23 @@ export default function FlowWizardKfz({
                   <p className="text-sm text-emerald-700">Ihr Fall wurde erfolgreich erstellt! Der Gutachter wurde bereits informiert.</p>
                 </div>
 
-                {accountCreated ? (
+                {skipped ? (
+                  /* BUG-59: Erfolgsseite wenn Account uebersprungen */
+                  <div className="space-y-5 text-center py-6">
+                    <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto">
+                      <CheckIcon className="w-8 h-8 text-emerald-500" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">Vielen Dank!</h2>
+                      <p className="text-sm text-gray-500 mt-2">Ihre Sicherungsabtretung wurde unterschrieben und Ihr Fall wurde erstellt.</p>
+                      <p className="text-sm text-gray-500 mt-1">Wir melden uns per WhatsApp bei Ihnen.</p>
+                    </div>
+                    <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 text-left">
+                      <p className="text-xs text-gray-400 mb-1">Sie moechten Ihren Fall online verfolgen?</p>
+                      <p className="text-sm text-gray-600">Registrieren Sie sich jederzeit unter <strong>claimondo.de/login</strong></p>
+                    </div>
+                  </div>
+                ) : accountCreated ? (
                   <div className="space-y-4">
                     <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 text-center">
                       <p className="text-sm text-gray-500 mb-2">Ihre Zugangsdaten:</p>
@@ -318,7 +327,7 @@ export default function FlowWizardKfz({
                       <p className="text-xs text-gray-400 mt-3">Bitte aendern Sie Ihr Passwort nach dem ersten Login.</p>
                     </div>
                     <button
-                      onClick={redirectToPortal}
+                      onClick={() => { window.location.href = '/kunde' }}
                       className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
                     >
                       Weiter zum Portal
@@ -351,7 +360,7 @@ export default function FlowWizardKfz({
 
                     <div className="border-t border-gray-100 pt-4">
                       <button
-                        onClick={redirectToPortal}
+                        onClick={() => setSkipped(true)}
                         className="w-full flex items-center justify-center gap-2 py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors"
                       >
                         <SkipForwardIcon className="w-4 h-4" />
