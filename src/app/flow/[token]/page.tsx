@@ -36,15 +36,19 @@ export default async function FlowPage({
     leadId = token
   }
 
-  // 2. Load lead data
+  // 2. Load lead data (extended for KFZ-117 FlowLink flow)
   const { data: lead } = await svc
     .from('leads')
     .select(`
       id, vorname, nachname, email, telefon,
-      schadenfall_typ, kunden_konstellation,
+      schadenfall_typ, kunden_konstellation, sf_variante, schadensursache,
       personenschaden_flag, mietwagen_flag,
       polizeibericht_pflicht, polizei_vor_ort, gutachter_termin,
-      kennzeichen, fahrzeug_hersteller, fahrzeug_modell
+      kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_farbe, erstzulassung, fin,
+      fahrzeug_standort_adresse, fahrzeug_standort_plz,
+      gegner_name, gegner_versicherung, gegner_kennzeichen,
+      eigene_versicherung, eigene_policennr,
+      unfallhergang
     `)
     .eq('id', leadId)
     .maybeSingle()
@@ -61,8 +65,8 @@ export default async function FlowPage({
         nachname: lead.nachname ?? '',
         email: lead.email ?? '',
         telefon: lead.telefon ?? '',
-        schadenfall_typ: lead.schadenfall_typ ?? 'SF-01',
-        kunden_konstellation: lead.kunden_konstellation ?? 'KK-01',
+        schadenfall_typ: lead.schadenfall_typ ?? 'sf-01',
+        kunden_konstellation: lead.kunden_konstellation ?? 'kk-01',
         personenschaden_flag: lead.personenschaden_flag ?? false,
         mietwagen_flag: lead.mietwagen_flag ?? false,
         polizeibericht_pflicht: lead.polizeibericht_pflicht ?? false,
@@ -71,6 +75,11 @@ export default async function FlowPage({
         kennzeichen: lead.kennzeichen ?? '',
         fahrzeug_hersteller: lead.fahrzeug_hersteller ?? '',
         fahrzeug_modell: lead.fahrzeug_modell ?? '',
+        fahrzeug_standort_adresse: lead.fahrzeug_standort_adresse ?? '',
+        fahrzeug_standort_plz: lead.fahrzeug_standort_plz ?? '',
+        gegner_name: lead.gegner_name ?? '',
+        gegner_versicherung: lead.gegner_versicherung ?? '',
+        unfallhergang: lead.unfallhergang ?? '',
       }}
     />
   )

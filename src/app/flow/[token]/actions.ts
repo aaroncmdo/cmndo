@@ -111,6 +111,140 @@ export async function createKundeAccount(
   return { password }
 }
 
+/**
+ * KFZ-117: SA unterzeichnet → Fall wird SOFORT erstellt.
+ * Auch OHNE Account — der Gutachter sieht den Fall sofort.
+ */
+export async function signSAandCreateFall(
+  leadId: string,
+  signatureUrl: string,
+  flowLinkId: string | null,
+): Promise<{ fallId: string }> {
+  const admin = createAdminClient()
+
+  // 1. Lead-Daten laden
+  const { data: lead, error: leadErr } = await admin
+    .from('leads')
+    .select('*')
+    .eq('id', leadId)
+    .single()
+  if (leadErr || !lead) throw new Error('Lead nicht gefunden')
+
+  // 2. Fallnummer generieren (CLM-YYYYMMDD-NNN)
+  const today = new Date()
+  const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '')
+  const { count } = await admin
+    .from('faelle')
+    .select('id', { count: 'exact', head: true })
+    .like('fall_nummer', `CLM-${dateStr}-%`)
+  const nr = String((count ?? 0) + 1).padStart(3, '0')
+  const fallNummer = `CLM-${dateStr}-${nr}`
+
+  // 3. Kundenbetreuer per Round-Robin zuweisen
+  let kundenbetreuerId: string | null = null
+  const { data: betreuer } = await admin
+    .from('profiles')
+    .select('id')
+    .in('rolle', ['kundenbetreuer', 'admin'])
+    .limit(10)
+  if (betreuer && betreuer.length > 0) {
+    const counts: Record<string, number> = {}
+    for (const b of betreuer) {
+      const { count: c } = await admin
+        .from('faelle')
+        .select('id', { count: 'exact', head: true })
+        .eq('kundenbetreuer_id', b.id)
+        .not('status', 'in', '("abgeschlossen","storniert")')
+      counts[b.id] = c ?? 0
+    }
+    const min = betreuer.reduce((m, b) => (counts[b.id] ?? 0) < (counts[m.id] ?? 0) ? b : m, betreuer[0])
+    kundenbetreuerId = min.id
+  }
+
+  // 4. Fall erstellen
+  const { data: fall, error: fallErr } = await admin
+    .from('faelle')
+    .insert({
+      fall_nummer: fallNummer,
+      lead_id: leadId,
+      status: 'ersterfassung',
+      schadenfall_typ: lead.schadenfall_typ,
+      kunden_konstellation: lead.kunden_konstellation,
+      kennzeichen: lead.kennzeichen,
+      fahrzeug_hersteller: lead.fahrzeug_hersteller,
+      fahrzeug_modell: lead.fahrzeug_modell,
+      gegner_bekannt: lead.gegner_bekannt ?? true,
+      personenschaden_flag: lead.personenschaden_flag ?? false,
+      mietwagen_flag: lead.mietwagen_flag ?? false,
+      leasing_flag: lead.leasing_flag ?? false,
+      finanzierung_flag: lead.finanzierung_flag ?? false,
+      gewerbe_flag: lead.gewerbe_flag ?? false,
+      halter_ungleich_fahrer_flag: lead.halter_ungleich_fahrer_flag ?? false,
+      polizei_bericht_vorhanden: lead.polizeibericht_pflicht ?? false,
+      gegner_name: lead.gegner_name ?? null,
+      gegner_versicherung: lead.gegner_versicherung ?? null,
+      gegner_kennzeichen: lead.gegner_kennzeichen ?? null,
+      eigene_versicherung: lead.eigene_versicherung ?? null,
+      eigene_policennr: lead.eigene_policennr ?? null,
+      polizei_aktenzeichen: lead.polizei_aktenzeichen ?? null,
+      schadensursache: lead.schadensursache ?? null,
+      leasing_geber: lead.leasing_geber ?? null,
+      finanzierung_bank: lead.finanzierung_bank ?? null,
+      firma_name: lead.firma_name ?? null,
+      firma_ustid: lead.firma_ustid ?? null,
+      halter_name: lead.halter_name ?? null,
+      kundenbetreuer_id: kundenbetreuerId,
+      konvertiert_am: new Date().toISOString(),
+      konvertiert_von_lead: leadId,
+      sv_termin: lead.gutachter_termin,
+      abtretung_pdf: signatureUrl,
+      abtretung_signiert_am: new Date().toISOString(),
+      sa_unterschrieben: true,
+    })
+    .select('id')
+    .single()
+  if (fallErr || !fall) throw new Error(`Fall-Erstellung fehlgeschlagen: ${fallErr?.message}`)
+
+  // 5. Lead-Status updaten
+  await admin.from('leads').update({
+    status: 'umgewandelt',
+    qualifizierungs_phase: 'abgeschlossen',
+    sa_unterschrieben: true,
+    sa_datum: new Date().toISOString(),
+    flow_link_abgeschlossen: true,
+    updated_at: new Date().toISOString(),
+  }).eq('id', leadId)
+
+  // 6. FlowLink updaten
+  if (flowLinkId) {
+    await admin.from('flow_links').update({
+      abgeschlossen_am: new Date().toISOString(),
+      status: 'abgeschlossen',
+      fall_id: fall.id,
+    }).eq('id', flowLinkId)
+  }
+
+  // 7. Timeline-Eintrag
+  await admin.from('timeline').insert({
+    fall_id: fall.id,
+    lead_id: leadId,
+    typ: 'system',
+    titel: 'Kunde hat SA unterschrieben — Fall erstellt',
+    beschreibung: `Fallnummer ${fallNummer}. SA digital unterschrieben via FlowLink.`,
+  })
+
+  // 8. WhatsApp an Admin (non-critical)
+  try {
+    const { sendStatusWhatsApp } = await import('@/lib/whatsapp')
+    await sendStatusWhatsApp(fall.id, 'nach_sa_unterschrift')
+  } catch { /* */ }
+
+  // 9. Benachrichtigung
+  try { await notifyNeuerFall(fall.id) } catch { /* */ }
+
+  return { fallId: fall.id }
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function generatePassword(): string {

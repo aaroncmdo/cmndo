@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useRef, useCallback, useMemo } from 'react'
-import Script from 'next/script'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
+import { signSAandCreateFall, createKundeAccount } from './actions'
 import {
   CheckIcon,
   CameraIcon,
@@ -12,9 +11,14 @@ import {
   CarIcon,
   ShieldCheckIcon,
   AlertTriangleIcon,
-  CalendarIcon,
-  DownloadIcon,
   ExternalLinkIcon,
+  UserPlusIcon,
+  MailIcon,
+  EyeIcon,
+  EyeOffIcon,
+  SkipForwardIcon,
+  PenToolIcon,
+  Trash2Icon,
 } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -25,8 +29,8 @@ export type LeadData = {
   nachname: string
   email: string
   telefon: string
-  schadenfall_typ: string   // SF-01..SF-04
-  kunden_konstellation: string // KK-01..KK-05
+  schadenfall_typ: string
+  kunden_konstellation: string
   personenschaden_flag: boolean
   mietwagen_flag: boolean
   polizeibericht_pflicht: boolean
@@ -35,570 +39,476 @@ export type LeadData = {
   kennzeichen: string
   fahrzeug_hersteller: string
   fahrzeug_modell: string
-}
-
-type UploadedFile = {
-  file: File
-  category: string
-}
-
-type FlowState = {
-  // Seite 2: Basis-Dokumente
-  fahrzeugschein: File | null
-  fuehrerschein: File | null
-  schadensfotos: File[]
-  // Seite 3: Schadenfall-Spezifisch
+  fahrzeug_standort_adresse: string
+  fahrzeug_standort_plz: string
   gegner_name: string
   gegner_versicherung: string
-  gegner_kennzeichen: string
-  eigene_versicherung: string
-  eigene_versicherungsnr: string
-  polizeibericht: File | null
-  unfall_ort: string
-  unfall_lat: number | null
-  unfall_lng: number | null
-  unfall_place_id: string
-  unfall_zeit: string
-  // Seite 4: Konstellations-Spezifisch
-  leasingvertrag: File | null
-  finanzierungsvertrag: File | null
-  gewerbenachweis: File | null
-  gf_vollmacht: File | null
-  ust_id: string
-  halter_ausweis: File | null
-  // Seite 5: Zusatz-Infos
-  aerztliches_attest: File | null
-  hat_mietwagen: boolean | null
-  mietwagenvertrag: File | null
-  // Unfallmitteilung (wenn polizei_vor_ort)
-  unfallmitteilung: File | null
+  unfallhergang: string
 }
 
-const INITIAL_STATE: FlowState = {
-  fahrzeugschein: null,
-  fuehrerschein: null,
-  schadensfotos: [],
-  gegner_name: '',
-  gegner_versicherung: '',
-  gegner_kennzeichen: '',
-  eigene_versicherung: '',
-  eigene_versicherungsnr: '',
-  polizeibericht: null,
-  unfall_ort: '',
-  unfall_lat: null,
-  unfall_lng: null,
-  unfall_place_id: '',
-  unfall_zeit: '',
-  leasingvertrag: null,
-  finanzierungsvertrag: null,
-  gewerbenachweis: null,
-  gf_vollmacht: null,
-  ust_id: '',
-  halter_ausweis: null,
-  aerztliches_attest: null,
-  hat_mietwagen: null,
-  mietwagenvertrag: null,
-  unfallmitteilung: null,
+type StepId = 'stammdaten' | 'sa' | 'account' | 'onboarding'
+
+const STEPS: { id: StepId; label: string }[] = [
+  { id: 'stammdaten', label: 'Stammdaten' },
+  { id: 'sa', label: 'Beauftragung' },
+  { id: 'account', label: 'Konto' },
+  { id: 'onboarding', label: 'Dokumente' },
+]
+
+// ─── SF Labels ───────────────────────────────────────────────────────────────
+
+const SF_LABELS: Record<string, string> = {
+  'sf-01': 'Unverschuldeter Unfall',
+  'sf-02': 'Teilschuld-Unfall',
+  'sf-03': 'Parkschaden / Fahrerflucht',
+  'sf-04': 'Selbstverschuldeter Unfall',
 }
 
-// ─── Step definitions ─────────────────────────────────────────────────────────
+// ─── Wizard ──────────────────────────────────────────────────────────────────
 
-type StepId = 'willkommen' | 'basis' | 'schadenfall' | 'konstellation' | 'zusatz' | 'zusammenfassung'
-
-function getActiveSteps(lead: LeadData): StepId[] {
-  const steps: StepId[] = ['willkommen', 'basis', 'schadenfall']
-
-  if (lead.kunden_konstellation !== 'KK-01') {
-    steps.push('konstellation')
-  }
-
-  if (lead.personenschaden_flag || lead.mietwagen_flag) {
-    steps.push('zusatz')
-  }
-
-  steps.push('zusammenfassung')
-  return steps
-}
-
-// ─── Checklist helper ─────────────────────────────────────────────────────────
-
-function getChecklist(lead: LeadData): string[] {
-  const items: string[] = [
-    'Fahrzeugschein',
-    'Fuehrerschein',
-    'Schadensfotos (mind. 4 Perspektiven)',
-  ]
-
-  const typ = lead.schadenfall_typ
-  if (typ === 'SF-01' || typ === 'SF-02') {
-    items.push('Daten des Unfallgegners')
-  }
-  if (typ === 'SF-02') {
-    items.push('Eigene Versicherungsdaten')
-  }
-  if (typ === 'SF-03') {
-    items.push('Polizeibericht')
-  }
-  if (typ === 'SF-04') {
-    items.push('Eigene Versicherungspolice')
-  }
-  if (lead.polizeibericht_pflicht && typ !== 'SF-03') {
-    items.push('Polizeibericht')
-  }
-
-  const kk = lead.kunden_konstellation
-  if (kk === 'KK-02') items.push('Leasingvertrag')
-  if (kk === 'KK-03') items.push('Finanzierungsvertrag')
-  if (kk === 'KK-04') items.push('Gewerbenachweis', 'GF-Vollmacht')
-  if (kk === 'KK-05') items.push('Ausweiskopie Halter')
-
-  if (lead.personenschaden_flag) items.push('Aerztliches Attest (falls vorhanden)')
-  if (lead.mietwagen_flag) items.push('Mietwagenvertrag (falls vorhanden)')
-
-  return items
-}
-
-// ─── Pflichtdokumente mapping ─────────────────────────────────────────────────
-
-function getPflichtdokumente(lead: LeadData): { typ: string; pflicht: boolean }[] {
-  const docs: { typ: string; pflicht: boolean }[] = [
-    { typ: 'fahrzeugschein', pflicht: true },
-    { typ: 'fuehrerschein', pflicht: true },
-    { typ: 'schadensfotos', pflicht: true },
-  ]
-
-  const sf = lead.schadenfall_typ
-  if (sf === 'SF-01' || sf === 'SF-02') {
-    docs.push({ typ: 'gegner-daten', pflicht: true })
-  }
-  if (sf === 'SF-02') {
-    docs.push({ typ: 'eigene-versicherung', pflicht: true })
-  }
-  if (sf === 'SF-03') {
-    docs.push({ typ: 'polizeibericht', pflicht: true })
-  }
-  if (sf === 'SF-04') {
-    docs.push({ typ: 'eigene-versicherungspolice', pflicht: true })
-  }
-  if (lead.polizeibericht_pflicht && sf !== 'SF-03') {
-    docs.push({ typ: 'polizeibericht', pflicht: true })
-  }
-
-  const kk = lead.kunden_konstellation
-  if (kk === 'KK-02') {
-    docs.push({ typ: 'leasingvertrag', pflicht: true })
-  }
-  if (kk === 'KK-03') {
-    docs.push({ typ: 'finanzierungsvertrag', pflicht: true })
-  }
-  if (kk === 'KK-04') {
-    docs.push({ typ: 'gewerbenachweis', pflicht: true })
-    docs.push({ typ: 'gf-vollmacht', pflicht: true })
-  }
-  if (kk === 'KK-05') {
-    docs.push({ typ: 'halter-ausweis', pflicht: true })
-  }
-
-  if (lead.personenschaden_flag) {
-    docs.push({ typ: 'aerztliches-attest', pflicht: false })
-  }
-  if (lead.mietwagen_flag) {
-    docs.push({ typ: 'mietwagenvertrag', pflicht: false })
-  }
-
-  return docs
-}
-
-// ─── Validation ───────────────────────────────────────────────────────────────
-
-function canProceed(stepId: StepId, state: FlowState, lead: LeadData): boolean {
-  switch (stepId) {
-    case 'willkommen':
-      return true
-    case 'basis':
-      return !!(state.fahrzeugschein && state.fuehrerschein && state.schadensfotos.length >= 4)
-    case 'schadenfall': {
-      const sf = lead.schadenfall_typ
-      if (sf === 'SF-01') return !!(state.gegner_name && state.gegner_versicherung && state.gegner_kennzeichen)
-      if (sf === 'SF-02') return !!(state.gegner_name && state.gegner_versicherung && state.gegner_kennzeichen && state.eigene_versicherung)
-      if (sf === 'SF-03') return !!(state.polizeibericht && state.unfall_ort && state.unfall_zeit)
-      if (sf === 'SF-04') return !!(state.schadensfotos.length >= 4)
-      if (lead.polizeibericht_pflicht) return !!state.polizeibericht
-      return true
-    }
-    case 'konstellation': {
-      const kk = lead.kunden_konstellation
-      if (kk === 'KK-02') return !!state.leasingvertrag
-      if (kk === 'KK-03') return !!state.finanzierungsvertrag
-      if (kk === 'KK-04') return !!(state.gewerbenachweis && state.gf_vollmacht && state.ust_id)
-      if (kk === 'KK-05') return !!state.halter_ausweis
-      return true
-    }
-    case 'zusatz':
-      return true
-    case 'zusammenfassung':
-      return true
-    default:
-      return true
-  }
-}
-
-// ─── Wizard ───────────────────────────────────────────────────────────────────
-
-export default function FlowWizardKfz({ token, flowLinkId, lead }: { token: string; flowLinkId?: string | null; lead: LeadData }) {
+export default function FlowWizardKfz({
+  token,
+  flowLinkId,
+  lead,
+}: {
+  token: string
+  flowLinkId?: string | null
+  lead: LeadData
+}) {
   const [stepIndex, setStepIndex] = useState(0)
-  const [state, setState] = useState<FlowState>(INITIAL_STATE)
-  const [submitting, setSubmitting] = useState(false)
+  const [datenschutz, setDatenschutz] = useState(false)
+  const [signatureBlob, setSignatureBlob] = useState<Blob | null>(null)
+  const [saAccepted, setSaAccepted] = useState(false)
+  const [submittingSA, setSubmittingSA] = useState(false)
+  const [fallId, setFallId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [done, setDone] = useState(false)
-  const [portalUrl, setPortalUrl] = useState<string | null>(null)
 
-  const activeSteps = useMemo(() => getActiveSteps(lead), [lead])
-  const currentStep = activeSteps[stepIndex]
-  const totalSteps = activeSteps.length
-  const progress = Math.round(((stepIndex + 1) / totalSteps) * 100)
+  // Account step
+  const [accountPassword, setAccountPassword] = useState('')
+  const [accountEmail, setAccountEmail] = useState(lead.email)
+  const [showPw, setShowPw] = useState(false)
+  const [creatingAccount, setCreatingAccount] = useState(false)
+  const [accountCreated, setAccountCreated] = useState(false)
 
-  function set<K extends keyof FlowState>(key: K, value: FlowState[K]) {
-    setState((s) => ({ ...s, [key]: value }))
-  }
+  // Onboarding step
+  const [fahrzeugschein, setFahrzeugschein] = useState<File | null>(null)
+  const [unfallmitteilung, setUnfallmitteilung] = useState<File | null>(null)
+  const [fuehrerschein, setFuehrerschein] = useState<File | null>(null)
+  const [schadensfotos, setSchadensfotos] = useState<File[]>([])
+  const [uploadingDocs, setUploadingDocs] = useState(false)
+  const [skipDocs, setSkipDocs] = useState(false)
 
-  // ─── Upload helper ────────────────────────────────────────────────────────
+  const currentStep = STEPS[stepIndex]
+  const progress = Math.round(((stepIndex + 1) / STEPS.length) * 100)
+  const fahrzeug = [lead.fahrzeug_hersteller, lead.fahrzeug_modell].filter(Boolean).join(' ')
+  const kundenName = [lead.vorname, lead.nachname].filter(Boolean).join(' ')
 
-  async function uploadFile(
-    supabase: ReturnType<typeof createClient>,
-    file: File,
-    fallId: string,
-    category: string,
-  ): Promise<string> {
-    const ext = file.name.split('.').pop() ?? 'jpg'
-    const path = `flow/${token}/${fallId}/${category}_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`
-    const { error: uploadErr } = await supabase.storage
-      .from('dokumente')
-      .upload(path, file, { contentType: file.type })
-    if (uploadErr) throw new Error(uploadErr.message)
-    const { data: { publicUrl } } = supabase.storage.from('dokumente').getPublicUrl(path)
-    return publicUrl
-  }
+  // ─── SA unterzeichnen + Fall erstellen ─────────────────────────────────────
 
-  // ─── Submit ───────────────────────────────────────────────────────────────
-
-  async function handleSubmit() {
-    setSubmitting(true)
+  async function handleSignSA() {
+    if (!signatureBlob) return
+    setSubmittingSA(true)
     setError(null)
-    const supabase = createClient()
-
     try {
-      // 1. Fall anlegen
-      const { data: fall, error: fallErr } = await supabase
-        .from('faelle')
-        .insert({
-          lead_id: lead.id,
-          schadens_ursache: `kfz-${lead.schadenfall_typ.toLowerCase()}`,
-          status: 'ersterfassung',
-          notizen: [
-            `Schadenfall-Typ: ${lead.schadenfall_typ}`,
-            `Konstellation: ${lead.kunden_konstellation}`,
-            lead.personenschaden_flag ? 'Personenschaden: Ja' : null,
-            lead.mietwagen_flag ? 'Mietwagen: Ja' : null,
-            state.gegner_name ? `Gegner: ${state.gegner_name}` : null,
-            state.gegner_versicherung ? `Gegner-Vers.: ${state.gegner_versicherung}` : null,
-            state.gegner_kennzeichen ? `Gegner-Kz.: ${state.gegner_kennzeichen}` : null,
-            state.eigene_versicherung ? `Eigene Vers.: ${state.eigene_versicherung}` : null,
-            state.unfall_ort ? `Unfallort: ${state.unfall_ort}` : null,
-            state.unfall_lat != null && state.unfall_lng != null ? `Koordinaten: ${state.unfall_lat}, ${state.unfall_lng}` : null,
-            state.unfall_zeit ? `Unfallzeit: ${state.unfall_zeit}` : null,
-            state.ust_id ? `USt-IdNr: ${state.ust_id}` : null,
-          ].filter(Boolean).join('\n'),
-        })
-        .select('id')
-        .single()
-      if (fallErr) throw new Error(fallErr.message)
+      const supabase = createClient()
 
-      // 2. Upload all files + create dokumente entries
+      // 1. Unterschrift als PNG hochladen
+      const ts = Date.now()
+      const path = `flow/${token}/sa_${ts}.png`
+      const { error: upErr } = await supabase.storage
+        .from('unterschriften')
+        .upload(path, signatureBlob, { contentType: 'image/png' })
+      if (upErr) throw new Error(upErr.message)
+      const { data: { publicUrl } } = supabase.storage.from('unterschriften').getPublicUrl(path)
+
+      // 2. Server Action: Fall erstellen
+      const result = await signSAandCreateFall(lead.id, publicUrl, flowLinkId ?? null)
+      setFallId(result.fallId)
+      setStepIndex(2) // → Account step
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Fehler bei der Beauftragung')
+    } finally {
+      setSubmittingSA(false)
+    }
+  }
+
+  // ─── Account erstellen ─────────────────────────────────────────────────────
+
+  async function handleCreateAccount() {
+    if (!fallId || !accountEmail) return
+    setCreatingAccount(true)
+    setError(null)
+    try {
+      const result = await createKundeAccount(fallId, accountEmail, lead.vorname, lead.nachname, lead.telefon || null)
+      setAccountPassword(result.password)
+      setAccountCreated(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Konto konnte nicht erstellt werden')
+    } finally {
+      setCreatingAccount(false)
+    }
+  }
+
+  // ─── Dokumente hochladen ───────────────────────────────────────────────────
+
+  async function handleUploadDocs() {
+    if (!fallId) return
+    setUploadingDocs(true)
+    setError(null)
+    try {
+      const supabase = createClient()
       const uploads: { file: File; category: string }[] = []
-      if (state.fahrzeugschein) uploads.push({ file: state.fahrzeugschein, category: 'fahrzeugschein' })
-      if (state.fuehrerschein) uploads.push({ file: state.fuehrerschein, category: 'fuehrerschein' })
-      for (const foto of state.schadensfotos) {
-        uploads.push({ file: foto, category: 'schadensfoto' })
-      }
-      if (state.polizeibericht) uploads.push({ file: state.polizeibericht, category: 'polizeibericht' })
-      if (state.leasingvertrag) uploads.push({ file: state.leasingvertrag, category: 'leasingvertrag' })
-      if (state.finanzierungsvertrag) uploads.push({ file: state.finanzierungsvertrag, category: 'finanzierungsvertrag' })
-      if (state.gewerbenachweis) uploads.push({ file: state.gewerbenachweis, category: 'gewerbenachweis' })
-      if (state.gf_vollmacht) uploads.push({ file: state.gf_vollmacht, category: 'gf-vollmacht' })
-      if (state.halter_ausweis) uploads.push({ file: state.halter_ausweis, category: 'halter-ausweis' })
-      if (state.aerztliches_attest) uploads.push({ file: state.aerztliches_attest, category: 'aerztliches-attest' })
-      if (state.mietwagenvertrag) uploads.push({ file: state.mietwagenvertrag, category: 'mietwagenvertrag' })
-      if (state.unfallmitteilung) uploads.push({ file: state.unfallmitteilung, category: 'unfallmitteilung' })
-
-      const uploadedCategories = new Set<string>()
-
-      // Map flow categories to dokumente kategorie + sichtbar_fuer
-      const kategorieMap: Record<string, string> = {
-        fahrzeugschein: 'kundendokument',
-        fuehrerschein: 'kundendokument',
-        schadensfoto: 'schadensfoto',
-        polizeibericht: 'kundendokument',
-        leasingvertrag: 'kundendokument',
-        finanzierungsvertrag: 'kundendokument',
-        gewerbenachweis: 'kundendokument',
-        'gf-vollmacht': 'unterschrift',
-        'halter-ausweis': 'kundendokument',
-        'aerztliches-attest': 'kundendokument',
-        mietwagenvertrag: 'kundendokument',
-        unfallmitteilung: 'kundendokument',
-      }
-      const sichtbarMap: Record<string, string[]> = {
-        kundendokument: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
-        schadensfoto: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
-        unterschrift: ['admin', 'kundenbetreuer', 'kanzlei'],
-      }
+      if (fahrzeugschein) uploads.push({ file: fahrzeugschein, category: 'fahrzeugschein' })
+      if (unfallmitteilung) uploads.push({ file: unfallmitteilung, category: 'unfallmitteilung' })
+      if (fuehrerschein) uploads.push({ file: fuehrerschein, category: 'fuehrerschein' })
+      for (const f of schadensfotos) uploads.push({ file: f, category: 'schadensfoto' })
 
       for (const { file, category } of uploads) {
-        const url = await uploadFile(supabase, file, fall.id, category)
-        uploadedCategories.add(category)
+        const ext = file.name.split('.').pop() ?? 'jpg'
+        const path = `flow/${token}/${fallId}/${category}_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`
+        const { error: upErr } = await supabase.storage.from('dokumente').upload(path, file, { contentType: file.type })
+        if (upErr) throw new Error(upErr.message)
+        const { data: { publicUrl } } = supabase.storage.from('dokumente').getPublicUrl(path)
 
-        const kat = kategorieMap[category] ?? 'sonstiges'
+        const kat = category === 'schadensfoto' ? 'schadensfoto' : 'kundendokument'
         await supabase.from('dokumente').insert({
-          fall_id: fall.id,
+          fall_id: fallId,
           typ: category,
-          datei_url: url,
+          datei_url: publicUrl,
           datei_name: file.name,
           datei_groesse: file.size,
           kategorie: kat,
           quelle: 'flowlink',
           hochgeladen_von_rolle: 'kunde',
-          sichtbar_fuer: sichtbarMap[kat] ?? ['admin', 'kundenbetreuer'],
+          sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
         })
       }
 
-      // 3. Pflichtdokumente erstellen
-      const pflichtdoks = getPflichtdokumente(lead)
-      const pflichtInserts = pflichtdoks.map((d) => {
-        const isUploaded = uploadedCategories.has(d.typ) ||
-          (d.typ === 'schadensfotos' && state.schadensfotos.length >= 4) ||
-          (d.typ === 'gegner-daten' && state.gegner_name) ||
-          (d.typ === 'eigene-versicherung' && state.eigene_versicherung)
-
-        return {
-          fall_id: fall.id,
-          dokument_typ: d.typ,
-          status: isUploaded ? 'hochgeladen' : 'ausstehend',
-          pflicht: d.pflicht,
-          quelle: 'flowlink',
-        }
-      })
-
-      if (pflichtInserts.length > 0) {
-        const { error: pflichtErr } = await supabase
-          .from('pflichtdokumente')
-          .insert(pflichtInserts)
-        if (pflichtErr) throw new Error(pflichtErr.message)
-      }
-
-      // 4. Lead-Status + Qualifizierungs-Phase updaten + flow_link_abgeschlossen
-      await supabase
-        .from('leads')
-        .update({
-          status: 'umgewandelt',
-          qualifizierungs_phase: 'abgeschlossen',
-          flow_link_abgeschlossen: true,
-          unfallmitteilung_hochgeladen: !!state.unfallmitteilung,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', lead.id)
-
-      // 4b. Update flow_links entry
-      if (flowLinkId) {
-        await supabase
-          .from('flow_links')
-          .update({ abgeschlossen_am: new Date().toISOString(), status: 'abgeschlossen', fall_id: fall.id })
-          .eq('id', flowLinkId)
-      }
-
-      // 5. Kundenbetreuer zuweisen (Load Balancing: wer hat am wenigsten aktive Faelle)
-      const { data: betreuer } = await supabase
-        .from('profiles')
-        .select('id')
-        .in('rolle', ['kundenbetreuer', 'admin'])
-        .limit(10)
-
-      if (betreuer && betreuer.length > 0) {
-        // Count active cases per betreuer
-        const counts: Record<string, number> = {}
-        for (const b of betreuer) {
-          const { count } = await supabase
-            .from('faelle')
-            .select('id', { count: 'exact', head: true })
-            .eq('kundenbetreuer_id', b.id)
-            .not('status', 'in', '("abgeschlossen","storniert")')
-          counts[b.id] = count ?? 0
-        }
-        const minBetreuer = betreuer.reduce((min, b) =>
-          (counts[b.id] ?? 0) < (counts[min.id] ?? 0) ? b : min
-        , betreuer[0])
-
-        await supabase
-          .from('faelle')
-          .update({ kundenbetreuer_id: minBetreuer.id })
-          .eq('id', fall.id)
-      }
-
-      // 6. Kunden-Account erstellen (wenn E-Mail vorhanden)
-      if (lead.email) {
-        try {
-          const { createKundeAccount } = await import('./actions')
-          await createKundeAccount(
-            fall.id,
-            lead.email,
-            lead.vorname ?? '',
-            lead.nachname ?? '',
-            lead.telefon ?? null,
-          )
-        } catch {
-          // Non-critical: account creation may fail if user already exists
-        }
-      }
-
-      // 7. Benachrichtigung + Timeline
-      try {
-        const { notifyNeuerFall } = await import('./actions')
-        await notifyNeuerFall(fall.id)
-      } catch { /* */ }
-
-      // Timeline-Eintrag
+      // Timeline
       await supabase.from('timeline').insert({
-        fall_id: fall.id,
+        fall_id: fallId,
         typ: 'system',
-        titel: 'FlowLink abgeschlossen - Lead konvertiert',
-        beschreibung: `Kunde hat alle Dokumente hochgeladen. Fall automatisch erstellt.`,
+        titel: 'Onboarding-Dokumente hochgeladen',
+        beschreibung: `${uploads.length} Dokument(e) via FlowLink hochgeladen.`,
       })
-
-      // 8. Onboarding-Tasks + Reminder automatisch erstellen
-      try {
-        const { triggerOnboardingTasks } = await import('@/lib/tasking')
-        const kbId = (await supabase.from('faelle').select('kundenbetreuer_id').eq('id', fall.id).single()).data?.kundenbetreuer_id ?? null
-        const kundeId = (await supabase.from('faelle').select('kunde_id').eq('id', fall.id).single()).data?.kunde_id ?? null
-        await triggerOnboardingTasks(fall.id, kbId, kundeId)
-      } catch { /* Non-critical */ }
-
-      setPortalUrl(`/portal/${token}`)
-      setDone(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unbekannter Fehler')
-    } finally {
-      setSubmitting(false)
+      setError(err instanceof Error ? err.message : 'Fehler beim Hochladen')
+      setUploadingDocs(false)
+      return
     }
+    setUploadingDocs(false)
+    // Redirect to Fallakte
+    window.location.href = `/kunde/fall/${fallId}`
   }
 
-  // ─── Done screen ──────────────────────────────────────────────────────────
+  // ─── Done: Redirect after skip ─────────────────────────────────────────────
 
-  if (done) {
-    return (
-      <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center px-5">
-        <div className="max-w-lg w-full bg-white border border-gray-200 rounded-3xl px-6 py-10 shadow-xl shadow-black/20 text-center">
-          <div className="w-16 h-16 rounded-full bg-green-500/10 border-2 border-green-500 flex items-center justify-center mx-auto mb-6">
-            <CheckIcon className="w-8 h-8 text-green-400" />
-          </div>
-          <h1 className="text-2xl font-semibold text-gray-900 mb-3">Vielen Dank!</h1>
-          <p className="text-gray-500 text-sm mb-8">
-            Ihre Unterlagen wurden erfolgreich uebermittelt. Falls noch Dokumente fehlen, koennen Sie diese ueber Ihr Kundenportal nachreichen.
-          </p>
-          {portalUrl && (
-            <a
-              href={portalUrl}
-              className="inline-flex items-center gap-2 w-full justify-center min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
-            >
-              <ExternalLinkIcon className="w-5 h-5" />
-              Zum Kundenportal
-            </a>
-          )}
-        </div>
-      </div>
-    )
+  function handleSkipDocs() {
+    if (fallId) window.location.href = `/kunde/fall/${fallId}`
   }
 
-  // ─── Shell ────────────────────────────────────────────────────────────────
+  // ─── Render ────────────────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
       {/* Progress bar */}
       <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-gray-100">
-        <div
-          className="h-full bg-[#4573A2] transition-all duration-500 ease-out"
-          style={{ width: `${progress}%` }}
-        />
+        <div className="h-full bg-[#4573A2] transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
       </div>
 
-      {/* Step counter */}
-      <div className="fixed top-4 right-4 z-10 text-xs text-gray-500 tabular-nums">
-        {stepIndex + 1}&thinsp;/&thinsp;{totalSteps}
+      {/* Step indicator */}
+      <div className="fixed top-4 left-0 right-0 z-10 flex justify-center">
+        <div className="flex items-center gap-2">
+          {STEPS.map((s, i) => (
+            <div key={s.id} className="flex items-center gap-2">
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
+                i < stepIndex ? 'bg-emerald-500 text-white' :
+                i === stepIndex ? 'bg-[#4573A2] text-white' :
+                'bg-gray-200 text-gray-400'
+              }`}>
+                {i < stepIndex ? <CheckIcon className="w-3.5 h-3.5" /> : i + 1}
+              </div>
+              {i < STEPS.length - 1 && <div className={`w-6 h-0.5 rounded ${i < stepIndex ? 'bg-emerald-400' : 'bg-gray-200'}`} />}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col px-5 pt-10 pb-8 max-w-lg mx-auto w-full">
+      <div className="flex-1 flex flex-col px-5 pt-16 pb-8 max-w-lg mx-auto w-full">
         <div className="flex-1 flex flex-col justify-center py-4">
-          <div className="bg-white border border-gray-200 rounded-3xl px-6 py-7 shadow-xl shadow-black/20">
-            {currentStep === 'willkommen' && (
-              <PageWillkommen lead={lead} />
+          <div className="bg-white border border-gray-200 rounded-3xl px-6 py-7 shadow-xl shadow-black/5">
+
+            {/* ═══ SCHRITT 1: STAMMDATEN + DATENSCHUTZ ═══ */}
+            {currentStep.id === 'stammdaten' && (
+              <div>
+                <StepHeader
+                  question={`Hallo ${lead.vorname}!`}
+                  sub="Bitte pruefen Sie Ihre Daten. Falls etwas nicht stimmt, kontaktieren Sie uns."
+                  icon={<CarIcon className="w-8 h-8 text-[#4573A2]" />}
+                />
+
+                <div className="space-y-2 mb-6">
+                  <SummaryRow label="Name" value={kundenName} />
+                  {lead.telefon && <SummaryRow label="Telefon" value={lead.telefon} />}
+                  {lead.email && <SummaryRow label="E-Mail" value={lead.email} />}
+                  {(lead.fahrzeug_standort_adresse || lead.fahrzeug_standort_plz) && (
+                    <SummaryRow label="Standort" value={[lead.fahrzeug_standort_adresse, lead.fahrzeug_standort_plz].filter(Boolean).join(', ')} />
+                  )}
+                  {fahrzeug && <SummaryRow label="Fahrzeug" value={`${fahrzeug}${lead.kennzeichen ? ` (${lead.kennzeichen})` : ''}`} />}
+                  {lead.schadenfall_typ && <SummaryRow label="Schadentyp" value={SF_LABELS[lead.schadenfall_typ] ?? lead.schadenfall_typ} />}
+                  {lead.gegner_name && <SummaryRow label="Unfallgegner" value={`${lead.gegner_name}${lead.gegner_versicherung ? ` — ${lead.gegner_versicherung}` : ''}`} />}
+                  {lead.unfallhergang && <SummaryRow label="Unfallhergang" value={lead.unfallhergang} />}
+                </div>
+
+                {/* Datenschutz */}
+                <div className="border-t border-gray-100 pt-5">
+                  <label className="flex items-start gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={datenschutz}
+                      onChange={e => setDatenschutz(e.target.checked)}
+                      className="mt-0.5 w-5 h-5 rounded border-gray-300 accent-[#4573A2] shrink-0"
+                    />
+                    <span className="text-sm text-gray-600 leading-relaxed">
+                      Ich habe die{' '}
+                      <a href="/datenschutz" target="_blank" className="text-[#4573A2] underline">Datenschutzerklaerung</a>{' '}
+                      gelesen und stimme der Verarbeitung meiner Daten zu. <span className="text-red-400">*</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
             )}
-            {currentStep === 'basis' && (
-              <PageBasis state={state} setState={set} />
+
+            {/* ═══ SCHRITT 2: SA UNTERSCHREIBEN ═══ */}
+            {currentStep.id === 'sa' && (
+              <div>
+                <StepHeader
+                  question="Beauftragung unterzeichnen"
+                  sub="Mit Ihrer Unterschrift beauftragen Sie Claimondo mit der kostenlosen Abwicklung Ihres Schadens."
+                  icon={<PenToolIcon className="w-8 h-8 text-[#4573A2]" />}
+                />
+
+                <div className="bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-2xl px-4 py-4 mb-5 text-sm text-gray-700 leading-relaxed">
+                  <p className="font-medium text-gray-900 mb-2">Zusammenfassung:</p>
+                  <p>Ich beauftrage die Claimondo GmbH mit der Koordination meines KFZ-Schadens.
+                  Mir entstehen <strong>keine Kosten</strong>. Die Gutachterkosten werden im Rahmen
+                  der Sicherungsabtretung an den Sachverstaendigen abgetreten und von der gegnerischen
+                  Versicherung getragen.</p>
+                </div>
+
+                <a
+                  href="/sa-volltext"
+                  target="_blank"
+                  className="flex items-center gap-2 text-sm text-[#4573A2] hover:underline mb-5"
+                >
+                  <FileTextIcon className="w-4 h-4" />
+                  Vollstaendige Sicherungsabtretung lesen
+                </a>
+
+                {/* Unterschrifts-Canvas */}
+                <div className="mb-4">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Ihre Unterschrift</p>
+                  <SignatureCanvas onSignature={setSignatureBlob} />
+                </div>
+
+                {/* Checkbox */}
+                <label className="flex items-start gap-3 cursor-pointer mb-5">
+                  <input
+                    type="checkbox"
+                    checked={saAccepted}
+                    onChange={e => setSaAccepted(e.target.checked)}
+                    className="mt-0.5 w-5 h-5 rounded border-gray-300 accent-[#4573A2] shrink-0"
+                  />
+                  <span className="text-sm text-gray-600 leading-relaxed">
+                    Ja, ich moechte den kostenlosen Service nutzen. Alle Kosten traegt die gegnerische Versicherung.
+                    Ich stimme den Vertragsbedingungen und der Widerrufsbelehrung zu. <span className="text-red-400">*</span>
+                  </span>
+                </label>
+
+                {error && <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4">{error}</p>}
+
+                <button
+                  onClick={handleSignSA}
+                  disabled={!signatureBlob || !saAccepted || submittingSA}
+                  className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+                >
+                  {submittingSA ? 'Wird verarbeitet ...' : 'SA unterzeichnen'}
+                </button>
+              </div>
             )}
-            {currentStep === 'schadenfall' && (
-              <PageSchadenfall lead={lead} state={state} setState={set} />
+
+            {/* ═══ SCHRITT 3: ACCOUNT ERSTELLEN ═══ */}
+            {currentStep.id === 'account' && (
+              <div>
+                <StepHeader
+                  question="Kundenportal-Zugang"
+                  sub="Erstellen Sie ein Konto, um Ihren Fall online zu verfolgen."
+                  icon={<UserPlusIcon className="w-8 h-8 text-[#4573A2]" />}
+                />
+
+                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-3 mb-5 flex items-center gap-3">
+                  <CheckIcon className="w-5 h-5 text-emerald-500 shrink-0" />
+                  <p className="text-sm text-emerald-700">Ihr Fall wurde erfolgreich erstellt! Der Gutachter wurde bereits informiert.</p>
+                </div>
+
+                {accountCreated ? (
+                  <div className="space-y-4">
+                    <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 text-center">
+                      <p className="text-sm text-gray-500 mb-2">Ihre Zugangsdaten:</p>
+                      <p className="text-sm text-gray-700"><strong>E-Mail:</strong> {accountEmail}</p>
+                      <p className="text-sm text-gray-700"><strong>Passwort:</strong> {accountPassword}</p>
+                      <p className="text-xs text-gray-400 mt-3">Bitte aendern Sie Ihr Passwort nach dem ersten Login.</p>
+                    </div>
+                    <button
+                      onClick={() => setStepIndex(3)}
+                      className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
+                    >
+                      Weiter zu Dokumenten
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1.5 block">E-Mail</label>
+                      <div className="relative">
+                        <MailIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                          type="email"
+                          value={accountEmail}
+                          onChange={e => setAccountEmail(e.target.value)}
+                          className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-gray-200 bg-gray-50 text-sm text-gray-800 focus:outline-none focus:border-[#4573A2]"
+                        />
+                      </div>
+                    </div>
+
+                    {error && <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-3">{error}</p>}
+
+                    <button
+                      onClick={handleCreateAccount}
+                      disabled={!accountEmail || creatingAccount}
+                      className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+                    >
+                      {creatingAccount ? 'Wird erstellt ...' : 'Konto erstellen'}
+                    </button>
+
+                    <div className="border-t border-gray-100 pt-4">
+                      <button
+                        onClick={() => setStepIndex(3)}
+                        className="w-full flex items-center justify-center gap-2 py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                      >
+                        <SkipForwardIcon className="w-4 h-4" />
+                        Ueberspringen
+                      </button>
+                      <p className="text-xs text-gray-400 text-center mt-1">
+                        Wir informieren Sie per WhatsApp. Ohne Account koennen Sie Ihren Fall nicht online verfolgen.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
-            {currentStep === 'konstellation' && (
-              <PageKonstellation lead={lead} state={state} setState={set} />
-            )}
-            {currentStep === 'zusatz' && (
-              <PageZusatz lead={lead} state={state} setState={set} />
-            )}
-            {currentStep === 'zusammenfassung' && (
-              <PageZusammenfassung lead={lead} state={state} />
+
+            {/* ═══ SCHRITT 4: ONBOARDING (Dokumente hochladen) ═══ */}
+            {currentStep.id === 'onboarding' && (
+              <div>
+                <StepHeader
+                  question="Dokumente hochladen"
+                  sub="Laden Sie bitte Ihre Fahrzeugdokumente hoch, damit der Gutachter starten kann."
+                />
+
+                <div className="space-y-4 mb-5">
+                  <FileUploadField
+                    label="Fahrzeugschein"
+                    accept="image/*,.pdf"
+                    file={fahrzeugschein}
+                    onFile={setFahrzeugschein}
+                    required
+                  />
+
+                  {lead.polizei_vor_ort && (
+                    <FileUploadField
+                      label="Unfallmitteilung"
+                      accept="image/*,.pdf"
+                      file={unfallmitteilung}
+                      onFile={setUnfallmitteilung}
+                      required
+                    />
+                  )}
+
+                  <FileUploadField
+                    label="Fuehrerschein"
+                    accept="image/*,.pdf"
+                    file={fuehrerschein}
+                    onFile={setFuehrerschein}
+                  />
+
+                  {/* Schadensfotos */}
+                  <div>
+                    <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">
+                      Schadensfotos <span className="text-gray-400 normal-case ml-1">(optional)</span>
+                    </label>
+                    <MultiPhotoUpload photos={schadensfotos} onChange={setSchadensfotos} />
+                  </div>
+                </div>
+
+                {error && <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4">{error}</p>}
+
+                <button
+                  onClick={handleUploadDocs}
+                  disabled={!fahrzeugschein || uploadingDocs || (lead.polizei_vor_ort && !unfallmitteilung)}
+                  className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+                >
+                  {uploadingDocs ? 'Wird hochgeladen ...' : 'Dokumente senden & zur Fallakte'}
+                </button>
+
+                <div className="border-t border-gray-100 mt-4 pt-4">
+                  <button
+                    onClick={handleSkipDocs}
+                    className="w-full flex items-center justify-center gap-2 py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                  >
+                    <SkipForwardIcon className="w-4 h-4" />
+                    Ich lade spaeter hoch
+                  </button>
+                  <p className="text-xs text-gray-400 text-center mt-1">
+                    Sie erhalten in 3 Tagen eine Erinnerung.
+                  </p>
+                </div>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Navigation */}
-        <div className="space-y-3 pt-4">
-          {error && (
-            <p className="text-sm text-red-400 text-center rounded-2xl bg-red-500/10 border border-red-900/50 px-4 py-3">
-              {error}
-            </p>
-          )}
-          {currentStep === 'zusammenfassung' ? (
+        {/* Navigation — nur Schritt 1 hat Weiter-Button */}
+        {currentStep.id === 'stammdaten' && (
+          <div className="pt-4">
             <button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
-            >
-              {submitting ? 'Wird gesendet ...' : 'Absenden'}
-            </button>
-          ) : (
-            <button
-              onClick={() => setStepIndex((s) => s + 1)}
-              disabled={!canProceed(currentStep, state, lead)}
+              onClick={() => setStepIndex(1)}
+              disabled={!datenschutz}
               className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
             >
-              Weiter
+              Weiter zur Beauftragung
             </button>
-          )}
-          {stepIndex > 0 && (
+          </div>
+        )}
+
+        {/* Zurueck-Button (nur Schritt 1→2) */}
+        {stepIndex === 1 && (
+          <div className="pt-2">
             <button
-              onClick={() => setStepIndex((s) => s - 1)}
+              onClick={() => setStepIndex(0)}
               className="w-full py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors"
             >
               Zurueck
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
-// ─── Shared UI ────────────────────────────────────────────────────────────────
+// ─── Shared UI ───────────────────────────────────────────────────────────────
 
 function StepHeader({ question, sub, icon }: { question: string; sub?: string; icon?: React.ReactNode }) {
   return (
@@ -610,20 +520,27 @@ function StepHeader({ question, sub, icon }: { question: string; sub?: string; i
   )
 }
 
+function SummaryRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-col gap-0.5 px-4 py-3 rounded-xl bg-gray-50 border border-gray-100">
+      <span className="text-xs text-gray-500">{label}</span>
+      <span className="text-sm text-gray-800 break-words">{value}</span>
+    </div>
+  )
+}
+
 function FileUploadField({
   label,
   accept,
   file,
   onFile,
   required,
-  capture,
 }: {
   label: string
   accept: string
   file: File | null
   onFile: (f: File | null) => void
   required?: boolean
-  capture?: 'environment' | 'user'
 }) {
   const ref = useRef<HTMLInputElement>(null)
 
@@ -633,9 +550,9 @@ function FileUploadField({
         {label} {required && <span className="text-red-400">*</span>}
       </label>
       {file ? (
-        <div className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-green-800/50 bg-green-500/5">
-          <CheckIcon className="w-5 h-5 text-green-400 flex-shrink-0" />
-          <span className="text-sm text-green-300 truncate flex-1">{file.name}</span>
+        <div className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-emerald-200 bg-emerald-50">
+          <CheckIcon className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+          <span className="text-sm text-emerald-700 truncate flex-1">{file.name}</span>
           <button
             onClick={() => { onFile(null); if (ref.current) ref.current.value = '' }}
             className="text-xs text-gray-500 hover:text-gray-700 flex-shrink-0"
@@ -646,716 +563,119 @@ function FileUploadField({
       ) : (
         <button
           onClick={() => ref.current?.click()}
-          className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100/50 hover:border-gray-300 transition-all active:scale-[0.98]"
+          className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 hover:border-gray-300 transition-all active:scale-[0.98]"
         >
-          <UploadIcon className="w-5 h-5 text-gray-500" />
-          <span className="text-sm text-gray-700">Datei auswaehlen</span>
+          <UploadIcon className="w-5 h-5 text-gray-400" />
+          <span className="text-sm text-gray-600">Datei auswaehlen</span>
         </button>
       )}
       <input
         ref={ref}
         type="file"
         accept={accept}
-        capture={capture}
-        onChange={(e) => {
-          const f = e.target.files?.[0]
-          if (f) onFile(f)
-        }}
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f) }}
         className="hidden"
       />
     </div>
   )
 }
 
-function InfoBox({ children, variant = 'info' }: { children: React.ReactNode; variant?: 'info' | 'warning' }) {
-  const colors = variant === 'warning'
-    ? 'border-amber-800/50 bg-amber-500/5 text-amber-300'
-    : 'border-[#1E3A5F]/50 bg-[#4573A2]/5 text-[#7BA3CC]'
+function MultiPhotoUpload({ photos, onChange }: { photos: File[]; onChange: (f: File[]) => void }) {
+  const ref = useRef<HTMLInputElement>(null)
   return (
-    <div className={`flex items-start gap-3 px-4 py-3 rounded-2xl border text-sm ${colors}`}>
-      {variant === 'warning'
-        ? <AlertTriangleIcon className="w-5 h-5 flex-shrink-0 mt-0.5" />
-        : <ShieldCheckIcon className="w-5 h-5 flex-shrink-0 mt-0.5" />
-      }
-      <div>{children}</div>
+    <div>
+      <button
+        onClick={() => ref.current?.click()}
+        className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 hover:border-gray-300 transition-all active:scale-[0.98]"
+      >
+        <CameraIcon className="w-5 h-5 text-gray-400" />
+        <span className="text-sm text-gray-600">Fotos aufnehmen oder hochladen</span>
+      </button>
+      <input
+        ref={ref}
+        type="file"
+        accept="image/*"
+        multiple
+        capture="environment"
+        onChange={(e) => { if (e.target.files) onChange([...photos, ...Array.from(e.target.files).filter(f => f.type.startsWith('image/'))]) }}
+        className="hidden"
+      />
+      {photos.length > 0 && (
+        <div className="mt-3 grid grid-cols-4 gap-2">
+          {photos.map((f, i) => (
+            <div key={i} className="relative group aspect-square">
+              <img src={URL.createObjectURL(f)} alt="" className="w-full h-full object-cover rounded-xl" />
+              <button
+                onClick={() => onChange(photos.filter((_, idx) => idx !== i))}
+                className="absolute top-1 right-1 w-6 h-6 rounded-full bg-white/90 text-gray-700 shadow-sm flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity"
+              >
+                <Trash2Icon className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
 
-function SummaryRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col gap-0.5 px-4 py-3 rounded-xl bg-gray-100/50 border border-gray-300/50">
-      <span className="text-xs text-gray-500">{label}</span>
-      <span className="text-sm text-gray-800 break-words">{value}</span>
-    </div>
-  )
-}
+// ─── Signature Canvas (using signature_pad library) ──────────────────────────
 
-const inputCls =
-  'w-full px-5 py-4 rounded-2xl border border-gray-300 bg-gray-100 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 transition-colors'
+function SignatureCanvas({ onSignature }: { onSignature: (blob: Blob | null) => void }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const padRef = useRef<any>(null)
+  const [isEmpty, setIsEmpty] = useState(true)
 
-// ─── SEITE 1: Willkommen ──────────────────────────────────────────────────────
+  useEffect(() => {
+    let pad: any = null
+    import('signature_pad').then(({ default: SignaturePad }) => {
+      if (!canvasRef.current) return
+      const canvas = canvasRef.current
+      const ratio = Math.max(window.devicePixelRatio || 1, 1)
+      canvas.width = canvas.offsetWidth * ratio
+      canvas.height = canvas.offsetHeight * ratio
+      const ctx = canvas.getContext('2d')
+      if (ctx) ctx.scale(ratio, ratio)
 
-function PageWillkommen({ lead }: { lead: LeadData }) {
-  const checklist = getChecklist(lead)
-  const termin = lead.gutachter_termin
-    ? new Date(lead.gutachter_termin).toLocaleDateString('de-DE', {
-        weekday: 'long',
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
+      pad = new SignaturePad(canvas, {
+        penColor: '#1E3A5F',
+        minWidth: 1.5,
+        maxWidth: 3,
+        backgroundColor: 'rgb(255, 255, 255)',
       })
-    : null
-
-  const fahrzeug = [lead.fahrzeug_hersteller, lead.fahrzeug_modell].filter(Boolean).join(' ')
-
-  return (
-    <div>
-      <Script
-        src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}
-        strategy="lazyOnload"
-      />
-      <StepHeader
-        question={`Hallo ${lead.vorname}!`}
-        sub="Wir benoetigen einige Unterlagen, um Ihren Schadensfall schnellstmoeglich zu bearbeiten."
-        icon={<CarIcon className="w-8 h-8 text-[#7BA3CC]" />}
-      />
-
-      {(fahrzeug || lead.kennzeichen) && (
-        <div className="mb-5 px-4 py-3 rounded-2xl border border-gray-300/50 bg-gray-100/30">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Ihr Fahrzeug</p>
-          {fahrzeug && <p className="text-sm text-gray-800">{fahrzeug}</p>}
-          {lead.kennzeichen && <p className="text-sm text-gray-500">{lead.kennzeichen}</p>}
-        </div>
-      )}
-
-      {termin && (
-        <div className="mb-5 flex items-center gap-3 px-4 py-3 rounded-2xl border border-[#1E3A5F]/50 bg-[#4573A2]/5">
-          <CalendarIcon className="w-5 h-5 text-[#7BA3CC] flex-shrink-0" />
-          <div>
-            <p className="text-xs text-[#7BA3CC]">Gutachtertermin</p>
-            <p className="text-sm text-[#7BA3CC]">{termin}</p>
-          </div>
-        </div>
-      )}
-
-      <div className="space-y-1">
-        <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Das wird benoetigt:</p>
-        {checklist.map((item, i) => (
-          <div key={i} className="flex items-center gap-3 px-4 py-2.5 rounded-xl">
-            <div className="w-5 h-5 rounded border border-gray-300 flex items-center justify-center flex-shrink-0">
-              <FileTextIcon className="w-3 h-3 text-gray-500" />
-            </div>
-            <span className="text-sm text-gray-700">{item}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// ─── SEITE 2: Basis-Dokumente ─────────────────────────────────────────────────
-
-function PageBasis({
-  state,
-  setState,
-}: {
-  state: FlowState
-  setState: <K extends keyof FlowState>(key: K, value: FlowState[K]) => void
-}) {
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [dragOver, setDragOver] = useState(false)
-
-  const addPhotos = useCallback((files: FileList | File[]) => {
-    const imgs = Array.from(files).filter((f) => f.type.startsWith('image/'))
-    setState('schadensfotos', [...state.schadensfotos, ...imgs])
-  }, [state.schadensfotos, setState])
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setDragOver(false)
-    addPhotos(e.dataTransfer.files)
-  }, [addPhotos])
-
-  return (
-    <div>
-      <StepHeader
-        question="Basis-Dokumente"
-        sub="Bitte laden Sie Fahrzeugschein, Fuehrerschein und Schadensfotos hoch."
-      />
-
-      <div className="space-y-5">
-        <FileUploadField
-          label="Fahrzeugschein"
-          accept="image/*,.pdf"
-          file={state.fahrzeugschein}
-          onFile={(f) => setState('fahrzeugschein', f)}
-          required
-        />
-
-        <FileUploadField
-          label="Fuehrerschein"
-          accept="image/*,.pdf"
-          file={state.fuehrerschein}
-          onFile={(f) => setState('fuehrerschein', f)}
-          required
-        />
-
-        <div>
-          <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">
-            Schadensfotos <span className="text-red-400">*</span>
-            <span className="text-gray-400 normal-case ml-1">(min. 4 Perspektiven)</span>
-          </label>
-          <div
-            onDrop={handleDrop}
-            onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
-            onDragLeave={() => setDragOver(false)}
-            onClick={() => fileInputRef.current?.click()}
-            className={`flex flex-col items-center justify-center gap-3 px-6 py-8 rounded-2xl border-2 border-dashed cursor-pointer transition-all ${
-              dragOver
-                ? 'border-[#4573A2] bg-[#4573A2]/5'
-                : 'border-gray-300 bg-gray-100/50 hover:border-gray-300'
-            }`}
-          >
-            <CameraIcon className="w-8 h-8 text-gray-500" />
-            <div className="text-center">
-              <p className="text-sm text-gray-700">Fotos aufnehmen oder hochladen</p>
-              <p className="text-xs text-gray-500 mt-1">Vorne, hinten, links, rechts + Detailaufnahmen</p>
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              capture="environment"
-              onChange={(e) => e.target.files && addPhotos(e.target.files)}
-              className="hidden"
-            />
-          </div>
-
-          {state.schadensfotos.length > 0 && (
-            <div className="mt-3">
-              <p className={`text-xs mb-2 ${state.schadensfotos.length >= 4 ? 'text-green-400' : 'text-amber-400'}`}>
-                {state.schadensfotos.length} / 4 Fotos {state.schadensfotos.length >= 4 ? <CheckIcon className="inline w-3 h-3" /> : ''}
-              </p>
-              <div className="grid grid-cols-4 gap-2">
-                {state.schadensfotos.map((f, i) => (
-                  <div key={i} className="relative group aspect-square">
-                    <img
-                      src={URL.createObjectURL(f)}
-                      alt=""
-                      className="w-full h-full object-cover rounded-xl"
-                    />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setState('schadensfotos', state.schadensfotos.filter((_, idx) => idx !== i))
-                      }}
-                      className="absolute top-1 right-1 w-6 h-6 rounded-full bg-white/90 text-gray-700 shadow-sm flex items-center justify-center text-xs leading-none opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity"
-                    >
-                      x
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ─── SEITE 3: Schadenfall-Spezifisch ──────────────────────────────────────────
-
-function PageSchadenfall({
-  lead,
-  state,
-  setState,
-}: {
-  lead: LeadData
-  state: FlowState
-  setState: <K extends keyof FlowState>(key: K, value: FlowState[K]) => void
-}) {
-  const sf = lead.schadenfall_typ
-
-  return (
-    <div>
-      <StepHeader
-        question="Angaben zum Schadenfall"
-        sub={
-          sf === 'SF-01' ? 'Unfall mit Gegner — bitte geben Sie die Daten des Unfallgegners an.' :
-          sf === 'SF-02' ? 'Teilschuld-Unfall — bitte geben Sie die Daten beider Parteien an.' :
-          sf === 'SF-03' ? 'Unfallflucht / Vandalismus — wir benoetigen den Polizeibericht.' :
-          sf === 'SF-04' ? 'Selbstverschuldeter Unfall — bitte laden Sie Ihre Versicherungspolice hoch.' :
-          'Bitte vervollstaendigen Sie die Angaben.'
+      pad.addEventListener('endStroke', () => {
+        setIsEmpty(pad.isEmpty())
+        if (!pad.isEmpty()) {
+          canvas.toBlob(blob => onSignature(blob), 'image/png')
         }
-      />
+      })
+      padRef.current = pad
+    })
 
-      <div className="space-y-4">
-        {/* SF-01 / SF-02: Gegner-Daten */}
-        {(sf === 'SF-01' || sf === 'SF-02') && (
-          <>
-            <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Unfallgegner</p>
-              <div className="space-y-3">
-                <input
-                  value={state.gegner_name}
-                  onChange={(e) => setState('gegner_name', e.target.value)}
-                  placeholder="Name des Unfallgegners"
-                  className={inputCls}
-                />
-                <input
-                  value={state.gegner_versicherung}
-                  onChange={(e) => setState('gegner_versicherung', e.target.value)}
-                  placeholder="Versicherung des Gegners"
-                  className={inputCls}
-                />
-                <input
-                  value={state.gegner_kennzeichen}
-                  onChange={(e) => setState('gegner_kennzeichen', e.target.value)}
-                  placeholder="Kennzeichen des Gegners"
-                  className={inputCls}
-                />
-              </div>
-            </div>
-          </>
-        )}
+    return () => { if (pad) pad.off() }
+  }, [])
 
-        {/* SF-02: Zusaetzlich eigene Versicherung */}
-        {sf === 'SF-02' && (
-          <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Ihre Versicherung</p>
-            <div className="space-y-3">
-              <input
-                value={state.eigene_versicherung}
-                onChange={(e) => setState('eigene_versicherung', e.target.value)}
-                placeholder="Ihre KFZ-Versicherung"
-                className={inputCls}
-              />
-              <input
-                value={state.eigene_versicherungsnr}
-                onChange={(e) => setState('eigene_versicherungsnr', e.target.value)}
-                placeholder="Versicherungsnummer (optional)"
-                className={inputCls}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* SF-03: Polizeibericht + Ort/Zeit */}
-        {sf === 'SF-03' && (
-          <>
-            <FileUploadField
-              label="Polizeibericht"
-              accept="image/*,.pdf"
-              file={state.polizeibericht}
-              onFile={(f) => setState('polizeibericht', f)}
-              required
-            />
-            <div className="space-y-3">
-              <GooglePlaceAutocomplete
-                defaultValue={state.unfall_ort}
-                placeholder="Unfallort / Tatort"
-                className={inputCls}
-                onSelect={(place: PlaceResult) => {
-                  setState('unfall_ort', place.adresse)
-                  setState('unfall_lat', place.lat)
-                  setState('unfall_lng', place.lng)
-                  setState('unfall_place_id', place.place_id)
-                }}
-              />
-              <input
-                type="datetime-local"
-                value={state.unfall_zeit}
-                onChange={(e) => setState('unfall_zeit', e.target.value)}
-                className={`${inputCls} [color-scheme:dark]`}
-              />
-            </div>
-          </>
-        )}
-
-        {/* SF-04: Eigene Police */}
-        {sf === 'SF-04' && (
-          <>
-            <InfoBox>
-              Bei einem selbstverschuldeten Unfall benoetigen wir Ihre Versicherungspolice, um den Anspruch zu pruefen.
-            </InfoBox>
-            <FileUploadField
-              label="Versicherungspolice"
-              accept="image/*,.pdf"
-              file={state.polizeibericht} // Reuse field for SF-04 police doc
-              onFile={(f) => setState('polizeibericht', f)}
-              required
-            />
-          </>
-        )}
-
-        {/* Polizeibericht-Pflicht (wenn nicht schon durch SF-03 abgedeckt) */}
-        {lead.polizeibericht_pflicht && sf !== 'SF-03' && (
-          <FileUploadField
-            label="Polizeibericht"
-            accept="image/*,.pdf"
-            file={state.polizeibericht}
-            onFile={(f) => setState('polizeibericht', f)}
-            required
-          />
-        )}
-
-        {/* Unfallmitteilung Upload (wenn polizei_vor_ort=true) */}
-        {lead.polizei_vor_ort && (
-          <div className="mt-4 p-3 rounded-xl border border-amber-200 bg-amber-50">
-            <p className="text-xs text-amber-700 font-medium mb-2">Polizei war vor Ort — Bitte Unfallmitteilung hochladen</p>
-            <FileUploadField
-              label="Unfallmitteilung / Polizeiprotokoll"
-              accept="image/*,.pdf"
-              file={state.unfallmitteilung}
-              onFile={(f) => setState('unfallmitteilung', f)}
-            />
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// ─── SEITE 4: Konstellations-Spezifisch ───────────────────────────────────────
-
-function PageKonstellation({
-  lead,
-  state,
-  setState,
-}: {
-  lead: LeadData
-  state: FlowState
-  setState: <K extends keyof FlowState>(key: K, value: FlowState[K]) => void
-}) {
-  const kk = lead.kunden_konstellation
-
-  return (
-    <div>
-      <StepHeader
-        question={
-          kk === 'KK-02' ? 'Leasing-Fahrzeug' :
-          kk === 'KK-03' ? 'Finanziertes Fahrzeug' :
-          kk === 'KK-04' ? 'Firmenfahrzeug' :
-          kk === 'KK-05' ? 'Halter / Fahrer' :
-          'Zusaetzliche Angaben'
-        }
-        sub={
-          kk === 'KK-02' ? 'Bitte laden Sie Ihren Leasingvertrag hoch.' :
-          kk === 'KK-03' ? 'Bitte laden Sie Ihren Finanzierungsvertrag hoch.' :
-          kk === 'KK-04' ? 'Wir benoetigen einige Firmendokumente.' :
-          kk === 'KK-05' ? 'Fahrzeughalter und Fahrer sind unterschiedliche Personen.' :
-          ''
-        }
-      />
-
-      <div className="space-y-4">
-        {/* KK-02: Leasing */}
-        {kk === 'KK-02' && (
-          <>
-            <FileUploadField
-              label="Leasingvertrag"
-              accept="image/*,.pdf"
-              file={state.leasingvertrag}
-              onFile={(f) => setState('leasingvertrag', f)}
-              required
-            />
-            <InfoBox variant="warning">
-              Bitte informieren Sie Ihren Leasinggeber ueber den Schadensfall.
-            </InfoBox>
-          </>
-        )}
-
-        {/* KK-03: Finanzierung */}
-        {kk === 'KK-03' && (
-          <FileUploadField
-            label="Finanzierungsvertrag"
-            accept="image/*,.pdf"
-            file={state.finanzierungsvertrag}
-            onFile={(f) => setState('finanzierungsvertrag', f)}
-            required
-          />
-        )}
-
-        {/* KK-04: Firma */}
-        {kk === 'KK-04' && (
-          <>
-            <FileUploadField
-              label="Gewerbenachweis"
-              accept="image/*,.pdf"
-              file={state.gewerbenachweis}
-              onFile={(f) => setState('gewerbenachweis', f)}
-              required
-            />
-            <FileUploadField
-              label="GF-Vollmacht"
-              accept="image/*,.pdf"
-              file={state.gf_vollmacht}
-              onFile={(f) => setState('gf_vollmacht', f)}
-              required
-            />
-            <div>
-              <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">
-                USt-IdNr <span className="text-red-400">*</span>
-              </label>
-              <input
-                value={state.ust_id}
-                onChange={(e) => setState('ust_id', e.target.value)}
-                placeholder="DE123456789"
-                className={inputCls}
-              />
-            </div>
-          </>
-        )}
-
-        {/* KK-05: Halter != Fahrer */}
-        {kk === 'KK-05' && (
-          <>
-            <FileUploadField
-              label="Ausweiskopie Halter"
-              accept="image/*,.pdf"
-              file={state.halter_ausweis}
-              onFile={(f) => setState('halter_ausweis', f)}
-              required
-            />
-            <InfoBox>
-              Wir benoetigen eine Kopie des Ausweises des Fahrzeughalters, da Halter und Fahrer nicht identisch sind.
-            </InfoBox>
-          </>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// ─── SEITE 5: Zusatz-Infos ───────────────────────────────────────────────────
-
-function PageZusatz({
-  lead,
-  state,
-  setState,
-}: {
-  lead: LeadData
-  state: FlowState
-  setState: <K extends keyof FlowState>(key: K, value: FlowState[K]) => void
-}) {
-  return (
-    <div>
-      <StepHeader
-        question="Zusaetzliche Informationen"
-        sub="Basierend auf Ihren Angaben benoetigen wir noch einige Details."
-      />
-
-      <div className="space-y-5">
-        {/* Personenschaden */}
-        {lead.personenschaden_flag && (
-          <div className="space-y-4">
-            <div className="px-4 py-3 rounded-2xl border border-red-800/50 bg-red-500/5">
-              <p className="text-sm text-red-300 font-medium mb-1">Personenschaden</p>
-              <p className="text-xs text-red-400/70">
-                Bitte dokumentieren Sie Ihre Verletzungen. Falls vorhanden, laden Sie ein aerztliches Attest hoch.
-                Ein Anwalt wird sich bei Ihnen melden.
-              </p>
-            </div>
-
-            <FileUploadField
-              label="Aerztliches Attest (falls vorhanden)"
-              accept="image/*,.pdf"
-              file={state.aerztliches_attest}
-              onFile={(f) => setState('aerztliches_attest', f)}
-            />
-
-            <a
-              href="/downloads/schmerzenstagebuch.pdf"
-              target="_blank"
-              className="flex items-center gap-3 px-5 py-4 rounded-2xl border border-gray-300 bg-gray-100/50 hover:border-gray-300 transition-all active:scale-[0.98]"
-            >
-              <DownloadIcon className="w-5 h-5 text-[#7BA3CC]" />
-              <div>
-                <p className="text-sm text-gray-800">Schmerzenstagebuch-Vorlage</p>
-                <p className="text-xs text-gray-500">PDF herunterladen</p>
-              </div>
-            </a>
-          </div>
-        )}
-
-        {/* Mietwagen */}
-        {lead.mietwagen_flag && (
-          <div className="space-y-4">
-            <InfoBox>
-              Sie haben Anspruch auf einen Mietwagen. Wir koennen dies fuer Sie organisieren.
-            </InfoBox>
-
-            <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Haben Sie bereits einen Mietwagen?</p>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => setState('hat_mietwagen', true)}
-                  className={`px-5 py-4 rounded-2xl border text-sm font-medium transition-all active:scale-[0.98] ${
-                    state.hat_mietwagen === true
-                      ? 'border-[#4573A2] bg-[#4573A2]/10 text-[#7BA3CC] font-semibold'
-                      : 'border-gray-300 bg-gray-100/50 text-gray-800 hover:border-gray-300'
-                  }`}
-                >
-                  Ja
-                </button>
-                <button
-                  onClick={() => { setState('hat_mietwagen', false); setState('mietwagenvertrag', null) }}
-                  className={`px-5 py-4 rounded-2xl border text-sm font-medium transition-all active:scale-[0.98] ${
-                    state.hat_mietwagen === false
-                      ? 'border-[#4573A2] bg-[#4573A2]/10 text-[#7BA3CC] font-semibold'
-                      : 'border-gray-300 bg-gray-100/50 text-gray-800 hover:border-gray-300'
-                  }`}
-                >
-                  Nein
-                </button>
-              </div>
-            </div>
-
-            {state.hat_mietwagen === true && (
-              <FileUploadField
-                label="Mietwagenvertrag"
-                accept="image/*,.pdf"
-                file={state.mietwagenvertrag}
-                onFile={(f) => setState('mietwagenvertrag', f)}
-              />
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// ─── SEITE 6: Zusammenfassung ─────────────────────────────────────────────────
-
-function PageZusammenfassung({ lead, state }: { lead: LeadData; state: FlowState }) {
-  const pflichtdoks = getPflichtdokumente(lead)
-
-  // Determine which are uploaded
-  const uploadStatus: { typ: string; uploaded: boolean; pflicht: boolean }[] = pflichtdoks.map((d) => {
-    let uploaded = false
-    switch (d.typ) {
-      case 'fahrzeugschein': uploaded = !!state.fahrzeugschein; break
-      case 'fuehrerschein': uploaded = !!state.fuehrerschein; break
-      case 'schadensfotos': uploaded = state.schadensfotos.length >= 4; break
-      case 'gegner-daten': uploaded = !!(state.gegner_name && state.gegner_versicherung); break
-      case 'eigene-versicherung': uploaded = !!state.eigene_versicherung; break
-      case 'polizeibericht': uploaded = !!state.polizeibericht; break
-      case 'eigene-versicherungspolice': uploaded = !!state.polizeibericht; break
-      case 'leasingvertrag': uploaded = !!state.leasingvertrag; break
-      case 'finanzierungsvertrag': uploaded = !!state.finanzierungsvertrag; break
-      case 'gewerbenachweis': uploaded = !!state.gewerbenachweis; break
-      case 'gf-vollmacht': uploaded = !!state.gf_vollmacht; break
-      case 'halter-ausweis': uploaded = !!state.halter_ausweis; break
-      case 'aerztliches-attest': uploaded = !!state.aerztliches_attest; break
-      case 'mietwagenvertrag': uploaded = !!state.mietwagenvertrag; break
-    }
-    return { typ: d.typ, uploaded, pflicht: d.pflicht }
-  })
-
-  const uploadedDocs = uploadStatus.filter((d) => d.uploaded)
-  const missingDocs = uploadStatus.filter((d) => !d.uploaded && d.pflicht)
-  const optionalMissing = uploadStatus.filter((d) => !d.uploaded && !d.pflicht)
-
-  const LABELS: Record<string, string> = {
-    'fahrzeugschein': 'Fahrzeugschein',
-    'fuehrerschein': 'Fuehrerschein',
-    'schadensfotos': 'Schadensfotos',
-    'gegner-daten': 'Gegner-Daten',
-    'eigene-versicherung': 'Eigene Versicherung',
-    'polizeibericht': 'Polizeibericht',
-    'eigene-versicherungspolice': 'Versicherungspolice',
-    'leasingvertrag': 'Leasingvertrag',
-    'finanzierungsvertrag': 'Finanzierungsvertrag',
-    'gewerbenachweis': 'Gewerbenachweis',
-    'gf-vollmacht': 'GF-Vollmacht',
-    'halter-ausweis': 'Ausweis Halter',
-    'aerztliches-attest': 'Aerztliches Attest',
-    'mietwagenvertrag': 'Mietwagenvertrag',
+  function clearSignature() {
+    padRef.current?.clear()
+    setIsEmpty(true)
+    onSignature(null)
   }
 
   return (
     <div>
-      <StepHeader
-        question="Zusammenfassung"
-        sub="Pruefen Sie Ihre Angaben vor dem Absenden."
-      />
-
-      <div className="space-y-4">
-        {/* Uploaded */}
-        {uploadedDocs.length > 0 && (
-          <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Hochgeladen</p>
-            <div className="space-y-1.5">
-              {uploadedDocs.map((d) => (
-                <div key={d.typ} className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-green-500/5 border border-green-800/30">
-                  <CheckIcon className="w-4 h-4 text-green-400 flex-shrink-0" />
-                  <span className="text-sm text-green-300">{LABELS[d.typ] ?? d.typ}</span>
-                </div>
-              ))}
-            </div>
+      <div className="relative border-2 border-gray-200 rounded-2xl overflow-hidden bg-white">
+        <canvas ref={canvasRef} className="w-full h-44 touch-none" />
+        {isEmpty && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <p className="text-gray-300 text-sm">Hier unterschreiben</p>
           </div>
         )}
-
-        {/* Missing pflicht */}
-        {missingDocs.length > 0 && (
-          <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Noch ausstehend (Pflicht)</p>
-            <div className="space-y-1.5">
-              {missingDocs.map((d) => (
-                <div key={d.typ} className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-amber-500/5 border border-amber-800/30">
-                  <AlertTriangleIcon className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                  <span className="text-sm text-amber-300">{LABELS[d.typ] ?? d.typ}</span>
-                  <span className="text-xs text-gray-500 ml-auto">im Portal nachreichen</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Optional missing */}
-        {optionalMissing.length > 0 && (
-          <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Optional (nicht hochgeladen)</p>
-            <div className="space-y-1.5">
-              {optionalMissing.map((d) => (
-                <div key={d.typ} className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-gray-100/50 border border-gray-300/50">
-                  <div className="w-4 h-4 rounded border border-gray-300 flex-shrink-0" />
-                  <span className="text-sm text-gray-500">{LABELS[d.typ] ?? d.typ}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Gegner-Daten Summary */}
-        {state.gegner_name && (
-          <div className="space-y-1.5 pt-2">
-            <SummaryRow label="Unfallgegner" value={state.gegner_name} />
-            {state.gegner_versicherung && <SummaryRow label="Gegner-Versicherung" value={state.gegner_versicherung} />}
-            {state.gegner_kennzeichen && <SummaryRow label="Gegner-Kennzeichen" value={state.gegner_kennzeichen} />}
-          </div>
-        )}
-        {state.eigene_versicherung && (
-          <SummaryRow label="Eigene Versicherung" value={state.eigene_versicherung} />
-        )}
-        {state.unfall_ort && (
-          <SummaryRow label="Unfallort" value={state.unfall_ort} />
-        )}
-        {state.ust_id && (
-          <SummaryRow label="USt-IdNr" value={state.ust_id} />
-        )}
-
-        {/* Portal-Info */}
-        <InfoBox>
-          Nach dem Absenden erhalten Sie Zugang zum Kundenportal, in dem Sie fehlende Dokumente nachreichen und den Status Ihres Falls verfolgen koennen.
-        </InfoBox>
       </div>
+      {!isEmpty && (
+        <button onClick={clearSignature} className="mt-2 text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1">
+          <Trash2Icon className="w-3 h-3" /> Unterschrift loeschen
+        </button>
+      )}
     </div>
   )
 }
