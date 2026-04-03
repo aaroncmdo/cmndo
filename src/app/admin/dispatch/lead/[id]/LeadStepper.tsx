@@ -690,20 +690,39 @@ function SlotCard({ slot, label, variant, onConfirm, confirming }: {
   slot: GutachterSlot; label: string; variant: 'empfohlen' | 'alternative'; onConfirm: () => void; confirming: boolean
 }) {
   const isEmpf = variant === 'empfohlen'
+  const wunsch = slot.wunschtermin_moeglich
+  const prio = (slot as Record<string, unknown>).prio as number | undefined
+  const routeInfo = (slot as Record<string, unknown>).route_info as string | undefined
+  const fahrzeitM = (slot as Record<string, unknown>).fahrzeit_min as number | undefined
+  const nextSlot = (slot as Record<string, unknown>).naechster_freier_slot as string | undefined
+  const partnerSeit = (slot as Record<string, unknown>).partner_seit as string | undefined
+
   return (
-    <div className={`rounded-xl p-3 border ${isEmpf ? 'bg-green-50 border-green-200' : 'bg-[#4573A2]/5 border-[#4573A2]/20'}`}>
-      <span className={`text-[10px] font-semibold uppercase ${isEmpf ? 'text-green-600' : 'text-[#4573A2]'}`}>{label}</span>
-      <div className="flex items-center gap-2 mt-1.5 mb-2">
-        <UserCheckIcon className={`w-3.5 h-3.5 ${isEmpf ? 'text-green-600' : 'text-[#4573A2]'}`} />
+    <div className={`rounded-xl p-3 border ${wunsch ? 'bg-green-50 border-green-200' : isEmpf ? 'bg-amber-50 border-amber-200' : 'bg-[#4573A2]/5 border-[#4573A2]/20'}`}>
+      <div className="flex items-center gap-2">
+        {prio && <span className="text-[9px] font-bold bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">PRIO {prio}</span>}
+        <span className={`text-[10px] font-semibold uppercase ${wunsch ? 'text-green-600' : isEmpf ? 'text-amber-600' : 'text-[#4573A2]'}`}>
+          {wunsch ? 'Verfügbar' : isEmpf ? 'Prio 1 — anderer Slot' : label}
+        </span>
+      </div>
+      <div className="flex items-center gap-2 mt-1.5 mb-1">
+        <UserCheckIcon className={`w-3.5 h-3.5 ${wunsch ? 'text-green-600' : 'text-[#4573A2]'}`} />
         <span className="text-gray-800 text-sm font-medium">{slot.name}</span>
         {slot.entfernung_km != null && <span className="text-gray-500 text-[11px] flex items-center gap-0.5"><MapPinIcon className="w-3 h-3" />{slot.entfernung_km}km</span>}
+        {fahrzeitM != null && <span className="text-gray-400 text-[10px]">~{fahrzeitM}min</span>}
       </div>
+      {partnerSeit && <p className="text-[10px] text-gray-400 mb-1">Partner seit {new Date(partnerSeit).toLocaleDateString('de-DE')}</p>}
+      {routeInfo && <p className="text-[10px] text-gray-500 mb-1.5 italic">{routeInfo}</p>}
+      {!wunsch && nextSlot && (
+        <p className="text-[10px] text-amber-600 font-medium mb-1">Nächster freier Slot: {new Date(nextSlot).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</p>
+      )}
       <div className="flex items-center gap-2 mb-2 px-2 py-1.5 rounded-lg bg-white border border-gray-100">
         <CalendarIcon className="w-3 h-3 text-gray-400" />
         <span className="text-gray-700 text-sm">{new Date(slot.termin).toLocaleString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
       </div>
+      <div className="text-[10px] text-gray-400 mb-2">Auslastung: {slot.auslastung}</div>
       <button onClick={onConfirm} disabled={confirming}
-        className={`w-full py-2 rounded-xl text-sm font-semibold disabled:opacity-50 transition-all ${isEmpf ? 'bg-green-600 hover:bg-green-500 text-white' : 'bg-[#1E3A5F] hover:bg-[#4573A2] text-white'}`}>
+        className={`w-full py-2 rounded-xl text-sm font-semibold disabled:opacity-50 transition-all ${wunsch ? 'bg-green-600 hover:bg-green-500 text-white' : 'bg-[#1E3A5F] hover:bg-[#4573A2] text-white'}`}>
         {confirming ? 'Wird bestaetigt...' : 'Termin bestaetigen'}
       </button>
     </div>

@@ -3,68 +3,65 @@ import { createClient } from '@/lib/supabase/server'
 
 // ─── Haversine (km) ──────────────────────────────────────────────────────────
 
-function haversineKm(
-  lat1: number, lng1: number,
-  lat2: number, lng2: number,
-): number {
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371
   const dLat = ((lat2 - lat1) * Math.PI) / 180
   const dLng = ((lng2 - lng1) * Math.PI) / 180
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLng / 2) ** 2
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
-
-// ─── Point-in-Polygon (Ray Casting) ─────────────────────────────────────────
 
 function pointInPolygon(point: { lat: number; lng: number }, polygon: { lat: number; lng: number }[]): boolean {
   let inside = false
   for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
     const xi = polygon[i].lat, yi = polygon[i].lng
     const xj = polygon[j].lat, yj = polygon[j].lng
-    if ((yi > point.lng) !== (yj > point.lng) &&
-        point.lat < (xj - xi) * (point.lng - yi) / (yj - yi) + xi) {
-      inside = !inside
-    }
+    if ((yi > point.lng) !== (yj > point.lng) && point.lat < (xj - xi) * (point.lng - yi) / (yj - yi) + xi) inside = !inside
   }
   return inside
 }
 
+// Fahrzeit in Minuten schätzen (50 km/h Durchschnitt Stadtverkehr)
+function fahrzeitMin(distanzKm: number): number {
+  return Math.round(distanzKm * 1.2) // 50 km/h = 1.2 min/km
+}
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type MatchResult = {
-  empfohlen: GutachterSlot | null
-  alternative_1: GutachterSlot | null
-  alternative_2: GutachterSlot | null
-}
+const BESICHTIGUNG_MIN = 60 // Besichtigung = IMMER 60 Minuten
 
 type GutachterSlot = {
   sv_id: string
   name: string
+  prio: number
+  partner_seit: string | null
   entfernung_km: number | null
+  fahrzeit_min: number | null
   auslastung: string
   offene_faelle: number
   max_faelle_monat: number
   paket: string | null
   termin: string
   wunschtermin_moeglich: boolean
+  naechster_freier_slot: string | null
+  route_info: string | null
 }
 
-// 2h appointment block: 30min drive + 60min inspection + 30min buffer
-const BLOCK_MINUTES = 120
+// Backward-compatible response
+type MatchResult = {
+  empfohlen: GutachterSlot | null
+  alternative_1: GutachterSlot | null
+  alternative_2: GutachterSlot | null
+  alle_kandidaten: GutachterSlot[]
+  sv_gesucht: boolean
+}
 
 // ─── POST /api/gutachter-matching ────────────────────────────────────────────
 
 export async function POST(request: Request) {
   const supabase = await createClient()
-
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) {
-    return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 })
-  }
+  if (!user) return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 })
 
   const body = await request.json().catch(() => null)
   const plz: string | undefined = body?.plz
@@ -77,36 +74,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'plz und wunschtermin sind erforderlich' }, { status: 400 })
   }
 
-  // 1. Use direct coordinates from Google Places, or fallback to PLZ geo lookup
+  // 1. Koordinaten
   let plzGeo: { lat: number; lng: number } | null = null
   if (directLat != null && directLng != null) {
     plzGeo = { lat: directLat, lng: directLng }
   } else {
-    const { data } = await supabase
-      .from('plz_geo')
-      .select('lat, lng')
-      .eq('plz', plz)
-      .single()
+    const { data } = await supabase.from('plz_geo').select('lat, lng').eq('plz', plz).single()
     plzGeo = data
   }
 
-  // 2. Load all active SVs with kalender_sync
+  // 2. Alle aktiven SVs laden
   const { data: svList } = await supabase
     .from('sachverstaendige')
-    .select(`
-      id, lat, lng, partner_seit,
-      offene_faelle, max_faelle_monat, paket, qualifikationen,
-      ist_aktiv, profile_id, kalender_sync_aktiv,
-      paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km,
-      standort_lat, standort_lng, isochrone_polygon
-    `)
+    .select('id, partner_seit, offene_faelle, max_faelle_monat, paket, qualifikationen, ist_aktiv, profile_id, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_lat, standort_lng, isochrone_polygon')
     .eq('ist_aktiv', true)
 
-  if (!svList || svList.length === 0) {
-    return NextResponse.json({ error: 'Keine aktiven Gutachter gefunden' }, { status: 404 })
-  }
+  if (!svList?.length) return NextResponse.json({ error: 'Keine aktiven Gutachter gefunden' }, { status: 404 })
 
-  // 3. Filter by 40km radius + capacity
+  // 3. Filter nach Gebiet + Kapazität + Scoring
   type Candidate = (typeof svList)[number] & { distanz_km: number | null; score: number }
   const candidates: Candidate[] = []
 
@@ -114,20 +99,14 @@ export async function POST(request: Request) {
     let distanz: number | null = null
     let inRange = false
     const maxRadius = sv.paket_umkreis_km ?? 40
-
-    // Use standort_lat/lng if available, fallback to lat/lng
-    const svLat = sv.standort_lat ?? sv.lat
-    const svLng = sv.standort_lng ?? sv.lng
+    const svLat = sv.standort_lat ?? null
+    const svLng = sv.standort_lng ?? null
 
     if (plzGeo && svLat != null && svLng != null) {
-      distanz = haversineKm(
-        Number(plzGeo.lat), Number(plzGeo.lng),
-        Number(svLat), Number(svLng),
-      )
+      distanz = haversineKm(Number(plzGeo.lat), Number(plzGeo.lng), Number(svLat), Number(svLng))
       inRange = distanz <= maxRadius
     }
 
-    // Isochrone Point-in-Polygon check (replaces PLZ matching)
     if (!inRange && plzGeo && sv.isochrone_polygon && Array.isArray(sv.isochrone_polygon)) {
       if (pointInPolygon({ lat: Number(plzGeo.lat), lng: Number(plzGeo.lng) }, sv.isochrone_polygon as { lat: number; lng: number }[])) {
         inRange = true
@@ -139,277 +118,146 @@ export async function POST(request: Request) {
 
     if (!inRange) continue
 
-    // Capacity: skip full gutachter
     const maxFaelle = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10
     const genutztFaelle = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
     if (genutztFaelle >= maxFaelle) continue
 
-    // ── KFZ-116 Prio-Scoring (lower = better) ──
+    // Prio-Scoring (lower = better)
     let score = 0
-
-    // 1. ÄLTESTER VERTRAG ZUERST (stärkstes Signal: -100 bis 0)
     if (sv.partner_seit) {
       const years = (Date.now() - new Date(sv.partner_seit).getTime()) / (365.25 * 86400000)
-      score -= Math.min(years, 10) * 10 // max -100 für 10+ Jahre
+      score -= Math.min(years, 10) * 10
     }
-
-    // 2. KAPAZITÄT: Je weniger belegt, desto besser (-30 bis 0)
-    const kapazitaetFrei = maxFaelle > 0 ? 1 - (genutztFaelle / maxFaelle) : 0.5
-    score -= kapazitaetFrei * 30
-
-    // 3. QUALIFIKATION: Matching Bonus (-50)
-    if (schadenfallTyp && Array.isArray(sv.qualifikationen)) {
-      if (sv.qualifikationen.includes(schadenfallTyp)) score -= 50
-    }
-
-    // 4. DISTANZ: Näher = besser (0 bis +maxRadius)
+    const kapFrei = maxFaelle > 0 ? 1 - (genutztFaelle / maxFaelle) : 0.5
+    score -= kapFrei * 30
+    if (schadenfallTyp && Array.isArray(sv.qualifikationen) && sv.qualifikationen.includes(schadenfallTyp)) score -= 50
     if (distanz != null) score += distanz
 
     candidates.push({ ...sv, distanz_km: distanz, score })
   }
 
-  if (candidates.length === 0) {
-    return NextResponse.json({ error: 'Kein Gutachter im Umkreis gefunden' }, { status: 404 })
-  }
-
-  // ── KFZ-116: Route vom LETZTEN TERMIN (nicht vom Büro) ──
-  // Lade den letzten Termin-Ort jedes Kandidaten am Wunschtag
-  if (plzGeo) {
-    const svIds = candidates.map(c => c.id)
-    const wDate = new Date(wunschtermin)
-    const dayStart = new Date(wDate); dayStart.setHours(0, 0, 0, 0)
-
-    // Finde den letzten Termin VOR dem Wunschtermin fuer jeden SV
-    const { data: vorherigeTermine } = await supabase
-      .from('faelle')
-      .select('sv_id, schadens_adresse, schadens_plz, schadens_ort, sv_termin')
-      .in('sv_id', svIds)
-      .not('sv_termin', 'is', null)
-      .gte('sv_termin', dayStart.toISOString())
-      .lt('sv_termin', wDate.toISOString())
-      .order('sv_termin', { ascending: false })
-
-    // PLZ-Koordinaten der letzten Termine laden
-    if (vorherigeTermine && vorherigeTermine.length > 0) {
-      const letzterTerminPlz: Record<string, string> = {}
-      for (const t of vorherigeTermine) {
-        if (t.sv_id && t.schadens_plz && !letzterTerminPlz[t.sv_id]) {
-          letzterTerminPlz[t.sv_id] = t.schadens_plz
-        }
-      }
-
-      // PLZ → Koordinaten
-      const uniquePlzs = [...new Set(Object.values(letzterTerminPlz))]
-      if (uniquePlzs.length > 0) {
-        const { data: plzCoords } = await supabase
-          .from('plz_geo')
-          .select('plz, lat, lng')
-          .in('plz', uniquePlzs)
-
-        const plzMap: Record<string, { lat: number; lng: number }> = {}
-        for (const p of plzCoords ?? []) plzMap[p.plz] = { lat: Number(p.lat), lng: Number(p.lng) }
-
-        // Distanz vom letzten Termin-Ort zum Schadensort berechnen
-        for (const c of candidates) {
-          const lastPlz = letzterTerminPlz[c.id]
-          if (lastPlz && plzMap[lastPlz]) {
-            const routeDistanz = haversineKm(plzMap[lastPlz].lat, plzMap[lastPlz].lng, Number(plzGeo.lat), Number(plzGeo.lng))
-            // Ersetze Büro-Distanz durch Route-Distanz (wenn kürzer = Bonus)
-            if (c.distanz_km != null && routeDistanz < c.distanz_km) {
-              c.score -= (c.distanz_km - routeDistanz) // Bonus für kürzere Route
-              c.distanz_km = routeDistanz
-            }
-          }
-        }
-      }
-    }
+  if (!candidates.length) {
+    return NextResponse.json({ empfohlen: null, alternative_1: null, alternative_2: null, alle_kandidaten: [], sv_gesucht: true })
   }
 
   candidates.sort((a, b) => a.score - b.score)
 
-  // 4. Load profile names for top candidates
+  // 4. Profile-Namen laden
   const topCandidates = candidates.slice(0, 10)
   const profileIds = topCandidates.map(c => c.profile_id).filter(Boolean)
   const { data: profiles } = profileIds.length > 0
     ? await supabase.from('profiles').select('id, vorname, nachname').in('id', profileIds)
     : { data: [] }
+  const nameMap: Record<string, string> = {}
+  for (const p of profiles ?? []) nameMap[p.id] = `${p.vorname ?? ''} ${p.nachname ?? ''}`.trim() || '—'
 
-  const profileNameMap: Record<string, string> = {}
-  for (const p of profiles ?? []) {
-    profileNameMap[p.id] = `${p.vorname ?? ''} ${p.nachname ?? ''}`.trim() || '—'
+  // 5. Termine des Tages laden für alle Kandidaten
+  const wDate = new Date(wunschtermin)
+  const dayStart = new Date(wDate); dayStart.setHours(0, 0, 0, 0)
+  const dayEnd = new Date(wDate); dayEnd.setHours(23, 59, 59, 999)
+  const svIds = topCandidates.map(c => c.id)
+
+  const [{ data: kalTermine }, { data: fallTermine }] = await Promise.all([
+    supabase.from('gutachter_termine').select('sv_id, start_zeit, end_zeit, status')
+      .in('sv_id', svIds).gte('start_zeit', dayStart.toISOString()).lte('start_zeit', dayEnd.toISOString())
+      .in('status', ['bestaetigt', 'reserviert', 'vorschlag']),
+    supabase.from('faelle').select('sv_id, sv_termin, schadens_adresse')
+      .in('sv_id', svIds).not('sv_termin', 'is', null)
+      .gte('sv_termin', dayStart.toISOString()).lte('sv_termin', dayEnd.toISOString()),
+  ])
+
+  // Termine pro SV gruppieren
+  function getTermine(svId: string): { start: Date; end: Date; adresse: string }[] {
+    const termine: { start: Date; end: Date; adresse: string }[] = []
+    for (const t of kalTermine ?? []) {
+      if (t.sv_id !== svId) continue
+      termine.push({ start: new Date(t.start_zeit), end: new Date(t.end_zeit), adresse: '' })
+    }
+    for (const f of fallTermine ?? []) {
+      if (f.sv_id !== svId || !f.sv_termin) continue
+      const s = new Date(f.sv_termin)
+      // Nur hinzufügen wenn nicht schon in kalTermine
+      if (!termine.some(t => Math.abs(t.start.getTime() - s.getTime()) < 60000)) {
+        termine.push({ start: s, end: new Date(s.getTime() + (BESICHTIGUNG_MIN + 30) * 60000), adresse: f.schadens_adresse ?? '' })
+      }
+    }
+    termine.sort((a, b) => a.start.getTime() - b.start.getTime())
+    return termine
   }
 
-  // 5. Check availability using gutachter_termine table (real calendar)
-  const wunschDate = new Date(wunschtermin)
-  const wunschDayStart = new Date(wunschDate)
-  wunschDayStart.setHours(0, 0, 0, 0)
-  const wunschDayEnd = new Date(wunschDate)
-  wunschDayEnd.setHours(23, 59, 59, 999)
-
-  const candidateIds = topCandidates.map(c => c.id)
-
-  // Load from gutachter_termine (includes both Claimondo + synced external calendar)
-  const { data: kalenderTermine } = await supabase
-    .from('gutachter_termine')
-    .select('sv_id, start_zeit, end_zeit, status')
-    .in('sv_id', candidateIds)
-    .gte('start_zeit', wunschDayStart.toISOString())
-    .lte('start_zeit', wunschDayEnd.toISOString())
-    .in('status', ['bestaetigt', 'vorschlag'])
-
-  // Also check faelle.sv_termin as fallback for legacy data
-  const { data: fallTermine } = await supabase
-    .from('faelle')
-    .select('sv_id, sv_termin')
-    .in('sv_id', candidateIds)
-    .gte('sv_termin', wunschDayStart.toISOString())
-    .lte('sv_termin', wunschDayEnd.toISOString())
-
-  // Check if a 2h block starting at a given time conflicts with any existing appointment
-  function isBlocked(svId: string, startTime: Date): boolean {
-    const blockEnd = new Date(startTime.getTime() + BLOCK_MINUTES * 60 * 1000)
-
-    // Check gutachter_termine
-    for (const t of kalenderTermine ?? []) {
-      if (t.sv_id !== svId) continue
-      const tStart = new Date(t.start_zeit)
-      const tEnd = new Date(t.end_zeit)
-      // Overlap check: block [startTime, blockEnd) overlaps [tStart, tEnd)
-      if (startTime < tEnd && blockEnd > tStart) return true
+  // Block-Check: 60min Besichtigung + geschätzte Fahrzeit
+  function isBlocked(svId: string, startTime: Date, fahrzeit: number): boolean {
+    const blockEnd = new Date(startTime.getTime() + (BESICHTIGUNG_MIN + fahrzeit) * 60000)
+    for (const t of getTermine(svId)) {
+      if (startTime < t.end && blockEnd > t.start) return true
     }
-
-    // Check faelle.sv_termin (legacy, 2h assumed block)
-    for (const t of fallTermine ?? []) {
-      if (t.sv_id !== svId || !t.sv_termin) continue
-      const tStart = new Date(t.sv_termin)
-      const tEnd = new Date(tStart.getTime() + BLOCK_MINUTES * 60 * 1000)
-      if (startTime < tEnd && blockEnd > tStart) return true
-    }
-
     return false
   }
 
-  // 6. Build recommended result
-  const prioSv = topCandidates[0]
-  const prioAvailable = !isBlocked(prioSv.id, wunschDate)
+  // Nächsten freien Slot finden (gleicher Tag, 8-17 Uhr)
+  function findNextFreeSlot(svId: string, fahrzeit: number): Date | null {
+    for (let h = 8; h <= 17; h++) {
+      for (const m of [0, 30]) {
+        const slot = new Date(wDate)
+        slot.setHours(h, m, 0, 0)
+        if (slot <= new Date()) continue // Vergangenheit überspringen
+        if (!isBlocked(svId, slot, fahrzeit)) return slot
+      }
+    }
+    return null
+  }
 
-  function buildSlot(sv: Candidate, termin: string, wunschMoeglich: boolean): GutachterSlot {
+  // Route-Info: letzter Termin VOR dem Wunschtermin
+  function getRouteInfo(svId: string, distKm: number | null): { info: string; fahrzeit: number } {
+    const termine = getTermine(svId)
+    const vorher = termine.filter(t => t.end <= wDate)
+    if (vorher.length > 0) {
+      const letzter = vorher[vorher.length - 1]
+      const endZeit = `${String(letzter.end.getHours()).padStart(2, '0')}:${String(letzter.end.getMinutes()).padStart(2, '0')}`
+      const fz = distKm != null ? fahrzeitMin(distKm) : 30
+      return { info: `Letzter Termin endet ${endZeit} + ~${fz}min Fahrt`, fahrzeit: fz }
+    }
+    const fz = distKm != null ? fahrzeitMin(distKm) : 20
+    return { info: `Anfahrt vom Büro ~${fz}min`, fahrzeit: fz }
+  }
+
+  // 6. Slots bauen — Prio 1 IMMER zeigen
+  const slots: GutachterSlot[] = []
+
+  for (let i = 0; i < topCandidates.length && slots.length < 5; i++) {
+    const sv = topCandidates[i]
     const maxF = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10
     const genutztF = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
-    return {
+    const { info, fahrzeit } = getRouteInfo(sv.id, sv.distanz_km)
+    const wunschMoeglich = !isBlocked(sv.id, wDate, fahrzeit)
+    const nextSlot = wunschMoeglich ? null : findNextFreeSlot(sv.id, fahrzeit)
+
+    slots.push({
       sv_id: sv.id,
-      name: profileNameMap[sv.profile_id] ?? '—',
+      name: nameMap[sv.profile_id] ?? '—',
+      prio: i + 1,
+      partner_seit: sv.partner_seit,
       entfernung_km: sv.distanz_km != null ? Math.round(sv.distanz_km) : null,
+      fahrzeit_min: fahrzeit,
       auslastung: `${genutztF}/${maxF}`,
       offene_faelle: genutztF,
       max_faelle_monat: maxF,
       paket: sv.paket,
-      termin,
+      termin: wunschMoeglich ? wunschtermin : (nextSlot?.toISOString() ?? wunschtermin),
       wunschtermin_moeglich: wunschMoeglich,
-    }
+      naechster_freier_slot: nextSlot?.toISOString() ?? null,
+      route_info: info,
+    })
   }
 
-  const empfohlen = prioAvailable
-    ? buildSlot(prioSv, wunschtermin, true)
-    : null
-
-  // 7. Find 2 alternative slots
-  const alternatives: GutachterSlot[] = []
-
-  // If Prio-SV not available at Wunschtermin, try other times same day
-  const sameDayHours = [9, 10, 11, 13, 14, 15, 16]
-  const wunschHour = wunschDate.getHours()
-
-  // Sort alternative hours by proximity to Wunschtermin
-  const sortedHours = [...sameDayHours]
-    .filter(h => h !== wunschHour)
-    .sort((a, b) => Math.abs(a - wunschHour) - Math.abs(b - wunschHour))
-
-  // Try same day, different times for top candidates
-  for (const hour of sortedHours) {
-    if (alternatives.length >= 2) break
-    const altDate = new Date(wunschDate)
-    altDate.setHours(hour, 0, 0, 0)
-
-    for (const sv of topCandidates) {
-      if (alternatives.length >= 2) break
-      if (!isBlocked(sv.id, altDate)) {
-        const altIso = altDate.toISOString()
-        if (!alternatives.some(a => a.sv_id === sv.id && a.termin === altIso)) {
-          alternatives.push(buildSlot(sv, altIso, false))
-          break
-        }
-      }
-    }
-  }
-
-  // Try next days if still need alternatives
-  if (alternatives.length < 2) {
-    const dayOffsets = [1, 2, -1, 3]
-    for (const offset of dayOffsets) {
-      if (alternatives.length >= 2) break
-      const altDay = new Date(wunschDate)
-      altDay.setDate(altDay.getDate() + offset)
-      if (altDay.getDay() === 0 || altDay.getDay() === 6) continue
-
-      // Load termine for that day
-      const dayStart = new Date(altDay)
-      dayStart.setHours(0, 0, 0, 0)
-      const dayEnd = new Date(altDay)
-      dayEnd.setHours(23, 59, 59, 999)
-
-      const { data: altKalender } = await supabase
-        .from('gutachter_termine')
-        .select('sv_id, start_zeit, end_zeit, status')
-        .in('sv_id', candidateIds)
-        .gte('start_zeit', dayStart.toISOString())
-        .lte('start_zeit', dayEnd.toISOString())
-        .in('status', ['bestaetigt', 'vorschlag'])
-
-      const { data: altFall } = await supabase
-        .from('faelle')
-        .select('sv_id, sv_termin')
-        .in('sv_id', candidateIds)
-        .gte('sv_termin', dayStart.toISOString())
-        .lte('sv_termin', dayEnd.toISOString())
-
-      function isBlockedAlt(svId: string, startTime: Date): boolean {
-        const blockEnd = new Date(startTime.getTime() + BLOCK_MINUTES * 60 * 1000)
-        for (const t of altKalender ?? []) {
-          if (t.sv_id !== svId) continue
-          const tStart = new Date(t.start_zeit)
-          const tEnd = new Date(t.end_zeit)
-          if (startTime < tEnd && blockEnd > tStart) return true
-        }
-        for (const t of altFall ?? []) {
-          if (t.sv_id !== svId || !t.sv_termin) continue
-          const tStart = new Date(t.sv_termin)
-          const tEnd = new Date(tStart.getTime() + BLOCK_MINUTES * 60 * 1000)
-          if (startTime < tEnd && blockEnd > tStart) return true
-        }
-        return false
-      }
-
-      const altDate = new Date(altDay)
-      altDate.setHours(wunschHour, 0, 0, 0)
-
-      for (const sv of topCandidates) {
-        if (alternatives.length >= 2) break
-        if (!isBlockedAlt(sv.id, altDate)) {
-          const altIso = altDate.toISOString()
-          if (!alternatives.some(a => a.termin === altIso && a.sv_id === sv.id)) {
-            alternatives.push(buildSlot(sv, altIso, false))
-            break
-          }
-        }
-      }
-    }
-  }
+  const svGesucht = slots.length === 0 || slots.every(s => !s.wunschtermin_moeglich && !s.naechster_freier_slot)
 
   const result: MatchResult = {
-    empfohlen,
-    alternative_1: alternatives[0] ?? null,
-    alternative_2: alternatives[1] ?? null,
+    empfohlen: slots[0] ?? null,
+    alternative_1: slots[1] ?? null,
+    alternative_2: slots[2] ?? null,
+    alle_kandidaten: slots,
+    sv_gesucht: svGesucht,
   }
 
   return NextResponse.json(result)
