@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { SendIcon, UploadIcon, FileTextIcon, CheckIcon } from 'lucide-react'
+import { SendIcon, FileTextIcon } from 'lucide-react'
 
 type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean | null; anhang_url: string | null; created_at: string }
 type Dokument = { id: string; typ: string; datei_url: string; datei_name: string | null; created_at: string }
@@ -17,8 +17,20 @@ function fmtDateTime(val: string | null): string {
   return new Date(val).toLocaleString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
 }
 
+// ─── Tabs ───────────────────────────────────────────────────────────────────
+
+const TABS = [
+  { key: 'uebersicht', label: 'Uebersicht' },
+  { key: 'dokumente', label: 'Dokumente' },
+  { key: 'chat', label: 'Chat' },
+] as const
+
+type TabKey = (typeof TABS)[number]['key']
+
+// ─── Main Component ─────────────────────────────────────────────────────────
+
 export default function FallDetailSections({
-  fall, svName, svTelefon, dokumente, nachrichten: initialNachrichten, userId,
+  fall, svName, svTelefon, dokumente, nachrichten, userId,
 }: {
   fall: Record<string, unknown>
   svName: string | null
@@ -27,64 +39,84 @@ export default function FallDetailSections({
   nachrichten: Nachricht[]
   userId: string
 }) {
+  const [activeTab, setActiveTab] = useState<TabKey>('uebersicht')
+
   return (
-    <>
-      {/* ── Aktueller Status ── */}
-      <Section title="Aktueller Status">
-        <InfoRow label="Fallnummer" value={(fall.fall_nummer as string) ?? (fall.id as string)?.slice(0, 8)} />
-        <InfoRow label="Status" value={(fall.status as string) ?? '—'} />
-        {fall.sv_termin && <InfoRow label="Naechster Termin" value={fmtDateTime(fall.sv_termin as string)} />}
-      </Section>
+    <div>
+      {/* Tab-Leiste */}
+      <div className="flex bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-5">
+        {TABS.map(tab => (
+          <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+            className={`flex-1 py-3 text-sm font-medium transition-colors ${
+              activeTab === tab.key
+                ? 'bg-[#4573A2] text-white'
+                : 'text-gray-500 hover:bg-gray-50'
+            }`}>
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
-      {/* ── Fahrzeug ── */}
-      <Section title="Fahrzeug">
-        {fall.kennzeichen && <InfoRow label="Kennzeichen" value={fall.kennzeichen as string} />}
-        {fall.fahrzeug_hersteller && <InfoRow label="Marke" value={fall.fahrzeug_hersteller as string} />}
-        {fall.fahrzeug_modell && <InfoRow label="Modell" value={fall.fahrzeug_modell as string} />}
-        {fall.schadens_datum && <InfoRow label="Schadensdatum" value={fmt(fall.schadens_datum as string)} />}
-        {fall.schadens_beschreibung && (
-          <div className="pt-2 border-t border-gray-100">
-            <p className="text-xs text-gray-400 mb-1">Unfallhergang</p>
-            <p className="text-sm text-[#0D1B3E] whitespace-pre-wrap">{fall.schadens_beschreibung as string}</p>
-          </div>
-        )}
-      </Section>
+      {/* Tab-Inhalt */}
+      {activeTab === 'uebersicht' && (
+        <div className="space-y-5">
+          <Section title="Aktueller Status">
+            <InfoRow label="Fallnummer" value={(fall.fall_nummer as string) ?? (fall.id as string)?.slice(0, 8)} />
+            <InfoRow label="Status" value={(fall.status as string) ?? '—'} />
+            {fall.sv_termin && <InfoRow label="Naechster Termin" value={fmtDateTime(fall.sv_termin as string)} />}
+          </Section>
 
-      {/* ── Gutachter ── */}
-      {svName && (
-        <Section title="Ihr Gutachter">
-          <InfoRow label="Name" value={svName} />
-          {svTelefon && <InfoRow label="Telefon" value={svTelefon} />}
-          {fall.sv_termin && <InfoRow label="Besichtigungstermin" value={fmtDateTime(fall.sv_termin as string)} />}
-          {fall.besichtigungsort_adresse && <InfoRow label="Besichtigungsort" value={fall.besichtigungsort_adresse as string} />}
+          <Section title="Fahrzeug">
+            {fall.kennzeichen && <InfoRow label="Kennzeichen" value={fall.kennzeichen as string} />}
+            {fall.fahrzeug_hersteller && <InfoRow label="Marke" value={fall.fahrzeug_hersteller as string} />}
+            {fall.fahrzeug_modell && <InfoRow label="Modell" value={fall.fahrzeug_modell as string} />}
+            {fall.schadens_datum && <InfoRow label="Schadensdatum" value={fmt(fall.schadens_datum as string)} />}
+            {fall.schadens_beschreibung && (
+              <div className="pt-2 border-t border-gray-100">
+                <p className="text-xs text-gray-400 mb-1">Unfallhergang</p>
+                <p className="text-sm text-[#0D1B3E] whitespace-pre-wrap">{fall.schadens_beschreibung as string}</p>
+              </div>
+            )}
+          </Section>
+
+          {svName && (
+            <Section title="Ihr Gutachter">
+              <InfoRow label="Name" value={svName} />
+              {svTelefon && <InfoRow label="Telefon" value={svTelefon} />}
+              {fall.sv_termin && <InfoRow label="Besichtigungstermin" value={fmtDateTime(fall.sv_termin as string)} />}
+              {fall.besichtigungsort_adresse && <InfoRow label="Besichtigungsort" value={fall.besichtigungsort_adresse as string} />}
+            </Section>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'dokumente' && (
+        <Section title="Dokumente">
+          {dokumente.length === 0 ? (
+            <p className="text-sm text-gray-400">Noch keine Dokumente vorhanden.</p>
+          ) : (
+            <div className="space-y-2">
+              {dokumente.map(doc => (
+                <a key={doc.id} href={doc.datei_url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                  <FileTextIcon className="w-4 h-4 text-[#4573A2] shrink-0" />
+                  <span className="text-sm text-[#0D1B3E] truncate flex-1">{doc.datei_name ?? 'Dokument'}</span>
+                  <span className="text-[10px] text-gray-400">{fmt(doc.created_at)}</span>
+                </a>
+              ))}
+            </div>
+          )}
         </Section>
       )}
 
-      {/* ── Dokumente ── */}
-      <Section title="Dokumente">
-        {dokumente.length === 0 ? (
-          <p className="text-sm text-gray-400">Noch keine Dokumente vorhanden.</p>
-        ) : (
-          <div className="space-y-2">
-            {dokumente.map(doc => (
-              <a key={doc.id} href={doc.datei_url} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                <FileTextIcon className="w-4 h-4 text-[#4573A2] shrink-0" />
-                <span className="text-sm text-[#0D1B3E] truncate flex-1">{doc.datei_name ?? 'Dokument'}</span>
-                <span className="text-[10px] text-gray-400">{fmt(doc.created_at)}</span>
-              </a>
-            ))}
-          </div>
-        )}
-      </Section>
-
-      {/* ── Chat ── */}
-      <ChatSection fallId={fall.id as string} initialNachrichten={initialNachrichten} userId={userId} />
-    </>
+      {activeTab === 'chat' && (
+        <ChatTab fallId={fall.id as string} nachrichten={nachrichten} userId={userId} hasSv={!!fall.sv_id} />
+      )}
+    </div>
   )
 }
 
-// ─── Section Wrapper ────────────────────────────────────────────────────────
+// ─── Section + InfoRow ──────────────────────────────────────────────────────
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -104,10 +136,11 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   )
 }
 
-// ─── Chat Section — 3 Kanaele: Claimondo + Gutachter + WhatsApp ────────────
+// ─── Chat Tab — Sub-Tabs [Claimondo] [Gutachter] + WhatsApp ────────────────
 
-function ChatSection({ fallId, initialNachrichten, userId }: { fallId: string; initialNachrichten: Nachricht[]; userId: string }) {
-  const hasSv = initialNachrichten.some(m => m.kanal === 'portal-kunde-gutachter')
+function ChatTab({ fallId, nachrichten: initialNachrichten, userId, hasSv }: {
+  fallId: string; nachrichten: Nachricht[]; userId: string; hasSv: boolean
+}) {
   const [activeKanal, setActiveKanal] = useState<string>('portal-kunde-claimondo')
   const [messages, setMessages] = useState(initialNachrichten)
   const [text, setText] = useState('')
@@ -115,7 +148,6 @@ function ChatSection({ fallId, initialNachrichten, userId }: { fallId: string; i
   const [error, setError] = useState<string | null>(null)
   const endRef = useRef<HTMLDivElement>(null)
 
-  // Filter: aktiver Kanal + WhatsApp-Nachrichten immer anzeigen
   const filtered = messages.filter(m => m.kanal === activeKanal || m.kanal === 'whatsapp')
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [filtered])
@@ -139,9 +171,7 @@ function ChatSection({ fallId, initialNachrichten, userId }: { fallId: string; i
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-      <h3 className="text-sm font-semibold text-[#0D1B3E] mb-3">Nachrichten</h3>
-
-      {/* Kanal-Tabs */}
+      {/* Sub-Tabs: Claimondo / Gutachter */}
       <div className="flex gap-1 mb-4">
         <button onClick={() => setActiveKanal('portal-kunde-claimondo')}
           className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${activeKanal === 'portal-kunde-claimondo' ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
@@ -156,8 +186,8 @@ function ChatSection({ fallId, initialNachrichten, userId }: { fallId: string; i
       </div>
 
       {/* Messages */}
-      <div className="space-y-3 mb-4 max-h-80 overflow-y-auto">
-        {filtered.length === 0 && <p className="text-sm text-gray-400 text-center py-4">Noch keine Nachrichten. Schreiben Sie uns!</p>}
+      <div className="space-y-3 mb-4 max-h-96 overflow-y-auto">
+        {filtered.length === 0 && <p className="text-sm text-gray-400 text-center py-8">Noch keine Nachrichten. Schreiben Sie uns!</p>}
         {filtered.map(msg => {
           const isOwn = msg.sender_id === userId
           const isWhatsApp = msg.kanal === 'whatsapp'
@@ -168,7 +198,7 @@ function ChatSection({ fallId, initialNachrichten, userId }: { fallId: string; i
             <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${bubbleColor}`}>
                 <div className="flex items-center gap-1.5">
-                  <p className={`text-[10px] font-semibold uppercase tracking-wide mb-0.5 ${isOwn ? 'text-white/60' : isGutachter ? 'text-white/60' : 'text-gray-400'}`}>
+                  <p className={`text-[10px] font-semibold uppercase tracking-wide ${isOwn || isGutachter ? 'text-white/60' : 'text-gray-400'}`}>
                     {ROLLE_LABEL[msg.sender_rolle] ?? msg.sender_rolle}
                   </p>
                   {isWhatsApp && <span className="text-[9px] opacity-60">via WhatsApp</span>}
