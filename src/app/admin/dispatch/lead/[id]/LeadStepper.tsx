@@ -216,40 +216,56 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
         {/* ── LEFT: Step Navigation ──────────────────────────────── */}
         <div className="w-48 border-r border-gray-100 bg-gray-50/50 flex-shrink-0 py-3">
           <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider px-3 mb-2">Qualifizierung</p>
-          {STEPS.map((step, idx) => {
-            if (step.key === 'gegner' && !gegnerStepVisible) return null
-            const Icon = step.icon
-            const done = isStepDone(idx)
-            const current = isStepCurrent(idx)
-            const active = openStep === idx
+          {(() => {
+            const visibleSteps = STEPS.filter(s => !(s.key === 'gegner' && !gegnerStepVisible))
+            return visibleSteps.map((step, vIdx) => {
+              const idx = STEPS.indexOf(step)
+              const Icon = step.icon
+              const done = isStepDone(idx)
+              const current = isStepCurrent(idx)
+              const active = openStep === idx
+              const isLast = vIdx === visibleSteps.length - 1
+              const nextDone = !isLast && isStepDone(STEPS.indexOf(visibleSteps[vIdx + 1]))
+              const nextCurrent = !isLast && isStepCurrent(STEPS.indexOf(visibleSteps[vIdx + 1]))
 
-            return (
-              <button
-                key={step.key}
-                onClick={() => setOpenStep(idx)}
-                className={`w-full flex items-center gap-2 px-3 py-2 text-left transition-colors ${
-                  active ? 'bg-white border-r-2 border-[#4573A2] shadow-sm' : 'hover:bg-white/60'
-                }`}
-              >
-                <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
-                  done ? 'bg-emerald-500' : current ? 'bg-[#4573A2] animate-stepper-pulse' : 'bg-gray-200'
-                }`}>
-                  {done ? (
-                    <CheckCircle2Icon className="w-3 h-3 text-white" />
-                  ) : (
-                    <Icon className={`w-2.5 h-2.5 ${current ? 'text-white' : 'text-gray-400'}`} />
+              return (
+                <div key={step.key}>
+                  <button
+                    onClick={() => setOpenStep(idx)}
+                    className={`w-full flex items-center gap-2 px-3 py-1.5 text-left transition-colors ${
+                      active ? 'bg-white border-r-2 border-[#4573A2] shadow-sm' : 'hover:bg-white/60'
+                    }`}
+                  >
+                    <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+                      done ? 'bg-emerald-500' : current ? 'bg-[#4573A2] animate-stepper-pulse' : 'bg-gray-200'
+                    }`}>
+                      {done ? (
+                        <CheckCircle2Icon className="w-3 h-3 text-white" />
+                      ) : (
+                        <Icon className={`w-2.5 h-2.5 ${current ? 'text-white' : 'text-gray-400'}`} />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className={`text-[11px] font-medium truncate ${
+                        done ? 'text-emerald-600' : current ? 'text-[#4573A2]' : active ? 'text-gray-800' : 'text-gray-500'
+                      }`}>
+                        {step.label}
+                      </p>
+                    </div>
+                  </button>
+                  {!isLast && (
+                    <div className="pl-3">
+                      <div className={`w-0.5 h-3 ml-[9px] rounded-full ${
+                        done && nextDone ? 'bg-emerald-400' :
+                        done && nextCurrent ? 'bg-gradient-to-b from-emerald-400 to-gray-300' :
+                        'bg-gray-200'
+                      }`} />
+                    </div>
                   )}
                 </div>
-                <div className="min-w-0">
-                  <p className={`text-[11px] font-medium truncate ${
-                    done ? 'text-emerald-600' : current ? 'text-[#4573A2]' : active ? 'text-gray-800' : 'text-gray-500'
-                  }`}>
-                    {step.label}
-                  </p>
-                </div>
-              </button>
-            )
-          })}
+              )
+            })
+          })()}
         </div>
 
         {/* ── MIDDLE: Active Step Content ─────────────────────────── */}
