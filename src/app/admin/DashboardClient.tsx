@@ -711,13 +711,15 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
                   // Benachrichtigungen an Teilnehmer
                   if (terminTyp === 'intern' && terminTeilnehmer.length > 0) {
                     for (const t of terminTeilnehmer) {
-                      await supabase.from('benachrichtigungen').insert({
-                        user_id: t.user_id,
-                        typ: 'termin',
-                        titel: `Neuer Termin: ${terminBetreff}`,
-                        beschreibung: `${datum.toLocaleDateString('de-DE')} ${String(Math.floor(terminSlotTime / 60)).padStart(2, '0')}:${String(terminSlotTime % 60).padStart(2, '0')} · ${terminOrt === 'google_meet' ? 'Google Meet' : 'Im Office'}`,
-                        link: '/admin',
-                      }).catch(() => {})
+                      try {
+                        await supabase.from('benachrichtigungen').insert({
+                          user_id: t.user_id,
+                          typ: 'termin',
+                          titel: `Neuer Termin: ${terminBetreff}`,
+                          beschreibung: `${datum.toLocaleDateString('de-DE')} ${String(Math.floor(terminSlotTime / 60)).padStart(2, '0')}:${String(terminSlotTime % 60).padStart(2, '0')} · ${terminOrt === 'google_meet' ? 'Google Meet' : 'Im Office'}`,
+                          link: '/admin',
+                        })
+                      } catch { /* non-critical */ }
                     }
                   }
                   setSavingTermin(false)

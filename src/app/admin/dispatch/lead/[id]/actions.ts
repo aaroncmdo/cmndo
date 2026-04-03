@@ -485,7 +485,7 @@ export async function deleteLead(leadId: string): Promise<{ success: boolean; er
         for (const table of tables) {
           try { await admin.from(table).delete().eq('fall_id', f.id) } catch { /* */ }
         }
-        await admin.from('faelle').delete().eq('id', f.id).catch(() => {})
+        try { await admin.from('faelle').delete().eq('id', f.id) } catch { /* */ }
       }
 
       // Lead-Referenzen

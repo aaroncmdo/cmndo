@@ -106,13 +106,15 @@ export async function completeOnboarding(fallId: string): Promise<{ success: boo
     if (error) return { success: false, error: error.message }
 
     // Timeline-Eintrag
-    await admin.from('timeline').insert({
-      fall_id: fallId,
-      typ: 'system',
-      titel: 'Onboarding abgeschlossen',
-      beschreibung: 'Kunde hat das Onboarding abgeschlossen.',
-      erstellt_von: user.id,
-    }).catch(() => {})
+    try {
+      await admin.from('timeline').insert({
+        fall_id: fallId,
+        typ: 'system',
+        titel: 'Onboarding abgeschlossen',
+        beschreibung: 'Kunde hat das Onboarding abgeschlossen.',
+        erstellt_von: user.id,
+      })
+    } catch { /* non-critical */ }
 
     revalidatePath('/kunde')
     revalidatePath(`/kunde/onboarding/${fallId}`)

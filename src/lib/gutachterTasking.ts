@@ -130,11 +130,13 @@ export async function deductLeadpreis(svId: string, fallId: string, schadenhoehe
     await db.from('sachverstaendige').update({ guthaben: current - leadpreis }).eq('id', svId)
   })
 
-  await db.from('gutachter_abrechnungen').insert({
-    sv_id: svId,
-    fall_id: fallId,
-    typ: 'leadpreis',
-    betrag: -leadpreis,
-    beschreibung: `Leadpreis Fall ${fallNummer} (Schaden: ${schadenhoehe}€)`,
-  }).catch(() => {}) // Table might not exist yet
+  try {
+    await db.from('gutachter_abrechnungen').insert({
+      sv_id: svId,
+      fall_id: fallId,
+      typ: 'leadpreis',
+      betrag: -leadpreis,
+      beschreibung: `Leadpreis Fall ${fallNummer} (Schaden: ${schadenhoehe}€)`,
+    })
+  } catch { /* Table might not exist yet */ }
 }
