@@ -254,13 +254,29 @@ export async function signSAandCreateFall(
     kundenbetreuerId = min.id
   }
 
-  // 4. Fall erstellen
+  // 4a. SV-Zuweisung aus gutachter_termine laden (falls Termin vor SA vereinbart wurde)
+  let svIdFromTermin: string | null = null
+  if (lead.gutachter_termin) {
+    const { data: existingTermin } = await admin.from('gutachter_termine')
+      .select('sv_id')
+      .eq('lead_id', leadId)
+      .in('status', ['reserviert', 'bestaetigt'])
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    svIdFromTermin = existingTermin?.sv_id ?? null
+  }
+
+  // 4b. Fall erstellen
   const { data: fall, error: fallErr } = await admin
     .from('faelle')
     .insert({
       fall_nummer: fallNummer,
       lead_id: leadId,
-      status: 'ersterfassung',
+      status: svIdFromTermin ? 'sv-termin' : 'ersterfassung',
+      sv_id: svIdFromTermin,
+      sv_zugewiesen_am: svIdFromTermin ? new Date().toISOString() : null,
+      gutachter_termin_status: lead.gutachter_termin ? 'reserviert' : null,
       schadenfall_typ: lead.schadenfall_typ,
       kunden_konstellation: lead.kunden_konstellation,
       kennzeichen: lead.kennzeichen,
