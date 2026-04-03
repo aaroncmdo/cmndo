@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 export async function uploadPflichtdokument(
@@ -64,41 +65,60 @@ export async function uploadPflichtdokument(
   return { dateiUrl: urlData.publicUrl, dateiName: file.name }
 }
 
-export async function completeOnboarding(fallId: string) {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+export async function completeOnboarding(fallId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient()
+    const user = (await supabase.auth.getUser())?.data?.user ?? null
+    if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  // Verify ownership
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('id, kunde_id')
-    .eq('id', fallId)
-    .single()
+    // Verify ownership (via user-scoped client = RLS)
+    const { data: fall } = await supabase
+      .from('faelle')
+      .select('id, kunde_id')
+      .eq('id', fallId)
+      .single()
 
-  if (!fall || fall.kunde_id !== user.id) {
-    throw new Error('Kein Zugriff')
+    if (!fall || fall.kunde_id !== user.id) {
+      return { success: false, error: 'Kein Zugriff' }
+    }
+
+    // BUG-59: Admin-Client fuer UPDATE (Kunde hat keine UPDATE-RLS auf faelle)
+    const admin = createAdminClient()
+
+    // Verify all pflicht documents are uploaded
+    const { data: pending } = await admin
+      .from('pflichtdokumente')
+      .select('id')
+      .eq('fall_id', fallId)
+      .eq('pflicht', true)
+      .eq('status', 'ausstehend')
+
+    if (pending && pending.length > 0) {
+      return { success: false, error: `Noch ${pending.length} Pflichtdokument(e) ausstehend` }
+    }
+
+    // Mark onboarding as complete
+    const { error } = await admin
+      .from('faelle')
+      .update({ onboarding_complete: true, updated_at: new Date().toISOString() })
+      .eq('id', fallId)
+
+    if (error) return { success: false, error: error.message }
+
+    // Timeline-Eintrag
+    await admin.from('timeline').insert({
+      fall_id: fallId,
+      typ: 'system',
+      titel: 'Onboarding abgeschlossen',
+      beschreibung: 'Kunde hat das Onboarding abgeschlossen.',
+      erstellt_von: user.id,
+    }).catch(() => {})
+
+    revalidatePath('/kunde')
+    revalidatePath(`/kunde/onboarding/${fallId}`)
+    return { success: true }
+  } catch (err) {
+    console.error('[completeOnboarding] Error:', err)
+    return { success: false, error: String(err) }
   }
-
-  // Verify all pflicht documents are uploaded
-  const { data: pending } = await supabase
-    .from('pflichtdokumente')
-    .select('id')
-    .eq('fall_id', fallId)
-    .eq('pflicht', true)
-    .eq('status', 'ausstehend')
-
-  if (pending && pending.length > 0) {
-    throw new Error('Es gibt noch ausstehende Pflichtdokumente')
-  }
-
-  // Mark onboarding as complete
-  const { error } = await supabase
-    .from('faelle')
-    .update({ onboarding_complete: true })
-    .eq('id', fallId)
-
-  if (error) throw new Error(error.message)
-
-  revalidatePath('/kunde')
 }

@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { uploadPflichtdokument, completeOnboarding } from './actions'
 
 type Pflichtdokument = {
@@ -54,10 +55,19 @@ export default function OnboardingClient({
     setCompleting(true)
     setError(null)
     try {
-      await completeOnboarding(fallId)
-      router.push('/kunde')
+      const result = await completeOnboarding(fallId)
+      if (result?.success) {
+        toast.success('Onboarding abgeschlossen!')
+        router.push('/kunde')
+      } else {
+        const msg = result?.error ?? 'Fehler beim Abschliessen'
+        setError(msg)
+        toast.error(msg)
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fehler beim Abschliessen')
+      const msg = err instanceof Error ? err.message : 'Fehler beim Abschliessen'
+      setError(msg)
+      toast.error(msg)
     } finally {
       setCompleting(false)
     }
