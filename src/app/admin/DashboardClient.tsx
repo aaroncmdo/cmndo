@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import {
   PhoneIcon, CalendarIcon, CheckIcon, ClipboardListIcon, FolderOpenIcon,
   AlertTriangleIcon, MessageCircleIcon, BanknoteIcon, ClockIcon,
-  ChevronLeftIcon, ChevronRightIcon, UserIcon, WrenchIcon, PhoneCallIcon,
+  ChevronLeftIcon, ChevronRightIcon, UserIcon, WrenchIcon, PhoneCallIcon, VideoIcon, BuildingIcon,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -80,6 +80,25 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
   const [terminTelefon, setTerminTelefon] = useState('')
   const [savingTermin, setSavingTermin] = useState(false)
 
+  // KFZ-121: Interne Termine — Teilnehmer + Ort
+  const [terminOrt, setTerminOrt] = useState<'office' | 'google_meet'>('office')
+  const [terminTeilnehmer, setTerminTeilnehmer] = useState<{ user_id: string; name: string; rolle: string }[]>([])
+  const [terminAgenda, setTerminAgenda] = useState('')
+  const [teilnehmerTab, setTeilnehmerTab] = useState<'teams' | 'einzelne'>('teams')
+  const [mitarbeiter, setMitarbeiter] = useState<{ id: string; name: string; rolle: string; email: string }[]>([])
+  const [mitarbeiterSearch, setMitarbeiterSearch] = useState('')
+
+  // Mitarbeiter laden (einmalig)
+  useEffect(() => {
+    supabase.from('profiles').select('id, vorname, nachname, rolle, email')
+      .in('rolle', ['admin', 'kundenbetreuer', 'leadbearbeiter'])
+      .then(({ data }) => {
+        setMitarbeiter((data ?? []).map(p => ({
+          id: p.id, name: `${p.vorname ?? ''} ${p.nachname ?? ''}`.trim() || (p.email ?? '—'), rolle: p.rolle ?? '', email: p.email ?? '',
+        })))
+      })
+  }, [])
+
   // Erlaubte Termin-Typen basierend auf Rolle
   const allowedTypes = userRolle === 'admin'
     ? [{ value: 'rueckruf', label: 'Rückruf' }, { value: 'kundentermin', label: 'Kundentermin' }, { value: 'intern', label: 'Interner Termin' }]
@@ -132,7 +151,7 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
         .order('rueckruf_datum', { ascending: true }),
       // Kunden-Termine
       supabase.from('termine')
-        .select('id, fall_id, betreff, datum, dauer_minuten, typ, status')
+        .select('id, fall_id, betreff, datum, dauer_minuten, typ, status, ort, teilnehmer, meeting_link')
         .gte('datum', ds).lt('datum', de)
         .not('status', 'eq', 'abgesagt')
         .order('datum', { ascending: true }),
@@ -206,13 +225,15 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
         t.typ === 'rueckruf' ? 'rueckruf' :
         t.typ === 'intern' ? 'intern' :
         'kunde'
+      const teilnehmerArr = Array.isArray(t.teilnehmer) ? t.teilnehmer : []
+      const ortLabel = t.ort === 'google_meet' ? '📹 Meet' : t.ort === 'office' ? '🏢 Office' : ''
       calBlocks.push({
         id: `kt-${t.id}`,
         typ: blockTyp,
         startMin,
         dauer: t.dauer_minuten ?? 30,
         label: t.betreff ?? (t.typ === 'rueckruf' ? 'Rückruf' : t.typ === 'intern' ? 'Intern' : 'Kundentermin'),
-        sublabel: t.typ ?? '',
+        sublabel: t.typ === 'intern' ? `${teilnehmerArr.length} Teilnehmer · ${ortLabel}` : (t.typ ?? ''),
         link: t.fall_id ? `/admin/faelle/${t.fall_id}` : '#',
       })
     }
@@ -565,11 +586,99 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-[#4573A2]" />
               </div>
 
-              <div>
-                <label className="text-xs text-gray-500 mb-1 block">Notizen</label>
-                <textarea value={terminNotiz} onChange={e => setTerminNotiz(e.target.value)} rows={2} placeholder="Optional"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-[#4573A2] resize-none" />
-              </div>
+              {/* KFZ-121: Teilnehmer + Ort für interne Termine */}
+              {terminTyp === 'intern' && (
+                <>
+                  {/* Ort */}
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1.5 block">Ort</label>
+                    <div className="flex gap-2">
+                      {(['office', 'google_meet'] as const).map(o => (
+                        <button key={o} onClick={() => setTerminOrt(o)}
+                          className={`flex-1 py-2 rounded-lg text-xs font-medium border transition-colors ${terminOrt === o ? 'border-[#4573A2] bg-[#4573A2]/5 text-[#4573A2]' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
+                          {o === 'office' ? 'Im Office' : 'Google Meet'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Teilnehmer */}
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1.5 block">Teilnehmer</label>
+                    <div className="flex gap-1 mb-2">
+                      <button onClick={() => setTeilnehmerTab('teams')} className={`text-[10px] font-medium px-2 py-1 rounded-md ${teilnehmerTab === 'teams' ? 'bg-[#4573A2]/10 text-[#4573A2]' : 'text-gray-400'}`}>Teams</button>
+                      <button onClick={() => setTeilnehmerTab('einzelne')} className={`text-[10px] font-medium px-2 py-1 rounded-md ${teilnehmerTab === 'einzelne' ? 'bg-[#4573A2]/10 text-[#4573A2]' : 'text-gray-400'}`}>Einzelne</button>
+                    </div>
+
+                    {teilnehmerTab === 'teams' ? (
+                      <div className="space-y-1.5">
+                        {['admin', 'kundenbetreuer', 'leadbearbeiter'].map(rolle => {
+                          const members = mitarbeiter.filter(m => m.rolle === rolle)
+                          if (members.length === 0) return null
+                          const allSelected = members.every(m => terminTeilnehmer.some(t => t.user_id === m.id))
+                          return (
+                            <label key={rolle} className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+                              <input type="checkbox" checked={allSelected} onChange={() => {
+                                if (allSelected) {
+                                  setTerminTeilnehmer(prev => prev.filter(t => !members.some(m => m.id === t.user_id)))
+                                } else {
+                                  const newT = members.filter(m => !terminTeilnehmer.some(t => t.user_id === m.id)).map(m => ({ user_id: m.id, name: m.name, rolle: m.rolle }))
+                                  setTerminTeilnehmer(prev => [...prev, ...newT])
+                                }
+                              }} className="accent-[#4573A2] w-3.5 h-3.5" />
+                              <span className="font-medium capitalize">{rolle === 'leadbearbeiter' ? 'Dispatch' : rolle === 'kundenbetreuer' ? 'Kundenbetreuer' : 'Admin'}</span>
+                              <span className="text-gray-400">({members.length})</span>
+                            </label>
+                          )
+                        })}
+                      </div>
+                    ) : (
+                      <div>
+                        <input value={mitarbeiterSearch} onChange={e => setMitarbeiterSearch(e.target.value)} placeholder="Suche..."
+                          className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-xs mb-1.5 focus:outline-none focus:border-[#4573A2]" />
+                        <div className="max-h-28 overflow-y-auto space-y-1">
+                          {mitarbeiter.filter(m => !mitarbeiterSearch || m.name.toLowerCase().includes(mitarbeiterSearch.toLowerCase())).map(m => (
+                            <label key={m.id} className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+                              <input type="checkbox" checked={terminTeilnehmer.some(t => t.user_id === m.id)}
+                                onChange={e => {
+                                  if (e.target.checked) setTerminTeilnehmer(prev => [...prev, { user_id: m.id, name: m.name, rolle: m.rolle }])
+                                  else setTerminTeilnehmer(prev => prev.filter(t => t.user_id !== m.id))
+                                }} className="accent-[#4573A2] w-3.5 h-3.5" />
+                              {m.name} <span className="text-gray-400 capitalize">({m.rolle})</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {terminTeilnehmer.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {terminTeilnehmer.map(t => (
+                          <span key={t.user_id} className="bg-[#4573A2]/10 text-[#4573A2] text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
+                            {t.name}
+                            <button onClick={() => setTerminTeilnehmer(prev => prev.filter(x => x.user_id !== t.user_id))} className="hover:text-red-500">×</button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Agenda */}
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Agenda</label>
+                    <textarea value={terminAgenda} onChange={e => setTerminAgenda(e.target.value)} rows={2} placeholder="Themen..."
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-[#4573A2] resize-none" />
+                  </div>
+                </>
+              )}
+
+              {terminTyp !== 'intern' && (
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">Notizen</label>
+                  <textarea value={terminNotiz} onChange={e => setTerminNotiz(e.target.value)} rows={2} placeholder="Optional"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-[#4573A2] resize-none" />
+                </div>
+              )}
             </div>
 
             <div className="flex gap-2 mt-5">
@@ -588,14 +697,29 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
                     dauer_minuten: terminDauer,
                     typ: terminTyp,
                     betreff: terminBetreff,
-                    notiz: terminNotiz || null,
+                    notiz: terminTyp === 'intern' ? terminAgenda || null : terminNotiz || null,
                     kontakt_name: terminKontakt || null,
                     kontakt_telefon: terminTelefon || null,
                     status: 'geplant',
                     erstellt_von_user_id: userId,
                     erstellt_von_rolle: userRolle,
                     betreuer_user_id: userId,
+                    ort: terminTyp === 'intern' ? terminOrt : null,
+                    teilnehmer: terminTyp === 'intern' ? terminTeilnehmer : null,
+                    agenda: terminTyp === 'intern' ? terminAgenda || null : null,
                   })
+                  // Benachrichtigungen an Teilnehmer
+                  if (terminTyp === 'intern' && terminTeilnehmer.length > 0) {
+                    for (const t of terminTeilnehmer) {
+                      await supabase.from('benachrichtigungen').insert({
+                        user_id: t.user_id,
+                        typ: 'termin',
+                        titel: `Neuer Termin: ${terminBetreff}`,
+                        beschreibung: `${datum.toLocaleDateString('de-DE')} ${String(Math.floor(terminSlotTime / 60)).padStart(2, '0')}:${String(terminSlotTime % 60).padStart(2, '0')} · ${terminOrt === 'google_meet' ? 'Google Meet' : 'Im Office'}`,
+                        link: '/admin',
+                      }).catch(() => {})
+                    }
+                  }
                   setSavingTermin(false)
                   setShowTerminModal(false)
                   load()
