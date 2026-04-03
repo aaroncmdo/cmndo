@@ -60,9 +60,11 @@ export async function confirmGutachterTermin(
 
   const now = new Date().toISOString()
   const terminDate = new Date(termin)
-  const endDate = new Date(terminDate.getTime() + 120 * 60 * 1000) // 2h block
+  const endDate = new Date(terminDate.getTime() + 90 * 60 * 1000) // 60min Besichtigung + 30min Puffer
 
-  // 1. Update lead with termin info
+  console.log('[confirmGutachterTermin] START', { leadId, svId, termin, fahrzeugPlz, fahrzeugAdresse })
+
+  // 1. Lead updaten mit Termin-Info
   const { error: leadErr } = await supabase
     .from('leads')
     .update({
@@ -74,9 +76,13 @@ export async function confirmGutachterTermin(
     })
     .eq('id', leadId)
 
-  if (leadErr) throw new Error(`Lead-Update fehlgeschlagen: ${leadErr.message}`)
+  if (leadErr) {
+    console.error('[confirmGutachterTermin] Lead-Update FEHLER:', leadErr)
+    throw new Error(`Lead-Update fehlgeschlagen: ${leadErr.message}`)
+  }
+  console.log('[confirmGutachterTermin] Lead updated ✓')
 
-  // 2. If a fall exists for this lead, update sv_id + sv_termin
+  // 2. Fall updaten (wenn vorhanden) — sv_id + sv_termin + termin_status
   const { data: fall } = await supabase
     .from('faelle')
     .select('id')
@@ -93,15 +99,22 @@ export async function confirmGutachterTermin(
         sv_termin: termin,
         sv_zugewiesen_am: now,
         gutachter_termin_status: 'reserviert',
+        besichtigungsort_adresse: fahrzeugAdresse || null,
         status: 'sv-termin',
         updated_at: now,
       })
       .eq('id', fall.id)
 
-    if (fallErr) throw new Error(`Fall-Update fehlgeschlagen: ${fallErr.message}`)
+    if (fallErr) {
+      console.error('[confirmGutachterTermin] Fall-Update FEHLER:', fallErr)
+      throw new Error(`Fall-Update fehlgeschlagen: ${fallErr.message}`)
+    }
+    console.log('[confirmGutachterTermin] Fall updated ✓', { fallId: fall.id, sv_id: svId, termin_status: 'reserviert' })
+  } else {
+    console.log('[confirmGutachterTermin] Kein Fall vorhanden (wird bei SA-Unterschrift erstellt)')
   }
 
-  // 3. Create entry in gutachter_termine (verbindlicher Kalender-Eintrag)
+  // 3. Kalender-Eintrag erstellen (gutachter_termine)
   const { error: terminErr } = await supabase
     .from('gutachter_termine')
     .insert({
@@ -113,7 +126,11 @@ export async function confirmGutachterTermin(
       status: 'reserviert',
     })
 
-  if (terminErr) throw new Error(`Kalender-Eintrag fehlgeschlagen: ${terminErr.message}`)
+  if (terminErr) {
+    console.error('[confirmGutachterTermin] Kalender-Eintrag FEHLER:', terminErr)
+    throw new Error(`Kalender-Eintrag fehlgeschlagen: ${terminErr.message}`)
+  }
+  console.log('[confirmGutachterTermin] gutachter_termine erstellt ✓', { sv_id: svId, start: termin, end: endDate.toISOString(), status: 'reserviert' })
 
   // 4. Try to sync to external calendar (fire & forget)
   try {
