@@ -81,7 +81,7 @@ export default async function KundeDashboard() {
   const vorname = profile?.vorname ?? user.email?.split('@')[0] ?? 'Kunde'
 
   return (
-    <div className="px-5 py-6 max-w-lg mx-auto">
+    <div className="w-full px-4 py-6 max-w-xl mx-auto">
       {/* Greeting */}
       <h1 className="text-xl font-bold text-[#0D1B3E] mb-1">Hallo {vorname}</h1>
       <p className="text-sm text-gray-500 mb-6">Hier sehen Sie den Stand Ihrer Faelle.</p>

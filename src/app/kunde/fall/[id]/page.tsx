@@ -109,7 +109,7 @@ export default async function KundeFallPage({
   const adresse = (fall.besichtigungsort_adresse as string) || (fall.unfallort as string) || [(fall.schadens_adresse as string), (fall.schadens_plz as string), (fall.schadens_ort as string)].filter(Boolean).join(', ') || ''
 
   return (
-    <div className="px-5 pt-5 pb-0 max-w-lg mx-auto">
+    <div className="w-full px-4 pt-5 pb-0 max-w-xl mx-auto">
       {/* Header */}
       <Link href="/kunde" className="text-xs text-gray-400 hover:text-[#4573A2] mb-3 inline-block">&larr; Meine Faelle</Link>
       <div className="mb-4">

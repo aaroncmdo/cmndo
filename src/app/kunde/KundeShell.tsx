@@ -38,9 +38,9 @@ export default function KundeShell({
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] flex flex-col relative">
-      {/* Header */}
-      <header className="relative z-10 flex items-center justify-between px-5 py-3 bg-[#0D1B3E]">
+    <div className="w-full min-h-screen bg-[#f8f9fb] flex flex-col relative">
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-30 flex items-center justify-between px-5 py-3 bg-[#0D1B3E]">
         <Link href="/kunde">
           <span className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
         </Link>

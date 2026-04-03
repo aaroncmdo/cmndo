@@ -245,7 +245,7 @@ export default function FallDetailClient({
   }, {})
 
   return (
-    <div className="px-5 pb-8 max-w-lg mx-auto">
+    <div className="w-full px-4 pb-8 max-w-xl mx-auto">
         <div className="space-y-5">
 
           {/* Storniert banner */}
