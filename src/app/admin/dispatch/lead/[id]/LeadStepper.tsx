@@ -118,7 +118,7 @@ function phaseIndex(phase: string | null): number { return PHASE_ORDER.indexOf(p
 export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; rightSidebar?: ReactNode }) {
   const router = useRouter()
   const currentPhaseIdx = phaseIndex(lead.qualifizierungs_phase)
-  const defaultOpen = STEPS.findIndex(s => phaseIndex(s.phase) >= currentPhaseIdx)
+  const defaultOpen = STEPS.findIndex(s => phaseIndex(s.phase) > currentPhaseIdx)
   const [openStep, setOpenStep] = useState(defaultOpen >= 0 ? defaultOpen : 0)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -192,8 +192,15 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
     setSaving(false)
   }
 
-  function isStepDone(idx: number) { return currentPhaseIdx > phaseIndex(STEPS[idx].phase) }
-  function isStepCurrent(idx: number) { return currentPhaseIdx === phaseIndex(STEPS[idx].phase) }
+  function isStepDone(idx: number) { return currentPhaseIdx >= phaseIndex(STEPS[idx].phase) }
+  function isStepCurrent(idx: number) {
+    if (isStepDone(idx)) return false
+    for (let i = 0; i < idx; i++) {
+      if (STEPS[i].key === 'gegner' && !gegnerStepVisible) continue
+      if (!isStepDone(i)) return false
+    }
+    return true
+  }
 
   // ─── Render: 3-column split layout ─────────────────────────────────
 
@@ -225,12 +232,12 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
                 }`}
               >
                 <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
-                  done ? 'bg-emerald-100' : current ? 'bg-[#4573A2]/15' : 'bg-gray-100'
+                  done ? 'bg-emerald-500' : current ? 'bg-[#4573A2] animate-stepper-pulse' : 'bg-gray-200'
                 }`}>
                   {done ? (
-                    <CheckCircle2Icon className="w-3 h-3 text-emerald-500" />
+                    <CheckCircle2Icon className="w-3 h-3 text-white" />
                   ) : (
-                    <Icon className={`w-2.5 h-2.5 ${current ? 'text-[#4573A2]' : 'text-gray-400'}`} />
+                    <Icon className={`w-2.5 h-2.5 ${current ? 'text-white' : 'text-gray-400'}`} />
                   )}
                 </div>
                 <div className="min-w-0">
