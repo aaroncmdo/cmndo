@@ -2,7 +2,6 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { emailFilmcheckBestanden } from '@/lib/email'
 import { sendStatusWhatsApp, sendManualWhatsApp } from '@/lib/whatsapp'
 import { triggerKanzleiPaketTask, triggerAsSendedatumTask, triggerArchivierungTask } from '@/lib/tasking'
@@ -906,20 +905,29 @@ export async function updateTerminStatus(
 
 // ─── KFZ-120: Fall löschen (komplett aus DB) ────────────────────────────────
 
-export async function deleteFall(fallId: string) {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+export async function deleteFall(fallId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient()
+    const user = (await supabase.auth.getUser())?.data?.user ?? null
+    if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
-  if (profile?.rolle !== 'admin') throw new Error('Nur Admins können Fälle löschen')
+    const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
+    if (profile?.rolle !== 'admin') return { success: false, error: 'Nur Admins können Fälle löschen' }
 
-  // Bombensichere DB-Funktion (SECURITY DEFINER, umgeht RLS)
-  const { error } = await supabase.rpc('delete_fall_komplett', { p_fall_id: fallId })
-  if (error) throw new Error(`Löschen fehlgeschlagen: ${error.message}`)
+    // Bombensichere RPC-Funktion (SECURITY DEFINER, EXCEPTION WHEN OTHERS pro Tabelle)
+    const { error } = await supabase.rpc('delete_fall_komplett', { p_fall_id: fallId })
+    if (error) {
+      console.error('[deleteFall] RPC error:', error)
+      return { success: false, error: error.message }
+    }
 
-  // WICHTIG: redirect() statt revalidatePath() — verhindert Re-Render der gelöschten Seite
-  redirect('/admin/faelle')
+    // KEIN revalidatePath für die gelöschte Seite! Client macht router.push
+    revalidatePath('/admin/faelle')
+    return { success: true }
+  } catch (err) {
+    console.error('[deleteFall] Unerwarteter Fehler:', err)
+    return { success: false, error: String(err) }
+  }
 }
 
 // ─── KFZ-120: Fall deaktivieren (Soft Delete) ───────────────────────────────

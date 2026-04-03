@@ -3543,11 +3543,13 @@ function FallActionsDropdown({ fallId, fallNummer, istAktiv }: { fallId: string;
 
   async function handleDelete() {
     setProcessing(true); setError('')
-    try {
-      await deleteFall(fallId)
+    const result = await deleteFall(fallId)
+    if (result.success) {
       router.push('/admin/faelle')
-    } catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }
-    setProcessing(false)
+    } else {
+      setError(result.error ?? 'Löschen fehlgeschlagen')
+      setProcessing(false)
+    }
   }
 
   async function handleDeactivate() {

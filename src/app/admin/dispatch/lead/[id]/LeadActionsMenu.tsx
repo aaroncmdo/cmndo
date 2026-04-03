@@ -53,8 +53,9 @@ export default function LeadActionsMenu({ leadId, leadName }: { leadId: string; 
               <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200">Abbrechen</button>
               <button disabled={processing} onClick={async () => {
                 setProcessing(true); setError('')
-                try { await deleteLead(leadId); router.push('/admin/dispatch') } catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }
-                setProcessing(false)
+                const result = await deleteLead(leadId)
+                if (result.success) { router.push('/admin/dispatch') }
+                else { setError(result.error ?? 'Fehler'); setProcessing(false) }
               }} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 disabled:opacity-40">
                 {processing ? 'Wird gelöscht...' : 'Endgültig löschen'}
               </button>

@@ -2,7 +2,6 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { sendStatusWhatsApp, sendManualWhatsApp } from '@/lib/whatsapp'
 
 // ─── Manuelle WhatsApp (KFZ-114) ────────────────────────────────────────────
@@ -378,15 +377,24 @@ export async function handleGegenvorschlag(
 
 // ─── BUG-47: Lead komplett löschen ──────────────────────────────────────────
 
-export async function deleteLead(leadId: string) {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+export async function deleteLead(leadId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient()
+    const user = (await supabase.auth.getUser())?.data?.user ?? null
+    if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  const { error } = await supabase.rpc('delete_lead_komplett', { p_lead_id: leadId })
-  if (error) throw new Error(`Löschen fehlgeschlagen: ${error.message}`)
+    const { error } = await supabase.rpc('delete_lead_komplett', { p_lead_id: leadId })
+    if (error) {
+      console.error('[deleteLead] RPC error:', error)
+      return { success: false, error: error.message }
+    }
 
-  redirect('/admin/dispatch')
+    revalidatePath('/admin/dispatch')
+    return { success: true }
+  } catch (err) {
+    console.error('[deleteLead] Unerwarteter Fehler:', err)
+    return { success: false, error: String(err) }
+  }
 }
 
 // ─── BUG-47: Lead deaktivieren ──────────────────────────────────────────────
