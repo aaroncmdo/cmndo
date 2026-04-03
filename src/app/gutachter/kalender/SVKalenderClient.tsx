@@ -18,6 +18,7 @@ type Fall = {
   schadens_ort: string | null
   schadens_adresse: string | null
   lead_id: string | null
+  gutachter_termin_status: string | null
 }
 
 type DailyW = { date: string; tempMax: number; tempMin: number; code: number }
@@ -152,6 +153,7 @@ export default function SVKalenderClient({
                     {entries.map(fall => {
                       const time = fall.sv_termin ? format(new Date(fall.sv_termin), 'HH:mm') : ''
                       const overdue = fall.sv_termin && isBefore(new Date(fall.sv_termin), startOfDay(new Date()))
+                      const isReserviert = fall.gutachter_termin_status === 'reserviert'
                       return (
                         <Link
                           key={fall.id}
@@ -159,10 +161,12 @@ export default function SVKalenderClient({
                           className={`block px-2 py-1.5 rounded-lg text-[10px] leading-tight transition-colors ${
                             overdue
                               ? 'bg-red-50/80 text-red-300 hover:bg-red-900/80'
-                              : 'bg-[#4573A2]/10 text-[#7BA3CC] hover:bg-[#0D1B3E]/80'
+                              : isReserviert
+                                ? 'bg-amber-50 text-amber-600 hover:bg-amber-100'
+                                : 'bg-[#4573A2]/10 text-[#7BA3CC] hover:bg-[#0D1B3E]/80'
                           }`}
                         >
-                          <div className="font-medium">{time}</div>
+                          <div className="font-medium">{time}{isReserviert && <span className="ml-1 text-[8px] opacity-70">(reserviert)</span>}</div>
                           <div className="truncate">{fall.fall_nummer ?? fall.id.slice(0, 8)}</div>
                           {fall.lead_id && (
                             <div className="truncate text-[9px] opacity-70">{leadMap[fall.lead_id] ?? ''}</div>

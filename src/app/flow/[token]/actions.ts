@@ -205,7 +205,21 @@ export async function signSAandCreateFall(
     .single()
   if (fallErr || !fall) throw new Error(`Fall-Erstellung fehlgeschlagen: ${fallErr?.message}`)
 
-  // 5. Lead-Status updaten
+  // 5. Termin von 'reserviert' auf 'bestaetigt' upgraden (SA unterschrieben = bestätigt)
+  if (lead.gutachter_termin) {
+    // gutachter_termine: reserviert → bestaetigt
+    await admin.from('gutachter_termine')
+      .update({ status: 'bestaetigt', fall_id: fall.id })
+      .eq('lead_id', leadId)
+      .eq('status', 'reserviert')
+
+    // Fall: gutachter_termin_status → bestaetigt
+    await admin.from('faelle')
+      .update({ gutachter_termin_status: 'bestaetigt' })
+      .eq('id', fall.id)
+  }
+
+  // 6. Lead-Status updaten
   await admin.from('leads').update({
     status: 'umgewandelt',
     qualifizierungs_phase: 'abgeschlossen',
@@ -215,7 +229,7 @@ export async function signSAandCreateFall(
     updated_at: new Date().toISOString(),
   }).eq('id', leadId)
 
-  // 6. FlowLink updaten
+  // 7. FlowLink updaten
   if (flowLinkId) {
     await admin.from('flow_links').update({
       abgeschlossen_am: new Date().toISOString(),
@@ -224,22 +238,22 @@ export async function signSAandCreateFall(
     }).eq('id', flowLinkId)
   }
 
-  // 7. Timeline-Eintrag
+  // 8. Timeline-Eintrag
   await admin.from('timeline').insert({
     fall_id: fall.id,
     lead_id: leadId,
     typ: 'system',
     titel: 'Kunde hat SA unterschrieben — Fall erstellt',
-    beschreibung: `Fallnummer ${fallNummer}. SA digital unterschrieben via FlowLink.`,
+    beschreibung: `Fallnummer ${fallNummer}. SA digital unterschrieben via FlowLink.${lead.gutachter_termin ? ' Termin bestätigt.' : ''}`,
   })
 
-  // 8. WhatsApp an Admin (non-critical)
+  // 9. WhatsApp an Admin (non-critical)
   try {
     const { sendStatusWhatsApp } = await import('@/lib/whatsapp')
     await sendStatusWhatsApp(fall.id, 'nach_sa_unterschrift')
   } catch { /* */ }
 
-  // 9. Benachrichtigung
+  // 10. Benachrichtigung
   try { await notifyNeuerFall(fall.id) } catch { /* */ }
 
   return { fallId: fall.id }

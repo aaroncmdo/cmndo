@@ -14,7 +14,7 @@ const ROW_H = 48 // px per hour
 const TOTAL_H = (HOUR_END - HOUR_START) * ROW_H
 const DAYS_DE = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa']
 
-type Appt = { id: string; start: Date; end: Date; label: string; fallId: string | null }
+type Appt = { id: string; start: Date; end: Date; label: string; fallId: string | null; status?: string }
 
 function getMonday(d: Date): Date {
   const copy = new Date(d)
@@ -75,7 +75,7 @@ export default function SvKalenderModal({ svId, svName, onClose }: { svId: strin
     const appts: Appt[] = []
     const seenFallIds = new Set<string>()
     for (const t of gtRes.data ?? []) {
-      appts.push({ id: t.id, start: new Date(t.start_zeit), end: new Date(t.end_zeit), label: `Termin ${t.status}`, fallId: t.fall_id })
+      appts.push({ id: t.id, start: new Date(t.start_zeit), end: new Date(t.end_zeit), label: t.status === 'reserviert' ? 'Reserviert' : 'Bestätigt', fallId: t.fall_id, status: t.status })
       if (t.fall_id) seenFallIds.add(t.fall_id)
     }
     for (const f of fallRes.data ?? []) {
@@ -118,7 +118,7 @@ export default function SvKalenderModal({ svId, svName, onClose }: { svId: strin
     const startDate = new Date(bookingSlot.day)
     startDate.setHours(Math.floor(bookingSlot.minute / 60), bookingSlot.minute % 60, 0, 0)
     const endDate = new Date(startDate.getTime() + 120 * 60000)
-    await supabase.from('gutachter_termine').insert({ sv_id: svId, fall_id: bookingFallId, start_zeit: startDate.toISOString(), end_zeit: endDate.toISOString(), status: 'bestaetigt' })
+    await supabase.from('gutachter_termine').insert({ sv_id: svId, fall_id: bookingFallId, start_zeit: startDate.toISOString(), end_zeit: endDate.toISOString(), status: 'reserviert' })
     await supabase.from('faelle').update({ sv_id: svId, sv_termin: startDate.toISOString(), sv_zugewiesen_am: new Date().toISOString(), status: 'sv-termin', updated_at: new Date().toISOString() }).eq('id', bookingFallId)
     setBookingSlot(null); setBookingFallId(''); setBooking(false)
     loadData()
@@ -221,10 +221,16 @@ export default function SvKalenderModal({ svId, svName, onClose }: { svId: strin
                         const height = Math.max(20, minuteToY(endMin) - top)
                         return (
                           <Link key={appt.id} href={appt.fallId ? `/admin/faelle/${appt.fallId}` : '#'}
-                            className="absolute left-0.5 right-0.5 bg-[#4573A2]/15 border-l-[3px] border-[#4573A2] rounded-r z-10 overflow-hidden hover:bg-[#4573A2]/25 transition-colors"
+                            className={`absolute left-0.5 right-0.5 rounded-r z-10 overflow-hidden border-l-[3px] transition-colors ${
+                              appt.status === 'reserviert'
+                                ? 'bg-amber-100/60 border-amber-400 hover:bg-amber-100'
+                                : 'bg-[#4573A2]/15 border-[#4573A2] hover:bg-[#4573A2]/25'
+                            }`}
                             style={{ top, height }}>
                             <div className="px-1 py-0.5">
-                              <span className="text-[9px] font-semibold text-[#4573A2] tabular-nums block">
+                              <span className={`text-[9px] font-semibold tabular-nums block ${
+                                appt.status === 'reserviert' ? 'text-amber-600' : 'text-[#4573A2]'
+                              }`}>
                                 {String(appt.start.getHours()).padStart(2, '0')}:{String(appt.start.getMinutes()).padStart(2, '0')}
                               </span>
                               {height > 28 && <p className="text-[8px] text-gray-600 truncate">{appt.label}</p>}

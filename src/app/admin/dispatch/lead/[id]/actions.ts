@@ -92,7 +92,7 @@ export async function confirmGutachterTermin(
         sv_id: svId,
         sv_termin: termin,
         sv_zugewiesen_am: now,
-        gutachter_termin_status: 'bestaetigt',
+        gutachter_termin_status: 'reserviert',
         status: 'sv-termin',
         updated_at: now,
       })
@@ -107,9 +107,10 @@ export async function confirmGutachterTermin(
     .insert({
       sv_id: svId,
       fall_id: fall?.id ?? null,
+      lead_id: leadId,
       start_zeit: termin,
       end_zeit: endDate.toISOString(),
-      status: 'bestaetigt',
+      status: 'reserviert',
     })
 
   if (terminErr) throw new Error(`Kalender-Eintrag fehlgeschlagen: ${terminErr.message}`)
