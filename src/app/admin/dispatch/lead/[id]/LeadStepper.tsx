@@ -288,6 +288,7 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
 
           {STEPS[openStep]?.key === 'erstkontakt' && (
             <StepErstkontakt done={isStepDone(0)} saving={saving} onAdvance={() => saveAndAdvance('erstkontakt')}
+              lead={lead}
               kundeAdresse={kundeAdresse} onAdresseChange={(a, lat, lng) => { setKundeAdresse(a); setKundeLat(lat); setKundeLng(lng) }} />
           )}
           {STEPS[openStep]?.key === 'schadentyp' && (
@@ -349,14 +350,52 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
 
 // ─── Step 1: Erstkontakt ────────────────────────────────────────────────────
 
-function StepErstkontakt({ done, saving, onAdvance, kundeAdresse, onAdresseChange }: {
+function StepErstkontakt({ done, saving, onAdvance, lead, kundeAdresse, onAdresseChange }: {
   done: boolean; saving: boolean; onAdvance: () => void
+  lead: LeadData
   kundeAdresse: string; onAdresseChange: (adresse: string, lat: number | null, lng: number | null) => void
 }) {
-  if (done) return <p className="text-emerald-500 text-sm flex items-center gap-2"><CheckCircle2Icon className="w-4 h-4" /> Erstkontakt hergestellt</p>
+  if (done) {
+    const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
+    return (
+      <div className="space-y-2">
+        <p className="text-emerald-500 text-sm flex items-center gap-2"><CheckCircle2Icon className="w-4 h-4" /> Erstkontakt hergestellt</p>
+        <div className="text-xs text-gray-500 space-y-0.5">
+          <p><strong>Name:</strong> {name}</p>
+          {lead.telefon && <p><strong>Telefon:</strong> {lead.telefon}</p>}
+          {lead.email && <p><strong>Email:</strong> {lead.email}</p>}
+        </div>
+      </div>
+    )
+  }
   return (
     <div className="space-y-3">
       <p className="text-gray-500 text-sm">Rufen Sie den Lead an und stellen Sie den Erstkontakt her.</p>
+
+      {/* Kontaktdaten-Zusammenfassung (Bearbeitung im Header / LeadInlineFields) */}
+      <fieldset className="border border-gray-200 rounded-xl p-3 space-y-1.5">
+        <legend className="text-xs text-[#4573A2] font-medium px-2">Kontaktdaten</legend>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div>
+            <span className="text-xs text-gray-500">Vorname</span>
+            <p className="text-gray-800 font-medium">{lead.vorname || '—'}</p>
+          </div>
+          <div>
+            <span className="text-xs text-gray-500">Nachname</span>
+            <p className="text-gray-800 font-medium">{lead.nachname || '—'}</p>
+          </div>
+          <div>
+            <span className="text-xs text-gray-500">Telefon</span>
+            <p className="text-gray-800">{lead.telefon || '—'}</p>
+          </div>
+          <div>
+            <span className="text-xs text-gray-500">Email</span>
+            <p className="text-gray-800 truncate">{lead.email || '—'}</p>
+          </div>
+        </div>
+      </fieldset>
+
+      {/* Kundenadresse mit Google Places */}
       <div>
         <label className="text-xs text-gray-500 mb-1 flex items-center gap-1"><MapPinIcon className="w-3 h-3" /> Kundenadresse (Wohnadresse)</label>
         <GooglePlaceAutocomplete
@@ -366,6 +405,7 @@ function StepErstkontakt({ done, saving, onAdvance, kundeAdresse, onAdresseChang
           className={inputCls}
         />
       </div>
+
       <button onClick={onAdvance} disabled={saving}
         className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-white text-sm font-medium rounded-xl px-5 py-2.5 transition-colors flex items-center gap-2">
         <PhoneCallIcon className="w-4 h-4" /> {saving ? 'Speichert...' : 'Erstkontakt hergestellt'}
