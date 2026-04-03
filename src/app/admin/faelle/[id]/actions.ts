@@ -914,27 +914,63 @@ export async function deleteFall(fallId: string) {
   const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
   if (profile?.rolle !== 'admin') throw new Error('Nur Admins können Fälle löschen')
 
-  const { data: fall } = await supabase.from('faelle').select('id, fall_nummer').eq('id', fallId).single()
+  // Admin-Client (Service Role) für Bypass von RLS
+  let admin: ReturnType<typeof import('@/lib/supabase/admin').createAdminClient>
+  try {
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    admin = createAdminClient()
+  } catch {
+    // Fallback auf regulären Client wenn kein Service-Key
+    admin = supabase as any
+  }
+
+  const { data: fall } = await admin.from('faelle').select('id, fall_nummer, lead_id').eq('id', fallId).single()
   if (!fall) throw new Error('Fall nicht gefunden')
 
   // Storage-Dateien löschen
   try {
-    const { data: docs } = await supabase.from('dokumente').select('datei_url').eq('fall_id', fallId)
+    const { data: docs } = await admin.from('dokumente').select('datei_url').eq('fall_id', fallId)
     for (const d of docs ?? []) {
       if (d.datei_url?.includes('/storage/')) {
         const pathMatch = d.datei_url.match(/\/object\/public\/[^/]+\/(.+)/)
-        if (pathMatch?.[1]) await supabase.storage.from('dokumente').remove([pathMatch[1]]).catch(() => {})
+        if (pathMatch?.[1]) await admin.storage.from('dokumente').remove([pathMatch[1]]).catch(() => {})
       }
     }
   } catch { /* */ }
 
-  // Verknüpfte Daten löschen (FK-Reihenfolge)
-  for (const table of ['lead_historie', 'pflichtdokumente', 'timeline', 'tasks', 'nachrichten', 'gutachter_termine', 'gutachter_abrechnungen', 'dokumente', 'termine']) {
-    await supabase.from(table).delete().eq('fall_id', fallId).catch(() => {})
-  }
-  await supabase.from('flow_links').delete().eq('fall_id', fallId).catch(() => {})
+  // ALLE verknüpften Tabellen löschen (BOMBENSICHER, jede einzeln mit catch)
+  // Reihenfolge: Deepest FK-Dependencies zuerst
+  const tablesToClean = [
+    'lead_historie',
+    'pflichtdokumente',
+    'qc_checkliste',
+    'forderungspositionen',
+    'zahlungseingaenge',
+    'technische_probleme',
+    'gutachter_abrechnungspositionen',
+    'gutachter_abrechnungen',
+    'gutachter_termine',
+    'gutachter_mitteilungen',
+    'benachrichtigungen',
+    'timeline',
+    'tasks',
+    'nachrichten',
+    'dokumente',
+    'termine',
+    'flow_links',
+  ]
 
-  const { error } = await supabase.from('faelle').delete().eq('id', fallId)
+  for (const table of tablesToClean) {
+    try { await admin.from(table).delete().eq('fall_id', fallId) } catch { /* FK or table may not exist */ }
+  }
+
+  // Lead-Referenz auf flow_links (fall_id kann auch lead_id sein)
+  if (fall.lead_id) {
+    try { await admin.from('flow_links').delete().eq('lead_id', fall.lead_id) } catch { /* */ }
+  }
+
+  // Fall selbst löschen
+  const { error } = await admin.from('faelle').delete().eq('id', fallId)
   if (error) throw new Error(`Löschen fehlgeschlagen: ${error.message}`)
 
   revalidatePath('/admin/faelle')
