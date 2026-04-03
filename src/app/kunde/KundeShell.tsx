@@ -3,13 +3,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { HomeIcon, FolderOpenIcon, MessageSquareIcon, UserIcon, BellIcon, HelpCircleIcon } from 'lucide-react'
+import { HomeIcon, MessageSquareIcon, UserIcon, BellIcon, HelpCircleIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import ProblemMeldenModal from '@/components/ProblemMeldenModal'
 
 const NAV_ITEMS = [
   { href: '/kunde', label: 'Start', icon: HomeIcon },
-  { href: '/kunde/dokumente', label: 'Dokumente', icon: FolderOpenIcon },
   { href: '/kunde/chat', label: 'Chat', icon: MessageSquareIcon },
   { href: '/kunde/profil', label: 'Profil', icon: UserIcon },
 ]

@@ -448,7 +448,7 @@ export default function FallDetailClient({
                 {kundenbetreuer ? (
                   <div>
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}>
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: '#4573A2' }}>
                         <span className="text-gray-900 text-sm font-bold">
                           {(kundenbetreuer.vorname?.[0] ?? '').toUpperCase()}{(kundenbetreuer.nachname?.[0] ?? '').toUpperCase()}
                         </span>
@@ -660,7 +660,7 @@ function AuszahlungsUebersicht({ fall }: { fall: Fall }) {
         </div>
       )}
       {fall.ki_geschaetzte_kosten_min != null && fall.ki_geschaetzte_kosten_max != null && (
-        <div className="bg-violet-50/30 border border-violet-800/30 rounded-xl p-3 mb-3">
+        <div className="bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-xl p-3 mb-3">
           <p className="text-violet-300 text-xs font-medium">KI-Vorabschaetzung</p>
           <p className="text-violet-400 text-sm font-semibold mt-1 tabular-nums">
             {fmtCurrency(fall.ki_geschaetzte_kosten_min)} — {fmtCurrency(fall.ki_geschaetzte_kosten_max)}

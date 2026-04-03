@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
+import Link from 'next/link'
 import FallDetailClient from './FallDetailClient'
 
 export default async function KundeFallPage({
@@ -97,13 +98,99 @@ export default async function KundeFallPage({
     }
   }
 
+  // Phase-Stepper Berechnung
+  const progress = computeProgress(fall)
+
   return (
-    <FallDetailClient
-      fall={fall}
-      dokumente={dokumente ?? []}
-      sv={sv}
-      nachrichten={nachrichten ?? []}
-      kundenbetreuer={kundenbetreuer}
-    />
+    <div>
+      {/* KFZ-126: Phase-Stepper mit Prozent */}
+      <div className="px-5 pt-5 pb-3 max-w-lg mx-auto">
+        <Link href="/kunde" className="text-xs text-gray-400 hover:text-[#4573A2] mb-3 inline-block">&larr; Zurueck</Link>
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm font-semibold text-[#0D1B3E]">{progress.label}</p>
+            <span className="text-sm font-bold text-[#4573A2]">{progress.pct}%</span>
+          </div>
+          <div className="w-full h-2.5 bg-gray-100 rounded-full mb-3">
+            <div className="h-full bg-[#4573A2] rounded-full transition-all duration-700" style={{ width: `${progress.pct}%` }} />
+          </div>
+          <p className="text-sm text-gray-500">{progress.next}</p>
+
+          {/* Mini-Phasen nur bis zur aktuellen */}
+          <div className="flex items-center gap-0.5 mt-4">
+            {PHASE_STEPS.map((step, i) => {
+              const reached = step.pct <= progress.pct
+              const isCurrent = step.pct === progress.pct || (i < PHASE_STEPS.length - 1 && PHASE_STEPS[i + 1].pct > progress.pct && step.pct <= progress.pct)
+              if (step.pct > progress.pct + 10) return null // nur abgeschlossene + aktuelle + naechste
+              return (
+                <div key={step.key} className="flex items-center flex-1">
+                  <div className={`w-2 h-2 rounded-full shrink-0 ${reached ? 'bg-[#4573A2]' : 'bg-gray-200'} ${isCurrent ? 'ring-2 ring-[#4573A2]/30' : ''}`} />
+                  {i < PHASE_STEPS.length - 1 && step.pct <= progress.pct + 10 && (
+                    <div className={`flex-1 h-0.5 mx-0.5 ${reached ? 'bg-[#4573A2]/40' : 'bg-gray-200'}`} />
+                  )}
+                </div>
+              )
+            })}
+          </div>
+          <div className="flex mt-1 gap-0.5">
+            {PHASE_STEPS.map(step => {
+              if (step.pct > progress.pct + 10) return null
+              return (
+                <span key={step.key} className={`flex-1 text-[8px] ${step.pct <= progress.pct ? 'text-[#4573A2]' : 'text-gray-300'}`}>
+                  {step.label}
+                </span>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
+      <FallDetailClient
+        fall={fall}
+        dokumente={dokumente ?? []}
+        sv={sv}
+        nachrichten={nachrichten ?? []}
+        kundenbetreuer={kundenbetreuer}
+      />
+    </div>
   )
+}
+
+// ─── Phase Stepper ──────────────────────────────────────────────────────────
+
+const PHASE_STEPS = [
+  { key: 'kontakt', label: 'Kontakt', pct: 5 },
+  { key: 'sa', label: 'SA', pct: 10 },
+  { key: 'sv', label: 'Gutachter', pct: 15 },
+  { key: 'termin', label: 'Termin', pct: 20 },
+  { key: 'besichtigung', label: 'Besicht.', pct: 30 },
+  { key: 'gutachten', label: 'Gutachten', pct: 50 },
+  { key: 'fertig', label: 'Fertig', pct: 55 },
+  { key: 'kanzlei', label: 'Kanzlei', pct: 65 },
+  { key: 'ansprueche', label: 'Ansprueche', pct: 75 },
+  { key: 'regulierung', label: 'Regulierung', pct: 85 },
+  { key: 'auszahlung', label: 'Auszahlung', pct: 100 },
+]
+
+function computeProgress(fall: Record<string, unknown>): { pct: number; label: string; next: string } {
+  const status = (fall.status as string) ?? 'ersterfassung'
+  const sa = fall.sa_unterschrieben === true
+  const svId = fall.sv_id as string | null
+  const svTermin = fall.sv_termin as string | null
+  const gutachtenAm = fall.gutachten_eingegangen_am as string | null
+
+  if (status === 'abgeschlossen') return { pct: 100, label: 'Abgeschlossen', next: 'Ihr Schadensfall wurde erfolgreich abgeschlossen!' }
+  if (status === 'regulierung') return { pct: 85, label: 'Regulierung', next: 'Die Versicherung bearbeitet Ihren Schaden.' }
+  if (status === 'anschlussschreiben') return { pct: 75, label: 'Ansprueche eingereicht', next: 'Die Kanzlei hat Ihre Ansprueche geltend gemacht.' }
+  if (status === 'kanzlei-uebergeben') return { pct: 65, label: 'Kanzlei', next: 'Ihr Fall wurde an die Partnerkanzlei uebergeben.' }
+  if (status === 'filmcheck' || status === 'qc-pruefung') return { pct: 55, label: 'Gutachten fertig', next: 'Ihr Gutachten wird geprueft.' }
+  if (gutachtenAm || status === 'gutachten-eingegangen') return { pct: 55, label: 'Gutachten fertig', next: 'Ihr Gutachten ist fertig.' }
+  if (status === 'besichtigung') return { pct: 30, label: 'Besichtigung', next: 'Der Gutachter besichtigt Ihr Fahrzeug.' }
+  if (svTermin) {
+    const d = new Date(svTermin as string)
+    return { pct: 20, label: 'Termin vereinbart', next: `Besichtigung: ${d.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' })} um ${d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}` }
+  }
+  if (svId) return { pct: 15, label: 'Gutachter zugewiesen', next: 'Ihr Gutachter meldet sich fuer einen Termin.' }
+  if (sa) return { pct: 10, label: 'SA unterschrieben', next: 'Ein Gutachter wird Ihnen zugewiesen.' }
+  return { pct: 5, label: 'Kontakt aufgenommen', next: 'Ihr Fall wird geprueft.' }
 }
