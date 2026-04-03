@@ -103,12 +103,22 @@ export default async function KundeFallPage({
   const phasen = SZENARIO_PHASEN[szenario] ?? SZENARIO_PHASEN.normalfall
   const progress = berechneProgress(fall, phasen)
 
+  // Fahrzeug + Adresse fuer Header
+  const kennzeichen = (fall.kennzeichen as string) ?? ''
+  const fahrzeug = [(fall.fahrzeug_hersteller as string), (fall.fahrzeug_modell as string)].filter(Boolean).join(' ')
+  const adresse = (fall.besichtigungsort_adresse as string) || (fall.unfallort as string) || [(fall.schadens_adresse as string), (fall.schadens_plz as string), (fall.schadens_ort as string)].filter(Boolean).join(', ') || ''
+
   return (
-    <div>
-      {/* KFZ-126: Vertikaler Szenario-Stepper */}
-      <div className="px-5 pt-5 pb-3 max-w-lg mx-auto">
-        <Link href="/kunde" className="text-xs text-gray-400 hover:text-[#4573A2] mb-3 inline-block">&larr; Zurueck</Link>
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+    <div className="px-5 pt-5 pb-0 max-w-lg mx-auto">
+      {/* Header */}
+      <Link href="/kunde" className="text-xs text-gray-400 hover:text-[#4573A2] mb-3 inline-block">&larr; Meine Faelle</Link>
+      <div className="mb-4">
+        <h1 className="text-lg font-bold text-[#0D1B3E]">{kennzeichen || fall.fall_nummer || 'Schadensfall'}{fahrzeug ? ` — ${fahrzeug}` : ''}</h1>
+        {adresse && <p className="text-sm text-gray-500 mt-0.5">{adresse}</p>}
+      </div>
+
+      {/* Stepper Card */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 mb-5">
           {/* Fortschrittsbalken oben */}
           <div className="flex items-center justify-between mb-2">
             <p className="text-base font-semibold text-[#0D1B3E]">Ihr Fortschritt</p>
@@ -181,7 +191,6 @@ export default async function KundeFallPage({
             </div>
           )}
         </div>
-      </div>
 
       <FallDetailClient
         fall={fall}

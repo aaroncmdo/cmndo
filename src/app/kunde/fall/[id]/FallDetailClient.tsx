@@ -245,45 +245,21 @@ export default function FallDetailClient({
   }, {})
 
   return (
-    <div className="px-4 py-8">
-      <div className="max-w-3xl mx-auto">
-
-        {/* Header */}
-        <div className="mb-6">
-          <a
-            href="/kunde"
-            className="text-gray-500 hover:text-gray-700 text-sm transition-colors"
-          >
-            ← Meine Fälle
-          </a>
-          <div className="flex items-start justify-between mt-2">
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900">
-                {URSACHE_LABEL[fall.schadens_ursache ?? ''] ?? 'Schadensfall'}
-              </h1>
-              <p className="text-gray-500 text-sm mt-0.5">
-                Fall {fall.fall_nummer ?? fall.id.slice(0, 8)}
-                {' · '}
-                {fall.besichtigungsort_adresse || fall.unfallort || [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') || ''}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-4">
+    <div className="px-5 pb-8 max-w-lg mx-auto">
+        <div className="space-y-5">
 
           {/* Storniert banner */}
           {isStorniert && (
-            <div className="bg-red-50 border border-red-800 rounded-2xl p-5">
-              <p className="text-red-300 font-medium text-sm">Dieser Fall wurde storniert.</p>
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+              <p className="text-red-600 font-medium text-sm">Dieser Fall wurde storniert.</p>
             </div>
           )}
 
           {/* BUG-62: Status-Verlauf ENTFERNT — der obere Stepper in page.tsx ist die einzige Fortschrittsanzeige */}
 
           {/* ── Dateien ── */}
-          <div className="bg-white rounded-2xl p-5 border border-gray-200">
-            <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">
+          <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
+            <h3 className="text-[#0D1B3E] text-sm font-semibold mb-3">
               Dateien
             </h3>
 
@@ -365,8 +341,8 @@ export default function FallDetailClient({
           </div>
 
           {/* ── Nachrichten ── */}
-          <div className="bg-white rounded-2xl p-5 border border-gray-200">
-            <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">
+          <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
+            <h3 className="text-[#0D1B3E] text-sm font-semibold mb-3">
               Nachrichten
             </h3>
             <NachrichtenBereich fallId={fall.id} nachrichten={nachrichten} onSend={() => router.refresh()} />
@@ -379,12 +355,12 @@ export default function FallDetailClient({
 
           {/* ── Ansprechpartner (2 Karten nebeneinander) ── */}
           <div>
-            <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">
+            <h3 className="text-[#0D1B3E] text-sm font-semibold mb-3">
               Ihre Ansprechpartner
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* KARTE 1: Kundenbetreuer bei Claimondo */}
-              <div className="bg-white rounded-2xl p-5 border border-gray-200">
+              <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
                 <p className="text-gray-500 text-[10px] font-semibold uppercase tracking-wider mb-3">
                   Ihr Kundenbetreuer bei Claimondo
                 </p>
@@ -428,7 +404,7 @@ export default function FallDetailClient({
               </div>
 
               {/* KARTE 2: Kanzlei LexDrive */}
-              <div className="bg-white rounded-2xl p-5 border border-gray-200">
+              <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
                 <p className="text-gray-500 text-[10px] font-semibold uppercase tracking-wider mb-3">
                   Ihre Kanzlei LexDrive
                 </p>
@@ -468,8 +444,8 @@ export default function FallDetailClient({
           </div>
 
           {/* ── Fall-Info ── */}
-          <div className="bg-white rounded-2xl p-5 border border-gray-200">
-            <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">
+          <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
+            <h3 className="text-[#0D1B3E] text-sm font-semibold mb-3">
               Fall-Details
             </h3>
             <InfoRow label="Fallnummer" value={fall.fall_nummer ?? fall.id.slice(0, 8)} />
@@ -487,7 +463,6 @@ export default function FallDetailClient({
             )}
           </div>
         </div>
-      </div>
     </div>
   )
 }
@@ -574,8 +549,8 @@ function AuszahlungsUebersicht({ fall }: { fall: Fall }) {
   }
 
   return (
-    <div className="bg-white rounded-2xl p-5 border border-gray-200">
-      <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-4">Voraussichtliche Auszahlung</h3>
+    <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
+      <h3 className="text-[#0D1B3E] text-sm font-semibold mb-4">Voraussichtliche Auszahlung</h3>
       <div className="text-center mb-5">
         <p className="text-3xl font-bold text-[#4573A2] tabular-nums">{fmtCurrency(fall.regulierung_betrag ?? total)}</p>
         <p className="text-gray-500 text-xs mt-1">{fall.regulierung_betrag ? 'Reguliert' : 'Geschaetzter Anspruch'}</p>
