@@ -7,5 +7,7 @@ export default async function AdminPage() {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  return <DashboardClient userId={user.id} />
+  const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
+
+  return <DashboardClient userId={user.id} userRolle={profile?.rolle ?? 'admin'} />
 }

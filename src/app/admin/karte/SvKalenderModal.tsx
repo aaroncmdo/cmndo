@@ -162,7 +162,7 @@ export default function SvKalenderModal({ svId, svName, onClose }: { svId: strin
                 <div className="relative" style={{ height: TOTAL_H }}>
                   {Array.from({ length: HOUR_END - HOUR_START + 1 }, (_, i) => (
                     <div key={i} className="absolute left-0 right-0" style={{ top: i * ROW_H }}>
-                      <span className="text-[10px] text-gray-400 font-medium tabular-nums block text-right pr-2 -mt-1.5 select-none">
+                      <span className="text-xs text-gray-600 font-medium tabular-nums block text-right pr-2 -mt-1.5 select-none">
                         {String(HOUR_START + i).padStart(2, '0')}:00
                       </span>
                     </div>
@@ -189,11 +189,11 @@ export default function SvKalenderModal({ svId, svName, onClose }: { svId: strin
                     <div className="relative" style={{ height: TOTAL_H }}>
                       {/* Hour lines */}
                       {Array.from({ length: HOUR_END - HOUR_START }, (_, i) => (
-                        <div key={i} className="absolute left-0 right-0 border-t border-gray-100" style={{ top: i * ROW_H }} />
+                        <div key={i} className="absolute left-0 right-0 border-t border-gray-300" style={{ top: i * ROW_H }} />
                       ))}
                       {/* Half-hour dashed lines */}
                       {Array.from({ length: HOUR_END - HOUR_START }, (_, i) => (
-                        <div key={`h-${i}`} className="absolute left-0 right-0 border-t border-dashed border-gray-50" style={{ top: i * ROW_H + ROW_H / 2 }} />
+                        <div key={`h-${i}`} className="absolute left-0 right-0 border-t border-dashed border-gray-200" style={{ top: i * ROW_H + ROW_H / 2 }} />
                       ))}
 
                       {/* Clickable hour slots */}

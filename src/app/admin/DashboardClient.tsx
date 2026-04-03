@@ -13,7 +13,7 @@ import { createClient } from '@/lib/supabase/client'
 /* ── Types ─────────────────────────────────────────────────────────────── */
 type CalBlock = {
   id: string
-  typ: 'gutachter' | 'rueckruf' | 'kunde'
+  typ: 'gutachter' | 'rueckruf' | 'kunde' | 'intern'
   startMin: number // minutes since midnight
   dauer: number    // duration in minutes
   label: string
@@ -30,16 +30,18 @@ const TOTAL_MINUTES = (HOUR_END - HOUR_START) * 60 // 600
 const HOUR_PX = 64 // px per hour
 const TOTAL_PX = (HOUR_END - HOUR_START) * HOUR_PX
 
-const BLOCK_COLORS = {
+const BLOCK_COLORS: Record<string, { bg: string; border: string; text: string; dot: string; label: string }> = {
   gutachter: { bg: 'bg-[#4573A2]/10', border: 'border-l-[#4573A2]', text: 'text-[#4573A2]', dot: 'bg-[#4573A2]', label: 'Gutachter' },
   rueckruf:  { bg: 'bg-amber-50',     border: 'border-l-amber-500',  text: 'text-amber-700',  dot: 'bg-amber-500',  label: 'Rückruf' },
   kunde:     { bg: 'bg-green-50',     border: 'border-l-green-500',  text: 'text-green-700',  dot: 'bg-green-500',  label: 'Kunde' },
+  intern:    { bg: 'bg-gray-100',     border: 'border-l-gray-400',   text: 'text-gray-600',   dot: 'bg-gray-400',   label: 'Intern' },
 }
 
-const BLOCK_ICONS = {
+const BLOCK_ICONS: Record<string, typeof WrenchIcon> = {
   gutachter: WrenchIcon,
   rueckruf: PhoneCallIcon,
   kunde: UserIcon,
+  intern: ClipboardListIcon,
 }
 
 function minuteToY(min: number): number {
@@ -50,7 +52,7 @@ function minuteToY(min: number): number {
 const fmt = (d: string | null) => d ? new Date(d).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '—'
 
 /* ── Component ─────────────────────────────────────────────────────────── */
-export default function DashboardClient({ userId }: { userId: string }) {
+export default function DashboardClient({ userId, userRolle = 'admin' }: { userId: string; userRolle?: string }) {
   const router = useRouter()
   const supabase = createClient()
   const calRef = useRef<HTMLDivElement>(null)
@@ -66,6 +68,24 @@ export default function DashboardClient({ userId }: { userId: string }) {
   const [tasks, setTasks] = useState<Task[]>([])
   const [neueFaelle, setNeueFaelle] = useState<Fall[]>([])
   const [stats, setStats] = useState({ leads: 0, faelle: 0, konvertiert: 0, ueberfaellig: 0 })
+
+  // KFZ-119: Termin erstellen Modal
+  const [showTerminModal, setShowTerminModal] = useState(false)
+  const [terminSlotTime, setTerminSlotTime] = useState<number | null>(null)
+  const [terminTyp, setTerminTyp] = useState('rueckruf')
+  const [terminBetreff, setTerminBetreff] = useState('')
+  const [terminDauer, setTerminDauer] = useState(30)
+  const [terminNotiz, setTerminNotiz] = useState('')
+  const [terminKontakt, setTerminKontakt] = useState('')
+  const [terminTelefon, setTerminTelefon] = useState('')
+  const [savingTermin, setSavingTermin] = useState(false)
+
+  // Erlaubte Termin-Typen basierend auf Rolle
+  const allowedTypes = userRolle === 'admin'
+    ? [{ value: 'rueckruf', label: 'Rückruf' }, { value: 'kundentermin', label: 'Kundentermin' }, { value: 'intern', label: 'Interner Termin' }]
+    : userRolle === 'kundenbetreuer' || userRolle === 'leadbearbeiter'
+      ? [{ value: 'rueckruf', label: 'Rückruf' }, { value: 'kundentermin', label: 'Kundentermin' }]
+      : [{ value: 'rueckruf', label: 'Rückruf' }]
 
   const isToday = selectedDate.toDateString() === new Date().toDateString()
   const datumLabel = selectedDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -178,16 +198,20 @@ export default function DashboardClient({ userId }: { userId: string }) {
       })
     }
 
-    // Kunden-Termine → green
+    // Termine (Kunden, Rückruf, Intern) → farbbasiert auf typ
     for (const t of termineR.data ?? []) {
       const d = new Date(t.datum!)
       const startMin = d.getHours() * 60 + d.getMinutes()
+      const blockTyp: CalBlock['typ'] =
+        t.typ === 'rueckruf' ? 'rueckruf' :
+        t.typ === 'intern' ? 'intern' :
+        'kunde'
       calBlocks.push({
         id: `kt-${t.id}`,
-        typ: 'kunde',
+        typ: blockTyp,
         startMin,
         dauer: t.dauer_minuten ?? 30,
-        label: t.betreff ?? 'Kundentermin',
+        label: t.betreff ?? (t.typ === 'rueckruf' ? 'Rückruf' : t.typ === 'intern' ? 'Intern' : 'Kundentermin'),
         sublabel: t.typ ?? '',
         link: t.fall_id ? `/admin/faelle/${t.fall_id}` : '#',
       })
@@ -241,11 +265,11 @@ export default function DashboardClient({ userId }: { userId: string }) {
           const hour = HOUR_START + i
           const y = i * HOUR_PX
           return (
-            <div key={hour} className="absolute left-0 right-0 flex items-start" style={{ top: y }}>
-              <span className="text-[10px] text-gray-400 font-medium tabular-nums w-12 text-right pr-2 -mt-1.5 shrink-0 select-none">
+            <div key={hour} className={`absolute left-0 right-0 flex items-start ${i % 2 === 0 ? '' : ''}`} style={{ top: y }}>
+              <span className="text-xs text-gray-600 font-medium tabular-nums w-12 text-right pr-2 -mt-1.5 shrink-0 select-none">
                 {String(hour).padStart(2, '0')}:00
               </span>
-              <div className="flex-1 border-t border-gray-100" />
+              <div className="flex-1 border-t border-gray-300" />
             </div>
           )
         })}
@@ -255,7 +279,7 @@ export default function DashboardClient({ userId }: { userId: string }) {
           const y = i * HOUR_PX + HOUR_PX / 2
           return (
             <div key={`half-${i}`} className="absolute right-0" style={{ top: y, left: 48 }}>
-              <div className="border-t border-dashed border-gray-50 w-full" />
+              <div className="border-t border-dashed border-gray-200 w-full" />
             </div>
           )
         })}
@@ -308,9 +332,28 @@ export default function DashboardClient({ userId }: { userId: string }) {
           )
         })}
 
+        {/* Clickable hour slots for creating new appointments */}
+        {Array.from({ length: HOUR_END - HOUR_START }, (_, i) => {
+          const slotMin = (HOUR_START + i) * 60
+          const slotEnd = slotMin + 60
+          const conflict = blocks.some(b => b.startMin < slotEnd && (b.startMin + b.dauer) > slotMin)
+          if (conflict) return null
+          return (
+            <div key={`new-slot-${i}`}
+              className="absolute left-14 right-2 cursor-pointer hover:bg-[#4573A2]/5 transition-colors group rounded"
+              style={{ top: minuteToY(slotMin), height: HOUR_PX }}
+              onClick={() => { setTerminSlotTime(slotMin); setTerminTyp(allowedTypes[0]?.value ?? 'rueckruf'); setTerminBetreff(''); setTerminNotiz(''); setTerminKontakt(''); setTerminTelefon(''); setShowTerminModal(true) }}
+            >
+              <div className="opacity-0 group-hover:opacity-100 flex items-center justify-center h-full">
+                <span className="text-[10px] text-[#4573A2] font-medium">+ Termin</span>
+              </div>
+            </div>
+          )
+        })}
+
         {/* Empty state */}
         {blocks.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="text-center">
               <CalendarIcon className="w-8 h-8 text-gray-200 mx-auto mb-2" />
               <p className="text-xs text-gray-400">Keine Termine an diesem Tag</p>
@@ -466,6 +509,104 @@ export default function DashboardClient({ userId }: { userId: string }) {
           {rightColumn}
         </div>
       </div>
+      {/* KFZ-119: Termin erstellen Modal */}
+      {showTerminModal && terminSlotTime !== null && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Termin erstellen</h3>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">Typ</label>
+                <select value={terminTyp} onChange={e => setTerminTyp(e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-[#4573A2]">
+                  {allowedTypes.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">Uhrzeit</label>
+                  <p className="text-sm text-gray-800 font-medium">
+                    {String(Math.floor(terminSlotTime / 60)).padStart(2, '0')}:{String(terminSlotTime % 60).padStart(2, '0')}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">Dauer</label>
+                  <select value={terminDauer} onChange={e => setTerminDauer(Number(e.target.value))}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-[#4573A2]">
+                    <option value={15}>15 Min</option>
+                    <option value={30}>30 Min</option>
+                    <option value={60}>60 Min</option>
+                    <option value={90}>90 Min</option>
+                  </select>
+                </div>
+              </div>
+
+              {(terminTyp === 'rueckruf' || terminTyp === 'kundentermin') && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Kontakt</label>
+                    <input value={terminKontakt} onChange={e => setTerminKontakt(e.target.value)} placeholder="Name"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-[#4573A2]" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Telefon</label>
+                    <input value={terminTelefon} onChange={e => setTerminTelefon(e.target.value)} placeholder="Tel."
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-[#4573A2]" />
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">Betreff</label>
+                <input value={terminBetreff} onChange={e => setTerminBetreff(e.target.value)}
+                  placeholder={terminTyp === 'rueckruf' ? 'Rückruf-Grund' : terminTyp === 'intern' ? 'Meeting-Titel' : 'Thema'}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-[#4573A2]" />
+              </div>
+
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">Notizen</label>
+                <textarea value={terminNotiz} onChange={e => setTerminNotiz(e.target.value)} rows={2} placeholder="Optional"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-[#4573A2] resize-none" />
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-5">
+              <button onClick={() => setShowTerminModal(false)}
+                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
+                Abbrechen
+              </button>
+              <button
+                disabled={savingTermin || !terminBetreff}
+                onClick={async () => {
+                  setSavingTermin(true)
+                  const datum = new Date(selectedDate)
+                  datum.setHours(Math.floor(terminSlotTime / 60), terminSlotTime % 60, 0, 0)
+                  await supabase.from('termine').insert({
+                    datum: datum.toISOString(),
+                    dauer_minuten: terminDauer,
+                    typ: terminTyp,
+                    betreff: terminBetreff,
+                    notiz: terminNotiz || null,
+                    kontakt_name: terminKontakt || null,
+                    kontakt_telefon: terminTelefon || null,
+                    status: 'geplant',
+                    erstellt_von_user_id: userId,
+                    erstellt_von_rolle: userRolle,
+                    betreuer_user_id: userId,
+                  })
+                  setSavingTermin(false)
+                  setShowTerminModal(false)
+                  load()
+                }}
+                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-[#1E3A5F] hover:bg-[#4573A2] transition-colors disabled:opacity-40">
+                {savingTermin ? 'Wird erstellt...' : 'Termin erstellen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
