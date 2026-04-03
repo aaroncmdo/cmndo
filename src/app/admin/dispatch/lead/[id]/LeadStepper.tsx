@@ -330,8 +330,15 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
               onAdvance={(svId, termin, plz, adresse) => {
                 setSaving(true)
                 confirmGutachterTermin(lead.id, svId, termin, plz, adresse)
-                  .then(() => saveAndAdvance('gutachtertermin'))
-                  .catch(() => setSaving(false))
+                  .then(() => {
+                    console.log('[LeadStepper] confirmGutachterTermin SUCCESS → saveAndAdvance')
+                    return saveAndAdvance('gutachtertermin')
+                  })
+                  .catch((err) => {
+                    console.error('[LeadStepper] confirmGutachterTermin FEHLER:', err)
+                    setSaving(false)
+                    alert(`Fehler beim Zuweisen: ${err instanceof Error ? err.message : String(err)}`)
+                  })
               }} />
           )}
           {STEPS[openStep]?.key === 'flow' && <StepFlowLink lead={lead} />}
