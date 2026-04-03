@@ -48,6 +48,8 @@ type Fall = {
   kunden_konstellation: string | null
   ki_geschaetzte_kosten_min: number | null
   ki_geschaetzte_kosten_max: number | null
+  besichtigungsort_adresse: string | null
+  unfallort: string | null
 }
 
 type Dokument = {
@@ -262,7 +264,7 @@ export default function FallDetailClient({
               <p className="text-gray-500 text-sm mt-0.5">
                 Fall {fall.fall_nummer ?? fall.id.slice(0, 8)}
                 {' · '}
-                {[fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') || 'Keine Adresse'}
+                {fall.besichtigungsort_adresse || fall.unfallort || [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') || ''}
               </p>
             </div>
           </div>
@@ -277,66 +279,7 @@ export default function FallDetailClient({
             </div>
           )}
 
-          {/* ── Status-Timeline ── */}
-          <div className="bg-white rounded-2xl p-5 border border-gray-200">
-            <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-5">
-              Status-Verlauf
-            </h3>
-
-            <div className="relative">
-              {timeline.map((step, i) => {
-                const isLast = i === timeline.length - 1
-                return (
-                  <div key={step.label} className="flex gap-4 relative">
-                    {/* Vertical line + dot */}
-                    <div className="flex flex-col items-center shrink-0">
-                      <div
-                        className={`w-4 h-4 rounded-full border-2 shrink-0 z-10 ${
-                          step.active
-                            ? 'border-[#4573A2] bg-[#4573A2] shadow-[0_0_8px_rgba(59,130,246,0.5)]'
-                            : step.reached
-                            ? 'border-[#4573A2]/60 bg-[#4573A2]/60'
-                            : 'border-gray-300 bg-gray-100'
-                        }`}
-                      />
-                      {!isLast && (
-                        <div
-                          className={`w-0.5 flex-1 min-h-8 ${
-                            step.reached && timeline[i + 1]?.reached
-                              ? 'bg-[#4573A2]/40'
-                              : 'bg-gray-100'
-                          }`}
-                        />
-                      )}
-                    </div>
-
-                    {/* Content */}
-                    <div className={`pb-6 ${isLast ? 'pb-0' : ''}`}>
-                      <p className={`text-sm font-medium leading-tight ${
-                        step.active
-                          ? 'text-gray-900'
-                          : step.reached
-                          ? 'text-gray-700'
-                          : 'text-gray-400'
-                      }`}>
-                        {step.label}
-                      </p>
-                      <p className={`text-xs mt-0.5 ${
-                        step.reached ? 'text-gray-500' : 'text-gray-300'
-                      }`}>
-                        {step.description}
-                      </p>
-                      {step.date && (
-                        <p className="text-gray-400 text-xs mt-1">
-                          {fmt(step.date)}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
+          {/* BUG-62: Status-Verlauf ENTFERNT — der obere Stepper in page.tsx ist die einzige Fortschrittsanzeige */}
 
           {/* ── Dateien ── */}
           <div className="bg-white rounded-2xl p-5 border border-gray-200">
@@ -473,7 +416,7 @@ export default function FallDetailClient({
                           E-Mail schreiben
                         </a>
                       )}
-                      <a href={`/kunde/fall/${fall.id}#nachrichten`} className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-xl text-sm text-emerald-400 hover:bg-gray-200 transition-colors">
+                      <a href={`/kunde/fall/${fall.id}#nachrichten`} className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-xl text-sm text-[#4573A2] hover:bg-gray-200 transition-colors">
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg>
                         Chat öffnen
                       </a>
@@ -634,7 +577,7 @@ function AuszahlungsUebersicht({ fall }: { fall: Fall }) {
     <div className="bg-white rounded-2xl p-5 border border-gray-200">
       <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-4">Voraussichtliche Auszahlung</h3>
       <div className="text-center mb-5">
-        <p className="text-3xl font-bold text-emerald-400 tabular-nums">{fmtCurrency(fall.regulierung_betrag ?? total)}</p>
+        <p className="text-3xl font-bold text-[#4573A2] tabular-nums">{fmtCurrency(fall.regulierung_betrag ?? total)}</p>
         <p className="text-gray-500 text-xs mt-1">{fall.regulierung_betrag ? 'Reguliert' : 'Geschaetzter Anspruch'}</p>
       </div>
       <div className="space-y-2 mb-4">
@@ -756,7 +699,7 @@ function NachrichtenBereich({
             onClick={() => { setActiveKanal(tab.key); setError(null) }}
             className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
               activeKanal === tab.key
-                ? 'bg-emerald-600 text-white'
+                ? 'bg-[#4573A2] text-white'
                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700'
             }`}
           >
@@ -778,12 +721,12 @@ function NachrichtenBereich({
               <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
                   isOwn
-                    ? 'bg-emerald-600/90 text-white'
+                    ? 'bg-[#4573A2] text-white'
                     : 'bg-gray-100 text-gray-800'
                 }`}>
                   {/* Sender badge */}
                   <p className={`text-[10px] font-semibold uppercase tracking-wide mb-0.5 ${
-                    isOwn ? 'text-emerald-200' : 'text-gray-500'
+                    isOwn ? 'text-white/60' : 'text-gray-500'
                   }`}>
                     {ROLLE_LABEL[msg.sender_rolle] ?? msg.sender_rolle}
                   </p>
@@ -795,7 +738,7 @@ function NachrichtenBereich({
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`inline-flex items-center gap-1 mt-1 text-xs underline ${
-                        isOwn ? 'text-emerald-200' : 'text-[#7BA3CC]'
+                        isOwn ? 'text-white/60' : 'text-[#7BA3CC]'
                       }`}
                     >
                       <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -805,7 +748,7 @@ function NachrichtenBereich({
                     </a>
                   )}
                   {/* Timestamp */}
-                  <p className={`text-[10px] mt-1 ${isOwn ? 'text-emerald-200/70' : 'text-gray-500'}`}>
+                  <p className={`text-[10px] mt-1 ${isOwn ? 'text-white/60/70' : 'text-gray-500'}`}>
                     {new Date(msg.created_at).toLocaleString('de-DE', {
                       day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
                     })}
@@ -825,12 +768,12 @@ function NachrichtenBereich({
           value={text}
           onChange={e => setText(e.target.value)}
           placeholder="Nachricht schreiben..."
-          className="flex-1 bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-600"
+          className="flex-1 bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
         />
         <button
           type="submit"
           disabled={sending || !text.trim()}
-          className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-40"
+          className="px-4 py-2.5 bg-[#4573A2] hover:bg-[#1E3A5F] text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-40"
         >
           {sending ? '...' : 'Senden'}
         </button>
