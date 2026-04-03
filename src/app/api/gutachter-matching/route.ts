@@ -21,33 +21,26 @@ function pointInPolygon(point: { lat: number; lng: number }, polygon: { lat: num
   return inside
 }
 
-// Fahrzeit in Minuten schätzen (50 km/h Durchschnitt Stadtverkehr)
 function fahrzeitMin(distanzKm: number): number {
-  return Math.round(distanzKm * 1.2) // 50 km/h = 1.2 min/km
+  return Math.round(distanzKm * 1.2) // ~50 km/h
+}
+
+function fmtTime(d: Date): string {
+  return `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`
 }
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-const BESICHTIGUNG_MIN = 60 // Besichtigung = IMMER 60 Minuten
+const BESICHTIGUNG_MIN = 60
 
 type GutachterSlot = {
-  sv_id: string
-  name: string
-  prio: number
-  partner_seit: string | null
-  entfernung_km: number | null
-  fahrzeit_min: number | null
-  auslastung: string
-  offene_faelle: number
-  max_faelle_monat: number
-  paket: string | null
-  termin: string
-  wunschtermin_moeglich: boolean
-  naechster_freier_slot: string | null
-  route_info: string | null
+  sv_id: string; name: string; prio: number; partner_seit: string | null
+  entfernung_km: number | null; fahrzeit_min: number | null
+  auslastung: string; offene_faelle: number; max_faelle_monat: number; paket: string | null
+  termin: string; wunschtermin_moeglich: boolean
+  naechster_freier_slot: string | null; route_info: string | null
 }
 
-// Backward-compatible response
 type MatchResult = {
   empfohlen: GutachterSlot | null
   alternative_1: GutachterSlot | null
@@ -55,6 +48,8 @@ type MatchResult = {
   alle_kandidaten: GutachterSlot[]
   sv_gesucht: boolean
 }
+
+type Termin = { start: Date; end: Date }
 
 // ─── POST /api/gutachter-matching ────────────────────────────────────────────
 
@@ -74,6 +69,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'plz und wunschtermin sind erforderlich' }, { status: 400 })
   }
 
+  const wDate = new Date(wunschtermin)
+  console.log(`[matching] Wunschtermin: ${wDate.toISOString()} (UTC ${fmtTime(wDate)})`)
+
   // 1. Koordinaten
   let plzGeo: { lat: number; lng: number } | null = null
   if (directLat != null && directLng != null) {
@@ -83,15 +81,15 @@ export async function POST(request: Request) {
     plzGeo = data
   }
 
-  // 2. Alle aktiven SVs laden
+  // 2. Alle aktiven SVs
   const { data: svList } = await supabase
     .from('sachverstaendige')
     .select('id, partner_seit, offene_faelle, max_faelle_monat, paket, qualifikationen, ist_aktiv, profile_id, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_lat, standort_lng, isochrone_polygon')
     .eq('ist_aktiv', true)
 
-  if (!svList?.length) return NextResponse.json({ error: 'Keine aktiven Gutachter gefunden' }, { status: 404 })
+  if (!svList?.length) return NextResponse.json({ empfohlen: null, alternative_1: null, alternative_2: null, alle_kandidaten: [], sv_gesucht: true })
 
-  // 3. Filter nach Gebiet + Kapazität + Scoring
+  // 3. Filter + Scoring
   type Candidate = (typeof svList)[number] & { distanz_km: number | null; score: number }
   const candidates: Candidate[] = []
 
@@ -106,30 +104,21 @@ export async function POST(request: Request) {
       distanz = haversineKm(Number(plzGeo.lat), Number(plzGeo.lng), Number(svLat), Number(svLng))
       inRange = distanz <= maxRadius
     }
-
     if (!inRange && plzGeo && sv.isochrone_polygon && Array.isArray(sv.isochrone_polygon)) {
       if (pointInPolygon({ lat: Number(plzGeo.lat), lng: Number(plzGeo.lng) }, sv.isochrone_polygon as { lat: number; lng: number }[])) {
         inRange = true
-        if (distanz === null && svLat != null && svLng != null) {
-          distanz = haversineKm(Number(plzGeo.lat), Number(plzGeo.lng), Number(svLat), Number(svLng))
-        }
+        if (distanz === null && svLat != null && svLng != null) distanz = haversineKm(Number(plzGeo.lat), Number(plzGeo.lng), Number(svLat), Number(svLng))
       }
     }
-
     if (!inRange) continue
 
     const maxFaelle = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10
     const genutztFaelle = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
     if (genutztFaelle >= maxFaelle) continue
 
-    // Prio-Scoring (lower = better)
     let score = 0
-    if (sv.partner_seit) {
-      const years = (Date.now() - new Date(sv.partner_seit).getTime()) / (365.25 * 86400000)
-      score -= Math.min(years, 10) * 10
-    }
-    const kapFrei = maxFaelle > 0 ? 1 - (genutztFaelle / maxFaelle) : 0.5
-    score -= kapFrei * 30
+    if (sv.partner_seit) score -= Math.min((Date.now() - new Date(sv.partner_seit).getTime()) / (365.25 * 86400000), 10) * 10
+    score -= (maxFaelle > 0 ? 1 - (genutztFaelle / maxFaelle) : 0.5) * 30
     if (schadenfallTyp && Array.isArray(sv.qualifikationen) && sv.qualifikationen.includes(schadenfallTyp)) score -= 50
     if (distanz != null) score += distanz
 
@@ -141,8 +130,9 @@ export async function POST(request: Request) {
   }
 
   candidates.sort((a, b) => a.score - b.score)
+  console.log(`[matching] ${candidates.length} Kandidaten im Gebiet`)
 
-  // 4. Profile-Namen laden
+  // 4. Profile-Namen
   const topCandidates = candidates.slice(0, 10)
   const profileIds = topCandidates.map(c => c.profile_id).filter(Boolean)
   const { data: profiles } = profileIds.length > 0
@@ -151,94 +141,112 @@ export async function POST(request: Request) {
   const nameMap: Record<string, string> = {}
   for (const p of profiles ?? []) nameMap[p.id] = `${p.vorname ?? ''} ${p.nachname ?? ''}`.trim() || '—'
 
-  // 5. Termine des Tages laden für alle Kandidaten
-  const wDate = new Date(wunschtermin)
-  const dayStart = new Date(wDate); dayStart.setHours(0, 0, 0, 0)
-  const dayEnd = new Date(wDate); dayEnd.setHours(23, 59, 59, 999)
+  // 5. Termine des Tages laden
+  // Lade 24h Fenster um den Wunschtag (UTC-basiert)
+  const dayStart = new Date(wDate)
+  dayStart.setUTCHours(0, 0, 0, 0)
+  const dayEnd = new Date(wDate)
+  dayEnd.setUTCHours(23, 59, 59, 999)
   const svIds = topCandidates.map(c => c.id)
 
   const [{ data: kalTermine }, { data: fallTermine }] = await Promise.all([
     supabase.from('gutachter_termine').select('sv_id, start_zeit, end_zeit, status')
-      .in('sv_id', svIds).gte('start_zeit', dayStart.toISOString()).lte('start_zeit', dayEnd.toISOString())
-      .in('status', ['bestaetigt', 'reserviert', 'vorschlag']),
-    supabase.from('faelle').select('sv_id, sv_termin, schadens_adresse')
-      .in('sv_id', svIds).not('sv_termin', 'is', null)
+      .in('sv_id', svIds)
+      .gte('start_zeit', dayStart.toISOString())
+      .lte('start_zeit', dayEnd.toISOString())
+      .not('status', 'eq', 'storniert')
+      .not('status', 'eq', 'abgelehnt'),
+    supabase.from('faelle').select('sv_id, sv_termin')
+      .in('sv_id', svIds)
+      .not('sv_termin', 'is', null)
       .not('status', 'in', '("abgeschlossen","storniert")')
-      .gte('sv_termin', dayStart.toISOString()).lte('sv_termin', dayEnd.toISOString()),
+      .gte('sv_termin', dayStart.toISOString())
+      .lte('sv_termin', dayEnd.toISOString()),
   ])
 
-  console.log(`[matching] ${topCandidates.length} Kandidaten, Tag: ${dayStart.toISOString()}, kalTermine: ${kalTermine?.length ?? 0}, fallTermine: ${fallTermine?.length ?? 0}`)
+  console.log(`[matching] DB: kalTermine=${kalTermine?.length ?? 0}, fallTermine=${fallTermine?.length ?? 0}, dayRange=${dayStart.toISOString()} bis ${dayEnd.toISOString()}`)
 
-  // Termine pro SV gruppieren
-  function getTermine(svId: string): { start: Date; end: Date; adresse: string }[] {
-    const termine: { start: Date; end: Date; adresse: string }[] = []
+  // Termine pro SV bauen
+  function getTermine(svId: string): Termin[] {
+    const result: Termin[] = []
+    const seen = new Set<string>()
+
+    // Aus gutachter_termine (hat start + end)
     for (const t of kalTermine ?? []) {
       if (t.sv_id !== svId) continue
-      termine.push({ start: new Date(t.start_zeit), end: new Date(t.end_zeit), adresse: '' })
+      const key = `${t.start_zeit}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      result.push({ start: new Date(t.start_zeit), end: new Date(t.end_zeit) })
     }
+
+    // Aus faelle.sv_termin (nur start, end = start + 90min)
     for (const f of fallTermine ?? []) {
       if (f.sv_id !== svId || !f.sv_termin) continue
       const s = new Date(f.sv_termin)
-      // Nur hinzufügen wenn nicht schon in kalTermine
-      if (!termine.some(t => Math.abs(t.start.getTime() - s.getTime()) < 60000)) {
-        termine.push({ start: s, end: new Date(s.getTime() + (BESICHTIGUNG_MIN + 30) * 60000), adresse: f.schadens_adresse ?? '' })
-      }
+      const key = s.toISOString()
+      if (seen.has(key)) continue
+      seen.add(key)
+      result.push({ start: s, end: new Date(s.getTime() + 90 * 60000) })
     }
-    termine.sort((a, b) => a.start.getTime() - b.start.getTime())
-    return termine
+
+    result.sort((a, b) => a.start.getTime() - b.start.getTime())
+    return result
   }
 
-  // Verfügbarkeits-Check gemäß Prompt-Logik:
-  // Vorheriger Termin endet + Fahrzeit <= gewünschter Start
-  // Gewünschter Start + 60min Besichtigung + Fahrzeit <= nächster Termin
+  // Verfügbarkeits-Check: Passt ein 60min-Slot OHNE Überschneidung?
   function canDoSlot(svId: string, slotStart: Date, fahrzeit: number): boolean {
     const termine = getTermine(svId)
     const slotEnd = new Date(slotStart.getTime() + BESICHTIGUNG_MIN * 60000)
+    const svName = nameMap[topCandidates.find(c => c.id === svId)?.profile_id ?? ''] ?? svId.slice(0, 8)
 
-    // Kein Termin am Tag → SV ist FREI
-    if (termine.length === 0) return true
+    // Kein Termin am Tag → FREI
+    if (termine.length === 0) {
+      console.log(`[matching] ✅ ${svName}: FREI (keine Termine)`)
+      return true
+    }
 
-    // Prüfe Überschneidung mit JEDEM existierenden Termin
+    // Überschneidungs-Check mit JEDEM Termin
     for (const t of termine) {
-      // Einfacher Overlap-Check: Slot [start, start+60min] vs Termin [t.start, t.end]
-      if (slotStart < t.end && slotEnd > t.start) {
-        console.log(`[matching] ${svId.slice(0,8)} BLOCKED: Slot ${slotStart.toISOString()} overlaps ${t.start.toISOString()}-${t.end.toISOString()}`)
+      const overlap = slotStart.getTime() < t.end.getTime() && slotEnd.getTime() > t.start.getTime()
+      if (overlap) {
+        console.log(`[matching] ❌ ${svName}: BLOCKED — Slot ${fmtTime(slotStart)}-${fmtTime(slotEnd)} überschneidet ${fmtTime(t.start)}-${fmtTime(t.end)}`)
         return false
       }
     }
 
-    // Prüfe ob Fahrzeit vom vorherigen Termin passt
-    const vorher = termine.filter(t => t.end <= slotStart)
+    // Fahrzeit vom vorherigen Termin
+    const vorher = termine.filter(t => t.end.getTime() <= slotStart.getTime())
     if (vorher.length > 0) {
-      const letzter = vorher[vorher.length - 1]
-      const fruehestAnkunft = new Date(letzter.end.getTime() + fahrzeit * 60000)
-      if (fruehestAnkunft > slotStart) {
-        console.log(`[matching] ${svId.slice(0,8)} BLOCKED by travel: prev ends ${letzter.end.toISOString()}, +${fahrzeit}min → ${fruehestAnkunft.toISOString()} > ${slotStart.toISOString()}`)
+      const prev = vorher[vorher.length - 1]
+      const ankunft = new Date(prev.end.getTime() + fahrzeit * 60000)
+      if (ankunft.getTime() > slotStart.getTime()) {
+        console.log(`[matching] ❌ ${svName}: BLOCKED by travel — prev endet ${fmtTime(prev.end)}, +${fahrzeit}min=${fmtTime(ankunft)} > ${fmtTime(slotStart)}`)
         return false
       }
     }
 
-    // Prüfe ob Fahrzeit zum nächsten Termin passt
-    const nachher = termine.filter(t => t.start >= slotEnd)
+    // Fahrzeit zum nächsten Termin
+    const nachher = termine.filter(t => t.start.getTime() >= slotEnd.getTime())
     if (nachher.length > 0) {
-      const naechster = nachher[0]
-      const spaetesteAbfahrt = new Date(naechster.start.getTime() - fahrzeit * 60000)
-      if (slotEnd > spaetesteAbfahrt) {
-        console.log(`[matching] ${svId.slice(0,8)} BLOCKED by next: slot ends ${slotEnd.toISOString()}, next at ${naechster.start.toISOString()}, need ${fahrzeit}min travel`)
+      const next = nachher[0]
+      const deadline = new Date(next.start.getTime() - fahrzeit * 60000)
+      if (slotEnd.getTime() > deadline.getTime()) {
+        console.log(`[matching] ❌ ${svName}: BLOCKED by next — slot endet ${fmtTime(slotEnd)}, next um ${fmtTime(next.start)}, deadline ${fmtTime(deadline)}`)
         return false
       }
     }
 
-    console.log(`[matching] ${svId.slice(0,8)} AVAILABLE at ${slotStart.toISOString()} (${termine.length} existing termine)`)
+    console.log(`[matching] ✅ ${svName}: VERFÜGBAR um ${fmtTime(slotStart)} (${termine.length} Termine heute)`)
     return true
   }
 
-  // Nächsten freien Slot finden (gleicher Tag, 8-17 Uhr)
+  // Nächster freier Slot (8:00-17:00 UTC, 30min-Schritte)
   function findNextFreeSlot(svId: string, fahrzeit: number): Date | null {
-    for (let h = 8; h <= 17; h++) {
+    for (let h = 6; h <= 18; h++) {
       for (const m of [0, 30]) {
-        const slot = new Date(wDate)
-        slot.setHours(h, m, 0, 0)
+        const slot = new Date(dayStart)
+        slot.setUTCHours(h, m, 0, 0)
         if (slot.getTime() <= Date.now()) continue
         if (canDoSlot(svId, slot, fahrzeit)) return slot
       }
@@ -246,21 +254,20 @@ export async function POST(request: Request) {
     return null
   }
 
-  // Route-Info: letzter Termin VOR dem Wunschtermin
+  // Route-Info
   function getRouteInfo(svId: string, distKm: number | null): { info: string; fahrzeit: number } {
     const termine = getTermine(svId)
-    const vorher = termine.filter(t => t.end <= wDate)
+    const vorher = termine.filter(t => t.end.getTime() <= wDate.getTime())
     if (vorher.length > 0) {
-      const letzter = vorher[vorher.length - 1]
-      const endZeit = `${String(letzter.end.getHours()).padStart(2, '0')}:${String(letzter.end.getMinutes()).padStart(2, '0')}`
+      const last = vorher[vorher.length - 1]
       const fz = distKm != null ? fahrzeitMin(distKm) : 30
-      return { info: `Letzter Termin endet ${endZeit} + ~${fz}min Fahrt`, fahrzeit: fz }
+      return { info: `Letzter Termin endet ${fmtTime(last.end)} + ~${fz}min Fahrt`, fahrzeit: fz }
     }
     const fz = distKm != null ? fahrzeitMin(distKm) : 20
     return { info: `Anfahrt vom Büro ~${fz}min`, fahrzeit: fz }
   }
 
-  // 6. Slots bauen — Prio 1 IMMER zeigen
+  // 6. Slots bauen
   const slots: GutachterSlot[] = []
 
   for (let i = 0; i < topCandidates.length && slots.length < 5; i++) {
@@ -291,13 +298,13 @@ export async function POST(request: Request) {
 
   const svGesucht = slots.length === 0 || slots.every(s => !s.wunschtermin_moeglich && !s.naechster_freier_slot)
 
-  const result: MatchResult = {
+  console.log(`[matching] Ergebnis: ${slots.length} Slots, sv_gesucht=${svGesucht}, verfügbar=${slots.filter(s => s.wunschtermin_moeglich).length}`)
+
+  return NextResponse.json({
     empfohlen: slots[0] ?? null,
     alternative_1: slots[1] ?? null,
     alternative_2: slots[2] ?? null,
     alle_kandidaten: slots,
     sv_gesucht: svGesucht,
-  }
-
-  return NextResponse.json(result)
+  })
 }
