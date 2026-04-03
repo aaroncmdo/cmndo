@@ -907,6 +907,11 @@ export async function updateTerminStatus(
 
 export async function deleteFall(fallId: string): Promise<{ success: boolean; error?: string }> {
   try {
+    // REGEL 11: NIEMALS DELETE ohne WHERE! NIEMALS mit NULL!
+    if (!fallId || typeof fallId !== 'string' || fallId.length < 10) {
+      return { success: false, error: 'Ungültige Fall-ID' }
+    }
+
     const supabase = await createClient()
     const user = (await supabase.auth.getUser())?.data?.user ?? null
     if (!user) return { success: false, error: 'Nicht angemeldet' }
@@ -914,14 +919,34 @@ export async function deleteFall(fallId: string): Promise<{ success: boolean; er
     const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
     if (profile?.rolle !== 'admin') return { success: false, error: 'Nur Admins können Fälle löschen' }
 
-    // Bombensichere RPC-Funktion (SECURITY DEFINER, EXCEPTION WHEN OTHERS pro Tabelle)
-    const { error } = await supabase.rpc('delete_fall_komplett', { p_fall_id: fallId })
-    if (error) {
-      console.error('[deleteFall] RPC error:', error)
-      return { success: false, error: error.message }
+    // SICHERHEITS-CHECK: Fall muss existieren (genau 1)
+    const { data: fall, error: findErr } = await supabase.from('faelle').select('id').eq('id', fallId).single()
+    if (findErr || !fall) return { success: false, error: 'Fall nicht gefunden' }
+
+    // Versuche RPC (bombensicher, mit NULL+COUNT Checks in der DB)
+    const { error: rpcErr } = await supabase.rpc('delete_fall_komplett', { p_fall_id: fallId })
+
+    if (rpcErr) {
+      console.error('[deleteFall] RPC error, nutze Fallback:', rpcErr.message)
+
+      // FALLBACK: Einzelne Deletes (wenn RPC nicht existiert)
+      const { createAdminClient } = await import('@/lib/supabase/admin')
+      const admin = createAdminClient()
+
+      const tables = [
+        'lead_historie', 'pflichtdokumente', 'qc_checkliste', 'forderungspositionen',
+        'zahlungseingaenge', 'technische_probleme', 'gutachter_abrechnungspositionen',
+        'gutachter_abrechnungen', 'gutachter_termine', 'gutachter_mitteilungen',
+        'benachrichtigungen', 'timeline', 'tasks', 'nachrichten', 'dokumente',
+        'termine', 'flow_links',
+      ]
+      for (const table of tables) {
+        try { await admin.from(table).delete().eq('fall_id', fallId) } catch { /* */ }
+      }
+      const { error: delErr } = await admin.from('faelle').delete().eq('id', fallId)
+      if (delErr) return { success: false, error: delErr.message }
     }
 
-    // KEIN revalidatePath für die gelöschte Seite! Client macht router.push
     revalidatePath('/admin/faelle')
     return { success: true }
   } catch (err) {

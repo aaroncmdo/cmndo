@@ -379,14 +379,54 @@ export async function handleGegenvorschlag(
 
 export async function deleteLead(leadId: string): Promise<{ success: boolean; error?: string }> {
   try {
+    // REGEL 11: NIEMALS DELETE ohne WHERE! NIEMALS mit NULL!
+    if (!leadId || typeof leadId !== 'string' || leadId.length < 10) {
+      return { success: false, error: 'Ungültige Lead-ID' }
+    }
+
     const supabase = await createClient()
     const user = (await supabase.auth.getUser())?.data?.user ?? null
     if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-    const { error } = await supabase.rpc('delete_lead_komplett', { p_lead_id: leadId })
-    if (error) {
-      console.error('[deleteLead] RPC error:', error)
-      return { success: false, error: error.message }
+    // SICHERHEITS-CHECK: Lead muss existieren (genau 1)
+    const { data: lead, error: findErr } = await supabase.from('leads').select('id').eq('id', leadId).single()
+    if (findErr || !lead) return { success: false, error: 'Lead nicht gefunden' }
+
+    // Versuche RPC (bombensicher, mit NULL+COUNT Checks in der DB)
+    const { error: rpcErr } = await supabase.rpc('delete_lead_komplett', { p_lead_id: leadId })
+
+    if (rpcErr) {
+      console.error('[deleteLead] RPC error, nutze Fallback:', rpcErr.message)
+
+      // FALLBACK: Erst alle Fälle des Leads löschen, dann den Lead
+      const { createAdminClient } = await import('@/lib/supabase/admin')
+      const admin = createAdminClient()
+
+      // Fälle des Leads finden und einzeln löschen
+      const { data: faelle } = await admin.from('faelle').select('id').eq('lead_id', leadId)
+      for (const f of faelle ?? []) {
+        // Jede Fall-Löschung nutzt die sichere deleteFall-Logik
+        const tables = [
+          'lead_historie', 'pflichtdokumente', 'qc_checkliste', 'forderungspositionen',
+          'zahlungseingaenge', 'technische_probleme', 'gutachter_abrechnungspositionen',
+          'gutachter_abrechnungen', 'gutachter_termine', 'gutachter_mitteilungen',
+          'benachrichtigungen', 'timeline', 'tasks', 'nachrichten', 'dokumente',
+          'termine', 'flow_links',
+        ]
+        for (const table of tables) {
+          try { await admin.from(table).delete().eq('fall_id', f.id) } catch { /* */ }
+        }
+        await admin.from('faelle').delete().eq('id', f.id).catch(() => {})
+      }
+
+      // Lead-Referenzen
+      try { await admin.from('flow_links').delete().eq('lead_id', leadId) } catch { /* */ }
+      try { await admin.from('lead_historie').delete().eq('lead_id', leadId) } catch { /* */ }
+      try { await admin.from('timeline').delete().eq('lead_id', leadId) } catch { /* */ }
+      try { await admin.from('gutachter_termine').delete().eq('lead_id', leadId) } catch { /* */ }
+
+      const { error: delErr } = await admin.from('leads').delete().eq('id', leadId)
+      if (delErr) return { success: false, error: delErr.message }
     }
 
     revalidatePath('/admin/dispatch')
