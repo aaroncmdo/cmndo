@@ -6,7 +6,7 @@ export default async function AdminFaellePage() {
 
   const { data: faelle } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, status, schadens_ursache, schadens_ort, sv_id, kundenbetreuer_id, mandatsnummer, schadenfall_typ, kennzeichen, created_at, kunde_id, lead_id')
+    .select('id, fall_nummer, status, schadens_ursache, schadens_ort, sv_id, kundenbetreuer_id, mandatsnummer, schadenfall_typ, kennzeichen, created_at, kunde_id, lead_id, ist_aktiv, deaktiviert_grund')
     .not('status', 'eq', 'storniert')
     .order('created_at', { ascending: false })
 
@@ -49,6 +49,8 @@ export default async function AdminFaellePage() {
       schadenfall_typ: (f as Record<string, unknown>).schadenfall_typ as string | null,
       kennzeichen: (f as Record<string, unknown>).kennzeichen as string | null,
       created_at: f.created_at as string,
+      ist_aktiv: (f as Record<string, unknown>).ist_aktiv as boolean | null,
+      deaktiviert_grund: (f as Record<string, unknown>).deaktiviert_grund as string | null,
       kunde_name,
       betreuer_name,
       sv_name,

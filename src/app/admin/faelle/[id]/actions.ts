@@ -902,3 +902,84 @@ export async function updateTerminStatus(
   revalidatePath('/mitarbeiter/performance')
   revalidatePath('/kunde')
 }
+
+// ─── KFZ-120: Fall löschen (komplett aus DB) ────────────────────────────────
+
+export async function deleteFall(fallId: string) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  // Nur Admins dürfen löschen
+  const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
+  if (profile?.rolle !== 'admin') throw new Error('Nur Admins können Fälle löschen')
+
+  const { data: fall } = await supabase.from('faelle').select('id, fall_nummer').eq('id', fallId).single()
+  if (!fall) throw new Error('Fall nicht gefunden')
+
+  // Storage-Dateien löschen
+  try {
+    const { data: docs } = await supabase.from('dokumente').select('datei_url').eq('fall_id', fallId)
+    for (const d of docs ?? []) {
+      if (d.datei_url?.includes('/storage/')) {
+        const pathMatch = d.datei_url.match(/\/object\/public\/[^/]+\/(.+)/)
+        if (pathMatch?.[1]) await supabase.storage.from('dokumente').remove([pathMatch[1]]).catch(() => {})
+      }
+    }
+  } catch { /* */ }
+
+  // Verknüpfte Daten löschen (FK-Reihenfolge)
+  for (const table of ['lead_historie', 'pflichtdokumente', 'timeline', 'tasks', 'nachrichten', 'gutachter_termine', 'gutachter_abrechnungen', 'dokumente', 'termine']) {
+    await supabase.from(table).delete().eq('fall_id', fallId).catch(() => {})
+  }
+  await supabase.from('flow_links').delete().eq('fall_id', fallId).catch(() => {})
+
+  const { error } = await supabase.from('faelle').delete().eq('id', fallId)
+  if (error) throw new Error(`Löschen fehlgeschlagen: ${error.message}`)
+
+  revalidatePath('/admin/faelle')
+}
+
+// ─── KFZ-120: Fall deaktivieren (Soft Delete) ───────────────────────────────
+
+export async function deactivateFall(fallId: string, grund: string, notiz: string) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  await supabase.from('faelle').update({
+    ist_aktiv: false, deaktiviert_am: new Date().toISOString(),
+    deaktiviert_grund: grund, deaktiviert_notiz: notiz || null,
+    updated_at: new Date().toISOString(),
+  }).eq('id', fallId)
+
+  await supabase.from('timeline').insert({
+    fall_id: fallId, typ: 'system', titel: 'Fall deaktiviert',
+    beschreibung: `Grund: ${grund}. ${notiz ? `Notiz: ${notiz}` : ''}`,
+    erstellt_von: user.id,
+  })
+
+  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath('/admin/faelle')
+}
+
+// ─── KFZ-120: Fall reaktivieren ─────────────────────────────────────────────
+
+export async function reactivateFall(fallId: string) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  await supabase.from('faelle').update({
+    ist_aktiv: true, deaktiviert_am: null, deaktiviert_grund: null,
+    deaktiviert_notiz: null, updated_at: new Date().toISOString(),
+  }).eq('id', fallId)
+
+  await supabase.from('timeline').insert({
+    fall_id: fallId, typ: 'system', titel: 'Fall reaktiviert',
+    beschreibung: 'Fall wurde reaktiviert.', erstellt_von: user.id,
+  })
+
+  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath('/admin/faelle')
+}

@@ -23,6 +23,9 @@ import {
   createTermin,
   updateTerminStatus,
   erfasseZahlungseingang,
+  deleteFall,
+  deactivateFall,
+  reactivateFall,
 } from './actions'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import {
@@ -624,6 +627,14 @@ export default function FallakteClient({
         />
       )}
 
+      {/* KFZ-120: Deaktiviert-Banner */}
+      {(fall as Record<string, unknown>).ist_aktiv === false && (
+        <div className="bg-red-500 text-white px-4 py-2 flex items-center justify-between text-sm font-medium flex-shrink-0">
+          <span>DEAKTIVIERT{(fall as Record<string, unknown>).deaktiviert_am ? ` seit ${new Date((fall as Record<string, unknown>).deaktiviert_am as string).toLocaleDateString('de-DE')}` : ''}{(fall as Record<string, unknown>).deaktiviert_grund ? ` — Grund: ${(fall as Record<string, unknown>).deaktiviert_grund}` : ''}</span>
+          <button onClick={async () => { await reactivateFall(fall.id); router.refresh() }} className="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg text-xs font-semibold transition-colors">Reaktivieren</button>
+        </div>
+      )}
+
       {/* ─── STICKY HEADER (fest oben, scrollt NICHT mit) ─── */}
       <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
         <div className="max-w-7xl mx-auto px-4">
@@ -641,7 +652,9 @@ export default function FallakteClient({
             </div>
             <div className="flex items-center gap-2">
               {fall.prioritaet === 'hoch' && <Badge color="red">Prioritaet</Badge>}
+              {(fall as Record<string, unknown>).ist_aktiv === false && <Badge color="red">Deaktiviert</Badge>}
               <StatusBadge status={fall.status} />
+              <FallActionsDropdown fallId={fall.id} fallNummer={fall.mandatsnummer ?? fall.fall_nummer ?? ''} istAktiv={(fall as Record<string, unknown>).ist_aktiv !== false} />
             </div>
           </div>
 
@@ -3502,6 +3515,133 @@ function NaechsterSchrittBanner({ fall, tasks: allTasks, onAction }: { fall: Fal
           className="text-xs font-medium px-3 py-1.5 rounded-lg bg-[#1E3A5F] hover:bg-[#4573A2] text-white shrink-0 transition-colors">
           Öffnen
         </button>
+      )}
+    </div>
+  )
+}
+
+// ─── KFZ-120: Drei-Punkte-Menü mit Löschen/Deaktivieren ────────────────────
+
+const DEAKTIVIEREN_GRUENDE = ['Kunde hat abgesagt', 'Kein Interesse', 'Duplikat', 'Spam', 'Sonstiges']
+
+function FallActionsDropdown({ fallId, fallNummer, istAktiv }: { fallId: string; fallNummer: string; istAktiv: boolean }) {
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const [modal, setModal] = useState<'delete' | 'deactivate' | null>(null)
+  const [confirmId, setConfirmId] = useState('')
+  const [grund, setGrund] = useState('')
+  const [notiz, setNotiz] = useState('')
+  const [processing, setProcessing] = useState(false)
+  const [error, setError] = useState('')
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  async function handleDelete() {
+    if (confirmId !== fallId.slice(0, 8)) { setError('Fall-ID stimmt nicht überein'); return }
+    setProcessing(true); setError('')
+    try {
+      await deleteFall(fallId)
+      router.push('/admin/faelle')
+    } catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }
+    setProcessing(false)
+  }
+
+  async function handleDeactivate() {
+    if (!grund) { setError('Bitte Grund auswählen'); return }
+    setProcessing(true); setError('')
+    try {
+      await deactivateFall(fallId, grund, notiz)
+      setModal(null); router.refresh()
+    } catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }
+    setProcessing(false)
+  }
+
+  return (
+    <div ref={ref} className="relative">
+      <button onClick={() => setOpen(!open)} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="4" r="2"/><circle cx="10" cy="10" r="2"/><circle cx="10" cy="16" r="2"/></svg>
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg py-1 w-48 z-30">
+          {istAktiv ? (
+            <button onClick={() => { setOpen(false); setModal('deactivate'); setGrund(''); setNotiz(''); setError('') }}
+              className="w-full text-left px-3 py-2 text-sm text-amber-600 hover:bg-amber-50 transition-colors">
+              Fall deaktivieren
+            </button>
+          ) : (
+            <button onClick={async () => { setOpen(false); await reactivateFall(fallId); router.refresh() }}
+              className="w-full text-left px-3 py-2 text-sm text-green-600 hover:bg-green-50 transition-colors">
+              Reaktivieren
+            </button>
+          )}
+          <button onClick={() => { setOpen(false); setModal('delete'); setConfirmId(''); setError('') }}
+            className="w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors">
+            Fall endgültig löschen
+          </button>
+        </div>
+      )}
+
+      {/* Delete Modal */}
+      {modal === 'delete' && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl">
+            <h3 className="text-lg font-semibold text-red-600 mb-2">Fall endgültig löschen</h3>
+            <div className="bg-red-50 border border-red-100 rounded-xl p-3 mb-4 text-sm text-red-700">
+              <p className="font-medium mb-1">WARNUNG: Dieser Fall wird UNWIDERRUFLICH gelöscht!</p>
+              <p>Alle zugehörigen Daten werden entfernt: Dokumente, Chat-Nachrichten, Tasks, Historie, Termine.</p>
+            </div>
+            <p className="text-sm text-gray-600 mb-1">Mandatsnummer: <strong>{fallNummer}</strong></p>
+            <p className="text-sm text-gray-500 mb-3">Zur Bestätigung die ersten 8 Zeichen der Fall-ID eingeben: <code className="bg-gray-100 px-1 rounded">{fallId.slice(0, 8)}</code></p>
+            <input value={confirmId} onChange={e => setConfirmId(e.target.value)} placeholder="Fall-ID eingeben"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:border-red-400" />
+            {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
+            <div className="flex gap-2">
+              <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200">Abbrechen</button>
+              <button onClick={handleDelete} disabled={processing || confirmId !== fallId.slice(0, 8)}
+                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 disabled:opacity-40">
+                {processing ? 'Wird gelöscht...' : 'Endgültig löschen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Deactivate Modal */}
+      {modal === 'deactivate' && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Fall deaktivieren</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">Grund</label>
+                <select value={grund} onChange={e => setGrund(e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#4573A2]">
+                  <option value="">— Bitte wählen —</option>
+                  {DEAKTIVIEREN_GRUENDE.map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">Notiz (optional)</label>
+                <textarea value={notiz} onChange={e => setNotiz(e.target.value)} rows={2}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#4573A2] resize-none" />
+              </div>
+            </div>
+            {error && <p className="text-sm text-red-500 mt-3">{error}</p>}
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200">Abbrechen</button>
+              <button onClick={handleDeactivate} disabled={processing || !grund}
+                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 disabled:opacity-40">
+                {processing ? 'Wird deaktiviert...' : 'Deaktivieren'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

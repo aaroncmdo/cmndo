@@ -18,6 +18,8 @@ type Fall = {
   schadenfall_typ: string | null
   kennzeichen: string | null
   created_at: string
+  ist_aktiv: boolean | null
+  deaktiviert_grund: string | null
   kunde_name: string | null
   betreuer_name: string | null
   sv_name: string | null
@@ -55,20 +57,25 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
   const [localFaelle, setLocalFaelle] = useState(faelle)
   const [toast, setToast] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+  const [aktivFilter, setAktivFilter] = useState<'aktive' | 'deaktivierte' | 'alle'>('aktive')
 
   useEffect(() => { setLocalFaelle(faelle) }, [faelle])
 
   const filtered = useMemo(() => {
-    if (!search) return localFaelle.filter(f => f.status !== 'storniert')
+    let result = localFaelle.filter(f => f.status !== 'storniert')
+    // KFZ-120: Aktiv/Deaktiviert Filter
+    if (aktivFilter === 'aktive') result = result.filter(f => f.ist_aktiv !== false)
+    else if (aktivFilter === 'deaktivierte') result = result.filter(f => f.ist_aktiv === false)
+
+    if (!search) return result
     const q = search.toLowerCase()
-    return localFaelle.filter(f => {
-      if (f.status === 'storniert') return false
-      return (f.kunde_name ?? '').toLowerCase().includes(q) ||
-        (f.mandatsnummer ?? '').toLowerCase().includes(q) ||
-        (f.kennzeichen ?? '').toLowerCase().includes(q) ||
-        (f.fall_nummer ?? '').includes(q)
-    })
-  }, [localFaelle, search])
+    return result.filter(f =>
+      (f.kunde_name ?? '').toLowerCase().includes(q) ||
+      (f.mandatsnummer ?? '').toLowerCase().includes(q) ||
+      (f.kennzeichen ?? '').toLowerCase().includes(q) ||
+      (f.fall_nummer ?? '').includes(q)
+    )
+  }, [localFaelle, search, aktivFilter])
 
   const byColumn = useMemo(() => {
     const map: Record<string, Fall[]> = {}
@@ -103,8 +110,18 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
           <h1 className="text-sm font-semibold text-gray-900">Fälle</h1>
           <span className="text-gray-400 text-xs">{filtered.length}</span>
         </div>
-        <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suche..."
-          className="px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#4573A2] w-40 h-7" />
+        <div className="flex items-center gap-2">
+          <div className="flex gap-0.5 bg-gray-100 rounded-lg p-0.5">
+            {(['aktive', 'deaktivierte', 'alle'] as const).map(f => (
+              <button key={f} onClick={() => setAktivFilter(f)}
+                className={`text-[10px] font-medium px-2 py-1 rounded-md transition-colors ${aktivFilter === f ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+                {f === 'aktive' ? 'Aktive' : f === 'deaktivierte' ? 'Deaktiv.' : 'Alle'}
+              </button>
+            ))}
+          </div>
+          <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suche..."
+            className="px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#4573A2] w-40 h-7" />
+        </div>
       </div>
 
       {toast && (
@@ -166,14 +183,19 @@ function FallCard({ fall }: { fall: Fall }) {
   const label = fall.mandatsnummer ?? fall.fall_nummer ?? fall.id.slice(0, 8)
   return (
     <Link href={`/admin/faelle/${fall.id}`}
-      className="block bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all cursor-grab active:cursor-grabbing"
+      className={`block rounded-lg border hover:shadow-sm transition-all cursor-grab active:cursor-grabbing ${
+        fall.ist_aktiv === false ? 'bg-red-50/60 border-red-200 opacity-60' : 'bg-white border-gray-200 hover:border-gray-300'
+      }`}
       style={{ padding: '6px 8px' }}
       onClick={e => e.stopPropagation()}>
       <div className="flex items-center justify-between mb-0.5">
         <span className="text-xs font-mono text-[#4573A2] truncate">{label}</span>
-        <span className="text-[9px] text-gray-400 shrink-0 ml-1">{timeSince(fall.created_at)}</span>
+        <div className="flex items-center gap-1 shrink-0 ml-1">
+          {fall.ist_aktiv === false && <span className="text-[8px] bg-red-100 text-red-500 px-1 py-0.5 rounded font-medium">Deaktiviert</span>}
+          <span className="text-[9px] text-gray-400">{timeSince(fall.created_at)}</span>
+        </div>
       </div>
-      {fall.kunde_name && <p className="text-xs font-medium text-gray-800 truncate">{fall.kunde_name}</p>}
+      {fall.kunde_name && <p className={`text-xs font-medium truncate ${fall.ist_aktiv === false ? 'text-gray-400 line-through' : 'text-gray-800'}`}>{fall.kunde_name}</p>}
       <div className="flex flex-wrap gap-1 mt-1">
         {fall.kennzeichen && <span className="bg-gray-100 text-gray-600 text-[9px] px-1 py-0.5 rounded">{fall.kennzeichen}</span>}
         {fall.schadenfall_typ && <span className="bg-[#4573A2]/5 text-[#4573A2] text-[9px] px-1 py-0.5 rounded">{SF_SHORT[fall.schadenfall_typ] ?? fall.schadenfall_typ}</span>}
