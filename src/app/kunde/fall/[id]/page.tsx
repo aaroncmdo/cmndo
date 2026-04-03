@@ -128,15 +128,15 @@ export default async function KundeFallPage({
 
               return (
                 <div key={phase.key}>
-                  {/* Hauptphase — grosser Punkt */}
+                  {/* Hauptphase — grosser Punkt: GRUEN sobald angefangen (pi <= progress.phase) */}
                   <div className="flex items-start gap-3">
                     <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                      phaseComplete ? 'bg-green-500' : phaseCurrent ? 'bg-[#4573A2] animate-pulse' : 'bg-gray-200'
+                      (phaseComplete || phaseCurrent) ? 'bg-green-500' : 'bg-gray-200'
                     }`}>
-                      {phaseComplete && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                      {(phaseComplete || phaseCurrent) && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
                     </div>
                     <div className="pb-1">
-                      <p className={`text-base font-semibold ${phaseComplete ? 'text-green-600' : phaseCurrent ? 'text-[#0D1B3E]' : 'text-gray-400'}`}>
+                      <p className={`text-base font-semibold ${(phaseComplete || phaseCurrent) ? 'text-green-600' : 'text-gray-400'}`}>
                         {phase.label}
                       </p>
                       {phaseCurrent && phase.desc && <p className="text-sm text-gray-500 mt-0.5">{phase.desc}</p>}
@@ -155,7 +155,7 @@ export default async function KundeFallPage({
                         <div className="flex flex-col items-center">
                           <div className={`w-0.5 h-2 ${subComplete || subCurrent ? 'bg-green-300' : 'bg-gray-200'}`} />
                           <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-                            subComplete ? 'bg-green-400' : subCurrent ? 'bg-[#4573A2]' : 'bg-gray-200'
+                            subComplete ? 'bg-green-400' : subCurrent ? 'bg-[#4573A2] animate-pulse' : 'bg-gray-200'
                           }`} />
                           <div className={`w-0.5 h-2 ${subComplete ? 'bg-green-300' : 'bg-gray-200'}`} />
                         </div>
