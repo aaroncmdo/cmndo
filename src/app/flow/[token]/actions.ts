@@ -253,7 +253,63 @@ export async function signSAandCreateFall(
     await sendStatusWhatsApp(fall.id, 'nach_sa_unterschrift')
   } catch { /* */ }
 
-  // 10. Benachrichtigung
+  // 10. WhatsApp an Gutachter: Termin bestätigt + Ablehnen-Link (KFZ-118)
+  if (lead.gutachter_termin) {
+    try {
+      // Gutachter-Daten laden
+      const { data: terminRow } = await admin.from('gutachter_termine')
+        .select('id, sv_id, ablehnen_token')
+        .eq('fall_id', fall.id)
+        .eq('status', 'bestaetigt')
+        .limit(1)
+        .maybeSingle()
+
+      if (terminRow?.sv_id) {
+        const { data: svData } = await admin.from('sachverstaendige')
+          .select('profile_id, profiles(telefon, vorname, nachname)')
+          .eq('id', terminRow.sv_id)
+          .single()
+
+        const svProfile = (Array.isArray(svData?.profiles) ? svData?.profiles[0] : svData?.profiles) as { telefon: string | null; vorname: string | null; nachname: string | null } | null
+        const svTelefon = svProfile?.telefon
+
+        if (svTelefon) {
+          const terminDate = new Date(lead.gutachter_termin)
+          const datum = terminDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
+          const uhrzeit = terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+          const kundeName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim()
+          const adresse = lead.fahrzeug_standort_adresse || lead.fahrzeug_standort_plz || 'Adresse folgt'
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://claimondo.de'
+          const ablehnenLink = terminRow.ablehnen_token
+            ? `${baseUrl}/api/termin/ablehnen?token=${terminRow.ablehnen_token}`
+            : ''
+
+          const { sendWhatsApp } = await import('@/lib/whatsapp')
+          await sendWhatsApp(svTelefon,
+            `✅ *Neuer Termin bestätigt!*\n\n` +
+            `Kunde: ${kundeName}\n` +
+            `Kennzeichen: ${lead.kennzeichen || '—'}\n` +
+            `Besichtigung: ${datum} um ${uhrzeit}\n` +
+            `Adresse: ${adresse}\n\n` +
+            `Falls Sie diesen Termin NICHT wahrnehmen können, klicken Sie hier:\n${ablehnenLink}\n\n` +
+            `Ansonsten steht der Termin. Viel Erfolg!`
+          )
+
+          // Mitteilung im Gutachter-Portal
+          await admin.from('gutachter_mitteilungen').insert({
+            sv_id: terminRow.sv_id,
+            typ: 'termin_bestaetigt',
+            titel: `Neuer Termin: ${datum} ${uhrzeit}`,
+            nachricht: `Besichtigung bei ${kundeName} in ${adresse}. Kennzeichen: ${lead.kennzeichen || '—'}.`,
+            dringend: true,
+            link: `/gutachter/fall/${fall.id}`,
+          })
+        }
+      }
+    } catch { /* WhatsApp an SV ist non-critical */ }
+  }
+
+  // 11. Benachrichtigung
   try { await notifyNeuerFall(fall.id) } catch { /* */ }
 
   return { fallId: fall.id }

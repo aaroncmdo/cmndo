@@ -19,7 +19,7 @@ import {
   DownloadIcon,
   FolderOpenIcon,
 } from 'lucide-react'
-import { uploadGutachten, uploadDokument, uploadDatei, saveFinVinGutachter, sendChatNachricht } from './actions'
+import { uploadGutachten, uploadDokument, uploadDatei, saveFinVinGutachter, sendChatNachricht, declineTermin } from './actions'
 import VorOrtPanel from '@/components/VorOrtPanel'
 import ChatChannel from '@/components/ChatChannel'
 
@@ -224,6 +224,11 @@ export default function FallDetailClient({
         </div>
 
         {/* Vor-Ort Button */}
+        {/* KFZ-118: Termin ablehnen */}
+        {fall.sv_termin && !hasGutachten && (fall.status === 'sv-termin' || fall.status === 'sv-zugewiesen') && (
+          <DeclineTerminButton fallId={fall.id as string} />
+        )}
+
         {fall.sv_termin && !hasGutachten && (fall.status === 'sv-termin' || fall.status === 'sv-zugewiesen') && (
           <div className="flex gap-2 mb-4">
             <button onClick={() => setShowVorOrt(true)}
@@ -930,5 +935,80 @@ function GutachterChatTabs({ fallId }: { fallId: string }) {
         <ChatChannel fallId={fallId} kanal={ch} currentUserId={userId} />
       </div>
     </div>
+  )
+}
+
+// ─── KFZ-118: Termin ablehnen Button + Modal ────────────────────────────────
+
+const DECLINE_REASONS = [
+  'Zeitlich nicht moeglich',
+  'Zu weit entfernt',
+  'Krankheit',
+  'Sonstiges',
+]
+
+function DeclineTerminButton({ fallId }: { fallId: string }) {
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const [grund, setGrund] = useState('')
+  const [declining, setDeclining] = useState(false)
+
+  async function handleDecline() {
+    setDeclining(true)
+    try {
+      await declineTermin(fallId, grund || 'Nicht angegeben')
+      setOpen(false)
+      router.refresh()
+    } catch { /* */ }
+    setDeclining(false)
+  }
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="w-full flex items-center justify-center gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 text-sm py-2 rounded-lg transition-colors mb-3 border border-red-200"
+      >
+        <XCircleIcon className="w-4 h-4" />
+        Termin ablehnen
+      </button>
+
+      {open && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Termin ablehnen?</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              Sind Sie sicher? Claimondo wird einen anderen Gutachter zuweisen.
+            </p>
+
+            <label className="text-xs text-gray-500 mb-1.5 block">Grund (optional)</label>
+            <select
+              value={grund}
+              onChange={e => setGrund(e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 mb-4 focus:outline-none focus:border-[#4573A2]"
+            >
+              <option value="">— Bitte waehlen —</option>
+              {DECLINE_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
+            </select>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setOpen(false)}
+                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={handleDecline}
+                disabled={declining}
+                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-50"
+              >
+                {declining ? 'Wird abgelehnt...' : 'Ja, ablehnen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

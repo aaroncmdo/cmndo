@@ -376,6 +376,92 @@ export async function uploadDatei(fallId: string, formData: FormData) {
   revalidatePath('/gutachter')
 }
 
+/**
+ * KFZ-118: Gutachter lehnt Termin ab (via Portal-Button)
+ */
+export async function declineTermin(fallId: string, grund: string) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const sv = await getGutachterForUser(supabase, user.id, 'id')
+  if (!sv) throw new Error('Kein Sachverstaendigen-Profil gefunden')
+
+  // Verify fall belongs to this gutachter
+  const { data: fall } = await supabase
+    .from('faelle')
+    .select('id, sv_id, fall_nummer')
+    .eq('id', fallId)
+    .eq('sv_id', sv.id)
+    .single()
+  if (!fall) throw new Error('Fall nicht gefunden')
+
+  // 1. gutachter_termine → abgelehnt
+  await supabase.from('gutachter_termine')
+    .update({ status: 'abgelehnt', abgelehnt_am: new Date().toISOString(), abgelehnt_grund: grund || 'Im Portal abgelehnt' })
+    .eq('fall_id', fallId)
+    .eq('sv_id', sv.id)
+    .in('status', ['reserviert', 'bestaetigt'])
+
+  // 2. Fall: sv_id NULL, gutachter_termin_status = abgelehnt
+  await supabase.from('faelle').update({
+    sv_id: null,
+    gutachter_termin_status: 'abgelehnt',
+    updated_at: new Date().toISOString(),
+  }).eq('id', fallId)
+
+  // 3. Timeline
+  await supabase.from('timeline').insert({
+    fall_id: fallId,
+    typ: 'system',
+    titel: 'Gutachter hat Termin abgelehnt',
+    beschreibung: `Grund: ${grund || 'Nicht angegeben'}. Neuer Gutachter wird gesucht.`,
+    erstellt_von: user.id,
+  })
+
+  // 4. WhatsApp an Admin (non-critical)
+  try {
+    const { data: svProfile } = await supabase.from('profiles').select('vorname, nachname').eq('id', user.id).single()
+    const svName = svProfile ? `${svProfile.vorname ?? ''} ${svProfile.nachname ?? ''}`.trim() : 'Gutachter'
+    const { sendManualWhatsApp } = await import('@/lib/whatsapp')
+    const { data: admins } = await supabase.from('profiles').select('telefon').eq('rolle', 'admin')
+    for (const a of admins ?? []) {
+      if (a.telefon) {
+        await sendManualWhatsApp(a.telefon,
+          `⚠️ Gutachter ${svName} hat den Termin für ${fall.fall_nummer ?? 'Fall'} ABGELEHNT. Grund: ${grund || '—'}. Bitte neuen Gutachter zuweisen.`,
+          fallId,
+        )
+      }
+    }
+  } catch { /* */ }
+
+  // 5. Task: Neuen Gutachter zuweisen
+  try {
+    const { data: fallData } = await supabase.from('faelle').select('kundenbetreuer_id').eq('id', fallId).single()
+    await supabase.from('tasks').insert({
+      fall_id: fallId,
+      titel: `Neuen Gutachter zuweisen für ${fall.fall_nummer ?? 'Fall'}`,
+      typ: 'dispatch',
+      status: 'offen',
+      prioritaet: 'hoch',
+      faellig_am: new Date().toISOString(),
+      zugewiesen_an: fallData?.kundenbetreuer_id ?? null,
+    })
+  } catch { /* */ }
+
+  // 6. Kapazität zurückgeben
+  try {
+    await supabase.rpc('increment_field', { row_id: sv.id, table_name: 'sachverstaendige', field_name: 'paket_faelle_genutzt', amount: -1 })
+  } catch {
+    // RPC may not exist, ignore
+  }
+
+  revalidatePath(`/gutachter/fall/${fallId}`)
+  revalidatePath('/gutachter/faelle')
+  revalidatePath('/gutachter/kalender')
+  revalidatePath('/gutachter')
+}
+
 export async function sendChatNachricht(fallId: string, nachricht: string) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
