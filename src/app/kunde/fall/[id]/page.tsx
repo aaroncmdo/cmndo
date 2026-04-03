@@ -99,46 +99,86 @@ export default async function KundeFallPage({
   }
 
   // Phase-Stepper Berechnung
-  const progress = computeProgress(fall)
+  const progress = berechneProgress(fall)
 
   return (
     <div>
-      {/* KFZ-126: Phase-Stepper mit Prozent */}
+      {/* KFZ-126: Vertikaler Phase-Stepper */}
       <div className="px-5 pt-5 pb-3 max-w-lg mx-auto">
         <Link href="/kunde" className="text-xs text-gray-400 hover:text-[#4573A2] mb-3 inline-block">&larr; Zurueck</Link>
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+          {/* Fortschrittsbalken oben */}
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-semibold text-[#0D1B3E]">{progress.label}</p>
-            <span className="text-sm font-bold text-[#4573A2]">{progress.pct}%</span>
+            <p className="text-base font-semibold text-[#0D1B3E]">Ihr Fortschritt</p>
+            <span className="text-base font-bold text-[#4573A2]">{progress.pct}%</span>
           </div>
-          <div className="w-full h-2.5 bg-gray-100 rounded-full mb-3">
+          <div className="w-full h-2.5 bg-gray-100 rounded-full mb-5">
             <div className="h-full bg-[#4573A2] rounded-full transition-all duration-700" style={{ width: `${progress.pct}%` }} />
           </div>
-          <p className="text-sm text-gray-500">{progress.next}</p>
 
-          {/* Mini-Phasen nur bis zur aktuellen */}
-          <div className="flex items-center gap-0.5 mt-4">
-            {PHASE_STEPS.map((step, i) => {
-              const reached = step.pct <= progress.pct
-              const isCurrent = step.pct === progress.pct || (i < PHASE_STEPS.length - 1 && PHASE_STEPS[i + 1].pct > progress.pct && step.pct <= progress.pct)
-              if (step.pct > progress.pct + 10) return null // nur abgeschlossene + aktuelle + naechste
+          {/* Vertikale Timeline */}
+          <div className="space-y-0">
+            {PHASES.map((phase, pi) => {
+              const phaseComplete = pi < progress.phase
+              const phaseCurrent = pi === progress.phase
+              const phaseVisible = pi <= progress.phase
+              if (!phaseVisible) return null
+
               return (
-                <div key={step.key} className="flex items-center flex-1">
-                  <div className={`w-2 h-2 rounded-full shrink-0 ${reached ? 'bg-[#4573A2]' : 'bg-gray-200'} ${isCurrent ? 'ring-2 ring-[#4573A2]/30' : ''}`} />
-                  {i < PHASE_STEPS.length - 1 && step.pct <= progress.pct + 10 && (
-                    <div className={`flex-1 h-0.5 mx-0.5 ${reached ? 'bg-[#4573A2]/40' : 'bg-gray-200'}`} />
+                <div key={phase.key}>
+                  {/* Hauptphase — grosser Punkt */}
+                  <div className="flex items-start gap-3 relative">
+                    <div className="flex flex-col items-center">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+                        phaseComplete ? 'bg-green-500' : phaseCurrent ? 'bg-[#4573A2] animate-pulse' : 'bg-gray-200'
+                      }`}>
+                        {phaseComplete && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                      </div>
+                    </div>
+                    <div className="pb-1">
+                      <p className={`text-base font-semibold ${phaseComplete ? 'text-green-600' : phaseCurrent ? 'text-[#0D1B3E]' : 'text-gray-400'}`}>
+                        {phase.label}
+                      </p>
+                      {phaseCurrent && <p className="text-sm text-gray-500 mt-0.5">{phase.desc}</p>}
+                    </div>
+                  </div>
+
+                  {/* Subprozesse — kleine Punkte eingerueckt */}
+                  {phase.subs.map((sub, si) => {
+                    const subComplete = phaseComplete || (phaseCurrent && si < progress.subStep)
+                    const subCurrent = phaseCurrent && si === progress.subStep
+                    const subVisible = phaseComplete || (phaseCurrent && si <= progress.subStep)
+                    if (!subVisible) return null
+
+                    return (
+                      <div key={sub} className="flex items-start gap-3 pl-8 relative">
+                        <div className="flex flex-col items-center">
+                          {/* Verbindungslinie */}
+                          <div className={`w-0.5 h-2 ${subComplete || subCurrent ? 'bg-green-300' : 'bg-gray-200'}`} />
+                          <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                            subComplete ? 'bg-green-400' : subCurrent ? 'bg-[#4573A2]' : 'bg-gray-200'
+                          }`} />
+                          <div className={`w-0.5 h-2 ${subComplete ? 'bg-green-300' : 'bg-gray-200'}`} />
+                        </div>
+                        <p className={`text-sm py-1 ${subComplete ? 'text-green-600' : subCurrent ? 'text-[#0D1B3E] font-medium' : 'text-gray-400'}`}>
+                          {sub}
+                        </p>
+                      </div>
+                    )
+                  })}
+
+                  {/* Verbindungslinie zur naechsten Hauptphase */}
+                  {pi < progress.phase && (
+                    <div className="pl-[9px]">
+                      <div className="w-0.5 h-3 bg-green-300" />
+                    </div>
+                  )}
+                  {phaseCurrent && pi < PHASES.length - 1 && (
+                    <div className="pl-[9px]">
+                      <div className="w-0.5 h-3 bg-gray-200" />
+                    </div>
                   )}
                 </div>
-              )
-            })}
-          </div>
-          <div className="flex mt-1 gap-0.5">
-            {PHASE_STEPS.map(step => {
-              if (step.pct > progress.pct + 10) return null
-              return (
-                <span key={step.key} className={`flex-1 text-[8px] ${step.pct <= progress.pct ? 'text-[#4573A2]' : 'text-gray-300'}`}>
-                  {step.label}
-                </span>
               )
             })}
           </div>
@@ -156,41 +196,65 @@ export default async function KundeFallPage({
   )
 }
 
-// ─── Phase Stepper ──────────────────────────────────────────────────────────
+// ─── 8 Hauptphasen mit Subprozessen ────────────────────────────────────────
 
-const PHASE_STEPS = [
-  { key: 'kontakt', label: 'Kontakt', pct: 5 },
-  { key: 'sa', label: 'SA', pct: 10 },
-  { key: 'sv', label: 'Gutachter', pct: 15 },
-  { key: 'termin', label: 'Termin', pct: 20 },
-  { key: 'besichtigung', label: 'Besicht.', pct: 30 },
-  { key: 'gutachten', label: 'Gutachten', pct: 50 },
-  { key: 'fertig', label: 'Fertig', pct: 55 },
-  { key: 'kanzlei', label: 'Kanzlei', pct: 65 },
-  { key: 'ansprueche', label: 'Ansprueche', pct: 75 },
-  { key: 'regulierung', label: 'Regulierung', pct: 85 },
-  { key: 'auszahlung', label: 'Auszahlung', pct: 100 },
+const PHASES = [
+  { key: 'kontakt', label: 'Kontakt aufgenommen', desc: 'Ihr Schadenfall wurde erfasst.',
+    subs: ['Schadenfall erfasst', 'Erstberatung abgeschlossen'] },
+  { key: 'sa', label: 'Sicherungsabtretung', desc: 'Ihre SA wird unterschrieben.',
+    subs: ['Datenschutz akzeptiert', 'SA unterschrieben', 'Account erstellt'] },
+  { key: 'gutachter', label: 'Gutachter wird gesucht', desc: 'Ein Sachverstaendiger wird zugewiesen.',
+    subs: ['Gutachter zugewiesen', 'Termin vereinbart', 'Terminbestaetigung erhalten'] },
+  { key: 'besichtigung', label: 'Fahrzeug-Besichtigung', desc: 'Der Gutachter besichtigt Ihr Fahrzeug.',
+    subs: ['Gutachter vor Ort', 'Besichtigung abgeschlossen', 'Fotos erstellt'] },
+  { key: 'gutachten', label: 'Gutachten wird erstellt', desc: 'Das Gutachten wird angefertigt.',
+    subs: ['Gutachten in Bearbeitung', 'Gutachten hochgeladen', 'Qualitaetspruefung bestanden'] },
+  { key: 'kanzlei', label: 'Kanzlei uebernimmt', desc: 'Ihr Fall wurde an die Partnerkanzlei uebergeben.',
+    subs: ['Mandat eroeffnet', 'Anspruchsschreiben an Versicherung'] },
+  { key: 'versicherung', label: 'Versicherung bearbeitet', desc: 'Die Versicherung reguliert Ihren Schaden.',
+    subs: ['Ansprueche eingereicht', 'Frist laeuft', 'Regulierung angekuendigt'] },
+  { key: 'auszahlung', label: 'Auszahlung', desc: 'Ihr Geld wird ausgezahlt.',
+    subs: ['Zahlung eingegangen', 'Auszahlung an Sie erfolgt', 'Fall abgeschlossen'] },
 ]
 
-function computeProgress(fall: Record<string, unknown>): { pct: number; label: string; next: string } {
+function berechneProgress(fall: Record<string, unknown>): { phase: number; subStep: number; pct: number } {
   const status = (fall.status as string) ?? 'ersterfassung'
   const sa = fall.sa_unterschrieben === true
+  const kundeId = fall.kunde_id as string | null
   const svId = fall.sv_id as string | null
   const svTermin = fall.sv_termin as string | null
+  const terminStatus = (fall.gutachter_termin_status as string) ?? ''
   const gutachtenAm = fall.gutachten_eingegangen_am as string | null
+  const regulierungAm = fall.regulierung_am as string | null
 
-  if (status === 'abgeschlossen') return { pct: 100, label: 'Abgeschlossen', next: 'Ihr Schadensfall wurde erfolgreich abgeschlossen!' }
-  if (status === 'regulierung') return { pct: 85, label: 'Regulierung', next: 'Die Versicherung bearbeitet Ihren Schaden.' }
-  if (status === 'anschlussschreiben') return { pct: 75, label: 'Ansprueche eingereicht', next: 'Die Kanzlei hat Ihre Ansprueche geltend gemacht.' }
-  if (status === 'kanzlei-uebergeben') return { pct: 65, label: 'Kanzlei', next: 'Ihr Fall wurde an die Partnerkanzlei uebergeben.' }
-  if (status === 'filmcheck' || status === 'qc-pruefung') return { pct: 55, label: 'Gutachten fertig', next: 'Ihr Gutachten wird geprueft.' }
-  if (gutachtenAm || status === 'gutachten-eingegangen') return { pct: 55, label: 'Gutachten fertig', next: 'Ihr Gutachten ist fertig.' }
-  if (status === 'besichtigung') return { pct: 30, label: 'Besichtigung', next: 'Der Gutachter besichtigt Ihr Fahrzeug.' }
-  if (svTermin) {
-    const d = new Date(svTermin as string)
-    return { pct: 20, label: 'Termin vereinbart', next: `Besichtigung: ${d.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' })} um ${d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}` }
-  }
-  if (svId) return { pct: 15, label: 'Gutachter zugewiesen', next: 'Ihr Gutachter meldet sich fuer einen Termin.' }
-  if (sa) return { pct: 10, label: 'SA unterschrieben', next: 'Ein Gutachter wird Ihnen zugewiesen.' }
-  return { pct: 5, label: 'Kontakt aufgenommen', next: 'Ihr Fall wird geprueft.' }
+  // Phase 8: Auszahlung
+  if (status === 'abgeschlossen') return { phase: 7, subStep: 2, pct: 100 }
+  if (regulierungAm) return { phase: 7, subStep: 1, pct: 95 }
+
+  // Phase 7: Versicherung
+  if (status === 'regulierung') return { phase: 6, subStep: 2, pct: 82 }
+  if (status === 'anschlussschreiben') return { phase: 6, subStep: 1, pct: 72 }
+
+  // Phase 6: Kanzlei
+  if (status === 'kanzlei-uebergeben') return { phase: 5, subStep: 0, pct: 58 }
+
+  // Phase 5: Gutachten
+  if (status === 'filmcheck' || status === 'qc-pruefung') return { phase: 4, subStep: 2, pct: 48 }
+  if (gutachtenAm || status === 'gutachten-eingegangen') return { phase: 4, subStep: 1, pct: 42 }
+
+  // Phase 4: Besichtigung
+  if (status === 'besichtigung') return { phase: 3, subStep: 1, pct: 28 }
+
+  // Phase 3: Gutachter
+  if (terminStatus === 'bestaetigt' && svTermin) return { phase: 2, subStep: 2, pct: 20 }
+  if (svTermin) return { phase: 2, subStep: 1, pct: 18 }
+  if (svId) return { phase: 2, subStep: 0, pct: 15 }
+
+  // Phase 2: SA
+  if (sa && kundeId) return { phase: 1, subStep: 2, pct: 10 }
+  if (sa) return { phase: 1, subStep: 1, pct: 8 }
+
+  // Phase 1: Kontakt
+  if (status !== 'ersterfassung') return { phase: 0, subStep: 1, pct: 5 }
+  return { phase: 0, subStep: 0, pct: 2 }
 }
