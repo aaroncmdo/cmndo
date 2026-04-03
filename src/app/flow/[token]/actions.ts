@@ -213,6 +213,9 @@ export async function signSAandCreateFall(
   signatureUrl: string,
   flowLinkId: string | null,
 ): Promise<{ fallId: string }> {
+  if (!leadId || !signatureUrl) throw new Error('Fehlende Daten fuer SA-Unterschrift')
+
+  try {
   const admin = createAdminClient()
 
   // 1. Lead-Daten laden
@@ -293,15 +296,14 @@ export async function signSAandCreateFall(
       gegner_name: lead.gegner_name ?? null,
       gegner_versicherung: lead.gegner_versicherung ?? null,
       gegner_kennzeichen: lead.gegner_kennzeichen ?? null,
-      eigene_versicherung: lead.eigene_versicherung ?? null,
-      eigene_policennr: lead.eigene_policennr ?? null,
       polizei_aktenzeichen: lead.polizei_aktenzeichen ?? null,
-      schadensursache: lead.schadensursache ?? null,
-      leasing_geber: lead.leasing_geber ?? null,
-      finanzierung_bank: lead.finanzierung_bank ?? null,
-      firma_name: lead.firma_name ?? null,
-      firma_ustid: lead.firma_ustid ?? null,
-      halter_name: lead.halter_name ?? null,
+      // BUG-58: Spalten die in faelle anders heissen oder nicht existieren — korrekt mappen
+      versicherung_name: lead.eigene_versicherung ?? null,
+      versicherung_schaden_nr: lead.eigene_policennr ?? null,
+      leasinggeber_name: lead.leasing_geber ?? null,
+      bank_name: lead.finanzierung_bank ?? null,
+      ust_id: lead.firma_ustid ?? null,
+      unfallhergang: lead.unfallhergang ?? null,
       kundenbetreuer_id: kundenbetreuerId,
       konvertiert_am: new Date().toISOString(),
       konvertiert_von_lead: leadId,
@@ -422,6 +424,11 @@ export async function signSAandCreateFall(
   try { await notifyNeuerFall(fall.id) } catch { /* */ }
 
   return { fallId: fall.id }
+
+  } catch (err) {
+    console.error('[signSAandCreateFall] FEHLER:', err)
+    throw err instanceof Error ? err : new Error(String(err))
+  }
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

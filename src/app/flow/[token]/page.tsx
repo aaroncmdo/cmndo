@@ -1,4 +1,4 @@
-import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import FlowWizardKfz from './FlowWizardKfz'
 
@@ -8,7 +8,8 @@ export default async function FlowPage({
   params: Promise<{ token: string }>
 }) {
   const { token } = await params
-  const supabase = await createClient()
+
+  try {
   const svc = createServiceClient()
 
   // 1. Look up flow_links by token
@@ -83,4 +84,16 @@ export default async function FlowPage({
       }}
     />
   )
+
+  } catch (err) {
+    console.error('[FlowPage] Server Error:', err)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-8">
+        <div className="text-center max-w-md">
+          <h1 className="text-lg font-semibold text-red-600 mb-2">Fehler beim Laden</h1>
+          <p className="text-gray-500 text-sm">Bitte versuchen Sie es erneut oder kontaktieren Sie uns.</p>
+        </div>
+      </div>
+    )
+  }
 }
