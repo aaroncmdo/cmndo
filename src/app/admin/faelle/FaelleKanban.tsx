@@ -1,10 +1,11 @@
 'use client'
 
-import { useMemo, useCallback, useState, useEffect } from 'react'
+import { useMemo, useCallback, useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import { updateFallStatus } from '../dispatch/actions'
+import { deleteFall, deactivateFall } from './[id]/actions'
 
 type Fall = {
   id: string
@@ -160,7 +161,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
                             {(dp, ds) => (
                               <div ref={dp.innerRef} {...dp.draggableProps} {...dp.dragHandleProps}
                                 className={`transition-shadow ${ds.isDragging ? 'opacity-80 shadow-xl' : ''}`}>
-                                <FallCard fall={fall} />
+                                <FallCard fall={fall} onRefresh={() => router.refresh()} />
                               </div>
                             )}
                           </Draggable>
@@ -179,33 +180,105 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
   )
 }
 
-function FallCard({ fall }: { fall: Fall }) {
+function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
+  const router = useRouter()
   const label = fall.mandatsnummer ?? fall.fall_nummer ?? fall.id.slice(0, 8)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [modal, setModal] = useState<'delete' | 'deactivate' | null>(null)
+  const [grund, setGrund] = useState('')
+  const [processing, setProcessing] = useState(false)
+  const [error, setError] = useState('')
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function h(e: MouseEvent) { if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false) }
+    document.addEventListener('mousedown', h)
+    return () => document.removeEventListener('mousedown', h)
+  }, [])
+
   return (
-    <Link href={`/admin/faelle/${fall.id}`}
-      className={`block rounded-lg border hover:shadow-sm transition-all cursor-grab active:cursor-grabbing ${
+    <>
+      <div className={`relative rounded-lg border hover:shadow-sm transition-all ${
         fall.ist_aktiv === false ? 'bg-red-50/60 border-red-200 opacity-60' : 'bg-white border-gray-200 hover:border-gray-300'
-      }`}
-      style={{ padding: '6px 8px' }}
-      onClick={e => e.stopPropagation()}>
-      <div className="flex items-center justify-between mb-0.5">
-        <span className="text-xs font-mono text-[#4573A2] truncate">{label}</span>
-        <div className="flex items-center gap-1 shrink-0 ml-1">
-          {fall.ist_aktiv === false && <span className="text-[8px] bg-red-100 text-red-500 px-1 py-0.5 rounded font-medium">Deaktiviert</span>}
-          <span className="text-[9px] text-gray-400">{timeSince(fall.created_at)}</span>
+      }`} style={{ padding: '6px 8px' }}>
+        <div className="flex items-center justify-between mb-0.5">
+          <Link href={`/admin/faelle/${fall.id}`} className="text-xs font-mono text-[#4573A2] truncate hover:underline" onClick={e => e.stopPropagation()}>
+            {label}
+          </Link>
+          <div className="flex items-center gap-1 shrink-0 ml-1" ref={menuRef}>
+            {fall.ist_aktiv === false && <span className="text-[8px] bg-red-100 text-red-500 px-1 py-0.5 rounded font-medium">Deaktiviert</span>}
+            <button onClick={e => { e.stopPropagation(); setMenuOpen(!menuOpen) }} className="p-0.5 text-gray-300 hover:text-gray-500 transition-colors">
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="4" r="2"/><circle cx="10" cy="10" r="2"/><circle cx="10" cy="16" r="2"/></svg>
+            </button>
+            {menuOpen && (
+              <div className="absolute right-1 top-6 bg-white border border-gray-200 rounded-lg shadow-lg py-1 w-36 z-30">
+                <Link href={`/admin/faelle/${fall.id}`} className="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50">Öffnen</Link>
+                <button onClick={() => { setMenuOpen(false); setModal('deactivate'); setGrund(''); setError('') }} className="w-full text-left px-3 py-1.5 text-xs text-amber-600 hover:bg-amber-50">Deaktivieren</button>
+                <button onClick={() => { setMenuOpen(false); setModal('delete'); setError('') }} className="w-full text-left px-3 py-1.5 text-xs text-red-500 hover:bg-red-50">Löschen</button>
+              </div>
+            )}
+          </div>
         </div>
+        <Link href={`/admin/faelle/${fall.id}`} onClick={e => e.stopPropagation()}>
+          {fall.kunde_name && <p className={`text-xs font-medium truncate ${fall.ist_aktiv === false ? 'text-gray-400 line-through' : 'text-gray-800'}`}>{fall.kunde_name}</p>}
+          <div className="flex flex-wrap gap-1 mt-1">
+            {fall.kennzeichen && <span className="bg-gray-100 text-gray-600 text-[9px] px-1 py-0.5 rounded">{fall.kennzeichen}</span>}
+            {fall.schadenfall_typ && <span className="bg-[#4573A2]/5 text-[#4573A2] text-[9px] px-1 py-0.5 rounded">{SF_SHORT[fall.schadenfall_typ] ?? fall.schadenfall_typ}</span>}
+          </div>
+          {(fall.betreuer_name || fall.sv_name) && (
+            <div className="flex gap-2 mt-1 text-[9px] text-gray-400 truncate">
+              {fall.betreuer_name && <span>KB: {fall.betreuer_name}</span>}
+              {fall.sv_name && <span>SV: {fall.sv_name}</span>}
+            </div>
+          )}
+        </Link>
       </div>
-      {fall.kunde_name && <p className={`text-xs font-medium truncate ${fall.ist_aktiv === false ? 'text-gray-400 line-through' : 'text-gray-800'}`}>{fall.kunde_name}</p>}
-      <div className="flex flex-wrap gap-1 mt-1">
-        {fall.kennzeichen && <span className="bg-gray-100 text-gray-600 text-[9px] px-1 py-0.5 rounded">{fall.kennzeichen}</span>}
-        {fall.schadenfall_typ && <span className="bg-[#4573A2]/5 text-[#4573A2] text-[9px] px-1 py-0.5 rounded">{SF_SHORT[fall.schadenfall_typ] ?? fall.schadenfall_typ}</span>}
-      </div>
-      {(fall.betreuer_name || fall.sv_name) && (
-        <div className="flex gap-2 mt-1 text-[9px] text-gray-400 truncate">
-          {fall.betreuer_name && <span>KB: {fall.betreuer_name}</span>}
-          {fall.sv_name && <span>SV: {fall.sv_name}</span>}
+
+      {/* Delete Confirmation */}
+      {modal === 'delete' && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setModal(null)}>
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-red-600 mb-2">Fall löschen?</h3>
+            <p className="text-sm text-gray-600 mb-1"><strong>{label}</strong> — {fall.kunde_name ?? 'Unbekannt'}</p>
+            <p className="text-xs text-gray-400 mb-4">Alle Daten werden unwiderruflich entfernt.</p>
+            {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
+            <div className="flex gap-2">
+              <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200">Abbrechen</button>
+              <button disabled={processing} onClick={async () => {
+                setProcessing(true)
+                try { await deleteFall(fall.id); onRefresh() } catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }
+                setProcessing(false); setModal(null)
+              }} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 disabled:opacity-40">
+                {processing ? 'Löscht...' : 'Endgültig löschen'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
-    </Link>
+
+      {/* Deactivate Confirmation */}
+      {modal === 'deactivate' && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setModal(null)}>
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Fall deaktivieren</h3>
+            <select value={grund} onChange={e => setGrund(e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3">
+              <option value="">— Grund —</option>
+              {['Kunde hat abgesagt', 'Kein Interesse', 'Duplikat', 'Spam', 'Sonstiges'].map(g => <option key={g} value={g}>{g}</option>)}
+            </select>
+            {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
+            <div className="flex gap-2">
+              <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200">Abbrechen</button>
+              <button disabled={processing || !grund} onClick={async () => {
+                setProcessing(true)
+                try { await deactivateFall(fall.id, grund, ''); onRefresh() } catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }
+                setProcessing(false); setModal(null)
+              }} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 disabled:opacity-40">
+                {processing ? 'Deaktiviert...' : 'Deaktivieren'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

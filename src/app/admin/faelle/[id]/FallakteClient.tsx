@@ -3542,7 +3542,6 @@ function FallActionsDropdown({ fallId, fallNummer, istAktiv }: { fallId: string;
   }, [])
 
   async function handleDelete() {
-    if (confirmId !== fallId.slice(0, 8)) { setError('Fall-ID stimmt nicht überein'); return }
     setProcessing(true); setError('')
     try {
       await deleteFall(fallId)
@@ -3596,14 +3595,11 @@ function FallActionsDropdown({ fallId, fallNummer, istAktiv }: { fallId: string;
               <p className="font-medium mb-1">WARNUNG: Dieser Fall wird UNWIDERRUFLICH gelöscht!</p>
               <p>Alle zugehörigen Daten werden entfernt: Dokumente, Chat-Nachrichten, Tasks, Historie, Termine.</p>
             </div>
-            <p className="text-sm text-gray-600 mb-1">Mandatsnummer: <strong>{fallNummer}</strong></p>
-            <p className="text-sm text-gray-500 mb-3">Zur Bestätigung die ersten 8 Zeichen der Fall-ID eingeben: <code className="bg-gray-100 px-1 rounded">{fallId.slice(0, 8)}</code></p>
-            <input value={confirmId} onChange={e => setConfirmId(e.target.value)} placeholder="Fall-ID eingeben"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:border-red-400" />
+            <p className="text-sm text-gray-600 mb-4">Mandatsnummer: <strong>{fallNummer}</strong></p>
             {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
             <div className="flex gap-2">
               <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200">Abbrechen</button>
-              <button onClick={handleDelete} disabled={processing || confirmId !== fallId.slice(0, 8)}
+              <button onClick={handleDelete} disabled={processing}
                 className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 disabled:opacity-40">
                 {processing ? 'Wird gelöscht...' : 'Endgültig löschen'}
               </button>

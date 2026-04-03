@@ -6,6 +6,7 @@ import RueckrufSection from './RueckrufSection'
 import LeadNotizen from './LeadNotizen'
 import LeadTimeline from './LeadTimeline'
 import DisqualifizierungButton from './DisqualifizierungButton'
+import LeadActionsMenu from './LeadActionsMenu'
 import LeadHistorie from './LeadHistorie'
 import LeadInlineFields from './LeadInlineFields'
 import LeadDetailTabs from './LeadDetailTabs'
@@ -84,6 +85,7 @@ export default async function LeadDetailPage({
                   DISQUALIFIZIERT: {lead.disqualifiziert_grund ?? 'Unbekannt'}
                 </span>
               )}
+              <LeadActionsMenu leadId={lead.id} leadName={`${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || 'Lead'} />
             </div>
           </div>
 

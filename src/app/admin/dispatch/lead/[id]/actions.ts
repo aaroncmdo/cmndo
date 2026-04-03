@@ -374,3 +374,35 @@ export async function handleGegenvorschlag(
   revalidatePath(`/admin/dispatch/lead/${leadId}`)
   revalidatePath('/admin/dispatch')
 }
+
+// ─── BUG-47: Lead komplett löschen ──────────────────────────────────────────
+
+export async function deleteLead(leadId: string) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const { error } = await supabase.rpc('delete_lead_komplett', { p_lead_id: leadId })
+  if (error) throw new Error(`Löschen fehlgeschlagen: ${error.message}`)
+
+  revalidatePath('/admin/dispatch')
+  revalidatePath('/admin/faelle')
+}
+
+// ─── BUG-47: Lead deaktivieren ──────────────────────────────────────────────
+
+export async function deactivateLead(leadId: string, grund: string) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  await supabase.from('leads').update({
+    status: 'disqualifiziert',
+    disqualifiziert: true,
+    disqualifiziert_grund: grund,
+    disqualifiziert_am: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  }).eq('id', leadId)
+
+  revalidatePath('/admin/dispatch')
+}
