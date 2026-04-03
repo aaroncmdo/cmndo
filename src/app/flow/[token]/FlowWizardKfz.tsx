@@ -5,8 +5,6 @@ import { createClient } from '@/lib/supabase/client'
 import { signSAandCreateFall, createKundeAccount, updateLeadStammdaten, generateSAPdf } from './actions'
 import {
   CheckIcon,
-  CameraIcon,
-  UploadIcon,
   FileTextIcon,
   CarIcon,
   ShieldCheckIcon,
@@ -14,8 +12,6 @@ import {
   ExternalLinkIcon,
   UserPlusIcon,
   MailIcon,
-  EyeIcon,
-  EyeOffIcon,
   SkipForwardIcon,
   PenToolIcon,
   Trash2Icon,
@@ -46,13 +42,12 @@ export type LeadData = {
   unfallhergang: string
 }
 
-type StepId = 'stammdaten' | 'sa' | 'account' | 'onboarding'
+type StepId = 'stammdaten' | 'sa' | 'account'
 
 const STEPS: { id: StepId; label: string }[] = [
   { id: 'stammdaten', label: 'Stammdaten' },
   { id: 'sa', label: 'Beauftragung' },
   { id: 'account', label: 'Konto' },
-  { id: 'onboarding', label: 'Dokumente' },
 ]
 
 // ─── SF Labels ───────────────────────────────────────────────────────────────
@@ -95,14 +90,6 @@ export default function FlowWizardKfz({
   const [showPw, setShowPw] = useState(false)
   const [creatingAccount, setCreatingAccount] = useState(false)
   const [accountCreated, setAccountCreated] = useState(false)
-
-  // Onboarding step
-  const [fahrzeugschein, setFahrzeugschein] = useState<File | null>(null)
-  const [unfallmitteilung, setUnfallmitteilung] = useState<File | null>(null)
-  const [fuehrerschein, setFuehrerschein] = useState<File | null>(null)
-  const [schadensfotos, setSchadensfotos] = useState<File[]>([])
-  const [uploadingDocs, setUploadingDocs] = useState(false)
-  const [skipDocs, setSkipDocs] = useState(false)
 
   const currentStep = STEPS[stepIndex]
   const progress = Math.round(((stepIndex + 1) / STEPS.length) * 100)
@@ -159,62 +146,14 @@ export default function FlowWizardKfz({
     }
   }
 
-  // ─── Dokumente hochladen ───────────────────────────────────────────────────
+  // ─── Redirect zum Portal nach Account ────────────────────────────────────
 
-  async function handleUploadDocs() {
-    if (!fallId) return
-    setUploadingDocs(true)
-    setError(null)
-    try {
-      const supabase = createClient()
-      const uploads: { file: File; category: string }[] = []
-      if (fahrzeugschein) uploads.push({ file: fahrzeugschein, category: 'fahrzeugschein' })
-      if (unfallmitteilung) uploads.push({ file: unfallmitteilung, category: 'unfallmitteilung' })
-      if (fuehrerschein) uploads.push({ file: fuehrerschein, category: 'fuehrerschein' })
-      for (const f of schadensfotos) uploads.push({ file: f, category: 'schadensfoto' })
-
-      for (const { file, category } of uploads) {
-        const ext = file.name.split('.').pop() ?? 'jpg'
-        const path = `flow/${token}/${fallId}/${category}_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`
-        const { error: upErr } = await supabase.storage.from('dokumente').upload(path, file, { contentType: file.type })
-        if (upErr) throw new Error(upErr.message)
-        const { data: { publicUrl } } = supabase.storage.from('dokumente').getPublicUrl(path)
-
-        const kat = category === 'schadensfoto' ? 'schadensfoto' : 'kundendokument'
-        await supabase.from('dokumente').insert({
-          fall_id: fallId,
-          typ: category,
-          datei_url: publicUrl,
-          datei_name: file.name,
-          datei_groesse: file.size,
-          kategorie: kat,
-          quelle: 'flowlink',
-          hochgeladen_von_rolle: 'kunde',
-          sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
-        })
-      }
-
-      // Timeline
-      await supabase.from('timeline').insert({
-        fall_id: fallId,
-        typ: 'system',
-        titel: 'Onboarding-Dokumente hochgeladen',
-        beschreibung: `${uploads.length} Dokument(e) via FlowLink hochgeladen.`,
-      })
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fehler beim Hochladen')
-      setUploadingDocs(false)
-      return
+  function redirectToPortal() {
+    if (fallId) {
+      window.location.href = `/kunde/onboarding/${fallId}`
+    } else {
+      window.location.href = '/kunde'
     }
-    setUploadingDocs(false)
-    // Redirect to Fallakte
-    window.location.href = `/kunde/fall/${fallId}`
-  }
-
-  // ─── Done: Redirect after skip ─────────────────────────────────────────────
-
-  function handleSkipDocs() {
-    if (fallId) window.location.href = `/kunde/fall/${fallId}`
   }
 
   // ─── Render ────────────────────────────────────────────────────────────────
@@ -379,10 +318,10 @@ export default function FlowWizardKfz({
                       <p className="text-xs text-gray-400 mt-3">Bitte aendern Sie Ihr Passwort nach dem ersten Login.</p>
                     </div>
                     <button
-                      onClick={() => setStepIndex(3)}
+                      onClick={redirectToPortal}
                       className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
                     >
-                      Weiter zu Dokumenten
+                      Weiter zum Portal
                     </button>
                   </div>
                 ) : (
@@ -412,88 +351,19 @@ export default function FlowWizardKfz({
 
                     <div className="border-t border-gray-100 pt-4">
                       <button
-                        onClick={() => setStepIndex(3)}
+                        onClick={redirectToPortal}
                         className="w-full flex items-center justify-center gap-2 py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors"
                       >
                         <SkipForwardIcon className="w-4 h-4" />
-                        Ueberspringen
+                        Ueberspringen — Wir informieren per WhatsApp
                       </button>
-                      <p className="text-xs text-gray-400 text-center mt-1">
-                        Wir informieren Sie per WhatsApp. Ohne Account koennen Sie Ihren Fall nicht online verfolgen.
-                      </p>
                     </div>
                   </div>
                 )}
               </div>
             )}
 
-            {/* ═══ SCHRITT 4: ONBOARDING (Dokumente hochladen) ═══ */}
-            {currentStep.id === 'onboarding' && (
-              <div>
-                <StepHeader
-                  question="Dokumente hochladen"
-                  sub="Laden Sie bitte Ihre Fahrzeugdokumente hoch, damit der Gutachter starten kann."
-                />
-
-                <div className="space-y-4 mb-5">
-                  <FileUploadField
-                    label="Fahrzeugschein"
-                    accept="image/*,.pdf"
-                    file={fahrzeugschein}
-                    onFile={setFahrzeugschein}
-                    required
-                  />
-
-                  {lead.polizei_vor_ort && (
-                    <FileUploadField
-                      label="Unfallmitteilung"
-                      accept="image/*,.pdf"
-                      file={unfallmitteilung}
-                      onFile={setUnfallmitteilung}
-                      required
-                    />
-                  )}
-
-                  <FileUploadField
-                    label="Fuehrerschein"
-                    accept="image/*,.pdf"
-                    file={fuehrerschein}
-                    onFile={setFuehrerschein}
-                  />
-
-                  {/* Schadensfotos */}
-                  <div>
-                    <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">
-                      Schadensfotos <span className="text-gray-400 normal-case ml-1">(optional)</span>
-                    </label>
-                    <MultiPhotoUpload photos={schadensfotos} onChange={setSchadensfotos} />
-                  </div>
-                </div>
-
-                {error && <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4">{error}</p>}
-
-                <button
-                  onClick={handleUploadDocs}
-                  disabled={!fahrzeugschein || uploadingDocs || (lead.polizei_vor_ort && !unfallmitteilung)}
-                  className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
-                >
-                  {uploadingDocs ? 'Wird hochgeladen ...' : 'Dokumente senden & zur Fallakte'}
-                </button>
-
-                <div className="border-t border-gray-100 mt-4 pt-4">
-                  <button
-                    onClick={handleSkipDocs}
-                    className="w-full flex items-center justify-center gap-2 py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors"
-                  >
-                    <SkipForwardIcon className="w-4 h-4" />
-                    Ich lade spaeter hoch
-                  </button>
-                  <p className="text-xs text-gray-400 text-center mt-1">
-                    Sie erhalten in 3 Tagen eine Erinnerung.
-                  </p>
-                </div>
-              </div>
-            )}
+            {/* KFZ-125: Onboarding/Uploads ins Kunden-Portal verschoben */}
           </div>
         </div>
 
@@ -566,96 +436,6 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
     <div className="flex flex-col gap-0.5 px-4 py-3 rounded-xl bg-gray-50 border border-gray-100">
       <span className="text-xs text-gray-500">{label}</span>
       <span className="text-sm text-gray-800 break-words">{value}</span>
-    </div>
-  )
-}
-
-function FileUploadField({
-  label,
-  accept,
-  file,
-  onFile,
-  required,
-}: {
-  label: string
-  accept: string
-  file: File | null
-  onFile: (f: File | null) => void
-  required?: boolean
-}) {
-  const ref = useRef<HTMLInputElement>(null)
-
-  return (
-    <div>
-      <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">
-        {label} {required && <span className="text-red-400">*</span>}
-      </label>
-      {file ? (
-        <div className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-emerald-200 bg-emerald-50">
-          <CheckIcon className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-          <span className="text-sm text-emerald-700 truncate flex-1">{file.name}</span>
-          <button
-            onClick={() => { onFile(null); if (ref.current) ref.current.value = '' }}
-            className="text-xs text-gray-500 hover:text-gray-700 flex-shrink-0"
-          >
-            Entfernen
-          </button>
-        </div>
-      ) : (
-        <button
-          onClick={() => ref.current?.click()}
-          className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 hover:border-gray-300 transition-all active:scale-[0.98]"
-        >
-          <UploadIcon className="w-5 h-5 text-gray-400" />
-          <span className="text-sm text-gray-600">Datei auswaehlen</span>
-        </button>
-      )}
-      <input
-        ref={ref}
-        type="file"
-        accept={accept}
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f) }}
-        className="hidden"
-      />
-    </div>
-  )
-}
-
-function MultiPhotoUpload({ photos, onChange }: { photos: File[]; onChange: (f: File[]) => void }) {
-  const ref = useRef<HTMLInputElement>(null)
-  return (
-    <div>
-      <button
-        onClick={() => ref.current?.click()}
-        className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 hover:border-gray-300 transition-all active:scale-[0.98]"
-      >
-        <CameraIcon className="w-5 h-5 text-gray-400" />
-        <span className="text-sm text-gray-600">Fotos aufnehmen oder hochladen</span>
-      </button>
-      <input
-        ref={ref}
-        type="file"
-        accept="image/*"
-        multiple
-        capture="environment"
-        onChange={(e) => { if (e.target.files) onChange([...photos, ...Array.from(e.target.files).filter(f => f.type.startsWith('image/'))]) }}
-        className="hidden"
-      />
-      {photos.length > 0 && (
-        <div className="mt-3 grid grid-cols-4 gap-2">
-          {photos.map((f, i) => (
-            <div key={i} className="relative group aspect-square">
-              <img src={URL.createObjectURL(f)} alt="" className="w-full h-full object-cover rounded-xl" />
-              <button
-                onClick={() => onChange(photos.filter((_, idx) => idx !== i))}
-                className="absolute top-1 right-1 w-6 h-6 rounded-full bg-white/90 text-gray-700 shadow-sm flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity"
-              >
-                <Trash2Icon className="w-3 h-3" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   )
 }
