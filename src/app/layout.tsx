@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -32,6 +33,7 @@ export default function RootLayout({
           Zum Hauptinhalt springen
         </a>
         {children}
+        <Toaster position="top-right" richColors closeButton />
       </body>
     </html>
   );

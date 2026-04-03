@@ -47,12 +47,62 @@ export async function disqualifiziereLead(
   revalidatePath('/admin/dispatch')
 }
 
+// ─── BUG-57: SV gesucht setzen ────────────────────────────────────────────
+
+export async function setSvGesucht(
+  leadId: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient()
+    const user = (await supabase.auth.getUser())?.data?.user ?? null
+    if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+    // Fall updaten (wenn vorhanden)
+    const { data: fall } = await supabase
+      .from('faelle')
+      .select('id')
+      .eq('lead_id', leadId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (fall) {
+      await supabase.from('faelle').update({
+        gutachter_termin_status: 'sv_gesucht',
+        updated_at: new Date().toISOString(),
+      }).eq('id', fall.id)
+
+      await supabase.from('timeline').insert({
+        fall_id: fall.id,
+        typ: 'system',
+        titel: 'SV gesucht',
+        beschreibung: 'Kein passender Sachverstaendiger im Gebiet gefunden. Status auf "SV gesucht" gesetzt. Termin verfaellt NICHT.',
+        erstellt_von: user.id,
+      })
+    }
+
+    // Lead auch markieren
+    await supabase.from('leads').update({
+      updated_at: new Date().toISOString(),
+    }).eq('id', leadId)
+
+    revalidatePath(`/admin/dispatch/lead/${leadId}`)
+    revalidatePath('/admin/dispatch')
+    return { success: true }
+  } catch (err) {
+    console.error('[setSvGesucht] Error:', err)
+    return { success: false, error: String(err) }
+  }
+}
+
 export async function confirmGutachterTermin(
   leadId: string,
   svId: string,
   termin: string,
   fahrzeugPlz: string,
   fahrzeugAdresse: string,
+  besichtigungsortLat?: number | null,
+  besichtigungsortLng?: number | null,
 ) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -100,6 +150,8 @@ export async function confirmGutachterTermin(
         sv_zugewiesen_am: now,
         gutachter_termin_status: 'reserviert',
         besichtigungsort_adresse: fahrzeugAdresse || null,
+        besichtigungsort_lat: besichtigungsortLat ?? null,
+        besichtigungsort_lng: besichtigungsortLng ?? null,
         status: 'sv-termin',
         updated_at: now,
       })

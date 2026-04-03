@@ -17,33 +17,55 @@ export default async function LeadDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const supabase = await createClient()
 
-  const { data: lead } = await supabase
-    .from('leads')
-    .select('*')
-    .eq('id', id)
-    .single()
+  let lead: Record<string, unknown> | null = null
+  let faelle: Array<{ id: string; fall_nummer: string | null; status: string | null; schadens_ursache: string | null; created_at: string | null }> = []
+  let timelineEntries: Array<{ id: string; typ: string | null; titel: string | null; beschreibung: string | null; created_at: string | null }> = []
+
+  try {
+    const supabase = await createClient()
+
+    const { data: leadData } = await supabase
+      .from('leads')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (!leadData) notFound()
+    lead = leadData
+
+    // Zugehoerige Faelle laden
+    const { data: faelleData } = await supabase
+      .from('faelle')
+      .select('id, fall_nummer, status, schadens_ursache, created_at')
+      .eq('lead_id', id)
+      .order('created_at', { ascending: false })
+
+    faelle = faelleData ?? []
+
+    // Timeline: aus Fall laden falls vorhanden
+    const fallId = faelle?.[0]?.id ?? null
+    const { data: tlData } = fallId
+      ? await supabase
+          .from('timeline')
+          .select('id, typ, titel, beschreibung, created_at')
+          .eq('fall_id', fallId)
+          .order('created_at', { ascending: false })
+          .limit(30)
+      : { data: [] }
+
+    timelineEntries = tlData ?? []
+  } catch (err) {
+    console.error('[LeadDetailPage] Server Error:', err)
+    return (
+      <div className="p-8 text-center">
+        <h1 className="text-lg font-semibold text-red-600 mb-2">Fehler beim Laden</h1>
+        <p className="text-gray-500 text-sm">{String(err)}</p>
+      </div>
+    )
+  }
 
   if (!lead) notFound()
-
-  // Zugehoerige Faelle laden
-  const { data: faelle } = await supabase
-    .from('faelle')
-    .select('id, fall_nummer, status, schadens_ursache, created_at')
-    .eq('lead_id', id)
-    .order('created_at', { ascending: false })
-
-  // Timeline: aus Fall laden falls vorhanden
-  const fallId = faelle?.[0]?.id ?? null
-  const { data: timelineEntries } = fallId
-    ? await supabase
-        .from('timeline')
-        .select('id, typ, titel, beschreibung, created_at')
-        .eq('fall_id', fallId)
-        .order('created_at', { ascending: false })
-        .limit(30)
-    : { data: [] }
 
   return (
     <div className="h-full flex flex-col overflow-hidden">

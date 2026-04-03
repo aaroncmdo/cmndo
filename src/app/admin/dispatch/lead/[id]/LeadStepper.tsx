@@ -2,7 +2,8 @@
 
 import { useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import { saveLeadQualifizierung, confirmGutachterTermin } from './actions'
+import { toast } from 'sonner'
+import { saveLeadQualifizierung, confirmGutachterTermin, setSvGesucht } from './actions'
 import { sendFlowLink } from '../../actions'
 import {
   PhoneCallIcon,
@@ -122,7 +123,11 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
-  // Form state
+  // Form state — BUG-57: Vorname, Nachname, Telefon, Email EDITIERBAR
+  const [vorname, setVorname] = useState(lead.vorname ?? '')
+  const [nachname, setNachname] = useState(lead.nachname ?? '')
+  const [telefon, setTelefon] = useState(lead.telefon ?? '')
+  const [email, setEmail] = useState(lead.email ?? '')
   const [sf, setSf] = useState(lead.schadenfall_typ ?? '')
   const [kk, setKk] = useState(lead.kunden_konstellation ?? 'kk-01')
   const [sfVariante, setSfVariante] = useState(lead.sf_variante ?? '')
@@ -170,6 +175,8 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
     setSaving(true); setSaved(false)
     try {
       await saveLeadQualifizierung(lead.id, {
+        vorname: vorname || null, nachname: nachname || null,
+        telefon: telefon || null, email: email || null,
         schadenfall_typ: sf || null, kunden_konstellation: kk || null,
         qualifizierungs_phase: newPhase,
         sf_variante: sf === 'sf-03' ? sfVariante || null : null,
@@ -289,6 +296,10 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
           {STEPS[openStep]?.key === 'erstkontakt' && (
             <StepErstkontakt done={isStepDone(0)} saving={saving} onAdvance={() => saveAndAdvance('erstkontakt')}
               lead={lead}
+              vorname={vorname} setVorname={setVorname}
+              nachname={nachname} setNachname={setNachname}
+              telefon={telefon} setTelefon={setTelefon}
+              email={email} setEmail={setEmail}
               kundeAdresse={kundeAdresse} onAdresseChange={(a, lat, lng) => { setKundeAdresse(a); setKundeLat(lat); setKundeLng(lng) }} />
           )}
           {STEPS[openStep]?.key === 'schadentyp' && (
@@ -327,17 +338,17 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
           )}
           {STEPS[openStep]?.key === 'termin' && (
             <StepGutachterTermin lead={lead} saving={saving}
-              onAdvance={(svId, termin, plz, adresse) => {
+              onAdvance={(svId, termin, plz, adresse, bLat, bLng) => {
                 setSaving(true)
-                confirmGutachterTermin(lead.id, svId, termin, plz, adresse)
+                confirmGutachterTermin(lead.id, svId, termin, plz, adresse, bLat, bLng)
                   .then(() => {
-                    console.log('[LeadStepper] confirmGutachterTermin SUCCESS → saveAndAdvance')
+                    toast.success('Gutachter-Termin reserviert')
                     return saveAndAdvance('gutachtertermin')
                   })
                   .catch((err) => {
                     console.error('[LeadStepper] confirmGutachterTermin FEHLER:', err)
                     setSaving(false)
-                    alert(`Fehler beim Zuweisen: ${err instanceof Error ? err.message : String(err)}`)
+                    toast.error(`Fehler beim Zuweisen: ${err instanceof Error ? err.message : String(err)}`)
                   })
               }} />
           )}
@@ -357,20 +368,27 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
 
 // ─── Step 1: Erstkontakt ────────────────────────────────────────────────────
 
-function StepErstkontakt({ done, saving, onAdvance, lead, kundeAdresse, onAdresseChange }: {
+function StepErstkontakt({ done, saving, onAdvance, lead,
+  vorname, setVorname, nachname, setNachname, telefon, setTelefon, email, setEmail,
+  kundeAdresse, onAdresseChange,
+}: {
   done: boolean; saving: boolean; onAdvance: () => void
   lead: LeadData
+  vorname: string; setVorname: (v: string) => void
+  nachname: string; setNachname: (v: string) => void
+  telefon: string; setTelefon: (v: string) => void
+  email: string; setEmail: (v: string) => void
   kundeAdresse: string; onAdresseChange: (adresse: string, lat: number | null, lng: number | null) => void
 }) {
   if (done) {
-    const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
+    const name = [vorname || lead.vorname, nachname || lead.nachname].filter(Boolean).join(' ') || '—'
     return (
       <div className="space-y-2">
         <p className="text-emerald-500 text-sm flex items-center gap-2"><CheckCircle2Icon className="w-4 h-4" /> Erstkontakt hergestellt</p>
         <div className="text-xs text-gray-500 space-y-0.5">
           <p><strong>Name:</strong> {name}</p>
-          {lead.telefon && <p><strong>Telefon:</strong> {lead.telefon}</p>}
-          {lead.email && <p><strong>Email:</strong> {lead.email}</p>}
+          {(telefon || lead.telefon) && <p><strong>Telefon:</strong> {telefon || lead.telefon}</p>}
+          {(email || lead.email) && <p><strong>Email:</strong> {email || lead.email}</p>}
         </div>
       </div>
     )
@@ -379,26 +397,14 @@ function StepErstkontakt({ done, saving, onAdvance, lead, kundeAdresse, onAdress
     <div className="space-y-3">
       <p className="text-gray-500 text-sm">Rufen Sie den Lead an und stellen Sie den Erstkontakt her.</p>
 
-      {/* Kontaktdaten-Zusammenfassung (Bearbeitung im Header / LeadInlineFields) */}
-      <fieldset className="border border-gray-200 rounded-xl p-3 space-y-1.5">
+      {/* Kontaktdaten — BUG-57: EDITIERBAR */}
+      <fieldset className="border border-gray-200 rounded-xl p-3 space-y-2">
         <legend className="text-xs text-[#4573A2] font-medium px-2">Kontaktdaten</legend>
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <span className="text-xs text-gray-500">Vorname</span>
-            <p className="text-gray-800 font-medium">{lead.vorname || '—'}</p>
-          </div>
-          <div>
-            <span className="text-xs text-gray-500">Nachname</span>
-            <p className="text-gray-800 font-medium">{lead.nachname || '—'}</p>
-          </div>
-          <div>
-            <span className="text-xs text-gray-500">Telefon</span>
-            <p className="text-gray-800">{lead.telefon || '—'}</p>
-          </div>
-          <div>
-            <span className="text-xs text-gray-500">Email</span>
-            <p className="text-gray-800 truncate">{lead.email || '—'}</p>
-          </div>
+        <div className="grid grid-cols-2 gap-2">
+          <Input label="Vorname *" value={vorname} onChange={setVorname} />
+          <Input label="Nachname *" value={nachname} onChange={setNachname} />
+          <Input label="Telefon *" value={telefon} onChange={setTelefon} />
+          <Input label="Email" value={email} onChange={setEmail} />
         </div>
       </fieldset>
 
@@ -413,7 +419,7 @@ function StepErstkontakt({ done, saving, onAdvance, lead, kundeAdresse, onAdress
         />
       </div>
 
-      <button onClick={onAdvance} disabled={saving}
+      <button onClick={onAdvance} disabled={saving || !vorname || !nachname}
         className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-white text-sm font-medium rounded-xl px-5 py-2.5 transition-colors flex items-center gap-2">
         <PhoneCallIcon className="w-4 h-4" /> {saving ? 'Speichert...' : 'Erstkontakt hergestellt'}
       </button>
@@ -610,8 +616,9 @@ function StepGegner({ gegnerName, setGegnerName, gegnerVersicherung, setGegnerVe
 // ─── Step 5: Gutachtertermin ────────────────────────────────────────────────
 
 function StepGutachterTermin({ lead, saving: parentSaving, onAdvance }: {
-  lead: LeadData; saving: boolean; onAdvance: (svId: string, termin: string, plz: string, adresse: string) => void
+  lead: LeadData; saving: boolean; onAdvance: (svId: string, termin: string, plz: string, adresse: string, lat?: number | null, lng?: number | null) => void
 }) {
+  const router = useRouter()
   const [plz, setPlz] = useState(lead.fahrzeug_standort_plz ?? '')
   const [adresse, setAdresse] = useState(lead.fahrzeug_standort_adresse ?? '')
   const [lat, setLat] = useState<number | null>(null)
@@ -620,12 +627,13 @@ function StepGutachterTermin({ lead, saving: parentSaving, onAdvance }: {
   const [searching, setSearching] = useState(false)
   const [result, setResult] = useState<MatchResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [settingSvGesucht, setSettingSvGesucht] = useState(false)
 
-  function handlePlaceSelect(result: PlaceResult) {
-    setAdresse(result.adresse)
-    setPlz(result.plz)
-    setLat(result.lat)
-    setLng(result.lng)
+  function handlePlaceSelect(r: PlaceResult) {
+    setAdresse(r.adresse)
+    setPlz(r.plz)
+    setLat(r.lat)
+    setLng(r.lng)
   }
 
   if (lead.gutachter_termin) {
@@ -645,11 +653,35 @@ function StepGutachterTermin({ lead, saving: parentSaving, onAdvance }: {
     setSearching(true); setError(null); setResult(null)
     try {
       const res = await fetch('/api/gutachter-matching', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plz, lat, lng, wunschtermin: new Date(wunschtermin).toISOString(), schadenfall_typ: lead.schadenfall_typ }) })
-      if (!res.ok) { const data = await res.json(); throw new Error(data.error ?? 'Suche fehlgeschlagen') }
+      if (!res.ok) { const data = await res.json(); throw new Error(data?.error ?? 'Suche fehlgeschlagen') }
       setResult(await res.json())
-    } catch (err) { setError(err instanceof Error ? err.message : 'Fehler') }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Fehler'
+      setError(msg)
+      toast.error(msg)
+    }
     finally { setSearching(false) }
   }
+
+  async function handleSvGesucht() {
+    setSettingSvGesucht(true)
+    try {
+      const res = await setSvGesucht(lead.id)
+      if (res?.success) {
+        toast.success('Status auf "SV gesucht" gesetzt — Termin verfaellt NICHT')
+        router.refresh()
+      } else {
+        toast.error(res?.error ?? 'Fehler beim Setzen')
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Fehler')
+    } finally {
+      setSettingSvGesucht(false)
+    }
+  }
+
+  const svGesucht = result && (result as Record<string, unknown>).sv_gesucht === true
+  const slots = result ? [result.empfohlen, result.alternative_1, result.alternative_2].filter(Boolean) : []
 
   return (
     <div className="space-y-3">
@@ -682,10 +714,29 @@ function StepGutachterTermin({ lead, saving: parentSaving, onAdvance }: {
       )}
       {result && (
         <div className="space-y-2">
-          {[result.empfohlen, result.alternative_1, result.alternative_2].filter(Boolean).map((slot, i) => (
-            <SlotCard key={slot!.sv_id + slot!.termin} slot={slot!} label={i === 0 ? 'Empfohlen' : `Alternative ${i}`} variant={i === 0 ? 'empfohlen' : 'alternative'}
-              onConfirm={() => onAdvance(slot!.sv_id, slot!.termin, plz, adresse)} confirming={parentSaving} />
-          ))}
+          {slots.length > 0 ? (
+            <>
+              {slots.map((slot, i) => (
+                <SlotCard key={slot!.sv_id + slot!.termin} slot={slot!} label={i === 0 ? 'Empfohlen' : `Alternative ${i}`} variant={i === 0 ? 'empfohlen' : 'alternative'}
+                  onConfirm={() => onAdvance(slot!.sv_id, slot!.termin, plz, adresse, lat, lng)} confirming={parentSaving} />
+              ))}
+            </>
+          ) : (
+            <div className="rounded-xl bg-amber-50 border border-amber-200 p-4 text-center">
+              <AlertCircleIcon className="w-5 h-5 text-amber-500 mx-auto mb-2" />
+              <p className="text-sm text-amber-700 font-medium">Kein Gutachter verfuegbar</p>
+              <p className="text-xs text-amber-600 mt-1">Es konnte kein passender SV im Gebiet gefunden werden.</p>
+            </div>
+          )}
+
+          {/* SV gesucht Button — immer anzeigen wenn sv_gesucht oder keine Slots */}
+          {(svGesucht || slots.length === 0) && (
+            <button onClick={handleSvGesucht} disabled={settingSvGesucht}
+              className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 bg-amber-500 hover:bg-amber-400 text-white flex items-center justify-center gap-2">
+              {settingSvGesucht ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Wird gesetzt...</> : <><SearchIcon className="w-4 h-4" />SV gesucht setzen</>}
+            </button>
+          )}
+
           <button onClick={() => setResult(null)} className="w-full py-2 text-sm text-gray-500 hover:text-gray-700">Anderen Termin</button>
         </div>
       )}
@@ -729,8 +780,8 @@ function SlotCard({ slot, label, variant, onConfirm, confirming }: {
       </div>
       <div className="text-[10px] text-gray-400 mb-2">Auslastung: {slot.auslastung}</div>
       <button onClick={onConfirm} disabled={confirming}
-        className={`w-full py-2 rounded-xl text-sm font-semibold disabled:opacity-50 transition-all ${wunsch ? 'bg-green-600 hover:bg-green-500 text-white' : 'bg-[#1E3A5F] hover:bg-[#4573A2] text-white'}`}>
-        {confirming ? 'Wird bestaetigt...' : 'Termin bestaetigen'}
+        className={`w-full py-2 rounded-xl text-sm font-semibold disabled:opacity-50 transition-all flex items-center justify-center gap-2 ${wunsch ? 'bg-green-600 hover:bg-green-500 text-white' : 'bg-[#1E3A5F] hover:bg-[#4573A2] text-white'}`}>
+        {confirming ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Wird zugewiesen...</> : 'Zuweisen'}
       </button>
     </div>
   )
