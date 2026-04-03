@@ -1,45 +1,40 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { decode } from '@here/flexpolyline'
 
-const NUM_POINTS = 60
+const NUM_FALLBACK_POINTS = 60
 
-async function calculateIsochrone(lat: number, lng: number, radiusKm: number): Promise<{ lat: number; lng: number }[]> {
-  const rayPoints: { lat: number; lng: number; angle: number }[] = []
-  for (let i = 0; i < NUM_POINTS; i++) {
-    const angle = (2 * Math.PI * i) / NUM_POINTS
-    const dLat = (radiusKm / 111.32) * Math.cos(angle)
-    const dLng = (radiusKm / (111.32 * Math.cos(lat * Math.PI / 180))) * Math.sin(angle)
-    rayPoints.push({ lat: lat + dLat, lng: lng + dLng, angle })
-  }
+// ─── HERE Isoline API ────────────────────────────────────────────────────────
+
+async function fetchHereIsoline(lat: number, lng: number, radiusKm: number): Promise<{ lat: number; lng: number }[] | null> {
+  const apiKey = process.env.HERE_API_KEY
+  if (!apiKey) return null
 
   try {
-    const coords = [[lng, lat], ...rayPoints.map(p => [p.lng, p.lat])]
-      .map(c => `${c[0].toFixed(5)},${c[1].toFixed(5)}`).join(';')
-    const res = await fetch(
-      `https://router.project-osrm.org/table/v1/driving/${coords}?sources=0&annotations=distance`,
-      { signal: AbortSignal.timeout(8000) },
-    )
-    if (res.ok) {
-      const data = await res.json()
-      if (data.code === 'Ok' && data.distances?.[0]) {
-        const driveDistances: number[] = data.distances[0].slice(1).map((d: number) => d / 1000)
-        return rayPoints.map((p, i) => {
-          const driveDist = driveDistances[i]
-          if (!driveDist || driveDist <= 0) return { lat: p.lat, lng: p.lng }
-          const dLat = p.lat - lat
-          const dLng = p.lng - lng
-          const airDist = Math.sqrt((dLat * 111.32) ** 2 + (dLng * 111.32 * Math.cos(lat * Math.PI / 180)) ** 2)
-          const scale = Math.max(0.4, Math.min(1.3, airDist > 0 ? radiusKm / driveDist : 1))
-          return { lat: lat + dLat * scale, lng: lng + dLng * scale }
-        })
-      }
-    }
-  } catch { /* fallback */ }
+    const radiusM = Math.round(radiusKm * 1000)
+    const url = `https://isoline.router.hereapi.com/v8/isolines?transportMode=car&origin=${lat},${lng}&range[type]=distance&range[values]=${radiusM}&apiKey=${apiKey}`
+    const res = await fetch(url, { signal: AbortSignal.timeout(10000) })
+    if (!res.ok) return null
 
+    const data = await res.json()
+    const encoded = data?.isolines?.[0]?.polygons?.[0]?.outer
+    if (!encoded) return null
+
+    const decoded = decode(encoded)
+    const points = decoded.polyline.map(([lat, lng]: [number, number]) => ({ lat, lng }))
+    return points.length >= 3 ? points : null
+  } catch {
+    return null
+  }
+}
+
+// ─── Fallback ────────────────────────────────────────────────────────────────
+
+function generateFallbackPolygon(lat: number, lng: number, radiusKm: number): { lat: number; lng: number }[] {
   function seededRandom(seed: number) { const x = Math.sin(seed * 9301 + 49297) * 49297; return x - Math.floor(x) }
   const baseSeed = Math.round(lat * 1000) * 100000 + Math.round(lng * 1000) * 100 + radiusKm
-  return rayPoints.map((_, i) => {
-    const angle = (2 * Math.PI * i) / NUM_POINTS
+  return Array.from({ length: NUM_FALLBACK_POINTS }, (_, i) => {
+    const angle = (2 * Math.PI * i) / NUM_FALLBACK_POINTS
     const variation = 0.15 + seededRandom(baseSeed + i * 7) * 0.2
     const factor = 1 - variation + seededRandom(baseSeed + i * 13) * variation * 2
     const dLat = (radiusKm * factor / 111.32) * Math.cos(angle)
@@ -47,6 +42,8 @@ async function calculateIsochrone(lat: number, lng: number, radiusKm: number): P
     return { lat: lat + dLat, lng: lng + dLng }
   })
 }
+
+// ─── Recalc Endpoint ─────────────────────────────────────────────────────────
 
 export async function POST() {
   const admin = createAdminClient()
@@ -61,7 +58,7 @@ export async function POST() {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  const results: { id: string; status: string; points: number }[] = []
+  const results: { id: string; status: string; points: number; source: string }[] = []
 
   for (const sv of svList ?? []) {
     const lat = sv.standort_lat
@@ -71,26 +68,32 @@ export async function POST() {
     if (lat == null || lng == null) continue
 
     try {
-      const polygon = await calculateIsochrone(lat, lng, radiusKm)
+      // HERE zuerst, dann Fallback
+      const herePolygon = await fetchHereIsoline(lat, lng, radiusKm)
+      const polygon = herePolygon ?? generateFallbackPolygon(lat, lng, radiusKm)
+      const source = herePolygon ? 'here' : 'fallback'
+
       if (polygon.length > 0) {
         await admin.from('sachverstaendige')
           .update({ isochrone_polygon: polygon })
           .eq('id', sv.id)
-        results.push({ id: sv.id, status: 'ok', points: polygon.length })
+        results.push({ id: sv.id, status: 'ok', points: polygon.length, source })
       } else {
-        results.push({ id: sv.id, status: 'empty', points: 0 })
+        results.push({ id: sv.id, status: 'empty', points: 0, source })
       }
     } catch (e) {
-      results.push({ id: sv.id, status: `error: ${e instanceof Error ? e.message : 'unknown'}`, points: 0 })
+      results.push({ id: sv.id, status: `error: ${e instanceof Error ? e.message : 'unknown'}`, points: 0, source: 'error' })
     }
 
-    // Rate limit: 1s between OSRM requests
-    await new Promise(r => setTimeout(r, 1000))
+    // Rate limit: 500ms zwischen Requests
+    await new Promise(r => setTimeout(r, 500))
   }
 
   return NextResponse.json({
     total: svList?.length ?? 0,
     recalculated: results.filter(r => r.status === 'ok').length,
+    hereCount: results.filter(r => r.source === 'here').length,
+    fallbackCount: results.filter(r => r.source === 'fallback').length,
     results,
   })
 }

@@ -1,81 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { decode } from '@here/flexpolyline'
 
 const cache = new Map<string, { lat: number; lng: number }[]>()
 
-const NUM_POINTS = 60
+const NUM_FALLBACK_POINTS = 60
 
-/**
- * Generate points around a center at given radius (in km) for each compass direction.
- */
-function generateRayPoints(lat: number, lng: number, radiusKm: number): { lat: number; lng: number; angle: number }[] {
-  const points: { lat: number; lng: number; angle: number }[] = []
-  for (let i = 0; i < NUM_POINTS; i++) {
-    const angle = (2 * Math.PI * i) / NUM_POINTS
-    const dLat = (radiusKm / 111.32) * Math.cos(angle)
-    const dLng = (radiusKm / (111.32 * Math.cos(lat * Math.PI / 180))) * Math.sin(angle)
-    points.push({ lat: lat + dLat, lng: lng + dLng, angle })
+// ─── HERE Isoline API ────────────────────────────────────────────────────────
+
+async function fetchHereIsoline(
+  lat: number,
+  lng: number,
+  radiusKm: number,
+): Promise<{ lat: number; lng: number }[] | null> {
+  const apiKey = process.env.HERE_API_KEY
+  if (!apiKey) {
+    console.warn('[isochrone] HERE_API_KEY nicht gesetzt, nutze Fallback')
+    return null
   }
-  return points
-}
 
-/**
- * Use OSRM table API to get driving distances from center to all ray points.
- * Returns actual driving distances in km, or null if API fails.
- */
-async function getOsrmDistances(centerLat: number, centerLng: number, points: { lat: number; lng: number }[]): Promise<number[] | null> {
   try {
-    const coords = [[centerLng, centerLat], ...points.map(p => [p.lng, p.lat])]
-      .map(c => `${c[0].toFixed(5)},${c[1].toFixed(5)}`)
-      .join(';')
+    const radiusM = Math.round(radiusKm * 1000)
+    const url = `https://isoline.router.hereapi.com/v8/isolines?transportMode=car&origin=${lat},${lng}&range[type]=distance&range[values]=${radiusM}&apiKey=${apiKey}`
 
-    const url = `https://router.project-osrm.org/table/v1/driving/${coords}?sources=0&annotations=distance`
-    const res = await fetch(url, { signal: AbortSignal.timeout(5000) })
-    if (!res.ok) return null
+    const res = await fetch(url, { signal: AbortSignal.timeout(8000) })
+    if (!res.ok) {
+      console.warn(`[isochrone] HERE API ${res.status}: ${res.statusText}`)
+      return null
+    }
 
     const data = await res.json()
-    if (data.code !== 'Ok' || !data.distances?.[0]) return null
+    const encoded = data?.isolines?.[0]?.polygons?.[0]?.outer
 
-    // distances[0] = distances from source (center) to all destinations, in meters
-    const distances: number[] = data.distances[0].slice(1) // skip self-distance
-    return distances.map((d: number) => d / 1000) // convert to km
-  } catch {
+    if (!encoded) {
+      console.warn('[isochrone] HERE API: Kein Polygon im Response')
+      return null
+    }
+
+    // Flexible Polyline decoding
+    const decoded = decode(encoded)
+    const points = decoded.polyline.map(([lat, lng]: [number, number]) => ({ lat, lng }))
+
+    if (points.length < 3) {
+      console.warn('[isochrone] HERE API: Zu wenige Punkte')
+      return null
+    }
+
+    return points
+  } catch (err) {
+    console.warn('[isochrone] HERE API Fehler:', err)
     return null
   }
 }
 
-/**
- * Scale ray points based on actual driving distance vs. air distance.
- * If drive distance is longer than air distance, pull the point closer.
- */
-function scalePoints(
-  centerLat: number, centerLng: number,
-  rayPoints: { lat: number; lng: number; angle: number }[],
-  driveDistances: number[],
-  targetRadiusKm: number,
-): { lat: number; lng: number }[] {
-  return rayPoints.map((p, i) => {
-    const driveDist = driveDistances[i]
-    if (!driveDist || driveDist <= 0) return { lat: p.lat, lng: p.lng }
+// ─── Fallback: Seeded pseudo-random polygon (kein API nötig) ─────────────────
 
-    // Air distance
-    const dLat = p.lat - centerLat
-    const dLng = p.lng - centerLng
-    const airDist = Math.sqrt((dLat * 111.32) ** 2 + (dLng * 111.32 * Math.cos(centerLat * Math.PI / 180)) ** 2)
-
-    // Scale factor: if drive is 1.5x air, pull point in by 1/1.5
-    const scale = airDist > 0 ? targetRadiusKm / driveDist : 1
-    const clampedScale = Math.max(0.4, Math.min(1.3, scale))
-
-    return {
-      lat: centerLat + dLat * clampedScale,
-      lng: centerLng + dLng * clampedScale,
-    }
-  })
-}
-
-/**
- * Fallback: Seeded pseudo-random polygon (no API needed).
- */
 function generateFallbackPolygon(lat: number, lng: number, radiusKm: number): { lat: number; lng: number }[] {
   const points: { lat: number; lng: number }[] = []
   function seededRandom(seed: number): number {
@@ -84,8 +62,8 @@ function generateFallbackPolygon(lat: number, lng: number, radiusKm: number): { 
   }
   const baseSeed = Math.round(lat * 1000) * 100000 + Math.round(lng * 1000) * 100 + radiusKm
 
-  for (let i = 0; i < NUM_POINTS; i++) {
-    const angle = (2 * Math.PI * i) / NUM_POINTS
+  for (let i = 0; i < NUM_FALLBACK_POINTS; i++) {
+    const angle = (2 * Math.PI * i) / NUM_FALLBACK_POINTS
     const variation = 0.15 + seededRandom(baseSeed + i * 7) * 0.2
     const cardinalBias = 1 + 0.08 * Math.abs(Math.cos(2 * angle))
     const factor = (1 - variation + seededRandom(baseSeed + i * 13) * variation * 2) * cardinalBias
@@ -96,6 +74,8 @@ function generateFallbackPolygon(lat: number, lng: number, radiusKm: number): { 
   }
   return points
 }
+
+// ─── API Route ───────────────────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
   const lat = parseFloat(req.nextUrl.searchParams.get('lat') ?? '')
@@ -111,17 +91,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ polygon: cache.get(cacheKey), source: 'cache' })
   }
 
-  // Try OSRM first
-  const rayPoints = generateRayPoints(lat, lng, radiusKm)
-  const driveDistances = await getOsrmDistances(lat, lng, rayPoints)
+  // 1. Versuche HERE Isoline API (echtes Polygon mit hunderten Punkten)
+  const herePolygon = await fetchHereIsoline(lat, lng, radiusKm)
 
   let polygon: { lat: number; lng: number }[]
   let source: string
 
-  if (driveDistances) {
-    polygon = scalePoints(lat, lng, rayPoints, driveDistances, radiusKm)
-    source = 'osrm'
+  if (herePolygon) {
+    polygon = herePolygon
+    source = 'here'
   } else {
+    // 2. Fallback: Pseudo-Random Polygon
     polygon = generateFallbackPolygon(lat, lng, radiusKm)
     source = 'fallback'
   }
