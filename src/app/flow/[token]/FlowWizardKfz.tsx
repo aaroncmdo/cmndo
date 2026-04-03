@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { signSAandCreateFall, createKundeAccount } from './actions'
+import { signSAandCreateFall, createKundeAccount, updateLeadStammdaten, generateSAPdf } from './actions'
 import {
   CheckIcon,
   CameraIcon,
@@ -83,9 +83,15 @@ export default function FlowWizardKfz({
   const [fallId, setFallId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  // Editierbare Stammdaten (KFZ-117: Kunde kann korrigieren)
+  const [editVorname, setEditVorname] = useState(lead.vorname)
+  const [editNachname, setEditNachname] = useState(lead.nachname)
+  const [editTelefon, setEditTelefon] = useState(lead.telefon)
+  const [editEmail, setEditEmail] = useState(lead.email)
+
   // Account step
   const [accountPassword, setAccountPassword] = useState('')
-  const [accountEmail, setAccountEmail] = useState(lead.email)
+  const [accountEmail, setAccountEmail] = useState(editEmail)
   const [showPw, setShowPw] = useState(false)
   const [creatingAccount, setCreatingAccount] = useState(false)
   const [accountCreated, setAccountCreated] = useState(false)
@@ -101,7 +107,7 @@ export default function FlowWizardKfz({
   const currentStep = STEPS[stepIndex]
   const progress = Math.round(((stepIndex + 1) / STEPS.length) * 100)
   const fahrzeug = [lead.fahrzeug_hersteller, lead.fahrzeug_modell].filter(Boolean).join(' ')
-  const kundenName = [lead.vorname, lead.nachname].filter(Boolean).join(' ')
+  const kundenName = [editVorname, editNachname].filter(Boolean).join(' ')
 
   // ─── SA unterzeichnen + Fall erstellen ─────────────────────────────────────
 
@@ -124,6 +130,10 @@ export default function FlowWizardKfz({
       // 2. Server Action: Fall erstellen
       const result = await signSAandCreateFall(lead.id, publicUrl, flowLinkId ?? null)
       setFallId(result.fallId)
+
+      // 3. SA-PDF generieren (Background, non-blocking)
+      generateSAPdf(result.fallId, lead.id, publicUrl).catch(() => {})
+
       setStepIndex(2) // → Account step
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler bei der Beauftragung')
@@ -243,15 +253,23 @@ export default function FlowWizardKfz({
             {currentStep.id === 'stammdaten' && (
               <div>
                 <StepHeader
-                  question={`Hallo ${lead.vorname}!`}
-                  sub="Bitte pruefen Sie Ihre Daten. Falls etwas nicht stimmt, kontaktieren Sie uns."
+                  question={`Hallo ${editVorname || 'dort'}!`}
+                  sub="Bitte pruefen und korrigieren Sie Ihre Daten."
                   icon={<CarIcon className="w-8 h-8 text-[#4573A2]" />}
                 />
 
+                {/* Editierbare Kontaktdaten */}
+                <div className="space-y-3 mb-5">
+                  <div className="grid grid-cols-2 gap-3">
+                    <EditableInput label="Vorname" value={editVorname} onChange={setEditVorname} />
+                    <EditableInput label="Nachname" value={editNachname} onChange={setEditNachname} />
+                  </div>
+                  <EditableInput label="Telefon" value={editTelefon} onChange={setEditTelefon} type="tel" />
+                  <EditableInput label="E-Mail" value={editEmail} onChange={setEditEmail} type="email" />
+                </div>
+
+                {/* Nicht-editierbare Infos (aus Qualifizierung) */}
                 <div className="space-y-2 mb-6">
-                  <SummaryRow label="Name" value={kundenName} />
-                  {lead.telefon && <SummaryRow label="Telefon" value={lead.telefon} />}
-                  {lead.email && <SummaryRow label="E-Mail" value={lead.email} />}
                   {(lead.fahrzeug_standort_adresse || lead.fahrzeug_standort_plz) && (
                     <SummaryRow label="Standort" value={[lead.fahrzeug_standort_adresse, lead.fahrzeug_standort_plz].filter(Boolean).join(', ')} />
                   )}
@@ -483,8 +501,17 @@ export default function FlowWizardKfz({
         {currentStep.id === 'stammdaten' && (
           <div className="pt-4">
             <button
-              onClick={() => setStepIndex(1)}
-              disabled={!datenschutz}
+              onClick={async () => {
+                // Korrigierte Stammdaten speichern
+                if (editVorname !== lead.vorname || editNachname !== lead.nachname || editTelefon !== lead.telefon || editEmail !== lead.email) {
+                  try {
+                    await updateLeadStammdaten(lead.id, { vorname: editVorname, nachname: editNachname, telefon: editTelefon, email: editEmail })
+                    setAccountEmail(editEmail)
+                  } catch { /* weiter trotzdem */ }
+                }
+                setStepIndex(1)
+              }}
+              disabled={!datenschutz || !editVorname || !editNachname}
               className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
             >
               Weiter zur Beauftragung
@@ -516,6 +543,20 @@ function StepHeader({ question, sub, icon }: { question: string; sub?: string; i
       {icon && <div className="mb-3">{icon}</div>}
       <h1 className="text-2xl font-semibold text-gray-900 leading-snug">{question}</h1>
       {sub && <p className="mt-2 text-sm text-gray-500">{sub}</p>}
+    </div>
+  )
+}
+
+function EditableInput({ label, value, onChange, type = 'text' }: { label: string; value: string; onChange: (v: string) => void; type?: string }) {
+  return (
+    <div>
+      <label className="block text-xs text-gray-500 mb-1">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-800 focus:outline-none focus:border-[#4573A2] focus:bg-white transition-colors"
+      />
     </div>
   )
 }

@@ -4,6 +4,99 @@ import { emailNeuerFall } from '@/lib/email'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
+/**
+ * KFZ-117: Kunde kann Stammdaten korrigieren (Step 1 FlowLink)
+ */
+export async function updateLeadStammdaten(
+  leadId: string,
+  data: { vorname?: string; nachname?: string; telefon?: string; email?: string },
+) {
+  const admin = createAdminClient()
+  const update: Record<string, unknown> = { updated_at: new Date().toISOString() }
+  if (data.vorname !== undefined) update.vorname = data.vorname
+  if (data.nachname !== undefined) update.nachname = data.nachname
+  if (data.telefon !== undefined) update.telefon = data.telefon
+  if (data.email !== undefined) update.email = data.email
+  await admin.from('leads').update(update).eq('id', leadId)
+}
+
+/**
+ * KFZ-117: SA-PDF generieren (Vertragstext + Kundendaten + Unterschrift + Datum)
+ */
+export async function generateSAPdf(
+  fallId: string,
+  leadId: string,
+  signatureUrl: string,
+): Promise<{ pdfUrl: string }> {
+  const admin = createAdminClient()
+
+  // Lead-Daten laden
+  const { data: lead } = await admin.from('leads').select('vorname, nachname, email, telefon, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_standort_adresse').eq('id', leadId).single()
+  const name = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : 'Kunde'
+  const datum = new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  const fahrzeug = lead ? [lead.fahrzeug_hersteller, lead.fahrzeug_modell].filter(Boolean).join(' ') : ''
+
+  // Einfaches SA-Text-Dokument als HTML → in Storage als .html speichern
+  const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Sicherungsabtretung</title>
+<style>body{font-family:serif;max-width:700px;margin:40px auto;padding:20px;font-size:14px;color:#222}
+h1{font-size:20px;text-align:center;margin-bottom:30px}h2{font-size:15px;margin-top:20px}
+.meta{border:1px solid #ccc;padding:12px;margin:20px 0;background:#f9f9f9}
+.sig{margin-top:40px;border-top:1px solid #000;padding-top:10px}
+.sig img{max-height:80px}</style></head>
+<body>
+<h1>Sicherungsabtretung und Unterschriftsvollmacht</h1>
+<div class="meta">
+<p><strong>Auftraggeber:</strong> ${name}</p>
+<p><strong>E-Mail:</strong> ${lead?.email ?? '—'} | <strong>Telefon:</strong> ${lead?.telefon ?? '—'}</p>
+<p><strong>Fahrzeug:</strong> ${fahrzeug} ${lead?.kennzeichen ? `(${lead.kennzeichen})` : ''}</p>
+<p><strong>Datum:</strong> ${datum}</p>
+</div>
+<h2>1. Abtretungserklaerung</h2>
+<p>Hiermit trete ich saemtliche mir aus dem nachfolgend bezeichneten Schadensereignis zustehenden
+Schadensersatzansprueche — insbesondere die Ansprueche auf Erstattung der Sachverstaendigenkosten —
+erfuellungshalber an die Claimondo GmbH ab.</p>
+<p>Die Abtretung umfasst: Sachschadenersatzansprueche, Gutachterverguetung, Nebenkosten,
+vorgerichtliche Rechtsanwaltskosten.</p>
+<h2>2. Kostenfreiheit</h2>
+<p>Dem Auftraggeber entstehen keine Kosten. Die Sachverstaendigenkosten werden von der gegnerischen
+Haftpflichtversicherung getragen.</p>
+<h2>3. Vollmacht</h2>
+<p>Der Auftraggeber bevollmaechtigt die Claimondo GmbH, einen Kfz-Sachverstaendigen zu beauftragen,
+Ansprueche gegenueber der Versicherung geltend zu machen, und Zahlungen entgegenzunehmen.</p>
+<h2>4. Widerrufsbelehrung</h2>
+<p>Widerrufsfrist: 14 Tage ab Vertragsschluss per Post oder E-Mail an Claimondo GmbH.</p>
+<div class="sig">
+<p><strong>Ort, Datum:</strong> ${datum}</p>
+<p><strong>Unterschrift:</strong></p>
+<img src="${signatureUrl}" alt="Unterschrift" />
+</div>
+</body></html>`
+
+  // Als HTML in Storage speichern
+  const path = `sa-dokumente/${fallId}/sicherungsabtretung_${Date.now()}.html`
+  const blob = new Blob([html], { type: 'text/html' })
+  await admin.storage.from('dokumente').upload(path, blob, { contentType: 'text/html' })
+  const { data: { publicUrl } } = admin.storage.from('dokumente').getPublicUrl(path)
+
+  // Fall updaten mit SA-PDF URL
+  await admin.from('faelle').update({ abtretung_pdf: publicUrl }).eq('id', fallId)
+
+  // Dokumente-Eintrag
+  await admin.from('dokumente').insert({
+    fall_id: fallId,
+    typ: 'sicherungsabtretung',
+    datei_url: publicUrl,
+    datei_name: `Sicherungsabtretung_${name.replace(/\s/g, '_')}_${datum}.html`,
+    kategorie: 'unterschrift',
+    quelle: 'flowlink',
+    hochgeladen_von_rolle: 'kunde',
+    sichtbar_fuer: ['admin', 'kundenbetreuer', 'kanzlei'],
+  })
+
+  return { pdfUrl: publicUrl }
+}
+
 export async function notifyNeuerFall(fallId: string) {
   const supabase = await createClient()
 
