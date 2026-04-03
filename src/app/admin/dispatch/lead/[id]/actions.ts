@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { sendStatusWhatsApp, sendManualWhatsApp } from '@/lib/whatsapp'
 
 // ─── Manuelle WhatsApp (KFZ-114) ────────────────────────────────────────────
@@ -385,8 +386,7 @@ export async function deleteLead(leadId: string) {
   const { error } = await supabase.rpc('delete_lead_komplett', { p_lead_id: leadId })
   if (error) throw new Error(`Löschen fehlgeschlagen: ${error.message}`)
 
-  revalidatePath('/admin/dispatch')
-  revalidatePath('/admin/faelle')
+  redirect('/admin/dispatch')
 }
 
 // ─── BUG-47: Lead deaktivieren ──────────────────────────────────────────────

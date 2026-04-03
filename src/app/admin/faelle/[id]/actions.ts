@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { emailFilmcheckBestanden } from '@/lib/email'
 import { sendStatusWhatsApp, sendManualWhatsApp } from '@/lib/whatsapp'
 import { triggerKanzleiPaketTask, triggerAsSendedatumTask, triggerArchivierungTask } from '@/lib/tasking'
@@ -917,8 +918,8 @@ export async function deleteFall(fallId: string) {
   const { error } = await supabase.rpc('delete_fall_komplett', { p_fall_id: fallId })
   if (error) throw new Error(`Löschen fehlgeschlagen: ${error.message}`)
 
-  revalidatePath('/admin/faelle')
-  revalidatePath('/admin/dispatch')
+  // WICHTIG: redirect() statt revalidatePath() — verhindert Re-Render der gelöschten Seite
+  redirect('/admin/faelle')
 }
 
 // ─── KFZ-120: Fall deaktivieren (Soft Delete) ───────────────────────────────
