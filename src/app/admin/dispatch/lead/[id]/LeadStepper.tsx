@@ -152,6 +152,15 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
   const [fin, setFin] = useState(lead.fin ?? '')
   const [kilometerstand, setKilometerstand] = useState(lead.kilometerstand ?? '')
 
+  // BUG-52: Kundenadresse, Unfallort, Unfalldatum
+  const [kundeAdresse, setKundeAdresse] = useState((lead as Record<string, unknown>).kunde_adresse as string ?? '')
+  const [kundeLat, setKundeLat] = useState<number | null>((lead as Record<string, unknown>).kunde_lat as number ?? null)
+  const [kundeLng, setKundeLng] = useState<number | null>((lead as Record<string, unknown>).kunde_lng as number ?? null)
+  const [unfallort, setUnfallort] = useState((lead as Record<string, unknown>).unfallort as string ?? '')
+  const [unfallortLat, setUnfallortLat] = useState<number | null>((lead as Record<string, unknown>).unfallort_lat as number ?? null)
+  const [unfallortLng, setUnfallortLng] = useState<number | null>((lead as Record<string, unknown>).unfallort_lng as number ?? null)
+  const [unfalldatum, setUnfalldatum] = useState((lead as Record<string, unknown>).unfalldatum as string ?? '')
+
   const needsGegner = sf === 'sf-01' || sf === 'sf-02' || (sf === 'sf-03' && sfVariante === 'a')
   const needsEigeneVers = sf === 'sf-02' || (sf === 'sf-03' && sfVariante === 'b')
   const needsPolizei = sf === 'sf-02' || sf === 'sf-03'
@@ -181,6 +190,10 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
         finanzierung_bank: kk === 'kk-03' ? finanzierungBank || null : null, finanzierung_flag: kk === 'kk-03',
         firma_name: kk === 'kk-04' ? firmaName || null : null, firma_ustid: kk === 'kk-04' ? firmaUstid || null : null, gewerbe_flag: kk === 'kk-04',
         halter_name: kk === 'kk-05' ? halterName || null : null, halter_ungleich_fahrer_flag: kk === 'kk-05',
+        // BUG-52: Adressen
+        kunde_adresse: kundeAdresse || null, kunde_lat: kundeLat, kunde_lng: kundeLng,
+        unfallort: unfallort || null, unfallort_lat: unfallortLat, unfallort_lng: unfallortLng,
+        unfalldatum: unfalldatum || null,
         ...extraData,
       })
       setSaved(true); setTimeout(() => setSaved(false), 2000)
@@ -274,7 +287,8 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
           </h3>
 
           {STEPS[openStep]?.key === 'erstkontakt' && (
-            <StepErstkontakt done={isStepDone(0)} saving={saving} onAdvance={() => saveAndAdvance('erstkontakt')} />
+            <StepErstkontakt done={isStepDone(0)} saving={saving} onAdvance={() => saveAndAdvance('erstkontakt')}
+              kundeAdresse={kundeAdresse} onAdresseChange={(a, lat, lng) => { setKundeAdresse(a); setKundeLat(lat); setKundeLng(lng) }} />
           )}
           {STEPS[openStep]?.key === 'schadentyp' && (
             <StepSchadentyp
@@ -293,6 +307,8 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
               erstzulassung={erstzulassung} setErstzulassung={setErstzulassung}
               fin={fin} setFin={setFin}
               kilometerstand={kilometerstand} setKilometerstand={setKilometerstand}
+              unfallort={unfallort} onUnfallortChange={(a, lat, lng) => { setUnfallort(a); setUnfallortLat(lat); setUnfallortLng(lng) }}
+              unfalldatum={unfalldatum} setUnfalldatum={setUnfalldatum}
               saving={saving} onAdvance={() => saveAndAdvance('schadentyp-erfasst')}
             />
           )}
@@ -333,11 +349,23 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
 
 // ─── Step 1: Erstkontakt ────────────────────────────────────────────────────
 
-function StepErstkontakt({ done, saving, onAdvance }: { done: boolean; saving: boolean; onAdvance: () => void }) {
+function StepErstkontakt({ done, saving, onAdvance, kundeAdresse, onAdresseChange }: {
+  done: boolean; saving: boolean; onAdvance: () => void
+  kundeAdresse: string; onAdresseChange: (adresse: string, lat: number | null, lng: number | null) => void
+}) {
   if (done) return <p className="text-emerald-500 text-sm flex items-center gap-2"><CheckCircle2Icon className="w-4 h-4" /> Erstkontakt hergestellt</p>
   return (
-    <div>
-      <p className="text-gray-500 text-sm mb-3">Rufen Sie den Lead an und stellen Sie den Erstkontakt her.</p>
+    <div className="space-y-3">
+      <p className="text-gray-500 text-sm">Rufen Sie den Lead an und stellen Sie den Erstkontakt her.</p>
+      <div>
+        <label className="text-xs text-gray-500 mb-1 flex items-center gap-1"><MapPinIcon className="w-3 h-3" /> Kundenadresse (Wohnadresse)</label>
+        <GooglePlaceAutocomplete
+          defaultValue={kundeAdresse}
+          placeholder="Wohnadresse eingeben..."
+          onSelect={r => onAdresseChange(r.adresse, r.lat, r.lng)}
+          className={inputCls}
+        />
+      </div>
       <button onClick={onAdvance} disabled={saving}
         className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-white text-sm font-medium rounded-xl px-5 py-2.5 transition-colors flex items-center gap-2">
         <PhoneCallIcon className="w-4 h-4" /> {saving ? 'Speichert...' : 'Erstkontakt hergestellt'}
@@ -375,6 +403,8 @@ function StepSchadentyp({
   erstzulassung: string; setErstzulassung: (v: string) => void
   fin: string; setFin: (v: string) => void
   kilometerstand: string | number; setKilometerstand: (v: string | number) => void
+  unfallort: string; onUnfallortChange: (adresse: string, lat: number | null, lng: number | null) => void
+  unfalldatum: string; setUnfalldatum: (v: string) => void
   saving: boolean; onAdvance: () => void
 }) {
   return (
@@ -414,21 +444,38 @@ function StepSchadentyp({
         </div>
       )}
 
-      {/* Unfallhergang */}
+      {/* Unfallhergang + Unfallort + Unfalldatum */}
       {sf && (
-        <div>
-          <label className="text-xs text-gray-500 mb-1.5 block flex items-center gap-1">
-            <AlertCircleIcon className="w-3 h-3" /> Unfallhergang
-          </label>
-          <textarea
-            value={unfallhergang}
-            onChange={e => setUnfallhergang(e.target.value)}
-            placeholder="Wie ist der Unfall passiert? (Ort, Zeit, Ablauf, Beteiligte...)"
-            rows={4}
-            className="w-full bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2] resize-none"
-          />
-          <p className="text-[10px] text-gray-400 mt-1">Freitext-Beschreibung des Unfallhergangs durch den Kunden</p>
-        </div>
+        <>
+          <div>
+            <label className="text-xs text-gray-500 mb-1.5 block flex items-center gap-1">
+              <AlertCircleIcon className="w-3 h-3" /> Unfallhergang
+            </label>
+            <textarea
+              value={unfallhergang}
+              onChange={e => setUnfallhergang(e.target.value)}
+              placeholder="Wie ist der Unfall passiert? (Ort, Zeit, Ablauf, Beteiligte...)"
+              rows={4}
+              className="w-full bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2] resize-none"
+            />
+            <p className="text-[10px] text-gray-400 mt-1">Freitext-Beschreibung des Unfallhergangs durch den Kunden</p>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs text-gray-500 mb-1 flex items-center gap-1"><MapPinIcon className="w-3 h-3" /> Unfallort</label>
+              <GooglePlaceAutocomplete
+                defaultValue={unfallort}
+                placeholder="Unfallort eingeben..."
+                onSelect={r => onUnfallortChange(r.adresse, r.lat, r.lng)}
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Unfalldatum</label>
+              <input type="date" value={unfalldatum} onChange={e => setUnfalldatum(e.target.value)} className={inputCls} />
+            </div>
+          </div>
+        </>
       )}
 
       {needsEigeneVers && (
@@ -558,7 +605,7 @@ function StepGutachterTermin({ lead, saving: parentSaving, onAdvance }: {
   return (
     <div className="space-y-3">
       <div>
-        <label className="text-xs text-gray-500 mb-1 flex items-center gap-1"><MapPinIcon className="w-3 h-3" /> Fahrzeug-Standort (Google Places)</label>
+        <label className="text-xs text-gray-500 mb-1 flex items-center gap-1"><MapPinIcon className="w-3 h-3" /> Besichtigungsort (Google Places)</label>
         <GooglePlaceAutocomplete
           defaultValue={adresse}
           placeholder="Adresse eingeben..."
