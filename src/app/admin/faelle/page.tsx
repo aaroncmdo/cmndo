@@ -37,6 +37,14 @@ export default async function AdminFaellePage() {
       }
     }
 
+    // KFZ-128: Ungelesene Nachrichten zaehlen
+    const { count: ungelesene } = await supabase
+      .from('nachrichten')
+      .select('id', { count: 'exact', head: true })
+      .eq('fall_id', f.id)
+      .eq('gelesen', false)
+      .eq('sender_rolle', 'kunde')
+
     return {
       id: f.id as string,
       fall_nummer: f.fall_nummer as string | null,
@@ -54,6 +62,7 @@ export default async function AdminFaellePage() {
       kunde_name,
       betreuer_name,
       sv_name,
+      ungelesene_nachrichten: ungelesene ?? 0,
     }
   }))
 

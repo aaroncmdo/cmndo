@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { SendIcon, FileTextIcon } from 'lucide-react'
+import { markNachrichtenGelesen } from '@/lib/markNachrichtenGelesen'
 
 type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean | null; anhang_url: string | null; created_at: string }
 type Dokument = { id: string; typ: string; datei_url: string; datei_name: string | null; created_at: string }
@@ -47,7 +48,10 @@ export default function FallDetailSections({
       {/* Tab-Leiste */}
       <div className="flex bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-5">
         {TABS.map(tab => (
-          <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+          <button key={tab.key} onClick={() => {
+            setActiveTab(tab.key)
+            if (tab.key === 'chat') markNachrichtenGelesen(fall.id as string)
+          }}
             className={`flex-1 py-3 text-sm font-medium transition-colors ${
               activeTab === tab.key
                 ? 'bg-[#4573A2] text-white'

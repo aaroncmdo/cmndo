@@ -24,6 +24,7 @@ type Fall = {
   kunde_name: string | null
   betreuer_name: string | null
   sv_name: string | null
+  ungelesene_nachrichten?: number
 }
 
 const COLUMNS = [
@@ -82,7 +83,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
     const map: Record<string, Fall[]> = {}
     for (const col of COLUMNS) {
       map[col.key] = filtered.filter(f => mapStatus(f.status) === col.key)
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .sort((a, b) => (b.ungelesene_nachrichten ?? 0) - (a.ungelesene_nachrichten ?? 0) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     }
     return map
   }, [filtered])
@@ -220,7 +221,14 @@ function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
           </div>
         </div>
         <Link href={`/admin/faelle/${fall.id}`} onClick={e => e.stopPropagation()}>
-          {fall.kunde_name && <p className={`text-xs font-medium truncate ${fall.ist_aktiv === false ? 'text-gray-400 line-through' : 'text-gray-800'}`}>{fall.kunde_name}</p>}
+          <div className="flex items-center gap-2">
+            {fall.kunde_name && <p className={`text-xs font-medium truncate ${fall.ist_aktiv === false ? 'text-gray-400 line-through' : 'text-gray-800'}`}>{fall.kunde_name}</p>}
+            {(fall.ungelesene_nachrichten ?? 0) > 0 && (
+              <span className="inline-flex items-center gap-0.5 bg-[#4573A2] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0">
+                💬 {fall.ungelesene_nachrichten}
+              </span>
+            )}
+          </div>
           <div className="flex flex-wrap gap-1 mt-1">
             {fall.kennzeichen && <span className="bg-gray-100 text-gray-600 text-[9px] px-1 py-0.5 rounded">{fall.kennzeichen}</span>}
             {fall.schadenfall_typ && <span className="bg-[#4573A2]/5 text-[#4573A2] text-[9px] px-1 py-0.5 rounded">{SF_SHORT[fall.schadenfall_typ] ?? fall.schadenfall_typ}</span>}
