@@ -163,8 +163,11 @@ export async function POST(request: Request) {
       .in('status', ['bestaetigt', 'reserviert', 'vorschlag']),
     supabase.from('faelle').select('sv_id, sv_termin, schadens_adresse')
       .in('sv_id', svIds).not('sv_termin', 'is', null)
+      .not('status', 'in', '("abgeschlossen","storniert")')
       .gte('sv_termin', dayStart.toISOString()).lte('sv_termin', dayEnd.toISOString()),
   ])
+
+  console.log(`[matching] ${topCandidates.length} Kandidaten, Tag: ${dayStart.toISOString()}, kalTermine: ${kalTermine?.length ?? 0}, fallTermine: ${fallTermine?.length ?? 0}`)
 
   // Termine pro SV gruppieren
   function getTermine(svId: string): { start: Date; end: Date; adresse: string }[] {
@@ -185,13 +188,49 @@ export async function POST(request: Request) {
     return termine
   }
 
-  // Block-Check: 60min Besichtigung + geschätzte Fahrzeit
-  function isBlocked(svId: string, startTime: Date, fahrzeit: number): boolean {
-    const blockEnd = new Date(startTime.getTime() + (BESICHTIGUNG_MIN + fahrzeit) * 60000)
-    for (const t of getTermine(svId)) {
-      if (startTime < t.end && blockEnd > t.start) return true
+  // Verfügbarkeits-Check gemäß Prompt-Logik:
+  // Vorheriger Termin endet + Fahrzeit <= gewünschter Start
+  // Gewünschter Start + 60min Besichtigung + Fahrzeit <= nächster Termin
+  function canDoSlot(svId: string, slotStart: Date, fahrzeit: number): boolean {
+    const termine = getTermine(svId)
+    const slotEnd = new Date(slotStart.getTime() + BESICHTIGUNG_MIN * 60000)
+
+    // Kein Termin am Tag → SV ist FREI
+    if (termine.length === 0) return true
+
+    // Prüfe Überschneidung mit JEDEM existierenden Termin
+    for (const t of termine) {
+      // Einfacher Overlap-Check: Slot [start, start+60min] vs Termin [t.start, t.end]
+      if (slotStart < t.end && slotEnd > t.start) {
+        console.log(`[matching] ${svId.slice(0,8)} BLOCKED: Slot ${slotStart.toISOString()} overlaps ${t.start.toISOString()}-${t.end.toISOString()}`)
+        return false
+      }
     }
-    return false
+
+    // Prüfe ob Fahrzeit vom vorherigen Termin passt
+    const vorher = termine.filter(t => t.end <= slotStart)
+    if (vorher.length > 0) {
+      const letzter = vorher[vorher.length - 1]
+      const fruehestAnkunft = new Date(letzter.end.getTime() + fahrzeit * 60000)
+      if (fruehestAnkunft > slotStart) {
+        console.log(`[matching] ${svId.slice(0,8)} BLOCKED by travel: prev ends ${letzter.end.toISOString()}, +${fahrzeit}min → ${fruehestAnkunft.toISOString()} > ${slotStart.toISOString()}`)
+        return false
+      }
+    }
+
+    // Prüfe ob Fahrzeit zum nächsten Termin passt
+    const nachher = termine.filter(t => t.start >= slotEnd)
+    if (nachher.length > 0) {
+      const naechster = nachher[0]
+      const spaetesteAbfahrt = new Date(naechster.start.getTime() - fahrzeit * 60000)
+      if (slotEnd > spaetesteAbfahrt) {
+        console.log(`[matching] ${svId.slice(0,8)} BLOCKED by next: slot ends ${slotEnd.toISOString()}, next at ${naechster.start.toISOString()}, need ${fahrzeit}min travel`)
+        return false
+      }
+    }
+
+    console.log(`[matching] ${svId.slice(0,8)} AVAILABLE at ${slotStart.toISOString()} (${termine.length} existing termine)`)
+    return true
   }
 
   // Nächsten freien Slot finden (gleicher Tag, 8-17 Uhr)
@@ -200,8 +239,8 @@ export async function POST(request: Request) {
       for (const m of [0, 30]) {
         const slot = new Date(wDate)
         slot.setHours(h, m, 0, 0)
-        if (slot <= new Date()) continue // Vergangenheit überspringen
-        if (!isBlocked(svId, slot, fahrzeit)) return slot
+        if (slot.getTime() <= Date.now()) continue
+        if (canDoSlot(svId, slot, fahrzeit)) return slot
       }
     }
     return null
@@ -229,7 +268,7 @@ export async function POST(request: Request) {
     const maxF = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10
     const genutztF = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
     const { info, fahrzeit } = getRouteInfo(sv.id, sv.distanz_km)
-    const wunschMoeglich = !isBlocked(sv.id, wDate, fahrzeit)
+    const wunschMoeglich = canDoSlot(sv.id, wDate, fahrzeit)
     const nextSlot = wunschMoeglich ? null : findNextFreeSlot(sv.id, fahrzeit)
 
     slots.push({
