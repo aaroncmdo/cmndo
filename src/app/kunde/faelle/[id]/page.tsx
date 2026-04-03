@@ -52,7 +52,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const { data: nachrichten } = await admin.from('nachrichten')
       .select('id, kanal, sender_id, sender_rolle, nachricht, hat_anhang, anhang_url, created_at')
       .eq('fall_id', id)
-      .in('kanal', ['portal-kunde-claimondo', 'portal-kunde-gutachter'])
+      .in('kanal', ['portal-kunde-claimondo', 'portal-kunde-gutachter', 'whatsapp'])
       .order('created_at', { ascending: true })
 
     // Progress berechnen

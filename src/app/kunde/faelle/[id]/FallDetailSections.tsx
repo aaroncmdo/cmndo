@@ -104,16 +104,21 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   )
 }
 
-// ─── Chat Section (inline, NICHT geloescht!) ────────────────────────────────
+// ─── Chat Section — 3 Kanaele: Claimondo + Gutachter + WhatsApp ────────────
 
 function ChatSection({ fallId, initialNachrichten, userId }: { fallId: string; initialNachrichten: Nachricht[]; userId: string }) {
+  const hasSv = initialNachrichten.some(m => m.kanal === 'portal-kunde-gutachter')
+  const [activeKanal, setActiveKanal] = useState<string>('portal-kunde-claimondo')
   const [messages, setMessages] = useState(initialNachrichten)
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const endRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
+  // Filter: aktiver Kanal + WhatsApp-Nachrichten immer anzeigen
+  const filtered = messages.filter(m => m.kanal === activeKanal || m.kanal === 'whatsapp')
+
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [filtered])
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault()
@@ -121,9 +126,9 @@ function ChatSection({ fallId, initialNachrichten, userId }: { fallId: string; i
     setSending(true); setError(null)
     try {
       const { sendNachricht } = await import('./actions')
-      await sendNachricht(fallId, text.trim(), 'portal-kunde-claimondo')
+      await sendNachricht(fallId, text.trim(), activeKanal as 'portal-kunde-claimondo' | 'portal-kunde-gutachter')
       setMessages(prev => [...prev, {
-        id: crypto.randomUUID(), kanal: 'portal-kunde-claimondo', sender_id: userId,
+        id: crypto.randomUUID(), kanal: activeKanal, sender_id: userId,
         sender_rolle: 'kunde', nachricht: text.trim(), hat_anhang: false, anhang_url: null,
         created_at: new Date().toISOString(),
       }])
@@ -136,19 +141,46 @@ function ChatSection({ fallId, initialNachrichten, userId }: { fallId: string; i
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
       <h3 className="text-sm font-semibold text-[#0D1B3E] mb-3">Nachrichten</h3>
 
+      {/* Kanal-Tabs */}
+      <div className="flex gap-1 mb-4">
+        <button onClick={() => setActiveKanal('portal-kunde-claimondo')}
+          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${activeKanal === 'portal-kunde-claimondo' ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
+          Claimondo
+        </button>
+        {hasSv && (
+          <button onClick={() => setActiveKanal('portal-kunde-gutachter')}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${activeKanal === 'portal-kunde-gutachter' ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
+            Gutachter
+          </button>
+        )}
+      </div>
+
       {/* Messages */}
       <div className="space-y-3 mb-4 max-h-80 overflow-y-auto">
-        {messages.length === 0 && <p className="text-sm text-gray-400 text-center py-4">Noch keine Nachrichten. Schreiben Sie uns!</p>}
-        {messages.map(msg => {
+        {filtered.length === 0 && <p className="text-sm text-gray-400 text-center py-4">Noch keine Nachrichten. Schreiben Sie uns!</p>}
+        {filtered.map(msg => {
           const isOwn = msg.sender_id === userId
+          const isWhatsApp = msg.kanal === 'whatsapp'
+          const isGutachter = msg.sender_rolle === 'gutachter'
+          const bubbleColor = isOwn ? 'bg-[#4573A2] text-white' : isGutachter ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-[#0D1B3E]'
+
           return (
             <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${isOwn ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-[#0D1B3E]'}`}>
-                <p className={`text-[10px] font-semibold uppercase tracking-wide mb-0.5 ${isOwn ? 'text-white/60' : 'text-gray-400'}`}>
-                  {ROLLE_LABEL[msg.sender_rolle] ?? msg.sender_rolle}
-                </p>
+              <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${bubbleColor}`}>
+                <div className="flex items-center gap-1.5">
+                  <p className={`text-[10px] font-semibold uppercase tracking-wide mb-0.5 ${isOwn ? 'text-white/60' : isGutachter ? 'text-white/60' : 'text-gray-400'}`}>
+                    {ROLLE_LABEL[msg.sender_rolle] ?? msg.sender_rolle}
+                  </p>
+                  {isWhatsApp && <span className="text-[9px] opacity-60">via WhatsApp</span>}
+                </div>
                 <p className="text-sm whitespace-pre-wrap">{msg.nachricht}</p>
-                <p className={`text-[10px] mt-1 ${isOwn ? 'text-white/50' : 'text-gray-400'}`}>
+                {msg.hat_anhang && msg.anhang_url && (
+                  <a href={msg.anhang_url} target="_blank" rel="noopener noreferrer"
+                    className={`inline-flex items-center gap-1 mt-1 text-xs underline ${isOwn || isGutachter ? 'text-white/70' : 'text-[#4573A2]'}`}>
+                    Anhang
+                  </a>
+                )}
+                <p className={`text-[10px] mt-1 ${isOwn || isGutachter ? 'text-white/50' : 'text-gray-400'}`}>
                   {new Date(msg.created_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
@@ -162,7 +194,7 @@ function ChatSection({ fallId, initialNachrichten, userId }: { fallId: string; i
       {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
       <form onSubmit={handleSend} className="flex gap-2">
         <input type="text" value={text} onChange={e => setText(e.target.value)}
-          placeholder="Nachricht schreiben..."
+          placeholder={activeKanal === 'portal-kunde-gutachter' ? 'Nachricht an Gutachter...' : 'Nachricht an Claimondo...'}
           className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#0D1B3E] placeholder-gray-400 focus:outline-none focus:border-[#4573A2]" />
         <button type="submit" disabled={sending || !text.trim()}
           className="px-4 py-3 bg-[#4573A2] hover:bg-[#1E3A5F] text-white rounded-xl transition-colors disabled:opacity-40 min-h-12 flex items-center justify-center">
