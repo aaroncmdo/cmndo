@@ -10,6 +10,61 @@ export type PlaceResult = {
   place_id: string
 }
 
+// Google Maps Script einmalig laden (singleton)
+let scriptLoading = false
+let scriptLoaded = false
+
+function ensureGoogleMapsScript(): Promise<void> {
+  if (scriptLoaded || (typeof google !== 'undefined' && google.maps?.places)) {
+    scriptLoaded = true
+    return Promise.resolve()
+  }
+  if (scriptLoading) {
+    return new Promise(resolve => {
+      const iv = setInterval(() => {
+        if (typeof google !== 'undefined' && google.maps?.places) {
+          scriptLoaded = true
+          clearInterval(iv)
+          resolve()
+        }
+      }, 200)
+    })
+  }
+
+  const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY
+  if (!key) return Promise.reject('NEXT_PUBLIC_GOOGLE_MAPS_KEY fehlt')
+
+  scriptLoading = true
+  return new Promise((resolve, reject) => {
+    // Check if script tag already exists
+    if (document.querySelector('script[src*="maps.googleapis.com"]')) {
+      const iv = setInterval(() => {
+        if (typeof google !== 'undefined' && google.maps?.places) {
+          scriptLoaded = true
+          clearInterval(iv)
+          resolve()
+        }
+      }, 200)
+      return
+    }
+
+    const s = document.createElement('script')
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places`
+    s.async = true
+    s.onload = () => {
+      const iv = setInterval(() => {
+        if (typeof google !== 'undefined' && google.maps?.places) {
+          scriptLoaded = true
+          clearInterval(iv)
+          resolve()
+        }
+      }, 100)
+    }
+    s.onerror = () => reject('Google Maps Script konnte nicht geladen werden')
+    document.head.appendChild(s)
+  })
+}
+
 export default function GooglePlaceAutocomplete({
   defaultValue,
   placeholder,
@@ -24,11 +79,15 @@ export default function GooglePlaceAutocomplete({
   const inputRef = useRef<HTMLInputElement>(null)
   const [value, setValue] = useState(defaultValue ?? '')
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null)
+  const onSelectRef = useRef(onSelect)
+  onSelectRef.current = onSelect
 
   useEffect(() => {
-    function init() {
-      if (!inputRef.current || typeof google === 'undefined' || !google.maps?.places) return false
-      if (autocompleteRef.current) return true
+    let cancelled = false
+
+    function initAutocomplete() {
+      if (!inputRef.current || autocompleteRef.current) return
+      if (typeof google === 'undefined' || !google.maps?.places) return
 
       const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
         componentRestrictions: { country: 'de' },
@@ -45,31 +104,25 @@ export default function GooglePlaceAutocomplete({
         const placeId = place.place_id ?? ''
         const formattedAddress = place.formatted_address ?? ''
 
-        // Extract PLZ from address_components
         let plz = ''
         for (const comp of place.address_components ?? []) {
-          if (comp.types.includes('postal_code')) {
-            plz = comp.long_name
-            break
-          }
+          if (comp.types.includes('postal_code')) { plz = comp.long_name; break }
         }
 
         setValue(formattedAddress)
-        onSelect({ adresse: formattedAddress, plz, lat, lng, place_id: placeId })
+        onSelectRef.current({ adresse: formattedAddress, plz, lat, lng, place_id: placeId })
       })
 
       autocompleteRef.current = autocomplete
-      return true
     }
 
-    if (init()) return
+    // Script laden + Autocomplete initialisieren
+    ensureGoogleMapsScript()
+      .then(() => { if (!cancelled) initAutocomplete() })
+      .catch(() => {})
 
-    // Retry until the Google Maps script has loaded
-    const interval = setInterval(() => {
-      if (init()) clearInterval(interval)
-    }, 300)
-    return () => clearInterval(interval)
-  }, [onSelect])
+    return () => { cancelled = true }
+  }, [])
 
   const defaultCls = 'w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-[#4573A2] transition-colors'
 
