@@ -79,6 +79,21 @@ export default function NotificationBell() {
     if (item.link) router.push(item.link)
   }
 
+  // KFZ-130: Klick auf gebuendelte Nachricht — alle im Bundle als gelesen markieren
+  async function handleBundleClick(bundle: { latest: Notification; count: number; ids: string[] }) {
+    const unreadIds = bundle.ids.filter(id => {
+      const item = items.find(i => i.id === id)
+      return item && !item.gelesen
+    })
+    if (unreadIds.length > 0) {
+      await supabase.from('benachrichtigungen').update({ gelesen: true }).in('id', unreadIds)
+      setItems(prev => prev.map(n => unreadIds.includes(n.id) ? { ...n, gelesen: true } : n))
+      setUnread(prev => Math.max(0, prev - unreadIds.length))
+    }
+    setOpen(false)
+    if (bundle.latest.link) router.push(bundle.latest.link)
+  }
+
   async function markAllRead() {
     const ids = items.filter(n => !n.gelesen).map(n => n.id)
     if (!ids.length) return
@@ -89,9 +104,37 @@ export default function NotificationBell() {
 
   // Split into tabs
   const chatTypes = new Set(['chat', 'nachricht'])
-  const nachrichten = items.filter(i => chatTypes.has(i.typ))
+  const rawNachrichten = items.filter(i => chatTypes.has(i.typ))
   const updates = items.filter(i => !chatTypes.has(i.typ))
-  const visibleItems = tab === 'nachrichten' ? nachrichten : updates
+
+  // KFZ-130: Nachrichten buendeln nach link (= Fall-URL) + titel (= Absender)
+  const bundled = useMemo(() => {
+    const groups = new Map<string, { latest: Notification; count: number; ids: string[] }>()
+    for (const n of rawNachrichten) {
+      const key = `${n.link ?? ''}||${n.titel ?? ''}`
+      const existing = groups.get(key)
+      if (!existing) {
+        groups.set(key, { latest: n, count: 1, ids: [n.id] })
+      } else {
+        existing.count++
+        existing.ids.push(n.id)
+        if (new Date(n.erstellt_am) > new Date(existing.latest.erstellt_am)) {
+          existing.latest = n
+        }
+      }
+    }
+    return Array.from(groups.values()).sort(
+      (a, b) => new Date(b.latest.erstellt_am).getTime() - new Date(a.latest.erstellt_am).getTime()
+    )
+  }, [rawNachrichten])
+
+  // Gebuendelter unread count fuer Badge (Anzahl Gruppen, nicht einzelne Nachrichten)
+  const bundledUnreadCount = bundled.filter(b => !b.latest.gelesen || b.ids.some(id => {
+    const item = items.find(i => i.id === id)
+    return item && !item.gelesen
+  })).length
+
+  const visibleItems = tab === 'nachrichten' ? null : updates // null = use bundled view
 
   return (
     <div ref={ref} className="relative">
@@ -136,30 +179,71 @@ export default function NotificationBell() {
 
           {/* Items */}
           <div className="flex-1 overflow-y-auto">
-            {visibleItems.length === 0 ? (
-              <div className="px-4 py-8 text-center">
-                <p className="text-gray-400 text-sm">Keine {tab === 'nachrichten' ? 'Nachrichten' : 'Updates'}</p>
-              </div>
+            {tab === 'updates' ? (
+              /* Updates Tab — einzelne Benachrichtigungen */
+              updates.length === 0 ? (
+                <div className="px-4 py-8 text-center">
+                  <p className="text-gray-400 text-sm">Keine Updates</p>
+                </div>
+              ) : (
+                updates.map(item => (
+                  <button key={item.id} onClick={() => handleClick(item)}
+                    className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors ${!item.gelesen ? 'bg-[#4573A2]/10' : ''}`}>
+                    <div className="flex items-start gap-3">
+                      {!item.gelesen && <div className="w-2 h-2 rounded-full bg-[#4573A2] mt-1.5 shrink-0" />}
+                      {item.gelesen && <div className="w-2 shrink-0" />}
+                      <div className="w-6 h-6 flex items-center justify-center text-sm shrink-0">
+                        {TYP_ICONS[item.typ] ?? '🔔'}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className={`text-sm leading-snug ${item.gelesen ? 'text-gray-500' : 'text-gray-900 font-medium'}`}>
+                          {item.titel}
+                        </p>
+                        {item.beschreibung && <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">{item.beschreibung}</p>}
+                        <p className="text-[11px] text-gray-300 mt-1">{timeAgo(item.erstellt_am)}</p>
+                      </div>
+                    </div>
+                  </button>
+                ))
+              )
             ) : (
-              visibleItems.map(item => (
-                <button key={item.id} onClick={() => handleClick(item)}
-                  className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors ${!item.gelesen ? 'bg-[#4573A2]/10' : ''}`}>
-                  <div className="flex items-start gap-3">
-                    {!item.gelesen && <div className="w-2 h-2 rounded-full bg-[#4573A2] mt-1.5 shrink-0" />}
-                    {item.gelesen && <div className="w-2 shrink-0" />}
-                    <div className="w-6 h-6 flex items-center justify-center text-sm shrink-0">
-                      {TYP_ICONS[item.typ] ?? '🔔'}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className={`text-sm leading-snug ${item.gelesen ? 'text-gray-500' : 'text-gray-900 font-medium'}`}>
-                        {item.titel}
-                      </p>
-                      {item.beschreibung && <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">{item.beschreibung}</p>}
-                      <p className="text-[11px] text-gray-300 mt-1">{timeAgo(item.erstellt_am)}</p>
-                    </div>
-                  </div>
-                </button>
-              ))
+              /* KFZ-130: Nachrichten Tab — gebuendelt */
+              bundled.length === 0 ? (
+                <div className="px-4 py-8 text-center">
+                  <p className="text-gray-400 text-sm">Keine Nachrichten</p>
+                </div>
+              ) : (
+                bundled.map(bundle => {
+                  const item = bundle.latest
+                  const hasUnread = bundle.ids.some(id => {
+                    const n = items.find(i => i.id === id)
+                    return n && !n.gelesen
+                  })
+                  return (
+                    <button key={`bundle-${item.id}`} onClick={() => handleBundleClick(bundle)}
+                      className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors ${hasUnread ? 'bg-[#4573A2]/10' : ''}`}>
+                      <div className="flex items-start gap-3">
+                        {hasUnread && <div className="w-2 h-2 rounded-full bg-[#4573A2] mt-1.5 shrink-0" />}
+                        {!hasUnread && <div className="w-2 shrink-0" />}
+                        <div className="w-6 h-6 flex items-center justify-center text-sm shrink-0">💬</div>
+                        <div className="min-w-0 flex-1">
+                          <p className={`text-sm leading-snug ${hasUnread ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
+                            {item.titel}
+                          </p>
+                          {item.beschreibung && <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{item.beschreibung}</p>}
+                          <p className="text-[11px] text-gray-300 mt-1">{timeAgo(item.erstellt_am)}</p>
+                        </div>
+                        {/* KFZ-130: Badge mit Anzahl rechts */}
+                        {bundle.count > 1 && (
+                          <span className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-[#4573A2] text-[10px] font-bold text-white leading-none shrink-0 self-center">
+                            {bundle.count}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  )
+                })
+              )
             )}
           </div>
         </div>
