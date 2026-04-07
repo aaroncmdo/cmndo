@@ -54,5 +54,18 @@ export async function sendNachricht(
     } catch { /* non-critical */ }
   }
 
+  // KFZ-128: WhatsApp Fallback an KB/SV
+  try {
+    const admin = createAdminClient()
+    if (empfaengerId) {
+      const { data: empfaenger } = await admin.from('profiles').select('telefon').eq('id', empfaengerId).single()
+      if (empfaenger?.telefon) {
+        const { data: fall } = await admin.from('faelle').select('fall_nummer').eq('id', fallId).single()
+        const { sendWhatsApp } = await import('@/lib/whatsapp')
+        await sendWhatsApp(empfaenger.telefon, `Neue Kundennachricht in Fall ${fall?.fall_nummer ?? fallId.slice(0, 8)}: ${nachricht.trim().slice(0, 200)}`)
+      }
+    }
+  } catch { /* non-critical */ }
+
   revalidatePath(`/kunde/faelle/${fallId}`)
 }

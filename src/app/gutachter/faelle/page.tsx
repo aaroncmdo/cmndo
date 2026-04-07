@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -95,7 +96,23 @@ export default async function GutachterFaellePage({
     query = query.in('status', ['abgeschlossen'])
   }
 
-  const { data: faelle } = await query
+  const { data: rawFaelle } = await query
+
+  // KFZ-128: Ungelesene Nachrichten pro Fall zaehlen
+  const admin = createAdminClient()
+  const faelleWithUnread = await Promise.all((rawFaelle ?? []).map(async (f) => {
+    const { count } = await admin
+      .from('nachrichten')
+      .select('id', { count: 'exact', head: true })
+      .eq('fall_id', f.id)
+      .eq('gelesen', false)
+      .eq('sender_rolle', 'kunde')
+    return { ...f, ungelesene_nachrichten: count ?? 0 }
+  }))
+
+  // Sortierung: Faelle mit ungelesenen Nachrichten OBEN
+  faelleWithUnread.sort((a, b) => b.ungelesene_nachrichten - a.ungelesene_nachrichten || new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  const faelle = faelleWithUnread
 
   // Fetch lead names
   const leadIds = (faelle ?? []).map(f => f.lead_id).filter(Boolean) as string[]
@@ -150,6 +167,7 @@ export default async function GutachterFaellePage({
                       <th className="text-left px-4 py-3 text-gray-500 font-medium">Ort</th>
                       <th className="text-left px-4 py-3 text-gray-500 font-medium">SV-Termin</th>
                       <th className="text-left px-4 py-3 text-gray-500 font-medium">Status</th>
+                      <th className="text-left px-4 py-3 text-gray-500 font-medium">Chat</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -192,6 +210,13 @@ export default async function GutachterFaellePage({
                               {STATUS_LABEL[fall.status] ?? fall.status}
                             </span>
                           </td>
+                          <td className="px-4 py-3">
+                            {(fall.ungelesene_nachrichten ?? 0) > 0 && (
+                              <span className="inline-flex items-center gap-0.5 bg-[#4573A2] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                                💬 {fall.ungelesene_nachrichten}
+                              </span>
+                            )}
+                          </td>
                         </tr>
                       )
                     })}
@@ -220,13 +245,20 @@ export default async function GutachterFaellePage({
                         </span>
                         <p className="text-gray-900 text-sm font-medium mt-0.5">{name}</p>
                       </div>
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
-                          STATUS_COLOR[fall.status] ?? 'bg-gray-100 text-gray-700'
-                        }`}
-                      >
-                        {STATUS_LABEL[fall.status] ?? fall.status}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {(fall.ungelesene_nachrichten ?? 0) > 0 && (
+                          <span className="inline-flex items-center gap-0.5 bg-[#4573A2] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                            💬 {fall.ungelesene_nachrichten}
+                          </span>
+                        )}
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
+                            STATUS_COLOR[fall.status] ?? 'bg-gray-100 text-gray-700'
+                          }`}
+                        >
+                          {STATUS_LABEL[fall.status] ?? fall.status}
+                        </span>
+                      </div>
                     </div>
                     <div className="flex gap-4 text-xs text-gray-500">
                       <span>{URSACHE_LABEL[fall.schadens_ursache ?? ''] ?? '--'}</span>

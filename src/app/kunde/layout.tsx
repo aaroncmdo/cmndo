@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import NotificationBell from '@/app/admin/_components/NotificationBell'
 
 export default async function KundeLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -25,6 +26,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
             <span className="text-[#4573A2]">ondo</span>
           </span>
         </Link>
+        <NotificationBell />
       </header>
 
       {/* Content — full width, scrollable */}

@@ -39,6 +39,23 @@ export default async function KundeStartseite() {
     }
   }
 
+  // KFZ-128: Ungelesene Nachrichten pro Fall zaehlen
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const admin = createAdminClient()
+  const faelleWithUnread = await Promise.all(faelle.map(async (f) => {
+    const { count } = await admin
+      .from('nachrichten')
+      .select('id', { count: 'exact', head: true })
+      .eq('fall_id', f.id as string)
+      .eq('gelesen', false)
+      .neq('sender_id', user.id)
+    return { ...f, ungelesene_nachrichten: count ?? 0 }
+  }))
+
+  // Sortierung: Faelle mit ungelesenen Nachrichten OBEN
+  faelleWithUnread.sort((a, b) => b.ungelesene_nachrichten - a.ungelesene_nachrichten)
+  faelle = faelleWithUnread
+
   // Onboarding-Redirect
   const needsOnboarding = faelle.find(f => f.onboarding_complete === false)
   if (needsOnboarding) redirect(`/kunde/onboarding/${needsOnboarding.id}`)
@@ -72,7 +89,14 @@ export default async function KundeStartseite() {
                     <p className="text-[#0D1B3E] font-semibold text-base">{(fall.kennzeichen as string) || (fall.fall_nummer as string) || 'Fall'}</p>
                     {fahrzeug && <p className="text-sm text-gray-500">{fahrzeug}</p>}
                   </div>
-                  <span className="text-sm font-bold text-[#4573A2]">{progress.pct}%</span>
+                  <div className="flex items-center gap-2">
+                    {((fall as Record<string, unknown>).ungelesene_nachrichten as number) > 0 && (
+                      <span className="inline-flex items-center gap-0.5 bg-[#4573A2] text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                        💬 {(fall as Record<string, unknown>).ungelesene_nachrichten as number}
+                      </span>
+                    )}
+                    <span className="text-sm font-bold text-[#4573A2]">{progress.pct}%</span>
+                  </div>
                 </div>
                 <div className="w-full h-2 bg-gray-100 rounded-full mb-3">
                   <div className="h-full bg-[#4573A2] rounded-full transition-all" style={{ width: `${progress.pct}%` }} />
