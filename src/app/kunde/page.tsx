@@ -69,7 +69,7 @@ export default async function KundeStartseite() {
   const vorname = profile?.vorname ?? user.email?.split('@')[0] ?? 'Kunde'
 
   return (
-    <div className="w-full px-4 py-6 max-w-xl mx-auto">
+    <div className="w-full px-4 md:px-8 py-6 max-w-xl md:max-w-none mx-auto">
       <h1 className="text-xl font-bold text-[#0D1B3E] mb-1">Hallo {vorname}</h1>
       <p className="text-sm text-gray-500 mb-6">Hier sehen Sie den Stand Ihrer Faelle.</p>
 
@@ -79,7 +79,7 @@ export default async function KundeStartseite() {
           <p className="text-sm text-gray-500 mt-1">Sobald ein Fall fuer Sie angelegt wird, erscheint er hier.</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 md:space-y-0">
           {faelle.map(fall => {
             const szenario = ((fall.szenario as string) ?? 'normalfall') as keyof typeof SZENARIO_PHASEN
             const phasen = SZENARIO_PHASEN[szenario] ?? SZENARIO_PHASEN.normalfall
@@ -118,7 +118,7 @@ export default async function KundeStartseite() {
   } catch (err) {
     console.error('[KundeStartseite] Error:', err)
     return (
-      <div className="w-full px-4 py-6 max-w-xl mx-auto">
+      <div className="w-full px-4 md:px-8 py-6">
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">
           <p className="text-[#0D1B3E] font-semibold">Fehler beim Laden</p>
           <p className="text-sm text-gray-500 mt-1">Bitte versuchen Sie es erneut.</p>

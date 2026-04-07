@@ -75,7 +75,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const adresse = (fall.besichtigungsort_adresse as string) || (fall.unfallort as string) || [(fall.schadens_adresse as string), (fall.schadens_plz as string), (fall.schadens_ort as string)].filter(Boolean).join(', ') || ''
 
     return (
-      <div className="w-full px-4 pt-5 pb-8 max-w-xl mx-auto space-y-5">
+      <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl md:max-w-none mx-auto space-y-5">
         {/* Header */}
         <div>
           <Link href="/kunde" className="text-xs text-gray-400 hover:text-[#4573A2] mb-2 inline-block">&larr; Meine Faelle</Link>
@@ -85,25 +85,27 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           {adresse && <p className="text-sm text-gray-500 mt-0.5">{adresse}</p>}
         </div>
 
-        {/* Stepper Card */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-base font-semibold text-[#0D1B3E]">Ihr Fortschritt</p>
-            <span className="text-base font-bold text-[#4573A2]">{progress.pct}%</span>
-          </div>
-          <div className="w-full h-2.5 bg-gray-100 rounded-full mb-5">
-            <div className="h-full bg-[#4573A2] rounded-full transition-all duration-700" style={{ width: `${progress.pct}%` }} />
-          </div>
-          <ScenarioStepper phasen={phasen} progress={progress} />
-          {szenario === 'ruegefall' && (
-            <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-              <p className="text-xs text-amber-700 font-medium">Die Versicherung hat Einwaende erhoben. Unsere Partnerkanzlei kuemmert sich darum.</p>
+        {/* KFZ-131: Desktop Grid — Stepper links, Details rechts */}
+        <div className="grid md:grid-cols-2 gap-5">
+          {/* Stepper Card */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-base font-semibold text-[#0D1B3E]">Ihr Fortschritt</p>
+              <span className="text-base font-bold text-[#4573A2]">{progress.pct}%</span>
             </div>
-          )}
-        </div>
+            <div className="w-full h-2.5 bg-gray-100 rounded-full mb-5">
+              <div className="h-full bg-[#4573A2] rounded-full transition-all duration-700" style={{ width: `${progress.pct}%` }} />
+            </div>
+            <ScenarioStepper phasen={phasen} progress={progress} />
+            {szenario === 'ruegefall' && (
+              <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                <p className="text-xs text-amber-700 font-medium">Die Versicherung hat Einwaende erhoben. Unsere Partnerkanzlei kuemmert sich darum.</p>
+              </div>
+            )}
+          </div>
 
-        {/* Fall-Details + Dokumente + Chat */}
-        <FallDetailSections
+          {/* Fall-Details + Dokumente + Chat */}
+          <FallDetailSections
           fall={fall as Record<string, unknown>}
           svName={svName}
           svTelefon={svTelefon}
@@ -113,6 +115,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           userId={user.id}
           chatTeilnehmer={chatTeilnehmer}
         />
+        </div>
       </div>
     )
   } catch (err) {
