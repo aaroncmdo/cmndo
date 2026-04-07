@@ -23,6 +23,7 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Versicherung | null>(null)
   const [editing, setEditing] = useState(false)
+  const [creating, setCreating] = useState(false)
   const [form, setForm] = useState<Partial<Versicherung>>({})
   const [saving, setSaving] = useState(false)
 
@@ -40,6 +41,28 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
     setSaving(false)
     setEditing(false)
     setSelected(null)
+    router.refresh()
+  }
+
+  async function handleCreate() {
+    if (!form.name?.trim()) return
+    setSaving(true)
+    const { createClient } = await import('@/lib/supabase/client')
+    const supabase = createClient()
+    await supabase.from('versicherungen').insert({
+      name: form.name.trim(),
+      schaden_telefon: form.schaden_telefon || null,
+      schaden_email: form.schaden_email || null,
+      hotline_telefon: form.hotline_telefon || null,
+      webseite: form.webseite || null,
+      adresse: form.adresse || null,
+      plz: form.plz || null,
+      stadt: form.stadt || null,
+      bafin_nummer: form.bafin_nummer || null,
+    })
+    setSaving(false)
+    setCreating(false)
+    setForm({})
     router.refresh()
   }
 
@@ -64,6 +87,10 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
             <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suchen..."
               className="pl-8 pr-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#4573A2] w-48" />
           </div>
+          <button onClick={() => { setCreating(true); setForm({}) }}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#4573A2] text-white rounded-lg text-xs font-medium hover:bg-[#1E3A5F] transition-colors">
+            <PlusIcon className="w-3.5 h-3.5" /> Neue Versicherung
+          </button>
         </div>
       </div>
 
@@ -109,6 +136,34 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
           </tbody>
         </table>
       </div>
+
+      {/* Create-Modal */}
+      {creating && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setCreating(false)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+              <h2 className="text-base font-semibold text-gray-900">Neue Versicherung</h2>
+              <button onClick={() => setCreating(false)} className="p-1 text-gray-400 hover:text-gray-600"><XIcon className="w-5 h-5" /></button>
+            </div>
+            <div className="p-5 space-y-3">
+              {(['name', 'schaden_telefon', 'schaden_email', 'hotline_telefon', 'webseite', 'adresse', 'plz', 'stadt', 'bafin_nummer'] as const).map(key => (
+                <div key={key}>
+                  <label className="text-xs text-gray-500 mb-0.5 block">{key === 'name' ? 'Name *' : key.replace(/_/g, ' ')}</label>
+                  <input value={(form as Record<string, string | null>)[key] ?? ''} onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value || null }))}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#4573A2]" />
+                </div>
+              ))}
+              <div className="flex gap-2 pt-2">
+                <button onClick={handleCreate} disabled={saving || !form.name?.trim()}
+                  className="flex-1 py-2 bg-[#4573A2] text-white rounded-lg text-sm font-medium hover:bg-[#1E3A5F] disabled:opacity-50">
+                  {saving ? 'Speichert...' : 'Erstellen'}
+                </button>
+                <button onClick={() => setCreating(false)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm">Abbrechen</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Detail-Panel */}
       {selected && (

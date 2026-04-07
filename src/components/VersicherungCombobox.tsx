@@ -55,15 +55,19 @@ export default function VersicherungCombobox({
         />
         <ChevronDownIcon className={`absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
       </div>
-      {open && filtered.length > 0 && (
+      {open && (
         <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg">
-          {filtered.map(o => (
-            <button key={o.id} type="button"
-              onClick={() => { onChange(o.name); setSearch(o.name); setOpen(false) }}
-              className="w-full text-left px-3 py-2 text-sm hover:bg-[#4573A2]/10 transition-colors">
-              {o.name}
-            </button>
-          ))}
+          {filtered.length === 0 ? (
+            <p className="px-3 py-3 text-sm text-gray-400 text-center">Keine Versicherung gefunden</p>
+          ) : (
+            filtered.map(o => (
+              <button key={o.id} type="button"
+                onClick={() => { onChange(o.name); setSearch(o.name); setOpen(false) }}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-[#4573A2]/10 transition-colors">
+                {o.name}
+              </button>
+            ))
+          )}
         </div>
       )}
     </div>

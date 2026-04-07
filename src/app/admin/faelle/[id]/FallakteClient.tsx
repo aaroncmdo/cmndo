@@ -2404,30 +2404,36 @@ function TabKanzlei({
         } />
         <InfoRow label="Versicherung" value={fall.versicherung_name} />
         <InfoRow label="Schadennummer" value={fall.versicherung_schaden_nr} />
-        {/* KFZ-133: Versicherungs-Kontaktdaten mit Anruf-Button */}
+        {/* KFZ-133: Versicherungs-Kontaktdaten mit Anruf-Button + Mail-Button */}
         {versicherungKontakt && (
-          <div className="mt-3 p-3 bg-[#4573A2]/5 rounded-xl border border-[#4573A2]/20 space-y-2">
-            <p className="text-xs font-semibold text-[#0D1B3E]">{versicherungKontakt.name}</p>
-            {versicherungKontakt.schaden_telefon && (
-              <a href={`tel:${versicherungKontakt.schaden_telefon}`} className="flex items-center gap-2 text-xs text-[#4573A2] hover:underline">
-                <PhoneIcon className="w-3.5 h-3.5" /> Schadenhotline: {versicherungKontakt.schaden_telefon}
-              </a>
-            )}
-            {versicherungKontakt.schaden_email && (
-              <a href={`mailto:${versicherungKontakt.schaden_email}`} className="flex items-center gap-2 text-xs text-[#4573A2] hover:underline">
-                <MailIcon className="w-3.5 h-3.5" /> {versicherungKontakt.schaden_email}
-              </a>
-            )}
-            {versicherungKontakt.hotline_telefon && versicherungKontakt.hotline_telefon !== versicherungKontakt.schaden_telefon && (
-              <a href={`tel:${versicherungKontakt.hotline_telefon}`} className="flex items-center gap-2 text-xs text-gray-500 hover:underline">
-                <PhoneIcon className="w-3.5 h-3.5" /> Hotline: {versicherungKontakt.hotline_telefon}
-              </a>
-            )}
-            {versicherungKontakt.webseite && (
-              <a href={versicherungKontakt.webseite} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs text-gray-500 hover:underline">
-                <GlobeIcon className="w-3.5 h-3.5" /> Webseite
-              </a>
-            )}
+          <div className="mt-3 p-4 bg-white rounded-xl border border-gray-200 space-y-3">
+            <p className="text-sm font-semibold text-[#0D1B3E]">{versicherungKontakt.name}</p>
+            <div className="flex flex-wrap gap-2">
+              {versicherungKontakt.schaden_telefon && (
+                <a href={`tel:${versicherungKontakt.schaden_telefon}`}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#4573A2] text-white rounded-lg hover:bg-[#1E3A5F] text-sm font-medium transition-colors">
+                  <PhoneIcon className="w-4 h-4" /> {versicherungKontakt.schaden_telefon}
+                </a>
+              )}
+              {versicherungKontakt.schaden_email && (
+                <a href={`mailto:${versicherungKontakt.schaden_email}`}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#1E3A5F] text-white rounded-lg hover:bg-[#0D1B3E] text-sm font-medium transition-colors">
+                  <MailIcon className="w-4 h-4" /> Email schreiben
+                </a>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+              {versicherungKontakt.hotline_telefon && versicherungKontakt.hotline_telefon !== versicherungKontakt.schaden_telefon && (
+                <a href={`tel:${versicherungKontakt.hotline_telefon}`} className="flex items-center gap-1 hover:text-[#4573A2]">
+                  <PhoneIcon className="w-3 h-3" /> Hotline: {versicherungKontakt.hotline_telefon}
+                </a>
+              )}
+              {versicherungKontakt.webseite && (
+                <a href={versicherungKontakt.webseite} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-[#4573A2]">
+                  <GlobeIcon className="w-3 h-3" /> Webseite
+                </a>
+              )}
+            </div>
           </div>
         )}
         {/* Kanzlei-Paket PDF Download */}
