@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { confirmGutachterTermin } from './actions'
 import {
   CalendarIcon,
@@ -10,6 +11,7 @@ import {
   UserCheckIcon,
   ClockIcon,
   CheckCircle2Icon,
+  StarIcon,
 } from 'lucide-react'
 
 type GutachterSlot = {
@@ -112,22 +114,25 @@ export default function GutachterTermin({
     setConfirming(slot.sv_id + slot.termin)
     setError(null)
     try {
-      const result = await confirmGutachterTermin(lead.id, slot.sv_id, slot.termin, plz, adresse)
-      if (!result.success) {
-        setError(result.error ?? 'Bestaetigung fehlgeschlagen')
+      const res = await confirmGutachterTermin(lead.id, slot.sv_id, slot.termin, plz, adresse)
+      if (!res.success) {
+        setError(res.error ?? 'Bestaetigung fehlgeschlagen')
         return
       }
       setConfirmed(true)
 
-      // Open WhatsApp with confirmation (non-critical)
+      // BUG-65D: Toast mit Details
+      const terminStr = new Date(slot.termin).toLocaleString('de-DE', {
+        weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+      })
+      toast.success(`Termin reserviert mit ${slot.name} am ${terminStr} an ${adresse || plz}`)
+
+      // WhatsApp Bestätigung (non-critical)
       try {
         const phone = (lead.telefon ?? '').replace(/[^0-9+]/g, '')
         if (phone) {
           const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ')
-          const terminStr = new Date(slot.termin).toLocaleString('de-DE', {
-            weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
-            hour: '2-digit', minute: '2-digit',
-          })
           const msg = `Hallo ${name}, Ihr Gutachtertermin wurde bestaetigt:\n\nGutachter: ${slot.name}\nDatum: ${terminStr}\nAdresse: ${adresse || plz}\n\nIhr Claimondo-Team`
           const { sendWhatsAppFromLead } = await import('./actions')
           await sendWhatsAppFromLead(phone, msg)
@@ -137,10 +142,14 @@ export default function GutachterTermin({
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Bestaetigung fehlgeschlagen')
+      toast.error('Fehler beim Zuweisen')
     } finally {
       setConfirming(null)
     }
   }
+
+  // BUG-65C: Irgendein Button in Bearbeitung?
+  const anyConfirming = confirming !== null
 
   const inputCls = 'w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-100 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 transition-colors'
 
@@ -225,6 +234,7 @@ export default function GutachterTermin({
               variant="empfohlen"
               onConfirm={handleConfirm}
               confirming={confirming === result.empfohlen.sv_id + result.empfohlen.termin}
+              disabled={anyConfirming && confirming !== result.empfohlen.sv_id + result.empfohlen.termin}
             />
           )}
 
@@ -236,6 +246,7 @@ export default function GutachterTermin({
               label="Alternative 1"
               onConfirm={handleConfirm}
               confirming={confirming === result.alternative_1.sv_id + result.alternative_1.termin}
+              disabled={anyConfirming && confirming !== result.alternative_1.sv_id + result.alternative_1.termin}
             />
           )}
 
@@ -247,6 +258,7 @@ export default function GutachterTermin({
               label="Alternative 2"
               onConfirm={handleConfirm}
               confirming={confirming === result.alternative_2.sv_id + result.alternative_2.termin}
+              disabled={anyConfirming && confirming !== result.alternative_2.sv_id + result.alternative_2.termin}
             />
           )}
 
@@ -273,65 +285,68 @@ function SlotCard({
   label,
   onConfirm,
   confirming,
+  disabled,
 }: {
   slot: GutachterSlot
   variant: 'empfohlen' | 'alternative'
   label?: string
   onConfirm: (slot: GutachterSlot) => void
   confirming: boolean
+  disabled?: boolean
 }) {
   const isEmpfohlen = variant === 'empfohlen'
   const terminDate = new Date(slot.termin)
 
   return (
-    <div className={`rounded-xl p-4 border ${
+    <div className={`rounded-xl p-4 border transition-all ${
       isEmpfohlen
-        ? 'bg-green-50/30 border-green-800/50'
-        : 'bg-[#4573A2]/10 border-[#1E3A5F]/50'
+        ? 'bg-[#4573A2] border-[#4573A2] text-white'
+        : 'bg-white border-gray-200'
     }`}>
-      {/* Header */}
+      {/* Header — BUG-65B: Empfehlung-Badge */}
       <div className="flex items-center justify-between mb-3">
-        <span className={`text-xs font-semibold uppercase tracking-wide ${
-          isEmpfohlen ? 'text-green-400' : 'text-[#7BA3CC]'
+        <span className={`text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5 ${
+          isEmpfohlen ? 'text-white' : 'text-[#7BA3CC]'
         }`}>
-          {isEmpfohlen ? 'Empfohlen' : label ?? 'Alternative'}
-          {isEmpfohlen && slot.wunschtermin_moeglich && (
-            <span className="ml-2 text-green-500">Wunschtermin moeglich</span>
-          )}
+          {isEmpfohlen && <StarIcon className="w-3.5 h-3.5 fill-current" />}
+          {isEmpfohlen ? '*EMPFEHLUNG' : label ?? 'Alternative'}
         </span>
+        {isEmpfohlen && slot.wunschtermin_moeglich && (
+          <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">Wunschtermin moeglich</span>
+        )}
       </div>
 
       {/* Gutachter info */}
       <div className="flex items-start gap-3 mb-3">
         <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
-          isEmpfohlen ? 'bg-green-500/20' : 'bg-[#4573A2]/20'
+          isEmpfohlen ? 'bg-white/20' : 'bg-[#4573A2]/10'
         }`}>
-          <UserCheckIcon className={`w-4 h-4 ${isEmpfohlen ? 'text-green-400' : 'text-[#7BA3CC]'}`} />
+          <UserCheckIcon className={`w-4 h-4 ${isEmpfohlen ? 'text-white' : 'text-[#4573A2]'}`} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-gray-900 text-sm font-medium">{slot.name}</p>
+          <p className={`text-sm font-medium ${isEmpfohlen ? 'text-white' : 'text-gray-900'}`}>{slot.name}</p>
           <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
             {slot.entfernung_km != null && (
-              <span className="text-gray-500 text-[11px] flex items-center gap-1">
+              <span className={`text-[11px] flex items-center gap-1 ${isEmpfohlen ? 'text-white/70' : 'text-gray-500'}`}>
                 <MapPinIcon className="w-3 h-3" />
                 {slot.entfernung_km} km
               </span>
             )}
-            <span className="text-gray-500 text-[11px] flex items-center gap-1">
+            <span className={`text-[11px] flex items-center gap-1 ${isEmpfohlen ? 'text-white/70' : 'text-gray-500'}`}>
               <ClockIcon className="w-3 h-3" />
               Auslastung {slot.auslastung}
             </span>
             {slot.paket && (
-              <span className="text-gray-500 text-[11px]">{slot.paket}</span>
+              <span className={`text-[11px] ${isEmpfohlen ? 'text-white/70' : 'text-gray-500'}`}>{slot.paket}</span>
             )}
           </div>
         </div>
       </div>
 
       {/* Termin */}
-      <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-gray-100/50">
-        <CalendarIcon className="w-3.5 h-3.5 text-gray-500" />
-        <span className="text-gray-800 text-sm">
+      <div className={`flex items-center gap-2 mb-3 px-3 py-2 rounded-lg ${isEmpfohlen ? 'bg-white/10' : 'bg-gray-50'}`}>
+        <CalendarIcon className={`w-3.5 h-3.5 ${isEmpfohlen ? 'text-white/70' : 'text-gray-500'}`} />
+        <span className={`text-sm ${isEmpfohlen ? 'text-white' : 'text-gray-800'}`}>
           {terminDate.toLocaleString('de-DE', {
             weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric',
             hour: '2-digit', minute: '2-digit',
@@ -339,17 +354,22 @@ function SlotCard({
         </span>
       </div>
 
-      {/* Confirm button */}
+      {/* BUG-65C: Confirm button — disabled wenn anderer Button in Bearbeitung */}
       <button
         onClick={() => onConfirm(slot)}
-        disabled={confirming}
-        className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-[0.98] disabled:opacity-50 ${
+        disabled={confirming || disabled}
+        className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 ${
           isEmpfohlen
-            ? 'bg-green-600 hover:bg-green-500 text-white'
-            : 'bg-[#1E3A5F] hover:bg-[#4573A2] text-white'
+            ? 'bg-white text-[#4573A2] hover:bg-white/90'
+            : 'bg-[#0D1B3E] hover:bg-[#1E3A5F] text-white'
         }`}
       >
-        {confirming ? 'Wird bestaetigt...' : 'Diesen Termin bestaetigen'}
+        {confirming ? (
+          <>
+            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            Wird bestaetigt...
+          </>
+        ) : 'Diesen Termin bestaetigen'}
       </button>
     </div>
   )
