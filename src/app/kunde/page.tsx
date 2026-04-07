@@ -8,6 +8,7 @@ export default async function KundeStartseite() {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
+  try {
   const { data: profile } = await supabase
     .from('profiles')
     .select('vorname')
@@ -39,27 +40,31 @@ export default async function KundeStartseite() {
     }
   }
 
-  // KFZ-128: Ungelesene Nachrichten pro Fall zaehlen
-  const { createAdminClient } = await import('@/lib/supabase/admin')
-  const admin = createAdminClient()
-  const faelleWithUnread = await Promise.all(faelle.map(async (f) => {
-    const { count } = await admin
-      .from('nachrichten')
-      .select('id', { count: 'exact', head: true })
-      .eq('fall_id', f.id as string)
-      .eq('gelesen', false)
-      .neq('sender_id', user.id)
-    return { ...f, ungelesene_nachrichten: count ?? 0 }
-  }))
-
-  // Sortierung: Faelle mit ungelesenen Nachrichten OBEN
-  faelleWithUnread.sort((a, b) => b.ungelesene_nachrichten - a.ungelesene_nachrichten)
-  faelle = faelleWithUnread
-
   // Onboarding-Redirect
   // BUG-63: Redirect auf Fall-Detail statt /kunde/onboarding (Route existiert nicht)
   const needsOnboarding = faelle.find(f => f.onboarding_complete === false)
   if (needsOnboarding) redirect(`/kunde/faelle/${needsOnboarding.id}`)
+
+  // KFZ-128: Ungelesene Nachrichten pro Fall zaehlen (non-critical)
+  try {
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const admin = createAdminClient()
+    const faelleWithUnread = await Promise.all(faelle.map(async (f) => {
+      const { count } = await admin
+        .from('nachrichten')
+        .select('id', { count: 'exact', head: true })
+        .eq('fall_id', f.id as string)
+        .eq('gelesen', false)
+        .neq('sender_id', user.id)
+      return { ...f, ungelesene_nachrichten: count ?? 0 }
+    }))
+    // Sortierung: Faelle mit ungelesenen Nachrichten OBEN
+    faelleWithUnread.sort((a, b) => b.ungelesene_nachrichten - a.ungelesene_nachrichten)
+    faelle = faelleWithUnread
+  } catch (e) {
+    console.error('[KundeStartseite] Ungelesene Nachrichten Fehler:', e)
+    // Seite funktioniert trotzdem — ohne Badges
+  }
 
   const vorname = profile?.vorname ?? user.email?.split('@')[0] ?? 'Kunde'
 
@@ -110,4 +115,15 @@ export default async function KundeStartseite() {
       )}
     </div>
   )
+  } catch (err) {
+    console.error('[KundeStartseite] Error:', err)
+    return (
+      <div className="w-full px-4 py-6 max-w-xl mx-auto">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">
+          <p className="text-[#0D1B3E] font-semibold">Fehler beim Laden</p>
+          <p className="text-sm text-gray-500 mt-1">Bitte versuchen Sie es erneut.</p>
+        </div>
+      </div>
+    )
+  }
 }
