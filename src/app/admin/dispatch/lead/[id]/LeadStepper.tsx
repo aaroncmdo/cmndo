@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { saveLeadQualifizierung, confirmGutachterTermin, setSvGesucht } from './actions'
 import { sendFlowLink } from '../../actions'
+import VersicherungCombobox from '@/components/VersicherungCombobox'
 import {
   PhoneCallIcon,
   ClipboardListIcon,
@@ -541,7 +542,7 @@ function StepSchadentyp({
       {needsEigeneVers && (
         <fieldset className="border border-gray-200 rounded-xl p-3 space-y-2">
           <legend className="text-xs text-amber-600 font-medium px-2">Eigene Versicherung</legend>
-          <Input label="Versicherung" value={eigeneVersicherung} onChange={setEigeneVersicherung} />
+          <VersicherungCombobox label="Versicherung" value={eigeneVersicherung} onChange={setEigeneVersicherung} />
           <Input label="Policennummer" value={eigenePolicennr} onChange={setEigenePolicennr} />
         </fieldset>
       )}
@@ -608,7 +609,7 @@ function StepGegner({ gegnerName, setGegnerName, gegnerVersicherung, setGegnerVe
   return (
     <div className="space-y-3">
       <Input label="Name Gegner" value={gegnerName} onChange={setGegnerName} />
-      <Input label="Versicherung Gegner" value={gegnerVersicherung} onChange={setGegnerVersicherung} />
+      <VersicherungCombobox label="Versicherung Gegner" value={gegnerVersicherung} onChange={setGegnerVersicherung} />
       <Input label="Kennzeichen Gegner" value={gegnerKennzeichen} onChange={setGegnerKennzeichen} />
       <button onClick={onAdvance} disabled={saving}
         className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-white text-sm font-medium rounded-xl px-5 py-2.5 transition-colors">

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboardIcon, FolderOpenIcon, BadgeEuroIcon, ClipboardListIcon,
   HardHatIcon, MapIcon, LogOutIcon, GitBranchIcon, CalendarIcon,
-  BarChart3Icon, UsersIcon,
+  BarChart3Icon, UsersIcon, BuildingIcon,
 } from 'lucide-react'
 
 const NAV_MAIN = [
@@ -18,6 +18,7 @@ const NAV_MAIN = [
 ]
 
 const NAV_SECONDARY = [
+  { href: '/admin/versicherungen', label: 'Versicherer', icon: BuildingIcon },
   { href: '/admin/finance', label: 'Finanzen', icon: BadgeEuroIcon },
   { href: '/admin/statistiken', label: 'Statistiken', icon: BarChart3Icon },
   { href: '/admin/team', label: 'Team', icon: UsersIcon },

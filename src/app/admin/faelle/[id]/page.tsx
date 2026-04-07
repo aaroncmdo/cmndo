@@ -135,6 +135,20 @@ export default async function FallaktePage({
   const { getChatTeilnehmer } = await import('@/lib/chatGruppe')
   const chatTeilnehmer = await getChatTeilnehmer(id)
 
+  // KFZ-133: Versicherungs-Kontaktdaten laden
+  let versicherungKontakt: { name: string; schaden_telefon: string | null; schaden_email: string | null; hotline_telefon: string | null; webseite: string | null } | null = null
+  if (fall.versicherung_id) {
+    const { data: vk } = await supabase.from('versicherungen').select('name, schaden_telefon, schaden_email, hotline_telefon, webseite').eq('id', fall.versicherung_id).single()
+    versicherungKontakt = vk
+  } else if (fall.gegner_versicherung || fall.versicherung_name) {
+    // Fallback: nach Name suchen
+    const vName = (fall.gegner_versicherung as string) ?? (fall.versicherung_name as string)
+    if (vName) {
+      const { data: vk } = await supabase.from('versicherungen').select('name, schaden_telefon, schaden_email, hotline_telefon, webseite').ilike('name', `%${vName}%`).limit(1).maybeSingle()
+      versicherungKontakt = vk
+    }
+  }
+
   return (
     <FallakteClient
       fall={fall}
@@ -153,6 +167,7 @@ export default async function FallaktePage({
       mitarbeiter={mitarbeiter}
       forderungspositionen={forderungspositionen ?? []}
       chatTeilnehmer={chatTeilnehmer}
+      versicherungKontakt={versicherungKontakt}
     />
   )
 }

@@ -54,6 +54,7 @@ import {
   SparklesIcon,
   LoaderIcon,
   TimerIcon,
+  GlobeIcon,
 } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -558,6 +559,7 @@ export default function FallakteClient({
   mitarbeiter: Mitarbeiter[]
   forderungspositionen: Forderungsposition[]
   chatTeilnehmer?: { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url: string | null }[]
+  versicherungKontakt?: { name: string; schaden_telefon: string | null; schaden_email: string | null; hotline_telefon: string | null; webseite: string | null } | null
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -2402,6 +2404,32 @@ function TabKanzlei({
         } />
         <InfoRow label="Versicherung" value={fall.versicherung_name} />
         <InfoRow label="Schadennummer" value={fall.versicherung_schaden_nr} />
+        {/* KFZ-133: Versicherungs-Kontaktdaten mit Anruf-Button */}
+        {versicherungKontakt && (
+          <div className="mt-3 p-3 bg-[#4573A2]/5 rounded-xl border border-[#4573A2]/20 space-y-2">
+            <p className="text-xs font-semibold text-[#0D1B3E]">{versicherungKontakt.name}</p>
+            {versicherungKontakt.schaden_telefon && (
+              <a href={`tel:${versicherungKontakt.schaden_telefon}`} className="flex items-center gap-2 text-xs text-[#4573A2] hover:underline">
+                <PhoneIcon className="w-3.5 h-3.5" /> Schadenhotline: {versicherungKontakt.schaden_telefon}
+              </a>
+            )}
+            {versicherungKontakt.schaden_email && (
+              <a href={`mailto:${versicherungKontakt.schaden_email}`} className="flex items-center gap-2 text-xs text-[#4573A2] hover:underline">
+                <MailIcon className="w-3.5 h-3.5" /> {versicherungKontakt.schaden_email}
+              </a>
+            )}
+            {versicherungKontakt.hotline_telefon && versicherungKontakt.hotline_telefon !== versicherungKontakt.schaden_telefon && (
+              <a href={`tel:${versicherungKontakt.hotline_telefon}`} className="flex items-center gap-2 text-xs text-gray-500 hover:underline">
+                <PhoneIcon className="w-3.5 h-3.5" /> Hotline: {versicherungKontakt.hotline_telefon}
+              </a>
+            )}
+            {versicherungKontakt.webseite && (
+              <a href={versicherungKontakt.webseite} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs text-gray-500 hover:underline">
+                <GlobeIcon className="w-3.5 h-3.5" /> Webseite
+              </a>
+            )}
+          </div>
+        )}
         {/* Kanzlei-Paket PDF Download */}
         <div className="mt-3">
           <a
