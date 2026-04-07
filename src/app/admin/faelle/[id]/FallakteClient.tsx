@@ -540,6 +540,7 @@ export default function FallakteClient({
   termine,
   mitarbeiter,
   forderungspositionen,
+  chatTeilnehmer,
 }: {
   fall: Fall
   lead: Lead
@@ -556,6 +557,7 @@ export default function FallakteClient({
   termine: Termin[]
   mitarbeiter: Mitarbeiter[]
   forderungspositionen: Forderungsposition[]
+  chatTeilnehmer?: { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url: string | null }[]
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -762,6 +764,7 @@ export default function FallakteClient({
             fall={fall}
             nachrichten={nachrichten}
             onRefresh={() => router.refresh()}
+            teilnehmer={chatTeilnehmer ?? []}
           />
         )}
         {activeTab === 'abrechnung' && (
@@ -2534,22 +2537,33 @@ const CHAT_CHANNELS: { key: string; label: string; readonly: boolean }[] = [
   { key: 'portal-kunde-gutachter', label: 'Kunde\u2194Gutachter', readonly: true },
 ]
 
+type ChatTeilnehmerType = { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url: string | null }
+
 function TabChat({
   fall,
   nachrichten,
   onRefresh,
+  teilnehmer,
 }: {
   fall: Fall
   nachrichten: Nachricht[]
   onRefresh: () => void
+  teilnehmer?: ChatTeilnehmerType[]
 }) {
-  const [activeChannel, setActiveChannel] = useState('portal-kunde-claimondo')
+  const [activeChannel, setActiveChannel] = useState('alle')
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const channelMessages = nachrichten.filter((n) => n.kanal === activeChannel)
-  const channel = CHAT_CHANNELS.find((c) => c.key === activeChannel)!
+  // Teilnehmer-Map
+  const teilnehmerMap = Object.fromEntries((teilnehmer ?? []).map(t => [t.user_id, t]))
+
+  const channelMessages = activeChannel === 'alle'
+    ? nachrichten
+    : nachrichten.filter((n) => n.kanal === activeChannel)
+  const channel = activeChannel === 'alle'
+    ? { key: 'alle', label: 'Alle', readonly: false }
+    : CHAT_CHANNELS.find((c) => c.key === activeChannel) ?? { key: activeChannel, label: activeChannel, readonly: true }
 
   async function handleSend() {
     const trimmed = text.trim()
@@ -2607,12 +2621,48 @@ function TabChat({
   // Track last rendered date for date separators
   let lastDate = ''
 
+  // Sender-Name aus Teilnehmer-Daten oder Rolle
+  function senderName(msg: Nachricht): string {
+    if (!msg.sender_id) return 'System'
+    const t = teilnehmerMap[msg.sender_id]
+    if (t) {
+      const name = [t.vorname, t.nachname].filter(Boolean).join(' ')
+      if (name) return name
+    }
+    return rolleLabel(msg.sender_rolle)
+  }
+
+  const ALL_CHANNELS = [{ key: 'alle', label: 'Alle' }, ...CHAT_CHANNELS]
+
   return (
     <div className="space-y-4">
+      {/* KFZ-129: Teilnehmer-Header */}
+      {(teilnehmer ?? []).length > 0 && (
+        <div className="flex flex-wrap gap-3 px-4 py-3 bg-white rounded-xl border border-gray-200">
+          <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold self-center mr-2">Teilnehmer</span>
+          {(teilnehmer ?? []).map(t => {
+            const name = [t.vorname, t.nachname].filter(Boolean).join(' ') || 'Unbekannt'
+            const initials = [t.vorname?.[0], t.nachname?.[0]].filter(Boolean).join('').toUpperCase() || '?'
+            const rolleText = t.rolle === 'kundenbetreuer' ? 'KB' : t.rolle === 'gutachter' ? 'SV' : t.rolle === 'kunde' ? 'Kunde' : t.rolle
+            return (
+              <div key={t.user_id} className="flex items-center gap-1.5">
+                {t.avatar_url ? (
+                  <img src={t.avatar_url} alt={name} className="w-6 h-6 rounded-full object-cover" />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-[#1E3A5F] flex items-center justify-center text-white text-[9px] font-bold">{initials}</div>
+                )}
+                <span className="text-xs text-gray-700">{name}</span>
+                <span className="text-[9px] text-gray-400">({rolleText})</span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
       {/* Channel Sub-Tabs */}
       <div className="flex gap-1 bg-white rounded-xl p-1 border border-gray-200">
-        {CHAT_CHANNELS.map((ch) => {
-          const count = nachrichten.filter((n) => n.kanal === ch.key).length
+        {ALL_CHANNELS.map((ch) => {
+          const count = ch.key === 'alle' ? nachrichten.length : nachrichten.filter((n) => n.kanal === ch.key).length
           return (
             <button
               key={ch.key}
@@ -2651,7 +2701,8 @@ function TabChat({
           ) : (
             <>
               {channelMessages.map((msg) => {
-                const isOwnSide = msg.sender_rolle === 'admin' || msg.sender_rolle === 'kanzlei'
+                const isSystem = msg.sender_rolle === 'system'
+                const isOwnSide = msg.sender_rolle === 'admin' || msg.sender_rolle === 'kanzlei' || msg.sender_rolle === 'kundenbetreuer'
                 const msgDate = fmtChatDate(msg.created_at)
                 let showDateSep = false
                 if (msgDate !== lastDate) {
@@ -2668,12 +2719,20 @@ function TabChat({
                         <div className="flex-1 h-px bg-gray-100" />
                       </div>
                     )}
+                    {/* KFZ-129: System-Nachrichten zentriert */}
+                    {isSystem ? (
+                      <div className="flex justify-center">
+                        <div className="bg-gray-100 rounded-full px-4 py-1.5 max-w-[85%]">
+                          <p className="text-xs text-gray-500 text-center">{msg.nachricht}</p>
+                        </div>
+                      </div>
+                    ) : (
                     <div className={`flex ${isOwnSide ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-[75%] ${isOwnSide ? 'items-end' : 'items-start'}`}>
                         {/* Sender badge + time */}
                         <div className={`flex items-center gap-2 mb-1 ${isOwnSide ? 'justify-end' : 'justify-start'}`}>
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border ${rolleColor(msg.sender_rolle)}`}>
-                            {rolleLabel(msg.sender_rolle)}
+                            {senderName(msg)}
                           </span>
                           <span className="text-[10px] text-gray-400">{fmtChatTime(msg.created_at)}</span>
                         </div>
@@ -2698,6 +2757,7 @@ function TabChat({
                         </div>
                       </div>
                     </div>
+                    )}
                   </div>
                 )
               })}

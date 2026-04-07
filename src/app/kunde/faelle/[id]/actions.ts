@@ -40,10 +40,39 @@ export async function sendNachricht(
 
   if (error) throw new Error(error.message)
 
-  // Benachrichtigung fuer den KB/SV erstellen
-  if (empfaengerId) {
-    try {
-      const admin = createAdminClient()
+  // KFZ-129: Benachrichtigung + WhatsApp an ALLE anderen Gruppen-Teilnehmer
+  try {
+    const admin = createAdminClient()
+    const { data: fall } = await admin.from('faelle').select('fall_nummer').eq('id', fallId).single()
+    const { data: gruppe } = await admin.from('chat_gruppen').select('id').eq('fall_id', fallId).maybeSingle()
+
+    if (gruppe) {
+      const { data: teilnehmer } = await admin
+        .from('chat_teilnehmer')
+        .select('user_id')
+        .eq('gruppe_id', gruppe.id)
+        .is('entfernt_am', null)
+        .neq('user_id', user.id)
+
+      for (const t of teilnehmer ?? []) {
+        // Benachrichtigung
+        await admin.from('benachrichtigungen').insert({
+          user_id: t.user_id,
+          typ: 'nachricht',
+          titel: 'Neue Nachricht vom Kunden',
+          beschreibung: nachricht.trim().slice(0, 100),
+          link: `/admin/faelle/${fallId}`,
+        })
+
+        // WhatsApp Fallback
+        const { data: profile } = await admin.from('profiles').select('telefon').eq('id', t.user_id).single()
+        if (profile?.telefon) {
+          const { sendWhatsApp } = await import('@/lib/whatsapp')
+          await sendWhatsApp(profile.telefon, `Neue Kundennachricht in Fall ${fall?.fall_nummer ?? fallId.slice(0, 8)}: ${nachricht.trim().slice(0, 200)}`)
+        }
+      }
+    } else if (empfaengerId) {
+      // Fallback: alte Logik wenn keine Gruppe existiert
       await admin.from('benachrichtigungen').insert({
         user_id: empfaengerId,
         typ: 'nachricht',
@@ -51,19 +80,6 @@ export async function sendNachricht(
         beschreibung: nachricht.trim().slice(0, 100),
         link: `/admin/faelle/${fallId}`,
       })
-    } catch { /* non-critical */ }
-  }
-
-  // KFZ-128: WhatsApp Fallback an KB/SV
-  try {
-    const admin = createAdminClient()
-    if (empfaengerId) {
-      const { data: empfaenger } = await admin.from('profiles').select('telefon').eq('id', empfaengerId).single()
-      if (empfaenger?.telefon) {
-        const { data: fall } = await admin.from('faelle').select('fall_nummer').eq('id', fallId).single()
-        const { sendWhatsApp } = await import('@/lib/whatsapp')
-        await sendWhatsApp(empfaenger.telefon, `Neue Kundennachricht in Fall ${fall?.fall_nummer ?? fallId.slice(0, 8)}: ${nachricht.trim().slice(0, 200)}`)
-      }
     }
   } catch { /* non-critical */ }
 

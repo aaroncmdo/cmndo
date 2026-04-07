@@ -55,12 +55,15 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       .eq('fall_id', id)
       .order('created_at')
 
-    // Nachrichten laden
+    // Nachrichten laden (alle Kanaele inkl. Gruppe)
     const { data: nachrichten } = await admin.from('nachrichten')
       .select('id, kanal, sender_id, sender_rolle, nachricht, hat_anhang, anhang_url, created_at')
       .eq('fall_id', id)
-      .in('kanal', ['portal-kunde-claimondo', 'portal-kunde-gutachter', 'whatsapp'])
       .order('created_at', { ascending: true })
+
+    // KFZ-129: Chat-Teilnehmer laden
+    const { getChatTeilnehmer } = await import('@/lib/chatGruppe')
+    const chatTeilnehmer = await getChatTeilnehmer(id)
 
     // Progress berechnen
     const szenario = ((fall.szenario as string) ?? 'normalfall') as keyof typeof SZENARIO_PHASEN
@@ -108,6 +111,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           dokumente={dokumente ?? []}
           nachrichten={nachrichten ?? []}
           userId={user.id}
+          chatTeilnehmer={chatTeilnehmer}
         />
       </div>
     )

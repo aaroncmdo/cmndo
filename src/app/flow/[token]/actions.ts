@@ -175,6 +175,12 @@ export async function createKundeAccount(
         // Create default pflichtdokumente
         await createDefaultPflichtdokumente(admin, fallId)
 
+        // KFZ-129: Kunde als Chat-Teilnehmer hinzufuegen
+        try {
+          const { syncChatTeilnehmer } = await import('@/lib/chatGruppe')
+          await syncChatTeilnehmer(fallId)
+        } catch (e) { console.error('[KFZ-129] syncChatTeilnehmer:', e) }
+
         return { password }
       }
     }
@@ -200,6 +206,12 @@ export async function createKundeAccount(
 
   // Create default pflichtdokumente
   await createDefaultPflichtdokumente(admin, fallId)
+
+  // KFZ-129: Kunde als Chat-Teilnehmer hinzufuegen
+  try {
+    const { syncChatTeilnehmer } = await import('@/lib/chatGruppe')
+    await syncChatTeilnehmer(fallId)
+  } catch (e) { console.error('[KFZ-129] syncChatTeilnehmer:', e) }
 
   return { password }
 }
@@ -357,6 +369,13 @@ export async function signSAandCreateFall(
     titel: 'Kunde hat SA unterschrieben — Fall erstellt',
     beschreibung: `Fallnummer ${fallNummer}. SA digital unterschrieben via FlowLink.${lead.gutachter_termin ? ' Termin bestätigt.' : ''}`,
   })
+
+  // 8b. KFZ-129: Chat-Gruppe erstellen + Teilnehmer synchronisieren + System-Nachricht
+  try {
+    const { syncChatTeilnehmer, sendSystemNachricht } = await import('@/lib/chatGruppe')
+    await syncChatTeilnehmer(fall.id)
+    await sendSystemNachricht(fall.id, `Fall ${fallNummer} wurde erstellt. Willkommen in Ihrem persoenlichen Chat!`)
+  } catch (e) { console.error('[KFZ-129] Chat-Gruppe Fehler:', e) }
 
   // 9. WhatsApp an Admin (non-critical)
   try {

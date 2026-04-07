@@ -16,13 +16,15 @@ export default function ChatChannel({ fallId, kanal, currentUserId, readOnly }: 
   const endRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    supabase.from('nachrichten').select('id, sender_id, sender_rolle, nachricht, hat_anhang, anhang_url, created_at')
-      .eq('fall_id', fallId).eq('kanal', kanal).order('created_at', { ascending: true })
-      .then(({ data }) => { setMessages(data ?? []); setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), 100) })
+    // KFZ-129: kanal='alle' zeigt alle Nachrichten
+    const query = supabase.from('nachrichten').select('id, sender_id, sender_rolle, nachricht, hat_anhang, anhang_url, created_at')
+      .eq('fall_id', fallId).order('created_at', { ascending: true })
+    if (kanal !== 'alle') query.eq('kanal', kanal)
+    query.then(({ data }) => { setMessages(data ?? []); setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), 100) })
 
     const channel = supabase.channel(`chat-${fallId}-${kanal}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'nachrichten', filter: `fall_id=eq.${fallId}` },
-        (payload) => { const n = payload.new as Msg; if (n.kanal === kanal) setMessages(prev => [...prev, n]) })
+        (payload) => { const n = payload.new as Msg; if (kanal === 'alle' || n.kanal === kanal) setMessages(prev => [...prev, n]) })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [fallId, kanal, supabase])

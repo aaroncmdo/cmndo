@@ -131,6 +131,10 @@ export default async function FallaktePage({
     sv = { id: raw.id as string, paket: raw.paket as string, profile }
   }
 
+  // KFZ-129: Chat-Teilnehmer laden
+  const { getChatTeilnehmer } = await import('@/lib/chatGruppe')
+  const chatTeilnehmer = await getChatTeilnehmer(id)
+
   return (
     <FallakteClient
       fall={fall}
@@ -148,6 +152,7 @@ export default async function FallaktePage({
       termine={termine ?? []}
       mitarbeiter={mitarbeiter}
       forderungspositionen={forderungspositionen ?? []}
+      chatTeilnehmer={chatTeilnehmer}
     />
   )
 }

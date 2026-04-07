@@ -6,8 +6,10 @@ import { markNachrichtenGelesen } from '@/lib/markNachrichtenGelesen'
 
 type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean | null; anhang_url: string | null; created_at: string }
 type Dokument = { id: string; typ: string; datei_url: string; datei_name: string | null; created_at: string }
+type ChatTeilnehmer = { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url: string | null }
 
-const ROLLE_LABEL: Record<string, string> = { kunde: 'Sie', admin: 'Claimondo', kundenbetreuer: 'Ihr Betreuer', gutachter: 'Gutachter', system: 'System' }
+const ROLLE_LABEL: Record<string, string> = { kunde: 'Sie', admin: 'Claimondo', kundenbetreuer: 'Ihr Betreuer', gutachter: 'Gutachter', sachverstaendiger: 'Gutachter', system: 'System' }
+const ROLLE_COLOR: Record<string, string> = { kunde: 'bg-[#4573A2]', admin: 'bg-[#0D1B3E]', kundenbetreuer: 'bg-[#1E3A5F]', gutachter: 'bg-[#1E3A5F]', sachverstaendiger: 'bg-[#1E3A5F]', system: 'bg-gray-400' }
 
 function fmt(val: string | null): string {
   if (!val) return ''
@@ -31,7 +33,7 @@ type TabKey = (typeof TABS)[number]['key']
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export default function FallDetailSections({
-  fall, svName, svTelefon, kbName, dokumente, nachrichten, userId,
+  fall, svName, svTelefon, kbName, dokumente, nachrichten, userId, chatTeilnehmer,
 }: {
   fall: Record<string, unknown>
   svName: string | null
@@ -40,6 +42,7 @@ export default function FallDetailSections({
   dokumente: Dokument[]
   nachrichten: Nachricht[]
   userId: string
+  chatTeilnehmer?: ChatTeilnehmer[]
 }) {
   const [activeTab, setActiveTab] = useState<TabKey>('uebersicht')
 
@@ -116,7 +119,7 @@ export default function FallDetailSections({
       )}
 
       {activeTab === 'chat' && (
-        <ChatTab fallId={fall.id as string} nachrichten={nachrichten} userId={userId} hasSv={!!fall.sv_id} />
+        <ChatTab fallId={fall.id as string} nachrichten={nachrichten} userId={userId} teilnehmer={chatTeilnehmer ?? []} />
       )}
     </div>
   )
@@ -142,21 +145,28 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   )
 }
 
-// ─── Chat Tab — Sub-Tabs [Claimondo] [Gutachter] + WhatsApp ────────────────
+// ─── Chat Tab — KFZ-129: Gruppen-Chat mit Teilnehmer-Header ──────────────
 
-function ChatTab({ fallId, nachrichten: initialNachrichten, userId, hasSv }: {
-  fallId: string; nachrichten: Nachricht[]; userId: string; hasSv: boolean
+function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }: {
+  fallId: string; nachrichten: Nachricht[]; userId: string; teilnehmer: ChatTeilnehmer[]
 }) {
-  const [activeKanal, setActiveKanal] = useState<string>('portal-kunde-claimondo')
   const [messages, setMessages] = useState(initialNachrichten)
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const endRef = useRef<HTMLDivElement>(null)
 
-  const filtered = messages.filter(m => m.kanal === activeKanal || m.kanal === 'whatsapp')
+  // Teilnehmer-Map fuer Namen-Lookup
+  const teilnehmerMap = Object.fromEntries(teilnehmer.map(t => [t.user_id, t]))
 
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [filtered])
+  function getSenderName(msg: Nachricht): string {
+    if (msg.sender_id === userId) return 'Sie'
+    const t = teilnehmerMap[msg.sender_id]
+    if (t) return [t.vorname, t.nachname].filter(Boolean).join(' ') || ROLLE_LABEL[t.rolle] || t.rolle
+    return ROLLE_LABEL[msg.sender_rolle] ?? msg.sender_rolle
+  }
+
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault()
@@ -164,9 +174,9 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, hasSv }: {
     setSending(true); setError(null)
     try {
       const { sendNachricht } = await import('./actions')
-      await sendNachricht(fallId, text.trim(), activeKanal as 'portal-kunde-claimondo' | 'portal-kunde-gutachter')
+      await sendNachricht(fallId, text.trim(), 'portal-kunde-claimondo')
       setMessages(prev => [...prev, {
-        id: crypto.randomUUID(), kanal: activeKanal, sender_id: userId,
+        id: crypto.randomUUID(), kanal: 'gruppe', sender_id: userId,
         sender_rolle: 'kunde', nachricht: text.trim(), hat_anhang: false, anhang_url: null,
         created_at: new Date().toISOString(),
       }])
@@ -175,48 +185,81 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, hasSv }: {
     finally { setSending(false) }
   }
 
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-      {/* Sub-Tabs: Claimondo / Gutachter */}
-      <div className="flex gap-1 mb-4">
-        <button onClick={() => setActiveKanal('portal-kunde-claimondo')}
-          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${activeKanal === 'portal-kunde-claimondo' ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
-          Claimondo
-        </button>
-        {hasSv && (
-          <button onClick={() => setActiveKanal('portal-kunde-gutachter')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${activeKanal === 'portal-kunde-gutachter' ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
-            Gutachter
-          </button>
-        )}
-      </div>
+  // Andere Teilnehmer (nicht der Kunde selbst)
+  const otherTeilnehmer = teilnehmer.filter(t => t.user_id !== userId)
 
-      {/* Messages */}
-      <div className="space-y-3 mb-4 max-h-96 overflow-y-auto">
-        {filtered.length === 0 && <p className="text-sm text-gray-400 text-center py-8">Noch keine Nachrichten. Schreiben Sie uns!</p>}
-        {filtered.map(msg => {
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      {/* KFZ-129: Teilnehmer-Header */}
+      {otherTeilnehmer.length > 0 && (
+        <div className="px-4 py-3 bg-[#0D1B3E]/5 border-b border-gray-200">
+          <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-2">Ihre Ansprechpartner</p>
+          <div className="flex flex-wrap gap-3">
+            {otherTeilnehmer.map(t => {
+              const name = [t.vorname, t.nachname].filter(Boolean).join(' ') || 'Unbekannt'
+              const rolleLabel = t.rolle === 'kundenbetreuer' ? 'Kundenbetreuer' : t.rolle === 'gutachter' ? 'Gutachter' : t.rolle === 'admin' ? 'Admin' : t.rolle
+              const avatarBg = ROLLE_COLOR[t.rolle] ?? 'bg-gray-400'
+              const initials = [t.vorname?.[0], t.nachname?.[0]].filter(Boolean).join('').toUpperCase() || '?'
+              return (
+                <div key={t.user_id} className="flex items-center gap-2">
+                  {t.avatar_url ? (
+                    <img src={t.avatar_url} alt={name} className="w-8 h-8 rounded-full object-cover" />
+                  ) : (
+                    <div className={`w-8 h-8 rounded-full ${avatarBg} flex items-center justify-center text-white text-xs font-bold`}>
+                      {initials}
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-[#0D1B3E]">{name}</p>
+                    <p className="text-[10px] text-gray-400">{rolleLabel}</p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Messages — ein Stream fuer alle */}
+      <div className="space-y-3 p-4 max-h-96 overflow-y-auto">
+        {messages.length === 0 && <p className="text-sm text-gray-400 text-center py-8">Noch keine Nachrichten. Schreiben Sie uns!</p>}
+        {messages.map(msg => {
           const isOwn = msg.sender_id === userId
+          const isSystem = msg.sender_rolle === 'system'
           const isWhatsApp = msg.kanal === 'whatsapp'
-          const isGutachter = msg.sender_rolle === 'gutachter'
-          const bubbleColor = isOwn ? 'bg-[#4573A2] text-white' : isGutachter ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-[#0D1B3E]'
+
+          // System-Nachrichten zentriert
+          if (isSystem) {
+            return (
+              <div key={msg.id} className="flex justify-center">
+                <div className="bg-gray-100 rounded-full px-4 py-1.5 max-w-[85%]">
+                  <p className="text-xs text-gray-500 text-center">{msg.nachricht}</p>
+                </div>
+              </div>
+            )
+          }
+
+          const senderName = getSenderName(msg)
+          const bubbleColor = isOwn ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-[#0D1B3E]'
+          const lightText = isOwn ? 'text-white/60' : 'text-gray-400'
 
           return (
             <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${bubbleColor}`}>
                 <div className="flex items-center gap-1.5">
-                  <p className={`text-[10px] font-semibold uppercase tracking-wide ${isOwn || isGutachter ? 'text-white/60' : 'text-gray-400'}`}>
-                    {ROLLE_LABEL[msg.sender_rolle] ?? msg.sender_rolle}
+                  <p className={`text-[10px] font-semibold uppercase tracking-wide ${lightText}`}>
+                    {senderName}
                   </p>
-                  {isWhatsApp && <span className="text-[9px] opacity-60">via WhatsApp</span>}
+                  {isWhatsApp && <span className={`text-[9px] ${lightText}`}>via WhatsApp</span>}
                 </div>
                 <p className="text-sm whitespace-pre-wrap">{msg.nachricht}</p>
                 {msg.hat_anhang && msg.anhang_url && (
                   <a href={msg.anhang_url} target="_blank" rel="noopener noreferrer"
-                    className={`inline-flex items-center gap-1 mt-1 text-xs underline ${isOwn || isGutachter ? 'text-white/70' : 'text-[#4573A2]'}`}>
+                    className={`inline-flex items-center gap-1 mt-1 text-xs underline ${isOwn ? 'text-white/70' : 'text-[#4573A2]'}`}>
                     Anhang
                   </a>
                 )}
-                <p className={`text-[10px] mt-1 ${isOwn || isGutachter ? 'text-white/50' : 'text-gray-400'}`}>
+                <p className={`text-[10px] mt-1 ${lightText}`}>
                   {new Date(msg.created_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
@@ -227,16 +270,18 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, hasSv }: {
       </div>
 
       {/* Input */}
-      {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
-      <form onSubmit={handleSend} className="flex gap-2">
-        <input type="text" value={text} onChange={e => setText(e.target.value)}
-          placeholder={activeKanal === 'portal-kunde-gutachter' ? 'Nachricht an Gutachter...' : 'Nachricht an Claimondo...'}
-          className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#0D1B3E] placeholder-gray-400 focus:outline-none focus:border-[#4573A2]" />
-        <button type="submit" disabled={sending || !text.trim()}
-          className="px-4 py-3 bg-[#4573A2] hover:bg-[#1E3A5F] text-white rounded-xl transition-colors disabled:opacity-40 min-h-12 flex items-center justify-center">
-          {sending ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <SendIcon className="w-5 h-5" />}
-        </button>
-      </form>
+      <div className="p-4 border-t border-gray-200">
+        {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
+        <form onSubmit={handleSend} className="flex gap-2">
+          <input type="text" value={text} onChange={e => setText(e.target.value)}
+            placeholder="Nachricht schreiben..."
+            className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#0D1B3E] placeholder-gray-400 focus:outline-none focus:border-[#4573A2]" />
+          <button type="submit" disabled={sending || !text.trim()}
+            className="px-4 py-3 bg-[#4573A2] hover:bg-[#1E3A5F] text-white rounded-xl transition-colors disabled:opacity-40 min-h-12 flex items-center justify-center">
+            {sending ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <SendIcon className="w-5 h-5" />}
+          </button>
+        </form>
+      </div>
     </div>
   )
 }

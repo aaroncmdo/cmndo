@@ -66,6 +66,7 @@ export default function FallDetailClient({
   timeline,
   nachrichten,
   kundenbetreuer,
+  chatTeilnehmer,
 }: {
   fall: Record<string, unknown>
   lead: { vorname: string | null; nachname: string | null; email: string | null; telefon: string | null } | null
@@ -75,6 +76,7 @@ export default function FallDetailClient({
   timeline: Record<string, unknown>[]
   nachrichten: Record<string, unknown>[]
   kundenbetreuer?: { vorname: string | null; nachname: string | null; email: string | null; telefon: string | null } | null
+  chatTeilnehmer?: { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url: string | null }[]
 }) {
   const [tab, setTab] = useState<TabKey>('uebersicht')
   const [uploading, setUploading] = useState(false)
@@ -900,7 +902,7 @@ export default function FallDetailClient({
 
         {/* Tab: Chat */}
         {tab === 'chat' && (
-          <GutachterChatTabs fallId={fallId} />
+          <GutachterChatTabs fallId={fallId} teilnehmer={chatTeilnehmer ?? []} />
         )}
       </div>
     </div>
@@ -920,16 +922,46 @@ function Badge({ label, color }: { label: string; color: string }) {
   return <span className={`px-2.5 py-1 rounded-full text-[10px] font-medium ${color}`}>{label}</span>
 }
 
-function GutachterChatTabs({ fallId }: { fallId: string }) {
-  const [ch, setCh] = useState<'claimondo-gutachter' | 'kunde-gutachter'>('claimondo-gutachter')
+type GutachterTeilnehmer = { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url: string | null }
+
+function GutachterChatTabs({ fallId, teilnehmer }: { fallId: string; teilnehmer: GutachterTeilnehmer[] }) {
+  const [ch, setCh] = useState<'alle' | 'portal-kunde-gutachter' | 'portal-kunde-claimondo'>('alle')
   const [userId, setUserId] = useState('')
   useEffect(() => { createClient().auth.getUser().then(({ data: { user } }) => { if (user) setUserId(user.id) }) }, [])
   if (!userId) return null
+
+  // Andere Teilnehmer (nicht der SV selbst)
+  const otherTeilnehmer = teilnehmer.filter(t => t.user_id !== userId)
+
   return (
     <div className="bg-white border border-gray-200 rounded-2xl flex flex-col" style={{ height: '70vh' }}>
+      {/* KFZ-129: Teilnehmer-Header */}
+      {otherTeilnehmer.length > 0 && (
+        <div className="px-4 py-3 border-b border-gray-200 bg-gray-50/50">
+          <div className="flex flex-wrap gap-3">
+            {otherTeilnehmer.map(t => {
+              const name = [t.vorname, t.nachname].filter(Boolean).join(' ') || 'Unbekannt'
+              const initials = [t.vorname?.[0], t.nachname?.[0]].filter(Boolean).join('').toUpperCase() || '?'
+              const rolleText = t.rolle === 'kundenbetreuer' ? 'KB' : t.rolle === 'kunde' ? 'Kunde' : t.rolle === 'admin' ? 'Admin' : t.rolle
+              return (
+                <div key={t.user_id} className="flex items-center gap-1.5">
+                  {t.avatar_url ? (
+                    <img src={t.avatar_url} alt={name} className="w-6 h-6 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-[#1E3A5F] flex items-center justify-center text-white text-[9px] font-bold">{initials}</div>
+                  )}
+                  <span className="text-xs text-gray-700">{name}</span>
+                  <span className="text-[9px] text-gray-400">({rolleText})</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
       <div className="flex border-b border-gray-200 shrink-0">
-        <button onClick={() => setCh('claimondo-gutachter')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'claimondo-gutachter' ? 'border-[#4573A2] text-[#4573A2]' : 'border-transparent text-gray-400'}`}>Claimondo</button>
-        <button onClick={() => setCh('kunde-gutachter')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'kunde-gutachter' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-400'}`}>Kunde</button>
+        <button onClick={() => setCh('alle')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'alle' ? 'border-[#4573A2] text-[#4573A2]' : 'border-transparent text-gray-400'}`}>Alle</button>
+        <button onClick={() => setCh('portal-kunde-claimondo')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'portal-kunde-claimondo' ? 'border-[#4573A2] text-[#4573A2]' : 'border-transparent text-gray-400'}`}>Claimondo</button>
+        <button onClick={() => setCh('portal-kunde-gutachter')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'portal-kunde-gutachter' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-400'}`}>Kunde</button>
       </div>
       <div className="flex-1 min-h-0">
         <ChatChannel fallId={fallId} kanal={ch} currentUserId={userId} />

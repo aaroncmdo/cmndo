@@ -102,6 +102,10 @@ export default async function GutachterFallPage({
     _preistyp: abrechnung?.preistyp ?? null,
   }
 
+  // KFZ-129: Chat-Teilnehmer laden
+  const { getChatTeilnehmer } = await import('@/lib/chatGruppe')
+  const chatTeilnehmer = await getChatTeilnehmer(id)
+
   return (
     <FallDetailClient
       fall={fallWithAbrechnung}
@@ -112,6 +116,7 @@ export default async function GutachterFallPage({
       timeline={timeline ?? []}
       nachrichten={nachrichten ?? []}
       kundenbetreuer={kundenbetreuer}
+      chatTeilnehmer={chatTeilnehmer}
     />
   )
 }

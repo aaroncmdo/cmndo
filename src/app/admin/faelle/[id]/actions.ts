@@ -420,30 +420,59 @@ export async function sendChatNachricht(fallId: string, kanal: string, nachricht
 
   if (error) throw new Error(error.message)
 
-  // KFZ-128: Benachrichtigung + WhatsApp an den Kunden
+  // KFZ-129: Benachrichtigung + WhatsApp an ALLE anderen Gruppen-Teilnehmer
   try {
     const { createAdminClient } = await import('@/lib/supabase/admin')
     const admin = createAdminClient()
-    const { data: fall } = await admin.from('faelle').select('kunde_id, lead_id, fall_nummer').eq('id', fallId).single()
+    const senderName = [profile?.vorname, profile?.nachname].filter(Boolean).join(' ') || 'Claimondo'
+    const { data: fall } = await admin.from('faelle').select('fall_nummer, lead_id').eq('id', fallId).single()
+    const { data: gruppe } = await admin.from('chat_gruppen').select('id').eq('fall_id', fallId).maybeSingle()
 
-    if (fall?.kunde_id) {
-      // Benachrichtigung fuer den Kunden erstellen
-      const senderName = [profile?.vorname, profile?.nachname].filter(Boolean).join(' ') || 'Claimondo'
-      await admin.from('benachrichtigungen').insert({
-        user_id: fall.kunde_id,
-        typ: 'chat',
-        titel: `Neue Nachricht von ${senderName}`,
-        beschreibung: nachricht.slice(0, 100),
-        link: `/kunde/faelle/${fallId}`,
-      })
+    if (gruppe) {
+      const { data: teilnehmer } = await admin
+        .from('chat_teilnehmer')
+        .select('user_id, rolle')
+        .eq('gruppe_id', gruppe.id)
+        .is('entfernt_am', null)
+        .neq('user_id', user.id)
 
-      // WhatsApp Fallback an den Kunden
-      const { data: lead } = fall.lead_id
-        ? await admin.from('leads').select('telefon').eq('id', fall.lead_id).single()
-        : { data: null }
-      if (lead?.telefon) {
-        const { sendWhatsApp } = await import('@/lib/whatsapp')
-        await sendWhatsApp(lead.telefon, `Neue Nachricht zu Ihrem Fall ${fall.fall_nummer ?? ''}: ${nachricht.slice(0, 200)}`)
+      for (const t of teilnehmer ?? []) {
+        const isKunde = t.rolle === 'kunde'
+        // Benachrichtigung
+        await admin.from('benachrichtigungen').insert({
+          user_id: t.user_id,
+          typ: 'chat',
+          titel: `Neue Nachricht von ${senderName}`,
+          beschreibung: nachricht.slice(0, 100),
+          link: isKunde ? `/kunde/faelle/${fallId}` : `/admin/faelle/${fallId}`,
+        })
+
+        // WhatsApp Fallback
+        if (isKunde && fall?.lead_id) {
+          const { data: lead } = await admin.from('leads').select('telefon').eq('id', fall.lead_id).single()
+          if (lead?.telefon) {
+            const { sendWhatsApp } = await import('@/lib/whatsapp')
+            await sendWhatsApp(lead.telefon, `Neue Nachricht zu Ihrem Fall ${fall?.fall_nummer ?? ''}: ${nachricht.slice(0, 200)}`)
+          }
+        } else {
+          const { data: p } = await admin.from('profiles').select('telefon').eq('id', t.user_id).single()
+          if (p?.telefon) {
+            const { sendWhatsApp } = await import('@/lib/whatsapp')
+            await sendWhatsApp(p.telefon, `Neue Nachricht in Fall ${fall?.fall_nummer ?? fallId.slice(0, 8)}: ${nachricht.slice(0, 200)}`)
+          }
+        }
+      }
+    } else {
+      // Fallback: alte Logik
+      const { data: fallOld } = await admin.from('faelle').select('kunde_id, lead_id, fall_nummer').eq('id', fallId).single()
+      if (fallOld?.kunde_id) {
+        await admin.from('benachrichtigungen').insert({
+          user_id: fallOld.kunde_id,
+          typ: 'chat',
+          titel: `Neue Nachricht von ${senderName}`,
+          beschreibung: nachricht.slice(0, 100),
+          link: `/kunde/faelle/${fallId}`,
+        })
       }
     }
   } catch { /* non-critical */ }
