@@ -103,10 +103,10 @@ export async function confirmGutachterTermin(
   fahrzeugAdresse: string,
   besichtigungsortLat?: number | null,
   besichtigungsortLng?: number | null,
-) {
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const now = new Date().toISOString()
   const terminDate = new Date(termin)
@@ -128,7 +128,7 @@ export async function confirmGutachterTermin(
 
   if (leadErr) {
     console.error('[confirmGutachterTermin] Lead-Update FEHLER:', leadErr)
-    throw new Error(`Lead-Update fehlgeschlagen: ${leadErr.message}`)
+    return { success: false, error: `Lead-Update fehlgeschlagen: ${leadErr.message}` }
   }
   console.log('[confirmGutachterTermin] Lead updated ✓')
 
@@ -159,7 +159,7 @@ export async function confirmGutachterTermin(
 
     if (fallErr) {
       console.error('[confirmGutachterTermin] Fall-Update FEHLER:', fallErr)
-      throw new Error(`Fall-Update fehlgeschlagen: ${fallErr.message}`)
+      return { success: false, error: `Fall-Update fehlgeschlagen: ${fallErr.message}` }
     }
     console.log('[confirmGutachterTermin] Fall updated ✓', { fallId: fall.id, sv_id: svId, termin_status: 'reserviert' })
   } else {
@@ -180,9 +180,11 @@ export async function confirmGutachterTermin(
 
   if (terminErr) {
     console.error('[confirmGutachterTermin] Kalender-Eintrag FEHLER:', terminErr)
-    throw new Error(`Kalender-Eintrag fehlgeschlagen: ${terminErr.message}`)
+    return { success: false, error: `Kalender-Eintrag fehlgeschlagen: ${terminErr.message}` }
   }
   console.log('[confirmGutachterTermin] gutachter_termine erstellt ✓', { sv_id: svId, start: termin, end: endDate.toISOString(), status: 'reserviert' })
+
+  // ── Ab hier: non-critical Schritte — Fehler werden geloggt aber nicht geworfen ──
 
   // 4. Try to sync to external calendar (fire & forget)
   try {
@@ -200,7 +202,7 @@ export async function confirmGutachterTermin(
       ? `${leadData.vorname ?? ''} ${leadData.nachname ?? ''}`.trim()
       : 'Kunde'
 
-    await fetch(`${origin}/api/kalender-eintragen`, {
+    fetch(`${origin}/api/kalender-eintragen`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -211,74 +213,85 @@ export async function confirmGutachterTermin(
         titel: `Gutachten: ${kundenName}`,
         beschreibung: `KFZ-Begutachtung fuer ${kundenName}. Standort: ${fahrzeugAdresse || fahrzeugPlz}.`,
       }),
-    }).catch(() => {})
-  } catch {
-    // External calendar sync is best-effort
+    }).then(() => {}).catch(e => console.error('[confirmGutachterTermin] Kalender-Sync Fehler:', e))
+  } catch (e) {
+    console.error('[confirmGutachterTermin] Kalender-Sync Fehler:', e)
   }
 
-  // 5. Increment paket_faelle_genutzt (or offene_faelle as fallback)
-  const { data: sv } = await supabase
-    .from('sachverstaendige')
-    .select('offene_faelle, paket_faelle_genutzt')
-    .eq('id', svId)
-    .single()
-
-  if (sv) {
-    await supabase
+  // 5. Increment paket_faelle_genutzt (non-critical)
+  try {
+    const { data: sv } = await supabase
       .from('sachverstaendige')
-      .update({
-        offene_faelle: (sv.offene_faelle ?? 0) + 1,
-        paket_faelle_genutzt: (sv.paket_faelle_genutzt ?? 0) + 1,
-      })
-      .eq('id', svId)
-  }
-
-  // 6. Create timeline entry
-  if (fall) {
-    const { data: svProfile } = await supabase
-      .from('sachverstaendige')
-      .select('profile_id')
+      .select('offene_faelle, paket_faelle_genutzt')
       .eq('id', svId)
       .single()
 
-    let svName = '—'
-    if (svProfile?.profile_id) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('vorname, nachname')
-        .eq('id', svProfile.profile_id)
-        .single()
-      if (profile) svName = `${profile.vorname ?? ''} ${profile.nachname ?? ''}`.trim() || '—'
+    if (sv) {
+      await supabase
+        .from('sachverstaendige')
+        .update({
+          offene_faelle: (sv.offene_faelle ?? 0) + 1,
+          paket_faelle_genutzt: (sv.paket_faelle_genutzt ?? 0) + 1,
+        })
+        .eq('id', svId)
     }
+  } catch (e) { console.error('[confirmGutachterTermin] SV-Counter Fehler:', e) }
 
-    const terminStr = new Date(termin).toLocaleString('de-DE', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    })
+  // 6. Create timeline entry + WhatsApp (non-critical)
+  try {
+    if (fall) {
+      const { data: svProfile } = await supabase
+        .from('sachverstaendige')
+        .select('profile_id')
+        .eq('id', svId)
+        .single()
 
-    await supabase.from('timeline').insert({
-      fall_id: fall.id,
-      typ: 'system',
-      titel: 'Gutachter-Termin vereinbart',
-      beschreibung: `Gutachter ${svName} am ${terminStr}. Standort: ${fahrzeugAdresse || fahrzeugPlz}. Termin im Kalender eingetragen.`,
-      erstellt_von: user.id,
-    })
+      let svName = '—'
+      if (svProfile?.profile_id) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('vorname, nachname')
+          .eq('id', svProfile.profile_id)
+          .single()
+        if (profile) svName = `${profile.vorname ?? ''} ${profile.nachname ?? ''}`.trim() || '—'
+      }
 
-    // WhatsApp: Gutachter beauftragt + Termin bestaetigt
-    const terminDate = new Date(termin)
-    sendStatusWhatsApp(fall.id, 'nach_gutachter_dispatch', {
-      gutachter_name: svName,
-    }).catch(() => {})
-    sendStatusWhatsApp(fall.id, 'nach_terminbestaetigung', {
-      gutachter_name: svName,
-      termin_datum: terminDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
-      termin_uhrzeit: terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
-      termin_ort: fahrzeugAdresse || fahrzeugPlz,
-    }).catch(() => {})
-  }
+      const terminStr = new Date(termin).toLocaleString('de-DE', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+      })
+
+      await supabase.from('timeline').insert({
+        fall_id: fall.id,
+        typ: 'system',
+        titel: 'Gutachter-Termin vereinbart',
+        beschreibung: `Gutachter ${svName} am ${terminStr}. Standort: ${fahrzeugAdresse || fahrzeugPlz}. Termin im Kalender eingetragen.`,
+        erstellt_von: user.id,
+      })
+
+      // WhatsApp: Gutachter beauftragt + Termin bestaetigt (non-critical, fire & forget)
+      sendStatusWhatsApp(fall.id, 'nach_gutachter_dispatch', {
+        gutachter_name: svName,
+      }).then(() => {}).catch(e => console.error('[confirmGutachterTermin] WhatsApp Fehler:', e))
+      sendStatusWhatsApp(fall.id, 'nach_terminbestaetigung', {
+        gutachter_name: svName,
+        termin_datum: terminDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+        termin_uhrzeit: terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+        termin_ort: fahrzeugAdresse || fahrzeugPlz,
+      }).then(() => {}).catch(e => console.error('[confirmGutachterTermin] WhatsApp Fehler:', e))
+
+      // KFZ-129: SV als Chat-Teilnehmer hinzufuegen
+      try {
+        const { syncChatTeilnehmer, sendSystemNachricht } = await import('@/lib/chatGruppe')
+        await syncChatTeilnehmer(fall.id)
+        await sendSystemNachricht(fall.id, `Gutachter ${svName} wurde zugewiesen. Termin am ${terminStr}.`)
+      } catch (e) { console.error('[confirmGutachterTermin] Chat-Gruppe Fehler:', e) }
+    }
+  } catch (e) { console.error('[confirmGutachterTermin] Timeline/WhatsApp Fehler:', e) }
 
   revalidatePath(`/admin/dispatch/lead/${leadId}`)
   revalidatePath('/admin/dispatch')
+  return { success: true }
 }
 
 // ─── Lead-Qualifizierung speichern ─────────────────────────────────────────

@@ -112,21 +112,27 @@ export default function GutachterTermin({
     setConfirming(slot.sv_id + slot.termin)
     setError(null)
     try {
-      await confirmGutachterTermin(lead.id, slot.sv_id, slot.termin, plz, adresse)
+      const result = await confirmGutachterTermin(lead.id, slot.sv_id, slot.termin, plz, adresse)
+      if (!result.success) {
+        setError(result.error ?? 'Bestaetigung fehlgeschlagen')
+        return
+      }
       setConfirmed(true)
 
-      // Open WhatsApp with confirmation
-      const phone = (lead.telefon ?? '').replace(/[^0-9+]/g, '')
-      if (phone) {
-        const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ')
-        const terminStr = new Date(slot.termin).toLocaleString('de-DE', {
-          weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
-          hour: '2-digit', minute: '2-digit',
-        })
-        const msg = `Hallo ${name}, Ihr Gutachtertermin wurde bestaetigt:\n\nGutachter: ${slot.name}\nDatum: ${terminStr}\nAdresse: ${adresse || plz}\n\nIhr Claimondo-Team`
-        const { sendWhatsAppFromLead } = await import('./actions')
-        await sendWhatsAppFromLead(phone, msg).catch(() => {})
-      }
+      // Open WhatsApp with confirmation (non-critical)
+      try {
+        const phone = (lead.telefon ?? '').replace(/[^0-9+]/g, '')
+        if (phone) {
+          const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ')
+          const terminStr = new Date(slot.termin).toLocaleString('de-DE', {
+            weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit',
+          })
+          const msg = `Hallo ${name}, Ihr Gutachtertermin wurde bestaetigt:\n\nGutachter: ${slot.name}\nDatum: ${terminStr}\nAdresse: ${adresse || plz}\n\nIhr Claimondo-Team`
+          const { sendWhatsAppFromLead } = await import('./actions')
+          await sendWhatsAppFromLead(phone, msg)
+        }
+      } catch (e) { console.error('[GutachterTermin] WhatsApp Fehler:', e) }
 
       router.refresh()
     } catch (err) {

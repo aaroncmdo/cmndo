@@ -341,9 +341,14 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
               onAdvance={(svId, termin, plz, adresse, bLat, bLng) => {
                 setSaving(true)
                 confirmGutachterTermin(lead.id, svId, termin, plz, adresse, bLat, bLng)
-                  .then(() => {
-                    toast.success('Gutachter-Termin reserviert')
-                    return saveAndAdvance('gutachtertermin')
+                  .then((result) => {
+                    if (result.success) {
+                      toast.success('Gutachter-Termin reserviert')
+                      return saveAndAdvance('gutachtertermin')
+                    } else {
+                      toast.error(`Fehler: ${result.error ?? 'Unbekannt'}`)
+                      setSaving(false)
+                    }
                   })
                   .catch((err) => {
                     console.error('[LeadStepper] confirmGutachterTermin FEHLER:', err)

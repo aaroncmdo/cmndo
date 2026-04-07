@@ -57,8 +57,9 @@ export default async function KundeStartseite() {
   faelle = faelleWithUnread
 
   // Onboarding-Redirect
+  // BUG-63: Redirect auf Fall-Detail statt /kunde/onboarding (Route existiert nicht)
   const needsOnboarding = faelle.find(f => f.onboarding_complete === false)
-  if (needsOnboarding) redirect(`/kunde/onboarding/${needsOnboarding.id}`)
+  if (needsOnboarding) redirect(`/kunde/faelle/${needsOnboarding.id}`)
 
   const vorname = profile?.vorname ?? user.email?.split('@')[0] ?? 'Kunde'
 
