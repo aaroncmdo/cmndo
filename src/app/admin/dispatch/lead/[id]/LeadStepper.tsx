@@ -20,6 +20,7 @@ import {
   ClockIcon,
   UserCheckIcon,
   AlertCircleIcon,
+  StarIcon,
 } from 'lucide-react'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 
@@ -339,12 +340,14 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
           )}
           {STEPS[openStep]?.key === 'termin' && (
             <StepGutachterTermin lead={lead} saving={saving}
-              onAdvance={(svId, termin, plz, adresse, bLat, bLng) => {
+              onAdvance={(svId, termin, plz, adresse, bLat, bLng, svName) => {
                 setSaving(true)
                 confirmGutachterTermin(lead.id, svId, termin, plz, adresse, bLat, bLng)
                   .then((result) => {
                     if (result.success) {
-                      toast.success('Gutachter-Termin reserviert')
+                      // BUG-65D: Toast mit Details
+                      const terminStr = new Date(termin).toLocaleString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                      toast.success(`Termin reserviert mit ${svName ?? 'Gutachter'} am ${terminStr} an ${adresse || plz}`)
                       return saveAndAdvance('gutachtertermin')
                     } else {
                       toast.error(`Fehler: ${result.error ?? 'Unbekannt'}`)
@@ -622,7 +625,7 @@ function StepGegner({ gegnerName, setGegnerName, gegnerVersicherung, setGegnerVe
 // ─── Step 5: Gutachtertermin ────────────────────────────────────────────────
 
 function StepGutachterTermin({ lead, saving: parentSaving, onAdvance }: {
-  lead: LeadData; saving: boolean; onAdvance: (svId: string, termin: string, plz: string, adresse: string, lat?: number | null, lng?: number | null) => void
+  lead: LeadData; saving: boolean; onAdvance: (svId: string, termin: string, plz: string, adresse: string, lat?: number | null, lng?: number | null, svName?: string) => void
 }) {
   const router = useRouter()
   const [plz, setPlz] = useState(lead.fahrzeug_standort_plz ?? '')
@@ -634,6 +637,8 @@ function StepGutachterTermin({ lead, saving: parentSaving, onAdvance }: {
   const [result, setResult] = useState<MatchResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [settingSvGesucht, setSettingSvGesucht] = useState(false)
+  // BUG-65C: Loading-State pro SV-Karte (nicht global)
+  const [loadingSvId, setLoadingSvId] = useState<string | null>(null)
 
   function handlePlaceSelect(r: PlaceResult) {
     setAdresse(r.adresse)
@@ -724,7 +729,9 @@ function StepGutachterTermin({ lead, saving: parentSaving, onAdvance }: {
             <>
               {slots.map((slot, i) => (
                 <SlotCard key={slot!.sv_id + slot!.termin} slot={slot!} label={i === 0 ? 'Empfohlen' : `Alternative ${i}`} variant={i === 0 ? 'empfohlen' : 'alternative'}
-                  onConfirm={() => onAdvance(slot!.sv_id, slot!.termin, plz, adresse, lat, lng)} confirming={parentSaving} />
+                  onConfirm={() => { setLoadingSvId(slot!.sv_id); onAdvance(slot!.sv_id, slot!.termin, plz, adresse, lat, lng, slot!.name) }}
+                  confirming={loadingSvId === slot!.sv_id}
+                  disabled={loadingSvId !== null && loadingSvId !== slot!.sv_id} />
               ))}
             </>
           ) : (
@@ -750,8 +757,8 @@ function StepGutachterTermin({ lead, saving: parentSaving, onAdvance }: {
   )
 }
 
-function SlotCard({ slot, label, variant, onConfirm, confirming }: {
-  slot: GutachterSlot; label: string; variant: 'empfohlen' | 'alternative'; onConfirm: () => void; confirming: boolean
+function SlotCard({ slot, label, variant, onConfirm, confirming, disabled }: {
+  slot: GutachterSlot; label: string; variant: 'empfohlen' | 'alternative'; onConfirm: () => void; confirming: boolean; disabled?: boolean
 }) {
   const isEmpf = variant === 'empfohlen'
   const wunsch = slot.wunschtermin_moeglich
@@ -761,33 +768,44 @@ function SlotCard({ slot, label, variant, onConfirm, confirming }: {
   const nextSlot = (slot as Record<string, unknown>).naechster_freier_slot as string | undefined
   const partnerSeit = (slot as Record<string, unknown>).partner_seit as string | undefined
 
+  // BUG-65B: Empfohlener SV bekommt bg-[#4573A2] (Ondo Blue) + weiss + *EMPFEHLUNG Badge
   return (
-    <div className={`rounded-xl p-3 border ${wunsch ? 'bg-green-50 border-green-200' : isEmpf ? 'bg-amber-50 border-amber-200' : 'bg-[#4573A2]/5 border-[#4573A2]/20'}`}>
+    <div className={`rounded-xl p-3 border transition-all ${
+      isEmpf
+        ? 'bg-[#4573A2] border-[#4573A2] text-white'
+        : 'bg-white border-gray-200'
+    }`}>
       <div className="flex items-center gap-2">
-        {prio && <span className="text-[9px] font-bold bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">PRIO {prio}</span>}
-        <span className={`text-[10px] font-semibold uppercase ${wunsch ? 'text-green-600' : isEmpf ? 'text-amber-600' : 'text-[#4573A2]'}`}>
-          {wunsch ? 'Verfügbar' : isEmpf ? 'Prio 1 — anderer Slot' : label}
+        {isEmpf && <StarIcon className="w-3.5 h-3.5 text-white fill-current" />}
+        <span className={`text-[10px] font-semibold uppercase tracking-wide ${isEmpf ? 'text-white' : 'text-[#4573A2]'}`}>
+          {isEmpf ? '*EMPFEHLUNG' : label}
         </span>
+        {wunsch && <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${isEmpf ? 'bg-white/20 text-white' : 'bg-green-50 text-green-600'}`}>Wunschtermin</span>}
       </div>
       <div className="flex items-center gap-2 mt-1.5 mb-1">
-        <UserCheckIcon className={`w-3.5 h-3.5 ${wunsch ? 'text-green-600' : 'text-[#4573A2]'}`} />
-        <span className="text-gray-800 text-sm font-medium">{slot.name}</span>
-        {slot.entfernung_km != null && <span className="text-gray-500 text-[11px] flex items-center gap-0.5"><MapPinIcon className="w-3 h-3" />{slot.entfernung_km}km</span>}
-        {fahrzeitM != null && <span className="text-gray-400 text-[10px]">~{fahrzeitM}min</span>}
+        <UserCheckIcon className={`w-3.5 h-3.5 ${isEmpf ? 'text-white/80' : 'text-[#4573A2]'}`} />
+        <span className={`text-sm font-medium ${isEmpf ? 'text-white' : 'text-gray-800'}`}>{slot.name}</span>
+        {slot.entfernung_km != null && <span className={`text-[11px] flex items-center gap-0.5 ${isEmpf ? 'text-white/70' : 'text-gray-500'}`}><MapPinIcon className="w-3 h-3" />{slot.entfernung_km}km</span>}
+        {fahrzeitM != null && <span className={`text-[10px] ${isEmpf ? 'text-white/60' : 'text-gray-400'}`}>~{fahrzeitM}min</span>}
       </div>
-      {partnerSeit && <p className="text-[10px] text-gray-400 mb-1">Partner seit {new Date(partnerSeit).toLocaleDateString('de-DE')}</p>}
-      {routeInfo && <p className="text-[10px] text-gray-500 mb-1.5 italic">{routeInfo}</p>}
+      {partnerSeit && <p className={`text-[10px] mb-1 ${isEmpf ? 'text-white/60' : 'text-gray-400'}`}>Partner seit {new Date(partnerSeit).toLocaleDateString('de-DE')}</p>}
+      {routeInfo && <p className={`text-[10px] mb-1.5 italic ${isEmpf ? 'text-white/70' : 'text-gray-500'}`}>{routeInfo}</p>}
       {!wunsch && nextSlot && (
-        <p className="text-[10px] text-amber-600 font-medium mb-1">Nächster freier Slot: {new Date(nextSlot).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</p>
+        <p className={`text-[10px] font-medium mb-1 ${isEmpf ? 'text-white/80' : 'text-amber-600'}`}>Nächster freier Slot: {new Date(nextSlot).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</p>
       )}
-      <div className="flex items-center gap-2 mb-2 px-2 py-1.5 rounded-lg bg-white border border-gray-100">
-        <CalendarIcon className="w-3 h-3 text-gray-400" />
-        <span className="text-gray-700 text-sm">{new Date(slot.termin).toLocaleString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+      <div className={`flex items-center gap-2 mb-2 px-2 py-1.5 rounded-lg ${isEmpf ? 'bg-white/10' : 'bg-gray-50 border border-gray-100'}`}>
+        <CalendarIcon className={`w-3 h-3 ${isEmpf ? 'text-white/70' : 'text-gray-400'}`} />
+        <span className={`text-sm ${isEmpf ? 'text-white' : 'text-gray-700'}`}>{new Date(slot.termin).toLocaleString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
       </div>
-      <div className="text-[10px] text-gray-400 mb-2">Auslastung: {slot.auslastung}</div>
-      <button onClick={onConfirm} disabled={confirming}
-        className={`w-full py-2 rounded-xl text-sm font-semibold disabled:opacity-50 transition-all flex items-center justify-center gap-2 ${wunsch ? 'bg-green-600 hover:bg-green-500 text-white' : 'bg-[#1E3A5F] hover:bg-[#4573A2] text-white'}`}>
-        {confirming ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Wird zugewiesen...</> : 'Zuweisen'}
+      <div className={`text-[10px] mb-2 ${isEmpf ? 'text-white/60' : 'text-gray-400'}`}>Auslastung: {slot.auslastung}</div>
+      {/* BUG-65C: Button disabled wenn ANDERER SV in Bearbeitung */}
+      <button onClick={onConfirm} disabled={confirming || disabled}
+        className={`w-full py-2 rounded-xl text-sm font-semibold disabled:opacity-40 transition-all flex items-center justify-center gap-2 ${
+          isEmpf
+            ? 'bg-white text-[#4573A2] hover:bg-white/90'
+            : 'bg-[#0D1B3E] hover:bg-[#1E3A5F] text-white'
+        }`}>
+        {confirming ? <><div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />Wird zugewiesen...</> : 'Zuweisen'}
       </button>
     </div>
   )
