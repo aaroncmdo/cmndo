@@ -181,6 +181,12 @@ export async function createKundeAccount(
           await syncChatTeilnehmer(fallId)
         } catch (e) { console.error('[KFZ-129] syncChatTeilnehmer:', e) }
 
+        // KFZ-137: Welcome-Email an Kunden
+        try {
+          const { sendKundeWelcome } = await import('@/lib/email/google/flows')
+          await sendKundeWelcome(fallId)
+        } catch (err) { console.error('[KFZ-137] Email Welcome fehlgeschlagen:', err) }
+
         return { password }
       }
     }
@@ -212,6 +218,12 @@ export async function createKundeAccount(
     const { syncChatTeilnehmer } = await import('@/lib/chatGruppe')
     await syncChatTeilnehmer(fallId)
   } catch (e) { console.error('[KFZ-129] syncChatTeilnehmer:', e) }
+
+  // KFZ-137: Welcome-Email an Kunden
+  try {
+    const { sendKundeWelcome } = await import('@/lib/email/google/flows')
+    await sendKundeWelcome(fallId)
+  } catch (err) { console.error('[KFZ-137] Email Welcome fehlgeschlagen:', err) }
 
   return { password }
 }

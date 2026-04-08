@@ -458,6 +458,12 @@ export async function terminAnnehmen({
   // KFZ-136: Reminder neu generieren (Termin ist jetzt bestaetigt)
   try { await generateReminderForTermin(tId) } catch (err) { console.error('[KFZ-136] Reminder-Generierung fehlgeschlagen:', err) }
 
+  // KFZ-137: SV Auftragszusammenfassung Email
+  try {
+    const { sendSvAuftragszusammenfassung } = await import('@/lib/email/google/flows')
+    if (svId) await sendSvAuftragszusammenfassung(fId, svId)
+  } catch (err) { console.error('[KFZ-137] SV-Email fehlgeschlagen:', err) }
+
   // Fall updaten
   await admin.from('faelle').update({
     gutachter_termin_status: 'bestaetigt',
@@ -566,6 +572,12 @@ export async function terminBuchen({
 
   // KFZ-136: Reminder generieren (Termin gebucht)
   try { await generateReminderForTermin(termin.id) } catch (err) { console.error('[KFZ-136] Reminder-Generierung fehlgeschlagen:', err) }
+
+  // KFZ-137: SV Auftragszusammenfassung Email
+  try {
+    const { sendSvAuftragszusammenfassung } = await import('@/lib/email/google/flows')
+    if (svId) await sendSvAuftragszusammenfassung(fId, svId)
+  } catch (err) { console.error('[KFZ-137] SV-Email fehlgeschlagen:', err) }
 
   // 2. Fall updaten
   await admin.from('faelle').update({

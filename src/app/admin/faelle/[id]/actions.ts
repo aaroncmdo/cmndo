@@ -54,6 +54,14 @@ export async function saveFilmcheck(fallId: string, notizen: string) {
     if (k.email) emailFilmcheckBestanden(k.email, fallNr).catch(() => {})
   }
 
+  // KFZ-137: Kanzlei Auftragszusammenfassung Email
+  try {
+    const { sendKanzleiAuftragszusammenfassung } = await import('@/lib/email/google/flows')
+    for (const k of kanzleiUsers ?? []) {
+      if (k.email) await sendKanzleiAuftragszusammenfassung(fallId, k.email)
+    }
+  } catch (err) { console.error('[KFZ-137] Kanzlei-Email fehlgeschlagen:', err) }
+
   await supabase.from('tasks').insert({
     fall_id: fallId,
     typ: 'kanzlei-anschlussschreiben',
