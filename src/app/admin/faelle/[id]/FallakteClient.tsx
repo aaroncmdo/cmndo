@@ -554,6 +554,7 @@ export default function FallakteClient({
   chatTeilnehmer,
   versicherungKontakt,
   stepperState,
+  fallFinanzen,
 }: {
   fall: Fall
   lead: Lead
@@ -573,6 +574,7 @@ export default function FallakteClient({
   chatTeilnehmer?: { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url: string | null }[]
   versicherungKontakt?: { name: string; schaden_telefon: string | null; schaden_email: string | null; hotline_telefon: string | null; webseite: string | null } | null
   stepperState?: import('@/lib/fall/stepper-state').StepperState | null
+  fallFinanzen?: import('@/lib/finance/fall-finanzen').FallFinanzen | null
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -879,6 +881,43 @@ export default function FallakteClient({
                   <span className="text-[10px] text-purple-500 bg-purple-100 px-2 py-0.5 rounded-full">Vollmacht unterschrieben</span>
                 </div>
                 <p className="text-[10px] text-purple-400 mt-1">Mandatstyp: Kanzlei + Claimondo</p>
+              </div>
+            )}
+
+            {/* KFZ-140: Fall-Finanzen */}
+            {fallFinanzen && (fallFinanzen.schadenhoehe || fallFinanzen.svHonorar || fallFinanzen.zahlungEingegangen) && (
+              <div className="bg-white rounded-xl border border-gray-200 p-3">
+                <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Finanzen</h3>
+                <div className="space-y-1 text-xs">
+                  {fallFinanzen.schadenhoehe != null && (
+                    <div className="flex justify-between"><span className="text-gray-500">Schadenhöhe</span><span className="text-gray-800 font-semibold">{fallFinanzen.schadenhoehe.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €</span></div>
+                  )}
+                  {fallFinanzen.svLeadpreis != null && (
+                    <div className="flex justify-between"><span className="text-gray-500">SV-Leadpreis{fallFinanzen.svPreistyp === 'paket' ? ' (Paket)' : ''}</span><span className="text-red-600">−{fallFinanzen.svLeadpreis.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €</span></div>
+                  )}
+                  {fallFinanzen.kanzleiHonorar != null && (
+                    <div className="flex justify-between"><span className="text-gray-500">Kanzlei</span><span className="text-red-600">−{fallFinanzen.kanzleiHonorar.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €</span></div>
+                  )}
+                  {fallFinanzen.marketingProvision != null && (
+                    <div className="flex justify-between"><span className="text-gray-500">Marketing</span><span className="text-red-600">−{fallFinanzen.marketingProvision.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €</span></div>
+                  )}
+                  {fallFinanzen.nettoMarge != null && (
+                    <div className="flex justify-between pt-1 border-t border-gray-100"><span className="text-gray-700 font-medium">Netto-Marge</span><span className={`font-bold ${fallFinanzen.nettoMarge >= 0 ? 'text-green-600' : 'text-red-600'}`}>{fallFinanzen.nettoMarge.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €</span></div>
+                  )}
+                  <div className="flex justify-between pt-1">
+                    <span className="text-gray-500">Zahlung</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                      fallFinanzen.zahlungStatus === 'eingegangen' ? 'bg-green-50 text-green-600' :
+                      fallFinanzen.zahlungStatus === 'ueberfaellig' ? 'bg-red-50 text-red-600' :
+                      fallFinanzen.zahlungStatus === 'erwartet' ? 'bg-amber-50 text-amber-600' :
+                      'bg-gray-100 text-gray-500'
+                    }`}>
+                      {fallFinanzen.zahlungStatus === 'eingegangen' ? `${(fallFinanzen.zahlungEingegangen ?? 0).toLocaleString('de-DE', { minimumFractionDigits: 2 })} €` :
+                       fallFinanzen.zahlungStatus === 'ueberfaellig' ? 'Überfällig' :
+                       fallFinanzen.zahlungStatus === 'erwartet' ? 'Erwartet' : 'Offen'}
+                    </span>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -1490,6 +1529,16 @@ function TabUebersicht({
               <Badge key={f.label} color={f.color}>{f.label}</Badge>
             ))}
           </div>
+        </Section>
+      )}
+
+      {/* KFZ-140: Versicherungs-Korrespondenz */}
+      {(fall.vs_anschreiben_datum || fall.vs_antwort_datum || fall.vs_timer_stufe) && (
+        <Section title="Versicherungs-Korrespondenz">
+          {fall.vs_anschreiben_datum && <InfoRow label="Anschreiben" value={new Date(fall.vs_anschreiben_datum as string).toLocaleDateString('de-DE')} />}
+          {fall.vs_antwort_datum && <InfoRow label="Antwort" value={new Date(fall.vs_antwort_datum as string).toLocaleDateString('de-DE')} />}
+          {fall.vs_timer_stufe && <InfoRow label="Timer-Stufe" value={String(fall.vs_timer_stufe)} />}
+          {fall.vs_eskalation_am && <InfoRow label="Eskaliert am" value={new Date(fall.vs_eskalation_am as string).toLocaleDateString('de-DE')} />}
         </Section>
       )}
 

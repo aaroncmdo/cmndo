@@ -153,6 +153,10 @@ export default async function FallaktePage({
     }
   }
 
+  // KFZ-140: Fall-Finanzen berechnen
+  const { getFallFinanzen } = await import('@/lib/finance/fall-finanzen')
+  const fallFinanzen = await getFallFinanzen(id)
+
   return (
     <FallakteClient
       fall={fall}
@@ -173,6 +177,7 @@ export default async function FallaktePage({
       chatTeilnehmer={chatTeilnehmer}
       versicherungKontakt={versicherungKontakt}
       stepperState={stepperState}
+      fallFinanzen={fallFinanzen}
     />
   )
 }
