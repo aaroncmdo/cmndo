@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { PhoneIcon, MailIcon, MessageSquareIcon, InfoIcon, ChevronDownIcon, PlayIcon, BrainIcon, SearchIcon, SendIcon, Loader2Icon } from 'lucide-react'
+import { PhoneIcon, MailIcon, MessageSquareIcon, InfoIcon, ChevronDownIcon, SearchIcon, Loader2Icon } from 'lucide-react'
 import type { TimelineItem } from '@/lib/fall/communication-timeline'
 
 const TYPE_CONFIG = {
@@ -15,12 +15,10 @@ export default function CommunicationTimeline({
   fallId,
   initialItems,
   initialHasMore,
-  onCompose,
 }: {
   fallId: string
   initialItems: TimelineItem[]
   initialHasMore: boolean
-  onCompose?: () => void
 }) {
   const [items, setItems] = useState(initialItems)
   const [hasMore, setHasMore] = useState(initialHasMore)
@@ -95,12 +93,6 @@ export default function CommunicationTimeline({
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Suchen..."
             className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" />
         </div>
-        {onCompose && (
-          <button onClick={onCompose}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#4573A2] text-white text-xs font-medium rounded-lg hover:bg-[#1E3A5F] transition-colors ml-auto">
-            <SendIcon className="w-3.5 h-3.5" /> Email senden
-          </button>
-        )}
       </div>
 
       {/* Timeline */}
