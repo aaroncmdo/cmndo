@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import GutachterShell from './GutachterShell'
 
 export default async function GutachterLayout({
@@ -21,7 +22,7 @@ export default async function GutachterLayout({
 
   const displayName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || user.email || ''
 
-  const svSelect = 'logo_url, brand_primary, brand_secondary, use_custom_branding, vertrag_unterschrieben, anzahlung_status, freigeschaltet, standort_lat, standort_lng, ist_aktiv'
+  const svSelect = 'logo_url, brand_primary, brand_secondary, use_custom_branding, vertrag_unterschrieben, anzahlung_status, freigeschaltet, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet'
   let { data: sv } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
@@ -50,6 +51,15 @@ export default async function GutachterLayout({
   }
 
   const isDeactivated = sv?.ist_aktiv === false
+
+  // KFZ-148: Hard-Blocker — Portal-Zugang nur wenn freigeschaltet
+  if (sv && sv.portal_zugang_freigeschaltet === false) {
+    const h = await headers()
+    const pathname = h.get('x-next-url') ?? h.get('x-invoke-path') ?? ''
+    if (!pathname.includes('/gutachter/onboarding')) {
+      redirect('/gutachter/onboarding')
+    }
+  }
 
   return (
     <GutachterShell
