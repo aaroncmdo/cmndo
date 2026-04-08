@@ -49,7 +49,7 @@ export async function createMitarbeiter(formData: FormData): Promise<{ email: st
   })
   if (profileError) throw new Error(`Profil erstellen fehlgeschlagen: ${profileError.message}`)
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'
   await sendEmail({
     to: email, subject: 'Einladung zu Claimondo', heading: 'Willkommen bei Claimondo!',
     lines: [

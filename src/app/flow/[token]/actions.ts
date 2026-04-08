@@ -409,7 +409,7 @@ export async function signSAandCreateFall(
           const uhrzeit = terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
           const kundeName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim()
           const adresse = lead.fahrzeug_standort_adresse || lead.fahrzeug_standort_plz || 'Adresse folgt'
-          const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://claimondo.de'
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
           const terminLink = terminRow.ablehnen_token
             ? `${baseUrl}/sv/termin/${terminRow.ablehnen_token}`
             : ''
