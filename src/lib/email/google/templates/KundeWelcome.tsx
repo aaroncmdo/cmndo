@@ -1,4 +1,7 @@
-import { EmailLayout, Heading, Paragraph, Button, InfoTable, Divider, APP_URL } from './layout'
+import { EmailLayout, Heading, Paragraph, Button, InfoTable, Divider, APP_URL, ONDO } from './layout'
+import { Text, Section } from '@react-email/components'
+
+type TerminInfo = { datum: string; uhrzeit: string; adresse: string; svName: string | null }
 
 type Props = {
   vorname: string
@@ -10,6 +13,7 @@ type Props = {
   svName: string | null
   accountExists: boolean
   flowToken?: string | null
+  terminInfo?: TerminInfo | null
 }
 
 export function subject(p: Props) {
@@ -37,6 +41,27 @@ export function KundeWelcomeEmail(props: Props) {
         ['Versicherung', props.versicherung],
         ...(props.svName ? [['Gutachter', props.svName] as [string, string]] : []),
       ]} />
+
+      {/* BUG-72: Termin-Info Block */}
+      {props.terminInfo && (
+        <>
+          <Divider />
+          <Section style={{ marginBottom: 16 }}>
+            <Text style={{ color: ONDO, fontSize: 13, fontWeight: 700, margin: '0 0 8px', letterSpacing: '0.5px' }}>
+              Ihr Besichtigungstermin
+            </Text>
+          </Section>
+          <InfoTable rows={[
+            ['Datum', props.terminInfo.datum],
+            ['Uhrzeit', `${props.terminInfo.uhrzeit} Uhr`],
+            ['Adresse', props.terminInfo.adresse],
+            ...(props.terminInfo.svName ? [['Sachverstaendiger', props.terminInfo.svName] as [string, string]] : []),
+          ]} />
+          <Text style={{ color: '#6b7280', fontSize: 12, lineHeight: '18px', margin: '8px 0 0', fontStyle: 'italic' }}>
+            Bitte stellen Sie sicher, dass das Fahrzeug zum Termin zugaenglich ist. Sie werden kurz vorher per WhatsApp erinnert.
+          </Text>
+        </>
+      )}
 
       <Divider />
       {props.accountExists ? (

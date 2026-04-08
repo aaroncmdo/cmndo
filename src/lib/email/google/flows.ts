@@ -74,6 +74,35 @@ export async function sendKundeWelcome(fallId: string): Promise<void> {
     flowToken = fl?.token ?? null
   }
 
+  // BUG-72: Termin-Info laden (naechster zukuenftiger Termin)
+  let terminInfo: { datum: string; uhrzeit: string; adresse: string; svName: string | null } | null = null
+  const { data: termin } = await db.from('gutachter_termine')
+    .select('start_zeit, sv_id, fall_id')
+    .eq('fall_id', fallId)
+    .in('status', ['reserviert', 'bestaetigt'])
+    .gte('start_zeit', new Date().toISOString())
+    .order('start_zeit', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+
+  if (termin) {
+    const tDate = new Date(termin.start_zeit)
+    let terminSvName: string | null = svName
+    if (!terminSvName && termin.sv_id) {
+      const { data: sv2 } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.sv_id).single()
+      if (sv2?.profile_id) {
+        const { data: p2 } = await db.from('profiles').select('vorname, nachname').eq('id', sv2.profile_id).single()
+        if (p2) terminSvName = [p2.vorname, p2.nachname].filter(Boolean).join(' ') || null
+      }
+    }
+    terminInfo = {
+      datum: tDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }),
+      uhrzeit: tDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+      adresse: fall.besichtigungsort_adresse ?? '—',
+      svName: terminSvName,
+    }
+  }
+
   const props = {
     vorname,
     fallNummer: fall.fall_nummer ?? fallId.slice(0, 8),
@@ -84,6 +113,7 @@ export async function sendKundeWelcome(fallId: string): Promise<void> {
     svName,
     accountExists,
     flowToken,
+    terminInfo,
   }
 
   const html = await render(KundeWelcomeEmail(props))
