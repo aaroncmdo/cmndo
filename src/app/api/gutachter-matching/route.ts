@@ -86,6 +86,7 @@ export async function POST(request: Request) {
     .from('sachverstaendige')
     .select('id, partner_seit, offene_faelle, max_faelle_monat, paket, qualifikationen, ist_aktiv, profile_id, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_lat, standort_lng, isochrone_polygon')
     .eq('ist_aktiv', true)
+    .eq('portal_zugang_freigeschaltet', true) // KFZ-148: Nur freigeschaltete SVs
 
   if (!svList?.length) return NextResponse.json({ empfohlen: null, alternative_1: null, alternative_2: null, alle_kandidaten: [], sv_gesucht: true })
 
