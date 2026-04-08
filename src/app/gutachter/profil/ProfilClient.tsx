@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Script from 'next/script'
 import { createClient } from '@/lib/supabase/client'
@@ -285,6 +285,145 @@ export default function ProfilClient({
             </div>
           </div>
         )}
+        {/* KFZ-139: Branding Section */}
+        <BrandingSection svId={sv.id} />
+      </div>
+    </div>
+  )
+}
+
+// ─── KFZ-139: Branding Section ──────────────────────────────────────────────
+
+function BrandingSection({ svId }: { svId: string }) {
+  const router = useRouter()
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const [primary, setPrimary] = useState('#0D1B3E')
+  const [secondary, setSecondary] = useState('#4573A2')
+  const [useCustom, setUseCustom] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  // Load current branding
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.from('sachverstaendige').select('logo_url, brand_primary, brand_secondary, use_custom_branding').eq('id', svId).single()
+      .then(({ data }) => {
+        if (data) {
+          setLogoUrl(data.logo_url)
+          if (data.brand_primary) setPrimary(data.brand_primary)
+          if (data.brand_secondary) setSecondary(data.brand_secondary)
+          setUseCustom(data.use_custom_branding ?? false)
+        }
+      })
+  }, [svId])
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 2 * 1024 * 1024) { alert('Max 2 MB'); return }
+    setUploading(true)
+    try {
+      const { uploadGutachterLogo } = await import('@/lib/actions/branding-actions')
+      const formData = new FormData()
+      formData.append('logo', file)
+      const result = await uploadGutachterLogo(formData)
+      setLogoUrl(result.logo_url)
+      setPrimary(result.primary)
+      setSecondary(result.secondary)
+    } catch (err) { alert(err instanceof Error ? err.message : 'Upload fehlgeschlagen') }
+    setUploading(false)
+  }
+
+  async function handleSave() {
+    setSaving(true); setSaved(false)
+    try {
+      const { saveGutachterBranding } = await import('@/lib/actions/branding-actions')
+      await saveGutachterBranding({
+        logo_url: logoUrl ?? undefined,
+        brand_primary: primary,
+        brand_secondary: secondary,
+        use_custom_branding: useCustom,
+      })
+      setSaved(true)
+      router.refresh()
+    } catch (err) { alert(err instanceof Error ? err.message : 'Speichern fehlgeschlagen') }
+    setSaving(false)
+  }
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-2xl p-5 mt-5">
+      <h2 className="text-sm font-medium text-gray-500 mb-4">Branding</h2>
+
+      {/* Toggle */}
+      <label className="flex items-center gap-3 mb-4 cursor-pointer">
+        <div className={`relative w-10 h-5 rounded-full transition-colors ${useCustom ? 'bg-[#4573A2]' : 'bg-gray-300'}`}
+          onClick={() => setUseCustom(!useCustom)}>
+          <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${useCustom ? 'translate-x-5' : 'translate-x-0.5'}`} />
+        </div>
+        <span className="text-sm text-gray-700">{useCustom ? 'Mein Branding verwenden' : 'Claimondo Standard'}</span>
+      </label>
+
+      {useCustom && (
+        <div className="space-y-4">
+          {/* Logo Upload */}
+          <div>
+            <p className="text-xs text-gray-500 mb-2">Logo (PNG/JPG/SVG, max 2 MB)</p>
+            <div className="flex items-center gap-3">
+              {logoUrl ? (
+                <img src={logoUrl} alt="Logo" className="h-12 w-auto max-w-32 object-contain rounded border border-gray-200 bg-white p-1" />
+              ) : (
+                <div className="h-12 w-24 bg-gray-100 rounded border border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-xs">Kein Logo</div>
+              )}
+              <label className="px-3 py-1.5 text-xs font-medium text-[#4573A2] border border-[#4573A2] rounded-lg cursor-pointer hover:bg-[#4573A2]/5 transition-colors">
+                {uploading ? 'Wird hochgeladen...' : 'Logo hochladen'}
+                <input type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" className="hidden" onChange={handleUpload} disabled={uploading} />
+              </label>
+            </div>
+          </div>
+
+          {/* Color Pickers */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Primaerfarbe</p>
+              <div className="flex items-center gap-2">
+                <input type="color" value={primary} onChange={e => setPrimary(e.target.value)}
+                  className="w-8 h-8 rounded border border-gray-200 cursor-pointer" />
+                <input value={primary} onChange={e => setPrimary(e.target.value)} maxLength={7}
+                  className="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-xs font-mono text-gray-700 focus:outline-none focus:border-[#4573A2]" />
+              </div>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Sekundaerfarbe</p>
+              <div className="flex items-center gap-2">
+                <input type="color" value={secondary} onChange={e => setSecondary(e.target.value)}
+                  className="w-8 h-8 rounded border border-gray-200 cursor-pointer" />
+                <input value={secondary} onChange={e => setSecondary(e.target.value)} maxLength={7}
+                  className="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-xs font-mono text-gray-700 focus:outline-none focus:border-[#4573A2]" />
+              </div>
+            </div>
+          </div>
+
+          {/* Preview */}
+          <div className="rounded-xl overflow-hidden border border-gray-200">
+            <div className="h-10 flex items-center px-4" style={{ backgroundColor: primary }}>
+              {logoUrl ? <img src={logoUrl} alt="" className="h-6 w-auto brightness-0 invert" /> : <span className="text-white text-sm font-bold">Vorschau</span>}
+            </div>
+            <div className="p-3 flex gap-2">
+              <button className="px-3 py-1.5 rounded-lg text-white text-xs font-medium" style={{ backgroundColor: secondary }}>Button</button>
+              <button className="px-3 py-1.5 rounded-lg text-xs font-medium border" style={{ borderColor: secondary, color: secondary }}>Outline</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Save */}
+      <div className="flex items-center gap-2 mt-4">
+        <button onClick={handleSave} disabled={saving}
+          className="px-4 py-2 text-xs font-medium text-white bg-[#4573A2] rounded-lg hover:bg-[#1E3A5F] transition-colors disabled:opacity-50">
+          {saving ? 'Wird gespeichert...' : 'Branding speichern'}
+        </button>
+        {saved && <span className="text-green-600 text-xs">Gespeichert!</span>}
       </div>
     </div>
   )

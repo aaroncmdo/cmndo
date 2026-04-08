@@ -21,7 +21,7 @@ export default async function GutachterLayout({
 
   const displayName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || user.email || ''
 
-  const svSelect = 'logo_url, brand_primary, brand_secondary, vertrag_unterschrieben, anzahlung_status, freigeschaltet, standort_lat, standort_lng, ist_aktiv'
+  const svSelect = 'logo_url, brand_primary, brand_secondary, use_custom_branding, vertrag_unterschrieben, anzahlung_status, freigeschaltet, standort_lat, standort_lng, ist_aktiv'
   let { data: sv } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
@@ -54,9 +54,9 @@ export default async function GutachterLayout({
   return (
     <GutachterShell
       displayName={displayName}
-      logoUrl={sv?.logo_url ?? null}
-      brandPrimary={sv?.brand_primary ?? null}
-      brandSecondary={sv?.brand_secondary ?? null}
+      logoUrl={sv?.use_custom_branding ? (sv?.logo_url ?? null) : null}
+      brandPrimary={sv?.use_custom_branding ? (sv?.brand_primary ?? null) : null}
+      brandSecondary={sv?.use_custom_branding ? (sv?.brand_secondary ?? null) : null}
       standortLat={sv?.standort_lat ? Number(sv.standort_lat) : null}
       standortLng={sv?.standort_lng ? Number(sv.standort_lng) : null}
     >
