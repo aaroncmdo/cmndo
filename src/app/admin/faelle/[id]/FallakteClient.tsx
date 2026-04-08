@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Script from 'next/script'
 import DokumenteTab from './DokumenteTab'
+import FallStepper from '@/components/admin/FallStepper'
 import { createClient } from '@/lib/supabase/client'
 import {
   addTimelineEntry,
@@ -569,6 +570,7 @@ export default function FallakteClient({
   forderungspositionen: Forderungsposition[]
   chatTeilnehmer?: { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url: string | null }[]
   versicherungKontakt?: { name: string; schaden_telefon: string | null; schaden_email: string | null; hotline_telefon: string | null; webseite: string | null } | null
+  stepperState?: import('@/lib/fall/stepper-state').StepperState | null
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -676,6 +678,9 @@ export default function FallakteClient({
 
           {/* Zeile 3: Nächster Schritt (kompakt) */}
           <NaechsterSchrittBanner fall={fall} tasks={tasks} onAction={(tab) => { setActiveTab(tab as Tab); setTimeout(() => { const el = document.querySelector('[data-task-target]'); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('blink-highlight'); setTimeout(() => el.classList.remove('blink-highlight'), 2000) } }, 150) }} />
+
+          {/* BUG-74: Prozess-Stepper */}
+          {stepperState && <FallStepper state={stepperState} />}
 
           {/* Zeile 4: Tab-Leiste */}
           <div className="flex gap-0.5 py-1 overflow-x-auto">
