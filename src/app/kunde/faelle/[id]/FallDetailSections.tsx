@@ -1,12 +1,15 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { SendIcon, FileTextIcon } from 'lucide-react'
+import { SendIcon, FileTextIcon, CalendarIcon } from 'lucide-react'
 import { markNachrichtenGelesen } from '@/lib/markNachrichtenGelesen'
+import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
+import Link from 'next/link'
 
 type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean | null; anhang_url: string | null; created_at: string }
 type Dokument = { id: string; typ: string; datei_url: string; datei_name: string | null; created_at: string }
 type ChatTeilnehmer = { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url: string | null }
+type AktiverTermin = { id: string; status: string; start_zeit: string; end_zeit: string; vorgeschlagenes_datum: string | null; gegenvorschlag_von: string | null; gegenvorschlag_grund: string | null; sv_id: string | null }
 
 const ROLLE_LABEL: Record<string, string> = { kunde: 'Sie', admin: 'Claimondo', kundenbetreuer: 'Ihr Betreuer', gutachter: 'Gutachter', sachverstaendiger: 'Gutachter', system: 'System' }
 const ROLLE_COLOR: Record<string, string> = { kunde: 'bg-[#4573A2]', admin: 'bg-[#0D1B3E]', kundenbetreuer: 'bg-[#1E3A5F]', gutachter: 'bg-[#1E3A5F]', sachverstaendiger: 'bg-[#1E3A5F]', system: 'bg-gray-400' }
@@ -33,7 +36,7 @@ type TabKey = (typeof TABS)[number]['key']
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export default function FallDetailSections({
-  fall, svName, svTelefon, kbName, dokumente, nachrichten, userId, chatTeilnehmer,
+  fall, svName, svTelefon, kbName, dokumente, nachrichten, userId, chatTeilnehmer, aktiverTermin,
 }: {
   fall: Record<string, unknown>
   svName: string | null
@@ -43,6 +46,7 @@ export default function FallDetailSections({
   nachrichten: Nachricht[]
   userId: string
   chatTeilnehmer?: ChatTeilnehmer[]
+  aktiverTermin?: AktiverTermin | null
 }) {
   const [activeTab, setActiveTab] = useState<TabKey>('uebersicht')
 
@@ -95,6 +99,16 @@ export default function FallDetailSections({
               {fall.sv_termin && <InfoRow label="Besichtigungstermin" value={fmtDateTime(fall.sv_termin as string)} />}
               {fall.besichtigungsort_adresse && <InfoRow label="Besichtigungsort" value={fall.besichtigungsort_adresse as string} />}
             </Section>
+          )}
+
+          {/* KFZ-134: SV-Gegenvorschlag Banner */}
+          {aktiverTermin && aktiverTermin.status === 'gegenvorschlag' && aktiverTermin.gegenvorschlag_von === 'sv' && aktiverTermin.vorgeschlagenes_datum && (
+            <GegenvorschlagBanner
+              fallId={fall.id as string}
+              svName={svName ?? 'Sachverstaendiger'}
+              vorgeschlagenesDatum={aktiverTermin.vorgeschlagenes_datum}
+              grund={aktiverTermin.gegenvorschlag_grund}
+            />
           )}
         </div>
       )}
@@ -228,12 +242,15 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
           const isSystem = msg.sender_rolle === 'system'
           const isWhatsApp = msg.kanal === 'whatsapp'
 
-          // System-Nachrichten zentriert
+          // KFZ-134: System-Nachrichten zentriert mit eigenem Style
           if (isSystem) {
             return (
               <div key={msg.id} className="flex justify-center">
-                <div className="bg-gray-100 rounded-full px-4 py-1.5 max-w-[85%]">
-                  <p className="text-xs text-gray-500 text-center">{msg.nachricht}</p>
+                <div className="bg-[#f8f9fb] border border-[#7BA3CC]/30 rounded-xl px-4 py-2 max-w-[85%]">
+                  <p className="text-xs text-[#0D1B3E] text-center whitespace-pre-wrap">{msg.nachricht}</p>
+                  <p className="text-[9px] text-gray-400 text-center mt-1">
+                    {new Date(msg.created_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                  </p>
                 </div>
               </div>
             )
@@ -283,5 +300,105 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
         </form>
       </div>
     </div>
+  )
+}
+
+// ─── KFZ-134: Gegenvorschlag-Banner (Kunde sieht SV-Vorschlag) ────────────
+
+function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
+  fallId: string; svName: string; vorgeschlagenesDatum: string; grund: string | null
+}) {
+  const [loading, setLoading] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const [neuerTermin, setNeuerTermin] = useState('')
+  const [kundeGrund, setKundeGrund] = useState('')
+  const [done, setDone] = useState<string | null>(null)
+
+  const datumStr = new Date(vorgeschlagenesDatum).toLocaleString('de-DE', {
+    weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  })
+
+  async function handleAnnehmen() {
+    setLoading(true)
+    const result = await terminAnnehmen({ source: 'kunde', fallId })
+    setLoading(false)
+    if (result.success) {
+      setDone('Termin bestaetigt! Der Sachverstaendige wird informiert.')
+    }
+  }
+
+  async function handleGegenvorschlag() {
+    if (!neuerTermin) return
+    setLoading(true)
+    const result = await terminGegenvorschlag({ neuesDatum: neuerTermin, grund: kundeGrund, source: 'kunde', fallId })
+    setLoading(false)
+    if (result.success) {
+      setShowModal(false)
+      setDone('Ihr Gegenvorschlag wurde uebermittelt. Der Sachverstaendige wird informiert.')
+    }
+  }
+
+  if (done) {
+    return (
+      <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+        <p className="text-sm text-green-700 font-medium">{done}</p>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <div className="bg-[#4573A2]/5 border border-[#7BA3CC]/30 rounded-xl p-5">
+        <p className="text-sm font-semibold text-[#0D1B3E] mb-2">Neuer Terminvorschlag vom Sachverstaendigen</p>
+        <p className="text-sm text-[#1E3A5F] mb-1">
+          {svName} hat einen alternativen Termin vorgeschlagen: <strong>{datumStr}</strong>
+        </p>
+        {grund && <p className="text-xs text-gray-500 mb-3">Grund: {grund}</p>}
+        {!grund && <div className="mb-3" />}
+
+        <div className="space-y-2">
+          <button onClick={handleAnnehmen} disabled={loading}
+            className="w-full py-3 rounded-xl bg-[#4573A2] text-white font-medium text-sm hover:bg-[#1E3A5F] transition-colors disabled:opacity-40">
+            {loading ? 'Wird verarbeitet...' : 'Vorschlag annehmen'}
+          </button>
+          <button onClick={() => setShowModal(true)} disabled={loading}
+            className="w-full py-3 rounded-xl bg-white text-[#1E3A5F] font-medium text-sm border border-[#1E3A5F] hover:bg-[#f8f9fb] transition-colors disabled:opacity-40">
+            Anderen Termin vorschlagen
+          </button>
+          <Link href={`/kunde/faelle/${fallId}/kalender`}
+            className="w-full py-3 rounded-xl bg-white text-[#1E3A5F] font-medium text-sm border border-[#7BA3CC]/30 hover:bg-[#f8f9fb] transition-colors flex items-center justify-center gap-2">
+            <CalendarIcon className="w-4 h-4" /> Kalender des Gutachters oeffnen
+          </Link>
+        </div>
+      </div>
+
+      {/* Modal: Anderen Termin vorschlagen */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-lg font-semibold text-[#0D1B3E] mb-2">Anderen Termin vorschlagen</h3>
+            <p className="text-sm text-gray-500 mb-4">Waehlen Sie einen fuer Sie passenden Termin:</p>
+
+            <input type="datetime-local" value={neuerTermin} onChange={e => setNeuerTermin(e.target.value)}
+              min={new Date().toISOString().slice(0, 16)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 mb-3 focus:outline-none focus:border-[#4573A2]" />
+            <textarea value={kundeGrund} onChange={e => setKundeGrund(e.target.value)}
+              placeholder="Begruendung (optional)"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 mb-4 focus:outline-none focus:border-[#4573A2] resize-none" rows={2} />
+
+            <div className="flex gap-2">
+              <button onClick={() => setShowModal(false)}
+                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
+                Abbrechen
+              </button>
+              <button onClick={handleGegenvorschlag} disabled={loading || !neuerTermin}
+                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-[#4573A2] hover:bg-[#1E3A5F] transition-colors disabled:opacity-50">
+                {loading ? 'Wird gesendet...' : 'Vorschlag senden'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

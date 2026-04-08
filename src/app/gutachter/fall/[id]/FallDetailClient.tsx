@@ -19,7 +19,8 @@ import {
   DownloadIcon,
   FolderOpenIcon,
 } from 'lucide-react'
-import { uploadGutachten, uploadDokument, uploadDatei, saveFinVinGutachter, sendChatNachricht, declineTermin } from './actions'
+import { uploadGutachten, uploadDokument, uploadDatei, saveFinVinGutachter, sendChatNachricht } from './actions'
+import { terminAblehnen, terminGegenvorschlag, terminAnnehmen } from '@/lib/actions/termin-actions'
 import VorOrtPanel from '@/components/VorOrtPanel'
 import ChatChannel from '@/components/ChatChannel'
 
@@ -55,6 +56,11 @@ const KANZLEI_STEPS = [
   { key: 'abgeschlossen', label: 'Zahlung eingegangen', desc: 'Regulierung abgeschlossen, Zahlung da' },
 ]
 
+type TerminInfo = {
+  id: string; status: string; start_zeit: string; end_zeit: string
+  vorgeschlagenes_datum: string | null; gegenvorschlag_von: string | null; gegenvorschlag_grund: string | null
+}
+
 type TabKey = 'uebersicht' | 'dokumente' | 'dateien' | 'gutachten' | 'kanzlei' | 'timeline' | 'chat'
 
 export default function FallDetailClient({
@@ -67,6 +73,7 @@ export default function FallDetailClient({
   nachrichten,
   kundenbetreuer,
   chatTeilnehmer,
+  aktiverTermin,
 }: {
   fall: Record<string, unknown>
   lead: { vorname: string | null; nachname: string | null; email: string | null; telefon: string | null } | null
@@ -77,6 +84,7 @@ export default function FallDetailClient({
   nachrichten: Record<string, unknown>[]
   kundenbetreuer?: { vorname: string | null; nachname: string | null; email: string | null; telefon: string | null } | null
   chatTeilnehmer?: { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url: string | null }[]
+  aktiverTermin?: TerminInfo | null
 }) {
   const [tab, setTab] = useState<TabKey>('uebersicht')
   const [uploading, setUploading] = useState(false)
@@ -225,12 +233,12 @@ export default function FallDetailClient({
           </span>
         </div>
 
-        {/* Vor-Ort Button */}
-        {/* KFZ-118: Termin ablehnen */}
-        {fall.sv_termin && !hasGutachten && (fall.status === 'sv-termin' || fall.status === 'sv-zugewiesen') && (
-          <DeclineTerminButton fallId={fall.id as string} />
+        {/* KFZ-134: Termin-Aktionen (Ablehnen + Gegenvorschlag + Kunden-Gegenvorschlag-Banner) */}
+        {aktiverTermin && (aktiverTermin.status === 'reserviert' || aktiverTermin.status === 'gegenvorschlag') && (
+          <TerminActionsPanel fallId={fallId} termin={aktiverTermin} />
         )}
 
+        {/* Vor-Ort Button */}
         {fall.sv_termin && !hasGutachten && (fall.status === 'sv-termin' || fall.status === 'sv-zugewiesen') && (
           <div className="flex gap-2 mb-4">
             <button onClick={() => setShowVorOrt(true)}
@@ -970,77 +978,135 @@ function GutachterChatTabs({ fallId, teilnehmer }: { fallId: string; teilnehmer:
   )
 }
 
-// ─── KFZ-118: Termin ablehnen Button + Modal ────────────────────────────────
+// ─── KFZ-134: Termin-Aktionen Panel ────────────────────────────────────────
 
-const DECLINE_REASONS = [
-  'Zeitlich nicht moeglich',
-  'Zu weit entfernt',
-  'Krankheit',
-  'Sonstiges',
-]
-
-function DeclineTerminButton({ fallId }: { fallId: string }) {
+function TerminActionsPanel({ fallId, termin }: { fallId: string; termin: TerminInfo }) {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
+  const [modal, setModal] = useState<'ablehnen' | 'gegenvorschlag' | null>(null)
   const [grund, setGrund] = useState('')
-  const [declining, setDeclining] = useState(false)
+  const [neuerTermin, setNeuerTermin] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  async function handleDecline() {
-    setDeclining(true)
-    try {
-      await declineTermin(fallId, grund || 'Nicht angegeben')
-      setOpen(false)
-      router.refresh()
-    } catch { /* */ }
-    setDeclining(false)
+  const isKundenGegenvorschlag = termin.status === 'gegenvorschlag' && termin.gegenvorschlag_von === 'kunde'
+
+  async function handleAblehnen() {
+    setLoading(true)
+    const result = await terminAblehnen({ grund, source: 'sv_portal', fallId })
+    setLoading(false)
+    if (result.success) { setModal(null); router.refresh() }
+  }
+
+  async function handleGegenvorschlag() {
+    if (!neuerTermin) return
+    setLoading(true)
+    const result = await terminGegenvorschlag({ neuesDatum: neuerTermin, grund, source: 'sv_portal', fallId })
+    setLoading(false)
+    if (result.success) { setModal(null); router.refresh() }
+  }
+
+  async function handleAnnehmen() {
+    setLoading(true)
+    const result = await terminAnnehmen({ source: 'sv_portal', fallId })
+    setLoading(false)
+    if (result.success) router.refresh()
   }
 
   return (
-    <>
-      <button
-        onClick={() => setOpen(true)}
-        className="w-full flex items-center justify-center gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 text-sm py-2 rounded-lg transition-colors mb-3 border border-red-200"
-      >
-        <XCircleIcon className="w-4 h-4" />
-        Termin ablehnen
-      </button>
+    <div className="mb-4 space-y-3">
+      {/* Kunden-Gegenvorschlag Banner */}
+      {isKundenGegenvorschlag && termin.vorgeschlagenes_datum && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <p className="text-sm font-medium text-amber-800 mb-1">Der Kunde hat einen Gegenvorschlag gemacht</p>
+          <p className="text-sm text-amber-700">
+            Neues Datum: {new Date(termin.vorgeschlagenes_datum).toLocaleString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+          </p>
+          {termin.gegenvorschlag_grund && (
+            <p className="text-xs text-amber-600 mt-1">Grund: {termin.gegenvorschlag_grund}</p>
+          )}
+          <div className="flex gap-2 mt-3">
+            <button onClick={handleAnnehmen} disabled={loading}
+              className="flex-1 py-2 rounded-lg text-sm font-medium text-white bg-[#1E3A5F] hover:bg-[#4573A2] transition-colors disabled:opacity-50">
+              {loading ? '...' : 'Annehmen'}
+            </button>
+            <button onClick={() => setModal('gegenvorschlag')} disabled={loading}
+              className="flex-1 py-2 rounded-lg text-sm font-medium text-[#1E3A5F] bg-white border border-[#1E3A5F] hover:bg-[#f8f9fb] transition-colors disabled:opacity-50">
+              Erneut gegenvorschlagen
+            </button>
+            <button onClick={() => setModal('ablehnen')} disabled={loading}
+              className="py-2 px-3 rounded-lg text-sm font-medium text-red-600 bg-white border border-red-200 hover:bg-red-50 transition-colors disabled:opacity-50">
+              Ablehnen
+            </button>
+          </div>
+        </div>
+      )}
 
-      {open && (
+      {/* Hinweistext + Buttons (nur bei reserviert) */}
+      {termin.status === 'reserviert' && (
+        <>
+          <div className="bg-[#4573A2]/5 border border-[#7BA3CC]/30 rounded-xl px-4 py-3">
+            <p className="text-xs text-[#1E3A5F]">
+              Termin ist standardmaessig bestaetigt. Hier nur eingreifen wenn Sie ablehnen oder verschieben moechten.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => setModal('ablehnen')}
+              className="flex-1 flex items-center justify-center gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 text-sm py-2.5 rounded-lg transition-colors border border-red-200">
+              <XCircleIcon className="w-4 h-4" /> Termin ablehnen
+            </button>
+            <button onClick={() => setModal('gegenvorschlag')}
+              className="flex-1 flex items-center justify-center gap-2 text-[#1E3A5F] hover:bg-[#4573A2]/5 text-sm py-2.5 rounded-lg transition-colors border border-[#4573A2]">
+              <ClockIcon className="w-4 h-4" /> Gegenvorschlag
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* Ablehnen Modal */}
+      {modal === 'ablehnen' && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Termin ablehnen?</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Sind Sie sicher? Claimondo wird einen anderen Gutachter zuweisen.
-            </p>
-
-            <label className="text-xs text-gray-500 mb-1.5 block">Grund (optional)</label>
-            <select
-              value={grund}
-              onChange={e => setGrund(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 mb-4 focus:outline-none focus:border-[#4573A2]"
-            >
-              <option value="">— Bitte waehlen —</option>
-              {DECLINE_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
-            </select>
-
+            <p className="text-sm text-gray-500 mb-4">Claimondo wird einen anderen Gutachter zuweisen.</p>
+            <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begruendung (optional)"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 mb-4 focus:outline-none focus:border-[#4573A2] resize-none" rows={3} />
             <div className="flex gap-2">
-              <button
-                onClick={() => setOpen(false)}
-                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
-              >
+              <button onClick={() => setModal(null)}
+                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
                 Abbrechen
               </button>
-              <button
-                onClick={handleDecline}
-                disabled={declining}
-                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-50"
-              >
-                {declining ? 'Wird abgelehnt...' : 'Ja, ablehnen'}
+              <button onClick={handleAblehnen} disabled={loading}
+                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-50">
+                {loading ? 'Wird abgelehnt...' : 'Ja, ablehnen'}
               </button>
             </div>
           </div>
         </div>
       )}
-    </>
+
+      {/* Gegenvorschlag Modal */}
+      {modal === 'gegenvorschlag' && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Gegenvorschlag</h3>
+            <p className="text-sm text-gray-500 mb-4">Schlagen Sie einen alternativen Termin vor:</p>
+            <input type="datetime-local" value={neuerTermin} onChange={e => setNeuerTermin(e.target.value)}
+              min={new Date().toISOString().slice(0, 16)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 mb-3 focus:outline-none focus:border-[#4573A2]" />
+            <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begruendung (optional)"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 mb-4 focus:outline-none focus:border-[#4573A2] resize-none" rows={2} />
+            <div className="flex gap-2">
+              <button onClick={() => setModal(null)}
+                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
+                Abbrechen
+              </button>
+              <button onClick={handleGegenvorschlag} disabled={loading || !neuerTermin}
+                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-[#1E3A5F] hover:bg-[#4573A2] transition-colors disabled:opacity-50">
+                {loading ? 'Wird gesendet...' : 'Gegenvorschlag senden'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }

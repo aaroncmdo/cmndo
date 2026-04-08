@@ -106,6 +106,19 @@ export default async function GutachterFallPage({
   const { getChatTeilnehmer } = await import('@/lib/chatGruppe')
   const chatTeilnehmer = await getChatTeilnehmer(id)
 
+  // KFZ-134: Aktiven gutachter_termine Eintrag laden
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const admin = createAdminClient()
+  const { data: aktiverTermin } = await admin
+    .from('gutachter_termine')
+    .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund')
+    .eq('fall_id', id)
+    .eq('sv_id', sv.id)
+    .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
   return (
     <FallDetailClient
       fall={fallWithAbrechnung}
@@ -117,6 +130,7 @@ export default async function GutachterFallPage({
       nachrichten={nachrichten ?? []}
       kundenbetreuer={kundenbetreuer}
       chatTeilnehmer={chatTeilnehmer}
+      aktiverTermin={aktiverTermin}
     />
   )
 }

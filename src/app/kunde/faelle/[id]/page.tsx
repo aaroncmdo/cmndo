@@ -65,6 +65,16 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const { getChatTeilnehmer } = await import('@/lib/chatGruppe')
     const chatTeilnehmer = await getChatTeilnehmer(id)
 
+    // KFZ-134: Aktiven gutachter_termine Eintrag laden
+    const { data: aktiverTermin } = await admin
+      .from('gutachter_termine')
+      .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, sv_id')
+      .eq('fall_id', id)
+      .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
     // Progress berechnen
     const szenario = ((fall.szenario as string) ?? 'normalfall') as keyof typeof SZENARIO_PHASEN
     const phasen = SZENARIO_PHASEN[szenario] ?? SZENARIO_PHASEN.normalfall
@@ -114,6 +124,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           nachrichten={nachrichten ?? []}
           userId={user.id}
           chatTeilnehmer={chatTeilnehmer}
+          aktiverTermin={aktiverTermin}
         />
         </div>
       </div>

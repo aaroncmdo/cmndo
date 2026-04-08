@@ -11,6 +11,9 @@ export type TerminData = {
   kennzeichen: string
   adresse: string
   fall_nummer: string | null
+  vorgeschlagenes_datum: string | null
+  gegenvorschlag_von: string | null
+  gegenvorschlag_grund: string | null
 }
 
 export async function getTerminByToken(token: string): Promise<{ termin: TerminData | null; error?: string }> {
@@ -18,7 +21,7 @@ export async function getTerminByToken(token: string): Promise<{ termin: TerminD
 
   const { data: termin } = await svc
     .from('gutachter_termine')
-    .select('id, status, start_zeit, end_zeit, fall_id, lead_id')
+    .select('id, status, start_zeit, end_zeit, fall_id, lead_id, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund')
     .eq('ablehnen_token', token)
     .maybeSingle()
 
@@ -74,6 +77,9 @@ export async function getTerminByToken(token: string): Promise<{ termin: TerminD
       kennzeichen,
       adresse,
       fall_nummer: fallNummer,
+      vorgeschlagenes_datum: termin.vorgeschlagenes_datum ?? null,
+      gegenvorschlag_von: termin.gegenvorschlag_von ?? null,
+      gegenvorschlag_grund: termin.gegenvorschlag_grund ?? null,
     },
   }
 }
