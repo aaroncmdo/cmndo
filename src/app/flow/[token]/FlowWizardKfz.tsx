@@ -136,7 +136,7 @@ export default function FlowWizardKfz({
     setCreatingAccount(true)
     setError(null)
     try {
-      const result = await createKundeAccount(fallId, accountEmail, lead.vorname, lead.nachname, lead.telefon || null)
+      const result = await createKundeAccount(fallId, accountEmail, editVorname || lead.vorname, editNachname || lead.nachname, editTelefon || lead.telefon || null)
       setAccountPassword(result.password)
       setAccountCreated(true)
     } catch (err) {

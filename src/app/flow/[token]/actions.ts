@@ -135,6 +135,12 @@ export async function createKundeAccount(
   nachname: string,
   telefon: string | null
 ): Promise<{ password: string }> {
+  // BUG-70: Validierung vor signUp
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new Error('Bitte geben Sie eine gueltige E-Mail-Adresse ein.')
+  }
+  if (!fallId) throw new Error('Fall-ID fehlt.')
+
   const admin = createAdminClient()
 
   // Generate a random password
@@ -181,11 +187,8 @@ export async function createKundeAccount(
           await syncChatTeilnehmer(fallId)
         } catch (e) { console.error('[KFZ-129] syncChatTeilnehmer:', e) }
 
-        // KFZ-137: Welcome-Email an Kunden
-        try {
-          const { sendKundeWelcome } = await import('@/lib/email/google/flows')
-          await sendKundeWelcome(fallId)
-        } catch (err) { console.error('[KFZ-137] Email Welcome fehlgeschlagen:', err) }
+        // KFZ-137: Welcome-Email (fire & forget — BUG-70: darf Account-Flow nicht blocken)
+        import('@/lib/email/google/flows').then(m => m.sendKundeWelcome(fallId)).catch(err => console.error('[KFZ-137] Email Welcome:', err))
 
         return { password }
       }
@@ -219,11 +222,8 @@ export async function createKundeAccount(
     await syncChatTeilnehmer(fallId)
   } catch (e) { console.error('[KFZ-129] syncChatTeilnehmer:', e) }
 
-  // KFZ-137: Welcome-Email an Kunden
-  try {
-    const { sendKundeWelcome } = await import('@/lib/email/google/flows')
-    await sendKundeWelcome(fallId)
-  } catch (err) { console.error('[KFZ-137] Email Welcome fehlgeschlagen:', err) }
+  // KFZ-137: Welcome-Email (fire & forget — BUG-70: darf Account-Flow nicht blocken)
+  import('@/lib/email/google/flows').then(m => m.sendKundeWelcome(fallId)).catch(err => console.error('[KFZ-137] Email Welcome:', err))
 
   return { password }
 }
