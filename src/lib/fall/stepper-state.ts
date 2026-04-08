@@ -44,8 +44,8 @@ const PHASEN_KEYS = [
 const PHASEN_LABELS: Record<string, { label: string; desc: string }> = {
   besichtigung: { label: 'Besichtigung', desc: 'Gutachter besichtigt das Fahrzeug' },
   gutachten: { label: 'Gutachten', desc: 'Gutachten wird erstellt und hochgeladen' },
-  qualitaetssicherung: { label: 'Qualitaetssicherung', desc: 'Filmcheck und Dokumentenpruefung' },
-  kanzlei_uebergabe: { label: 'Kanzlei-Uebergabe', desc: 'Akte wird an Partnerkanzlei uebergeben' },
+  qualitaetssicherung: { label: 'Qualitätssicherung', desc: 'Filmcheck und Dokumentenprüfung' },
+  kanzlei_uebergabe: { label: 'Kanzlei-Übergabe', desc: 'Akte wird an Partnerkanzlei übergeben' },
   versicherung: { label: 'Versicherung', desc: 'Korrespondenz mit der gegnerischen Versicherung' },
   regulierung: { label: 'Regulierung', desc: 'Schadensregulierung und Zahlung' },
   abschluss: { label: 'Abschluss', desc: 'Fall abgeschlossen' },
@@ -123,14 +123,14 @@ export async function getStepperState(fallId: string): Promise<StepperState> {
           status: 'aktiv',
         })
       } else if (termin?.status === 'reserviert') {
-        subs.push({ key: 'termin_bestaetigung', label: 'Termin reserviert, Bestaetigung ausstehend', status: 'aktiv' })
+        subs.push({ key: 'termin_bestaetigung', label: 'Termin reserviert, Bestätigung ausstehend', status: 'aktiv' })
       } else if (termin?.status === 'bestaetigt') {
-        subs.push({ key: 'termin_bestaetigt', label: 'Termin bestaetigt', status: 'erledigt' })
+        subs.push({ key: 'termin_bestaetigt', label: 'Termin bestätigt', status: 'erledigt' })
       }
 
       // SV-Neuzuweisung
       if (termin?.status === 'abgelehnt' || fall.gutachter_termin_status === 'abgelehnt') {
-        subs.push({ key: 'sv_neuzuweisung', label: 'SV-Neuzuweisung laeuft', status: 'aktiv' })
+        subs.push({ key: 'sv_neuzuweisung', label: 'SV-Neuzuweisung läuft', status: 'aktiv' })
       }
 
       // Vor-Ort Erfassung
@@ -157,7 +157,7 @@ export async function getStepperState(fallId: string): Promise<StepperState> {
 
     if (key === 'kanzlei_uebergabe') {
       if (fall.kanzlei_uebergeben_am) {
-        subs.push({ key: 'kanzlei_uebergeben', label: 'An Kanzlei uebergeben', status: 'erledigt' })
+        subs.push({ key: 'kanzlei_uebergeben', label: 'An Kanzlei übergeben', status: 'erledigt' })
       }
       if (fall.anschlussschreiben_am) {
         subs.push({ key: 'anschlussschreiben', label: 'Anschlussschreiben versendet', status: 'erledigt' })

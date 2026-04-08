@@ -186,7 +186,7 @@ export default function FlowWizardKfz({
               <div>
                 <StepHeader
                   question={`Hallo ${editVorname || 'dort'}!`}
-                  sub="Bitte pruefen und korrigieren Sie Ihre Daten."
+                  sub="Bitte prüfen und korrigieren Sie Ihre Daten."
                   icon={<CarIcon className="w-8 h-8 text-[#4573A2]" />}
                 />
 
@@ -222,7 +222,7 @@ export default function FlowWizardKfz({
                     />
                     <span className="text-sm text-gray-600 leading-relaxed">
                       Ich habe die{' '}
-                      <a href="/datenschutz" target="_blank" className="text-[#4573A2] underline">Datenschutzerklaerung</a>{' '}
+                      <a href="/datenschutz" target="_blank" className="text-[#4573A2] underline">Datenschutzerklärung</a>{' '}
                       gelesen und stimme der Verarbeitung meiner Daten zu. <span className="text-red-400">*</span>
                     </span>
                   </label>
@@ -243,7 +243,7 @@ export default function FlowWizardKfz({
                   <p className="font-medium text-gray-900 mb-2">Zusammenfassung:</p>
                   <p>Ich beauftrage die Claimondo GmbH mit der Koordination meines KFZ-Schadens.
                   Mir entstehen <strong>keine Kosten</strong>. Die Gutachterkosten werden im Rahmen
-                  der Sicherungsabtretung an den Sachverstaendigen abgetreten und von der gegnerischen
+                  der Sicherungsabtretung an den Sachverständigen abgetreten und von der gegnerischen
                   Versicherung getragen.</p>
                 </div>
 
@@ -253,7 +253,7 @@ export default function FlowWizardKfz({
                   className="flex items-center gap-2 text-sm text-[#4573A2] hover:underline mb-5"
                 >
                   <FileTextIcon className="w-4 h-4" />
-                  Vollstaendige Sicherungsabtretung lesen
+                  Vollständige Sicherungsabtretung lesen
                 </a>
 
                 {/* Unterschrifts-Canvas */}
@@ -271,7 +271,7 @@ export default function FlowWizardKfz({
                     className="mt-0.5 w-5 h-5 rounded border-gray-300 accent-[#4573A2] shrink-0"
                   />
                   <span className="text-sm text-gray-600 leading-relaxed">
-                    Ja, ich moechte den kostenlosen Service nutzen. Alle Kosten traegt die gegnerische Versicherung.
+                    Ja, ich möchte den kostenlosen Service nutzen. Alle Kosten trägt die gegnerische Versicherung.
                     Ich stimme den Vertragsbedingungen und der Widerrufsbelehrung zu. <span className="text-red-400">*</span>
                   </span>
                 </label>
@@ -314,7 +314,7 @@ export default function FlowWizardKfz({
                       <p className="text-sm text-gray-500 mt-1">Wir melden uns per WhatsApp bei Ihnen.</p>
                     </div>
                     <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 text-left">
-                      <p className="text-xs text-gray-400 mb-1">Sie moechten Ihren Fall online verfolgen?</p>
+                      <p className="text-xs text-gray-400 mb-1">Sie möchten Ihren Fall online verfolgen?</p>
                       <p className="text-sm text-gray-600">Registrieren Sie sich jederzeit unter <strong>claimondo.de/login</strong></p>
                     </div>
                   </div>
@@ -324,7 +324,7 @@ export default function FlowWizardKfz({
                       <p className="text-sm text-gray-500 mb-2">Ihre Zugangsdaten:</p>
                       <p className="text-sm text-gray-700"><strong>E-Mail:</strong> {accountEmail}</p>
                       <p className="text-sm text-gray-700"><strong>Passwort:</strong> {accountPassword}</p>
-                      <p className="text-xs text-gray-400 mt-3">Bitte aendern Sie Ihr Passwort nach dem ersten Login.</p>
+                      <p className="text-xs text-gray-400 mt-3">Bitte ändern Sie Ihr Passwort nach dem ersten Login.</p>
                     </div>
                     <button
                       onClick={() => { window.location.href = '/kunde' }}
@@ -364,7 +364,7 @@ export default function FlowWizardKfz({
                         className="w-full flex items-center justify-center gap-2 py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors"
                       >
                         <SkipForwardIcon className="w-4 h-4" />
-                        Ueberspringen — Wir informieren per WhatsApp
+                        Überspringen — Wir informieren per WhatsApp
                       </button>
                     </div>
                   </div>
@@ -398,14 +398,14 @@ export default function FlowWizardKfz({
           </div>
         )}
 
-        {/* Zurueck-Button (nur Schritt 1→2) */}
+        {/* Zurück-Button (nur Schritt 1→2) */}
         {stepIndex === 1 && (
           <div className="pt-2">
             <button
               onClick={() => setStepIndex(0)}
               className="w-full py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors"
             >
-              Zurueck
+              Zurück
             </button>
           </div>
         )}
@@ -503,7 +503,7 @@ function SignatureCanvas({ onSignature }: { onSignature: (blob: Blob | null) => 
       </div>
       {!isEmpty && (
         <button onClick={clearSignature} className="mt-2 text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1">
-          <Trash2Icon className="w-3 h-3" /> Unterschrift loeschen
+          <Trash2Icon className="w-3 h-3" /> Unterschrift löschen
         </button>
       )}
     </div>

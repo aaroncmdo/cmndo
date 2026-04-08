@@ -71,12 +71,12 @@ export default async function KundeStartseite() {
   return (
     <div className="w-full px-4 md:px-8 py-6 max-w-xl md:max-w-none mx-auto">
       <h1 className="text-xl font-bold text-[#0D1B3E] mb-1">Hallo {vorname}</h1>
-      <p className="text-sm text-gray-500 mb-6">Hier sehen Sie den Stand Ihrer Faelle.</p>
+      <p className="text-sm text-gray-500 mb-6">Hier sehen Sie den Stand Ihrer Fälle.</p>
 
       {faelle.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">
           <p className="text-[#0D1B3E] font-semibold">Noch kein Schadensfall</p>
-          <p className="text-sm text-gray-500 mt-1">Sobald ein Fall fuer Sie angelegt wird, erscheint er hier.</p>
+          <p className="text-sm text-gray-500 mt-1">Sobald ein Fall für Sie angelegt wird, erscheint er hier.</p>
         </div>
       ) : (
         <div className="space-y-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 md:space-y-0">

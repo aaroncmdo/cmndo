@@ -155,7 +155,7 @@ function MarketingMaikSection({ monatsberichte }: { monatsberichte: MonatsBerich
 
           <div className="mt-4 p-3 bg-gray-100/50 rounded-xl">
             <p className="text-gray-500 text-xs">
-              Google Ads CPL-Werte koennen manuell in der Datenbank erfasst werden.
+              Google Ads CPL-Werte können manuell in der Datenbank erfasst werden.
               API-Endpoint <code className="text-gray-500">/api/google-ads/sync</code> ist vorbereitet.
             </p>
           </div>
@@ -343,7 +343,7 @@ function InvestitionProFallSection() {
           <div className="mt-4 p-3 bg-[#4573A2]/10 border border-[#1E3A5F]/30 rounded-xl">
             <p className="text-[#7BA3CC] text-xs">
               Lexoffice-Abgleich vorbereitet: <code className="text-[#7BA3CC]">/api/lexoffice/sync</code> —
-              Zahlungseingaenge werden spaeter automatisch abgeglichen.
+              Zahlungseingänge werden später automatisch abgeglichen.
             </p>
           </div>
         </div>

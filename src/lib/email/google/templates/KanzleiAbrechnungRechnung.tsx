@@ -13,15 +13,15 @@ type Props = {
 }
 
 export function subject(p: Props) {
-  return `Abrechnung + Rechnung fuer Fall ${p.fallNummer}`
+  return `Abrechnung + Rechnung für Fall ${p.fallNummer}`
 }
 
 export function KanzleiAbrechnungRechnungEmail(props: Props) {
   return (
     <EmailLayout preview={`Kanzlei-Rechnung ${props.rechnungsNr} — ${props.gesamtbetrag}`}>
-      <Heading>Abrechnung + Rechnung fuer Fall {props.fallNummer}</Heading>
+      <Heading>Abrechnung + Rechnung für Fall {props.fallNummer}</Heading>
       <Paragraph>
-        Anbei die Abrechnung und Rechnung fuer den abgeschlossenen Fall als PDF.
+        Anbei die Abrechnung und Rechnung für den abgeschlossenen Fall als PDF.
       </Paragraph>
 
       <InfoTable rows={[
@@ -41,7 +41,7 @@ export function KanzleiAbrechnungRechnungEmail(props: Props) {
         </Text>
       </Section>
 
-      <Button href={`${APP_URL}/admin/faelle/${props.fallId}`}>Fallakte oeffnen</Button>
+      <Button href={`${APP_URL}/admin/faelle/${props.fallId}`}>Fallakte öffnen</Button>
 
       <Paragraph>
         Die Rechnung liegt dieser Email als PDF bei.

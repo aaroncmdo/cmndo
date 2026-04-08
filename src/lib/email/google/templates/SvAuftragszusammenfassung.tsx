@@ -14,15 +14,15 @@ type Props = {
 }
 
 export function subject(p: Props) {
-  return `Neuer Auftrag bestaetigt: ${p.fallNummer}`
+  return `Neuer Auftrag bestätigt: ${p.fallNummer}`
 }
 
 export function SvAuftragszusammenfassungEmail(props: Props) {
   return (
     <EmailLayout preview={`Neuer Auftrag ${props.fallNummer} — Termin am ${props.terminDatum}`}>
-      <Heading>Neuer Auftrag bestaetigt</Heading>
+      <Heading>Neuer Auftrag bestätigt</Heading>
       <Paragraph>
-        Hallo {props.svVorname}, der Termin fuer Fall {props.fallNummer} ist bestaetigt. Hier die wichtigsten Daten:
+        Hallo {props.svVorname}, der Termin für Fall {props.fallNummer} ist bestätigt. Hier die wichtigsten Daten:
       </Paragraph>
 
       <InfoTable rows={[
@@ -35,11 +35,11 @@ export function SvAuftragszusammenfassungEmail(props: Props) {
         ['Versicherung', props.versicherung],
       ]} />
 
-      <Button href={`${APP_URL}/gutachter/fall/${props.fallId}`}>Fallakte oeffnen</Button>
+      <Button href={`${APP_URL}/gutachter/fall/${props.fallId}`}>Fallakte öffnen</Button>
 
       <Divider />
       <Paragraph>
-        Die Kommunikation zum Fall laeuft primaer ueber WhatsApp. Diese Email dient als schriftliche Zusammenfassung.
+        Die Kommunikation zum Fall läuft primär über WhatsApp. Diese Email dient als schriftliche Zusammenfassung.
       </Paragraph>
     </EmailLayout>
   )

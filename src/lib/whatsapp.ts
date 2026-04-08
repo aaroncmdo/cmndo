@@ -89,37 +89,37 @@ function buildNachricht(typ: NachrichtTyp, ctx: FallContext): string {
 
   switch (typ) {
     case 'nach_sa_unterschrift':
-      return `Hallo ${name}, vielen Dank! Ihre Unterlagen sind bei uns eingegangen. Wir beauftragen jetzt einen Gutachter fuer Ihr Fahrzeug. Sie werden in Kuerze kontaktiert.${portal}\n\nIhr Claimondo-Team`
+      return `Hallo ${name}, vielen Dank! Ihre Unterlagen sind bei uns eingegangen. Wir beauftragen jetzt einen Gutachter für Ihr Fahrzeug. Sie werden in Kürze kontaktiert.${portal}\n\nIhr Claimondo-Team`
 
     case 'nach_gutachter_dispatch':
       return `Hallo ${name}, Ihr Gutachter ${ctx.gutachter_name ?? ''} wurde beauftragt und wird sich innerhalb von 24 Stunden bei Ihnen melden, um einen Termin zu vereinbaren.${portal}\n\nIhr Claimondo-Team`
 
     case 'nach_terminbestaetigung':
-      return `Hallo ${name}, Ihr Gutachtertermin wurde bestaetigt:\n${ctx.termin_datum ?? '—'} um ${ctx.termin_uhrzeit ?? '—'} Uhr${ctx.termin_ort ? `\nOrt: ${ctx.termin_ort}` : ''}\nGutachter: ${ctx.gutachter_name ?? '—'}${portal}\n\nIhr Claimondo-Team`
+      return `Hallo ${name}, Ihr Gutachtertermin wurde bestätigt:\n${ctx.termin_datum ?? '—'} um ${ctx.termin_uhrzeit ?? '—'} Uhr${ctx.termin_ort ? `\nOrt: ${ctx.termin_ort}` : ''}\nGutachter: ${ctx.gutachter_name ?? '—'}${portal}\n\nIhr Claimondo-Team`
 
     case 'erinnerung_24h':
       return `Hallo ${name}, zur Erinnerung: Morgen kommt Ihr Gutachter ${ctx.gutachter_name ?? ''} zu Ihrem Termin${ctx.termin_uhrzeit ? ` um ${ctx.termin_uhrzeit} Uhr` : ''}. Bitte halten Sie Ihr Fahrzeug bereit.${portal}\n\nIhr Claimondo-Team`
 
     case 'erinnerung_2h':
-      return `Hallo ${name}, in 2 Stunden ist Ihr Gutachter ${ctx.gutachter_name ?? ''} bei Ihnen. Bitte stellen Sie sicher, dass Ihr Fahrzeug zugaenglich ist.${portal}\n\nIhr Claimondo-Team`
+      return `Hallo ${name}, in 2 Stunden ist Ihr Gutachter ${ctx.gutachter_name ?? ''} bei Ihnen. Bitte stellen Sie sicher, dass Ihr Fahrzeug zugänglich ist.${portal}\n\nIhr Claimondo-Team`
 
     case 'nach_gutachten':
-      return `Hallo ${name}, das Gutachten fuer Ihr Fahrzeug wurde erstellt und wird jetzt an unsere Partnerkanzlei uebergeben. Wir halten Sie auf dem Laufenden.${portal}\n\nIhr Claimondo-Team`
+      return `Hallo ${name}, das Gutachten für Ihr Fahrzeug wurde erstellt und wird jetzt an unsere Partnerkanzlei übergeben. Wir halten Sie auf dem Laufenden.${portal}\n\nIhr Claimondo-Team`
 
     case 'nach_qc_freigabe':
-      return `Hallo ${name}, Ihre Akte wurde geprueft und an unsere Partnerkanzlei uebergeben. Die Kanzlei wird jetzt Ihre Ansprueche gegenueber der Versicherung geltend machen.${portal}\n\nIhr Claimondo-Team`
+      return `Hallo ${name}, Ihre Akte wurde geprüft und an unsere Partnerkanzlei übergeben. Die Kanzlei wird jetzt Ihre Ansprüche gegenüber der Versicherung geltend machen.${portal}\n\nIhr Claimondo-Team`
 
     case 'nach_anspruchsschreiben':
-      return `Hallo ${name}, das Anspruchsschreiben wurde an die gegnerische Versicherung gesendet. Die Versicherung hat 14 Tage Zeit zu reagieren. Wir informieren Sie ueber jeden Fortschritt.${portal}\n\nIhr Claimondo-Team`
+      return `Hallo ${name}, das Anspruchsschreiben wurde an die gegnerische Versicherung gesendet. Die Versicherung hat 14 Tage Zeit zu reagieren. Wir informieren Sie über jeden Fortschritt.${portal}\n\nIhr Claimondo-Team`
 
     case 'nach_regulierung':
-      return `Hallo ${name}, gute Nachrichten! Die Versicherung hat die Regulierung Ihres Schadens angekuendigt. Die Auszahlung wird in Kuerze erfolgen.${portal}\n\nIhr Claimondo-Team`
+      return `Hallo ${name}, gute Nachrichten! Die Versicherung hat die Regulierung Ihres Schadens angekündigt. Die Auszahlung wird in Kürze erfolgen.${portal}\n\nIhr Claimondo-Team`
 
     case 'nach_zahlung':
-      return `Hallo ${name}, die Zahlung${ctx.betrag ? ` in Hoehe von ${ctx.betrag}` : ''} ist eingegangen! Die Abrechnung folgt in Kuerze. Vielen Dank fuer Ihr Vertrauen.${portal}\n\nIhr Claimondo-Team`
+      return `Hallo ${name}, die Zahlung${ctx.betrag ? ` in Höhe von ${ctx.betrag}` : ''} ist eingegangen! Die Abrechnung folgt in Kürze. Vielen Dank für Ihr Vertrauen.${portal}\n\nIhr Claimondo-Team`
 
     case 'nach_abschluss':
-      return `Hallo ${name}, Ihr Fall ${ctx.fall_nummer ?? ''} wurde erfolgreich abgeschlossen! Wir freuen uns, dass wir Ihnen helfen konnten.\n\nWenn Sie zufrieden waren, wuerden wir uns ueber eine Google-Bewertung freuen: https://g.page/claimondo/review\n\nIhr Claimondo-Team`
+      return `Hallo ${name}, Ihr Fall ${ctx.fall_nummer ?? ''} wurde erfolgreich abgeschlossen! Wir freuen uns, dass wir Ihnen helfen konnten.\n\nWenn Sie zufrieden waren, würden wir uns über eine Google-Bewertung freuen: https://g.page/claimondo/review\n\nIhr Claimondo-Team`
 
     case 'eskalation_vs03':
       return `Hallo ${name}, wir haben die gegnerische Versicherung erneut kontaktiert, da die 14-Tage-Frist abgelaufen ist. Wir halten Sie auf dem Laufenden.${portal}\n\nIhr Claimondo-Team`
@@ -128,22 +128,22 @@ function buildNachricht(typ: NachrichtTyp, ctx: FallContext): string {
       return `Hallo ${name}, die Versicherung hat auf unsere Anfragen nicht reagiert. Eine Mahnung mit Verzugszinsen wurde verschickt. Wir setzen alle Hebel in Bewegung.${portal}\n\nIhr Claimondo-Team`
 
     case 'eskalation_vs06':
-      return `Hallo ${name}, Ihr Kundenbetreuer wird Sie in Kuerze anrufen, um die naechsten Schritte mit Ihnen zu besprechen.${portal}\n\nIhr Claimondo-Team`
+      return `Hallo ${name}, Ihr Kundenbetreuer wird Sie in Kürze anrufen, um die nächsten Schritte mit Ihnen zu besprechen.${portal}\n\nIhr Claimondo-Team`
 
     case 'zahlung_teilweise':
-      return `Hallo ${name}, wir haben eine Teilzahlung der Versicherung erhalten. Leider wurden einige Positionen gekuerzt. Ihr Kundenbetreuer ${ctx.kb_name ?? ''} wird Sie in Kuerze anrufen um die naechsten Schritte zu besprechen.${portal}\n\nIhr Claimondo-Team`
+      return `Hallo ${name}, wir haben eine Teilzahlung der Versicherung erhalten. Leider wurden einige Positionen gekürzt. Ihr Kundenbetreuer ${ctx.kb_name ?? ''} wird Sie in Kürze anrufen um die nächsten Schritte zu besprechen.${portal}\n\nIhr Claimondo-Team`
 
     case 'kuerzung_ruege':
-      return `Hallo ${name}, die Versicherung hat Ihren Anspruch um ${ctx.kuerzung_betrag ?? '—'} gekuerzt. Wir akzeptieren das nicht und haben unsere Partnerkanzlei beauftragt ein Ruegeschreiben zu verfassen. Sie muessen nichts weiter tun - wir kaempfen fuer Ihr Recht.${portal}\n\nIhr Claimondo-Team`
+      return `Hallo ${name}, die Versicherung hat Ihren Anspruch um ${ctx.kuerzung_betrag ?? '—'} gekürzt. Wir akzeptieren das nicht und haben unsere Partnerkanzlei beauftragt ein Rügeschreiben zu verfassen. Sie müssen nichts weiter tun - wir kämpfen für Ihr Recht.${portal}\n\nIhr Claimondo-Team`
 
     case 'kuerzung_akzeptiert':
-      return `Hallo ${name}, nach Pruefung der Zahlung der Versicherung wird Ihr Fall jetzt mit dem eingegangenen Betrag von ${ctx.betrag ?? '—'} abgerechnet. Die Auszahlung erfolgt in den naechsten 2-5 Werktagen.${portal}\n\nIhr Claimondo-Team`
+      return `Hallo ${name}, nach Prüfung der Zahlung der Versicherung wird Ihr Fall jetzt mit dem eingegangenen Betrag von ${ctx.betrag ?? '—'} abgerechnet. Die Auszahlung erfolgt in den nächsten 2-5 Werktagen.${portal}\n\nIhr Claimondo-Team`
 
     case 'auszahlung':
-      return `Hallo ${name}, die Auszahlung in Hoehe von ${ctx.betrag ?? '—'} wurde veranlasst. Der Betrag sollte innerhalb von 2-3 Werktagen auf Ihrem Konto eingehen.${portal}\n\nIhr Claimondo-Team`
+      return `Hallo ${name}, die Auszahlung in Höhe von ${ctx.betrag ?? '—'} wurde veranlasst. Der Betrag sollte innerhalb von 2-3 Werktagen auf Ihrem Konto eingehen.${portal}\n\nIhr Claimondo-Team`
 
     case 'dokument_fehlt':
-      return `Hallo ${name}, fuer Ihren Fall fehlt noch: ${ctx.dokument_name ?? 'ein Dokument'}. Bitte laden Sie es in Ihrem Portal hoch oder senden Sie es hier per WhatsApp.${portal}\n\nIhr Claimondo-Team`
+      return `Hallo ${name}, für Ihren Fall fehlt noch: ${ctx.dokument_name ?? 'ein Dokument'}. Bitte laden Sie es in Ihrem Portal hoch oder senden Sie es hier per WhatsApp.${portal}\n\nIhr Claimondo-Team`
 
     case 'termin_vereinbart_kb':
       return `Hallo ${name}, Ihr Kundenbetreuer ${ctx.kb_name ?? ''} hat einen Termin mit Ihnen vereinbart: ${ctx.termin_typ === 'video-call' ? 'Video-Call' : 'Telefonat'} am ${ctx.termin_datum ?? '—'} um ${ctx.termin_uhrzeit ?? '—'}.${ctx.meet_link ? `\nLink: ${ctx.meet_link}` : ''}${portal}\n\nIhr Claimondo-Team`
@@ -152,10 +152,10 @@ function buildNachricht(typ: NachrichtTyp, ctx: FallContext): string {
       return `Hallo ${name}, zur Erinnerung: Heute um ${ctx.termin_uhrzeit ?? '—'} haben Sie einen ${ctx.termin_typ === 'video-call' ? 'Video-Call' : 'Telefonat'} mit Ihrem Kundenbetreuer ${ctx.kb_name ?? ''}.${ctx.meet_link ? `\nLink: ${ctx.meet_link}` : ''}${portal}\n\nIhr Claimondo-Team`
 
     case 'nachbesserung_gutachten':
-      return `Hallo ${name}, bei der Pruefung Ihres Gutachtens sind kleine Nachbesserungen noetig. Wir kuemmern uns darum - Sie muessen nichts tun.${portal}\n\nIhr Claimondo-Team`
+      return `Hallo ${name}, bei der Prüfung Ihres Gutachtens sind kleine Nachbesserungen nötig. Wir kümmern uns darum - Sie müssen nichts tun.${portal}\n\nIhr Claimondo-Team`
 
     case 'status_update':
-      return `Hallo ${name}, es gibt ein Update zu Ihrem Fall: ${ctx.status_text ?? 'Status geaendert'}. Bei Fragen koennen Sie uns jederzeit hier antworten.${portal}\n\nIhr Claimondo-Team`
+      return `Hallo ${name}, es gibt ein Update zu Ihrem Fall: ${ctx.status_text ?? 'Status geändert'}. Bei Fragen können Sie uns jederzeit hier antworten.${portal}\n\nIhr Claimondo-Team`
   }
 }
 
@@ -163,18 +163,18 @@ function titelFuerTyp(typ: NachrichtTyp): string {
   const map: Record<NachrichtTyp, string> = {
     nach_sa_unterschrift: 'Unterlagen eingegangen',
     nach_gutachter_dispatch: 'Gutachter beauftragt',
-    nach_terminbestaetigung: 'Termin bestaetigt',
+    nach_terminbestaetigung: 'Termin bestätigt',
     erinnerung_24h: 'Terminerinnerung (24h)',
     erinnerung_2h: 'Terminerinnerung (2h)',
     nach_gutachten: 'Gutachten erstellt',
-    nach_qc_freigabe: 'Akte an Kanzlei uebergeben',
+    nach_qc_freigabe: 'Akte an Kanzlei übergeben',
     nach_anspruchsschreiben: 'Anspruchsschreiben gesendet',
-    nach_regulierung: 'Regulierung angekuendigt',
+    nach_regulierung: 'Regulierung angekündigt',
     nach_zahlung: 'Zahlung eingegangen',
     nach_abschluss: 'Fall abgeschlossen',
     eskalation_vs03: 'Eskalation: Frist abgelaufen',
     eskalation_vs05: 'Eskalation: Mahnung + Verzugszinsen',
-    eskalation_vs06: 'Eskalation: Kundenrueckruf',
+    eskalation_vs06: 'Eskalation: Kundenrückruf',
     zahlung_teilweise: 'Teilzahlung eingegangen',
     kuerzung_ruege: 'Kürzung - Rügeschreiben',
     kuerzung_akzeptiert: 'Kürzung akzeptiert',

@@ -52,18 +52,18 @@ h1{font-size:20px;text-align:center;margin-bottom:30px}h2{font-size:15px;margin-
 <p><strong>Fahrzeug:</strong> ${fahrzeug} ${lead?.kennzeichen ? `(${lead.kennzeichen})` : ''}</p>
 <p><strong>Datum:</strong> ${datum}</p>
 </div>
-<h2>1. Abtretungserklaerung</h2>
-<p>Hiermit trete ich saemtliche mir aus dem nachfolgend bezeichneten Schadensereignis zustehenden
-Schadensersatzansprueche — insbesondere die Ansprueche auf Erstattung der Sachverstaendigenkosten —
-erfuellungshalber an die Claimondo GmbH ab.</p>
-<p>Die Abtretung umfasst: Sachschadenersatzansprueche, Gutachterverguetung, Nebenkosten,
+<h2>1. Abtretungserklärung</h2>
+<p>Hiermit trete ich sämtliche mir aus dem nachfolgend bezeichneten Schadensereignis zustehenden
+Schadensersatzansprüche — insbesondere die Ansprüche auf Erstattung der Sachverständigenkosten —
+erfüllungshalber an die Claimondo GmbH ab.</p>
+<p>Die Abtretung umfasst: Sachschadenersatzansprüche, Gutachtervergütung, Nebenkosten,
 vorgerichtliche Rechtsanwaltskosten.</p>
 <h2>2. Kostenfreiheit</h2>
-<p>Dem Auftraggeber entstehen keine Kosten. Die Sachverstaendigenkosten werden von der gegnerischen
+<p>Dem Auftraggeber entstehen keine Kosten. Die Sachverständigenkosten werden von der gegnerischen
 Haftpflichtversicherung getragen.</p>
 <h2>3. Vollmacht</h2>
-<p>Der Auftraggeber bevollmaechtigt die Claimondo GmbH, einen Kfz-Sachverstaendigen zu beauftragen,
-Ansprueche gegenueber der Versicherung geltend zu machen, und Zahlungen entgegenzunehmen.</p>
+<p>Der Auftraggeber bevollmächtigt die Claimondo GmbH, einen Kfz-Sachverständigen zu beauftragen,
+Ansprüche gegenüber der Versicherung geltend zu machen, und Zahlungen entgegenzunehmen.</p>
 <h2>4. Widerrufsbelehrung</h2>
 <p>Widerrufsfrist: 14 Tage ab Vertragsschluss per Post oder E-Mail an Claimondo GmbH.</p>
 <div class="sig">
@@ -137,7 +137,7 @@ export async function createKundeAccount(
 ): Promise<{ password: string }> {
   // BUG-70: Validierung vor signUp
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    throw new Error('Bitte geben Sie eine gueltige E-Mail-Adresse ein.')
+    throw new Error('Bitte geben Sie eine gültige E-Mail-Adresse ein.')
   }
   if (!fallId) throw new Error('Fall-ID fehlt.')
 
@@ -235,7 +235,7 @@ export async function signSAandCreateFall(
   signatureUrl: string,
   flowLinkId: string | null,
 ): Promise<{ fallId: string }> {
-  if (!leadId || !signatureUrl) throw new Error('Fehlende Daten fuer SA-Unterschrift')
+  if (!leadId || !signatureUrl) throw new Error('Fehlende Daten für SA-Unterschrift')
 
   try {
   const admin = createAdminClient()
@@ -406,7 +406,7 @@ export async function signSAandCreateFall(
   try {
     const { syncChatTeilnehmer, sendSystemNachricht } = await import('@/lib/chatGruppe')
     await syncChatTeilnehmer(fall.id)
-    await sendSystemNachricht(fall.id, `Fall ${fallNummer} wurde erstellt. Willkommen in Ihrem persoenlichen Chat!`)
+    await sendSystemNachricht(fall.id, `Fall ${fallNummer} wurde erstellt. Willkommen in Ihrem persönlichen Chat!`)
   } catch (e) { console.error('[KFZ-129] Chat-Gruppe Fehler:', e) }
 
   // 9. WhatsApp an Admin (non-critical)
@@ -503,12 +503,12 @@ async function createDefaultPflichtdokumente(
   const defaults = [
     {
       titel: 'Personalausweis / Reisepass',
-      beschreibung: 'Zur Identitaetspruefung benoetigen wir eine Kopie Ihres Ausweises.',
+      beschreibung: 'Zur Identitätsprüfung benötigen wir eine Kopie Ihres Ausweises.',
       pflicht: true,
     },
     {
       titel: 'Mietvertrag / Eigentumsnachweis',
-      beschreibung: 'Nachweis ueber Ihr Miet- oder Eigentumsverhaeltnis der betroffenen Immobilie.',
+      beschreibung: 'Nachweis über Ihr Miet- oder Eigentumsverhältnis der betroffenen Immobilie.',
       pflicht: true,
     },
     {
@@ -518,12 +518,12 @@ async function createDefaultPflichtdokumente(
     },
     {
       titel: 'Schadenmeldung an Versicherung',
-      beschreibung: 'Falls Sie den Schaden bereits bei Ihrer Versicherung gemeldet haben, laden Sie die Bestaetigung hoch.',
+      beschreibung: 'Falls Sie den Schaden bereits bei Ihrer Versicherung gemeldet haben, laden Sie die Bestätigung hoch.',
       pflicht: false,
     },
     {
       titel: 'Kostenvoranschlaege / Rechnungen',
-      beschreibung: 'Falls bereits Kostenvoranschlaege oder Rechnungen fuer die Reparatur vorliegen.',
+      beschreibung: 'Falls bereits Kostenvoranschläge oder Rechnungen für die Reparatur vorliegen.',
       pflicht: false,
     },
   ]

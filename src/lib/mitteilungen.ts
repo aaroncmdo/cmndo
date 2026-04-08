@@ -87,14 +87,14 @@ function buildMessage(
 
     case 'termin_bestaetigt':
       return {
-        titel: 'Termin bestaetigt',
-        nachricht: `Termin bestaetigt${fallRef}: ${e.datum ?? ''} ${e.uhrzeit ?? ''}. ${e.kunde_name ?? ''} ${e.adresse ? `in ${e.adresse}` : ''}.`.trim(),
+        titel: 'Termin bestätigt',
+        nachricht: `Termin bestätigt${fallRef}: ${e.datum ?? ''} ${e.uhrzeit ?? ''}. ${e.kunde_name ?? ''} ${e.adresse ? `in ${e.adresse}` : ''}.`.trim(),
       }
 
     case 'termin_geaendert':
       return {
-        titel: 'Termin geaendert',
-        nachricht: `Termin wurde geaendert${fallRef}: Neuer Termin ${e.datum ?? ''} ${e.uhrzeit ?? ''}.`.trim(),
+        titel: 'Termin geändert',
+        nachricht: `Termin wurde geändert${fallRef}: Neuer Termin ${e.datum ?? ''} ${e.uhrzeit ?? ''}.`.trim(),
       }
 
     case 'kunde_dokument_hochgeladen':
@@ -114,19 +114,19 @@ function buildMessage(
     case 'vorschaden_warnung':
       return {
         titel: 'VORSCHADEN GEFUNDEN',
-        nachricht: `${e.vorschaden_anzahl ?? 'Mehrere'} Vorschaeden gefunden${fallRef}. Bitte vor Gutachtenerstellung beruecksichtigen!`,
+        nachricht: `${e.vorschaden_anzahl ?? 'Mehrere'} Vorschäden gefunden${fallRef}. Bitte vor Gutachtenerstellung berücksichtigen!`,
       }
 
     case 'gutachten_erinnerung':
       return {
         titel: 'Gutachten ausstehend',
-        nachricht: `Bitte laden Sie das Gutachten fuer ${e.kunde_name ?? 'den Kunden'} hoch${fallRef}. Die Besichtigung liegt bereits zurueck.`,
+        nachricht: `Bitte laden Sie das Gutachten für ${e.kunde_name ?? 'den Kunden'} hoch${fallRef}. Die Besichtigung liegt bereits zurück.`,
       }
 
     case 'qc_bestanden':
       return {
         titel: 'QC bestanden',
-        nachricht: `Qualitaetspruefung bestanden${fallRef}. Die Akte wurde an die Kanzlei uebergeben.`,
+        nachricht: `Qualitätsprüfung bestanden${fallRef}. Die Akte wurde an die Kanzlei übergeben.`,
       }
 
     case 'qc_nachbesserung':

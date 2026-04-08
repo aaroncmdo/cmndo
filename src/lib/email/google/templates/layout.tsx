@@ -35,7 +35,7 @@ export function EmailLayout({ children, preview }: { children: ReactNode; previe
               Claimondo GmbH &middot; <Link href={`${APP_URL}/impressum`} style={{ color: '#9ca3af' }}>Impressum</Link> &middot; <Link href={`${APP_URL}/datenschutz`} style={{ color: '#9ca3af' }}>Datenschutz</Link>
             </Text>
             <Text style={{ color: '#9ca3af', fontSize: 11, margin: '4px 0 0', textAlign: 'center' as const }}>
-              Diese E-Mail wurde automatisch versendet. Bei Fragen antworten Sie nicht auf diese E-Mail, sondern kontaktieren Sie uns ueber das Portal.
+              Diese E-Mail wurde automatisch versendet. Bei Fragen antworten Sie nicht auf diese E-Mail, sondern kontaktieren Sie uns über das Portal.
             </Text>
           </Section>
         </Container>

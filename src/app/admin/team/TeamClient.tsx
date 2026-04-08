@@ -60,7 +60,7 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
       </div>
 
       <div className="flex gap-2 mb-4">
-        <Link href="/admin/team" className="px-3 py-1.5 bg-[#1E3A5F] text-white text-xs font-medium rounded-lg">Uebersicht</Link>
+        <Link href="/admin/team" className="px-3 py-1.5 bg-[#1E3A5F] text-white text-xs font-medium rounded-lg">Übersicht</Link>
         <Link href="/admin/team/leaderboard" className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-500 hover:text-gray-800 text-xs font-medium rounded-lg transition-colors"><TrophyIcon className="w-3.5 h-3.5" />Leaderboard</Link>
         <Link href="/admin/team/incentives" className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-500 hover:text-gray-800 text-xs font-medium rounded-lg transition-colors"><GiftIcon className="w-3.5 h-3.5" />Incentives</Link>
       </div>

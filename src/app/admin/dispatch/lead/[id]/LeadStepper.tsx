@@ -490,7 +490,7 @@ function StepSchadentyp({
       <div>
         <label className="text-xs text-gray-500 mb-1.5 block">Schadentyp *</label>
         <select value={sf} onChange={e => setSf(e.target.value)} className={selectCls}>
-          <option value="">Bitte waehlen</option>
+          <option value="">Bitte wählen</option>
           {SF_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label} {o.pct}</option>)}
         </select>
       </div>
@@ -652,7 +652,7 @@ function StepGutachterTermin({ lead, saving: parentSaving, onAdvance }: {
       <div className="flex items-center gap-3">
         <CheckCircle2Icon className="w-4 h-4 text-green-500" />
         <div>
-          <p className="text-green-600 text-sm">Termin bestaetigt</p>
+          <p className="text-green-600 text-sm">Termin bestätigt</p>
           <p className="text-gray-500 text-xs">{new Date(lead.gutachter_termin).toLocaleString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
         </div>
       </div>
@@ -737,7 +737,7 @@ function StepGutachterTermin({ lead, saving: parentSaving, onAdvance }: {
           ) : (
             <div className="rounded-xl bg-amber-50 border border-amber-200 p-4 text-center">
               <AlertCircleIcon className="w-5 h-5 text-amber-500 mx-auto mb-2" />
-              <p className="text-sm text-amber-700 font-medium">Kein Gutachter verfuegbar</p>
+              <p className="text-sm text-amber-700 font-medium">Kein Gutachter verfügbar</p>
               <p className="text-xs text-amber-600 mt-1">Es konnte kein passender SV im Gebiet gefunden werden.</p>
             </div>
           )}

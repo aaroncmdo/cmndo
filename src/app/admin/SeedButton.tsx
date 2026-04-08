@@ -27,7 +27,7 @@ export default function SeedButton() {
         Testdaten
       </h3>
       <p className="text-gray-500 text-sm mb-3">
-        Keine Faelle vorhanden. Testdaten fuer einen kompletten Durchlauf einfuegen?
+        Keine Fälle vorhanden. Testdaten für einen kompletten Durchlauf einfügen?
       </p>
       <button
         onClick={handleSeed}

@@ -31,7 +31,7 @@ export async function sendKundeWelcome(fallId: string): Promise<void> {
 
   // BUG-71: Idempotenz — nur einmal pro Fall
   const { data: alreadySent } = await db.from('email_log').select('id').eq('fall_id', fallId).eq('template', 'kunde_welcome').eq('status', 'sent').limit(1).maybeSingle()
-  if (alreadySent) { console.log(`[KFZ-137] Welcome-Mail fuer Fall ${fallId} bereits gesendet, skip`); return }
+  if (alreadySent) { console.log(`[KFZ-137] Welcome-Mail für Fall ${fallId} bereits gesendet, skip`); return }
 
   const { data: fall } = await db.from('faelle').select('fall_nummer, lead_id, sv_id, kunde_id, schadens_datum, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen').eq('id', fallId).single()
   if (!fall) return
@@ -49,7 +49,7 @@ export async function sendKundeWelcome(fallId: string): Promise<void> {
     kundeEmail = l?.email ?? null
     vorname = l?.vorname ?? 'Kunde'
   }
-  if (!kundeEmail) throw new Error('Keine Email-Adresse fuer Kunden')
+  if (!kundeEmail) throw new Error('Keine Email-Adresse für Kunden')
 
   // Versicherung
   let versicherung = '—'
@@ -142,7 +142,7 @@ export async function sendSvAuftragszusammenfassung(fallId: string, gutachterId:
   const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', gutachterId).single()
   if (!sv?.profile_id) return
   const { data: svProfile } = await db.from('profiles').select('email, vorname').eq('id', sv.profile_id).single()
-  if (!svProfile?.email) throw new Error('Keine Email-Adresse fuer SV')
+  if (!svProfile?.email) throw new Error('Keine Email-Adresse für SV')
 
   // Kunde
   let kundeName = '—'
@@ -196,13 +196,13 @@ export async function sendSvAbrechnung(abrechnungId: string): Promise<void> {
   const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', abr.sv_id).single()
   if (!sv?.profile_id) return
   const { data: svProfile } = await db.from('profiles').select('email, vorname').eq('id', sv.profile_id).single()
-  if (!svProfile?.email) throw new Error('Keine Email-Adresse fuer SV')
+  if (!svProfile?.email) throw new Error('Keine Email-Adresse für SV')
 
   const props = {
     svVorname: svProfile.vorname ?? 'Gutachter',
     fallNummer: fall?.fall_nummer ?? '—',
     positionen: [
-      { bezeichnung: 'Schadenshoehe', betrag: fmtCurrency(Number(abr.schadenhoehe)) },
+      { bezeichnung: 'Schadenshöhe', betrag: fmtCurrency(Number(abr.schadenhoehe)) },
       { bezeichnung: `Leadpreis (${abr.preistyp ?? 'einzel'})`, betrag: fmtCurrency(Number(abr.leadpreis)) },
     ],
     gesamtbetrag: fmtCurrency(Number(abr.leadpreis)),
@@ -235,7 +235,7 @@ export async function sendSvRechnung(rechnungId: string): Promise<void> {
   const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', rechnung.sv_id).single()
   if (!sv?.profile_id) return
   const { data: svProfile } = await db.from('profiles').select('email, vorname').eq('id', sv.profile_id).single()
-  if (!svProfile?.email) throw new Error('Keine Email-Adresse fuer SV')
+  if (!svProfile?.email) throw new Error('Keine Email-Adresse für SV')
 
   const props = {
     svVorname: svProfile.vorname ?? 'Gutachter',

@@ -482,7 +482,7 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
             confirmDelete ? (
               <button onClick={handleDelete} disabled={loading}
                 className="px-3 py-2.5 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50">
-                Wirklich loeschen?
+                Wirklich löschen?
               </button>
             ) : (
               <button onClick={() => setConfirmDelete(true)}

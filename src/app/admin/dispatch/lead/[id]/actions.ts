@@ -76,7 +76,7 @@ export async function setSvGesucht(
         fall_id: fall.id,
         typ: 'system',
         titel: 'SV gesucht',
-        beschreibung: 'Kein passender Sachverstaendiger im Gebiet gefunden. Status auf "SV gesucht" gesetzt. Termin verfaellt NICHT.',
+        beschreibung: 'Kein passender Sachverständiger im Gebiet gefunden. Status auf "SV gesucht" gesetzt. Termin verfällt NICHT.',
         erstellt_von: user.id,
       })
     }
@@ -219,7 +219,7 @@ export async function confirmGutachterTermin(
         start_zeit: termin,
         end_zeit: endDate.toISOString(),
         titel: `Gutachten: ${kundenName}`,
-        beschreibung: `KFZ-Begutachtung fuer ${kundenName}. Standort: ${fahrzeugAdresse || fahrzeugPlz}.`,
+        beschreibung: `KFZ-Begutachtung für ${kundenName}. Standort: ${fahrzeugAdresse || fahrzeugPlz}.`,
       }),
     }).then(() => {}).catch(e => console.error('[confirmGutachterTermin] Kalender-Sync Fehler:', e))
   } catch (e) {

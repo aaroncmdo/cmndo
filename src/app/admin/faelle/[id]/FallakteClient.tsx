@@ -251,22 +251,22 @@ const PIPELINE_STEPS = [
   { key: 'sv-zugewiesen', label: 'Gutachter zugew.' },
   { key: 'sv-termin', label: 'Termin vereinbart' },
   { key: 'gutachten-eingegangen', label: 'Gutachten eing.' },
-  { key: 'filmcheck', label: 'QC-Pruefung' },
-  { key: 'kanzlei-uebergeben', label: 'Kanzlei uebergeben' },
+  { key: 'filmcheck', label: 'QC-Prüfung' },
+  { key: 'kanzlei-uebergeben', label: 'Kanzlei übergeben' },
   { key: 'anschlussschreiben', label: 'AS gesendet' },
   { key: 'regulierung', label: 'Regulierung' },
   { key: 'abgeschlossen', label: 'Abgeschlossen' },
 ]
 
 const NEXT_ACTION: Record<string, { label: string; desc: string; color: string }> = {
-  ersterfassung: { label: 'Dokumente pruefen', desc: 'FlowLink-Daten pruefen und fehlende Dokumente anfordern.', color: 'blue' },
+  ersterfassung: { label: 'Dokumente prüfen', desc: 'FlowLink-Daten prüfen und fehlende Dokumente anfordern.', color: 'blue' },
   'sv-zugewiesen': { label: 'SV-Termin koordinieren', desc: 'Gutachter-Termin mit Kunden abstimmen.', color: 'blue' },
-  'sv-termin': { label: 'Auf Gutachten warten', desc: 'Gutachten-Eingang ueberwachen. Kunde informieren.', color: 'yellow' },
-  'gutachten-eingegangen': { label: 'Filmcheck durchfuehren', desc: 'Alle Unterlagen pruefen und Fall an Kanzlei uebergeben.', color: 'orange' },
-  filmcheck: { label: 'Filmcheck abschliessen', desc: 'Qualitaetskontrolle aller Dokumente.', color: 'orange' },
+  'sv-termin': { label: 'Auf Gutachten warten', desc: 'Gutachten-Eingang überwachen. Kunde informieren.', color: 'yellow' },
+  'gutachten-eingegangen': { label: 'Filmcheck durchführen', desc: 'Alle Unterlagen prüfen und Fall an Kanzlei übergeben.', color: 'orange' },
+  filmcheck: { label: 'Filmcheck abschließen', desc: 'Qualitätskontrolle aller Dokumente.', color: 'orange' },
   'kanzlei-uebergeben': { label: 'Anschlussschreiben senden', desc: 'AS an Versicherung senden und VS-Frist starten.', color: 'purple' },
-  anschlussschreiben: { label: 'VS-Frist ueberwachen', desc: 'Tag X von 14 — Frist ueberwachen, ggf. eskalieren.', color: 'red' },
-  regulierung: { label: 'Zahlung pruefen', desc: 'Zahlungseingang dokumentieren und Fall abschliessen.', color: 'green' },
+  anschlussschreiben: { label: 'VS-Frist überwachen', desc: 'Tag X von 14 — Frist überwachen, ggf. eskalieren.', color: 'red' },
+  regulierung: { label: 'Zahlung prüfen', desc: 'Zahlungseingang dokumentieren und Fall abschließen.', color: 'green' },
   abgeschlossen: { label: 'Fall abgeschlossen', desc: 'Keine Aktion erforderlich.', color: 'green' },
   storniert: { label: 'Fall storniert', desc: 'Keine Aktion erforderlich.', color: 'zinc' },
 }
@@ -329,7 +329,7 @@ const WA_TEMPLATES: Record<string, { label: string; text: string }> = {
   },
   'kanzlei-uebergeben': {
     label: 'Kanzlei informiert',
-    text: 'Hallo {name}, Ihr Fall wurde an unsere Partnerkanzlei uebergeben. Die Kanzlei wird sich bei Ihnen melden.',
+    text: 'Hallo {name}, Ihr Fall wurde an unsere Partnerkanzlei übergeben. Die Kanzlei wird sich bei Ihnen melden.',
   },
   anschlussschreiben: {
     label: 'AS versendet',
@@ -621,12 +621,12 @@ export default function FallakteClient({
 
   const tabs: [Tab, string][] = [
     ['tasks', `Tasks${offeneTasks > 0 ? ` (${offeneTasks})` : ''}`],
-    ['uebersicht', 'Uebersicht'],
+    ['uebersicht', 'Übersicht'],
     ['timeline', `Timeline (${timeline.length})`],
     ['chat', 'Chat'],
     ['dokumente', `Dokumente (${pflichtdokumente.length})`],
     ['dateien', `Dateien (${dokumente.length})`],
-    ['qc', `QC-Pruefung${qcCheckliste?.status === 'bestanden' ? ' ✓' : qcCheckliste?.status === 'nachbesserung' ? ' !' : ''}`],
+    ['qc', `QC-Prüfung${qcCheckliste?.status === 'bestanden' ? ' ✓' : qcCheckliste?.status === 'nachbesserung' ? ' !' : ''}`],
     ['kommunikation', 'Kommunikation'],
     ['kanzlei', 'Kanzlei'],
     ['abrechnung', 'Abrechnung'],
@@ -1412,7 +1412,7 @@ function TabUebersicht({
         {fall.fahrzeug_baujahr && <InfoRow label="Baujahr" value={String(fall.fahrzeug_baujahr)} />}
         {fall.fahrzeug_typ && <InfoRow label="Typ" value={fall.fahrzeug_typ} />}
         {fall.schadenhoehe_netto && (
-          <InfoRow label="Schadenhoehe" value={
+          <InfoRow label="Schadenhöhe" value={
             <span className="text-amber-400 font-semibold">
               {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(fall.schadenhoehe_netto)}
             </span>
@@ -1492,7 +1492,7 @@ function TabUebersicht({
       )}
 
       {/* SV + Gutachten */}
-      <Section title="Sachverstaendiger & Gutachten">
+      <Section title="Sachverständiger & Gutachten">
         {sv ? (
           <>
             <InfoRow label="SV" value={
@@ -1797,7 +1797,7 @@ function TabDateien({
         </div>
         <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-300 hover:border-zinc-500 rounded-xl p-6 cursor-pointer transition-colors">
           <UploadIcon className="w-6 h-6 text-gray-500" />
-          <span className="text-gray-500 text-sm">{uploading ? 'Wird hochgeladen...' : 'Datei auswaehlen oder hierher ziehen'}</span>
+          <span className="text-gray-500 text-sm">{uploading ? 'Wird hochgeladen...' : 'Datei auswählen oder hierher ziehen'}</span>
           <input
             ref={fileRef}
             type="file"
@@ -2708,7 +2708,7 @@ function TabChat({
       kunde: 'Kunde',
       gutachter: 'Gutachter',
       kanzlei: 'Kanzlei',
-      sv: 'Sachverstaendiger',
+      sv: 'Sachverständiger',
     }
     return labels[rolle] ?? rolle
   }

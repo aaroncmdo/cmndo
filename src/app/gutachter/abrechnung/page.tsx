@@ -28,7 +28,7 @@ export default async function AbrechnungPage() {
       <div className="h-full flex flex-col">
         <div className="w-full">
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
-            <p className="text-gray-500">Kein Sachverstaendigen-Profil gefunden.</p>
+            <p className="text-gray-500">Kein Sachverständigen-Profil gefunden.</p>
           </div>
         </div>
       </div>
@@ -185,7 +185,7 @@ export default async function AbrechnungPage() {
                       <tr className="border-b border-gray-200">
                         <th className="text-left px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Fall-Nr.</th>
                         <th className="text-left px-4 py-3 text-gray-500 font-medium">Kunde</th>
-                        <th className="text-right px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Schadenhoehe</th>
+                        <th className="text-right px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Schadenhöhe</th>
                         <th className="text-right px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Leadpreis</th>
                         <th className="text-left px-4 py-3 text-gray-500 font-medium">Datum</th>
                       </tr>
@@ -298,7 +298,7 @@ export default async function AbrechnungPage() {
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <div>
-                          <span className="text-gray-500 text-xs">Schadenhoehe</span>
+                          <span className="text-gray-500 text-xs">Schadenhöhe</span>
                           <p className="text-gray-800 tabular-nums">{betrag}</p>
                         </div>
                         <div className="text-right">

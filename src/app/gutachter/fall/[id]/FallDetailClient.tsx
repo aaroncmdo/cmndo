@@ -26,7 +26,7 @@ import ChatChannel from '@/components/ChatChannel'
 
 const DOKUMENT_TYP_LABEL: Record<string, string> = {
   fahrzeugschein: 'Fahrzeugschein',
-  fuehrerschein: 'Fuehrerschein',
+  fuehrerschein: 'Führerschein',
   schadensfotos: 'Schadensfotos',
   gegner_daten: 'Gegnerdaten',
   polizeibericht: 'Polizeibericht',
@@ -36,7 +36,7 @@ const DOKUMENT_TYP_LABEL: Record<string, string> = {
   gf_vollmacht: 'GF-Vollmacht',
   halter_vollmacht: 'Halter-Vollmacht',
   halter_ausweis: 'Halter-Ausweis',
-  aerztliches_attest: 'Aerztl. Attest',
+  aerztliches_attest: 'Ärztl. Attest',
   krankenhausbericht: 'Krankenhausbericht',
   au_bescheinigung: 'AU-Bescheinigung',
   gutachten: 'Gutachten',
@@ -50,7 +50,7 @@ const STATUS_BADGE: Record<string, string> = {
 }
 
 const KANZLEI_STEPS = [
-  { key: 'kanzlei-uebergeben', label: 'Kanzlei-Uebergabe', desc: 'Akte an Kanzlei uebergeben' },
+  { key: 'kanzlei-uebergeben', label: 'Kanzlei-Übergabe', desc: 'Akte an Kanzlei übergeben' },
   { key: 'anschlussschreiben', label: 'Anschlussschreiben', desc: 'Kanzlei hat AS an Versicherung gesendet' },
   { key: 'regulierung', label: 'Regulierung', desc: 'Versicherung bearbeitet den Anspruch' },
   { key: 'abgeschlossen', label: 'Zahlung eingegangen', desc: 'Regulierung abgeschlossen, Zahlung da' },
@@ -109,7 +109,7 @@ export default function FallDetailClient({
   const hasGutachten = !!(fall.gutachten_eingegangen_am)
 
   const tabs: { key: TabKey; label: string }[] = [
-    { key: 'uebersicht', label: 'Uebersicht' },
+    { key: 'uebersicht', label: 'Übersicht' },
     { key: 'dokumente', label: `Dokumente (${pflichtdokumente.length})` },
     { key: 'dateien', label: `Dateien (${dokumente.length})` },
     { key: 'gutachten', label: 'Gutachten' },
@@ -218,7 +218,7 @@ export default function FallDetailClient({
     <div className="h-full flex flex-col">
       <div className="w-full">
         <Link href="/gutachter/faelle" className="text-sm text-gray-500 hover:text-gray-800 transition-colors mb-6 inline-block">
-          ← Zurueck zu Faelle
+          ← Zurück zu Fälle
         </Link>
 
         <div className="flex items-center justify-between mb-6">
@@ -272,7 +272,7 @@ export default function FallDetailClient({
             <div>
               <p className="text-red-300 font-medium text-sm">VORSCHADEN GEFUNDEN</p>
               <p className="text-red-400 text-xs mt-0.5">
-                {fall.vorschaden_anzahl ? `${fall.vorschaden_anzahl} Vorschaeden bekannt` : 'Details pruefen'}
+                {fall.vorschaden_anzahl ? `${fall.vorschaden_anzahl} Vorschäden bekannt` : 'Details prüfen'}
               </p>
             </div>
           </div>
@@ -386,7 +386,7 @@ export default function FallDetailClient({
               <div className="bg-white border border-gray-200 rounded-2xl p-5">
                 <h2 className="text-sm font-medium text-gray-500 mb-3">FIN / VIN eingeben</h2>
                 <p className="text-gray-500 text-xs mb-3">
-                  Fahrzeug-Identifikationsnummer (17 Zeichen) fuer Vorschaden-Pruefung
+                  Fahrzeug-Identifikationsnummer (17 Zeichen) für Vorschaden-Prüfung
                 </p>
                 <div className="flex gap-2">
                   <input
@@ -401,7 +401,7 @@ export default function FallDetailClient({
                       setFinSaving(true); setError(null)
                       try {
                         await saveFinVinGutachter(fallId, finInput)
-                        setSuccess('FIN gespeichert. Vorschaden-Pruefung gestartet.')
+                        setSuccess('FIN gespeichert. Vorschaden-Prüfung gestartet.')
                         setFinInput('')
                         router.refresh()
                       } catch (err) {
@@ -430,7 +430,7 @@ export default function FallDetailClient({
                     ? fall.vorschaden_vorhanden
                       ? ` · Vorschaden: ${fall.vorschaden_anzahl ?? '?'} gefunden`
                       : ' · Vorschadenfrei'
-                    : ' · Pruefung laeuft...'}
+                    : ' · Prüfung läuft...'}
                 </p>
               </div>
             )}
@@ -526,7 +526,7 @@ export default function FallDetailClient({
               <h3 className="text-sm font-medium text-gray-500 mb-3">Dokument hochladen (vor Ort eingesammelt)</h3>
               <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-300 hover:border-zinc-500 rounded-xl p-6 cursor-pointer transition-colors">
                 <UploadIcon className="w-6 h-6 text-gray-500" />
-                <span className="text-gray-500 text-sm">{uploadingDoc ? 'Wird hochgeladen...' : 'Datei auswaehlen oder hierher ziehen'}</span>
+                <span className="text-gray-500 text-sm">{uploadingDoc ? 'Wird hochgeladen...' : 'Datei auswählen oder hierher ziehen'}</span>
                 <input
                   ref={docInputRef}
                   type="file"
@@ -564,7 +564,7 @@ export default function FallDetailClient({
                 </select>
                 <label className="flex-1 flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 hover:border-zinc-500 rounded-xl p-4 cursor-pointer transition-colors">
                   <UploadIcon className="w-5 h-5 text-gray-500" />
-                  <span className="text-gray-500 text-sm">{dateiUploading ? 'Wird hochgeladen...' : 'Datei auswaehlen'}</span>
+                  <span className="text-gray-500 text-sm">{dateiUploading ? 'Wird hochgeladen...' : 'Datei auswählen'}</span>
                   <input
                     ref={dateiInputRef}
                     type="file"
@@ -693,7 +693,7 @@ export default function FallDetailClient({
                     <p className="text-green-400/60 text-sm mt-0.5">
                       Eingegangen am {new Date(fall.gutachten_eingegangen_am as string).toLocaleDateString('de-DE')}
                       {fall.gutachten_betrag != null && (
-                        <> · Schadenhoehe: {Number(fall.gutachten_betrag).toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR</>
+                        <> · Schadenhöhe: {Number(fall.gutachten_betrag).toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR</>
                       )}
                     </p>
                   </div>
@@ -715,7 +715,7 @@ export default function FallDetailClient({
                       rel="noopener noreferrer"
                       className="text-[#7BA3CC] hover:text-[#7BA3CC] text-xs"
                     >
-                      Oeffnen
+                      Öffnen
                     </a>
                   </div>
                 ))}
@@ -730,7 +730,7 @@ export default function FallDetailClient({
                     </div>
                     <div>
                       <h2 className="text-gray-900 font-medium">Gutachten hochladen</h2>
-                      <p className="text-gray-500 text-xs">PDF-Datei mit Ihrem Gutachten und Schadenhoehe</p>
+                      <p className="text-gray-500 text-xs">PDF-Datei mit Ihrem Gutachten und Schadenhöhe</p>
                     </div>
                   </div>
 
@@ -749,7 +749,7 @@ export default function FallDetailClient({
 
                     {/* Schadenhöhe */}
                     <div>
-                      <label className="text-sm text-gray-500 mb-2 block">Schadenhoehe (Netto-RK) *</label>
+                      <label className="text-sm text-gray-500 mb-2 block">Schadenhöhe (Netto-RK) *</label>
                       <div className="relative">
                         <input
                           type="number"
@@ -786,7 +786,7 @@ export default function FallDetailClient({
               <p className="text-gray-400 text-xs mb-3">Fotos die Sie bei der Besichtigung vor Ort gemacht haben</p>
               <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 hover:border-zinc-500 rounded-xl p-4 cursor-pointer transition-colors">
                 <CameraIcon className="w-5 h-5 text-gray-500" />
-                <span className="text-gray-500 text-sm">{uploadingDoc ? 'Wird hochgeladen...' : 'Fotos auswaehlen'}</span>
+                <span className="text-gray-500 text-sm">{uploadingDoc ? 'Wird hochgeladen...' : 'Fotos auswählen'}</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -866,7 +866,7 @@ export default function FallDetailClient({
               {currentStatusIndex < 0 && (
                 <div className="mt-6 bg-gray-100 rounded-xl p-4">
                   <p className="text-gray-500 text-sm">
-                    Die Kanzlei-Bearbeitung hat noch nicht begonnen. Der Fall wird nach erfolgreichem Filmcheck an die Kanzlei uebergeben.
+                    Die Kanzlei-Bearbeitung hat noch nicht begonnen. Der Fall wird nach erfolgreichem Filmcheck an die Kanzlei übergeben.
                   </p>
                 </div>
               )}
@@ -874,7 +874,7 @@ export default function FallDetailClient({
 
             {/* Financial info for gutachter */}
             <div className="bg-white border border-gray-200 rounded-2xl p-5">
-              <h3 className="text-sm font-medium text-gray-500 mb-3">Ihre Abrechnung fuer diesen Fall</h3>
+              <h3 className="text-sm font-medium text-gray-500 mb-3">Ihre Abrechnung für diesen Fall</h3>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <InfoRow label="Gutachten-Betrag" value={fall.gutachten_betrag != null ? `${Number(fall.gutachten_betrag).toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR` : '—'} />
                 <InfoRow label="Leadpreis" value={
@@ -903,7 +903,7 @@ export default function FallDetailClient({
               </div>
             ))}
             {timeline.length === 0 && (
-              <p className="text-gray-500 text-sm text-center py-8">Keine Eintraege.</p>
+              <p className="text-gray-500 text-sm text-center py-8">Keine Einträge.</p>
             )}
           </div>
         )}
@@ -1045,7 +1045,7 @@ function TerminActionsPanel({ fallId, termin }: { fallId: string; termin: Termin
         <>
           <div className="bg-[#4573A2]/5 border border-[#7BA3CC]/30 rounded-xl px-4 py-3">
             <p className="text-xs text-[#1E3A5F]">
-              Termin ist standardmaessig bestaetigt. Hier nur eingreifen wenn Sie ablehnen oder verschieben moechten.
+              Termin ist standardmäßig bestätigt. Hier nur eingreifen wenn Sie ablehnen oder verschieben möchten.
             </p>
           </div>
           <div className="flex gap-2">
@@ -1067,7 +1067,7 @@ function TerminActionsPanel({ fallId, termin }: { fallId: string; termin: Termin
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Termin ablehnen?</h3>
             <p className="text-sm text-gray-500 mb-4">Claimondo wird einen anderen Gutachter zuweisen.</p>
-            <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begruendung (optional)"
+            <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 mb-4 focus:outline-none focus:border-[#4573A2] resize-none" rows={3} />
             <div className="flex gap-2">
               <button onClick={() => setModal(null)}
@@ -1092,7 +1092,7 @@ function TerminActionsPanel({ fallId, termin }: { fallId: string; termin: Termin
             <input type="datetime-local" value={neuerTermin} onChange={e => setNeuerTermin(e.target.value)}
               min={new Date().toISOString().slice(0, 16)}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 mb-3 focus:outline-none focus:border-[#4573A2]" />
-            <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begruendung (optional)"
+            <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 mb-4 focus:outline-none focus:border-[#4573A2] resize-none" rows={2} />
             <div className="flex gap-2">
               <button onClick={() => setModal(null)}

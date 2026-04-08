@@ -143,8 +143,8 @@ export async function triggerQcTask(fallId: string, kundenbetreuerIds: string | 
     empfaenger_id: kundenbetreuerIds,
     empfaenger_rolle: 'kundenbetreuer',
     task_typ: 'qc-pruefung',
-    titel: 'QC-Pruefung durchfuehren (Filmcheck)',
-    beschreibung: 'Gutachten eingegangen. Bitte QC-Pruefung innerhalb von 2h durchfuehren.',
+    titel: 'QC-Prüfung durchführen (Filmcheck)',
+    beschreibung: 'Gutachten eingegangen. Bitte QC-Prüfung innerhalb von 2h durchführen.',
     deadline,
     prioritaet: 'dringend',
   })
@@ -159,8 +159,8 @@ export async function triggerKanzleiPaketTask(fallId: string, kundenbetreuerIds:
     empfaenger_id: kundenbetreuerIds,
     empfaenger_rolle: 'kundenbetreuer',
     task_typ: 'kanzlei-paket',
-    titel: 'Kanzlei-Paket uebergeben',
-    beschreibung: 'QC bestanden. Bitte Kanzlei-Paket sofort uebergeben.',
+    titel: 'Kanzlei-Paket übergeben',
+    beschreibung: 'QC bestanden. Bitte Kanzlei-Paket sofort übergeben.',
     deadline,
     prioritaet: 'dringend',
   })
@@ -179,7 +179,7 @@ export async function triggerAsSendedatumTask(fallId: string, kundenbetreuerIds:
     empfaenger_rolle: 'kundenbetreuer',
     task_typ: 'as-sendedatum',
     titel: 'AS-Sendedatum eintragen – KRITISCH',
-    beschreibung: 'Kanzlei-Uebergabe erfolgt. Bitte Anschlussschreiben-Sendedatum HEUTE eintragen.',
+    beschreibung: 'Kanzlei-Übergabe erfolgt. Bitte Anschlussschreiben-Sendedatum HEUTE eintragen.',
     deadline,
     prioritaet: 'kritisch',
   })

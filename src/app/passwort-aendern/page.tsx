@@ -19,7 +19,7 @@ export default function PasswortAendernPage() {
       return
     }
     if (password !== confirm) {
-      setError('Passwoerter stimmen nicht ueberein')
+      setError('Passwörter stimmen nicht überein')
       return
     }
 
@@ -56,7 +56,7 @@ export default function PasswortAendernPage() {
 
       window.location.href = dest
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fehler beim Aendern des Passworts')
+      setError(err instanceof Error ? err.message : 'Fehler beim Ändern des Passworts')
     } finally {
       setLoading(false)
     }
@@ -67,7 +67,7 @@ export default function PasswortAendernPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <span className="text-3xl font-bold tracking-tight"><span className="text-[#0D1B3E]">Claim</span><span className="text-[#4573A2]">ondo</span></span>
-          <p className="mt-1 text-sm text-gray-500">Bitte aendern Sie Ihr Passwort</p>
+          <p className="mt-1 text-sm text-gray-500">Bitte ändern Sie Ihr Passwort</p>
         </div>
 
         <div className="bg-white border border-gray-200 rounded-2xl p-8">
@@ -77,7 +77,7 @@ export default function PasswortAendernPage() {
             </div>
             <div>
               <p className="text-gray-900 font-medium text-sm">Neues Passwort setzen</p>
-              <p className="text-gray-500 text-xs">Ihr Einmalpasswort muss geaendert werden</p>
+              <p className="text-gray-500 text-xs">Ihr Einmalpasswort muss geändert werden</p>
             </div>
           </div>
 
@@ -100,7 +100,7 @@ export default function PasswortAendernPage() {
 
             <div className="flex flex-col gap-1.5">
               <label htmlFor="confirm" className="text-sm font-medium text-gray-700">
-                Passwort bestaetigen
+                Passwort bestätigen
               </label>
               <input
                 id="confirm"
@@ -125,7 +125,7 @@ export default function PasswortAendernPage() {
               disabled={loading}
               className="w-full py-3.5 rounded-xl bg-white hover:bg-zinc-200 disabled:bg-zinc-700 disabled:text-gray-500 text-zinc-950 font-semibold text-sm active:scale-[0.98] transition-all mt-1"
             >
-              {loading ? 'Wird gespeichert...' : 'Passwort aendern'}
+              {loading ? 'Wird gespeichert...' : 'Passwort ändern'}
             </button>
           </form>
         </div>

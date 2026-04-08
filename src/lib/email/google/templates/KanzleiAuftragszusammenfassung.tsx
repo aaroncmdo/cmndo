@@ -22,7 +22,7 @@ export function KanzleiAuftragszusammenfassungEmail(props: Props) {
     <EmailLayout preview={`Neuer Fall ${props.fallNummer} — ${props.kundeName}`}>
       <Heading>Neuer Fall zur Bearbeitung: {props.fallNummer}</Heading>
       <Paragraph>
-        Ein neuer Fall wurde nach erfolgreicher Qualitaetspruefung an Ihre Kanzlei uebergeben.
+        Ein neuer Fall wurde nach erfolgreicher Qualitätsprüfung an Ihre Kanzlei übergeben.
       </Paragraph>
 
       <InfoTable rows={[
@@ -33,12 +33,12 @@ export function KanzleiAuftragszusammenfassungEmail(props: Props) {
         ['Fahrzeug', props.fahrzeug],
         ['Gegn. Versicherung', props.versicherung],
         ['Schadennummer', props.schadennummer],
-        ['Uebergabe am', props.uebergabeDatum],
+        ['Übergabe am', props.uebergabeDatum],
       ]} />
 
       <Paragraph>{props.svBerichtHinweis}</Paragraph>
 
-      <Button href={`${APP_URL}/admin/faelle/${props.fallId}`}>Fallakte im Portal oeffnen</Button>
+      <Button href={`${APP_URL}/admin/faelle/${props.fallId}`}>Fallakte im Portal öffnen</Button>
 
       <Divider />
       <Paragraph>

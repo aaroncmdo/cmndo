@@ -78,7 +78,7 @@ function PhaseRow({ phase, isLast, defaultOpen }: { phase: HauptPhase; isLast: b
               {phase.label}
               {hasActiveSub && phase.status === 'aktiv' && (
                 <span className="ml-2 inline-flex items-center gap-1 text-[10px] font-medium text-[#E89B3C] bg-[#E89B3C]/10 px-1.5 py-0.5 rounded-full">
-                  Aktion noetig
+                  Aktion nötig
                 </span>
               )}
             </p>

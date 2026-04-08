@@ -10,7 +10,7 @@ type Props = {
 }
 
 export function subject(p: Props) {
-  return `Rechnung ${p.rechnungsNr} fuer Fall ${p.fallNummer}`
+  return `Rechnung ${p.rechnungsNr} für Fall ${p.fallNummer}`
 }
 
 export function SvRechnungEmail(props: Props) {
@@ -18,7 +18,7 @@ export function SvRechnungEmail(props: Props) {
     <EmailLayout preview={`Rechnung ${props.rechnungsNr} — ${props.betrag}`}>
       <Heading>Ihre Rechnung</Heading>
       <Paragraph>
-        Hallo {props.svVorname}, anbei Ihre Rechnung fuer Fall {props.fallNummer} als PDF.
+        Hallo {props.svVorname}, anbei Ihre Rechnung für Fall {props.fallNummer} als PDF.
       </Paragraph>
 
       <InfoTable rows={[

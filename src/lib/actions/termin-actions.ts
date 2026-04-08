@@ -67,9 +67,9 @@ async function authSvToken(token: string) {
     .select('id, sv_id, fall_id, start_zeit, status')
     .eq('ablehnen_token', token)
     .maybeSingle()
-  if (!termin) return { error: 'Token ungueltig' }
+  if (!termin) return { error: 'Token ungültig' }
   if (!['reserviert', 'gegenvorschlag'].includes(termin.status)) {
-    return { error: `Aktion im Status "${termin.status}" nicht moeglich` }
+    return { error: `Aktion im Status "${termin.status}" nicht möglich` }
   }
   return { terminId: termin.id, svId: termin.sv_id, fallId: termin.fall_id, startZeit: termin.start_zeit, status: termin.status }
 }
@@ -141,14 +141,14 @@ export async function terminAblehnen({
     fId = fallIdArg
     startZeit = termin.start_zeit
   } else {
-    return { success: false, error: 'Ungueltige Parameter' }
+    return { success: false, error: 'Ungültige Parameter' }
   }
 
   // 1. DB Update
   const { error: updateErr } = await admin.from('gutachter_termine').update({
     status: 'abgelehnt',
     abgelehnt_am: new Date().toISOString(),
-    abgelehnt_grund: grund || 'Ohne Begruendung',
+    abgelehnt_grund: grund || 'Ohne Begründung',
   }).eq('id', tId)
 
   if (updateErr) return { success: false, error: updateErr.message }
@@ -177,7 +177,7 @@ export async function terminAblehnen({
   const grundText = grund ? ` Grund: "${grund}"` : ''
   await postChatSystemMessage({
     fallId: fId,
-    text: `❌ Sachverstaendiger ${svName} hat den Termin am ${terminDatum} abgelehnt.${grundText}`,
+    text: `❌ Sachverständiger ${svName} hat den Termin am ${terminDatum} abgelehnt.${grundText}`,
     event: 'termin_abgelehnt',
   })
 
@@ -191,7 +191,7 @@ export async function terminAblehnen({
       const { data: kundeProfile } = await admin.from('profiles').select('telefon').eq('id', fallData.kunde_id).single()
       if (kundeProfile?.telefon) {
         await sendManualWhatsApp(kundeProfile.telefon,
-          `⚠️ Der Sachverstaendige hat den Termin am ${terminDatum} fuer Ihren Fall ${fallData?.fall_nummer ?? ''} abgelehnt. Wir suchen umgehend einen neuen Gutachter fuer Sie.`,
+          `⚠️ Der Sachverständige hat den Termin am ${terminDatum} für Ihren Fall ${fallData?.fall_nummer ?? ''} abgelehnt. Wir suchen umgehend einen neuen Gutachter für Sie.`,
           fId)
       }
     }
@@ -201,7 +201,7 @@ export async function terminAblehnen({
     for (const a of admins ?? []) {
       if (a.telefon) {
         await sendManualWhatsApp(a.telefon,
-          `⚠️ Gutachter ${svName} hat den Termin am ${terminDatum} fuer ${fallData?.fall_nummer ?? 'Fall'} ABGELEHNT. Bitte neuen Gutachter zuweisen.`,
+          `⚠️ Gutachter ${svName} hat den Termin am ${terminDatum} für ${fallData?.fall_nummer ?? 'Fall'} ABGELEHNT. Bitte neuen Gutachter zuweisen.`,
           fId)
       }
     }
@@ -209,7 +209,7 @@ export async function terminAblehnen({
     // Task erstellen
     await admin.from('tasks').insert({
       fall_id: fId,
-      titel: `Neuen Gutachter zuweisen fuer ${fallData?.fall_nummer ?? 'Fall'}`,
+      titel: `Neuen Gutachter zuweisen für ${fallData?.fall_nummer ?? 'Fall'}`,
       typ: 'dispatch',
       status: 'offen',
       prioritaet: 'hoch',
@@ -283,7 +283,7 @@ export async function terminGegenvorschlag({
     if (!termin) return { success: false, error: 'Kein aktiver Gegenvorschlag gefunden' }
     tId = termin.id
   } else {
-    return { success: false, error: 'Ungueltige Parameter' }
+    return { success: false, error: 'Ungültige Parameter' }
   }
 
   const neueStartZeit = new Date(neuesDatum)
@@ -321,12 +321,12 @@ export async function terminGegenvorschlag({
   let rollenName: string
   if (vonWem === 'sv' && svId) {
     const name = await getSvName(admin, svId)
-    rollenName = `Sachverstaendiger ${name}`
+    rollenName = `Sachverständiger ${name}`
   } else if (vonWem === 'kunde' && kundeId) {
     const name = await getKundeName(admin, kundeId)
     rollenName = `Kunde ${name}`
   } else {
-    rollenName = vonWem === 'sv' ? 'Sachverstaendiger' : 'Kunde'
+    rollenName = vonWem === 'sv' ? 'Sachverständiger' : 'Kunde'
   }
 
   const grundText = grund ? ` Grund: "${grund}"` : ''
@@ -347,7 +347,7 @@ export async function terminGegenvorschlag({
         const { data: kundeProfile } = await admin.from('profiles').select('telefon').eq('id', fallData.kunde_id).single()
         if (kundeProfile?.telefon) {
           await sendManualWhatsApp(kundeProfile.telefon,
-            `📅 Der Sachverstaendige schlaegt einen neuen Termin vor: ${terminStr}. Bitte pruefen Sie den Vorschlag in Ihrem Portal.`,
+            `📅 Der Sachverständige schlägt einen neuen Termin vor: ${terminStr}. Bitte prüfen Sie den Vorschlag in Ihrem Portal.`,
             fId)
         }
       }
@@ -359,7 +359,7 @@ export async function terminGegenvorschlag({
           const { data: svProfile } = await admin.from('profiles').select('telefon').eq('id', sv.profile_id).single()
           if (svProfile?.telefon) {
             await sendManualWhatsApp(svProfile.telefon,
-              `📅 Kunde schlaegt stattdessen ${terminStr} vor fuer Fall ${fallData?.fall_nummer ?? ''}. Bitte pruefen Sie den Vorschlag im Portal.`,
+              `📅 Kunde schlägt stattdessen ${terminStr} vor für Fall ${fallData?.fall_nummer ?? ''}. Bitte prüfen Sie den Vorschlag im Portal.`,
               fId)
           }
         }
@@ -371,7 +371,7 @@ export async function terminGegenvorschlag({
     for (const a of admins ?? []) {
       if (a.telefon) {
         await sendManualWhatsApp(a.telefon,
-          `ℹ️ Gegenvorschlag fuer ${fallData?.fall_nummer ?? 'Fall'}: ${rollenName} schlaegt ${terminStr} vor.`,
+          `ℹ️ Gegenvorschlag für ${fallData?.fall_nummer ?? 'Fall'}: ${rollenName} schlägt ${terminStr} vor.`,
           fId)
       }
     }
@@ -452,7 +452,7 @@ export async function terminAnnehmen({
     const { error: updateErr } = await admin.from('gutachter_termine').update(updateData).eq('id', tId)
     if (updateErr) return { success: false, error: updateErr.message }
   } else {
-    return { success: false, error: 'Ungueltige Parameter' }
+    return { success: false, error: 'Ungültige Parameter' }
   }
 
   // KFZ-136: Reminder neu generieren (Termin ist jetzt bestaetigt)
@@ -475,7 +475,7 @@ export async function terminAnnehmen({
     fall_id: fId,
     typ: 'system',
     titel: source === 'kunde' ? 'Kunde hat Terminvorschlag angenommen' : 'Gutachter hat Kunden-Vorschlag angenommen',
-    beschreibung: 'Termin ist jetzt bestaetigt.',
+    beschreibung: 'Termin ist jetzt bestätigt.',
   })
 
   // KEINE Chat-System-Message bei Annahme (laut Ticket)
@@ -494,7 +494,7 @@ export async function terminAnnehmen({
           const { data: termin } = await admin.from('gutachter_termine').select('start_zeit').eq('fall_id', fId).eq('status', 'bestaetigt').single()
           const terminStr = termin?.start_zeit ? formatDatumDE(termin.start_zeit) : ''
           await sendManualWhatsApp(svProfile.telefon,
-            `✅ Kunde akzeptiert ${terminStr} fuer Fall ${fallData?.fall_nummer ?? ''}.`,
+            `✅ Kunde akzeptiert ${terminStr} für Fall ${fallData?.fall_nummer ?? ''}.`,
             fId)
         }
       }
@@ -505,7 +505,7 @@ export async function terminAnnehmen({
         const { data: termin } = await admin.from('gutachter_termine').select('start_zeit').eq('fall_id', fId).eq('status', 'bestaetigt').single()
         const terminStr = termin?.start_zeit ? formatDatumDE(termin.start_zeit) : ''
         await sendManualWhatsApp(kundeProfile.telefon,
-          `✅ Der Sachverstaendige akzeptiert Ihren Terminvorschlag: ${terminStr}.`,
+          `✅ Der Sachverständige akzeptiert Ihren Terminvorschlag: ${terminStr}.`,
           fId)
       }
     }
@@ -515,7 +515,7 @@ export async function terminAnnehmen({
     for (const a of admins ?? []) {
       if (a.telefon) {
         await sendManualWhatsApp(a.telefon,
-          `ℹ️ Termin fuer ${fallData?.fall_nummer ?? 'Fall'} wurde bestaetigt.`,
+          `ℹ️ Termin für ${fallData?.fall_nummer ?? 'Fall'} wurde bestätigt.`,
           fId)
       }
     }
@@ -525,7 +525,7 @@ export async function terminAnnehmen({
   return { success: true }
 }
 
-// ─── 4. terminBuchen (Kunde waehlt Slot aus SV-Kalender) ───────────────────
+// ─── 4. terminBuchen (Kunde wählt Slot aus SV-Kalender) ───────────────────
 
 export async function terminBuchen({
   terminId,
@@ -538,7 +538,7 @@ export async function terminBuchen({
   source: 'kunde_kalender'
   fallId?: string
 }): Promise<ActionResult> {
-  if (!fallIdArg) return { success: false, error: 'Ungueltige Parameter' }
+  if (!fallIdArg) return { success: false, error: 'Ungültige Parameter' }
 
   const auth = await authKundePortal(fallIdArg)
   if ('error' in auth) return { success: false, error: auth.error }
@@ -608,7 +608,7 @@ export async function terminBuchen({
         const { data: svProfile } = await admin.from('profiles').select('telefon').eq('id', sv.profile_id).single()
         if (svProfile?.telefon) {
           await sendManualWhatsApp(svProfile.telefon,
-            `✅ Kunde hat verbindlich ${terminStr} gebucht fuer Fall ${fallData?.fall_nummer ?? ''}.`,
+            `✅ Kunde hat verbindlich ${terminStr} gebucht für Fall ${fallData?.fall_nummer ?? ''}.`,
             fId)
         }
       }
@@ -618,7 +618,7 @@ export async function terminBuchen({
     for (const a of admins ?? []) {
       if (a.telefon) {
         await sendManualWhatsApp(a.telefon,
-          `ℹ️ Kunde hat Termin ${terminStr} fuer ${fallData?.fall_nummer ?? 'Fall'} aus SV-Kalender gebucht.`,
+          `ℹ️ Kunde hat Termin ${terminStr} für ${fallData?.fall_nummer ?? 'Fall'} aus SV-Kalender gebucht.`,
           fId)
       }
     }

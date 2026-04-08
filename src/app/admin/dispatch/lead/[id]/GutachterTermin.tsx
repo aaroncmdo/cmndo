@@ -67,7 +67,7 @@ export default function GutachterTermin({
             <CheckCircle2Icon className="w-4 h-4 text-green-400" />
           </div>
           <div>
-            <h2 className="text-sm font-medium text-green-400">Gutachter-Termin bestaetigt</h2>
+            <h2 className="text-sm font-medium text-green-400">Gutachter-Termin bestätigt</h2>
             {lead.gutachter_termin && (
               <p className="text-gray-500 text-xs mt-0.5">
                 {new Date(lead.gutachter_termin).toLocaleString('de-DE', {
@@ -133,7 +133,7 @@ export default function GutachterTermin({
         const phone = (lead.telefon ?? '').replace(/[^0-9+]/g, '')
         if (phone) {
           const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ')
-          const msg = `Hallo ${name}, Ihr Gutachtertermin wurde bestaetigt:\n\nGutachter: ${slot.name}\nDatum: ${terminStr}\nAdresse: ${adresse || plz}\n\nIhr Claimondo-Team`
+          const msg = `Hallo ${name}, Ihr Gutachtertermin wurde bestätigt:\n\nGutachter: ${slot.name}\nDatum: ${terminStr}\nAdresse: ${adresse || plz}\n\nIhr Claimondo-Team`
           const { sendWhatsAppFromLead } = await import('./actions')
           await sendWhatsAppFromLead(phone, msg)
         }
@@ -312,7 +312,7 @@ function SlotCard({
           {isEmpfohlen ? '*EMPFEHLUNG' : label ?? 'Alternative'}
         </span>
         {isEmpfohlen && slot.wunschtermin_moeglich && (
-          <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">Wunschtermin moeglich</span>
+          <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">Wunschtermin möglich</span>
         )}
       </div>
 
@@ -367,9 +367,9 @@ function SlotCard({
         {confirming ? (
           <>
             <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            Wird bestaetigt...
+            Wird bestätigt...
           </>
-        ) : 'Diesen Termin bestaetigen'}
+        ) : 'Diesen Termin bestätigen'}
       </button>
     </div>
   )

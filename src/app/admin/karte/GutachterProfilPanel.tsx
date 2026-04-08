@@ -186,7 +186,7 @@ export default function GutachterProfilPanel({
   const isDeactivated = sv.istAktiv === false
 
   async function handleDeactivate() {
-    if (!confirm('Gutachter wirklich deaktivieren? Er erhaelt keine neuen Auftraege mehr.')) return
+    if (!confirm('Gutachter wirklich deaktivieren? Er erhält keine neuen Aufträge mehr.')) return
     setDeactivating(true)
     try {
       await updateGutachterProfil(sv.id, 'ist_aktiv', false)

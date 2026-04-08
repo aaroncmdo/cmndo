@@ -9,8 +9,8 @@ const GRUENDE = [
   { value: 'kaskoschaden', label: 'Kein Gegner - Kaskoschaden' },
   { value: 'eigenschaden', label: 'Selbstverschulden' },
   { value: 'bagatelle', label: 'Bagatellschaden unter Gutachten-Schwelle' },
-  { value: 'kunde-will-nicht', label: 'Kunde moechte nicht fortfahren' },
-  { value: 'falsche-angaben', label: 'Falsche oder unvollstaendige Angaben' },
+  { value: 'kunde-will-nicht', label: 'Kunde möchte nicht fortfahren' },
+  { value: 'falsche-angaben', label: 'Falsche oder unvollständige Angaben' },
   { value: 'doppelt', label: 'Doppelter Lead bereits vorhanden' },
   { value: 'sonstiges', label: 'Sonstiges' },
 ]
@@ -63,7 +63,7 @@ export default function DisqualifizierungButton({ leadId }: { leadId: string }) 
                   onChange={e => setGrund(e.target.value)}
                   className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-red-500"
                 >
-                  <option value="">Bitte waehlen...</option>
+                  <option value="">Bitte wählen...</option>
                   {GRUENDE.map(g => (
                     <option key={g.value} value={g.value}>{g.label}</option>
                   ))}

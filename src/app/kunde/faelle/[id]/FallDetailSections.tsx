@@ -26,7 +26,7 @@ function fmtDateTime(val: string | null): string {
 // ─── Tabs ───────────────────────────────────────────────────────────────────
 
 const TABS = [
-  { key: 'uebersicht', label: 'Uebersicht' },
+  { key: 'uebersicht', label: 'Übersicht' },
   { key: 'dokumente', label: 'Dokumente' },
   { key: 'chat', label: 'Chat' },
 ] as const
@@ -76,7 +76,7 @@ export default function FallDetailSections({
             <InfoRow label="Fallnummer" value={(fall.fall_nummer as string) ?? (fall.id as string)?.slice(0, 8)} />
             <InfoRow label="Status" value={(fall.status as string) ?? '—'} />
             {kbName && <InfoRow label="Ihr Ansprechpartner" value={kbName} />}
-            {fall.sv_termin && <InfoRow label="Naechster Termin" value={fmtDateTime(fall.sv_termin as string)} />}
+            {fall.sv_termin && <InfoRow label="Nächster Termin" value={fmtDateTime(fall.sv_termin as string)} />}
           </Section>
 
           <Section title="Fahrzeug">
@@ -105,7 +105,7 @@ export default function FallDetailSections({
           {aktiverTermin && aktiverTermin.status === 'gegenvorschlag' && aktiverTermin.gegenvorschlag_von === 'sv' && aktiverTermin.vorgeschlagenes_datum && (
             <GegenvorschlagBanner
               fallId={fall.id as string}
-              svName={svName ?? 'Sachverstaendiger'}
+              svName={svName ?? 'Sachverständiger'}
               vorgeschlagenesDatum={aktiverTermin.vorgeschlagenes_datum}
               grund={aktiverTermin.gegenvorschlag_grund}
             />
@@ -323,7 +323,7 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
     const result = await terminAnnehmen({ source: 'kunde', fallId })
     setLoading(false)
     if (result.success) {
-      setDone('Termin bestaetigt! Der Sachverstaendige wird informiert.')
+      setDone('Termin bestätigt! Der Sachverständige wird informiert.')
     }
   }
 
@@ -334,7 +334,7 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
     setLoading(false)
     if (result.success) {
       setShowModal(false)
-      setDone('Ihr Gegenvorschlag wurde uebermittelt. Der Sachverstaendige wird informiert.')
+      setDone('Ihr Gegenvorschlag wurde übermittelt. Der Sachverständige wird informiert.')
     }
   }
 
@@ -349,7 +349,7 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
   return (
     <>
       <div className="bg-[#4573A2]/5 border border-[#7BA3CC]/30 rounded-xl p-5">
-        <p className="text-sm font-semibold text-[#0D1B3E] mb-2">Neuer Terminvorschlag vom Sachverstaendigen</p>
+        <p className="text-sm font-semibold text-[#0D1B3E] mb-2">Neuer Terminvorschlag vom Sachverständigen</p>
         <p className="text-sm text-[#1E3A5F] mb-1">
           {svName} hat einen alternativen Termin vorgeschlagen: <strong>{datumStr}</strong>
         </p>
@@ -367,7 +367,7 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
           </button>
           <Link href={`/kunde/faelle/${fallId}/kalender`}
             className="w-full py-3 rounded-xl bg-white text-[#1E3A5F] font-medium text-sm border border-[#7BA3CC]/30 hover:bg-[#f8f9fb] transition-colors flex items-center justify-center gap-2">
-            <CalendarIcon className="w-4 h-4" /> Kalender des Gutachters oeffnen
+            <CalendarIcon className="w-4 h-4" /> Kalender des Gutachters öffnen
           </Link>
         </div>
       </div>
@@ -377,13 +377,13 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
             <h3 className="text-lg font-semibold text-[#0D1B3E] mb-2">Anderen Termin vorschlagen</h3>
-            <p className="text-sm text-gray-500 mb-4">Waehlen Sie einen fuer Sie passenden Termin:</p>
+            <p className="text-sm text-gray-500 mb-4">Wählen Sie einen für Sie passenden Termin:</p>
 
             <input type="datetime-local" value={neuerTermin} onChange={e => setNeuerTermin(e.target.value)}
               min={new Date().toISOString().slice(0, 16)}
               className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 mb-3 focus:outline-none focus:border-[#4573A2]" />
             <textarea value={kundeGrund} onChange={e => setKundeGrund(e.target.value)}
-              placeholder="Begruendung (optional)"
+              placeholder="Begründung (optional)"
               className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 mb-4 focus:outline-none focus:border-[#4573A2] resize-none" rows={2} />
 
             <div className="flex gap-2">

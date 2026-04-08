@@ -7,11 +7,11 @@ export const dynamic = 'force-dynamic'
 // ─── WhatsApp Template Builder ─────────────────────────────────────────────
 
 function buildKundeMorgenMsg(vorname: string, datum: string, uhrzeit: string, adresse: string, svName: string): string {
-  return `Guten Morgen ${vorname}! Heute findet die Besichtigung deines Fahrzeugs statt. Termin: ${datum} ${uhrzeit} bei ${adresse}. Sachverstaendiger: ${svName}. Bitte stelle sicher, dass das Fahrzeug zugaenglich ist.`
+  return `Guten Morgen ${vorname}! Heute findet die Besichtigung deines Fahrzeugs statt. Termin: ${datum} ${uhrzeit} bei ${adresse}. Sachverständiger: ${svName}. Bitte stelle sicher, dass das Fahrzeug zugänglich ist.`
 }
 
 function buildKunde1hMsg(uhrzeit: string, adresse: string, svName: string): string {
-  return `In einer Stunde ist deine Besichtigung! ${uhrzeit} bei ${adresse}. ${svName} ist gleich vor Ort. Viele Gruesse von Claimondo!`
+  return `In einer Stunde ist deine Besichtigung! ${uhrzeit} bei ${adresse}. ${svName} ist gleich vor Ort. Viele Grüße von Claimondo!`
 }
 
 function buildSvRouteMsg(
@@ -105,7 +105,7 @@ export async function GET(request: Request) {
           svTelefon = svProfile.telefon
         }
       }
-      const svName = [svVorname, svNachname].filter(Boolean).join(' ') || 'Sachverstaendiger'
+      const svName = [svVorname, svNachname].filter(Boolean).join(' ') || 'Sachverständiger'
 
       // Kunde-Daten laden
       let kundeVorname = '', kundeNachname = '', kundeTelefon: string | null = null

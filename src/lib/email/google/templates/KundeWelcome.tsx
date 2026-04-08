@@ -25,10 +25,10 @@ export function KundeWelcomeEmail(props: Props) {
     <EmailLayout preview={`Willkommen bei Claimondo — Ihr Fall ${props.fallNummer}`}>
       <Heading>Willkommen bei Claimondo, {props.vorname}!</Heading>
       <Paragraph>
-        Vielen Dank fuer Ihr Vertrauen. Wir kuemmern uns um die komplette Schadensabwicklung nach Ihrem Unfall — <strong>fuer Sie voellig kostenfrei</strong>.
+        Vielen Dank für Ihr Vertrauen. Wir kümmern uns um die komplette Schadensabwicklung nach Ihrem Unfall — <strong>für Sie völlig kostenfrei</strong>.
       </Paragraph>
       <Paragraph>
-        Was passiert jetzt? Ein unabhaengiger Sachverstaendiger begutachtet Ihr Fahrzeug, danach uebernimmt unsere Partnerkanzlei die Regulierung mit der gegnerischen Versicherung.
+        Was passiert jetzt? Ein unabhängiger Sachverständiger begutachtet Ihr Fahrzeug, danach übernimmt unsere Partnerkanzlei die Regulierung mit der gegnerischen Versicherung.
       </Paragraph>
 
       <Divider />
@@ -55,10 +55,10 @@ export function KundeWelcomeEmail(props: Props) {
             ['Datum', props.terminInfo.datum],
             ['Uhrzeit', `${props.terminInfo.uhrzeit} Uhr`],
             ['Adresse', props.terminInfo.adresse],
-            ...(props.terminInfo.svName ? [['Sachverstaendiger', props.terminInfo.svName] as [string, string]] : []),
+            ...(props.terminInfo.svName ? [['Sachverständiger', props.terminInfo.svName] as [string, string]] : []),
           ]} />
           <Text style={{ color: '#6b7280', fontSize: 12, lineHeight: '18px', margin: '8px 0 0', fontStyle: 'italic' }}>
-            Bitte stellen Sie sicher, dass das Fahrzeug zum Termin zugaenglich ist. Sie werden kurz vorher per WhatsApp erinnert.
+            Bitte stellen Sie sicher, dass das Fahrzeug zum Termin zugänglich ist. Sie werden kurz vorher per WhatsApp erinnert.
           </Text>
         </>
       )}
@@ -67,14 +67,14 @@ export function KundeWelcomeEmail(props: Props) {
       {props.accountExists ? (
         <>
           <Paragraph>
-            In Ihrem Kunden-Portal koennen Sie den Fortschritt Ihres Falls verfolgen, Dokumente einsehen und direkt mit uns kommunizieren.
+            In Ihrem Kunden-Portal können Sie den Fortschritt Ihres Falls verfolgen, Dokumente einsehen und direkt mit uns kommunizieren.
           </Paragraph>
           <Button href={`${APP_URL}/kunde`}>Zum Kunden-Portal</Button>
         </>
       ) : (
         <>
           <Paragraph>
-            Erstellen Sie jetzt Ihr persoenliches Portal-Konto, um den Fortschritt Ihres Falls zu verfolgen und Dokumente einzusehen.
+            Erstellen Sie jetzt Ihr persönliches Portal-Konto, um den Fortschritt Ihres Falls zu verfolgen und Dokumente einzusehen.
           </Paragraph>
           <Button href={props.flowToken ? `${APP_URL}/flow/${props.flowToken}` : `${APP_URL}/kunde`}>
             {props.flowToken ? 'Konto erstellen' : 'Zum Portal'}
@@ -83,7 +83,7 @@ export function KundeWelcomeEmail(props: Props) {
       )}
 
       <Paragraph>
-        Bei Fragen erreichen Sie uns jederzeit ueber den Chat im Portal oder per WhatsApp.
+        Bei Fragen erreichen Sie uns jederzeit über den Chat im Portal oder per WhatsApp.
       </Paragraph>
     </EmailLayout>
   )

@@ -70,7 +70,7 @@ export default async function GutachterFaellePage({
       <div className="h-full flex flex-col">
         <div className="w-full">
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
-            <p className="text-gray-500">Kein Sachverstaendigen-Profil gefunden.</p>
+            <p className="text-gray-500">Kein Sachverständigen-Profil gefunden.</p>
           </div>
         </div>
       </div>

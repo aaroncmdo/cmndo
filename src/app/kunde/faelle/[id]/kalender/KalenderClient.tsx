@@ -82,7 +82,7 @@ export default function KalenderClient({
         </p>
         <button onClick={() => router.push(`/kunde/faelle/${fallId}`)}
           className="px-4 py-2 bg-[#4573A2] text-white rounded-lg text-sm font-medium hover:bg-[#1E3A5F] transition-colors">
-          Zurueck zum Fall
+          Zurück zum Fall
         </button>
       </div>
     )
@@ -94,7 +94,7 @@ export default function KalenderClient({
     <div className="space-y-4">
       {/* Tage-Auswahl */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-        <p className="text-xs text-gray-500 uppercase tracking-wider mb-3 font-semibold">Tag waehlen</p>
+        <p className="text-xs text-gray-500 uppercase tracking-wider mb-3 font-semibold">Tag wählen</p>
         <div className="grid grid-cols-7 gap-1.5">
           {arbeitsTage.map(day => {
             const isSelected = selectedDay?.toDateString() === day.toDateString()
@@ -121,10 +121,10 @@ export default function KalenderClient({
       {selectedDay && (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
           <p className="text-xs text-gray-500 uppercase tracking-wider mb-3 font-semibold">
-            Verfuegbare Zeiten — {selectedDay.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' })}
+            Verfügbare Zeiten — {selectedDay.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' })}
           </p>
           {selectedSlots.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-4">Keine verfuegbaren Zeiten an diesem Tag.</p>
+            <p className="text-sm text-gray-400 text-center py-4">Keine verfügbaren Zeiten an diesem Tag.</p>
           ) : (
             <div className="grid grid-cols-3 gap-2">
               {selectedSlots.map(slot => {
@@ -158,7 +158,7 @@ export default function KalenderClient({
       {confirmSlot && (
         <div className="bg-[#4573A2]/5 border border-[#7BA3CC]/30 rounded-xl p-4">
           <p className="text-sm text-[#0D1B3E] mb-3">
-            <strong>Gewaehlter Termin:</strong>{' '}
+            <strong>Gewählter Termin:</strong>{' '}
             {new Date(confirmSlot).toLocaleString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} Uhr
           </p>
           <button onClick={handleBuchen} disabled={loading}

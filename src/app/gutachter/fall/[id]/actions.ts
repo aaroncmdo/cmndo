@@ -15,14 +15,14 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
   const file = formData.get('datei') as File
   const betrag = parseFloat(formData.get('betrag') as string)
 
-  if (!file || file.size === 0) throw new Error('Bitte eine PDF-Datei auswaehlen')
-  if (isNaN(betrag) || betrag <= 0) throw new Error('Bitte einen gueltigen Betrag eingeben')
+  if (!file || file.size === 0) throw new Error('Bitte eine PDF-Datei auswählen')
+  if (isNaN(betrag) || betrag <= 0) throw new Error('Bitte einen gültigen Betrag eingeben')
   if (file.type !== 'application/pdf') throw new Error('Nur PDF-Dateien sind erlaubt')
 
   // Verify the case belongs to this gutachter
   const sv = await getGutachterForUser(supabase, user.id, 'id')
 
-  if (!sv) throw new Error('Kein Sachverstaendigen-Profil gefunden')
+  if (!sv) throw new Error('Kein Sachverständigen-Profil gefunden')
 
   const { data: fall } = await supabase
     .from('faelle')
@@ -81,7 +81,7 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
     fall_id: fallId,
     typ: 'gutachten-eingegangen',
     titel: 'Gutachten eingereicht',
-    beschreibung: `Gutachten mit Schadenshoehe ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(betrag)} hochgeladen.`,
+    beschreibung: `Gutachten mit Schadenshöhe ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(betrag)} hochgeladen.`,
     erstellt_von: user.id,
   })
 
@@ -158,7 +158,7 @@ export async function uploadDokument(fallId: string, formData: FormData) {
   // Verify the case belongs to this gutachter
   const sv = await getGutachterForUser(supabase, user.id, 'id')
 
-  if (!sv) throw new Error('Kein Sachverstaendigen-Profil gefunden')
+  if (!sv) throw new Error('Kein Sachverständigen-Profil gefunden')
 
   const { data: fall } = await supabase
     .from('faelle')
@@ -259,7 +259,7 @@ export async function saveFinVinGutachter(fallId: string, finVin: string) {
 
   // Verify this gutachter owns the case
   const sv = await getGutachterForUser(supabase, user.id, 'id')
-  if (!sv) throw new Error('Kein Sachverstaendigen-Profil gefunden')
+  if (!sv) throw new Error('Kein Sachverständigen-Profil gefunden')
 
   const { data: fall } = await supabase
     .from('faelle')
@@ -315,7 +315,7 @@ export async function uploadDatei(fallId: string, formData: FormData) {
   // Verify the case belongs to this gutachter
   const sv = await getGutachterForUser(supabase, user.id, 'id')
 
-  if (!sv) throw new Error('Kein Sachverstaendigen-Profil gefunden')
+  if (!sv) throw new Error('Kein Sachverständigen-Profil gefunden')
 
   const { data: fall } = await supabase
     .from('faelle')
@@ -385,7 +385,7 @@ export async function declineTermin(fallId: string, grund: string) {
   if (!user) throw new Error('Nicht angemeldet')
 
   const sv = await getGutachterForUser(supabase, user.id, 'id')
-  if (!sv) throw new Error('Kein Sachverstaendigen-Profil gefunden')
+  if (!sv) throw new Error('Kein Sachverständigen-Profil gefunden')
 
   // Verify fall belongs to this gutachter
   const { data: fall } = await supabase
@@ -483,7 +483,7 @@ export async function sendChatNachricht(fallId: string, nachricht: string) {
   // Verify gutachter has SV profile
   const sv = await getGutachterForUser(supabase, user.id, 'id')
 
-  if (!sv) throw new Error('Kein Sachverstaendigen-Profil gefunden')
+  if (!sv) throw new Error('Kein Sachverständigen-Profil gefunden')
 
   // Verify fall belongs to this gutachter
   const { data: fall } = await supabase

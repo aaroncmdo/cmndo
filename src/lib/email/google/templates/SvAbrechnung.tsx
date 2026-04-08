@@ -13,15 +13,15 @@ type Props = {
 }
 
 export function subject(p: Props) {
-  return `Abrechnung fuer Fall ${p.fallNummer}`
+  return `Abrechnung für Fall ${p.fallNummer}`
 }
 
 export function SvAbrechnungEmail(props: Props) {
   return (
     <EmailLayout preview={`Abrechnung ${props.fallNummer} — ${props.gesamtbetrag}`}>
-      <Heading>Deine Abrechnung fuer Fall {props.fallNummer}</Heading>
+      <Heading>Deine Abrechnung für Fall {props.fallNummer}</Heading>
       <Paragraph>
-        Hallo {props.svVorname}, hier ist die Abrechnung fuer deinen Auftrag:
+        Hallo {props.svVorname}, hier ist die Abrechnung für deinen Auftrag:
       </Paragraph>
 
       {/* Tabelle */}
@@ -39,7 +39,7 @@ export function SvAbrechnungEmail(props: Props) {
 
       <Paragraph>{props.zahlungsHinweis}</Paragraph>
 
-      <Button href={`${APP_URL}/gutachter/abrechnung`}>Zur Abrechnungsuebersicht</Button>
+      <Button href={`${APP_URL}/gutachter/abrechnung`}>Zur Abrechnungsübersicht</Button>
     </EmailLayout>
   )
 }

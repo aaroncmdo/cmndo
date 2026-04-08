@@ -29,7 +29,7 @@ export default function LeaderboardClient({ dispatch, kundenbetreuer, monatLabel
       </div>
 
       <div className="flex gap-2 mb-6">
-        <Link href="/admin/team" className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-500 hover:text-gray-800 text-xs font-medium rounded-lg transition-colors"><UsersIcon className="w-3.5 h-3.5" />Uebersicht</Link>
+        <Link href="/admin/team" className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-500 hover:text-gray-800 text-xs font-medium rounded-lg transition-colors"><UsersIcon className="w-3.5 h-3.5" />Übersicht</Link>
         <Link href="/admin/team/leaderboard" className="px-3 py-1.5 bg-[#1E3A5F] text-white text-xs font-medium rounded-lg"><TrophyIcon className="w-3.5 h-3.5 inline mr-1.5" />Leaderboard</Link>
         <Link href="/admin/team/incentives" className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-500 hover:text-gray-800 text-xs font-medium rounded-lg transition-colors"><GiftIcon className="w-3.5 h-3.5" />Incentives</Link>
       </div>
