@@ -78,6 +78,48 @@ export async function getUsers(): Promise<Array<{ id: number; name: string; emai
   return data.users ?? []
 }
 
+/** KFZ-144: Call transferieren (für Bridge-Calls) */
+export async function aircallTransferCall(opts: {
+  callId: string; toNumber: string; type: 'external' | 'internal'
+}): Promise<void> {
+  const res = await aircallFetch(`/v1/calls/${opts.callId}/transfers`, {
+    method: 'POST',
+    body: JSON.stringify({ to: opts.toNumber, type: opts.type }),
+  })
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Aircall Transfer fehlgeschlagen (${res.status}): ${body}`)
+  }
+}
+
+/** KFZ-144: Freien Relay-Seat finden (atomic locking) */
+export async function findFreeRelaySeat(): Promise<{
+  id: string; aircallUserId: number; aircallNumberId: number
+} | null> {
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const db = createAdminClient()
+  // Atomic: UPDATE ... WHERE belegt=false RETURNING * (nimmt den ersten freien)
+  const { data } = await db.from('aircall_relay_seats')
+    .update({ belegt: true, belegt_seit: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .eq('aktiv', true).eq('belegt', false)
+    .order('zuletzt_verwendet', { ascending: true, nullsFirst: true })
+    .limit(1)
+    .select('id, aircall_user_id, aircall_number_id')
+    .single()
+  if (!data) return null
+  return { id: data.id, aircallUserId: Number(data.aircall_user_id), aircallNumberId: Number(data.aircall_number_id) }
+}
+
+/** KFZ-144: Relay-Seat freigeben */
+export async function freeRelaySeat(relaySeatId: string): Promise<void> {
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const db = createAdminClient()
+  await db.from('aircall_relay_seats').update({
+    belegt: false, belegt_seit: null, belegt_call_id: null,
+    zuletzt_verwendet: new Date().toISOString(), updated_at: new Date().toISOString(),
+  }).eq('id', relaySeatId)
+}
+
 /** Webhook-Signatur prüfen */
 export function verifyWebhookSignature(payload: string, signature: string): boolean {
   const secret = process.env.AIRCALL_WEBHOOK_TOKEN

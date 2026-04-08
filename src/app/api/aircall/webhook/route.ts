@@ -46,11 +46,61 @@ export async function POST(request: Request) {
 
       case 'call.ringing':
       case 'call.answered': {
-        await db.from('calls').update({
-          status: eventType === 'call.ringing' ? 'klingelt' : 'aktiv',
-          beantwortet_am: eventType === 'call.answered' ? new Date().toISOString() : undefined,
-          updated_at: new Date().toISOString(),
-        }).eq('aircall_call_id', aircallId)
+        const { data: existingCall } = await db.from('calls').select('id, bridge').eq('aircall_call_id', aircallId).single()
+
+        if (eventType === 'call.answered' && existingCall?.bridge?.leg_a_status === 'klingelt') {
+          // KFZ-144: Bridge Leg A hat abgenommen → zu Leg B transferieren
+          await db.from('calls').update({
+            status: 'aktiv',
+            beantwortet_am: new Date().toISOString(),
+            bridge: { ...existingCall.bridge, leg_a_status: 'angenommen', leg_b_status: 'klingelt' },
+            updated_at: new Date().toISOString(),
+          }).eq('id', existingCall.id)
+
+          // Transfer zu Leg B
+          try {
+            const { aircallTransferCall } = await import('@/lib/aircall/client')
+            await aircallTransferCall({ callId: aircallId, toNumber: existingCall.bridge.leg_b_nummer, type: 'external' })
+          } catch (err) { console.error('[KFZ-144] Bridge Transfer fehlgeschlagen:', err) }
+        } else {
+          await db.from('calls').update({
+            status: eventType === 'call.ringing' ? 'klingelt' : 'aktiv',
+            beantwortet_am: eventType === 'call.answered' ? new Date().toISOString() : undefined,
+            updated_at: new Date().toISOString(),
+          }).eq('aircall_call_id', aircallId)
+        }
+        break
+      }
+
+      case 'call.external_transferred': {
+        // KFZ-144: Leg B wurde verbunden
+        const { data: bridgeCall } = await db.from('calls').select('id, bridge').eq('aircall_call_id', aircallId).single()
+        if (bridgeCall?.bridge) {
+          await db.from('calls').update({
+            status: 'aktiv',
+            bridge: { ...bridgeCall.bridge, leg_b_status: 'angenommen', verbunden_um: new Date().toISOString() },
+            updated_at: new Date().toISOString(),
+          }).eq('id', bridgeCall.id)
+        }
+        break
+      }
+
+      case 'call.unsuccessful_transfer': {
+        // KFZ-144: Transfer zu Leg B fehlgeschlagen
+        const { data: failCall } = await db.from('calls').select('id, bridge').eq('aircall_call_id', aircallId).single()
+        if (failCall?.bridge) {
+          await db.from('calls').update({
+            status: 'beendet',
+            beendet_am: new Date().toISOString(),
+            bridge: { ...failCall.bridge, leg_b_status: 'timeout', getrennt_um: new Date().toISOString(), getrennt_grund: 'leg_b_aufgelegt' },
+            updated_at: new Date().toISOString(),
+          }).eq('id', failCall.id)
+          // Relay-Seat freigeben
+          if (failCall.bridge.relay_seat_id) {
+            const { freeRelaySeat } = await import('@/lib/aircall/client')
+            await freeRelaySeat(failCall.bridge.relay_seat_id)
+          }
+        }
         break
       }
 
@@ -67,10 +117,21 @@ export async function POST(request: Request) {
           updated_at: new Date().toISOString(),
         }).eq('aircall_call_id', aircallId)
 
+        // KFZ-144: Relay-Seat freigeben bei Bridge-Call
+        const { data: endedCall } = await db.from('calls').select('id, bridge').eq('aircall_call_id', aircallId).single()
+        if (endedCall?.bridge?.relay_seat_id) {
+          const { freeRelaySeat } = await import('@/lib/aircall/client')
+          await freeRelaySeat(endedCall.bridge.relay_seat_id)
+          // Bridge-Metadaten aktualisieren
+          await db.from('calls').update({
+            bridge: { ...endedCall.bridge, getrennt_um: new Date().toISOString(), getrennt_grund: 'normal' },
+          }).eq('id', endedCall.id)
+        }
+
         // Post-Call AI Analyse triggern (fire & forget)
-        const { data: call } = await db.from('calls').select('id').eq('aircall_call_id', aircallId).single()
-        if (call) {
-          import('@/lib/copilot/post-call').then(m => m.analyzeCallPostHoc(call.id)).catch(err => console.error('[KFZ-143] Post-Call Analyse:', err))
+        const callForAnalysis = endedCall ?? (await db.from('calls').select('id').eq('aircall_call_id', aircallId).single()).data
+        if (callForAnalysis) {
+          import('@/lib/copilot/post-call').then(m => m.analyzeCallPostHoc(callForAnalysis.id)).catch(err => console.error('[KFZ-143] Post-Call Analyse:', err))
         }
         break
       }
