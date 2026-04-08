@@ -552,6 +552,8 @@ export default function FallakteClient({
   mitarbeiter,
   forderungspositionen,
   chatTeilnehmer,
+  versicherungKontakt,
+  stepperState,
 }: {
   fall: Fall
   lead: Lead
