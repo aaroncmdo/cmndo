@@ -11,9 +11,13 @@ export type TerminData = {
   kennzeichen: string
   adresse: string
   fall_nummer: string | null
+  fall_id: string | null
   vorgeschlagenes_datum: string | null
   gegenvorschlag_von: string | null
   gegenvorschlag_grund: string | null
+  fahrzeug: string | null
+  versicherung: string | null
+  abgelehnt_am: string | null
 }
 
 export async function getTerminByToken(token: string): Promise<{ termin: TerminData | null; error?: string }> {
@@ -21,50 +25,59 @@ export async function getTerminByToken(token: string): Promise<{ termin: TerminD
 
   const { data: termin } = await svc
     .from('gutachter_termine')
-    .select('id, status, start_zeit, end_zeit, fall_id, lead_id, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund')
+    .select('id, status, start_zeit, end_zeit, fall_id, lead_id, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, abgelehnt_am')
     .eq('ablehnen_token', token)
     .maybeSingle()
 
   if (!termin) return { termin: null, error: 'Token ungültig oder abgelaufen.' }
 
-  // Lade Kunden-Daten + Fall-Nummer
+  // Lade Kunden-Daten + Fall-Nummer + Fahrzeug
   let kundeName = '—'
   let kennzeichen = '—'
   let adresse = '—'
   let fallNummer: string | null = null
+  let fahrzeug: string | null = null
+  let versicherung: string | null = null
 
-  if (termin.fall_id) {
-    const { data: fall } = await svc
-      .from('faelle')
-      .select('fall_nummer, lead_id')
-      .eq('id', termin.fall_id)
-      .single()
-    fallNummer = fall?.fall_nummer ?? null
-
-    const leadId = termin.lead_id || fall?.lead_id
-    if (leadId) {
-      const { data: lead } = await svc
-        .from('leads')
-        .select('vorname, nachname, kennzeichen, fahrzeug_standort_adresse, fahrzeug_standort_plz')
-        .eq('id', leadId)
-        .single()
-      if (lead) {
-        kundeName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—'
-        kennzeichen = lead.kennzeichen || '—'
-        adresse = lead.fahrzeug_standort_adresse || lead.fahrzeug_standort_plz || '—'
-      }
-    }
-  } else if (termin.lead_id) {
+  const loadLeadData = async (leadId: string) => {
     const { data: lead } = await svc
       .from('leads')
-      .select('vorname, nachname, kennzeichen, fahrzeug_standort_adresse, fahrzeug_standort_plz')
-      .eq('id', termin.lead_id)
+      .select('vorname, nachname, kennzeichen, fahrzeug_standort_adresse, fahrzeug_standort_plz, fahrzeug_hersteller, fahrzeug_modell')
+      .eq('id', leadId)
       .single()
     if (lead) {
       kundeName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—'
       kennzeichen = lead.kennzeichen || '—'
       adresse = lead.fahrzeug_standort_adresse || lead.fahrzeug_standort_plz || '—'
+      const parts = [lead.fahrzeug_hersteller, lead.fahrzeug_modell].filter(Boolean)
+      if (parts.length > 0) fahrzeug = parts.join(' ')
     }
+  }
+
+  if (termin.fall_id) {
+    const { data: fall } = await svc
+      .from('faelle')
+      .select('fall_nummer, lead_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, besichtigungsort_adresse')
+      .eq('id', termin.fall_id)
+      .single()
+    fallNummer = fall?.fall_nummer ?? null
+    if (fall?.besichtigungsort_adresse) adresse = fall.besichtigungsort_adresse
+    if (fall?.kennzeichen) kennzeichen = fall.kennzeichen
+    const fp = [fall?.fahrzeug_hersteller, fall?.fahrzeug_modell].filter(Boolean)
+    if (fp.length > 0) fahrzeug = fp.join(' ')
+
+    const leadId = termin.lead_id || fall?.lead_id
+    if (leadId) await loadLeadData(leadId)
+    // Fall-Daten ueberschreiben Lead-Daten wo vorhanden
+    if (fall?.besichtigungsort_adresse) adresse = fall.besichtigungsort_adresse
+    if (fall?.kennzeichen) kennzeichen = fall.kennzeichen
+    if (fp.length > 0) fahrzeug = fp.join(' ')
+
+    // Versicherung aus parteien
+    const { data: partei } = await svc.from('parteien').select('versicherung_name').eq('fall_id', termin.fall_id).eq('rolle', 'gegner').limit(1).maybeSingle()
+    if (partei?.versicherung_name) versicherung = partei.versicherung_name
+  } else if (termin.lead_id) {
+    await loadLeadData(termin.lead_id)
   }
 
   return {
@@ -77,9 +90,13 @@ export async function getTerminByToken(token: string): Promise<{ termin: TerminD
       kennzeichen,
       adresse,
       fall_nummer: fallNummer,
+      fall_id: termin.fall_id ?? null,
       vorgeschlagenes_datum: termin.vorgeschlagenes_datum ?? null,
       gegenvorschlag_von: termin.gegenvorschlag_von ?? null,
       gegenvorschlag_grund: termin.gegenvorschlag_grund ?? null,
+      fahrzeug,
+      versicherung,
+      abgelehnt_am: termin.abgelehnt_am ?? null,
     },
   }
 }
