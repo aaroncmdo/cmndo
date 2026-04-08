@@ -487,7 +487,7 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
             ) : (
               <button onClick={() => setConfirmDelete(true)}
                 className="px-3 py-2.5 text-sm font-medium text-red-500 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
-                Loeschen
+                Löschen
               </button>
             )
           )}
