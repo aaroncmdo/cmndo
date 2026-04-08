@@ -397,11 +397,21 @@ export async function declineTermin(fallId: string, grund: string) {
   if (!fall) throw new Error('Fall nicht gefunden')
 
   // 1. gutachter_termine → abgelehnt
+  // KFZ-136: Termin-IDs vor dem Update holen fuer Reminder-Cancel
+  const { data: activeTermine } = await supabase.from('gutachter_termine')
+    .select('id').eq('fall_id', fallId).eq('sv_id', sv.id).in('status', ['reserviert', 'bestaetigt'])
+
   await supabase.from('gutachter_termine')
     .update({ status: 'abgelehnt', abgelehnt_am: new Date().toISOString(), abgelehnt_grund: grund || 'Im Portal abgelehnt' })
     .eq('fall_id', fallId)
     .eq('sv_id', sv.id)
     .in('status', ['reserviert', 'bestaetigt'])
+
+  // KFZ-136: Reminder stornieren
+  try {
+    const { cancelRemindersForTermin } = await import('@/lib/reminders/generate')
+    for (const t of activeTermine ?? []) { await cancelRemindersForTermin(t.id) }
+  } catch (err) { console.error('[KFZ-136] Reminder-Cancel:', err) }
 
   // 2. Fall: sv_id NULL, gutachter_termin_status = abgelehnt
   await supabase.from('faelle').update({

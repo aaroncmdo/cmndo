@@ -43,6 +43,9 @@ export async function GET(req: NextRequest) {
     abgelehnt_grund: grund,
   }).eq('id', termin.id)
 
+  // KFZ-136: Reminder stornieren
+  try { const { cancelRemindersForTermin } = await import('@/lib/reminders/generate'); await cancelRemindersForTermin(termin.id) } catch (err) { console.error('[KFZ-136] Reminder-Cancel:', err) }
+
   // 3. Fall updaten: sv_id NULL, gutachter_termin_status = abgelehnt
   if (termin.fall_id) {
     await svc.from('faelle').update({

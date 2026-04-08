@@ -167,7 +167,7 @@ export async function confirmGutachterTermin(
   }
 
   // 3. Kalender-Eintrag erstellen (gutachter_termine)
-  const { error: terminErr } = await supabase
+  const { data: insertedTermin, error: terminErr } = await supabase
     .from('gutachter_termine')
     .insert({
       sv_id: svId,
@@ -177,12 +177,20 @@ export async function confirmGutachterTermin(
       end_zeit: endDate.toISOString(),
       status: 'reserviert',
     })
+    .select('id')
+    .single()
 
   if (terminErr) {
     console.error('[confirmGutachterTermin] Kalender-Eintrag FEHLER:', terminErr)
     return { success: false, error: `Kalender-Eintrag fehlgeschlagen: ${terminErr.message}` }
   }
   console.log('[confirmGutachterTermin] gutachter_termine erstellt ✓', { sv_id: svId, start: termin, end: endDate.toISOString(), status: 'reserviert' })
+
+  // KFZ-136: Reminder generieren fuer neuen Termin
+  try {
+    const { generateReminderForTermin } = await import('@/lib/reminders/generate')
+    if (insertedTermin?.id) await generateReminderForTermin(insertedTermin.id)
+  } catch (err) { console.error('[KFZ-136] Reminder-Generierung:', err) }
 
   // ── Ab hier: non-critical Schritte — Fehler werden geloggt aber nicht geworfen ──
 
@@ -429,6 +437,9 @@ export async function handleGegenvorschlag(
       })
       .eq('id', terminId)
 
+    // KFZ-136: Reminder generieren (Termin bestaetigt mit neuem Datum)
+    try { const { generateReminderForTermin } = await import('@/lib/reminders/generate'); await generateReminderForTermin(terminId) } catch (err) { console.error('[KFZ-136] Reminder-Gen:', err) }
+
     // Update lead + fall
     await supabase
       .from('leads')
@@ -451,6 +462,9 @@ export async function handleGegenvorschlag(
       .from('gutachter_termine')
       .update({ status: 'storniert' })
       .eq('id', terminId)
+
+    // KFZ-136: Reminder stornieren
+    try { const { cancelRemindersForTermin } = await import('@/lib/reminders/generate'); await cancelRemindersForTermin(terminId) } catch (err) { console.error('[KFZ-136] Reminder-Cancel:', err) }
   }
 
   revalidatePath(`/admin/dispatch/lead/${leadId}`)

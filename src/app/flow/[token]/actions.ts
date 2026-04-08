@@ -331,10 +331,17 @@ export async function signSAandCreateFall(
   // 5. Termin von 'reserviert' auf 'bestaetigt' upgraden (SA unterschrieben = bestätigt)
   if (lead.gutachter_termin) {
     // gutachter_termine: reserviert → bestaetigt
-    await admin.from('gutachter_termine')
+    const { data: upgradedTermine } = await admin.from('gutachter_termine')
       .update({ status: 'bestaetigt', fall_id: fall.id })
       .eq('lead_id', leadId)
       .eq('status', 'reserviert')
+      .select('id')
+
+    // KFZ-136: Reminder generieren fuer bestaetigen Termin
+    try {
+      const { generateReminderForTermin } = await import('@/lib/reminders/generate')
+      for (const t of upgradedTermine ?? []) { await generateReminderForTermin(t.id) }
+    } catch (err) { console.error('[KFZ-136] Reminder-Gen:', err) }
 
     // Fall: gutachter_termin_status → bestaetigt
     await admin.from('faelle')

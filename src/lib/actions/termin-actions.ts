@@ -5,6 +5,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { postChatSystemMessage } from '@/lib/chat/system-messages'
+import { generateReminderForTermin, cancelRemindersForTermin } from '@/lib/reminders/generate'
 import { revalidatePath } from 'next/cache'
 
 type ActionResult = { success: boolean; error?: string }
@@ -152,6 +153,9 @@ export async function terminAblehnen({
 
   if (updateErr) return { success: false, error: updateErr.message }
 
+  // KFZ-136: Reminder stornieren
+  try { await cancelRemindersForTermin(tId) } catch (err) { console.error('[KFZ-136] Reminder-Cancel fehlgeschlagen:', err) }
+
   // 2. Fall updaten
   await admin.from('faelle').update({
     sv_id: null,
@@ -294,6 +298,9 @@ export async function terminGegenvorschlag({
   }).eq('id', tId)
 
   if (updateErr) return { success: false, error: updateErr.message }
+
+  // KFZ-136: Bestehende Reminder stornieren (Termin noch nicht final)
+  try { await cancelRemindersForTermin(tId) } catch (err) { console.error('[KFZ-136] Reminder-Cancel fehlgeschlagen:', err) }
 
   // 2. Fall updaten
   await admin.from('faelle').update({
@@ -448,6 +455,9 @@ export async function terminAnnehmen({
     return { success: false, error: 'Ungueltige Parameter' }
   }
 
+  // KFZ-136: Reminder neu generieren (Termin ist jetzt bestaetigt)
+  try { await generateReminderForTermin(tId) } catch (err) { console.error('[KFZ-136] Reminder-Generierung fehlgeschlagen:', err) }
+
   // Fall updaten
   await admin.from('faelle').update({
     gutachter_termin_status: 'bestaetigt',
@@ -553,6 +563,9 @@ export async function terminBuchen({
   }).eq('id', termin.id)
 
   if (updateErr) return { success: false, error: updateErr.message }
+
+  // KFZ-136: Reminder generieren (Termin gebucht)
+  try { await generateReminderForTermin(termin.id) } catch (err) { console.error('[KFZ-136] Reminder-Generierung fehlgeschlagen:', err) }
 
   // 2. Fall updaten
   await admin.from('faelle').update({

@@ -111,6 +111,9 @@ export async function ablehnenTermin(
 
   if (updateErr) return { success: false, error: updateErr.message }
 
+  // KFZ-136: Reminder stornieren
+  try { const { cancelRemindersForTermin } = await import('@/lib/reminders/generate'); await cancelRemindersForTermin(termin.id) } catch (err) { console.error('[KFZ-136] Reminder-Cancel:', err) }
+
   // 2. Fall updaten
   if (termin.fall_id) {
     await svc.from('faelle').update({
@@ -188,6 +191,9 @@ export async function bestaetigenTermin(
 
   if (updateErr) return { success: false, error: updateErr.message }
 
+  // KFZ-136: Reminder generieren (Termin bestaetigt)
+  try { const { generateReminderForTermin } = await import('@/lib/reminders/generate'); await generateReminderForTermin(termin.id) } catch (err) { console.error('[KFZ-136] Reminder-Gen:', err) }
+
   if (termin.fall_id) {
     await svc.from('faelle').update({
       gutachter_termin_status: 'bestaetigt',
@@ -234,6 +240,9 @@ export async function gegenvorschlagTermin(
   }).eq('id', termin.id)
 
   if (updateErr) return { success: false, error: updateErr.message }
+
+  // KFZ-136: Bestehende Reminder stornieren (Termin nicht final)
+  try { const { cancelRemindersForTermin } = await import('@/lib/reminders/generate'); await cancelRemindersForTermin(termin.id) } catch (err) { console.error('[KFZ-136] Reminder-Cancel:', err) }
 
   if (termin.fall_id) {
     await svc.from('faelle').update({
