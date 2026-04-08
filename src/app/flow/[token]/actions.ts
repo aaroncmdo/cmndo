@@ -381,8 +381,14 @@ export async function signSAandCreateFall(
     sa_unterschrieben: true,
     sa_datum: new Date().toISOString(),
     flow_link_abgeschlossen: true,
+    konvertiert_zu_fall_id: fall.id,
     updated_at: new Date().toISOString(),
   }).eq('id', leadId)
+
+  // 6b. KFZ-146: Alle Lead-Side-Channel-Daten an den neuen Fall zuordnen
+  try {
+    await admin.rpc('link_lead_data_to_fall', { p_lead_id: leadId, p_fall_id: fall.id })
+  } catch (err) { console.error('[KFZ-146] Lead-Daten-Übergabe:', err) }
 
   // 7. FlowLink updaten
   if (flowLinkId) {
