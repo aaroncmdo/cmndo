@@ -8,6 +8,8 @@ type Props = {
   fahrzeug: string
   versicherung: string
   svName: string | null
+  accountExists: boolean
+  flowToken?: string | null
 }
 
 export function subject(p: Props) {
@@ -37,10 +39,23 @@ export function KundeWelcomeEmail(props: Props) {
       ]} />
 
       <Divider />
-      <Paragraph>
-        Wir haben ein Portal-Konto fuer Sie eingerichtet. Dort koennen Sie den Fortschritt Ihres Falls verfolgen, Dokumente einsehen und direkt mit uns kommunizieren.
-      </Paragraph>
-      <Button href={`${APP_URL}/kunde`}>Zum Kunden-Portal</Button>
+      {props.accountExists ? (
+        <>
+          <Paragraph>
+            In Ihrem Kunden-Portal koennen Sie den Fortschritt Ihres Falls verfolgen, Dokumente einsehen und direkt mit uns kommunizieren.
+          </Paragraph>
+          <Button href={`${APP_URL}/kunde`}>Zum Kunden-Portal</Button>
+        </>
+      ) : (
+        <>
+          <Paragraph>
+            Erstellen Sie jetzt Ihr persoenliches Portal-Konto, um den Fortschritt Ihres Falls zu verfolgen und Dokumente einzusehen.
+          </Paragraph>
+          <Button href={props.flowToken ? `${APP_URL}/flow/${props.flowToken}` : `${APP_URL}/kunde`}>
+            {props.flowToken ? 'Konto erstellen' : 'Zum Portal'}
+          </Button>
+        </>
+      )}
 
       <Paragraph>
         Bei Fragen erreichen Sie uns jederzeit ueber den Chat im Portal oder per WhatsApp.

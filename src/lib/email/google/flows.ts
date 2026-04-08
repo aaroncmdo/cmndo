@@ -28,6 +28,11 @@ function fmtCurrency(val: number | null): string {
 
 export async function sendKundeWelcome(fallId: string): Promise<void> {
   const db = admin()
+
+  // BUG-71: Idempotenz — nur einmal pro Fall
+  const { data: alreadySent } = await db.from('email_log').select('id').eq('fall_id', fallId).eq('template', 'kunde_welcome').eq('status', 'sent').limit(1).maybeSingle()
+  if (alreadySent) { console.log(`[KFZ-137] Welcome-Mail fuer Fall ${fallId} bereits gesendet, skip`); return }
+
   const { data: fall } = await db.from('faelle').select('fall_nummer, lead_id, sv_id, kunde_id, schadens_datum, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen').eq('id', fallId).single()
   if (!fall) return
 
@@ -61,6 +66,14 @@ export async function sendKundeWelcome(fallId: string): Promise<void> {
     }
   }
 
+  // BUG-71: Pruefen ob Account schon existiert + FlowLink-Token fuer "Konto erstellen"-Link
+  const accountExists = !!fall.kunde_id
+  let flowToken: string | null = null
+  if (!accountExists && fall.lead_id) {
+    const { data: fl } = await db.from('flow_links').select('token').eq('lead_id', fall.lead_id).eq('status', 'abgeschlossen').limit(1).maybeSingle()
+    flowToken = fl?.token ?? null
+  }
+
   const props = {
     vorname,
     fallNummer: fall.fall_nummer ?? fallId.slice(0, 8),
@@ -69,6 +82,8 @@ export async function sendKundeWelcome(fallId: string): Promise<void> {
     fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || fall.kennzeichen || '—',
     versicherung,
     svName,
+    accountExists,
+    flowToken,
   }
 
   const html = await render(KundeWelcomeEmail(props))

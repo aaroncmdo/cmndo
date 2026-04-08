@@ -187,8 +187,7 @@ export async function createKundeAccount(
           await syncChatTeilnehmer(fallId)
         } catch (e) { console.error('[KFZ-129] syncChatTeilnehmer:', e) }
 
-        // KFZ-137: Welcome-Email (fire & forget — BUG-70: darf Account-Flow nicht blocken)
-        import('@/lib/email/google/flows').then(m => m.sendKundeWelcome(fallId)).catch(err => console.error('[KFZ-137] Email Welcome:', err))
+        // BUG-71: Welcome-Mail geht jetzt nach SA-Unterzeichnung raus, nicht hier
 
         return { password }
       }
@@ -222,8 +221,7 @@ export async function createKundeAccount(
     await syncChatTeilnehmer(fallId)
   } catch (e) { console.error('[KFZ-129] syncChatTeilnehmer:', e) }
 
-  // KFZ-137: Welcome-Email (fire & forget — BUG-70: darf Account-Flow nicht blocken)
-  import('@/lib/email/google/flows').then(m => m.sendKundeWelcome(fallId)).catch(err => console.error('[KFZ-137] Email Welcome:', err))
+  // BUG-71: Welcome-Mail geht jetzt nach SA-Unterzeichnung raus, nicht hier
 
   return { password }
 }
@@ -460,6 +458,9 @@ export async function signSAandCreateFall(
 
   // 11. Benachrichtigung
   try { await notifyNeuerFall(fall.id) } catch { /* */ }
+
+  // 12. BUG-71: Welcome-Mail nach SA-Unterzeichnung (fire & forget, idempotent)
+  import('@/lib/email/google/flows').then(m => m.sendKundeWelcome(fall.id)).catch(err => console.error('[BUG-71] Welcome-Mail nach SA:', err))
 
   return { fallId: fall.id }
 
