@@ -31,6 +31,14 @@
     {
       "path": "/api/cron/send-reminders",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/monats-abrechnungen",
+      "schedule": "0 18 28-31 * *"
+    },
+    {
+      "path": "/api/cron/abrechnungen-faellig-check",
+      "schedule": "0 9 * * *"
     }
   ]
 }

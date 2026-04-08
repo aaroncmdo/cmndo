@@ -8,6 +8,8 @@ import { SvAbrechnungEmail, subject as svAbrechnungSubject } from './templates/S
 import { SvRechnungEmail, subject as svRechnungSubject } from './templates/SvRechnung'
 import { KanzleiAuftragszusammenfassungEmail, subject as kanzleiAuftragSubject } from './templates/KanzleiAuftragszusammenfassung'
 import { KanzleiAbrechnungRechnungEmail, subject as kanzleiAbrechnungSubject } from './templates/KanzleiAbrechnungRechnung'
+import { MarketingAbrechnungEmail, subject as marketingAbrechnungSubject } from './templates/MarketingAbrechnung'
+import { KanzleiMonatsAbrechnungEmail, subject as kanzleiMonatsAbrechnungSubject } from './templates/KanzleiMonatsAbrechnung'
 
 const admin = () => createAdminClient()
 
@@ -362,4 +364,109 @@ export async function sendKanzleiAbrechnungRechnung(abrechnungId: string): Promi
     empfaengerTyp: 'kanzlei',
     template: 'kanzlei_abrechnung',
   })
+}
+
+// ─── 7. Marketing Monats-Abrechnung (KFZ-141) ─────────────────────────────
+
+export async function sendMarketingAbrechnung(abrechnungId: string): Promise<void> {
+  const db = admin()
+  const { data: abr } = await db.from('abrechnungen').select('*').eq('id', abrechnungId).single()
+  if (!abr) return
+
+  const monat = abr.abrechnungs_zeitraum_start.slice(0, 7)
+  const monatLabel = new Date(abr.abrechnungs_zeitraum_start).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })
+  const positionen = abr.positionen as Array<{ beschreibung?: string }>
+
+  const props = {
+    empfaengerName: abr.empfaenger_name,
+    abrechnungsNr: abr.abrechnungs_nr,
+    monat: monatLabel,
+    anzahlPositionen: positionen.length,
+    summeBrutto: fmtCurrency(Number(abr.summe_brutto)),
+    faelligAm: abr.faellig_am ? fmtDate(abr.faellig_am) : '—',
+  }
+
+  // PDF laden
+  const attachments: Array<{ filename: string; content: Buffer | string; contentType: string }> = []
+  if (abr.pdf_path) {
+    const { data: pdfData } = await db.storage.from('abrechnungen-pdf').download(abr.pdf_path)
+    if (pdfData) {
+      const buf = Buffer.from(await pdfData.arrayBuffer())
+      attachments.push({ filename: `Abrechnung_${abr.abrechnungs_nr}.pdf`, content: buf, contentType: 'application/pdf' })
+    }
+  }
+
+  const html = await render(MarketingAbrechnungEmail(props))
+  const { messageId } = await sendEmail({
+    to: abr.empfaenger_email,
+    subject: marketingAbrechnungSubject(props),
+    html,
+    attachments,
+    empfaengerTyp: 'admin',
+    template: 'marketing_abrechnung',
+  })
+
+  // Status updaten
+  const faelligAm = new Date(Date.now() + 14 * 86400_000).toISOString().slice(0, 10)
+  const { data: logEntry } = await db.from('email_log').select('id').eq('message_id', messageId).limit(1).maybeSingle()
+
+  await db.from('abrechnungen').update({
+    versand_datum: new Date().toISOString(),
+    faellig_am: faelligAm,
+    status: 'versendet',
+    email_log_id: logEntry?.id ?? null,
+    updated_at: new Date().toISOString(),
+  }).eq('id', abrechnungId)
+}
+
+// ─── 8. Kanzlei Monats-Abrechnung (KFZ-141) ──────────────────────────────
+
+export async function sendKanzleiMonatsAbrechnung(abrechnungId: string): Promise<void> {
+  const db = admin()
+  const { data: abr } = await db.from('abrechnungen').select('*').eq('id', abrechnungId).single()
+  if (!abr) return
+
+  const monatLabel = new Date(abr.abrechnungs_zeitraum_start).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })
+  const positionen = abr.positionen as Array<{ beschreibung?: string }>
+
+  const props = {
+    kanzleiName: abr.empfaenger_name,
+    abrechnungsNr: abr.abrechnungs_nr,
+    monat: monatLabel,
+    anzahlFaelle: positionen.length,
+    summeBrutto: fmtCurrency(Number(abr.summe_brutto)),
+    faelligAm: abr.faellig_am ? fmtDate(abr.faellig_am) : '—',
+  }
+
+  // PDF laden
+  const attachments: Array<{ filename: string; content: Buffer | string; contentType: string }> = []
+  if (abr.pdf_path) {
+    const { data: pdfData } = await db.storage.from('abrechnungen-pdf').download(abr.pdf_path)
+    if (pdfData) {
+      const buf = Buffer.from(await pdfData.arrayBuffer())
+      attachments.push({ filename: `Abrechnung_${abr.abrechnungs_nr}.pdf`, content: buf, contentType: 'application/pdf' })
+    }
+  }
+
+  const html = await render(KanzleiMonatsAbrechnungEmail(props))
+  const { messageId } = await sendEmail({
+    to: abr.empfaenger_email,
+    subject: kanzleiMonatsAbrechnungSubject(props),
+    html,
+    attachments,
+    empfaengerTyp: 'kanzlei',
+    template: 'kanzlei_monats_abrechnung',
+  })
+
+  // Status updaten
+  const faelligAm = new Date(Date.now() + 14 * 86400_000).toISOString().slice(0, 10)
+  const { data: logEntry } = await db.from('email_log').select('id').eq('message_id', messageId).limit(1).maybeSingle()
+
+  await db.from('abrechnungen').update({
+    versand_datum: new Date().toISOString(),
+    faellig_am: faelligAm,
+    status: 'versendet',
+    email_log_id: logEntry?.id ?? null,
+    updated_at: new Date().toISOString(),
+  }).eq('id', abrechnungId)
 }

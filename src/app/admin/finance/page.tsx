@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import FinanceClient from './FinanceClient'
+import AbrechnungenSection from './AbrechnungenSection'
 
 const PAKET_PREIS: Record<string, number> = {
   standard: 750, 'starter-10': 750,
@@ -424,6 +425,34 @@ function GutachterAbrechnungen({ svRows, gutachterAnzahlungenGesamt }: {
   )
 }
 
+// ── Abrechnungen (KFZ-141) ──
+
+async function AbrechnungenSectionWrapper() {
+  const supabase = await createClient()
+
+  let abrechnungen: Array<{
+    id: string; empfaenger_typ: string; empfaenger_name: string; abrechnungs_nr: string
+    abrechnungs_zeitraum_start: string; abrechnungs_zeitraum_ende: string
+    summe_brutto: number; versand_datum: string | null; faellig_am: string | null
+    status: string; pdf_path: string | null
+  }> = []
+
+  try {
+    const { data } = await supabase
+      .from('abrechnungen')
+      .select('id, empfaenger_typ, empfaenger_name, abrechnungs_nr, abrechnungs_zeitraum_start, abrechnungs_zeitraum_ende, summe_brutto, versand_datum, faellig_am, status, pdf_path')
+      .order('created_at', { ascending: false })
+      .limit(100)
+
+    abrechnungen = (data ?? []).map(d => ({ ...d, summe_brutto: Number(d.summe_brutto) }))
+  } catch { /* table may not exist yet */ }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+  const pdfBaseUrl = `${supabaseUrl}/storage/v1/object/public/abrechnungen-pdf`
+
+  return <AbrechnungenSection abrechnungen={abrechnungen} pdfBaseUrl={pdfBaseUrl} />
+}
+
 export default async function FinancePage() {
   const supabase = await createClient()
 
@@ -690,6 +719,7 @@ export default async function FinancePage() {
         }))}
       />
       <GutachterAbrechnungen svRows={svRows} gutachterAnzahlungenGesamt={gutachterAnzahlungenGesamt} />
+      <AbrechnungenSectionWrapper />
       <IndividuelleAnfragenSection anfragen={individuelleAnfragen} />
       <InvestitionProFallSection />
       </div>
