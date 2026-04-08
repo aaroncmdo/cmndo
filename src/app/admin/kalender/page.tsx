@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import KalenderClient from './KalenderClient'
+import { getActiveGutachter } from '@/lib/actions/admin-kalender'
 
 export default async function KalenderPage() {
   const supabase = await createClient()
@@ -45,12 +46,16 @@ export default async function KalenderPage() {
     fallMap[f.id] = f.fall_nummer ?? f.id.slice(0, 8)
   }
 
+  // KFZ-138: Active Gutachter fuer Multiselect
+  const gutachter = await getActiveGutachter()
+
   return (
     <KalenderClient
       faelle={faelle ?? []}
       tasks={tasks ?? []}
       svMap={svMap}
       fallMap={fallMap}
+      gutachterList={gutachter}
     />
   )
 }
