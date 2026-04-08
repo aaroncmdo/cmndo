@@ -51,6 +51,6 @@ export async function updateSession(request: NextRequest) {
 
 function isPublicPath(pathname: string): boolean {
   if (pathname === '/') return true
-  const publicPaths = ['/login', '/flow', '/api', '/passwort-aendern']
+  const publicPaths = ['/login', '/flow', '/api', '/passwort-aendern', '/sv']
   return publicPaths.some(path => pathname.startsWith(path))
 }

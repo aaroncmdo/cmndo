@@ -410,8 +410,8 @@ export async function signSAandCreateFall(
           const kundeName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim()
           const adresse = lead.fahrzeug_standort_adresse || lead.fahrzeug_standort_plz || 'Adresse folgt'
           const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://claimondo.de'
-          const ablehnenLink = terminRow.ablehnen_token
-            ? `${baseUrl}/api/termin/ablehnen?token=${terminRow.ablehnen_token}`
+          const terminLink = terminRow.ablehnen_token
+            ? `${baseUrl}/sv/termin/${terminRow.ablehnen_token}`
             : ''
 
           const { sendWhatsApp } = await import('@/lib/whatsapp')
@@ -421,7 +421,7 @@ export async function signSAandCreateFall(
             `Kennzeichen: ${lead.kennzeichen || '—'}\n` +
             `Besichtigung: ${datum} um ${uhrzeit}\n` +
             `Adresse: ${adresse}\n\n` +
-            `Falls Sie diesen Termin NICHT wahrnehmen können, klicken Sie hier:\n${ablehnenLink}\n\n` +
+            `Termin bestätigen, ablehnen oder verschieben:\n${terminLink}\n\n` +
             `Ansonsten steht der Termin. Viel Erfolg!`
           )
 

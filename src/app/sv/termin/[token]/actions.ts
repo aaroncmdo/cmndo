@@ -1,0 +1,267 @@
+'use server'
+
+import { createServiceClient } from '@/lib/supabase/server'
+
+export type TerminData = {
+  id: string
+  status: string
+  start_zeit: string
+  end_zeit: string
+  kunde_name: string
+  kennzeichen: string
+  adresse: string
+  fall_nummer: string | null
+}
+
+export async function getTerminByToken(token: string): Promise<{ termin: TerminData | null; error?: string }> {
+  const svc = createServiceClient()
+
+  const { data: termin } = await svc
+    .from('gutachter_termine')
+    .select('id, status, start_zeit, end_zeit, fall_id, lead_id')
+    .eq('ablehnen_token', token)
+    .maybeSingle()
+
+  if (!termin) return { termin: null, error: 'Token ungültig oder abgelaufen.' }
+
+  // Lade Kunden-Daten + Fall-Nummer
+  let kundeName = '—'
+  let kennzeichen = '—'
+  let adresse = '—'
+  let fallNummer: string | null = null
+
+  if (termin.fall_id) {
+    const { data: fall } = await svc
+      .from('faelle')
+      .select('fall_nummer, lead_id')
+      .eq('id', termin.fall_id)
+      .single()
+    fallNummer = fall?.fall_nummer ?? null
+
+    const leadId = termin.lead_id || fall?.lead_id
+    if (leadId) {
+      const { data: lead } = await svc
+        .from('leads')
+        .select('vorname, nachname, kennzeichen, fahrzeug_standort_adresse, fahrzeug_standort_plz')
+        .eq('id', leadId)
+        .single()
+      if (lead) {
+        kundeName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—'
+        kennzeichen = lead.kennzeichen || '—'
+        adresse = lead.fahrzeug_standort_adresse || lead.fahrzeug_standort_plz || '—'
+      }
+    }
+  } else if (termin.lead_id) {
+    const { data: lead } = await svc
+      .from('leads')
+      .select('vorname, nachname, kennzeichen, fahrzeug_standort_adresse, fahrzeug_standort_plz')
+      .eq('id', termin.lead_id)
+      .single()
+    if (lead) {
+      kundeName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—'
+      kennzeichen = lead.kennzeichen || '—'
+      adresse = lead.fahrzeug_standort_adresse || lead.fahrzeug_standort_plz || '—'
+    }
+  }
+
+  return {
+    termin: {
+      id: termin.id,
+      status: termin.status,
+      start_zeit: termin.start_zeit,
+      end_zeit: termin.end_zeit,
+      kunde_name: kundeName,
+      kennzeichen,
+      adresse,
+      fall_nummer: fallNummer,
+    },
+  }
+}
+
+export async function ablehnenTermin(
+  token: string,
+  grund: string,
+): Promise<{ success: boolean; error?: string }> {
+  const svc = createServiceClient()
+
+  const { data: termin } = await svc
+    .from('gutachter_termine')
+    .select('id, sv_id, fall_id, start_zeit, status')
+    .eq('ablehnen_token', token)
+    .maybeSingle()
+
+  if (!termin) return { success: false, error: 'Token ungültig.' }
+  if (termin.status === 'abgelehnt') return { success: false, error: 'Bereits abgelehnt.' }
+  if (termin.status !== 'reserviert' && termin.status !== 'bestaetigt') {
+    return { success: false, error: `Termin kann im Status "${termin.status}" nicht abgelehnt werden.` }
+  }
+
+  // 1. Termin ablehnen
+  const { error: updateErr } = await svc.from('gutachter_termine').update({
+    status: 'abgelehnt',
+    abgelehnt_am: new Date().toISOString(),
+    abgelehnt_grund: grund || 'Über Ablehnen-Seite',
+  }).eq('id', termin.id)
+
+  if (updateErr) return { success: false, error: updateErr.message }
+
+  // 2. Fall updaten
+  if (termin.fall_id) {
+    await svc.from('faelle').update({
+      sv_id: null,
+      gutachter_termin_status: 'abgelehnt',
+      updated_at: new Date().toISOString(),
+    }).eq('id', termin.fall_id)
+
+    await svc.from('timeline').insert({
+      fall_id: termin.fall_id,
+      typ: 'system',
+      titel: 'Gutachter hat Termin abgelehnt',
+      beschreibung: `Grund: ${grund || 'Kein Grund angegeben'}. Neuer Gutachter wird gesucht.`,
+    })
+
+    // WhatsApp an Admin (non-critical)
+    try {
+      const { data: svData } = await svc.from('sachverstaendige')
+        .select('profiles(vorname, nachname)')
+        .eq('id', termin.sv_id)
+        .single()
+      const svP = (Array.isArray(svData?.profiles) ? svData?.profiles[0] : svData?.profiles) as { vorname: string | null; nachname: string | null } | null
+      const svName = svP ? `${svP.vorname ?? ''} ${svP.nachname ?? ''}`.trim() : 'Unbekannt'
+
+      const { data: fallData } = await svc.from('faelle').select('fall_nummer, kundenbetreuer_id').eq('id', termin.fall_id).single()
+      const terminDatum = termin.start_zeit ? new Date(termin.start_zeit).toLocaleDateString('de-DE') : '?'
+
+      const { sendManualWhatsApp } = await import('@/lib/whatsapp')
+      const { data: admins } = await svc.from('profiles').select('telefon').eq('rolle', 'admin')
+      for (const a of admins ?? []) {
+        if (a.telefon) {
+          await sendManualWhatsApp(a.telefon,
+            `⚠️ Gutachter ${svName} hat den Termin am ${terminDatum} für ${fallData?.fall_nummer ?? 'Fall'} ABGELEHNT. Bitte neuen Gutachter zuweisen.`,
+            termin.fall_id,
+          )
+        }
+      }
+
+      // Task erstellen
+      await svc.from('tasks').insert({
+        fall_id: termin.fall_id,
+        titel: `Neuen Gutachter zuweisen für ${fallData?.fall_nummer ?? 'Fall'}`,
+        typ: 'dispatch',
+        status: 'offen',
+        prioritaet: 'hoch',
+        faellig_am: new Date().toISOString(),
+        zugewiesen_an: fallData?.kundenbetreuer_id ?? null,
+      })
+    } catch { /* non-critical */ }
+  }
+
+  return { success: true }
+}
+
+export async function bestaetigenTermin(
+  token: string,
+): Promise<{ success: boolean; error?: string }> {
+  const svc = createServiceClient()
+
+  const { data: termin } = await svc
+    .from('gutachter_termine')
+    .select('id, fall_id, status')
+    .eq('ablehnen_token', token)
+    .maybeSingle()
+
+  if (!termin) return { success: false, error: 'Token ungültig.' }
+  if (termin.status === 'bestaetigt') return { success: false, error: 'Bereits bestätigt.' }
+  if (termin.status !== 'reserviert') {
+    return { success: false, error: `Termin kann im Status "${termin.status}" nicht bestätigt werden.` }
+  }
+
+  const { error: updateErr } = await svc.from('gutachter_termine').update({
+    status: 'bestaetigt',
+  }).eq('id', termin.id)
+
+  if (updateErr) return { success: false, error: updateErr.message }
+
+  if (termin.fall_id) {
+    await svc.from('faelle').update({
+      gutachter_termin_status: 'bestaetigt',
+      updated_at: new Date().toISOString(),
+    }).eq('id', termin.fall_id)
+
+    await svc.from('timeline').insert({
+      fall_id: termin.fall_id,
+      typ: 'system',
+      titel: 'Gutachter hat Termin bestätigt',
+      beschreibung: 'Der Sachverständige hat den Termin über die Bestätigungsseite angenommen.',
+    })
+  }
+
+  return { success: true }
+}
+
+export async function gegenvorschlagTermin(
+  token: string,
+  neuerTermin: string,
+  grund: string,
+): Promise<{ success: boolean; error?: string }> {
+  const svc = createServiceClient()
+
+  const { data: termin } = await svc
+    .from('gutachter_termine')
+    .select('id, fall_id, status')
+    .eq('ablehnen_token', token)
+    .maybeSingle()
+
+  if (!termin) return { success: false, error: 'Token ungültig.' }
+  if (termin.status !== 'reserviert' && termin.status !== 'bestaetigt') {
+    return { success: false, error: `Gegenvorschlag im Status "${termin.status}" nicht möglich.` }
+  }
+
+  const neueStartZeit = new Date(neuerTermin)
+  const neueEndZeit = new Date(neueStartZeit.getTime() + 90 * 60 * 1000)
+
+  const { error: updateErr } = await svc.from('gutachter_termine').update({
+    status: 'gegenvorschlag',
+    start_zeit: neueStartZeit.toISOString(),
+    end_zeit: neueEndZeit.toISOString(),
+    abgelehnt_grund: grund || 'Gegenvorschlag ohne Begründung',
+  }).eq('id', termin.id)
+
+  if (updateErr) return { success: false, error: updateErr.message }
+
+  if (termin.fall_id) {
+    await svc.from('faelle').update({
+      gutachter_termin_status: 'gegenvorschlag',
+      updated_at: new Date().toISOString(),
+    }).eq('id', termin.fall_id)
+
+    const terminStr = neueStartZeit.toLocaleString('de-DE', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    })
+
+    await svc.from('timeline').insert({
+      fall_id: termin.fall_id,
+      typ: 'system',
+      titel: 'Gutachter hat Gegenvorschlag gemacht',
+      beschreibung: `Neuer Terminvorschlag: ${terminStr}. Grund: ${grund || '—'}`,
+    })
+
+    // WhatsApp an Admin (non-critical)
+    try {
+      const { data: fallData } = await svc.from('faelle').select('fall_nummer').eq('id', termin.fall_id).single()
+      const { sendManualWhatsApp } = await import('@/lib/whatsapp')
+      const { data: admins } = await svc.from('profiles').select('telefon').eq('rolle', 'admin')
+      for (const a of admins ?? []) {
+        if (a.telefon) {
+          await sendManualWhatsApp(a.telefon,
+            `📅 Gegenvorschlag für ${fallData?.fall_nummer ?? 'Fall'}: Gutachter schlägt ${terminStr} vor. Bitte im Dispatching prüfen.`,
+            termin.fall_id,
+          )
+        }
+      }
+    } catch { /* non-critical */ }
+  }
+
+  return { success: true }
+}
