@@ -109,6 +109,15 @@ type Fall = Record<string, unknown> & {
   ust_id: string | null
   leasinggeber_name: string | null
   bank_name: string | null
+  unfallhergang: string | null
+  fahrzeug_farbe: string | null
+  erstzulassung: string | null
+  kilometerstand: number | null
+  schadensursache: string | null
+  firma_name: string | null
+  halter_name: string | null
+  polizei_vor_ort: boolean | null
+  lead_source_channel: string | null
   anwalt_status: string | null
   prioritaet: string | null
   kundenbetreuer_id: string | null
@@ -807,6 +816,35 @@ export default function FallakteClient({
                 <div className="space-y-1 text-xs">
                   {fall.kennzeichen && <div className="flex justify-between"><span className="text-gray-500">Kennzeichen</span><span className="text-gray-800 font-mono font-medium">{fall.kennzeichen}</span></div>}
                   {(fall.fahrzeug_hersteller || fall.fahrzeug_modell) && <div className="flex justify-between"><span className="text-gray-500">Fahrzeug</span><span className="text-gray-700">{[fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ')}</span></div>}
+                  {fall.fahrzeug_farbe && <div className="flex justify-between"><span className="text-gray-500">Farbe</span><span className="text-gray-700">{fall.fahrzeug_farbe}</span></div>}
+                  {fall.erstzulassung && <div className="flex justify-between"><span className="text-gray-500">EZ</span><span className="text-gray-700">{fall.erstzulassung}</span></div>}
+                  {fall.kilometerstand && <div className="flex justify-between"><span className="text-gray-500">km-Stand</span><span className="text-gray-700">{Number(fall.kilometerstand).toLocaleString('de-DE')} km</span></div>}
+                </div>
+              </div>
+            )}
+
+            {/* BUG-73: Unfall-Details */}
+            {(fall.unfallhergang || fall.schadensursache) && (
+              <div className="bg-white rounded-xl border border-gray-200 p-3">
+                <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Unfall</h3>
+                <div className="space-y-1 text-xs">
+                  {fall.schadensursache && <div className="flex justify-between"><span className="text-gray-500">Ursache</span><span className="text-gray-700">{fall.schadensursache}</span></div>}
+                  {fall.polizei_vor_ort && <div className="flex justify-between"><span className="text-gray-500">Polizei vor Ort</span><span className="text-gray-700">Ja</span></div>}
+                  {fall.unfallhergang && <p className="text-gray-600 text-xs mt-1 whitespace-pre-wrap">{fall.unfallhergang}</p>}
+                </div>
+              </div>
+            )}
+
+            {/* BUG-73: Spezial-Daten (Leasing/Finanzierung/Gewerbe/Halter) */}
+            {(fall.leasinggeber_name || fall.bank_name || fall.firma_name || fall.halter_name || fall.ust_id) && (
+              <div className="bg-white rounded-xl border border-gray-200 p-3">
+                <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Details</h3>
+                <div className="space-y-1 text-xs">
+                  {fall.leasinggeber_name && <div className="flex justify-between"><span className="text-gray-500">Leasinggeber</span><span className="text-gray-700">{fall.leasinggeber_name}</span></div>}
+                  {fall.bank_name && <div className="flex justify-between"><span className="text-gray-500">Finanzierungsbank</span><span className="text-gray-700">{fall.bank_name}</span></div>}
+                  {fall.firma_name && <div className="flex justify-between"><span className="text-gray-500">Firma</span><span className="text-gray-700">{fall.firma_name}</span></div>}
+                  {fall.ust_id && <div className="flex justify-between"><span className="text-gray-500">USt-ID</span><span className="text-gray-700 font-mono">{fall.ust_id}</span></div>}
+                  {fall.halter_name && <div className="flex justify-between"><span className="text-gray-500">Halter</span><span className="text-gray-700">{fall.halter_name}</span></div>}
                 </div>
               </div>
             )}
@@ -1405,6 +1443,35 @@ function TabUebersicht({
           <InfoRow label="Versicherung" value={fall.gegner_versicherung} />
           <InfoRow label="Kennzeichen" value={fall.gegner_kennzeichen} />
           {fall.polizei_aktenzeichen && <InfoRow label="Polizei-Aktenzeichen" value={fall.polizei_aktenzeichen} />}
+          {fall.polizei_vor_ort != null && <InfoRow label="Polizei vor Ort" value={fall.polizei_vor_ort ? 'Ja' : 'Nein'} />}
+        </Section>
+      )}
+
+      {/* BUG-73: Eigene Versicherung */}
+      {(fall.versicherung_name || fall.versicherung_schaden_nr) && (
+        <Section title="Eigene Versicherung">
+          {fall.versicherung_name && <InfoRow label="Versicherung" value={fall.versicherung_name} />}
+          {fall.versicherung_schaden_nr && <InfoRow label="Schaden-Nr." value={fall.versicherung_schaden_nr} />}
+        </Section>
+      )}
+
+      {/* BUG-73: Unfall-Details */}
+      {(fall.unfallhergang || fall.schadensursache) && (
+        <Section title="Unfall-Details">
+          {fall.schadensursache && <InfoRow label="Schadens-Ursache" value={fall.schadensursache} />}
+          {fall.schadens_datum && <InfoRow label="Schadens-Datum" value={new Date(fall.schadens_datum).toLocaleDateString('de-DE')} />}
+          {fall.unfallhergang && <p className="text-sm text-gray-600 whitespace-pre-wrap mt-2">{fall.unfallhergang}</p>}
+        </Section>
+      )}
+
+      {/* BUG-73: Spezial-Details */}
+      {(fall.leasinggeber_name || fall.bank_name || fall.firma_name || fall.halter_name || fall.ust_id) && (
+        <Section title="Zusatz-Details">
+          {fall.leasinggeber_name && <InfoRow label="Leasinggeber" value={fall.leasinggeber_name} />}
+          {fall.bank_name && <InfoRow label="Finanzierungsbank" value={fall.bank_name} />}
+          {fall.firma_name && <InfoRow label="Firma" value={fall.firma_name} />}
+          {fall.ust_id && <InfoRow label="USt-ID" value={fall.ust_id} />}
+          {fall.halter_name && <InfoRow label="Halter (abw.)" value={fall.halter_name} />}
         </Section>
       )}
 
