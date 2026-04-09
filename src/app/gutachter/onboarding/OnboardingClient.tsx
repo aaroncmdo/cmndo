@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Script from 'next/script'
 import { completeOnboarding } from './actions'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
+import SoloVertragWizard from './SoloVertragWizard'
 import {
   UserIcon,
   MapPinIcon,
@@ -20,6 +21,26 @@ import {
 
 // KFZ-152: Organisationstyp-Auswahl (Schritt 0)
 type OrgTyp = 'solo' | 'buero' | 'akademie' | 'community' | 'sub_invite' | null
+
+// KFZ-148 Lueckenfix: Vorlage-Type fuer den Vertrags-Step
+export type Vorlage = {
+  id: string
+  typ: string
+  titel: string
+  version: string
+  inhalt_html: string
+  pflicht_unterschrift: boolean
+}
+
+// KFZ-148 Lueckenfix: existing SV info aus page.tsx
+type ExistingSv = {
+  id: string
+  paket: string | null
+  onboarding_status: string | null
+  onboarding_anzahlung_betrag: number | string | null
+  vertrag_unterschrieben: boolean | null
+  ist_aktiv: boolean | null
+} | null
 
 const STEPS = [
   { key: 'person', label: 'Persönliche Daten', icon: UserIcon },
@@ -72,12 +93,16 @@ export default function OnboardingClient({
   userId,
   email,
   existingProfile,
-  existingSvId,
+  existingSv,
+  nbVorlage,
+  kvVorlage,
 }: {
   userId: string
   email: string
   existingProfile: { vorname: string | null; nachname: string | null; email: string | null; telefon: string | null }
-  existingSvId: string | null
+  existingSv: ExistingSv
+  nbVorlage: Vorlage | null
+  kvVorlage: Vorlage | null
 }) {
   const router = useRouter()
   const [step, setStep] = useState(0)
@@ -85,6 +110,14 @@ export default function OnboardingClient({
   const [error, setError] = useState<string | null>(null)
   // KFZ-152: Org-Typ wird in Schritt 0 gewaehlt. NULL = noch nicht entschieden.
   const [orgTyp, setOrgTyp] = useState<OrgTyp>(null)
+  // KFZ-148 Lueckenfix: Phase A = existing 6-Step Stammdaten, Phase B = neuer 3-Step Vertrag
+  // Wenn existingSv schon Stammdaten hat (paket gesetzt), startet der User direkt in Phase B.
+  type Phase = 'stammdaten' | 'vertrag'
+  const initialPhase: Phase = existingSv?.paket && existingSv.onboarding_status !== 'aktiv'
+    ? 'vertrag'
+    : 'stammdaten'
+  const [phase, setPhase] = useState<Phase>(initialPhase)
+  const existingSvId = existingSv?.id ?? null
   const [data, setData] = useState<FormData>({
     vorname: existingProfile.vorname ?? '',
     nachname: existingProfile.nachname ?? '',
@@ -140,8 +173,12 @@ export default function OnboardingClient({
         userId,
         existingSvId,
       })
-      router.push('/gutachter')
+      // KFZ-148 Lueckenfix: Statt direkt zum Dashboard → in Phase B (Vertrag) wechseln
+      // Dort laeuft der 3-Step Vertrags-Wizard (Paket-Review / Vertrag / Stripe).
+      // Die Page wird durch router.refresh() den frisch angelegten SV nachladen.
       router.refresh()
+      setPhase('vertrag')
+      setSaving(false)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Fehler')
       setSaving(false)
@@ -157,6 +194,25 @@ export default function OnboardingClient({
     : step === 3
     ? data.paket
     : true
+
+  // KFZ-148 Lueckenfix Phase B: Solo-Vertrags-Wizard (3-Step)
+  // Wird angezeigt nachdem der Stammdaten-Wizard fertig ist und der SV in der DB ist.
+  if (phase === 'vertrag' && existingSv) {
+    return (
+      <SoloVertragWizard
+        sv={{
+          id: existingSv.id,
+          paket: existingSv.paket ?? data.paket ?? 'standard',
+          onboarding_anzahlung_betrag: Number(existingSv.onboarding_anzahlung_betrag ?? 0),
+          onboarding_status: existingSv.onboarding_status,
+          vertrag_unterschrieben: !!existingSv.vertrag_unterschrieben,
+        }}
+        profile={existingProfile}
+        nbVorlage={nbVorlage}
+        kvVorlage={kvVorlage}
+      />
+    )
+  }
 
   // KFZ-152 Schritt 0: Org-Typ Selector
   if (orgTyp === null) {
