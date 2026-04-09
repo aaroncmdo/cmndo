@@ -21,7 +21,7 @@ export default async function AbrechnungPage() {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
 
   // Get the SV record
-  const sv = await getGutachterForUser(supabase, user!.id, 'id, paket, offene_faelle, max_faelle_monat, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, guthaben, guthaben_initial, anzahlung_betrag, anzahlung_bezahlt, sv_paket')
+  const sv = await getGutachterForUser(supabase, user!.id, 'id, paket, offene_faelle, max_faelle_monat, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, guthaben, guthaben_initial, anzahlung_betrag, anzahlung_bezahlt')
 
   if (!sv) {
     return (
@@ -74,7 +74,7 @@ export default async function AbrechnungPage() {
     leadMap[l.id] = l
   }
 
-  const paketLabel = PAKET_LABELS[sv.sv_paket ?? sv.paket ?? ''] ?? sv.paket ?? 'Kein Paket'
+  const paketLabel = PAKET_LABELS[sv.paket ?? ''] ?? sv.paket ?? 'Kein Paket'
   const offeneFaelle = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
   const maxFaelle = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10
   const guthaben = typeof sv.guthaben === 'number' ? sv.guthaben : 0
