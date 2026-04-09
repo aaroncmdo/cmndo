@@ -3,6 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import FinanceClient from './FinanceClient'
 import AbrechnungenSection from './AbrechnungenSection'
 import AusstehendeZahlungenTable from '../_components/AusstehendeZahlungenTable'
+import StripeConnectStatusWidget from '../_components/StripeConnectStatusWidget'
+import LeadPreiseVerteilungWidget from '../_components/LeadPreiseVerteilungWidget'
+import WerbebudgetAggregatWidget from '../_components/WerbebudgetAggregatWidget'
 
 const PAKET_PREIS: Record<string, number> = {
   standard: 750, 'starter-10': 750,
@@ -730,6 +733,16 @@ export default async function FinancePage() {
       />
       <GutachterAbrechnungen svRows={svRows} gutachterAnzahlungenGesamt={gutachterAnzahlungenGesamt} />
       <AbrechnungenSectionWrapper />
+      {/* KFZ-155: Stripe-Connect Health, Lead-Preise Verteilung, Werbebudget */}
+      <Suspense fallback={<div className="px-4 pb-8"><div className="max-w-5xl mx-auto h-48 bg-white border border-gray-200 rounded-2xl animate-pulse" /></div>}>
+        <StripeConnectStatusWidget />
+      </Suspense>
+      <Suspense fallback={<div className="px-4 pb-8"><div className="max-w-5xl mx-auto h-48 bg-white border border-gray-200 rounded-2xl animate-pulse" /></div>}>
+        <LeadPreiseVerteilungWidget />
+      </Suspense>
+      <Suspense fallback={<div className="px-4 pb-8"><div className="max-w-5xl mx-auto h-48 bg-white border border-gray-200 rounded-2xl animate-pulse" /></div>}>
+        <WerbebudgetAggregatWidget />
+      </Suspense>
       <IndividuelleAnfragenSection anfragen={individuelleAnfragen} />
       <InvestitionProFallSection />
       </div>

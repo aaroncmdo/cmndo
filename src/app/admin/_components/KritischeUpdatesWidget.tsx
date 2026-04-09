@@ -1,13 +1,18 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { AlertTriangleIcon, CheckCircle2Icon, ArrowRightIcon } from 'lucide-react'
 
 // KFZ-155: Kritische Updates Widget — rote Box mit allem was Aaron sofort
 // braucht. Wenn keine Alerts: gruene 'Alles ruhig' Box.
 //
 // Quellen:
-//   - Failed Stripe-Webhook-Calls (stripe_events mit error)
+//   - Failed Stripe-Webhook-Calls (stripe_events.fehler IS NOT NULL)
+//   - VS-Timer-Eskalationen (tasks.task_code LIKE 'VS-%' ueberfaellig)
+//   - SVs ohne Login seit > 14 Tagen mit zugewiesenen Faellen
+//   - Kanzlei-Tasks die ueberfaellig sind (tasks.phase='kanzlei')
 //   - Faelle die im Status 'wartet auf Gutachter-Annahme' > 24h haengen
+//   - Dispatcher-Faelle ohne SV (faelle.sv_id IS NULL > 1h)
 //   - Faelle in Reklamation (status='reklamation')
 //   - Failed Welcome-Mails (email_log status='failed')
 //   - SVs deren Stripe-Einzug fehlgeschlagen ist
@@ -23,23 +28,131 @@ async function loadAlerts(): Promise<Alert[]> {
   const supabase = await createClient()
   const alerts: Alert[] = []
 
-  // 1. Faelle die > 24h auf Gutachter-Annahme warten
+  const nowIso = new Date().toISOString()
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
   const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+  const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()
+
+  // 1. Faelle die > 24h im SV-Zugewiesen Status haengen ohne dass der SV
+  // den Termin bestaetigt hat (gutachter_termin_bestaetigt=false).
   try {
     const { count: hangingFaelle } = await supabase
       .from('faelle')
       .select('id', { count: 'exact', head: true })
-      .in('status', ['wartet_auf_gutachter', 'wartet_auf_annahme', 'angefragt'])
-      .lt('created_at', dayAgo)
+      .eq('status', 'sv-zugewiesen')
+      .eq('gutachter_termin_bestaetigt', false)
+      .lt('sv_zugewiesen_am', dayAgo)
     if ((hangingFaelle ?? 0) > 0) {
       alerts.push({
         key: 'hanging-cases',
-        text: `${hangingFaelle} Faelle warten seit > 24h auf Gutachter-Annahme`,
+        text: `${hangingFaelle} Faelle warten seit > 24h auf SV-Annahme`,
         href: '/admin/dispatch',
         severity: 'kritisch',
       })
     }
-  } catch { /* status enum may not contain that key */ }
+  } catch { /* schema may differ */ }
+
+  // 1b. Dispatcher-Faelle ohne SV — laenger als 1h ohne Zuweisung
+  try {
+    const { count: ohneSv } = await supabase
+      .from('faelle')
+      .select('id', { count: 'exact', head: true })
+      .is('sv_id', null)
+      .in('status', ['ersterfassung', 'onboarding'])
+      .lt('created_at', oneHourAgo)
+    if ((ohneSv ?? 0) > 0) {
+      alerts.push({
+        key: 'ohne-sv',
+        text: `${ohneSv} Dispatcher-Faelle ohne passenden SV im Gebiet`,
+        href: '/admin/dispatch',
+        severity: 'kritisch',
+      })
+    }
+  } catch { /* ignore */ }
+
+  // 1c. VS-Timer-Eskalationen (KFZ-148 Audit-System)
+  // Tasks mit task_code LIKE 'VS-%' die ueberfaellig sind
+  try {
+    const { count: vsEsk } = await supabase
+      .from('tasks')
+      .select('id', { count: 'exact', head: true })
+      .like('task_code', 'VS-%')
+      .is('erledigt_am', null)
+      .is('auto_resolved_am', null)
+      .lt('deadline', nowIso)
+    if ((vsEsk ?? 0) > 0) {
+      alerts.push({
+        key: 'vs-timer',
+        text: `${vsEsk} VS-Timer-Eskalationen ueberfaellig`,
+        href: '/admin/tasks',
+        severity: 'kritisch',
+      })
+    }
+  } catch { /* ignore */ }
+
+  // 1d. Ueberfaellige Kanzlei-Tasks
+  try {
+    const { count: kanzleiTasks } = await supabase
+      .from('tasks')
+      .select('id', { count: 'exact', head: true })
+      .eq('phase', 'kanzlei')
+      .is('erledigt_am', null)
+      .is('auto_resolved_am', null)
+      .lt('deadline', nowIso)
+    if ((kanzleiTasks ?? 0) > 0) {
+      alerts.push({
+        key: 'kanzlei-tasks',
+        text: `${kanzleiTasks} Kanzlei-Tasks ueberfaellig`,
+        href: '/admin/tasks',
+        severity: 'warnung',
+      })
+    }
+  } catch { /* ignore */ }
+
+  // 1e. SVs ohne Login seit > 14 Tagen, denen aktive Faelle zugewiesen sind.
+  // Setzt voraus dass wir auth.users.last_sign_in_at lesen koennen — geht nur
+  // ueber den Admin-Client (service_role). Defensive Try/Catch falls die
+  // Berechtigungen fehlen.
+  try {
+    const admin = createAdminClient()
+    // Liste der SVs mit zugewiesenen, nicht-abgeschlossenen Faellen
+    const { data: assignedSvs } = await admin
+      .from('faelle')
+      .select('sv_id')
+      .not('sv_id', 'is', null)
+      .not('status', 'in', '("abgeschlossen","storniert")')
+    const svIds = Array.from(new Set((assignedSvs ?? []).map(r => r.sv_id).filter(Boolean) as string[]))
+    if (svIds.length > 0) {
+      const { data: svProfiles } = await admin
+        .from('sachverstaendige')
+        .select('profile_id')
+        .in('id', svIds)
+      const profileIds = Array.from(new Set((svProfiles ?? []).map(r => r.profile_id).filter(Boolean) as string[]))
+
+      // auth.users via Admin-API durchblaettern
+      let inactiveCount = 0
+      if (profileIds.length > 0) {
+        const profileIdSet = new Set(profileIds)
+        const { data: usersData } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 })
+        for (const u of usersData?.users ?? []) {
+          if (!profileIdSet.has(u.id)) continue
+          if (!u.last_sign_in_at) { inactiveCount++; continue }
+          if (u.last_sign_in_at < fourteenDaysAgo) inactiveCount++
+        }
+      }
+
+      if (inactiveCount > 0) {
+        alerts.push({
+          key: 'inactive-sv',
+          text: `${inactiveCount} SVs > 14 Tage ohne Login trotz aktiver Faelle`,
+          href: '/admin/sachverstaendige',
+          severity: 'warnung',
+        })
+      }
+    }
+  } catch (err) {
+    console.error('[KFZ-155] Inactive-SV check failed:', err)
+  }
 
   // 2. Faelle in Reklamation
   try {
@@ -93,16 +206,18 @@ async function loadAlerts(): Promise<Alert[]> {
     }
   } catch { /* spalte existiert evtl. nicht */ }
 
-  // 5. Failed Stripe-Webhook-Calls (stripe_events mit error_at)
+  // 5. Failed Stripe-Webhook-Calls (stripe_events.fehler IS NOT NULL)
   try {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
     const { count: webhookFails } = await supabase
       .from('stripe_events')
       .select('id', { count: 'exact', head: true })
-      .not('error_at', 'is', null)
+      .not('fehler', 'is', null)
+      .gte('empfangen_am', sevenDaysAgo)
     if ((webhookFails ?? 0) > 0) {
       alerts.push({
         key: 'webhook-fails',
-        text: `${webhookFails} Stripe-Webhook-Events mit Fehler`,
+        text: `${webhookFails} Stripe-Webhook-Events mit Fehler (letzte 7 Tage)`,
         href: '/admin/finance',
         severity: 'kritisch',
       })
