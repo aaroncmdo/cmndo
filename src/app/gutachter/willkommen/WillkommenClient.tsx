@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -9,8 +9,6 @@ import {
   CreditCardIcon,
   ImageIcon,
   CheckCircle2Icon,
-  ChevronDownIcon,
-  ChevronUpIcon,
   MapPinIcon,
   UserIcon,
   Building2Icon,
@@ -26,6 +24,13 @@ import { akzeptiereAgbSubSv } from './actions'
 import SignaturePadInput from '@/components/SignaturePadInput'
 import StripeBrandingFooter from '@/components/StripeBrandingFooter'
 import LogoUploadStep from '@/components/LogoUploadStep'
+import { LoadingButton } from '@/components/ui/loading-button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 // ARCH-1: Willkommen-Wizard mit drei Rollen-Varianten:
 //   - solo            : 3-Step Wizard (Konditionen → Vertrag+Sig → Stripe)
@@ -196,26 +201,12 @@ export default function WillkommenClient({
   )
   const [agbAccepted, setAgbAccepted] = useState(false)
   const [signaturePng, setSignaturePng] = useState<string | null>(null)
-  const [scrolled80, setScrolled80] = useState(false)
-  const [kvOpen, setKvOpen] = useState(false)
-  const nbScrollRef = useRef<HTMLDivElement>(null)
 
-  // 80% Scroll-Lock fuer Nutzungsbedingungen (Solo + Inhaber)
-  useEffect(() => {
-    if (rolle === 'sub_mitarbeiter') return
-    const el = nbScrollRef.current
-    if (!el) return
-    function handleScroll() {
-      if (!el) return
-      const total = el.scrollHeight - el.clientHeight
-      if (total <= 0) { setScrolled80(true); return }
-      const ratio = el.scrollTop / total
-      if (ratio >= 0.8) setScrolled80(true)
-    }
-    el.addEventListener('scroll', handleScroll)
-    handleScroll() // Initial check fuer kurze Vertraege
-    return () => el.removeEventListener('scroll', handleScroll)
-  }, [step, rolle])
+  // BUG-96: Modal-State fuer NB / KV Anzeige. Aaron-Wunsch: 'wenn die das
+  // lesen wollen, sollen die auf den dafuer vorgesehenen link klicken.'
+  // Statt Scroll-Lock + Inline-Box → Click-Trigger fuer Modal mit dem
+  // jeweiligen Vertragstext.
+  const [vertragModal, setVertragModal] = useState<'nb' | 'kv' | null>(null)
 
   const paketLabel = PAKET_LABELS[sv.paket] ?? sv.paket
   const fullName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || '—'
@@ -231,7 +222,8 @@ export default function WillkommenClient({
     if (!agbAccepted) { setError('Bitte akzeptiere die AGB/NB/DS'); return }
     if (!unterschriftName.trim()) { setError('Bitte gib deinen Namen ein'); return }
     if (!signaturePng) { setError('Bitte unterschreibe im Feld unten'); return }
-    if (!scrolled80) { setError('Bitte lies die Nutzungsbedingungen vollständig (80% gescrollt)'); return }
+    // BUG-96: Scroll-Lock raus — der User entscheidet ueber die Modal-Links
+    // ob er die Vertragstexte vor der Akzeptanz lesen will.
 
     setSaving(true)
     const result = await signSvVertrag({
@@ -254,7 +246,7 @@ export default function WillkommenClient({
     if (!agbAccepted) { setError('Bitte akzeptiere die AGB/NB/DS'); return }
     if (!unterschriftName.trim()) { setError('Bitte gib deinen Namen ein'); return }
     if (!signaturePng) { setError('Bitte unterschreibe im Feld unten'); return }
-    if (!scrolled80) { setError('Bitte lies die Nutzungsbedingungen vollständig (80% gescrollt)'); return }
+    // BUG-96: Scroll-Lock raus — siehe Solo-Handler.
 
     setSaving(true)
     const result = await signBueroVertrag({
@@ -565,98 +557,147 @@ export default function WillkommenClient({
 
           {/* ═══════════════════════════════════════════════════════════════
               SCHRITT 1: Vertrag (Solo + Inhaber) bzw. AGB-Checkbox (Sub)
+              BUG-96: Scroll-Lock + Inline-Vertragstexte raus → kompakte
+              Auftragszusammenfassung + Modal-Links fuer NB / KV.
              ═══════════════════════════════════════════════════════════════ */}
           {step === 1 && rolle !== 'sub_mitarbeiter' && (
-            <div className="space-y-4">
-              {!nbVorlage ? (
-                <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm">
-                  Keine aktive Nutzungsbedingungen-Vorlage hinterlegt. Bitte support@claimondo.de kontaktieren.
+            <div className="space-y-5">
+              {/* Auftragszusammenfassung */}
+              <div className="bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-xl p-5">
+                <p className="text-xs text-[#1E3A5F] uppercase tracking-wide font-semibold mb-3">
+                  Deine Bestellung
+                </p>
+                <div className="grid grid-cols-2 gap-y-3 gap-x-4">
+                  <Kondition label="Paket" value={paketLabel} />
+                  <Kondition label="Faelle pro Monat" value={String(sv.max_faelle_monat)} />
+                  <Kondition label="Radius" value={`${sv.paket_umkreis_km} km`} />
+                  <Kondition
+                    label={rolle === 'buero_inhaber' ? 'Anzahlung gesamt' : 'Anzahlung'}
+                    value={fmtEur(rolle === 'buero_inhaber' ? gesamtAnzahlung : sv.onboarding_anzahlung_betrag)}
+                    highlight
+                  />
                 </div>
-              ) : (
-                <>
-                  {/* Nutzungsbedingungen mit 80% Scroll-Lock */}
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="text-xs text-gray-500 uppercase tracking-wide">
-                        {nbVorlage.titel} <span className="text-red-400">*</span>
-                      </label>
-                      <span className={`text-[10px] ${scrolled80 ? 'text-[#4573A2]' : 'text-gray-400'}`}>
-                        {scrolled80 ? '✓ vollständig gelesen' : 'bitte vollständig scrollen'}
-                      </span>
-                    </div>
-                    <div
-                      ref={nbScrollRef}
-                      className="bg-gray-50 border border-gray-200 rounded-xl p-4 max-h-64 overflow-y-auto text-xs text-gray-600 leading-relaxed prose prose-sm max-w-none"
-                      // eslint-disable-next-line react/no-danger
-                      dangerouslySetInnerHTML={{ __html: nbVorlage.inhalt_html }}
-                    />
-                  </div>
+                <div className="mt-4 pt-4 border-t border-[#4573A2]/15 flex items-center justify-between text-xs">
+                  <span className="text-gray-600">Lead-Preis pro Fall variiert nach Schadenhoehe</span>
+                  <Link
+                    href="/gutachter/leadpreise"
+                    target="_blank"
+                    className="text-[#1E3A5F] underline hover:text-[#4573A2] font-medium"
+                  >
+                    → Lead-Preis-Tabelle einsehen
+                  </Link>
+                </div>
+              </div>
 
-                  {/* Kooperationsvertrag-Muster aufklappbar */}
-                  {kvVorlage && (
-                    <div className="border border-gray-200 rounded-xl overflow-hidden">
-                      <button
-                        type="button"
-                        onClick={() => setKvOpen(!kvOpen)}
-                        className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
-                      >
-                        <span className="text-sm font-medium text-gray-900">{kvVorlage.titel}</span>
-                        {kvOpen ? <ChevronUpIcon className="w-4 h-4 text-gray-400" /> : <ChevronDownIcon className="w-4 h-4 text-gray-400" />}
-                      </button>
-                      {kvOpen && (
-                        <div
-                          className="px-4 pb-4 text-xs text-gray-600 leading-relaxed max-h-64 overflow-y-auto prose prose-sm max-w-none"
-                          // eslint-disable-next-line react/no-danger
-                          dangerouslySetInnerHTML={{ __html: kvVorlage.inhalt_html }}
-                        />
-                      )}
+              {/* Hinweis fuer Buero-Inhaber: stellvertretend fuer alle Sub-Standorte */}
+              {rolle === 'buero_inhaber' && organisation && (
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-start gap-3">
+                  <Building2Icon className="w-5 h-5 text-[#4573A2] flex-shrink-0 mt-0.5" />
+                  <div className="text-xs text-gray-700">
+                    Du unterzeichnest stellvertretend fuer <strong>{organisation.name}</strong> und alle{' '}
+                    {subSvs.length} {subSvs.length === 1 ? 'Sub-Standort' : 'Sub-Standorte'}.
+                  </div>
+                </div>
+              )}
+
+              {/* Stammdaten kompakt */}
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <p className="text-[10px] text-gray-500 uppercase tracking-wide font-semibold mb-2">
+                  Stammdaten
+                </p>
+                <div className="space-y-1.5 text-xs">
+                  <div className="flex justify-between gap-2">
+                    <span className="text-gray-500">Name</span>
+                    <span className="text-gray-900 text-right">{fullName}</span>
+                  </div>
+                  {organisation && (
+                    <div className="flex justify-between gap-2">
+                      <span className="text-gray-500">Buero</span>
+                      <span className="text-gray-900 text-right">{organisation.name}</span>
                     </div>
                   )}
-
-                  {/* Name */}
-                  <div>
-                    <label className="text-xs text-gray-500 mb-1.5 block">
-                      Dein Name (juristisch verbindlich) <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={unterschriftName}
-                      onChange={e => setUnterschriftName(e.target.value)}
-                      className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
-                    />
+                  <div className="flex justify-between gap-2">
+                    <span className="text-gray-500">Email</span>
+                    <span className="text-gray-900 text-right break-all">{profile.email ?? '—'}</span>
                   </div>
-
-                  {/* Signature Pad */}
-                  <div>
-                    <label className="text-xs text-gray-500 mb-1.5 block">
-                      Unterschrift <span className="text-red-400">*</span>
-                    </label>
-                    <SignaturePadInput
-                      value={signaturePng}
-                      onChange={setSignaturePng}
-                      height="h-44"
-                      placeholder="Hier mit Maus oder Finger unterschreiben"
-                    />
-                  </div>
-
-                  {/* AGB-Checkbox */}
-                  <label className="flex items-start gap-2.5 cursor-pointer text-sm text-gray-700">
-                    <input
-                      type="checkbox"
-                      checked={agbAccepted}
-                      onChange={e => setAgbAccepted(e.target.checked)}
-                      className="mt-0.5 rounded border-gray-300"
-                    />
-                    <span>
-                      Ich akzeptiere die <strong>Nutzungsbedingungen</strong>, die <strong>AGB</strong> und die <strong>Datenschutzerklärung</strong>.
-                      Mit meiner Unterschrift bestätige ich rechtsverbindlich die Annahme
-                      {rolle === 'buero_inhaber' && organisation
-                        ? ` stellvertretend für ${organisation.name} und alle Sub-Standorte.`
-                        : '.'}
+                  <div className="flex justify-between gap-2">
+                    <span className="text-gray-500">Anschrift</span>
+                    <span className="text-gray-900 text-right">
+                      {[sv.standort_adresse, sv.standort_plz].filter(Boolean).join(', ') || '—'}
                     </span>
-                  </label>
-                </>
-              )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Name */}
+              <div>
+                <label className="text-xs text-gray-500 mb-1.5 block">
+                  Dein Name (juristisch verbindlich) <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={unterschriftName}
+                  onChange={e => setUnterschriftName(e.target.value)}
+                  className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                />
+              </div>
+
+              {/* Signature Pad — BUG-81 controlled component bleibt */}
+              <div>
+                <label className="text-xs text-gray-500 mb-1.5 block">
+                  Unterschrift <span className="text-red-400">*</span>
+                </label>
+                <SignaturePadInput
+                  value={signaturePng}
+                  onChange={setSignaturePng}
+                  height="h-44"
+                  placeholder="Hier mit Maus oder Finger unterschreiben"
+                />
+              </div>
+
+              {/* AGB-Checkbox mit Modal-Links */}
+              <label className="flex items-start gap-2.5 cursor-pointer text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={agbAccepted}
+                  onChange={e => setAgbAccepted(e.target.checked)}
+                  className="mt-0.5 rounded border-gray-300"
+                />
+                <span>
+                  Ich akzeptiere die{' '}
+                  {nbVorlage ? (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); setVertragModal('nb') }}
+                      className="font-semibold text-[#1E3A5F] underline hover:text-[#4573A2]"
+                    >
+                      Nutzungsbedingungen
+                    </button>
+                  ) : (
+                    <strong>Nutzungsbedingungen</strong>
+                  )}
+                  ,{' '}
+                  {kvVorlage ? (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); setVertragModal('kv') }}
+                      className="font-semibold text-[#1E3A5F] underline hover:text-[#4573A2]"
+                    >
+                      den Kooperationsvertrag
+                    </button>
+                  ) : (
+                    <strong>den Kooperationsvertrag</strong>
+                  )}
+                  {' '}und die{' '}
+                  <Link href="/datenschutz" target="_blank" className="font-semibold text-[#1E3A5F] underline hover:text-[#4573A2]">
+                    Datenschutzerklaerung
+                  </Link>
+                  . Mit meiner Unterschrift bestaetige ich rechtsverbindlich die Annahme
+                  {rolle === 'buero_inhaber' && organisation
+                    ? ` stellvertretend fuer ${organisation.name} und alle Sub-Standorte.`
+                    : '.'}
+                </span>
+              </label>
             </div>
           )}
 
@@ -800,8 +841,9 @@ export default function WillkommenClient({
                   Zurück
                 </button>
               )}
-              <button
-                type="button"
+              <LoadingButton
+                isLoading={saving}
+                loadingText="Wird verarbeitet..."
                 onClick={() => {
                   if (rolle === 'sub_mitarbeiter') {
                     if (step === 0) setStep(1)
@@ -815,15 +857,14 @@ export default function WillkommenClient({
                   }
                 }}
                 disabled={
-                  saving ||
                   (step === 1 && rolle !== 'sub_mitarbeiter' && !nbVorlage) ||
+                  // BUG-96: Vertrag-Submit nur wenn Checkbox an + Name + Signatur
+                  (step === 1 && rolle !== 'sub_mitarbeiter' && (!agbAccepted || !unterschriftName.trim() || !signaturePng)) ||
                   (step === 0 && rolle === 'buero_inhaber' && subSvs.length === 0)
                 }
-                className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40"
+                className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {saving
-                  ? 'Wird verarbeitet...'
-                  : rolle === 'sub_mitarbeiter'
+                {rolle === 'sub_mitarbeiter'
                   ? step === 0
                     ? 'Weiter zur Bestaetigung'
                     : 'Bedingungen akzeptieren'
@@ -834,11 +875,31 @@ export default function WillkommenClient({
                   : rolle === 'buero_inhaber'
                   ? 'Buero-Vertrag unterzeichnen'
                   : 'Vertrag unterzeichnen'}
-              </button>
+              </LoadingButton>
             </div>
           )}
         </div>
       </div>
+
+      {/* BUG-96: Modal fuer Nutzungsbedingungen / Kooperationsvertrag.
+          Aaron-Wunsch: User klickt auf den Link in der Checkbox und bekommt
+          den Vertragstext im Modal — kein Scroll-Lock mehr. */}
+      <Dialog open={vertragModal !== null} onOpenChange={(open) => { if (!open) setVertragModal(null) }}>
+        <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col gap-4">
+          <DialogHeader>
+            <DialogTitle>
+              {vertragModal === 'nb' ? (nbVorlage?.titel ?? 'Nutzungsbedingungen') : (kvVorlage?.titel ?? 'Kooperationsvertrag')}
+            </DialogTitle>
+          </DialogHeader>
+          <div
+            className="flex-1 overflow-y-auto text-xs text-gray-700 leading-relaxed prose prose-sm max-w-none pr-2"
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{
+              __html: (vertragModal === 'nb' ? nbVorlage?.inhalt_html : kvVorlage?.inhalt_html) ?? '',
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
