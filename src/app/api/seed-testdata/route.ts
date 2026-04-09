@@ -151,7 +151,7 @@ export async function POST() {
         paket: 'standard-25' as const, paket_faelle_gesamt: 25, paket_umkreis_km: 40,
         guthaben: 3750, anzahlung_status: 'bezahlt' as const,
         onboarding_abgeschlossen: true, ist_parent_account: false,
-        qualifikationen: ['Haftpflichtschaden', 'Kaskoschaden', 'Totalschaden-Bewertung'],
+        qualifikationen_neu: ['Haftpflichtschaden', 'Kaskoschaden'],
       },
       {
         email: 'info@ib-hartmann.de', vorname: 'Stefan', nachname: 'Hartmann',
@@ -162,7 +162,8 @@ export async function POST() {
         paket: 'premium-50' as const, paket_faelle_gesamt: 50, paket_umkreis_km: 100,
         guthaben: 7500, anzahlung_status: 'bezahlt' as const,
         onboarding_abgeschlossen: true, ist_parent_account: true,
-        qualifikationen: ['Haftpflichtschaden', 'Kaskoschaden', 'Flottenmanagement', 'LKW/Nutzfahrzeuge'],
+        qualifikationen_neu: ['Haftpflichtschaden', 'Kaskoschaden'],
+        spezifikationen: ['LKW', 'Nutzfahrzeuge'],
       },
       {
         email: 'wagner@dat-sv.de', vorname: 'Klaus', nachname: 'Wagner',
@@ -173,7 +174,7 @@ export async function POST() {
         paket: 'standard' as const, paket_faelle_gesamt: 10, paket_umkreis_km: 15,
         guthaben: 1500, anzahlung_status: 'bezahlt' as const,
         onboarding_abgeschlossen: true, ist_parent_account: false,
-        qualifikationen: ['Haftpflichtschaden', 'Kaskoschaden'],
+        qualifikationen_neu: ['Haftpflichtschaden', 'Kaskoschaden'],
       },
       {
         email: 'fischer@akademie-sv.de', vorname: 'Maria', nachname: 'Fischer',
@@ -184,7 +185,8 @@ export async function POST() {
         paket: 'standard-25' as const, paket_faelle_gesamt: 25, paket_umkreis_km: 40,
         guthaben: 3750, anzahlung_status: 'bezahlt' as const,
         onboarding_abgeschlossen: true, ist_parent_account: false,
-        qualifikationen: ['Haftpflichtschaden', 'Gerichtsgutachten', 'Beweissicherung', 'Oldtimer'],
+        qualifikationen_neu: ['Haftpflichtschaden', 'Gerichtsgutachten', 'Beweissicherung'],
+        spezifikationen: ['Oldtimer'],
       },
     ]
 
@@ -213,7 +215,8 @@ export async function POST() {
         guthaben: sv.guthaben,
         anzahlung_status: sv.anzahlung_status,
         onboarding_abgeschlossen: sv.onboarding_abgeschlossen,
-        qualifikationen: sv.qualifikationen,
+        qualifikationen_neu: sv.qualifikationen_neu,
+        spezifikationen: ('spezifikationen' in sv ? (sv as { spezifikationen?: string[] }).spezifikationen : null) ?? [],
         ist_aktiv: true,
         ist_parent_account: sv.ist_parent_account,
       }).select('id').single()

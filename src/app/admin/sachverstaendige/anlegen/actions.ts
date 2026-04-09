@@ -113,14 +113,12 @@ export async function anlegeSv(data: AnlegeSvFormData): Promise<{ success: boole
   }
 
   // 3. sachverstaendige (mit ARCH-1 Status)
-  // KFZ-154: Dual-Write — qualifikationen (legacy column, fuer alte Read-Side
-  // wie /admin/karte) bekommt das gleiche Array wie qualifikationen_neu plus
-  // spezifikationen + schadenarten gehen in eigene Spalten.
+  // KFZ-154 Cleanup: legacy 'qualifikationen' Spalte ist gedroppt, nur noch
+  // qualifikationen_neu + spezifikationen + schadenarten.
   const { data: svRow, error: svErr } = await adminDb.from('sachverstaendige').insert({
     profile_id: authUser.user.id,
     paket: data.paket === 'individuell' ? 'standard' : data.paket, // 'individuell' wird intern als 'standard' geflaggt mit Override
     gutachter_typ: data.gutachter_typ,
-    qualifikationen: data.qualifikationen,
     qualifikationen_neu: data.qualifikationen,
     spezifikationen: data.spezifikationen ?? [],
     schadenarten: data.schadenarten ?? [],
@@ -401,7 +399,7 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
     }
 
     // 5c. Sub sachverstaendige (immer ein neuer Eintrag, auch wenn Email wiederverwendet)
-    // KFZ-154: Spezialisierungen pro Sub-SV (3 Listen, dual-write).
+    // KFZ-154 Cleanup: nur noch qualifikationen_neu + spezifikationen + schadenarten.
     const subQual = std.qualifikationen ?? []
     const { data: subSvRow } = await adminDb.from('sachverstaendige').insert({
       profile_id: subUserId,
@@ -409,7 +407,6 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
       rolle_in_organisation: 'mitarbeiter',
       paket: std.paket === 'individuell' ? 'standard' : std.paket,
       gutachter_typ: 'kfz-gutachter',
-      qualifikationen: subQual,
       qualifikationen_neu: subQual,
       spezifikationen: std.spezifikationen ?? [],
       schadenarten: std.schadenarten ?? [],
@@ -587,7 +584,7 @@ export async function anlegeSubSv(params: {
     return { success: false, error: `Profil fehlgeschlagen: ${profileErr.message}` }
   }
 
-  // KFZ-154: dual-write fuer Spezialisierungen
+  // KFZ-154 Cleanup: nur noch qualifikationen_neu + spezifikationen + schadenarten
   const subQual = params.qualifikationen ?? []
   const { data: svRow, error: svErr } = await adminDb.from('sachverstaendige').insert({
     profile_id: subUserId,
@@ -595,7 +592,6 @@ export async function anlegeSubSv(params: {
     rolle_in_organisation: 'mitarbeiter',
     paket: params.paket === 'individuell' ? 'standard' : params.paket,
     gutachter_typ: 'kfz-gutachter',
-    qualifikationen: subQual,
     qualifikationen_neu: subQual,
     spezifikationen: params.spezifikationen ?? [],
     schadenarten: params.schadenarten ?? [],

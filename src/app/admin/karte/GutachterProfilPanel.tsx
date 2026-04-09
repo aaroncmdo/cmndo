@@ -156,6 +156,8 @@ export default function GutachterProfilPanel({
   onClose: () => void
 }) {
   const [editingQual, setEditingQual] = useState(false)
+  // KFZ-154: liest aus dem unified qualifikationen-Feld (Mapper im
+  // page.tsx hat qualifikationen_neu mit Fallback auf legacy bereits aufgeloest)
   const [quals, setQuals] = useState<string[]>(sv.qualifikationen ?? [])
   const [savingQual, setSavingQual] = useState(false)
   const [notiz, setNotiz] = useState('')
@@ -172,7 +174,8 @@ export default function GutachterProfilPanel({
   async function handleQualSave() {
     setSavingQual(true)
     try {
-      await updateGutachterProfil(sv.id, 'qualifikationen', quals)
+      // KFZ-154 Cleanup: legacy qualifikationen-Spalte gedroppt -> nur _neu schreiben
+      await updateGutachterProfil(sv.id, 'qualifikationen_neu', quals)
       setEditingQual(false)
     } catch { /* */ }
     setSavingQual(false)

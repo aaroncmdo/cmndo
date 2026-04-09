@@ -76,7 +76,7 @@ export async function completeOnboarding(data: {
         standort_lng: data.standort_lng,
         standort_place_id: data.standort_place_id || null,
         kalender_typ: data.kalender_typ,
-        qualifikationen: data.qualifikationen,
+        qualifikationen_neu: data.qualifikationen,
         onboarding_abgeschlossen: true,
         ist_aktiv: true,
       })
@@ -105,7 +105,7 @@ export async function completeOnboarding(data: {
         standort_lng: data.standort_lng,
         standort_place_id: data.standort_place_id || null,
         kalender_typ: data.kalender_typ,
-        qualifikationen: data.qualifikationen,
+        qualifikationen_neu: data.qualifikationen,
         onboarding_abgeschlossen: true,
         ist_aktiv: true, // Deaktiviert-Banner triggert ueber 'ist_aktiv=false', nicht hier
         onboarding_status: 'pending',

@@ -128,7 +128,7 @@ export async function onboardGutachter(data: OnboardingData) {
     user_id: authUser.user.id,
     paket: data.paket,
     gutachter_typ: data.gutachter_typ,
-    qualifikationen: data.qualifikationen,
+    qualifikationen_neu: data.qualifikationen,
     standort_adresse: data.standort_adresse || null,
     standort_plz: data.standort_plz || null,
     standort_lat: data.standort_lat,

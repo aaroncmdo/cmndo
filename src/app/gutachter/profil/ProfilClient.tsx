@@ -11,7 +11,7 @@ import { LoadingButton } from '@/components/ui/loading-button'
 import { MapPinIcon, InfoIcon } from 'lucide-react'
 
 type Profile = { anrede: string | null; titel: string | null; vorname: string | null; nachname: string | null; telefon: string | null; rolle: string }
-type SV = { id: string; paket: string; gebiet_plz: string | null; ist_aktiv: boolean; max_faelle_monat: number; offene_faelle: number; kalender_typ: string; kalender_sync_aktiv: boolean; kalender_sync_letzte: string | null; qualifikationen: string[] | null; qualifikationen_neu: string[] | null; spezifikationen: string[] | null; schadenarten: string[] | null; standort_adresse: string | null; standort_plz: string | null; standort_lat: number | null; standort_lng: number | null; standort_place_id: string | null; firmenname: string | null; rechtsform: string | null; steuernummer: string | null; ust_id: string | null; hrb: string | null }
+type SV = { id: string; paket: string; gebiet_plz: string | null; ist_aktiv: boolean; max_faelle_monat: number; offene_faelle: number; kalender_typ: string; kalender_sync_aktiv: boolean; kalender_sync_letzte: string | null; qualifikationen_neu: string[] | null; spezifikationen: string[] | null; schadenarten: string[] | null; standort_adresse: string | null; standort_plz: string | null; standort_lat: number | null; standort_lng: number | null; standort_place_id: string | null; firmenname: string | null; rechtsform: string | null; steuernummer: string | null; ust_id: string | null; hrb: string | null }
 
 // BUG-91: Klassische deutsche Rechtsformen + 'Einzelunternehmen' als Default
 // fuer Solo-SVs ohne eigene GmbH/UG.
@@ -367,11 +367,10 @@ export default function ProfilClient({
             <SpezSection
               svId={sv.id}
               column="qualifikationen_neu"
-              legacyColumn="qualifikationen"
               title="Qualifikationen"
               hint="Was bietest du fachlich an?"
               options={QUALIFIKATIONEN}
-              initial={sv.qualifikationen_neu ?? sv.qualifikationen ?? []}
+              initial={sv.qualifikationen_neu ?? []}
             />
             <SpezSection
               svId={sv.id}
@@ -652,14 +651,13 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
   )
 }
 
-// KFZ-154: SV pflegt seine 3 Spezialisierungs-Listen direkt aus dem Profil
-// (Tags, dual-write fuer qualifikationen → legacy-column zusaetzlich).
+// KFZ-154 Cleanup: SV pflegt seine 3 Spezialisierungs-Listen direkt aus dem
+// Profil (Tags). Legacy 'qualifikationen' Spalte ist gedroppt.
 function SpezSection({
-  svId, column, legacyColumn, title, hint, options, initial,
+  svId, column, title, hint, options, initial,
 }: {
   svId: string
   column: 'qualifikationen_neu' | 'spezifikationen' | 'schadenarten'
-  legacyColumn?: 'qualifikationen'
   title: string
   hint: string
   options: ReadonlyArray<string>
@@ -678,9 +676,6 @@ function SpezSection({
     try {
       const supabase = createClient()
       const update: Record<string, string[]> = { [column]: next }
-      // KFZ-154 Dual-Write: qualifikationen-Spalte wird zusaetzlich geschrieben
-      // damit /admin/karte und andere Read-Side Anzeigen weiter funktionieren.
-      if (legacyColumn) update[legacyColumn] = next
       const { error: updErr } = await supabase
         .from('sachverstaendige')
         .update(update)

@@ -137,6 +137,11 @@ export async function createLead(data: {
   email: string
   source_channel: string
   schadenfall_typ?: string
+  // KFZ-154: Spezifikation + Schadenart fuer Dispatcher-Match. Optional bei
+  // schnellem Quick-Add (kann nachtraeglich via LeadInlineFields gesetzt werden)
+  // oder beim manuellen Anlegen direkt mitgegeben werden.
+  spezifikation?: string
+  schadenart?: string
 }) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -149,6 +154,8 @@ export async function createLead(data: {
     email: data.email || null,
     source_channel: data.source_channel || 'telefon',
     schadenfall_typ: data.schadenfall_typ || null,
+    spezifikation: data.spezifikation || null,
+    schadenart: data.schadenart || null,
     status: 'neu',
     qualifizierungs_phase: 'neu',
     kunden_konstellation: 'kk-01',

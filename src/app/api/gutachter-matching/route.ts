@@ -86,10 +86,10 @@ export async function POST(request: Request) {
   }
 
   // 2. Alle aktiven SVs
-  // KFZ-154: zusaetzlich qualifikationen_neu + spezifikationen + schadenarten
+  // KFZ-154 Cleanup: legacy qualifikationen Spalte gedroppt
   const { data: svList } = await supabase
     .from('sachverstaendige')
-    .select('id, partner_seit, offene_faelle, max_faelle_monat, paket, qualifikationen, qualifikationen_neu, spezifikationen, schadenarten, ist_aktiv, profile_id, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_lat, standort_lng, isochrone_polygon')
+    .select('id, partner_seit, offene_faelle, max_faelle_monat, paket, qualifikationen_neu, spezifikationen, schadenarten, ist_aktiv, profile_id, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_lat, standort_lng, isochrone_polygon')
     .eq('ist_aktiv', true)
     .eq('portal_zugang_freigeschaltet', true) // KFZ-148: Nur freigeschaltete SVs
 
@@ -133,8 +133,8 @@ export async function POST(request: Request) {
     let score = 0
     if (sv.partner_seit) score -= Math.min((Date.now() - new Date(sv.partner_seit).getTime()) / (365.25 * 86400000), 10) * 10
     score -= (maxFaelle > 0 ? 1 - (genutztFaelle / maxFaelle) : 0.5) * 30
-    // Legacy qualifikationen-Match (schadenfall_typ Body-Param)
-    if (schadenfallTyp && (svQualNeu.includes(schadenfallTyp) || (Array.isArray(sv.qualifikationen) && sv.qualifikationen.includes(schadenfallTyp)))) score -= 50
+    // KFZ-154: schadenfall_typ-Match gegen qualifikationen_neu
+    if (schadenfallTyp && svQualNeu.includes(schadenfallTyp)) score -= 50
     // KFZ-154: schadenart-Match Bonus (Soft-Priority -40)
     if (schadenMatch) score -= 40
     if (distanz != null) score += distanz
