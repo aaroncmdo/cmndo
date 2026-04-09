@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { headers } from 'next/headers'
+import { signAndStoreContract } from '@/lib/contracts/sign-and-store'
 import { PAKET_KONTINGENT, berechneStandortAnzahlung, type BueroStandortInput } from './constants'
 
 // KFZ-152 Block C: Buero-Onboarding Server Actions
@@ -92,13 +93,15 @@ export async function createBueroOrganisation(data: {
 }
 
 /**
- * Schritt 2: Vertrag unterzeichnen (analog KFZ-148, aber als Buero-Inhaber).
+ * Schritt 2: Vertrag unterzeichnen — Buero-Inhaber unterzeichnet stellvertretend
+ * fuer alle aktuellen und zukuenftigen Standorte. Nutzt den shared
+ * signAndStoreContract Helper (PDF + Storage + DB) wie KFZ-148.
  */
 export async function signBueroVertrag(params: {
   organisation_id: string
-  signatureSvg: string
+  signaturePngDataUri: string  // padRef.current.toDataURL('image/png')
   unterschriftName: string
-}): Promise<{ success: boolean; error?: string }> {
+}): Promise<{ success: boolean; error?: string; vertrag_id?: string; pdf_path?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
@@ -107,45 +110,66 @@ export async function signBueroVertrag(params: {
 
   // Org gehoert dem aktuellen User?
   const { data: org } = await db.from('organisationen')
-    .select('id, hauptansprechpartner_user_id')
+    .select('id, name, hauptansprechpartner_user_id')
     .eq('id', params.organisation_id)
     .single()
   if (!org || org.hauptansprechpartner_user_id !== user.id) {
     return { success: false, error: 'Keine Berechtigung' }
   }
 
-  // Aktive Nutzungsbedingungen
-  const { data: nbVorlage } = await db.from('vertragsvorlagen')
-    .select('id, version')
-    .eq('typ', 'nutzungsbedingungen')
-    .eq('aktiv', true)
-    .limit(1)
-    .single()
-  if (!nbVorlage) return { success: false, error: 'Nutzungsbedingungen nicht verfuegbar' }
-
   const h = await headers()
   const ip = h.get('x-forwarded-for')?.split(',')[0]?.trim() ?? h.get('x-real-ip') ?? null
   const userAgent = h.get('user-agent') ?? null
 
-  const { data: vertrag, error: vertragErr } = await db.from('vertraege_unterzeichnet').insert({
-    organisation_id: params.organisation_id,
-    vorlage_id: nbVorlage.id,
-    vorlage_typ: 'nutzungsbedingungen',
-    vorlage_version: nbVorlage.version,
-    unterschrift_name: params.unterschriftName,
-    unterschrift_ip: ip,
-    unterschrift_user_agent: userAgent,
-  }).select('id').single()
-
-  if (vertragErr || !vertrag) return { success: false, error: vertragErr?.message ?? 'Vertrag konnte nicht gespeichert werden' }
+  // Vertrag unterzeichnen + PDF + Storage in einem Step
+  let result
+  try {
+    result = await signAndStoreContract({
+      vorlage_typ: 'nutzungsbedingungen',
+      unterschrift_name: params.unterschriftName,
+      unterschrift_ip: ip,
+      unterschrift_user_agent: userAgent,
+      signature_png_data_uri: params.signaturePngDataUri,
+      organisation_id: params.organisation_id,
+      rolle: 'Buero-Inhaber (stellvertretend fuer alle Standorte)',
+      organisation_name: org.name,
+    })
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Vertrag konnte nicht gespeichert werden' }
+  }
 
   await db.from('organisationen').update({
     onboarding_status: 'vertrag_unterzeichnet',
-    vertrag_unterzeichnet_id: vertrag.id,
+    vertrag_unterzeichnet_id: result.vertrag_id,
     updated_at: new Date().toISOString(),
   }).eq('id', params.organisation_id)
 
-  return { success: true }
+  // Welcome-Email mit PDF-Anhang an den Inhaber
+  try {
+    const { sendEmail } = await import('@/lib/email/google/client')
+    const { data: profile } = await db.from('profiles').select('email, vorname').eq('id', user.id).single()
+    if (profile?.email) {
+      await sendEmail({
+        to: profile.email,
+        subject: `Vertrag unterzeichnet — ${org.name}`,
+        html: `<div style="font-family:-apple-system,sans-serif;font-size:14px;line-height:1.7;color:#374151">
+<p>Hallo ${profile.vorname ?? 'Partner'},</p>
+<p>vielen Dank fuer die Unterzeichnung. Im Anhang findest du das Vertragsdokument fuer dein Buero <strong>${org.name}</strong>.</p>
+<p><strong>Naechster Schritt:</strong> Bitte leiste die zentrale Anzahlung ueber den Stripe-Checkout im Buero-Onboarding. Sobald die Zahlung eingegangen ist, werden alle Standorte freigeschaltet.</p>
+<p>Dein Claimondo-Team</p></div>`,
+        fallId: null,
+        empfaengerTyp: 'sv',
+        template: 'buero_onboarding_vertrag',
+        attachments: [{
+          filename: `Claimondo-Buero-Vertrag-v${result.vorlage_version}.pdf`,
+          content: result.pdf_buffer,
+          contentType: 'application/pdf',
+        }],
+      })
+    }
+  } catch (err) { console.error('[KFZ-152] Buero-Vertrag-Email:', err) }
+
+  return { success: true, vertrag_id: result.vertrag_id, pdf_path: result.pdf_path }
 }
 
 /**

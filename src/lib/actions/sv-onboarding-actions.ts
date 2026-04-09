@@ -5,18 +5,24 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
+import { signAndStoreContract } from '@/lib/contracts/sign-and-store'
 
 /**
  * KFZ-148: Vertrag unterzeichnen (Schritt 2).
- * Speichert Akzeptanz in vertraege_unterzeichnet, generiert PDF (TODO), sendet Email.
+ * Speichert Akzeptanz in vertraege_unterzeichnet, generiert PDF mit eingebrannter
+ * Unterschrift via @react-pdf/renderer, lädt es nach storage:vertraege hoch und
+ * schickt eine Welcome-Mail mit PDF-Anhang an den SV.
+ *
+ * KFZ-152 Refactor: Helper signAndStoreContract uebernimmt PDF + Storage + DB,
+ * damit Buero-Onboarding den gleichen Pfad nutzen kann.
  */
 export async function signSvVertrag({
-  signatureSvg,
+  signaturePngDataUri,
   unterschriftName,
 }: {
-  signatureSvg: string
+  signaturePngDataUri: string  // padRef.current.toDataURL('image/png') aus signature_pad
   unterschriftName: string
-}): Promise<{ success: boolean; error?: string }> {
+}): Promise<{ success: boolean; error?: string; vertrag_id?: string; pdf_path?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
@@ -25,42 +31,39 @@ export async function signSvVertrag({
   if (!sv) return { success: false, error: 'Kein SV-Profil' }
 
   const db = createAdminClient()
+  const h = await headers()
+  const ip = h.get('x-forwarded-for')?.split(',')[0]?.trim() ?? h.get('x-real-ip') ?? null
+  const userAgent = h.get('user-agent') ?? null
 
-  // Aktive Vertragsvorlagen laden
-  const { data: nbVorlage } = await db.from('vertragsvorlagen')
-    .select('id, version')
-    .eq('typ', 'nutzungsbedingungen')
-    .eq('aktiv', true)
-    .limit(1)
+  // Profile für Personalisierung der Email
+  const { data: profile } = await db.from('profiles')
+    .select('email, vorname, nachname')
+    .eq('id', user.id)
     .single()
 
+  // 1. Vertrag unterzeichnen + PDF generieren + Storage-Upload
+  let result
+  try {
+    result = await signAndStoreContract({
+      vorlage_typ: 'nutzungsbedingungen',
+      unterschrift_name: unterschriftName,
+      unterschrift_ip: ip,
+      unterschrift_user_agent: userAgent,
+      signature_png_data_uri: signaturePngDataUri,
+      gutachter_id: sv.id,
+      rolle: 'Solo-Sachverstaendiger',
+    })
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Vertrag konnte nicht erstellt werden' }
+  }
+
+  // 2. Audit-Trail: Kooperationsvertrag-Muster als gelesen markieren (separater Eintrag, ohne PDF)
   const { data: kvVorlage } = await db.from('vertragsvorlagen')
     .select('id, version')
     .eq('typ', 'kooperationsvertrag_muster')
     .eq('aktiv', true)
     .limit(1)
     .maybeSingle()
-
-  if (!nbVorlage) return { success: false, error: 'Nutzungsbedingungen nicht verfügbar' }
-
-  // IP + User-Agent
-  const h = await headers()
-  const ip = h.get('x-forwarded-for')?.split(',')[0]?.trim() ?? h.get('x-real-ip') ?? null
-  const userAgent = h.get('user-agent') ?? null
-
-  // 1. Insert Nutzungsbedingungen-Akzeptanz
-  const { error: nbErr } = await db.from('vertraege_unterzeichnet').insert({
-    gutachter_id: sv.id,
-    vorlage_id: nbVorlage.id,
-    vorlage_typ: 'nutzungsbedingungen',
-    vorlage_version: nbVorlage.version,
-    unterschrift_name: unterschriftName,
-    unterschrift_ip: ip,
-    unterschrift_user_agent: userAgent,
-  })
-  if (nbErr) return { success: false, error: nbErr.message }
-
-  // 2. Insert Kooperationsvertrag-Muster gelesen (Audit-Trail)
   if (kvVorlage) {
     await db.from('vertraege_unterzeichnet').insert({
       gutachter_id: sv.id,
@@ -73,40 +76,40 @@ export async function signSvVertrag({
     })
   }
 
-  // 3. TODO: PDF-Generierung mit eingebrannter Unterschrift
-  // PDF enthält: Claimondo Header, "Bestätigung Nutzungsbedingungen-Akzeptanz",
-  // SV-Stammdaten, eingebrannte SVG-Unterschrift, Footer mit IP+Timestamp
-  // Für jetzt: ohne PDF, wird in Folge-Task ergänzt
-
-  // 4. Status updaten
+  // 3. Status updaten
   await db.from('sachverstaendige').update({
     onboarding_status: 'vertrag_unterzeichnet',
     vertrag_unterschrieben: true,
   }).eq('id', sv.id)
 
-  // 5. Welcome-Email (fire & forget)
+  // 4. Welcome-Email mit PDF-Anhang (fire & forget)
   try {
     const { sendEmail } = await import('@/lib/email/google/client')
-    const { data: profile } = await db.from('profiles').select('email, vorname').eq('id', user.id).single()
     if (profile?.email) {
       await sendEmail({
         to: profile.email,
-        subject: 'Willkommen bei Claimondo — deine nächsten Schritte',
+        subject: 'Willkommen bei Claimondo — deine Vertragsunterlagen',
         html: `<div style="font-family:-apple-system,sans-serif;font-size:14px;line-height:1.7;color:#374151">
 <p>Hallo ${profile.vorname ?? 'Partner'},</p>
-<p>vielen Dank für die Unterzeichnung der Nutzungsbedingungen. Dein Portal-Zugang wird freigeschaltet sobald die Anzahlung eingegangen ist.</p>
+<p>vielen Dank für die Unterzeichnung der Nutzungsbedingungen. Im Anhang findest du dein unterschriebenes Vertragsdokument zur Aufbewahrung.</p>
+<p>Dein Portal-Zugang wird freigeschaltet sobald die Anzahlung eingegangen ist.</p>
 <p><strong>Nächster Schritt:</strong> Bitte leiste die Anzahlung über den Stripe-Checkout in deinem Onboarding-Bereich.</p>
 <p>Bei Fragen stehen wir dir jederzeit zur Verfügung.</p>
 <p>Dein Claimondo-Team</p></div>`,
         fallId: null,
         empfaengerTyp: 'sv',
         template: 'sv_onboarding_welcome',
+        attachments: [{
+          filename: `Claimondo-Nutzungsbedingungen-v${result.vorlage_version}.pdf`,
+          content: result.pdf_buffer,
+          contentType: 'application/pdf',
+        }],
       })
     }
   } catch (err) { console.error('[KFZ-148] Welcome-Mail:', err) }
 
   revalidatePath('/gutachter/onboarding')
-  return { success: true }
+  return { success: true, vertrag_id: result.vertrag_id, pdf_path: result.pdf_path }
 }
 
 /**

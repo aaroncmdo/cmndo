@@ -21,6 +21,7 @@ import {
   type BueroPaket,
   type BueroStandortInput,
 } from './constants'
+import SignaturePadInput from '@/components/SignaturePadInput'
 
 const STEPS = [
   { key: 'stammdaten', label: 'Stammdaten + Standorte', icon: Building2Icon },
@@ -84,6 +85,7 @@ export default function BueroOnboardingClient({
     [profile.vorname, profile.nachname].filter(Boolean).join(' '),
   )
   const [agbAccepted, setAgbAccepted] = useState(false)
+  const [signaturePng, setSignaturePng] = useState<string | null>(null)
 
   const gesamtAnzahlung = standorte.reduce((sum, s) => sum + PAKET_KONTINGENT[s.paket] * ANZAHLUNG_PRO_FALL, 0)
 
@@ -126,11 +128,12 @@ export default function BueroOnboardingClient({
     if (!organisationId) { setError('Keine Organisation'); return }
     if (!agbAccepted) { setError('Bitte akzeptiere die AGB/NB/DS'); return }
     if (!unterschriftName.trim()) { setError('Bitte gib deinen Namen ein'); return }
+    if (!signaturePng) { setError('Bitte unterschreibe im Feld unten'); return }
 
     setSaving(true)
     const result = await signBueroVertrag({
       organisation_id: organisationId,
-      signatureSvg: '<svg></svg>', // Placeholder — Phase 1 ohne Unterschrifts-Pad
+      signaturePngDataUri: signaturePng,
       unterschriftName,
     })
     setSaving(false)
@@ -301,6 +304,18 @@ export default function BueroOnboardingClient({
                 onChange={setUnterschriftName}
                 required
               />
+
+              <div>
+                <label className="text-xs text-gray-500 mb-1.5 block">
+                  Unterschrift <span className="text-red-400">*</span>
+                </label>
+                <SignaturePadInput
+                  value={signaturePng}
+                  onChange={setSignaturePng}
+                  height="h-44"
+                  placeholder="Hier mit Maus oder Finger unterschreiben"
+                />
+              </div>
 
               <label className="flex items-start gap-2.5 cursor-pointer text-sm text-gray-700">
                 <input
