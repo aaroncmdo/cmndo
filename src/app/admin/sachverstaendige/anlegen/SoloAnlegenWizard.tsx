@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { anlegeSv } from './actions'
-import { PAKET_KONFIG, paketAnzahlung, paketKontingent, QUALIFIKATIONEN, type AnlegePaket, type GutachterTyp, type AnlegeSvFormData } from './constants'
+import { PAKET_KONFIG, paketAnzahlung, paketKontingent, QUALIFIKATIONEN, ANREDE_OPTIONEN, TITEL_OPTIONEN, type AnlegePaket, type GutachterTyp, type AnlegeSvFormData } from './constants'
 
 // ARCH-1 Phase 2 (BLOCK C): 4-Step Solo-Anlegen Wizard fuer den Admin.
 
@@ -25,6 +25,7 @@ type FormState = {
   email: string
   telefon: string
   anrede: string
+  titel: string
   firmenname: string
   rechtsform: string
   anschrift: string
@@ -44,7 +45,7 @@ type FormState = {
 }
 
 const initialState: FormState = {
-  vorname: '', nachname: '', email: '', telefon: '', anrede: '',
+  vorname: '', nachname: '', email: '', telefon: '', anrede: '', titel: '',
   firmenname: '', rechtsform: '', anschrift: '',
   anschrift_lat: null, anschrift_lng: null, anschrift_place_id: '', anschrift_plz: '',
   steuernummer: '', ust_id: '', hrb: '',
@@ -91,7 +92,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
   const liveKontingent = paketKontingent(data.paket, overrideKontingent)
 
   function canNext(): boolean {
-    if (step === 0) return !!(data.vorname && data.nachname && data.email && data.steuernummer && data.anschrift && data.anschrift_lat !== null)
+    if (step === 0) return !!(data.anrede && data.vorname && data.nachname && data.email && data.steuernummer && data.anschrift && data.anschrift_lat !== null)
     if (step === 1) {
       if (data.paket === 'individuell') return !!(data.paket_override_kontingent && data.paket_override_radius_km && data.paket_override_anzahlung_eur)
       return true
@@ -110,6 +111,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
       email: data.email,
       telefon: data.telefon,
       anrede: data.anrede || undefined,
+      titel: data.titel || undefined,
       firmenname: data.firmenname || undefined,
       rechtsform: data.rechtsform || undefined,
       anschrift: data.anschrift,
@@ -204,11 +206,26 @@ export default function SoloAnlegenWizard({ onSuccess }: {
         {step === 0 && (
           <div className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* ARCH-1 POLISH: Anrede + Titel als Dropdowns, klassische Reihenfolge:
+                  Anrede → Titel → Vorname → Nachname → Email → Telefon */}
+              <SelectField
+                label="Anrede *"
+                value={data.anrede}
+                onChange={v => update('anrede', v)}
+                options={ANREDE_OPTIONEN}
+                placeholder="Bitte waehlen..."
+              />
+              <SelectField
+                label="Titel"
+                value={data.titel}
+                onChange={v => update('titel', v)}
+                options={TITEL_OPTIONEN}
+                placeholder="kein Titel"
+              />
               <Field label="Vorname *" value={data.vorname} onChange={v => update('vorname', v)} />
               <Field label="Nachname *" value={data.nachname} onChange={v => update('nachname', v)} />
               <Field label="Email *" type="email" value={data.email} onChange={v => update('email', v)} className="sm:col-span-2" />
-              <Field label="Telefon" type="tel" value={data.telefon} onChange={v => update('telefon', v)} />
-              <Field label="Anrede / Titel" value={data.anrede} onChange={v => update('anrede', v)} />
+              <Field label="Telefon" type="tel" value={data.telefon} onChange={v => update('telefon', v)} className="sm:col-span-2" />
             </div>
             <div className="pt-4 mt-4 border-t border-gray-200">
               <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Firma</p>
@@ -455,6 +472,38 @@ function Field({
         placeholder={placeholder}
         className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
       />
+    </div>
+  )
+}
+
+function SelectField({
+  label, value, onChange, options, placeholder, className,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  options: ReadonlyArray<string>
+  placeholder?: string
+  className?: string
+}) {
+  return (
+    <div className={className}>
+      <label className="text-xs text-gray-500 mb-1.5 block">{label}</label>
+      <select
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+      >
+        {/* Leer-Option mit Placeholder-Label nur zeigen falls noch nichts gewaehlt
+            ist, ausser '' selbst ist eine valide Option (z.B. bei TITEL_OPTIONEN
+            wo '' = 'kein Titel'). */}
+        {!options.includes('') && (
+          <option value="" disabled>{placeholder ?? 'Bitte waehlen...'}</option>
+        )}
+        {options.map(opt => (
+          <option key={opt} value={opt}>{opt === '' ? (placeholder ?? '—') : opt}</option>
+        ))}
+      </select>
     </div>
   )
 }

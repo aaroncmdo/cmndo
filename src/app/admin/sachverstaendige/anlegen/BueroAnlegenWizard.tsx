@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { anlegeBuero } from './actions'
-import { PAKET_KONFIG, paketAnzahlung, type AnlegePaket, type AnlegeBueroFormData } from './constants'
+import { PAKET_KONFIG, paketAnzahlung, ANREDE_OPTIONEN, TITEL_OPTIONEN, type AnlegePaket, type AnlegeBueroFormData } from './constants'
 
 // ARCH-1 Phase 2 (BLOCK C): 3-Step Buero-Anlegen Wizard fuer den Admin.
 
@@ -25,6 +25,8 @@ type SubStandort = {
   anschrift_lng: number | null
   anschrift_place_id: string
   anschrift_plz: string
+  sub_anrede: string
+  sub_titel: string
   sub_email: string
   sub_vorname: string
   sub_nachname: string
@@ -36,6 +38,7 @@ function newSubStandort(): SubStandort {
     id: Math.random().toString(36).slice(2),
     name: '', anschrift: '',
     anschrift_lat: null, anschrift_lng: null, anschrift_place_id: '', anschrift_plz: '',
+    sub_anrede: '', sub_titel: '',
     sub_email: '', sub_vorname: '', sub_nachname: '',
     paket: 'standard',
   }
@@ -52,6 +55,8 @@ export default function BueroAnlegenWizard({ onSuccess }: {
   const [result, setResult] = useState<{ organisation_id: string; sub_count: number } | null>(null)
 
   // Inhaber + Buero
+  const [inhaberAnrede, setInhaberAnrede] = useState('')
+  const [inhaberTitel, setInhaberTitel] = useState('')
   const [inhaberVorname, setInhaberVorname] = useState('')
   const [inhaberNachname, setInhaberNachname] = useState('')
   const [inhaberEmail, setInhaberEmail] = useState('')
@@ -92,11 +97,11 @@ export default function BueroAnlegenWizard({ onSuccess }: {
   const gesamtAnzahlung = standorte.reduce((sum, s) => sum + paketAnzahlung(s.paket), 0)
 
   function canNext(): boolean {
-    if (step === 0) return !!(inhaberVorname && inhaberNachname && inhaberEmail && bueroName && bueroSteuernummer)
+    if (step === 0) return !!(inhaberAnrede && inhaberVorname && inhaberNachname && inhaberEmail && bueroName && bueroSteuernummer)
     if (step === 1) {
       if (standorte.length === 0) return false
       return standorte.every(s =>
-        s.name && s.sub_email && s.sub_vorname && s.sub_nachname &&
+        s.name && s.sub_anrede && s.sub_email && s.sub_vorname && s.sub_nachname &&
         s.anschrift_lat !== null && s.anschrift_lng !== null
       )
     }
@@ -108,6 +113,8 @@ export default function BueroAnlegenWizard({ onSuccess }: {
     setSaving(true)
 
     const payload: AnlegeBueroFormData = {
+      inhaber_anrede: inhaberAnrede || undefined,
+      inhaber_titel: inhaberTitel || undefined,
       inhaber_vorname: inhaberVorname,
       inhaber_nachname: inhaberNachname,
       inhaber_email: inhaberEmail,
@@ -125,6 +132,8 @@ export default function BueroAnlegenWizard({ onSuccess }: {
         anschrift_lng: s.anschrift_lng,
         anschrift_place_id: s.anschrift_place_id || undefined,
         anschrift_plz: s.anschrift_plz,
+        sub_anrede: s.sub_anrede || undefined,
+        sub_titel: s.sub_titel || undefined,
         sub_email: s.sub_email,
         sub_vorname: s.sub_vorname,
         sub_nachname: s.sub_nachname,
@@ -198,10 +207,25 @@ export default function BueroAnlegenWizard({ onSuccess }: {
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Inhaber-Person</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* ARCH-1 POLISH: Anrede + Titel als Dropdowns, klassische Reihenfolge */}
+                <SelectField
+                  label="Anrede *"
+                  value={inhaberAnrede}
+                  onChange={setInhaberAnrede}
+                  options={ANREDE_OPTIONEN}
+                  placeholder="Bitte waehlen..."
+                />
+                <SelectField
+                  label="Titel"
+                  value={inhaberTitel}
+                  onChange={setInhaberTitel}
+                  options={TITEL_OPTIONEN}
+                  placeholder="kein Titel"
+                />
                 <Field label="Vorname *" value={inhaberVorname} onChange={setInhaberVorname} />
                 <Field label="Nachname *" value={inhaberNachname} onChange={setInhaberNachname} />
                 <Field label="Email *" type="email" value={inhaberEmail} onChange={setInhaberEmail} className="sm:col-span-2" />
-                <Field label="Telefon" type="tel" value={inhaberTelefon} onChange={setInhaberTelefon} />
+                <Field label="Telefon" type="tel" value={inhaberTelefon} onChange={setInhaberTelefon} className="sm:col-span-2" />
               </div>
             </div>
 
@@ -262,10 +286,27 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                     className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
                   />
                 </div>
+                {/* ARCH-1 POLISH: Sub-Anrede + Sub-Titel oben, dann Vor-/Nachname/Email */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <SelectField
+                    label="Sub-Anrede *"
+                    value={std.sub_anrede}
+                    onChange={v => updateStandort(std.id, 'sub_anrede', v)}
+                    options={ANREDE_OPTIONEN}
+                    placeholder="Bitte waehlen..."
+                  />
+                  <SelectField
+                    label="Sub-Titel"
+                    value={std.sub_titel}
+                    onChange={v => updateStandort(std.id, 'sub_titel', v)}
+                    options={TITEL_OPTIONEN}
+                    placeholder="kein Titel"
+                  />
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  <Field label="Sub-Email *" type="email" value={std.sub_email} onChange={v => updateStandort(std.id, 'sub_email', v)} />
                   <Field label="Sub-Vorname *" value={std.sub_vorname} onChange={v => updateStandort(std.id, 'sub_vorname', v)} />
                   <Field label="Sub-Nachname *" value={std.sub_nachname} onChange={v => updateStandort(std.id, 'sub_nachname', v)} />
+                  <Field label="Sub-Email *" type="email" value={std.sub_email} onChange={v => updateStandort(std.id, 'sub_email', v)} />
                 </div>
                 <div>
                   <label className="text-xs text-gray-500 mb-1.5 block">Paket</label>
@@ -398,6 +439,35 @@ function Field({
         placeholder={placeholder}
         className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
       />
+    </div>
+  )
+}
+
+function SelectField({
+  label, value, onChange, options, placeholder, className,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  options: ReadonlyArray<string>
+  placeholder?: string
+  className?: string
+}) {
+  return (
+    <div className={className}>
+      <label className="text-xs text-gray-500 mb-1.5 block">{label}</label>
+      <select
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+      >
+        {!options.includes('') && (
+          <option value="" disabled>{placeholder ?? 'Bitte waehlen...'}</option>
+        )}
+        {options.map(opt => (
+          <option key={opt} value={opt}>{opt === '' ? (placeholder ?? '—') : opt}</option>
+        ))}
+      </select>
     </div>
   )
 }

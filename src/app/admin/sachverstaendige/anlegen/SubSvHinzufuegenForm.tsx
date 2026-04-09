@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { CheckCircle2Icon, MailIcon } from 'lucide-react'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { anlegeSubSv } from './actions'
-import { PAKET_KONFIG, type AnlegePaket } from './constants'
+import { PAKET_KONFIG, ANREDE_OPTIONEN, TITEL_OPTIONEN, type AnlegePaket } from './constants'
 
 // ARCH-1 Phase 2 (BLOCK C): Sub-SV zu bestehender Buero-Org hinzufuegen.
 
@@ -16,6 +16,8 @@ export default function SubSvHinzufuegenForm({ organisationen, onSuccess }: {
 }) {
   const router = useRouter()
   const [orgId, setOrgId] = useState('')
+  const [anrede, setAnrede] = useState('')
+  const [titel, setTitel] = useState('')
   const [vorname, setVorname] = useState('')
   const [nachname, setNachname] = useState('')
   const [email, setEmail] = useState('')
@@ -42,13 +44,15 @@ export default function SubSvHinzufuegenForm({ organisationen, onSuccess }: {
 
   async function handleSubmit() {
     setError(null)
-    if (!orgId || !email || !vorname || !nachname || anschriftLat === null) {
+    if (!orgId || !anrede || !email || !vorname || !nachname || anschriftLat === null) {
       setError('Bitte alle Pflichtfelder ausfüllen + Anschrift via Dropdown wählen')
       return
     }
     setSaving(true)
     const r = await anlegeSubSv({
       organisation_id: orgId,
+      sub_anrede: anrede,
+      sub_titel: titel || undefined,
       sub_email: email,
       sub_vorname: vorname,
       sub_nachname: nachname,
@@ -112,7 +116,22 @@ export default function SubSvHinzufuegenForm({ organisationen, onSuccess }: {
           </select>
         </div>
 
+        {/* ARCH-1 POLISH: Anrede + Titel als Dropdowns vor Vor-/Nachname */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <SelectField
+            label="Anrede *"
+            value={anrede}
+            onChange={setAnrede}
+            options={ANREDE_OPTIONEN}
+            placeholder="Bitte waehlen..."
+          />
+          <SelectField
+            label="Titel"
+            value={titel}
+            onChange={setTitel}
+            options={TITEL_OPTIONEN}
+            placeholder="kein Titel"
+          />
           <Field label="Vorname *" value={vorname} onChange={setVorname} />
           <Field label="Nachname *" value={nachname} onChange={setNachname} />
           <Field label="Email *" type="email" value={email} onChange={setEmail} className="sm:col-span-2" />
@@ -205,6 +224,35 @@ function Field({
         placeholder={placeholder}
         className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
       />
+    </div>
+  )
+}
+
+function SelectField({
+  label, value, onChange, options, placeholder, className,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  options: ReadonlyArray<string>
+  placeholder?: string
+  className?: string
+}) {
+  return (
+    <div className={className}>
+      <label className="text-xs text-gray-500 mb-1.5 block">{label}</label>
+      <select
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+      >
+        {!options.includes('') && (
+          <option value="" disabled>{placeholder ?? 'Bitte waehlen...'}</option>
+        )}
+        {options.map(opt => (
+          <option key={opt} value={opt}>{opt === '' ? (placeholder ?? '—') : opt}</option>
+        ))}
+      </select>
     </div>
   )
 }

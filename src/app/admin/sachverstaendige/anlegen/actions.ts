@@ -98,6 +98,8 @@ export async function anlegeSv(data: AnlegeSvFormData): Promise<{ success: boole
     id: authUser.user.id,
     email: data.email,
     rolle: 'sachverstaendiger',
+    anrede: data.anrede || null,
+    titel: data.titel || null,
     vorname: data.vorname,
     nachname: data.nachname,
     telefon: data.telefon || null,
@@ -148,6 +150,8 @@ export async function anlegeSv(data: AnlegeSvFormData): Promise<{ success: boole
     const { sendWillkommenSv } = await import('@/lib/email/google/flows')
     await sendWillkommenSv({
       to: data.email,
+      anrede: data.anrede,
+      titel: data.titel,
       vorname: data.vorname,
       nachname: data.nachname,
       paket_name: data.paket === 'individuell' ? 'Individuell' : data.paket.charAt(0).toUpperCase() + data.paket.slice(1),
@@ -226,6 +230,8 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
     id: inhaberUserId,
     email: data.inhaber_email,
     rolle: 'sachverstaendiger',
+    anrede: data.inhaber_anrede || null,
+    titel: data.inhaber_titel || null,
     vorname: data.inhaber_vorname,
     nachname: data.inhaber_nachname,
     telefon: data.inhaber_telefon || null,
@@ -334,6 +340,8 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
         id: subUserId,
         email: std.sub_email,
         rolle: 'sachverstaendiger',
+        anrede: std.sub_anrede || null,
+        titel: std.sub_titel || null,
         vorname: std.sub_vorname,
         nachname: std.sub_nachname,
         force_password_change: true,
@@ -378,6 +386,8 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
     // Mail 1: Welcome an Inhaber
     await sendWillkommenSv({
       to: data.inhaber_email,
+      anrede: data.inhaber_anrede,
+      titel: data.inhaber_titel,
       vorname: data.inhaber_vorname,
       nachname: data.inhaber_nachname,
       paket_name: 'Buero-Inhaber',
@@ -401,6 +411,8 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
       if (!welcomeMailSent.has(std.sub_email)) {
         await sendWillkommenSv({
           to: std.sub_email,
+          anrede: std.sub_anrede,
+          titel: std.sub_titel,
           vorname: std.sub_vorname,
           nachname: std.sub_nachname,
           paket_name: std.paket === 'individuell' ? 'Individuell' : std.paket.charAt(0).toUpperCase() + std.paket.slice(1),
@@ -446,6 +458,8 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
 
 export async function anlegeSubSv(params: {
   organisation_id: string
+  sub_anrede?: string
+  sub_titel?: string
   sub_email: string
   sub_vorname: string
   sub_nachname: string
@@ -495,6 +509,8 @@ export async function anlegeSubSv(params: {
     id: subUserId,
     email: params.sub_email,
     rolle: 'sachverstaendiger',
+    anrede: params.sub_anrede || null,
+    titel: params.sub_titel || null,
     vorname: params.sub_vorname,
     nachname: params.sub_nachname,
     telefon: params.sub_telefon || null,
@@ -544,6 +560,8 @@ export async function anlegeSubSv(params: {
     const { sendWillkommenSv, sendWillkommenSvAnBuero } = await import('@/lib/email/google/flows')
     await sendWillkommenSv({
       to: params.sub_email,
+      anrede: params.sub_anrede,
+      titel: params.sub_titel,
       vorname: params.sub_vorname,
       nachname: params.sub_nachname,
       paket_name: params.paket === 'individuell' ? 'Individuell' : params.paket.charAt(0).toUpperCase() + params.paket.slice(1),

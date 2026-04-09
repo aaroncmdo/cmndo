@@ -425,6 +425,9 @@ export async function sendMarketingAbrechnung(abrechnungId: string): Promise<voi
 
 export type WillkommenSvParams = {
   to: string
+  // ARCH-1 POLISH: Anrede + Titel fuer 'Hallo Herr Dr. Mustermann'-Salutation
+  anrede?: string
+  titel?: string
   vorname: string
   nachname: string
   paket_name: string
@@ -444,6 +447,8 @@ export type WillkommenSvParams = {
  */
 export async function sendWillkommenSv(params: WillkommenSvParams): Promise<void> {
   const props = {
+    anrede: params.anrede,
+    titel: params.titel,
     vorname: params.vorname,
     nachname: params.nachname,
     paket_name: params.paket_name,

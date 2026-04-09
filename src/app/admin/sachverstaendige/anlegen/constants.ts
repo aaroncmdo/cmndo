@@ -32,6 +32,26 @@ export const QUALIFIKATIONEN = [
   'Unfallrekonstruktion',
 ]
 
+// ARCH-1 POLISH: Anrede + Titel als Dropdowns (Aaron-Feedback). Reihenfolge
+// in Step 1 Person: Anrede → Titel → Vorname → Nachname → ...
+export const ANREDE_OPTIONEN = ['Herr', 'Frau', 'Divers', 'Keine Angabe'] as const
+
+// Klassische deutsche Titel-Reihenfolge (Bachelor → Master → Diplom → Doktor → Professor).
+// Erste Option ist Leer-String = 'kein Titel' (Default).
+export const TITEL_OPTIONEN = [
+  '',
+  'B.Eng.',
+  'B.Sc.',
+  'Dipl.-Ing.',
+  'Dipl.-Kfm.',
+  'M.Eng.',
+  'M.Sc.',
+  'Dr.',
+  'Dr.-Ing.',
+  'Prof.',
+  'Prof. Dr.',
+] as const
+
 export type GutachterTyp = 'kfz-gutachter' | 'dat-gutachter'
 
 // ─── Form-Data Types fuer Server Actions ──────────────────────────────────
@@ -43,6 +63,7 @@ export type AnlegeSvFormData = {
   email: string
   telefon: string
   anrede?: string
+  titel?: string
   // Firma
   firmenname?: string
   rechtsform?: string
@@ -67,6 +88,8 @@ export type AnlegeSvFormData = {
 
 export type AnlegeBueroFormData = {
   // Inhaber
+  inhaber_anrede?: string
+  inhaber_titel?: string
   inhaber_vorname: string
   inhaber_nachname: string
   inhaber_email: string
@@ -86,6 +109,8 @@ export type AnlegeBueroFormData = {
     anschrift_lng: number | null
     anschrift_place_id?: string
     anschrift_plz: string
+    sub_anrede?: string
+    sub_titel?: string
     sub_email: string
     sub_vorname: string
     sub_nachname: string

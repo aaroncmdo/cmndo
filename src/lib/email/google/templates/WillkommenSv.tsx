@@ -5,6 +5,9 @@ import { Text } from '@react-email/components'
 // Template-Variablen werden vom Server-Action anlegeSv() befuellt.
 
 type Props = {
+  // ARCH-1 POLISH: Anrede + Titel fuer 'Hallo Herr Dr. Mustermann'-Salutation
+  anrede?: string
+  titel?: string
   vorname: string
   nachname: string
   paket_name: string
@@ -18,6 +21,19 @@ type Props = {
   von_admin_name?: string  // Name des Admins der angelegt hat (Aaron / Nicolas)
 }
 
+/**
+ * 'Hallo Herr Dr. Mustermann' wenn Anrede + Nachname gesetzt sind, mit Titel
+ * dazwischen falls vorhanden. Bei 'Keine Angabe' oder fehlender Anrede:
+ * Fallback auf Vorname ('Hallo Max').
+ */
+function buildSalutation(p: Pick<Props, 'anrede' | 'titel' | 'vorname' | 'nachname'>): string {
+  if (p.anrede && p.anrede !== 'Keine Angabe' && p.nachname) {
+    const titelTeil = p.titel ? `${p.titel} ` : ''
+    return `Hallo ${p.anrede} ${titelTeil}${p.nachname}`
+  }
+  return `Hallo ${p.vorname}`
+}
+
 export function subject(p: Props) {
   return `Willkommen bei Claimondo, ${p.vorname}!`
 }
@@ -25,10 +41,11 @@ export function subject(p: Props) {
 export function WillkommenSvEmail(props: Props) {
   const loginUrl = props.login_url ?? `${APP_URL}/login`
   const isSubSv = !!props.organisation_name
+  const salutation = buildSalutation(props)
 
   return (
     <EmailLayout preview={`Willkommen bei Claimondo, ${props.vorname} ${props.nachname}!`}>
-      <Heading>Willkommen bei Claimondo, {props.vorname}!</Heading>
+      <Heading>{salutation}!</Heading>
       <Paragraph>
         {props.von_admin_name
           ? `${props.von_admin_name} hat deinen Account bei Claimondo angelegt.`
