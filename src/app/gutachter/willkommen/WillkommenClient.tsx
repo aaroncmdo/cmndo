@@ -61,6 +61,9 @@ type SvData = {
   rolle_in_organisation: string | null
   portal_zugang_freigeschaltet: boolean
   logo_url: string | null
+  // BUG-96: fuer die Stammdaten-Card im Vertrag-Step
+  firmenname: string | null
+  steuernummer: string | null
 }
 
 type Vorlage = {
@@ -87,6 +90,9 @@ type Organisation = {
   name: string
   typ: string | null
   onboarding_status: string | null
+  // BUG-96: rechtsform + steuernummer fuer die Stammdaten-Card
+  rechtsform: string | null
+  steuernummer: string | null
 }
 
 // KFZ-157: Solo + Buero-Inhaber haben jetzt 4 Steps (Konditionen → Vertrag
@@ -571,20 +577,24 @@ export default function WillkommenClient({
                   <Kondition label="Paket" value={paketLabel} />
                   <Kondition label="Faelle pro Monat" value={String(sv.max_faelle_monat)} />
                   <Kondition label="Radius" value={`${sv.paket_umkreis_km} km`} />
+                  <Kondition label="Monatsbeitrag" value="0,00 EUR" />
                   <Kondition
                     label={rolle === 'buero_inhaber' ? 'Anzahlung gesamt' : 'Anzahlung'}
                     value={fmtEur(rolle === 'buero_inhaber' ? gesamtAnzahlung : sv.onboarding_anzahlung_betrag)}
                     highlight
                   />
+                  <Kondition label="Abrechnung" value="Pay-per-Lead" />
                 </div>
                 <div className="mt-4 pt-4 border-t border-[#4573A2]/15 flex items-center justify-between text-xs">
-                  <span className="text-gray-600">Lead-Preis pro Fall variiert nach Schadenhoehe</span>
+                  <span className="text-gray-600">
+                    Kein monatlicher Grundpreis — nur Lead-Preise pro Fall (variiert nach Schadenhoehe).
+                  </span>
                   <Link
                     href="/gutachter/leadpreise"
                     target="_blank"
-                    className="text-[#1E3A5F] underline hover:text-[#4573A2] font-medium"
+                    className="text-[#1E3A5F] underline hover:text-[#4573A2] font-medium ml-3 flex-shrink-0"
                   >
-                    → Lead-Preis-Tabelle einsehen
+                    → Lead-Preis-Tabelle
                   </Link>
                 </div>
               </div>
@@ -600,32 +610,45 @@ export default function WillkommenClient({
                 </div>
               )}
 
-              {/* Stammdaten kompakt */}
+              {/* Stammdaten kompakt — BUG-96: Firma + Steuernummer ergaenzt */}
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
                 <p className="text-[10px] text-gray-500 uppercase tracking-wide font-semibold mb-2">
                   Stammdaten
                 </p>
                 <div className="space-y-1.5 text-xs">
-                  <div className="flex justify-between gap-2">
-                    <span className="text-gray-500">Name</span>
-                    <span className="text-gray-900 text-right">{fullName}</span>
-                  </div>
-                  {organisation && (
-                    <div className="flex justify-between gap-2">
-                      <span className="text-gray-500">Buero</span>
-                      <span className="text-gray-900 text-right">{organisation.name}</span>
-                    </div>
+                  <StammRow label="Name" value={fullName} />
+                  {/* Firma: Buero-Name fuer Inhaber, sonst sv.firmenname */}
+                  {(rolle === 'buero_inhaber' && organisation
+                    ? `${organisation.name}${organisation.rechtsform ? ` (${organisation.rechtsform})` : ''}`
+                    : sv.firmenname
+                  ) && (
+                    <StammRow
+                      label="Firma"
+                      value={
+                        rolle === 'buero_inhaber' && organisation
+                          ? `${organisation.name}${organisation.rechtsform ? ` (${organisation.rechtsform})` : ''}`
+                          : (sv.firmenname ?? '—')
+                      }
+                    />
                   )}
-                  <div className="flex justify-between gap-2">
-                    <span className="text-gray-500">Email</span>
-                    <span className="text-gray-900 text-right break-all">{profile.email ?? '—'}</span>
-                  </div>
-                  <div className="flex justify-between gap-2">
-                    <span className="text-gray-500">Anschrift</span>
-                    <span className="text-gray-900 text-right">
-                      {[sv.standort_adresse, sv.standort_plz].filter(Boolean).join(', ') || '—'}
-                    </span>
-                  </div>
+                  <StammRow label="Email" value={profile.email ?? '—'} breakAll />
+                  <StammRow
+                    label="Anschrift"
+                    value={[sv.standort_adresse, sv.standort_plz].filter(Boolean).join(', ') || '—'}
+                  />
+                  {/* Steuernummer: Org-Steuernummer fuer Inhaber, sonst sv.steuernummer */}
+                  {(rolle === 'buero_inhaber' && organisation?.steuernummer
+                    ? organisation.steuernummer
+                    : sv.steuernummer) && (
+                    <StammRow
+                      label="Steuernummer"
+                      value={
+                        rolle === 'buero_inhaber' && organisation?.steuernummer
+                          ? organisation.steuernummer
+                          : (sv.steuernummer ?? '—')
+                      }
+                    />
+                  )}
                 </div>
               </div>
 
@@ -921,6 +944,16 @@ function Kondition({ label, value, highlight }: { label: string; value: string; 
     <div>
       <p className="text-[10px] text-gray-500 uppercase">{label}</p>
       <p className={`text-sm font-semibold mt-0.5 ${highlight ? 'text-[#1E3A5F]' : 'text-gray-900'}`}>{value}</p>
+    </div>
+  )
+}
+
+// BUG-96: Helper fuer die kompakte Stammdaten-Card im Vertrag-Step
+function StammRow({ label, value, breakAll }: { label: string; value: string; breakAll?: boolean }) {
+  return (
+    <div className="flex justify-between gap-2">
+      <span className="text-gray-500">{label}</span>
+      <span className={`text-gray-900 text-right ${breakAll ? 'break-all' : ''}`}>{value}</span>
     </div>
   )
 }

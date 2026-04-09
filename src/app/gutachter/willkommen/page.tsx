@@ -38,8 +38,9 @@ export default async function GutachterWillkommenPage({
   //   3. ohne organisation → Solo-Flow
   // KFZ-157: logo_url aufnehmen damit der Wizard weiss ob Step 4 noch
   // angezeigt werden muss oder bereits ein Logo existiert.
+  // BUG-96: firmenname + steuernummer fuer die Stammdaten-Card im Vertrag-Step.
   const svSelect =
-    'id, paket, max_faelle_monat, paket_umkreis_km, onboarding_status, onboarding_anzahlung_betrag, vertrag_unterschrieben, portal_zugang_freigeschaltet, standort_adresse, standort_plz, organisation_id, rolle_in_organisation, logo_url, brand_primary, brand_secondary, use_custom_branding'
+    'id, paket, max_faelle_monat, paket_umkreis_km, onboarding_status, onboarding_anzahlung_betrag, vertrag_unterschrieben, portal_zugang_freigeschaltet, standort_adresse, standort_plz, organisation_id, rolle_in_organisation, logo_url, brand_primary, brand_secondary, use_custom_branding, firmenname, steuernummer'
   const { data: svRows } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
@@ -103,7 +104,8 @@ export default async function GutachterWillkommenPage({
   const kvVorlage = (vorlagen ?? []).find(v => v.typ === 'kooperationsvertrag_muster') ?? null
 
   // Org-Daten + ggf. Sub-SVs (fuer Inhaber + Sub-Mitarbeiter)
-  let organisation: { id: string; name: string; typ: string | null; onboarding_status: string | null } | null = null
+  // BUG-96: rechtsform + steuernummer fuer die Stammdaten-Card im Vertrag-Step
+  let organisation: { id: string; name: string; typ: string | null; onboarding_status: string | null; rechtsform: string | null; steuernummer: string | null } | null = null
   let subSvs: Array<{
     id: string
     name: string | null
@@ -118,7 +120,7 @@ export default async function GutachterWillkommenPage({
   if (sv.organisation_id) {
     const { data: org } = await supabase
       .from('organisationen')
-      .select('id, name, typ, onboarding_status')
+      .select('id, name, typ, onboarding_status, rechtsform, steuernummer')
       .eq('id', sv.organisation_id)
       .maybeSingle()
     organisation = org ?? null
@@ -172,7 +174,7 @@ export default async function GutachterWillkommenPage({
   // Wir reichen ihn als Prop in den Client-Wizard.
   const stripePublishableKey = process.env.STRIPE_PUBLISHABLE_KEY ?? ''
 
-  const svRow = sv as typeof sv & { logo_url?: string | null }
+  const svRow = sv as typeof sv & { logo_url?: string | null; firmenname?: string | null; steuernummer?: string | null }
 
   return (
     <WillkommenClient
@@ -190,6 +192,9 @@ export default async function GutachterWillkommenPage({
         rolle_in_organisation: sv.rolle_in_organisation,
         portal_zugang_freigeschaltet: !!sv.portal_zugang_freigeschaltet,
         logo_url: svRow.logo_url ?? null,
+        // BUG-96: fuer die Stammdaten-Card im Vertrag-Step
+        firmenname: svRow.firmenname ?? null,
+        steuernummer: svRow.steuernummer ?? null,
       }}
       profile={profile ?? { vorname: null, nachname: null, email: null, telefon: null }}
       organisation={organisation}
