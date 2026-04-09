@@ -199,9 +199,11 @@ export async function signBueroVertrag(params: {
 }
 
 /**
- * Schritt 3: Stripe Checkout fuer Gesamt-Anzahlung des Bueros starten.
+ * Schritt 3 / KFZ-156: Stripe Checkout fuer Gesamt-Anzahlung des Bueros starten.
+ *
+ * KFZ-156: Returnt clientSecret fuer Embedded Checkout statt checkoutUrl.
  */
-export async function startBueroStripeCheckout(organisationId: string): Promise<{ checkoutUrl: string } | { error: string }> {
+export async function startBueroStripeCheckout(organisationId: string): Promise<{ clientSecret: string; sessionId: string } | { error: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { error: 'Nicht angemeldet' }

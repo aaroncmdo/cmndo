@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   PackageIcon,
   FileSignatureIcon,
   CreditCardIcon,
+  ImageIcon,
   CheckCircle2Icon,
   ChevronDownIcon,
   ChevronUpIcon,
@@ -15,11 +16,16 @@ import {
   Building2Icon,
   AlertTriangleIcon,
   ClockIcon,
+  CheckIcon,
 } from 'lucide-react'
+import { loadStripe, type Stripe } from '@stripe/stripe-js'
+import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js'
 import { signSvVertrag, startStripeCheckout } from '@/lib/actions/sv-onboarding-actions'
 import { signBueroVertrag, startBueroStripeCheckout } from '@/app/gutachter/onboarding/buero/actions'
 import { akzeptiereAgbSubSv } from './actions'
 import SignaturePadInput from '@/components/SignaturePadInput'
+import StripeBrandingFooter from '@/components/StripeBrandingFooter'
+import LogoUploadStep from '@/components/LogoUploadStep'
 
 // ARCH-1: Willkommen-Wizard mit drei Rollen-Varianten:
 //   - solo            : 3-Step Wizard (Konditionen → Vertrag+Sig → Stripe)
@@ -49,6 +55,7 @@ type SvData = {
   standort_plz: string | null
   rolle_in_organisation: string | null
   portal_zugang_freigeschaltet: boolean
+  logo_url: string | null
 }
 
 type Vorlage = {
@@ -77,10 +84,13 @@ type Organisation = {
   onboarding_status: string | null
 }
 
-const STEPS_3: { key: string; label: string; icon: typeof PackageIcon }[] = [
+// KFZ-157: Solo + Buero-Inhaber haben jetzt 4 Steps (Konditionen → Vertrag
+// → Anzahlung → Logo). Sub-Mitarbeiter behalten ihren 2-Step Light-Flow.
+const STEPS_4: { key: string; label: string; icon: typeof PackageIcon }[] = [
   { key: 'konditionen', label: 'Konditionen', icon: PackageIcon },
   { key: 'vertrag', label: 'Vertrag', icon: FileSignatureIcon },
   { key: 'anzahlung', label: 'Anzahlung', icon: CreditCardIcon },
+  { key: 'branding', label: 'Logo', icon: ImageIcon },
 ]
 
 const STEPS_2_SUB: { key: string; label: string; icon: typeof PackageIcon }[] = [
@@ -102,6 +112,7 @@ export default function WillkommenClient({
   nbVorlage,
   kvVorlage,
   stepOverride,
+  stripePublishableKey,
 }: {
   rolle: Rolle
   sv: SvData
@@ -112,9 +123,11 @@ export default function WillkommenClient({
   nbVorlage: Vorlage | null
   kvVorlage: Vorlage | null
   stepOverride?: number
+  stripePublishableKey: string
 }) {
   const router = useRouter()
-  const STEPS = rolle === 'sub_mitarbeiter' ? STEPS_2_SUB : STEPS_3
+  // KFZ-157: Sub-Mitarbeiter behalten 2-Step Flow, alle anderen jetzt 4-Step.
+  const STEPS = rolle === 'sub_mitarbeiter' ? STEPS_2_SUB : STEPS_4
 
   // Initial-Step basierend auf Status (reload-sicher):
   // - Solo: sv.vertrag_unterschrieben → Step 2 (Stripe)
@@ -122,6 +135,7 @@ export default function WillkommenClient({
   //   nicht sv.vertrag_unterschrieben — also Org-Status als Quelle nehmen.
   //   'vertrag_unterzeichnet' und 'anzahlung_offen' bedeuten beide:
   //   Vertrag durch, jetzt Stripe.
+  // - KFZ-157: portal_zugang_freigeschaltet aber kein Logo → Step 3 (Branding)
   // - Sub-Mitarbeiter: bleibt initial bei Step 0 (falls neu) oder landet
   //   ueber den separaten warteAufInhaber-Branch auf der Warte-Page.
   let initialStep = 0
@@ -133,6 +147,9 @@ export default function WillkommenClient({
       initialStep = 2
     }
   }
+  if (rolle !== 'sub_mitarbeiter' && sv.portal_zugang_freigeschaltet && !sv.logo_url) {
+    initialStep = 3
+  }
   if (typeof stepOverride === 'number') initialStep = stepOverride
 
   const [step, setStep] = useState(initialStep)
@@ -141,6 +158,37 @@ export default function WillkommenClient({
   const [warteAufInhaber, setWarteAufInhaber] = useState(
     rolle === 'sub_mitarbeiter' && sv.vertrag_unterschrieben && !sv.portal_zugang_freigeschaltet,
   )
+
+  // KFZ-156: Embedded Checkout state — clientSecret wird beim Eintritt in
+  // Step 2 vom Server geholt und an EmbeddedCheckoutProvider uebergeben.
+  const [clientSecret, setClientSecret] = useState<string | null>(null)
+  const [stripePromise] = useState<Promise<Stripe | null>>(() =>
+    stripePublishableKey ? loadStripe(stripePublishableKey) : Promise.resolve(null),
+  )
+
+  const fetchClientSecret = useCallback(async (): Promise<string> => {
+    const result = rolle === 'buero_inhaber' && organisation
+      ? await startBueroStripeCheckout(organisation.id)
+      : await startStripeCheckout()
+    if ('error' in result) throw new Error(result.error)
+    return result.clientSecret
+  }, [rolle, organisation])
+
+  const checkoutOptions = useMemo(() => ({ fetchClientSecret }), [fetchClientSecret])
+
+  // Beim Wechsel auf Step 2 ein client_secret holen damit der Provider mounten kann.
+  useEffect(() => {
+    if (step !== 2 || rolle === 'sub_mitarbeiter') return
+    if (clientSecret) return
+    let cancelled = false
+    setSaving(true)
+    setError(null)
+    fetchClientSecret()
+      .then(secret => { if (!cancelled) setClientSecret(secret) })
+      .catch(err => { if (!cancelled) setError(err instanceof Error ? err.message : 'Stripe-Fehler') })
+      .finally(() => { if (!cancelled) setSaving(false) })
+    return () => { cancelled = true }
+  }, [step, rolle, clientSecret, fetchClientSecret])
 
   // Vertrag-Form (Solo + Inhaber)
   const [unterschriftName, setUnterschriftName] = useState(
@@ -196,15 +244,8 @@ export default function WillkommenClient({
     setStep(2)
   }
 
-  async function handleSoloCheckout() {
-    setError(null)
-    setSaving(true)
-    const result = await startStripeCheckout()
-    setSaving(false)
-
-    if ('error' in result) { setError(result.error); return }
-    window.location.href = result.checkoutUrl
-  }
+  // KFZ-156: handleSoloCheckout entfaellt — der Embedded Checkout uebernimmt
+  // den Stripe-Flow inline in Step 2 (siehe useEffect/fetchClientSecret oben).
 
   // ── Inhaber-Handler ────────────────────────────────────────────────────
   async function handleInhaberVertragSubmit() {
@@ -227,25 +268,9 @@ export default function WillkommenClient({
     setStep(2)
   }
 
-  async function handleInhaberCheckout() {
-    setError(null)
-    if (!organisation) { setError('Keine Organisation zugeordnet'); return }
-
-    // FR-6: 0-EUR-Schutz — Inhaber selbst hat onboarding_anzahlung_betrag=0,
-    // Stripe-Aufruf darf nur passieren wenn Sub-Standorte tatsaechlich
-    // einen Anzahlungsbetrag haben. Defensive Pruefung VOR dem Server-Call.
-    if (gesamtAnzahlung <= 0) {
-      setError('Keine Sub-Standorte mit Anzahlungsbetrag gefunden — bitte support@claimondo.de kontaktieren')
-      return
-    }
-
-    setSaving(true)
-    const result = await startBueroStripeCheckout(organisation.id)
-    setSaving(false)
-
-    if ('error' in result) { setError(result.error); return }
-    window.location.href = result.checkoutUrl
-  }
+  // KFZ-156: handleInhaberCheckout entfaellt ebenfalls — Embedded Checkout
+  // mountet inline in Step 2. Die FR-6 0-EUR-Pruefung bleibt im Render-Pfad
+  // (Disable des Step-2-Buttons + Fehlermeldung) erhalten.
 
   // ── Sub-Mitarbeiter-Handler ────────────────────────────────────────────
   async function handleSubAgbSubmit() {
@@ -338,19 +363,32 @@ export default function WillkommenClient({
           </div>
         )}
 
-        {/* Stepper */}
-        <div className="flex items-center justify-center gap-1 mb-8">
+        {/* BUG-89: Stepper in Claimondo-CI mit gruenem Done-State.
+            done   → emerald-500 + Checkmark, weiss
+            aktiv  → #4573A2 (Ondo Blue) + Step-Nummer, weiss
+            naechst → gray-200 + Step-Nummer, gray-500
+            Connector zwischen done Steps emerald-500, sonst gray-300 */}
+        <div className="flex items-center justify-center gap-0 mb-8 font-[Montserrat]">
           {STEPS.map((s, i) => {
-            const Icon = s.icon
+            const isDone = i < step
+            const isActive = i === step
             return (
               <div key={s.key} className="flex items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                  i < step ? 'bg-green-600' : i === step ? 'bg-[#1E3A5F]' : 'bg-gray-100'
-                }`}>
-                  <Icon className="w-4 h-4 text-white" />
+                <div
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors text-xs font-semibold ${
+                    isDone
+                      ? 'bg-emerald-500 text-white'
+                      : isActive
+                      ? 'bg-[#4573A2] text-white'
+                      : 'bg-gray-200 text-gray-500'
+                  }`}
+                  aria-current={isActive ? 'step' : undefined}
+                  aria-label={s.label}
+                >
+                  {isDone ? <CheckIcon className="w-4 h-4" /> : i + 1}
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div className={`w-8 h-0.5 ${i < step ? 'bg-green-600' : 'bg-gray-100'}`} />
+                  <div className={`w-10 h-0.5 transition-colors ${isDone ? 'bg-emerald-500' : 'bg-gray-300'}`} />
                 )}
               </div>
             )
@@ -665,53 +703,80 @@ export default function WillkommenClient({
           )}
 
           {/* ═══════════════════════════════════════════════════════════════
-              SCHRITT 2: Stripe Checkout (Solo + Inhaber)
+              SCHRITT 2: Stripe Embedded Checkout (Solo + Inhaber)
+              KFZ-156: Inline iframe via @stripe/react-stripe-js statt
+              hosted Stripe-Page. clientSecret wird in useEffect geholt
+              sobald der User Step 2 betritt.
              ═══════════════════════════════════════════════════════════════ */}
-          {step === 2 && rolle === 'solo' && (
+          {step === 2 && rolle !== 'sub_mitarbeiter' && (
             <div className="space-y-4">
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-start gap-3">
-                <CheckCircle2Icon className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-green-700">
-                  <strong>Vertrag unterzeichnet.</strong> Letzter Schritt: Anzahlung leisten.
-                  Du wirst zu Stripe weitergeleitet — bezahle dort sicher per Karte oder SEPA.
+              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
+                <CheckCircle2Icon className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-emerald-800">
+                  {rolle === 'buero_inhaber' ? (
+                    <><strong>Buero-Vertrag unterzeichnet.</strong> Bitte schliesse jetzt die zentrale Anzahlung fuer alle Sub-Standorte ab.</>
+                  ) : (
+                    <><strong>Vertrag unterzeichnet.</strong> Bitte schliesse jetzt die Anzahlung ab.</>
+                  )}
                 </div>
               </div>
 
-              <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-xl p-4">
+              <div className="bg-[#4573A2]/5 border border-[#4573A2]/15 rounded-xl p-4">
                 <p className="text-xs text-gray-500 uppercase tracking-wide">Zu zahlender Betrag</p>
-                <p className="text-2xl font-bold text-[#1E3A5F] mt-1">{fmtEur(sv.onboarding_anzahlung_betrag)}</p>
+                <p className="text-2xl font-bold text-[#1E3A5F] mt-1">
+                  {fmtEur(rolle === 'buero_inhaber' ? gesamtAnzahlung : sv.onboarding_anzahlung_betrag)}
+                  {rolle === 'buero_inhaber' && (
+                    <span className="text-sm font-normal text-gray-500"> netto</span>
+                  )}
+                </p>
                 <p className="text-[11px] text-gray-500 mt-2">
-                  Wird mit den ersten Lead-Gebuehren verrechnet. Sobald die Zahlung eingegangen ist, ist dein Portal-Zugang freigeschaltet.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {step === 2 && rolle === 'buero_inhaber' && (
-            <div className="space-y-4">
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-start gap-3">
-                <CheckCircle2Icon className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-green-700">
-                  <strong>Buero-Vertrag unterzeichnet.</strong> Letzter Schritt: zentrale Anzahlung
-                  fuer alle Sub-Standorte leisten. Du wirst zu Stripe weitergeleitet.
-                </div>
-              </div>
-
-              <div className="bg-[#1E3A5F] text-white rounded-xl p-5">
-                <p className="text-xs text-white/70 uppercase tracking-wide">Gesamt-Anzahlung</p>
-                <p className="text-3xl font-bold mt-1">{fmtEur(gesamtAnzahlung)} <span className="text-sm font-normal text-white/70">netto</span></p>
-                <p className="text-[11px] text-white/70 mt-2">
-                  Sammelbetrag fuer {subSvs.length} Sub-Standort(e). Wird mit den ersten
-                  Lead-Gebuehren der jeweiligen Standorte verrechnet.
+                  {rolle === 'buero_inhaber'
+                    ? `Sammelbetrag fuer ${subSvs.length} Sub-Standort(e). Wird mit den ersten Lead-Gebuehren verrechnet.`
+                    : 'Wird mit den ersten Lead-Gebuehren verrechnet. Sobald die Zahlung eingegangen ist, ist dein Portal-Zugang freigeschaltet.'}
                 </p>
               </div>
 
-              {gesamtAnzahlung <= 0 && (
+              {rolle === 'buero_inhaber' && gesamtAnzahlung <= 0 && (
                 <div className="px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
                   Es sind keine Sub-Standorte mit Anzahlungsbetrag vorhanden. Bitte support@claimondo.de kontaktieren.
                 </div>
               )}
+
+              {/* Embedded Stripe Checkout */}
+              {!stripePublishableKey ? (
+                <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+                  Stripe-Konfiguration fehlt (STRIPE_PUBLISHABLE_KEY). Bitte support@claimondo.de kontaktieren.
+                </div>
+              ) : !clientSecret ? (
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center text-sm text-gray-500">
+                  Checkout wird geladen ...
+                </div>
+              ) : (
+                <div className="rounded-xl border border-gray-200 overflow-hidden bg-white">
+                  <EmbeddedCheckoutProvider stripe={stripePromise} options={checkoutOptions}>
+                    <EmbeddedCheckout />
+                  </EmbeddedCheckoutProvider>
+                </div>
+              )}
+
+              <StripeBrandingFooter />
             </div>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════════════
+              SCHRITT 3: Logo-Upload + Branding (KFZ-157)
+              Nur fuer Solo + Buero-Inhaber. Sub-Mitarbeiter erben die
+              Org-Farben automatisch sobald der Inhaber ein Logo hochlaedt.
+             ═══════════════════════════════════════════════════════════════ */}
+          {step === 3 && rolle !== 'sub_mitarbeiter' && (
+            <LogoUploadStep
+              variant={rolle === 'buero_inhaber' ? 'buero_inhaber' : 'solo'}
+              organisationId={organisation?.id ?? null}
+              onDone={() => {
+                router.push('/gutachter')
+                router.refresh()
+              }}
+            />
           )}
 
           {error && (
@@ -720,61 +785,58 @@ export default function WillkommenClient({
             </div>
           )}
 
-          {/* Buttons */}
-          <div className="flex items-center gap-3 mt-6">
-            {step > 0 && step !== 2 && (
+          {/* Buttons — Step 2 (Embedded Checkout) und Step 3 (LogoUploadStep)
+              haben ihre eigenen Buttons; deshalb keine Wizard-Footer-Buttons
+              auf diesen Schritten rendern. */}
+          {step !== 2 && step !== 3 && (
+            <div className="flex items-center gap-3 mt-6">
+              {step > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setStep(step - 1)}
+                  disabled={saving}
+                  className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50 disabled:opacity-40"
+                >
+                  Zurueck
+                </button>
+              )}
               <button
                 type="button"
-                onClick={() => setStep(step - 1)}
-                disabled={saving}
-                className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50 disabled:opacity-40"
-              >
-                Zurueck
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => {
-                if (rolle === 'sub_mitarbeiter') {
-                  if (step === 0) setStep(1)
-                  else handleSubAgbSubmit()
-                } else if (rolle === 'buero_inhaber') {
-                  if (step === 0) setStep(1)
-                  else if (step === 1) handleInhaberVertragSubmit()
-                  else handleInhaberCheckout()
-                } else {
-                  if (step === 0) setStep(1)
-                  else if (step === 1) handleSoloVertragSubmit()
-                  else handleSoloCheckout()
+                onClick={() => {
+                  if (rolle === 'sub_mitarbeiter') {
+                    if (step === 0) setStep(1)
+                    else handleSubAgbSubmit()
+                  } else if (rolle === 'buero_inhaber') {
+                    if (step === 0) setStep(1)
+                    else if (step === 1) handleInhaberVertragSubmit()
+                  } else {
+                    if (step === 0) setStep(1)
+                    else if (step === 1) handleSoloVertragSubmit()
+                  }
+                }}
+                disabled={
+                  saving ||
+                  (step === 1 && rolle !== 'sub_mitarbeiter' && !nbVorlage) ||
+                  (step === 0 && rolle === 'buero_inhaber' && subSvs.length === 0)
                 }
-              }}
-              disabled={
-                saving ||
-                (step === 1 && rolle !== 'sub_mitarbeiter' && !nbVorlage) ||
-                (step === 2 && rolle === 'buero_inhaber' && gesamtAnzahlung <= 0) ||
-                (step === 0 && rolle === 'buero_inhaber' && subSvs.length === 0)
-              }
-              className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40"
-            >
-              {saving
-                ? 'Wird verarbeitet...'
-                : rolle === 'sub_mitarbeiter'
-                ? step === 0
-                  ? 'Weiter zur Bestaetigung'
-                  : 'Bedingungen akzeptieren'
-                : step === 0
-                ? rolle === 'buero_inhaber'
-                  ? 'Weiter zum Buero-Vertrag'
-                  : 'Weiter zum Vertrag'
-                : step === 1
-                ? rolle === 'buero_inhaber'
+                className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40"
+              >
+                {saving
+                  ? 'Wird verarbeitet...'
+                  : rolle === 'sub_mitarbeiter'
+                  ? step === 0
+                    ? 'Weiter zur Bestaetigung'
+                    : 'Bedingungen akzeptieren'
+                  : step === 0
+                  ? rolle === 'buero_inhaber'
+                    ? 'Weiter zum Buero-Vertrag'
+                    : 'Weiter zum Vertrag'
+                  : rolle === 'buero_inhaber'
                   ? 'Buero-Vertrag unterzeichnen'
-                  : 'Vertrag unterzeichnen'
-                : rolle === 'buero_inhaber'
-                ? `Jetzt ${fmtEur(gesamtAnzahlung)} zahlen`
-                : `Jetzt ${fmtEur(sv.onboarding_anzahlung_betrag)} zahlen`}
-            </button>
-          </div>
+                  : 'Vertrag unterzeichnen'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import type Stripe from 'stripe'
 import { stripe } from './client'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -37,9 +38,14 @@ export async function getOrCreateStripeCustomer(gutachterId: string): Promise<st
 }
 
 /**
- * KFZ-148: Stripe Checkout Session für SV-Anzahlung erstellen.
+ * KFZ-148 / KFZ-156: Stripe Checkout Session für SV-Anzahlung erstellen.
+ *
+ * KFZ-156: Auf ui_mode='embedded' umgestellt — der Checkout laeuft jetzt
+ * INLINE im Willkommen-Flow (Step 3) statt in einer hosted Stripe-Page.
+ * Wir geben jetzt einen client_secret zurueck statt einer URL, der Browser
+ * mountet damit <EmbeddedCheckout />.
  */
-export async function createStripeCheckoutSession(gutachterId: string): Promise<{ checkoutUrl: string }> {
+export async function createStripeCheckoutSession(gutachterId: string): Promise<{ clientSecret: string; sessionId: string }> {
   const db = createAdminClient()
   const { data: sv } = await db.from('sachverstaendige')
     .select('onboarding_anzahlung_betrag, paket')
@@ -56,6 +62,9 @@ export async function createStripeCheckoutSession(gutachterId: string): Promise<
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: 'payment',
+    // KFZ-156: stripe@22 SDK-Types listen 'embedded' nicht direkt, die Stripe-API
+    // akzeptiert den String aber problemlos — daher der Cast.
+    ui_mode: 'embedded' as unknown as Stripe.Checkout.SessionCreateParams['ui_mode'],
     line_items: [{
       price_data: {
         currency: 'eur',
@@ -71,8 +80,10 @@ export async function createStripeCheckoutSession(gutachterId: string): Promise<
       gutachter_id: gutachterId,
       typ: 'sv_anzahlung',
     },
-    success_url: `${APP_URL}/gutachter/onboarding/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${APP_URL}/gutachter/onboarding?step=3&cancelled=1`,
+    // KFZ-156: return_url ersetzt success_url im embedded mode. Stripe leitet
+    // nach erfolgreicher Zahlung zurueck zur Willkommen-Page mit stripe_success=1,
+    // wo dann Step 4 (Logo-Upload) angezeigt wird.
+    return_url: `${APP_URL}/gutachter/willkommen?stripe_success=1&session_id={CHECKOUT_SESSION_ID}`,
   })
 
   // Status updaten
@@ -81,5 +92,6 @@ export async function createStripeCheckoutSession(gutachterId: string): Promise<
     onboarding_anzahlung_faellig_am: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
   }).eq('id', gutachterId)
 
-  return { checkoutUrl: session.url! }
+  if (!session.client_secret) throw new Error('Stripe hat keinen client_secret zurueckgegeben')
+  return { clientSecret: session.client_secret, sessionId: session.id }
 }

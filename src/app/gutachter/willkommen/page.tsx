@@ -23,7 +23,7 @@ import WillkommenClient from './WillkommenClient'
 export default async function GutachterWillkommenPage({
   searchParams,
 }: {
-  searchParams: Promise<{ step?: string }>
+  searchParams: Promise<{ step?: string; stripe_success?: string; session_id?: string }>
 }) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -36,8 +36,10 @@ export default async function GutachterWillkommenPage({
   //   1. inhaber           → Buero-Inhaber-Flow
   //   2. mitarbeiter/...   → Sub-Mitarbeiter-Flow
   //   3. ohne organisation → Solo-Flow
+  // KFZ-157: logo_url aufnehmen damit der Wizard weiss ob Step 4 noch
+  // angezeigt werden muss oder bereits ein Logo existiert.
   const svSelect =
-    'id, paket, max_faelle_monat, paket_umkreis_km, onboarding_status, onboarding_anzahlung_betrag, vertrag_unterschrieben, portal_zugang_freigeschaltet, standort_adresse, standort_plz, organisation_id, rolle_in_organisation'
+    'id, paket, max_faelle_monat, paket_umkreis_km, onboarding_status, onboarding_anzahlung_betrag, vertrag_unterschrieben, portal_zugang_freigeschaltet, standort_adresse, standort_plz, organisation_id, rolle_in_organisation, logo_url, brand_primary, brand_secondary, use_custom_branding'
   const { data: svRows } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
@@ -74,10 +76,13 @@ export default async function GutachterWillkommenPage({
     sv = allSvs[0]
   }
 
-  // Schon vollstaendig durch → Dashboard. Sub-Mitarbeiter ohne eigenen
-  // Vertrag landet trotzdem hier (er muss ja AGB akzeptieren), darum
-  // pruefen wir zusaetzlich vertrag_unterschrieben.
-  if (sv.portal_zugang_freigeschaltet) {
+  // KFZ-157: Wenn der User schon freigeschaltet ist, sind wir normalerweise
+  // fertig. Eine Ausnahme: Solo + Inhaber, die zwar bezahlt haben, aber
+  // noch kein Logo hochgeladen haben — die lassen wir Step 4 nochmal sehen.
+  // Sub-Mitarbeiter sehen Step 4 NIE — sie erben das Branding der Org.
+  const needsLogoStep =
+    rolle !== 'sub_mitarbeiter' && !((sv as { logo_url?: string | null }).logo_url)
+  if (sv.portal_zugang_freigeschaltet && !needsLogoStep) {
     redirect('/gutachter')
   }
 
@@ -156,8 +161,18 @@ export default async function GutachterWillkommenPage({
   }
 
   // URL-Param ?step=stripe ueberschreibt den initial-Step (z.B. nach Stripe-Cancel)
+  // KFZ-156: ?stripe_success=1 nach Stripe-Embed-Return → direkt auf Step 4 (Logo)
   const params = await searchParams
-  const stepOverride = params?.step === 'stripe' ? 2 : undefined
+  let stepOverride: number | undefined
+  if (params?.step === 'stripe') stepOverride = 2
+  if (params?.stripe_success === '1') stepOverride = 3
+
+  // KFZ-156: Stripe Publishable Key kommt aus dem Server (kein
+  // NEXT_PUBLIC_-Var, da Vercel ihn nur als STRIPE_PUBLISHABLE_KEY hat).
+  // Wir reichen ihn als Prop in den Client-Wizard.
+  const stripePublishableKey = process.env.STRIPE_PUBLISHABLE_KEY ?? ''
+
+  const svRow = sv as typeof sv & { logo_url?: string | null }
 
   return (
     <WillkommenClient
@@ -174,6 +189,7 @@ export default async function GutachterWillkommenPage({
         standort_plz: sv.standort_plz,
         rolle_in_organisation: sv.rolle_in_organisation,
         portal_zugang_freigeschaltet: !!sv.portal_zugang_freigeschaltet,
+        logo_url: svRow.logo_url ?? null,
       }}
       profile={profile ?? { vorname: null, nachname: null, email: null, telefon: null }}
       organisation={organisation}
@@ -182,6 +198,7 @@ export default async function GutachterWillkommenPage({
       nbVorlage={nbVorlage}
       kvVorlage={kvVorlage}
       stepOverride={stepOverride}
+      stripePublishableKey={stripePublishableKey}
     />
   )
 }

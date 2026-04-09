@@ -118,9 +118,12 @@ export async function signSvVertrag({
 }
 
 /**
- * KFZ-148: Stripe Checkout starten (Schritt 3).
+ * KFZ-148 / KFZ-156: Stripe Checkout starten (Schritt 3).
+ *
+ * KFZ-156: Returnt jetzt clientSecret (statt checkoutUrl), damit die
+ * Willkommen-Page <EmbeddedCheckout /> mounten kann.
  */
-export async function startStripeCheckout(): Promise<{ checkoutUrl: string } | { error: string }> {
+export async function startStripeCheckout(): Promise<{ clientSecret: string; sessionId: string } | { error: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { error: 'Nicht angemeldet' }

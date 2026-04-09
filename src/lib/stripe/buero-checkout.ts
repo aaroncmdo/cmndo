@@ -1,3 +1,4 @@
+import type Stripe from 'stripe'
 import { stripe } from './client'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -42,11 +43,14 @@ export async function getOrCreateBueroStripeCustomer(organisationId: string): Pr
 }
 
 /**
- * KFZ-152: Stripe Checkout fuer die Gesamt-Anzahlung des Bueros.
+ * KFZ-152 / KFZ-156: Stripe Checkout fuer die Gesamt-Anzahlung des Bueros.
  * setup_future_usage='off_session' damit spaetere Sammelabrechnungen
  * automatisch eingezogen werden koennen.
+ *
+ * KFZ-156: Auf ui_mode='embedded' umgestellt — Checkout laeuft inline im
+ * Willkommen-Flow Step 3. Returnt jetzt client_secret statt URL.
  */
-export async function createBueroCheckoutSession(organisationId: string): Promise<{ checkoutUrl: string }> {
+export async function createBueroCheckoutSession(organisationId: string): Promise<{ clientSecret: string; sessionId: string }> {
   const db = createAdminClient()
 
   // Gesamt-Anzahlung als Summe aller Sub-Standort-Anzahlungen
@@ -70,6 +74,8 @@ export async function createBueroCheckoutSession(organisationId: string): Promis
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: 'payment',
+    // KFZ-156: siehe sv-checkout.ts — stripe@22 Type-Inkonsistenz beim ui_mode.
+    ui_mode: 'embedded' as unknown as Stripe.Checkout.SessionCreateParams['ui_mode'],
     payment_intent_data: {
       // Kartendaten fuer spaetere Sammelabrechnungen speichern
       setup_future_usage: 'off_session',
@@ -90,8 +96,8 @@ export async function createBueroCheckoutSession(organisationId: string): Promis
       typ: 'buero_anzahlung',
       anzahl_standorte: String(subSvs.length),
     },
-    success_url: `${APP_URL}/gutachter/onboarding/buero/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${APP_URL}/gutachter/onboarding/buero?cancelled=1`,
+    // KFZ-156: return_url ersetzt success_url im embedded mode
+    return_url: `${APP_URL}/gutachter/willkommen?stripe_success=1&session_id={CHECKOUT_SESSION_ID}`,
   })
 
   await db.from('organisationen').update({
@@ -99,5 +105,6 @@ export async function createBueroCheckoutSession(organisationId: string): Promis
     updated_at: new Date().toISOString(),
   }).eq('id', organisationId)
 
-  return { checkoutUrl: session.url! }
+  if (!session.client_secret) throw new Error('Stripe hat keinen client_secret zurueckgegeben')
+  return { clientSecret: session.client_secret, sessionId: session.id }
 }

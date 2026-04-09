@@ -167,15 +167,10 @@ export default function BueroOnboardingClient({
   }
 
   async function handleCheckout() {
-    setError(null)
+    // KFZ-156: Stripe Checkout laeuft jetzt embedded im Willkommen-Flow.
+    // Legacy-Wizard leitet daher zur neuen Page weiter.
     if (!organisationId) { setError('Keine Organisation'); return }
-
-    setSaving(true)
-    const result = await startBueroStripeCheckout(organisationId)
-    setSaving(false)
-
-    if ('error' in result) { setError(result.error); return }
-    window.location.href = result.checkoutUrl
+    window.location.href = '/gutachter/willkommen?step=stripe'
   }
 
   return (

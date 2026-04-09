@@ -106,13 +106,9 @@ export default function SoloVertragWizard({
   }
 
   async function handleCheckout() {
-    setError(null)
-    setSaving(true)
-    const result = await startStripeCheckout()
-    setSaving(false)
-
-    if ('error' in result) { setError(result.error); return }
-    window.location.href = result.checkoutUrl
+    // KFZ-156: Stripe Checkout laeuft jetzt embedded im Willkommen-Flow.
+    // Legacy-Wizard leitet daher zur neuen Page weiter.
+    window.location.href = '/gutachter/willkommen?step=stripe'
   }
 
   return (
