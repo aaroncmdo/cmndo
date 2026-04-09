@@ -29,6 +29,9 @@ interface SV {
   standortAdresse?: string | null
   guthaben?: number
   qualifikationen?: string[]
+  // KFZ-154
+  spezifikationen?: string[]
+  schadenarten?: string[]
   anzahlungStatus?: string
   istAktiv?: boolean
   deaktiviertGrund?: string | null

@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import KarteClient from '../karte/KarteClient'
 
-const BASE_SELECT = 'id, profile_id, gebiet_plz, paket, offene_faelle, max_faelle_monat, ist_aktiv, gutachter_typ, qualifikationen, onboarding_abgeschlossen, anzahlung_status, standort_adresse, standort_lat, standort_lng, lat, lng, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, radius_km, guthaben, organisation_id, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, profiles(vorname, nachname, email, telefon)'
+const BASE_SELECT = 'id, profile_id, gebiet_plz, paket, offene_faelle, max_faelle_monat, ist_aktiv, gutachter_typ, qualifikationen, qualifikationen_neu, spezifikationen, schadenarten, onboarding_abgeschlossen, anzahlung_status, standort_adresse, standort_lat, standort_lng, lat, lng, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, radius_km, guthaben, organisation_id, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, profiles(vorname, nachname, email, telefon)'
 const EXTENDED_SELECT = BASE_SELECT.replace('organisation_id,', 'organisation_id, deaktiviert_grund, deaktiviert_am, geloescht_am,')
 
 export default async function SachverstaendigePage() {
@@ -11,7 +11,7 @@ export default async function SachverstaendigePage() {
   let svList: Record<string, unknown>[] | null = null
   const extended = await supabase.from('sachverstaendige').select(EXTENDED_SELECT).is('geloescht_am', null).order('created_at', { ascending: false })
   if (!extended.error) {
-    svList = extended.data as Record<string, unknown>[] | null
+    svList = extended.data as unknown as Record<string, unknown>[] | null
   } else {
     // Columns don't exist yet — load all, no geloescht_am filter possible
     const base = await supabase.from('sachverstaendige').select(BASE_SELECT).order('created_at', { ascending: false })
@@ -40,7 +40,10 @@ export default async function SachverstaendigePage() {
       gutachterTyp: (sv.gutachter_typ as string) ?? 'kfz-gutachter',
       standortAdresse: sv.standort_adresse as string | null,
       guthaben: Number(sv.guthaben) || 0,
-      qualifikationen: (sv.qualifikationen as string[] | null) ?? [],
+      // KFZ-154: bevorzugt qualifikationen_neu, fallback auf legacy qualifikationen
+      qualifikationen: (sv.qualifikationen_neu as string[] | null) ?? (sv.qualifikationen as string[] | null) ?? [],
+      spezifikationen: (sv.spezifikationen as string[] | null) ?? [],
+      schadenarten: (sv.schadenarten as string[] | null) ?? [],
       anzahlungStatus: (sv.anzahlung_status as string) ?? 'offen',
       istAktiv: sv.ist_aktiv !== false,
       deaktiviertGrund: (sv.deaktiviert_grund as string | null) ?? null,

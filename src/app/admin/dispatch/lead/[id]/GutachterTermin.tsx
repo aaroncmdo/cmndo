@@ -41,6 +41,9 @@ export default function GutachterTermin({
     nachname: string | null
     telefon: string | null
     schadenfall_typ: string | null
+    // KFZ-154
+    spezifikation?: string | null
+    schadenart?: string | null
     fahrzeug_standort_plz: string | null
     fahrzeug_standort_adresse: string | null
     gutachter_termin: string | null
@@ -95,6 +98,9 @@ export default function GutachterTermin({
           plz,
           wunschtermin: new Date(wunschtermin).toISOString(),
           schadenfall_typ: lead.schadenfall_typ,
+          // KFZ-154
+          spezifikation: lead.spezifikation ?? null,
+          schadenart: lead.schadenart ?? null,
         }),
       })
       if (!res.ok) {

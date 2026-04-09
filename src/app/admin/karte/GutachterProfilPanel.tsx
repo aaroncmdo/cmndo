@@ -37,6 +37,9 @@ interface SV {
   standortAdresse?: string | null
   guthaben?: number
   qualifikationen?: string[]
+  // KFZ-154
+  spezifikationen?: string[]
+  schadenarten?: string[]
   anzahlungStatus?: string
   istAktiv?: boolean
   deaktiviertAm?: string | null
@@ -356,6 +359,32 @@ export default function GutachterProfilPanel({
               </div>
             )}
           </section>
+
+          {/* KFZ-154: Spezifikationen + Schadenarten Read-Only Display */}
+          {(sv.spezifikationen?.length || sv.schadenarten?.length) ? (
+            <section>
+              {sv.spezifikationen && sv.spezifikationen.length > 0 && (
+                <div className="mb-3">
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Spezifikationen</h3>
+                  <div className="flex flex-wrap gap-1">
+                    {sv.spezifikationen.map(s => (
+                      <span key={s} className="bg-[#4573A2]/10 text-[#4573A2] text-[10px] px-2 py-0.5 rounded-full">{s}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {sv.schadenarten && sv.schadenarten.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Schadenarten</h3>
+                  <div className="flex flex-wrap gap-1">
+                    {sv.schadenarten.map(s => (
+                      <span key={s} className="bg-amber-50 text-amber-700 text-[10px] px-2 py-0.5 rounded-full">{s}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+          ) : null}
 
           {/* Notizen */}
           <section>

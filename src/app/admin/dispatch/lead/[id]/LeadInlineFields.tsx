@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveLeadQualifizierung } from './actions'
 import { PencilIcon, CheckIcon, XIcon, Loader2Icon } from 'lucide-react'
+import { SPEZIFIKATIONEN, SCHADENARTEN } from '@/app/admin/sachverstaendige/anlegen/constants'
 
 /* ── Inline Text Field ────────────────────────────────────────────────── */
 
@@ -189,6 +190,7 @@ export default function LeadInlineFields({ lead }: {
     telefon: string | null; email: string | null
     source_channel: string | null; source_domain: string | null
     schadenfall_typ: string | null; kunden_konstellation: string | null
+    spezifikation: string | null; schadenart: string | null
     gegner_name: string | null; gegner_versicherung: string | null; gegner_kennzeichen: string | null
     gegner_bekannt: boolean | null
     eigene_versicherung: string | null; eigene_policennr: string | null
@@ -225,6 +227,9 @@ export default function LeadInlineFields({ lead }: {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <InlineSelect leadId={id} field="schadenfall_typ" value={lead.schadenfall_typ} label="Schadenfall-Typ" options={SF_OPTIONS} />
           <InlineSelect leadId={id} field="kunden_konstellation" value={lead.kunden_konstellation} label="Kunden-Konstellation" options={KK_OPTIONS} />
+          {/* KFZ-154: Spezifikation + Schadenart fuer den Dispatcher-Match */}
+          <InlineSelect leadId={id} field="spezifikation" value={lead.spezifikation} label="Spezifikation" options={SPEZIFIKATIONEN.map(s => ({ value: s, label: s }))} />
+          <InlineSelect leadId={id} field="schadenart" value={lead.schadenart} label="Schadenart" options={SCHADENARTEN.map(s => ({ value: s, label: s }))} />
           <InlineText leadId={id} field="kennzeichen" value={lead.kennzeichen} label="Kennzeichen" mono />
           <InlineText leadId={id} field="fahrzeug_hersteller" value={lead.fahrzeug_hersteller} label="Hersteller" />
           <InlineText leadId={id} field="fahrzeug_modell" value={lead.fahrzeug_modell} label="Modell" />

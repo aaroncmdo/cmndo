@@ -35,6 +35,9 @@ type LeadData = {
   status: string
   schadenfall_typ: string | null
   kunden_konstellation: string | null
+  // KFZ-154
+  spezifikation: string | null
+  schadenart: string | null
   sf_variante: string | null
   gegner_name: string | null
   gegner_versicherung: string | null
@@ -663,7 +666,8 @@ function StepGutachterTermin({ lead, saving: parentSaving, onAdvance }: {
     if (!plz || !wunschtermin) return
     setSearching(true); setError(null); setResult(null)
     try {
-      const res = await fetch('/api/gutachter-matching', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plz, lat, lng, wunschtermin: new Date(wunschtermin).toISOString(), schadenfall_typ: lead.schadenfall_typ }) })
+      // KFZ-154: spezifikation + schadenart aus dem Lead mit reichen
+      const res = await fetch('/api/gutachter-matching', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plz, lat, lng, wunschtermin: new Date(wunschtermin).toISOString(), schadenfall_typ: lead.schadenfall_typ, spezifikation: lead.spezifikation, schadenart: lead.schadenart }) })
       if (!res.ok) { const data = await res.json(); throw new Error(data?.error ?? 'Suche fehlgeschlagen') }
       setResult(await res.json())
     } catch (err) {

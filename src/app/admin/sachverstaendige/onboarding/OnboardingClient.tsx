@@ -32,11 +32,11 @@ const TYPEN = [
   { value: 'gutachterbuero', label: 'Gutachterbuero', desc: 'Gutachterbuero mit mehreren Standorten', color: 'border-purple-500 bg-purple-50/30' },
 ]
 
-const QUALIFIKATIONEN = [
-  'Haftpflichtschaden', 'Kaskoschaden', 'Leasingrueckgabe', 'Flottenmanagement',
-  'Oldtimer', 'LKW/Nutzfahrzeuge', 'Motorrad', 'Wohnmobil',
-  'Totalschaden-Bewertung', 'Wiederbeschaffungswert', 'Beweissicherung', 'Gerichtsgutachten',
-]
+// KFZ-154: deprecated Self-Service Onboarding-Flow (ARCH-1 hat den abgeloest).
+// Wir nutzen jetzt die zentrale 12-er Qualifikationen-Liste damit die Anzeige
+// hier konsistent bleibt — Pflege passiert ueber den Admin-Anlege-Wizard.
+import { QUALIFIKATIONEN as QUALIFIKATIONEN_NEU } from '../anlegen/constants'
+const QUALIFIKATIONEN = QUALIFIKATIONEN_NEU
 
 const PAKETE = [
   { value: 'standard', label: 'Standard', faelle: 10, km: 15, preis: 1500 },

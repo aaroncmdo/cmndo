@@ -83,15 +83,12 @@ const PAKETE = [
   { key: 'premium', label: 'Premium', faelle: 50, km: 70, preis: 7500, color: 'border-amber-500' },
 ] as const
 
-const QUALIFIKATIONEN = [
-  'KFZ-Schäden',
-  'Motorrad',
-  'LKW/Nutzfahrzeuge',
-  'Oldtimer',
-  'Elektrofahrzeuge',
-  'Totalschaden-Bewertung',
-  'Unfallrekonstruktion',
-]
+// KFZ-154: deprecated Self-Service-Onboarding-Wizard, ARCH-1 hat den Pfad
+// abgeloest. Die Kategorien hier kommen jetzt aus der zentralen constants.ts
+// damit Anzeigen konsistent sind. Eigentliche Pflege passiert ueber den
+// Admin-Anlege-Wizard + /gutachter/profil ('Spezialisierungen' Sektion).
+import { QUALIFIKATIONEN as QUALIFIKATIONEN_NEU } from '@/app/admin/sachverstaendige/anlegen/constants'
+const QUALIFIKATIONEN = QUALIFIKATIONEN_NEU
 
 type FormData = {
   vorname: string
