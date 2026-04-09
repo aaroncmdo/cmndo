@@ -24,6 +24,7 @@ import { akzeptiereAgbSubSv } from './actions'
 import SignaturePadInput from '@/components/SignaturePadInput'
 import StripeBrandingFooter from '@/components/StripeBrandingFooter'
 import LogoUploadStep from '@/components/LogoUploadStep'
+import OrderSummaryCard from './OrderSummaryCard'
 import { LoadingButton } from '@/components/ui/loading-button'
 import {
   Dialog,
@@ -335,9 +336,13 @@ export default function WillkommenClient({
     )
   }
 
+  // BUG-97: Step 2 (Stripe-Anzahlung) braucht ein 2-Spalten-Layout — daher
+  // breiterer Wrapper auf diesem Step. Andere Steps bleiben kompakt.
+  const wrapperWidth = step === 2 && rolle !== 'sub_mitarbeiter' ? 'max-w-5xl' : 'max-w-2xl'
+
   return (
     <div className="h-full overflow-y-auto bg-[#f8f9fb] flex items-start justify-center px-4 py-10">
-      <div className="w-full max-w-2xl">
+      <div className={`w-full ${wrapperWidth}`}>
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-semibold text-gray-900">
@@ -568,36 +573,17 @@ export default function WillkommenClient({
              ═══════════════════════════════════════════════════════════════ */}
           {step === 1 && rolle !== 'sub_mitarbeiter' && (
             <div className="space-y-5">
-              {/* Auftragszusammenfassung */}
-              <div className="bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-xl p-5">
-                <p className="text-xs text-[#1E3A5F] uppercase tracking-wide font-semibold mb-3">
-                  Deine Bestellung
-                </p>
-                <div className="grid grid-cols-2 gap-y-3 gap-x-4">
-                  <Kondition label="Paket" value={paketLabel} />
-                  <Kondition label="Fälle pro Monat" value={String(sv.max_faelle_monat)} />
-                  <Kondition label="Radius" value={`${sv.paket_umkreis_km} km`} />
-                  <Kondition label="Monatsbeitrag" value="0,00 EUR" />
-                  <Kondition
-                    label={rolle === 'buero_inhaber' ? 'Anzahlung gesamt' : 'Anzahlung'}
-                    value={fmtEur(rolle === 'buero_inhaber' ? gesamtAnzahlung : sv.onboarding_anzahlung_betrag)}
-                    highlight
-                  />
-                  <Kondition label="Abrechnung" value="Pay-per-Lead" />
-                </div>
-                <div className="mt-4 pt-4 border-t border-[#4573A2]/15 flex items-center justify-between text-xs">
-                  <span className="text-gray-600">
-                    Kein monatlicher Grundpreis — nur Lead-Preise pro Fall (variiert nach Schadenhoehe).
-                  </span>
-                  <Link
-                    href="/gutachter/leadpreise"
-                    target="_blank"
-                    className="text-[#1E3A5F] underline hover:text-[#4573A2] font-medium ml-3 flex-shrink-0"
-                  >
-                    → Lead-Preis-Tabelle
-                  </Link>
-                </div>
-              </div>
+              {/* BUG-96 + BUG-97: Auftragszusammenfassung als geteilte
+                  OrderSummaryCard (compact-Variante). Gleiches Component
+                  wird in Step 2 als xl-Variante wiederverwendet. */}
+              <OrderSummaryCard
+                variant="compact"
+                paketLabel={paketLabel}
+                kontingent={sv.max_faelle_monat}
+                radiusKm={sv.paket_umkreis_km}
+                anzahlungBetrag={rolle === 'buero_inhaber' ? gesamtAnzahlung : sv.onboarding_anzahlung_betrag}
+                organisationName={rolle !== 'buero_inhaber' && organisation ? organisation.name : null}
+              />
 
               {/* Hinweis fuer Buero-Inhaber: stellvertretend fuer alle Sub-Standorte */}
               {rolle === 'buero_inhaber' && organisation && (
@@ -778,26 +764,11 @@ export default function WillkommenClient({
                 <CheckCircle2Icon className="w-5 h-5 text-[#4573A2] flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-[#0D1B3E]">
                   {rolle === 'buero_inhaber' ? (
-                    <><strong>Büro-Vertrag unterzeichnet.</strong> Bitte schließe jetzt die zentrale Anzahlung für alle Sub-Standorte ab.</>
+                    <><strong>Buero-Vertrag unterzeichnet.</strong> Bitte schliesse jetzt die zentrale Anzahlung fuer alle Sub-Standorte ab.</>
                   ) : (
-                    <><strong>Vertrag unterzeichnet.</strong> Bitte schließe jetzt die Anzahlung ab.</>
+                    <><strong>Vertrag unterzeichnet.</strong> Bitte schliesse jetzt die Anzahlung ab.</>
                   )}
                 </div>
-              </div>
-
-              <div className="bg-[#4573A2]/5 border border-[#4573A2]/15 rounded-xl p-4">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Zu zahlender Betrag</p>
-                <p className="text-2xl font-bold text-[#1E3A5F] mt-1">
-                  {fmtEur(rolle === 'buero_inhaber' ? gesamtAnzahlung : sv.onboarding_anzahlung_betrag)}
-                  {rolle === 'buero_inhaber' && (
-                    <span className="text-sm font-normal text-gray-500"> netto</span>
-                  )}
-                </p>
-                <p className="text-[11px] text-gray-500 mt-2">
-                  {rolle === 'buero_inhaber'
-                    ? `Sammelbetrag für ${subSvs.length} Sub-Standort(e). Wird mit den ersten Lead-Gebühren verrechnet.`
-                    : 'Wird mit den ersten Lead-Gebühren verrechnet. Sobald die Zahlung eingegangen ist, ist dein Portal-Zugang freigeschaltet.'}
-                </p>
               </div>
 
               {rolle === 'buero_inhaber' && gesamtAnzahlung <= 0 && (
@@ -806,24 +777,41 @@ export default function WillkommenClient({
                 </div>
               )}
 
-              {/* Embedded Stripe Checkout */}
-              {!stripePublishableKey ? (
-                <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm">
-                  Stripe-Konfiguration fehlt (STRIPE_PUBLISHABLE_KEY). Bitte support@claimondo.de kontaktieren.
-                </div>
-              ) : !clientSecret ? (
-                <div className="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center text-sm text-gray-500">
-                  Checkout wird geladen ...
-                </div>
-              ) : (
-                <div className="rounded-xl border border-gray-200 overflow-hidden bg-white">
-                  <EmbeddedCheckoutProvider stripe={stripePromise} options={checkoutOptions}>
-                    <EmbeddedCheckout />
-                  </EmbeddedCheckoutProvider>
-                </div>
-              )}
+              {/* BUG-97: 2-Spalten-Layout. Mobile = 1 Spalte (stacked).
+                  Links: OrderSummaryCard xl mit grossem Anzahlungs-Betrag.
+                  Rechts: Embedded Stripe Checkout + StripeBrandingFooter. */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                {/* Linke Spalte: Auftragszusammenfassung */}
+                <OrderSummaryCard
+                  variant="xl"
+                  paketLabel={paketLabel}
+                  kontingent={sv.max_faelle_monat}
+                  radiusKm={sv.paket_umkreis_km}
+                  anzahlungBetrag={rolle === 'buero_inhaber' ? gesamtAnzahlung : sv.onboarding_anzahlung_betrag}
+                  subBueros={rolle === 'buero_inhaber' ? subSvs : undefined}
+                />
 
-              <StripeBrandingFooter />
+                {/* Rechte Spalte: Embedded Stripe Checkout + Branding-Footer */}
+                <div className="space-y-3">
+                  {!stripePublishableKey ? (
+                    <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+                      Stripe-Konfiguration fehlt (STRIPE_PUBLISHABLE_KEY). Bitte support@claimondo.de kontaktieren.
+                    </div>
+                  ) : !clientSecret ? (
+                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center text-sm text-gray-500">
+                      Checkout wird geladen ...
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-gray-200 overflow-hidden bg-white">
+                      <EmbeddedCheckoutProvider stripe={stripePromise} options={checkoutOptions}>
+                        <EmbeddedCheckout />
+                      </EmbeddedCheckoutProvider>
+                    </div>
+                  )}
+
+                  <StripeBrandingFooter />
+                </div>
+              </div>
             </div>
           )}
 
