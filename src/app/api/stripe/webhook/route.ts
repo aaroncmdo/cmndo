@@ -82,6 +82,30 @@ export async function POST(request: Request) {
             ist_aktiv: true,
           }).eq('organisation_id', orgId)
 
+          // ARCH-1 FR-5: Werbebudget pro Sub-SV mit dem jeweiligen
+          // onboarding_anzahlung_betrag initialisieren (analog BUG-FOLLOW-4
+          // im Solo-Branch). Der Inhaber selbst hat anzahlung=0 und bekommt
+          // keine Faelle persoenlich → er bleibt bei 0 Werbebudget.
+          // process-case-billing zieht 150 EUR pro Fall vom Werbebudget ab;
+          // ohne diese Init wuerde der Sub-SV trotz Buero-Anzahlung sofort
+          // den vollen Lead-Preis zahlen statt der Differenz.
+          try {
+            const { data: subs } = await db.from('sachverstaendige')
+              .select('id, onboarding_anzahlung_betrag, rolle_in_organisation, ist_parent_account')
+              .eq('organisation_id', orgId)
+            for (const s of subs ?? []) {
+              const r = (s.rolle_in_organisation ?? '').toLowerCase()
+              if (r === 'inhaber' || s.ist_parent_account) continue
+              const guthaben = Number(s.onboarding_anzahlung_betrag ?? 0)
+              if (guthaben <= 0) continue
+              await db.from('sachverstaendige').update({
+                werbebudget_guthaben_netto: guthaben,
+              }).eq('id', s.id)
+            }
+          } catch (err) {
+            console.error('[ARCH-1 FR-5] Werbebudget-Init Buero-Branch:', err)
+          }
+
           // Email an Inhaber
           try {
             const { data: org } = await db.from('organisationen')

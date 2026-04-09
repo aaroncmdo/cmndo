@@ -7,14 +7,18 @@ import WillkommenClient from './WillkommenClient'
  *
  * Die neue Onboarding-Page nach dem Self-Service-Wegfall. SVs werden vom
  * Admin angelegt (siehe ARCH-1 Phase 2 Admin-UI), beim ersten Login landen
- * sie hier und sehen einen 3-Step Wizard:
- *   1. Konditionen + Stammdaten (read-only)
- *   2. Vertrag unterzeichnen
- *   3. Stripe-Anzahlung
+ * sie hier und durchlaufen je nach Rolle einen anderen Flow:
  *
- * Zugang ist nur erlaubt fuer SVs deren onboarding_status NICHT 'bezahlt' und
- * portal_zugang_freigeschaltet=false ist. Wer schon durch ist landet im
- * Dashboard, wer keinen SV-Eintrag hat im Login mit Fehler.
+ *   - solo            : 3-Step Wizard (Konditionen, Vertrag+Sig, Stripe)
+ *   - buero_inhaber   : 3-Step Wizard mit Sub-Tabelle + Buero-Vertrag +
+ *                       Buero-Sammel-Anzahlung (alle Sub-Standorte zusammen)
+ *   - sub_mitarbeiter : 2-Step Light-Flow (eigenes Paket + Checkbox-AGB)
+ *                       danach Warte-Page oder direkt Dashboard wenn der
+ *                       Inhaber bereits bezahlt hat
+ *
+ * Zugang ist nur erlaubt fuer SVs deren portal_zugang_freigeschaltet=false
+ * ist. Wer schon durch ist landet im Dashboard, wer keinen SV-Eintrag hat
+ * im Login mit Fehler.
  */
 export default async function GutachterWillkommenPage({
   searchParams,
@@ -25,28 +29,54 @@ export default async function GutachterWillkommenPage({
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  // SV laden (profile_id ODER user_id Fallback)
-  const svSelect = 'id, paket, max_faelle_monat, paket_umkreis_km, onboarding_status, onboarding_anzahlung_betrag, vertrag_unterschrieben, portal_zugang_freigeschaltet, standort_adresse, standort_plz, organisation_id, rolle_in_organisation'
-  let { data: sv } = await supabase
+  // ARCH-1: Ein User kann mehrere sachverstaendige-Eintraege haben
+  // (Inhaber + Sub-Standort, oder mehrere Sub-Standorte mit gleicher Email).
+  // Wir laden ALLE und entscheiden anhand der Rollen-Prioritaet welchen
+  // Eintrag wir hier behandeln:
+  //   1. inhaber           → Buero-Inhaber-Flow
+  //   2. mitarbeiter/...   → Sub-Mitarbeiter-Flow
+  //   3. ohne organisation → Solo-Flow
+  const svSelect =
+    'id, paket, max_faelle_monat, paket_umkreis_km, onboarding_status, onboarding_anzahlung_betrag, vertrag_unterschrieben, portal_zugang_freigeschaltet, standort_adresse, standort_plz, organisation_id, rolle_in_organisation'
+  const { data: svRows } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
-    .eq('profile_id', user.id)
-    .maybeSingle()
-  if (!sv) {
-    const r = await supabase
-      .from('sachverstaendige')
-      .select(svSelect)
-      .eq('user_id', user.id)
-      .maybeSingle()
-    sv = r.data
-  }
+    .or(`profile_id.eq.${user.id},user_id.eq.${user.id}`)
 
-  // Kein SV → Aaron muss anlegen
-  if (!sv) {
+  const allSvs = svRows ?? []
+
+  if (!allSvs.length) {
     redirect('/login?error=Dein%20Account%20ist%20noch%20nicht%20eingerichtet.%20Bitte%20kontaktiere%20support%40claimondo.de')
   }
 
-  // Schon vollstaendig durch → Dashboard
+  // Rolle ableiten + primaeren SV-Eintrag waehlen
+  type Rolle = 'solo' | 'buero_inhaber' | 'sub_mitarbeiter'
+  const SUB_ROLLEN = new Set(['mitarbeiter', 'akademie_sub', 'community_member'])
+
+  const inhaberSv = allSvs.find(s => (s.rolle_in_organisation ?? '').toLowerCase() === 'inhaber')
+  const subSv = allSvs.find(s => SUB_ROLLEN.has((s.rolle_in_organisation ?? '').toLowerCase()))
+  const soloSv = allSvs.find(s => !s.organisation_id)
+
+  let rolle: Rolle
+  let sv: (typeof allSvs)[number]
+  if (inhaberSv) {
+    rolle = 'buero_inhaber'
+    sv = inhaberSv
+  } else if (subSv) {
+    rolle = 'sub_mitarbeiter'
+    sv = subSv
+  } else if (soloSv) {
+    rolle = 'solo'
+    sv = soloSv
+  } else {
+    // Defensive: SV hat organisation_id aber keine bekannte Rolle → wie Solo behandeln
+    rolle = 'solo'
+    sv = allSvs[0]
+  }
+
+  // Schon vollstaendig durch → Dashboard. Sub-Mitarbeiter ohne eigenen
+  // Vertrag landet trotzdem hier (er muss ja AGB akzeptieren), darum
+  // pruefen wir zusaetzlich vertrag_unterschrieben.
   if (sv.portal_zugang_freigeschaltet) {
     redirect('/gutachter')
   }
@@ -58,7 +88,7 @@ export default async function GutachterWillkommenPage({
     .eq('id', user.id)
     .single()
 
-  // Vertragsvorlagen (NB + KV)
+  // Vertragsvorlagen (NB + KV) — fuer Solo + Inhaber
   const { data: vorlagen } = await supabase
     .from('vertragsvorlagen')
     .select('id, typ, titel, version, inhalt_html, pflicht_unterschrift')
@@ -67,15 +97,62 @@ export default async function GutachterWillkommenPage({
   const nbVorlage = (vorlagen ?? []).find(v => v.typ === 'nutzungsbedingungen') ?? null
   const kvVorlage = (vorlagen ?? []).find(v => v.typ === 'kooperationsvertrag_muster') ?? null
 
-  // Falls Sub-SV einer Org: Org-Daten laden (fuer "Du gehoerst zu ..." Hinweis)
-  let organisation: { id: string; name: string; typ: string | null } | null = null
+  // Org-Daten + ggf. Sub-SVs (fuer Inhaber + Sub-Mitarbeiter)
+  let organisation: { id: string; name: string; typ: string | null; onboarding_status: string | null } | null = null
+  let subSvs: Array<{
+    id: string
+    name: string | null
+    standort_adresse: string | null
+    standort_plz: string | null
+    paket: string
+    onboarding_anzahlung_betrag: number
+    profile_email: string | null
+  }> = []
+  let gesamtAnzahlung = 0
+
   if (sv.organisation_id) {
     const { data: org } = await supabase
       .from('organisationen')
-      .select('id, name, typ')
+      .select('id, name, typ, onboarding_status')
       .eq('id', sv.organisation_id)
       .maybeSingle()
     organisation = org ?? null
+
+    if (rolle === 'buero_inhaber') {
+      // Alle Sub-Standorte (mitarbeiter) der Org laden + Mitarbeiter-Email
+      const { data: subs } = await supabase
+        .from('sachverstaendige')
+        .select('id, standort_adresse, standort_plz, paket, onboarding_anzahlung_betrag, profile_id, rolle_in_organisation')
+        .eq('organisation_id', sv.organisation_id)
+
+      const subList = (subs ?? []).filter(s => {
+        const r = (s.rolle_in_organisation ?? '').toLowerCase()
+        return SUB_ROLLEN.has(r)
+      })
+
+      // Email-Lookup pro Sub
+      const profileIds = Array.from(new Set(subList.map(s => s.profile_id).filter(Boolean) as string[]))
+      let profileMap = new Map<string, string>()
+      if (profileIds.length) {
+        const { data: profs } = await supabase
+          .from('profiles')
+          .select('id, email')
+          .in('id', profileIds)
+        profileMap = new Map((profs ?? []).map(p => [p.id, p.email ?? '']))
+      }
+
+      subSvs = subList.map(s => ({
+        id: s.id,
+        name: null, // Sub-Standorte haben keinen separaten Namen — wir zeigen Adresse
+        standort_adresse: s.standort_adresse,
+        standort_plz: s.standort_plz,
+        paket: s.paket ?? 'standard',
+        onboarding_anzahlung_betrag: Number(s.onboarding_anzahlung_betrag ?? 0),
+        profile_email: s.profile_id ? profileMap.get(s.profile_id) ?? null : null,
+      }))
+
+      gesamtAnzahlung = subSvs.reduce((sum, s) => sum + s.onboarding_anzahlung_betrag, 0)
+    }
   }
 
   // URL-Param ?step=stripe ueberschreibt den initial-Step (z.B. nach Stripe-Cancel)
@@ -84,6 +161,7 @@ export default async function GutachterWillkommenPage({
 
   return (
     <WillkommenClient
+      rolle={rolle}
       sv={{
         id: sv.id,
         paket: sv.paket ?? 'standard',
@@ -95,9 +173,12 @@ export default async function GutachterWillkommenPage({
         standort_adresse: sv.standort_adresse,
         standort_plz: sv.standort_plz,
         rolle_in_organisation: sv.rolle_in_organisation,
+        portal_zugang_freigeschaltet: !!sv.portal_zugang_freigeschaltet,
       }}
       profile={profile ?? { vorname: null, nachname: null, email: null, telefon: null }}
       organisation={organisation}
+      subSvs={subSvs}
+      gesamtAnzahlung={gesamtAnzahlung}
       nbVorlage={nbVorlage}
       kvVorlage={kvVorlage}
       stepOverride={stepOverride}
