@@ -1,0 +1,412 @@
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
+import {
+  PackageIcon,
+  FileSignatureIcon,
+  CreditCardIcon,
+  CheckCircle2Icon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  MapPinIcon,
+  UserIcon,
+  Building2Icon,
+} from 'lucide-react'
+import { signSvVertrag, startStripeCheckout } from '@/lib/actions/sv-onboarding-actions'
+import SignaturePadInput from '@/components/SignaturePadInput'
+
+// ARCH-1 Phase 1: Willkommen-Wizard (3-Step) — ersetzt den Self-Service Solo-Wizard.
+// Step 2 + 3 sind logisch aequivalent zu SoloVertragWizard.tsx (signSvVertrag +
+// startStripeCheckout). Step 1 ist neu: read-only Konditionen-Uebersicht.
+
+const STEPS = [
+  { key: 'konditionen', label: 'Konditionen', icon: PackageIcon },
+  { key: 'vertrag', label: 'Vertrag', icon: FileSignatureIcon },
+  { key: 'anzahlung', label: 'Anzahlung', icon: CreditCardIcon },
+] as const
+
+const PAKET_LABELS: Record<string, string> = {
+  standard: 'Standard',
+  pro: 'Pro',
+  premium: 'Premium',
+}
+
+type SvData = {
+  id: string
+  paket: string
+  max_faelle_monat: number
+  paket_umkreis_km: number
+  onboarding_anzahlung_betrag: number
+  onboarding_status: string | null
+  vertrag_unterschrieben: boolean
+  standort_adresse: string | null
+  standort_plz: string | null
+  rolle_in_organisation: string | null
+}
+
+type Vorlage = {
+  id: string
+  typ: string
+  titel: string
+  version: string
+  inhalt_html: string
+  pflicht_unterschrift: boolean
+}
+
+export default function WillkommenClient({
+  sv,
+  profile,
+  organisation,
+  nbVorlage,
+  kvVorlage,
+  stepOverride,
+}: {
+  sv: SvData
+  profile: { vorname: string | null; nachname: string | null; email: string | null; telefon: string | null }
+  organisation: { id: string; name: string; typ: string | null } | null
+  nbVorlage: Vorlage | null
+  kvVorlage: Vorlage | null
+  stepOverride?: number
+}) {
+  // Initial-Step basierend auf Status (reload-sicher):
+  // - Vertrag noch nicht unterzeichnet → Step 0 (Konditionen)
+  // - Vertrag unterzeichnet, Anzahlung offen → Step 2 (Stripe)
+  // - URL-Param ?step=stripe ueberschreibt (z.B. nach Stripe-Cancel)
+  let initialStep = 0
+  if (sv.vertrag_unterschrieben) initialStep = 2
+  if (typeof stepOverride === 'number') initialStep = stepOverride
+
+  const [step, setStep] = useState(initialStep)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Vertrag-Form
+  const [unterschriftName, setUnterschriftName] = useState(
+    [profile.vorname, profile.nachname].filter(Boolean).join(' '),
+  )
+  const [agbAccepted, setAgbAccepted] = useState(false)
+  const [signaturePng, setSignaturePng] = useState<string | null>(null)
+  const [scrolled80, setScrolled80] = useState(false)
+  const [kvOpen, setKvOpen] = useState(false)
+  const nbScrollRef = useRef<HTMLDivElement>(null)
+
+  // 80% Scroll-Lock fuer Nutzungsbedingungen
+  useEffect(() => {
+    const el = nbScrollRef.current
+    if (!el) return
+    function handleScroll() {
+      if (!el) return
+      const total = el.scrollHeight - el.clientHeight
+      if (total <= 0) { setScrolled80(true); return }
+      const ratio = el.scrollTop / total
+      if (ratio >= 0.8) setScrolled80(true)
+    }
+    el.addEventListener('scroll', handleScroll)
+    handleScroll() // Initial check fuer kurze Vertraege
+    return () => el.removeEventListener('scroll', handleScroll)
+  }, [step])
+
+  const paketLabel = PAKET_LABELS[sv.paket] ?? sv.paket
+  const fullName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || '—'
+
+  async function handleVertragSubmit() {
+    setError(null)
+    if (!agbAccepted) { setError('Bitte akzeptiere die AGB/NB/DS'); return }
+    if (!unterschriftName.trim()) { setError('Bitte gib deinen Namen ein'); return }
+    if (!signaturePng) { setError('Bitte unterschreibe im Feld unten'); return }
+    if (!scrolled80) { setError('Bitte lies die Nutzungsbedingungen vollstaendig (80% gescrollt)'); return }
+
+    setSaving(true)
+    const result = await signSvVertrag({
+      signaturePngDataUri: signaturePng,
+      unterschriftName,
+    })
+    setSaving(false)
+
+    if (!result.success) { setError(result.error ?? 'Vertrag fehlgeschlagen'); return }
+    setStep(2)
+  }
+
+  async function handleCheckout() {
+    setError(null)
+    setSaving(true)
+    const result = await startStripeCheckout()
+    setSaving(false)
+
+    if ('error' in result) { setError(result.error); return }
+    window.location.href = result.checkoutUrl
+  }
+
+  return (
+    <div className="h-full overflow-y-auto bg-[#f8f9fb] flex items-start justify-center px-4 py-10">
+      <div className="w-full max-w-2xl">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-semibold text-gray-900">
+            Willkommen bei Claimondo{profile.vorname ? `, ${profile.vorname}` : ''}!
+          </h1>
+          <p className="text-gray-500 text-sm mt-1">Schritt {step + 1} von {STEPS.length}</p>
+        </div>
+
+        {/* Stepper */}
+        <div className="flex items-center justify-center gap-1 mb-8">
+          {STEPS.map((s, i) => {
+            const Icon = s.icon
+            return (
+              <div key={s.key} className="flex items-center">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                  i < step ? 'bg-green-600' : i === step ? 'bg-[#1E3A5F]' : 'bg-gray-100'
+                }`}>
+                  <Icon className="w-4 h-4 text-white" />
+                </div>
+                {i < STEPS.length - 1 && (
+                  <div className={`w-8 h-0.5 ${i < step ? 'bg-green-600' : 'bg-gray-100'}`} />
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Content Card */}
+        <div className="bg-white border border-gray-200 rounded-2xl p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-5">{STEPS[step].label}</h2>
+
+          {/* SCHRITT 0: Konditionen + Stammdaten (read-only) */}
+          {step === 0 && (
+            <div className="space-y-5">
+              {/* Konditionen-Card */}
+              <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-xl p-5">
+                <p className="text-xs text-gray-500 uppercase tracking-wide mb-3">Deine Konditionen</p>
+                <div className="grid grid-cols-2 gap-y-3 gap-x-4">
+                  <div>
+                    <p className="text-[10px] text-gray-500 uppercase">Paket</p>
+                    <p className="text-sm font-semibold text-gray-900 mt-0.5">{paketLabel}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-500 uppercase">Faelle / Monat</p>
+                    <p className="text-sm font-semibold text-gray-900 mt-0.5">{sv.max_faelle_monat}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-500 uppercase">Radius</p>
+                    <p className="text-sm font-semibold text-gray-900 mt-0.5">{sv.paket_umkreis_km} km</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-500 uppercase">Anzahlung</p>
+                    <p className="text-sm font-semibold text-[#1E3A5F] mt-0.5">
+                      {sv.onboarding_anzahlung_betrag.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })}
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-4 pt-4 border-t border-[#1E3A5F]/10">
+                  <Link
+                    href="/gutachter/leadpreise"
+                    className="text-xs text-[#1E3A5F] underline hover:text-[#4573A2]"
+                  >
+                    → Lead-Preis-Tabelle einsehen
+                  </Link>
+                </div>
+              </div>
+
+              {/* Stammdaten-Card (read-only) */}
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
+                <p className="text-xs text-gray-500 uppercase tracking-wide mb-3">Deine Stammdaten</p>
+                <div className="space-y-2.5 text-sm">
+                  <ReadRow icon={UserIcon} label="Name" value={fullName} />
+                  <ReadRow icon={UserIcon} label="Email" value={profile.email ?? '—'} />
+                  {profile.telefon && <ReadRow icon={UserIcon} label="Telefon" value={profile.telefon} />}
+                  <ReadRow
+                    icon={MapPinIcon}
+                    label="Standort"
+                    value={[sv.standort_adresse, sv.standort_plz].filter(Boolean).join(', ') || '—'}
+                  />
+                  {organisation && (
+                    <ReadRow
+                      icon={Building2Icon}
+                      label="Organisation"
+                      value={`${organisation.name}${sv.rolle_in_organisation ? ` (${sv.rolle_in_organisation})` : ''}`}
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* Hinweis */}
+              <div className="text-xs text-gray-500 bg-amber-50 border border-amber-200 rounded-xl p-4">
+                <strong>Stimmt etwas nicht?</strong> Schreib uns an{' '}
+                <a href="mailto:support@claimondo.de" className="text-[#1E3A5F] underline">
+                  support@claimondo.de
+                </a>
+                {' '}— wir korrigieren deine Stammdaten bevor du den Vertrag unterzeichnest.
+              </div>
+            </div>
+          )}
+
+          {/* SCHRITT 1: Vertrag */}
+          {step === 1 && (
+            <div className="space-y-4">
+              {!nbVorlage ? (
+                <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm">
+                  Keine aktive Nutzungsbedingungen-Vorlage hinterlegt. Bitte support@claimondo.de kontaktieren.
+                </div>
+              ) : (
+                <>
+                  {/* Nutzungsbedingungen mit 80% Scroll-Lock */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs text-gray-500 uppercase tracking-wide">
+                        {nbVorlage.titel} <span className="text-red-400">*</span>
+                      </label>
+                      <span className={`text-[10px] ${scrolled80 ? 'text-green-600' : 'text-gray-400'}`}>
+                        {scrolled80 ? '✓ vollstaendig gelesen' : 'bitte vollstaendig scrollen'}
+                      </span>
+                    </div>
+                    <div
+                      ref={nbScrollRef}
+                      className="bg-gray-50 border border-gray-200 rounded-xl p-4 max-h-64 overflow-y-auto text-xs text-gray-600 leading-relaxed prose prose-sm max-w-none"
+                      // eslint-disable-next-line react/no-danger
+                      dangerouslySetInnerHTML={{ __html: nbVorlage.inhalt_html }}
+                    />
+                  </div>
+
+                  {/* Kooperationsvertrag-Muster aufklappbar */}
+                  {kvVorlage && (
+                    <div className="border border-gray-200 rounded-xl overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => setKvOpen(!kvOpen)}
+                        className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+                      >
+                        <span className="text-sm font-medium text-gray-900">{kvVorlage.titel}</span>
+                        {kvOpen ? <ChevronUpIcon className="w-4 h-4 text-gray-400" /> : <ChevronDownIcon className="w-4 h-4 text-gray-400" />}
+                      </button>
+                      {kvOpen && (
+                        <div
+                          className="px-4 pb-4 text-xs text-gray-600 leading-relaxed max-h-64 overflow-y-auto prose prose-sm max-w-none"
+                          // eslint-disable-next-line react/no-danger
+                          dangerouslySetInnerHTML={{ __html: kvVorlage.inhalt_html }}
+                        />
+                      )}
+                    </div>
+                  )}
+
+                  {/* Name */}
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1.5 block">
+                      Dein Name (juristisch verbindlich) <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={unterschriftName}
+                      onChange={e => setUnterschriftName(e.target.value)}
+                      className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                    />
+                  </div>
+
+                  {/* Signature Pad */}
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1.5 block">
+                      Unterschrift <span className="text-red-400">*</span>
+                    </label>
+                    <SignaturePadInput
+                      value={signaturePng}
+                      onChange={setSignaturePng}
+                      height="h-44"
+                      placeholder="Hier mit Maus oder Finger unterschreiben"
+                    />
+                  </div>
+
+                  {/* AGB-Checkbox */}
+                  <label className="flex items-start gap-2.5 cursor-pointer text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={agbAccepted}
+                      onChange={e => setAgbAccepted(e.target.checked)}
+                      className="mt-0.5 rounded border-gray-300"
+                    />
+                    <span>
+                      Ich akzeptiere die <strong>Nutzungsbedingungen</strong>, die <strong>AGB</strong> und die <strong>Datenschutzerklaerung</strong>.
+                      Mit meiner Unterschrift bestaetige ich rechtsverbindlich die Annahme.
+                    </span>
+                  </label>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* SCHRITT 2: Stripe Checkout */}
+          {step === 2 && (
+            <div className="space-y-4">
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-start gap-3">
+                <CheckCircle2Icon className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-green-700">
+                  <strong>Vertrag unterzeichnet.</strong> Letzter Schritt: Anzahlung leisten.
+                  Du wirst zu Stripe weitergeleitet — bezahle dort sicher per Karte oder SEPA.
+                </div>
+              </div>
+
+              <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-xl p-4">
+                <p className="text-xs text-gray-500 uppercase tracking-wide">Zu zahlender Betrag</p>
+                <p className="text-2xl font-bold text-[#1E3A5F] mt-1">
+                  {sv.onboarding_anzahlung_betrag.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })}
+                </p>
+                <p className="text-[11px] text-gray-500 mt-2">
+                  Wird mit den ersten Lead-Gebuehren verrechnet. Sobald die Zahlung eingegangen ist, ist dein Portal-Zugang freigeschaltet.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div className="mt-4 px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+              {error}
+            </div>
+          )}
+
+          {/* Buttons */}
+          <div className="flex items-center gap-3 mt-6">
+            {step > 0 && step !== 2 && (
+              <button
+                type="button"
+                onClick={() => setStep(step - 1)}
+                disabled={saving}
+                className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50 disabled:opacity-40"
+              >
+                Zurueck
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                if (step === 0) setStep(1)
+                else if (step === 1) handleVertragSubmit()
+                else handleCheckout()
+              }}
+              disabled={saving || (step === 1 && !nbVorlage)}
+              className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40"
+            >
+              {saving
+                ? 'Wird verarbeitet...'
+                : step === 0
+                ? 'Weiter zum Vertrag'
+                : step === 1
+                ? 'Vertrag unterzeichnen'
+                : `Jetzt ${sv.onboarding_anzahlung_betrag.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })} zahlen`}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ReadRow({ icon: Icon, label, value }: { icon: typeof UserIcon; label: string; value: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <Icon className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+      <div className="flex-1 min-w-0">
+        <p className="text-[10px] text-gray-500 uppercase">{label}</p>
+        <p className="text-sm text-gray-800 break-words">{value}</p>
+      </div>
+    </div>
+  )
+}

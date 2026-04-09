@@ -1,3 +1,22 @@
+/**
+ * @deprecated ARCH-1 Phase 1 (2026-04-09)
+ *
+ * Diese Komponente ist NICHT MEHR im aktiven SV-Onboarding-Flow.
+ * Self-Service-Onboarding entfaellt komplett: Aaron legt SVs (und Sub-SVs)
+ * jetzt im Admin-UI an, der SV sieht beim ersten Login nur die neue
+ * /gutachter/willkommen Page (3-Step Konditionen → Vertrag → Stripe).
+ *
+ * Diese Datei wird NICHT geloescht weil:
+ * - Tests/Storybook koennen noch darauf verweisen
+ * - Falls ARCH-1 Phase 2 (Admin-UI BLOCK C+D) noch nicht fertig ist und ein
+ *   Notfall-Rollback noetig wird, hier liegt der alte Self-Service-Wizard
+ * - Loeschen kann nach erfolgreichem Phase 2 Deploy + 1-2 Wochen Stabilitaets-
+ *   pruefung gemacht werden
+ *
+ * Aktive Pfade nach ARCH-1 Phase 1:
+ * - /gutachter/onboarding (page.tsx) ist nur noch eine Redirect-Logik
+ * - /gutachter/willkommen ist die neue 3-Step Page
+ */
 'use client'
 
 import { useCallback, useState } from 'react'

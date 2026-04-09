@@ -54,15 +54,18 @@ export default async function GutachterLayout({
 
   // KFZ-148: Hard-Blocker — Portal-Zugang nur wenn freigeschaltet.
   // BUG-A.1 fix: greift jetzt auch fuer User die noch GAR KEINEN
-  // sachverstaendige-Eintrag haben (frische Sign-Ups). Davor: nur 'sv && ...'
-  // hat solche User durch das Layout durchgelassen mit leerem Profil.
+  // sachverstaendige-Eintrag haben.
+  // ARCH-1 Phase 1: /gutachter/willkommen ist der neue Onboarding-Pfad
+  // (3-Step Konditionen → Vertrag → Stripe). /gutachter/onboarding ist nur
+  // noch eine Redirect-Logik, bleibt aber whitelisted fuer Backwards-Compat.
   if (!sv || sv.portal_zugang_freigeschaltet === false) {
-    // Pathname robust ermitteln: x-pathname (von src/middleware.ts) ist primary,
-    // x-next-url + x-invoke-path bleiben als Fallback fuer Backward-Compat.
     const h = await headers()
     const pathname = h.get('x-pathname') ?? h.get('x-next-url') ?? h.get('x-invoke-path') ?? ''
-    if (!pathname.includes('/gutachter/onboarding')) {
-      redirect('/gutachter/onboarding')
+    const isOnboardingPath =
+      pathname.includes('/gutachter/onboarding') ||
+      pathname.includes('/gutachter/willkommen')
+    if (!isOnboardingPath) {
+      redirect('/gutachter/willkommen')
     }
   }
 

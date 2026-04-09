@@ -1,39 +1,54 @@
 import { createClient } from '@/lib/supabase/server'
-import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
-import OnboardingClient from './OnboardingClient'
 
+/**
+ * ARCH-1 Phase 1 (2026-04-09): Self-Service-Onboarding entfaellt.
+ *
+ * Diese Page ist nur noch eine Redirect-Logik:
+ * - Kein SV-Eintrag → /login mit Fehler ("Aaron muss Account anlegen")
+ * - vom_admin_angelegt + kein Vertrag → /gutachter/willkommen
+ * - Vertrag unterzeichnet, noch nicht bezahlt → /gutachter/willkommen?step=stripe
+ * - Bezahlt + freigeschaltet → /gutachter (Dashboard)
+ *
+ * Backwards-Compat: Bestehende Bookmarks/Links zu /gutachter/onboarding fuehren
+ * jetzt automatisch zur richtigen Stelle im neuen Flow.
+ */
 export default async function GutachterOnboardingPage() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  // Check if SV already exists and is fully onboarded
-  const sv = await getGutachterForUser(supabase, user.id, 'id, paket, onboarding_status, onboarding_anzahlung_betrag, vertrag_unterschrieben, ist_aktiv')
+  // Lade SV-Eintrag (profile_id ODER user_id Fallback)
+  const svSelect = 'id, onboarding_status, vertrag_unterschrieben, portal_zugang_freigeschaltet'
+  let { data: sv } = await supabase
+    .from('sachverstaendige')
+    .select(svSelect)
+    .eq('profile_id', user.id)
+    .maybeSingle()
+  if (!sv) {
+    const r = await supabase
+      .from('sachverstaendige')
+      .select(svSelect)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    sv = r.data
+  }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('vorname, nachname, email, telefon')
-    .eq('id', user.id)
-    .single()
+  // Fall 1: kein SV-Eintrag → Aaron muss Account anlegen
+  if (!sv) {
+    redirect('/login?error=Dein%20Account%20ist%20noch%20nicht%20eingerichtet.%20Bitte%20kontaktiere%20Aaron%20unter%20support%40claimondo.de')
+  }
 
-  // KFZ-148 Lückenfix: Vertragsvorlagen serverseitig laden für den Vertrags-Step
-  const { data: vorlagen } = await supabase
-    .from('vertragsvorlagen')
-    .select('id, typ, titel, version, inhalt_html, pflicht_unterschrift')
-    .eq('aktiv', true)
+  // Fall 4: vollstaendig durch → Dashboard
+  if (sv.portal_zugang_freigeschaltet) {
+    redirect('/gutachter')
+  }
 
-  const nbVorlage = (vorlagen ?? []).find(v => v.typ === 'nutzungsbedingungen') ?? null
-  const kvVorlage = (vorlagen ?? []).find(v => v.typ === 'kooperationsvertrag_muster') ?? null
+  // Fall 3: Vertrag unterzeichnet aber noch nicht bezahlt → Stripe-Step
+  if (sv.vertrag_unterschrieben) {
+    redirect('/gutachter/willkommen?step=stripe')
+  }
 
-  return (
-    <OnboardingClient
-      userId={user.id}
-      email={user.email ?? ''}
-      existingProfile={profile ?? { vorname: null, nachname: null, email: null, telefon: null }}
-      existingSv={sv ?? null}
-      nbVorlage={nbVorlage}
-      kvVorlage={kvVorlage}
-    />
-  )
+  // Fall 2: vom Admin angelegt, kein Vertrag → /willkommen Step 1
+  redirect('/gutachter/willkommen')
 }
