@@ -1,0 +1,167 @@
+'use server'
+
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { revalidatePath } from 'next/cache'
+
+// Stripe wird in retryEinzug() lazy via dynamic import geladen — sonst crasht
+// 'next build' im Page-Data-Collection-Schritt falls STRIPE_SECRET_KEY
+// zur Build-Zeit nicht gesetzt ist (siehe stripe/webhook/route.ts).
+
+// KFZ-149 Hund-D: Server Actions fuer das /admin/abrechnungen Listing.
+//   - retryEinzug : startet einen erneuten Stripe-Lastschrift-Einzug
+//   - markBezahlt : manuell als bezahlt markieren (z.B. nach Bank-Ueberweisung)
+
+async function ensureAdmin(): Promise<{ ok: true } | { ok: false; error: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('rolle')
+    .eq('id', user.id)
+    .single()
+  if (profile?.rolle !== 'admin') return { ok: false, error: 'Nur Admins' }
+  return { ok: true }
+}
+
+/**
+ * Manueller Retry des Lastschrift-Einzugs fuer eine fehlgeschlagene Abrechnung.
+ * Resettet die einzug_versucht_am Sperre nicht — wir machen einen neuen Versuch
+ * und ueberschreiben einzug_versucht_am und einzug_fehler.
+ */
+export async function retryEinzug(abrechnung_id: string): Promise<{ success: boolean; error?: string; payment_intent_id?: string }> {
+  const auth = await ensureAdmin()
+  if (!auth.ok) return { success: false, error: auth.error }
+
+  const db = createAdminClient()
+
+  const { data: abr } = await db.from('abrechnungen')
+    .select('id, abrechnungs_nr, empfaenger_typ, empfaenger_id, summe_brutto, bezahlt_am')
+    .eq('id', abrechnung_id)
+    .maybeSingle()
+  if (!abr) return { success: false, error: 'Abrechnung nicht gefunden' }
+  if (abr.bezahlt_am) return { success: false, error: 'Abrechnung ist bereits bezahlt' }
+  if (abr.empfaenger_typ !== 'sv') return { success: false, error: 'Retry nur fuer SV-Abrechnungen unterstuetzt' }
+  if (!abr.empfaenger_id || !abr.summe_brutto) return { success: false, error: 'empfaenger_id oder Betrag fehlt' }
+
+  // Customer + PM auflosen (analog zum Cron)
+  let svRow: { id: string; stripe_customer_id: string | null; stripe_default_payment_method_id: string | null; organisation_id: string | null } | null = null
+  {
+    const { data } = await db.from('sachverstaendige')
+      .select('id, stripe_customer_id, stripe_default_payment_method_id, organisation_id')
+      .eq('id', abr.empfaenger_id)
+      .maybeSingle()
+    if (data) svRow = data
+  }
+  if (!svRow) {
+    const { data } = await db.from('sachverstaendige')
+      .select('id, stripe_customer_id, stripe_default_payment_method_id, organisation_id')
+      .eq('profile_id', abr.empfaenger_id)
+      .limit(1)
+      .maybeSingle()
+    if (data) svRow = data
+  }
+  if (!svRow) return { success: false, error: 'Kein Sachverstaendiger gefunden' }
+
+  let customerId = svRow.stripe_customer_id
+  let pmId = svRow.stripe_default_payment_method_id
+  if ((!customerId || !pmId) && svRow.organisation_id) {
+    const { data: org } = await db.from('organisationen')
+      .select('parent_stripe_customer_id, parent_stripe_default_pm_id')
+      .eq('id', svRow.organisation_id)
+      .maybeSingle()
+    customerId = customerId ?? (org?.parent_stripe_customer_id ?? null)
+    pmId = pmId ?? (org?.parent_stripe_default_pm_id ?? null)
+  }
+
+  if (!customerId || !pmId) return { success: false, error: 'Stripe Customer oder Payment Method fehlt — bitte SV-Profil pruefen' }
+
+  const { stripe } = await import('@/lib/stripe/client')
+
+  try {
+    const pi = await stripe.paymentIntents.create({
+      amount: Math.round(Number(abr.summe_brutto) * 100),
+      currency: 'eur',
+      customer: customerId,
+      payment_method: pmId,
+      confirm: true,
+      off_session: true,
+      description: `Claimondo Monatsabrechnung ${abr.abrechnungs_nr} (manueller Retry)`,
+      metadata: {
+        abrechnung_id: abr.id,
+        abrechnungs_nr: abr.abrechnungs_nr,
+        empfaenger_typ: 'sv',
+        gutachter_id: svRow.id,
+        manueller_retry: 'true',
+      },
+    })
+
+    if (pi.status === 'succeeded') {
+      await db.from('abrechnungen').update({
+        bezahlt_am: new Date().toISOString(),
+        bezahlt_betrag: Number(abr.summe_brutto),
+        einzug_versucht_am: new Date().toISOString(),
+        einzug_fehler: null,
+        stripe_payment_intent_id: pi.id,
+        status: 'bezahlt',
+        updated_at: new Date().toISOString(),
+      }).eq('id', abr.id)
+      revalidatePath('/admin/abrechnungen', 'page')
+      return { success: true, payment_intent_id: pi.id }
+    }
+
+    await db.from('abrechnungen').update({
+      einzug_versucht_am: new Date().toISOString(),
+      einzug_fehler: `PaymentIntent status=${pi.status}`,
+      stripe_payment_intent_id: pi.id,
+      status: 'fehlgeschlagen',
+      updated_at: new Date().toISOString(),
+    }).eq('id', abr.id)
+    revalidatePath('/admin/abrechnungen', 'page')
+    return { success: false, error: `PaymentIntent ist im Status '${pi.status}' (kein 'succeeded'). PaymentIntent-ID: ${pi.id}` }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    await db.from('abrechnungen').update({
+      einzug_versucht_am: new Date().toISOString(),
+      einzug_fehler: msg,
+      status: 'fehlgeschlagen',
+      updated_at: new Date().toISOString(),
+    }).eq('id', abr.id)
+    revalidatePath('/admin/abrechnungen', 'page')
+    return { success: false, error: msg }
+  }
+}
+
+/**
+ * Manuelle Markierung als bezahlt — z.B. nach Bank-Ueberweisung die nicht
+ * ueber Stripe lief. Setzt bezahlt_am, bezahlt_betrag und status='bezahlt'.
+ */
+export async function markBezahlt(abrechnung_id: string, notiz?: string): Promise<{ success: boolean; error?: string }> {
+  const auth = await ensureAdmin()
+  if (!auth.ok) return { success: false, error: auth.error }
+
+  const db = createAdminClient()
+
+  const { data: abr } = await db.from('abrechnungen')
+    .select('id, summe_brutto, bezahlt_am, notiz')
+    .eq('id', abrechnung_id)
+    .maybeSingle()
+  if (!abr) return { success: false, error: 'Abrechnung nicht gefunden' }
+  if (abr.bezahlt_am) return { success: false, error: 'Abrechnung ist bereits bezahlt' }
+
+  const neueNotiz = [abr.notiz, notiz?.trim()].filter(Boolean).join('\n---\n').trim() || null
+
+  const { error } = await db.from('abrechnungen').update({
+    bezahlt_am: new Date().toISOString(),
+    bezahlt_betrag: Number(abr.summe_brutto ?? 0),
+    status: 'bezahlt',
+    notiz: neueNotiz,
+    updated_at: new Date().toISOString(),
+  }).eq('id', abrechnung_id)
+
+  if (error) return { success: false, error: error.message }
+
+  revalidatePath('/admin/abrechnungen', 'page')
+  return { success: true }
+}

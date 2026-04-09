@@ -39,6 +39,14 @@
     {
       "path": "/api/cron/abrechnungen-faellig-check",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/abrechnung-reminder",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/abrechnung-einzug",
+      "schedule": "0 10 * * *"
     }
   ]
 }
