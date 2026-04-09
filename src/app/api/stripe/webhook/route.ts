@@ -115,6 +115,16 @@ export async function POST(request: Request) {
         if (meta.typ === 'sv_anzahlung' && meta.gutachter_id) {
           const svId = meta.gutachter_id
 
+          // BUG-FOLLOW-4: werbebudget_guthaben_netto mit Anzahlungsbetrag initialisieren.
+          // KFZ-149 process-case-billing zieht 150 EUR pro Fall vom Werbebudget ab —
+          // ohne diese Initialisierung waere das Guthaben 0 und der SV wuerde sofort
+          // den vollen Lead-Preis zahlen statt der Differenz.
+          const { data: svBefore } = await db.from('sachverstaendige')
+            .select('onboarding_anzahlung_betrag')
+            .eq('id', svId)
+            .single()
+          const initGuthaben = Number(svBefore?.onboarding_anzahlung_betrag ?? 0)
+
           // Portal freischalten
           await db.from('sachverstaendige').update({
             onboarding_status: 'bezahlt',
@@ -122,6 +132,7 @@ export async function POST(request: Request) {
             stripe_anzahlung_bezahlt_am: new Date().toISOString(),
             portal_zugang_freigeschaltet: true,
             anzahlung_status: 'bezahlt',
+            werbebudget_guthaben_netto: initGuthaben,
           }).eq('id', svId)
 
           // KFZ-151: Auto-Resolve aller offenen Tasks zu diesem Onboarding
