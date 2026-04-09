@@ -5,7 +5,7 @@ import { SearchIcon, XIcon, UserPlusIcon, PhoneIcon, MailIcon, MapPinIcon, Penci
 import Link from 'next/link'
 import GutachterProfilPanel from './GutachterProfilPanel'
 import { updateGutachterProfil, reactivateGutachter, deactivateGutachter, softDeleteGutachter, reassignCases, getOpenCasesCount } from './actions'
-import { getSvStatus, SV_STATUS_FILTER_OPTIONS, type SvStatusKey } from '@/lib/sv-status'
+import { getSvStatus } from '@/lib/sv-status'
 import NeuSvDrawer from '../sachverstaendige/NeuSvDrawer'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -139,9 +139,12 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
   const [showNeuDrawer, setShowNeuDrawer] = useState(false)
   const [mapReady, setMapReady] = useState(false)
   const [search, setSearch] = useState('')
-  const [svFilter, setSvFilter] = useState<'aktive' | 'deaktivierte' | 'alle'>('aktive')
-  // ARCH-1 POLISH Befund 1: Status-Filter
-  const [statusFilter, setStatusFilter] = useState<SvStatusKey | 'alle'>('alle')
+  // BUG-92 Korrektur: Tab-Switcher als binaerer Onboarding-Filter, Quelle ist
+  // jetzt portal_zugang_freigeschaltet (nicht das alte ist_aktiv-Feld). Damit
+  // landet ein noch nicht bezahlter SV im 'Deaktiviert'-Fach unabhaengig vom
+  // Sub-Status (Wartet auf Vertrag/Anzahlung). Sub-Status bleibt als kleine
+  // Info-Badge pro Zeile sichtbar (siehe getSvStatus-Aufruf in der Liste).
+  const [svFilter, setSvFilter] = useState<'aktive' | 'deaktivierte' | 'gesperrt' | 'alle'>('aktive')
 
   // ─── Map init (runs ONCE) ──────────────────────────────────────
   useEffect(() => {
@@ -166,22 +169,16 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
   }, [apiKey])
 
   // ─── Filtered SVs (gelöschte sind bereits durch DB-Query ausgeschlossen) ──
-  // 1) ist_aktiv-Filter (alt) — wird durch Status-Filter (neu) zusaetzlich verfeinert.
-  const filteredByActive = sachverstaendige.filter(sv => {
-    if (svFilter === 'aktive') return sv.istAktiv !== false
-    if (svFilter === 'deaktivierte') return sv.istAktiv === false
+  // BUG-92 Korrektur: Onboarding-Status binaer aus portal_zugang_freigeschaltet
+  // ableiten. Gesperrt hat Vorrang. Sub-Status (Wartet auf Vertrag/Anzahlung)
+  // bleibt nur als kleine Info-Badge pro Zeile, NICHT als Filter-Kategorie.
+  const filteredByStatus = sachverstaendige.filter(sv => {
+    const istGesperrt = !!sv.gesperrtSeit
+    const istFreigeschaltet = sv.portalZugangFreigeschaltet === true
+    if (svFilter === 'gesperrt') return istGesperrt
+    if (svFilter === 'aktive') return !istGesperrt && istFreigeschaltet
+    if (svFilter === 'deaktivierte') return !istGesperrt && !istFreigeschaltet
     return true // 'alle'
-  })
-
-  // 2) ARCH-1 POLISH Befund 1: Status-Filter ueber Onboarding-Phase.
-  const filteredByStatus = filteredByActive.filter(sv => {
-    if (statusFilter === 'alle') return true
-    const status = getSvStatus({
-      portal_zugang_freigeschaltet: sv.portalZugangFreigeschaltet,
-      vertrag_unterschrieben: sv.vertragUnterschrieben,
-      gesperrt_seit: sv.gesperrtSeit,
-    })
-    return status.key === statusFilter
   })
 
   // ─── SV Markers (dep: [sachverstaendige, mapReady, svFilter] ) ──
@@ -203,7 +200,7 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
       marker.addListener('click', () => setSelectedSV(sv))
       markersRef.current.push(marker)
     })
-  }, [sachverstaendige, mapReady, svFilter, statusFilter])
+  }, [sachverstaendige, mapReady, svFilter])
 
   // ─── Coverage areas: Isochronen-Polygone (OSRM) ──────────────
   useEffect(() => {
@@ -232,7 +229,7 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
         polygonsRef.current.push(polygon)
       })
     })
-  }, [sachverstaendige, mapReady, svFilter, statusFilter])
+  }, [sachverstaendige, mapReady, svFilter])
 
   // ─── Sidebar filter (no useEffect, just derived) ──────────────
   const filteredSVs = filteredByStatus.filter(sv =>
@@ -273,21 +270,19 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
             <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suche..."
               className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-300" />
           </div>
-          {/* ARCH-1 POLISH Befund 1: Status-Filter (Onboarding-Phase) */}
-          <select
-            value={statusFilter}
-            onChange={e => setStatusFilter(e.target.value as SvStatusKey | 'alle')}
-            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs text-gray-700 focus:outline-none focus:border-gray-300"
-          >
-            {SV_STATUS_FILTER_OPTIONS.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
+          {/* BUG-92 Korrektur: 4 Top-Level Tabs als binaerer Onboarding-Filter
+              (Aktiv/Deaktiviert/Gesperrt/Alle). Sub-Status (Wartet auf Vertrag/
+              Anzahlung) erscheint nur noch als kleine Info-Badge in der Liste. */}
           <div className="flex gap-1">
-            {(['aktive', 'deaktivierte', 'alle'] as const).map(f => (
-              <button key={f} onClick={() => setSvFilter(f)}
-                className={`flex-1 text-[10px] font-medium py-1.5 rounded-lg transition-colors ${svFilter === f ? 'bg-[#1E3A5F] text-white' : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300'}`}>
-                {f === 'aktive' ? 'Aktive' : f === 'deaktivierte' ? 'Deaktiv.' : 'Alle'}
+            {([
+              { k: 'aktive', label: 'Aktiv' },
+              { k: 'deaktivierte', label: 'Deaktiv.' },
+              { k: 'gesperrt', label: 'Gesperrt' },
+              { k: 'alle', label: 'Alle' },
+            ] as const).map(f => (
+              <button key={f.k} onClick={() => setSvFilter(f.k)}
+                className={`flex-1 text-[10px] font-medium py-1.5 rounded-lg transition-colors ${svFilter === f.k ? 'bg-[#1E3A5F] text-white' : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300'}`}>
+                {f.label}
               </button>
             ))}
           </div>
