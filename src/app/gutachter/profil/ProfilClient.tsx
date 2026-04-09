@@ -164,15 +164,18 @@ export default function ProfilClient({
         )}
       </div>
 
-      {/* BUG-91: Scroll-Container, max-w-full Page-Content */}
+      {/* BUG-91: Scroll-Container, max-w-full Page-Content
+          BUG-98 Folge-Cleanup: Form von max-w-3xl auf max-w-4xl angehoben
+          damit Desktop/Tablet quer den Platz nutzen. 4xl (~896px) bleibt
+          fuer das einspaltige Profil-Form gut lesbar. */}
       <div className="flex-1 min-h-0 overflow-y-auto p-6 max-w-full">
         {success && (
-          <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-4 max-w-3xl">
-            <p className="text-green-700 text-sm">Profil gespeichert.</p>
+          <div className="bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-xl p-3 mb-4 max-w-4xl">
+            <p className="text-[#0D1B3E] text-sm">Profil gespeichert.</p>
           </div>
         )}
 
-        <form onSubmit={handleSave} className="max-w-3xl">
+        <form onSubmit={handleSave} className="max-w-4xl">
           <div className="bg-white rounded-2xl p-6 border border-gray-200 space-y-4">
             {/* Avatar */}
             <div className="flex items-center gap-4 pb-4 border-b border-gray-200">

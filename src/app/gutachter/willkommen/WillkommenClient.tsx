@@ -299,7 +299,7 @@ export default function WillkommenClient({
   if (warteAufInhaber) {
     return (
       <div className="h-full overflow-y-auto bg-[#f8f9fb] flex items-start justify-center px-4 py-10">
-        <div className="w-full max-w-2xl">
+        <div className="w-full max-w-4xl">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-semibold text-gray-900">
               Bedingungen akzeptiert{profile.vorname ? `, ${profile.vorname}` : ''}!
@@ -337,8 +337,11 @@ export default function WillkommenClient({
   }
 
   // BUG-97: Step 2 (Stripe-Anzahlung) braucht ein 2-Spalten-Layout — daher
-  // breiterer Wrapper auf diesem Step. Andere Steps bleiben kompakt.
-  const wrapperWidth = step === 2 && rolle !== 'sub_mitarbeiter' ? 'max-w-5xl' : 'max-w-2xl'
+  // breiterer Wrapper auf diesem Step.
+  // BUG-98 Folge-Cleanup: Andere Steps von max-w-2xl auf max-w-4xl
+  // angehoben — der Wizard war auf 1920px Desktop / Tablet quer zu klein.
+  // 4xl (~896px) bleibt für Forms gut lesbar, nutzt aber Desktop ordentlich aus.
+  const wrapperWidth = step === 2 && rolle !== 'sub_mitarbeiter' ? 'max-w-5xl' : 'max-w-4xl'
 
   return (
     <div className="h-full overflow-y-auto bg-[#f8f9fb] flex items-start justify-center px-4 py-10">
