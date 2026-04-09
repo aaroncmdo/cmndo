@@ -1,9 +1,27 @@
 'use client'
 
 import { useState } from 'react'
+import { useFormStatus } from 'react-dom'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { MailIcon, SmartphoneIcon } from 'lucide-react'
+import { LoadingButton } from '@/components/ui/loading-button'
+
+// Submit-Button mit useFormStatus damit der Loading-Spinner waehrend der
+// Server-Action-Ausfuehrung sichtbar ist (BUG-88).
+function EmailSubmitButton() {
+  const { pending } = useFormStatus()
+  return (
+    <LoadingButton
+      type="submit"
+      isLoading={pending}
+      loadingText="Wird angemeldet..."
+      className="w-full py-3.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-sm active:scale-[0.98] transition-all mt-1 disabled:opacity-60 disabled:cursor-not-allowed"
+    >
+      Einloggen
+    </LoadingButton>
+  )
+}
 
 type Tab = 'email' | 'telefon' | 'google'
 
@@ -146,12 +164,7 @@ export default function LoginClient({
             </label>
           </div>
 
-          <button
-            type="submit"
-            className="w-full py-3.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-white font-semibold text-sm active:scale-[0.98] transition-all mt-1"
-          >
-            Einloggen
-          </button>
+          <EmailSubmitButton />
 
           {/* BUG-83 Befund 7: Passwort vergessen Link.
               Ziel-Page wird von Hund C angelegt — bis dahin landet der User
@@ -183,14 +196,15 @@ export default function LoginClient({
               {phoneError && (
                 <p className="text-sm text-red-400 rounded-xl bg-red-50/50 border border-red-200 px-4 py-3">{phoneError}</p>
               )}
-              <button
-                type="button"
+              <LoadingButton
                 onClick={handlePhoneSend}
-                disabled={phoneLoading || !phone}
-                className="w-full py-3.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white disabled:bg-[#1E3A5F] disabled:text-gray-500 text-white font-semibold text-sm active:scale-[0.98] transition-all mt-1"
+                disabled={!phone}
+                isLoading={phoneLoading}
+                loadingText="Wird gesendet..."
+                className="w-full py-3.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-sm active:scale-[0.98] transition-all mt-1 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {phoneLoading ? 'Wird gesendet...' : 'Code per SMS senden'}
-              </button>
+                Code per SMS senden
+              </LoadingButton>
             </>
           ) : (
             <>
@@ -209,14 +223,15 @@ export default function LoginClient({
               {phoneError && (
                 <p className="text-sm text-red-400 rounded-xl bg-red-50/50 border border-red-200 px-4 py-3">{phoneError}</p>
               )}
-              <button
-                type="button"
+              <LoadingButton
                 onClick={handlePhoneVerify}
-                disabled={phoneLoading || otp.length < 6}
-                className="w-full py-3.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white disabled:bg-[#1E3A5F] disabled:text-gray-500 text-white font-semibold text-sm active:scale-[0.98] transition-all mt-1"
+                disabled={otp.length < 6}
+                isLoading={phoneLoading}
+                loadingText="Wird geprüft..."
+                className="w-full py-3.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-sm active:scale-[0.98] transition-all mt-1 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {phoneLoading ? 'Wird geprueft...' : 'Bestaetigen'}
-              </button>
+                Bestätigen
+              </LoadingButton>
               <button
                 type="button"
                 onClick={() => { setPhoneStep('enter'); setOtp(''); setPhoneError(null) }}

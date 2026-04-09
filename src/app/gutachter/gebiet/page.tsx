@@ -258,6 +258,17 @@ export default function GebietPage() {
         <div className="flex-1 relative" style={{ minHeight: 0 }}>
           <div ref={mapRef} className="absolute inset-0" />
 
+          {/* BUG-90: Fallback-Hinweis wenn Isochrone noch leer ist (z.B.
+              direkt nach Anlage / OSRM hat noch nicht durchgerechnet). */}
+          {mapReady && svData && (!svData.iso || (Array.isArray(svData.iso) && (svData.iso as { lat: number; lng: number }[]).length === 0)) && (
+            <div className="absolute top-3 right-3 z-10 bg-amber-50/95 backdrop-blur-sm border border-amber-200 rounded-xl p-3 max-w-xs text-xs">
+              <p className="font-semibold text-amber-700">Einsatzgebiet wird berechnet</p>
+              <p className="text-amber-600 mt-0.5">
+                Dein Einsatzgebiet wird gerade berechnet. Komm in wenigen Minuten zurück oder lade die Seite neu.
+              </p>
+            </div>
+          )}
+
           {/* Stats Box */}
           {mapReady && (
             <div className="absolute top-3 left-3 z-10 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-xl p-3 space-y-1 text-xs max-w-[200px]">

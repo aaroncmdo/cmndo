@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { randomBytes } from 'node:crypto'
+import { calculateIsochrone } from '@/lib/isochrone/calculate-isochrone'
 import { PAKET_KONFIG, type AnlegePaket, type AnlegeSvFormData, type AnlegeBueroFormData } from './constants'
 
 // ARCH-1 Phase 2 (BLOCK C): Server Actions fuer Admin-Anlage von SVs.
@@ -143,6 +144,28 @@ export async function anlegeSv(data: AnlegeSvFormData): Promise<{ success: boole
     await adminDb.from('profiles').delete().eq('id', authUser.user.id)
     await adminDb.auth.admin.deleteUser(authUser.user.id)
     return { success: false, error: `SV-Eintrag fehlgeschlagen: ${svErr?.message}` }
+  }
+
+  // BUG-90: Isochrone direkt nach SV-Anlage berechnen damit /gutachter/gebiet
+  // sofort eine Karte anzeigen kann. Defensive try/catch — wenn OSRM/Fallback
+  // failt, ist der SV trotzdem angelegt; das Polygon kann spaeter via
+  // /api/recalc-isochrones nachgezogen werden.
+  if (data.anschrift_lat != null && data.anschrift_lng != null) {
+    try {
+      const polygon = await calculateIsochrone(
+        data.anschrift_lat,
+        data.anschrift_lng,
+        cfg.radius_km,
+      )
+      if (polygon.length > 0) {
+        await adminDb
+          .from('sachverstaendige')
+          .update({ isochrone_polygon: polygon })
+          .eq('id', svRow.id)
+      }
+    } catch (err) {
+      console.error('[BUG-90] Isochrone-Berechnung fuer Solo-SV fehlgeschlagen:', err)
+    }
   }
 
   // 4. Welcome-Mail (fire & forget — Auch wenn Mail failt, SV ist da)

@@ -7,6 +7,7 @@ import {
   MailIcon,
 } from 'lucide-react'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
+import { LoadingButton } from '@/components/ui/loading-button'
 import { anlegeSv } from './actions'
 import { PAKET_KONFIG, paketAnzahlung, paketKontingent, QUALIFIKATIONEN, ANREDE_OPTIONEN, TITEL_OPTIONEN, type AnlegePaket, type GutachterTyp, type AnlegeSvFormData } from './constants'
 
@@ -435,17 +436,19 @@ export default function SoloAnlegenWizard({ onSuccess }: {
               Zurück
             </button>
           )}
-          <button
+          <LoadingButton
             type="button"
             onClick={() => {
               if (step < STEPS.length - 1) setStep(step + 1)
               else handleSubmit()
             }}
-            disabled={saving || !canNext()}
+            disabled={!canNext()}
+            isLoading={saving}
+            loadingText="Wird angelegt..."
             className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40"
           >
-            {saving ? 'Wird angelegt...' : step < STEPS.length - 1 ? 'Weiter' : 'Anlegen + Welcome-Mail senden'}
-          </button>
+            {step < STEPS.length - 1 ? 'Weiter' : 'Anlegen + Welcome-Mail senden'}
+          </LoadingButton>
         </div>
       </div>
     </div>

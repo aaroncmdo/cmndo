@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { KeyIcon, CheckCircle2Icon, AlertTriangleIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { LoadingButton } from '@/components/ui/loading-button'
 import { confirmPasswordReset } from '@/lib/actions/auth/reset-password'
 
 type Phase = 'verifying' | 'ready' | 'expired' | 'success' | 'error'
@@ -180,13 +181,14 @@ export default function PasswortZuruecksetzenPage() {
                   </p>
                 )}
 
-                <button
+                <LoadingButton
                   type="submit"
-                  disabled={submitting}
+                  isLoading={submitting}
+                  loadingText="Wird gespeichert..."
                   className="w-full py-3.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white disabled:opacity-60 disabled:cursor-not-allowed font-semibold text-sm active:scale-[0.98] transition-all mt-1"
                 >
-                  {submitting ? 'Wird gespeichert...' : 'Passwort speichern'}
-                </button>
+                  Passwort speichern
+                </LoadingButton>
               </form>
             </>
           )}

@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircle2Icon, XCircleIcon, PlusIcon, FileTextIcon } from 'lucide-react'
+import { LoadingButton } from '@/components/ui/loading-button'
 import {
   createVertragsvorlage,
   updateVertragsvorlage,
@@ -193,13 +194,14 @@ function VorlageCard({
         </label>
         {err && <p className="text-red-600 text-sm mb-2">{err}</p>}
         <div className="flex gap-2">
-          <button
+          <LoadingButton
             onClick={handleSave}
-            disabled={saving}
+            isLoading={saving}
+            loadingText="Speichern..."
             className="px-4 py-2 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium disabled:opacity-40"
           >
-            {saving ? 'Speichern...' : 'Speichern'}
-          </button>
+            Speichern
+          </LoadingButton>
           <button
             onClick={onCancelEdit}
             className="px-4 py-2 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50"
@@ -244,24 +246,26 @@ function VorlageCard({
               >
                 Editieren
               </button>
-              <button
+              <LoadingButton
                 onClick={onAktivieren}
-                disabled={isPending}
-                className="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-medium"
+                isLoading={isPending}
+                loadingText="..."
+                className="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-medium disabled:opacity-40"
               >
                 Aktivieren
-              </button>
+              </LoadingButton>
             </>
           )}
           {vorlage.aktiv && (
-            <button
+            <LoadingButton
               onClick={onDeaktivieren}
-              disabled={isPending}
-              className="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs hover:bg-red-50 flex items-center gap-1"
+              isLoading={isPending}
+              loadingText="..."
+              className="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs hover:bg-red-50 inline-flex items-center gap-1 disabled:opacity-40"
             >
               <XCircleIcon className="w-3 h-3" />
               Deaktivieren
-            </button>
+            </LoadingButton>
           )}
         </div>
       </div>
@@ -339,9 +343,14 @@ function CreateDialog({ onClose, onCreated }: { onClose: () => void; onCreated: 
             <button onClick={onClose} className="px-4 py-2 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50">
               Abbrechen
             </button>
-            <button onClick={handleCreate} disabled={saving} className="px-4 py-2 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium disabled:opacity-40">
-              {saving ? 'Wird erstellt...' : 'Erstellen'}
-            </button>
+            <LoadingButton
+              onClick={handleCreate}
+              isLoading={saving}
+              loadingText="Wird erstellt..."
+              className="px-4 py-2 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium disabled:opacity-40"
+            >
+              Erstellen
+            </LoadingButton>
           </div>
         </div>
       </div>

@@ -4,12 +4,29 @@ import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Script from 'next/script'
 import { createClient } from '@/lib/supabase/client'
-import { updateProfil } from './actions'
+import { updateOwnProfile } from '@/lib/actions/sv/update-own-profile'
+import { ANREDE_OPTIONEN, TITEL_OPTIONEN } from '@/app/admin/sachverstaendige/anlegen/constants'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
-import { MapPinIcon } from 'lucide-react'
+import { LoadingButton } from '@/components/ui/loading-button'
+import { MapPinIcon, InfoIcon } from 'lucide-react'
 
-type Profile = { vorname: string | null; nachname: string | null; telefon: string | null; rolle: string }
-type SV = { id: string; paket: string; gebiet_plz: string | null; ist_aktiv: boolean; max_faelle_monat: number; offene_faelle: number; kalender_typ: string; kalender_sync_aktiv: boolean; kalender_sync_letzte: string | null; qualifikationen: string[] | null; standort_adresse: string | null; standort_plz: string | null; standort_lat: number | null; standort_lng: number | null; standort_place_id: string | null }
+type Profile = { anrede: string | null; titel: string | null; vorname: string | null; nachname: string | null; telefon: string | null; rolle: string }
+type SV = { id: string; paket: string; gebiet_plz: string | null; ist_aktiv: boolean; max_faelle_monat: number; offene_faelle: number; kalender_typ: string; kalender_sync_aktiv: boolean; kalender_sync_letzte: string | null; qualifikationen: string[] | null; standort_adresse: string | null; standort_plz: string | null; standort_lat: number | null; standort_lng: number | null; standort_place_id: string | null; firmenname: string | null; rechtsform: string | null; steuernummer: string | null; ust_id: string | null; hrb: string | null }
+
+// BUG-91: Klassische deutsche Rechtsformen + 'Einzelunternehmen' als Default
+// fuer Solo-SVs ohne eigene GmbH/UG.
+const RECHTSFORM_OPTIONEN = [
+  '',
+  'Einzelunternehmen',
+  'Freiberufler',
+  'GbR',
+  'OHG',
+  'KG',
+  'GmbH',
+  'GmbH & Co. KG',
+  'UG (haftungsbeschränkt)',
+  'AG',
+] as const
 
 const QUALIFIKATION_OPTIONS = [
   { value: 'sf-01', label: 'Haftpflichtschaden (SF-01)' },
@@ -48,6 +65,22 @@ export default function ProfilClient({
   const [mapsReady, setMapsReady] = useState(
     typeof window !== 'undefined' && typeof google !== 'undefined' && !!google.maps?.places,
   )
+
+  // BUG-91: Lokaler Form-State fuer alle editierbaren Felder.
+  // Email ist read-only und wird via prop reingereicht.
+  const [form, setForm] = useState({
+    anrede: profile.anrede ?? '',
+    titel: profile.titel ?? '',
+    vorname: profile.vorname ?? '',
+    nachname: profile.nachname ?? '',
+    telefon: profile.telefon ?? '',
+    firmenname: sv.firmenname ?? '',
+    rechtsform: sv.rechtsform ?? '',
+    steuernummer: sv.steuernummer ?? '',
+    ust_id: sv.ust_id ?? '',
+    hrb: sv.hrb ?? '',
+  })
+
   const [standort, setStandort] = useState({
     adresse: sv.standort_adresse ?? '',
     plz: sv.standort_plz ?? '',
@@ -66,19 +99,37 @@ export default function ProfilClient({
     })
   }, [])
 
+  function updateField<K extends keyof typeof form>(key: K, value: string) {
+    setForm(prev => ({ ...prev, [key]: value }))
+  }
+
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setSaving(true)
     setError(null)
     setSuccess(false)
     try {
-      const fd = new FormData(e.currentTarget)
-      fd.set('standort_adresse', standort.adresse)
-      fd.set('standort_plz', standort.plz)
-      fd.set('standort_lat', standort.lat?.toString() ?? '')
-      fd.set('standort_lng', standort.lng?.toString() ?? '')
-      fd.set('standort_place_id', standort.place_id)
-      await updateProfil(fd)
+      const result = await updateOwnProfile({
+        anrede: form.anrede || null,
+        titel: form.titel || null,
+        vorname: form.vorname,
+        nachname: form.nachname,
+        telefon: form.telefon || null,
+        firmenname: form.firmenname || null,
+        rechtsform: form.rechtsform || null,
+        steuernummer: form.steuernummer || null,
+        ust_id: form.ust_id || null,
+        hrb: form.hrb || null,
+        standort_adresse: standort.adresse || null,
+        standort_plz: standort.plz || null,
+        standort_lat: standort.lat,
+        standort_lng: standort.lng,
+        standort_place_id: standort.place_id || null,
+      })
+      if (!result.success) {
+        setError(result.error ?? 'Fehler beim Speichern')
+        return
+      }
       setEditing(false)
       setSuccess(true)
       router.refresh()
@@ -101,26 +152,32 @@ export default function ProfilClient({
           onReady={() => setMapsReady(true)}
         />
       )}
-      <div className="max-w-xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">Mein Profil</h1>
-          {!editing && (
-            <button
-              onClick={() => { setEditing(true); setSuccess(false) }}
-              className="px-4 py-2 text-xs font-medium text-[#7BA3CC] hover:text-[#7BA3CC] hover:bg-gray-100 rounded-xl transition-colors"
-            >
-              Bearbeiten
-            </button>
-          )}
-        </div>
 
+      {/* BUG-91: Sticky Header — bleibt beim Scrollen oben sichtbar */}
+      <div className="flex-shrink-0 sticky top-0 z-20 bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+        <div>
+          <h1 className="text-sm font-semibold text-gray-900">Mein Profil</h1>
+          <p className="text-gray-500 text-xs">Stammdaten + Firma + Standort</p>
+        </div>
+        {!editing && (
+          <button
+            onClick={() => { setEditing(true); setSuccess(false) }}
+            className="px-4 py-2 text-xs font-medium text-white bg-[#1E3A5F] hover:bg-[#4573A2] rounded-xl transition-colors"
+          >
+            Bearbeiten
+          </button>
+        )}
+      </div>
+
+      {/* BUG-91: Scroll-Container, max-w-full Page-Content */}
+      <div className="flex-1 min-h-0 overflow-y-auto p-6 max-w-full">
         {success && (
-          <div className="bg-green-50 border border-green-800 rounded-xl p-3 mb-4">
-            <p className="text-green-300 text-sm">Profil gespeichert.</p>
+          <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-4 max-w-3xl">
+            <p className="text-green-700 text-sm">Profil gespeichert.</p>
           </div>
         )}
 
-        <form onSubmit={handleSave}>
+        <form onSubmit={handleSave} className="max-w-3xl">
           <div className="bg-white rounded-2xl p-6 border border-gray-200 space-y-4">
             {/* Avatar */}
             <div className="flex items-center gap-4 pb-4 border-b border-gray-200">
@@ -135,16 +192,38 @@ export default function ProfilClient({
 
             {/* Fields */}
             <div className="space-y-0">
-              <FieldRow label="E-Mail" value={email} />
+              {/* E-Mail read-only mit Hinweis */}
+              <div className="flex gap-2 py-2.5 border-b border-gray-200/50">
+                <span className="text-gray-500 text-sm w-36 shrink-0">E-Mail</span>
+                <div className="flex-1">
+                  <span className="text-gray-800 text-sm">{email}</span>
+                  <p className="text-gray-400 text-[10px] mt-0.5 flex items-center gap-1">
+                    <InfoIcon className="w-3 h-3" />
+                    Email-Änderung via Support: <span className="text-[#4573A2]">support@claimondo.de</span>
+                  </p>
+                </div>
+              </div>
 
               {editing ? (
                 <>
-                  <EditRow label="Vorname" name="vorname" defaultValue={profile.vorname ?? ''} />
-                  <EditRow label="Nachname" name="nachname" defaultValue={profile.nachname ?? ''} />
-                  <EditRow label="Telefon" name="telefon" defaultValue={profile.telefon ?? ''} type="tel" />
-                  <EditRow label="Gebiet (PLZ)" name="gebiet_plz" defaultValue={sv.gebiet_plz ?? ''} placeholder="z.B. 10115,10117,10119" />
+                  {/* Anrede + Titel als Dropdowns */}
+                  <SelectRow
+                    label="Anrede"
+                    value={form.anrede}
+                    onChange={v => updateField('anrede', v)}
+                    options={['', ...ANREDE_OPTIONEN].map(o => ({ value: o, label: o || '— wählen —' }))}
+                  />
+                  <SelectRow
+                    label="Titel"
+                    value={form.titel}
+                    onChange={v => updateField('titel', v)}
+                    options={TITEL_OPTIONEN.map(o => ({ value: o, label: o || '— kein Titel —' }))}
+                  />
+                  <ControlledRow label="Vorname" value={form.vorname} onChange={v => updateField('vorname', v)} />
+                  <ControlledRow label="Nachname" value={form.nachname} onChange={v => updateField('nachname', v)} />
+                  <ControlledRow label="Telefon" type="tel" value={form.telefon} onChange={v => updateField('telefon', v)} />
                   <div className="flex gap-2 py-2 border-b border-gray-200/50">
-                    <span className="text-gray-500 text-sm w-36 shrink-0 pt-2">Standort</span>
+                    <span className="text-gray-500 text-sm w-36 shrink-0 pt-2">Anschrift</span>
                     <div className="flex-1 space-y-2">
                       {mapsReady ? (
                         <GooglePlaceAutocomplete
@@ -163,39 +242,53 @@ export default function ProfilClient({
                         />
                       )}
                       {standort.lat != null && (
-                        <p className="text-green-500 text-xs flex items-center gap-1">
+                        <p className="text-green-600 text-xs flex items-center gap-1">
                           <MapPinIcon className="w-3 h-3" />
-                          Koordinaten erfasst ({standort.lat.toFixed(4)}, {standort.lng?.toFixed(4)})
+                          Koordinaten erfasst ({standort.lat.toFixed(4)}, {standort.lng?.toFixed(4)}) — Einsatzgebiet wird neu berechnet
                         </p>
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-2 py-2.5 border-b border-gray-200/50">
-                    <span className="text-gray-500 text-sm w-36 shrink-0">Verfügbar</span>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        name="verfuegbar"
-                        defaultChecked={sv.ist_aktiv}
-                        className="w-4 h-4 rounded bg-gray-100 border-gray-300 text-[#4573A2] focus:ring-[#1E3A5F] focus:ring-offset-0"
-                      />
-                      <span className="text-gray-700 text-sm">Neue Aufträge annehmen</span>
-                    </label>
+
+                  {/* Firmen-Stammdaten */}
+                  <div className="pt-3 mt-3 border-t border-gray-200">
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1 px-1">Firma / Steuerliches</p>
                   </div>
+                  <ControlledRow label="Firmenname" value={form.firmenname} onChange={v => updateField('firmenname', v)} />
+                  <SelectRow
+                    label="Rechtsform"
+                    value={form.rechtsform}
+                    onChange={v => updateField('rechtsform', v)}
+                    options={RECHTSFORM_OPTIONEN.map(o => ({ value: o, label: o || '— wählen —' }))}
+                  />
+                  <ControlledRow label="Steuernummer" value={form.steuernummer} onChange={v => updateField('steuernummer', v)} />
+                  <ControlledRow label="USt-IdNr" value={form.ust_id} onChange={v => updateField('ust_id', v)} placeholder="z.B. DE123456789" />
+                  <ControlledRow label="HRB" value={form.hrb} onChange={v => updateField('hrb', v)} placeholder="z.B. HRB 12345 (Berlin)" />
                 </>
               ) : (
                 <>
+                  <FieldRow label="Anrede" value={profile.anrede ?? '—'} />
+                  <FieldRow label="Titel" value={profile.titel || '—'} />
                   <FieldRow label="Vorname" value={profile.vorname ?? '—'} />
                   <FieldRow label="Nachname" value={profile.nachname ?? '—'} />
                   <FieldRow label="Telefon" value={profile.telefon ?? '—'} />
-                  <FieldRow label="Gebiet (PLZ)" value={sv.gebiet_plz ?? '—'} />
-                  <FieldRow label="Standort" value={sv.standort_adresse ?? '—'} />
-                  <FieldRow label="Verfügbar" value={sv.ist_aktiv ? 'Ja' : 'Nein'} />
+                  <FieldRow label="Anschrift" value={sv.standort_adresse ?? '—'} />
+                  <div className="pt-3 mt-3 border-t border-gray-200">
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1 px-1">Firma / Steuerliches</p>
+                  </div>
+                  <FieldRow label="Firmenname" value={sv.firmenname ?? '—'} />
+                  <FieldRow label="Rechtsform" value={sv.rechtsform ?? '—'} />
+                  <FieldRow label="Steuernummer" value={sv.steuernummer ?? '—'} />
+                  <FieldRow label="USt-IdNr" value={sv.ust_id ?? '—'} />
+                  <FieldRow label="HRB" value={sv.hrb ?? '—'} />
                 </>
               )}
 
+              <div className="pt-3 mt-3 border-t border-gray-200">
+                <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1 px-1">Vertrag</p>
+              </div>
               <FieldRow label="Paket" value={PAKET_LABELS[sv.paket] ?? sv.paket ?? '—'} />
-              <FieldRow label="Offene Faelle" value={`${sv.offene_faelle} / ${sv.max_faelle_monat}`} />
+              <FieldRow label="Offene Fälle" value={`${sv.offene_faelle} / ${sv.max_faelle_monat}`} />
               <FieldRow label="Zugewiesene Fälle gesamt" value={String(faelleCount)} />
             </div>
 
@@ -209,17 +302,20 @@ export default function ProfilClient({
                 >
                   Abbrechen
                 </button>
-                <button
+                <LoadingButton
                   type="submit"
-                  disabled={saving}
+                  isLoading={saving}
+                  loadingText="Wird gespeichert..."
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[#1E3A5F] hover:bg-[#4573A2] text-white transition-colors disabled:opacity-40"
                 >
-                  {saving ? 'Wird gespeichert...' : 'Speichern'}
-                </button>
+                  Speichern
+                </LoadingButton>
               </div>
             )}
 
-            {error && <p className="text-red-400 text-sm">{error}</p>}
+            {error && (
+              <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-xl p-3 mt-2">{error}</p>
+            )}
           </div>
         </form>
 
@@ -607,6 +703,48 @@ function EditRow({ label, name, defaultValue, type = 'text', placeholder }: {
         placeholder={placeholder}
         className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
       />
+    </div>
+  )
+}
+
+// BUG-91: Controlled-Variante fuer den neuen Profil-Form. Zustand wird im
+// Parent gehalten (form-State) damit die Server Action saubere Werte
+// bekommt — keine FormData-Sammlung mehr.
+function ControlledRow({ label, value, onChange, type = 'text', placeholder }: {
+  label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string
+}) {
+  return (
+    <div className="flex gap-2 py-2 border-b border-gray-200/50">
+      <span className="text-gray-500 text-sm w-36 shrink-0 pt-2">{label}</span>
+      <input
+        type={type}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+      />
+    </div>
+  )
+}
+
+function SelectRow({ label, value, onChange, options }: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  options: ReadonlyArray<{ value: string; label: string }>
+}) {
+  return (
+    <div className="flex gap-2 py-2 border-b border-gray-200/50">
+      <span className="text-gray-500 text-sm w-36 shrink-0 pt-2">{label}</span>
+      <select
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+      >
+        {options.map(o => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
     </div>
   )
 }

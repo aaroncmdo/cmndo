@@ -6,6 +6,7 @@ import Script from 'next/script'
 import { updateSvProfile } from './actions'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { MapPinIcon } from 'lucide-react'
+import { LoadingButton } from '@/components/ui/loading-button'
 
 const PAKET_OPTIONS = [
   { value: 'standard', label: 'Standard (10 Fälle, 15km)' },
@@ -159,10 +160,14 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
         {error && <p className="text-red-500 text-sm">{error}</p>}
         {success && <p className="text-emerald-500 text-sm">Gespeichert! Isochrone wird neu berechnet.</p>}
 
-        <button type="submit" disabled={saving}
-          className="w-full py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 bg-[#1E3A5F] hover:bg-[#4573A2] text-white">
-          {saving ? 'Speichert + berechnet Isochrone ...' : 'Änderungen speichern'}
-        </button>
+        <LoadingButton
+          type="submit"
+          isLoading={saving}
+          loadingText="Speichert + berechnet Isochrone ..."
+          className="w-full py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 bg-[#1E3A5F] hover:bg-[#4573A2] text-white"
+        >
+          Änderungen speichern
+        </LoadingButton>
       </form>
     </div>
   )

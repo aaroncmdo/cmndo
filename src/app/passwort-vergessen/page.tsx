@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { MailIcon, ArrowLeftIcon, CheckCircle2Icon } from 'lucide-react'
+import { LoadingButton } from '@/components/ui/loading-button'
 import { requestPasswordReset } from '@/lib/actions/auth/reset-password'
 
 export default function PasswortVergessenPage() {
@@ -66,13 +67,15 @@ export default function PasswortVergessenPage() {
                   />
                 </div>
 
-                <button
+                <LoadingButton
                   type="submit"
-                  disabled={loading || !email.trim()}
+                  isLoading={loading}
+                  loadingText="Wird gesendet..."
+                  disabled={!email.trim()}
                   className="w-full py-3.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white disabled:opacity-60 disabled:cursor-not-allowed font-semibold text-sm active:scale-[0.98] transition-all mt-1"
                 >
-                  {loading ? 'Wird gesendet...' : 'Reset-Link senden'}
-                </button>
+                  Reset-Link senden
+                </LoadingButton>
               </form>
             </>
           ) : (

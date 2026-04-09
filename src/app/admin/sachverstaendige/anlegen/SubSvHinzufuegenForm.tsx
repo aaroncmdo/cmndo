@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircle2Icon, MailIcon } from 'lucide-react'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
+import { LoadingButton } from '@/components/ui/loading-button'
 import { anlegeSubSv } from './actions'
 import { PAKET_KONFIG, ANREDE_OPTIONEN, TITEL_OPTIONEN, type AnlegePaket } from './constants'
 
@@ -191,14 +192,15 @@ export default function SubSvHinzufuegenForm({ organisationen, onSuccess }: {
           </div>
         )}
 
-        <button
+        <LoadingButton
           type="button"
           onClick={handleSubmit}
-          disabled={saving}
+          isLoading={saving}
+          loadingText="Wird angelegt..."
           className="w-full py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40"
         >
-          {saving ? 'Wird angelegt...' : 'Sub-SV anlegen + Welcome-Mail senden'}
-        </button>
+          Sub-SV anlegen + Welcome-Mail senden
+        </LoadingButton>
       </div>
     </div>
   )

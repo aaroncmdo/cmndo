@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { KeyIcon, CheckCircle2Icon } from 'lucide-react'
+import { KeyIcon } from 'lucide-react'
+import { LoadingButton } from '@/components/ui/loading-button'
 
 export default function PasswortAendernPage() {
   const [password, setPassword] = useState('')
@@ -120,13 +121,14 @@ export default function PasswortAendernPage() {
               </p>
             )}
 
-            <button
+            <LoadingButton
               type="submit"
-              disabled={loading}
+              isLoading={loading}
+              loadingText="Wird gespeichert..."
               className="w-full py-3.5 rounded-xl bg-white hover:bg-zinc-200 disabled:bg-zinc-700 disabled:text-gray-500 text-zinc-950 font-semibold text-sm active:scale-[0.98] transition-all mt-1"
             >
-              {loading ? 'Wird gespeichert...' : 'Passwort ändern'}
-            </button>
+              Passwort ändern
+            </LoadingButton>
           </form>
         </div>
       </div>
