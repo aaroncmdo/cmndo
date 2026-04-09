@@ -169,7 +169,7 @@ export default function AuftragClient({
 
   return (
     <div className="h-full flex flex-col">
-      <div className="max-w-3xl mx-auto">
+      <div>
 
         {/* Header */}
         <div className="flex items-start justify-between mb-6">

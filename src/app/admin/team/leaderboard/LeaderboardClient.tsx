@@ -20,7 +20,7 @@ export default function LeaderboardClient({ dispatch, kundenbetreuer, monatLabel
   monatLabel: string
 }) {
   return (
-    <div className="px-4 py-8"><div className="max-w-5xl mx-auto">
+    <div className="py-8"><div>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2"><TrophyIcon className="w-5 h-5 text-amber-400" />Leaderboard</h1>

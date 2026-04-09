@@ -26,7 +26,7 @@ export default function LeadDetailTabs({
     <>
       {/* Tab bar */}
       <div className="sticky top-[89px] z-10 bg-white border-b border-gray-200 flex-shrink-0">
-        <div className="max-w-4xl mx-auto flex">
+        <div className="flex">
           {TABS.map(t => {
             const Icon = t.icon
             return (

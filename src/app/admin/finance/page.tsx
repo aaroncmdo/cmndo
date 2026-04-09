@@ -31,7 +31,7 @@ function GewinnverteilungSection({
 
   return (
     <div className="px-4 pb-8">
-      <div className="max-w-5xl mx-auto">
+      <div>
         <div className="bg-white border border-gray-200 rounded-2xl p-5">
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
             Gewinnverteilung
@@ -93,7 +93,7 @@ function MarketingMaikSection({ monatsberichte }: { monatsberichte: MonatsBerich
 
   return (
     <div className="px-4 pb-8">
-      <div className="max-w-5xl mx-auto">
+      <div>
         <div className="bg-white border border-gray-200 rounded-2xl p-5">
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
             Marketing (Maik)
@@ -196,7 +196,7 @@ function IndividuelleAnfragenSection({ anfragen }: { anfragen: IndividuelleAnfra
 
   return (
     <div className="px-4 pb-8">
-      <div className="max-w-5xl mx-auto">
+      <div>
         <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-200">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
@@ -266,7 +266,7 @@ function KanzleiProvisionSection({
 
   return (
     <div className="px-4 pb-8">
-      <div className="max-w-5xl mx-auto">
+      <div>
         <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
@@ -325,7 +325,7 @@ function KanzleiProvisionSection({
 function InvestitionProFallSection() {
   return (
     <div className="px-4 pb-8">
-      <div className="max-w-5xl mx-auto">
+      <div>
         <div className="bg-white border border-gray-200 rounded-2xl p-5">
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
             Investition pro Fall
@@ -371,7 +371,7 @@ function GutachterAbrechnungen({ svRows, gutachterAnzahlungenGesamt }: {
 
   return (
     <div className="px-4 pb-8">
-      <div className="max-w-5xl mx-auto">
+      <div>
         <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
@@ -700,14 +700,14 @@ export default async function FinancePage() {
       <div className="flex-1 overflow-y-auto">
       {/* KFZ-155: Ausstehende Zahlungen — volle Tabelle ganz oben im Finance-Tab */}
       <div className="px-4 pt-6 pb-2">
-        <div className="max-w-5xl mx-auto">
+        <div>
           <Suspense fallback={<div className="h-48 bg-white border border-gray-200 rounded-2xl animate-pulse" />}>
             <AusstehendeZahlungenTable />
           </Suspense>
         </div>
       </div>
       {/* KFZ-155: Monats-Umsatz laufend + geplant Forecast */}
-      <Suspense fallback={<div className="px-4 pb-8"><div className="max-w-5xl mx-auto h-48 bg-white border border-gray-200 rounded-2xl animate-pulse" /></div>}>
+      <Suspense fallback={<div className="pb-8"><div className="h-48 bg-white border border-gray-200 rounded-2xl animate-pulse" /></div>}>
         <MonatsUmsatzForecast />
       </Suspense>
       <FinanceClient
@@ -739,13 +739,13 @@ export default async function FinancePage() {
       <GutachterAbrechnungen svRows={svRows} gutachterAnzahlungenGesamt={gutachterAnzahlungenGesamt} />
       <AbrechnungenSectionWrapper />
       {/* KFZ-155: Stripe-Connect Health, Lead-Preise Verteilung, Werbebudget */}
-      <Suspense fallback={<div className="px-4 pb-8"><div className="max-w-5xl mx-auto h-48 bg-white border border-gray-200 rounded-2xl animate-pulse" /></div>}>
+      <Suspense fallback={<div className="pb-8"><div className="h-48 bg-white border border-gray-200 rounded-2xl animate-pulse" /></div>}>
         <StripeConnectStatusWidget />
       </Suspense>
-      <Suspense fallback={<div className="px-4 pb-8"><div className="max-w-5xl mx-auto h-48 bg-white border border-gray-200 rounded-2xl animate-pulse" /></div>}>
+      <Suspense fallback={<div className="pb-8"><div className="h-48 bg-white border border-gray-200 rounded-2xl animate-pulse" /></div>}>
         <LeadPreiseVerteilungWidget />
       </Suspense>
-      <Suspense fallback={<div className="px-4 pb-8"><div className="max-w-5xl mx-auto h-48 bg-white border border-gray-200 rounded-2xl animate-pulse" /></div>}>
+      <Suspense fallback={<div className="pb-8"><div className="h-48 bg-white border border-gray-200 rounded-2xl animate-pulse" /></div>}>
         <WerbebudgetAggregatWidget />
       </Suspense>
       <IndividuelleAnfragenSection anfragen={individuelleAnfragen} />

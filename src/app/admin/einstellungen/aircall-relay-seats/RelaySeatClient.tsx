@@ -49,8 +49,8 @@ export default function RelaySeatClient({ seats: initialSeats }: { seats: Seat[]
   }
 
   return (
-    <div className="h-full overflow-y-auto px-4 py-6">
-      <div className="max-w-3xl mx-auto">
+    <div className="h-full overflow-y-auto py-6">
+      <div>
         <div className="flex items-center justify-between mb-5">
           <div>
             <h1 className="text-xl font-semibold text-gray-900">Aircall Relay-Seats</h1>

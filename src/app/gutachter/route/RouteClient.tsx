@@ -109,7 +109,7 @@ export default function RouteClient({
   const pendingCount = stops.filter(s => s.status === 'ausstehend' || s.status === 'vor-ort').length
 
   return (
-    <div className="h-full flex flex-col"><div className="max-w-3xl mx-auto">
+    <div className="h-full flex flex-col"><div>
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">Tagesroute</h1>
         <p className="text-gray-500 text-sm mt-0.5">{datum}</p>

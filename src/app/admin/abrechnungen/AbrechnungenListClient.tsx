@@ -130,7 +130,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
   }
 
   return (
-    <div className="px-8 py-8 max-w-7xl mx-auto">
+    <div className="py-8">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Abrechnungen</h1>

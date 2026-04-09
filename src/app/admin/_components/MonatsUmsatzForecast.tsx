@@ -77,8 +77,8 @@ export default async function MonatsUmsatzForecast() {
   const remainingForecast = f.gesamtForecast - f.gesamtLaufend
 
   return (
-    <div className="px-4 pb-8">
-      <div className="max-w-5xl mx-auto">
+    <div className="pb-8">
+      <div className="">
         <div className="bg-white border border-gray-200 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">

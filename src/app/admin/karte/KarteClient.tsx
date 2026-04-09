@@ -250,7 +250,10 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
   )
 
   return (
-    <div className="flex h-screen">
+    // BUG-98 Cleanup: -mx-* negiert das horizontale Padding des PageContainer
+    // damit die Karte+Sidebar fullbleed laufen koennen. h-full statt h-screen
+    // weil wir innerhalb von PageContainer (h-full innerhalb von main) leben.
+    <div className="flex h-full -mx-4 sm:-mx-6 md:-mx-8 lg:-mx-16 xl:-mx-24">
       {/* ─── Sidebar ──────────────────────────────────────────────── */}
       <aside className="w-72 shrink-0 border-r border-gray-200 bg-[#f8f9fb] flex flex-col overflow-hidden">
         <div className="px-4 pt-6 pb-4">

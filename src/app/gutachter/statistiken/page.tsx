@@ -8,7 +8,7 @@ export default function StatistikenPage() {
         <p className="text-gray-500 text-xs">Auswertungen und Kennzahlen</p>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto p-4">
-        <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-gray-200 p-12 text-center">
+        <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
           <div className="w-14 h-14 mx-auto rounded-2xl bg-[#4573A2]/10 flex items-center justify-center mb-4">
             <BarChart3Icon className="w-7 h-7 text-[#4573A2]" />
           </div>

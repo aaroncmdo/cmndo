@@ -108,8 +108,8 @@ export default function OnboardingClient() {
   const selectedPaket = PAKETE.find(p => p.value === form.paket) ?? PAKETE[0]
 
   return (
-    <div className="px-4 py-8">
-      <div className="max-w-2xl mx-auto">
+    <div className="py-8">
+      <div>
         <h1 className="text-xl font-semibold text-gray-900 mb-6">Neuer Gutachter – Onboarding</h1>
 
         {/* Progress */}

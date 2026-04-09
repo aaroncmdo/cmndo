@@ -57,9 +57,8 @@ export default async function LeadPreiseVerteilungWidget() {
   const maxBucket = Math.max(1, ...data.buckets.map(b => b.summe))
 
   return (
-    <div className="px-4 pb-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="bg-white border border-gray-200 rounded-2xl p-5">
+    <div className="pb-8">
+      <div className="bg-white border border-gray-200 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <BarChart3Icon className="w-4 h-4 text-[#4573A2]" />
@@ -138,7 +137,6 @@ export default async function LeadPreiseVerteilungWidget() {
               </div>
             </div>
           )}
-        </div>
       </div>
     </div>
   )

@@ -89,8 +89,8 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
   }
 
   return (
-    <div className="px-4 pb-8">
-      <div className="max-w-5xl mx-auto">
+    <div className="pb-8">
+      <div>
         <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
 
           {/* Header */}

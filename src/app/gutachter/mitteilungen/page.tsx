@@ -11,8 +11,8 @@ export default async function MitteilungenPage() {
   if (!sv) {
     return (
       <div className="h-full flex flex-col">
-        <div className="max-w-3xl mx-auto bg-yellow-50 border border-yellow-800 rounded-2xl p-6">
-          <p className="text-yellow-300 text-sm">Sachverständigen-Profil nicht gefunden.</p>
+        <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6">
+          <p className="text-yellow-700 text-sm">Sachverständigen-Profil nicht gefunden.</p>
         </div>
       </div>
     )

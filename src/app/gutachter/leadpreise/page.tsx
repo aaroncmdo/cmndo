@@ -25,8 +25,8 @@ export default async function LeadpreisePage() {
   function eur(val: number) { return val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }
 
   return (
-    <div className="h-full overflow-y-auto px-4 py-6">
-      <div className="max-w-3xl mx-auto">
+    <div className="h-full overflow-y-auto py-6">
+      <div>
         <h1 className="text-xl font-semibold text-gray-900 mb-1">Lead-Preis-Tabelle</h1>
         <p className="text-sm text-gray-500 mb-1">Stand: {standDatum} (Version {tabelle?.[0]?.version ?? 'v1'})</p>
         <p className="text-xs text-gray-400 mb-5">Diese Tabelle ist Bestandteil deines Kooperationsvertrags (Anhang). Änderungen werden dir vorab schriftlich mitgeteilt.</p>

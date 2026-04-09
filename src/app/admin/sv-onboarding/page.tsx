@@ -31,8 +31,8 @@ export default async function AdminSvOnboardingPage() {
   const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p]))
 
   return (
-    <div className="h-full overflow-y-auto px-4 py-6">
-      <div className="max-w-5xl mx-auto">
+    <div className="h-full overflow-y-auto py-6">
+      <div>
         <h1 className="text-xl font-semibold text-gray-900 mb-1">SV-Onboarding Verwaltung</h1>
         <p className="text-sm text-gray-500 mb-5">Übersicht aller Sachverständigen mit Onboarding-Status</p>
 

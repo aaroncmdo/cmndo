@@ -71,7 +71,7 @@ export default async function LeadDetailPage({
     <div className="h-full flex flex-col overflow-hidden">
       {/* ── Sticky Header ──────────────────────────────────────────── */}
       <div className="sticky top-0 z-20 bg-white border-b border-gray-200 flex-shrink-0 px-4 py-3">
-        <div className="max-w-4xl mx-auto">
+        <div>
           <Link
             href="/admin/dispatch"
             className="text-xs text-gray-400 hover:text-gray-600 transition-colors mb-2 inline-block"
@@ -119,7 +119,7 @@ export default async function LeadDetailPage({
       {/* ── Tabs + Content ─────────────────────────────────────────── */}
       <LeadDetailTabs
         uebersichtContent={
-          <div className="max-w-4xl mx-auto space-y-0">
+          <div className="space-y-0">
             {/* Rueckruftermin */}
             <RueckrufSection
               lead={{
@@ -230,7 +230,7 @@ export default async function LeadDetailPage({
           </div>
         }
         felderContent={
-          <div className="max-w-4xl mx-auto">
+          <div>
             <LeadInlineFields lead={{
               id: lead.id,
               vorname: lead.vorname ?? null,
@@ -273,7 +273,7 @@ export default async function LeadDetailPage({
           </div>
         }
         historieContent={
-          <div className="max-w-4xl mx-auto">
+          <div>
             <LeadHistorie leadId={lead.id} />
           </div>
         }

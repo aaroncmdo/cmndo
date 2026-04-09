@@ -231,7 +231,9 @@ export default function GebietPage() {
   const overlapPct = touchingNeighbors.length > 0 ? Math.min(95, touchingNeighbors.length * 15) : 0
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    // BUG-98 Cleanup: -mx-* negiert das horizontale Padding des PageContainer
+    // damit die Karte fullbleed laufen kann.
+    <div className="h-full flex flex-col overflow-hidden -mx-4 sm:-mx-6 md:-mx-8 lg:-mx-16 xl:-mx-24">
       {/* Topbar */}
       <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
         <div>

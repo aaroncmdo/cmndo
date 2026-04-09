@@ -55,8 +55,8 @@ export default function FinanceClient({
   tabellenDaten,
 }: Props) {
   return (
-    <div className="px-4 py-8">
-      <div className="max-w-5xl mx-auto">
+    <div className="py-8">
+      <div>
 
         {/* KPI Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">

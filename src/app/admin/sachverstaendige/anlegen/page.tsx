@@ -21,8 +21,8 @@ export default async function SachverstaendigeAnlegen() {
   const organisationen = await listBueroOrganisationen()
 
   return (
-    <div className="h-full overflow-y-auto px-6 py-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="h-full overflow-y-auto py-8">
+      <div>
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-xl font-semibold text-gray-900">Sachverständigen anlegen</h1>

@@ -81,8 +81,8 @@ export default async function StripeConnectStatusWidget() {
   const healthOk = s.failed7d === 0 && s.total7d > 0
 
   return (
-    <div className="px-4 pb-8">
-      <div className="max-w-5xl mx-auto">
+    <div className="pb-8">
+      <div className="">
         <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
             <div className="flex items-center gap-2">

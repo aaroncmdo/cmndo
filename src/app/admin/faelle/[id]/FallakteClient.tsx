@@ -656,7 +656,7 @@ export default function FallakteClient({
 
       {/* ─── STICKY HEADER (fest oben, scrollt NICHT mit) ─── */}
       <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="px-4">
           {/* Zeile 1: Name + Status */}
           <div className="flex items-center justify-between py-2">
             <div className="flex items-center gap-3">
@@ -707,7 +707,7 @@ export default function FallakteClient({
 
       {/* ─── SCROLLABLE CONTENT ─── */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-4 py-3">
+        <div className="px-4 py-3">
           <div className="flex gap-4 items-start">
             {/* LEFT: Tab Content */}
             <div className="flex-1 min-w-0">

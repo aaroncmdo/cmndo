@@ -32,7 +32,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
   const myRank = leaderboard.findIndex(l => l.id === userId) + 1
 
   return (
-    <div className="px-4 py-8"><div className="max-w-4xl mx-auto">
+    <div className="py-8"><div>
       <div className="mb-6">
         <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2"><BarChart3Icon className="w-5 h-5 text-[#7BA3CC]" />Meine Performance</h1>
         <p className="text-gray-500 text-sm mt-0.5">{name} · {monatLabel}</p>

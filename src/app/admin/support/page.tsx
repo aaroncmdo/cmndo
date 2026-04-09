@@ -25,8 +25,8 @@ export default async function SupportPage() {
     .order('erstellt_am', { ascending: false })
 
   return (
-    <div className="px-4 py-6 overflow-y-auto" style={{ height: '100%' }}>
-      <div className="max-w-5xl mx-auto">
+    <div className="py-6 overflow-y-auto" style={{ height: '100%' }}>
+      <div>
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-lg font-semibold text-gray-900">Support-Tickets</h1>

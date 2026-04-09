@@ -64,7 +64,7 @@ export default async function SvDetailPage({
     <div className="h-full flex flex-col overflow-hidden">
       {/* ── Sticky Header ──────────────────────────────────────────── */}
       <div className="sticky top-0 z-20 bg-white border-b border-gray-200 flex-shrink-0 px-4 py-3">
-        <div className="max-w-6xl mx-auto">
+        <div>
           <Link href="/admin/sachverstaendige" className="text-xs text-gray-400 hover:text-gray-600 transition-colors mb-1.5 inline-block">
             &larr; Gutachter-Übersicht
           </Link>

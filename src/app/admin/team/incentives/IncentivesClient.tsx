@@ -52,7 +52,7 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
   const fmt = (v: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(v)
 
   return (
-    <div className="px-4 py-8"><div className="max-w-5xl mx-auto">
+    <div className="py-8"><div>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2"><GiftIcon className="w-5 h-5 text-violet-400" />Incentives</h1>

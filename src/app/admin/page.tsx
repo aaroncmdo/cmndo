@@ -31,7 +31,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="h-full overflow-y-auto bg-[#f8f9fb]">
-      <div className="max-w-7xl mx-auto px-4 py-5 space-y-4 min-h-full flex flex-col">
+      <div className="py-5 space-y-4 min-h-full flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between flex-shrink-0">
           <div>
