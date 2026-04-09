@@ -33,9 +33,9 @@ const RECHTSFORM_OPTIONEN = [
 // Die alten SF-01..SF-06 Codes wurden ersetzt durch die 3 sauberen Listen.
 
 const PAKET_LABELS: Record<string, string> = {
-  standard: 'Standard (10 Faelle/Monat)', 'starter-10': 'Standard (10 Faelle/Monat)',
-  pro: 'Pro (25 Faelle/Monat)', 'standard-25': 'Pro (25 Faelle/Monat)',
-  premium: 'Premium (50 Faelle/Monat)', 'premium-50': 'Premium (50 Faelle/Monat)',
+  standard: 'Standard (10 Fälle/Monat)', 'starter-10': 'Standard (10 Fälle/Monat)',
+  pro: 'Pro (25 Fälle/Monat)', 'standard-25': 'Pro (25 Fälle/Monat)',
+  premium: 'Premium (50 Fälle/Monat)', 'premium-50': 'Premium (50 Fälle/Monat)',
 }
 type PendingTermin = { id: string; fall_id: string; start_zeit: string; end_zeit: string; fall_nummer?: string }
 
@@ -361,7 +361,7 @@ export default function ProfilClient({
         <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-5">
           <h2 className="text-sm font-medium text-gray-500 mb-1">Spezialisierungen</h2>
           <p className="text-xs text-gray-400 mb-4">
-            Wir nutzen diese Angaben um dir passende Faelle zuzuordnen. Aenderungen werden sofort gespeichert.
+            Wir nutzen diese Angaben um dir passende Fälle zuzuordnen. Änderungen werden sofort gespeichert.
           </p>
           <div className="space-y-5">
             <SpezSection

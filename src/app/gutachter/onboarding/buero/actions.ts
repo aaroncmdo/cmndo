@@ -174,8 +174,8 @@ export async function signBueroVertrag(params: {
         subject: `Vertrag unterzeichnet — ${org.name}`,
         html: `<div style="font-family:-apple-system,sans-serif;font-size:14px;line-height:1.7;color:#374151">
 <p>Hallo ${profile.vorname ?? 'Partner'},</p>
-<p>vielen Dank fuer die Unterzeichnung. Im Anhang findest du das Vertragsdokument fuer dein Buero <strong>${org.name}</strong>.</p>
-<p><strong>Naechster Schritt:</strong> Bitte leiste die zentrale Anzahlung ueber den Stripe-Checkout im Buero-Onboarding. Sobald die Zahlung eingegangen ist, werden alle Standorte freigeschaltet.</p>
+<p>vielen Dank für die Unterzeichnung. Im Anhang findest du das Vertragsdokument für dein Büro <strong>${org.name}</strong>.</p>
+<p><strong>Nächster Schritt:</strong> Bitte leiste die zentrale Anzahlung über den Stripe-Checkout im Büro-Onboarding. Sobald die Zahlung eingegangen ist, werden alle Standorte freigeschaltet.</p>
 <p>Dein Claimondo-Team</p></div>`,
         fallId: null,
         empfaengerTyp: 'sv',

@@ -19,20 +19,20 @@ export function KanzleiMonatsAbrechnungEmail(props: Props) {
       <Heading>Monatsabrechnung {props.monat}</Heading>
       <Paragraph>
         Sehr geehrte Damen und Herren von {props.kanzleiName}, anbei die Abrechnung
-        fuer {props.monat}. Der Gesamtbetrag von {props.summeBrutto} ist bis zum{' '}
+        für {props.monat}. Der Gesamtbetrag von {props.summeBrutto} ist bis zum{' '}
         {props.faelligAm} zahlbar auf das im PDF angegebene Konto.
       </Paragraph>
 
       <InfoTable rows={[
         ['Abrechnungs-Nr', props.abrechnungsNr],
         ['Zeitraum', props.monat],
-        ['Abgeschlossene Faelle', String(props.anzahlFaelle)],
+        ['Abgeschlossene Fälle', String(props.anzahlFaelle)],
         ['Gesamtbetrag (brutto)', props.summeBrutto],
         ['Zahlbar bis', props.faelligAm],
       ]} />
 
       <Paragraph>
-        Die detaillierte Aufstellung mit allen Positionen finden Sie im angehaengten PDF.
+        Die detaillierte Aufstellung mit allen Positionen finden Sie im angehängten PDF.
         Die Abrechnung ist auch im Portal abrufbar.
       </Paragraph>
 

@@ -151,7 +151,7 @@ export default async function GutachterFaellePage({
       <div className="flex-1 min-h-0 overflow-y-auto p-4">
         {!faelle?.length ? (
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
-            <p className="text-gray-500">Keine Faelle gefunden.</p>
+            <p className="text-gray-500">Keine Fälle gefunden.</p>
           </div>
         ) : (
           <div className="space-y-3 sm:space-y-0">

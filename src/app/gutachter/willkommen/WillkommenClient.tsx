@@ -575,7 +575,7 @@ export default function WillkommenClient({
                 </p>
                 <div className="grid grid-cols-2 gap-y-3 gap-x-4">
                   <Kondition label="Paket" value={paketLabel} />
-                  <Kondition label="Faelle pro Monat" value={String(sv.max_faelle_monat)} />
+                  <Kondition label="Fälle pro Monat" value={String(sv.max_faelle_monat)} />
                   <Kondition label="Radius" value={`${sv.paket_umkreis_km} km`} />
                   <Kondition label="Monatsbeitrag" value="0,00 EUR" />
                   <Kondition

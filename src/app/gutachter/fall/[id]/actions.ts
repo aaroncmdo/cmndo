@@ -153,7 +153,7 @@ export async function uploadDokument(fallId: string, formData: FormData) {
 
   const file = formData.get('file') as File
   const pflichtdokumentId = formData.get('pflichtdokument_id') as string | null
-  if (!file || file.size === 0) throw new Error('Keine Datei ausgewaehlt')
+  if (!file || file.size === 0) throw new Error('Keine Datei ausgewählt')
 
   // Verify the case belongs to this gutachter
   const sv = await getGutachterForUser(supabase, user.id, 'id')
@@ -309,7 +309,7 @@ export async function uploadDatei(fallId: string, formData: FormData) {
 
   const file = formData.get('file') as File
   const kategorie = formData.get('kategorie') as string
-  if (!file || file.size === 0) throw new Error('Keine Datei ausgewaehlt')
+  if (!file || file.size === 0) throw new Error('Keine Datei ausgewählt')
   if (!kategorie) throw new Error('Keine Kategorie angegeben')
 
   // Verify the case belongs to this gutachter

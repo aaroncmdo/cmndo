@@ -209,7 +209,7 @@ export default function OnboardingClient() {
                   }`}
                 >
                   <p className="text-gray-900 font-semibold">{p.label}</p>
-                  <p className="text-gray-500 text-sm mt-2">{p.faelle} Faelle</p>
+                  <p className="text-gray-500 text-sm mt-2">{p.faelle} Fälle</p>
                   <p className="text-gray-500 text-sm">{p.km} km Umkreis</p>
                   <p className="text-[#7BA3CC] text-lg font-bold mt-3">{p.preis.toLocaleString('de-DE')} EUR</p>
                 </button>

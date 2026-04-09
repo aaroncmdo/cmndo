@@ -140,7 +140,7 @@ export default function RouteClient({
         <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
           <MapPinIcon className="w-10 h-10 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500 font-medium">Keine Termine heute</p>
-          <p className="text-gray-400 text-sm mt-1">Fuer heute sind keine Vor-Ort-Besichtigungen geplant.</p>
+          <p className="text-gray-400 text-sm mt-1">Für heute sind keine Vor-Ort-Besichtigungen geplant.</p>
         </div>
       ) : (
         <div className="space-y-3">
