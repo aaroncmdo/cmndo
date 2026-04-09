@@ -165,17 +165,54 @@ export default function BueroAnlegenWizard({ onSuccess }: {
     standorte.forEach((s, idx) => {
       const istHauptbuero = idx === 0
       const labelPrefix = istHauptbuero ? 'Hauptbuero' : `Standort ${idx + 1}`
+      // BUG-94: Im Hauptbuero mit Inhaber-Mitarbeiter-Checkbox sind die
+      // Mitarbeiter-Felder readonly + kommen vom Inhaber. Nicht erneut pruefen.
+      const skipMitarbeiter = istHauptbuero && inhaberIstHauptbueroMitarbeiter
       if (!s.name.trim()) { missing.push(`${labelPrefix}: Name`); fields.add(`std-${s.id}-name`) }
-      if (!s.sub_anrede) { missing.push(`${labelPrefix}: Anrede`); fields.add(`std-${s.id}-anrede`) }
-      if (!s.sub_vorname.trim()) { missing.push(`${labelPrefix}: Vorname`); fields.add(`std-${s.id}-vorname`) }
-      if (!s.sub_nachname.trim()) { missing.push(`${labelPrefix}: Nachname`); fields.add(`std-${s.id}-nachname`) }
-      if (!s.sub_email.trim()) { missing.push(`${labelPrefix}: Email`); fields.add(`std-${s.id}-email`) }
+      if (!skipMitarbeiter) {
+        if (!s.sub_anrede) { missing.push(`${labelPrefix}: Anrede`); fields.add(`std-${s.id}-anrede`) }
+        if (!s.sub_vorname.trim()) { missing.push(`${labelPrefix}: Vorname`); fields.add(`std-${s.id}-vorname`) }
+        if (!s.sub_nachname.trim()) { missing.push(`${labelPrefix}: Nachname`); fields.add(`std-${s.id}-nachname`) }
+        if (!s.sub_email.trim()) { missing.push(`${labelPrefix}: Email`); fields.add(`std-${s.id}-email`) }
+      }
       if (!istHauptbuero && (s.anschrift_lat === null || s.anschrift_lng === null)) {
         missing.push(`${labelPrefix}: Anschrift (mit Geo)`)
         fields.add(`std-${s.id}-anschrift`)
       }
     })
     return { missing, fields }
+  }
+
+  // BUG-94: Click-Handler ersetzt das alte disabled-Pattern. Erst validieren,
+  // bei Fehler missingFields/fieldErrors setzen + return. Der Button ist immer
+  // klickbar (ausser waehrend saving), damit Aaron die Rueckmeldung bekommt
+  // welches Feld fehlt — frueher war der Button silent disabled.
+  function handleNext() {
+    if (step === 0) {
+      const r = validateStep0()
+      if (r.missing.length > 0) {
+        setMissingFields(r.missing)
+        setFieldErrors(r.fields)
+        return
+      }
+      setMissingFields([])
+      setFieldErrors(new Set())
+      goToStep1FromStep0()
+      return
+    }
+    if (step === 1) {
+      const r = validateStep1()
+      if (r.missing.length > 0) {
+        setMissingFields(r.missing)
+        setFieldErrors(r.fields)
+        return
+      }
+      setMissingFields([])
+      setFieldErrors(new Set())
+      setStep(2)
+      return
+    }
+    handleSubmit()
   }
 
   // BUG-93: Beim Wechsel von Step 0 → Step 1 standorte[0] (Hauptbuero) automatisch
@@ -310,6 +347,21 @@ export default function BueroAnlegenWizard({ onSuccess }: {
       <div className="bg-white border border-gray-200 rounded-2xl p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-5">{STEPS[step].label}</h2>
 
+        {/* BUG-94: Alert-Box mit Liste der fehlenden Felder, sichtbar nach
+            erfolglosem Weiter-Klick. Wird auto-versteckt sobald ein Feld
+            korrigiert wird (siehe clearFieldError im onChange jeder Field). */}
+        {missingFields.length > 0 && (
+          <div className="mb-5 px-4 py-3 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3">
+            <AlertTriangleIcon className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 text-sm text-red-700">
+              <p className="font-semibold mb-1">Bitte fuelle alle Pflicht-Felder aus:</p>
+              <ul className="list-disc list-inside text-xs space-y-0.5">
+                {missingFields.map((m, i) => <li key={i}>{m}</li>)}
+              </ul>
+            </div>
+          </div>
+        )}
+
         {/* SCHRITT 0: Inhaber + Buero */}
         {step === 0 && (
           <div className="space-y-5">
@@ -320,9 +372,10 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                 <SelectField
                   label="Anrede *"
                   value={inhaberAnrede}
-                  onChange={setInhaberAnrede}
+                  onChange={v => { setInhaberAnrede(v); clearFieldError('inhaberAnrede') }}
                   options={ANREDE_OPTIONEN}
                   placeholder="Bitte waehlen..."
+                  error={fieldErrors.has('inhaberAnrede')}
                 />
                 <SelectField
                   label="Titel"
@@ -331,23 +384,65 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                   options={TITEL_OPTIONEN}
                   placeholder="kein Titel"
                 />
-                <Field label="Vorname *" value={inhaberVorname} onChange={setInhaberVorname} />
-                <Field label="Nachname *" value={inhaberNachname} onChange={setInhaberNachname} />
-                <Field label="Email *" type="email" value={inhaberEmail} onChange={setInhaberEmail} className="sm:col-span-2" />
-                <Field label="Telefon" type="tel" value={inhaberTelefon} onChange={setInhaberTelefon} className="sm:col-span-2" />
+                <Field
+                  label="Vorname *"
+                  value={inhaberVorname}
+                  onChange={v => { setInhaberVorname(v); clearFieldError('inhaberVorname') }}
+                  error={fieldErrors.has('inhaberVorname')}
+                />
+                <Field
+                  label="Nachname *"
+                  value={inhaberNachname}
+                  onChange={v => { setInhaberNachname(v); clearFieldError('inhaberNachname') }}
+                  error={fieldErrors.has('inhaberNachname')}
+                />
+                <Field
+                  label="Email *"
+                  type="email"
+                  value={inhaberEmail}
+                  onChange={v => { setInhaberEmail(v); clearFieldError('inhaberEmail') }}
+                  className="sm:col-span-2"
+                  error={fieldErrors.has('inhaberEmail')}
+                />
+                <Field
+                  label="Telefon *"
+                  type="tel"
+                  value={inhaberTelefon}
+                  onChange={v => { setInhaberTelefon(v); clearFieldError('inhaberTelefon') }}
+                  className="sm:col-span-2"
+                  error={fieldErrors.has('inhaberTelefon')}
+                />
               </div>
             </div>
 
             <div className="pt-4 border-t border-gray-200">
               <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Büro-Stammdaten</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Field label="Büro-Name *" value={bueroName} onChange={setBueroName} className="sm:col-span-2" />
-                <Field label="Rechtsform" value={bueroRechtsform} onChange={setBueroRechtsform} placeholder="z.B. GmbH" />
-                <Field label="Steuernummer *" value={bueroSteuernummer} onChange={setBueroSteuernummer} />
+                <Field
+                  label="Büro-Name *"
+                  value={bueroName}
+                  onChange={v => { setBueroName(v); clearFieldError('bueroName') }}
+                  className="sm:col-span-2"
+                  error={fieldErrors.has('bueroName')}
+                />
+                <Field
+                  label="Rechtsform *"
+                  value={bueroRechtsform}
+                  onChange={v => { setBueroRechtsform(v); clearFieldError('bueroRechtsform') }}
+                  placeholder="z.B. GmbH"
+                  error={fieldErrors.has('bueroRechtsform')}
+                />
+                <Field
+                  label="Steuernummer *"
+                  value={bueroSteuernummer}
+                  onChange={v => { setBueroSteuernummer(v); clearFieldError('bueroSteuernummer') }}
+                  error={fieldErrors.has('bueroSteuernummer')}
+                />
                 {/* BUG-93: Hauptbuero-Anschrift via Google Places (Pflicht — wird
-                    auch als Standort 1 = Hauptbuero verwendet, daher Geo-Pflicht). */}
+                    auch als Standort 1 = Hauptbuero verwendet, daher Geo-Pflicht).
+                    BUG-94: bei Validation-Fehler roter Border. */}
                 <div className="sm:col-span-2">
-                  <label className="text-xs text-gray-500 mb-1.5 block">
+                  <label className={`text-xs mb-1.5 block ${fieldErrors.has('bueroAnschrift') ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
                     Anschrift Hauptbüro (= Rechnungsadresse) *
                     {bueroAnschriftLat !== null && <span className="text-green-600 ml-2">✓ Geo gesetzt</span>}
                   </label>
@@ -360,8 +455,13 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                       setBueroAnschriftLat(place.lat)
                       setBueroAnschriftLng(place.lng)
                       setBueroAnschriftPlaceId(place.place_id)
+                      clearFieldError('bueroAnschrift')
                     }}
-                    className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                    className={`w-full border rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 ${
+                      fieldErrors.has('bueroAnschrift')
+                        ? 'bg-red-50 border-red-400 focus:ring-red-400'
+                        : 'bg-gray-100 border-gray-300 focus:ring-[#1E3A5F]'
+                    }`}
                   />
                 </div>
                 <Field label="USt-IdNr (optional)" value={bueroUstId} onChange={setBueroUstId} />
@@ -430,10 +530,11 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                   )}
                 </div>
                 <Field
-                  label="Standort-Name"
+                  label="Standort-Name *"
                   value={std.name}
-                  onChange={v => updateStandort(std.id, 'name', v)}
+                  onChange={v => { updateStandort(std.id, 'name', v); clearFieldError(`std-${std.id}-name`) }}
                   placeholder={istHauptbuero ? 'z.B. Hauptbüro München' : 'z.B. Filiale Köln'}
+                  error={fieldErrors.has(`std-${std.id}-name`)}
                 />
                 {istHauptbuero ? (
                   <div>
@@ -449,14 +550,18 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                   </div>
                 ) : (
                   <div>
-                    <label className="text-xs text-gray-500 mb-1.5 block">
-                      Anschrift {std.anschrift_lat !== null && <span className="text-green-600 ml-2">✓ Geo</span>}
+                    <label className={`text-xs mb-1.5 block ${fieldErrors.has(`std-${std.id}-anschrift`) ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
+                      Anschrift * {std.anschrift_lat !== null && <span className="text-green-600 ml-2">✓ Geo</span>}
                     </label>
                     <GooglePlaceAutocomplete
                       defaultValue={std.anschrift}
                       placeholder="Adresse via Auswahl..."
-                      onSelect={place => setStandortPlace(std.id, place)}
-                      className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                      onSelect={place => { setStandortPlace(std.id, place); clearFieldError(`std-${std.id}-anschrift`) }}
+                      className={`w-full border rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 ${
+                        fieldErrors.has(`std-${std.id}-anschrift`)
+                          ? 'bg-red-50 border-red-400 focus:ring-red-400'
+                          : 'bg-gray-100 border-gray-300 focus:ring-[#1E3A5F]'
+                      }`}
                     />
                   </div>
                 )}
@@ -470,10 +575,11 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                   <SelectField
                     label={istHauptbuero ? 'Anrede *' : 'Sub-Anrede *'}
                     value={std.sub_anrede}
-                    onChange={v => updateStandort(std.id, 'sub_anrede', v)}
+                    onChange={v => { updateStandort(std.id, 'sub_anrede', v); clearFieldError(`std-${std.id}-anrede`) }}
                     options={ANREDE_OPTIONEN}
                     placeholder="Bitte waehlen..."
                     disabled={mitarbeiterReadonly}
+                    error={fieldErrors.has(`std-${std.id}-anrede`)}
                   />
                   <SelectField
                     label={istHauptbuero ? 'Titel' : 'Sub-Titel'}
@@ -488,21 +594,24 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                   <Field
                     label={istHauptbuero ? 'Vorname *' : 'Sub-Vorname *'}
                     value={std.sub_vorname}
-                    onChange={v => updateStandort(std.id, 'sub_vorname', v)}
+                    onChange={v => { updateStandort(std.id, 'sub_vorname', v); clearFieldError(`std-${std.id}-vorname`) }}
                     disabled={mitarbeiterReadonly}
+                    error={fieldErrors.has(`std-${std.id}-vorname`)}
                   />
                   <Field
                     label={istHauptbuero ? 'Nachname *' : 'Sub-Nachname *'}
                     value={std.sub_nachname}
-                    onChange={v => updateStandort(std.id, 'sub_nachname', v)}
+                    onChange={v => { updateStandort(std.id, 'sub_nachname', v); clearFieldError(`std-${std.id}-nachname`) }}
                     disabled={mitarbeiterReadonly}
+                    error={fieldErrors.has(`std-${std.id}-nachname`)}
                   />
                   <Field
                     label={istHauptbuero ? 'Email *' : 'Sub-Email *'}
                     type="email"
                     value={std.sub_email}
-                    onChange={v => updateStandort(std.id, 'sub_email', v)}
+                    onChange={v => { updateStandort(std.id, 'sub_email', v); clearFieldError(`std-${std.id}-email`) }}
                     disabled={mitarbeiterReadonly}
+                    error={fieldErrors.has(`std-${std.id}-email`)}
                   />
                 </div>
                 <div>
@@ -624,13 +733,8 @@ export default function BueroAnlegenWizard({ onSuccess }: {
           )}
           <button
             type="button"
-            onClick={() => {
-              // BUG-93: beim Step 0→1 Wechsel das Hauptbuero auto-vorausfuellen
-              if (step === 0) goToStep1FromStep0()
-              else if (step < STEPS.length - 1) setStep(step + 1)
-              else handleSubmit()
-            }}
-            disabled={saving || (step === 0 ? validateStep0().missing.length > 0 : step === 1 ? validateStep1().missing.length > 0 : false)}
+            onClick={handleNext}
+            disabled={saving}
             className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40"
           >
             {saving ? 'Wird angelegt...' : step < STEPS.length - 1 ? 'Weiter' : 'Büro anlegen + Welcome-Mails senden'}
@@ -679,7 +783,7 @@ function TagSection({
 }
 
 function Field({
-  label, value, onChange, type = 'text', placeholder, className, disabled,
+  label, value, onChange, type = 'text', placeholder, className, disabled, error,
 }: {
   label: string
   value: string
@@ -688,20 +792,24 @@ function Field({
   placeholder?: string
   className?: string
   disabled?: boolean
+  // BUG-94: error=true rendert roten Border + roter focus-Ring statt blau
+  error?: boolean
 }) {
   return (
     <div className={className}>
-      <label className="text-xs text-gray-500 mb-1.5 block">{label}</label>
+      <label className={`text-xs mb-1.5 block ${error ? 'text-red-600 font-medium' : 'text-gray-500'}`}>{label}</label>
       <input
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] ${
+        className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 ${
           disabled
             ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed'
-            : 'bg-gray-100 border-gray-300 text-gray-800 placeholder-gray-400'
+            : error
+            ? 'bg-red-50 border-red-400 text-gray-800 placeholder-gray-400 focus:ring-red-400'
+            : 'bg-gray-100 border-gray-300 text-gray-800 placeholder-gray-400 focus:ring-[#1E3A5F]'
         }`}
       />
     </div>
@@ -709,7 +817,7 @@ function Field({
 }
 
 function SelectField({
-  label, value, onChange, options, placeholder, className, disabled,
+  label, value, onChange, options, placeholder, className, disabled, error,
 }: {
   label: string
   value: string
@@ -718,18 +826,22 @@ function SelectField({
   placeholder?: string
   className?: string
   disabled?: boolean
+  // BUG-94: error=true rendert roten Border statt blau
+  error?: boolean
 }) {
   return (
     <div className={className}>
-      <label className="text-xs text-gray-500 mb-1.5 block">{label}</label>
+      <label className={`text-xs mb-1.5 block ${error ? 'text-red-600 font-medium' : 'text-gray-500'}`}>{label}</label>
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
         disabled={disabled}
-        className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] ${
+        className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 ${
           disabled
             ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed'
-            : 'bg-gray-100 border-gray-300 text-gray-800'
+            : error
+            ? 'bg-red-50 border-red-400 text-gray-800 focus:ring-red-400'
+            : 'bg-gray-100 border-gray-300 text-gray-800 focus:ring-[#1E3A5F]'
         }`}
       >
         {!options.includes('') && (
