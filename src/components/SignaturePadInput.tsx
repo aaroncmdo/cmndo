@@ -7,6 +7,11 @@ import { RotateCcwIcon } from 'lucide-react'
  * KFZ-148/152: Wiederverwendbares Unterschrifts-Pad fuer Onboarding-Wizards.
  * Liefert beim Submit ein PNG data URI das direkt ins PDF eingebrannt werden kann.
  *
+ * BUG-81 Fix (ARCH-1 Phase 1): Wenn die Component remounted wird (z.B. nach
+ * Step-Wechsel im Wizard), wird der initial-`value` aus dem Parent-State via
+ * signature_pad.fromDataURL() wieder ins Canvas gerendert. Davor: Canvas war
+ * nach Step-Zurueck leer, obwohl der Parent-State die Unterschrift noch hatte.
+ *
  * Pattern aus src/app/flow/signatur/[token]/SignaturPage.tsx generalisiert.
  */
 export default function SignaturePadInput({
@@ -26,7 +31,12 @@ export default function SignaturePadInput({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const padRef = useRef<import('signature_pad').default | null>(null)
-  const [isEmpty, setIsEmpty] = useState(true)
+  // BUG-81: initial state basierend auf value damit der Placeholder nicht
+  // faelschlich angezeigt wird wenn die Component mit einem value remounted wird
+  const [isEmpty, setIsEmpty] = useState(!value)
+  // BUG-81: initialValue beim Mount cachen damit die fromDataURL-Restore-Logik
+  // im useEffect den Wert sieht (useEffect closure ueber initial value)
+  const initialValueRef = useRef<string | null>(value)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -54,6 +64,15 @@ export default function SignaturePadInput({
       }
       pad.addEventListener('endStroke', handleEnd)
       padRef.current = pad
+
+      // BUG-81 Fix: wenn beim Mount schon ein value im Parent-State ist
+      // (z.B. nach Step-Zurueck im Wizard), restore das Bild ins Canvas damit
+      // die Unterschrift weiterhin sichtbar ist und der User nicht
+      // versehentlich denkt sie sei verloren.
+      if (initialValueRef.current) {
+        pad.fromDataURL(initialValueRef.current, { ratio: 1 })
+        setIsEmpty(false)
+      }
 
       const handleResize = () => {
         if (!padRef.current) return
