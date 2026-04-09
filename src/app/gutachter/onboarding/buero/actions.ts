@@ -56,6 +56,7 @@ export async function createBueroOrganisation(data: {
     onboarding_anzahlung_betrag: 0,
     ist_aktiv: false,
     ist_parent_account: true,
+    portal_zugang_freigeschaltet: false, // BUG-FOLLOW-1 workaround: DB-Default ist faelschlich true
   }).select('id').single()
 
   if (inhaberErr || !inhaberSv) {
@@ -79,6 +80,7 @@ export async function createBueroOrganisation(data: {
       onboarding_anzahlung_betrag: standortAnzahlung,
       ist_aktiv: false,
       ist_parent_account: false,
+      portal_zugang_freigeschaltet: false, // BUG-FOLLOW-1 workaround: DB-Default ist faelschlich true
     })
 
     if (subErr) {

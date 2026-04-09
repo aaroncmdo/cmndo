@@ -48,16 +48,20 @@ export async function completeOnboarding(data: {
   if (profileErr) throw new Error(`Profil-Update fehlgeschlagen: ${profileErr.message}`)
 
   // Create or update sachverstaendige
+  // BUG-A.3 fix: gebiet_plz ist text[] nicht text → wrap im Array.
+  // BUG-FOLLOW-1 workaround: portal_zugang_freigeschaltet explizit auf false
+  // setzen (DB-Default ist faelschlich true, separater Folge-Bug).
   if (data.existingSvId) {
     const { error } = await supabase
       .from('sachverstaendige')
       .update({
         paket: data.paket,
-        gebiet_plz: data.standort_plz,
+        gebiet_plz: data.standort_plz ? [data.standort_plz] : [],
         max_faelle_monat: paketConfig.faelle,
         paket_faelle_gesamt: paketConfig.faelle,
         paket_umkreis_km: paketConfig.km,
         anzahlung_faellig: paketConfig.preis,
+        onboarding_anzahlung_betrag: paketConfig.preis,
         gutachter_typ: data.gutachter_typ,
         standort_adresse: data.standort_adresse,
         standort_plz: data.standort_plz,
@@ -78,12 +82,13 @@ export async function completeOnboarding(data: {
       .insert({
         profile_id: data.userId,
         paket: data.paket,
-        gebiet_plz: data.standort_plz,
+        gebiet_plz: data.standort_plz ? [data.standort_plz] : [],
         max_faelle_monat: paketConfig.faelle,
         paket_faelle_gesamt: paketConfig.faelle,
         paket_faelle_genutzt: 0,
         paket_umkreis_km: paketConfig.km,
         anzahlung_faellig: paketConfig.preis,
+        onboarding_anzahlung_betrag: paketConfig.preis,
         gutachter_typ: data.gutachter_typ,
         offene_faelle: 0,
         standort_adresse: data.standort_adresse,
@@ -94,7 +99,9 @@ export async function completeOnboarding(data: {
         kalender_typ: data.kalender_typ,
         qualifikationen: data.qualifikationen,
         onboarding_abgeschlossen: true,
-        ist_aktiv: true,
+        ist_aktiv: true, // Deaktiviert-Banner triggert ueber 'ist_aktiv=false', nicht hier
+        onboarding_status: 'pending',
+        portal_zugang_freigeschaltet: false, // BUG-FOLLOW-1 workaround: DB-Default ist faelschlich true
       })
 
     if (error) throw new Error(`SV-Erstellung fehlgeschlagen: ${error.message}`)
