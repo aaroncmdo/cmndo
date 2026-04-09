@@ -1,6 +1,8 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import FinanceClient from './FinanceClient'
 import AbrechnungenSection from './AbrechnungenSection'
+import AusstehendeZahlungenTable from '../_components/AusstehendeZahlungenTable'
 
 const PAKET_PREIS: Record<string, number> = {
   standard: 750, 'starter-10': 750,
@@ -692,6 +694,14 @@ export default async function FinancePage() {
       </div>
       {/* Scrollbarer Content */}
       <div className="flex-1 overflow-y-auto">
+      {/* KFZ-155: Ausstehende Zahlungen — volle Tabelle ganz oben im Finance-Tab */}
+      <div className="px-4 pt-6 pb-2">
+        <div className="max-w-5xl mx-auto">
+          <Suspense fallback={<div className="h-48 bg-white border border-gray-200 rounded-2xl animate-pulse" />}>
+            <AusstehendeZahlungenTable />
+          </Suspense>
+        </div>
+      </div>
       <FinanceClient
         mrr={mrr}
         aktiveSvCount={(aktiveSvs ?? []).length}
