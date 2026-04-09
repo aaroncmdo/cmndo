@@ -18,7 +18,7 @@ import type { Vorlage } from './OnboardingClient'
 // Pattern aus BueroOnboardingClient.tsx uebernommen.
 
 const STEPS = [
-  { key: 'paket', label: 'Paket-Uebersicht', icon: PackageIcon },
+  { key: 'paket', label: 'Paket-Übersicht', icon: PackageIcon },
   { key: 'vertrag', label: 'Vertrag unterzeichnen', icon: FileSignatureIcon },
   { key: 'checkout', label: 'Anzahlung leisten', icon: CreditCardIcon },
 ] as const
@@ -92,7 +92,7 @@ export default function SoloVertragWizard({
     if (!agbAccepted) { setError('Bitte akzeptiere die AGB/NB/DS'); return }
     if (!unterschriftName.trim()) { setError('Bitte gib deinen Namen ein'); return }
     if (!signaturePng) { setError('Bitte unterschreibe im Feld unten'); return }
-    if (!scrolled80) { setError('Bitte lies die Nutzungsbedingungen vollstaendig (80% gescrollt)'); return }
+    if (!scrolled80) { setError('Bitte lies die Nutzungsbedingungen vollständig (80% gescrollt)'); return }
 
     setSaving(true)
     const result = await signSvVertrag({
@@ -120,7 +120,7 @@ export default function SoloVertragWizard({
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900">Onboarding abschliessen</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">Onboarding abschließen</h1>
           <p className="text-gray-500 text-sm mt-1">Schritt {step + 1} von {STEPS.length}</p>
         </div>
 
@@ -166,7 +166,7 @@ export default function SoloVertragWizard({
 
                 <div className="grid grid-cols-2 gap-3 pt-3 border-t border-[#1E3A5F]/10">
                   <div>
-                    <p className="text-[10px] text-gray-500 uppercase">Faelle / Monat</p>
+                    <p className="text-[10px] text-gray-500 uppercase">Fälle / Monat</p>
                     <p className="text-sm font-semibold text-gray-900 mt-0.5">{paketInfo.faelle}</p>
                   </div>
                   <div>
@@ -178,10 +178,10 @@ export default function SoloVertragWizard({
 
               <div className="text-xs text-gray-500 leading-relaxed bg-gray-50 border border-gray-200 rounded-xl p-4">
                 <p className="mb-2">
-                  <strong>So funktioniert die Anzahlung:</strong> Du leistest einmalig {anzahlung.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })} als Sicherheit gemaess §4 des Kooperationsvertrags. Diese Anzahlung wird mit den ersten Lead-Gebuehren verrechnet — du zahlst sie also de facto NICHT zusaetzlich, sondern nur frueher.
+                  <strong>So funktioniert die Anzahlung:</strong> Du leistest einmalig {anzahlung.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })} als Sicherheit gemäß §4 des Kooperationsvertrags. Diese Anzahlung wird mit den ersten Lead-Gebühren verrechnet — du zahlst sie also de facto NICHT zusätzlich, sondern nur früher.
                 </p>
                 <p>
-                  Die genauen Lead-Preise pro Schadenshoehe findest du in der{' '}
+                  Die genauen Lead-Preise pro Schadenshöhe findest du in der{' '}
                   <Link href="/gutachter/leadpreise" className="text-[#1E3A5F] underline hover:text-[#4573A2]">
                     Lead-Preis-Tabelle
                   </Link>.
@@ -195,7 +195,7 @@ export default function SoloVertragWizard({
             <div className="space-y-4">
               {!nbVorlage ? (
                 <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm">
-                  Keine aktive Nutzungsbedingungen-Vorlage hinterlegt. Bitte Admin im Vertraege-Editor anlegen.
+                  Keine aktive Nutzungsbedingungen-Vorlage hinterlegt. Bitte Admin im Verträge-Editor anlegen.
                 </div>
               ) : (
                 <>
@@ -206,7 +206,7 @@ export default function SoloVertragWizard({
                         {nbVorlage.titel} <span className="text-red-400">*</span>
                       </label>
                       <span className={`text-[10px] ${scrolled80 ? 'text-green-600' : 'text-gray-400'}`}>
-                        {scrolled80 ? '✓ vollstaendig gelesen' : 'bitte vollstaendig scrollen'}
+                        {scrolled80 ? '✓ vollständig gelesen' : 'bitte vollständig scrollen'}
                       </span>
                     </div>
                     <div
@@ -273,8 +273,8 @@ export default function SoloVertragWizard({
                       className="mt-0.5 rounded border-gray-300"
                     />
                     <span>
-                      Ich akzeptiere die <strong>Nutzungsbedingungen</strong>, die <strong>AGB</strong> und die <strong>Datenschutzerklaerung</strong>.
-                      Mit meiner Unterschrift bestaetige ich rechtsverbindlich die Annahme.
+                      Ich akzeptiere die <strong>Nutzungsbedingungen</strong>, die <strong>AGB</strong> und die <strong>Datenschutzerklärung</strong>.
+                      Mit meiner Unterschrift bestätige ich rechtsverbindlich die Annahme.
                     </span>
                   </label>
                 </>
@@ -299,7 +299,7 @@ export default function SoloVertragWizard({
                   {anzahlung.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })}
                 </p>
                 <p className="text-[11px] text-gray-500 mt-2">
-                  Wird mit den ersten Lead-Gebuehren verrechnet. Sobald die Zahlung eingegangen ist, ist dein Portal-Zugang freigeschaltet.
+                  Wird mit den ersten Lead-Gebühren verrechnet. Sobald die Zahlung eingegangen ist, ist dein Portal-Zugang freigeschaltet.
                 </p>
               </div>
             </div>
@@ -320,7 +320,7 @@ export default function SoloVertragWizard({
                 disabled={saving}
                 className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50 disabled:opacity-40"
               >
-                Zurueck
+                Zurück
               </button>
             )}
             <button

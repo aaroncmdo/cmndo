@@ -21,7 +21,7 @@ export default function GutachterCockpit() {
   const [loading, setLoading] = useState(true)
   const [greeting, setGreeting] = useState(''); const [datum, setDatum] = useState('')
   const [termine, setTermine] = useState<Termin[]>([]); const [auftraege, setAuftraege] = useState<Auftrag[]>([]); const [tasks, setTasks] = useState<Task[]>([])
-  const [stats, setStats] = useState({ faelle: 0, max: 25, guthaben: 0, monat: 0 })
+  const [stats, setStats] = useState({ faelle: 0, max: 25, monat: 0 })
   const [routeUrl, setRouteUrl] = useState<string | null>(null)
   const [faellig, setFaellig] = useState<{ id: string; kunde: string } | null>(null)
   const [finanz, setFinanz] = useState({ eingegangen: 0, offen: 0, leadpreise: 0 })
@@ -36,8 +36,8 @@ export default function GutachterCockpit() {
 
   const load = useCallback(async () => {
     const user = (await supabase.auth.getUser())?.data?.user ?? null; if (!user) return
-    let { data: sv } = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, guthaben, offene_faelle, max_faelle_monat').eq('profile_id', user.id).single()
-    if (!sv) { const r = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, guthaben, offene_faelle, max_faelle_monat').eq('user_id', user.id).single(); sv = r.data }
+    let { data: sv } = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, offene_faelle, max_faelle_monat').eq('profile_id', user.id).single()
+    if (!sv) { const r = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, offene_faelle, max_faelle_monat').eq('user_id', user.id).single(); sv = r.data }
     if (!sv) { setLoading(false); return }
     const { data: p } = await supabase.from('profiles').select('vorname').eq('id', user.id).single()
     const now = new Date(); const h = now.getHours()
@@ -45,7 +45,7 @@ export default function GutachterCockpit() {
     const isToday = selectedDate.toDateString() === now.toDateString()
     setDatum(isToday ? `HEUTE ${selectedDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}` : selectedDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }))
     setSvLat(sv.standort_lat ? Number(sv.standort_lat) : null); setSvLng(sv.standort_lng ? Number(sv.standort_lng) : null)
-    setStats({ faelle: sv.offene_faelle ?? sv.paket_faelle_genutzt ?? 0, max: sv.max_faelle_monat ?? sv.paket_faelle_gesamt ?? 25, guthaben: typeof sv.guthaben === 'number' ? sv.guthaben : 0, monat: 0 })
+    setStats({ faelle: sv.offene_faelle ?? sv.paket_faelle_genutzt ?? 0, max: sv.max_faelle_monat ?? sv.paket_faelle_gesamt ?? 25, monat: 0 })
 
     const ds = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString()
     const de = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + 1).toISOString()
@@ -190,7 +190,7 @@ export default function GutachterCockpit() {
             {doneTasks.length > 0 && <div className="bg-white border border-gray-200 rounded-lg p-3"><button onClick={() => setShowDone(!showDone)} className="flex items-center gap-2 text-sm font-semibold text-gray-600 w-full"><CheckIcon className="w-4 h-4 text-green-500" /><span>Am {selectedDate.toLocaleDateString('de-DE')} erledigt ({doneTasks.length})</span><span className="ml-auto text-gray-400 text-xs">{showDone ? '▲' : '▼'}</span></button>{showDone && <div className="mt-2 space-y-1">{doneTasks.map(t => <p key={t.id} className="text-xs text-gray-500 flex items-center gap-1.5"><CheckIcon className="w-3 h-3 text-green-400 shrink-0" /><span className="line-through">{t.titel}</span></p>)}</div>}</div>}
             <div className="grid grid-cols-2 gap-2">
               <Link href="/gutachter/faelle" className="bg-white border border-gray-200 rounded-lg p-3 text-center hover:border-[#4573A2]/30"><p className="text-lg font-bold text-gray-900">{stats.faelle}/{stats.max}</p><p className="text-[10px] text-gray-500">Fälle</p></Link>
-              <Link href="/gutachter/abrechnung" className="bg-white border border-gray-200 rounded-lg p-3 text-center hover:border-[#4573A2]/30"><p className="text-lg font-bold text-gray-900">{stats.guthaben}€</p><p className="text-[10px] text-gray-500">Guthaben</p></Link>
+              <Link href="/gutachter/abrechnung" className="bg-white border border-gray-200 rounded-lg p-3 text-center hover:border-[#4573A2]/30"><p className="text-lg font-bold text-gray-900">{finanz.eingegangen}€</p><p className="text-[10px] text-gray-500">Eingegangen</p></Link>
             </div>
             {faellig && <Link href={`/gutachter/fall/${faellig.id}`} className="block bg-amber-50 border border-amber-200 rounded-lg p-3 hover:bg-amber-100"><p className="text-xs font-semibold text-amber-700">Gutachten fällig</p><p className="text-sm text-gray-900 mt-0.5">{faellig.kunde}</p></Link>}
             {/* Finanz-Quick */}

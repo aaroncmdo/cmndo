@@ -33,13 +33,13 @@ export function WillkommenSvEmail(props: Props) {
         {props.von_admin_name
           ? `${props.von_admin_name} hat deinen Account bei Claimondo angelegt.`
           : 'Dein Account bei Claimondo wurde angelegt.'}
-        {' '}Schoen dass du dabei bist!
+        {' '}Schön dass du dabei bist!
       </Paragraph>
 
       {isSubSv && (
         <Paragraph>
-          Du wurdest dem Buero <strong>{props.organisation_name}</strong> als{' '}
-          {props.rolle_in_organisation ?? 'Mitarbeiter'} hinzugefuegt.
+          Du wurdest dem Büro <strong>{props.organisation_name}</strong> als{' '}
+          {props.rolle_in_organisation ?? 'Mitarbeiter'} hinzugefügt.
         </Paragraph>
       )}
 
@@ -47,13 +47,13 @@ export function WillkommenSvEmail(props: Props) {
       <Heading>Deine Konditionen</Heading>
       <InfoTable rows={[
         ['Paket', props.paket_name],
-        ['Kontingent', `${props.kontingent} Faelle / Monat`],
+        ['Kontingent', `${props.kontingent} Fälle / Monat`],
         ['Radius', `${props.radius_km} km`],
         ['Anzahlung (= Werbebudget)', `${props.anzahlung_betrag_eur.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })}`],
       ]} />
 
       <Divider />
-      <Heading>Naechste Schritte</Heading>
+      <Heading>Nächste Schritte</Heading>
       <Paragraph>
         <strong>1.</strong> Logge dich ein mit deiner Email-Adresse (an die diese Mail geschickt wurde) und dem Initial-Passwort unten:
       </Paragraph>
@@ -62,22 +62,22 @@ export function WillkommenSvEmail(props: Props) {
         ['Initial-Passwort', props.initial_password],
       ]} />
       <Text style={{ color: '#6b7280', fontSize: 12, margin: '4px 0 16px', fontStyle: 'italic' }}>
-        Beim ersten Login wirst du dein Passwort aendern muessen.
+        Beim ersten Login wirst du dein Passwort ändern müssen.
       </Text>
 
       <Paragraph>
-        <strong>2.</strong> Du siehst deine vollstaendigen Konditionen, kannst den Vertrag unterzeichnen und die Anzahlung leisten.
+        <strong>2.</strong> Du siehst deine vollständigen Konditionen, kannst den Vertrag unterzeichnen und die Anzahlung leisten.
       </Paragraph>
 
       {!isSubSv && (
         <Paragraph>
-          <strong>3.</strong> Sobald die Anzahlung eingegangen ist, ist dein Portal-Zugang freigeschaltet und du kannst Auftraege erhalten.
+          <strong>3.</strong> Sobald die Anzahlung eingegangen ist, ist dein Portal-Zugang freigeschaltet und du kannst Aufträge erhalten.
         </Paragraph>
       )}
 
       {isSubSv && (
         <Paragraph>
-          <strong>3.</strong> Dein Buero-Inhaber unterzeichnet den Vertrag stellvertretend und leistet die zentrale Anzahlung. Sobald das passiert ist, ist auch dein Portal-Zugang freigeschaltet.
+          <strong>3.</strong> Dein Büro-Inhaber unterzeichnet den Vertrag stellvertretend und leistet die zentrale Anzahlung. Sobald das passiert ist, ist auch dein Portal-Zugang freigeschaltet.
         </Paragraph>
       )}
 
@@ -88,7 +88,7 @@ export function WillkommenSvEmail(props: Props) {
         Bei Fragen erreichst du uns unter <strong>support@claimondo.de</strong>.
       </Paragraph>
       <Paragraph>
-        Viele Gruesse,<br/>
+        Viele Grüße,<br/>
         Aaron Sprafke<br/>
         Claimondo GmbH i.G.
       </Paragraph>

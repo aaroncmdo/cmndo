@@ -10,6 +10,7 @@ import {
   FolderOpenIcon,
   CalendarIcon,
   ReceiptIcon,
+  BarChart3Icon,
   UserIcon,
   LogOutIcon,
 } from 'lucide-react'
@@ -21,7 +22,7 @@ const NAV_ITEMS = [
   { href: '/gutachter/gebiet', label: 'Mein Gebiet', icon: MapIcon },
   { href: '/gutachter/kalender', label: 'Kalender', icon: CalendarIcon },
   { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
-  { href: '/gutachter/leadpreise', label: 'Lead-Preise', icon: ReceiptIcon },
+  { href: '/gutachter/statistiken', label: 'Statistiken', icon: BarChart3Icon },
 ]
 
 type HourW = { hour: number; temp: number; code: number }

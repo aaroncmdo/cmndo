@@ -1,11 +1,12 @@
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
-import { WalletIcon, PackageIcon, FileTextIcon, DownloadIcon } from 'lucide-react'
+import { WalletIcon, PackageIcon, FileTextIcon, DownloadIcon, InfoIcon } from 'lucide-react'
 
 const PAKET_LABELS: Record<string, string> = {
-  standard: 'Standard (10 Faelle/Monat)', 'starter-10': 'Standard (10 Faelle/Monat)',
-  pro: 'Pro (25 Faelle/Monat)', 'standard-25': 'Pro (25 Faelle/Monat)',
-  premium: 'Premium (50 Faelle/Monat)', 'premium-50': 'Premium (50 Faelle/Monat)',
+  standard: 'Standard (10 Fälle/Monat)', 'starter-10': 'Standard (10 Fälle/Monat)',
+  pro: 'Pro (25 Fälle/Monat)', 'standard-25': 'Pro (25 Fälle/Monat)',
+  premium: 'Premium (50 Fälle/Monat)', 'premium-50': 'Premium (50 Fälle/Monat)',
 }
 
 const COMPLETED_STATUSES = [
@@ -34,6 +35,13 @@ export default async function AbrechnungPage() {
       </div>
     )
   }
+
+  // ARCH-1 POLISH Befund 2: SV sieht NICHT mehr seinen Live-Werbebudget-Stand,
+  // sondern lediglich die einmalig geleistete Anzahlung als Info.
+  const anzahlungBetrag = typeof sv.anzahlung_betrag === 'number'
+    ? sv.anzahlung_betrag
+    : Number(sv.anzahlung_betrag ?? 0)
+  const anzahlungBezahlt = sv.anzahlung_bezahlt === true || sv.anzahlung_bezahlt === 'true'
 
   // Fetch abrechnungen from the real billing table
   const { data: abrechnungen } = await supabase
@@ -77,7 +85,6 @@ export default async function AbrechnungPage() {
   const paketLabel = PAKET_LABELS[sv.paket ?? ''] ?? sv.paket ?? 'Kein Paket'
   const offeneFaelle = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
   const maxFaelle = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10
-  const guthaben = typeof sv.guthaben === 'number' ? sv.guthaben : 0
   const auslastungProzent = maxFaelle > 0 ? Math.min(Math.round((offeneFaelle / maxFaelle) * 100), 100) : 0
 
   // Progress bar color based on utilization
@@ -97,9 +104,17 @@ export default async function AbrechnungPage() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-2">
-        <h1 className="text-sm font-semibold text-gray-900">Abrechnung</h1>
-        <p className="text-gray-500 text-xs">Übersicht Ihrer Abrechnungen und Pakete</p>
+      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-sm font-semibold text-gray-900">Abrechnung</h1>
+          <p className="text-gray-500 text-xs">Übersicht Ihrer Abrechnungen und Pakete</p>
+        </div>
+        <Link
+          href="/gutachter/leadpreise"
+          className="text-xs font-medium text-[#4573A2] hover:text-[#1E3A5F] underline underline-offset-2 whitespace-nowrap"
+        >
+          Aktuelle Lead-Preis-Tabelle einsehen
+        </Link>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto p-4">
         {/* Einnahmen-Dashboard (KFZ-88) */}
@@ -123,18 +138,34 @@ export default async function AbrechnungPage() {
 
         {/* Top cards grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-          {/* Guthaben */}
+          {/* Anzahlung (Initial-Wert, KEIN Live-Stand) — ARCH-1 POLISH Befund 2 */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
                 <WalletIcon className="w-5 h-5 text-emerald-400" />
               </div>
               <div>
-                <p className="text-gray-500 text-sm font-medium">Guthaben</p>
+                <p className="text-gray-500 text-sm font-medium">Anzahlung</p>
+                <p className="text-gray-400 text-[11px]">Einmalig geleistet</p>
               </div>
             </div>
-            <p className="text-3xl font-bold text-gray-900 tabular-nums">{guthaben.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR</p>
-            {guthaben <= 0 && <p className="text-gray-400 text-xs mt-1">Kein Guthaben vorhanden</p>}
+            {anzahlungBezahlt && anzahlungBetrag > 0 ? (
+              <>
+                <p className="text-3xl font-bold text-gray-900 tabular-nums">
+                  {anzahlungBetrag.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR
+                </p>
+                <p className="text-gray-500 text-xs mt-1">Du hast einmalig diesen Betrag als Anzahlung geleistet.</p>
+              </>
+            ) : (
+              <>
+                <p className="text-3xl font-bold text-gray-400 tabular-nums">— EUR</p>
+                <p className="text-gray-400 text-xs mt-1">Noch keine Anzahlung eingegangen.</p>
+              </>
+            )}
+            <p className="text-gray-400 text-[10px] mt-3 flex items-start gap-1">
+              <InfoIcon className="w-3 h-3 mt-0.5 shrink-0" />
+              <span>Die Verrechnung deiner Lead-Preise findest du in der Monatsabrechnung.</span>
+            </p>
           </div>
 
           {/* Paket-Auslastung */}
@@ -163,17 +194,17 @@ export default async function AbrechnungPage() {
           </div>
         </div>
 
-        {/* Abgerechnete Faelle */}
+        {/* Abgerechnete Fälle */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <FileTextIcon className="w-5 h-5 text-gray-500" />
-            <h2 className="text-lg font-semibold text-gray-900">Abgerechnete Faelle</h2>
-            <span className="text-gray-400 text-sm ml-auto">{completedFaelle?.length ?? 0} Faelle</span>
+            <h2 className="text-lg font-semibold text-gray-900">Abgerechnete Fälle</h2>
+            <span className="text-gray-400 text-sm ml-auto">{completedFaelle?.length ?? 0} Fälle</span>
           </div>
 
           {!completedFaelle?.length ? (
             <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
-              <p className="text-gray-500">Noch keine abgerechneten Faelle vorhanden.</p>
+              <p className="text-gray-500">Noch keine abgerechneten Fälle vorhanden.</p>
             </div>
           ) : (
             <>
@@ -368,7 +399,7 @@ export default async function AbrechnungPage() {
               PDF Download
             </button>
           </div>
-          <p className="text-gray-400 text-xs mt-3">Coming soon - PDF-Abrechnungen werden in Kuerze verfuegbar sein.</p>
+          <p className="text-gray-400 text-xs mt-3">Coming soon — PDF-Abrechnungen werden in Kürze verfügbar sein.</p>
         </div>
       </div>
     </div>
