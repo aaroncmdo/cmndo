@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
@@ -74,12 +75,17 @@ export async function POST(request: Request) {
           }).eq('id', orgId)
 
           // Alle Sub-SVs (mitarbeiter) + Inhaber freischalten
+          // BUG-92: vertrag_unterschrieben=true defensiv mitziehen — falls der
+          // Sub-SV/Inhaber den AGB-Step nicht durchlaufen hat, ist der State
+          // sonst inkonsistent (portal=true aber vertrag_unterschrieben=false).
           await db.from('sachverstaendige').update({
             onboarding_status: 'bezahlt',
             stripe_anzahlung_bezahlt_am: new Date().toISOString(),
             portal_zugang_freigeschaltet: true,
             anzahlung_status: 'bezahlt',
             ist_aktiv: true,
+            vertrag_unterschrieben: true,
+            vertrag_unterschrieben_am: new Date().toISOString(),
           }).eq('organisation_id', orgId)
 
           // ARCH-1 FR-5: Werbebudget pro Sub-SV mit dem jeweiligen
@@ -133,6 +139,15 @@ export async function POST(request: Request) {
             await resolveTasksForEntity('sv_onboarding', orgId, 'Buero-Anzahlung eingegangen')
           } catch (err) { console.error('[KFZ-151] resolveTasks buero:', err) }
 
+          // BUG-92: Admin-Listing/Karte revalidieren damit die Status-Badges
+          // sofort nach Webhook-Eingang frische Daten zeigen statt 'Wartet auf
+          // Vertrag' aus dem stale Server-Component-Cache.
+          try {
+            revalidatePath('/admin/sachverstaendige', 'page')
+            revalidatePath('/admin/karte', 'page')
+            revalidatePath('/admin/organisationen', 'page')
+          } catch { /* */ }
+
           break
         }
 
@@ -150,6 +165,9 @@ export async function POST(request: Request) {
           const initGuthaben = Number(svBefore?.onboarding_anzahlung_betrag ?? 0)
 
           // Portal freischalten
+          // BUG-92: vertrag_unterschrieben=true defensiv mitziehen — falls der
+          // Solo-SV den Vertrag-Step uebersprungen hat (sollte nicht vorkommen,
+          // aber verhindert inkonsistenten State im Admin-Listing).
           await db.from('sachverstaendige').update({
             onboarding_status: 'bezahlt',
             stripe_anzahlung_payment_intent_id: session.payment_intent as string ?? null,
@@ -157,6 +175,8 @@ export async function POST(request: Request) {
             portal_zugang_freigeschaltet: true,
             anzahlung_status: 'bezahlt',
             werbebudget_guthaben_netto: initGuthaben,
+            vertrag_unterschrieben: true,
+            vertrag_unterschrieben_am: new Date().toISOString(),
           }).eq('id', svId)
 
           // KFZ-151: Auto-Resolve aller offenen Tasks zu diesem Onboarding
@@ -190,6 +210,12 @@ export async function POST(request: Request) {
             for (const a of admins ?? []) {
               if (a.telefon) await sendManualWhatsApp(a.telefon, `✅ SV-Anzahlung eingegangen für ${svId.slice(0, 8)}. Portal freigeschaltet.`, null)
             }
+          } catch { /* */ }
+
+          // BUG-92: Admin-Listing/Karte revalidieren — analog Buero-Branch.
+          try {
+            revalidatePath('/admin/sachverstaendige', 'page')
+            revalidatePath('/admin/karte', 'page')
           } catch { /* */ }
         }
         break

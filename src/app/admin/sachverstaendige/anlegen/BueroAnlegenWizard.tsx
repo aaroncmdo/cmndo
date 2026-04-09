@@ -64,11 +64,20 @@ export default function BueroAnlegenWizard({ onSuccess }: {
   const [bueroName, setBueroName] = useState('')
   const [bueroRechtsform, setBueroRechtsform] = useState('')
   const [bueroAnschrift, setBueroAnschrift] = useState('')
+  // BUG-93: Buero-Anschrift braucht jetzt Geo (wird auch als Hauptbuero-Standort
+  // verwendet → Lead-Dispatcher braucht lat/lng/place_id).
+  const [bueroAnschriftLat, setBueroAnschriftLat] = useState<number | null>(null)
+  const [bueroAnschriftLng, setBueroAnschriftLng] = useState<number | null>(null)
+  const [bueroAnschriftPlaceId, setBueroAnschriftPlaceId] = useState('')
+  const [bueroAnschriftPlz, setBueroAnschriftPlz] = useState('')
   const [bueroSteuernummer, setBueroSteuernummer] = useState('')
   const [bueroUstId, setBueroUstId] = useState('')
   const [bueroHrb, setBueroHrb] = useState('')
+  // BUG-93 Aaron-Option C: Inhaber ist auch Hauptbuero-Mitarbeiter (Default an).
+  const [inhaberIstHauptbueroMitarbeiter, setInhaberIstHauptbueroMitarbeiter] = useState(true)
 
-  // Sub-Standorte
+  // Sub-Standorte. Index 0 = Hauptbuero (auto-initialisiert beim Step 0→1
+  // Uebergang). Indizes 1+ = optionale Filialen.
   const [standorte, setStandorte] = useState<SubStandort[]>([newSubStandort()])
 
   function addStandort() {
@@ -97,7 +106,12 @@ export default function BueroAnlegenWizard({ onSuccess }: {
   const gesamtAnzahlung = standorte.reduce((sum, s) => sum + paketAnzahlung(s.paket), 0)
 
   function canNext(): boolean {
-    if (step === 0) return !!(inhaberAnrede && inhaberVorname && inhaberNachname && inhaberEmail && bueroName && bueroSteuernummer)
+    if (step === 0) return !!(
+      inhaberAnrede && inhaberVorname && inhaberNachname && inhaberEmail &&
+      bueroName && bueroSteuernummer &&
+      // BUG-93: Buero-Anschrift via Places ist Pflicht
+      bueroAnschriftLat !== null && bueroAnschriftLng !== null
+    )
     if (step === 1) {
       if (standorte.length === 0) return false
       return standorte.every(s =>
@@ -106,6 +120,37 @@ export default function BueroAnlegenWizard({ onSuccess }: {
       )
     }
     return true
+  }
+
+  // BUG-93: Beim Wechsel von Step 0 → Step 1 standorte[0] (Hauptbuero) automatisch
+  // mit Inhaber-Daten + Buero-Anschrift vorausfuellen. Wenn der User schon mal
+  // in Step 1 war und etwas geaendert hat, NICHT ueberschreiben (id stable check).
+  function goToStep1FromStep0() {
+    setStandorte(prev => {
+      const next = [...prev]
+      const hb = next[0]
+      // Nur ueberschreiben wenn das Hauptbuero noch leer ist, damit ein 'Zurueck'
+      // den Edit-State erhaelt.
+      const istLeer = !hb.name && !hb.sub_email && !hb.anschrift
+      if (!istLeer) return prev
+      next[0] = {
+        ...hb,
+        name: 'Hauptbuero',
+        anschrift: bueroAnschrift,
+        anschrift_lat: bueroAnschriftLat,
+        anschrift_lng: bueroAnschriftLng,
+        anschrift_place_id: bueroAnschriftPlaceId,
+        anschrift_plz: bueroAnschriftPlz,
+        // Mitarbeiter-Daten aus Inhaber wenn Checkbox an
+        sub_anrede: inhaberIstHauptbueroMitarbeiter ? inhaberAnrede : '',
+        sub_titel: inhaberIstHauptbueroMitarbeiter ? inhaberTitel : '',
+        sub_vorname: inhaberIstHauptbueroMitarbeiter ? inhaberVorname : '',
+        sub_nachname: inhaberIstHauptbueroMitarbeiter ? inhaberNachname : '',
+        sub_email: inhaberIstHauptbueroMitarbeiter ? inhaberEmail : '',
+      }
+      return next
+    })
+    setStep(1)
   }
 
   async function handleSubmit() {
@@ -119,9 +164,14 @@ export default function BueroAnlegenWizard({ onSuccess }: {
       inhaber_nachname: inhaberNachname,
       inhaber_email: inhaberEmail,
       inhaber_telefon: inhaberTelefon,
+      inhaber_ist_hauptbuero_mitarbeiter: inhaberIstHauptbueroMitarbeiter,
       buero_name: bueroName,
       buero_rechtsform: bueroRechtsform || undefined,
       buero_anschrift: bueroAnschrift,
+      buero_anschrift_lat: bueroAnschriftLat,
+      buero_anschrift_lng: bueroAnschriftLng,
+      buero_anschrift_place_id: bueroAnschriftPlaceId || undefined,
+      buero_anschrift_plz: bueroAnschriftPlz,
       buero_steuernummer: bueroSteuernummer,
       buero_ust_id: bueroUstId || undefined,
       buero_hrb: bueroHrb || undefined,
@@ -234,21 +284,61 @@ export default function BueroAnlegenWizard({ onSuccess }: {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Field label="Büro-Name *" value={bueroName} onChange={setBueroName} className="sm:col-span-2" />
                 <Field label="Rechtsform" value={bueroRechtsform} onChange={setBueroRechtsform} placeholder="z.B. GmbH" />
-                <Field label="Anschrift (Rechnungsadresse)" value={bueroAnschrift} onChange={setBueroAnschrift} />
                 <Field label="Steuernummer *" value={bueroSteuernummer} onChange={setBueroSteuernummer} />
+                {/* BUG-93: Hauptbuero-Anschrift via Google Places (Pflicht — wird
+                    auch als Standort 1 = Hauptbuero verwendet, daher Geo-Pflicht). */}
+                <div className="sm:col-span-2">
+                  <label className="text-xs text-gray-500 mb-1.5 block">
+                    Anschrift Hauptbüro (= Rechnungsadresse) *
+                    {bueroAnschriftLat !== null && <span className="text-green-600 ml-2">✓ Geo gesetzt</span>}
+                  </label>
+                  <GooglePlaceAutocomplete
+                    defaultValue={bueroAnschrift}
+                    placeholder="Adresse via Auswahl wählen..."
+                    onSelect={place => {
+                      setBueroAnschrift(place.adresse)
+                      setBueroAnschriftPlz(place.plz)
+                      setBueroAnschriftLat(place.lat)
+                      setBueroAnschriftLng(place.lng)
+                      setBueroAnschriftPlaceId(place.place_id)
+                    }}
+                    className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                  />
+                </div>
                 <Field label="USt-IdNr (optional)" value={bueroUstId} onChange={setBueroUstId} />
-                <Field label="HRB (optional)" value={bueroHrb} onChange={setBueroHrb} className="sm:col-span-2" />
+                <Field label="HRB (optional)" value={bueroHrb} onChange={setBueroHrb} />
               </div>
+            </div>
+
+            {/* BUG-93 Aaron-Option C: Inhaber-ist-auch-Mitarbeiter Checkbox */}
+            <div className="pt-4 border-t border-gray-200">
+              <label className="flex items-start gap-2.5 cursor-pointer text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={inhaberIstHauptbueroMitarbeiter}
+                  onChange={e => setInhaberIstHauptbueroMitarbeiter(e.target.checked)}
+                  className="mt-0.5 rounded border-gray-300"
+                />
+                <span>
+                  <strong>Ich (Inhaber) bin auch Mitarbeiter im Hauptbüro und bekomme selbst Fälle.</strong>
+                  <br />
+                  <span className="text-xs text-gray-500">
+                    Wenn aktiv: das Hauptbüro wird im nächsten Schritt mit deinen Inhaber-Daten
+                    vorausgefüllt — du brauchst keine zweite Email. Wenn aus: das Hauptbüro hat
+                    einen separaten Mitarbeiter mit eigener Email.
+                  </span>
+                </span>
+              </label>
             </div>
           </div>
         )}
 
-        {/* SCHRITT 1: Sub-Standorte */}
+        {/* SCHRITT 1: Sub-Standorte (Index 0 = Hauptbuero, auto-vorausgefuellt) */}
         {step === 1 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <p className="text-xs text-gray-500">
-                Jeder Sub-Standort = ein eigener SV mit eigenem Login. Geo-Koordinaten sind Pflicht (via Google Places).
+                Standort 1 ist immer das Hauptbüro (auto-vorausgefüllt). Weitere Filialen optional.
               </p>
               <button
                 type="button"
@@ -260,11 +350,17 @@ export default function BueroAnlegenWizard({ onSuccess }: {
               </button>
             </div>
 
-            {standorte.map((std, idx) => (
-              <div key={std.id} className="border border-gray-200 rounded-xl p-4 space-y-3">
+            {standorte.map((std, idx) => {
+              const istHauptbuero = idx === 0
+              // Mitarbeiter-Felder im Hauptbuero sind read-only wenn Inhaber=Mitarbeiter
+              const mitarbeiterReadonly = istHauptbuero && inhaberIstHauptbueroMitarbeiter
+              return (
+              <div key={std.id} className={`border rounded-xl p-4 space-y-3 ${istHauptbuero ? 'border-[#1E3A5F]/30 bg-[#1E3A5F]/[0.02]' : 'border-gray-200'}`}>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-gray-500">Standort {idx + 1}</span>
-                  {standorte.length > 1 && (
+                  <span className="text-xs font-semibold text-gray-500">
+                    {istHauptbuero ? 'Hauptbüro' : `Standort ${idx + 1}`}
+                  </span>
+                  {!istHauptbuero && standorte.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeStandort(std.id)}
@@ -274,39 +370,81 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                     </button>
                   )}
                 </div>
-                <Field label="Standort-Name" value={std.name} onChange={v => updateStandort(std.id, 'name', v)} placeholder="z.B. Filiale Köln" />
-                <div>
-                  <label className="text-xs text-gray-500 mb-1.5 block">
-                    Anschrift {std.anschrift_lat !== null && <span className="text-green-600 ml-2">✓ Geo</span>}
-                  </label>
-                  <GooglePlaceAutocomplete
-                    defaultValue={std.anschrift}
-                    placeholder="Adresse via Auswahl..."
-                    onSelect={place => setStandortPlace(std.id, place)}
-                    className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
-                  />
-                </div>
+                <Field
+                  label="Standort-Name"
+                  value={std.name}
+                  onChange={v => updateStandort(std.id, 'name', v)}
+                  placeholder={istHauptbuero ? 'z.B. Hauptbüro München' : 'z.B. Filiale Köln'}
+                />
+                {istHauptbuero ? (
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1.5 block">
+                      Anschrift <span className="text-green-600 ml-2">✓ aus Stammdaten</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={std.anschrift}
+                      readOnly
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-500 cursor-not-allowed"
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1.5 block">
+                      Anschrift {std.anschrift_lat !== null && <span className="text-green-600 ml-2">✓ Geo</span>}
+                    </label>
+                    <GooglePlaceAutocomplete
+                      defaultValue={std.anschrift}
+                      placeholder="Adresse via Auswahl..."
+                      onSelect={place => setStandortPlace(std.id, place)}
+                      className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                    />
+                  </div>
+                )}
+                {mitarbeiterReadonly && (
+                  <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-lg px-3 py-2 text-[11px] text-gray-600">
+                    ℹ Mitarbeiter-Daten werden vom Inhaber-Account übernommen (kein zweiter Login nötig).
+                  </div>
+                )}
                 {/* ARCH-1 POLISH: Sub-Anrede + Sub-Titel oben, dann Vor-/Nachname/Email */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <SelectField
-                    label="Sub-Anrede *"
+                    label={istHauptbuero ? 'Anrede *' : 'Sub-Anrede *'}
                     value={std.sub_anrede}
                     onChange={v => updateStandort(std.id, 'sub_anrede', v)}
                     options={ANREDE_OPTIONEN}
                     placeholder="Bitte waehlen..."
+                    disabled={mitarbeiterReadonly}
                   />
                   <SelectField
-                    label="Sub-Titel"
+                    label={istHauptbuero ? 'Titel' : 'Sub-Titel'}
                     value={std.sub_titel}
                     onChange={v => updateStandort(std.id, 'sub_titel', v)}
                     options={TITEL_OPTIONEN}
                     placeholder="kein Titel"
+                    disabled={mitarbeiterReadonly}
                   />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  <Field label="Sub-Vorname *" value={std.sub_vorname} onChange={v => updateStandort(std.id, 'sub_vorname', v)} />
-                  <Field label="Sub-Nachname *" value={std.sub_nachname} onChange={v => updateStandort(std.id, 'sub_nachname', v)} />
-                  <Field label="Sub-Email *" type="email" value={std.sub_email} onChange={v => updateStandort(std.id, 'sub_email', v)} />
+                  <Field
+                    label={istHauptbuero ? 'Vorname *' : 'Sub-Vorname *'}
+                    value={std.sub_vorname}
+                    onChange={v => updateStandort(std.id, 'sub_vorname', v)}
+                    disabled={mitarbeiterReadonly}
+                  />
+                  <Field
+                    label={istHauptbuero ? 'Nachname *' : 'Sub-Nachname *'}
+                    value={std.sub_nachname}
+                    onChange={v => updateStandort(std.id, 'sub_nachname', v)}
+                    disabled={mitarbeiterReadonly}
+                  />
+                  <Field
+                    label={istHauptbuero ? 'Email *' : 'Sub-Email *'}
+                    type="email"
+                    value={std.sub_email}
+                    onChange={v => updateStandort(std.id, 'sub_email', v)}
+                    disabled={mitarbeiterReadonly}
+                  />
                 </div>
                 <div>
                   <label className="text-xs text-gray-500 mb-1.5 block">Paket</label>
@@ -329,7 +467,8 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                   </div>
                 </div>
               </div>
-            ))}
+              )
+            })}
 
             <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-xl p-4">
               <p className="text-xs text-gray-500">Gesamt-Anzahlung (alle Standorte)</p>
@@ -405,7 +544,9 @@ export default function BueroAnlegenWizard({ onSuccess }: {
           <button
             type="button"
             onClick={() => {
-              if (step < STEPS.length - 1) setStep(step + 1)
+              // BUG-93: beim Step 0→1 Wechsel das Hauptbuero auto-vorausfuellen
+              if (step === 0) goToStep1FromStep0()
+              else if (step < STEPS.length - 1) setStep(step + 1)
               else handleSubmit()
             }}
             disabled={saving || !canNext()}
@@ -420,7 +561,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
 }
 
 function Field({
-  label, value, onChange, type = 'text', placeholder, className,
+  label, value, onChange, type = 'text', placeholder, className, disabled,
 }: {
   label: string
   value: string
@@ -428,6 +569,7 @@ function Field({
   type?: string
   placeholder?: string
   className?: string
+  disabled?: boolean
 }) {
   return (
     <div className={className}>
@@ -437,14 +579,19 @@ function Field({
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+        disabled={disabled}
+        className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] ${
+          disabled
+            ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed'
+            : 'bg-gray-100 border-gray-300 text-gray-800 placeholder-gray-400'
+        }`}
       />
     </div>
   )
 }
 
 function SelectField({
-  label, value, onChange, options, placeholder, className,
+  label, value, onChange, options, placeholder, className, disabled,
 }: {
   label: string
   value: string
@@ -452,6 +599,7 @@ function SelectField({
   options: ReadonlyArray<string>
   placeholder?: string
   className?: string
+  disabled?: boolean
 }) {
   return (
     <div className={className}>
@@ -459,7 +607,12 @@ function SelectField({
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+        disabled={disabled}
+        className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] ${
+          disabled
+            ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed'
+            : 'bg-gray-100 border-gray-300 text-gray-800'
+        }`}
       >
         {!options.includes('') && (
           <option value="" disabled>{placeholder ?? 'Bitte waehlen...'}</option>

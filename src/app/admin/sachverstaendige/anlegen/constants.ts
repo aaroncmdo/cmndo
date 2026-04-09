@@ -94,10 +94,22 @@ export type AnlegeBueroFormData = {
   inhaber_nachname: string
   inhaber_email: string
   inhaber_telefon: string
+  // BUG-93: Inhaber ist auch Mitarbeiter im Hauptbuero (Aaron-Option C).
+  // Default true. Wenn true, wird standorte[0] (Hauptbuero) automatisch mit
+  // Inhaber-Daten vorausgefuellt UND der Sub-SV-Datensatz reused den
+  // Inhaber-profile_id (kein neuer auth.user), damit der Inhaber persoenlich
+  // Faelle bekommen kann ohne dass eine zweite Email noetig ist.
+  inhaber_ist_hauptbuero_mitarbeiter?: boolean
   // Buero-Stammdaten
   buero_name: string
   buero_rechtsform?: string
+  // Buero-Anschrift mit Geo (Pflicht — wird auch fuer den Hauptbuero-Standort
+  // verwendet wenn keine separate Standort-Anschrift gesetzt wird).
   buero_anschrift: string
+  buero_anschrift_lat?: number | null
+  buero_anschrift_lng?: number | null
+  buero_anschrift_place_id?: string
+  buero_anschrift_plz?: string
   buero_steuernummer: string
   buero_ust_id?: string
   buero_hrb?: string

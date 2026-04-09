@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { headers } from 'next/headers'
+import { revalidatePath } from 'next/cache'
 import { signAndStoreContract } from '@/lib/contracts/sign-and-store'
 import { PAKET_KONTINGENT, berechneStandortAnzahlung, type BueroStandortInput } from './constants'
 
@@ -151,6 +152,18 @@ export async function signBueroVertrag(params: {
     updated_at: new Date().toISOString(),
   }).eq('id', params.organisation_id)
 
+  // BUG-92: Inhaber-sachverstaendige-Row muss vertrag_unterschrieben=true bekommen,
+  // damit das Admin-Status-Badge von 'Wartet auf Vertrag' (gelb) auf 'Wartet auf
+  // Anzahlung' (orange) wechselt. signBueroVertrag aktualisierte bisher nur
+  // organisationen.onboarding_status, nicht aber den SV-Eintrag des Inhabers.
+  // Sub-SVs bleiben unangetastet — die akzeptieren AGB separat ueber FR-3
+  // akzeptiereAgbSubSv (oder werden spaetestens im Webhook defensiv mitgezogen).
+  await db.from('sachverstaendige').update({
+    vertrag_unterschrieben: true,
+    vertrag_unterschrieben_am: new Date().toISOString(),
+    onboarding_status: 'vertrag_unterzeichnet',
+  }).eq('organisation_id', params.organisation_id).eq('ist_parent_account', true)
+
   // Welcome-Email mit PDF-Anhang an den Inhaber
   try {
     const { sendEmail } = await import('@/lib/email/google/client')
@@ -175,6 +188,12 @@ export async function signBueroVertrag(params: {
       })
     }
   } catch (err) { console.error('[KFZ-152] Buero-Vertrag-Email:', err) }
+
+  // BUG-92: Admin-Listing muss frische Daten sehen sobald der Buero-Inhaber
+  // unterzeichnet hat, sonst zeigt das Status-Badge dort weiter 'Wartet auf Vertrag'.
+  revalidatePath('/admin/sachverstaendige', 'page')
+  revalidatePath('/admin/karte', 'page')
+  revalidatePath('/admin/organisationen', 'page')
 
   return { success: true, vertrag_id: result.vertrag_id, pdf_path: result.pdf_path }
 }

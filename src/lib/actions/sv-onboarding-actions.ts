@@ -76,10 +76,11 @@ export async function signSvVertrag({
     })
   }
 
-  // 3. Status updaten
+  // 3. Status updaten — vertrag_unterschrieben + Zeitstempel
   await db.from('sachverstaendige').update({
     onboarding_status: 'vertrag_unterzeichnet',
     vertrag_unterschrieben: true,
+    vertrag_unterschrieben_am: new Date().toISOString(),
   }).eq('id', sv.id)
 
   // 4. Welcome-Email mit PDF-Anhang (fire & forget)
@@ -109,6 +110,10 @@ export async function signSvVertrag({
   } catch (err) { console.error('[KFZ-148] Welcome-Mail:', err) }
 
   revalidatePath('/gutachter/onboarding')
+  // BUG-92: Admin-Listing muss frische Daten sehen sobald der SV unterzeichnet hat,
+  // sonst zeigt das Status-Badge dort weiter 'Wartet auf Vertrag'.
+  revalidatePath('/admin/sachverstaendige', 'page')
+  revalidatePath('/admin/karte', 'page')
   return { success: true, vertrag_id: result.vertrag_id, pdf_path: result.pdf_path }
 }
 

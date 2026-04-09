@@ -198,11 +198,26 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
   if (data.sub_standorte.some(s => s.anschrift_lat === null || s.anschrift_lng === null)) {
     return { success: false, error: 'Jeder Sub-Standort braucht Geo-Koordinaten (via Google Places auswaehlen)' }
   }
-  // ARCH-1 Phase 2 Update: Inhaber-Email darf NICHT als Sub-Email auftauchen
-  // (sonst Konflikt im auth.users Insert + Mapping). Mehrere Subs mit gleicher
-  // Email sind erlaubt — die werden zusammengelegt.
-  if (data.sub_standorte.some(s => s.sub_email.toLowerCase() === data.inhaber_email.toLowerCase())) {
-    return { success: false, error: 'Inhaber-Email darf nicht als Sub-Standort-Email verwendet werden' }
+  // BUG-93 Aaron-Option C: Inhaber-Email darf jetzt im Hauptbuero (standorte[0])
+  // wiederverwendet werden — der Inhaber teilt sich dann seinen Login mit dem
+  // Hauptbuero-SV-Eintrag (kein zweiter auth.user). Multi-SV-Tolerance via
+  // getGutachterForUser ist seit ARCH-1 Phase 2 vorhanden.
+  // Aber: nur das HAUPTBUERO darf diese Email haben, NICHT die Filialen 1+.
+  const inhaberEmailLower = data.inhaber_email.toLowerCase()
+  if (data.inhaber_ist_hauptbuero_mitarbeiter !== true) {
+    // Klassischer Fall: Inhaber-Email darf gar nicht als Sub-Email vorkommen
+    if (data.sub_standorte.some(s => s.sub_email.toLowerCase() === inhaberEmailLower)) {
+      return { success: false, error: 'Inhaber-Email darf nicht als Sub-Standort-Email verwendet werden' }
+    }
+  } else {
+    // Option-C Fall: Hauptbuero-Email muss Inhaber-Email sein, Filialen 1+ duerfen sie NICHT haben
+    const hauptbueroEmail = data.sub_standorte[0]?.sub_email?.toLowerCase()
+    if (hauptbueroEmail !== inhaberEmailLower) {
+      return { success: false, error: 'Wenn Inhaber=Hauptbuero-Mitarbeiter aktiv ist, muss die Hauptbuero-Email der Inhaber-Email entsprechen' }
+    }
+    if (data.sub_standorte.slice(1).some(s => s.sub_email.toLowerCase() === inhaberEmailLower)) {
+      return { success: false, error: 'Inhaber-Email darf nur im Hauptbuero verwendet werden, nicht in Filialen' }
+    }
   }
 
   const adminDb = createAdminClient()
@@ -301,6 +316,14 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
   const emailToUserId = new Map<string, string>()
   // Mapping: Email → wurde Welcome-Mail schon versendet?
   const welcomeMailSent = new Set<string>()
+
+  // BUG-93 Option C: Inhaber-Email vorseeden, damit der Hauptbuero-Sub-SV die
+  // existing inhaberUserId reused (kein neuer auth.user, kein duplicate Profil).
+  // Welcome-Mail wird ohnehin separat als Inhaber-Mail versendet — markieren.
+  if (data.inhaber_ist_hauptbuero_mitarbeiter === true) {
+    emailToUserId.set(data.inhaber_email, inhaberUserId)
+    welcomeMailSent.add(data.inhaber_email)
+  }
 
   for (const std of data.sub_standorte) {
     const subCfg = paketKonfig(std.paket)
@@ -427,17 +450,21 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
         welcomeMailSent.add(std.sub_email)
       }
 
-      // Mail-Kopie an Inhaber: immer pro Sub-Standort
-      await sendWillkommenSvAnBuero({
-        to: data.inhaber_email,
-        inhaber_vorname: data.inhaber_vorname,
-        buero_name: data.buero_name,
-        neuer_sv_vorname: std.sub_vorname,
-        neuer_sv_nachname: std.sub_nachname,
-        neuer_sv_email: std.sub_email,
-        paket_name: std.paket === 'individuell' ? 'Individuell' : std.paket.charAt(0).toUpperCase() + std.paket.slice(1),
-        standort_adresse: std.anschrift,
-      })
+      // Mail-Kopie an Inhaber: immer pro Sub-Standort.
+      // BUG-93 Option C: NICHT wenn das Hauptbuero der Inhaber selbst ist
+      // (er wuerde sich sonst eine 'neuer Mitarbeiter angelegt: YOU' Mail schicken).
+      if (std.sub_email.toLowerCase() !== data.inhaber_email.toLowerCase()) {
+        await sendWillkommenSvAnBuero({
+          to: data.inhaber_email,
+          inhaber_vorname: data.inhaber_vorname,
+          buero_name: data.buero_name,
+          neuer_sv_vorname: std.sub_vorname,
+          neuer_sv_nachname: std.sub_nachname,
+          neuer_sv_email: std.sub_email,
+          paket_name: std.paket === 'individuell' ? 'Individuell' : std.paket.charAt(0).toUpperCase() + std.paket.slice(1),
+          standort_adresse: std.anschrift,
+        })
+      }
     }
   } catch (err) {
     console.error('[ARCH-1] Welcome-Mails Buero fehlgeschlagen:', err)
