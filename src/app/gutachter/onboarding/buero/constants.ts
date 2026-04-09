@@ -19,4 +19,9 @@ export type BueroStandortInput = {
   name: string
   anschrift: string
   paket: BueroPaket
+  // Geo-Koordinaten aus Google Places (Pflicht fuer KFZ-152 Phase 2 Lead-Dispatch)
+  plz: string
+  lat: number | null
+  lng: number | null
+  place_id: string
 }

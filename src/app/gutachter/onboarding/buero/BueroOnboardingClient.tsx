@@ -22,6 +22,7 @@ import {
   type BueroStandortInput,
 } from './constants'
 import SignaturePadInput from '@/components/SignaturePadInput'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 
 const STEPS = [
   { key: 'stammdaten', label: 'Stammdaten + Standorte', icon: Building2Icon },
@@ -43,6 +44,10 @@ function newStandort(): Standort {
     name: '',
     anschrift: '',
     paket: 'standard',
+    plz: '',
+    lat: null,
+    lng: null,
+    place_id: '',
   }
 }
 
@@ -101,11 +106,28 @@ export default function BueroOnboardingClient({
     setStandorte(prev => prev.map(s => s.id === id ? { ...s, [key]: value } : s))
   }
 
+  function setStandortPlace(id: string, place: { adresse: string; plz: string; lat: number; lng: number; place_id: string }) {
+    setStandorte(prev => prev.map(s => s.id === id ? {
+      ...s,
+      anschrift: place.adresse,
+      plz: place.plz,
+      lat: place.lat,
+      lng: place.lng,
+      place_id: place.place_id,
+    } : s))
+  }
+
   async function handleStammdatenSubmit() {
     setError(null)
     if (!bueroName.trim()) { setError('Bueroname fehlt'); return }
     if (standorte.length === 0) { setError('Mindestens ein Standort erforderlich'); return }
     if (standorte.some(s => !s.name.trim())) { setError('Jeder Standort braucht einen Namen'); return }
+    // KFZ-152 BUG-B.2-A: alle Sub-Standorte muessen Geo-Koordinaten haben
+    // (Voraussetzung fuer Lead-Dispatcher Phase 2 — sonst kein Isochron-Match moeglich)
+    if (standorte.some(s => s.lat === null || s.lng === null)) {
+      setError('Jeder Standort braucht eine Adresse via Auswahl-Dropdown (fuer Geo-Koordinaten)')
+      return
+    }
 
     setSaving(true)
     const result = await createBueroOrganisation({
@@ -114,7 +136,9 @@ export default function BueroOnboardingClient({
       anschrift,
       steuernummer,
       ust_id: ustId,
-      standorte: standorte.map(({ name, anschrift: a, paket }) => ({ name, anschrift: a, paket })),
+      standorte: standorte.map(({ name, anschrift: a, paket, plz, lat, lng, place_id }) => ({
+        name, anschrift: a, paket, plz, lat, lng, place_id,
+      })),
     })
     setSaving(false)
 
@@ -226,18 +250,30 @@ export default function BueroOnboardingClient({
                           </button>
                         )}
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <Field
-                          label="Name"
-                          value={std.name}
-                          onChange={v => updateStandort(std.id, 'name', v)}
-                          placeholder="z.B. Standort Köln"
+                      <Field
+                        label="Name"
+                        value={std.name}
+                        onChange={v => updateStandort(std.id, 'name', v)}
+                        placeholder="z.B. Standort Köln"
+                      />
+                      <div>
+                        <label className="text-xs text-gray-500 mb-1.5 block">
+                          Anschrift <span className="text-red-400">*</span>
+                          {std.lat !== null && std.lng !== null && (
+                            <span className="text-green-600 ml-2">✓ Geo gesetzt</span>
+                          )}
+                        </label>
+                        <GooglePlaceAutocomplete
+                          defaultValue={std.anschrift}
+                          placeholder="Adresse via Auswahl waehlen..."
+                          onSelect={place => setStandortPlace(std.id, place)}
+                          className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
                         />
-                        <Field
-                          label="Anschrift"
-                          value={std.anschrift}
-                          onChange={v => updateStandort(std.id, 'anschrift', v)}
-                        />
+                        {std.anschrift && (std.lat === null || std.lng === null) && (
+                          <p className="text-[10px] text-amber-600 mt-1">
+                            Bitte aus dem Dropdown auswaehlen damit die Geo-Koordinaten gesetzt werden
+                          </p>
+                        )}
                       </div>
                       <div>
                         <label className="text-xs text-gray-500 mb-1.5 block">Paket</label>
