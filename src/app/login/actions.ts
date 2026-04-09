@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
 const ROLE_REDIRECT: Record<string, string> = {
@@ -75,9 +76,22 @@ export async function login(formData: FormData) {
   // Check if password change is required (only for email auth)
   const authProvider = profile.auth_provider ?? 'email'
   if (profile.force_password_change && authProvider === 'email') {
+    // BUG-82: Vor dem Redirect den gesamten App-Cache invalidieren — sonst
+    // serviert der Next.js Router-Cache die alte (logged-out) RSC-Payload
+    // fuer den Ziel-Pfad und der User landet auf einem White-Screen, der
+    // nur per Hard-Reload wieder zum Leben kommt.
+    revalidatePath('/', 'layout')
     redirect('/passwort-aendern')
   }
 
+  // BUG-82: revalidatePath('/', 'layout') vor dem redirect() ist NOTWENDIG
+  // damit der Next.js Router-Cache die alte RSC-Payload fuer den Ziel-Pfad
+  // (z.B. /gutachter, das vor dem Login als 'redirect to /login' gecached
+  // wurde) verwirft. Ohne diesen Aufruf rendert /gutachter direkt nach
+  // dem Login einen White-Screen und nur ein Hard-Reload behebt es.
+  // Root Cause: Server Actions revalidieren nur den AKTUELLEN Pfad, nicht
+  // den Ziel-Pfad eines redirect(). Bekanntes App-Router Verhalten.
+  revalidatePath('/', 'layout')
   const destination = ROLE_REDIRECT[profile.rolle] ?? '/admin'
   redirect(destination)
 }
