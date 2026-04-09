@@ -3,9 +3,10 @@
 import { useEffect, useState, useRef } from 'react'
 import { SearchIcon, XIcon, UserPlusIcon, PhoneIcon, MailIcon, MapPinIcon, PencilIcon, CheckIcon, PowerOffIcon, Trash2Icon, RefreshCwIcon, AlertTriangleIcon } from 'lucide-react'
 import Link from 'next/link'
-import GutachterSlideOver from './GutachterSlideOver'
 import GutachterProfilPanel from './GutachterProfilPanel'
 import { updateGutachterProfil, reactivateGutachter, deactivateGutachter, softDeleteGutachter, reassignCases, getOpenCasesCount } from './actions'
+import { getSvStatus, SV_STATUS_FILTER_OPTIONS, type SvStatusKey } from '@/lib/sv-status'
+import NeuSvDrawer from '../sachverstaendige/NeuSvDrawer'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -33,6 +34,10 @@ interface SV {
   deaktiviertGrund?: string | null
   deaktiviertAm?: string | null
   geloeschtAm?: string | null
+  // ARCH-1 POLISH Befund 1
+  portalZugangFreigeschaltet?: boolean | null
+  vertragUnterschrieben?: boolean | null
+  gesperrtSeit?: string | null
 }
 
 interface Fall {
@@ -131,10 +136,12 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
 
   // State ONLY for UI overlays
   const [selectedSV, setSelectedSV] = useState<SV | null>(null)
-  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [showNeuDrawer, setShowNeuDrawer] = useState(false)
   const [mapReady, setMapReady] = useState(false)
   const [search, setSearch] = useState('')
   const [svFilter, setSvFilter] = useState<'aktive' | 'deaktivierte' | 'alle'>('aktive')
+  // ARCH-1 POLISH Befund 1: Status-Filter
+  const [statusFilter, setStatusFilter] = useState<SvStatusKey | 'alle'>('alle')
 
   // ─── Map init (runs ONCE) ──────────────────────────────────────
   useEffect(() => {
@@ -159,10 +166,22 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
   }, [apiKey])
 
   // ─── Filtered SVs (gelöschte sind bereits durch DB-Query ausgeschlossen) ──
-  const filteredByStatus = sachverstaendige.filter(sv => {
+  // 1) ist_aktiv-Filter (alt) — wird durch Status-Filter (neu) zusaetzlich verfeinert.
+  const filteredByActive = sachverstaendige.filter(sv => {
     if (svFilter === 'aktive') return sv.istAktiv !== false
     if (svFilter === 'deaktivierte') return sv.istAktiv === false
     return true // 'alle'
+  })
+
+  // 2) ARCH-1 POLISH Befund 1: Status-Filter ueber Onboarding-Phase.
+  const filteredByStatus = filteredByActive.filter(sv => {
+    if (statusFilter === 'alle') return true
+    const status = getSvStatus({
+      portal_zugang_freigeschaltet: sv.portalZugangFreigeschaltet,
+      vertrag_unterschrieben: sv.vertragUnterschrieben,
+      gesperrt_seit: sv.gesperrtSeit,
+    })
+    return status.key === statusFilter
   })
 
   // ─── SV Markers (dep: [sachverstaendige, mapReady, svFilter] ) ──
@@ -184,7 +203,7 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
       marker.addListener('click', () => setSelectedSV(sv))
       markersRef.current.push(marker)
     })
-  }, [sachverstaendige, mapReady, svFilter])
+  }, [sachverstaendige, mapReady, svFilter, statusFilter])
 
   // ─── Coverage areas: Isochronen-Polygone (OSRM) ──────────────
   useEffect(() => {
@@ -213,7 +232,7 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
         polygonsRef.current.push(polygon)
       })
     })
-  }, [sachverstaendige, mapReady, svFilter])
+  }, [sachverstaendige, mapReady, svFilter, statusFilter])
 
   // ─── Sidebar filter (no useEffect, just derived) ──────────────
   const filteredSVs = filteredByStatus.filter(sv =>
@@ -237,22 +256,34 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
         <div className="px-4 pt-6 pb-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">Karte</h1>
+              <h1 className="text-lg font-semibold text-gray-900">Sachverstaendige</h1>
               <p className="text-gray-500 text-xs mt-0.5">{filteredSVs.length} von {sachverstaendige.length} SV</p>
             </div>
-            <button onClick={() => setShowOnboarding(true)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-white bg-[#4573A2] hover:bg-[#4573A2] transition-colors">
+            {/* ARCH-1 POLISH Befund 4: '+ Neu' oeffnet Slide-out-Drawer
+                mit AnlegenTabs (statt dem alten Self-Service-Onboarding). */}
+            <button onClick={() => setShowNeuDrawer(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-white bg-[#4573A2] hover:bg-[#1E3A5F] transition-colors">
               <UserPlusIcon className="w-3.5 h-3.5" /> Neu
             </button>
           </div>
         </div>
-        <div className="px-4 pb-3">
+        <div className="px-4 pb-3 space-y-2">
           <div className="relative">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
             <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suche..."
               className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-300" />
           </div>
-          <div className="flex gap-1 mt-2">
+          {/* ARCH-1 POLISH Befund 1: Status-Filter (Onboarding-Phase) */}
+          <select
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value as SvStatusKey | 'alle')}
+            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs text-gray-700 focus:outline-none focus:border-gray-300"
+          >
+            {SV_STATUS_FILTER_OPTIONS.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          <div className="flex gap-1">
             {(['aktive', 'deaktivierte', 'alle'] as const).map(f => (
               <button key={f} onClick={() => setSvFilter(f)}
                 className={`flex-1 text-[10px] font-medium py-1.5 rounded-lg transition-colors ${svFilter === f ? 'bg-[#1E3A5F] text-white' : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300'}`}>
@@ -268,6 +299,12 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
         <div className="flex-1 overflow-y-auto px-2 py-2 border-t border-gray-200">
           {filteredSVs.map(sv => {
             const ti = TYP_COLORS[sv.gutachterTyp]
+            // ARCH-1 POLISH Befund 1: Status-Badge pro Zeile
+            const status = getSvStatus({
+              portal_zugang_freigeschaltet: sv.portalZugangFreigeschaltet,
+              vertrag_unterschrieben: sv.vertragUnterschrieben,
+              gesperrt_seit: sv.gesperrtSeit,
+            })
             return (
               <button key={sv.id}
                 onClick={() => {
@@ -283,10 +320,16 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
                 }`}>
                 <div className="flex items-center gap-2">
                   <div className={`w-2.5 h-2.5 rounded-full ${sv.istAktiv === false ? 'bg-red-400' : (ti?.marker ?? 'bg-[#4573A2]')}`} />
-                  <span className={`text-sm truncate ${sv.istAktiv === false ? 'text-gray-400 line-through' : 'text-gray-800'}`}>{sv.name}</span>
+                  <span className={`text-sm truncate flex-1 ${sv.istAktiv === false ? 'text-gray-400 line-through' : 'text-gray-800'}`}>{sv.name}</span>
                   {sv.istAktiv === false && <span className="text-[8px] bg-red-50 text-red-500 px-1 py-0.5 rounded font-medium shrink-0">Deaktiviert</span>}
                 </div>
-                <span className="text-gray-400 text-[10px] ml-4.5">{PAKET_LABEL[sv.paket] ?? sv.paket} · {sv.offeneFaelle}/{sv.maxFaelleMonat}</span>
+                <div className="flex items-center justify-between gap-2 mt-1 ml-4.5">
+                  <span className="text-gray-400 text-[10px]">{PAKET_LABEL[sv.paket] ?? sv.paket} · {sv.offeneFaelle}/{sv.maxFaelleMonat}</span>
+                  <span className={`inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-medium shrink-0 ${status.bg} ${status.text}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
+                    {status.label}
+                  </span>
+                </div>
               </button>
             )
           })}
@@ -321,8 +364,8 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
         )}
       </div>
 
-      {/* ─── Onboarding (fixed overlay, does NOT affect map) ──────── */}
-      <GutachterSlideOver open={showOnboarding} onClose={() => setShowOnboarding(false)} />
+      {/* ─── ARCH-1 POLISH Befund 4: Slide-out Drawer fuer + Neu ──── */}
+      <NeuSvDrawer open={showNeuDrawer} onOpenChange={setShowNeuDrawer} />
 
       {/* ─── Profil-Panel (fixed overlay, does NOT affect map) ────── */}
       {selectedSV && (

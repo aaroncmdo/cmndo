@@ -13,14 +13,18 @@ type TabKey = 'solo' | 'buero' | 'sub' | 'akademie' | 'community'
 
 const TABS: { key: TabKey; label: string; icon: typeof UserIcon; disabled: boolean; disabledHint?: string }[] = [
   { key: 'solo', label: 'Solo-SV', icon: UserIcon, disabled: false },
-  { key: 'buero', label: 'Buero', icon: Building2Icon, disabled: false },
-  { key: 'sub', label: 'Sub-SV hinzufuegen', icon: UserPlusIcon, disabled: false },
+  { key: 'buero', label: 'Büro', icon: Building2Icon, disabled: false },
+  { key: 'sub', label: 'Sub-SV hinzufügen', icon: UserPlusIcon, disabled: false },
   { key: 'akademie', label: 'Akademie', icon: GraduationCapIcon, disabled: true, disabledHint: 'KFZ-152 Phase 2' },
   { key: 'community', label: 'Community', icon: UsersIcon, disabled: true, disabledHint: 'KFZ-152 Phase 3' },
 ]
 
-export default function AnlegenTabs({ organisationen }: {
+export default function AnlegenTabs({ organisationen, onSuccess }: {
   organisationen: Array<{ id: string; name: string }>
+  // ARCH-1 POLISH Befund 4: optionaler Callback fuer den Drawer-Use-Case.
+  // Wenn gesetzt, ruft der jeweilige Wizard nach erfolgreichem Anlegen
+  // diesen Callback auf — der Drawer kann dann zumachen + Toast feuern.
+  onSuccess?: (info: { name: string; email: string }) => void
 }) {
   const [active, setActive] = useState<TabKey>('solo')
 
@@ -57,9 +61,9 @@ export default function AnlegenTabs({ organisationen }: {
       </div>
 
       {/* Aktiver Tab */}
-      {active === 'solo' && <SoloAnlegenWizard />}
-      {active === 'buero' && <BueroAnlegenWizard />}
-      {active === 'sub' && <SubSvHinzufuegenForm organisationen={organisationen} />}
+      {active === 'solo' && <SoloAnlegenWizard onSuccess={onSuccess} />}
+      {active === 'buero' && <BueroAnlegenWizard onSuccess={onSuccess} />}
+      {active === 'sub' && <SubSvHinzufuegenForm organisationen={organisationen} onSuccess={onSuccess} />}
     </div>
   )
 }

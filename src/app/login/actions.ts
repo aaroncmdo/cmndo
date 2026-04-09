@@ -1,6 +1,7 @@
 'use server'
 
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 
 const ROLE_REDIRECT: Record<string, string> = {
@@ -10,11 +11,33 @@ const ROLE_REDIRECT: Record<string, string> = {
   kanzlei: '/admin',
 }
 
-export async function login(formData: FormData) {
-  const supabase = await createClient()
+// BUG-83 Befund 7: gleiche Konstante wie in supabase/server.ts.
+const REMEMBER_COOKIE_NAME = 'cm_remember'
+const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365
 
+export async function login(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
+  // BUG-83 Befund 7: Checkbox-Wert. Default OFF (Session-Cookie) — nur wenn
+  // der User aktiv "Angemeldet bleiben" angekreuzt hat, persistieren wir
+  // langfristig.
+  const remember = formData.get('remember') === 'on'
+
+  // Marker-Cookie BEVOR wir den Supabase-Client erstellen — der Client liest
+  // ihn fuer cookieOptions, und auch die Middleware nutzt ihn bei
+  // spaeteren Token-Rotationen.
+  const cookieStore = await cookies()
+  cookieStore.set(REMEMBER_COOKIE_NAME, remember ? '1' : '0', {
+    path: '/',
+    sameSite: 'lax',
+    // Marker-Cookie selbst lebt 1 Jahr — wir muessen wissen, was der User
+    // gewaehlt hat, auch wenn die Auth-Cookies Session-Cookies sind.
+    // (Bei Logout wird er via supabase signOut nicht entfernt; das ist OK,
+    // er hat ohne Auth-Cookies keine Wirkung.)
+    maxAge: ONE_YEAR_SECONDS,
+  })
+
+  const supabase = await createClient({ remember })
 
   if (!email || !password) {
     redirect('/login?error=E-Mail+und+Passwort+sind+erforderlich')

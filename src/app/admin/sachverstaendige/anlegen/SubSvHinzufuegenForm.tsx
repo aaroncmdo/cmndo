@@ -9,8 +9,10 @@ import { PAKET_KONFIG, type AnlegePaket } from './constants'
 
 // ARCH-1 Phase 2 (BLOCK C): Sub-SV zu bestehender Buero-Org hinzufuegen.
 
-export default function SubSvHinzufuegenForm({ organisationen }: {
+export default function SubSvHinzufuegenForm({ organisationen, onSuccess }: {
   organisationen: Array<{ id: string; name: string }>
+  // ARCH-1 POLISH Befund 4: optional fuer Drawer-Verwendung.
+  onSuccess?: (info: { name: string; email: string }) => void
 }) {
   const router = useRouter()
   const [orgId, setOrgId] = useState('')
@@ -32,7 +34,7 @@ export default function SubSvHinzufuegenForm({ organisationen }: {
     return (
       <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center">
         <p className="text-gray-500 text-sm">
-          Noch keine Buero-Organisationen vorhanden. Lege zuerst ein Buero an, dann kannst du Sub-SVs hinzufuegen.
+          Noch keine Büro-Organisationen vorhanden. Lege zuerst ein Büro an, dann kannst du Sub-SVs hinzufügen.
         </p>
       </div>
     )
@@ -41,7 +43,7 @@ export default function SubSvHinzufuegenForm({ organisationen }: {
   async function handleSubmit() {
     setError(null)
     if (!orgId || !email || !vorname || !nachname || anschriftLat === null) {
-      setError('Bitte alle Pflichtfelder ausfuellen + Anschrift via Dropdown waehlen')
+      setError('Bitte alle Pflichtfelder ausfüllen + Anschrift via Dropdown wählen')
       return
     }
     setSaving(true)
@@ -62,6 +64,7 @@ export default function SubSvHinzufuegenForm({ organisationen }: {
     if (!r.success) { setError(r.error ?? 'Anlegen fehlgeschlagen'); return }
     const orgName = organisationen.find(o => o.id === orgId)?.name ?? '?'
     setResult({ sv_id: r.sv_id!, org_name: orgName })
+    onSuccess?.({ name: `${vorname} ${nachname}`.trim(), email })
   }
 
   if (result) {
@@ -74,7 +77,7 @@ export default function SubSvHinzufuegenForm({ organisationen }: {
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-gray-900">{vorname} {nachname} angelegt</h2>
             <p className="text-sm text-gray-500 mt-1">
-              Hinzugefuegt zu <strong>{result.org_name}</strong>. Welcome-Mail an {email} versendet, Mail-Kopie an Inhaber.
+              Hinzugefügt zu <strong>{result.org_name}</strong>. Welcome-Mail an {email} versendet, Mail-Kopie an Inhaber.
             </p>
             <div className="mt-6 flex gap-3">
               <button
@@ -92,7 +95,7 @@ export default function SubSvHinzufuegenForm({ organisationen }: {
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-5">Sub-SV zu bestehender Org hinzufuegen</h2>
+      <h2 className="text-lg font-semibold text-gray-900 mb-5">Sub-SV zu bestehender Org hinzufügen</h2>
 
       <div className="space-y-4">
         <div>
@@ -102,7 +105,7 @@ export default function SubSvHinzufuegenForm({ organisationen }: {
             onChange={e => setOrgId(e.target.value)}
             className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
           >
-            <option value="">Auswaehlen...</option>
+            <option value="">Auswählen...</option>
             {organisationen.map(o => (
               <option key={o.id} value={o.id}>{o.name}</option>
             ))}

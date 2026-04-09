@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { MailIcon, SmartphoneIcon } from 'lucide-react'
 
@@ -127,12 +128,40 @@ export default function LoginClient({
               className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-100 text-gray-900 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
             />
           </div>
+
+          {/* BUG-83 Befund 7: 'Angemeldet bleiben' Checkbox.
+              Default OFF — User muss aktiv anhaken um Persistent Token
+              zu bekommen. */}
+          <div className="flex items-start gap-2">
+            <input
+              id="remember"
+              name="remember"
+              type="checkbox"
+              defaultChecked={false}
+              className="mt-0.5 w-4 h-4 rounded border-gray-300 text-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]"
+            />
+            <label htmlFor="remember" className="text-xs text-gray-600 leading-tight">
+              Angemeldet bleiben
+              <span className="block text-[10px] text-gray-400 mt-0.5">Nur auf privaten Geraeten verwenden</span>
+            </label>
+          </div>
+
           <button
             type="submit"
             className="w-full py-3.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-white font-semibold text-sm active:scale-[0.98] transition-all mt-1"
           >
             Einloggen
           </button>
+
+          {/* BUG-83 Befund 7: Passwort vergessen Link.
+              Ziel-Page wird von Hund C angelegt — bis dahin landet der User
+              auf einer 404, das ist OK fuer den parallelen Workflow. */}
+          <Link
+            href="/passwort-vergessen"
+            className="text-center text-xs text-gray-500 hover:text-[#1E3A5F] transition-colors -mt-1"
+          >
+            Passwort vergessen?
+          </Link>
         </form>
       )}
 

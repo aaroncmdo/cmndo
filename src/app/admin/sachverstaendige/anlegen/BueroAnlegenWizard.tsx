@@ -12,7 +12,7 @@ import { PAKET_KONFIG, paketAnzahlung, type AnlegePaket, type AnlegeBueroFormDat
 // ARCH-1 Phase 2 (BLOCK C): 3-Step Buero-Anlegen Wizard fuer den Admin.
 
 const STEPS = [
-  { key: 'inhaber', label: 'Inhaber + Buero', icon: Building2Icon },
+  { key: 'inhaber', label: 'Inhaber + Büro', icon: Building2Icon },
   { key: 'standorte', label: 'Sub-Standorte', icon: UsersIcon },
   { key: 'submit', label: 'Zusammenfassung', icon: CheckCircle2Icon },
 ] as const
@@ -41,7 +41,10 @@ function newSubStandort(): SubStandort {
   }
 }
 
-export default function BueroAnlegenWizard() {
+export default function BueroAnlegenWizard({ onSuccess }: {
+  // ARCH-1 POLISH Befund 4: optional fuer Drawer-Verwendung.
+  onSuccess?: (info: { name: string; email: string }) => void
+} = {}) {
   const router = useRouter()
   const [step, setStep] = useState(0)
   const [saving, setSaving] = useState(false)
@@ -133,6 +136,7 @@ export default function BueroAnlegenWizard() {
     setSaving(false)
     if (!r.success) { setError(r.error ?? 'Anlegen fehlgeschlagen'); return }
     setResult({ organisation_id: r.organisation_id!, sub_count: r.sub_sv_ids?.length ?? 0 })
+    onSuccess?.({ name: bueroName, email: inhaberEmail })
   }
 
   // Erfolgs-Page
@@ -202,9 +206,9 @@ export default function BueroAnlegenWizard() {
             </div>
 
             <div className="pt-4 border-t border-gray-200">
-              <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Buero-Stammdaten</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Büro-Stammdaten</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Field label="Buero-Name *" value={bueroName} onChange={setBueroName} className="sm:col-span-2" />
+                <Field label="Büro-Name *" value={bueroName} onChange={setBueroName} className="sm:col-span-2" />
                 <Field label="Rechtsform" value={bueroRechtsform} onChange={setBueroRechtsform} placeholder="z.B. GmbH" />
                 <Field label="Anschrift (Rechnungsadresse)" value={bueroAnschrift} onChange={setBueroAnschrift} />
                 <Field label="Steuernummer *" value={bueroSteuernummer} onChange={setBueroSteuernummer} />
@@ -299,7 +303,7 @@ export default function BueroAnlegenWizard() {
         {step === 2 && (
           <div className="space-y-4">
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm">
-              <p className="text-xs text-gray-500 uppercase mb-2">Buero</p>
+              <p className="text-xs text-gray-500 uppercase mb-2">Büro</p>
               <p className="text-gray-900"><strong>{bueroName}</strong>{bueroRechtsform && ` (${bueroRechtsform})`}</p>
               <p className="text-gray-500 text-xs mt-1">{bueroAnschrift}</p>
               <p className="text-gray-500 text-xs">Steuer-Nr: {bueroSteuernummer}</p>
@@ -354,7 +358,7 @@ export default function BueroAnlegenWizard() {
               disabled={saving}
               className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50 disabled:opacity-40"
             >
-              Zurueck
+              Zurück
             </button>
           )}
           <button
@@ -366,7 +370,7 @@ export default function BueroAnlegenWizard() {
             disabled={saving || !canNext()}
             className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40"
           >
-            {saving ? 'Wird angelegt...' : step < STEPS.length - 1 ? 'Weiter' : 'Buero anlegen + Welcome-Mails senden'}
+            {saving ? 'Wird angelegt...' : step < STEPS.length - 1 ? 'Weiter' : 'Büro anlegen + Welcome-Mails senden'}
           </button>
         </div>
       </div>

@@ -56,7 +56,10 @@ const initialState: FormState = {
   qualifikationen: [],
 }
 
-export default function SoloAnlegenWizard() {
+export default function SoloAnlegenWizard({ onSuccess }: {
+  // ARCH-1 POLISH Befund 4: optional fuer Drawer-Verwendung.
+  onSuccess?: (info: { name: string; email: string }) => void
+} = {}) {
   const router = useRouter()
   const [step, setStep] = useState(0)
   const [data, setData] = useState<FormState>(initialState)
@@ -129,6 +132,7 @@ export default function SoloAnlegenWizard() {
     setSaving(false)
     if (!r.success) { setError(r.error ?? 'Anlegen fehlgeschlagen'); return }
     setResult({ sv_id: r.sv_id!, initial_password: r.initial_password! })
+    onSuccess?.({ name: `${data.vorname} ${data.nachname}`.trim(), email: data.email })
   }
 
   // Erfolgs-Page
@@ -149,7 +153,7 @@ export default function SoloAnlegenWizard() {
               <code className="block mt-1 font-mono text-sm bg-white px-2 py-1 rounded border border-amber-300">
                 {result.initial_password}
               </code>
-              Der SV wird beim ersten Login zur Aenderung gezwungen.
+              Der SV wird beim ersten Login zur Änderung gezwungen.
             </div>
             <div className="mt-6 flex gap-3">
               <button
@@ -217,7 +221,7 @@ export default function SoloAnlegenWizard() {
                   </label>
                   <GooglePlaceAutocomplete
                     defaultValue={data.anschrift}
-                    placeholder="Adresse via Auswahl waehlen..."
+                    placeholder="Adresse via Auswahl wählen..."
                     onSelect={place => setData(prev => ({
                       ...prev,
                       anschrift: place.adresse,
@@ -291,11 +295,11 @@ export default function SoloAnlegenWizard() {
               <p className="text-xs text-gray-500 mb-3">
                 {data.paket === 'individuell'
                   ? 'Individuell: Werte sind Pflicht'
-                  : 'Optional: Werte ueberschreiben fuer Sonder-Konditionen'}
+                  : 'Optional: Werte überschreiben für Sonder-Konditionen'}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <Field
-                  label="Kontingent (Faelle/Monat)"
+                  label="Kontingent (Fälle/Monat)"
                   type="number"
                   value={data.paket_override_kontingent}
                   onChange={v => update('paket_override_kontingent', v)}
@@ -324,7 +328,7 @@ export default function SoloAnlegenWizard() {
               <div className="grid grid-cols-2 gap-3 mt-2">
                 <div>
                   <p className="text-[10px] text-gray-500 uppercase">Kontingent</p>
-                  <p className="text-sm font-semibold text-gray-900">{liveKontingent} Faelle/Monat</p>
+                  <p className="text-sm font-semibold text-gray-900">{liveKontingent} Fälle/Monat</p>
                 </div>
                 <div>
                   <p className="text-[10px] text-gray-500 uppercase">Anzahlung</p>
@@ -377,7 +381,7 @@ export default function SoloAnlegenWizard() {
                 <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Konditionen</p>
                 <p className="text-gray-900">
                   {data.paket === 'individuell' ? 'Individuell' : data.paket.charAt(0).toUpperCase() + data.paket.slice(1)} ·
-                  {' '}{liveKontingent} Faelle/Monat · {liveAnzahlung.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })} Anzahlung
+                  {' '}{liveKontingent} Fälle/Monat · {liveAnzahlung.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })} Anzahlung
                 </p>
                 <p className="text-gray-500 text-xs mt-1">Typ: {data.gutachter_typ === 'kfz-gutachter' ? 'KFZ-Gutachter' : 'DAT-Gutachter'}</p>
                 {data.qualifikationen.length > 0 && (
@@ -390,7 +394,7 @@ export default function SoloAnlegenWizard() {
               <MailIcon className="w-5 h-5 text-[#1E3A5F] flex-shrink-0 mt-0.5" />
               <div className="text-xs text-gray-700">
                 <strong>Welcome-Mail wird versendet an:</strong> {data.email}<br/>
-                Inhalt: Initial-Passwort + Login-Link + Konditionen-Uebersicht. SV wird beim ersten Login zur Passwort-Aenderung gezwungen.
+                Inhalt: Initial-Passwort + Login-Link + Konditionen-Übersicht. SV wird beim ersten Login zur Passwort-Änderung gezwungen.
               </div>
             </div>
           </div>
@@ -411,7 +415,7 @@ export default function SoloAnlegenWizard() {
               disabled={saving}
               className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50 disabled:opacity-40"
             >
-              Zurueck
+              Zurück
             </button>
           )}
           <button

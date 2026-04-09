@@ -1,14 +1,27 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// BUG-83 Befund 7: gleiche Konstante wie in server.ts.
+const REMEMBER_COOKIE_NAME = 'cm_remember'
+const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365
+
 export async function updateSession(request: NextRequest) {
   // Collect cookies that need to be set on the response
   const cookiesToUpdate: { name: string; value: string; options: Record<string, unknown> }[] = []
+
+  // BUG-83 Befund 7: User-Wahl "Angemeldet bleiben" wird in cm_remember
+  // gespeichert. Bei Refresh-Token-Rotation respektiert die Middleware
+  // diese Wahl, sonst wuerden Session-Cookies versehentlich zu langlebigen
+  // werden sobald supabase einen Token rotiert.
+  const remember = request.cookies.get(REMEMBER_COOKIE_NAME)?.value !== '0'
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      cookieOptions: remember
+        ? { maxAge: ONE_YEAR_SECONDS, path: '/', sameSite: 'lax' }
+        : { maxAge: undefined, path: '/', sameSite: 'lax' },
       cookies: {
         getAll() {
           return request.cookies.getAll()
@@ -17,11 +30,18 @@ export async function updateSession(request: NextRequest) {
           // CRITICAL FIX: Do NOT call request.cookies.set() — it corrupts
           // the cookie store in Next.js 16 proxy and causes TypeError.
           // Instead, collect cookies and apply them only to the response.
-          cookiesToUpdate.push(...cookiesToSet.map(c => ({
-            name: c.name,
-            value: c.value,
-            options: c.options ?? {},
-          })))
+          cookiesToUpdate.push(...cookiesToSet.map(c => {
+            const opts = c.options ?? {}
+            // Wenn remember=false, hartes Session-Cookie erzwingen.
+            const finalOpts = remember
+              ? opts
+              : { ...opts, maxAge: undefined, expires: undefined }
+            return {
+              name: c.name,
+              value: c.value,
+              options: finalOpts,
+            }
+          }))
         },
       },
     }

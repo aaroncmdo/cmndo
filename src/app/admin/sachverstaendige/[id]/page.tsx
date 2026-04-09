@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import SvDetailClient from './SvDetailClient'
 import { FALL_STATUS_LABELS, FALL_STATUS_COLORS } from '@/lib/statusLabels'
+import { getSvStatus } from '@/lib/sv-status'
 
 const STATUS_LABEL = FALL_STATUS_LABELS
 const STATUS_COLOR = FALL_STATUS_COLORS
@@ -17,7 +18,7 @@ export default async function SvDetailPage({
 
   const { data: sv } = await supabase
     .from('sachverstaendige')
-    .select('id, profile_id, radius_km, paket, max_faelle_monat, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, guthaben, anzahlung_status, profiles(vorname, nachname, email, telefon)')
+    .select('id, profile_id, radius_km, paket, max_faelle_monat, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, guthaben, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, profiles(vorname, nachname, email, telefon)')
     .eq('id', id)
     .single()
 
@@ -52,6 +53,13 @@ export default async function SvDetailPage({
   const pct = maxFaelle > 0 ? Math.round((genutzt / maxFaelle) * 100) : 0
   const now = new Date()
 
+  // ARCH-1 POLISH Befund 1: Onboarding-Status-Badge im Detail-Header
+  const onboardingStatus = getSvStatus({
+    portal_zugang_freigeschaltet: sv.portal_zugang_freigeschaltet,
+    vertrag_unterschrieben: sv.vertrag_unterschrieben,
+    gesperrt_seit: sv.gesperrt_seit,
+  })
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* ── Sticky Header ──────────────────────────────────────────── */}
@@ -77,6 +85,11 @@ export default async function SvDetailPage({
                     style={{ width: `${Math.min(100, pct)}%` }} />
                 </div>
               </div>
+              {/* ARCH-1 POLISH Befund 1: Onboarding-Status-Badge */}
+              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium ${onboardingStatus.bg} ${onboardingStatus.text}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${onboardingStatus.dot}`} />
+                {onboardingStatus.label}
+              </span>
               {sv.ist_aktiv ? (
                 <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-green-50 text-green-600">Aktiv</span>
               ) : (
