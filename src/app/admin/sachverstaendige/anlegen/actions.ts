@@ -161,7 +161,7 @@ export async function anlegeSv(data: AnlegeSvFormData): Promise<{ success: boole
     console.error('[ARCH-1] Welcome-Mail an Solo-SV fehlgeschlagen:', err)
   }
 
-  revalidatePath('/admin/sachverstaendige')
+  revalidatePath('/admin/sachverstaendige', 'page')
   return {
     success: true,
     sv_id: svRow.id,
@@ -431,8 +431,8 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
     console.error('[ARCH-1] Welcome-Mails Buero fehlgeschlagen:', err)
   }
 
-  revalidatePath('/admin/sachverstaendige')
-  revalidatePath('/admin/organisationen')
+  revalidatePath('/admin/sachverstaendige', 'page')
+  revalidatePath('/admin/organisationen', 'page')
 
   return {
     success: true,
@@ -579,7 +579,7 @@ export async function anlegeSubSv(params: {
     console.error('[ARCH-1] Welcome-Mails Sub-SV fehlgeschlagen:', err)
   }
 
-  revalidatePath('/admin/sachverstaendige')
+  revalidatePath('/admin/sachverstaendige', 'page')
   return { success: true, sv_id: svRow.id }
 }
 
