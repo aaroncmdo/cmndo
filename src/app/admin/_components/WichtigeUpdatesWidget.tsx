@@ -49,7 +49,12 @@ function timeAgo(iso: string): string {
   return `vor ${days} ${days === 1 ? 'Tag' : 'Tagen'}`
 }
 
-async function loadEvents(): Promise<Event[]> {
+type LoadResult = {
+  events: Event[]
+  mails: { versendet: number; failed: number }
+}
+
+async function loadEvents(): Promise<LoadResult> {
   const supabase = await createClient()
   const since = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
   const events: Event[] = []
@@ -170,11 +175,36 @@ async function loadEvents(): Promise<Event[]> {
   }
 
   events.sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime())
-  return events.slice(0, 10)
+
+  // Welcome-Mail-Versand-Statistik der letzten 48h (zaehlt alle Mails an SVs,
+  // nicht nur Welcome — die Templates sind aber alle in dem gleichen Topf).
+  let versendet = 0
+  let failed = 0
+  try {
+    const [{ count: ok }, { count: fail }] = await Promise.all([
+      supabase
+        .from('email_log')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'sent')
+        .gte('created_at', since),
+      supabase
+        .from('email_log')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'failed')
+        .gte('created_at', since),
+    ])
+    versendet = ok ?? 0
+    failed = fail ?? 0
+  } catch { /* ignore */ }
+
+  return {
+    events: events.slice(0, 10),
+    mails: { versendet, failed },
+  }
 }
 
 export default async function WichtigeUpdatesWidget() {
-  const events = await loadEvents()
+  const { events, mails } = await loadEvents()
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col h-full">
@@ -184,6 +214,19 @@ export default async function WichtigeUpdatesWidget() {
           <h2 className="text-sm font-semibold text-gray-700">Wichtige Updates</h2>
         </div>
         <span className="text-[10px] text-gray-500">letzte 48h</span>
+      </div>
+
+      {/* Welcome-Mail-Versand-Statistik */}
+      <div className="px-5 py-2 border-b border-gray-100 bg-gray-50 flex items-center gap-3 text-[11px]">
+        <span className="text-gray-500">Email-Versand 48h:</span>
+        <span className="flex items-center gap-1 text-emerald-600 font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+          {mails.versendet} versendet
+        </span>
+        <span className={`flex items-center gap-1 font-medium ${mails.failed > 0 ? 'text-red-600' : 'text-gray-400'}`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${mails.failed > 0 ? 'bg-red-500' : 'bg-gray-300'}`} />
+          {mails.failed} failed
+        </span>
       </div>
 
       <div className="flex-1 overflow-y-auto">

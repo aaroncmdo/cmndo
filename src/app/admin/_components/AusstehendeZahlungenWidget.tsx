@@ -10,7 +10,7 @@ import { AlertCircleIcon, ArrowRightIcon, EuroIcon } from 'lucide-react'
 //   2. abrechnungen.bezahlt_am IS NULL UND faellig_am < CURRENT_DATE
 //   3. abrechnungen mit storniert_am IS NULL UND status='versendet' und ueberfaellig
 //
-// Das volle Tabelle laeuft in /admin/finance, hier nur Top 5 + Link.
+// Das volle Tabelle laeuft in /admin/abrechnungen, hier nur Top 5 + Link.
 
 type Eintrag = {
   key: string
@@ -96,7 +96,7 @@ async function loadAusstehende(): Promise<{ rows: Eintrag[]; gesamt: number; tot
       status: failed ? 'einzug_failed' : 'rechnung_ueberfaellig',
       href: r.empfaenger_typ === 'gutachter' && r.empfaenger_id
         ? `/admin/sachverstaendige/${r.empfaenger_id}`
-        : '/admin/finance',
+        : '/admin/abrechnungen',
     })
   }
 
@@ -177,7 +177,7 @@ export default async function AusstehendeZahlungenWidget() {
 
       <div className="px-5 py-3 border-t border-gray-100 bg-gray-50">
         <Link
-          href="/admin/finance"
+          href="/admin/abrechnungen"
           className="flex items-center justify-center gap-1.5 text-xs font-medium text-[#4573A2] hover:text-[#1E3A5F] transition-colors"
         >
           Alle anzeigen <ArrowRightIcon className="w-3 h-3" />

@@ -6,6 +6,7 @@ import AusstehendeZahlungenTable from '../_components/AusstehendeZahlungenTable'
 import StripeConnectStatusWidget from '../_components/StripeConnectStatusWidget'
 import LeadPreiseVerteilungWidget from '../_components/LeadPreiseVerteilungWidget'
 import WerbebudgetAggregatWidget from '../_components/WerbebudgetAggregatWidget'
+import MonatsUmsatzForecast from '../_components/MonatsUmsatzForecast'
 
 const PAKET_PREIS: Record<string, number> = {
   standard: 750, 'starter-10': 750,
@@ -705,6 +706,10 @@ export default async function FinancePage() {
           </Suspense>
         </div>
       </div>
+      {/* KFZ-155: Monats-Umsatz laufend + geplant Forecast */}
+      <Suspense fallback={<div className="px-4 pb-8"><div className="max-w-5xl mx-auto h-48 bg-white border border-gray-200 rounded-2xl animate-pulse" /></div>}>
+        <MonatsUmsatzForecast />
+      </Suspense>
       <FinanceClient
         mrr={mrr}
         aktiveSvCount={(aktiveSvs ?? []).length}

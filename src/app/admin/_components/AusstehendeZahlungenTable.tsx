@@ -161,7 +161,7 @@ async function loadAusstehendeFull() {
       status: failed ? 'einzug_failed' : 'rechnung_ueberfaellig',
       href: r.empfaenger_typ === 'gutachter' && r.empfaenger_id
         ? `/admin/sachverstaendige/${r.empfaenger_id}`
-        : '/admin/finance',
+        : '/admin/abrechnungen',
     })
   }
 
