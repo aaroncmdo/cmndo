@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { sendStatusWhatsApp, sendManualWhatsApp } from '@/lib/whatsapp'
+import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 
 // ─── Manuelle WhatsApp (KFZ-114) ────────────────────────────────────────────
 
@@ -42,6 +43,11 @@ export async function disqualifiziereLead(
     .eq('id', leadId)
 
   if (error) throw new Error(error.message)
+
+  // KFZ-151: Auto-Resolve aller offenen Lead-Tasks
+  try {
+    await resolveTasksForEntity('lead', leadId, `Lead disqualifiziert: ${grund}`)
+  } catch (err) { console.error('[KFZ-151] resolveTasks lead disqualifiziert:', err) }
 
   revalidatePath(`/admin/dispatch/lead/${leadId}`)
   revalidatePath('/admin/dispatch')
@@ -162,6 +168,12 @@ export async function confirmGutachterTermin(
       return { success: false, error: `Fall-Update fehlgeschlagen: ${fallErr.message}` }
     }
     console.log('[confirmGutachterTermin] Fall updated ✓', { fallId: fall.id, sv_id: svId, termin_status: 'reserviert' })
+
+    // KFZ-151: Auto-Resolve "Ersatztermin vermitteln" / "Neuen Gutachter zuweisen" Tasks
+    // Idempotent: tut nichts wenn keine offenen Case-Tasks existieren.
+    try {
+      await resolveTasksForEntity('case', fall.id, 'Neuer SV-Termin eingetragen')
+    } catch (err) { console.error('[KFZ-151] resolveTasks case:', err) }
   } else {
     console.log('[confirmGutachterTermin] Kein Fall vorhanden (wird bei SA-Unterschrift erstellt)')
   }

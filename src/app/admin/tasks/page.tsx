@@ -7,7 +7,7 @@ export default async function TasksPage() {
   const [{ data: tasks }, { data: faelle }, { data: admins }] = await Promise.all([
     supabase
       .from('tasks')
-      .select('id, fall_id, typ, titel, beschreibung, status, faellig_am, erledigt_am, zugewiesen_an, created_at')
+      .select('id, fall_id, typ, titel, beschreibung, status, faellig_am, erledigt_am, zugewiesen_an, created_at, entity_type, entity_id, auto_resolved_am, auto_resolved_grund')
       .order('created_at', { ascending: false }),
     supabase
       .from('faelle')

@@ -8,7 +8,7 @@ import { createTask, updateTaskStatus, deleteTask } from './actions'
 
 type Task = {
   id: string
-  fall_id: string
+  fall_id: string | null
   typ: string
   titel: string
   beschreibung: string | null
@@ -17,6 +17,10 @@ type Task = {
   erledigt_am: string | null
   zugewiesen_an: string | null
   created_at: string
+  entity_type: string | null
+  entity_id: string | null
+  auto_resolved_am: string | null
+  auto_resolved_grund: string | null
 }
 
 type Fall = { id: string; fall_nummer: string | null }
@@ -99,6 +103,13 @@ export default function KanbanBoard({
   const [isPending, startTransition] = useTransition()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // KFZ-151: Auto-erledigte Tasks default ausgeblendet
+  const [showAutoResolved, setShowAutoResolved] = useState(false)
+
+  // KFZ-151: Filter Auto-Resolved aus 'erledigt' Spalte (default OFF)
+  const visibleTasks = showAutoResolved
+    ? tasks
+    : tasks.filter(t => !(t.status === 'erledigt' && t.auto_resolved_am))
 
   function handleStatusChange(taskId: string, newStatus: string) {
     setError(null)
@@ -145,14 +156,26 @@ export default function KanbanBoard({
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-xl font-semibold text-gray-900">Tasks</h1>
-            <p className="text-gray-500 text-sm mt-0.5">{tasks.length} Aufgaben</p>
+            <p className="text-gray-500 text-sm mt-0.5">{visibleTasks.length} von {tasks.length} Aufgaben</p>
           </div>
-          <button
-            onClick={() => setDialogOpen(true)}
-            className="px-4 py-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium rounded-xl transition-colors"
-          >
-            + Neuer Task
-          </button>
+          <div className="flex items-center gap-3">
+            {/* KFZ-151: Auto-erledigt Toggle */}
+            <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={showAutoResolved}
+                onChange={e => setShowAutoResolved(e.target.checked)}
+                className="rounded border-gray-300"
+              />
+              Auto-erledigte anzeigen
+            </label>
+            <button
+              onClick={() => setDialogOpen(true)}
+              className="px-4 py-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium rounded-xl transition-colors"
+            >
+              + Neuer Task
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -164,7 +187,7 @@ export default function KanbanBoard({
         {/* Kanban columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           {COLUMNS.map(col => {
-            const colTasks = tasks.filter(t => t.status === col.key)
+            const colTasks = visibleTasks.filter(t => t.status === col.key)
             return (
               <div key={col.key} className="min-w-0">
                 {/* Column header */}
@@ -236,10 +259,14 @@ function TaskCard({
   isPending: boolean
 }) {
   const overdue = isOverdue(task.faellig_am) && task.status !== 'erledigt'
+  // KFZ-151: Hinweis-Banner wenn assigned-Task obsolet wurde aber noch offen ist
+  const obsoleteHint = task.status === 'offen' && task.auto_resolved_am
+  // KFZ-151: Auto-resolved Marker fuer geschlossene Tasks
+  const isAutoResolved = task.status === 'erledigt' && task.auto_resolved_am
 
   return (
     <div className={`bg-white rounded-xl p-4 border transition-colors ${
-      overdue ? 'border-red-800/60' : 'border-gray-200'
+      overdue ? 'border-red-800/60' : isAutoResolved ? 'border-gray-100' : 'border-gray-200'
     }`}>
       {/* Typ badge + delete */}
       <div className="flex items-start justify-between gap-2 mb-2">
@@ -262,12 +289,33 @@ function TaskCard({
       {/* Title */}
       <p className="text-gray-800 text-sm font-medium leading-snug mb-2">{task.titel}</p>
 
+      {/* KFZ-151: Hinweis-Banner — Task ist eventuell obsolet (assigned auto-resolved) */}
+      {obsoleteHint && (
+        <div className="mb-2 px-2 py-1.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700 text-[10px] leading-tight">
+          <strong>Eventuell schon erledigt:</strong> {task.auto_resolved_grund}
+          <br/>Schliessen oder offen lassen falls du noch dran bist.
+        </div>
+      )}
+
+      {/* KFZ-151: Auto-Resolved Marker fuer geschlossene Tasks */}
+      {isAutoResolved && (
+        <div
+          className="mb-2 inline-flex items-center gap-1 text-[10px] text-gray-400"
+          title={`Automatisch erledigt am ${task.auto_resolved_am ? new Date(task.auto_resolved_am).toLocaleString('de-DE') : ''} weil ${task.auto_resolved_grund ?? ''}`}
+        >
+          <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Auto-erledigt
+        </div>
+      )}
+
       {/* Fall number */}
       <div className="flex items-center gap-1.5 mb-2">
         <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="text-gray-400">
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
         </svg>
-        <span className="text-gray-500 text-xs font-mono">{fallMap[task.fall_id] ?? '—'}</span>
+        <span className="text-gray-500 text-xs font-mono">{task.fall_id ? fallMap[task.fall_id] ?? '—' : (task.entity_type ?? '—')}</span>
       </div>
 
       {/* Meta row: due date + assignee */}

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revertCaseBilling } from '@/lib/abrechnung/revert-case-billing'
+import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,6 +37,9 @@ export async function GET() {
     // Storno durchführen
     await db.from('faelle').update({ status: 'storniert' }).eq('id', fall.id)
     await revertCaseBilling(fall.id, 'storno_kunde_no_show', 'system')
+
+    // KFZ-151: Auto-Resolve aller offenen Case-Tasks (z.B. "Ersatztermin vermitteln")
+    await resolveTasksForEntity('case', fall.id, 'No-Show via Cron finalisiert')
     storniert++
   }
 

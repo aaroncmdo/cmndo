@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { revertCaseBilling } from '@/lib/abrechnung/revert-case-billing'
+import { createLinkedTask } from '@/lib/tasks/create-task'
+import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { revalidatePath } from 'next/cache'
 
 /**
@@ -64,14 +66,15 @@ export async function meldeNoShow(fallId: string): Promise<{ success: boolean; e
 
   if (error) return { success: false, error: error.message }
 
-  // Admin-Task erstellen
-  await db.from('tasks').insert({
+  // Admin-Task erstellen (KFZ-151: verknuepft mit case)
+  await createLinkedTask({
     fall_id: fallId,
     titel: 'Kunde nicht erschienen — Ersatztermin vermitteln',
     typ: 'dispatch',
-    status: 'offen',
-    prioritaet: 'hoch',
-    faellig_am: new Date().toISOString(),
+    prioritaet: 'dringend',
+    faellig_am: new Date(),
+    entity_type: 'case',
+    entity_id: fallId,
   })
 
   revalidatePath(`/gutachter/fall/${fallId}`)
@@ -109,25 +112,26 @@ export async function einreicheReklamation(data: {
     if (day !== 0 && day !== 6) werktageCounted++
   }
 
-  const { error } = await db.from('reklamationen').insert({
+  const { data: rekl, error } = await db.from('reklamationen').insert({
     fall_id: data.fallId,
     gutachter_id: sv.id,
     grund: data.grund,
     begruendung: data.begruendung,
     frist_bis: fristBis.toISOString(),
-  })
+  }).select('id').single()
 
-  if (error) return { success: false, error: error.message }
+  if (error || !rekl) return { success: false, error: error?.message ?? 'Reklamation konnte nicht angelegt werden' }
 
-  // Admin-Task
+  // Admin-Task (KFZ-151: verknuepft mit reklamation)
   const { data: fallInfo } = await db.from('faelle').select('fall_nummer').eq('id', data.fallId).single()
-  await db.from('tasks').insert({
+  await createLinkedTask({
     fall_id: data.fallId,
     titel: `Reklamation von SV zu Fall ${fallInfo?.fall_nummer ?? data.fallId.slice(0, 8)} prüfen`,
     typ: 'reklamation',
-    status: 'offen',
-    prioritaet: 'hoch',
-    faellig_am: new Date().toISOString(),
+    prioritaet: 'dringend',
+    faellig_am: new Date(),
+    entity_type: 'reklamation',
+    entity_id: rekl.id,
   })
 
   revalidatePath(`/gutachter/fall/${data.fallId}`)
@@ -162,6 +166,9 @@ export async function entscheideReklamation(reklamationId: string, entscheidung:
     await db.from('faelle').update({ status: 'storniert' }).eq('id', rekl.fall_id)
     await revertCaseBilling(rekl.fall_id, 'storno_reklamation', user.id)
   }
+
+  // KFZ-151: Auto-Resolve aller offenen Tasks zu dieser Reklamation
+  await resolveTasksForEntity('reklamation', reklamationId, `Reklamation entschieden: ${entscheidung}`)
 
   revalidatePath('/admin/reklamationen')
   return { success: true }

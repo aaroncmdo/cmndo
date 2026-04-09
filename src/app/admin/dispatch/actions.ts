@@ -115,6 +115,12 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
   }
   if (newStatus === 'abgeschlossen') {
     sendStatusWhatsApp(fallId, 'nach_abschluss').catch(() => {})
+    // KFZ-151: Auto-Resolve aller offenen Fall- und Case-Tasks
+    try {
+      const { resolveTasksForEntity } = await import('@/lib/tasks/resolve-tasks')
+      await resolveTasksForEntity('fall', fallId, 'Fall abgeschlossen')
+      await resolveTasksForEntity('case', fallId, 'Fall abgeschlossen')
+    } catch (err) { console.error('[KFZ-151] resolveTasks fall abschluss:', err) }
   }
 
   revalidatePath('/admin/dispatch')
@@ -186,6 +192,11 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
       status: 'umgewandelt',
       updated_at: now,
     }).eq('id', leadId)
+    // KFZ-151: Auto-Resolve aller offenen Lead-Tasks
+    try {
+      const { resolveTasksForEntity } = await import('@/lib/tasks/resolve-tasks')
+      await resolveTasksForEntity('lead', leadId, 'Lead konvertiert')
+    } catch (err) { console.error('[KFZ-151] resolveTasks lead konvertiert:', err) }
     revalidatePath('/admin/dispatch')
     return { converted: true, fallId }
   }

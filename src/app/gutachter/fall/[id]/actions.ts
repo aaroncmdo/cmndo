@@ -445,17 +445,19 @@ export async function declineTermin(fallId: string, grund: string) {
     }
   } catch { /* */ }
 
-  // 5. Task: Neuen Gutachter zuweisen
+  // 5. Task: Neuen Gutachter zuweisen (KFZ-151: verknuepft mit case)
   try {
     const { data: fallData } = await supabase.from('faelle').select('kundenbetreuer_id').eq('id', fallId).single()
-    await supabase.from('tasks').insert({
+    const { createLinkedTask } = await import('@/lib/tasks/create-task')
+    await createLinkedTask({
       fall_id: fallId,
       titel: `Neuen Gutachter zuweisen für ${fall.fall_nummer ?? 'Fall'}`,
       typ: 'dispatch',
-      status: 'offen',
-      prioritaet: 'hoch',
-      faellig_am: new Date().toISOString(),
+      prioritaet: 'dringend',
+      faellig_am: new Date(),
       zugewiesen_an: fallData?.kundenbetreuer_id ?? null,
+      entity_type: 'case',
+      entity_id: fallId,
     })
   } catch { /* */ }
 

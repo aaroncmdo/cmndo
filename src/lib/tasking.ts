@@ -34,6 +34,9 @@ export async function createAutoTask(params: AutoTaskParams) {
     prioritaet: params.prioritaet ?? 'normal',
     phase: params.phase ?? null,
     task_code: params.task_code ?? null,
+    // KFZ-151: Implizite Entity-Verknuepfung damit der zentrale Resolver greift
+    entity_type: 'fall',
+    entity_id: params.fall_id,
   })
 
   if (error) {

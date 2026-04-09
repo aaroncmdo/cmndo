@@ -169,15 +169,17 @@ export async function ablehnenTermin(
         }
       }
 
-      // Task erstellen
-      await svc.from('tasks').insert({
+      // Task erstellen (KFZ-151: verknuepft mit case)
+      const { createLinkedTask } = await import('@/lib/tasks/create-task')
+      await createLinkedTask({
         fall_id: termin.fall_id,
         titel: `Neuen Gutachter zuweisen für ${fallData?.fall_nummer ?? 'Fall'}`,
         typ: 'dispatch',
-        status: 'offen',
-        prioritaet: 'hoch',
-        faellig_am: new Date().toISOString(),
+        prioritaet: 'dringend',
+        faellig_am: new Date(),
         zugewiesen_an: fallData?.kundenbetreuer_id ?? null,
+        entity_type: 'case',
+        entity_id: termin.fall_id,
       })
     } catch { /* non-critical */ }
   }

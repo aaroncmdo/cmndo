@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { generiereMarketingAbrechnung, generiereKanzleiAbrechnungen } from '@/lib/finance/abrechnungen-generator'
 import { generateAbrechnungPDF } from '@/lib/finance/abrechnung-pdf'
 import { sendMarketingAbrechnung, sendKanzleiMonatsAbrechnung } from '@/lib/email/google/flows'
+import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { revalidatePath } from 'next/cache'
 
 export async function markiereAlsBezahlt(abrechnungId: string, betrag: number) {
@@ -19,6 +20,12 @@ export async function markiereAlsBezahlt(abrechnungId: string, betrag: number) {
     .eq('id', abrechnungId)
 
   if (error) throw new Error(error.message)
+
+  // KFZ-151: Auto-Resolve aller offenen Tasks zu dieser Abrechnung
+  try {
+    await resolveTasksForEntity('abrechnung', abrechnungId, 'Rechnung bezahlt')
+  } catch (err) { console.error('[KFZ-151] resolveTasks abrechnung bezahlt:', err) }
+
   revalidatePath('/admin/finance')
 }
 
@@ -30,6 +37,12 @@ export async function storniereAbrechnung(abrechnungId: string) {
     .eq('id', abrechnungId)
 
   if (error) throw new Error(error.message)
+
+  // KFZ-151: Auto-Resolve aller offenen Tasks zu dieser Abrechnung
+  try {
+    await resolveTasksForEntity('abrechnung', abrechnungId, 'Rechnung storniert')
+  } catch (err) { console.error('[KFZ-151] resolveTasks abrechnung storniert:', err) }
+
   revalidatePath('/admin/finance')
 }
 

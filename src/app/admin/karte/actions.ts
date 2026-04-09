@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { revalidatePath } from 'next/cache'
 
 export async function updateGutachterProfil(
@@ -62,6 +63,12 @@ export async function reactivateGutachter(svId: string) {
   try {
     await supabase.from('sachverstaendige').update({ deaktiviert_grund: null, deaktiviert_am: null }).eq('id', svId)
   } catch { /* columns may not exist */ }
+
+  // KFZ-151: Auto-Resolve Account-Sperr-Tasks (Reminder/Mahn-Tasks die jetzt obsolet sind)
+  try {
+    await resolveTasksForEntity('gutachter', svId, 'Account manuell entsperrt')
+    await resolveTasksForEntity('sv_onboarding', svId, 'Account manuell entsperrt')
+  } catch (err) { console.error('[KFZ-151] resolveTasks reactivate:', err) }
 
   revalidatePath('/admin/sachverstaendige')
   revalidatePath('/admin/karte')

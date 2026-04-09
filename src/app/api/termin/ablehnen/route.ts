@@ -86,17 +86,19 @@ export async function GET(req: NextRequest) {
       }
     } catch { /* non-critical */ }
 
-    // Task erstellen: Neuen Gutachter zuweisen
+    // Task erstellen: Neuen Gutachter zuweisen (KFZ-151: verknuepft mit case)
     try {
       const { data: fallData } = await svc.from('faelle').select('fall_nummer, kundenbetreuer_id').eq('id', termin.fall_id).single()
-      await svc.from('tasks').insert({
+      const { createLinkedTask } = await import('@/lib/tasks/create-task')
+      await createLinkedTask({
         fall_id: termin.fall_id,
         titel: `Neuen Gutachter zuweisen für ${fallData?.fall_nummer ?? 'Fall'}`,
         typ: 'dispatch',
-        status: 'offen',
-        prioritaet: 'hoch',
-        faellig_am: new Date().toISOString(),
+        prioritaet: 'dringend',
+        faellig_am: new Date(),
         zugewiesen_an: fallData?.kundenbetreuer_id ?? null,
+        entity_type: 'case',
+        entity_id: termin.fall_id,
       })
     } catch { /* non-critical */ }
   }

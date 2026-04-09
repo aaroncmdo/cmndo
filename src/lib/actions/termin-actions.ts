@@ -6,6 +6,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { postChatSystemMessage } from '@/lib/chat/system-messages'
 import { generateReminderForTermin, cancelRemindersForTermin } from '@/lib/reminders/generate'
+import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { revalidatePath } from 'next/cache'
 
 type ActionResult = { success: boolean; error?: string }
@@ -206,15 +207,17 @@ export async function terminAblehnen({
       }
     }
 
-    // Task erstellen
-    await admin.from('tasks').insert({
+    // Task erstellen (KFZ-151: verknuepft mit case)
+    const { createLinkedTask } = await import('@/lib/tasks/create-task')
+    await createLinkedTask({
       fall_id: fId,
       titel: `Neuen Gutachter zuweisen für ${fallData?.fall_nummer ?? 'Fall'}`,
       typ: 'dispatch',
-      status: 'offen',
-      prioritaet: 'hoch',
-      faellig_am: new Date().toISOString(),
+      prioritaet: 'dringend',
+      faellig_am: new Date(),
       zugewiesen_an: fallData?.kundenbetreuer_id ?? null,
+      entity_type: 'case',
+      entity_id: fId,
     })
   } catch { /* non-critical */ }
 
@@ -463,6 +466,9 @@ export async function terminAnnehmen({
     const { sendSvAuftragszusammenfassung } = await import('@/lib/email/google/flows')
     if (svId) await sendSvAuftragszusammenfassung(fId, svId)
   } catch (err) { console.error('[KFZ-137] SV-Email fehlgeschlagen:', err) }
+
+  // KFZ-151: Auto-Resolve aller offenen Termin-Tasks (z.B. "Termin bestaetigen")
+  try { await resolveTasksForEntity('termin', tId, 'Termin bestaetigt') } catch (err) { console.error('[KFZ-151] resolveTasks termin:', err) }
 
   // Fall updaten
   await admin.from('faelle').update({

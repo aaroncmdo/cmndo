@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createLinkedTask } from '@/lib/tasks/create-task'
+import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,6 +21,9 @@ export async function GET() {
 
   for (const r of abgelaufen ?? []) {
     await db.from('reklamationen').update({ status: 'auto_abgelehnt_frist', bearbeitet_am: now }).eq('id', r.id)
+
+    // KFZ-151: Auto-Resolve aller offenen Tasks zu dieser Reklamation
+    await resolveTasksForEntity('reklamation', r.id, 'Reklamation auto-abgelehnt: Frist abgelaufen')
 
     // Email an SV
     try {
@@ -48,23 +53,24 @@ export async function GET() {
     .gte('frist_bis', now) // Frist noch nicht abgelaufen
 
   for (const r of ueberfaellig ?? []) {
-    // Nur einmal Task erstellen
+    // Nur einmal Task pro Reklamation erstellen (KFZ-151: ueber entity_id deduplizieren)
     const { data: existingTask } = await db.from('tasks')
       .select('id')
-      .eq('fall_id', r.fall_id)
-      .eq('typ', 'reklamation')
+      .eq('entity_type', 'reklamation')
+      .eq('entity_id', r.id)
       .eq('status', 'offen')
       .limit(1)
       .maybeSingle()
 
     if (!existingTask) {
-      await db.from('tasks').insert({
+      await createLinkedTask({
         fall_id: r.fall_id,
         titel: 'Überfällige Reklamation bearbeiten (3-Werktage-Frist §7)',
         typ: 'reklamation',
-        status: 'offen',
-        prioritaet: 'hoch',
-        faellig_am: new Date().toISOString(),
+        prioritaet: 'dringend',
+        faellig_am: new Date(),
+        entity_type: 'reklamation',
+        entity_id: r.id,
       })
     }
   }

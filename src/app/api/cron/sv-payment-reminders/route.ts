@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createLinkedTask } from '@/lib/tasks/create-task'
 
 export const dynamic = 'force-dynamic'
 
@@ -64,14 +65,16 @@ export async function GET() {
         } catch (err) { console.error(`[KFZ-148] Reminder ${trigger.typ}:`, err) }
       }
 
-      // Admin-Task erstellen
+      // Admin-Task erstellen (KFZ-151: mit entity_type/entity_id verknuepfen)
       if (trigger.adminTask) {
-        await db.from('tasks').insert({
+        await createLinkedTask({
           titel: trigger.adminTask,
           typ: 'sv-onboarding',
-          status: 'offen',
-          prioritaet: tage >= 14 ? 'hoch' : 'mittel',
-          faellig_am: new Date().toISOString(),
+          prioritaet: tage >= 14 ? 'kritisch' : 'dringend',
+          faellig_am: new Date(),
+          entity_type: 'sv_onboarding',
+          entity_id: sv.id,
+          trigger_event: trigger.typ,
         })
       }
 

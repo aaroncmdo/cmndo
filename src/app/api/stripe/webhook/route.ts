@@ -62,6 +62,12 @@ export async function POST(request: Request) {
             anzahlung_status: 'bezahlt',
           }).eq('id', svId)
 
+          // KFZ-151: Auto-Resolve aller offenen Tasks zu diesem Onboarding
+          try {
+            const { resolveTasksForEntity } = await import('@/lib/tasks/resolve-tasks')
+            await resolveTasksForEntity('sv_onboarding', svId, 'Anzahlung eingegangen')
+          } catch (err) { console.error('[KFZ-151] resolveTasks sv_onboarding:', err) }
+
           // Email an SV: Portal freigeschaltet
           try {
             const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', svId).single()
