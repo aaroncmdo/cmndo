@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 const PAKET_CONFIG: Record<string, { faelle: number; km: number; preis: number }> = {
@@ -51,8 +52,14 @@ export async function completeOnboarding(data: {
   // BUG-A.3 fix: gebiet_plz ist text[] nicht text → wrap im Array.
   // BUG-FOLLOW-1 workaround: portal_zugang_freigeschaltet explizit auf false
   // setzen (DB-Default ist faelschlich true, separater Folge-Bug).
+  // BUG-A.4 fix: createAdminClient() statt createClient() weil RLS auf
+  // sachverstaendige keinen INSERT-Pfad fuer User mit rolle='sachverstaendiger'
+  // erlaubt (nur SELECT-Policies). Security: profile_id wird hardcoded auf
+  // user.id (aus auth.getUser()) gesetzt damit ein User nicht via gefaelschter
+  // form data jemand anderem einen SV-Record anlegen kann.
+  const adminDb = createAdminClient()
   if (data.existingSvId) {
-    const { error } = await supabase
+    const { error } = await adminDb
       .from('sachverstaendige')
       .update({
         paket: data.paket,
@@ -74,13 +81,14 @@ export async function completeOnboarding(data: {
         ist_aktiv: true,
       })
       .eq('id', data.existingSvId)
+      .eq('profile_id', user.id) // Security: nur eigenen Record updaten
 
     if (error) throw new Error(`SV-Update fehlgeschlagen: ${error.message}`)
   } else {
-    const { error } = await supabase
+    const { error } = await adminDb
       .from('sachverstaendige')
       .insert({
-        profile_id: data.userId,
+        profile_id: user.id, // Security: aus auth.getUser(), nicht aus form data
         paket: data.paket,
         gebiet_plz: data.standort_plz ? [data.standort_plz] : [],
         max_faelle_monat: paketConfig.faelle,
