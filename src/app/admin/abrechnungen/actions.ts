@@ -98,15 +98,56 @@ export async function retryEinzug(abrechnung_id: string): Promise<{ success: boo
     })
 
     if (pi.status === 'succeeded') {
+      const bezahltAm = new Date().toISOString()
       await db.from('abrechnungen').update({
-        bezahlt_am: new Date().toISOString(),
+        bezahlt_am: bezahltAm,
         bezahlt_betrag: Number(abr.summe_brutto),
-        einzug_versucht_am: new Date().toISOString(),
+        einzug_versucht_am: bezahltAm,
         einzug_fehler: null,
         stripe_payment_intent_id: pi.id,
         status: 'bezahlt',
-        updated_at: new Date().toISOString(),
+        updated_at: bezahltAm,
       }).eq('id', abr.id)
+
+      // Bezahlt-Bestaetigungs-Mail an SV (best effort, blockt Retry-Erfolg nicht)
+      try {
+        const { data: full } = await db.from('abrechnungen')
+          .select('empfaenger_email, empfaenger_id')
+          .eq('id', abr.id).maybeSingle()
+        if (full?.empfaenger_email) {
+          let vorname: string | null = null
+          if (full.empfaenger_id) {
+            const { data: sub } = await db.from('sachverstaendige')
+              .select('profile_id').eq('id', full.empfaenger_id).maybeSingle()
+            const profileId = sub?.profile_id ?? full.empfaenger_id
+            const { data: p } = await db.from('profiles')
+              .select('vorname').eq('id', profileId).maybeSingle()
+            vorname = p?.vorname ?? null
+          }
+          const { render } = await import('@react-email/render')
+          const { AbrechnungBezahltConfirmationEmail, subject: bezahltSubject } =
+            await import('@/lib/email/google/templates/AbrechnungBezahltConfirmation')
+          const { sendEmail } = await import('@/lib/email/google/client')
+          const props = {
+            vorname,
+            abrechnungs_nr: abr.abrechnungs_nr,
+            summe_brutto: Number(abr.summe_brutto ?? 0),
+            bezahlt_am: bezahltAm,
+            stripe_payment_intent_id: pi.id,
+            manuell: true,
+          }
+          await sendEmail({
+            to: full.empfaenger_email,
+            subject: bezahltSubject(props),
+            html: await render(AbrechnungBezahltConfirmationEmail(props)),
+            empfaengerTyp: 'sv',
+            template: 'abrechnung_bezahlt_confirmation',
+          })
+        }
+      } catch (mailErr) {
+        console.error('[KFZ-149 retry] Bezahlt-Mail fehlgeschlagen:', mailErr)
+      }
+
       revalidatePath('/admin/abrechnungen', 'page')
       return { success: true, payment_intent_id: pi.id }
     }
