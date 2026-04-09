@@ -52,10 +52,15 @@ export default async function GutachterLayout({
 
   const isDeactivated = sv?.ist_aktiv === false
 
-  // KFZ-148: Hard-Blocker — Portal-Zugang nur wenn freigeschaltet
-  if (sv && sv.portal_zugang_freigeschaltet === false) {
+  // KFZ-148: Hard-Blocker — Portal-Zugang nur wenn freigeschaltet.
+  // BUG-A.1 fix: greift jetzt auch fuer User die noch GAR KEINEN
+  // sachverstaendige-Eintrag haben (frische Sign-Ups). Davor: nur 'sv && ...'
+  // hat solche User durch das Layout durchgelassen mit leerem Profil.
+  if (!sv || sv.portal_zugang_freigeschaltet === false) {
+    // Pathname robust ermitteln: x-pathname (von src/middleware.ts) ist primary,
+    // x-next-url + x-invoke-path bleiben als Fallback fuer Backward-Compat.
     const h = await headers()
-    const pathname = h.get('x-next-url') ?? h.get('x-invoke-path') ?? ''
+    const pathname = h.get('x-pathname') ?? h.get('x-next-url') ?? h.get('x-invoke-path') ?? ''
     if (!pathname.includes('/gutachter/onboarding')) {
       redirect('/gutachter/onboarding')
     }

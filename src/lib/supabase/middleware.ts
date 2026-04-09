@@ -36,10 +36,17 @@ export async function updateSession(request: NextRequest) {
     user = null
   }
 
-  // Build response
+  // KFZ-148 Lueckenfix (BUG-A.1): x-pathname Header injizieren damit Server
+  // Components / Layouts den aktuellen Pfad zuverlaessig lesen koennen
+  // (statt sich auf non-standard x-next-url / x-invoke-path zu verlassen).
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-pathname', request.nextUrl.pathname)
+
+  // Build response — modified request headers werden via { request: { headers } }
+  // an die nachgelagerten Server Components weitergegeben.
   const response = !user && !isPublicPath(request.nextUrl.pathname)
     ? NextResponse.redirect(new URL('/login', request.url))
-    : NextResponse.next({ request })
+    : NextResponse.next({ request: { headers: requestHeaders } })
 
   // Apply collected cookie updates to response
   for (const cookie of cookiesToUpdate) {
