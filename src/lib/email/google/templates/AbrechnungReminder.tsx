@@ -15,7 +15,7 @@ type Props = {
 }
 
 export function subject(p: Props) {
-  return `Erinnerung: Monatsabrechnung ${p.abrechnungs_nr} faellig am ${formatDate(p.faellig_am)}`
+  return `Erinnerung: Monatsabrechnung ${p.abrechnungs_nr} fällig am ${formatDate(p.faellig_am)}`
 }
 
 function formatDate(iso: string): string {
@@ -36,10 +36,10 @@ export function AbrechnungReminderEmail(props: Props) {
     : `in ${props.tage_bis_faellig} Tagen`
 
   return (
-    <EmailLayout preview={`Erinnerung Monatsabrechnung ${props.abrechnungs_nr} faellig ${tageText}`}>
+    <EmailLayout preview={`Erinnerung Monatsabrechnung ${props.abrechnungs_nr} fällig ${tageText}`}>
       <Heading>{greeting}</Heading>
       <Paragraph>
-        kurze Erinnerung: deine Monatsabrechnung <strong>{props.abrechnungs_nr}</strong> ist <strong>{tageText}</strong> faellig.
+        kurze Erinnerung: deine Monatsabrechnung <strong>{props.abrechnungs_nr}</strong> ist <strong>{tageText}</strong> fällig.
         Wir ziehen den Betrag automatisch von deiner hinterlegten Zahlungsmethode ein.
       </Paragraph>
 
@@ -47,20 +47,20 @@ export function AbrechnungReminderEmail(props: Props) {
       <Heading>Details</Heading>
       <InfoTable rows={[
         ['Rechnungsnummer', props.abrechnungs_nr],
-        ['Faellig am', formatDate(props.faellig_am)],
+        ['Fällig am', formatDate(props.faellig_am)],
         ['Endbetrag (brutto)', formatEuro(props.summe_brutto)],
       ]} />
 
       <Divider />
       <Paragraph>
         Bitte stelle sicher dass dein hinterlegtes Zahlungsmittel ausreichend gedeckt ist.
-        Bei Rueckfragen erreichst du uns unter <strong>support@claimondo.de</strong>.
+        Bei Rückfragen erreichst du uns unter <strong>support@claimondo.de</strong>.
       </Paragraph>
       <Text style={{ color: '#6b7280', fontSize: 12, margin: '16px 0 0', fontStyle: 'italic' }}>
-        Diese Mail wurde automatisch versendet. Bei einer fehlgeschlagenen Lastschrift erhaeltst du eine separate Benachrichtigung.
+        Diese Mail wurde automatisch versendet. Bei einer fehlgeschlagenen Lastschrift erhältst du eine separate Benachrichtigung.
       </Text>
       <Text style={{ color: '#6b7280', fontSize: 11, margin: '8px 0 0' }}>
-        <a href={`${APP_URL}/gutachter/abrechnung`} style={{ color: '#4573A2' }}>Zur Abrechnungs-Uebersicht im Portal</a>
+        <a href={`${APP_URL}/gutachter/abrechnung`} style={{ color: '#4573A2' }}>Zur Abrechnungs-Übersicht im Portal</a>
       </Text>
     </EmailLayout>
   )

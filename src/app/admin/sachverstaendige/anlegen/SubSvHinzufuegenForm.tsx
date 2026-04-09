@@ -85,10 +85,10 @@ export default function SubSvHinzufuegenForm({ organisationen, onSuccess }: {
 
   if (result) {
     return (
-      <div className="bg-white border border-green-200 rounded-2xl p-8">
+      <div className="bg-white border border-[#4573A2]/30 rounded-2xl p-8">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
-            <CheckCircle2Icon className="w-6 h-6 text-green-600" />
+          <div className="w-12 h-12 rounded-xl bg-[#4573A2]/10 flex items-center justify-center flex-shrink-0">
+            <CheckCircle2Icon className="w-6 h-6 text-[#4573A2]" />
           </div>
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-gray-900">{vorname} {nachname} angelegt</h2>
@@ -135,7 +135,7 @@ export default function SubSvHinzufuegenForm({ organisationen, onSuccess }: {
             value={anrede}
             onChange={setAnrede}
             options={ANREDE_OPTIONEN}
-            placeholder="Bitte waehlen..."
+            placeholder="Bitte wählen..."
           />
           <SelectField
             label="Titel"
@@ -152,7 +152,7 @@ export default function SubSvHinzufuegenForm({ organisationen, onSuccess }: {
 
         <div>
           <label className="text-xs text-gray-500 mb-1.5 block">
-            Standort-Anschrift * {anschriftLat !== null && <span className="text-green-600 ml-2">✓ Geo</span>}
+            Standort-Anschrift * {anschriftLat !== null && <span className="text-[#4573A2] ml-2">✓ Geo</span>}
           </label>
           <GooglePlaceAutocomplete
             defaultValue={anschrift}
@@ -252,7 +252,7 @@ function TagSection({
     <div>
       <div className="flex items-baseline justify-between mb-1.5">
         <span className="text-xs font-medium text-gray-700">{title}</span>
-        <span className="text-[10px] text-gray-400">{selected.length} gewaehlt</span>
+        <span className="text-[10px] text-gray-400">{selected.length} gewählt</span>
       </div>
       <div className="flex flex-wrap gap-1.5">
         {options.map(opt => {
@@ -318,7 +318,7 @@ function SelectField({
         className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
       >
         {!options.includes('') && (
-          <option value="" disabled>{placeholder ?? 'Bitte waehlen...'}</option>
+          <option value="" disabled>{placeholder ?? 'Bitte wählen...'}</option>
         )}
         {options.map(opt => (
           <option key={opt} value={opt}>{opt === '' ? (placeholder ?? '—') : opt}</option>

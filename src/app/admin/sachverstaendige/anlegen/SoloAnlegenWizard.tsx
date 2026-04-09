@@ -157,10 +157,10 @@ export default function SoloAnlegenWizard({ onSuccess }: {
   // Erfolgs-Page
   if (result) {
     return (
-      <div className="bg-white border border-green-200 rounded-2xl p-8">
+      <div className="bg-white border border-[#4573A2]/30 rounded-2xl p-8">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
-            <CheckCircle2Icon className="w-6 h-6 text-green-600" />
+          <div className="w-12 h-12 rounded-xl bg-[#4573A2]/10 flex items-center justify-center flex-shrink-0">
+            <CheckCircle2Icon className="w-6 h-6 text-[#4573A2]" />
           </div>
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-gray-900">{data.vorname} {data.nachname} angelegt</h2>
@@ -196,19 +196,20 @@ export default function SoloAnlegenWizard({ onSuccess }: {
 
   return (
     <div>
-      {/* Stepper */}
+      {/* BUG-95 KORREKTUR: Stepper in Claimondo-CI ohne Grün.
+          done → #4573A2 (Ondo Blue), aktiv → #0D1B3E (Navy), naechst → gray-200 */}
       <div className="flex items-center justify-center gap-1 mb-6">
         {STEPS.map((s, i) => {
           const Icon = s.icon
           return (
             <div key={s.key} className="flex items-center">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                i < step ? 'bg-green-600' : i === step ? 'bg-[#1E3A5F]' : 'bg-gray-100'
+                i < step ? 'bg-[#4573A2]' : i === step ? 'bg-[#0D1B3E]' : 'bg-gray-200'
               }`}>
-                <Icon className="w-4 h-4 text-white" />
+                <Icon className={`w-4 h-4 ${i <= step ? 'text-white' : 'text-gray-500'}`} />
               </div>
               {i < STEPS.length - 1 && (
-                <div className={`w-8 h-0.5 ${i < step ? 'bg-green-600' : 'bg-gray-100'}`} />
+                <div className={`w-8 h-0.5 ${i < step ? 'bg-[#4573A2]' : 'bg-gray-300'}`} />
               )}
             </div>
           )
@@ -230,7 +231,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
                 value={data.anrede}
                 onChange={v => update('anrede', v)}
                 options={ANREDE_OPTIONEN}
-                placeholder="Bitte waehlen..."
+                placeholder="Bitte wählen..."
               />
               <SelectField
                 label="Titel"
@@ -251,7 +252,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
                 <Field label="Rechtsform" value={data.rechtsform} onChange={v => update('rechtsform', v)} placeholder="z.B. GmbH" />
                 <div className="sm:col-span-2">
                   <label className="text-xs text-gray-500 mb-1.5 block">
-                    Anschrift * {data.anschrift_lat !== null && <span className="text-green-600 ml-2">✓ Geo gesetzt</span>}
+                    Anschrift * {data.anschrift_lat !== null && <span className="text-[#4573A2] ml-2">✓ Geo gesetzt</span>}
                   </label>
                   <GooglePlaceAutocomplete
                     defaultValue={data.anschrift}
@@ -516,7 +517,7 @@ function TagSection({
     <div>
       <div className="flex items-baseline justify-between mb-2">
         <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
-        <span className="text-[10px] text-gray-400">{selected.length} gewaehlt</span>
+        <span className="text-[10px] text-gray-400">{selected.length} gewählt</span>
       </div>
       <p className="text-xs text-gray-500 mb-2">{hint}</p>
       <div className="flex flex-wrap gap-1.5">
@@ -564,7 +565,7 @@ function SelectField({
             ist, ausser '' selbst ist eine valide Option (z.B. bei TITEL_OPTIONEN
             wo '' = 'kein Titel'). */}
         {!options.includes('') && (
-          <option value="" disabled>{placeholder ?? 'Bitte waehlen...'}</option>
+          <option value="" disabled>{placeholder ?? 'Bitte wählen...'}</option>
         )}
         {options.map(opt => (
           <option key={opt} value={opt}>{opt === '' ? (placeholder ?? '—') : opt}</option>

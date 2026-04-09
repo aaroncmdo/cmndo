@@ -33,7 +33,7 @@ export function AbrechnungBezahltConfirmationEmail(props: Props) {
     <EmailLayout preview={`Zahlung ${fmtEuro(props.summe_brutto)} eingegangen — ${props.abrechnungs_nr}`}>
       <Heading>{greeting}</Heading>
       <Paragraph>
-        deine Zahlung fuer die Monatsabrechnung <strong>{props.abrechnungs_nr}</strong> ist eingegangen.
+        deine Zahlung für die Monatsabrechnung <strong>{props.abrechnungs_nr}</strong> ist eingegangen.
         Vielen Dank!
       </Paragraph>
 
@@ -48,7 +48,7 @@ export function AbrechnungBezahltConfirmationEmail(props: Props) {
 
       <Divider />
       <Paragraph>
-        Du kannst diese Bestaetigung als Beleg fuer deine Buchhaltung aufbewahren.
+        Du kannst diese Bestätigung als Beleg für deine Buchhaltung aufbewahren.
         Die offizielle Rechnung mit allen Positionen findest du jederzeit in deinem Portal.
       </Paragraph>
       {props.manuell && (
@@ -57,7 +57,7 @@ export function AbrechnungBezahltConfirmationEmail(props: Props) {
         </Text>
       )}
       <Text style={{ color: '#6b7280', fontSize: 11, margin: '16px 0 0' }}>
-        <a href={`${APP_URL}/gutachter/abrechnung`} style={{ color: '#4573A2' }}>Zur Abrechnungs-Uebersicht im Portal</a>
+        <a href={`${APP_URL}/gutachter/abrechnung`} style={{ color: '#4573A2' }}>Zur Abrechnungs-Übersicht im Portal</a>
       </Text>
     </EmailLayout>
   )

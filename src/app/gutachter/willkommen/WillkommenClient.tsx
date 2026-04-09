@@ -231,7 +231,7 @@ export default function WillkommenClient({
     if (!agbAccepted) { setError('Bitte akzeptiere die AGB/NB/DS'); return }
     if (!unterschriftName.trim()) { setError('Bitte gib deinen Namen ein'); return }
     if (!signaturePng) { setError('Bitte unterschreibe im Feld unten'); return }
-    if (!scrolled80) { setError('Bitte lies die Nutzungsbedingungen vollstaendig (80% gescrollt)'); return }
+    if (!scrolled80) { setError('Bitte lies die Nutzungsbedingungen vollständig (80% gescrollt)'); return }
 
     setSaving(true)
     const result = await signSvVertrag({
@@ -254,7 +254,7 @@ export default function WillkommenClient({
     if (!agbAccepted) { setError('Bitte akzeptiere die AGB/NB/DS'); return }
     if (!unterschriftName.trim()) { setError('Bitte gib deinen Namen ein'); return }
     if (!signaturePng) { setError('Bitte unterschreibe im Feld unten'); return }
-    if (!scrolled80) { setError('Bitte lies die Nutzungsbedingungen vollstaendig (80% gescrollt)'); return }
+    if (!scrolled80) { setError('Bitte lies die Nutzungsbedingungen vollständig (80% gescrollt)'); return }
 
     setSaving(true)
     const result = await signBueroVertrag({
@@ -315,7 +315,7 @@ export default function WillkommenClient({
                 <p className="font-semibold mb-1">Dein Inhaber muss noch die Anzahlung leisten.</p>
                 <p>
                   Du wirst per Email benachrichtigt sobald dein Account freigeschaltet ist und du
-                  die ersten Faelle erhalten kannst.
+                  die ersten Fälle erhalten kannst.
                 </p>
                 {organisation && (
                   <p className="mt-2 text-xs text-amber-700">
@@ -326,7 +326,7 @@ export default function WillkommenClient({
             </div>
 
             <div className="mt-5 text-xs text-gray-500 text-center">
-              Du kannst dieses Fenster schliessen. Bei Fragen erreichst du uns unter{' '}
+              Du kannst dieses Fenster schließen. Bei Fragen erreichst du uns unter{' '}
               <a href="mailto:support@claimondo.de" className="text-[#1E3A5F] underline">
                 support@claimondo.de
               </a>
@@ -353,21 +353,21 @@ export default function WillkommenClient({
           <div className="mb-5 bg-amber-50 border border-amber-300 rounded-xl p-4 flex items-start gap-3">
             <AlertTriangleIcon className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-amber-800">
-              <strong>Sie erhalten erst Faelle von uns, sobald Sie angezahlt haben!</strong>
+              <strong>Sie erhalten erst Fälle von uns, sobald Sie angezahlt haben!</strong>
               <p className="text-xs text-amber-700 mt-1">
                 {rolle === 'buero_inhaber'
-                  ? 'Sobald die Buero-Anzahlung eingegangen ist, werden alle Sub-Standorte gleichzeitig freigeschaltet.'
+                  ? 'Sobald die Büro-Anzahlung eingegangen ist, werden alle Sub-Standorte gleichzeitig freigeschaltet.'
                   : 'Sobald die Anzahlung eingegangen ist, ist dein Portal-Zugang sofort freigeschaltet.'}
               </p>
             </div>
           </div>
         )}
 
-        {/* BUG-89: Stepper in Claimondo-CI mit gruenem Done-State.
-            done   → emerald-500 + Checkmark, weiss
-            aktiv  → #4573A2 (Ondo Blue) + Step-Nummer, weiss
+        {/* BUG-95 KORREKTUR: Stepper in Claimondo-CI ohne Grün.
+            done   → #4573A2 (Ondo Blue) + Checkmark, weiß
+            aktiv  → #0D1B3E (Navy Primary) + Step-Nummer, weiß
             naechst → gray-200 + Step-Nummer, gray-500
-            Connector zwischen done Steps emerald-500, sonst gray-300 */}
+            Connector zwischen done Steps Ondo-Blue, sonst gray-300 */}
         <div className="flex items-center justify-center gap-0 mb-8 font-[Montserrat]">
           {STEPS.map((s, i) => {
             const isDone = i < step
@@ -377,9 +377,9 @@ export default function WillkommenClient({
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors text-xs font-semibold ${
                     isDone
-                      ? 'bg-emerald-500 text-white'
-                      : isActive
                       ? 'bg-[#4573A2] text-white'
+                      : isActive
+                      ? 'bg-[#0D1B3E] text-white'
                       : 'bg-gray-200 text-gray-500'
                   }`}
                   aria-current={isActive ? 'step' : undefined}
@@ -388,7 +388,7 @@ export default function WillkommenClient({
                   {isDone ? <CheckIcon className="w-4 h-4" /> : i + 1}
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div className={`w-10 h-0.5 transition-colors ${isDone ? 'bg-emerald-500' : 'bg-gray-300'}`} />
+                  <div className={`w-10 h-0.5 transition-colors ${isDone ? 'bg-[#4573A2]' : 'bg-gray-300'}`} />
                 )}
               </div>
             )
@@ -409,7 +409,7 @@ export default function WillkommenClient({
                 <p className="text-xs text-gray-500 uppercase tracking-wide mb-3">Deine Konditionen</p>
                 <div className="grid grid-cols-2 gap-y-3 gap-x-4">
                   <Kondition label="Paket" value={paketLabel} />
-                  <Kondition label="Faelle / Monat" value={String(sv.max_faelle_monat)} />
+                  <Kondition label="Fälle / Monat" value={String(sv.max_faelle_monat)} />
                   <Kondition label="Radius" value={`${sv.paket_umkreis_km} km`} />
                   <Kondition label="Anzahlung" value={fmtEur(sv.onboarding_anzahlung_betrag)} highlight />
                 </div>
@@ -491,7 +491,7 @@ export default function WillkommenClient({
                 </div>
               )}
 
-              {/* Gesamt-Anzahlung gross hervorgehoben */}
+              {/* Gesamt-Anzahlung groß hervorgehoben */}
               <div className="bg-[#1E3A5F] text-white rounded-xl p-5">
                 <p className="text-xs text-white/70 uppercase tracking-wide">Gesamt-Anzahlung (alle Sub-Standorte)</p>
                 <p className="text-3xl font-bold mt-1">{fmtEur(gesamtAnzahlung)} <span className="text-sm font-normal text-white/70">netto</span></p>
@@ -540,7 +540,7 @@ export default function WillkommenClient({
                 <p className="text-xs text-gray-500 uppercase tracking-wide mb-3">Dein Paket</p>
                 <div className="grid grid-cols-2 gap-y-3 gap-x-4">
                   <Kondition label="Paket" value={paketLabel} />
-                  <Kondition label="Faelle / Monat" value={String(sv.max_faelle_monat)} />
+                  <Kondition label="Fälle / Monat" value={String(sv.max_faelle_monat)} />
                   <Kondition label="Radius" value={`${sv.paket_umkreis_km} km`} />
                   <Kondition
                     label="Standort"
@@ -580,8 +580,8 @@ export default function WillkommenClient({
                       <label className="text-xs text-gray-500 uppercase tracking-wide">
                         {nbVorlage.titel} <span className="text-red-400">*</span>
                       </label>
-                      <span className={`text-[10px] ${scrolled80 ? 'text-green-600' : 'text-gray-400'}`}>
-                        {scrolled80 ? '✓ vollstaendig gelesen' : 'bitte vollstaendig scrollen'}
+                      <span className={`text-[10px] ${scrolled80 ? 'text-[#4573A2]' : 'text-gray-400'}`}>
+                        {scrolled80 ? '✓ vollständig gelesen' : 'bitte vollständig scrollen'}
                       </span>
                     </div>
                     <div
@@ -648,10 +648,10 @@ export default function WillkommenClient({
                       className="mt-0.5 rounded border-gray-300"
                     />
                     <span>
-                      Ich akzeptiere die <strong>Nutzungsbedingungen</strong>, die <strong>AGB</strong> und die <strong>Datenschutzerklaerung</strong>.
-                      Mit meiner Unterschrift bestaetige ich rechtsverbindlich die Annahme
+                      Ich akzeptiere die <strong>Nutzungsbedingungen</strong>, die <strong>AGB</strong> und die <strong>Datenschutzerklärung</strong>.
+                      Mit meiner Unterschrift bestätige ich rechtsverbindlich die Annahme
                       {rolle === 'buero_inhaber' && organisation
-                        ? ` stellvertretend fuer ${organisation.name} und alle Sub-Standorte.`
+                        ? ` stellvertretend für ${organisation.name} und alle Sub-Standorte.`
                         : '.'}
                     </span>
                   </label>
@@ -664,20 +664,20 @@ export default function WillkommenClient({
           {step === 1 && rolle === 'sub_mitarbeiter' && (
             <div className="space-y-5">
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-xs text-gray-600 leading-relaxed">
-                Bitte bestaetige unsere{' '}
+                Bitte bestätige unsere{' '}
                 <Link href="/nutzungsbedingungen" target="_blank" className="text-[#1E3A5F] underline">Nutzungsbedingungen</Link>,
                 die <Link href="/agb" target="_blank" className="text-[#1E3A5F] underline">AGB</Link>{' '}
-                und die <Link href="/datenschutz" target="_blank" className="text-[#1E3A5F] underline">Datenschutzerklaerung</Link>.
+                und die <Link href="/datenschutz" target="_blank" className="text-[#1E3A5F] underline">Datenschutzerklärung</Link>.
                 <br /><br />
-                Den vollstaendigen Vertrag inkl. Anzahlung schliesst dein
-                {organisation?.typ === 'akademie' ? ' Verwalter' : ' Inhaber'} fuer dich ab — du musst
+                Den vollständigen Vertrag inkl. Anzahlung schließt dein
+                {organisation?.typ === 'akademie' ? ' Verwalter' : ' Inhaber'} für dich ab — du musst
                 hier nur einmal die Bedingungen akzeptieren.
               </div>
 
-              {/* Name-Bestaetigung */}
+              {/* Name-Bestätigung */}
               <div>
                 <label className="text-xs text-gray-500 mb-1.5 block">
-                  Dein Name (zur Bestaetigung) <span className="text-red-400">*</span>
+                  Dein Name (zur Bestätigung) <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
@@ -696,7 +696,7 @@ export default function WillkommenClient({
                   className="mt-0.5 rounded border-gray-300"
                 />
                 <span>
-                  Ich akzeptiere die <strong>Nutzungsbedingungen</strong>, die <strong>AGB</strong> und die <strong>Datenschutzerklaerung</strong>.
+                  Ich akzeptiere die <strong>Nutzungsbedingungen</strong>, die <strong>AGB</strong> und die <strong>Datenschutzerklärung</strong>.
                 </span>
               </label>
             </div>
@@ -710,13 +710,13 @@ export default function WillkommenClient({
              ═══════════════════════════════════════════════════════════════ */}
           {step === 2 && rolle !== 'sub_mitarbeiter' && (
             <div className="space-y-4">
-              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
-                <CheckCircle2Icon className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-emerald-800">
+              <div className="bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-xl p-4 flex items-start gap-3">
+                <CheckCircle2Icon className="w-5 h-5 text-[#4573A2] flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-[#0D1B3E]">
                   {rolle === 'buero_inhaber' ? (
-                    <><strong>Buero-Vertrag unterzeichnet.</strong> Bitte schliesse jetzt die zentrale Anzahlung fuer alle Sub-Standorte ab.</>
+                    <><strong>Büro-Vertrag unterzeichnet.</strong> Bitte schließe jetzt die zentrale Anzahlung für alle Sub-Standorte ab.</>
                   ) : (
-                    <><strong>Vertrag unterzeichnet.</strong> Bitte schliesse jetzt die Anzahlung ab.</>
+                    <><strong>Vertrag unterzeichnet.</strong> Bitte schließe jetzt die Anzahlung ab.</>
                   )}
                 </div>
               </div>
@@ -731,8 +731,8 @@ export default function WillkommenClient({
                 </p>
                 <p className="text-[11px] text-gray-500 mt-2">
                   {rolle === 'buero_inhaber'
-                    ? `Sammelbetrag fuer ${subSvs.length} Sub-Standort(e). Wird mit den ersten Lead-Gebuehren verrechnet.`
-                    : 'Wird mit den ersten Lead-Gebuehren verrechnet. Sobald die Zahlung eingegangen ist, ist dein Portal-Zugang freigeschaltet.'}
+                    ? `Sammelbetrag für ${subSvs.length} Sub-Standort(e). Wird mit den ersten Lead-Gebühren verrechnet.`
+                    : 'Wird mit den ersten Lead-Gebühren verrechnet. Sobald die Zahlung eingegangen ist, ist dein Portal-Zugang freigeschaltet.'}
                 </p>
               </div>
 
@@ -797,7 +797,7 @@ export default function WillkommenClient({
                   disabled={saving}
                   className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50 disabled:opacity-40"
                 >
-                  Zurueck
+                  Zurück
                 </button>
               )}
               <button

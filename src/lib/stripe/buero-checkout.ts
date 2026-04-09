@@ -74,8 +74,9 @@ export async function createBueroCheckoutSession(organisationId: string): Promis
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: 'payment',
-    // KFZ-156: siehe sv-checkout.ts — stripe@22 Type-Inkonsistenz beim ui_mode.
-    ui_mode: 'embedded' as unknown as Stripe.Checkout.SessionCreateParams['ui_mode'],
+    // BUG-95: siehe sv-checkout.ts — Stripe hat 'embedded' zu 'embedded_page'
+    // umbenannt, stripe@22 Type-Inkonsistenz beim ui_mode bleibt.
+    ui_mode: 'embedded_page' as unknown as Stripe.Checkout.SessionCreateParams['ui_mode'],
     payment_intent_data: {
       // Kartendaten fuer spaetere Sammelabrechnungen speichern
       setup_future_usage: 'off_session',

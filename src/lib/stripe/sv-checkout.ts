@@ -62,9 +62,10 @@ export async function createStripeCheckoutSession(gutachterId: string): Promise<
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: 'payment',
-    // KFZ-156: stripe@22 SDK-Types listen 'embedded' nicht direkt, die Stripe-API
-    // akzeptiert den String aber problemlos — daher der Cast.
-    ui_mode: 'embedded' as unknown as Stripe.Checkout.SessionCreateParams['ui_mode'],
+    // BUG-95: Stripe hat 'embedded' zu 'embedded_page' umbenannt. Cast bleibt
+    // bestehen weil stripe@22 SDK-Types den neuen Namen ebenfalls noch nicht
+    // listen, die API akzeptiert ihn aber.
+    ui_mode: 'embedded_page' as unknown as Stripe.Checkout.SessionCreateParams['ui_mode'],
     line_items: [{
       price_data: {
         currency: 'eur',

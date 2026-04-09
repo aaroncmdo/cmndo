@@ -297,10 +297,10 @@ export default function BueroAnlegenWizard({ onSuccess }: {
   // Erfolgs-Page
   if (result) {
     return (
-      <div className="bg-white border border-green-200 rounded-2xl p-8">
+      <div className="bg-white border border-[#4573A2]/30 rounded-2xl p-8">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
-            <CheckCircle2Icon className="w-6 h-6 text-green-600" />
+          <div className="w-12 h-12 rounded-xl bg-[#4573A2]/10 flex items-center justify-center flex-shrink-0">
+            <CheckCircle2Icon className="w-6 h-6 text-[#4573A2]" />
           </div>
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-gray-900">{bueroName} angelegt</h2>
@@ -325,19 +325,20 @@ export default function BueroAnlegenWizard({ onSuccess }: {
 
   return (
     <div>
-      {/* Stepper */}
+      {/* BUG-95 KORREKTUR: Stepper in Claimondo-CI ohne Grün.
+          done → #4573A2 (Ondo Blue), aktiv → #0D1B3E (Navy), naechst → gray-200 */}
       <div className="flex items-center justify-center gap-1 mb-6">
         {STEPS.map((s, i) => {
           const Icon = s.icon
           return (
             <div key={s.key} className="flex items-center">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                i < step ? 'bg-green-600' : i === step ? 'bg-[#1E3A5F]' : 'bg-gray-100'
+                i < step ? 'bg-[#4573A2]' : i === step ? 'bg-[#0D1B3E]' : 'bg-gray-200'
               }`}>
-                <Icon className="w-4 h-4 text-white" />
+                <Icon className={`w-4 h-4 ${i <= step ? 'text-white' : 'text-gray-500'}`} />
               </div>
               {i < STEPS.length - 1 && (
-                <div className={`w-8 h-0.5 ${i < step ? 'bg-green-600' : 'bg-gray-100'}`} />
+                <div className={`w-8 h-0.5 ${i < step ? 'bg-[#4573A2]' : 'bg-gray-300'}`} />
               )}
             </div>
           )
@@ -354,7 +355,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
           <div className="mb-5 px-4 py-3 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3">
             <AlertTriangleIcon className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div className="flex-1 text-sm text-red-700">
-              <p className="font-semibold mb-1">Bitte fuelle alle Pflicht-Felder aus:</p>
+              <p className="font-semibold mb-1">Bitte fülle alle Pflicht-Felder aus:</p>
               <ul className="list-disc list-inside text-xs space-y-0.5">
                 {missingFields.map((m, i) => <li key={i}>{m}</li>)}
               </ul>
@@ -374,7 +375,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                   value={inhaberAnrede}
                   onChange={v => { setInhaberAnrede(v); clearFieldError('inhaberAnrede') }}
                   options={ANREDE_OPTIONEN}
-                  placeholder="Bitte waehlen..."
+                  placeholder="Bitte wählen..."
                   error={fieldErrors.has('inhaberAnrede')}
                 />
                 <SelectField
@@ -444,7 +445,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                 <div className="sm:col-span-2">
                   <label className={`text-xs mb-1.5 block ${fieldErrors.has('bueroAnschrift') ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
                     Anschrift Hauptbüro (= Rechnungsadresse) *
-                    {bueroAnschriftLat !== null && <span className="text-green-600 ml-2">✓ Geo gesetzt</span>}
+                    {bueroAnschriftLat !== null && <span className="text-[#4573A2] ml-2">✓ Geo gesetzt</span>}
                   </label>
                   <GooglePlaceAutocomplete
                     defaultValue={bueroAnschrift}
@@ -539,7 +540,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                 {istHauptbuero ? (
                   <div>
                     <label className="text-xs text-gray-500 mb-1.5 block">
-                      Anschrift <span className="text-green-600 ml-2">✓ aus Stammdaten</span>
+                      Anschrift <span className="text-[#4573A2] ml-2">✓ aus Stammdaten</span>
                     </label>
                     <input
                       type="text"
@@ -551,7 +552,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                 ) : (
                   <div>
                     <label className={`text-xs mb-1.5 block ${fieldErrors.has(`std-${std.id}-anschrift`) ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
-                      Anschrift * {std.anschrift_lat !== null && <span className="text-green-600 ml-2">✓ Geo</span>}
+                      Anschrift * {std.anschrift_lat !== null && <span className="text-[#4573A2] ml-2">✓ Geo</span>}
                     </label>
                     <GooglePlaceAutocomplete
                       defaultValue={std.anschrift}
@@ -577,7 +578,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                     value={std.sub_anrede}
                     onChange={v => { updateStandort(std.id, 'sub_anrede', v); clearFieldError(`std-${std.id}-anrede`) }}
                     options={ANREDE_OPTIONEN}
-                    placeholder="Bitte waehlen..."
+                    placeholder="Bitte wählen..."
                     disabled={mitarbeiterReadonly}
                     error={fieldErrors.has(`std-${std.id}-anrede`)}
                   />
@@ -757,7 +758,7 @@ function TagSection({
     <div>
       <div className="flex items-baseline justify-between mb-1.5">
         <span className="text-xs font-medium text-gray-700">{title}</span>
-        <span className="text-[10px] text-gray-400">{selected.length} gewaehlt</span>
+        <span className="text-[10px] text-gray-400">{selected.length} gewählt</span>
       </div>
       <div className="flex flex-wrap gap-1.5">
         {options.map(opt => {
@@ -845,7 +846,7 @@ function SelectField({
         }`}
       >
         {!options.includes('') && (
-          <option value="" disabled>{placeholder ?? 'Bitte waehlen...'}</option>
+          <option value="" disabled>{placeholder ?? 'Bitte wählen...'}</option>
         )}
         {options.map(opt => (
           <option key={opt} value={opt}>{opt === '' ? (placeholder ?? '—') : opt}</option>

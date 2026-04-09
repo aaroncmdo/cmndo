@@ -119,13 +119,13 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
 
   return (
     <div className="space-y-5">
-      {/* Header */}
-      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
-        <CheckCircle2Icon className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-        <div className="text-sm text-emerald-800">
-          <p className="font-semibold">Herzlichen Dank fuer Ihre Anzahlung!</p>
-          <p className="text-xs text-emerald-700 mt-1">
-            Letzter Schritt: Lade jetzt dein Logo hoch fuer dein eigenes Branding.
+      {/* BUG-95: Header in Claimondo-CI ohne Grün */}
+      <div className="bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-xl p-4 flex items-start gap-3">
+        <CheckCircle2Icon className="w-5 h-5 text-[#4573A2] flex-shrink-0 mt-0.5" />
+        <div className="text-sm text-[#0D1B3E]">
+          <p className="font-semibold">Herzlichen Dank für Ihre Anzahlung!</p>
+          <p className="text-xs text-[#1E3A5F] mt-1">
+            Letzter Schritt: Lade jetzt dein Logo hoch für dein eigenes Branding.
             Die Farben werden automatisch aus deinem Logo extrahiert und auf dein
             gesamtes Portal angewendet.
           </p>
@@ -145,7 +145,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
           <input {...getInputProps()} />
           <UploadCloudIcon className="w-10 h-10 text-gray-400 mx-auto mb-3" />
           <p className="text-sm font-medium text-gray-700">
-            {isDragActive ? 'Hier ablegen ...' : 'Logo hierher ziehen oder klicken zum Auswaehlen'}
+            {isDragActive ? 'Hier ablegen ...' : 'Logo hierher ziehen oder klicken zum Auswählen'}
           </p>
           <p className="text-[11px] text-gray-500 mt-1">PNG, JPG, SVG oder WebP — max 2 MB</p>
           {uploading && (
@@ -163,7 +163,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-900 flex items-center gap-1.5">
-                  <CheckCircle2Icon className="w-4 h-4 text-emerald-500" />
+                  <CheckCircle2Icon className="w-4 h-4 text-[#4573A2]" />
                   Logo hochgeladen
                 </p>
                 <p className="text-[11px] text-gray-500 mt-0.5">Farben automatisch extrahiert</p>
@@ -173,7 +173,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
               type="button"
               onClick={handleReset}
               className="text-gray-400 hover:text-gray-600"
-              aria-label="Anderes Logo waehlen"
+              aria-label="Anderes Logo wählen"
             >
               <XIcon className="w-4 h-4" />
             </button>

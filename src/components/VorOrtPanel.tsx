@@ -156,7 +156,7 @@ export default function VorOrtPanel({ fallId, kundeName, kennzeichen, adresse, o
         <div className="px-4 py-3 border-t border-gray-200 shrink-0">
           <button onClick={handleComplete} disabled={completing || fotosErledigt < 4}
             className="w-full bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-white text-sm font-medium py-3 rounded-lg transition-colors">
-            {completing ? 'Wird gespeichert...' : 'Besichtigung abschliessen'}
+            {completing ? 'Wird gespeichert...' : 'Besichtigung abschließen'}
           </button>
           {fotosErledigt < 4 && <p className="text-gray-400 text-[10px] text-center mt-1">Min. 4 Fotos benötigt</p>}
         </div>
