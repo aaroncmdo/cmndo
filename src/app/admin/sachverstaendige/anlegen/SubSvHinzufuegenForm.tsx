@@ -6,7 +6,7 @@ import { CheckCircle2Icon, MailIcon } from 'lucide-react'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { anlegeSubSv } from './actions'
-import { PAKET_KONFIG, ANREDE_OPTIONEN, TITEL_OPTIONEN, type AnlegePaket } from './constants'
+import { PAKET_KONFIG, ANREDE_OPTIONEN, TITEL_OPTIONEN, QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN, type AnlegePaket } from './constants'
 
 // ARCH-1 Phase 2 (BLOCK C): Sub-SV zu bestehender Buero-Org hinzufuegen.
 
@@ -29,6 +29,14 @@ export default function SubSvHinzufuegenForm({ organisationen, onSuccess }: {
   const [anschriftPlaceId, setAnschriftPlaceId] = useState('')
   const [anschriftPlz, setAnschriftPlz] = useState('')
   const [paket, setPaket] = useState<AnlegePaket>('standard')
+  // KFZ-154: 3 Spezialisierungs-Listen
+  const [qualifikationen, setQualifikationen] = useState<string[]>([])
+  const [spezifikationen, setSpezifikationen] = useState<string[]>([])
+  const [schadenarten, setSchadenarten] = useState<string[]>([])
+
+  function toggleTag(setter: (fn: (prev: string[]) => string[]) => void, value: string) {
+    setter(prev => prev.includes(value) ? prev.filter(x => x !== value) : [...prev, value])
+  }
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<{ sv_id: string; org_name: string } | null>(null)
@@ -64,6 +72,9 @@ export default function SubSvHinzufuegenForm({ organisationen, onSuccess }: {
       anschrift_place_id: anschriftPlaceId || undefined,
       anschrift_plz: anschriftPlz,
       paket,
+      qualifikationen,
+      spezifikationen,
+      schadenarten,
     })
     setSaving(false)
     if (!r.success) { setError(r.error ?? 'Anlegen fehlgeschlagen'); return }
@@ -178,6 +189,29 @@ export default function SubSvHinzufuegenForm({ organisationen, onSuccess }: {
           </div>
         </div>
 
+        {/* KFZ-154: Spezialisierungen */}
+        <div className="pt-3 border-t border-gray-200 space-y-3">
+          <p className="text-xs text-gray-500 uppercase tracking-wide">Spezialisierungen</p>
+          <TagSection
+            title="Qualifikationen"
+            options={QUALIFIKATIONEN}
+            selected={qualifikationen}
+            onToggle={v => toggleTag(setQualifikationen, v)}
+          />
+          <TagSection
+            title="Spezifikationen"
+            options={SPEZIFIKATIONEN}
+            selected={spezifikationen}
+            onToggle={v => toggleTag(setSpezifikationen, v)}
+          />
+          <TagSection
+            title="Schadenarten"
+            options={SCHADENARTEN}
+            selected={schadenarten}
+            onToggle={v => toggleTag(setSchadenarten, v)}
+          />
+        </div>
+
         <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-xl p-3 flex items-start gap-3">
           <MailIcon className="w-4 h-4 text-[#1E3A5F] flex-shrink-0 mt-0.5" />
           <p className="text-xs text-gray-700">
@@ -201,6 +235,41 @@ export default function SubSvHinzufuegenForm({ organisationen, onSuccess }: {
         >
           Sub-SV anlegen + Welcome-Mail senden
         </LoadingButton>
+      </div>
+    </div>
+  )
+}
+
+function TagSection({
+  title, options, selected, onToggle,
+}: {
+  title: string
+  options: ReadonlyArray<string>
+  selected: string[]
+  onToggle: (v: string) => void
+}) {
+  return (
+    <div>
+      <div className="flex items-baseline justify-between mb-1.5">
+        <span className="text-xs font-medium text-gray-700">{title}</span>
+        <span className="text-[10px] text-gray-400">{selected.length} gewaehlt</span>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {options.map(opt => {
+          const active = selected.includes(opt)
+          return (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => onToggle(opt)}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
+                active ? 'bg-[#1E3A5F] text-white' : 'bg-gray-100 text-gray-500 hover:text-gray-800'
+              }`}
+            >
+              {opt}
+            </button>
+          )
+        })}
       </div>
     </div>
   )

@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation'
 import Script from 'next/script'
 import { createClient } from '@/lib/supabase/client'
 import { updateOwnProfile } from '@/lib/actions/sv/update-own-profile'
-import { ANREDE_OPTIONEN, TITEL_OPTIONEN } from '@/app/admin/sachverstaendige/anlegen/constants'
+import { ANREDE_OPTIONEN, TITEL_OPTIONEN, QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN } from '@/app/admin/sachverstaendige/anlegen/constants'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { MapPinIcon, InfoIcon } from 'lucide-react'
 
 type Profile = { anrede: string | null; titel: string | null; vorname: string | null; nachname: string | null; telefon: string | null; rolle: string }
-type SV = { id: string; paket: string; gebiet_plz: string | null; ist_aktiv: boolean; max_faelle_monat: number; offene_faelle: number; kalender_typ: string; kalender_sync_aktiv: boolean; kalender_sync_letzte: string | null; qualifikationen: string[] | null; standort_adresse: string | null; standort_plz: string | null; standort_lat: number | null; standort_lng: number | null; standort_place_id: string | null; firmenname: string | null; rechtsform: string | null; steuernummer: string | null; ust_id: string | null; hrb: string | null }
+type SV = { id: string; paket: string; gebiet_plz: string | null; ist_aktiv: boolean; max_faelle_monat: number; offene_faelle: number; kalender_typ: string; kalender_sync_aktiv: boolean; kalender_sync_letzte: string | null; qualifikationen: string[] | null; qualifikationen_neu: string[] | null; spezifikationen: string[] | null; schadenarten: string[] | null; standort_adresse: string | null; standort_plz: string | null; standort_lat: number | null; standort_lng: number | null; standort_place_id: string | null; firmenname: string | null; rechtsform: string | null; steuernummer: string | null; ust_id: string | null; hrb: string | null }
 
 // BUG-91: Klassische deutsche Rechtsformen + 'Einzelunternehmen' als Default
 // fuer Solo-SVs ohne eigene GmbH/UG.
@@ -28,14 +28,9 @@ const RECHTSFORM_OPTIONEN = [
   'AG',
 ] as const
 
-const QUALIFIKATION_OPTIONS = [
-  { value: 'sf-01', label: 'Haftpflichtschaden (SF-01)' },
-  { value: 'sf-02', label: 'Kasko-Schaden (SF-02)' },
-  { value: 'sf-03', label: 'Diebstahl (SF-03)' },
-  { value: 'sf-04', label: 'Elementarschaden (SF-04)' },
-  { value: 'sf-05', label: 'Oldtimer (SF-05)' },
-  { value: 'sf-06', label: 'LKW / Nutzfahrzeug (SF-06)' },
-]
+// KFZ-154: Qualifikationen / Spezifikationen / Schadenarten kommen jetzt aus
+// /admin/sachverstaendige/anlegen/constants.ts (single source of truth).
+// Die alten SF-01..SF-06 Codes wurden ersetzt durch die 3 sauberen Listen.
 
 const PAKET_LABELS: Record<string, string> = {
   standard: 'Standard (10 Faelle/Monat)', 'starter-10': 'Standard (10 Faelle/Monat)',
@@ -362,10 +357,39 @@ export default function ProfilClient({
           </div>
         </div>
 
-        {/* Qualifikationen */}
+        {/* KFZ-154: 3 Spezialisierungs-Listen */}
         <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-5">
-          <h2 className="text-sm font-medium text-gray-500 mb-4">Qualifikationen</h2>
-          <QualifikationenSection svId={sv.id} initialQualifikationen={sv.qualifikationen ?? []} />
+          <h2 className="text-sm font-medium text-gray-500 mb-1">Spezialisierungen</h2>
+          <p className="text-xs text-gray-400 mb-4">
+            Wir nutzen diese Angaben um dir passende Faelle zuzuordnen. Aenderungen werden sofort gespeichert.
+          </p>
+          <div className="space-y-5">
+            <SpezSection
+              svId={sv.id}
+              column="qualifikationen_neu"
+              legacyColumn="qualifikationen"
+              title="Qualifikationen"
+              hint="Was bietest du fachlich an?"
+              options={QUALIFIKATIONEN}
+              initial={sv.qualifikationen_neu ?? sv.qualifikationen ?? []}
+            />
+            <SpezSection
+              svId={sv.id}
+              column="spezifikationen"
+              title="Spezifikationen"
+              hint="Auf welche Fahrzeug-Arten bist du spezialisiert?"
+              options={SPEZIFIKATIONEN}
+              initial={sv.spezifikationen ?? []}
+            />
+            <SpezSection
+              svId={sv.id}
+              column="schadenarten"
+              title="Schadenarten"
+              hint="Welche Schadenarten bearbeitest du?"
+              options={SCHADENARTEN}
+              initial={sv.schadenarten ?? []}
+            />
+          </div>
         </div>
 
         {/* Offene Terminanfragen */}
@@ -628,55 +652,80 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
   )
 }
 
-function QualifikationenSection({ svId, initialQualifikationen }: { svId: string; initialQualifikationen: string[] }) {
-  const [quals, setQuals] = useState<string[]>(initialQualifikationen)
+// KFZ-154: SV pflegt seine 3 Spezialisierungs-Listen direkt aus dem Profil
+// (Tags, dual-write fuer qualifikationen → legacy-column zusaetzlich).
+function SpezSection({
+  svId, column, legacyColumn, title, hint, options, initial,
+}: {
+  svId: string
+  column: 'qualifikationen_neu' | 'spezifikationen' | 'schadenarten'
+  legacyColumn?: 'qualifikationen'
+  title: string
+  hint: string
+  options: ReadonlyArray<string>
+  initial: string[]
+}) {
+  const [values, setValues] = useState<string[]>(initial)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
-  async function toggleQual(value: string) {
-    const newQuals = quals.includes(value)
-      ? quals.filter(q => q !== value)
-      : [...quals, value]
-    setQuals(newQuals)
+  async function toggle(value: string) {
+    const next = values.includes(value) ? values.filter(v => v !== value) : [...values, value]
+    setValues(next)
     setSaving(true)
-    const supabase = createClient()
-    await supabase
-      .from('sachverstaendige')
-      .update({ qualifikationen: newQuals })
-      .eq('id', svId)
-    setSaving(false)
-    router.refresh()
+    setError(null)
+    try {
+      const supabase = createClient()
+      const update: Record<string, string[]> = { [column]: next }
+      // KFZ-154 Dual-Write: qualifikationen-Spalte wird zusaetzlich geschrieben
+      // damit /admin/karte und andere Read-Side Anzeigen weiter funktionieren.
+      if (legacyColumn) update[legacyColumn] = next
+      const { error: updErr } = await supabase
+        .from('sachverstaendige')
+        .update(update)
+        .eq('id', svId)
+      if (updErr) {
+        setError(updErr.message)
+        setValues(values) // rollback UI
+      } else {
+        router.refresh()
+      }
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
-    <div className="space-y-2">
-      {QUALIFIKATION_OPTIONS.map(opt => {
-        const active = quals.includes(opt.value)
-        return (
-          <button
-            key={opt.value}
-            onClick={() => toggleQual(opt.value)}
-            disabled={saving}
-            className={`w-full flex items-center gap-3 text-left px-4 py-3 rounded-xl border text-sm transition-all ${
-              active
-                ? 'border-[#4573A2]/50 bg-[#4573A2]/10 text-[#7BA3CC]'
-                : 'border-gray-300 bg-gray-100/50 text-gray-500 hover:border-gray-300'
-            }`}
-          >
-            <div className={`w-4 h-4 rounded border flex items-center justify-center ${
-              active ? 'border-[#4573A2] bg-[#4573A2]' : 'border-gray-300'
-            }`}>
-              {active && (
-                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                </svg>
-              )}
-            </div>
-            {opt.label}
-          </button>
-        )
-      })}
-      {saving && <p className="text-gray-500 text-xs">Wird gespeichert...</p>}
+    <div>
+      <div className="flex items-baseline justify-between mb-1">
+        <h3 className="text-sm font-medium text-gray-800">{title}</h3>
+        <span className="text-[10px] text-gray-400">
+          {values.length} gewaehlt{saving ? ' · speichert...' : ''}
+        </span>
+      </div>
+      <p className="text-xs text-gray-500 mb-2">{hint}</p>
+      <div className="flex flex-wrap gap-1.5">
+        {options.map(opt => {
+          const active = values.includes(opt)
+          return (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => toggle(opt)}
+              disabled={saving}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-60 ${
+                active
+                  ? 'bg-[#4573A2] text-white'
+                  : 'bg-gray-100 text-gray-500 hover:text-gray-800'
+              }`}
+            >
+              {opt}
+            </button>
+          )
+        })}
+      </div>
+      {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
     </div>
   )
 }

@@ -113,11 +113,17 @@ export async function anlegeSv(data: AnlegeSvFormData): Promise<{ success: boole
   }
 
   // 3. sachverstaendige (mit ARCH-1 Status)
+  // KFZ-154: Dual-Write — qualifikationen (legacy column, fuer alte Read-Side
+  // wie /admin/karte) bekommt das gleiche Array wie qualifikationen_neu plus
+  // spezifikationen + schadenarten gehen in eigene Spalten.
   const { data: svRow, error: svErr } = await adminDb.from('sachverstaendige').insert({
     profile_id: authUser.user.id,
     paket: data.paket === 'individuell' ? 'standard' : data.paket, // 'individuell' wird intern als 'standard' geflaggt mit Override
     gutachter_typ: data.gutachter_typ,
     qualifikationen: data.qualifikationen,
+    qualifikationen_neu: data.qualifikationen,
+    spezifikationen: data.spezifikationen ?? [],
+    schadenarten: data.schadenarten ?? [],
     standort_adresse: data.anschrift,
     standort_plz: data.anschrift_plz,
     standort_lat: data.anschrift_lat,
@@ -395,12 +401,18 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
     }
 
     // 5c. Sub sachverstaendige (immer ein neuer Eintrag, auch wenn Email wiederverwendet)
+    // KFZ-154: Spezialisierungen pro Sub-SV (3 Listen, dual-write).
+    const subQual = std.qualifikationen ?? []
     const { data: subSvRow } = await adminDb.from('sachverstaendige').insert({
       profile_id: subUserId,
       organisation_id: organisationId,
       rolle_in_organisation: 'mitarbeiter',
       paket: std.paket === 'individuell' ? 'standard' : std.paket,
       gutachter_typ: 'kfz-gutachter',
+      qualifikationen: subQual,
+      qualifikationen_neu: subQual,
+      spezifikationen: std.spezifikationen ?? [],
+      schadenarten: std.schadenarten ?? [],
       gebiet_plz: std.anschrift_plz ? [std.anschrift_plz] : [],
       max_faelle_monat: subCfg.kontingent,
       paket_faelle_gesamt: subCfg.kontingent,
@@ -520,6 +532,10 @@ export async function anlegeSubSv(params: {
   anschrift_place_id?: string
   anschrift_plz: string
   paket: AnlegePaket
+  // KFZ-154: pro Sub-SV eigene Spezialisierungen
+  qualifikationen?: string[]
+  spezifikationen?: string[]
+  schadenarten?: string[]
 }): Promise<{ success: boolean; error?: string; sv_id?: string }> {
   const auth = await ensureAdmin()
   if (!auth.ok) return { success: false, error: auth.error }
@@ -571,12 +587,18 @@ export async function anlegeSubSv(params: {
     return { success: false, error: `Profil fehlgeschlagen: ${profileErr.message}` }
   }
 
+  // KFZ-154: dual-write fuer Spezialisierungen
+  const subQual = params.qualifikationen ?? []
   const { data: svRow, error: svErr } = await adminDb.from('sachverstaendige').insert({
     profile_id: subUserId,
     organisation_id: params.organisation_id,
     rolle_in_organisation: 'mitarbeiter',
     paket: params.paket === 'individuell' ? 'standard' : params.paket,
     gutachter_typ: 'kfz-gutachter',
+    qualifikationen: subQual,
+    qualifikationen_neu: subQual,
+    spezifikationen: params.spezifikationen ?? [],
+    schadenarten: params.schadenarten ?? [],
     gebiet_plz: params.anschrift_plz ? [params.anschrift_plz] : [],
     max_faelle_monat: cfg.kontingent,
     paket_faelle_gesamt: cfg.kontingent,

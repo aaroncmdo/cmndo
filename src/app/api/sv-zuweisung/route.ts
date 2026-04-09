@@ -52,10 +52,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'fall_id fehlt' }, { status: 400 })
   }
 
-  // 1. Fall laden
+  // 1. Fall laden — KFZ-154: zusaetzlich spezifikation + schadenart fuer Match
   const { data: fall, error: fallErr } = await supabase
     .from('faelle')
-    .select('id, schadens_plz, sv_id, status')
+    .select('id, schadens_plz, sv_id, status, spezifikation, schadenart')
     .eq('id', fallId)
     .single()
 
@@ -77,9 +77,10 @@ export async function POST(request: Request) {
     .single()
 
   // 3. Alle aktiven SVs mit Kapazität laden
+  // KFZ-154: zusaetzlich spezifikationen + schadenarten fuer den Match
   const { data: svList, error: svErr } = await supabase
     .from('sachverstaendige')
-    .select('id, lat, lng, partner_seit, offene_faelle, max_faelle_monat, standort_lat, standort_lng, isochrone_polygon, paket_umkreis_km')
+    .select('id, lat, lng, partner_seit, offene_faelle, max_faelle_monat, standort_lat, standort_lng, isochrone_polygon, paket_umkreis_km, spezifikationen, schadenarten')
     .eq('ist_aktiv', true)
 
   if (svErr || !svList || svList.length === 0) {
@@ -90,7 +91,8 @@ export async function POST(request: Request) {
   }
 
   // 4. Filtern: Kapazität + Umkreis 40 km
-  type Candidate = (typeof svList)[number] & { distanz_km: number | null }
+  // KFZ-154: spezifikation als Hard-Filter mit Fallback, schadenart als Soft-Priority
+  type Candidate = (typeof svList)[number] & { distanz_km: number | null; spez_match: boolean; schaden_match: boolean }
 
   const candidates: Candidate[] = []
 
@@ -125,7 +127,12 @@ export async function POST(request: Request) {
     }
 
     if (inRange) {
-      candidates.push({ ...sv, distanz_km: distanz })
+      // KFZ-154 Match-Flags pro Kandidat
+      const svSpez = (sv.spezifikationen as string[] | null) ?? []
+      const svSchaden = (sv.schadenarten as string[] | null) ?? []
+      const spezMatch = !fall.spezifikation || svSpez.includes(fall.spezifikation)
+      const schadenMatch = !!fall.schadenart && svSchaden.includes(fall.schadenart)
+      candidates.push({ ...sv, distanz_km: distanz, spez_match: spezMatch, schaden_match: schadenMatch })
     }
   }
 
@@ -136,14 +143,29 @@ export async function POST(request: Request) {
     )
   }
 
-  // 5. Sortieren: partner_seit ASC (länger dabei = Vorrang)
-  candidates.sort((a, b) => {
+  // KFZ-154: Hard-Filter Spezifikation mit Fallback. Wenn der Fall eine
+  // Spezifikation gesetzt hat und es Kandidaten mit Spez-Match gibt, NUR die
+  // verwenden. Sonst (kein Match) Fallback auf alle (besser einer als keiner)
+  // mit Warning-Log.
+  let matchedCandidates = candidates
+  if (fall.spezifikation) {
+    const withSpez = candidates.filter(c => c.spez_match)
+    if (withSpez.length > 0) {
+      matchedCandidates = withSpez
+    } else {
+      console.warn(`[KFZ-154] sv-zuweisung fall=${fallId} spezifikation='${fall.spezifikation}' kein passender SV — Fallback auf ${candidates.length} ohne Spez-Match`)
+    }
+  }
+
+  // 5. Sortieren: schadenart-Match (true vor false), dann partner_seit ASC
+  matchedCandidates.sort((a, b) => {
+    if (a.schaden_match !== b.schaden_match) return a.schaden_match ? -1 : 1
     const da = a.partner_seit ? new Date(a.partner_seit).getTime() : Infinity
     const db = b.partner_seit ? new Date(b.partner_seit).getTime() : Infinity
     return da - db
   })
 
-  const bestSv = candidates[0]
+  const bestSv = matchedCandidates[0]
 
   // 6. Fall updaten: SV zuweisen + Status ändern
   const now = new Date().toISOString()

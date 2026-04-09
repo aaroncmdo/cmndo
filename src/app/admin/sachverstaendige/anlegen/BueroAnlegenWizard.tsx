@@ -3,11 +3,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  Building2Icon, UsersIcon, CheckCircle2Icon, MailIcon, PlusIcon, TrashIcon,
+  Building2Icon, UsersIcon, CheckCircle2Icon, MailIcon, PlusIcon, TrashIcon, AlertTriangleIcon,
 } from 'lucide-react'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { anlegeBuero } from './actions'
-import { PAKET_KONFIG, paketAnzahlung, ANREDE_OPTIONEN, TITEL_OPTIONEN, type AnlegePaket, type AnlegeBueroFormData } from './constants'
+import { PAKET_KONFIG, paketAnzahlung, ANREDE_OPTIONEN, TITEL_OPTIONEN, QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN, type AnlegePaket, type AnlegeBueroFormData } from './constants'
 
 // ARCH-1 Phase 2 (BLOCK C): 3-Step Buero-Anlegen Wizard fuer den Admin.
 
@@ -31,6 +31,10 @@ type SubStandort = {
   sub_vorname: string
   sub_nachname: string
   paket: AnlegePaket
+  // KFZ-154
+  qualifikationen: string[]
+  spezifikationen: string[]
+  schadenarten: string[]
 }
 
 function newSubStandort(): SubStandort {
@@ -41,6 +45,7 @@ function newSubStandort(): SubStandort {
     sub_anrede: '', sub_titel: '',
     sub_email: '', sub_vorname: '', sub_nachname: '',
     paket: 'standard',
+    qualifikationen: [], spezifikationen: [], schadenarten: [],
   }
 }
 
@@ -53,6 +58,21 @@ export default function BueroAnlegenWizard({ onSuccess }: {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<{ organisation_id: string; sub_count: number } | null>(null)
+
+  // BUG-94: Statt silent disabled Button — wir validieren beim Klick und
+  // markieren fehlende Felder mit rotem Border + Alert-Box. Die alte
+  // canNext()-Logik hat den Button silent disabled, sodass Aaron nicht
+  // wusste welches Feld fehlt.
+  const [missingFields, setMissingFields] = useState<string[]>([])
+  const [fieldErrors, setFieldErrors] = useState<Set<string>>(new Set())
+  function clearFieldError(field: string) {
+    if (!fieldErrors.has(field)) return
+    setFieldErrors(prev => {
+      const next = new Set(prev)
+      next.delete(field)
+      return next
+    })
+  }
 
   // Inhaber + Buero
   const [inhaberAnrede, setInhaberAnrede] = useState('')
@@ -92,6 +112,15 @@ export default function BueroAnlegenWizard({ onSuccess }: {
     setStandorte(prev => prev.map(s => s.id === id ? { ...s, [key]: value } : s))
   }
 
+  // KFZ-154: toggle einer Spezialisierung pro Standort
+  function toggleStandortTag(id: string, key: 'qualifikationen' | 'spezifikationen' | 'schadenarten', value: string) {
+    setStandorte(prev => prev.map(s => {
+      if (s.id !== id) return s
+      const cur = s[key]
+      return { ...s, [key]: cur.includes(value) ? cur.filter(x => x !== value) : [...cur, value] }
+    }))
+  }
+
   function setStandortPlace(id: string, place: { adresse: string; plz: string; lat: number; lng: number; place_id: string }) {
     setStandorte(prev => prev.map(s => s.id === id ? {
       ...s,
@@ -105,21 +134,48 @@ export default function BueroAnlegenWizard({ onSuccess }: {
 
   const gesamtAnzahlung = standorte.reduce((sum, s) => sum + paketAnzahlung(s.paket), 0)
 
-  function canNext(): boolean {
-    if (step === 0) return !!(
-      inhaberAnrede && inhaberVorname && inhaberNachname && inhaberEmail &&
-      bueroName && bueroSteuernummer &&
-      // BUG-93: Buero-Anschrift via Places ist Pflicht
-      bueroAnschriftLat !== null && bueroAnschriftLng !== null
-    )
-    if (step === 1) {
-      if (standorte.length === 0) return false
-      return standorte.every(s =>
-        s.name && s.sub_anrede && s.sub_email && s.sub_vorname && s.sub_nachname &&
-        s.anschrift_lat !== null && s.anschrift_lng !== null
-      )
+  // BUG-94: Validation-Funktionen statt canNext(). Gibt Liste der fehlenden
+  // Felder + Set der Field-IDs zurueck, sodass wir die individuellen Felder
+  // rot einfaerben und die Alert-Box oben anzeigen koennen.
+  function validateStep0(): { missing: string[]; fields: Set<string> } {
+    const missing: string[] = []
+    const fields = new Set<string>()
+    if (!inhaberAnrede) { missing.push('Anrede'); fields.add('inhaberAnrede') }
+    if (!inhaberVorname.trim()) { missing.push('Vorname'); fields.add('inhaberVorname') }
+    if (!inhaberNachname.trim()) { missing.push('Nachname'); fields.add('inhaberNachname') }
+    if (!inhaberEmail.trim()) { missing.push('Email'); fields.add('inhaberEmail') }
+    if (!inhaberTelefon.trim()) { missing.push('Telefon'); fields.add('inhaberTelefon') }
+    if (!bueroName.trim()) { missing.push('Buero-Name'); fields.add('bueroName') }
+    if (!bueroRechtsform.trim()) { missing.push('Rechtsform'); fields.add('bueroRechtsform') }
+    if (!bueroSteuernummer.trim()) { missing.push('Steuernummer'); fields.add('bueroSteuernummer') }
+    if (bueroAnschriftLat === null || bueroAnschriftLng === null) {
+      missing.push('Hauptbuero-Anschrift (mit Geo)')
+      fields.add('bueroAnschrift')
     }
-    return true
+    return { missing, fields }
+  }
+
+  function validateStep1(): { missing: string[]; fields: Set<string> } {
+    const missing: string[] = []
+    const fields = new Set<string>()
+    if (standorte.length === 0) {
+      missing.push('Mindestens ein Standort')
+      return { missing, fields }
+    }
+    standorte.forEach((s, idx) => {
+      const istHauptbuero = idx === 0
+      const labelPrefix = istHauptbuero ? 'Hauptbuero' : `Standort ${idx + 1}`
+      if (!s.name.trim()) { missing.push(`${labelPrefix}: Name`); fields.add(`std-${s.id}-name`) }
+      if (!s.sub_anrede) { missing.push(`${labelPrefix}: Anrede`); fields.add(`std-${s.id}-anrede`) }
+      if (!s.sub_vorname.trim()) { missing.push(`${labelPrefix}: Vorname`); fields.add(`std-${s.id}-vorname`) }
+      if (!s.sub_nachname.trim()) { missing.push(`${labelPrefix}: Nachname`); fields.add(`std-${s.id}-nachname`) }
+      if (!s.sub_email.trim()) { missing.push(`${labelPrefix}: Email`); fields.add(`std-${s.id}-email`) }
+      if (!istHauptbuero && (s.anschrift_lat === null || s.anschrift_lng === null)) {
+        missing.push(`${labelPrefix}: Anschrift (mit Geo)`)
+        fields.add(`std-${s.id}-anschrift`)
+      }
+    })
+    return { missing, fields }
   }
 
   // BUG-93: Beim Wechsel von Step 0 → Step 1 standorte[0] (Hauptbuero) automatisch
@@ -188,6 +244,9 @@ export default function BueroAnlegenWizard({ onSuccess }: {
         sub_vorname: s.sub_vorname,
         sub_nachname: s.sub_nachname,
         paket: s.paket,
+        qualifikationen: s.qualifikationen,
+        spezifikationen: s.spezifikationen,
+        schadenarten: s.schadenarten,
       })),
     }
 
@@ -466,6 +525,28 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                     ))}
                   </div>
                 </div>
+                {/* KFZ-154: Pro Sub-SV eigene Spezialisierungen (3 Listen) */}
+                <div className="pt-3 mt-3 border-t border-gray-200 space-y-3">
+                  <p className="text-[10px] uppercase tracking-wide text-gray-400">Spezialisierungen dieses Sub-SV</p>
+                  <TagSection
+                    title="Qualifikationen"
+                    options={QUALIFIKATIONEN}
+                    selected={std.qualifikationen}
+                    onToggle={v => toggleStandortTag(std.id, 'qualifikationen', v)}
+                  />
+                  <TagSection
+                    title="Spezifikationen"
+                    options={SPEZIFIKATIONEN}
+                    selected={std.spezifikationen}
+                    onToggle={v => toggleStandortTag(std.id, 'spezifikationen', v)}
+                  />
+                  <TagSection
+                    title="Schadenarten"
+                    options={SCHADENARTEN}
+                    selected={std.schadenarten}
+                    onToggle={v => toggleStandortTag(std.id, 'schadenarten', v)}
+                  />
+                </div>
               </div>
               )
             })}
@@ -549,12 +630,49 @@ export default function BueroAnlegenWizard({ onSuccess }: {
               else if (step < STEPS.length - 1) setStep(step + 1)
               else handleSubmit()
             }}
-            disabled={saving || !canNext()}
+            disabled={saving || (step === 0 ? validateStep0().missing.length > 0 : step === 1 ? validateStep1().missing.length > 0 : false)}
             className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40"
           >
             {saving ? 'Wird angelegt...' : step < STEPS.length - 1 ? 'Weiter' : 'Büro anlegen + Welcome-Mails senden'}
           </button>
         </div>
+      </div>
+    </div>
+  )
+}
+
+function TagSection({
+  title, options, selected, onToggle,
+}: {
+  title: string
+  options: ReadonlyArray<string>
+  selected: string[]
+  onToggle: (v: string) => void
+}) {
+  return (
+    <div>
+      <div className="flex items-baseline justify-between mb-1.5">
+        <span className="text-xs font-medium text-gray-700">{title}</span>
+        <span className="text-[10px] text-gray-400">{selected.length} gewaehlt</span>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {options.map(opt => {
+          const active = selected.includes(opt)
+          return (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => onToggle(opt)}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
+                active
+                  ? 'bg-[#1E3A5F] text-white'
+                  : 'bg-gray-100 text-gray-500 hover:text-gray-800'
+              }`}
+            >
+              {opt}
+            </button>
+          )
+        })}
       </div>
     </div>
   )

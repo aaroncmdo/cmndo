@@ -62,6 +62,10 @@ export async function POST(request: Request) {
   const plz: string | undefined = body?.plz
   const wunschtermin: string | undefined = body?.wunschtermin
   const schadenfallTyp: string | undefined = body?.schadenfall_typ
+  // KFZ-154: zusaetzlich Spezifikation (Hard-Filter mit Fallback) und
+  // Schadenart (Soft-Score Bonus) per Body-Param.
+  const spezifikation: string | undefined = body?.spezifikation
+  const schadenart: string | undefined = body?.schadenart
   const directLat: number | undefined = body?.lat
   const directLng: number | undefined = body?.lng
 
@@ -82,16 +86,18 @@ export async function POST(request: Request) {
   }
 
   // 2. Alle aktiven SVs
+  // KFZ-154: zusaetzlich qualifikationen_neu + spezifikationen + schadenarten
   const { data: svList } = await supabase
     .from('sachverstaendige')
-    .select('id, partner_seit, offene_faelle, max_faelle_monat, paket, qualifikationen, ist_aktiv, profile_id, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_lat, standort_lng, isochrone_polygon')
+    .select('id, partner_seit, offene_faelle, max_faelle_monat, paket, qualifikationen, qualifikationen_neu, spezifikationen, schadenarten, ist_aktiv, profile_id, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_lat, standort_lng, isochrone_polygon')
     .eq('ist_aktiv', true)
     .eq('portal_zugang_freigeschaltet', true) // KFZ-148: Nur freigeschaltete SVs
 
   if (!svList?.length) return NextResponse.json({ empfohlen: null, alternative_1: null, alternative_2: null, alle_kandidaten: [], sv_gesucht: true })
 
   // 3. Filter + Scoring
-  type Candidate = (typeof svList)[number] & { distanz_km: number | null; score: number }
+  // KFZ-154: spez_match Flag (Hard-Filter mit Fallback unten), schaden_match Bonus
+  type Candidate = (typeof svList)[number] & { distanz_km: number | null; score: number; spez_match: boolean; schaden_match: boolean }
   const candidates: Candidate[] = []
 
   for (const sv of svList) {
@@ -117,24 +123,46 @@ export async function POST(request: Request) {
     const genutztFaelle = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
     if (genutztFaelle >= maxFaelle) continue
 
+    // KFZ-154: Spezialisierungs-Match-Flags
+    const svSpez = (sv.spezifikationen as string[] | null) ?? []
+    const svSchaden = (sv.schadenarten as string[] | null) ?? []
+    const svQualNeu = (sv.qualifikationen_neu as string[] | null) ?? []
+    const spezMatch = !spezifikation || svSpez.includes(spezifikation)
+    const schadenMatch = !!schadenart && svSchaden.includes(schadenart)
+
     let score = 0
     if (sv.partner_seit) score -= Math.min((Date.now() - new Date(sv.partner_seit).getTime()) / (365.25 * 86400000), 10) * 10
     score -= (maxFaelle > 0 ? 1 - (genutztFaelle / maxFaelle) : 0.5) * 30
-    if (schadenfallTyp && Array.isArray(sv.qualifikationen) && sv.qualifikationen.includes(schadenfallTyp)) score -= 50
+    // Legacy qualifikationen-Match (schadenfall_typ Body-Param)
+    if (schadenfallTyp && (svQualNeu.includes(schadenfallTyp) || (Array.isArray(sv.qualifikationen) && sv.qualifikationen.includes(schadenfallTyp)))) score -= 50
+    // KFZ-154: schadenart-Match Bonus (Soft-Priority -40)
+    if (schadenMatch) score -= 40
     if (distanz != null) score += distanz
 
-    candidates.push({ ...sv, distanz_km: distanz, score })
+    candidates.push({ ...sv, distanz_km: distanz, score, spez_match: spezMatch, schaden_match: schadenMatch })
   }
 
   if (!candidates.length) {
     return NextResponse.json({ empfohlen: null, alternative_1: null, alternative_2: null, alle_kandidaten: [], sv_gesucht: true })
   }
 
-  candidates.sort((a, b) => a.score - b.score)
-  console.log(`[matching] ${candidates.length} Kandidaten im Gebiet`)
+  // KFZ-154: Hard-Filter Spezifikation mit Fallback. Wenn passender Spez-Match
+  // existiert: NUR diese verwenden. Sonst Fallback auf alle Kandidaten + Warning.
+  let workingCandidates = candidates
+  if (spezifikation) {
+    const withSpez = candidates.filter(c => c.spez_match)
+    if (withSpez.length > 0) {
+      workingCandidates = withSpez
+    } else {
+      console.warn(`[KFZ-154] gutachter-matching plz=${plz} spezifikation='${spezifikation}' kein passender SV — Fallback auf ${candidates.length} ohne Spez-Match`)
+    }
+  }
 
-  // 4. Profile-Namen
-  const topCandidates = candidates.slice(0, 10)
+  workingCandidates.sort((a, b) => a.score - b.score)
+  console.log(`[matching] ${workingCandidates.length}/${candidates.length} Kandidaten im Gebiet (KFZ-154 spez_filter=${!!spezifikation})`)
+
+  // 4. Profile-Namen — KFZ-154: aus dem ggf. spez-gefilterten workingCandidates
+  const topCandidates = workingCandidates.slice(0, 10)
   const profileIds = topCandidates.map(c => c.profile_id).filter(Boolean)
   const { data: profiles } = profileIds.length > 0
     ? await supabase.from('profiles').select('id, vorname, nachname').in('id', profileIds)

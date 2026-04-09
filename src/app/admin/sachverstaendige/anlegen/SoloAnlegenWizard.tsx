@@ -9,7 +9,7 @@ import {
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { anlegeSv } from './actions'
-import { PAKET_KONFIG, paketAnzahlung, paketKontingent, QUALIFIKATIONEN, ANREDE_OPTIONEN, TITEL_OPTIONEN, type AnlegePaket, type GutachterTyp, type AnlegeSvFormData } from './constants'
+import { PAKET_KONFIG, paketAnzahlung, paketKontingent, QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN, ANREDE_OPTIONEN, TITEL_OPTIONEN, type AnlegePaket, type GutachterTyp, type AnlegeSvFormData } from './constants'
 
 // ARCH-1 Phase 2 (BLOCK C): 4-Step Solo-Anlegen Wizard fuer den Admin.
 
@@ -43,6 +43,8 @@ type FormState = {
   paket_override_radius_km: string
   paket_override_anzahlung_eur: string
   qualifikationen: string[]
+  spezifikationen: string[]
+  schadenarten: string[]
 }
 
 const initialState: FormState = {
@@ -56,6 +58,8 @@ const initialState: FormState = {
   paket_override_radius_km: '',
   paket_override_anzahlung_eur: '',
   qualifikationen: [],
+  spezifikationen: [],
+  schadenarten: [],
 }
 
 export default function SoloAnlegenWizard({ onSuccess }: {
@@ -79,6 +83,16 @@ export default function SoloAnlegenWizard({ onSuccess }: {
       qualifikationen: prev.qualifikationen.includes(q)
         ? prev.qualifikationen.filter(x => x !== q)
         : [...prev.qualifikationen, q],
+    }))
+  }
+
+  // KFZ-154: 2 weitere Toggle-Helper fuer Spezifikationen + Schadenarten
+  function toggleArrayField(key: 'spezifikationen' | 'schadenarten', value: string) {
+    setData(prev => ({
+      ...prev,
+      [key]: prev[key].includes(value)
+        ? prev[key].filter(x => x !== value)
+        : [...prev[key], value],
     }))
   }
 
@@ -129,6 +143,8 @@ export default function SoloAnlegenWizard({ onSuccess }: {
       paket_override_radius_km: data.paket_override_radius_km ? parseInt(data.paket_override_radius_km, 10) : undefined,
       paket_override_anzahlung_eur: overrideAnzahlung,
       qualifikationen: data.qualifikationen,
+      spezifikationen: data.spezifikationen,
+      schadenarten: data.schadenarten,
     }
 
     const r = await anlegeSv(payload)
@@ -357,28 +373,30 @@ export default function SoloAnlegenWizard({ onSuccess }: {
           </div>
         )}
 
-        {/* SCHRITT 2: Qualifikationen */}
+        {/* SCHRITT 2: Qualifikationen / Spezifikationen / Schadenarten (KFZ-154) */}
         {step === 2 && (
-          <div className="space-y-3">
-            <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs">
-              KFZ-154 (Aufteilung in Qualifikationen / Spezifikationen / Schadenarten) ist noch nicht implementiert. Bis dahin: einfaches Multi-Select.
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {QUALIFIKATIONEN.map(q => (
-                <button
-                  key={q}
-                  type="button"
-                  onClick={() => toggleQualifikation(q)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    data.qualifikationen.includes(q)
-                      ? 'bg-[#1E3A5F] text-white'
-                      : 'bg-gray-100 text-gray-500 hover:text-gray-800'
-                  }`}
-                >
-                  {q}
-                </button>
-              ))}
-            </div>
+          <div className="space-y-5">
+            <TagSection
+              title="Qualifikationen"
+              hint="Was kann der SV fachlich anbieten?"
+              options={QUALIFIKATIONEN}
+              selected={data.qualifikationen}
+              onToggle={toggleQualifikation}
+            />
+            <TagSection
+              title="Spezifikationen"
+              hint="Auf welche Fahrzeug-Arten ist er spezialisiert?"
+              options={SPEZIFIKATIONEN}
+              selected={data.spezifikationen}
+              onToggle={v => toggleArrayField('spezifikationen', v)}
+            />
+            <TagSection
+              title="Schadenarten"
+              hint="Welche Schadenarten bearbeitet er?"
+              options={SCHADENARTEN}
+              selected={data.schadenarten}
+              onToggle={v => toggleArrayField('schadenarten', v)}
+            />
           </div>
         )}
 
@@ -404,6 +422,12 @@ export default function SoloAnlegenWizard({ onSuccess }: {
                 <p className="text-gray-500 text-xs mt-1">Typ: {data.gutachter_typ === 'kfz-gutachter' ? 'KFZ-Gutachter' : 'DAT-Gutachter'}</p>
                 {data.qualifikationen.length > 0 && (
                   <p className="text-gray-500 text-xs mt-1">Qualifikationen: {data.qualifikationen.join(', ')}</p>
+                )}
+                {data.spezifikationen.length > 0 && (
+                  <p className="text-gray-500 text-xs mt-1">Spezifikationen: {data.spezifikationen.join(', ')}</p>
+                )}
+                {data.schadenarten.length > 0 && (
+                  <p className="text-gray-500 text-xs mt-1">Schadenarten: {data.schadenarten.join(', ')}</p>
                 )}
               </div>
             </div>
@@ -475,6 +499,45 @@ function Field({
         placeholder={placeholder}
         className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
       />
+    </div>
+  )
+}
+
+function TagSection({
+  title, hint, options, selected, onToggle,
+}: {
+  title: string
+  hint: string
+  options: ReadonlyArray<string>
+  selected: string[]
+  onToggle: (v: string) => void
+}) {
+  return (
+    <div>
+      <div className="flex items-baseline justify-between mb-2">
+        <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+        <span className="text-[10px] text-gray-400">{selected.length} gewaehlt</span>
+      </div>
+      <p className="text-xs text-gray-500 mb-2">{hint}</p>
+      <div className="flex flex-wrap gap-1.5">
+        {options.map(opt => {
+          const active = selected.includes(opt)
+          return (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => onToggle(opt)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                active
+                  ? 'bg-[#1E3A5F] text-white'
+                  : 'bg-gray-100 text-gray-500 hover:text-gray-800'
+              }`}
+            >
+              {opt}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }

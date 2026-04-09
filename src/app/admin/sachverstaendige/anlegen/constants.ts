@@ -22,15 +22,64 @@ export function paketKontingent(paket: AnlegePaket, override?: number): number {
   return PAKET_KONFIG[paket].kontingent
 }
 
+// KFZ-154: Qualifikationen / Spezifikationen / Schadenarten als 3 separate
+// Felder. Aaron-Wording: Qualifikationen = was kann der SV fachlich,
+// Spezifikationen = auf welche Fahrzeug-Arten ist er spezialisiert,
+// Schadenarten = welche Arten von Schaeden bearbeitet er.
+// Quelle der Wahrheit: sachverstaendige.qualifikationen_neu / spezifikationen /
+// schadenarten (TEXT[]). Die alte qualifikationen-Spalte bleibt als Fallback.
+
 export const QUALIFIKATIONEN = [
-  'KFZ-Schäden',
+  'Haftpflichtschaden',
+  'Kaskoschaden',
+  'Bewertungen',
+  'Wertgutachten',
+  'Reparaturkostengutachten',
+  'Beweissicherung',
+  'Schiedsgutachten',
+  'Gerichtsgutachten',
+  'Oldtimer-Bewertung',
+  'Leasingrücknahme',
+  'Restwertermittlung',
+  'Wiederbeschaffungswert',
+] as const
+
+export const SPEZIFIKATIONEN = [
+  'PKW',
+  'LKW',
+  'Transporter',
   'Motorrad',
-  'LKW/Nutzfahrzeuge',
+  'Wohnmobil',
+  'Wohnwagen',
+  'Anhänger',
   'Oldtimer',
-  'Elektrofahrzeuge',
-  'Totalschaden-Bewertung',
-  'Unfallrekonstruktion',
-]
+  'Youngtimer',
+  'E-Fahrzeuge',
+  'Hybrid',
+  'Sportwagen',
+  'Nutzfahrzeuge',
+  'Landmaschinen',
+  'Baumaschinen',
+  'Sonderfahrzeuge',
+] as const
+
+export const SCHADENARTEN = [
+  'Karosserieschaden',
+  'Lackschaden',
+  'Hagelschaden',
+  'Brandschaden',
+  'Wasserschaden',
+  'Elementarschaden',
+  'Diebstahlschaden',
+  'Vandalismusschaden',
+  'Glasschaden',
+  'Marderschaden',
+  'Wildschaden',
+  'Motorschaden',
+  'Getriebeschaden',
+  'Totalschaden',
+  'Bagatellschaden',
+] as const
 
 // ARCH-1 POLISH: Anrede + Titel als Dropdowns (Aaron-Feedback). Reihenfolge
 // in Step 1 Person: Anrede → Titel → Vorname → Nachname → ...
@@ -82,8 +131,10 @@ export type AnlegeSvFormData = {
   paket_override_kontingent?: number
   paket_override_radius_km?: number
   paket_override_anzahlung_eur?: number
-  // Qualifikationen
+  // KFZ-154: 3 separate Listen statt einer
   qualifikationen: string[]
+  spezifikationen: string[]
+  schadenarten: string[]
 }
 
 export type AnlegeBueroFormData = {
@@ -127,5 +178,9 @@ export type AnlegeBueroFormData = {
     sub_vorname: string
     sub_nachname: string
     paket: AnlegePaket
+    // KFZ-154: pro Sub-SV eigene Spezialisierungen
+    qualifikationen?: string[]
+    spezifikationen?: string[]
+    schadenarten?: string[]
   }>
 }

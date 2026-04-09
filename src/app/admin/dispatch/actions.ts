@@ -319,6 +319,11 @@ async function convertLeadToFall(
       kennzeichen: lead.kennzeichen,
       fahrzeug_hersteller: lead.fahrzeug_hersteller,
       fahrzeug_modell: lead.fahrzeug_modell,
+      // KFZ-154: Spezifikation + Schadenart fuer den Dispatcher-Match.
+      // Werden vom Lead uebernommen wenn der Lead-Import die Felder mitliefert,
+      // sonst null (Dispatcher faellt ohne Spez-Filter zurueck).
+      spezifikation: lead.spezifikation ?? null,
+      schadenart: lead.schadenart ?? null,
       // Flags vom Lead
       gegner_bekannt: lead.gegner_bekannt ?? true,
       personenschaden_flag: lead.personenschaden_flag ?? false,

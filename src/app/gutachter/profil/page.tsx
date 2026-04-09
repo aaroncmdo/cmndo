@@ -12,7 +12,7 @@ export default async function ProfilPage() {
       .select('anrede, titel, vorname, nachname, telefon, rolle')
       .eq('id', user!.id)
       .single(),
-    getGutachterForUser(supabase, user!.id, 'id, paket, gebiet_plz, ist_aktiv, max_faelle_monat, offene_faelle, kalender_typ, kalender_sync_aktiv, kalender_sync_letzte, qualifikationen, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, firmenname, rechtsform, steuernummer, ust_id, hrb'),
+    getGutachterForUser(supabase, user!.id, 'id, paket, gebiet_plz, ist_aktiv, max_faelle_monat, offene_faelle, kalender_typ, kalender_sync_aktiv, kalender_sync_letzte, qualifikationen, qualifikationen_neu, spezifikationen, schadenarten, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, firmenname, rechtsform, steuernummer, ust_id, hrb'),
     supabase
       .from('faelle')
       .select('id', { count: 'exact', head: true })
@@ -35,7 +35,7 @@ export default async function ProfilPage() {
     <ProfilClient
       email={user!.email ?? ''}
       profile={profile ?? { anrede: null, titel: null, vorname: null, nachname: null, telefon: null, rolle: 'sachverstaendiger' }}
-      sv={sv ?? { id: '', paket: '', gebiet_plz: null, ist_aktiv: true, max_faelle_monat: 10, offene_faelle: 0, kalender_typ: 'keiner', kalender_sync_aktiv: false, kalender_sync_letzte: null, qualifikationen: [], standort_adresse: null, standort_plz: null, standort_lat: null, standort_lng: null, standort_place_id: null, firmenname: null, rechtsform: null, steuernummer: null, ust_id: null, hrb: null }}
+      sv={sv ?? { id: '', paket: '', gebiet_plz: null, ist_aktiv: true, max_faelle_monat: 10, offene_faelle: 0, kalender_typ: 'keiner', kalender_sync_aktiv: false, kalender_sync_letzte: null, qualifikationen: [], qualifikationen_neu: [], spezifikationen: [], schadenarten: [], standort_adresse: null, standort_plz: null, standort_lat: null, standort_lng: null, standort_place_id: null, firmenname: null, rechtsform: null, steuernummer: null, ust_id: null, hrb: null }}
       faelleCount={faelleResult.count ?? 0}
       pendingTermine={pendingTermine}
     />
