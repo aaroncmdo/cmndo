@@ -55,11 +55,10 @@ export function WillkommenSvEmail(props: Props) {
       <Divider />
       <Heading>Naechste Schritte</Heading>
       <Paragraph>
-        <strong>1.</strong> Logge dich ein mit deinen Zugangsdaten:
+        <strong>1.</strong> Logge dich ein mit deiner Email-Adresse (an die diese Mail geschickt wurde) und dem Initial-Passwort unten:
       </Paragraph>
       <InfoTable rows={[
         ['Login-Adresse', loginUrl],
-        ['Email', `${props.vorname.toLowerCase()}@…`],
         ['Initial-Passwort', props.initial_password],
       ]} />
       <Text style={{ color: '#6b7280', fontSize: 12, margin: '4px 0 16px', fontStyle: 'italic' }}>
