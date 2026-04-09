@@ -194,6 +194,12 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
   if (data.sub_standorte.some(s => s.anschrift_lat === null || s.anschrift_lng === null)) {
     return { success: false, error: 'Jeder Sub-Standort braucht Geo-Koordinaten (via Google Places auswaehlen)' }
   }
+  // ARCH-1 Phase 2 Update: Inhaber-Email darf NICHT als Sub-Email auftauchen
+  // (sonst Konflikt im auth.users Insert + Mapping). Mehrere Subs mit gleicher
+  // Email sind erlaubt — die werden zusammengelegt.
+  if (data.sub_standorte.some(s => s.sub_email.toLowerCase() === data.inhaber_email.toLowerCase())) {
+    return { success: false, error: 'Inhaber-Email darf nicht als Sub-Standort-Email verwendet werden' }
+  }
 
   const adminDb = createAdminClient()
   // Initial-Passworter gesammelt damit wir sie pro Sub mit der Welcome-Mail versenden koennen
@@ -278,47 +284,63 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
   }
 
   // 5. Pro Sub-Standort: auth.users + profiles + sachverstaendige
+  // ARCH-1 Phase 2 Update: gleiche Email darf MEHRFACH vorkommen (z.B. eine
+  // Person managed mehrere Sub-Standorte). Pro unique Email wird nur EIN
+  // auth.users + profiles + Welcome-Mail angelegt; alle Sub-Standorte mit
+  // dieser Email teilen sich den selben profile_id und bekommen jeweils einen
+  // eigenen sachverstaendige-Eintrag.
   const subSvIds: string[] = []
   const createdAuthUserIds: string[] = []
+  // Mapping: Email → User-ID (fuer Wiederverwendung im selben Buero-Anlege-Flow)
+  const emailToUserId = new Map<string, string>()
+  // Mapping: Email → wurde Welcome-Mail schon versendet?
+  const welcomeMailSent = new Set<string>()
 
   for (const std of data.sub_standorte) {
-    const subPw = initialPasswords[std.sub_email]
     const subCfg = paketKonfig(std.paket)
+    let subUserId: string
 
-    // 5a. Sub auth.users
-    const { data: subAuth, error: subAuthErr } = await adminDb.auth.admin.createUser({
-      email: std.sub_email,
-      password: subPw,
-      email_confirm: true,
-      user_metadata: { force_password_change: true, von_admin: auth.user_id, rolle: 'buero_mitarbeiter' },
-    })
+    if (emailToUserId.has(std.sub_email)) {
+      // ARCH-1 Update: Email schon im Wizard verwendet → existing User wiederverwenden
+      subUserId = emailToUserId.get(std.sub_email)!
+    } else {
+      // Neuer User: auth.users + profiles + Welcome-Mail (spaeter im Mail-Block)
+      const subPw = initialPasswords[std.sub_email]
+      const { data: subAuth, error: subAuthErr } = await adminDb.auth.admin.createUser({
+        email: std.sub_email,
+        password: subPw,
+        email_confirm: true,
+        user_metadata: { force_password_change: true, von_admin: auth.user_id, rolle: 'buero_mitarbeiter' },
+      })
 
-    if (subAuthErr || !subAuth?.user) {
-      // Rollback alles bisher angelegte
-      for (const uid of createdAuthUserIds) {
-        await adminDb.from('profiles').delete().eq('id', uid)
-        await adminDb.auth.admin.deleteUser(uid)
+      if (subAuthErr || !subAuth?.user) {
+        // Rollback alles bisher angelegte
+        for (const uid of createdAuthUserIds) {
+          await adminDb.from('profiles').delete().eq('id', uid)
+          await adminDb.auth.admin.deleteUser(uid)
+        }
+        await adminDb.from('sachverstaendige').delete().eq('organisation_id', organisationId)
+        await adminDb.from('organisationen').delete().eq('id', organisationId)
+        await adminDb.from('profiles').delete().eq('id', inhaberUserId)
+        await adminDb.auth.admin.deleteUser(inhaberUserId)
+        return { success: false, error: `Sub-Auth fehlgeschlagen fuer ${std.sub_email}: ${subAuthErr?.message}` }
       }
-      await adminDb.from('sachverstaendige').delete().eq('organisation_id', organisationId)
-      await adminDb.from('organisationen').delete().eq('id', organisationId)
-      await adminDb.from('profiles').delete().eq('id', inhaberUserId)
-      await adminDb.auth.admin.deleteUser(inhaberUserId)
-      return { success: false, error: `Sub-Auth fehlgeschlagen fuer ${std.sub_email}: ${subAuthErr?.message}` }
+      subUserId = subAuth.user.id
+      createdAuthUserIds.push(subUserId)
+      emailToUserId.set(std.sub_email, subUserId)
+
+      // Sub profile (nur einmal pro unique Email)
+      await adminDb.from('profiles').insert({
+        id: subUserId,
+        email: std.sub_email,
+        rolle: 'sachverstaendiger',
+        vorname: std.sub_vorname,
+        nachname: std.sub_nachname,
+        force_password_change: true,
+      })
     }
-    const subUserId = subAuth.user.id
-    createdAuthUserIds.push(subUserId)
 
-    // 5b. Sub profile
-    await adminDb.from('profiles').insert({
-      id: subUserId,
-      email: std.sub_email,
-      rolle: 'sachverstaendiger',
-      vorname: std.sub_vorname,
-      nachname: std.sub_nachname,
-      force_password_change: true,
-    })
-
-    // 5c. Sub sachverstaendige
+    // 5c. Sub sachverstaendige (immer ein neuer Eintrag, auch wenn Email wiederverwendet)
     const { data: subSvRow } = await adminDb.from('sachverstaendige').insert({
       profile_id: subUserId,
       organisation_id: organisationId,
@@ -368,23 +390,32 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
       von_admin_name: auth.admin_name,
     })
 
-    // Pro Sub-Standort: Welcome an Sub + Mail-Kopie an Inhaber
+    // Pro Sub-Standort: Welcome an Sub (nur einmal pro unique Email) +
+    // Mail-Kopie an Inhaber (immer pro Sub-Standort, weil Inhaber wissen
+    // soll dass ein neuer Standort angelegt wurde)
     for (const std of data.sub_standorte) {
       const subCfg = paketKonfig(std.paket)
-      await sendWillkommenSv({
-        to: std.sub_email,
-        vorname: std.sub_vorname,
-        nachname: std.sub_nachname,
-        paket_name: std.paket === 'individuell' ? 'Individuell' : std.paket.charAt(0).toUpperCase() + std.paket.slice(1),
-        kontingent: subCfg.kontingent,
-        radius_km: subCfg.radius_km,
-        anzahlung_betrag_eur: subCfg.preis_anzahlung_eur,
-        initial_password: initialPasswords[std.sub_email],
-        organisation_name: data.buero_name,
-        rolle_in_organisation: 'Mitarbeiter',
-        von_admin_name: auth.admin_name,
-      })
 
+      // Welcome-Mail nur EINMAL pro unique Email (Spam-Schutz bei gleicher
+      // Email fuer mehrere Sub-Standorte)
+      if (!welcomeMailSent.has(std.sub_email)) {
+        await sendWillkommenSv({
+          to: std.sub_email,
+          vorname: std.sub_vorname,
+          nachname: std.sub_nachname,
+          paket_name: std.paket === 'individuell' ? 'Individuell' : std.paket.charAt(0).toUpperCase() + std.paket.slice(1),
+          kontingent: subCfg.kontingent,
+          radius_km: subCfg.radius_km,
+          anzahlung_betrag_eur: subCfg.preis_anzahlung_eur,
+          initial_password: initialPasswords[std.sub_email],
+          organisation_name: data.buero_name,
+          rolle_in_organisation: 'Mitarbeiter',
+          von_admin_name: auth.admin_name,
+        })
+        welcomeMailSent.add(std.sub_email)
+      }
+
+      // Mail-Kopie an Inhaber: immer pro Sub-Standort
       await sendWillkommenSvAnBuero({
         to: data.inhaber_email,
         inhaber_vorname: data.inhaber_vorname,
