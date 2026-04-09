@@ -78,6 +78,18 @@ export async function updateSession(request: NextRequest) {
 
 function isPublicPath(pathname: string): boolean {
   if (pathname === '/') return true
-  const publicPaths = ['/login', '/flow', '/api', '/passwort-aendern', '/sv']
+  // BUG-84 follow-up: /passwort-vergessen + /passwort-zuruecksetzen muessen
+  // unauthenticated erreichbar sein, sonst redirected die Middleware den
+  // User der gerade auf den Reset-Link in seiner Mail geklickt hat zu /login
+  // und der gesamte Reset-Flow ist tot.
+  const publicPaths = [
+    '/login',
+    '/flow',
+    '/api',
+    '/passwort-aendern',
+    '/passwort-vergessen',
+    '/passwort-zuruecksetzen',
+    '/sv',
+  ]
   return publicPaths.some(path => pathname.startsWith(path))
 }
