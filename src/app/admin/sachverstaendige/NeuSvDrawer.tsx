@@ -56,10 +56,13 @@ export default function NeuSvDrawer({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      {/* Drawer-Width 720px (zwischen 600 und 800 wie spezifiziert). */}
+      {/* ARCH-1 POLISH Aaron-Feedback: 40vw responsive mit Mindest-Breite 600px,
+          damit der Drawer auf grossen Screens grosszuegig ist und auf kleineren
+          Screens trotzdem nicht zu schmal wird. sm:max-w-none ueberschreibt das
+          shadcn-Default sm:max-w-sm. */}
       <SheetContent
         side="right"
-        className="w-full sm:max-w-[720px] overflow-y-auto"
+        className="w-full sm:w-[40vw] sm:min-w-[600px] sm:max-w-none overflow-y-auto"
       >
         <SheetHeader className="border-b border-gray-200">
           <SheetTitle>Neuen Sachverstaendigen anlegen</SheetTitle>
