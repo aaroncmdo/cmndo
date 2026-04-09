@@ -1,0 +1,165 @@
+'use server'
+
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
+import { PAKET_KONTINGENT, berechneStandortAnzahlung, type BueroStandortInput } from './constants'
+
+// KFZ-152 Block C: Buero-Onboarding Server Actions
+
+/**
+ * Schritt 1: Buero anlegen + Sub-Standorte registrieren.
+ * Erstellt organisationen-Eintrag (typ='buero', onboarding_status='pending')
+ * + N+1 sachverstaendige (1 Inhaber ohne Kontingent + N Sub-Bueros mit Paket).
+ */
+export async function createBueroOrganisation(data: {
+  buero_name: string
+  rechtsform: string
+  anschrift: string
+  steuernummer: string
+  ust_id: string
+  standorte: BueroStandortInput[]
+}): Promise<{ organisation_id: string; gesamt_anzahlung: number } | { error: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { error: 'Nicht angemeldet' }
+
+  if (!data.buero_name?.trim()) return { error: 'Bueroname fehlt' }
+  if (!data.standorte?.length) return { error: 'Mindestens ein Standort erforderlich' }
+
+  const db = createAdminClient()
+
+  // 1. Organisation anlegen
+  const { data: org, error: orgErr } = await db.from('organisationen').insert({
+    name: data.buero_name,
+    typ: 'buero',
+    rechtsform: data.rechtsform || null,
+    anschrift: data.anschrift || null,
+    steuernummer: data.steuernummer || null,
+    ust_id: data.ust_id || null,
+    hauptansprechpartner_user_id: user.id,
+    parent_user_id: user.id,
+    onboarding_status: 'pending',
+  }).select('id').single()
+
+  if (orgErr || !org) return { error: orgErr?.message ?? 'Org-Anlage fehlgeschlagen' }
+
+  // 2. Inhaber-Eintrag (verwaltet, kein eigenes Kontingent)
+  const { data: inhaberSv, error: inhaberErr } = await db.from('sachverstaendige').insert({
+    profile_id: user.id,
+    organisation_id: org.id,
+    rolle_in_organisation: 'inhaber',
+    paket: 'standard', // Pflichtfeld, wird nicht genutzt
+    max_faelle_monat: 0, // Inhaber bekommt keine Faelle persoenlich
+    onboarding_status: 'pending',
+    onboarding_anzahlung_betrag: 0,
+    ist_aktiv: false,
+    ist_parent_account: true,
+  }).select('id').single()
+
+  if (inhaberErr || !inhaberSv) {
+    await db.from('organisationen').delete().eq('id', org.id)
+    return { error: inhaberErr?.message ?? 'Inhaber-Anlage fehlgeschlagen' }
+  }
+
+  // 3. Sub-Standorte anlegen
+  let gesamtAnzahlung = 0
+  for (const std of data.standorte) {
+    const standortAnzahlung = berechneStandortAnzahlung(std.paket)
+    gesamtAnzahlung += standortAnzahlung
+
+    const { error: subErr } = await db.from('sachverstaendige').insert({
+      organisation_id: org.id,
+      rolle_in_organisation: 'mitarbeiter',
+      paket: std.paket,
+      max_faelle_monat: PAKET_KONTINGENT[std.paket],
+      standort_adresse: std.anschrift || null,
+      onboarding_status: 'pending',
+      onboarding_anzahlung_betrag: standortAnzahlung,
+      ist_aktiv: false,
+      ist_parent_account: false,
+    })
+
+    if (subErr) {
+      // Cleanup
+      await db.from('sachverstaendige').delete().eq('organisation_id', org.id)
+      await db.from('organisationen').delete().eq('id', org.id)
+      return { error: `Standort '${std.name}' konnte nicht angelegt werden: ${subErr.message}` }
+    }
+  }
+
+  return { organisation_id: org.id, gesamt_anzahlung: gesamtAnzahlung }
+}
+
+/**
+ * Schritt 2: Vertrag unterzeichnen (analog KFZ-148, aber als Buero-Inhaber).
+ */
+export async function signBueroVertrag(params: {
+  organisation_id: string
+  signatureSvg: string
+  unterschriftName: string
+}): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const db = createAdminClient()
+
+  // Org gehoert dem aktuellen User?
+  const { data: org } = await db.from('organisationen')
+    .select('id, hauptansprechpartner_user_id')
+    .eq('id', params.organisation_id)
+    .single()
+  if (!org || org.hauptansprechpartner_user_id !== user.id) {
+    return { success: false, error: 'Keine Berechtigung' }
+  }
+
+  // Aktive Nutzungsbedingungen
+  const { data: nbVorlage } = await db.from('vertragsvorlagen')
+    .select('id, version')
+    .eq('typ', 'nutzungsbedingungen')
+    .eq('aktiv', true)
+    .limit(1)
+    .single()
+  if (!nbVorlage) return { success: false, error: 'Nutzungsbedingungen nicht verfuegbar' }
+
+  const h = await headers()
+  const ip = h.get('x-forwarded-for')?.split(',')[0]?.trim() ?? h.get('x-real-ip') ?? null
+  const userAgent = h.get('user-agent') ?? null
+
+  const { data: vertrag, error: vertragErr } = await db.from('vertraege_unterzeichnet').insert({
+    organisation_id: params.organisation_id,
+    vorlage_id: nbVorlage.id,
+    vorlage_typ: 'nutzungsbedingungen',
+    vorlage_version: nbVorlage.version,
+    unterschrift_name: params.unterschriftName,
+    unterschrift_ip: ip,
+    unterschrift_user_agent: userAgent,
+  }).select('id').single()
+
+  if (vertragErr || !vertrag) return { success: false, error: vertragErr?.message ?? 'Vertrag konnte nicht gespeichert werden' }
+
+  await db.from('organisationen').update({
+    onboarding_status: 'vertrag_unterzeichnet',
+    vertrag_unterzeichnet_id: vertrag.id,
+    updated_at: new Date().toISOString(),
+  }).eq('id', params.organisation_id)
+
+  return { success: true }
+}
+
+/**
+ * Schritt 3: Stripe Checkout fuer Gesamt-Anzahlung des Bueros starten.
+ */
+export async function startBueroStripeCheckout(organisationId: string): Promise<{ checkoutUrl: string } | { error: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { error: 'Nicht angemeldet' }
+
+  try {
+    const { createBueroCheckoutSession } = await import('@/lib/stripe/buero-checkout')
+    return await createBueroCheckoutSession(organisationId)
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Stripe-Fehler' }
+  }
+}

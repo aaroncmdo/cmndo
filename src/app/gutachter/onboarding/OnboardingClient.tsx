@@ -12,7 +12,14 @@ import {
   CalendarIcon,
   CheckCircle2Icon,
   ShieldCheckIcon,
+  Building2Icon,
+  GraduationCapIcon,
+  UsersIcon,
+  MailOpenIcon,
 } from 'lucide-react'
+
+// KFZ-152: Organisationstyp-Auswahl (Schritt 0)
+type OrgTyp = 'solo' | 'buero' | 'akademie' | 'community' | 'sub_invite' | null
 
 const STEPS = [
   { key: 'person', label: 'Persönliche Daten', icon: UserIcon },
@@ -76,6 +83,8 @@ export default function OnboardingClient({
   const [step, setStep] = useState(0)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // KFZ-152: Org-Typ wird in Schritt 0 gewaehlt. NULL = noch nicht entschieden.
+  const [orgTyp, setOrgTyp] = useState<OrgTyp>(null)
   const [data, setData] = useState<FormData>({
     vorname: existingProfile.vorname ?? '',
     nachname: existingProfile.nachname ?? '',
@@ -148,6 +157,62 @@ export default function OnboardingClient({
     : step === 3
     ? data.paket
     : true
+
+  // KFZ-152 Schritt 0: Org-Typ Selector
+  if (orgTyp === null) {
+    return (
+      <div className="h-full overflow-y-auto bg-[#f8f9fb] flex items-start justify-center px-4 py-10">
+        <div className="w-full max-w-2xl">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-semibold text-gray-900">Willkommen bei Claimondo</h1>
+            <p className="text-gray-500 text-sm mt-1">Wie machst du Gutachten?</p>
+          </div>
+
+          <div className="space-y-3">
+            <OrgTypCard
+              icon={UserIcon}
+              title="Solo-Sachverständiger"
+              desc="Ich arbeite alleine, eigenes Paket, eigene Anzahlung, eigener Vertrag."
+              onClick={() => setOrgTyp('solo')}
+            />
+            <OrgTypCard
+              icon={Building2Icon}
+              title="Inhaber eines Gutachterbüros"
+              desc="Ich habe ein Büro mit mehreren Standorten/Mitarbeitern. Ich zahle zentral für alle Sub-Standorte."
+              onClick={() => router.push('/gutachter/onboarding/buero')}
+            />
+            <OrgTypCard
+              icon={GraduationCapIcon}
+              title="Akademie"
+              desc="Wir bilden Sachverständige aus und sammeln deren Anzahlungen intern ein."
+              comingSoon
+              onClick={() => setError('Akademie-Onboarding kommt in einer Folge-Version. Bitte melde dich beim Claimondo-Team.')}
+            />
+            <OrgTypCard
+              icon={UsersIcon}
+              title="Community / Einkaufsgemeinschaft"
+              desc="Mehrere SVs in einem gemeinsamen Gebiet."
+              comingSoon
+              onClick={() => setError('Communities werden vom Claimondo-Admin angelegt. Du bekommst eine Einladung per Email.')}
+            />
+            <OrgTypCard
+              icon={MailOpenIcon}
+              title="Ich gehöre zu einem Büro / einer Akademie"
+              desc="Ich habe einen Einladungs-Link bekommen."
+              comingSoon
+              onClick={() => setError('Bitte öffne den Einladungs-Link aus deiner Email — du brauchst keinen separaten Onboarding-Flow.')}
+            />
+          </div>
+
+          {error && (
+            <div className="mt-4 px-3 py-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm">
+              {error}
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="h-full overflow-y-auto bg-[#f8f9fb] flex items-start justify-center px-4 py-10">
@@ -413,5 +478,45 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
       <span className="text-gray-500 text-sm">{label}</span>
       <span className="text-gray-800 text-sm font-medium">{value}</span>
     </div>
+  )
+}
+
+// KFZ-152: Org-Typ Karte fuer Schritt 0
+function OrgTypCard({
+  icon: Icon,
+  title,
+  desc,
+  onClick,
+  comingSoon,
+}: {
+  icon: typeof UserIcon
+  title: string
+  desc: string
+  onClick: () => void
+  comingSoon?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full text-left bg-white border border-gray-200 rounded-2xl p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
+    >
+      <div className="flex items-start gap-4">
+        <div className="w-10 h-10 rounded-xl bg-[#1E3A5F]/5 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-[#1E3A5F]" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <h3 className="text-gray-900 font-semibold text-sm">{title}</h3>
+            {comingSoon && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 font-medium">
+                Folge-Version
+              </span>
+            )}
+          </div>
+          <p className="text-gray-500 text-xs mt-1 leading-relaxed">{desc}</p>
+        </div>
+      </div>
+    </button>
   )
 }
