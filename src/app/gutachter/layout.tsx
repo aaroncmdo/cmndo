@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import GutachterShell from './GutachterShell'
+import { PageContainer } from '@/components/PageContainer'
 
 export default async function GutachterLayout({
   children,
@@ -90,7 +91,10 @@ export default async function GutachterLayout({
           Ihre Anzahlung ist noch ausstehend. Sie erhalten Fälle sobald die Zahlung eingegangen ist.
         </div>
       )}
-      {children}
+      {/* BUG-98: PageContainer gibt Desktop ~15-20% horizontale Marge,
+          Tablet quer großflächig, Mobile fast volle Breite. Banner liegen
+          bewusst außerhalb damit sie weiterhin volle Breite haben. */}
+      <PageContainer className="h-full">{children}</PageContainer>
     </GutachterShell>
   )
 }

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import AdminNav from './_components/AdminNav'
 import NotificationBell from './_components/NotificationBell'
 import Spotlight from '@/components/Spotlight'
+import { PageContainer } from '@/components/PageContainer'
 
 export default async function AdminLayout({
   children,
@@ -38,8 +39,13 @@ export default async function AdminLayout({
           <NotificationBell />
         </div>
 
-        {/* Content — each page decides its own scroll behavior */}
-        <main id="main-content" role="main" className="flex-1 min-h-0 overflow-hidden pb-16 md:pb-0">{children}</main>
+        {/* Content — each page decides its own scroll behavior.
+            BUG-98: PageContainer gibt Desktop ~15-20 % horizontale Marge,
+            Tablet quer großflächig, Mobile fast volle Breite. Kein py,
+            damit Sticky-Header-Pattern in Pages weiter funktionieren. */}
+        <main id="main-content" role="main" className="flex-1 min-h-0 overflow-hidden pb-16 md:pb-0">
+          <PageContainer className="h-full">{children}</PageContainer>
+        </main>
       </div>
     </div>
   )
