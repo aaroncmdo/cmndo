@@ -10,6 +10,8 @@ import { KanzleiAuftragszusammenfassungEmail, subject as kanzleiAuftragSubject }
 import { KanzleiAbrechnungRechnungEmail, subject as kanzleiAbrechnungSubject } from './templates/KanzleiAbrechnungRechnung'
 import { MarketingAbrechnungEmail, subject as marketingAbrechnungSubject } from './templates/MarketingAbrechnung'
 import { KanzleiMonatsAbrechnungEmail, subject as kanzleiMonatsAbrechnungSubject } from './templates/KanzleiMonatsAbrechnung'
+import { WillkommenSvEmail, subject as willkommenSvSubject } from './templates/WillkommenSv'
+import { WillkommenSvAnBueroEmail, subject as willkommenSvAnBueroSubject } from './templates/WillkommenSvAnBuero'
 
 const admin = () => createAdminClient()
 
@@ -417,6 +419,89 @@ export async function sendMarketingAbrechnung(abrechnungId: string): Promise<voi
     email_log_id: logEntry?.id ?? null,
     updated_at: new Date().toISOString(),
   }).eq('id', abrechnungId)
+}
+
+// ─── ARCH-1 Phase 2: Welcome-Mails fuer Admin-angelegte SVs ────────────────
+
+export type WillkommenSvParams = {
+  to: string
+  vorname: string
+  nachname: string
+  paket_name: string
+  kontingent: number
+  radius_km: number
+  anzahlung_betrag_eur: number
+  initial_password: string
+  organisation_name?: string | null
+  rolle_in_organisation?: string | null
+  von_admin_name?: string
+}
+
+/**
+ * Welcome-Mail an einen vom Admin angelegten SV (ARCH-1).
+ * Enthaelt Konditionen-Uebersicht, Login-URL, Initial-Passwort.
+ * Caller-Verantwortung: nur einmal pro SV-Anlage aufrufen (kein Dedup hier).
+ */
+export async function sendWillkommenSv(params: WillkommenSvParams): Promise<void> {
+  const props = {
+    vorname: params.vorname,
+    nachname: params.nachname,
+    paket_name: params.paket_name,
+    kontingent: params.kontingent,
+    radius_km: params.radius_km,
+    anzahlung_betrag_eur: params.anzahlung_betrag_eur,
+    initial_password: params.initial_password,
+    organisation_name: params.organisation_name ?? null,
+    rolle_in_organisation: params.rolle_in_organisation ?? null,
+    von_admin_name: params.von_admin_name,
+  }
+
+  const html = await render(WillkommenSvEmail(props))
+  await sendEmail({
+    to: params.to,
+    subject: willkommenSvSubject(props),
+    html,
+    fallId: null,
+    empfaengerTyp: 'sv',
+    template: 'arch1_willkommen_sv',
+  })
+}
+
+export type WillkommenSvAnBueroParams = {
+  to: string                       // Inhaber-Email
+  inhaber_vorname: string
+  buero_name: string
+  neuer_sv_vorname: string
+  neuer_sv_nachname: string
+  neuer_sv_email: string
+  paket_name: string
+  standort_adresse?: string | null
+}
+
+/**
+ * Mail-Kopie an Buero-Inhaber wenn ein neuer Sub-SV angelegt wurde.
+ * Wird zusaetzlich zur Sub-SV-Welcome-Mail versendet.
+ */
+export async function sendWillkommenSvAnBuero(params: WillkommenSvAnBueroParams): Promise<void> {
+  const props = {
+    inhaber_vorname: params.inhaber_vorname,
+    buero_name: params.buero_name,
+    neuer_sv_vorname: params.neuer_sv_vorname,
+    neuer_sv_nachname: params.neuer_sv_nachname,
+    neuer_sv_email: params.neuer_sv_email,
+    paket_name: params.paket_name,
+    standort_adresse: params.standort_adresse ?? null,
+  }
+
+  const html = await render(WillkommenSvAnBueroEmail(props))
+  await sendEmail({
+    to: params.to,
+    subject: willkommenSvAnBueroSubject(props),
+    html,
+    fallId: null,
+    empfaengerTyp: 'sv',
+    template: 'arch1_willkommen_sv_an_buero',
+  })
 }
 
 // ─── 8. Kanzlei Monats-Abrechnung (KFZ-141) ──────────────────────────────
