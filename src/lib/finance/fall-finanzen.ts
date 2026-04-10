@@ -99,7 +99,8 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   }
 
   // Zahlungs-Status
-  const eingegangen = (zahlungEingegangen ?? 0) + (Number(fall.zahlung_betrag) || 0)
+  // BUG-79 fix: NUR zahlungseingaenge summieren, NICHT + fall.zahlung_betrag (war Doppelzaehlung)
+  const eingegangen = zahlungEingegangen ?? (Number(fall.zahlung_betrag) || 0)
   const erwartetDatum = fall.zahlung_erwartet_am ? new Date(fall.zahlung_erwartet_am) : null
   let zahlungStatus: FallFinanzen['zahlungStatus'] = 'offen'
   if (eingegangen > 0 || fall.zahlung_eingegangen_am) {
