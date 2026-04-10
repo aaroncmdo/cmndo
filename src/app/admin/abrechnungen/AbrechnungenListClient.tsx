@@ -5,7 +5,7 @@ import {
   ReceiptIcon, AlertTriangleIcon, CheckCircle2Icon, ClockIcon, RefreshCwIcon,
   ExternalLinkIcon, XIcon,
 } from 'lucide-react'
-import { retryEinzug, markBezahlt } from './actions'
+import { retryEinzug, markBezahlt, stornoAbrechnung, reIssueAbrechnung } from './actions'
 
 // KFZ-149 Hund-D: Listing aller SV-Monatsabrechnungen mit Filter,
 // Detail-Modal, manuellem Retry und Manuell-bezahlt Button.
@@ -28,6 +28,8 @@ type Row = {
   stripe_payment_intent_id: string | null
   reminder_gesendet_am: string | null
   storniert_am: string | null
+  storniert_grund: string | null
+  ersetzt_durch_abrechnung_id: string | null
   created_at: string | null
   notiz: string | null
 }
@@ -73,6 +75,8 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
   const [pending, startTransition] = useTransition()
   const [confirmMarkBezahlt, setConfirmMarkBezahlt] = useState(false)
   const [bezahltNotiz, setBezahltNotiz] = useState('')
+  const [confirmStorno, setConfirmStorno] = useState(false)
+  const [stornoGrund, setStornoGrund] = useState('')
 
   const filtered = useMemo(() => {
     return rows.filter(r => {
@@ -125,6 +129,34 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
         setSelected(null)
       } else {
         setActionMsg({ kind: 'error', text: r.error ?? 'Unbekannter Fehler' })
+      }
+    })
+  }
+
+  function handleStorno(row: Row) {
+    setActionMsg(null)
+    startTransition(async () => {
+      const r = await stornoAbrechnung(row.id, stornoGrund)
+      if (r.success) {
+        setActionMsg({ kind: 'success', text: `${row.abrechnungs_nr} storniert` })
+        setConfirmStorno(false)
+        setStornoGrund('')
+        setSelected(null)
+      } else {
+        setActionMsg({ kind: 'error', text: r.error ?? 'Storno fehlgeschlagen' })
+      }
+    })
+  }
+
+  function handleReIssue(row: Row) {
+    setActionMsg(null)
+    startTransition(async () => {
+      const r = await reIssueAbrechnung(row.id)
+      if (r.success) {
+        setActionMsg({ kind: 'success', text: r.neue_abrechnung_id ? `Korrekturabrechnung erstellt` : 'Keine verbleibenden Fälle — keine neue Abrechnung' })
+        setSelected(null)
+      } else {
+        setActionMsg({ kind: 'error', text: r.error ?? 'Re-Issue fehlgeschlagen' })
       }
     })
   }
@@ -367,6 +399,56 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                         </button>
                       </div>
                     </div>
+                  )}
+                  {/* KFZ-150: Storno Button */}
+                  {!confirmStorno ? (
+                    <button
+                      onClick={() => setConfirmStorno(true)}
+                      disabled={pending}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-sm font-medium transition-colors disabled:opacity-40"
+                    >
+                      Rechnung stornieren
+                    </button>
+                  ) : (
+                    <div className="border border-red-200 rounded-xl p-3 bg-red-50/50 space-y-2">
+                      <p className="text-xs text-red-800"><strong>Storno-Grund (Pflicht):</strong></p>
+                      <textarea
+                        value={stornoGrund}
+                        onChange={e => setStornoGrund(e.target.value)}
+                        placeholder="z.B. Fall storniert, Fehl-Abrechnung..."
+                        rows={2}
+                        className="w-full bg-white border border-gray-300 rounded-lg px-2 py-1.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-red-300"
+                      />
+                      <div className="flex gap-2">
+                        <button onClick={() => { setConfirmStorno(false); setStornoGrund('') }} disabled={pending}
+                          className="flex-1 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50">Abbrechen</button>
+                        <button onClick={() => handleStorno(selected)} disabled={pending || !stornoGrund.trim()}
+                          className="flex-1 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-medium disabled:opacity-40">
+                          {pending ? '...' : 'Stornieren'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* KFZ-150: Storno-Details + Re-Issue Button */}
+              {selected.storniert_am && selected.status === 'storniert' && (
+                <div className="pt-4 border-t border-gray-200 space-y-3">
+                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 space-y-1">
+                    <p className="text-xs text-gray-600"><strong>Storniert am:</strong> {fmtDate(selected.storniert_am)}</p>
+                    {selected.storniert_grund && <p className="text-xs text-gray-600"><strong>Grund:</strong> {selected.storniert_grund}</p>}
+                    {selected.ersetzt_durch_abrechnung_id && <p className="text-xs text-emerald-600"><strong>Korrekturabrechnung erstellt</strong></p>}
+                  </div>
+                  {!selected.ersetzt_durch_abrechnung_id && (
+                    <button
+                      onClick={() => handleReIssue(selected)}
+                      disabled={pending}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#4573A2] hover:bg-[#1E3A5F] text-white text-sm font-medium transition-colors disabled:opacity-40"
+                    >
+                      <RefreshCwIcon className="w-4 h-4" />
+                      {pending ? 'Wird erstellt...' : 'Korrekturabrechnung erstellen (Re-Issue)'}
+                    </button>
                   )}
                 </div>
               )}

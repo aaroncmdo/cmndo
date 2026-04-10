@@ -225,3 +225,77 @@ export async function markBezahlt(abrechnung_id: string, notiz?: string): Promis
   revalidatePath('/admin/abrechnungen', 'page')
   return { success: true }
 }
+
+/**
+ * KFZ-150 Szenario B: Abrechnung stornieren.
+ * Setzt status='storniert' + storniert_am/grund. Stripe PI wird gecancelt.
+ */
+export async function stornoAbrechnung(
+  abrechnung_id: string,
+  grund: string,
+): Promise<{ success: boolean; error?: string }> {
+  const auth = await ensureAdmin()
+  if (!auth.ok) return { success: false, error: auth.error }
+  if (!grund.trim()) return { success: false, error: 'Storno-Grund ist Pflicht' }
+
+  const db = createAdminClient()
+
+  const { data: abr } = await db.from('abrechnungen')
+    .select('id, status, bezahlt_am, stripe_payment_intent_id')
+    .eq('id', abrechnung_id)
+    .maybeSingle()
+  if (!abr) return { success: false, error: 'Abrechnung nicht gefunden' }
+  if (abr.storniert_am || abr.status === 'storniert') return { success: false, error: 'Bereits storniert' }
+  if (abr.bezahlt_am) return { success: false, error: 'Bereits bezahlt — nutze Gutschrift statt Storno' }
+
+  const now = new Date().toISOString()
+  await db.from('abrechnungen').update({
+    status: 'storniert',
+    storniert_am: now,
+    storniert_grund: grund.trim(),
+    updated_at: now,
+  }).eq('id', abrechnung_id)
+
+  // Stripe PI canceln falls vorhanden
+  if (abr.stripe_payment_intent_id) {
+    try {
+      const { stripe } = await import('@/lib/stripe/client')
+      await stripe.paymentIntents.cancel(abr.stripe_payment_intent_id)
+    } catch { /* already cancelled/captured */ }
+  }
+
+  revalidatePath('/admin/abrechnungen', 'page')
+  return { success: true }
+}
+
+/**
+ * KFZ-150 Szenario B: Re-Issue einer stornierten Abrechnung.
+ * Erstellt neue Korrekturabrechnung mit verbleibenden Fällen.
+ */
+export async function reIssueAbrechnung(
+  abrechnung_id: string,
+): Promise<{ success: boolean; error?: string; neue_abrechnung_id?: string }> {
+  const auth = await ensureAdmin()
+  if (!auth.ok) return { success: false, error: auth.error }
+
+  const db = createAdminClient()
+
+  const { data: abr } = await db.from('abrechnungen')
+    .select('id, status, storniert_am, ersetzt_durch_abrechnung_id')
+    .eq('id', abrechnung_id)
+    .maybeSingle()
+  if (!abr) return { success: false, error: 'Abrechnung nicht gefunden' }
+  if (abr.status !== 'storniert' || !abr.storniert_am) return { success: false, error: 'Abrechnung muss zuerst storniert sein' }
+  if (abr.ersetzt_durch_abrechnung_id) return { success: false, error: 'Re-Issue wurde bereits erstellt' }
+
+  const { reissueAbrechnung } = await import('@/lib/abrechnung/reissue-abrechnung')
+  const result = await reissueAbrechnung(abrechnung_id)
+
+  revalidatePath('/admin/abrechnungen', 'page')
+
+  if (!result.neue_abrechnung_id) {
+    return { success: true, error: 'Keine verbleibenden Fälle — keine neue Abrechnung erstellt' }
+  }
+
+  return { success: true, neue_abrechnung_id: result.neue_abrechnung_id }
+}

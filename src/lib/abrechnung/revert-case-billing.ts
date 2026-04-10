@@ -76,10 +76,13 @@ export async function revertCaseBilling(
       storniert_grund: `Fall ${fallId.slice(0, 8)} wurde storniert`,
     }).eq('id', abr.id)
 
-    // TODO: Re-Issue mit verbleibenden Cases (reissueAbrechnung)
+    // KFZ-150 Szenario B: Re-Issue mit verbleibenden Cases
+    const { reissueAbrechnung } = await import('./reissue-abrechnung')
+    const { neue_abrechnung_id } = await reissueAbrechnung(abr.id)
     return {
       werbebudget_rueckgebucht: guthabenRueck,
       abrechnung_side_effect: 'abrechnung_storniert_und_neu',
+      neue_abrechnung_id: neue_abrechnung_id ?? undefined,
     }
   }
 
