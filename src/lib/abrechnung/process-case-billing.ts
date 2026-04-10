@@ -1,3 +1,5 @@
+'use server'
+
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getLeadPriceFromTable, isCaseInKontingent } from './calculate-lead-price'
 

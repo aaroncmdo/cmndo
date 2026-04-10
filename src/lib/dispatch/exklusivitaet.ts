@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { haversineKm } from '@/lib/gps/geofence'
 
 // KFZ-152 Phase 3: Exklusivitaets-Check fuer Communities.
 // Wenn ein Lead/Fall-Standort in einem `gebiet_exklusivitaeten`-Polygon
@@ -18,14 +19,6 @@ type ExklusivitaetMatch = {
   community_name: string | null
 }
 
-function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371
-  const dLat = ((lat2 - lat1) * Math.PI) / 180
-  const dLng = ((lng2 - lng1) * Math.PI) / 180
-  const a = Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-}
 
 // KFZ-152 Phase 3 Follow-up: Ray-Casting Point-in-Polygon (GeoJSON: [lng,lat]).
 // Returnt true wenn (lat,lng) im Polygon-Ring liegt.

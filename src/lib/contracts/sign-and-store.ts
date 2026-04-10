@@ -1,3 +1,5 @@
+'use server'
+
 import { createAdminClient } from '@/lib/supabase/admin'
 import { generateContractPdf, type ContractPdfData } from './contract-pdf'
 

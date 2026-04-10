@@ -1,3 +1,5 @@
+'use server'
+
 // BUG-83 Befund 6: Zentraler Logout-Helper.
 // Wird sowohl von der API-Route /api/auth/logout (Admin + Mitarbeiter via
 // <form action=...>) als auch vom Gutachter-Portal (client-side

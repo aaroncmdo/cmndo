@@ -1,3 +1,5 @@
+'use server'
+
 import { createAdminClient } from '@/lib/supabase/admin'
 import { ensureChatGruppe } from '@/lib/chatGruppe'
 

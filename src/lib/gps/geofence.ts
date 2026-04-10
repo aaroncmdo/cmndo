@@ -1,4 +1,5 @@
-// KFZ-158 Phase 3: Geofence — Haversine-Distanz + Termin-Proximity-Check.
+// Zentrale Geo-Utilities. Alle anderen Haversine-Kopien im Codebase
+// sollten diese Exports nutzen statt eigene Implementierungen.
 
 /** Distanz in Metern zwischen zwei Geo-Punkten (Haversine-Formel). */
 export function haversineMeters(
@@ -12,6 +13,13 @@ export function haversineMeters(
     Math.sin(dLat / 2) ** 2 +
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
+/** Distanz in Kilometern (Convenience-Wrapper). */
+export function haversineKm(
+  lat1: number, lng1: number, lat2: number, lng2: number,
+): number {
+  return haversineMeters(lat1, lng1, lat2, lng2) / 1000
 }
 
 /**
