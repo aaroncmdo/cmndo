@@ -4,6 +4,7 @@ import AdminNav from './_components/AdminNav'
 import NotificationBell from './_components/NotificationBell'
 import Spotlight from '@/components/Spotlight'
 import { PageContainer } from '@/components/PageContainer'
+import OutboxBadge from '@/components/offline/OutboxBadge'
 
 export default async function AdminLayout({
   children,
@@ -34,8 +35,9 @@ export default async function AdminLayout({
           <NotificationBell />
         </header>
 
-        {/* Desktop: Notification bell top-right */}
-        <div className="hidden md:block fixed top-3 right-4 z-30">
+        {/* Desktop: Notification bell + Outbox badge top-right */}
+        <div className="hidden md:flex items-center gap-2 fixed top-3 right-4 z-30">
+          <OutboxBadge />
           <NotificationBell />
         </div>
 

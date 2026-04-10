@@ -18,6 +18,7 @@ import {
   TrophyIcon,
 } from 'lucide-react'
 import NotificationBell from '@/app/admin/_components/NotificationBell'
+import OutboxBadge from '@/components/offline/OutboxBadge'
 
 const NAV_ITEMS_BASE = [
   { href: '/gutachter/heute', label: 'Heute', icon: MapPinIcon },
@@ -237,8 +238,8 @@ export default function GutachterShell({
                 <div key={h.hour} className="text-center shrink-0 px-1"><p className="text-[9px] opacity-60">{String(h.hour).padStart(2, '0')}h</p><p className="text-[10px]">{wEmoji(h.code)}</p><p className="text-xs font-semibold">{h.temp}°</p></div>
               ))}
             </div>
-            {/* Mobile: nur Glocke */}
-            <div className="shrink-0 sm:hidden"><NotificationBell /></div>
+            {/* Mobile: Outbox + Glocke */}
+            <div className="shrink-0 sm:hidden flex items-center gap-2"><OutboxBadge /><NotificationBell /></div>
             {/* Desktop: Gute Fahrt + Glocke */}
             <div className="shrink-0 text-right hidden sm:flex sm:items-center sm:gap-3">
               <div>
@@ -248,6 +249,7 @@ export default function GutachterShell({
                   <p className="text-[10px] opacity-70 mt-0.5">Morgen: {wEmoji(tomorrowDaily.code)} {tomorrowDaily.tempMax}°/{tomorrowDaily.tempMin}° {wLabel(tomorrowDaily.code)}</p>
                 )}
               </div>
+              <OutboxBadge />
               <NotificationBell />
             </div>
           </div>
