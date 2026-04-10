@@ -25,11 +25,16 @@ export async function getTerminByToken(token: string): Promise<{ termin: TerminD
 
   const { data: termin } = await svc
     .from('gutachter_termine')
-    .select('id, status, start_zeit, end_zeit, fall_id, lead_id, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, abgelehnt_am')
+    .select('id, status, start_zeit, end_zeit, fall_id, lead_id, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, abgelehnt_am, ablehnen_token_expires_at')
     .eq('ablehnen_token', token)
     .maybeSingle()
 
   if (!termin) return { termin: null, error: 'Token ungültig oder abgelaufen.' }
+
+  // BUG-101: Token-Expiry prüfen
+  if (termin.ablehnen_token_expires_at && new Date(termin.ablehnen_token_expires_at) < new Date()) {
+    return { termin: null, error: 'Dieser Link ist abgelaufen. Bitte kontaktieren Sie den Dispatcher.' }
+  }
 
   // Lade Kunden-Daten + Fall-Nummer + Fahrzeug
   let kundeName = '—'
@@ -109,21 +114,26 @@ export async function ablehnenTermin(
 
   const { data: termin } = await svc
     .from('gutachter_termine')
-    .select('id, sv_id, fall_id, start_zeit, status')
+    .select('id, sv_id, fall_id, start_zeit, status, ablehnen_token_expires_at')
     .eq('ablehnen_token', token)
     .maybeSingle()
 
   if (!termin) return { success: false, error: 'Token ungültig.' }
+  // BUG-101: Expiry prüfen
+  if (termin.ablehnen_token_expires_at && new Date(termin.ablehnen_token_expires_at) < new Date()) {
+    return { success: false, error: 'Dieser Link ist abgelaufen.' }
+  }
   if (termin.status === 'abgelehnt') return { success: false, error: 'Bereits abgelehnt.' }
   if (termin.status !== 'reserviert' && termin.status !== 'bestaetigt') {
     return { success: false, error: `Termin kann im Status "${termin.status}" nicht abgelehnt werden.` }
   }
 
-  // 1. Termin ablehnen
+  // 1. Termin ablehnen + Token verbrauchen (BUG-101)
   const { error: updateErr } = await svc.from('gutachter_termine').update({
     status: 'abgelehnt',
     abgelehnt_am: new Date().toISOString(),
     abgelehnt_grund: grund || 'Über Ablehnen-Seite',
+    ablehnen_token_expires_at: new Date().toISOString(),
   }).eq('id', termin.id)
 
   if (updateErr) return { success: false, error: updateErr.message }
@@ -194,18 +204,24 @@ export async function bestaetigenTermin(
 
   const { data: termin } = await svc
     .from('gutachter_termine')
-    .select('id, fall_id, status')
+    .select('id, fall_id, status, ablehnen_token_expires_at')
     .eq('ablehnen_token', token)
     .maybeSingle()
 
   if (!termin) return { success: false, error: 'Token ungültig.' }
+  // BUG-101: Expiry prüfen
+  if (termin.ablehnen_token_expires_at && new Date(termin.ablehnen_token_expires_at) < new Date()) {
+    return { success: false, error: 'Dieser Link ist abgelaufen.' }
+  }
   if (termin.status === 'bestaetigt') return { success: false, error: 'Bereits bestätigt.' }
   if (termin.status !== 'reserviert') {
     return { success: false, error: `Termin kann im Status "${termin.status}" nicht bestätigt werden.` }
   }
 
+  // BUG-101: Token verbrauchen nach Bestätigung
   const { error: updateErr } = await svc.from('gutachter_termine').update({
     status: 'bestaetigt',
+    ablehnen_token_expires_at: new Date().toISOString(),
   }).eq('id', termin.id)
 
   if (updateErr) return { success: false, error: updateErr.message }
@@ -239,11 +255,15 @@ export async function gegenvorschlagTermin(
 
   const { data: termin } = await svc
     .from('gutachter_termine')
-    .select('id, fall_id, status')
+    .select('id, fall_id, status, ablehnen_token_expires_at')
     .eq('ablehnen_token', token)
     .maybeSingle()
 
   if (!termin) return { success: false, error: 'Token ungültig.' }
+  // BUG-101: Expiry prüfen
+  if (termin.ablehnen_token_expires_at && new Date(termin.ablehnen_token_expires_at) < new Date()) {
+    return { success: false, error: 'Dieser Link ist abgelaufen.' }
+  }
   if (termin.status !== 'reserviert' && termin.status !== 'bestaetigt') {
     return { success: false, error: `Gegenvorschlag im Status "${termin.status}" nicht möglich.` }
   }
