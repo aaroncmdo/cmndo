@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboardIcon, FolderOpenIcon, BadgeEuroIcon, ClipboardListIcon,
   HardHatIcon, MapIcon, LogOutIcon, GitBranchIcon, CalendarIcon,
-  BarChart3Icon, UsersIcon, BuildingIcon, Building2Icon, ReceiptIcon, ShieldCheckIcon,
+  BarChart3Icon, UsersIcon, BuildingIcon, Building2Icon, ReceiptIcon, ShieldCheckIcon, MessageCircleIcon,
 } from 'lucide-react'
 
 const NAV_MAIN = [
@@ -16,6 +16,7 @@ const NAV_MAIN = [
   { href: '/admin/kalender', label: 'Kalender', icon: CalendarIcon },
   { href: '/admin/tasks', label: 'Tasks', icon: ClipboardListIcon },
   { href: '/admin/meine-tasks', label: 'Meine Tasks', icon: ClipboardListIcon },
+  { href: '/admin/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon },
 ]
 
 const NAV_SECONDARY = [
