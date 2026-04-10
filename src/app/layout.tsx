@@ -6,6 +6,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { CookieBanner } from "@/components/CookieBanner";
 import { Footer } from "@/components/Footer";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
+import OfflineBanner from "@/components/offline/OfflineBanner";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -53,6 +54,7 @@ export default function RootLayout({
         <Toaster position="top-right" richColors closeButton />
         <CookieBanner />
         <PwaInstallBanner />
+        <OfflineBanner />
         <Analytics />
         <SpeedInsights />
       </body>

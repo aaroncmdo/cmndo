@@ -61,6 +61,19 @@ self.addEventListener('push', (event) => {
   )
 })
 
+// KFZ-180: Background Sync — notify clients to flush outbox
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'outbox-sync') {
+    event.waitUntil(
+      self.clients.matchAll({ type: 'window' }).then((clients) => {
+        for (const client of clients) {
+          client.postMessage({ type: 'OUTBOX_SYNC' })
+        }
+      })
+    )
+  }
+})
+
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
   const url = event.notification.data?.url ?? '/'
