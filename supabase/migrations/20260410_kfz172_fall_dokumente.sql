@@ -3,6 +3,16 @@
 
 -- 1. faelle erweitern
 ALTER TABLE faelle ADD COLUMN IF NOT EXISTS aktuelle_phase TEXT;
+
+-- KFZ-172/173: szenario CHECK constraint erweitern fuer die 6 neuen Szenarien
+ALTER TABLE faelle DROP CONSTRAINT IF EXISTS faelle_szenario_check;
+ALTER TABLE faelle ADD CONSTRAINT faelle_szenario_check CHECK (
+  szenario IS NULL OR szenario IN (
+    'normalfall', 'ruegefall', 'klagefall',
+    'haftpflicht_eindeutig', 'haftpflicht_strittig', 'bewertung',
+    'leasingrueckgabe', 'totalschaden', 'gerichtsgutachten'
+  )
+);
 ALTER TABLE faelle ADD COLUMN IF NOT EXISTS dokumente_vollstaendig_fuer_phase TEXT;
 ALTER TABLE faelle ADD COLUMN IF NOT EXISTS dokumente_vollstaendig_am_phase TIMESTAMPTZ;
 
