@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   themeColor: "#0D1B3E",
   icons: {
     icon: [
-      { url: "/favicon.ico" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
       { url: "/icons/icon.svg", type: "image/svg+xml" },
     ],
     apple: "/icons/icon.svg",
