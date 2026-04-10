@@ -72,9 +72,13 @@ export async function GET(request: Request) {
     }
 
     // Stripe-Customer + Payment Method aufloesen.
-    // empfaenger_id koennte sachverstaendige.id ODER profile_id sein —
-    // wir versuchen erst .id, dann .profile_id.
+    // KFZ-152 Phase 2+3 Fix: empfaenger_id kann jetzt drei Dinge sein:
+    //   a) sachverstaendige.id (Solo + Community-Member, individuelle Rechnung)
+    //   b) sachverstaendige.profile_id (Legacy-Pfad, Fallback)
+    //   c) organisationen.id (Buero/Akademie Sammelrechnung von Hund N)
+    // Wir versuchen die Quellen in dieser Reihenfolge.
     let svRow: { id: string; stripe_customer_id: string | null; stripe_default_payment_method_id: string | null; organisation_id: string | null; profile_id: string | null } | null = null
+    let orgRow: { id: string; parent_stripe_customer_id: string | null; parent_stripe_default_pm_id: string | null; typ: string | null } | null = null
     {
       const { data } = await db.from('sachverstaendige')
         .select('id, stripe_customer_id, stripe_default_payment_method_id, organisation_id, profile_id')
@@ -90,23 +94,40 @@ export async function GET(request: Request) {
         .maybeSingle()
       if (data) svRow = data
     }
-
     if (!svRow) {
-      await markFailed(abr.id, 'Kein Sachverstaendiger gefunden', 'Lookup fehlgeschlagen', abr)
+      // KFZ-152: Org-Sammelrechnung — empfaenger_id ist die Org-ID
+      const { data } = await db.from('organisationen')
+        .select('id, parent_stripe_customer_id, parent_stripe_default_pm_id, typ')
+        .eq('id', abr.empfaenger_id)
+        .maybeSingle()
+      if (data) orgRow = data
+    }
+
+    if (!svRow && !orgRow) {
+      await markFailed(abr.id, 'Kein Sachverstaendiger / keine Organisation gefunden', 'Lookup fehlgeschlagen', abr)
       failed++
       continue
     }
 
-    // Customer + PM bestimmen: Solo direkt vom SV, Buero via Org
-    let customerId = svRow.stripe_customer_id
-    let pmId = svRow.stripe_default_payment_method_id
-    if ((!customerId || !pmId) && svRow.organisation_id) {
-      const { data: org } = await db.from('organisationen')
-        .select('parent_stripe_customer_id, parent_stripe_default_pm_id')
-        .eq('id', svRow.organisation_id)
-        .maybeSingle()
-      customerId = customerId ?? (org?.parent_stripe_customer_id ?? null)
-      pmId = pmId ?? (org?.parent_stripe_default_pm_id ?? null)
+    // Customer + PM bestimmen
+    let customerId: string | null = null
+    let pmId: string | null = null
+    if (orgRow) {
+      // Org-Sammelrechnung: direkt vom Org-Stripe-Customer
+      customerId = orgRow.parent_stripe_customer_id
+      pmId = orgRow.parent_stripe_default_pm_id
+    } else if (svRow) {
+      // Solo + Community: SV-eigener Customer, Fallback Org bei Buero/Akademie-Sub
+      customerId = svRow.stripe_customer_id
+      pmId = svRow.stripe_default_payment_method_id
+      if ((!customerId || !pmId) && svRow.organisation_id) {
+        const { data: org } = await db.from('organisationen')
+          .select('parent_stripe_customer_id, parent_stripe_default_pm_id')
+          .eq('id', svRow.organisation_id)
+          .maybeSingle()
+        customerId = customerId ?? (org?.parent_stripe_customer_id ?? null)
+        pmId = pmId ?? (org?.parent_stripe_default_pm_id ?? null)
+      }
     }
 
     if (!customerId || !pmId) {
@@ -124,12 +145,15 @@ export async function GET(request: Request) {
         payment_method: pmId,
         confirm: true,
         off_session: true,
-        description: `Claimondo Monatsabrechnung ${abr.abrechnungs_nr}`,
+        description: orgRow
+          ? `Claimondo Sammelabrechnung ${abr.abrechnungs_nr} (${orgRow.typ})`
+          : `Claimondo Monatsabrechnung ${abr.abrechnungs_nr}`,
         metadata: {
           abrechnung_id: abr.id,
           abrechnungs_nr: abr.abrechnungs_nr,
-          empfaenger_typ: 'sv',
-          gutachter_id: svRow.id,
+          empfaenger_typ: orgRow ? 'org' : 'sv',
+          ...(svRow ? { gutachter_id: svRow.id } : {}),
+          ...(orgRow ? { organisation_id: orgRow.id, organisation_typ: orgRow.typ ?? '' } : {}),
         },
       })
 

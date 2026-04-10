@@ -11,7 +11,7 @@ import { LoadingButton } from '@/components/ui/loading-button'
 import { MapPinIcon, InfoIcon } from 'lucide-react'
 
 type Profile = { anrede: string | null; titel: string | null; vorname: string | null; nachname: string | null; telefon: string | null; rolle: string }
-type SV = { id: string; paket: string; gebiet_plz: string | null; ist_aktiv: boolean; max_faelle_monat: number; offene_faelle: number; kalender_typ: string; kalender_sync_aktiv: boolean; kalender_sync_letzte: string | null; qualifikationen_neu: string[] | null; spezifikationen: string[] | null; schadenarten: string[] | null; standort_adresse: string | null; standort_plz: string | null; standort_lat: number | null; standort_lng: number | null; standort_place_id: string | null; firmenname: string | null; rechtsform: string | null; steuernummer: string | null; ust_id: string | null; hrb: string | null }
+type SV = { id: string; paket: string; gebiet_plz: string | null; ist_aktiv: boolean; max_faelle_monat: number; offene_faelle: number; kalender_typ: string; kalender_sync_aktiv: boolean; kalender_sync_letzte: string | null; qualifikationen_neu: string[] | null; spezifikationen: string[] | null; schadenarten: string[] | null; standort_adresse: string | null; standort_plz: string | null; standort_lat: number | null; standort_lng: number | null; standort_place_id: string | null; firmenname: string | null; rechtsform: string | null; steuernummer: string | null; ust_id: string | null; hrb: string | null; rolle_in_organisation: string | null; community_anonym: boolean }
 
 // BUG-91: Klassische deutsche Rechtsformen + 'Einzelunternehmen' als Default
 // fuer Solo-SVs ohne eigene GmbH/UG.
@@ -394,6 +394,18 @@ export default function ProfilClient({
           </div>
         </div>
 
+        {/* KFZ-152 Phase 3 Follow-up: Privacy-Toggle (nur fuer Community-Mitglieder) */}
+        {sv.rolle_in_organisation === 'community_member' && (
+          <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-5">
+            <h2 className="text-sm font-medium text-gray-500 mb-1">Community-Privatsphäre</h2>
+            <p className="text-xs text-gray-400 mb-4">
+              Wenn aktiv, sehen andere Community-Mitglieder im Leaderboard „Anonym" statt deines Namens.
+              Deine Statistiken (Fälle, Umsatz) bleiben sichtbar — nur dein Name wird verborgen.
+            </p>
+            <PrivacyToggle svId={sv.id} initial={sv.community_anonym} />
+          </div>
+        )}
+
         {/* Offene Terminanfragen */}
         {pendingTermine.length > 0 && (
           <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-5">
@@ -650,6 +662,59 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+// KFZ-152 Phase 3 Follow-up: Privacy-Toggle fuer Community-Mitglieder.
+// Toggled sachverstaendige.community_anonym zwischen true/false.
+function PrivacyToggle({ svId, initial }: { svId: string; initial: boolean }) {
+  const [active, setActive] = useState(initial)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
+
+  async function toggle() {
+    setSaving(true)
+    setError(null)
+    const next = !active
+    setActive(next)
+    try {
+      const supabase = createClient()
+      const { error: updErr } = await supabase
+        .from('sachverstaendige')
+        .update({ community_anonym: next })
+        .eq('id', svId)
+      if (updErr) {
+        setError(updErr.message)
+        setActive(!next) // rollback UI
+      } else {
+        router.refresh()
+      }
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={toggle}
+        disabled={saving}
+        className={`relative inline-flex items-center w-12 h-6 rounded-full transition-colors disabled:opacity-50 ${
+          active ? 'bg-emerald-500' : 'bg-gray-300'
+        }`}
+      >
+        <span className={`inline-block w-5 h-5 rounded-full bg-white shadow transform transition-transform ${
+          active ? 'translate-x-6' : 'translate-x-0.5'
+        }`} />
+      </button>
+      <span className="ml-3 text-sm text-gray-700">
+        {active ? 'Anonym aktiviert' : 'Name sichtbar'}
+        {saving && <span className="text-gray-400 text-xs ml-2">speichert...</span>}
+      </span>
+      {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
     </div>
   )
 }

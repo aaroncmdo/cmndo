@@ -1,27 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getGutachterForUser } from '@/lib/gutachter'
-import { Building2Icon, GraduationCapIcon, MailIcon } from 'lucide-react'
+import { Building2Icon, GraduationCapIcon } from 'lucide-react'
+import TeamClient from './TeamClient'
 
 // KFZ-152 Phase 2+3: Team-Verwaltung fuer Buero-Inhaber und Akademie-Verwalter.
-// Zeigt alle Sub-SVs der eigenen Org mit Status, Paket, Werbebudget, Faellen.
-// Phase-1 MVP: nur Listing, keine Edit/Sperren-Aktionen (Folge-Auftrag).
+// Zeigt alle Sub-SVs der eigenen Org + die Pool-Leads die noch nicht zugewiesen
+// wurden (organisation_id=org AND sv_id IS NULL). Verwalter kann Pool-Leads
+// manuell zuweisen UND Mitarbeiter sperren/entsperren.
 
 export const dynamic = 'force-dynamic'
 
-type SubSv = {
-  id: string
-  paket: string
-  rolle_in_organisation: string | null
-  ist_aktiv: boolean
-  portal_zugang_freigeschaltet: boolean
-  max_faelle_monat: number
-  paket_faelle_genutzt: number | null
-  werbebudget_guthaben_netto: number | null
-  vorname: string | null
-  nachname: string | null
-  email: string | null
-}
+// Type-Imports vom Client-Component (nicht lokal definieren um Drift zu vermeiden)
+import type { SubSvData, PoolLeadData } from './TeamClient'
 
 export default async function TeamPage() {
   const supabase = await createClient()
@@ -71,12 +62,21 @@ export default async function TeamPage() {
     for (const p of profs ?? []) profileMap.set(p.id, p)
   }
 
-  const subSvs: SubSv[] = (subRows ?? []).map(s => ({
+  // KFZ-152 Erweiterung: gesperrt_seit fuer den Sperre-Toggle
+  const { data: subRowsExt } = await supabase
+    .from('sachverstaendige')
+    .select('id, gesperrt_seit')
+    .eq('organisation_id', sv.organisation_id)
+  const sperreMap = new Map<string, string | null>()
+  for (const r of subRowsExt ?? []) sperreMap.set(r.id, (r.gesperrt_seit as string | null) ?? null)
+
+  const subSvs: SubSvData[] = (subRows ?? []).map(s => ({
     id: s.id,
     paket: s.paket ?? 'standard',
     rolle_in_organisation: s.rolle_in_organisation,
     ist_aktiv: !!s.ist_aktiv,
     portal_zugang_freigeschaltet: !!s.portal_zugang_freigeschaltet,
+    gesperrt_seit: sperreMap.get(s.id) ?? null,
     max_faelle_monat: s.max_faelle_monat ?? 0,
     paket_faelle_genutzt: s.paket_faelle_genutzt,
     werbebudget_guthaben_netto: s.werbebudget_guthaben_netto != null ? Number(s.werbebudget_guthaben_netto) : null,
@@ -85,79 +85,46 @@ export default async function TeamPage() {
     email: s.profile_id ? profileMap.get(s.profile_id)?.email ?? null : null,
   }))
 
+  // KFZ-152 Phase 2+3: Pool-Leads laden (Faelle die an die Org geroutet wurden,
+  // aber noch keinem konkreten Sub-SV zugewiesen sind)
+  const { data: poolFaelle } = await supabase
+    .from('faelle')
+    .select('id, fall_nummer, status, schadens_plz, schadens_ort, schadens_adresse, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, spezifikation, schadenart, created_at')
+    .eq('organisation_id', sv.organisation_id)
+    .is('sv_id', null)
+    .order('created_at', { ascending: false })
+    .limit(50)
+
+  const poolLeads: PoolLeadData[] = (poolFaelle ?? []).map(f => ({
+    id: f.id as string,
+    fall_nummer: (f.fall_nummer as string) ?? f.id.slice(0, 8),
+    status: (f.status as string) ?? 'ersterfassung',
+    schadens_plz: (f.schadens_plz as string) ?? null,
+    schadens_ort: (f.schadens_ort as string) ?? null,
+    schadens_adresse: (f.schadens_adresse as string) ?? null,
+    kennzeichen: (f.kennzeichen as string) ?? null,
+    fahrzeug: [f.fahrzeug_hersteller, f.fahrzeug_modell].filter(Boolean).join(' ') || null,
+    spezifikation: (f.spezifikation as string) ?? null,
+    schadenart: (f.schadenart as string) ?? null,
+    created_at: (f.created_at as string) ?? null,
+  }))
+
   const Icon = org.typ === 'akademie' ? GraduationCapIcon : Building2Icon
   const orgLabel = org.typ === 'akademie' ? 'Akademie' : 'Büro'
+  // Nur in Org-Pool-Modellen (Akademie) hat Verwalter Pool-Leads zur Verteilung.
+  // Buero verteilt direkt an Sub-Standorte beim Dispatch.
+  const showPoolSection = org.typ === 'akademie'
 
+  // Icon wird im Client-Component anhand iconKey gewaehlt
+  void Icon
   return (
-    <div className="px-8 py-8 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-3">
-            <Icon className="w-6 h-6 text-[#4573A2]" /> {org.name}
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Team-Verwaltung — {orgLabel} mit {subSvs.length} Mitgliedern
-          </p>
-        </div>
-      </div>
-
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-        {subSvs.length === 0 ? (
-          <div className="p-12 text-center">
-            <MailIcon className="w-8 h-8 text-gray-300 mx-auto mb-3" />
-            <p className="text-sm text-gray-500">Noch keine Mitglieder in deiner Organisation.</p>
-            <p className="text-[11px] text-gray-400 mt-2">
-              Mitglieder werden vom Admin über das Anlege-UI hinzugefügt.
-            </p>
-          </div>
-        ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-[10px] uppercase tracking-wide text-gray-500">
-              <tr>
-                <th className="text-left px-4 py-3">Name</th>
-                <th className="text-left px-4 py-3">Email</th>
-                <th className="text-left px-4 py-3">Paket</th>
-                <th className="text-left px-4 py-3">Status</th>
-                <th className="text-right px-4 py-3">Fälle Monat</th>
-                <th className="text-right px-4 py-3">Werbebudget</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {subSvs.map(s => {
-                const name = [s.vorname, s.nachname].filter(Boolean).join(' ') || '—'
-                const status = !s.ist_aktiv ? { label: 'Inaktiv', cls: 'bg-gray-100 text-gray-500' }
-                  : !s.portal_zugang_freigeschaltet ? { label: 'Wartet auf Onboarding', cls: 'bg-yellow-50 text-yellow-700' }
-                  : { label: 'Aktiv', cls: 'bg-emerald-50 text-emerald-700' }
-                return (
-                  <tr key={s.id} className="hover:bg-gray-50/50">
-                    <td className="px-4 py-3 text-gray-900">{name}</td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">{s.email ?? '—'}</td>
-                    <td className="px-4 py-3 text-gray-700 capitalize">{s.paket}</td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full font-medium ${status.cls}`}>
-                        {status.label}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right text-gray-700">
-                      {s.paket_faelle_genutzt ?? 0} / {s.max_faelle_monat}
-                    </td>
-                    <td className="px-4 py-3 text-right text-gray-700">
-                      {s.werbebudget_guthaben_netto != null
-                        ? s.werbebudget_guthaben_netto.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })
-                        : '—'}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      <p className="text-[10px] text-gray-400 mt-3 text-center">
-        Edit-Aktionen (Mitglied einladen / sperren) folgen im Folge-Auftrag.
-        Aktuell werden Mitglieder vom Admin im /admin/sachverstaendige-Bereich verwaltet.
-      </p>
-    </div>
+    <TeamClient
+      orgName={org.name}
+      orgLabel={orgLabel}
+      iconKey={org.typ === 'akademie' ? 'akademie' : 'buero'}
+      subSvs={subSvs}
+      poolLeads={poolLeads}
+      showPoolSection={showPoolSection}
+    />
   )
 }

@@ -9,6 +9,7 @@ import {
   PAKET_KONFIG, ANREDE_OPTIONEN, TITEL_OPTIONEN,
   type AnlegePaket, type AnlegeCommunityFormData,
 } from '@/app/admin/sachverstaendige/anlegen/constants'
+import PolygonEditor, { type PolygonPath } from './PolygonEditor'
 
 // KFZ-152 Phase 3: 3-Step Community-Anlegen Wizard.
 // Step 1: Stammdaten + Gebiet (MVP: Adresse + Radius statt Polygon)
@@ -58,6 +59,8 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
   const [zentrumPlaceId, setZentrumPlaceId] = useState('')
   const [zentrumPlz, setZentrumPlz] = useState('')
   const [radiusKm, setRadiusKm] = useState(200)
+  const [polygon, setPolygon] = useState<PolygonPath | null>(null)
+  const [gebietMode, setGebietMode] = useState<'circle' | 'polygon'>('circle')
   const [maxFaelleMonat, setMaxFaelleMonat] = useState(100)
   const [exklusiv, setExklusiv] = useState(false)
 
@@ -70,7 +73,12 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
   }
 
   function canNext(): boolean {
-    if (step === 0) return !!(name.trim() && zentrumLat !== null && zentrumLng !== null && radiusKm > 0)
+    if (step === 0) {
+      if (!name.trim() || zentrumLat === null || zentrumLng === null) return false
+      if (gebietMode === 'circle') return radiusKm > 0
+      // polygon mode: braucht mindestens 3 Eckpunkte
+      return !!polygon && polygon.length >= 3
+    }
     if (step === 1) return mitglieder.length > 0 && mitglieder.every(m => m.anrede && m.vorname.trim() && m.nachname.trim() && m.email.trim())
     return true
   }
@@ -87,6 +95,7 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
         zentrum_place_id: zentrumPlaceId || undefined,
         zentrum_plz: zentrumPlz,
         radius_km: radiusKm,
+        polygon: gebietMode === 'polygon' ? polygon : null,
         max_faelle_monat: maxFaelleMonat,
         exklusiv,
         mitglieder: mitglieder.map(m => ({
@@ -177,13 +186,40 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
                 }}
                 className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
               />
-              <p className="text-[10px] text-gray-400 mt-1">
-                MVP: Zentrum + Radius. Polygon-Editor folgt im Folge-Auftrag.
-              </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <NumField label="Radius km" value={radiusKm} onChange={setRadiusKm} />
-              <NumField label="Max Fälle/Monat" value={maxFaelleMonat} onChange={setMaxFaelleMonat} />
+
+            {/* KFZ-152 Phase 3 Follow-up: Circle-vs-Polygon Toggle */}
+            <div>
+              <div className="inline-flex bg-gray-100 rounded-xl p-0.5 text-xs font-medium mb-2">
+                <button type="button" onClick={() => setGebietMode('circle')}
+                  className={`px-3 py-1.5 rounded-lg transition-colors ${
+                    gebietMode === 'circle' ? 'bg-white text-[#1E3A5F] shadow' : 'text-gray-500 hover:text-gray-700'
+                  }`}>
+                  Kreis (Zentrum + Radius)
+                </button>
+                <button type="button" onClick={() => setGebietMode('polygon')}
+                  className={`px-3 py-1.5 rounded-lg transition-colors ${
+                    gebietMode === 'polygon' ? 'bg-white text-[#1E3A5F] shadow' : 'text-gray-500 hover:text-gray-700'
+                  }`}>
+                  Polygon (frei zeichnen)
+                </button>
+              </div>
+              {gebietMode === 'circle' ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <NumField label="Radius km" value={radiusKm} onChange={setRadiusKm} />
+                  <NumField label="Max Fälle/Monat" value={maxFaelleMonat} onChange={setMaxFaelleMonat} />
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <PolygonEditor
+                    centerLat={zentrumLat}
+                    centerLng={zentrumLng}
+                    initialPolygon={polygon}
+                    onChange={setPolygon}
+                  />
+                  <NumField label="Max Fälle/Monat" value={maxFaelleMonat} onChange={setMaxFaelleMonat} />
+                </div>
+              )}
             </div>
             <label className="flex items-start gap-2.5 cursor-pointer text-sm text-gray-700 bg-amber-50 border border-amber-200 rounded-xl p-3">
               <input
@@ -259,7 +295,11 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
             <p className="text-gray-900"><strong>{name}</strong></p>
             {beschreibung && <p className="text-xs text-gray-500 mt-1">{beschreibung}</p>}
             <p className="text-xs text-gray-500 mt-2">Zentrum: {zentrumAnschrift}</p>
-            <p className="text-xs text-gray-500">Radius: {radiusKm} km · Max {maxFaelleMonat} Fälle/Monat</p>
+            <p className="text-xs text-gray-500">
+              {gebietMode === 'polygon' && polygon
+                ? `Polygon: ${polygon.length} Eckpunkte`
+                : `Radius: ${radiusKm} km`} · Max {maxFaelleMonat} Fälle/Monat
+            </p>
             {exklusiv && (
               <p className="text-xs text-amber-700 mt-2"><ShieldCheckIcon className="w-3 h-3 inline mr-1" /> Exklusivität aktiviert</p>
             )}

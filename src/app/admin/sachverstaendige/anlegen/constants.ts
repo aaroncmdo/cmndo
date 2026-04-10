@@ -226,13 +226,16 @@ export type AnlegeAkademieFormData = {
 export type AnlegeCommunityFormData = {
   name: string
   beschreibung?: string
-  // Gemeinsames Einsatzgebiet (MVP: Adresse + Radius statt Polygon)
+  // Gemeinsames Einsatzgebiet — wahlweise Circle (Zentrum + Radius) oder Polygon.
+  // Wenn `polygon` gesetzt ist, hat es Vorrang bei der Exklusivitaets-Geometrie.
   zentrum_anschrift: string
   zentrum_lat: number | null
   zentrum_lng: number | null
   zentrum_place_id?: string
   zentrum_plz: string
   radius_km: number
+  // KFZ-152 Phase 3 Follow-up: optionales Polygon (Liste von {lat,lng})
+  polygon?: { lat: number; lng: number }[] | null
   max_faelle_monat: number
   exklusiv: boolean
   // Initial-Mitglieder

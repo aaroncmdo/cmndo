@@ -62,18 +62,20 @@ export default async function CommunityDashboardPage() {
     .eq('zeitraum_jahr', jahr)
     .order('rang', { ascending: true })
 
-  // Profile-Lookup
+  // Profile-Lookup + Anonym-Flag pro SV
   const svIds = (lbRows ?? []).map(r => r.sv_id)
   const profileMap = new Map<string, { vorname: string | null; nachname: string | null }>()
+  const anonymMap = new Map<string, boolean>()
   if (svIds.length) {
     const { data: svRows } = await supabase
       .from('sachverstaendige')
-      .select('id, profile_id')
+      .select('id, profile_id, community_anonym')
       .in('id', svIds)
     const profileIds = (svRows ?? []).map(s => s.profile_id).filter(Boolean) as string[]
     const svToProfile = new Map<string, string>()
     for (const s of svRows ?? []) {
       if (s.profile_id) svToProfile.set(s.id, s.profile_id)
+      anonymMap.set(s.id, !!s.community_anonym)
     }
     if (profileIds.length) {
       const { data: profs } = await supabase
@@ -88,15 +90,21 @@ export default async function CommunityDashboardPage() {
     }
   }
 
-  const leaderboard: LeaderboardRow[] = (lbRows ?? []).map(r => ({
-    sv_id: r.sv_id,
-    rang: r.rang,
-    faelle_count: r.faelle_count,
-    umsatz_netto: Number(r.umsatz_netto ?? 0),
-    durchschnitt_bearbeitungsdauer_h: r.durchschnitt_bearbeitungsdauer_h ? Number(r.durchschnitt_bearbeitungsdauer_h) : null,
-    vorname: profileMap.get(r.sv_id)?.vorname ?? null,
-    nachname: profileMap.get(r.sv_id)?.nachname ?? null,
-  }))
+  // KFZ-152 Phase 3 Follow-up: Privacy-Filter — andere Mitglieder mit
+  // community_anonym=true werden anonymisiert. Eigener Eintrag bleibt sichtbar.
+  const leaderboard: LeaderboardRow[] = (lbRows ?? []).map(r => {
+    const isMe = r.sv_id === sv.id
+    const isAnonym = !isMe && anonymMap.get(r.sv_id) === true
+    return {
+      sv_id: r.sv_id,
+      rang: r.rang,
+      faelle_count: r.faelle_count,
+      umsatz_netto: Number(r.umsatz_netto ?? 0),
+      durchschnitt_bearbeitungsdauer_h: r.durchschnitt_bearbeitungsdauer_h ? Number(r.durchschnitt_bearbeitungsdauer_h) : null,
+      vorname: isAnonym ? null : (profileMap.get(r.sv_id)?.vorname ?? null),
+      nachname: isAnonym ? null : (profileMap.get(r.sv_id)?.nachname ?? null),
+    }
+  })
 
   return (
     <div className="px-8 py-8 max-w-5xl mx-auto">
@@ -136,7 +144,7 @@ export default async function CommunityDashboardPage() {
             <tbody className="divide-y divide-gray-100">
               {leaderboard.map(row => {
                 const isMe = row.sv_id === sv.id
-                const name = [row.vorname, row.nachname].filter(Boolean).join(' ') || 'Unbekannt'
+                const name = [row.vorname, row.nachname].filter(Boolean).join(' ') || 'Anonym'
                 return (
                   <tr key={row.sv_id} className={isMe ? 'bg-[#4573A2]/5 border-l-4 border-l-[#4573A2]' : ''}>
                     <td className="px-4 py-3">

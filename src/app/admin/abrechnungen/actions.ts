@@ -45,8 +45,9 @@ export async function retryEinzug(abrechnung_id: string): Promise<{ success: boo
   if (abr.empfaenger_typ !== 'sv') return { success: false, error: 'Retry nur fuer SV-Abrechnungen unterstuetzt' }
   if (!abr.empfaenger_id || !abr.summe_brutto) return { success: false, error: 'empfaenger_id oder Betrag fehlt' }
 
-  // Customer + PM auflosen (analog zum Cron)
+  // KFZ-152 Phase 2+3 Fix: empfaenger_id kann SV-Id, profile_id ODER org_id sein
   let svRow: { id: string; stripe_customer_id: string | null; stripe_default_payment_method_id: string | null; organisation_id: string | null } | null = null
+  let orgRow: { id: string; parent_stripe_customer_id: string | null; parent_stripe_default_pm_id: string | null; typ: string | null } | null = null
   {
     const { data } = await db.from('sachverstaendige')
       .select('id, stripe_customer_id, stripe_default_payment_method_id, organisation_id')
@@ -62,20 +63,35 @@ export async function retryEinzug(abrechnung_id: string): Promise<{ success: boo
       .maybeSingle()
     if (data) svRow = data
   }
-  if (!svRow) return { success: false, error: 'Kein Sachverstaendiger gefunden' }
-
-  let customerId = svRow.stripe_customer_id
-  let pmId = svRow.stripe_default_payment_method_id
-  if ((!customerId || !pmId) && svRow.organisation_id) {
-    const { data: org } = await db.from('organisationen')
-      .select('parent_stripe_customer_id, parent_stripe_default_pm_id')
-      .eq('id', svRow.organisation_id)
+  if (!svRow) {
+    // Org-Sammelrechnung
+    const { data } = await db.from('organisationen')
+      .select('id, parent_stripe_customer_id, parent_stripe_default_pm_id, typ')
+      .eq('id', abr.empfaenger_id)
       .maybeSingle()
-    customerId = customerId ?? (org?.parent_stripe_customer_id ?? null)
-    pmId = pmId ?? (org?.parent_stripe_default_pm_id ?? null)
+    if (data) orgRow = data
+  }
+  if (!svRow && !orgRow) return { success: false, error: 'Kein Sachverstaendiger / keine Organisation gefunden' }
+
+  let customerId: string | null = null
+  let pmId: string | null = null
+  if (orgRow) {
+    customerId = orgRow.parent_stripe_customer_id
+    pmId = orgRow.parent_stripe_default_pm_id
+  } else if (svRow) {
+    customerId = svRow.stripe_customer_id
+    pmId = svRow.stripe_default_payment_method_id
+    if ((!customerId || !pmId) && svRow.organisation_id) {
+      const { data: org } = await db.from('organisationen')
+        .select('parent_stripe_customer_id, parent_stripe_default_pm_id')
+        .eq('id', svRow.organisation_id)
+        .maybeSingle()
+      customerId = customerId ?? (org?.parent_stripe_customer_id ?? null)
+      pmId = pmId ?? (org?.parent_stripe_default_pm_id ?? null)
+    }
   }
 
-  if (!customerId || !pmId) return { success: false, error: 'Stripe Customer oder Payment Method fehlt — bitte SV-Profil pruefen' }
+  if (!customerId || !pmId) return { success: false, error: 'Stripe Customer oder Payment Method fehlt — bitte Profil pruefen' }
 
   const { stripe } = await import('@/lib/stripe/client')
 
@@ -87,12 +103,15 @@ export async function retryEinzug(abrechnung_id: string): Promise<{ success: boo
       payment_method: pmId,
       confirm: true,
       off_session: true,
-      description: `Claimondo Monatsabrechnung ${abr.abrechnungs_nr} (manueller Retry)`,
+      description: orgRow
+        ? `Claimondo Sammelabrechnung ${abr.abrechnungs_nr} (${orgRow.typ}, manueller Retry)`
+        : `Claimondo Monatsabrechnung ${abr.abrechnungs_nr} (manueller Retry)`,
       metadata: {
         abrechnung_id: abr.id,
         abrechnungs_nr: abr.abrechnungs_nr,
-        empfaenger_typ: 'sv',
-        gutachter_id: svRow.id,
+        empfaenger_typ: orgRow ? 'org' : 'sv',
+        ...(svRow ? { gutachter_id: svRow.id } : {}),
+        ...(orgRow ? { organisation_id: orgRow.id, organisation_typ: orgRow.typ ?? '' } : {}),
         manueller_retry: 'true',
       },
     })

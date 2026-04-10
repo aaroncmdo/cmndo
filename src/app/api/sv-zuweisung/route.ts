@@ -190,18 +190,35 @@ export async function POST(request: Request) {
     return da - db
   })
 
-  const bestSv = matchedCandidates[0]
-
-  // KFZ-152 Phase 2+3: Organisations-aware Routing
-  // - akademie_sub: NICHT direkt an den Sub-SV zuweisen, sondern an die
-  //   Akademie-Org. Akademie-Verwalter verteilt intern manuell.
-  //   sv_id bleibt null, organisation_id wird gesetzt.
-  // - community_member: Lead geht in den Community-Pool. sv_id null,
-  //   organisation_id gesetzt. Admin/Verwalter verteilt manuell (MVP).
+  // KFZ-152 Phase 2+3 + Follow-up: Organisations-aware Routing
+  // - akademie_sub: Pool-Routing (sv_id=null, organisation_id=org).
+  //   Akademie-Verwalter verteilt manuell ueber /gutachter/team.
+  // - community_member: Round-Robin innerhalb der Community.
+  //   Wir picken den Member mit der NIEDRIGSTEN paket_faelle_genutzt-Quote
+  //   aus den matchedCandidates (sortiert nach freier Kapazitaet).
   // - mitarbeiter (Buero): direkt an den Sub-Buero (existing).
   // - solo / kein org: direkt zugewiesen (existing).
+  let bestSv = matchedCandidates[0]
+  const firstRolle = (bestSv.rolle_in_organisation ?? '').toLowerCase()
+
+  if (firstRolle === 'community_member') {
+    // KFZ-152 Follow-up: Round-Robin per niedrigste Auslastung
+    const communityCandidates = matchedCandidates.filter(c =>
+      (c.rolle_in_organisation ?? '').toLowerCase() === 'community_member'
+    )
+    // Sort by 'free capacity' = max - genutzt, hoechster freier Slot zuerst
+    type WithCapacity = (typeof communityCandidates)[number] & { paket_faelle_genutzt?: number | null }
+    communityCandidates.sort((a, b) => {
+      const aFree = (a.max_faelle_monat ?? 0) - ((a as WithCapacity).paket_faelle_genutzt ?? a.offene_faelle ?? 0)
+      const bFree = (b.max_faelle_monat ?? 0) - ((b as WithCapacity).paket_faelle_genutzt ?? b.offene_faelle ?? 0)
+      return bFree - aFree
+    })
+    if (communityCandidates.length > 0) bestSv = communityCandidates[0]
+  }
+
   const bestRolle = (bestSv.rolle_in_organisation ?? '').toLowerCase()
-  const orgPool = bestRolle === 'akademie_sub' || bestRolle === 'community_member'
+  // Akademie bleibt Pool. Community wird durch Round-Robin oben direkt zugewiesen.
+  const orgPool = bestRolle === 'akademie_sub'
 
   // 6. Fall updaten: SV zuweisen ODER an Org-Pool
   const now = new Date().toISOString()

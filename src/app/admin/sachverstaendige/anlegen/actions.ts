@@ -996,12 +996,27 @@ export async function anlegeCommunity(data: AnlegeCommunityFormData): Promise<{
   const organisationId = orgRow.id
 
   // 2. Wenn Exklusivitaet: Eintrag in gebiet_exklusivitaeten
+  // KFZ-152 Phase 3 Follow-up: Polygon hat Vorrang vor Circle. Wenn der Admin
+  // im Wizard ein Polygon gezeichnet hat, speichern wir es als GeoJSON Polygon
+  // (coordinates = [[[lng,lat], ...]]). Sonst Fallback auf Circle (MVP).
   if (data.exklusiv) {
-    // MVP: einfacher GeoJSON Point + Radius (statt echtes Polygon)
-    const isochronGeoJson = {
-      type: 'Circle',
-      coordinates: [data.zentrum_lng, data.zentrum_lat],
-      radius_km: data.radius_km,
+    let isochronGeoJson: Record<string, unknown>
+    if (data.polygon && data.polygon.length >= 3) {
+      // GeoJSON-Polygon: erster Ring geschlossen (erstes = letztes Pair)
+      const ring = data.polygon.map(p => [p.lng, p.lat])
+      const first = ring[0]
+      const last = ring[ring.length - 1]
+      if (first[0] !== last[0] || first[1] !== last[1]) ring.push([first[0], first[1]])
+      isochronGeoJson = {
+        type: 'Polygon',
+        coordinates: [ring],
+      }
+    } else {
+      isochronGeoJson = {
+        type: 'Circle',
+        coordinates: [data.zentrum_lng, data.zentrum_lat],
+        radius_km: data.radius_km,
+      }
     }
     await adminDb.from('gebiet_exklusivitaeten').insert({
       organisation_id: organisationId,
