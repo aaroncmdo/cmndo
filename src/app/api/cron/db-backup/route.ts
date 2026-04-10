@@ -93,20 +93,18 @@ export async function GET(request: Request) {
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
 
-    // Send error notification via Resend if configured
-    if (process.env.RESEND_API_KEY) {
-      try {
-        const { Resend } = await import('resend')
-        const resend = new Resend(process.env.RESEND_API_KEY)
-        await resend.emails.send({
-          from: process.env.RESEND_FROM || 'Claimondo <noreply@claimondo.de>',
-          to: 'aaron@claimondo.de',
-          subject: `[ALERT] DB-Backup fehlgeschlagen - ${dateStr}`,
-          text: `Das taegliche DB-Backup ist fehlgeschlagen.\n\nFehler: ${message}\nZeit: ${now.toISOString()}\n\nBitte pruefen: Supabase Dashboard > Storage > db-backups`,
-        })
-      } catch (mailErr) {
-        console.error('Failed to send backup error notification:', mailErr)
-      }
+    // Send error notification via central sendEmail
+    try {
+      const { sendEmail } = await import('@/lib/email/google/client')
+      await sendEmail({
+        to: process.env.ADMIN_ALERT_EMAIL || 'aaron@claimondo.de',
+        subject: `[ALERT] DB-Backup fehlgeschlagen - ${dateStr}`,
+        html: `<p>Das taegliche DB-Backup ist fehlgeschlagen.</p><p>Fehler: ${message}</p><p>Zeit: ${now.toISOString()}</p><p>Bitte pruefen: Supabase Dashboard &gt; Storage &gt; db-backups</p>`,
+        empfaengerTyp: 'admin',
+        template: 'db_backup_error',
+      })
+    } catch (mailErr) {
+      console.error('Failed to send backup error notification:', mailErr)
     }
 
     return NextResponse.json({ status: 'error', error: message }, { status: 500 })

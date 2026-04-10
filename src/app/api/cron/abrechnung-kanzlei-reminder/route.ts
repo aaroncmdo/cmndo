@@ -58,7 +58,7 @@ const REMINDER_CONFIGS: ReminderConfig[] = [
     tageBisFaellig: -1,
     subject: 'MAHNUNG: Claimondo Rechnung ueberfaellig',
     bodyFn: ({ ansprechpartner, rechnungsnummer, brutto, faelligAm, magicUrl }) =>
-      `<p>Hallo ${ansprechpartner},</p><p>leider haben wir noch keinen Zahlungseingang fuer Rechnung <strong>${rechnungsnummer}</strong> ueber <strong>${brutto}</strong> festgestellt. Die Rechnung war am <strong>${faelligAm}</strong> faellig.</p><p>Bitte begleichen Sie den Betrag umgehend.</p><p><a href="${magicUrl}" style="display:inline-block;padding:10px 20px;background:#c0392b;color:#fff;border-radius:6px;text-decoration:none;font-weight:600;">Jetzt bezahlen</a></p><p>Bei Fragen melden Sie sich bitte unter abrechnung@claimondo.de.</p><p>Mit freundlichen Gruessen,<br>Ihr Claimondo-Team</p>`,
+      `<p>Hallo ${ansprechpartner},</p><p>leider haben wir noch keinen Zahlungseingang fuer Rechnung <strong>${rechnungsnummer}</strong> ueber <strong>${brutto}</strong> festgestellt. Die Rechnung war am <strong>${faelligAm}</strong> faellig.</p><p>Bitte begleichen Sie den Betrag umgehend.</p><p><a href="${magicUrl}" style="display:inline-block;padding:10px 20px;background:#c0392b;color:#fff;border-radius:6px;text-decoration:none;font-weight:600;">Jetzt bezahlen</a></p><p>Bei Fragen melden Sie sich bitte unter support@claimondo.de.</p><p>Mit freundlichen Gruessen,<br>Ihr Claimondo-Team</p>`,
   },
   {
     typ: 'mahnung_2',
