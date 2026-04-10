@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { CalendarIcon, NavigationIcon, PhoneIcon } from 'lucide-react'
 
 const STATUS_LABEL: Record<string, string> = {
   'sv-zugewiesen': 'Zugewiesen',
@@ -117,7 +118,7 @@ export default async function GutachterFaellePage({
   // Fetch lead names
   const leadIds = (faelle ?? []).map(f => f.lead_id).filter(Boolean) as string[]
   const { data: leads } = leadIds.length
-    ? await supabase.from('leads').select('id, vorname, nachname').in('id', leadIds)
+    ? await supabase.from('leads').select('id, vorname, nachname, telefon').in('id', leadIds)
     : { data: [] }
   const leadMap = Object.fromEntries((leads ?? []).map(l => [l.id, l]))
 
@@ -149,6 +150,69 @@ export default async function GutachterFaellePage({
 
       {/* Scrollable Content */}
       <div className="flex-1 min-h-0 overflow-y-auto p-4">
+        {/* KFZ-158: XL-Karten fuer Faelle mit anstehenden Terminen (naechste 7 Tage) */}
+        {(() => {
+          const now = new Date()
+          const in7d = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+          const xlFaelle = (faelle ?? []).filter(f => {
+            if (!f.sv_termin) return false
+            const t = new Date(f.sv_termin)
+            return t >= now && t <= in7d
+          }).sort((a, b) => new Date(a.sv_termin!).getTime() - new Date(b.sv_termin!).getTime())
+          if (xlFaelle.length === 0) return null
+          return (
+            <div className="mb-4 space-y-3">
+              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                <CalendarIcon className="w-3.5 h-3.5" /> Nächste Termine
+              </h2>
+              {xlFaelle.map(fall => {
+                const lead = fall.lead_id ? leadMap[fall.lead_id] : null
+                const name = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : '—'
+                const termin = new Date(fall.sv_termin!)
+                const isHeute = termin.toDateString() === now.toDateString()
+                const adresse = fall.schadens_ort ?? '—'
+                return (
+                  <div key={fall.id} className={`rounded-2xl border-2 p-5 ${isHeute ? 'border-[#4573A2] bg-[#4573A2]/5' : 'border-gray-200 bg-white'}`}>
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-lg font-bold ${isHeute ? 'text-[#1E3A5F]' : 'text-gray-900'}`}>
+                            {termin.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
+                          </span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isHeute ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-gray-600'}`}>
+                            {isHeute ? 'HEUTE' : termin.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-800 mt-1">{name}</p>
+                        <p className="text-xs text-gray-500">{adresse}</p>
+                      </div>
+                      <Link href={`/gutachter/fall/${fall.id}`} className="text-[10px] text-[#4573A2] hover:underline">
+                        {fall.fall_nummer ?? fall.id.slice(0, 8)}
+                      </Link>
+                    </div>
+                    <div className="flex gap-2">
+                      <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(adresse)}`}
+                        target="_blank" rel="noopener noreferrer"
+                        className="flex-1 flex items-center justify-center gap-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white rounded-xl py-2.5 text-sm font-semibold transition-colors"
+                      >
+                        <NavigationIcon className="w-4 h-4" /> Navigation starten
+                      </a>
+                      {lead?.telefon && (
+                        <a href={`tel:${lead.telefon}`}
+                          className="flex items-center justify-center gap-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl px-4 py-2.5 text-sm transition-colors"
+                        >
+                          <PhoneIcon className="w-4 h-4" /> Anrufen
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )
+        })()}
+
         {!faelle?.length ? (
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
             <p className="text-gray-500">Keine Fälle gefunden.</p>

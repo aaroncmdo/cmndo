@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboardIcon,
   MapIcon,
+  MapPinIcon,
   FolderOpenIcon,
   CalendarIcon,
   ReceiptIcon,
@@ -19,6 +20,7 @@ import {
 import NotificationBell from '@/app/admin/_components/NotificationBell'
 
 const NAV_ITEMS_BASE = [
+  { href: '/gutachter/heute', label: 'Heute', icon: MapPinIcon },
   { href: '/gutachter', label: 'Dashboard', icon: LayoutDashboardIcon },
   { href: '/gutachter/faelle', label: 'Meine Fälle', icon: FolderOpenIcon },
   { href: '/gutachter/gebiet', label: 'Mein Gebiet', icon: MapIcon },
