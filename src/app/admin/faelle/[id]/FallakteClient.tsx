@@ -122,7 +122,6 @@ type Fall = Record<string, unknown> & {
   firma_name: string | null
   halter_name: string | null
   polizei_vor_ort: boolean | null
-  lead_source_channel: string | null
   anwalt_status: string | null
   prioritaet: string | null
   kundenbetreuer_id: string | null
