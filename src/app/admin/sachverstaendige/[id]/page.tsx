@@ -47,6 +47,23 @@ export default async function SvDetailPage({
   const faelle = faelleRes.data ?? []
   const tasks = tasksRes.data ?? []
 
+  // KFZ-153: Gutachten-Mängel Counts für diesen SV
+  const fallIds = faelle.map(f => f.id)
+  let mangelCounts = { formal: 0, inhaltlich: 0 }
+  if (fallIds.length > 0) {
+    const { data: mangel } = await supabase
+      .from('regulierungs_klassifizierung')
+      .select('kuerzungsgrund')
+      .in('fall_id', fallIds)
+      .in('kuerzungsgrund', ['gutachten_formaler_mangel', 'gutachten_inhaltlicher_mangel'])
+    if (mangel) {
+      mangelCounts = {
+        formal: mangel.filter(m => m.kuerzungsgrund === 'gutachten_formaler_mangel').length,
+        inhaltlich: mangel.filter(m => m.kuerzungsgrund === 'gutachten_inhaltlicher_mangel').length,
+      }
+    }
+  }
+
   const name = profile ? `${profile.vorname ?? ''} ${profile.nachname ?? ''}`.trim() : ''
   const maxFaelle = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10
   const genutzt = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
@@ -90,6 +107,12 @@ export default async function SvDetailPage({
                 <span className={`w-1.5 h-1.5 rounded-full ${onboardingStatus.dot}`} />
                 {onboardingStatus.label}
               </span>
+              {/* KFZ-153: Gutachten-Mängel Warnung */}
+              {(mangelCounts.formal > 0 || mangelCounts.inhaltlich > 0) && (
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-amber-50 text-amber-600" title={`${mangelCounts.formal}x formaler Mangel, ${mangelCounts.inhaltlich}x inhaltlicher Mangel`}>
+                  {mangelCounts.formal + mangelCounts.inhaltlich} Gutachten-Mängel
+                </span>
+              )}
               {sv.ist_aktiv ? (
                 <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-green-50 text-green-600">Aktiv</span>
               ) : (

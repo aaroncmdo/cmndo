@@ -211,6 +211,51 @@ export default function FlowWizardKfz({
                   {lead.unfallhergang && <SummaryRow label="Unfallhergang" value={lead.unfallhergang} />}
                 </div>
 
+                {/* KFZ-153: Unfall-Konstellation + Gegner-Daten Dropdowns */}
+                <div className="space-y-3 mb-6 border-t border-gray-100 pt-5">
+                  <p className="text-sm font-medium text-gray-700">Angaben zum Unfall (optional)</p>
+                  <div>
+                    <label className="text-xs text-gray-500 block mb-1">Art des Unfalls</label>
+                    <select defaultValue="" className="w-full bg-white border border-gray-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-[#4573A2]"
+                      onChange={e => { const v = e.target.value; if (v) updateLeadStammdaten(lead.id, { unfall_konstellation: v } as Record<string, string>) }}>
+                      <option value="">-- Bitte wählen --</option>
+                      <option value="auffahrunfall">Auffahrunfall</option>
+                      <option value="spurwechsel">Spurwechsel</option>
+                      <option value="parkschaden">Parkschaden</option>
+                      <option value="vorfahrt">Vorfahrt</option>
+                      <option value="tueroeffnung">Türöffnung</option>
+                      <option value="wildunfall">Wildunfall</option>
+                      <option value="glatteis">Glatteis</option>
+                      <option value="sonstiges">Sonstiges</option>
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs text-gray-500 block mb-1">Anzahl Beteiligte</label>
+                      <select defaultValue="2" className="w-full bg-white border border-gray-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-[#4573A2]"
+                        onChange={e => updateLeadStammdaten(lead.id, { gegner_anzahl_beteiligte: e.target.value } as Record<string, string>)}>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3+</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500 block mb-1">Fahrzeugtyp Gegner</label>
+                      <select defaultValue="" className="w-full bg-white border border-gray-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-[#4573A2]"
+                        onChange={e => { const v = e.target.value; if (v) updateLeadStammdaten(lead.id, { gegner_fahrzeugtyp: v } as Record<string, string>) }}>
+                        <option value="">-- Bitte wählen --</option>
+                        <option value="pkw">PKW</option>
+                        <option value="lkw">LKW</option>
+                        <option value="transporter">Transporter</option>
+                        <option value="motorrad">Motorrad</option>
+                        <option value="fahrrad">Fahrrad</option>
+                        <option value="bus">Bus</option>
+                        <option value="sonstiges">Sonstiges</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Datenschutz */}
                 <div className="border-t border-gray-100 pt-5">
                   <label className="flex items-start gap-3 cursor-pointer group">

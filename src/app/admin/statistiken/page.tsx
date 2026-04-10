@@ -34,6 +34,8 @@ export type StatistikFall = {
   gegner_anzahl_beteiligte: number | null
   gegner_fahrzeugtyp: string | null
   organisation_id: string | null
+  fahrzeug_typ: string | null
+  leadbearbeiter_id: string | null
 }
 
 export type StatistikKlassifizierung = {
@@ -147,7 +149,7 @@ export default async function StatistikenPage() {
   // Fetch faelle
   let faelleQuery = adminClient
     .from('faelle')
-    .select('id, status, sv_id, created_at, regulierung_am, regulierung_betrag, gutachten_betrag, gutachten_eingegangen_am, sv_zugewiesen_am, schadens_ursache, schadens_plz, kundenbetreuer_id, unfall_konstellation, gegner_anzahl_beteiligte, gegner_fahrzeugtyp, organisation_id')
+    .select('id, status, sv_id, created_at, regulierung_am, regulierung_betrag, gutachten_betrag, gutachten_eingegangen_am, sv_zugewiesen_am, schadens_ursache, schadens_plz, kundenbetreuer_id, unfall_konstellation, gegner_anzahl_beteiligte, gegner_fahrzeugtyp, organisation_id, fahrzeug_typ, leadbearbeiter_id')
     .order('created_at', { ascending: false })
 
   if (rolle === 'kundenbetreuer') {

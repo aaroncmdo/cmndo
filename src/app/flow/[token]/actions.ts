@@ -9,7 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
  */
 export async function updateLeadStammdaten(
   leadId: string,
-  data: { vorname?: string; nachname?: string; telefon?: string; email?: string },
+  data: { vorname?: string; nachname?: string; telefon?: string; email?: string; unfall_konstellation?: string; gegner_anzahl_beteiligte?: string; gegner_fahrzeugtyp?: string },
 ) {
   const admin = createAdminClient()
   const update: Record<string, unknown> = { updated_at: new Date().toISOString() }
@@ -17,6 +17,10 @@ export async function updateLeadStammdaten(
   if (data.nachname !== undefined) update.nachname = data.nachname
   if (data.telefon !== undefined) update.telefon = data.telefon
   if (data.email !== undefined) update.email = data.email
+  // KFZ-153: Unfall + Gegner Daten
+  if (data.unfall_konstellation !== undefined) update.unfall_konstellation = data.unfall_konstellation
+  if (data.gegner_anzahl_beteiligte !== undefined) update.gegner_anzahl_beteiligte = parseInt(data.gegner_anzahl_beteiligte) || 1
+  if (data.gegner_fahrzeugtyp !== undefined) update.gegner_fahrzeugtyp = data.gegner_fahrzeugtyp
   await admin.from('leads').update(update).eq('id', leadId)
 }
 

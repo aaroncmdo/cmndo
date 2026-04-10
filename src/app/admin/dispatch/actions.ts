@@ -344,6 +344,10 @@ async function convertLeadToFall(
       // sonst null (Dispatcher faellt ohne Spez-Filter zurueck).
       spezifikation: lead.spezifikation ?? null,
       schadenart: lead.schadenart ?? null,
+      // KFZ-153: Unfall + Gegner Daten vom Lead
+      unfall_konstellation: lead.unfall_konstellation ?? null,
+      gegner_anzahl_beteiligte: lead.gegner_anzahl_beteiligte ?? null,
+      gegner_fahrzeugtyp: lead.gegner_fahrzeugtyp ?? null,
       // Flags vom Lead
       gegner_bekannt: lead.gegner_bekannt ?? true,
       personenschaden_flag: lead.personenschaden_flag ?? false,

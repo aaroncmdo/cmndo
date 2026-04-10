@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
-  LineChart, Line, CartesianGrid,
+  LineChart, Line,
 } from 'recharts'
 import DrillDownModal from '@/components/admin/DrillDownModal'
 import type { DrillDownItem } from '@/lib/analytics'
@@ -17,7 +17,6 @@ import type {
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 const ONDO_BLUE = '#4573A2'
-const NAVY = '#0D1B3E'
 
 const KUERZUNGSGRUND_LABELS: Record<string, string> = {
   honorarkuerzung_pauschal: 'Honorarkürzung pauschal',
@@ -42,14 +41,8 @@ const UNFALL_LABELS: Record<string, string> = {
 }
 
 const FAHRZEUGTYP_LABELS: Record<string, string> = {
-  pkw: 'PKW',
-  lkw: 'LKW',
-  transporter: 'Transporter',
-  motorrad: 'Motorrad',
-  fahrrad: 'Fahrrad',
-  fussgaenger: 'Fußgänger',
-  bus: 'Bus',
-  sonstiges: 'Sonstiges',
+  pkw: 'PKW', lkw: 'LKW', transporter: 'Transporter', motorrad: 'Motorrad',
+  fahrrad: 'Fahrrad', fussgaenger: 'Fußgänger', bus: 'Bus', sonstiges: 'Sonstiges',
 }
 
 const CHART_COLORS = [ONDO_BLUE, '#1E3A5F', '#7BA3CC', '#2d5f8a', '#5a9bd5', '#3b6d99', '#8fb8de', '#14375a']
@@ -61,6 +54,15 @@ const ZEITRAUM_OPTIONS = [
   { label: '1 Jahr', days: 365 },
   { label: 'Gesamt', days: 0 },
 ]
+
+const WAS_TUN_TIPS: Record<string, string> = {
+  avg_bearbeitungsdauer_tage: 'Prüfe SVs mit Wartezeiten > 5 Tage, sprich mit ihnen über Kapazitätsplanung. Engpässe bei Terminvergabe identifizieren.',
+  avg_kuerzungsquote_prozent: 'Häufige Kürzungsgründe analysieren (Sektion oben). Gutachten-Qualität mit SVs besprechen. Versicherer mit höchster Quote gezielt adressieren.',
+  avg_schadenhoehe_eur: 'Niedrigere Schadenhöhe kann auf Bagatell-Fälle hinweisen. Marketing-Qualifizierung prüfen — werden die richtigen Leads angezogen?',
+  avg_gutachten_zeit_tage: 'SVs mit langer Gutachten-Zeit identifizieren. Automatische Erinnerungen (SV-04) prüfen. Kapazitätsplanung optimieren.',
+  avg_anteil_klare_haftung_prozent: 'Höherer Anteil klarer Haftung vereinfacht Regulierung. Lead-Qualifizierung optimieren für Fälle mit eindeutiger Schuldfrage.',
+  konversion_lead_zu_fall_prozent: 'FlowLink Completion Rate prüfen. Telefonische Nachfass-Strategie für abgebrochene Leads. SA-Unterschrift-Hürde analysieren.',
+}
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -75,13 +77,33 @@ function daysBefore(days: number): string {
   return d.toISOString()
 }
 
-// ─── Visibility Matrix (Aaron-Präzisierung 09.04.2026) ─────────────────────
+function monthKey(d: string) {
+  const dt = new Date(d)
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`
+}
+
+function monthLabel(key: string) {
+  const [y, m] = key.split('-')
+  const months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez']
+  return `${months[parseInt(m) - 1]} ${y.slice(2)}`
+}
+
+function last6Months(): string[] {
+  const result: string[] = []
+  const now = new Date()
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    result.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
+  }
+  return result
+}
+
+// ─── Visibility Matrix ─────────────────────────────────────────────────────
 
 function canSee(rolle: UserStatistikRolle, section: 'kuerzung' | 'unfall' | 'gegner' | 'potenziale'): boolean {
   if (rolle === 'admin') return true
   if (rolle === 'kundenbetreuer') return section !== 'potenziale'
   if (rolle === 'leadbearbeiter') return section === 'unfall' || section === 'gegner'
-  // SV roles
   if (section === 'potenziale') {
     return ['sv_solo', 'sv_buero_inhaber', 'sv_sub_buero', 'akademie_verwalter', 'akademie_sub_sv', 'community_member'].includes(rolle)
   }
@@ -108,29 +130,60 @@ export default function StatistikenClient({
   leaderboard: { sv_id: string; faelle_count: number; umsatz_netto: number; rang: number }[]
 }) {
   const [zeitraum, setZeitraum] = useState(90)
-  const [nurEigene, setNurEigene] = useState(rolle === 'kundenbetreuer')
+  const [nurEigene, setNurEigene] = useState(rolle === 'kundenbetreuer' || rolle === 'leadbearbeiter')
+  const [filterSv, setFilterSv] = useState('')
+  const [filterVersicherer, setFilterVersicherer] = useState('')
+  const [filterPlz, setFilterPlz] = useState('')
   const [drillDown, setDrillDown] = useState<{ title: string; items: DrillDownItem[]; summe?: number; berechnetAus?: string } | null>(null)
+  const [wasTunOpen, setWasTunOpen] = useState<string | null>(null)
 
   const cutoff = daysBefore(zeitraum)
 
-  // Filter faelle by zeitraum and optionally by Kundenberater
+  // Unique filter options
+  const svOptions = useMemo(() => Object.entries(svNameMap).sort((a, b) => a[1].localeCompare(b[1])), [svNameMap])
+  const versichererOptions = useMemo(() => {
+    const set = new Set<string>()
+    for (const k of klassifizierungen) if (k.versicherer) set.add(k.versicherer)
+    return Array.from(set).sort()
+  }, [klassifizierungen])
+
+  // Filter faelle
   const filtered = useMemo(() => {
     let f = faelle
     if (cutoff) f = f.filter(x => x.created_at >= cutoff)
     if (nurEigene && rolle === 'kundenbetreuer') {
       f = f.filter(x => x.kundenbetreuer_id === userId)
     }
+    if (nurEigene && rolle === 'leadbearbeiter') {
+      f = f.filter(x => x.leadbearbeiter_id === userId)
+    }
+    if (filterSv) f = f.filter(x => x.sv_id === filterSv)
+    if (filterPlz) f = f.filter(x => x.schadens_plz?.startsWith(filterPlz))
     return f
-  }, [faelle, cutoff, nurEigene, rolle, userId])
+  }, [faelle, cutoff, nurEigene, rolle, userId, filterSv, filterPlz])
 
-  // Map klassifizierungen to fall_id for quick lookup
+  // Filter klassifizierungen by versicherer + time
+  const filteredKlass = useMemo(() => {
+    return klassifizierungen.filter(k => {
+      const f = faelle.find(x => x.id === k.fall_id)
+      if (!f) return false
+      if (cutoff && f.created_at < cutoff) return false
+      if (nurEigene && rolle === 'kundenbetreuer' && f.kundenbetreuer_id !== userId) return false
+      if (nurEigene && rolle === 'leadbearbeiter' && f.leadbearbeiter_id !== userId) return false
+      if (filterSv && f.sv_id !== filterSv) return false
+      if (filterPlz && !f.schadens_plz?.startsWith(filterPlz)) return false
+      if (filterVersicherer && k.versicherer !== filterVersicherer) return false
+      return true
+    })
+  }, [klassifizierungen, faelle, cutoff, nurEigene, rolle, userId, filterSv, filterPlz, filterVersicherer])
+
+  // Klassifizierung map
   const klassMap = useMemo(() => {
     const m = new Map<string, StatistikKlassifizierung>()
     for (const k of klassifizierungen) m.set(k.fall_id, k)
     return m
   }, [klassifizierungen])
 
-  // Tooltip style
   const tooltipStyle = {
     contentStyle: { backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, fontSize: 12 },
     labelStyle: { color: '#6b7280' },
@@ -159,14 +212,6 @@ export default function StatistikenClient({
   // ═══════════════════════════════════════════════════════════════════════════
 
   const kuerzungData = useMemo(() => {
-    const filteredKlass = klassifizierungen.filter(k => {
-      const f = faelle.find(x => x.id === k.fall_id)
-      if (!f) return false
-      if (cutoff && f.created_at < cutoff) return false
-      if (nurEigene && rolle === 'kundenbetreuer' && f.kundenbetreuer_id !== userId) return false
-      return true
-    })
-
     const byGrund: Record<string, { count: number; summeKuerzung: number; fallIds: string[] }> = {}
     for (const k of filteredKlass) {
       if (!k.kuerzungsgrund) continue
@@ -175,7 +220,6 @@ export default function StatistikenClient({
       byGrund[k.kuerzungsgrund].summeKuerzung += Number(k.kuerzung_betrag_netto ?? 0)
       byGrund[k.kuerzungsgrund].fallIds.push(k.fall_id)
     }
-
     return Object.entries(byGrund)
       .map(([grund, d]) => ({
         grund,
@@ -186,23 +230,23 @@ export default function StatistikenClient({
         fallIds: d.fallIds,
       }))
       .sort((a, b) => b.summeKuerzung - a.summeKuerzung)
-  }, [klassifizierungen, faelle, cutoff, nurEigene, rolle, userId])
+  }, [filteredKlass])
 
   // ═══════════════════════════════════════════════════════════════════════════
   // SEKTION 2: Unfall-Konstellationen
   // ═══════════════════════════════════════════════════════════════════════════
 
   const unfallData = useMemo(() => {
-    const counts: Record<string, { count: number; avgBetrag: number; totalBetrag: number; fallIds: string[] }> = {}
+    const counts: Record<string, { count: number; totalBetrag: number; fallIds: string[] }> = {}
     for (const f of filtered) {
-      const k = f.unfall_konstellation ?? 'unbekannt'
-      if (!counts[k]) counts[k] = { count: 0, avgBetrag: 0, totalBetrag: 0, fallIds: [] }
+      const k = f.unfall_konstellation
+      if (!k) continue
+      if (!counts[k]) counts[k] = { count: 0, totalBetrag: 0, fallIds: [] }
       counts[k].count++
       counts[k].totalBetrag += Number(f.gutachten_betrag ?? 0)
       counts[k].fallIds.push(f.id)
     }
     return Object.entries(counts)
-      .filter(([k]) => k !== 'unbekannt')
       .map(([k, d]) => ({
         typ: k,
         label: UNFALL_LABELS[k] ?? k,
@@ -245,25 +289,51 @@ export default function StatistikenClient({
     }
     return Object.entries(counts)
       .map(([k, d]) => ({
-        typ: k,
-        label: FAHRZEUGTYP_LABELS[k] ?? k,
-        count: d.count,
-        avgBetrag: d.count > 0 ? Math.round(d.totalBetrag / d.count) : 0,
-        fallIds: d.fallIds,
+        typ: k, label: FAHRZEUGTYP_LABELS[k] ?? k, count: d.count,
+        avgBetrag: d.count > 0 ? Math.round(d.totalBetrag / d.count) : 0, fallIds: d.fallIds,
       }))
       .sort((a, b) => b.count - a.count)
   }, [filtered])
 
+  // Wer-trifft-Wen Heatmap Matrix
+  const heatmapData = useMemo(() => {
+    const typLabels = Object.keys(FAHRZEUGTYP_LABELS)
+    const matrix: Record<string, Record<string, { count: number; avgBetrag: number; total: number }>> = {}
+    for (const eigen of typLabels) {
+      matrix[eigen] = {}
+      for (const gegner of typLabels) matrix[eigen][gegner] = { count: 0, avgBetrag: 0, total: 0 }
+    }
+    let maxCount = 0
+    for (const f of filtered) {
+      const eigen = f.fahrzeug_typ ?? 'pkw'
+      const gegner = f.gegner_fahrzeugtyp
+      if (!gegner || !matrix[eigen]) continue
+      if (!matrix[eigen][gegner]) matrix[eigen][gegner] = { count: 0, avgBetrag: 0, total: 0 }
+      matrix[eigen][gegner].count++
+      matrix[eigen][gegner].total += Number(f.gutachten_betrag ?? 0)
+      if (matrix[eigen][gegner].count > maxCount) maxCount = matrix[eigen][gegner].count
+    }
+    // Calc averages
+    for (const eigen of typLabels) {
+      for (const gegner of typLabels) {
+        const c = matrix[eigen][gegner]
+        if (c.count > 0) c.avgBetrag = Math.round(c.total / c.count)
+      }
+    }
+    return { matrix, typLabels, maxCount }
+  }, [filtered])
+
   // ═══════════════════════════════════════════════════════════════════════════
-  // SEKTION 4: Potenziale (Branchen-Benchmark)
+  // SEKTION 4: Potenziale (Branchen-Benchmark) mit 6-Monats-Trend
   // ═══════════════════════════════════════════════════════════════════════════
 
+  const months = last6Months()
+
   const potenzialeData = useMemo(() => {
-    // Calculate actual metrics
     const totalFaelle = filtered.length
     const abgeschlossene = filtered.filter(f => f.status === 'abgeschlossen')
 
-    // Avg Bearbeitungsdauer (Tage)
+    // Avg Bearbeitungsdauer
     const bearbeitungsDauern = abgeschlossene
       .filter(f => f.created_at && f.regulierung_am)
       .map(f => (new Date(f.regulierung_am!).getTime() - new Date(f.created_at).getTime()) / 86400000)
@@ -273,10 +343,7 @@ export default function StatistikenClient({
       : null
 
     // Avg Kürzungsquote
-    const klassWithKuerzung = klassifizierungen.filter(k => {
-      const f = faelle.find(x => x.id === k.fall_id)
-      return f && (!cutoff || f.created_at >= cutoff) && k.geltend_gemacht_netto && Number(k.geltend_gemacht_netto) > 0
-    })
+    const klassWithKuerzung = filteredKlass.filter(k => k.geltend_gemacht_netto && Number(k.geltend_gemacht_netto) > 0)
     const kuerzungsQuote = klassWithKuerzung.length > 0
       ? Math.round(
           (klassWithKuerzung.reduce((s, k) => s + (Number(k.kuerzung_betrag_netto ?? 0) / Number(k.geltend_gemacht_netto!)), 0) /
@@ -290,7 +357,7 @@ export default function StatistikenClient({
       ? Math.round(mitBetrag.reduce((s, f) => s + Number(f.gutachten_betrag!), 0) / mitBetrag.length)
       : null
 
-    // Avg Gutachten-Zeit (SV zugewiesen → Gutachten eingegangen)
+    // Avg Gutachten-Zeit
     const gutachtenZeiten = filtered
       .filter(f => f.sv_zugewiesen_am && f.gutachten_eingegangen_am)
       .map(f => (new Date(f.gutachten_eingegangen_am!).getTime() - new Date(f.sv_zugewiesen_am!).getTime()) / 86400000)
@@ -299,7 +366,6 @@ export default function StatistikenClient({
       ? Math.round((gutachtenZeiten.reduce((s, d) => s + d, 0) / gutachtenZeiten.length) * 10) / 10
       : null
 
-    // Map to benchmarks
     const metrikMap: Record<string, number | null> = {
       avg_bearbeitungsdauer_tage: avgBearbeitungsdauer,
       avg_kuerzungsquote_prozent: kuerzungsQuote,
@@ -307,12 +373,31 @@ export default function StatistikenClient({
       avg_gutachten_zeit_tage: avgGutachtenZeit,
     }
 
+    // 6-month trend per metric
+    function calcTrend(metrik: string): { month: string; value: number }[] {
+      return months.map(m => {
+        const mFaelle = faelle.filter(f => monthKey(f.created_at) === m)
+        if (metrik === 'avg_bearbeitungsdauer_tage') {
+          const ds = mFaelle.filter(f => f.regulierung_am).map(f => (new Date(f.regulierung_am!).getTime() - new Date(f.created_at).getTime()) / 86400000).filter(d => d >= 0 && d < 365)
+          return { month: monthLabel(m), value: ds.length > 0 ? Math.round(ds.reduce((s, d) => s + d, 0) / ds.length * 10) / 10 : 0 }
+        }
+        if (metrik === 'avg_schadenhoehe_eur') {
+          const mb = mFaelle.filter(f => f.gutachten_betrag && Number(f.gutachten_betrag) > 0)
+          return { month: monthLabel(m), value: mb.length > 0 ? Math.round(mb.reduce((s, f) => s + Number(f.gutachten_betrag!), 0) / mb.length) : 0 }
+        }
+        if (metrik === 'avg_gutachten_zeit_tage') {
+          const gt = mFaelle.filter(f => f.sv_zugewiesen_am && f.gutachten_eingegangen_am).map(f => (new Date(f.gutachten_eingegangen_am!).getTime() - new Date(f.sv_zugewiesen_am!).getTime()) / 86400000).filter(d => d >= 0 && d < 90)
+          return { month: monthLabel(m), value: gt.length > 0 ? Math.round(gt.reduce((s, d) => s + d, 0) / gt.length * 10) / 10 : 0 }
+        }
+        return { month: monthLabel(m), value: 0 }
+      })
+    }
+
     return benchmarks.map(b => {
       const eigenerWert = metrikMap[b.metrik] ?? null
       let statusLabel = 'Keine Daten'
       let statusColor = 'gray'
       if (eigenerWert != null) {
-        // For "lower is better" metrics (duration, Kürzungsquote)
         const lowerIsBetter = b.metrik.includes('dauer') || b.metrik.includes('zeit') || b.metrik.includes('kuerzung')
         const diff = eigenerWert - Number(b.branchen_wert)
         if (lowerIsBetter) {
@@ -325,9 +410,9 @@ export default function StatistikenClient({
           else { statusLabel = 'Verbesserungspotenzial'; statusColor = 'amber' }
         }
       }
-      return { ...b, eigenerWert, statusLabel, statusColor, datenpunkte: totalFaelle }
+      return { ...b, eigenerWert, statusLabel, statusColor, datenpunkte: totalFaelle, trend: calcTrend(b.metrik) }
     })
-  }, [filtered, klassifizierungen, faelle, cutoff, benchmarks])
+  }, [filtered, filteredKlass, faelle, benchmarks, months])
 
   // ─── Render ───────────────────────────────────────────────────────────────
 
@@ -335,41 +420,61 @@ export default function StatistikenClient({
     <div className="flex h-full flex-col">
       {/* Sticky Filter-Bar */}
       <header className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm px-4 py-3">
-        <div className="max-w-[1600px] mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <h1 className="text-xl font-semibold text-gray-900">Statistiken</h1>
-          <div className="flex items-center gap-3 flex-wrap">
-            {/* Zeitraum */}
-            <div className="flex bg-gray-100 rounded-lg p-0.5">
-              {ZEITRAUM_OPTIONS.map(o => (
-                <button
-                  key={o.days}
-                  onClick={() => setZeitraum(o.days)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                    zeitraum === o.days ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  {o.label}
-                </button>
-              ))}
-            </div>
-            {/* Kundenberater Toggle */}
-            {rolle === 'kundenbetreuer' && (
+        <div className="max-w-[1600px] mx-auto space-y-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <h1 className="text-xl font-semibold text-gray-900">Statistiken</h1>
+            <div className="flex items-center gap-3 flex-wrap">
+              {/* Zeitraum */}
               <div className="flex bg-gray-100 rounded-lg p-0.5">
-                <button
-                  onClick={() => setNurEigene(true)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${nurEigene ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}
-                >
-                  Eigene Fälle
-                </button>
-                <button
-                  onClick={() => setNurEigene(false)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${!nurEigene ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}
-                >
-                  Alle Fälle
-                </button>
+                {ZEITRAUM_OPTIONS.map(o => (
+                  <button key={o.days} onClick={() => setZeitraum(o.days)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${zeitraum === o.days ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+                    {o.label}
+                  </button>
+                ))}
               </div>
+              {/* Kundenberater / Leadabarbeiter Toggle */}
+              {(rolle === 'kundenbetreuer' || rolle === 'leadbearbeiter') && (
+                <div className="flex bg-gray-100 rounded-lg p-0.5">
+                  <button onClick={() => setNurEigene(true)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${nurEigene ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>
+                    Eigene
+                  </button>
+                  <button onClick={() => setNurEigene(false)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${!nurEigene ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>
+                    {rolle === 'leadbearbeiter' ? 'Team' : 'Alle Fälle'}
+                  </button>
+                </div>
+              )}
+              <span className="text-xs text-gray-400">{filtered.length} Fälle</span>
+            </div>
+          </div>
+          {/* Extended Filters Row */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* SV Filter */}
+            {(rolle === 'admin' || rolle === 'sv_buero_inhaber' || rolle === 'akademie_verwalter') && svOptions.length > 1 && (
+              <select value={filterSv} onChange={e => setFilterSv(e.target.value)}
+                className="px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-[#4573A2]">
+                <option value="">Alle SVs</option>
+                {svOptions.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
+              </select>
             )}
-            <span className="text-xs text-gray-400">{filtered.length} Fälle</span>
+            {/* Versicherer Filter */}
+            {versichererOptions.length > 0 && (
+              <select value={filterVersicherer} onChange={e => setFilterVersicherer(e.target.value)}
+                className="px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-[#4573A2]">
+                <option value="">Alle Versicherer</option>
+                {versichererOptions.map(v => <option key={v} value={v}>{v}</option>)}
+              </select>
+            )}
+            {/* Region (PLZ) Filter */}
+            <input type="text" value={filterPlz} onChange={e => setFilterPlz(e.target.value.replace(/\D/g, '').slice(0, 5))}
+              placeholder="PLZ-Region" maxLength={5}
+              className="w-24 px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-[#4573A2]" />
+            {(filterSv || filterVersicherer || filterPlz) && (
+              <button onClick={() => { setFilterSv(''); setFilterVersicherer(''); setFilterPlz('') }}
+                className="text-xs text-gray-400 hover:text-gray-600">Filter zurücksetzen</button>
+            )}
           </div>
         </div>
       </header>
@@ -385,7 +490,6 @@ export default function StatistikenClient({
                 <p className="text-gray-400 text-sm py-8 text-center">Noch keine Regulierungs-Klassifizierungen erfasst</p>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                  {/* Bar Chart */}
                   <ResponsiveContainer width="100%" height={280}>
                     <BarChart data={kuerzungData} layout="vertical">
                       <XAxis type="number" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false}
@@ -393,24 +497,15 @@ export default function StatistikenClient({
                       <YAxis type="category" dataKey="label" tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} width={160} />
                       <Tooltip {...tooltipStyle} formatter={(v: number) => [fmtEur(v), 'Kürzungssumme']} />
                       <Bar dataKey="summeKuerzung" fill={ONDO_BLUE} radius={[0, 6, 6, 0]} cursor="pointer"
-                        onClick={(d: { fallIds?: string[]; label?: string }) => {
-                          if (d.fallIds) openDrillDown(`Kürzungsgrund: ${d.label}`, d.fallIds, 'regulierungs_klassifizierung.kuerzung_betrag_netto')
-                        }}
-                      />
+                        onClick={(d: { fallIds?: string[]; label?: string }) => d.fallIds && openDrillDown(`Kürzungsgrund: ${d.label}`, d.fallIds, 'regulierungs_klassifizierung.kuerzung_betrag_netto')} />
                     </BarChart>
                   </ResponsiveContainer>
-
-                  {/* Data Table */}
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-gray-200 text-[10px] text-gray-500 uppercase">
-                          <th className="text-left py-2 px-2">Grund</th>
-                          <th className="text-right py-2 px-2">Fälle</th>
-                          <th className="text-right py-2 px-2">Summe</th>
-                          <th className="text-right py-2 px-2">Ø Kürzung</th>
-                        </tr>
-                      </thead>
+                      <thead><tr className="border-b border-gray-200 text-[10px] text-gray-500 uppercase">
+                        <th className="text-left py-2 px-2">Grund</th><th className="text-right py-2 px-2">Fälle</th>
+                        <th className="text-right py-2 px-2">Summe</th><th className="text-right py-2 px-2">Ø Kürzung</th>
+                      </tr></thead>
                       <tbody>
                         {kuerzungData.map(d => (
                           <tr key={d.grund} className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
@@ -436,43 +531,22 @@ export default function StatistikenClient({
                 <p className="text-gray-400 text-sm py-8 text-center">Noch keine Unfall-Konstellationen erfasst</p>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                  {/* Donut Chart */}
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
-                      <Pie
-                        data={unfallData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={70}
-                        outerRadius={120}
-                        dataKey="count"
-                        nameKey="label"
-                        label={({ label, count }) => `${label} (${count})`}
-                        labelLine={false}
-                        cursor="pointer"
-                        onClick={(d: { fallIds?: string[]; label?: string }) => {
-                          if (d.fallIds) openDrillDown(`Unfall: ${d.label}`, d.fallIds, 'faelle.unfall_konstellation')
-                        }}
-                      >
-                        {unfallData.map((_, i) => (
-                          <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                        ))}
+                      <Pie data={unfallData} cx="50%" cy="50%" innerRadius={70} outerRadius={120}
+                        dataKey="count" nameKey="label" label={({ label, count }) => `${label} (${count})`} labelLine={false}
+                        cursor="pointer" onClick={(d: { fallIds?: string[]; label?: string }) => d.fallIds && openDrillDown(`Unfall: ${d.label}`, d.fallIds, 'faelle.unfall_konstellation')}>
+                        {unfallData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                       </Pie>
                       <Tooltip {...tooltipStyle} />
                     </PieChart>
                   </ResponsiveContainer>
-
-                  {/* Metrics Table */}
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-gray-200 text-[10px] text-gray-500 uppercase">
-                          <th className="text-left py-2 px-2">Konstellation</th>
-                          <th className="text-right py-2 px-2">Fälle</th>
-                          <th className="text-right py-2 px-2">Anteil</th>
-                          <th className="text-right py-2 px-2">Ø Schadenhöhe</th>
-                        </tr>
-                      </thead>
+                      <thead><tr className="border-b border-gray-200 text-[10px] text-gray-500 uppercase">
+                        <th className="text-left py-2 px-2">Konstellation</th><th className="text-right py-2 px-2">Fälle</th>
+                        <th className="text-right py-2 px-2">Anteil</th><th className="text-right py-2 px-2">Ø Schadenhöhe</th>
+                      </tr></thead>
                       <tbody>
                         {unfallData.map(d => (
                           <tr key={d.typ} className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
@@ -493,9 +567,8 @@ export default function StatistikenClient({
 
           {/* ═══ Sektion 3: Unfall mit Gegner ═══ */}
           {canSee(rolle, 'gegner') && (
-            <ChartCard title="Unfall mit Gegner" subtitle="Beteiligte & Fahrzeugtypen">
+            <ChartCard title="Unfall mit Gegner" subtitle="Beteiligte, Fahrzeugtypen & Wer-trifft-Wen">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                {/* Pie: Anzahl Beteiligte */}
                 <div>
                   <h4 className="text-xs font-medium text-gray-500 mb-3">Anzahl Beteiligte</h4>
                   {gegnerBeteiligteData.length === 0 ? (
@@ -504,22 +577,15 @@ export default function StatistikenClient({
                     <ResponsiveContainer width="100%" height={220}>
                       <PieChart>
                         <Pie data={gegnerBeteiligteData} cx="50%" cy="50%" outerRadius={80} dataKey="count" nameKey="label"
-                          label={({ label, count }) => `${label} (${count})`} labelLine={false}
-                          cursor="pointer"
-                          onClick={(d: { fallIds?: string[]; label?: string }) => {
-                            if (d.fallIds) openDrillDown(`Beteiligte: ${d.label}`, d.fallIds, 'faelle.gegner_anzahl_beteiligte')
-                          }}>
-                          {gegnerBeteiligteData.map((_, i) => (
-                            <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                          ))}
+                          label={({ label, count }) => `${label} (${count})`} labelLine={false} cursor="pointer"
+                          onClick={(d: { fallIds?: string[]; label?: string }) => d.fallIds && openDrillDown(`Beteiligte: ${d.label}`, d.fallIds, 'faelle.gegner_anzahl_beteiligte')}>
+                          {gegnerBeteiligteData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                         </Pie>
                         <Tooltip {...tooltipStyle} />
                       </PieChart>
                     </ResponsiveContainer>
                   )}
                 </div>
-
-                {/* Bar: Fahrzeugtyp Gegner */}
                 <div>
                   <h4 className="text-xs font-medium text-gray-500 mb-3">Fahrzeugtyp Gegner</h4>
                   {gegnerFahrzeugData.length === 0 ? (
@@ -531,15 +597,50 @@ export default function StatistikenClient({
                         <YAxis tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
                         <Tooltip {...tooltipStyle} />
                         <Bar dataKey="count" fill={ONDO_BLUE} radius={[4, 4, 0, 0]} name="Fälle" cursor="pointer"
-                          onClick={(d: { fallIds?: string[]; label?: string }) => {
-                            if (d.fallIds) openDrillDown(`Gegner-Fahrzeug: ${d.label}`, d.fallIds, 'faelle.gegner_fahrzeugtyp')
-                          }}
-                        />
+                          onClick={(d: { fallIds?: string[]; label?: string }) => d.fallIds && openDrillDown(`Gegner-Fahrzeug: ${d.label}`, d.fallIds, 'faelle.gegner_fahrzeugtyp')} />
                       </BarChart>
                     </ResponsiveContainer>
                   )}
                 </div>
               </div>
+
+              {/* Wer-trifft-Wen Heatmap Matrix */}
+              {heatmapData.maxCount > 0 && (
+                <div className="mt-5">
+                  <h4 className="text-xs font-medium text-gray-500 mb-3">Wer-trifft-Wen Matrix (Eigenes Fahrzeug vs. Gegner)</h4>
+                  <div className="overflow-x-auto">
+                    <table className="text-[10px]">
+                      <thead>
+                        <tr>
+                          <th className="py-1.5 px-2 text-left text-gray-500 font-medium">Eigenes ↓ \ Gegner →</th>
+                          {heatmapData.typLabels.map(t => (
+                            <th key={t} className="py-1.5 px-2 text-center text-gray-500 font-medium">{FAHRZEUGTYP_LABELS[t]}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {heatmapData.typLabels.map(eigen => (
+                          <tr key={eigen}>
+                            <td className="py-1.5 px-2 text-gray-700 font-medium">{FAHRZEUGTYP_LABELS[eigen]}</td>
+                            {heatmapData.typLabels.map(gegner => {
+                              const cell = heatmapData.matrix[eigen]?.[gegner]
+                              const count = cell?.count ?? 0
+                              const intensity = heatmapData.maxCount > 0 ? count / heatmapData.maxCount : 0
+                              return (
+                                <td key={gegner} className="py-1.5 px-2 text-center tabular-nums"
+                                  style={{ backgroundColor: count > 0 ? `rgba(69, 115, 162, ${0.1 + intensity * 0.7})` : 'transparent', color: intensity > 0.5 ? '#fff' : '#374151' }}
+                                  title={count > 0 ? `${count} Fälle, Ø ${fmtEur(cell?.avgBetrag ?? 0)}` : ''}>
+                                  {count > 0 ? count : '·'}
+                                </td>
+                              )
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
 
               {/* Insight Box */}
               {gegnerFahrzeugData.length >= 2 && (
@@ -554,7 +655,7 @@ export default function StatistikenClient({
             </ChartCard>
           )}
 
-          {/* ═══ Sektion 4: Potenziale (Branchen-Benchmark) ═══ */}
+          {/* ═══ Sektion 4: Potenziale ═══ */}
           {canSee(rolle, 'potenziale') && (
             <ChartCard title="Potenziale — Branchen-Benchmark Vergleich" subtitle="Eigene Werte vs. Branchendurchschnitt">
               {potenzialeData.length === 0 ? (
@@ -564,8 +665,8 @@ export default function StatistikenClient({
                   {potenzialeData.map(b => (
                     <div key={b.metrik} className="bg-gray-50 border border-gray-200 rounded-xl p-4">
                       <div className="flex items-start justify-between mb-2">
-                        <h4 className="text-sm font-medium text-gray-800">{b.beschreibung}</h4>
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                        <h4 className="text-sm font-medium text-gray-800 pr-2">{b.beschreibung}</h4>
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${
                           b.statusColor === 'green' ? 'bg-green-100 text-green-700' :
                           b.statusColor === 'amber' ? 'bg-amber-100 text-amber-700' :
                           b.statusColor === 'blue' ? 'bg-[#4573A2]/10 text-[#4573A2]' :
@@ -584,23 +685,46 @@ export default function StatistikenClient({
                           vs. {b.einheit === 'EUR' ? fmtEur(Number(b.branchen_wert)) : `${b.branchen_wert}${b.einheit === 'Prozent' ? '%' : ''}`} Branche
                         </span>
                       </div>
+
+                      {/* Mini Trend Sparkline (6 Monate) */}
+                      {b.trend.some(t => t.value > 0) && (
+                        <div className="mb-2">
+                          <ResponsiveContainer width="100%" height={40}>
+                            <LineChart data={b.trend}>
+                              <Line type="monotone" dataKey="value" stroke={ONDO_BLUE} strokeWidth={1.5} dot={false} />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </div>
+                      )}
+
                       {/* Progress bar */}
                       {b.eigenerWert != null && (
                         <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all ${
-                              b.statusColor === 'green' ? 'bg-green-500' :
-                              b.statusColor === 'amber' ? 'bg-amber-500' :
-                              'bg-[#4573A2]'
-                            }`}
-                            style={{ width: `${Math.min(Math.max((b.eigenerWert / Number(b.branchen_wert)) * 50, 5), 100)}%` }}
-                          />
+                          <div className={`h-full rounded-full transition-all ${
+                            b.statusColor === 'green' ? 'bg-green-500' : b.statusColor === 'amber' ? 'bg-amber-500' : 'bg-[#4573A2]'
+                          }`} style={{ width: `${Math.min(Math.max((b.eigenerWert / Number(b.branchen_wert)) * 50, 5), 100)}%` }} />
                         </div>
                       )}
+
                       <div className="flex items-center justify-between mt-2">
                         <span className="text-[10px] text-gray-400">Quelle: {b.quelle ?? 'k.A.'}</span>
                         <span className="text-[10px] text-gray-400">{b.datenpunkte} Fälle</span>
                       </div>
+
+                      {/* Was tun? Tooltip */}
+                      {b.statusColor === 'amber' && WAS_TUN_TIPS[b.metrik] && (
+                        <div className="mt-2">
+                          <button onClick={() => setWasTunOpen(wasTunOpen === b.metrik ? null : b.metrik)}
+                            className="text-[10px] text-amber-600 hover:text-amber-700 font-medium">
+                            {wasTunOpen === b.metrik ? 'Schließen' : 'Was tun?'}
+                          </button>
+                          {wasTunOpen === b.metrik && (
+                            <div className="mt-1.5 bg-amber-50 border border-amber-200 rounded-lg p-2">
+                              <p className="text-[11px] text-amber-800 leading-relaxed">{WAS_TUN_TIPS[b.metrik]}</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -613,14 +737,10 @@ export default function StatistikenClient({
             <ChartCard title="Community Leaderboard">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200 text-[10px] text-gray-500 uppercase">
-                      <th className="text-left py-2 px-2">Rang</th>
-                      <th className="text-left py-2 px-2">SV</th>
-                      <th className="text-right py-2 px-2">Fälle</th>
-                      <th className="text-right py-2 px-2">Umsatz</th>
-                    </tr>
-                  </thead>
+                  <thead><tr className="border-b border-gray-200 text-[10px] text-gray-500 uppercase">
+                    <th className="text-left py-2 px-2">Rang</th><th className="text-left py-2 px-2">SV</th>
+                    <th className="text-right py-2 px-2">Fälle</th><th className="text-right py-2 px-2">Umsatz</th>
+                  </tr></thead>
                   <tbody>
                     {leaderboard.map(l => (
                       <tr key={l.sv_id} className="border-b border-gray-100">
@@ -641,13 +761,8 @@ export default function StatistikenClient({
 
       {/* Drill-Down Modal */}
       {drillDown && (
-        <DrillDownModal
-          title={drillDown.title}
-          summe={drillDown.summe}
-          berechnetAus={drillDown.berechnetAus}
-          items={drillDown.items}
-          onClose={() => setDrillDown(null)}
-        />
+        <DrillDownModal title={drillDown.title} summe={drillDown.summe} berechnetAus={drillDown.berechnetAus}
+          items={drillDown.items} onClose={() => setDrillDown(null)} />
       )}
     </div>
   )

@@ -857,6 +857,45 @@ export async function POST() {
     await admin.from('sachverstaendige').update({ paket_faelle_genutzt: 1, offene_faelle: 0 }).eq('id', sv3Id)
     await admin.from('sachverstaendige').update({ paket_faelle_genutzt: 1, offene_faelle: 0 }).eq('id', sv4Id)
 
+    // ═══════════════════════════════════════════════════════════════════
+    // KFZ-153: Statistik-Testdaten (Unfall-Konstellationen + Gegner + Klassifizierungen)
+    // ═══════════════════════════════════════════════════════════════════
+
+    const unfallTypen = ['auffahrunfall', 'spurwechsel', 'parkschaden', 'vorfahrt', 'tueroeffnung', 'wildunfall', 'glatteis', 'sonstiges'] as const
+    const gegnerTypen = ['pkw', 'lkw', 'transporter', 'motorrad', 'fahrrad', 'bus', 'sonstiges'] as const
+    const kuerzungsGruende = ['honorarkuerzung_pauschal', 'mithaftung_kunde', 'gutachten_formaler_mangel', 'gutachten_inhaltlicher_mangel', 'verspaetete_meldung', 'bagatelle', 'verweigerung_versicherer', 'sonstiges'] as const
+    const versicherer = ['Allianz', 'HUK-Coburg', 'ADAC', 'AXA', 'Zurich', 'Gothaer']
+
+    // Update existing faelle with unfall + gegner data
+    for (let i = 0; i < fallIds.length; i++) {
+      await admin.from('faelle').update({
+        unfall_konstellation: unfallTypen[i % unfallTypen.length],
+        gegner_anzahl_beteiligte: (i % 3) + 1,
+        gegner_fahrzeugtyp: gegnerTypen[i % gegnerTypen.length],
+      }).eq('id', fallIds[i])
+    }
+
+    // Create regulierungs_klassifizierung for some faelle
+    const klassCount = Math.min(fallIds.length, 8)
+    for (let i = 0; i < klassCount; i++) {
+      const isVoll = i === 0
+      const geltend = 3000 + i * 500
+      const reguliert = isVoll ? geltend : geltend - (200 + i * 100)
+      await admin.from('regulierungs_klassifizierung').upsert({
+        fall_id: fallIds[i],
+        regulierungs_status: isVoll ? 'voll_reguliert' : i < 6 ? 'teilweise_reguliert' : 'abgelehnt',
+        kuerzungsgrund: isVoll ? null : kuerzungsGruende[i % kuerzungsGruende.length],
+        geltend_gemacht_netto: geltend,
+        reguliert_betrag_netto: isVoll ? geltend : reguliert,
+        kuerzung_betrag_netto: isVoll ? 0 : geltend - reguliert,
+        versicherer: versicherer[i % versicherer.length],
+        begruendung_versicherer: isVoll ? null : `Testgrund ${i}`,
+        erfasst_von: user.id,
+      }, { onConflict: 'fall_id' })
+    }
+
+    summary.push(`KFZ-153: ${fallIds.length} Fälle mit Unfall-Konstellationen + ${klassCount} Regulierungs-Klassifizierungen`)
+
     return Response.json({
       success: true,
       summary,

@@ -114,6 +114,14 @@ CREATE POLICY "Authenticated users can read branchen_benchmarks"
   TO authenticated USING (true);
 
 -- Seed-Daten (BVSK/GDV-basierte Schaetzwerte)
+-- ─── 5. FlowLink Felder auf leads ─────────────────────────────────────────────
+
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS unfall_konstellation TEXT NULL;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS gegner_anzahl_beteiligte INT NULL DEFAULT 1;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS gegner_fahrzeugtyp TEXT NULL;
+
+-- ─── 6. Seed Branchen-Benchmarks ──────────────────────────────────────────────
+
 INSERT INTO branchen_benchmarks (metrik, beschreibung, branchen_wert, einheit, quelle, gueltig_ab) VALUES
   ('avg_bearbeitungsdauer_tage', 'Durchschnittliche Bearbeitungsdauer vom Eingang bis Regulierung', 14.00, 'Tage', 'BVSK Honorarbefragung 2024/GDV', '2026-01-01'),
   ('avg_kuerzungsquote_prozent', 'Durchschnittlicher Anteil der Kuerzungen am Gesamtvolumen', 15.00, 'Prozent', 'GDV Schadensstatistik', '2026-01-01'),
