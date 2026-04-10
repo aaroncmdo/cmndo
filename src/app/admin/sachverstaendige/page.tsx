@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import KarteClient from '../karte/KarteClient'
 
-const BASE_SELECT = 'id, profile_id, gebiet_plz, paket, offene_faelle, max_faelle_monat, ist_aktiv, gutachter_typ, qualifikationen_neu, spezifikationen, schadenarten, onboarding_abgeschlossen, anzahlung_status, standort_adresse, standort_lat, standort_lng, lat, lng, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, radius_km, guthaben, organisation_id, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, ablehnungen_30_tage, profiles(vorname, nachname, email, telefon)'
+const BASE_SELECT = 'id, profile_id, gebiet_plz, paket, offene_faelle, max_faelle_monat, ist_aktiv, gutachter_typ, qualifikationen_neu, spezifikationen, schadenarten, onboarding_abgeschlossen, anzahlung_status, standort_adresse, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, radius_km, werbebudget_guthaben_netto, organisation_id, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, ablehnungen_30_tage, profiles(vorname, nachname, email, telefon)'
 const EXTENDED_SELECT = BASE_SELECT.replace('organisation_id,', 'organisation_id, deaktiviert_grund, deaktiviert_am, geloescht_am,')
 
 export default async function SachverstaendigePage() {
@@ -34,8 +34,8 @@ export default async function SachverstaendigePage() {
       paket: sv.paket as string,
       offeneFaelle: Number(sv.paket_faelle_genutzt) || Number(sv.offene_faelle) || 0,
       maxFaelleMonat: Number(sv.paket_faelle_gesamt) || Number(sv.max_faelle_monat) || 10,
-      standortLat: sv.standort_lat != null ? Number(sv.standort_lat) : (sv.lat != null ? Number(sv.lat) : null),
-      standortLng: sv.standort_lng != null ? Number(sv.standort_lng) : (sv.lng != null ? Number(sv.lng) : null),
+      standortLat: sv.standort_lat != null ? Number(sv.standort_lat) : null,
+      standortLng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
       organisationId: sv.organisation_id as string | null,
       gutachterTyp: (sv.gutachter_typ as string) ?? 'kfz-gutachter',
       standortAdresse: sv.standort_adresse as string | null,

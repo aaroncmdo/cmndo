@@ -83,7 +83,7 @@ export async function POST(request: Request) {
   // BUG-107: Nur SVs die bezahlt haben UND aktiv sind (kein Pilot-Fall, kein dispatch_aktiv)
   let svQuery = supabase
     .from('sachverstaendige')
-    .select('id, lat, lng, partner_seit, offene_faelle, max_faelle_monat, standort_lat, standort_lng, isochrone_polygon, paket_umkreis_km, spezifikationen, schadenarten, organisation_id, rolle_in_organisation')
+    .select('id, partner_seit, offene_faelle, max_faelle_monat, standort_lat, standort_lng, isochrone_polygon, paket_umkreis_km, spezifikationen, schadenarten, organisation_id, rolle_in_organisation')
     .eq('ist_aktiv', true)
     .eq('portal_zugang_freigeschaltet', true)
 
@@ -114,8 +114,8 @@ export async function POST(request: Request) {
     let distanz: number | null = null
     let inRange = false
 
-    const svLat = sv.standort_lat ?? sv.lat
-    const svLng = sv.standort_lng ?? sv.lng
+    const svLat = sv.standort_lat
+    const svLng = sv.standort_lng
     const maxRadius = sv.paket_umkreis_km ?? 40
 
     // a) Haversine-Distanz
