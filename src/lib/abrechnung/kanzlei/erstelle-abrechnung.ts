@@ -1,6 +1,10 @@
 import crypto from 'crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendEmail } from '@/lib/email/google/client'
+import { render } from '@react-email/render'
+import { KanzleiMagicLinkAbrechnungEmail, subject as magicLinkSubject } from '@/lib/email/google/templates/KanzleiMagicLinkAbrechnung'
+import { generateAndUploadKanzleiAbrechnungPdf, generateKanzleiAbrechnungPdf } from './generate-pdf'
+import type { KanzleiPdfData } from './generate-pdf'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
 const BETRAG_PRO_VOLLMACHT_NETTO = 150
@@ -57,7 +61,7 @@ export async function erstelleKanzleiAbrechnung(
   // Alle aktiven Kanzleien laden
   const { data: kanzleien, error: kanzleiErr } = await db
     .from('kanzleien')
-    .select('id, name, email, ansprechpartner')
+    .select('id, name, email, ansprechpartner, adresse')
     .eq('aktiv', true)
 
   if (kanzleiErr) throw new Error(`kanzleien Query: ${kanzleiErr.message}`)
@@ -210,30 +214,75 @@ export async function erstelleKanzleiAbrechnung(
       const magicUrl = `${APP_URL}/kanzlei/abrechnung/${magicToken}`
       const ansprechpartner = kanzlei.ansprechpartner ?? 'Sehr geehrte Damen und Herren'
       const monatName = new Intl.DateTimeFormat('de-DE', { month: 'long' }).format(new Date(jahr, monat - 1, 1))
+      const monatLabel = `${monatName} ${jahr}`
+
+      function fmtEurStr(val: number): string {
+        return new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val) + ' €'
+      }
+      function fmtDateStr(d: Date): string {
+        return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      }
+
+      // PDF generieren
+      const pdfData: KanzleiPdfData = {
+        rechnungsnummer,
+        datum: fmtDateStr(new Date()),
+        faelligAm: fmtDateStr(faelligkeitsdatum),
+        leistungszeitraum: monatLabel,
+        kanzleiName: kanzlei.name,
+        kanzleiAdresse: (kanzlei as { adresse?: string }).adresse ?? '',
+        positionen: positionen.map(p => ({
+          nr: p.position_nr,
+          vollmachtDatum: fmtDateStr(new Date(p.vollmacht_unterschrieben_am)),
+          fallNr: p.fall_nr ?? '',
+          kundeName: p.kunde_name,
+          betragNetto: p.betrag_netto,
+        })),
+        nettoGesamt,
+        mwstBetrag,
+        brutto,
+        magicLinkUrl: magicUrl,
+      }
+
+      let pdfBuffer: Buffer | null = null
+      let pdfStoragePath: string | null = null
+      try {
+        pdfStoragePath = await generateAndUploadKanzleiAbrechnungPdf(pdfData, monat, jahr)
+        pdfBuffer = await generateKanzleiAbrechnungPdf(pdfData)
+        // pdf_path in DB speichern
+        if (pdfStoragePath) {
+          await db
+            .from('kanzlei_abrechnungen')
+            .update({ pdf_path: pdfStoragePath })
+            .eq('id', abrechnungId)
+        }
+      } catch (pdfErr) {
+        console.error(`[KFZ-188] PDF-Generierung fuer ${kanzlei.id}:`, pdfErr)
+        // PDF-Fehler ist nicht fatal — Email ohne Anhang senden
+      }
+
+      const emailProps = {
+        ansprechpartner,
+        rechnungsnummer,
+        monat: monatLabel,
+        anzahl,
+        nettoGesamt: fmtEurStr(nettoGesamt),
+        mwstBetrag: fmtEurStr(mwstBetrag),
+        brutto: fmtEurStr(brutto),
+        faelligAm: fmtDateStr(faelligkeitsdatum),
+        magicLinkUrl: magicUrl,
+        magicLinkExpiresAm: fmtDateStr(magicLinkExpires),
+      }
 
       try {
+        const html = await render(KanzleiMagicLinkAbrechnungEmail(emailProps))
         await sendEmail({
           to: kanzlei.email,
-          subject: `Monatsabrechnung ${monatName} ${jahr} — ${rechnungsnummer}`,
-          html: `
-<p>Hallo ${ansprechpartner},</p>
-<p>anbei Ihre Abrechnung fuer <strong>${monatName} ${jahr}</strong>:</p>
-<ul>
-  <li>Rechnungsnummer: <strong>${rechnungsnummer}</strong></li>
-  <li>Anzahl Vollmachten: <strong>${anzahl}</strong></li>
-  <li>Nettobetrag: <strong>${nettoGesamt.toFixed(2).replace('.', ',')} €</strong></li>
-  <li>MwSt. (19 %): <strong>${mwstBetrag.toFixed(2).replace('.', ',')} €</strong></li>
-  <li>Bruttobetrag: <strong>${brutto.toFixed(2).replace('.', ',')} €</strong></li>
-  <li>Faellig am: <strong>${faelligkeitsdatum.toISOString().slice(0, 10)}</strong></li>
-</ul>
-<p>
-  <a href="${magicUrl}" style="display:inline-block;padding:12px 24px;background:#0D1B3E;color:#fff;border-radius:6px;text-decoration:none;font-weight:600;">
-    Rechnung aufrufen &amp; bezahlen
-  </a>
-</p>
-<p>Dieser Link ist bis zum ${magicLinkExpires.toISOString().slice(0, 10)} gueltig.</p>
-<p>Mit freundlichen Gruessen,<br>Ihr Claimondo-Team</p>
-`,
+          subject: magicLinkSubject(emailProps),
+          html,
+          attachments: pdfBuffer
+            ? [{ filename: `${rechnungsnummer}.pdf`, content: pdfBuffer, contentType: 'application/pdf' }]
+            : undefined,
           empfaengerTyp: 'kanzlei',
           template: 'kanzlei_monatsabrechnung',
         })
