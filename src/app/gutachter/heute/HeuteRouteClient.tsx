@@ -1,10 +1,13 @@
 'use client'
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
-import { MapPinIcon, PhoneIcon, NavigationIcon, ClockIcon, CarIcon, AlertTriangleIcon, CheckCircleIcon, LocateIcon } from 'lucide-react'
+import { MapPinIcon, PhoneIcon, NavigationIcon, ClockIcon, CarIcon, AlertTriangleIcon, CheckCircleIcon, LocateIcon, HandIcon } from 'lucide-react'
 import HeuteMap, { type MapTermin } from '@/components/maps/HeuteMap'
 import { useWatchPosition } from '@/lib/gps/use-watch-position'
 import { trackPosition } from '@/lib/gps/track-position'
+import { isAtTermin } from '@/lib/gps/geofence'
+import { markArrival } from '@/lib/gps/mark-arrival'
+import AnkommenModal, { type AnkommenTermin } from '@/components/faelle/AnkommenModal'
 import type { HeuteTermin } from './page'
 
 // KFZ-158 Phase 1: Tagesroute Client-Component.
@@ -45,6 +48,8 @@ export default function HeuteRouteClient({
   const { position: gpsRaw, error: gpsError, permissionState } = useWatchPosition(gpsEnabled)
   const gpsPosition = gpsRaw ? { lat: gpsRaw.lat, lng: gpsRaw.lng } : null
   const lastTrackRef = useRef(0)
+  const [arrivedAtId, setArrivedAtId] = useState<string | null>(null)
+  const [ankommenModal, setAnkommenModal] = useState<AnkommenTermin | null>(null)
 
   // Throttled GPS-Tracking: alle 30s an Server senden
   useEffect(() => {
@@ -60,6 +65,46 @@ export default function HeuteRouteClient({
       speed_mps: gpsRaw.speed,
     }).catch(() => {})
   }, [gpsRaw])
+
+  // KFZ-158 Phase 3: Geofence — pruefe ob SV am Termin angekommen ist
+  useEffect(() => {
+    if (!gpsRaw || !mapTermine.length) return
+    for (const t of termine) {
+      if (t.id === arrivedAtId) continue
+      const mt = mapTermine.find(m => m.id === t.id)
+      if (!mt) continue
+      if (isAtTermin({ lat: gpsRaw.lat, lng: gpsRaw.lng }, { lat: mt.lat, lng: mt.lng, start_zeit: t.start_zeit })) {
+        setArrivedAtId(t.id)
+        // Vibration + Notification
+        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([200, 100, 200])
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+          new Notification('Claimondo', { body: `Du bist am Termin ${t.fall_nummer} angekommen`, icon: '/icons/icon.svg' })
+        }
+        // DB markieren
+        markArrival({ termin_id: t.id, lat: gpsRaw.lat, lng: gpsRaw.lng, via: 'gps' }).catch(() => {})
+        // Modal zeigen
+        const adresse = [t.schadens_adresse, t.schadens_plz, t.schadens_ort].filter(Boolean).join(', ')
+        setAnkommenModal({
+          termin_id: t.id, fall_id: t.fall_id, fall_nummer: t.fall_nummer,
+          kunde_name: t.kunde_name, adresse: adresse || '—',
+          kennzeichen: t.kennzeichen, fahrzeug: t.fahrzeug,
+        })
+        break
+      }
+    }
+  }, [gpsRaw, mapTermine, termine, arrivedAtId])
+
+  // Manueller "Ich bin da" Handler
+  function handleManualArrival(t: HeuteTermin) {
+    setArrivedAtId(t.id)
+    if (gpsRaw) markArrival({ termin_id: t.id, lat: gpsRaw.lat, lng: gpsRaw.lng, via: 'manual_swipe' }).catch(() => {})
+    const adresse = [t.schadens_adresse, t.schadens_plz, t.schadens_ort].filter(Boolean).join(', ')
+    setAnkommenModal({
+      termin_id: t.id, fall_id: t.fall_id, fall_nummer: t.fall_nummer,
+      kunde_name: t.kunde_name, adresse: adresse || '—',
+      kennzeichen: t.kennzeichen, fahrzeug: t.fahrzeug,
+    })
+  }
 
   // Termin-Marker: verwende Adresse als Fallback-Geocoding
   // Da wir kein geocoding API hier aufrufen wollen, nutzen wir die Koeln-Koordinaten
@@ -238,8 +283,34 @@ export default function HeuteRouteClient({
           })}
         </div>
 
-        {/* TODO KFZ-158 Phase 3: 'Ich bin angekommen' Swipe-Button */}
+        {/* KFZ-158 Phase 3: 'Ich bin da' Button fuer naechsten Termin */}
+        {naechsterTermin && arrivedAtId !== naechsterTermin.id && (
+          <div className="px-4 py-3 border-t border-gray-200">
+            <button
+              onClick={() => handleManualArrival(naechsterTermin)}
+              className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-3 text-sm font-semibold transition-colors"
+            >
+              <HandIcon className="w-4 h-4" /> Ich bin angekommen
+            </button>
+          </div>
+        )}
+        {arrivedAtId === naechsterTermin?.id && (
+          <div className="px-4 py-3 border-t border-emerald-200 bg-emerald-50 text-center">
+            <p className="text-xs text-emerald-700 font-medium flex items-center justify-center gap-1.5">
+              <CheckCircleIcon className="w-3.5 h-3.5" /> Ankunft registriert
+            </p>
+          </div>
+        )}
       </div>
+
+      {/* KFZ-158 Phase 3: Ankommen-Modal */}
+      {ankommenModal && (
+        <AnkommenModal
+          termin={ankommenModal}
+          onClose={() => setAnkommenModal(null)}
+          onOpenAkte={() => setAnkommenModal(null)}
+        />
+      )}
     </div>
   )
 }
