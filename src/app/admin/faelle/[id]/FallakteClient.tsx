@@ -204,6 +204,7 @@ type TimelineEntry = {
   beschreibung: string | null
   erstellt_von: string | null
   metadata: Record<string, unknown> | null
+  lead_id?: string | null
   created_at: string
 }
 
@@ -953,9 +954,9 @@ export default function FallakteClient({
             <FallActivityFeed
               fallId={fall.id}
               events={buildActivityEvents(
-                timeline as { id: string; typ: string; titel: string; beschreibung?: string | null; erstellt_von?: string | null; created_at: string }[],
-                tasks as { id: string; titel: string; status: string; created_at: string }[],
-                nachrichten as { id: string; kanal: string; sender_rolle?: string | null; nachricht: string; created_at: string }[],
+                timeline as { id: string; typ: string; titel: string; beschreibung?: string | null; erstellt_von?: string | null; lead_id?: string | null; created_at: string }[],
+                tasks as { id: string; titel: string; status: string; lead_id?: string | null; created_at: string }[],
+                nachrichten as { id: string; kanal: string; sender_rolle?: string | null; nachricht: string; lead_id?: string | null; created_at: string }[],
               )}
             />
 
@@ -2082,6 +2083,11 @@ function TabTimeline({
                       {KanalIcon && (
                         <span className="flex items-center gap-1 text-xs text-gray-500">
                           <KanalIcon className="w-3 h-3" /> {kanal}
+                        </span>
+                      )}
+                      {entry.lead_id && (
+                        <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-400">
+                          Aus Lead-Phase
                         </span>
                       )}
                     </div>

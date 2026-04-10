@@ -301,9 +301,9 @@ export default function FallDetailClient({
           <FallActivityFeed
             fallId={fall.id as string}
             events={buildActivityEvents(
-              timeline as { id: string; typ: string; titel: string; beschreibung?: string | null; erstellt_von?: string | null; created_at: string }[],
+              timeline as { id: string; typ: string; titel: string; beschreibung?: string | null; erstellt_von?: string | null; lead_id?: string | null; created_at: string }[],
               [],
-              nachrichten as { id: string; kanal: string; sender_rolle?: string | null; nachricht: string; created_at: string }[],
+              nachrichten as { id: string; kanal: string; sender_rolle?: string | null; nachricht: string; lead_id?: string | null; created_at: string }[],
             )}
             maxItems={8}
           />

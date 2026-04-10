@@ -17,6 +17,7 @@ export type ActivityEvent = {
   beschreibung?: string | null
   erstellt_von?: string | null
   created_at: string
+  from_lead?: boolean
 }
 
 const TYPE_CONFIG: Record<string, { icon: typeof ArrowRightIcon; color: string }> = {
@@ -104,7 +105,14 @@ export default function FallActivityFeed({
               <div key={ev.id} className="flex items-start gap-2 px-1 py-1.5 rounded-md hover:bg-gray-50/50">
                 <Icon className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${cfg.color}`} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[11px] text-gray-800 leading-snug truncate">{ev.titel}</p>
+                  <div className="flex items-center gap-1">
+                    <p className="text-[11px] text-gray-800 leading-snug truncate">{ev.titel}</p>
+                    {ev.from_lead && (
+                      <span className="flex-shrink-0 text-[8px] font-medium text-slate-400 bg-slate-100 px-1 py-0.5 rounded">
+                        Aus Lead
+                      </span>
+                    )}
+                  </div>
                   <p className="text-[9px] text-gray-400 mt-0.5">
                     {formatRelativ(ev.created_at)}
                     {ev.erstellt_von && <span> · {ev.erstellt_von}</span>}
@@ -124,9 +132,9 @@ export default function FallActivityFeed({
  * Wird in der Server-Page oder im Client aufgerufen.
  */
 export function buildActivityEvents(
-  timeline: { id: string; typ: string; titel: string; beschreibung?: string | null; erstellt_von?: string | null; created_at: string }[],
-  tasks: { id: string; titel: string; status: string; created_at: string }[],
-  nachrichten: { id: string; kanal: string; sender_rolle?: string | null; nachricht: string; created_at: string }[],
+  timeline: { id: string; typ: string; titel: string; beschreibung?: string | null; erstellt_von?: string | null; lead_id?: string | null; created_at: string }[],
+  tasks: { id: string; titel: string; status: string; lead_id?: string | null; created_at: string }[],
+  nachrichten: { id: string; kanal: string; sender_rolle?: string | null; nachricht: string; lead_id?: string | null; created_at: string }[],
 ): ActivityEvent[] {
   const events: ActivityEvent[] = []
 
@@ -142,6 +150,7 @@ export function buildActivityEvents(
       beschreibung: t.beschreibung,
       erstellt_von: t.erstellt_von,
       created_at: t.created_at,
+      from_lead: !!t.lead_id,
     })
   }
 
@@ -151,6 +160,7 @@ export function buildActivityEvents(
       typ: 'task',
       titel: `Task: ${t.titel}${t.status === 'erledigt' ? ' ✓' : ''}`,
       created_at: t.created_at,
+      from_lead: !!t.lead_id,
     })
   }
 
@@ -161,6 +171,7 @@ export function buildActivityEvents(
       titel: `${n.kanal === 'whatsapp' ? 'WhatsApp' : n.kanal === 'email' ? 'E-Mail' : n.kanal === 'anruf' ? 'Anruf' : n.kanal}: ${n.nachricht.slice(0, 60)}${n.nachricht.length > 60 ? '…' : ''}`,
       erstellt_von: n.sender_rolle,
       created_at: n.created_at,
+      from_lead: !!n.lead_id,
     })
   }
 

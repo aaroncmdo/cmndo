@@ -47,7 +47,7 @@ export default async function FallaktePage({
       .eq('fall_id', id),
     supabase
       .from('timeline')
-      .select('id, typ, titel, beschreibung, erstellt_von, metadata, created_at')
+      .select('id, typ, titel, beschreibung, erstellt_von, metadata, lead_id, created_at')
       .eq('fall_id', id)
       .order('created_at', { ascending: false }),
     supabase

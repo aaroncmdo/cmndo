@@ -390,9 +390,19 @@ export async function signSAandCreateFall(
   }).eq('id', leadId)
 
   // 6b. KFZ-146: Alle Lead-Side-Channel-Daten an den neuen Fall zuordnen
-  try {
-    await admin.rpc('link_lead_data_to_fall', { p_lead_id: leadId, p_fall_id: fall.id })
-  } catch (err) { console.error('[KFZ-146] Lead-Daten-Übergabe:', err) }
+  const { error: linkErr } = await admin.rpc('link_lead_data_to_fall', { p_lead_id: leadId, p_fall_id: fall.id })
+  if (linkErr) console.error('[KFZ-146] link_lead_data_to_fall:', linkErr.message)
+
+  // 6c. KFZ-146: Lead-Notiz als Timeline-Eintrag übertragen
+  if (lead.notiz && String(lead.notiz).trim()) {
+    await admin.from('timeline').insert({
+      fall_id: fall.id,
+      lead_id: leadId,
+      typ: 'notiz',
+      titel: 'Notiz aus Lead-Phase',
+      beschreibung: String(lead.notiz).trim(),
+    })
+  }
 
   // 7. FlowLink updaten
   if (flowLinkId) {

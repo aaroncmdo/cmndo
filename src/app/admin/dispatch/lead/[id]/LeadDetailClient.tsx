@@ -61,7 +61,10 @@ export default function LeadDetailClient({
   }
 
   async function handleConvert() {
-    const result = await updateLeadStatus(lead.id, 'umgewandelt') as { converted?: boolean; fallId?: string }
+    const result = await updateLeadStatus(lead.id, 'umgewandelt') as {
+      converted?: boolean; fallId?: string
+      linked?: { calls: number; tasks: number; emails: number; termine: number; nachrichten: number; dokumente: number }
+    }
     return result
   }
 

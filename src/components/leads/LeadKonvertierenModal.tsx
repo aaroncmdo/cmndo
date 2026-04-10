@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRightIcon, XIcon, CheckCircleIcon, AlertTriangleIcon, UserIcon, CarIcon, FileTextIcon, PhoneIcon, MailIcon } from 'lucide-react'
+import { toast } from 'sonner'
 
 // KFZ-146: Bestätigungs-Modal fuer Lead-zu-Fall-Konvertierung.
 // Zeigt Zusammenfassung der zu uebernehmenden Daten.
@@ -26,7 +27,7 @@ export default function LeadKonvertierenModal({
 }: {
   lead: LeadSummary
   onClose: () => void
-  onConvert: () => Promise<{ converted?: boolean; fallId?: string; error?: string }>
+  onConvert: () => Promise<{ converted?: boolean; fallId?: string; linked?: { calls: number; tasks: number; emails: number; termine: number; nachrichten: number; dokumente: number }; error?: string }>
 }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -37,6 +38,22 @@ export default function LeadKonvertierenModal({
     startTransition(async () => {
       const result = await onConvert()
       if (result.converted && result.fallId) {
+        // KFZ-146: Toast mit Zähler der übertragenen Entitäten
+        const l = result.linked
+        if (l) {
+          const parts = [
+            l.calls > 0 ? `${l.calls} Calls` : null,
+            l.tasks > 0 ? `${l.tasks} Tasks` : null,
+            l.emails > 0 ? `${l.emails} E-Mails` : null,
+            l.nachrichten > 0 ? `${l.nachrichten} Nachrichten` : null,
+            l.dokumente > 0 ? `${l.dokumente} Dokumente` : null,
+            l.termine > 0 ? `${l.termine} Termine` : null,
+          ].filter(Boolean)
+          const summary = parts.length > 0 ? parts.join(', ') + ' übertragen.' : 'Keine Lead-Daten zum Übertragen.'
+          toast.success(`Lead zu Kundenakte konvertiert. ${summary}`)
+        } else {
+          toast.success('Lead zu Kundenakte konvertiert.')
+        }
         router.push(`/admin/faelle/${result.fallId}`)
       } else {
         setError(result.error ?? 'Konvertierung fehlgeschlagen')

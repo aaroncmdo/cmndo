@@ -206,7 +206,7 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
 
   // Konversion triggers
   if (newStatus === 'umgewandelt' || newStatus === 'abgeschlossen' || newStatus === 'konvertiert') {
-    const fallId = await convertLeadToFall(svc, leadId, user.id)
+    const result = await convertLeadToFall(svc, leadId, user.id)
     await svc.from('leads').update({
       qualifizierungs_phase: 'konvertiert',
       status: 'umgewandelt',
@@ -218,7 +218,7 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
       await resolveTasksForEntity('lead', leadId, 'Lead konvertiert')
     } catch (err) { console.error('[KFZ-151] resolveTasks lead konvertiert:', err) }
     revalidatePath('/admin/dispatch')
-    return { converted: true, fallId }
+    return { converted: true, fallId: result.fallId, linked: result.linked }
   }
 
   const updateData: Record<string, unknown> = { updated_at: now }
@@ -299,11 +299,16 @@ export async function sendFlowLink(leadId: string) {
 
 // ─── Lead → Kundenakte Konversion ───────────────────────────────────────────
 
+type ConvertResult = {
+  fallId: string
+  linked: { calls: number; tasks: number; emails: number; termine: number; nachrichten: number; dokumente: number }
+}
+
 async function convertLeadToFall(
   supabase: Awaited<ReturnType<typeof createClient>>,
   leadId: string,
   userId: string,
-): Promise<string> {
+): Promise<ConvertResult> {
   // 1. Lead-Daten laden
   const { data: lead, error: leadErr } = await supabase
     .from('leads')
@@ -405,23 +410,51 @@ async function convertLeadToFall(
     })
     .eq('id', leadId)
 
-  // 5b. KFZ-146: Alle verbundenen Daten (Calls, Tasks, Emails, Termine) verlinken
-  await supabase.rpc('link_lead_data_to_fall', {
+  // 5b. KFZ-146: Alle verbundenen Daten (Calls, Tasks, Emails, Termine, Nachrichten, Dokumente) verlinken
+  type LinkResult = { calls: number; tasks: number; emails: number; termine: number; nachrichten: number; dokumente: number }
+  let linked: LinkResult = { calls: 0, tasks: 0, emails: 0, termine: 0, nachrichten: 0, dokumente: 0 }
+  const { data: linkData, error: linkErr } = await supabase.rpc('link_lead_data_to_fall', {
     p_lead_id: leadId,
     p_fall_id: fall.id,
-  }).catch(err => console.warn('[KFZ-146] link_lead_data_to_fall failed:', err))
+  })
+  if (linkErr) {
+    console.error('[KFZ-146] link_lead_data_to_fall failed:', linkErr.message)
+  } else if (linkData) {
+    linked = linkData as unknown as LinkResult
+  }
+
+  // 5c. KFZ-146: Lead-Notiz als Timeline-Eintrag übertragen
+  if (lead.notiz && String(lead.notiz).trim()) {
+    await supabase.from('timeline').insert({
+      fall_id: fall.id,
+      lead_id: leadId,
+      typ: 'notiz',
+      titel: 'Notiz aus Lead-Phase',
+      beschreibung: String(lead.notiz).trim(),
+      erstellt_von: userId,
+    })
+  }
 
   // 6. Pflichtdokumente erstellen
   await createPflichtdokumente(supabase, fall.id, lead)
 
-  // 7. Timeline-Eintrag erstellen
+  // 7. Timeline-Eintrag erstellen (mit Zähler der übertragenen Entitäten)
   const betreuerName = await getProfileName(supabase, kundenbetreuerId)
+  const parts = [
+    linked.calls > 0 ? `${linked.calls} Calls` : null,
+    linked.tasks > 0 ? `${linked.tasks} Tasks` : null,
+    linked.emails > 0 ? `${linked.emails} E-Mails` : null,
+    linked.termine > 0 ? `${linked.termine} Termine` : null,
+    linked.nachrichten > 0 ? `${linked.nachrichten} Nachrichten` : null,
+    linked.dokumente > 0 ? `${linked.dokumente} Dokumente` : null,
+  ].filter(Boolean)
+  const linkedSummary = parts.length > 0 ? ` Übertragen: ${parts.join(', ')}.` : ''
   await supabase.from('timeline').insert({
     fall_id: fall.id,
     lead_id: leadId,
     typ: 'system',
     titel: 'Lead konvertiert zu Kundenakte',
-    beschreibung: `Fallnummer ${fallNummer} erstellt. Kundenbetreuer: ${betreuerName}.`,
+    beschreibung: `Fallnummer ${fallNummer} erstellt. Kundenbetreuer: ${betreuerName}.${linkedSummary}`,
     erstellt_von: userId,
   })
 
@@ -431,7 +464,7 @@ async function convertLeadToFall(
   // 9. Auto-Tasks: Konversion
   triggerKonversionTasks(fall.id, kundenbetreuerId, null).catch(() => {})
 
-  return fall.id
+  return { fallId: fall.id, linked }
 }
 
 // ─── Kundenbetreuer Load Balancing ──────────────────────────────────────────
