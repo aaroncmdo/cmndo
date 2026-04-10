@@ -120,6 +120,7 @@ export default function StatistikenClient({
   rolle,
   userId,
   leaderboard,
+  totalLeads,
 }: {
   faelle: StatistikFall[]
   klassifizierungen: StatistikKlassifizierung[]
@@ -128,6 +129,7 @@ export default function StatistikenClient({
   rolle: UserStatistikRolle
   userId: string
   leaderboard: { sv_id: string; faelle_count: number; umsatz_netto: number; rang: number }[]
+  totalLeads: number
 }) {
   const [zeitraum, setZeitraum] = useState(90)
   const [nurEigene, setNurEigene] = useState(rolle === 'kundenbetreuer' || rolle === 'leadbearbeiter')
@@ -237,14 +239,19 @@ export default function StatistikenClient({
   // ═══════════════════════════════════════════════════════════════════════════
 
   const unfallData = useMemo(() => {
-    const counts: Record<string, { count: number; totalBetrag: number; fallIds: string[] }> = {}
+    const counts: Record<string, { count: number; totalBetrag: number; fallIds: string[]; dauern: number[]; mitLead: number }> = {}
     for (const f of filtered) {
       const k = f.unfall_konstellation
       if (!k) continue
-      if (!counts[k]) counts[k] = { count: 0, totalBetrag: 0, fallIds: [] }
+      if (!counts[k]) counts[k] = { count: 0, totalBetrag: 0, fallIds: [], dauern: [], mitLead: 0 }
       counts[k].count++
       counts[k].totalBetrag += Number(f.gutachten_betrag ?? 0)
       counts[k].fallIds.push(f.id)
+      if (f.regulierung_am) {
+        const d = (new Date(f.regulierung_am).getTime() - new Date(f.created_at).getTime()) / 86400000
+        if (d >= 0 && d < 365) counts[k].dauern.push(d)
+      }
+      if (f.lead_id) counts[k].mitLead++
     }
     return Object.entries(counts)
       .map(([k, d]) => ({
@@ -252,6 +259,8 @@ export default function StatistikenClient({
         label: UNFALL_LABELS[k] ?? k,
         count: d.count,
         avgBetrag: d.count > 0 ? Math.round(d.totalBetrag / d.count) : 0,
+        avgDauer: d.dauern.length > 0 ? Math.round(d.dauern.reduce((s, v) => s + v, 0) / d.dauern.length) : null,
+        konversionPct: d.count > 0 ? Math.round((d.mitLead / d.count) * 100) : null,
         fallIds: d.fallIds,
       }))
       .sort((a, b) => b.count - a.count)
@@ -366,11 +375,40 @@ export default function StatistikenClient({
       ? Math.round((gutachtenZeiten.reduce((s, d) => s + d, 0) / gutachtenZeiten.length) * 10) / 10
       : null
 
+    // Konversionsrate Lead → Fall
+    const faelleMitLead = filtered.filter(f => f.lead_id).length
+    const konversionPct = totalLeads > 0 ? Math.round((faelleMitLead / totalLeads) * 1000) / 10 : null
+
     const metrikMap: Record<string, number | null> = {
       avg_bearbeitungsdauer_tage: avgBearbeitungsdauer,
       avg_kuerzungsquote_prozent: kuerzungsQuote,
       avg_schadenhoehe_eur: avgSchadenhoehe,
       avg_gutachten_zeit_tage: avgGutachtenZeit,
+      konversion_lead_zu_fall_prozent: konversionPct,
+    }
+
+    // Top 3 SVs per metric for insight text
+    function getTop3SvsForMetrik(metrik: string): string[] {
+      if (metrik === 'avg_bearbeitungsdauer_tage' || metrik === 'avg_gutachten_zeit_tage') {
+        const svDauern: Record<string, { total: number; count: number }> = {}
+        for (const f of filtered) {
+          if (!f.sv_id) continue
+          const from = metrik === 'avg_bearbeitungsdauer_tage' ? f.created_at : f.sv_zugewiesen_am
+          const to = metrik === 'avg_bearbeitungsdauer_tage' ? f.regulierung_am : f.gutachten_eingegangen_am
+          if (!from || !to) continue
+          const d = (new Date(to).getTime() - new Date(from).getTime()) / 86400000
+          if (d < 0 || d > 365) continue
+          if (!svDauern[f.sv_id]) svDauern[f.sv_id] = { total: 0, count: 0 }
+          svDauern[f.sv_id].total += d
+          svDauern[f.sv_id].count++
+        }
+        return Object.entries(svDauern)
+          .map(([id, d]) => ({ id, avg: d.total / d.count }))
+          .sort((a, b) => b.avg - a.avg)
+          .slice(0, 3)
+          .map(s => svNameMap[s.id] ?? s.id.slice(0, 8))
+      }
+      return []
     }
 
     // 6-month trend per metric
@@ -410,9 +448,19 @@ export default function StatistikenClient({
           else { statusLabel = 'Verbesserungspotenzial'; statusColor = 'amber' }
         }
       }
-      return { ...b, eigenerWert, statusLabel, statusColor, datenpunkte: totalFaelle, trend: calcTrend(b.metrik) }
+      // Dynamic insight text
+      let insight = ''
+      if (eigenerWert != null && statusColor === 'amber') {
+        const diff = Math.abs(eigenerWert - Number(b.branchen_wert))
+        const unit = b.einheit === 'EUR' ? fmtEur(diff) : b.einheit === 'Prozent' ? `${diff.toFixed(1)}%` : `${diff.toFixed(1)} ${b.einheit}`
+        insight = `Du liegst ${unit} ${b.metrik.includes('dauer') || b.metrik.includes('zeit') || b.metrik.includes('kuerzung') ? 'über' : 'unter'} dem Branchenschnitt.`
+        const top3 = getTop3SvsForMetrik(b.metrik)
+        if (top3.length > 0) insight += ` Top 3 SVs: ${top3.join(', ')}.`
+      }
+
+      return { ...b, eigenerWert, statusLabel, statusColor, datenpunkte: totalFaelle, trend: calcTrend(b.metrik), insight }
     })
-  }, [filtered, filteredKlass, faelle, benchmarks, months])
+  }, [filtered, filteredKlass, faelle, benchmarks, months, totalLeads, svNameMap])
 
   // ─── Render ───────────────────────────────────────────────────────────────
 
@@ -546,6 +594,7 @@ export default function StatistikenClient({
                       <thead><tr className="border-b border-gray-200 text-[10px] text-gray-500 uppercase">
                         <th className="text-left py-2 px-2">Konstellation</th><th className="text-right py-2 px-2">Fälle</th>
                         <th className="text-right py-2 px-2">Anteil</th><th className="text-right py-2 px-2">Ø Schadenhöhe</th>
+                        <th className="text-right py-2 px-2">Ø Dauer</th><th className="text-right py-2 px-2">Konversion</th>
                       </tr></thead>
                       <tbody>
                         {unfallData.map(d => (
@@ -555,6 +604,8 @@ export default function StatistikenClient({
                             <td className="py-2 px-2 text-right tabular-nums text-gray-600">{d.count}</td>
                             <td className="py-2 px-2 text-right tabular-nums text-gray-600">{unfallTotal > 0 ? `${Math.round((d.count / unfallTotal) * 100)}%` : '—'}</td>
                             <td className="py-2 px-2 text-right tabular-nums text-gray-800 font-medium">{d.avgBetrag > 0 ? fmtEur(d.avgBetrag) : '—'}</td>
+                            <td className="py-2 px-2 text-right tabular-nums text-gray-600">{d.avgDauer != null ? `${d.avgDauer} T` : '—'}</td>
+                            <td className="py-2 px-2 text-right tabular-nums text-gray-600">{d.konversionPct != null ? `${d.konversionPct}%` : '—'}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -710,6 +761,11 @@ export default function StatistikenClient({
                         <span className="text-[10px] text-gray-400">Quelle: {b.quelle ?? 'k.A.'}</span>
                         <span className="text-[10px] text-gray-400">{b.datenpunkte} Fälle</span>
                       </div>
+
+                      {/* Dynamic Insight Text */}
+                      {b.insight && (
+                        <p className="text-[11px] text-gray-600 mt-2 leading-relaxed italic">{b.insight}</p>
+                      )}
 
                       {/* Was tun? Tooltip */}
                       {b.statusColor === 'amber' && WAS_TUN_TIPS[b.metrik] && (

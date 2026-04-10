@@ -127,6 +127,5 @@ INSERT INTO branchen_benchmarks (metrik, beschreibung, branchen_wert, einheit, q
   ('avg_kuerzungsquote_prozent', 'Durchschnittlicher Anteil der Kuerzungen am Gesamtvolumen', 15.00, 'Prozent', 'GDV Schadensstatistik', '2026-01-01'),
   ('avg_schadenhoehe_eur', 'Durchschnittliche Schadenhoehe pro Fall', 4500.00, 'EUR', 'Allianz Schadenstudie 2024', '2026-01-01'),
   ('avg_gutachten_zeit_tage', 'Durchschnittliche Zeit vom SV-Zuweisen bis Gutachten-Eingang', 3.00, 'Tage', 'BVSK', '2026-01-01'),
-  ('avg_anteil_klare_haftung_prozent', 'Anteil der Faelle mit klarer Haftung', 65.00, 'Prozent', 'GDV', '2026-01-01'),
   ('konversion_lead_zu_fall_prozent', 'Konversionsrate Lead zu Fall', 35.00, 'Prozent', 'Branchenschaetzung', '2026-01-01')
 ON CONFLICT (metrik) DO NOTHING;

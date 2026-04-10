@@ -36,6 +36,7 @@ export type StatistikFall = {
   organisation_id: string | null
   fahrzeug_typ: string | null
   leadbearbeiter_id: string | null
+  lead_id: string | null
 }
 
 export type StatistikKlassifizierung = {
@@ -149,7 +150,7 @@ export default async function StatistikenPage() {
   // Fetch faelle
   let faelleQuery = adminClient
     .from('faelle')
-    .select('id, status, sv_id, created_at, regulierung_am, regulierung_betrag, gutachten_betrag, gutachten_eingegangen_am, sv_zugewiesen_am, schadens_ursache, schadens_plz, kundenbetreuer_id, unfall_konstellation, gegner_anzahl_beteiligte, gegner_fahrzeugtyp, organisation_id, fahrzeug_typ, leadbearbeiter_id')
+    .select('id, status, sv_id, created_at, regulierung_am, regulierung_betrag, gutachten_betrag, gutachten_eingegangen_am, sv_zugewiesen_am, schadens_ursache, schadens_plz, kundenbetreuer_id, unfall_konstellation, gegner_anzahl_beteiligte, gegner_fahrzeugtyp, organisation_id, fahrzeug_typ, leadbearbeiter_id, lead_id')
     .order('created_at', { ascending: false })
 
   if (rolle === 'kundenbetreuer') {
@@ -189,6 +190,11 @@ export default async function StatistikenPage() {
     svNameMap[sv.id] = p ? `${p.vorname ?? ''} ${p.nachname ?? ''}`.trim() || '—' : '—'
   }
 
+  // Leads count for Konversionsquote benchmark
+  const { count: leadsCount } = await adminClient
+    .from('leads')
+    .select('id', { count: 'exact', head: true })
+
   // Community leaderboard data if needed
   let leaderboard: { sv_id: string; faelle_count: number; umsatz_netto: number; rang: number }[] = []
   if (rolle === 'community_member' && orgId) {
@@ -209,6 +215,7 @@ export default async function StatistikenPage() {
       rolle={rolle}
       userId={user.id}
       leaderboard={leaderboard}
+      totalLeads={leadsCount ?? 0}
     />
   )
 }
