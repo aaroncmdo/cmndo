@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { MessageCircleIcon, SendIcon, SearchIcon, UserIcon } from 'lucide-react'
 import Link from 'next/link'
+import { sendNachrichtFromInbox } from './actions'
 
 // KFZ-182 Phase C: Gesamt-Chat-Inbox — WhatsApp-like Layout mit Threads + Chat-Stream.
 
@@ -44,6 +45,7 @@ export default function NachrichtenInboxClient({
   const [search, setSearch] = useState('')
   const [activeThread, setActiveThread] = useState<Thread | null>(null)
   const [replyText, setReplyText] = useState('')
+  const [sending, startSend] = useTransition()
 
   const filtered = threads.filter(t => {
     if (filter === 'unzugeordnet') return !t.fallId
@@ -171,9 +173,20 @@ export default function NachrichtenInboxClient({
               <div className="bg-white border-t border-gray-200 px-4 py-3">
                 <div className="flex items-center gap-2">
                   <input type="text" value={replyText} onChange={e => setReplyText(e.target.value)}
-                    placeholder="Nachricht schreiben..." onKeyDown={e => { if (e.key === 'Enter' && replyText.trim()) { /* TODO: send via server action */ } }}
+                    placeholder="Nachricht schreiben..."
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && replyText.trim() && activeThread?.fallId) {
+                        const text = replyText; setReplyText('')
+                        startSend(async () => { await sendNachrichtFromInbox(activeThread.fallId!, text) })
+                      }
+                    }}
                     className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-[#4573A2]" />
-                  <button disabled={!replyText.trim()}
+                  <button disabled={!replyText.trim() || !activeThread?.fallId || sending}
+                    onClick={() => {
+                      if (!replyText.trim() || !activeThread?.fallId) return
+                      const text = replyText; setReplyText('')
+                      startSend(async () => { await sendNachrichtFromInbox(activeThread.fallId!, text) })
+                    }}
                     className="p-2 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white disabled:opacity-40 transition-colors">
                     <SendIcon className="w-4 h-4" />
                   </button>

@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { MessageCircleIcon, UserIcon, SearchIcon } from 'lucide-react'
+import { useState, useTransition } from 'react'
+import { MessageCircleIcon, UserIcon, SearchIcon, SendIcon } from 'lucide-react'
 import Link from 'next/link'
+import { sendNachrichtFromSvInbox } from './actions'
 
 // KFZ-182: SV-Nachrichten-Inbox — nur eigene Fall-Chats.
 
@@ -31,6 +32,8 @@ type Thread = {
 export default function NachrichtenSvClient({ threads }: { threads: Thread[] }) {
   const [search, setSearch] = useState('')
   const [activeThread, setActiveThread] = useState<Thread | null>(null)
+  const [replyText, setReplyText] = useState('')
+  const [sending, startSend] = useTransition()
 
   const filtered = threads.filter(t => {
     if (!search) return true
@@ -120,6 +123,30 @@ export default function NachrichtenSvClient({ threads }: { threads: Thread[] }) 
                     </div>
                   )
                 })}
+              </div>
+
+              {/* Reply Input */}
+              <div className="bg-white border-t border-gray-200 px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <input type="text" value={replyText} onChange={e => setReplyText(e.target.value)}
+                    placeholder="Nachricht schreiben..."
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && replyText.trim() && activeThread) {
+                        const text = replyText; setReplyText('')
+                        startSend(async () => { await sendNachrichtFromSvInbox(activeThread.fallId, text) })
+                      }
+                    }}
+                    className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-[#4573A2]" />
+                  <button disabled={!replyText.trim() || sending}
+                    onClick={() => {
+                      if (!replyText.trim() || !activeThread) return
+                      const text = replyText; setReplyText('')
+                      startSend(async () => { await sendNachrichtFromSvInbox(activeThread.fallId, text) })
+                    }}
+                    className="p-2 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white disabled:opacity-40 transition-colors">
+                    <SendIcon className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </>
           )}
