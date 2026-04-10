@@ -274,7 +274,7 @@ export async function sendFlowLink(leadId: string) {
   // Create flow_links entry with unique token
   const { data: flowLink, error: flowErr } = await supabase
     .from('flow_links')
-    .insert({ lead_id: leadId })
+    .insert({ lead_id: leadId, expires_at: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString() })
     .select('token')
     .single()
 

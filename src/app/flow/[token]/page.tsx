@@ -12,10 +12,10 @@ export default async function FlowPage({
   try {
   const svc = createServiceClient()
 
-  // 1. Look up flow_links by token
+  // 1. Look up flow_links by token + check expiry (BUG-100)
   const { data: flowLink } = await svc
     .from('flow_links')
-    .select('id, lead_id, status, geoeffnet_am')
+    .select('id, lead_id, status, geoeffnet_am, expires_at')
     .eq('token', token)
     .maybeSingle()
 
@@ -24,6 +24,32 @@ export default async function FlowPage({
   let flowLinkId: string | null = null
 
   if (flowLink) {
+    // BUG-100: Token-Expiry prüfen
+    if (flowLink.expires_at && new Date(flowLink.expires_at) < new Date()) {
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow p-8 max-w-md w-full text-center">
+            <div className="text-4xl mb-4">&#x23F3;</div>
+            <h1 className="text-xl font-bold text-gray-900 mb-2">Link abgelaufen</h1>
+            <p className="text-gray-500">Dieser FlowLink ist nicht mehr gueltig. Bitte kontaktieren Sie Ihren Berater fuer einen neuen Link.</p>
+          </div>
+        </div>
+      )
+    }
+
+    // BUG-100: Bereits abgeschlossene Links blockieren
+    if (flowLink.status === 'abgeschlossen') {
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow p-8 max-w-md w-full text-center">
+            <div className="text-4xl mb-4">&#x2705;</div>
+            <h1 className="text-xl font-bold text-gray-900 mb-2">Bereits abgeschlossen</h1>
+            <p className="text-gray-500">Dieser FlowLink wurde bereits verwendet.</p>
+          </div>
+        </div>
+      )
+    }
+
     leadId = flowLink.lead_id
     flowLinkId = flowLink.id
 
