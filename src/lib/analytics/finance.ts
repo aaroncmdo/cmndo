@@ -100,8 +100,8 @@ export async function getCashFlow(filter: AnalyticsFilter): Promise<{
   const now = new Date().toISOString()
 
   // Eingegangen
-  const { data: eing } = await db.from('zahlungseingaenge').select('id, fall_id, betrag')
-  const eingBetrag = eing?.reduce((sum, z) => sum + (Number(z.betrag) || 0), 0) ?? 0
+  const { data: eing } = await db.from('zahlungseingaenge').select('id, fall_id, gesamtbetrag')
+  const eingBetrag = eing?.reduce((sum, z) => sum + (Number(z.gesamtbetrag) || 0), 0) ?? 0
   const eingIds = [...new Set(eing?.map(z => z.fall_id).filter(Boolean) ?? [])]
 
   // Erwartet (regulierung_am gesetzt aber keine Zahlung)
