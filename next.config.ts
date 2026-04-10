@@ -2,10 +2,7 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  /* KFZ-177: ignoreBuildErrors entfernt — tsc ist jetzt sauber */
 };
 
 export default process.env.SENTRY_AUTH_TOKEN
