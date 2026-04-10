@@ -20,12 +20,18 @@ type SendEmailOpts = {
   text?: string
   attachments?: Array<{ filename: string; content: Buffer | string; contentType?: string }>
   replyTo?: string
+  /** @deprecated Wird ignoriert — alle Sends gehen von RESEND_FROM/GMAIL_SMTP_FROM. */
+  from?: string
   fallId?: string | null
   empfaengerTyp?: 'kunde' | 'sv' | 'kanzlei' | 'admin'
   template?: string
 }
 
 export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: string }> {
+  // KFZ-189: Zentraler Sender — from-Overrides werden ignoriert
+  if (opts.from) {
+    console.warn(`[email] from-Override ignoriert: "${opts.from}" → nutze env RESEND_FROM/GMAIL_SMTP_FROM`)
+  }
   const from = process.env.GMAIL_SMTP_FROM || 'Claimondo <noreply@claimondo.de>'
   const admin = createAdminClient()
   const toAddr = Array.isArray(opts.to) ? opts.to.join(', ') : opts.to
