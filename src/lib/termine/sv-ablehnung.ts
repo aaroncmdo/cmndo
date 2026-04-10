@@ -39,21 +39,51 @@ export async function ablehnTermin(terminId: string, grund: string) {
 
   if (updateErr) throw new Error(`Termin-Update fehlgeschlagen: ${updateErr.message}`)
 
-  // ablehnungen_30_tage inkrementieren
+  // ablehnungen_30_tage inkrementieren + Ablehnquote pruefen
+  const svId = termin.sv_id as string
   const { data: sv, error: svErr } = await db
     .from('sachverstaendige')
-    .select('ablehnungen_30_tage')
-    .eq('id', termin.sv_id as string)
+    .select('ablehnungen_30_tage, ist_aktiv, profile_id')
+    .eq('id', svId)
     .single()
 
   if (!svErr && sv) {
+    const neueAnzahl = (sv.ablehnungen_30_tage ?? 0) + 1
     await db
       .from('sachverstaendige')
-      .update({ ablehnungen_30_tage: (sv.ablehnungen_30_tage ?? 0) + 1 })
-      .eq('id', termin.sv_id as string)
+      .update({ ablehnungen_30_tage: neueAnzahl })
+      .eq('id', svId)
+
+    // Ablehnquote-Check: Termine der letzten 30 Tage zaehlen
+    const dreissigTageHer = new Date(Date.now() - 30 * 86400_000).toISOString()
+    const { count: termineCount } = await db
+      .from('gutachter_termine')
+      .select('*', { count: 'exact', head: true })
+      .eq('sv_id', svId)
+      .gte('created_at', dreissigTageHer)
+
+    const quote = (termineCount && termineCount > 0) ? (neueAnzahl / termineCount) * 100 : 0
+
+    // >20%: SV auto-deaktivieren + Admin-Task
+    if (quote > 20 && sv.ist_aktiv !== false) {
+      await db.from('sachverstaendige').update({ ist_aktiv: false }).eq('id', svId)
+      await db.from('tasks').insert({
+        titel: 'SV wegen hoher Ablehnquote automatisch deaktiviert',
+        beschreibung: `Ablehnquote: ${quote.toFixed(1)}% (${neueAnzahl}/${termineCount}). SV wurde automatisch auf inaktiv gesetzt. Manuelle Klärung nötig.`,
+        typ: 'sv_ablehnquote', status: 'offen', prioritaet: 'dringend', auto_erstellt: true,
+      })
+    }
+    // >10%: Warning-Task
+    else if (quote > 10) {
+      await db.from('tasks').insert({
+        titel: 'SV hat hohe Ablehnquote — Klärung empfohlen',
+        beschreibung: `Ablehnquote: ${quote.toFixed(1)}% (${neueAnzahl}/${termineCount}).`,
+        typ: 'sv_ablehnquote', status: 'offen', prioritaet: 'mittel', auto_erstellt: true,
+      })
+    }
   }
 
-  // Admin-Task erstellen
+  // Admin-Task fuer SV-Replacement
   const { error: taskErr } = await db.from('tasks').insert({
     fall_id: termin.fall_id,
     titel: 'SV hat Termin abgelehnt — alternativen SV finden',
@@ -76,4 +106,35 @@ export async function ablehnTermin(terminId: string, grund: string) {
       ? `Ablehnungsgrund: ${grund}`
       : 'SV hat Termin ohne Angabe von Gründen abgelehnt.',
   })
+
+  // Auto-Dispatch: versuche neuen SV im gleichen Zeitslot zu finden
+  try {
+    const { data: fall } = await db.from('faelle')
+      .select('id, besichtigungsort_adresse, schadens_plz')
+      .eq('id', termin.fall_id as string)
+      .single()
+
+    if (fall) {
+      // Trigger SV-Zuweisung API intern (gleicher Zeitslot)
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
+      const resp = await fetch(`${appUrl}/api/sv-zuweisung`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.CRON_SECRET}` },
+        body: JSON.stringify({ fall_id: fall.id }),
+      })
+      if (resp.ok) {
+        const result = await resp.json()
+        if (result.sv_id) {
+          await db.from('timeline').insert({
+            fall_id: fall.id, typ: 'termin',
+            titel: 'Neuer SV automatisch zugewiesen',
+            beschreibung: `Nach Ablehnung wurde automatisch ein Ersatz-SV gefunden.`,
+          })
+        }
+      }
+    }
+  } catch {
+    // Auto-Dispatch fehlgeschlagen — Admin-Task existiert bereits
+    console.error('[ablehnTermin] Auto-Dispatch fehlgeschlagen, Admin-Task wurde erstellt')
+  }
 }
