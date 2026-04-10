@@ -255,6 +255,27 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
   return { converted: false }
 }
 
+// ─── KFZ-192: Service-Typ setzen ────────────────────────────────────────────
+
+export async function updateServiceTyp(
+  leadId: string,
+  serviceTyp: 'komplett' | 'nur_gutachter',
+) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const { error } = await supabase
+    .from('leads')
+    .update({ service_typ: serviceTyp, updated_at: new Date().toISOString() })
+    .eq('id', leadId)
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath(`/admin/dispatch/lead/${leadId}`)
+  revalidatePath('/admin/dispatch')
+}
+
 // ─── Flow-Link ──────────────────────────────────────────────────────────────
 
 export async function sendFlowLink(leadId: string) {
@@ -264,16 +285,19 @@ export async function sendFlowLink(leadId: string) {
 
   const { data: lead } = await supabase
     .from('leads')
-    .select('id, vorname, nachname, telefon')
+    .select('id, vorname, nachname, telefon, service_typ')
     .eq('id', leadId)
     .single()
 
   if (!lead) throw new Error('Lead nicht gefunden')
 
+  // KFZ-192: service_typ aus Lead in FlowLink kopieren
+  const serviceTyp = (lead as Record<string, unknown>).service_typ as string ?? 'komplett'
+
   // Create flow_links entry with unique token
   const { data: flowLink, error: flowErr } = await supabase
     .from('flow_links')
-    .insert({ lead_id: leadId, expires_at: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString() })
+    .insert({ lead_id: leadId, expires_at: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(), service_typ: serviceTyp })
     .select('token')
     .single()
 

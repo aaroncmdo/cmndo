@@ -1,0 +1,159 @@
+import { NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+
+/**
+ * KFZ-192: Vollmacht-Reminder Cron.
+ * Läuft täglich um 10:00 Uhr.
+ * Prüft Fälle mit service_typ='komplett', noch nicht unterschriebener Vollmacht,
+ * und einem Termin mit status='reserviert'.
+ *
+ * - 1 Tag alt → erster Reminder
+ * - 3 Tage alt → zweiter Reminder
+ * - 7 Tage alt → Admin-Task erstellen
+ * Idempotent via Timeline-Duplikat-Check.
+ */
+
+export async function GET(request: Request) {
+  const authHeader = request.headers.get('authorization')
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const db = createAdminClient()
+  const now = new Date()
+
+  // Fälle laden: komplett + reservierter Termin + Vollmacht nicht unterschrieben
+  const { data: faelle, error: faelleErr } = await db
+    .from('faelle')
+    .select('id, fall_nummer, lead_id, kundenbetreuer_id, created_at, vollmacht_unterschrieben')
+    .eq('service_typ', 'komplett')
+    .not('status', 'in', '("abgeschlossen","storniert")')
+    .or('vollmacht_unterschrieben.is.null,vollmacht_unterschrieben.eq.false')
+
+  if (faelleErr) {
+    console.error('[vollmacht-reminder] faelle query:', faelleErr.message)
+    return NextResponse.json({ error: faelleErr.message }, { status: 500 })
+  }
+
+  if (!faelle?.length) {
+    return NextResponse.json({ checked: 0, reminders: 0, tasks: 0 })
+  }
+
+  // Nur Fälle mit einem aktiven reservierten Termin
+  const fallIds = faelle.map(f => f.id)
+  const { data: reservierteTermine, error: termineErr } = await db
+    .from('gutachter_termine')
+    .select('fall_id')
+    .in('fall_id', fallIds)
+    .eq('status', 'reserviert')
+
+  if (termineErr) {
+    console.error('[vollmacht-reminder] termine query:', termineErr.message)
+  }
+
+  const fallsWithTermin = new Set((reservierteTermine ?? []).map(t => t.fall_id as string))
+
+  let reminders = 0
+  let tasks = 0
+
+  for (const fall of faelle) {
+    if (!fallsWithTermin.has(fall.id)) continue // Kein reservierter Termin
+
+    const createdAt = new Date(fall.created_at as string)
+    const ageMs = now.getTime() - createdAt.getTime()
+    const ageDays = ageMs / (1000 * 60 * 60 * 24)
+
+    const isDay1 = ageDays >= 1 && ageDays < 2
+    const isDay3 = ageDays >= 3 && ageDays < 4
+    const isDay7Plus = ageDays >= 7
+
+    if (!isDay1 && !isDay3 && !isDay7Plus) continue
+
+    // Idempotenz-Check via Timeline
+    const reminderTyp = isDay7Plus ? 'vollmacht_task' : isDay3 ? 'vollmacht_reminder_2' : 'vollmacht_reminder_1'
+
+    const { count: existing } = await db
+      .from('timeline')
+      .select('id', { count: 'exact', head: true })
+      .eq('fall_id', fall.id)
+      .eq('typ', reminderTyp)
+
+    if (existing && existing > 0) continue // Bereits gesendet
+
+    if (isDay7Plus) {
+      // Admin-Task erstellen
+      const { error: taskErr } = await db.from('tasks').insert({
+        fall_id: fall.id,
+        titel: 'Vollmacht ausstehend — Kunde kontaktieren',
+        beschreibung: `Fall ${fall.fall_nummer ?? fall.id.slice(0, 8)}: Vollmacht seit ${Math.floor(ageDays)} Tagen nicht unterschrieben. Bitte Kunden direkt kontaktieren.`,
+        typ: 'vollmacht_ausstehend',
+        status: 'offen',
+        prioritaet: 'dringend',
+        auto_erstellt: true,
+        faellig_am: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(),
+        empfaenger_user_id: (fall.kundenbetreuer_id as string) ?? null,
+      })
+
+      if (taskErr) {
+        console.error('[vollmacht-reminder] task insert:', taskErr.message)
+        continue
+      }
+
+      // Timeline-Marker für Idempotenz
+      await db.from('timeline').insert({
+        fall_id: fall.id,
+        typ: reminderTyp,
+        titel: 'Admin-Task: Vollmacht ausstehend (7+ Tage)',
+        beschreibung: `Automatisch erstellt nach ${Math.floor(ageDays)} Tagen ohne Vollmacht-Unterschrift.`,
+      })
+
+      tasks++
+    } else {
+      // WhatsApp-Reminder an Kunden
+      const reminderNr = isDay3 ? '2.' : '1.'
+      let gesendet = false
+      if (fall.lead_id) {
+        const { data: lead } = await db
+          .from('leads')
+          .select('telefon, vorname')
+          .eq('id', fall.lead_id as string)
+          .single()
+
+        if (lead?.telefon) {
+          try {
+            const { sendWhatsApp } = await import('@/lib/whatsapp')
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'
+            await sendWhatsApp(
+              lead.telefon,
+              `Hallo ${lead.vorname ?? 'Kunde'}, wir möchten Sie daran erinnern, dass Ihre Vollmacht für Fall ${fall.fall_nummer ?? fall.id.slice(0, 8)} noch aussteht.\n\nBitte unterschreiben Sie die Vollmacht, damit wir Ihren Termin verbindlich bestätigen können:\n${appUrl}/kunde\n\nIhr Claimondo-Team`,
+            )
+            gesendet = true
+          } catch (err) {
+            console.error('[vollmacht-reminder] WhatsApp:', err)
+          }
+        }
+      }
+
+      // Timeline-Marker für Idempotenz (auch wenn WhatsApp fehlschlug)
+      await db.from('timeline').insert({
+        fall_id: fall.id,
+        typ: reminderTyp,
+        titel: `Vollmacht-Reminder ${reminderNr} gesendet`,
+        beschreibung: gesendet
+          ? `WhatsApp-Reminder an Kunden gesendet (Tag ${Math.floor(ageDays)}).`
+          : `Reminder-Versuch (Tag ${Math.floor(ageDays)}) — kein WhatsApp möglich.`,
+      })
+
+      reminders++
+    }
+  }
+
+  console.log(`[KFZ-192] vollmacht-reminder: ${faelle.length} geprüft, ${reminders} Reminder, ${tasks} Tasks`)
+
+  return NextResponse.json({
+    checked: faelle.length,
+    withTermin: fallsWithTermin.size,
+    reminders,
+    tasks,
+  })
+}

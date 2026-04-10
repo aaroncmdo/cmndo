@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
+import { bestaetigeTermin } from '@/lib/termine/bestaetigung'
 
 export async function sendNachricht(
   fallId: string,
@@ -84,4 +85,73 @@ export async function sendNachricht(
   } catch { /* non-critical */ }
 
   revalidatePath(`/kunde/faelle/${fallId}`)
+}
+
+/**
+ * KFZ-192: Kunde wählt einen der vom SV vorgeschlagenen Slots aus.
+ * Setzt den Termin auf den gewählten Slot, bestätigt den Termin, und
+ * aktualisiert Fall + Lead.
+ */
+export async function waehleGegenvorschlagSlot(
+  fallId: string,
+  terminId: string,
+  slot: { datum: string; uhrzeit: string },
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient()
+    const user = (await supabase.auth.getUser())?.data?.user ?? null
+    if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+    const admin = createAdminClient()
+
+    // Ownership prüfen
+    const { data: fall } = await admin.from('faelle').select('id, lead_id, service_typ').eq('id', fallId).single()
+    if (!fall) return { success: false, error: 'Fall nicht gefunden' }
+
+    // Termin neu setzen
+    const startZeit = `${slot.datum}T${slot.uhrzeit}:00`
+    const endZeit = new Date(new Date(startZeit).getTime() + 90 * 60 * 1000).toISOString()
+
+    const { error: updateErr } = await admin
+      .from('gutachter_termine')
+      .update({
+        start_zeit: startZeit,
+        end_zeit: endZeit,
+        sv_vorgeschlagene_slots: null,
+        // status wird durch bestaetigeTermin auf 'bestaetigt' gesetzt
+      })
+      .eq('id', terminId)
+
+    if (updateErr) return { success: false, error: updateErr.message }
+
+    // Termin bestätigen (setzt status='bestaetigt' + final_verbindlich_ab)
+    await bestaetigeTermin(terminId)
+
+    // Fall + Lead aktualisieren
+    await admin.from('faelle')
+      .update({
+        sv_termin: startZeit,
+        gutachter_termin_status: 'bestaetigt',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', fallId)
+
+    if (fall.lead_id) {
+      await admin.from('leads')
+        .update({ gutachter_termin: startZeit, updated_at: new Date().toISOString() })
+        .eq('id', fall.lead_id as string)
+    }
+
+    // KFZ-136: Reminder generieren
+    try {
+      const { generateReminderForTermin } = await import('@/lib/reminders/generate')
+      await generateReminderForTermin(terminId)
+    } catch (err) { console.error('[KFZ-136] Reminder-Gen Gegenvorschlag:', err) }
+
+    revalidatePath(`/kunde/faelle/${fallId}`)
+    return { success: true }
+  } catch (err) {
+    console.error('[waehleGegenvorschlagSlot]', err)
+    return { success: false, error: err instanceof Error ? err.message : String(err) }
+  }
 }

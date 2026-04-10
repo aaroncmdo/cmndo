@@ -4,12 +4,13 @@ import { useState, useRef, useEffect } from 'react'
 import { SendIcon, FileTextIcon, CalendarIcon } from 'lucide-react'
 import { markNachrichtenGelesen } from '@/lib/markNachrichtenGelesen'
 import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
+import { waehleGegenvorschlagSlot } from './actions'
 import Link from 'next/link'
 
 type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean | null; anhang_url: string | null; created_at: string }
 type Dokument = { id: string; typ: string; datei_url: string; datei_name: string | null; created_at: string }
 type ChatTeilnehmer = { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url: string | null }
-type AktiverTermin = { id: string; status: string; start_zeit: string; end_zeit: string; vorgeschlagenes_datum: string | null; gegenvorschlag_von: string | null; gegenvorschlag_grund: string | null; sv_id: string | null }
+type AktiverTermin = { id: string; status: string; start_zeit: string; end_zeit: string; vorgeschlagenes_datum: string | null; gegenvorschlag_von: string | null; gegenvorschlag_grund: string | null; sv_id: string | null; sv_vorgeschlagene_slots?: Array<{ datum: string; uhrzeit: string }> | null }
 
 const ROLLE_LABEL: Record<string, string> = { kunde: 'Sie', admin: 'Claimondo', kundenbetreuer: 'Ihr Betreuer', gutachter: 'Gutachter', sachverstaendiger: 'Gutachter', system: 'System' }
 const ROLLE_COLOR: Record<string, string> = { kunde: 'bg-[#4573A2]', admin: 'bg-[#0D1B3E]', kundenbetreuer: 'bg-[#1E3A5F]', gutachter: 'bg-[#1E3A5F]', sachverstaendiger: 'bg-[#1E3A5F]', system: 'bg-gray-400' }
@@ -101,13 +102,23 @@ export default function FallDetailSections({
             </Section>
           )}
 
-          {/* KFZ-134: SV-Gegenvorschlag Banner */}
-          {aktiverTermin && aktiverTermin.status === 'gegenvorschlag' && aktiverTermin.gegenvorschlag_von === 'sv' && aktiverTermin.vorgeschlagenes_datum && (
+          {/* KFZ-134: SV-Gegenvorschlag Banner (altes Format: 1 Datum) */}
+          {aktiverTermin && aktiverTermin.status === 'gegenvorschlag' && aktiverTermin.gegenvorschlag_von === 'sv' && aktiverTermin.vorgeschlagenes_datum && !aktiverTermin.sv_vorgeschlagene_slots?.length && (
             <GegenvorschlagBanner
               fallId={fall.id as string}
               svName={svName ?? 'Sachverständiger'}
               vorgeschlagenesDatum={aktiverTermin.vorgeschlagenes_datum}
               grund={aktiverTermin.gegenvorschlag_grund}
+            />
+          )}
+
+          {/* KFZ-192: SV hat mehrere alternative Slots vorgeschlagen */}
+          {aktiverTermin && aktiverTermin.status === 'gegenvorschlag' && aktiverTermin.sv_vorgeschlagene_slots && aktiverTermin.sv_vorgeschlagene_slots.length > 0 && (
+            <SlotAuswahlBanner
+              fallId={fall.id as string}
+              terminId={aktiverTermin.id}
+              svName={svName ?? 'Sachverständiger'}
+              slots={aktiverTermin.sv_vorgeschlagene_slots}
             />
           )}
         </div>
@@ -400,5 +411,88 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
         </div>
       )}
     </>
+  )
+}
+
+// ─── KFZ-192: Slot-Auswahl Banner (Kunde wählt aus SV-Gegenvorschlägen) ─────
+
+function SlotAuswahlBanner({
+  fallId,
+  terminId,
+  svName,
+  slots,
+}: {
+  fallId: string
+  terminId: string
+  svName: string
+  slots: Array<{ datum: string; uhrzeit: string }>
+}) {
+  const [loading, setLoading] = useState(false)
+  const [done, setDone] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleWahl(slot: { datum: string; uhrzeit: string }) {
+    setLoading(true)
+    setError(null)
+    const result = await waehleGegenvorschlagSlot(fallId, terminId, slot)
+    setLoading(false)
+    if (result.success) {
+      const datumStr = (() => {
+        try {
+          return new Date(`${slot.datum}T${slot.uhrzeit}`).toLocaleString('de-DE', {
+            weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+          })
+        } catch {
+          return `${slot.datum} ${slot.uhrzeit}`
+        }
+      })()
+      setDone(`Termin am ${datumStr} wurde bestätigt! Der Sachverständige wird informiert.`)
+    } else {
+      setError(result.error ?? 'Fehler beim Bestätigen')
+    }
+  }
+
+  if (done) {
+    return (
+      <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+        <p className="text-sm text-green-700 font-medium">{done}</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="bg-[#4573A2]/5 border border-[#7BA3CC]/30 rounded-xl p-5">
+      <p className="text-sm font-semibold text-[#0D1B3E] mb-1">
+        {svName} hat alternative Termine vorgeschlagen
+      </p>
+      <p className="text-xs text-gray-500 mb-4">
+        Bitte wählen Sie einen der folgenden Termine:
+      </p>
+      <div className="space-y-2">
+        {slots.map((slot, idx) => {
+          const datumStr = (() => {
+            try {
+              return new Date(`${slot.datum}T${slot.uhrzeit}`).toLocaleString('de-DE', {
+                weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+              })
+            } catch {
+              return `${slot.datum} ${slot.uhrzeit}`
+            }
+          })()
+          return (
+            <button
+              key={idx}
+              onClick={() => handleWahl(slot)}
+              disabled={loading}
+              className="w-full text-left px-4 py-3 rounded-xl border border-[#7BA3CC]/40 bg-white hover:bg-[#4573A2]/5 hover:border-[#4573A2] transition-colors disabled:opacity-40"
+            >
+              <span className="text-sm font-medium text-[#0D1B3E]">{datumStr}</span>
+              <span className="block text-xs text-[#4573A2] mt-0.5">Diesen Termin wählen →</span>
+            </button>
+          )
+        })}
+      </div>
+      {error && <p className="text-red-500 text-xs mt-3">{error}</p>}
+    </div>
   )
 }

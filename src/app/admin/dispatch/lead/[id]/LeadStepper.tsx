@@ -4,7 +4,7 @@ import { useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { saveLeadQualifizierung, confirmGutachterTermin, setSvGesucht } from './actions'
-import { sendFlowLink } from '../../actions'
+import { sendFlowLink, updateServiceTyp } from '../../actions'
 import VersicherungCombobox from '@/components/VersicherungCombobox'
 import {
   PhoneCallIcon,
@@ -69,6 +69,7 @@ type LeadData = {
   vollmacht_datum: string | null
   mandatstyp: string | null
   wa_gesendet: boolean
+  service_typ?: 'komplett' | 'nur_gutachter' | null
   unfallhergang?: string | null
   kennzeichen?: string | null
   fahrzeug_hersteller?: string | null
@@ -825,8 +826,23 @@ function StepFlowLink({ lead }: { lead: LeadData }) {
   const [flowUrl, setFlowUrl] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // KFZ-192: Service-Typ
+  const [serviceTyp, setServiceTyp] = useState<'komplett' | 'nur_gutachter'>(
+    (lead.service_typ ?? 'komplett') as 'komplett' | 'nur_gutachter'
+  )
+  const [serviceTypSaving, setServiceTypSaving] = useState(false)
   const alreadySent = lead.wa_gesendet || lead.status === 'flow-gesendet'
   const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || ''
+
+  async function handleServiceTypChange(val: 'komplett' | 'nur_gutachter') {
+    setServiceTyp(val)
+    setServiceTypSaving(true)
+    try {
+      await updateServiceTyp(lead.id, val)
+    } catch (err) { console.error('[KFZ-192] updateServiceTyp:', err) }
+    finally { setServiceTypSaving(false) }
+    router.refresh()
+  }
 
   async function handleSend() {
     setSending(true); setError(null)
@@ -863,9 +879,43 @@ function StepFlowLink({ lead }: { lead: LeadData }) {
   }
 
   return (
-    <div>
-      {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
-      {!lead.telefon && <p className="text-amber-600 text-sm mb-3">Keine Telefonnummer hinterlegt.</p>}
+    <div className="space-y-4">
+      {/* KFZ-192: Service-Typ Auswahl */}
+      <div>
+        <label className="text-xs text-gray-500 mb-2 block font-medium">Service-Typ</label>
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleServiceTypChange('komplett')}
+            disabled={serviceTypSaving}
+            className={`flex-1 py-2.5 px-3 rounded-xl text-sm font-medium border transition-colors disabled:opacity-50 ${
+              serviceTyp === 'komplett'
+                ? 'bg-[#1E3A5F] text-white border-[#1E3A5F]'
+                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+            }`}
+          >
+            Komplett
+          </button>
+          <button
+            onClick={() => handleServiceTypChange('nur_gutachter')}
+            disabled={serviceTypSaving}
+            className={`flex-1 py-2.5 px-3 rounded-xl text-sm font-medium border transition-colors disabled:opacity-50 ${
+              serviceTyp === 'nur_gutachter'
+                ? 'bg-[#1E3A5F] text-white border-[#1E3A5F]'
+                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+            }`}
+          >
+            Nur Gutachter
+          </button>
+        </div>
+        <p className="text-[10px] text-gray-400 mt-1">
+          {serviceTyp === 'komplett'
+            ? 'Komplett: SA + Vollmacht nötig. Termin wird nach Vollmacht bestätigt.'
+            : 'Nur Gutachter: Termin wird sofort nach SA bestätigt. Keine Vollmacht nötig.'}
+        </p>
+      </div>
+
+      {error && <p className="text-red-600 text-sm">{error}</p>}
+      {!lead.telefon && <p className="text-amber-600 text-sm">Keine Telefonnummer hinterlegt.</p>}
       <button onClick={handleSend} disabled={sending || !lead.telefon}
         className="w-full py-3 rounded-xl text-sm font-semibold disabled:opacity-40 bg-green-600 hover:bg-green-500 text-white flex items-center justify-center gap-2 transition-all">
         <SendIcon className="w-4 h-4" /> {sending ? 'Wird erstellt...' : 'Flow-Link senden via WhatsApp'}

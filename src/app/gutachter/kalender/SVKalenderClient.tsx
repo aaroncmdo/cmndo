@@ -8,7 +8,7 @@ import {
   format, isSameDay, isToday, isBefore, startOfDay,
 } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { setTermin } from './actions'
+import { setTermin, ablehnTerminAction, gegenvorschlagAction } from './actions'
 
 type Fall = {
   id: string
@@ -21,6 +21,13 @@ type Fall = {
   gutachter_termin_status: string | null
 }
 
+type GutachterTermin = {
+  id: string
+  fall_id: string
+  status: string
+  final_verbindlich_ab: string | null
+}
+
 type DailyW = { date: string; tempMax: number; tempMin: number; code: number }
 function wEmoji(c: number) { return c === 0 ? '☀️' : c <= 3 ? '☁️' : c <= 48 ? '🌫️' : c <= 67 ? '🌧️' : c <= 77 ? '❄️' : c <= 82 ? '🌦️' : '⛈️' }
 
@@ -30,6 +37,7 @@ export default function SVKalenderClient({
   gcalConnected,
   standortLat,
   standortLng,
+  termine,
 }: {
   faelle: Fall[]
   leadMap: Record<string, string>
@@ -37,6 +45,7 @@ export default function SVKalenderClient({
   gcalConnected: boolean
   standortLat?: number | null
   standortLng?: number | null
+  termine?: GutachterTermin[]
 }) {
   const router = useRouter()
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -46,6 +55,57 @@ export default function SVKalenderClient({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [dailyWeather, setDailyWeather] = useState<Record<string, DailyW>>({})
+
+  // KFZ-192: Ablehnen/Gegenvorschlag Modal State
+  const [svAktionModal, setSvAktionModal] = useState<{
+    type: 'ablehnen' | 'gegenvorschlag'
+    termin: GutachterTermin
+  } | null>(null)
+  const [ablehnenGrund, setAblehnenGrund] = useState('')
+  const [gegSlots, setGegSlots] = useState([{ datum: '', uhrzeit: '10:00' }])
+  const [svAktionSaving, setSvAktionSaving] = useState(false)
+  const [svAktionError, setSvAktionError] = useState<string | null>(null)
+
+  // Hilfsfunktion: Hat Termin noch ein offenes Zeitfenster zur Ablehnung?
+  function kannTerminAblehnen(t: GutachterTermin) {
+    if (!t.final_verbindlich_ab) return true // kein Limit gesetzt → noch möglich
+    return new Date(t.final_verbindlich_ab) > new Date()
+  }
+
+  // Termin-Map: fall_id → GutachterTermin
+  const terminMapByFall = useMemo(() => {
+    const map: Record<string, GutachterTermin> = {}
+    for (const t of termine ?? []) {
+      map[t.fall_id] = t
+    }
+    return map
+  }, [termine])
+
+  async function handleSvAblehnen() {
+    if (!svAktionModal || svAktionModal.type !== 'ablehnen') return
+    setSvAktionSaving(true)
+    setSvAktionError(null)
+    const result = await ablehnTerminAction(svAktionModal.termin.id, ablehnenGrund)
+    setSvAktionSaving(false)
+    if (!result.success) { setSvAktionError(result.error ?? 'Fehler'); return }
+    setSvAktionModal(null)
+    setAblehnenGrund('')
+    router.refresh()
+  }
+
+  async function handleSvGegenvorschlag() {
+    if (!svAktionModal || svAktionModal.type !== 'gegenvorschlag') return
+    const filledSlots = gegSlots.filter(s => s.datum && s.uhrzeit)
+    if (filledSlots.length === 0) { setSvAktionError('Mindestens einen Slot angeben'); return }
+    setSvAktionSaving(true)
+    setSvAktionError(null)
+    const result = await gegenvorschlagAction(svAktionModal.termin.id, filledSlots)
+    setSvAktionSaving(false)
+    if (!result.success) { setSvAktionError(result.error ?? 'Fehler'); return }
+    setSvAktionModal(null)
+    setGegSlots([{ datum: '', uhrzeit: '10:00' }])
+    router.refresh()
+  }
 
   // Fetch 7-day weather forecast
   useEffect(() => {
@@ -154,24 +214,41 @@ export default function SVKalenderClient({
                       const time = fall.sv_termin ? format(new Date(fall.sv_termin), 'HH:mm') : ''
                       const overdue = fall.sv_termin && isBefore(new Date(fall.sv_termin), startOfDay(new Date()))
                       const isReserviert = fall.gutachter_termin_status === 'reserviert'
+                      // KFZ-192: Zugehörigen gutachter_termine Eintrag finden
+                      const gtTermin = terminMapByFall[fall.id]
+                      const darfAblehnen = gtTermin && kannTerminAblehnen(gtTermin) && isReserviert
                       return (
-                        <Link
-                          key={fall.id}
-                          href={`/gutachter/fall/${fall.id}`}
-                          className={`block px-2 py-1.5 rounded-lg text-[10px] leading-tight transition-colors ${
-                            overdue
-                              ? 'bg-red-50/80 text-red-300 hover:bg-red-900/80'
-                              : isReserviert
-                                ? 'bg-amber-50 text-amber-600 hover:bg-amber-100'
-                                : 'bg-[#4573A2]/10 text-[#7BA3CC] hover:bg-[#0D1B3E]/80'
-                          }`}
-                        >
-                          <div className="font-medium">{time}{isReserviert && <span className="ml-1 text-[8px] opacity-70">(reserviert)</span>}</div>
-                          <div className="truncate">{fall.fall_nummer ?? fall.id.slice(0, 8)}</div>
-                          {fall.lead_id && (
-                            <div className="truncate text-[9px] opacity-70">{leadMap[fall.lead_id] ?? ''}</div>
+                        <div key={fall.id} className="space-y-0.5">
+                          <Link
+                            href={`/gutachter/fall/${fall.id}`}
+                            className={`block px-2 py-1.5 rounded-lg text-[10px] leading-tight transition-colors ${
+                              overdue
+                                ? 'bg-red-50/80 text-red-300 hover:bg-red-900/80'
+                                : isReserviert
+                                  ? 'bg-amber-50 text-amber-600 hover:bg-amber-100'
+                                  : 'bg-[#4573A2]/10 text-[#7BA3CC] hover:bg-[#0D1B3E]/80'
+                            }`}
+                          >
+                            <div className="font-medium">{time}{isReserviert && <span className="ml-1 text-[8px] opacity-70">(reserviert)</span>}</div>
+                            <div className="truncate">{fall.fall_nummer ?? fall.id.slice(0, 8)}</div>
+                            {fall.lead_id && (
+                              <div className="truncate text-[9px] opacity-70">{leadMap[fall.lead_id] ?? ''}</div>
+                            )}
+                          </Link>
+                          {/* KFZ-192: Ablehnen/Gegenvorschlag Buttons (nur wenn noch möglich) */}
+                          {darfAblehnen && (
+                            <div className="flex gap-0.5">
+                              <button
+                                onClick={() => { setSvAktionModal({ type: 'gegenvorschlag', termin: gtTermin }); setGegSlots([{ datum: '', uhrzeit: '10:00' }]); setSvAktionError(null) }}
+                                className="flex-1 text-[8px] px-1 py-0.5 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded transition-colors"
+                              >Vorschlag</button>
+                              <button
+                                onClick={() => { setSvAktionModal({ type: 'ablehnen', termin: gtTermin }); setAblehnenGrund(''); setSvAktionError(null) }}
+                                className="flex-1 text-[8px] px-1 py-0.5 bg-red-50 text-red-500 hover:bg-red-100 rounded transition-colors"
+                              >Ablehnen</button>
+                            </div>
                           )}
-                        </Link>
+                        </div>
                       )
                     })}
                   </div>
@@ -254,6 +331,98 @@ export default function SVKalenderClient({
                     className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[#1E3A5F] hover:bg-[#4573A2] text-white transition-colors disabled:opacity-40"
                   >
                     {saving ? 'Wird gesetzt...' : 'Speichern'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* KFZ-192: Ablehnen Modal */}
+        {svAktionModal?.type === 'ablehnen' && (
+          <>
+            <div className="fixed inset-0 bg-black/60 z-50" onClick={() => setSvAktionModal(null)} />
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-sm p-5" onClick={e => e.stopPropagation()}>
+                <h2 className="text-gray-900 font-semibold mb-1 text-red-600">Termin ablehnen</h2>
+                <p className="text-gray-500 text-xs mb-4">
+                  Bitte geben Sie einen Grund an (optional). Dieser wird dem Admin mitgeteilt.
+                </p>
+                <textarea
+                  value={ablehnenGrund}
+                  onChange={e => setAblehnenGrund(e.target.value)}
+                  placeholder="Ablehnungsgrund (z.B. Terminkonflikt, Krankheit ...)"
+                  rows={3}
+                  className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-300 mb-4 resize-none"
+                />
+                {svAktionError && <p className="text-red-400 text-xs mb-3">{svAktionError}</p>}
+                <div className="flex gap-2">
+                  <button onClick={() => setSvAktionModal(null)} className="flex-1 py-2.5 rounded-xl text-sm text-gray-500 hover:bg-gray-100 transition-colors">
+                    Abbrechen
+                  </button>
+                  <button
+                    onClick={handleSvAblehnen}
+                    disabled={svAktionSaving}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-red-600 hover:bg-red-700 text-white transition-colors disabled:opacity-40"
+                  >
+                    {svAktionSaving ? 'Wird abgelehnt...' : 'Ablehnen'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* KFZ-192: Gegenvorschlag Modal */}
+        {svAktionModal?.type === 'gegenvorschlag' && (
+          <>
+            <div className="fixed inset-0 bg-black/60 z-50" onClick={() => setSvAktionModal(null)} />
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-sm p-5" onClick={e => e.stopPropagation()}>
+                <h2 className="text-gray-900 font-semibold mb-1">Alternative Termine vorschlagen</h2>
+                <p className="text-gray-500 text-xs mb-4">
+                  Schlagen Sie 1–3 alternative Termine vor.
+                </p>
+                <div className="space-y-2 mb-4">
+                  {gegSlots.map((slot, idx) => (
+                    <div key={idx} className="flex gap-2">
+                      <input
+                        type="date"
+                        value={slot.datum}
+                        onChange={e => setGegSlots(prev => prev.map((s, i) => i === idx ? { ...s, datum: e.target.value } : s))}
+                        className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+                      />
+                      <input
+                        type="time"
+                        value={slot.uhrzeit}
+                        onChange={e => setGegSlots(prev => prev.map((s, i) => i === idx ? { ...s, uhrzeit: e.target.value } : s))}
+                        className="w-24 bg-gray-100 border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+                      />
+                      {gegSlots.length > 1 && (
+                        <button onClick={() => setGegSlots(prev => prev.filter((_, i) => i !== idx))} className="text-gray-400 hover:text-red-500 text-xs px-1">✕</button>
+                      )}
+                    </div>
+                  ))}
+                  {gegSlots.length < 3 && (
+                    <button
+                      onClick={() => setGegSlots(prev => [...prev, { datum: '', uhrzeit: '10:00' }])}
+                      className="text-xs text-[#4573A2] hover:underline mt-1"
+                    >
+                      + Weiteren Termin hinzufügen
+                    </button>
+                  )}
+                </div>
+                {svAktionError && <p className="text-red-400 text-xs mb-3">{svAktionError}</p>}
+                <div className="flex gap-2">
+                  <button onClick={() => setSvAktionModal(null)} className="flex-1 py-2.5 rounded-xl text-sm text-gray-500 hover:bg-gray-100 transition-colors">
+                    Abbrechen
+                  </button>
+                  <button
+                    onClick={handleSvGegenvorschlag}
+                    disabled={svAktionSaving}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-amber-500 hover:bg-amber-600 text-white transition-colors disabled:opacity-40"
+                  >
+                    {svAktionSaving ? 'Wird gesendet...' : 'Vorschlag senden'}
                   </button>
                 </div>
               </div>

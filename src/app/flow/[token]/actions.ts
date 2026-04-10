@@ -307,6 +307,8 @@ export async function signSAandCreateFall(
       sv_zugewiesen_am: svIdFromTermin ? new Date().toISOString() : null,
       gutachter_termin_status: lead.gutachter_termin ? 'reserviert' : null,
       schadenfall_typ: lead.schadenfall_typ,
+      // KFZ-192: service_typ aus Lead kopieren
+      service_typ: lead.service_typ ?? 'komplett',
       kunden_konstellation: lead.kunden_konstellation,
       // KFZ-154: Spezifikation + Schadenart fuer Dispatcher-Match
       spezifikation: lead.spezifikation ?? null,
@@ -365,25 +367,47 @@ export async function signSAandCreateFall(
     .single()
   if (fallErr || !fall) throw new Error(`Fall-Erstellung fehlgeschlagen: ${fallErr?.message}`)
 
-  // 5. Termin von 'reserviert' auf 'bestaetigt' upgraden (SA unterschrieben = bestätigt)
+  // 5. KFZ-192: Termin-State-Machine basierend auf service_typ
   if (lead.gutachter_termin) {
-    // gutachter_termine: reserviert → bestaetigt
-    const { data: upgradedTermine } = await admin.from('gutachter_termine')
-      .update({ status: 'bestaetigt', fall_id: fall.id })
-      .eq('lead_id', leadId)
-      .eq('status', 'reserviert')
-      .select('id')
+    const serviceTyp = lead.service_typ ?? 'komplett'
 
-    // KFZ-136: Reminder generieren fuer bestaetigen Termin
-    try {
-      const { generateReminderForTermin } = await import('@/lib/reminders/generate')
-      for (const t of upgradedTermine ?? []) { await generateReminderForTermin(t.id) }
-    } catch (err) { console.error('[KFZ-136] Reminder-Gen:', err) }
+    if (serviceTyp === 'nur_gutachter') {
+      // nur_gutachter: SA unterschrieben = sofort verbindlich bestätigt (keine Vollmacht nötig)
+      const { data: upgradedTermine, error: upErr } = await admin.from('gutachter_termine')
+        .update({ status: 'bestaetigt', fall_id: fall.id })
+        .eq('lead_id', leadId)
+        .eq('status', 'reserviert')
+        .select('id')
 
-    // Fall: gutachter_termin_status → bestaetigt
-    await admin.from('faelle')
-      .update({ gutachter_termin_status: 'bestaetigt' })
-      .eq('id', fall.id)
+      if (upErr) console.error('[KFZ-192] Termin-Upgrade (nur_gutachter):', upErr.message)
+
+      // KFZ-192: bestaetigeTermin aufrufen (setzt final_verbindlich_ab + Timeline)
+      try {
+        const { bestaetigeTermin } = await import('@/lib/termine/bestaetigung')
+        for (const t of upgradedTermine ?? []) { await bestaetigeTermin(t.id) }
+      } catch (err) { console.error('[KFZ-192] bestaetigeTermin:', err) }
+
+      // KFZ-136: Reminder generieren
+      try {
+        const { generateReminderForTermin } = await import('@/lib/reminders/generate')
+        for (const t of upgradedTermine ?? []) { await generateReminderForTermin(t.id) }
+      } catch (err) { console.error('[KFZ-136] Reminder-Gen:', err) }
+
+      await admin.from('faelle')
+        .update({ gutachter_termin_status: 'bestaetigt' })
+        .eq('id', fall.id)
+    } else {
+      // komplett: SA unterschrieben → Termin bleibt 'reserviert', wartet auf Vollmacht
+      await admin.from('gutachter_termine')
+        .update({ fall_id: fall.id })
+        .eq('lead_id', leadId)
+        .eq('status', 'reserviert')
+
+      // Fall: gutachter_termin_status bleibt reserviert
+      await admin.from('faelle')
+        .update({ gutachter_termin_status: 'reserviert' })
+        .eq('id', fall.id)
+    }
   }
 
   // 6. Lead-Status updaten
@@ -517,6 +541,57 @@ export async function signSAandCreateFall(
     console.error('[signSAandCreateFall] FEHLER:', err)
     throw err instanceof Error ? err : new Error(String(err))
   }
+}
+
+/**
+ * KFZ-192: Vollmacht unterschrieben → Termin bestätigen (nur für service_typ='komplett').
+ * Wird aufgerufen nachdem Kunde Vollmacht unterschrieben hat.
+ */
+export async function confirmVollmacht(fallId: string): Promise<void> {
+  const admin = createAdminClient()
+
+  // Fall laden, um service_typ zu prüfen
+  const { data: fall, error: fallErr } = await admin
+    .from('faelle')
+    .select('id, service_typ')
+    .eq('id', fallId)
+    .single()
+
+  if (fallErr || !fall) throw new Error('Fall nicht gefunden')
+
+  // Nur für 'komplett' — bei 'nur_gutachter' wurde Termin bereits bei SA bestätigt
+  if ((fall.service_typ ?? 'komplett') !== 'komplett') return
+
+  // Aktiven Termin finden (status='reserviert')
+  const { data: termin, error: terminErr } = await admin
+    .from('gutachter_termine')
+    .select('id')
+    .eq('fall_id', fallId)
+    .eq('status', 'reserviert')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (terminErr) {
+    console.error('[confirmVollmacht] Termin-Query:', terminErr.message)
+    return
+  }
+  if (!termin) return // Kein Termin vorhanden
+
+  // Termin bestätigen
+  const { bestaetigeTermin } = await import('@/lib/termine/bestaetigung')
+  await bestaetigeTermin(termin.id)
+
+  // Fall: gutachter_termin_status → bestaetigt
+  await admin.from('faelle')
+    .update({ gutachter_termin_status: 'bestaetigt', vollmacht_unterschrieben: true, vollmacht_datum: new Date().toISOString() })
+    .eq('id', fallId)
+
+  // KFZ-136: Reminder generieren
+  try {
+    const { generateReminderForTermin } = await import('@/lib/reminders/generate')
+    await generateReminderForTermin(termin.id)
+  } catch (err) { console.error('[KFZ-136] Reminder-Gen nach Vollmacht:', err) }
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

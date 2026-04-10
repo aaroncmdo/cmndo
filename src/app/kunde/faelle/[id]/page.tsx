@@ -65,10 +65,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const { getChatTeilnehmer } = await import('@/lib/chatGruppe')
     const chatTeilnehmer = await getChatTeilnehmer(id)
 
-    // KFZ-134: Aktiven gutachter_termine Eintrag laden
+    // KFZ-134 + KFZ-192: Aktiven gutachter_termine Eintrag laden (inkl. sv_vorgeschlagene_slots)
     const { data: aktiverTermin } = await admin
       .from('gutachter_termine')
-      .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, sv_id')
+      .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, sv_id, sv_vorgeschlagene_slots')
       .eq('fall_id', id)
       .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
       .order('created_at', { ascending: false })

@@ -191,6 +191,7 @@ export default async function LeadDetailPage({
                 vollmacht_datum: lead.vollmacht_datum ?? null,
                 mandatstyp: lead.mandatstyp ?? null,
                 wa_gesendet: lead.wa_gesendet ?? false,
+                service_typ: (lead.service_typ as 'komplett' | 'nur_gutachter' | null) ?? null,
                 kennzeichen: lead.kennzeichen ?? null,
                 fahrzeug_hersteller: lead.fahrzeug_hersteller ?? null,
                 fahrzeug_modell: lead.fahrzeug_modell ?? null,

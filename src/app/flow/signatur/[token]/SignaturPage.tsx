@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { CheckIcon, RotateCcwIcon } from 'lucide-react'
+import { confirmVollmacht } from '@/app/flow/[token]/actions'
 
 // ─── Rechtstexte ──────────────────────────────────────────────────────────────
 
@@ -79,6 +80,11 @@ export default function SignaturPage({ fallId }: { fallId: string }) {
         })
         .eq('id', fallId)
       if (e3) throw new Error(e3.message)
+
+      // KFZ-192: Termin bestätigen wenn service_typ='komplett'
+      try {
+        await confirmVollmacht(fallId)
+      } catch (err) { console.error('[KFZ-192] confirmVollmacht:', err) }
 
       setStep('done')
     } catch (err) {

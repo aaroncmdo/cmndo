@@ -21,6 +21,16 @@ export default async function SVKalenderPage() {
     .not('status', 'in', '("abgeschlossen","storniert")')
     .order('sv_termin', { ascending: true })
 
+  // KFZ-192: gutachter_termine mit final_verbindlich_ab laden (für Ablehnen/Gegenvorschlag)
+  const fallIds = (faelle ?? []).map(f => f.id).filter(Boolean)
+  const { data: termine } = fallIds.length > 0
+    ? await supabase
+        .from('gutachter_termine')
+        .select('id, fall_id, status, final_verbindlich_ab')
+        .in('fall_id', fallIds)
+        .in('status', ['reserviert', 'bestaetigt'])
+    : { data: [] }
+
   // Fetch lead names
   const leadIds = [...new Set((faelle ?? []).map(f => f.lead_id).filter(Boolean))]
   const { data: leads } = leadIds.length > 0
@@ -40,6 +50,12 @@ export default async function SVKalenderPage() {
       gcalConnected={!!sv.gcal_connected}
       standortLat={sv.standort_lat ? Number(sv.standort_lat) : null}
       standortLng={sv.standort_lng ? Number(sv.standort_lng) : null}
+      termine={(termine ?? []).map(t => ({
+        id: t.id as string,
+        fall_id: t.fall_id as string,
+        status: t.status as string,
+        final_verbindlich_ab: t.final_verbindlich_ab as string | null,
+      }))}
     />
   )
 }
