@@ -23,6 +23,19 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
   if (!user) throw new Error('Nicht angemeldet')
 
   const now = new Date().toISOString()
+
+  // KFZ-153: Block status change to regulierung/abgeschlossen without Klassifizierung
+  if (newStatus === 'regulierung' || newStatus === 'abgeschlossen') {
+    const { data: klassifizierung } = await serviceClient
+      .from('regulierungs_klassifizierung')
+      .select('id')
+      .eq('fall_id', fallId)
+      .maybeSingle()
+    if (!klassifizierung) {
+      throw new Error('Regulierungs-Klassifizierung fehlt. Bitte im Tab "Abrechnung" die Pflicht-Klassifizierung ausfüllen.')
+    }
+  }
+
   const updateData: Record<string, unknown> = {
     status: newStatus,
     updated_at: now,

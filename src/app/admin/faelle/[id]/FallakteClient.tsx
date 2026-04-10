@@ -29,6 +29,7 @@ import {
   deleteFall,
   deactivateFall,
   reactivateFall,
+  saveRegulierungsKlassifizierung,
 } from './actions'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import {
@@ -522,6 +523,21 @@ type Forderungsposition = {
   erstellt_am: string
 }
 
+type RegulierungsKlassifizierung = {
+  id: string
+  fall_id: string
+  regulierungs_status: string
+  kuerzungsgrund: string | null
+  kuerzung_betrag_netto: number | null
+  reguliert_betrag_netto: number | null
+  geltend_gemacht_netto: number | null
+  versicherer: string | null
+  begruendung_versicherer: string | null
+  notiz_intern: string | null
+  erfasst_am: string
+  updated_am: string
+}
+
 type Termin = {
   id: string
   typ: string
@@ -579,6 +595,7 @@ export default function FallakteClient({
   stepperState?: import('@/lib/fall/stepper-state').StepperState | null
   fallFinanzen?: import('@/lib/finance/fall-finanzen').FallFinanzen | null
   fallDokumente?: FallDokumentRow[]
+  regulierungsKlassifizierung?: RegulierungsKlassifizierung | null
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -792,7 +809,7 @@ export default function FallakteClient({
         )}
         {activeTab === 'abrechnung' && (
           <div id="abrechnung-section">
-          <TabAbrechnung fall={fall} forderungspositionen={forderungspositionen} onRefresh={() => router.refresh()} />
+          <TabAbrechnung fall={fall} forderungspositionen={forderungspositionen} regulierungsKlassifizierung={regulierungsKlassifizierung ?? null} onRefresh={() => router.refresh()} />
           </div>
         )}
         {activeTab === 'tasks' && (
@@ -2977,9 +2994,22 @@ function TabChat({
 
 // ─── TAB 9: Abrechnung ──────────────────────────────────────────────────────
 
-function TabAbrechnung({ fall, forderungspositionen, onRefresh }: { fall: Fall; forderungspositionen: Forderungsposition[]; onRefresh: () => void }) {
+function TabAbrechnung({ fall, forderungspositionen, regulierungsKlassifizierung, onRefresh }: { fall: Fall; forderungspositionen: Forderungsposition[]; regulierungsKlassifizierung: RegulierungsKlassifizierung | null; onRefresh: () => void }) {
   const regulierungBetrag = fall.regulierung_betrag ?? 0
   const [showZahlung, setShowZahlung] = useState(false)
+
+  // KFZ-153: Regulierungs-Klassifizierung State
+  const [rkStatus, setRkStatus] = useState(regulierungsKlassifizierung?.regulierungs_status ?? '')
+  const [rkGrund, setRkGrund] = useState(regulierungsKlassifizierung?.kuerzungsgrund ?? '')
+  const [rkGeltend, setRkGeltend] = useState(regulierungsKlassifizierung?.geltend_gemacht_netto?.toString() ?? '')
+  const [rkReguliert, setRkReguliert] = useState(regulierungsKlassifizierung?.reguliert_betrag_netto?.toString() ?? '')
+  const [rkVersicherer, setRkVersicherer] = useState(regulierungsKlassifizierung?.versicherer ?? '')
+  const [rkBegruendung, setRkBegruendung] = useState(regulierungsKlassifizierung?.begruendung_versicherer ?? '')
+  const [rkNotiz, setRkNotiz] = useState(regulierungsKlassifizierung?.notiz_intern ?? '')
+  const [rkSaving, setRkSaving] = useState(false)
+  const [rkSaved, setRkSaved] = useState(false)
+
+  const rkKuerzung = (parseFloat(rkGeltend) || 0) - (parseFloat(rkReguliert) || 0)
   const [zDatum, setZDatum] = useState(new Date().toISOString().slice(0, 10))
   const [zBetrag, setZBetrag] = useState('')
   const [zRef, setZRef] = useState('')
@@ -3015,6 +3045,116 @@ function TabAbrechnung({ fall, forderungspositionen, onRefresh }: { fall: Fall; 
 
   return (
     <div className="space-y-4">
+      {/* KFZ-153: Pflicht-Klassifizierung */}
+      <Section title="Regulierungs-Klassifizierung (Pflicht)">
+        <div className="space-y-3">
+          {regulierungsKlassifizierung && (
+            <div className="flex items-center gap-2 mb-2">
+              <CheckIcon className="w-4 h-4 text-green-500" />
+              <span className="text-xs text-green-600 font-medium">Klassifizierung erfasst am {new Date(regulierungsKlassifizierung.updated_am).toLocaleDateString('de-DE')}</span>
+            </div>
+          )}
+          {!regulierungsKlassifizierung && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 mb-2">
+              <p className="text-xs text-amber-700 font-medium">Status-Wechsel zu &quot;Regulierung&quot; oder &quot;Abgeschlossen&quot; ist erst nach Ausfuellen dieser Klassifizierung moeglich.</p>
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-gray-500 block mb-1">Regulierungs-Status *</label>
+              <select value={rkStatus} onChange={e => setRkStatus(e.target.value)}
+                className="w-full bg-white border border-gray-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-[#4573A2]">
+                <option value="">-- Bitte waehlen --</option>
+                <option value="voll_reguliert">Voll reguliert</option>
+                <option value="teilweise_reguliert">Teilweise reguliert</option>
+                <option value="abgelehnt">Abgelehnt</option>
+                <option value="ausstehend">Ausstehend</option>
+              </select>
+            </div>
+            {rkStatus && rkStatus !== 'voll_reguliert' && (
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Kuerzungsgrund *</label>
+                <select value={rkGrund} onChange={e => setRkGrund(e.target.value)}
+                  className="w-full bg-white border border-gray-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-[#4573A2]">
+                  <option value="">-- Bitte waehlen --</option>
+                  <option value="honorarkuerzung_pauschal">Honorarkuerzung pauschal</option>
+                  <option value="mithaftung_kunde">Mithaftung Kunde</option>
+                  <option value="gutachten_formaler_mangel">Gutachten formaler Mangel</option>
+                  <option value="gutachten_inhaltlicher_mangel">Gutachten inhaltlicher Mangel</option>
+                  <option value="verspaetete_meldung">Verspaetete Meldung</option>
+                  <option value="bagatelle">Bagatelle</option>
+                  <option value="verweigerung_versicherer">Verweigerung Versicherer</option>
+                  <option value="sonstiges">Sonstiges</option>
+                </select>
+              </div>
+            )}
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="text-xs text-gray-500 block mb-1">Geltend gemacht (EUR) *</label>
+              <input type="number" step="0.01" value={rkGeltend} onChange={e => setRkGeltend(e.target.value)}
+                className="w-full bg-white border border-gray-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-[#4573A2]" placeholder="0,00" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 block mb-1">Reguliert (EUR) {rkStatus !== 'abgelehnt' ? '*' : ''}</label>
+              <input type="number" step="0.01" value={rkReguliert} onChange={e => setRkReguliert(e.target.value)}
+                className="w-full bg-white border border-gray-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-[#4573A2]" placeholder="0,00" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 block mb-1">Kuerzung (auto)</label>
+              <div className={`px-3 py-2 text-sm rounded-lg border ${rkKuerzung > 0 ? 'bg-red-50 border-red-200 text-red-700' : 'bg-gray-50 border-gray-200 text-gray-700'} tabular-nums`}>
+                {rkKuerzung > 0 ? fmtEur(rkKuerzung) : '—'}
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-gray-500 block mb-1">Versicherer</label>
+              <input type="text" value={rkVersicherer} onChange={e => setRkVersicherer(e.target.value)}
+                className="w-full bg-white border border-gray-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-[#4573A2]" placeholder="z.B. Allianz, HUK..." />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 block mb-1">Begruendung Versicherer</label>
+              <input type="text" value={rkBegruendung} onChange={e => setRkBegruendung(e.target.value)}
+                className="w-full bg-white border border-gray-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-[#4573A2]" />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 block mb-1">Interne Notiz</label>
+            <textarea value={rkNotiz} onChange={e => setRkNotiz(e.target.value)} rows={2}
+              className="w-full bg-white border border-gray-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-[#4573A2] resize-none" />
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              disabled={rkSaving || !rkStatus || !rkGeltend}
+              onClick={async () => {
+                setRkSaving(true)
+                try {
+                  await saveRegulierungsKlassifizierung(fall.id, {
+                    regulierungs_status: rkStatus,
+                    kuerzungsgrund: rkStatus !== 'voll_reguliert' ? rkGrund || null : null,
+                    geltend_gemacht_netto: parseFloat(rkGeltend) || null,
+                    reguliert_betrag_netto: parseFloat(rkReguliert) || null,
+                    kuerzung_betrag_netto: rkKuerzung > 0 ? rkKuerzung : null,
+                    versicherer: rkVersicherer || null,
+                    begruendung_versicherer: rkBegruendung || null,
+                    notiz_intern: rkNotiz || null,
+                  })
+                  setRkSaved(true)
+                  setTimeout(() => setRkSaved(false), 3000)
+                  onRefresh()
+                } catch { /* */ }
+                setRkSaving(false)
+              }}
+              className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors"
+            >
+              {rkSaving ? 'Speichert...' : 'Klassifizierung speichern'}
+            </button>
+            {rkSaved && <span className="text-xs text-green-600 font-medium">Gespeichert</span>}
+          </div>
+        </div>
+      </Section>
+
       {/* Forderungsaufstellung */}
       <Section title={`Forderungsaufstellung${hasOcrPositionen ? ' (OCR)' : ''}`}>
         {hasOcrPositionen ? (

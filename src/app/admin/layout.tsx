@@ -43,7 +43,7 @@ export default async function AdminLayout({
             BUG-98: PageContainer gibt Desktop ~15-20 % horizontale Marge,
             Tablet quer großflächig, Mobile fast volle Breite. Kein py,
             damit Sticky-Header-Pattern in Pages weiter funktionieren. */}
-        <main id="main-content" role="main" className="flex-1 min-h-0 overflow-hidden pb-16 md:pb-0">
+        <main id="main-content" role="main" className="flex-1 min-h-0 overflow-y-auto pb-16 md:pb-0">
           <PageContainer className="h-full">{children}</PageContainer>
         </main>
       </div>

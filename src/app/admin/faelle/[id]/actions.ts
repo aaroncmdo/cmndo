@@ -1063,3 +1063,40 @@ export async function reactivateFall(fallId: string) {
   revalidatePath(`/admin/faelle/${fallId}`)
   revalidatePath('/admin/faelle')
 }
+
+// ─── KFZ-153: Regulierungs-Klassifizierung ─────────────────────────────────
+
+export async function saveRegulierungsKlassifizierung(fallId: string, data: {
+  regulierungs_status: string
+  kuerzungsgrund?: string | null
+  kuerzung_betrag_netto?: number | null
+  reguliert_betrag_netto?: number | null
+  geltend_gemacht_netto?: number | null
+  versicherer?: string | null
+  begruendung_versicherer?: string | null
+  notiz_intern?: string | null
+}) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const { error } = await supabase
+    .from('regulierungs_klassifizierung')
+    .upsert({
+      fall_id: fallId,
+      regulierungs_status: data.regulierungs_status,
+      kuerzungsgrund: data.kuerzungsgrund || null,
+      kuerzung_betrag_netto: data.kuerzung_betrag_netto ?? null,
+      reguliert_betrag_netto: data.reguliert_betrag_netto ?? null,
+      geltend_gemacht_netto: data.geltend_gemacht_netto ?? null,
+      versicherer: data.versicherer || null,
+      begruendung_versicherer: data.begruendung_versicherer || null,
+      notiz_intern: data.notiz_intern || null,
+      erfasst_von: user.id,
+      updated_am: new Date().toISOString(),
+    }, { onConflict: 'fall_id' })
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath(`/admin/faelle/${fallId}`)
+}
