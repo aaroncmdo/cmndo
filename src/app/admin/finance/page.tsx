@@ -585,7 +585,7 @@ export default async function FinancePage() {
   // ── Gutachter-Abrechnungsübersicht ──
   const { data: svUebersicht } = await supabase
     .from('sachverstaendige')
-    .select('id, paket, guthaben, paket_faelle_genutzt, paket_faelle_gesamt, profile_id')
+    .select('id, paket, werbebudget_guthaben_netto, paket_faelle_genutzt, paket_faelle_gesamt, profile_id')
     .eq('ist_aktiv', true)
 
   // Fetch profile names for SVs
@@ -613,7 +613,7 @@ export default async function FinancePage() {
       id: s.id,
       name: profile ? `${profile.vorname ?? ''} ${profile.nachname ?? ''}`.trim() || '—' : '—',
       paket: s.paket ?? '—',
-      guthaben: Number(s.guthaben ?? 0),
+      guthaben: Number(s.werbebudget_guthaben_netto ?? 0),
       faelleGenutzt: s.paket_faelle_genutzt ?? 0,
       faelleGesamt: s.paket_faelle_gesamt ?? 0,
       leadkostenMonat: monatKostenMap[s.id] ?? 0,

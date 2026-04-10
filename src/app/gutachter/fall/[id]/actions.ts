@@ -88,14 +88,14 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
   // ── Automatische Abrechnung ──────────────────────────────────────────────
   const { data: svData } = await supabase
     .from('sachverstaendige')
-    .select('id, guthaben, paket_faelle_genutzt, paket_faelle_gesamt')
+    .select('id, werbebudget_guthaben_netto, paket_faelle_genutzt, paket_faelle_gesamt')
     .eq('id', sv.id)
     .single()
 
   if (svData) {
     const hatPaket = (svData.paket_faelle_genutzt ?? 0) < (svData.paket_faelle_gesamt ?? 0)
     const leadpreis = berechneLeadpreis(betrag, hatPaket)
-    const guthabenVorher = Number(svData.guthaben ?? 0)
+    const guthabenVorher = Number(svData.werbebudget_guthaben_netto ?? 0)
     const guthabenNachher = guthabenVorher - leadpreis
     const monat = new Date().toISOString().slice(0, 7) // YYYY-MM
 
