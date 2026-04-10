@@ -366,14 +366,15 @@ async function convertLeadToFall(
       gegner_name: lead.gegner_name ?? null,
       gegner_versicherung: lead.gegner_versicherung ?? null,
       gegner_kennzeichen: lead.gegner_kennzeichen ?? null,
-      eigene_versicherung: lead.eigene_versicherung ?? null,
-      eigene_policennr: lead.eigene_policennr ?? null,
+      // BUG-58 Mapping: Lead-Spalten → korrekte Faelle-Spalten
+      versicherung_name: lead.eigene_versicherung ?? null,
+      versicherung_schaden_nr: lead.eigene_policennr ?? null,
       polizei_aktenzeichen: lead.polizei_aktenzeichen ?? null,
       schadensursache: lead.schadensursache ?? null,
-      leasing_geber: lead.leasing_geber ?? null,
-      finanzierung_bank: lead.finanzierung_bank ?? null,
+      leasinggeber_name: lead.leasing_geber ?? null,
+      bank_name: lead.finanzierung_bank ?? null,
       firma_name: lead.firma_name ?? null,
-      firma_ustid: lead.firma_ustid ?? null,
+      ust_id: lead.firma_ustid ?? null,
       halter_name: lead.halter_name ?? null,
       // KFZ-146: Erweiterte Fahrzeugdaten
       fahrzeug_farbe: lead.fahrzeug_farbe ?? null,
@@ -381,9 +382,13 @@ async function convertLeadToFall(
       fin_vin: lead.fin ?? null,
       kilometerstand: lead.kilometerstand ?? null,
       unfallhergang: lead.unfallhergang ?? null,
-      // KFZ-146: Schadens-Adresse vom Fahrzeugstandort
+      // KFZ-140: Fehlende Felder aus signSAandCreateFall uebernehmen
+      schadens_datum: lead.unfalldatum ?? null,
       schadens_adresse: lead.fahrzeug_standort_adresse ?? null,
       schadens_plz: lead.fahrzeug_standort_plz ?? null,
+      schadens_ort: lead.unfallort ?? null,
+      polizei_vor_ort: lead.polizei_vor_ort ?? null,
+      wunschtermin: lead.wunschtermin ?? null,
       // KFZ-146: Lead-Source uebernehmen
       source_channel: lead.source_channel ?? null,
       source_domain: lead.source_domain ?? null,
