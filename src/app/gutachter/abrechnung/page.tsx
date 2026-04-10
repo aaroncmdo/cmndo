@@ -31,10 +31,9 @@ export default async function AbrechnungPage() {
     paket_faelle_gesamt: number | null
     paket_umkreis_km: number | null
     guthaben: number | null
-    guthaben_initial: number | null
     anzahlung_betrag: number | null
-    anzahlung_bezahlt: boolean | null
-  }>(supabase, user!.id, 'id, paket, offene_faelle, max_faelle_monat, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, guthaben, guthaben_initial, anzahlung_betrag, anzahlung_bezahlt')
+    anzahlung_bezahlt_am: string | null
+  }>(supabase, user!.id, 'id, paket, offene_faelle, max_faelle_monat, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, guthaben, anzahlung_betrag, anzahlung_bezahlt_am')
 
   if (!sv) {
     return (
