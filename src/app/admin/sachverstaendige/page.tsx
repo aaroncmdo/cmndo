@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import KarteClient from '../karte/KarteClient'
 
-const BASE_SELECT = 'id, profile_id, gebiet_plz, paket, offene_faelle, max_faelle_monat, ist_aktiv, gutachter_typ, qualifikationen_neu, spezifikationen, schadenarten, onboarding_abgeschlossen, anzahlung_status, standort_adresse, standort_lat, standort_lng, lat, lng, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, radius_km, guthaben, organisation_id, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, profiles(vorname, nachname, email, telefon)'
+const BASE_SELECT = 'id, profile_id, gebiet_plz, paket, offene_faelle, max_faelle_monat, ist_aktiv, gutachter_typ, qualifikationen_neu, spezifikationen, schadenarten, onboarding_abgeschlossen, anzahlung_status, standort_adresse, standort_lat, standort_lng, lat, lng, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, radius_km, guthaben, organisation_id, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, ablehnungen_30_tage, profiles(vorname, nachname, email, telefon)'
 const EXTENDED_SELECT = BASE_SELECT.replace('organisation_id,', 'organisation_id, deaktiviert_grund, deaktiviert_am, geloescht_am,')
 
 export default async function SachverstaendigePage() {
@@ -53,6 +53,7 @@ export default async function SachverstaendigePage() {
       portalZugangFreigeschaltet: (sv.portal_zugang_freigeschaltet as boolean | null) ?? null,
       vertragUnterschrieben: (sv.vertrag_unterschrieben as boolean | null) ?? null,
       gesperrtSeit: (sv.gesperrt_seit as string | null) ?? null,
+      ablehnungen30Tage: Number(sv.ablehnungen_30_tage) || 0,
     }
   })
 

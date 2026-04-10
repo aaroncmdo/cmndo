@@ -40,18 +40,51 @@ export async function bestaetigeTermin(terminId: string) {
 
   if (tlErr) console.error('[bestaetigeTermin] Timeline-Insert:', tlErr.message)
 
-  // 4. WhatsApp T4 an Kunden (non-critical, fire & forget)
+  // 4. WhatsApp T4 an Kunden + Email S-E6 an SV (non-critical)
   try {
-    const { data: fall } = await db.from('faelle').select('lead_id').eq('id', termin.fall_id).single()
+    const { data: fall } = await db.from('faelle').select('lead_id, besichtigungsort_adresse').eq('id', termin.fall_id).single()
+    const datum = new Date(termin.start_zeit).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
+    const uhrzeit = new Date(termin.start_zeit).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+
+    // WhatsApp T4 an Kunden
     if (fall?.lead_id) {
       const { data: lead } = await db.from('leads').select('telefon, vorname').eq('id', fall.lead_id).single()
       if (lead?.telefon) {
         const { sendWhatsApp } = await import('@/lib/whatsapp')
-        const datum = new Date(termin.start_zeit).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
-        const uhrzeit = new Date(termin.start_zeit).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
         await sendWhatsApp(lead.telefon,
           `Hallo ${lead.vorname ?? 'Kunde'}, Ihr Begutachtungstermin am ${datum} um ${uhrzeit} ist jetzt verbindlich bestätigt. Bitte stellen Sie sicher, dass das Fahrzeug zugänglich ist.\n\nIhr Claimondo-Team`
         )
+      }
+
+      // Email S-E6 an SV
+      if (termin.sv_id) {
+        const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.sv_id).single()
+        if (sv?.profile_id) {
+          const { data: svProfile } = await db.from('profiles').select('email, vorname').eq('id', sv.profile_id).single()
+          if (svProfile?.email) {
+            const { render } = await import('@react-email/render')
+            const { SvTerminBestaetigungEmail, subject } = await import('@/lib/email/google/templates/SvTerminBestaetigung')
+            const { sendEmail } = await import('@/lib/email/google/client')
+            const kundenName = lead ? `${lead.vorname ?? ''}`.trim() || 'Kunde' : 'Kunde'
+            const props = {
+              svVorname: svProfile.vorname ?? 'Partner',
+              fallNummer: termin.fall_id.slice(0, 8),
+              terminDatum: datum,
+              terminUhrzeit: uhrzeit,
+              kundenName,
+              adresse: fall?.besichtigungsort_adresse ?? '—',
+            }
+            const html = await render(SvTerminBestaetigungEmail(props))
+            await sendEmail({
+              to: svProfile.email,
+              subject: subject(props),
+              html,
+              fallId: termin.fall_id,
+              empfaengerTyp: 'sv',
+              template: 'sv_termin_bestaetigung',
+            })
+          }
+        }
       }
     }
   } catch { /* non-critical */ }

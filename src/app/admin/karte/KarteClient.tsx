@@ -42,6 +42,7 @@ interface SV {
   portalZugangFreigeschaltet?: boolean | null
   vertragUnterschrieben?: boolean | null
   gesperrtSeit?: string | null
+  ablehnungen30Tage?: number
 }
 
 interface Fall {
@@ -402,6 +403,11 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
                 </div>
                 <div className="flex items-center justify-between gap-2 mt-1 ml-4.5">
                   <span className="text-gray-400 text-[10px]">{PAKET_LABEL[sv.paket] ?? sv.paket} · {sv.offeneFaelle}/{sv.maxFaelleMonat}</span>
+                  {(sv.ablehnungen30Tage ?? 0) > 0 && (
+                    <span className={`text-[8px] px-1 py-0.5 rounded font-medium ${(sv.ablehnungen30Tage ?? 0) > 2 ? 'bg-red-50 text-red-600' : (sv.ablehnungen30Tage ?? 0) > 1 ? 'bg-amber-50 text-amber-600' : 'text-gray-400'}`}>
+                      Abl: {sv.ablehnungen30Tage}
+                    </span>
+                  )}
                   <span className={`inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-medium shrink-0 ${status.bg} ${status.text}`}>
                     <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
                     {status.label}
