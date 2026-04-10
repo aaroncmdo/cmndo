@@ -7,8 +7,8 @@
 // Aaron setzt die Werte in Vercel nachdem Twilio die Templates genehmigt hat.
 
 export type TemplateName =
-  | 'fall_eroeffnet'
   | 'flowlink_versand'
+  | 'fall_eroeffnet'
   | 'sv_beauftragt'
   | 'termin_bestaetigt'
   | 'reminder_24h'
@@ -40,33 +40,34 @@ type TemplateConfig = {
   beschreibung: string
 }
 
+// Variable-Counts abgeglichen mit Notion-Page 33e1da4c-9124-817b (10.04.2026)
 export const TEMPLATE_CONFIGS: Record<TemplateName, TemplateConfig> = {
-  fall_eroeffnet:         { envKey: 'TWILIO_TPL_FALL_EROEFFNET', variableCount: 2, beschreibung: 'Fall eroeffnet (Kunde-Vorname, Mandatsnr)' },
-  flowlink_versand:       { envKey: 'TWILIO_TPL_FLOWLINK_VERSAND', variableCount: 2, beschreibung: 'Flow-Link an Kunde (Vorname, Link)' },
-  sv_beauftragt:          { envKey: 'TWILIO_TPL_SV_BEAUFTRAGT', variableCount: 2, beschreibung: 'SV beauftragt (Kunde-Vorname, SV-Vorname)' },
-  termin_bestaetigt:      { envKey: 'TWILIO_TPL_TERMIN_BESTAETIGT', variableCount: 3, beschreibung: 'Termin bestaetigt (Vorname, SV-Name, Datum+Uhrzeit)' },
-  reminder_24h:           { envKey: 'TWILIO_TPL_REMINDER_24H', variableCount: 2, beschreibung: '24h Erinnerung (Vorname, Uhrzeit)' },
-  reminder_2h:            { envKey: 'TWILIO_TPL_REMINDER_2H', variableCount: 2, beschreibung: '2h Erinnerung (Vorname, Uhrzeit)' },
-  sv_tagesroute:          { envKey: 'TWILIO_TPL_SV_TAGESROUTE', variableCount: 2, beschreibung: 'SV auf dem Weg (Vorname, ETA)' },
-  gutachten_fertig:       { envKey: 'TWILIO_TPL_GUTACHTEN_FERTIG', variableCount: 1, beschreibung: 'Gutachten fertig (Vorname)' },
-  kanzlei_uebergabe:      { envKey: 'TWILIO_TPL_KANZLEI_UEBERGABE', variableCount: 1, beschreibung: 'An Kanzlei uebergeben (Vorname)' },
-  as_gesendet:            { envKey: 'TWILIO_TPL_AS_GESENDET', variableCount: 1, beschreibung: 'Anschlussschreiben gesendet (Vorname)' },
-  regulierung_angekuendigt: { envKey: 'TWILIO_TPL_REGULIERUNG_ANGEKUENDIGT', variableCount: 1, beschreibung: 'Regulierung angekuendigt (Vorname)' },
-  zahlung_eingegangen:    { envKey: 'TWILIO_TPL_ZAHLUNG_EINGEGANGEN', variableCount: 2, beschreibung: 'Zahlung eingegangen (Vorname, Betrag)' },
-  fall_abgeschlossen:     { envKey: 'TWILIO_TPL_FALL_ABGESCHLOSSEN', variableCount: 1, beschreibung: 'Fall abgeschlossen (Vorname)' },
-  eskalation_tag14:       { envKey: 'TWILIO_TPL_ESKALATION_TAG14', variableCount: 1, beschreibung: 'VS Eskalation 14 Tage (Vorname)' },
-  eskalation_tag28:       { envKey: 'TWILIO_TPL_ESKALATION_TAG28', variableCount: 1, beschreibung: 'VS Eskalation 28 Tage (Vorname)' },
-  eskalation_tag42:       { envKey: 'TWILIO_TPL_ESKALATION_TAG42', variableCount: 1, beschreibung: 'VS Eskalation 42 Tage (Vorname)' },
-  chat_fallback_kunde:    { envKey: 'TWILIO_TPL_CHAT_FALLBACK_KUNDE', variableCount: 1, beschreibung: 'Chat Fallback Kunde (Vorname)' },
-  chat_fallback_kb:       { envKey: 'TWILIO_TPL_CHAT_FALLBACK_KB', variableCount: 1, beschreibung: 'Chat Fallback KB (Vorname)' },
-  kuerzung_eingetragen:   { envKey: 'TWILIO_TPL_KUERZUNG_EINGETRAGEN', variableCount: 1, beschreibung: 'Kuerzung eingetragen (Vorname)' },
-  sv_losgefahren:         { envKey: 'TWILIO_TPL_SV_LOSGEFAHREN', variableCount: 2, beschreibung: 'SV losgefahren (Vorname, ETA Minuten)' },
-  sv_fast_da:             { envKey: 'TWILIO_TPL_SV_FAST_DA', variableCount: 2, beschreibung: 'SV fast da (Vorname, SV-Vorname)' },
-  sv_angekommen:          { envKey: 'TWILIO_TPL_SV_ANGEKOMMEN', variableCount: 2, beschreibung: 'SV angekommen (Vorname, SV-Vorname)' },
-  termin_storniert:       { envKey: 'TWILIO_TPL_TERMIN_STORNIERT', variableCount: 3, beschreibung: 'Termin storniert (Vorname, SV-Name, Datum)' },
-  sv_verspaetet:          { envKey: 'TWILIO_TPL_SV_VERSPAETET', variableCount: 3, beschreibung: 'SV verspaetet sich (Vorname, SV-Name, Minuten)' },
-  dokumente_nachreichen:  { envKey: 'TWILIO_TPL_DOKUMENTE_NACHREICHEN', variableCount: 3, beschreibung: 'Dokumente nachreichen (Vorname, Dok-Liste, Link)' },
-  rechnung_verfuegbar:    { envKey: 'TWILIO_TPL_RECHNUNG_VERFUEGBAR', variableCount: 2, beschreibung: 'Rechnung verfuegbar (Vorname, Link)' },
+  flowlink_versand:       { envKey: 'TWILIO_TPL_FLOWLINK_VERSAND', variableCount: 6, beschreibung: 'T1: FlowLink-Versand (Vorname, SV-Vorname, SV-Nachname, Datum, Uhrzeit, FlowLink-URL)' },
+  fall_eroeffnet:         { envKey: 'TWILIO_TPL_FALL_EROEFFNET', variableCount: 2, beschreibung: 'T2: Fall eroeffnet (Vorname, Portal-Link)' },
+  sv_beauftragt:          { envKey: 'TWILIO_TPL_SV_BEAUFTRAGT', variableCount: 3, beschreibung: 'T3: SV beauftragt (Vorname, SV-Vorname, Portal-Link)' },
+  termin_bestaetigt:      { envKey: 'TWILIO_TPL_TERMIN_BESTAETIGT', variableCount: 6, beschreibung: 'T4: Termin bestaetigt (Vorname, Datum, Uhrzeit, SV-Vorname, Adresse, Portal-Link)' },
+  reminder_24h:           { envKey: 'TWILIO_TPL_REMINDER_24H', variableCount: 4, beschreibung: 'T5: 24h Erinnerung (Vorname, SV-Vorname, Uhrzeit, Portal-Link)' },
+  reminder_2h:            { envKey: 'TWILIO_TPL_REMINDER_2H', variableCount: 3, beschreibung: 'T6: 2h Erinnerung (Vorname, SV-Vorname, Portal-Link)' },
+  sv_tagesroute:          { envKey: 'TWILIO_TPL_SV_TAGESROUTE', variableCount: 4, beschreibung: 'T7: SV Tagesroute (SV-Vorname, Anzahl-Termine, Erster-Uhrzeit, Heute-Link)' },
+  gutachten_fertig:       { envKey: 'TWILIO_TPL_GUTACHTEN_FERTIG', variableCount: 3, beschreibung: 'T8: Gutachten fertig (Vorname, Betrag, Portal-Link)' },
+  kanzlei_uebergabe:      { envKey: 'TWILIO_TPL_KANZLEI_UEBERGABE', variableCount: 2, beschreibung: 'T9: Kanzlei-Uebergabe (Vorname, Portal-Link)' },
+  as_gesendet:            { envKey: 'TWILIO_TPL_AS_GESENDET', variableCount: 2, beschreibung: 'T10: AS gesendet (Vorname, Portal-Link)' },
+  regulierung_angekuendigt: { envKey: 'TWILIO_TPL_REGULIERUNG_ANGEKUENDIGT', variableCount: 2, beschreibung: 'T11: Regulierung angekuendigt (Vorname, Portal-Link)' },
+  zahlung_eingegangen:    { envKey: 'TWILIO_TPL_ZAHLUNG_EINGEGANGEN', variableCount: 3, beschreibung: 'T12: Zahlung eingegangen (Vorname, Betrag, Portal-Link)' },
+  fall_abgeschlossen:     { envKey: 'TWILIO_TPL_FALL_ABGESCHLOSSEN', variableCount: 2, beschreibung: 'T13: Fall abgeschlossen (Vorname, Google-Review-Link)' },
+  eskalation_tag14:       { envKey: 'TWILIO_TPL_ESKALATION_TAG14', variableCount: 2, beschreibung: 'T14: Eskalation 14 Tage (Vorname, Portal-Link)' },
+  eskalation_tag28:       { envKey: 'TWILIO_TPL_ESKALATION_TAG28', variableCount: 2, beschreibung: 'T15: Eskalation 28 Tage (Vorname, Portal-Link)' },
+  eskalation_tag42:       { envKey: 'TWILIO_TPL_ESKALATION_TAG42', variableCount: 2, beschreibung: 'T16: Eskalation 42 Tage (Vorname, Portal-Link)' },
+  chat_fallback_kunde:    { envKey: 'TWILIO_TPL_CHAT_FALLBACK_KUNDE', variableCount: 3, beschreibung: 'T17: Chat Fallback Kunde (Vorname, Nachricht-Preview, Portal-Link)' },
+  chat_fallback_kb:       { envKey: 'TWILIO_TPL_CHAT_FALLBACK_KB', variableCount: 3, beschreibung: 'T18: Chat Fallback KB (KB-Vorname, Kunden-Name, Nachricht-Preview)' },
+  kuerzung_eingetragen:   { envKey: 'TWILIO_TPL_KUERZUNG_EINGETRAGEN', variableCount: 4, beschreibung: 'T19: Kuerzung eingetragen (Vorname, Kuerzungs-Betrag, Original-Betrag, Portal-Link)' },
+  sv_losgefahren:         { envKey: 'TWILIO_TPL_SV_LOSGEFAHREN', variableCount: 5, beschreibung: 'T21: SV losgefahren (Vorname, SV-Vorname, ETA-Min, Adresse, Tracking-Link)' },
+  sv_fast_da:             { envKey: 'TWILIO_TPL_SV_FAST_DA', variableCount: 2, beschreibung: 'T22: SV fast da (Vorname, SV-Vorname)' },
+  sv_angekommen:          { envKey: 'TWILIO_TPL_SV_ANGEKOMMEN', variableCount: 2, beschreibung: 'T23: SV angekommen (Vorname, SV-Vorname)' },
+  termin_storniert:       { envKey: 'TWILIO_TPL_TERMIN_STORNIERT', variableCount: 4, beschreibung: 'T24: Termin storniert (Vorname, SV-Vorname, Datum, Portal-Link)' },
+  sv_verspaetet:          { envKey: 'TWILIO_TPL_SV_VERSPAETET', variableCount: 4, beschreibung: 'T25: SV verspaetet (Vorname, SV-Vorname, Minuten, Portal-Link)' },
+  dokumente_nachreichen:  { envKey: 'TWILIO_TPL_DOKUMENTE_NACHREICHEN', variableCount: 3, beschreibung: 'T26: Dokumente nachreichen (Vorname, Dok-Liste, Portal-Link)' },
+  rechnung_verfuegbar:    { envKey: 'TWILIO_TPL_RECHNUNG_VERFUEGBAR', variableCount: 2, beschreibung: 'T27: Rechnung verfuegbar (Vorname, Portal-Link)' },
 }
 
 /**
