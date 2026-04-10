@@ -1,0 +1,133 @@
+'use client'
+
+import {
+  ArrowRightIcon, MessageSquareIcon, FileTextIcon, CalendarIcon, AlertTriangleIcon,
+  CheckCircleIcon, PhoneIcon, MailIcon, UploadIcon, ClockIcon,
+} from 'lucide-react'
+
+// KFZ-172: Activity-Feed fuer die Fall-Akte Right-Sidebar.
+// Zeigt die letzten Events des Falls aus timeline + tasks + nachrichten.
+
+export type ActivityEvent = {
+  id: string
+  typ: 'status' | 'kommunikation' | 'dokument' | 'task' | 'termin' | 'eskalation' | 'notiz'
+  titel: string
+  beschreibung?: string | null
+  erstellt_von?: string | null
+  created_at: string
+}
+
+const TYPE_CONFIG: Record<string, { icon: typeof ArrowRightIcon; color: string }> = {
+  status: { icon: ArrowRightIcon, color: 'text-[#4573A2]' },
+  kommunikation: { icon: MessageSquareIcon, color: 'text-blue-500' },
+  dokument: { icon: FileTextIcon, color: 'text-emerald-500' },
+  task: { icon: CheckCircleIcon, color: 'text-amber-500' },
+  termin: { icon: CalendarIcon, color: 'text-purple-500' },
+  eskalation: { icon: AlertTriangleIcon, color: 'text-red-500' },
+  notiz: { icon: ClockIcon, color: 'text-gray-400' },
+}
+
+function formatRelativ(dateStr: string): string {
+  const now = Date.now()
+  const d = new Date(dateStr).getTime()
+  const diff = now - d
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return 'gerade eben'
+  if (mins < 60) return `vor ${mins} Min`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `vor ${hours} Std`
+  const days = Math.floor(hours / 24)
+  if (days === 1) return 'gestern'
+  if (days < 7) return `vor ${days} Tagen`
+  return new Date(dateStr).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
+}
+
+export default function FallActivityFeed({
+  events,
+  maxItems = 15,
+}: {
+  events: ActivityEvent[]
+  maxItems?: number
+}) {
+  const sorted = [...events]
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, maxItems)
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-3">
+      <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+        Letzte Aktivitäten
+      </h3>
+      {sorted.length === 0 ? (
+        <p className="text-xs text-gray-400">Noch keine Aktivitäten.</p>
+      ) : (
+        <div className="space-y-0.5">
+          {sorted.map(ev => {
+            const cfg = TYPE_CONFIG[ev.typ] ?? TYPE_CONFIG.notiz
+            const Icon = cfg.icon
+            return (
+              <div key={ev.id} className="flex items-start gap-2 px-1 py-1.5 rounded-md hover:bg-gray-50/50">
+                <Icon className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${cfg.color}`} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] text-gray-800 leading-snug truncate">{ev.titel}</p>
+                  <p className="text-[9px] text-gray-400 mt-0.5">
+                    {formatRelativ(ev.created_at)}
+                    {ev.erstellt_von && <span> · {ev.erstellt_von}</span>}
+                  </p>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * Helper: baut ActivityEvents aus den existing Fall-Daten zusammen.
+ * Wird in der Server-Page oder im Client aufgerufen.
+ */
+export function buildActivityEvents(
+  timeline: { id: string; typ: string; titel: string; beschreibung?: string | null; erstellt_von?: string | null; created_at: string }[],
+  tasks: { id: string; titel: string; status: string; created_at: string }[],
+  nachrichten: { id: string; kanal: string; sender_rolle?: string | null; nachricht: string; created_at: string }[],
+): ActivityEvent[] {
+  const events: ActivityEvent[] = []
+
+  for (const t of timeline) {
+    events.push({
+      id: `tl-${t.id}`,
+      typ: t.typ === 'eskalation' ? 'eskalation'
+        : t.typ === 'status' || t.typ === 'status_wechsel' ? 'status'
+        : t.typ === 'dokument' ? 'dokument'
+        : t.typ === 'termin' ? 'termin'
+        : 'notiz',
+      titel: t.titel,
+      beschreibung: t.beschreibung,
+      erstellt_von: t.erstellt_von,
+      created_at: t.created_at,
+    })
+  }
+
+  for (const t of tasks) {
+    events.push({
+      id: `task-${t.id}`,
+      typ: 'task',
+      titel: `Task: ${t.titel}${t.status === 'erledigt' ? ' ✓' : ''}`,
+      created_at: t.created_at,
+    })
+  }
+
+  for (const n of nachrichten.slice(-10)) {
+    events.push({
+      id: `msg-${n.id}`,
+      typ: 'kommunikation',
+      titel: `${n.kanal === 'whatsapp' ? 'WhatsApp' : n.kanal === 'email' ? 'E-Mail' : n.kanal === 'anruf' ? 'Anruf' : n.kanal}: ${n.nachricht.slice(0, 60)}${n.nachricht.length > 60 ? '…' : ''}`,
+      erstellt_von: n.sender_rolle,
+      created_at: n.created_at,
+    })
+  }
+
+  return events
+}

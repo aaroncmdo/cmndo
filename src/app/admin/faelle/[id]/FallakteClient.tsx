@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Script from 'next/script'
 import DokumenteTab from './DokumenteTab'
 import FallStepper from '@/components/admin/FallStepper'
+import FallActivityFeed, { buildActivityEvents } from '@/components/faelle/FallActivityFeed'
+import FallDokumenteSidebar, { type FallDokumentRow } from '@/components/faelle/FallDokumenteSidebar'
 import { createClient } from '@/lib/supabase/client'
 import {
   addTimelineEntry,
@@ -555,6 +557,7 @@ export default function FallakteClient({
   versicherungKontakt,
   stepperState,
   fallFinanzen,
+  fallDokumente,
 }: {
   fall: Fall
   lead: Lead
@@ -575,6 +578,7 @@ export default function FallakteClient({
   versicherungKontakt?: { name: string; schaden_telefon: string | null; schaden_email: string | null; hotline_telefon: string | null; webseite: string | null } | null
   stepperState?: import('@/lib/fall/stepper-state').StepperState | null
   fallFinanzen?: import('@/lib/finance/fall-finanzen').FallFinanzen | null
+  fallDokumente?: FallDokumentRow[]
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -628,8 +632,7 @@ export default function FallakteClient({
     ['uebersicht', 'Übersicht'],
     ['timeline', `Timeline (${timeline.length})`],
     ['chat', 'Chat'],
-    ['dokumente', `Dokumente (${pflichtdokumente.length})`],
-    ['dateien', `Dateien (${dokumente.length})`],
+    ['dokumente', `Dateien (${dokumente.length + pflichtdokumente.length})`],
     ['qc', `QC-Prüfung${qcCheckliste?.status === 'bestanden' ? ' ✓' : qcCheckliste?.status === 'nachbesserung' ? ' !' : ''}`],
     ['kommunikation', 'Kommunikation'],
     ['kanzlei', 'Kanzlei'],
@@ -920,6 +923,22 @@ export default function FallakteClient({
                 </div>
               </div>
             )}
+
+            {/* KFZ-172: Activity Feed */}
+            <FallActivityFeed
+              events={buildActivityEvents(
+                timeline as { id: string; typ: string; titel: string; beschreibung?: string | null; erstellt_von?: string | null; created_at: string }[],
+                tasks as { id: string; titel: string; status: string; created_at: string }[],
+                nachrichten as { id: string; kanal: string; sender_rolle?: string | null; nachricht: string; created_at: string }[],
+              )}
+            />
+
+            {/* KFZ-172: Pflichtdokumente-Sidebar (Phase x Szenario) */}
+            <FallDokumenteSidebar
+              aktuellePhase={(fall as Record<string, unknown>).aktuelle_phase as string | null}
+              szenario={(fall as Record<string, unknown>).szenario as string | null}
+              dokumente={fallDokumente ?? []}
+            />
 
             {/* Ansprechpartner */}
             <div className="bg-white rounded-xl border border-gray-200 p-3">

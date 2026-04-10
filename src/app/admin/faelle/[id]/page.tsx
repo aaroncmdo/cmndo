@@ -109,6 +109,20 @@ export default async function FallaktePage({
       : Promise.resolve({ data: null }),
   ])
 
+  // KFZ-172: Lade fall_dokumente (neue Tabelle, kann noch nicht existieren)
+  let fallDokumente: { id: string; dokument_typ: string; ist_pflicht: boolean; ab_phase: string | null; storage_path: string; original_filename: string | null; ocr_status: string | null; hochgeladen_am: string }[] = []
+  try {
+    const { data: fd } = await supabase
+      .from('fall_dokumente')
+      .select('id, dokument_typ, ist_pflicht, ab_phase, storage_path, original_filename, ocr_status, hochgeladen_am')
+      .eq('fall_id', id)
+      .is('geloescht_am', null)
+      .order('hochgeladen_am')
+    fallDokumente = (fd ?? []) as typeof fallDokumente
+  } catch {
+    // Tabelle existiert noch nicht — Phase 2 Migration pending
+  }
+
   // Fetch mitarbeiter for task assignment
   const { data: mitarbeiterList } = await supabase
     .from('profiles')
@@ -178,6 +192,7 @@ export default async function FallaktePage({
       versicherungKontakt={versicherungKontakt}
       stepperState={stepperState}
       fallFinanzen={fallFinanzen}
+      fallDokumente={fallDokumente}
     />
   )
 }
