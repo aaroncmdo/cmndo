@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { CookieBanner } from "@/components/CookieBanner";
 import { Footer } from "@/components/Footer";
+import PwaInstallBanner from "@/components/PwaInstallBanner";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -17,8 +18,19 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: "Claimondo",
   description: "Claimondo KFZ-Schadensmanagement",
+  manifest: "/manifest.json",
+  themeColor: "#0D1B3E",
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icons/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/icons/icon.svg",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Claimondo",
   },
 };
 
@@ -40,6 +52,7 @@ export default function RootLayout({
         <Footer />
         <Toaster position="top-right" richColors closeButton />
         <CookieBanner />
+        <PwaInstallBanner />
         <Analytics />
         <SpeedInsights />
       </body>
