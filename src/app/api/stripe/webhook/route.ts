@@ -234,6 +234,67 @@ export async function POST(request: Request) {
           break
         }
 
+        // KFZ-188: Kanzlei-Monatsabrechnung bezahlt
+        if (meta.typ === 'kanzlei_abrechnung' && meta.kanzlei_abrechnung_id) {
+          const abrId = meta.kanzlei_abrechnung_id
+          const bezahltAm = new Date().toISOString()
+          const piId = (session.payment_intent as string) ?? null
+
+          // Abrechnung als bezahlt markieren
+          await db.from('kanzlei_abrechnungen').update({
+            status: 'bezahlt',
+            bezahlt_am: bezahltAm,
+            stripe_payment_intent_id: piId,
+          }).eq('id', abrId)
+
+          // Alle Faelle in den Positionen auf 'ausgezahlt' setzen
+          try {
+            const { data: positionen } = await db
+              .from('kanzlei_abrechnung_positionen')
+              .select('fall_id')
+              .eq('kanzlei_abrechnung_id', abrId)
+            const fallIds = (positionen ?? []).map((p) => p.fall_id as string).filter(Boolean)
+            if (fallIds.length > 0) {
+              await db.from('faelle').update({
+                kanzlei_provision_status: 'ausgezahlt',
+                kanzlei_provision_ausgezahlt_am: bezahltAm,
+              }).in('id', fallIds)
+            }
+          } catch (err) {
+            console.error('[KFZ-188] faelle ausgezahlt update:', err)
+          }
+
+          // Bestaetigung an Kanzlei
+          try {
+            const { data: abr } = await db.from('kanzlei_abrechnungen')
+              .select('rechnungsnummer, endbetrag_brutto, kanzlei_id')
+              .eq('id', abrId).single()
+            if (abr?.kanzlei_id) {
+              const { data: kanzlei } = await db.from('kanzleien')
+                .select('email, name, ansprechpartner')
+                .eq('id', abr.kanzlei_id).single()
+              if (kanzlei?.email) {
+                const { sendEmail } = await import('@/lib/email/google/client')
+                await sendEmail({
+                  to: kanzlei.email,
+                  subject: `Zahlung bestaetigt — ${abr.rechnungsnummer}`,
+                  html: `<p>Hallo ${kanzlei.ansprechpartner ?? 'Sehr geehrte Damen und Herren'},</p><p>Ihre Zahlung in Hoehe von <strong>${Number(abr.endbetrag_brutto).toFixed(2).replace('.', ',')} €</strong> fuer Rechnung <strong>${abr.rechnungsnummer}</strong> ist eingegangen. Vielen Dank!</p><p>Mit freundlichen Gruessen,<br>Ihr Claimondo-Team</p>`,
+                  empfaengerTyp: 'kanzlei',
+                  template: 'kanzlei_abrechnung_bezahlt',
+                })
+              }
+            }
+          } catch (err) {
+            console.error('[KFZ-188] Bestaetigung-Email:', err)
+          }
+
+          try {
+            revalidatePath('/admin/kanzlei-abrechnungen', 'page')
+          } catch { /* */ }
+
+          break
+        }
+
         if (meta.typ === 'sv_anzahlung' && meta.gutachter_id) {
           const svId = meta.gutachter_id
 

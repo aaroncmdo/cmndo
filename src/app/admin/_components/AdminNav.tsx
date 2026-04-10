@@ -24,6 +24,8 @@ const NAV_SECONDARY = [
   { href: '/admin/finance', label: 'Finanzen', icon: BadgeEuroIcon },
   // KFZ-149 Hund-D: SV-Monatsabrechnungen Listing mit Reminder/Einzug-Status
   { href: '/admin/abrechnungen', label: 'Abrechnungen', icon: ReceiptIcon },
+  // KFZ-188: Kanzlei-Monatsabrechnungen
+  { href: '/admin/kanzlei-abrechnungen', label: 'Kanzlei-Abr.', icon: ReceiptIcon },
   // KFZ-152: Organisationen (Buero + Akademie Listing)
   { href: '/admin/organisationen', label: 'Organisationen', icon: Building2Icon },
   // KFZ-152 Phase 3 Hund-N: Communities (gemeinsame Einsatzgebiete + Pool)
