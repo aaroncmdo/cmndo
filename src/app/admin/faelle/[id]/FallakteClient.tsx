@@ -924,8 +924,9 @@ export default function FallakteClient({
               </div>
             )}
 
-            {/* KFZ-172: Activity Feed */}
+            {/* KFZ-172: Activity Feed (Realtime) */}
             <FallActivityFeed
+              fallId={fall.id}
               events={buildActivityEvents(
                 timeline as { id: string; typ: string; titel: string; beschreibung?: string | null; erstellt_von?: string | null; created_at: string }[],
                 tasks as { id: string; titel: string; status: string; created_at: string }[],

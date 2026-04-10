@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { CheckCircle2Icon, CircleDotIcon, AlertCircleIcon, FileTextIcon, ImageIcon, UploadIcon } from 'lucide-react'
 import { getPflichtDokumenteFuerFall, DOKUMENT_LABELS, type Phase, type Szenario } from '@/lib/dokumente/pflicht-dokumente'
+import { createClient } from '@/lib/supabase/client'
 import FallDokumentDropzone from './FallDokumentDropzone'
 import OcrAutoFillModal, { type OcrData } from './OcrAutoFillModal'
 
@@ -37,14 +38,53 @@ export default function FallDokumenteSidebar({
 }) {
   const [uploadingTyp, setUploadingTyp] = useState<string | null>(null)
   const [ocrModal, setOcrModal] = useState<{ dokumentTyp: string; data: OcrData } | null>(null)
+  const [liveDokumente, setLiveDokumente] = useState<FallDokumentRow[]>(dokumente)
+  const supabase = useMemo(() => createClient(), [])
+
+  // Sync props -> state wenn sich Server-Daten aendern (z.B. nach router.refresh)
+  useEffect(() => { setLiveDokumente(dokumente) }, [dokumente])
+
+  // Realtime: auf INSERT + UPDATE in fall_dokumente subscriben
+  useEffect(() => {
+    if (!fallId) return
+    const channel = supabase
+      .channel(`fall-docs-${fallId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'fall_dokumente', filter: `fall_id=eq.${fallId}` },
+        (payload) => {
+          const row = payload.new as FallDokumentRow
+          if (row.geloescht_am) return
+          setLiveDokumente(prev => {
+            if (prev.some(d => d.id === row.id)) return prev
+            return [...prev, row]
+          })
+        },
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'fall_dokumente', filter: `fall_id=eq.${fallId}` },
+        (payload) => {
+          const row = payload.new as FallDokumentRow & { geloescht_am?: string | null }
+          setLiveDokumente(prev =>
+            row.geloescht_am
+              ? prev.filter(d => d.id !== row.id)
+              : prev.map(d => d.id === row.id ? { ...d, ...row } : d)
+          )
+        },
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [fallId, supabase])
+
   const pflicht = getPflichtDokumenteFuerFall(
     aktuellePhase as Phase | null,
     szenario as Szenario | null,
   )
 
-  // Vorhandene Docs nach Typ indexieren
+  // Vorhandene Docs nach Typ indexieren (aus live-State)
   const vorhandenMap = new Map<string, FallDokumentRow>()
-  for (const d of dokumente) {
+  for (const d of liveDokumente) {
     if (!vorhandenMap.has(d.dokument_typ)) {
       vorhandenMap.set(d.dokument_typ, d)
     }
@@ -52,7 +92,7 @@ export default function FallDokumenteSidebar({
 
   // Optionale Docs (hochgeladen, aber nicht in der Pflicht-Liste)
   const pflichtTypen = new Set(pflicht.map(p => p.typ))
-  const optionale = dokumente.filter(d => !pflichtTypen.has(d.dokument_typ))
+  const optionale = liveDokumente.filter(d => !pflichtTypen.has(d.dokument_typ))
 
   const totalPflicht = pflicht.length
   const erledigtPflicht = pflicht.filter(p => vorhandenMap.has(p.typ)).length

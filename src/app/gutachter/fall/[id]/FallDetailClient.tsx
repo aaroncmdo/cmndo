@@ -299,6 +299,7 @@ export default function FallDetailClient({
         {/* KFZ-172: Activity + Pflichtdokumente Sidebar (inline, vor Tabs) */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 mb-4">
           <FallActivityFeed
+            fallId={fall.id as string}
             events={buildActivityEvents(
               timeline as { id: string; typ: string; titel: string; beschreibung?: string | null; erstellt_von?: string | null; created_at: string }[],
               [],

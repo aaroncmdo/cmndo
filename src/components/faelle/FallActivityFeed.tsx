@@ -1,9 +1,11 @@
 'use client'
 
+import { useState, useEffect, useMemo } from 'react'
 import {
   ArrowRightIcon, MessageSquareIcon, FileTextIcon, CalendarIcon, AlertTriangleIcon,
   CheckCircleIcon, PhoneIcon, MailIcon, UploadIcon, ClockIcon,
 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 // KFZ-172: Activity-Feed fuer die Fall-Akte Right-Sidebar.
 // Zeigt die letzten Events des Falls aus timeline + tasks + nachrichten.
@@ -43,13 +45,46 @@ function formatRelativ(dateStr: string): string {
 }
 
 export default function FallActivityFeed({
+  fallId,
   events,
   maxItems = 15,
 }: {
+  fallId?: string
   events: ActivityEvent[]
   maxItems?: number
 }) {
-  const sorted = [...events]
+  const [liveEvents, setLiveEvents] = useState<ActivityEvent[]>(events)
+  const supabase = useMemo(() => createClient(), [])
+
+  // Sync props -> state
+  useEffect(() => { setLiveEvents(events) }, [events])
+
+  // Realtime: neue Timeline-Eintraege live empfangen
+  useEffect(() => {
+    if (!fallId) return
+    const channel = supabase
+      .channel(`fall-activity-${fallId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'timeline', filter: `fall_id=eq.${fallId}` },
+        (payload) => {
+          const row = payload.new as { id: string; typ: string; titel: string; beschreibung?: string | null; erstellt_von?: string | null; created_at: string }
+          const ev: ActivityEvent = {
+            id: `tl-live-${row.id}`,
+            typ: row.typ === 'eskalation' ? 'eskalation' : row.typ === 'status' ? 'status' : row.typ === 'dokument' ? 'dokument' : 'notiz',
+            titel: row.titel,
+            beschreibung: row.beschreibung,
+            erstellt_von: row.erstellt_von,
+            created_at: row.created_at,
+          }
+          setLiveEvents(prev => [ev, ...prev].slice(0, 30))
+        },
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [fallId, supabase])
+
+  const sorted = [...liveEvents]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, maxItems)
 
