@@ -51,6 +51,10 @@
     {
       "path": "/api/cron/community-leaderboard-update",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/pflichtdokumente-reminder",
+      "schedule": "0 */4 * * *"
     }
   ]
 }
