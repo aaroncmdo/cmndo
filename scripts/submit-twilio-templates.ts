@@ -358,14 +358,28 @@ async function submitTemplate(tpl: Template): Promise<{ name: string; sid: strin
 
     const sid = content.sid
 
-    // Submit for WhatsApp approval
+    // Submit for WhatsApp approval via REST API
     try {
-      await client.content.v1.contents(sid).approvalRequests.create({
-        name: `claimondo_${tpl.name}`,
-        category: 'UTILITY',
-      })
+      const resp = await fetch(
+        `https://content.twilio.com/v1/Content/${sid}/ApprovalRequests/whatsapp`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic ' + Buffer.from(`${ACCOUNT_SID}:${AUTH_TOKEN}`).toString('base64'),
+          },
+          body: JSON.stringify({
+            name: `claimondo_${tpl.name}`,
+            category: 'UTILITY',
+          }),
+        },
+      )
+      if (!resp.ok) {
+        const body = await resp.text()
+        console.warn(`  [WARN] Approval-Request ${resp.status}: ${body}`)
+      }
     } catch (approvalErr) {
-      console.warn(`  [WARN] Approval-Request fuer ${tpl.name} fehlgeschlagen (Template trotzdem erstellt): ${approvalErr}`)
+      console.warn(`  [WARN] Approval-Request fuer ${tpl.name} fehlgeschlagen: ${approvalErr}`)
     }
 
     return { name: tpl.name, sid, envKey: tpl.envKey }
