@@ -5,19 +5,23 @@ import {
   KB_BERATUNG_REICHWEITE_TAGE,
 } from './constants'
 
-type WorkingHours = {
-  [day: string]: { start: string; end: string } | null
+// DB format: {"mo":["09:00","17:00"],"di":["09:00","17:00"],...}
+type DbWorkingHours = {
+  [day: string]: [string, string] | null | undefined
 }
 
-// Day names as returned by toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()
-const DEFAULT_WORKING_HOURS: WorkingHours = {
-  monday:    { start: '09:00', end: '17:00' },
-  tuesday:   { start: '09:00', end: '17:00' },
-  wednesday: { start: '09:00', end: '17:00' },
-  thursday:  { start: '09:00', end: '17:00' },
-  friday:    { start: '09:00', end: '17:00' },
-  saturday:  null,
-  sunday:    null,
+// Map: JS weekday (from toLocaleDateString) -> DB key
+const WEEKDAY_TO_DB: Record<string, string> = {
+  monday: 'mo', tuesday: 'di', wednesday: 'mi',
+  thursday: 'do', friday: 'fr', saturday: 'sa', sunday: 'so',
+}
+
+const DEFAULT_WORKING_HOURS: DbWorkingHours = {
+  mo: ['09:00', '17:00'],
+  di: ['09:00', '17:00'],
+  mi: ['09:00', '17:00'],
+  do: ['09:00', '17:00'],
+  fr: ['09:00', '17:00'],
 }
 
 function parseTime(timeStr: string, baseDate: Date): Date {
@@ -45,8 +49,8 @@ export async function getAvailableKbSlots(
     console.error('[kb-slots] Profile-Fehler:', profileErr.message)
   }
 
-  const workingHours: WorkingHours =
-    (kbProfile?.working_hours as WorkingHours | null) ?? DEFAULT_WORKING_HOURS
+  const workingHours: DbWorkingHours =
+    (kbProfile?.working_hours as DbWorkingHours | null) ?? DEFAULT_WORKING_HOURS
 
   // 2. Load already-booked kb_beratung slots for this KB in the window
   const windowStart = now.toISOString()
@@ -84,15 +88,17 @@ export async function getAvailableKbSlots(
     day.setDate(day.getDate() + dayOffset)
     day.setHours(0, 0, 0, 0)
 
-    const dayName = day
+    const dayNameEn = day
       .toLocaleDateString('en-US', { weekday: 'long' })
       .toLowerCase()
+    const dbKey = WEEKDAY_TO_DB[dayNameEn]
+    if (!dbKey) continue
 
-    const wh = workingHours[dayName]
-    if (!wh) continue
+    const wh = workingHours[dbKey]
+    if (!wh || !Array.isArray(wh) || wh.length < 2) continue
 
-    const dayStart = parseTime(wh.start, day)
-    const dayEnd = parseTime(wh.end, day)
+    const dayStart = parseTime(wh[0], day)
+    const dayEnd = parseTime(wh[1], day)
 
     // Generate 30-min slots within working hours
     let slotTime = new Date(dayStart)
