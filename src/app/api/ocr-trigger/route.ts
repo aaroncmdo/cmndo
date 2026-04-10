@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import {
+  parseFahrzeugschein,
+  parseVersicherungsschein,
+  parseFuehrerschein,
+  parseUnfallbericht,
+} from '@/lib/dokumente/ocr-patterns'
 
-// KFZ-172 Phase 3: OCR-Trigger-Route.
-// Ruft die Supabase Edge Function 'ocr-extract' auf oder fuehrt den
-// OCR-Stub inline aus wenn die Edge Function nicht erreichbar ist.
+// KFZ-172: OCR-Trigger — ruft Google Cloud Vision API direkt auf.
+// Env-Var: GOOGLE_VISION_API_KEY (in Vercel setzen).
+// Wenn kein Key: Stub-Daten fuer Tests.
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -14,55 +21,118 @@ export async function POST(request: Request) {
   const dokumentId: string | undefined = body?.dokument_id
   if (!dokumentId) return NextResponse.json({ error: 'dokument_id fehlt' }, { status: 400 })
 
-  // Versuche die Supabase Edge Function aufzurufen
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  // Admin-Client fuer Storage-Download (umgeht RLS)
+  const db = createAdminClient()
 
-  if (supabaseUrl && anonKey) {
-    try {
-      const resp = await fetch(`${supabaseUrl}/functions/v1/ocr-extract`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${anonKey}`,
-        },
-        body: JSON.stringify({ dokument_id: dokumentId }),
-      })
-      if (resp.ok) {
-        const data = await resp.json()
-        return NextResponse.json(data)
-      }
-    } catch {
-      // Edge Function nicht deployed — Inline-Stub
-    }
-  }
-
-  // Fallback: Inline-Stub (setzt ocr_status='done' mit Stub-Daten)
-  const { data: dok } = await supabase
+  // 1. Dokument laden
+  const { data: dok } = await db
     .from('fall_dokumente')
-    .select('id, dokument_typ')
+    .select('id, fall_id, dokument_typ, storage_path, mime_type')
     .eq('id', dokumentId)
     .single()
 
   if (!dok) return NextResponse.json({ error: 'Dokument nicht gefunden' }, { status: 404 })
 
-  const stubData = {
-    stub: true,
-    dokument_typ: dok.dokument_typ,
-    hinweis: 'OCR Edge Function nicht deployed. Stub-Daten.',
-    parsed: getStubData(dok.dokument_typ),
+  // Status auf processing
+  await db.from('fall_dokumente').update({ ocr_status: 'processing' }).eq('id', dokumentId)
+
+  const apiKey = process.env.GOOGLE_VISION_API_KEY
+  let extractedData: Record<string, unknown>
+
+  if (apiKey) {
+    // ─── LIVE: Google Cloud Vision API ──────────────────────────────
+    try {
+      // Datei aus Storage lesen
+      const { data: fileData, error: fileErr } = await db.storage
+        .from('fall-dokumente')
+        .download(dok.storage_path)
+
+      if (fileErr || !fileData) {
+        await db.from('fall_dokumente').update({ ocr_status: 'failed' }).eq('id', dokumentId)
+        return NextResponse.json({ error: 'Datei nicht lesbar' }, { status: 500 })
+      }
+
+      // Base64 konvertieren
+      const arrayBuffer = await fileData.arrayBuffer()
+      const base64 = Buffer.from(arrayBuffer).toString('base64')
+
+      // Vision API aufrufen
+      const visionResp = await fetch(
+        `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            requests: [{
+              image: { content: base64 },
+              features: [{ type: 'TEXT_DETECTION', maxResults: 1 }],
+            }],
+          }),
+        },
+      )
+
+      if (!visionResp.ok) {
+        const errBody = await visionResp.text().catch(() => '')
+        console.error('[OCR] Vision API Error:', visionResp.status, errBody)
+        await db.from('fall_dokumente').update({ ocr_status: 'failed' }).eq('id', dokumentId)
+        return NextResponse.json({ error: `Vision API ${visionResp.status}` }, { status: 502 })
+      }
+
+      const visionData = await visionResp.json()
+      const fullText: string = visionData?.responses?.[0]?.fullTextAnnotation?.text ?? ''
+
+      // Parse basierend auf dokument_typ
+      const parsed = parseByType(dok.dokument_typ, fullText)
+
+      extractedData = {
+        live: true,
+        dokument_typ: dok.dokument_typ,
+        raw_text: fullText.slice(0, 2000),
+        parsed,
+      }
+    } catch (err) {
+      console.error('[OCR] Exception:', err)
+      await db.from('fall_dokumente').update({ ocr_status: 'failed' }).eq('id', dokumentId)
+      return NextResponse.json({ error: String(err) }, { status: 500 })
+    }
+  } else {
+    // ─── STUB: kein API Key ──────────────────────────────────────────
+    extractedData = {
+      stub: true,
+      dokument_typ: dok.dokument_typ,
+      hinweis: 'GOOGLE_VISION_API_KEY nicht gesetzt. Stub-Daten.',
+      parsed: getStubData(dok.dokument_typ),
+    }
   }
 
-  await supabase
+  // Ergebnis speichern
+  await db
     .from('fall_dokumente')
     .update({
       ocr_status: 'done',
-      ocr_extracted_data: stubData,
+      ocr_extracted_data: extractedData,
       ocr_processed_at: new Date().toISOString(),
     })
     .eq('id', dokumentId)
 
-  return NextResponse.json({ success: true, extracted: stubData })
+  return NextResponse.json({ success: true, extracted: extractedData })
+}
+
+// ─── Typ-spezifisches Parsing ──────────────────────────────────────────────
+
+function parseByType(typ: string, text: string): Record<string, string | null> {
+  switch (typ) {
+    case 'fahrzeugschein':
+      return parseFahrzeugschein(text) as unknown as Record<string, string | null>
+    case 'versicherungsschein_eigener':
+      return parseVersicherungsschein(text) as unknown as Record<string, string | null>
+    case 'personalausweis':
+      return parseFuehrerschein(text) as unknown as Record<string, string | null>
+    case 'unfallbericht_polizei':
+      return parseUnfallbericht(text) as unknown as Record<string, string | null>
+    default:
+      return { raw_excerpt: text.slice(0, 500) }
+  }
 }
 
 function getStubData(typ: string): Record<string, string | null> {
