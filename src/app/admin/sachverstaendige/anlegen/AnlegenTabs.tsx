@@ -5,9 +5,12 @@ import { UserIcon, Building2Icon, UserPlusIcon, GraduationCapIcon, UsersIcon } f
 import SoloAnlegenWizard from './SoloAnlegenWizard'
 import BueroAnlegenWizard from './BueroAnlegenWizard'
 import SubSvHinzufuegenForm from './SubSvHinzufuegenForm'
+import AkademieAnlegenWizard from './AkademieAnlegenWizard'
+import Link from 'next/link'
 
-// ARCH-1 Phase 2 (BLOCK C): Tab-Switcher fuer die Admin-Anlegen-Page.
-// 5 Modi, 2 davon (Akademie + Community) sind disabled bis KFZ-152 Phase 2/3 durch ist.
+// KFZ-152 Phase 2+3: Tab-Switcher mit allen 5 Modi aktiviert.
+// Community wird ueber /admin/communities verwaltet (eigenes Listing) statt
+// als Tab hier — Admin klickt 'Community' Tab und wird verlinkt.
 
 type TabKey = 'solo' | 'buero' | 'sub' | 'akademie' | 'community'
 
@@ -15,8 +18,8 @@ const TABS: { key: TabKey; label: string; icon: typeof UserIcon; disabled: boole
   { key: 'solo', label: 'Solo-SV', icon: UserIcon, disabled: false },
   { key: 'buero', label: 'Büro', icon: Building2Icon, disabled: false },
   { key: 'sub', label: 'Sub-SV hinzufügen', icon: UserPlusIcon, disabled: false },
-  { key: 'akademie', label: 'Akademie', icon: GraduationCapIcon, disabled: true, disabledHint: 'KFZ-152 Phase 2' },
-  { key: 'community', label: 'Community', icon: UsersIcon, disabled: true, disabledHint: 'KFZ-152 Phase 3' },
+  { key: 'akademie', label: 'Akademie', icon: GraduationCapIcon, disabled: false },
+  { key: 'community', label: 'Community', icon: UsersIcon, disabled: false },
 ]
 
 export default function AnlegenTabs({ organisationen, onSuccess }: {
@@ -64,6 +67,22 @@ export default function AnlegenTabs({ organisationen, onSuccess }: {
       {active === 'solo' && <SoloAnlegenWizard onSuccess={onSuccess} />}
       {active === 'buero' && <BueroAnlegenWizard onSuccess={onSuccess} />}
       {active === 'sub' && <SubSvHinzufuegenForm organisationen={organisationen} onSuccess={onSuccess} />}
+      {active === 'akademie' && <AkademieAnlegenWizard onSuccess={onSuccess} />}
+      {active === 'community' && (
+        <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center">
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Communities werden separat verwaltet</h2>
+          <p className="text-sm text-gray-500 mb-5">
+            Communities haben ein gemeinsames Einsatzgebiet und einen eigenen Mitglieder-Pool.
+            Verwaltung erfolgt im dedizierten Communities-Bereich.
+          </p>
+          <Link
+            href="/admin/communities"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold"
+          >
+            <UsersIcon className="w-4 h-4" /> Zu /admin/communities
+          </Link>
+        </div>
+      )}
     </div>
   )
 }

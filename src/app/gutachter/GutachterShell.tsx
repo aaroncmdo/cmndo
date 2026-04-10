@@ -13,10 +13,12 @@ import {
   BarChart3Icon,
   UserIcon,
   LogOutIcon,
+  UsersIcon,
+  TrophyIcon,
 } from 'lucide-react'
 import NotificationBell from '@/app/admin/_components/NotificationBell'
 
-const NAV_ITEMS = [
+const NAV_ITEMS_BASE = [
   { href: '/gutachter', label: 'Dashboard', icon: LayoutDashboardIcon },
   { href: '/gutachter/faelle', label: 'Meine Fälle', icon: FolderOpenIcon },
   { href: '/gutachter/gebiet', label: 'Mein Gebiet', icon: MapIcon },
@@ -41,6 +43,8 @@ export default function GutachterShell({
   brandSecondary,
   standortLat,
   standortLng,
+  showTeam,
+  showCommunity,
 }: {
   displayName: string
   children: React.ReactNode
@@ -49,10 +53,21 @@ export default function GutachterShell({
   brandSecondary?: string | null
   standortLat?: number | null
   standortLng?: number | null
+  // KFZ-152 Phase 2+3: conditional Nav fuer Team (Inhaber/Verwalter)
+  // und Community (Member).
+  showTeam?: boolean
+  showCommunity?: boolean
 }) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [weather, setWeather] = useState<{ temp: number; code: number; hourly: Record<string, HourW[]>; daily: DailyW[] } | null>(null)
+
+  // KFZ-152: NAV-Items dynamisch zusammenstellen je nach Rolle
+  const NAV_ITEMS = [
+    ...NAV_ITEMS_BASE,
+    ...(showTeam ? [{ href: '/gutachter/team', label: 'Team', icon: UsersIcon }] : []),
+    ...(showCommunity ? [{ href: '/gutachter/community', label: 'Community', icon: TrophyIcon }] : []),
+  ]
 
   // Apply brand colors
   useEffect(() => {

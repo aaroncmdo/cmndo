@@ -151,6 +151,89 @@ export async function POST(request: Request) {
           break
         }
 
+        // KFZ-152 Phase 2: Akademie-Anzahlung — analog zum Buero-Branch.
+        // Der Akademie-Verwalter zahlt eine individuelle Erst-Anzahlung,
+        // danach sind ALLE Akademie-Mitglieder freigeschaltet.
+        if (meta.typ === 'akademie_anzahlung' && meta.organisation_id) {
+          const orgId = meta.organisation_id
+
+          let defaultPmId: string | null = null
+          try {
+            const piId = session.payment_intent as string | null
+            if (piId) {
+              const { stripe } = await import('@/lib/stripe/client')
+              const pi = await stripe.paymentIntents.retrieve(piId)
+              defaultPmId = (pi.payment_method as string) ?? null
+            }
+          } catch (err) { console.error('[KFZ-152 akademie] PI retrieve:', err) }
+
+          await db.from('organisationen').update({
+            onboarding_status: 'aktiv',
+            parent_stripe_default_pm_id: defaultPmId,
+            updated_at: new Date().toISOString(),
+          }).eq('id', orgId)
+
+          // Alle Akademie-Mitglieder + Verwalter freischalten
+          await db.from('sachverstaendige').update({
+            onboarding_status: 'bezahlt',
+            stripe_anzahlung_bezahlt_am: new Date().toISOString(),
+            portal_zugang_freigeschaltet: true,
+            anzahlung_status: 'bezahlt',
+            ist_aktiv: true,
+            vertrag_unterschrieben: true,
+            vertrag_unterschrieben_am: new Date().toISOString(),
+          }).eq('organisation_id', orgId)
+
+          // Werbebudget-Init pro Sub-SV (analog FR-5 Buero-Branch).
+          // Akademie-Verwalter selbst (ist_parent_account=true) bekommt nichts.
+          try {
+            const { data: subs } = await db.from('sachverstaendige')
+              .select('id, onboarding_anzahlung_betrag, rolle_in_organisation, ist_parent_account')
+              .eq('organisation_id', orgId)
+            for (const s of subs ?? []) {
+              if (s.ist_parent_account) continue
+              const guthaben = Number(s.onboarding_anzahlung_betrag ?? 0)
+              if (guthaben <= 0) continue
+              await db.from('sachverstaendige').update({
+                werbebudget_guthaben_netto: guthaben,
+              }).eq('id', s.id)
+            }
+          } catch (err) { console.error('[KFZ-152 akademie] Werbebudget-Init:', err) }
+
+          // Welcome-Confirm-Mail an Verwalter
+          try {
+            const { data: org } = await db.from('organisationen')
+              .select('name, hauptansprechpartner_user_id')
+              .eq('id', orgId).single()
+            if (org?.hauptansprechpartner_user_id) {
+              const { data: p } = await db.from('profiles').select('email, vorname').eq('id', org.hauptansprechpartner_user_id).single()
+              if (p?.email) {
+                const { sendEmail } = await import('@/lib/email/google/client')
+                await sendEmail({
+                  to: p.email,
+                  subject: `Anzahlung eingegangen — Akademie ${org.name} ist aktiv`,
+                  html: `<p>Hallo ${p.vorname ?? 'Partner'},</p><p>deine Anzahlung fuer die Akademie <strong>${org.name}</strong> ist eingegangen. Alle Mitglieder sind freigeschaltet.</p><p><a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'}/gutachter">Zum Akademie-Portal</a></p>`,
+                  empfaengerTyp: 'sv',
+                  template: 'akademie_onboarding_payment_confirmed',
+                })
+              }
+            }
+          } catch (err) { console.error('[KFZ-152 akademie] Confirm-mail:', err) }
+
+          try {
+            const { resolveTasksForEntity } = await import('@/lib/tasks/resolve-tasks')
+            await resolveTasksForEntity('sv_onboarding', orgId, 'Akademie-Anzahlung eingegangen')
+          } catch (err) { console.error('[KFZ-151] resolveTasks akademie:', err) }
+
+          try {
+            revalidatePath('/admin/sachverstaendige', 'page')
+            revalidatePath('/admin/karte', 'page')
+            revalidatePath('/admin/organisationen', 'page')
+          } catch { /* */ }
+
+          break
+        }
+
         if (meta.typ === 'sv_anzahlung' && meta.gutachter_id) {
           const svId = meta.gutachter_id
 

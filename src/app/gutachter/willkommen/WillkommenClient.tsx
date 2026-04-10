@@ -20,6 +20,7 @@ import { loadStripe, type Stripe } from '@stripe/stripe-js'
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js'
 import { signSvVertrag, startStripeCheckout } from '@/lib/actions/sv-onboarding-actions'
 import { signBueroVertrag, startBueroStripeCheckout } from '@/app/gutachter/onboarding/buero/actions'
+import { signAkademieVertrag, startAkademieStripeCheckout } from '@/app/gutachter/onboarding/akademie/actions'
 import { akzeptiereAgbSubSv } from './actions'
 import SignaturePadInput from '@/components/SignaturePadInput'
 import StripeBrandingFooter from '@/components/StripeBrandingFooter'
@@ -40,7 +41,13 @@ import {
 //   - sub_mitarbeiter : 2-Step Light-Flow (Paket-Hinweis → Checkbox-AGB +
 //                       Name) → Warte-Page oder direkt /gutachter
 
-type Rolle = 'solo' | 'buero_inhaber' | 'sub_mitarbeiter'
+// KFZ-152 Phase 2+3: 5 Rollen-Varianten:
+//   - solo            : klassischer Solo-SV
+//   - buero_inhaber   : Buero-Inhaber, zentrale Anzahlung fuer alle Standorte
+//   - akademie_verwalter : Akademie-Verwalter, individuelle Erst-Anzahlung
+//   - sub_mitarbeiter : Sub-SV (Buero oder Akademie), nur AGB-Checkbox
+//   - community_member : Community-Mitglied, technisch wie Solo aber mit Banner
+type Rolle = 'solo' | 'buero_inhaber' | 'akademie_verwalter' | 'sub_mitarbeiter' | 'community_member'
 
 const PAKET_LABELS: Record<string, string> = {
   standard: 'Standard',
@@ -138,8 +145,17 @@ export default function WillkommenClient({
   stripePublishableKey: string
 }) {
   const router = useRouter()
+  // KFZ-152 Phase 2+3: Wir behandeln intern nur die 3 Render-Kategorien
+  // (solo/buero_inhaber/sub_mitarbeiter). Akademie-Verwalter rendert wie
+  // buero_inhaber, Community-Member wie solo. Spezifische Dispatches
+  // (signAkademieVertrag, startAkademieStripeCheckout) benutzen die
+  // 5-wertige `rolle` prop direkt.
+  const r: 'solo' | 'buero_inhaber' | 'sub_mitarbeiter' =
+    rolle === 'akademie_verwalter' ? 'buero_inhaber'
+    : rolle === 'community_member' ? 'solo'
+    : rolle
   // KFZ-157: Sub-Mitarbeiter behalten 2-Step Flow, alle anderen jetzt 4-Step.
-  const STEPS = rolle === 'sub_mitarbeiter' ? STEPS_2_SUB : STEPS_4
+  const STEPS = r === 'sub_mitarbeiter' ? STEPS_2_SUB : STEPS_4
 
   // Initial-Step basierend auf Status (reload-sicher):
   // - Solo: sv.vertrag_unterschrieben → Step 2 (Stripe)
@@ -151,15 +167,15 @@ export default function WillkommenClient({
   // - Sub-Mitarbeiter: bleibt initial bei Step 0 (falls neu) oder landet
   //   ueber den separaten warteAufInhaber-Branch auf der Warte-Page.
   let initialStep = 0
-  if (rolle === 'solo' && sv.vertrag_unterschrieben) {
+  if (r === 'solo' && sv.vertrag_unterschrieben) {
     initialStep = 2
-  } else if (rolle === 'buero_inhaber') {
+  } else if (r === 'buero_inhaber') {
     const orgStatus = organisation?.onboarding_status ?? ''
     if (orgStatus === 'vertrag_unterzeichnet' || orgStatus === 'anzahlung_offen') {
       initialStep = 2
     }
   }
-  if (rolle !== 'sub_mitarbeiter' && sv.portal_zugang_freigeschaltet && !sv.logo_url) {
+  if (r !== 'sub_mitarbeiter' && sv.portal_zugang_freigeschaltet && !sv.logo_url) {
     initialStep = 3
   }
   if (typeof stepOverride === 'number') initialStep = stepOverride
@@ -168,7 +184,7 @@ export default function WillkommenClient({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [warteAufInhaber, setWarteAufInhaber] = useState(
-    rolle === 'sub_mitarbeiter' && sv.vertrag_unterschrieben && !sv.portal_zugang_freigeschaltet,
+    r === 'sub_mitarbeiter' && sv.vertrag_unterschrieben && !sv.portal_zugang_freigeschaltet,
   )
 
   // KFZ-156: Embedded Checkout state — clientSecret wird beim Eintritt in
@@ -179,7 +195,12 @@ export default function WillkommenClient({
   )
 
   const fetchClientSecret = useCallback(async (): Promise<string> => {
-    const result = rolle === 'buero_inhaber' && organisation
+    // KFZ-152 Phase 2: Akademie-Verwalter triggert createAkademieCheckoutSession
+    // (eigene erst_anzahlung_eur), Buero-Inhaber sammelt aller Sub-Anzahlungen,
+    // Solo + Community-Member zahlen ihre eigene Anzahlung.
+    const result = rolle === 'akademie_verwalter' && organisation
+      ? await startAkademieStripeCheckout(organisation.id)
+      : rolle === 'buero_inhaber' && organisation
       ? await startBueroStripeCheckout(organisation.id)
       : await startStripeCheckout()
     if ('error' in result) throw new Error(result.error)
@@ -190,7 +211,7 @@ export default function WillkommenClient({
 
   // Beim Wechsel auf Step 2 ein client_secret holen damit der Provider mounten kann.
   useEffect(() => {
-    if (step !== 2 || rolle === 'sub_mitarbeiter') return
+    if (step !== 2 || r === 'sub_mitarbeiter') return
     if (clientSecret) return
     let cancelled = false
     setSaving(true)
@@ -221,7 +242,7 @@ export default function WillkommenClient({
   // FR-2: Banner sichtbar fuer Solo + Inhaber, NICHT fuer Sub-Mitarbeiter,
   // und nur solange portal_zugang_freigeschaltet=false ist.
   const showAnzahlungBanner =
-    (rolle === 'solo' || rolle === 'buero_inhaber') && !sv.portal_zugang_freigeschaltet
+    (r === 'solo' || r === 'buero_inhaber') && !sv.portal_zugang_freigeschaltet
 
   // ── Solo-Handler (existing) ────────────────────────────────────────────
   async function handleSoloVertragSubmit() {
@@ -247,23 +268,30 @@ export default function WillkommenClient({
   // den Stripe-Flow inline in Step 2 (siehe useEffect/fetchClientSecret oben).
 
   // ── Inhaber-Handler ────────────────────────────────────────────────────
+  // KFZ-152 Phase 2: Bei Akademie-Verwalter wird signAkademieVertrag statt
+  // signBueroVertrag aufgerufen (anderer vorlage_typ + andere Org-Pruefung).
   async function handleInhaberVertragSubmit() {
     setError(null)
     if (!organisation) { setError('Keine Organisation zugeordnet'); return }
     if (!agbAccepted) { setError('Bitte akzeptiere die AGB/NB/DS'); return }
     if (!unterschriftName.trim()) { setError('Bitte gib deinen Namen ein'); return }
     if (!signaturePng) { setError('Bitte unterschreibe im Feld unten'); return }
-    // BUG-96: Scroll-Lock raus — siehe Solo-Handler.
 
     setSaving(true)
-    const result = await signBueroVertrag({
-      organisation_id: organisation.id,
-      signaturePngDataUri: signaturePng,
-      unterschriftName,
-    })
+    const result = rolle === 'akademie_verwalter'
+      ? await signAkademieVertrag({
+          organisation_id: organisation.id,
+          signaturePngDataUri: signaturePng,
+          unterschriftName,
+        })
+      : await signBueroVertrag({
+          organisation_id: organisation.id,
+          signaturePngDataUri: signaturePng,
+          unterschriftName,
+        })
     setSaving(false)
 
-    if (!result.success) { setError(result.error ?? 'Buero-Vertrag fehlgeschlagen'); return }
+    if (!result.success) { setError(result.error ?? 'Vertrag fehlgeschlagen'); return }
     setStep(2)
   }
 
@@ -341,7 +369,7 @@ export default function WillkommenClient({
   // BUG-98 Folge-Cleanup: Andere Steps von max-w-2xl auf max-w-4xl
   // angehoben — der Wizard war auf 1920px Desktop / Tablet quer zu klein.
   // 4xl (~896px) bleibt für Forms gut lesbar, nutzt aber Desktop ordentlich aus.
-  const wrapperWidth = step === 2 && rolle !== 'sub_mitarbeiter' ? 'max-w-5xl' : 'max-w-4xl'
+  const wrapperWidth = step === 2 && r !== 'sub_mitarbeiter' ? 'max-w-5xl' : 'max-w-4xl'
 
   return (
     <div className="h-full overflow-y-auto bg-[#f8f9fb] flex items-start justify-center px-4 py-10">
@@ -361,7 +389,7 @@ export default function WillkommenClient({
             <div className="text-sm text-amber-800">
               <strong>Sie erhalten erst Fälle von uns, sobald Sie angezahlt haben!</strong>
               <p className="text-xs text-amber-700 mt-1">
-                {rolle === 'buero_inhaber'
+                {r === 'buero_inhaber'
                   ? 'Sobald die Büro-Anzahlung eingegangen ist, werden alle Sub-Standorte gleichzeitig freigeschaltet.'
                   : 'Sobald die Anzahlung eingegangen ist, ist dein Portal-Zugang sofort freigeschaltet.'}
               </p>
@@ -408,8 +436,22 @@ export default function WillkommenClient({
           {/* ═══════════════════════════════════════════════════════════════
               SCHRITT 0: Konditionen
              ═══════════════════════════════════════════════════════════════ */}
-          {step === 0 && rolle === 'solo' && (
+          {step === 0 && r === 'solo' && (
             <div className="space-y-5">
+              {/* KFZ-152 Phase 3: Community-Banner wenn der User Mitglied einer Community ist */}
+              {rolle === 'community_member' && organisation && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+                  <Building2Icon className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-amber-800">
+                    <p className="font-medium">Du bist Mitglied der Community <strong>{organisation.name}</strong>.</p>
+                    <p className="text-xs text-amber-700 mt-1">
+                      Du zahlst deine Anzahlung selbst und unterzeichnest deinen eigenen Vertrag.
+                      Der Unterschied zur Solo-Mitgliedschaft: dein Lead-Pool ist mit anderen Community-Mitgliedern geteilt.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Konditionen-Card */}
               <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-xl p-5">
                 <p className="text-xs text-gray-500 uppercase tracking-wide mb-3">Deine Konditionen</p>
@@ -449,7 +491,7 @@ export default function WillkommenClient({
           )}
 
           {/* SCHRITT 0 — Buero-Inhaber: Sub-Tabelle + Stammdaten */}
-          {step === 0 && rolle === 'buero_inhaber' && (
+          {step === 0 && r === 'buero_inhaber' && (
             <div className="space-y-5">
               {/* Buero-Header */}
               <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-xl p-5">
@@ -525,7 +567,7 @@ export default function WillkommenClient({
           )}
 
           {/* SCHRITT 0 — Sub-Mitarbeiter: eigenes Paket + Org-Hinweis */}
-          {step === 0 && rolle === 'sub_mitarbeiter' && (
+          {step === 0 && r === 'sub_mitarbeiter' && (
             <div className="space-y-5">
               {/* Org-Hinweis */}
               {organisation && (
@@ -574,7 +616,7 @@ export default function WillkommenClient({
               BUG-96: Scroll-Lock + Inline-Vertragstexte raus → kompakte
               Auftragszusammenfassung + Modal-Links fuer NB / KV.
              ═══════════════════════════════════════════════════════════════ */}
-          {step === 1 && rolle !== 'sub_mitarbeiter' && (
+          {step === 1 && r !== 'sub_mitarbeiter' && (
             <div className="space-y-5">
               {/* BUG-96 + BUG-97: Auftragszusammenfassung als geteilte
                   OrderSummaryCard (compact-Variante). Gleiches Component
@@ -584,12 +626,12 @@ export default function WillkommenClient({
                 paketLabel={paketLabel}
                 kontingent={sv.max_faelle_monat}
                 radiusKm={sv.paket_umkreis_km}
-                anzahlungBetrag={rolle === 'buero_inhaber' ? gesamtAnzahlung : sv.onboarding_anzahlung_betrag}
-                organisationName={rolle !== 'buero_inhaber' && organisation ? organisation.name : null}
+                anzahlungBetrag={r === 'buero_inhaber' ? gesamtAnzahlung : sv.onboarding_anzahlung_betrag}
+                organisationName={r !== 'buero_inhaber' && organisation ? organisation.name : null}
               />
 
               {/* Hinweis fuer Buero-Inhaber: stellvertretend fuer alle Sub-Standorte */}
-              {rolle === 'buero_inhaber' && organisation && (
+              {r === 'buero_inhaber' && organisation && (
                 <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-start gap-3">
                   <Building2Icon className="w-5 h-5 text-[#4573A2] flex-shrink-0 mt-0.5" />
                   <div className="text-xs text-gray-700">
@@ -607,14 +649,14 @@ export default function WillkommenClient({
                 <div className="space-y-1.5 text-xs">
                   <StammRow label="Name" value={fullName} />
                   {/* Firma: Buero-Name fuer Inhaber, sonst sv.firmenname */}
-                  {(rolle === 'buero_inhaber' && organisation
+                  {(r === 'buero_inhaber' && organisation
                     ? `${organisation.name}${organisation.rechtsform ? ` (${organisation.rechtsform})` : ''}`
                     : sv.firmenname
                   ) && (
                     <StammRow
                       label="Firma"
                       value={
-                        rolle === 'buero_inhaber' && organisation
+                        r === 'buero_inhaber' && organisation
                           ? `${organisation.name}${organisation.rechtsform ? ` (${organisation.rechtsform})` : ''}`
                           : (sv.firmenname ?? '—')
                       }
@@ -626,13 +668,13 @@ export default function WillkommenClient({
                     value={[sv.standort_adresse, sv.standort_plz].filter(Boolean).join(', ') || '—'}
                   />
                   {/* Steuernummer: Org-Steuernummer fuer Inhaber, sonst sv.steuernummer */}
-                  {(rolle === 'buero_inhaber' && organisation?.steuernummer
+                  {(r === 'buero_inhaber' && organisation?.steuernummer
                     ? organisation.steuernummer
                     : sv.steuernummer) && (
                     <StammRow
                       label="Steuernummer"
                       value={
-                        rolle === 'buero_inhaber' && organisation?.steuernummer
+                        r === 'buero_inhaber' && organisation?.steuernummer
                           ? organisation.steuernummer
                           : (sv.steuernummer ?? '—')
                       }
@@ -705,7 +747,7 @@ export default function WillkommenClient({
                     Datenschutzerklaerung
                   </Link>
                   . Mit meiner Unterschrift bestaetige ich rechtsverbindlich die Annahme
-                  {rolle === 'buero_inhaber' && organisation
+                  {r === 'buero_inhaber' && organisation
                     ? ` stellvertretend fuer ${organisation.name} und alle Sub-Standorte.`
                     : '.'}
                 </span>
@@ -714,7 +756,7 @@ export default function WillkommenClient({
           )}
 
           {/* SCHRITT 1 — Sub-Mitarbeiter: nur Checkbox + Name (kein PDF, keine Sig) */}
-          {step === 1 && rolle === 'sub_mitarbeiter' && (
+          {step === 1 && r === 'sub_mitarbeiter' && (
             <div className="space-y-5">
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-xs text-gray-600 leading-relaxed">
                 Bitte bestätige unsere{' '}
@@ -761,12 +803,12 @@ export default function WillkommenClient({
               hosted Stripe-Page. clientSecret wird in useEffect geholt
               sobald der User Step 2 betritt.
              ═══════════════════════════════════════════════════════════════ */}
-          {step === 2 && rolle !== 'sub_mitarbeiter' && (
+          {step === 2 && r !== 'sub_mitarbeiter' && (
             <div className="space-y-4">
               <div className="bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-xl p-4 flex items-start gap-3">
                 <CheckCircle2Icon className="w-5 h-5 text-[#4573A2] flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-[#0D1B3E]">
-                  {rolle === 'buero_inhaber' ? (
+                  {r === 'buero_inhaber' ? (
                     <><strong>Buero-Vertrag unterzeichnet.</strong> Bitte schliesse jetzt die zentrale Anzahlung fuer alle Sub-Standorte ab.</>
                   ) : (
                     <><strong>Vertrag unterzeichnet.</strong> Bitte schliesse jetzt die Anzahlung ab.</>
@@ -774,7 +816,7 @@ export default function WillkommenClient({
                 </div>
               </div>
 
-              {rolle === 'buero_inhaber' && gesamtAnzahlung <= 0 && (
+              {r === 'buero_inhaber' && gesamtAnzahlung <= 0 && (
                 <div className="px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
                   Es sind keine Sub-Standorte mit Anzahlungsbetrag vorhanden. Bitte support@claimondo.de kontaktieren.
                 </div>
@@ -790,8 +832,8 @@ export default function WillkommenClient({
                   paketLabel={paketLabel}
                   kontingent={sv.max_faelle_monat}
                   radiusKm={sv.paket_umkreis_km}
-                  anzahlungBetrag={rolle === 'buero_inhaber' ? gesamtAnzahlung : sv.onboarding_anzahlung_betrag}
-                  subBueros={rolle === 'buero_inhaber' ? subSvs : undefined}
+                  anzahlungBetrag={r === 'buero_inhaber' ? gesamtAnzahlung : sv.onboarding_anzahlung_betrag}
+                  subBueros={r === 'buero_inhaber' ? subSvs : undefined}
                 />
 
                 {/* Rechte Spalte: Embedded Stripe Checkout + Branding-Footer */}
@@ -823,9 +865,9 @@ export default function WillkommenClient({
               Nur fuer Solo + Buero-Inhaber. Sub-Mitarbeiter erben die
               Org-Farben automatisch sobald der Inhaber ein Logo hochlaedt.
              ═══════════════════════════════════════════════════════════════ */}
-          {step === 3 && rolle !== 'sub_mitarbeiter' && (
+          {step === 3 && r !== 'sub_mitarbeiter' && (
             <LogoUploadStep
-              variant={rolle === 'buero_inhaber' ? 'buero_inhaber' : 'solo'}
+              variant={r === 'buero_inhaber' ? 'buero_inhaber' : 'solo'}
               organisationId={organisation?.id ?? null}
               onDone={() => {
                 router.push('/gutachter')
@@ -859,10 +901,10 @@ export default function WillkommenClient({
                 isLoading={saving}
                 loadingText="Wird verarbeitet..."
                 onClick={() => {
-                  if (rolle === 'sub_mitarbeiter') {
+                  if (r === 'sub_mitarbeiter') {
                     if (step === 0) setStep(1)
                     else handleSubAgbSubmit()
-                  } else if (rolle === 'buero_inhaber') {
+                  } else if (r === 'buero_inhaber') {
                     if (step === 0) setStep(1)
                     else if (step === 1) handleInhaberVertragSubmit()
                   } else {
@@ -871,22 +913,22 @@ export default function WillkommenClient({
                   }
                 }}
                 disabled={
-                  (step === 1 && rolle !== 'sub_mitarbeiter' && !nbVorlage) ||
+                  (step === 1 && r !== 'sub_mitarbeiter' && !nbVorlage) ||
                   // BUG-96: Vertrag-Submit nur wenn Checkbox an + Name + Signatur
-                  (step === 1 && rolle !== 'sub_mitarbeiter' && (!agbAccepted || !unterschriftName.trim() || !signaturePng)) ||
-                  (step === 0 && rolle === 'buero_inhaber' && subSvs.length === 0)
+                  (step === 1 && r !== 'sub_mitarbeiter' && (!agbAccepted || !unterschriftName.trim() || !signaturePng)) ||
+                  (step === 0 && r === 'buero_inhaber' && subSvs.length === 0)
                 }
                 className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {rolle === 'sub_mitarbeiter'
+                {r === 'sub_mitarbeiter'
                   ? step === 0
                     ? 'Weiter zur Bestaetigung'
                     : 'Bedingungen akzeptieren'
                   : step === 0
-                  ? rolle === 'buero_inhaber'
+                  ? r === 'buero_inhaber'
                     ? 'Weiter zum Buero-Vertrag'
                     : 'Weiter zum Vertrag'
-                  : rolle === 'buero_inhaber'
+                  : r === 'buero_inhaber'
                   ? 'Buero-Vertrag unterzeichnen'
                   : 'Vertrag unterzeichnen'}
               </LoadingButton>

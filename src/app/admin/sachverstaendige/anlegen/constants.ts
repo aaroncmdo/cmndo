@@ -184,3 +184,65 @@ export type AnlegeBueroFormData = {
     schadenarten?: string[]
   }>
 }
+
+// KFZ-152 Phase 2: Akademie-Anlege Form-Type
+export type AnlegeAkademieFormData = {
+  akademie_name: string
+  rechtsform?: string
+  anschrift: string
+  anschrift_lat: number | null
+  anschrift_lng: number | null
+  anschrift_place_id?: string
+  anschrift_plz: string
+  steuernummer: string
+  ust_id?: string
+  radius_km: number
+  max_faelle_monat: number
+  erst_anzahlung_eur: number
+  // Verwalter
+  verwalter_anrede?: string
+  verwalter_titel?: string
+  verwalter_vorname: string
+  verwalter_nachname: string
+  verwalter_email: string
+  verwalter_telefon?: string
+  // Default-Spezialisierungen der Akademie
+  qualifikationen: string[]
+  spezifikationen: string[]
+  schadenarten: string[]
+  // Mitglieder (optional)
+  sub_svs: Array<{
+    anrede?: string
+    titel?: string
+    vorname: string
+    nachname: string
+    email: string
+    telefon?: string
+    paket: AnlegePaket
+  }>
+}
+
+// KFZ-152 Phase 3: Community-Anlege Form-Type
+export type AnlegeCommunityFormData = {
+  name: string
+  beschreibung?: string
+  // Gemeinsames Einsatzgebiet (MVP: Adresse + Radius statt Polygon)
+  zentrum_anschrift: string
+  zentrum_lat: number | null
+  zentrum_lng: number | null
+  zentrum_place_id?: string
+  zentrum_plz: string
+  radius_km: number
+  max_faelle_monat: number
+  exklusiv: boolean
+  // Initial-Mitglieder
+  mitglieder: Array<{
+    anrede?: string
+    titel?: string
+    vorname: string
+    nachname: string
+    email: string
+    telefon?: string
+    paket: AnlegePaket
+  }>
+}

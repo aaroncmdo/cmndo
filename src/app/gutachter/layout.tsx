@@ -23,7 +23,7 @@ export default async function GutachterLayout({
 
   const displayName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || user.email || ''
 
-  const svSelect = 'logo_url, brand_primary, brand_secondary, use_custom_branding, vertrag_unterschrieben, anzahlung_status, freigeschaltet, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet'
+  const svSelect = 'logo_url, brand_primary, brand_secondary, use_custom_branding, vertrag_unterschrieben, anzahlung_status, freigeschaltet, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, organisation_id, rolle_in_organisation, ist_parent_account'
   let { data: sv } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
@@ -33,6 +33,12 @@ export default async function GutachterLayout({
     const r = await supabase.from('sachverstaendige').select(svSelect).eq('user_id', user.id).single()
     sv = r.data
   }
+
+  // KFZ-152 Phase 2+3: Conditional Sidebar-Eintraege
+  // - Team: nur fuer Inhaber (Buero) oder Akademie-Verwalter (rolle='inhaber' + ist_parent_account)
+  // - Community: nur fuer community_member
+  const showTeam = !!(sv?.ist_parent_account || (sv?.rolle_in_organisation === 'inhaber'))
+  const showCommunity = sv?.rolle_in_organisation === 'community_member'
 
   // Check if this gutachter has been soft-deleted → sign out + redirect
   if (sv) {
@@ -78,6 +84,8 @@ export default async function GutachterLayout({
       brandSecondary={sv?.use_custom_branding ? (sv?.brand_secondary ?? null) : null}
       standortLat={sv?.standort_lat ? Number(sv.standort_lat) : null}
       standortLng={sv?.standort_lng ? Number(sv.standort_lng) : null}
+      showTeam={showTeam}
+      showCommunity={showCommunity}
     >
       {/* Deaktiviert-Banner */}
       {isDeactivated && (

@@ -52,27 +52,35 @@ export default async function GutachterWillkommenPage({
     redirect('/login?error=Dein%20Account%20ist%20noch%20nicht%20eingerichtet.%20Bitte%20kontaktiere%20support%40claimondo.de')
   }
 
-  // Rolle ableiten + primaeren SV-Eintrag waehlen
-  type Rolle = 'solo' | 'buero_inhaber' | 'sub_mitarbeiter'
-  const SUB_ROLLEN = new Set(['mitarbeiter', 'akademie_sub', 'community_member'])
+  // KFZ-152 Phase 2+3: Rolle ableiten + primaeren SV-Eintrag waehlen.
+  // Community-Member wird NICHT mehr als sub_mitarbeiter behandelt — sie zahlen
+  // selbst und bekommen den Solo-Flow mit Community-Banner. Akademie-Verwalter
+  // ist eine neue Rolle (rolle='inhaber' AND org.typ='akademie').
+  type Rolle = 'solo' | 'buero_inhaber' | 'akademie_verwalter' | 'sub_mitarbeiter' | 'community_member'
+  const SUB_ROLLEN = new Set(['mitarbeiter', 'akademie_sub'])
 
   const inhaberSv = allSvs.find(s => (s.rolle_in_organisation ?? '').toLowerCase() === 'inhaber')
   const subSv = allSvs.find(s => SUB_ROLLEN.has((s.rolle_in_organisation ?? '').toLowerCase()))
+  const communitySv = allSvs.find(s => (s.rolle_in_organisation ?? '').toLowerCase() === 'community_member')
   const soloSv = allSvs.find(s => !s.organisation_id)
 
   let rolle: Rolle
   let sv: (typeof allSvs)[number]
   if (inhaberSv) {
+    // Default: buero_inhaber. Wird unten zu akademie_verwalter upgegradet
+    // wenn org.typ='akademie'.
     rolle = 'buero_inhaber'
     sv = inhaberSv
   } else if (subSv) {
     rolle = 'sub_mitarbeiter'
     sv = subSv
+  } else if (communitySv) {
+    rolle = 'community_member'
+    sv = communitySv
   } else if (soloSv) {
     rolle = 'solo'
     sv = soloSv
   } else {
-    // Defensive: SV hat organisation_id aber keine bekannte Rolle → wie Solo behandeln
     rolle = 'solo'
     sv = allSvs[0]
   }
@@ -105,7 +113,8 @@ export default async function GutachterWillkommenPage({
 
   // Org-Daten + ggf. Sub-SVs (fuer Inhaber + Sub-Mitarbeiter)
   // BUG-96: rechtsform + steuernummer fuer die Stammdaten-Card im Vertrag-Step
-  let organisation: { id: string; name: string; typ: string | null; onboarding_status: string | null; rechtsform: string | null; steuernummer: string | null } | null = null
+  // KFZ-152: + akademie_erst_anzahlung_eur fuer Akademie-Verwalter
+  let organisation: { id: string; name: string; typ: string | null; onboarding_status: string | null; rechtsform: string | null; steuernummer: string | null; akademie_erst_anzahlung_eur: number | null } | null = null
   let subSvs: Array<{
     id: string
     name: string | null
@@ -120,12 +129,21 @@ export default async function GutachterWillkommenPage({
   if (sv.organisation_id) {
     const { data: org } = await supabase
       .from('organisationen')
-      .select('id, name, typ, onboarding_status, rechtsform, steuernummer')
+      .select('id, name, typ, onboarding_status, rechtsform, steuernummer, akademie_erst_anzahlung_eur')
       .eq('id', sv.organisation_id)
       .maybeSingle()
-    organisation = org ?? null
+    organisation = org ? {
+      ...org,
+      akademie_erst_anzahlung_eur: org.akademie_erst_anzahlung_eur != null ? Number(org.akademie_erst_anzahlung_eur) : null,
+    } : null
 
-    if (rolle === 'buero_inhaber') {
+    // KFZ-152 Phase 2: Akademie-Verwalter Upgrade. Wenn die Org eine Akademie
+    // ist und der User rolle='inhaber' hat, ist er Akademie-Verwalter.
+    if (rolle === 'buero_inhaber' && organisation?.typ === 'akademie') {
+      rolle = 'akademie_verwalter'
+    }
+
+    if (rolle === 'buero_inhaber' || rolle === 'akademie_verwalter') {
       // Alle Sub-Standorte (mitarbeiter) der Org laden + Mitarbeiter-Email
       const { data: subs } = await supabase
         .from('sachverstaendige')
@@ -159,6 +177,12 @@ export default async function GutachterWillkommenPage({
       }))
 
       gesamtAnzahlung = subSvs.reduce((sum, s) => sum + s.onboarding_anzahlung_betrag, 0)
+    }
+
+    // KFZ-152 Phase 2: Akademie-Verwalter zahlt eine individuelle Erst-Anzahlung
+    // (NICHT die Sub-Summen, die werden intern von der Akademie eingesammelt).
+    if (rolle === 'akademie_verwalter') {
+      gesamtAnzahlung = organisation?.akademie_erst_anzahlung_eur ?? 0
     }
   }
 

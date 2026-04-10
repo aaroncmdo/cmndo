@@ -76,12 +76,37 @@ export async function POST(request: Request) {
     .eq('plz', fall.schadens_plz)
     .single()
 
+  // KFZ-152 Phase 3: Exklusivitaets-Check VOR der SV-Auswahl. Wenn der Lead
+  // in einem exklusiven Community-Gebiet liegt, duerfen nur SVs aus DIESER Org
+  // den Lead bekommen.
+  let exklusivOrgId: string | null = null
+  if (schadenGeo) {
+    try {
+      const { checkExklusivitaet } = await import('@/lib/dispatch/exklusivitaet')
+      const ex = await checkExklusivitaet(supabase, Number(schadenGeo.lat), Number(schadenGeo.lng))
+      if (ex.exklusiv) {
+        exklusivOrgId = ex.organisation_id
+        console.log(`[KFZ-152] Lead ${fallId} im exklusiven Gebiet von Community ${ex.community_name} (org=${ex.organisation_id})`)
+      }
+    } catch (err) {
+      console.error('[KFZ-152] Exklusivitaets-Check fehlgeschlagen:', err)
+    }
+  }
+
   // 3. Alle aktiven SVs mit Kapazität laden
   // KFZ-154: zusaetzlich spezifikationen + schadenarten fuer den Match
-  const { data: svList, error: svErr } = await supabase
+  // KFZ-152 Phase 3: zusaetzlich organisation_id + rolle_in_organisation fuer Org-Routing
+  let svQuery = supabase
     .from('sachverstaendige')
-    .select('id, lat, lng, partner_seit, offene_faelle, max_faelle_monat, standort_lat, standort_lng, isochrone_polygon, paket_umkreis_km, spezifikationen, schadenarten')
+    .select('id, lat, lng, partner_seit, offene_faelle, max_faelle_monat, standort_lat, standort_lng, isochrone_polygon, paket_umkreis_km, spezifikationen, schadenarten, organisation_id, rolle_in_organisation')
     .eq('ist_aktiv', true)
+
+  // Wenn Exklusivitaet aktiv: Hard-Filter auf nur die Mitglieder dieser Org
+  if (exklusivOrgId) {
+    svQuery = svQuery.eq('organisation_id', exklusivOrgId)
+  }
+
+  const { data: svList, error: svErr } = await svQuery
 
   if (svErr || !svList || svList.length === 0) {
     return NextResponse.json(
@@ -167,12 +192,28 @@ export async function POST(request: Request) {
 
   const bestSv = matchedCandidates[0]
 
-  // 6. Fall updaten: SV zuweisen + Status ändern
+  // KFZ-152 Phase 2+3: Organisations-aware Routing
+  // - akademie_sub: NICHT direkt an den Sub-SV zuweisen, sondern an die
+  //   Akademie-Org. Akademie-Verwalter verteilt intern manuell.
+  //   sv_id bleibt null, organisation_id wird gesetzt.
+  // - community_member: Lead geht in den Community-Pool. sv_id null,
+  //   organisation_id gesetzt. Admin/Verwalter verteilt manuell (MVP).
+  // - mitarbeiter (Buero): direkt an den Sub-Buero (existing).
+  // - solo / kein org: direkt zugewiesen (existing).
+  const bestRolle = (bestSv.rolle_in_organisation ?? '').toLowerCase()
+  const orgPool = bestRolle === 'akademie_sub' || bestRolle === 'community_member'
+
+  // 6. Fall updaten: SV zuweisen ODER an Org-Pool
   const now = new Date().toISOString()
   const { error: updateErr } = await supabase
     .from('faelle')
-    .update({
+    .update(orgPool ? {
+      organisation_id: bestSv.organisation_id,
+      sv_zugewiesen_am: null,
+      status: 'sv-gesucht',
+    } : {
       sv_id: bestSv.id,
+      organisation_id: bestSv.organisation_id ?? null,
       sv_zugewiesen_am: now,
       status: 'sv-zugewiesen',
     })
@@ -185,17 +226,19 @@ export async function POST(request: Request) {
     )
   }
 
-  // 7. offene_faelle beim SV um 1 erhöhen
-  const { error: svUpdateErr } = await supabase.rpc('increment_offene_faelle', {
-    sv_id_param: bestSv.id,
-  })
+  // 7. offene_faelle beim SV um 1 erhöhen — NICHT bei org-pool routing
+  if (!orgPool) {
+    const { error: svUpdateErr } = await supabase.rpc('increment_offene_faelle', {
+      sv_id_param: bestSv.id,
+    })
 
-  // Fallback: direktes Update wenn RPC nicht existiert
-  if (svUpdateErr) {
-    await supabase
-      .from('sachverstaendige')
-      .update({ offene_faelle: (bestSv.offene_faelle ?? 0) + 1 })
-      .eq('id', bestSv.id)
+    // Fallback: direktes Update wenn RPC nicht existiert
+    if (svUpdateErr) {
+      await supabase
+        .from('sachverstaendige')
+        .update({ offene_faelle: (bestSv.offene_faelle ?? 0) + 1 })
+        .eq('id', bestSv.id)
+    }
   }
 
   // 8. SV-Profil laden für Response

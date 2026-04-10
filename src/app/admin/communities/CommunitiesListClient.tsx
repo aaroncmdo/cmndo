@@ -1,0 +1,88 @@
+'use client'
+
+import { useState } from 'react'
+import { UsersIcon, PlusIcon, ShieldCheckIcon } from 'lucide-react'
+import CommunityAnlegenWizard from './CommunityAnlegenWizard'
+
+type Community = {
+  id: string
+  name: string
+  exklusiv: boolean
+  radius_km: number | null
+  max_faelle_monat: number | null
+  member_count: number
+  created_at: string
+}
+
+export default function CommunitiesListClient({ communities }: { communities: Community[] }) {
+  const [showWizard, setShowWizard] = useState(false)
+
+  return (
+    <div className="px-8 py-8 max-w-6xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900">Communities</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Einkaufsgemeinschaften mit gemeinsamem Einsatzgebiet, eigenem Pool und Leaderboard.
+          </p>
+        </div>
+        <button
+          onClick={() => setShowWizard(true)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold"
+        >
+          <PlusIcon className="w-4 h-4" /> Neue Community
+        </button>
+      </div>
+
+      {showWizard ? (
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
+          <CommunityAnlegenWizard onSuccess={() => setShowWizard(false)} onCancel={() => setShowWizard(false)} />
+        </div>
+      ) : null}
+
+      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+        {communities.length === 0 ? (
+          <div className="p-12 text-center">
+            <UsersIcon className="w-8 h-8 text-gray-300 mx-auto mb-3" />
+            <p className="text-sm text-gray-500">Noch keine Communities angelegt.</p>
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-[10px] uppercase tracking-wide text-gray-500">
+              <tr>
+                <th className="text-left px-4 py-3">Name</th>
+                <th className="text-left px-4 py-3">Mitglieder</th>
+                <th className="text-left px-4 py-3">Radius</th>
+                <th className="text-left px-4 py-3">Max Fälle/Monat</th>
+                <th className="text-left px-4 py-3">Exklusiv</th>
+                <th className="text-left px-4 py-3">Erstellt</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {communities.map(c => (
+                <tr key={c.id} className="hover:bg-gray-50/50">
+                  <td className="px-4 py-3 font-medium text-gray-900">{c.name}</td>
+                  <td className="px-4 py-3 text-gray-700">{c.member_count}</td>
+                  <td className="px-4 py-3 text-gray-700">{c.radius_km ? `${c.radius_km} km` : '—'}</td>
+                  <td className="px-4 py-3 text-gray-700">{c.max_faelle_monat ?? '—'}</td>
+                  <td className="px-4 py-3">
+                    {c.exklusiv ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-medium">
+                        <ShieldCheckIcon className="w-3 h-3" /> Exklusiv
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-400">—</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-xs text-gray-500">
+                    {new Date(c.created_at).toLocaleDateString('de-DE')}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  )
+}

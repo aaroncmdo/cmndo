@@ -35,10 +35,45 @@ export async function GET() {
   const monthStartDate = new Date(jahr, monat - 1, 1).toISOString().slice(0, 10)
   const monthEndDate = new Date(jahr, monat, 0).toISOString().slice(0, 10)
 
-  // Alle aktiven SVs
+  // KFZ-152 Phase 2+3: Alle aktiven SVs MIT Org-Info fuer die Sammelabrechnungs-
+  // Logik. Buero+Akademie werden zur EINEN Sammelrechnung pro Org gruppiert,
+  // Solo + Community + null-Org bekommen weiterhin individuelle Rechnungen.
   const { data: svs } = await db.from('sachverstaendige')
-    .select('id, profile_id, werbebudget_guthaben_netto')
+    .select('id, profile_id, werbebudget_guthaben_netto, organisation_id, rolle_in_organisation')
     .eq('ist_aktiv', true)
+
+  // Org-Typ-Lookup vor dem SV-Loop (1 Query statt 1-pro-SV)
+  const orgIds = Array.from(new Set((svs ?? []).map(s => s.organisation_id).filter(Boolean) as string[]))
+  const orgTypMap = new Map<string, { typ: string | null; name: string; hauptansprechpartner_user_id: string | null }>()
+  if (orgIds.length) {
+    const { data: orgs } = await db.from('organisationen')
+      .select('id, typ, name, hauptansprechpartner_user_id')
+      .in('id', orgIds)
+    for (const o of orgs ?? []) {
+      orgTypMap.set(o.id, { typ: o.typ, name: o.name, hauptansprechpartner_user_id: o.hauptansprechpartner_user_id })
+    }
+  }
+
+  // Akkumulator fuer Buero/Akademie Sammelrechnungen
+  type OrgPosition = {
+    fall_id: string
+    fall_datum: string
+    kennzeichen: string | null
+    schadenhoehe_netto: number
+    lead_preis_netto: number
+    lead_preis_typ: string
+    guthaben_verrechnet_netto: number
+    sv_nachzahlung_netto: number
+    sub_sv_id: string  // KFZ-152: Sub-SV Zuordnung pro Position
+    sub_sv_name: string | null
+  }
+  const orgAccumulator = new Map<string, {
+    org_typ: string
+    org_name: string
+    org_id: string
+    positions: OrgPosition[]
+    fall_ids: string[]
+  }>()
 
   let created = 0
 
@@ -71,6 +106,38 @@ export async function GET() {
       continue
     }
     const empfaengerName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || 'Sachverstaendiger'
+
+    // KFZ-152 Phase 2+3: Sammelabrechnungs-Routing
+    // Wenn der SV Teil einer Buero- oder Akademie-Org ist, sammeln wir die
+    // Positionen pro Org statt einzeln zu inserten. Eine Sammelrechnung pro
+    // Org wird nach dem Loop am Ende erstellt.
+    const orgInfo = sv.organisation_id ? orgTypMap.get(sv.organisation_id) : null
+    if (orgInfo && (orgInfo.typ === 'buero' || orgInfo.typ === 'akademie')) {
+      const acc: { org_typ: string; org_name: string; org_id: string; positions: OrgPosition[]; fall_ids: string[] } = orgAccumulator.get(sv.organisation_id!) ?? {
+        org_typ: orgInfo.typ,
+        org_name: orgInfo.name,
+        org_id: sv.organisation_id!,
+        positions: [] as OrgPosition[],
+        fall_ids: [] as string[],
+      }
+      for (const f of faelle) {
+        acc.positions.push({
+          fall_id: f.id,
+          fall_datum: new Date(f.created_at).toISOString().slice(0, 10),
+          kennzeichen: f.kennzeichen ?? null,
+          schadenhoehe_netto: Number(f.schadenhoehe_netto ?? f.gutachten_betrag ?? 0),
+          lead_preis_netto: Number(f.lead_preis_netto),
+          lead_preis_typ: f.lead_preis_typ ?? 'paket',
+          guthaben_verrechnet_netto: Number(f.guthaben_verrechnet_netto ?? 0),
+          sv_nachzahlung_netto: Number(f.sv_nachzahlung_netto ?? 0),
+          sub_sv_id: sv.id,
+          sub_sv_name: empfaengerName,
+        })
+        acc.fall_ids.push(f.id)
+      }
+      orgAccumulator.set(sv.organisation_id!, acc)
+      continue // Skip individual insert
+    }
 
     // Rechnungsnummer: CMNDO-YYYY-MM-NNNN
     // Wir zaehlen aller existierenden SV-Abrechnungen im Monat mit dem
@@ -170,5 +237,93 @@ export async function GET() {
     created++
   }
 
-  return NextResponse.json({ ok: true, created })
+  // ─── KFZ-152 Phase 2+3: Sammelrechnungen pro Buero/Akademie-Org ─────────
+  for (const [orgId, acc] of orgAccumulator.entries()) {
+    const totalNetto = acc.positions.reduce((s, p) => s + p.sv_nachzahlung_netto, 0)
+    const mwst = Math.round(totalNetto * 0.19 * 100) / 100
+    const totalBrutto = Math.round((totalNetto + mwst) * 100) / 100
+    if (totalNetto <= 0) continue
+
+    // Verwalter-Email aus Org laden
+    const orgInfo = orgTypMap.get(orgId)
+    let verwalterEmail = ''
+    let verwalterName = orgInfo?.name ?? ''
+    if (orgInfo?.hauptansprechpartner_user_id) {
+      const { data: p } = await db.from('profiles')
+        .select('email, vorname, nachname')
+        .eq('id', orgInfo.hauptansprechpartner_user_id)
+        .maybeSingle()
+      if (p?.email) verwalterEmail = p.email
+      if (p?.vorname || p?.nachname) verwalterName = [p?.vorname, p?.nachname].filter(Boolean).join(' ')
+    }
+    if (!verwalterEmail) {
+      console.error(`[KFZ-152] Sammelrechnung Org ${orgId}: kein Verwalter-Email`)
+      continue
+    }
+
+    // Rechnungsnummer
+    const { count: existing } = await db.from('abrechnungen').select('id', { count: 'exact', head: true })
+      .eq('empfaenger_typ', 'sv')
+      .gte('abrechnungs_zeitraum_start', monthStartDate)
+      .lte('abrechnungs_zeitraum_ende', monthEndDate)
+    const nr = String((existing ?? 0) + 1).padStart(4, '0')
+    const abrechnungsNr = `CMNDO-${jahr}-${String(monat).padStart(2, '0')}-${nr}`
+
+    const faellig = new Date(jahr, monat, 14)
+    const faelligIso = faellig.toISOString().slice(0, 10)
+
+    // Positionen mit Sub-SV-Sektionen (jede Position trackt ihren sub_sv_id)
+    const positionenJson = acc.positions.map((p, i) => ({ position_nr: i + 1, ...p }))
+
+    const { data: abr, error: abrErr } = await db.from('abrechnungen').insert({
+      empfaenger_typ: 'sv',
+      empfaenger_id: orgId, // Die ORG ist Empfaenger der Sammelrechnung
+      empfaenger_email: verwalterEmail,
+      empfaenger_name: `${verwalterName} (${acc.org_typ === 'buero' ? 'Büro' : 'Akademie'} ${acc.org_name})`,
+      abrechnungs_nr: abrechnungsNr,
+      abrechnungs_zeitraum_start: monthStartDate,
+      abrechnungs_zeitraum_ende: monthEndDate,
+      positionen: positionenJson,
+      summe_netto: totalNetto,
+      ust_satz: 19.00,
+      ust_betrag: mwst,
+      summe_brutto: totalBrutto,
+      faellig_am: faelligIso,
+      status: 'versendet',
+      versand_datum: new Date().toISOString(),
+      notiz: `Sammelrechnung für ${acc.org_typ === 'buero' ? 'Büro' : 'Akademie'} ${acc.org_name}. ${acc.positions.length} Positionen aus ${new Set(acc.positions.map(p => p.sub_sv_id)).size} Sub-SVs. Wird gegen ${acc.org_typ === 'buero' ? 'parent_stripe_customer_id' : 'Akademie-Customer'} eingezogen.`,
+    }).select('id').single()
+
+    if (abrErr || !abr) {
+      console.error(`[KFZ-152] Sammelrechnung ${orgId}:`, abrErr?.message)
+      continue
+    }
+
+    // Faelle markieren
+    await db.from('faelle').update({ abrechnung_id: abr.id }).in('id', acc.fall_ids)
+
+    // Welcome-Mail an Verwalter
+    try {
+      const { sendEmail } = await import('@/lib/email/google/client')
+      await sendEmail({
+        to: verwalterEmail,
+        subject: `Claimondo Sammelabrechnung ${String(monat).padStart(2, '0')}/${jahr} — ${abrechnungsNr}`,
+        html: `<p>Hallo ${verwalterName},</p>
+<p>die Sammelabrechnung für ${acc.org_typ === 'buero' ? 'dein Büro' : 'deine Akademie'} <strong>${acc.org_name}</strong> ist erstellt:</p>
+<ul>
+<li><strong>Rechnungsnummer:</strong> ${abrechnungsNr}</li>
+<li><strong>Anzahl Positionen:</strong> ${acc.positions.length} (über ${new Set(acc.positions.map(p => p.sub_sv_id)).size} Sub-SVs)</li>
+<li><strong>Endbetrag:</strong> ${totalBrutto.toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR brutto</li>
+<li><strong>Fällig am:</strong> ${faellig.toLocaleDateString('de-DE')}</li>
+</ul>
+<p>Der Betrag wird am ${faellig.toLocaleDateString('de-DE')} automatisch von der hinterlegten ${acc.org_typ === 'buero' ? 'Buero' : 'Akademie'}-Zahlungsmethode eingezogen.</p>`,
+        empfaengerTyp: 'sv',
+        template: 'org_sammelabrechnung',
+      })
+    } catch (err) { console.error('[KFZ-152] Sammelrechnungs-Email:', err) }
+
+    created++
+  }
+
+  return NextResponse.json({ ok: true, created, sammelrechnungen: orgAccumulator.size })
 }
