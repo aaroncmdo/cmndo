@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { CheckCircle2Icon, CircleDotIcon, AlertCircleIcon, FileTextIcon, ImageIcon, UploadIcon } from 'lucide-react'
 import { getPflichtDokumenteFuerFall, DOKUMENT_LABELS, type Phase, type Szenario } from '@/lib/dokumente/pflicht-dokumente'
 import FallDokumentDropzone from './FallDokumentDropzone'
+import OcrAutoFillModal, { type OcrData } from './OcrAutoFillModal'
 
 // KFZ-172: Dokumente-Sidebar fuer die Fall-Akte Right-Sidebar.
 // Zeigt kumulierte Pflichtdokumente mit Status (vorhanden/fehlend/OCR)
@@ -17,6 +18,7 @@ export type FallDokumentRow = {
   storage_path: string
   original_filename: string | null
   ocr_status: string | null
+  ocr_extracted_data?: Record<string, unknown> | null
   hochgeladen_am: string
 }
 
@@ -34,6 +36,7 @@ export default function FallDokumenteSidebar({
   onUploadClick?: (dokumentTyp: string) => void
 }) {
   const [uploadingTyp, setUploadingTyp] = useState<string | null>(null)
+  const [ocrModal, setOcrModal] = useState<{ dokumentTyp: string; data: OcrData } | null>(null)
   const pflicht = getPflichtDokumenteFuerFall(
     aktuellePhase as Phase | null,
     szenario as Szenario | null,
@@ -103,7 +106,19 @@ export default function FallDokumenteSidebar({
                 {p.label}*
               </span>
               {isProcessing && <span className="text-[9px] text-amber-600 animate-pulse">OCR...</span>}
-              {isOcr && <span className="text-[9px] text-emerald-600">OCR</span>}
+              {isOcr && (
+                <button
+                  type="button"
+                  onClick={e => {
+                    e.stopPropagation()
+                    const parsed = (vorhanden?.ocr_extracted_data as Record<string, unknown>)?.parsed as OcrData | undefined
+                    if (parsed) setOcrModal({ dokumentTyp: vorhanden!.dokument_typ, data: parsed })
+                  }}
+                  className="text-[9px] text-emerald-600 hover:text-emerald-800 underline"
+                >
+                  OCR
+                </button>
+              )}
               {!vorhanden && (
                 <UploadIcon className="w-3 h-3 text-red-400" />
               )}
@@ -155,6 +170,16 @@ export default function FallDokumenteSidebar({
       >
         <UploadIcon className="w-3 h-3" /> Weiteres Dokument
       </button>
+
+      {/* KFZ-172: OCR Auto-Fill Modal */}
+      {ocrModal && (
+        <OcrAutoFillModal
+          fallId={fallId}
+          dokumentTyp={ocrModal.dokumentTyp}
+          ocrData={ocrModal.data}
+          onClose={() => setOcrModal(null)}
+        />
+      )}
     </div>
   )
 }

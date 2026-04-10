@@ -23,6 +23,8 @@ import { uploadGutachten, uploadDokument, uploadDatei, saveFinVinGutachter, send
 import { terminAblehnen, terminGegenvorschlag, terminAnnehmen } from '@/lib/actions/termin-actions'
 import VorOrtPanel from '@/components/VorOrtPanel'
 import ChatChannel from '@/components/ChatChannel'
+import FallActivityFeed, { buildActivityEvents } from '@/components/faelle/FallActivityFeed'
+import FallDokumenteSidebar, { type FallDokumentRow } from '@/components/faelle/FallDokumenteSidebar'
 
 const DOKUMENT_TYP_LABEL: Record<string, string> = {
   fahrzeugschein: 'Fahrzeugschein',
@@ -74,6 +76,7 @@ export default function FallDetailClient({
   kundenbetreuer,
   chatTeilnehmer,
   aktiverTermin,
+  fallDokumente,
 }: {
   fall: Record<string, unknown>
   lead: { vorname: string | null; nachname: string | null; email: string | null; telefon: string | null } | null
@@ -85,6 +88,7 @@ export default function FallDetailClient({
   kundenbetreuer?: { vorname: string | null; nachname: string | null; email: string | null; telefon: string | null } | null
   chatTeilnehmer?: { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url: string | null }[]
   aktiverTermin?: TerminInfo | null
+  fallDokumente?: FallDokumentRow[]
 }) {
   const [tab, setTab] = useState<TabKey>('uebersicht')
   const [uploading, setUploading] = useState(false)
@@ -291,6 +295,24 @@ export default function FallDetailClient({
             <p className="text-green-300 text-sm">{success}</p>
           </div>
         )}
+
+        {/* KFZ-172: Activity + Pflichtdokumente Sidebar (inline, vor Tabs) */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 mb-4">
+          <FallActivityFeed
+            events={buildActivityEvents(
+              timeline as { id: string; typ: string; titel: string; beschreibung?: string | null; erstellt_von?: string | null; created_at: string }[],
+              [],
+              nachrichten as { id: string; kanal: string; sender_rolle?: string | null; nachricht: string; created_at: string }[],
+            )}
+            maxItems={8}
+          />
+          <FallDokumenteSidebar
+            fallId={fall.id as string}
+            aktuellePhase={fall.aktuelle_phase as string | null}
+            szenario={fall.szenario as string | null}
+            dokumente={fallDokumente ?? []}
+          />
+        </div>
 
         {/* Tabs */}
         <div className="flex gap-1 mb-6 bg-white rounded-xl p-1 border border-gray-200 overflow-x-auto">

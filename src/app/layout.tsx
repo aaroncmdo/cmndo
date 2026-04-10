@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { CookieBanner } from "@/components/CookieBanner";
+import { Footer } from "@/components/Footer";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -33,7 +37,11 @@ export default function RootLayout({
           Zum Hauptinhalt springen
         </a>
         {children}
+        <Footer />
         <Toaster position="top-right" richColors closeButton />
+        <CookieBanner />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

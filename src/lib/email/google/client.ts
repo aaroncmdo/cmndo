@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resend, isResendAvailable } from '@/lib/email/resend-client'
 
 // Google Workspace Limit: 2000 Mails/Tag pro User
 const transporter = nodemailer.createTransport({
@@ -58,7 +59,52 @@ export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: strin
 
   const logId = logEntry?.id
 
-  // Retry-Logik: 3 Versuche bei Fehler, exponential backoff
+  // ─── Resend-Pfad (wenn RESEND_API_KEY gesetzt) ───────────────────────────
+  if (isResendAvailable() && resend) {
+    let lastError: Error | null = null
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const result = await resend.emails.send({
+          from: process.env.RESEND_FROM || 'Claimondo <noreply@claimondo.de>',
+          to: Array.isArray(opts.to) ? opts.to : [opts.to],
+          subject: opts.subject,
+          html: opts.html,
+          text: opts.text,
+          replyTo: opts.replyTo,
+          attachments: opts.attachments?.map(a => ({
+            filename: a.filename,
+            content: Buffer.isBuffer(a.content) ? a.content : Buffer.from(a.content),
+          })),
+        })
+
+        const messageId = result.data?.id ?? `resend-${Date.now()}`
+
+        if (logId) {
+          await admin.from('email_log').update({
+            status: 'sent',
+            message_id: messageId,
+            versuche: attempt,
+            gesendet_am: new Date().toISOString(),
+          }).eq('id', logId)
+        }
+
+        return { messageId }
+      } catch (err) {
+        lastError = err instanceof Error ? err : new Error(String(err))
+        if (logId) {
+          await admin.from('email_log').update({ versuche: attempt, fehler: lastError.message }).eq('id', logId)
+        }
+        if (attempt < 3) await new Promise(r => setTimeout(r, attempt * 2000))
+      }
+    }
+
+    if (logId) {
+      await admin.from('email_log').update({ status: 'failed', fehler: lastError?.message ?? 'Unbekannter Fehler' }).eq('id', logId)
+    }
+    throw lastError ?? new Error('Email-Versand via Resend fehlgeschlagen')
+  }
+
+  // ─── Google SMTP Fallback ───────────────────────────────────────────────
   let lastError: Error | null = null
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {

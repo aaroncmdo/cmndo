@@ -114,7 +114,7 @@ export default async function FallaktePage({
   try {
     const { data: fd } = await supabase
       .from('fall_dokumente')
-      .select('id, dokument_typ, ist_pflicht, ab_phase, storage_path, original_filename, ocr_status, hochgeladen_am')
+      .select('id, dokument_typ, ist_pflicht, ab_phase, storage_path, original_filename, ocr_status, ocr_extracted_data, hochgeladen_am')
       .eq('fall_id', id)
       .is('geloescht_am', null)
       .order('hochgeladen_am')

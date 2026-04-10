@@ -10,6 +10,7 @@ import LeadActionsMenu from './LeadActionsMenu'
 import LeadHistorie from './LeadHistorie'
 import LeadInlineFields from './LeadInlineFields'
 import LeadDetailTabs from './LeadDetailTabs'
+import FallDokumenteSidebar from '@/components/faelle/FallDokumenteSidebar'
 
 export default async function LeadDetailPage({
   params,
@@ -193,6 +194,13 @@ export default async function LeadDetailPage({
                       qualifizierungs_phase: lead.qualifizierungs_phase ?? 'neu',
                     }}
                     timelineEntries={timelineEntries ?? []}
+                  />
+                  {/* KFZ-172: Pflichtdokumente fuer Lead-Phase */}
+                  <FallDokumenteSidebar
+                    fallId={faelle?.[0]?.id ?? lead.id}
+                    aktuellePhase="lead"
+                    szenario={((lead.schadenfall_typ as string) ?? '').includes('strittig') ? 'haftpflicht_strittig' : 'haftpflicht_eindeutig'}
+                    dokumente={[]}
                   />
                 </>
               }

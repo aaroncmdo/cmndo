@@ -102,6 +102,18 @@ export default async function GutachterFallPage({
     _preistyp: abrechnung?.preistyp ?? null,
   }
 
+  // KFZ-172: fall_dokumente laden
+  let fallDokumente: { id: string; dokument_typ: string; ist_pflicht: boolean; ab_phase: string | null; storage_path: string; original_filename: string | null; ocr_status: string | null; hochgeladen_am: string }[] = []
+  try {
+    const { data: fd } = await supabase
+      .from('fall_dokumente')
+      .select('id, dokument_typ, ist_pflicht, ab_phase, storage_path, original_filename, ocr_status, ocr_extracted_data, hochgeladen_am')
+      .eq('fall_id', id)
+      .is('geloescht_am', null)
+      .order('hochgeladen_am')
+    fallDokumente = (fd ?? []) as typeof fallDokumente
+  } catch { /* Tabelle kann noch nicht existieren */ }
+
   // KFZ-129: Chat-Teilnehmer laden
   const { getChatTeilnehmer } = await import('@/lib/chatGruppe')
   const chatTeilnehmer = await getChatTeilnehmer(id)
@@ -131,6 +143,7 @@ export default async function GutachterFallPage({
       kundenbetreuer={kundenbetreuer}
       chatTeilnehmer={chatTeilnehmer}
       aktiverTermin={aktiverTermin}
+      fallDokumente={fallDokumente}
     />
   )
 }
