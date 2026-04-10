@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { MapPinIcon, FolderOpenIcon, XIcon, CameraIcon } from 'lucide-react'
+import { MapPinIcon, FolderOpenIcon, XIcon, CameraIcon, CheckCircleIcon, LoaderIcon } from 'lucide-react'
+import { uploadFallDokument } from '@/lib/dokumente/upload'
 
-// KFZ-158 Phase 3: Modal das erscheint wenn der SV am Termin-Ort ankommt.
-// Zeigt Termin-Details und Button um die Fall-Akte zu oeffnen.
+// KFZ-158 Phase 3+4: Modal das erscheint wenn der SV am Termin-Ort ankommt.
+// Zeigt Termin-Details, Button um Fall-Akte zu oeffnen, + Kamera-Upload.
 
 export type AnkommenTermin = {
   termin_id: string
@@ -27,10 +28,30 @@ export default function AnkommenModal({
   onOpenAkte: () => void
 }) {
   const router = useRouter()
+  const cameraRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadCount, setUploadCount] = useState(0)
 
   function handleOpenAkte() {
     onOpenAkte()
     router.push(`/gutachter/fall/${termin.fall_id}`)
+  }
+
+  async function handleCameraCapture(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files
+    if (!files?.length) return
+    setUploading(true)
+    let count = 0
+    for (const file of Array.from(files)) {
+      const fd = new FormData()
+      fd.append('file', file)
+      const typ = count === 0 ? 'fotos_schaden_uebersicht' : 'fotos_schaden_detail'
+      await uploadFallDokument(termin.fall_id, typ, true, 'termin', fd)
+      count++
+    }
+    setUploadCount(prev => prev + count)
+    setUploading(false)
+    if (cameraRef.current) cameraRef.current.value = ''
   }
 
   return (
@@ -74,6 +95,35 @@ export default function AnkommenModal({
               <span className="text-gray-500">Fahrzeug</span>
               <span className="text-gray-700">{termin.fahrzeug}</span>
             </div>
+          )}
+        </div>
+
+        {/* KFZ-158 Phase 4: Quick-Foto-Upload */}
+        <div className="px-5 pb-2">
+          <input
+            ref={cameraRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            multiple
+            onChange={handleCameraCapture}
+            className="hidden"
+          />
+          <button
+            onClick={() => cameraRef.current?.click()}
+            disabled={uploading}
+            className="w-full flex items-center justify-center gap-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl py-3 text-sm font-medium transition-colors disabled:opacity-50"
+          >
+            {uploading ? (
+              <><LoaderIcon className="w-4 h-4 animate-spin" /> Wird hochgeladen...</>
+            ) : (
+              <><CameraIcon className="w-4 h-4" /> Schadensfotos aufnehmen</>
+            )}
+          </button>
+          {uploadCount > 0 && (
+            <p className="text-[10px] text-emerald-600 text-center mt-1 flex items-center justify-center gap-1">
+              <CheckCircleIcon className="w-3 h-3" /> {uploadCount} Foto(s) hochgeladen + OCR gestartet
+            </p>
           )}
         </div>
 
