@@ -5,7 +5,6 @@ import {
   emailSvZugewiesen,
   emailGutachtenEingegangen,
   emailFilmcheckBestanden,
-  emailFallAbgeschlossen,
 } from '@/lib/email'
 
 export async function POST(req: NextRequest) {
@@ -106,22 +105,6 @@ export async function POST(req: NextRequest) {
             await emailFilmcheckBestanden(k.email, fallNr)
           }
         }
-        break
-      }
-
-      case 'fall-abgeschlossen': {
-        if (!fall.lead_id) break
-        const { data: lead } = await supabase
-          .from('leads')
-          .select('email')
-          .eq('id', fall.lead_id)
-          .single()
-        if (!lead?.email) break
-
-        const betrag = fall.regulierung_betrag
-          ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(fall.regulierung_betrag))
-          : '—'
-        await emailFallAbgeschlossen(lead.email, fallNr, betrag)
         break
       }
 

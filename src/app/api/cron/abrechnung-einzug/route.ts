@@ -167,7 +167,6 @@ export async function GET(request: Request) {
           status: 'bezahlt',
           updated_at: bezahltAm,
         }).eq('id', abr.id)
-        await sendBezahltMail(abr, bezahltAm, pi.id, false)
         success++
       } else {
         // 'requires_action' (3DS) oder 'processing' — Einzug noch offen, Versuch zaehlen
@@ -216,48 +215,6 @@ export async function GET(request: Request) {
       updated_at: new Date().toISOString(),
     }).eq('id', abrechnungId)
     await alertAaron(abr, `${grund}: ${fehler}`)
-  }
-
-  async function sendBezahltMail(
-    abr: { id: string; abrechnungs_nr: string; empfaenger_email: string | null; empfaenger_id: string | null; summe_brutto: number | string | null },
-    bezahltAm: string,
-    paymentIntentId: string,
-    manuell: boolean,
-  ) {
-    if (!abr.empfaenger_email) return
-    try {
-      // Vorname aus Profile lookup (best effort)
-      let vorname: string | null = null
-      if (abr.empfaenger_id) {
-        const { data: sv } = await db.from('sachverstaendige')
-          .select('profile_id').eq('id', abr.empfaenger_id).maybeSingle()
-        const profileId = sv?.profile_id ?? abr.empfaenger_id
-        const { data: p } = await db.from('profiles')
-          .select('vorname').eq('id', profileId).maybeSingle()
-        vorname = p?.vorname ?? null
-      }
-      const { render } = await import('@react-email/render')
-      const { AbrechnungBezahltConfirmationEmail, subject: bezahltSubject } =
-        await import('@/lib/email/google/templates/AbrechnungBezahltConfirmation')
-      const props = {
-        vorname,
-        abrechnungs_nr: abr.abrechnungs_nr,
-        summe_brutto: Number(abr.summe_brutto ?? 0),
-        bezahlt_am: bezahltAm,
-        stripe_payment_intent_id: paymentIntentId,
-        manuell,
-      }
-      const html = await render(AbrechnungBezahltConfirmationEmail(props))
-      await sendEmail({
-        to: abr.empfaenger_email,
-        subject: bezahltSubject(props),
-        html,
-        empfaengerTyp: 'sv',
-        template: 'abrechnung_bezahlt_confirmation',
-      })
-    } catch (err) {
-      console.error('[KFZ-149 einzug] Bezahlt-Mail fehlgeschlagen:', err)
-    }
   }
 
   async function alertAaron(

@@ -8,7 +8,6 @@ import {
   emailSvZugewiesen,
   emailGutachtenEingegangen,
   emailFilmcheckBestanden,
-  emailFallAbgeschlossen,
 } from '@/lib/email'
 import { sendStatusWhatsApp } from '@/lib/whatsapp'
 import { triggerKonversionTasks, triggerGutachterTerminTask, triggerGutachtenUploadTask, triggerQcTask, triggerLeadTasks, triggerOnboardingTasks, resolveGates, autoCompleteTask } from '@/lib/tasking'
@@ -668,13 +667,4 @@ async function triggerStatusEmail(supabase: Awaited<ReturnType<typeof createClie
     }
   }
 
-  if (status === 'abgeschlossen' && fall.lead_id) {
-    const { data: lead } = await supabase.from('leads').select('email').eq('id', fall.lead_id).single()
-    if (lead?.email) {
-      const betrag = fall.regulierung_betrag
-        ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(fall.regulierung_betrag))
-        : '—'
-      await emailFallAbgeschlossen(lead.email, fallNr, betrag)
-    }
-  }
 }

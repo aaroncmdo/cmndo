@@ -1,8 +1,5 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { render } from '@react-email/render'
-import { sendEmail } from '@/lib/email/google/client'
-import { AbrechnungReminderEmail, subject as reminderSubject } from '@/lib/email/google/templates/AbrechnungReminder'
 
 export const dynamic = 'force-dynamic'
 
@@ -89,58 +86,19 @@ export async function GET(request: Request) {
 
     if (existing) { skipped++; continue }
 
-    // Vorname aus Profile lookup (best effort)
-    let vorname: string | null = null
-    let nachname: string | null = null
-    if (abr.empfaenger_id) {
-      const { data: sv } = await db.from('sachverstaendige')
-        .select('profile_id')
-        .eq('id', abr.empfaenger_id)
-        .maybeSingle()
-      const profileId = sv?.profile_id ?? abr.empfaenger_id
-      const { data: p } = await db.from('profiles')
-        .select('vorname, nachname')
-        .eq('id', profileId)
-        .maybeSingle()
-      vorname = p?.vorname ?? null
-      nachname = p?.nachname ?? null
-    }
+    // Audit-Trail: Tier in abrechnung_reminders + legacy reminder_gesendet_am setzen
+    const versendetAm = new Date().toISOString()
+    await db.from('abrechnung_reminders').insert({
+      abrechnung_id: abr.id,
+      reminder_typ: tier,
+      versendet_am: versendetAm,
+      details: { tage_bis_faellig: tageBisFaellig, summe_brutto: Number(abr.summe_brutto ?? 0) },
+    })
+    await db.from('abrechnungen').update({
+      reminder_gesendet_am: versendetAm,
+    }).eq('id', abr.id)
 
-    try {
-      const props = {
-        vorname,
-        nachname,
-        abrechnungs_nr: abr.abrechnungs_nr,
-        summe_brutto: Number(abr.summe_brutto ?? 0),
-        faellig_am: abr.faellig_am as string,
-        tage_bis_faellig: Math.max(0, tageBisFaellig),
-      }
-      const html = await render(AbrechnungReminderEmail(props))
-      await sendEmail({
-        to: abr.empfaenger_email,
-        subject: reminderSubject(props),
-        html,
-        empfaengerTyp: 'sv',
-        template: `abrechnung_${tier}`,
-      })
-
-      // Audit-Trail: Tier in abrechnung_reminders + legacy reminder_gesendet_am setzen
-      const versendetAm = new Date().toISOString()
-      await db.from('abrechnung_reminders').insert({
-        abrechnung_id: abr.id,
-        reminder_typ: tier,
-        versendet_am: versendetAm,
-        details: { tage_bis_faellig: tageBisFaellig, summe_brutto: Number(abr.summe_brutto ?? 0) },
-      })
-      await db.from('abrechnungen').update({
-        reminder_gesendet_am: versendetAm,
-      }).eq('id', abr.id)
-
-      counts[tier]++
-    } catch (err) {
-      console.error(`[KFZ-149 reminder] ${tier} Mail fuer ${abr.abrechnungs_nr} fehlgeschlagen:`, err)
-      failed++
-    }
+    counts[tier]++
   }
 
   console.log(`[KFZ-149 reminder] T-7=${counts.reminder_7d} T-3=${counts.reminder_3d} T-1=${counts.reminder_1d} skipped=${skipped} failed=${failed} total_pruefung=${faellig?.length ?? 0}`)
