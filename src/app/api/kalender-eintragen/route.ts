@@ -68,27 +68,52 @@ export async function POST(request: Request) {
   return NextResponse.json({ termin_id: termin.id, externer_kalender_id: externerKalenderId })
 }
 
-/**
- * Placeholder: Create event in Google Calendar.
- */
+// Google Calendar API: Termin erstellen.
 async function createGoogleCalendarEvent(
-  _token: unknown,
-  _event: { start_zeit: string; end_zeit: string; titel?: string; beschreibung?: string },
+  token: unknown,
+  event: { start_zeit: string; end_zeit: string; titel?: string; beschreibung?: string },
 ): Promise<string | null> {
-  // TODO: Implement real Google Calendar API
-  // POST https://www.googleapis.com/calendar/v3/calendars/primary/events
-  // Returns the created event ID
-  return `google-mock-${Date.now()}`
+  const tokenObj = token as { access_token?: string } | string | null
+  const accessToken = typeof tokenObj === 'string' ? tokenObj : tokenObj?.access_token
+  if (!accessToken) return null
+  try {
+    const resp = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        summary: event.titel ?? 'Claimondo Gutachtertermin',
+        description: event.beschreibung ?? '',
+        start: { dateTime: event.start_zeit, timeZone: 'Europe/Berlin' },
+        end: { dateTime: event.end_zeit, timeZone: 'Europe/Berlin' },
+      }),
+    })
+    if (!resp.ok) return null
+    const data = await resp.json()
+    return data.id ?? null
+  } catch { return null }
 }
 
-/**
- * Placeholder: Create event in Outlook Calendar.
- */
+// Microsoft Graph API: Outlook Termin erstellen.
 async function createOutlookCalendarEvent(
-  _token: unknown,
-  _event: { start_zeit: string; end_zeit: string; titel?: string; beschreibung?: string },
+  token: unknown,
+  event: { start_zeit: string; end_zeit: string; titel?: string; beschreibung?: string },
 ): Promise<string | null> {
-  // TODO: Implement real Microsoft Graph API
-  // POST https://graph.microsoft.com/v1.0/me/events
-  return `outlook-mock-${Date.now()}`
+  const tokenObj = token as { access_token?: string } | string | null
+  const accessToken = typeof tokenObj === 'string' ? tokenObj : tokenObj?.access_token
+  if (!accessToken) return null
+  try {
+    const resp = await fetch('https://graph.microsoft.com/v1.0/me/events', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subject: event.titel ?? 'Claimondo Gutachtertermin',
+        body: { contentType: 'text', content: event.beschreibung ?? '' },
+        start: { dateTime: event.start_zeit, timeZone: 'Europe/Berlin' },
+        end: { dateTime: event.end_zeit, timeZone: 'Europe/Berlin' },
+      }),
+    })
+    if (!resp.ok) return null
+    const data = await resp.json()
+    return data.id ?? null
+  } catch { return null }
 }

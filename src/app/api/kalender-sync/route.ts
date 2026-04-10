@@ -82,30 +82,55 @@ export async function POST(request: Request) {
   return NextResponse.json({ results })
 }
 
-/**
- * Placeholder: Fetch events from Google Calendar API.
- * Will be replaced with real Google Calendar API calls once OAuth is set up.
- */
+// Google Calendar API: Termine der naechsten 30 Tage lesen.
 async function fetchGoogleCalendarEvents(
-  _token: unknown,
+  token: unknown,
 ): Promise<{ start: string; end: string; title?: string; externer_id?: string }[]> {
-  // TODO: Implement real Google Calendar API integration
-  // Uses token.access_token to call:
-  // GET https://www.googleapis.com/calendar/v3/calendars/primary/events
-  //   ?timeMin=<now>&timeMax=<+30days>&singleEvents=true
-  // For now, return empty (no mock data to avoid confusion)
-  return []
+  const tokenObj = token as { access_token?: string } | string | null
+  const accessToken = typeof tokenObj === 'string' ? tokenObj : tokenObj?.access_token
+  if (!accessToken) return []
+  const now = new Date()
+  const in30d = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+  const url = new URL('https://www.googleapis.com/calendar/v3/calendars/primary/events')
+  url.searchParams.set('timeMin', now.toISOString())
+  url.searchParams.set('timeMax', in30d.toISOString())
+  url.searchParams.set('singleEvents', 'true')
+  url.searchParams.set('orderBy', 'startTime')
+  url.searchParams.set('maxResults', '100')
+  try {
+    const resp = await fetch(url.toString(), { headers: { Authorization: `Bearer ${accessToken}` } })
+    if (!resp.ok) return []
+    const data = await resp.json()
+    return (data.items ?? [])
+      .filter((e: { start?: { dateTime?: string }; end?: { dateTime?: string } }) => e.start?.dateTime && e.end?.dateTime)
+      .map((e: { id: string; summary?: string; start: { dateTime: string }; end: { dateTime: string } }) => ({
+        start: e.start.dateTime, end: e.end.dateTime, title: e.summary, externer_id: e.id,
+      }))
+  } catch { return [] }
 }
 
-/**
- * Placeholder: Fetch events from Outlook/Microsoft Graph API.
- */
+// Microsoft Graph API: Outlook Kalender-Termine lesen.
 async function fetchOutlookCalendarEvents(
-  _token: unknown,
+  token: unknown,
 ): Promise<{ start: string; end: string; title?: string; externer_id?: string }[]> {
-  // TODO: Implement real Microsoft Graph API integration
-  // Uses token.access_token to call:
-  // GET https://graph.microsoft.com/v1.0/me/calendarView
-  //   ?startDateTime=<now>&endDateTime=<+30days>
-  return []
+  const tokenObj = token as { access_token?: string } | string | null
+  const accessToken = typeof tokenObj === 'string' ? tokenObj : tokenObj?.access_token
+  if (!accessToken) return []
+  const now = new Date()
+  const in30d = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+  const url = new URL('https://graph.microsoft.com/v1.0/me/calendarView')
+  url.searchParams.set('startDateTime', now.toISOString())
+  url.searchParams.set('endDateTime', in30d.toISOString())
+  url.searchParams.set('$top', '100')
+  url.searchParams.set('$orderby', 'start/dateTime')
+  try {
+    const resp = await fetch(url.toString(), { headers: { Authorization: `Bearer ${accessToken}` } })
+    if (!resp.ok) return []
+    const data = await resp.json()
+    return (data.value ?? [])
+      .filter((e: { start?: { dateTime?: string }; end?: { dateTime?: string } }) => e.start?.dateTime && e.end?.dateTime)
+      .map((e: { id: string; subject?: string; start: { dateTime: string }; end: { dateTime: string } }) => ({
+        start: e.start.dateTime, end: e.end.dateTime, title: e.subject, externer_id: e.id,
+      }))
+  } catch { return [] }
 }
