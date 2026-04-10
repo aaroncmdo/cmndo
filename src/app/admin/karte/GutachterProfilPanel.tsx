@@ -60,7 +60,7 @@ const PAKET_LABELS: Record<string, string> = {
 }
 
 const ALL_QUALIFIKATIONEN = [
-  'Haftpflichtschaden', 'Kaskoschaden', 'Leasingrueckgabe', 'Flottenmanagement',
+  'Haftpflichtschaden', 'Leasingrueckgabe', 'Flottenmanagement',
   'Oldtimer', 'LKW/Nutzfahrzeuge', 'Motorrad', 'Wohnmobil',
   'Totalschaden-Bewertung', 'Wiederbeschaffungswert', 'Beweissicherung', 'Gerichtsgutachten',
 ]

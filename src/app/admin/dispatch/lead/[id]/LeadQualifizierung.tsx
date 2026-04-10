@@ -10,7 +10,7 @@ const SF_OPTIONS = [
   { value: 'sf-01', label: 'SF-01 Unverschuldeter Kfz-Unfall (Haftpflicht Gegner)', pct: '~60%' },
   { value: 'sf-02', label: 'SF-02 Teilschuld-Unfall', pct: '~10%' },
   { value: 'sf-03', label: 'SF-03 Parkschaden / Fahrerflucht', pct: '~8%' },
-  { value: 'sf-04', label: 'SF-04 Kaskoschaden ohne Gegner', pct: '~7%' },
+  { value: 'sf-04', label: 'SF-04 Eigenverschulden / kein Gegner', pct: '~7%' },
   { value: 'sf-05', label: 'SF-05 Personenschaden (Zusatz)', pct: '~10%' },
   { value: 'sf-06', label: 'SF-06 Nutzungsausfall / Mietwagen (Flag)', pct: '' },
 ]

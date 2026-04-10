@@ -82,7 +82,7 @@ export const SF_LABELS: Record<string, string> = {
   'sf-01': 'Unverschuldeter Kfz-Unfall',
   'sf-02': 'Teilschuld-Unfall',
   'sf-03': 'Parkschaden / Fahrerflucht',
-  'sf-04': 'Kaskoschaden ohne Gegner',
+  'sf-04': 'Eigenverschulden / kein Gegner',
   'sf-05': 'Personenschaden',
   'sf-06': 'Nutzungsausfall / Mietwagen',
 }

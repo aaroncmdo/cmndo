@@ -24,7 +24,7 @@ export const FACHBEGRIFFE: Record<string, string> = {
   'Sicherungsabtretung': 'Sie treten Ihren Anspruch auf Gutachterkosten-Erstattung an uns ab. Wir holen das Geld direkt von der Versicherung.',
   'Totalschaden': 'Wenn die Reparaturkosten den Wiederbeschaffungswert übersteigen (über 130%). Dann wird der WBW minus Restwert erstattet.',
   'Haftpflichtschaden': 'Schaden durch einen anderen Verkehrsteilnehmer verursacht. Dessen Versicherung muss alle Kosten tragen.',
-  'Kaskoschaden': 'Schaden an Ihrem eigenen Fahrzeug (z.B. Wildunfall, Hagel). Ihre eigene Versicherung reguliert.',
+  'Eigenverschulden': 'Schaden ohne Fremdverschulden (z.B. Wildunfall, Hagel). Ggf. ueber eigene Versicherung regulierbar.',
 }
 
 export const FRISTEN = [

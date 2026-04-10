@@ -31,7 +31,6 @@ export function paketKontingent(paket: AnlegePaket, override?: number): number {
 
 export const QUALIFIKATIONEN = [
   'Haftpflichtschaden',
-  'Kaskoschaden',
   'Bewertungen',
   'Wertgutachten',
   'Reparaturkostengutachten',

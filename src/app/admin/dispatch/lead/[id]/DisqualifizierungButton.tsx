@@ -6,7 +6,7 @@ import { disqualifiziereLead } from './actions'
 import { XCircleIcon, XIcon } from 'lucide-react'
 
 const GRUENDE = [
-  { value: 'kaskoschaden', label: 'Kein Gegner - Kaskoschaden' },
+  { value: 'eigenverschulden', label: 'Kein Gegner - Eigenverschulden' },
   { value: 'eigenschaden', label: 'Selbstverschulden' },
   { value: 'bagatelle', label: 'Bagatellschaden unter Gutachten-Schwelle' },
   { value: 'kunde-will-nicht', label: 'Kunde möchte nicht fortfahren' },

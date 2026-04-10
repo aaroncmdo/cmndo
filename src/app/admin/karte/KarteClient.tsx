@@ -81,7 +81,7 @@ const PAKET_RADIUS_M: Record<string, number> = {
 // Note: legacy keys (starter-10 etc.) kept for backward compatibility with existing DB entries
 
 const ALL_QUALIFIKATIONEN = [
-  'Haftpflichtschaden', 'Kaskoschaden', 'Leasingrueckgabe', 'Flottenmanagement',
+  'Haftpflichtschaden', 'Leasingrueckgabe', 'Flottenmanagement',
   'Oldtimer', 'LKW/Nutzfahrzeuge', 'Motorrad', 'Wohnmobil',
   'Totalschaden-Bewertung', 'Wiederbeschaffungswert', 'Beweissicherung', 'Gerichtsgutachten',
 ]
