@@ -19,13 +19,21 @@ export default async function AdminLayout({
     ? user.email.substring(0, 2).toUpperCase()
     : 'U'
 
+  // KFZ-182: Unread nachrichten count for sidebar badge
+  const { count: unreadNachrichten } = await supabase
+    .from('nachrichten')
+    .select('*', { count: 'exact', head: true })
+    .eq('kanal', 'whatsapp')
+    .eq('richtung', 'inbound')
+    .eq('gelesen', false)
+
   return (
     <div className="h-screen bg-[#f8f9fb] relative overflow-hidden">
       {/* Spotlight search (Cmd+K) */}
       <Spotlight />
 
       {/* Client-side nav with usePathname for active state */}
-      <AdminNav email={user.email ?? ''} initials={initials} />
+      <AdminNav email={user.email ?? ''} initials={initials} unreadNachrichten={unreadNachrichten ?? 0} />
 
       {/* Main content area — offset by sidebar width on desktop */}
       <div className="md:ml-56 h-screen flex flex-col relative z-10">

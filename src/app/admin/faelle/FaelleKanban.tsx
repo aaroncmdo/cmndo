@@ -202,6 +202,10 @@ function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
       <div className={`relative rounded-lg border hover:shadow-sm transition-all ${
         fall.ist_aktiv === false ? 'bg-red-50/60 border-red-200 opacity-60' : 'bg-white border-gray-200 hover:border-gray-300'
       }`} style={{ padding: '6px 8px' }}>
+        {/* KFZ-182: Roter Dot wenn Chat UND Updates > 0 */}
+        {(fall.ungelesene_nachrichten ?? 0) > 0 && (fall.ungelesene_updates ?? 0) > 0 && (
+          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#DC2626] rounded-full border-2 border-white z-10" />
+        )}
         <div className="flex items-center justify-between mb-0.5">
           <Link href={`/admin/faelle/${fall.id}`} className="text-xs font-mono text-[#4573A2] truncate hover:underline" onClick={e => e.stopPropagation()}>
             {label}

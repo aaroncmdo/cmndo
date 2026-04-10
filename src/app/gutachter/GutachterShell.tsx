@@ -16,6 +16,7 @@ import {
   LogOutIcon,
   UsersIcon,
   TrophyIcon,
+  MessageCircleIcon,
 } from 'lucide-react'
 import NotificationBell from '@/app/admin/_components/NotificationBell'
 import OutboxBadge from '@/components/offline/OutboxBadge'
@@ -69,6 +70,7 @@ export default function GutachterShell({
   // KFZ-152: NAV-Items dynamisch zusammenstellen je nach Rolle
   const NAV_ITEMS = [
     ...NAV_ITEMS_BASE,
+    { href: '/gutachter/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon },
     ...(showTeam ? [{ href: '/gutachter/team', label: 'Team', icon: UsersIcon }] : []),
     ...(showCommunity ? [{ href: '/gutachter/community', label: 'Community', icon: TrophyIcon }] : []),
   ]

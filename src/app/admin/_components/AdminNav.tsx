@@ -32,7 +32,7 @@ const NAV_SECONDARY = [
   { href: '/admin/team', label: 'Team', icon: UsersIcon },
 ]
 
-export default function AdminNav({ email, initials }: { email: string; initials: string }) {
+export default function AdminNav({ email, initials, unreadNachrichten }: { email: string; initials: string; unreadNachrichten?: number }) {
   const pathname = usePathname()
 
   function isActive(href: string, exact?: boolean) {
@@ -63,6 +63,11 @@ export default function AdminNav({ email, initials }: { email: string; initials:
               >
                 <item.icon style={{ width: 17, height: 17 }} />
                 {item.label}
+                {item.label === 'Nachrichten' && (unreadNachrichten ?? 0) > 0 && (
+                  <span className="ml-auto bg-[#4573A2] text-white text-[9px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
+                    {unreadNachrichten! > 99 ? '99+' : unreadNachrichten}
+                  </span>
+                )}
               </Link>
             )
           })}
