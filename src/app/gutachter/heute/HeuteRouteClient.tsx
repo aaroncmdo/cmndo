@@ -10,6 +10,8 @@ import { markArrival } from '@/lib/gps/mark-arrival'
 import AnkommenModal, { type AnkommenTermin } from '@/components/faelle/AnkommenModal'
 import VerspaetenModal from '@/components/gutachter/VerspaetenModal'
 import { meldeVerspaetung } from '@/app/gutachter/fall/[id]/actions'
+import { triggerSvLosgefahren } from '@/lib/termine/trigger-losgefahren'
+import { notifyKundeAngekommen } from '@/lib/termine/notify-kunde-angekommen'
 import type { HeuteTermin } from './page'
 
 // KFZ-158 Phase 1: Tagesroute Client-Component.
@@ -53,6 +55,8 @@ export default function HeuteRouteClient({
   const [arrivedAtId, setArrivedAtId] = useState<string | null>(null)
   const [ankommenModal, setAnkommenModal] = useState<AnkommenTermin | null>(null)
   const [showVerspaeten, setShowVerspaeten] = useState(false)
+  const [losgefahrenIds, setLosgefahrenIds] = useState<Set<string>>(new Set())
+  const [losfahrenPending, setLosfahrenPending] = useState(false)
 
   // Throttled GPS-Tracking: alle 30s an Server senden
   useEffect(() => {
@@ -83,8 +87,9 @@ export default function HeuteRouteClient({
         if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
           new Notification('Claimondo', { body: `Du bist am Termin ${t.fall_nummer} angekommen`, icon: '/icons/icon.svg' })
         }
-        // DB markieren
+        // DB markieren + Kunde benachrichtigen
         markArrival({ termin_id: t.id, lat: gpsRaw.lat, lng: gpsRaw.lng, via: 'gps' }).catch(() => {})
+        notifyKundeAngekommen(t.id).catch(() => {})
         // Modal zeigen
         const adresse = [t.schadens_adresse, t.schadens_plz, t.schadens_ort].filter(Boolean).join(', ')
         setAnkommenModal({
@@ -177,6 +182,27 @@ export default function HeuteRouteClient({
         {/* Floating Action Buttons */}
         {naechsterTermin && (
           <div className="absolute bottom-4 left-4 right-4 flex gap-2 z-10">
+            {/* KFZ-179: Losfahren-Button */}
+            {!losgefahrenIds.has(naechsterTermin.id) ? (
+              <button
+                disabled={losfahrenPending}
+                onClick={async () => {
+                  setLosfahrenPending(true)
+                  const r = await triggerSvLosgefahren(naechsterTermin.id)
+                  if (r.success) {
+                    setLosgefahrenIds(prev => new Set([...prev, naechsterTermin.id]))
+                  }
+                  setLosfahrenPending(false)
+                }}
+                className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-4 py-3 text-sm font-semibold shadow-lg transition-colors disabled:opacity-50"
+              >
+                <CarIcon className="w-4 h-4" /> {losfahrenPending ? '...' : 'Losfahren'}
+              </button>
+            ) : (
+              <span className="flex items-center gap-1.5 bg-emerald-100 text-emerald-700 rounded-xl px-4 py-3 text-xs font-medium">
+                <CheckCircleIcon className="w-3.5 h-3.5" /> Unterwegs
+              </span>
+            )}
             <a
               href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
                 [naechsterTermin.schadens_adresse, naechsterTermin.schadens_plz, naechsterTermin.schadens_ort].filter(Boolean).join(', ')
