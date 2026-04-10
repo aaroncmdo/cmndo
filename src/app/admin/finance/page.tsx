@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import FinanceClient from './FinanceClient'
 import AbrechnungenSection from './AbrechnungenSection'
 import AusstehendeZahlungenTable from '../_components/AusstehendeZahlungenTable'
@@ -461,6 +462,10 @@ async function AbrechnungenSectionWrapper() {
 
 export default async function FinancePage() {
   const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) redirect('/login')
+  const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
+  if (profile?.rolle !== 'admin') redirect('/admin')
 
   const now = new Date()
   const monatStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
