@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createHmac } from 'crypto'
 import { notFound } from 'next/navigation'
 import KundeTrackingClient from './KundeTrackingClient'
 
@@ -90,9 +91,17 @@ export default async function KundeTerminPage({
   }
   const plzGeo = fall?.schadens_plz ? PLZ_FALLBACK[fall.schadens_plz as string] : null
 
+  // BUG-105: Channel-Name hashen damit svId nicht direkt exponiert wird
+  const realtimeSecret = process.env.SUPABASE_REALTIME_SECRET || 'dev-fallback-secret-change-me'
+  const channelHash = createHmac('sha256', realtimeSecret)
+    .update(String(termin.sv_id) + token)
+    .digest('hex')
+    .slice(0, 16)
+
   return (
     <KundeTrackingClient
       svId={termin.sv_id}
+      channelHash={channelHash}
       svVorname={svVorname}
       svNachname={svNachname}
       terminLat={plzGeo?.lat ?? 50.9375}

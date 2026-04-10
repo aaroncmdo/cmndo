@@ -9,6 +9,7 @@ import { haversineKm } from '@/lib/gps/geofence'
 
 export default function KundeTrackingClient({
   svId,
+  channelHash,
   svVorname,
   svNachname,
   terminLat,
@@ -25,6 +26,7 @@ export default function KundeTrackingClient({
   notification5minSent,
 }: {
   svId: string
+  channelHash: string
   svVorname: string
   svNachname: string
   terminLat: number
@@ -64,8 +66,9 @@ export default function KundeTrackingClient({
         if (data) setSvPosition({ lat: Number(data.lat), lng: Number(data.lng) })
       })
 
+    // BUG-105: Channel-Name gehasht statt svId direkt
     const channel = supabase
-      .channel(`kunde-tracking-${svId}`)
+      .channel(`kunde-tracking-${channelHash}`)
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
