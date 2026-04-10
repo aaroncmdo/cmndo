@@ -27,17 +27,17 @@ export async function erfasseEinzahlung(formData: FormData) {
 
   if (insertErr) throw new Error(insertErr.message)
 
-  // Update gutachter guthaben
+  // Update gutachter werbebudget
   const { data: sv } = await supabase
     .from('sachverstaendige')
-    .select('guthaben')
+    .select('werbebudget_guthaben_netto')
     .eq('id', svId)
     .single()
 
   if (sv) {
     await supabase
       .from('sachverstaendige')
-      .update({ guthaben: Number(sv.guthaben ?? 0) + betrag })
+      .update({ werbebudget_guthaben_netto: Number(sv.werbebudget_guthaben_netto ?? 0) + betrag })
       .eq('id', svId)
   }
 
