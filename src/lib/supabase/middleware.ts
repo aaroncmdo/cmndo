@@ -90,6 +90,11 @@ function isPublicPath(pathname: string): boolean {
     '/passwort-vergessen',
     '/passwort-zuruecksetzen',
     '/sv',
+    '/kunde/termin',
+    '/agb',
+    '/nutzungsbedingungen',
+    '/datenschutz',
+    '/impressum',
   ]
   return publicPaths.some(path => pathname.startsWith(path))
 }
