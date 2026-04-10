@@ -7,6 +7,7 @@ import DokumenteTab from './DokumenteTab'
 import FallStepper from '@/components/admin/FallStepper'
 import FallActivityFeed, { buildActivityEvents } from '@/components/faelle/FallActivityFeed'
 import FallDokumenteSidebar, { type FallDokumentRow } from '@/components/faelle/FallDokumenteSidebar'
+import TaskList from '@/components/tasks/TaskList'
 import { createClient } from '@/lib/supabase/client'
 import {
   addTimelineEntry,
@@ -940,6 +941,13 @@ export default function FallakteClient({
                 </div>
               </div>
             )}
+
+            {/* KFZ-175: Tasks fuer diesen Fall */}
+            <TaskList
+              tasks={(tasks as { id: string; titel: string; status: string; prioritaet: string | null; faellig_am: string | null; auto_erstellt: boolean }[])}
+              fallId={fall.id}
+              mitarbeiter={mitarbeiter}
+            />
 
             {/* KFZ-172: Activity Feed (Realtime) */}
             <FallActivityFeed

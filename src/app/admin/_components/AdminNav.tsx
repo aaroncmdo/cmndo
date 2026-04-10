@@ -15,6 +15,7 @@ const NAV_MAIN = [
   { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: HardHatIcon },
   { href: '/admin/kalender', label: 'Kalender', icon: CalendarIcon },
   { href: '/admin/tasks', label: 'Tasks', icon: ClipboardListIcon },
+  { href: '/admin/meine-tasks', label: 'Meine Tasks', icon: ClipboardListIcon },
 ]
 
 const NAV_SECONDARY = [
