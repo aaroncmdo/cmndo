@@ -39,7 +39,7 @@ export default async function SachverstaendigePage() {
       organisationId: sv.organisation_id as string | null,
       gutachterTyp: (sv.gutachter_typ as string) ?? 'kfz-gutachter',
       standortAdresse: sv.standort_adresse as string | null,
-      guthaben: Number(sv.guthaben) || 0,
+      guthaben: Number(sv.werbebudget_guthaben_netto) || 0,
       // KFZ-154 Cleanup: legacy qualifikationen-Spalte gedroppt
       qualifikationen: (sv.qualifikationen_neu as string[] | null) ?? [],
       spezifikationen: (sv.spezifikationen as string[] | null) ?? [],
