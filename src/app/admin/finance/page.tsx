@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { FINANCE } from '@/lib/finance/constants'
 import FinanceClient from './FinanceClient'
 import AbrechnungenSection from './AbrechnungenSection'
 import AusstehendeZahlungenTable from '../_components/AusstehendeZahlungenTable'
@@ -86,7 +87,7 @@ function MarketingMaikSection({ monatsberichte }: { monatsberichte: MonatsBerich
   }
 
   const letzteMonat = monatsberichte.length > 0 ? monatsberichte[monatsberichte.length - 1] : null
-  const cpaFix = 150
+  const cpaFix = FINANCE.CPA_MARKETING_NETTO
   const cpl = Number(letzteMonat?.maik_google_cpl ?? 0)
   const faelle = Number(letzteMonat?.neue_faelle ?? 0)
   const marge = cpaFix - cpl
@@ -629,8 +630,8 @@ export default async function FinancePage() {
 
   // ── Gewinnverteilung berechnen ──
   const gesamtProvision = (alleAbgeschlossen ?? []).reduce((s, f) => s + Number(f.regulierung_betrag) * 0.1, 0)
-  const claimondoGewinn = gesamtProvision * 0.75
-  const kanzleiGewinn = gesamtProvision * 0.25
+  const claimondoGewinn = gesamtProvision * FINANCE.SPLIT_CLAIMONDO
+  const kanzleiGewinn = gesamtProvision * FINANCE.SPLIT_KANZLEI
 
   // ── Gutachter-Anzahlungen Summe ──
   const { data: allEinzahlungen } = await supabase
@@ -657,8 +658,8 @@ export default async function FinancePage() {
 
   const kanzleiVollmachtenTotal = (kanzleiVollmachtenGesamt ?? []).length
   const kanzleiVollmachtenDiesenMonat = (kanzleiVollmachtenMonat ?? []).length
-  const kanzleiProvisionGesamt = kanzleiVollmachtenTotal * 150
-  const kanzleiProvisionMonat = kanzleiVollmachtenDiesenMonat * 150
+  const kanzleiProvisionGesamt = kanzleiVollmachtenTotal * FINANCE.KANZLEI_PROVISION_NETTO
+  const kanzleiProvisionMonat = kanzleiVollmachtenDiesenMonat * FINANCE.KANZLEI_PROVISION_NETTO
 
   // ── Individuelle Anfragen ──
   let individuelleAnfragen: IndividuelleAnfrage[] = []
