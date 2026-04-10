@@ -73,6 +73,16 @@ export async function uploadFallDokument(
   revalidatePath(`/admin/faelle/${fallId}`, 'page')
   revalidatePath(`/gutachter/fall/${fallId}`, 'page')
 
+  // KFZ-172 Phase 3: OCR triggern (fire & forget, async)
+  if (file.type === 'application/pdf' || file.type.startsWith('image/')) {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'
+    fetch(`${baseUrl}/api/ocr-trigger`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dokument_id: row.id }),
+    }).catch(() => {})
+  }
+
   return { success: true, dokumentId: row.id }
 }
 
