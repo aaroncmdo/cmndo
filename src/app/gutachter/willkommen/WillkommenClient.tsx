@@ -949,7 +949,7 @@ export default function WillkommenClient({
           </DialogHeader>
           <div
             className="flex-1 overflow-y-auto text-xs text-gray-700 leading-relaxed prose prose-sm max-w-none pr-2"
-            // eslint-disable-next-line react/no-danger
+             
             dangerouslySetInnerHTML={{
               __html: (vertragModal === 'nb' ? nbVorlage?.inhalt_html : kvVorlage?.inhalt_html) ?? '',
             }}

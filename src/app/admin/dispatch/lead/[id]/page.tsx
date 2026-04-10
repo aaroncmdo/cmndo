@@ -208,6 +208,7 @@ export default async function LeadDetailPage({
                       created_at: lead.created_at,
                       qualifizierungs_phase: lead.qualifizierungs_phase ?? 'neu',
                     }}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     timelineEntries={(timelineEntries ?? []) as any}
                   />
                   {/* KFZ-172: Pflichtdokumente fuer Lead-Phase */}

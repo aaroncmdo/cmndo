@@ -208,7 +208,7 @@ export default function SoloVertragWizard({
                     <div
                       ref={nbScrollRef}
                       className="bg-gray-50 border border-gray-200 rounded-xl p-4 max-h-64 overflow-y-auto text-xs text-gray-600 leading-relaxed prose prose-sm max-w-none"
-                      // eslint-disable-next-line react/no-danger
+                       
                       dangerouslySetInnerHTML={{ __html: nbVorlage.inhalt_html }}
                     />
                   </div>
@@ -227,7 +227,7 @@ export default function SoloVertragWizard({
                       {kvOpen && (
                         <div
                           className="px-4 pb-4 text-xs text-gray-600 leading-relaxed max-h-64 overflow-y-auto prose prose-sm max-w-none"
-                          // eslint-disable-next-line react/no-danger
+                           
                           dangerouslySetInnerHTML={{ __html: kvVorlage.inhalt_html }}
                         />
                       )}

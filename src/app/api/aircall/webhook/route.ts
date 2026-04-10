@@ -37,6 +37,7 @@ export async function POST(request: Request) {
           aircall_call_id: aircallId,
           richtung: callData.direction === 'outbound' ? 'outbound' : 'inbound',
           status: 'initiiert',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           von_nummer: String(callData.raw_digits ?? (callData.number as any)?.digits ?? ''),
           zu_nummer: String(callData.to ?? ''),
           gestartet_am: callData.started_at ? new Date(Number(callData.started_at) * 1000).toISOString() : new Date().toISOString(),

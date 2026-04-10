@@ -154,6 +154,7 @@ export async function generiereMarketingAbrechnung(monat: string): Promise<{ abr
 // ─── Kanzlei-Abrechnungen ─────────────────────────────────────────────────
 
 export async function generiereKanzleiAbrechnungen(monat: string): Promise<Array<{ kanzleiId: string; abrechnungId: string }>> {
+  const { FINANCE } = await import('@/lib/finance/constants')
   const supabase = createAdminClient()
   const { start, ende } = monatRange(monat)
   const results: Array<{ kanzleiId: string; abrechnungId: string }> = []

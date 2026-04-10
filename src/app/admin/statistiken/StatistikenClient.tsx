@@ -543,9 +543,10 @@ export default function StatistikenClient({
                       <XAxis type="number" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false}
                         tickFormatter={v => `${(v / 1000).toFixed(0)}k €`} />
                       <YAxis type="category" dataKey="label" tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} width={160} />
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                       <Tooltip {...tooltipStyle} formatter={((v: number) => [fmtEur(v), 'Kürzungssumme']) as any} />
-                      <Bar dataKey="summeKuerzung" fill={ONDO_BLUE} radius={[0, 6, 6, 0]} cursor="pointer"
-                        onClick={((d: { fallIds?: string[]; label?: string }) => d.fallIds && openDrillDown(`Kürzungsgrund: ${d.label}`, d.fallIds, 'regulierungs_klassifizierung.kuerzung_betrag_netto')) as any} />
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                      <Bar dataKey="summeKuerzung" fill={ONDO_BLUE} radius={[0, 6, 6, 0]} cursor="pointer" onClick={((d: { fallIds?: string[]; label?: string }) => d.fallIds && openDrillDown(`Kürzungsgrund: ${d.label}`, d.fallIds, 'regulierungs_klassifizierung.kuerzung_betrag_netto')) as any} />
                     </BarChart>
                   </ResponsiveContainer>
                   <div className="overflow-x-auto">
@@ -582,7 +583,9 @@ export default function StatistikenClient({
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie data={unfallData} cx="50%" cy="50%" innerRadius={70} outerRadius={120}
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         dataKey="count" nameKey="label" label={(({ label, count }: any) => `${label} (${count})`) as any} labelLine={false}
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         cursor="pointer" onClick={((d: { fallIds?: string[]; label?: string }) => d.fallIds && openDrillDown(`Unfall: ${d.label}`, d.fallIds, 'faelle.unfall_konstellation')) as any}>
                         {unfallData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                       </Pie>
@@ -628,7 +631,9 @@ export default function StatistikenClient({
                     <ResponsiveContainer width="100%" height={220}>
                       <PieChart>
                         <Pie data={gegnerBeteiligteData} cx="50%" cy="50%" outerRadius={80} dataKey="count" nameKey="label"
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           label={(({ label, count }: any) => `${label} (${count})`) as any} labelLine={false} cursor="pointer"
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           onClick={((d: { fallIds?: string[]; label?: string }) => d.fallIds && openDrillDown(`Beteiligte: ${d.label}`, d.fallIds, 'faelle.gegner_anzahl_beteiligte')) as any}>
                           {gegnerBeteiligteData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                         </Pie>
@@ -648,6 +653,7 @@ export default function StatistikenClient({
                         <YAxis tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
                         <Tooltip {...tooltipStyle} />
                         <Bar dataKey="count" fill={ONDO_BLUE} radius={[4, 4, 0, 0]} name="Fälle" cursor="pointer"
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           onClick={((d: { fallIds?: string[]; label?: string }) => d.fallIds && openDrillDown(`Gegner-Fahrzeug: ${d.label}`, d.fallIds, 'faelle.gegner_fahrzeugtyp')) as any} />
                       </BarChart>
                     </ResponsiveContainer>

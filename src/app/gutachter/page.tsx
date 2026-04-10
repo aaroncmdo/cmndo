@@ -59,7 +59,7 @@ export default function GutachterCockpit() {
     ])
 
     const ids = [...new Set([...(tR.data ?? []), ...(nR.data ?? []), ...(fR.data ?? [])].map(f => f.lead_id).filter(Boolean) as string[])]
-    let lm: Record<string, { n: string; t: string | null; e: string | null }> = {}
+    const lm: Record<string, { n: string; t: string | null; e: string | null }> = {}
     if (ids.length) { const { data: ls } = await supabase.from('leads').select('id, vorname, nachname, telefon, email').in('id', ids); for (const l of ls ?? []) lm[l.id] = { n: [l.vorname, l.nachname].filter(Boolean).join(' ') || '—', t: l.telefon, e: l.email } }
 
     setTermine((tR.data ?? []).map(f => ({ id: f.id, uhrzeit: f.sv_termin ? new Date(f.sv_termin).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '—', kunde: lm[f.lead_id ?? '']?.n ?? '—', telefon: lm[f.lead_id ?? '']?.t ?? null, email: lm[f.lead_id ?? '']?.e ?? null, adresse: [f.schadens_adresse, f.schadens_plz, f.schadens_ort].filter(Boolean).join(', '), kennzeichen: f.kennzeichen ?? null, fahrzeug: [f.fahrzeug_hersteller, f.fahrzeug_modell].filter(Boolean).join(' ') || null, schadentyp: f.schadenfall_typ ?? null })))

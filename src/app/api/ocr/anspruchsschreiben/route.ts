@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
 
     // Parse PDF text
     const pdfModule = await import('pdf-parse')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pdfParse = ((pdfModule as any).default ?? pdfModule) as (buffer: Buffer) => Promise<{ text: string }>
     const parsed = await pdfParse(buffer)
     const text = parsed.text

@@ -498,10 +498,12 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 
 function SignatureCanvas({ onSignature }: { onSignature: (blob: Blob | null) => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const padRef = useRef<any>(null)
   const [isEmpty, setIsEmpty] = useState(true)
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let pad: any = null
     import('signature_pad').then(({ default: SignaturePad }) => {
       if (!canvasRef.current) return

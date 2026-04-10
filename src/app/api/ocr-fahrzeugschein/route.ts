@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     // For now: FIN extraction is a placeholder.
     // In production, use tesseract.js or a dedicated OCR service.
     // The FIN will be entered manually until OCR is set up.
-    let extractedFin: string | null = null
+    const extractedFin: string | null = null
 
     // If a URL is provided, we could download and OCR it.
     // For now, return a hint that manual entry is needed.

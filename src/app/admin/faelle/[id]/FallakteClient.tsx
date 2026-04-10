@@ -764,6 +764,7 @@ export default function FallakteClient({
             <DokumenteTab
               fallId={fall.id}
               pflichtdokumente={pflichtdokumente}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               dokumente={dokumente as any}
               fallAS={{
                 anschlussschreiben_url: (fall as Record<string, unknown>).anschlussschreiben_url as string | null ?? null,

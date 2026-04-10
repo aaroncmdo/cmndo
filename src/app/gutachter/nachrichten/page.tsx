@@ -88,5 +88,6 @@ export default async function GutachterNachrichtenPage() {
 
   const threads = Array.from(threadMap.values()).sort((a, b) => (b.lastAt > a.lastAt ? 1 : -1))
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <NachrichtenSvClient threads={threads as any} />
 }

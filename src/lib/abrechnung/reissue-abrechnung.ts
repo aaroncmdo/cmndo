@@ -24,7 +24,7 @@ export async function reissueAbrechnung(
 
   // 2. Verbleibende aktive Fälle im gleichen Zeitraum für denselben Empfänger
   //    (Fälle die auf diese Abrechnung zeigen ODER im gleichen Monat sind)
-  let query = db.from('faelle')
+  const query = db.from('faelle')
     .select('id, created_at, kennzeichen, schadenhoehe_netto, lead_preis_netto, lead_preis_typ, guthaben_verrechnet_netto, sv_nachzahlung_netto')
     .eq('abrechnung_id', alteAbrechnungId)
     .is('storniert_am', null)

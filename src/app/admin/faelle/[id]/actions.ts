@@ -152,6 +152,7 @@ export async function uploadAnschlussschreiben(fallId: string, fileUrl: string, 
     if (pdfResponse.ok) {
       const buffer = Buffer.from(await pdfResponse.arrayBuffer())
       const pdfModule = await import('pdf-parse')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const pdfParse = ((pdfModule as any).default ?? pdfModule) as (buffer: Buffer) => Promise<{ text: string }>
       const parsed = await pdfParse(buffer)
       const text = parsed.text

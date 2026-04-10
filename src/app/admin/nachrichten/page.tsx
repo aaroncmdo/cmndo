@@ -39,7 +39,7 @@ export default async function NachrichtenPage() {
 
   // Get unique fall_ids and load fall info
   const fallIds = Array.from(new Set((nachrichten ?? []).map(n => n.fall_id).filter(Boolean) as string[]))
-  let fallMap: Record<string, { fall_nummer: string | null; lead_id: string | null; kundenbetreuer_id: string | null }> = {}
+  const fallMap: Record<string, { fall_nummer: string | null; lead_id: string | null; kundenbetreuer_id: string | null }> = {}
 
   if (fallIds.length > 0) {
     const { data: faelle } = await supabase
@@ -53,7 +53,7 @@ export default async function NachrichtenPage() {
 
   // Load customer names from leads
   const leadIds = Array.from(new Set(Object.values(fallMap).map(f => f.lead_id).filter(Boolean) as string[]))
-  let kundenMap: Record<string, string> = {}
+  const kundenMap: Record<string, string> = {}
   if (leadIds.length > 0) {
     const { data: leads } = await supabase
       .from('leads')
@@ -102,6 +102,7 @@ export default async function NachrichtenPage() {
 
   return (
     <NachrichtenInboxClient
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       threads={threads as any}
       userId={user.id}
       isAdmin={isAdmin}

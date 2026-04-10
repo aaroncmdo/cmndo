@@ -71,7 +71,7 @@ export async function GET(request: Request) {
     .not('faellig_am', 'is', null)
     .lt('faellig_am', now.toISOString())
 
-  let overdueCount = overdue?.length ?? 0
+  const overdueCount = overdue?.length ?? 0
 
   return NextResponse.json({
     ok: true,
