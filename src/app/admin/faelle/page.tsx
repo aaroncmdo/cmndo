@@ -4,11 +4,23 @@ import FaelleKanban from './FaelleKanban'
 export default async function AdminFaellePage() {
   const supabase = await createClient()
 
-  const { data: faelle } = await supabase
+  // BUG-104: KB-Filter — KB sieht nur eigene Fälle
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  const { data: profile } = user
+    ? await supabase.from('profiles').select('rolle').eq('id', user.id).single()
+    : { data: null }
+
+  let query = supabase
     .from('faelle')
     .select('id, fall_nummer, status, schadens_ursache, schadens_ort, sv_id, kundenbetreuer_id, mandatsnummer, schadenfall_typ, kennzeichen, created_at, kunde_id, lead_id, ist_aktiv, deaktiviert_grund')
     .not('status', 'eq', 'storniert')
     .order('created_at', { ascending: false })
+
+  if (profile?.rolle === 'kundenbetreuer' && user) {
+    query = query.eq('kundenbetreuer_id', user.id)
+  }
+
+  const { data: faelle } = await query
 
   // Resolve names
   const enriched = await Promise.all((faelle ?? []).map(async (f) => {

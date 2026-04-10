@@ -4,20 +4,30 @@ import DispatchBoard from './DispatchBoard'
 export default async function DispatchPage() {
   const supabase = await createClient()
 
-  // Current user for "Meine Faelle" filter
+  // Current user + Rolle für KB-Filter (BUG-104)
   const user = (await supabase.auth.getUser())?.data?.user ?? null
+  const { data: profile } = user
+    ? await supabase.from('profiles').select('rolle').eq('id', user.id).single()
+    : { data: null }
+  const isKb = profile?.rolle === 'kundenbetreuer'
 
   // Fetch leads and faelle in parallel
-  const [leadsResult, faelleResult] = await Promise.all([
-    supabase
-      .from('leads')
-      .select('id, vorname, nachname, email, telefon, status, source_channel, kontaktversuche, updated_at, created_at, qualifizierungs_phase, schadenfall_typ, personenschaden_flag, mietwagen_flag, zugewiesen_an, rueckruf_datum, rueckruf_notiz, rueckruf_erledigt, anruf_versuche, letzter_anruf_am, letzter_anruf_status, flow_link_geoeffnet, flow_link_abgeschlossen, sa_unterschrieben, vollmacht_unterschrieben, leasing_flag')
-      .order('created_at', { ascending: false }),
-    supabase
-      .from('faelle')
-      .select('id, fall_nummer, status, schadens_ursache, sv_id, lead_id, kundenbetreuer_id, onboarding_complete, regulierung_am, anschlussschreiben_am, vs_eskalationsstufe, status_changed_at, updated_at, created_at, vorschaden_vorhanden')
-      .order('created_at', { ascending: false }),
-  ])
+  let leadsQuery = supabase
+    .from('leads')
+    .select('id, vorname, nachname, email, telefon, status, source_channel, kontaktversuche, updated_at, created_at, qualifizierungs_phase, schadenfall_typ, personenschaden_flag, mietwagen_flag, zugewiesen_an, rueckruf_datum, rueckruf_notiz, rueckruf_erledigt, anruf_versuche, letzter_anruf_am, letzter_anruf_status, flow_link_geoeffnet, flow_link_abgeschlossen, sa_unterschrieben, vollmacht_unterschrieben, leasing_flag')
+    .order('created_at', { ascending: false })
+  let faelleQuery = supabase
+    .from('faelle')
+    .select('id, fall_nummer, status, schadens_ursache, sv_id, lead_id, kundenbetreuer_id, onboarding_complete, regulierung_am, anschlussschreiben_am, vs_eskalationsstufe, status_changed_at, updated_at, created_at, vorschaden_vorhanden')
+    .order('created_at', { ascending: false })
+
+  // BUG-104: KB sieht nur eigene Leads/Faelle
+  if (isKb && user) {
+    leadsQuery = leadsQuery.eq('zugewiesen_an', user.id)
+    faelleQuery = faelleQuery.eq('kundenbetreuer_id', user.id)
+  }
+
+  const [leadsResult, faelleResult] = await Promise.all([leadsQuery, faelleQuery])
 
   const leads = leadsResult.data ?? []
   const faelle = faelleResult.data ?? []
