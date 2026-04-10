@@ -115,6 +115,15 @@ export default async function FallaktePage({
       : Promise.resolve({ data: null }),
   ])
 
+  // KFZ-193: KB-Beratungstermine laden
+  const { data: kbTermineRaw } = await supabase
+    .from('gutachter_termine')
+    .select('id, start_zeit, end_zeit, kanal, video_link, notiz_kunde, notiz_intern, status, cancelled_at')
+    .eq('fall_id', id)
+    .eq('typ', 'kb_beratung')
+    .order('start_zeit', { ascending: false })
+  const kbTermine = kbTermineRaw ?? []
+
   // KFZ-172: Lade fall_dokumente (neue Tabelle, kann noch nicht existieren)
   let fallDokumente: { id: string; dokument_typ: string; ist_pflicht: boolean; ab_phase: string | null; storage_path: string; original_filename: string | null; ocr_status: string | null; hochgeladen_am: string }[] = []
   try {
@@ -200,6 +209,7 @@ export default async function FallaktePage({
       fallFinanzen={fallFinanzen}
       fallDokumente={fallDokumente}
       regulierungsKlassifizierung={regulierungsKlassifizierung ?? null}
+      kbTermine={kbTermine}
     />
   )
 }

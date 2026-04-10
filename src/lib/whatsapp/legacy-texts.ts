@@ -85,6 +85,17 @@ const TEMPLATES: Record<TemplateName, (vars: Record<string, string>) => string> 
 
   rechnung_verfuegbar: (v) =>
     `Hallo ${v['1'] ?? ''}, Ihre Rechnung steht zum Download bereit: ${v['2'] ?? ''}`,
+
+  // ─── KFZ-193: KB-Beratungstermin Templates ───────────────────────────────
+
+  kb_termin_bestaetigt: (v) =>
+    `Hallo ${v['1'] ?? ''}, Ihr Beratungstermin am ${v['2'] ?? ''} um ${v['3'] ?? ''} Uhr (${v['4'] === 'video' ? 'Video-Call' : 'Telefon'}) ist bestätigt.${v['5'] ? ` Video-Link: ${v['5']}` : ''} Ihr Claimondo-Team`,
+
+  kb_termin_reminder_24h: (v) =>
+    `Erinnerung: ${v['1'] ?? ''}, morgen ${v['2'] ?? ''} um ${v['3'] ?? ''} Uhr haben Sie einen Beratungstermin mit Ihrem Claimondo-Betreuer (${v['4'] === 'video' ? 'Video-Call' : 'Telefon'}).`,
+
+  kb_termin_reminder_1h: (v) =>
+    `${v['1'] ?? ''}, in ca. 1 Stunde (${v['2'] ?? ''} Uhr) ${v['3'] ? `startet Ihr Video-Gespräch. Link: ${v['3']}` : 'ruft Ihr Claimondo-Betreuer Sie an. Bitte halten Sie Ihr Telefon bereit.'}`,
 }
 
 /**

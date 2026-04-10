@@ -7,7 +7,7 @@ type TypFilter = { gutachter: boolean; rueckruf: boolean; kunde: boolean; intern
 
 type KalenderTermin = {
   id: string
-  typ: 'gutachter' | 'rueckruf' | 'kunde' | 'intern'
+  typ: 'gutachter' | 'rueckruf' | 'kunde' | 'intern' | 'kb_beratung'
   titel: string
   start: string
   end: string
@@ -25,6 +25,7 @@ const FARBEN: Record<string, string> = {
   rueckruf: '#E89B3C',
   kunde: '#5DAA80',
   intern: '#7B7B8A',
+  kb_beratung: '#C9A84C',
 }
 
 export async function getKalenderTermine(
@@ -124,6 +125,41 @@ export async function getKalenderTermine(
         farbe: FARBEN[t.typ] ?? FARBEN.intern,
         fallId: t.fall_id,
         fallNummer: t.fall_id ? fallNrMap[t.fall_id] : undefined,
+        link: t.fall_id ? `/admin/faelle/${t.fall_id}` : undefined,
+        status: t.status,
+      })
+    }
+  }
+
+  // 3. KB-Beratungstermine
+  {
+    const { data: kbTermine } = await supabase
+      .from('gutachter_termine')
+      .select('id, fall_id, kb_id, start_zeit, end_zeit, status, kanal')
+      .eq('typ', 'kb_beratung')
+      .gte('start_zeit', startDate)
+      .lte('start_zeit', endDate)
+      .in('status', ['bestaetigt', 'reserviert'])
+      .is('cancelled_at', null)
+
+    const kbFallIds = [...new Set((kbTermine ?? []).map(t => t.fall_id).filter(Boolean))]
+    const kbFallNrMap: Record<string, string> = {}
+    if (kbFallIds.length > 0) {
+      const { data: kbFaelle } = await supabase.from('faelle').select('id, fall_nummer').in('id', kbFallIds)
+      for (const f of kbFaelle ?? []) kbFallNrMap[f.id] = f.fall_nummer ?? f.id.slice(0, 8)
+    }
+
+    for (const t of kbTermine ?? []) {
+      const kanalLabel = t.kanal === 'video' ? '📹' : '📞'
+      results.push({
+        id: t.id,
+        typ: 'kb_beratung',
+        titel: `${kanalLabel} ${kbFallNrMap[t.fall_id] ?? 'KB-Beratung'}`,
+        start: t.start_zeit,
+        end: t.end_zeit,
+        farbe: FARBEN.kb_beratung,
+        fallId: t.fall_id,
+        fallNummer: kbFallNrMap[t.fall_id],
         link: t.fall_id ? `/admin/faelle/${t.fall_id}` : undefined,
         status: t.status,
       })

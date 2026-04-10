@@ -20,7 +20,7 @@ export default async function KundeStartseite() {
 
   const { data: directFaelle } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sa_unterschrieben, sv_id, sv_termin, gutachten_eingegangen_am, gutachter_termin_status, regulierung_am, szenario, onboarding_complete, kunde_id, created_at')
+    .select('id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sa_unterschrieben, sv_id, sv_termin, gutachten_eingegangen_am, gutachter_termin_status, regulierung_am, szenario, onboarding_complete, kunde_id, kundenbetreuer_id, created_at')
     .eq('kunde_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -33,7 +33,7 @@ export default async function KundeStartseite() {
     if (leadIds.length) {
       const { data } = await supabase
         .from('faelle')
-        .select('id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sa_unterschrieben, sv_id, sv_termin, gutachten_eingegangen_am, gutachter_termin_status, regulierung_am, szenario, onboarding_complete, kunde_id, created_at')
+        .select('id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sa_unterschrieben, sv_id, sv_termin, gutachten_eingegangen_am, gutachter_termin_status, regulierung_am, szenario, onboarding_complete, kunde_id, kundenbetreuer_id, created_at')
         .in('lead_id', leadIds)
         .order('created_at', { ascending: false })
       faelle = data ?? []
@@ -72,6 +72,25 @@ export default async function KundeStartseite() {
     <div className="w-full px-4 md:px-8 py-6 max-w-xl md:max-w-none mx-auto">
       <h1 className="text-xl font-bold text-[#0D1B3E] mb-1">Hallo {vorname}</h1>
       <p className="text-sm text-gray-500 mb-6">Hier sehen Sie den Stand Ihrer Fälle.</p>
+
+      {/* KFZ-193: Beratungstermin-Card (wenn mindestens ein Fall mit KB vorhanden) */}
+      {faelle.length > 0 && !!(faelle[0] as Record<string, unknown>).kundenbetreuer_id && (
+        <div className="mb-6">
+          <Link href="/kunde/beratungstermin"
+            className="block bg-[#1E3A5F] rounded-xl border border-[#4573A2]/30 shadow-sm p-4 hover:shadow-md transition-shadow active:scale-[0.99]">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[#C9A84C]/20 flex items-center justify-center flex-shrink-0">
+                <span className="text-[#C9A84C] text-lg">📞</span>
+              </div>
+              <div>
+                <p className="text-white font-semibold text-sm">Termin mit Kundenberater</p>
+                <p className="text-[#7BA3CC] text-xs mt-0.5">Persönliche Beratung buchen — Telefon oder Video</p>
+              </div>
+              <span className="ml-auto text-[#7BA3CC] text-sm">→</span>
+            </div>
+          </Link>
+        </div>
+      )}
 
       {faelle.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">

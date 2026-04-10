@@ -33,6 +33,9 @@ export type TemplateName =
   | 'sv_verspaetet'
   | 'dokumente_nachreichen'
   | 'rechnung_verfuegbar'
+  | 'kb_termin_bestaetigt'
+  | 'kb_termin_reminder_24h'
+  | 'kb_termin_reminder_1h'
 
 type TemplateConfig = {
   envKey: string
@@ -68,6 +71,9 @@ export const TEMPLATE_CONFIGS: Record<TemplateName, TemplateConfig> = {
   sv_verspaetet:          { envKey: 'TWILIO_TPL_SV_VERSPAETET', variableCount: 4, beschreibung: 'T25: SV verspaetet (Vorname, SV-Vorname, Minuten, Portal-Link)' },
   dokumente_nachreichen:  { envKey: 'TWILIO_TPL_DOKUMENTE_NACHREICHEN', variableCount: 3, beschreibung: 'T26: Dokumente nachreichen (Vorname, Dok-Liste, Portal-Link)' },
   rechnung_verfuegbar:    { envKey: 'TWILIO_TPL_RECHNUNG_VERFUEGBAR', variableCount: 2, beschreibung: 'T27: Rechnung verfuegbar (Vorname, Portal-Link)' },
+  kb_termin_bestaetigt:   { envKey: 'TWILIO_TPL_KB_TERMIN_BESTAETIGT', variableCount: 6, beschreibung: 'T28: KB-Termin bestaetigt (Vorname, Datum, Uhrzeit, Kanal, Video-Link, Portal-Link)' },
+  kb_termin_reminder_24h: { envKey: 'TWILIO_TPL_KB_TERMIN_REMINDER_24H', variableCount: 4, beschreibung: 'T29: KB-Termin 24h-Erinnerung (Vorname, Datum, Uhrzeit, Kanal)' },
+  kb_termin_reminder_1h:  { envKey: 'TWILIO_TPL_KB_TERMIN_REMINDER_1H', variableCount: 3, beschreibung: 'T30: KB-Termin 1h-Erinnerung (Vorname, Uhrzeit, Video-Link-oder-leer)' },
 }
 
 /**

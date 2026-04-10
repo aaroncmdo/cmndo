@@ -552,6 +552,18 @@ type Termin = {
   erstellt_am: string
 }
 
+type KbTermin = {
+  id: string
+  start_zeit: string
+  end_zeit: string | null
+  kanal: string
+  video_link: string | null
+  notiz_kunde: string | null
+  notiz_intern: string | null
+  status: string
+  cancelled_at: string | null
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function FallakteClient({
@@ -576,6 +588,7 @@ export default function FallakteClient({
   fallFinanzen,
   fallDokumente,
   regulierungsKlassifizierung,
+  kbTermine,
 }: {
   fall: Fall
   lead: Lead
@@ -598,6 +611,7 @@ export default function FallakteClient({
   fallFinanzen?: import('@/lib/finance/fall-finanzen').FallFinanzen | null
   fallDokumente?: FallDokumentRow[]
   regulierungsKlassifizierung?: RegulierungsKlassifizierung | null
+  kbTermine?: KbTermin[]
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -957,6 +971,11 @@ export default function FallakteClient({
               fallId={fall.id}
               mitarbeiter={mitarbeiter}
             />
+
+            {/* KFZ-193: KB-Beratungstermine */}
+            {kbTermine && kbTermine.length > 0 && (
+              <KbBeratungstermineSection kbTermine={kbTermine} fallId={fall.id} onRefresh={() => router.refresh()} />
+            )}
 
             {/* KFZ-134: Termin-Pingpong-Historie */}
             <TerminHistorie termine={(termine as unknown as { id: string; start_zeit: string; status: string; vorgeschlagenes_datum: string | null; gegenvorschlag_von: string | null; gegenvorschlag_grund: string | null; abgelehnt_grund: string | null; created_at: string }[])} />
@@ -4046,6 +4065,110 @@ function FallActionsDropdown({ fallId, fallNummer, istAktiv }: { fallId: string;
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+// ─── KFZ-193: KB-Beratungstermine Section ────────────────────────────────────
+
+function KbBeratungstermineSection({
+  kbTermine,
+  fallId,
+  onRefresh,
+}: {
+  kbTermine: KbTermin[]
+  fallId: string
+  onRefresh: () => void
+}) {
+  const [editingNotizId, setEditingNotizId] = useState<string | null>(null)
+  const [notizIntern, setNotizIntern] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  async function saveNotizIntern(terminId: string) {
+    setSaving(true)
+    const { createClient: createBrowserClient } = await import('@/lib/supabase/client')
+    const supabase = createBrowserClient()
+    const { error } = await supabase
+      .from('gutachter_termine')
+      .update({ notiz_intern: notizIntern.trim() || null })
+      .eq('id', terminId)
+    if (!error) {
+      setEditingNotizId(null)
+      onRefresh()
+    }
+    setSaving(false)
+  }
+
+  return (
+    <div className="bg-white rounded-xl border border-[#C9A84C]/30 p-3">
+      <h3 className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: '#C9A84C' }}>
+        KB-Beratungstermine
+      </h3>
+      <div className="space-y-2">
+        {kbTermine.map(termin => {
+          const startDate = new Date(termin.start_zeit)
+          const datum = startDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+          const uhrzeit = startDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+          const storniert = !!termin.cancelled_at || termin.status === 'kunde_storniert'
+
+          return (
+            <div key={termin.id} className={`text-xs rounded-lg p-2.5 border ${storniert ? 'bg-gray-50 border-gray-200 opacity-60' : 'bg-[#C9A84C]/5 border-[#C9A84C]/20'}`}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="font-medium text-gray-800">{datum} · {uhrzeit} Uhr</span>
+                <div className="flex items-center gap-1.5">
+                  <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-medium ${
+                    termin.kanal === 'video' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'
+                  }`}>
+                    {termin.kanal === 'video' ? '📹 Video' : '📞 Telefon'}
+                  </span>
+                  {storniert && <span className="px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-red-100 text-red-600">Storniert</span>}
+                </div>
+              </div>
+              {termin.video_link && !storniert && (
+                <a href={termin.video_link} target="_blank" rel="noopener noreferrer"
+                  className="text-[#4573A2] text-[10px] underline hover:no-underline block mb-1">
+                  Video-Link
+                </a>
+              )}
+              {termin.notiz_kunde && (
+                <p className="text-gray-500 text-[10px] italic mb-1">&ldquo;{termin.notiz_kunde}&rdquo;</p>
+              )}
+              {/* Interne Notiz */}
+              {editingNotizId === termin.id ? (
+                <div className="mt-1.5">
+                  <textarea
+                    value={notizIntern}
+                    onChange={e => setNotizIntern(e.target.value)}
+                    rows={2}
+                    placeholder="Interne Notiz..."
+                    className="w-full border border-gray-200 rounded px-2 py-1 text-[11px] focus:outline-none focus:border-[#C9A84C] resize-none"
+                  />
+                  <div className="flex gap-1 mt-1">
+                    <button onClick={() => setEditingNotizId(null)} className="px-2 py-0.5 text-[10px] text-gray-500 bg-gray-100 rounded hover:bg-gray-200">Abbrechen</button>
+                    <button onClick={() => saveNotizIntern(termin.id)} disabled={saving}
+                      className="px-2 py-0.5 text-[10px] text-white rounded disabled:opacity-50"
+                      style={{ backgroundColor: '#C9A84C' }}>
+                      {saving ? '...' : 'Speichern'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1 mt-0.5">
+                  <span className="text-gray-400 text-[10px]">
+                    {termin.notiz_intern ? `Notiz: ${termin.notiz_intern}` : 'Keine interne Notiz'}
+                  </span>
+                  <button
+                    onClick={() => { setEditingNotizId(termin.id); setNotizIntern(termin.notiz_intern ?? '') }}
+                    className="text-[#C9A84C] text-[10px] hover:underline ml-1"
+                  >
+                    Bearbeiten
+                  </button>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }

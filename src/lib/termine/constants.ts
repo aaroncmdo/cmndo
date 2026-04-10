@@ -1,0 +1,3 @@
+export const KB_BERATUNG_DURATION_MIN = 30
+export const KB_BERATUNG_VORLAUF_H = 2
+export const KB_BERATUNG_REICHWEITE_TAGE = 14

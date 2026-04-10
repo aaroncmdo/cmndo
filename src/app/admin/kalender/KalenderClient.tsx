@@ -18,17 +18,17 @@ type FallTermin = { id: string; fall_nummer: string | null; sv_termin: string; s
 type TaskTermin = { id: string; fall_id: string | null; titel: string; faellig_am: string; status: string }
 type Gutachter = { id: string; name: string; typ: string; avatar_url?: string }
 
-type TypFilter = { gutachter: boolean; rueckruf: boolean; kunde: boolean; intern: boolean }
+type TypFilter = { gutachter: boolean; rueckruf: boolean; kunde: boolean; intern: boolean; kb_beratung: boolean }
 
 type KalenderTermin = {
-  id: string; typ: 'gutachter' | 'rueckruf' | 'kunde' | 'intern' | 'task'
+  id: string; typ: 'gutachter' | 'rueckruf' | 'kunde' | 'intern' | 'task' | 'kb_beratung'
   titel: string; start: string; end?: string; farbe: string
   gutachterName?: string; gutachterId?: string; fallId?: string; fallNummer?: string; link?: string; status?: string; overdue?: boolean
 }
 
-const FARBEN: Record<string, string> = { gutachter: '#4573A2', rueckruf: '#E89B3C', kunde: '#5DAA80', intern: '#7B7B8A', task: '#f97316' }
-const TYP_LABELS: Record<string, string> = { gutachter: 'Gutachter', rueckruf: 'Rueckruf', kunde: 'Kunde', intern: 'Intern' }
-const TYP_ICONS: Record<string, typeof CalendarIcon> = { gutachter: CalendarIcon, rueckruf: PhoneIcon, kunde: UsersIcon, intern: CoffeeIcon }
+const FARBEN: Record<string, string> = { gutachter: '#4573A2', rueckruf: '#E89B3C', kunde: '#5DAA80', intern: '#7B7B8A', task: '#f97316', kb_beratung: '#C9A84C' }
+const TYP_LABELS: Record<string, string> = { gutachter: 'Gutachter', rueckruf: 'Rueckruf', kunde: 'Kunde', intern: 'Intern', kb_beratung: 'KB-Beratung' }
+const TYP_ICONS: Record<string, typeof CalendarIcon> = { gutachter: CalendarIcon, rueckruf: PhoneIcon, kunde: UsersIcon, intern: CoffeeIcon, kb_beratung: PhoneIcon }
 const SV_TYP_BADGE: Record<string, { label: string; color: string }> = {
   'kfz-gutachter': { label: 'KFZ', color: 'bg-blue-100 text-blue-700' },
   'dat-gutachter': { label: 'DAT', color: 'bg-orange-100 text-orange-700' },
@@ -39,12 +39,19 @@ const SV_TYP_BADGE: Record<string, { label: string; color: string }> = {
 const STORAGE_KEY = 'claimondo_admin_kalender_filter'
 
 function loadFilter(): { typFilter: TypFilter; gutachterIds: string[] } {
-  if (typeof window === 'undefined') return { typFilter: { gutachter: true, rueckruf: true, kunde: true, intern: true }, gutachterIds: [] }
+  if (typeof window === 'undefined') return { typFilter: { gutachter: true, rueckruf: true, kunde: true, intern: true, kb_beratung: true }, gutachterIds: [] }
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return JSON.parse(raw)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      // Ensure kb_beratung key exists (backward-compat)
+      if (parsed.typFilter && parsed.typFilter.kb_beratung === undefined) {
+        parsed.typFilter.kb_beratung = true
+      }
+      return parsed
+    }
   } catch { /* */ }
-  return { typFilter: { gutachter: true, rueckruf: true, kunde: true, intern: true }, gutachterIds: [] }
+  return { typFilter: { gutachter: true, rueckruf: true, kunde: true, intern: true, kb_beratung: true }, gutachterIds: [] }
 }
 
 function saveFilter(typFilter: TypFilter, gutachterIds: string[]) {
@@ -60,7 +67,7 @@ export default function KalenderClient({
 }) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [viewMode, setViewMode] = useState<'month' | 'week'>('month')
-  const [typFilter, setTypFilter] = useState<TypFilter>({ gutachter: true, rueckruf: true, kunde: true, intern: true })
+  const [typFilter, setTypFilter] = useState<TypFilter>({ gutachter: true, rueckruf: true, kunde: true, intern: true, kb_beratung: true })
   const [gutachterIds, setGutachterIds] = useState<string[]>([])
   const [gutachterOpen, setGutachterOpen] = useState(false)
   const [gutachterSearch, setGutachterSearch] = useState('')
