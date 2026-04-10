@@ -1,0 +1,32 @@
+name: Weekly DB Backup
+
+on:
+  schedule:
+    - cron: '0 4 * * 0' # Sonntag 04:00 UTC
+  workflow_dispatch: {} # Manueller Trigger
+
+jobs:
+  trigger-backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger DB Backup Cron
+        run: |
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.PRODUCTION_URL }}/api/cron/db-backup")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Response: $BODY"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Backup failed with HTTP $HTTP_CODE"
+            exit 1
+          fi
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Weekly DB backup failed. Check Supabase Storage and logs."
