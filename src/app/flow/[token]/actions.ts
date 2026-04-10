@@ -308,6 +308,13 @@ export async function signSAandCreateFall(
       gutachter_termin_status: lead.gutachter_termin ? 'reserviert' : null,
       schadenfall_typ: lead.schadenfall_typ,
       kunden_konstellation: lead.kunden_konstellation,
+      // KFZ-154: Spezifikation + Schadenart fuer Dispatcher-Match
+      spezifikation: lead.spezifikation ?? null,
+      schadenart: lead.schadenart ?? null,
+      // KFZ-153: Unfall + Gegner Detaildaten
+      unfall_konstellation: lead.unfall_konstellation ?? null,
+      gegner_anzahl_beteiligte: lead.gegner_anzahl_beteiligte ?? null,
+      gegner_fahrzeugtyp: lead.gegner_fahrzeugtyp ?? null,
       kennzeichen: lead.kennzeichen,
       fahrzeug_hersteller: lead.fahrzeug_hersteller,
       fahrzeug_modell: lead.fahrzeug_modell,
@@ -404,6 +411,12 @@ export async function signSAandCreateFall(
       beschreibung: String(lead.notiz).trim(),
     })
   }
+
+  // 6d. KFZ-140: Pflichtdokumente erstellen (bisher nur im Dispatch-Pfad)
+  try {
+    const { createPflichtdokumente } = await import('@/app/admin/dispatch/actions')
+    await createPflichtdokumente(admin, fall.id, lead)
+  } catch (err) { console.error('[KFZ-140] Pflichtdokumente im FlowLink-Pfad:', err) }
 
   // 7. FlowLink updaten
   if (flowLinkId) {

@@ -526,7 +526,7 @@ async function findLeastBusyKundenbetreuer(
 
 // ─── Pflichtdokumente automatisch erstellen ─────────────────────────────────
 
-async function createPflichtdokumente(
+export async function createPflichtdokumente(
   supabase: Awaited<ReturnType<typeof createClient>>,
   fallId: string,
   lead: Record<string, unknown>,
