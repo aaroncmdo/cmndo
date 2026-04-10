@@ -1,7 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import { CheckCircle2Icon, CircleDotIcon, AlertCircleIcon, FileTextIcon, ImageIcon, UploadIcon } from 'lucide-react'
 import { getPflichtDokumenteFuerFall, DOKUMENT_LABELS, type Phase, type Szenario } from '@/lib/dokumente/pflicht-dokumente'
+import FallDokumentDropzone from './FallDokumentDropzone'
 
 // KFZ-172: Dokumente-Sidebar fuer die Fall-Akte Right-Sidebar.
 // Zeigt kumulierte Pflichtdokumente mit Status (vorhanden/fehlend/OCR)
@@ -19,16 +21,19 @@ export type FallDokumentRow = {
 }
 
 export default function FallDokumenteSidebar({
+  fallId,
   aktuellePhase,
   szenario,
   dokumente,
   onUploadClick,
 }: {
+  fallId: string
   aktuellePhase: string | null
   szenario: string | null
   dokumente: FallDokumentRow[]
   onUploadClick?: (dokumentTyp: string) => void
 }) {
+  const [uploadingTyp, setUploadingTyp] = useState<string | null>(null)
   const pflicht = getPflichtDokumenteFuerFall(
     aktuellePhase as Phase | null,
     szenario as Szenario | null,
@@ -87,7 +92,7 @@ export default function FallDokumenteSidebar({
                   ? 'bg-emerald-50/50 hover:bg-emerald-50'
                   : 'bg-red-50/30 hover:bg-red-50/60 cursor-pointer'
               }`}
-              onClick={!vorhanden && onUploadClick ? () => onUploadClick(p.typ) : undefined}
+              onClick={!vorhanden ? () => setUploadingTyp(p.typ) : undefined}
             >
               {vorhanden ? (
                 <CheckCircle2Icon className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
@@ -106,6 +111,20 @@ export default function FallDokumenteSidebar({
           )
         })}
       </div>
+
+      {/* Inline-Dropzone fuer den aktuell ausgewaehlten Dokument-Typ */}
+      {uploadingTyp && (
+        <div className="mt-2">
+          <FallDokumentDropzone
+            fallId={fallId}
+            dokumentTyp={uploadingTyp}
+            istPflicht={pflichtTypen.has(uploadingTyp)}
+            abPhase={pflicht.find(p => p.typ === uploadingTyp)?.ab_phase ?? aktuellePhase}
+            onClose={() => setUploadingTyp(null)}
+            onSuccess={() => setUploadingTyp(null)}
+          />
+        </div>
+      )}
 
       {/* Optionale hochgeladene Docs */}
       {optionale.length > 0 && (
@@ -129,15 +148,13 @@ export default function FallDokumenteSidebar({
       )}
 
       {/* Upload-Hint */}
-      {onUploadClick && (
-        <button
-          type="button"
-          onClick={() => onUploadClick('')}
-          className="mt-2 w-full flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border border-dashed border-gray-300 text-gray-400 hover:text-[#4573A2] hover:border-[#4573A2] text-[10px] transition-colors"
-        >
-          <UploadIcon className="w-3 h-3" /> Dokument hochladen
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={() => setUploadingTyp('sonstiges')}
+        className="mt-2 w-full flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border border-dashed border-gray-300 text-gray-400 hover:text-[#4573A2] hover:border-[#4573A2] text-[10px] transition-colors"
+      >
+        <UploadIcon className="w-3 h-3" /> Weiteres Dokument
+      </button>
     </div>
   )
 }

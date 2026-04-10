@@ -935,6 +935,7 @@ export default function FallakteClient({
 
             {/* KFZ-172: Pflichtdokumente-Sidebar (Phase x Szenario) */}
             <FallDokumenteSidebar
+              fallId={fall.id}
               aktuellePhase={(fall as Record<string, unknown>).aktuelle_phase as string | null}
               szenario={(fall as Record<string, unknown>).szenario as string | null}
               dokumente={fallDokumente ?? []}
