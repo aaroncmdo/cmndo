@@ -9,7 +9,7 @@ export default async function SVKalenderPage() {
   if (!user) redirect('/login')
 
   // Get the SV's sachverstaendige ID
-  const sv = await getGutachterForUser(supabase, user.id, 'id, gcal_connected, standort_lat, standort_lng')
+  const sv = await getGutachterForUser<{ id: string; gcal_connected: boolean | null; standort_lat: number | null; standort_lng: number | null }>(supabase, user.id, 'id, gcal_connected, standort_lat, standort_lng')
 
   if (!sv) redirect('/login')
 

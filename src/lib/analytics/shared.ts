@@ -22,19 +22,19 @@ export function eur(val: number): string {
 }
 
 /** Monats-Range berechnen */
-export function getMonthRange(monat: string): { start: string; end: string } {
+export function getMonthRange(monat: string): AnalyticsFilter {
   const d = new Date(monat + '-01T00:00:00Z')
-  const start = d.toISOString()
+  const startDate = d.toISOString()
   const nextMonth = new Date(d)
   nextMonth.setMonth(nextMonth.getMonth() + 1)
-  return { start, end: nextMonth.toISOString() }
+  return { startDate, endDate: nextMonth.toISOString() }
 }
 
 /** YTD-Range */
-export function getYtdRange(): { start: string; end: string } {
+export function getYtdRange(): AnalyticsFilter {
   const now = new Date()
-  const start = new Date(now.getFullYear(), 0, 1).toISOString()
-  return { start, end: now.toISOString() }
+  const startDate = new Date(now.getFullYear(), 0, 1).toISOString()
+  return { startDate, endDate: now.toISOString() }
 }
 
 export function getDb() { return createAdminClient() }

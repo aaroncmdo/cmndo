@@ -73,6 +73,31 @@ export default function HeuteRouteClient({
     }).catch(() => {})
   }, [gpsRaw])
 
+  // Termin-Marker: verwende Adresse als Fallback-Geocoding
+  // Da wir kein geocoding API hier aufrufen wollen, nutzen wir die Koeln-Koordinaten
+  // als Fallback (die Test-Daten haben keine lat/lng auf Faelle).
+  const mapTermine: MapTermin[] = useMemo(() => {
+    // PLZ-basierte grobe Koordinaten fuer Koeln (Fallback)
+    const PLZ_FALLBACK: Record<string, { lat: number; lng: number }> = {
+      '50667': { lat: 50.9375, lng: 6.9603 },
+      '50823': { lat: 50.9614, lng: 6.9407 },
+      '50677': { lat: 50.9209, lng: 6.9531 },
+      '51063': { lat: 50.9709, lng: 7.0029 },
+      '50733': { lat: 50.9847, lng: 6.9447 },
+      '50670': { lat: 50.9489, lng: 6.9526 },
+    }
+    return termine.map(t => {
+      const plzGeo = t.schadens_plz ? PLZ_FALLBACK[t.schadens_plz] : null
+      return {
+        id: t.id,
+        lat: plzGeo?.lat ?? svLat ?? 50.9375,
+        lng: plzGeo?.lng ?? svLng ?? 6.9603,
+        label: `${formatZeit(t.start_zeit)} ${t.kunde_name}`,
+        adresse: [t.schadens_adresse, t.schadens_plz, t.schadens_ort].filter(Boolean).join(', ') || '—',
+      }
+    })
+  }, [termine, svLat, svLng])
+
   // KFZ-158 Phase 3: Geofence — pruefe ob SV am Termin angekommen ist
   useEffect(() => {
     if (!gpsRaw || !mapTermine.length) return
@@ -113,31 +138,6 @@ export default function HeuteRouteClient({
       kennzeichen: t.kennzeichen, fahrzeug: t.fahrzeug,
     })
   }
-
-  // Termin-Marker: verwende Adresse als Fallback-Geocoding
-  // Da wir kein geocoding API hier aufrufen wollen, nutzen wir die Koeln-Koordinaten
-  // als Fallback (die Test-Daten haben keine lat/lng auf Faelle).
-  const mapTermine: MapTermin[] = useMemo(() => {
-    // PLZ-basierte grobe Koordinaten fuer Koeln (Fallback)
-    const PLZ_FALLBACK: Record<string, { lat: number; lng: number }> = {
-      '50667': { lat: 50.9375, lng: 6.9603 },
-      '50823': { lat: 50.9614, lng: 6.9407 },
-      '50677': { lat: 50.9209, lng: 6.9531 },
-      '51063': { lat: 50.9709, lng: 7.0029 },
-      '50733': { lat: 50.9847, lng: 6.9447 },
-      '50670': { lat: 50.9489, lng: 6.9526 },
-    }
-    return termine.map(t => {
-      const plzGeo = t.schadens_plz ? PLZ_FALLBACK[t.schadens_plz] : null
-      return {
-        id: t.id,
-        lat: plzGeo?.lat ?? svLat ?? 50.9375,
-        lng: plzGeo?.lng ?? svLng ?? 6.9603,
-        label: `${formatZeit(t.start_zeit)} ${t.kunde_name}`,
-        adresse: [t.schadens_adresse, t.schadens_plz, t.schadens_ort].filter(Boolean).join(', ') || '—',
-      }
-    })
-  }, [termine, svLat, svLng])
 
   const activeTermin = termine.find(t => t.id === activeId)
 

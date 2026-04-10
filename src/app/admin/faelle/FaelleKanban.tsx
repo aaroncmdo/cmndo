@@ -56,6 +56,7 @@ function timeSince(d: string): string {
 }
 
 export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
+  const router = useRouter()
   const [localFaelle, setLocalFaelle] = useState(faelle)
   const [toast, setToast] = useState<string | null>(null)
   const [search, setSearch] = useState('')

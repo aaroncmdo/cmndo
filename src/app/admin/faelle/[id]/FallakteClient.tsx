@@ -577,6 +577,7 @@ export default function FallakteClient({
   stepperState,
   fallFinanzen,
   fallDokumente,
+  regulierungsKlassifizierung,
 }: {
   fall: Fall
   lead: Lead
@@ -805,6 +806,7 @@ export default function FallakteClient({
           <TabKanzlei
             fall={fall}
             onRefresh={() => router.refresh()}
+            versicherungKontakt={versicherungKontakt}
           />
           </div>
         )}
@@ -2474,9 +2476,11 @@ const ESKALATIONSSTUFEN_DETAIL = [
 function TabKanzlei({
   fall,
   onRefresh,
+  versicherungKontakt,
 }: {
   fall: Fall
   onRefresh: () => void
+  versicherungKontakt?: { name: string; schaden_telefon: string | null; schaden_email: string | null; hotline_telefon: string | null; webseite: string | null } | null
 }) {
   const [betrag, setBetrag] = useState('')
   const [saving, setSaving] = useState(false)

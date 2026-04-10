@@ -123,12 +123,14 @@ export async function deductLeadpreis(svId: string, fallId: string, schadenhoehe
   const db = createAdminClient()
   const leadpreis = calculateLeadpreis(schadenhoehe)
 
-  await db.rpc('decrement_guthaben', { sv_id_param: svId, amount: leadpreis }).catch(async () => {
+  try {
+    await db.rpc('decrement_guthaben', { sv_id_param: svId, amount: leadpreis })
+  } catch {
     // Fallback if RPC doesn't exist
     const { data: sv } = await db.from('sachverstaendige').select('guthaben').eq('id', svId).single()
     const current = Number(sv?.guthaben ?? 0)
     await db.from('sachverstaendige').update({ guthaben: current - leadpreis }).eq('id', svId)
-  })
+  }
 
   try {
     await db.from('gutachter_abrechnungen').insert({

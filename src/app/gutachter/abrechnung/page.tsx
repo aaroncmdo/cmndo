@@ -22,7 +22,19 @@ export default async function AbrechnungPage() {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
 
   // Get the SV record
-  const sv = await getGutachterForUser(supabase, user!.id, 'id, paket, offene_faelle, max_faelle_monat, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, guthaben, guthaben_initial, anzahlung_betrag, anzahlung_bezahlt')
+  const sv = await getGutachterForUser<{
+    id: string
+    paket: string | null
+    offene_faelle: number | null
+    max_faelle_monat: number | null
+    paket_faelle_genutzt: number | null
+    paket_faelle_gesamt: number | null
+    paket_umkreis_km: number | null
+    guthaben: number | null
+    guthaben_initial: number | null
+    anzahlung_betrag: number | null
+    anzahlung_bezahlt: boolean | null
+  }>(supabase, user!.id, 'id, paket, offene_faelle, max_faelle_monat, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, guthaben, guthaben_initial, anzahlung_betrag, anzahlung_bezahlt')
 
   if (!sv) {
     return (

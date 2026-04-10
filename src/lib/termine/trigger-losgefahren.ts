@@ -90,12 +90,14 @@ export async function triggerSvLosgefahren(
 
   // Timeline
   if (fall) {
-    await db.from('timeline').insert({
-      fall_id: fall.id,
-      typ: 'termin',
-      titel: `${svName} ist losgefahren`,
-      beschreibung: `ETA ca. ${etaMinutes} Min. Kunde wurde via WhatsApp informiert. Tracking: ${trackingUrl}`,
-    }).catch(() => {})
+    try {
+      await db.from('timeline').insert({
+        fall_id: fall.id,
+        typ: 'termin',
+        titel: `${svName} ist losgefahren`,
+        beschreibung: `ETA ca. ${etaMinutes} Min. Kunde wurde via WhatsApp informiert. Tracking: ${trackingUrl}`,
+      })
+    } catch { /* fire-and-forget */ }
   }
 
   return { success: true, token, etaMinutes }

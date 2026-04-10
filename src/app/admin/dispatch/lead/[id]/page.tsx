@@ -19,7 +19,8 @@ export default async function LeadDetailPage({
 }) {
   const { id } = await params
 
-  let lead: Record<string, unknown> | null = null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let lead: any = null
   let faelle: Array<{ id: string; fall_nummer: string | null; status: string | null; schadens_ursache: string | null; created_at: string | null }> = []
   let timelineEntries: Array<{ id: string; typ: string | null; titel: string | null; beschreibung: string | null; created_at: string | null }> = []
 

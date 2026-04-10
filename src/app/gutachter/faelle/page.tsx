@@ -305,8 +305,12 @@ export default async function GutachterFaellePage({
                   <Link
                     key={fall.id}
                     href={`/gutachter/fall/${fall.id}`}
-                    className="block bg-white rounded-2xl p-4 border border-gray-200 hover:border-gray-300 transition-colors"
+                    className="block bg-white rounded-2xl p-4 border border-gray-200 hover:border-gray-300 transition-colors relative"
                   >
+                    {/* KFZ-182: NotificationDot wenn Chat UND Updates > 0 */}
+                    {(fall.ungelesene_nachrichten ?? 0) > 0 && (fall.ungelesene_updates ?? 0) > 0 && (
+                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#DC2626] rounded-full border-2 border-white z-10" />
+                    )}
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <span className="text-[#7BA3CC] font-mono text-xs">
@@ -317,7 +321,12 @@ export default async function GutachterFaellePage({
                       <div className="flex items-center gap-2">
                         {(fall.ungelesene_nachrichten ?? 0) > 0 && (
                           <span className="inline-flex items-center gap-0.5 bg-[#4573A2] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                            💬 {fall.ungelesene_nachrichten}
+                            {fall.ungelesene_nachrichten}
+                          </span>
+                        )}
+                        {(fall.ungelesene_updates ?? 0) > 0 && (
+                          <span className="inline-flex items-center gap-0.5 bg-[#DC2626] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                            {fall.ungelesene_updates}
                           </span>
                         )}
                         <span

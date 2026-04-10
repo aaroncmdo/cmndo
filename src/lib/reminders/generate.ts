@@ -69,21 +69,21 @@ export async function generateReminderForTermin(terminId: string): Promise<void>
   })
 
   // Reminder-Einträge upserten
-  const reminders = [
+  const reminders: Array<{ termin_id: string; empfaenger: string; reminder_typ: string; geplant_fuer: string; status: string; versuche: number }> = [
     {
       termin_id: terminId,
-      empfaenger: 'kunde' as const,
-      reminder_typ: 'kunde_morgen' as const,
+      empfaenger: 'kunde',
+      reminder_typ: 'kunde_morgen',
       geplant_fuer: kundeMorgen.toISOString(),
-      status: 'pending' as const,
+      status: 'pending',
       versuche: 0,
     },
     {
       termin_id: terminId,
-      empfaenger: 'kunde' as const,
-      reminder_typ: 'kunde_1h' as const,
+      empfaenger: 'kunde',
+      reminder_typ: 'kunde_1h',
       geplant_fuer: kunde1h.toISOString(),
-      status: 'pending' as const,
+      status: 'pending',
       versuche: 0,
     },
   ]
@@ -91,10 +91,10 @@ export async function generateReminderForTermin(terminId: string): Promise<void>
   if (svRoute) {
     reminders.push({
       termin_id: terminId,
-      empfaenger: 'sv' as const,
-      reminder_typ: 'sv_route' as const,
+      empfaenger: 'sv',
+      reminder_typ: 'sv_route',
       geplant_fuer: svRoute.toISOString(),
-      status: 'pending' as const,
+      status: 'pending',
       versuche: 0,
     })
   } else {

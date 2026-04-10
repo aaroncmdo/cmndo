@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import {
   FileTextIcon,
   UploadIcon,
@@ -91,6 +92,12 @@ export default function FallDetailClient({
   fallDokumente?: FallDokumentRow[]
 }) {
   const [tab, setTab] = useState<TabKey>('uebersicht')
+
+  // KFZ-182: Mark fall as read on mount (badges verschwinden)
+  useEffect(() => {
+    import('@/lib/faelle/mark-read-action').then(m => m.markFallAsReadAction(fall.id as string)).catch(() => {})
+  }, [fall.id])
+
   const [uploading, setUploading] = useState(false)
   const [uploadingDoc, setUploadingDoc] = useState(false)
   const [error, setError] = useState<string | null>(null)
