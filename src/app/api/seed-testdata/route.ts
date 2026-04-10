@@ -207,7 +207,6 @@ export async function POST() {
         gutachter_typ: sv.gutachter_typ,
         standort_adresse: sv.standort_adresse, standort_plz: sv.standort_plz,
         standort_lat: sv.standort_lat, standort_lng: sv.standort_lng,
-        standort_lat: sv.standort_lat, standort_lng: sv.standort_lng,
         gebiet_plz: [sv.standort_plz],
         paket: sv.paket, paket_faelle_gesamt: sv.paket_faelle_gesamt,
         paket_umkreis_km: sv.paket_umkreis_km, radius_km: sv.paket_umkreis_km,
