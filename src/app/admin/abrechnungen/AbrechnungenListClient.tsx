@@ -77,6 +77,8 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
   const [bezahltNotiz, setBezahltNotiz] = useState('')
   const [confirmStorno, setConfirmStorno] = useState(false)
   const [stornoGrund, setStornoGrund] = useState('')
+  const [showReIssueForm, setShowReIssueForm] = useState(false)
+  const [reIssueKorrekturen, setReIssueKorrekturen] = useState<{ fall_id: string; label: string; original: number; neuer_betrag: string }[]>([])
 
   const filtered = useMemo(() => {
     return rows.filter(r => {
@@ -150,10 +152,15 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
 
   function handleReIssue(row: Row) {
     setActionMsg(null)
+    const korrekturen = reIssueKorrekturen
+      .filter(k => k.neuer_betrag && parseFloat(k.neuer_betrag) !== k.original)
+      .map(k => ({ fall_id: k.fall_id, neuer_betrag_netto: parseFloat(k.neuer_betrag) }))
     startTransition(async () => {
-      const r = await reIssueAbrechnung(row.id)
+      const r = await reIssueAbrechnung(row.id, korrekturen.length > 0 ? korrekturen : undefined)
       if (r.success) {
         setActionMsg({ kind: 'success', text: r.neue_abrechnung_id ? `Korrekturabrechnung erstellt` : 'Keine verbleibenden Fälle — keine neue Abrechnung' })
+        setShowReIssueForm(false)
+        setReIssueKorrekturen([])
         setSelected(null)
       } else {
         setActionMsg({ kind: 'error', text: r.error ?? 'Re-Issue fehlgeschlagen' })
@@ -440,15 +447,49 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                     {selected.storniert_grund && <p className="text-xs text-gray-600"><strong>Grund:</strong> {selected.storniert_grund}</p>}
                     {selected.ersetzt_durch_abrechnung_id && <p className="text-xs text-emerald-600"><strong>Korrekturabrechnung erstellt</strong></p>}
                   </div>
-                  {!selected.ersetzt_durch_abrechnung_id && (
+                  {!selected.ersetzt_durch_abrechnung_id && !showReIssueForm && (
                     <button
-                      onClick={() => handleReIssue(selected)}
+                      onClick={() => {
+                        // Positionen aus der Abrechnung laden für Korrektur-Form
+                        // positionen ist nicht im Row-Typ, daher zeigen wir ein einfaches Form
+                        setShowReIssueForm(true)
+                        setReIssueKorrekturen([])
+                      }}
                       disabled={pending}
                       className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#4573A2] hover:bg-[#1E3A5F] text-white text-sm font-medium transition-colors disabled:opacity-40"
                     >
                       <RefreshCwIcon className="w-4 h-4" />
-                      {pending ? 'Wird erstellt...' : 'Korrekturabrechnung erstellen (Re-Issue)'}
+                      Korrekturabrechnung erstellen (Re-Issue)
                     </button>
+                  )}
+                  {!selected.ersetzt_durch_abrechnung_id && showReIssueForm && (
+                    <div className="border border-[#4573A2]/20 rounded-xl p-3 bg-[#4573A2]/5 space-y-3">
+                      <p className="text-xs text-gray-700 font-medium">Korrekturen (optional)</p>
+                      <p className="text-[10px] text-gray-500">Positionen können vor dem Re-Issue korrigiert werden. Leer lassen = Originalwert beibehalten.</p>
+                      {reIssueKorrekturen.map((k, i) => (
+                        <div key={k.fall_id} className="flex items-center gap-2 text-xs">
+                          <span className="text-gray-600 flex-1 truncate">{k.label}</span>
+                          <span className="text-gray-400 tabular-nums">{fmtEur(k.original)}</span>
+                          <span className="text-gray-400">→</span>
+                          <input type="number" step="0.01" value={k.neuer_betrag}
+                            onChange={e => setReIssueKorrekturen(prev => prev.map((p, j) => j === i ? { ...p, neuer_betrag: e.target.value } : p))}
+                            placeholder={String(k.original)}
+                            className="w-24 bg-white border border-gray-300 rounded px-2 py-1 text-xs tabular-nums text-right" />
+                        </div>
+                      ))}
+                      <button onClick={() => {
+                        // Quick-add: ein leeres Korrektur-Feld (Fall-ID manuell eingeben)
+                        setReIssueKorrekturen(prev => [...prev, { fall_id: '', label: 'Fall-ID eingeben', original: 0, neuer_betrag: '' }])
+                      }} className="text-[10px] text-[#4573A2] hover:underline">+ Position hinzufügen</button>
+                      <div className="flex gap-2">
+                        <button onClick={() => { setShowReIssueForm(false); setReIssueKorrekturen([]) }} disabled={pending}
+                          className="flex-1 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50">Abbrechen</button>
+                        <button onClick={() => handleReIssue(selected)} disabled={pending}
+                          className="flex-1 py-1.5 rounded-lg bg-[#4573A2] hover:bg-[#1E3A5F] text-white text-xs font-medium disabled:opacity-40">
+                          {pending ? 'Erstelle...' : 'Re-Issue erstellen'}
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </div>
               )}

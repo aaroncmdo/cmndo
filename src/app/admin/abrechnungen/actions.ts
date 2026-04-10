@@ -227,8 +227,10 @@ export async function markBezahlt(abrechnung_id: string, notiz?: string): Promis
 }
 
 /**
- * KFZ-150 Szenario B: Abrechnung stornieren.
- * Setzt status='storniert' + storniert_am/grund. Stripe PI wird gecancelt.
+ * KFZ-150: Abrechnung stornieren.
+ * - Nicht bezahlt: Status storniert + Stripe PI Cancel + Storno-Rechnung (neg. Betrag)
+ * - Bezahlt: Stripe Refund + Status storniert + Storno-Rechnung
+ * - Email an Empfänger + Timeline-Eintrag
  */
 export async function stornoAbrechnung(
   abrechnung_id: string,
@@ -238,17 +240,39 @@ export async function stornoAbrechnung(
   if (!auth.ok) return { success: false, error: auth.error }
   if (!grund.trim()) return { success: false, error: 'Storno-Grund ist Pflicht' }
 
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
   const db = createAdminClient()
 
   const { data: abr } = await db.from('abrechnungen')
-    .select('id, status, bezahlt_am, stripe_payment_intent_id')
+    .select('id, abrechnungs_nr, status, bezahlt_am, summe_netto, summe_brutto, ust_satz, ust_betrag, empfaenger_typ, empfaenger_id, empfaenger_email, empfaenger_name, stripe_payment_intent_id, abrechnungs_zeitraum_start, abrechnungs_zeitraum_ende')
     .eq('id', abrechnung_id)
     .maybeSingle()
   if (!abr) return { success: false, error: 'Abrechnung nicht gefunden' }
-  if (abr.storniert_am || abr.status === 'storniert') return { success: false, error: 'Bereits storniert' }
-  if (abr.bezahlt_am) return { success: false, error: 'Bereits bezahlt — nutze Gutschrift statt Storno' }
+  if (abr.status === 'storniert') return { success: false, error: 'Bereits storniert' }
 
   const now = new Date().toISOString()
+
+  // 1. Bei bezahlter Rechnung: Stripe Refund
+  if (abr.bezahlt_am && abr.stripe_payment_intent_id) {
+    try {
+      const { stripe } = await import('@/lib/stripe/client')
+      await stripe.refunds.create({ payment_intent: abr.stripe_payment_intent_id })
+    } catch (e) {
+      console.error('[KFZ-150] Stripe Refund fehlgeschlagen:', e)
+      // Continue with storno even if refund fails — admin can handle manually
+    }
+  }
+
+  // 2. Bei nicht bezahlter Rechnung: Stripe PI canceln
+  if (!abr.bezahlt_am && abr.stripe_payment_intent_id) {
+    try {
+      const { stripe } = await import('@/lib/stripe/client')
+      await stripe.paymentIntents.cancel(abr.stripe_payment_intent_id)
+    } catch { /* already cancelled/captured */ }
+  }
+
+  // 3. Status auf storniert setzen
   await db.from('abrechnungen').update({
     status: 'storniert',
     storniert_am: now,
@@ -256,12 +280,57 @@ export async function stornoAbrechnung(
     updated_at: now,
   }).eq('id', abrechnung_id)
 
-  // Stripe PI canceln falls vorhanden
-  if (abr.stripe_payment_intent_id) {
-    try {
-      const { stripe } = await import('@/lib/stripe/client')
-      await stripe.paymentIntents.cancel(abr.stripe_payment_intent_id)
-    } catch { /* already cancelled/captured */ }
+  // 4. Storno-Rechnung erstellen (negativer Betrag, bezieht sich auf Original)
+  const stornoNr = `${abr.abrechnungs_nr}-S`
+  await db.from('abrechnungen').insert({
+    empfaenger_typ: abr.empfaenger_typ,
+    empfaenger_id: abr.empfaenger_id,
+    empfaenger_email: abr.empfaenger_email,
+    empfaenger_name: abr.empfaenger_name,
+    abrechnungs_nr: stornoNr,
+    abrechnungs_zeitraum_start: abr.abrechnungs_zeitraum_start,
+    abrechnungs_zeitraum_ende: abr.abrechnungs_zeitraum_ende,
+    positionen: [{ typ: 'storno', bezeichnung: `Storno zu ${abr.abrechnungs_nr}`, betrag: -Number(abr.summe_netto) }],
+    summe_netto: -Number(abr.summe_netto),
+    ust_satz: Number(abr.ust_satz ?? 19),
+    ust_betrag: -Number(abr.ust_betrag ?? 0),
+    summe_brutto: -Number(abr.summe_brutto),
+    status: 'versendet',
+    versand_datum: now,
+    notiz: `Storno-Rechnung zu ${abr.abrechnungs_nr}. Grund: ${grund.trim()}`,
+  })
+
+  // 5. Email an Empfänger
+  try {
+    const { sendEmail } = await import('@/lib/email/google/client')
+    await sendEmail({
+      to: abr.empfaenger_email,
+      subject: `Storno: Rechnung ${abr.abrechnungs_nr} wurde storniert`,
+      html: `<p>Hallo ${abr.empfaenger_name?.split(' ')[0] ?? ''},</p>
+<p>die Rechnung <strong>${abr.abrechnungs_nr}</strong> wurde storniert.</p>
+<p><strong>Grund:</strong> ${grund.trim()}</p>
+<p>Eine Storno-Rechnung (${stornoNr}) wurde erstellt.${abr.bezahlt_am ? ' Der bereits gezahlte Betrag wird erstattet.' : ''}</p>
+<p>Bei Fragen wende dich an support@claimondo.de.</p>
+<p>Dein Claimondo-Team</p>`,
+      empfaengerTyp: abr.empfaenger_typ ?? 'sv',
+      template: 'abrechnung_storno',
+    })
+  } catch (e) {
+    console.error('[KFZ-150] Storno-Email fehlgeschlagen:', e)
+  }
+
+  // 6. Timeline-Einträge für betroffene Fälle
+  const { data: betroffeneFaelle } = await db.from('faelle')
+    .select('id')
+    .eq('abrechnung_id', abrechnung_id)
+  for (const f of betroffeneFaelle ?? []) {
+    await db.from('timeline').insert({
+      fall_id: f.id,
+      typ: 'system',
+      titel: 'Abrechnung storniert',
+      beschreibung: `Rechnung ${abr.abrechnungs_nr} wurde storniert. Grund: ${grund.trim()}`,
+      erstellt_von: user?.id ?? null,
+    })
   }
 
   revalidatePath('/admin/abrechnungen', 'page')
@@ -269,11 +338,12 @@ export async function stornoAbrechnung(
 }
 
 /**
- * KFZ-150 Szenario B: Re-Issue einer stornierten Abrechnung.
- * Erstellt neue Korrekturabrechnung mit verbleibenden Fällen.
+ * KFZ-150: Re-Issue einer stornierten Abrechnung.
+ * Erstellt neue Korrekturabrechnung. Optional mit Korrekturen an Positionen.
  */
 export async function reIssueAbrechnung(
   abrechnung_id: string,
+  korrekturen?: { fall_id: string; neuer_betrag_netto: number }[],
 ): Promise<{ success: boolean; error?: string; neue_abrechnung_id?: string }> {
   const auth = await ensureAdmin()
   if (!auth.ok) return { success: false, error: auth.error }
@@ -287,6 +357,15 @@ export async function reIssueAbrechnung(
   if (!abr) return { success: false, error: 'Abrechnung nicht gefunden' }
   if (abr.status !== 'storniert' || !abr.storniert_am) return { success: false, error: 'Abrechnung muss zuerst storniert sein' }
   if (abr.ersetzt_durch_abrechnung_id) return { success: false, error: 'Re-Issue wurde bereits erstellt' }
+
+  // Korrekturen anwenden falls vorhanden
+  if (korrekturen?.length) {
+    for (const k of korrekturen) {
+      await db.from('faelle').update({
+        sv_nachzahlung_netto: k.neuer_betrag_netto,
+      }).eq('id', k.fall_id)
+    }
+  }
 
   const { reissueAbrechnung } = await import('@/lib/abrechnung/reissue-abrechnung')
   const result = await reissueAbrechnung(abrechnung_id)
