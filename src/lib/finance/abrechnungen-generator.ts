@@ -91,7 +91,8 @@ export async function generiereMarketingAbrechnung(monat: string): Promise<{ abr
 
   // Für jeden Lead: Fall laden und prüfen ob marketing_quelle gesetzt
   const positionen: Position[] = []
-  const CPA = 150
+  const { FINANCE } = await import('@/lib/finance/constants')
+  const CPA = FINANCE.CPA_MARKETING_NETTO
 
   for (const lead of leads) {
     const { data: fall } = await supabase
@@ -201,7 +202,7 @@ export async function generiereKanzleiAbrechnungen(monat: string): Promise<Array
 
     const positionen: Position[] = []
     for (const fall of kanzleiFaelle) {
-      const honorar = Number(fall.kanzlei_honorar ?? 150)
+      const honorar = Number(fall.kanzlei_honorar ?? FINANCE.KANZLEI_PROVISION_NETTO)
 
       // Kundenname laden
       let kundeName = '—'

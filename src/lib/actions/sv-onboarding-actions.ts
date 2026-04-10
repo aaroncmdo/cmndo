@@ -165,9 +165,10 @@ export async function getOnboardingData() {
     .select('id, vorlage_typ')
     .eq('gutachter_id', sv.id as string)
 
-  // Anzahlung berechnen (150 EUR netto pro Fall im Kontingent)
+  // Anzahlung berechnen (pro Fall im Kontingent)
+  const { FINANCE } = await import('@/lib/finance/constants')
   const maxFaelle = Number(sv.max_faelle_monat ?? 10)
-  const anzahlung = Number(sv.onboarding_anzahlung_betrag ?? maxFaelle * 150)
+  const anzahlung = Number(sv.onboarding_anzahlung_betrag ?? maxFaelle * FINANCE.ANZAHLUNG_PRO_KONTINGENT)
 
   return {
     svId: sv.id as string,

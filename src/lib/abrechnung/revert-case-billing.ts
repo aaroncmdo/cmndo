@@ -92,7 +92,8 @@ export async function revertCaseBilling(
     // Szenario C: Bereits bezahlt → Gutschrift erstellen
     const nachzahlung = Number(fall.sv_nachzahlung_netto ?? 0)
     if (nachzahlung > 0) {
-      const mwst = Math.round(nachzahlung * 0.19 * 100) / 100
+      const { FINANCE } = await import('@/lib/finance/constants')
+      const mwst = Math.round(nachzahlung * (FINANCE.MWST_PROZENT / 100) * 100) / 100
       const { data: gs } = await db.from('gutschriften').insert({
         gutachter_id: abr.gutachter_id,
         betrag_netto: nachzahlung,
