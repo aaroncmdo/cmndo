@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { MapPinIcon, PhoneIcon, NavigationIcon, ClockIcon, CarIcon, AlertTriangleIcon, CheckCircleIcon } from 'lucide-react'
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import { MapPinIcon, PhoneIcon, NavigationIcon, ClockIcon, CarIcon, AlertTriangleIcon, CheckCircleIcon, LocateIcon } from 'lucide-react'
 import HeuteMap, { type MapTermin } from '@/components/maps/HeuteMap'
+import { useWatchPosition } from '@/lib/gps/use-watch-position'
+import { trackPosition } from '@/lib/gps/track-position'
 import type { HeuteTermin } from './page'
 
 // KFZ-158 Phase 1: Tagesroute Client-Component.
@@ -39,12 +41,25 @@ export default function HeuteRouteClient({
   svLng: number | null
 }) {
   const [activeId, setActiveId] = useState<string | null>(termine[0]?.id ?? null)
-  const [gpsPosition, setGpsPosition] = useState<{ lat: number; lng: number } | null>(null)
+  const [gpsEnabled, setGpsEnabled] = useState(true)
+  const { position: gpsRaw, error: gpsError, permissionState } = useWatchPosition(gpsEnabled)
+  const gpsPosition = gpsRaw ? { lat: gpsRaw.lat, lng: gpsRaw.lng } : null
+  const lastTrackRef = useRef(0)
 
-  // Fuer Phase 2: GPS-Position wird hier entgegengenommen
-  // import { useWatchPosition } from '@/lib/gps/use-watch-position'
-  // const { position } = useWatchPosition(true)
-  // useEffect(() => { if (position) setGpsPosition({ lat: position.lat, lng: position.lng }) }, [position])
+  // Throttled GPS-Tracking: alle 30s an Server senden
+  useEffect(() => {
+    if (!gpsRaw) return
+    const now = Date.now()
+    if (now - lastTrackRef.current < 30000) return
+    lastTrackRef.current = now
+    trackPosition({
+      lat: gpsRaw.lat,
+      lng: gpsRaw.lng,
+      accuracy_m: gpsRaw.accuracy,
+      heading: gpsRaw.heading,
+      speed_mps: gpsRaw.speed,
+    }).catch(() => {})
+  }, [gpsRaw])
 
   // Termin-Marker: verwende Adresse als Fallback-Geocoding
   // Da wir kein geocoding API hier aufrufen wollen, nutzen wir die Koeln-Koordinaten
@@ -92,6 +107,14 @@ export default function HeuteRouteClient({
 
   return (
     <div className="flex flex-col h-full -mx-4 sm:-mx-6 lg:-mx-8 -my-4">
+      {/* GPS Permission Banner */}
+      {permissionState === 'denied' && (
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-xs text-amber-700 flex items-center gap-2 flex-shrink-0">
+          <AlertTriangleIcon className="w-3.5 h-3.5 flex-shrink-0" />
+          Standort blockiert. Aktiviere ihn in den Browser-Einstellungen für Live-Tracking und optimierte Routenführung.
+        </div>
+      )}
+
       {/* Map — 55% */}
       <div className="flex-[55] min-h-0 relative">
         <HeuteMap

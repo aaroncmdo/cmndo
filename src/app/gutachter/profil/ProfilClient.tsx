@@ -406,6 +406,16 @@ export default function ProfilClient({
           </div>
         )}
 
+        {/* KFZ-158 Phase 2: GPS-Tracking Privacy-Toggle */}
+        <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-5">
+          <h2 className="text-sm font-medium text-gray-500 mb-1">Live-Standort</h2>
+          <p className="text-xs text-gray-400 mb-4">
+            Wenn aktiv, wird dein Standort während Terminen live getrackt.
+            Ermöglicht optimierte Routenführung und Admin-Übersicht.
+          </p>
+          <GpsTrackingToggle svId={sv.id} initial={(sv as Record<string, unknown>).live_tracking_enabled !== false} />
+        </div>
+
         {/* Offene Terminanfragen */}
         {pendingTermine.length > 0 && (
           <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-5">
@@ -715,6 +725,36 @@ function PrivacyToggle({ svId, initial }: { svId: string; initial: boolean }) {
         {saving && <span className="text-gray-400 text-xs ml-2">speichert...</span>}
       </span>
       {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
+    </div>
+  )
+}
+
+// KFZ-158 Phase 2: GPS-Tracking Toggle
+function GpsTrackingToggle({ svId, initial }: { svId: string; initial: boolean }) {
+  const [active, setActive] = useState(initial)
+  const [saving, setSaving] = useState(false)
+  const router = useRouter()
+
+  async function toggle() {
+    setSaving(true)
+    const next = !active
+    setActive(next)
+    const supabase = createClient()
+    await supabase.from('sachverstaendige').update({ live_tracking_enabled: next }).eq('id', svId)
+    setSaving(false)
+    router.refresh()
+  }
+
+  return (
+    <div>
+      <button type="button" onClick={toggle} disabled={saving}
+        className={`relative inline-flex items-center w-12 h-6 rounded-full transition-colors disabled:opacity-50 ${active ? 'bg-[#4573A2]' : 'bg-gray-300'}`}>
+        <span className={`inline-block w-5 h-5 rounded-full bg-white shadow transform transition-transform ${active ? 'translate-x-6' : 'translate-x-0.5'}`} />
+      </button>
+      <span className="ml-3 text-sm text-gray-700">
+        {active ? 'Live-Tracking aktiv' : 'Tracking deaktiviert'}
+        {saving && <span className="text-gray-400 text-xs ml-2">speichert...</span>}
+      </span>
     </div>
   )
 }
