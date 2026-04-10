@@ -30,6 +30,7 @@ type Row = {
   storniert_am: string | null
   storniert_grund: string | null
   ersetzt_durch_abrechnung_id: string | null
+  positionen: Record<string, unknown>[] | null
   created_at: string | null
   notiz: string | null
 }
@@ -450,10 +451,15 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                   {!selected.ersetzt_durch_abrechnung_id && !showReIssueForm && (
                     <button
                       onClick={() => {
-                        // Positionen aus der Abrechnung laden für Korrektur-Form
-                        // positionen ist nicht im Row-Typ, daher zeigen wir ein einfaches Form
                         setShowReIssueForm(true)
-                        setReIssueKorrekturen([])
+                        // Positionen aus der Abrechnung laden
+                        const pos = (selected.positionen ?? []) as { fall_id?: string; kennzeichen?: string; sv_nachzahlung_netto?: number }[]
+                        setReIssueKorrekturen(pos.filter(p => p.fall_id).map(p => ({
+                          fall_id: p.fall_id!,
+                          label: p.kennzeichen ?? p.fall_id!.slice(0, 8),
+                          original: p.sv_nachzahlung_netto ?? 0,
+                          neuer_betrag: '',
+                        })))
                       }}
                       disabled={pending}
                       className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#4573A2] hover:bg-[#1E3A5F] text-white text-sm font-medium transition-colors disabled:opacity-40"
@@ -477,10 +483,9 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                             className="w-24 bg-white border border-gray-300 rounded px-2 py-1 text-xs tabular-nums text-right" />
                         </div>
                       ))}
-                      <button onClick={() => {
-                        // Quick-add: ein leeres Korrektur-Feld (Fall-ID manuell eingeben)
-                        setReIssueKorrekturen(prev => [...prev, { fall_id: '', label: 'Fall-ID eingeben', original: 0, neuer_betrag: '' }])
-                      }} className="text-[10px] text-[#4573A2] hover:underline">+ Position hinzufügen</button>
+                      {reIssueKorrekturen.length === 0 && (
+                        <p className="text-[10px] text-gray-400">Keine Positionen in dieser Abrechnung.</p>
+                      )}
                       <div className="flex gap-2">
                         <button onClick={() => { setShowReIssueForm(false); setReIssueKorrekturen([]) }} disabled={pending}
                           className="flex-1 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50">Abbrechen</button>

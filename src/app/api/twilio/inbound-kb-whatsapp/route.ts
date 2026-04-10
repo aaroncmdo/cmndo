@@ -1,26 +1,51 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import crypto from 'crypto'
 
 export const dynamic = 'force-dynamic'
 
 // KFZ-182 Phase B: Twilio Inbound-Webhook für KB-eigene WhatsApp-Nummern.
 // Twilio POST → routet Nachricht in den richtigen Fall-Chat.
 
-export async function POST(req: Request) {
-  const db = createAdminClient()
+function validateTwilioSignature(req: Request, params: URLSearchParams): boolean {
+  const authToken = process.env.TWILIO_AUTH_TOKEN
+  if (!authToken) return false // No auth token = can't validate, reject
+  const signature = req.headers.get('x-twilio-signature')
+  if (!signature) return false
 
-  // Parse Twilio form data
-  const formData = await req.formData()
-  const from = formData.get('From')?.toString() ?? '' // whatsapp:+49...
-  const to = formData.get('To')?.toString() ?? ''     // whatsapp:+49...
-  const body = formData.get('Body')?.toString() ?? ''
-  const messageSid = formData.get('MessageSid')?.toString() ?? null
-  const numMedia = parseInt(formData.get('NumMedia')?.toString() ?? '0')
+  const url = 'https://cmndo.vercel.app/api/twilio/inbound-kb-whatsapp'
+  // Sort params alphabetically and concat
+  const sortedKeys = Array.from(params.keys()).sort()
+  let dataStr = url
+  for (const key of sortedKeys) dataStr += key + params.get(key)
+
+  const expected = crypto.createHmac('sha1', authToken).update(dataStr).digest('base64')
+  return signature === expected
+}
+
+export async function POST(req: Request) {
+  // Clone request for signature validation
+  const body = await req.text()
+  const formData = new URLSearchParams(body)
+
+  // Twilio Signature Validation
+  if (process.env.NODE_ENV === 'production') {
+    if (!validateTwilioSignature(req, formData)) {
+      return new NextResponse('Forbidden', { status: 403 })
+    }
+  }
+
+  const db = createAdminClient()
+  const from = formData.get('From') ?? '' // whatsapp:+49...
+  const to = formData.get('To') ?? ''     // whatsapp:+49...
+  const msgBody = formData.get('Body') ?? ''
+  const messageSid = formData.get('MessageSid') ?? null
+  const numMedia = parseInt(formData.get('NumMedia') ?? '0')
 
   // Collect media URLs
   const mediaUrls: string[] = []
   for (let i = 0; i < numMedia; i++) {
-    const url = formData.get(`MediaUrl${i}`)?.toString()
+    const url = formData.get(`MediaUrl${i}`)
     if (url) mediaUrls.push(url)
   }
 
@@ -99,7 +124,7 @@ export async function POST(req: Request) {
     richtung: 'inbound',
     sender_id: kundenId,
     sender_rolle: 'kunde',
-    nachricht: body || '(Medien-Nachricht)',
+    nachricht: msgBody || '(Medien-Nachricht)',
     hat_anhang: mediaUrls.length > 0,
     anhang_url: mediaUrls.length > 0 ? mediaUrls[0] : null,
     kb_empfaenger_id: kb?.id ?? null,
@@ -120,13 +145,15 @@ export async function POST(req: Request) {
       .eq('rolle', 'kundenbetreuer')
       .eq('aktiv', true)
     for (const k of kbs ?? []) {
-      await db.from('benachrichtigungen').insert({
-        user_id: k.id,
-        typ: 'unbekannte-nachricht',
-        titel: `Unbekannte Nummer: ${kundenNummer}`,
-        text: body?.slice(0, 100) || 'Medien-Nachricht',
-        link: '/admin/nachrichten',
-      }).catch(() => {})
+      try {
+        await db.from('benachrichtigungen').insert({
+          user_id: k.id,
+          typ: 'unbekannte-nachricht',
+          titel: `Unbekannte Nummer: ${kundenNummer}`,
+          text: msgBody?.slice(0, 100) || 'Medien-Nachricht',
+          link: '/admin/nachrichten',
+        })
+      } catch { /* fire-and-forget */ }
     }
   }
 

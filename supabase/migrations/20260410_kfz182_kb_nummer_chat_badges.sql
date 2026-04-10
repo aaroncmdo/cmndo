@@ -43,6 +43,10 @@ ALTER TABLE nachrichten ADD COLUMN IF NOT EXISTS kb_empfaenger_id UUID REFERENCE
 ALTER TABLE nachrichten ADD COLUMN IF NOT EXISTS external_id TEXT;
 ALTER TABLE nachrichten ADD COLUMN IF NOT EXISTS richtung TEXT DEFAULT 'outbound';
 
+-- Fix: bestehende Kunde-Nachrichten als inbound markieren
+UPDATE nachrichten SET richtung = 'inbound'
+  WHERE kanal = 'whatsapp' AND sender_rolle = 'kunde' AND richtung = 'outbound';
+
 -- ─── 4. count_unread_updates RPC ──────────────────────────────────────────────
 
 CREATE OR REPLACE FUNCTION count_unread_updates(p_fall_id UUID, p_since TIMESTAMPTZ)

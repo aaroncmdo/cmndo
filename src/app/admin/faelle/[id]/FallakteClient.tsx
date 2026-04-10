@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect, useTransition } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Script from 'next/script'
 import DokumenteTab from './DokumenteTab'
@@ -766,7 +766,7 @@ export default function FallakteClient({
             <DokumenteTab
               fallId={fall.id}
               pflichtdokumente={pflichtdokumente}
-              dokumente={dokumente}
+              dokumente={dokumente as any}
               fallAS={{
                 anschlussschreiben_url: (fall as Record<string, unknown>).anschlussschreiben_url as string | null ?? null,
                 anschlussschreiben_sendedatum: (fall as Record<string, unknown>).anschlussschreiben_sendedatum as string | null ?? null,
@@ -1592,12 +1592,12 @@ function TabUebersicht({
       )}
 
       {/* KFZ-140: Versicherungs-Korrespondenz */}
-      {(fall.vs_anschreiben_datum || fall.vs_antwort_datum || fall.vs_timer_stufe) && (
+      {!!(fall.vs_anschreiben_datum || fall.vs_antwort_datum || fall.vs_timer_stufe) && (
         <Section title="Versicherungs-Korrespondenz">
-          {fall.vs_anschreiben_datum && <InfoRow label="Anschreiben" value={new Date(fall.vs_anschreiben_datum as string).toLocaleDateString('de-DE')} />}
-          {fall.vs_antwort_datum && <InfoRow label="Antwort" value={new Date(fall.vs_antwort_datum as string).toLocaleDateString('de-DE')} />}
-          {fall.vs_timer_stufe && <InfoRow label="Timer-Stufe" value={String(fall.vs_timer_stufe)} />}
-          {fall.vs_eskalation_am && <InfoRow label="Eskaliert am" value={new Date(fall.vs_eskalation_am as string).toLocaleDateString('de-DE')} />}
+          {!!fall.vs_anschreiben_datum && <InfoRow label="Anschreiben" value={new Date(fall.vs_anschreiben_datum as string).toLocaleDateString('de-DE')} />}
+          {!!fall.vs_antwort_datum && <InfoRow label="Antwort" value={new Date(fall.vs_antwort_datum as string).toLocaleDateString('de-DE')} />}
+          {!!fall.vs_timer_stufe && <InfoRow label="Timer-Stufe" value={String(fall.vs_timer_stufe)} />}
+          {!!fall.vs_eskalation_am && <InfoRow label="Eskaliert am" value={new Date(fall.vs_eskalation_am as string).toLocaleDateString('de-DE')} />}
         </Section>
       )}
 

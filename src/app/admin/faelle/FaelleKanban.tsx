@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import { updateFallStatus } from '../dispatch/actions'
 import { deleteFall, deactivateFall } from './[id]/actions'
+import FallCardBadges, { NotificationDot } from '@/components/faelle/FallCardBadges'
 
 type Fall = {
   id: string
@@ -25,6 +26,7 @@ type Fall = {
   betreuer_name: string | null
   sv_name: string | null
   ungelesene_nachrichten?: number
+  ungelesene_updates?: number
 }
 
 const COLUMNS = [
@@ -204,9 +206,7 @@ function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
         fall.ist_aktiv === false ? 'bg-red-50/60 border-red-200 opacity-60' : 'bg-white border-gray-200 hover:border-gray-300'
       }`} style={{ padding: '6px 8px' }}>
         {/* KFZ-182: Roter Dot wenn Chat UND Updates > 0 */}
-        {(fall.ungelesene_nachrichten ?? 0) > 0 && (fall.ungelesene_updates ?? 0) > 0 && (
-          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#DC2626] rounded-full border-2 border-white z-10" />
-        )}
+        {(fall.ungelesene_nachrichten ?? 0) > 0 && (fall.ungelesene_updates ?? 0) > 0 && <NotificationDot />}
         <div className="flex items-center justify-between mb-0.5">
           <Link href={`/admin/faelle/${fall.id}`} className="text-xs font-mono text-[#4573A2] truncate hover:underline" onClick={e => e.stopPropagation()}>
             {label}
@@ -228,16 +228,7 @@ function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
         <Link href={`/admin/faelle/${fall.id}`} onClick={e => e.stopPropagation()}>
           <div className="flex items-center gap-2">
             {fall.kunde_name && <p className={`text-xs font-medium truncate ${fall.ist_aktiv === false ? 'text-gray-400 line-through' : 'text-gray-800'}`}>{fall.kunde_name}</p>}
-            {(fall.ungelesene_nachrichten ?? 0) > 0 && (
-              <span className="inline-flex items-center gap-0.5 bg-[#4573A2] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0">
-                {fall.ungelesene_nachrichten}
-              </span>
-            )}
-            {(fall.ungelesene_updates ?? 0) > 0 && (
-              <span className="inline-flex items-center gap-0.5 bg-[#DC2626] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0">
-                {fall.ungelesene_updates}
-              </span>
-            )}
+            <FallCardBadges chatCount={fall.ungelesene_nachrichten ?? 0} updateCount={fall.ungelesene_updates ?? 0} />
           </div>
           <div className="flex flex-wrap gap-1 mt-1">
             {fall.kennzeichen && <span className="bg-gray-100 text-gray-600 text-[9px] px-1 py-0.5 rounded">{fall.kennzeichen}</span>}

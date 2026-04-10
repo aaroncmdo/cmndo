@@ -24,7 +24,7 @@ export default async function AbrechnungenPage() {
   // Pagination wenn Aaron 1000+ pro Monat erreicht.
   const { data, error } = await supabase
     .from('abrechnungen')
-    .select('id, abrechnungs_nr, empfaenger_typ, empfaenger_id, empfaenger_name, empfaenger_email, summe_netto, summe_brutto, status, faellig_am, versand_datum, bezahlt_am, bezahlt_betrag, einzug_versucht_am, einzug_fehler, stripe_payment_intent_id, reminder_gesendet_am, storniert_am, storniert_grund, ersetzt_durch_abrechnung_id, created_at, notiz')
+    .select('id, abrechnungs_nr, empfaenger_typ, empfaenger_id, empfaenger_name, empfaenger_email, summe_netto, summe_brutto, status, faellig_am, versand_datum, bezahlt_am, bezahlt_betrag, einzug_versucht_am, einzug_fehler, stripe_payment_intent_id, reminder_gesendet_am, storniert_am, storniert_grund, ersetzt_durch_abrechnung_id, positionen, created_at, notiz')
     .order('faellig_am', { ascending: false, nullsFirst: false })
     .limit(200)
 
@@ -52,6 +52,7 @@ export default async function AbrechnungenPage() {
     storniert_am: (r.storniert_am as string) ?? null,
     storniert_grund: (r.storniert_grund as string) ?? null,
     ersetzt_durch_abrechnung_id: (r.ersetzt_durch_abrechnung_id as string) ?? null,
+    positionen: (r.positionen as Record<string, unknown>[]) ?? null,
     created_at: (r.created_at as string) ?? null,
     notiz: (r.notiz as string) ?? null,
   }))

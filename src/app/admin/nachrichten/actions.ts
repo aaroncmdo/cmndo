@@ -49,8 +49,28 @@ export async function sendNachrichtFromInbox(
 
     if (lead?.telefon) {
       try {
-        const { sendWhatsApp } = await import('@/lib/whatsapp')
-        await sendWhatsApp(lead.telefon, nachricht.trim())
+        // KFZ-182: KB-eigene Nummer nutzen wenn vorhanden
+        if (profile.twilio_whatsapp_nummer) {
+          const accountSid = process.env.TWILIO_ACCOUNT_SID
+          const authToken = process.env.TWILIO_AUTH_TOKEN
+          if (accountSid && authToken) {
+            let normalTo = lead.telefon.replace(/\s/g, '')
+            if (normalTo.startsWith('0')) normalTo = '+49' + normalTo.slice(1)
+            if (!normalTo.startsWith('+')) normalTo = '+' + normalTo
+            const body = new URLSearchParams()
+            body.set('From', `whatsapp:${profile.twilio_whatsapp_nummer}`)
+            body.set('To', `whatsapp:${normalTo}`)
+            body.set('Body', nachricht.trim())
+            await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, {
+              method: 'POST',
+              headers: { Authorization: 'Basic ' + Buffer.from(`${accountSid}:${authToken}`).toString('base64'), 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: body.toString(),
+            })
+          }
+        } else {
+          const { sendWhatsApp } = await import('@/lib/whatsapp')
+          await sendWhatsApp(lead.telefon, nachricht.trim())
+        }
       } catch (e) {
         console.error('[KFZ-182] WhatsApp send failed:', e)
       }
