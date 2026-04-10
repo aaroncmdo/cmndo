@@ -115,6 +115,25 @@ export default async function TeamPage() {
   // Buero verteilt direkt an Sub-Standorte beim Dispatch.
   const showPoolSection = org.typ === 'akademie'
 
+  // KFZ-152 Follow-up: Aggregierte Stats fuer den Verwalter
+  const aktiveCount = subSvs.filter(s => s.ist_aktiv && !s.gesperrt_seit).length
+  const gesperrtCount = subSvs.filter(s => !!s.gesperrt_seit).length
+  const totalFaelleGenutzt = subSvs.reduce((sum, s) => sum + (s.paket_faelle_genutzt ?? 0), 0)
+  const totalFaelleMax = subSvs.reduce((sum, s) => sum + s.max_faelle_monat, 0)
+  const totalWerbebudget = subSvs.reduce((sum, s) => sum + (s.werbebudget_guthaben_netto ?? 0), 0)
+  const auslastungPct = totalFaelleMax > 0 ? Math.round((totalFaelleGenutzt / totalFaelleMax) * 100) : 0
+
+  const stats = {
+    mitglieder_gesamt: subSvs.length,
+    mitglieder_aktiv: aktiveCount,
+    mitglieder_gesperrt: gesperrtCount,
+    faelle_genutzt: totalFaelleGenutzt,
+    faelle_max: totalFaelleMax,
+    auslastung_pct: auslastungPct,
+    werbebudget_gesamt: totalWerbebudget,
+    pool_leads: poolLeads.length,
+  }
+
   // Icon wird im Client-Component anhand iconKey gewaehlt
   void Icon
   return (
@@ -125,6 +144,7 @@ export default async function TeamPage() {
       subSvs={subSvs}
       poolLeads={poolLeads}
       showPoolSection={showPoolSection}
+      stats={stats}
     />
   )
 }

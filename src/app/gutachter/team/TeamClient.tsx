@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Building2Icon, GraduationCapIcon, MailIcon, ShieldOffIcon, ShieldCheckIcon, ArrowRightIcon, InboxIcon } from 'lucide-react'
+import { Building2Icon, GraduationCapIcon, MailIcon, ShieldOffIcon, ShieldCheckIcon, ArrowRightIcon, InboxIcon, UsersIcon, BarChart3Icon, WalletIcon, ActivityIcon } from 'lucide-react'
 import { assignPoolLead, toggleSubSvSperre } from './actions'
 
 export type SubSvData = {
@@ -33,8 +33,19 @@ export type PoolLeadData = {
   created_at: string | null
 }
 
+export type OrgStats = {
+  mitglieder_gesamt: number
+  mitglieder_aktiv: number
+  mitglieder_gesperrt: number
+  faelle_genutzt: number
+  faelle_max: number
+  auslastung_pct: number
+  werbebudget_gesamt: number
+  pool_leads: number
+}
+
 export default function TeamClient({
-  orgName, orgLabel, iconKey, subSvs, poolLeads, showPoolSection,
+  orgName, orgLabel, iconKey, subSvs, poolLeads, showPoolSection, stats,
 }: {
   orgName: string
   orgLabel: string
@@ -42,6 +53,7 @@ export default function TeamClient({
   subSvs: SubSvData[]
   poolLeads: PoolLeadData[]
   showPoolSection: boolean
+  stats: OrgStats
 }) {
   const Icon = iconKey === 'akademie' ? GraduationCapIcon : Building2Icon
   const [pending, startTransition] = useTransition()
@@ -85,6 +97,19 @@ export default function TeamClient({
             Team-Verwaltung — {orgLabel} mit {subSvs.length} Mitgliedern
           </p>
         </div>
+      </div>
+
+      {/* KFZ-152 Follow-up: Aggregierte Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <StatCard icon={UsersIcon} label="Mitglieder" value={`${stats.mitglieder_aktiv} aktiv`} sub={stats.mitglieder_gesperrt > 0 ? `${stats.mitglieder_gesperrt} gesperrt` : `${stats.mitglieder_gesamt} gesamt`} />
+        <StatCard icon={BarChart3Icon} label="Fälle Monat" value={`${stats.faelle_genutzt} / ${stats.faelle_max}`} sub={`${stats.auslastung_pct}% Auslastung`} highlight={stats.auslastung_pct >= 80} />
+        <StatCard icon={WalletIcon} label="Werbebudget" value={stats.werbebudget_gesamt.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })} sub="Gesamt-Guthaben" />
+        {showPoolSection && (
+          <StatCard icon={InboxIcon} label="Pool-Leads" value={String(stats.pool_leads)} sub="ohne Zuweisung" highlight={stats.pool_leads > 0} />
+        )}
+        {!showPoolSection && (
+          <StatCard icon={ActivityIcon} label="Auslastung" value={`${stats.auslastung_pct}%`} sub={`${stats.faelle_max - stats.faelle_genutzt} Slots frei`} />
+        )}
       </div>
 
       {actionMsg && (
@@ -246,6 +271,21 @@ export default function TeamClient({
         Pool-Leads werden manuell verteilt. Mitglieder einladen läuft aktuell über den Admin
         (/admin/sachverstaendige).
       </p>
+    </div>
+  )
+}
+
+function StatCard({ icon: Icon, label, value, sub, highlight }: {
+  icon: typeof UsersIcon; label: string; value: string; sub: string; highlight?: boolean
+}) {
+  return (
+    <div className={`rounded-xl border p-4 ${highlight ? 'border-amber-200 bg-amber-50/50' : 'border-gray-200 bg-white'}`}>
+      <div className="flex items-center gap-2 mb-2">
+        <Icon className={`w-4 h-4 ${highlight ? 'text-amber-600' : 'text-[#4573A2]'}`} />
+        <span className="text-[10px] uppercase tracking-wide text-gray-500 font-medium">{label}</span>
+      </div>
+      <div className="text-lg font-semibold text-gray-900">{value}</div>
+      <div className="text-[11px] text-gray-500 mt-0.5">{sub}</div>
     </div>
   )
 }
