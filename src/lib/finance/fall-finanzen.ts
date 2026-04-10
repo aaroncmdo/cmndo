@@ -68,16 +68,16 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
 
   // Forderungspositionen
   const { data: forderungen } = await db.from('forderungspositionen')
-    .select('betrag')
+    .select('betrag_gefordert')
     .eq('fall_id', fallId)
-  const forderungenGesamt = forderungen?.reduce((sum, f) => sum + (Number(f.betrag) || 0), 0) ?? null
+  const forderungenGesamt = forderungen?.reduce((sum, f) => sum + (Number(f.betrag_gefordert) || 0), 0) ?? null
   const forderungenAnzahl = forderungen?.length ?? 0
 
   // Zahlungseingaenge
   const { data: zahlungen } = await db.from('zahlungseingaenge')
-    .select('betrag')
+    .select('gesamtbetrag')
     .eq('fall_id', fallId)
-  const zahlungEingegangen = zahlungen?.reduce((sum, z) => sum + (Number(z.betrag) || 0), 0) ?? null
+  const zahlungEingegangen = zahlungen?.reduce((sum, z) => sum + (Number(z.gesamtbetrag) || 0), 0) ?? null
 
   // Nutzungsausfall berechnen
   const nutzungsausfallGesamt = (fall.nutzungsausfall_tage && fall.nutzungsausfall_tagessatz)

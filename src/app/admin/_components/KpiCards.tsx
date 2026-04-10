@@ -52,7 +52,8 @@ async function loadKpis() {
     supabase
       .from('faelle')
       .select('id', { count: 'exact', head: true })
-      .gte('created_at', todayStart),
+      .gte('created_at', todayStart)
+      .not('status', 'in', '("storniert")'),
 
     supabase
       .from('abrechnungen')

@@ -378,7 +378,7 @@ async function convertLeadToFall(
       // KFZ-146: Erweiterte Fahrzeugdaten
       fahrzeug_farbe: lead.fahrzeug_farbe ?? null,
       erstzulassung: lead.erstzulassung ?? null,
-      fin: lead.fin ?? null,
+      fin_vin: lead.fin ?? null,
       kilometerstand: lead.kilometerstand ?? null,
       unfallhergang: lead.unfallhergang ?? null,
       // KFZ-146: Schadens-Adresse vom Fahrzeugstandort
