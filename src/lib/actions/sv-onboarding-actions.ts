@@ -86,17 +86,15 @@ export async function signSvVertrag({
   // 4. Welcome-Email mit PDF-Anhang (fire & forget)
   try {
     const { sendEmail } = await import('@/lib/email/google/client')
+    const { render } = await import('@react-email/render')
+    const { SvPortalFreigeschaltetEmail, subject: svPortalSubject } = await import('@/lib/email/google/templates/SvPortalFreigeschaltet')
     if (profile?.email) {
+      const props = { vorname: profile.vorname ?? null }
+      const html = await render(SvPortalFreigeschaltetEmail(props))
       await sendEmail({
         to: profile.email,
-        subject: 'Willkommen bei Claimondo — deine Vertragsunterlagen',
-        html: `<div style="font-family:-apple-system,sans-serif;font-size:14px;line-height:1.7;color:#374151">
-<p>Hallo ${profile.vorname ?? 'Partner'},</p>
-<p>vielen Dank für die Unterzeichnung der Nutzungsbedingungen. Im Anhang findest du dein unterschriebenes Vertragsdokument zur Aufbewahrung.</p>
-<p>Dein Portal-Zugang wird freigeschaltet sobald die Anzahlung eingegangen ist.</p>
-<p><strong>Nächster Schritt:</strong> Bitte leiste die Anzahlung über den Stripe-Checkout in deinem Onboarding-Bereich.</p>
-<p>Bei Fragen stehen wir dir jederzeit zur Verfügung.</p>
-<p>Dein Claimondo-Team</p></div>`,
+        subject: svPortalSubject(props),
+        html,
         fallId: null,
         empfaengerTyp: 'sv',
         template: 'sv_onboarding_welcome',

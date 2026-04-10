@@ -265,18 +265,19 @@ export async function GET(request: Request) {
     error: string,
   ) {
     try {
+      const { render } = await import('@react-email/render')
+      const { AdminEinzugFehlgeschlagenEmail, subject: einzugSubject } = await import('@/lib/email/google/templates/AdminEinzugFehlgeschlagen')
+      const props = {
+        abrechnungsNr: abr.abrechnungs_nr,
+        empfaengerName: abr.empfaenger_name ?? null,
+        betragBrutto: Number(abr.summe_brutto ?? 0),
+        fehlerGrund: error,
+      }
+      const html = await render(AdminEinzugFehlgeschlagenEmail(props))
       await sendEmail({
         to: ADMIN_ALERT_EMAIL,
-        subject: `[Claimondo] Lastschrift-Einzug fehlgeschlagen: ${abr.abrechnungs_nr}`,
-        html: `<p>Hallo Aaron,</p>
-<p>der automatische Lastschrift-Einzug fuer eine SV-Monatsabrechnung ist fehlgeschlagen:</p>
-<ul>
-  <li><strong>Rechnungsnummer:</strong> ${abr.abrechnungs_nr}</li>
-  <li><strong>Empfaenger:</strong> ${abr.empfaenger_name ?? '—'}</li>
-  <li><strong>Betrag:</strong> ${Number(abr.summe_brutto ?? 0).toFixed(2)} EUR</li>
-  <li><strong>Fehler:</strong> ${error}</li>
-</ul>
-<p>Pruefung im Admin-Panel: <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'}/admin/abrechnungen">/admin/abrechnungen</a></p>`,
+        subject: einzugSubject(props),
+        html,
         empfaengerTyp: 'admin',
         template: 'abrechnung_einzug_failed',
       })

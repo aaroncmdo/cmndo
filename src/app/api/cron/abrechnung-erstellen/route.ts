@@ -216,19 +216,20 @@ export async function GET() {
     // Email an SV
     try {
       const { sendEmail } = await import('@/lib/email/google/client')
+      const { render } = await import('@react-email/render')
+      const { SvMonatsabrechnungVersandEmail, subject: svAbrSubject } = await import('@/lib/email/google/templates/SvMonatsabrechnungVersand')
+      const abrProps = {
+        vorname: profile.vorname ?? null,
+        abrechnungsNr,
+        monat: `${String(monat).padStart(2, '0')}/${jahr}`,
+        betragBrutto: endbetragBrutto,
+        faelligAm: faellig.toLocaleDateString('de-DE'),
+      }
+      const html = await render(SvMonatsabrechnungVersandEmail(abrProps))
       await sendEmail({
         to: profile.email,
-        subject: `Claimondo Monatsabrechnung ${String(monat).padStart(2, '0')}/${jahr} — ${abrechnungsNr}`,
-        html: `<p>Hallo ${profile.vorname ?? 'Partner'},</p>
-<p>deine Monatsabrechnung für ${String(monat).padStart(2, '0')}/${jahr} ist erstellt:</p>
-<ul>
-<li><strong>Rechnungsnummer:</strong> ${abrechnungsNr}</li>
-<li><strong>Lead-Preise gesamt:</strong> ${bruttoNetto.toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR netto</li>
-<li><strong>Verrechnet (Werbebudget):</strong> -${guthabenVerrechnet.toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR</li>
-<li><strong>Endbetrag:</strong> ${endbetragBrutto.toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR brutto</li>
-<li><strong>Fällig am:</strong> ${faellig.toLocaleDateString('de-DE')}</li>
-</ul>
-<p>Der Betrag wird am ${faellig.toLocaleDateString('de-DE')} automatisch von deinem hinterlegten Zahlungsmittel eingezogen.</p>`,
+        subject: svAbrSubject(abrProps),
+        html,
         empfaengerTyp: 'sv',
         template: 'sv_monatsabrechnung',
       })
@@ -305,18 +306,25 @@ export async function GET() {
     // Welcome-Mail an Verwalter
     try {
       const { sendEmail } = await import('@/lib/email/google/client')
+      const { render } = await import('@react-email/render')
+      const { BueroVerwalterAbrechnungInfoEmail, subject: bueroAbrSubject } = await import('@/lib/email/google/templates/BueroVerwalterAbrechnungInfo')
+      const subSvCount = new Set(acc.positions.map(p => p.sub_sv_id)).size
+      const orgAbrProps = {
+        verwalterVorname: verwalterName.split(' ')[0] || null,
+        bueroName: acc.org_name,
+        svName: verwalterName,
+        abrechnungsNr,
+        betragBrutto: totalBrutto,
+        faelligAm: faellig.toLocaleDateString('de-DE'),
+        anzahlPositionen: acc.positions.length,
+        anzahlSubSvs: subSvCount,
+        orgTyp: acc.org_typ as 'buero' | 'akademie',
+      }
+      const html = await render(BueroVerwalterAbrechnungInfoEmail(orgAbrProps))
       await sendEmail({
         to: verwalterEmail,
-        subject: `Claimondo Sammelabrechnung ${String(monat).padStart(2, '0')}/${jahr} — ${abrechnungsNr}`,
-        html: `<p>Hallo ${verwalterName},</p>
-<p>die Sammelabrechnung für ${acc.org_typ === 'buero' ? 'dein Büro' : 'deine Akademie'} <strong>${acc.org_name}</strong> ist erstellt:</p>
-<ul>
-<li><strong>Rechnungsnummer:</strong> ${abrechnungsNr}</li>
-<li><strong>Anzahl Positionen:</strong> ${acc.positions.length} (über ${new Set(acc.positions.map(p => p.sub_sv_id)).size} Sub-SVs)</li>
-<li><strong>Endbetrag:</strong> ${totalBrutto.toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR brutto</li>
-<li><strong>Fällig am:</strong> ${faellig.toLocaleDateString('de-DE')}</li>
-</ul>
-<p>Der Betrag wird am ${faellig.toLocaleDateString('de-DE')} automatisch von der hinterlegten ${acc.org_typ === 'buero' ? 'Buero' : 'Akademie'}-Zahlungsmethode eingezogen.</p>`,
+        subject: bueroAbrSubject(orgAbrProps),
+        html,
         empfaengerTyp: 'sv',
         template: 'org_sammelabrechnung',
       })

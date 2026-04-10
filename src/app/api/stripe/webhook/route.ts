@@ -122,10 +122,14 @@ export async function POST(request: Request) {
               const { data: p } = await db.from('profiles').select('email, vorname').eq('id', org.hauptansprechpartner_user_id).single()
               if (p?.email) {
                 const { sendEmail } = await import('@/lib/email/google/client')
+                const { render } = await import('@react-email/render')
+                const { AnzahlungEingegangenEmail, subject: anzahlungSubject } = await import('@/lib/email/google/templates/AnzahlungEingegangen')
+                const props = { vorname: p.vorname ?? null, typ: 'buero' as const, orgName: org.name }
+                const html = await render(AnzahlungEingegangenEmail(props))
                 await sendEmail({
                   to: p.email,
-                  subject: `Anzahlung eingegangen — Buero ${org.name} ist aktiv`,
-                  html: `<p>Hallo ${p.vorname ?? 'Partner'},</p><p>deine Anzahlung fuer das Buero <strong>${org.name}</strong> ist eingegangen. Alle Standorte sind freigeschaltet und koennen ab sofort Auftraege erhalten.</p><p><a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'}/gutachter">Zum Buero-Portal</a></p>`,
+                  subject: anzahlungSubject(props),
+                  html,
                   empfaengerTyp: 'sv',
                   template: 'buero_onboarding_payment_confirmed',
                 })
@@ -209,10 +213,14 @@ export async function POST(request: Request) {
               const { data: p } = await db.from('profiles').select('email, vorname').eq('id', org.hauptansprechpartner_user_id).single()
               if (p?.email) {
                 const { sendEmail } = await import('@/lib/email/google/client')
+                const { render } = await import('@react-email/render')
+                const { AnzahlungEingegangenEmail, subject: anzahlungSubject } = await import('@/lib/email/google/templates/AnzahlungEingegangen')
+                const props = { vorname: p.vorname ?? null, typ: 'akademie' as const, orgName: org.name }
+                const html = await render(AnzahlungEingegangenEmail(props))
                 await sendEmail({
                   to: p.email,
-                  subject: `Anzahlung eingegangen — Akademie ${org.name} ist aktiv`,
-                  html: `<p>Hallo ${p.vorname ?? 'Partner'},</p><p>deine Anzahlung fuer die Akademie <strong>${org.name}</strong> ist eingegangen. Alle Mitglieder sind freigeschaltet.</p><p><a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'}/gutachter">Zum Akademie-Portal</a></p>`,
+                  subject: anzahlungSubject(props),
+                  html,
                   empfaengerTyp: 'sv',
                   template: 'akademie_onboarding_payment_confirmed',
                 })
@@ -275,10 +283,19 @@ export async function POST(request: Request) {
                 .eq('id', abr.kanzlei_id).single()
               if (kanzlei?.email) {
                 const { sendEmail } = await import('@/lib/email/google/client')
+                const { render } = await import('@react-email/render')
+                const { KanzleiZahlungBestaetigungEmail, subject: kanzleiSubject } = await import('@/lib/email/google/templates/KanzleiZahlungBestaetigung')
+                const props = {
+                  ansprechpartner: kanzlei.ansprechpartner ?? 'Sehr geehrte Damen und Herren',
+                  rechnungsnummer: abr.rechnungsnummer,
+                  brutto: `${Number(abr.endbetrag_brutto).toFixed(2).replace('.', ',')} €`,
+                  bezahltAm: bezahltAm,
+                }
+                const html = await render(KanzleiZahlungBestaetigungEmail(props))
                 await sendEmail({
                   to: kanzlei.email,
-                  subject: `Zahlung bestaetigt — ${abr.rechnungsnummer}`,
-                  html: `<p>Hallo ${kanzlei.ansprechpartner ?? 'Sehr geehrte Damen und Herren'},</p><p>Ihre Zahlung in Hoehe von <strong>${Number(abr.endbetrag_brutto).toFixed(2).replace('.', ',')} €</strong> fuer Rechnung <strong>${abr.rechnungsnummer}</strong> ist eingegangen. Vielen Dank!</p><p>Mit freundlichen Gruessen,<br>Ihr Claimondo-Team</p>`,
+                  subject: kanzleiSubject(props),
+                  html,
                   empfaengerTyp: 'kanzlei',
                   template: 'kanzlei_abrechnung_bezahlt',
                 })
@@ -336,10 +353,14 @@ export async function POST(request: Request) {
               const { data: p } = await db.from('profiles').select('email, vorname').eq('id', sv.profile_id).single()
               if (p?.email) {
                 const { sendEmail } = await import('@/lib/email/google/client')
+                const { render } = await import('@react-email/render')
+                const { AnzahlungEingegangenEmail, subject: anzahlungSubject } = await import('@/lib/email/google/templates/AnzahlungEingegangen')
+                const props = { vorname: p.vorname ?? null, typ: 'solo' as const }
+                const html = await render(AnzahlungEingegangenEmail(props))
                 await sendEmail({
                   to: p.email,
-                  subject: 'Zahlung eingegangen — dein Portal ist freigeschaltet!',
-                  html: `<p>Hallo ${p.vorname ?? 'Partner'},</p><p>deine Anzahlung ist eingegangen. Dein Gutachter-Portal ist jetzt freigeschaltet!</p><p><a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'}/gutachter">Zum Portal</a></p>`,
+                  subject: anzahlungSubject(props),
+                  html,
                   empfaengerTyp: 'sv',
                   template: 'sv_onboarding_payment_confirmed',
                 })

@@ -96,10 +96,14 @@ export async function GET(request: Request) {
     // Send error notification via central sendEmail
     try {
       const { sendEmail } = await import('@/lib/email/google/client')
+      const { render } = await import('@react-email/render')
+      const { AdminBackupFehlgeschlagenEmail, subject: backupSubject } = await import('@/lib/email/google/templates/AdminBackupFehlgeschlagen')
+      const backupProps = { datum: dateStr, fehler: message }
+      const html = await render(AdminBackupFehlgeschlagenEmail(backupProps))
       await sendEmail({
         to: process.env.ADMIN_ALERT_EMAIL || 'aaron@claimondo.de',
-        subject: `[ALERT] DB-Backup fehlgeschlagen - ${dateStr}`,
-        html: `<p>Das taegliche DB-Backup ist fehlgeschlagen.</p><p>Fehler: ${message}</p><p>Zeit: ${now.toISOString()}</p><p>Bitte pruefen: Supabase Dashboard &gt; Storage &gt; db-backups</p>`,
+        subject: backupSubject(backupProps),
+        html,
         empfaengerTyp: 'admin',
         template: 'db_backup_error',
       })

@@ -167,16 +167,21 @@ export async function signBueroVertrag(params: {
   // Welcome-Email mit PDF-Anhang an den Inhaber
   try {
     const { sendEmail } = await import('@/lib/email/google/client')
+    const { render } = await import('@react-email/render')
+    const { BueroSubSvEinladungEmail, subject: bueroSubject } = await import('@/lib/email/google/templates/BueroSubSvEinladung')
     const { data: profile } = await db.from('profiles').select('email, vorname').eq('id', user.id).single()
     if (profile?.email) {
+      const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
+      const props = {
+        vorname: profile.vorname ?? null,
+        bueroName: org.name,
+        portalUrl: `${APP_URL}/gutachter/onboarding/buero`,
+      }
+      const html = await render(BueroSubSvEinladungEmail(props))
       await sendEmail({
         to: profile.email,
-        subject: `Vertrag unterzeichnet — ${org.name}`,
-        html: `<div style="font-family:-apple-system,sans-serif;font-size:14px;line-height:1.7;color:#374151">
-<p>Hallo ${profile.vorname ?? 'Partner'},</p>
-<p>vielen Dank für die Unterzeichnung. Im Anhang findest du das Vertragsdokument für dein Büro <strong>${org.name}</strong>.</p>
-<p><strong>Nächster Schritt:</strong> Bitte leiste die zentrale Anzahlung über den Stripe-Checkout im Büro-Onboarding. Sobald die Zahlung eingegangen ist, werden alle Standorte freigeschaltet.</p>
-<p>Dein Claimondo-Team</p></div>`,
+        subject: bueroSubject(props),
+        html,
         fallId: null,
         empfaengerTyp: 'sv',
         template: 'buero_onboarding_vertrag',

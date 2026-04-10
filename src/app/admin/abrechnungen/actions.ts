@@ -303,15 +303,22 @@ export async function stornoAbrechnung(
   // 5. Email an Empfänger
   try {
     const { sendEmail } = await import('@/lib/email/google/client')
+    const { render } = await import('@react-email/render')
+    const { AbrechnungManuellVersendetEmail, subject: stornoSubject } = await import('@/lib/email/google/templates/AbrechnungManuellVersendet')
+    const stornoProps = {
+      empfaengerVorname: abr.empfaenger_name?.split(' ')[0] ?? null,
+      abrechnungsNr: abr.abrechnungs_nr,
+      betragBrutto: Number(abr.summe_brutto ?? 0),
+      stornoGrund: grund.trim(),
+      stornoNr,
+      istStorno: true,
+      wirdErstattet: !!abr.bezahlt_am,
+    }
+    const html = await render(AbrechnungManuellVersendetEmail(stornoProps))
     await sendEmail({
       to: abr.empfaenger_email,
-      subject: `Storno: Rechnung ${abr.abrechnungs_nr} wurde storniert`,
-      html: `<p>Hallo ${abr.empfaenger_name?.split(' ')[0] ?? ''},</p>
-<p>die Rechnung <strong>${abr.abrechnungs_nr}</strong> wurde storniert.</p>
-<p><strong>Grund:</strong> ${grund.trim()}</p>
-<p>Eine Storno-Rechnung (${stornoNr}) wurde erstellt.${abr.bezahlt_am ? ' Der bereits gezahlte Betrag wird erstattet.' : ''}</p>
-<p>Bei Fragen wende dich an support@claimondo.de.</p>
-<p>Dein Claimondo-Team</p>`,
+      subject: stornoSubject(stornoProps),
+      html,
       empfaengerTyp: abr.empfaenger_typ ?? 'sv',
       template: 'abrechnung_storno',
     })
