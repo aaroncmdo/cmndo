@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Script from 'next/script'
 import DokumenteTab from './DokumenteTab'
@@ -603,6 +603,12 @@ export default function FallakteClient({
   const router = useRouter()
   const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState<Tab>('tasks')
+
+  // KFZ-182: Mark fall as read on mount (badges verschwinden)
+  useEffect(() => {
+    import('@/lib/faelle/mark-read-action').then(m => m.markFallAsReadAction(fall.id)).catch(() => {})
+  }, [fall.id])
+
   const [mapsReady, setMapsReady] = useState(
     typeof window !== 'undefined' && typeof google !== 'undefined' && !!google.maps?.places,
   )

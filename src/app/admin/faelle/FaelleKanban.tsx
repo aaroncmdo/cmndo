@@ -225,7 +225,12 @@ function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
             {fall.kunde_name && <p className={`text-xs font-medium truncate ${fall.ist_aktiv === false ? 'text-gray-400 line-through' : 'text-gray-800'}`}>{fall.kunde_name}</p>}
             {(fall.ungelesene_nachrichten ?? 0) > 0 && (
               <span className="inline-flex items-center gap-0.5 bg-[#4573A2] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0">
-                💬 {fall.ungelesene_nachrichten}
+                {fall.ungelesene_nachrichten}
+              </span>
+            )}
+            {(fall.ungelesene_updates ?? 0) > 0 && (
+              <span className="inline-flex items-center gap-0.5 bg-[#DC2626] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0">
+                {fall.ungelesene_updates}
               </span>
             )}
           </div>

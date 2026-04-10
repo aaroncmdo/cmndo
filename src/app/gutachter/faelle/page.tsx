@@ -277,7 +277,12 @@ export default async function GutachterFaellePage({
                           <td className="px-4 py-3">
                             {(fall.ungelesene_nachrichten ?? 0) > 0 && (
                               <span className="inline-flex items-center gap-0.5 bg-[#4573A2] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                                💬 {fall.ungelesene_nachrichten}
+                                {fall.ungelesene_nachrichten}
+                              </span>
+                            )}
+                            {(fall.ungelesene_updates ?? 0) > 0 && (
+                              <span className="inline-flex items-center gap-0.5 bg-[#DC2626] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1">
+                                {fall.ungelesene_updates}
                               </span>
                             )}
                           </td>
