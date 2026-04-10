@@ -45,6 +45,15 @@ export default async function AdminFaellePage() {
       .eq('gelesen', false)
       .eq('sender_rolle', 'kunde')
 
+    // KFZ-182: Ungelesene Updates (Tasks + Timeline + Dokumente)
+    const { data: readState } = await supabase
+      .from('fall_read_state')
+      .select('last_read_update_at')
+      .eq('fall_id', f.id)
+      .maybeSingle()
+    const since = readState?.last_read_update_at ?? '1970-01-01T00:00:00Z'
+    const { data: updateCount } = await supabase.rpc('count_unread_updates', { p_fall_id: f.id, p_since: since })
+
     return {
       id: f.id as string,
       fall_nummer: f.fall_nummer as string | null,
@@ -63,6 +72,7 @@ export default async function AdminFaellePage() {
       betreuer_name,
       sv_name,
       ungelesene_nachrichten: ungelesene ?? 0,
+      ungelesene_updates: typeof updateCount === 'number' ? updateCount : 0,
     }
   }))
 

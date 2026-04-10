@@ -108,7 +108,18 @@ export default async function GutachterFaellePage({
       .eq('fall_id', f.id)
       .eq('gelesen', false)
       .eq('sender_rolle', 'kunde')
-    return { ...f, ungelesene_nachrichten: count ?? 0 }
+
+    // KFZ-182: Ungelesene Updates
+    const { data: readState } = await admin
+      .from('fall_read_state')
+      .select('last_read_update_at')
+      .eq('fall_id', f.id)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    const since = readState?.last_read_update_at ?? '1970-01-01T00:00:00Z'
+    const { data: updateCount } = await admin.rpc('count_unread_updates', { p_fall_id: f.id, p_since: since })
+
+    return { ...f, ungelesene_nachrichten: count ?? 0, ungelesene_updates: typeof updateCount === 'number' ? updateCount : 0 }
   }))
 
   // Sortierung: Faelle mit ungelesenen Nachrichten OBEN
