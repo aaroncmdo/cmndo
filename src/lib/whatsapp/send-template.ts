@@ -13,6 +13,7 @@ export async function sendWhatsAppTemplate(
   to: string,
   templateName: TemplateName,
   variables: Record<string, string>,
+  absender_kb_id?: string,
 ): Promise<{ success: boolean; sid?: string; error?: string; provider: 'twilio-template' | 'twilio-legacy' }> {
   const contentSid = getTemplateSid(templateName)
 
@@ -20,7 +21,20 @@ export async function sendWhatsAppTemplate(
     // ─── Twilio Content API (Template genehmigt) ──────────────────
     const accountSid = process.env.TWILIO_ACCOUNT_SID
     const authToken = process.env.TWILIO_AUTH_TOKEN
-    const from = process.env.TWILIO_WHATSAPP_FROM ?? 'whatsapp:+14155238886'
+    let from = process.env.TWILIO_WHATSAPP_FROM ?? 'whatsapp:+14155238886'
+
+    // KFZ-182: KB-eigene Nummer als Absender wenn vorhanden
+    if (absender_kb_id) {
+      try {
+        const { createAdminClient } = await import('@/lib/supabase/admin')
+        const db = createAdminClient()
+        const { data: kb } = await db.from('profiles')
+          .select('twilio_whatsapp_nummer')
+          .eq('id', absender_kb_id)
+          .single()
+        if (kb?.twilio_whatsapp_nummer) from = kb.twilio_whatsapp_nummer
+      } catch { /* fallback to default */ }
+    }
 
     if (!accountSid || !authToken) {
       return { success: false, error: 'Twilio credentials missing', provider: 'twilio-template' }

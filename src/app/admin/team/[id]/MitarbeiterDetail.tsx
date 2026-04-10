@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeftIcon, SaveIcon, UserIcon, BarChart3Icon, BriefcaseIcon, ClockIcon } from 'lucide-react'
-import { updateMitarbeiter } from '../actions'
+import { ArrowLeftIcon, SaveIcon, UserIcon, BarChart3Icon, BriefcaseIcon, ClockIcon, PhoneIcon, Trash2Icon } from 'lucide-react'
+import { updateMitarbeiter, provisionTwilioNummer, releaseTwilioNummer } from '../actions'
 
 type Perf = { monat: string; jahr: number; leads_qualifiziert: number; leads_konvertiert: number; faelle_abgeschlossen: number; aktive_faelle: number; umsatz_generiert: number }
 
@@ -16,6 +16,8 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
+  const [twilioLoading, setTwilioLoading] = useState(false)
+  const [twilioMsg, setTwilioMsg] = useState<string | null>(null)
   const m = mitarbeiter
 
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
@@ -122,6 +124,51 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
             <SaveIcon className="w-4 h-4" />{saving ? 'Speichere...' : 'Speichern'}
           </button>
         </form>
+
+        {/* KFZ-182: Twilio WhatsApp-Nummer Zuweisung */}
+        {(m.rolle === 'kundenbetreuer' || m.rolle === 'admin') && (
+          <div className="mt-5 bg-white border border-gray-200 rounded-2xl p-5">
+            <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2"><PhoneIcon className="w-4 h-4" /> WhatsApp-Nummer</h3>
+            {m.twilio_whatsapp_nummer ? (
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-mono text-gray-900 bg-gray-100 px-3 py-1.5 rounded-lg">{m.twilio_whatsapp_nummer as string}</span>
+                  <span className="text-[10px] text-gray-400">seit {m.twilio_nummer_provisioned_am ? new Date(m.twilio_nummer_provisioned_am as string).toLocaleDateString('de-DE') : '—'}</span>
+                </div>
+                <button
+                  onClick={async () => {
+                    if (!confirm('Nummer wirklich freigeben? Kann nicht rueckgaengig gemacht werden.')) return
+                    setTwilioLoading(true); setTwilioMsg(null)
+                    try { await releaseTwilioNummer(m.id as string); setTwilioMsg('Nummer freigegeben'); router.refresh() }
+                    catch (e) { setTwilioMsg(e instanceof Error ? e.message : 'Fehler') }
+                    finally { setTwilioLoading(false) }
+                  }}
+                  disabled={twilioLoading}
+                  className="flex items-center gap-1.5 text-xs text-red-500 hover:text-red-700 disabled:opacity-40"
+                >
+                  <Trash2Icon className="w-3.5 h-3.5" /> Nummer freigeben
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-xs text-gray-500">Noch keine eigene WhatsApp-Nummer zugewiesen. Kosten: ~1 EUR/Monat via Twilio.</p>
+                <button
+                  onClick={async () => {
+                    setTwilioLoading(true); setTwilioMsg(null)
+                    try { await provisionTwilioNummer(m.id as string); setTwilioMsg('Nummer zugewiesen!'); router.refresh() }
+                    catch (e) { setTwilioMsg(e instanceof Error ? e.message : 'Fehler') }
+                    finally { setTwilioLoading(false) }
+                  }}
+                  disabled={twilioLoading}
+                  className="flex items-center gap-2 bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-40 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
+                >
+                  <PhoneIcon className="w-4 h-4" /> {twilioLoading ? 'Wird provisioniert...' : 'WhatsApp-Nummer zuweisen'}
+                </button>
+              </div>
+            )}
+            {twilioMsg && <p className={`text-xs mt-2 ${twilioMsg.includes('!') ? 'text-green-600' : 'text-red-500'}`}>{twilioMsg}</p>}
+          </div>
+        )}
       </div>
     </div></div>
   )

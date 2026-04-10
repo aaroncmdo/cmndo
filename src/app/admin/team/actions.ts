@@ -105,3 +105,16 @@ export async function toggleIncentive(id: string, aktiv: boolean) {
   const { error } = await supabase.from('incentives').update({ aktiv }).eq('id', id)
   if (error) throw new Error(error.message)
 }
+
+// KFZ-182: Twilio WhatsApp-Nummer Provisioning
+export async function provisionTwilioNummer(profileId: string) {
+  await requireAdmin()
+  const { provisionKbNummer } = await import('@/lib/twilio/provision-kb-nummer')
+  return provisionKbNummer(profileId)
+}
+
+export async function releaseTwilioNummer(profileId: string) {
+  await requireAdmin()
+  const { releaseKbNummer } = await import('@/lib/twilio/provision-kb-nummer')
+  return releaseKbNummer(profileId)
+}
