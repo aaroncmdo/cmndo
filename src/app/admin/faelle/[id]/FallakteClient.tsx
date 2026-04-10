@@ -119,7 +119,6 @@ type Fall = Record<string, unknown> & {
   fahrzeug_farbe: string | null
   erstzulassung: string | null
   kilometerstand: number | null
-  schadensursache: string | null
   firma_name: string | null
   halter_name: string | null
   polizei_vor_ort: boolean | null
@@ -864,11 +863,11 @@ export default function FallakteClient({
             )}
 
             {/* BUG-73: Unfall-Details */}
-            {(fall.unfallhergang || fall.schadensursache) && (
+            {(fall.unfallhergang || fall.schadens_ursache) && (
               <div className="bg-white rounded-xl border border-gray-200 p-3">
                 <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Unfall</h3>
                 <div className="space-y-1 text-xs">
-                  {fall.schadensursache && <div className="flex justify-between"><span className="text-gray-500">Ursache</span><span className="text-gray-700">{fall.schadensursache}</span></div>}
+                  {fall.schadens_ursache && <div className="flex justify-between"><span className="text-gray-500">Ursache</span><span className="text-gray-700">{fall.schadens_ursache}</span></div>}
                   {fall.polizei_vor_ort && <div className="flex justify-between"><span className="text-gray-500">Polizei vor Ort</span><span className="text-gray-700">Ja</span></div>}
                   {fall.unfallhergang && <p className="text-gray-600 text-xs mt-1 whitespace-pre-wrap">{fall.unfallhergang}</p>}
                 </div>
@@ -1561,9 +1560,9 @@ function TabUebersicht({
       )}
 
       {/* BUG-73: Unfall-Details */}
-      {(fall.unfallhergang || fall.schadensursache) && (
+      {(fall.unfallhergang || fall.schadens_ursache) && (
         <Section title="Unfall-Details">
-          {fall.schadensursache && <InfoRow label="Schadens-Ursache" value={fall.schadensursache} />}
+          {fall.schadens_ursache && <InfoRow label="Schadens-Ursache" value={fall.schadens_ursache} />}
           {fall.schadens_datum && <InfoRow label="Schadens-Datum" value={new Date(fall.schadens_datum).toLocaleDateString('de-DE')} />}
           {fall.unfallhergang && <p className="text-sm text-gray-600 whitespace-pre-wrap mt-2">{fall.unfallhergang}</p>}
         </Section>

@@ -96,7 +96,7 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
     schadens_adresse: data.schadens_adresse?.trim() || null,
     schadens_plz: data.schadens_plz.trim(),
     schadens_ort: data.schadens_ort?.trim() || null,
-    schadensursache: data.schadensursache?.trim() || null,
+    schadens_ursache: data.schadensursache?.trim() || null,
     // KFZ-154: Spezifikation + Schadenart fuer den Dispatcher-Match
     spezifikation: data.spezifikation || null,
     schadenart: data.schadenart || null,
