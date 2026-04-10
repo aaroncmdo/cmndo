@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useMemo } from 'react'
 import { SearchIcon, XIcon, UserPlusIcon, PhoneIcon, MailIcon, MapPinIcon, PencilIcon, CheckIcon, PowerOffIcon, Trash2Icon, RefreshCwIcon, AlertTriangleIcon } from 'lucide-react'
 import Link from 'next/link'
 import GutachterProfilPanel from './GutachterProfilPanel'
 import { updateGutachterProfil, reactivateGutachter, deactivateGutachter, softDeleteGutachter, reassignCases, getOpenCasesCount } from './actions'
 import { getSvStatus } from '@/lib/sv-status'
 import NeuSvDrawer from '../sachverstaendige/NeuSvDrawer'
+import { createClient } from '@/lib/supabase/client'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -136,6 +137,8 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
   const mapRef = useRef<google.maps.Map | null>(null)
   const markersRef = useRef<google.maps.Marker[]>([])
   const polygonsRef = useRef<google.maps.Polygon[]>([])
+  const liveMarkersRef = useRef<Map<string, google.maps.Marker>>(new Map())
+  const supabase = useMemo(() => createClient(), [])
 
   // State ONLY for UI overlays
   const [selectedSV, setSelectedSV] = useState<SV | null>(null)
@@ -233,6 +236,79 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
       })
     })
   }, [sachverstaendige, mapReady, svFilter])
+
+  // ─── KFZ-158: SV Live-Positionen via Realtime ──────────────────
+  useEffect(() => {
+    if (!mapRef.current || !mapReady) return
+
+    // Initial: letzte Position pro SV laden
+    supabase
+      .from('sv_live_position')
+      .select('gutachter_id, lat, lng, updated_at')
+      .order('updated_at', { ascending: false })
+      .then(({ data }) => {
+        if (!data || !mapRef.current) return
+        // Nur neueste pro gutachter_id
+        const latest = new Map<string, { lat: number; lng: number; updated_at: string }>()
+        for (const row of data) {
+          if (!latest.has(row.gutachter_id)) {
+            latest.set(row.gutachter_id, { lat: Number(row.lat), lng: Number(row.lng), updated_at: row.updated_at })
+          }
+        }
+        // Nur Positionen die < 30 min alt sind
+        const cutoff = Date.now() - 30 * 60 * 1000
+        for (const [svId, pos] of latest) {
+          if (new Date(pos.updated_at).getTime() < cutoff) continue
+          const svName = sachverstaendige.find(s => s.id === svId)?.name ?? 'SV'
+          upsertLiveMarker(svId, pos.lat, pos.lng, svName)
+        }
+      })
+
+    // Realtime: neue Positionen live
+    const channel = supabase
+      .channel('admin-sv-live-positions')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'sv_live_position' },
+        (payload) => {
+          const row = payload.new as { gutachter_id: string; lat: string; lng: string }
+          const svName = sachverstaendige.find(s => s.id === row.gutachter_id)?.name ?? 'SV'
+          upsertLiveMarker(row.gutachter_id, Number(row.lat), Number(row.lng), svName)
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+      for (const m of liveMarkersRef.current.values()) m.setMap(null)
+      liveMarkersRef.current.clear()
+    }
+  }, [mapReady, supabase, sachverstaendige])
+
+  function upsertLiveMarker(svId: string, lat: number, lng: number, name: string) {
+    if (!mapRef.current) return
+    const existing = liveMarkersRef.current.get(svId)
+    if (existing) {
+      existing.setPosition({ lat, lng })
+      return
+    }
+    const marker = new google.maps.Marker({
+      position: { lat, lng },
+      map: mapRef.current,
+      icon: {
+        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+        scale: 5,
+        fillColor: '#3B82F6',
+        fillOpacity: 1,
+        strokeColor: '#fff',
+        strokeWeight: 2,
+        rotation: 0,
+      },
+      title: `${name} (Live)`,
+      zIndex: 30,
+    })
+    liveMarkersRef.current.set(svId, marker)
+  }
 
   // ─── Sidebar filter (no useEffect, just derived) ──────────────
   const filteredSVs = filteredByStatus.filter(sv =>
