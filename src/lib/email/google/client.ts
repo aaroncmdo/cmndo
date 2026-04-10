@@ -45,6 +45,9 @@ export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: strin
     throw new Error('Keine Email-Adresse')
   }
 
+  // Determine provider upfront
+  const provider = isResendAvailable() && resend ? 'resend' : 'google_smtp'
+
   // Insert pending log
   const { data: logEntry } = await admin.from('email_log').insert({
     fall_id: opts.fallId ?? null,
@@ -54,6 +57,7 @@ export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: strin
     subject: opts.subject,
     status: 'pending',
     versuche: 0,
+    provider,
     attachments: opts.attachments ? opts.attachments.map(a => ({ filename: a.filename, contentType: a.contentType })) : null,
   }).select('id').single()
 

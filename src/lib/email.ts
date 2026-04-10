@@ -1,13 +1,4 @@
-import { Resend } from 'resend'
-
-let _resend: Resend | null = null
-function getResend(): Resend | null {
-  if (!process.env.RESEND_API_KEY) return null
-  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY)
-  return _resend
-}
-
-const FROM = 'Claimondo <noreply@claimondo.de>'
+import { sendEmail as sendViaHelper } from '@/lib/email/google/client'
 
 type EmailPayload = {
   to: string
@@ -44,22 +35,13 @@ function buildHtml({ heading, lines, ctaLabel, ctaUrl }: Omit<EmailPayload, 'to'
 }
 
 export async function sendEmail(payload: EmailPayload) {
-  const resend = getResend()
-  if (!resend) {
-    console.warn('[email] RESEND_API_KEY not set, skipping email')
-    return
-  }
-
-  try {
-    await resend.emails.send({
-      from: FROM,
-      to: payload.to,
-      subject: payload.subject,
-      html: buildHtml(payload),
-    })
-  } catch (err) {
-    console.error('[email] Failed to send:', err)
-  }
+  await sendViaHelper({
+    to: payload.to,
+    subject: payload.subject,
+    html: buildHtml(payload),
+    empfaengerTyp: 'admin',
+    template: 'convenience_notification',
+  })
 }
 
 // ─── Pre-built notification emails ─────────────────────────────────────────
