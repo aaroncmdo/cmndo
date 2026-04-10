@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     if (process.env.STRIPE_WEBHOOK_SECRET && sig) {
       const { stripe } = await import('@/lib/stripe/client')
       const verified = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET)
-      event = verified as typeof event
+      event = verified as unknown as typeof event
     } else {
       event = JSON.parse(body)
     }
@@ -291,7 +291,7 @@ export async function POST(request: Request) {
             const { data: admins } = await db.from('profiles').select('telefon').eq('rolle', 'admin')
             const { sendManualWhatsApp } = await import('@/lib/whatsapp')
             for (const a of admins ?? []) {
-              if (a.telefon) await sendManualWhatsApp(a.telefon, `✅ SV-Anzahlung eingegangen für ${svId.slice(0, 8)}. Portal freigeschaltet.`, null)
+              if (a.telefon) await sendManualWhatsApp(a.telefon, `✅ SV-Anzahlung eingegangen für ${svId.slice(0, 8)}. Portal freigeschaltet.`, undefined)
             }
           } catch { /* */ }
 

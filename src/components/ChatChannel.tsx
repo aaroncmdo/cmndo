@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { SendIcon, ImageIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
-type Msg = { id: string; sender_id: string | null; sender_rolle: string | null; nachricht: string; hat_anhang: boolean; anhang_url: string | null; created_at: string }
+type Msg = { id: string; sender_id: string | null; sender_rolle: string | null; nachricht: string; hat_anhang: boolean; anhang_url: string | null; created_at: string; kanal?: string | null }
 
 export default function ChatChannel({ fallId, kanal, currentUserId, readOnly }: {
   fallId: string; kanal: string; currentUserId: string; readOnly?: boolean

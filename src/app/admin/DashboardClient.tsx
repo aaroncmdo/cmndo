@@ -172,14 +172,14 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
     const leadMap: Record<string, string> = {}
     const nameBatch: Promise<void>[] = []
     if (svIds.length > 0) {
-      nameBatch.push(supabase.from('profiles').select('id, vorname, nachname').in('id', svIds).then(({ data }) => {
+      nameBatch.push(Promise.resolve(supabase.from('profiles').select('id, vorname, nachname').in('id', svIds).then(({ data }) => {
         for (const p of data ?? []) svMap[p.id] = [p.vorname, p.nachname].filter(Boolean).join(' ') || '—'
-      }))
+      })))
     }
     if (leadIds.length > 0) {
-      nameBatch.push(supabase.from('leads').select('id, vorname, nachname').in('id', leadIds).then(({ data }) => {
+      nameBatch.push(Promise.resolve(supabase.from('leads').select('id, vorname, nachname').in('id', leadIds).then(({ data }) => {
         for (const l of data ?? []) leadMap[l.id] = [l.vorname, l.nachname].filter(Boolean).join(' ') || '—'
-      }))
+      })))
     }
     await Promise.all(nameBatch)
 
@@ -242,7 +242,7 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
 
     // Tasks
     setTasks((tasksR.data ?? []).map(t => {
-      const fr = t.faelle as Record<string, unknown> | null
+      const fr = t.faelle as unknown as Record<string, unknown> | null
       return { id: t.id, titel: t.titel, fallNr: (fr?.fall_nummer as string) ?? '—', fallId: t.fall_id, deadline: t.faellig_am, prioritaet: t.prioritaet, typ: t.typ ?? null }
     }))
 

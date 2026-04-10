@@ -21,6 +21,8 @@ export type FallDokumentRow = {
   ocr_status: string | null
   ocr_extracted_data?: Record<string, unknown> | null
   hochgeladen_am: string
+  geloescht_am?: string | null
+  mime_type?: string | null
 }
 
 export default function FallDokumenteSidebar({

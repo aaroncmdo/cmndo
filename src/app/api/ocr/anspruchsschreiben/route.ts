@@ -52,7 +52,8 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(await pdfResponse.arrayBuffer())
 
     // Parse PDF text
-    const pdfParse = (await import('pdf-parse')).default
+    const pdfModule = await import('pdf-parse')
+    const pdfParse = ((pdfModule as any).default ?? pdfModule) as (buffer: Buffer) => Promise<{ text: string }>
     const parsed = await pdfParse(buffer)
     const text = parsed.text
 

@@ -21,7 +21,7 @@ async function fetchHereIsoline(lat: number, lng: number, radiusKm: number): Pro
     if (!encoded) return null
 
     const decoded = decode(encoded)
-    const points = decoded.polyline.map(([lat, lng]: [number, number]) => ({ lat, lng }))
+    const points = decoded.polyline.map((coord: number[]) => ({ lat: coord[0], lng: coord[1] }))
     return points.length >= 3 ? points : null
   } catch {
     return null

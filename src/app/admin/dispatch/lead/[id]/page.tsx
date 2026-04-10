@@ -208,7 +208,7 @@ export default async function LeadDetailPage({
                       created_at: lead.created_at,
                       qualifizierungs_phase: lead.qualifizierungs_phase ?? 'neu',
                     }}
-                    timelineEntries={timelineEntries ?? []}
+                    timelineEntries={(timelineEntries ?? []) as any}
                   />
                   {/* KFZ-172: Pflichtdokumente fuer Lead-Phase */}
                   <FallDokumenteSidebar
@@ -282,10 +282,6 @@ export default async function LeadDetailPage({
               kennzeichen: lead.kennzeichen ?? null,
               fahrzeug_hersteller: lead.fahrzeug_hersteller ?? null,
               fahrzeug_modell: lead.fahrzeug_modell ?? null,
-              fahrzeug_farbe: lead.fahrzeug_farbe ?? null,
-              erstzulassung: lead.erstzulassung ?? null,
-              fin: lead.fin ?? null,
-              kilometerstand: lead.kilometerstand ?? null,
               kontaktversuche: lead.kontaktversuche ?? null,
               verpasste_anrufe: lead.verpasste_anrufe ?? null,
               firma_name: lead.firma_name ?? null,

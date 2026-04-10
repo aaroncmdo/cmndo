@@ -76,15 +76,15 @@ export default function FallDetailSections({
             <InfoRow label="Fallnummer" value={(fall.fall_nummer as string) ?? (fall.id as string)?.slice(0, 8)} />
             <InfoRow label="Status" value={(fall.status as string) ?? '—'} />
             {kbName && <InfoRow label="Ihr Ansprechpartner" value={kbName} />}
-            {fall.sv_termin && <InfoRow label="Nächster Termin" value={fmtDateTime(fall.sv_termin as string)} />}
+            {!!fall.sv_termin && <InfoRow label="Nächster Termin" value={fmtDateTime(fall.sv_termin as string)} />}
           </Section>
 
           <Section title="Fahrzeug">
-            {fall.kennzeichen && <InfoRow label="Kennzeichen" value={fall.kennzeichen as string} />}
-            {fall.fahrzeug_hersteller && <InfoRow label="Marke" value={fall.fahrzeug_hersteller as string} />}
-            {fall.fahrzeug_modell && <InfoRow label="Modell" value={fall.fahrzeug_modell as string} />}
-            {fall.schadens_datum && <InfoRow label="Schadensdatum" value={fmt(fall.schadens_datum as string)} />}
-            {fall.schadens_beschreibung && (
+            {!!fall.kennzeichen && <InfoRow label="Kennzeichen" value={fall.kennzeichen as string} />}
+            {!!fall.fahrzeug_hersteller && <InfoRow label="Marke" value={fall.fahrzeug_hersteller as string} />}
+            {!!fall.fahrzeug_modell && <InfoRow label="Modell" value={fall.fahrzeug_modell as string} />}
+            {!!fall.schadens_datum && <InfoRow label="Schadensdatum" value={fmt(fall.schadens_datum as string)} />}
+            {!!fall.schadens_beschreibung && (
               <div className="pt-2 border-t border-gray-100">
                 <p className="text-xs text-gray-400 mb-1">Unfallhergang</p>
                 <p className="text-sm text-[#0D1B3E] whitespace-pre-wrap">{fall.schadens_beschreibung as string}</p>
@@ -96,8 +96,8 @@ export default function FallDetailSections({
             <Section title="Ihr Gutachter">
               <InfoRow label="Name" value={svName} />
               {svTelefon && <InfoRow label="Telefon" value={svTelefon} />}
-              {fall.sv_termin && <InfoRow label="Besichtigungstermin" value={fmtDateTime(fall.sv_termin as string)} />}
-              {fall.besichtigungsort_adresse && <InfoRow label="Besichtigungsort" value={fall.besichtigungsort_adresse as string} />}
+              {!!fall.sv_termin && <InfoRow label="Besichtigungstermin" value={fmtDateTime(fall.sv_termin as string)} />}
+              {!!fall.besichtigungsort_adresse && <InfoRow label="Besichtigungsort" value={fall.besichtigungsort_adresse as string} />}
             </Section>
           )}
 

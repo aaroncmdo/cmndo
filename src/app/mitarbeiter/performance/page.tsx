@@ -87,7 +87,7 @@ export default async function MitarbeiterPerformancePage() {
   const timelineItems: { zeit: string; typ: string; label: string; detail: string; color: string; link?: string; meetLink?: string }[] = []
 
   for (const t of heuteTermine ?? []) {
-    const fallRaw = t.faelle as Record<string, unknown> | null
+    const fallRaw = t.faelle as unknown as Record<string, unknown> | null
     const leadRaw = fallRaw?.leads as { vorname: string | null; nachname: string | null } | { vorname: string | null; nachname: string | null }[] | null
     const lead = Array.isArray(leadRaw) ? leadRaw[0] : leadRaw
     const kundeName = lead ? [lead?.vorname, lead?.nachname].filter(Boolean).join(' ') : 'Kunde'
@@ -103,7 +103,7 @@ export default async function MitarbeiterPerformancePage() {
   }
 
   for (const t of heuteTasks ?? []) {
-    const fallRaw = t.faelle as Record<string, unknown> | null
+    const fallRaw = t.faelle as unknown as Record<string, unknown> | null
     timelineItems.push({
       zeit: t.faellig_am ?? todayStart,
       typ: 'task',
@@ -119,7 +119,7 @@ export default async function MitarbeiterPerformancePage() {
       zeit: t.start_zeit,
       typ: 'gutachter',
       label: 'Gutachtertermin',
-      detail: `Fall ${(t.faelle as Record<string, unknown>)?.fall_nummer ?? ''}`,
+      detail: `Fall ${(t.faelle as unknown as Record<string, unknown>)?.fall_nummer ?? ''}`,
       color: 'orange',
       link: t.fall_id ? `/admin/faelle/${t.fall_id}` : undefined,
     })
@@ -133,7 +133,6 @@ export default async function MitarbeiterPerformancePage() {
 
   return (
     <>
-      {/* @ts-expect-error Async Server Component */}
       <UeberfaelligeTasks mode="user" />
       <PerformanceClient
         profile={profile}

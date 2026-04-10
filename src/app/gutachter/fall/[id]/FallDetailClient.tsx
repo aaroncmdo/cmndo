@@ -245,12 +245,12 @@ export default function FallDetailClient({
         </div>
 
         {/* KFZ-134: Termin-Aktionen (Ablehnen + Gegenvorschlag + Kunden-Gegenvorschlag-Banner) */}
-        {aktiverTermin && (aktiverTermin.status === 'reserviert' || aktiverTermin.status === 'gegenvorschlag') && (
+        {aktiverTermin != null && (aktiverTermin.status === 'reserviert' || aktiverTermin.status === 'gegenvorschlag') && (
           <TerminActionsPanel fallId={fallId} termin={aktiverTermin} />
         )}
 
         {/* Vor-Ort Button */}
-        {fall.sv_termin && !hasGutachten && (fall.status === 'sv-termin' || fall.status === 'sv-zugewiesen') && (
+        {!!fall.sv_termin && !hasGutachten && (fall.status === 'sv-termin' || fall.status === 'sv-zugewiesen') && (
           <div className="flex gap-2 mb-4">
             <button onClick={() => setShowVorOrt(true)}
               className="flex-1 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">

@@ -119,7 +119,8 @@ export default async function GutachterFaellePage({
     const since = readState?.last_read_update_at ?? '1970-01-01T00:00:00Z'
     const { data: updateCount } = await admin.rpc('count_unread_updates', { p_fall_id: f.id, p_since: since })
 
-    return { ...f, ungelesene_nachrichten: count ?? 0, ungelesene_updates: typeof updateCount === 'number' ? updateCount : 0 }
+    const ungelesene_updates: number = typeof updateCount === 'number' ? updateCount : 0
+    return { ...f, ungelesene_nachrichten: count ?? 0, ungelesene_updates }
   }))
 
   // Sortierung: Faelle mit ungelesenen Nachrichten OBEN

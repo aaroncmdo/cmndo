@@ -214,7 +214,7 @@ export default async function SvDetailPage({
               ) : (
                 <div className="max-h-[300px] overflow-y-auto">
                   {tasks.map(t => {
-                    const fr = t.faelle as Record<string, unknown> | null
+                    const fr = t.faelle as unknown as Record<string, unknown> | null
                     const fallNr = (fr?.fall_nummer as string) ?? '—'
                     const overdue = t.faellig_am && new Date(t.faellig_am) < now
                     return (

@@ -9,7 +9,7 @@ const Vibrant = (VibrantModule as { default?: typeof VibrantModule }).default ??
  * Secondary = zweitkräftigste oder abgedunkelte Variante
  */
 export async function extractTwoColors(imageUrl: string): Promise<{ primary: string; secondary: string }> {
-  const palette = await Vibrant.from(imageUrl).getPalette()
+  const palette = await (Vibrant as any).from(imageUrl).getPalette()
 
   const candidates = [
     palette.Vibrant,

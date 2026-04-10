@@ -102,7 +102,7 @@ export default async function NachrichtenPage() {
 
   return (
     <NachrichtenInboxClient
-      threads={threads as Thread[]}
+      threads={threads as any}
       userId={user.id}
       isAdmin={isAdmin}
     />

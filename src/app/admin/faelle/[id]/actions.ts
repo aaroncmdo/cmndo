@@ -151,7 +151,8 @@ export async function uploadAnschlussschreiben(fallId: string, fileUrl: string, 
     const pdfResponse = await fetch(fileUrl)
     if (pdfResponse.ok) {
       const buffer = Buffer.from(await pdfResponse.arrayBuffer())
-      const pdfParse = (await import('pdf-parse')).default
+      const pdfModule = await import('pdf-parse')
+      const pdfParse = ((pdfModule as any).default ?? pdfModule) as (buffer: Buffer) => Promise<{ text: string }>
       const parsed = await pdfParse(buffer)
       const text = parsed.text
 

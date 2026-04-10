@@ -38,7 +38,7 @@ async function fetchHereIsoline(
 
     // Flexible Polyline decoding
     const decoded = decode(encoded)
-    const points = decoded.polyline.map(([lat, lng]: [number, number]) => ({ lat, lng }))
+    const points = decoded.polyline.map((coord: number[]) => ({ lat: coord[0], lng: coord[1] }))
 
     if (points.length < 3) {
       console.warn('[isochrone] HERE API: Zu wenige Punkte')

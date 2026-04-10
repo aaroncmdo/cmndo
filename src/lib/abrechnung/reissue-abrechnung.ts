@@ -115,9 +115,11 @@ export async function reissueAbrechnung(
     const { AbrechnungReminderEmail } = await import('@/lib/email/google/templates/AbrechnungReminder')
     const html = await render(AbrechnungReminderEmail({
       vorname: alte.empfaenger_name.split(' ')[0] || null,
+      nachname: null,
       abrechnungs_nr: neueNr,
       summe_brutto: summeBrutto,
       faellig_am: new Date(Date.now() + 14 * 86400000).toISOString(),
+      tage_bis_faellig: 14,
     }))
     await sendEmail({
       to: alte.empfaenger_email,

@@ -53,7 +53,7 @@ export default async function AbrechnungPage() {
   const anzahlungBetrag = typeof sv.anzahlung_betrag === 'number'
     ? sv.anzahlung_betrag
     : Number(sv.anzahlung_betrag ?? 0)
-  const anzahlungBezahlt = sv.anzahlung_bezahlt === true || sv.anzahlung_bezahlt === 'true'
+  const anzahlungBezahlt = sv.anzahlung_bezahlt === true
 
   // Fetch abrechnungen from the real billing table
   const { data: abrechnungen } = await supabase

@@ -65,14 +65,16 @@ export async function POST(request: Request) {
 
     // In DB speichern
     const db = createAdminClient()
-    await db.from('finance_monatsberichte').upsert({
-      monat: now.getMonth() + 1,
-      jahr: now.getFullYear(),
-      google_ads_kosten_eur: Math.round(totalCostEur * 100) / 100,
-      google_ads_leads: totalConversions,
-      google_ads_cpl_eur: cpl,
-      google_ads_sync_am: new Date().toISOString(),
-    }, { onConflict: 'monat,jahr' }).catch(() => {})
+    try {
+      await db.from('finance_monatsberichte').upsert({
+        monat: now.getMonth() + 1,
+        jahr: now.getFullYear(),
+        google_ads_kosten_eur: Math.round(totalCostEur * 100) / 100,
+        google_ads_leads: totalConversions,
+        google_ads_cpl_eur: cpl,
+        google_ads_sync_am: new Date().toISOString(),
+      }, { onConflict: 'monat,jahr' })
+    } catch { /* fire-and-forget */ }
 
     return NextResponse.json({ ok: true, totalCostEur: Math.round(totalCostEur * 100) / 100, totalConversions, cpl })
   } catch (err) {
