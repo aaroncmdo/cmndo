@@ -33,18 +33,18 @@ export default function ImpressumPage() {
           <h2 className="text-lg font-semibold text-[#1E3A5F] mb-2">Kontakt</h2>
           <p>
             E-Mail: <a href="mailto:support@claimondo.de" className="text-[#4573A2] underline">support@claimondo.de</a><br />
-            Telefon: <span className="text-[#1E3A5F]/50">TODO</span>
+            Telefon: <a href="tel:+4922116398980" className="text-[#4573A2] underline">+49 221 163 989 80</a>
           </p>
         </div>
 
         <div>
           <h2 className="text-lg font-semibold text-[#1E3A5F] mb-2">Handelsregister</h2>
-          <p className="text-[#1E3A5F]/50">TODO (sobald GmbH eingetragen)</p>
+          <p>Eintragung in Vorbereitung</p>
         </div>
 
         <div>
           <h2 className="text-lg font-semibold text-[#1E3A5F] mb-2">Umsatzsteuer-Identifikationsnummer</h2>
-          <p className="text-[#1E3A5F]/50">USt-IdNr.: TODO</p>
+          <p>In Beantragung</p>
         </div>
 
         <div>
