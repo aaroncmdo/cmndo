@@ -8,6 +8,8 @@ import { trackPosition } from '@/lib/gps/track-position'
 import { isAtTermin } from '@/lib/gps/geofence'
 import { markArrival } from '@/lib/gps/mark-arrival'
 import AnkommenModal, { type AnkommenTermin } from '@/components/faelle/AnkommenModal'
+import VerspaetenModal from '@/components/gutachter/VerspaetenModal'
+import { meldeVerspaetung } from '@/app/gutachter/fall/[id]/actions'
 import type { HeuteTermin } from './page'
 
 // KFZ-158 Phase 1: Tagesroute Client-Component.
@@ -50,6 +52,7 @@ export default function HeuteRouteClient({
   const lastTrackRef = useRef(0)
   const [arrivedAtId, setArrivedAtId] = useState<string | null>(null)
   const [ankommenModal, setAnkommenModal] = useState<AnkommenTermin | null>(null)
+  const [showVerspaeten, setShowVerspaeten] = useState(false)
 
   // Throttled GPS-Tracking: alle 30s an Server senden
   useEffect(() => {
@@ -184,6 +187,12 @@ export default function HeuteRouteClient({
             >
               <NavigationIcon className="w-4 h-4" /> Navigation
             </a>
+            <button
+              onClick={() => setShowVerspaeten(true)}
+              className="flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl px-4 py-3 text-sm font-semibold shadow-lg transition-colors"
+            >
+              <ClockIcon className="w-4 h-4" />
+            </button>
             {naechsterTermin.kunde_telefon && (
               <a
                 href={`tel:${naechsterTermin.kunde_telefon}`}
@@ -309,6 +318,16 @@ export default function HeuteRouteClient({
           termin={ankommenModal}
           onClose={() => setAnkommenModal(null)}
           onOpenAkte={() => setAnkommenModal(null)}
+        />
+      )}
+
+      {/* KFZ-181 Trigger 25: Verspäten-Modal */}
+      {showVerspaeten && naechsterTermin && (
+        <VerspaetenModal
+          terminId={naechsterTermin.id}
+          fallId={naechsterTermin.fall_id}
+          onClose={() => setShowVerspaeten(false)}
+          onSend={meldeVerspaetung}
         />
       )}
     </div>

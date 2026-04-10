@@ -29,7 +29,7 @@ export async function GET(request: Request) {
   // Alle Faelle mit Phase + Szenario laden wo Dokumente nicht vollstaendig
   const { data: faelle } = await db
     .from('faelle')
-    .select('id, fall_nummer, aktuelle_phase, szenario, dokumente_vollstaendig_fuer_phase, kundenbetreuer_id, sv_id, updated_at')
+    .select('id, fall_nummer, aktuelle_phase, szenario, dokumente_vollstaendig_fuer_phase, kundenbetreuer_id, sv_id, updated_at, dokumente_reminder_whatsapp_letzte_sendung')
     .not('aktuelle_phase', 'is', null)
     .not('szenario', 'is', null)
     .not('status', 'in', '("abgeschlossen","storniert")')
@@ -89,6 +89,27 @@ export async function GET(request: Request) {
             empfaenger_user_id: phase === 'termin' ? fall.sv_id : fall.kundenbetreuer_id,
           })
           reminders++
+
+          // KFZ-181 Trigger 26: WhatsApp an Kunden (max alle 48h)
+          const vor48h = new Date(now.getTime() - 48 * 60 * 60 * 1000).toISOString()
+          const letzteSendung = (fall as Record<string, unknown>).dokumente_reminder_whatsapp_letzte_sendung as string | null
+          if (!letzteSendung || letzteSendung < vor48h) {
+            // Kunden-Telefon laden
+            const { data: fallFull } = await db.from('faelle').select('lead_id').eq('id', fall.id).single()
+            if (fallFull?.lead_id) {
+              const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', fallFull.lead_id).single()
+              if (lead?.telefon) {
+                const { sendWhatsAppTemplate } = await import('@/lib/whatsapp/send-template')
+                const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'
+                await sendWhatsAppTemplate(lead.telefon, 'dokumente_nachreichen', {
+                  '1': lead.vorname ?? 'Kunde',
+                  '2': fehlendListe,
+                  '3': `${appUrl}/kunde`,
+                }).catch(() => {})
+                await db.from('faelle').update({ dokumente_reminder_whatsapp_letzte_sendung: now.toISOString() }).eq('id', fall.id)
+              }
+            }
+          }
         }
       }
     } else {

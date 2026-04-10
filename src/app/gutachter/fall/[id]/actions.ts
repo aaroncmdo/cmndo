@@ -511,3 +511,109 @@ export async function sendChatNachricht(fallId: string, nachricht: string) {
 
   revalidatePath(`/gutachter/fall/${fallId}`)
 }
+
+// ─── KFZ-181 Trigger 24: Termin stornieren ─────────────────────────────────
+
+export async function storniereTermin(
+  terminId: string,
+): Promise<{ success?: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { error: 'Nicht angemeldet' }
+
+  const { data: termin } = await supabase
+    .from('gutachter_termine')
+    .select('id, fall_id, start_zeit, sv_id')
+    .eq('id', terminId)
+    .single()
+  if (!termin) return { error: 'Termin nicht gefunden' }
+
+  // Status auf storniert setzen
+  await supabase
+    .from('gutachter_termine')
+    .update({ status: 'storniert' })
+    .eq('id', terminId)
+
+  // WhatsApp an Kunden
+  const { sendWhatsAppTemplate } = await import('@/lib/whatsapp/send-template')
+  const { data: fall } = await supabase
+    .from('faelle')
+    .select('lead_id, fall_nummer')
+    .eq('id', termin.fall_id)
+    .single()
+  if (fall?.lead_id) {
+    const { data: lead } = await supabase.from('leads').select('vorname, telefon').eq('id', fall.lead_id).single()
+    const { data: svProf } = await supabase.from('sachverstaendige').select('profile_id').eq('id', termin.sv_id).single()
+    let svName = 'Gutachter'
+    if (svProf?.profile_id) {
+      const { data: p } = await supabase.from('profiles').select('vorname, nachname').eq('id', svProf.profile_id).single()
+      if (p) svName = [p.vorname, p.nachname].filter(Boolean).join(' ')
+    }
+    const datum = new Date(termin.start_zeit).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
+    if (lead?.telefon) {
+      await sendWhatsAppTemplate(lead.telefon, 'termin_storniert', { '1': lead.vorname ?? 'Kunde', '2': svName, '3': datum }).catch(() => {})
+    }
+  }
+
+  // Timeline
+  await supabase.from('timeline').insert({
+    fall_id: termin.fall_id,
+    typ: 'termin',
+    titel: 'Termin storniert',
+    beschreibung: `Termin am ${new Date(termin.start_zeit).toLocaleDateString('de-DE')} wurde storniert.`,
+  })
+
+  revalidatePath(`/gutachter/fall/${termin.fall_id}`)
+  return { success: true }
+}
+
+// ─── KFZ-181 Trigger 25: Verspätung melden ─────────────────────────────────
+
+export async function meldeVerspaetung(
+  terminId: string,
+  minuten: number,
+): Promise<{ success?: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { error: 'Nicht angemeldet' }
+
+  const { data: termin } = await supabase
+    .from('gutachter_termine')
+    .select('id, fall_id, sv_id')
+    .eq('id', terminId)
+    .single()
+  if (!termin) return { error: 'Termin nicht gefunden' }
+
+  // Update verspaetung
+  await supabase
+    .from('gutachter_termine')
+    .update({ verspaetung_minuten: minuten })
+    .eq('id', terminId)
+
+  // WhatsApp an Kunden
+  const { sendWhatsAppTemplate } = await import('@/lib/whatsapp/send-template')
+  const { data: fall } = await supabase.from('faelle').select('lead_id').eq('id', termin.fall_id).single()
+  if (fall?.lead_id) {
+    const { data: lead } = await supabase.from('leads').select('vorname, telefon').eq('id', fall.lead_id).single()
+    const { data: svProf } = await supabase.from('sachverstaendige').select('profile_id').eq('id', termin.sv_id).single()
+    let svName = 'Gutachter'
+    if (svProf?.profile_id) {
+      const { data: p } = await supabase.from('profiles').select('vorname, nachname').eq('id', svProf.profile_id).single()
+      if (p) svName = [p.vorname, p.nachname].filter(Boolean).join(' ')
+    }
+    if (lead?.telefon) {
+      await sendWhatsAppTemplate(lead.telefon, 'sv_verspaetet', { '1': lead.vorname ?? 'Kunde', '2': svName, '3': String(minuten) }).catch(() => {})
+    }
+  }
+
+  // Timeline
+  await supabase.from('timeline').insert({
+    fall_id: termin.fall_id,
+    typ: 'termin',
+    titel: `Verspätung gemeldet (${minuten} Min)`,
+    beschreibung: `Gutachter verspätet sich um ca. ${minuten} Minuten. Kunde wurde via WhatsApp informiert.`,
+  })
+
+  revalidatePath(`/gutachter/fall/${termin.fall_id}`)
+  return { success: true }
+}

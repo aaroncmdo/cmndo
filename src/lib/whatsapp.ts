@@ -225,6 +225,30 @@ export async function sendManualWhatsApp(telefon: string, message: string, fallI
  * For now: stores the message in the nachrichten table (kanal='whatsapp').
  * WhatsApp Business API will be connected later.
  */
+// KFZ-181: Mapping NachrichtTyp -> TemplateName fuer Template-SID-Versand.
+// Wenn der TemplateName in TEMPLATE_SIDS eine gesetzte Env-Var hat,
+// wird automatisch die Twilio Content API statt des Legacy-Texts genutzt.
+import type { TemplateName } from './whatsapp/template-sids'
+const NACHRICHT_TO_TEMPLATE: Partial<Record<NachrichtTyp, TemplateName>> = {
+  nach_sa_unterschrift: 'fall_eroeffnet',
+  nach_gutachter_dispatch: 'sv_beauftragt',
+  nach_terminbestaetigung: 'termin_bestaetigt',
+  erinnerung_24h: 'reminder_24h',
+  erinnerung_2h: 'reminder_2h',
+  nach_gutachten: 'gutachten_fertig',
+  nach_qc_freigabe: 'kanzlei_uebergabe',
+  nach_anspruchsschreiben: 'as_gesendet',
+  nach_regulierung: 'regulierung_angekuendigt',
+  nach_zahlung: 'zahlung_eingegangen',
+  nach_abschluss: 'fall_abgeschlossen',
+  eskalation_vs03: 'eskalation_tag14',
+  eskalation_vs05: 'eskalation_tag28',
+  eskalation_vs06: 'eskalation_tag42',
+  nachbesserung_gutachten: 'gutachten_fertig',
+  kuerzung_ruege: 'kuerzung_eingetragen',
+  dokument_fehlt: 'dokumente_nachreichen',
+}
+
 export async function sendStatusWhatsApp(
   fallId: string,
   nachrichtTyp: NachrichtTyp,
@@ -334,17 +358,34 @@ export async function sendStatusWhatsApp(
         : 'Keine Telefonnummer hinterlegt – Nachricht nur protokolliert.',
     })
 
-    // Send via Twilio WhatsApp
+    // KFZ-181: Template-Versand (wenn SID gesetzt) oder Legacy-Text
     if (telefon) {
-      await sendWhatsApp(telefon, nachricht).catch(err => {
-        console.error(`[whatsapp] Twilio send failed:`, err)
-        // Timeline vermerk
-        supabase.from('timeline').insert({
-          fall_id: fallId, typ: 'system',
-          titel: 'WhatsApp-Versand fehlgeschlagen',
-          beschreibung: `Nachricht an ${telefon} konnte nicht gesendet werden.`,
-        }).then(() => {})
-      })
+      const { getTemplateSid } = await import('./whatsapp/template-sids')
+      const tplName = NACHRICHT_TO_TEMPLATE[nachrichtTyp]
+      const sid = tplName ? getTemplateSid(tplName) : null
+
+      if (sid && tplName) {
+        // Template-Versand via Twilio Content API
+        const { sendWhatsAppTemplate } = await import('./whatsapp/send-template')
+        const tplVars: Record<string, string> = {
+          '1': vorname || 'Kunde',
+          '2': gutachterName ?? ctx.betrag ?? '',
+          '3': ctx.termin_datum ?? '',
+        }
+        await sendWhatsAppTemplate(telefon, tplName, tplVars).catch(err => {
+          console.error(`[whatsapp] Template send failed:`, err)
+        })
+      } else {
+        // Legacy: reiner Text
+        await sendWhatsApp(telefon, nachricht).catch(err => {
+          console.error(`[whatsapp] Twilio send failed:`, err)
+          supabase.from('timeline').insert({
+            fall_id: fallId, typ: 'system',
+            titel: 'WhatsApp-Versand fehlgeschlagen',
+            beschreibung: `Nachricht an ${telefon} konnte nicht gesendet werden.`,
+          }).then(() => {})
+        })
+      }
     }
 
     // Set google_review_gesendet flag on case close
