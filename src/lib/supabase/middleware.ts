@@ -62,11 +62,33 @@ export async function updateSession(request: NextRequest) {
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set('x-pathname', request.nextUrl.pathname)
 
-  // Build response — modified request headers werden via { request: { headers } }
-  // an die nachgelagerten Server Components weitergegeben.
-  const response = !user && !isPublicPath(request.nextUrl.pathname)
-    ? NextResponse.redirect(new URL('/login', request.url))
-    : NextResponse.next({ request: { headers: requestHeaders } })
+  // Build response
+  let response: NextResponse
+
+  if (!user && !isPublicPath(request.nextUrl.pathname)) {
+    response = NextResponse.redirect(new URL('/login', request.url))
+  } else if (user && !isPublicPath(request.nextUrl.pathname) && request.nextUrl.pathname !== '/login/2fa') {
+    // KFZ-184: 2FA-Check — wenn User eingeloggt aber 2FA pending
+    // Google-OAuth-User skippen 2FA (provider check via app_metadata)
+    const isGoogleUser = user.app_metadata?.provider === 'google'
+    const has2faCookie = request.cookies.get('claimondo_2fa_verified')?.value === '1'
+    const hasRememberCookie = !!request.cookies.get('claimondo_remember')?.value
+
+    if (!isGoogleUser && !has2faCookie && !hasRememberCookie) {
+      // Prüfe ob User 2FA aktiviert hat (via twofa_aktiviert Default true)
+      // Da wir in der Middleware keinen DB-Call machen wollen, setzen wir
+      // das 2fa_verified Cookie nach erfolgreichem Verify in /login/2fa.
+      // Wenn das Cookie fehlt UND kein remember-token: redirect zu 2FA.
+      // Beim allerersten Login nach Deploy: Cookie fehlt → 2FA-Page.
+      // HINWEIS: Wenn twofa_aktiviert=false soll die 2FA-Page selbst
+      // direkt weiterleiten (passiert im Server Component).
+      response = NextResponse.redirect(new URL('/login/2fa', request.url))
+    } else {
+      response = NextResponse.next({ request: { headers: requestHeaders } })
+    }
+  } else {
+    response = NextResponse.next({ request: { headers: requestHeaders } })
+  }
 
   // Apply collected cookie updates to response
   for (const cookie of cookiesToUpdate) {

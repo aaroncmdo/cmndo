@@ -8,6 +8,7 @@ import { updateOwnProfile } from '@/lib/actions/sv/update-own-profile'
 import { ANREDE_OPTIONEN, TITEL_OPTIONEN, QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN } from '@/app/admin/sachverstaendige/anlegen/constants'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { LoadingButton } from '@/components/ui/loading-button'
+import PhoneVerificationModal from '@/components/auth/PhoneVerificationModal'
 import { MapPinIcon, InfoIcon } from 'lucide-react'
 
 type Profile = { anrede: string | null; titel: string | null; vorname: string | null; nachname: string | null; telefon: string | null; rolle: string }
@@ -416,6 +417,9 @@ export default function ProfilClient({
           <GpsTrackingToggle svId={sv.id} initial={(sv as Record<string, unknown>).live_tracking_enabled !== false} />
         </div>
 
+        {/* KFZ-184: Telefon-Verifizierung fuer 2FA */}
+        <TwoFaPhoneSection />
+
         {/* Offene Terminanfragen */}
         {pendingTermine.length > 0 && (
           <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-5">
@@ -730,6 +734,22 @@ function PrivacyToggle({ svId, initial }: { svId: string; initial: boolean }) {
 }
 
 // KFZ-158 Phase 2: GPS-Tracking Toggle
+// KFZ-184: 2FA Telefon-Verifizierung Section
+function TwoFaPhoneSection() {
+  const [showModal, setShowModal] = useState(false)
+  return (
+    <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-5">
+      <h2 className="text-sm font-medium text-gray-500 mb-1">Zwei-Faktor-Authentifizierung</h2>
+      <p className="text-xs text-gray-400 mb-4">Verifizieren Sie Ihre Telefonnummer für den SMS-Login-Code.</p>
+      <button onClick={() => setShowModal(true)}
+        className="px-4 py-2 rounded-xl bg-[#4573A2] hover:bg-[#1E3A5F] text-white text-sm font-semibold transition-colors">
+        Telefon verifizieren
+      </button>
+      {showModal && <PhoneVerificationModal onClose={() => setShowModal(false)} />}
+    </div>
+  )
+}
+
 function GpsTrackingToggle({ svId, initial }: { svId: string; initial: boolean }) {
   const [active, setActive] = useState(initial)
   const [saving, setSaving] = useState(false)

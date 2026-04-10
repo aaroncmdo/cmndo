@@ -42,6 +42,17 @@ export async function verifyTwoFaCode(code: string): Promise<{ success: boolean;
 
   // Reset fail count
   failCountMap.delete(key)
+
+  // KFZ-184: Session-Cookie setzen damit Middleware 2FA als erledigt erkennt
+  const { cookies } = await import('next/headers')
+  const cookieStore = await cookies()
+  cookieStore.set('claimondo_2fa_verified', '1', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+  })
+
   return { success: true }
 }
 
