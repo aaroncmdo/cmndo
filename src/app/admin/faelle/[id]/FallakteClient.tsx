@@ -8,6 +8,7 @@ import FallStepper from '@/components/admin/FallStepper'
 import FallActivityFeed, { buildActivityEvents } from '@/components/faelle/FallActivityFeed'
 import FallDokumenteSidebar, { type FallDokumentRow } from '@/components/faelle/FallDokumenteSidebar'
 import TaskList from '@/components/tasks/TaskList'
+import TerminHistorie from '@/components/faelle/TerminHistorie'
 import { createClient } from '@/lib/supabase/client'
 import {
   addTimelineEntry,
@@ -949,6 +950,9 @@ export default function FallakteClient({
               fallId={fall.id}
               mitarbeiter={mitarbeiter}
             />
+
+            {/* KFZ-134: Termin-Pingpong-Historie */}
+            <TerminHistorie termine={(termine as { id: string; start_zeit: string; status: string; vorgeschlagenes_datum: string | null; gegenvorschlag_von: string | null; gegenvorschlag_grund: string | null; abgelehnt_grund: string | null; created_at: string }[])} />
 
             {/* KFZ-172: Activity Feed (Realtime) */}
             <FallActivityFeed

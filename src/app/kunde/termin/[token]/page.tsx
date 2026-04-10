@@ -17,7 +17,7 @@ export default async function KundeTerminPage({
 
   const { data: termin } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, start_zeit, losgefahren_am, ankunft_zeit, kunden_tracking_token, notification_5min_gesendet_am')
+    .select('id, fall_id, sv_id, start_zeit, status, losgefahren_am, ankunft_zeit, kunden_tracking_token, notification_5min_gesendet_am, vorgeschlagenes_datum, gegenvorschlag_von')
     .eq('kunden_tracking_token', token)
     .single()
 
@@ -101,6 +101,11 @@ export default async function KundeTerminPage({
       angekommen={!!termin.ankunft_zeit}
       losgefahren={!!termin.losgefahren_am}
       token={token}
+      terminId={termin.id as string}
+      fallId={termin.fall_id as string}
+      terminStatus={(termin.status as string) ?? 'bestaetigt'}
+      gegenvorschlagVon={(termin.gegenvorschlag_von as string | null) ?? null}
+      vorgeschlagenesDatum={(termin.vorgeschlagenes_datum as string | null) ?? null}
       notification5minSent={!!termin.notification_5min_gesendet_am}
     />
   )

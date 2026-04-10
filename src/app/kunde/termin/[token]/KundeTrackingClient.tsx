@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import { MapPinIcon, ClockIcon, CheckCircleIcon, CarIcon } from 'lucide-react'
+import { MapPinIcon, ClockIcon, CheckCircleIcon, CarIcon, RefreshCwIcon, XCircleIcon, CalendarIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
 import LiveTrackingMap from '@/components/maps/LiveTrackingMap'
 
 // KFZ-179: Kunden-Tracking-Client — Live-Map mit SV-Position + ETA.
@@ -26,6 +27,11 @@ export default function KundeTrackingClient({
   angekommen,
   losgefahren,
   token,
+  terminId,
+  fallId,
+  terminStatus,
+  gegenvorschlagVon,
+  vorgeschlagenesDatum,
   notification5minSent,
 }: {
   svId: string
@@ -37,12 +43,22 @@ export default function KundeTrackingClient({
   angekommen: boolean
   losgefahren: boolean
   token: string
+  terminId: string
+  fallId: string
+  terminStatus: string
+  gegenvorschlagVon: string | null
+  vorgeschlagenesDatum: string | null
   notification5minSent: boolean
 }) {
   const [svPosition, setSvPosition] = useState<{ lat: number; lng: number } | null>(null)
   const [etaMinutes, setEtaMinutes] = useState<number | null>(null)
   const [isAngekommen, setIsAngekommen] = useState(angekommen)
   const [notified5min, setNotified5min] = useState(notification5minSent)
+  const [showGegenvorschlag, setShowGegenvorschlag] = useState(false)
+  const [gegenDatum, setGegenDatum] = useState('')
+  const [gegenGrund, setGegenGrund] = useState('')
+  const [actionPending, setActionPending] = useState(false)
+  const [actionDone, setActionDone] = useState<string | null>(null)
   const supabase = useMemo(() => createClient(), [])
 
   // Initial: letzte Position laden + Realtime
@@ -107,15 +123,91 @@ export default function KundeTrackingClient({
     )
   }
 
-  if (!losgefahren) {
+  // KFZ-134: Gegenvorschlag UI wenn SV einen Termin vorgeschlagen hat
+  const isSvVorschlag = (terminStatus === 'vorschlag' || terminStatus === 'reserviert' || (terminStatus === 'gegenvorschlag' && gegenvorschlagVon === 'sv'))
+
+  if (actionDone) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8f9fb] px-6">
         <div className="max-w-md text-center">
-          <ClockIcon className="w-12 h-12 text-[#4573A2] mx-auto mb-4" />
-          <h1 className="text-xl font-bold text-[#0D1B3E] mb-2">Termin vorbereitet</h1>
-          <p className="text-gray-600">
-            {svVorname} wird sich auf den Weg machen. Sie werden benachrichtigt sobald es losgeht.
-          </p>
+          <CheckCircleIcon className="w-12 h-12 text-emerald-500 mx-auto mb-4" />
+          <h1 className="text-xl font-bold text-[#0D1B3E] mb-2">{actionDone}</h1>
+        </div>
+      </div>
+    )
+  }
+
+  if (!losgefahren) {
+    const terminDatum = vorgeschlagenesDatum ?? ''
+    const terminDisplay = terminDatum ? new Date(terminDatum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' }) : ''
+
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f8f9fb] px-6">
+        <div className="max-w-md w-full">
+          <div className="text-center mb-6">
+            <CalendarIcon className="w-12 h-12 text-[#4573A2] mx-auto mb-4" />
+            <h1 className="text-xl font-bold text-[#0D1B3E] mb-2">
+              {isSvVorschlag ? 'Terminvorschlag' : 'Termin vorbereitet'}
+            </h1>
+            {terminDisplay && <p className="text-sm text-gray-700 font-medium mb-1">{terminDisplay}</p>}
+            <p className="text-sm text-gray-500">Sachverständiger: {svVorname} {svNachname}</p>
+            <p className="text-xs text-gray-400 mt-1">{adresse}</p>
+          </div>
+
+          {isSvVorschlag && !showGegenvorschlag && (
+            <div className="space-y-2">
+              <button
+                onClick={async () => {
+                  setActionPending(true)
+                  await terminAnnehmen({ source: 'kunde', fallId })
+                  setActionDone('Termin bestätigt!')
+                }}
+                disabled={actionPending}
+                className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-3 text-sm font-semibold transition-colors disabled:opacity-50"
+              >
+                <CheckCircleIcon className="w-4 h-4" /> Termin annehmen
+              </button>
+              <button
+                onClick={() => setShowGegenvorschlag(true)}
+                disabled={actionPending}
+                className="w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-amber-700 border border-amber-200 rounded-xl py-3 text-sm font-medium transition-colors"
+              >
+                <RefreshCwIcon className="w-4 h-4" /> Anderen Termin vorschlagen
+              </button>
+            </div>
+          )}
+
+          {showGegenvorschlag && (
+            <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
+              <h3 className="text-sm font-semibold text-gray-900">Alternativen Termin vorschlagen</h3>
+              <input type="datetime-local" value={gegenDatum} onChange={e => setGegenDatum(e.target.value)}
+                min={new Date().toISOString().slice(0, 16)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#4573A2]" />
+              <textarea value={gegenGrund} onChange={e => setGegenGrund(e.target.value)} placeholder="Begründung (optional)"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-[#4573A2]" rows={2} />
+              <div className="flex gap-2">
+                <button onClick={() => setShowGegenvorschlag(false)} className="flex-1 py-2 rounded-xl text-sm bg-gray-100 text-gray-600">Abbrechen</button>
+                <button
+                  onClick={async () => {
+                    if (!gegenDatum) return
+                    setActionPending(true)
+                    await terminGegenvorschlag({ source: 'kunde', fallId, neuesDatum: gegenDatum, grund: gegenGrund })
+                    setActionDone('Gegenvorschlag gesendet!')
+                  }}
+                  disabled={actionPending || !gegenDatum}
+                  className="flex-1 py-2 rounded-xl text-sm font-semibold bg-amber-500 text-white disabled:opacity-50"
+                >
+                  Vorschlagen
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!isSvVorschlag && (
+            <p className="text-center text-gray-500 text-sm">
+              {svVorname} wird sich auf den Weg machen. Sie werden benachrichtigt sobald es losgeht.
+            </p>
+          )}
         </div>
       </div>
     )

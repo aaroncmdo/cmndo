@@ -25,6 +25,7 @@ const NAV_ITEMS_BASE = [
   { href: '/gutachter', label: 'Dashboard', icon: LayoutDashboardIcon },
   { href: '/gutachter/faelle', label: 'Meine Fälle', icon: FolderOpenIcon },
   { href: '/gutachter/gebiet', label: 'Mein Gebiet', icon: MapIcon },
+  { href: '/gutachter/termine', label: 'Termine', icon: CalendarIcon },
   { href: '/gutachter/kalender', label: 'Kalender', icon: CalendarIcon },
   { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
   { href: '/gutachter/statistiken', label: 'Statistiken', icon: BarChart3Icon },
