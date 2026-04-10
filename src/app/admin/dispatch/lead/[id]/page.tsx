@@ -108,7 +108,21 @@ export default async function LeadDetailPage({
                   DISQUALIFIZIERT: {lead.disqualifiziert_grund ?? 'Unbekannt'}
                 </span>
               )}
-              <LeadActionsMenu leadId={lead.id} leadName={`${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || 'Lead'} />
+              <LeadActionsMenu
+                leadId={lead.id}
+                leadName={`${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || 'Lead'}
+                leadData={{
+                  vorname: lead.vorname as string | null,
+                  nachname: lead.nachname as string | null,
+                  telefon: lead.telefon as string | null,
+                  email: lead.email as string | null,
+                  kennzeichen: lead.kennzeichen as string | null,
+                  fahrzeug_hersteller: lead.fahrzeug_hersteller as string | null,
+                  fahrzeug_modell: lead.fahrzeug_modell as string | null,
+                  schadenfall_typ: lead.schadenfall_typ as string | null,
+                  source_channel: lead.source_channel as string | null,
+                }}
+              />
             </div>
           </div>
 

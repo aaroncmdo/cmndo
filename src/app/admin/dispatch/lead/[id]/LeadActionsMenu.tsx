@@ -3,13 +3,18 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { deleteLead, deactivateLead } from './actions'
+import { updateLeadStatus } from '../../actions'
+import LeadKonvertierenModal from '@/components/leads/LeadKonvertierenModal'
 
 const GRUENDE = ['Kunde hat abgesagt', 'Kein Interesse', 'Duplikat', 'Spam', 'Sonstiges']
 
-export default function LeadActionsMenu({ leadId, leadName }: { leadId: string; leadName: string }) {
+export default function LeadActionsMenu({ leadId, leadName, leadData }: {
+  leadId: string; leadName: string
+  leadData?: { vorname?: string | null; nachname?: string | null; telefon?: string | null; email?: string | null; kennzeichen?: string | null; fahrzeug_hersteller?: string | null; fahrzeug_modell?: string | null; schadenfall_typ?: string | null; source_channel?: string | null }
+}) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [modal, setModal] = useState<'delete' | 'deactivate' | null>(null)
+  const [modal, setModal] = useState<'delete' | 'deactivate' | 'konvertieren' | null>(null)
   const [grund, setGrund] = useState('')
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState('')
@@ -29,6 +34,10 @@ export default function LeadActionsMenu({ leadId, leadName }: { leadId: string; 
 
       {open && (
         <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg py-1 w-44 z-30">
+          <button onClick={() => { setOpen(false); setModal('konvertieren') }}
+            className="w-full text-left px-3 py-2 text-sm text-emerald-600 hover:bg-emerald-50 transition-colors font-medium">
+            Zu Kundenakte konvertieren
+          </button>
           <button onClick={() => { setOpen(false); setModal('deactivate'); setGrund(''); setError('') }}
             className="w-full text-left px-3 py-2 text-sm text-amber-600 hover:bg-amber-50 transition-colors">
             Lead deaktivieren
@@ -62,6 +71,28 @@ export default function LeadActionsMenu({ leadId, leadName }: { leadId: string; 
             </div>
           </div>
         </div>
+      )}
+
+      {/* KFZ-146: Konvertieren Modal */}
+      {modal === 'konvertieren' && (
+        <LeadKonvertierenModal
+          lead={{
+            id: leadId,
+            vorname: leadData?.vorname ?? null,
+            nachname: leadData?.nachname ?? null,
+            telefon: leadData?.telefon ?? null,
+            email: leadData?.email ?? null,
+            kennzeichen: leadData?.kennzeichen ?? null,
+            fahrzeug: [leadData?.fahrzeug_hersteller, leadData?.fahrzeug_modell].filter(Boolean).join(' ') || null,
+            schadenfall_typ: leadData?.schadenfall_typ ?? null,
+            source_channel: leadData?.source_channel ?? null,
+          }}
+          onClose={() => setModal(null)}
+          onConvert={async () => {
+            const result = await updateLeadStatus(leadId, 'umgewandelt') as { converted?: boolean; fallId?: string }
+            return result
+          }}
+        />
       )}
 
       {/* Deactivate Modal */}

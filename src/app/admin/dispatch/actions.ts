@@ -370,6 +370,18 @@ async function convertLeadToFall(
       firma_name: lead.firma_name ?? null,
       firma_ustid: lead.firma_ustid ?? null,
       halter_name: lead.halter_name ?? null,
+      // KFZ-146: Erweiterte Fahrzeugdaten
+      fahrzeug_farbe: lead.fahrzeug_farbe ?? null,
+      erstzulassung: lead.erstzulassung ?? null,
+      fin: lead.fin ?? null,
+      kilometerstand: lead.kilometerstand ?? null,
+      unfallhergang: lead.unfallhergang ?? null,
+      // KFZ-146: Schadens-Adresse vom Fahrzeugstandort
+      schadens_adresse: lead.fahrzeug_standort_adresse ?? null,
+      schadens_plz: lead.fahrzeug_standort_plz ?? null,
+      // KFZ-146: Lead-Source uebernehmen
+      source_channel: lead.source_channel ?? null,
+      source_domain: lead.source_domain ?? null,
       // Konversions-Metadaten
       leadbearbeiter_id: userId,
       kundenbetreuer_id: kundenbetreuerId,
@@ -383,11 +395,21 @@ async function convertLeadToFall(
 
   if (fallErr || !fall) throw new Error(`Fall-Erstellung fehlgeschlagen: ${fallErr?.message}`)
 
-  // 5. Lead-Status auf umgewandelt setzen
+  // 5. Lead-Status auf umgewandelt setzen + konvertiert_zu_fall_id verlinken
   await supabase
     .from('leads')
-    .update({ status: 'umgewandelt', updated_at: new Date().toISOString() })
+    .update({
+      status: 'umgewandelt',
+      konvertiert_zu_fall_id: fall.id,
+      updated_at: new Date().toISOString(),
+    })
     .eq('id', leadId)
+
+  // 5b. KFZ-146: Alle verbundenen Daten (Calls, Tasks, Emails, Termine) verlinken
+  await supabase.rpc('link_lead_data_to_fall', {
+    p_lead_id: leadId,
+    p_fall_id: fall.id,
+  }).catch(err => console.warn('[KFZ-146] link_lead_data_to_fall failed:', err))
 
   // 6. Pflichtdokumente erstellen
   await createPflichtdokumente(supabase, fall.id, lead)
