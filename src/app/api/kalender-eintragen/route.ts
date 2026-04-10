@@ -59,6 +59,7 @@ export async function POST(request: Request) {
       end_zeit,
       status: 'bestaetigt',
       externer_kalender_id: externerKalenderId,
+      ablehnen_token_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     })
     .select('id')
     .single()

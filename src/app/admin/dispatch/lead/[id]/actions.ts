@@ -188,6 +188,8 @@ export async function confirmGutachterTermin(
       start_zeit: termin,
       end_zeit: endDate.toISOString(),
       status: 'reserviert',
+      // BUG-101: Token-Expiry bei Erstellung setzen
+      ablehnen_token_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     })
     .select('id')
     .single()

@@ -118,7 +118,7 @@ export default function SvKalenderModal({ svId, svName, onClose }: { svId: strin
     const startDate = new Date(bookingSlot.day)
     startDate.setHours(Math.floor(bookingSlot.minute / 60), bookingSlot.minute % 60, 0, 0)
     const endDate = new Date(startDate.getTime() + 120 * 60000)
-    const { data: inserted } = await supabase.from('gutachter_termine').insert({ sv_id: svId, fall_id: bookingFallId, start_zeit: startDate.toISOString(), end_zeit: endDate.toISOString(), status: 'reserviert' }).select('id').single()
+    const { data: inserted } = await supabase.from('gutachter_termine').insert({ sv_id: svId, fall_id: bookingFallId, start_zeit: startDate.toISOString(), end_zeit: endDate.toISOString(), status: 'reserviert', ablehnen_token_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() }).select('id').single()
     await supabase.from('faelle').update({ sv_id: svId, sv_termin: startDate.toISOString(), sv_zugewiesen_am: new Date().toISOString(), status: 'sv-termin', updated_at: new Date().toISOString() }).eq('id', bookingFallId)
     // KFZ-136: Reminder generieren (fire & forget via internal API)
     if (inserted?.id) { fetch('/api/reminder-generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ terminId: inserted.id }) }).catch(() => {}) }
