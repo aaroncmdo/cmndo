@@ -92,6 +92,63 @@ export async function sendNachricht(
   revalidatePath(`/kunde/faelle/${fallId}`)
 }
 
+// KFZ-206: Bankdaten für Auszahlung
+export async function saveBankdaten(fallId: string, iban: string, bic: string, kontoinhaber: string) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const { data: fall } = await supabase.from('faelle').select('id, kunde_id').eq('id', fallId).single()
+  if (!fall || fall.kunde_id !== user.id) throw new Error('Nicht autorisiert')
+
+  const { error } = await supabase.from('faelle').update({
+    iban, bic: bic || null, kontoinhaber,
+    bankdaten_hinterlegt_am: new Date().toISOString(),
+  }).eq('id', fallId)
+  if (error) throw new Error(error.message)
+
+  await supabase.from('timeline').insert({
+    fall_id: fallId, typ: 'system', titel: 'Bankdaten hinterlegt',
+    beschreibung: `IBAN: ${iban.slice(0, 4)}****${iban.slice(-4)}, Kontoinhaber: ${kontoinhaber}`,
+    erstellt_von: user.id,
+  })
+  revalidatePath(`/kunde/faelle/${fallId}`)
+}
+
+// KFZ-206: Pflichtdokument hochladen (Kunden-Portal)
+export async function uploadPflichtdokumentKunde(fallId: string, pflichtdokumentId: string, formData: FormData) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const file = formData.get('file') as File
+  if (!file || file.size === 0) throw new Error('Keine Datei')
+
+  const { data: fall } = await supabase.from('faelle').select('id, kunde_id').eq('id', fallId).single()
+  if (!fall || fall.kunde_id !== user.id) throw new Error('Nicht autorisiert')
+
+  const ext = file.name.split('.').pop() ?? 'bin'
+  const path = `kunden-dokumente/${fallId}/${Date.now()}.${ext}`
+  const { error: uploadErr } = await supabase.storage.from('dokumente').upload(path, file)
+  if (uploadErr) throw new Error(uploadErr.message)
+
+  const { data: urlData } = supabase.storage.from('dokumente').getPublicUrl(path)
+  const { data: pd } = await supabase.from('pflichtdokumente').select('titel').eq('id', pflichtdokumentId).single()
+
+  await supabase.from('pflichtdokumente').update({
+    status: 'hochgeladen', datei_url: urlData.publicUrl, datei_name: file.name,
+  }).eq('id', pflichtdokumentId)
+
+  await supabase.from('dokumente').insert({
+    fall_id: fallId, typ: pd?.titel ?? 'kundendokument',
+    datei_url: urlData.publicUrl, datei_name: file.name, datei_groesse: file.size,
+    kategorie: 'kundendokument', quelle: 'kunde',
+    hochgeladen_von: user.id, hochgeladen_von_rolle: 'kunde',
+    sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
+  })
+  revalidatePath(`/kunde/faelle/${fallId}`)
+}
+
 /**
  * KFZ-192: Kunde wählt einen der vom SV vorgeschlagenen Slots aus.
  * Setzt den Termin auf den gewählten Slot, bestätigt den Termin, und

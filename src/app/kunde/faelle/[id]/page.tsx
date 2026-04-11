@@ -5,6 +5,10 @@ import Link from 'next/link'
 import { berechneProgress, SZENARIO_PHASEN } from '@/components/kunde/stepperConfig'
 import ScenarioStepper from '@/components/kunde/ScenarioStepper'
 import FallDetailSections from './FallDetailSections'
+import FallStatusCard from '@/components/kunde/FallStatusCard'
+import BankdatenBanner from '@/components/kunde/BankdatenBanner'
+import DokumenteSection from '@/components/kunde/DokumenteSection'
+import { saveBankdaten, uploadPflichtdokumentKunde } from './actions'
 
 export default async function KundeFallDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -65,6 +69,12 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const { getChatTeilnehmer } = await import('@/lib/chatGruppe')
     const chatTeilnehmer = await getChatTeilnehmer(id)
 
+    // KFZ-206: Pflichtdokumente laden
+    const { data: pflichtdokumente } = await admin.from('pflichtdokumente')
+      .select('id, titel, status, datei_url, datei_name')
+      .eq('fall_id', id)
+      .order('created_at')
+
     // KFZ-134 + KFZ-192: Aktiven gutachter_termine Eintrag laden (inkl. sv_vorgeschlagene_slots)
     const { data: aktiverTermin } = await admin
       .from('gutachter_termine')
@@ -94,6 +104,42 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           </h1>
           {adresse && <p className="text-sm text-gray-500 mt-0.5">{adresse}</p>}
         </div>
+
+        {/* KFZ-206: Status-Card */}
+        <FallStatusCard
+          fall={{
+            id: fall.id as string,
+            status: (fall.status as string) ?? '',
+            fall_nummer: fall.fall_nummer as string | null,
+            sv_termin: fall.sv_termin as string | null,
+            anschlussschreiben_am: fall.anschlussschreiben_am as string | null,
+            vs_ablehnungsgrund: (fall as Record<string, unknown>).vs_ablehnungsgrund as string | null,
+            regulierung_betrag: fall.regulierung_betrag as number | null,
+            zahlung_betrag: (fall as Record<string, unknown>).zahlung_betrag as number | null,
+            zahlung_eingegangen_am: (fall as Record<string, unknown>).zahlung_eingegangen_am as string | null,
+            storno_grund: fall.storno_grund as string | null,
+            abgeschlossen_am: fall.abgeschlossen_am as string | null,
+            google_review_gesendet: fall.google_review_gesendet as boolean | null,
+            versicherung_name: fall.versicherung_name as string | null,
+            kanzlei_ansprechpartner_name: fall.kanzlei_ansprechpartner_name as string | null,
+          }}
+          svName={svName ?? undefined}
+        />
+
+        {/* KFZ-206: Bankdaten-Banner */}
+        <BankdatenBanner
+          fallId={fall.id as string}
+          status={(fall.status as string) ?? ''}
+          bankdatenHinterlegt={!!(fall as Record<string, unknown>).bankdaten_hinterlegt_am}
+          saveBankdaten={saveBankdaten}
+        />
+
+        {/* KFZ-206: Dokumente-Upload */}
+        <DokumenteSection
+          fallId={fall.id as string}
+          pflichtdokumente={(pflichtdokumente ?? []) as { id: string; titel: string; status: string; datei_url: string | null; datei_name: string | null }[]}
+          uploadDokument={uploadPflichtdokumentKunde}
+        />
 
         {/* KFZ-131: Desktop Grid — Stepper links, Details rechts */}
         <div className="grid md:grid-cols-2 gap-5">
