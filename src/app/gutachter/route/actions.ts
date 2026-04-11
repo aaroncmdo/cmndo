@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
+import { transitionFallStatus } from '@/lib/faelle/state-machine'
 
 export async function markAnkunft(fallId: string, lat: number, lng: number) {
   const supabase = await createClient()
@@ -34,17 +35,10 @@ export async function markAnkunft(fallId: string, lat: number, lng: number) {
     }).eq('id', termin.id)
   }
 
-  // Update fall status to besichtigung
-  await supabase.from('faelle').update({ status: 'besichtigung' }).eq('id', fallId)
-
-  // Timeline entry
-  await supabase.from('timeline').insert({
-    fall_id: fallId,
-    typ: 'status',
-    titel: 'Gutachter vor Ort angekommen',
-    beschreibung: 'D-03 Besichtigung gestartet',
-    erstellt_von: user.id,
-  })
+  // KFZ-202: Status via State-Machine
+  try {
+    await transitionFallStatus(fallId, 'besichtigung', { user_id: user.id })
+  } catch { /* Transition evtl. nicht erlaubt wenn Status schon weiter */ }
 
   revalidatePath('/gutachter/route')
 }
@@ -116,16 +110,10 @@ export async function completeBesichtigung(fallId: string, notizen: string) {
     }).eq('id', termin.id)
   }
 
-  // Set status D-03 done -> waiting for gutachten upload
-  await supabase.from('faelle').update({ status: 'gutachten-eingegangen' }).eq('id', fallId).eq('status', 'besichtigung')
-
-  await supabase.from('timeline').insert({
-    fall_id: fallId,
-    typ: 'status',
-    titel: 'Besichtigung abgeschlossen',
-    beschreibung: notizen ? `Notizen: ${notizen}` : 'D-03 abgeschlossen, Gutachten-Upload erwartet',
-    erstellt_von: user.id,
-  })
+  // KFZ-202: Status via State-Machine (D-03 done → waiting for gutachten upload)
+  try {
+    await transitionFallStatus(fallId, 'gutachten-eingegangen', { user_id: user.id })
+  } catch { /* Transition evtl. nicht erlaubt wenn Status schon weiter */ }
 
   revalidatePath('/gutachter/route')
 }

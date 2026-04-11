@@ -11,6 +11,7 @@ import { checkFallAutoPhase } from '@/lib/autoPhase'
 import { resolveGates, autoCompleteTask } from '@/lib/tasking'
 import { completeSVTask, triggerSV04, triggerSV05, deductLeadpreis } from '@/lib/gutachterTasking'
 import { createNotification } from '@/lib/notifications'
+import { transitionFallStatus } from '@/lib/faelle/state-machine'
 
 export async function saveFilmcheck(fallId: string, notizen: string) {
   const supabase = await createClient()
@@ -34,19 +35,21 @@ export async function saveFilmcheck(fallId: string, notizen: string) {
   }
   const mandatsnummer = `CLM-${year}-${String(nextNum).padStart(4, '0')}`
 
+  // Filmcheck-Felder setzen (ohne Status — der kommt via State-Machine)
   const { error } = await supabase
     .from('faelle')
     .update({
       filmcheck_ok: true,
       filmcheck_am: new Date().toISOString(),
       filmcheck_notizen: notizen || null,
-      status: 'kanzlei-uebergeben',
-      kanzlei_uebergeben_am: new Date().toISOString(),
       mandatsnummer,
     })
     .eq('id', fallId)
 
   if (error) throw new Error(error.message)
+
+  // KFZ-202: Status via State-Machine (setzt auch kanzlei_uebergeben_am)
+  await transitionFallStatus(fallId, 'kanzlei-uebergeben')
 
   const { data: fallInfo } = await supabase.from('faelle').select('fall_nummer').eq('id', fallId).single()
   const fallNr = fallInfo?.fall_nummer ?? fallId.slice(0, 8)
@@ -259,25 +262,16 @@ export async function setAnschlussschreibenDatum(fallId: string) {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
-  const now = new Date().toISOString()
+  // VS-Eskalationsstufe setzen
   const { error } = await supabase
     .from('faelle')
-    .update({
-      anschlussschreiben_am: now,
-      vs_eskalationsstufe: 'vs-01',
-      status: 'anschlussschreiben',
-    })
+    .update({ vs_eskalationsstufe: 'vs-01' })
     .eq('id', fallId)
 
   if (error) throw new Error(error.message)
 
-  await supabase.from('timeline').insert({
-    fall_id: fallId,
-    typ: 'status-change',
-    titel: 'Anschlussschreiben gesendet',
-    beschreibung: 'VS-Frist gestartet (14 Tage).',
-    erstellt_von: user.id,
-  })
+  // KFZ-202: Status via State-Machine (setzt auch anschlussschreiben_am + Timeline)
+  await transitionFallStatus(fallId, 'anschlussschreiben', { user_id: user.id })
 
   // WhatsApp: Anspruchsschreiben gesendet, 14 Tage Frist
   sendFallCommunication(fallId, 'as_gesendet').catch(() => {})
@@ -299,26 +293,16 @@ export async function recordZahlung(fallId: string, betrag: number) {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
-  const now = new Date().toISOString()
+  // Regulierungsbetrag setzen
   const { error } = await supabase
     .from('faelle')
-    .update({
-      regulierung_betrag: betrag,
-      regulierung_am: now,
-      zahlung_eingegangen_am: now,
-      status: 'regulierung',
-    })
+    .update({ regulierung_betrag: betrag })
     .eq('id', fallId)
 
   if (error) throw new Error(error.message)
 
-  await supabase.from('timeline').insert({
-    fall_id: fallId,
-    typ: 'status-change',
-    titel: 'Zahlungseingang',
-    beschreibung: `Regulierungsbetrag: ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(betrag)}`,
-    erstellt_von: user.id,
-  })
+  // KFZ-202: Status via State-Machine (setzt zahlung_eingegangen_am + Timeline)
+  await transitionFallStatus(fallId, 'zahlung-eingegangen', { betrag, user_id: user.id })
 
   // WhatsApp: Zahlung eingegangen
   sendFallCommunication(fallId, 'zahlung_eingegangen').catch(() => {})

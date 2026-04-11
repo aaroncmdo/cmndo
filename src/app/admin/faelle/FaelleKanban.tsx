@@ -46,6 +46,10 @@ function mapStatus(status: string): string {
   if (COLUMNS.some(c => c.key === status)) return status
   if (status === 'qc-pruefung') return 'filmcheck'
   if (status === 'vs-regulierung') return 'regulierung'
+  if (status === 'begutachtung-laeuft') return 'besichtigung'
+  if (status === 'regulierung-laeuft') return 'regulierung'
+  if (status === 'vs-abgelehnt') return 'regulierung'
+  if (status === 'zahlung-eingegangen') return 'abgeschlossen'
   return 'ersterfassung'
 }
 

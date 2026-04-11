@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revertCaseBilling } from '@/lib/abrechnung/revert-case-billing'
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
+import { transitionFallStatus } from '@/lib/faelle/state-machine'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,7 +36,7 @@ export async function GET() {
     if (fall.sv_termin && new Date(fall.sv_termin) > gemeldet) continue // Neuer Termin existiert
 
     // Storno durchführen
-    await db.from('faelle').update({ status: 'storniert' }).eq('id', fall.id)
+    await transitionFallStatus(fall.id, 'storniert', { grund: 'storno_kunde_no_show' })
     await revertCaseBilling(fall.id, 'storno_kunde_no_show', 'system')
 
     // KFZ-151: Auto-Resolve aller offenen Case-Tasks (z.B. "Ersatztermin vermitteln")

@@ -7,6 +7,7 @@ import { revertCaseBilling } from '@/lib/abrechnung/revert-case-billing'
 import { createLinkedTask } from '@/lib/tasks/create-task'
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { revalidatePath } from 'next/cache'
+import { transitionFallStatus } from '@/lib/faelle/state-machine'
 
 /**
  * KFZ-150: SV storniert einen Termin/Fall.
@@ -31,18 +32,14 @@ export async function stornoFall(fallId: string, grund: string): Promise<{ succe
 
   if (hoursUntilTermin >= 24) {
     // Kostenfrei: Werbebudget zurückbuchen
-    await db.from('faelle').update({ status: 'storniert' }).eq('id', fallId)
+    await transitionFallStatus(fallId, 'storniert', { grund: `storno_sv_24h: ${grund}`, user_id: user.id })
     await revertCaseBilling(fallId, `storno_sv_24h: ${grund}`, user.id)
     revalidatePath(`/gutachter/fall/${fallId}`)
     return { success: true, typ: 'storno_sv_24h' }
   } else {
     // Vertragsstrafe: Lead-Preis bleibt, KEINE Rückbuchung
-    await db.from('faelle').update({
-      status: 'storniert',
-      storniert_am: new Date().toISOString(),
-      storno_grund: `storno_sv_spaet: ${grund}`,
-      storno_durch_user_id: user.id,
-    }).eq('id', fallId)
+    await transitionFallStatus(fallId, 'storniert', { grund: `storno_sv_spaet: ${grund}`, user_id: user.id })
+    await db.from('faelle').update({ storno_durch_user_id: user.id }).eq('id', fallId)
     revalidatePath(`/gutachter/fall/${fallId}`)
     return { success: true, typ: 'storno_sv_spaet' }
   }
@@ -163,7 +160,7 @@ export async function entscheideReklamation(reklamationId: string, entscheidung:
 
   if (entscheidung === 'berechtigt') {
     // Rückbuchung triggern
-    await db.from('faelle').update({ status: 'storniert' }).eq('id', rekl.fall_id)
+    await transitionFallStatus(rekl.fall_id, 'storniert', { grund: 'storno_reklamation', user_id: user.id })
     await revertCaseBilling(rekl.fall_id, 'storno_reklamation', user.id)
   }
 
@@ -186,7 +183,7 @@ export async function adminStornoFall(fallId: string, grund: string): Promise<{ 
   if (profile?.rolle !== 'admin') return { success: false, error: 'Kein Zugriff' }
 
   const db = createAdminClient()
-  await db.from('faelle').update({ status: 'storniert' }).eq('id', fallId)
+  await transitionFallStatus(fallId, 'storniert', { grund: `storno_admin: ${grund}`, user_id: user.id })
   await revertCaseBilling(fallId, `storno_admin: ${grund}`, user.id)
 
   revalidatePath(`/admin/faelle/${fallId}`)

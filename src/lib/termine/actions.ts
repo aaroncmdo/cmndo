@@ -6,6 +6,7 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { haversineMeters } from '@/lib/gps/geofence'
 import { calculateEtaMinutes } from '@/lib/eta/calculate-eta'
 import { sendCommunication } from '@/lib/communications/send'
+import { transitionFallStatus } from '@/lib/faelle/state-machine'
 
 // KFZ-200: Server Actions für SV-Navigation, Vor-Ort-Modus, Begutachtung.
 
@@ -47,13 +48,10 @@ export async function startNavigation(
 
   if (updErr) return { error: updErr.message }
 
-  // Timeline-Eintrag
-  await db.from('timeline').insert({
-    fall_id: termin.fall_id,
-    typ: 'termin',
-    titel: 'SV ist unterwegs',
-    beschreibung: 'Navigation wurde gestartet.',
-  }).then(() => {})
+  // KFZ-202: Fall-Status auf begutachtung-laeuft setzen
+  try {
+    await transitionFallStatus(termin.fall_id, 'begutachtung-laeuft')
+  } catch { /* Transition evtl. nicht erlaubt wenn Status schon weiter */ }
 
   // WhatsApp an Kunden (non-critical)
   try {
@@ -295,6 +293,11 @@ export async function completeBegutachtung(
     .eq('id', terminId)
 
   if (updErr) return { error: updErr.message }
+
+  // KFZ-202: Fall-Status auf gutachten-eingegangen setzen
+  try {
+    await transitionFallStatus(termin.fall_id, 'gutachten-eingegangen')
+  } catch { /* Transition evtl. nicht erlaubt wenn Status schon weiter */ }
 
   // Notizen speichern (non-critical)
   if (notizen) {
