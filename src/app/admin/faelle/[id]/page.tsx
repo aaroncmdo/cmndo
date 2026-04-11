@@ -164,10 +164,6 @@ export default async function FallaktePage({
   const { getChatTeilnehmer } = await import('@/lib/chatGruppe')
   const chatTeilnehmer = await getChatTeilnehmer(id)
 
-  // BUG-74: Stepper-State berechnen
-  const { getStepperState } = await import('@/lib/fall/stepper-state')
-  const stepperState = await getStepperState(id)
-
   // KFZ-133: Versicherungs-Kontaktdaten laden
   let versicherungKontakt: { name: string; schaden_telefon: string | null; schaden_email: string | null; hotline_telefon: string | null; webseite: string | null } | null = null
   if (fall.versicherung_id) {
@@ -205,7 +201,6 @@ export default async function FallaktePage({
       forderungspositionen={forderungspositionen ?? []}
       chatTeilnehmer={chatTeilnehmer}
       versicherungKontakt={versicherungKontakt}
-      stepperState={stepperState}
       fallFinanzen={fallFinanzen}
       fallDokumente={fallDokumente}
       regulierungsKlassifizierung={regulierungsKlassifizierung ?? null}

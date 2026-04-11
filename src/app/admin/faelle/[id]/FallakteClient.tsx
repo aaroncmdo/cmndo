@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Script from 'next/script'
 import DokumenteTab from './DokumenteTab'
 import VsRegulierungTab from './components/VsRegulierungTab'
-import FallStepper from '@/components/admin/FallStepper'
 import FallActivityFeed, { buildActivityEvents } from '@/components/faelle/FallActivityFeed'
 import FallDokumenteSidebar, { type FallDokumentRow } from '@/components/faelle/FallDokumenteSidebar'
 import TaskList from '@/components/tasks/TaskList'
@@ -601,7 +600,6 @@ export default function FallakteClient({
   forderungspositionen,
   chatTeilnehmer,
   versicherungKontakt,
-  stepperState,
   fallFinanzen,
   fallDokumente,
   regulierungsKlassifizierung,
@@ -624,7 +622,6 @@ export default function FallakteClient({
   forderungspositionen: Forderungsposition[]
   chatTeilnehmer?: { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url: string | null }[]
   versicherungKontakt?: { name: string; schaden_telefon: string | null; schaden_email: string | null; hotline_telefon: string | null; webseite: string | null } | null
-  stepperState?: import('@/lib/fall/stepper-state').StepperState | null
   fallFinanzen?: import('@/lib/finance/fall-finanzen').FallFinanzen | null
   fallDokumente?: FallDokumentRow[]
   regulierungsKlassifizierung?: RegulierungsKlassifizierung | null
@@ -739,9 +736,6 @@ export default function FallakteClient({
 
           {/* Zeile 3: Nächster Schritt (kompakt) */}
           <NaechsterSchrittBanner fall={fall} tasks={tasks} onAction={(tab) => { setActiveTab(tab as Tab); setTimeout(() => { const el = document.querySelector('[data-task-target]'); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('blink-highlight'); setTimeout(() => el.classList.remove('blink-highlight'), 2000) } }, 150) }} />
-
-          {/* BUG-74: Prozess-Stepper */}
-          {stepperState && <FallStepper state={stepperState} />}
 
           {/* Zeile 4: Tab-Leiste */}
           <div className="flex gap-0.5 py-1 overflow-x-auto">
