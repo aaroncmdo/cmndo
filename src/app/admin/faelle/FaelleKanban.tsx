@@ -29,24 +29,28 @@ type Fall = {
   ungelesene_updates?: number
 }
 
+// BUG-05: Kanban-Columns nach faelle.status Enum
 const COLUMNS = [
-  { key: 'ersterfassung', label: 'Ersterfassung', color: 'text-gray-600', bg: 'bg-gray-400' },
+  { key: 'ersterfassung', label: 'Offen', color: 'text-gray-600', bg: 'bg-gray-400' },
   { key: 'sv-zugewiesen', label: 'SV zugew.', color: 'text-[#4573A2]', bg: 'bg-[#4573A2]' },
   { key: 'sv-termin', label: 'Termin', color: 'text-[#4573A2]', bg: 'bg-[#4573A2]' },
-  { key: 'besichtigung', label: 'Besicht.', color: 'text-[#1E3A5F]', bg: 'bg-[#4573A2]' },
+  { key: 'besichtigung', label: 'Besichtigung', color: 'text-[#1E3A5F]', bg: 'bg-[#4573A2]' },
   { key: 'gutachten-eingegangen', label: 'Gutachten', color: 'text-violet-600', bg: 'bg-violet-500' },
   { key: 'filmcheck', label: 'QC', color: 'text-amber-600', bg: 'bg-amber-500' },
   { key: 'kanzlei-uebergeben', label: 'Kanzlei', color: 'text-green-600', bg: 'bg-green-500' },
   { key: 'anschlussschreiben', label: 'AS gesendet', color: 'text-green-600', bg: 'bg-green-400' },
-  { key: 'regulierung', label: 'Regulierung', color: 'text-emerald-600', bg: 'bg-emerald-500' },
-  { key: 'abgeschlossen', label: 'Abgeschl.', color: 'text-emerald-700', bg: 'bg-emerald-600' },
+  { key: 'regulierung-laeuft', label: 'Regulierung', color: 'text-emerald-600', bg: 'bg-emerald-500' },
+  { key: 'zahlung-eingegangen', label: 'Zahlung', color: 'text-emerald-600', bg: 'bg-emerald-400' },
+  { key: 'abgeschlossen', label: 'Fertig', color: 'text-emerald-700', bg: 'bg-emerald-600' },
 ]
 
 function mapStatus(status: string): string {
   if (COLUMNS.some(c => c.key === status)) return status
   if (status === 'qc-pruefung') return 'filmcheck'
-  if (status === 'vs-regulierung') return 'regulierung'
+  if (status === 'regulierung') return 'regulierung-laeuft'
   if (status === 'begutachtung-laeuft') return 'besichtigung'
+  if (status === 'nachbesichtigung-laeuft') return 'regulierung-laeuft'
+  if (status === 'vs-abgelehnt') return 'regulierung-laeuft'
   if (status === 'regulierung-laeuft') return 'regulierung'
   if (status === 'vs-abgelehnt') return 'regulierung'
   if (status === 'zahlung-eingegangen') return 'abgeschlossen'

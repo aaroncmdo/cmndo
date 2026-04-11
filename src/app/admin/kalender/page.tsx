@@ -5,7 +5,7 @@ import { getActiveGutachter } from '@/lib/actions/admin-kalender'
 export default async function KalenderPage() {
   const supabase = await createClient()
 
-  const [{ data: faelle }, { data: tasks }] = await Promise.all([
+  const [{ data: faelle }, { data: tasks }, { data: termine }] = await Promise.all([
     supabase
       .from('faelle')
       .select('id, fall_nummer, sv_termin, sv_id, status')
@@ -14,6 +14,11 @@ export default async function KalenderPage() {
       .from('tasks')
       .select('id, fall_id, titel, faellig_am, status')
       .not('faellig_am', 'is', null),
+    // BUG-08: Auch KB-Termine und manuelle Termine laden
+    supabase
+      .from('termine')
+      .select('id, fall_id, typ, datum, dauer_minuten, betreff, status')
+      .not('datum', 'is', null),
   ])
 
   // Fetch SV names
@@ -53,6 +58,7 @@ export default async function KalenderPage() {
     <KalenderClient
       faelle={faelle ?? []}
       tasks={tasks ?? []}
+      termine={termine ?? []}
       svMap={svMap}
       fallMap={fallMap}
       gutachterList={gutachter}

@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Script from 'next/script'
+import { FALL_STATUS_LABELS } from '@/lib/statusLabels'
 import DokumenteTab from './DokumenteTab'
 import VsRegulierungTab from './components/VsRegulierungTab'
 import FallActivityFeed, { buildActivityEvents } from '@/components/faelle/FallActivityFeed'
@@ -266,15 +267,15 @@ type QcCheckliste = {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
+// BUG-07: 9 Haupt-Stati nach faelle.status Enum
 const PIPELINE_STEPS = [
-  { key: 'ersterfassung', label: 'Ersterfassung' },
-  { key: 'sv-zugewiesen', label: 'Gutachter zugew.' },
-  { key: 'sv-termin', label: 'Termin vereinbart' },
-  { key: 'gutachten-eingegangen', label: 'Gutachten eing.' },
-  { key: 'filmcheck', label: 'QC-Prüfung' },
-  { key: 'kanzlei-uebergeben', label: 'Kanzlei übergeben' },
+  { key: 'ersterfassung', label: 'Offen' },
+  { key: 'begutachtung-laeuft', label: 'Begutachtung', alt: ['sv-gesucht', 'sv-zugewiesen', 'sv-termin', 'besichtigung'] },
+  { key: 'gutachten-eingegangen', label: 'Gutachten', alt: ['filmcheck', 'qc-pruefung'] },
+  { key: 'kanzlei-uebergeben', label: 'Kanzlei' },
   { key: 'anschlussschreiben', label: 'AS gesendet' },
-  { key: 'regulierung', label: 'Regulierung' },
+  { key: 'regulierung-laeuft', label: 'Regulierung', alt: ['regulierung'] },
+  { key: 'zahlung-eingegangen', label: 'Zahlung' },
   { key: 'abgeschlossen', label: 'Abgeschlossen' },
 ]
 
@@ -1040,23 +1041,19 @@ export default function FallakteClient({
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: string }) {
-  const step = PIPELINE_STEPS.find((s) => s.key === status)
-  const label = step?.label ?? status
-  const idx = PIPELINE_STEPS.findIndex((s) => s.key === status)
-  const color = status === 'storniert' ? 'zinc' :
-    status === 'abgeschlossen' ? 'green' :
-    idx <= 1 ? 'blue' :
-    idx <= 4 ? 'orange' :
-    idx <= 6 ? 'purple' : 'green'
+  const label = FALL_STATUS_LABELS[status] ?? status
+  const cls =
+    status === 'storniert' ? 'bg-gray-100 text-gray-500 border-gray-300' :
+    status === 'abgeschlossen' ? 'bg-green-500/10 text-green-400 border-green-800/30' :
+    status === 'vs-abgelehnt' ? 'bg-red-500/10 text-red-400 border-red-800/30' :
+    status === 'nachbesichtigung-laeuft' ? 'bg-amber-500/10 text-amber-400 border-amber-800/30' :
+    status === 'zahlung-eingegangen' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-800/30' :
+    ['ersterfassung', 'onboarding', 'sv-gesucht', 'sv-zugewiesen'].includes(status) ? 'bg-[#4573A2]/10 text-[#7BA3CC] border-[#1E3A5F]/30' :
+    ['sv-termin', 'besichtigung', 'begutachtung-laeuft', 'gutachten-eingegangen', 'filmcheck', 'qc-pruefung'].includes(status) ? 'bg-orange-500/10 text-orange-400 border-orange-800/30' :
+    'bg-purple-500/10 text-purple-400 border-purple-800/30'
 
   return (
-    <span className={`px-3 py-1.5 rounded-full text-sm font-semibold border ${
-      color === 'green' ? 'bg-green-500/10 text-green-400 border-green-800/30' :
-      color === 'blue' ? 'bg-[#4573A2]/10 text-[#7BA3CC] border-[#1E3A5F]/30' :
-      color === 'orange' ? 'bg-orange-500/10 text-orange-400 border-orange-800/30' :
-      color === 'purple' ? 'bg-purple-500/10 text-purple-400 border-purple-800/30' :
-      'bg-gray-100 text-gray-500 border-gray-300'
-    }`}>
+    <span className={`px-3 py-1.5 rounded-full text-sm font-semibold border ${cls}`}>
       {label}
     </span>
   )
@@ -1065,27 +1062,37 @@ function StatusBadge({ status }: { status: string }) {
 // ─── Pipeline Bar ─────────────────────────────────────────────────────────────
 
 function PipelineBar({ status }: { status: string }) {
-  const currentIdx = PIPELINE_STEPS.findIndex((s) => s.key === status)
+  // BUG-07: Finde aktiven Step (Key oder alt-Key Match)
+  const currentIdx = PIPELINE_STEPS.findIndex((s) =>
+    s.key === status || ('alt' in s && (s as { alt?: string[] }).alt?.includes(status))
+  )
+  const isStorniert = status === 'storniert'
+  const isAbgelehnt = status === 'vs-abgelehnt'
+  const isNachbesichtigung = status === 'nachbesichtigung-laeuft'
 
   return (
-    <div className="mb-6 bg-white rounded-2xl p-4 border border-gray-200">
+    <div className="py-2">
       <div className="flex items-center gap-1">
         {PIPELINE_STEPS.map((step, i) => {
           const isActive = i === currentIdx
-          const isPast = i < currentIdx
+          const isPast = i < currentIdx && !isStorniert
           return (
-            <div key={step.key} className="flex-1 flex flex-col items-center gap-1.5">
+            <div key={step.key} className="flex-1 flex flex-col items-center gap-1">
               <div
                 className={`w-full h-2 rounded-full transition-all ${
+                  isStorniert ? 'bg-gray-200' :
                   isPast ? 'bg-[#4573A2]' :
+                  isActive && isAbgelehnt ? 'bg-red-500 animate-pulse' :
+                  isActive && isNachbesichtigung ? 'bg-amber-500 animate-pulse' :
                   isActive ? 'bg-[#4573A2] animate-pulse' :
                   'bg-gray-100'
                 }`}
               />
-              <span className={`text-[10px] font-medium tracking-wider ${
-                isActive ? 'text-[#7BA3CC]' :
+              <span className={`text-[9px] font-medium leading-tight text-center ${
+                isStorniert ? 'text-gray-300' :
+                isActive ? 'text-[#4573A2] font-semibold' :
                 isPast ? 'text-gray-500' :
-                'text-gray-400'
+                'text-gray-300'
               }`}>
                 {step.label}
               </span>
@@ -1093,6 +1100,10 @@ function PipelineBar({ status }: { status: string }) {
           )
         })}
       </div>
+      {/* Sonder-Badges */}
+      {isStorniert && <div className="mt-1.5 text-center"><span className="bg-gray-100 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-medium">Storniert</span></div>}
+      {isAbgelehnt && <div className="mt-1.5 text-center"><span className="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-medium">VS abgelehnt</span></div>}
+      {isNachbesichtigung && <div className="mt-1.5 text-center"><span className="bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-medium">Nachbesichtigung läuft</span></div>}
     </div>
   )
 }

@@ -60,10 +60,12 @@ function saveFilter(typFilter: TypFilter, gutachterIds: string[]) {
 
 // ─── Main ───────────────────────────────────────────────────────────────────
 
+type ManuellerTermin = { id: string; fall_id: string | null; typ: string; datum: string; dauer_minuten: number; betreff: string | null; status: string }
+
 export default function KalenderClient({
-  faelle, tasks, svMap, fallMap, gutachterList,
+  faelle, tasks, termine: manuelleTermine, svMap, fallMap, gutachterList,
 }: {
-  faelle: FallTermin[]; tasks: TaskTermin[]; svMap: Record<string, string>; fallMap: Record<string, string>; gutachterList: Gutachter[]
+  faelle: FallTermin[]; tasks: TaskTermin[]; termine?: ManuellerTermin[]; svMap: Record<string, string>; fallMap: Record<string, string>; gutachterList: Gutachter[]
 }) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [viewMode, setViewMode] = useState<'month' | 'week'>('month')
@@ -129,13 +131,28 @@ export default function KalenderClient({
       })
     }
 
+    // BUG-08: Manuelle Termine aus termine-Tabelle
+    for (const mt of manuelleTermine ?? []) {
+      const terminTyp = mt.typ === 'video-call' ? 'kunde' : mt.typ === 'telefonat' ? 'rueckruf' : 'intern'
+      if (terminTyp === 'kunde' && !typFilter.kunde) continue
+      if (terminTyp === 'rueckruf' && !typFilter.rueckruf) continue
+      if (terminTyp === 'intern' && !typFilter.intern) continue
+      items.push({
+        id: `termin-${mt.id}`, typ: terminTyp,
+        titel: mt.betreff ?? `${mt.typ} (${mt.dauer_minuten} Min)`,
+        start: mt.datum, farbe: FARBEN[terminTyp],
+        fallId: mt.fall_id ?? undefined, fallNummer: mt.fall_id ? fallMap[mt.fall_id] : undefined,
+        link: mt.fall_id ? `/admin/faelle/${mt.fall_id}` : undefined,
+      })
+    }
+
     // Server admin_termine
     for (const st of serverTermine) {
       items.push(st)
     }
 
     return items
-  }, [faelle, tasks, svMap, fallMap, typFilter, gutachterIds, serverTermine])
+  }, [faelle, tasks, manuelleTermine, svMap, fallMap, typFilter, gutachterIds, serverTermine])
 
   const calendarDays = useMemo(() => {
     if (viewMode === 'week') {
