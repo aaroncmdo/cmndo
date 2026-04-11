@@ -222,7 +222,7 @@ export async function arrived(terminId: string): Promise<{ success?: boolean; er
 
   await db.from('gutachter_termine').update({ sv_angekommen_am: now }).eq('id', terminId)
 
-  // WhatsApp T-X4: SV angekommen
+  // WhatsApp T23 (sv_angekommen): SV angekommen
   try {
     const { data: fall } = await db.from('faelle').select('lead_id').eq('id', termin.fall_id).single()
     const { data: svRec } = await db.from('sachverstaendige').select('profile_id').eq('id', sv.id).single()
