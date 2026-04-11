@@ -15,6 +15,10 @@ export default async function AdminLayout({
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
+  // KFZ-203 Fix: Dispatch-User dürfen nicht auf /admin/* (Layout-Level Guard)
+  const { data: profileCheck } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
+  if (profileCheck?.rolle === 'dispatch') redirect('/dispatch/dashboard')
+
   const initials = user.email
     ? user.email.substring(0, 2).toUpperCase()
     : 'U'

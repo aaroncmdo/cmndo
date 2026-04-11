@@ -63,7 +63,12 @@ export default async function FlowPage({
     const { data: lead } = await svc.from('leads').select('qualifizierungs_phase, vorname, nachname').eq('id', leadId).single()
     if (lead?.qualifizierungs_phase === 'kalt') {
       await svc.from('leads').update({ qualifizierungs_phase: 'in-qualifizierung', updated_at: new Date().toISOString() }).eq('id', leadId)
-      await svc.from('tasks').insert({ titel: `Lead reaktiviert: ${lead.vorname ?? ''} ${lead.nachname ?? ''} (FlowLink geöffnet)`, typ: 'dispatch', prioritaet: 'dringend', status: 'offen' })
+      const { data: linkedFall } = await svc.from('faelle').select('id').eq('lead_id', leadId).limit(1).maybeSingle()
+      const fallId = linkedFall?.id ?? null
+      await svc.from('tasks').insert({ fall_id: fallId, titel: `Lead reaktiviert: ${lead.vorname ?? ''} ${lead.nachname ?? ''} (FlowLink geöffnet)`, typ: 'dispatch', prioritaet: 'dringend', status: 'offen' })
+      if (fallId) {
+        await svc.from('timeline').insert({ fall_id: fallId, typ: 'system', titel: 'Lead reaktiviert (FlowLink geöffnet)', beschreibung: `${lead.vorname ?? ''} ${lead.nachname ?? ''} war kalt, hat sich selbst reaktiviert.` })
+      }
     }
   } else {
     // Backward compat: token might be lead_id

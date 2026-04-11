@@ -69,8 +69,9 @@ export async function updateSession(request: NextRequest) {
     response = NextResponse.redirect(new URL('/login', request.url))
   } else if (user && request.nextUrl.pathname.startsWith('/admin')) {
     // KFZ-203: Dispatch-User darf nicht auf /admin/*
-    // Leichtgewichtiger Check via user_metadata (wird beim Login gesetzt)
-    const rolle = user.user_metadata?.rolle as string | undefined
+    // Check via app_metadata.rolle (gesetzt via admin.auth.admin.updateUserById bei Rollenzuweisung)
+    // Fallback: Layout-Check in /admin/layout.tsx prüft profiles.rolle
+    const rolle = (user.app_metadata?.rolle ?? user.user_metadata?.rolle) as string | undefined
     if (rolle === 'dispatch') {
       response = NextResponse.redirect(new URL('/dispatch/dashboard', request.url))
     } else {

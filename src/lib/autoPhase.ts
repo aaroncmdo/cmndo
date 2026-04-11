@@ -1,5 +1,6 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { triggerGutachterTerminTask, triggerGutachtenUploadTask, triggerQcTask, triggerKanzleiPaketTask, triggerAsSendedatumTask, triggerArchivierungTask } from '@/lib/tasking'
+import { transitionFallStatus } from '@/lib/faelle/state-machine'
 
 /**
  * Check if a lead should automatically move to a new phase based on its data.
@@ -48,17 +49,13 @@ export async function checkFallAutoPhase(fallId: string) {
   if (fall.zahlung_eingegangen_am && (status === 'anschlussschreiben' || status === 'regulierung')) newStatus = 'abgeschlossen'
 
   if (newStatus && newStatus !== status) {
-    await svc.from('faelle').update({
-      status: newStatus,
-      status_changed_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }).eq('id', fallId)
-
-    await svc.from('timeline').insert({
-      fall_id: fallId, typ: 'system',
-      titel: `Phase automatisch geaendert: ${newStatus}`,
-      beschreibung: 'Automatische Verschiebung basierend auf Daten.',
-    })
+    // KFZ-202 Fix: State-Machine statt direktem Update
+    try {
+      await transitionFallStatus(fallId, newStatus)
+    } catch {
+      // Transition nicht erlaubt — autoPhase überspringt
+      return
+    }
 
     // Trigger tasks for the new phase
     const kbId = fall.kundenbetreuer_id as string | null

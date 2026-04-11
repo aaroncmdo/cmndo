@@ -50,7 +50,14 @@ export default async function KundeStartseite() {
       .eq('qualifizierungs_phase', 'kalt')
     for (const lead of kaltLeads ?? []) {
       await admin.from('leads').update({ qualifizierungs_phase: 'in-qualifizierung', updated_at: new Date().toISOString() }).eq('id', lead.id)
-      await admin.from('tasks').insert({ titel: `Lead reaktiviert: ${lead.vorname ?? ''} ${lead.nachname ?? ''} (Portal geöffnet)`, typ: 'dispatch', prioritaet: 'dringend', status: 'offen' })
+      // Fall-ID für Task + Timeline ermitteln
+      const { data: linkedFall } = await admin.from('faelle').select('id').eq('lead_id', lead.id).limit(1).maybeSingle()
+      const fallId = linkedFall?.id ?? null
+      await admin.from('tasks').insert({ fall_id: fallId, titel: `Lead reaktiviert: ${lead.vorname ?? ''} ${lead.nachname ?? ''} (Portal geöffnet)`, typ: 'dispatch', prioritaet: 'dringend', status: 'offen' })
+      // Timeline-Entry
+      if (fallId) {
+        await admin.from('timeline').insert({ fall_id: fallId, typ: 'system', titel: 'Lead reaktiviert (Kunde hat Portal geöffnet)', beschreibung: `${lead.vorname ?? ''} ${lead.nachname ?? ''} war kalt, hat sich selbst reaktiviert.` })
+      }
     }
   } catch { /* non-critical */ }
 
