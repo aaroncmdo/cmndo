@@ -8,6 +8,9 @@ import FallDetailSections from './FallDetailSections'
 import FallStatusCard from '@/components/kunde/FallStatusCard'
 import BankdatenBanner from '@/components/kunde/BankdatenBanner'
 import DokumenteSection from '@/components/kunde/DokumenteSection'
+import SaeuleMeinAnwalt from '@/components/kunde/SaeuleMeinAnwalt'
+import SaeuleMeinGeld from '@/components/kunde/SaeuleMeinGeld'
+import SaeuleMeinBetreuer from '@/components/kunde/SaeuleMeinBetreuer'
 import { saveBankdaten, uploadPflichtdokumentKunde } from './actions'
 
 export default async function KundeFallDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -48,9 +51,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
     // KB-Daten laden
     let kbName: string | null = null
+    let kbTelefon: string | null = null
     if (fall.kundenbetreuer_id) {
-      const { data: kb } = await admin.from('profiles').select('vorname, nachname').eq('id', fall.kundenbetreuer_id).single()
-      if (kb) kbName = [kb.vorname, kb.nachname].filter(Boolean).join(' ') || null
+      const { data: kb } = await admin.from('profiles').select('vorname, nachname, telefon').eq('id', fall.kundenbetreuer_id).single()
+      if (kb) { kbName = [kb.vorname, kb.nachname].filter(Boolean).join(' ') || null; kbTelefon = kb.telefon }
     }
 
     // Dokumente laden
@@ -126,27 +130,65 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           svName={svName ?? undefined}
         />
 
-        {/* KFZ-206: Bankdaten-Banner */}
-        <BankdatenBanner
-          fallId={fall.id as string}
-          status={(fall.status as string) ?? ''}
-          bankdatenHinterlegt={!!(fall as Record<string, unknown>).bankdaten_hinterlegt_am}
-          saveBankdaten={saveBankdaten}
-        />
+        {/* KFZ-210: Nachbesichtigung Soft-Blocker */}
+        {(fall.status as string) === 'nachbesichtigung-laeuft' && (
+          <div className="bg-violet-50 border border-violet-200 rounded-xl px-4 py-3 flex items-center gap-3">
+            <span className="text-violet-600 text-lg">&#9888;</span>
+            <div>
+              <p className="text-sm font-semibold text-violet-800">Nachbesichtigung läuft</p>
+              <p className="text-xs text-violet-600">Die Versicherung hat eine erneute Besichtigung angefordert. Ihr Fall wird fortgesetzt sobald das Ergebnis vorliegt.</p>
+            </div>
+          </div>
+        )}
 
-        {/* KFZ-206: Dokumente-Upload */}
-        <DokumenteSection
-          fallId={fall.id as string}
-          pflichtdokumente={(pflichtdokumente ?? []) as { id: string; titel: string; status: string; datei_url: string | null; datei_name: string | null }[]}
-          uploadDokument={uploadPflichtdokumentKunde}
-        />
+        {/* ═══ 5-Säulen Layout (KFZ-206) ═══ */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
-        {/* KFZ-131: Desktop Grid — Stepper links, Details rechts */}
+          {/* S1: Mein Anwalt (nur bei Komplett-Service) */}
+          <SaeuleMeinAnwalt
+            mandatstyp={(fall as Record<string, unknown>).mandatstyp as string | null}
+            vollmacht_status={!!(fall as Record<string, unknown>).vollmacht_signiert_am}
+            kanzlei_name={fall.kanzlei_ansprechpartner_name as string | null}
+          />
+
+          {/* S2: Mein Geld */}
+          <SaeuleMeinGeld
+            status={(fall.status as string) ?? ''}
+            schadenhoehe_netto={fall.schadenhoehe_netto as number | null}
+            regulierung_betrag={fall.regulierung_betrag as number | null}
+            kuerzungs_betrag={(fall as Record<string, unknown>).kuerzungs_betrag as number | null}
+            zahlung_betrag={(fall as Record<string, unknown>).zahlung_betrag as number | null}
+            ist_totalschaden={!!((fall as Record<string, unknown>).ist_totalschaden)}
+          />
+
+          {/* S5: Mein Betreuer */}
+          <SaeuleMeinBetreuer
+            fallId={fall.id as string}
+            kbName={kbName}
+            kbTelefon={kbTelefon}
+          />
+        </div>
+
+        {/* S3: Meine Aufgaben (Docs + Bankdaten) */}
+        <div className="space-y-4">
+          <BankdatenBanner
+            fallId={fall.id as string}
+            status={(fall.status as string) ?? ''}
+            bankdatenHinterlegt={!!(fall as Record<string, unknown>).bankdaten_hinterlegt_am}
+            saveBankdaten={saveBankdaten}
+          />
+          <DokumenteSection
+            fallId={fall.id as string}
+            pflichtdokumente={(pflichtdokumente ?? []) as { id: string; titel: string; status: string; datei_url: string | null; datei_name: string | null }[]}
+            uploadDokument={uploadPflichtdokumentKunde}
+          />
+        </div>
+
+        {/* S4: Mein Fortschritt + Fall-Details */}
         <div className="grid md:grid-cols-2 gap-5">
-          {/* Stepper Card */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-base font-semibold text-[#0D1B3E]">Ihr Fortschritt</p>
+              <p className="text-base font-semibold text-[#0D1B3E]">Mein Fortschritt</p>
               <span className="text-base font-bold text-[#4573A2]">{progress.pct}%</span>
             </div>
             <div className="w-full h-2.5 bg-gray-100 rounded-full mb-5">
@@ -160,18 +202,17 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             )}
           </div>
 
-          {/* Fall-Details + Dokumente + Chat */}
           <FallDetailSections
-          fall={fall as Record<string, unknown>}
-          svName={svName}
-          svTelefon={svTelefon}
-          kbName={kbName}
-          dokumente={dokumente ?? []}
-          nachrichten={nachrichten ?? []}
-          userId={user.id}
-          chatTeilnehmer={chatTeilnehmer}
-          aktiverTermin={aktiverTermin}
-        />
+            fall={fall as Record<string, unknown>}
+            svName={svName}
+            svTelefon={svTelefon}
+            kbName={kbName}
+            dokumente={dokumente ?? []}
+            nachrichten={nachrichten ?? []}
+            userId={user.id}
+            chatTeilnehmer={chatTeilnehmer}
+            aktiverTermin={aktiverTermin}
+          />
         </div>
       </div>
     )
