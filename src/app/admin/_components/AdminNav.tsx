@@ -8,30 +8,19 @@ import {
   BarChart3Icon, UsersIcon, BuildingIcon, Building2Icon, ReceiptIcon, ShieldCheckIcon, MessageCircleIcon,
 } from 'lucide-react'
 
+// BUG-17: Nur die relevanten Menüpunkte
 const NAV_MAIN = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboardIcon, exact: true },
   { href: '/admin/dispatch', label: 'Dispatch', icon: GitBranchIcon },
   { href: '/admin/faelle', label: 'Fälle', icon: FolderOpenIcon },
-  { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: HardHatIcon },
   { href: '/admin/kalender', label: 'Kalender', icon: CalendarIcon },
-  { href: '/admin/tasks', label: 'Tasks', icon: ClipboardListIcon },
-  { href: '/admin/meine-tasks', label: 'Meine Tasks', icon: ClipboardListIcon },
-  { href: '/admin/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon },
+  { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: HardHatIcon },
+  { href: '/admin/karte', label: 'Karte', icon: MapIcon },
 ]
 
 const NAV_SECONDARY = [
-  { href: '/admin/versicherungen', label: 'Versicherer', icon: BuildingIcon },
-  { href: '/admin/finance', label: 'Finanzen', icon: BadgeEuroIcon },
-  // KFZ-149 Hund-D: SV-Monatsabrechnungen Listing mit Reminder/Einzug-Status
-  { href: '/admin/abrechnungen', label: 'Abrechnungen', icon: ReceiptIcon },
-  // KFZ-188: Kanzlei-Monatsabrechnungen
-  { href: '/admin/kanzlei-abrechnungen', label: 'Kanzlei-Abr.', icon: ReceiptIcon },
-  // KFZ-152: Organisationen (Buero + Akademie Listing)
-  { href: '/admin/organisationen', label: 'Organisationen', icon: Building2Icon },
-  // KFZ-152 Phase 3 Hund-N: Communities (gemeinsame Einsatzgebiete + Pool)
-  { href: '/admin/communities', label: 'Communities', icon: ShieldCheckIcon },
   { href: '/admin/statistiken', label: 'Statistiken', icon: BarChart3Icon },
-  { href: '/admin/team', label: 'Team', icon: UsersIcon },
+  { href: '/admin/einstellungen', label: 'Einstellungen', icon: ClipboardListIcon },
 ]
 
 export default function AdminNav({ email, initials, unreadNachrichten }: { email: string; initials: string; unreadNachrichten?: number }) {
