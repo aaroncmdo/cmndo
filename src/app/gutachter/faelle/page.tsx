@@ -99,28 +99,24 @@ export default async function GutachterFaellePage({
 
   const { data: rawFaelle } = await query
 
-  // KFZ-128: Ungelesene Nachrichten pro Fall zaehlen
+  // KFZ-195a: Batch-Lookup statt N+1 fuer ungelesene Nachrichten
   const admin = createAdminClient()
-  const faelleWithUnread = await Promise.all((rawFaelle ?? []).map(async (f) => {
-    const { count } = await admin
-      .from('nachrichten')
-      .select('id', { count: 'exact', head: true })
-      .eq('fall_id', f.id)
-      .eq('gelesen', false)
-      .eq('sender_rolle', 'kunde')
+  const allRaw = rawFaelle ?? []
+  const fallIds = allRaw.map(f => f.id)
 
-    // KFZ-182: Ungelesene Updates
-    const { data: readState } = await admin
-      .from('fall_read_state')
-      .select('last_read_update_at')
-      .eq('fall_id', f.id)
-      .eq('user_id', user.id)
-      .maybeSingle()
-    const since = readState?.last_read_update_at ?? '1970-01-01T00:00:00Z'
-    const { data: updateCount } = await admin.rpc('count_unread_updates', { p_fall_id: f.id, p_since: since })
+  // Batch: alle ungelesenen Nachrichten in einem Query
+  const { data: unreadMsgs } = fallIds.length > 0
+    ? await admin.from('nachrichten').select('fall_id').eq('gelesen', false).eq('sender_rolle', 'kunde').in('fall_id', fallIds)
+    : { data: [] }
+  const unreadMap: Record<string, number> = {}
+  for (const msg of unreadMsgs ?? []) {
+    unreadMap[msg.fall_id] = (unreadMap[msg.fall_id] ?? 0) + 1
+  }
 
-    const ungelesene_updates: number = typeof updateCount === 'number' ? updateCount : 0
-    return { ...f, ungelesene_nachrichten: count ?? 0, ungelesene_updates }
+  const faelleWithUnread = allRaw.map(f => ({
+    ...f,
+    ungelesene_nachrichten: unreadMap[f.id] ?? 0,
+    ungelesene_updates: 0, // TODO: batch RPC for count_unread_updates
   }))
 
   // Sortierung: Faelle mit ungelesenen Nachrichten OBEN

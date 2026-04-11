@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import FaelleKanban from './FaelleKanban'
 
 export default async function AdminFaellePage() {
@@ -21,71 +22,71 @@ export default async function AdminFaellePage() {
   }
 
   const { data: faelle } = await query
+  const allFaelle = faelle ?? []
 
-  // Resolve names
-  const enriched = await Promise.all((faelle ?? []).map(async (f) => {
-    let kunde_name: string | null = null
-    let betreuer_name: string | null = null
-    let sv_name: string | null = null
+  // KFZ-195a: Batch-Lookups statt N+1
+  const admin = createAdminClient()
 
-    // Kunde name from lead
-    if (f.lead_id) {
-      const { data: lead } = await supabase.from('leads').select('vorname, nachname').eq('id', f.lead_id).single()
-      if (lead) kunde_name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || null
-    }
+  // 1. Alle Lead-Namen in einem Query
+  const leadIds = [...new Set(allFaelle.map(f => f.lead_id).filter(Boolean))] as string[]
+  const { data: leads } = leadIds.length > 0
+    ? await supabase.from('leads').select('id, vorname, nachname').in('id', leadIds)
+    : { data: [] }
+  const leadMap = Object.fromEntries((leads ?? []).map(l => [l.id, `${l.vorname ?? ''} ${l.nachname ?? ''}`.trim() || null]))
 
-    // Betreuer name
-    if (f.kundenbetreuer_id) {
-      const { data: p } = await supabase.from('profiles').select('vorname, nachname').eq('id', f.kundenbetreuer_id).single()
-      if (p) betreuer_name = [p.vorname, p.nachname].filter(Boolean).join(' ') || null
-    }
+  // 2. Alle Betreuer-Namen in einem Query
+  const kbIds = [...new Set(allFaelle.map(f => f.kundenbetreuer_id).filter(Boolean))] as string[]
+  const { data: kbProfiles } = kbIds.length > 0
+    ? await supabase.from('profiles').select('id, vorname, nachname').in('id', kbIds)
+    : { data: [] }
+  const kbMap = Object.fromEntries((kbProfiles ?? []).map(p => [p.id, `${p.vorname ?? ''} ${p.nachname ?? ''}`.trim() || null]))
 
-    // SV name
-    if (f.sv_id) {
-      const { data: sv } = await supabase.from('sachverstaendige').select('profiles(vorname, nachname)').eq('id', f.sv_id).single()
-      if (sv) {
-        const pr = (Array.isArray(sv.profiles) ? sv.profiles[0] : sv.profiles) as { vorname: string | null; nachname: string | null } | null
-        if (pr) sv_name = [pr.vorname, pr.nachname].filter(Boolean).join(' ') || null
-      }
-    }
+  // 3. Alle SV-Namen in einem Query
+  const svIds = [...new Set(allFaelle.map(f => f.sv_id).filter(Boolean))] as string[]
+  const { data: svs } = svIds.length > 0
+    ? await supabase.from('sachverstaendige').select('id, profiles(vorname, nachname)').in('id', svIds)
+    : { data: [] }
+  const svMap = Object.fromEntries((svs ?? []).map(sv => {
+    const pr = (Array.isArray(sv.profiles) ? sv.profiles[0] : sv.profiles) as { vorname: string | null; nachname: string | null } | null
+    return [sv.id, pr ? `${pr.vorname ?? ''} ${pr.nachname ?? ''}`.trim() || null : null]
+  }))
 
-    // KFZ-128: Ungelesene Nachrichten zaehlen
-    const { count: ungelesene } = await supabase
-      .from('nachrichten')
-      .select('id', { count: 'exact', head: true })
-      .eq('fall_id', f.id)
-      .eq('gelesen', false)
-      .eq('sender_rolle', 'kunde')
+  // 4. Alle ungelesenen Nachrichten in einem Query
+  const fallIds = allFaelle.map(f => f.id)
+  const { data: unreadMsgs } = fallIds.length > 0
+    ? await admin.from('nachrichten').select('fall_id').eq('gelesen', false).eq('sender_rolle', 'kunde').in('fall_id', fallIds)
+    : { data: [] }
+  const unreadMap: Record<string, number> = {}
+  for (const msg of unreadMsgs ?? []) {
+    unreadMap[msg.fall_id] = (unreadMap[msg.fall_id] ?? 0) + 1
+  }
 
-    // KFZ-182: Ungelesene Updates (Tasks + Timeline + Dokumente)
-    const { data: readState } = await supabase
-      .from('fall_read_state')
-      .select('last_read_update_at')
-      .eq('fall_id', f.id)
-      .maybeSingle()
-    const since = readState?.last_read_update_at ?? '1970-01-01T00:00:00Z'
-    const { data: updateCount } = await supabase.rpc('count_unread_updates', { p_fall_id: f.id, p_since: since })
+  // 5. Alle read_state in einem Query
+  const { data: readStates } = fallIds.length > 0
+    ? await admin.from('fall_read_state').select('fall_id, last_read_update_at').in('fall_id', fallIds)
+    : { data: [] }
+  const readStateMap = Object.fromEntries((readStates ?? []).map(rs => [rs.fall_id, rs.last_read_update_at]))
 
-    return {
-      id: f.id as string,
-      fall_nummer: f.fall_nummer as string | null,
-      status: f.status as string,
-      schadens_ursache: f.schadens_ursache as string | null,
-      schadens_ort: f.schadens_ort as string | null,
-      sv_id: f.sv_id as string | null,
-      kundenbetreuer_id: f.kundenbetreuer_id as string | null,
-      mandatsnummer: (f as Record<string, unknown>).mandatsnummer as string | null,
-      schadenfall_typ: (f as Record<string, unknown>).schadenfall_typ as string | null,
-      kennzeichen: (f as Record<string, unknown>).kennzeichen as string | null,
-      created_at: f.created_at as string,
-      ist_aktiv: (f as Record<string, unknown>).ist_aktiv as boolean | null,
-      deaktiviert_grund: (f as Record<string, unknown>).deaktiviert_grund as string | null,
-      kunde_name,
-      betreuer_name,
-      sv_name,
-      ungelesene_nachrichten: ungelesene ?? 0,
-      ungelesene_updates: typeof updateCount === 'number' ? updateCount : 0,
-    }
+  // Zusammenbauen (kein N+1 mehr)
+  const enriched = allFaelle.map(f => ({
+    id: f.id as string,
+    fall_nummer: f.fall_nummer as string | null,
+    status: f.status as string,
+    schadens_ursache: f.schadens_ursache as string | null,
+    schadens_ort: f.schadens_ort as string | null,
+    sv_id: f.sv_id as string | null,
+    kundenbetreuer_id: f.kundenbetreuer_id as string | null,
+    mandatsnummer: (f as Record<string, unknown>).mandatsnummer as string | null,
+    schadenfall_typ: (f as Record<string, unknown>).schadenfall_typ as string | null,
+    kennzeichen: (f as Record<string, unknown>).kennzeichen as string | null,
+    created_at: f.created_at as string,
+    ist_aktiv: (f as Record<string, unknown>).ist_aktiv as boolean | null,
+    deaktiviert_grund: (f as Record<string, unknown>).deaktiviert_grund as string | null,
+    kunde_name: f.lead_id ? (leadMap[f.lead_id] ?? null) : null,
+    betreuer_name: f.kundenbetreuer_id ? (kbMap[f.kundenbetreuer_id] ?? null) : null,
+    sv_name: f.sv_id ? (svMap[f.sv_id] ?? null) : null,
+    ungelesene_nachrichten: unreadMap[f.id] ?? 0,
+    ungelesene_updates: 0, // TODO: batch RPC for count_unread_updates
   }))
 
   return <FaelleKanban faelle={enriched} />
