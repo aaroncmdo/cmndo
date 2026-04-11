@@ -61,6 +61,7 @@ export default function VsRegulierungTab({ fall }: { fall: VsFall }) {
   const [stornoGrund, setStornoGrund] = useState('')
   const [zahlungsweg, setZahlungsweg] = useState<string>(fall.zahlungsweg ?? 'kundenkonto')
   const [asDatum, setAsDatum] = useState(new Date().toISOString().slice(0, 10))
+  const [konfrontation, setKonfrontation] = useState(fall.nachbesichtigung_konfrontation ?? false)
 
   function handle(fn: () => Promise<void>) {
     startTransition(async () => {
@@ -321,11 +322,11 @@ export default function VsRegulierungTab({ fall }: { fall: VsFall }) {
               <h3 className="font-semibold text-gray-900">VS fordert Nachbesichtigung</h3>
               <label className="block text-xs text-gray-500">Details</label>
               <textarea value={details} onChange={e => setDetails(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm h-24" placeholder="Was soll nachbesichtigt werden?" autoFocus />
-              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <input type="checkbox" checked={fall.nachbesichtigung_konfrontation ?? false} className="w-4 h-4 rounded border-gray-300 text-[#4573A2]" readOnly />
+              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer" onClick={() => setKonfrontation(!konfrontation)}>
+                <input type="checkbox" checked={konfrontation} onChange={() => setKonfrontation(!konfrontation)} className="w-4 h-4 rounded border-gray-300 text-[#4573A2]" />
                 Konfrontationstermin — unser SV soll dabei sein
               </label>
-              <ModalActions disabled={pending} onCancel={() => setModal(null)} onConfirm={() => handle(() => vsWillNachbesichtigung(fall.id, details))} label="Task erstellen" />
+              <ModalActions disabled={pending} onCancel={() => setModal(null)} onConfirm={() => handle(() => vsWillNachbesichtigung(fall.id, details, konfrontation))} label="Task erstellen" />
             </>)}
 
             {modal === 'zahlung' && (<>

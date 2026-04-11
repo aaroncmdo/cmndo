@@ -4,14 +4,15 @@ import { ScaleIcon, CheckCircleIcon, PhoneIcon, MailIcon } from 'lucide-react'
 
 type Props = {
   mandatstyp: string | null
+  serviceTyp: string | null
   vollmacht_status: boolean
   kanzlei_name: string | null
 }
 
-export default function SaeuleMeinAnwalt({ mandatstyp, vollmacht_status, kanzlei_name }: Props) {
-  const isKomplett = mandatstyp === 'kanzlei-claimondo'
-
-  if (!isKomplett) return null
+export default function SaeuleMeinAnwalt({ mandatstyp, serviceTyp, vollmacht_status, kanzlei_name }: Props) {
+  // Nicht anzeigen bei nur-Gutachter oder wenn kein Kanzlei-Mandatstyp
+  if (serviceTyp === 'nur_gutachter') return null
+  if (mandatstyp !== 'kanzlei-claimondo') return null
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 space-y-4">

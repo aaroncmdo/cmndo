@@ -118,7 +118,7 @@ export async function vsBrauchtMehrZeit(fallId: string, fristBis: string) {
   revalidatePath(`/admin/faelle/${fallId}`)
 }
 
-export async function vsWillNachbesichtigung(fallId: string, details: string) {
+export async function vsWillNachbesichtigung(fallId: string, details: string, konfrontation?: boolean) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
@@ -128,6 +128,7 @@ export async function vsWillNachbesichtigung(fallId: string, details: string) {
     vs_reaktion_am: new Date().toISOString(),
     nachbesichtigung_status: 'angefordert',
     nachbesichtigung_angefordert_am: new Date().toISOString(),
+    nachbesichtigung_konfrontation: konfrontation ?? false,
   }).eq('id', fallId)
 
   // KFZ-210: Status → nachbesichtigung-laeuft (Soft-Blocker)
@@ -149,13 +150,29 @@ export async function vsWillNachbesichtigung(fallId: string, details: string) {
     entity_id: fallId,
   })
 
+  // KFZ-210: Konfrontation → SV-Task
+  if (konfrontation) {
+    const { data: fallData } = await supabase.from('faelle').select('sv_id').eq('id', fallId).single()
+    if (fallData?.sv_id) {
+      await createLinkedTask({
+        fall_id: fallId,
+        titel: `Konfrontationstermin: Fall ${fallInfo?.fall_nummer ?? fallId.slice(0, 8)} — SV muss anwesend sein`,
+        typ: 'gutachter',
+        prioritaet: 'dringend',
+        faellig_am: new Date(),
+        entity_type: 'case',
+        entity_id: fallId,
+      })
+    }
+  }
+
   // KFZ-210: WA an Kunden
   sendFallCommunication(fallId, 'nachbesichtigung_angefordert').catch(() => {})
 
   await supabase.from('timeline').insert({
     fall_id: fallId,
     typ: 'system',
-    titel: 'VS fordert Nachbesichtigung',
+    titel: `VS fordert Nachbesichtigung${konfrontation ? ' (Konfrontation)' : ''}`,
     beschreibung: details || 'Versicherung hat eine erneute Besichtigung angefordert.',
     erstellt_von: user.id,
   })

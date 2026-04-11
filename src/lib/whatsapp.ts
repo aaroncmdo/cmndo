@@ -54,7 +54,7 @@ type NachrichtTyp =
   | 'nach_abschluss'
   | 'eskalation_vs03'
   | 'eskalation_vs05'
-  | 'eskalation_vs06'
+  | 'eskalation_vs04'
   | 'zahlung_teilweise'
   | 'kuerzung_ruege'
   | 'kuerzung_akzeptiert'
@@ -127,7 +127,7 @@ function buildNachricht(typ: NachrichtTyp, ctx: FallContext): string {
     case 'eskalation_vs05':
       return `Hallo ${name}, die Versicherung hat auf unsere Anfragen nicht reagiert. Eine Mahnung mit Verzugszinsen wurde verschickt. Wir setzen alle Hebel in Bewegung.${portal}\n\nIhr Claimondo-Team`
 
-    case 'eskalation_vs06':
+    case 'eskalation_vs04':
       return `Hallo ${name}, Ihr Kundenbetreuer wird Sie in Kürze anrufen, um die nächsten Schritte mit Ihnen zu besprechen.${portal}\n\nIhr Claimondo-Team`
 
     case 'zahlung_teilweise':
@@ -174,7 +174,7 @@ function titelFuerTyp(typ: NachrichtTyp): string {
     nach_abschluss: 'Fall abgeschlossen',
     eskalation_vs03: 'Eskalation: Frist abgelaufen',
     eskalation_vs05: 'Eskalation: Mahnung + Verzugszinsen',
-    eskalation_vs06: 'Eskalation: Kundenrückruf',
+    eskalation_vs04: 'Eskalation: Kundenrückruf',
     zahlung_teilweise: 'Teilzahlung eingegangen',
     kuerzung_ruege: 'Kürzung - Rügeschreiben',
     kuerzung_akzeptiert: 'Kürzung akzeptiert',
@@ -243,7 +243,7 @@ const NACHRICHT_TO_TEMPLATE: Partial<Record<NachrichtTyp, TemplateName>> = {
   nach_abschluss: 'fall_abgeschlossen',
   eskalation_vs03: 'eskalation_tag14',
   eskalation_vs05: 'eskalation_tag28',
-  eskalation_vs06: 'eskalation_tag42',
+  eskalation_vs04: 'eskalation_tag21',
   nachbesserung_gutachten: 'gutachten_fertig',
   kuerzung_ruege: 'kuerzung_eingetragen',
   dokument_fehlt: 'dokumente_nachreichen',

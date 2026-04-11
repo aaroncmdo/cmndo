@@ -11,7 +11,7 @@ import DokumenteSection from '@/components/kunde/DokumenteSection'
 import SaeuleMeinAnwalt from '@/components/kunde/SaeuleMeinAnwalt'
 import SaeuleMeinGeld from '@/components/kunde/SaeuleMeinGeld'
 import SaeuleMeinBetreuer from '@/components/kunde/SaeuleMeinBetreuer'
-import { saveBankdaten, uploadPflichtdokumentKunde } from './actions'
+import { saveBankdaten, uploadPflichtdokumentKunde, updateZahlungsweg } from './actions'
 
 export default async function KundeFallDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -147,18 +147,22 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           {/* S1: Mein Anwalt (nur bei Komplett-Service) */}
           <SaeuleMeinAnwalt
             mandatstyp={(fall as Record<string, unknown>).mandatstyp as string | null}
+            serviceTyp={(fall as Record<string, unknown>).service_typ as string | null}
             vollmacht_status={!!(fall as Record<string, unknown>).vollmacht_signiert_am}
             kanzlei_name={fall.kanzlei_ansprechpartner_name as string | null}
           />
 
           {/* S2: Mein Geld */}
           <SaeuleMeinGeld
+            fallId={fall.id as string}
             status={(fall.status as string) ?? ''}
             schadenhoehe_netto={fall.schadenhoehe_netto as number | null}
             regulierung_betrag={fall.regulierung_betrag as number | null}
             kuerzungs_betrag={(fall as Record<string, unknown>).kuerzungs_betrag as number | null}
             zahlung_betrag={(fall as Record<string, unknown>).zahlung_betrag as number | null}
             ist_totalschaden={!!((fall as Record<string, unknown>).ist_totalschaden)}
+            zahlungsweg={(fall as Record<string, unknown>).zahlungsweg as string | null}
+            onZahlungswegSave={updateZahlungsweg}
           />
 
           {/* S5: Mein Betreuer */}

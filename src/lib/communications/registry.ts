@@ -147,15 +147,6 @@ export const COMMUNICATION_REGISTRY: Record<string, TriggerConfig> = {
     description: 'T15: Eskalation nach 28 Tagen ohne Versicherungsantwort',
   },
 
-  eskalation_tag42: {
-    trigger_name: 'eskalation_tag42',
-    channel: 'whatsapp',
-    recipient: 'kunde',
-    t_number: 16,
-    whatsapp_template_name: 'eskalation_tag42',
-    has_attachment: false,
-    description: 'T16: Eskalation nach 42 Tagen — rechtliche Schritte',
-  },
 
   chat_fallback_kunde: {
     trigger_name: 'chat_fallback_kunde',

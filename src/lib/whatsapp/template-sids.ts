@@ -22,7 +22,6 @@ export type TemplateName =
   | 'fall_abgeschlossen'
   | 'eskalation_tag14'
   | 'eskalation_tag28'
-  | 'eskalation_tag42'
   | 'chat_fallback_kunde'
   | 'chat_fallback_kb'
   | 'kuerzung_eingetragen'
@@ -71,7 +70,6 @@ export const TEMPLATE_CONFIGS: Record<TemplateName, TemplateConfig> = {
   fall_abgeschlossen:     { envKey: 'TWILIO_TPL_FALL_ABGESCHLOSSEN', variableCount: 2, beschreibung: 'T13: Fall abgeschlossen (Vorname, Google-Review-Link)' },
   eskalation_tag14:       { envKey: 'TWILIO_TPL_ESKALATION_TAG14', variableCount: 2, beschreibung: 'T14: Eskalation 14 Tage (Vorname, Portal-Link)' },
   eskalation_tag28:       { envKey: 'TWILIO_TPL_ESKALATION_TAG28', variableCount: 2, beschreibung: 'T15: Eskalation 28 Tage (Vorname, Portal-Link)' },
-  eskalation_tag42:       { envKey: 'TWILIO_TPL_ESKALATION_TAG42', variableCount: 2, beschreibung: 'T16: Eskalation 42 Tage (Vorname, Portal-Link)' },
   chat_fallback_kunde:    { envKey: 'TWILIO_TPL_CHAT_FALLBACK_KUNDE', variableCount: 3, beschreibung: 'T17: Chat Fallback Kunde (Vorname, Nachricht-Preview, Portal-Link)' },
   chat_fallback_kb:       { envKey: 'TWILIO_TPL_CHAT_FALLBACK_KB', variableCount: 3, beschreibung: 'T18: Chat Fallback KB (KB-Vorname, Kunden-Name, Nachricht-Preview)' },
   kuerzung_eingetragen:   { envKey: 'TWILIO_TPL_KUERZUNG_EINGETRAGEN', variableCount: 4, beschreibung: 'T19: Kuerzung eingetragen (Vorname, Kuerzungs-Betrag, Original-Betrag, Portal-Link)' },

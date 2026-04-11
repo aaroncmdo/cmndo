@@ -51,8 +51,6 @@ const TEMPLATES: Record<TemplateName, (vars: Record<string, string>) => string> 
   eskalation_tag28: (v) =>
     `${v['1'] ?? ''}, nach 28 Tagen ohne Antwort der Versicherung haben wir eine foermliche Fristsetzung gesendet.`,
 
-  eskalation_tag42: (v) =>
-    `${v['1'] ?? ''}, die Versicherung reagiert seit 42 Tagen nicht. Wir pruefen jetzt rechtliche Schritte ueber die Kanzlei.`,
 
   chat_fallback_kunde: (v) =>
     `Hallo ${v['1'] ?? ''}, Sie haben eine neue Nachricht in Ihrem Claimondo-Portal. Bitte pruefen Sie Ihr Postfach.`,

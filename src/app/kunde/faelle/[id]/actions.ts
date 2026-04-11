@@ -217,3 +217,27 @@ export async function waehleGegenvorschlagSlot(
     return { success: false, error: err instanceof Error ? err.message : String(err) }
   }
 }
+
+// KFZ-206: Zahlungsweg-Auswahl durch Kunden
+export async function updateZahlungsweg(
+  fallId: string,
+  zahlungsweg: string,
+): Promise<{ success: boolean }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false }
+
+  const admin = createAdminClient()
+  const { data: fall } = await admin.from('faelle').select('id, kunde_id').eq('id', fallId).single()
+  if (!fall || fall.kunde_id !== user.id) return { success: false }
+
+  await admin.from('faelle').update({ zahlungsweg }).eq('id', fallId)
+  await admin.from('timeline').insert({
+    fall_id: fallId,
+    typ: 'system',
+    titel: `Zahlungsweg gewählt: ${zahlungsweg === 'kundenkonto' ? 'Kundenkonto' : 'Werkstatt direkt'}`,
+  })
+
+  revalidatePath(`/kunde/faelle/${fallId}`)
+  return { success: true }
+}
