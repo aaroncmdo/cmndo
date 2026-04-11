@@ -97,6 +97,10 @@ const TEMPLATES: Record<TemplateName, (vars: Record<string, string>) => string> 
   kb_termin_reminder_1h: (v) =>
     `${v['1'] ?? ''}, in ca. 1 Stunde (${v['2'] ?? ''} Uhr) ${v['3'] ? `startet Ihr Video-Gespräch. Link: ${v['3']}` : 'ruft Ihr Claimondo-Betreuer Sie an. Bitte halten Sie Ihr Telefon bereit.'}`,
 
+  // KFZ-202: No-Show
+  no_show_kunde: (v) =>
+    `Hallo ${v['1'] ?? ''}, wir haben Sie leider beim vereinbarten Gutachtertermin nicht angetroffen. Bitte melden Sie sich, damit wir einen neuen Termin fuer Sie vereinbaren koennen.`,
+
 }
 // KFZ-200 → KFZ-201: SV-Navigation Templates (sv_nav_unterwegs, sv_nav_15min,
 // sv_nav_5min, sv_nav_angekommen, sv_begutachtung_fertig) wurden konsolidiert:

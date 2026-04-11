@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { ablehnTermin } from '@/lib/termine/sv-ablehnung'
 import { gegenvorschlagTermin } from '@/lib/termine/sv-gegenvorschlag'
+import { transitionFallStatus } from '@/lib/faelle/state-machine'
 
 export async function setTermin(fallId: string, termin: string) {
   const supabase = await createClient()
@@ -16,12 +17,21 @@ export async function setTermin(fallId: string, termin: string) {
   const { data: fall } = await supabase.from('faelle').select('id').eq('id', fallId).eq('sv_id', sv.id).maybeSingle()
   if (!fall) throw new Error('Nicht autorisiert')
 
+  // sv_termin Datum setzen
   const { error } = await supabase
     .from('faelle')
-    .update({ sv_termin: termin, status: 'sv-termin' })
+    .update({ sv_termin: termin })
     .eq('id', fallId)
 
   if (error) throw new Error(error.message)
+
+  // KFZ-202: State-Machine statt direktem status-Update
+  try {
+    await transitionFallStatus(fallId, 'sv-termin', { user_id: user.id })
+  } catch {
+    // Transition nicht erlaubt (z.B. Status schon weiter) — sv_termin ist trotzdem gesetzt
+  }
+
   revalidatePath('/gutachter/kalender')
   revalidatePath('/gutachter')
 }

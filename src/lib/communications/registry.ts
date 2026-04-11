@@ -269,6 +269,16 @@ export const COMMUNICATION_REGISTRY: Record<string, TriggerConfig> = {
     description: 'T30: 1h-Erinnerung KB-Beratungstermin',
   },
 
+  no_show_kunde: {
+    trigger_name: 'no_show_kunde',
+    channel: 'whatsapp',
+    recipient: 'kunde',
+    t_number: null,
+    whatsapp_template_name: 'no_show_kunde',
+    has_attachment: false,
+    description: 'Kunde ist nicht zum Gutachtertermin erschienen — Kontaktaufnahme',
+  },
+
   nachbesserung_gutachten: {
     trigger_name: 'nachbesserung_gutachten',
     channel: 'whatsapp',

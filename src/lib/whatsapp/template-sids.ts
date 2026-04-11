@@ -36,6 +36,7 @@ export type TemplateName =
   | 'kb_termin_bestaetigt'
   | 'kb_termin_reminder_24h'
   | 'kb_termin_reminder_1h'
+  | 'no_show_kunde'
   // KFZ-200 → KFZ-201: SV-Navigation Templates konsolidiert zu T21-T25:
   //   sv_nav_unterwegs    → sv_losgefahren (T21)
   //   sv_nav_15min        → sv_fast_da (T22)
@@ -80,6 +81,7 @@ export const TEMPLATE_CONFIGS: Record<TemplateName, TemplateConfig> = {
   kb_termin_bestaetigt:   { envKey: 'TWILIO_TPL_KB_TERMIN_BESTAETIGT', variableCount: 6, beschreibung: 'T28: KB-Termin bestaetigt (Vorname, Datum, Uhrzeit, Kanal, Video-Link, Portal-Link)' },
   kb_termin_reminder_24h: { envKey: 'TWILIO_TPL_KB_TERMIN_REMINDER_24H', variableCount: 4, beschreibung: 'T29: KB-Termin 24h-Erinnerung (Vorname, Datum, Uhrzeit, Kanal)' },
   kb_termin_reminder_1h:  { envKey: 'TWILIO_TPL_KB_TERMIN_REMINDER_1H', variableCount: 3, beschreibung: 'T30: KB-Termin 1h-Erinnerung (Vorname, Uhrzeit, Video-Link-oder-leer)' },
+  no_show_kunde:          { envKey: 'TWILIO_TPL_NO_SHOW_KUNDE', variableCount: 2, beschreibung: 'No-Show: Kunde nicht erschienen (Vorname, Portal-Link)' },
 }
 
 /**

@@ -370,6 +370,9 @@ export async function signSAandCreateFall(
       finanzierungsgeber_name: lead.finanzierungsgeber_name ?? null,
       finanzierungsgeber_adresse: lead.finanzierungsgeber_adresse ?? null,
       finanzierungsgeber_vertragsnr: lead.finanzierungsgeber_vertragsnr ?? null,
+      // KFZ-202: Vorschaeden
+      hat_vorschaeden: lead.hat_vorschaeden ?? false,
+      vorschaeden_beschreibung: lead.vorschaeden_beschreibung ?? null,
       kundenbetreuer_id: kundenbetreuerId,
       konvertiert_am: new Date().toISOString(),
       konvertiert_von_lead: leadId,

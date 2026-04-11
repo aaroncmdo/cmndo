@@ -60,7 +60,7 @@ export async function meldeNoShow(fallId: string): Promise<{ success: boolean; e
 
   // KFZ-202: no_show_count inkrementieren
   const { data: fall } = await db.from('faelle')
-    .select('no_show_count')
+    .select('no_show_count, lead_id')
     .eq('id', fallId)
     .eq('sv_id', sv.id)
     .single()
@@ -96,6 +96,19 @@ export async function meldeNoShow(fallId: string): Promise<{ success: boolean; e
     entity_type: 'case',
     entity_id: fallId,
   })
+
+  // KFZ-202: WA an Kunden bei 1x No-Show
+  if (fall.lead_id) {
+    const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', fall.lead_id).single()
+    if (lead?.telefon) {
+      const { sendCommunication } = await import('@/lib/communications/send')
+      sendCommunication('no_show_kunde', {
+        telefon: lead.telefon,
+        vorname: lead.vorname ?? '',
+        fall_id: fallId,
+      }).catch(() => {})
+    }
+  }
 
   revalidatePath(`/gutachter/fall/${fallId}`)
   return { success: true }
