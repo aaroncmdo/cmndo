@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import DispatchNav from './_components/DispatchNav'
+import RealtimeLeadAlert from './_components/RealtimeLeadAlert'
 import { PageContainer } from '@/components/PageContainer'
 
 export default async function DispatchLayout({
@@ -29,6 +30,7 @@ export default async function DispatchLayout({
 
   return (
     <div className="h-screen bg-[#f8f9fb] relative overflow-hidden">
+      <RealtimeLeadAlert />
       <DispatchNav email={user.email ?? ''} initials={initials} />
 
       <div className="md:ml-56 h-screen flex flex-col relative z-10">
