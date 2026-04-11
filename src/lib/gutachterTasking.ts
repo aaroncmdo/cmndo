@@ -1,6 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createAutoTask, resolveGates } from '@/lib/tasking'
-import { sendStatusWhatsApp } from '@/lib/whatsapp'
 import { createNotification } from '@/lib/notifications'
 
 /**

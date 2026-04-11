@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
 import { emailGutachtenEingegangen } from '@/lib/email'
-import { sendStatusWhatsApp } from '@/lib/whatsapp'
+import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { berechneLeadpreis } from '@/lib/leadpreis'
 
 export async function uploadGutachten(fallId: string, formData: FormData) {
@@ -138,7 +138,7 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
   }
 
   // WhatsApp: Gutachten erstellt, wird an Kanzlei uebergeben
-  sendStatusWhatsApp(fallId, 'nach_gutachten').catch(() => {})
+  sendFallCommunication(fallId, 'gutachten_fertig').catch(() => {})
 
   revalidatePath(`/gutachter/fall/${fallId}`)
   revalidatePath('/gutachter/faelle')

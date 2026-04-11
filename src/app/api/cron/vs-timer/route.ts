@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendStatusWhatsApp } from '@/lib/whatsapp'
+import { sendFallCommunication } from '@/lib/communications/send-fall'
 
 type Stufe = {
   key: string
@@ -92,13 +92,13 @@ export async function GET(request: Request) {
     // WhatsApp at vs-03, vs-05, and vs-06 with specific escalation messages
     if (stufeDef.whatsapp) {
       if (neueStufe === 'vs-03') {
-        sendStatusWhatsApp(fall.id, 'eskalation_vs03').catch(() => {})
+        sendFallCommunication(fall.id, 'eskalation_tag14').catch(() => {})
       }
       if (neueStufe === 'vs-05') {
-        sendStatusWhatsApp(fall.id, 'eskalation_vs05').catch(() => {})
+        sendFallCommunication(fall.id, 'eskalation_tag28').catch(() => {})
       }
       if (neueStufe === 'vs-06') {
-        sendStatusWhatsApp(fall.id, 'eskalation_vs06').catch(() => {})
+        sendFallCommunication(fall.id, 'eskalation_tag42').catch(() => {})
       }
     }
 

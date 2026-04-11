@@ -9,7 +9,7 @@ import {
   emailGutachtenEingegangen,
   emailFilmcheckBestanden,
 } from '@/lib/email'
-import { sendStatusWhatsApp } from '@/lib/whatsapp'
+import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { triggerKonversionTasks, triggerGutachterTerminTask, triggerGutachtenUploadTask, triggerQcTask, triggerLeadTasks, triggerOnboardingTasks, resolveGates, autoCompleteTask } from '@/lib/tasking'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 
@@ -64,7 +64,7 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
 
   // Fire-and-forget WhatsApp notifications on status change
   if (newStatus === 'sv-zugewiesen') {
-    sendStatusWhatsApp(fallId, 'nach_gutachter_dispatch').catch(() => {})
+    sendFallCommunication(fallId, 'sv_losgefahren').catch(() => {})
     // Auto-Task: Gutachter soll Termin bestaetigen
     const { data: fallInfo } = await supabase.from('faelle').select('sv_id, fall_nummer, schadens_ursache, schadens_adresse, schadens_plz, schadens_ort, lead_id').eq('id', fallId).single()
     triggerGutachterTerminTask(fallId, fallInfo?.sv_id ?? null).catch(() => {})
@@ -93,7 +93,7 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
     }
   }
   if (newStatus === 'sv-termin') {
-    sendStatusWhatsApp(fallId, 'nach_terminbestaetigung').catch(() => {})
+    sendFallCommunication(fallId, 'termin_bestaetigt').catch(() => {})
     // Gutachter-Mitteilung: Termin bestaetigt
     const { data: fallInfo } = await supabase.from('faelle').select('sv_id, fall_nummer, sv_termin').eq('id', fallId).single()
     if (fallInfo?.sv_id) {
@@ -116,7 +116,7 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
     triggerQcTask(fallId, fallInfo?.kundenbetreuer_id ?? null).catch(() => {})
   }
   if (newStatus === 'regulierung' || newStatus === 'vs-regulierung') {
-    sendStatusWhatsApp(fallId, 'nach_regulierung').catch(() => {})
+    sendFallCommunication(fallId, 'regulierung_angekuendigt').catch(() => {})
     // Gutachter-Mitteilung: Regulierung angekuendigt
     const { data: fallInfo } = await supabase.from('faelle').select('sv_id, fall_nummer').eq('id', fallId).single()
     if (fallInfo?.sv_id) {
@@ -126,7 +126,7 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
     }
   }
   if (newStatus === 'abgeschlossen') {
-    sendStatusWhatsApp(fallId, 'nach_abschluss').catch(() => {})
+    sendFallCommunication(fallId, 'fall_abgeschlossen').catch(() => {})
     // KFZ-151: Auto-Resolve aller offenen Fall- und Case-Tasks
     try {
       const { resolveTasksForEntity } = await import('@/lib/tasks/resolve-tasks')
@@ -487,7 +487,7 @@ async function convertLeadToFall(
   })
 
   // 8. WhatsApp: Unterlagen eingegangen + Gutachter wird beauftragt
-  sendStatusWhatsApp(fall.id, 'nach_sa_unterschrift').catch(() => {})
+  sendFallCommunication(fall.id, 'fall_eroeffnet').catch(() => {})
 
   // 9. Auto-Tasks: Konversion
   triggerKonversionTasks(fall.id, kundenbetreuerId, null).catch(() => {})

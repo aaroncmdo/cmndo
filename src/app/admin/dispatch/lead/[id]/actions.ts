@@ -2,7 +2,8 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { sendStatusWhatsApp, sendManualWhatsApp } from '@/lib/whatsapp'
+import { sendManualWhatsApp } from '@/lib/whatsapp'
+import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { sendCommunication } from '@/lib/communications/send'
 
@@ -321,15 +322,19 @@ export async function confirmGutachterTermin(
       })
 
       // WhatsApp: Gutachter beauftragt + Termin bestaetigt (non-critical, fire & forget)
-      sendStatusWhatsApp(fall.id, 'nach_gutachter_dispatch', {
+      sendFallCommunication(fall.id, 'sv_losgefahren', {
         gutachter_name: svName,
-      }).then(() => {}).catch(e => console.error('[confirmGutachterTermin] WhatsApp Fehler:', e))
-      sendStatusWhatsApp(fall.id, 'nach_terminbestaetigung', {
+        '2': svName,
+      }).catch(e => console.error('[confirmGutachterTermin] WhatsApp Fehler:', e))
+      sendFallCommunication(fall.id, 'termin_bestaetigt', {
         gutachter_name: svName,
         termin_datum: terminDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
         termin_uhrzeit: terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
         termin_ort: fahrzeugAdresse || fahrzeugPlz,
-      }).then(() => {}).catch(e => console.error('[confirmGutachterTermin] WhatsApp Fehler:', e))
+        '2': svName,
+        '3': terminDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+        '4': terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+      }).catch(e => console.error('[confirmGutachterTermin] WhatsApp Fehler:', e))
 
       // KFZ-129: SV als Chat-Teilnehmer hinzufuegen
       try {

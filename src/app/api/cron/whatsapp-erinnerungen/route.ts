@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendStatusWhatsApp } from '@/lib/whatsapp'
+import { sendFallCommunication } from '@/lib/communications/send-fall'
 
 /**
  * Cron-Route: Prueft gutachter_termine auf bevorstehende Termine
@@ -47,8 +47,9 @@ export async function GET(request: Request) {
     if (existing && existing.length > 0) continue
 
     const startZeit = new Date(termin.start_zeit)
-    await sendStatusWhatsApp(termin.fall_id, 'erinnerung_24h', {
+    await sendFallCommunication(termin.fall_id, 'reminder_24h', {
       termin_uhrzeit: startZeit.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+      '3': startZeit.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
     })
     sent24h++
   }
@@ -79,7 +80,7 @@ export async function GET(request: Request) {
 
     if (existing && existing.length > 0) continue
 
-    await sendStatusWhatsApp(termin.fall_id, 'erinnerung_2h')
+    await sendFallCommunication(termin.fall_id, 'reminder_2h')
     sent2h++
   }
 

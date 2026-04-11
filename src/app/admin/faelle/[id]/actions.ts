@@ -3,7 +3,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { emailFilmcheckBestanden } from '@/lib/email'
-import { sendStatusWhatsApp, sendManualWhatsApp } from '@/lib/whatsapp'
+import { sendManualWhatsApp } from '@/lib/whatsapp'
+import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { triggerKanzleiPaketTask, triggerAsSendedatumTask, triggerArchivierungTask } from '@/lib/tasking'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { checkFallAutoPhase } from '@/lib/autoPhase'
@@ -71,7 +72,7 @@ export async function saveFilmcheck(fallId: string, notizen: string) {
   })
 
   // WhatsApp: Akte an Partnerkanzlei uebergeben
-  sendStatusWhatsApp(fallId, 'nach_qc_freigabe').catch(() => {})
+  sendFallCommunication(fallId, 'kanzlei_uebergabe').catch(() => {})
 
   // Gutachter-Mitteilung: QC bestanden
   const { data: fallForSv } = await supabase.from('faelle').select('sv_id, fall_nummer').eq('id', fallId).single()
@@ -279,7 +280,7 @@ export async function setAnschlussschreibenDatum(fallId: string) {
   })
 
   // WhatsApp: Anspruchsschreiben gesendet, 14 Tage Frist
-  sendStatusWhatsApp(fallId, 'nach_anspruchsschreiben').catch(() => {})
+  sendFallCommunication(fallId, 'as_gesendet').catch(() => {})
   autoCompleteTask(fallId, 'as_sendedatum_gesetzt').catch(() => {})
 
   // Gutachter-Mitteilung: AS gesendet
@@ -320,7 +321,7 @@ export async function recordZahlung(fallId: string, betrag: number) {
   })
 
   // WhatsApp: Zahlung eingegangen
-  sendStatusWhatsApp(fallId, 'nach_zahlung').catch(() => {})
+  sendFallCommunication(fallId, 'zahlung_eingegangen').catch(() => {})
 
   // Auto-Task: Fall archivieren nach Auszahlung
   const { data: fallForArchive } = await supabase.from('faelle').select('kundenbetreuer_id, sv_id, fall_nummer').eq('id', fallId).single()
@@ -651,7 +652,7 @@ export async function qcNachbesserung(fallId: string, kommentar: string) {
   }
 
   // WhatsApp: Nachbesserung nötig
-  sendStatusWhatsApp(fallId, 'nachbesserung_gutachten').catch(() => {})
+  sendFallCommunication(fallId, 'nachbesserung_gutachten').catch(() => {})
 
   // SV-05: Nachbesserung Task für Gutachter
   if (fallInfo?.sv_id) {
@@ -876,7 +877,7 @@ export async function erfasseZahlungseingang(
   })
 
   // WhatsApp
-  sendStatusWhatsApp(fallId, 'nach_zahlung').catch(() => {})
+  sendFallCommunication(fallId, 'zahlung_eingegangen').catch(() => {})
 
   // Auto-Phase
   checkFallAutoPhase(fallId).catch(() => {})
@@ -928,11 +929,13 @@ export async function createTermin(
 
   // WhatsApp: Termin vereinbart
   const terminDate = new Date(data.datum)
-  sendStatusWhatsApp(fallId, 'termin_vereinbart_kb', {
+  sendFallCommunication(fallId, 'kb_termin_bestaetigt', {
     termin_typ: data.typ,
     termin_datum: terminDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
     termin_uhrzeit: terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
-    meet_link: meetLink ?? undefined,
+    meet_link: meetLink ?? '',
+    '3': terminDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+    '4': terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
   }).catch(() => {})
 
   revalidatePath(`/admin/faelle/${fallId}`)

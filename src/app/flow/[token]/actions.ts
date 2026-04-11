@@ -467,10 +467,10 @@ export async function signSAandCreateFall(
     await sendSystemNachricht(fall.id, `Fall ${fallNummer} wurde erstellt. Willkommen in Ihrem persönlichen Chat!`)
   } catch (e) { console.error('[KFZ-129] Chat-Gruppe Fehler:', e) }
 
-  // 9. WhatsApp an Admin (non-critical)
+  // 9. WhatsApp an Kunde: Fall eröffnet (non-critical)
   try {
-    const { sendStatusWhatsApp } = await import('@/lib/whatsapp')
-    await sendStatusWhatsApp(fall.id, 'nach_sa_unterschrift')
+    const { sendFallCommunication } = await import('@/lib/communications/send-fall')
+    await sendFallCommunication(fall.id, 'fall_eroeffnet')
   } catch { /* */ }
 
   // 10. WhatsApp an Gutachter: Termin bestätigt + Ablehnen-Link (KFZ-118)

@@ -269,6 +269,16 @@ export const COMMUNICATION_REGISTRY: Record<string, TriggerConfig> = {
     description: 'T30: 1h-Erinnerung KB-Beratungstermin',
   },
 
+  nachbesserung_gutachten: {
+    trigger_name: 'nachbesserung_gutachten',
+    channel: 'whatsapp',
+    recipient: 'kunde',
+    t_number: null,
+    whatsapp_template_name: 'gutachten_fertig',
+    has_attachment: false,
+    description: 'Gutachten-Nachbesserung — Kunde wird informiert',
+  },
+
   // ─── WhatsApp: SV ────────────────────────────────────────────────────────
 
   sv_tagesroute: {

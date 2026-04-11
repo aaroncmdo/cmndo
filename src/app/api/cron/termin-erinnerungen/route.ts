@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendStatusWhatsApp } from '@/lib/whatsapp'
+import { sendFallCommunication } from '@/lib/communications/send-fall'
 
 /**
  * Cron-Route: Termin-Erinnerungen (stuendlich)
@@ -120,8 +120,9 @@ export async function GET(request: Request) {
     if (!termin.fall_id) continue
 
     const startZeit = new Date(termin.start_zeit)
-    await sendStatusWhatsApp(termin.fall_id, 'erinnerung_24h', {
+    await sendFallCommunication(termin.fall_id, 'reminder_24h', {
       termin_uhrzeit: startZeit.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+      '3': startZeit.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
     })
 
     await supabase
@@ -147,7 +148,7 @@ export async function GET(request: Request) {
   for (const termin of termine2h ?? []) {
     if (!termin.fall_id) continue
 
-    await sendStatusWhatsApp(termin.fall_id, 'erinnerung_2h')
+    await sendFallCommunication(termin.fall_id, 'reminder_2h')
 
     await supabase
       .from('gutachter_termine')
