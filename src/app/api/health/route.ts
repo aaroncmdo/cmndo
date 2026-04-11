@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+// Lightweight ping for offline-detection (no DB query)
+export async function HEAD() {
+  return new Response(null, { status: 200 })
+}
+
 export async function GET() {
   const checks: Record<string, 'ok' | 'fail' | 'skipped'> = {}
 
