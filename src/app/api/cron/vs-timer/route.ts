@@ -11,14 +11,14 @@ type Stufe = {
   whatsapp: boolean
 }
 
+// KFZ-207: Eskalation korrigiert auf 14-21-28 Tage (Tag 42 entfernt)
 const STUFEN: Stufe[] = [
   { key: 'vs-01', tage: 0,  titel: 'AS gesendet',                           taskTyp: '',                        taskTitel: '',                                          whatsapp: false },
   { key: 'vs-02', tage: 7,  titel: 'Schriftliche Erinnerung',               taskTyp: 'versicherung-kontakt',    taskTitel: 'Schriftliche Erinnerung an Versicherung',   whatsapp: false },
   { key: 'vs-03', tage: 14, titel: 'Frist abgelaufen – Nachfrage senden',   taskTyp: 'versicherung-kontakt',    taskTitel: 'VS-Frist abgelaufen: Nachfrage senden',     whatsapp: true  },
-  { key: 'vs-04', tage: 21, titel: 'Telefonische Direktanfrage',            taskTyp: 'versicherung-kontakt',    taskTitel: 'Versicherung anrufen (Pflicht!)',            whatsapp: false },
-  { key: 'vs-05', tage: 28, titel: 'Mahnung mit Verzugszinsen',             taskTyp: 'versicherung-kontakt',    taskTitel: 'Mahnung mit Verzugszinsen senden',          whatsapp: true  },
-  { key: 'vs-06', tage: 42, titel: 'Letzte Mahnung + Klageankuendigung',    taskTyp: 'kunde-rueckfrage',        taskTitel: 'Kunden anrufen: Klageankuendigung',         whatsapp: true  },
-  { key: 'vs-07', tage: 60, titel: 'Klage eingereicht',                     taskTyp: 'versicherung-kontakt',    taskTitel: 'Klage eingereicht – Dokumentation',         whatsapp: false },
+  { key: 'vs-04', tage: 21, titel: 'Telefonische Direktanfrage',            taskTyp: 'versicherung-kontakt',    taskTitel: 'Versicherung anrufen (Pflicht!)',            whatsapp: true  },
+  { key: 'vs-05', tage: 28, titel: 'Mahnung mit Verzugszinsen + Klageankuendigung', taskTyp: 'versicherung-kontakt', taskTitel: 'Mahnung + Klageankuendigung senden',  whatsapp: true  },
+  { key: 'vs-06', tage: 60, titel: 'Klage eingereicht',                     taskTyp: 'versicherung-kontakt',    taskTitel: 'Klage eingereicht – Dokumentation',         whatsapp: false },
 ]
 
 /**
@@ -89,16 +89,16 @@ export async function GET(request: Request) {
       beschreibung: `${stufeDef.titel} (Tag ${tage} seit AS).`,
     })
 
-    // WhatsApp at vs-03, vs-05, and vs-06 with specific escalation messages
+    // KFZ-207: WhatsApp bei vs-03 (Tag 14), vs-04 (Tag 21), vs-05 (Tag 28)
     if (stufeDef.whatsapp) {
       if (neueStufe === 'vs-03') {
         sendFallCommunication(fall.id, 'eskalation_tag14').catch(() => {})
       }
+      if (neueStufe === 'vs-04') {
+        sendFallCommunication(fall.id, 'eskalation_tag14').catch(() => {})
+      }
       if (neueStufe === 'vs-05') {
         sendFallCommunication(fall.id, 'eskalation_tag28').catch(() => {})
-      }
-      if (neueStufe === 'vs-06') {
-        sendFallCommunication(fall.id, 'eskalation_tag42').catch(() => {})
       }
     }
 
