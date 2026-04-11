@@ -207,7 +207,7 @@ export default async function WichtigeUpdatesWidget() {
   const { events, mails } = await loadEvents()
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col h-full">
+    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col h-full max-h-[500px]">
       <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ActivityIcon className="w-4 h-4 text-[#4573A2]" />
