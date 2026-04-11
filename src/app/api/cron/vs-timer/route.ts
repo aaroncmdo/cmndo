@@ -95,7 +95,7 @@ export async function GET(request: Request) {
         sendFallCommunication(fall.id, 'eskalation_tag14').catch(() => {})
       }
       if (neueStufe === 'vs-04') {
-        sendFallCommunication(fall.id, 'eskalation_tag14').catch(() => {})
+        sendFallCommunication(fall.id, 'eskalation_tag21').catch(() => {})
       }
       if (neueStufe === 'vs-05') {
         sendFallCommunication(fall.id, 'eskalation_tag28').catch(() => {})

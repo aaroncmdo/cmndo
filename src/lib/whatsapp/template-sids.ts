@@ -37,6 +37,7 @@ export type TemplateName =
   | 'kb_termin_reminder_24h'
   | 'kb_termin_reminder_1h'
   | 'no_show_kunde'
+  | 'eskalation_tag21'
   | 'nachbesichtigung_angefordert'
   | 'nachbesichtigung_termin'
   | 'nachbesichtigung_abgeschlossen'
@@ -85,6 +86,7 @@ export const TEMPLATE_CONFIGS: Record<TemplateName, TemplateConfig> = {
   kb_termin_reminder_24h: { envKey: 'TWILIO_TPL_KB_TERMIN_REMINDER_24H', variableCount: 4, beschreibung: 'T29: KB-Termin 24h-Erinnerung (Vorname, Datum, Uhrzeit, Kanal)' },
   kb_termin_reminder_1h:  { envKey: 'TWILIO_TPL_KB_TERMIN_REMINDER_1H', variableCount: 3, beschreibung: 'T30: KB-Termin 1h-Erinnerung (Vorname, Uhrzeit, Video-Link-oder-leer)' },
   no_show_kunde:          { envKey: 'TWILIO_TPL_NO_SHOW_KUNDE', variableCount: 2, beschreibung: 'No-Show: Kunde nicht erschienen (Vorname, Portal-Link)' },
+  eskalation_tag21:       { envKey: 'TWILIO_TPL_ESKALATION_TAG21', variableCount: 2, beschreibung: 'Eskalation 21 Tage — Direktanfrage (Vorname, Portal-Link)' },
   nachbesichtigung_angefordert: { envKey: 'TWILIO_TPL_NACHBESICHTIGUNG_ANGEFORDERT', variableCount: 2, beschreibung: 'Nachbesichtigung angefordert (Vorname, Portal-Link)' },
   nachbesichtigung_termin:      { envKey: 'TWILIO_TPL_NACHBESICHTIGUNG_TERMIN', variableCount: 3, beschreibung: 'Nachbesichtigung Termin (Vorname, Datum, Portal-Link)' },
   nachbesichtigung_abgeschlossen: { envKey: 'TWILIO_TPL_NACHBESICHTIGUNG_ABGESCHLOSSEN', variableCount: 2, beschreibung: 'Nachbesichtigung abgeschlossen (Vorname, Portal-Link)' },
