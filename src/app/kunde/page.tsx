@@ -40,6 +40,20 @@ export default async function KundeStartseite() {
     }
   }
 
+  // KFZ-207: Auto-Reaktivierung kalt-Lead wenn Kunde Portal öffnet
+  try {
+    const { createAdminClient: createAdmin } = await import('@/lib/supabase/admin')
+    const admin = createAdmin()
+    const { data: kaltLeads } = await admin.from('leads')
+      .select('id, vorname, nachname')
+      .eq('email', user.email!)
+      .eq('qualifizierungs_phase', 'kalt')
+    for (const lead of kaltLeads ?? []) {
+      await admin.from('leads').update({ qualifizierungs_phase: 'in-qualifizierung', updated_at: new Date().toISOString() }).eq('id', lead.id)
+      await admin.from('tasks').insert({ titel: `Lead reaktiviert: ${lead.vorname ?? ''} ${lead.nachname ?? ''} (Portal geöffnet)`, typ: 'dispatch', prioritaet: 'dringend', status: 'offen' })
+    }
+  } catch { /* non-critical */ }
+
   // Onboarding-Redirect
   // BUG-63: Redirect auf Fall-Detail statt /kunde/onboarding (Route existiert nicht)
   const needsOnboarding = faelle.find(f => f.onboarding_complete === false)

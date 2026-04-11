@@ -58,6 +58,13 @@ export default async function FlowPage({
       await svc.from('flow_links').update({ geoeffnet_am: new Date().toISOString(), status: 'geoeffnet' }).eq('id', flowLink.id)
       await svc.from('leads').update({ flow_link_geoeffnet: true, updated_at: new Date().toISOString() }).eq('id', leadId)
     }
+
+    // KFZ-207: Auto-Reaktivierung kalt-Lead wenn FlowLink geöffnet wird
+    const { data: lead } = await svc.from('leads').select('qualifizierungs_phase, vorname, nachname').eq('id', leadId).single()
+    if (lead?.qualifizierungs_phase === 'kalt') {
+      await svc.from('leads').update({ qualifizierungs_phase: 'in-qualifizierung', updated_at: new Date().toISOString() }).eq('id', leadId)
+      await svc.from('tasks').insert({ titel: `Lead reaktiviert: ${lead.vorname ?? ''} ${lead.nachname ?? ''} (FlowLink geöffnet)`, typ: 'dispatch', prioritaet: 'dringend', status: 'offen' })
+    }
   } else {
     // Backward compat: token might be lead_id
     leadId = token
