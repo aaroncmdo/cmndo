@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Script from 'next/script'
 import DokumenteTab from './DokumenteTab'
+import VsRegulierungTab from './components/VsRegulierungTab'
 import FallStepper from '@/components/admin/FallStepper'
 import FallActivityFeed, { buildActivityEvents } from '@/components/faelle/FallActivityFeed'
 import FallDokumenteSidebar, { type FallDokumentRow } from '@/components/faelle/FallDokumenteSidebar'
@@ -140,6 +141,17 @@ type Fall = Record<string, unknown> & {
   ki_geschaetzte_kosten_max: number | null
   schadenhoehe_netto: number | null
   vs_eskalationsstufe: string | null
+  vs_reaktion_typ: string | null
+  vs_reaktion_am: string | null
+  vs_ablehnungsgrund: string | null
+  vs_frist_bis: string | null
+  kuerzungs_betrag: number | null
+  ruege_counter: number | null
+  ruege_gesendet_am: string | null
+  ruege_betrag: number | null
+  zahlung_betrag: number | null
+  zahlung_eingegangen_am: string | null
+  schlussabrechnung_am: string | null
   kanzlei_ansprechpartner_name: string | null
   kanzlei_ansprechpartner_email: string | null
   kanzlei_ansprechpartner_telefon: string | null
@@ -491,7 +503,7 @@ function Badge({ children, color }: { children: React.ReactNode; color: string }
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
-type Tab = 'uebersicht' | 'dokumente' | 'dateien' | 'qc' | 'timeline' | 'kommunikation' | 'kanzlei' | 'chat' | 'abrechnung' | 'tasks'
+type Tab = 'uebersicht' | 'dokumente' | 'dateien' | 'qc' | 'timeline' | 'kommunikation' | 'kanzlei' | 'chat' | 'abrechnung' | 'tasks' | 'vs-regulierung'
 
 type TaskItem = {
   id: string
@@ -676,6 +688,7 @@ export default function FallakteClient({
     ['qc', `QC-Prüfung${qcCheckliste?.status === 'bestanden' ? ' ✓' : qcCheckliste?.status === 'nachbesserung' ? ' !' : ''}`],
     ['kommunikation', 'Kommunikation'],
     ['kanzlei', 'Kanzlei'],
+    ['vs-regulierung', 'VS-Regulierung'],
     ['abrechnung', 'Abrechnung'],
   ]
 
@@ -831,6 +844,9 @@ export default function FallakteClient({
             onRefresh={() => router.refresh()}
             teilnehmer={chatTeilnehmer ?? []}
           />
+        )}
+        {activeTab === 'vs-regulierung' && (
+          <VsRegulierungTab fall={fall} />
         )}
         {activeTab === 'abrechnung' && (
           <div id="abrechnung-section">
