@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { saveLeadQualifizierung, confirmGutachterTermin, setSvGesucht, sendFlowLinkCommunication } from './actions'
 import { sendFlowLink, updateServiceTyp } from '../../actions'
 import VersicherungCombobox from '@/components/VersicherungCombobox'
+import MandantenfragebogenStep from './MandantenfragebogenStep'
 import {
   PhoneCallIcon,
   ClipboardListIcon,
@@ -109,6 +110,7 @@ type GutachterSlot = {
 type MatchResult = { empfohlen: GutachterSlot | null; alternative_1: GutachterSlot | null; alternative_2: GutachterSlot | null }
 
 const STEPS = [
+  { key: 'mandantenfragebogen', label: 'Mandant', icon: FileTextIcon, phase: 'erstkontakt' },
   { key: 'erstkontakt', label: 'Erstkontakt', icon: PhoneCallIcon, phase: 'erstkontakt' },
   { key: 'schadentyp', label: 'Schadentyp', icon: ClipboardListIcon, phase: 'schadentyp-erfasst' },
   { key: 'konstellation', label: 'Konstellation', icon: UsersIcon, phase: 'konstellation-erfasst' },
@@ -298,6 +300,39 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
           <h3 className="text-sm font-semibold text-gray-800 mb-3">
             Schritt {openStep + 1}: {STEPS[openStep]?.label}
           </h3>
+
+          {STEPS[openStep]?.key === 'mandantenfragebogen' && (
+            <MandantenfragebogenStep
+              leadId={lead.id}
+              initialData={{
+                ist_fahrzeughalter: (lead as Record<string, unknown>).ist_fahrzeughalter as boolean ?? true,
+                finanzierung_leasing: (lead as Record<string, unknown>).finanzierung_leasing as string ?? 'keine',
+                vorsteuerabzugsberechtigt: (lead as Record<string, unknown>).vorsteuerabzugsberechtigt as boolean ?? false,
+                vorname: lead.vorname ?? '', nachname: lead.nachname ?? '',
+                telefon: lead.telefon ?? '', email: lead.email ?? '',
+                kunde_strasse: (lead as Record<string, unknown>).kunde_strasse as string ?? '',
+                kunde_plz: (lead as Record<string, unknown>).kunde_plz as string ?? '',
+                kunde_stadt: (lead as Record<string, unknown>).kunde_stadt as string ?? '',
+                halter_vorname: (lead as Record<string, unknown>).halter_vorname as string ?? '',
+                halter_nachname: (lead as Record<string, unknown>).halter_nachname as string ?? '',
+                halter_strasse: (lead as Record<string, unknown>).halter_strasse as string ?? '',
+                halter_plz: (lead as Record<string, unknown>).halter_plz as string ?? '',
+                halter_stadt: (lead as Record<string, unknown>).halter_stadt as string ?? '',
+                halter_telefon: (lead as Record<string, unknown>).halter_telefon as string ?? '',
+                halter_email: (lead as Record<string, unknown>).halter_email as string ?? '',
+                finanzierungsgeber_name: (lead as Record<string, unknown>).finanzierungsgeber_name as string ?? '',
+                finanzierungsgeber_adresse: (lead as Record<string, unknown>).finanzierungsgeber_adresse as string ?? '',
+                finanzierungsgeber_vertragsnr: (lead as Record<string, unknown>).finanzierungsgeber_vertragsnr as string ?? '',
+                kennzeichen: lead.kennzeichen ?? '', fahrzeug_hersteller: lead.fahrzeug_hersteller ?? '', fahrzeug_modell: lead.fahrzeug_modell ?? '',
+                fin: lead.fin ?? '', erstzulassung: lead.erstzulassung ?? '',
+                unfalldatum: (lead as Record<string, unknown>).unfalldatum as string ?? '',
+                unfallort: (lead as Record<string, unknown>).unfallort as string ?? '',
+                schadenhergang: (lead as Record<string, unknown>).schadenhergang as string ?? '',
+                service_typ: lead.service_typ ?? 'komplett',
+              }}
+              onComplete={() => setOpenStep(1)}
+            />
+          )}
 
           {STEPS[openStep]?.key === 'erstkontakt' && (
             <StepErstkontakt done={isStepDone(0)} saving={saving} onAdvance={() => saveAndAdvance('erstkontakt')}
