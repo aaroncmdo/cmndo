@@ -603,31 +603,41 @@ export async function qcNachbesserung(fallId: string, kommentar: string) {
     await supabase.from('qc_checkliste').insert({ fall_id: fallId, ...qcData })
   }
 
-  // Create task for Gutachter
+  // Fall-Daten + SV-Profile laden
   const { data: fallInfo } = await supabase
     .from('faelle')
     .select('fall_nummer, sv_id')
     .eq('id', fallId)
     .single()
 
+  const fallNr = fallInfo?.fall_nummer ?? fallId.slice(0, 8)
+
+  // KFZ-204: Task fuer SV mit profile_id (damit SV ihn im Portal sieht)
+  let svProfileId: string | null = null
+  if (fallInfo?.sv_id) {
+    const { data: svd } = await supabase.from('sachverstaendige').select('profile_id').eq('id', fallInfo.sv_id).single()
+    svProfileId = svd?.profile_id ?? null
+  }
+
   await supabase.from('tasks').insert({
     fall_id: fallId,
     typ: 'filmcheck',
-    titel: 'QC Nachbesserung erforderlich',
-    beschreibung: kommentar || 'Bitte Unterlagen nachbessern.',
+    titel: `Gutachten korrigieren für Fall ${fallNr}`,
+    beschreibung: kommentar || 'Bitte Unterlagen nachbessern. Prüfe die Anmerkungen im Portal.',
     status: 'offen',
-    zugewiesen_an: fallInfo?.sv_id ? fallInfo.sv_id : null,
+    prioritaet: 'dringend',
+    zugewiesen_an: svProfileId,
   })
 
   await supabase.from('timeline').insert({
     fall_id: fallId,
     typ: 'system',
-    titel: 'QC-Pruefung: Nachbesserung angefordert',
+    titel: 'QC nicht bestanden — Nachbesserung angefordert',
     beschreibung: kommentar || null,
     erstellt_von: user.id,
   })
 
-  // Gutachter-Mitteilung: Nachbesserung erforderlich
+  // Gutachter-Mitteilung: Nachbesserung erforderlich (im SV-Portal sichtbar)
   if (fallInfo?.sv_id) {
     createGutachterMitteilung(fallInfo.sv_id, 'qc_nachbesserung', fallId, {
       kommentar: kommentar || undefined,
@@ -635,13 +645,23 @@ export async function qcNachbesserung(fallId: string, kommentar: string) {
     }).catch(() => {})
   }
 
-  // WhatsApp: Nachbesserung nötig
+  // KFZ-204: In-App Notification fuer SV
+  if (svProfileId) {
+    createNotification(
+      svProfileId,
+      'qc-fehlgeschlagen',
+      `Gutachten nachbessern: Fall ${fallNr}`,
+      kommentar || 'QC nicht bestanden. Bitte Anmerkungen im Portal prüfen.',
+      `/gutachter/fall/${fallId}`,
+    ).catch(() => {})
+  }
+
+  // WhatsApp: Nachbesserung nötig (SV-04c via Registry)
   sendFallCommunication(fallId, 'nachbesserung_gutachten').catch(() => {})
 
-  // SV-05: Nachbesserung Task für Gutachter
-  if (fallInfo?.sv_id) {
-    const { data: svd } = await supabase.from('sachverstaendige').select('profile_id').eq('id', fallInfo.sv_id).single()
-    if (svd?.profile_id) triggerSV05(fallId, svd.profile_id, kommentar || 'Nachbesserung erforderlich').catch(() => {})
+  // SV-05: Nachbesserung Task für Gutachter (Deadline +24h, kritisch)
+  if (svProfileId) {
+    triggerSV05(fallId, svProfileId, kommentar || 'Nachbesserung erforderlich').catch(() => {})
   }
 
   revalidatePath(`/admin/faelle/${fallId}`)
