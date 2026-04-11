@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { markiereAlsBezahlt, storniereAbrechnung, manuellVersenden, manuellGenerieren } from './abrechnungen-actions'
 
 type Abrechnung = {
@@ -60,7 +61,7 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
     try {
       await markiereAlsBezahlt(bezahltModal.id, parseFloat(bezahltBetrag) || bezahltModal.brutto)
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Fehler')
+      toast.error(err instanceof Error ? err.message : 'Fehler')
     }
     setBezahltModal(null)
     setBezahltBetrag('')
@@ -76,14 +77,14 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
 
   async function handleVersenden(id: string) {
     setLoading(id)
-    try { await manuellVersenden(id) } catch (err) { alert(err instanceof Error ? err.message : 'Fehler') }
+    try { await manuellVersenden(id) } catch (err) { toast.error(err instanceof Error ? err.message : 'Fehler') }
     setLoading(null)
   }
 
   async function handleGenerieren() {
     if (!genMonat) return
     setLoading('gen')
-    try { await manuellGenerieren(genMonat, genTyp) } catch (err) { alert(err instanceof Error ? err.message : 'Fehler') }
+    try { await manuellGenerieren(genMonat, genTyp) } catch (err) { toast.error(err instanceof Error ? err.message : 'Fehler') }
     setLoading(null)
     setGenMonat('')
   }

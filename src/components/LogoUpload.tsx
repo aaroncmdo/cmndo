@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { toast } from 'sonner'
 import { UploadIcon, XIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -58,7 +59,7 @@ export default function LogoUpload({ svId, currentLogoUrl, currentPrimary, curre
   const fileRef = useRef<HTMLInputElement>(null)
 
   async function handleUpload(file: File) {
-    if (file.size > 2 * 1024 * 1024) { alert('Max 2MB'); return }
+    if (file.size > 2 * 1024 * 1024) { toast.error('Max 2MB'); return }
     setUploading(true)
     try {
       const supabase = createClient()

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
+import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import Script from 'next/script'
 import { createClient } from '@/lib/supabase/client'
@@ -341,13 +342,13 @@ export default function ProfilClient({
             {!sv.kalender_sync_aktiv && (
               <div className="flex gap-2">
                 <button
-                  onClick={() => alert('Google OAuth2 wird konfiguriert. Bitte Admin kontaktieren.')}
+                  onClick={() => toast.info('Google OAuth2 wird konfiguriert. Bitte Admin kontaktieren.')}
                   className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-300 transition-colors"
                 >
                   Google Kalender
                 </button>
                 <button
-                  onClick={() => alert('Outlook OAuth2 wird konfiguriert. Bitte Admin kontaktieren.')}
+                  onClick={() => toast.info('Outlook OAuth2 wird konfiguriert. Bitte Admin kontaktieren.')}
                   className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-300 transition-colors"
                 >
                   Outlook Kalender
@@ -469,7 +470,7 @@ function BrandingSection({ svId }: { svId: string }) {
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    if (file.size > 2 * 1024 * 1024) { alert('Max 2 MB'); return }
+    if (file.size > 2 * 1024 * 1024) { toast.error('Max 2 MB'); return }
     setUploading(true)
     try {
       const { uploadGutachterLogo } = await import('@/lib/actions/branding-actions')
@@ -479,7 +480,7 @@ function BrandingSection({ svId }: { svId: string }) {
       setLogoUrl(result.logo_url)
       setPrimary(result.primary)
       setSecondary(result.secondary)
-    } catch (err) { alert(err instanceof Error ? err.message : 'Upload fehlgeschlagen') }
+    } catch (err) { toast.error(err instanceof Error ? err.message : 'Upload fehlgeschlagen') }
     setUploading(false)
   }
 
@@ -495,7 +496,7 @@ function BrandingSection({ svId }: { svId: string }) {
       })
       setSaved(true)
       router.refresh()
-    } catch (err) { alert(err instanceof Error ? err.message : 'Speichern fehlgeschlagen') }
+    } catch (err) { toast.error(err instanceof Error ? err.message : 'Speichern fehlgeschlagen') }
     setSaving(false)
   }
 

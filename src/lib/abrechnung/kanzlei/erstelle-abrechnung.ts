@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { FINANCE } from '@/lib/finance/constants'
 import { sendEmail } from '@/lib/email/google/client'
 import { render } from '@react-email/render'
 import { KanzleiMagicLinkAbrechnungEmail, subject as magicLinkSubject } from '@/lib/email/google/templates/KanzleiMagicLinkAbrechnung'
@@ -114,7 +115,7 @@ export async function erstelleKanzleiAbrechnung(
       // Betraege berechnen
       const anzahl = faelle.length
       const nettoGesamt = anzahl * BETRAG_PRO_VOLLMACHT_NETTO
-      const mwstBetrag = Math.round(nettoGesamt * 0.19 * 100) / 100
+      const mwstBetrag = Math.round(nettoGesamt * FINANCE.MWST_PROZENT / 100 * 100) / 100
       const brutto = Math.round((nettoGesamt + mwstBetrag) * 100) / 100
 
       // Magic-Link Token generieren

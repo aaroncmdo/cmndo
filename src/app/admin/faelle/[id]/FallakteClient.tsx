@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
+import { toast } from 'sonner'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Script from 'next/script'
 import DokumenteTab from './DokumenteTab'
@@ -1739,7 +1740,7 @@ function TabDokumente({
       await uploadPflichtdokument(fall.id, pflichtdok.id, publicUrl)
       onRefresh()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Upload fehlgeschlagen')
+      toast.error(err instanceof Error ? err.message : 'Upload fehlgeschlagen')
     } finally {
       setUploading(null)
     }
@@ -1905,7 +1906,7 @@ function TabDateien({
       })
       onRefresh()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Upload fehlgeschlagen')
+      toast.error(err instanceof Error ? err.message : 'Upload fehlgeschlagen')
     } finally {
       setUploading(false)
     }
@@ -2036,7 +2037,7 @@ function TabTimeline({
       setShowForm(false)
       onRefresh()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Fehler')
+      toast.error(err instanceof Error ? err.message : 'Fehler')
     } finally {
       setSaving(false)
     }
@@ -2298,7 +2299,7 @@ function TabQcPruefung({
       await upsertQcCheckliste(fall.id, payload)
       onRefresh()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Fehler')
+      toast.error(err instanceof Error ? err.message : 'Fehler')
     } finally {
       setSaving(false)
     }
@@ -2310,7 +2311,7 @@ function TabQcPruefung({
       await qcBestanden(fall.id, kommentar)
       onRefresh()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Fehler')
+      toast.error(err instanceof Error ? err.message : 'Fehler')
     } finally {
       setSaving(false)
     }
@@ -2318,7 +2319,7 @@ function TabQcPruefung({
 
   async function handleNachbesserung() {
     if (!kommentar.trim()) {
-      alert('Bitte Kommentar eingeben, was nachgebessert werden muss.')
+      toast.warning('Bitte Kommentar eingeben, was nachgebessert werden muss.')
       return
     }
     setSaving(true)
@@ -2326,7 +2327,7 @@ function TabQcPruefung({
       await qcNachbesserung(fall.id, kommentar)
       onRefresh()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Fehler')
+      toast.error(err instanceof Error ? err.message : 'Fehler')
     } finally {
       setSaving(false)
     }
@@ -2515,7 +2516,7 @@ function TabKanzlei({
       await setAnschlussschreibenDatum(fall.id)
       onRefresh()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Fehler')
+      toast.error(err instanceof Error ? err.message : 'Fehler')
     } finally {
       setSaving(false)
     }
@@ -2530,7 +2531,7 @@ function TabKanzlei({
       setBetrag('')
       onRefresh()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Fehler')
+      toast.error(err instanceof Error ? err.message : 'Fehler')
     } finally {
       setSaving(false)
     }
@@ -2542,7 +2543,7 @@ function TabKanzlei({
       await eskalation(fall.id, stufe)
       onRefresh()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Fehler')
+      toast.error(err instanceof Error ? err.message : 'Fehler')
     } finally {
       setSaving(false)
     }
@@ -2560,7 +2561,7 @@ function TabKanzlei({
       await saveKanzleiAnsprechpartner(fall.id, { name: kName, email: kEmail, telefon: kTelefon, position: kPosition })
       onRefresh()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Fehler')
+      toast.error(err instanceof Error ? err.message : 'Fehler')
     } finally {
       setKSaving(false)
     }
@@ -2815,7 +2816,7 @@ function TabChat({
       setText('')
       onRefresh()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Fehler beim Senden')
+      toast.error(err instanceof Error ? err.message : 'Fehler beim Senden')
     } finally {
       setSending(false)
     }

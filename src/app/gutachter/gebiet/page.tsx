@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { MapPinIcon, UsersIcon, FlameIcon, ArrowUpIcon, XIcon, SendIcon, EyeIcon, LayersIcon } from 'lucide-react'
 import { PAKETE, getPaket } from '@/lib/pakete'
@@ -209,7 +210,7 @@ export default function GebietPage() {
       sv_id: svData.id, altes_paket: svData.paket, neues_paket: neuPaket,
       differenz_anzahlung: Math.max(0, differenz),
     })
-    alert(`Upgrade-Anfrage gesendet! Differenz-Anzahlung: ${Math.max(0, differenz).toLocaleString('de-DE')}€`)
+    toast.success(`Upgrade-Anfrage gesendet! Differenz-Anzahlung: ${Math.max(0, differenz).toLocaleString('de-DE')}€`)
     setUpgrading(false)
   }
 

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { FINANCE } from '@/lib/finance/constants'
 
 export const dynamic = 'force-dynamic'
 
@@ -93,7 +94,7 @@ export async function GET() {
     const bruttoNetto = faelle.reduce((s, f) => s + (Number(f.lead_preis_netto) || 0), 0)
     const guthabenVerrechnet = faelle.reduce((s, f) => s + (Number(f.guthaben_verrechnet_netto) || 0), 0)
     const endbetragNetto = faelle.reduce((s, f) => s + (Number(f.sv_nachzahlung_netto) || 0), 0)
-    const mwst = Math.round(endbetragNetto * 0.19 * 100) / 100
+    const mwst = Math.round(endbetragNetto * FINANCE.MWST_PROZENT / 100 * 100) / 100
     const endbetragBrutto = Math.round((endbetragNetto + mwst) * 100) / 100
 
     // Empfaenger-Daten aus profiles laden
@@ -240,7 +241,7 @@ export async function GET() {
   // ─── KFZ-152 Phase 2+3: Sammelrechnungen pro Buero/Akademie-Org ─────────
   for (const [orgId, acc] of orgAccumulator.entries()) {
     const totalNetto = acc.positions.reduce((s, p) => s + p.sv_nachzahlung_netto, 0)
-    const mwst = Math.round(totalNetto * 0.19 * 100) / 100
+    const mwst = Math.round(totalNetto * FINANCE.MWST_PROZENT / 100 * 100) / 100
     const totalBrutto = Math.round((totalNetto + mwst) * 100) / 100
     if (totalNetto <= 0) continue
 

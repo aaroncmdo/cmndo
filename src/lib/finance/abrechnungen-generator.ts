@@ -110,7 +110,7 @@ export async function generiereMarketingAbrechnung(monat: string): Promise<{ abr
       fall_id: fall?.id ?? null,
       beschreibung: `CPA für Fall ${fallNr} — ${name} (SA ${new Date(lead.vollmacht_datum!).toLocaleDateString('de-DE')})`,
       betrag_netto: CPA,
-      betrag_brutto: Math.round(CPA * 1.19 * 100) / 100,
+      betrag_brutto: Math.round(CPA * (1 + FINANCE.MWST_PROZENT / 100) * 100) / 100,
     })
   }
 
@@ -220,7 +220,7 @@ export async function generiereKanzleiAbrechnungen(monat: string): Promise<Array
         fall_id: fall.id,
         beschreibung: `Honorar Fall ${fall.fall_nummer ?? fall.id.slice(0, 8)} — ${kundeName}`,
         betrag_netto: honorar,
-        betrag_brutto: Math.round(honorar * 1.19 * 100) / 100,
+        betrag_brutto: Math.round(honorar * (1 + FINANCE.MWST_PROZENT / 100) * 100) / 100,
       })
     }
 
