@@ -131,18 +131,21 @@ async function main() {
       vorname: 'Peter', nachname: 'Becker', telefon: TEST_PHONE, email: 'peter.becker@test.de',
       qualifizierungs_phase: 'neu',
       gegner_versicherung: 'Allianz', gegner_bekannt: true,
+      zugewiesen_an: kbId,
     },
     {
       vorname: 'Sandra', nachname: 'Klein', telefon: TEST_PHONE, email: 'sandra.klein@test.de',
       qualifizierungs_phase: 'in-qualifizierung',
       gegner_versicherung: 'HUK-COBURG', gegner_bekannt: true,
       ist_fahrzeughalter: false, halter_vorname: 'Michael', halter_nachname: 'Klein',
+      zugewiesen_an: kbId,
     },
     {
       vorname: 'Ahmed', nachname: 'Yilmaz', telefon: TEST_PHONE, email: 'ahmed.yilmaz@test.de',
       qualifizierungs_phase: 'flow-versendet',
       gegner_versicherung: 'AXA', gegner_bekannt: true,
       service_typ: 'komplett',
+      zugewiesen_an: kbId,
     },
   ]
 
