@@ -269,6 +269,36 @@ export const COMMUNICATION_REGISTRY: Record<string, TriggerConfig> = {
     description: 'T30: 1h-Erinnerung KB-Beratungstermin',
   },
 
+  nachbesichtigung_angefordert: {
+    trigger_name: 'nachbesichtigung_angefordert',
+    channel: 'whatsapp',
+    recipient: 'kunde',
+    t_number: null,
+    whatsapp_template_name: 'nachbesichtigung_angefordert',
+    has_attachment: false,
+    description: 'Nachbesichtigung angefordert — Kunde soll Termin waehlen',
+  },
+
+  nachbesichtigung_termin: {
+    trigger_name: 'nachbesichtigung_termin',
+    channel: 'whatsapp',
+    recipient: 'kunde',
+    t_number: null,
+    whatsapp_template_name: 'nachbesichtigung_termin',
+    has_attachment: false,
+    description: 'Nachbesichtigungstermin bestaetigt',
+  },
+
+  nachbesichtigung_abgeschlossen: {
+    trigger_name: 'nachbesichtigung_abgeschlossen',
+    channel: 'whatsapp',
+    recipient: 'kunde',
+    t_number: null,
+    whatsapp_template_name: 'nachbesichtigung_abgeschlossen',
+    has_attachment: false,
+    description: 'Nachbesichtigung ist abgeschlossen',
+  },
+
   no_show_kunde: {
     trigger_name: 'no_show_kunde',
     channel: 'whatsapp',

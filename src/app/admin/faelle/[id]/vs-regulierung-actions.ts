@@ -126,7 +126,16 @@ export async function vsWillNachbesichtigung(fallId: string, details: string) {
   await supabase.from('faelle').update({
     vs_reaktion_typ: 'nachbesichtigung',
     vs_reaktion_am: new Date().toISOString(),
+    nachbesichtigung_status: 'angefordert',
+    nachbesichtigung_angefordert_am: new Date().toISOString(),
   }).eq('id', fallId)
+
+  // KFZ-210: Status → nachbesichtigung-laeuft (Soft-Blocker)
+  try {
+    await transitionFallStatus(fallId, 'nachbesichtigung-laeuft', { user_id: user.id })
+  } catch {
+    // Transition evtl. nicht erlaubt
+  }
 
   const { data: fallInfo } = await supabase.from('faelle').select('fall_nummer').eq('id', fallId).single()
 
@@ -139,6 +148,9 @@ export async function vsWillNachbesichtigung(fallId: string, details: string) {
     entity_type: 'case',
     entity_id: fallId,
   })
+
+  // KFZ-210: WA an Kunden
+  sendFallCommunication(fallId, 'nachbesichtigung_angefordert').catch(() => {})
 
   await supabase.from('timeline').insert({
     fall_id: fallId,

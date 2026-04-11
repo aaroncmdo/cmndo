@@ -101,6 +101,14 @@ const TEMPLATES: Record<TemplateName, (vars: Record<string, string>) => string> 
   no_show_kunde: (v) =>
     `Hallo ${v['1'] ?? ''}, wir haben Sie leider beim vereinbarten Gutachtertermin nicht angetroffen. Bitte melden Sie sich, damit wir einen neuen Termin fuer Sie vereinbaren koennen.`,
 
+  // KFZ-210: Nachbesichtigung
+  nachbesichtigung_angefordert: (v) =>
+    `Hallo ${v['1'] ?? ''}, die Versicherung hat eine erneute Besichtigung Ihres Fahrzeugs angefordert. Bitte waehlen Sie einen Termin in Ihrem Portal: ${v['2'] ?? ''}`,
+  nachbesichtigung_termin: (v) =>
+    `Hallo ${v['1'] ?? ''}, Ihr Nachbesichtigungstermin ist bestaetigt fuer ${v['2'] ?? ''}. Bitte stellen Sie Ihr Fahrzeug bereit. Details: ${v['3'] ?? ''}`,
+  nachbesichtigung_abgeschlossen: (v) =>
+    `Hallo ${v['1'] ?? ''}, die Nachbesichtigung Ihres Fahrzeugs ist abgeschlossen. Wir informieren Sie sobald das Ergebnis vorliegt. Portal: ${v['2'] ?? ''}`,
+
 }
 // KFZ-200 → KFZ-201: SV-Navigation Templates (sv_nav_unterwegs, sv_nav_15min,
 // sv_nav_5min, sv_nav_angekommen, sv_begutachtung_fertig) wurden konsolidiert:
