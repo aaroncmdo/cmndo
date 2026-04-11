@@ -6,6 +6,7 @@ import KpiCards from './_components/KpiCards'
 import AusstehendeZahlungenWidget from './_components/AusstehendeZahlungenWidget'
 import WichtigeUpdatesWidget from './_components/WichtigeUpdatesWidget'
 import DashboardStats from './_components/DashboardStats'
+import TageskalenderWidget from './_components/TageskalenderWidget'
 
 // KFZ-155: Admin-Dashboard Rework — komplett ueberarbeitet.
 //
@@ -60,7 +61,12 @@ export default async function AdminDashboardPage() {
           <KpiCards />
         </Suspense>
 
-        {/* Row 3: Ausstehende Zahlungen + Wichtige Updates (split) */}
+        {/* Row 3: Tageskalender + Wichtige Updates + Zahlungen */}
+        <Suspense fallback={<WidgetSkeleton height="h-48" />}>
+          <TageskalenderWidget />
+        </Suspense>
+
+        {/* Row 4: Ausstehende Zahlungen + Wichtige Updates (split) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 flex-1 min-h-[360px]">
           <Suspense fallback={<WidgetSkeleton height="h-full" />}>
             <AusstehendeZahlungenWidget />

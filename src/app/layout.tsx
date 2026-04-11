@@ -50,7 +50,7 @@ export default function RootLayout({
           Zum Hauptinhalt springen
         </a>
         {children}
-        <Footer />
+        {/* BUG-11: Footer nur auf Public-Seiten — App-Layouts haben eigene fullscreen Container */}
         <Toaster position="top-right" richColors closeButton />
         <CookieBanner />
         <PwaInstallBanner />
