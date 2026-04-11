@@ -1530,6 +1530,52 @@ function TabUebersicht({
         )}
       </Section>
 
+      {/* KFZ-208: Mandantenfragebogen-Sections */}
+      <Section title="Mandant">
+        <div className="space-y-1">
+          <div className="flex gap-2 mb-2">
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${(fall as Record<string,unknown>).ist_fahrzeughalter !== false ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+              Fahrzeughalter: {(fall as Record<string,unknown>).ist_fahrzeughalter !== false ? 'Ja' : 'Nein'}
+            </span>
+            {!!(fall as Record<string,unknown>).vorsteuerabzugsberechtigt && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-violet-100 text-violet-700">Vorsteuerabzugsberechtigt</span>
+            )}
+            {String((fall as Record<string,unknown>).finanzierung_leasing ?? '') !== '' && String((fall as Record<string,unknown>).finanzierung_leasing) !== 'keine' && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-blue-100 text-blue-700">
+                {String((fall as Record<string,unknown>).finanzierung_leasing) === 'leasing' ? 'Leasing' : 'Finanzierung'}
+              </span>
+            )}
+          </div>
+        </div>
+      </Section>
+
+      {(fall as Record<string,unknown>).ist_fahrzeughalter === false && (
+        <Section title="Fahrzeughalter">
+          <div className="space-y-1">
+            <InfoRow label="Name" value={[(fall as Record<string,unknown>).halter_vorname, (fall as Record<string,unknown>).halter_nachname].filter(Boolean).join(' ') || '—'} />
+            <InfoRow label="Adresse" value={[(fall as Record<string,unknown>).halter_strasse, (fall as Record<string,unknown>).halter_plz, (fall as Record<string,unknown>).halter_stadt].filter(Boolean).join(', ') || '—'} />
+            {!!(fall as Record<string,unknown>).halter_telefon && <InfoRow label="Telefon" value={String((fall as Record<string,unknown>).halter_telefon)} />}
+            {!!(fall as Record<string,unknown>).halter_email && <InfoRow label="Email" value={String((fall as Record<string,unknown>).halter_email)} />}
+          </div>
+        </Section>
+      )}
+
+      {!!(fall as Record<string,unknown>).finanzierung_leasing && String((fall as Record<string,unknown>).finanzierung_leasing) !== 'keine' && (
+        <Section title={String((fall as Record<string,unknown>).finanzierung_leasing) === 'leasing' ? 'Leasinggeber' : 'Finanzierungsgeber'}>
+          <div className="space-y-1">
+            <InfoRow label="Name" value={String((fall as Record<string,unknown>).finanzierungsgeber_name ?? '—')} />
+            <InfoRow label="Adresse" value={String((fall as Record<string,unknown>).finanzierungsgeber_adresse ?? '—')} />
+            {!!(fall as Record<string,unknown>).finanzierungsgeber_vertragsnr && <InfoRow label="Vertragsnr" value={String((fall as Record<string,unknown>).finanzierungsgeber_vertragsnr)} />}
+          </div>
+        </Section>
+      )}
+
+      {!!(fall as Record<string,unknown>).schadenhergang && (
+        <Section title="Schadenhergang">
+          <p className="text-sm text-gray-700 whitespace-pre-wrap">{String((fall as Record<string,unknown>).schadenhergang)}</p>
+        </Section>
+      )}
+
       {/* Fahrzeugdaten + FIN */}
       <Section title="Fahrzeugdaten">
         <div className="space-y-0">
