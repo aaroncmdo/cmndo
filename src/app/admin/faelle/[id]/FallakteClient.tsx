@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Script from 'next/script'
 import { FALL_STATUS_LABELS } from '@/lib/statusLabels'
+import { updateFall } from './actions'
 import DokumenteTab from './DokumenteTab'
 import VsRegulierungTab from './components/VsRegulierungTab'
 import FallActivityFeed, { buildActivityEvents } from '@/components/faelle/FallActivityFeed'
@@ -483,6 +484,81 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     <div className="bg-white rounded-2xl p-5 border border-gray-200">
       <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">{title}</h3>
       {children}
+    </div>
+  )
+}
+
+// AAR-49: Editierbare Section mit Inline-Edit Toggle
+function EditableSection({ title, fallId, fields, children }: {
+  title: string
+  fallId: string
+  fields?: { key: string; label: string; value: unknown; type?: 'text' | 'date' | 'number' | 'textarea' | 'toggle' | 'select'; options?: { value: string; label: string }[] }[]
+  children?: React.ReactNode
+}) {
+  const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [values, setValues] = useState<Record<string, unknown>>({})
+  const router = useRouter()
+
+  function startEdit() {
+    const initial: Record<string, unknown> = {}
+    for (const f of fields ?? []) initial[f.key] = f.value
+    setValues(initial)
+    setEditing(true)
+  }
+
+  async function save() {
+    setSaving(true)
+    const result = await updateFall(fallId, values)
+    setSaving(false)
+    if (result.success) {
+      setEditing(false)
+      toast.success('Gespeichert')
+      router.refresh()
+    } else {
+      toast.error(result.error ?? 'Fehler')
+    }
+  }
+
+  return (
+    <div className="bg-white rounded-2xl p-5 border border-gray-200">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider">{title}</h3>
+        {fields && fields.length > 0 && !editing && (
+          <button onClick={startEdit} className="text-[10px] text-[#4573A2] hover:underline">Bearbeiten</button>
+        )}
+        {editing && (
+          <div className="flex gap-2">
+            <button onClick={() => setEditing(false)} className="text-[10px] text-gray-400 hover:text-gray-600">Abbrechen</button>
+            <button onClick={save} disabled={saving} className="text-[10px] text-white bg-[#4573A2] px-2 py-0.5 rounded hover:bg-[#3a6290] disabled:opacity-50">
+              {saving ? '...' : 'Speichern'}
+            </button>
+          </div>
+        )}
+      </div>
+      {editing && fields ? (
+        <div className="space-y-2">
+          {fields.map(f => (
+            <div key={f.key}>
+              <label className="text-[10px] text-gray-500 mb-0.5 block">{f.label}</label>
+              {f.type === 'toggle' ? (
+                <div className="flex gap-2">
+                  <button onClick={() => setValues(v => ({ ...v, [f.key]: true }))} className={`flex-1 px-2 py-1.5 rounded text-xs font-medium ${values[f.key] === true ? 'bg-[#0D1B3E] text-white' : 'bg-gray-100 text-gray-600'}`}>Ja</button>
+                  <button onClick={() => setValues(v => ({ ...v, [f.key]: false }))} className={`flex-1 px-2 py-1.5 rounded text-xs font-medium ${values[f.key] === false ? 'bg-[#0D1B3E] text-white' : 'bg-gray-100 text-gray-600'}`}>Nein</button>
+                </div>
+              ) : f.type === 'select' ? (
+                <select value={String(values[f.key] ?? '')} onChange={e => setValues(v => ({ ...v, [f.key]: e.target.value }))} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm bg-white">
+                  {f.options?.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              ) : f.type === 'textarea' ? (
+                <textarea value={String(values[f.key] ?? '')} onChange={e => setValues(v => ({ ...v, [f.key]: e.target.value }))} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm h-20 resize-none" />
+              ) : (
+                <input type={f.type ?? 'text'} value={String(values[f.key] ?? '')} onChange={e => setValues(v => ({ ...v, [f.key]: f.type === 'number' ? (e.target.value ? Number(e.target.value) : null) : e.target.value || null }))} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
+              )}
+            </div>
+          ))}
+        </div>
+      ) : children}
     </div>
   )
 }
@@ -1537,7 +1613,13 @@ function TabUebersicht({
       </Section>
 
       {/* KFZ-208: Mandantenfragebogen-Sections */}
-      <Section title="Mandant">
+      <EditableSection title="Mandant" fallId={fall.id} fields={[
+        { key: 'ist_fahrzeughalter', label: 'Fahrzeughalter', value: (fall as Record<string,unknown>).ist_fahrzeughalter ?? true, type: 'toggle' },
+        { key: 'vorsteuerabzugsberechtigt', label: 'Vorsteuerabzugsberechtigt', value: (fall as Record<string,unknown>).vorsteuerabzugsberechtigt ?? false, type: 'toggle' },
+        { key: 'hat_vorschaeden', label: 'Vorschäden', value: (fall as Record<string,unknown>).hat_vorschaeden ?? false, type: 'toggle' },
+        { key: 'ist_totalschaden', label: 'Totalschaden', value: fall.ist_totalschaden ?? false, type: 'toggle' },
+        { key: 'finanzierung_leasing', label: 'Finanzierung/Leasing', value: (fall as Record<string,unknown>).finanzierung_leasing ?? 'keine', type: 'select', options: [{ value: 'keine', label: 'Keine' }, { value: 'finanzierung', label: 'Finanzierung' }, { value: 'leasing', label: 'Leasing' }] },
+      ]}>
         <div className="space-y-1">
           <div className="flex gap-2 mb-2">
             <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${(fall as Record<string,unknown>).ist_fahrzeughalter !== false ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
@@ -1559,7 +1641,7 @@ function TabUebersicht({
             )}
           </div>
         </div>
-      </Section>
+      </EditableSection>
 
       {(fall as Record<string,unknown>).ist_fahrzeughalter === false && (
         <Section title="Fahrzeughalter">
@@ -1573,20 +1655,25 @@ function TabUebersicht({
       )}
 
       {!!(fall as Record<string,unknown>).finanzierung_leasing && String((fall as Record<string,unknown>).finanzierung_leasing) !== 'keine' && (
-        <Section title={String((fall as Record<string,unknown>).finanzierung_leasing) === 'leasing' ? 'Leasinggeber' : 'Finanzierungsgeber'}>
+        <EditableSection title={String((fall as Record<string,unknown>).finanzierung_leasing) === 'leasing' ? 'Leasinggeber' : 'Finanzierungsgeber'} fallId={fall.id} fields={[
+          { key: 'finanzierungsgeber_name', label: 'Name', value: (fall as Record<string,unknown>).finanzierungsgeber_name ?? '', type: 'text' },
+          { key: 'finanzierungsgeber_adresse', label: 'Adresse', value: (fall as Record<string,unknown>).finanzierungsgeber_adresse ?? '', type: 'text' },
+          { key: 'finanzierungsgeber_vertragsnr', label: 'Vertragsnr', value: (fall as Record<string,unknown>).finanzierungsgeber_vertragsnr ?? '', type: 'text' },
+        ]}>
           <div className="space-y-1">
             <InfoRow label="Name" value={String((fall as Record<string,unknown>).finanzierungsgeber_name ?? '—')} />
             <InfoRow label="Adresse" value={String((fall as Record<string,unknown>).finanzierungsgeber_adresse ?? '—')} />
             {!!(fall as Record<string,unknown>).finanzierungsgeber_vertragsnr && <InfoRow label="Vertragsnr" value={String((fall as Record<string,unknown>).finanzierungsgeber_vertragsnr)} />}
           </div>
-        </Section>
+        </EditableSection>
       )}
 
-      {!!(fall as Record<string,unknown>).schadenhergang && (
-        <Section title="Schadenhergang">
-          <p className="text-sm text-gray-700 whitespace-pre-wrap">{String((fall as Record<string,unknown>).schadenhergang)}</p>
-        </Section>
-      )}
+      {/* Schadenhergang */}
+      <EditableSection title="Schadenhergang" fallId={fall.id} fields={[
+        { key: 'schadenhergang', label: 'Schadenhergang', value: (fall as Record<string,unknown>).schadenhergang ?? '', type: 'textarea' },
+      ]}>
+        <p className="text-sm text-gray-700 whitespace-pre-wrap">{String((fall as Record<string,unknown>).schadenhergang ?? '—')}</p>
+      </EditableSection>
 
       {/* Fahrzeugdaten + FIN */}
       <Section title="Fahrzeugdaten">

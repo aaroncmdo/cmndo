@@ -1119,3 +1119,49 @@ export async function saveRegulierungsKlassifizierung(fallId: string, data: {
 
   revalidatePath(`/admin/faelle/${fallId}`)
 }
+
+// ─── AAR-49: Generisches Fall-Update (KEIN Status!) ──────────────────────────
+
+const BLOCKED_FIELDS = new Set(['id', 'status', 'created_at'])
+
+export async function updateFall(
+  fallId: string,
+  updates: Record<string, unknown>,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  // Status darf NIEMALS ueber updateFall geaendert werden
+  const safeUpdates: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(updates)) {
+    if (BLOCKED_FIELDS.has(k)) continue
+    safeUpdates[k] = v
+  }
+
+  if (Object.keys(safeUpdates).length === 0) return { success: true }
+
+  safeUpdates.updated_at = new Date().toISOString()
+
+  const { error } = await supabase
+    .from('faelle')
+    .update(safeUpdates)
+    .eq('id', fallId)
+
+  if (error) return { success: false, error: error.message }
+
+  // Timeline-Eintrag
+  const changedFields = Object.keys(safeUpdates).filter(k => k !== 'updated_at')
+  if (changedFields.length > 0) {
+    await supabase.from('timeline').insert({
+      fall_id: fallId,
+      typ: 'system',
+      titel: 'Fall aktualisiert',
+      beschreibung: `Felder geaendert: ${changedFields.join(', ')}`,
+      erstellt_von: user.id,
+    })
+  }
+
+  revalidatePath(`/admin/faelle/${fallId}`)
+  return { success: true }
+}
