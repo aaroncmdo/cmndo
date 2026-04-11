@@ -709,9 +709,9 @@ export default function FallakteClient({
         </div>
       )}
 
-      {/* ─── STICKY HEADER (fest oben, scrollt NICHT mit) ─── */}
-      <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
-        <div className="px-4">
+      {/* ─── STICKY HEADER (edge-to-edge, bricht aus PageContainer padding aus) ─── */}
+      <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm flex-shrink-0 -mx-4 sm:-mx-6 md:-mx-8 lg:-mx-16 xl:-mx-24">
+        <div className="px-4 sm:px-6 md:px-8 lg:px-16 xl:px-24">
           {/* Zeile 1: Name + Status */}
           <div className="flex items-center justify-between py-2">
             <div className="flex items-center gap-3">
