@@ -118,6 +118,9 @@ async function main() {
       radius_km: 40,
       paket: 'pro',
       onboarding_status: 'abgeschlossen',
+      portal_zugang_freigeschaltet: true,
+      vertrag_unterschrieben: true,
+      ist_aktiv: true,
     }).select('id').single()
     if (svErr) throw new Error(`SV: ${svErr.message}`)
     svId = newSv.id

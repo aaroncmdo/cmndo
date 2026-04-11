@@ -19,6 +19,8 @@ const NAV_MAIN = [
 ]
 
 const NAV_SECONDARY = [
+  { href: '/admin/finance', label: 'Finanzen', icon: BadgeEuroIcon },
+  { href: '/admin/abrechnungen', label: 'Abrechnungen', icon: ReceiptIcon },
   { href: '/admin/statistiken', label: 'Statistiken', icon: BarChart3Icon },
   { href: '/admin/einstellungen', label: 'Einstellungen', icon: ClipboardListIcon },
 ]
