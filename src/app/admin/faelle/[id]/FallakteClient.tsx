@@ -694,7 +694,7 @@ export default function FallakteClient({
   ]
 
   return (
-    <div style={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }} className="bg-[#f8f9fb]">
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }} className="bg-[#f8f9fb]">
       {process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY && (
         <Script
           src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}
@@ -763,7 +763,7 @@ export default function FallakteClient({
       </div>
 
       {/* ─── SCROLLABLE CONTENT ─── */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="px-4 py-3">
           <div className="flex gap-4 items-start">
             {/* LEFT: Tab Content */}
