@@ -3,11 +3,11 @@
 import { useState, useTransition } from 'react'
 import {
   vsReguliertVoll, vsKuerzt, vsLehntAb, vsBrauchtMehrZeit, vsWillNachbesichtigung,
-  ruegeAkzeptiert, ruegeAbgelehnt,
+  ruegeAkzeptiert, ruegeAbgelehnt, techStellungnahmeFreigeben,
   zahlungEingegangen, schlussabrechnungErstellt,
-  klageEingeleitet, fallStornieren,
+  klageEingeleitet, fallStornieren, asVersandManuell,
 } from '../vs-regulierung-actions'
-import { CheckCircleIcon, AlertTriangleIcon, XCircleIcon, ClockIcon, EyeIcon, BanknoteIcon, ScaleIcon, GavelIcon } from 'lucide-react'
+import { CheckCircleIcon, AlertTriangleIcon, XCircleIcon, ClockIcon, EyeIcon, BanknoteIcon, ScaleIcon, GavelIcon, FileTextIcon, ShieldAlertIcon, SendIcon } from 'lucide-react'
 
 type VsFall = {
   id: string
@@ -29,6 +29,10 @@ type VsFall = {
   vs_eskalationsstufe: string | null
   schadenhoehe_netto: number | null
   gutachten_betrag: number | null
+  ist_totalschaden: boolean | null
+  zahlungsweg: string | null
+  technische_stellungnahme_status: string | null
+  nachbesichtigung_konfrontation: boolean | null
 }
 
 function fmt(n: number): string {
@@ -55,6 +59,8 @@ export default function VsRegulierungTab({ fall }: { fall: VsFall }) {
   const [zahlBetrag, setZahlBetrag] = useState(String(fall.regulierung_betrag ?? ''))
   const [klageNotiz, setKlageNotiz] = useState('')
   const [stornoGrund, setStornoGrund] = useState('')
+  const [zahlungsweg, setZahlungsweg] = useState<string>(fall.zahlungsweg ?? 'kundenkonto')
+  const [asDatum, setAsDatum] = useState(new Date().toISOString().slice(0, 10))
 
   function handle(fn: () => Promise<void>) {
     startTransition(async () => {
@@ -133,6 +139,49 @@ export default function VsRegulierungTab({ fall }: { fall: VsFall }) {
           </div>
         )}
       </div>
+
+      {/* ═══ Totalschaden-Badge ═══ */}
+      {fall.ist_totalschaden && (
+        <div className="bg-red-100 rounded-xl border border-red-300 p-4 flex items-center gap-3">
+          <ShieldAlertIcon className="w-5 h-5 text-red-600 shrink-0" />
+          <p className="text-sm font-semibold text-red-800">Totalschaden — Fahrzeug ist wirtschaftlicher Totalschaden</p>
+        </div>
+      )}
+
+      {/* ═══ Tech. Stellungnahme Card (wenn beauftragt/hochgeladen) ═══ */}
+      {fall.technische_stellungnahme_status && fall.technische_stellungnahme_status !== 'nicht_benoetigt' && (
+        <div className="bg-violet-50 rounded-xl border border-violet-200 p-5 space-y-3">
+          <h3 className="text-xs font-semibold text-violet-800 uppercase flex items-center gap-2">
+            <FileTextIcon className="w-4 h-4" /> Technische Stellungnahme
+          </h3>
+          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+            fall.technische_stellungnahme_status === 'beauftragt' ? 'bg-amber-100 text-amber-800' :
+            fall.technische_stellungnahme_status === 'hochgeladen' ? 'bg-blue-100 text-blue-800' :
+            fall.technische_stellungnahme_status === 'freigegeben' ? 'bg-green-100 text-green-800' :
+            'bg-red-100 text-red-800'
+          }`}>
+            {({ beauftragt: 'SV arbeitet dran (72h SLA)', hochgeladen: 'KB-Freigabe ausstehend', freigegeben: 'Freigegeben → Kanzlei', abgelehnt: 'Abgelehnt' } as Record<string, string>)[fall.technische_stellungnahme_status] ?? fall.technische_stellungnahme_status}
+          </span>
+          {fall.technische_stellungnahme_status === 'hochgeladen' && (
+            <button disabled={pending} onClick={() => handle(() => techStellungnahmeFreigeben(fall.id))} className="w-full px-4 py-2 rounded-lg bg-green-600 text-white text-xs font-medium hover:bg-green-700 disabled:opacity-50">
+              Plausibilitäts-Check bestanden — Freigeben
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ═══ AS manuell eintragen (wenn kanzlei-uebergeben aber kein AS) ═══ */}
+      {fall.status === 'kanzlei-uebergeben' && !fall.anschlussschreiben_am && (
+        <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+          <h3 className="text-xs font-semibold text-gray-500 uppercase flex items-center gap-2">
+            <SendIcon className="w-4 h-4" /> AS-Versand manuell eintragen
+          </h3>
+          <input type="date" value={asDatum} onChange={e => setAsDatum(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm" />
+          <button disabled={pending} onClick={() => handle(() => asVersandManuell(fall.id, asDatum))} className="w-full px-4 py-2 rounded-lg bg-[#4573A2] text-white text-xs font-medium hover:bg-[#3a6290] disabled:opacity-50">
+            Anschlussschreiben als versendet markieren
+          </button>
+        </div>
+      )}
 
       {/* ═══ Phase A: VS-Reaktion Actions (nur wenn AS gesendet) ═══ */}
       {isAS && (
@@ -272,6 +321,10 @@ export default function VsRegulierungTab({ fall }: { fall: VsFall }) {
               <h3 className="font-semibold text-gray-900">VS fordert Nachbesichtigung</h3>
               <label className="block text-xs text-gray-500">Details</label>
               <textarea value={details} onChange={e => setDetails(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm h-24" placeholder="Was soll nachbesichtigt werden?" autoFocus />
+              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <input type="checkbox" checked={fall.nachbesichtigung_konfrontation ?? false} className="w-4 h-4 rounded border-gray-300 text-[#4573A2]" readOnly />
+                Konfrontationstermin — unser SV soll dabei sein
+              </label>
               <ModalActions disabled={pending} onCancel={() => setModal(null)} onConfirm={() => handle(() => vsWillNachbesichtigung(fall.id, details))} label="Task erstellen" />
             </>)}
 
@@ -281,7 +334,12 @@ export default function VsRegulierungTab({ fall }: { fall: VsFall }) {
               <input type="number" step="0.01" value={zahlBetrag} onChange={e => setZahlBetrag(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm" autoFocus />
               <label className="block text-xs text-gray-500">Datum</label>
               <input type="date" value={zahlDatum} onChange={e => setZahlDatum(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm" />
-              <ModalActions disabled={pending || !zahlBetrag} onCancel={() => setModal(null)} onConfirm={() => handle(() => zahlungEingegangen(fall.id, parseFloat(zahlBetrag), zahlDatum))} label="Zahlung eintragen" cls="bg-emerald-600 hover:bg-emerald-700" />
+              <label className="block text-xs text-gray-500">Zahlungsweg</label>
+              <select value={zahlungsweg} onChange={e => setZahlungsweg(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                <option value="kundenkonto">Auf Kundenkonto</option>
+                <option value="werkstatt_direkt">Direkt an Werkstatt</option>
+              </select>
+              <ModalActions disabled={pending || !zahlBetrag} onCancel={() => setModal(null)} onConfirm={() => handle(() => zahlungEingegangen(fall.id, parseFloat(zahlBetrag), zahlDatum, zahlungsweg))} label="Zahlung eintragen" cls="bg-emerald-600 hover:bg-emerald-700" />
             </>)}
 
             {modal === 'klage' && (<>

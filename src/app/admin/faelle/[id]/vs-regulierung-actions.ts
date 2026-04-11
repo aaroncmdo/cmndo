@@ -81,6 +81,18 @@ export async function vsLehntAb(fallId: string, grund: string) {
     erstellt_von: user.id,
   })
 
+  // KFZ-205: Kunden-Anruf-Task erstellen
+  const { data: fallInfo } = await supabase.from('faelle').select('fall_nummer, kundenbetreuer_id').eq('id', fallId).single()
+  await createLinkedTask({
+    fall_id: fallId,
+    titel: `Kunden anrufen — VS-Ablehnung: Fall ${fallInfo?.fall_nummer ?? fallId.slice(0, 8)}`,
+    typ: 'kundenbetreuer',
+    prioritaet: 'dringend',
+    faellig_am: new Date(),
+    entity_type: 'case',
+    entity_id: fallId,
+  })
+
   revalidatePath(`/admin/faelle/${fallId}`)
 }
 
@@ -165,19 +177,89 @@ export async function ruegeAbgelehnt(fallId: string) {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
-  const { data: fall } = await supabase.from('faelle').select('ruege_counter').eq('id', fallId).single()
+  const { data: fall } = await supabase.from('faelle').select('ruege_counter, sv_id, fall_nummer').eq('id', fallId).single()
   const counter = ((fall?.ruege_counter as number) ?? 0) + 1
 
   await supabase.from('faelle').update({
     ruege_counter: counter,
     ruege_gesendet_am: new Date().toISOString(),
+    // KFZ-205: Bei 1. Ablehnung → Tech. Stellungnahme anfordern
+    ...(counter === 1 && { technische_stellungnahme_status: 'beauftragt', technische_stellungnahme_beauftragt_am: new Date().toISOString() }),
   }).eq('id', fallId)
+
+  // KFZ-205: SV-Task "Technische Stellungnahme" bei erster Rüge-Ablehnung
+  if (counter === 1 && fall?.sv_id) {
+    const { data: svProf } = await supabase.from('sachverstaendige').select('profile_id').eq('id', fall.sv_id).single()
+    if (svProf?.profile_id) {
+      const slaDeadline = new Date(Date.now() + 72 * 60 * 60 * 1000) // 72h SLA
+      await createLinkedTask({
+        fall_id: fallId,
+        titel: `Technische Stellungnahme verfassen: Fall ${fall.fall_nummer ?? fallId.slice(0, 8)}`,
+        typ: 'gutachter',
+        prioritaet: 'dringend',
+        faellig_am: slaDeadline,
+        entity_type: 'case',
+        entity_id: fallId,
+      })
+    }
+  }
 
   await supabase.from('timeline').insert({
     fall_id: fallId,
     typ: 'status-change',
-    titel: `Rüge ${counter}x abgelehnt`,
-    beschreibung: `Versicherung hat die ${counter}. Nachforderung abgelehnt.`,
+    titel: counter === 1
+      ? 'Rüge abgelehnt — Technische Stellungnahme angefordert'
+      : `Rüge ${counter}x abgelehnt`,
+    beschreibung: counter === 1
+      ? 'SV erstellt Technische Stellungnahme. KB prüft, dann geht Rüge an Kanzlei.'
+      : `Versicherung hat die ${counter}. Nachforderung abgelehnt.`,
+    erstellt_von: user.id,
+  })
+
+  revalidatePath(`/admin/faelle/${fallId}`)
+}
+
+// KFZ-205: KB gibt Technische Stellungnahme frei → Rüge geht an Kanzlei
+export async function techStellungnahmeFreigeben(fallId: string) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  await supabase.from('faelle').update({
+    technische_stellungnahme_status: 'freigegeben',
+    technische_stellungnahme_freigabe_am: new Date().toISOString(),
+  }).eq('id', fallId)
+
+  await supabase.from('timeline').insert({
+    fall_id: fallId,
+    typ: 'system',
+    titel: 'Technische Stellungnahme freigegeben',
+    beschreibung: 'KB hat Plausibilitäts-Check bestanden. Rüge geht an Kanzlei.',
+    erstellt_von: user.id,
+  })
+
+  revalidatePath(`/admin/faelle/${fallId}`)
+}
+
+// KFZ-205: AS-Versand manuell eintragen
+export async function asVersandManuell(fallId: string, datum: string) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  await supabase.from('faelle').update({
+    anschlussschreiben_am: datum || new Date().toISOString(),
+  }).eq('id', fallId)
+
+  await transitionFallStatus(fallId, 'anschlussschreiben', { user_id: user.id })
+
+  sendFallCommunication(fallId, 'as_gesendet').catch(() => {})
+
+  await supabase.from('timeline').insert({
+    fall_id: fallId,
+    typ: 'status-change',
+    titel: 'Anschlussschreiben manuell eingetragen',
+    beschreibung: `AS-Versand am ${new Date(datum || Date.now()).toLocaleDateString('de-DE')}`,
     erstellt_von: user.id,
   })
 
@@ -186,7 +268,7 @@ export async function ruegeAbgelehnt(fallId: string) {
 
 // ─── Phase B: Zahlungseingang ───────────────────────────────────────────────
 
-export async function zahlungEingegangen(fallId: string, betrag: number, datum: string) {
+export async function zahlungEingegangen(fallId: string, betrag: number, datum: string, zahlungsweg?: string) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
@@ -194,6 +276,7 @@ export async function zahlungEingegangen(fallId: string, betrag: number, datum: 
   await supabase.from('faelle').update({
     zahlung_betrag: betrag,
     zahlung_eingegangen_am: datum || new Date().toISOString(),
+    ...(zahlungsweg && { zahlungsweg }),
   }).eq('id', fallId)
 
   await transitionFallStatus(fallId, 'zahlung-eingegangen', { betrag, user_id: user.id })

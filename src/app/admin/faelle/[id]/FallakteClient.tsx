@@ -152,6 +152,10 @@ type Fall = Record<string, unknown> & {
   zahlung_betrag: number | null
   zahlung_eingegangen_am: string | null
   schlussabrechnung_am: string | null
+  ist_totalschaden: boolean | null
+  zahlungsweg: string | null
+  technische_stellungnahme_status: string | null
+  nachbesichtigung_konfrontation: boolean | null
   kanzlei_ansprechpartner_name: string | null
   kanzlei_ansprechpartner_email: string | null
   kanzlei_ansprechpartner_telefon: string | null
