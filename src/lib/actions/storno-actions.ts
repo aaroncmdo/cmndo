@@ -57,11 +57,34 @@ export async function meldeNoShow(fallId: string): Promise<{ success: boolean; e
   if (!sv) return { success: false, error: 'Kein SV-Profil' }
 
   const db = createAdminClient()
+
+  // KFZ-202: no_show_count inkrementieren
+  const { data: fall } = await db.from('faelle')
+    .select('no_show_count')
+    .eq('id', fallId)
+    .eq('sv_id', sv.id)
+    .single()
+
+  if (!fall) return { success: false, error: 'Fall nicht gefunden' }
+
+  const newCount = ((fall.no_show_count as number) ?? 0) + 1
+
   const { error } = await db.from('faelle').update({
     no_show_gemeldet_am: new Date().toISOString(),
+    no_show_count: newCount,
   }).eq('id', fallId).eq('sv_id', sv.id)
 
   if (error) return { success: false, error: error.message }
+
+  // KFZ-202: Auto-Storno bei >= 2 No-Shows
+  if (newCount >= 2) {
+    try {
+      await transitionFallStatus(fallId, 'storniert', { grund: `storno_no_show_${newCount}x`, user_id: user.id })
+      await revertCaseBilling(fallId, `storno_no_show_${newCount}x`, user.id)
+    } catch { /* Transition evtl. nicht moeglich */ }
+    revalidatePath(`/gutachter/fall/${fallId}`)
+    return { success: true }
+  }
 
   // Admin-Task erstellen (KFZ-151: verknuepft mit case)
   await createLinkedTask({
