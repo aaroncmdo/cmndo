@@ -141,6 +141,14 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
   const liveMarkersRef = useRef<Map<string, google.maps.Marker>>(new Map())
   const supabase = useMemo(() => createClient(), [])
 
+  // BUG-18: Typ-Filter Toggles
+  const [visibleTypes, setVisibleTypes] = useState<Set<string>>(new Set(Object.keys(TYP_COLORS)))
+  const toggleType = (typ: string) => setVisibleTypes(prev => {
+    const next = new Set(prev)
+    if (next.has(typ)) next.delete(typ); else next.add(typ)
+    return next
+  })
+
   // State ONLY for UI overlays
   const [selectedSV, setSelectedSV] = useState<SV | null>(null)
   const [showNeuDrawer, setShowNeuDrawer] = useState(false)
@@ -428,15 +436,15 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
           </div>
         )}
 
-        {/* ─── Legende ──────────────────────────────────────────────── */}
+        {/* BUG-18: Typ-Toggles statt statischer Legende */}
         {mapReady && (
           <div className="absolute bottom-4 left-4 z-10 bg-white/90 backdrop-blur-sm border border-gray-300/50 rounded-xl p-3 space-y-1.5">
-            <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Legende</p>
+            <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Filter</p>
             {Object.entries(TYP_COLORS).map(([key, val]) => (
-              <div key={key} className="flex items-center gap-2">
+              <button key={key} onClick={() => toggleType(key)} className="flex items-center gap-2 w-full text-left hover:bg-gray-50 rounded px-1 py-0.5 transition-colors">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: val.fill, opacity: 0.7 }} />
-                <span className="text-[11px] text-gray-700">{val.label}</span>
-              </div>
+                <span className={`text-[11px] ${visibleTypes.has(key) ? 'text-gray-700' : 'text-gray-400 line-through'}`}>{val.label}</span>
+              </button>
             ))}
             <div className="border-t border-gray-300/50 pt-1.5 mt-1.5 space-y-0.5">
               <p className="text-[10px] text-gray-500">Standard: 15km</p>

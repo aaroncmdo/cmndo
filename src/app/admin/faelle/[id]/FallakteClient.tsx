@@ -2998,11 +2998,11 @@ function TabChat({
         })}
       </div>
 
-      {/* WhatsApp placeholder note */}
+      {/* WhatsApp info note */}
       {activeChannel === 'whatsapp' && (
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-500/5 border border-emerald-800/50">
-          <MessageSquareIcon className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span className="text-sm text-emerald-400">WhatsApp-Integration als Platzhalter</span>
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-200">
+          <MessageSquareIcon className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span className="text-sm text-emerald-700">WhatsApp-Nachrichten werden automatisch per Template gesendet. Eingehende Nachrichten erscheinen hier.</span>
         </div>
       )}
 
