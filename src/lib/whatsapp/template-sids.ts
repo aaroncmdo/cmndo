@@ -36,12 +36,12 @@ export type TemplateName =
   | 'kb_termin_bestaetigt'
   | 'kb_termin_reminder_24h'
   | 'kb_termin_reminder_1h'
-  // KFZ-200: SV-Navigation Templates
-  | 'sv_nav_unterwegs'
-  | 'sv_nav_15min'
-  | 'sv_nav_5min'
-  | 'sv_nav_angekommen'
-  | 'sv_begutachtung_fertig'
+  // KFZ-200 → KFZ-201: SV-Navigation Templates konsolidiert zu T21-T25:
+  //   sv_nav_unterwegs    → sv_losgefahren (T21)
+  //   sv_nav_15min        → sv_fast_da (T22)
+  //   sv_nav_5min         → sv_angekommen (T23)
+  //   sv_nav_angekommen   → consolidated into sv_angekommen (T23)
+  //   sv_begutachtung_fertig → gutachten_fertig (T8) for Begutachtung-done notification
 
 type TemplateConfig = {
   envKey: string
@@ -80,12 +80,6 @@ export const TEMPLATE_CONFIGS: Record<TemplateName, TemplateConfig> = {
   kb_termin_bestaetigt:   { envKey: 'TWILIO_TPL_KB_TERMIN_BESTAETIGT', variableCount: 6, beschreibung: 'T28: KB-Termin bestaetigt (Vorname, Datum, Uhrzeit, Kanal, Video-Link, Portal-Link)' },
   kb_termin_reminder_24h: { envKey: 'TWILIO_TPL_KB_TERMIN_REMINDER_24H', variableCount: 4, beschreibung: 'T29: KB-Termin 24h-Erinnerung (Vorname, Datum, Uhrzeit, Kanal)' },
   kb_termin_reminder_1h:  { envKey: 'TWILIO_TPL_KB_TERMIN_REMINDER_1H', variableCount: 3, beschreibung: 'T30: KB-Termin 1h-Erinnerung (Vorname, Uhrzeit, Video-Link-oder-leer)' },
-  // KFZ-200: SV-Navigation Templates
-  sv_nav_unterwegs:       { envKey: 'TWILIO_TPL_SV_NAV_UNTERWEGS', variableCount: 3, beschreibung: 'T31: SV unterwegs (Vorname, SV-Vorname, ETA-Minuten)' },
-  sv_nav_15min:           { envKey: 'TWILIO_TPL_SV_NAV_15MIN', variableCount: 2, beschreibung: 'T32: SV 15min-Reminder (Vorname, SV-Vorname)' },
-  sv_nav_5min:            { envKey: 'TWILIO_TPL_SV_NAV_5MIN', variableCount: 2, beschreibung: 'T33: SV 5min-Reminder (Vorname, SV-Vorname)' },
-  sv_nav_angekommen:      { envKey: 'TWILIO_TPL_SV_NAV_ANGEKOMMEN', variableCount: 2, beschreibung: 'T34: SV angekommen via Navigation (Vorname, SV-Vorname)' },
-  sv_begutachtung_fertig: { envKey: 'TWILIO_TPL_SV_BEGUTACHTUNG_FERTIG', variableCount: 2, beschreibung: 'T35: Begutachtung abgeschlossen (Vorname, Portal-Link)' },
 }
 
 /**

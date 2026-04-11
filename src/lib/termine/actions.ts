@@ -305,12 +305,12 @@ export async function completeBegutachtung(
 
     const discrepancyCount = docs?.length ?? 0
 
-    // WhatsApp T-X5: Begutachtung fertig
+    // WhatsApp T8: Begutachtung fertig → gutachten_fertig (KFZ-201: sv_begutachtung_fertig konsolidiert)
     const { data: fall } = await db.from('faelle').select('lead_id').eq('id', termin.fall_id).single()
     if (fall?.lead_id) {
       const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', fall.lead_id).single()
       if (lead?.telefon) {
-        await sendWhatsAppTemplate(lead.telefon, 'sv_begutachtung_fertig', {
+        await sendWhatsAppTemplate(lead.telefon, 'gutachten_fertig', {
           '1': lead.vorname ?? 'Kunde',
         }).catch(() => {})
       }

@@ -97,23 +97,14 @@ const TEMPLATES: Record<TemplateName, (vars: Record<string, string>) => string> 
   kb_termin_reminder_1h: (v) =>
     `${v['1'] ?? ''}, in ca. 1 Stunde (${v['2'] ?? ''} Uhr) ${v['3'] ? `startet Ihr Video-Gespräch. Link: ${v['3']}` : 'ruft Ihr Claimondo-Betreuer Sie an. Bitte halten Sie Ihr Telefon bereit.'}`,
 
-  // ─── KFZ-200: SV-Navigation Templates ───────────────────────────────────────
-
-  sv_nav_unterwegs: (v) =>
-    `${v['1'] ?? 'Kunde'}, Ihr Gutachter ${v['2'] ?? ''} ist jetzt auf dem Weg zu Ihnen. Voraussichtliche Ankunft: ca. ${v['3'] ?? '—'} Minuten. Bitte halten Sie das Fahrzeug bereit.`,
-
-  sv_nav_15min: (v) =>
-    `${v['1'] ?? 'Kunde'}, Ihr Gutachter ${v['2'] ?? ''} ist in ca. 15 Minuten bei Ihnen. Bitte halten Sie Fahrzeugschein und Personalausweis bereit.`,
-
-  sv_nav_5min: (v) =>
-    `${v['1'] ?? 'Kunde'}, Ihr Gutachter ${v['2'] ?? ''} trifft in wenigen Minuten ein. Bitte öffnen Sie ggf. die Einfahrt.`,
-
-  sv_nav_angekommen: (v) =>
-    `${v['1'] ?? 'Kunde'}, Ihr Gutachter ${v['2'] ?? ''} ist angekommen und beginnt jetzt mit der Begutachtung Ihres Fahrzeugs.`,
-
-  sv_begutachtung_fertig: (v) =>
-    `${v['1'] ?? 'Kunde'}, die Begutachtung Ihres Fahrzeugs wurde erfolgreich abgeschlossen. Das Gutachten wird jetzt erstellt. Sie werden benachrichtigt sobald es verfügbar ist.${v['2'] ? `\n\nIhr Portal: ${v['2']}` : ''}`,
 }
+// KFZ-200 → KFZ-201: SV-Navigation Templates (sv_nav_unterwegs, sv_nav_15min,
+// sv_nav_5min, sv_nav_angekommen, sv_begutachtung_fertig) wurden konsolidiert:
+//   sv_nav_unterwegs    → sv_losgefahren (T21)
+//   sv_nav_15min        → sv_fast_da (T22)
+//   sv_nav_5min         → sv_angekommen (T23)
+//   sv_nav_angekommen   → sv_angekommen (T23)
+//   sv_begutachtung_fertig → gutachten_fertig (T8)
 
 /**
  * Returnt den Legacy-Text fuer einen Template-Namen mit Variablen-Substitution.
