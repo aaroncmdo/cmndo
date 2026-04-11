@@ -6,6 +6,8 @@ import { revalidatePath } from 'next/cache'
 import { emailGutachtenEingegangen } from '@/lib/email'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { berechneLeadpreis } from '@/lib/leadpreis'
+import { transitionFallStatus } from '@/lib/faelle/state-machine'
+import { createNotification } from '@/lib/notifications'
 
 export async function uploadGutachten(fallId: string, formData: FormData) {
   const supabase = await createClient()
@@ -64,26 +66,63 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
 
   if (docError) throw new Error(`Dokument-Eintrag fehlgeschlagen: ${docError.message}`)
 
-  // Update case status and gutachten data
-  const { error: updateError } = await supabase
+  // Update gutachten data (status via state-machine separat)
+  await supabase
     .from('faelle')
     .update({
-      status: 'gutachten-eingegangen',
       gutachten_eingegangen_am: new Date().toISOString(),
       gutachten_betrag: betrag,
     })
     .eq('id', fallId)
 
-  if (updateError) throw new Error(`Status-Update fehlgeschlagen: ${updateError.message}`)
+  // KFZ-204: Status via State-Machine
+  try {
+    await transitionFallStatus(fallId, 'gutachten-eingegangen', { user_id: user.id })
+  } catch { /* Transition evtl. nicht erlaubt wenn Status schon weiter */ }
 
-  // Timeline entry
+  // SV-Name fuer Timeline + Task
+  const { data: svProfile } = await supabase.from('profiles').select('vorname, nachname').eq('id', user.id).single()
+  const svName = svProfile ? `${svProfile.vorname ?? ''} ${svProfile.nachname ?? ''}`.trim() : 'Gutachter'
+  const betragFmt = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(betrag)
+
+  // Timeline: SV-Name + Betrag
   await supabase.from('timeline').insert({
     fall_id: fallId,
     typ: 'gutachten-eingegangen',
-    titel: 'Gutachten eingereicht',
-    beschreibung: `Gutachten mit Schadenshöhe ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(betrag)} hochgeladen.`,
+    titel: `Gutachten hochgeladen von ${svName}`,
+    beschreibung: `Schadenshöhe: ${betragFmt}`,
     erstellt_von: user.id,
   })
+
+  // KFZ-204: QC-Task fuer KB "Filmcheck durchfuehren"
+  const { data: fallForTask } = await supabase
+    .from('faelle')
+    .select('fall_nummer, kundenbetreuer_id')
+    .eq('id', fallId)
+    .single()
+
+  const fallNrForTask = fallForTask?.fall_nummer ?? fallId.slice(0, 8)
+
+  await supabase.from('tasks').insert({
+    fall_id: fallId,
+    typ: 'filmcheck',
+    titel: `Filmcheck durchführen für Fall ${fallNrForTask}`,
+    beschreibung: `Gutachten von ${svName} hochgeladen (${betragFmt}). Bitte QC-Prüfung durchführen.`,
+    status: 'offen',
+    prioritaet: 'dringend',
+    zugewiesen_an: fallForTask?.kundenbetreuer_id ?? null,
+  })
+
+  // KFZ-204: In-App Notification fuer KB (KEIN Email — R19)
+  if (fallForTask?.kundenbetreuer_id) {
+    createNotification(
+      fallForTask.kundenbetreuer_id,
+      'filmcheck',
+      `Gutachten bereit: Fall ${fallNrForTask}`,
+      `${svName} hat das Gutachten hochgeladen. Filmcheck erforderlich.`,
+      `/admin/faelle/${fallId}`,
+    ).catch(() => {})
+  }
 
   // ── Automatische Abrechnung ──────────────────────────────────────────────
   const { data: svData } = await supabase

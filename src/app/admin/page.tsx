@@ -48,7 +48,8 @@ export default async function AdminDashboardPage() {
         {/* Row 2: 4 KPI-Cards */}
         <Suspense
           fallback={
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+              <WidgetSkeleton height="h-24" />
               <WidgetSkeleton height="h-24" />
               <WidgetSkeleton height="h-24" />
               <WidgetSkeleton height="h-24" />

@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { UsersIcon, EuroIcon, FolderIcon, TrendingUpIcon } from 'lucide-react'
+import { UsersIcon, EuroIcon, FolderIcon, TrendingUpIcon, ClipboardCheckIcon } from 'lucide-react'
 
 // KFZ-155: 4 KPI-Cards in einer Row.
 //   - Aktive SVs (portal_zugang_freigeschaltet=true)
@@ -29,6 +29,7 @@ async function loadKpis() {
     offeneRechnungen,
     neueFaelleHeute,
     umsatzMonat,
+    pendingQc,
   ] = await Promise.all([
     supabase
       .from('sachverstaendige')
@@ -61,6 +62,13 @@ async function loadKpis() {
       .not('bezahlt_am', 'is', null)
       .gte('bezahlt_am', monatStart)
       .lte('bezahlt_am', monatEnde),
+
+    // KFZ-204: Gutachten warten auf QC
+    supabase
+      .from('faelle')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'gutachten-eingegangen')
+      .or('filmcheck_ok.is.null,filmcheck_ok.eq.false'),
   ])
 
   const sumAnzahlungen = (offeneAnzahlungen.data ?? []).reduce(
@@ -83,6 +91,7 @@ async function loadKpis() {
     ausstehendGesamt,
     neueFaelleHeute: neueFaelleHeute.count ?? 0,
     umsatzMonat: umsatz,
+    pendingQc: pendingQc.count ?? 0,
   }
 }
 
@@ -122,10 +131,18 @@ export default async function KpiCards() {
       iconColor: 'text-emerald-600',
       hint: 'bezahlte Rechnungen',
     },
+    {
+      label: 'Gutachten → QC',
+      value: fmtNumber(kpis.pendingQc),
+      icon: ClipboardCheckIcon,
+      bg: kpis.pendingQc > 0 ? 'bg-red-50' : 'bg-gray-50',
+      iconColor: kpis.pendingQc > 0 ? 'text-red-600' : 'text-gray-400',
+      hint: 'warten auf Filmcheck',
+    },
   ]
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
       {cards.map(c => {
         const Icon = c.icon
         return (
