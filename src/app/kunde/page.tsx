@@ -68,10 +68,89 @@ export default async function KundeStartseite() {
 
   const vorname = profile?.vorname ?? user.email?.split('@')[0] ?? 'Kunde'
 
+  // KFZ-200: SV unterwegs / vor Ort Status laden (non-critical)
+  let svUnterwegsInfo: {
+    fallId: string
+    svVorname: string
+    svUnterwegs: boolean
+    svVorOrt: boolean
+    etaMinuten: number | null
+  } | null = null
+  try {
+    const fallIds = faelle.map(f => f.id as string).filter(Boolean)
+    if (fallIds.length) {
+      const { createAdminClient: adminCl } = await import('@/lib/supabase/admin')
+      const adminDb = adminCl()
+      const { data: aktiveTermine } = await adminDb
+        .from('gutachter_termine')
+        .select('id, fall_id, sv_id, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, status')
+        .in('fall_id', fallIds)
+        .eq('typ', 'sv_begutachtung')
+        .not('sv_unterwegs_seit', 'is', null)
+        .is('durchgefuehrt_am', null)
+        .order('sv_unterwegs_seit', { ascending: false })
+        .limit(1)
+
+      const t = aktiveTermine?.[0]
+      if (t) {
+        let svName = 'Gutachter'
+        if (t.sv_id) {
+          const { data: sv } = await adminDb.from('sachverstaendige').select('profile_id').eq('id', t.sv_id).single()
+          if (sv?.profile_id) {
+            const { data: p } = await adminDb.from('profiles').select('vorname').eq('id', sv.profile_id).single()
+            if (p?.vorname) svName = p.vorname
+          }
+        }
+        svUnterwegsInfo = {
+          fallId: String(t.fall_id),
+          svVorname: svName,
+          svUnterwegs: !t.sv_angekommen_am,
+          svVorOrt: !!t.sv_angekommen_am,
+          etaMinuten: t.sv_eta_minuten ? Number(t.sv_eta_minuten) : null,
+        }
+      }
+    }
+  } catch { /* non-critical */ }
+
   return (
     <div className="w-full px-4 md:px-8 py-6 max-w-xl md:max-w-none mx-auto">
       <h1 className="text-xl font-bold text-[#0D1B3E] mb-1">Hallo {vorname}</h1>
       <p className="text-sm text-gray-500 mb-6">Hier sehen Sie den Stand Ihrer Fälle.</p>
+
+      {/* KFZ-200: SV unterwegs Banner */}
+      {svUnterwegsInfo?.svUnterwegs && (
+        <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+              <span className="text-lg">🚗</span>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-amber-900">Ihr Gutachter ist unterwegs!</p>
+              <p className="text-xs text-amber-700 mt-0.5">
+                {svUnterwegsInfo.svVorname} ist auf dem Weg zu Ihnen.
+                {svUnterwegsInfo.etaMinuten ? ` Ankunft in ca. ${svUnterwegsInfo.etaMinuten} Min.` : ''}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* KFZ-200: SV vor Ort Banner */}
+      {svUnterwegsInfo?.svVorOrt && (
+        <div className="mb-4 bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+              <span className="text-lg">✅</span>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-emerald-900">Ihr Gutachter ist vor Ort!</p>
+              <p className="text-xs text-emerald-700 mt-0.5">
+                {svUnterwegsInfo.svVorname} führt gerade die Begutachtung durch.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* KFZ-193: Beratungstermin-Card (wenn mindestens ein Fall mit KB vorhanden) */}
       {faelle.length > 0 && !!(faelle[0] as Record<string, unknown>).kundenbetreuer_id && (
