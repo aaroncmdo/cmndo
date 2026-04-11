@@ -461,14 +461,24 @@ export async function sendChatNachricht(fallId: string, kanal: string, nachricht
         if (isKunde && fall?.lead_id) {
           const { data: lead } = await admin.from('leads').select('telefon').eq('id', fall.lead_id).single()
           if (lead?.telefon) {
-            const { sendWhatsApp } = await import('@/lib/whatsapp')
-            await sendWhatsApp(lead.telefon, `Neue Nachricht zu Ihrem Fall ${fall?.fall_nummer ?? ''}: ${nachricht.slice(0, 200)}`)
+            const { sendCommunication } = await import('@/lib/communications/send')
+            await sendCommunication('chat_fallback_kunde', {
+              telefon: lead.telefon,
+              fall_id: fallId,
+              '1': fall?.fall_nummer ?? '',
+              '2': nachricht.slice(0, 200),
+            })
           }
         } else {
           const { data: p } = await admin.from('profiles').select('telefon').eq('id', t.user_id).single()
           if (p?.telefon) {
-            const { sendWhatsApp } = await import('@/lib/whatsapp')
-            await sendWhatsApp(p.telefon, `Neue Nachricht in Fall ${fall?.fall_nummer ?? fallId.slice(0, 8)}: ${nachricht.slice(0, 200)}`)
+            const { sendCommunication } = await import('@/lib/communications/send')
+            await sendCommunication('chat_fallback_kb', {
+              telefon: p.telefon,
+              fall_id: fallId,
+              '1': fall?.fall_nummer ?? fallId.slice(0, 8),
+              '2': nachricht.slice(0, 200),
+            })
           }
         }
       }

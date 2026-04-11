@@ -31,17 +31,16 @@ export async function GET() {
       if (sv?.profile_id) {
         const { data: p } = await db.from('profiles').select('email, vorname').eq('id', sv.profile_id).single()
         if (p?.email) {
-          const { sendEmail } = await import('@/lib/email/google/client')
+          const { sendCommunication } = await import('@/lib/communications/send')
           const { render } = await import('@react-email/render')
           const { ReklamationFristAbgelaufenEmail, subject: reklaSubject } = await import('@/lib/email/google/templates/ReklamationFristAbgelaufen')
           const reklaProps = { vorname: p.vorname ?? null }
           const html = await render(ReklamationFristAbgelaufenEmail(reklaProps))
-          await sendEmail({
-            to: p.email,
+          await sendCommunication('sv_monatsabrechnung', {
+            email: p.email,
+            vorname: p.vorname ?? '',
             subject: reklaSubject(reklaProps),
             html,
-            empfaengerTyp: 'sv',
-            template: 'reklamation_frist_abgelaufen',
           })
         }
       }

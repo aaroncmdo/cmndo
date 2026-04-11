@@ -68,8 +68,12 @@ export async function sendNachrichtFromInbox(
             })
           }
         } else {
-          const { sendWhatsApp } = await import('@/lib/whatsapp')
-          await sendWhatsApp(lead.telefon, nachricht.trim())
+          const { sendCommunication } = await import('@/lib/communications/send')
+          await sendCommunication('chat_fallback_kunde', {
+            telefon: lead.telefon,
+            fall_id: fallId,
+            '1': nachricht.trim(),
+          })
         }
       } catch (e) {
         console.error('[KFZ-182] WhatsApp send failed:', e)

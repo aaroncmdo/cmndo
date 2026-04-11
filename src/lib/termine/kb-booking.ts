@@ -128,11 +128,15 @@ export async function bookKbTermin(
     }
 
     if (telefon) {
-      const { sendWhatsApp } = await import('@/lib/whatsapp')
-      const msg = kanal === 'video'
-        ? `Hallo ${vorname}, Ihr Beratungstermin am ${datum} um ${uhrzeit} Uhr (Video-Call) ist bestätigt. Link: ${videoLink}`
-        : `Hallo ${vorname}, Ihr Beratungstermin am ${datum} um ${uhrzeit} Uhr (Telefon) ist bestätigt. Wir rufen Sie an.`
-      await sendWhatsApp(telefon, msg)
+      const { sendCommunication } = await import('@/lib/communications/send')
+      await sendCommunication('kb_termin_bestaetigt', {
+        telefon,
+        vorname,
+        '1': vorname,
+        '2': datum,
+        '3': uhrzeit,
+        '4': kanal === 'video' ? `Video-Call${videoLink ? ': ' + videoLink : ''}` : 'Telefon',
+      })
     }
   } catch { /* non-critical */ }
 

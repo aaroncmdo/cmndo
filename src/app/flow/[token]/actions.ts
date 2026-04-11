@@ -504,16 +504,17 @@ export async function signSAandCreateFall(
             ? `${baseUrl}/sv/termin/${terminRow.ablehnen_token}`
             : ''
 
-          const { sendWhatsApp } = await import('@/lib/whatsapp')
-          await sendWhatsApp(svTelefon,
-            `✅ *Neuer Termin bestätigt!*\n\n` +
-            `Kunde: ${kundeName}\n` +
-            `Kennzeichen: ${lead.kennzeichen || '—'}\n` +
-            `Besichtigung: ${datum} um ${uhrzeit}\n` +
-            `Adresse: ${adresse}\n\n` +
-            `Termin bestätigen, ablehnen oder verschieben:\n${terminLink}\n\n` +
-            `Ansonsten steht der Termin. Viel Erfolg!`
-          )
+          const { sendCommunication } = await import('@/lib/communications/send')
+          await sendCommunication('sv_tagesroute', {
+            telefon: svTelefon,
+            vorname: svProfile?.vorname ?? '',
+            '1': kundeName,
+            '2': lead.kennzeichen || '—',
+            '3': datum,
+            '4': uhrzeit,
+            '5': adresse,
+            '6': terminLink,
+          })
 
           // Mitteilung im Gutachter-Portal
           await admin.from('gutachter_mitteilungen').insert({

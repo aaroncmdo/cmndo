@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendWhatsApp } from '@/lib/whatsapp'
+import { sendCommunication } from '@/lib/communications/send'
 
 export const dynamic = 'force-dynamic'
 
@@ -187,7 +187,15 @@ export async function GET(request: Request) {
       }
 
       // WhatsApp senden
-      const result = await sendWhatsApp(telefon, message)
+      const triggerName = reminder.reminder_typ === 'kunde_morgen' ? 'reminder_24h'
+        : reminder.reminder_typ === 'kunde_1h' ? 'reminder_2h'
+        : 'sv_tagesroute'
+      await sendCommunication(triggerName, {
+        telefon,
+        vorname: reminder.empfaenger === 'kunde' ? kundeVorname : svVorname,
+        '1': message,
+      })
+      const result = { success: true, error: undefined as string | undefined }
 
       if (result.success) {
         await supabase
@@ -241,7 +249,10 @@ async function notifyAdmins(supabase: ReturnType<typeof createAdminClient>, mess
 
     for (const admin of admins ?? []) {
       if (admin.telefon) {
-        await sendWhatsApp(admin.telefon, `[Claimondo System] ${message}`)
+        await sendCommunication('admin_backup_failed', {
+          telefon: admin.telefon,
+          '1': message,
+        })
       }
     }
   } catch (err) {

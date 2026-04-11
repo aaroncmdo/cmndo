@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendWhatsApp } from '@/lib/whatsapp'
+import { sendCommunication } from '@/lib/communications/send'
 
 /**
  * KFZ-193: KB-Beratungstermin 1h-Erinnerung (alle 15 Minuten)
@@ -61,13 +61,13 @@ export async function GET(request: Request) {
     }
 
     if (telefon) {
-      let msg: string
-      if (termin.kanal === 'video' && termin.video_link) {
-        msg = `${vorname}, in ca. 1 Stunde (${uhrzeit} Uhr) beginnt Ihr Beratungsgespräch. Bitte nutzen Sie diesen Video-Link: ${termin.video_link}`
-      } else {
-        msg = `${vorname}, in ca. 1 Stunde (${uhrzeit} Uhr) ruft Ihr Claimondo-Betreuer Sie an. Bitte halten Sie Ihr Telefon bereit.`
-      }
-      await sendWhatsApp(telefon, msg)
+      await sendCommunication('kb_termin_reminder_1h', {
+        telefon,
+        vorname,
+        '1': vorname,
+        '2': uhrzeit,
+        '3': termin.kanal === 'video' && termin.video_link ? termin.video_link : '',
+      })
     }
 
     // Reminder-1h-Timestamp setzen

@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { generateTrackingToken } from './generate-tracking-token'
 import { calculateEtaMinutes } from '@/lib/eta/calculate-eta'
-import { sendWhatsAppTemplate } from '@/lib/whatsapp/send-template'
+import { sendCommunication } from '@/lib/communications/send'
 
 // KFZ-179: Server Action — SV markiert "Losfahren" fuer einen Termin.
 // Generiert Tracking-Token, berechnet ETA, sendet WhatsApp an Kunden.
@@ -82,10 +82,12 @@ export async function triggerSvLosgefahren(
   const trackingUrl = `${appUrl}/kunde/termin/${token}`
 
   if (kundeTelefon) {
-    await sendWhatsAppTemplate(kundeTelefon, 'sv_losgefahren', {
+    await sendCommunication('sv_losgefahren', {
+      telefon: kundeTelefon,
+      vorname: kundeVorname,
       '1': kundeVorname,
       '2': String(etaMinutes),
-    }).catch(err => console.error('[KFZ-179] WhatsApp losgefahren failed:', err))
+    }).catch((err: unknown) => console.error('[KFZ-179] WhatsApp losgefahren failed:', err))
   }
 
   // Timeline

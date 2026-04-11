@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { confirmGutachterTermin } from './actions'
+import { confirmGutachterTermin, sendTerminBestaetigtCommunication } from './actions'
 import {
   CalendarIcon,
   MapPinIcon,
@@ -134,14 +134,19 @@ export default function GutachterTermin({
       })
       toast.success(`Termin reserviert mit ${slot.name} am ${terminStr} an ${adresse || plz}`)
 
-      // WhatsApp Bestätigung (non-critical)
+      // WhatsApp Bestätigung (non-critical, via server action)
       try {
         const phone = (lead.telefon ?? '').replace(/[^0-9+]/g, '')
         if (phone) {
-          const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ')
-          const msg = `Hallo ${name}, Ihr Gutachtertermin wurde bestätigt:\n\nGutachter: ${slot.name}\nDatum: ${terminStr}\nAdresse: ${adresse || plz}\n\nIhr Claimondo-Team`
-          const { sendWhatsAppFromLead } = await import('./actions')
-          await sendWhatsAppFromLead(phone, msg)
+          await sendTerminBestaetigtCommunication({
+            telefon: phone,
+            vorname: lead.vorname ?? '',
+            '1': [lead.vorname, lead.nachname].filter(Boolean).join(' '),
+            '2': slot.name,
+            '3': terminStr,
+            '4': adresse || plz,
+            '5': '',
+          })
         }
       } catch (e) { console.error('[GutachterTermin] WhatsApp Fehler:', e) }
 

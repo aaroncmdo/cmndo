@@ -91,6 +91,7 @@ export async function signSvVertrag({
     if (profile?.email) {
       const props = { vorname: profile.vorname ?? null }
       const html = await render(SvPortalFreigeschaltetEmail(props))
+      // TODO: migrate to sendCommunication when attachment support added
       await sendEmail({
         to: profile.email,
         subject: svPortalSubject(props),

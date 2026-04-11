@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendEmail } from '@/lib/email/google/client'
+import { sendCommunication } from '@/lib/communications/send'
 
 // Lazy-Import von '@/lib/stripe/client' innerhalb der Handler — der Client
 // instantiiert Stripe im Konstruktor mit STRIPE_SECRET_KEY!. Bei einem
@@ -231,12 +231,10 @@ export async function GET(request: Request) {
         fehlerGrund: error,
       }
       const html = await render(AdminEinzugFehlgeschlagenEmail(props))
-      await sendEmail({
-        to: ADMIN_ALERT_EMAIL,
+      await sendCommunication('admin_einzug_failed', {
+        email: ADMIN_ALERT_EMAIL,
         subject: einzugSubject(props),
         html,
-        empfaengerTyp: 'admin',
-        template: 'abrechnung_einzug_failed',
       })
     } catch (mailErr) {
       console.error('[KFZ-149 einzug] Admin-Alert-Mail fehlgeschlagen:', mailErr)

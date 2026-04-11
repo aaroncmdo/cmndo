@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendWhatsApp } from '@/lib/whatsapp'
+import { sendCommunication } from '@/lib/communications/send'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,7 +53,11 @@ export async function GET(request: Request) {
 
     for (const admin of admins ?? []) {
       if (admin.telefon) {
-        await sendWhatsApp(admin.telefon, `[Claimondo] ${updated} Abrechnung(en) ueberfaellig:\n${summary}`)
+        await sendCommunication('admin_einzug_failed', {
+          telefon: admin.telefon,
+          '1': String(updated),
+          '2': summary,
+        })
       }
     }
   }

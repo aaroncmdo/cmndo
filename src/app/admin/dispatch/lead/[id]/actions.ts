@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { sendStatusWhatsApp, sendManualWhatsApp } from '@/lib/whatsapp'
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
+import { sendCommunication } from '@/lib/communications/send'
 
 // ─── Manuelle WhatsApp (KFZ-114) ────────────────────────────────────────────
 
@@ -14,6 +15,34 @@ export async function sendWhatsAppFromLead(telefon: string, message: string) {
     console.error('[sendWhatsAppFromLead] Fehler:', result.error)
   }
   return result
+}
+
+// ─── sendCommunication-Wrapper (server-side, für Client Components) ──────────
+
+export async function sendFlowLinkCommunication(data: {
+  telefon: string
+  vorname: string
+  name: string
+  url: string
+}) {
+  await sendCommunication('flowlink_versand', {
+    telefon: data.telefon,
+    vorname: data.vorname,
+    '1': data.name,
+    '2': data.url,
+  })
+}
+
+export async function sendTerminBestaetigtCommunication(data: {
+  telefon: string
+  vorname: string
+  '1': string
+  '2': string
+  '3': string
+  '4': string
+  '5': string
+}) {
+  await sendCommunication('termin_bestaetigt', data)
 }
 
 // ─── Disqualifizierung (BUG-28) ─────────────────────────────────────────────

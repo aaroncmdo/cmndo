@@ -146,7 +146,7 @@ export async function retryEinzug(abrechnung_id: string): Promise<{ success: boo
           const { render } = await import('@react-email/render')
           const { AbrechnungBezahltConfirmationEmail, subject: bezahltSubject } =
             await import('@/lib/email/google/templates/AbrechnungBezahltConfirmation')
-          const { sendEmail } = await import('@/lib/email/google/client')
+          const { sendCommunication } = await import('@/lib/communications/send')
           const props = {
             vorname,
             abrechnungs_nr: abr.abrechnungs_nr,
@@ -155,12 +155,11 @@ export async function retryEinzug(abrechnung_id: string): Promise<{ success: boo
             stripe_payment_intent_id: pi.id,
             manuell: true,
           }
-          await sendEmail({
-            to: full.empfaenger_email,
+          await sendCommunication('sv_monatsabrechnung', {
+            email: full.empfaenger_email,
+            vorname: vorname ?? '',
             subject: bezahltSubject(props),
             html: await render(AbrechnungBezahltConfirmationEmail(props)),
-            empfaengerTyp: 'sv',
-            template: 'abrechnung_bezahlt_confirmation',
           })
         }
       } catch (mailErr) {
@@ -302,9 +301,9 @@ export async function stornoAbrechnung(
 
   // 5. Email an Empfänger
   try {
-    const { sendEmail } = await import('@/lib/email/google/client')
     const { render } = await import('@react-email/render')
     const { AbrechnungManuellVersendetEmail, subject: stornoSubject } = await import('@/lib/email/google/templates/AbrechnungManuellVersendet')
+    const { sendCommunication } = await import('@/lib/communications/send')
     const stornoProps = {
       empfaengerVorname: abr.empfaenger_name?.split(' ')[0] ?? null,
       abrechnungsNr: abr.abrechnungs_nr,
@@ -315,12 +314,11 @@ export async function stornoAbrechnung(
       wirdErstattet: !!abr.bezahlt_am,
     }
     const html = await render(AbrechnungManuellVersendetEmail(stornoProps))
-    await sendEmail({
-      to: abr.empfaenger_email,
+    await sendCommunication(abr.empfaenger_typ === 'kanzlei' ? 'kanzlei_monatsabrechnung' : 'sv_monatsabrechnung', {
+      email: abr.empfaenger_email,
+      vorname: abr.empfaenger_name?.split(' ')[0] ?? '',
       subject: stornoSubject(stornoProps),
       html,
-      empfaengerTyp: abr.empfaenger_typ ?? 'sv',
-      template: 'abrechnung_storno',
     })
   } catch (e) {
     console.error('[KFZ-150] Storno-Email fehlgeschlagen:', e)

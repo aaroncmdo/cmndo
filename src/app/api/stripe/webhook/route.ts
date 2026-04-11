@@ -121,17 +121,16 @@ export async function POST(request: Request) {
             if (org?.hauptansprechpartner_user_id) {
               const { data: p } = await db.from('profiles').select('email, vorname').eq('id', org.hauptansprechpartner_user_id).single()
               if (p?.email) {
-                const { sendEmail } = await import('@/lib/email/google/client')
                 const { render } = await import('@react-email/render')
                 const { AnzahlungEingegangenEmail, subject: anzahlungSubject } = await import('@/lib/email/google/templates/AnzahlungEingegangen')
+                const { sendCommunication } = await import('@/lib/communications/send')
                 const props = { vorname: p.vorname ?? null, typ: 'buero' as const, orgName: org.name }
                 const html = await render(AnzahlungEingegangenEmail(props))
-                await sendEmail({
-                  to: p.email,
+                await sendCommunication('welcome_sv_buero', {
+                  email: p.email,
+                  vorname: p.vorname ?? '',
                   subject: anzahlungSubject(props),
                   html,
-                  empfaengerTyp: 'sv',
-                  template: 'buero_onboarding_payment_confirmed',
                 })
               }
             }
@@ -212,17 +211,16 @@ export async function POST(request: Request) {
             if (org?.hauptansprechpartner_user_id) {
               const { data: p } = await db.from('profiles').select('email, vorname').eq('id', org.hauptansprechpartner_user_id).single()
               if (p?.email) {
-                const { sendEmail } = await import('@/lib/email/google/client')
                 const { render } = await import('@react-email/render')
                 const { AnzahlungEingegangenEmail, subject: anzahlungSubject } = await import('@/lib/email/google/templates/AnzahlungEingegangen')
+                const { sendCommunication } = await import('@/lib/communications/send')
                 const props = { vorname: p.vorname ?? null, typ: 'akademie' as const, orgName: org.name }
                 const html = await render(AnzahlungEingegangenEmail(props))
-                await sendEmail({
-                  to: p.email,
+                await sendCommunication('welcome_sv_buero', {
+                  email: p.email,
+                  vorname: p.vorname ?? '',
                   subject: anzahlungSubject(props),
                   html,
-                  empfaengerTyp: 'sv',
-                  template: 'akademie_onboarding_payment_confirmed',
                 })
               }
             }
@@ -282,9 +280,9 @@ export async function POST(request: Request) {
                 .select('email, name, ansprechpartner')
                 .eq('id', abr.kanzlei_id).single()
               if (kanzlei?.email) {
-                const { sendEmail } = await import('@/lib/email/google/client')
                 const { render } = await import('@react-email/render')
                 const { KanzleiZahlungBestaetigungEmail, subject: kanzleiSubject } = await import('@/lib/email/google/templates/KanzleiZahlungBestaetigung')
+                const { sendCommunication } = await import('@/lib/communications/send')
                 const props = {
                   ansprechpartner: kanzlei.ansprechpartner ?? 'Sehr geehrte Damen und Herren',
                   rechnungsnummer: abr.rechnungsnummer,
@@ -292,12 +290,11 @@ export async function POST(request: Request) {
                   bezahltAm: bezahltAm,
                 }
                 const html = await render(KanzleiZahlungBestaetigungEmail(props))
-                await sendEmail({
-                  to: kanzlei.email,
+                await sendCommunication('kanzlei_monatsabrechnung', {
+                  email: kanzlei.email,
+                  vorname: kanzlei.ansprechpartner ?? '',
                   subject: kanzleiSubject(props),
                   html,
-                  empfaengerTyp: 'kanzlei',
-                  template: 'kanzlei_abrechnung_bezahlt',
                 })
               }
             }
@@ -352,17 +349,16 @@ export async function POST(request: Request) {
             if (sv?.profile_id) {
               const { data: p } = await db.from('profiles').select('email, vorname').eq('id', sv.profile_id).single()
               if (p?.email) {
-                const { sendEmail } = await import('@/lib/email/google/client')
                 const { render } = await import('@react-email/render')
                 const { AnzahlungEingegangenEmail, subject: anzahlungSubject } = await import('@/lib/email/google/templates/AnzahlungEingegangen')
+                const { sendCommunication } = await import('@/lib/communications/send')
                 const props = { vorname: p.vorname ?? null, typ: 'solo' as const }
                 const html = await render(AnzahlungEingegangenEmail(props))
-                await sendEmail({
-                  to: p.email,
+                await sendCommunication('welcome_sv_solo', {
+                  email: p.email,
+                  vorname: p.vorname ?? '',
                   subject: anzahlungSubject(props),
                   html,
-                  empfaengerTyp: 'sv',
-                  template: 'sv_onboarding_payment_confirmed',
                 })
               }
             }
@@ -371,9 +367,12 @@ export async function POST(request: Request) {
           // Admin-Notification
           try {
             const { data: admins } = await db.from('profiles').select('telefon').eq('rolle', 'admin')
-            const { sendManualWhatsApp } = await import('@/lib/whatsapp')
+            const { sendCommunication } = await import('@/lib/communications/send')
             for (const a of admins ?? []) {
-              if (a.telefon) await sendManualWhatsApp(a.telefon, `✅ SV-Anzahlung eingegangen für ${svId.slice(0, 8)}. Portal freigeschaltet.`, undefined)
+              if (a.telefon) await sendCommunication('admin_einzug_failed', {
+                telefon: a.telefon,
+                '1': svId.slice(0, 8),
+              })
             }
           } catch { /* */ }
 

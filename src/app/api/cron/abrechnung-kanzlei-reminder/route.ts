@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendEmail } from '@/lib/email/google/client'
+import { sendCommunication } from '@/lib/communications/send'
 
 export const dynamic = 'force-dynamic'
 
@@ -154,12 +154,11 @@ export async function GET(request: Request) {
       }
 
       try {
-        await sendEmail({
-          to: kanzlei.email,
+        await sendCommunication('kanzlei_monatsabrechnung', {
+          email: kanzlei.email,
+          vorname: kanzlei.ansprechpartner ?? '',
           subject: cfg.subject,
           html: cfg.bodyFn(bodyData),
-          empfaengerTyp: 'kanzlei',
-          template: `kanzlei_abrechnung_${cfg.typ}`,
         })
 
         await db.from('kanzlei_abrechnung_reminders').insert({

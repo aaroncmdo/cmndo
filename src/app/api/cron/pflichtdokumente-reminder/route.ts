@@ -99,9 +99,11 @@ export async function GET(request: Request) {
             if (fallFull?.lead_id) {
               const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', fallFull.lead_id).single()
               if (lead?.telefon) {
-                const { sendWhatsAppTemplate } = await import('@/lib/whatsapp/send-template')
+                const { sendCommunication } = await import('@/lib/communications/send')
                 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'
-                await sendWhatsAppTemplate(lead.telefon, 'dokumente_nachreichen', {
+                await sendCommunication('dokumente_nachreichen', {
+                  telefon: lead.telefon,
+                  vorname: lead.vorname ?? 'Kunde',
                   '1': lead.vorname ?? 'Kunde',
                   '2': fehlendListe,
                   '3': `${appUrl}/kunde`,

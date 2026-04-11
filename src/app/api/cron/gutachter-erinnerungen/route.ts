@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
-import { sendWhatsApp } from '@/lib/whatsapp'
+import { sendCommunication } from '@/lib/communications/send'
 
 async function getOsrmDuration(fromLat: number, fromLng: number, toLat: number, toLng: number): Promise<{ minutes: number; km: number } | null> {
   try {
@@ -78,18 +78,29 @@ export async function GET(req: NextRequest) {
 
     // LOSFAHREN Erinnerung
     if (!termin.losfahren_erinnerung_gesendet && now >= losfahrenUm && minutesUntil > 5) {
-      const msg = `Hallo ${svName}, in ${Math.max(5, Math.round((terminTime.getTime() - now.getTime()) / 60000 - (fahrzeitMin ?? 30)))} Minuten sollten Sie losfahren um pünktlich bei Ihrem Termin um ${terminTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} bei ${kundeName} zu sein.\n\nAdresse: ${addr}\nFahrzeit: ca. ${fahrzeitMin ?? 30} Min\n\nNavigation starten: ${mapsLink}\n\nIhr Claimondo-Team.`
-
-      await sendWhatsApp(svProfile.telefon, msg)
+      const minBisLos = Math.max(5, Math.round((terminTime.getTime() - now.getTime()) / 60000 - (fahrzeitMin ?? 30)))
+      await sendCommunication('sv_tagesroute', {
+        telefon: svProfile.telefon,
+        vorname: svName,
+        '1': String(minBisLos),
+        '2': terminTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+        '3': kundeName,
+        '4': addr,
+        '5': String(fahrzeitMin ?? 30),
+        '6': mapsLink,
+      })
       await svc.from('faelle').update({ losfahren_erinnerung_gesendet: true }).eq('id', termin.id)
       sent++
     }
 
     // 5-MIN Erinnerung
     if (!termin.termin_erinnerung_5min_gesendet && minutesUntil <= 5 && minutesUntil >= -10) {
-      const msg = `Hallo ${svName}, Ihr Termin bei ${kundeName} beginnt in 5 Minuten.\n\nAdresse: ${addr}\n\nViel Erfolg!\nIhr Claimondo-Team.`
-
-      await sendWhatsApp(svProfile.telefon, msg)
+      await sendCommunication('sv_tagesroute', {
+        telefon: svProfile.telefon,
+        vorname: svName,
+        '1': kundeName,
+        '2': addr,
+      })
       await svc.from('faelle').update({ termin_erinnerung_5min_gesendet: true }).eq('id', termin.id)
       sent++
     }

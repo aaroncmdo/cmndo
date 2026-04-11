@@ -57,10 +57,12 @@ export async function GET() {
       // Reminder senden
       if (trigger.emailSubject && email) {
         try {
-          const { sendEmail } = await import('@/lib/email/google/client')
-          await sendEmail({
-            to: email, subject: trigger.emailSubject, html: trigger.emailBody,
-            empfaengerTyp: 'sv', template: `sv_payment_${trigger.typ}`,
+          const { sendCommunication } = await import('@/lib/communications/send')
+          await sendCommunication('sv_monatsabrechnung', {
+            email,
+            vorname,
+            subject: trigger.emailSubject,
+            html: trigger.emailBody,
           })
         } catch (err) { console.error(`[KFZ-148] Reminder ${trigger.typ}:`, err) }
       }

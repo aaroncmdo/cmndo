@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { saveLeadQualifizierung, confirmGutachterTermin, setSvGesucht } from './actions'
+import { saveLeadQualifizierung, confirmGutachterTermin, setSvGesucht, sendFlowLinkCommunication } from './actions'
 import { sendFlowLink, updateServiceTyp } from '../../actions'
 import VersicherungCombobox from '@/components/VersicherungCombobox'
 import {
@@ -850,11 +850,14 @@ function StepFlowLink({ lead }: { lead: LeadData }) {
       const { token } = await sendFlowLink(lead.id)
       const url = `${window.location.origin}/flow/${token}`
       setFlowUrl(url)
-      // Send via Twilio WhatsApp API
+      // Send via Twilio WhatsApp API (server action)
       if (lead.telefon) {
-        const { sendWhatsAppFromLead } = await import('./actions')
-        const msg = `Hallo ${name}, hier ist Ihr Link zur Schadensaufnahme: ${url}\n\nIhr Claimondo-Team`
-        await sendWhatsAppFromLead(lead.telefon, msg)
+        await sendFlowLinkCommunication({
+          telefon: lead.telefon,
+          vorname: lead.vorname ?? '',
+          name,
+          url,
+        })
       }
       router.refresh()
     } catch (err) { setError(err instanceof Error ? err.message : 'Fehler') }

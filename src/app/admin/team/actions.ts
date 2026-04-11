@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendEmail } from '@/lib/email'
+import { sendCommunication } from '@/lib/communications/send'
 
 function generatePassword(length = 12): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
@@ -50,15 +50,11 @@ export async function createMitarbeiter(formData: FormData): Promise<{ email: st
   if (profileError) throw new Error(`Profil erstellen fehlgeschlagen: ${profileError.message}`)
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'
-  await sendEmail({
-    to: email, subject: 'Einladung zu Claimondo', heading: 'Willkommen bei Claimondo!',
-    lines: [
-      `Hallo ${vorname},`,
-      `Sie wurden als <strong style="color:#fff">${rolle}</strong> zu Claimondo eingeladen.`,
-      `E-Mail: <strong style="color:#fff">${email}</strong>`,
-      `Einmalpasswort: <strong style="color:#fff">${password}</strong>`,
-    ],
-    ctaLabel: 'Jetzt einloggen', ctaUrl: `${appUrl}/login`,
+  await sendCommunication('mitarbeiter_einladung', {
+    email,
+    vorname,
+    subject: 'Einladung zu Claimondo',
+    html: `<p>Hallo ${vorname},</p><p>Sie wurden als <strong>${rolle}</strong> zu Claimondo eingeladen.</p><p>E-Mail: <strong>${email}</strong></p><p>Einmalpasswort: <strong>${password}</strong></p><p><a href="${appUrl}/login">Jetzt einloggen</a></p>`,
   })
   return { email, password }
 }

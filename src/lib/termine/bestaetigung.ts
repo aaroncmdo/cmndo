@@ -50,10 +50,15 @@ export async function bestaetigeTermin(terminId: string) {
     if (fall?.lead_id) {
       const { data: lead } = await db.from('leads').select('telefon, vorname').eq('id', fall.lead_id).single()
       if (lead?.telefon) {
-        const { sendWhatsApp } = await import('@/lib/whatsapp')
-        await sendWhatsApp(lead.telefon,
-          `Hallo ${lead.vorname ?? 'Kunde'}, Ihr Begutachtungstermin am ${datum} um ${uhrzeit} ist jetzt verbindlich bestätigt. Bitte stellen Sie sicher, dass das Fahrzeug zugänglich ist.\n\nIhr Claimondo-Team`
-        )
+        const { sendCommunication } = await import('@/lib/communications/send')
+        await sendCommunication('termin_bestaetigt', {
+          telefon: lead.telefon,
+          vorname: lead.vorname ?? 'Kunde',
+          '1': lead.vorname ?? 'Kunde',
+          '2': datum,
+          '3': uhrzeit,
+          '4': fall?.besichtigungsort_adresse ?? '—',
+        })
       }
 
       // Email S-E6 an SV
@@ -62,9 +67,9 @@ export async function bestaetigeTermin(terminId: string) {
         if (sv?.profile_id) {
           const { data: svProfile } = await db.from('profiles').select('email, vorname').eq('id', sv.profile_id).single()
           if (svProfile?.email) {
+            const { sendCommunication } = await import('@/lib/communications/send')
             const { render } = await import('@react-email/render')
             const { SvTerminBestaetigungEmail, subject } = await import('@/lib/email/google/templates/SvTerminBestaetigung')
-            const { sendEmail } = await import('@/lib/email/google/client')
             const kundenName = lead ? `${lead.vorname ?? ''}`.trim() || 'Kunde' : 'Kunde'
             const props = {
               svVorname: svProfile.vorname ?? 'Partner',
@@ -75,13 +80,11 @@ export async function bestaetigeTermin(terminId: string) {
               adresse: fall?.besichtigungsort_adresse ?? '—',
             }
             const html = await render(SvTerminBestaetigungEmail(props))
-            await sendEmail({
-              to: svProfile.email,
+            await sendCommunication('sv_termin_bestaetigung', {
+              email: svProfile.email,
+              vorname: svProfile.vorname ?? 'Partner',
               subject: subject(props),
               html,
-              fallId: termin.fall_id,
-              empfaengerTyp: 'sv',
-              template: 'sv_termin_bestaetigung',
             })
           }
         }

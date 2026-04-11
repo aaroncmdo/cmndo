@@ -535,7 +535,7 @@ export async function storniereTermin(
     .eq('id', terminId)
 
   // WhatsApp an Kunden
-  const { sendWhatsAppTemplate } = await import('@/lib/whatsapp/send-template')
+  const { sendCommunication } = await import('@/lib/communications/send')
   const { data: fall } = await supabase
     .from('faelle')
     .select('lead_id, fall_nummer')
@@ -551,7 +551,7 @@ export async function storniereTermin(
     }
     const datum = new Date(termin.start_zeit).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
     if (lead?.telefon) {
-      await sendWhatsAppTemplate(lead.telefon, 'termin_storniert', { '1': lead.vorname ?? 'Kunde', '2': svName, '3': datum }).catch(() => {})
+      await sendCommunication('termin_storniert', { telefon: lead.telefon, vorname: lead.vorname ?? 'Kunde', '1': lead.vorname ?? 'Kunde', '2': svName, '3': datum }).catch(() => {})
     }
   }
 
@@ -591,7 +591,7 @@ export async function meldeVerspaetung(
     .eq('id', terminId)
 
   // WhatsApp an Kunden
-  const { sendWhatsAppTemplate } = await import('@/lib/whatsapp/send-template')
+  const { sendCommunication } = await import('@/lib/communications/send')
   const { data: fall } = await supabase.from('faelle').select('lead_id').eq('id', termin.fall_id).single()
   if (fall?.lead_id) {
     const { data: lead } = await supabase.from('leads').select('vorname, telefon').eq('id', fall.lead_id).single()
@@ -602,7 +602,7 @@ export async function meldeVerspaetung(
       if (p) svName = [p.vorname, p.nachname].filter(Boolean).join(' ')
     }
     if (lead?.telefon) {
-      await sendWhatsAppTemplate(lead.telefon, 'sv_verspaetet', { '1': lead.vorname ?? 'Kunde', '2': svName, '3': String(minuten) }).catch(() => {})
+      await sendCommunication('sv_verspaetet', { telefon: lead.telefon, vorname: lead.vorname ?? 'Kunde', '1': lead.vorname ?? 'Kunde', '2': svName, '3': String(minuten) }).catch(() => {})
     }
   }
 

@@ -110,7 +110,7 @@ export async function reissueAbrechnung(
 
   // 9. Email an Empfänger (best effort)
   try {
-    const { sendEmail } = await import('@/lib/email/google/client')
+    const { sendCommunication } = await import('@/lib/communications/send')
     const { render } = await import('@react-email/render')
     const { AbrechnungReminderEmail } = await import('@/lib/email/google/templates/AbrechnungReminder')
     const html = await render(AbrechnungReminderEmail({
@@ -121,12 +121,11 @@ export async function reissueAbrechnung(
       faellig_am: new Date(Date.now() + 14 * 86400000).toISOString(),
       tage_bis_faellig: 14,
     }))
-    await sendEmail({
-      to: alte.empfaenger_email,
+    await sendCommunication(alte.empfaenger_typ === 'kanzlei' ? 'kanzlei_monatsabrechnung' : 'sv_monatsabrechnung', {
+      email: alte.empfaenger_email,
+      vorname: alte.empfaenger_name.split(' ')[0] || '',
       subject: `Korrekturabrechnung ${neueNr} — Rechnung ${alte.abrechnungs_nr} wurde widerrufen`,
       html,
-      empfaengerTyp: alte.empfaenger_typ ?? 'sv',
-      template: 'abrechnung_reissue',
     })
   } catch (e) {
     console.error('[KFZ-150] Re-Issue Email fehlgeschlagen:', e)

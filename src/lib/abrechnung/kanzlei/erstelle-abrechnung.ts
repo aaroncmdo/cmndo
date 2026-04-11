@@ -276,6 +276,7 @@ export async function erstelleKanzleiAbrechnung(
 
       try {
         const html = await render(KanzleiMagicLinkAbrechnungEmail(emailProps))
+        // TODO: migrate to sendCommunication when attachment support added
         await sendEmail({
           to: kanzlei.email,
           subject: magicLinkSubject(emailProps),

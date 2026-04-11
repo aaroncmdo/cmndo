@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendWhatsApp } from '@/lib/whatsapp'
+import { sendCommunication } from '@/lib/communications/send'
 
 /**
  * KFZ-193: KB-Beratungstermin 24h-Erinnerung (stuendlich)
@@ -62,8 +62,14 @@ export async function GET(request: Request) {
     }
 
     if (telefon) {
-      const msg = `Erinnerung: ${vorname}, morgen ${datum} um ${uhrzeit} Uhr haben Sie einen Beratungstermin mit Ihrem Claimondo-Betreuer (${termin.kanal === 'video' ? 'Video-Call' : 'Telefon'}). Wir freuen uns auf das Gespräch!`
-      await sendWhatsApp(telefon, msg)
+      await sendCommunication('kb_termin_reminder_24h', {
+        telefon,
+        vorname,
+        '1': vorname,
+        '2': datum,
+        '3': uhrzeit,
+        '4': termin.kanal === 'video' ? 'Video-Call' : 'Telefon',
+      })
     }
 
     // Reminder-Timestamp setzen (auch wenn WhatsApp nicht gesendet wurde)

@@ -93,19 +93,17 @@ export async function GET(request: Request) {
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
 
-    // Send error notification via central sendEmail
+    // Send error notification via central sendCommunication
     try {
-      const { sendEmail } = await import('@/lib/email/google/client')
       const { render } = await import('@react-email/render')
       const { AdminBackupFehlgeschlagenEmail, subject: backupSubject } = await import('@/lib/email/google/templates/AdminBackupFehlgeschlagen')
+      const { sendCommunication } = await import('@/lib/communications/send')
       const backupProps = { datum: dateStr, fehler: message }
       const html = await render(AdminBackupFehlgeschlagenEmail(backupProps))
-      await sendEmail({
-        to: process.env.ADMIN_ALERT_EMAIL || 'aaron@claimondo.de',
+      await sendCommunication('admin_backup_failed', {
+        email: process.env.ADMIN_ALERT_EMAIL || 'aaron@claimondo.de',
         subject: backupSubject(backupProps),
         html,
-        empfaengerTyp: 'admin',
-        template: 'db_backup_error',
       })
     } catch (mailErr) {
       console.error('Failed to send backup error notification:', mailErr)

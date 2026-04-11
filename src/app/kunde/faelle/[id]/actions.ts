@@ -68,8 +68,13 @@ export async function sendNachricht(
         // WhatsApp Fallback
         const { data: profile } = await admin.from('profiles').select('telefon').eq('id', t.user_id).single()
         if (profile?.telefon) {
-          const { sendWhatsApp } = await import('@/lib/whatsapp')
-          await sendWhatsApp(profile.telefon, `Neue Kundennachricht in Fall ${fall?.fall_nummer ?? fallId.slice(0, 8)}: ${nachricht.trim().slice(0, 200)}`)
+          const { sendCommunication } = await import('@/lib/communications/send')
+          await sendCommunication('chat_fallback_kb', {
+            telefon: profile.telefon,
+            fall_id: fallId,
+            '1': fall?.fall_nummer ?? fallId.slice(0, 8),
+            '2': nachricht.trim().slice(0, 200),
+          })
         }
       }
     } else if (empfaengerId) {

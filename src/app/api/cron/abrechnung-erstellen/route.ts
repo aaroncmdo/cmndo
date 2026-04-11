@@ -215,9 +215,9 @@ export async function GET() {
 
     // Email an SV
     try {
-      const { sendEmail } = await import('@/lib/email/google/client')
       const { render } = await import('@react-email/render')
       const { SvMonatsabrechnungVersandEmail, subject: svAbrSubject } = await import('@/lib/email/google/templates/SvMonatsabrechnungVersand')
+      const { sendCommunication } = await import('@/lib/communications/send')
       const abrProps = {
         vorname: profile.vorname ?? null,
         abrechnungsNr,
@@ -226,12 +226,11 @@ export async function GET() {
         faelligAm: faellig.toLocaleDateString('de-DE'),
       }
       const html = await render(SvMonatsabrechnungVersandEmail(abrProps))
-      await sendEmail({
-        to: profile.email,
+      await sendCommunication('sv_monatsabrechnung', {
+        email: profile.email,
+        vorname: profile.vorname ?? '',
         subject: svAbrSubject(abrProps),
         html,
-        empfaengerTyp: 'sv',
-        template: 'sv_monatsabrechnung',
       })
     } catch (err) { console.error('[KFZ-149] Abrechnungs-Email:', err) }
 
@@ -305,9 +304,9 @@ export async function GET() {
 
     // Welcome-Mail an Verwalter
     try {
-      const { sendEmail } = await import('@/lib/email/google/client')
       const { render } = await import('@react-email/render')
       const { BueroVerwalterAbrechnungInfoEmail, subject: bueroAbrSubject } = await import('@/lib/email/google/templates/BueroVerwalterAbrechnungInfo')
+      const { sendCommunication } = await import('@/lib/communications/send')
       const subSvCount = new Set(acc.positions.map(p => p.sub_sv_id)).size
       const orgAbrProps = {
         verwalterVorname: verwalterName.split(' ')[0] || null,
@@ -321,12 +320,11 @@ export async function GET() {
         orgTyp: acc.org_typ as 'buero' | 'akademie',
       }
       const html = await render(BueroVerwalterAbrechnungInfoEmail(orgAbrProps))
-      await sendEmail({
-        to: verwalterEmail,
+      await sendCommunication('sv_monatsabrechnung', {
+        email: verwalterEmail,
+        vorname: verwalterName.split(' ')[0] || '',
         subject: bueroAbrSubject(orgAbrProps),
         html,
-        empfaengerTyp: 'sv',
-        template: 'org_sammelabrechnung',
       })
     } catch (err) { console.error('[KFZ-152] Sammelrechnungs-Email:', err) }
 

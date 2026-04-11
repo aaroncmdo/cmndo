@@ -5,7 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { haversineMeters } from '@/lib/gps/geofence'
 import { calculateEtaMinutes } from '@/lib/eta/calculate-eta'
-import { sendWhatsAppTemplate } from '@/lib/whatsapp/send-template'
+import { sendCommunication } from '@/lib/communications/send'
 
 // KFZ-200: Server Actions für SV-Navigation, Vor-Ort-Modus, Begutachtung.
 
@@ -61,7 +61,9 @@ export async function startNavigation(
     if (fall?.lead_id) {
       const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', fall.lead_id).single()
       if (lead?.telefon) {
-        await sendWhatsAppTemplate(lead.telefon, 'sv_losgefahren', {
+        await sendCommunication('sv_losgefahren', {
+          telefon: lead.telefon,
+          vorname: lead.vorname ?? 'Kunde',
           '1': lead.vorname ?? 'Kunde',
           '2': '—',
           '3': '—',
@@ -168,7 +170,9 @@ export async function updateLivePosition(
           if (p) svName = [p.vorname, p.nachname].filter(Boolean).join(' ')
         }
         if (lead?.telefon) {
-          await sendWhatsAppTemplate(lead.telefon, 'sv_fast_da', {
+          await sendCommunication('sv_fast_da', {
+            telefon: lead.telefon,
+            vorname: lead.vorname ?? 'Kunde',
             '1': lead.vorname ?? 'Kunde',
             '2': svName,
           }).catch(() => {})
@@ -230,7 +234,9 @@ export async function arrived(terminId: string): Promise<{ success?: boolean; er
     if (fall?.lead_id) {
       const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', fall.lead_id).single()
       if (lead?.telefon) {
-        await sendWhatsAppTemplate(lead.telefon, 'sv_angekommen', {
+        await sendCommunication('sv_angekommen', {
+          telefon: lead.telefon,
+          vorname: lead.vorname ?? 'Kunde',
           '1': lead.vorname ?? 'Kunde',
           '2': svName,
         }).catch(() => {})
@@ -310,7 +316,9 @@ export async function completeBegutachtung(
     if (fall?.lead_id) {
       const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', fall.lead_id).single()
       if (lead?.telefon) {
-        await sendWhatsAppTemplate(lead.telefon, 'gutachten_fertig', {
+        await sendCommunication('gutachten_fertig', {
+          telefon: lead.telefon,
+          vorname: lead.vorname ?? 'Kunde',
           '1': lead.vorname ?? 'Kunde',
         }).catch(() => {})
       }

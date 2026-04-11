@@ -1,7 +1,7 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendWhatsAppTemplate } from '@/lib/whatsapp/send-template'
+import { sendCommunication } from '@/lib/communications/send'
 
 // KFZ-179: WhatsApp-Notification an Kunden wenn SV angekommen ist.
 
@@ -34,10 +34,12 @@ export async function notifyKundeAngekommen(terminId: string) {
   }
 
   if (kundeTelefon) {
-    await sendWhatsAppTemplate(kundeTelefon, 'sv_angekommen', {
+    await sendCommunication('sv_angekommen', {
+      telefon: kundeTelefon,
+      vorname: kundeVorname,
       '1': kundeVorname,
       '2': svName,
-    }).catch(err => console.error('[KFZ-179] WhatsApp angekommen failed:', err))
+    }).catch((err: unknown) => console.error('[KFZ-179] WhatsApp angekommen failed:', err))
   }
 
   await db.from('gutachter_termine').update({

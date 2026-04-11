@@ -33,11 +33,15 @@ export default function FlowLinkSection({
       const url = `${window.location.origin}/flow/${token}`
       setFlowUrl(url)
 
-      // Send via Twilio WhatsApp API
+      // Send via central communications
       if (lead.telefon) {
-        const { sendWhatsAppFromLead } = await import('./actions')
-        const msg = `Hallo ${name}, hier ist Ihr Link zur Schadensaufnahme: ${url}\n\nIhr Claimondo-Team`
-        await sendWhatsAppFromLead(lead.telefon, msg)
+        const { sendCommunication } = await import('@/lib/communications/send')
+        await sendCommunication('flowlink_versand', {
+          telefon: lead.telefon,
+          vorname: lead.vorname ?? '',
+          '1': name,
+          '2': url,
+        })
       }
 
       router.refresh()

@@ -121,12 +121,15 @@ export async function GET(request: Request) {
 
         if (lead?.telefon) {
           try {
-            const { sendWhatsApp } = await import('@/lib/whatsapp')
+            const { sendCommunication } = await import('@/lib/communications/send')
             const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'
-            await sendWhatsApp(
-              lead.telefon,
-              `Hallo ${lead.vorname ?? 'Kunde'}, wir möchten Sie daran erinnern, dass Ihre Vollmacht für Fall ${fall.fall_nummer ?? fall.id.slice(0, 8)} noch aussteht.\n\nBitte unterschreiben Sie die Vollmacht, damit wir Ihren Termin verbindlich bestätigen können:\n${appUrl}/kunde\n\nIhr Claimondo-Team`,
-            )
+            await sendCommunication('dokumente_nachreichen', {
+              telefon: lead.telefon,
+              vorname: lead.vorname ?? 'Kunde',
+              '1': lead.vorname ?? 'Kunde',
+              '2': `Vollmacht für Fall ${fall.fall_nummer ?? fall.id.slice(0, 8)}`,
+              '3': `${appUrl}/kunde`,
+            })
             gesendet = true
           } catch (err) {
             console.error('[vollmacht-reminder] WhatsApp:', err)

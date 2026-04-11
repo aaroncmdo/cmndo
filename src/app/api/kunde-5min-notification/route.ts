@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendWhatsAppTemplate } from '@/lib/whatsapp/send-template'
+import { sendCommunication } from '@/lib/communications/send'
 
 // KFZ-179: 5-Minuten-Notification an Kunden — getriggert vom Client wenn ETA < 5.
 
@@ -38,7 +38,9 @@ export async function POST(request: Request) {
   }
 
   if (kundeTelefon) {
-    await sendWhatsAppTemplate(kundeTelefon, 'sv_fast_da', {
+    await sendCommunication('sv_fast_da', {
+      telefon: kundeTelefon,
+      vorname: kundeVorname,
       '1': kundeVorname,
       '2': svName,
     }).catch(() => {})

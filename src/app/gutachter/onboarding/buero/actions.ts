@@ -178,6 +178,7 @@ export async function signBueroVertrag(params: {
         portalUrl: `${APP_URL}/gutachter/onboarding/buero`,
       }
       const html = await render(BueroSubSvEinladungEmail(props))
+      // TODO: migrate to sendCommunication when attachment support added
       await sendEmail({
         to: profile.email,
         subject: bueroSubject(props),
