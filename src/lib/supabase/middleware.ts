@@ -67,6 +67,15 @@ export async function updateSession(request: NextRequest) {
 
   if (!user && !isPublicPath(request.nextUrl.pathname)) {
     response = NextResponse.redirect(new URL('/login', request.url))
+  } else if (user && request.nextUrl.pathname.startsWith('/admin')) {
+    // KFZ-203: Dispatch-User darf nicht auf /admin/*
+    // Leichtgewichtiger Check via user_metadata (wird beim Login gesetzt)
+    const rolle = user.user_metadata?.rolle as string | undefined
+    if (rolle === 'dispatch') {
+      response = NextResponse.redirect(new URL('/dispatch/dashboard', request.url))
+    } else {
+      response = NextResponse.next({ request: { headers: requestHeaders } })
+    }
   } else if (user && !isPublicPath(request.nextUrl.pathname) && request.nextUrl.pathname !== '/login/2fa') {
     // KFZ-184: 2FA-Check — wenn User eingeloggt aber 2FA pending
     // Google-OAuth-User skippen 2FA (provider check via app_metadata)
