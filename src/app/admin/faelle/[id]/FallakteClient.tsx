@@ -632,7 +632,7 @@ export default function FallakteClient({
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [activeTab, setActiveTab] = useState<Tab>('tasks')
+  const [activeTab, setActiveTab] = useState<Tab>('uebersicht')
 
   // KFZ-182: Mark fall as read on mount (badges verschwinden)
   useEffect(() => {
@@ -683,17 +683,14 @@ export default function FallakteClient({
 
   const offeneTasks = tasks.filter(t => t.status !== 'erledigt').length
 
+  // KFZ-211: Tab-Struktur nach Notion-Dokumenten
+  const showVsTab = ['anschlussschreiben', 'regulierung', 'regulierung-laeuft', 'nachbesichtigung-laeuft', 'zahlung-eingegangen', 'vs-abgelehnt', 'abgeschlossen'].includes(fall.status)
   const tabs: [Tab, string][] = [
-    ['tasks', `Tasks${offeneTasks > 0 ? ` (${offeneTasks})` : ''}`],
     ['uebersicht', 'Übersicht'],
+    ['dokumente', `Dokumente (${dokumente.length + pflichtdokumente.length})`],
+    ['chat', 'Kommunikation'],
+    ...(showVsTab ? [['vs-regulierung', 'VS-Regulierung'] as [Tab, string]] : []),
     ['timeline', `Timeline (${timeline.length})`],
-    ['chat', 'Chat'],
-    ['dokumente', `Dateien (${dokumente.length + pflichtdokumente.length})`],
-    ['qc', `QC-Prüfung${qcCheckliste?.status === 'bestanden' ? ' ✓' : qcCheckliste?.status === 'nachbesserung' ? ' !' : ''}`],
-    ['kommunikation', 'Kommunikation'],
-    ['kanzlei', 'Kanzlei'],
-    ['vs-regulierung', 'VS-Regulierung'],
-    ['abrechnung', 'Abrechnung'],
   ]
 
   return (
@@ -1548,6 +1545,12 @@ function TabUebersicht({
               <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-blue-100 text-blue-700">
                 {String((fall as Record<string,unknown>).finanzierung_leasing) === 'leasing' ? 'Leasing' : 'Finanzierung'}
               </span>
+            )}
+            {!!(fall as Record<string,unknown>).hat_vorschaeden && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-amber-100 text-amber-700">Vorschäden</span>
+            )}
+            {!!fall.ist_totalschaden && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-red-100 text-red-700">Totalschaden</span>
             )}
           </div>
         </div>
