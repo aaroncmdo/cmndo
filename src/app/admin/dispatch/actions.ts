@@ -415,6 +415,21 @@ async function convertLeadToFall(
       // KFZ-146: Lead-Source uebernehmen
       source_channel: lead.source_channel ?? null,
       source_domain: lead.source_domain ?? null,
+      // KFZ-208: Mandantenfragebogen-Felder
+      ist_fahrzeughalter: lead.ist_fahrzeughalter ?? true,
+      finanzierung_leasing: lead.finanzierung_leasing ?? 'keine',
+      vorsteuerabzugsberechtigt: lead.vorsteuerabzugsberechtigt ?? false,
+      schadenhergang: lead.schadenhergang ?? null,
+      halter_vorname: lead.halter_vorname ?? null,
+      halter_nachname: lead.halter_nachname ?? null,
+      halter_strasse: lead.halter_strasse ?? null,
+      halter_plz: lead.halter_plz ?? null,
+      halter_stadt: lead.halter_stadt ?? null,
+      halter_telefon: lead.halter_telefon ?? null,
+      halter_email: lead.halter_email ?? null,
+      finanzierungsgeber_name: lead.finanzierungsgeber_name ?? null,
+      finanzierungsgeber_adresse: lead.finanzierungsgeber_adresse ?? null,
+      finanzierungsgeber_vertragsnr: lead.finanzierungsgeber_vertragsnr ?? null,
       // Konversions-Metadaten
       leadbearbeiter_id: userId,
       kundenbetreuer_id: kundenbetreuerId,
