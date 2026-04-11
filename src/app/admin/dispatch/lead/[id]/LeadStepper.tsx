@@ -110,13 +110,10 @@ type GutachterSlot = {
 type MatchResult = { empfohlen: GutachterSlot | null; alternative_1: GutachterSlot | null; alternative_2: GutachterSlot | null }
 
 const STEPS = [
-  { key: 'mandantenfragebogen', label: 'Mandant', icon: FileTextIcon, phase: 'erstkontakt' },
-  { key: 'erstkontakt', label: 'Erstkontakt', icon: PhoneCallIcon, phase: 'erstkontakt' },
-  { key: 'schadentyp', label: 'Schadentyp', icon: ClipboardListIcon, phase: 'schadentyp-erfasst' },
-  { key: 'konstellation', label: 'Konstellation', icon: UsersIcon, phase: 'konstellation-erfasst' },
-  { key: 'gegner', label: 'Gegner-Daten', icon: ShieldIcon, phase: 'gegner-daten' },
-  { key: 'termin', label: 'Gutachtertermin', icon: CalendarIcon, phase: 'gutachtertermin' },
-  { key: 'flow', label: 'FlowLink', icon: SendIcon, phase: 'flow-gesendet' },
+  { key: 'kontakt', label: 'Kontaktdaten', icon: FileTextIcon, phase: 'erstkontakt', mandantStep: 1 as const },
+  { key: 'unfall', label: 'Unfalldetails', icon: ClipboardListIcon, phase: 'schadentyp-erfasst', mandantStep: 2 as const },
+  { key: 'fahrzeug', label: 'Fahrzeugdaten', icon: UsersIcon, phase: 'konstellation-erfasst', mandantStep: 3 as const },
+  { key: 'abschluss', label: 'Abschluss', icon: SendIcon, phase: 'flow-gesendet', mandantStep: 4 as const },
 ]
 
 function phaseIndex(phase: string | null): number { return PHASE_ORDER.indexOf(phase ?? 'neu') }
@@ -174,46 +171,15 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
   const [unfallortLng, setUnfallortLng] = useState<number | null>((lead as Record<string, unknown>).unfallort_lng as number ?? null)
   const [unfalldatum, setUnfalldatum] = useState((lead as Record<string, unknown>).unfalldatum as string ?? '')
 
-  const needsGegner = sf === 'sf-01' || sf === 'sf-02' || (sf === 'sf-03' && sfVariante === 'a')
-  const needsEigeneVers = sf === 'sf-02' || (sf === 'sf-03' && sfVariante === 'b')
-  const needsPolizei = sf === 'sf-02' || sf === 'sf-03'
-  const gegnerStepVisible = needsGegner
+  // Legacy compatibility — used in stepper navigation
+  const gegnerStepVisible = true
 
-  async function saveAndAdvance(newPhase: string, extraData?: Record<string, unknown>) {
+  // BUG-03: Vereinfacht — MandantenfragebogenStep macht jetzt eigene Saves
+  async function saveAndAdvance(newPhase: string) {
     setSaving(true); setSaved(false)
     try {
-      await saveLeadQualifizierung(lead.id, {
-        vorname: vorname || null, nachname: nachname || null,
-        telefon: telefon || null, email: email || null,
-        schadenfall_typ: sf || null, kunden_konstellation: kk || null,
-        qualifizierungs_phase: newPhase,
-        sf_variante: sf === 'sf-03' ? sfVariante || null : null,
-        gegner_name: needsGegner ? gegnerName || null : null,
-        gegner_versicherung: needsGegner ? gegnerVersicherung || null : null,
-        gegner_kennzeichen: needsGegner ? gegnerKennzeichen || null : null,
-        gegner_bekannt: sf === 'sf-03' ? sfVariante === 'a' : sf === 'sf-01' || sf === 'sf-02',
-        eigene_versicherung: needsEigeneVers ? eigeneVersicherung || null : null,
-        eigene_policennr: needsEigeneVers ? eigenePolicennr || null : null,
-        polizei_aktenzeichen: needsPolizei ? polizeiAktenzeichen || null : null,
-        polizeibericht_pflicht: polizeibericht, personenschaden_flag: personenschaden, mietwagen_flag: mietwagen,
-        schadensursache: schadensursache || null, unfallhergang: unfallhergang || null,
-        kennzeichen: kennzeichen || null, fahrzeug_hersteller: fzHersteller || null,
-        fahrzeug_modell: fzModell || null, fahrzeug_farbe: fzFarbe || null,
-        erstzulassung: erstzulassung || null, fin: fin || null,
-        kilometerstand: kilometerstand ? Number(kilometerstand) : null,
-        leasing_geber: kk === 'kk-02' ? leasingGeber || null : null, leasing_flag: kk === 'kk-02',
-        finanzierung_bank: kk === 'kk-03' ? finanzierungBank || null : null, finanzierung_flag: kk === 'kk-03',
-        firma_name: kk === 'kk-04' ? firmaName || null : null, firma_ustid: kk === 'kk-04' ? firmaUstid || null : null, gewerbe_flag: kk === 'kk-04',
-        halter_name: kk === 'kk-05' ? halterName || null : null, halter_ungleich_fahrer_flag: kk === 'kk-05',
-        // BUG-52: Adressen
-        kunde_adresse: kundeAdresse || null, kunde_lat: kundeLat, kunde_lng: kundeLng,
-        unfallort: unfallort || null, unfallort_lat: unfallortLat, unfallort_lng: unfallortLng,
-        unfalldatum: unfalldatum || null,
-        ...extraData,
-      })
+      await saveLeadQualifizierung(lead.id, { qualifizierungs_phase: newPhase })
       setSaved(true); setTimeout(() => setSaved(false), 2000)
-      const nextStepIdx = STEPS.findIndex(s => s.phase === newPhase)
-      if (nextStepIdx >= 0 && nextStepIdx < STEPS.length - 1) setOpenStep(nextStepIdx + 1)
       router.refresh()
     } catch { /* handled */ }
     setSaving(false)
@@ -301,106 +267,64 @@ export default function LeadStepper({ lead, rightSidebar }: { lead: LeadData; ri
             Schritt {openStep + 1}: {STEPS[openStep]?.label}
           </h3>
 
-          {STEPS[openStep]?.key === 'mandantenfragebogen' && (
-            <MandantenfragebogenStep
-              leadId={lead.id}
-              initialData={{
-                ist_fahrzeughalter: (lead as Record<string, unknown>).ist_fahrzeughalter as boolean ?? true,
-                finanzierung_leasing: (lead as Record<string, unknown>).finanzierung_leasing as string ?? 'keine',
-                vorsteuerabzugsberechtigt: (lead as Record<string, unknown>).vorsteuerabzugsberechtigt as boolean ?? false,
-                vorname: lead.vorname ?? '', nachname: lead.nachname ?? '',
-                telefon: lead.telefon ?? '', email: lead.email ?? '',
-                kunde_strasse: (lead as Record<string, unknown>).kunde_strasse as string ?? '',
-                kunde_plz: (lead as Record<string, unknown>).kunde_plz as string ?? '',
-                kunde_stadt: (lead as Record<string, unknown>).kunde_stadt as string ?? '',
-                halter_vorname: (lead as Record<string, unknown>).halter_vorname as string ?? '',
-                halter_nachname: (lead as Record<string, unknown>).halter_nachname as string ?? '',
-                halter_strasse: (lead as Record<string, unknown>).halter_strasse as string ?? '',
-                halter_plz: (lead as Record<string, unknown>).halter_plz as string ?? '',
-                halter_stadt: (lead as Record<string, unknown>).halter_stadt as string ?? '',
-                halter_telefon: (lead as Record<string, unknown>).halter_telefon as string ?? '',
-                halter_email: (lead as Record<string, unknown>).halter_email as string ?? '',
-                finanzierungsgeber_name: (lead as Record<string, unknown>).finanzierungsgeber_name as string ?? '',
-                finanzierungsgeber_adresse: (lead as Record<string, unknown>).finanzierungsgeber_adresse as string ?? '',
-                finanzierungsgeber_vertragsnr: (lead as Record<string, unknown>).finanzierungsgeber_vertragsnr as string ?? '',
-                kennzeichen: lead.kennzeichen ?? '', fahrzeug_hersteller: lead.fahrzeug_hersteller ?? '', fahrzeug_modell: lead.fahrzeug_modell ?? '',
-                fin: lead.fin ?? '', erstzulassung: lead.erstzulassung ?? '',
-                unfalldatum: (lead as Record<string, unknown>).unfalldatum as string ?? '',
-                unfallort: (lead as Record<string, unknown>).unfallort as string ?? '',
-                schadenhergang: (lead as Record<string, unknown>).schadenhergang as string ?? '',
-                service_typ: lead.service_typ ?? 'komplett',
-              }}
-              onComplete={() => setOpenStep(1)}
-            />
-          )}
-
-          {STEPS[openStep]?.key === 'erstkontakt' && (
-            <StepErstkontakt done={isStepDone(0)} saving={saving} onAdvance={() => saveAndAdvance('erstkontakt')}
-              lead={lead}
-              vorname={vorname} setVorname={setVorname}
-              nachname={nachname} setNachname={setNachname}
-              telefon={telefon} setTelefon={setTelefon}
-              email={email} setEmail={setEmail}
-              kundeAdresse={kundeAdresse} onAdresseChange={(a, lat, lng) => { setKundeAdresse(a); setKundeLat(lat); setKundeLng(lng) }} />
-          )}
-          {STEPS[openStep]?.key === 'schadentyp' && (
-            <StepSchadentyp
-              sf={sf} setSf={setSf} sfVariante={sfVariante} setSfVariante={setSfVariante}
-              needsEigeneVers={needsEigeneVers} eigeneVersicherung={eigeneVersicherung} setEigeneVersicherung={setEigeneVersicherung}
-              eigenePolicennr={eigenePolicennr} setEigenePolicennr={setEigenePolicennr}
-              needsPolizei={needsPolizei} polizeiAktenzeichen={polizeiAktenzeichen} setPolizeiAktenzeichen={setPolizeiAktenzeichen}
-              polizeibericht={polizeibericht} setPolizeibericht={setPolizeibericht}
-              personenschaden={personenschaden} setPersonenschaden={setPersonenschaden}
-              mietwagen={mietwagen} setMietwagen={setMietwagen}
-              unfallhergang={unfallhergang} setUnfallhergang={setUnfallhergang}
-              kennzeichen={kennzeichen} setKennzeichen={setKennzeichen}
-              fzHersteller={fzHersteller} setFzHersteller={setFzHersteller}
-              fzModell={fzModell} setFzModell={setFzModell}
-              fzFarbe={fzFarbe} setFzFarbe={setFzFarbe}
-              erstzulassung={erstzulassung} setErstzulassung={setErstzulassung}
-              fin={fin} setFin={setFin}
-              kilometerstand={kilometerstand} setKilometerstand={setKilometerstand}
-              unfallort={unfallort} onUnfallortChange={(a, lat, lng) => { setUnfallort(a); setUnfallortLat(lat); setUnfallortLng(lng) }}
-              unfalldatum={unfalldatum} setUnfalldatum={setUnfalldatum}
-              saving={saving} onAdvance={() => saveAndAdvance('schadentyp-erfasst')}
-            />
-          )}
-          {STEPS[openStep]?.key === 'konstellation' && (
-            <StepKonstellation kk={kk} setKk={setKk} leasingGeber={leasingGeber} setLeasingGeber={setLeasingGeber}
-              finanzierungBank={finanzierungBank} setFinanzierungBank={setFinanzierungBank}
-              firmaName={firmaName} setFirmaName={setFirmaName} firmaUstid={firmaUstid} setFirmaUstid={setFirmaUstid}
-              halterName={halterName} setHalterName={setHalterName} saving={saving} onAdvance={() => saveAndAdvance('konstellation-erfasst')} />
-          )}
-          {STEPS[openStep]?.key === 'gegner' && (
-            <StepGegner gegnerName={gegnerName} setGegnerName={setGegnerName}
-              gegnerVersicherung={gegnerVersicherung} setGegnerVersicherung={setGegnerVersicherung}
-              gegnerKennzeichen={gegnerKennzeichen} setGegnerKennzeichen={setGegnerKennzeichen}
-              saving={saving} onAdvance={() => saveAndAdvance('gegner-daten')} />
-          )}
-          {STEPS[openStep]?.key === 'termin' && (
-            <StepGutachterTermin lead={lead} saving={saving}
-              onAdvance={(svId, termin, plz, adresse, bLat, bLng, svName) => {
-                setSaving(true)
-                confirmGutachterTermin(lead.id, svId, termin, plz, adresse, bLat, bLng)
-                  .then((result) => {
-                    if (result.success) {
-                      // BUG-65D: Toast mit Details
-                      const terminStr = new Date(termin).toLocaleString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-                      toast.success(`Termin reserviert mit ${svName ?? 'Gutachter'} am ${terminStr} an ${adresse || plz}`)
-                      return saveAndAdvance('gutachtertermin')
-                    } else {
-                      toast.error(`Fehler: ${result.error ?? 'Unbekannt'}`)
-                      setSaving(false)
-                    }
+          {/* BUG-03: Alle 4 Steps nutzen MandantenfragebogenStep */}
+          <MandantenfragebogenStep
+            leadId={lead.id}
+            activeStep={(STEPS[openStep]?.mandantStep ?? 1) as 1 | 2 | 3 | 4}
+            initialData={{
+              ist_fahrzeughalter: (lead as Record<string, unknown>).ist_fahrzeughalter as boolean ?? true,
+              finanzierung_leasing: (lead as Record<string, unknown>).finanzierung_leasing as string ?? 'keine',
+              vorsteuerabzugsberechtigt: (lead as Record<string, unknown>).vorsteuerabzugsberechtigt as boolean ?? false,
+              hat_vorschaeden: (lead as Record<string, unknown>).hat_vorschaeden as boolean ?? false,
+              vorname: lead.vorname ?? '', nachname: lead.nachname ?? '',
+              telefon: lead.telefon ?? '', email: lead.email ?? '',
+              kunde_strasse: (lead as Record<string, unknown>).kunde_strasse as string ?? '',
+              kunde_plz: (lead as Record<string, unknown>).kunde_plz as string ?? '',
+              kunde_stadt: (lead as Record<string, unknown>).kunde_stadt as string ?? '',
+              halter_vorname: (lead as Record<string, unknown>).halter_vorname as string ?? '',
+              halter_nachname: (lead as Record<string, unknown>).halter_nachname as string ?? '',
+              halter_strasse: (lead as Record<string, unknown>).halter_strasse as string ?? '',
+              halter_plz: (lead as Record<string, unknown>).halter_plz as string ?? '',
+              halter_stadt: (lead as Record<string, unknown>).halter_stadt as string ?? '',
+              halter_telefon: (lead as Record<string, unknown>).halter_telefon as string ?? '',
+              halter_email: (lead as Record<string, unknown>).halter_email as string ?? '',
+              finanzierungsgeber_name: (lead as Record<string, unknown>).finanzierungsgeber_name as string ?? '',
+              finanzierungsgeber_adresse: (lead as Record<string, unknown>).finanzierungsgeber_adresse as string ?? '',
+              finanzierungsgeber_vertragsnr: (lead as Record<string, unknown>).finanzierungsgeber_vertragsnr as string ?? '',
+              kennzeichen: lead.kennzeichen ?? '', fahrzeug_hersteller: lead.fahrzeug_hersteller ?? '', fahrzeug_modell: lead.fahrzeug_modell ?? '',
+              fin: lead.fin ?? '', erstzulassung: lead.erstzulassung ?? '',
+              unfalldatum: (lead as Record<string, unknown>).unfalldatum as string ?? '',
+              unfallort: (lead as Record<string, unknown>).unfallort as string ?? '',
+              schadenhergang: (lead as Record<string, unknown>).schadenhergang as string ?? '',
+              schadenhoehe_netto: String((lead as Record<string, unknown>).schadenhoehe_netto ?? ''),
+              gegner_versicherung: lead.gegner_versicherung ?? '',
+              versicherung_schaden_nr: (lead as Record<string, unknown>).versicherung_schaden_nr as string ?? '',
+              service_typ: lead.service_typ ?? 'komplett',
+            }}
+            onStepComplete={(step) => {
+              if (step < 4 && openStep < STEPS.length - 1) setOpenStep(openStep + 1)
+              router.refresh()
+            }}
+            onFlowLink={async () => {
+              setSaving(true)
+              try {
+                const result = await sendFlowLink(lead.id)
+                if (lead.telefon && result) {
+                  await sendFlowLinkCommunication({
+                    telefon: lead.telefon,
+                    vorname: lead.vorname ?? '',
+                    name: [lead.vorname, lead.nachname].filter(Boolean).join(' '),
+                    url: typeof result === 'object' && 'url' in result ? (result as { url: string }).url : '',
                   })
-                  .catch((err) => {
-                    console.error('[LeadStepper] confirmGutachterTermin FEHLER:', err)
-                    setSaving(false)
-                    toast.error(`Fehler beim Zuweisen: ${err instanceof Error ? err.message : String(err)}`)
-                  })
-              }} />
-          )}
-          {STEPS[openStep]?.key === 'flow' && <StepFlowLink lead={lead} />}
+                }
+                toast.success('FlowLink gesendet!')
+                await saveAndAdvance('flow-gesendet')
+              } catch (err) {
+                toast.error(err instanceof Error ? err.message : 'Fehler beim FlowLink-Versand')
+              }
+              setSaving(false)
+            }}
+          />
         </div>
 
         {/* ── RIGHT: Notizen + Timeline ──────────────────────────── */}
