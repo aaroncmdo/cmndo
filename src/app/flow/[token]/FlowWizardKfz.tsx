@@ -11,8 +11,8 @@ import {
   AlertTriangleIcon,
   ExternalLinkIcon,
   UserPlusIcon,
+  UserIcon,
   MailIcon,
-  SkipForwardIcon,
   PenToolIcon,
   Trash2Icon,
 } from 'lucide-react'
@@ -26,6 +26,8 @@ export type LeadData = {
   email: string
   telefon: string
   schadenfall_typ: string
+  schadentyp: string | null
+  schadentyp_freitext: string | null
   kunden_konstellation: string
   personenschaden_flag: boolean
   mietwagen_flag: boolean
@@ -42,21 +44,30 @@ export type LeadData = {
   unfallhergang: string
 }
 
-type StepId = 'stammdaten' | 'sa' | 'account'
+export type GutachterInfo = {
+  vorname: string
+  avatarUrl: string | null
+  terminDatum: string | null
+}
+
+// AAR-99: 4-Step Flow
+type StepId = 'zusammenfassung' | 'gutachter' | 'sa' | 'account'
 
 const STEPS: { id: StepId; label: string }[] = [
-  { id: 'stammdaten', label: 'Stammdaten' },
+  { id: 'zusammenfassung', label: 'Zusammenfassung' },
+  { id: 'gutachter', label: 'Ihr Gutachter' },
   { id: 'sa', label: 'Beauftragung' },
   { id: 'account', label: 'Konto' },
 ]
 
-// ─── SF Labels ───────────────────────────────────────────────────────────────
+// ─── Schadentyp Labels (AAR-99: neue ENUM) ──────────────────────────────────
 
-const SF_LABELS: Record<string, string> = {
-  'sf-01': 'Unverschuldeter Unfall',
-  'sf-02': 'Teilschuld-Unfall',
-  'sf-03': 'Parkschaden / Fahrerflucht',
-  'sf-04': 'Selbstverschuldeter Unfall',
+const SCHADENTYP_LABELS: Record<string, string> = {
+  spurwechsel: 'Spurwechsel-Unfall',
+  auffahrunfall: 'Auffahrunfall',
+  vorfahrtsverletzung: 'Vorfahrtsverletzung',
+  parkplatz: 'Parkplatz-Schaden',
+  sonstiges: 'Sonstiger Verkehrsunfall',
 }
 
 // ─── Wizard ──────────────────────────────────────────────────────────────────
@@ -65,10 +76,12 @@ export default function FlowWizardKfz({
   token,
   flowLinkId,
   lead,
+  gutachter,
 }: {
   token: string
   flowLinkId?: string | null
   lead: LeadData
+  gutachter?: GutachterInfo | null
 }) {
   const [stepIndex, setStepIndex] = useState(0)
   const [datenschutz, setDatenschutz] = useState(false)
@@ -121,7 +134,8 @@ export default function FlowWizardKfz({
       // 3. SA-PDF generieren (Background, non-blocking)
       generateSAPdf(result.fallId, lead.id, publicUrl).catch(() => {})
 
-      setStepIndex(2) // → Account step
+      // AAR-99: Nach SA → Account-Step (Index 3)
+      setStepIndex(3)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler bei der Beauftragung')
     } finally {
@@ -146,8 +160,7 @@ export default function FlowWizardKfz({
     }
   }
 
-  // ─── BUG-59: States fuer Abschluss ──────────────────────────────────────
-  const [skipped, setSkipped] = useState(false)
+  // AAR-99: Kein Skip-Button mehr — Account ist Pflicht
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
@@ -181,8 +194,8 @@ export default function FlowWizardKfz({
         <div className="flex-1 flex flex-col justify-center py-4">
           <div className="bg-white border border-gray-200 rounded-3xl px-6 py-7 shadow-xl shadow-black/5">
 
-            {/* ═══ SCHRITT 1: STAMMDATEN + DATENSCHUTZ ═══ */}
-            {currentStep.id === 'stammdaten' && (
+            {/* ═══ SCHRITT 1: ZUSAMMENFASSUNG + DATENSCHUTZ ═══ */}
+            {currentStep.id === 'zusammenfassung' && (
               <div>
                 <StepHeader
                   question={`Hallo ${editVorname || 'dort'}!`}
@@ -206,7 +219,7 @@ export default function FlowWizardKfz({
                     <SummaryRow label="Standort" value={[lead.fahrzeug_standort_adresse, lead.fahrzeug_standort_plz].filter(Boolean).join(', ')} />
                   )}
                   {fahrzeug && <SummaryRow label="Fahrzeug" value={`${fahrzeug}${lead.kennzeichen ? ` (${lead.kennzeichen})` : ''}`} />}
-                  {lead.schadenfall_typ && <SummaryRow label="Schadentyp" value={SF_LABELS[lead.schadenfall_typ] ?? lead.schadenfall_typ} />}
+                  {lead.schadentyp && <SummaryRow label="Schadentyp" value={SCHADENTYP_LABELS[lead.schadentyp] ?? lead.schadentyp_freitext ?? lead.schadentyp} />}
                   {lead.gegner_name && <SummaryRow label="Unfallgegner" value={`${lead.gegner_name}${lead.gegner_versicherung ? ` — ${lead.gegner_versicherung}` : ''}`} />}
                   {lead.unfallhergang && <SummaryRow label="Unfallhergang" value={lead.unfallhergang} />}
                 </div>
@@ -275,7 +288,60 @@ export default function FlowWizardKfz({
               </div>
             )}
 
-            {/* ═══ SCHRITT 2: SA UNTERSCHREIBEN ═══ */}
+            {/* ═══ SCHRITT 2: GUTACHTER-ANZEIGE (AAR-99) ═══ */}
+            {currentStep.id === 'gutachter' && (
+              <div>
+                <StepHeader
+                  question="Ihr persoenlicher Gutachter"
+                  sub="Dieser Sachverstaendige wird Ihren Schaden begutachten."
+                  icon={<UserIcon className="w-8 h-8 text-[#4573A2]" />}
+                />
+
+                {gutachter ? (
+                  <div className="bg-gradient-to-br from-[#4573A2]/10 to-[#1E3A5F]/5 border border-[#4573A2]/20 rounded-3xl p-7 text-center mb-6">
+                    {gutachter.avatarUrl ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={gutachter.avatarUrl}
+                        alt={gutachter.vorname}
+                        className="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-4 border-white shadow-lg"
+                      />
+                    ) : (
+                      <div className="w-24 h-24 rounded-full bg-[#4573A2] flex items-center justify-center mx-auto mb-4 text-white text-3xl font-bold">
+                        {gutachter.vorname.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <p className="text-xs uppercase tracking-wider text-[#4573A2] mb-1">Ihr Sachverstaendiger</p>
+                    <h2 className="text-2xl font-bold text-[#0D1B3E] mb-2">{gutachter.vorname}</h2>
+                    <p className="text-sm text-gray-600">Wird sich bei Ihnen melden</p>
+                    {gutachter.terminDatum && (
+                      <div className="mt-4 pt-4 border-t border-[#4573A2]/20">
+                        <p className="text-xs text-gray-500 mb-1">Termin reserviert</p>
+                        <p className="text-sm font-semibold text-[#0D1B3E]">
+                          {new Date(gutachter.terminDatum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {new Date(gutachter.terminDatum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-6 text-sm text-amber-800">
+                    Wir suchen gerade einen passenden Sachverstaendigen fuer Sie. Sie erhalten in Kuerze eine Bestaetigung.
+                  </div>
+                )}
+
+                <button
+                  onClick={() => setStepIndex(stepIndex + 1)}
+                  className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
+                >
+                  Weiter zur Beauftragung
+                </button>
+              </div>
+            )}
+
+            {/* ═══ SCHRITT 3: SA UNTERSCHREIBEN ═══ */}
             {currentStep.id === 'sa' && (
               <div>
                 <StepHeader
@@ -333,12 +399,12 @@ export default function FlowWizardKfz({
               </div>
             )}
 
-            {/* ═══ SCHRITT 3: ACCOUNT ERSTELLEN ═══ */}
+            {/* ═══ SCHRITT 4: ACCOUNT ERSTELLEN (AAR-99: Pflicht, kein Skip) ═══ */}
             {currentStep.id === 'account' && (
               <div>
                 <StepHeader
                   question="Kundenportal-Zugang"
-                  sub="Erstellen Sie ein Konto, um Ihren Fall online zu verfolgen."
+                  sub="Erstellen Sie Ihr Konto, um Ihren Fall online zu verfolgen."
                   icon={<UserPlusIcon className="w-8 h-8 text-[#4573A2]" />}
                 />
 
@@ -347,29 +413,13 @@ export default function FlowWizardKfz({
                   <p className="text-sm text-emerald-700">Ihr Fall wurde erfolgreich erstellt! Der Gutachter wurde bereits informiert.</p>
                 </div>
 
-                {skipped ? (
-                  /* BUG-59: Erfolgsseite wenn Account uebersprungen */
-                  <div className="space-y-5 text-center py-6">
-                    <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto">
-                      <CheckIcon className="w-8 h-8 text-emerald-500" />
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-semibold text-gray-900">Vielen Dank!</h2>
-                      <p className="text-sm text-gray-500 mt-2">Ihre Sicherungsabtretung wurde unterschrieben und Ihr Fall wurde erstellt.</p>
-                      <p className="text-sm text-gray-500 mt-1">Wir melden uns per WhatsApp bei Ihnen.</p>
-                    </div>
-                    <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 text-left">
-                      <p className="text-xs text-gray-400 mb-1">Sie möchten Ihren Fall online verfolgen?</p>
-                      <p className="text-sm text-gray-600">Registrieren Sie sich jederzeit unter <strong>claimondo.de/login</strong></p>
-                    </div>
-                  </div>
-                ) : accountCreated ? (
+                {accountCreated ? (
                   <div className="space-y-4">
                     <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 text-center">
                       <p className="text-sm text-gray-500 mb-2">Ihre Zugangsdaten:</p>
                       <p className="text-sm text-gray-700"><strong>E-Mail:</strong> {accountEmail}</p>
                       <p className="text-sm text-gray-700"><strong>Passwort:</strong> {accountPassword}</p>
-                      <p className="text-xs text-gray-400 mt-3">Bitte ändern Sie Ihr Passwort nach dem ersten Login.</p>
+                      <p className="text-xs text-gray-400 mt-3">Bitte aendern Sie Ihr Passwort nach dem ersten Login.</p>
                     </div>
                     <button
                       onClick={() => { window.location.href = '/kunde' }}
@@ -402,16 +452,6 @@ export default function FlowWizardKfz({
                     >
                       {creatingAccount ? 'Wird erstellt ...' : 'Konto erstellen'}
                     </button>
-
-                    <div className="border-t border-gray-100 pt-4">
-                      <button
-                        onClick={() => setSkipped(true)}
-                        className="w-full flex items-center justify-center gap-2 py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors"
-                      >
-                        <SkipForwardIcon className="w-4 h-4" />
-                        Überspringen — Wir informieren per WhatsApp
-                      </button>
-                    </div>
                   </div>
                 )}
               </div>
@@ -421,8 +461,8 @@ export default function FlowWizardKfz({
           </div>
         </div>
 
-        {/* Navigation — nur Schritt 1 hat Weiter-Button */}
-        {currentStep.id === 'stammdaten' && (
+        {/* Navigation — Schritt 1 (Zusammenfassung) hat Weiter-Button */}
+        {currentStep.id === 'zusammenfassung' && (
           <div className="pt-4">
             <button
               onClick={async () => {
@@ -433,24 +473,24 @@ export default function FlowWizardKfz({
                     setAccountEmail(editEmail)
                   } catch { /* weiter trotzdem */ }
                 }
-                setStepIndex(1)
+                setStepIndex(1) // → gutachter
               }}
               disabled={!datenschutz || !editVorname || !editNachname}
               className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
             >
-              Weiter zur Beauftragung
+              Weiter
             </button>
           </div>
         )}
 
-        {/* Zurück-Button (nur Schritt 1→2) */}
-        {stepIndex === 1 && (
+        {/* Zurück-Button (auf Schritt 2 und 3) */}
+        {(currentStep.id === 'gutachter' || currentStep.id === 'sa') && (
           <div className="pt-2">
             <button
-              onClick={() => setStepIndex(0)}
+              onClick={() => setStepIndex(stepIndex - 1)}
               className="w-full py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors"
             >
-              Zurück
+              Zurueck
             </button>
           </div>
         )}

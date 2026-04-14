@@ -86,10 +86,36 @@ export default async function FlowPage({
 
   if (!lead) return notFound()
 
+  // AAR-99: Reservierten SV+Termin laden fuer Schritt 2
+  const { data: terminMitSv } = await svc
+    .from('gutachter_termine')
+    .select('id, start_zeit, sv_id, sachverstaendige(profile_id, profiles(vorname, avatar_url))')
+    .eq('lead_id', leadId)
+    .in('status', ['reserviert', 'bestaetigt'])
+    .order('start_zeit', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  let gutachter: { vorname: string; avatarUrl: string | null; terminDatum: string | null } | null = null
+  if (terminMitSv?.sachverstaendige) {
+    const svJoin = terminMitSv.sachverstaendige as unknown as { profile_id: string; profiles: { vorname: string | null; avatar_url: string | null } | { vorname: string | null; avatar_url: string | null }[] | null } | { profile_id: string; profiles: unknown }[] | null
+    const svRow = Array.isArray(svJoin) ? svJoin[0] : svJoin
+    const profile = svRow?.profiles as { vorname: string | null; avatar_url: string | null } | { vorname: string | null; avatar_url: string | null }[] | null
+    const profileRow = Array.isArray(profile) ? profile[0] : profile
+    if (profileRow?.vorname) {
+      gutachter = {
+        vorname: profileRow.vorname,
+        avatarUrl: profileRow.avatar_url ?? null,
+        terminDatum: (terminMitSv.start_zeit as string | null) ?? null,
+      }
+    }
+  }
+
   return (
     <FlowWizardKfz
       token={token}
       flowLinkId={flowLinkId}
+      gutachter={gutachter}
       lead={{
         id: lead.id,
         vorname: lead.vorname ?? '',
@@ -97,6 +123,8 @@ export default async function FlowPage({
         email: lead.email ?? '',
         telefon: lead.telefon ?? '',
         schadenfall_typ: lead.schadenfall_typ ?? 'sf-01',
+        schadentyp: lead.schadentyp ?? null,
+        schadentyp_freitext: lead.schadentyp_freitext ?? null,
         kunden_konstellation: lead.kunden_konstellation ?? 'kk-01',
         personenschaden_flag: lead.personenschaden_flag ?? false,
         mietwagen_flag: lead.mietwagen_flag ?? false,
