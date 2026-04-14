@@ -86,3 +86,63 @@ export async function setServiceTyp(leadId: string, serviceTyp: 'komplett' | 'nu
   if (error) throw new Error(error.message)
   revalidatePath(`/dispatch/leads/${leadId}`)
 }
+
+// AAR-80: Schritt 0 Hard Gate — Q1/Q2/Q3
+export type HardGateData = {
+  unfallhergang?: string
+  schuldfrage?: 'gegner' | 'unklar' | 'eigenverantwortung'
+  aufklaerung_teilschuld_bestaetigt?: boolean
+  schaden_sichtbar?: boolean
+  personenschaden_flag?: boolean
+  mietwagen_flag?: boolean
+  nutzungsausfall?: boolean
+  hat_haftpflicht?: boolean
+}
+
+export async function saveHardGate(
+  leadId: string,
+  data: HardGateData,
+): Promise<{ success: boolean; disqualifiziert?: boolean; grund?: string; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  // Disqualifikations-Check
+  let disqualifiziert = false
+  let grund: string | undefined
+
+  if (data.schuldfrage === 'eigenverantwortung') {
+    disqualifiziert = true
+    grund = 'Eigenverantwortung / Kasko-Fall'
+  } else if (data.schaden_sichtbar === false && !data.personenschaden_flag) {
+    disqualifiziert = true
+    grund = 'Kein sichtbarer Schaden und kein Personenschaden'
+  } else if (data.hat_haftpflicht === false) {
+    disqualifiziert = true
+    grund = 'Keine Haftpflicht beim Gegner'
+  }
+
+  const updates: Record<string, unknown> = {
+    ...(data.unfallhergang !== undefined && { unfallhergang: data.unfallhergang }),
+    ...(data.schuldfrage !== undefined && { schuldfrage: data.schuldfrage }),
+    ...(data.aufklaerung_teilschuld_bestaetigt !== undefined && { aufklaerung_teilschuld_bestaetigt: data.aufklaerung_teilschuld_bestaetigt }),
+    ...(data.schaden_sichtbar !== undefined && { schaden_sichtbar: data.schaden_sichtbar }),
+    ...(data.personenschaden_flag !== undefined && { personenschaden_flag: data.personenschaden_flag }),
+    ...(data.mietwagen_flag !== undefined && { mietwagen_flag: data.mietwagen_flag }),
+    ...(data.nutzungsausfall !== undefined && { nutzungsausfall: data.nutzungsausfall }),
+    ...(data.hat_haftpflicht !== undefined && { hat_haftpflicht: data.hat_haftpflicht }),
+    updated_at: new Date().toISOString(),
+  }
+
+  if (disqualifiziert) {
+    updates.qualifizierungs_phase = 'disqualifiziert'
+    updates.disqualifikations_grund = grund
+  }
+
+  const { error } = await supabase.from('leads').update(updates).eq('id', leadId)
+  if (error) return { success: false, error: error.message }
+
+  revalidatePath(`/dispatch/leads/${leadId}`)
+  return { success: true, disqualifiziert, grund }
+}
+

@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeftIcon, PhoneIcon, MailIcon, CarIcon, ShieldIcon } from 'lucide-react'
 import LeadDetailActions from './LeadDetailActions'
+import Schritt0HardGate from './Schritt0HardGate'
+import { computeHardGateStatus } from './hard-gate-utils'
 
 export default async function DispatchLeadDetail({
   params,
@@ -88,6 +90,9 @@ export default async function DispatchLeadDetail({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Lead Data */}
         <div className="lg:col-span-2 space-y-4">
+          {/* AAR-80: Schritt 0 Hard Gate */}
+          <Schritt0HardGate lead={lead as Parameters<typeof Schritt0HardGate>[0]['lead']} />
+
           {/* Kontaktdaten */}
           <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
             <h2 className="text-sm font-semibold text-gray-900">Kontaktdaten</h2>
@@ -166,6 +171,7 @@ export default async function DispatchLeadDetail({
             currentPhase={lead.qualifizierungs_phase}
             serviceTyp={lead.service_typ ?? 'komplett'}
             flowStatus={flowStatus}
+            hardGateOk={computeHardGateStatus(lead).allComplete}
           />
 
           {/* FlowLinks */}
