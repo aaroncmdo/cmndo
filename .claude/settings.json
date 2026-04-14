@@ -9,5 +9,18 @@
       "Read(//c/Users/**)"
     ],
     "defaultMode": "bypassPermissions"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-umlauts.mjs"
+          }
+        ]
+      }
+    ]
   }
 }
