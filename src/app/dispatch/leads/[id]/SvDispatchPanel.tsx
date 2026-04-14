@@ -48,6 +48,7 @@ export default function SvDispatchPanel({
   const [selectedSv, setSelectedSv] = useState<SvSuggestion | null>(null)
   const [startDatum, setStartDatum] = useState('')
   const [startZeit, setStartZeit] = useState('09:00')
+  const [dauerMin, setDauerMin] = useState(120)
   const [toast, setToast] = useState('')
 
   // Defaults: morgen 09:00 als erster Slot
@@ -74,9 +75,14 @@ export default function SvDispatchPanel({
 
   function handleReserve() {
     if (!selectedSv || !startDatum || !startZeit) return
-    const iso = new Date(`${startDatum}T${startZeit}:00`).toISOString()
+    const startIso = new Date(`${startDatum}T${startZeit}:00`)
+    if (startIso.getTime() < Date.now()) {
+      setToast('Startzeit liegt in der Vergangenheit')
+      setTimeout(() => setToast(''), 3000)
+      return
+    }
     startTransition(async () => {
-      const r = await reserveSvTerminForLead(leadId, selectedSv.svId, iso)
+      const r = await reserveSvTerminForLead(leadId, selectedSv.svId, startIso.toISOString(), dauerMin)
       if (r.success) {
         setToast('Termin reserviert')
         setSelectedSv(null)
@@ -242,11 +248,22 @@ export default function SvDispatchPanel({
           {/* Schritt 3: Zeitslot */}
           {selectedSv && (
             <div className="space-y-3 border-t border-gray-200 pt-4">
-              <div className="flex items-center gap-2">
-                <ClockIcon className="w-4 h-4 text-gray-400" />
-                <p className="text-xs font-medium text-gray-700">Terminzeit wählen (2h Block)</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ClockIcon className="w-4 h-4 text-gray-400" />
+                  <p className="text-xs font-medium text-gray-700">
+                    Terminzeit bei <span className="text-[#0D1B3E]">{selectedSv.name}</span>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedSv(null)}
+                  className="text-[10px] text-[#4573A2] hover:underline"
+                >
+                  Anderen SV wählen
+                </button>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 <input
                   type="date"
                   value={startDatum}
@@ -260,6 +277,20 @@ export default function SvDispatchPanel({
                   className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
                   step={900}
                 />
+                <div className="relative">
+                  <select
+                    value={dauerMin}
+                    onChange={(e) => setDauerMin(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm appearance-none bg-white"
+                  >
+                    <option value={60}>60 min</option>
+                    <option value={90}>90 min</option>
+                    <option value={120}>120 min</option>
+                    <option value={150}>150 min</option>
+                    <option value={180}>180 min</option>
+                    <option value={240}>240 min</option>
+                  </select>
+                </div>
               </div>
               <button
                 type="button"
@@ -268,7 +299,7 @@ export default function SvDispatchPanel({
                 className="w-full text-sm font-medium px-3 py-2.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-40 flex items-center justify-center gap-2"
               >
                 <CalendarCheckIcon className="w-4 h-4" />
-                {pending ? 'Reserviere...' : `Termin bei ${selectedSv.name} reservieren`}
+                {pending ? 'Reserviere...' : `Termin reservieren (${dauerMin} min)`}
               </button>
             </div>
           )}

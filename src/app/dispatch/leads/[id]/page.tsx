@@ -147,8 +147,15 @@ export default async function DispatchLeadDetail({
             <ExitSkript grund={disqualifikationsGrundKey} />
           ) : (
             <>
+              {/* AAR-120: Reihenfolge Hard Gate → Schadentyp → SV+Termin */}
               <Schritt0HardGate lead={lead as Parameters<typeof Schritt0HardGate>[0]['lead']} />
-              {/* AAR-115: SV-Zuweisung + Termin-Reservierung (zwischen Hard Gate und FlowLink) */}
+              <SchadentypPicker
+                leadId={lead.id}
+                initialTyp={lead.schadentyp as Parameters<typeof SchadentypPicker>[0]['initialTyp']}
+                initialFreitext={lead.schadentyp_freitext}
+                gegnerKennzeichen={lead.gegner_kennzeichen}
+                initialKamera={lead.parkplatz_kamera}
+              />
               <SvDispatchPanel
                 leadId={lead.id}
                 hardGateOk={computeHardGateStatus(lead).allComplete}
@@ -164,15 +171,6 @@ export default async function DispatchLeadDetail({
             rueckruf_notiz: lead.rueckruf_notiz,
             rueckruf_erledigt: lead.rueckruf_erledigt,
           }} />
-
-          {/* AAR-81+83: Schadentyp Picker + Parkplatz-Kamera */}
-          <SchadentypPicker
-            leadId={lead.id}
-            initialTyp={lead.schadentyp as Parameters<typeof SchadentypPicker>[0]['initialTyp']}
-            initialFreitext={lead.schadentyp_freitext}
-            gegnerKennzeichen={lead.gegner_kennzeichen}
-            initialKamera={lead.parkplatz_kamera}
-          />
 
           {/* Kontaktdaten */}
           <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
