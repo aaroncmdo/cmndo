@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { PhoneIcon, ExternalLinkIcon } from 'lucide-react'
+import NeuLeadDrawer from './_components/NeuLeadDrawer'
 
 const PHASE_OPTIONS = [
   { value: '', label: 'Alle' },
@@ -57,7 +58,10 @@ export default async function DispatchLeads({
     <div className="py-6 space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-gray-900">Leads</h1>
-        <span className="text-sm text-gray-500">{leads?.length ?? 0} Ergebnisse</span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-500">{leads?.length ?? 0} Ergebnisse</span>
+          <NeuLeadDrawer />
+        </div>
       </div>
 
       {/* Filter */}
