@@ -8,6 +8,7 @@ import { FALL_STATUS_LABELS } from '@/lib/statusLabels'
 import { updateFall } from './actions'
 import DokumenteTab from './DokumenteTab'
 import VsRegulierungTab from './components/VsRegulierungTab'
+import AIAssistantTab from './_components/AIAssistantTab'
 import FallActivityFeed, { buildActivityEvents } from '@/components/faelle/FallActivityFeed'
 import FallDokumenteSidebar, { type FallDokumentRow } from '@/components/faelle/FallDokumenteSidebar'
 import TaskList from '@/components/tasks/TaskList'
@@ -583,7 +584,7 @@ function Badge({ children, color }: { children: React.ReactNode; color: string }
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
-type Tab = 'uebersicht' | 'dokumente' | 'dateien' | 'qc' | 'timeline' | 'kommunikation' | 'kanzlei' | 'chat' | 'abrechnung' | 'tasks' | 'vs-regulierung'
+type Tab = 'uebersicht' | 'dokumente' | 'dateien' | 'qc' | 'timeline' | 'kommunikation' | 'kanzlei' | 'chat' | 'abrechnung' | 'tasks' | 'vs-regulierung' | 'ai'
 
 type TaskItem = {
   id: string
@@ -765,6 +766,7 @@ export default function FallakteClient({
     ['chat', 'Kommunikation'],
     ...(showVsTab ? [['vs-regulierung', 'VS-Regulierung'] as [Tab, string]] : []),
     ['timeline', `Timeline (${timeline.length})`],
+    ['ai', 'AI Assistant'],
   ]
 
   return (
@@ -919,6 +921,11 @@ export default function FallakteClient({
         )}
         {activeTab === 'vs-regulierung' && (
           <VsRegulierungTab fall={fall} />
+        )}
+        {activeTab === 'ai' && (
+          <div className="p-4 md:p-6">
+            <AIAssistantTab fallId={fall.id} />
+          </div>
         )}
         {activeTab === 'abrechnung' && (
           <div id="abrechnung-section">
