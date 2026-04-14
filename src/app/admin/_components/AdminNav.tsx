@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboardIcon, FolderOpenIcon, BadgeEuroIcon, ClipboardListIcon,
-  HardHatIcon, MapIcon, LogOutIcon, GitBranchIcon, CalendarIcon,
+  CarFrontIcon, MapIcon, LogOutIcon, GitBranchIcon, CalendarIcon,
   BarChart3Icon, UsersIcon, BuildingIcon, Building2Icon, ReceiptIcon,
   ShieldCheckIcon, MessageCircleIcon, SettingsIcon, AlertCircleIcon,
   LifeBuoyIcon, UserPlusIcon, ListChecksIcon, CheckSquareIcon,
@@ -20,7 +20,7 @@ const NAV_NAVIGATION: NavItem[] = [
   { href: '/admin/faelle', label: 'Fälle', icon: FolderOpenIcon },
   { href: '/admin/kalender', label: 'Kalender', icon: CalendarIcon },
   { href: '/admin/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon },
-  { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: HardHatIcon },
+  { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: CarFrontIcon },
   { href: '/admin/karte', label: 'Karte', icon: MapIcon },
   { href: '/admin/meine-tasks', label: 'Meine Tasks', icon: CheckSquareIcon },
 ]
