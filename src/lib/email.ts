@@ -57,7 +57,7 @@ export async function emailNeuerFall(adminEmail: string, fallNummer: string, sch
       'Der Fall wurde erstellt und wartet auf Bearbeitung.',
     ],
     ctaLabel: 'Fall öffnen',
-    ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'}/admin/dispatch`,
+    ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/admin/dispatch`,
   })
 }
 
@@ -73,7 +73,7 @@ export async function emailSvZugewiesen(svEmail: string, fallNummer: string, kun
       'Bitte vereinbaren Sie einen Termin mit dem Kunden.',
     ],
     ctaLabel: 'Auftrag ansehen',
-    ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'}/gutachter`,
+    ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/gutachter`,
   })
 }
 
@@ -87,7 +87,7 @@ export async function emailGutachtenEingegangen(adminEmail: string, fallNummer: 
       'Bitte prüfen Sie das Gutachten im Filmcheck.',
     ],
     ctaLabel: 'Zum Filmcheck',
-    ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'}/admin/dispatch`,
+    ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/admin/dispatch`,
   })
 }
 
@@ -101,7 +101,7 @@ export async function emailFilmcheckBestanden(kanzleiEmail: string, fallNummer: 
       'Alle Unterlagen sind vollständig. Bitte übernehmen Sie die rechtliche Bearbeitung.',
     ],
     ctaLabel: 'Fall-Paket öffnen',
-    ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'}/admin/dispatch`,
+    ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/admin/dispatch`,
   })
 }
 
