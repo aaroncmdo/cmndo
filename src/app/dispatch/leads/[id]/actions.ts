@@ -87,7 +87,7 @@ export async function setServiceTyp(leadId: string, serviceTyp: 'komplett' | 'nu
   revalidatePath(`/dispatch/leads/${leadId}`)
 }
 
-// AAR-81+83: Schadentyp speichern + AAR-83 Parkplatz-Kamera-Check
+// AAR-81+83+114: Schadentyp speichern + AAR-83 Parkplatz-Kamera-Check
 export async function saveSchadentyp(
   leadId: string,
   schadentyp: 'spurwechsel' | 'auffahrunfall' | 'vorfahrtsverletzung' | 'parkplatz' | 'sonstiges',
@@ -98,7 +98,6 @@ export async function saveSchadentyp(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  // AAR-83: Parkplatz + kein Kennzeichen + keine Kamera → Disqualifizieren
   let disqualifiziert = false
   const updates: Record<string, unknown> = {
     schadentyp,
@@ -108,11 +107,11 @@ export async function saveSchadentyp(
   if (schadentyp === 'parkplatz' && parkplatzKamera !== undefined) {
     updates.parkplatz_kamera = parkplatzKamera
     if (parkplatzKamera === false) {
-      // Kein Kennzeichen + keine Kamera → Disqualifikation
       const { data: lead } = await supabase.from('leads').select('gegner_kennzeichen').eq('id', leadId).maybeSingle()
       if (!lead?.gegner_kennzeichen?.trim()) {
         updates.qualifizierungs_phase = 'disqualifiziert'
         updates.disqualifikations_grund = 'Parkplatz ohne Kennzeichen + keine Überwachungskamera'
+        updates.disqualifikations_grund_key = 'parkplatz_ohne_kamera'
         disqualifiziert = true
       }
     }
@@ -122,6 +121,62 @@ export async function saveSchadentyp(
   if (error) return { success: false, error: error.message }
   revalidatePath(`/dispatch/leads/${leadId}`)
   return { success: true, disqualifiziert }
+}
+
+// AAR-114: Gespraechsleitfaden-Timer (Notion-Spec §1)
+export async function startGespraech(leadId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const { error } = await supabase
+    .from('leads')
+    .update({
+      gespraech_gestartet_am: new Date().toISOString(),
+      gespraech_beendet_am: null,
+      gespraech_dauer_sekunden: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', leadId)
+
+  if (error) return { success: false, error: error.message }
+  revalidatePath(`/dispatch/leads/${leadId}`)
+  return { success: true }
+}
+
+export async function endeGespraech(leadId: string): Promise<{ success: boolean; dauerSekunden?: number; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const { data: lead } = await supabase
+    .from('leads')
+    .select('gespraech_gestartet_am')
+    .eq('id', leadId)
+    .single()
+
+  if (!lead?.gespraech_gestartet_am) {
+    return { success: false, error: 'Gespräch wurde nicht gestartet' }
+  }
+
+  const beendetAm = new Date()
+  const dauerSekunden = Math.max(
+    0,
+    Math.floor((beendetAm.getTime() - new Date(lead.gespraech_gestartet_am).getTime()) / 1000),
+  )
+
+  const { error } = await supabase
+    .from('leads')
+    .update({
+      gespraech_beendet_am: beendetAm.toISOString(),
+      gespraech_dauer_sekunden: dauerSekunden,
+      updated_at: beendetAm.toISOString(),
+    })
+    .eq('id', leadId)
+
+  if (error) return { success: false, error: error.message }
+  revalidatePath(`/dispatch/leads/${leadId}`)
+  return { success: true, dauerSekunden }
 }
 
 // AAR-98: Rueckruf speichern + als erledigt markieren (migriert von admin/dispatch/lead)
@@ -192,24 +247,35 @@ export type HardGateData = {
 export async function saveHardGate(
   leadId: string,
   data: HardGateData,
-): Promise<{ success: boolean; disqualifiziert?: boolean; grund?: string; error?: string }> {
+): Promise<{ success: boolean; disqualifiziert?: boolean; grund?: string; grundKey?: string; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  // Disqualifikations-Check
+  // AAR-114: Disqualifikations-Check mit grund_key (Notion-Spec §2)
+  // kein_schaden: schaden_sichtbar=false UND keine der 3 Nachfrage-Flags
+  // (personenschaden, mietwagen, nutzungsausfall)
   let disqualifiziert = false
   let grund: string | undefined
+  let grundKey: 'eigenverantwortung' | 'kein_schaden' | 'kein_haftpflicht' | undefined
 
   if (data.schuldfrage === 'eigenverantwortung') {
     disqualifiziert = true
     grund = 'Eigenverantwortung / Kasko-Fall'
-  } else if (data.schaden_sichtbar === false && !data.personenschaden_flag) {
+    grundKey = 'eigenverantwortung'
+  } else if (
+    data.schaden_sichtbar === false &&
+    !data.personenschaden_flag &&
+    !data.mietwagen_flag &&
+    !data.nutzungsausfall
+  ) {
     disqualifiziert = true
-    grund = 'Kein sichtbarer Schaden und kein Personenschaden'
+    grund = 'Kein sichtbarer Schaden und keine Personenschaden/Mietwagen/Nutzungsausfall-Flags'
+    grundKey = 'kein_schaden'
   } else if (data.hat_haftpflicht === false) {
     disqualifiziert = true
-    grund = 'Keine Haftpflicht beim Gegner'
+    grund = 'Kasko / eigene Versicherung — kein Haftpflichtschaden'
+    grundKey = 'kein_haftpflicht'
   }
 
   const updates: Record<string, unknown> = {
@@ -227,12 +293,25 @@ export async function saveHardGate(
   if (disqualifiziert) {
     updates.qualifizierungs_phase = 'disqualifiziert'
     updates.disqualifikations_grund = grund
+    updates.disqualifikations_grund_key = grundKey
+  } else {
+    // AAR-114: Wenn alle 3 Fragen beantwortet sind und nicht disqualifiziert → in-qualifizierung
+    const q1Complete =
+      !!data.unfallhergang &&
+      !!data.schuldfrage &&
+      (data.schuldfrage !== 'unklar' || data.aufklaerung_teilschuld_bestaetigt === true)
+    const q2Complete = data.schaden_sichtbar !== null && data.schaden_sichtbar !== undefined
+    const q3Complete = data.hat_haftpflicht !== null && data.hat_haftpflicht !== undefined
+
+    if (q1Complete && q2Complete && q3Complete) {
+      updates.qualifizierungs_phase = 'in-qualifizierung'
+    }
   }
 
   const { error } = await supabase.from('leads').update(updates).eq('id', leadId)
   if (error) return { success: false, error: error.message }
 
   revalidatePath(`/dispatch/leads/${leadId}`)
-  return { success: true, disqualifiziert, grund }
+  return { success: true, disqualifiziert, grund, grundKey }
 }
 
