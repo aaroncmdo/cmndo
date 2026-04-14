@@ -6,6 +6,7 @@ import LeadDetailActions from './LeadDetailActions'
 import Schritt0HardGate from './Schritt0HardGate'
 import SchadentypPicker from './SchadentypPicker'
 import CardentityButton from './CardentityButton'
+import AircallCallButton from '@/components/AircallCallButton'
 import { computeHardGateStatus } from './hard-gate-utils'
 import { computeFlowLinkStufe, FLOWLINK_STUFE_LABEL } from '@/lib/dispatch/fahrzeug-marken'
 
@@ -114,7 +115,10 @@ export default async function DispatchLeadDetail({
               <div className="flex items-center gap-2">
                 <PhoneIcon className="w-4 h-4 text-gray-400" />
                 {lead.telefon ? (
-                  <a href={`tel:${lead.telefon}`} className="text-[#4573A2] hover:underline">{lead.telefon}</a>
+                  <>
+                    <a href={`tel:${lead.telefon}`} className="text-[#4573A2] hover:underline">{lead.telefon}</a>
+                    <AircallCallButton phoneNumber={lead.telefon} leadId={lead.id} variant="icon" />
+                  </>
                 ) : <span className="text-gray-400">—</span>}
               </div>
               <div className="flex items-center gap-2">
