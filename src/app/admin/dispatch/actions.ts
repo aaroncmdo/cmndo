@@ -608,6 +608,9 @@ export async function createPflichtdokumente(
   const kk = String(lead.kunden_konstellation ?? 'kk-01').toLowerCase()
 
   // ─── Immer Pflicht ──────────────────────────────────────────────────────
+  // AAR-75: Vollmacht + Sicherungsabtretung sind Pflichtdokumente fuer JEDEN Fall
+  add('vollmacht')
+  add('sicherungsabtretung')
   add('fahrzeugschein')
   add('fuehrerschein')
   add('schadensfotos') // min 4
