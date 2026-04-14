@@ -87,28 +87,41 @@ export async function setServiceTyp(leadId: string, serviceTyp: 'komplett' | 'nu
   revalidatePath(`/dispatch/leads/${leadId}`)
 }
 
-// AAR-81: Schadentyp speichern
+// AAR-81+83: Schadentyp speichern + AAR-83 Parkplatz-Kamera-Check
 export async function saveSchadentyp(
   leadId: string,
   schadentyp: 'spurwechsel' | 'auffahrunfall' | 'vorfahrtsverletzung' | 'parkplatz' | 'sonstiges',
   freitext?: string | null,
-): Promise<{ success: boolean; error?: string }> {
+  parkplatzKamera?: boolean | null,
+): Promise<{ success: boolean; disqualifiziert?: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  const { error } = await supabase
-    .from('leads')
-    .update({
-      schadentyp,
-      schadentyp_freitext: schadentyp === 'sonstiges' ? freitext ?? null : null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', leadId)
+  // AAR-83: Parkplatz + kein Kennzeichen + keine Kamera → Disqualifizieren
+  let disqualifiziert = false
+  const updates: Record<string, unknown> = {
+    schadentyp,
+    schadentyp_freitext: schadentyp === 'sonstiges' ? freitext ?? null : null,
+    updated_at: new Date().toISOString(),
+  }
+  if (schadentyp === 'parkplatz' && parkplatzKamera !== undefined) {
+    updates.parkplatz_kamera = parkplatzKamera
+    if (parkplatzKamera === false) {
+      // Kein Kennzeichen + keine Kamera → Disqualifikation
+      const { data: lead } = await supabase.from('leads').select('gegner_kennzeichen').eq('id', leadId).maybeSingle()
+      if (!lead?.gegner_kennzeichen?.trim()) {
+        updates.qualifizierungs_phase = 'disqualifiziert'
+        updates.disqualifikations_grund = 'Parkplatz ohne Kennzeichen + keine Überwachungskamera'
+        disqualifiziert = true
+      }
+    }
+  }
 
+  const { error } = await supabase.from('leads').update(updates).eq('id', leadId)
   if (error) return { success: false, error: error.message }
   revalidatePath(`/dispatch/leads/${leadId}`)
-  return { success: true }
+  return { success: true, disqualifiziert }
 }
 
 // AAR-80: Schritt 0 Hard Gate — Q1/Q2/Q3

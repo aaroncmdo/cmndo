@@ -97,11 +97,13 @@ export default async function DispatchLeadDetail({
           {/* AAR-80: Schritt 0 Hard Gate */}
           <Schritt0HardGate lead={lead as Parameters<typeof Schritt0HardGate>[0]['lead']} />
 
-          {/* AAR-81: Schadentyp Picker */}
+          {/* AAR-81+83: Schadentyp Picker + Parkplatz-Kamera */}
           <SchadentypPicker
             leadId={lead.id}
             initialTyp={lead.schadentyp as Parameters<typeof SchadentypPicker>[0]['initialTyp']}
             initialFreitext={lead.schadentyp_freitext}
+            gegnerKennzeichen={lead.gegner_kennzeichen}
+            initialKamera={lead.parkplatz_kamera}
           />
 
           {/* Kontaktdaten */}
