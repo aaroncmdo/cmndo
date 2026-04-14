@@ -76,19 +76,11 @@ export default async function FlowPage({
   }
 
   // 2. Load lead data (extended for KFZ-117 FlowLink flow)
+  // AAR-71: SELECT * statt hardcoded Liste — verhindert dass neue Felder
+  // (Halter, Leasing/Finanzierung, Vorschaeden, Schadenkonstellation) verloren gehen
   const { data: lead } = await svc
     .from('leads')
-    .select(`
-      id, vorname, nachname, email, telefon,
-      schadenfall_typ, kunden_konstellation, sf_variante, schadensursache,
-      personenschaden_flag, mietwagen_flag,
-      polizeibericht_pflicht, polizei_vor_ort, gutachter_termin,
-      kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_farbe, erstzulassung, fin,
-      fahrzeug_standort_adresse, fahrzeug_standort_plz,
-      gegner_name, gegner_versicherung, gegner_kennzeichen,
-      eigene_versicherung, eigene_policennr,
-      unfallhergang
-    `)
+    .select('*')
     .eq('id', leadId)
     .maybeSingle()
 
