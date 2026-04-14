@@ -2,12 +2,26 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { HomeIcon, MessageSquareIcon, UserIcon, SettingsIcon, LogOutIcon } from 'lucide-react'
+import { HomeIcon, MessageSquareIcon, UserIcon, CalendarIcon, FolderOpenIcon, SearchIcon, ClockIcon } from 'lucide-react'
 
+// AAR-59: Alle 7 Kunden-Routen verlinken
 const NAV_ITEMS = [
   { href: '/kunde', label: 'Meine Fälle', icon: HomeIcon, exact: true },
+  { href: '/kunde/faelle', label: 'Alle Fälle', icon: FolderOpenIcon },
+  { href: '/kunde/beratungstermin', label: 'Beratungstermin', icon: CalendarIcon },
+  { href: '/kunde/termin', label: 'Termine', icon: ClockIcon },
+  { href: '/kunde/nachbesichtigung', label: 'Nachbesichtigung', icon: SearchIcon },
   { href: '/kunde/chat', label: 'Nachrichten', icon: MessageSquareIcon },
   { href: '/kunde/profil', label: 'Profil', icon: UserIcon },
+]
+
+// Mobile: 5 wichtigste Items
+const MOBILE_ITEMS = [
+  NAV_ITEMS[0], // Meine Fälle
+  NAV_ITEMS[2], // Beratungstermin
+  NAV_ITEMS[5], // Nachrichten
+  NAV_ITEMS[6], // Profil
+  NAV_ITEMS[3], // Termine
 ]
 
 export default function KundeNav({ mobile }: { mobile?: boolean }) {
@@ -22,7 +36,7 @@ export default function KundeNav({ mobile }: { mobile?: boolean }) {
   if (mobile) {
     return (
       <>
-        {NAV_ITEMS.map(item => {
+        {MOBILE_ITEMS.map(item => {
           const active = isActive(item.href, item.exact)
           return (
             <Link key={item.href} href={item.href}
