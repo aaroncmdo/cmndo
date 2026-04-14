@@ -1,26 +1,19 @@
-// BUG-98: Shared responsive content wrapper.
+// AAR-121: Shared responsive content wrapper.
 //
-// Aaron-Anforderung: Desktop 15-20 % Marge / Tablet quer großflächig /
-// Mobile hochkant untereinander. SVs nutzen oft Tablet.
+// Minimaler horizontaler Padding-Wrapper. BUG-98 hatte einen Hard-Cap
+// `max-w-[1600px]` plus `lg:px-16 xl:px-24` eingefuehrt, das auf grossen
+// Monitors ~15-20 % leeren Rand links+rechts erzeugt hat. Aaron wollte
+// das zurueck auf volle Breite mit nur minimalem Sicherheits-Padding.
 //
-// Tailwind-Breakpoints + horizontale Padding-Skala:
-//   default (<640): px-4    → Mobile hochkant, fast volle Breite
+// Padding-Skala:
+//   default (<640): px-4    → Mobile
 //   sm  (>=640):    px-6
-//   md  (>=768):    px-8
-//   lg  (>=1024):   px-16   → Tablet quer / kleines Laptop, ~10 % pro Seite
-//   xl  (>=1280):   px-24   → Desktop, ~10 % pro Seite (auf 1920px ≈ 80 % Content)
+//   md  (>=768):    px-8    → Tablet + Desktop, konsistent
 //
-// max-w-[1600px] verhindert dass auf 4K-Screens alles ueberproportional
-// gestreckt wird.
-//
-// `h-full` als Default damit Pages, die innen ein `h-full flex flex-col`
-// Pattern nutzen (Sticky-Header von BUG-91 etc.), weiterhin die volle
-// vertikale Höhe des Eltern-`<main>` bekommen. Kein `py-*`, weil das die
-// Sticky-Header-Logik der Pages stören würde.
-//
-// Wenn eine Page in der Folge-Welle den Wrapper umgehen muss (z.B. eine
-// Vollbild-Karte), kann sie das via `<div className="-mx-... w-screen">`
-// machen — solche Edge-Cases werden in einer separaten Welle adressiert.
+// Kein `py-*`, weil das die Sticky-Header-Logik der Pages stoeren wuerde.
+// Kein `max-w`, weil Aaron die volle Breite will. Falls eine einzelne
+// Page einen zentrierten Lese-Modus braucht, kann sie das per eigenem
+// `max-w-...` innerhalb ihres Contents regeln.
 
 import type { ReactNode } from 'react'
 
@@ -31,9 +24,7 @@ type Props = {
 
 export function PageContainer({ children, className = '' }: Props) {
   return (
-    <div
-      className={`mx-auto w-full max-w-[1600px] px-4 sm:px-6 md:px-8 lg:px-16 xl:px-24 ${className}`}
-    >
+    <div className={`w-full px-4 sm:px-6 md:px-8 ${className}`}>
       {children}
     </div>
   )
