@@ -82,10 +82,11 @@ export default function AdminNav({ email, initials, unreadNachrichten }: { email
     )
   }
 
-  // Mobile: Dashboard, Dispatch, Faelle, Nachrichten, Karte (5 Slots)
-  const mobileItems: NavItem[] = [
-    NAV_NAVIGATION[0], NAV_NAVIGATION[1], NAV_NAVIGATION[2], NAV_NAVIGATION[4], NAV_NAVIGATION[6],
-  ]
+  // AAR-72: Mobile-Items per href-Lookup (nicht Array-Index)
+  const MOBILE_HREFS = ['/admin', '/admin/dispatch', '/admin/faelle', '/admin/nachrichten', '/admin/karte']
+  const mobileItems: NavItem[] = MOBILE_HREFS
+    .map(h => NAV_NAVIGATION.find(i => i.href === h))
+    .filter((i): i is NavItem => !!i)
 
   return (
     <>
