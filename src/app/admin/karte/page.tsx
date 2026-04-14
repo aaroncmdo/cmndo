@@ -1,7 +1,8 @@
 // AAR-122: Karte als Hub für Geo-Ressourcen (SVs + Communities + Organisationen).
-// Ersetzt die vorherige Redirect-Page. Koordinaten für Communities/Orgs werden
-// vom Standort ihres Hauptansprechpartners/ersten SV-Members abgeleitet
-// (da organisationen keine eigenen lat/lng-Spalten hat — Follow-up-Migration).
+// AAR-129: Organisationen haben jetzt eigene Koordinaten — kein Hack mehr via
+// Hauptansprechpartner/erster SV-Member. Für Altdaten ohne standort_lat/lng
+// fällt der Lookup noch auf einen SV-Member zurück, bis das Backfill-Script
+// (scripts/backfill-org-isochrones.mjs) gelaufen ist.
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import KarteHubClient, { type SvMarker, type CommunityMarker, type OrgMarker } from './KarteHubClient'
@@ -49,10 +50,10 @@ export default async function KartePage() {
     }
   })
 
-  // Organisationen (Communities + Büros + Akademien)
+  // AAR-129: Organisationen mit eigenen Geo-Feldern laden
   const { data: orgRaw } = await supabase
     .from('organisationen')
-    .select('id, name, typ, community_exklusiv, community_max_faelle_monat')
+    .select('id, name, typ, community_exklusiv, community_max_faelle_monat, standort_lat, standort_lng, einsatzgebiet_zentrum_lat, einsatzgebiet_zentrum_lng')
 
   type OrgRow = {
     id: string
@@ -60,10 +61,16 @@ export default async function KartePage() {
     typ: 'community' | 'buero' | 'akademie' | string
     community_exklusiv: boolean | null
     community_max_faelle_monat: number | null
+    standort_lat: number | null
+    standort_lng: number | null
+    // Legacy-Fallback bis Backfill gelaufen ist
+    einsatzgebiet_zentrum_lat: number | null
+    einsatzgebiet_zentrum_lng: number | null
   }
   const orgRows = (orgRaw ?? []) as unknown as OrgRow[]
 
-  // Lat/Lng-Lookup pro Org via ersten SV-Member mit Standort
+  // Legacy-Fallback: SV-Member-Standort für Alt-Orgs ohne eigene Koordinaten.
+  // Wird nach dem Backfill nicht mehr benötigt.
   const orgToSv = new Map<string, SvRow>()
   for (const sv of svRows) {
     if (!sv.organisation_id) continue
@@ -71,30 +78,44 @@ export default async function KartePage() {
     if (!orgToSv.has(sv.organisation_id)) orgToSv.set(sv.organisation_id, sv)
   }
 
+  function resolveCoords(o: OrgRow): { lat: number | null; lng: number | null } {
+    if (o.standort_lat != null && o.standort_lng != null) {
+      return { lat: Number(o.standort_lat), lng: Number(o.standort_lng) }
+    }
+    if (o.einsatzgebiet_zentrum_lat != null && o.einsatzgebiet_zentrum_lng != null) {
+      return { lat: Number(o.einsatzgebiet_zentrum_lat), lng: Number(o.einsatzgebiet_zentrum_lng) }
+    }
+    const svMember = orgToSv.get(o.id)
+    return {
+      lat: svMember?.standort_lat != null ? Number(svMember.standort_lat) : null,
+      lng: svMember?.standort_lng != null ? Number(svMember.standort_lng) : null,
+    }
+  }
+
   const communities: CommunityMarker[] = orgRows
     .filter((o) => o.typ === 'community')
     .map((o) => {
-      const svMember = orgToSv.get(o.id)
+      const { lat, lng } = resolveCoords(o)
       return {
         id: o.id,
         name: o.name,
         exklusiv: !!o.community_exklusiv,
         maxFaelle: o.community_max_faelle_monat,
-        lat: svMember?.standort_lat != null ? Number(svMember.standort_lat) : null,
-        lng: svMember?.standort_lng != null ? Number(svMember.standort_lng) : null,
+        lat,
+        lng,
       }
     })
 
   const organisationen: OrgMarker[] = orgRows
     .filter((o) => o.typ === 'buero' || o.typ === 'akademie')
     .map((o) => {
-      const svMember = orgToSv.get(o.id)
+      const { lat, lng } = resolveCoords(o)
       return {
         id: o.id,
         name: o.name,
         typ: o.typ as 'buero' | 'akademie',
-        lat: svMember?.standort_lat != null ? Number(svMember.standort_lat) : null,
-        lng: svMember?.standort_lng != null ? Number(svMember.standort_lng) : null,
+        lat,
+        lng,
       }
     })
 
