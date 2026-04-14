@@ -8,7 +8,7 @@ import {
   BarChart3Icon, UsersIcon, BuildingIcon, Building2Icon, ReceiptIcon,
   ShieldCheckIcon, MessageCircleIcon, SettingsIcon, AlertCircleIcon,
   LifeBuoyIcon, UserPlusIcon, ListChecksIcon, CheckSquareIcon,
-  TimerIcon,
+  TimerIcon, ScaleIcon,
 } from 'lucide-react'
 
 // AAR-57: 4 Sektionen — Navigation, Operations, Stammdaten, Verwaltung
@@ -28,6 +28,7 @@ const NAV_NAVIGATION: NavItem[] = [
 const NAV_OPERATIONS: NavItem[] = [
   { href: '/admin/tasks', label: 'Alle Tasks', icon: ListChecksIcon },
   { href: '/admin/sla', label: 'SLA-Monitoring', icon: TimerIcon },
+  { href: '/admin/kanzlei-board', label: 'Kanzlei-Board', icon: ScaleIcon },
   { href: '/admin/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
   { href: '/admin/support', label: 'Support', icon: LifeBuoyIcon },
 ]
