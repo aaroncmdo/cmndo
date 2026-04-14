@@ -3,24 +3,24 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  LayoutDashboardIcon, FolderOpenIcon, BadgeEuroIcon, ClipboardListIcon,
-  CarFrontIcon, MapIcon, LogOutIcon, GitBranchIcon, CalendarIcon,
-  BarChart3Icon, UsersIcon, BuildingIcon, Building2Icon, ReceiptIcon,
-  ShieldCheckIcon, MessageCircleIcon, SettingsIcon, AlertCircleIcon,
-  LifeBuoyIcon, UserPlusIcon, ListChecksIcon, CheckSquareIcon,
+  LayoutDashboardIcon, FolderOpenIcon, BadgeEuroIcon,
+  MapIcon, LogOutIcon, GitBranchIcon, CalendarIcon,
+  BarChart3Icon, UsersIcon, BuildingIcon, ReceiptIcon,
+  MessageCircleIcon, SettingsIcon, AlertCircleIcon,
+  LifeBuoyIcon, ListChecksIcon, CheckSquareIcon,
   TimerIcon, ScaleIcon,
 } from 'lucide-react'
 
 // AAR-57: 4 Sektionen — Navigation, Operations, Stammdaten, Verwaltung
 type NavItem = { href: string; label: string; icon: typeof LayoutDashboardIcon; exact?: boolean }
 
+// AAR-122: "Sachverständige" entfernt — jetzt Teil des Karte-Hubs
 const NAV_NAVIGATION: NavItem[] = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboardIcon, exact: true },
   { href: '/admin/dispatch', label: 'Dispatch', icon: GitBranchIcon },
   { href: '/admin/faelle', label: 'Fälle', icon: FolderOpenIcon },
   { href: '/admin/kalender', label: 'Kalender', icon: CalendarIcon },
   { href: '/admin/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon },
-  { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: CarFrontIcon },
   { href: '/admin/karte', label: 'Karte', icon: MapIcon },
   { href: '/admin/meine-tasks', label: 'Meine Tasks', icon: CheckSquareIcon },
 ]
@@ -33,12 +33,12 @@ const NAV_OPERATIONS: NavItem[] = [
   { href: '/admin/support', label: 'Support', icon: LifeBuoyIcon },
 ]
 
+// AAR-122: SV-Onboarding, Organisationen, Communities entfernt —
+// jetzt aus dem Karte-Hub erreichbar. Deep-Links /admin/sv-onboarding,
+// /admin/organisationen, /admin/communities bleiben funktional.
 const NAV_STAMMDATEN: NavItem[] = [
-  { href: '/admin/sv-onboarding', label: 'SV-Onboarding', icon: UserPlusIcon },
-  { href: '/admin/organisationen', label: 'Organisationen', icon: Building2Icon },
   { href: '/admin/team', label: 'Team', icon: UsersIcon },
   { href: '/admin/versicherungen', label: 'Versicherer', icon: BuildingIcon },
-  { href: '/admin/communities', label: 'Communities', icon: ShieldCheckIcon },
 ]
 
 const NAV_VERWALTUNG: NavItem[] = [
