@@ -17,17 +17,28 @@ import {
   UsersIcon,
   TrophyIcon,
   MessageCircleIcon,
+  CheckSquareIcon,
+  InboxIcon,
+  FileTextIcon,
+  RouteIcon,
+  EuroIcon,
 } from 'lucide-react'
 import NotificationBell from '@/app/admin/_components/NotificationBell'
 import OutboxBadge from '@/components/offline/OutboxBadge'
 
+// AAR-60: Alle Gutachter-Routen verlinken
 const NAV_ITEMS_BASE = [
   { href: '/gutachter/heute', label: 'Heute', icon: MapPinIcon },
   { href: '/gutachter', label: 'Dashboard', icon: LayoutDashboardIcon },
   { href: '/gutachter/faelle', label: 'Meine Fälle', icon: FolderOpenIcon },
-  { href: '/gutachter/gebiet', label: 'Mein Gebiet', icon: MapIcon },
+  { href: '/gutachter/tasks', label: 'Tasks', icon: CheckSquareIcon },
+  { href: '/gutachter/mitteilungen', label: 'Mitteilungen', icon: InboxIcon },
+  { href: '/gutachter/stellungnahme', label: 'Stellungnahmen', icon: FileTextIcon },
   { href: '/gutachter/termine', label: 'Termine', icon: CalendarIcon },
   { href: '/gutachter/kalender', label: 'Kalender', icon: CalendarIcon },
+  { href: '/gutachter/route', label: 'Route', icon: RouteIcon },
+  { href: '/gutachter/gebiet', label: 'Mein Gebiet', icon: MapIcon },
+  { href: '/gutachter/leadpreise', label: 'Lead-Preise', icon: EuroIcon },
   { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
   { href: '/gutachter/statistiken', label: 'Statistiken', icon: BarChart3Icon },
 ]
