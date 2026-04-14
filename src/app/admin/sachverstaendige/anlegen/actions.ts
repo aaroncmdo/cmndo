@@ -29,6 +29,59 @@ function randomPassword(length = 16): string {
   return pw
 }
 
+/**
+ * AAR-129: Baut Geo-Felder für `organisationen`-Insert.
+ * Berechnet die Isochrone via HERE API (AAR-132). Fehler werden geloggt,
+ * isochrone_polygon bleibt null und die Org wird trotzdem angelegt —
+ * findBestSV fällt dann auf den Radius-Check zurück.
+ */
+async function buildOrgGeoFields(input: {
+  lat: number | null | undefined
+  lng: number | null | undefined
+  adresse: string | null | undefined
+  plz: string | null | undefined
+  placeId: string | null | undefined
+  radiusKm: number | null | undefined
+}): Promise<{
+  standort_lat: number | null
+  standort_lng: number | null
+  standort_adresse: string | null
+  standort_plz: string | null
+  standort_place_id: string | null
+  einsatzgebiet_km: number | null
+  isochrone_polygon: { type: 'Polygon'; coordinates: number[][][] } | null
+}> {
+  const fields = {
+    standort_lat: input.lat ?? null,
+    standort_lng: input.lng ?? null,
+    standort_adresse: input.adresse ?? null,
+    standort_plz: input.plz ?? null,
+    standort_place_id: input.placeId ?? null,
+    einsatzgebiet_km: input.radiusKm ?? null,
+    isochrone_polygon: null as { type: 'Polygon'; coordinates: number[][][] } | null,
+  }
+
+  if (input.lat == null || input.lng == null || !input.radiusKm || input.radiusKm <= 0) {
+    return fields
+  }
+
+  try {
+    const points = await calculateIsochrone(Number(input.lat), Number(input.lng), Number(input.radiusKm))
+    if (points.length >= 3) {
+      // GeoJSON: [lng, lat] — Ring schließen wenn erstes ≠ letztes Paar
+      const ring = points.map((p) => [p.lng, p.lat])
+      const first = ring[0]
+      const last = ring[ring.length - 1]
+      if (first[0] !== last[0] || first[1] !== last[1]) ring.push([first[0], first[1]])
+      fields.isochrone_polygon = { type: 'Polygon', coordinates: [ring] }
+    }
+  } catch (err) {
+    console.error('[AAR-129] Isochrone-Berechnung für Organisation fehlgeschlagen:', err)
+  }
+
+  return fields
+}
+
 async function ensureAdmin(): Promise<{ ok: true; user_id: string; admin_name: string } | { ok: false; error: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -285,6 +338,17 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
   }
 
   // 3. Organisation
+  // AAR-129: Für Büro gibt es aktuell keine separate Geo-Auswahl im UI —
+  // Büro-Adresse ist frei-Text ohne Google Places. standort_* bleibt daher leer;
+  // Wizard-UI-Erweiterung ist Follow-up. Isochrone kann erst mit Koordinaten berechnet werden.
+  const bueroGeo = await buildOrgGeoFields({
+    lat: null,
+    lng: null,
+    adresse: data.buero_anschrift || null,
+    plz: null,
+    placeId: null,
+    radiusKm: null,
+  })
   const { data: orgRow, error: orgErr } = await adminDb.from('organisationen').insert({
     name: data.buero_name,
     typ: 'buero',
@@ -295,6 +359,7 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
     hauptansprechpartner_user_id: inhaberUserId,
     parent_user_id: inhaberUserId,
     onboarding_status: 'pending',
+    ...bueroGeo,
   }).select('id').single()
 
   if (orgErr || !orgRow) {
@@ -749,6 +814,15 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
   }
 
   // 3. Akademie-Org anlegen
+  // AAR-129: neue standort_* + isochrone_polygon Felder zusätzlich zu Legacy-Feldern
+  const akademieGeo = await buildOrgGeoFields({
+    lat: data.anschrift_lat,
+    lng: data.anschrift_lng,
+    adresse: data.anschrift,
+    plz: data.anschrift_plz ?? null,
+    placeId: data.anschrift_place_id ?? null,
+    radiusKm: data.radius_km,
+  })
   const { data: orgRow, error: orgErr } = await adminDb.from('organisationen').insert({
     name: data.akademie_name,
     typ: 'akademie',
@@ -765,6 +839,7 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
     akademie_max_faelle_monat: data.max_faelle_monat,
     akademie_radius_km: data.radius_km,
     akademie_erst_anzahlung_eur: data.erst_anzahlung_eur,
+    ...akademieGeo,
   }).select('id').single()
 
   if (orgErr || !orgRow) {
@@ -977,6 +1052,35 @@ export async function anlegeCommunity(data: AnlegeCommunityFormData): Promise<{
   const adminDb = createAdminClient()
 
   // 1. Community-Org anlegen
+  // AAR-129: neue standort_* + isochrone_polygon Felder zusätzlich zu Legacy-Feldern.
+  // Wenn im Wizard ein manuelles Polygon gezeichnet wurde, nutzen wir DAS für die
+  // Isochrone statt HERE — der Admin hat Exklusivitäts-Polygone manuell festgelegt.
+  const communityGeo = await (async () => {
+    // Manuelles Polygon hat Vorrang (KFZ-152 Phase 3)
+    if (data.polygon && data.polygon.length >= 3) {
+      const ring = data.polygon.map((p) => [p.lng, p.lat])
+      const first = ring[0]
+      const last = ring[ring.length - 1]
+      if (first[0] !== last[0] || first[1] !== last[1]) ring.push([first[0], first[1]])
+      return {
+        standort_lat: data.zentrum_lat,
+        standort_lng: data.zentrum_lng,
+        standort_adresse: data.zentrum_anschrift || null,
+        standort_plz: data.zentrum_plz || null,
+        standort_place_id: data.zentrum_place_id ?? null,
+        einsatzgebiet_km: data.radius_km,
+        isochrone_polygon: { type: 'Polygon' as const, coordinates: [ring] },
+      }
+    }
+    return buildOrgGeoFields({
+      lat: data.zentrum_lat,
+      lng: data.zentrum_lng,
+      adresse: data.zentrum_anschrift || null,
+      plz: data.zentrum_plz || null,
+      placeId: data.zentrum_place_id ?? null,
+      radiusKm: data.radius_km,
+    })
+  })()
   const { data: orgRow, error: orgErr } = await adminDb.from('organisationen').insert({
     name: data.name,
     typ: 'community',
@@ -988,6 +1092,7 @@ export async function anlegeCommunity(data: AnlegeCommunityFormData): Promise<{
     community_exklusiv: data.exklusiv,
     community_max_faelle_monat: data.max_faelle_monat,
     community_leaderboard_aktiv: true,
+    ...communityGeo,
   }).select('id').single()
 
   if (orgErr || !orgRow) {
