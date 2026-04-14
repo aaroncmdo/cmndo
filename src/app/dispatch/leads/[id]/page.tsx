@@ -9,6 +9,7 @@ import CardentityButton from './CardentityButton'
 import RueckrufSection from './RueckrufSection'
 import GespraechsleitfadenTimer from './GespraechsleitfadenTimer'
 import ExitSkript, { type DisqualifikationsGrund } from './ExitSkript'
+import SvDispatchPanel from './SvDispatchPanel'
 import AircallCallButton from '@/components/AircallCallButton'
 import { computeHardGateStatus } from './hard-gate-utils'
 import { computeFlowLinkStufe, FLOWLINK_STUFE_LABEL } from '@/lib/dispatch/fahrzeug-marken'
@@ -44,6 +45,36 @@ export default async function DispatchLeadDetail({
     .eq('lead_id', id)
     .order('started_at', { ascending: false })
     .limit(10)
+
+  // AAR-115: aktiver SV-Termin (pre-FlowLink) — reserviert oder bestätigt
+  const { data: svTerminRaw } = await supabase
+    .from('gutachter_termine')
+    .select('id, sv_id, start_zeit, end_zeit, status, sachverstaendige(profiles(vorname, nachname))')
+    .eq('lead_id', id)
+    .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag'])
+    .order('start_zeit', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+  type SvTerminRow = {
+    id: string
+    sv_id: string
+    start_zeit: string
+    end_zeit: string
+    status: string
+    sachverstaendige: { profiles: { vorname: string | null; nachname: string | null } | null } | null
+  }
+  const svTerminRow = svTerminRaw as SvTerminRow | null
+  const aktiverSvTermin = svTerminRow
+    ? {
+        id: svTerminRow.id,
+        sv_id: svTerminRow.sv_id,
+        sv_vorname: svTerminRow.sachverstaendige?.profiles?.vorname ?? null,
+        sv_nachname: svTerminRow.sachverstaendige?.profiles?.nachname ?? null,
+        start_zeit: svTerminRow.start_zeit,
+        end_zeit: svTerminRow.end_zeit,
+        status: svTerminRow.status,
+      }
+    : null
 
   const phaseLabel: Record<string, string> = {
     'neu': 'Neu', 'nicht-erreicht': 'Nicht erreicht', 'rueckruf': 'Rückruf',
@@ -115,7 +146,15 @@ export default async function DispatchLeadDetail({
           {istDisqualifiziert && disqualifikationsGrundKey ? (
             <ExitSkript grund={disqualifikationsGrundKey} />
           ) : (
-            <Schritt0HardGate lead={lead as Parameters<typeof Schritt0HardGate>[0]['lead']} />
+            <>
+              <Schritt0HardGate lead={lead as Parameters<typeof Schritt0HardGate>[0]['lead']} />
+              {/* AAR-115: SV-Zuweisung + Termin-Reservierung (zwischen Hard Gate und FlowLink) */}
+              <SvDispatchPanel
+                leadId={lead.id}
+                hardGateOk={computeHardGateStatus(lead).allComplete}
+                aktiverTermin={aktiverSvTermin}
+              />
+            </>
           )}
 
           {/* AAR-98: Rueckruf (migriert von admin/dispatch/lead) */}
@@ -225,6 +264,7 @@ export default async function DispatchLeadDetail({
             serviceTyp={lead.service_typ ?? 'komplett'}
             flowStatus={flowStatus}
             hardGateOk={computeHardGateStatus(lead).allComplete}
+            hasSvTermin={!!aktiverSvTermin}
           />
 
           {/* FlowLinks */}

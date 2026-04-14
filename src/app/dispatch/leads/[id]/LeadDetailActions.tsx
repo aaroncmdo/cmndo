@@ -11,12 +11,15 @@ export default function LeadDetailActions({
   serviceTyp,
   flowStatus,
   hardGateOk = false,
+  hasSvTermin = false,
 }: {
   leadId: string
   currentPhase: string
   serviceTyp: string
   flowStatus: 'none' | 'offen' | 'abgeschlossen' | 'abgelaufen'
   hardGateOk?: boolean
+  // AAR-115: FlowLink nur freischalten wenn auch SV + Termin reserviert sind
+  hasSvTermin?: boolean
 }) {
   const [pending, startTransition] = useTransition()
   const [showRueckruf, setShowRueckruf] = useState(false)
@@ -62,20 +65,23 @@ export default function LeadDetailActions({
         </button>
       )}
 
-      {/* FlowLink generieren — AAR-80: Hard Gate Block */}
+      {/* FlowLink generieren — AAR-80 Hard Gate + AAR-115 SV-Termin Block */}
       {!isTerminal && flowStatus !== 'abgeschlossen' && (
         <>
           <button
-            disabled={pending || !hardGateOk}
+            disabled={pending || !hardGateOk || !hasSvTermin}
             onClick={() => handleAction(async () => { await sendFlowLink(leadId) })}
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            title={!hardGateOk ? 'Schritt 0 Hard Gate muss erst abgeschlossen sein' : ''}
+            title={!hardGateOk ? 'Schritt 0 Hard Gate muss erst abgeschlossen sein' : !hasSvTermin ? 'SV + Termin muss erst reserviert sein' : ''}
           >
             <LinkIcon className="w-4 h-4" />
             FlowLink generieren
           </button>
           {!hardGateOk && (
-            <p className="text-[10px] text-amber-700 text-center">Schritt 0 Hard Gate erst abschliessen</p>
+            <p className="text-[10px] text-amber-700 text-center">Schritt 0 Hard Gate erst abschließen</p>
+          )}
+          {hardGateOk && !hasSvTermin && (
+            <p className="text-[10px] text-amber-700 text-center">SV + Termin erst reservieren</p>
           )}
         </>
       )}

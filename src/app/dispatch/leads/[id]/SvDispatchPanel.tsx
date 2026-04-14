@@ -1,0 +1,287 @@
+'use client'
+
+// AAR-115: SV-Zuweisung + Termin-Reservierung im Lead-Detail (Dispatch-Portal)
+// Dispatcher waehlt vor FlowLink-Versand einen SV aus den Isochrone-Vorschlaegen
+// (findBestSV) und reserviert einen Termin. Der Termin wird mit lead_id
+// (NICHT fall_id) angelegt und nach SA-Unterschrift im FlowWizard zu einem
+// Fall-Termin upgegradet.
+
+import { useState, useTransition, useEffect } from 'react'
+import {
+  CalendarCheckIcon,
+  MapPinIcon,
+  UserCheckIcon,
+  XIcon,
+  RefreshCwIcon,
+  ClockIcon,
+  AlertTriangleIcon,
+} from 'lucide-react'
+import {
+  listSvSuggestionsForLead,
+  reserveSvTerminForLead,
+  cancelSvTerminForLead,
+  type SvSuggestion,
+} from './actions'
+
+type AktiverTermin = {
+  id: string
+  sv_id: string
+  sv_vorname: string | null
+  sv_nachname: string | null
+  start_zeit: string
+  end_zeit: string
+  status: string
+}
+
+export default function SvDispatchPanel({
+  leadId,
+  hardGateOk,
+  aktiverTermin,
+}: {
+  leadId: string
+  hardGateOk: boolean
+  aktiverTermin: AktiverTermin | null
+}) {
+  const [pending, startTransition] = useTransition()
+  const [suggestions, setSuggestions] = useState<SvSuggestion[] | null>(null)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [selectedSv, setSelectedSv] = useState<SvSuggestion | null>(null)
+  const [startDatum, setStartDatum] = useState('')
+  const [startZeit, setStartZeit] = useState('09:00')
+  const [toast, setToast] = useState('')
+
+  // Defaults: morgen 09:00 als erster Slot
+  useEffect(() => {
+    if (!startDatum) {
+      const morgen = new Date()
+      morgen.setDate(morgen.getDate() + 1)
+      setStartDatum(morgen.toISOString().slice(0, 10))
+    }
+  }, [startDatum])
+
+  function loadSuggestions() {
+    setLoadError(null)
+    startTransition(async () => {
+      const r = await listSvSuggestionsForLead(leadId)
+      if (!r.success) {
+        setLoadError(r.error ?? 'Unbekannter Fehler')
+        setSuggestions([])
+        return
+      }
+      setSuggestions(r.suggestions ?? [])
+    })
+  }
+
+  function handleReserve() {
+    if (!selectedSv || !startDatum || !startZeit) return
+    const iso = new Date(`${startDatum}T${startZeit}:00`).toISOString()
+    startTransition(async () => {
+      const r = await reserveSvTerminForLead(leadId, selectedSv.svId, iso)
+      if (r.success) {
+        setToast('Termin reserviert')
+        setSelectedSv(null)
+        setSuggestions(null)
+      } else {
+        setToast(r.error ?? 'Fehler beim Reservieren')
+      }
+      setTimeout(() => setToast(''), 3000)
+    })
+  }
+
+  function handleCancel() {
+    if (!confirm('Termin wirklich stornieren? Der Lead verliert den SV-Slot.')) return
+    startTransition(async () => {
+      const r = await cancelSvTerminForLead(leadId)
+      setToast(r.success ? 'Termin storniert' : r.error ?? 'Fehler')
+      setTimeout(() => setToast(''), 2500)
+    })
+  }
+
+  // ─── Wenn bereits ein Termin existiert, zeige ihn an ─────────────────────
+  if (aktiverTermin) {
+    const start = new Date(aktiverTermin.start_zeit)
+    const ende = new Date(aktiverTermin.end_zeit)
+    const svName = [aktiverTermin.sv_vorname, aktiverTermin.sv_nachname].filter(Boolean).join(' ') || 'SV'
+    return (
+      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-emerald-900 flex items-center gap-2">
+            <CalendarCheckIcon className="w-4 h-4" /> SV-Termin reserviert
+          </h2>
+          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+            aktiverTermin.status === 'bestaetigt'
+              ? 'bg-emerald-200 text-emerald-800'
+              : 'bg-amber-100 text-amber-700'
+          }`}>
+            {aktiverTermin.status === 'bestaetigt' ? 'Bestätigt' : 'Reserviert'}
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div>
+            <p className="text-[10px] text-emerald-700 uppercase">Sachverständiger</p>
+            <p className="font-medium text-emerald-900">{svName}</p>
+          </div>
+          <div>
+            <p className="text-[10px] text-emerald-700 uppercase">Termin</p>
+            <p className="font-medium text-emerald-900">
+              {start.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}
+              {' · '}
+              {start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+              {' – '}
+              {ende.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+            </p>
+          </div>
+        </div>
+        <button
+          disabled={pending}
+          onClick={handleCancel}
+          className="w-full text-xs font-medium text-red-700 hover:text-red-800 hover:bg-red-50 py-2 rounded-lg border border-red-200 flex items-center justify-center gap-2"
+        >
+          <XIcon className="w-3.5 h-3.5" /> Reservierung stornieren
+        </button>
+        {toast && <p className="text-xs text-emerald-800 text-center">{toast}</p>}
+      </div>
+    )
+  }
+
+  // ─── Noch kein Termin: SV-Auswahl + Zeitslot ─────────────────────────────
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+          <UserCheckIcon className="w-4 h-4 text-[#4573A2]" /> SV-Termin reservieren
+        </h2>
+        {!hardGateOk && (
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
+            Hard Gate erst abschließen
+          </span>
+        )}
+      </div>
+
+      {!hardGateOk ? (
+        <p className="text-xs text-gray-500 flex items-start gap-2">
+          <AlertTriangleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+          Schritt 0 (Hard Gate) muss vollständig beantwortet sein bevor ein SV reserviert werden kann.
+        </p>
+      ) : (
+        <>
+          {/* Schritt 1: SV-Vorschlaege laden */}
+          {!suggestions && (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={loadSuggestions}
+              className="w-full text-sm font-medium px-3 py-2.5 rounded-lg bg-[#4573A2] text-white hover:bg-[#3a6290] disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              <MapPinIcon className="w-4 h-4" />
+              {pending ? 'Suche läuft...' : 'SV-Vorschläge laden (Isochrone)'}
+            </button>
+          )}
+
+          {loadError && (
+            <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg p-2 flex items-start gap-2">
+              <AlertTriangleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" /> {loadError}
+            </p>
+          )}
+
+          {suggestions && suggestions.length === 0 && !loadError && (
+            <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">
+              Keine SVs in Reichweite gefunden. Prüfe Kontingent, Urlaub oder Isochrone-Polygone.
+            </p>
+          )}
+
+          {/* Schritt 2: SV-Liste */}
+          {suggestions && suggestions.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] text-gray-500 uppercase font-medium">
+                  {suggestions.length} Kandidaten (sortiert nach Score)
+                </p>
+                <button
+                  type="button"
+                  onClick={loadSuggestions}
+                  disabled={pending}
+                  className="text-[10px] text-[#4573A2] hover:text-[#3a6290] flex items-center gap-1"
+                >
+                  <RefreshCwIcon className="w-3 h-3" /> neu laden
+                </button>
+              </div>
+              <div className="max-h-60 overflow-y-auto space-y-1.5 pr-1">
+                {suggestions.map((s) => {
+                  const isSel = selectedSv?.svId === s.svId
+                  return (
+                    <button
+                      key={s.svId}
+                      type="button"
+                      onClick={() => setSelectedSv(s)}
+                      className={`w-full text-left px-3 py-2 rounded-lg border transition-colors ${
+                        isSel
+                          ? 'bg-[#0D1B3E] text-white border-[#0D1B3E]'
+                          : 'bg-white border-gray-200 hover:border-[#4573A2] hover:bg-blue-50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-sm font-medium">{s.name}</span>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                          isSel ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
+                        }`}>{s.paket}</span>
+                      </div>
+                      <div className={`flex items-center gap-3 mt-1 text-[11px] ${isSel ? 'text-white/80' : 'text-gray-500'}`}>
+                        <span>{s.distanzKm.toFixed(1)} km</span>
+                        <span>Score {s.score.toFixed(1)}</span>
+                        <span>{s.kontingentFrei} frei</span>
+                        <span>{s.offeneFaelle} offen</span>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Schritt 3: Zeitslot */}
+          {selectedSv && (
+            <div className="space-y-3 border-t border-gray-200 pt-4">
+              <div className="flex items-center gap-2">
+                <ClockIcon className="w-4 h-4 text-gray-400" />
+                <p className="text-xs font-medium text-gray-700">Terminzeit wählen (2h Block)</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="date"
+                  value={startDatum}
+                  onChange={(e) => setStartDatum(e.target.value)}
+                  className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                />
+                <input
+                  type="time"
+                  value={startZeit}
+                  onChange={(e) => setStartZeit(e.target.value)}
+                  className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                  step={900}
+                />
+              </div>
+              <button
+                type="button"
+                disabled={pending || !startDatum || !startZeit}
+                onClick={handleReserve}
+                className="w-full text-sm font-medium px-3 py-2.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-40 flex items-center justify-center gap-2"
+              >
+                <CalendarCheckIcon className="w-4 h-4" />
+                {pending ? 'Reserviere...' : `Termin bei ${selectedSv.name} reservieren`}
+              </button>
+            </div>
+          )}
+
+          {toast && (
+            <div className={`text-xs px-3 py-2 rounded-lg ${
+              toast === 'Termin reserviert' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800'
+            }`}>
+              {toast}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
