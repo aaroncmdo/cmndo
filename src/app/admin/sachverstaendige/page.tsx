@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import KarteClient from '../karte/KarteClient'
+import SachverstaendigeListClient from './SachverstaendigeListClient'
 
 const BASE_SELECT = 'id, profile_id, gebiet_plz, paket, offene_faelle, max_faelle_monat, ist_aktiv, gutachter_typ, qualifikationen_neu, spezifikationen, schadenarten, onboarding_abgeschlossen, anzahlung_status, standort_adresse, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, radius_km, werbebudget_guthaben_netto, organisation_id, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, ablehnungen_30_tage, profiles(vorname, nachname, email, telefon)'
 const EXTENDED_SELECT = BASE_SELECT.replace('organisation_id,', 'organisation_id, deaktiviert_grund, deaktiviert_am, geloescht_am,')
@@ -57,27 +57,5 @@ export default async function SachverstaendigePage() {
     }
   })
 
-  // Cases for map
-  const { data: faelle } = await supabase
-    .from('faelle')
-    .select('id, fall_nummer, status, schadens_ursache, schadens_adresse, schadens_plz, schadens_ort, sv_id, leads!faelle_lead_id_fkey(vorname, nachname)')
-    .not('status', 'in', '("abgeschlossen","storniert")')
-
-  const offeneFaelle = (faelle ?? []).map((f) => {
-    const leadRaw = f.leads as unknown
-    const lead = (Array.isArray(leadRaw) ? leadRaw[0] : leadRaw) as { vorname: string | null; nachname: string | null } | null
-    return {
-      id: f.id as string,
-      fallNummer: (f.fall_nummer as string) ?? (f.id as string).slice(0, 8),
-      status: f.status as string,
-      schadensUrsache: f.schadens_ursache as string | null,
-      adresse: [f.schadens_adresse, f.schadens_plz, f.schadens_ort].filter(Boolean).join(', '),
-      schadensPLZ: f.schadens_plz as string | null,
-      schadensOrt: f.schadens_ort as string | null,
-      svId: f.sv_id as string | null,
-      kunde: lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : '—',
-    }
-  })
-
-  return <KarteClient sachverstaendige={sachverstaendige} faelle={offeneFaelle} />
+  return <SachverstaendigeListClient sachverstaendige={sachverstaendige} />
 }
