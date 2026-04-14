@@ -22,27 +22,7 @@ export async function setLeadPhase(leadId: string, phase: string) {
   revalidatePath('/dispatch/dashboard')
 }
 
-export async function setLeadRueckruf(leadId: string, datum: string, notiz: string) {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
-
-  const { error } = await supabase
-    .from('leads')
-    .update({
-      qualifizierungs_phase: 'rueckruf',
-      rueckruf_datum: datum || null,
-      rueckruf_notiz: notiz || null,
-      rueckruf_erledigt: false,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', leadId)
-
-  if (error) throw new Error(error.message)
-  revalidatePath(`/dispatch/leads/${leadId}`)
-  revalidatePath('/dispatch/leads')
-  revalidatePath('/dispatch/rueckrufe')
-}
+// AAR-118: setLeadRueckruf entfernt (nur noch über RueckrufSection via saveRueckruf)
 
 export async function disqualifiziereLead(leadId: string, grund: string) {
   const supabase = await createClient()

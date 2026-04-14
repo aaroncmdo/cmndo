@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { setLeadPhase, setLeadRueckruf, disqualifiziereLead, setServiceTyp } from './actions'
+import { setLeadPhase, disqualifiziereLead, setServiceTyp } from './actions'
 import { sendFlowLink } from '@/app/admin/dispatch/actions'
-import { PhoneForwardedIcon, LinkIcon, XCircleIcon, CheckCircleIcon, ArrowRightIcon } from 'lucide-react'
+import { LinkIcon, XCircleIcon, CheckCircleIcon } from 'lucide-react'
 
 export default function LeadDetailActions({
   leadId,
@@ -22,10 +22,7 @@ export default function LeadDetailActions({
   hasSvTermin?: boolean
 }) {
   const [pending, startTransition] = useTransition()
-  const [showRueckruf, setShowRueckruf] = useState(false)
   const [showDQ, setShowDQ] = useState(false)
-  const [rueckrufDatum, setRueckrufDatum] = useState('')
-  const [rueckrufNotiz, setRueckrufNotiz] = useState('')
   const [dqGrund, setDqGrund] = useState('')
   const [toast, setToast] = useState('')
 
@@ -86,47 +83,7 @@ export default function LeadDetailActions({
         </>
       )}
 
-      {/* Rückruf */}
-      {!isTerminal && (
-        <>
-          <button
-            onClick={() => setShowRueckruf(!showRueckruf)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-amber-300 text-amber-700 text-sm font-medium hover:bg-amber-50 transition-colors"
-          >
-            <PhoneForwardedIcon className="w-4 h-4" />
-            Rückruf planen
-          </button>
-          {showRueckruf && (
-            <div className="bg-amber-50 rounded-lg p-3 space-y-2">
-              <input
-                type="datetime-local"
-                value={rueckrufDatum}
-                onChange={(e) => setRueckrufDatum(e.target.value)}
-                className="w-full px-3 py-1.5 rounded border border-amber-200 text-sm"
-              />
-              <input
-                type="text"
-                placeholder="Notiz..."
-                value={rueckrufNotiz}
-                onChange={(e) => setRueckrufNotiz(e.target.value)}
-                className="w-full px-3 py-1.5 rounded border border-amber-200 text-sm"
-              />
-              <button
-                disabled={pending}
-                onClick={() => handleAction(async () => {
-                  await setLeadRueckruf(leadId, rueckrufDatum, rueckrufNotiz)
-                  setShowRueckruf(false)
-                  setRueckrufDatum('')
-                  setRueckrufNotiz('')
-                })}
-                className="w-full px-3 py-1.5 rounded bg-amber-600 text-white text-sm font-medium hover:bg-amber-700 disabled:opacity-50"
-              >
-                Rückruf setzen
-              </button>
-            </div>
-          )}
-        </>
-      )}
+      {/* Rückruf: entfernt (AAR-118) — siehe RueckrufSection.tsx (AAR-98) */}
 
       {/* Disqualifizieren */}
       {!isTerminal && (
