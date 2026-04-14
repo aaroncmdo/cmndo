@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { emailSvZugewiesen } from '@/lib/email'
 import { haversineKm } from '@/lib/gps/geofence'
+// AAR-87: nachgelagerte Trigger
+import { triggerGutachterTerminTask } from '@/lib/tasking'
+import { triggerSV01, deductLeadpreis } from '@/lib/gutachterTasking'
+import { sendFallCommunication } from '@/lib/communications/send-fall'
+import { createGutachterMitteilung } from '@/lib/mitteilungen'
 
 // ─── Point-in-Polygon (Ray Casting) ─────────────────────────────────────────
 
@@ -241,6 +246,63 @@ export async function POST(request: Request) {
         .from('sachverstaendige')
         .update({ offene_faelle: (bestSv.offene_faelle ?? 0) + 1 })
         .eq('id', bestSv.id)
+    }
+  }
+
+  // 7b. AAR-87: Trigger nachgelagerte Aktionen — nur bei direktem SV-Routing (nicht Pool)
+  if (!orgPool) {
+    const { data: fallFull } = await supabase
+      .from('faelle')
+      .select('id, fall_nummer, lead_id, sv_id, schadens_adresse, schadens_plz, schadens_ort, schadens_ursache, kennzeichen, wunschtermin, regulierung_betrag')
+      .eq('id', fallId)
+      .single()
+
+    if (fallFull) {
+      // Auto-Task: Gutachter soll Termin bestaetigen
+      triggerGutachterTerminTask(fallId, bestSv.id).catch(() => {})
+
+      // Kunde-Daten + Adresse fuer Trigger
+      let kundeName = ''
+      if (fallFull.lead_id) {
+        const { data: lead } = await supabase.from('leads').select('vorname, nachname').eq('id', fallFull.lead_id).single()
+        kundeName = [lead?.vorname, lead?.nachname].filter(Boolean).join(' ')
+      }
+      const adresse = [fallFull.schadens_adresse, fallFull.schadens_plz, fallFull.schadens_ort].filter(Boolean).join(', ') || ''
+
+      // SV-01 Task + In-App Notification (braucht profile_id)
+      const { data: svProfileData } = await supabase
+        .from('sachverstaendige')
+        .select('profile_id')
+        .eq('id', bestSv.id)
+        .single()
+
+      if (svProfileData?.profile_id) {
+        triggerSV01(
+          fallId,
+          svProfileData.profile_id,
+          kundeName,
+          adresse,
+          fallFull.kennzeichen ?? '',
+          fallFull.schadens_ursache ?? '',
+          fallFull.wunschtermin,
+        ).catch(() => {})
+      }
+
+      // Gutachter-Mitteilung
+      createGutachterMitteilung(bestSv.id, 'neuer_auftrag', fallId, {
+        kunde_name: kundeName || undefined,
+        schadentyp: fallFull.schadens_ursache ?? undefined,
+        adresse: adresse || undefined,
+        fall_nummer: fallFull.fall_nummer ?? undefined,
+      }).catch(() => {})
+
+      // WhatsApp an Kunden
+      sendFallCommunication(fallId, 'sv_losgefahren').catch(() => {})
+
+      // Lead-Preis vom SV-Guthaben abziehen
+      if (fallFull.regulierung_betrag) {
+        deductLeadpreis(bestSv.id, fallId, Number(fallFull.regulierung_betrag), fallFull.fall_nummer ?? fallId.slice(0, 8)).catch(() => {})
+      }
     }
   }
 

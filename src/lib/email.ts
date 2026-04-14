@@ -105,6 +105,31 @@ export async function emailFilmcheckBestanden(kanzleiEmail: string, fallNummer: 
   })
 }
 
+// AAR-86: Email an SV bei QC-Ablehnung mit KB-Kommentaren
+export async function emailFilmcheckNichtBestanden(
+  svEmail: string,
+  fallNummer: string,
+  kommentar: string,
+  fallUrl: string,
+): Promise<void> {
+  try {
+    await sendEmail({
+      to: svEmail,
+      subject: `Gutachten Nachbesserung erforderlich — Fall ${fallNummer}`,
+      heading: 'QC nicht bestanden — Nachbesserung noetig',
+      lines: [
+        `Ihr Gutachten zu Fall <strong style="color:#fff">${fallNummer}</strong> wurde im Filmcheck zurueckgewiesen.`,
+        `Anmerkungen des Kundenbetreuers:<br/><em style="color:#fbbf24">${kommentar}</em>`,
+        `Bitte korrigieren Sie das Gutachten innerhalb von <strong style="color:#fbbf24">24 Stunden</strong> und laden es erneut hoch.`,
+      ],
+      ctaLabel: 'Im Portal oeffnen',
+      ctaUrl: fallUrl,
+    })
+  } catch (err) {
+    console.error('[AAR-86] emailFilmcheckNichtBestanden:', err)
+  }
+}
+
 export async function emailFallAbgeschlossen(kundenEmail: string, fallNummer: string, betrag: string) {
   await sendEmail({
     to: kundenEmail,

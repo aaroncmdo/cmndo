@@ -664,6 +664,21 @@ export async function qcNachbesserung(fallId: string, kommentar: string) {
     triggerSV05(fallId, svProfileId, kommentar || 'Nachbesserung erforderlich').catch(() => {})
   }
 
+  // AAR-86: Email an SV mit QC-Kommentaren
+  if (svProfileId) {
+    const { data: svProfile } = await supabase
+      .from('profiles')
+      .select('email')
+      .eq('id', svProfileId)
+      .single()
+    if (svProfile?.email) {
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
+      const fallUrl = `${baseUrl}/gutachter/fall/${fallId}`
+      const { emailFilmcheckNichtBestanden } = await import('@/lib/email')
+      emailFilmcheckNichtBestanden(svProfile.email, fallNr, kommentar || 'Bitte Anmerkungen im Portal pruefen', fallUrl).catch(() => {})
+    }
+  }
+
   revalidatePath(`/admin/faelle/${fallId}`)
   revalidatePath('/admin/tasks')
 }
