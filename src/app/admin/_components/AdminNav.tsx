@@ -43,6 +43,7 @@ const NAV_STAMMDATEN: NavItem[] = [
 
 const NAV_VERWALTUNG: NavItem[] = [
   { href: '/admin/finance', label: 'Finanzen', icon: BadgeEuroIcon },
+  { href: '/admin/finance/provisionen-maik', label: 'Provisionen Maik', icon: BadgeEuroIcon },
   { href: '/admin/abrechnungen', label: 'Abrechnungen', icon: ReceiptIcon },
   { href: '/admin/kanzlei-abrechnungen', label: 'Kanzlei-Abr.', icon: ReceiptIcon },
   { href: '/admin/statistiken', label: 'Statistiken', icon: BarChart3Icon },

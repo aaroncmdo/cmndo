@@ -105,6 +105,32 @@ export async function emailFilmcheckBestanden(kanzleiEmail: string, fallNummer: 
   })
 }
 
+// AAR-92: Maik Monatsabrechnung
+export async function emailMaikMonatsabrechnung(
+  maikEmail: string,
+  monat: string,
+  gesamtBetrag: number,
+  leadCount: number,
+): Promise<void> {
+  try {
+    await sendEmail({
+      to: maikEmail,
+      subject: `Provisionsabrechnung ${monat} — ${gesamtBetrag.toFixed(2)}€`,
+      heading: `Monatsabrechnung ${monat}`,
+      lines: [
+        `Hi Maik, hier deine Abrechnung fuer ${monat}:`,
+        `Bestaetigte Leads: <strong style="color:#fff">${leadCount}</strong>`,
+        `Auszahlungssumme: <strong style="color:#34d399">${gesamtBetrag.toFixed(2)}€</strong>`,
+        leadCount === 0 ? 'Diesen Monat keine Auszahlung.' : 'Detailliste in Claimondo unter Admin → Finanzen → Provisionen Maik.',
+      ],
+      ctaLabel: 'Detailliste oeffnen',
+      ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/admin/finance/provisionen-maik?monat=${monat}`,
+    })
+  } catch (err) {
+    console.error('[AAR-92] emailMaikMonatsabrechnung:', err)
+  }
+}
+
 // AAR-91: Email an SV bei Auftrags-Storno
 export async function emailSvAuftragStorniert(
   svEmail: string,

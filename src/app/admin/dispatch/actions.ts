@@ -267,6 +267,18 @@ export async function createLead(data: {
         enrichLeadByFin(newLead.id).catch(() => {})
       } catch { /* */ }
     }
+
+    // AAR-92: Maik-Provision tracken bei Google-Ads/SEA Leads
+    if (data.source_channel === 'google-ads' || data.source_channel === 'sea') {
+      const monat = new Date().toISOString().slice(0, 7)
+      await supabase.from('provisionen_maik').insert({
+        lead_id: newLead.id,
+        monat,
+        basis_provision: 150.00,
+        source_channel: data.source_channel,
+        status: 'pending',
+      }).then(({ error }) => { if (error) console.error('[AAR-92] Provision-Insert:', error.message) })
+    }
   }
 
   revalidatePath('/admin/dispatch')
@@ -336,6 +348,17 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
     .eq('id', leadId)
 
   if (error) throw new Error(error.message)
+
+  // AAR-92: Maik-Provision reversen bei Disqualifikation/Kalt
+  if (newStatus === 'disqualifiziert' || newStatus === 'kalt') {
+    await svc.from('provisionen_maik').update({
+      status: 'reversed',
+      reversed_grund: `Lead status: ${newStatus}`,
+      updated_at: now,
+    }).eq('lead_id', leadId).neq('status', 'paid').then(({ error: revErr }) => {
+      if (revErr) console.error('[AAR-92] Provision-Reverse:', revErr.message)
+    })
+  }
 
   revalidatePath('/admin/dispatch')
   return { converted: false }
