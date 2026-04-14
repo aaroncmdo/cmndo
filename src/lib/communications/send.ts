@@ -24,27 +24,34 @@ export async function sendCommunication(
   }
 
   // ─── WhatsApp ──────────────────────────────────────────────────────────
+  // AAR-117: Return-Werte von sendWhatsAppTemplate/sendWhatsApp auswerten und
+  // bei success=false Exception werfen, damit Aufrufer (z.B. sendFlowLink)
+  // wa_gesendet NICHT auf true setzen und keinen Timeline-Eintrag erzeugen.
   if (config.channel.includes('whatsapp') && !options?.skipWhatsapp && data.telefon) {
-    try {
-      if (config.whatsapp_template_name) {
-        const { sendWhatsAppTemplate } = await import('@/lib/whatsapp/send-template')
-        // Build numbered variables from data — callers pass '1', '2', ... keys
-        const variables: Record<string, string> = {}
-        for (const [k, v] of Object.entries(data)) {
-          variables[k] = v
-        }
-        await sendWhatsAppTemplate(
-          data.telefon,
-          config.whatsapp_template_name as TemplateName,
-          variables,
-          data.absender_kb_id,
-        )
-      } else {
-        const { sendWhatsApp } = await import('@/lib/whatsapp')
-        await sendWhatsApp(data.telefon, buildMessage(config.description, data))
+    let result: { success: boolean; error?: string } | null = null
+
+    if (config.whatsapp_template_name) {
+      const { sendWhatsAppTemplate } = await import('@/lib/whatsapp/send-template')
+      // Build numbered variables from data — callers pass '1', '2', ... keys
+      const variables: Record<string, string> = {}
+      for (const [k, v] of Object.entries(data)) {
+        variables[k] = v
       }
-    } catch (err) {
-      console.error(`[COMM] WhatsApp failed for ${triggerName}:`, err)
+      result = await sendWhatsAppTemplate(
+        data.telefon,
+        config.whatsapp_template_name as TemplateName,
+        variables,
+        data.absender_kb_id,
+      )
+    } else {
+      const { sendWhatsApp } = await import('@/lib/whatsapp')
+      result = await sendWhatsApp(data.telefon, buildMessage(config.description, data))
+    }
+
+    if (!result.success) {
+      const errorMsg = `[COMM] WhatsApp failed for ${triggerName}: ${result.error ?? 'Unbekannter Fehler'}`
+      console.error(errorMsg)
+      throw new Error(errorMsg)
     }
   }
 
