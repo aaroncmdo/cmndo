@@ -107,4 +107,16 @@ export async function transitionFallStatus(
     beschreibung: metadata?.grund ?? null,
     erstellt_von: metadata?.user_id ?? null,
   })
+
+  // AAR-77: LexDrive-Email bei Status-Wechsel auf kanzlei-uebergeben
+  if (newStatus === 'kanzlei-uebergeben') {
+    try {
+      const { buildAndSendKanzleiEmail } = await import('@/lib/lexdrive/email-sender')
+      buildAndSendKanzleiEmail(fallId).catch(err =>
+        console.error('[AAR-77] LexDrive-Email Fehler:', err),
+      )
+    } catch (err) {
+      console.error('[AAR-77] LexDrive-Email Trigger Fehler:', err)
+    }
+  }
 }
