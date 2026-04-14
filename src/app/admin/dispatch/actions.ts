@@ -10,8 +10,9 @@ import {
   emailFilmcheckBestanden,
 } from '@/lib/email'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
-import { triggerKonversionTasks, triggerGutachterTerminTask, triggerGutachtenUploadTask, triggerQcTask, triggerLeadTasks, triggerOnboardingTasks, resolveGates, autoCompleteTask } from '@/lib/tasking'
+import { triggerKonversionTasks, triggerGutachterTerminTask, triggerGutachtenUploadTask, triggerQcTask, triggerLeadTasks, triggerOnboardingTasks, resolveGates, autoCompleteTask, triggerKanzleiPaketTask, triggerAsSendedatumTask, triggerArchivierungTask } from '@/lib/tasking'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
+import { transitionFallStatus } from '@/lib/faelle/state-machine'
 
 // ─── Fall Status ────────────────────────────────────────────────────────────
 
@@ -20,8 +21,6 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
   const serviceClient = createServiceClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
-
-  const now = new Date().toISOString()
 
   // KFZ-153: Block status change to regulierung/abgeschlossen without Klassifizierung
   if (newStatus === 'regulierung' || newStatus === 'abgeschlossen') {
@@ -35,29 +34,10 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
     }
   }
 
-  const updateData: Record<string, unknown> = {
-    status: newStatus,
-    updated_at: now,
-    status_changed_at: now,
-  }
-
-  // Set regulierung_am when entering regulierung status
-  if (newStatus === 'regulierung' || newStatus === 'vs-regulierung') {
-    updateData.regulierung_am = now
-    updateData.regulierung_angekuendigt_am = now
-  }
-
-  // Set abgeschlossen_am when case is closed
-  if (newStatus === 'abgeschlossen') {
-    updateData.abgeschlossen_am = now
-  }
-
-  const { error } = await serviceClient
-    .from('faelle')
-    .update(updateData)
-    .eq('id', fallId)
-
-  if (error) throw new Error(error.message)
+  // AAR-88: Zentraler Status-Wechsel via state-machine
+  // (validiert Uebergaenge, setzt Timestamps, schreibt Timeline,
+  // triggert LexDrive-Email + SLA-Hooks)
+  await transitionFallStatus(fallId, newStatus, { user_id: user.id })
 
   // Fire-and-forget email notifications on status change
   triggerStatusEmail(serviceClient, fallId, newStatus).catch(() => {})
@@ -135,7 +115,43 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
     } catch (err) { console.error('[KFZ-151] resolveTasks fall abschluss:', err) }
   }
 
+  // AAR-88: Neue Trigger fuer bisher fehlende Status
+  if (newStatus === 'kanzlei-uebergeben') {
+    const { data: fallInfo } = await serviceClient.from('faelle').select('kundenbetreuer_id, sv_id, fall_nummer').eq('id', fallId).single()
+    triggerKanzleiPaketTask(fallId, fallInfo?.kundenbetreuer_id ?? null).catch(() => {})
+    triggerAsSendedatumTask(fallId, fallInfo?.kundenbetreuer_id ?? null).catch(() => {})
+    sendFallCommunication(fallId, 'kanzlei_uebergabe').catch(() => {})
+    if (fallInfo?.sv_id) {
+      createGutachterMitteilung(fallInfo.sv_id, 'qc_bestanden', fallId, {
+        fall_nummer: fallInfo.fall_nummer ?? undefined,
+      }).catch(() => {})
+    }
+  }
+  if (newStatus === 'anschlussschreiben') {
+    sendFallCommunication(fallId, 'as_gesendet').catch(() => {})
+    autoCompleteTask(fallId, 'as_sendedatum_gesetzt').catch(() => {})
+  }
+  if (newStatus === 'zahlung-eingegangen') {
+    sendFallCommunication(fallId, 'zahlung_eingegangen').catch(() => {})
+    const { data: fallInfo } = await serviceClient.from('faelle').select('kundenbetreuer_id').eq('id', fallId).single()
+    triggerArchivierungTask(fallId, fallInfo?.kundenbetreuer_id ?? null).catch(() => {})
+  }
+  if (newStatus === 'vs-abgelehnt') {
+    sendFallCommunication(fallId, 'chat_fallback_kunde').catch(() => {})
+    const { data: fallInfo } = await serviceClient.from('faelle').select('kundenbetreuer_id, fall_nummer').eq('id', fallId).single()
+    if (fallInfo?.kundenbetreuer_id) {
+      createNotification(
+        fallInfo.kundenbetreuer_id,
+        'vs-abgelehnt',
+        `VS Ablehnung — Fall ${fallInfo.fall_nummer ?? fallId.slice(0, 8)}`,
+        'Versicherung hat abgelehnt. Bitte Eskalations-Schritte einleiten.',
+        `/admin/faelle/${fallId}`,
+      ).catch(() => {})
+    }
+  }
+
   revalidatePath('/admin/dispatch')
+  revalidatePath(`/admin/faelle/${fallId}`)
 }
 
 // ─── Lead Status ────────────────────────────────────────────────────────────
