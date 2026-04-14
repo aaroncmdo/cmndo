@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import Link from 'next/link'
 import NotificationBell from '@/app/admin/_components/NotificationBell'
 import KundeNav from './_components/KundeNav'
@@ -11,11 +12,18 @@ export default async function KundeLayout({ children }: { children: React.ReactN
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('rolle, vorname, nachname')
+    .select('rolle, vorname, nachname, onboarding_completed_at')
     .eq('id', user.id)
     .single()
 
   if (profile?.rolle !== 'kunde') redirect('/login')
+
+  // AAR-100: Onboarding-Redirect wenn noch nicht abgeschlossen
+  const h = await headers()
+  const pathname = h.get('x-pathname') ?? h.get('x-next-url') ?? h.get('x-invoke-path') ?? ''
+  if (!profile?.onboarding_completed_at && !pathname.includes('/onboarding') && !pathname.includes('/passwort-aendern')) {
+    redirect('/kunde/onboarding')
+  }
 
   const displayName = [profile?.vorname, profile?.nachname].filter(Boolean).join(' ') || user.email?.split('@')[0] || 'Kunde'
   const initials = [profile?.vorname?.[0], profile?.nachname?.[0]].filter(Boolean).join('').toUpperCase() || 'K'
