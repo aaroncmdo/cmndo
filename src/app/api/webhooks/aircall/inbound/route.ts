@@ -66,25 +66,18 @@ export async function POST(req: NextRequest) {
   else if (eventType === 'call.ended' && !callData.answered_at) status = 'missed'
   else if (eventType === 'call.voicemail_left') status = 'voicemail'
 
-  // Lead-Match / Auto-Lead bei Inbound
+  // Lead-Match / Auto-Lead bei Inbound (AAR-103: Multi-Fall-aware)
   let leadId: string | null = null
+  let fallId: string | null = null
   let isNewLead = false
 
   if (direction === 'inbound' && fromNumber) {
-    const normalized = fromNumber.replace(/[^0-9]/g, '')
-    const suffix = normalized.slice(-9)
+    const { matchInboundToFall } = await import('@/lib/inbound/match-fall')
+    const match = await matchInboundToFall(admin, fromNumber)
+    leadId = match.leadId
+    fallId = match.fallId
 
-    const { data: existingLead } = await admin
-      .from('leads')
-      .select('id')
-      .ilike('telefon', `%${suffix}%`)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-
-    if (existingLead) {
-      leadId = existingLead.id
-    } else if (eventType === 'call.created') {
+    if (!leadId && !fallId && eventType === 'call.created') {
       // Nur bei call.created neuen Lead anlegen - verhindert Duplikate bei ended/answered
       const { data: newLead } = await admin
         .from('leads')
@@ -135,6 +128,7 @@ export async function POST(req: NextRequest) {
     aircall_user_id: callData.user?.id ? String(callData.user.id) : null,
     aircall_user_email: callData.user?.email ?? null,
     lead_id: leadId,
+    fall_id: fallId,
     recording_url: callData.recording ?? null,
     voicemail_url: callData.voicemail ?? null,
     comments: (callData.comments ?? []).map(c => c.content).join('\n') || null,
@@ -143,5 +137,5 @@ export async function POST(req: NextRequest) {
     updated_at: new Date().toISOString(),
   }, { onConflict: 'aircall_id' })
 
-  return NextResponse.json({ ok: true, lead_id: leadId, is_new_lead: isNewLead })
+  return NextResponse.json({ ok: true, lead_id: leadId, fall_id: fallId, is_new_lead: isNewLead })
 }

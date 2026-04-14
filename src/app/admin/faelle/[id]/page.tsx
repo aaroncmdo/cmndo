@@ -182,7 +182,37 @@ export default async function FallaktePage({
   const { getFallFinanzen } = await import('@/lib/finance/fall-finanzen')
   const fallFinanzen = await getFallFinanzen(id)
 
+  // AAR-103: Andere offene Faelle desselben Kunden fuer Banner
+  let otherKundeFaelle: Array<{ id: string; fall_nummer: string | null; kennzeichen: string | null; status: string | null }> = []
+  if (fall.kunde_id) {
+    const { data: others } = await supabase
+      .from('faelle')
+      .select('id, fall_nummer, kennzeichen, status')
+      .eq('kunde_id', fall.kunde_id)
+      .neq('id', id)
+      .not('status', 'in', '("abgeschlossen","storniert")')
+      .order('created_at', { ascending: false })
+    otherKundeFaelle = others ?? []
+  }
+
   return (
+    <>
+      {otherKundeFaelle.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 mb-4 flex items-center justify-between text-sm flex-wrap gap-2">
+          <span className="text-amber-900">
+            Dieser Kunde hat {otherKundeFaelle.length} weitere{otherKundeFaelle.length > 1 ? '' : 'n'} aktiven Fall:
+          </span>
+          <div className="flex gap-2 flex-wrap">
+            {otherKundeFaelle.map(f => (
+              <a key={f.id} href={`/admin/faelle/${f.id}`}
+                className="text-[#4573A2] hover:underline font-medium text-sm">
+                {f.fall_nummer ?? f.id.slice(0, 8)}
+                {f.kennzeichen && ` (${f.kennzeichen})`}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
     <FallakteClient
       fall={fall}
       lead={leadResult.data}
@@ -206,5 +236,6 @@ export default async function FallaktePage({
       regulierungsKlassifizierung={regulierungsKlassifizierung ?? null}
       kbTermine={kbTermine}
     />
+    </>
   )
 }

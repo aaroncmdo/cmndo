@@ -65,6 +65,23 @@ export async function sendChatMessage(params: {
   return { success: true }
 }
 
+// AAR-103: Nachricht zu einem anderen Fall verschieben (Multi-Fall-Kunde)
+export async function moveNachrichtToFall(nachrichtId: string, newFallId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const { error } = await supabase
+    .from('nachrichten')
+    .update({ fall_id: newFallId })
+    .eq('id', nachrichtId)
+
+  if (error) return { success: false, error: error.message }
+  revalidatePath('/admin/nachrichten')
+  revalidatePath(`/admin/faelle/${newFallId}`)
+  return { success: true }
+}
+
 export async function markMessagesRead(fallId: string, kanal: ChatKanal): Promise<void> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null

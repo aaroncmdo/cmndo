@@ -45,22 +45,12 @@ export async function POST(req: NextRequest) {
     if (url) mediaUrls.push(url)
   }
 
-  // Lead/Fall via Telefon matchen
-  let matchedLeadId: string | null = null
-  let matchedFallId: string | null = null
+  // AAR-103: Multi-Fall-aware Matching via matchInboundToFall
+  const { matchInboundToFall } = await import('@/lib/inbound/match-fall')
+  const match = await matchInboundToFall(db, fromPhone)
+  const matchedLeadId = match.leadId
+  let matchedFallId = match.fallId
   let matchedTerminId: string | null = null
-
-  const { data: leads } = await db
-    .from('leads')
-    .select('id, konvertiert_zu_fall_id')
-    .eq('telefon', fromPhone)
-    .order('created_at', { ascending: false })
-    .limit(1)
-
-  if (leads?.[0]) {
-    matchedLeadId = leads[0].id
-    matchedFallId = leads[0].konvertiert_zu_fall_id ?? null
-  }
 
   if (matchedFallId) {
     const { data: termin } = await db
