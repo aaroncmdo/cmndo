@@ -2,7 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { berechneProgress, SZENARIO_PHASEN } from '@/components/kunde/stepperConfig'
-import LexDriveLink from './_components/LexDriveLink'
 
 export default async function KundeStartseite() {
   const supabase = await createClient()
@@ -174,31 +173,7 @@ export default async function KundeStartseite() {
         </div>
       )}
 
-      {/* AAR-78: LexDrive Videocall fuer juristische Fragen */}
-      {faelle.length > 0 && (
-        <div className="mb-4">
-          <LexDriveLink variant="card" />
-        </div>
-      )}
-
-      {/* KFZ-193: Beratungstermin-Card (wenn mindestens ein Fall mit KB vorhanden) */}
-      {faelle.length > 0 && !!(faelle[0] as Record<string, unknown>).kundenbetreuer_id && (
-        <div className="mb-6">
-          <Link href="/kunde/beratungstermin"
-            className="block bg-[#1E3A5F] rounded-xl border border-[#4573A2]/30 shadow-sm p-4 hover:shadow-md transition-shadow active:scale-[0.99]">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#C9A84C]/20 flex items-center justify-center flex-shrink-0">
-                <span className="text-[#C9A84C] text-lg">📞</span>
-              </div>
-              <div>
-                <p className="text-white font-semibold text-sm">Termin mit Kundenberater</p>
-                <p className="text-[#7BA3CC] text-xs mt-0.5">Persönliche Beratung buchen — Telefon oder Video</p>
-              </div>
-              <span className="ml-auto text-[#7BA3CC] text-sm">→</span>
-            </div>
-          </Link>
-        </div>
-      )}
+      {/* AAR-101: Beratungstermin-Card entfernt (KB bucht Videotermine via Google Calendar) */}
 
       {faelle.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">

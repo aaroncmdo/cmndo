@@ -1,6 +1,6 @@
 'use client'
 
-import { HeadphonesIcon, MessageSquareIcon, CalendarIcon } from 'lucide-react'
+import { HeadphonesIcon, MessageSquareIcon } from 'lucide-react'
 import Link from 'next/link'
 
 type Props = {
@@ -30,13 +30,6 @@ export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon }: Props)
           >
             <MessageSquareIcon className="w-4 h-4" />
             Chat öffnen
-          </Link>
-          <Link
-            href="/kunde/beratungstermin"
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-xs font-medium hover:bg-gray-50 transition-colors"
-          >
-            <CalendarIcon className="w-4 h-4" />
-            Beratungstermin buchen
           </Link>
         </div>
 

@@ -2,13 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { HomeIcon, MessageSquareIcon, UserIcon, CalendarIcon, FolderOpenIcon, SearchIcon, ClockIcon } from 'lucide-react'
+import { HomeIcon, MessageSquareIcon, UserIcon, FolderOpenIcon, SearchIcon, ClockIcon } from 'lucide-react'
 
-// AAR-59: Alle 7 Kunden-Routen verlinken
+// AAR-101: Beratungstermin entfernt (Kunde hat keinen Kalender)
 const NAV_ITEMS = [
   { href: '/kunde', label: 'Meine Fälle', icon: HomeIcon, exact: true },
   { href: '/kunde/faelle', label: 'Alle Fälle', icon: FolderOpenIcon },
-  { href: '/kunde/beratungstermin', label: 'Beratungstermin', icon: CalendarIcon },
   { href: '/kunde/termin', label: 'Termine', icon: ClockIcon },
   { href: '/kunde/nachbesichtigung', label: 'Nachbesichtigung', icon: SearchIcon },
   { href: '/kunde/chat', label: 'Nachrichten', icon: MessageSquareIcon },
@@ -17,11 +16,11 @@ const NAV_ITEMS = [
 
 // Mobile: 5 wichtigste Items
 const MOBILE_ITEMS = [
-  NAV_ITEMS[0], // Meine Fälle
-  NAV_ITEMS[2], // Beratungstermin
-  NAV_ITEMS[5], // Nachrichten
-  NAV_ITEMS[6], // Profil
-  NAV_ITEMS[3], // Termine
+  NAV_ITEMS[0], // Meine Faelle
+  NAV_ITEMS[1], // Alle Faelle
+  NAV_ITEMS[4], // Nachrichten
+  NAV_ITEMS[5], // Profil
+  NAV_ITEMS[2], // Termine
 ]
 
 export default function KundeNav({ mobile }: { mobile?: boolean }) {
