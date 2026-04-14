@@ -250,6 +250,14 @@ export async function arrived(terminId: string): Promise<{ success?: boolean; er
         beschreibung: `SV ${svName} hat den Besichtigungsort erreicht. Vor-Ort-Modus aktiv.`,
       })
     }
+
+    // AAR-89: SV-03 Task triggern (Vor-Ort-Dokumentation)
+    if (svRec?.profile_id) {
+      try {
+        const { triggerSV03 } = await import('@/lib/gutachterTasking')
+        await triggerSV03(termin.fall_id, svRec.profile_id)
+      } catch (err) { console.error('[AAR-89] triggerSV03:', err) }
+    }
   } catch { /* non-critical */ }
 
   return { success: true }

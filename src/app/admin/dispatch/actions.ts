@@ -3,7 +3,7 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { createNotification } from '@/lib/notifications'
-import { triggerSV01 } from '@/lib/gutachterTasking'
+import { triggerSV01, triggerSV04 } from '@/lib/gutachterTasking'
 import {
   emailSvZugewiesen,
   emailGutachtenEingegangen,
@@ -89,6 +89,13 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
     // Auto-Task: Gutachter soll Gutachten hochladen (48h)
     const { data: fallInfo } = await supabase.from('faelle').select('sv_id').eq('id', fallId).single()
     triggerGutachtenUploadTask(fallId, fallInfo?.sv_id ?? null).catch(() => {})
+    // AAR-89: SV-04 Task (mit profile_id)
+    if (fallInfo?.sv_id) {
+      const { data: svData } = await serviceClient.from('sachverstaendige').select('profile_id').eq('id', fallInfo.sv_id).single()
+      if (svData?.profile_id) {
+        triggerSV04(fallId, svData.profile_id).catch(() => {})
+      }
+    }
   }
   if (newStatus === 'gutachten-eingegangen') {
     // Auto-Task: QC-Pruefung durchfuehren (2h)

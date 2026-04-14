@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendCommunication } from '@/lib/communications/send'
+import { triggerSV02 } from '@/lib/gutachterTasking'
 
 async function getOsrmDuration(fromLat: number, fromLng: number, toLat: number, toLng: number): Promise<{ minutes: number; km: number } | null> {
   try {
@@ -106,5 +107,37 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ sent, checked: termine.length })
+  // AAR-89: SV-02 Task triggern fuer Faelle mit Termin <24h und Status sv-termin
+  let sv02Created = 0
+  try {
+    const in24h = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString()
+    const { data: sv02Faelle } = await svc
+      .from('faelle')
+      .select('id, sv_id, sv_termin')
+      .eq('status', 'sv-termin')
+      .not('sv_id', 'is', null)
+      .not('sv_termin', 'is', null)
+      .gte('sv_termin', now.toISOString())
+      .lte('sv_termin', in24h)
+
+    for (const f of sv02Faelle ?? []) {
+      // Schon vorhandenen SV-02 Task? -> skip
+      const { data: existing } = await svc.from('tasks')
+        .select('id')
+        .eq('fall_id', f.id)
+        .eq('task_code', 'SV-02')
+        .limit(1)
+        .maybeSingle()
+      if (existing) continue
+
+      const { data: svRec } = await svc.from('sachverstaendige').select('profile_id').eq('id', f.sv_id).single()
+      if (!svRec?.profile_id) continue
+      try {
+        await triggerSV02(f.id, svRec.profile_id, new Date(f.sv_termin!))
+        sv02Created++
+      } catch (err) { console.error('[AAR-89] triggerSV02:', err) }
+    }
+  } catch (err) { console.error('[AAR-89] SV-02 generation:', err) }
+
+  return NextResponse.json({ sent, checked: termine.length, sv02Created })
 }
