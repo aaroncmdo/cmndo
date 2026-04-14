@@ -71,8 +71,10 @@ export async function updateSvProfile(svId: string, profileId: string, formData:
       if (polygon.length > 0) {
         await supabase.from('sachverstaendige').update({ isochrone_polygon: polygon }).eq('id', svId)
       }
-    } catch {
-      // Isochrone-Berechnung nicht kritisch
+    } catch (err) {
+      // AAR-132: Isochrone-Berechnung nicht kritisch — SV-Update greift trotzdem.
+      // findBestSV fällt ohne Polygon auf den Radius-Check zurück.
+      console.error('[AAR-132] Isochrone-Berechnung nach SV-Profil-Update fehlgeschlagen:', err)
     }
   }
 
