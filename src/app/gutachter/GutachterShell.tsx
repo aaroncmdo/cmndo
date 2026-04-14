@@ -22,6 +22,7 @@ import {
   FileTextIcon,
   RouteIcon,
   EuroIcon,
+  AlertCircleIcon,
 } from 'lucide-react'
 import NotificationBell from '@/app/admin/_components/NotificationBell'
 import OutboxBadge from '@/components/offline/OutboxBadge'
@@ -40,6 +41,7 @@ const NAV_ITEMS_BASE = [
   { href: '/gutachter/gebiet', label: 'Mein Gebiet', icon: MapIcon },
   { href: '/gutachter/leadpreise', label: 'Lead-Preise', icon: EuroIcon },
   { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
+  { href: '/gutachter/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
   { href: '/gutachter/statistiken', label: 'Statistiken', icon: BarChart3Icon },
 ]
 
