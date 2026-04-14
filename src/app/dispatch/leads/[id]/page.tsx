@@ -5,6 +5,7 @@ import { ArrowLeftIcon, PhoneIcon, MailIcon, CarIcon, ShieldIcon } from 'lucide-
 import LeadDetailActions from './LeadDetailActions'
 import Schritt0HardGate from './Schritt0HardGate'
 import SchadentypPicker from './SchadentypPicker'
+import CardentityButton from './CardentityButton'
 import { computeHardGateStatus } from './hard-gate-utils'
 import { computeFlowLinkStufe, FLOWLINK_STUFE_LABEL } from '@/lib/dispatch/fahrzeug-marken'
 
@@ -137,6 +138,14 @@ export default async function DispatchLeadDetail({
               <div><p className="text-[10px] text-gray-400 uppercase">Schadenfall</p><p className="font-medium">{lead.schadenfall_typ || '—'}</p></div>
               <div><p className="text-[10px] text-gray-400 uppercase">Schadensursache</p><p className="font-medium">{lead.schadensursache || '—'}</p></div>
               <div><p className="text-[10px] text-gray-400 uppercase">Service-Typ</p><p className="font-medium">{lead.service_typ === 'nur_gutachter' ? 'Nur Gutachter' : 'Komplett'}</p></div>
+            </div>
+            {/* AAR-84: Cardentity-Anreicherung */}
+            <div className="pt-3 border-t border-gray-100">
+              <CardentityButton
+                leadId={lead.id}
+                hasFin={!!lead.fin}
+                alreadyEnriched={!!lead.cardentity_enriched_at}
+              />
             </div>
           </div>
 

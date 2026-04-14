@@ -124,6 +124,19 @@ export async function saveSchadentyp(
   return { success: true, disqualifiziert }
 }
 
+// AAR-84: Cardentity-Anreicherung
+export async function enrichLeadCardentity(leadId: string): Promise<{ success: boolean; updatedFields?: string[]; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const { enrichLeadByFin } = await import('@/lib/cardentity/enrich-fahrzeug')
+  const result = await enrichLeadByFin(leadId)
+  if (!result.success) return { success: false, error: result.error }
+  revalidatePath(`/dispatch/leads/${leadId}`)
+  return { success: true, updatedFields: result.updatedFields }
+}
+
 // AAR-80: Schritt 0 Hard Gate — Q1/Q2/Q3
 export type HardGateData = {
   unfallhergang?: string
