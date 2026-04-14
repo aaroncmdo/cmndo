@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import crypto from 'node:crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
@@ -40,18 +41,35 @@ const EVENT_STATUS_MAP: Partial<Record<EventType, string>> = {
 }
 
 export async function POST(req: NextRequest) {
-  // Auth: Shared-Secret
+  // Auth: Shared-Secret ODER HMAC-Signature (AAR-76 fuegt HMAC-Variante hinzu)
   const secret = process.env.LEXDRIVE_WEBHOOK_SECRET
   if (!secret) return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 })
 
-  const authHeader = req.headers.get('x-webhook-secret') ?? req.headers.get('authorization')?.replace('Bearer ', '')
-  if (authHeader !== secret) {
+  const rawBody = await req.text()
+
+  // Variante 1: HMAC-Signature (X-LexDrive-Signature: sha256=<hex>)
+  const sig = req.headers.get('x-lexdrive-signature')
+  let authOk = false
+  if (sig) {
+    const expected = crypto.createHmac('sha256', secret).update(rawBody).digest('hex')
+    const provided = sig.startsWith('sha256=') ? sig.slice(7) : sig
+    try {
+      authOk = expected.length === provided.length &&
+        crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(provided))
+    } catch { authOk = false }
+  } else {
+    // Variante 2: Bearer/Shared-Secret (Bestandsverhalten)
+    const authHeader = req.headers.get('x-webhook-secret') ?? req.headers.get('authorization')?.replace('Bearer ', '')
+    authOk = authHeader === secret
+  }
+
+  if (!authOk) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   let body: Record<string, unknown>
   try {
-    body = await req.json()
+    body = JSON.parse(rawBody) as Record<string, unknown>
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
