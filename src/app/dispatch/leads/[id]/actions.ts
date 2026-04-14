@@ -87,6 +87,30 @@ export async function setServiceTyp(leadId: string, serviceTyp: 'komplett' | 'nu
   revalidatePath(`/dispatch/leads/${leadId}`)
 }
 
+// AAR-81: Schadentyp speichern
+export async function saveSchadentyp(
+  leadId: string,
+  schadentyp: 'spurwechsel' | 'auffahrunfall' | 'vorfahrtsverletzung' | 'parkplatz' | 'sonstiges',
+  freitext?: string | null,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const { error } = await supabase
+    .from('leads')
+    .update({
+      schadentyp,
+      schadentyp_freitext: schadentyp === 'sonstiges' ? freitext ?? null : null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', leadId)
+
+  if (error) return { success: false, error: error.message }
+  revalidatePath(`/dispatch/leads/${leadId}`)
+  return { success: true }
+}
+
 // AAR-80: Schritt 0 Hard Gate — Q1/Q2/Q3
 export type HardGateData = {
   unfallhergang?: string

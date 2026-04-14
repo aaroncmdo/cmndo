@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowLeftIcon, PhoneIcon, MailIcon, CarIcon, ShieldIcon } from 'lucide-react'
 import LeadDetailActions from './LeadDetailActions'
 import Schritt0HardGate from './Schritt0HardGate'
+import SchadentypPicker from './SchadentypPicker'
 import { computeHardGateStatus } from './hard-gate-utils'
 import { computeFlowLinkStufe, FLOWLINK_STUFE_LABEL } from '@/lib/dispatch/fahrzeug-marken'
 
@@ -95,6 +96,13 @@ export default async function DispatchLeadDetail({
         <div className="lg:col-span-2 space-y-4">
           {/* AAR-80: Schritt 0 Hard Gate */}
           <Schritt0HardGate lead={lead as Parameters<typeof Schritt0HardGate>[0]['lead']} />
+
+          {/* AAR-81: Schadentyp Picker */}
+          <SchadentypPicker
+            leadId={lead.id}
+            initialTyp={lead.schadentyp as Parameters<typeof SchadentypPicker>[0]['initialTyp']}
+            initialFreitext={lead.schadentyp_freitext}
+          />
 
           {/* Kontaktdaten */}
           <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
