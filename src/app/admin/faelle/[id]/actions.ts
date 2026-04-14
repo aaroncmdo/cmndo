@@ -913,12 +913,58 @@ export async function createTermin(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
-  // Get the fall to find kunde_id
-  const { data: fall } = await supabase.from('faelle').select('kunde_id').eq('id', fallId).single()
+  // AAR-95: Fall + Kunde-Email + KB-Email laden
+  const { data: fall } = await supabase
+    .from('faelle')
+    .select('kunde_id, fall_nummer, lead_id, kundenbetreuer_id')
+    .eq('id', fallId)
+    .single()
+  if (!fall) throw new Error('Fall nicht gefunden')
 
-  const meetLink = data.typ === 'video-call'
-    ? `https://meet.google.com/new` // placeholder — real integration needs Google Calendar API
-    : null
+  const kbUserId = fall.kundenbetreuer_id ?? user.id
+
+  let meetLink: string | null = null
+  let googleEventId: string | null = null
+  let googleCalendarId: string | null = null
+
+  // AAR-95: Bei video-call → Google Calendar Event erstellen
+  if (data.typ === 'video-call') {
+    // KB Email
+    const { data: kbProfile } = await supabase
+      .from('profiles')
+      .select('email, google_refresh_token')
+      .eq('id', kbUserId)
+      .single()
+    if (!kbProfile?.email) throw new Error('KB-Email fehlt')
+    if (!kbProfile.google_refresh_token) {
+      throw new Error('Du musst zuerst dein Google Konto unter /admin/einstellungen/google verbinden, um Videotermine zu buchen.')
+    }
+
+    // Kunde-Email aus Lead
+    let kundeEmail: string | null = null
+    let kundeName = 'Kunde'
+    if (fall.lead_id) {
+      const { data: lead } = await supabase.from('leads').select('vorname, nachname, email').eq('id', fall.lead_id).single()
+      kundeEmail = lead?.email ?? null
+      kundeName = [lead?.vorname, lead?.nachname].filter(Boolean).join(' ') || 'Kunde'
+    }
+    if (!kundeEmail) throw new Error('Kunde-Email fehlt — Termin kann nicht erstellt werden')
+
+    const { createVideoEvent } = await import('@/lib/google-calendar/events')
+    const eventResult = await createVideoEvent({
+      kbUserId,
+      kbEmail: kbProfile.email,
+      kundeEmail,
+      kundeName,
+      fallNummer: fall.fall_nummer ?? fallId.slice(0, 8),
+      startISO: data.datum,
+      dauerMinuten: data.dauer_minuten,
+      beschreibung: data.notiz,
+    })
+    meetLink = eventResult.meetLink
+    googleEventId = eventResult.eventId
+    googleCalendarId = eventResult.calendarId
+  }
 
   const { error } = await supabase.from('termine').insert({
     fall_id: fallId,
@@ -930,6 +976,10 @@ export async function createTermin(
     betreff: data.betreff,
     notiz: data.notiz || null,
     meet_link: meetLink,
+    google_event_id: googleEventId,
+    google_calendar_id: googleCalendarId,
+    event_synced_at: googleEventId ? new Date().toISOString() : null,
+    event_sync_status: googleEventId ? 'synced' : 'not_synced',
     status: 'geplant',
   })
 
@@ -940,7 +990,7 @@ export async function createTermin(
     fall_id: fallId,
     typ: 'system',
     titel: `Termin vereinbart: ${data.betreff}`,
-    beschreibung: `${data.typ === 'video-call' ? 'Video-Call' : 'Telefonat'} am ${new Date(data.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} (${data.dauer_minuten} Min)`,
+    beschreibung: `${data.typ === 'video-call' ? 'Video-Call' : 'Telefonat'} am ${new Date(data.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} (${data.dauer_minuten} Min)${meetLink ? ` · ${meetLink}` : ''}`,
     erstellt_von: user.id,
   })
 
@@ -976,10 +1026,22 @@ export async function updateTerminStatus(
     .from('termine')
     .update(updateData)
     .eq('id', terminId)
-    .select('fall_id, betreff, typ')
+    .select('fall_id, betreff, typ, google_event_id, google_calendar_id, betreuer_user_id')
     .single()
 
   if (error) throw new Error(error.message)
+
+  // AAR-95: Bei Absage Google-Event loeschen
+  if (status === 'abgesagt' && termin?.google_event_id && termin?.betreuer_user_id) {
+    try {
+      const { cancelVideoEvent } = await import('@/lib/google-calendar/events')
+      await cancelVideoEvent(
+        termin.betreuer_user_id as string,
+        termin.google_event_id as string,
+        (termin.google_calendar_id as string | null) ?? 'primary',
+      )
+    } catch (err) { console.error('[AAR-95] cancelVideoEvent:', err) }
+  }
 
   if (termin?.fall_id) {
     const label = status === 'durchgefuehrt' ? 'Termin durchgefuehrt' :
