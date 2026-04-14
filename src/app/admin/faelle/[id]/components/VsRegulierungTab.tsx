@@ -354,8 +354,20 @@ export default function VsRegulierungTab({ fall }: { fall: VsFall }) {
               <h3 className="font-semibold text-red-700">Fall stornieren</h3>
               <p className="text-xs text-gray-500">Diese Aktion kann nicht rückgängig gemacht werden.</p>
               <label className="block text-xs text-gray-500">Grund</label>
-              <input type="text" value={stornoGrund} onChange={e => setStornoGrund(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm" placeholder="Storno-Grund" autoFocus />
-              <ModalActions disabled={pending || !stornoGrund} onCancel={() => setModal(null)} onConfirm={() => handle(() => fallStornieren(fall.id, stornoGrund))} label="Endgültig stornieren" cls="bg-red-600 hover:bg-red-700" />
+              {/* AAR-91: Standard-Gruende */}
+              <select value={stornoGrund} onChange={e => setStornoGrund(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm" autoFocus>
+                <option value="">Bitte wählen</option>
+                <option value="Kunde wollte nicht">Kunde wollte nicht</option>
+                <option value="Doppel-Lead">Doppel-Lead</option>
+                <option value="Falsche Daten">Falsche Daten</option>
+                <option value="Fahrer war schuld">Fahrer war schuld</option>
+                <option value="Schaden zu klein">Schaden zu klein</option>
+                <option value="__freitext__">Anderer Grund …</option>
+              </select>
+              {stornoGrund === '__freitext__' && (
+                <input type="text" autoFocus onChange={e => setStornoGrund(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm mt-2" placeholder="Bitte Grund angeben" />
+              )}
+              <ModalActions disabled={pending || !stornoGrund || stornoGrund === '__freitext__'} onCancel={() => setModal(null)} onConfirm={() => handle(() => fallStornieren(fall.id, stornoGrund))} label="Endgültig stornieren" cls="bg-red-600 hover:bg-red-700" />
             </>)}
 
           </div>

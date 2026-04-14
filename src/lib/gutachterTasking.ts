@@ -141,3 +141,50 @@ export async function deductLeadpreis(svId: string, fallId: string, schadenhoehe
     })
   } catch { /* Table might not exist yet */ }
 }
+
+/**
+ * AAR-91: Refund Leadpreis bei Fall-Storno (gegenbuchung)
+ */
+export async function refundLeadpreis(svId: string, fallId: string, fallNummer: string): Promise<void> {
+  const db = createAdminClient()
+
+  // Letzten leadpreis-Eintrag dieses Falls finden
+  const { data: deduction } = await db
+    .from('gutachter_abrechnungen')
+    .select('betrag')
+    .eq('sv_id', svId)
+    .eq('fall_id', fallId)
+    .eq('typ', 'leadpreis')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (!deduction?.betrag) return
+  const refundAmount = Math.abs(Number(deduction.betrag))
+
+  // Idempotenz: schon refunded?
+  const { data: existingRefund } = await db
+    .from('gutachter_abrechnungen')
+    .select('id')
+    .eq('sv_id', svId)
+    .eq('fall_id', fallId)
+    .eq('typ', 'leadpreis_refund')
+    .maybeSingle()
+  if (existingRefund) return
+
+  await db.from('gutachter_abrechnungen').insert({
+    sv_id: svId,
+    fall_id: fallId,
+    typ: 'leadpreis_refund',
+    betrag: +refundAmount,
+    beschreibung: `Refund Leadpreis Fall ${fallNummer} (Storniert)`,
+  })
+
+  try {
+    await db.rpc('decrement_guthaben', { sv_id_param: svId, amount: -refundAmount })
+  } catch {
+    const { data: sv } = await db.from('sachverstaendige').select('werbebudget_guthaben_netto').eq('id', svId).single()
+    const current = Number(sv?.werbebudget_guthaben_netto ?? 0)
+    await db.from('sachverstaendige').update({ werbebudget_guthaben_netto: current + refundAmount }).eq('id', svId)
+  }
+}

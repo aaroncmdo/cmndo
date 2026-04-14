@@ -105,6 +105,52 @@ export async function emailFilmcheckBestanden(kanzleiEmail: string, fallNummer: 
   })
 }
 
+// AAR-91: Email an SV bei Auftrags-Storno
+export async function emailSvAuftragStorniert(
+  svEmail: string,
+  fallNummer: string,
+  grund: string,
+): Promise<void> {
+  try {
+    await sendEmail({
+      to: svEmail,
+      subject: `Auftrag zurueckgezogen — Fall ${fallNummer}`,
+      heading: 'Auftrag zurueckgezogen',
+      lines: [
+        `Der Auftrag fuer Fall <strong style="color:#fff">${fallNummer}</strong> wurde storniert.`,
+        grund ? `Grund: <em style="color:#fbbf24">${grund}</em>` : 'Kein Grund angegeben.',
+        'Falls bereits Lead-Preis abgezogen wurde, wird dieser automatisch zurueckerstattet.',
+      ],
+    })
+  } catch (err) {
+    console.error('[AAR-91] emailSvAuftragStorniert:', err)
+  }
+}
+
+// AAR-91: Email an Kanzlei bei Auftrags-Storno (nur wenn schon uebergeben)
+export async function emailKanzleiAuftragStorniert(
+  kanzleiEmail: string,
+  fallNummer: string,
+  grund: string,
+  status: string,
+): Promise<void> {
+  try {
+    await sendEmail({
+      to: kanzleiEmail,
+      subject: `Mandat zurueckgezogen — Fall ${fallNummer}`,
+      heading: 'Mandat zurueckgezogen',
+      lines: [
+        `Der Fall <strong style="color:#fff">${fallNummer}</strong> wurde storniert.`,
+        `Letzter bekannter Status: <strong style="color:#fbbf24">${status}</strong>.`,
+        grund ? `Grund: <em>${grund}</em>` : 'Kein Grund angegeben.',
+        'Bitte ggf. laufende Massnahmen einstellen.',
+      ],
+    })
+  } catch (err) {
+    console.error('[AAR-91] emailKanzleiAuftragStorniert:', err)
+  }
+}
+
 // AAR-86: Email an SV bei QC-Ablehnung mit KB-Kommentaren
 export async function emailFilmcheckNichtBestanden(
   svEmail: string,

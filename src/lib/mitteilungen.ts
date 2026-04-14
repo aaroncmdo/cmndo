@@ -17,6 +17,7 @@ type MitteilungTyp =
   | 'kanzlei_zahlung'
   | 'paket_fast_voll'
   | 'guthaben_niedrig'
+  | 'auftrag_storniert'  // AAR-91
 
 interface MitteilungExtras {
   kunde_name?: string
@@ -33,6 +34,7 @@ interface MitteilungExtras {
   faelle_gesamt?: number
   guthaben?: number
   fall_nummer?: string | number
+  grund?: string  // AAR-91
 }
 
 const DRINGEND_TYPEN: MitteilungTyp[] = [

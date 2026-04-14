@@ -143,6 +143,58 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
     const { data: fallInfo } = await serviceClient.from('faelle').select('kundenbetreuer_id').eq('id', fallId).single()
     triggerArchivierungTask(fallId, fallInfo?.kundenbetreuer_id ?? null).catch(() => {})
   }
+  // AAR-91: Storno-Workflow (Cleanup + Mitteilungen + Refund)
+  if (newStatus === 'storniert') {
+    const { data: fallInfo } = await serviceClient.from('faelle')
+      .select('id, fall_nummer, sv_id, kundenbetreuer_id, status, storno_grund')
+      .eq('id', fallId).single()
+
+    // Phase 1: Tasks aufloesen
+    try {
+      const { resolveTasksForEntity } = await import('@/lib/tasks/resolve-tasks')
+      await resolveTasksForEntity('fall', fallId, 'Fall storniert')
+      await resolveTasksForEntity('case', fallId, 'Fall storniert')
+    } catch (err) { console.error('[AAR-91] resolveTasks storniert:', err) }
+
+    // Phase 2a: WhatsApp an Kunde
+    sendFallCommunication(fallId, 'termin_storniert').catch(() => {})
+
+    // Phase 2b/3: SV-Mitteilung + Email + Refund
+    if (fallInfo?.sv_id) {
+      createGutachterMitteilung(fallInfo.sv_id, 'auftrag_storniert', fallId, {
+        fall_nummer: fallInfo.fall_nummer ?? undefined,
+        grund: fallInfo.storno_grund ?? undefined,
+      }).catch(() => {})
+
+      const { data: svData } = await serviceClient.from('sachverstaendige').select('profile_id').eq('id', fallInfo.sv_id).single()
+      if (svData?.profile_id) {
+        const { data: svProfile } = await serviceClient.from('profiles').select('email').eq('id', svData.profile_id).single()
+        if (svProfile?.email) {
+          const { emailSvAuftragStorniert } = await import('@/lib/email')
+          emailSvAuftragStorniert(svProfile.email, fallInfo.fall_nummer ?? '', fallInfo.storno_grund ?? '').catch(() => {})
+        }
+      }
+
+      // Refund
+      try {
+        const { refundLeadpreis } = await import('@/lib/gutachterTasking')
+        refundLeadpreis(fallInfo.sv_id, fallId, fallInfo.fall_nummer ?? fallId.slice(0, 8)).catch(() => {})
+      } catch { /* */ }
+    }
+
+    // Phase 2c: Kanzlei-Email wenn schon uebergeben
+    const KANZLEI_RELEVANT = ['kanzlei-uebergeben', 'anschlussschreiben', 'regulierung', 'regulierung-laeuft', 'nachbesichtigung-laeuft']
+    if (fallInfo?.status && KANZLEI_RELEVANT.includes(fallInfo.status)) {
+      const { data: kanzleiUsers } = await serviceClient.from('profiles').select('email').eq('rolle', 'kanzlei')
+      for (const k of kanzleiUsers ?? []) {
+        if (k.email) {
+          const { emailKanzleiAuftragStorniert } = await import('@/lib/email')
+          emailKanzleiAuftragStorniert(k.email, fallInfo.fall_nummer ?? '', fallInfo.storno_grund ?? '', fallInfo.status).catch(() => {})
+        }
+      }
+    }
+  }
+
   if (newStatus === 'vs-abgelehnt') {
     sendFallCommunication(fallId, 'chat_fallback_kunde').catch(() => {})
     const { data: fallInfo } = await serviceClient.from('faelle').select('kundenbetreuer_id, fall_nummer').eq('id', fallId).single()
