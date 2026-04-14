@@ -4,13 +4,18 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboardIcon, UsersIcon, PhoneIcon, LogOutIcon,
+  MapIcon, CarFrontIcon, TargetIcon,
 } from 'lucide-react'
 
 // AAR-63: /dispatch/einstellungen Link entfernt (Route existiert nicht → 404)
+// AAR-112: Karte + Sachverständige + Isochrone ergänzt
 const NAV_ITEMS = [
   { href: '/dispatch/dashboard', label: 'Dashboard', icon: LayoutDashboardIcon },
   { href: '/dispatch/leads', label: 'Leads', icon: UsersIcon },
   { href: '/dispatch/rueckrufe', label: 'Rückrufe', icon: PhoneIcon },
+  { href: '/dispatch/karte', label: 'Karte', icon: MapIcon },
+  { href: '/dispatch/sachverstaendige', label: 'Sachverständige', icon: CarFrontIcon },
+  { href: '/dispatch/isochrone', label: 'Isochrone', icon: TargetIcon },
 ]
 
 export default function DispatchNav({ email, initials }: { email: string; initials: string }) {

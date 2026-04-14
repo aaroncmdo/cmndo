@@ -43,7 +43,14 @@ const PAKET_BADGE: Record<string, string> = {
   'premium-50': 'Premium', premium: 'Premium',
 }
 
-export default function SachverstaendigeListClient({ sachverstaendige }: { sachverstaendige: SV[] }) {
+// AAR-112: basePath erlaubt Wiederverwendung unter /dispatch/sachverstaendige
+export default function SachverstaendigeListClient({
+  sachverstaendige,
+  basePath = '/admin',
+}: {
+  sachverstaendige: SV[]
+  basePath?: string
+}) {
   const [svFilter, setSvFilter] = useState<'aktive' | 'deaktivierte' | 'gesperrt' | 'alle'>('aktive')
   const [search, setSearch] = useState('')
 
@@ -92,7 +99,7 @@ export default function SachverstaendigeListClient({ sachverstaendige }: { sachv
               className="pl-7 pr-2 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg w-48 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
             />
           </div>
-          <Link href="/admin/karte" className="text-xs text-[#4573A2] hover:underline">Karte öffnen →</Link>
+          <Link href={`${basePath}/karte`} className="text-xs text-[#4573A2] hover:underline">Karte öffnen →</Link>
         </div>
       </div>
 
@@ -170,7 +177,7 @@ export default function SachverstaendigeListClient({ sachverstaendige }: { sachv
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${status.bg} ${status.text}`}>{status.label}</span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link href={`/admin/sachverstaendige/${sv.id}`} className="text-[#4573A2] hover:underline text-xs">→</Link>
+                    <Link href={`${basePath}/sachverstaendige/${sv.id}`} className="text-[#4573A2] hover:underline text-xs">→</Link>
                   </td>
                 </tr>
               )
