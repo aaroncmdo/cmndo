@@ -5,6 +5,7 @@ import { ArrowLeftIcon, PhoneIcon, MailIcon, CarIcon, ShieldIcon } from 'lucide-
 import LeadDetailActions from './LeadDetailActions'
 import Schritt0HardGate from './Schritt0HardGate'
 import { computeHardGateStatus } from './hard-gate-utils'
+import { computeFlowLinkStufe, FLOWLINK_STUFE_LABEL } from '@/lib/dispatch/fahrzeug-marken'
 
 export default async function DispatchLeadDetail({
   params,
@@ -52,17 +53,19 @@ export default async function DispatchLeadDetail({
     'disqualifiziert': 'bg-red-100 text-red-700', 'kalt': 'bg-gray-200 text-gray-500',
   }
 
+  // AAR-82 B-09: 6-stufige FlowLink-Status-Anzeige
   const latestFlow = flowLinks?.[0]
+  const flowStufe = computeFlowLinkStufe(lead, latestFlow)
+  const flowStufeBadge = FLOWLINK_STUFE_LABEL[flowStufe]
+  // Legacy mapping fuer LeadDetailActions
   let flowStatus: 'none' | 'offen' | 'abgeschlossen' | 'abgelaufen' = 'none'
-  if (latestFlow) {
-    if (lead.flow_link_abgeschlossen) flowStatus = 'abgeschlossen'
-    else if (latestFlow.expires_at && new Date(latestFlow.expires_at) < new Date()) flowStatus = 'abgelaufen'
-    else flowStatus = 'offen'
-  }
+  if (flowStufe === 'abgeschlossen') flowStatus = 'abgeschlossen'
+  else if (flowStufe === 'abgelaufen') flowStatus = 'abgelaufen'
+  else if (flowStufe !== 'nicht_gesendet') flowStatus = 'offen'
 
   const flowBadge = {
     none: { label: 'Kein FlowLink', cls: 'bg-gray-100 text-gray-500' },
-    offen: { label: 'FlowLink offen', cls: 'bg-amber-100 text-amber-700' },
+    offen: { label: flowStufeBadge.label, cls: flowStufeBadge.cls },
     abgeschlossen: { label: 'FlowLink abgeschlossen', cls: 'bg-green-100 text-green-700' },
     abgelaufen: { label: 'FlowLink abgelaufen', cls: 'bg-red-100 text-red-700' },
   }[flowStatus]
