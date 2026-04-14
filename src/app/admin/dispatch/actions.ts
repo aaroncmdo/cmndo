@@ -314,10 +314,37 @@ export async function sendFlowLink(leadId: string) {
 
   if (leadErr) throw new Error(`Lead-Update fehlgeschlagen: ${leadErr.message}`)
 
+  // AAR-52: FlowLink per WhatsApp an Kunden senden
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
+  const flowUrl = `${baseUrl}/flow/${flowLink.token}`
+
+  if (lead.telefon) {
+    try {
+      const { sendCommunication } = await import('@/lib/communications/send')
+      await sendCommunication('flowlink_versand', {
+        telefon: lead.telefon,
+        vorname: lead.vorname ?? '',
+        '1': lead.vorname ?? '',
+        '2': flowUrl,
+      })
+      // Timeline-Eintrag: FlowLink versendet
+      await supabase.from('timeline').insert({
+        fall_id: null,
+        typ: 'system',
+        titel: 'FlowLink versendet',
+        beschreibung: `Per WhatsApp an ${lead.telefon}`,
+        erstellt_von: user.id,
+      }).then(() => {}, () => {})
+    } catch (err) {
+      console.error('[sendFlowLink] WA-Send fehlgeschlagen:', err)
+      // Token bleibt gueltig — Fehler wird nur geloggt
+    }
+  }
+
   revalidatePath('/admin/dispatch')
   revalidatePath(`/admin/dispatch/lead/${leadId}`)
 
-  return { token: flowLink.token }
+  return { token: flowLink.token, url: flowUrl }
 }
 
 // ─── Lead → Kundenakte Konversion ───────────────────────────────────────────
