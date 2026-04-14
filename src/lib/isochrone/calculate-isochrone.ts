@@ -1,98 +1,93 @@
-// BUG-90: Zentrale Isochronen-Berechnung — extrahiert aus
-// admin/sachverstaendige/[id]/actions.ts damit auch anlegeSv() und der
-// Profil-Tab des Gutachters die gleiche Logik verwenden koennen.
+// AAR-132: HERE API Isoline statt OSRM + seeded-random Fallback.
 //
-// Strategie:
-// 1) OSRM (project-osrm.org) gibt echte Fahr-Distanzen zurueck. Wir
-//    bauen einen 60-Punkt-Stern um den Standort und skalieren jeden
-//    Strahl so, dass die FAHR-Distanz dem gewuenschten Radius entspricht.
-// 2) Wenn OSRM nicht antwortet (Timeout / Fehler), faellt die Funktion
-//    auf einen seeded-pseudo-random Polygon zurueck (variabler Radius
-//    ±15-30%, deterministisch pro Standort).
-//
-// Returns IMMER ein Polygon (Array von >=3 Punkten). Caller koennen
-// also unbedingt schreiben — kein null-handling noetig.
+// Ruft HERE's Isoline-Endpoint auf und gibt das echte Fahr-Isochronen-Polygon
+// zurück. Kein manuelles Ray-Skalieren mehr, kein seeded-random Fallback.
+// Bei API-Problemen wirft die Funktion IsochroneError — der Caller entscheidet
+// was damit passiert (typischerweise: loggen + Polygon-Speicherung überspringen,
+// findBestSV fällt auf Radius-Check zurück).
 
-const NUM_POINTS = 60
-const OSRM_TIMEOUT_MS = 5000
+import { decode } from '@here/flexpolyline'
+
+const HERE_API_URL = 'https://isoline.router.hereapi.com/v8/isolines'
+const REQUEST_TIMEOUT_MS = 8000
 
 export type IsoPoint = { lat: number; lng: number }
 
+export class IsochroneError extends Error {
+  cause?: unknown
+  constructor(message: string, cause?: unknown) {
+    super(message)
+    this.name = 'IsochroneError'
+    this.cause = cause
+  }
+}
+
+/**
+ * Berechnet ein Fahr-Isochronen-Polygon via HERE API.
+ *
+ * @param lat       Start-Breitengrad
+ * @param lng       Start-Längengrad
+ * @param radiusKm  Einsatzradius in Kilometern (wird zu Metern konvertiert)
+ * @returns Polygon als Array von IsoPoints (>=3 Punkte)
+ * @throws IsochroneError wenn HERE_API_KEY fehlt, die API nicht antwortet oder
+ *   kein gültiges Polygon liefert. NIE als NEXT_PUBLIC_* setzen — Server-only.
+ */
 export async function calculateIsochrone(
   lat: number,
   lng: number,
   radiusKm: number,
 ): Promise<IsoPoint[]> {
-  const rayPoints = buildRayPoints(lat, lng, radiusKm)
-
-  // 1) OSRM-Distanzen versuchen
-  try {
-    const coords = [[lng, lat], ...rayPoints.map(p => [p.lng, p.lat])]
-      .map(c => `${c[0].toFixed(5)},${c[1].toFixed(5)}`)
-      .join(';')
-    const res = await fetch(
-      `https://router.project-osrm.org/table/v1/driving/${coords}?sources=0&annotations=distance`,
-      { signal: AbortSignal.timeout(OSRM_TIMEOUT_MS) },
+  const apiKey = process.env.HERE_API_KEY
+  if (!apiKey) {
+    throw new IsochroneError(
+      'HERE_API_KEY environment variable nicht gesetzt. Siehe AAR-132.',
     )
-    if (res.ok) {
-      const data = await res.json()
-      if (data.code === 'Ok' && data.distances?.[0]) {
-        const driveDistances: number[] = data.distances[0]
-          .slice(1)
-          .map((d: number) => d / 1000)
-        return rayPoints.map((p, i) => {
-          const driveDist = driveDistances[i]
-          if (!driveDist || driveDist <= 0) return { lat: p.lat, lng: p.lng }
-          const dLat = p.lat - lat
-          const dLng = p.lng - lng
-          const airDist = Math.sqrt(
-            (dLat * 111.32) ** 2 +
-              (dLng * 111.32 * Math.cos((lat * Math.PI) / 180)) ** 2,
-          )
-          const scale = Math.max(
-            0.4,
-            Math.min(1.3, airDist > 0 ? radiusKm / driveDist : 1),
-          )
-          return { lat: lat + dLat * scale, lng: lng + dLng * scale }
-        })
-      }
-    }
-  } catch {
-    // OSRM nicht erreichbar - silent fallback.
   }
 
-  // 2) Fallback: seeded variabler Radius
-  return fallbackPolygon(lat, lng, radiusKm)
-}
+  const rangeMeters = Math.round(radiusKm * 1000)
 
-function buildRayPoints(lat: number, lng: number, radiusKm: number) {
-  const rayPoints: { lat: number; lng: number; angle: number }[] = []
-  for (let i = 0; i < NUM_POINTS; i++) {
-    const angle = (2 * Math.PI * i) / NUM_POINTS
-    const dLat = (radiusKm / 111.32) * Math.cos(angle)
-    const dLng =
-      (radiusKm / (111.32 * Math.cos((lat * Math.PI) / 180))) * Math.sin(angle)
-    rayPoints.push({ lat: lat + dLat, lng: lng + dLng, angle })
-  }
-  return rayPoints
-}
+  const url = new URL(HERE_API_URL)
+  url.searchParams.set('apiKey', apiKey)
+  url.searchParams.set('transportMode', 'car')
+  url.searchParams.set('origin', `${lat},${lng}`)
+  url.searchParams.set('range[type]', 'distance')
+  url.searchParams.set('range[values]', String(rangeMeters))
+  url.searchParams.set('routingMode', 'fast')
+  url.searchParams.set('shape', 'simple')
 
-function fallbackPolygon(lat: number, lng: number, radiusKm: number): IsoPoint[] {
-  function seededRandom(seed: number) {
-    const x = Math.sin(seed * 9301 + 49297) * 49297
-    return x - Math.floor(x)
+  let response: Response
+  try {
+    response = await fetch(url.toString(), {
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    })
+  } catch (err) {
+    throw new IsochroneError('HERE API nicht erreichbar (Netzwerk/Timeout)', err)
   }
-  const baseSeed =
-    Math.round(lat * 1000) * 100000 + Math.round(lng * 1000) * 100 + radiusKm
-  return Array.from({ length: NUM_POINTS }, (_, i) => {
-    const angle = (2 * Math.PI * i) / NUM_POINTS
-    const variation = 0.15 + seededRandom(baseSeed + i * 7) * 0.2
-    const factor =
-      1 - variation + seededRandom(baseSeed + i * 13) * variation * 2
-    const dLat = ((radiusKm * factor) / 111.32) * Math.cos(angle)
-    const dLng =
-      ((radiusKm * factor) / (111.32 * Math.cos((lat * Math.PI) / 180))) *
-      Math.sin(angle)
-    return { lat: lat + dLat, lng: lng + dLng }
-  })
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => '')
+    throw new IsochroneError(
+      `HERE API Fehler ${response.status}: ${body.slice(0, 200)}`,
+    )
+  }
+
+  const data = (await response.json()) as {
+    isolines?: Array<{
+      polygons?: Array<{ outer: string }>
+    }>
+  }
+
+  const outerEncoded = data.isolines?.[0]?.polygons?.[0]?.outer
+  if (!outerEncoded) {
+    throw new IsochroneError('HERE API lieferte kein Polygon zurück')
+  }
+
+  const decoded = decode(outerEncoded)
+  if (!decoded.polyline || decoded.polyline.length < 3) {
+    throw new IsochroneError(
+      `HERE API Polygon hat nur ${decoded.polyline?.length ?? 0} Punkte (min 3 nötig)`,
+    )
+  }
+
+  return decoded.polyline.map(([pLat, pLng]) => ({ lat: pLat, lng: pLng }))
 }
