@@ -59,6 +59,24 @@ Notion-Page „📨 WhatsApp Templates — Twilio Content API Setup":
 
 Variablen-Zählung matcht `src/lib/whatsapp/template-sids.ts`.
 
+## backfill-org-isochrones.mjs (AAR-129)
+
+Einmaliges Backfill-Script für bestehende Organisationen (Communities, Büros,
+Akademien) die noch kein `isochrone_polygon` haben. Idempotent, überspringt
+bereits befüllte Einträge.
+
+Pro Org: nimmt `standort_lat/lng` falls vorhanden, sonst
+`einsatzgebiet_zentrum_lat/lng`, sonst ersten SV-Member mit Koordinaten.
+Danach HERE-API-Aufruf + GeoJSON-Polygon speichern.
+
+### Ausführung
+
+```bash
+HERE_API_KEY=xxx \
+SUPABASE_URL=xxx SUPABASE_SERVICE_ROLE_KEY=xxx \
+  node scripts/backfill-org-isochrones.mjs
+```
+
 ## recalc-all-isochrones.mjs (AAR-132)
 
 Einmalig alle `sachverstaendige.isochrone_polygon` Einträge mit HERE API
