@@ -10,7 +10,8 @@ const TEMPLATES: Record<TemplateName, (vars: Record<string, string>) => string> 
     `Hallo ${v['1'] ?? 'Kunde'}, Ihr Fall ${v['2'] ?? ''} wurde bei Claimondo eroeffnet. Wir kuemmern uns um alles Weitere. Bei Fragen antworten Sie einfach auf diese Nachricht.`,
 
   flowlink_versand: (v) =>
-    `Hallo ${v['1'] ?? ''}, bitte fuellen Sie das Formular aus um Ihren Schadenfall zu vervollstaendigen: ${v['2'] ?? ''}`,
+    // AAR-116: Template erwartet 6 Variablen (Vorname, SV-Vorname, SV-Nachname, Datum, Uhrzeit, FlowLink-URL)
+    `Hallo ${v['1'] ?? ''}, Ihr Gutachtertermin mit ${v['2'] ?? ''} ${v['3'] ?? ''} am ${v['4'] ?? ''} um ${v['5'] ?? ''} Uhr steht. Bitte füllen Sie jetzt das Formular aus um Ihren Schadenfall zu vervollständigen: ${v['6'] ?? ''}`,
 
   sv_beauftragt: (v) =>
     `Gute Nachrichten, ${v['1'] ?? ''}! Wir haben den Gutachter ${v['2'] ?? ''} fuer Sie beauftragt. Er wird sich in Kuerze bei Ihnen melden um einen Besichtigungstermin zu vereinbaren.`,

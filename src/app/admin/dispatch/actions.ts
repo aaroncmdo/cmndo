@@ -428,27 +428,60 @@ export async function sendFlowLink(leadId: string) {
   const flowUrl = `${baseUrl}/flow/${flowLink.token}`
 
   if (lead.telefon) {
-    try {
-      const { sendCommunication } = await import('@/lib/communications/send')
-      await sendCommunication('flowlink_versand', {
-        telefon: lead.telefon,
-        vorname: lead.vorname ?? '',
-        '1': lead.vorname ?? '',
-        '2': flowUrl,
-      })
-      // AAR-67: wa_gesendet=true NUR bei erfolgreichem WA-Send
-      await supabase.from('leads').update({ wa_gesendet: true }).eq('id', leadId)
-      // Timeline-Eintrag: FlowLink versendet
-      await supabase.from('timeline').insert({
-        fall_id: null,
-        typ: 'system',
-        titel: 'FlowLink versendet',
-        beschreibung: `Per WhatsApp an ${lead.telefon}`,
-        erstellt_von: user.id,
-      }).then(() => {}, () => {})
-    } catch (err) {
-      console.error('[sendFlowLink] WA-Send fehlgeschlagen:', err)
-      // wa_gesendet bleibt false — Token aber gueltig, kann manuell erneut gesendet werden
+    // AAR-116: Template flowlink_versand erwartet 6 Variablen (Vorname, SV-Vorname,
+    // SV-Nachname, Datum, Uhrzeit, FlowLink-URL). Wir suchen den reservierten
+    // Gutachter-Termin zum Lead und liefern alle Felder. Ohne Termin waere das
+    // Template leer und Twilio wuerde die Nachricht mit leeren Placeholdern rendern.
+    type TerminWithSv = {
+      start_zeit: string
+      sachverstaendige: { profiles: { vorname: string | null; nachname: string | null } | null } | null
+    }
+    const { data: terminRaw } = await supabase
+      .from('gutachter_termine')
+      .select('start_zeit, sachverstaendige(profiles(vorname, nachname))')
+      .eq('lead_id', leadId)
+      .in('status', ['reserviert', 'bestaetigt'])
+      .order('start_zeit', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+    const termin = terminRaw as TerminWithSv | null
+    const svVorname = termin?.sachverstaendige?.profiles?.vorname ?? ''
+    const svNachname = termin?.sachverstaendige?.profiles?.nachname ?? ''
+    const terminDate = termin?.start_zeit ? new Date(termin.start_zeit) : null
+    const datum = terminDate ? terminDate.toLocaleDateString('de-DE') : ''
+    const uhrzeit = terminDate
+      ? terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+      : ''
+
+    if (!termin) {
+      console.warn('[sendFlowLink] Kein reservierter Gutachter-Termin für Lead', leadId, '— WhatsApp übersprungen (AAR-115 notwendig)')
+    } else {
+      try {
+        const { sendCommunication } = await import('@/lib/communications/send')
+        await sendCommunication('flowlink_versand', {
+          telefon: lead.telefon,
+          vorname: lead.vorname ?? '',
+          '1': lead.vorname ?? '',
+          '2': svVorname,
+          '3': svNachname,
+          '4': datum,
+          '5': uhrzeit,
+          '6': flowUrl,
+        })
+        // AAR-67: wa_gesendet=true NUR bei erfolgreichem WA-Send
+        await supabase.from('leads').update({ wa_gesendet: true }).eq('id', leadId)
+        // Timeline-Eintrag: FlowLink versendet
+        await supabase.from('timeline').insert({
+          fall_id: null,
+          typ: 'system',
+          titel: 'FlowLink versendet',
+          beschreibung: `Per WhatsApp an ${lead.telefon} — SV ${svVorname} ${svNachname} am ${datum} ${uhrzeit}`,
+          erstellt_von: user.id,
+        }).then(() => {}, () => {})
+      } catch (err) {
+        console.error('[sendFlowLink] WA-Send fehlgeschlagen:', err)
+        // wa_gesendet bleibt false — Token aber gueltig, kann manuell erneut gesendet werden
+      }
     }
   }
 
