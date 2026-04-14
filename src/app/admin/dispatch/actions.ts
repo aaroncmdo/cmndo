@@ -303,12 +303,12 @@ export async function sendFlowLink(leadId: string) {
 
   if (flowErr) throw new Error(`Flow-Link Erstellung fehlgeschlagen: ${flowErr.message}`)
 
+  // AAR-67: wa_gesendet erst NACH erfolgreichem WA-Send, nicht hier
   const { error: leadErr } = await supabase
     .from('leads')
     .update({
       status: 'flow-gesendet',
       qualifizierungs_phase: 'flow-versendet',
-      wa_gesendet: true,
     })
     .eq('id', leadId)
 
@@ -327,6 +327,8 @@ export async function sendFlowLink(leadId: string) {
         '1': lead.vorname ?? '',
         '2': flowUrl,
       })
+      // AAR-67: wa_gesendet=true NUR bei erfolgreichem WA-Send
+      await supabase.from('leads').update({ wa_gesendet: true }).eq('id', leadId)
       // Timeline-Eintrag: FlowLink versendet
       await supabase.from('timeline').insert({
         fall_id: null,
@@ -337,7 +339,7 @@ export async function sendFlowLink(leadId: string) {
       }).then(() => {}, () => {})
     } catch (err) {
       console.error('[sendFlowLink] WA-Send fehlgeschlagen:', err)
-      // Token bleibt gueltig — Fehler wird nur geloggt
+      // wa_gesendet bleibt false — Token aber gueltig, kann manuell erneut gesendet werden
     }
   }
 
