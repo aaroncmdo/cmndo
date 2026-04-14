@@ -375,9 +375,11 @@ export async function reserveSvTerminForLead(
   }
 
   // Bestehende Reservierung zum Lead stornieren (nur 1 aktive Reservierung pro Lead)
+  // gutachter_termine hat KEINE storniert_am-Spalte (nur faelle/abrechnungen haben das),
+  // daher nur status-Update.
   await supabase
     .from('gutachter_termine')
-    .update({ status: 'storniert', storniert_am: new Date().toISOString() })
+    .update({ status: 'storniert' })
     .eq('lead_id', leadId)
     .in('status', ['reserviert', 'gegenvorschlag'])
 
@@ -427,9 +429,10 @@ export async function cancelSvTerminForLead(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
+  // gutachter_termine hat keine storniert_am-Spalte — nur status-Update
   const { error } = await supabase
     .from('gutachter_termine')
-    .update({ status: 'storniert', storniert_am: new Date().toISOString() })
+    .update({ status: 'storniert' })
     .eq('lead_id', leadId)
     .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
 

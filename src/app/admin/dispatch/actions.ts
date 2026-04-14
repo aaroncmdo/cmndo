@@ -412,20 +412,14 @@ export async function sendFlowLink(leadId: string) {
 
   if (flowErr) throw new Error(`Flow-Link Erstellung fehlgeschlagen: ${flowErr.message}`)
 
-  // AAR-67: wa_gesendet erst NACH erfolgreichem WA-Send, nicht hier
-  const { error: leadErr } = await supabase
-    .from('leads')
-    .update({
-      status: 'flow-gesendet',
-      qualifizierungs_phase: 'flow-versendet',
-    })
-    .eq('id', leadId)
-
-  if (leadErr) throw new Error(`Lead-Update fehlgeschlagen: ${leadErr.message}`)
-
   // AAR-52: FlowLink per WhatsApp an Kunden senden
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
   const flowUrl = `${baseUrl}/flow/${flowLink.token}`
+
+  // AAR-116 Hardening: Lead-Status wird erst NACH erfolgreichem WA-Send aktualisiert
+  // (siehe unten). Ohne Termin gibt es keinen WA-Send und der Lead bleibt in der
+  // vorherigen Phase — sonst zeigt er "flow-versendet" obwohl keine Nachricht
+  // angekommen ist (KFZ-Bug 14.04.2026, DB-Evidenz siehe AAR-116).
 
   if (lead.telefon) {
     // AAR-116: Template flowlink_versand erwartet 6 Variablen (Vorname, SV-Vorname,
@@ -473,7 +467,13 @@ export async function sendFlowLink(leadId: string) {
           '6': flowUrl,
         })
         // AAR-67: wa_gesendet=true NUR bei erfolgreichem WA-Send
-        await supabase.from('leads').update({ wa_gesendet: true }).eq('id', leadId)
+        // AAR-116 Hardening: Lead-Status erst HIER setzen (nach bestätigtem WA-Send),
+        // damit ein fehlgeschlagener Send den Lead nicht in 'flow-versendet' hängen lässt.
+        await supabase.from('leads').update({
+          wa_gesendet: true,
+          status: 'flow-gesendet',
+          qualifizierungs_phase: 'flow-versendet',
+        }).eq('id', leadId)
         // Timeline-Eintrag: FlowLink versendet
         await supabase.from('timeline').insert({
           fall_id: null,
@@ -484,11 +484,11 @@ export async function sendFlowLink(leadId: string) {
         }).then(() => {}, () => {})
       } catch (err) {
         console.error('[sendFlowLink] WA-Send fehlgeschlagen:', err)
-        // wa_gesendet bleibt false — Token aber gueltig, kann manuell erneut gesendet werden
+        // wa_gesendet + qualifizierungs_phase bleiben unverändert — Token ist aber
+        // gültig, kann manuell erneut gesendet werden
       }
     }
   }
-
   revalidatePath('/admin/dispatch')
   revalidatePath(`/admin/dispatch/lead/${leadId}`)
 
