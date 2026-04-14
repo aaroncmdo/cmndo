@@ -30,18 +30,24 @@ export default async function KartePage() {
     standort_lng: number | null
     ist_aktiv: boolean
     organisation_id: string | null
-    profiles: { vorname: string | null; nachname: string | null } | null
+    profiles: unknown
   }
   const svRows = (svRaw ?? []) as unknown as SvRow[]
 
-  const svs: SvMarker[] = svRows.map((sv) => ({
-    id: sv.id,
-    name: sv.profiles ? `${sv.profiles.vorname ?? ''} ${sv.profiles.nachname ?? ''}`.trim() : 'Unbekannt',
-    paket: sv.paket,
-    lat: sv.standort_lat != null ? Number(sv.standort_lat) : null,
-    lng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
-    istAktiv: sv.ist_aktiv !== false,
-  }))
+  const svs: SvMarker[] = svRows.map((sv) => {
+    const pRel = sv.profiles
+    const p = (Array.isArray(pRel) ? pRel[0] : pRel) as
+      | { vorname: string | null; nachname: string | null }
+      | null
+    return {
+      id: sv.id,
+      name: p ? `${p.vorname ?? ''} ${p.nachname ?? ''}`.trim() : 'Unbekannt',
+      paket: sv.paket,
+      lat: sv.standort_lat != null ? Number(sv.standort_lat) : null,
+      lng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
+      istAktiv: sv.ist_aktiv !== false,
+    }
+  })
 
   // Organisationen (Communities + Büros + Akademien)
   const { data: orgRaw } = await supabase

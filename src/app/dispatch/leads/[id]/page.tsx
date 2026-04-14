@@ -55,21 +55,27 @@ export default async function DispatchLeadDetail({
     .order('start_zeit', { ascending: true })
     .limit(1)
     .maybeSingle()
-  type SvTerminRow = {
+  // Nested-FK normalisieren (Supabase liefert je nach Cardinality Array oder Objekt)
+  const svTerminRow = svTerminRaw as {
     id: string
     sv_id: string
     start_zeit: string
     end_zeit: string
     status: string
-    sachverstaendige: { profiles: { vorname: string | null; nachname: string | null } | null } | null
-  }
-  const svTerminRow = svTerminRaw as SvTerminRow | null
+    sachverstaendige: unknown
+  } | null
+  const svRel = svTerminRow?.sachverstaendige
+  const sv = (Array.isArray(svRel) ? svRel[0] : svRel) as { profiles: unknown } | null
+  const profileRel = sv?.profiles
+  const svProfile = (Array.isArray(profileRel) ? profileRel[0] : profileRel) as
+    | { vorname: string | null; nachname: string | null }
+    | null
   const aktiverSvTermin = svTerminRow
     ? {
         id: svTerminRow.id,
         sv_id: svTerminRow.sv_id,
-        sv_vorname: svTerminRow.sachverstaendige?.profiles?.vorname ?? null,
-        sv_nachname: svTerminRow.sachverstaendige?.profiles?.nachname ?? null,
+        sv_vorname: svProfile?.vorname ?? null,
+        sv_nachname: svProfile?.nachname ?? null,
         start_zeit: svTerminRow.start_zeit,
         end_zeit: svTerminRow.end_zeit,
         status: svTerminRow.status,

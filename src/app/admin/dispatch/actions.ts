@@ -432,10 +432,6 @@ export async function sendFlowLink(leadId: string) {
     // SV-Nachname, Datum, Uhrzeit, FlowLink-URL). Wir suchen den reservierten
     // Gutachter-Termin zum Lead und liefern alle Felder. Ohne Termin waere das
     // Template leer und Twilio wuerde die Nachricht mit leeren Placeholdern rendern.
-    type TerminWithSv = {
-      start_zeit: string
-      sachverstaendige: { profiles: { vorname: string | null; nachname: string | null } | null } | null
-    }
     const { data: terminRaw } = await supabase
       .from('gutachter_termine')
       .select('start_zeit, sachverstaendige(profiles(vorname, nachname))')
@@ -444,9 +440,17 @@ export async function sendFlowLink(leadId: string) {
       .order('start_zeit', { ascending: true })
       .limit(1)
       .maybeSingle()
-    const termin = terminRaw as TerminWithSv | null
-    const svVorname = termin?.sachverstaendige?.profiles?.vorname ?? ''
-    const svNachname = termin?.sachverstaendige?.profiles?.nachname ?? ''
+    // Nested-FK-Relations kommen je nach Cardinality als Array ODER Objekt zurück.
+    // Safe-Normalisierung via Array.isArray (siehe SvKalenderModal.tsx Pattern).
+    const termin = terminRaw as { start_zeit: string; sachverstaendige: unknown } | null
+    const svRaw = termin?.sachverstaendige
+    const sv = (Array.isArray(svRaw) ? svRaw[0] : svRaw) as { profiles: unknown } | null
+    const profileRaw = sv?.profiles
+    const profile = (Array.isArray(profileRaw) ? profileRaw[0] : profileRaw) as
+      | { vorname: string | null; nachname: string | null }
+      | null
+    const svVorname = profile?.vorname ?? ''
+    const svNachname = profile?.nachname ?? ''
     const terminDate = termin?.start_zeit ? new Date(termin.start_zeit) : null
     const datum = terminDate ? terminDate.toLocaleDateString('de-DE') : ''
     const uhrzeit = terminDate
