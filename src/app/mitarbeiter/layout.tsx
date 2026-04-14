@@ -34,7 +34,7 @@ export default async function MitarbeiterLayout({
         <div className="flex items-center gap-3">
           <span className="text-[#7BA3CC] text-sm">{displayName}</span>
           <form action="/api/auth/logout" method="POST">
-            <button type="button" className="text-[#7BA3CC] hover:text-white transition-colors">
+            <button type="submit" className="text-[#7BA3CC] hover:text-white transition-colors">
               <LogOutIcon className="w-4 h-4" />
             </button>
           </form>
