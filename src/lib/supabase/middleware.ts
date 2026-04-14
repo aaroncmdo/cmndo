@@ -65,38 +65,34 @@ export async function updateSession(request: NextRequest) {
   // Build response
   let response: NextResponse
 
+  // AAR-111: Reihenfolge gefixt — 2FA-Check MUSS vor Admin-Rollen-Check greifen,
+  // sonst umgehen Admin-User den 2FA-Flow komplett solange sie unter /admin/* bleiben.
+
   if (!user && !isPublicPath(request.nextUrl.pathname)) {
+    // Nicht eingeloggt + nicht public → /login
     response = NextResponse.redirect(new URL('/login', request.url))
-  } else if (user && request.nextUrl.pathname.startsWith('/admin')) {
-    // KFZ-203: Dispatch-User darf nicht auf /admin/*
-    // Check via app_metadata.rolle (gesetzt via admin.auth.admin.updateUserById bei Rollenzuweisung)
-    // Fallback: Layout-Check in /admin/layout.tsx prüft profiles.rolle
-    const rolle = (user.app_metadata?.rolle ?? user.user_metadata?.rolle) as string | undefined
-    if (rolle === 'dispatch') {
-      response = NextResponse.redirect(new URL('/dispatch/dashboard', request.url))
-    } else {
-      response = NextResponse.next({ request: { headers: requestHeaders } })
-    }
   } else if (user && !isPublicPath(request.nextUrl.pathname) && request.nextUrl.pathname !== '/login/2fa') {
-    // KFZ-184: 2FA-Check — wenn User eingeloggt aber 2FA pending
-    // Google-OAuth-User skippen 2FA (provider check via app_metadata)
+    // Eingeloggt + geschützter Pfad (auch /admin/*): ZUERST 2FA-Check (KFZ-184)
     const isGoogleUser = user.app_metadata?.provider === 'google'
     const has2faCookie = request.cookies.get('claimondo_2fa_verified')?.value === '1'
     const hasRememberCookie = !!request.cookies.get('claimondo_remember')?.value
 
     if (!isGoogleUser && !has2faCookie && !hasRememberCookie) {
-      // Prüfe ob User 2FA aktiviert hat (via twofa_aktiviert Default true)
-      // Da wir in der Middleware keinen DB-Call machen wollen, setzen wir
-      // das 2fa_verified Cookie nach erfolgreichem Verify in /login/2fa.
-      // Wenn das Cookie fehlt UND kein remember-token: redirect zu 2FA.
-      // Beim allerersten Login nach Deploy: Cookie fehlt → 2FA-Page.
-      // HINWEIS: Wenn twofa_aktiviert=false soll die 2FA-Page selbst
-      // direkt weiterleiten (passiert im Server Component).
       response = NextResponse.redirect(new URL('/login/2fa', request.url))
+    } else if (request.nextUrl.pathname.startsWith('/admin')) {
+      // 2FA OK → Admin-Rollen-Check (KFZ-203: Dispatch-User darf nicht auf /admin/*)
+      const rolle = (user.app_metadata?.rolle ?? user.user_metadata?.rolle) as string | undefined
+      if (rolle === 'dispatch') {
+        response = NextResponse.redirect(new URL('/dispatch/dashboard', request.url))
+      } else {
+        response = NextResponse.next({ request: { headers: requestHeaders } })
+      }
     } else {
+      // 2FA OK + kein /admin/* → durchlassen
       response = NextResponse.next({ request: { headers: requestHeaders } })
     }
   } else {
+    // Public path oder /login/2fa selbst → durchlassen
     response = NextResponse.next({ request: { headers: requestHeaders } })
   }
 
