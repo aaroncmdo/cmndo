@@ -87,6 +87,10 @@
     {
       "path": "/api/cron/fall-abschluss",
       "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/sla-check",
+      "schedule": "*/15 * * * *"
     }
   ]
 }

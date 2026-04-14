@@ -119,4 +119,19 @@ export async function transitionFallStatus(
       console.error('[AAR-77] LexDrive-Email Trigger Fehler:', err)
     }
   }
+
+  // AAR-85: SLA-Tracking an Status-Uebergaengen
+  try {
+    const { completeSla, startSla } = await import('@/lib/sla/tracker')
+    if (newStatus === 'sv-zugewiesen' || newStatus === 'sv-termin') {
+      await completeSla(fallId, 'gutachter_zuweisung')
+    }
+    if (newStatus === 'besichtigung' || newStatus === 'begutachtung-laeuft') {
+      await completeSla(fallId, 'besichtigung')
+      await startSla(fallId, 'gutachten_upload')
+    }
+    if (newStatus === 'gutachten-eingegangen') {
+      await completeSla(fallId, 'gutachten_upload')
+    }
+  } catch (err) { console.error('[AAR-85] SLA Status-Hook:', err) }
 }

@@ -40,6 +40,12 @@ export async function bestaetigeTermin(terminId: string) {
 
   if (tlErr) console.error('[bestaetigeTermin] Timeline-Insert:', tlErr.message)
 
+  // AAR-85: SLA termin_bestaetigung abschliessen + besichtigung-Frist startet effektiv jetzt
+  try {
+    const { completeSla } = await import('@/lib/sla/tracker')
+    await completeSla(termin.fall_id, 'termin_bestaetigung')
+  } catch (err) { console.error('[AAR-85] completeSla termin_bestaetigung:', err) }
+
   // 4. WhatsApp T4 an Kunden + Email S-E6 an SV (non-critical)
   try {
     const { data: fall } = await db.from('faelle').select('lead_id, besichtigungsort_adresse').eq('id', termin.fall_id).single()

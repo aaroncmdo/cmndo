@@ -554,6 +554,37 @@ export async function signSAandCreateFall(
   // 12. BUG-71: Welcome-Mail nach SA-Unterzeichnung (fire & forget, idempotent)
   import('@/lib/email/google/flows').then(m => m.sendKundeWelcome(fall.id)).catch(err => console.error('[BUG-71] Welcome-Mail nach SA:', err))
 
+  // 13. AAR-85: SLA-Tracking starten (Prozessstart = SA unterschrieben)
+  // Simultan-Trigger: alle Pipelines parallel via Promise.allSettled
+  const slaPromises: Promise<unknown>[] = []
+  try {
+    const { startSla } = await import('@/lib/sla/tracker')
+    if (!svIdFromTermin) slaPromises.push(startSla(fall.id, 'gutachter_zuweisung'))
+    slaPromises.push(startSla(fall.id, 'termin_bestaetigung'))
+    slaPromises.push(startSla(fall.id, 'besichtigung'))
+  } catch (err) { console.error('[AAR-85] SLA-Start Fehler:', err) }
+
+  // Dispatch-Matching (best SV finden) parallel — falls noch kein SV
+  const fallLat = (lead.unfallort_lat ?? lead.kunde_lat) as number | null
+  const fallLng = (lead.unfallort_lng ?? lead.kunde_lng) as number | null
+  if (!svIdFromTermin && fallLat != null && fallLng != null) {
+    slaPromises.push(
+      (async () => {
+        try {
+          const { findBestSV } = await import('@/lib/dispatch/findBestSV')
+          await findBestSV({
+            fallLat: Number(fallLat),
+            fallLng: Number(fallLng),
+            terminDatum: (lead.gutachter_termin as string | undefined) ?? undefined,
+          })
+        } catch (err) { console.error('[AAR-85] Dispatch-Matching:', err) }
+      })()
+    )
+  }
+
+  // Alle Trigger parallel ausfuehren — Fehler einzelner Trigger blockieren nicht
+  await Promise.allSettled(slaPromises)
+
   return { fallId: fall.id }
 
   } catch (err) {
