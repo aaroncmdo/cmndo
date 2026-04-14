@@ -7,6 +7,8 @@ import Schritt0HardGate from './Schritt0HardGate'
 import SchadentypPicker from './SchadentypPicker'
 import CardentityButton from './CardentityButton'
 import RueckrufSection from './RueckrufSection'
+import GespraechsleitfadenTimer from './GespraechsleitfadenTimer'
+import ExitSkript, { type DisqualifikationsGrund } from './ExitSkript'
 import AircallCallButton from '@/components/AircallCallButton'
 import { computeHardGateStatus } from './hard-gate-utils'
 import { computeFlowLinkStufe, FLOWLINK_STUFE_LABEL } from '@/lib/dispatch/fahrzeug-marken'
@@ -74,6 +76,10 @@ export default async function DispatchLeadDetail({
     abgelaufen: { label: 'FlowLink abgelaufen', cls: 'bg-red-100 text-red-700' },
   }[flowStatus]
 
+  // AAR-114: Disqualifikations-Grund-Key fuer ExitSkript
+  const disqualifikationsGrundKey = lead.disqualifikations_grund_key as DisqualifikationsGrund | null
+  const istDisqualifiziert = lead.qualifizierungs_phase === 'disqualifiziert'
+
   return (
     <div className="py-6 space-y-6">
       {/* Back + Header */}
@@ -94,11 +100,23 @@ export default async function DispatchLeadDetail({
         </div>
       </div>
 
+      {/* AAR-114: Gespraechsleitfaden-Timer (oben, vor Grid) */}
+      <GespraechsleitfadenTimer
+        leadId={lead.id}
+        gestartetAm={lead.gespraech_gestartet_am ?? null}
+        beendetAm={lead.gespraech_beendet_am ?? null}
+        dauerSekunden={lead.gespraech_dauer_sekunden ?? null}
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Lead Data */}
         <div className="lg:col-span-2 space-y-4">
-          {/* AAR-80: Schritt 0 Hard Gate */}
-          <Schritt0HardGate lead={lead as Parameters<typeof Schritt0HardGate>[0]['lead']} />
+          {/* AAR-114: ExitSkript bei Disqualifikation statt Hard Gate */}
+          {istDisqualifiziert && disqualifikationsGrundKey ? (
+            <ExitSkript grund={disqualifikationsGrundKey} />
+          ) : (
+            <Schritt0HardGate lead={lead as Parameters<typeof Schritt0HardGate>[0]['lead']} />
+          )}
 
           {/* AAR-98: Rueckruf (migriert von admin/dispatch/lead) */}
           <RueckrufSection lead={{

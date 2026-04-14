@@ -88,7 +88,7 @@ export default function Schritt0HardGate({ lead }: { lead: Lead }) {
           value={draft.unfallhergang ?? ''}
           onChange={e => setDraft(d => ({ ...d, unfallhergang: e.target.value }))}
           className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm h-20 resize-none"
-          placeholder="Wie ist es passiert? (offene Beschreibung — Sprachregel: niemals „Schuld")"
+          placeholder={'Wie ist es passiert? (offene Beschreibung — Sprachregel: niemals „Schuld")'}
         />
         <div className="flex gap-2">
           {([
