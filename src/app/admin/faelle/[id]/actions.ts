@@ -382,13 +382,11 @@ export async function saveFinVin(fallId: string, finVin: string) {
     erstellt_von: user.id,
   })
 
-  // Trigger CarDentity Typ-A check
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-  fetch(`${baseUrl}/api/cardentity/typ-a`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fall_id: fallId, fin_vin: cleaned }),
-  }).catch(() => {})
+  // AAR-90: direkter Cardentity-Lib-Aufruf statt internem fetch
+  try {
+    const { enrichFallByFin } = await import('@/lib/cardentity/enrich-fahrzeug')
+    enrichFallByFin(fallId).catch(() => {})
+  } catch (err) { console.error('[AAR-90] enrichFallByFin:', err) }
 
   revalidatePath(`/admin/faelle/${fallId}`)
 }

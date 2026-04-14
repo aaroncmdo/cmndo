@@ -177,6 +177,8 @@ export async function createLead(data: {
   // oder beim manuellen Anlegen direkt mitgegeben werden.
   spezifikation?: string
   schadenart?: string
+  // AAR-90: optional FIN bei manuellem Lead-Anlegen → Cardentity-Anreicherung
+  fin?: string
 }) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -191,6 +193,7 @@ export async function createLead(data: {
     schadenfall_typ: data.schadenfall_typ || null,
     spezifikation: data.spezifikation || null,
     schadenart: data.schadenart || null,
+    fin: data.fin ? data.fin.toUpperCase() : null,
     status: 'neu',
     qualifizierungs_phase: 'neu',
     kunden_konstellation: 'kk-01',
@@ -204,6 +207,14 @@ export async function createLead(data: {
   if (newLead) {
     triggerLeadTasks(newLead.id, user.id).catch(() => {})
     createNotification(user.id, 'neuer-lead', `Neuer Lead: ${data.vorname} ${data.nachname}`, `${data.source_channel} · ${data.schadenfall_typ || 'Kein Typ'}`, `/admin/dispatch/lead/${newLead.id}`).catch(() => {})
+
+    // AAR-90: Cardentity-Anreicherung wenn FIN angegeben
+    if (data.fin) {
+      try {
+        const { enrichLeadByFin } = await import('@/lib/cardentity/enrich-fahrzeug')
+        enrichLeadByFin(newLead.id).catch(() => {})
+      } catch { /* */ }
+    }
   }
 
   revalidatePath('/admin/dispatch')
@@ -535,6 +546,14 @@ async function convertLeadToFall(
 
   // 6. Pflichtdokumente erstellen
   await createPflichtdokumente(supabase, fall.id, lead)
+
+  // AAR-90: Cardentity-Anreicherung wenn Lead FIN hat (kopiert vom Lead in Fall)
+  if (lead.fin) {
+    try {
+      const { enrichFallByFin } = await import('@/lib/cardentity/enrich-fahrzeug')
+      enrichFallByFin(fall.id).catch(() => {})
+    } catch { /* */ }
+  }
 
   // 7. Timeline-Eintrag erstellen (mit Zähler der übertragenen Entitäten)
   const betreuerName = await getProfileName(supabase, kundenbetreuerId)

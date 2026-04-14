@@ -5,6 +5,29 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
+ * AAR-90: FIN im Flow setzen + Cardentity-Anreicherung triggern.
+ * Wird vom FlowWizard onBlur des FIN-Felds aufgerufen (UI-Wiring folgt bei
+ * naechstem FlowWizard-Refactor). Idempotent.
+ */
+export async function enrichFlowLeadByFin(token: string, fin: string): Promise<{ success: boolean; updatedFields?: string[]; error?: string }> {
+  const admin = createAdminClient()
+  const cleaned = fin.trim().toUpperCase()
+  if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(cleaned)) {
+    return { success: false, error: 'FIN-Format ungueltig (17 alphanumerische Zeichen)' }
+  }
+
+  const { data: flow } = await admin.from('flow_links').select('lead_id').eq('token', token).single()
+  if (!flow?.lead_id) return { success: false, error: 'Flow-Link ungueltig' }
+
+  await admin.from('leads').update({ fin: cleaned }).eq('id', flow.lead_id)
+
+  const { enrichLeadByFin } = await import('@/lib/cardentity/enrich-fahrzeug')
+  const result = await enrichLeadByFin(flow.lead_id)
+  if (!result.success) return { success: false, error: result.error }
+  return { success: true, updatedFields: result.updatedFields }
+}
+
+/**
  * KFZ-117: Kunde kann Stammdaten korrigieren (Step 1 FlowLink)
  */
 export async function updateLeadStammdaten(
