@@ -23,16 +23,13 @@ export default async function GutachterLayout({
 
   const displayName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || user.email || ''
 
-  const svSelect = 'logo_url, brand_primary, brand_secondary, use_custom_branding, vertrag_unterschrieben, anzahlung_status, freigeschaltet, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, organisation_id, rolle_in_organisation, ist_parent_account'
-  let { data: sv } = await supabase
+  // AAR-70: Konsistenter SV-Lookup nur ueber profile_id (user_id ist deprecated, alle rows haben profile_id)
+  const svSelect = 'logo_url, brand_primary, brand_secondary, use_custom_branding, vertrag_unterschrieben, anzahlung_status, freigeschaltet, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, organisation_id, rolle_in_organisation, ist_parent_account, geloescht_am'
+  const { data: sv } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
     .eq('profile_id', user.id)
-    .single()
-  if (!sv) {
-    const r = await supabase.from('sachverstaendige').select(svSelect).eq('user_id', user.id).single()
-    sv = r.data
-  }
+    .maybeSingle()
 
   // KFZ-152 Phase 2+3: Conditional Sidebar-Eintraege
   // - Team: nur fuer Inhaber (Buero) oder Akademie-Verwalter (rolle='inhaber' + ist_parent_account)
@@ -41,20 +38,9 @@ export default async function GutachterLayout({
   const showCommunity = sv?.rolle_in_organisation === 'community_member'
 
   // Check if this gutachter has been soft-deleted → sign out + redirect
-  if (sv) {
-    let isDeleted = false
-    try {
-      const { data: svCheck } = await supabase
-        .from('sachverstaendige')
-        .select('geloescht_am')
-        .or(`profile_id.eq.${user.id},user_id.eq.${user.id}`)
-        .single()
-      if (svCheck?.geloescht_am) isDeleted = true
-    } catch { /* geloescht_am column may not exist */ }
-    if (isDeleted) {
-      await supabase.auth.signOut()
-      redirect('/login?error=Ihr%20Account%20wurde%20deaktiviert.%20Bitte%20kontaktieren%20Sie%20den%20Support.')
-    }
+  if (sv?.geloescht_am) {
+    await supabase.auth.signOut()
+    redirect('/login?error=Ihr%20Account%20wurde%20deaktiviert.%20Bitte%20kontaktieren%20Sie%20den%20Support.')
   }
 
   const isDeactivated = sv?.ist_aktiv === false
