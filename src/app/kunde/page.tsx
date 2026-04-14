@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { berechneProgress, SZENARIO_PHASEN } from '@/components/kunde/stepperConfig'
+import LexDriveLink from './_components/LexDriveLink'
 
 export default async function KundeStartseite() {
   const supabase = await createClient()
@@ -170,6 +171,13 @@ export default async function KundeStartseite() {
               </p>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* AAR-78: LexDrive Videocall fuer juristische Fragen */}
+      {faelle.length > 0 && (
+        <div className="mb-4">
+          <LexDriveLink variant="card" />
         </div>
       )}
 

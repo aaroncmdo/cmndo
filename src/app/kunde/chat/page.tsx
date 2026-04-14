@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import ChatClient from './ChatClient'
+import LexDriveLink from '../_components/LexDriveLink'
 
 export default async function KundeChatPage() {
   const supabase = await createClient()
@@ -40,11 +41,12 @@ export default async function KundeChatPage() {
 
   if (!fallId) {
     return (
-      <div className="px-5 py-8 max-w-lg mx-auto">
+      <div className="px-5 py-8 max-w-lg mx-auto space-y-4">
         <h1 className="text-xl font-bold text-[#0D1B3E] mb-4">Chat</h1>
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 text-center">
           <p className="text-gray-500 text-sm">Noch kein Schadensfall vorhanden. Sobald Ihr Fall erstellt wurde, können Sie hier chatten.</p>
         </div>
+        <LexDriveLink variant="banner" />
       </div>
     )
   }
@@ -57,5 +59,12 @@ export default async function KundeChatPage() {
     .in('kanal', ['portal-kunde-claimondo', 'portal-kunde-gutachter'])
     .order('created_at', { ascending: true })
 
-  return <ChatClient fallId={fallId} nachrichten={nachrichten ?? []} userId={user.id} />
+  return (
+    <div className="space-y-4">
+      <div className="px-5 pt-4">
+        <LexDriveLink variant="banner" />
+      </div>
+      <ChatClient fallId={fallId} nachrichten={nachrichten ?? []} userId={user.id} />
+    </div>
+  )
 }
