@@ -1,10 +1,11 @@
+// AAR-102: Multi-Channel Inbox mit Split-View + MultiChannelChat
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import NachrichtenInboxClient from './NachrichtenInboxClient'
 
-// KFZ-182 Phase C: Gesamt-Chat-Inbox für Admin/KB.
-
 export const dynamic = 'force-dynamic'
+
+const VISIBLE_KANAELE = ['whatsapp', 'chat_kb_kunde', 'gruppenchat', 'chat_kunde_sv']
 
 export default async function NachrichtenPage() {
   const supabase = await createClient()
@@ -17,41 +18,32 @@ export default async function NachrichtenPage() {
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['admin', 'kundenbetreuer'].includes(profile.rolle)) {
+  if (!profile || !['admin', 'kundenbetreuer', 'leadbearbeiter', 'dispatch'].includes(profile.rolle)) {
     redirect('/admin')
   }
 
-  const isAdmin = profile.rolle === 'admin'
-
-  // Fetch recent nachrichten grouped by fall (last 500 messages)
-  let query = supabase
+  // Fetch letzte 500 Nachrichten in sichtbaren Kanaelen
+  const { data: nachrichten } = await supabase
     .from('nachrichten')
-    .select('id, fall_id, kanal, sender_id, sender_rolle, nachricht, hat_anhang, created_at, kb_empfaenger_id, richtung')
-    .eq('kanal', 'whatsapp')
+    .select('id, fall_id, kanal, sender_id, sender_rolle, nachricht, gelesen, created_at')
+    .in('kanal', VISIBLE_KANAELE)
+    .not('fall_id', 'is', null)
     .order('created_at', { ascending: false })
     .limit(500)
 
-  if (!isAdmin) {
-    query = query.eq('kb_empfaenger_id', user.id)
-  }
-
-  const { data: nachrichten } = await query
-
-  // Get unique fall_ids and load fall info
   const fallIds = Array.from(new Set((nachrichten ?? []).map(n => n.fall_id).filter(Boolean) as string[]))
-  const fallMap: Record<string, { fall_nummer: string | null; lead_id: string | null; kundenbetreuer_id: string | null }> = {}
+  const fallMap: Record<string, { fall_nummer: string | null; lead_id: string | null; kennzeichen: string | null }> = {}
 
   if (fallIds.length > 0) {
     const { data: faelle } = await supabase
       .from('faelle')
-      .select('id, fall_nummer, lead_id, kundenbetreuer_id')
+      .select('id, fall_nummer, lead_id, kennzeichen')
       .in('id', fallIds)
     for (const f of faelle ?? []) {
-      fallMap[f.id] = { fall_nummer: f.fall_nummer, lead_id: f.lead_id, kundenbetreuer_id: f.kundenbetreuer_id }
+      fallMap[f.id] = { fall_nummer: f.fall_nummer, lead_id: f.lead_id, kennzeichen: f.kennzeichen }
     }
   }
 
-  // Load customer names from leads
   const leadIds = Array.from(new Set(Object.values(fallMap).map(f => f.lead_id).filter(Boolean) as string[]))
   const kundenMap: Record<string, string> = {}
   if (leadIds.length > 0) {
@@ -64,48 +56,40 @@ export default async function NachrichtenPage() {
     }
   }
 
-  // Build chat threads grouped by fall_id
+  // Gruppieren nach fall_id - nimmt jeweils letzte Message + unread count
   type Thread = {
-    fallId: string | null
+    fallId: string
     fallNummer: string | null
+    kennzeichen: string | null
     kundeName: string
     lastMessage: string
     lastAt: string
+    lastKanal: string
     unreadCount: number
-    messages: typeof nachrichten
   }
 
   const threadMap = new Map<string, Thread>()
   for (const n of nachrichten ?? []) {
-    const key = n.fall_id ?? 'unzugeordnet'
-    if (!threadMap.has(key)) {
-      const fallInfo = n.fall_id ? fallMap[n.fall_id] : null
-      const kundeName = fallInfo?.lead_id ? (kundenMap[fallInfo.lead_id] ?? 'Kunde') : 'Unbekannt'
-      threadMap.set(key, {
+    if (!n.fall_id) continue
+    const info = fallMap[n.fall_id]
+    if (!threadMap.has(n.fall_id)) {
+      threadMap.set(n.fall_id, {
         fallId: n.fall_id,
-        fallNummer: fallInfo?.fall_nummer ?? null,
-        kundeName,
-        lastMessage: n.nachricht?.slice(0, 80) ?? '',
+        fallNummer: info?.fall_nummer ?? null,
+        kennzeichen: info?.kennzeichen ?? null,
+        kundeName: info?.lead_id ? (kundenMap[info.lead_id] ?? 'Kunde') : 'Unbekannt',
+        lastMessage: (n.nachricht ?? '').slice(0, 80),
         lastAt: n.created_at,
+        lastKanal: n.kanal,
         unreadCount: 0,
-        messages: [],
       })
     }
-    threadMap.get(key)!.messages!.push(n)
-    if (n.richtung === 'inbound') {
-      threadMap.get(key)!.unreadCount++
-    }
+    const t = threadMap.get(n.fall_id)!
+    // Unread counter (nicht vom eigenen User)
+    if (!n.gelesen && n.sender_id !== user.id) t.unreadCount++
   }
 
-  const threads = Array.from(threadMap.values())
-    .sort((a, b) => (b.lastAt > a.lastAt ? 1 : -1))
+  const threads = Array.from(threadMap.values()).sort((a, b) => (b.lastAt > a.lastAt ? 1 : -1))
 
-  return (
-    <NachrichtenInboxClient
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      threads={threads as any}
-      userId={user.id}
-      isAdmin={isAdmin}
-    />
-  )
+  return <NachrichtenInboxClient threads={threads} currentUserId={user.id} />
 }

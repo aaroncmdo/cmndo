@@ -1,0 +1,223 @@
+'use client'
+
+// AAR-102: Shared Multi-Channel Chat Komponente mit 5 Kanal-Tabs.
+// Nutzt Supabase Realtime fuer Live-Messages.
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { CHAT_KANAELE, type ChatKanal } from '@/lib/communications/channels'
+import { sendChatMessage, markMessagesRead } from '@/lib/communications/send-chat'
+import { SendIcon } from 'lucide-react'
+
+type Nachricht = {
+  id: string
+  fall_id: string
+  kanal: string
+  sender_id: string | null
+  sender_rolle: string | null
+  empfaenger_id: string | null
+  nachricht: string
+  hat_anhang: boolean | null
+  anhang_url: string | null
+  anhang_typ: string | null
+  gelesen: boolean | null
+  richtung: string | null
+  created_at: string
+  is_system: boolean | null
+}
+
+export default function MultiChannelChat({
+  fallId,
+  currentUserId,
+  showInternalKbSvChat = false,
+  defaultKanal = 'whatsapp',
+  empfaengerHints,
+}: {
+  fallId: string
+  currentUserId: string | null
+  showInternalKbSvChat?: boolean
+  defaultKanal?: ChatKanal
+  empfaengerHints?: Partial<Record<ChatKanal, string | null>>
+}) {
+  const [activeKanal, setActiveKanal] = useState<ChatKanal>(defaultKanal)
+  const [messages, setMessages] = useState<Nachricht[]>([])
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({})
+  const [input, setInput] = useState('')
+  const [sending, setSending] = useState(false)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const visibleChannels = CHAT_KANAELE.filter(c =>
+    c.id === 'chat_kb_sv' ? showInternalKbSvChat : c.visibleInInbox,
+  )
+
+  const loadMessages = useCallback(async (kanal: ChatKanal) => {
+    const supabase = createClient()
+    const { data } = await supabase
+      .from('nachrichten')
+      .select('*')
+      .eq('fall_id', fallId)
+      .eq('kanal', kanal)
+      .order('created_at', { ascending: true })
+    setMessages(data ?? [])
+    // Auto-scroll + als gelesen markieren
+    setTimeout(() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight }), 50)
+    markMessagesRead(fallId, kanal).catch(() => {})
+  }, [fallId])
+
+  const loadUnreadCounts = useCallback(async () => {
+    const supabase = createClient()
+    const counts: Record<string, number> = {}
+    for (const c of visibleChannels) {
+      const { count } = await supabase
+        .from('nachrichten')
+        .select('id', { count: 'exact', head: true })
+        .eq('fall_id', fallId)
+        .eq('kanal', c.id)
+        .eq('gelesen', false)
+        .neq('sender_id', currentUserId ?? '')
+      counts[c.id] = count ?? 0
+    }
+    setUnreadCounts(counts)
+  }, [fallId, visibleChannels, currentUserId])
+
+  useEffect(() => { loadMessages(activeKanal) }, [activeKanal, loadMessages])
+  useEffect(() => { loadUnreadCounts() }, [loadUnreadCounts])
+
+  // Realtime subscription
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`chat:${fallId}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'nachrichten',
+        filter: `fall_id=eq.${fallId}`,
+      }, (payload) => {
+        const row = payload.new as Nachricht
+        if (row.kanal === activeKanal) {
+          setMessages(prev => [...prev, row])
+          setTimeout(() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' }), 50)
+          if (row.sender_id !== currentUserId) {
+            markMessagesRead(fallId, activeKanal).catch(() => {})
+          }
+        }
+        loadUnreadCounts()
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [fallId, activeKanal, currentUserId, loadUnreadCounts])
+
+  async function handleSend() {
+    if (!input.trim() || sending) return
+    setSending(true)
+    try {
+      await sendChatMessage({
+        fallId,
+        kanal: activeKanal,
+        nachricht: input,
+        empfaengerId: empfaengerHints?.[activeKanal] ?? null,
+      })
+      setInput('')
+      // Realtime liefert die Nachricht zurueck - kein manueller Refresh noetig
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 flex flex-col h-[600px]">
+      {/* Tabs */}
+      <div className="flex border-b border-gray-100 overflow-x-auto">
+        {visibleChannels.map(c => {
+          const Icon = c.icon
+          const unread = unreadCounts[c.id] ?? 0
+          const active = activeKanal === c.id
+          return (
+            <button
+              key={c.id}
+              onClick={() => setActiveKanal(c.id)}
+              className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors whitespace-nowrap ${
+                active ? 'border-[#4573A2] text-[#0D1B3E]' : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Icon className="w-4 h-4" style={{ color: c.color }} />
+              <span className="text-sm font-medium">{c.label}</span>
+              {unread > 0 && (
+                <span className="bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                  {unread}
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Messages */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+        {messages.length === 0 ? (
+          <p className="text-center text-gray-400 text-sm py-10">Noch keine Nachrichten in diesem Kanal.</p>
+        ) : (
+          messages.map(m => <MessageBubble key={m.id} message={m} currentUserId={currentUserId} />)
+        )}
+      </div>
+
+      {/* Input */}
+      <div className="border-t border-gray-100 p-3 flex gap-2">
+        <input
+          type="text"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
+          placeholder={`Nachricht ueber ${visibleChannels.find(c => c.id === activeKanal)?.label}...`}
+          className="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
+          disabled={sending}
+        />
+        <button
+          onClick={handleSend}
+          disabled={!input.trim() || sending}
+          className="px-4 py-2.5 bg-[#4573A2] text-white rounded-xl text-sm font-medium hover:bg-[#0D1B3E] disabled:opacity-40 inline-flex items-center gap-1.5"
+        >
+          <SendIcon className="w-4 h-4" />
+          {sending ? 'Sende...' : 'Senden'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function MessageBubble({ message, currentUserId }: { message: Nachricht; currentUserId: string | null }) {
+  const isOwnMsg = currentUserId && message.sender_id === currentUserId
+  const isSystem = message.is_system
+  const alignRight = isOwnMsg
+
+  if (isSystem) {
+    return (
+      <div className="text-center">
+        <span className="inline-block text-[10px] text-gray-500 bg-white border border-gray-200 rounded-full px-3 py-1">
+          {message.nachricht}
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <div className={`flex ${alignRight ? 'justify-end' : 'justify-start'}`}>
+      <div className={`max-w-[70%] rounded-2xl px-4 py-2 ${
+        alignRight ? 'bg-[#4573A2] text-white' : 'bg-white border border-gray-200 text-gray-800'
+      }`}>
+        {!alignRight && message.sender_rolle && (
+          <p className="text-[10px] font-semibold text-gray-500 mb-0.5 uppercase">{message.sender_rolle}</p>
+        )}
+        <p className="text-sm whitespace-pre-wrap">{message.nachricht}</p>
+        {message.hat_anhang && message.anhang_url && (
+          <a href={message.anhang_url} target="_blank" rel="noopener noreferrer" className={`text-xs underline mt-1 block ${alignRight ? 'text-white/80' : 'text-[#4573A2]'}`}>
+            Anhang oeffnen
+          </a>
+        )}
+        <p className={`text-[10px] mt-1 ${alignRight ? 'text-white/60' : 'text-gray-400'}`}>
+          {new Date(message.created_at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+        </p>
+      </div>
+    </div>
+  )
+}
