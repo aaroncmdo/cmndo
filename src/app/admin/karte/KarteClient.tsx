@@ -184,15 +184,15 @@ export default function KarteClient({ sachverstaendige, faelle }: { sachverstaen
   }, [apiKey])
 
   // ─── Filtered SVs (gelöschte sind bereits durch DB-Query ausgeschlossen) ──
-  // BUG-92 Korrektur: Onboarding-Status binaer aus portal_zugang_freigeschaltet
-  // ableiten. Gesperrt hat Vorrang. Sub-Status (Wartet auf Vertrag/Anzahlung)
-  // bleibt nur als kleine Info-Badge pro Zeile, NICHT als Filter-Kategorie.
+  // AAR-53: "Aktiv" zeigt alle nicht-gesperrten UND nicht-deaktivierten SVs,
+  // unabhaengig vom Freischaltungsstatus. Sub-Status (Wartet auf Freischaltung)
+  // erscheint als Badge pro Zeile, NICHT als Filter.
   const filteredByStatus = sachverstaendige.filter(sv => {
     const istGesperrt = !!sv.gesperrtSeit
-    const istFreigeschaltet = sv.portalZugangFreigeschaltet === true
+    const istDeaktiviert = sv.istAktiv === false
     if (svFilter === 'gesperrt') return istGesperrt
-    if (svFilter === 'aktive') return !istGesperrt && istFreigeschaltet
-    if (svFilter === 'deaktivierte') return !istGesperrt && !istFreigeschaltet
+    if (svFilter === 'aktive') return !istGesperrt && !istDeaktiviert
+    if (svFilter === 'deaktivierte') return !istGesperrt && istDeaktiviert
     return true // 'alle'
   })
 
