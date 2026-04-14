@@ -3,14 +3,14 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  LayoutDashboardIcon, UsersIcon, PhoneIcon, SettingsIcon, LogOutIcon,
+  LayoutDashboardIcon, UsersIcon, PhoneIcon, LogOutIcon,
 } from 'lucide-react'
 
+// AAR-63: /dispatch/einstellungen Link entfernt (Route existiert nicht → 404)
 const NAV_ITEMS = [
   { href: '/dispatch/dashboard', label: 'Dashboard', icon: LayoutDashboardIcon },
   { href: '/dispatch/leads', label: 'Leads', icon: UsersIcon },
   { href: '/dispatch/rueckrufe', label: 'Rückrufe', icon: PhoneIcon },
-  { href: '/dispatch/einstellungen', label: 'Einstellungen', icon: SettingsIcon },
 ]
 
 export default function DispatchNav({ email, initials }: { email: string; initials: string }) {
