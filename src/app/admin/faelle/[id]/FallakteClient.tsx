@@ -9,6 +9,7 @@ import { updateFall } from './actions'
 import DokumenteTab from './DokumenteTab'
 import VsRegulierungTab from './components/VsRegulierungTab'
 import AIAssistantTab from './_components/AIAssistantTab'
+import LexDriveTriggerPanel from './_components/LexDriveTriggerPanel'
 import FallActivityFeed, { buildActivityEvents } from '@/components/faelle/FallActivityFeed'
 import FallDokumenteSidebar, { type FallDokumentRow } from '@/components/faelle/FallDokumenteSidebar'
 import TaskList from '@/components/tasks/TaskList'
@@ -920,7 +921,12 @@ export default function FallakteClient({
           />
         )}
         {activeTab === 'vs-regulierung' && (
-          <VsRegulierungTab fall={fall} />
+          <div className="space-y-4">
+            <VsRegulierungTab fall={fall} />
+            <div className="p-4 md:p-6">
+              <LexDriveTriggerPanel fallId={fall.id} />
+            </div>
+          </div>
         )}
         {activeTab === 'ai' && (
           <div className="p-4 md:p-6">
