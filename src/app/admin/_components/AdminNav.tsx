@@ -65,7 +65,10 @@ export default function AdminNav({ email, initials, unreadNachrichten }: { email
             )
           })}
 
-          <p className="text-[10px] uppercase tracking-wider text-[#7BA3CC] px-3 pt-5 pb-2">Verwaltung</p>
+          {/* AAR-55: Verwaltung-Sektion visuell deutlicher */}
+          <div className="mt-6 pt-4 border-t border-white/10">
+            <p className="text-xs font-semibold uppercase tracking-wider text-white/60 px-3 pb-2">Verwaltung</p>
+          </div>
           {NAV_SECONDARY.map((item) => {
             const active = isActive(item.href)
             return (
