@@ -1,5 +1,6 @@
 'use client'
 
+// AAR-98: Migriert von admin/dispatch/lead - nutzt dispatch/leads/[id]/actions
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveRueckruf, markRueckrufErledigt } from './actions'
@@ -49,18 +50,18 @@ export default function RueckrufSection({
     <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-5">
       <div className="flex items-center gap-2 mb-4">
         <PhoneCallIcon className="w-4 h-4 text-amber-400" />
-        <h2 className="text-sm font-medium text-gray-500">Rückruftermin</h2>
+        <h2 className="text-sm font-medium text-gray-500">Rueckruftermin</h2>
         {isErledigt && (
-          <span className="ml-auto bg-emerald-50 text-emerald-400 text-xs px-2 py-0.5 rounded-full">Erledigt</span>
+          <span className="ml-auto bg-emerald-50 text-emerald-500 text-xs px-2 py-0.5 rounded-full">Erledigt</span>
         )}
         {!isErledigt && hasDatum && inPast && (
-          <span className="ml-auto bg-red-50 text-red-400 text-xs font-semibold px-2 py-0.5 rounded-full">ÜBERFÄLLIG</span>
+          <span className="ml-auto bg-red-50 text-red-500 text-xs font-semibold px-2 py-0.5 rounded-full">UEBERFAELLIG</span>
         )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">Datum & Uhrzeit</label>
+          <label className="text-xs text-gray-500 mb-1 block">Datum &amp; Uhrzeit</label>
           <input
             type="datetime-local"
             value={datum}
@@ -84,7 +85,7 @@ export default function RueckrufSection({
         <button
           onClick={handleSave}
           disabled={saving}
-          className="bg-[#4573A2] hover:bg-[#4573A2] disabled:opacity-50 text-white text-sm font-medium rounded-xl px-4 py-2 transition-colors"
+          className="bg-[#4573A2] hover:bg-[#0D1B3E] disabled:opacity-50 text-white text-sm font-medium rounded-xl px-4 py-2 transition-colors"
         >
           {saving ? 'Speichert ...' : 'Termin speichern'}
         </button>
@@ -96,11 +97,11 @@ export default function RueckrufSection({
             className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl px-4 py-2 transition-colors"
           >
             <CheckCircle2Icon className="w-3.5 h-3.5" />
-            Rückruf erledigt
+            Rueckruf erledigt
           </button>
         )}
 
-        {saved && <span className="text-emerald-400 text-xs">Gespeichert</span>}
+        {saved && <span className="text-emerald-500 text-xs">Gespeichert</span>}
       </div>
     </div>
   )

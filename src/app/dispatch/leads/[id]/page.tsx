@@ -6,6 +6,7 @@ import LeadDetailActions from './LeadDetailActions'
 import Schritt0HardGate from './Schritt0HardGate'
 import SchadentypPicker from './SchadentypPicker'
 import CardentityButton from './CardentityButton'
+import RueckrufSection from './RueckrufSection'
 import AircallCallButton from '@/components/AircallCallButton'
 import { computeHardGateStatus } from './hard-gate-utils'
 import { computeFlowLinkStufe, FLOWLINK_STUFE_LABEL } from '@/lib/dispatch/fahrzeug-marken'
@@ -98,6 +99,14 @@ export default async function DispatchLeadDetail({
         <div className="lg:col-span-2 space-y-4">
           {/* AAR-80: Schritt 0 Hard Gate */}
           <Schritt0HardGate lead={lead as Parameters<typeof Schritt0HardGate>[0]['lead']} />
+
+          {/* AAR-98: Rueckruf (migriert von admin/dispatch/lead) */}
+          <RueckrufSection lead={{
+            id: lead.id,
+            rueckruf_datum: lead.rueckruf_datum,
+            rueckruf_notiz: lead.rueckruf_notiz,
+            rueckruf_erledigt: lead.rueckruf_erledigt,
+          }} />
 
           {/* AAR-81+83: Schadentyp Picker + Parkplatz-Kamera */}
           <SchadentypPicker

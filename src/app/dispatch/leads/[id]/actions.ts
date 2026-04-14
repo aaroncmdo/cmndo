@@ -124,6 +124,46 @@ export async function saveSchadentyp(
   return { success: true, disqualifiziert }
 }
 
+// AAR-98: Rueckruf speichern + als erledigt markieren (migriert von admin/dispatch/lead)
+export async function saveRueckruf(leadId: string, datumIso: string | null, notiz: string | null) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const { error } = await supabase
+    .from('leads')
+    .update({
+      rueckruf_datum: datumIso,
+      rueckruf_notiz: notiz,
+      rueckruf_erledigt: false,
+      qualifizierungs_phase: datumIso ? 'rueckruf' : undefined,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', leadId)
+
+  if (error) throw new Error(error.message)
+  revalidatePath(`/dispatch/leads/${leadId}`)
+  revalidatePath('/dispatch/rueckrufe')
+}
+
+export async function markRueckrufErledigt(leadId: string) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const { error } = await supabase
+    .from('leads')
+    .update({
+      rueckruf_erledigt: true,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', leadId)
+
+  if (error) throw new Error(error.message)
+  revalidatePath(`/dispatch/leads/${leadId}`)
+  revalidatePath('/dispatch/rueckrufe')
+}
+
 // AAR-84: Cardentity-Anreicherung
 export async function enrichLeadCardentity(leadId: string): Promise<{ success: boolean; updatedFields?: string[]; error?: string }> {
   const supabase = await createClient()
