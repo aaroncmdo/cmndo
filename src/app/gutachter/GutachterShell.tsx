@@ -23,6 +23,8 @@ import {
   RouteIcon,
   EuroIcon,
   AlertCircleIcon,
+  ClipboardListIcon,
+  FileSignatureIcon,
 } from 'lucide-react'
 import NotificationBell from '@/app/admin/_components/NotificationBell'
 import OutboxBadge from '@/components/offline/OutboxBadge'
@@ -32,6 +34,7 @@ const NAV_ITEMS_BASE = [
   { href: '/gutachter/heute', label: 'Heute', icon: MapPinIcon },
   { href: '/gutachter', label: 'Dashboard', icon: LayoutDashboardIcon },
   { href: '/gutachter/faelle', label: 'Meine Fälle', icon: FolderOpenIcon },
+  { href: '/gutachter/auftraege', label: 'Aufträge', icon: ClipboardListIcon },
   { href: '/gutachter/tasks', label: 'Tasks', icon: CheckSquareIcon },
   { href: '/gutachter/mitteilungen', label: 'Mitteilungen', icon: InboxIcon },
   { href: '/gutachter/stellungnahme', label: 'Stellungnahmen', icon: FileTextIcon },
@@ -43,6 +46,7 @@ const NAV_ITEMS_BASE = [
   { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
   { href: '/gutachter/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
   { href: '/gutachter/statistiken', label: 'Statistiken', icon: BarChart3Icon },
+  { href: '/gutachter/vertrag', label: 'Vertrag', icon: FileSignatureIcon },
 ]
 
 type HourW = { hour: number; temp: number; code: number }
