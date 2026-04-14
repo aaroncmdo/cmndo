@@ -59,6 +59,21 @@ Notion-Page „📨 WhatsApp Templates — Twilio Content API Setup":
 
 Variablen-Zählung matcht `src/lib/whatsapp/template-sids.ts`.
 
+## recalc-all-isochrones.mjs (AAR-132)
+
+Einmalig alle `sachverstaendige.isochrone_polygon` Einträge mit HERE API
+neu berechnen (nach dem OSRM→HERE-Wechsel). Idempotent, kann mehrfach laufen.
+
+### Ausführung
+
+```bash
+HERE_API_KEY=xxx \
+SUPABASE_URL=xxx SUPABASE_SERVICE_ROLE_KEY=xxx \
+  node scripts/recalc-all-isochrones.mjs
+```
+
+Rate-Limit: 200 ms zwischen Calls (HERE Free-Tier erlaubt 5 req/sec).
+
 ## Weitere Skripte
 
 - `submit-twilio-templates.ts` — ältere TypeScript-Variante mit längeren
