@@ -70,9 +70,15 @@ type LeadFields = {
   zeugen?: boolean | null
 }
 
-// Auto-Format für deutsche Kennzeichen: alles groß + Whitespace entfernen
+// Auto-Format für deutsche Kennzeichen mit Pattern-Matching.
+// AAR-188 Fix #4: Aus „KAB1234" / „ko ab 123" → „K-AB 1234" / „KO-AB 123".
+// Bei unvollständiger / nicht erkennbarer Eingabe geben wir cleaned Uppercase
+// zurück (ohne Spaces/Bindestriche) damit der MA korrigieren kann.
 function formatKennzeichen(raw: string): string {
-  return raw.toUpperCase().replace(/\s+/g, ' ').trim()
+  const clean = raw.replace(/[\s-]/g, '').toUpperCase()
+  const m = clean.match(/^([A-ZÄÖÜ]{1,3})([A-Z]{1,2})(\d{1,4}[A-Z]?)$/)
+  if (m) return `${m[1]}-${m[2]} ${m[3]}`
+  return clean
 }
 
 // AAR-181: Baujahr-Input kommt als String rein, DB-Spalte ist INTEGER.
@@ -320,12 +326,14 @@ export default function Phase4Stammdaten() {
           />
 
           {/* AAR-177 Fix #3: Eigentümer-Typ mit Info-Tooltip + Label.
-              Fix #6: Leasing/Gewerblich kontextuelle Hilfe-Box — MA weiß
-              sofort was der nächste Arbeitsschritt ist. */}
+              Fix #6: Leasing/Gewerblich kontextuelle Hilfe-Box.
+              AAR-188 Fix #3: Label explizit auf Fahrzeug-Eigentümer laut
+              ZB1 bezogen — der MA weiß dann dass der Anrufer nicht
+              zwingend der Halter sein muss. */}
           <div className="space-y-1 sm:col-span-2">
             <label className="text-[10px] text-gray-400 uppercase tracking-wider flex items-center gap-1">
               <UserCheckIcon className="w-3 h-3" />
-              Eigentümer-Typ
+              Fahrzeug-Eigentümer (laut Fahrzeugschein/ZB1)
               <span
                 className="text-gray-400 cursor-help"
                 title="Privat = Kunde ist Eigentümer + nicht vorsteuerabzugsberechtigt. Leasing = Leasing-Fahrzeug → Vollmacht vom Leasinggeber nötig. Gewerblich = Firma als Eigentümer, Netto-Regulierung (Vorsteuer ziehbar)."
@@ -333,6 +341,9 @@ export default function Phase4Stammdaten() {
                 <InfoIcon className="w-3 h-3" />
               </span>
             </label>
+            <p className="text-[10px] text-gray-400">
+              Wer steht als Halter im Fahrzeugschein? Nicht zwingend der Anrufer.
+            </p>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -392,17 +403,31 @@ export default function Phase4Stammdaten() {
                 Gewerblich
               </button>
             </div>
-            {/* AAR-177 Fix #6: Kontext-Hilfe-Boxen — erscheinen je nach Auswahl */}
+            {/* AAR-177 Fix #6 / AAR-188 Fix #5: Kontext-Hilfe-Boxen.
+                Leasing + Finanzierung jetzt als Gesprächshilfe formuliert
+                (statt aktionsorientiert „Vollmacht 48h" — falsch, weil
+                die Kanzlei das nach dem Gutachten klärt, nicht beim
+                Erstgespräch). */}
             {l.finanzierung_leasing === 'leasing' && (
               <div className="mt-2 rounded-md bg-amber-50 border border-amber-200 p-2 space-y-1">
                 <p className="text-[11px] font-semibold text-amber-900 flex items-center gap-1">
-                  <InfoIcon className="w-3 h-3" /> Nächste Schritte bei Leasing
+                  <InfoIcon className="w-3 h-3" /> Gesprächshilfe bei Leasing
                 </p>
-                <ul className="text-[10px] text-amber-800 list-disc list-inside space-y-0.5">
-                  <li>Leasinggeber-Name + Vertragsnummer am Telefon aufnehmen</li>
-                  <li>Leasing-Vollmacht anfordern — Frist 48h (Kanzlei schickt Formular)</li>
-                  <li>Reparatur darf erst nach Vollmacht-Erteilung freigegeben werden</li>
-                </ul>
+                <p className="text-[10px] text-amber-800 italic">
+                  „Falls Sie Fragen wegen Ihrer Leasingbank haben — das klären
+                  wir nach dem Gutachten gemeinsam. Sie müssen jetzt nichts tun."
+                </p>
+              </div>
+            )}
+            {l.finanzierung_leasing === 'finanzierung' && (
+              <div className="mt-2 rounded-md bg-amber-50 border border-amber-200 p-2 space-y-1">
+                <p className="text-[11px] font-semibold text-amber-900 flex items-center gap-1">
+                  <InfoIcon className="w-3 h-3" /> Gesprächshilfe bei Finanzierung
+                </p>
+                <p className="text-[10px] text-amber-800 italic">
+                  „Bei finanziertem Fahrzeug informieren wir Sie nach dem
+                  Gutachten über die nächsten Schritte."
+                </p>
               </div>
             )}
             {l.vorsteuerabzugsberechtigt === true && (
