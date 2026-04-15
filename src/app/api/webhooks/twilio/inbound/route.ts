@@ -207,6 +207,10 @@ export async function POST(req: NextRequest) {
                 zb1_ocr_daten: { raw_text: fullText, extracted, ts: new Date().toISOString() },
                 updated_at: new Date().toISOString(),
               }
+              // AAR-208 Bug 1: FIN wurde vorher NICHT geschrieben — jetzt
+              // in leads.fin (Spalten-Name ist 'fin' auf leads, 'fin_vin' auf
+              // faelle — enrich-fahrzeug.ts kennt beide Varianten).
+              if (extracted.fin_vin) leadUpdate.fin = extracted.fin_vin
               if (extracted.kennzeichen) leadUpdate.kennzeichen = extracted.kennzeichen
               if (extracted.fahrzeug_hersteller) leadUpdate.fahrzeug_hersteller = extracted.fahrzeug_hersteller
               if (extracted.fahrzeug_modell) leadUpdate.fahrzeug_modell = extracted.fahrzeug_modell
@@ -217,7 +221,18 @@ export async function POST(req: NextRequest) {
               if (extracted.halter_strasse) leadUpdate.halter_strasse = extracted.halter_strasse
               if (extracted.halter_plz) leadUpdate.halter_plz = extracted.halter_plz
               if (extracted.halter_stadt) leadUpdate.halter_stadt = extracted.halter_stadt
+              // AAR-208: HSN/TSN aus OCR (Migration aar208_leads_hsn_tsn)
+              if (extracted.hsn) leadUpdate.hsn = extracted.hsn
+              if (extracted.tsn) leadUpdate.tsn = extracted.tsn
               await db.from('leads').update(leadUpdate).eq('id', matchedLeadId)
+
+              // AAR-208 Bug 1: Cardentity-Auto-Trigger wenn FIN gefunden —
+              // Vorschaden-Check für den Lead. Non-blocking.
+              if (extracted.fin_vin) {
+                import('@/lib/cardentity/enrich-fahrzeug')
+                  .then(({ enrichLeadByFin }) => enrichLeadByFin(matchedLeadId))
+                  .catch((err) => console.warn('[AAR-208] Cardentity-Trigger fehlgeschlagen:', err))
+              }
             }
           }
         }

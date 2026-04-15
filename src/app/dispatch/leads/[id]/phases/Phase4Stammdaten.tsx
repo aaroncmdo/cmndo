@@ -69,6 +69,14 @@ type LeadFields = {
   schadentyp?: string | null
   parkplatz_kamera?: boolean | null
   zeugen?: boolean | null
+  // AAR-208: Halter-Daten aus ZB1-OCR (Fahrzeugschein)
+  halter_vorname?: string | null
+  halter_nachname?: string | null
+  halter_strasse?: string | null
+  halter_plz?: string | null
+  halter_stadt?: string | null
+  hsn?: string | null
+  tsn?: string | null
 }
 
 // Auto-Format für deutsche Kennzeichen mit Pattern-Matching.
@@ -524,6 +532,42 @@ export default function Phase4Stammdaten() {
             )}
           </div>
         </div>
+
+        {/* AAR-208: Halter-Anzeige aus ZB1-OCR. Wenn Halter-Nachname ≠
+            Anrufer-Nachname → Warnung, weil Vollmacht vom Halter nötig ist. */}
+        {l.halter_nachname && (
+          <div className="mt-3 rounded-lg bg-blue-50 border border-blue-200 p-3 space-y-1">
+            <p className="text-[10px] text-blue-700 font-semibold uppercase tracking-wider flex items-center gap-1">
+              <UserCheckIcon className="w-3 h-3" />
+              Halter laut ZB1 (Fahrzeugschein)
+            </p>
+            <p className="text-sm text-gray-900 font-medium">
+              {[l.halter_vorname, l.halter_nachname].filter(Boolean).join(' ')}
+            </p>
+            {(l.halter_strasse || l.halter_plz || l.halter_stadt) && (
+              <p className="text-xs text-gray-600">
+                {l.halter_strasse}
+                {l.halter_strasse && (l.halter_plz || l.halter_stadt) && ', '}
+                {l.halter_plz} {l.halter_stadt}
+              </p>
+            )}
+            {(l.hsn || l.tsn) && (
+              <p className="text-[10px] text-gray-500">
+                HSN/TSN: {l.hsn ?? '—'} / {l.tsn ?? '—'}
+              </p>
+            )}
+            {l.nachname && l.halter_nachname &&
+              l.halter_nachname.trim().toLowerCase() !== l.nachname.trim().toLowerCase() && (
+              <div className="mt-2 rounded-md bg-amber-50 border border-amber-200 p-2 flex items-start gap-1.5">
+                <AlertTriangleIcon className="w-3.5 h-3.5 text-amber-700 mt-0.5 shrink-0" />
+                <p className="text-[11px] text-amber-900">
+                  <strong>Halter ≠ Anrufer</strong> — bitte mit Kunde klären: Ist der Halter
+                  mit der Vertretung einverstanden? Vollmacht wird vom Halter benötigt.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* AAR-177 Fix #1: CardentityButton entfernt — Anreicherung läuft
             automatisch nach ZB1-OCR, kein manueller Trigger mehr nötig. */}
