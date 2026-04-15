@@ -213,6 +213,16 @@ export async function enrichLeadCardentity(leadId: string): Promise<{ success: b
 }
 
 // AAR-80: Schritt 0 Hard Gate — Q1/Q2/Q3
+// AAR-124: Unfallort (Google Places) + Polizei-vor-Ort ergänzt
+export type UnfallortKategorie =
+  | 'parkplatz'
+  | 'strasse'
+  | 'autobahn'
+  | 'kreuzung'
+  | 'tankstelle'
+  | 'innenstadt'
+  | 'sonstiges'
+
 export type HardGateData = {
   unfallhergang?: string
   schuldfrage?: 'gegner' | 'unklar' | 'eigenverantwortung'
@@ -222,6 +232,15 @@ export type HardGateData = {
   mietwagen_flag?: boolean
   nutzungsausfall?: boolean
   hat_haftpflicht?: boolean
+  // AAR-124: Unfallort
+  unfallort?: string
+  unfallort_kategorie?: UnfallortKategorie
+  unfallort_lat?: number | null
+  unfallort_lng?: number | null
+  // AAR-124: Polizei-vor-Ort
+  polizei_vor_ort?: boolean
+  polizei_aktenzeichen?: string | null
+  polizeibericht_pflicht?: boolean
 }
 
 export async function saveHardGate(
@@ -267,7 +286,21 @@ export async function saveHardGate(
     ...(data.mietwagen_flag !== undefined && { mietwagen_flag: data.mietwagen_flag }),
     ...(data.nutzungsausfall !== undefined && { nutzungsausfall: data.nutzungsausfall }),
     ...(data.hat_haftpflicht !== undefined && { hat_haftpflicht: data.hat_haftpflicht }),
+    // AAR-124: Unfallort + Polizei
+    ...(data.unfallort !== undefined && { unfallort: data.unfallort }),
+    ...(data.unfallort_kategorie !== undefined && { unfallort_kategorie: data.unfallort_kategorie }),
+    ...(data.unfallort_lat !== undefined && { unfallort_lat: data.unfallort_lat }),
+    ...(data.unfallort_lng !== undefined && { unfallort_lng: data.unfallort_lng }),
+    ...(data.polizei_vor_ort !== undefined && { polizei_vor_ort: data.polizei_vor_ort }),
+    ...(data.polizei_aktenzeichen !== undefined && { polizei_aktenzeichen: data.polizei_aktenzeichen }),
     updated_at: new Date().toISOString(),
+  }
+
+  // AAR-124 Business-Rule: polizei_vor_ort=true → polizeibericht_pflicht=true
+  if (data.polizei_vor_ort === true) {
+    updates.polizeibericht_pflicht = true
+  } else if (data.polizeibericht_pflicht !== undefined) {
+    updates.polizeibericht_pflicht = data.polizeibericht_pflicht
   }
 
   if (disqualifiziert) {
