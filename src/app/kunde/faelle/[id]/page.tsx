@@ -89,8 +89,18 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       .limit(1)
       .maybeSingle()
 
-    // Progress berechnen
-    const szenario = ((fall.szenario as string) ?? 'normalfall') as keyof typeof SZENARIO_PHASEN
+    // AAR-171: Szenario aus DB übernehmen, aber auto-bump auf ruegefall/klagefall
+    // wenn der Status das bereits signalisiert — so muss der KB nicht manuell
+    // szenario setzen, der Kunde sieht trotzdem die richtige Erklär-Phase.
+    const fallStatus = (fall.status as string) ?? ''
+    let szenario = ((fall.szenario as string) ?? 'normalfall') as keyof typeof SZENARIO_PHASEN
+    if (fallStatus === 'klage' && szenario !== 'klagefall') szenario = 'klagefall'
+    else if (
+      ['vs-kuerzt', 'vs-abgelehnt', 'nachbesichtigung-laeuft'].includes(fallStatus) &&
+      szenario === 'normalfall'
+    ) {
+      szenario = 'ruegefall'
+    }
     const phasen = SZENARIO_PHASEN[szenario] ?? SZENARIO_PHASEN.normalfall
     const progress = berechneProgress(fall as Record<string, unknown>, phasen)
 
@@ -138,6 +148,66 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
               <p className="text-sm font-semibold text-violet-800">Nachbesichtigung läuft</p>
               <p className="text-xs text-violet-600">Die Versicherung hat eine erneute Besichtigung angefordert. Ihr Fall wird fortgesetzt sobald das Ergebnis vorliegt.</p>
             </div>
+          </div>
+        )}
+
+        {/* AAR-171: VS-Kürzung / VS-Ablehnung — Kunde transparent informieren
+            welchen Betrag die Versicherung gekürzt hat und dass die Kanzlei
+            bereits an der Rüge arbeitet. */}
+        {(fall.status as string) === 'vs-kuerzt' && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-amber-700 text-lg">&#9888;</span>
+              <p className="text-sm font-semibold text-amber-900">Versicherung hat gekürzt</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              {(fall as Record<string, unknown>).kuerzungs_betrag != null && (
+                <div>
+                  <p className="text-amber-700">Kürzungsbetrag</p>
+                  <p className="text-amber-900 font-semibold">
+                    {Number((fall as Record<string, unknown>).kuerzungs_betrag).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
+                  </p>
+                </div>
+              )}
+              {(fall as Record<string, unknown>).regulierung_betrag != null && (
+                <div>
+                  <p className="text-amber-700">Teilregulierung</p>
+                  <p className="text-amber-900 font-semibold">
+                    {Number((fall as Record<string, unknown>).regulierung_betrag).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
+                  </p>
+                </div>
+              )}
+            </div>
+            {typeof (fall as Record<string, unknown>).vs_kuerzung_grund === 'string' &&
+              ((fall as Record<string, unknown>).vs_kuerzung_grund as string) && (
+                <div className="rounded-md bg-white/60 border border-amber-200 p-2 text-[11px] text-amber-800">
+                  <strong className="block mb-0.5">Begründung der Versicherung:</strong>
+                  {(fall as Record<string, unknown>).vs_kuerzung_grund as string}
+                </div>
+              )}
+            <p className="text-[11px] text-amber-700">
+              Die Partnerkanzlei bereitet eine Rüge vor. Sie müssen nichts tun — wir melden uns bei Fortschritt.
+            </p>
+          </div>
+        )}
+
+        {/* AAR-171: VS hat abgelehnt — noch härterer Hinweis */}
+        {(fall.status as string) === 'vs-abgelehnt' && (
+          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 space-y-1">
+            <p className="text-sm font-semibold text-red-900">Versicherung hat abgelehnt</p>
+            <p className="text-xs text-red-700">
+              Die Versicherung lehnt die Regulierung ab. Unsere Partnerkanzlei prüft den Fall und meldet sich mit den nächsten Schritten (Rüge oder Klage-Empfehlung).
+            </p>
+          </div>
+        )}
+
+        {/* AAR-171: Klage übergeben — Kunde sieht dass der Fall bei der Kanzlei liegt */}
+        {(fall.status as string) === 'klage' && (
+          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 space-y-1">
+            <p className="text-sm font-semibold text-red-900">Fall wird gerichtlich geklärt</p>
+            <p className="text-xs text-red-700">
+              Ihr Fall wurde an unsere Partnerkanzlei übergeben. Die weitere Kommunikation läuft direkt mit der Kanzlei. Claimondo begleitet den Fall bis zum Abschluss.
+            </p>
           </div>
         )}
 

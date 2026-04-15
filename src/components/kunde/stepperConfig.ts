@@ -1,4 +1,8 @@
-// KFZ-126 NEU: Stepper-Konfiguration mit Szenario-Unterstuetzung
+// KFZ-126 NEU: Stepper-Konfiguration mit Szenario-Unterstützung
+// AAR-171: Subphasen-Matrix aus src/lib/fall/phase-config.ts hier gespiegelt —
+// neue Status-Codes (as-vorbereitung / as-versendet / warten-auf-vs /
+// vs-kuerzt / nachbesichtigung-laeuft / vs-reguliert / regulierung-laeuft /
+// zahlung-eingegangen / klage) werden jetzt auch vom Kunden-Stepper erkannt.
 
 export type Phase = {
   key: string
@@ -79,6 +83,7 @@ export function berechneProgress(fall: Record<string, unknown>, phasen: Phase[])
   const terminStatus = (fall.gutachter_termin_status as string) ?? ''
   const gutachtenAm = fall.gutachten_eingegangen_am as string | null
   const regulierungAm = fall.regulierung_am as string | null
+  const zahlungEingangAm = fall.zahlung_eingegangen_am as string | null
 
   function pct(phaseIdx: number, subIdx: number): number {
     const p = phasen[phaseIdx]
@@ -88,19 +93,63 @@ export function berechneProgress(fall: Record<string, unknown>, phasen: Phase[])
     return Math.round(p.pctFrom + subPct)
   }
 
+  // ─── Phase 8: Abschluss ────────────────────────────────────────────────
   if (status === 'abgeschlossen') return { phase: 7, subStep: 2, pct: 100 }
-  if (regulierungAm) return { phase: 7, subStep: 1, pct: pct(7, 1) }
-  if (status === 'regulierung') return { phase: 6, subStep: 1, pct: pct(6, 1) }
-  if (status === 'anschlussschreiben') return { phase: 6, subStep: 0, pct: pct(6, 0) }
-  if (status === 'kanzlei-uebergeben') return { phase: 5, subStep: 0, pct: pct(5, 0) }
-  if (status === 'filmcheck' || status === 'qc-pruefung') return { phase: 4, subStep: 2, pct: pct(4, 2) }
-  if (gutachtenAm || status === 'gutachten-eingegangen') return { phase: 4, subStep: 1, pct: pct(4, 1) }
-  if (status === 'besichtigung') return { phase: 3, subStep: 1, pct: pct(3, 1) }
+  if (zahlungEingangAm || status === 'zahlung-eingegangen') {
+    return { phase: 7, subStep: 1, pct: pct(7, 1) }
+  }
+  if (regulierungAm) return { phase: 7, subStep: 0, pct: pct(7, 0) }
+
+  // ─── Phase 6/7: Klage → Rüge/VS-Kürzung/Nachbesichtigung ───────────────
+  // Klage greift vor jedem anderen VS-Reaktions-Status — Kunde sieht
+  // „Einwände wurden gerichtlich geklärt".
+  if (status === 'klage') return { phase: 6, subStep: phasen[6]?.subs.length ? phasen[6].subs.length - 1 : 0, pct: pct(6, (phasen[6]?.subs.length ?? 1) - 1) }
+  if (status === 'nachbesichtigung-laeuft') return { phase: 6, subStep: 3, pct: pct(6, 3) }
+  if (status === 'vs-kuerzt' || status === 'vs-abgelehnt') return { phase: 6, subStep: 2, pct: pct(6, 2) }
+  if (status === 'warten-auf-vs') return { phase: 6, subStep: 1, pct: pct(6, 1) }
+  if (status === 'vs-reguliert' || status === 'regulierung-laeuft' || status === 'regulierung') {
+    return { phase: 6, subStep: 0, pct: pct(6, 0) }
+  }
+
+  // ─── Phase 5: Kanzlei + AS ─────────────────────────────────────────────
+  if (status === 'as-versendet' || status === 'anschlussschreiben') {
+    return { phase: 5, subStep: 1, pct: pct(5, 1) }
+  }
+  if (
+    status === 'as-vorbereitung' ||
+    status === 'kanzlei-uebergeben' ||
+    status === 'akte-uebergeben'
+  ) {
+    return { phase: 5, subStep: 0, pct: pct(5, 0) }
+  }
+
+  // ─── Phase 4: Gutachten ────────────────────────────────────────────────
+  if (status === 'filmcheck' || status === 'qc-pruefung' || status === 'gutachten-erstellt') {
+    return { phase: 4, subStep: 2, pct: pct(4, 2) }
+  }
+  if (gutachtenAm || status === 'gutachten-eingegangen' || status === 'gutachten-bearbeitung') {
+    return { phase: 4, subStep: 1, pct: pct(4, 1) }
+  }
+
+  // ─── Phase 3: Besichtigung ─────────────────────────────────────────────
+  if (status === 'besichtigung-laeuft' || status === 'besichtigung' || status === 'begutachtung-laeuft') {
+    return { phase: 3, subStep: 1, pct: pct(3, 1) }
+  }
+
+  // ─── Phase 2: SV-Suche + Termin ────────────────────────────────────────
   if (terminStatus === 'bestaetigt' && svTermin) return { phase: 2, subStep: 2, pct: pct(2, 2) }
-  if (svTermin) return { phase: 2, subStep: 1, pct: pct(2, 1) }
-  if (svId) return { phase: 2, subStep: 0, pct: pct(2, 0) }
+  if (svTermin || status === 'termin-reserviert' || status === 'sv-termin') {
+    return { phase: 2, subStep: 1, pct: pct(2, 1) }
+  }
+  if (svId || status === 'sv-gesucht' || status === 'sv-zugewiesen') {
+    return { phase: 2, subStep: 0, pct: pct(2, 0) }
+  }
+
+  // ─── Phase 1: SA ────────────────────────────────────────────────────────
   if (sa && kundeId) return { phase: 1, subStep: 2, pct: pct(1, 2) }
   if (sa) return { phase: 1, subStep: 1, pct: pct(1, 1) }
+
+  // ─── Phase 0: Kontakt ──────────────────────────────────────────────────
   if (status !== 'ersterfassung') return { phase: 0, subStep: 1, pct: pct(0, 1) }
   return { phase: 0, subStep: 0, pct: pct(0, 0) }
 }
