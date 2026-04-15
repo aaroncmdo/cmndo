@@ -119,6 +119,8 @@ function isPublicPath(pathname: string): boolean {
     '/passwort-zuruecksetzen',
     '/sv',
     '/kunde/termin',
+    // AAR-134: SV-Token-Ablehnung via Email-Link (kein Login nötig)
+    '/ablehnen',
     '/agb',
     '/nutzungsbedingungen',
     '/datenschutz',

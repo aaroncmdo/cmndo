@@ -415,11 +415,12 @@ export async function reserveSvTerminForLead(
   // Bestehende Reservierung zum Lead stornieren (nur 1 aktive Reservierung pro Lead)
   // gutachter_termine hat KEINE storniert_am-Spalte (nur faelle/abrechnungen haben das),
   // daher nur status-Update.
+  // AAR-134: 'abgelehnt' auch stornieren — verhindert Doppel-Termine nach SV-Ablehnung.
   await supabase
     .from('gutachter_termine')
     .update({ status: 'storniert' })
     .eq('lead_id', leadId)
-    .in('status', ['reserviert', 'gegenvorschlag'])
+    .in('status', ['reserviert', 'gegenvorschlag', 'abgelehnt'])
 
   const { data: inserted, error } = await supabase
     .from('gutachter_termine')
@@ -476,12 +477,14 @@ export async function cancelSvTerminForLead(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  // gutachter_termine hat keine storniert_am-Spalte — nur status-Update
+  // gutachter_termine hat keine storniert_am-Spalte — nur status-Update.
+  // AAR-134: 'abgelehnt' mit drin, damit Dispatcher aus der roten Card-View
+  // heraus den Termin schließen und einen neuen SV wählen kann.
   const { error } = await supabase
     .from('gutachter_termine')
     .update({ status: 'storniert' })
     .eq('lead_id', leadId)
-    .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
+    .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt', 'abgelehnt'])
 
   if (error) return { success: false, error: error.message }
 
