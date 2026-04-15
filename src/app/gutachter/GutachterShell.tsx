@@ -28,6 +28,7 @@ import {
 } from 'lucide-react'
 import NotificationBell from '@/app/admin/_components/NotificationBell'
 import OutboxBadge from '@/components/offline/OutboxBadge'
+import { CLAIMONDO_DEFAULT_THEME, type BrandTheme } from '@/lib/branding/theme'
 
 // AAR-60: Alle Gutachter-Routen verlinken
 const NAV_ITEMS_BASE = [
@@ -61,8 +62,8 @@ export default function GutachterShell({
   displayName,
   children,
   logoUrl,
-  brandPrimary,
-  brandSecondary,
+  brandTheme,
+  firmenname,
   standortLat,
   standortLng,
   showTeam,
@@ -71,8 +72,10 @@ export default function GutachterShell({
   displayName: string
   children: React.ReactNode
   logoUrl?: string | null
-  brandPrimary?: string | null
-  brandSecondary?: string | null
+  // AAR-220: Vollständiges Theme oder null (= Claimondo-Default).
+  brandTheme?: BrandTheme | null
+  // AAR-220: Firmenname für Logo-Alt-Text (Accessibility + SEO).
+  firmenname?: string | null
   standortLat?: number | null
   standortLng?: number | null
   // KFZ-152 Phase 2+3: conditional Nav fuer Team (Inhaber/Verwalter)
@@ -92,15 +95,20 @@ export default function GutachterShell({
     ...(showCommunity ? [{ href: '/gutachter/community', label: 'Community', icon: TrophyIcon }] : []),
   ]
 
-  // Apply brand colors
-  useEffect(() => {
-    if (brandPrimary) document.documentElement.style.setProperty('--brand-primary', brandPrimary)
-    if (brandSecondary) document.documentElement.style.setProperty('--brand-secondary', brandSecondary)
-    return () => {
-      document.documentElement.style.removeProperty('--brand-primary')
-      document.documentElement.style.removeProperty('--brand-secondary')
-    }
-  }, [brandPrimary, brandSecondary])
+  // AAR-220: Vollständiges Theme via CSS-Vars + sanfte Transition (1.5s).
+  // Wir setzen alle 6 Vars: --brand-primary, --brand-secondary, --brand-accent,
+  // --brand-sidebar-bg, --brand-text-on-primary, --brand-surface. Die alten
+  // --brand-primary/--brand-secondary bleiben für Backward-Compat erhalten.
+  const theme: BrandTheme = brandTheme ?? CLAIMONDO_DEFAULT_THEME
+  const useBrand = !!brandTheme
+  const themeVars = {
+    '--brand-primary': theme.primary,
+    '--brand-secondary': theme.secondary,
+    '--brand-accent': theme.accent,
+    '--brand-sidebar-bg': theme.sidebarBg,
+    '--brand-text-on-primary': theme.textOnPrimary,
+    '--brand-surface': theme.surface,
+  } as React.CSSProperties
 
   // Fetch 7-day weather
   useEffect(() => {
@@ -176,51 +184,89 @@ export default function GutachterShell({
   const tomorrowDaily = weather?.daily?.[1] ?? null
 
   return (
-    <div className="h-screen bg-[#f8f9fb] flex overflow-hidden">
+    <div className="h-screen flex overflow-hidden" style={{ ...themeVars, backgroundColor: 'var(--brand-surface)' }}>
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Sidebar */}
+      {/* AAR-220: Sidebar nutzt Theme-Vars + sanfte 1.5s Transition für
+          Background- und Border-Farben, damit Logo-Upload nicht ruckartig
+          umschaltet. */}
       <aside
         role="navigation"
         aria-label="Gutachter-Navigation"
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0D1B3E] flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
+        style={{
+          backgroundColor: 'var(--brand-sidebar-bg)',
+          color: 'var(--brand-text-on-primary)',
+          transition: 'background-color 1.5s ease, color 1.5s ease, transform 200ms ease',
+        }}
       >
         <div className="px-5 py-5 border-b border-white/10">
+          {/* AAR-220: Wenn Custom-Branding aktiv → Logo OHNE Filter auf
+              weißem rounded-Container damit farbige Logos echt aussehen.
+              Sonst (Default Claimondo) → brightness/invert für SVG-Logo. */}
           {logoUrl ? (
-            <Link href="/gutachter"><img src={logoUrl} alt="Claimondo Logo" className="h-8 w-auto max-w-36 object-contain brightness-0 invert" /></Link>
+            <Link href="/gutachter">
+              {useBrand ? (
+                <span className="inline-flex items-center justify-center bg-white rounded-lg p-2 shadow-sm">
+                  <img
+                    src={logoUrl}
+                    alt={firmenname ? `${firmenname} Logo` : 'Logo'}
+                    className="h-8 w-auto max-w-32 object-contain"
+                  />
+                </span>
+              ) : (
+                <img
+                  src={logoUrl}
+                  alt="Claimondo Logo"
+                  className="h-8 w-auto max-w-36 object-contain brightness-0 invert"
+                />
+              )}
+            </Link>
           ) : (
             <Link href="/gutachter" className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></Link>
           )}
-          <p className="text-[#7BA3CC] text-xs mt-0.5">Gutachter-Portal</p>
+          <p className="text-[#7BA3CC] text-xs mt-0.5">{firmenname ?? 'Gutachter-Portal'}</p>
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                isActive(href)
-                  ? 'bg-[#1E3A5F] text-white'
-                  : 'text-[#7BA3CC] hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <Icon className="w-5 h-5" />
-              {label}
-            </Link>
-          ))}
+          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+            const active = isActive(href)
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium ${
+                  active ? 'text-white' : 'text-white/60 hover:text-white hover:bg-white/5'
+                }`}
+                style={{
+                  backgroundColor: active ? 'var(--brand-secondary)' : undefined,
+                  transition: 'background-color 1.5s ease, color 200ms ease',
+                }}
+              >
+                <Icon className="w-5 h-5" />
+                {label}
+              </Link>
+            )
+          })}
         </nav>
 
         <div className="mt-auto px-3 py-3 border-t border-white/10 space-y-2">
           <Link href="/gutachter/profil" onClick={() => setSidebarOpen(false)}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-colors group">
-            <div className="w-10 h-10 rounded-full bg-[#4573A2] flex items-center justify-center text-white text-xs font-bold shrink-0">
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+              style={{
+                backgroundColor: 'var(--brand-accent)',
+                color: 'var(--brand-text-on-primary)',
+                transition: 'background-color 1.5s ease',
+              }}
+            >
               {displayName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
             </div>
             <div className="flex-1 min-w-0">
@@ -238,9 +284,16 @@ export default function GutachterShell({
 
       <div className="flex-1 flex flex-col min-w-0 h-screen">
         {/* Mobile Header (nur Hamburger + Logo, Glocke ist im Wetter-Banner) */}
-        {/* AAR-211: Header Navy statt weiß — war bei halber Bildschirmbreite
-            (< lg) weiß statt Navy, was mit dem Navy-Sidebar kollidierte. */}
-        <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#0D1B3E] shrink-0">
+        {/* AAR-211 + AAR-220: Header nutzt Theme-Sidebar-Bg (gleicher Look wie
+            Sidebar-Hintergrund) mit sanfter 1.5s Color-Transition. */}
+        <header
+          className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0"
+          style={{
+            backgroundColor: 'var(--brand-sidebar-bg)',
+            color: 'var(--brand-text-on-primary)',
+            transition: 'background-color 1.5s ease, color 1.5s ease',
+          }}
+        >
           <button onClick={() => setSidebarOpen(true)} className="p-2 -ml-2 text-white/70 hover:text-white transition-colors" aria-label="Menü öffnen">
             <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
           </button>

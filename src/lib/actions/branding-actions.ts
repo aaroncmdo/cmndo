@@ -136,13 +136,18 @@ export async function uploadSvLogo(formData: FormData): Promise<{
     console.error('[KFZ-157] Color-Extraction fehlgeschlagen, Defaults verwendet:', err)
   }
 
+  // AAR-220: Vollständiges Theme aus primary ableiten + zusätzlich speichern.
+  const { generateTheme } = await import('@/lib/branding/theme')
+  const theme = generateTheme(brand_primary)
+
   // Speichern + use_custom_branding aktivieren (das Logo wird ja jetzt
   // genutzt — sonst koennten wir uns die ganze Extraktion sparen).
   const { error } = await db.from('sachverstaendige').update({
     logo_url: logoUrl,
     brand_primary,
     brand_secondary,
-    brand_accent: brand_secondary,
+    brand_accent: theme.accent,
+    brand_theme: theme,
     brand_extracted_at: new Date().toISOString(),
     use_custom_branding: true,
   }).eq('id', svId)
@@ -212,12 +217,17 @@ export async function uploadBueroLogo(formData: FormData): Promise<{
     console.error('[KFZ-157] Buero-Color-Extraction fehlgeschlagen, Defaults verwendet:', err)
   }
 
+  // AAR-220: Theme ableiten + auf Org und Inhaber-SV speichern.
+  const { generateTheme: genTheme } = await import('@/lib/branding/theme')
+  const theme = genTheme(brand_primary)
+
   // Auf Org speichern → Sub-SVs erben das Branding via Layout-Lookup
   const { error } = await db.from('organisationen').update({
     logo_url: logoUrl,
     brand_primary,
     brand_secondary,
-    brand_accent: brand_secondary,
+    brand_accent: theme.accent,
+    brand_theme: theme,
     brand_extracted_at: new Date().toISOString(),
     use_custom_branding: true,
   }).eq('id', organisation_id)
@@ -229,7 +239,8 @@ export async function uploadBueroLogo(formData: FormData): Promise<{
     logo_url: logoUrl,
     brand_primary,
     brand_secondary,
-    brand_accent: brand_secondary,
+    brand_accent: theme.accent,
+    brand_theme: theme,
     brand_extracted_at: new Date().toISOString(),
     use_custom_branding: true,
   }).eq('organisation_id', organisation_id).eq('ist_parent_account', true)
@@ -253,11 +264,17 @@ export async function saveSvBrandColors(params: {
   if (!hexRe.test(params.brand_primary)) throw new Error('Primaerfarbe ungueltig')
   if (!hexRe.test(params.brand_secondary)) throw new Error('Sekundaerfarbe ungueltig')
 
+  // AAR-220: Theme aus dem manuell gewählten primary regenerieren — secondary
+  // bleibt der User-Wert (Override).
+  const { generateTheme: genTheme } = await import('@/lib/branding/theme')
+  const theme = { ...genTheme(params.brand_primary), secondary: params.brand_secondary }
+
   const db = createAdminClient()
   const { error } = await db.from('sachverstaendige').update({
     brand_primary: params.brand_primary,
     brand_secondary: params.brand_secondary,
-    brand_accent: params.brand_secondary,
+    brand_accent: theme.accent,
+    brand_theme: theme,
   }).eq('id', svId)
   if (error) throw new Error(error.message)
   revalidatePath('/gutachter')
@@ -288,16 +305,22 @@ export async function saveBueroBrandColors(params: {
     throw new Error('Keine Berechtigung')
   }
 
+  // AAR-220: Theme regenerieren mit User-Override für secondary.
+  const { generateTheme: genTheme } = await import('@/lib/branding/theme')
+  const theme = { ...genTheme(params.brand_primary), secondary: params.brand_secondary }
+
   await db.from('organisationen').update({
     brand_primary: params.brand_primary,
     brand_secondary: params.brand_secondary,
-    brand_accent: params.brand_secondary,
+    brand_accent: theme.accent,
+    brand_theme: theme,
   }).eq('id', params.organisation_id)
 
   await db.from('sachverstaendige').update({
     brand_primary: params.brand_primary,
     brand_secondary: params.brand_secondary,
-    brand_accent: params.brand_secondary,
+    brand_accent: theme.accent,
+    brand_theme: theme,
   }).eq('organisation_id', params.organisation_id).eq('ist_parent_account', true)
 
   revalidatePath('/gutachter')

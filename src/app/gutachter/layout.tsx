@@ -27,7 +27,8 @@ export default async function GutachterLayout({
   // AAR-184 Fix: `freigeschaltet` existiert NICHT — nur `portal_zugang_freigeschaltet`.
   // Der Alt-Spaltenname hatte PostgREST 400 zurückgegeben, sv=null, alle SVs
   // wurden zu /gutachter/willkommen redirected → Portal komplett unbenutzbar.
-  const svSelect = 'logo_url, brand_primary, brand_secondary, use_custom_branding, vertrag_unterschrieben, anzahlung_status, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, organisation_id, rolle_in_organisation, ist_parent_account, geloescht_am'
+  // AAR-220: brand_theme + firmenname zusätzlich für Whitelabel-Theme + Logo-alt-Text.
+  const svSelect = 'logo_url, brand_primary, brand_secondary, brand_theme, firmenname, use_custom_branding, vertrag_unterschrieben, anzahlung_status, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, organisation_id, rolle_in_organisation, ist_parent_account, geloescht_am'
   const { data: sv } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
@@ -65,12 +66,19 @@ export default async function GutachterLayout({
     }
   }
 
+  // AAR-220: Theme + Firmenname nur wenn use_custom_branding aktiv.
+  const useBrand = !!sv?.use_custom_branding
+  const { themeFromLegacy } = await import('@/lib/branding/theme')
+  const brandTheme = useBrand
+    ? (sv?.brand_theme ?? themeFromLegacy(sv?.brand_primary ?? null, sv?.brand_secondary ?? null))
+    : null
+
   return (
     <GutachterShell
       displayName={displayName}
-      logoUrl={sv?.use_custom_branding ? (sv?.logo_url ?? null) : null}
-      brandPrimary={sv?.use_custom_branding ? (sv?.brand_primary ?? null) : null}
-      brandSecondary={sv?.use_custom_branding ? (sv?.brand_secondary ?? null) : null}
+      logoUrl={useBrand ? (sv?.logo_url ?? null) : null}
+      brandTheme={brandTheme}
+      firmenname={useBrand ? (sv?.firmenname ?? null) : null}
       standortLat={sv?.standort_lat ? Number(sv.standort_lat) : null}
       standortLng={sv?.standort_lng ? Number(sv.standort_lng) : null}
       showTeam={showTeam}
