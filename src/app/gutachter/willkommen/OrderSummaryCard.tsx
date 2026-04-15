@@ -1,5 +1,7 @@
 'use client'
 
+// AAR-213: Lead-Preis-Tabelle-Link geht jetzt über Callback an
+// WillkommenClient — dort wird der Overlay statt einem neuen Tab geöffnet.
 import Link from 'next/link'
 
 // BUG-96 + BUG-97: Geteilte Bestelluebersicht fuer Step 1 (Vertrag) und
@@ -48,6 +50,11 @@ type Props = {
    * Component framework-agnostisch bleibt.
    */
   className?: string
+  /**
+   * AAR-213: Callback um das Lead-Preis-Tabelle-Overlay im Parent zu öffnen.
+   * Wenn nicht gesetzt fällt das Link-Verhalten auf /gutachter/leadpreise zurück.
+   */
+  onShowLeadPreise?: () => void
 }
 
 const PAKET_LABELS: Record<string, string> = {
@@ -74,6 +81,7 @@ export default function OrderSummaryCard({
   subBueros,
   organisationName,
   className = '',
+  onShowLeadPreise,
 }: Props) {
   const istBuero = !!subBueros && subBueros.length > 0
   const anzahlungLabel = istBuero ? 'Anzahlung gesamt' : 'Anzahlung'
@@ -145,13 +153,23 @@ export default function OrderSummaryCard({
           <p className="text-gray-600 leading-relaxed mb-2">
             Kein monatlicher Grundpreis — nur Lead-Preise pro Fall (variiert nach Schadenhoehe).
           </p>
-          <Link
-            href="/gutachter/leadpreise"
-            target="_blank"
-            className="text-[#1E3A5F] underline hover:text-[#4573A2] font-medium"
-          >
-            → Lead-Preis-Tabelle einsehen
-          </Link>
+          {onShowLeadPreise ? (
+            <button
+              type="button"
+              onClick={onShowLeadPreise}
+              className="text-[#1E3A5F] underline hover:text-[#4573A2] font-medium"
+            >
+              → Lead-Preis-Tabelle + ROI-Rechner
+            </button>
+          ) : (
+            <Link
+              href="/gutachter/leadpreise"
+              target="_blank"
+              className="text-[#1E3A5F] underline hover:text-[#4573A2] font-medium"
+            >
+              → Lead-Preis-Tabelle einsehen
+            </Link>
+          )}
         </div>
       </div>
     )
@@ -180,13 +198,23 @@ export default function OrderSummaryCard({
         <span className="text-gray-600">
           Kein monatlicher Grundpreis — nur Lead-Preise pro Fall.
         </span>
-        <Link
-          href="/gutachter/leadpreise"
-          target="_blank"
-          className="text-[#1E3A5F] underline hover:text-[#4573A2] font-medium ml-3 flex-shrink-0"
-        >
-          → Lead-Preis-Tabelle
-        </Link>
+        {onShowLeadPreise ? (
+          <button
+            type="button"
+            onClick={onShowLeadPreise}
+            className="text-[#1E3A5F] underline hover:text-[#4573A2] font-medium ml-3 flex-shrink-0"
+          >
+            → Lead-Preis-Tabelle
+          </button>
+        ) : (
+          <Link
+            href="/gutachter/leadpreise"
+            target="_blank"
+            className="text-[#1E3A5F] underline hover:text-[#4573A2] font-medium ml-3 flex-shrink-0"
+          >
+            → Lead-Preis-Tabelle
+          </Link>
+        )}
       </div>
     </div>
   )

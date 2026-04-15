@@ -26,6 +26,7 @@ import SignaturePadInput from '@/components/SignaturePadInput'
 import StripeBrandingFooter from '@/components/StripeBrandingFooter'
 import LogoUploadStep from '@/components/LogoUploadStep'
 import OrderSummaryCard from './OrderSummaryCard'
+import LeadPreisOverlay, { type LeadpreisRow } from './LeadPreisOverlay'
 import { LoadingButton } from '@/components/ui/loading-button'
 import {
   Dialog,
@@ -132,6 +133,7 @@ export default function WillkommenClient({
   kvVorlage,
   stepOverride,
   stripePublishableKey,
+  leadpreise,
 }: {
   rolle: Rolle
   sv: SvData
@@ -143,6 +145,7 @@ export default function WillkommenClient({
   kvVorlage: Vorlage | null
   stepOverride?: number
   stripePublishableKey: string
+  leadpreise: LeadpreisRow[]
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -202,6 +205,8 @@ export default function WillkommenClient({
   const [step, setStep] = useState(initialStep)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // AAR-213: Overlay-State für Lead-Preis-Tabelle + ROI-Rechner
+  const [showLeadPreisOverlay, setShowLeadPreisOverlay] = useState(false)
   const [warteAufInhaber, setWarteAufInhaber] = useState(
     r === 'sub_mitarbeiter' && sv.vertrag_unterschrieben && !sv.portal_zugang_freigeschaltet,
   )
@@ -481,12 +486,13 @@ export default function WillkommenClient({
                   <Kondition label="Anzahlung" value={fmtEur(sv.onboarding_anzahlung_betrag)} highlight />
                 </div>
                 <div className="mt-4 pt-4 border-t border-[#1E3A5F]/10">
-                  <Link
-                    href="/gutachter/leadpreise"
+                  <button
+                    type="button"
+                    onClick={() => setShowLeadPreisOverlay(true)}
                     className="text-xs text-[#1E3A5F] underline hover:text-[#4573A2]"
                   >
-                    → Lead-Preis-Tabelle einsehen
-                  </Link>
+                    → Lead-Preis-Tabelle + ROI-Rechner
+                  </button>
                 </div>
               </div>
 
@@ -647,6 +653,7 @@ export default function WillkommenClient({
                 radiusKm={sv.paket_umkreis_km}
                 anzahlungBetrag={r === 'buero_inhaber' ? gesamtAnzahlung : sv.onboarding_anzahlung_betrag}
                 organisationName={r !== 'buero_inhaber' && organisation ? organisation.name : null}
+                onShowLeadPreise={() => setShowLeadPreisOverlay(true)}
               />
 
               {/* Hinweis fuer Buero-Inhaber: stellvertretend fuer alle Sub-Standorte */}
@@ -853,6 +860,7 @@ export default function WillkommenClient({
                   radiusKm={sv.paket_umkreis_km}
                   anzahlungBetrag={r === 'buero_inhaber' ? gesamtAnzahlung : sv.onboarding_anzahlung_betrag}
                   subBueros={r === 'buero_inhaber' ? subSvs : undefined}
+                  onShowLeadPreise={() => setShowLeadPreisOverlay(true)}
                 />
 
                 {/* Rechte Spalte: Embedded Stripe Checkout + Branding-Footer */}
@@ -975,6 +983,16 @@ export default function WillkommenClient({
           />
         </DialogContent>
       </Dialog>
+
+      {/* AAR-213: Lead-Preis-Tabelle + ROI-Rechner als Overlay (kein Tab-Switch) */}
+      <LeadPreisOverlay
+        open={showLeadPreisOverlay}
+        onClose={() => setShowLeadPreisOverlay(false)}
+        rows={leadpreise}
+        kontingent={sv.max_faelle_monat}
+        paketLabel={paketLabel}
+        maxFaelleMonat={sv.max_faelle_monat}
+      />
     </div>
   )
 }

@@ -206,6 +206,19 @@ export default async function GutachterWillkommenPage({
     }
   }
 
+  // AAR-213: Lead-Preis-Tabelle laden für Overlay + ROI-Rechner im Wizard.
+  const { data: leadpreiseRows } = await supabase
+    .from('leadpreise_tabelle')
+    .select('schadenhoehe_bis_netto, paketpreis_netto, einzelpreis_netto')
+    .eq('aktiv', true)
+    .order('schadenhoehe_bis_netto', { ascending: true })
+
+  const leadpreise = (leadpreiseRows ?? []).map(r => ({
+    schadenhoehe_bis_netto: Number(r.schadenhoehe_bis_netto),
+    paketpreis_netto: Number(r.paketpreis_netto),
+    einzelpreis_netto: Number(r.einzelpreis_netto),
+  }))
+
   // URL-Param ?step=stripe ueberschreibt den initial-Step (z.B. nach Stripe-Cancel)
   // KFZ-156: ?stripe_success=1 nach Stripe-Embed-Return → direkt auf Step 4 (Logo)
   const params = await searchParams
@@ -248,6 +261,7 @@ export default async function GutachterWillkommenPage({
       kvVorlage={kvVorlage}
       stepOverride={stepOverride}
       stripePublishableKey={stripePublishableKey}
+      leadpreise={leadpreise}
     />
   )
 }
