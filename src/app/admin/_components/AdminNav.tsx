@@ -43,9 +43,12 @@ const NAV_STAMMDATEN: NavItem[] = [
   { href: '/admin/communities', label: 'Communities', icon: ShieldCheckIcon },
 ]
 
+// AAR-153: „Provisionen Maik" war ein eigener Top-Level-Eintrag — jetzt als
+// Sub-Link innerhalb der Finanzen-Page (FinanceClient zeigt dafür einen Button
+// „Partner-Provisionen verwalten"). Die Route /admin/finance/provisionen-maik
+// bleibt intakt für direkte Bookmarks.
 const NAV_VERWALTUNG: NavItem[] = [
   { href: '/admin/finance', label: 'Finanzen', icon: BadgeEuroIcon },
-  { href: '/admin/finance/provisionen-maik', label: 'Provisionen Maik', icon: BadgeEuroIcon },
   { href: '/admin/abrechnungen', label: 'Abrechnungen', icon: ReceiptIcon },
   { href: '/admin/kanzlei-abrechnungen', label: 'Kanzlei-Abr.', icon: ReceiptIcon },
   { href: '/admin/statistiken', label: 'Statistiken', icon: BarChart3Icon },

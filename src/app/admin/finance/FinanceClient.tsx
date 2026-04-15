@@ -84,6 +84,57 @@ export default function FinanceClient({
           />
         </div>
 
+        {/* AAR-153: Sub-Navigation innerhalb Finanzen. Die „Maik-Provisionen"-
+            Seite hängt jetzt unter /admin/finance statt als eigener Nav-Eintrag
+            oben — damit Aaron einen Einstiegspunkt auf der Haupt-Finance-Page
+            hat statt zwei getrennter Menüpunkte. */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
+          <Link
+            href="/admin/finance/provisionen-maik"
+            className="group bg-white border border-gray-200 rounded-2xl p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] text-gray-400 uppercase tracking-wider">
+                  Partner-Provisionen
+                </p>
+                <h3 className="text-base font-semibold text-gray-900 mt-0.5">
+                  Maik-Provisionen verwalten
+                </h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  Monatsübersicht je Lead: 150&nbsp;€ minus tatsächlicher CPL.
+                  Status offen / bezahlt.
+                </p>
+              </div>
+              <span className="text-[#4573A2] group-hover:translate-x-0.5 transition-transform shrink-0">
+                →
+              </span>
+            </div>
+          </Link>
+          <Link
+            href="/admin/kanzlei-abrechnungen"
+            className="group bg-white border border-gray-200 rounded-2xl p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] text-gray-400 uppercase tracking-wider">
+                  Kanzlei-Abrechnungen
+                </p>
+                <h3 className="text-base font-semibold text-gray-900 mt-0.5">
+                  LexDrive-Monatsabrechnung
+                </h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  Pauschalen pro abgeschlossenem Fall, Rechnungen an die
+                  Partnerkanzlei versenden.
+                </p>
+              </div>
+              <span className="text-[#4573A2] group-hover:translate-x-0.5 transition-transform shrink-0">
+                →
+              </span>
+            </div>
+          </Link>
+        </div>
+
         {/* Chart */}
         <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-8">
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">

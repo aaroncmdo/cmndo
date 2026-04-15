@@ -4,7 +4,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { setCpl, confirmProvision, reverseProvision } from './actions'
+import { setCpl, confirmProvision, reverseProvision, markMonthAsPaid } from './actions'
 
 type Provision = {
   id: string
@@ -47,16 +47,48 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
   }
 
   function handleReverse(id: string) {
-    const grund = window.prompt('Grund fuer Reversion?')
+    const grund = window.prompt('Grund für Reversion?')
     if (!grund) return
     startTransition(async () => { await reverseProvision(id, grund) })
   }
 
+  // AAR-153: Bulk-Auszahlung pro Monat — markiert alle confirmed als paid.
+  function handleMarkMonthPaid() {
+    if (kpi.confirmed === 0) return
+    const ok = window.confirm(
+      `Alle ${kpi.confirmed} bestätigten Provisionen im Monat ${monat} als bezahlt markieren (${kpi.sumConfirmed.toFixed(2)} €)?`,
+    )
+    if (!ok) return
+    startTransition(async () => {
+      const r = await markMonthAsPaid(monat)
+      if (!r.success && r.error) window.alert(`Fehler: ${r.error}`)
+      else router.refresh()
+    })
+  }
+
   return (
     <div className="py-6 space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-gray-900">Maik-Provisionen (Google Ads)</h1>
-        <p className="text-sm text-gray-500 mt-1">150€ pro Lead minus tatsaechlicher CPL. CPL aus Google-Ads-Reports nachtragen.</p>
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">Maik-Provisionen (Google Ads)</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            150&nbsp;€ pro Lead minus tatsächlicher CPL. CPL aus Google-Ads-Reports nachtragen.
+          </p>
+        </div>
+        {/* AAR-153: „Als bezahlt markieren"-Button pro Monat */}
+        <button
+          type="button"
+          disabled={pending || kpi.confirmed === 0}
+          onClick={handleMarkMonthPaid}
+          className="px-4 py-2 rounded-xl bg-[#1E3A5F] text-white text-sm font-medium hover:bg-[#4573A2] disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+          title={
+            kpi.confirmed === 0
+              ? 'Keine bestätigten Provisionen in diesem Monat'
+              : `Alle ${kpi.confirmed} bestätigten Einträge als bezahlt markieren`
+          }
+        >
+          {pending ? 'Wird gespeichert...' : `Als bezahlt markieren (${kpi.confirmed})`}
+        </button>
       </div>
 
       {/* Monatsfilter */}
