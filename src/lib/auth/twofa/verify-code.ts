@@ -43,7 +43,12 @@ export async function verifyTwoFaCode(code: string): Promise<{ success: boolean;
   // Reset fail count
   failCountMap.delete(key)
 
-  // KFZ-184: Session-Cookie setzen damit Middleware 2FA als erledigt erkennt
+  // KFZ-184 + AAR-152: 2FA-Cookie mit expliziter 3-Tage-Lebensdauer.
+  // Ohne maxAge war es ein Session-Cookie — beim Tab-Schliessen oder Browser-
+  // Neustart wurde die 2FA wieder abgefragt, und teilweise bereits beim
+  // Navigieren weil Supabase SSR-Middleware die Supabase-Cookies neu setzt
+  // (und die "Continue where I left off"-Browser-Einstellung nicht bei allen
+  // Nutzern aktiv ist). 3 Tage = die vom User erwartete Trust-Periode.
   const { cookies } = await import('next/headers')
   const cookieStore = await cookies()
   cookieStore.set('claimondo_2fa_verified', '1', {
@@ -51,6 +56,7 @@ export async function verifyTwoFaCode(code: string): Promise<{ success: boolean;
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
+    maxAge: 3 * 24 * 60 * 60, // 3 Tage
   })
 
   return { success: true }
