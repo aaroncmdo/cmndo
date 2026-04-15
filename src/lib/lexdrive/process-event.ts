@@ -5,6 +5,7 @@ import { sendFallCommunication } from '@/lib/communications/send-fall'
 
 export const VALID_LEXDRIVE_EVENTS = [
   'vollmacht_bestaetigt', 'akte_eingegangen_bestaetigt',
+  'mandatsnummer_vergeben',
   'as_versendet', 'mahnung_versendet',
   'vs_kuerzt', 'ruege_1_gesendet', 'ruege_1_anerkannt',
   'ruege_2_gesendet', 'ruege_2_anerkannt', 'ruege_abgelehnt',
@@ -14,6 +15,7 @@ export const VALID_LEXDRIVE_EVENTS = [
   'zahlung_eingegangen',
   'technische_stellungnahme_benoetigt',
   'vs_nachbesichtigung_angefordert', 'vs_nachbesichtigung_ergebnis',
+  'fall_geschlossen',
 ] as const
 
 export type LexDriveEvent = typeof VALID_LEXDRIVE_EVENTS[number]
@@ -61,6 +63,8 @@ const EVENT_STATUS_MAP: Partial<Record<LexDriveEvent, string>> = {
   regulierung_angekuendigt: 'regulierung-laeuft',
   zahlung_eingegangen: 'zahlung-eingegangen',
   vs_ablehnung: 'vs-abgelehnt',
+  // AAR-165 W5 Audit-Fix: Status-Übergang bei Fall-Schluss
+  fall_geschlossen: 'abgeschlossen',
 }
 
 function computeFieldUpdates(eventType: LexDriveEvent, payload: LexDriveEventPayload): Record<string, unknown> {
@@ -124,6 +128,26 @@ function computeFieldUpdates(eventType: LexDriveEvent, payload: LexDriveEventPay
   if (eventType === 'technische_stellungnahme_benoetigt') {
     updates.technische_stellungnahme_status = 'beauftragt'
     updates.technische_stellungnahme_beauftragt_am = now
+  }
+  // AAR-165 / W5 Audit-Fix: mandatsnummer_vergeben (Subphasen-Matrix 5.2)
+  // schreibt Salesforce-Mandatsnummer aus Payload nach faelle.mandatsnummer
+  // bzw. as_salesforce_id (beide Spalten existieren).
+  if (eventType === 'mandatsnummer_vergeben') {
+    if (typeof payload.mandats_nr === 'string') {
+      updates.mandatsnummer = payload.mandats_nr
+      updates.as_salesforce_id = payload.mandats_nr
+    } else if (typeof payload.mandatsnummer === 'string') {
+      updates.mandatsnummer = payload.mandatsnummer
+      updates.as_salesforce_id = payload.mandatsnummer
+    }
+  }
+  // AAR-165 / W5 Audit-Fix: fall_geschlossen (Subphasen-Matrix Phase 9.1)
+  // setzt geschlossen_grund (W1-Feld) + abgeschlossen_am.
+  if (eventType === 'fall_geschlossen') {
+    updates.abgeschlossen_am = payload.datum ?? now
+    if (typeof payload.grund === 'string') {
+      updates.geschlossen_grund = payload.grund
+    }
   }
 
   return updates
