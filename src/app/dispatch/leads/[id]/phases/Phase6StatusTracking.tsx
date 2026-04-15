@@ -1,11 +1,12 @@
 'use client'
 
 // AAR-142 / W8: Phase 6 Status-Tracking nach FlowLink-Versand.
-// Vertikaler Stepper mit 5-6 Schritten (Pfad A vs. Pfad B) + Inaktiv-Alarm
-// bei >2h ohne Portal-Aktion. Daten kommen aus flow_links (status + Events)
-// und ggf. vom Fall (sa_unterschrieben, vollmacht_bestaetigt).
+// AAR-178 P3-C + P3-E: Erneut-senden Button + Vollmacht immer als 5. Schritt
+// sichtbar (grayed-out für Pfad B damit der MA die komplette Reihenfolge sieht).
 
+import { useState, useTransition } from 'react'
 import { useDispatchPhase } from '../lib/phase-context'
+import { sendFlowLinkMultiChannel } from '../actions'
 import AircallCallButton from '@/components/AircallCallButton'
 import {
   CheckCircle2Icon,
@@ -16,6 +17,8 @@ import {
   ScaleIcon,
   AlertTriangleIcon,
   PhoneIcon,
+  SendIcon,
+  MinusCircleIcon,
 } from 'lucide-react'
 
 type FlowLinkRow = {
@@ -34,7 +37,7 @@ type FallSnapshot = {
   vollmacht_unterschrieben?: boolean | null
 }
 
-type StepState = 'pending' | 'done' | 'warning'
+type StepState = 'pending' | 'done' | 'warning' | 'disabled'
 
 type Step = {
   label: string
@@ -103,18 +106,42 @@ export default function Phase6StatusTracking({
     icon: <FileSignatureIcon className="w-4 h-4" />,
   }
 
+  // AAR-178 P3-E: Vollmacht immer als 5. Schritt sichtbar, für Pfad B
+  // grayed-out („nicht relevant") statt ganz versteckt — MA soll die ganze
+  // Reihenfolge sehen können.
   const stepVollmacht: Step = {
     label: 'Vollmacht unterschrieben',
-    sub: fall?.vollmacht_unterschrieben
-      ? 'LexDrive-Vollmacht erteilt'
-      : 'LexDrive WhatsApp-Bot sendet Vollmacht',
-    state: fall?.vollmacht_unterschrieben ? 'done' : 'pending',
-    icon: <ScaleIcon className="w-4 h-4" />,
+    sub: isPfadB
+      ? 'Nicht relevant bei Pfad B — Kunde hat keine Kanzlei-Vollmacht'
+      : fall?.vollmacht_unterschrieben
+        ? 'LexDrive-Vollmacht erteilt'
+        : 'LexDrive WhatsApp-Bot sendet Vollmacht',
+    state: isPfadB
+      ? 'disabled'
+      : fall?.vollmacht_unterschrieben ? 'done' : 'pending',
+    icon: isPfadB ? <MinusCircleIcon className="w-4 h-4" /> : <ScaleIcon className="w-4 h-4" />,
   }
 
-  const steps: Step[] = isPfadB
-    ? [stepSent, stepDelivered, stepOpened, stepSa]
-    : [stepSent, stepDelivered, stepOpened, stepSa, stepVollmacht]
+  const steps: Step[] = [stepSent, stepDelivered, stepOpened, stepSa, stepVollmacht]
+
+  // AAR-178 P3-C: Erneut-senden Button — falls der Kunde den Link verloren hat
+  // oder der Alarm anschlägt, kann der MA aus Phase 6 direkt re-triggern ohne
+  // zurück zu Phase 5 springen zu müssen.
+  const [resendPending, startResend] = useTransition()
+  const [resendStatus, setResendStatus] = useState<{ ok: boolean; text: string } | null>(null)
+  function resend() {
+    if (!l.telefon) {
+      setResendStatus({ ok: false, text: 'Keine Telefonnummer am Lead' })
+      return
+    }
+    startResend(async () => {
+      const r = await sendFlowLinkMultiChannel(lead.id, 'whatsapp')
+      setResendStatus({
+        ok: r.success,
+        text: r.success ? 'FlowLink erneut per WhatsApp gesendet' : r.error ?? 'Versand fehlgeschlagen',
+      })
+    })
+  }
 
   return (
     <div className="space-y-4">
@@ -155,15 +182,21 @@ export default function Phase6StatusTracking({
                     ? 'bg-green-500 text-white'
                     : s.state === 'warning'
                       ? 'bg-red-500 text-white'
-                      : 'bg-gray-200 text-gray-400'
+                      : s.state === 'disabled'
+                        ? 'bg-gray-100 text-gray-300'
+                        : 'bg-gray-200 text-gray-400'
                 }`}
               >
                 {s.state === 'done' ? <CheckCircle2Icon className="w-3.5 h-3.5" /> : s.icon}
               </span>
-              <p className={`text-sm font-medium ${s.state === 'warning' ? 'text-red-700' : 'text-gray-900'}`}>
+              <p className={`text-sm font-medium ${
+                s.state === 'warning' ? 'text-red-700'
+                : s.state === 'disabled' ? 'text-gray-400'
+                : 'text-gray-900'
+              }`}>
                 {s.label}
               </p>
-              {s.sub && <p className="text-[11px] text-gray-500 mt-0.5">{s.sub}</p>}
+              {s.sub && <p className={`text-[11px] mt-0.5 ${s.state === 'disabled' ? 'text-gray-400 italic' : 'text-gray-500'}`}>{s.sub}</p>}
             </li>
           ))}
           {!steps.length && (
@@ -175,6 +208,31 @@ export default function Phase6StatusTracking({
             </li>
           )}
         </ol>
+
+        {/* AAR-178 P3-C: FlowLink erneut senden (WhatsApp) */}
+        {latestFlow && (
+          <div className="mt-5 pt-4 border-t border-gray-100 space-y-2">
+            <button
+              type="button"
+              onClick={resend}
+              disabled={resendPending || !l.telefon}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#25D366] text-white text-xs font-semibold hover:bg-[#1fa855] disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <SendIcon className="w-3.5 h-3.5" />
+              {resendPending ? 'Sende ...' : 'FlowLink erneut per WhatsApp senden'}
+            </button>
+            {!l.telefon && (
+              <p className="text-[10px] text-gray-400">
+                Keine Telefonnummer am Lead — erst in Phase 5 hinterlegen.
+              </p>
+            )}
+            {resendStatus && (
+              <p className={`text-[11px] ${resendStatus.ok ? 'text-green-700' : 'text-red-600'}`}>
+                {resendStatus.text}
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

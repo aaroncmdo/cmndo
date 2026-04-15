@@ -60,7 +60,9 @@ export default function Phase5Zusammenfassung() {
   const termin = aktiverTermin as unknown as AktiverTermin
 
   const [waNummer, setWaNummer] = useState(l.telefon ?? '')
+  const [email, setEmail] = useState(l.email ?? '')
   const [savingNummer, setSavingNummer] = useState(false)
+  const [savingEmail, setSavingEmail] = useState(false)
   const [, startTransition] = useTransition()
   const [sendStatus, setSendStatus] = useState<{ kanal: string | null; text: string; ok: boolean }>({
     kanal: null,
@@ -83,6 +85,21 @@ export default function Phase5Zusammenfassung() {
     })
   }
 
+  // AAR-178 P2-K: Email editierbar direkt vor dem Versand — in der Praxis
+  // tippt der Kunde die Adresse am Telefon, und der MA muss sie live
+  // korrigieren können bevor er Email-FlowLink abschickt.
+  function saveEmail() {
+    if (email === (l.email ?? '')) return
+    setSavingEmail(true)
+    startTransition(async () => {
+      try {
+        await saveStammdaten(lead.id, { email: email.trim() || null })
+      } finally {
+        setSavingEmail(false)
+      }
+    })
+  }
+
   function send(kanal: 'whatsapp' | 'sms' | 'email') {
     if (!qualification.canSendFlowLink) return
     startSend(async () => {
@@ -92,6 +109,11 @@ export default function Phase5Zusammenfassung() {
         ok: r.success,
         text: r.success ? 'FlowLink versendet' : r.error ?? 'Fehler',
       })
+      // AAR-178 P3-B: Auto-Advance zu Phase 6 nach erfolgreichem Versand
+      // (der Dispatcher sieht sofort das Status-Tracking statt Phase 5 nochmal).
+      if (r.success) {
+        setTimeout(() => setPhase(6), 600)
+      }
     })
   }
 
@@ -254,23 +276,45 @@ export default function Phase5Zusammenfassung() {
         </div>
       </div>
 
-      {/* WA-Nummer Inline-Edit */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-2">
+      {/* WA-Nummer + Email Inline-Edit */}
+      <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
         <div className="flex items-center gap-2">
           <PhoneIcon className="w-4 h-4 text-gray-400" />
-          <h3 className="text-sm font-semibold text-gray-900">WhatsApp-Nummer für Versand</h3>
+          <h3 className="text-sm font-semibold text-gray-900">Kontaktdaten für FlowLink-Versand</h3>
         </div>
-        <input
-          type="tel"
-          value={waNummer}
-          onChange={(e) => setWaNummer(e.target.value)}
-          onBlur={saveWaNummer}
-          placeholder="+49 170 1234567"
-          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
-        />
-        <p className="text-[10px] text-gray-400">
-          {savingNummer ? 'Speichern ...' : 'Änderung wird beim Verlassen des Feldes gespeichert.'}
-        </p>
+        <div>
+          <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">
+            WhatsApp / SMS-Nummer
+          </label>
+          <input
+            type="tel"
+            value={waNummer}
+            onChange={(e) => setWaNummer(e.target.value)}
+            onBlur={saveWaNummer}
+            placeholder="+49 170 1234567"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+          />
+          <p className="text-[10px] text-gray-400 mt-0.5">
+            {savingNummer ? 'Speichern ...' : 'Änderung wird beim Verlassen des Feldes gespeichert.'}
+          </p>
+        </div>
+        {/* AAR-178 P2-K: Email inline editierbar */}
+        <div>
+          <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">
+            Email für FlowLink (optional)
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onBlur={saveEmail}
+            placeholder="name@example.de"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+          />
+          <p className="text-[10px] text-gray-400 mt-0.5">
+            {savingEmail ? 'Speichern ...' : 'Änderung wird beim Verlassen des Feldes gespeichert.'}
+          </p>
+        </div>
       </div>
 
       {/* 3 Versand-Buttons */}
@@ -303,7 +347,7 @@ export default function Phase5Zusammenfassung() {
           </button>
           <button
             type="button"
-            disabled={pending || !qualification.canSendFlowLink || !l.email}
+            disabled={pending || !qualification.canSendFlowLink || !email.trim()}
             onClick={() => send('email')}
             className="flex items-center justify-center gap-2 py-3 rounded-xl bg-[#4573A2] text-white text-sm font-bold hover:bg-[#3a6290] disabled:opacity-40 disabled:cursor-not-allowed"
           >
