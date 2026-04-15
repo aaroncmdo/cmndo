@@ -10,7 +10,7 @@
 // Hat_haftpflicht bleibt im saveHardGate-Disqualifier für Legacy-Leads, wird
 // aber in der neuen UI nicht mehr aktiv abgefragt — Q3 ist jetzt Polizei.
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect, useRef } from 'react'
 // AAR-176 P2-B: UnfallortKategorie-Import raus — die Spalte wird jetzt auto
 // aus schadentyp abgeleitet (saveSchadentyp setzt kategorie mit, Dropdown
 // ist in der UI weg).
@@ -127,6 +127,37 @@ export default function Phase1Qualifizierung() {
       setTimeout(() => setToast(''), 3000)
     })
   }
+
+  // AAR-192: Auto-Save mit 800ms Debounce sobald Phase komplett.
+  // Der Speichern-Button fliegt raus — MA füllt die Felder, nach kurzem
+  // Nichtstun wird automatisch gespeichert und zu Phase 2 weitergeschickt.
+  // autoSavedHash verhindert dass identische drafts mehrfach gespeichert
+  // werden (z.B. wenn nur nicht-relevante Felder sich ändern).
+  const autoSavedHashRef = useRef<string>('')
+  const draftHash = JSON.stringify({
+    unfallhergang: draft.unfallhergang,
+    schuldfrage: draft.schuldfrage,
+    aufklaerung_teilschuld_bestaetigt: draft.aufklaerung_teilschuld_bestaetigt,
+    schaden_sichtbar: draft.schaden_sichtbar,
+    personenschaden_flag: draft.personenschaden_flag,
+    mietwagen_flag: draft.mietwagen_flag,
+    nutzungsausfall: draft.nutzungsausfall,
+    fahrzeug_fahrbereit: draft.fahrzeug_fahrbereit,
+    polizei_vor_ort: draft.polizei_vor_ort,
+    polizei_aktenzeichen: draft.polizei_aktenzeichen,
+    polizeibericht_vorhanden: draft.polizeibericht_vorhanden,
+    unfallort: draft.unfallort,
+  })
+  useEffect(() => {
+    if (!allComplete) return
+    if (autoSavedHashRef.current === draftHash) return
+    const t = setTimeout(() => {
+      autoSavedHashRef.current = draftHash
+      save()
+    }, 800)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allComplete, draftHash])
 
   if (qualification.disqualifiziert) {
     // Overlay kommt über DispatchShell → PhaseContent → DisqualifiziertOverlay;
@@ -448,17 +479,18 @@ export default function Phase1Qualifizierung() {
         <div className={`text-xs px-3 py-2 rounded-lg ${toast === 'Gespeichert' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-800'}`}>{toast}</div>
       )}
 
-      <button
-        disabled={pending}
-        onClick={save}
-        className="w-full px-4 py-2.5 rounded-xl bg-[#4573A2] text-white text-sm font-medium hover:bg-[#3a6290] disabled:opacity-50"
-      >
-        {pending ? 'Speichern...' : 'Speichern'}
-      </button>
-
-      {!allComplete && (
+      {/* AAR-192: Speichern-Button entfernt — Auto-Save mit 800ms Debounce
+          speichert sobald alle 3 Pflichtfelder beantwortet sind. MA sieht
+          entweder Toast „Gespeichert" oder den Pending-Indicator unten. */}
+      {!allComplete ? (
         <p className="text-[10px] text-gray-500 flex items-center gap-1">
           <InfoIcon className="w-3 h-3" /> Alle 3 Bereiche müssen beantwortet sein bevor Phase 2 freigeschaltet wird.
+        </p>
+      ) : (
+        <p className="text-[10px] text-gray-500 flex items-center gap-1">
+          {pending
+            ? <><span className="inline-block w-2 h-2 rounded-full bg-[#4573A2] animate-pulse" /> Auto-Save läuft ...</>
+            : <><CheckCircleIcon className="w-3 h-3 text-green-600" /> Änderungen werden automatisch gespeichert.</>}
         </p>
       )}
     </div>
