@@ -3,8 +3,10 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import TerminDetailActions from './TerminDetailActions'
+import PolizeiberichtUpload from './PolizeiberichtUpload'
 
 // KFZ-200: Termin-Detail-Seite mit "Navigation starten"-Button.
+// AAR-126: Vor-Ort-Polizeibericht-Upload wenn polizei_vor_ort=true und Bericht fehlt.
 
 export const dynamic = 'force-dynamic'
 
@@ -30,12 +32,24 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
 
   if (tErr || !termin) redirect('/gutachter/termine')
 
-  // Fall + Lead laden
+  // Fall + Lead laden — AAR-126: polizei_vor_ort + polizei_aktenzeichen mitladen
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, lead_id, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, fahrzeug_hersteller, fahrzeug_modell, kennzeichen')
+    .select('id, fall_nummer, lead_id, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, polizei_vor_ort, polizei_aktenzeichen')
     .eq('id', termin.fall_id)
     .single()
+
+  // AAR-126: Polizeibericht-Status prüfen
+  let polizeiberichtHochgeladen = false
+  if (fall?.polizei_vor_ort === true) {
+    const { data: docs } = await db
+      .from('pflichtdokumente')
+      .select('dokument_url')
+      .eq('fall_id', fall.id)
+      .eq('dokument_typ', 'polizeibericht')
+      .limit(1)
+    polizeiberichtHochgeladen = !!docs?.[0]?.dokument_url
+  }
 
   let lead: { vorname: string | null; nachname: string | null; telefon: string | null; email: string | null } | null = null
   if (fall?.lead_id) {
@@ -117,6 +131,14 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
           </div>
         </div>
       </div>
+
+      {/* AAR-126: Vor-Ort einzuholen — Polizeibericht wenn polizei_vor_ort=true und Kunde noch nicht hochgeladen */}
+      {fall?.polizei_vor_ort === true && !polizeiberichtHochgeladen && (
+        <PolizeiberichtUpload
+          fallId={fall.id}
+          bereitsBekanntesAktenzeichen={fall.polizei_aktenzeichen ?? null}
+        />
+      )}
 
       {/* Navigation / Vor-Ort Actions */}
       <TerminDetailActions
