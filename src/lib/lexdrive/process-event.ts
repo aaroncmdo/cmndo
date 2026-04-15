@@ -75,6 +75,8 @@ function computeFieldUpdates(eventType: LexDriveEvent, payload: LexDriveEventPay
     updates.vs_reaktion_am = payload.datum ?? now
     if (payload.kuerzungs_betrag) updates.kuerzungs_betrag = Number(payload.kuerzungs_betrag)
     if (payload.anerkannt_betrag) updates.regulierung_betrag = Number(payload.anerkannt_betrag)
+    // AAR-165 / W5: vs_kuerzung_grund-Feld (AAR-161 W1) konsumieren
+    if (payload.grund) updates.vs_kuerzung_grund = payload.grund
   }
   if (eventType === 'vs_reguliert_voll') {
     updates.vs_reaktion_typ = 'voll_reguliert'
@@ -95,6 +97,20 @@ function computeFieldUpdates(eventType: LexDriveEvent, payload: LexDriveEventPay
     updates.vs_reaktion_typ = 'nachbesichtigung'
     updates.nachbesichtigung_status = 'angefordert'
     updates.nachbesichtigung_angefordert_am = payload.datum ?? now
+    // AAR-165 / W5: optionale Termin-Felder aus dem Payload mitnehmen
+    if (payload.nachbesichtigung_termin) {
+      updates.nachbesichtigung_termin_datum = payload.nachbesichtigung_termin
+    }
+    if (typeof payload.konfrontation === 'boolean') {
+      updates.nachbesichtigung_konfrontation = payload.konfrontation
+    }
+  }
+  // AAR-165 / W5: Ergebnis-Event schreibt das W1-Feld nachbesichtigung_ergebnis
+  if (eventType === 'vs_nachbesichtigung_ergebnis') {
+    updates.nachbesichtigung_status = 'ergebnis_eingegangen'
+    if (payload.beschreibung) updates.nachbesichtigung_ergebnis = payload.beschreibung
+    if (payload.grund) updates.nachbesichtigung_ergebnis = payload.grund
+    if (payload.betrag) updates.regulierung_betrag = Number(payload.betrag)
   }
   if (eventType === 'zahlung_eingegangen') {
     updates.zahlung_eingegangen_am = payload.datum ?? now
