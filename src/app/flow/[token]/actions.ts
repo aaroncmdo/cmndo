@@ -205,8 +205,12 @@ export async function createKundeAccount(
         // Set kunde_id on the case
         await admin.from('faelle').update({ kunde_id: existing.id }).eq('id', fallId)
 
-        // Create default pflichtdokumente
-        await createDefaultPflichtdokumente(admin, fallId)
+        // AAR-125: Lead laden für conditional Polizeibericht
+        const { data: leadForDocs } = await admin
+          .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht)').eq('id', fallId).single()
+        const lRaw = (leadForDocs as { leads: unknown } | null)?.leads
+        const leadDocs = (Array.isArray(lRaw) ? lRaw[0] : lRaw) as Record<string, unknown> | null
+        await createDefaultPflichtdokumente(admin, fallId, leadDocs)
 
         // KFZ-129: Kunde als Chat-Teilnehmer hinzufuegen
         try {
@@ -680,37 +684,28 @@ function generatePassword(): string {
 
 async function createDefaultPflichtdokumente(
   admin: ReturnType<typeof createAdminClient>,
-  fallId: string
+  fallId: string,
+  lead?: Record<string, unknown> | null,
 ) {
-  const defaults = [
-    {
-      titel: 'Personalausweis / Reisepass',
-      beschreibung: 'Zur Identitätsprüfung benötigen wir eine Kopie Ihres Ausweises.',
-      pflicht: true,
-    },
-    {
-      titel: 'Mietvertrag / Eigentumsnachweis',
-      beschreibung: 'Nachweis über Ihr Miet- oder Eigentumsverhältnis der betroffenen Immobilie.',
-      pflicht: true,
-    },
-    {
-      titel: 'Versicherungspolice',
-      beschreibung: 'Ihre aktuelle Versicherungspolice zum betroffenen Objekt.',
-      pflicht: true,
-    },
-    {
-      titel: 'Schadenmeldung an Versicherung',
-      beschreibung: 'Falls Sie den Schaden bereits bei Ihrer Versicherung gemeldet haben, laden Sie die Bestätigung hoch.',
-      pflicht: false,
-    },
-    {
-      titel: 'Kostenvoranschlaege / Rechnungen',
-      beschreibung: 'Falls bereits Kostenvoranschläge oder Rechnungen für die Reparatur vorliegen.',
-      pflicht: false,
-    },
+  // AAR-125: pflichtdokumente Schema hat NUR (id, fall_id, dokument_typ, status,
+  // pflicht, quelle, dokument_url, hochgeladen_am, created_at). Die alten
+  // titel/beschreibung-Inserts hätten geworfen — wurden nur deshalb nicht
+  // bemerkt weil createPflichtdokumente (admin/dispatch) im SA-Flow zuerst läuft
+  // und dann die Idempotenz-Prüfung hier den Insert verhindert hat.
+  // Defaults sind hier deshalb minimaler Safety-Net (KundeAccount-Pfad ohne SA).
+  const defaults: { dokument_typ: string; pflicht: boolean }[] = [
+    { dokument_typ: 'fahrzeugschein', pflicht: true },
+    { dokument_typ: 'fuehrerschein', pflicht: true },
+    { dokument_typ: 'schadensfotos', pflicht: true },
   ]
 
-  // Check if pflichtdokumente already exist for this fall
+  // AAR-125: Polizeibericht conditional wenn Polizei vor Ort war (siehe AAR-124)
+  if (lead?.polizei_vor_ort === true || lead?.polizeibericht_pflicht === true) {
+    defaults.push({ dokument_typ: 'polizeibericht', pflicht: true })
+  }
+
+  // Idempotenz: keine Defaults wenn schon was existiert (z.B. nach
+  // createPflichtdokumente in signSAandCreateFall)
   const { data: existing } = await admin
     .from('pflichtdokumente')
     .select('id')
@@ -720,12 +715,12 @@ async function createDefaultPflichtdokumente(
   if (existing && existing.length > 0) return
 
   await admin.from('pflichtdokumente').insert(
-    defaults.map(d => ({
+    defaults.map((d) => ({
       fall_id: fallId,
-      titel: d.titel,
-      beschreibung: d.beschreibung,
+      dokument_typ: d.dokument_typ,
       pflicht: d.pflicht,
       status: 'ausstehend',
-    }))
+      quelle: 'system',
+    })),
   )
 }
