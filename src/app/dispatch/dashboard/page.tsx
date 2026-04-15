@@ -23,11 +23,11 @@ export default async function DispatchDashboard() {
       .select('*', { count: 'exact', head: true })
       .eq('qualifizierungs_phase', 'rueckruf')
       .or('rueckruf_erledigt.is.null,rueckruf_erledigt.eq.false'),
-    // FlowLinks versendet heute
+    // FlowLinks versendet heute — flow_links benutzt `erstellt_am`, nicht `created_at`
     supabase
       .from('flow_links')
       .select('*', { count: 'exact', head: true })
-      .gte('created_at', todayStart.toISOString()),
+      .gte('erstellt_am', todayStart.toISOString()),
     // Meine offenen Tasks
     supabase
       .from('tasks')

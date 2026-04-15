@@ -26,12 +26,26 @@ export default async function DispatchLeadDetail({
 
   if (!lead) notFound()
 
-  const { data: flowLinks } = await supabase
+  // flow_links hat erstellt_am (nicht created_at) — das ursprüngliche Select
+  // hat stillschweigend die Spalte ignoriert weil der Supabase-Client bei
+  // unbekannten Spaltennamen nur einen Warn loggt; wir brauchen das Feld für
+  // den Inaktiv-Alarm in Phase 6 und aliasen daher direkt auf `created_at`.
+  const { data: flowLinksRaw } = await supabase
     .from('flow_links')
-    .select('id, token, status, created_at, expires_at, geoeffnet_am, abgeschlossen_am, fall_id')
+    .select('id, token, status, erstellt_am, expires_at, geoeffnet_am, abgeschlossen_am, fall_id')
     .eq('lead_id', id)
-    .order('created_at', { ascending: false })
+    .order('erstellt_am', { ascending: false })
     .limit(5)
+  const flowLinks = (flowLinksRaw ?? []).map((fl) => ({
+    id: fl.id as string,
+    token: fl.token as string,
+    status: fl.status as string,
+    created_at: fl.erstellt_am as string,
+    expires_at: fl.expires_at as string,
+    geoeffnet_am: (fl.geoeffnet_am ?? null) as string | null,
+    abgeschlossen_am: (fl.abgeschlossen_am ?? null) as string | null,
+    fall_id: (fl.fall_id ?? null) as string | null,
+  }))
 
   // Phase 6 Status-Tracking Snapshot. Sowohl sa_unterschrieben als auch
   // vollmacht_unterschrieben leben auf der leads-Tabelle (siehe BUG-15
@@ -97,7 +111,7 @@ export default async function DispatchLeadDetail({
 
   // Initial-Phase aus Daten ableiten (erste unvollständige Phase)
   const qual = computeQualificationStatus(lead, aktiverSvTermin)
-  const latestFlow = flowLinks?.[0]
+  const latestFlow = flowLinks[0]
   const flowLinkGesendet = !!latestFlow && latestFlow.status !== 'abgelaufen'
   const saUnterschrieben = !!lead.sa_unterschrieben
 
@@ -113,7 +127,7 @@ export default async function DispatchLeadDetail({
     <DispatchShell
       lead={lead}
       aktiverTermin={aktiverSvTermin}
-      flowLinks={flowLinks ?? []}
+      flowLinks={flowLinks}
       calls={calls ?? []}
       fall={unterschriftenSnapshot}
       initialPhase={initialPhase}
