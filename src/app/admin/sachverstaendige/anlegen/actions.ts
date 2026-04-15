@@ -173,6 +173,13 @@ export async function anlegeSv(data: AnlegeSvFormData): Promise<{ success: boole
     // AAR-206: user_id mit setzen — Legacy-Queries joinen teilweise via
     // user_id statt profile_id. Siehe AAR-185.
     user_id: authUser.user.id,
+    // AAR-207: Firma-Stammdaten aus dem Wizard durchreichen — vorher waren
+    // diese Felder auf sachverstaendige trotz vorhandener Spalten null.
+    firmenname: data.firmenname || null,
+    rechtsform: data.rechtsform || null,
+    steuernummer: data.steuernummer || null,
+    ust_id: data.ust_id || null,
+    hrb: data.hrb || null,
     paket: data.paket === 'individuell' ? 'standard' : data.paket, // 'individuell' wird intern als 'standard' geflaggt mit Override
     gutachter_typ: data.gutachter_typ,
     qualifikationen_neu: data.qualifikationen,
