@@ -146,12 +146,64 @@ export default function Phase1Qualifizierung() {
           <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold ${q1Complete ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>1</span>
           <h3 className="text-xs font-semibold text-gray-700">Unfallhergang &amp; Verantwortlichkeit</h3>
         </div>
+        {/* AAR-179 P3-G: Guided Bausteine — 5 Klick-Buttons erzeugen Prompt-
+            Satzanfänge die der MA im Gespräch konkret abfragt. Hilft dem MA
+            die 5-Punkt-Checkliste (Wann/Wo/Gegner/Situation/Zeugen) strukturiert
+            durchzugehen ohne wichtige Details zu vergessen. */}
+        <div className="flex flex-wrap gap-1.5">
+          {([
+            { label: 'Wann?', prompt: 'Wann ist es passiert? ' },
+            { label: 'Wo?', prompt: 'Wo ist es passiert (Straße/Ort)? ' },
+            { label: 'Gegner?', prompt: 'Wer war der Unfallgegner (Fahrzeug/Richtung)? ' },
+            { label: 'Situation?', prompt: 'In welcher Situation — Ampel/Kreuzung/Parkplatz? ' },
+            { label: 'Zeugen?', prompt: 'Gab es Zeugen oder Dashcam-Aufnahmen? ' },
+          ] as const).map((b) => (
+            <button
+              key={b.label}
+              type="button"
+              onClick={() =>
+                setDraft((d) => ({
+                  ...d,
+                  unfallhergang: (d.unfallhergang ? d.unfallhergang + '\n' : '') + b.prompt,
+                }))
+              }
+              className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100"
+              title={`„${b.prompt.trim()}" ans Textfeld anhängen`}
+            >
+              + {b.label}
+            </button>
+          ))}
+        </div>
         <textarea
           value={draft.unfallhergang ?? ''}
           onChange={e => setDraft(d => ({ ...d, unfallhergang: e.target.value }))}
-          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm h-20 resize-none"
+          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm h-28 resize-none font-mono"
           placeholder={'Wie ist es passiert? (offene Beschreibung — Sprachregel: niemals „Schuld")'}
         />
+        {/* AAR-179 P3-G: 5-Punkt-Checkliste — zeigt welche Bausteine schon
+            im Hergang stehen. Matching ist fuzzy per Prompt-Start-Substring. */}
+        <div className="flex flex-wrap gap-2 text-[10px]">
+          {([
+            { label: 'Wann', match: 'Wann ist es passiert' },
+            { label: 'Wo', match: 'Wo ist es passiert' },
+            { label: 'Gegner', match: 'Wer war der Unfallgegner' },
+            { label: 'Situation', match: 'In welcher Situation' },
+            { label: 'Zeugen', match: 'Gab es Zeugen' },
+          ] as const).map((c) => {
+            const hit = (draft.unfallhergang ?? '').includes(c.match)
+            return (
+              <span
+                key={c.label}
+                className={`flex items-center gap-1 px-1.5 py-0.5 rounded ${
+                  hit ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-400'
+                }`}
+              >
+                {hit ? <CheckCircleIcon className="w-3 h-3" /> : <span className="w-3 h-3 inline-block" />}
+                {c.label}
+              </span>
+            )
+          })}
+        </div>
         <div className="flex gap-2">
           {([
             { v: 'gegner', label: 'Gegner hat verursacht' },

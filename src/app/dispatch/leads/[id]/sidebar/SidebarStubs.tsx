@@ -175,36 +175,68 @@ export function RueckrufButton() {
 }
 
 // ─── Gesprächshilfen pro Phase (Notion-Spec Sektion 4) ──────────────────────
-const GESPRAECHSHILFEN: Record<Phase, { titel: string; skript: string }> = {
+// AAR-179 P3-J: Volle Skripte aus der Master-Spec — pro Phase ein kurzer
+// Opener + 2-3 Folge-Sätze die der MA bei Bedarf nachlegen kann.
+const GESPRAECHSHILFEN: Record<Phase, { titel: string; opener: string; folge: string[] }> = {
   1: {
-    titel: 'Einstieg + Empathie',
-    skript:
+    titel: 'Einstieg + Empathie + Qualifizierung',
+    opener:
       '„Claimondo Unfallservice, [Ihr Name] am Apparat. Das klingt stressig — wir kümmern uns. Erzählen Sie mir zuerst in Ruhe wie es passiert ist."',
+    folge: [
+      'Aktiv zuhören, nicht unterbrechen — erst 60–90s reden lassen.',
+      'Dann strukturiert Q1 (Hergang), Q2 (Schaden/Personenschaden), Q3 (Polizei) abhaken.',
+      'Bei „unklar" immer Teilschuld-Aufklärung vorlesen (rot markierter Checkbox-Block).',
+    ],
   },
   2: {
-    titel: 'Terminreservierung',
-    skript:
+    titel: 'Terminreservierung + Pfad-Entscheidung',
+    opener:
       '„Ich habe einen Sachverständigen in Ihrer Nähe verfügbar — [Datum] um [Uhrzeit] könnten wir direkt reservieren. Passt das für Sie?"',
+    folge: [
+      'Zuerst Besichtigungsadresse klären (Auto-Save bei Select).',
+      'Dann Pfad A (Komplett) vs. Pfad B (Nur SV) erklären — Standard ist Komplett.',
+      'SV-Vorschläge nach Distanz + Kontingent automatisch sortiert.',
+    ],
   },
   3: {
-    titel: 'Schadentyp bestätigen',
-    skript:
-      '„Damit wir das richtig einordnen — war das ein [Auffahrunfall / Spurwechsel / Parkplatz]? Dann weiß der Gutachter schon auf was er achten muss."',
+    titel: 'Schadentyp + Konstellation',
+    opener:
+      '„Damit wir das richtig einordnen — war das ein Auffahrunfall, ein Spurwechsel, oder auf dem Parkplatz?"',
+    folge: [
+      'Pro Schadentyp gibt es Dispatch-Hinweise (Zeugen/Dashcam/Polizei-AZ etc.).',
+      'Bei Parkplatz ohne Kennzeichen: Kamera-Check ist Pflicht — Disqualifier.',
+      'Schadentyp bestimmt automatisch die Ortskategorie (siehe P2-B).',
+    ],
   },
   4: {
-    titel: 'Dateneingabe',
-    skript:
-      '„Ich nehme noch kurz die restlichen Daten auf — Kennzeichen, Marke, Gegner. Dann sind wir fast durch."',
+    titel: 'Stammdaten + Gegner',
+    opener:
+      '„Ich nehme noch kurz die restlichen Daten auf — Kennzeichen, Marke, Gegner-Kennzeichen. Dann sind wir fast durch."',
+    folge: [
+      'Kennzeichen über HSN/TSN triggert Cardentity-Call (Halter + Marke).',
+      'Gegner-Versicherung: wenn bekannt eintragen, sonst „unbekannt" — Kanzlei recherchiert.',
+      'Vorschäden-Frage nicht vergessen (Kasko-relevant).',
+    ],
   },
   5: {
-    titel: 'Abschluss + Portal',
-    skript:
+    titel: 'Letzter Check + FlowLink-Versand',
+    opener:
       '„Ich schicke Ihnen jetzt den Link per WhatsApp. Darin unterschreiben Sie den Sachverständigen-Auftrag — das dauert drei Minuten. Danach ist Ihr Termin fix gebucht."',
+    folge: [
+      'Summary durchgehen — rote Zeilen sind noch offene Pflichtfelder.',
+      'WA-Nummer + Email live editierbar (wird onBlur gespeichert).',
+      'Nach Versand: Auto-Sprung zu Phase 6 Status-Tracking.',
+    ],
   },
   6: {
-    titel: 'Nachverfolgung',
-    skript:
+    titel: 'Nachverfolgung + Inaktiv-Alarm',
+    opener:
       '„Der Link wurde gesendet. Ich prüfe in den nächsten zwei Stunden den Status — melden Sie sich wenn irgendwas hakt, sonst hören wir uns nach dem Termin wieder."',
+    folge: [
+      'Alarm bei >2h ohne Portal-Öffnung — direkt Rückruf einleiten.',
+      'Erneut-senden-Button unter dem Stepper falls Link verloren.',
+      'Nach SA-Unterschrift wird T4 „Termin bestätigt" automatisch gesendet.',
+    ],
   },
 }
 
@@ -218,59 +250,95 @@ export function GespraechshilfePanel() {
         <span>Gesprächshilfe — {hilfe.titel}</span>
         <ChevronDownIcon className="w-3.5 h-3.5 ml-auto text-gray-400 group-open:rotate-180 transition-transform" />
       </summary>
-      <p className="text-[11px] text-gray-600 mt-2 italic leading-relaxed">{hilfe.skript}</p>
+      <div className="mt-2 space-y-2">
+        <p className="text-[11px] text-gray-700 italic leading-relaxed">{hilfe.opener}</p>
+        <ul className="space-y-1 pt-1 border-t border-gray-100">
+          {hilfe.folge.map((f, i) => (
+            <li key={i} className="text-[10px] text-gray-500 flex gap-1.5">
+              <span className="text-gray-400 shrink-0">•</span>
+              <span>{f}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </details>
   )
 }
 
 // ─── Einwand-Karten (Notion-Spec Sektion 5) ─────────────────────────────────
-const EINWAENDE: { einwand: string; antwort: string }[] = [
+// AAR-179 P3-K: Einwände sind jetzt phasensensitiv — jeder Einwand hat ein
+// Array von Phasen in denen er typischerweise kommt. Default in allen Phasen
+// sichtbar sind nur die „Dauerbrenner" (Kosten, Seriosität).
+type Einwand = {
+  einwand: string
+  antwort: string
+  phasen: Phase[]  // leer = immer sichtbar
+}
+
+const EINWAENDE: Einwand[] = [
   {
     einwand: '„Ich melde mich selbst bei der Versicherung"',
     antwort:
       'Wir übernehmen alles komplett — Gutachten, Kanzlei, Kommunikation mit der Gegenseite. Mit unserer Partnerkanzlei bekommen Sie im Schnitt mehr heraus als wenn Sie es selbst regulieren.',
+    phasen: [1, 2, 5],
   },
   {
     einwand: '„Muss ich irgendetwas zahlen?"',
     antwort:
       'Nein, für Sie ist alles kostenlos. Die Kosten trägt die Versicherung des Unfallverursachers — das ist Ihr gesetzliches Recht.',
+    phasen: [],  // immer — Dauerbrenner
   },
   {
     einwand: '„Ich habe schon einen Anwalt"',
     antwort:
       'Kein Problem — dann übernehmen wir nur den Gutachtertermin. Ihr Anwalt bleibt unabhängig, wir liefern ihm nur das Gutachten.',
+    phasen: [2],
   },
   {
     einwand: '„Das dauert mir zu lange"',
     antwort:
       'Wir haben oft schon übermorgen einen Termin. Sie müssen nur kurz unterschreiben — das dauert drei Minuten im Portal.',
+    phasen: [2, 5],
   },
   {
     einwand: '„Ich überlege mir das"',
     antwort:
       'Ich halte den Termin 30 Minuten für Sie offen — danach geht der Slot an den nächsten Fall. Sollen wir zusammen kurz durchgehen?',
+    phasen: [5, 6],
   },
   {
     einwand: '„Wie lange dauert die Regulierung?"',
     antwort:
       'In der Regel 4–6 Wochen. Sie sehen den Status jederzeit live in Ihrem Portal — inkl. aller Dokumente.',
+    phasen: [1, 5],
   },
   {
     einwand: '„Ist das seriös?"',
     antwort:
       'Wir arbeiten ausschließlich mit DAT-zertifizierten Gutachtern und der LexDrive GmbH als Kanzlei-Partner — beide gerichtlich anerkannt und geprüft.',
+    phasen: [],  // immer — Dauerbrenner
   },
 ]
 
 export function EinwandKarten() {
+  const { currentPhase } = useDispatchPhase()
+  // Zeige nur die Einwände, die in der aktuellen Phase typisch sind (oder
+  // immer — leeres Phasen-Array). So sieht der MA nicht 7 Karten auf einmal
+  // sondern nur die 2-4 relevanten.
+  const relevante = EINWAENDE.filter(
+    (e) => e.phasen.length === 0 || e.phasen.includes(currentPhase),
+  )
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-1.5">
       <div className="flex items-center gap-2 text-xs font-semibold text-gray-700 mb-1">
         <MessageSquareWarningIcon className="w-4 h-4 text-amber-500" />
         <span>Einwand-Karten</span>
+        <span className="ml-auto text-[9px] text-gray-400 uppercase tracking-wide">
+          Phase {currentPhase}
+        </span>
       </div>
       <div className="space-y-1">
-        {EINWAENDE.map((e, i) => (
+        {relevante.map((e, i) => (
           <details key={i} className="group rounded-lg border border-gray-100 p-2 hover:border-amber-200">
             <summary className="text-[11px] font-medium text-gray-700 cursor-pointer list-none flex items-start gap-1">
               <ChevronDownIcon className="w-3 h-3 mt-0.5 text-gray-400 group-open:rotate-180 transition-transform shrink-0" />
@@ -279,6 +347,11 @@ export function EinwandKarten() {
             <p className="text-[10px] text-gray-600 mt-1.5 pl-4 italic leading-relaxed">{e.antwort}</p>
           </details>
         ))}
+        {relevante.length === 0 && (
+          <p className="text-[10px] text-gray-400 italic py-1">
+            Keine phasentypischen Einwände in Phase {currentPhase}.
+          </p>
+        )}
       </div>
     </div>
   )
