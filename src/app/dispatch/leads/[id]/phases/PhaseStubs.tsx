@@ -9,12 +9,10 @@
 import Phase1Qualifizierung from './Phase1Qualifizierung'
 import Phase2TerminServiceTypComponent from './Phase2TerminServiceTyp'
 import Phase3SchadentypComponent from './Phase3Schadentyp'
-import CardentityButton from '../CardentityButton'
+import Phase4StammdatenComponent from './Phase4Stammdaten'
 import LeadDetailActions from '../LeadDetailActions'
 import ExitSkript, { type DisqualifikationsGrund } from '../ExitSkript'
 import { useDispatchPhase } from '../lib/phase-context'
-import { PhoneIcon, MailIcon, CarIcon, ShieldIcon } from 'lucide-react'
-import AircallCallButton from '@/components/AircallCallButton'
 import { computeFlowLinkStufe, FLOWLINK_STUFE_LABEL } from '@/lib/dispatch/fahrzeug-marken'
 
 type FlowLinkRow = {
@@ -76,72 +74,11 @@ export function Phase3Schadentyp() {
   return <Phase3SchadentypComponent />
 }
 
-/** Phase 4 — Stammdaten (Kontakt, Fahrzeug, Versicherung, Gegner). W6 baut echte Form. */
+/** Phase 4 — Stammdaten (Inline-Edit + Auto-Flags). W6 (AAR-140). */
 export function Phase4Stammdaten() {
-  const { lead, qualification } = useDispatchPhase()
+  const { qualification } = useDispatchPhase()
   if (qualification.disqualifiziert) return <DisqualifiziertOverlay />
-  const l = lead as unknown as Record<string, string | boolean | null | undefined>
-  return (
-    <div className="space-y-4">
-      <Card title="Kontaktdaten">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-          <div className="flex items-center gap-2">
-            <PhoneIcon className="w-4 h-4 text-gray-400" />
-            {l.telefon ? (
-              <>
-                <a href={`tel:${l.telefon}`} className="text-[#4573A2] hover:underline">
-                  {l.telefon as string}
-                </a>
-                <AircallCallButton phoneNumber={l.telefon as string} leadId={lead.id} variant="icon" />
-              </>
-            ) : <span className="text-gray-400">—</span>}
-          </div>
-          <div className="flex items-center gap-2">
-            <MailIcon className="w-4 h-4 text-gray-400" />
-            {l.email ? (
-              <a href={`mailto:${l.email}`} className="text-[#4573A2] hover:underline">
-                {l.email as string}
-              </a>
-            ) : <span className="text-gray-400">—</span>}
-          </div>
-        </div>
-      </Card>
-
-      <Card>
-        <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-          <CarIcon className="w-4 h-4 text-gray-400" /> Fahrzeug & Schaden
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
-          <div><p className="text-[10px] text-gray-400 uppercase">Kennzeichen</p><p className="font-medium">{(l.kennzeichen as string) || '—'}</p></div>
-          <div><p className="text-[10px] text-gray-400 uppercase">Hersteller</p><p className="font-medium">{(l.fahrzeug_hersteller as string) || '—'}</p></div>
-          <div><p className="text-[10px] text-gray-400 uppercase">Modell</p><p className="font-medium">{(l.fahrzeug_modell as string) || '—'}</p></div>
-          <div><p className="text-[10px] text-gray-400 uppercase">Schadenfall</p><p className="font-medium">{(l.schadenfall_typ as string) || '—'}</p></div>
-          <div><p className="text-[10px] text-gray-400 uppercase">Schadensursache</p><p className="font-medium">{(l.schadensursache as string) || '—'}</p></div>
-          <div><p className="text-[10px] text-gray-400 uppercase">Service-Typ</p><p className="font-medium">{l.service_typ === 'nur_gutachter' ? 'Nur Gutachter' : 'Komplett'}</p></div>
-        </div>
-        <div className="pt-3 border-t border-gray-100">
-          <CardentityButton
-            leadId={lead.id}
-            hasFin={!!l.fin}
-            alreadyEnriched={!!l.cardentity_enriched_at}
-          />
-        </div>
-      </Card>
-
-      <Card>
-        <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-          <ShieldIcon className="w-4 h-4 text-gray-400" /> Versicherung & Gegner
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
-          <div><p className="text-[10px] text-gray-400 uppercase">Gegner bekannt</p><p className="font-medium">{l.gegner_bekannt ? 'Ja' : 'Nein'}</p></div>
-          <div><p className="text-[10px] text-gray-400 uppercase">Gegner VS</p><p className="font-medium">{(l.gegner_versicherung as string) || '—'}</p></div>
-          <div><p className="text-[10px] text-gray-400 uppercase">Gegner Kennzeichen</p><p className="font-medium">{(l.gegner_kennzeichen as string) || '—'}</p></div>
-          <div><p className="text-[10px] text-gray-400 uppercase">Unfall-Konstellation</p><p className="font-medium">{(l.unfall_konstellation as string) || '—'}</p></div>
-          <div><p className="text-[10px] text-gray-400 uppercase">Quelle</p><p className="font-medium">{(l.source_channel as string) || '—'}</p></div>
-        </div>
-      </Card>
-    </div>
-  )
+  return <Phase4StammdatenComponent />
 }
 
 /** Phase 5 — Zusammenfassung + FlowLink versenden. W7 baut Zusammenfassungs-Panel. */
