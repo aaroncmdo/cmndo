@@ -13,7 +13,7 @@ import type { FallakteRolle } from '@/lib/fall/field-permissions'
 import UebersichtTab from './tabs/UebersichtTab'
 import KommunikationTab from './tabs/KommunikationTab'
 import TimelineTab from './tabs/TimelineTab'
-import ProzessTabStub from './tabs/ProzessTabStub'
+import ProzessTab from './tabs/ProzessTab'
 import DokumenteTab from './DokumenteTab'
 import FallSidebar from './sidebar/FallSidebar'
 
@@ -115,7 +115,7 @@ export default function FallakteShell({
             {activeTab === 'uebersicht' && <UebersichtTab />}
             {activeTab === 'dokumente' && <DokumenteTab {...dokumenteTabProps} />}
             {activeTab === 'kommunikation' && <KommunikationTab />}
-            {activeTab === 'prozess' && <ProzessTabStub />}
+            {activeTab === 'prozess' && <ProzessTab />}
             {activeTab === 'timeline' && <TimelineTab timeline={timeline} />}
           </div>
         </main>
