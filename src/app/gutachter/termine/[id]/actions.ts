@@ -1,13 +1,166 @@
 'use server'
 
 // AAR-126: Server Action für Polizeibericht-Upload durch den SV.
-// Wird vom Termin-Detail aufgerufen wenn der Kunde den Bericht nicht
-// rechtzeitig hochgeladen hat und der SV ihn vor Ort einholt.
+// AAR-134: Server Actions für SV-Termin-Ablehnung + Gegenvorschlag.
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
+
+// ─── AAR-134: SV-Termin ablehnen ──────────────────────────────────────────
+
+export async function svAblehneTermin(
+  terminId: string,
+  grund: string,
+): Promise<{ success: boolean; error?: string }> {
+  if (!grund || grund.trim().length < 10) {
+    return { success: false, error: 'Bitte mindestens 10 Zeichen Begründung angeben.' }
+  }
+
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
+  if (!sv) return { success: false, error: 'Kein SV-Profil' }
+
+  const adminDb = createAdminClient()
+  const { data: termin } = await adminDb
+    .from('gutachter_termine')
+    .select('id, sv_id, status, lead_id, fall_id')
+    .eq('id', terminId)
+    .single()
+
+  if (!termin) return { success: false, error: 'Termin nicht gefunden' }
+  if (termin.sv_id !== sv.id) return { success: false, error: 'Nicht autorisiert' }
+  if (!['reserviert', 'bestaetigt'].includes(termin.status)) {
+    return { success: false, error: `Termin kann im Status "${termin.status}" nicht abgelehnt werden` }
+  }
+
+  const { error } = await adminDb
+    .from('gutachter_termine')
+    .update({
+      status: 'abgelehnt',
+      sv_ablehnung_grund: grund.trim(),
+      sv_ablehnung_am: new Date().toISOString(),
+    })
+    .eq('id', terminId)
+
+  if (error) return { success: false, error: error.message }
+
+  // Dispatcher-Email (non-blocking)
+  try {
+    const { sendDispatcherTerminAbgelehnt } = await import('@/lib/email/google/flows')
+    await sendDispatcherTerminAbgelehnt(terminId, grund.trim())
+  } catch (err) {
+    console.warn('[svAblehneTermin] Dispatcher-Email fehlgeschlagen:', err)
+  }
+
+  // Timeline — typ='termin', scope auf fall_id ODER lead_id
+  await adminDb.from('timeline').insert({
+    fall_id: termin.fall_id ?? null,
+    lead_id: !termin.fall_id ? termin.lead_id : null,
+    typ: 'termin',
+    titel: 'SV hat Termin abgelehnt',
+    beschreibung: `Grund: ${grund.trim()}`,
+    erstellt_von: user.id,
+  }).then(() => {}, () => {})
+
+  revalidatePath('/gutachter/termine')
+  revalidatePath(`/gutachter/termine/${terminId}`)
+  revalidatePath('/dispatch/leads')
+  if (termin.lead_id) revalidatePath(`/dispatch/leads/${termin.lead_id}`)
+
+  return { success: true }
+}
+
+// ─── AAR-134: SV-Gegenvorschlag ──────────────────────────────────────────
+
+export type GegenvorschlagSlot = { start: string; end: string }
+
+export async function svGegenvorschlagTermin(
+  terminId: string,
+  slots: GegenvorschlagSlot[],
+  begruendung?: string,
+): Promise<{ success: boolean; error?: string }> {
+  if (!Array.isArray(slots) || slots.length < 1 || slots.length > 5) {
+    return { success: false, error: 'Bitte 1-5 alternative Termine vorschlagen.' }
+  }
+
+  // Slot-Validierung: start < end, start in Zukunft
+  const now = Date.now()
+  for (const [i, slot] of slots.entries()) {
+    const start = new Date(slot.start).getTime()
+    const end = new Date(slot.end).getTime()
+    if (Number.isNaN(start) || Number.isNaN(end)) {
+      return { success: false, error: `Slot ${i + 1}: ungültiges Datum` }
+    }
+    if (start >= end) {
+      return { success: false, error: `Slot ${i + 1}: Start muss vor Ende liegen` }
+    }
+    if (start < now) {
+      return { success: false, error: `Slot ${i + 1}: Termin liegt in der Vergangenheit` }
+    }
+  }
+
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
+  if (!sv) return { success: false, error: 'Kein SV-Profil' }
+
+  const adminDb = createAdminClient()
+  const { data: termin } = await adminDb
+    .from('gutachter_termine')
+    .select('id, sv_id, status, lead_id, fall_id')
+    .eq('id', terminId)
+    .single()
+
+  if (!termin) return { success: false, error: 'Termin nicht gefunden' }
+  if (termin.sv_id !== sv.id) return { success: false, error: 'Nicht autorisiert' }
+  if (!['reserviert', 'bestaetigt'].includes(termin.status)) {
+    return { success: false, error: `Termin kann im Status "${termin.status}" nicht geändert werden` }
+  }
+
+  const { error } = await adminDb
+    .from('gutachter_termine')
+    .update({
+      status: 'gegenvorschlag',
+      sv_vorgeschlagene_slots: slots,
+      sv_ablehnung_grund: begruendung?.trim() || null,
+      sv_ablehnung_am: new Date().toISOString(),
+    })
+    .eq('id', terminId)
+
+  if (error) return { success: false, error: error.message }
+
+  try {
+    const { sendDispatcherGegenvorschlag } = await import('@/lib/email/google/flows')
+    await sendDispatcherGegenvorschlag(terminId, slots, begruendung?.trim() || null)
+  } catch (err) {
+    console.warn('[svGegenvorschlagTermin] Dispatcher-Email fehlgeschlagen:', err)
+  }
+
+  await adminDb.from('timeline').insert({
+    fall_id: termin.fall_id ?? null,
+    lead_id: !termin.fall_id ? termin.lead_id : null,
+    typ: 'termin',
+    titel: 'SV hat Gegenvorschlag gemacht',
+    beschreibung: `${slots.length} alternative Termine vorgeschlagen.${begruendung ? ' Begründung: ' + begruendung.trim() : ''}`,
+    erstellt_von: user.id,
+  }).then(() => {}, () => {})
+
+  revalidatePath('/gutachter/termine')
+  revalidatePath(`/gutachter/termine/${terminId}`)
+  revalidatePath('/dispatch/leads')
+  if (termin.lead_id) revalidatePath(`/dispatch/leads/${termin.lead_id}`)
+
+  return { success: true }
+}
+
+// ─── AAR-126: Polizeibericht-Upload ──────────────────────────────────────
 
 export async function uploadPolizeiberichtAsSv(
   fallId: string,

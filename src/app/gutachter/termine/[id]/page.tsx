@@ -210,13 +210,14 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
         />
       )}
 
-      {/* Navigation / Vor-Ort Actions */}
+      {/* Navigation / Vor-Ort Actions + AAR-134 Ablehnen/Gegenvorschlag */}
       <TerminDetailActions
         terminId={id}
         navigationStartedAt={termin.navigation_started_at ?? null}
         svAngekommen={!!termin.sv_angekommen_am}
         durchgefuehrt={!!termin.durchgefuehrt_am}
         adresse={adresse}
+        status={termin.status}
       />
 
     </div>

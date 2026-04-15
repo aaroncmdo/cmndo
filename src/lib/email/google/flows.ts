@@ -10,6 +10,8 @@ import { KanzleiAuftragszusammenfassungEmail, subject as kanzleiAuftragSubject }
 import { KanzleiAbrechnungRechnungEmail, subject as kanzleiAbrechnungSubject } from './templates/KanzleiAbrechnungRechnung'
 import { MarketingAbrechnungEmail, subject as marketingAbrechnungSubject } from './templates/MarketingAbrechnung'
 import { SvTerminBestaetigungEmail, subject as svTerminBestaetigungSubject } from './templates/SvTerminBestaetigung'
+import { DispatcherTerminAbgelehntEmail, subject as dispatcherAbgelehntSubject } from './templates/DispatcherTerminAbgelehnt'
+import { DispatcherGegenvorschlagEmail, subject as dispatcherGegenvorschlagSubject } from './templates/DispatcherGegenvorschlag'
 import { KanzleiMonatsAbrechnungEmail, subject as kanzleiMonatsAbrechnungSubject } from './templates/KanzleiMonatsAbrechnung'
 import { WillkommenSvEmail, subject as willkommenSvSubject } from './templates/WillkommenSv'
 import { WillkommenSvAnBueroEmail, subject as willkommenSvAnBueroSubject } from './templates/WillkommenSvAnBuero'
@@ -684,12 +686,10 @@ export async function sendSvTerminBestaetigung(svId: string, terminId: string): 
     kundenName,
     adresse,
     istVorreservierung,
-    // AAR-133 (revalidiert): ablehnenUrl bleibt NULL bis AAR-134 den
-    // /sv/termin/{token}-Endpoint baut. Sonst landet jede Mail mit einem Link
-    // auf einer 404-Page. Token ist in DB via .select('id, ablehnen_token')
-    // verfügbar (siehe reserveSvTerminForLead) — wenn AAR-134 gemerged ist,
-    // hier den URL-String wieder aktivieren.
-    ablehnenUrl: null,
+    // AAR-134: /ablehnen/{token}-Endpoint existiert jetzt (public route)
+    ablehnenUrl: termin.ablehnen_token
+      ? `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/ablehnen/${termin.ablehnen_token}`
+      : null,
   }
 
   const html = await render(SvTerminBestaetigungEmail(props))
@@ -701,4 +701,132 @@ export async function sendSvTerminBestaetigung(svId: string, terminId: string): 
     empfaengerTyp: 'sv',
     template: 'sv_termin_bestaetigung',
   })
+}
+
+// ─── AAR-134: Dispatcher-Email bei SV-Ablehnung ────────────────────────────
+
+async function getDispatcherEmails(): Promise<string[]> {
+  const db = admin()
+  const { data } = await db
+    .from('profiles')
+    .select('email')
+    .in('rolle', ['dispatch', 'admin'])
+    .not('email', 'is', null)
+  return ((data ?? []) as { email: string | null }[]).map((p) => p.email).filter((e): e is string => !!e)
+}
+
+async function loadTerminContext(terminId: string) {
+  const db = admin()
+  const { data: termin } = await db
+    .from('gutachter_termine')
+    .select('id, fall_id, lead_id, sv_id, start_zeit')
+    .eq('id', terminId)
+    .single()
+  if (!termin) return null
+
+  let svName = 'Sachverständiger'
+  if (termin.sv_id) {
+    const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.sv_id).single()
+    if (sv?.profile_id) {
+      const { data: p } = await db.from('profiles').select('vorname, nachname').eq('id', sv.profile_id).single()
+      if (p) svName = [p.vorname, p.nachname].filter(Boolean).join(' ') || svName
+    }
+  }
+
+  let kundenName = '—'
+  if (termin.fall_id) {
+    const { data: fall } = await db.from('faelle').select('lead_id').eq('id', termin.fall_id).single()
+    if (fall?.lead_id) {
+      const { data: l } = await db.from('leads').select('vorname, nachname').eq('id', fall.lead_id).single()
+      if (l) kundenName = [l.vorname, l.nachname].filter(Boolean).join(' ') || '—'
+    }
+  } else if (termin.lead_id) {
+    const { data: l } = await db.from('leads').select('vorname, nachname').eq('id', termin.lead_id).single()
+    if (l) kundenName = [l.vorname, l.nachname].filter(Boolean).join(' ') || '—'
+  }
+
+  const tDate = new Date(termin.start_zeit)
+  return {
+    svName,
+    kundenName,
+    fallId: termin.fall_id as string | null,
+    leadId: termin.lead_id as string | null,
+    datum: tDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }),
+    uhrzeit: tDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+  }
+}
+
+export async function sendDispatcherTerminAbgelehnt(terminId: string, grund: string): Promise<void> {
+  const ctx = await loadTerminContext(terminId)
+  if (!ctx) return
+  const dispatcherEmails = await getDispatcherEmails()
+  if (!dispatcherEmails.length) {
+    console.warn('[AAR-134] sendDispatcherTerminAbgelehnt: keine Dispatcher-Emails')
+    return
+  }
+
+  const props = {
+    svName: ctx.svName,
+    kundenName: ctx.kundenName,
+    terminDatum: ctx.datum,
+    terminUhrzeit: ctx.uhrzeit,
+    grund,
+    leadId: ctx.leadId,
+    fallId: ctx.fallId,
+  }
+  const html = await render(DispatcherTerminAbgelehntEmail(props))
+  for (const to of dispatcherEmails) {
+    await sendEmail({
+      to,
+      subject: dispatcherAbgelehntSubject(props),
+      html,
+      fallId: ctx.fallId,
+      empfaengerTyp: 'admin',
+      template: 'dispatcher_termin_abgelehnt',
+    }).catch((err) => console.warn('[AAR-134] Dispatcher-Email an', to, 'fehlgeschlagen:', err))
+  }
+}
+
+export async function sendDispatcherGegenvorschlag(
+  terminId: string,
+  slots: { start: string; end: string }[],
+  begruendung: string | null,
+): Promise<void> {
+  const ctx = await loadTerminContext(terminId)
+  if (!ctx) return
+  const dispatcherEmails = await getDispatcherEmails()
+  if (!dispatcherEmails.length) {
+    console.warn('[AAR-134] sendDispatcherGegenvorschlag: keine Dispatcher-Emails')
+    return
+  }
+
+  const slotInfo = slots.map((s) => {
+    const d = new Date(s.start)
+    return {
+      datum: d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' }),
+      uhrzeit: d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+    }
+  })
+
+  const props = {
+    svName: ctx.svName,
+    kundenName: ctx.kundenName,
+    originalDatum: ctx.datum,
+    originalUhrzeit: ctx.uhrzeit,
+    slots: slotInfo,
+    begruendung,
+    leadId: ctx.leadId,
+    fallId: ctx.fallId,
+  }
+  const html = await render(DispatcherGegenvorschlagEmail(props))
+  for (const to of dispatcherEmails) {
+    await sendEmail({
+      to,
+      subject: dispatcherGegenvorschlagSubject(props),
+      html,
+      fallId: ctx.fallId,
+      empfaengerTyp: 'admin',
+      template: 'dispatcher_gegenvorschlag',
+    }).catch((err) => console.warn('[AAR-134] Dispatcher-Email an', to, 'fehlgeschlagen:', err))
+  }
 }
