@@ -130,10 +130,19 @@ export async function sendFlowLinkMultiChannel(
 
   // Lead-Status auf flow-versendet (AAR-116 Hardening: nur nach erfolgreichem Send).
   // wa_gesendet wird nur bei WA-Versand auf true gesetzt — per conditional spread.
+  // AAR-155: zugewiesen_an wird automatisch auf den Dispatcher gesetzt falls
+  // noch leer — damit später bei Fall-Erstellung leadbearbeiter_id FK bekannt
+  // ist. Wenn bereits zugewiesen → nicht überschreiben.
+  const { data: currentLead } = await supabase
+    .from('leads')
+    .select('zugewiesen_an')
+    .eq('id', leadId)
+    .maybeSingle()
   await supabase
     .from('leads')
     .update({
       ...(kanal === 'whatsapp' && { wa_gesendet: true }),
+      ...(!currentLead?.zugewiesen_an && { zugewiesen_an: user.id }),
       status: 'flow-gesendet',
       qualifizierungs_phase: 'flow-versendet',
       updated_at: new Date().toISOString(),

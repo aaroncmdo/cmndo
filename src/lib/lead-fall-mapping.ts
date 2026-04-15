@@ -143,6 +143,12 @@ export type BuildFallOptions = {
   kundenbetreuerId: string | null
   svIdFromTermin: string | null
   signatureUrl: string
+  // AAR-155: 4 Entity-FK-IDs, resolved via resolveFallEntityFks() BEVOR
+  // buildFallInsertFromLead synchron aufgerufen wird.
+  versicherungId?: string | null
+  kanzleiId?: string | null
+  organisationId?: string | null
+  leadbearbeiterId?: string | null
 }
 
 export function fallComputedFields(lead: LeadRow, options: BuildFallOptions): Record<string, unknown> {
@@ -163,7 +169,92 @@ export function fallComputedFields(lead: LeadRow, options: BuildFallOptions): Re
     abtretung_pdf: options.signatureUrl,
     abtretung_signiert_am: now,
     sa_unterschrieben: true,
+    // AAR-155: Entity-FKs — resolveFallEntityFks() muss vorher laufen.
+    // Bei Lookup-Miss bleibt der Wert null (nicht-blockierend).
+    versicherung_id: options.versicherungId ?? null,
+    kanzlei_id: options.kanzleiId ?? null,
+    organisation_id: options.organisationId ?? null,
+    leadbearbeiter_id: options.leadbearbeiterId ?? null,
   }
+}
+
+// ─── 6. ENTITY-RESOLVER (AAR-155) ──────────────────────────────────────────
+// Löst die 4 FK-IDs für den Fall auf: Versicherung (Fuzzy-Match auf
+// gegner_versicherung), Kanzlei (bei Pfad A = LexDrive), Organisation
+// (via SV-Mitgliedschaft), Leadbearbeiter (lead.zugewiesen_an oder Fallback).
+// Non-blocking: jeder Miss → null.
+// Der admin-Parameter ist bewusst `any` — Supabase-Client-Generics sind bei
+// Lookup-Queries über mehrere Tabellen schwer exakt zu typen (TS2589); die
+// Resolver-Funktion ist klein, try/catch-umhüllt und die Rückgabewerte sind
+// strikt getypt.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AdminClient = any
+
+export async function resolveFallEntityFks(
+  admin: AdminClient,
+  lead: LeadRow,
+  svIdFromTermin: string | null,
+): Promise<{
+  versicherungId: string | null
+  kanzleiId: string | null
+  organisationId: string | null
+  leadbearbeiterId: string | null
+}> {
+  const gegnerVs = typeof lead.gegner_versicherung === 'string' ? lead.gegner_versicherung.trim() : ''
+  const serviceTyp = typeof lead.service_typ === 'string' ? lead.service_typ : 'komplett'
+  const zugewiesenAn = typeof lead.zugewiesen_an === 'string' ? lead.zugewiesen_an : null
+
+  // 1. Versicherung — Fuzzy ILIKE-Match auf Namen (erste Treffer gewinnt).
+  // Spec fordert „Fuzzy-Match" — wir nutzen ILIKE %pattern% weil die
+  // versicherungen-Tabelle kurze Kanonische Namen hat (z.B. „Allianz",
+  // „HUK-Coburg") und der Dispatcher oft nur „allianz" tippt.
+  let versicherungId: string | null = null
+  if (gegnerVs.length >= 3) {
+    try {
+      const { data } = await admin
+        .from('versicherungen')
+        .select('id, name')
+        .ilike('name', `%${gegnerVs}%`)
+        .limit(1)
+        .maybeSingle()
+      versicherungId = data?.id ?? null
+    } catch { /* non-blocking */ }
+  }
+
+  // 2. Kanzlei — bei Pfad A (Komplett) LexDrive zuweisen. Wir suchen per
+  // ILIKE 'lexdrive%' damit wir keine Hardcoded-UUID pflegen müssen.
+  let kanzleiId: string | null = null
+  if (serviceTyp === 'komplett') {
+    try {
+      const { data } = await admin
+        .from('kanzleien')
+        .select('id, name')
+        .ilike('name', 'LexDrive%')
+        .limit(1)
+        .maybeSingle()
+      kanzleiId = data?.id ?? null
+    } catch { /* non-blocking — falls Kanzleien-Tabelle leer */ }
+  }
+
+  // 3. Organisation — SV-Mitgliedschaft via sachverstaendige.organisation_id
+  let organisationId: string | null = null
+  if (svIdFromTermin) {
+    try {
+      const { data } = await admin
+        .from('sachverstaendige')
+        .select('organisation_id')
+        .eq('id', svIdFromTermin)
+        .maybeSingle()
+      organisationId = (data as { organisation_id?: string | null } | null)?.organisation_id ?? null
+    } catch { /* non-blocking */ }
+  }
+
+  // 4. Leadbearbeiter — lead.zugewiesen_an (gesetzt vom Dispatcher bei
+  // Qualifizierung) oder null. Wir setzen zugewiesen_an jetzt aus
+  // sendFlowLinkMultiChannel automatisch.
+  const leadbearbeiterId = zugewiesenAn
+
+  return { versicherungId, kanzleiId, organisationId, leadbearbeiterId }
 }
 
 /**

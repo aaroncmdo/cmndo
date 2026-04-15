@@ -3,7 +3,7 @@
 import { emailNeuerFall } from '@/lib/email'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { buildFallInsertFromLead } from '@/lib/lead-fall-mapping'
+import { buildFallInsertFromLead, resolveFallEntityFks } from '@/lib/lead-fall-mapping'
 
 /**
  * AAR-90: FIN im Flow setzen + Cardentity-Anreicherung triggern.
@@ -365,6 +365,11 @@ export async function signSAandCreateFall(
     svIdFromTermin = existingTermin?.sv_id ?? null
   }
 
+  // 4aa. AAR-155: Entity-FKs auflösen (versicherung/kanzlei/organisation/
+  // leadbearbeiter) — siehe resolveFallEntityFks JSDoc. Non-blocking:
+  // Misses landen als NULL in faelle, kein Fehler.
+  const entityFks = await resolveFallEntityFks(admin, lead, svIdFromTermin)
+
   // 4b. Fall erstellen
   // AAR-128: ~80-Zeilen Inline-Mapping ersetzt durch zentrale buildFallInsertFromLead.
   // Single Source of Truth für Lead→Fall-Field-Kopie liegt jetzt in
@@ -374,6 +379,7 @@ export async function signSAandCreateFall(
     kundenbetreuerId,
     svIdFromTermin,
     signatureUrl,
+    ...entityFks,
   })
   const { data: fall, error: fallErr } = await admin
     .from('faelle')
