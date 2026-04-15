@@ -12,6 +12,12 @@
 
 export { updateFallField } from './stammdaten'
 export { triggerFinCallForFall, markDokumentNachgereicht } from './dokumente'
+export {
+  requestTechnischeStellungnahme,
+  freigebeTechnischeStellungnahme,
+  startRuege,
+  uebergebeFallKlage,
+} from './prozess'
 
 // Re-exports aus dem vorhandenen Monolith (wird später zerlegt):
 export {

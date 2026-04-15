@@ -1,16 +1,13 @@
 'use client'
 
 // AAR-164 / W4: ProzessTab Sections (8 Stück).
-// Jede Section rendert sich nur wenn der Fall-Status die zugehörige Section-Id
-// in FallContext.visibleSections enthält (phase-config.ts). Die schwergewichtigen
-// Server-Actions (E-Akte an Kanzlei, Rüge versenden, Nachbesichtigung koordinieren,
-// Klage übergeben) werden inkrementell verdrahtet — W4 stellt die UI-Struktur
-// + Status-Anzeige her, die Trigger-Logik kommt über W5 + eigene Tickets.
-//
-// Hintergrund aus Notion-Spec 3431da4c9124814db2ecf2d7e613de03 Abschnitt W4.
+// AAR-167: Trigger-Buttons für Stellungnahme / Rüge / Klage sind jetzt
+// verdrahtet. E-Akte-Übergabe + Nachbesichtigung-Koordination folgen, sobald
+// die entsprechenden Server-Actions existieren.
 
 import Link from 'next/link'
-import type { ReactNode } from 'react'
+import { useTransition, type ReactNode } from 'react'
+import { toast } from 'sonner'
 import {
   ScaleIcon,
   SendIcon,
@@ -22,6 +19,12 @@ import {
   ShieldAlertIcon,
 } from 'lucide-react'
 import { useFall } from '../FallContext'
+import {
+  requestTechnischeStellungnahme,
+  freigebeTechnischeStellungnahme,
+  startRuege,
+  uebergebeFallKlage,
+} from '../actions/prozess'
 
 function Card({
   icon,
@@ -147,11 +150,23 @@ export function VsReaktionSection() {
 
 // ─── 4. Technische Stellungnahme (NEU, ab vs-kuerzt + technisch) ───────────
 export function StellungnahmeSection() {
-  const { fall } = useFall()
+  const { fall, refreshFall } = useFall()
+  const [pending, startTransition] = useTransition()
   const status = fall.technische_stellungnahme_status as string | null
   const beauftragtAm = fmtDate(fall.technische_stellungnahme_beauftragt_am)
   const hochgeladenAm = fmtDate(fall.technische_stellungnahme_hochgeladen_am)
   const freigabeAm = fmtDate(fall.technische_stellungnahme_freigabe_am)
+  const kannBeauftragen = !status || status === 'ausstehend'
+  const kannFreigeben = status === 'hochgeladen'
+  function trigger(action: () => Promise<{ success: boolean; error?: string }>, label: string) {
+    startTransition(async () => {
+      const r = await action()
+      if (r.success) {
+        toast.success(`${label} erfolgreich`)
+        refreshFall()
+      } else toast.error(r.error ?? `${label} fehlgeschlagen`)
+    })
+  }
   return (
     <Card
       icon={<FileTextIcon className="w-4 h-4 text-[#4573A2]" />}
@@ -164,9 +179,30 @@ export function StellungnahmeSection() {
         <Info label="Hochgeladen am" value={hochgeladenAm} />
         <Info label="Freigabe am" value={freigabeAm} />
       </div>
+      <div className="flex flex-wrap gap-2">
+        {kannBeauftragen && (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => trigger(() => requestTechnischeStellungnahme(fall.id), 'Stellungnahme beauftragt')}
+            className="px-3 py-1.5 rounded-md bg-[#4573A2] text-white text-xs font-medium hover:bg-[#0D1B3E] disabled:opacity-50"
+          >
+            SV mit Stellungnahme beauftragen
+          </button>
+        )}
+        {kannFreigeben && (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => trigger(() => freigebeTechnischeStellungnahme(fall.id), 'Freigabe')}
+            className="px-3 py-1.5 rounded-md bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
+          >
+            Freigeben (Kanzlei kann Rüge vorbereiten)
+          </button>
+        )}
+      </div>
       <p className="text-[11px] text-gray-500">
-        SV-Portal-Route: <code className="text-[10px]">/gutachter/stellungnahme</code> — existiert,
-        wird in W5 verkabelt.
+        SV-Portal-Route: <code className="text-[10px]">/gutachter/stellungnahme/{String(fall.id).slice(0, 8)}</code>
       </p>
     </Card>
   )
@@ -174,9 +210,19 @@ export function StellungnahmeSection() {
 
 // ─── 5. Rüge (Refactoring, ab vs-kuerzt) ──────────────────────────────────
 export function RuegeSection() {
-  const { fall } = useFall()
+  const { fall, refreshFall } = useFall()
+  const [pending, startTransition] = useTransition()
   const counter = (fall.ruege_counter as number | null) ?? 0
   const betrag = fall.ruege_betrag as number | null
+  function starteRuege() {
+    startTransition(async () => {
+      const r = await startRuege(fall.id)
+      if (r.success) {
+        toast.success(`Rüge ${r.runde} gestartet`)
+        refreshFall()
+      } else toast.error(r.error ?? 'Rüge fehlgeschlagen')
+    })
+  }
   return (
     <Card
       icon={<AlertCircleIcon className="w-4 h-4 text-orange-600" />}
@@ -188,7 +234,16 @@ export function RuegeSection() {
         <Info label="Differenzbetrag (€)" value={betrag} />
         <Info label="Versendet SLA" value="1-2 WT nach Stellungnahme" />
       </div>
-      {counter >= 2 && (
+      {counter < 2 ? (
+        <button
+          type="button"
+          disabled={pending}
+          onClick={starteRuege}
+          className="px-3 py-1.5 rounded-md bg-orange-600 text-white text-xs font-medium hover:bg-orange-700 disabled:opacity-50"
+        >
+          {counter === 0 ? 'Rüge 1 starten' : 'Rüge 2 starten'}
+        </button>
+      ) : (
         <div className="rounded-md bg-red-50 border border-red-200 p-3 text-[11px] text-red-700">
           Max. Rüge-Runden erreicht — Klage-Entscheidung erforderlich.
         </div>
@@ -236,7 +291,23 @@ export function NachbesichtigungSection() {
 
 // ─── 7. Klage-Übergabe (NEU, ab klage) ─────────────────────────────────────
 export function KlageSection() {
-  const { fall } = useFall()
+  const { fall, refreshFall } = useFall()
+  const [pending, startTransition] = useTransition()
+  const bereitsInKlage = fall.status === 'klage' || fall.status === 'abgeschlossen'
+  function uebergeben() {
+    const grund = window.prompt(
+      'Grund für Klage-Übergabe (wird in geschlossen_grund gespeichert):',
+      'Nach 2 Rüge-Runden — LexDrive übernimmt',
+    )
+    if (grund === null) return
+    startTransition(async () => {
+      const r = await uebergebeFallKlage(fall.id, grund || undefined)
+      if (r.success) {
+        toast.success('Fall an LexDrive übergeben')
+        refreshFall()
+      } else toast.error(r.error ?? 'Übergabe fehlgeschlagen')
+    })
+  }
   return (
     <Card
       icon={<GavelIcon className="w-4 h-4 text-red-600" />}
@@ -247,6 +318,16 @@ export function KlageSection() {
         <Info label="Status" value={fall.status as string | null} />
         <Info label="Geschlossen-Grund" value={fall.geschlossen_grund as string | null} />
       </div>
+      {!bereitsInKlage && (
+        <button
+          type="button"
+          disabled={pending}
+          onClick={uebergeben}
+          className="px-3 py-1.5 rounded-md bg-red-600 text-white text-xs font-medium hover:bg-red-700 disabled:opacity-50"
+        >
+          Fall an LexDrive übergeben
+        </button>
+      )}
       <div className="rounded-md bg-red-50 border border-red-200 p-3 text-[11px] text-red-700">
         Übergabe-Screen: Termin mit LexDrive-Rechtsberater koordinieren. Kein fixer
         Schwellenwert — die Kanzlei entscheidet individuell ob Klage sinnvoll ist.
