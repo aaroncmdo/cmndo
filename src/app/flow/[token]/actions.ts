@@ -3,6 +3,7 @@
 import { emailNeuerFall } from '@/lib/email'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { buildFallInsertFromLead } from '@/lib/lead-fall-mapping'
 
 /**
  * AAR-90: FIN im Flow setzen + Cardentity-Anreicherung triggern.
@@ -365,90 +366,18 @@ export async function signSAandCreateFall(
   }
 
   // 4b. Fall erstellen
+  // AAR-128: ~80-Zeilen Inline-Mapping ersetzt durch zentrale buildFallInsertFromLead.
+  // Single Source of Truth für Lead→Fall-Field-Kopie liegt jetzt in
+  // src/lib/lead-fall-mapping.ts — neue Felder dort hinzufügen, nicht hier.
+  const fallInsert = buildFallInsertFromLead(lead, {
+    fallNummer,
+    kundenbetreuerId,
+    svIdFromTermin,
+    signatureUrl,
+  })
   const { data: fall, error: fallErr } = await admin
     .from('faelle')
-    .insert({
-      fall_nummer: fallNummer,
-      lead_id: leadId,
-      status: svIdFromTermin ? 'sv-termin' : 'ersterfassung',
-      sv_id: svIdFromTermin,
-      sv_zugewiesen_am: svIdFromTermin ? new Date().toISOString() : null,
-      gutachter_termin_status: lead.gutachter_termin ? 'reserviert' : null,
-      schadenfall_typ: lead.schadenfall_typ,
-      // KFZ-192: service_typ aus Lead kopieren
-      service_typ: lead.service_typ ?? 'komplett',
-      kunden_konstellation: lead.kunden_konstellation,
-      // KFZ-154: Spezifikation + Schadenart fuer Dispatcher-Match
-      spezifikation: lead.spezifikation ?? null,
-      schadenart: lead.schadenart ?? null,
-      // KFZ-153: Unfall + Gegner Detaildaten
-      unfall_konstellation: lead.unfall_konstellation ?? null,
-      gegner_anzahl_beteiligte: lead.gegner_anzahl_beteiligte ?? null,
-      gegner_fahrzeugtyp: lead.gegner_fahrzeugtyp ?? null,
-      kennzeichen: lead.kennzeichen,
-      fahrzeug_hersteller: lead.fahrzeug_hersteller,
-      fahrzeug_modell: lead.fahrzeug_modell,
-      gegner_bekannt: lead.gegner_bekannt ?? true,
-      personenschaden_flag: lead.personenschaden_flag ?? false,
-      mietwagen_flag: lead.mietwagen_flag ?? false,
-      leasing_flag: lead.leasing_flag ?? false,
-      finanzierung_flag: lead.finanzierung_flag ?? false,
-      gewerbe_flag: lead.gewerbe_flag ?? false,
-      halter_ungleich_fahrer_flag: lead.halter_ungleich_fahrer_flag ?? false,
-      polizei_bericht_vorhanden: lead.polizeibericht_pflicht ?? false,
-      gegner_name: lead.gegner_name ?? null,
-      gegner_versicherung: lead.gegner_versicherung ?? null,
-      gegner_kennzeichen: lead.gegner_kennzeichen ?? null,
-      polizei_aktenzeichen: lead.polizei_aktenzeichen ?? null,
-      // BUG-58: Spalten die in faelle anders heissen oder nicht existieren — korrekt mappen
-      versicherung_name: lead.eigene_versicherung ?? null,
-      versicherung_schaden_nr: lead.eigene_policennr ?? null,
-      leasinggeber_name: lead.leasing_geber ?? null,
-      bank_name: lead.finanzierung_bank ?? null,
-      ust_id: lead.firma_ustid ?? null,
-      unfallhergang: lead.unfallhergang ?? null,
-      // BUG-73: Bisher fehlende Lead-Felder mappen
-      schadens_datum: lead.unfalldatum ?? null,
-      schadens_adresse: lead.fahrzeug_standort_adresse ?? null,
-      schadens_plz: lead.fahrzeug_standort_plz ?? null,
-      schadens_ort: lead.unfallort ?? null,
-      fahrzeug_farbe: lead.fahrzeug_farbe ?? null,
-      erstzulassung: lead.erstzulassung ?? null,
-      kilometerstand: lead.kilometerstand ? Number(lead.kilometerstand) : null,
-      schadensursache: lead.schadensursache ?? null,
-      firma_name: lead.firma_name ?? null,
-      halter_name: lead.halter_name ?? null,
-      polizei_vor_ort: lead.polizei_vor_ort ?? null,
-      wunschtermin: lead.wunschtermin ?? null,
-      source_channel: lead.source_channel ?? null,
-      source_domain: lead.source_domain ?? null,
-      fin_vin: lead.fin ?? null,
-      // KFZ-208: Mandantenfragebogen-Felder
-      ist_fahrzeughalter: lead.ist_fahrzeughalter ?? true,
-      finanzierung_leasing: lead.finanzierung_leasing ?? 'keine',
-      vorsteuerabzugsberechtigt: lead.vorsteuerabzugsberechtigt ?? false,
-      schadenhergang: lead.schadenhergang ?? null,
-      halter_vorname: lead.halter_vorname ?? null,
-      halter_nachname: lead.halter_nachname ?? null,
-      halter_strasse: lead.halter_strasse ?? null,
-      halter_plz: lead.halter_plz ?? null,
-      halter_stadt: lead.halter_stadt ?? null,
-      halter_telefon: lead.halter_telefon ?? null,
-      halter_email: lead.halter_email ?? null,
-      finanzierungsgeber_name: lead.finanzierungsgeber_name ?? null,
-      finanzierungsgeber_adresse: lead.finanzierungsgeber_adresse ?? null,
-      finanzierungsgeber_vertragsnr: lead.finanzierungsgeber_vertragsnr ?? null,
-      // KFZ-202: Vorschaeden
-      hat_vorschaeden: lead.hat_vorschaeden ?? false,
-      vorschaeden_beschreibung: lead.vorschaeden_beschreibung ?? null,
-      kundenbetreuer_id: kundenbetreuerId,
-      konvertiert_am: new Date().toISOString(),
-      konvertiert_von_lead: leadId,
-      sv_termin: lead.gutachter_termin,
-      abtretung_pdf: signatureUrl,
-      abtretung_signiert_am: new Date().toISOString(),
-      sa_unterschrieben: true,
-    })
+    .insert(fallInsert)
     .select('id')
     .single()
   if (fallErr || !fall) throw new Error(`Fall-Erstellung fehlgeschlagen: ${fallErr?.message}`)
