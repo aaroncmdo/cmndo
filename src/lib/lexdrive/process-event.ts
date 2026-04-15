@@ -63,7 +63,15 @@ const EVENT_STATUS_MAP: Partial<Record<LexDriveEvent, string>> = {
   regulierung_angekuendigt: 'regulierung-laeuft',
   zahlung_eingegangen: 'zahlung-eingegangen',
   vs_ablehnung: 'vs-abgelehnt',
-  // AAR-165 W5 Audit-Fix: Status-Übergang bei Fall-Schluss
+  // AAR-165 W5 Audit-Fix Phase 2: ohne diese Mappings bleiben die ProzessTab-
+  // Sections (Kürzung, Rüge, Stellungnahme, Nachbesichtigung, Klage) unsicht-
+  // bar weil visibleSections an den Status gebunden ist (phase-config.ts).
+  // Wenn der Webhook fall_status nicht ändert, sieht der KB die neuen Daten
+  // nirgendwo.
+  vs_kuerzt: 'vs-kuerzt',
+  vs_nachbesichtigung: 'nachbesichtigung-laeuft',
+  vs_nachbesichtigung_angefordert: 'nachbesichtigung-laeuft',
+  klage_eingereicht: 'klage',
   fall_geschlossen: 'abgeschlossen',
 }
 

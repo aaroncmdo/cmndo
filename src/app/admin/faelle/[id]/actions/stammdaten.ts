@@ -12,33 +12,38 @@ import { revalidatePath } from 'next/cache'
 import { canEditField, type FallakteRolle } from '@/lib/fall/field-permissions'
 
 /**
- * Allowlist der editierbaren Fall-Felder. Muss synchron zu den Stammdaten-
- * Sections im UebersichtTab bleiben. Status-Transitions, Termine und
- * Regulierung gehen über eigene Actions (siehe actions/termine.ts etc.).
+ * Allowlist der editierbaren Fall-Felder.
+ *
+ * WICHTIG: Diese Liste wurde gegen das echte faelle-Schema verifiziert
+ * (information_schema.columns). Frühere Versionen enthielten zahlreiche
+ * Felder die auf faelle gar nicht existieren (kunde_*, kernwert_*,
+ * gegner_vorname/nachname, fin, hsn, tsn) — Saves wären serverseitig still
+ * mit „column does not exist"-Fehler ausgestiegen.
+ *
+ * Kunde-Stammdaten leben auf profiles bzw. leads — das fall-Objekt liefert
+ * sie via JOIN, Inline-Edit der Kunde-Felder läuft daher gegen profiles
+ * (separater Endpoint, nicht hier).
  */
 const FALL_EDITABLE_FIELDS = new Set<string>([
-  // Kunde — wird primär über den Lead gespiegelt, hier als Override möglich
-  'kunde_vorname',
-  'kunde_nachname',
-  'kunde_email',
-  'kunde_telefon',
-  // Fahrzeug
+  // Fahrzeug (echte Spalten auf faelle)
   'fahrzeug_hersteller',
   'fahrzeug_modell',
   'fahrzeug_baujahr',
   'fahrzeug_farbe',
+  'fahrzeug_typ',
   'kennzeichen',
-  'fin',
-  'hsn',
-  'tsn',
+  'fin_vin',
   'erstzulassung',
   'kilometerstand',
   // Halter (ZB1-OCR)
   'halter_vorname',
   'halter_nachname',
+  'halter_name',
   'halter_strasse',
   'halter_plz',
   'halter_stadt',
+  'halter_email',
+  'halter_telefon',
   // Unfall
   'schadens_datum',
   'schadens_adresse',
@@ -46,32 +51,33 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'schadens_ort',
   'schadens_ursache',
   'schadens_beschreibung',
-  'unfall_uhrzeit',
+  'schadenhergang',
+  'schadenart',
   // Gegner / Versicherung
-  'gegner_vorname',
-  'gegner_nachname',
+  'gegner_name',
   'gegner_kennzeichen',
   'gegner_versicherung',
-  'gegner_schadennummer',
-  'versicherung_name',
+  'gegner_fahrzeugtyp',
+  'schadennummer_versicherung',
   'versicherung_schaden_nr',
   'versicherung_id',
   // Vorschäden
-  'hat_vorschaeden',
-  'vorschaeden_beschreibung',
-  // Besichtigung
+  'vorschaden_vorhanden',
+  'vorschaden_anzahl',
+  // Besichtigung (DB-verifiziert: Adresse + Lat/Lng/PlaceID + Datum)
   'besichtigungsort_adresse',
-  'besichtigungsort_plz',
-  'besichtigungsort_stadt',
-  'fahrzeug_standort_adresse',
-  'fahrzeug_standort_plz',
-  // Kernwerte — Kanzlei/LexDrive schreibt per Webhook, Admin-Override möglich
-  'kernwert_reparaturkosten',
-  'kernwert_wiederbeschaffungswert',
-  'kernwert_nutzungsausfall',
-  'kernwert_restwert',
-  'kernwert_mietwagen',
-  // VS-Status-Felder (AAR-161 neu)
+  'besichtigungsort_lat',
+  'besichtigungsort_lng',
+  'besichtigungsort_place_id',
+  'besichtigung_datum',
+  // Kernwerte (LexDrive-Webhook schreibt; Admin-Override)
+  'reparaturkosten',
+  'wiederbeschaffungswert',
+  'restwert',
+  'wertminderung',
+  'schadenshoehe',
+  'schadenhoehe_netto',
+  // VS-Status-Felder (AAR-161 W1 neu)
   'vs_kuerzung_grund',
   'geschlossen_grund',
   'nachbesichtigung_ergebnis',

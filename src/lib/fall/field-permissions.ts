@@ -5,26 +5,26 @@
 // müssen dieselbe Regel serverseitig durchsetzen — nicht nur UI (BUG-Klasse:
 // „read-only"-UI ohne Server-Check ist eine Sicherheitslücke).
 //
-// Rollen (aus profiles.rolle):
+// Rollen (aus profiles.rolle, DB-verifiziert):
 //   - admin, kundenbetreuer — vollständiger Editier-Zugriff
-//   - gutachter, sachverstaendige — nur Fahrzeug + Besichtigungsort + Gutachten
+//   - sachverstaendiger — nur Fahrzeug + Besichtigungsort + Gutachten
 //   - kunde — read-only
 //   - dispatch — keine Fallakte-Edits (Dispatch = eigener Client vor Fall-
-//     Erstellung, sobald Fall existiert hat Dispatch keine Write-Permissions)
-//   - kanzlei — read-only auf Fallakte (schreibt über LexDrive-Webhooks)
+//     Erstellung; sobald Fall existiert keine Write-Permissions)
 //
 // Bei Status `abgeschlossen` oder `storniert` wird ALLES read-only.
+//
+// Hinweis: profiles.rolle in der DB enthält nur diese 5 Werte (per SELECT
+// DISTINCT verifiziert). Frühere Annahmen über 'gutachter'/'sachverstaendige'/
+// 'kanzlei'/'buero'/'akademie' waren falsch — diese Strings sind nie in der
+// DB und der Code hat sie zur Laufzeit nie matchen können.
 
 export type FallakteRolle =
   | 'admin'
   | 'kundenbetreuer'
-  | 'gutachter'
-  | 'sachverstaendige'
+  | 'sachverstaendiger'
   | 'kunde'
   | 'dispatch'
-  | 'kanzlei'
-  | 'buero'
-  | 'akademie'
 
 /** System-Felder — NIEMALS editierbar, unabhängig von der Rolle. */
 export const SYSTEM_FIELDS = new Set<string>([
@@ -87,16 +87,12 @@ export function canEditField(
     case 'kundenbetreuer':
       return true
 
-    case 'gutachter':
-    case 'sachverstaendige':
-    case 'buero':
-    case 'akademie':
+    case 'sachverstaendiger':
       if (SV_EDITABLE_FIELDS.has(field)) return true
       return SV_EDITABLE_PREFIXES.some((p) => field.startsWith(p))
 
     case 'kunde':
     case 'dispatch':
-    case 'kanzlei':
       return false
 
     default:
@@ -115,6 +111,5 @@ export function hasAnyEditPermission(
 ): boolean {
   if (!rolle) return false
   if (status === 'abgeschlossen' || status === 'storniert') return false
-  return rolle === 'admin' || rolle === 'kundenbetreuer' || rolle === 'gutachter' ||
-    rolle === 'sachverstaendige' || rolle === 'buero' || rolle === 'akademie'
+  return rolle === 'admin' || rolle === 'kundenbetreuer' || rolle === 'sachverstaendiger'
 }

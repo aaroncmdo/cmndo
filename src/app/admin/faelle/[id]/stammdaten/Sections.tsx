@@ -57,40 +57,47 @@ function f(fall: Record<string, unknown>, key: string): string | number | null {
 }
 
 export function KundendatenSection() {
-  const { fall, lead } = useFall()
-  // Kunde-Daten kommen primär vom Lead; Fallakte-Override möglich.
-  const vorname = (fall.kunde_vorname as string | null) ?? lead?.vorname ?? null
-  const nachname = (fall.kunde_nachname as string | null) ?? lead?.nachname ?? null
-  const email = (fall.kunde_email as string | null) ?? lead?.email ?? null
-  const telefon = (fall.kunde_telefon as string | null) ?? lead?.telefon ?? null
+  const { lead } = useFall()
+  // Kunde-Daten leben auf profiles bzw. leads — KEINE kunde_*-Spalten auf
+  // faelle. Inline-Edit der Kunde-Felder läuft nicht über die Fall-Allowlist
+  // (siehe stammdaten.ts) — daher hier nur Read-Only-Anzeige aus dem Lead.
+  // Bearbeitung über den Lead-Detail bzw. profiles separat.
   return (
-    <Card icon={<UserIcon className="w-4 h-4 text-gray-400" />} title="Kundendaten">
-      <InlineEditField label="Vorname" fieldName="kunde_vorname" value={vorname} />
-      <InlineEditField label="Nachname" fieldName="kunde_nachname" value={nachname} />
-      <InlineEditField label="E-Mail" fieldName="kunde_email" value={email} type="email" />
-      <InlineEditField label="Telefon" fieldName="kunde_telefon" value={telefon} type="tel" />
+    <Card icon={<UserIcon className="w-4 h-4 text-gray-400" />} title="Kundendaten" hint="Bearbeiten über Lead-Detail">
+      <div className="text-xs space-y-2">
+        <div><span className="text-[10px] uppercase tracking-wider text-gray-400 block">Name</span><span className="text-gray-800 font-medium">{[lead?.vorname, lead?.nachname].filter(Boolean).join(' ') || '—'}</span></div>
+        <div><span className="text-[10px] uppercase tracking-wider text-gray-400 block">E-Mail</span><span className="text-gray-800 font-medium">{lead?.email ?? '—'}</span></div>
+      </div>
+      <div className="text-xs space-y-2">
+        <div><span className="text-[10px] uppercase tracking-wider text-gray-400 block">Telefon</span><span className="text-gray-800 font-medium">{lead?.telefon ?? '—'}</span></div>
+      </div>
     </Card>
   )
 }
 
 export function FahrzeugdatenSection() {
   const { fall } = useFall()
+  // FIN-Spalte heißt fin_vin (nicht fin); HSN/TSN existieren auf leads, nicht
+  // auf faelle — daher in der Fallakte nicht editierbar.
   return (
     <Card
       icon={<CarIcon className="w-4 h-4 text-gray-400" />}
       title="Fahrzeug & Halter"
-      hint="ZB1-OCR aus W3 schreibt Halter + HSN/TSN"
+      hint="ZB1-OCR aus W3 schreibt Halter-Felder + FIN"
     >
       <InlineEditField label="Kennzeichen" fieldName="kennzeichen" value={f(fall, 'kennzeichen')} />
       <InlineEditField label="Hersteller" fieldName="fahrzeug_hersteller" value={f(fall, 'fahrzeug_hersteller')} />
       <InlineEditField label="Modell" fieldName="fahrzeug_modell" value={f(fall, 'fahrzeug_modell')} />
-      <InlineEditField label="FIN" fieldName="fin" value={f(fall, 'fin')} />
-      <InlineEditField label="HSN" fieldName="hsn" value={f(fall, 'hsn')} />
-      <InlineEditField label="TSN" fieldName="tsn" value={f(fall, 'tsn')} />
+      <InlineEditField label="FIN/VIN" fieldName="fin_vin" value={f(fall, 'fin_vin')} />
+      <InlineEditField label="Baujahr" fieldName="fahrzeug_baujahr" value={f(fall, 'fahrzeug_baujahr')} type="number" />
+      <InlineEditField label="Farbe" fieldName="fahrzeug_farbe" value={f(fall, 'fahrzeug_farbe')} />
       <InlineEditField label="Erstzulassung" fieldName="erstzulassung" value={f(fall, 'erstzulassung')} type="date" />
       <InlineEditField label="Kilometerstand" fieldName="kilometerstand" value={f(fall, 'kilometerstand')} type="number" />
       <InlineEditField label="Halter Vorname" fieldName="halter_vorname" value={f(fall, 'halter_vorname')} />
       <InlineEditField label="Halter Nachname" fieldName="halter_nachname" value={f(fall, 'halter_nachname')} />
+      <InlineEditField label="Halter Straße" fieldName="halter_strasse" value={f(fall, 'halter_strasse')} />
+      <InlineEditField label="Halter PLZ" fieldName="halter_plz" value={f(fall, 'halter_plz')} />
+      <InlineEditField label="Halter Stadt" fieldName="halter_stadt" value={f(fall, 'halter_stadt')} />
     </Card>
   )
 }
@@ -100,7 +107,7 @@ export function UnfallSection() {
   return (
     <Card icon={<AlertTriangleIcon className="w-4 h-4 text-gray-400" />} title="Unfall">
       <InlineEditField label="Schadensdatum" fieldName="schadens_datum" value={typeof fall.schadens_datum === 'string' ? fall.schadens_datum.slice(0, 10) : null} type="date" />
-      <InlineEditField label="Unfall-Uhrzeit" fieldName="unfall_uhrzeit" value={f(fall, 'unfall_uhrzeit')} placeholder="z.B. 14:30" />
+      <InlineEditField label="Schadenart" fieldName="schadenart" value={f(fall, 'schadenart')} />
       <div className="sm:col-span-2">
         <InlineEditField label="Schadens-Adresse" fieldName="schadens_adresse" value={f(fall, 'schadens_adresse')} />
       </div>
@@ -108,6 +115,9 @@ export function UnfallSection() {
       <InlineEditField label="Ort" fieldName="schadens_ort" value={f(fall, 'schadens_ort')} />
       <div className="sm:col-span-2">
         <InlineEditField label="Schadens-Ursache" fieldName="schadens_ursache" value={f(fall, 'schadens_ursache')} type="textarea" />
+      </div>
+      <div className="sm:col-span-2">
+        <InlineEditField label="Schadenhergang" fieldName="schadenhergang" value={f(fall, 'schadenhergang')} type="textarea" />
       </div>
       <div className="sm:col-span-2">
         <InlineEditField label="Beschreibung" fieldName="schadens_beschreibung" value={f(fall, 'schadens_beschreibung')} type="textarea" />
@@ -118,13 +128,17 @@ export function UnfallSection() {
 
 export function GegnerSection() {
   const { fall } = useFall()
+  // DB-Schema: gegner_name (1 Spalte, kein Vor-/Nachname-Split),
+  // schadennummer_versicherung (statt gegner_schadennummer)
   return (
     <Card icon={<ShieldIcon className="w-4 h-4 text-gray-400" />} title="Gegner & Versicherung">
-      <InlineEditField label="Gegner Vorname" fieldName="gegner_vorname" value={f(fall, 'gegner_vorname')} />
-      <InlineEditField label="Gegner Nachname" fieldName="gegner_nachname" value={f(fall, 'gegner_nachname')} />
+      <div className="sm:col-span-2">
+        <InlineEditField label="Gegner Name" fieldName="gegner_name" value={f(fall, 'gegner_name')} />
+      </div>
       <InlineEditField label="Gegner-Kennzeichen" fieldName="gegner_kennzeichen" value={f(fall, 'gegner_kennzeichen')} />
+      <InlineEditField label="Gegner-Fahrzeugtyp" fieldName="gegner_fahrzeugtyp" value={f(fall, 'gegner_fahrzeugtyp')} />
       <InlineEditField label="Gegner Versicherung" fieldName="gegner_versicherung" value={f(fall, 'gegner_versicherung')} />
-      <InlineEditField label="Schadennummer" fieldName="gegner_schadennummer" value={f(fall, 'gegner_schadennummer')} />
+      <InlineEditField label="Schadennr. (Versicherung)" fieldName="schadennummer_versicherung" value={f(fall, 'schadennummer_versicherung')} />
       <InlineEditField label="VS-Schadennummer (intern)" fieldName="versicherung_schaden_nr" value={f(fall, 'versicherung_schaden_nr')} />
     </Card>
   )
@@ -132,52 +146,46 @@ export function GegnerSection() {
 
 export function VorschaedenSection() {
   const { fall } = useFall()
+  // DB-Schema: vorschaden_vorhanden + vorschaden_anzahl + vorschaden_letzter_datum
+  // (kein hat_vorschaeden / vorschaeden_beschreibung — die liegen auf leads)
   return (
     <Card icon={<WrenchIcon className="w-4 h-4 text-gray-400" />} title="Vorschäden">
-      <div className="sm:col-span-2">
-        <InlineEditField label="Vorschäden bekannt?" fieldName="hat_vorschaeden" value={f(fall, 'hat_vorschaeden')} placeholder="Ja / Nein" />
-      </div>
-      <div className="sm:col-span-2">
-        <InlineEditField
-          label="Beschreibung (Bereich / Schadenhöhe)"
-          fieldName="vorschaeden_beschreibung"
-          value={f(fall, 'vorschaeden_beschreibung')}
-          type="textarea"
-        />
-      </div>
+      <InlineEditField label="Vorschäden vorhanden?" fieldName="vorschaden_vorhanden" value={f(fall, 'vorschaden_vorhanden')} placeholder="Ja / Nein" />
+      <InlineEditField label="Anzahl" fieldName="vorschaden_anzahl" value={f(fall, 'vorschaden_anzahl')} type="number" />
     </Card>
   )
 }
 
 export function BesichtigungSection() {
   const { fall } = useFall()
+  // DB-Schema: besichtigungsort_adresse + besichtigung_datum existieren;
+  // besichtigungsort_plz/stadt + fahrzeug_standort_* gibt es NICHT.
   return (
     <Card icon={<MapPinIcon className="w-4 h-4 text-gray-400" />} title="Besichtigung">
       <div className="sm:col-span-2">
         <InlineEditField label="Besichtigungsort-Adresse" fieldName="besichtigungsort_adresse" value={f(fall, 'besichtigungsort_adresse')} />
       </div>
-      <InlineEditField label="PLZ" fieldName="besichtigungsort_plz" value={f(fall, 'besichtigungsort_plz')} />
-      <InlineEditField label="Stadt" fieldName="besichtigungsort_stadt" value={f(fall, 'besichtigungsort_stadt')} />
-      <div className="sm:col-span-2">
-        <InlineEditField label="Fahrzeug-Standort (falls abweichend)" fieldName="fahrzeug_standort_adresse" value={f(fall, 'fahrzeug_standort_adresse')} />
-      </div>
+      <InlineEditField label="Besichtigungsdatum" fieldName="besichtigung_datum" value={typeof fall.besichtigung_datum === 'string' ? fall.besichtigung_datum.slice(0, 10) : null} type="date" />
     </Card>
   )
 }
 
 export function KernwerteSection() {
   const { fall } = useFall()
+  // DB-Schema: reparaturkosten / wiederbeschaffungswert / restwert / wertminderung /
+  // schadenshoehe / schadenhoehe_netto — kein kernwert_-Prefix
   return (
     <Card
       icon={<CalculatorIcon className="w-4 h-4 text-gray-400" />}
       title="Gutachten-Kernwerte"
       hint="LexDrive-OCR überschreibt automatisch — Admin-Override möglich"
     >
-      <InlineEditField label="Reparaturkosten (€)" fieldName="kernwert_reparaturkosten" value={f(fall, 'kernwert_reparaturkosten')} type="number" />
-      <InlineEditField label="Wiederbeschaffungswert (€)" fieldName="kernwert_wiederbeschaffungswert" value={f(fall, 'kernwert_wiederbeschaffungswert')} type="number" />
-      <InlineEditField label="Nutzungsausfall (€)" fieldName="kernwert_nutzungsausfall" value={f(fall, 'kernwert_nutzungsausfall')} type="number" />
-      <InlineEditField label="Restwert (€)" fieldName="kernwert_restwert" value={f(fall, 'kernwert_restwert')} type="number" />
-      <InlineEditField label="Mietwagen (€)" fieldName="kernwert_mietwagen" value={f(fall, 'kernwert_mietwagen')} type="number" />
+      <InlineEditField label="Reparaturkosten (€)" fieldName="reparaturkosten" value={f(fall, 'reparaturkosten')} type="number" />
+      <InlineEditField label="Wiederbeschaffungswert (€)" fieldName="wiederbeschaffungswert" value={f(fall, 'wiederbeschaffungswert')} type="number" />
+      <InlineEditField label="Restwert (€)" fieldName="restwert" value={f(fall, 'restwert')} type="number" />
+      <InlineEditField label="Wertminderung (€)" fieldName="wertminderung" value={f(fall, 'wertminderung')} type="number" />
+      <InlineEditField label="Schadenhöhe brutto (€)" fieldName="schadenshoehe" value={f(fall, 'schadenshoehe')} type="number" />
+      <InlineEditField label="Schadenhöhe netto (€)" fieldName="schadenhoehe_netto" value={f(fall, 'schadenhoehe_netto')} type="number" />
     </Card>
   )
 }
