@@ -29,9 +29,8 @@ export default async function SachverstaendigeAnlegen() {
           <p className="text-gray-500 text-sm mt-0.5">
             Lege einen neuen Solo-SV an, ein komplettes Büro mit Sub-Standorten oder füge einen Sub-SV zu einer bestehenden Org hinzu.
           </p>
-          <p className="text-amber-700 text-xs mt-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 inline-block">
-            ARCH-1: Self-Service-Onboarding ist abgeschaltet. SVs werden hier vom Admin angelegt und sehen beim ersten Login nur Konditionen + Vertrag + Stripe.
-          </p>
+          {/* AAR-197: ARCH-1-Dev-Banner entfernt — war Intern-Hinweis, hat in
+              Production-UI nichts zu suchen. */}
         </div>
 
         <AnlegenTabs organisationen={organisationen} />
