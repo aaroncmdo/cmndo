@@ -19,6 +19,7 @@ import {
   PhoneIcon,
   SendIcon,
   MinusCircleIcon,
+  MailIcon,
 } from 'lucide-react'
 
 type FlowLinkRow = {
@@ -127,24 +128,30 @@ export default function Phase6StatusTracking({
 
   const steps: Step[] = [stepSent, stepDelivered, stepOpened, stepSa, stepVollmacht]
 
-  // AAR-178 P3-C: Erneut-senden Button — falls der Kunde den Link verloren hat
-  // oder der Alarm anschlägt, kann der MA aus Phase 6 direkt re-triggern ohne
-  // zurück zu Phase 5 springen zu müssen.
+  // AAR-178 P3-C + AAR-200: Erneut-senden Button — falls der Kunde den
+  // Link verloren hat oder der Alarm anschlägt, kann der MA aus Phase 6
+  // direkt re-triggern ohne zurück zu Phase 5 springen zu müssen.
+  // AAR-200: SMS + Email als Alternative zu WhatsApp — wenn der Kunde
+  // kein WA hat (Status-Callback hat bevorzugter_kanal auf 'sms' gesetzt
+  // → MA wählt jetzt direkt den richtigen Kanal).
   const [resendPending, startResend] = useTransition()
   const [resendStatus, setResendStatus] = useState<{ ok: boolean; text: string } | null>(null)
-  function resend() {
-    if (!l.telefon) {
+  function resend(kanal: 'whatsapp' | 'sms' | 'email') {
+    if ((kanal === 'whatsapp' || kanal === 'sms') && !l.telefon) {
       setResendStatus({ ok: false, text: 'Keine Telefonnummer am Lead' })
       return
     }
+    if (kanal === 'email' && !l.email) {
+      setResendStatus({ ok: false, text: 'Keine Email-Adresse am Lead' })
+      return
+    }
     startResend(async () => {
-      // AAR-179 Audit-Fix: throw sauber abfangen, sonst hängt der pending-
-      // State ewig und der User sieht keinen Fehler.
       try {
-        const r = await sendFlowLinkMultiChannel(lead.id, 'whatsapp', null)
+        const r = await sendFlowLinkMultiChannel(lead.id, kanal, null)
+        const label = kanal === 'whatsapp' ? 'WhatsApp' : kanal === 'sms' ? 'SMS' : 'Email'
         setResendStatus({
           ok: r.success,
-          text: r.success ? 'FlowLink erneut per WhatsApp gesendet' : r.error ?? 'Versand fehlgeschlagen',
+          text: r.success ? `FlowLink erneut per ${label} gesendet` : r.error ?? 'Versand fehlgeschlagen',
         })
       } catch (err) {
         setResendStatus({
@@ -226,26 +233,51 @@ export default function Phase6StatusTracking({
           )}
         </ol>
 
-        {/* AAR-178 P3-C: FlowLink erneut senden (WhatsApp) */}
+        {/* AAR-178 P3-C + AAR-200: FlowLink erneut senden — 3 Kanäle
+            (WhatsApp / SMS / Email) damit der MA auch nach Phase-6-Öffnung
+            noch den passenden Kanal wählen kann. */}
         {latestFlow && (
           <div className="mt-5 pt-4 border-t border-gray-100 space-y-2">
-            <button
-              type="button"
-              onClick={resend}
-              disabled={resendPending || !l.telefon}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#25D366] text-white text-xs font-semibold hover:bg-[#1fa855] disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <SendIcon className="w-3.5 h-3.5" />
-              {resendPending ? 'Sende ...' : 'FlowLink erneut per WhatsApp senden'}
-            </button>
-            {!l.telefon && (
+            <p className="text-[10px] text-gray-400 uppercase tracking-wider">
+              FlowLink erneut senden
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => resend('whatsapp')}
+                disabled={resendPending || !l.telefon}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[#25D366] text-white text-xs font-semibold hover:bg-[#1fa855] disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <SendIcon className="w-3.5 h-3.5" />
+                WhatsApp
+              </button>
+              <button
+                type="button"
+                onClick={() => resend('sms')}
+                disabled={resendPending || !l.telefon}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500 text-white text-xs font-semibold hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <PhoneIcon className="w-3.5 h-3.5" />
+                SMS
+              </button>
+              <button
+                type="button"
+                onClick={() => resend('email')}
+                disabled={resendPending || !l.email}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[#4573A2] text-white text-xs font-semibold hover:bg-[#3a6290] disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <MailIcon className="w-3.5 h-3.5" />
+                Email
+              </button>
+            </div>
+            {!l.telefon && !l.email && (
               <p className="text-[10px] text-gray-400">
-                Keine Telefonnummer am Lead — erst in Phase 5 hinterlegen.
+                Weder Telefon noch Email am Lead — erst in Phase 5 hinterlegen.
               </p>
             )}
             {resendStatus && (
               <p className={`text-[11px] ${resendStatus.ok ? 'text-green-700' : 'text-red-600'}`}>
-                {resendStatus.text}
+                {resendPending ? 'Sende ...' : resendStatus.text}
               </p>
             )}
           </div>
