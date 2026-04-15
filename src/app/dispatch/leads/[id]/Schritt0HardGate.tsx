@@ -5,9 +5,10 @@
 // Aufklaerungstext: Prozess-Verlaengerung/Kuerzung (NICHT Strafanzeige)
 
 import { useState, useTransition } from 'react'
-import { saveHardGate, type HardGateData } from './actions'
+import { saveHardGate, type HardGateData, type UnfallortKategorie } from './actions'
 import { computeHardGateStatus } from './hard-gate-utils'
-import { CheckCircleIcon, AlertTriangleIcon, XCircleIcon, InfoIcon } from 'lucide-react'
+import { CheckCircleIcon, AlertTriangleIcon, XCircleIcon, InfoIcon, MapPinIcon, ShieldAlertIcon } from 'lucide-react'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 
 type Lead = {
   id: string
@@ -21,7 +22,25 @@ type Lead = {
   hat_haftpflicht?: boolean | null
   qualifizierungs_phase?: string | null
   disqualifikations_grund?: string | null
+  // AAR-124: Unfallort + Polizei
+  unfallort?: string | null
+  unfallort_kategorie?: UnfallortKategorie | null
+  unfallort_lat?: number | null
+  unfallort_lng?: number | null
+  polizei_vor_ort?: boolean | null
+  polizei_aktenzeichen?: string | null
+  polizeibericht_pflicht?: boolean | null
 }
+
+const UNFALLORT_KATEGORIEN: { value: UnfallortKategorie; label: string }[] = [
+  { value: 'parkplatz', label: 'Parkplatz' },
+  { value: 'strasse', label: 'Straße' },
+  { value: 'autobahn', label: 'Autobahn' },
+  { value: 'kreuzung', label: 'Kreuzung' },
+  { value: 'tankstelle', label: 'Tankstelle' },
+  { value: 'innenstadt', label: 'Innenstadt' },
+  { value: 'sonstiges', label: 'Sonstiges' },
+]
 
 export default function Schritt0HardGate({ lead }: { lead: Lead }) {
   const [pending, startTransition] = useTransition()
@@ -34,6 +53,13 @@ export default function Schritt0HardGate({ lead }: { lead: Lead }) {
     mietwagen_flag: lead.mietwagen_flag ?? false,
     nutzungsausfall: lead.nutzungsausfall ?? false,
     hat_haftpflicht: lead.hat_haftpflicht ?? undefined,
+    // AAR-124: Unfallort + Polizei
+    unfallort: lead.unfallort ?? '',
+    unfallort_kategorie: lead.unfallort_kategorie ?? undefined,
+    unfallort_lat: lead.unfallort_lat ?? null,
+    unfallort_lng: lead.unfallort_lng ?? null,
+    polizei_vor_ort: lead.polizei_vor_ort ?? false,
+    polizei_aktenzeichen: lead.polizei_aktenzeichen ?? '',
   })
   const [toast, setToast] = useState('')
 
@@ -172,6 +198,83 @@ export default function Schritt0HardGate({ lead }: { lead: Lead }) {
                 Nutzungsausfall
               </label>
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* AAR-124: Unfallort & Polizei (zwischen Q2 und Q3) */}
+      <div className="space-y-3 border-t border-gray-100 pt-4">
+        <div className="flex items-center gap-2">
+          <MapPinIcon className="w-4 h-4 text-[#4573A2]" />
+          <h3 className="text-xs font-semibold text-gray-700">Unfallort &amp; Polizei</h3>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_160px] gap-2">
+          <GooglePlaceAutocomplete
+            defaultValue={draft.unfallort ?? ''}
+            placeholder="Wo ist es passiert? (Adresse wählen)"
+            onSelect={(r) =>
+              setDraft((d) => ({
+                ...d,
+                unfallort: r.adresse,
+                unfallort_lat: r.lat,
+                unfallort_lng: r.lng,
+              }))
+            }
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+          />
+          <select
+            value={draft.unfallort_kategorie ?? ''}
+            onChange={(e) =>
+              setDraft((d) => ({
+                ...d,
+                unfallort_kategorie: (e.target.value || undefined) as UnfallortKategorie | undefined,
+              }))
+            }
+            className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white"
+          >
+            <option value="">Kategorie ...</option>
+            {UNFALLORT_KATEGORIEN.map((k) => (
+              <option key={k.value} value={k.value}>{k.label}</option>
+            ))}
+          </select>
+        </div>
+        {draft.unfallort && (draft.unfallort_lat == null || draft.unfallort_lng == null) && (
+          <p className="text-[10px] text-amber-700 flex items-start gap-1">
+            <InfoIcon className="w-3 h-3 mt-0.5 shrink-0" />
+            Koordinaten fehlen — SV-Dispatch nutzt Kunden-Adresse als Fallback. Bitte einen Autocomplete-Vorschlag wählen.
+          </p>
+        )}
+
+        {/* Polizei-vor-Ort Toggle */}
+        <label className="flex items-center gap-2 cursor-pointer pt-1">
+          <input
+            type="checkbox"
+            checked={draft.polizei_vor_ort ?? false}
+            onChange={(e) =>
+              setDraft((d) => ({
+                ...d,
+                polizei_vor_ort: e.target.checked,
+                // Wenn Polizei vor Ort war → Bericht ist Pflicht
+                polizeibericht_pflicht: e.target.checked ? true : d.polizeibericht_pflicht,
+              }))
+            }
+            className="w-4 h-4"
+          />
+          <ShieldAlertIcon className="w-3.5 h-3.5 text-gray-500" />
+          <span className="text-xs font-medium text-gray-700">Polizei war vor Ort</span>
+        </label>
+        {draft.polizei_vor_ort && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 space-y-2">
+            <input
+              type="text"
+              value={draft.polizei_aktenzeichen ?? ''}
+              onChange={(e) => setDraft((d) => ({ ...d, polizei_aktenzeichen: e.target.value }))}
+              placeholder="Aktenzeichen (optional)"
+              className="w-full px-3 py-1.5 border border-blue-200 rounded-lg text-xs bg-white"
+            />
+            <p className="text-[10px] text-blue-800 italic">
+              Falls ja, muss der Kunde im Onboarding den Polizeibericht nachreichen. Falls er es nicht bis zum Termin schafft, holt der Gutachter die Info vor Ort ein.
+            </p>
           </div>
         )}
       </div>
