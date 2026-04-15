@@ -24,7 +24,10 @@ export default async function GutachterLayout({
   const displayName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || user.email || ''
 
   // AAR-70: Konsistenter SV-Lookup nur ueber profile_id (user_id ist deprecated, alle rows haben profile_id)
-  const svSelect = 'logo_url, brand_primary, brand_secondary, use_custom_branding, vertrag_unterschrieben, anzahlung_status, freigeschaltet, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, organisation_id, rolle_in_organisation, ist_parent_account, geloescht_am'
+  // AAR-184 Fix: `freigeschaltet` existiert NICHT — nur `portal_zugang_freigeschaltet`.
+  // Der Alt-Spaltenname hatte PostgREST 400 zurückgegeben, sv=null, alle SVs
+  // wurden zu /gutachter/willkommen redirected → Portal komplett unbenutzbar.
+  const svSelect = 'logo_url, brand_primary, brand_secondary, use_custom_branding, vertrag_unterschrieben, anzahlung_status, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, organisation_id, rolle_in_organisation, ist_parent_account, geloescht_am'
   const { data: sv } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
