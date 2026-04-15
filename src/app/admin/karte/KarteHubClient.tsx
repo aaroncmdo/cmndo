@@ -5,14 +5,16 @@
 // Detail-Panel rechts. Communities/Orgs leiten auf ihre vollen Listing-Pages
 // weiter (Deep-Links bleiben erreichbar, Nav-Items sind konsolidiert).
 
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   CarFrontIcon, ShieldCheckIcon, Building2Icon, UserPlusIcon,
-  XIcon, MapPinIcon, ArrowRightIcon, LayersIcon, RefreshCwIcon,
+  XIcon, MapPinIcon, ArrowRightIcon, LayersIcon, RefreshCwIcon, SearchIcon,
 } from 'lucide-react'
 import { recalculateIsochrone } from './actions'
+import { createClient } from '@/lib/supabase/client'
+import { getSvStatus } from '@/lib/sv-status'
 
 // AAR-130: GeoJSON-Polygon als optionales Feld auf jedem Marker
 export type GeoPolygon = { type: 'Polygon'; coordinates: number[][][] } | null
@@ -26,6 +28,14 @@ export type SvMarker = {
   istAktiv: boolean
   isochrone?: GeoPolygon
   einsatzKm?: number | null
+  // AAR-131: Sidebar-Felder (aus altem KarteClient migriert)
+  gutachterTyp?: string | null
+  offeneFaelle?: number
+  maxFaelleMonat?: number
+  ablehnungen30Tage?: number
+  portalZugangFreigeschaltet?: boolean | null
+  vertragUnterschrieben?: boolean | null
+  gesperrtSeit?: string | null
 }
 
 export type CommunityMarker = {
@@ -55,6 +65,24 @@ const LAYER = {
   community: { fill: '#10b981', label: 'Communities', icon: ShieldCheckIcon },
   org: { fill: '#f59e0b', label: 'Organisationen', icon: Building2Icon },
 } as const
+
+// AAR-131: 4 SV-Typ-Farben (aus altem KarteClient migriert).
+// Wird auf Marker + Sidebar-Liste angewendet wenn der SV-Layer aktiv ist.
+const TYP_COLORS: Record<string, { fill: string; label: string }> = {
+  'kfz-gutachter': { fill: '#3b82f6', label: 'KFZ-SV' },
+  'dat-gutachter': { fill: '#f97316', label: 'DAT' },
+  akademie: { fill: '#22c55e', label: 'Akademie' },
+  gutachterbuero: { fill: '#a855f7', label: 'Büro' },
+}
+
+// AAR-131: Paket-Label-Legacy-Mapping (alte Keys aus DB konsistent darstellen)
+const PAKET_LABEL: Record<string, string> = {
+  'starter-10': 'Standard', standard: 'Standard',
+  'standard-25': 'Pro', pro: 'Pro',
+  'premium-50': 'Premium', premium: 'Premium',
+}
+
+type SvStatusFilter = 'aktive' | 'deaktivierte' | 'gesperrt' | 'alle'
 
 const MAPS_SCRIPT_ID = 'google-maps-script'
 
@@ -101,6 +129,8 @@ export default function KarteHubClient({
   // AAR-130: Polygon-Overlays separat tracken damit sie unabhängig von Markern
   // gecleant werden können (Toggle "Einsatzgebiete" + verschiedene Layer)
   const polygonsRef = useRef<google.maps.Polygon[]>([])
+  // AAR-131 (KFZ-158): Live-Marker für unterwegs-SVs separat tracken
+  const liveMarkersRef = useRef<Map<string, google.maps.Marker>>(new Map())
   const [mapReady, setMapReady] = useState(false)
 
   const [showSvs, setShowSvs] = useState(true)
@@ -109,6 +139,32 @@ export default function KarteHubClient({
   // AAR-130: Default off — Polygone werden auf Wunsch eingeblendet
   const [showOverlays, setShowOverlays] = useState(false)
   const [selected, setSelected] = useState<Selected>(null)
+
+  // AAR-131: SV-Sidebar State (Suche + Status-Filter + Typ-Filter)
+  const [search, setSearch] = useState('')
+  const [svFilter, setSvFilter] = useState<SvStatusFilter>('aktive')
+  const [visibleTypes, setVisibleTypes] = useState<Set<string>>(new Set(Object.keys(TYP_COLORS)))
+  const toggleType = (typ: string) =>
+    setVisibleTypes((prev) => {
+      const next = new Set(prev)
+      if (next.has(typ)) next.delete(typ)
+      else next.add(typ)
+      return next
+    })
+
+  // AAR-131: gefilterte SVs für Sidebar + Marker (Status + Typ + Search)
+  const filteredSvs = useMemo(() => {
+    return svs.filter((sv) => {
+      const istGesperrt = !!sv.gesperrtSeit
+      const istDeaktiviert = sv.istAktiv === false
+      if (svFilter === 'gesperrt' && !istGesperrt) return false
+      if (svFilter === 'aktive' && (istGesperrt || istDeaktiviert)) return false
+      if (svFilter === 'deaktivierte' && (istGesperrt || !istDeaktiviert)) return false
+      if (!visibleTypes.has(sv.gutachterTyp ?? 'kfz-gutachter')) return false
+      if (search && !sv.name.toLowerCase().includes(search.toLowerCase())) return false
+      return true
+    })
+  }, [svs, svFilter, visibleTypes, search])
 
   // ─── Map init (runs once) ──────────────────────────────────────
   useEffect(() => {
@@ -172,11 +228,14 @@ export default function KarteHubClient({
     }
 
     if (showSvs) {
-      for (const sv of svs) {
+      // AAR-131: Marker nutzen TYP_COLORS, deaktivierte SVs bleiben rot+gedimt.
+      // Filter wird angewendet — Sidebar + Karte zeigen identischen Subset.
+      for (const sv of filteredSvs) {
         if (sv.lat == null || sv.lng == null) continue
+        const typColor = TYP_COLORS[sv.gutachterTyp ?? 'kfz-gutachter']?.fill ?? LAYER.sv.fill
         addMarker(
           { lat: sv.lat, lng: sv.lng },
-          sv.istAktiv ? LAYER.sv.fill : '#ef4444',
+          sv.istAktiv ? typColor : '#ef4444',
           7,
           sv.name,
           () => setSelected({ kind: 'sv', item: sv }),
@@ -209,7 +268,7 @@ export default function KarteHubClient({
         )
       }
     }
-  }, [mapReady, showSvs, showCommunities, showOrgs, svs, communities, organisationen])
+  }, [mapReady, showSvs, showCommunities, showOrgs, filteredSvs, communities, organisationen])
 
   // ─── Polygon-Overlays render (AAR-130) ─────────────────────────
   // Hover-Verhalten + Layer-Farben + clickable=false damit Marker-Click durchgeht.
@@ -226,7 +285,12 @@ export default function KarteHubClient({
 
     if (!showOverlays) return
 
-    function addPolygon(geo: GeoPolygon, color: string, layerVisible: boolean) {
+    function addPolygon(
+      geo: GeoPolygon,
+      color: string,
+      layerVisible: boolean,
+      onClick?: () => void,
+    ) {
       if (!layerVisible || !geo || !geo.coordinates?.[0]) return
       // GeoJSON [lng, lat] → Google Maps {lat, lng}
       const path = geo.coordinates[0].map(([lng, lat]) => ({ lat, lng }))
@@ -239,17 +303,113 @@ export default function KarteHubClient({
         strokeColor: color,
         strokeOpacity: 0.6,
         strokeWeight: 2,
-        clickable: false,
+        // AAR-131: clickable damit Polygon-Click das Detail-Panel öffnet
+        clickable: !!onClick,
       })
-      polygon.addListener('mouseover', () => polygon.setOptions({ fillOpacity: 0.25 }))
-      polygon.addListener('mouseout', () => polygon.setOptions({ fillOpacity: 0.12 }))
+      polygon.addListener('mouseover', () => polygon.setOptions({ fillOpacity: 0.25, strokeWeight: 3 }))
+      polygon.addListener('mouseout', () => polygon.setOptions({ fillOpacity: 0.12, strokeWeight: 2 }))
+      if (onClick) polygon.addListener('click', onClick)
       polygonsRef.current.push(polygon)
     }
 
-    for (const sv of svs) addPolygon(sv.isochrone ?? null, LAYER.sv.fill, showSvs)
-    for (const c of communities) addPolygon(c.isochrone ?? null, LAYER.community.fill, showCommunities)
-    for (const o of organisationen) addPolygon(o.isochrone ?? null, LAYER.org.fill, showOrgs)
-  }, [mapReady, showOverlays, showSvs, showCommunities, showOrgs, svs, communities, organisationen])
+    // AAR-131: SV-Polygone respektieren den Status/Typ-Filter (nur filteredSvs)
+    for (const sv of filteredSvs) {
+      addPolygon(sv.isochrone ?? null, TYP_COLORS[sv.gutachterTyp ?? 'kfz-gutachter']?.fill ?? LAYER.sv.fill, showSvs, () => setSelected({ kind: 'sv', item: sv }))
+    }
+    for (const c of communities) {
+      addPolygon(c.isochrone ?? null, LAYER.community.fill, showCommunities, () => setSelected({ kind: 'community', item: c }))
+    }
+    for (const o of organisationen) {
+      addPolygon(o.isochrone ?? null, LAYER.org.fill, showOrgs, () => setSelected({ kind: 'org', item: o }))
+    }
+  }, [mapReady, showOverlays, showSvs, showCommunities, showOrgs, filteredSvs, communities, organisationen])
+
+  // ─── KFZ-158: SV Live-Positionen via Realtime (AAR-131 migriert) ────
+  // Forward-Arrow-Marker in Blau, 30-Min-Cutoff für initiale Positionen.
+  // Realtime-INSERTs auf sv_live_position aktualisieren oder fügen Marker ein.
+  useEffect(() => {
+    if (!mapRef.current || !mapReady) return
+    const map = mapRef.current
+    const supabase = createClient()
+
+    function upsertLiveMarker(svId: string, lat: number, lng: number, name: string) {
+      const existing = liveMarkersRef.current.get(svId)
+      if (existing) {
+        existing.setPosition({ lat, lng })
+        return
+      }
+      const marker = new google.maps.Marker({
+        position: { lat, lng },
+        map,
+        icon: {
+          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+          scale: 5,
+          fillColor: '#3B82F6',
+          fillOpacity: 1,
+          strokeColor: '#fff',
+          strokeWeight: 2,
+          rotation: 0,
+        },
+        title: `${name} (Live)`,
+        zIndex: 30,
+      })
+      liveMarkersRef.current.set(svId, marker)
+    }
+
+    // Initial: letzte Position pro SV laden, 30-Min-Cutoff
+    supabase
+      .from('sv_live_position')
+      .select('gutachter_id, lat, lng, updated_at')
+      .order('updated_at', { ascending: false })
+      .then(({ data }) => {
+        if (!data) return
+        const latest = new Map<string, { lat: number; lng: number; updated_at: string }>()
+        for (const row of data) {
+          if (!latest.has(row.gutachter_id)) {
+            latest.set(row.gutachter_id, {
+              lat: Number(row.lat),
+              lng: Number(row.lng),
+              updated_at: row.updated_at,
+            })
+          }
+        }
+        const cutoff = Date.now() - 30 * 60 * 1000
+        for (const [svId, pos] of latest) {
+          if (new Date(pos.updated_at).getTime() < cutoff) continue
+          const svName = svs.find((s) => s.id === svId)?.name ?? 'SV'
+          upsertLiveMarker(svId, pos.lat, pos.lng, svName)
+        }
+      })
+
+    // Realtime-Channel
+    const channel = supabase
+      .channel('admin-sv-live-positions')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'sv_live_position' },
+        (payload) => {
+          const row = payload.new as { gutachter_id: string; lat: string; lng: string }
+          const svName = svs.find((s) => s.id === row.gutachter_id)?.name ?? 'SV'
+          upsertLiveMarker(row.gutachter_id, Number(row.lat), Number(row.lng), svName)
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+      for (const m of liveMarkersRef.current.values()) m.setMap(null)
+      liveMarkersRef.current.clear()
+    }
+  }, [mapReady, svs])
+
+  // AAR-131: Pan + Zoom bei Klick in Sidebar-Liste
+  function panToSv(sv: SvMarker) {
+    setSelected({ kind: 'sv', item: sv })
+    if (mapRef.current && sv.lat != null && sv.lng != null) {
+      mapRef.current.panTo({ lat: sv.lat, lng: sv.lng })
+      mapRef.current.setZoom(12)
+    }
+  }
 
   if (!apiKey) {
     return (
@@ -302,8 +462,21 @@ export default function KarteHubClient({
         </button>
       </div>
 
-      {/* Map + Side-Panel */}
+      {/* AAR-131: Sidebar links (SV-Liste mit Suche/Status-Filter) + Map + Side-Panel rechts */}
       <div className="flex-1 flex min-h-0">
+        <SvSidebar
+          svs={svs}
+          filteredSvs={filteredSvs}
+          search={search}
+          setSearch={setSearch}
+          svFilter={svFilter}
+          setSvFilter={setSvFilter}
+          visibleTypes={visibleTypes}
+          toggleType={toggleType}
+          selectedId={selected?.kind === 'sv' ? selected.item.id : null}
+          onSelect={panToSv}
+        />
+
         <div ref={mapContainerRef} className="flex-1 min-h-0" />
 
         {selected && (
@@ -313,6 +486,157 @@ export default function KarteHubClient({
         )}
       </div>
     </div>
+  )
+}
+
+// AAR-131: Sidebar mit Suche + 4-Stufen-Status-Filter + Typ-Toggles + SV-Liste
+function SvSidebar({
+  svs,
+  filteredSvs,
+  search,
+  setSearch,
+  svFilter,
+  setSvFilter,
+  visibleTypes,
+  toggleType,
+  selectedId,
+  onSelect,
+}: {
+  svs: SvMarker[]
+  filteredSvs: SvMarker[]
+  search: string
+  setSearch: (v: string) => void
+  svFilter: SvStatusFilter
+  setSvFilter: (v: SvStatusFilter) => void
+  visibleTypes: Set<string>
+  toggleType: (typ: string) => void
+  selectedId: string | null
+  onSelect: (sv: SvMarker) => void
+}) {
+  return (
+    <aside className="w-72 shrink-0 border-r border-gray-200 bg-[#f8f9fb] flex flex-col overflow-hidden">
+      <div className="px-4 pt-4 pb-2">
+        <h2 className="text-sm font-semibold text-gray-900">Sachverständige</h2>
+        <p className="text-[10px] text-gray-500 mt-0.5">{filteredSvs.length} von {svs.length}</p>
+      </div>
+      {/* Suche */}
+      <div className="px-4 pb-2">
+        <div className="relative">
+          <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Suche..."
+            className="w-full pl-8 pr-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs"
+          />
+        </div>
+      </div>
+      {/* 4-Stufen-Status-Filter */}
+      <div className="px-4 pb-2 flex gap-1">
+        {([
+          { k: 'aktive', label: 'Aktiv' },
+          { k: 'deaktivierte', label: 'Deaktiv.' },
+          { k: 'gesperrt', label: 'Gesperrt' },
+          { k: 'alle', label: 'Alle' },
+        ] as const).map((f) => (
+          <button
+            key={f.k}
+            onClick={() => setSvFilter(f.k)}
+            className={`flex-1 text-[10px] font-medium py-1.5 rounded-lg transition-colors ${
+              svFilter === f.k
+                ? 'bg-[#1E3A5F] text-white'
+                : 'bg-white text-gray-500 border border-gray-200'
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+      {/* Typ-Toggles (4 SV-Typen) */}
+      <div className="px-4 pb-2 border-b border-gray-200">
+        <p className="text-[9px] font-semibold text-gray-500 uppercase mb-1">Typen</p>
+        <div className="flex flex-wrap gap-1.5">
+          {Object.entries(TYP_COLORS).map(([key, val]) => (
+            <button
+              key={key}
+              onClick={() => toggleType(key)}
+              className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded hover:bg-gray-100"
+            >
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: val.fill }} />
+              <span className={visibleTypes.has(key) ? 'text-gray-700' : 'text-gray-400 line-through'}>
+                {val.label}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+      {/* SV-Liste */}
+      <div className="flex-1 overflow-y-auto px-2 py-2">
+        {filteredSvs.map((sv) => {
+          const ti = TYP_COLORS[sv.gutachterTyp ?? 'kfz-gutachter']
+          const status = getSvStatus({
+            portal_zugang_freigeschaltet: sv.portalZugangFreigeschaltet ?? null,
+            vertrag_unterschrieben: sv.vertragUnterschrieben ?? null,
+            gesperrt_seit: sv.gesperrtSeit ?? null,
+          })
+          const ablehnungen = sv.ablehnungen30Tage ?? 0
+          const ablehnungenCls =
+            ablehnungen > 2 ? 'bg-red-50 text-red-600' : ablehnungen > 1 ? 'bg-amber-50 text-amber-600' : 'text-gray-400'
+          return (
+            <button
+              key={sv.id}
+              onClick={() => onSelect(sv)}
+              className={`w-full text-left px-3 py-2 rounded-lg transition-colors mb-0.5 ${
+                selectedId === sv.id
+                  ? 'bg-[#1E3A5F]/20 border border-[#1E3A5F]/30'
+                  : sv.istAktiv === false
+                    ? 'bg-red-50/60 hover:bg-red-50'
+                    : 'hover:bg-gray-100/60'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: sv.istAktiv === false ? '#f87171' : ti?.fill ?? '#4573A2' }}
+                />
+                <span
+                  className={`text-sm truncate flex-1 ${
+                    sv.istAktiv === false ? 'text-gray-400 line-through' : 'text-gray-800'
+                  }`}
+                >
+                  {sv.name}
+                </span>
+                {sv.istAktiv === false && (
+                  <span className="text-[8px] bg-red-50 text-red-500 px-1 py-0.5 rounded font-medium shrink-0">
+                    Deaktiviert
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center justify-between gap-2 mt-1 ml-4.5">
+                <span className="text-gray-400 text-[10px]">
+                  {PAKET_LABEL[sv.paket ?? ''] ?? sv.paket} · {sv.offeneFaelle ?? 0}/{sv.maxFaelleMonat ?? '?'}
+                </span>
+                {ablehnungen > 0 && (
+                  <span className={`text-[8px] px-1 py-0.5 rounded font-medium ${ablehnungenCls}`}>
+                    Abl: {ablehnungen}
+                  </span>
+                )}
+                <span
+                  className={`inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-medium shrink-0 ${status.bg} ${status.text}`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
+                  {status.label}
+                </span>
+              </div>
+            </button>
+          )
+        })}
+        {filteredSvs.length === 0 && (
+          <p className="px-3 py-6 text-xs text-gray-400 text-center">Keine SVs gefunden</p>
+        )}
+      </div>
+    </aside>
   )
 }
 

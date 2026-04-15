@@ -20,11 +20,11 @@ export default async function KartePage() {
     .from('profiles').select('rolle').eq('id', user.id).single()
   if (profile?.rolle !== 'admin') redirect('/login?error=Nur+Admins')
 
-  // SVs mit Standort + Isochrone (AAR-130)
+  // SVs mit Standort + Isochrone (AAR-130) + AAR-131 SV-Sidebar-Felder
   // Radius-Fallback-Kette muss zu findBestSV.ts passen (3 Spalten existieren historisch)
   const { data: svRaw } = await supabase
     .from('sachverstaendige')
-    .select('id, paket, standort_lat, standort_lng, ist_aktiv, organisation_id, isochrone_polygon, paket_umkreis_km, radius_km, paket_radius_km, profiles(vorname, nachname)')
+    .select('id, paket, standort_lat, standort_lng, ist_aktiv, organisation_id, isochrone_polygon, paket_umkreis_km, radius_km, paket_radius_km, gutachter_typ, offene_faelle, max_faelle_monat, paket_faelle_genutzt, paket_faelle_gesamt, ablehnungen_30_tage, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, profiles(vorname, nachname)')
     .is('geloescht_am', null)
 
   type SvRow = {
@@ -38,6 +38,15 @@ export default async function KartePage() {
     paket_umkreis_km: number | null
     radius_km: number | null
     paket_radius_km: number | null
+    gutachter_typ: string | null
+    offene_faelle: number | null
+    max_faelle_monat: number | null
+    paket_faelle_genutzt: number | null
+    paket_faelle_gesamt: number | null
+    ablehnungen_30_tage: number | null
+    portal_zugang_freigeschaltet: boolean | null
+    vertrag_unterschrieben: boolean | null
+    gesperrt_seit: string | null
     profiles: unknown
   }
   const svRows = (svRaw ?? []) as unknown as SvRow[]
@@ -57,6 +66,14 @@ export default async function KartePage() {
       isochrone: sv.isochrone_polygon as SvMarker['isochrone'] ?? null,
       // Konsistent zu findBestSV.ts: 3-Spalten-Fallback
       einsatzKm: Number(sv.paket_umkreis_km) || Number(sv.radius_km) || Number(sv.paket_radius_km) || null,
+      // AAR-131: Sidebar-Felder
+      gutachterTyp: sv.gutachter_typ ?? 'kfz-gutachter',
+      offeneFaelle: Number(sv.paket_faelle_genutzt) || Number(sv.offene_faelle) || 0,
+      maxFaelleMonat: Number(sv.paket_faelle_gesamt) || Number(sv.max_faelle_monat) || 10,
+      ablehnungen30Tage: Number(sv.ablehnungen_30_tage) || 0,
+      portalZugangFreigeschaltet: sv.portal_zugang_freigeschaltet ?? null,
+      vertragUnterschrieben: sv.vertrag_unterschrieben ?? null,
+      gesperrtSeit: sv.gesperrt_seit ?? null,
     }
   })
 
