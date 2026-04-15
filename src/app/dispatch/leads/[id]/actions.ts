@@ -24,6 +24,7 @@ export {
   reserveSvTerminForLead,
   cancelSvTerminForLead,
   acceptGegenvorschlag,
+  getNextFreeSlotsForSv,
 } from './actions/sv-termin'
 export { sendFlowLinkMultiChannel } from './actions/flowlink'
 export { triggerZb1UploadRequest } from './actions/zb1'

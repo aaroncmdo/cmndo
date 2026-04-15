@@ -195,3 +195,62 @@ export async function acceptGegenvorschlag(
   if (termin.lead_id) revalidatePath(`/dispatch/leads/${termin.lead_id}`)
   return { success: true }
 }
+
+// AAR-195: Nächste freie Slots für einen SV — für den Slot-Picker in
+// SvDispatchPanel. Findet bis zu `count` Slots á `slotDauerMin` Minuten
+// die NICHT mit bestehenden reservierten/bestätigten Terminen kollidieren.
+// Werktage Mo–Fr 09:00–16:00 Start-Zeit (letzter Slot startet spätestens
+// 16:00 damit 2h-Termin bis 18:00 endet). Weekend bleibt ohne Slots.
+export async function getNextFreeSlotsForSv(
+  svId: string,
+  count: number = 3,
+  slotDauerMin: number = 120,
+): Promise<{ success: boolean; slots?: { start: string; end: string }[]; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const now = new Date()
+  const inZwoelfWochen = new Date(now.getTime() + 12 * 7 * 24 * 60 * 60 * 1000)
+
+  const { data: bestehend } = await supabase
+    .from('gutachter_termine')
+    .select('start_zeit, end_zeit')
+    .eq('sv_id', svId)
+    .not('status', 'in', '("storniert","abgelehnt","abgesagt")')
+    .gte('start_zeit', now.toISOString())
+    .lte('start_zeit', inZwoelfWochen.toISOString())
+    .order('start_zeit', { ascending: true })
+
+  const freieSlots: { start: string; end: string }[] = []
+  const kandidat = new Date(now)
+  // Frühestens morgen 09:00 — heute anzurufen + morgen Termin ist normales
+  // Dispatch-Tempo. Falls heute noch 14:00 ist, würde sonst „heute 16:00"
+  // vorgeschlagen — der SV hat aber keine Vorlaufzeit.
+  kandidat.setDate(kandidat.getDate() + 1)
+  kandidat.setHours(9, 0, 0, 0)
+
+  const maxIter = 12 * 7 * 24 // Sicherung gegen Endlos-Schleife
+  let i = 0
+  while (freieSlots.length < count && kandidat < inZwoelfWochen && i < maxIter) {
+    i++
+    const wochentag = kandidat.getDay()
+    if (wochentag !== 0 && wochentag !== 6 && kandidat.getHours() < 16) {
+      const slotEnd = new Date(kandidat.getTime() + slotDauerMin * 60_000)
+      const konflikt = (bestehend ?? []).some((b) =>
+        new Date(b.start_zeit) < slotEnd && new Date(b.end_zeit) > kandidat,
+      )
+      if (!konflikt) {
+        freieSlots.push({ start: kandidat.toISOString(), end: slotEnd.toISOString() })
+      }
+    }
+    // Nächster Kandidat: +1h. Nach 16:00 → nächster Tag 09:00.
+    kandidat.setTime(kandidat.getTime() + 60 * 60_000)
+    if (kandidat.getHours() >= 17) {
+      kandidat.setDate(kandidat.getDate() + 1)
+      kandidat.setHours(9, 0, 0, 0)
+    }
+  }
+
+  return { success: true, slots: freieSlots }
+}

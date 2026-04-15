@@ -23,6 +23,7 @@ import {
   reserveSvTerminForLead,
   cancelSvTerminForLead,
   acceptGegenvorschlag,
+  getNextFreeSlotsForSv,
   type SvSuggestion,
 } from './actions'
 
@@ -56,6 +57,45 @@ export default function SvDispatchPanel({
   const [startZeit, setStartZeit] = useState('09:00')
   const [dauerMin, setDauerMin] = useState(120)
   const [toast, setToast] = useState('')
+  // AAR-195: Vorgeschlagene Slots für den ausgewählten SV
+  const [freeSlots, setFreeSlots] = useState<{ start: string; end: string }[]>([])
+  const [slotsLoading, setSlotsLoading] = useState(false)
+
+  // Slots nachladen sobald SV ausgewählt ist (oder Dauer wechselt)
+  useEffect(() => {
+    if (!selectedSv) {
+      setFreeSlots([])
+      return
+    }
+    let cancelled = false
+    setSlotsLoading(true)
+    getNextFreeSlotsForSv(selectedSv.svId, 3, dauerMin)
+      .then((r) => {
+        if (!cancelled) setFreeSlots(r.success ? r.slots ?? [] : [])
+      })
+      .catch(() => {
+        if (!cancelled) setFreeSlots([])
+      })
+      .finally(() => {
+        if (!cancelled) setSlotsLoading(false)
+      })
+    return () => { cancelled = true }
+  }, [selectedSv, dauerMin])
+
+  function handleReserveSlot(slotStartIso: string) {
+    if (!selectedSv) return
+    startTransition(async () => {
+      const r = await reserveSvTerminForLead(leadId, selectedSv.svId, slotStartIso, dauerMin)
+      if (r.success) {
+        setToast('Termin reserviert')
+        setSelectedSv(null)
+        setSuggestions(null)
+      } else {
+        setToast(r.error ?? 'Fehler beim Reservieren')
+      }
+      setTimeout(() => setToast(''), 3000)
+    })
+  }
 
   // Defaults: morgen 09:00 als erster Slot
   useEffect(() => {
@@ -358,6 +398,49 @@ export default function SvDispatchPanel({
                   Anderen SV wählen
                 </button>
               </div>
+
+              {/* AAR-195: Slot-Vorschläge — Klick = sofort reservieren.
+                  Manuelle Eingabe bleibt parallel sichtbar für Sonderfälle. */}
+              <div className="space-y-1">
+                <p className="text-[10px] text-gray-500 uppercase tracking-wider">
+                  Vorgeschlagene Slots {slotsLoading && '(lade …)'}
+                </p>
+                {!slotsLoading && freeSlots.length === 0 && (
+                  <p className="text-[11px] text-gray-400 italic">
+                    Keine automatischen Slots — bitte manuell eingeben.
+                  </p>
+                )}
+                {freeSlots.length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {freeSlots.map((slot) => {
+                      const start = new Date(slot.start)
+                      const end = new Date(slot.end)
+                      const tag = start.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })
+                      const von = start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+                      const bis = end.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+                      return (
+                        <button
+                          key={slot.start}
+                          type="button"
+                          disabled={pending}
+                          onClick={() => handleReserveSlot(slot.start)}
+                          className="px-2 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-[11px] font-medium text-emerald-800 hover:bg-emerald-100 disabled:opacity-50 flex flex-col items-start"
+                        >
+                          <span className="flex items-center gap-1">
+                            <CalendarCheckIcon className="w-3 h-3" />
+                            {tag}
+                          </span>
+                          <span className="text-gray-700">{von} – {bis}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <p className="text-[10px] text-gray-400 uppercase tracking-wider pt-2 border-t border-gray-100">
+                Oder manuell eingeben
+              </p>
               <div className="grid grid-cols-3 gap-2">
                 <input
                   type="date"
