@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import {
   GraduationCapIcon, UsersIcon, CheckCircle2Icon, MailIcon, PlusIcon, TrashIcon,
 } from 'lucide-react'
@@ -148,6 +149,10 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
     setSaving(false)
     if (!r.success) { setError(r.error ?? 'Anlegen fehlgeschlagen'); return }
     setResult({ organisation_id: r.organisation_id!, sub_count: r.sub_sv_ids?.length ?? 0 })
+    // AAR-205: Toast für Page-Use
+    toast.success(`Akademie ${akademieName} angelegt`, {
+      description: `${r.sub_sv_ids?.length ?? 0} Mitglied(er) — Welcome-Mail an ${verwalterEmail}.`,
+    })
     onSuccess?.({ name: akademieName, email: verwalterEmail })
   }
 

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import {
   Building2Icon, UsersIcon, CheckCircle2Icon, MailIcon, PlusIcon, TrashIcon, AlertTriangleIcon,
 } from 'lucide-react'
@@ -291,6 +292,10 @@ export default function BueroAnlegenWizard({ onSuccess }: {
     setSaving(false)
     if (!r.success) { setError(r.error ?? 'Anlegen fehlgeschlagen'); return }
     setResult({ organisation_id: r.organisation_id!, sub_count: r.sub_sv_ids?.length ?? 0 })
+    // AAR-205: Toast für Page-Use — bleibt sichtbar auch nach Redirect
+    toast.success(`Büro ${bueroName} angelegt`, {
+      description: `${r.sub_sv_ids?.length ?? 0} Standort(e) — Welcome-Mail an ${inhaberEmail}.`,
+    })
     onSuccess?.({ name: bueroName, email: inhaberEmail })
   }
 

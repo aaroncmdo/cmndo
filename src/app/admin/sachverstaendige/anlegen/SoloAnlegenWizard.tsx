@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import {
   UserIcon, PackageIcon, ShieldCheckIcon, CheckCircle2Icon,
   MailIcon,
@@ -151,6 +152,11 @@ export default function SoloAnlegenWizard({ onSuccess }: {
     setSaving(false)
     if (!r.success) { setError(r.error ?? 'Anlegen fehlgeschlagen'); return }
     setResult({ sv_id: r.sv_id!, initial_password: r.initial_password! })
+    // AAR-205: Toast als globales Erfolgs-Feedback (bleibt auch nach
+    // Redirect sichtbar). onSuccess-Callback bleibt für den Drawer-Use-Case.
+    toast.success(`SV ${data.vorname} ${data.nachname} angelegt`, {
+      description: `Welcome-Mail an ${data.email} versendet.`,
+    })
     onSuccess?.({ name: `${data.vorname} ${data.nachname}`.trim(), email: data.email })
   }
 
@@ -183,9 +189,16 @@ export default function SoloAnlegenWizard({ onSuccess }: {
               </button>
               <button
                 onClick={() => router.push('/admin/sachverstaendige')}
-                className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold"
+                className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm hover:bg-gray-50"
               >
                 Zur SV-Liste
+              </button>
+              {/* AAR-205: Primary-Button zum frisch angelegten SV-Profil. */}
+              <button
+                onClick={() => router.push(`/admin/sachverstaendige/${result.sv_id}`)}
+                className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold"
+              >
+                Zum Profil von {data.vorname} {data.nachname}
               </button>
             </div>
           </div>

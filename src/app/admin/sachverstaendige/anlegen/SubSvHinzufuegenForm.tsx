@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { CheckCircle2Icon, MailIcon } from 'lucide-react'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { LoadingButton } from '@/components/ui/loading-button'
@@ -80,6 +81,10 @@ export default function SubSvHinzufuegenForm({ organisationen, onSuccess }: {
     if (!r.success) { setError(r.error ?? 'Anlegen fehlgeschlagen'); return }
     const orgName = organisationen.find(o => o.id === orgId)?.name ?? '?'
     setResult({ sv_id: r.sv_id!, org_name: orgName })
+    // AAR-205: Toast für Page-Use
+    toast.success(`Sub-SV ${vorname} ${nachname} zu ${orgName} hinzugefügt`, {
+      description: `Welcome-Mail an ${email} versendet.`,
+    })
     onSuccess?.({ name: `${vorname} ${nachname}`.trim(), email })
   }
 
