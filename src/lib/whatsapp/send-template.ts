@@ -52,6 +52,11 @@ export async function sendWhatsAppTemplate(
       body.set('To', `whatsapp:${normalTo}`)
       body.set('ContentSid', contentSid)
       body.set('ContentVariables', JSON.stringify(variables))
+      // AAR-183: StatusCallback für Delivery-Fehler-Erkennung (bevorzugter_kanal
+      // wird zurückgesetzt wenn WA scheitert, sodass der nächste Send auf SMS
+      // fällt ohne dass der MA das manuell pflegen muss).
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
+      body.set('StatusCallback', `${baseUrl}/api/webhooks/twilio/status`)
 
       const resp = await fetch(
         `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
