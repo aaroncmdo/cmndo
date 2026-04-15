@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
-  LayoutDashboardIcon,
   MapIcon,
   MapPinIcon,
   FolderOpenIcon,
@@ -17,10 +16,6 @@ import {
   UsersIcon,
   TrophyIcon,
   MessageCircleIcon,
-  CheckSquareIcon,
-  InboxIcon,
-  FileTextIcon,
-  RouteIcon,
   EuroIcon,
   AlertCircleIcon,
   ClipboardListIcon,
@@ -30,24 +25,57 @@ import NotificationBell from '@/app/admin/_components/NotificationBell'
 import OutboxBadge from '@/components/offline/OutboxBadge'
 import { CLAIMONDO_DEFAULT_THEME, type BrandTheme } from '@/lib/branding/theme'
 
-// AAR-60: Alle Gutachter-Routen verlinken
-const NAV_ITEMS_BASE = [
-  { href: '/gutachter/heute', label: 'Heute', icon: MapPinIcon },
-  { href: '/gutachter', label: 'Dashboard', icon: LayoutDashboardIcon },
-  { href: '/gutachter/faelle', label: 'Meine Fälle', icon: FolderOpenIcon },
-  { href: '/gutachter/auftraege', label: 'Aufträge', icon: ClipboardListIcon },
-  { href: '/gutachter/tasks', label: 'Tasks', icon: CheckSquareIcon },
-  { href: '/gutachter/mitteilungen', label: 'Mitteilungen', icon: InboxIcon },
-  { href: '/gutachter/stellungnahme', label: 'Stellungnahmen', icon: FileTextIcon },
-  { href: '/gutachter/termine', label: 'Termine', icon: CalendarIcon },
-  { href: '/gutachter/kalender', label: 'Kalender', icon: CalendarIcon },
-  { href: '/gutachter/route', label: 'Route', icon: RouteIcon },
-  { href: '/gutachter/gebiet', label: 'Mein Gebiet', icon: MapIcon },
-  { href: '/gutachter/leadpreise', label: 'Lead-Preise', icon: EuroIcon },
-  { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
-  { href: '/gutachter/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
-  { href: '/gutachter/statistiken', label: 'Statistiken', icon: BarChart3Icon },
-  { href: '/gutachter/vertrag', label: 'Vertrag', icon: FileSignatureIcon },
+// AAR-222: Sidebar-Refactor von 18 flachen Items auf 10 in 4 Sektionen.
+// Removed Items (Dashboard, Mitteilungen, Tasks, Stellungnahmen, Termine,
+// Route) bleiben als Routes erreichbar (Bookmarks brechen nicht), tauchen
+// aber nicht mehr in der Navigation auf — Inhalte sind in Heute/Fälle/
+// Kalender bzw. die Notification-Glocke integriert (siehe einzelne Tickets
+// für die Page-Merges).
+type NavItem = {
+  href: string
+  label: string
+  icon: typeof MapPinIcon
+  // badge: optional Render-Funktion die einen Counter zurückgibt
+  badgeKey?: 'auftraege' | 'nachrichten'
+}
+
+type NavSection = {
+  title: string
+  items: NavItem[]
+}
+
+const NAV_SECTIONS_BASE: NavSection[] = [
+  {
+    title: 'Tagesgeschäft',
+    items: [
+      { href: '/gutachter/heute', label: 'Heute', icon: MapPinIcon },
+      { href: '/gutachter/auftraege', label: 'Aufträge', icon: ClipboardListIcon, badgeKey: 'auftraege' },
+      { href: '/gutachter/faelle', label: 'Meine Fälle', icon: FolderOpenIcon },
+      { href: '/gutachter/kalender', label: 'Kalender', icon: CalendarIcon },
+    ],
+  },
+  {
+    title: 'Kommunikation',
+    items: [
+      { href: '/gutachter/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon, badgeKey: 'nachrichten' },
+    ],
+  },
+  {
+    title: 'Finanzen',
+    items: [
+      { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
+      { href: '/gutachter/leadpreise', label: 'Lead-Preise', icon: EuroIcon },
+    ],
+  },
+  {
+    title: 'Verwaltung',
+    items: [
+      { href: '/gutachter/gebiet', label: 'Mein Gebiet', icon: MapIcon },
+      { href: '/gutachter/vertrag', label: 'Vertrag', icon: FileSignatureIcon },
+      { href: '/gutachter/statistiken', label: 'Statistiken', icon: BarChart3Icon },
+      { href: '/gutachter/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
+    ],
+  },
 ]
 
 type HourW = { hour: number; temp: number; code: number }
@@ -87,13 +115,15 @@ export default function GutachterShell({
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [weather, setWeather] = useState<{ temp: number; code: number; hourly: Record<string, HourW[]>; daily: DailyW[] } | null>(null)
 
-  // KFZ-152: NAV-Items dynamisch zusammenstellen je nach Rolle
-  const NAV_ITEMS = [
-    ...NAV_ITEMS_BASE,
-    { href: '/gutachter/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon },
-    ...(showTeam ? [{ href: '/gutachter/team', label: 'Team', icon: UsersIcon }] : []),
-    ...(showCommunity ? [{ href: '/gutachter/community', label: 'Community', icon: TrophyIcon }] : []),
-  ]
+  // AAR-222: Sektions-basierte Nav. Team/Community werden conditional in
+  // Verwaltung eingehängt.
+  const NAV_SECTIONS: NavSection[] = NAV_SECTIONS_BASE.map(sec => {
+    if (sec.title !== 'Verwaltung') return sec
+    const conditional: NavItem[] = []
+    if (showTeam) conditional.push({ href: '/gutachter/team', label: 'Team', icon: UsersIcon })
+    if (showCommunity) conditional.push({ href: '/gutachter/community', label: 'Community', icon: TrophyIcon })
+    return { ...sec, items: [...sec.items, ...conditional] }
+  })
 
   // AAR-220: Vollständiges Theme via CSS-Vars + sanfte Transition (1.5s).
   // Wir setzen alle 6 Vars: --brand-primary, --brand-secondary, --brand-accent,
@@ -136,9 +166,16 @@ export default function GutachterShell({
       }).catch(() => {})
   }, [standortLat, standortLng])
 
-  const [unreadCount, setUnreadCount] = useState(0)
+  // AAR-222: Badge-Counter für Sidebar-Items.
+  // - auftraege: Anzahl Fälle mit status='sv-zugewiesen' (noch nicht terminiert)
+  // - nachrichten: Anzahl ungelesener Nachrichten in nachrichten (Mitteilungen
+  //   wandern in die Glocke, deshalb hier KEINE mitteilungen mehr)
+  const [badgeCounts, setBadgeCounts] = useState<{ auftraege: number; nachrichten: number }>({
+    auftraege: 0,
+    nachrichten: 0,
+  })
 
-  const loadUnread = useCallback(async () => {
+  const loadBadges = useCallback(async () => {
     const supabase = createClient()
     const user = (await supabase.auth.getUser())?.data?.user ?? null
     if (!user) return
@@ -148,24 +185,38 @@ export default function GutachterShell({
       .or(`profile_id.eq.${user.id},user_id.eq.${user.id}`)
       .single()
     if (!sv) return
-    const { count } = await supabase
-      .from('gutachter_mitteilungen')
+
+    // Aufträge: Fälle mit status='sv-zugewiesen' (neue Zuweisungen, noch nicht
+    // bestätigt/terminiert).
+    const { count: auftraegeCount } = await supabase
+      .from('faelle')
       .select('id', { count: 'exact', head: true })
       .eq('sv_id', sv.id)
+      .eq('status', 'sv-zugewiesen')
+
+    // Nachrichten: ungelesene Chat-Nachrichten in nachrichten.
+    const { count: nachrichtenCount } = await supabase
+      .from('nachrichten')
+      .select('id', { count: 'exact', head: true })
+      .eq('empfaenger_id', user.id)
       .eq('gelesen', false)
-    setUnreadCount(count ?? 0)
+
+    setBadgeCounts({
+      auftraege: auftraegeCount ?? 0,
+      nachrichten: nachrichtenCount ?? 0,
+    })
   }, [])
 
   useEffect(() => {
-    loadUnread()
+    loadBadges()
     const supabase = createClient()
     const channel = supabase
-      .channel('gutachter-mitteilungen-count')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'gutachter_mitteilungen' }, () => loadUnread())
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'gutachter_mitteilungen' }, () => loadUnread())
+      .channel('gutachter-sidebar-badges')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'faelle' }, () => loadBadges())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'nachrichten' }, () => loadBadges())
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [loadUnread])
+  }, [loadBadges])
 
   async function handleLogout() {
     const supabase = createClient()
@@ -233,27 +284,47 @@ export default function GutachterShell({
           <p className="text-[#7BA3CC] text-xs mt-0.5">{firmenname ?? 'Gutachter-Portal'}</p>
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-            const active = isActive(href)
-            return (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium ${
-                  active ? 'text-white' : 'text-white/60 hover:text-white hover:bg-white/5'
-                }`}
-                style={{
-                  backgroundColor: active ? 'var(--brand-secondary)' : undefined,
-                  transition: 'background-color 1.5s ease, color 200ms ease',
-                }}
-              >
-                <Icon className="w-5 h-5" />
-                {label}
-              </Link>
-            )
-          })}
+        {/* AAR-222: Gruppierte Nav mit Section-Headers + Badge-Counter
+            für Aufträge / Nachrichten. */}
+        <nav className="flex-1 px-3 py-4 space-y-4 overflow-y-auto">
+          {NAV_SECTIONS.map(section => (
+            <div key={section.title}>
+              <p className="px-3 mb-1.5 text-[10px] uppercase tracking-wider text-white/40 font-semibold">
+                {section.title}
+              </p>
+              <div className="space-y-0.5">
+                {section.items.map(({ href, label, icon: Icon, badgeKey }) => {
+                  const active = isActive(href)
+                  const badge = badgeKey ? badgeCounts[badgeKey] : 0
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={() => setSidebarOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium ${
+                        active ? 'text-white' : 'text-white/60 hover:text-white hover:bg-white/5'
+                      }`}
+                      style={{
+                        backgroundColor: active ? 'var(--brand-secondary)' : undefined,
+                        transition: 'background-color 1.5s ease, color 200ms ease',
+                      }}
+                    >
+                      <Icon className="w-5 h-5 shrink-0" />
+                      <span className="flex-1 truncate">{label}</span>
+                      {badge > 0 && (
+                        <span
+                          className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold bg-red-500 text-white"
+                          aria-label={`${badge} neue ${label}`}
+                        >
+                          {badge > 99 ? '99+' : badge}
+                        </span>
+                      )}
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
         <div className="mt-auto px-3 py-3 border-t border-white/10 space-y-2">
