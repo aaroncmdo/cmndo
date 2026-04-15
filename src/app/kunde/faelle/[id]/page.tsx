@@ -112,7 +112,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl md:max-w-none mx-auto space-y-5">
         {/* Header */}
         <div>
-          <Link href="/kunde" className="text-xs text-gray-400 hover:text-[#4573A2] mb-2 inline-block">&larr; Meine Faelle</Link>
+          <Link href="/kunde" className="text-xs text-gray-400 hover:text-[#4573A2] mb-2 inline-block">&larr; Meine Fälle</Link>
           <h1 className="text-lg font-bold text-[#0D1B3E]">
             {kennzeichen || fall.fall_nummer || 'Schadensfall'}{fahrzeug ? ` — ${fahrzeug}` : ''}
           </h1>
@@ -161,22 +161,34 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
               <p className="text-sm font-semibold text-amber-900">Versicherung hat gekürzt</p>
             </div>
             <div className="grid grid-cols-2 gap-3 text-xs">
-              {(fall as Record<string, unknown>).kuerzungs_betrag != null && (
-                <div>
-                  <p className="text-amber-700">Kürzungsbetrag</p>
-                  <p className="text-amber-900 font-semibold">
-                    {Number((fall as Record<string, unknown>).kuerzungs_betrag).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
-                  </p>
-                </div>
-              )}
-              {(fall as Record<string, unknown>).regulierung_betrag != null && (
-                <div>
-                  <p className="text-amber-700">Teilregulierung</p>
-                  <p className="text-amber-900 font-semibold">
-                    {Number((fall as Record<string, unknown>).regulierung_betrag).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
-                  </p>
-                </div>
-              )}
+              {/* Postgres liefert NUMERIC als string → erst parsen, dann auf > 0 prüfen
+                  damit 0-Werte (wenig aussagekräftig) nicht als „0,00 EUR" angezeigt werden */}
+              {(() => {
+                const raw = (fall as Record<string, unknown>).kuerzungs_betrag
+                const n = raw == null ? null : Number(raw)
+                if (n == null || Number.isNaN(n) || n <= 0) return null
+                return (
+                  <div>
+                    <p className="text-amber-700">Kürzungsbetrag</p>
+                    <p className="text-amber-900 font-semibold">
+                      {n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
+                    </p>
+                  </div>
+                )
+              })()}
+              {(() => {
+                const raw = (fall as Record<string, unknown>).regulierung_betrag
+                const n = raw == null ? null : Number(raw)
+                if (n == null || Number.isNaN(n) || n <= 0) return null
+                return (
+                  <div>
+                    <p className="text-amber-700">Teilregulierung</p>
+                    <p className="text-amber-900 font-semibold">
+                      {n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
+                    </p>
+                  </div>
+                )
+              })()}
             </div>
             {typeof (fall as Record<string, unknown>).vs_kuerzung_grund === 'string' &&
               ((fall as Record<string, unknown>).vs_kuerzung_grund as string) && (
@@ -271,7 +283,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             <ScenarioStepper phasen={phasen} progress={progress} />
             {szenario === 'ruegefall' && (
               <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                <p className="text-xs text-amber-700 font-medium">Die Versicherung hat Einwaende erhoben. Unsere Partnerkanzlei kuemmert sich darum.</p>
+                <p className="text-xs text-amber-700 font-medium">Die Versicherung hat Einwände erhoben. Unsere Partnerkanzlei kümmert sich darum.</p>
               </div>
             )}
           </div>

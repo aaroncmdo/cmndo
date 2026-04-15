@@ -17,11 +17,17 @@ export const FALL_STATUS_TRANSITIONS: Record<string, string[]> = {
   'filmcheck': ['kanzlei-uebergeben', 'gutachten-eingegangen', 'storniert'],
   'qc-pruefung': ['kanzlei-uebergeben', 'gutachten-eingegangen', 'storniert'],
   'kanzlei-uebergeben': ['anschlussschreiben', 'storniert'],
-  'anschlussschreiben': ['regulierung-laeuft', 'nachbesichtigung-laeuft', 'vs-abgelehnt', 'regulierung', 'storniert'],
+  // AAR-167 Fix: 'klage' als zulässiges Ziel aufgenommen, nachdem die Kanzlei
+  // den Fall gerichtlich weiterführt. 'vs-kuerzt' fehlte bisher komplett —
+  // Webhook `vs_kuerzt` schreibt Status direkt, aber uebergebeFallKlage()
+  // ruft transitionFallStatus() und darf ab hier abzweigen.
+  'anschlussschreiben': ['regulierung-laeuft', 'nachbesichtigung-laeuft', 'vs-abgelehnt', 'vs-kuerzt', 'regulierung', 'klage', 'storniert'],
   'regulierung': ['zahlung-eingegangen', 'nachbesichtigung-laeuft', 'abgeschlossen', 'storniert'],
-  'regulierung-laeuft': ['zahlung-eingegangen', 'nachbesichtigung-laeuft', 'vs-abgelehnt', 'storniert'],
-  'nachbesichtigung-laeuft': ['regulierung-laeuft', 'vs-abgelehnt', 'storniert'],
-  'vs-abgelehnt': ['storniert'],
+  'regulierung-laeuft': ['zahlung-eingegangen', 'nachbesichtigung-laeuft', 'vs-abgelehnt', 'vs-kuerzt', 'klage', 'storniert'],
+  'vs-kuerzt': ['nachbesichtigung-laeuft', 'regulierung-laeuft', 'vs-abgelehnt', 'klage', 'storniert'],
+  'nachbesichtigung-laeuft': ['regulierung-laeuft', 'vs-abgelehnt', 'klage', 'storniert'],
+  'vs-abgelehnt': ['klage', 'storniert'],
+  'klage': ['abgeschlossen', 'storniert'],
   'zahlung-eingegangen': ['abgeschlossen'],
   'abgeschlossen': [],
   'storniert': [],
@@ -90,6 +96,18 @@ export async function transitionFallStatus(
     update.vs_reaktion_typ = 'abgelehnt'
     update.vs_reaktion_am = now
     if (metadata?.grund) update.vs_ablehnungsgrund = metadata.grund
+  }
+  // AAR-167: Klage-Übergabe markiert den Fall als „geschlossen aus Claimondo-
+  // Sicht" — LexDrive führt weiter. Kein eigener Timestamp — status_changed_at
+  // reicht, geschlossen_grund kommt als Prompt-Input in der Action.
+  if (newStatus === 'klage') {
+    if (metadata?.grund) update.geschlossen_grund = metadata.grund
+  }
+  // AAR-167: VS-Kürzung — analog zu vs-abgelehnt, aber als eigener Reaktions-Typ
+  if (newStatus === 'vs-kuerzt') {
+    update.vs_reaktion_typ = 'gekuerzt'
+    update.vs_reaktion_am = now
+    if (metadata?.grund) update.vs_kuerzung_grund = metadata.grund
   }
 
   const { error: updateErr } = await db

@@ -101,10 +101,13 @@ export function KanzleiEakteSection() {
 }
 
 // ─── 2. Anspruchsschreiben (ab as-vorbereitung) ────────────────────────────
+// DB-Verify (2026-04-15): `as_versendet_am`, `as_forderungsbetrag` und
+// `vs_stufe` existieren NICHT. Echte Spalten: `anschlussschreiben_am`,
+// `as_geforderte_summe`, `vs_eskalationsstufe` (bzw. `vs_timer_stufe`).
 export function AsSection() {
   const { fall } = useFall()
-  const versendetAm = fmtDate(fall.anschlussschreiben_am ?? fall.as_versendet_am)
-  const betrag = (fall.as_forderungsbetrag as number | null) ?? null
+  const versendetAm = fmtDate(fall.anschlussschreiben_am)
+  const betrag = (fall.as_geforderte_summe as number | null) ?? null
   return (
     <Card
       icon={<SendIcon className="w-4 h-4 text-[#4573A2]" />}
@@ -114,7 +117,7 @@ export function AsSection() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Info label="AS versendet am" value={versendetAm} />
         <Info label="Forderungsbetrag (€)" value={betrag} />
-        <Info label="Eskalationsstufe" value={fall.vs_stufe as string | null} />
+        <Info label="Eskalationsstufe" value={fall.vs_eskalationsstufe as string | null} />
       </div>
     </Card>
   )
@@ -337,11 +340,14 @@ export function KlageSection() {
 }
 
 // ─── 8. Auszahlung (Refactoring, ab zahlung-eingegangen) ───────────────────
+// DB-Verify (2026-04-15): `abrechnungsbetrag` existiert NICHT auf faelle —
+// die Kanzlei-Abrechnung lebt via FK `kanzlei_abrechnung_id` in einer eigenen
+// Tabelle. Für die Fallakte reichen zahlung_betrag + regulierung_betrag.
 export function AuszahlungSection() {
   const { fall } = useFall()
   const betrag = fall.zahlung_betrag as number | null
   const eingangAm = fmtDate(fall.zahlung_eingegangen_am)
-  const abrechnungsbetrag = fall.abrechnungsbetrag as number | null
+  const regulierungBetrag = fall.regulierung_betrag as number | null
   return (
     <Card
       icon={<BanknoteIcon className="w-4 h-4 text-green-600" />}
@@ -351,7 +357,7 @@ export function AuszahlungSection() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Info label="Zahlung eingegangen" value={eingangAm} />
         <Info label="Betrag (€)" value={betrag} />
-        <Info label="Abrechnungsbetrag (€)" value={abrechnungsbetrag} />
+        <Info label="Regulierungs-Betrag (€)" value={regulierungBetrag} />
       </div>
     </Card>
   )

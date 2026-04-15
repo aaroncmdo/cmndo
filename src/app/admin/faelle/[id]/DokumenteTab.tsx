@@ -3,12 +3,17 @@
 import { useState, useRef, useTransition } from 'react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
-import { uploadAnschlussschreiben, uploadPflichtdokument } from './actions'
+import {
+  uploadAnschlussschreiben,
+  uploadPflichtdokument,
+  upsertQcCheckliste,
+  qcBestanden,
+  qcNachbesserung,
+} from './actions'
 import { markDokumentNachgereicht } from './actions/dokumente'
-import { upsertQcCheckliste, qcBestanden, qcNachbesserung } from './actions'
 import { useRouter } from 'next/navigation'
 import {
-  FileTextIcon, UploadIcon, CheckCircle2Icon, ClockIcon, AlertCircleIcon,
+  FileTextIcon, UploadIcon, CheckCircle2Icon, ClockIcon,
   DownloadIcon, EyeIcon, SearchIcon, Loader2Icon, FileCheckIcon,
   BellIcon, ClipboardCheckIcon,
 } from 'lucide-react'
@@ -73,14 +78,16 @@ const QC_FIELDS: { key: keyof QcCheckliste; label: string }[] = [
   { key: 'vorschaeden_beruecksichtigt', label: 'Vorschäden berücksichtigt' },
 ]
 
+// DB-Keys bleiben ASCII (CHECK-Constraint auf pflichtdokumente.dokument_typ),
+// UI-Labels nutzen echte Umlaute (Claimondo-Sprachregel).
 const DOK_LABELS: Record<string, string> = {
-  fahrzeugschein: 'Fahrzeugschein', fuehrerschein: 'Fuehrerschein',
+  fahrzeugschein: 'Fahrzeugschein', fuehrerschein: 'Führerschein',
   schadensfotos: 'Schadensfotos (min. 4)', polizeibericht: 'Polizeibericht',
   gegner_daten: 'Gegner-Daten', eigene_versicherung: 'Eigene Versicherung',
   leasingvertrag: 'Leasingvertrag', finanzierungsvertrag: 'Finanzierungsvertrag',
   gewerbenachweis: 'Gewerbenachweis', 'gf_vollmacht': 'GF-Vollmacht',
   halter_vollmacht: 'Halter-Vollmacht', halter_ausweis: 'Halter-Ausweis',
-  aerztliches_attest: 'Aerztliches Attest', krankenhausbericht: 'Krankenhausbericht',
+  aerztliches_attest: 'Ärztliches Attest', krankenhausbericht: 'Krankenhausbericht',
   au_bescheinigung: 'AU-Bescheinigung', anschlussschreiben: 'Anschlussschreiben',
 }
 
@@ -339,7 +346,7 @@ export default function DokumenteTab({
                   ) : (
                     <div className="flex items-center gap-2">
                       <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${cfg.bg} ${cfg.text}`}>
-                        {dok.status === 'hochgeladen' ? 'Hochgeladen' : 'Geprueft'}
+                        {dok.status === 'hochgeladen' ? 'Hochgeladen' : 'Geprüft'}
                       </span>
                       {dok.dokument_url && (
                         <a href={dok.dokument_url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600">
