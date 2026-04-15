@@ -3,6 +3,8 @@
 // Hauptansprechpartner/erster SV-Member. Für Altdaten ohne standort_lat/lng
 // fällt der Lookup noch auf einen SV-Member zurück, bis das Backfill-Script
 // (scripts/backfill-org-isochrones.mjs) gelaufen ist.
+// AAR-130: Isochrone-Polygone werden für alle drei Layer geladen und im
+// KarteHubClient als optionale Overlays angezeigt (Toggle "Einsatzgebiete").
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import KarteHubClient, { type SvMarker, type CommunityMarker, type OrgMarker } from './KarteHubClient'
@@ -18,10 +20,10 @@ export default async function KartePage() {
     .from('profiles').select('rolle').eq('id', user.id).single()
   if (profile?.rolle !== 'admin') redirect('/login?error=Nur+Admins')
 
-  // SVs mit Standort
+  // SVs mit Standort + Isochrone (AAR-130)
   const { data: svRaw } = await supabase
     .from('sachverstaendige')
-    .select('id, paket, standort_lat, standort_lng, ist_aktiv, organisation_id, profiles(vorname, nachname)')
+    .select('id, paket, standort_lat, standort_lng, ist_aktiv, organisation_id, isochrone_polygon, paket_umkreis_km, radius_km, profiles(vorname, nachname)')
     .is('geloescht_am', null)
 
   type SvRow = {
@@ -31,6 +33,9 @@ export default async function KartePage() {
     standort_lng: number | null
     ist_aktiv: boolean
     organisation_id: string | null
+    isochrone_polygon: unknown
+    paket_umkreis_km: number | null
+    radius_km: number | null
     profiles: unknown
   }
   const svRows = (svRaw ?? []) as unknown as SvRow[]
@@ -47,13 +52,16 @@ export default async function KartePage() {
       lat: sv.standort_lat != null ? Number(sv.standort_lat) : null,
       lng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
       istAktiv: sv.ist_aktiv !== false,
+      isochrone: sv.isochrone_polygon as SvMarker['isochrone'] ?? null,
+      einsatzKm: Number(sv.paket_umkreis_km) || Number(sv.radius_km) || null,
     }
   })
 
   // AAR-129: Organisationen mit eigenen Geo-Feldern laden
+  // AAR-130: zusätzlich isochrone_polygon + einsatzgebiet_km für Overlays
   const { data: orgRaw } = await supabase
     .from('organisationen')
-    .select('id, name, typ, community_exklusiv, community_max_faelle_monat, standort_lat, standort_lng, einsatzgebiet_zentrum_lat, einsatzgebiet_zentrum_lng')
+    .select('id, name, typ, community_exklusiv, community_max_faelle_monat, standort_lat, standort_lng, einsatzgebiet_zentrum_lat, einsatzgebiet_zentrum_lng, einsatzgebiet_km, einsatzgebiet_radius_km, isochrone_polygon')
 
   type OrgRow = {
     id: string
@@ -66,6 +74,9 @@ export default async function KartePage() {
     // Legacy-Fallback bis Backfill gelaufen ist
     einsatzgebiet_zentrum_lat: number | null
     einsatzgebiet_zentrum_lng: number | null
+    einsatzgebiet_km: number | null
+    einsatzgebiet_radius_km: number | null
+    isochrone_polygon: unknown
   }
   const orgRows = (orgRaw ?? []) as unknown as OrgRow[]
 
@@ -103,6 +114,8 @@ export default async function KartePage() {
         maxFaelle: o.community_max_faelle_monat,
         lat,
         lng,
+        isochrone: o.isochrone_polygon as CommunityMarker['isochrone'] ?? null,
+        einsatzKm: Number(o.einsatzgebiet_km) || Number(o.einsatzgebiet_radius_km) || null,
       }
     })
 
@@ -116,6 +129,8 @@ export default async function KartePage() {
         typ: o.typ as 'buero' | 'akademie',
         lat,
         lng,
+        isochrone: o.isochrone_polygon as OrgMarker['isochrone'] ?? null,
+        einsatzKm: Number(o.einsatzgebiet_km) || Number(o.einsatzgebiet_radius_km) || null,
       }
     })
 

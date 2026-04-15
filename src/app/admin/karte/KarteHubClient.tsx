@@ -5,13 +5,17 @@
 // Detail-Panel rechts. Communities/Orgs leiten auf ihre vollen Listing-Pages
 // weiter (Deep-Links bleiben erreichbar, Nav-Items sind konsolidiert).
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   CarFrontIcon, ShieldCheckIcon, Building2Icon, UserPlusIcon,
-  XIcon, MapPinIcon, ArrowRightIcon,
+  XIcon, MapPinIcon, ArrowRightIcon, LayersIcon, RefreshCwIcon,
 } from 'lucide-react'
+import { recalculateIsochrone } from './actions'
+
+// AAR-130: GeoJSON-Polygon als optionales Feld auf jedem Marker
+export type GeoPolygon = { type: 'Polygon'; coordinates: number[][][] } | null
 
 export type SvMarker = {
   id: string
@@ -20,6 +24,8 @@ export type SvMarker = {
   lat: number | null
   lng: number | null
   istAktiv: boolean
+  isochrone?: GeoPolygon
+  einsatzKm?: number | null
 }
 
 export type CommunityMarker = {
@@ -29,6 +35,8 @@ export type CommunityMarker = {
   maxFaelle: number | null
   lat: number | null
   lng: number | null
+  isochrone?: GeoPolygon
+  einsatzKm?: number | null
 }
 
 export type OrgMarker = {
@@ -37,6 +45,8 @@ export type OrgMarker = {
   typ: 'buero' | 'akademie'
   lat: number | null
   lng: number | null
+  isochrone?: GeoPolygon
+  einsatzKm?: number | null
 }
 
 // Layer-Farben (AAR-122 Spec)
@@ -88,11 +98,16 @@ export default function KarteHubClient({
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<google.maps.Map | null>(null)
   const markersRef = useRef<google.maps.Marker[]>([])
+  // AAR-130: Polygon-Overlays separat tracken damit sie unabhängig von Markern
+  // gecleant werden können (Toggle "Einsatzgebiete" + verschiedene Layer)
+  const polygonsRef = useRef<google.maps.Polygon[]>([])
   const [mapReady, setMapReady] = useState(false)
 
   const [showSvs, setShowSvs] = useState(true)
   const [showCommunities, setShowCommunities] = useState(true)
   const [showOrgs, setShowOrgs] = useState(true)
+  // AAR-130: Default off — Polygone werden auf Wunsch eingeblendet
+  const [showOverlays, setShowOverlays] = useState(false)
   const [selected, setSelected] = useState<Selected>(null)
 
   // ─── Map init (runs once) ──────────────────────────────────────
@@ -196,6 +211,46 @@ export default function KarteHubClient({
     }
   }, [mapReady, showSvs, showCommunities, showOrgs, svs, communities, organisationen])
 
+  // ─── Polygon-Overlays render (AAR-130) ─────────────────────────
+  // Hover-Verhalten + Layer-Farben + clickable=false damit Marker-Click durchgeht.
+  useEffect(() => {
+    if (!mapRef.current || !mapReady) return
+    const map = mapRef.current
+
+    // Cleanup
+    polygonsRef.current.forEach((p) => {
+      google.maps.event.clearInstanceListeners(p)
+      p.setMap(null)
+    })
+    polygonsRef.current = []
+
+    if (!showOverlays) return
+
+    function addPolygon(geo: GeoPolygon, color: string, layerVisible: boolean) {
+      if (!layerVisible || !geo || !geo.coordinates?.[0]) return
+      // GeoJSON [lng, lat] → Google Maps {lat, lng}
+      const path = geo.coordinates[0].map(([lng, lat]) => ({ lat, lng }))
+      if (path.length < 3) return
+      const polygon = new google.maps.Polygon({
+        paths: path,
+        map,
+        fillColor: color,
+        fillOpacity: 0.12,
+        strokeColor: color,
+        strokeOpacity: 0.6,
+        strokeWeight: 2,
+        clickable: false,
+      })
+      polygon.addListener('mouseover', () => polygon.setOptions({ fillOpacity: 0.25 }))
+      polygon.addListener('mouseout', () => polygon.setOptions({ fillOpacity: 0.12 }))
+      polygonsRef.current.push(polygon)
+    }
+
+    for (const sv of svs) addPolygon(sv.isochrone ?? null, LAYER.sv.fill, showSvs)
+    for (const c of communities) addPolygon(c.isochrone ?? null, LAYER.community.fill, showCommunities)
+    for (const o of organisationen) addPolygon(o.isochrone ?? null, LAYER.org.fill, showOrgs)
+  }, [mapReady, showOverlays, showSvs, showCommunities, showOrgs, svs, communities, organisationen])
+
   if (!apiKey) {
     return (
       <div className="py-8 text-center text-sm text-red-600">
@@ -229,6 +284,14 @@ export default function KarteHubClient({
           label={`Organisationen (${organisationen.filter((o) => o.lat != null).length}/${organisationen.length})`}
           Icon={LAYER.org.icon}
         />
+        {/* AAR-130: Toggle für Isochrone-Overlays */}
+        <FilterChip
+          active={showOverlays}
+          onClick={() => setShowOverlays(!showOverlays)}
+          color="#0D1B3E"
+          label="Einsatzgebiete"
+          Icon={LayersIcon}
+        />
         <div className="flex-1" />
         <button
           type="button"
@@ -245,7 +308,7 @@ export default function KarteHubClient({
 
         {selected && (
           <aside className="w-80 border-l border-gray-200 bg-white overflow-y-auto flex-shrink-0">
-            <DetailPanel selected={selected} onClose={() => setSelected(null)} />
+            <DetailPanel selected={selected} onClose={() => setSelected(null)} onRecalculated={() => router.refresh()} />
           </aside>
         )}
       </div>
@@ -283,7 +346,24 @@ function FilterChip({
   )
 }
 
-function DetailPanel({ selected, onClose }: { selected: NonNullable<Selected>; onClose: () => void }) {
+function DetailPanel({
+  selected,
+  onClose,
+  onRecalculated,
+}: {
+  selected: NonNullable<Selected>
+  onClose: () => void
+  onRecalculated: () => void
+}) {
+  // AAR-130: Einsatzgebiet-Block + Neu-Berechnen-Button für SVs und Orgs/Communities.
+  // Communities/Orgs werden serverseitig als entityType='organisation' behandelt
+  // (sind dieselbe Tabelle).
+  const entityKey = selected.kind
+  const item = selected.item
+  const isochrone = (item as { isochrone?: GeoPolygon }).isochrone ?? null
+  const einsatzKm = (item as { einsatzKm?: number | null }).einsatzKm ?? null
+  const entityType: 'sv' | 'organisation' = entityKey === 'sv' ? 'sv' : 'organisation'
+
   if (selected.kind === 'sv') {
     const sv = selected.item
     return (
@@ -306,6 +386,13 @@ function DetailPanel({ selected, onClose }: { selected: NonNullable<Selected>; o
             <MapPinIcon className="w-3 h-3" /> {sv.lat.toFixed(3)}, {sv.lng.toFixed(3)}
           </p>
         )}
+        <EinsatzGebietBlock
+          entityType={entityType}
+          entityId={sv.id}
+          isochrone={isochrone}
+          einsatzKm={einsatzKm}
+          onRecalculated={onRecalculated}
+        />
         <Link
           href={`/admin/sachverstaendige/${sv.id}`}
           className="text-xs text-[#4573A2] hover:underline flex items-center gap-1"
@@ -333,6 +420,13 @@ function DetailPanel({ selected, onClose }: { selected: NonNullable<Selected>; o
           {c.exklusiv && <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-medium">Exklusiv</span>}
           {c.maxFaelle != null && <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 font-medium">Max {c.maxFaelle}/Monat</span>}
         </div>
+        <EinsatzGebietBlock
+          entityType={entityType}
+          entityId={c.id}
+          isochrone={isochrone}
+          einsatzKm={einsatzKm}
+          onRecalculated={onRecalculated}
+        />
         <Link
           href="/admin/communities"
           className="text-xs text-[#4573A2] hover:underline flex items-center gap-1"
@@ -355,12 +449,79 @@ function DetailPanel({ selected, onClose }: { selected: NonNullable<Selected>; o
           <XIcon className="w-4 h-4" />
         </button>
       </div>
+      <EinsatzGebietBlock
+        entityType={entityType}
+        entityId={o.id}
+        isochrone={isochrone}
+        einsatzKm={einsatzKm}
+        onRecalculated={onRecalculated}
+      />
       <Link
         href="/admin/organisationen"
         className="text-xs text-[#4573A2] hover:underline flex items-center gap-1"
       >
         Zur Organisationen-Liste <ArrowRightIcon className="w-3 h-3" />
       </Link>
+    </div>
+  )
+}
+
+// AAR-130: Einsatzgebiet-Block mit Neu-Berechnen-Button (HERE API)
+function EinsatzGebietBlock({
+  entityType,
+  entityId,
+  isochrone,
+  einsatzKm,
+  onRecalculated,
+}: {
+  entityType: 'sv' | 'organisation'
+  entityId: string
+  isochrone: GeoPolygon
+  einsatzKm: number | null
+  onRecalculated: () => void
+}) {
+  const [pending, startTransition] = useTransition()
+  const [toast, setToast] = useState<string | null>(null)
+  const pointCount = isochrone?.coordinates?.[0]?.length ?? 0
+
+  function handleRecalc() {
+    startTransition(async () => {
+      const r = await recalculateIsochrone(entityType, entityId)
+      if (r.success) {
+        setToast(`${r.pointCount ?? '?'} Punkte gespeichert`)
+        onRecalculated()
+      } else {
+        setToast(r.error ?? 'Fehler')
+      }
+      setTimeout(() => setToast(null), 4000)
+    })
+  }
+
+  return (
+    <div className="border-t border-gray-100 pt-3 space-y-2">
+      <p className="text-[10px] uppercase text-gray-400 flex items-center gap-1">
+        <LayersIcon className="w-3 h-3" /> Einsatzgebiet
+      </p>
+      <div className="text-xs text-gray-600 space-y-0.5">
+        <p>{einsatzKm != null ? `${einsatzKm} km Radius` : 'Kein Radius gesetzt'}</p>
+        <p className="text-gray-400">
+          {pointCount > 0 ? `Polygon mit ${pointCount} Punkten` : 'Kein Polygon vorhanden'}
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={handleRecalc}
+        disabled={pending}
+        className="w-full text-xs font-medium px-3 py-1.5 rounded-lg border border-[#4573A2] text-[#4573A2] hover:bg-[#4573A2] hover:text-white transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+      >
+        <RefreshCwIcon className={`w-3 h-3 ${pending ? 'animate-spin' : ''}`} />
+        {pending ? 'Berechne...' : 'Neu berechnen'}
+      </button>
+      {toast && (
+        <p className={`text-[10px] ${toast.includes('Punkte') ? 'text-emerald-700' : 'text-red-700'}`}>
+          {toast}
+        </p>
+      )}
     </div>
   )
 }

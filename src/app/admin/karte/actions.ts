@@ -203,3 +203,83 @@ export async function deleteGutachter(svId: string): Promise<{ success: boolean;
     return { success: false, error: String(err) }
   }
 }
+
+// AAR-130: Isochrone für SV oder Organisation neu berechnen via HERE API.
+// Wird vom Detail-Panel im KarteHubClient als "Neu berechnen"-Button getriggert.
+// Nutzt die zentrale calculateIsochrone (AAR-132 — HERE) und schreibt das
+// resultierende GeoJSON-Polygon zurück in die jeweilige Tabelle.
+export async function recalculateIsochrone(
+  entityType: 'sv' | 'organisation',
+  entityId: string,
+): Promise<{ success: boolean; pointCount?: number; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const { data: profile } = await supabase
+    .from('profiles').select('rolle').eq('id', user.id).single()
+  if (profile?.rolle !== 'admin') return { success: false, error: 'Nur Admins' }
+
+  const adminDb = createAdminClient()
+  const selectCols = entityType === 'sv'
+    ? 'standort_lat, standort_lng, paket_umkreis_km, radius_km'
+    : 'standort_lat, standort_lng, einsatzgebiet_km, einsatzgebiet_radius_km'
+  const table = entityType === 'sv' ? 'sachverstaendige' : 'organisationen'
+
+  const { data: row, error: loadErr } = await adminDb
+    .from(table)
+    .select(selectCols)
+    .eq('id', entityId)
+    .maybeSingle()
+
+  if (loadErr || !row) {
+    return { success: false, error: loadErr?.message ?? 'Entität nicht gefunden' }
+  }
+
+  const r = row as unknown as Record<string, number | null>
+  const lat = r.standort_lat
+  const lng = r.standort_lng
+  const radiusCandidates = entityType === 'sv'
+    ? [r.paket_umkreis_km, r.radius_km]
+    : [r.einsatzgebiet_km, r.einsatzgebiet_radius_km]
+  const radiusKm = radiusCandidates.find((v) => v != null && Number(v) > 0) ?? null
+
+  if (lat == null || lng == null) {
+    return { success: false, error: 'Keine Koordinaten gesetzt — Adresse erst pflegen.' }
+  }
+  if (!radiusKm || radiusKm <= 0) {
+    return { success: false, error: 'Kein Einsatzradius gesetzt.' }
+  }
+
+  try {
+    const { calculateIsochrone } = await import('@/lib/isochrone/calculate-isochrone')
+    const points = await calculateIsochrone(Number(lat), Number(lng), Number(radiusKm))
+    if (points.length < 3) {
+      return { success: false, error: 'HERE API lieferte weniger als 3 Punkte.' }
+    }
+    // GeoJSON [lng, lat] mit geschlossenem Ring
+    const ring = points.map((p) => [p.lng, p.lat])
+    const first = ring[0]
+    const last = ring[ring.length - 1]
+    if (first[0] !== last[0] || first[1] !== last[1]) ring.push([first[0], first[1]])
+    const polygon = { type: 'Polygon' as const, coordinates: [ring] }
+
+    const { error: upErr } = await adminDb
+      .from(table)
+      .update({ isochrone_polygon: polygon })
+      .eq('id', entityId)
+
+    if (upErr) return { success: false, error: upErr.message }
+
+    revalidatePath('/admin/karte')
+    if (entityType === 'sv') revalidatePath('/admin/sachverstaendige')
+    if (entityType === 'organisation') {
+      revalidatePath('/admin/organisationen')
+      revalidatePath('/admin/communities')
+    }
+    return { success: true, pointCount: points.length }
+  } catch (err) {
+    console.error('[recalculateIsochrone] HERE-Fehler:', err)
+    return { success: false, error: err instanceof Error ? err.message : 'Unbekannter Fehler' }
+  }
+}
