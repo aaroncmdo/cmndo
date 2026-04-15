@@ -296,9 +296,14 @@ export async function saveHardGate(
     updated_at: new Date().toISOString(),
   }
 
-  // AAR-124 Business-Rule: polizei_vor_ort=true → polizeibericht_pflicht=true
+  // AAR-124 Business-Rule (revalidiert): polizei_vor_ort=true ⟹ polizeibericht_pflicht=true.
+  // polizei_vor_ort=false ⟹ polizeibericht_pflicht=false UND aktenzeichen löschen,
+  // sonst bleiben Stale-Daten in der DB wenn der Dispatcher die Checkbox zurücksetzt.
   if (data.polizei_vor_ort === true) {
     updates.polizeibericht_pflicht = true
+  } else if (data.polizei_vor_ort === false) {
+    updates.polizeibericht_pflicht = false
+    updates.polizei_aktenzeichen = null
   } else if (data.polizeibericht_pflicht !== undefined) {
     updates.polizeibericht_pflicht = data.polizeibericht_pflicht
   }

@@ -357,12 +357,11 @@ function DetailPanel({
 }) {
   // AAR-130: Einsatzgebiet-Block + Neu-Berechnen-Button für SVs und Orgs/Communities.
   // Communities/Orgs werden serverseitig als entityType='organisation' behandelt
-  // (sind dieselbe Tabelle).
-  const entityKey = selected.kind
-  const item = selected.item
-  const isochrone = (item as { isochrone?: GeoPolygon }).isochrone ?? null
-  const einsatzKm = (item as { einsatzKm?: number | null }).einsatzKm ?? null
-  const entityType: 'sv' | 'organisation' = entityKey === 'sv' ? 'sv' : 'organisation'
+  // (sind dieselbe Tabelle). isochrone/einsatzKm leben bei allen 3 Marker-Typen mit
+  // gleichem Field-Namen — daher hier shared destructure.
+  const isochrone = (selected.item as { isochrone?: GeoPolygon }).isochrone ?? null
+  const einsatzKm = (selected.item as { einsatzKm?: number | null }).einsatzKm ?? null
+  const entityType: 'sv' | 'organisation' = selected.kind === 'sv' ? 'sv' : 'organisation'
 
   if (selected.kind === 'sv') {
     const sv = selected.item
@@ -387,10 +386,12 @@ function DetailPanel({
           </p>
         )}
         <EinsatzGebietBlock
+          key={sv.id}
           entityType={entityType}
           entityId={sv.id}
           isochrone={isochrone}
           einsatzKm={einsatzKm}
+          hasCoords={sv.lat != null && sv.lng != null}
           onRecalculated={onRecalculated}
         />
         <Link
@@ -421,10 +422,12 @@ function DetailPanel({
           {c.maxFaelle != null && <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 font-medium">Max {c.maxFaelle}/Monat</span>}
         </div>
         <EinsatzGebietBlock
+          key={c.id}
           entityType={entityType}
           entityId={c.id}
           isochrone={isochrone}
           einsatzKm={einsatzKm}
+          hasCoords={c.lat != null && c.lng != null}
           onRecalculated={onRecalculated}
         />
         <Link
@@ -450,10 +453,12 @@ function DetailPanel({
         </button>
       </div>
       <EinsatzGebietBlock
+        key={o.id}
         entityType={entityType}
         entityId={o.id}
         isochrone={isochrone}
         einsatzKm={einsatzKm}
+        hasCoords={o.lat != null && o.lng != null}
         onRecalculated={onRecalculated}
       />
       <Link
@@ -472,23 +477,37 @@ function EinsatzGebietBlock({
   entityId,
   isochrone,
   einsatzKm,
+  hasCoords,
   onRecalculated,
 }: {
   entityType: 'sv' | 'organisation'
   entityId: string
   isochrone: GeoPolygon
   einsatzKm: number | null
+  hasCoords: boolean
   onRecalculated: () => void
 }) {
   const [pending, startTransition] = useTransition()
   const [toast, setToast] = useState<string | null>(null)
-  const pointCount = isochrone?.coordinates?.[0]?.length ?? 0
+  // AAR-130 (revalidiert): pointCount lokal mirrorn — nach Recalc zeigen wir
+  // den neuen Wert an obwohl router.refresh() den selected-State im Parent nicht ändert.
+  const initialPointCount = isochrone?.coordinates?.[0]?.length ?? 0
+  const [pointCount, setPointCount] = useState(initialPointCount)
+
+  // Disable wenn keine Koordinaten — HERE braucht lat/lng
+  const disabled = pending || !hasCoords || !einsatzKm || einsatzKm <= 0
+  const disabledReason = !hasCoords
+    ? 'Keine Koordinaten gesetzt'
+    : !einsatzKm || einsatzKm <= 0
+      ? 'Kein Radius gesetzt'
+      : ''
 
   function handleRecalc() {
     startTransition(async () => {
       const r = await recalculateIsochrone(entityType, entityId)
       if (r.success) {
         setToast(`${r.pointCount ?? '?'} Punkte gespeichert`)
+        if (r.pointCount) setPointCount(r.pointCount)
         onRecalculated()
       } else {
         setToast(r.error ?? 'Fehler')
@@ -511,8 +530,9 @@ function EinsatzGebietBlock({
       <button
         type="button"
         onClick={handleRecalc}
-        disabled={pending}
-        className="w-full text-xs font-medium px-3 py-1.5 rounded-lg border border-[#4573A2] text-[#4573A2] hover:bg-[#4573A2] hover:text-white transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+        disabled={disabled}
+        title={disabled && !pending ? disabledReason : ''}
+        className="w-full text-xs font-medium px-3 py-1.5 rounded-lg border border-[#4573A2] text-[#4573A2] hover:bg-[#4573A2] hover:text-white transition-colors disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-[#4573A2] flex items-center justify-center gap-1.5"
       >
         <RefreshCwIcon className={`w-3 h-3 ${pending ? 'animate-spin' : ''}`} />
         {pending ? 'Berechne...' : 'Neu berechnen'}

@@ -254,8 +254,10 @@ export default function Schritt0HardGate({ lead }: { lead: Lead }) {
               setDraft((d) => ({
                 ...d,
                 polizei_vor_ort: e.target.checked,
-                // Wenn Polizei vor Ort war → Bericht ist Pflicht
-                polizeibericht_pflicht: e.target.checked ? true : d.polizeibericht_pflicht,
+                // Server-Action ist die Authority (siehe saveHardGate), aber UI-Konsistenz hier:
+                // checked → pflicht=true, unchecked → pflicht+aktenzeichen löschen
+                polizeibericht_pflicht: e.target.checked ? true : false,
+                polizei_aktenzeichen: e.target.checked ? d.polizei_aktenzeichen : '',
               }))
             }
             className="w-4 h-4"
