@@ -99,15 +99,44 @@ export default function OnboardingWizard({
   const currentStep = STEPS[stepIndex]
   const progress = Math.round(((stepIndex + 1) / STEPS.length) * 100)
 
+  // AAR-166: ZB1-OCR-Ergebnis pro Dokument anzeigen (derzeit nur fahrzeugschein)
+  const [zb1Result, setZb1Result] = useState<{
+    extracted: Record<string, string | null>
+    message: string
+    fieldsFound: number
+  } | null>(null)
+
   function handleFileUpload(dokId: string, file: File) {
     if (!fall?.id) return
     setUploadingId(dokId)
+    const doc = pflichtDocs.find((d) => d.id === dokId)
+    const istFahrzeugschein = doc?.dokument_typ === 'fahrzeugschein'
     const reader = new FileReader()
     reader.onload = () => {
       const base64 = typeof reader.result === 'string' ? reader.result : ''
       startTransition(async () => {
         const res = await uploadPflichtdokument(dokId, fall.id, base64, file.name, file.type)
-        if (res.success) setUploadedIds(prev => new Set(prev).add(dokId))
+        if (res.success) setUploadedIds((prev) => new Set(prev).add(dokId))
+        // AAR-166: wenn ZB1 → OCR triggern und Ergebnis inline anzeigen
+        if (res.success && istFahrzeugschein) {
+          setZb1Result(null)
+          try {
+            const ocr = await fetch('/api/ocr-fahrzeugschein', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ fall_id: fall.id, image_base64: base64 }),
+            }).then((r) => r.json())
+            if (ocr?.success && ocr.extracted) {
+              setZb1Result({
+                extracted: ocr.extracted,
+                message: ocr.message ?? 'Fahrzeugschein gelesen',
+                fieldsFound: ocr.fields_found ?? 0,
+              })
+            }
+          } catch (err) {
+            console.warn('[Onboarding ZB1-OCR]', err)
+          }
+        }
         setUploadingId(null)
       })
     }
@@ -273,6 +302,40 @@ export default function OnboardingWizard({
                     )
                   })}
                 </div>
+                {/* AAR-166: ZB1-OCR-Ergebnis inline anzeigen nach Fahrzeugschein-Upload */}
+                {zb1Result && (
+                  <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                    <div className="flex items-center gap-2">
+                      <SparklesIcon className="w-4 h-4 text-emerald-600" />
+                      <p className="text-sm font-semibold text-emerald-900">
+                        Fahrzeugschein automatisch ausgelesen
+                      </p>
+                    </div>
+                    <p className="text-[11px] text-emerald-800 mt-1">
+                      {zb1Result.fieldsFound} Felder erkannt
+                    </p>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
+                      {zb1Result.extracted.kennzeichen && (
+                        <div><span className="text-emerald-700 block">Kennzeichen</span><span className="font-medium text-gray-900">{zb1Result.extracted.kennzeichen}</span></div>
+                      )}
+                      {zb1Result.extracted.fin_vin && (
+                        <div><span className="text-emerald-700 block">FIN</span><span className="font-mono font-medium text-gray-900">{zb1Result.extracted.fin_vin}</span></div>
+                      )}
+                      {zb1Result.extracted.fahrzeug_hersteller && (
+                        <div><span className="text-emerald-700 block">Marke</span><span className="font-medium text-gray-900">{zb1Result.extracted.fahrzeug_hersteller}</span></div>
+                      )}
+                      {zb1Result.extracted.fahrzeug_modell && (
+                        <div><span className="text-emerald-700 block">Modell</span><span className="font-medium text-gray-900">{zb1Result.extracted.fahrzeug_modell}</span></div>
+                      )}
+                      {zb1Result.extracted.halter_nachname && (
+                        <div className="col-span-2"><span className="text-emerald-700 block">Halter</span><span className="font-medium text-gray-900">{zb1Result.extracted.halter_vorname} {zb1Result.extracted.halter_nachname}</span></div>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-emerald-700 mt-3 italic">
+                      Daten wurden gespeichert. Falsche Werte? Einfach über die Betreuung melden.
+                    </p>
+                  </div>
+                )}
                 {pflichtBlocked.length > 0 && (
                   <p className="mt-4 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg p-2">
                     Sie koennen jetzt fortfahren — fehlende Pflicht-Dokumente ({pflichtBlocked.length}) koennen Sie im Dashboard nachreichen.

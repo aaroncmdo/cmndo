@@ -104,6 +104,13 @@ export default function FallDetailClient({
   const [success, setSuccess] = useState<string | null>(null)
   const [finInput, setFinInput] = useState('')
   const [finSaving, setFinSaving] = useState(false)
+  // AAR-166: ZB1-Foto-vor-Ort + OCR
+  const [zb1Uploading, setZb1Uploading] = useState(false)
+  const [zb1Result, setZb1Result] = useState<{
+    extracted: Record<string, string | null>
+    message: string
+    fieldsFound: number
+  } | null>(null)
   const [chatInput, setChatInput] = useState('')
   const [chatSending, setChatSending] = useState(false)
   const [dateiUploading, setDateiUploading] = useState(false)
@@ -194,6 +201,46 @@ export default function FallDetailClient({
       setError(err instanceof Error ? err.message : 'Nachricht konnte nicht gesendet werden')
     } finally {
       setChatSending(false)
+    }
+  }
+
+  // AAR-166: SV nimmt ZB1-Foto vor Ort auf — Base64 an /api/ocr-fahrzeugschein
+  async function handleZb1Foto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setError(null)
+    setSuccess(null)
+    setZb1Result(null)
+    setZb1Uploading(true)
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '')
+        reader.onerror = () => reject(reader.error)
+        reader.readAsDataURL(file)
+      })
+      const resp = await fetch('/api/ocr-fahrzeugschein', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fall_id: fallId, image_base64: base64 }),
+      })
+      const json = await resp.json()
+      if (json?.success && json.extracted) {
+        setZb1Result({
+          extracted: json.extracted,
+          message: json.message ?? 'Fahrzeugschein gelesen',
+          fieldsFound: json.fields_found ?? 0,
+        })
+        setSuccess('ZB1 erfolgreich ausgelesen')
+        router.refresh()
+      } else {
+        setError(json?.error ?? json?.message ?? 'OCR fehlgeschlagen')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'ZB1-Upload fehlgeschlagen')
+    } finally {
+      setZb1Uploading(false)
+      e.target.value = ''
     }
   }
 
@@ -486,6 +533,44 @@ export default function FallDetailClient({
         {/* Tab: Dokumente */}
         {tab === 'dokumente' && (
           <div className="space-y-5">
+            {/* AAR-166: ZB1-Foto vor Ort aufnehmen (SV macht Foto wenn Kunde
+                nicht nachgereicht hat) — Base64 → /api/ocr-fahrzeugschein,
+                Halter + FIN + Kennzeichen werden direkt auf faelle geschrieben. */}
+            <div className="bg-blue-50/50 border border-blue-200 rounded-xl p-4">
+              <h3 className="text-sm font-semibold text-blue-900 mb-1 flex items-center gap-2">
+                <UploadIcon className="w-4 h-4" /> ZB1-Foto vor Ort
+              </h3>
+              <p className="text-xs text-blue-700/80 mb-3">
+                Falls der Kunde den Fahrzeugschein nicht hochgeladen hat —
+                Foto aufnehmen, OCR extrahiert Halter + FIN + Kennzeichen automatisch.
+              </p>
+              <label className="inline-flex items-center gap-2 bg-[#4573A2] hover:bg-[#0D1B3E] text-white text-sm font-medium py-2 px-4 rounded-lg cursor-pointer transition-colors">
+                <UploadIcon className="w-4 h-4" />
+                {zb1Uploading ? 'Wird ausgewertet...' : 'ZB1-Foto aufnehmen / hochladen'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  disabled={zb1Uploading}
+                  onChange={handleZb1Foto}
+                />
+              </label>
+              {zb1Result && (
+                <div className="mt-3 rounded-lg bg-white border border-emerald-200 p-3">
+                  <p className="text-xs font-semibold text-emerald-800 mb-2">
+                    {zb1Result.fieldsFound} Felder erkannt
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    {zb1Result.extracted.kennzeichen && (<div><span className="text-gray-500 block">KZ</span><span className="font-medium text-gray-900">{zb1Result.extracted.kennzeichen}</span></div>)}
+                    {zb1Result.extracted.fin_vin && (<div><span className="text-gray-500 block">FIN</span><span className="font-mono font-medium text-gray-900">{zb1Result.extracted.fin_vin}</span></div>)}
+                    {zb1Result.extracted.fahrzeug_hersteller && (<div><span className="text-gray-500 block">Marke</span><span className="font-medium text-gray-900">{zb1Result.extracted.fahrzeug_hersteller}</span></div>)}
+                    {zb1Result.extracted.fahrzeug_modell && (<div><span className="text-gray-500 block">Modell</span><span className="font-medium text-gray-900">{zb1Result.extracted.fahrzeug_modell}</span></div>)}
+                    {zb1Result.extracted.halter_nachname && (<div className="col-span-2"><span className="text-gray-500 block">Halter</span><span className="font-medium text-gray-900">{zb1Result.extracted.halter_vorname} {zb1Result.extracted.halter_nachname}</span></div>)}
+                  </div>
+                </div>
+              )}
+            </div>
             {/* Missing docs as red cards */}
             {missingDocs.length > 0 && (
               <div>
