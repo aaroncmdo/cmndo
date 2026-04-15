@@ -192,6 +192,50 @@ export async function acceptGegenvorschlag(
     erstellt_von: user.id,
   }).then(() => {}, () => {})
 
+  // AAR-202: T4 termin_bestaetigt an Kunden senden damit der die Bestätigung
+  // per WA bekommt. Parallele Logik zu AAR-193 (T4 nach SA-Unterschrift).
+  // Non-blocking — bei Fehler bleibt der Termin trotzdem bestätigt.
+  try {
+    const leadIdForContact = termin.lead_id
+    if (leadIdForContact) {
+      const { data: leadData } = await supabase
+        .from('leads')
+        .select('telefon, vorname')
+        .eq('id', leadIdForContact)
+        .single()
+      if (leadData?.telefon) {
+        const slotStart = new Date(slot.start)
+        const datumUhrzeit = `${slotStart.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} um ${slotStart.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`
+
+        // SV-Name aus Termin nachladen (wenn Typ-Relations unterstützt)
+        let svName = 'Ihrem Gutachter'
+        const { data: svRow } = await supabase
+          .from('gutachter_termine')
+          .select('sachverstaendige(profiles(vorname, nachname))')
+          .eq('id', terminId)
+          .single()
+        const svRel = (svRow as { sachverstaendige: unknown } | null)?.sachverstaendige
+        const sv = (Array.isArray(svRel) ? svRel[0] : svRel) as { profiles: unknown } | null
+        const profileRel = sv?.profiles
+        const profile = (Array.isArray(profileRel) ? profileRel[0] : profileRel) as
+          | { vorname: string | null; nachname: string | null }
+          | null
+        const zusammen = `${profile?.vorname ?? ''} ${profile?.nachname ?? ''}`.trim()
+        if (zusammen) svName = zusammen
+
+        const { sendCommunication } = await import('@/lib/communications/send')
+        await sendCommunication('termin_bestaetigt', {
+          telefon: leadData.telefon,
+          '1': leadData.vorname ?? '',
+          '2': svName,
+          '3': datumUhrzeit,
+        })
+      }
+    }
+  } catch (t4Err) {
+    console.warn('[AAR-202] T4 termin_bestaetigt nach Gegenvorschlag fehlgeschlagen:', t4Err)
+  }
+
   if (termin.lead_id) revalidatePath(`/dispatch/leads/${termin.lead_id}`)
   return { success: true }
 }
