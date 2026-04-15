@@ -15,9 +15,10 @@ export default async function GutachterTerminePage() {
   const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
   if (!sv) redirect('/gutachter?error=Kein+SV-Profil')
 
+  // AAR-133: lead_id mitlesen — Pre-FlowLink-Termine haben fall_id=null
   const { data: termine } = await supabase
     .from('gutachter_termine')
-    .select('id, fall_id, start_zeit, end_zeit, status, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, ankunft_zeit, abgelehnt_am, abgelehnt_grund, created_at')
+    .select('id, fall_id, lead_id, start_zeit, end_zeit, status, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, ankunft_zeit, abgelehnt_am, abgelehnt_grund, created_at')
     .eq('sv_id', sv.id)
     .order('start_zeit', { ascending: true })
 
@@ -44,19 +45,42 @@ export default async function GutachterTerminePage() {
     }
   }
 
-  const rows = (termine ?? []).map(t => ({
-    ...t,
-    id: t.id as string,
-    fall_id: (t.fall_id ?? '') as string,
-    fall_nummer: fallMap.get(t.fall_id as string)?.fall_nummer ?? '—',
-    kunde_name: fallMap.get(t.fall_id as string)?.kunde_name ?? '—',
-    start_zeit: t.start_zeit as string,
-    end_zeit: t.end_zeit as string,
-    status: t.status as string,
-    vorgeschlagenes_datum: t.vorgeschlagenes_datum as string | null,
-    gegenvorschlag_von: t.gegenvorschlag_von as string | null,
-    gegenvorschlag_grund: t.gegenvorschlag_grund as string | null,
-  }))
+  // AAR-133: Pre-FlowLink — lead-Daten direkt laden für Termine ohne fall_id
+  const directLeadIds = [...new Set((termine ?? [])
+    .filter(t => !t.fall_id && t.lead_id)
+    .map(t => t.lead_id as string))]
+  const directLeadMap = new Map<string, { vorname: string | null; nachname: string | null }>()
+  if (directLeadIds.length) {
+    const { data: directLeads } = await supabase
+      .from('leads')
+      .select('id, vorname, nachname')
+      .in('id', directLeadIds)
+    for (const l of directLeads ?? []) directLeadMap.set(l.id, l)
+  }
+
+  const rows = (termine ?? []).map(t => {
+    const fId = t.fall_id as string | null
+    const lId = t.lead_id as string | null
+    const fallEntry = fId ? fallMap.get(fId) : undefined
+    const directLead = !fId && lId ? directLeadMap.get(lId) : undefined
+    const istVorreservierung = !fId && !!lId
+    return {
+      ...t,
+      id: t.id as string,
+      fall_id: fId,
+      lead_id: lId,
+      // AAR-133: Referenz-Label und Kunde fallen graceful auf Lead-Daten zurück
+      fall_nummer: fallEntry?.fall_nummer ?? (lId ? `Lead ${lId.slice(0, 8)}` : '—'),
+      kunde_name: fallEntry?.kunde_name ?? (directLead ? [directLead.vorname, directLead.nachname].filter(Boolean).join(' ') || '—' : '—'),
+      istVorreservierung,
+      start_zeit: t.start_zeit as string,
+      end_zeit: t.end_zeit as string,
+      status: t.status as string,
+      vorgeschlagenes_datum: t.vorgeschlagenes_datum as string | null,
+      gegenvorschlag_von: t.gegenvorschlag_von as string | null,
+      gegenvorschlag_grund: t.gegenvorschlag_grund as string | null,
+    }
+  })
 
   return <TermineClient termine={rows} />
 }

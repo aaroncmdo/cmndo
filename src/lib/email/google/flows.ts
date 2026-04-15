@@ -9,6 +9,7 @@ import { SvRechnungEmail, subject as svRechnungSubject } from './templates/SvRec
 import { KanzleiAuftragszusammenfassungEmail, subject as kanzleiAuftragSubject } from './templates/KanzleiAuftragszusammenfassung'
 import { KanzleiAbrechnungRechnungEmail, subject as kanzleiAbrechnungSubject } from './templates/KanzleiAbrechnungRechnung'
 import { MarketingAbrechnungEmail, subject as marketingAbrechnungSubject } from './templates/MarketingAbrechnung'
+import { SvTerminBestaetigungEmail, subject as svTerminBestaetigungSubject } from './templates/SvTerminBestaetigung'
 import { KanzleiMonatsAbrechnungEmail, subject as kanzleiMonatsAbrechnungSubject } from './templates/KanzleiMonatsAbrechnung'
 import { WillkommenSvEmail, subject as willkommenSvSubject } from './templates/WillkommenSv'
 import { WillkommenSvAnBueroEmail, subject as willkommenSvAnBueroSubject } from './templates/WillkommenSvAnBuero'
@@ -577,4 +578,116 @@ export async function sendKanzleiMonatsAbrechnung(abrechnungId: string): Promise
     email_log_id: logEntry?.id ?? null,
     updated_at: new Date().toISOString(),
   }).eq('id', abrechnungId)
+}
+
+// ─── AAR-133: SV Termin-Bestätigung (auch für Pre-FlowLink-Reservierungen) ──
+
+/**
+ * Schickt dem SV eine Email mit den Termindaten — funktioniert sowohl für
+ * Fall-Termine (klassisch nach SA-Unterschrift) als auch für Pre-FlowLink-
+ * Reservierungen via AAR-115 (gutachter_termine.lead_id gesetzt, fall_id null).
+ *
+ * Bei Pre-FlowLink: rendert das Template mit istVorreservierung=true und
+ * weist den SV explizit darauf hin dass der Kunde noch nicht unterschrieben hat.
+ */
+export async function sendSvTerminBestaetigung(svId: string, terminId: string): Promise<void> {
+  const db = admin()
+
+  // SV → profile (Email + Vorname)
+  const { data: sv } = await db
+    .from('sachverstaendige')
+    .select('profile_id')
+    .eq('id', svId)
+    .single()
+  if (!sv?.profile_id) {
+    console.warn(`[AAR-133] sendSvTerminBestaetigung: kein profile_id für SV ${svId}`)
+    return
+  }
+  const { data: svProfile } = await db
+    .from('profiles')
+    .select('email, vorname')
+    .eq('id', sv.profile_id)
+    .single()
+  if (!svProfile?.email) {
+    console.warn(`[AAR-133] sendSvTerminBestaetigung: keine Email für SV ${svId}`)
+    return
+  }
+
+  // Termin laden
+  const { data: termin } = await db
+    .from('gutachter_termine')
+    .select('id, fall_id, lead_id, start_zeit, end_zeit, ablehnen_token')
+    .eq('id', terminId)
+    .single()
+  if (!termin) {
+    console.warn(`[AAR-133] sendSvTerminBestaetigung: Termin ${terminId} nicht gefunden`)
+    return
+  }
+
+  const tDate = new Date(termin.start_zeit)
+  const datum = tDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
+  const uhrzeit = tDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+
+  let kundenName = '—'
+  let adresse = '—'
+  let referenz = `Termin ${terminId.slice(0, 8)}`
+  let istVorreservierung = false
+
+  if (termin.fall_id) {
+    const { data: fall } = await db
+      .from('faelle')
+      .select('id, fall_nummer, lead_id, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort')
+      .eq('id', termin.fall_id)
+      .single()
+    if (fall) {
+      referenz = fall.fall_nummer ?? `Fall ${fall.id.slice(0, 8)}`
+      adresse =
+        fall.besichtigungsort_adresse ??
+        [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') ??
+        '—'
+      if (fall.lead_id) {
+        const { data: lead } = await db
+          .from('leads')
+          .select('vorname, nachname')
+          .eq('id', fall.lead_id)
+          .single()
+        if (lead) kundenName = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
+      }
+    }
+  } else if (termin.lead_id) {
+    istVorreservierung = true
+    const { data: lead } = await db
+      .from('leads')
+      .select('id, vorname, nachname, kunde_strasse, kunde_plz, unfallort')
+      .eq('id', termin.lead_id)
+      .single()
+    if (lead) {
+      kundenName = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
+      adresse = lead.unfallort ?? [lead.kunde_strasse, lead.kunde_plz].filter(Boolean).join(', ') ?? '—'
+      referenz = `Lead ${lead.id.slice(0, 8)}`
+    }
+  }
+
+  const props = {
+    svVorname: svProfile.vorname ?? 'Sachverständiger',
+    fallNummer: referenz,
+    terminDatum: datum,
+    terminUhrzeit: uhrzeit,
+    kundenName,
+    adresse,
+    istVorreservierung,
+    ablehnenUrl: termin.ablehnen_token
+      ? `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/sv/termin/${termin.ablehnen_token}`
+      : null,
+  }
+
+  const html = await render(SvTerminBestaetigungEmail(props))
+  await sendEmail({
+    to: svProfile.email,
+    subject: svTerminBestaetigungSubject(props),
+    html,
+    fallId: termin.fall_id ?? null,
+    empfaengerTyp: 'sv',
+    template: 'sv_termin_bestaetigung',
+  })
 }

@@ -431,7 +431,8 @@ export async function reserveSvTerminForLead(
       status: 'reserviert',
       ablehnen_token_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     })
-    .select('id')
+    // AAR-133 Bug 4: ablehnen_token mitlesen für späteren AAR-134 (Ablehnen-Link)
+    .select('id, ablehnen_token')
     .single()
 
   if (error || !inserted) return { success: false, error: error?.message ?? 'Insert fehlgeschlagen' }
@@ -454,6 +455,14 @@ export async function reserveSvTerminForLead(
     })
   } catch (err) {
     console.warn('[reserveSvTerminForLead] Mitteilung fehlgeschlagen:', err)
+  }
+
+  // AAR-133: Email an SV (non-blocking — Reservierung steht auch wenn Mail failt)
+  try {
+    const { sendSvTerminBestaetigung } = await import('@/lib/email/google/flows')
+    await sendSvTerminBestaetigung(svId, inserted.id)
+  } catch (err) {
+    console.warn('[reserveSvTerminForLead] Email fehlgeschlagen:', err)
   }
 
   revalidatePath(`/dispatch/leads/${leadId}`)

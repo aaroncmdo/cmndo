@@ -8,9 +8,12 @@ import { terminAnnehmen, terminAblehnen, terminGegenvorschlag } from '@/lib/acti
 
 // KFZ-134: Gutachter Termine-Liste mit Akzeptieren/Ablehnen/Gegenvorschlag.
 
+// AAR-133: fall_id kann null sein bei Pre-FlowLink-Reservierungen,
+// dann ist lead_id gesetzt und istVorreservierung=true
 type TerminRow = {
   id: string
-  fall_id: string
+  fall_id: string | null
+  lead_id: string | null
   fall_nummer: string
   kunde_name: string
   start_zeit: string
@@ -19,6 +22,7 @@ type TerminRow = {
   vorgeschlagenes_datum: string | null
   gegenvorschlag_von: string | null
   gegenvorschlag_grund: string | null
+  istVorreservierung: boolean
 }
 
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
@@ -49,24 +53,29 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
   const filtered = filter === 'offen' ? offene : termine
 
   function handleAnnehmen(t: TerminRow) {
+    // AAR-133: Pre-FlowLink-Termine können nicht angenommen werden — der Fall
+    // existiert noch nicht. Bestätigung kommt automatisch nach SA-Unterschrift.
+    if (!t.fall_id) return
     startTransition(async () => {
-      await terminAnnehmen({ source: 'sv_portal', fallId: t.fall_id })
+      await terminAnnehmen({ source: 'sv_portal', fallId: t.fall_id! })
       router.refresh()
     })
   }
 
   function handleAblehnen() {
     if (!modal || modal.type !== 'ablehnen') return
+    if (!modal.termin.fall_id) return // AAR-133: Pre-FlowLink über andere Action (AAR-134)
     startTransition(async () => {
-      await terminAblehnen({ source: 'sv_portal', fallId: modal.termin.fall_id, grund })
+      await terminAblehnen({ source: 'sv_portal', fallId: modal.termin.fall_id!, grund })
       setModal(null); setGrund(''); router.refresh()
     })
   }
 
   function handleGegenvorschlag() {
     if (!modal || modal.type !== 'gegenvorschlag' || !neuesDatum) return
+    if (!modal.termin.fall_id) return // AAR-133: Pre-FlowLink über andere Action (AAR-134)
     startTransition(async () => {
-      await terminGegenvorschlag({ source: 'sv_portal', fallId: modal.termin.fall_id, neuesDatum, grund })
+      await terminGegenvorschlag({ source: 'sv_portal', fallId: modal.termin.fall_id!, neuesDatum, grund })
       setModal(null); setGrund(''); setNeuesDatum(''); router.refresh()
     })
   }
@@ -106,24 +115,35 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
               <div key={t.id} className={`bg-white rounded-2xl border p-5 ${needsAction ? 'border-[#4573A2] ring-1 ring-[#4573A2]/20' : 'border-gray-200'}`}>
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <span className="text-lg font-semibold text-gray-900">
                         {formatDatum(displayDatum)} · {formatZeit(displayDatum)}
                       </span>
                       <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${badge.cls}`}>{badge.label}</span>
-                      {needsAction && <span className="text-[9px] bg-[#4573A2] text-white px-1.5 py-0.5 rounded-full font-medium">Aktion nötig</span>}
+                      {/* AAR-133: Vorreservierung-Badge wenn fall_id null (Pre-FlowLink) */}
+                      {t.istVorreservierung && (
+                        <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full font-medium">
+                          Vorreservierung
+                        </span>
+                      )}
+                      {needsAction && !t.istVorreservierung && <span className="text-[9px] bg-[#4573A2] text-white px-1.5 py-0.5 rounded-full font-medium">Aktion nötig</span>}
                     </div>
                     <p className="text-sm text-gray-700">{t.kunde_name}</p>
                     {t.gegenvorschlag_grund && (
                       <p className="text-xs text-amber-600 mt-1">Grund: {t.gegenvorschlag_grund}</p>
                     )}
                   </div>
-                  <Link href={`/gutachter/fall/${t.fall_id}`} className="text-xs text-[#4573A2] hover:underline">
+                  {/* AAR-133: Link nur wenn Fall existiert, sonst zur Termin-Detail-Page (zeigt Lead-Daten) */}
+                  <Link
+                    href={t.fall_id ? `/gutachter/fall/${t.fall_id}` : `/gutachter/termine/${t.id}`}
+                    className="text-xs text-[#4573A2] hover:underline"
+                  >
                     {t.fall_nummer}
                   </Link>
                 </div>
 
-                {needsAction && (
+                {/* AAR-133: Aktions-Buttons nur bei Fall-Termin (Pre-FlowLink wartet auf SA) */}
+                {needsAction && !t.istVorreservierung && (
                   <div className="flex gap-2">
                     <button onClick={() => handleAnnehmen(t)} disabled={pending}
                       className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-2.5 text-sm font-semibold transition-colors disabled:opacity-50">
@@ -138,6 +158,11 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
                       <XIcon className="w-3.5 h-3.5" /> Ablehnen
                     </button>
                   </div>
+                )}
+                {t.istVorreservierung && (
+                  <p className="text-xs text-amber-700 italic">
+                    Wartet auf SA-Unterschrift des Kunden. Keine Aktion erforderlich — wird automatisch bestätigt.
+                  </p>
                 )}
               </div>
             )

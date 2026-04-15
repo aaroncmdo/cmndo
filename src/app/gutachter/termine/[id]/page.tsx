@@ -22,9 +22,10 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
 
   const db = (await import('@/lib/supabase/admin')).createAdminClient()
 
+  // AAR-133: lead_id mitlesen — Termin kann pre-FlowLink sein (lead_id ohne fall_id)
   const { data: termin, error: tErr } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, start_zeit, end_zeit, status, navigation_started_at, sv_angekommen_am, durchgefuehrt_am, sv_eta_minuten, sv_unterwegs_seit')
+    .select('id, fall_id, lead_id, sv_id, start_zeit, end_zeit, status, navigation_started_at, sv_angekommen_am, durchgefuehrt_am, sv_eta_minuten, sv_unterwegs_seit')
     .eq('id', id)
     .eq('typ', 'sv_begutachtung')
     .eq('sv_id', sv.id)
@@ -32,14 +33,64 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
 
   if (tErr || !termin) redirect('/gutachter/termine')
 
-  // Fall + Lead laden — AAR-126: polizei_vor_ort + polizei_aktenzeichen mitladen
-  const { data: fall } = await db
-    .from('faelle')
-    .select('id, fall_nummer, lead_id, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, polizei_vor_ort, polizei_aktenzeichen')
-    .eq('id', termin.fall_id)
-    .single()
+  // AAR-133: zwei Code-Pfade — Fall-Termin (klassisch) vs. Pre-FlowLink-Reservierung
+  type FallRow = {
+    id: string
+    fall_nummer: string | null
+    lead_id: string | null
+    besichtigungsort_adresse: string | null
+    schadens_adresse: string | null
+    schadens_plz: string | null
+    schadens_ort: string | null
+    fahrzeug_hersteller: string | null
+    fahrzeug_modell: string | null
+    kennzeichen: string | null
+    polizei_vor_ort: boolean | null
+    polizei_aktenzeichen: string | null
+  }
+  type LeadRow = {
+    vorname: string | null
+    nachname: string | null
+    telefon: string | null
+    email: string | null
+    kunde_strasse?: string | null
+    kunde_plz?: string | null
+    unfallort?: string | null
+    fahrzeug_hersteller?: string | null
+    fahrzeug_modell?: string | null
+    kennzeichen?: string | null
+  }
 
-  // AAR-126: Polizeibericht-Status prüfen
+  let fall: FallRow | null = null
+  let lead: LeadRow | null = null
+  const istVorreservierung = !termin.fall_id && !!termin.lead_id
+
+  if (termin.fall_id) {
+    const { data: f } = await db
+      .from('faelle')
+      .select('id, fall_nummer, lead_id, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, polizei_vor_ort, polizei_aktenzeichen')
+      .eq('id', termin.fall_id)
+      .single()
+    fall = f
+    if (f?.lead_id) {
+      const { data: l } = await db
+        .from('leads')
+        .select('vorname, nachname, telefon, email')
+        .eq('id', f.lead_id)
+        .single()
+      lead = l
+    }
+  } else if (termin.lead_id) {
+    // Pre-FlowLink: nur Lead, kein Fall
+    const { data: l } = await db
+      .from('leads')
+      .select('vorname, nachname, telefon, email, kunde_strasse, kunde_plz, unfallort, fahrzeug_hersteller, fahrzeug_modell, kennzeichen')
+      .eq('id', termin.lead_id)
+      .single()
+    lead = l
+  }
+
+  // AAR-126: Polizeibericht-Status nur prüfen wenn Fall existiert
   let polizeiberichtHochgeladen = false
   if (fall?.polizei_vor_ort === true) {
     const { data: docs } = await db
@@ -51,19 +102,22 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
     polizeiberichtHochgeladen = !!docs?.[0]?.dokument_url
   }
 
-  let lead: { vorname: string | null; nachname: string | null; telefon: string | null; email: string | null } | null = null
-  if (fall?.lead_id) {
-    const { data: l } = await db
-      .from('leads')
-      .select('vorname, nachname, telefon, email')
-      .eq('id', fall.lead_id)
-      .single()
-    lead = l
-  }
+  // Adresse-Fallback-Kette: Fall-Adresse → Lead-Adresse → "—"
+  const adresse =
+    fall?.besichtigungsort_adresse ??
+    (fall ? [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') : null) ??
+    (lead ? lead.unfallort ?? [lead.kunde_strasse, lead.kunde_plz].filter(Boolean).join(', ') : null) ??
+    '—'
 
-  const adresse = fall?.besichtigungsort_adresse
-    ?? [fall?.schadens_adresse, fall?.schadens_plz, fall?.schadens_ort].filter(Boolean).join(', ')
-    ?? '—'
+  // Fahrzeug-Info kann auch vom Lead kommen
+  const fahrzeugHersteller = fall?.fahrzeug_hersteller ?? lead?.fahrzeug_hersteller ?? null
+  const fahrzeugModell = fall?.fahrzeug_modell ?? lead?.fahrzeug_modell ?? null
+  const kennzeichen = fall?.kennzeichen ?? lead?.kennzeichen ?? null
+  const referenzLabel = fall?.fall_nummer
+    ? `Fall ${fall.fall_nummer}`
+    : termin.lead_id
+      ? `Lead ${termin.lead_id.slice(0, 8)}`
+      : id.slice(0, 8)
 
   const datum = new Date(termin.start_zeit).toLocaleDateString('de-DE', {
     weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
@@ -81,7 +135,18 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
       <h1 className="text-xl font-bold text-gray-900">
         {datum} · {uhrzeit}
       </h1>
-      <p className="text-sm text-gray-500 -mt-3">Fall {fall?.fall_nummer ?? id.slice(0, 8)}</p>
+      <p className="text-sm text-gray-500 -mt-3">{referenzLabel}</p>
+
+      {/* AAR-133: Vorreservierung-Badge wenn Pre-FlowLink (kein Fall) */}
+      {istVorreservierung && (
+        <div className="bg-amber-50 border-l-4 border-amber-500 rounded-lg p-3">
+          <p className="text-sm font-semibold text-amber-900">Vorreservierung</p>
+          <p className="text-xs text-amber-700 mt-1">
+            Der Kunde hat die Sicherungsabtretung noch nicht unterschrieben. Bitte warten bis der Termin
+            offiziell bestätigt wird — du erhältst dann eine zweite Mail. Bis dahin: nicht anfahren.
+          </p>
+        </div>
+      )}
 
       {/* Kunden-Info-Card */}
       <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
@@ -116,12 +181,12 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
             <p className="text-xs text-gray-400">Adresse</p>
             <p className="font-medium text-gray-900">{adresse}</p>
           </div>
-          {(fall?.fahrzeug_hersteller || fall?.fahrzeug_modell) && (
+          {(fahrzeugHersteller || fahrzeugModell) && (
             <div>
               <p className="text-xs text-gray-400">Fahrzeug</p>
               <p className="font-medium text-gray-900">
-                {[fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ')}
-                {fall.kennzeichen ? ` · ${fall.kennzeichen}` : ''}
+                {[fahrzeugHersteller, fahrzeugModell].filter(Boolean).join(' ')}
+                {kennzeichen ? ` · ${kennzeichen}` : ''}
               </p>
             </div>
           )}
