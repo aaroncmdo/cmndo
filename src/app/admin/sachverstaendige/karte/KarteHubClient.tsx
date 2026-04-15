@@ -15,6 +15,7 @@ import {
 import { recalculateIsochrone } from './actions'
 import { createClient } from '@/lib/supabase/client'
 import { getSvStatus } from '@/lib/sv-status'
+import NeuSvDrawer from '../NeuSvDrawer'
 
 // AAR-130: GeoJSON-Polygon als optionales Feld auf jedem Marker
 export type GeoPolygon = { type: 'Polygon'; coordinates: number[][][] } | null
@@ -144,6 +145,8 @@ export default function KarteHubClient({
   const [search, setSearch] = useState('')
   const [svFilter, setSvFilter] = useState<SvStatusFilter>('aktive')
   const [visibleTypes, setVisibleTypes] = useState<Set<string>>(new Set(Object.keys(TYP_COLORS)))
+  // AAR-151: NeuSvDrawer (Slide-out) statt Navigation zur alten /neu-Page
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const toggleType = (typ: string) =>
     setVisibleTypes((prev) => {
       const next = new Set(prev)
@@ -459,10 +462,10 @@ export default function KarteHubClient({
         <div className="flex-1" />
         <button
           type="button"
-          onClick={() => router.push('/admin/sachverstaendige/neu')}
+          onClick={() => setDrawerOpen(true)}
           className="px-3 py-1.5 rounded-lg bg-[#4573A2] text-white text-xs font-medium hover:bg-[#0D1B3E] flex items-center gap-1.5"
         >
-          <UserPlusIcon className="w-3.5 h-3.5" /> SV onboarden
+          <UserPlusIcon className="w-3.5 h-3.5" /> + Neuer SV
         </button>
       </div>
 
@@ -479,6 +482,7 @@ export default function KarteHubClient({
           toggleType={toggleType}
           selectedId={selected?.kind === 'sv' ? selected.item.id : null}
           onSelect={panToSv}
+          onOpenDrawer={() => setDrawerOpen(true)}
         />
 
         <div ref={mapContainerRef} className="flex-1 min-h-0" />
@@ -489,6 +493,10 @@ export default function KarteHubClient({
           </aside>
         )}
       </div>
+
+      {/* AAR-151: NeuSvDrawer — Slide-out Onboarding-Wizard.
+          Toolbar-Button oben rechts + Sidebar-Button „+ Neuer SV" triggern das Gleiche. */}
+      <NeuSvDrawer open={drawerOpen} onOpenChange={setDrawerOpen} />
     </div>
   )
 }
@@ -505,6 +513,7 @@ function SvSidebar({
   toggleType,
   selectedId,
   onSelect,
+  onOpenDrawer,
 }: {
   svs: SvMarker[]
   filteredSvs: SvMarker[]
@@ -516,12 +525,24 @@ function SvSidebar({
   toggleType: (typ: string) => void
   selectedId: string | null
   onSelect: (sv: SvMarker) => void
+  onOpenDrawer: () => void
 }) {
   return (
     <aside className="w-72 shrink-0 border-r border-gray-200 bg-[#f8f9fb] flex flex-col overflow-hidden">
-      <div className="px-4 pt-4 pb-2">
-        <h2 className="text-sm font-semibold text-gray-900">Sachverständige</h2>
-        <p className="text-[10px] text-gray-500 mt-0.5">{filteredSvs.length} von {svs.length}</p>
+      <div className="px-4 pt-4 pb-2 flex items-start gap-2">
+        <div className="flex-1">
+          <h2 className="text-sm font-semibold text-gray-900">Sachverständige</h2>
+          <p className="text-[10px] text-gray-500 mt-0.5">{filteredSvs.length} von {svs.length}</p>
+        </div>
+        {/* AAR-151: „+ Neuer SV"-Button prominent in der Sidebar oben rechts */}
+        <button
+          type="button"
+          onClick={onOpenDrawer}
+          className="px-2 py-1 rounded-md bg-[#4573A2] text-white text-[11px] font-medium hover:bg-[#0D1B3E] flex items-center gap-1 shrink-0"
+          title="Neuen SV onboarden"
+        >
+          <UserPlusIcon className="w-3 h-3" /> Neu
+        </button>
       </div>
       {/* Suche */}
       <div className="px-4 pb-2">

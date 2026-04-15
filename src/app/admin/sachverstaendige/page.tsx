@@ -1,61 +1,169 @@
+// AAR-151: /admin/sachverstaendige ist jetzt die integrierte Karten-Ansicht
+// (ONE VIEW). Die Karte-Page wurde aus karte/page.tsx in die Root-Route
+// gemerged. Sidebar, Filter und Onboarding-Drawer leben direkt im
+// KarteHubClient. Die Liste ist nicht mehr eigenständig (SachverstaendigeList-
+// Client wird noch vom Dispatch-Portal genutzt, bleibt daher erhalten).
+// AAR-122 / AAR-129 / AAR-130 / AAR-131 Historie siehe alte karte/page.tsx.
+
 import { createClient } from '@/lib/supabase/server'
-import SachverstaendigeListClient from './SachverstaendigeListClient'
+import { redirect } from 'next/navigation'
+import KarteHubClient, {
+  type SvMarker,
+  type CommunityMarker,
+  type OrgMarker,
+} from './karte/KarteHubClient'
 
-const BASE_SELECT = 'id, profile_id, gebiet_plz, paket, offene_faelle, max_faelle_monat, ist_aktiv, gutachter_typ, qualifikationen_neu, spezifikationen, schadenarten, onboarding_abgeschlossen, anzahlung_status, standort_adresse, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, radius_km, werbebudget_guthaben_netto, organisation_id, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, ablehnungen_30_tage, profiles(vorname, nachname, email, telefon)'
-const EXTENDED_SELECT = BASE_SELECT.replace('organisation_id,', 'organisation_id, deaktiviert_grund, deaktiviert_am, geloescht_am,')
+export const dynamic = 'force-dynamic'
 
-export default async function SachverstaendigePage() {
+export default async function SachverstaendigeHubPage() {
   const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) redirect('/login')
 
-  // Try with extended columns + geloescht_am IS NULL filter; fall back if columns don't exist
-  let svList: Record<string, unknown>[] | null = null
-  const extended = await supabase.from('sachverstaendige').select(EXTENDED_SELECT).is('geloescht_am', null).order('created_at', { ascending: false })
-  if (!extended.error) {
-    svList = extended.data as unknown as Record<string, unknown>[] | null
-  } else {
-    // Columns don't exist yet — load all, no geloescht_am filter possible
-    const base = await supabase.from('sachverstaendige').select(BASE_SELECT).order('created_at', { ascending: false })
-    svList = base.data as Record<string, unknown>[] | null
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('rolle')
+    .eq('id', user.id)
+    .single()
+  if (profile?.rolle !== 'admin') redirect('/login?error=Nur+Admins')
+
+  // SVs mit Standort + Isochrone + Sidebar-Felder (Kontingent, Ablehnungen, Status)
+  const { data: svRaw } = await supabase
+    .from('sachverstaendige')
+    .select(
+      'id, paket, standort_lat, standort_lng, ist_aktiv, organisation_id, isochrone_polygon, paket_umkreis_km, radius_km, paket_radius_km, gutachter_typ, offene_faelle, max_faelle_monat, paket_faelle_genutzt, paket_faelle_gesamt, ablehnungen_30_tage, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, profiles(vorname, nachname)',
+    )
+    .is('geloescht_am', null)
+
+  type SvRow = {
+    id: string
+    paket: string | null
+    standort_lat: number | null
+    standort_lng: number | null
+    ist_aktiv: boolean
+    organisation_id: string | null
+    isochrone_polygon: unknown
+    paket_umkreis_km: number | null
+    radius_km: number | null
+    paket_radius_km: number | null
+    gutachter_typ: string | null
+    offene_faelle: number | null
+    max_faelle_monat: number | null
+    paket_faelle_genutzt: number | null
+    paket_faelle_gesamt: number | null
+    ablehnungen_30_tage: number | null
+    portal_zugang_freigeschaltet: boolean | null
+    vertrag_unterschrieben: boolean | null
+    gesperrt_seit: string | null
+    profiles: unknown
   }
+  const svRows = (svRaw ?? []) as unknown as SvRow[]
 
-  // Map ALL SVs (KarteClient handles filtering by state)
-  const sachverstaendige = (svList ?? []).map((sv) => {
-    const profileRaw = sv.profiles as unknown
-    const profile = (Array.isArray(profileRaw) ? profileRaw[0] : profileRaw) as {
-      vorname: string | null; nachname: string | null; email: string | null; telefon: string | null
-    } | null
+  const svs: SvMarker[] = svRows.map((sv) => {
+    const pRel = sv.profiles
+    const p = (Array.isArray(pRel) ? pRel[0] : pRel) as
+      | { vorname: string | null; nachname: string | null }
+      | null
     return {
-      id: sv.id as string,
-      name: profile ? `${profile.vorname ?? ''} ${profile.nachname ?? ''}`.trim() : 'Unbekannt',
-      email: profile?.email ?? '',
-      telefon: profile?.telefon ?? '',
-      gebietPlz: (sv.gebiet_plz ?? []) as string[],
-      radiusKm: Number(sv.paket_umkreis_km) || Number(sv.radius_km) || 40,
-      paket: sv.paket as string,
+      id: sv.id,
+      name: p ? `${p.vorname ?? ''} ${p.nachname ?? ''}`.trim() : 'Unbekannt',
+      paket: sv.paket,
+      lat: sv.standort_lat != null ? Number(sv.standort_lat) : null,
+      lng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
+      istAktiv: sv.ist_aktiv !== false,
+      isochrone: (sv.isochrone_polygon as SvMarker['isochrone']) ?? null,
+      einsatzKm:
+        Number(sv.paket_umkreis_km) || Number(sv.radius_km) || Number(sv.paket_radius_km) || null,
+      gutachterTyp: sv.gutachter_typ ?? 'kfz-gutachter',
       offeneFaelle: Number(sv.paket_faelle_genutzt) || Number(sv.offene_faelle) || 0,
       maxFaelleMonat: Number(sv.paket_faelle_gesamt) || Number(sv.max_faelle_monat) || 10,
-      standortLat: sv.standort_lat != null ? Number(sv.standort_lat) : null,
-      standortLng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
-      organisationId: sv.organisation_id as string | null,
-      gutachterTyp: (sv.gutachter_typ as string) ?? 'kfz-gutachter',
-      standortAdresse: sv.standort_adresse as string | null,
-      guthaben: Number(sv.werbebudget_guthaben_netto) || 0,
-      // KFZ-154 Cleanup: legacy qualifikationen-Spalte gedroppt
-      qualifikationen: (sv.qualifikationen_neu as string[] | null) ?? [],
-      spezifikationen: (sv.spezifikationen as string[] | null) ?? [],
-      schadenarten: (sv.schadenarten as string[] | null) ?? [],
-      anzahlungStatus: (sv.anzahlung_status as string) ?? 'offen',
-      istAktiv: sv.ist_aktiv !== false,
-      deaktiviertGrund: (sv.deaktiviert_grund as string | null) ?? null,
-      deaktiviertAm: (sv.deaktiviert_am as string | null) ?? null,
-      geloeschtAm: (sv.geloescht_am as string | null) ?? null,
-      // ARCH-1 POLISH Befund 1: Status-Felder fuer Badges
-      portalZugangFreigeschaltet: (sv.portal_zugang_freigeschaltet as boolean | null) ?? null,
-      vertragUnterschrieben: (sv.vertrag_unterschrieben as boolean | null) ?? null,
-      gesperrtSeit: (sv.gesperrt_seit as string | null) ?? null,
       ablehnungen30Tage: Number(sv.ablehnungen_30_tage) || 0,
+      portalZugangFreigeschaltet: sv.portal_zugang_freigeschaltet ?? null,
+      vertragUnterschrieben: sv.vertrag_unterschrieben ?? null,
+      gesperrtSeit: sv.gesperrt_seit ?? null,
     }
   })
 
-  return <SachverstaendigeListClient sachverstaendige={sachverstaendige} />
+  // Organisationen (Communities + Büros + Akademien) mit Geo-Feldern
+  const { data: orgRaw } = await supabase
+    .from('organisationen')
+    .select(
+      'id, name, typ, community_exklusiv, community_max_faelle_monat, standort_lat, standort_lng, einsatzgebiet_zentrum_lat, einsatzgebiet_zentrum_lng, einsatzgebiet_km, einsatzgebiet_radius_km, isochrone_polygon',
+    )
+
+  type OrgRow = {
+    id: string
+    name: string
+    typ: 'community' | 'buero' | 'akademie' | string
+    community_exklusiv: boolean | null
+    community_max_faelle_monat: number | null
+    standort_lat: number | null
+    standort_lng: number | null
+    einsatzgebiet_zentrum_lat: number | null
+    einsatzgebiet_zentrum_lng: number | null
+    einsatzgebiet_km: number | null
+    einsatzgebiet_radius_km: number | null
+    isochrone_polygon: unknown
+  }
+  const orgRows = (orgRaw ?? []) as unknown as OrgRow[]
+
+  // Legacy-Fallback: SV-Member-Standort für Alt-Orgs ohne eigene Koordinaten
+  const orgToSv = new Map<string, SvRow>()
+  for (const sv of svRows) {
+    if (!sv.organisation_id) continue
+    if (sv.standort_lat == null || sv.standort_lng == null) continue
+    if (!orgToSv.has(sv.organisation_id)) orgToSv.set(sv.organisation_id, sv)
+  }
+
+  function resolveCoords(o: OrgRow): { lat: number | null; lng: number | null } {
+    if (o.standort_lat != null && o.standort_lng != null) {
+      return { lat: Number(o.standort_lat), lng: Number(o.standort_lng) }
+    }
+    if (o.einsatzgebiet_zentrum_lat != null && o.einsatzgebiet_zentrum_lng != null) {
+      return {
+        lat: Number(o.einsatzgebiet_zentrum_lat),
+        lng: Number(o.einsatzgebiet_zentrum_lng),
+      }
+    }
+    const svMember = orgToSv.get(o.id)
+    return {
+      lat: svMember?.standort_lat != null ? Number(svMember.standort_lat) : null,
+      lng: svMember?.standort_lng != null ? Number(svMember.standort_lng) : null,
+    }
+  }
+
+  const communities: CommunityMarker[] = orgRows
+    .filter((o) => o.typ === 'community')
+    .map((o) => {
+      const { lat, lng } = resolveCoords(o)
+      return {
+        id: o.id,
+        name: o.name,
+        exklusiv: !!o.community_exklusiv,
+        maxFaelle: o.community_max_faelle_monat,
+        lat,
+        lng,
+        isochrone: (o.isochrone_polygon as CommunityMarker['isochrone']) ?? null,
+        einsatzKm: Number(o.einsatzgebiet_km) || Number(o.einsatzgebiet_radius_km) || null,
+      }
+    })
+
+  const organisationen: OrgMarker[] = orgRows
+    .filter((o) => o.typ === 'buero' || o.typ === 'akademie')
+    .map((o) => {
+      const { lat, lng } = resolveCoords(o)
+      return {
+        id: o.id,
+        name: o.name,
+        typ: o.typ as 'buero' | 'akademie',
+        lat,
+        lng,
+        isochrone: (o.isochrone_polygon as OrgMarker['isochrone']) ?? null,
+        einsatzKm: Number(o.einsatzgebiet_km) || Number(o.einsatzgebiet_radius_km) || null,
+      }
+    })
+
+  return (
+    <KarteHubClient svs={svs} communities={communities} organisationen={organisationen} />
+  )
 }
