@@ -31,6 +31,18 @@ import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 // jetzt das volle 4-Punkte-Skript mit Copy-Button (Notion-Spec §2.Q1).
 import ExitSkript from '../ExitSkript'
 
+// AAR-179 Redundanz-Fix: EIN Array für Hergang-Buttons + Checkliste — vorher
+// zwei parallele Arrays (prompts + matches) mit Drift-Risiko.
+// `prompt` = was ins Textarea eingefügt wird, `match` = was die Checkliste
+// als Substring sucht (ohne abschließendes „?"), `label` = kurzer Button-Text.
+const HERGANG_BAUSTEINE = [
+  { label: 'Wann?',      prompt: 'Wann ist es passiert? ',                            match: 'Wann ist es passiert' },
+  { label: 'Wo?',        prompt: 'Wo ist es passiert (Straße/Ort)? ',                 match: 'Wo ist es passiert' },
+  { label: 'Gegner?',    prompt: 'Wer war der Unfallgegner (Fahrzeug/Richtung)? ',    match: 'Wer war der Unfallgegner' },
+  { label: 'Situation?', prompt: 'In welcher Situation — Ampel/Kreuzung/Parkplatz? ', match: 'In welcher Situation' },
+  { label: 'Zeugen?',    prompt: 'Gab es Zeugen oder Dashcam-Aufnahmen? ',            match: 'Gab es Zeugen' },
+] as const
+
 type LeadFields = {
   id: string
   unfallhergang?: string | null
@@ -147,28 +159,20 @@ export default function Phase1Qualifizierung() {
           <h3 className="text-xs font-semibold text-gray-700">Unfallhergang &amp; Verantwortlichkeit</h3>
         </div>
         {/* AAR-179 P3-G: Guided Bausteine — 5 Klick-Buttons erzeugen Prompt-
-            Satzanfänge die der MA im Gespräch konkret abfragt. Hilft dem MA
-            die 5-Punkt-Checkliste (Wann/Wo/Gegner/Situation/Zeugen) strukturiert
-            durchzugehen ohne wichtige Details zu vergessen. */}
+            Satzanfänge die der MA im Gespräch konkret abfragt. Die Checkliste
+            darunter zeigt welche Bausteine schon im Text stehen.
+            Redundanz-Fix: prompt + match kommen aus EINER Quelle (HERGANG_BAUSTEINE).
+            `match` = `prompt.replace(/\s*[?:]?\s*$/, '')` — sprich der Prompt
+            ohne abschließendes „?" und Leerzeichen. Drift ausgeschlossen. */}
         <div className="flex flex-wrap gap-1.5">
-          {([
-            { label: 'Wann?', prompt: 'Wann ist es passiert? ' },
-            { label: 'Wo?', prompt: 'Wo ist es passiert (Straße/Ort)? ' },
-            { label: 'Gegner?', prompt: 'Wer war der Unfallgegner (Fahrzeug/Richtung)? ' },
-            { label: 'Situation?', prompt: 'In welcher Situation — Ampel/Kreuzung/Parkplatz? ' },
-            { label: 'Zeugen?', prompt: 'Gab es Zeugen oder Dashcam-Aufnahmen? ' },
-          ] as const).map((b) => (
+          {HERGANG_BAUSTEINE.map((b) => (
             <button
               key={b.label}
               type="button"
               onClick={() =>
                 setDraft((d) => {
-                  // AAR-179 Audit-Fix: Doppelten Baustein nicht zweimal anhängen —
-                  // wenn der Prompt-Anfang schon im Text steht, ist der Klick ein
-                  // No-Op. MA kann Bausteine gezielt wiederverwenden indem er
-                  // den ersten Satz löscht.
                   const existing = d.unfallhergang ?? ''
-                  if (existing.includes(b.prompt.trim())) return d
+                  if (existing.includes(b.match)) return d
                   return {
                     ...d,
                     unfallhergang: (existing ? existing + '\n' : '') + b.prompt,
@@ -188,26 +192,18 @@ export default function Phase1Qualifizierung() {
           className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm h-28 resize-none font-mono"
           placeholder={'Wie ist es passiert? (offene Beschreibung — Sprachregel: niemals „Schuld")'}
         />
-        {/* AAR-179 P3-G: 5-Punkt-Checkliste — zeigt welche Bausteine schon
-            im Hergang stehen. Matching ist fuzzy per Prompt-Start-Substring. */}
         <div className="flex flex-wrap gap-2 text-[10px]">
-          {([
-            { label: 'Wann', match: 'Wann ist es passiert' },
-            { label: 'Wo', match: 'Wo ist es passiert' },
-            { label: 'Gegner', match: 'Wer war der Unfallgegner' },
-            { label: 'Situation', match: 'In welcher Situation' },
-            { label: 'Zeugen', match: 'Gab es Zeugen' },
-          ] as const).map((c) => {
-            const hit = (draft.unfallhergang ?? '').includes(c.match)
+          {HERGANG_BAUSTEINE.map((b) => {
+            const hit = (draft.unfallhergang ?? '').includes(b.match)
             return (
               <span
-                key={c.label}
+                key={b.label}
                 className={`flex items-center gap-1 px-1.5 py-0.5 rounded ${
                   hit ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-400'
                 }`}
               >
                 {hit ? <CheckCircleIcon className="w-3 h-3" /> : <span className="w-3 h-3 inline-block" />}
-                {c.label}
+                {b.label.replace(/\?$/, '')}
               </span>
             )
           })}

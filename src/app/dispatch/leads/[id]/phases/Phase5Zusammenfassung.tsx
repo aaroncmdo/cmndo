@@ -76,20 +76,32 @@ export default function Phase5Zusammenfassung() {
   })
   const [pending, startSend] = useTransition()
 
-  function saveWaNummer() {
-    if (waNummer === (l.telefon ?? '')) return
-    setSavingNummer(true)
-    setNummerError(null)
+  // Redundanz-Fix: saveWaNummer + saveEmail hatten identische 14-Zeilen-
+  // Struktur. Jetzt ein gemeinsamer Helper der nur einen Feld-Patch +
+  // dedicated Setter-Callbacks entgegennimmt.
+  function saveInlineField(
+    payload: Record<string, unknown>,
+    setSaving: (v: boolean) => void,
+    setError: (v: string | null) => void,
+    errorPrefix: string,
+  ) {
+    setSaving(true)
+    setError(null)
     startTransition(async () => {
       try {
-        const r = await saveStammdaten(lead.id, { telefon: waNummer || null })
-        if (!r.success) setNummerError(r.error ?? 'Telefon speichern fehlgeschlagen')
+        const r = await saveStammdaten(lead.id, payload)
+        if (!r.success) setError(r.error ?? `${errorPrefix} speichern fehlgeschlagen`)
       } catch (err) {
-        setNummerError(err instanceof Error ? err.message : 'Telefon speichern fehlgeschlagen')
+        setError(err instanceof Error ? err.message : `${errorPrefix} speichern fehlgeschlagen`)
       } finally {
-        setSavingNummer(false)
+        setSaving(false)
       }
     })
+  }
+
+  function saveWaNummer() {
+    if (waNummer === (l.telefon ?? '')) return
+    saveInlineField({ telefon: waNummer || null }, setSavingNummer, setNummerError, 'Telefon')
   }
 
   // AAR-178 P2-K: Email editierbar direkt vor dem Versand — in der Praxis
@@ -97,18 +109,7 @@ export default function Phase5Zusammenfassung() {
   // korrigieren können bevor er Email-FlowLink abschickt.
   function saveEmail() {
     if (email === (l.email ?? '')) return
-    setSavingEmail(true)
-    setEmailError(null)
-    startTransition(async () => {
-      try {
-        const r = await saveStammdaten(lead.id, { email: email.trim() || null })
-        if (!r.success) setEmailError(r.error ?? 'Email speichern fehlgeschlagen')
-      } catch (err) {
-        setEmailError(err instanceof Error ? err.message : 'Email speichern fehlgeschlagen')
-      } finally {
-        setSavingEmail(false)
-      }
-    })
+    saveInlineField({ email: email.trim() || null }, setSavingEmail, setEmailError, 'Email')
   }
 
   // AAR-179 Audit-Fix: Auto-Advance-Timeout wird beim Unmount/Re-Send

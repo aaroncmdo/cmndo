@@ -71,6 +71,10 @@ export default function Phase6StatusTracking({
 
   const isPfadB = l.service_typ === 'nur_gutachter'
 
+  // Beide Steps teilen den State „gibt es einen FlowLink?" — stepDelivered
+  // spreadet stepSent damit die Logik nicht parallel gepflegt werden muss
+  // (Redundanz-Fix). Twilio liefert den echten Delivery-Status asynchron —
+  // hier konservativ: sobald der Link erstellt ist, gilt er als zugestellt.
   const stepSent: Step = {
     label: 'Token-Link gesendet',
     sub: latestFlow
@@ -81,10 +85,9 @@ export default function Phase6StatusTracking({
   }
 
   const stepDelivered: Step = {
+    ...stepSent,
     label: 'Link angekommen',
     sub: 'Twilio Delivery-Bestätigung',
-    // Delivery-Status liegt in Twilio — konservativ: done sobald FlowLink existiert
-    state: latestFlow ? 'done' : 'pending',
     icon: <CheckCircle2Icon className="w-4 h-4" />,
   }
 
