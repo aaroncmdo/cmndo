@@ -179,19 +179,22 @@ export default function GutachterShell({
     const supabase = createClient()
     const user = (await supabase.auth.getUser())?.data?.user ?? null
     if (!user) return
-    const { data: sv } = await supabase
+    // AAR-222 Audit: Inhaber + Sub-Standort = mehrere SV-Rows → single() würde
+    // werfen. Wir laden ALLE und nehmen die SV-IDs als Filter (Aufträge zählen
+    // dann über alle Standorte des Users).
+    const { data: svs } = await supabase
       .from('sachverstaendige')
       .select('id')
       .or(`profile_id.eq.${user.id},user_id.eq.${user.id}`)
-      .single()
-    if (!sv) return
+    const svIds = (svs ?? []).map(s => s.id)
+    if (svIds.length === 0) return
 
     // Aufträge: Fälle mit status='sv-zugewiesen' (neue Zuweisungen, noch nicht
-    // bestätigt/terminiert).
+    // bestätigt/terminiert) — über alle SV-Rows des Users.
     const { count: auftraegeCount } = await supabase
       .from('faelle')
       .select('id', { count: 'exact', head: true })
-      .eq('sv_id', sv.id)
+      .in('sv_id', svIds)
       .eq('status', 'sv-zugewiesen')
 
     // Nachrichten: ungelesene Chat-Nachrichten in nachrichten.
@@ -368,7 +371,29 @@ export default function GutachterShell({
           <button onClick={() => setSidebarOpen(true)} className="p-2 -ml-2 text-white/70 hover:text-white transition-colors" aria-label="Menü öffnen">
             <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
           </button>
-          <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
+          {/* AAR-220 Audit: Mobile-Header zeigt branded Logo (mit weißem
+              Container, ohne Filter) wenn Custom-Branding aktiv — sonst
+              Claimondo-Schriftzug. Vorher war hier hardcoded "Claim ondo"
+              auch für gebrandete SVs → Inkonsistenz Sidebar vs Mobile. */}
+          {logoUrl && useBrand ? (
+            <Link href="/gutachter" className="inline-flex items-center justify-center bg-white rounded-lg p-1.5 shadow-sm">
+              <img
+                src={logoUrl}
+                alt={firmenname ? `${firmenname} Logo` : 'Logo'}
+                className="h-6 w-auto max-w-28 object-contain"
+              />
+            </Link>
+          ) : logoUrl ? (
+            <Link href="/gutachter">
+              <img
+                src={logoUrl}
+                alt="Claimondo Logo"
+                className="h-6 w-auto max-w-28 object-contain brightness-0 invert"
+              />
+            </Link>
+          ) : (
+            <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
+          )}
           <div className="w-8" />
         </header>
 

@@ -554,9 +554,18 @@ function BrandingSection({ svId }: { svId: string }) {
           </div>
 
           {/* Preview */}
+          {/* AAR-220 Audit: eigenes Logo NICHT inverten — der User soll im
+              Preview sein echtes Logo sehen (so wie es im Sidebar erscheint),
+              nicht eine schwarz-weiße Negativ-Variante. */}
           <div className="rounded-xl overflow-hidden border border-gray-200">
             <div className="h-10 flex items-center px-4" style={{ backgroundColor: primary }}>
-              {logoUrl ? <img src={logoUrl} alt="" className="h-6 w-auto brightness-0 invert" /> : <span className="text-white text-sm font-bold">Vorschau</span>}
+              {logoUrl ? (
+                <span className="inline-flex items-center justify-center bg-white rounded p-1">
+                  <img src={logoUrl} alt="Logo Vorschau" className="h-5 w-auto max-w-24 object-contain" />
+                </span>
+              ) : (
+                <span className="text-white text-sm font-bold">Vorschau</span>
+              )}
             </div>
             <div className="p-3 flex gap-2">
               <button className="px-3 py-1.5 rounded-lg text-white text-xs font-medium" style={{ backgroundColor: secondary }}>Button</button>

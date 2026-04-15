@@ -121,14 +121,22 @@ function setLightness(hex: string, targetL: number, sCap?: number): string {
 export function generateTheme(primaryHex: string): BrandTheme {
   const primary = primaryHex.toUpperCase()
   const { r, g, b } = hexToRgb(primary)
+  const { l: lightness } = rgbToHsl(r, g, b)
 
   // textOnPrimary: WCAG-Kontrast — wenn primary hell genug ist, schwarz, sonst weiß.
   const lum = relativeLuminance(r, g, b)
   const textOnPrimary = lum > 0.5 ? '#0D0D0D' : '#FFFFFF'
 
+  // secondary muss VISIBLE bleiben gegen sidebarBg (immer L=8). Bei dunklen
+  // Primaries (z.B. Claimondo-Navy L=15) würde -15% L = 0% = schwarz =
+  // unsichtbarer Active-State. Daher: bei L<30 → heller statt dunkler.
+  const secondary = lightness < 30
+    ? setLightness(primary, Math.min(35, lightness + 15))   // helle Variante für dunkle Primaries
+    : adjustHsl(primary, 0, 0, -15)                          // dunklere Variante für mittlere/helle Primaries
+
   return {
     primary,
-    secondary: adjustHsl(primary, 0, 0, -15),     // 15% dunkler
+    secondary,
     accent: adjustHsl(primary, 0, 10, 10),        // 10% heller + saturierter
     sidebarBg: setLightness(primary, 8, 50),      // ~8% Lightness, max 50% sat (sehr dunkel, leicht getönt)
     textOnPrimary,

@@ -67,9 +67,18 @@ export async function saveGutachterBranding(data: {
   if (!hexRe.test(data.brand_primary)) throw new Error('Primaerfarbe ungueltig')
   if (!hexRe.test(data.brand_secondary)) throw new Error('Sekundaerfarbe ungueltig')
 
+  // AAR-220 Audit: Theme aus primary regenerieren mit User-Override für
+  // secondary (Color-Picker-Pfad). Vorher wurde brand_theme hier nicht
+  // gesetzt → Profil-Save überschrieb brand_primary/secondary aber das
+  // Theme blieb stale.
+  const { generateTheme } = await import('@/lib/branding/theme')
+  const theme = { ...generateTheme(data.brand_primary), secondary: data.brand_secondary }
+
   const updateData: Record<string, unknown> = {
     brand_primary: data.brand_primary,
     brand_secondary: data.brand_secondary,
+    brand_accent: theme.accent,
+    brand_theme: theme,
     use_custom_branding: data.use_custom_branding,
   }
   if (data.logo_url) updateData.logo_url = data.logo_url
