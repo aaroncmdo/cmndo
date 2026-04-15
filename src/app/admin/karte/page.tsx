@@ -21,9 +21,10 @@ export default async function KartePage() {
   if (profile?.rolle !== 'admin') redirect('/login?error=Nur+Admins')
 
   // SVs mit Standort + Isochrone (AAR-130)
+  // Radius-Fallback-Kette muss zu findBestSV.ts passen (3 Spalten existieren historisch)
   const { data: svRaw } = await supabase
     .from('sachverstaendige')
-    .select('id, paket, standort_lat, standort_lng, ist_aktiv, organisation_id, isochrone_polygon, paket_umkreis_km, radius_km, profiles(vorname, nachname)')
+    .select('id, paket, standort_lat, standort_lng, ist_aktiv, organisation_id, isochrone_polygon, paket_umkreis_km, radius_km, paket_radius_km, profiles(vorname, nachname)')
     .is('geloescht_am', null)
 
   type SvRow = {
@@ -36,6 +37,7 @@ export default async function KartePage() {
     isochrone_polygon: unknown
     paket_umkreis_km: number | null
     radius_km: number | null
+    paket_radius_km: number | null
     profiles: unknown
   }
   const svRows = (svRaw ?? []) as unknown as SvRow[]
@@ -53,7 +55,8 @@ export default async function KartePage() {
       lng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
       istAktiv: sv.ist_aktiv !== false,
       isochrone: sv.isochrone_polygon as SvMarker['isochrone'] ?? null,
-      einsatzKm: Number(sv.paket_umkreis_km) || Number(sv.radius_km) || null,
+      // Konsistent zu findBestSV.ts: 3-Spalten-Fallback
+      einsatzKm: Number(sv.paket_umkreis_km) || Number(sv.radius_km) || Number(sv.paket_radius_km) || null,
     }
   })
 

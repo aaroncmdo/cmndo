@@ -28,18 +28,39 @@ const STEPS = [
   { id: 'fertig', label: 'Fertig' },
 ] as const
 
+// Konsistent zu admin/dispatch/actions.ts createPflichtdokumente — alle dort
+// per add() erzeugten dokument_typ-Werte müssen hier ein schönes Label haben,
+// sonst fällt der Wizard auf den raw dokument_typ zurück (z.B. "schadensfotos"
+// statt "Schadensfotos"). Tippfehler aus der Vorversion korrigiert (schadenfotos
+// → schadensfotos, atteste → aerztliches_attest) + Umlaute eingebaut (AAR-105).
 const DOKTYP_LABELS: Record<string, string> = {
-  fuehrerschein: 'Fuehrerschein',
-  fahrzeugschein: 'Fahrzeugschein',
+  // Identität
   personalausweis: 'Personalausweis',
-  schadenfotos: 'Schadenfotos',
+  fuehrerschein: 'Führerschein',
+  fahrzeugschein: 'Fahrzeugschein',
+  // Schaden
+  schadensfotos: 'Schadensfotos (mind. 4)',
   polizeibericht: 'Polizeibericht',
-  atteste: 'Aerztliche Atteste',
+  // Medizin
+  aerztliches_attest: 'Ärztliches Attest',
+  krankenhausbericht: 'Krankenhausbericht',
+  au_bescheinigung: 'AU-Bescheinigung',
+  // Versicherung & Gegner
+  eigene_versicherung: 'Eigene Versicherungspolice',
   versicherungspolice: 'Versicherungspolice',
-  kostenvoranschlag: 'Kostenvoranschlag',
+  gegner_daten: 'Daten des Unfallgegners',
+  // Halter / Geschäft
+  leasingvertrag: 'Leasingvertrag',
+  finanzierungsvertrag: 'Finanzierungsvertrag',
+  gewerbenachweis: 'Gewerbenachweis',
+  gf_vollmacht: 'Geschäftsführer-Vollmacht',
+  halter_vollmacht: 'Halter-Vollmacht',
+  halter_ausweis: 'Halter-Ausweis',
+  // Allgemein
   vollmacht: 'Vollmacht',
   sicherungsabtretung: 'Sicherungsabtretung',
   mietvertrag: 'Mietvertrag / Eigentumsnachweis',
+  kostenvoranschlag: 'Kostenvoranschlag',
   sonstiges: 'Sonstiges',
 }
 
