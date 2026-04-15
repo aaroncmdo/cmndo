@@ -4,20 +4,19 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboardIcon, FolderOpenIcon, BadgeEuroIcon,
-  CarFrontIcon, MapIcon, LogOutIcon, GitBranchIcon, CalendarIcon,
+  CarFrontIcon, LogOutIcon, GitBranchIcon, CalendarIcon,
   BarChart3Icon, UsersIcon, BuildingIcon, Building2Icon, ReceiptIcon,
   ShieldCheckIcon, MessageCircleIcon, SettingsIcon, AlertCircleIcon,
-  LifeBuoyIcon, UserPlusIcon, ListChecksIcon, CheckSquareIcon,
+  LifeBuoyIcon, ListChecksIcon, CheckSquareIcon,
   TimerIcon, ScaleIcon,
 } from 'lucide-react'
 
 // AAR-57: 4 Sektionen — Navigation, Operations, Stammdaten, Verwaltung
 type NavItem = { href: string; label: string; icon: typeof LayoutDashboardIcon; exact?: boolean }
 
-// Revert AAR-122 Nav-Cleanup: Aaron hat in AAR-123 nachgeschoben dass
-// /admin/sachverstaendige der Hub sein soll (Tabs-Layout), nicht die Karte.
-// AAR-123 consolidiert dann Liste/Karte/Neu als Tabs unter Sachverständige.
-// Bis dahin alle Original-Nav-Items wiederhergestellt.
+// AAR-123: /admin/karte und /admin/sv-onboarding sind jetzt Tabs unter
+// /admin/sachverstaendige. Die alten Nav-Items sind entfernt; der
+// Sachverständige-Hub enthält nun alle drei Views.
 const NAV_NAVIGATION: NavItem[] = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboardIcon, exact: true },
   { href: '/admin/dispatch', label: 'Dispatch', icon: GitBranchIcon },
@@ -25,7 +24,6 @@ const NAV_NAVIGATION: NavItem[] = [
   { href: '/admin/kalender', label: 'Kalender', icon: CalendarIcon },
   { href: '/admin/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon },
   { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: CarFrontIcon },
-  { href: '/admin/karte', label: 'Karte', icon: MapIcon },
   { href: '/admin/meine-tasks', label: 'Meine Tasks', icon: CheckSquareIcon },
 ]
 
@@ -38,7 +36,7 @@ const NAV_OPERATIONS: NavItem[] = [
 ]
 
 const NAV_STAMMDATEN: NavItem[] = [
-  { href: '/admin/sv-onboarding', label: 'SV-Onboarding', icon: UserPlusIcon },
+  // AAR-123: SV-Onboarding ist jetzt Tab im Sachverständige-Hub.
   { href: '/admin/organisationen', label: 'Organisationen', icon: Building2Icon },
   { href: '/admin/team', label: 'Team', icon: UsersIcon },
   { href: '/admin/versicherungen', label: 'Versicherer', icon: BuildingIcon },
@@ -91,7 +89,8 @@ export default function AdminNav({ email, initials, unreadNachrichten }: { email
   }
 
   // AAR-72: Mobile-Items per href-Lookup (nicht Array-Index)
-  const MOBILE_HREFS = ['/admin', '/admin/dispatch', '/admin/faelle', '/admin/nachrichten', '/admin/karte']
+  // AAR-123: /admin/karte ist weg (nun Tab im SV-Hub) — stattdessen der Hub selbst.
+  const MOBILE_HREFS = ['/admin', '/admin/dispatch', '/admin/faelle', '/admin/nachrichten', '/admin/sachverstaendige']
   const mobileItems: NavItem[] = MOBILE_HREFS
     .map(h => NAV_NAVIGATION.find(i => i.href === h))
     .filter((i): i is NavItem => !!i)

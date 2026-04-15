@@ -147,7 +147,7 @@ export async function POST(request: Request) {
           // Vertrag' aus dem stale Server-Component-Cache.
           try {
             revalidatePath('/admin/sachverstaendige', 'page')
-            revalidatePath('/admin/karte', 'page')
+            revalidatePath('/admin/sachverstaendige/karte', 'page')
             revalidatePath('/admin/organisationen', 'page')
           } catch { /* */ }
 
@@ -233,7 +233,7 @@ export async function POST(request: Request) {
 
           try {
             revalidatePath('/admin/sachverstaendige', 'page')
-            revalidatePath('/admin/karte', 'page')
+            revalidatePath('/admin/sachverstaendige/karte', 'page')
             revalidatePath('/admin/organisationen', 'page')
           } catch { /* */ }
 
@@ -379,7 +379,7 @@ export async function POST(request: Request) {
           // BUG-92: Admin-Listing/Karte revalidieren — analog Buero-Branch.
           try {
             revalidatePath('/admin/sachverstaendige', 'page')
-            revalidatePath('/admin/karte', 'page')
+            revalidatePath('/admin/sachverstaendige/karte', 'page')
           } catch { /* */ }
         }
         break

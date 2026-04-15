@@ -44,7 +44,7 @@ export async function updateGutachterProfil(
   }
 
   revalidatePath('/admin/sachverstaendige')
-  revalidatePath('/admin/karte')
+  revalidatePath('/admin/sachverstaendige/karte')
 }
 
 export async function reactivateGutachter(svId: string) {
@@ -71,7 +71,7 @@ export async function reactivateGutachter(svId: string) {
   } catch (err) { console.error('[KFZ-151] resolveTasks reactivate:', err) }
 
   revalidatePath('/admin/sachverstaendige')
-  revalidatePath('/admin/karte')
+  revalidatePath('/admin/sachverstaendige/karte')
 }
 
 export async function deactivateGutachter(svId: string, grund: string) {
@@ -92,7 +92,7 @@ export async function deactivateGutachter(svId: string, grund: string) {
   } catch { /* columns may not exist */ }
 
   revalidatePath('/admin/sachverstaendige')
-  revalidatePath('/admin/karte')
+  revalidatePath('/admin/sachverstaendige/karte')
 }
 
 export async function reassignCases(fromSvId: string, toSvId: string) {
@@ -154,7 +154,7 @@ export async function softDeleteGutachter(svId: string) {
   } catch { /* service role key may not be set, or user already deleted */ }
 
   revalidatePath('/admin/sachverstaendige')
-  revalidatePath('/admin/karte')
+  revalidatePath('/admin/sachverstaendige/karte')
   revalidatePath('/admin/finance')
 }
 
@@ -196,7 +196,7 @@ export async function deleteGutachter(svId: string): Promise<{ success: boolean;
     }
 
     revalidatePath('/admin/sachverstaendige')
-    revalidatePath('/admin/karte')
+    revalidatePath('/admin/sachverstaendige/karte')
     return { success: true }
   } catch (err) {
     console.error('[deleteGutachter] Fehler:', err)
@@ -272,7 +272,7 @@ export async function recalculateIsochrone(
 
     if (upErr) return { success: false, error: upErr.message }
 
-    revalidatePath('/admin/karte')
+    revalidatePath('/admin/sachverstaendige/karte')
     if (entityType === 'sv') revalidatePath('/admin/sachverstaendige')
     if (entityType === 'organisation') {
       revalidatePath('/admin/organisationen')

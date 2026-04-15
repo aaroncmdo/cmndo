@@ -455,7 +455,7 @@ export default function KarteHubClient({
         <div className="flex-1" />
         <button
           type="button"
-          onClick={() => router.push('/admin/sv-onboarding')}
+          onClick={() => router.push('/admin/sachverstaendige/neu')}
           className="px-3 py-1.5 rounded-lg bg-[#4573A2] text-white text-xs font-medium hover:bg-[#0D1B3E] flex items-center gap-1.5"
         >
           <UserPlusIcon className="w-3.5 h-3.5" /> SV onboarden
