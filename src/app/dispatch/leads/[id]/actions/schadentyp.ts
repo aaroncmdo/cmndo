@@ -3,9 +3,12 @@
 // AAR-143: Schadentyp-Speicherung extrahiert aus actions.ts.
 // AAR-83 Parkplatz-Kamera-Check inkl. automatischer Disqualifizierung wenn
 // kein Gegner-KZ + keine Kamera vorhanden ist.
+// AAR-175 P1-A: revalidatePath wurde entfernt. Der Aufrufer (SchadentypPicker
+// in Phase 2) steuert den Pfad-B-Sprung zu Phase 6 selbst (Client-Side-
+// Transition). Der Server-Revalidate würde die aktuelle Phase vom Server neu
+// berechnen + Phase 3 rendern, was den Sprung komplett unterdrückt.
 
 import { createClient } from '@/lib/supabase/server'
-import { revalidatePath } from 'next/cache'
 
 export async function saveSchadentyp(
   leadId: string,
@@ -42,6 +45,5 @@ export async function saveSchadentyp(
 
   const { error } = await supabase.from('leads').update(updates).eq('id', leadId)
   if (error) return { success: false, error: error.message }
-  revalidatePath(`/dispatch/leads/${leadId}`)
   return { success: true, disqualifiziert }
 }

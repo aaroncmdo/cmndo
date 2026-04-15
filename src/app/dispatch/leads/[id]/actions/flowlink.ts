@@ -70,9 +70,12 @@ export async function sendFlowLinkMultiChannel(
     if (!telefon) return { success: false, error: 'Keine Telefonnummer für WhatsApp' }
     try {
       const { sendCommunication } = await import('@/lib/communications/send')
+      // AAR-175 P0-C: Der vorname-Key war Alt-Last aus pre-numbered-Template-Zeit.
+      // Twilio-Templates konsumieren ausschließlich die nummerierten Placeholder
+      // '1'..'6' — der zusätzliche vorname-Key führte dazu, dass Content-API
+      // Warnung loggt und der Key für kein Template gemappt wird.
       await sendCommunication('flowlink_versand', {
         telefon,
-        vorname: lead.vorname ?? '',
         '1': lead.vorname ?? '',
         '2': svVorname,
         '3': svNachname,

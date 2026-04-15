@@ -23,6 +23,10 @@ import {
   UserPlusIcon,
 } from 'lucide-react'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
+// AAR-175 P1-B: ExitSkript inline rendern sobald die MA Eigenverantwortung
+// auswählt — vorher nur roter Einzeiler ohne konkrete Ausstiegsschritte,
+// jetzt das volle 4-Punkte-Skript mit Copy-Button (Notion-Spec §2.Q1).
+import ExitSkript from '../ExitSkript'
 
 const UNFALLORT_KATEGORIEN: { value: UnfallortKategorie; label: string }[] = [
   { value: 'parkplatz', label: 'Parkplatz' },
@@ -189,10 +193,13 @@ export default function Phase1Qualifizierung() {
           </label>
         )}
         {draft.schuldfrage === 'eigenverantwortung' && (
-          <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg p-2 flex items-start gap-2">
-            <AlertTriangleIcon className="w-4 h-4 shrink-0 mt-0.5" />
-            <span>Eigenverantwortung = Kasko-Fall. Lead wird disqualifiziert und Exit-Skript angezeigt.</span>
-          </p>
+          <>
+            <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg p-2 flex items-start gap-2">
+              <AlertTriangleIcon className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>Eigenverantwortung = Kasko-Fall. Lead wird nach Speichern disqualifiziert.</span>
+            </p>
+            <ExitSkript grund="eigenverantwortung" />
+          </>
         )}
       </div>
 
