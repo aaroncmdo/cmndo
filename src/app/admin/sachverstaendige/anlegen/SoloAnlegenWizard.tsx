@@ -391,13 +391,9 @@ export default function SoloAnlegenWizard({ onSuccess }: {
               selected={data.spezifikationen}
               onToggle={v => toggleArrayField('spezifikationen', v)}
             />
-            <TagSection
-              title="Schadenarten"
-              hint="Welche Schadenarten bearbeitet er?"
-              options={SCHADENARTEN}
-              selected={data.schadenarten}
-              onToggle={v => toggleArrayField('schadenarten', v)}
-            />
+            {/* AAR-204: Schadenarten raus aus dem SV-Wizard — für die
+                Gutachterzuweisung irrelevant, wird nur in der Dispatch-Phase
+                (Kanzlei-relevant) abgefragt. DB-Spalte bleibt erhalten. */}
           </div>
         )}
 
@@ -427,9 +423,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
                 {data.spezifikationen.length > 0 && (
                   <p className="text-gray-500 text-xs mt-1">Spezifikationen: {data.spezifikationen.join(', ')}</p>
                 )}
-                {data.schadenarten.length > 0 && (
-                  <p className="text-gray-500 text-xs mt-1">Schadenarten: {data.schadenarten.join(', ')}</p>
-                )}
+                {/* AAR-204: Schadenarten-Summary raus (Feld nicht mehr erfasst) */}
               </div>
             </div>
 

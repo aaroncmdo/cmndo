@@ -250,7 +250,7 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
               <p className="text-xs text-gray-500 uppercase tracking-wide">Default-Spezialisierungen (gelten für die ganze Akademie)</p>
               <TagSection title="Qualifikationen" options={QUALIFIKATIONEN} selected={qualifikationen} onToggle={v => toggleTag(setQualifikationen, v)} />
               <TagSection title="Spezifikationen" options={SPEZIFIKATIONEN} selected={spezifikationen} onToggle={v => toggleTag(setSpezifikationen, v)} />
-              <TagSection title="Schadenarten" options={SCHADENARTEN} selected={schadenarten} onToggle={v => toggleTag(setSchadenarten, v)} />
+              {/* AAR-204: Schadenarten raus (irrelevant für SV-Zuweisung) */}
             </div>
           </div>
         )}

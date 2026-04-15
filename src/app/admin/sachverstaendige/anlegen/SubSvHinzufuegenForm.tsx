@@ -204,12 +204,7 @@ export default function SubSvHinzufuegenForm({ organisationen, onSuccess }: {
             selected={spezifikationen}
             onToggle={v => toggleTag(setSpezifikationen, v)}
           />
-          <TagSection
-            title="Schadenarten"
-            options={SCHADENARTEN}
-            selected={schadenarten}
-            onToggle={v => toggleTag(setSchadenarten, v)}
-          />
+          {/* AAR-204: Schadenarten raus (irrelevant für SV-Zuweisung) */}
         </div>
 
         <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-xl p-3 flex items-start gap-3">

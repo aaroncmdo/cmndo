@@ -29,18 +29,18 @@ export function paketKontingent(paket: AnlegePaket, override?: number): number {
 // Quelle der Wahrheit: sachverstaendige.qualifikationen_neu / spezifikationen /
 // schadenarten (TEXT[]). Die alte qualifikationen-Spalte bleibt als Fallback.
 
+// AAR-204: QUALIFIKATIONEN ausgedünnt — die 7 Basics (Haftpflicht,
+// Wertgutachten, Beweissicherung, Reparaturkosten, Leasingrücknahme,
+// Restwert, Wiederbeschaffung) hat JEDER SV. Nur echte Spezialisierungen
+// bleiben im Wizard-UI. DB-Spalte qualifikationen_neu akzeptiert weiterhin
+// freie Werte — falls ein Altbestand diese Keys hat, bleiben sie erhalten.
 export const QUALIFIKATIONEN = [
-  'Haftpflichtschaden',
   'Bewertungen',
-  'Wertgutachten',
-  'Reparaturkostengutachten',
-  'Beweissicherung',
   'Schiedsgutachten',
   'Gerichtsgutachten',
   'Oldtimer-Bewertung',
-  'Leasingrücknahme',
-  'Restwertermittlung',
-  'Wiederbeschaffungswert',
+  'Unfallrekonstruktion',
+  'Brandursachenermittlung',
 ] as const
 
 export const SPEZIFIKATIONEN = [

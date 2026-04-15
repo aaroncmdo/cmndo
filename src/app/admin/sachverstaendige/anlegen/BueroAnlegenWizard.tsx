@@ -650,12 +650,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                     selected={std.spezifikationen}
                     onToggle={v => toggleStandortTag(std.id, 'spezifikationen', v)}
                   />
-                  <TagSection
-                    title="Schadenarten"
-                    options={SCHADENARTEN}
-                    selected={std.schadenarten}
-                    onToggle={v => toggleStandortTag(std.id, 'schadenarten', v)}
-                  />
+                  {/* AAR-204: Schadenarten raus (irrelevant für SV-Zuweisung) */}
                 </div>
               </div>
               )
