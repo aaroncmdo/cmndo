@@ -37,14 +37,6 @@ type FlowLinkRow = {
   fall_id?: string | null
 }
 
-type CallRow = {
-  id: string
-  direction: string
-  started_at: string
-  duration: number | null
-  status: string | null
-}
-
 type FallSnapshot = {
   sa_unterschrieben?: boolean | null
   vollmacht_unterschrieben?: boolean | null
@@ -77,7 +69,6 @@ export default function DispatchShell({
   lead,
   aktiverTermin,
   flowLinks,
-  calls,
   fall,
   initialPhase,
   saUnterschrieben,
@@ -90,7 +81,6 @@ export default function DispatchShell({
   }
   aktiverTermin: AktiverTerminLike
   flowLinks: FlowLinkRow[]
-  calls: CallRow[]
   fall: FallSnapshot | null
   initialPhase: Phase
   saUnterschrieben: boolean
@@ -137,7 +127,7 @@ export default function DispatchShell({
             saUnterschrieben={saUnterschrieben}
           />
 
-          <PhaseContent flowLinks={flowLinks} calls={calls} fall={fall} />
+          <PhaseContent flowLinks={flowLinks} fall={fall} />
         </main>
 
         {/* Sidebar */}

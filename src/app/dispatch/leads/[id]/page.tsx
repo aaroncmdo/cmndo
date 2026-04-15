@@ -62,13 +62,6 @@ export default async function DispatchLeadDetail({
         }
       : null
 
-  const { data: calls } = await supabase
-    .from('aircall_calls')
-    .select('id, direction, started_at, duration, status')
-    .eq('lead_id', id)
-    .order('started_at', { ascending: false })
-    .limit(10)
-
   // AAR-115 + AAR-134: aktiver SV-Termin — alle relevanten Status mitlesen
   const { data: svTerminRaw } = await supabase
     .from('gutachter_termine')
@@ -128,7 +121,6 @@ export default async function DispatchLeadDetail({
       lead={lead}
       aktiverTermin={aktiverSvTermin}
       flowLinks={flowLinks}
-      calls={calls ?? []}
       fall={unterschriftenSnapshot}
       initialPhase={initialPhase}
       saUnterschrieben={saUnterschrieben}

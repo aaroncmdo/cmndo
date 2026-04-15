@@ -117,7 +117,7 @@ export default function Phase1Qualifizierung() {
   }
 
   if (qualification.disqualifiziert) {
-    // Overlay kommt über DispatchShell → PhaseStubs → DisqualifiziertOverlay;
+    // Overlay kommt über DispatchShell → PhaseContent → DisqualifiziertOverlay;
     // hier bleiben wir defensiv still.
     return null
   }
