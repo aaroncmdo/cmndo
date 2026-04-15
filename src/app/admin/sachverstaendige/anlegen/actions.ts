@@ -170,6 +170,9 @@ export async function anlegeSv(data: AnlegeSvFormData): Promise<{ success: boole
   // qualifikationen_neu + spezifikationen + schadenarten.
   const { data: svRow, error: svErr } = await adminDb.from('sachverstaendige').insert({
     profile_id: authUser.user.id,
+    // AAR-206: user_id mit setzen — Legacy-Queries joinen teilweise via
+    // user_id statt profile_id. Siehe AAR-185.
+    user_id: authUser.user.id,
     paket: data.paket === 'individuell' ? 'standard' : data.paket, // 'individuell' wird intern als 'standard' geflaggt mit Override
     gutachter_typ: data.gutachter_typ,
     qualifikationen_neu: data.qualifikationen,
@@ -372,6 +375,8 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
   // 4. Inhaber-sachverstaendige (kein eigenes Kontingent, ist nur Verwaltung)
   const { data: inhaberSvRow, error: inhaberSvErr } = await adminDb.from('sachverstaendige').insert({
     profile_id: inhaberUserId,
+    // AAR-206: user_id mit setzen (siehe AAR-185-Begründung)
+    user_id: inhaberUserId,
     organisation_id: organisationId,
     rolle_in_organisation: 'inhaber',
     paket: 'standard', // Pflichtfeld, wird nicht genutzt
@@ -468,6 +473,8 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
     const subQual = std.qualifikationen ?? []
     const { data: subSvRow } = await adminDb.from('sachverstaendige').insert({
       profile_id: subUserId,
+      // AAR-206: user_id mit setzen
+      user_id: subUserId,
       organisation_id: organisationId,
       rolle_in_organisation: 'mitarbeiter',
       paket: std.paket === 'individuell' ? 'standard' : std.paket,
@@ -653,6 +660,8 @@ export async function anlegeSubSv(params: {
   const subQual = params.qualifikationen ?? []
   const { data: svRow, error: svErr } = await adminDb.from('sachverstaendige').insert({
     profile_id: subUserId,
+    // AAR-206: user_id mit setzen
+    user_id: subUserId,
     organisation_id: params.organisation_id,
     rolle_in_organisation: 'mitarbeiter',
     paket: params.paket === 'individuell' ? 'standard' : params.paket,
@@ -852,6 +861,8 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
   // 4. Verwalter-sachverstaendige (Verwaltung, kein eigenes Kontingent)
   const { data: verwSvRow, error: verwSvErr } = await adminDb.from('sachverstaendige').insert({
     profile_id: verwalterUserId,
+    // AAR-206: user_id mit setzen
+    user_id: verwalterUserId,
     organisation_id: organisationId,
     rolle_in_organisation: 'inhaber',
     paket: 'standard',
@@ -931,6 +942,8 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
 
     const { data: subSvRow } = await adminDb.from('sachverstaendige').insert({
       profile_id: subUserId,
+      // AAR-206: user_id mit setzen
+      user_id: subUserId,
       organisation_id: organisationId,
       rolle_in_organisation: 'akademie_sub',
       paket: sub.paket === 'individuell' ? 'standard' : sub.paket,
@@ -1172,6 +1185,8 @@ export async function anlegeCommunity(data: AnlegeCommunityFormData): Promise<{
 
     const { data: memSvRow } = await adminDb.from('sachverstaendige').insert({
       profile_id: memUserId,
+      // AAR-206: user_id mit setzen
+      user_id: memUserId,
       organisation_id: organisationId,
       rolle_in_organisation: 'community_member',
       paket: m.paket === 'individuell' ? 'standard' : m.paket,
