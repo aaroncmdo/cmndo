@@ -46,13 +46,13 @@ export default async function DispatchLeadDetail({
     .order('started_at', { ascending: false })
     .limit(10)
 
-  // AAR-115: aktiver SV-Termin (pre-FlowLink) — reserviert oder bestätigt
+  // AAR-115 + AAR-134: aktiver SV-Termin — alle relevanten Status mitlesen
   const { data: svTerminRaw } = await supabase
     .from('gutachter_termine')
-    .select('id, sv_id, start_zeit, end_zeit, status, sachverstaendige(profiles(vorname, nachname))')
+    .select('id, sv_id, start_zeit, end_zeit, status, sv_ablehnung_grund, sv_vorgeschlagene_slots, sachverstaendige(profiles(vorname, nachname))')
     .eq('lead_id', id)
-    .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag'])
-    .order('start_zeit', { ascending: true })
+    .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag', 'abgelehnt'])
+    .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
   // Nested-FK normalisieren (Supabase liefert je nach Cardinality Array oder Objekt)
@@ -62,6 +62,8 @@ export default async function DispatchLeadDetail({
     start_zeit: string
     end_zeit: string
     status: string
+    sv_ablehnung_grund: string | null
+    sv_vorgeschlagene_slots: { start: string; end: string }[] | null
     sachverstaendige: unknown
   } | null
   const svRel = svTerminRow?.sachverstaendige
@@ -79,6 +81,8 @@ export default async function DispatchLeadDetail({
         start_zeit: svTerminRow.start_zeit,
         end_zeit: svTerminRow.end_zeit,
         status: svTerminRow.status,
+        sv_ablehnung_grund: svTerminRow.sv_ablehnung_grund,
+        sv_vorgeschlagene_slots: svTerminRow.sv_vorgeschlagene_slots,
       }
     : null
 
@@ -268,7 +272,7 @@ export default async function DispatchLeadDetail({
             serviceTyp={lead.service_typ ?? 'komplett'}
             flowStatus={flowStatus}
             hardGateOk={computeHardGateStatus(lead).allComplete}
-            hasSvTermin={!!aktiverSvTermin}
+            hasSvTermin={aktiverSvTermin?.status === 'reserviert' || aktiverSvTermin?.status === 'bestaetigt'}
           />
 
           {/* FlowLinks */}

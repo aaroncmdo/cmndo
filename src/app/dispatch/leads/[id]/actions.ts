@@ -488,3 +488,61 @@ export async function cancelSvTerminForLead(
   revalidatePath(`/dispatch/leads/${leadId}`)
   return { success: true }
 }
+
+// AAR-134 Phase 8: Dispatcher akzeptiert einen vom SV vorgeschlagenen Slot.
+// Kopiert start_zeit/end_zeit aus sv_vorgeschlagene_slots[slotIndex] in
+// gutachter_termine.start_zeit/end_zeit, setzt status='bestaetigt',
+// resettet sv_vorgeschlagene_slots auf null.
+export async function acceptGegenvorschlag(
+  terminId: string,
+  slotIndex: number,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const { data: termin } = await supabase
+    .from('gutachter_termine')
+    .select('id, status, sv_vorgeschlagene_slots, lead_id, fall_id')
+    .eq('id', terminId)
+    .single()
+
+  if (!termin) return { success: false, error: 'Termin nicht gefunden' }
+  if (termin.status !== 'gegenvorschlag') {
+    return { success: false, error: `Termin ist nicht im Status 'gegenvorschlag' (aktuell: ${termin.status})` }
+  }
+
+  const slots = termin.sv_vorgeschlagene_slots as { start: string; end: string }[] | null
+  if (!Array.isArray(slots) || slotIndex < 0 || slotIndex >= slots.length) {
+    return { success: false, error: 'Ungültiger Slot-Index' }
+  }
+  const slot = slots[slotIndex]
+  if (!slot?.start || !slot?.end) {
+    return { success: false, error: 'Slot ist leer' }
+  }
+
+  const { error } = await supabase
+    .from('gutachter_termine')
+    .update({
+      status: 'bestaetigt',
+      start_zeit: slot.start,
+      end_zeit: slot.end,
+      sv_vorgeschlagene_slots: null,
+    })
+    .eq('id', terminId)
+
+  if (error) return { success: false, error: error.message }
+
+  // Timeline
+  await supabase.from('timeline').insert({
+    fall_id: termin.fall_id ?? null,
+    lead_id: !termin.fall_id ? termin.lead_id : null,
+    typ: 'termin',
+    titel: 'Dispatcher hat SV-Gegenvorschlag akzeptiert',
+    beschreibung: `Slot ${slotIndex + 1} angenommen: ${new Date(slot.start).toLocaleString('de-DE')}`,
+    erstellt_von: user.id,
+  }).then(() => {}, () => {})
+
+  if (termin.lead_id) revalidatePath(`/dispatch/leads/${termin.lead_id}`)
+  return { success: true }
+}

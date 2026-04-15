@@ -15,11 +15,14 @@ import {
   RefreshCwIcon,
   ClockIcon,
   AlertTriangleIcon,
+  XCircleIcon,
+  CheckIcon,
 } from 'lucide-react'
 import {
   listSvSuggestionsForLead,
   reserveSvTerminForLead,
   cancelSvTerminForLead,
+  acceptGegenvorschlag,
   type SvSuggestion,
 } from './actions'
 
@@ -31,6 +34,9 @@ type AktiverTermin = {
   start_zeit: string
   end_zeit: string
   status: string
+  // AAR-134
+  sv_ablehnung_grund?: string | null
+  sv_vorgeschlagene_slots?: { start: string; end: string }[] | null
 }
 
 export default function SvDispatchPanel({
@@ -103,7 +109,96 @@ export default function SvDispatchPanel({
     })
   }
 
-  // ─── Wenn bereits ein Termin existiert, zeige ihn an ─────────────────────
+  // ─── AAR-134: Slot-Akzeptieren-Handler ────────────────────────────────────
+  function handleAcceptSlot(slotIndex: number) {
+    if (!aktiverTermin) return
+    startTransition(async () => {
+      const r = await acceptGegenvorschlag(aktiverTermin.id, slotIndex)
+      setToast(r.success ? 'Slot akzeptiert' : r.error ?? 'Fehler')
+      setTimeout(() => setToast(''), 3000)
+    })
+  }
+
+  // ─── AAR-134: Status 'abgelehnt' ──────────────────────────────────────────
+  if (aktiverTermin && aktiverTermin.status === 'abgelehnt') {
+    const svName = [aktiverTermin.sv_vorname, aktiverTermin.sv_nachname].filter(Boolean).join(' ') || 'SV'
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-xl p-5 space-y-3">
+        <div className="flex items-center gap-2">
+          <XCircleIcon className="w-5 h-5 text-red-600 shrink-0" />
+          <h2 className="text-sm font-semibold text-red-900">SV hat Termin abgelehnt</h2>
+        </div>
+        <div className="text-xs text-red-800 space-y-1">
+          <p><span className="font-medium">Sachverständiger:</span> {svName}</p>
+          {aktiverTermin.sv_ablehnung_grund && (
+            <p><span className="font-medium">Grund:</span> {aktiverTermin.sv_ablehnung_grund}</p>
+          )}
+        </div>
+        <button
+          type="button"
+          disabled={pending}
+          onClick={handleCancel}
+          className="w-full text-xs font-medium px-3 py-2 rounded-lg bg-[#4573A2] hover:bg-[#3a6290] text-white disabled:opacity-50"
+        >
+          Termin schließen + neuen SV wählen
+        </button>
+        {toast && <p className="text-xs text-center">{toast}</p>}
+      </div>
+    )
+  }
+
+  // ─── AAR-134: Status 'gegenvorschlag' ─────────────────────────────────────
+  if (aktiverTermin && aktiverTermin.status === 'gegenvorschlag') {
+    const svName = [aktiverTermin.sv_vorname, aktiverTermin.sv_nachname].filter(Boolean).join(' ') || 'SV'
+    const slots = aktiverTermin.sv_vorgeschlagene_slots ?? []
+    return (
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 space-y-3">
+        <div className="flex items-center gap-2">
+          <ClockIcon className="w-5 h-5 text-amber-600 shrink-0" />
+          <h2 className="text-sm font-semibold text-amber-900">{svName} schlägt andere Termine vor</h2>
+        </div>
+        {aktiverTermin.sv_ablehnung_grund && (
+          <p className="text-xs text-amber-800">
+            <span className="font-medium">Begründung:</span> {aktiverTermin.sv_ablehnung_grund}
+          </p>
+        )}
+        <div className="space-y-1.5">
+          {slots.map((slot, i) => {
+            const s = new Date(slot.start)
+            const e = new Date(slot.end)
+            return (
+              <button
+                key={i}
+                type="button"
+                disabled={pending}
+                onClick={() => handleAcceptSlot(i)}
+                className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-white hover:bg-emerald-50 border border-amber-200 hover:border-emerald-300 text-xs disabled:opacity-50"
+              >
+                <span className="text-gray-800">
+                  Slot {i + 1}: {s.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })} ·{' '}
+                  {s.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} – {e.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+                <span className="flex items-center gap-1 text-emerald-600 font-medium">
+                  <CheckIcon className="w-3.5 h-3.5" /> Akzeptieren
+                </span>
+              </button>
+            )
+          })}
+        </div>
+        <button
+          type="button"
+          disabled={pending}
+          onClick={handleCancel}
+          className="w-full text-xs font-medium px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+        >
+          Stornieren + neuen SV wählen
+        </button>
+        {toast && <p className="text-xs text-center">{toast}</p>}
+      </div>
+    )
+  }
+
+  // ─── Wenn bereits ein Termin existiert (reserviert/bestaetigt), zeige ihn an
   if (aktiverTermin) {
     const start = new Date(aktiverTermin.start_zeit)
     const ende = new Date(aktiverTermin.end_zeit)
