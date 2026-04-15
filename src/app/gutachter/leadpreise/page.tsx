@@ -1,13 +1,19 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getGutachterForUser } from '@/lib/gutachter'
+import { paketLabelMitKontingent } from '@/lib/sachverstaendige/kontingent'
 
 export default async function LeadpreisePage() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  const sv = await getGutachterForUser<{ id: string; paket: string; kontingent_soll: number; max_faelle_monat: number }>(supabase, user.id, 'id, paket, kontingent_soll, max_faelle_monat')
+  // AAR-209: paket_faelle_gesamt zusätzlich laden für konsistenten
+  // Kontingent-Resolver (dieselben Quellen wie willkommen + dashboard).
+  const sv = await getGutachterForUser<{
+    id: string; paket: string; kontingent_soll: number | null;
+    max_faelle_monat: number | null; paket_faelle_gesamt: number | null;
+  }>(supabase, user.id, 'id, paket, kontingent_soll, max_faelle_monat, paket_faelle_gesamt')
   if (!sv) redirect('/gutachter')
 
   const { data: tabelle } = await supabase.from('leadpreise_tabelle')
@@ -15,8 +21,7 @@ export default async function LeadpreisePage() {
     .eq('aktiv', true)
     .order('schadenhoehe_bis_netto', { ascending: true })
 
-  const kontingent = sv.kontingent_soll ?? sv.max_faelle_monat ?? 10
-  const paketLabel = sv.paket === 'pro' || sv.paket === 'standard-25' ? 'Pro (25)' : sv.paket === 'premium' || sv.paket === 'premium-50' ? 'Premium (50)' : `Standard (${kontingent})`
+  const paketLabel = paketLabelMitKontingent(sv)
 
   const standDatum = tabelle?.[0]?.created_at
     ? new Date(tabelle[0].created_at).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })

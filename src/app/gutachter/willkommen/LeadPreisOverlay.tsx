@@ -18,16 +18,16 @@ export default function LeadPreisOverlay({
   open,
   onClose,
   rows,
-  kontingent,
-  paketLabel,
   maxFaelleMonat,
+  paketLabel,
 }: {
   open: boolean
   onClose: () => void
   rows: LeadpreisRow[]
-  kontingent: number
-  paketLabel: string
+  /** Monatliches Kontingent — gleichzeitig ROI-Multiplikator und
+   *  Anzeige im Header. */
   maxFaelleMonat: number
+  paketLabel: string
 }) {
   // ROI-Rechner State — Durchschnittswerte, einfach zu pflegen.
   // Default-Schadenhöhe 6.000 EUR (typisch für Karosserieschäden), Honorar
@@ -72,7 +72,7 @@ export default function LeadPreisOverlay({
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#0D1B3E] to-[#1E3A5F] text-white shrink-0">
           <div>
             <h2 id="leadpreis-overlay-title" className="text-lg font-semibold">Lead-Preis-Tabelle + ROI-Rechner</h2>
-            <p className="text-[11px] text-white/70 mt-0.5">33 Stufen · Paket {paketLabel} · {kontingent} Fälle im Kontingent</p>
+            <p className="text-[11px] text-white/70 mt-0.5">{rows.length} Stufen · Paket {paketLabel} · {maxFaelleMonat} Fälle im Kontingent</p>
           </div>
           <button
             onClick={onClose}

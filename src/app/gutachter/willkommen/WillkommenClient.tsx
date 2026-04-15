@@ -989,9 +989,8 @@ export default function WillkommenClient({
         open={showLeadPreisOverlay}
         onClose={() => setShowLeadPreisOverlay(false)}
         rows={leadpreise}
-        kontingent={sv.max_faelle_monat}
-        paketLabel={paketLabel}
         maxFaelleMonat={sv.max_faelle_monat}
+        paketLabel={paketLabel}
       />
     </div>
   )

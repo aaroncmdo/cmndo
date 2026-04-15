@@ -36,7 +36,7 @@ export default async function GutachterOnboardingPage() {
 
   // Fall 1: kein SV-Eintrag → Aaron muss Account anlegen
   if (!sv) {
-    redirect('/login?error=Dein%20Account%20ist%20noch%20nicht%20eingerichtet.%20Bitte%20kontaktiere%20Aaron%20unter%20support%40claimondo.de')
+    redirect('/login?error=Dein%20Account%20ist%20noch%20nicht%20eingerichtet.%20Bitte%20kontaktiere%20Aaron%20unter%20aaron.sprafke%40claimondo.de')
   }
 
   // Fall 4: vollstaendig durch → Dashboard
