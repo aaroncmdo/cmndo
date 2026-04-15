@@ -95,14 +95,15 @@ export function computeQualificationStatus(
     lead.parkplatz_kamera === true ||
     (lead.fahrerflucht === true && lead.polizei_vor_ort === true)
 
-  // AAR-181: Fahrzeug-Pflichtfelder in Phase 4.
-  // Baujahr wird jetzt explizit verlangt damit Fallakte + Gutachter die
-  // Info direkt haben (vorher nur optional in Fallakte nachgetragen).
+  // AAR-181 + AAR-199: Fahrzeug-Pflichtfelder in Phase 4.
+  // Baujahr war kurz als Pflicht (AAR-181), wurde aber am 2026-04-16 wieder
+  // optional erklärt — blockierte sonst JEDEN FlowLink-Versand bevor ZB1-OCR
+  // (AAR-182) oder CarQuery (AAR-194) das Feld automatisch befüllen kann.
+  // Pflicht bleiben Kennzeichen + Hersteller + Modell.
   const q7_fahrzeug =
     !!lead.kennzeichen?.trim() &&
     !!lead.fahrzeug_hersteller?.trim() &&
-    !!lead.fahrzeug_modell?.trim() &&
-    lead.fahrzeug_baujahr != null
+    !!lead.fahrzeug_modell?.trim()
 
   const disqualifiziert = lead.qualifizierungs_phase === 'disqualifiziert'
 

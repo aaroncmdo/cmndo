@@ -276,17 +276,20 @@ export default function Phase4Stammdaten() {
           dynamisch via CarQuery (gefiltert nach Baujahr falls gesetzt). */}
       <Card icon={<CarIcon className="w-4 h-4 text-gray-400" />} title="Fahrzeugdaten">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* AAR-181: Baujahr Pflichtfeld. AAR-194: Als erstes Feld damit
-              CarQuery Marke/Modell direkt nach Baujahr gefiltert laden. */}
+          {/* AAR-194: Baujahr als erstes Feld damit CarQuery Marke/Modell
+              direkt gefiltert lädt. AAR-199: Baujahr ist OPTIONAL — wird
+              via ZB1-OCR (AAR-182) oder CarQuery (AAR-194) auto-befüllt,
+              blockiert nicht mehr den FlowLink-Versand. */}
           <InlineField
             label="Baujahr"
-            required
             value={l.fahrzeug_baujahr != null ? String(l.fahrzeug_baujahr) : null}
             fieldName="fahrzeug_baujahr"
             leadId={leadId}
             placeholder="z.B. 2018"
             transform={formatBaujahr}
-            hint={l.fahrzeug_baujahr == null ? 'Wird auf Fall übernommen (1990–heute)' : 'Filtert die Marken-Liste'}
+            hint={l.fahrzeug_baujahr == null
+              ? 'Optional — via ZB1-OCR oder Auto-Vervollständigung nachträglich'
+              : 'Filtert die Marken-Liste'}
           />
 
           <InlineField
@@ -677,11 +680,12 @@ export default function Phase4Stammdaten() {
           (Fahrerflucht + Polizei=Ja).
         </p>
       )}
-      {/* AAR-181: Fahrzeug-Pflichtfeld-Hinweis — Kennzeichen/Marke/Modell/Baujahr */}
+      {/* AAR-181 / AAR-199: Fahrzeug-Pflichtfelder — Kennzeichen, Marke, Modell.
+          Baujahr ist optional (AAR-199). */}
       {!qualification.q7_fahrzeug && (
         <p className="text-[11px] text-amber-700 flex items-start gap-1 px-1">
           <AlertTriangleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-          Pflichtfelder fehlen: Kennzeichen, Marke, Modell und Baujahr müssen alle gesetzt sein.
+          Pflichtfelder fehlen: Kennzeichen, Marke und Modell müssen gesetzt sein.
         </p>
       )}
     </div>

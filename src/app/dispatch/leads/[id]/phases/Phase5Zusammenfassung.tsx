@@ -272,7 +272,8 @@ export default function Phase5Zusammenfassung() {
               ? 'bg-green-100 text-green-700'
               : 'bg-amber-100 text-amber-700'
           }`}>
-            {qualification.completedCount}/6 Bedingungen
+            {/* AAR-199: /7 seit q7_fahrzeug aus AAR-181 dazu kam. */}
+            {qualification.completedCount}/7 Bedingungen
           </span>
         </div>
         <div className="divide-y divide-gray-100">
