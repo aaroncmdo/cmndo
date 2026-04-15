@@ -33,31 +33,20 @@ export default async function DispatchLeadDetail({
     .order('created_at', { ascending: false })
     .limit(5)
 
-  // Wenn bereits ein Fall existiert (nach SA-Unterschrift), laden wir Snapshot-
-  // Felder für Phase 6 Status-Tracking. Der Lead-Status selbst (sa_unterschrieben
-  // auf leads) bleibt die primäre Quelle, aber Pfad-A zeigt auch Vollmacht.
-  const latestFallId = flowLinks?.find((f) => f.fall_id)?.fall_id ?? null
-  let fallSnapshot: { sa_unterschrieben: boolean | null; vollmacht_unterschrieben: boolean | null } | null = null
-  if (latestFallId) {
-    const { data: fallRow } = await supabase
-      .from('faelle')
-      .select('sa_unterschrieben, vollmacht_unterschrieben')
-      .eq('id', latestFallId)
-      .maybeSingle()
-    if (fallRow) {
-      fallSnapshot = {
-        sa_unterschrieben: (fallRow as { sa_unterschrieben: boolean | null }).sa_unterschrieben,
-        vollmacht_unterschrieben: (fallRow as { vollmacht_unterschrieben: boolean | null }).vollmacht_unterschrieben,
-      }
-    }
-  }
-  // Fallback: Lead hat sa_unterschrieben-Flag (wird vom autoPhase-Trigger gesetzt)
-  if (!fallSnapshot && lead.sa_unterschrieben) {
-    fallSnapshot = {
-      sa_unterschrieben: lead.sa_unterschrieben ?? null,
-      vollmacht_unterschrieben: lead.vollmacht_unterschrieben ?? null,
-    }
-  }
+  // Phase 6 Status-Tracking Snapshot. Sowohl sa_unterschrieben als auch
+  // vollmacht_unterschrieben leben auf der leads-Tabelle (siehe BUG-15
+  // Migration 20260330). Die faelle-Tabelle kennt zwar sa_unterschrieben,
+  // aber KEIN vollmacht_unterschrieben (nur vollmacht_geprueft_am +
+  // vollmacht_pruefung_status von LexDrive/AAR-69). Für die Dispatch-Ansicht
+  // ist das leads-Flag die relevante Quelle — setzt autoPhase und der
+  // FlowWizard setzt es nach SA/Vollmacht-Unterschrift.
+  const unterschriftenSnapshot =
+    lead.sa_unterschrieben || lead.vollmacht_unterschrieben
+      ? {
+          sa_unterschrieben: lead.sa_unterschrieben ?? null,
+          vollmacht_unterschrieben: lead.vollmacht_unterschrieben ?? null,
+        }
+      : null
 
   const { data: calls } = await supabase
     .from('aircall_calls')
@@ -126,7 +115,7 @@ export default async function DispatchLeadDetail({
       aktiverTermin={aktiverSvTermin}
       flowLinks={flowLinks ?? []}
       calls={calls ?? []}
-      fall={fallSnapshot}
+      fall={unterschriftenSnapshot}
       initialPhase={initialPhase}
       saUnterschrieben={saUnterschrieben}
     />
