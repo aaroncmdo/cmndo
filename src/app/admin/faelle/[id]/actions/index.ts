@@ -18,6 +18,7 @@ export {
   startRuege,
   uebergebeFallKlage,
 } from './prozess'
+export { createKbVideoterminByKb } from './termine'
 
 // Re-exports aus dem vorhandenen Monolith (wird später zerlegt):
 export {
