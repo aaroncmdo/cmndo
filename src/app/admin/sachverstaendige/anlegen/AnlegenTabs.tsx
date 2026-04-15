@@ -14,6 +14,21 @@ import Link from 'next/link'
 
 type TabKey = 'solo' | 'buero' | 'sub' | 'akademie' | 'community'
 
+// AAR-198: Typ-Farben konsistent mit KarteHubClient TYP_COLORS:
+//   kfz-gutachter → #3b82f6 (blau) — Solo-SV + Sub-SV (beides kfz-gutachter)
+//   gutachterbuero → #a855f7 (violett) — Büro
+//   akademie → #22c55e (grün) — Akademie
+//   community → #0ea5e9 (sky) — Community (in Karte als eigener Layer, hier
+//     als dezenter Sky-Ton)
+// Aktiver Tab: volle Farbe + Weiß. Inaktiv: dezenter Tint + Text in Farbe.
+const TAB_COLORS: Record<TabKey, { active: string; idle: string }> = {
+  solo:      { active: 'bg-[#3b82f6] text-white border-[#3b82f6]', idle: 'bg-[#3b82f6]/5 text-[#3b82f6] border-[#3b82f6]/20 hover:bg-[#3b82f6]/10' },
+  buero:     { active: 'bg-[#a855f7] text-white border-[#a855f7]', idle: 'bg-[#a855f7]/5 text-[#a855f7] border-[#a855f7]/20 hover:bg-[#a855f7]/10' },
+  sub:       { active: 'bg-[#3b82f6] text-white border-[#3b82f6]', idle: 'bg-[#3b82f6]/5 text-[#3b82f6] border-[#3b82f6]/20 hover:bg-[#3b82f6]/10' },
+  akademie:  { active: 'bg-[#22c55e] text-white border-[#22c55e]', idle: 'bg-[#22c55e]/5 text-[#22c55e] border-[#22c55e]/20 hover:bg-[#22c55e]/10' },
+  community: { active: 'bg-[#0ea5e9] text-white border-[#0ea5e9]', idle: 'bg-[#0ea5e9]/5 text-[#0ea5e9] border-[#0ea5e9]/20 hover:bg-[#0ea5e9]/10' },
+}
+
 const TABS: { key: TabKey; label: string; icon: typeof UserIcon; disabled: boolean; disabledHint?: string }[] = [
   { key: 'solo', label: 'Solo-SV', icon: UserIcon, disabled: false },
   { key: 'buero', label: 'Büro', icon: Building2Icon, disabled: false },
@@ -38,17 +53,18 @@ export default function AnlegenTabs({ organisationen, onSuccess }: {
         {TABS.map(t => {
           const Icon = t.icon
           const isActive = active === t.key
+          const colors = TAB_COLORS[t.key]
           return (
             <button
               key={t.key}
               onClick={() => !t.disabled && setActive(t.key)}
               disabled={t.disabled}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors whitespace-nowrap border ${
                 t.disabled
-                  ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                  ? 'bg-gray-100 text-gray-300 border-gray-200 cursor-not-allowed'
                   : isActive
-                  ? 'bg-[#1E3A5F] text-white'
-                  : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                  ? colors.active
+                  : colors.idle
               }`}
             >
               <Icon className="w-4 h-4" />
