@@ -77,6 +77,11 @@ export async function createSachverstaendiger(formData: FormData) {
   const { error: svErr } = await admin
     .from('sachverstaendige')
     .insert({
+      // AAR-185: user_id ergänzt — war vergessen und führte dazu dass
+      // neu angelegte SVs in der Admin-Karten-Ansicht nicht erschienen
+      // (manche Legacy-Queries joinen noch via user_id statt profile_id).
+      // onboardGutachter() weiter unten setzt es korrekt.
+      user_id: authUser.user.id,
       profile_id: authUser.user.id,
       paket,
       gebiet_plz: gebietPlz,
