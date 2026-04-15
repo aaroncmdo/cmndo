@@ -11,6 +11,7 @@
 // Nach dem Follow-up-Split verschwindet nur das Source-File — Imports bleiben.
 
 export { updateFallField } from './stammdaten'
+export { triggerFinCallForFall, markDokumentNachgereicht } from './dokumente'
 
 // Re-exports aus dem vorhandenen Monolith (wird später zerlegt):
 export {

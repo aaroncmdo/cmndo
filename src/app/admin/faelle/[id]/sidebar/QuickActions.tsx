@@ -1,67 +1,67 @@
 'use client'
 
-// AAR-162 / W2: Quick-Actions-Sidebar — phase-abhängige Buttons.
+// AAR-162 / W2 + AAR-163 / W3: Quick-Actions-Sidebar — phase-abhängige Buttons.
 // Inhalte kommen aus der Subphasen-Matrix 3431da4c91248176ae66e2a981993f60.
-// W2 implementiert das Grundgerüst + 2-3 Actions pro Haupt-Phase; der Rest
-// (Stellungnahme-anfordern, Nachbesichtigung-koordinieren, etc.) wandert
-// in W4 sobald die zugehörigen Server-Actions existieren.
+// W3 verdrahtet den FIN-Call — alle anderen Actions bleiben Platzhalter bis
+// zugehörige Server-Actions existieren (überwiegend W4/AAR-164).
 
+import { useTransition } from 'react'
+import { toast } from 'sonner'
 import { useFall } from '../FallContext'
+import { triggerFinCallForFall } from '../actions/dokumente'
 
 type QuickAction = {
   label: string
   description?: string
   onClick?: () => void
   disabled?: boolean
-}
-
-function getActionsForPhase(phase: string): QuickAction[] {
-  switch (phase) {
-    case 'ersterfassung':
-    case 'erstgespraech':
-    case 'flow-gesendet':
-    case 'onboarding':
-      return [
-        { label: 'ZB1 anfordern', description: 'WA-Reminder an Kunde' },
-        { label: 'Kunde anrufen' },
-      ]
-    case 'sv-gesucht':
-    case 'termin-reserviert':
-    case 'sv-zugewiesen':
-    case 'sv-termin':
-      return [
-        { label: 'FIN-Call triggern', description: 'Cardentity/DAT Vorschaden-Check' },
-        { label: 'Termin-Erinnerung senden' },
-      ]
-    case 'gutachten-erstellt':
-    case 'akte-uebergeben':
-    case 'gutachten-eingegangen':
-      return [
-        { label: 'QC durchführen' },
-        { label: 'E-Akte an Kanzlei' },
-      ]
-    case 'as-versendet':
-    case 'warten-auf-vs':
-      return [{ label: 'Eskalation triggern', description: 'Bei Frist-Ablauf Tag 14/21/28' }]
-    case 'vs-kuerzt':
-      return [
-        { label: 'Techn. Stellungnahme SV anfordern' },
-        { label: 'Rüge vorbereiten' },
-      ]
-    case 'nachbesichtigung-laeuft':
-      return [{ label: 'Nachbesichtigungs-Ergebnis einpflegen' }]
-    case 'vs-reguliert':
-    case 'regulierung-laeuft':
-    case 'zahlung-eingegangen':
-      return [{ label: 'Kunde informieren (WA)' }]
-    default:
-      return []
-  }
+  title?: string
 }
 
 export default function QuickActions() {
-  const { phase } = useFall()
-  const actions = getActionsForPhase(phase)
+  const { fall, phase } = useFall()
+  const [pending, startTransition] = useTransition()
+
+  // AAR-163 FIN-Call: nur sichtbar wenn FIN vorhanden + SV-Termin in Zukunft
+  // + noch nicht abgefragt. Admin/KB-Rollen-Check liegt serverseitig.
+  const fin = (fall.fin_vin as string | null) ?? (fall.fin as string | null)
+  const svTermin = fall.sv_termin as string | null
+  const cardentityAm = (fall.cardentity_abfrage_am as string | null) ??
+    (fall.cardentity_enriched_at as string | null)
+  const finCallMoeglich =
+    !!fin && !cardentityAm && (!svTermin || new Date(svTermin) > new Date())
+
+  function triggerFinCall() {
+    startTransition(async () => {
+      const r = await triggerFinCallForFall(fall.id)
+      if (r.success) {
+        toast.success(
+          r.updatedFields?.length
+            ? `FIN-Call erfolgreich — ${r.updatedFields.length} Felder aktualisiert`
+            : 'FIN-Call ausgeführt (keine neuen Daten)',
+        )
+      } else {
+        toast.error(r.error ?? 'FIN-Call fehlgeschlagen')
+      }
+    })
+  }
+
+  const actions: QuickAction[] = []
+
+  // FIN-Call ist phasen-übergreifend relevant (Vor-SV-Termin-Fenster)
+  if (finCallMoeglich) {
+    actions.push({
+      label: pending ? 'FIN-Call läuft ...' : 'FIN-Call triggern',
+      description: 'Cardentity/DAT — Fahrzeug + Vorschaden-Check',
+      onClick: triggerFinCall,
+      disabled: pending,
+    })
+  }
+
+  // Phase-spezifische Platzhalter-Aktionen (W4 aktiviert sie)
+  const phaseActions = getPhaseActions(phase)
+  actions.push(...phaseActions)
+
   if (actions.length === 0) return null
 
   return (
@@ -72,9 +72,9 @@ export default function QuickActions() {
           <button
             key={i}
             type="button"
-            disabled={a.disabled ?? true}
+            disabled={a.disabled}
             onClick={a.onClick}
-            title="Wird in W4 aktiviert (Server-Action fehlt noch)"
+            title={a.title ?? (a.onClick ? undefined : 'Wird in W4 aktiviert')}
             className="w-full text-left px-2 py-1.5 rounded-md border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <p className="text-xs font-medium text-gray-700">{a.label}</p>
@@ -84,4 +84,45 @@ export default function QuickActions() {
       </div>
     </div>
   )
+}
+
+function getPhaseActions(phase: string): QuickAction[] {
+  switch (phase) {
+    case 'ersterfassung':
+    case 'erstgespraech':
+    case 'flow-gesendet':
+    case 'onboarding':
+      return [
+        { label: 'ZB1 anfordern', description: 'WA-Reminder an Kunde', disabled: true },
+        { label: 'Kunde anrufen', disabled: true },
+      ]
+    case 'sv-gesucht':
+    case 'termin-reserviert':
+    case 'sv-zugewiesen':
+    case 'sv-termin':
+      return [{ label: 'Termin-Erinnerung senden', disabled: true }]
+    case 'gutachten-erstellt':
+    case 'akte-uebergeben':
+    case 'gutachten-eingegangen':
+      return [
+        { label: 'QC durchführen', disabled: true },
+        { label: 'E-Akte an Kanzlei', disabled: true },
+      ]
+    case 'as-versendet':
+    case 'warten-auf-vs':
+      return [{ label: 'Eskalation triggern', description: 'Bei Frist-Ablauf Tag 14/21/28', disabled: true }]
+    case 'vs-kuerzt':
+      return [
+        { label: 'Techn. Stellungnahme SV anfordern', disabled: true },
+        { label: 'Rüge vorbereiten', disabled: true },
+      ]
+    case 'nachbesichtigung-laeuft':
+      return [{ label: 'Nachbesichtigungs-Ergebnis einpflegen', disabled: true }]
+    case 'vs-reguliert':
+    case 'regulierung-laeuft':
+    case 'zahlung-eingegangen':
+      return [{ label: 'Kunde informieren (WA)', disabled: true }]
+    default:
+      return []
+  }
 }
