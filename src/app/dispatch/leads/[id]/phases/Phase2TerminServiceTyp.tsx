@@ -67,23 +67,24 @@ export default function Phase2TerminServiceTyp() {
       setServiceTypLocal(typ)
       try {
         await setServiceTyp(lead.id, typ)
-        setToast('Service-Typ gespeichert')
-        // AAR-176 P3-A: Auto-Advance zu Phase 3 sobald alles in Phase 2 steht.
-        // AAR-179 Audit-Fix #1: router.refresh() vor setPhase(3) damit der
-        // Context-State (aktiverTermin) aus frischen Server-Props berechnet
-        // wird — sonst bleibt aktiverTermin stale wenn User gerade erst
-        // reserviert hat und der Provider noch auf initialTermin sitzt.
-        if (hasKoordinaten) {
-          router.refresh()
-          // Das setPhase ist erst sinnvoll wenn ein Termin reserviert wurde.
-          // Wir prüfen den aktuellen (möglicherweise stale) State + lassen
-          // die nächste Phase-Check-Runde den Advance machen falls nötig.
-          if (aktiverTermin) setPhase(3)
+        // AAR-187 Fix: explizites Feedback für alle Zustände + await auf
+        // router.refresh() damit Context frisch ist BEVOR setPhase(3) läuft
+        // (vorher Race — stale aktiverTermin blockte Auto-Advance).
+        if (!aktiverTermin) {
+          setToast('Service-Typ gespeichert — bitte noch SV-Termin reservieren')
+        } else if (!hasKoordinaten) {
+          setToast('Service-Typ gespeichert — Besichtigungsadresse fehlt noch')
+        } else {
+          setToast('Service-Typ gespeichert')
+          await router.refresh()
+          // 200ms Delay damit der Provider die frischen Props übernimmt
+          // bevor Phase 3 gerendert wird.
+          setTimeout(() => setPhase(3), 200)
         }
       } catch (err) {
         setToast(err instanceof Error ? err.message : 'Fehler')
       }
-      setTimeout(() => setToast(''), 2500)
+      setTimeout(() => setToast(''), 3000)
     })
   }
 
