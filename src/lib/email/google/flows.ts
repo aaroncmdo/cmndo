@@ -15,6 +15,7 @@ import { DispatcherGegenvorschlagEmail, subject as dispatcherGegenvorschlagSubje
 import { KanzleiMonatsAbrechnungEmail, subject as kanzleiMonatsAbrechnungSubject } from './templates/KanzleiMonatsAbrechnung'
 import { WillkommenSvEmail, subject as willkommenSvSubject } from './templates/WillkommenSv'
 import { WillkommenSvAnBueroEmail, subject as willkommenSvAnBueroSubject } from './templates/WillkommenSvAnBuero'
+import { FlowLinkVersandEmail, subject as flowLinkVersandSubject } from './templates/FlowLinkVersand'
 
 const admin = () => createAdminClient()
 
@@ -828,5 +829,72 @@ export async function sendDispatcherGegenvorschlag(
       empfaengerTyp: 'admin',
       template: 'dispatcher_gegenvorschlag',
     }).catch((err) => console.warn('[AAR-134] Dispatcher-Email an', to, 'fehlgeschlagen:', err))
+  }
+}
+
+// ─── AAR-141 / W7: FlowLink-Versand per Email ────────────────────────────────
+// Alternative zum Standard-WA-Versand wenn Kunde Email bevorzugt oder keine
+// WA-Nummer hat. Wird aus sendFlowLinkMultiChannel heraus aufgerufen.
+
+export async function sendFlowLinkVersand(
+  leadId: string,
+  flowUrl: string,
+): Promise<{ success: boolean; error?: string }> {
+  const db = admin()
+
+  const { data: lead } = await db
+    .from('leads')
+    .select('email, vorname')
+    .eq('id', leadId)
+    .single()
+
+  if (!lead?.email) return { success: false, error: 'Kein Email bei Lead' }
+
+  // Aktiver Termin (reserviert oder bestaetigt) um SV-Name + Datum zu zeigen
+  const { data: terminRaw } = await db
+    .from('gutachter_termine')
+    .select('start_zeit, sachverstaendige(profiles(vorname, nachname))')
+    .eq('lead_id', leadId)
+    .in('status', ['reserviert', 'bestaetigt'])
+    .order('start_zeit', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+
+  const termin = terminRaw as { start_zeit: string; sachverstaendige: unknown } | null
+  const svRel = termin?.sachverstaendige
+  const sv = (Array.isArray(svRel) ? svRel[0] : svRel) as { profiles: unknown } | null
+  const profileRel = sv?.profiles
+  const profile = (Array.isArray(profileRel) ? profileRel[0] : profileRel) as
+    | { vorname: string | null; nachname: string | null }
+    | null
+
+  const props = {
+    vorname: lead.vorname ?? 'Kunde',
+    svVorname: profile?.vorname ?? '',
+    svNachname: profile?.nachname ?? '',
+    terminDatum: termin?.start_zeit
+      ? new Date(termin.start_zeit).toLocaleDateString('de-DE')
+      : '—',
+    terminUhrzeit: termin?.start_zeit
+      ? new Date(termin.start_zeit).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+      : '—',
+    flowUrl,
+  }
+
+  try {
+    const html = await render(FlowLinkVersandEmail(props))
+    await sendEmail({
+      to: lead.email,
+      subject: flowLinkVersandSubject(props),
+      html,
+      empfaengerTyp: 'kunde',
+      template: 'flowlink_versand',
+    })
+    return { success: true }
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Email-Versand fehlgeschlagen',
+    }
   }
 }
