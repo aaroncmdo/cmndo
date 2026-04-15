@@ -24,6 +24,11 @@ export type LeadLike = {
   fahrerflucht?: boolean | null
   // AAR-176: Treffpunkt-Hinweis für den SV (Phase 2)
   sv_treffpunkt?: string | null
+  // AAR-181: Fahrzeug-Stammdaten die Phase 4 als Pflichtfelder prüft
+  kennzeichen?: string | null
+  fahrzeug_hersteller?: string | null
+  fahrzeug_modell?: string | null
+  fahrzeug_baujahr?: number | null
 }
 
 export type AktiverTerminLike = {
@@ -43,11 +48,13 @@ export type QualificationResult = {
   q5_svTermin: boolean
   /** Q6: Gegner-KZ vorhanden ODER Parkplatz-Kamera=true ODER (Fahrerflucht + Polizei) */
   q6_gegnerKz: boolean
-  /** Alle 6 Bedingungen erfüllt */
+  /** AAR-181 Q7: Fahrzeug-Pflichtfelder (KZ, Marke, Modell, Baujahr) alle gesetzt */
+  q7_fahrzeug: boolean
+  /** Alle 7 Bedingungen erfüllt */
   allComplete: boolean
   /** FlowLink-Versand erlaubt (aktuell === allComplete) */
   canSendFlowLink: boolean
-  /** Wie viele der 6 Bedingungen bereits erfüllt sind (0-6) */
+  /** Wie viele der 7 Bedingungen bereits erfüllt sind (0-7) */
   completedCount: number
   /** Lead wurde explizit disqualifiziert */
   disqualifiziert: boolean
@@ -85,11 +92,23 @@ export function computeQualificationStatus(
     lead.parkplatz_kamera === true ||
     (lead.fahrerflucht === true && lead.polizei_vor_ort === true)
 
+  // AAR-181: Fahrzeug-Pflichtfelder in Phase 4.
+  // Baujahr wird jetzt explizit verlangt damit Fallakte + Gutachter die
+  // Info direkt haben (vorher nur optional in Fallakte nachgetragen).
+  const q7_fahrzeug =
+    !!lead.kennzeichen?.trim() &&
+    !!lead.fahrzeug_hersteller?.trim() &&
+    !!lead.fahrzeug_modell?.trim() &&
+    lead.fahrzeug_baujahr != null
+
   const disqualifiziert = lead.qualifizierungs_phase === 'disqualifiziert'
 
-  const flags = [q1_schuldfrage, q2_schaden, q3_polizei, q4_schadentyp, q5_svTermin, q6_gegnerKz]
+  const flags = [
+    q1_schuldfrage, q2_schaden, q3_polizei,
+    q4_schadentyp, q5_svTermin, q6_gegnerKz, q7_fahrzeug,
+  ]
   const completedCount = flags.filter(Boolean).length
-  const allComplete = completedCount === 6 && !disqualifiziert
+  const allComplete = completedCount === flags.length && !disqualifiziert
 
   return {
     q1_schuldfrage,
@@ -98,6 +117,7 @@ export function computeQualificationStatus(
     q4_schadentyp,
     q5_svTermin,
     q6_gegnerKz,
+    q7_fahrzeug,
     allComplete,
     canSendFlowLink: allComplete,
     completedCount,

@@ -25,6 +25,7 @@ type LeadSnapshot = {
   kennzeichen?: string | null
   fahrzeug_hersteller?: string | null
   fahrzeug_modell?: string | null
+  fahrzeug_baujahr?: number | null
   service_typ?: string | null
   schadentyp?: string | null
   schuldfrage?: string | null
@@ -207,9 +208,10 @@ export default function Phase5Zusammenfassung() {
       jumpToPhase: 2,
     },
     {
-      label: 'Eigenes KZ / Fahrzeug',
-      value: `${l.kennzeichen ?? '—'} / ${fahrzeugText}`,
-      missing: !l.kennzeichen || !l.fahrzeug_hersteller,
+      label: 'Eigenes KZ / Fahrzeug / Baujahr',
+      value: `${l.kennzeichen ?? '—'} / ${fahrzeugText} / ${l.fahrzeug_baujahr ?? '—'}`,
+      // AAR-181: Baujahr als Pflichtfeld
+      missing: !qualification.q7_fahrzeug,
       jumpToPhase: 4,
     },
     {

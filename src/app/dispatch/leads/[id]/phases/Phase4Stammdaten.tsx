@@ -39,6 +39,7 @@ type LeadFields = {
   kennzeichen?: string | null
   fahrzeug_hersteller?: string | null
   fahrzeug_modell?: string | null
+  fahrzeug_baujahr?: number | null
   fin?: string | null
   cardentity_enriched_at?: string | null
   hat_vorschaeden?: boolean | null
@@ -65,6 +66,19 @@ type LeadFields = {
 // Auto-Format für deutsche Kennzeichen: alles groß + Whitespace entfernen
 function formatKennzeichen(raw: string): string {
   return raw.toUpperCase().replace(/\s+/g, ' ').trim()
+}
+
+// AAR-181: Baujahr-Input kommt als String rein, DB-Spalte ist INTEGER.
+// Wir akzeptieren nur 4-stellige Jahreszahlen im plausiblen Bereich
+// (1990–aktuelles Jahr+1). Ungültige Eingaben werden auf '' gesetzt →
+// saveStammdaten speichert dann NULL.
+function formatBaujahr(raw: string): string {
+  const digits = raw.replace(/\D/g, '')
+  if (digits.length !== 4) return ''
+  const y = Number(digits)
+  const maxYear = new Date().getFullYear() + 1
+  if (y < 1990 || y > maxYear) return ''
+  return String(y)
 }
 
 /**
@@ -278,6 +292,19 @@ export default function Phase4Stammdaten() {
             value={l.fahrzeug_modell}
             fieldName="fahrzeug_modell"
             leadId={leadId}
+          />
+
+          {/* AAR-181: Baujahr ist Pflichtfeld — Phase 4 gilt nicht als
+              abgeschlossen wenn leer. Integer-Typ auf DB, Input akzeptiert
+              4-stellige Jahreszahl (YYYY). */}
+          <InlineField
+            label="Baujahr *"
+            value={l.fahrzeug_baujahr != null ? String(l.fahrzeug_baujahr) : null}
+            fieldName="fahrzeug_baujahr"
+            leadId={leadId}
+            placeholder="z.B. 2018"
+            transform={formatBaujahr}
+            hint={l.fahrzeug_baujahr == null ? 'Pflichtfeld — wird auf Fall übernommen' : undefined}
           />
 
           {/* Eigentümer (approximiert via finanzierung_leasing + vorsteuerabzugsberechtigt).
@@ -526,6 +553,13 @@ export default function Phase4Stammdaten() {
           <AlertTriangleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
           Phase 4 erst abgeschlossen wenn Gegner-KZ eingegeben ODER Parkplatz-Kamera=Ja ODER
           (Fahrerflucht + Polizei=Ja).
+        </p>
+      )}
+      {/* AAR-181: Fahrzeug-Pflichtfeld-Hinweis — Kennzeichen/Marke/Modell/Baujahr */}
+      {!qualification.q7_fahrzeug && (
+        <p className="text-[11px] text-amber-700 flex items-start gap-1 px-1">
+          <AlertTriangleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+          Pflichtfelder fehlen: Kennzeichen, Marke, Modell und Baujahr müssen alle gesetzt sein.
         </p>
       )}
     </div>

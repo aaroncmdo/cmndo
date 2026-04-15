@@ -13,6 +13,8 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   'vorname', 'nachname', 'telefon', 'email',
   // Fahrzeug
   'kennzeichen', 'fahrzeug_hersteller', 'fahrzeug_modell',
+  // AAR-181: Baujahr ist Pflichtfeld in Phase 4, muss in der Allowlist sein
+  'fahrzeug_baujahr', 'erstzulassung',
   'hat_vorschaeden', 'vorschaeden_beschreibung',
   'finanzierung_leasing', 'vorsteuerabzugsberechtigt',
   // Gegner + Unfall

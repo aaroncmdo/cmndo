@@ -22,6 +22,8 @@ const TSN_REGEX = /\b([A-Z0-9]{3})\b/i
 interface ExtractedData {
   kennzeichen: string | null
   erstzulassung: string | null
+  // AAR-181: Baujahr wird aus Erstzulassung abgeleitet (DD.MM.YYYY → Jahr)
+  fahrzeug_baujahr: number | null
   halter_nachname: string | null
   halter_vorname: string | null
   halter_strasse: string | null
@@ -36,7 +38,7 @@ interface ExtractedData {
 
 function parseZB1Fields(fullText: string): ExtractedData {
   const result: ExtractedData = {
-    kennzeichen: null, erstzulassung: null,
+    kennzeichen: null, erstzulassung: null, fahrzeug_baujahr: null,
     halter_nachname: null, halter_vorname: null,
     halter_strasse: null, halter_plz: null, halter_stadt: null,
     fahrzeug_hersteller: null, fahrzeug_modell: null,
@@ -124,6 +126,17 @@ function parseZB1Fields(fullText: string): ExtractedData {
   if (!result.kennzeichen) {
     const kzMatch = fullText.match(/\b([A-ZÄÖÜ]{1,3})[\s-]([A-Z]{1,2})[\s]?(\d{1,4})\b/)
     if (kzMatch) result.kennzeichen = `${kzMatch[1]}-${kzMatch[2]} ${kzMatch[3]}`
+  }
+
+  // AAR-181: Baujahr aus Erstzulassung ableiten (DD.MM.YYYY → YYYY).
+  // Plausibilitäts-Check 1990..currentYear+1, sonst null.
+  if (result.erstzulassung) {
+    const m = result.erstzulassung.match(/(\d{4})\s*$/)
+    if (m) {
+      const y = Number(m[1])
+      const maxYear = new Date().getFullYear() + 1
+      if (y >= 1990 && y <= maxYear) result.fahrzeug_baujahr = y
+    }
   }
 
   return result
@@ -217,6 +230,7 @@ export async function POST(request: Request) {
     }
     if (extracted.kennzeichen) updateData.kennzeichen = extracted.kennzeichen
     if (extracted.erstzulassung) updateData.erstzulassung = extracted.erstzulassung
+    if (extracted.fahrzeug_baujahr != null) updateData.fahrzeug_baujahr = extracted.fahrzeug_baujahr
     if (extracted.halter_vorname) updateData.halter_vorname = extracted.halter_vorname
     if (extracted.halter_nachname) updateData.halter_nachname = extracted.halter_nachname
     if (extracted.halter_strasse) updateData.halter_strasse = extracted.halter_strasse
