@@ -20,7 +20,7 @@ export default async function KundeStartseite() {
 
   const { data: directFaelle } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sa_unterschrieben, sv_id, sv_termin, gutachten_eingegangen_am, gutachter_termin_status, regulierung_am, szenario, onboarding_complete, kunde_id, kundenbetreuer_id, created_at')
+    .select('id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sa_unterschrieben, sv_id, sv_termin, gutachten_eingegangen_am, gutachter_termin_status, regulierung_am, szenario, onboarding_complete, kunde_id, kundenbetreuer_id, polizei_vor_ort, created_at')
     .eq('kunde_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -33,7 +33,7 @@ export default async function KundeStartseite() {
     if (leadIds.length) {
       const { data } = await supabase
         .from('faelle')
-        .select('id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sa_unterschrieben, sv_id, sv_termin, gutachten_eingegangen_am, gutachter_termin_status, regulierung_am, szenario, onboarding_complete, kunde_id, kundenbetreuer_id, created_at')
+        .select('id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sa_unterschrieben, sv_id, sv_termin, gutachten_eingegangen_am, gutachter_termin_status, regulierung_am, szenario, onboarding_complete, kunde_id, kundenbetreuer_id, polizei_vor_ort, created_at')
         .in('lead_id', leadIds)
         .order('created_at', { ascending: false })
       faelle = data ?? []
@@ -87,6 +87,24 @@ export default async function KundeStartseite() {
     // Seite funktioniert trotzdem — ohne Badges
   }
 
+  // AAR-125: Prüfen ob Polizeibericht fehlt für Fälle mit polizei_vor_ort=true
+  // Banner-Trigger: Fall hat polizei_vor_ort=true UND kein polizeibericht-Doc mit URL.
+  const polizeiFaelleIds = faelle
+    .filter((f) => f.polizei_vor_ort === true)
+    .map((f) => f.id as string)
+  let polizeiBerichtFehltFallId: string | null = null
+  if (polizeiFaelleIds.length) {
+    const { data: dokumente } = await supabase
+      .from('pflichtdokumente')
+      .select('fall_id, dokument_typ, dokument_url')
+      .in('fall_id', polizeiFaelleIds)
+      .eq('dokument_typ', 'polizeibericht')
+    const hatBerichtFallIds = new Set(
+      (dokumente ?? []).filter((d) => d.dokument_url).map((d) => d.fall_id as string),
+    )
+    polizeiBerichtFehltFallId = polizeiFaelleIds.find((id) => !hatBerichtFallIds.has(id)) ?? null
+  }
+
   const vorname = profile?.vorname ?? user.email?.split('@')[0] ?? 'Kunde'
 
   // KFZ-200: SV unterwegs / vor Ort Status laden (non-critical)
@@ -137,6 +155,29 @@ export default async function KundeStartseite() {
     <div className="w-full px-4 md:px-8 py-6 max-w-xl md:max-w-none mx-auto">
       <h1 className="text-xl font-bold text-[#0D1B3E] mb-1">Hallo {vorname}</h1>
       <p className="text-sm text-gray-500 mb-6">Hier sehen Sie den Stand Ihrer Fälle.</p>
+
+      {/* AAR-125: Polizeibericht-fehlt Banner */}
+      {polizeiBerichtFehltFallId && (
+        <div className="bg-amber-50 border-l-4 border-amber-500 rounded-lg p-4 mb-4">
+          <div className="flex items-start gap-3">
+            <span className="text-xl flex-shrink-0">⚠️</span>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-amber-900">Polizeibericht fehlt</p>
+              <p className="text-xs text-amber-700 mt-1">
+                Die Polizei war bei Ihrem Unfall vor Ort. Bitte laden Sie den Polizeibericht hoch,
+                sobald Sie ihn haben. Falls er bis zum Besichtigungstermin nicht vorliegt,
+                nimmt der Gutachter die Daten vor Ort auf.
+              </p>
+              <Link
+                href="/kunde/onboarding?step=dokumente"
+                className="inline-flex items-center gap-1 mt-2 text-sm font-medium text-amber-900 hover:text-amber-700"
+              >
+                Jetzt hochladen →
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* KFZ-200: SV unterwegs Banner */}
       {svUnterwegsInfo?.svUnterwegs && (
