@@ -1,0 +1,55 @@
+'use server'
+
+// AAR-143: Stammdaten-Inline-Edit extrahiert aus actions.ts (AAR-140 / W6).
+// Allowlist verhindert dass User über dieses Endpoint kritische Felder wie
+// qualifizierungs_phase / status / disqualifikations_grund_key manipulieren —
+// diese gehen ausschließlich über die jeweiligen dedizierten Actions.
+
+import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
+
+const STAMMDATEN_ALLOWED_FIELDS = new Set([
+  // Kunde
+  'vorname', 'nachname', 'telefon', 'email',
+  // Fahrzeug
+  'kennzeichen', 'fahrzeug_hersteller', 'fahrzeug_modell',
+  'hat_vorschaeden', 'vorschaeden_beschreibung',
+  'finanzierung_leasing', 'vorsteuerabzugsberechtigt',
+  // Gegner + Unfall
+  'gegner_bekannt', 'gegner_kennzeichen', 'gegner_versicherung',
+  'gegner_schadennummer', 'unfalldatum', 'unfall_uhrzeit',
+  'unfallort', 'unfallort_lat', 'unfallort_lng', 'unfallort_kategorie',
+  // AAR-135 Auto-Flags (von gegner-kz-flags.ts berechnet)
+  'fahrerflucht', 'auslandskennzeichen',
+  // Zeugen
+  'zeugen',
+])
+
+export async function saveStammdaten(
+  leadId: string,
+  updates: Record<string, unknown>,
+): Promise<{ success: boolean; error?: string; ignored?: string[] }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const allowed: Record<string, unknown> = {}
+  const ignored: string[] = []
+  for (const [key, value] of Object.entries(updates)) {
+    if (STAMMDATEN_ALLOWED_FIELDS.has(key)) {
+      allowed[key] = value
+    } else {
+      ignored.push(key)
+    }
+  }
+
+  if (Object.keys(allowed).length === 0) {
+    return { success: false, error: 'Keine erlaubten Felder im Update', ignored }
+  }
+
+  allowed.updated_at = new Date().toISOString()
+  const { error } = await supabase.from('leads').update(allowed).eq('id', leadId)
+  if (error) return { success: false, error: error.message, ignored }
+  revalidatePath(`/dispatch/leads/${leadId}`)
+  return { success: true, ignored: ignored.length ? ignored : undefined }
+}
