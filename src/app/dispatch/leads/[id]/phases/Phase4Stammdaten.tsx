@@ -10,10 +10,11 @@ import { useState, useTransition } from 'react'
 import { saveStammdaten } from '../actions'
 import { checkKZFlags } from '../lib/gegner-kz-flags'
 import { useDispatchPhase } from '../lib/phase-context'
-import CardentityButton from '../CardentityButton'
+// AAR-177 Fix #1: CardentityButton-Import entfernt (Button war nicht
+// funktionsreif und Text irritierte — Cardentity läuft jetzt im Hintergrund
+// via ZB1-OCR-Trigger in /api/ocr-fahrzeugschein Step 6).
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import {
-  UserIcon,
   CarIcon,
   ShieldIcon,
   UsersIcon,
@@ -22,6 +23,8 @@ import {
   CameraIcon,
   LoaderIcon,
   CheckIcon,
+  InfoIcon,
+  UserCheckIcon,
 } from 'lucide-react'
 
 // Top-20 KFZ-Marken in Deutschland nach Zulassungen (KBA 2024) + Sonstiges
@@ -225,24 +228,11 @@ export default function Phase4Stammdaten() {
 
   return (
     <div className="space-y-4">
-      {/* 1. Kundendaten */}
-      <Card icon={<UserIcon className="w-4 h-4 text-gray-400" />} title="Kundendaten">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <InlineField label="Vorname" value={l.vorname} fieldName="vorname" leadId={leadId} />
-          <InlineField label="Nachname" value={l.nachname} fieldName="nachname" leadId={leadId} />
-          <InlineField
-            label="Telefon (WhatsApp)"
-            value={l.telefon}
-            fieldName="telefon"
-            leadId={leadId}
-            type="tel"
-            hint="WhatsApp-Nummer für FlowLink-Versand"
-          />
-          <InlineField label="E-Mail" value={l.email} fieldName="email" leadId={leadId} type="email" />
-        </div>
-      </Card>
+      {/* AAR-177 Fix #2: Kundendaten-Card entfernt — die 4 Felder
+          (Vorname/Nachname/Telefon/Email) werden bereits in Phase 1/5
+          erfasst bzw. editiert. Doppelte Eingabe verwirrt den MA. */}
 
-      {/* 2. Fahrzeugdaten */}
+      {/* 1. Fahrzeugdaten */}
       <Card icon={<CarIcon className="w-4 h-4 text-gray-400" />} title="Fahrzeugdaten">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <InlineField
@@ -307,11 +297,20 @@ export default function Phase4Stammdaten() {
             hint={l.fahrzeug_baujahr == null ? 'Pflichtfeld — wird auf Fall übernommen' : undefined}
           />
 
-          {/* Eigentümer (approximiert via finanzierung_leasing + vorsteuerabzugsberechtigt).
-              Jeder Button setzt BEIDE Felder atomar in einem Save — sonst entstünden
-              Zwischenzustände mit doppelt-aktiven Buttons (Race zwischen 2 Writes). */}
+          {/* AAR-177 Fix #3: Eigentümer-Typ mit Info-Tooltip + Label.
+              Fix #6: Leasing/Gewerblich kontextuelle Hilfe-Box — MA weiß
+              sofort was der nächste Arbeitsschritt ist. */}
           <div className="space-y-1 sm:col-span-2">
-            <label className="text-[10px] text-gray-400 uppercase tracking-wider">Eigentümer-Typ</label>
+            <label className="text-[10px] text-gray-400 uppercase tracking-wider flex items-center gap-1">
+              <UserCheckIcon className="w-3 h-3" />
+              Eigentümer-Typ
+              <span
+                className="text-gray-400 cursor-help"
+                title="Privat = Kunde ist Eigentümer + nicht vorsteuerabzugsberechtigt. Leasing = Leasing-Fahrzeug → Vollmacht vom Leasinggeber nötig. Gewerblich = Firma als Eigentümer, Netto-Regulierung (Vorsteuer ziehbar)."
+              >
+                <InfoIcon className="w-3 h-3" />
+              </span>
+            </label>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -328,6 +327,7 @@ export default function Phase4Stammdaten() {
                     ? 'bg-[#4573A2] text-white'
                     : 'bg-gray-100 text-gray-600'
                 }`}
+                title="Kunde ist Eigentümer und nicht vorsteuerabzugsberechtigt — Brutto-Regulierung."
               >
                 Privat
               </button>
@@ -346,6 +346,7 @@ export default function Phase4Stammdaten() {
                     ? 'bg-amber-500 text-white'
                     : 'bg-gray-100 text-gray-600'
                 }`}
+                title="Leasing-Fahrzeug → Vollmacht vom Leasinggeber nötig bevor Kanzlei reguliert."
               >
                 Leasing
               </button>
@@ -364,14 +365,35 @@ export default function Phase4Stammdaten() {
                     ? 'bg-[#0D1B3E] text-white'
                     : 'bg-gray-100 text-gray-600'
                 }`}
+                title="Gewerblicher Halter — Netto-Regulierung, Vorsteuer wird abgezogen."
               >
                 Gewerblich
               </button>
             </div>
+            {/* AAR-177 Fix #6: Kontext-Hilfe-Boxen — erscheinen je nach Auswahl */}
             {l.finanzierung_leasing === 'leasing' && (
-              <p className="text-[10px] text-amber-700 italic">
-                Leasing-Vollmacht anfordern — Frist 48h.
-              </p>
+              <div className="mt-2 rounded-md bg-amber-50 border border-amber-200 p-2 space-y-1">
+                <p className="text-[11px] font-semibold text-amber-900 flex items-center gap-1">
+                  <InfoIcon className="w-3 h-3" /> Nächste Schritte bei Leasing
+                </p>
+                <ul className="text-[10px] text-amber-800 list-disc list-inside space-y-0.5">
+                  <li>Leasinggeber-Name + Vertragsnummer am Telefon aufnehmen</li>
+                  <li>Leasing-Vollmacht anfordern — Frist 48h (Kanzlei schickt Formular)</li>
+                  <li>Reparatur darf erst nach Vollmacht-Erteilung freigegeben werden</li>
+                </ul>
+              </div>
+            )}
+            {l.vorsteuerabzugsberechtigt === true && (
+              <div className="mt-2 rounded-md bg-[#0D1B3E]/5 border border-[#4573A2]/30 p-2 space-y-1">
+                <p className="text-[11px] font-semibold text-[#0D1B3E] flex items-center gap-1">
+                  <InfoIcon className="w-3 h-3" /> Hinweis bei Gewerblich
+                </p>
+                <ul className="text-[10px] text-[#0D1B3E] list-disc list-inside space-y-0.5">
+                  <li>Firma als Eigentümer → Gutachten an Firma adressieren</li>
+                  <li>Regulierung NETTO (Versicherung zieht USt. ab)</li>
+                  <li>Bei Gewerbenachweis-Pflicht: FlowLink zeigt Upload-Slot automatisch</li>
+                </ul>
+              </div>
             )}
           </div>
 
@@ -410,13 +432,8 @@ export default function Phase4Stammdaten() {
           </div>
         </div>
 
-        <div className="pt-2 border-t border-gray-100">
-          <CardentityButton
-            leadId={leadId}
-            hasFin={!!l.fin}
-            alreadyEnriched={!!l.cardentity_enriched_at}
-          />
-        </div>
+        {/* AAR-177 Fix #1: CardentityButton entfernt — Anreicherung läuft
+            automatisch nach ZB1-OCR, kein manueller Trigger mehr nötig. */}
       </Card>
 
       {/* 3. Gegner & Unfall */}
@@ -442,6 +459,21 @@ export default function Phase4Stammdaten() {
                 )}
                 <span>{kzFlags.warnung}</span>
               </p>
+            )}
+            {/* AAR-177 Fix #5: Fahrerflucht-Hinweis mit konkreten Handlungs-
+                Schritten für den MA — statt nur „Fahrerflucht!"-Warnung. */}
+            {kzFlags.fahrerflucht && (
+              <div className="mt-2 rounded-md bg-red-50 border border-red-200 p-2 space-y-1">
+                <p className="text-[11px] font-semibold text-red-900 flex items-center gap-1">
+                  <AlertTriangleIcon className="w-3 h-3" /> Fahrerflucht — nächste Schritte
+                </p>
+                <ul className="text-[10px] text-red-800 list-disc list-inside space-y-0.5">
+                  <li>Polizei wurde informiert? Wenn nein → Kunde JETZT zur Anzeige auffordern</li>
+                  <li>Aktenzeichen der Polizei aufnehmen (später im Portal nachreichbar)</li>
+                  <li>Ohne KZ + ohne Polizei = Disqualifikation (Fahrerflucht ohne KZ)</li>
+                  <li>Falls Kamera/Dashcam vorhanden: unbedingt Datei sichern lassen</li>
+                </ul>
+              </div>
             )}
             {kzFlags.showKameraCheck && (
               <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-2 space-y-1.5">
