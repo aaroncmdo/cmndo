@@ -30,70 +30,12 @@ export type OnboardingData = {
   paket: string
 }
 
-export async function createSachverstaendiger(formData: FormData) {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
-
-  const email = (formData.get('email') as string)?.trim()
-  const vorname = (formData.get('vorname') as string)?.trim() || null
-  const nachname = (formData.get('nachname') as string)?.trim() || null
-  const telefon = (formData.get('telefon') as string)?.trim() || null
-  const paket = (formData.get('paket') as string) || 'standard'
-  const gebietPlzRaw = (formData.get('gebiet_plz') as string)?.trim() || ''
-  const maxFaelle = parseInt(formData.get('max_faelle_monat') as string) || 10
-
-  if (!email) throw new Error('E-Mail ist erforderlich')
-
-  const gebietPlz = gebietPlzRaw
-    .split(/[,;\s]+/)
-    .map(s => s.trim())
-    .filter(Boolean)
-
-  const admin = createAdminClient()
-  const tempPassword = crypto.randomUUID().slice(0, 12)
-
-  const { data: authUser, error: authErr } = await admin.auth.admin.createUser({
-    email,
-    password: tempPassword,
-    email_confirm: true,
-  })
-
-  if (authErr) throw new Error(`User erstellen fehlgeschlagen: ${authErr.message}`)
-
-  const { error: profileErr } = await admin
-    .from('profiles')
-    .insert({
-      id: authUser.user.id,
-      email,
-      rolle: 'sachverstaendiger',
-      vorname,
-      nachname,
-      telefon,
-    })
-
-  if (profileErr) throw new Error(`Profil erstellen fehlgeschlagen: ${profileErr.message}`)
-
-  const { error: svErr } = await admin
-    .from('sachverstaendige')
-    .insert({
-      // AAR-185: user_id ergänzt — war vergessen und führte dazu dass
-      // neu angelegte SVs in der Admin-Karten-Ansicht nicht erschienen
-      // (manche Legacy-Queries joinen noch via user_id statt profile_id).
-      // onboardGutachter() weiter unten setzt es korrekt.
-      user_id: authUser.user.id,
-      profile_id: authUser.user.id,
-      paket,
-      gebiet_plz: gebietPlz,
-      max_faelle_monat: maxFaelle,
-    })
-
-  if (svErr) throw new Error(`SV-Eintrag fehlgeschlagen: ${svErr.message}`)
-
-  revalidatePath('/admin/sachverstaendige')
-
-  return { id: authUser.user.id, tempPassword }
-}
+// AAR-186: createSachverstaendiger + NeuSvForm wurden entfernt. Sie waren
+// Tote: NeuSvForm wurde nirgends mehr importiert (AAR-151 hat den Hub via
+// NeuSvDrawer + AnlegenTabs ersetzt) und createSachverstaendiger legte nur
+// ein halbfertiges SV-Row an ohne Paket-Konfig, Standort-Geocoding oder
+// Qualifikationen. Single Source of Truth ist jetzt onboardGutachter()
+// unten + der AnlegenTabs-Wizard.
 
 export async function onboardGutachter(data: OnboardingData) {
   const supabase = await createClient()
