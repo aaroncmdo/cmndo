@@ -1,7 +1,14 @@
 import { EmailLayout, Heading, Paragraph, Button, InfoTable, Divider, APP_URL, ONDO } from './layout'
-import { Text, Section } from '@react-email/components'
+import { Text, Section, Row, Column, Hr } from '@react-email/components'
 
 type TerminInfo = { datum: string; uhrzeit: string; adresse: string; svName: string | null }
+
+// AAR-127: Login-Info für Magic-Link + Email/Passwort-Block
+export type LoginInfo = {
+  magicLink: string | null
+  email: string
+  password: string
+}
 
 type Props = {
   vorname: string
@@ -14,6 +21,8 @@ type Props = {
   accountExists: boolean
   flowToken?: string | null
   terminInfo?: TerminInfo | null
+  // AAR-127: wenn gesetzt, wird Magic-Link-Button + Zugangsdaten-Block gerendert
+  loginInfo?: LoginInfo | null
 }
 
 export function subject(p: Props) {
@@ -64,7 +73,70 @@ export function KundeWelcomeEmail(props: Props) {
       )}
 
       <Divider />
-      {props.accountExists ? (
+      {/* AAR-127: Login-Info hat Vorrang vor accountExists/flowToken — wenn der
+          Account gerade frisch angelegt wurde, schicken wir Magic-Link UND
+          Zugangsdaten als Fallback. */}
+      {props.loginInfo ? (
+        <>
+          <Paragraph>
+            Ihr persönliches Portal-Konto ist eingerichtet. Sie können sich jetzt einloggen.
+          </Paragraph>
+
+          {/* Primärer CTA: Magic-Link */}
+          {props.loginInfo.magicLink && (
+            <Section style={{ textAlign: 'center', padding: '24px 0' }}>
+              <Button href={props.loginInfo.magicLink}>Jetzt einloggen</Button>
+              <Text style={{ fontSize: 12, color: '#666', margin: '8px 0 0' }}>
+                Dieser Link loggt Sie automatisch ein. Er ist 1 Stunde gültig.
+              </Text>
+            </Section>
+          )}
+
+          {/* Fallback: Zugangsdaten als Text */}
+          <Section style={{ backgroundColor: '#f8f9fb', padding: '16px', borderRadius: '8px' }}>
+            <Text style={{ fontSize: 13, color: ONDO, fontWeight: 700, margin: 0 }}>
+              Ihre Zugangsdaten
+            </Text>
+            <Text style={{ fontSize: 12, color: '#666', margin: '4px 0 12px' }}>
+              Falls Sie den Login-Button nicht nutzen, können Sie sich auch klassisch anmelden:
+            </Text>
+            <Row>
+              <Column style={{ width: '90px' }}>
+                <Text style={{ fontSize: 13, color: '#666', margin: 0 }}>Portal:</Text>
+              </Column>
+              <Column>
+                <Text style={{ fontSize: 13, margin: 0 }}>
+                  <a href={`${APP_URL}/login`}>{APP_URL.replace(/^https?:\/\//, '')}/login</a>
+                </Text>
+              </Column>
+            </Row>
+            <Row>
+              <Column style={{ width: '90px' }}>
+                <Text style={{ fontSize: 13, color: '#666', margin: 0 }}>E-Mail:</Text>
+              </Column>
+              <Column>
+                <Text style={{ fontSize: 13, fontFamily: 'monospace', margin: 0 }}>
+                  {props.loginInfo.email}
+                </Text>
+              </Column>
+            </Row>
+            <Row>
+              <Column style={{ width: '90px' }}>
+                <Text style={{ fontSize: 13, color: '#666', margin: 0 }}>Passwort:</Text>
+              </Column>
+              <Column>
+                <Text style={{ fontSize: 13, fontFamily: 'monospace', margin: 0 }}>
+                  {props.loginInfo.password}
+                </Text>
+              </Column>
+            </Row>
+            <Text style={{ fontSize: 11, color: '#666', margin: '12px 0 0', fontStyle: 'italic' }}>
+              Wir empfehlen Ihnen, das Passwort nach dem ersten Login in den Einstellungen zu ändern.
+            </Text>
+          </Section>
+          <Hr />
+        </>
+      ) : props.accountExists ? (
         <>
           <Paragraph>
             In Ihrem Kunden-Portal können Sie den Fortschritt Ihres Falls verfolgen, Dokumente einsehen und direkt mit uns kommunizieren.

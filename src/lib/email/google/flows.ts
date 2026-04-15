@@ -30,12 +30,28 @@ function fmtCurrency(val: number | null): string {
 
 // ─── 1. Kunde Welcome ──────────────────────────────────────────────────────
 
-export async function sendKundeWelcome(fallId: string): Promise<void> {
+// AAR-127: optional loginInfo (Magic-Link + Zugangsdaten) für die Welcome-Mail
+// nach createKundeAccount. Bei vorhandenem loginInfo wird die Idempotenz-Sperre
+// übergangen — der erste, generische Welcome (BUG-71 vor SA) hatte noch keine
+// Login-Daten, der zweite mit loginInfo soll sie nachliefern.
+export type KundeWelcomeLoginInfo = {
+  magicLink: string | null
+  email: string
+  password: string
+}
+
+export async function sendKundeWelcome(
+  fallId: string,
+  loginInfo?: KundeWelcomeLoginInfo | null,
+): Promise<void> {
   const db = admin()
 
-  // BUG-71: Idempotenz — nur einmal pro Fall
-  const { data: alreadySent } = await db.from('email_log').select('id').eq('fall_id', fallId).eq('template', 'kunde_welcome').eq('status', 'sent').limit(1).maybeSingle()
-  if (alreadySent) { console.log(`[KFZ-137] Welcome-Mail für Fall ${fallId} bereits gesendet, skip`); return }
+  // BUG-71: Idempotenz — nur einmal pro Fall.
+  // AAR-127: Skip Idempotenz wenn loginInfo gesetzt — Login-Daten sollen sicher raus.
+  if (!loginInfo) {
+    const { data: alreadySent } = await db.from('email_log').select('id').eq('fall_id', fallId).eq('template', 'kunde_welcome').eq('status', 'sent').limit(1).maybeSingle()
+    if (alreadySent) { console.log(`[KFZ-137] Welcome-Mail für Fall ${fallId} bereits gesendet, skip`); return }
+  }
 
   const { data: fall } = await db.from('faelle').select('fall_nummer, lead_id, sv_id, kunde_id, schadens_datum, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen').eq('id', fallId).single()
   if (!fall) return
@@ -118,6 +134,8 @@ export async function sendKundeWelcome(fallId: string): Promise<void> {
     accountExists,
     flowToken,
     terminInfo,
+    // AAR-127: an Template durchreichen — wenn vorhanden, rendert es Magic-Link + Zugangsdaten-Block
+    loginInfo: loginInfo ?? null,
   }
 
   const html = await render(KundeWelcomeEmail(props))

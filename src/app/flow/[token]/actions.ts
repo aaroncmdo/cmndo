@@ -218,7 +218,8 @@ export async function createKundeAccount(
           await syncChatTeilnehmer(fallId)
         } catch (e) { console.error('[KFZ-129] syncChatTeilnehmer:', e) }
 
-        // BUG-71: Welcome-Mail geht jetzt nach SA-Unterzeichnung raus, nicht hier
+        // AAR-127: Welcome-Mail mit Magic-Link + Zugangsdaten
+        await sendWelcomeWithLogin(admin, fallId, email, password)
 
         return { password }
       }
@@ -243,8 +244,12 @@ export async function createKundeAccount(
   // Set kunde_id on the case
   await admin.from('faelle').update({ kunde_id: userId }).eq('id', fallId)
 
-  // Create default pflichtdokumente
-  await createDefaultPflichtdokumente(admin, fallId)
+  // AAR-125: Lead laden für conditional Polizeibericht (auch im new-user-Pfad)
+  const { data: leadForDocsNew } = await admin
+    .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht)').eq('id', fallId).single()
+  const lRawNew = (leadForDocsNew as { leads: unknown } | null)?.leads
+  const leadDocsNew = (Array.isArray(lRawNew) ? lRawNew[0] : lRawNew) as Record<string, unknown> | null
+  await createDefaultPflichtdokumente(admin, fallId, leadDocsNew)
 
   // KFZ-129: Kunde als Chat-Teilnehmer hinzufuegen
   try {
@@ -252,9 +257,45 @@ export async function createKundeAccount(
     await syncChatTeilnehmer(fallId)
   } catch (e) { console.error('[KFZ-129] syncChatTeilnehmer:', e) }
 
-  // BUG-71: Welcome-Mail geht jetzt nach SA-Unterzeichnung raus, nicht hier
+  // AAR-127: Welcome-Mail mit Magic-Link + Zugangsdaten
+  await sendWelcomeWithLogin(admin, fallId, email, password)
 
   return { password }
+}
+
+// AAR-127: Helper — generiert Magic-Link via Supabase Auth Admin API
+// und schickt die Welcome-Mail mit Magic-Link + Zugangsdaten als Fallback.
+// Magic-Link-Generierung ist non-fatal: bei Fehler geht die Mail trotzdem
+// raus, nur ohne Button (Template rendert dann nur den Zugangsdaten-Block).
+async function sendWelcomeWithLogin(
+  adminDb: ReturnType<typeof createAdminClient>,
+  fallId: string,
+  email: string,
+  password: string,
+): Promise<void> {
+  let magicLink: string | null = null
+  try {
+    const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/kunde/onboarding`
+    const { data, error } = await adminDb.auth.admin.generateLink({
+      type: 'magiclink',
+      email,
+      options: { redirectTo },
+    })
+    if (error) {
+      console.error('[AAR-127] Magic-Link-Generierung fehlgeschlagen:', error)
+    } else {
+      magicLink = data?.properties?.action_link ?? null
+    }
+  } catch (err) {
+    console.error('[AAR-127] Magic-Link-Generierung fehlgeschlagen (Exception):', err)
+  }
+
+  try {
+    const { sendKundeWelcome } = await import('@/lib/email/google/flows')
+    await sendKundeWelcome(fallId, { magicLink, email, password })
+  } catch (err) {
+    console.error('[AAR-127] Welcome-Mail-Versand fehlgeschlagen:', err)
+  }
 }
 
 /**
@@ -578,8 +619,11 @@ export async function signSAandCreateFall(
   // 11. Benachrichtigung
   try { await notifyNeuerFall(fall.id) } catch { /* */ }
 
-  // 12. BUG-71: Welcome-Mail nach SA-Unterzeichnung (fire & forget, idempotent)
-  import('@/lib/email/google/flows').then(m => m.sendKundeWelcome(fall.id)).catch(err => console.error('[BUG-71] Welcome-Mail nach SA:', err))
+  // 12. AAR-127: Welcome-Mail wird jetzt aus createKundeAccount mit Magic-Link
+  // + Zugangsdaten verschickt, nicht mehr hier. Der SA-Step und createKundeAccount
+  // laufen back-to-back im FlowWizard — wenn der Kunde nach SA abbricht (kein
+  // Account), bekommt er keine Welcome-Mail. Das ist gewollt: ohne Account kann
+  // er sich eh nicht einloggen.
 
   // 13. AAR-85: SLA-Tracking starten (Prozessstart = SA unterschrieben)
   // Simultan-Trigger: alle Pipelines parallel via Promise.allSettled
