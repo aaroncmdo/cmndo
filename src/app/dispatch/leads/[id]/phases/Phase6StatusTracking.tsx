@@ -4,7 +4,8 @@
 // AAR-178 P3-C + P3-E: Erneut-senden Button + Vollmacht immer als 5. Schritt
 // sichtbar (grayed-out für Pfad B damit der MA die komplette Reihenfolge sieht).
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useDispatchPhase } from '../lib/phase-context'
 import { sendFlowLinkMultiChannel } from '../actions'
 import AircallCallButton from '@/components/AircallCallButton'
@@ -20,6 +21,7 @@ import {
   SendIcon,
   MinusCircleIcon,
   MailIcon,
+  RefreshCwIcon,
 } from 'lucide-react'
 
 type FlowLinkRow = {
@@ -54,6 +56,7 @@ export default function Phase6StatusTracking({
   flowLinks: FlowLinkRow[]
   fall: FallSnapshot | null
 }) {
+  const router = useRouter()
   const { lead } = useDispatchPhase()
   const l = lead as unknown as {
     service_typ?: 'komplett' | 'nur_gutachter' | string | null
@@ -129,6 +132,20 @@ export default function Phase6StatusTracking({
 
   const steps: Step[] = [stepSent, stepDelivered, stepOpened, stepSa, stepVollmacht]
 
+  // AAR-201: Auto-Refresh alle 30s solange SA noch aussteht + FlowLink da ist.
+  // Stop-Bedingungen:
+  //   - SA unterschrieben → Fall ist erstellt, weitere Updates kommen aus
+  //     Fallakte/Phase 6 rendert als archiviert
+  //   - Kein FlowLink → Empty-State, nichts zum Refreshen
+  useEffect(() => {
+    if (fall?.sa_unterschrieben) return
+    if (!latestFlow) return
+    const interval = setInterval(() => {
+      router.refresh()
+    }, 30_000)
+    return () => clearInterval(interval)
+  }, [fall?.sa_unterschrieben, latestFlow, router])
+
   // AAR-178 P3-C + AAR-200: Erneut-senden Button — falls der Kunde den
   // Link verloren hat oder der Alarm anschlägt, kann der MA aus Phase 6
   // direkt re-triggern ohne zurück zu Phase 5 springen zu müssen.
@@ -189,7 +206,19 @@ export default function Phase6StatusTracking({
         <div className="flex items-center gap-2 mb-4">
           <CheckCircle2Icon className="w-4 h-4 text-[#4573A2]" />
           <h2 className="text-sm font-semibold text-gray-900">Status-Tracking</h2>
-          <span className="ml-auto text-[10px] text-gray-400">
+          {/* AAR-201: Auto-Refresh läuft alle 30s im Hintergrund. Manueller
+              Button für Dispatcher der sofort sehen will ob Kunde gerade
+              geöffnet hat. */}
+          <button
+            type="button"
+            onClick={() => router.refresh()}
+            className="ml-auto text-[10px] text-gray-400 hover:text-[#4573A2] flex items-center gap-1"
+            title="Status neu laden (Auto-Refresh alle 30s)"
+          >
+            <RefreshCwIcon className="w-3 h-3" />
+            Aktualisieren
+          </button>
+          <span className="text-[10px] text-gray-400">
             {isPfadB ? 'Pfad B — Nur SV' : 'Pfad A — Komplett'}
           </span>
         </div>
