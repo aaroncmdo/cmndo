@@ -420,7 +420,11 @@ export default function KarteHubClient({
   }
 
   return (
-    <div className="h-[calc(100vh-120px)] flex flex-col bg-[#f8f9fb] rounded-xl overflow-hidden border border-gray-200">
+    // AAR-123: war ursprünglich h-[calc(100vh-120px)] für die alte /admin/karte-
+    // Route. Mit dem Tab-Bar im neuen Sachverständige-Hub kommen ~50px dazu —
+    // h-full nimmt die Höhe direkt aus dem Layout-Parent (`flex-1 min-h-0`)
+    // statt sie viewport-basiert zu schätzen.
+    <div className="h-full flex flex-col bg-[#f8f9fb] rounded-xl overflow-hidden border border-gray-200">
       {/* Toolbar: Filter-Chips + Onboarden-Button */}
       <div className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-200 bg-white flex-shrink-0 flex-wrap">
         <FilterChip

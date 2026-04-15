@@ -1,8 +1,9 @@
 // AAR-137 / W3: Dispatch-Lead-Detail Server-Component.
-// Lädt Lead + SV-Termin + FlowLinks + Calls und delegiert alles an DispatchShell.
-// Das alte 2-Column-Grid-Layout ist durch die DispatchShell ersetzt worden —
-// siehe AAR-137 für die Spec. Die alte Logik für HardGate / SvDispatch /
-// FlowLink bleibt in den Phase-Stubs bis W4-W8 echte Phase-Components bauen.
+// Lädt Lead + SV-Termin + FlowLinks und delegiert alles an DispatchShell.
+// Phase 1-6 sind echte Components (W4-W8 abgeschlossen), das alte 2-Column-
+// Grid-Layout ist abgelöst, PhaseStubs ist gelöscht (AAR-144). Calls werden
+// nicht mehr geladen — Phase 5 hatte ursprünglich eine Kontakthistorie, die
+// per W7 entfallen ist.
 
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'

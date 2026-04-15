@@ -3,6 +3,15 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
+// Vercel-Cron sendet `Authorization: Bearer ${CRON_SECRET}` mit. Andere
+// Auto-Tasks (z. B. sla-check) prüfen das Header — wir tun's hier auch,
+// damit der Endpoint nicht öffentlich missbrauchbar ist.
+function authorize(request: Request): boolean {
+  const expected = process.env.CRON_SECRET
+  if (!expected) return true // dev-Mode ohne Secret zulassen
+  return request.headers.get('authorization') === `Bearer ${expected}`
+}
+
 /**
  * AAR-147 / Spec §3 Phase 6: Inaktiv-Cron für FlowLinks.
  *
@@ -18,7 +27,10 @@ export const dynamic = 'force-dynamic'
  * NOTE: flow_links hat die Spalte `erstellt_am` (nicht `created_at`) —
  * siehe Schema. Das wurde im ursprünglichen page.tsx-Refactor übersehen.
  */
-export async function GET() {
+export async function GET(request: Request) {
+  if (!authorize(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   const db = createAdminClient()
 
   const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
