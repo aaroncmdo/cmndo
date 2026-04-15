@@ -103,10 +103,15 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
   }
 
   // Adresse-Fallback-Kette: Fall-Adresse → Lead-Adresse → "—"
+  // joinNonEmpty: leeres Array → undefined statt '' damit ?? korrekt fällt.
+  const joinNonEmpty = (parts: (string | null | undefined)[]) => {
+    const s = parts.filter(Boolean).join(', ')
+    return s || undefined
+  }
   const adresse =
     fall?.besichtigungsort_adresse ??
-    (fall ? [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') : null) ??
-    (lead ? lead.unfallort ?? [lead.kunde_strasse, lead.kunde_plz].filter(Boolean).join(', ') : null) ??
+    (fall ? joinNonEmpty([fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort]) : undefined) ??
+    (lead ? lead.unfallort ?? joinNonEmpty([lead.kunde_strasse, lead.kunde_plz]) : undefined) ??
     '—'
 
   // Fahrzeug-Info kann auch vom Lead kommen

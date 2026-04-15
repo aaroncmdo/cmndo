@@ -628,6 +628,14 @@ export async function sendSvTerminBestaetigung(svId: string, terminId: string): 
   const datum = tDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
   const uhrzeit = tDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
 
+  // Helper — leere Strings → undefined (für saubere ??-Fallbacks)
+  // [a, b].filter(Boolean).join(', ') liefert '' wenn alle Felder leer/null,
+  // und '' ?? '—' returnt '' (nicht '—'). Also explizit auf undefined casten.
+  const joinNonEmpty = (parts: (string | null | undefined)[]): string | undefined => {
+    const s = parts.filter(Boolean).join(', ')
+    return s || undefined
+  }
+
   let kundenName = '—'
   let adresse = '—'
   let referenz = `Termin ${terminId.slice(0, 8)}`
@@ -643,7 +651,7 @@ export async function sendSvTerminBestaetigung(svId: string, terminId: string): 
       referenz = fall.fall_nummer ?? `Fall ${fall.id.slice(0, 8)}`
       adresse =
         fall.besichtigungsort_adresse ??
-        [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') ??
+        joinNonEmpty([fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort]) ??
         '—'
       if (fall.lead_id) {
         const { data: lead } = await db
@@ -663,7 +671,7 @@ export async function sendSvTerminBestaetigung(svId: string, terminId: string): 
       .single()
     if (lead) {
       kundenName = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
-      adresse = lead.unfallort ?? [lead.kunde_strasse, lead.kunde_plz].filter(Boolean).join(', ') ?? '—'
+      adresse = lead.unfallort ?? joinNonEmpty([lead.kunde_strasse, lead.kunde_plz]) ?? '—'
       referenz = `Lead ${lead.id.slice(0, 8)}`
     }
   }
@@ -676,9 +684,12 @@ export async function sendSvTerminBestaetigung(svId: string, terminId: string): 
     kundenName,
     adresse,
     istVorreservierung,
-    ablehnenUrl: termin.ablehnen_token
-      ? `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/sv/termin/${termin.ablehnen_token}`
-      : null,
+    // AAR-133 (revalidiert): ablehnenUrl bleibt NULL bis AAR-134 den
+    // /sv/termin/{token}-Endpoint baut. Sonst landet jede Mail mit einem Link
+    // auf einer 404-Page. Token ist in DB via .select('id, ablehnen_token')
+    // verfügbar (siehe reserveSvTerminForLead) — wenn AAR-134 gemerged ist,
+    // hier den URL-String wieder aktivieren.
+    ablehnenUrl: null,
   }
 
   const html = await render(SvTerminBestaetigungEmail(props))
