@@ -32,6 +32,9 @@ type FlowLinkRow = {
   status: string
   created_at: string
   expires_at: string
+  geoeffnet_am?: string | null
+  abgeschlossen_am?: string | null
+  fall_id?: string | null
 }
 
 type CallRow = {
@@ -40,6 +43,11 @@ type CallRow = {
   started_at: string
   duration: number | null
   status: string | null
+}
+
+type FallSnapshot = {
+  sa_unterschrieben?: boolean | null
+  vollmacht_unterschrieben?: boolean | null
 }
 
 const PHASE_LABELS: Record<string, string> = {
@@ -70,6 +78,7 @@ export default function DispatchShell({
   aktiverTermin,
   flowLinks,
   calls,
+  fall,
   initialPhase,
   saUnterschrieben,
 }: {
@@ -82,6 +91,7 @@ export default function DispatchShell({
   aktiverTermin: AktiverTerminLike
   flowLinks: FlowLinkRow[]
   calls: CallRow[]
+  fall: FallSnapshot | null
   initialPhase: Phase
   saUnterschrieben: boolean
 }) {
@@ -127,7 +137,7 @@ export default function DispatchShell({
             saUnterschrieben={saUnterschrieben}
           />
 
-          <PhaseContent flowLinks={flowLinks} calls={calls} />
+          <PhaseContent flowLinks={flowLinks} calls={calls} fall={fall} />
         </main>
 
         {/* Sidebar */}

@@ -28,10 +28,36 @@ export default async function DispatchLeadDetail({
 
   const { data: flowLinks } = await supabase
     .from('flow_links')
-    .select('id, token, status, created_at, expires_at')
+    .select('id, token, status, created_at, expires_at, geoeffnet_am, abgeschlossen_am, fall_id')
     .eq('lead_id', id)
     .order('created_at', { ascending: false })
     .limit(5)
+
+  // Wenn bereits ein Fall existiert (nach SA-Unterschrift), laden wir Snapshot-
+  // Felder für Phase 6 Status-Tracking. Der Lead-Status selbst (sa_unterschrieben
+  // auf leads) bleibt die primäre Quelle, aber Pfad-A zeigt auch Vollmacht.
+  const latestFallId = flowLinks?.find((f) => f.fall_id)?.fall_id ?? null
+  let fallSnapshot: { sa_unterschrieben: boolean | null; vollmacht_unterschrieben: boolean | null } | null = null
+  if (latestFallId) {
+    const { data: fallRow } = await supabase
+      .from('faelle')
+      .select('sa_unterschrieben, vollmacht_unterschrieben')
+      .eq('id', latestFallId)
+      .maybeSingle()
+    if (fallRow) {
+      fallSnapshot = {
+        sa_unterschrieben: (fallRow as { sa_unterschrieben: boolean | null }).sa_unterschrieben,
+        vollmacht_unterschrieben: (fallRow as { vollmacht_unterschrieben: boolean | null }).vollmacht_unterschrieben,
+      }
+    }
+  }
+  // Fallback: Lead hat sa_unterschrieben-Flag (wird vom autoPhase-Trigger gesetzt)
+  if (!fallSnapshot && lead.sa_unterschrieben) {
+    fallSnapshot = {
+      sa_unterschrieben: lead.sa_unterschrieben ?? null,
+      vollmacht_unterschrieben: lead.vollmacht_unterschrieben ?? null,
+    }
+  }
 
   const { data: calls } = await supabase
     .from('aircall_calls')
@@ -100,6 +126,7 @@ export default async function DispatchLeadDetail({
       aktiverTermin={aktiverSvTermin}
       flowLinks={flowLinks ?? []}
       calls={calls ?? []}
+      fall={fallSnapshot}
       initialPhase={initialPhase}
       saUnterschrieben={saUnterschrieben}
     />

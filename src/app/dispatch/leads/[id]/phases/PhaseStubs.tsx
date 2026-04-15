@@ -11,6 +11,7 @@ import Phase2TerminServiceTypComponent from './Phase2TerminServiceTyp'
 import Phase3SchadentypComponent from './Phase3Schadentyp'
 import Phase4StammdatenComponent from './Phase4Stammdaten'
 import Phase5ZusammenfassungComponent from './Phase5Zusammenfassung'
+import Phase6StatusTrackingComponent from './Phase6StatusTracking'
 import ExitSkript, { type DisqualifikationsGrund } from '../ExitSkript'
 import { useDispatchPhase } from '../lib/phase-context'
 
@@ -20,6 +21,9 @@ type FlowLinkRow = {
   status: string
   created_at: string
   expires_at: string
+  geoeffnet_am?: string | null
+  abgeschlossen_am?: string | null
+  fall_id?: string | null
 }
 
 type CallRow = {
@@ -28,6 +32,11 @@ type CallRow = {
   started_at: string
   duration: number | null
   status: string | null
+}
+
+type FallSnapshot = {
+  sa_unterschrieben?: boolean | null
+  vollmacht_unterschrieben?: boolean | null
 }
 
 function DisqualifiziertOverlay() {
@@ -73,15 +82,15 @@ export function Phase5Zusammenfassung(_props: { flowLinks: FlowLinkRow[]; calls:
   return <Phase5ZusammenfassungComponent />
 }
 
-/** Phase 6 — Status-Tracking nach FlowLink. W8 baut AAR-142. */
-export function Phase6StatusTracking() {
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
-      <h2 className="text-sm font-semibold text-gray-900 mb-2">Phase 6 — Status-Tracking</h2>
-      <p className="text-xs text-gray-500">
-        Diese Phase zeigt den Status nach FlowLink-Versand: FlowLink abgeschlossen, SA
-        versendet, SA unterschrieben, Konvertiert. Implementierung folgt in W8 (AAR-142).
-      </p>
-    </div>
-  )
+/** Phase 6 — Status-Tracking nach FlowLink-Versand (AAR-142 / W8). */
+export function Phase6StatusTracking({
+  flowLinks,
+  fall,
+}: {
+  flowLinks: FlowLinkRow[]
+  fall: FallSnapshot | null
+}) {
+  const { qualification } = useDispatchPhase()
+  if (qualification.disqualifiziert) return <DisqualifiziertOverlay />
+  return <Phase6StatusTrackingComponent flowLinks={flowLinks} fall={fall} />
 }

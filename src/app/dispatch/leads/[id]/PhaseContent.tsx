@@ -19,6 +19,9 @@ type FlowLinkRow = {
   status: string
   created_at: string
   expires_at: string
+  geoeffnet_am?: string | null
+  abgeschlossen_am?: string | null
+  fall_id?: string | null
 }
 
 type CallRow = {
@@ -29,12 +32,19 @@ type CallRow = {
   status: string | null
 }
 
+type FallSnapshot = {
+  sa_unterschrieben?: boolean | null
+  vollmacht_unterschrieben?: boolean | null
+}
+
 export default function PhaseContent({
   flowLinks,
   calls,
+  fall,
 }: {
   flowLinks: FlowLinkRow[]
   calls: CallRow[]
+  fall: FallSnapshot | null
 }) {
   const { currentPhase } = useDispatchPhase()
   switch (currentPhase) {
@@ -49,7 +59,7 @@ export default function PhaseContent({
     case 5:
       return <Phase5Zusammenfassung flowLinks={flowLinks} calls={calls} />
     case 6:
-      return <Phase6StatusTracking />
+      return <Phase6StatusTracking flowLinks={flowLinks} fall={fall} />
     default:
       return null
   }

@@ -545,6 +545,39 @@ export async function signSAandCreateFall(
     } catch { /* WhatsApp an SV ist non-critical */ }
   }
 
+  // 10b. AAR-142 / W8 (Spec FEHLER 6): T4 termin_bestaetigt an Kunden nach SA.
+  // Die SA-Unterschrift fixiert den Termin — dem Kunden wird das per T4 bestätigt.
+  // Non-critical (fall bleibt auch bei Twilio-Fehler erstellt).
+  if (lead.gutachter_termin && lead.telefon) {
+    try {
+      const { data: terminRow } = await admin.from('gutachter_termine')
+        .select('sv_id, sachverstaendige(profiles(vorname, nachname))')
+        .eq('fall_id', fall.id)
+        .in('status', ['bestaetigt', 'reserviert'])
+        .limit(1)
+        .maybeSingle()
+      const svRel = (terminRow as { sachverstaendige: unknown } | null)?.sachverstaendige
+      const sv = (Array.isArray(svRel) ? svRel[0] : svRel) as { profiles: unknown } | null
+      const profileRel = sv?.profiles
+      const profile = (Array.isArray(profileRel) ? profileRel[0] : profileRel) as
+        | { vorname: string | null; nachname: string | null }
+        | null
+      const svName = `${profile?.vorname ?? ''} ${profile?.nachname ?? ''}`.trim() || 'Ihrem Gutachter'
+      const terminDate = new Date(lead.gutachter_termin)
+      const datumUhrzeit = `${terminDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} um ${terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`
+      const { sendCommunication } = await import('@/lib/communications/send')
+      await sendCommunication('termin_bestaetigt', {
+        telefon: lead.telefon,
+        vorname: lead.vorname ?? '',
+        '1': lead.vorname ?? '',
+        '2': svName,
+        '3': datumUhrzeit,
+      })
+    } catch (err) {
+      console.warn('[AAR-142] T4 termin_bestaetigt an Kunde fehlgeschlagen:', err)
+    }
+  }
+
   // 11. Benachrichtigung
   try { await notifyNeuerFall(fall.id) } catch { /* */ }
 
