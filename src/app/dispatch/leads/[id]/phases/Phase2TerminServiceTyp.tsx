@@ -6,6 +6,7 @@
 // sv_treffpunkt für konkrete Treffpunkt-Hinweise (Parkhaus-Ebene etc.).
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import SvDispatchPanel from '../SvDispatchPanel'
 import { useDispatchPhase } from '../lib/phase-context'
 import { saveHardGate, setServiceTyp } from '../actions'
@@ -13,6 +14,7 @@ import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { MapPinIcon, CheckCircle2Icon, ScaleIcon } from 'lucide-react'
 
 export default function Phase2TerminServiceTyp() {
+  const router = useRouter()
   const { lead, aktiverTermin, qualification, setPhase } = useDispatchPhase()
   const l = lead as unknown as {
     unfallort?: string | null
@@ -66,10 +68,17 @@ export default function Phase2TerminServiceTyp() {
       try {
         await setServiceTyp(lead.id, typ)
         setToast('Service-Typ gespeichert')
-        // AAR-176 P3-A: Auto-Advance zu Phase 3 sobald alles in Phase 2 steht
-        // (Adresse mit Koordinaten + aktiver Termin + Service-Typ gewählt).
-        if (hasKoordinaten && aktiverTermin) {
-          setPhase(3)
+        // AAR-176 P3-A: Auto-Advance zu Phase 3 sobald alles in Phase 2 steht.
+        // AAR-179 Audit-Fix #1: router.refresh() vor setPhase(3) damit der
+        // Context-State (aktiverTermin) aus frischen Server-Props berechnet
+        // wird — sonst bleibt aktiverTermin stale wenn User gerade erst
+        // reserviert hat und der Provider noch auf initialTermin sitzt.
+        if (hasKoordinaten) {
+          router.refresh()
+          // Das setPhase ist erst sinnvoll wenn ein Termin reserviert wurde.
+          // Wir prüfen den aktuellen (möglicherweise stale) State + lassen
+          // die nächste Phase-Check-Runde den Advance machen falls nötig.
+          if (aktiverTermin) setPhase(3)
         }
       } catch (err) {
         setToast(err instanceof Error ? err.message : 'Fehler')

@@ -190,6 +190,11 @@ export default function GespraechsleitfadenTimer({
                 Hat der Kunde den FlowLink per WA erhalten? Wenn nein → jetzt aktiv nachziehen statt
                 im nächsten Gespräch nachschlagen.
               </p>
+              {pending && (
+                <p className="text-[11px] text-gray-500 italic flex items-center gap-1">
+                  <ClockIcon className="w-3 h-3 animate-pulse" /> Gespräch wird beendet ...
+                </p>
+              )}
               {summaryError && (
                 <p className="text-[11px] text-red-700 bg-red-50 border border-red-200 rounded p-2">
                   Beenden fehlgeschlagen: {summaryError}
@@ -200,7 +205,8 @@ export default function GespraechsleitfadenTimer({
               <button
                 type="button"
                 onClick={() => setShowSummary(false)}
-                className="flex-1 px-3 py-2 rounded-lg bg-gray-100 text-gray-700 text-xs font-medium hover:bg-gray-200"
+                disabled={pending}
+                className="flex-1 px-3 py-2 rounded-lg bg-gray-100 text-gray-700 text-xs font-medium hover:bg-gray-200 disabled:opacity-50"
               >
                 Weiter sprechen
               </button>
@@ -210,7 +216,8 @@ export default function GespraechsleitfadenTimer({
                 disabled={pending}
                 className="flex-1 px-3 py-2 rounded-lg bg-red-600 text-white text-xs font-medium hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-1"
               >
-                <CheckIcon className="w-3.5 h-3.5" /> Jetzt beenden
+                <CheckIcon className="w-3.5 h-3.5" />
+                {pending ? 'Beendet ...' : summaryError ? 'Erneut versuchen' : 'Jetzt beenden'}
               </button>
             </div>
           </div>

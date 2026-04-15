@@ -208,12 +208,17 @@ export default function Phase6StatusTracking({
               {s.sub && <p className={`text-[11px] mt-0.5 ${s.state === 'disabled' ? 'text-gray-400 italic' : 'text-gray-500'}`}>{s.sub}</p>}
             </li>
           ))}
-          {!steps.length && (
-            <li className="pl-6">
+          {/* AAR-179 Audit-Fix #2: steps hat jetzt immer 5 Einträge (Vollmacht
+              immer sichtbar). Empty-State triggert jetzt wenn kein FlowLink
+              existiert — nicht mehr an steps.length gekoppelt (unreachable).
+              Der Stepper rendert weiter als visuelle Roadmap, die Empty-Zeile
+              darunter macht den Zustand explizit. */}
+          {!latestFlow && (
+            <li className="pl-6 pt-3 mt-1 border-t border-dashed border-gray-200">
               <span className="absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full ring-4 ring-white bg-gray-200 text-gray-400">
                 <CircleIcon className="w-3.5 h-3.5" />
               </span>
-              <p className="text-sm text-gray-500">Noch kein FlowLink versendet</p>
+              <p className="text-sm text-gray-500">Noch kein FlowLink versendet — zurück zu Phase 5</p>
             </li>
           )}
         </ol>

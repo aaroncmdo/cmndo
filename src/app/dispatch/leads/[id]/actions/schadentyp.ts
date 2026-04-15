@@ -30,6 +30,9 @@ export async function saveSchadentyp(
   // der MA muss den Ort nicht mehr doppelt pflegen. Nur setzen, wenn aus dem
   // Schadentyp eine eindeutige Ortskategorie folgt; für „sonstiges" bleibt
   // der Wert unverändert (könnte z. B. vom Kunden-Portal eingepflegt sein).
+  // AAR-179 Audit-Fix #6: Nur überschreiben wenn noch leer — sonst
+  // überschreibt ein späterer Schadentyp-Wechsel eine manuell gepflegte
+  // Kategorie (Daten-Race zwischen Phase 1 und Phase 3).
   const KATEGORIE_AUTO: Record<string, string | null> = {
     spurwechsel: 'strasse',
     auffahrunfall: 'strasse',
@@ -39,7 +42,14 @@ export async function saveSchadentyp(
   }
   const autoKategorie = KATEGORIE_AUTO[schadentyp]
   if (autoKategorie) {
-    updates.unfallort_kategorie = autoKategorie
+    const { data: currentLead } = await supabase
+      .from('leads')
+      .select('unfallort_kategorie')
+      .eq('id', leadId)
+      .maybeSingle()
+    if (!currentLead?.unfallort_kategorie) {
+      updates.unfallort_kategorie = autoKategorie
+    }
   }
   if (schadentyp === 'parkplatz' && parkplatzKamera !== undefined) {
     updates.parkplatz_kamera = parkplatzKamera

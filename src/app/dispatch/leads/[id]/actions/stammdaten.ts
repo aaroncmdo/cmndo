@@ -23,6 +23,10 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   'fahrerflucht', 'auslandskennzeichen',
   // Zeugen
   'zeugen',
+  // AAR-176 / AAR-179 Audit-Fix #4: sv_treffpunkt wird aktuell nur in Phase 2
+  // via saveHardGate gesetzt. Admins brauchen die Möglichkeit den Treffpunkt
+  // später auch inline zu editieren — daher auch hier zulassen.
+  'sv_treffpunkt',
 ])
 
 export async function saveStammdaten(
