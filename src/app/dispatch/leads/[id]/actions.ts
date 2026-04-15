@@ -26,4 +26,5 @@ export {
   acceptGegenvorschlag,
 } from './actions/sv-termin'
 export { sendFlowLinkMultiChannel } from './actions/flowlink'
+export { triggerZb1UploadRequest } from './actions/zb1'
 export type { HardGateData, SvSuggestion, UnfallortKategorie } from './actions/types'

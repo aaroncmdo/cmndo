@@ -1,146 +1,10 @@
+// AAR-166 / AAR-182: ZB1-OCR für Fall-Uploads (Admin Fallakte / Gutachter).
+// Shared Parser + Vision-Call liegt in @/lib/ocr/zb1-parser.
+// Der Lead-Pfad (Twilio-Inbound-Webhook) nutzt denselben Parser direkt.
+
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-
-// ─── Field-code patterns on a German Fahrzeugschein (ZB Teil I) ─────────
-// A   = Kennzeichen
-// B   = Datum der Erstzulassung
-// C.1 = Halter (Nachname, Vorname  OR  Firmenname)
-// C.3 = Adresse (Straße Hausnr, PLZ Ort)
-// D.1 = Marke
-// D.2 = Typ / Variante / Version
-// D.3 = Handelsbezeichnung
-// E   = FIN (Fahrzeug-Identifizierungsnummer, 17 alphanumeric)
-// 2.1 = HSN (Herstellerschlüsselnummer, 4 digits)
-// 2.2 = TSN (Typschlüsselnummer, 3 alphanumeric)
-
-const FIN_REGEX = /\b([A-HJ-NPR-Z0-9]{17})\b/gi
-const DATE_REGEX = /\b(\d{2}\.\d{2}\.\d{4})\b/
-const PLZ_ORT_REGEX = /\b(\d{5})\s+(.+)/
-const HSN_REGEX = /\b(\d{4})\b/
-const TSN_REGEX = /\b([A-Z0-9]{3})\b/i
-
-interface ExtractedData {
-  kennzeichen: string | null
-  erstzulassung: string | null
-  // AAR-181: Baujahr wird aus Erstzulassung abgeleitet (DD.MM.YYYY → Jahr)
-  fahrzeug_baujahr: number | null
-  halter_nachname: string | null
-  halter_vorname: string | null
-  halter_strasse: string | null
-  halter_plz: string | null
-  halter_stadt: string | null
-  fahrzeug_hersteller: string | null
-  fahrzeug_modell: string | null
-  fin_vin: string | null
-  hsn: string | null
-  tsn: string | null
-}
-
-function parseZB1Fields(fullText: string): ExtractedData {
-  const result: ExtractedData = {
-    kennzeichen: null, erstzulassung: null, fahrzeug_baujahr: null,
-    halter_nachname: null, halter_vorname: null,
-    halter_strasse: null, halter_plz: null, halter_stadt: null,
-    fahrzeug_hersteller: null, fahrzeug_modell: null,
-    fin_vin: null, hsn: null, tsn: null,
-  }
-
-  const lines = fullText.split('\n').map(l => l.trim()).filter(Boolean)
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]
-    const nextLine = lines[i + 1] ?? ''
-    const trimmed = line.replace(/[()[\]]/g, '').trim()
-
-    // FIN — 17-char alphanumeric
-    if (!result.fin_vin) {
-      const finMatch = line.match(FIN_REGEX)
-      if (finMatch) result.fin_vin = finMatch[0].toUpperCase()
-    }
-
-    // Kennzeichen — after field "A"
-    if (/^A$/i.test(trimmed) && nextLine) {
-      result.kennzeichen = nextLine.trim()
-    }
-
-    // Erstzulassung — after field "B"
-    if (/^B$/i.test(trimmed) && nextLine) {
-      const dateMatch = nextLine.match(DATE_REGEX)
-      if (dateMatch) result.erstzulassung = dateMatch[1]
-    }
-
-    // Halter — after field "C.1"
-    if (/^C\.?1$/i.test(trimmed) && nextLine) {
-      const parts = nextLine.split(/[,;]/).map(p => p.trim())
-      if (parts.length >= 2) {
-        result.halter_nachname = parts[0]
-        result.halter_vorname = parts[1]
-      } else {
-        result.halter_nachname = nextLine.trim()
-      }
-    }
-
-    // Adresse — after field "C.3" or "C.4"
-    if (/^C\.?[34]$/i.test(trimmed) && nextLine) {
-      result.halter_strasse = nextLine.trim()
-      const addrNext = lines[i + 2] ?? ''
-      const plzMatch = addrNext.match(PLZ_ORT_REGEX)
-      if (plzMatch) {
-        result.halter_plz = plzMatch[1]
-        result.halter_stadt = plzMatch[2].trim()
-      }
-    }
-
-    // Marke — after field "D.1"
-    if (/^D\.?1$/i.test(trimmed) && nextLine) {
-      result.fahrzeug_hersteller = nextLine.trim()
-    }
-
-    // Typ — after field "D.2" or "D.3"
-    if (/^D\.?[23]$/i.test(trimmed) && nextLine && !result.fahrzeug_modell) {
-      result.fahrzeug_modell = nextLine.trim()
-    }
-
-    // HSN — after field "2.1"
-    if (/^2\.?1$/i.test(trimmed) && nextLine) {
-      const hsnMatch = nextLine.match(HSN_REGEX)
-      if (hsnMatch) result.hsn = hsnMatch[1]
-    }
-
-    // TSN — after field "2.2"
-    if (/^2\.?2$/i.test(trimmed) && nextLine) {
-      const tsnMatch = nextLine.match(TSN_REGEX)
-      if (tsnMatch) result.tsn = tsnMatch[1].toUpperCase()
-    }
-  }
-
-  // Fallback: scan entire text for FIN
-  if (!result.fin_vin) {
-    const allFins = fullText.match(FIN_REGEX)
-    if (allFins && allFins.length > 0) {
-      result.fin_vin = allFins[0].toUpperCase()
-    }
-  }
-
-  // Fallback: Kennzeichen pattern (e.g. K-AB 1234)
-  if (!result.kennzeichen) {
-    const kzMatch = fullText.match(/\b([A-ZÄÖÜ]{1,3})[\s-]([A-Z]{1,2})[\s]?(\d{1,4})\b/)
-    if (kzMatch) result.kennzeichen = `${kzMatch[1]}-${kzMatch[2]} ${kzMatch[3]}`
-  }
-
-  // AAR-181: Baujahr aus Erstzulassung ableiten (DD.MM.YYYY → YYYY).
-  // Plausibilitäts-Check 1990..currentYear+1, sonst null.
-  if (result.erstzulassung) {
-    const m = result.erstzulassung.match(/(\d{4})\s*$/)
-    if (m) {
-      const y = Number(m[1])
-      const maxYear = new Date().getFullYear() + 1
-      if (y >= 1990 && y <= maxYear) result.fahrzeug_baujahr = y
-    }
-  }
-
-  return result
-}
+import { runZB1Ocr } from '@/lib/ocr/zb1-parser'
 
 export async function POST(request: Request) {
   try {
@@ -154,14 +18,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'datei_url oder image_base64 erforderlich' }, { status: 400 })
     }
 
-    const apiKey = process.env.GOOGLE_VISION_API_KEY
-    if (!apiKey) {
-      return NextResponse.json({ error: 'GOOGLE_VISION_API_KEY nicht konfiguriert' }, { status: 500 })
-    }
-
     // ─── Step 1: Get image as base64 ────────────────────────────────────────
     let base64Image = image_base64 ?? ''
-
     if (!base64Image && datei_url) {
       const imgResponse = await fetch(datei_url)
       if (!imgResponse.ok) {
@@ -171,37 +29,15 @@ export async function POST(request: Request) {
       base64Image = Buffer.from(buffer).toString('base64')
     }
 
-    // Strip data URI prefix if present
-    if (base64Image.includes(',')) {
-      base64Image = base64Image.split(',')[1]
-    }
-
-    // ─── Step 2: Call Google Cloud Vision API ───────────────────────────────
-    const visionResponse = await fetch(
-      `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          requests: [{
-            image: { content: base64Image },
-            features: [{ type: 'TEXT_DETECTION', maxResults: 1 }],
-          }],
-        }),
-      }
-    )
-
-    if (!visionResponse.ok) {
-      const errText = await visionResponse.text()
-      console.error('[OCR-ZB1] Vision API error:', errText)
+    // ─── Step 2+3: Shared Vision-Call + Parser ─────────────────────────────
+    const ocrResult = await runZB1Ocr(base64Image)
+    if ('error' in ocrResult) {
       return NextResponse.json(
-        { error: `Google Vision API Fehler: ${visionResponse.status}` },
-        { status: 502 }
+        { error: ocrResult.error },
+        { status: ocrResult.status ?? 500 },
       )
     }
-
-    const visionData = await visionResponse.json()
-    const fullText = visionData.responses?.[0]?.fullTextAnnotation?.text ?? ''
+    const { fullText, extracted } = ocrResult
 
     if (!fullText) {
       return NextResponse.json({
@@ -211,9 +47,6 @@ export async function POST(request: Request) {
         raw_text: '',
       })
     }
-
-    // ─── Step 3: Parse ZB1 fields ───────────────────────────────────────────
-    const extracted = parseZB1Fields(fullText)
 
     // ─── Step 4: Write to faelle table ──────────────────────────────────────
     const supabase = await createClient()

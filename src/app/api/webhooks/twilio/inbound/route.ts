@@ -134,6 +134,130 @@ export async function POST(req: NextRequest) {
     }).catch(() => {})
   }
 
+  // AAR-182: Lead-Pfad — ZB1-Upload-Anfrage. Wenn der Lead noch kein Fall
+  // ist aber zb1_status='gesendet' hat und Media kommt, interpretieren wir
+  // das erste Foto als Fahrzeugschein, schieben es in Storage, rufen den
+  // Parser direkt auf und schreiben extrahierte Felder auf den Lead. Das
+  // muss VOR dem Fall-Pfad stehen damit wir nicht den falschen Zweig gehen.
+  if (
+    matchedLeadId && !matchedFallId &&
+    intent === 'dokument_upload' && mediaUrls.length > 0
+  ) {
+    try {
+      const { data: leadRow } = await db
+        .from('leads')
+        .select('id, vorname, zb1_status, zugewiesen_an')
+        .eq('id', matchedLeadId)
+        .single()
+      if (leadRow?.zb1_status === 'gesendet' || leadRow?.zb1_status === 'geoeffnet') {
+        const twilioSid = process.env.TWILIO_ACCOUNT_SID
+        const twilioToken = process.env.TWILIO_AUTH_TOKEN
+        const basicAuth = twilioSid && twilioToken
+          ? 'Basic ' + Buffer.from(`${twilioSid}:${twilioToken}`).toString('base64')
+          : null
+
+        // Nur das erste Bild-Attachment als ZB1 nehmen — der Kunde schickt
+        // manchmal 2 Fotos (Vor-/Rück), wir werten hier die Vorderseite aus.
+        const firstImageIdx = mediaUrls.findIndex((_url, i) => {
+          const ct = body[`MediaContentType${i}`] ?? ''
+          return ct.startsWith('image/')
+        })
+        const url = firstImageIdx >= 0 ? mediaUrls[firstImageIdx] : mediaUrls[0]
+        const contentType = body[`MediaContentType${firstImageIdx >= 0 ? firstImageIdx : 0}`] ?? 'image/jpeg'
+        const ext =
+          contentType === 'image/png' ? 'png'
+          : contentType === 'image/webp' ? 'webp'
+          : 'jpg'
+
+        const res = await fetch(url, basicAuth ? { headers: { Authorization: basicAuth } } : undefined)
+        if (!res.ok) {
+          await db.from('leads').update({
+            zb1_status: 'fehlgeschlagen',
+            updated_at: new Date().toISOString(),
+          }).eq('id', matchedLeadId)
+          console.warn('[AAR-182] Twilio-Media Download fehlgeschlagen:', res.status)
+        } else {
+          const buf = Buffer.from(await res.arrayBuffer())
+          const ts = Date.now()
+          const path = `leads/${matchedLeadId}/zb1_${ts}.${ext}`
+          const { error: upErr } = await db.storage
+            .from('dokumente')
+            .upload(path, buf, { contentType, upsert: false })
+          if (upErr) {
+            console.warn('[AAR-182] Storage-Upload fehlgeschlagen:', upErr.message)
+          } else {
+            const { data: publicData } = db.storage.from('dokumente').getPublicUrl(path)
+            const publicUrl = publicData.publicUrl
+
+            // OCR direkt aus dem Buffer laufen lassen (shared parser)
+            const { runZB1Ocr } = await import('@/lib/ocr/zb1-parser')
+            const ocrResult = await runZB1Ocr(buf.toString('base64'))
+            if ('error' in ocrResult) {
+              await db.from('leads').update({
+                zb1_status: 'fehlgeschlagen',
+                zb1_url: publicUrl,
+                updated_at: new Date().toISOString(),
+              }).eq('id', matchedLeadId)
+            } else {
+              const { fullText, extracted } = ocrResult
+              const leadUpdate: Record<string, unknown> = {
+                zb1_status: 'hochgeladen',
+                zb1_url: publicUrl,
+                zb1_hochgeladen_am: new Date().toISOString(),
+                zb1_ocr_daten: { raw_text: fullText, extracted, ts: new Date().toISOString() },
+                updated_at: new Date().toISOString(),
+              }
+              if (extracted.kennzeichen) leadUpdate.kennzeichen = extracted.kennzeichen
+              if (extracted.fahrzeug_hersteller) leadUpdate.fahrzeug_hersteller = extracted.fahrzeug_hersteller
+              if (extracted.fahrzeug_modell) leadUpdate.fahrzeug_modell = extracted.fahrzeug_modell
+              if (extracted.fahrzeug_baujahr != null) leadUpdate.fahrzeug_baujahr = extracted.fahrzeug_baujahr
+              if (extracted.erstzulassung) leadUpdate.erstzulassung = extracted.erstzulassung
+              if (extracted.halter_vorname) leadUpdate.halter_vorname = extracted.halter_vorname
+              if (extracted.halter_nachname) leadUpdate.halter_nachname = extracted.halter_nachname
+              if (extracted.halter_strasse) leadUpdate.halter_strasse = extracted.halter_strasse
+              if (extracted.halter_plz) leadUpdate.halter_plz = extracted.halter_plz
+              if (extracted.halter_stadt) leadUpdate.halter_stadt = extracted.halter_stadt
+              await db.from('leads').update(leadUpdate).eq('id', matchedLeadId)
+            }
+          }
+        }
+
+        // WA-Bestätigung an Kunde (non-critical)
+        await sendCommunication('chat_fallback_kunde', {
+          telefon: fromPhone,
+          '1': '',
+          '2': 'Danke! Ihr Fahrzeugschein ist angekommen — wir lesen die Daten aus und der Dispatcher meldet sich.',
+        }).catch(() => {})
+
+        // Toast-Notification an Dispatcher (leadbearbeiter)
+        if (leadRow.zugewiesen_an) {
+          try {
+            const { createNotification } = await import('@/lib/notifications')
+            await createNotification(
+              leadRow.zugewiesen_an,
+              'zb1-hochgeladen',
+              `Fahrzeugschein eingegangen: ${leadRow.vorname ?? 'Lead'}`,
+              'ZB1-Foto wurde OCR-ausgelesen, Fahrzeugdaten sind gefüllt.',
+              `/dispatch/leads/${matchedLeadId}`,
+            )
+          } catch { /* non-critical */ }
+        }
+
+        // Abbruch des generischen Dokument-Upload-Pfads (wir haben den Lead-
+        // Pfad abgearbeitet). Mark processed + respond.
+        if (inbound?.id) {
+          await db.from('whatsapp_inbound_messages').update({
+            processed: true,
+            processed_at: new Date().toISOString(),
+          }).eq('id', inbound.id)
+        }
+        return new NextResponse(EMPTY_TWIML, { status: 200, headers: { 'Content-Type': 'text/xml' } })
+      }
+    } catch (err) {
+      console.error('[AAR-182] ZB1-Lead-Pfad Fehler:', err)
+    }
+  }
+
   // AAR-158: WA-Medien in Supabase Storage + dokumente-Row (nicht mehr
   // fall_dokumente — die Fallakte liest aus `dokumente`). Media von Twilio
   // werden downloaded (Basic-Auth mit Account-SID + Auth-Token) und unter

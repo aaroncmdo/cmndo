@@ -13,6 +13,7 @@ import { useDispatchPhase } from '../lib/phase-context'
 // AAR-177 Fix #1: CardentityButton-Import entfernt (Button war nicht
 // funktionsreif und Text irritierte — Cardentity läuft jetzt im Hintergrund
 // via ZB1-OCR-Trigger in /api/ocr-fahrzeugschein Step 6).
+import Zb1UploadCard from './Zb1UploadCard'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import {
   CarIcon,
@@ -44,6 +45,9 @@ type LeadFields = {
   fahrzeug_modell?: string | null
   fahrzeug_baujahr?: number | null
   fin?: string | null
+  // AAR-182: ZB1-Upload-Tracking
+  zb1_status?: string | null
+  zb1_hochgeladen_am?: string | null
   cardentity_enriched_at?: string | null
   hat_vorschaeden?: boolean | null
   vorschaeden_beschreibung?: string | null
@@ -231,6 +235,17 @@ export default function Phase4Stammdaten() {
       {/* AAR-177 Fix #2: Kundendaten-Card entfernt — die 4 Felder
           (Vorname/Nachname/Telefon/Email) werden bereits in Phase 1/5
           erfasst bzw. editiert. Doppelte Eingabe verwirrt den MA. */}
+
+      {/* AAR-182: ZB1-Upload-Karte — „Fahrzeugschein zur Hand?"-Toggle +
+          WA/SMS/Email-Versand. Kunde antwortet mit Foto → OCR füllt
+          KZ/Marke/Modell/Baujahr/Halter automatisch aus. */}
+      <Zb1UploadCard
+        leadId={leadId}
+        zb1Status={l.zb1_status ?? null}
+        zb1HochgeladenAm={l.zb1_hochgeladen_am ?? null}
+        telefon={l.telefon ?? null}
+        email={l.email ?? null}
+      />
 
       {/* 1. Fahrzeugdaten */}
       <Card icon={<CarIcon className="w-4 h-4 text-gray-400" />} title="Fahrzeugdaten">
