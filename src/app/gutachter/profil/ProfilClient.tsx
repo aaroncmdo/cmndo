@@ -199,7 +199,7 @@ export default function ProfilClient({
                   <span className="text-gray-800 text-sm">{email}</span>
                   <p className="text-gray-400 text-[10px] mt-0.5 flex items-center gap-1">
                     <InfoIcon className="w-3 h-3" />
-                    Email-Änderung via Support: <span className="text-[#4573A2]">support@claimondo.de</span>
+                    Email-Änderung via Support: <span className="text-[#4573A2]">aaron.sprafke@claimondo.de</span>
                   </p>
                 </div>
               </div>

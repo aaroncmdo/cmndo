@@ -55,7 +55,7 @@ export function KanzleiMagicLinkAbrechnungEmail(props: Props) {
 
       <Text style={{ color: '#6b7280', fontSize: 12, margin: '8px 0', fontStyle: 'italic' }}>
         Der Zahlungslink ist gültig bis zum {props.magicLinkExpiresAm}. Nach Ablauf dieser Frist
-        wenden Sie sich bitte an support@claimondo.de.
+        wenden Sie sich bitte an aaron.sprafke@claimondo.de.
       </Text>
 
       <Text style={{ color: '#6b7280', fontSize: 11, margin: '12px 0 0' }}>

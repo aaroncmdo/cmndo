@@ -1,6 +1,26 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import WillkommenClient from './WillkommenClient'
+import { PAKET_KONFIG, type AnlegePaket } from '@/app/admin/sachverstaendige/anlegen/constants'
+
+// AAR-209: Fallback für max_faelle_monat wenn DB-Spalte NULL ist.
+// Legacy-SVs haben max_faelle_monat nicht gesetzt — wir leiten dann aus
+// sv.paket ab via PAKET_KONFIG.
+function resolveMaxFaelleMonat(paket: string | null, max: number | null): number {
+  if (max && max > 0) return max
+  if (paket && paket !== 'individuell' && paket in PAKET_KONFIG) {
+    return PAKET_KONFIG[paket as Exclude<AnlegePaket, 'individuell'>].kontingent
+  }
+  return 0
+}
+
+function resolveUmkreisKm(paket: string | null, radius: number | null): number {
+  if (radius && radius > 0) return radius
+  if (paket && paket !== 'individuell' && paket in PAKET_KONFIG) {
+    return PAKET_KONFIG[paket as Exclude<AnlegePaket, 'individuell'>].radius_km
+  }
+  return 0
+}
 
 /**
  * ARCH-1 Phase 1: /gutachter/willkommen
@@ -206,8 +226,8 @@ export default async function GutachterWillkommenPage({
       sv={{
         id: sv.id,
         paket: sv.paket ?? 'standard',
-        max_faelle_monat: sv.max_faelle_monat ?? 0,
-        paket_umkreis_km: sv.paket_umkreis_km ?? 0,
+        max_faelle_monat: resolveMaxFaelleMonat(sv.paket ?? null, sv.max_faelle_monat ?? null),
+        paket_umkreis_km: resolveUmkreisKm(sv.paket ?? null, sv.paket_umkreis_km ?? null),
         onboarding_anzahlung_betrag: Number(sv.onboarding_anzahlung_betrag ?? 0),
         onboarding_status: sv.onboarding_status,
         vertrag_unterschrieben: !!sv.vertrag_unterschrieben,

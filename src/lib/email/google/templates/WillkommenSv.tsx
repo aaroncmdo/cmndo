@@ -102,7 +102,7 @@ export function WillkommenSvEmail(props: Props) {
 
       <Divider />
       <Paragraph>
-        Bei Fragen erreichst du uns unter <strong>support@claimondo.de</strong>.
+        Bei Fragen erreichst du uns unter <strong>aaron.sprafke@claimondo.de</strong>.
       </Paragraph>
       <Paragraph>
         Viele Grüße,<br/>

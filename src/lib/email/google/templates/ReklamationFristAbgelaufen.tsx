@@ -26,7 +26,7 @@ export function ReklamationFristAbgelaufenEmail(props: Props) {
       <Divider />
 
       <Paragraph>
-        Bei Fragen wende dich bitte an <strong>support@claimondo.de</strong>.
+        Bei Fragen wende dich bitte an <strong>aaron.sprafke@claimondo.de</strong>.
       </Paragraph>
 
       <Paragraph>Dein Claimondo-Team</Paragraph>

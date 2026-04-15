@@ -238,8 +238,10 @@ export default function GutachterShell({
 
       <div className="flex-1 flex flex-col min-w-0 h-screen">
         {/* Mobile Header (nur Hamburger + Logo, Glocke ist im Wetter-Banner) */}
-        <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white shrink-0">
-          <button onClick={() => setSidebarOpen(true)} className="p-2 -ml-2 text-gray-500 hover:text-gray-800 transition-colors" aria-label="Menu oeffnen">
+        {/* AAR-211: Header Navy statt weiß — war bei halber Bildschirmbreite
+            (< lg) weiß statt Navy, was mit dem Navy-Sidebar kollidierte. */}
+        <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#0D1B3E] shrink-0">
+          <button onClick={() => setSidebarOpen(true)} className="p-2 -ml-2 text-white/70 hover:text-white transition-colors" aria-label="Menü öffnen">
             <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
           </button>
           <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
@@ -259,7 +261,7 @@ export default function GutachterShell({
               ))}
             </div>
             {/* Mobile: Outbox + Glocke */}
-            <div className="shrink-0 sm:hidden flex items-center gap-2"><OutboxBadge /><NotificationBell /></div>
+            <div className="shrink-0 sm:hidden flex items-center gap-2"><OutboxBadge /><NotificationBell variant="dark" /></div>
             {/* Desktop: Gute Fahrt + Glocke */}
             <div className="shrink-0 text-right hidden sm:flex sm:items-center sm:gap-3">
               <div>
@@ -270,7 +272,7 @@ export default function GutachterShell({
                 )}
               </div>
               <OutboxBadge />
-              <NotificationBell />
+              <NotificationBell variant="dark" />
             </div>
           </div>
         )}

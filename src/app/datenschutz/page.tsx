@@ -22,7 +22,7 @@ export default function DatenschutzPage() {
             Claimondo GmbH i.G.<br />
             Hansaring 10<br />
             50670 Koeln<br />
-            E-Mail: <a href="mailto:support@claimondo.de" className="text-[#4573A2] underline">support@claimondo.de</a>
+            E-Mail: <a href="mailto:aaron.sprafke@claimondo.de" className="text-[#4573A2] underline">aaron.sprafke@claimondo.de</a>
           </p>
           <p className="mt-2">Geschaeftsfuehrer: Aaron Sprafke, Nicolas Kitta</p>
         </section>
@@ -145,7 +145,7 @@ export default function DatenschutzPage() {
           </ul>
           <p className="mt-2">
             Zur Ausuebung Ihrer Rechte wenden Sie sich bitte an:{' '}
-            <a href="mailto:support@claimondo.de" className="text-[#4573A2] underline">support@claimondo.de</a>
+            <a href="mailto:aaron.sprafke@claimondo.de" className="text-[#4573A2] underline">aaron.sprafke@claimondo.de</a>
           </p>
         </section>
 

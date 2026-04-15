@@ -32,7 +32,7 @@ export default function ImpressumPage() {
         <div>
           <h2 className="text-lg font-semibold text-[#1E3A5F] mb-2">Kontakt</h2>
           <p>
-            E-Mail: <a href="mailto:support@claimondo.de" className="text-[#4573A2] underline">support@claimondo.de</a><br />
+            E-Mail: <a href="mailto:aaron.sprafke@claimondo.de" className="text-[#4573A2] underline">aaron.sprafke@claimondo.de</a><br />
             Telefon: <a href="tel:+4922116398980" className="text-[#4573A2] underline">+49 221 163 989 80</a>
           </p>
         </div>

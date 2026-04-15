@@ -24,7 +24,9 @@ const TYP_ICONS: Record<string, string> = {
   'chat': '💬', 'system': '🔔',
 }
 
-export default function NotificationBell() {
+// AAR-212: variant-Prop für dunkle Header (Gutachter-Portal = Navy). Default
+// 'light' = grau-outline (Admin/weisse Header); 'dark' = weiß-gefüllt für Navy.
+export default function NotificationBell({ variant = 'light' }: { variant?: 'light' | 'dark' } = {}) {
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
   const [open, setOpen] = useState(false)
@@ -139,9 +141,16 @@ export default function NotificationBell() {
   return (
     <div ref={ref} className="relative">
       <button onClick={() => setOpen(o => !o)}
-        className="relative p-2 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
+        className={`relative p-2 rounded-lg transition-colors ${
+          variant === 'dark'
+            ? 'text-white hover:bg-white/10'
+            : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'
+        }`}
         aria-label="Benachrichtigungen">
-        <BellIcon className="w-4.5 h-4.5" />
+        <BellIcon
+          className="w-4.5 h-4.5"
+          fill={variant === 'dark' ? 'currentColor' : 'none'}
+        />
         {unread > 0 && (
           <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-[10px] font-bold text-white leading-none">
             {unread > 99 ? '99+' : unread}

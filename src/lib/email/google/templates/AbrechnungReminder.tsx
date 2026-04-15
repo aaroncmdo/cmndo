@@ -54,7 +54,7 @@ export function AbrechnungReminderEmail(props: Props) {
       <Divider />
       <Paragraph>
         Bitte stelle sicher dass dein hinterlegtes Zahlungsmittel ausreichend gedeckt ist.
-        Bei Rückfragen erreichst du uns unter <strong>support@claimondo.de</strong>.
+        Bei Rückfragen erreichst du uns unter <strong>aaron.sprafke@claimondo.de</strong>.
       </Paragraph>
       <Text style={{ color: '#6b7280', fontSize: 12, margin: '16px 0 0', fontStyle: 'italic' }}>
         Diese Mail wurde automatisch versendet. Bei einer fehlgeschlagenen Lastschrift erhältst du eine separate Benachrichtigung.

@@ -54,7 +54,7 @@ export function AbrechnungManuellVersendetEmail(props: Props) {
         )}
 
         <Paragraph>
-          Bei Fragen wende dich an <strong>support@claimondo.de</strong>.
+          Bei Fragen wende dich an <strong>aaron.sprafke@claimondo.de</strong>.
         </Paragraph>
 
         <Paragraph>Dein Claimondo-Team</Paragraph>
@@ -82,7 +82,7 @@ export function AbrechnungManuellVersendetEmail(props: Props) {
       <Divider />
 
       <Paragraph>
-        Bei Fragen wende dich an <strong>support@claimondo.de</strong>.
+        Bei Fragen wende dich an <strong>aaron.sprafke@claimondo.de</strong>.
       </Paragraph>
 
       <Paragraph>Dein Claimondo-Team</Paragraph>

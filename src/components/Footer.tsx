@@ -22,7 +22,7 @@ export function Footer() {
           <Link href="/datenschutz" className="text-white/80 hover:text-white transition-colors">
             Datenschutz
           </Link>
-          <a href="mailto:support@claimondo.de" className="text-white/80 hover:text-white transition-colors">
+          <a href="mailto:aaron.sprafke@claimondo.de" className="text-white/80 hover:text-white transition-colors">
             Kontakt
           </a>
         </nav>

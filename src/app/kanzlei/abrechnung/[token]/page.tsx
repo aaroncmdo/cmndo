@@ -50,7 +50,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
         <div className="bg-white rounded-2xl shadow p-8 max-w-md w-full text-center">
           <div className="text-4xl mb-4">🔒</div>
           <h1 className="text-xl font-bold text-gray-900 mb-2">Link ungueltig</h1>
-          <p className="text-gray-500">Dieser Abrechnungslink ist nicht gueltig oder wurde bereits verwendet. Bitte kontaktieren Sie uns unter <a href="mailto:support@claimondo.de" className="text-blue-600 underline">support@claimondo.de</a>.</p>
+          <p className="text-gray-500">Dieser Abrechnungslink ist nicht gueltig oder wurde bereits verwendet. Bitte kontaktieren Sie uns unter <a href="mailto:aaron.sprafke@claimondo.de" className="text-blue-600 underline">aaron.sprafke@claimondo.de</a>.</p>
         </div>
       </main>
     )
@@ -65,7 +65,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
         <div className="bg-white rounded-2xl shadow p-8 max-w-md w-full text-center">
           <div className="text-4xl mb-4">⏳</div>
           <h1 className="text-xl font-bold text-gray-900 mb-2">Link abgelaufen</h1>
-          <p className="text-gray-500">Dieser Link ist nicht mehr gueltig. Bitte kontaktieren Sie uns unter <a href="mailto:support@claimondo.de" className="text-blue-600 underline">support@claimondo.de</a> fuer einen neuen Link.</p>
+          <p className="text-gray-500">Dieser Link ist nicht mehr gueltig. Bitte kontaktieren Sie uns unter <a href="mailto:aaron.sprafke@claimondo.de" className="text-blue-600 underline">aaron.sprafke@claimondo.de</a> fuer einen neuen Link.</p>
         </div>
       </main>
     )

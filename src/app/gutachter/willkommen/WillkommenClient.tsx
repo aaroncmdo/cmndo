@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   PackageIcon,
   FileSignatureIcon,
@@ -145,6 +145,25 @@ export default function WillkommenClient({
   stripePublishableKey: string
 }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // AAR-214: Nach Stripe-Success-Redirect (?stripe_success=1) sind die
+  // Server-Props veraltet (portal_zugang_freigeschaltet=true, anzahlung_status=bezahlt
+  // wurden vom Webhook erst NACH dem Server-Fetch gesetzt). router.refresh()
+  // lädt Server-Props neu, danach entfernen wir das Query-Flag per
+  // router.replace, damit ein weiterer Navigation-Event nicht erneut
+  // refresht (Loop-Schutz).
+  useEffect(() => {
+    if (searchParams?.get('stripe_success') === '1') {
+      router.refresh()
+      const url = new URL(window.location.href)
+      url.searchParams.delete('stripe_success')
+      url.searchParams.delete('session_id')
+      router.replace(url.pathname + url.search, { scroll: false })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // KFZ-152 Phase 2+3: Wir behandeln intern nur die 3 Render-Kategorien
   // (solo/buero_inhaber/sub_mitarbeiter). Akademie-Verwalter rendert wie
   // buero_inhaber, Community-Member wie solo. Spezifische Dispatches
@@ -354,8 +373,8 @@ export default function WillkommenClient({
 
             <div className="mt-5 text-xs text-gray-500 text-center">
               Du kannst dieses Fenster schließen. Bei Fragen erreichst du uns unter{' '}
-              <a href="mailto:support@claimondo.de" className="text-[#1E3A5F] underline">
-                support@claimondo.de
+              <a href="mailto:aaron.sprafke@claimondo.de" className="text-[#1E3A5F] underline">
+                aaron.sprafke@claimondo.de
               </a>
             </div>
           </div>
@@ -535,7 +554,7 @@ export default function WillkommenClient({
                 </div>
               ) : (
                 <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm">
-                  Es sind noch keine Sub-Standorte angelegt. Bitte support@claimondo.de kontaktieren.
+                  Es sind noch keine Sub-Standorte angelegt. Bitte aaron.sprafke@claimondo.de kontaktieren.
                 </div>
               )}
 
@@ -818,7 +837,7 @@ export default function WillkommenClient({
 
               {r === 'buero_inhaber' && gesamtAnzahlung <= 0 && (
                 <div className="px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
-                  Es sind keine Sub-Standorte mit Anzahlungsbetrag vorhanden. Bitte support@claimondo.de kontaktieren.
+                  Es sind keine Sub-Standorte mit Anzahlungsbetrag vorhanden. Bitte aaron.sprafke@claimondo.de kontaktieren.
                 </div>
               )}
 
@@ -840,7 +859,7 @@ export default function WillkommenClient({
                 <div className="space-y-3">
                   {!stripePublishableKey ? (
                     <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm">
-                      Stripe-Konfiguration fehlt (STRIPE_PUBLISHABLE_KEY). Bitte support@claimondo.de kontaktieren.
+                      Stripe-Konfiguration fehlt (STRIPE_PUBLISHABLE_KEY). Bitte aaron.sprafke@claimondo.de kontaktieren.
                     </div>
                   ) : !clientSecret ? (
                     <div className="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center text-sm text-gray-500">
@@ -995,8 +1014,8 @@ function KontaktHinweis() {
   return (
     <div className="text-xs text-gray-500 bg-amber-50 border border-amber-200 rounded-xl p-4">
       <strong>Stimmt etwas nicht?</strong> Schreib uns an{' '}
-      <a href="mailto:support@claimondo.de" className="text-[#1E3A5F] underline">
-        support@claimondo.de
+      <a href="mailto:aaron.sprafke@claimondo.de" className="text-[#1E3A5F] underline">
+        aaron.sprafke@claimondo.de
       </a>
       {' '}— wir korrigieren deine Stammdaten bevor du den Vertrag unterzeichnest.
     </div>

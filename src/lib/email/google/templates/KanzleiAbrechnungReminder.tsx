@@ -65,7 +65,7 @@ export function KanzleiAbrechnungReminderEmail(props: Props) {
           <Divider />
           <Text style={{ color: '#dc2626', fontSize: 13, margin: '8px 0', fontWeight: 'bold' }}>
             Bei ausbleibender Zahlung behalten wir uns vor, rechtliche Schritte einzuleiten.
-            Bitte kontaktieren Sie uns unter support@claimondo.de falls es Rückfragen gibt.
+            Bitte kontaktieren Sie uns unter aaron.sprafke@claimondo.de falls es Rückfragen gibt.
           </Text>
         </>
       )}

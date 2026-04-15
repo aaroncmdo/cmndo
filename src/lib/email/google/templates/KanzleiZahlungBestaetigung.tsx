@@ -38,7 +38,7 @@ export function KanzleiZahlungBestaetigungEmail(props: Props) {
       <Paragraph>
         Diese Bestätigung können Sie als Beleg für Ihre Buchhaltung aufbewahren.
         Bei Rückfragen wenden Sie sich bitte an{' '}
-        <strong>support@claimondo.de</strong>.
+        <strong>aaron.sprafke@claimondo.de</strong>.
       </Paragraph>
 
       <Text style={{ color: '#6b7280', fontSize: 11, margin: '16px 0 0' }}>
