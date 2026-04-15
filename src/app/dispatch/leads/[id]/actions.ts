@@ -241,6 +241,8 @@ export type HardGateData = {
   polizei_vor_ort?: boolean
   polizei_aktenzeichen?: string | null
   polizeibericht_pflicht?: boolean
+  // AAR-138 / W4: Fahrzeug-Status nach Unfall (Spec §3 Q2)
+  fahrzeug_fahrbereit?: boolean
 }
 
 export async function saveHardGate(
@@ -293,6 +295,8 @@ export async function saveHardGate(
     ...(data.unfallort_lng !== undefined && { unfallort_lng: data.unfallort_lng }),
     ...(data.polizei_vor_ort !== undefined && { polizei_vor_ort: data.polizei_vor_ort }),
     ...(data.polizei_aktenzeichen !== undefined && { polizei_aktenzeichen: data.polizei_aktenzeichen }),
+    // AAR-138 / W4: fahrzeug_fahrbereit (Spec §3 Q2 Unterfeld)
+    ...(data.fahrzeug_fahrbereit !== undefined && { fahrzeug_fahrbereit: data.fahrzeug_fahrbereit }),
     updated_at: new Date().toISOString(),
   }
 
@@ -313,13 +317,15 @@ export async function saveHardGate(
     updates.disqualifikations_grund = grund
     updates.disqualifikations_grund_key = grundKey
   } else {
-    // AAR-114: Wenn alle 3 Fragen beantwortet sind und nicht disqualifiziert → in-qualifizierung
+    // AAR-114 + AAR-138/W4: Wenn alle 3 Fragen beantwortet sind und nicht disqualifiziert → in-qualifizierung.
+    // Q3 ist ab W4 Polizei-vor-Ort (nicht mehr Haftpflicht) — Frage gilt als
+    // beantwortet sobald polizei_vor_ort true ODER false gesetzt ist.
     const q1Complete =
       !!data.unfallhergang &&
       !!data.schuldfrage &&
       (data.schuldfrage !== 'unklar' || data.aufklaerung_teilschuld_bestaetigt === true)
     const q2Complete = data.schaden_sichtbar !== null && data.schaden_sichtbar !== undefined
-    const q3Complete = data.hat_haftpflicht !== null && data.hat_haftpflicht !== undefined
+    const q3Complete = data.polizei_vor_ort === true || data.polizei_vor_ort === false
 
     if (q1Complete && q2Complete && q3Complete) {
       updates.qualifizierungs_phase = 'in-qualifizierung'

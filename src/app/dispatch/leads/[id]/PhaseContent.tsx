@@ -5,7 +5,7 @@
 
 import { useDispatchPhase } from './lib/phase-context'
 import {
-  Phase1Qualifizierung,
+  Phase1,
   Phase2TerminServiceTyp,
   Phase3Schadentyp,
   Phase4Stammdaten,
@@ -39,7 +39,7 @@ export default function PhaseContent({
   const { currentPhase } = useDispatchPhase()
   switch (currentPhase) {
     case 1:
-      return <Phase1Qualifizierung />
+      return <Phase1 />
     case 2:
       return <Phase2TerminServiceTyp />
     case 3:

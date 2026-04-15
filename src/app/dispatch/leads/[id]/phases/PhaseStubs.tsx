@@ -6,7 +6,7 @@
 // jede Stub-Component durch eine eigenständige Phase-Implementation gemäß
 // Notion-Master-Spec 14.04.2026.
 
-import Schritt0HardGate from '../Schritt0HardGate'
+import Phase1Qualifizierung from './Phase1Qualifizierung'
 import SchadentypPicker from '../SchadentypPicker'
 import SvDispatchPanel from '../SvDispatchPanel'
 import CardentityButton from '../CardentityButton'
@@ -55,15 +55,11 @@ function DisqualifiziertOverlay() {
   return <ExitSkript grund={grund} />
 }
 
-/** Phase 1 — Qualifizierung (Hard Gate). W4 refactort das zu echter 6-Felder-Form. */
-export function Phase1Qualifizierung() {
-  const { lead, qualification } = useDispatchPhase()
+/** Phase 1 — Qualifizierung. W4 (AAR-138) hat den Hard Gate zu Phase1Qualifizierung refactort. */
+export function Phase1() {
+  const { qualification } = useDispatchPhase()
   if (qualification.disqualifiziert) return <DisqualifiziertOverlay />
-  return (
-    <div className="space-y-4">
-      <Schritt0HardGate lead={lead as Parameters<typeof Schritt0HardGate>[0]['lead']} />
-    </div>
-  )
+  return <Phase1Qualifizierung />
 }
 
 /** Phase 2 — SV-Termin + Service-Typ. W5 baut Wrapper-Component. */
