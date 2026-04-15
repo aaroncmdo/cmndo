@@ -19,20 +19,24 @@ export async function uploadGutachterLogo(formData: FormData): Promise<{
   primary: string
   secondary: string
 }> {
-  const { supabase, svId } = await requireGutachter()
+  const { svId } = await requireGutachter()
 
   const file = formData.get('logo') as File
-  if (!file || file.size === 0) throw new Error('Keine Datei ausgewaehlt')
-  if (file.size > 2 * 1024 * 1024) throw new Error('Datei zu gross (max 2 MB)')
+  if (!file || file.size === 0) throw new Error('Keine Datei ausgewählt')
+  if (file.size > 2 * 1024 * 1024) throw new Error('Datei zu groß (max 2 MB)')
 
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png'
   if (!['png', 'jpg', 'jpeg', 'svg', 'webp'].includes(ext)) throw new Error('Nur PNG, JPG, SVG oder WebP erlaubt')
 
+  // AAR-218: Storage-Upload über Admin-Client — Identität wurde in
+  // requireGutachter() bereits verifiziert, und die SSR-Client/Storage-Kombi
+  // hat JWT-Weitergabe-Probleme verursacht (400 auf /object/gutachter-logos/*).
+  const admin = createAdminClient()
   const path = `${svId}/${Date.now()}.${ext}`
-  const { error: uploadErr } = await supabase.storage.from('gutachter-logos').upload(path, file, { contentType: file.type })
+  const { error: uploadErr } = await admin.storage.from('gutachter-logos').upload(path, file, { contentType: file.type })
   if (uploadErr) throw new Error(`Upload fehlgeschlagen: ${uploadErr.message}`)
 
-  const { data: urlData } = supabase.storage.from('gutachter-logos').getPublicUrl(path)
+  const { data: urlData } = admin.storage.from('gutachter-logos').getPublicUrl(path)
   const logoUrl = urlData.publicUrl
 
   // Color Extraction
@@ -98,24 +102,26 @@ export async function uploadSvLogo(formData: FormData): Promise<{
   brand_primary: string
   brand_secondary: string
 }> {
-  const { supabase, svId } = await requireGutachter()
+  const { svId } = await requireGutachter()
 
   const file = formData.get('logo') as File
-  if (!file || file.size === 0) throw new Error('Keine Datei ausgewaehlt')
-  if (file.size > 2 * 1024 * 1024) throw new Error('Datei zu gross (max 2 MB)')
+  if (!file || file.size === 0) throw new Error('Keine Datei ausgewählt')
+  if (file.size > 2 * 1024 * 1024) throw new Error('Datei zu groß (max 2 MB)')
 
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png'
   if (!['png', 'jpg', 'jpeg', 'svg', 'webp'].includes(ext)) {
     throw new Error('Nur PNG, JPG, SVG oder WebP erlaubt')
   }
 
+  // AAR-218: Admin-Client für Storage — Identität oben bereits verifiziert.
+  const db = createAdminClient()
   const path = `${svId}/${Date.now()}.${ext}`
-  const { error: uploadErr } = await supabase.storage
+  const { error: uploadErr } = await db.storage
     .from('gutachter-logos')
     .upload(path, file, { contentType: file.type, upsert: true })
   if (uploadErr) throw new Error(`Upload fehlgeschlagen: ${uploadErr.message}`)
 
-  const { data: urlData } = supabase.storage.from('gutachter-logos').getPublicUrl(path)
+  const { data: urlData } = db.storage.from('gutachter-logos').getPublicUrl(path)
   const logoUrl = urlData.publicUrl
 
   // Server-side Farb-Extraction via node-vibrant
@@ -132,7 +138,6 @@ export async function uploadSvLogo(formData: FormData): Promise<{
 
   // Speichern + use_custom_branding aktivieren (das Logo wird ja jetzt
   // genutzt — sonst koennten wir uns die ganze Extraktion sparen).
-  const db = createAdminClient()
   const { error } = await db.from('sachverstaendige').update({
     logo_url: logoUrl,
     brand_primary,
@@ -173,26 +178,27 @@ export async function uploadBueroLogo(formData: FormData): Promise<{
     .eq('id', organisation_id)
     .single()
   if (!org || org.hauptansprechpartner_user_id !== user.id) {
-    throw new Error('Keine Berechtigung fuer dieses Buero')
+    throw new Error('Keine Berechtigung für dieses Büro')
   }
 
   const file = formData.get('logo') as File
-  if (!file || file.size === 0) throw new Error('Keine Datei ausgewaehlt')
-  if (file.size > 2 * 1024 * 1024) throw new Error('Datei zu gross (max 2 MB)')
+  if (!file || file.size === 0) throw new Error('Keine Datei ausgewählt')
+  if (file.size > 2 * 1024 * 1024) throw new Error('Datei zu groß (max 2 MB)')
 
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png'
   if (!['png', 'jpg', 'jpeg', 'svg', 'webp'].includes(ext)) {
     throw new Error('Nur PNG, JPG, SVG oder WebP erlaubt')
   }
 
-  // Storage-Pfad: org/<id>/... damit Buero- und SV-Logos sich nicht beissen
+  // AAR-218: Storage-Upload via Admin-Client. Pfad: org/<id>/... damit
+  // Büro- und SV-Logos sich nicht beißen.
   const path = `org/${organisation_id}/${Date.now()}.${ext}`
-  const { error: uploadErr } = await supabase.storage
+  const { error: uploadErr } = await db.storage
     .from('gutachter-logos')
     .upload(path, file, { contentType: file.type, upsert: true })
   if (uploadErr) throw new Error(`Upload fehlgeschlagen: ${uploadErr.message}`)
 
-  const { data: urlData } = supabase.storage.from('gutachter-logos').getPublicUrl(path)
+  const { data: urlData } = db.storage.from('gutachter-logos').getPublicUrl(path)
   const logoUrl = urlData.publicUrl
 
   let brand_primary = '#1E3A5F'
