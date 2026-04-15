@@ -208,16 +208,22 @@ export async function resolveFallEntityFks(
   // Spec fordert „Fuzzy-Match" — wir nutzen ILIKE %pattern% weil die
   // versicherungen-Tabelle kurze Kanonische Namen hat (z.B. „Allianz",
   // „HUK-Coburg") und der Dispatcher oft nur „allianz" tippt.
+  // AAR-155 Audit-Fix #4: LIKE-Wildcards im User-Input escapen damit
+  // „Allianz % Co" nicht als Pattern sondern als Literal gesucht wird.
   let versicherungId: string | null = null
   if (gegnerVs.length >= 3) {
     try {
+      const escaped = gegnerVs.replace(/[\\%_]/g, '\\$&')
       const { data } = await admin
         .from('versicherungen')
         .select('id, name')
-        .ilike('name', `%${gegnerVs}%`)
+        .ilike('name', `%${escaped}%`)
         .limit(1)
         .maybeSingle()
       versicherungId = data?.id ?? null
+      if (!versicherungId) {
+        console.warn('[AAR-155] Versicherung nicht gefunden:', gegnerVs)
+      }
     } catch { /* non-blocking */ }
   }
 

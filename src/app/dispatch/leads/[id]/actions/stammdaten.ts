@@ -29,6 +29,9 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   // via saveHardGate gesetzt. Admins brauchen die Möglichkeit den Treffpunkt
   // später auch inline zu editieren — daher auch hier zulassen.
   'sv_treffpunkt',
+  // AAR-182 Audit-Fix #2: zb1_status damit „Nein — manuell eintragen" in
+  // Zb1UploadCard persistiert werden kann (Wert 'abgelehnt').
+  'zb1_status',
 ])
 
 export async function saveStammdaten(

@@ -29,6 +29,9 @@ export type LeadLike = {
   fahrzeug_hersteller?: string | null
   fahrzeug_modell?: string | null
   fahrzeug_baujahr?: number | null
+  // AAR-181 Audit-Fix #5: erstzulassung (DD.MM.YYYY) aus ZB1-OCR, kann als
+  // Fallback für Baujahr-Ableitung genutzt werden wenn fahrzeug_baujahr null
+  erstzulassung?: string | null
 }
 
 export type AktiverTerminLike = {

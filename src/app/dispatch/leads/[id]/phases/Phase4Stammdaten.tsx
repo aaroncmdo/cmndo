@@ -102,6 +102,7 @@ function InlineField({
   placeholder,
   transform,
   hint,
+  required,
 }: {
   label: string
   value: string | null | undefined
@@ -111,6 +112,10 @@ function InlineField({
   placeholder?: string
   transform?: (raw: string) => string
   hint?: string
+  // AAR-181 Audit-Fix #3: Pflichtfeld-Markierung als dedicated Prop statt
+  // hartcodiert im Label-String (sonst verliert die Markierung den Kontext
+  // bei Label-Änderung).
+  required?: boolean
 }) {
   const [draft, setDraft] = useState(value ?? '')
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
@@ -136,6 +141,7 @@ function InlineField({
     <div className="space-y-0.5">
       <label className="text-[10px] text-gray-400 uppercase tracking-wider flex items-center gap-1">
         {label}
+        {required && <span className="text-red-500" aria-label="Pflichtfeld">*</span>}
         {status === 'saving' && <LoaderIcon className="w-3 h-3 text-blue-400 animate-spin" />}
         {status === 'saved' && <CheckIcon className="w-3 h-3 text-green-500" />}
         {status === 'error' && <span className="text-red-500">Fehler</span>}
@@ -303,13 +309,14 @@ export default function Phase4Stammdaten() {
               abgeschlossen wenn leer. Integer-Typ auf DB, Input akzeptiert
               4-stellige Jahreszahl (YYYY). */}
           <InlineField
-            label="Baujahr *"
+            label="Baujahr"
+            required
             value={l.fahrzeug_baujahr != null ? String(l.fahrzeug_baujahr) : null}
             fieldName="fahrzeug_baujahr"
             leadId={leadId}
             placeholder="z.B. 2018"
             transform={formatBaujahr}
-            hint={l.fahrzeug_baujahr == null ? 'Pflichtfeld — wird auf Fall übernommen' : undefined}
+            hint={l.fahrzeug_baujahr == null ? 'Wird auf Fall übernommen (1990–heute)' : undefined}
           />
 
           {/* AAR-177 Fix #3: Eigentümer-Typ mit Info-Tooltip + Label.

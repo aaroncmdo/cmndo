@@ -11,10 +11,10 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { triggerZb1UploadRequest } from '../actions'
+import { triggerZb1UploadRequest, saveStammdaten } from '../actions'
 import {
   FileTextIcon, MessageSquareIcon, PhoneIcon, MailIcon,
-  CheckCircle2Icon, ClockIcon, AlertCircleIcon,
+  CheckCircle2Icon, ClockIcon, AlertCircleIcon, XCircleIcon,
 } from 'lucide-react'
 
 type Props = {
@@ -30,18 +30,35 @@ const STATUS_UI: Record<string, { label: string; bg: string; text: string; icon:
   geoeffnet: { label: 'Kunde hat Anfrage geöffnet', bg: 'bg-blue-50 border-blue-200', text: 'text-blue-700', icon: ClockIcon },
   hochgeladen: { label: 'Foto eingegangen + Daten ausgelesen', bg: 'bg-green-50 border-green-200', text: 'text-green-700', icon: CheckCircle2Icon },
   fehlgeschlagen: { label: 'OCR fehlgeschlagen — manuell eintragen', bg: 'bg-red-50 border-red-200', text: 'text-red-700', icon: AlertCircleIcon },
+  abgelehnt: { label: 'Manuelle Eingabe gewählt — keine Anfrage', bg: 'bg-gray-50 border-gray-200', text: 'text-gray-600', icon: XCircleIcon },
 }
 
 export default function Zb1UploadCard({
   leadId, zb1Status, zb1HochgeladenAm, telefon, email,
 }: Props) {
   const router = useRouter()
-  const [toggle, setToggle] = useState<boolean | null>(
-    zb1Status && ['gesendet', 'geoeffnet', 'hochgeladen'].includes(zb1Status) ? true : null,
-  )
+  // AAR-182 Audit-Fix #2: Toggle-State wird aus zb1_status abgeleitet +
+  // beim „Nein"-Klick als 'abgelehnt' in der DB gespeichert (vorher nur
+  // Client-State, Reload hat die Entscheidung gelöscht).
+  const initialToggle: boolean | null =
+    zb1Status && ['gesendet', 'geoeffnet', 'hochgeladen'].includes(zb1Status) ? true
+    : zb1Status === 'abgelehnt' ? false
+    : null
+  const [toggle, setToggle] = useState<boolean | null>(initialToggle)
   const [kanal, setKanal] = useState<'whatsapp' | 'sms' | 'email'>('whatsapp')
   const [pending, startTransition] = useTransition()
   const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null)
+
+  function chooseManuell() {
+    setToggle(false)
+    // Persistieren via saveStammdaten — zb1_status ist in der Allowlist
+    // (wird via Audit-Fix unten ergänzt).
+    startTransition(async () => {
+      const r = await saveStammdaten(leadId, { zb1_status: 'abgelehnt' })
+      if (!r.success) setFeedback({ ok: false, text: r.error ?? 'Speichern fehlgeschlagen' })
+      else router.refresh()
+    })
+  }
 
   function send() {
     setFeedback(null)
@@ -98,10 +115,11 @@ export default function Zb1UploadCard({
             </button>
             <button
               type="button"
-              onClick={() => setToggle(false)}
+              onClick={chooseManuell}
+              disabled={pending}
               className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
                 toggle === false ? 'bg-gray-500 text-white' : 'bg-gray-100 text-gray-600'
-              }`}
+              } disabled:opacity-50`}
             >
               Nein — manuell eintragen
             </button>
