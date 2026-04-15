@@ -1,10 +1,9 @@
-// AAR-112: Dispatch-Portal Sachverständige-Liste (Read-Only)
-// Identische Daten wie /admin/sachverstaendige, aber:
-//   - keine "+ Neuer Sachverständiger" Actions
-//   - Links verweisen auf /dispatch/sachverstaendige/[id]
-//   - Admin-Actions (Löschen, Deaktivieren, Bearbeiten) werden in der Detail-Page nicht gezeigt
+// AAR-112: Dispatch-Portal Sachverständige-Liste (Read-Only).
+// AAR-151: Import aus shared components — /admin/sachverstaendige rendert
+// jetzt die Karte direkt, die Liste lebt ausschließlich im Dispatch-Portal
+// als Tabellen-Sicht.
 import { createClient } from '@/lib/supabase/server'
-import SachverstaendigeListClient from '@/app/admin/sachverstaendige/SachverstaendigeListClient'
+import SachverstaendigeList from '@/components/SachverstaendigeList'
 
 const BASE_SELECT = 'id, profile_id, gebiet_plz, paket, offene_faelle, max_faelle_monat, ist_aktiv, gutachter_typ, qualifikationen_neu, spezifikationen, schadenarten, onboarding_abgeschlossen, anzahlung_status, standort_adresse, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, radius_km, werbebudget_guthaben_netto, organisation_id, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, ablehnungen_30_tage, deaktiviert_grund, deaktiviert_am, geloescht_am, profiles(vorname, nachname, email, telefon)'
 
@@ -53,5 +52,5 @@ export default async function DispatchSachverstaendigePage() {
     }
   })
 
-  return <SachverstaendigeListClient sachverstaendige={sachverstaendige} basePath="/dispatch" />
+  return <SachverstaendigeList sachverstaendige={sachverstaendige} basePath="/dispatch" />
 }

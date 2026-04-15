@@ -5,7 +5,11 @@ import Link from 'next/link'
 import { SearchIcon, HardHatIcon, MapPinIcon } from 'lucide-react'
 import { getSvStatus } from '@/lib/sv-status'
 
-// AAR-54: Tabellen-Ansicht fuer Sachverstaendige (statt Karte)
+// AAR-54: Tabellen-Ansicht für Sachverständige (statt Karte).
+// AAR-151: Aus src/app/admin/sachverstaendige/ verschoben in src/components/,
+// weil /admin/sachverstaendige jetzt direkt die Karte rendert. Das Dispatch-
+// Portal (/dispatch/sachverstaendige) nutzt die Liste weiterhin als Read-Only-
+// Sicht — shared Component statt cross-route-Import.
 
 type SV = {
   id: string
@@ -44,7 +48,7 @@ const PAKET_BADGE: Record<string, string> = {
 }
 
 // AAR-112: basePath erlaubt Wiederverwendung unter /dispatch/sachverstaendige
-export default function SachverstaendigeListClient({
+export default function SachverstaendigeList({
   sachverstaendige,
   basePath = '/admin',
 }: {
@@ -99,7 +103,14 @@ export default function SachverstaendigeListClient({
               className="pl-7 pr-2 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg w-48 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
             />
           </div>
-          <Link href={`${basePath}/karte`} className="text-xs text-[#4573A2] hover:underline">Karte öffnen →</Link>
+          {/* AAR-151: „Karte öffnen" zeigt für Admin auf den Hub (dort IST die Karte),
+              für Dispatch auf die Isochrone-Ansicht (die Karte mit Lead-Auswahl). */}
+          <Link
+            href={basePath === '/admin' ? '/admin/sachverstaendige' : '/dispatch/isochrone'}
+            className="text-xs text-[#4573A2] hover:underline"
+          >
+            Karte öffnen →
+          </Link>
         </div>
       </div>
 
