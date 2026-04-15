@@ -350,14 +350,17 @@ export async function saveHardGate(
     updated_at: new Date().toISOString(),
   }
 
-  // AAR-124 Business-Rule (revalidiert): polizei_vor_ort=true ⟹ polizeibericht_pflicht=true.
-  // polizei_vor_ort=false ⟹ polizeibericht_pflicht=false UND aktenzeichen löschen,
-  // sonst bleiben Stale-Daten in der DB wenn der Dispatcher die Checkbox zurücksetzt.
-  if (data.polizei_vor_ort === true) {
-    updates.polizeibericht_pflicht = true
-  } else if (data.polizei_vor_ort === false) {
+  // AAR-124 + AAR-138/W4: Polizei-Business-Regeln.
+  // polizei_vor_ort=false ⟹ polizeibericht_pflicht=false UND aktenzeichen leeren.
+  // polizei_vor_ort=true ⟹ Default pflicht=true, ABER Phase 1 kann explizit
+  //   polizeibericht_pflicht=false senden wenn „Bericht nicht vorhanden, nur
+  //   Aktenzeichen" — in dem Fall Respekt vor der expliziten Wahl.
+  if (data.polizei_vor_ort === false) {
     updates.polizeibericht_pflicht = false
     updates.polizei_aktenzeichen = null
+  } else if (data.polizei_vor_ort === true) {
+    updates.polizeibericht_pflicht =
+      data.polizeibericht_pflicht !== undefined ? data.polizeibericht_pflicht : true
   } else if (data.polizeibericht_pflicht !== undefined) {
     updates.polizeibericht_pflicht = data.polizeibericht_pflicht
   }
@@ -730,11 +733,13 @@ export async function sendFlowLinkMultiChannel(
     if (!r.success) return { success: false, error: r.error }
   }
 
-  // Lead-Status auf flow-versendet (AAR-116 Hardening: nur nach erfolgreichem Send)
+  // Lead-Status auf flow-versendet (AAR-116 Hardening: nur nach erfolgreichem Send).
+  // wa_gesendet wird nur bei WA-Versand auf true gesetzt — per conditional spread,
+  // sonst überschreibt Supabase die Spalte mit null.
   await supabase
     .from('leads')
     .update({
-      wa_gesendet: kanal === 'whatsapp' ? true : undefined,
+      ...(kanal === 'whatsapp' && { wa_gesendet: true }),
       status: 'flow-gesendet',
       qualifizierungs_phase: 'flow-versendet',
       updated_at: new Date().toISOString(),

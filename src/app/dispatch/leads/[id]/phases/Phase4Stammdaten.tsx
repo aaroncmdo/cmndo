@@ -280,16 +280,22 @@ export default function Phase4Stammdaten() {
             leadId={leadId}
           />
 
-          {/* Eigentümer (approximiert via finanzierung_leasing + vorsteuerabzugsberechtigt) */}
+          {/* Eigentümer (approximiert via finanzierung_leasing + vorsteuerabzugsberechtigt).
+              Jeder Button setzt BEIDE Felder atomar in einem Save — sonst entstünden
+              Zwischenzustände mit doppelt-aktiven Buttons (Race zwischen 2 Writes). */}
           <div className="space-y-1 sm:col-span-2">
             <label className="text-[10px] text-gray-400 uppercase tracking-wider">Eigentümer-Typ</label>
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => {
-                  saveToggle('finanzierung_leasing', 'keine')
-                  saveToggle('vorsteuerabzugsberechtigt', false)
-                }}
+                onClick={() =>
+                  startTransition(async () => {
+                    await saveStammdaten(leadId, {
+                      finanzierung_leasing: 'keine',
+                      vorsteuerabzugsberechtigt: false,
+                    })
+                  })
+                }
                 className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
                   (l.finanzierung_leasing ?? 'keine') === 'keine' && !l.vorsteuerabzugsberechtigt
                     ? 'bg-[#4573A2] text-white'
@@ -300,9 +306,16 @@ export default function Phase4Stammdaten() {
               </button>
               <button
                 type="button"
-                onClick={() => saveToggle('finanzierung_leasing', 'leasing')}
+                onClick={() =>
+                  startTransition(async () => {
+                    await saveStammdaten(leadId, {
+                      finanzierung_leasing: 'leasing',
+                      vorsteuerabzugsberechtigt: false,
+                    })
+                  })
+                }
                 className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
-                  l.finanzierung_leasing === 'leasing'
+                  l.finanzierung_leasing === 'leasing' && !l.vorsteuerabzugsberechtigt
                     ? 'bg-amber-500 text-white'
                     : 'bg-gray-100 text-gray-600'
                 }`}
@@ -311,7 +324,14 @@ export default function Phase4Stammdaten() {
               </button>
               <button
                 type="button"
-                onClick={() => saveToggle('vorsteuerabzugsberechtigt', true)}
+                onClick={() =>
+                  startTransition(async () => {
+                    await saveStammdaten(leadId, {
+                      finanzierung_leasing: 'keine',
+                      vorsteuerabzugsberechtigt: true,
+                    })
+                  })
+                }
                 className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
                   l.vorsteuerabzugsberechtigt === true
                     ? 'bg-[#0D1B3E] text-white'

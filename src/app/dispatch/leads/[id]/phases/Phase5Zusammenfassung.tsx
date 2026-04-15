@@ -73,8 +73,13 @@ export default function Phase5Zusammenfassung() {
     if (waNummer === (l.telefon ?? '')) return
     setSavingNummer(true)
     startTransition(async () => {
-      await saveStammdaten(lead.id, { telefon: waNummer || null })
-      setSavingNummer(false)
+      try {
+        await saveStammdaten(lead.id, { telefon: waNummer || null })
+      } finally {
+        // Spinner immer zurücksetzen — auch wenn saveStammdaten throwt, sonst
+        // bleibt der „Speichern..."-Hinweis dauerhaft stehen.
+        setSavingNummer(false)
+      }
     })
   }
 
