@@ -150,6 +150,11 @@ export default function Phase1Qualifizierung() {
   })
   useEffect(() => {
     if (!allComplete) return
+    // AAR-203: NIE auto-speichern bei Eigenverantwortung — saveHardGate
+    // würde den Lead sofort disqualifizieren bevor der MA das Exit-Skript
+    // vorlesen konnte. MA muss manuell via Sidebar-Button „Disqualifizieren"
+    // speichern wenn er das Skript verlesen hat.
+    if (draft.schuldfrage === 'eigenverantwortung') return
     if (autoSavedHashRef.current === draftHash) return
     const t = setTimeout(() => {
       autoSavedHashRef.current = draftHash
@@ -480,11 +485,18 @@ export default function Phase1Qualifizierung() {
       )}
 
       {/* AAR-192: Speichern-Button entfernt — Auto-Save mit 800ms Debounce
-          speichert sobald alle 3 Pflichtfelder beantwortet sind. MA sieht
-          entweder Toast „Gespeichert" oder den Pending-Indicator unten. */}
+          speichert sobald alle 3 Pflichtfelder beantwortet sind.
+          AAR-203: Bei Eigenverantwortung wird Auto-Save ausgesetzt damit
+          der MA das Exit-Skript in Ruhe vorlesen kann — Disqualifikation
+          erst manuell via Sidebar-Button. */}
       {!allComplete ? (
         <p className="text-[10px] text-gray-500 flex items-center gap-1">
           <InfoIcon className="w-3 h-3" /> Alle 3 Bereiche müssen beantwortet sein bevor Phase 2 freigeschaltet wird.
+        </p>
+      ) : draft.schuldfrage === 'eigenverantwortung' ? (
+        <p className="text-[10px] text-amber-700 flex items-center gap-1">
+          <InfoIcon className="w-3 h-3" />
+          Auto-Save ausgesetzt — erst Exit-Skript vorlesen, dann manuell in der Sidebar „Disqualifizieren".
         </p>
       ) : (
         <p className="text-[10px] text-gray-500 flex items-center gap-1">
