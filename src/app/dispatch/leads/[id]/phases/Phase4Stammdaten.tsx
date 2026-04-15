@@ -6,10 +6,11 @@
 // Gegner-KZ (Fahrerflucht / Auslandskennzeichen) werden live aus
 // gegner-kz-flags.ts berechnet und mitgespeichert.
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { saveStammdaten } from '../actions'
 import { checkKZFlags } from '../lib/gegner-kz-flags'
 import { useDispatchPhase } from '../lib/phase-context'
+import { useCarQuery } from '../hooks/useCarQuery'
 // AAR-177 Fix #1: CardentityButton-Import entfernt (Button war nicht
 // funktionsreif und Text irritierte — Cardentity läuft jetzt im Hintergrund
 // via ZB1-OCR-Trigger in /api/ocr-fahrzeugschein Step 6).
@@ -236,11 +237,23 @@ export default function Phase4Stammdaten() {
     })
   }
 
+  // AAR-194: CarQuery-Dropdowns für Marke + Modell gefiltert nach Baujahr.
+  // KFZ_MARKEN-Fallback bleibt als `datalist` falls CarQuery langsam/offline.
   const marke = l.fahrzeug_hersteller ?? ''
   const isMarkeInList = marke !== '' && (KFZ_MARKEN as readonly string[]).includes(marke)
   const [markeMode, setMarkeMode] = useState<'dropdown' | 'freitext'>(
     marke === '' ? 'dropdown' : isMarkeInList ? 'dropdown' : 'freitext',
   )
+
+  const { marken: carMarken, modelle: carModelle, ladeModelle, loadingMarken, loadingModelle } =
+    useCarQuery(l.fahrzeug_baujahr ?? null)
+
+  // Modell-Liste nachladen wenn Marke sich ändert (aus Lead-Snapshot ODER
+  // user-Edit).
+  useEffect(() => {
+    if (marke) ladeModelle(marke)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [marke])
 
   return (
     <div className="space-y-4">
@@ -259,9 +272,23 @@ export default function Phase4Stammdaten() {
         email={l.email ?? null}
       />
 
-      {/* 1. Fahrzeugdaten */}
+      {/* 1. Fahrzeugdaten — AAR-194: Baujahr OBEN, dann Marke + Modell
+          dynamisch via CarQuery (gefiltert nach Baujahr falls gesetzt). */}
       <Card icon={<CarIcon className="w-4 h-4 text-gray-400" />} title="Fahrzeugdaten">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* AAR-181: Baujahr Pflichtfeld. AAR-194: Als erstes Feld damit
+              CarQuery Marke/Modell direkt nach Baujahr gefiltert laden. */}
+          <InlineField
+            label="Baujahr"
+            required
+            value={l.fahrzeug_baujahr != null ? String(l.fahrzeug_baujahr) : null}
+            fieldName="fahrzeug_baujahr"
+            leadId={leadId}
+            placeholder="z.B. 2018"
+            transform={formatBaujahr}
+            hint={l.fahrzeug_baujahr == null ? 'Wird auf Fall übernommen (1990–heute)' : 'Filtert die Marken-Liste'}
+          />
+
           <InlineField
             label="Eigenes Kennzeichen"
             value={l.kennzeichen}
@@ -271,28 +298,38 @@ export default function Phase4Stammdaten() {
             placeholder="XX-XX 1234"
           />
 
-          {/* Marke — Dropdown mit Freitext-Fallback */}
+          {/* Marke — CarQuery-Dropdown (gefiltert nach Baujahr) mit Freitext-
+              Fallback. Wenn CarQuery nichts liefert (Offline/Error), zeigen
+              wir die Top-20-Liste als datalist. */}
           <div className="space-y-0.5">
-            <label className="text-[10px] text-gray-400 uppercase tracking-wider">Marke</label>
+            <label className="text-[10px] text-gray-400 uppercase tracking-wider flex items-center gap-1">
+              Marke
+              {loadingMarken && <LoaderIcon className="w-3 h-3 text-blue-400 animate-spin" />}
+            </label>
             {markeMode === 'dropdown' ? (
-              <select
-                value={isMarkeInList ? marke : ''}
-                onChange={(e) => {
-                  const v = e.target.value
-                  if (v === '__freitext__') {
-                    setMarkeMode('freitext')
-                    return
-                  }
-                  saveToggle('fahrzeug_hersteller', v || null)
-                }}
-                className="text-sm font-medium bg-transparent border-b border-gray-200 hover:border-gray-300 focus:border-[#4573A2] w-full py-0.5 outline-none"
-              >
-                <option value="">— wählen —</option>
-                {KFZ_MARKEN.map((m) => (
-                  <option key={m} value={m}>{m}</option>
-                ))}
-                <option value="__freitext__">Sonstiges (Freitext) ...</option>
-              </select>
+              <>
+                <input
+                  type="text"
+                  list="carquery-marken"
+                  defaultValue={marke}
+                  onBlur={(e) => {
+                    const v = e.target.value.trim()
+                    if (v === '__freitext__' || v === 'Sonstiges') {
+                      setMarkeMode('freitext')
+                      return
+                    }
+                    if (v !== marke) saveToggle('fahrzeug_hersteller', v || null)
+                  }}
+                  placeholder={loadingMarken ? 'Lade Marken ...' : 'Marke wählen oder tippen'}
+                  className="text-sm font-medium bg-transparent border-b border-gray-200 hover:border-gray-300 focus:border-[#4573A2] w-full py-0.5 outline-none"
+                />
+                <datalist id="carquery-marken">
+                  {(carMarken.length > 0 ? carMarken : (KFZ_MARKEN as readonly string[])).map((m) => (
+                    <option key={m} value={m} />
+                  ))}
+                  <option value="Sonstiges" />
+                </datalist>
+              </>
             ) : (
               <InlineField
                 label=""
@@ -304,26 +341,32 @@ export default function Phase4Stammdaten() {
             )}
           </div>
 
-          <InlineField
-            label="Modell"
-            value={l.fahrzeug_modell}
-            fieldName="fahrzeug_modell"
-            leadId={leadId}
-          />
-
-          {/* AAR-181: Baujahr ist Pflichtfeld — Phase 4 gilt nicht als
-              abgeschlossen wenn leer. Integer-Typ auf DB, Input akzeptiert
-              4-stellige Jahreszahl (YYYY). */}
-          <InlineField
-            label="Baujahr"
-            required
-            value={l.fahrzeug_baujahr != null ? String(l.fahrzeug_baujahr) : null}
-            fieldName="fahrzeug_baujahr"
-            leadId={leadId}
-            placeholder="z.B. 2018"
-            transform={formatBaujahr}
-            hint={l.fahrzeug_baujahr == null ? 'Wird auf Fall übernommen (1990–heute)' : undefined}
-          />
+          {/* Modell — Datalist mit CarQuery-Modellen für gewählte Marke. */}
+          <div className="space-y-0.5">
+            <label className="text-[10px] text-gray-400 uppercase tracking-wider flex items-center gap-1">
+              Modell
+              {loadingModelle && <LoaderIcon className="w-3 h-3 text-blue-400 animate-spin" />}
+            </label>
+            <input
+              type="text"
+              list="carquery-modelle"
+              defaultValue={l.fahrzeug_modell ?? ''}
+              onBlur={(e) => {
+                const v = e.target.value.trim()
+                if (v !== (l.fahrzeug_modell ?? '')) {
+                  saveToggle('fahrzeug_modell', v || null)
+                }
+              }}
+              disabled={!marke}
+              placeholder={!marke ? 'Erst Marke wählen' : loadingModelle ? 'Lade Modelle ...' : 'Modell wählen oder tippen'}
+              className="text-sm font-medium bg-transparent border-b border-gray-200 hover:border-gray-300 focus:border-[#4573A2] w-full py-0.5 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+            />
+            <datalist id="carquery-modelle">
+              {carModelle.map((m) => (
+                <option key={m} value={m} />
+              ))}
+            </datalist>
+          </div>
 
           {/* AAR-177 Fix #3: Eigentümer-Typ mit Info-Tooltip + Label.
               Fix #6: Leasing/Gewerblich kontextuelle Hilfe-Box.
