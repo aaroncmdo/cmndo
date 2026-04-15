@@ -7,8 +7,8 @@
 // Notion-Master-Spec 14.04.2026.
 
 import Phase1Qualifizierung from './Phase1Qualifizierung'
-import SchadentypPicker from '../SchadentypPicker'
-import SvDispatchPanel from '../SvDispatchPanel'
+import Phase2TerminServiceTypComponent from './Phase2TerminServiceTyp'
+import Phase3SchadentypComponent from './Phase3Schadentyp'
 import CardentityButton from '../CardentityButton'
 import LeadDetailActions from '../LeadDetailActions'
 import ExitSkript, { type DisqualifikationsGrund } from '../ExitSkript'
@@ -62,39 +62,18 @@ export function Phase1() {
   return <Phase1Qualifizierung />
 }
 
-/** Phase 2 — SV-Termin + Service-Typ. W5 baut Wrapper-Component. */
+/** Phase 2 — SV-Termin + Service-Typ (Pfad A/B). W5 (AAR-139). */
 export function Phase2TerminServiceTyp() {
-  const { lead, aktiverTermin, qualification } = useDispatchPhase()
+  const { qualification } = useDispatchPhase()
   if (qualification.disqualifiziert) return <DisqualifiziertOverlay />
-  const svTerminForPanel = aktiverTermin
-    ? aktiverTermin as unknown as Parameters<typeof SvDispatchPanel>[0]['aktiverTermin']
-    : null
-  return (
-    <div className="space-y-4">
-      <SvDispatchPanel
-        leadId={lead.id}
-        hardGateOk={qualification.q1_schuldfrage && qualification.q2_schaden && qualification.q3_polizei}
-        aktiverTermin={svTerminForPanel}
-      />
-    </div>
-  )
+  return <Phase2TerminServiceTypComponent />
 }
 
-/** Phase 3 — Schadentyp. W5 baut Wrapper-Component. */
+/** Phase 3 — Schadentyp (Wrapper um SchadentypPicker). W5 (AAR-139). */
 export function Phase3Schadentyp() {
-  const { lead, qualification } = useDispatchPhase()
+  const { qualification } = useDispatchPhase()
   if (qualification.disqualifiziert) return <DisqualifiziertOverlay />
-  return (
-    <div className="space-y-4">
-      <SchadentypPicker
-        leadId={lead.id}
-        initialTyp={lead.schadentyp as Parameters<typeof SchadentypPicker>[0]['initialTyp']}
-        initialFreitext={(lead as { schadentyp_freitext?: string | null }).schadentyp_freitext ?? null}
-        gegnerKennzeichen={lead.gegner_kennzeichen ?? null}
-        initialKamera={lead.parkplatz_kamera ?? null}
-      />
-    </div>
-  )
+  return <Phase3SchadentypComponent />
 }
 
 /** Phase 4 — Stammdaten (Kontakt, Fahrzeug, Versicherung, Gegner). W6 baut echte Form. */
