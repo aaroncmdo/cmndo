@@ -5,11 +5,12 @@ import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { uploadAnschlussschreiben, uploadPflichtdokument } from './actions'
 import { markDokumentNachgereicht } from './actions/dokumente'
+import { upsertQcCheckliste, qcBestanden, qcNachbesserung } from './actions'
 import { useRouter } from 'next/navigation'
 import {
   FileTextIcon, UploadIcon, CheckCircle2Icon, ClockIcon, AlertCircleIcon,
   DownloadIcon, EyeIcon, SearchIcon, Loader2Icon, FileCheckIcon,
-  BellIcon,
+  BellIcon, ClipboardCheckIcon,
 } from 'lucide-react'
 
 type Pflichtdok = {
@@ -39,6 +40,38 @@ type FallAS = {
   anschlussschreiben_unterschrift: boolean | null
   anschlussschreiben_ocr_am: string | null
 }
+
+// AAR-170: QC-Checkliste — die 9 Prüf-Felder entsprechen 1:1 den Spalten in
+// Tabelle qc_checkliste (verifiziert via information_schema).
+type QcCheckliste = {
+  id?: string
+  fall_id?: string
+  gutachten_vorhanden?: boolean | null
+  gutachten_vollstaendig?: boolean | null
+  fin_17_zeichen?: boolean | null
+  schadenspositionen_erfasst?: boolean | null
+  fotos_ausreichend?: boolean | null
+  sa_vorhanden?: boolean | null
+  vollmacht_vorhanden?: boolean | null
+  kundendaten_vollstaendig?: boolean | null
+  vorschaeden_beruecksichtigt?: boolean | null
+  kommentar?: string | null
+  status?: string | null
+  geprueft_von?: string | null
+  geprueft_am?: string | null
+}
+
+const QC_FIELDS: { key: keyof QcCheckliste; label: string }[] = [
+  { key: 'gutachten_vorhanden', label: 'Gutachten vorhanden' },
+  { key: 'gutachten_vollstaendig', label: 'Gutachten vollständig' },
+  { key: 'fin_17_zeichen', label: 'FIN hat 17 Zeichen' },
+  { key: 'schadenspositionen_erfasst', label: 'Schadenspositionen erfasst' },
+  { key: 'fotos_ausreichend', label: 'Fotos ausreichend' },
+  { key: 'sa_vorhanden', label: 'Sachverständigen-Auftrag vorhanden' },
+  { key: 'vollmacht_vorhanden', label: 'Vollmacht vorhanden' },
+  { key: 'kundendaten_vollstaendig', label: 'Kundendaten vollständig' },
+  { key: 'vorschaeden_beruecksichtigt', label: 'Vorschäden berücksichtigt' },
+]
 
 const DOK_LABELS: Record<string, string> = {
   fahrzeugschein: 'Fahrzeugschein', fuehrerschein: 'Fuehrerschein',
@@ -74,11 +107,13 @@ export default function DokumenteTab({
   pflichtdokumente,
   dokumente,
   fallAS,
+  qcCheckliste,
 }: {
   fallId: string
   pflichtdokumente: Pflichtdok[]
   dokumente: Dokument[]
   fallAS: FallAS
+  qcCheckliste: QcCheckliste | null
 }) {
   const router = useRouter()
   const [uploading, setUploading] = useState<string | null>(null)
@@ -95,6 +130,66 @@ export default function DokumenteTab({
         toast.success(`${label}: Kunde wird per WA erinnert`)
         router.refresh()
       } else toast.error(r.error ?? 'Nachreichen fehlgeschlagen')
+    })
+  }
+
+  // AAR-170: QC-Checkliste — lokaler State für die 9 Checkboxen + Kommentar,
+  // damit der KB mehrere Felder zugleich ändern kann bevor er speichert.
+  const [qcState, setQcState] = useState<Record<string, boolean | null>>(() => {
+    const init: Record<string, boolean | null> = {}
+    for (const { key } of QC_FIELDS) {
+      init[key as string] = (qcCheckliste?.[key] as boolean | null | undefined) ?? null
+    }
+    return init
+  })
+  const [qcKommentar, setQcKommentar] = useState<string>(qcCheckliste?.kommentar ?? '')
+  const [qcPending, startQcTransition] = useTransition()
+  const qcStatus = qcCheckliste?.status ?? null
+
+  function toggleQc(key: string) {
+    setQcState((prev) => ({ ...prev, [key]: prev[key] === true ? false : prev[key] === false ? null : true }))
+  }
+
+  function handleQcSpeichern() {
+    startQcTransition(async () => {
+      try {
+        await upsertQcCheckliste(fallId, { ...qcState, kommentar: qcKommentar || null })
+        toast.success('QC-Checkliste gespeichert')
+        router.refresh()
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Speichern fehlgeschlagen')
+      }
+    })
+  }
+
+  function handleQcBestanden() {
+    startQcTransition(async () => {
+      try {
+        // Zuerst aktuelle Checks speichern, dann Bestanden-Flow (inkl. Filmcheck)
+        await upsertQcCheckliste(fallId, qcState)
+        await qcBestanden(fallId, qcKommentar)
+        toast.success('QC bestanden — Kanzlei-Übergabe läuft')
+        router.refresh()
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'QC-Bestanden fehlgeschlagen')
+      }
+    })
+  }
+
+  function handleQcNachbesserung() {
+    if (!qcKommentar.trim()) {
+      toast.error('Kommentar erforderlich — Sachverständiger braucht Anmerkungen')
+      return
+    }
+    startQcTransition(async () => {
+      try {
+        await upsertQcCheckliste(fallId, qcState)
+        await qcNachbesserung(fallId, qcKommentar)
+        toast.success('Nachbesserung angefordert — Task für SV erstellt')
+        router.refresh()
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Nachbesserung fehlgeschlagen')
+      }
     })
   }
 
@@ -300,6 +395,96 @@ export default function DokumenteTab({
               </div>
             )
           })}
+        </div>
+      </div>
+
+      {/* AAR-170: QC-Checkliste (Filmcheck) — vorher im Monolithen, jetzt
+          direkt im Dokumente-Tab. 9 Boolean-Felder + Kommentar + Bestanden/
+          Nachbesserung. Bestanden triggert saveFilmcheck() + Kanzlei-Tasks. */}
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+            <ClipboardCheckIcon className="w-3.5 h-3.5" /> QC-Checkliste (Filmcheck)
+          </h3>
+          {qcStatus && (
+            <span
+              className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                qcStatus === 'bestanden'
+                  ? 'bg-emerald-50 text-emerald-600'
+                  : qcStatus === 'nachbesserung'
+                  ? 'bg-orange-50 text-orange-600'
+                  : 'bg-gray-50 text-gray-500'
+              }`}
+            >
+              {qcStatus === 'bestanden' ? 'Bestanden' : qcStatus === 'nachbesserung' ? 'Nachbesserung' : qcStatus}
+            </span>
+          )}
+        </div>
+        <div className="p-4 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {QC_FIELDS.map(({ key, label }) => {
+              const v = qcState[key as string]
+              const badge =
+                v === true
+                  ? { bg: 'bg-emerald-50 border-emerald-200 text-emerald-700', txt: 'Ja' }
+                  : v === false
+                  ? { bg: 'bg-red-50 border-red-200 text-red-700', txt: 'Nein' }
+                  : { bg: 'bg-gray-50 border-gray-200 text-gray-500', txt: '—' }
+              return (
+                <button
+                  key={key as string}
+                  type="button"
+                  onClick={() => toggleQc(key as string)}
+                  className={`flex items-center justify-between px-3 py-2 rounded-lg border text-xs font-medium transition-colors hover:border-[#4573A2] ${badge.bg}`}
+                >
+                  <span className="text-gray-800">{label}</span>
+                  <span className="ml-2 text-[10px]">{badge.txt}</span>
+                </button>
+              )
+            })}
+          </div>
+          <div>
+            <label className="block text-[10px] text-gray-500 uppercase tracking-wider mb-1">
+              Kommentar / Anmerkungen
+            </label>
+            <textarea
+              value={qcKommentar}
+              onChange={(e) => setQcKommentar(e.target.value)}
+              rows={3}
+              placeholder="Bei Nachbesserung: konkrete Hinweise für Sachverständigen"
+              className="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={handleQcSpeichern}
+              disabled={qcPending}
+              className="px-3 py-1.5 rounded-md bg-white border border-gray-200 text-gray-700 text-xs font-medium hover:bg-gray-50 disabled:opacity-50"
+            >
+              Zwischenstand speichern
+            </button>
+            <button
+              type="button"
+              onClick={handleQcBestanden}
+              disabled={qcPending}
+              className="px-3 py-1.5 rounded-md bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
+            >
+              QC bestanden → Kanzlei übergeben
+            </button>
+            <button
+              type="button"
+              onClick={handleQcNachbesserung}
+              disabled={qcPending}
+              className="px-3 py-1.5 rounded-md bg-orange-600 text-white text-xs font-medium hover:bg-orange-700 disabled:opacity-50"
+            >
+              Nachbesserung anfordern
+            </button>
+          </div>
+          <p className="text-[10px] text-gray-400">
+            Klick auf ein Feld zykelt zwischen — / Ja / Nein. Bestanden speichert
+            automatisch + löst Filmcheck-Flow aus (Kanzlei-Paket, AS-Sendedatum).
+          </p>
         </div>
       </div>
     </div>

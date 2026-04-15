@@ -510,7 +510,9 @@ export async function eskalation(fallId: string, stufe: string) {
 
 export async function upsertQcCheckliste(
   fallId: string,
-  checks: Record<string, boolean | null>,
+  // AAR-170: Erlaubt auch das Kommentar-Feld (string) beim Upsert — vorher
+  // nur booleans. Wird ins update/insert 1:1 gespreaded.
+  checks: Record<string, boolean | string | null>,
 ) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null

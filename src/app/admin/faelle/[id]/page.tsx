@@ -37,6 +37,7 @@ export default async function FallaktePage({
     { data: dokumente },
     { data: timeline },
     { data: pflichtdokumente },
+    { data: qcCheckliste },
     leadResult,
     svResult,
     kundenbetreuerResult,
@@ -56,6 +57,12 @@ export default async function FallaktePage({
       .select('id, dokument_typ, status, pflicht, quelle, dokument_url, hochgeladen_am, created_at')
       .eq('fall_id', id)
       .order('created_at'),
+    // AAR-170: QC-Checkliste für Dokumente-Tab-Integration
+    supabase
+      .from('qc_checkliste')
+      .select('*')
+      .eq('fall_id', id)
+      .maybeSingle(),
     fall.lead_id
       ? supabase
           .from('leads')
@@ -148,6 +155,8 @@ export default async function FallaktePage({
             anschlussschreiben_unterschrift: (fall.anschlussschreiben_unterschrift as boolean | null) ?? null,
             anschlussschreiben_ocr_am: (fall.anschlussschreiben_ocr_am as string | null) ?? null,
           },
+          // AAR-170: QC-Checkliste direkt im Dokumente-Tab (vorher im Monolithen)
+          qcCheckliste: (qcCheckliste ?? null) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['qcCheckliste'],
         }}
       />
     </>

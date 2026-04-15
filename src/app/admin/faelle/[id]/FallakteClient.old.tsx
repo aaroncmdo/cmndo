@@ -875,6 +875,7 @@ export default function FallakteClient({
                 anschlussschreiben_unterschrift: (fall as Record<string, unknown>).anschlussschreiben_unterschrift as boolean | null ?? null,
                 anschlussschreiben_ocr_am: (fall as Record<string, unknown>).anschlussschreiben_ocr_am as string | null ?? null,
               }}
+              qcCheckliste={qcCheckliste}
             />
           </div>
         )}
