@@ -1,8 +1,9 @@
 'use client'
 
 // AAR-100: 5-Step Onboarding Wizard
+// AAR-125: Deep-Link via ?step=dokumente springt direkt in Step 3 (Dokumente)
 import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   CheckIcon, UploadCloudIcon, CalendarIcon, FileTextIcon, SparklesIcon, FolderOpenIcon,
 } from 'lucide-react'
@@ -59,7 +60,15 @@ export default function OnboardingWizard({
   pflichtDocs: PflichtDoc[]
 }) {
   const router = useRouter()
-  const [stepIndex, setStepIndex] = useState(0)
+  // AAR-125: Deep-Link aus Banner ("Polizeibericht hochladen") springt direkt in Step 3
+  const searchParams = useSearchParams()
+  const stepParam = searchParams.get('step')
+  const initialStepIndex = (() => {
+    if (!stepParam) return 0
+    const idx = STEPS.findIndex((s) => s.id === stepParam)
+    return idx >= 0 ? idx : 0
+  })()
+  const [stepIndex, setStepIndex] = useState(initialStepIndex)
   const [pending, startTransition] = useTransition()
   const [uploadingId, setUploadingId] = useState<string | null>(null)
   const [uploadedIds, setUploadedIds] = useState<Set<string>>(
