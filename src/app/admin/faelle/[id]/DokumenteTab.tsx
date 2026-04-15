@@ -1,12 +1,15 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useTransition } from 'react'
+import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { uploadAnschlussschreiben, uploadPflichtdokument } from './actions'
+import { markDokumentNachgereicht } from './actions/dokumente'
 import { useRouter } from 'next/navigation'
 import {
   FileTextIcon, UploadIcon, CheckCircle2Icon, ClockIcon, AlertCircleIcon,
   DownloadIcon, EyeIcon, SearchIcon, Loader2Icon, FileCheckIcon,
+  BellIcon,
 } from 'lucide-react'
 
 type Pflichtdok = {
@@ -52,6 +55,8 @@ const STATUS_CFG: Record<string, { bg: string; text: string; icon: typeof CheckC
   hochgeladen: { bg: 'bg-emerald-50', text: 'text-emerald-600', icon: CheckCircle2Icon },
   geprueft: { bg: 'bg-[#4573A2]/5', text: 'text-[#4573A2]', icon: FileCheckIcon },
   ausstehend: { bg: 'bg-amber-50', text: 'text-amber-600', icon: ClockIcon },
+  // AAR-168: „Nachreichen angefordert" — KB hat Reminder an Kunde getriggert
+  nachgereicht_angefordert: { bg: 'bg-orange-50', text: 'text-orange-600', icon: BellIcon },
 }
 
 const KAT_COLORS: Record<string, string> = {
@@ -81,6 +86,17 @@ export default function DokumenteTab({
   const fileRef = useRef<HTMLInputElement>(null)
   const asFileRef = useRef<HTMLInputElement>(null)
   const [uploadTarget, setUploadTarget] = useState<{ id: string; typ: string } | null>(null)
+  // AAR-168: Nachreichen-Button
+  const [nachreichPending, startNachreichTransition] = useTransition()
+  function handleNachreichen(pflichtdokId: string, label: string) {
+    startNachreichTransition(async () => {
+      const r = await markDokumentNachgereicht(pflichtdokId)
+      if (r.success) {
+        toast.success(`${label}: Kunde wird per WA erinnert`)
+        router.refresh()
+      } else toast.error(r.error ?? 'Nachreichen fehlgeschlagen')
+    })
+  }
 
   const pflichtCount = pflichtdokumente.length
   const hochgeladenCount = pflichtdokumente.filter(d => d.status !== 'ausstehend').length
@@ -197,8 +213,13 @@ export default function DokumenteTab({
                   {dok.pflicht && <span className="text-[9px] text-red-400 font-medium">Pflicht</span>}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  {dok.status === 'ausstehend' ? (
+                  {dok.status === 'ausstehend' || dok.status === 'nachgereicht_angefordert' ? (
                     <>
+                      {dok.status === 'nachgereicht_angefordert' && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-orange-50 text-orange-600">
+                          Nachreichen angefordert
+                        </span>
+                      )}
                       <input ref={uploadTarget?.id === dok.id ? fileRef : undefined} type="file" accept="image/*,.pdf" className="hidden"
                         onChange={e => { const f = e.target.files?.[0]; if (f) handleFileUpload(f, dok.id) }} />
                       <button
@@ -208,6 +229,17 @@ export default function DokumenteTab({
                         {uploading === dok.id ? <Loader2Icon className="w-3 h-3 animate-spin" /> : <UploadIcon className="w-3 h-3" />}
                         Hochladen
                       </button>
+                      {/* AAR-168: Nachreichen-Button — KB kann Kunde zum Nachreichen auffordern */}
+                      {dok.status === 'ausstehend' && (
+                        <button
+                          onClick={() => handleNachreichen(dok.id, label)}
+                          disabled={nachreichPending}
+                          className="text-[10px] text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1 disabled:opacity-50"
+                          title='Kunde per WA erinnern — Status wird auf „nachgereicht_angefordert" gesetzt'
+                        >
+                          <BellIcon className="w-3 h-3" /> Nachreichen
+                        </button>
+                      )}
                     </>
                   ) : (
                     <div className="flex items-center gap-2">

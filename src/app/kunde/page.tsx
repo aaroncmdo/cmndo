@@ -105,6 +105,31 @@ export default async function KundeStartseite() {
     polizeiBerichtFehltFallId = polizeiFaelleIds.find((id) => !hatBerichtFallIds.has(id)) ?? null
   }
 
+  // AAR-168: Nachreichen-Banner — Pflichtdokumente deren Status vom KB auf
+  // „nachgereicht_angefordert" gesetzt wurde brauchen die Aufmerksamkeit des
+  // Kunden. Ein Banner zeigt die erste offene Position.
+  const fallIdsForNachreichen = faelle.map((f) => f.id as string).filter(Boolean)
+  let nachreichenHint: { fallId: string; labels: string[] } | null = null
+  if (fallIdsForNachreichen.length) {
+    const { data: nachreichDocs } = await supabase
+      .from('pflichtdokumente')
+      .select('fall_id, dokument_typ')
+      .in('fall_id', fallIdsForNachreichen)
+      .eq('status', 'nachgereicht_angefordert')
+    if (nachreichDocs && nachreichDocs.length > 0) {
+      const byFall = new Map<string, string[]>()
+      for (const d of nachreichDocs) {
+        const fid = d.fall_id as string
+        if (!byFall.has(fid)) byFall.set(fid, [])
+        byFall.get(fid)!.push(d.dokument_typ as string)
+      }
+      const [first] = byFall.entries().next().value ?? []
+      if (first) {
+        nachreichenHint = { fallId: first, labels: byFall.get(first) ?? [] }
+      }
+    }
+  }
+
   const vorname = profile?.vorname ?? user.email?.split('@')[0] ?? 'Kunde'
 
   // KFZ-200: SV unterwegs / vor Ort Status laden (non-critical)
@@ -155,6 +180,29 @@ export default async function KundeStartseite() {
     <div className="w-full px-4 md:px-8 py-6 max-w-xl md:max-w-none mx-auto">
       <h1 className="text-xl font-bold text-[#0D1B3E] mb-1">Hallo {vorname}</h1>
       <p className="text-sm text-gray-500 mb-6">Hier sehen Sie den Stand Ihrer Fälle.</p>
+
+      {/* AAR-168: Nachreichen-Banner — KB hat zum Nachreichen aufgefordert */}
+      {nachreichenHint && (
+        <div className="bg-orange-50 border-l-4 border-orange-500 rounded-lg p-4 mb-4">
+          <div className="flex items-start gap-3">
+            <span className="text-xl flex-shrink-0">🔔</span>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-orange-900">
+                Bitte noch {nachreichenHint.labels.length === 1 ? 'ein Dokument' : `${nachreichenHint.labels.length} Dokumente`} nachreichen
+              </p>
+              <p className="text-xs text-orange-700 mt-1">
+                Ihr Betreuer bittet um {nachreichenHint.labels.join(', ')}. Bitte jetzt im Onboarding-Wizard hochladen.
+              </p>
+              <Link
+                href="/kunde/onboarding?step=dokumente"
+                className="inline-flex items-center gap-1 mt-2 text-sm font-medium text-orange-900 hover:text-orange-700"
+              >
+                Jetzt hochladen →
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* AAR-125: Polizeibericht-fehlt Banner */}
       {polizeiBerichtFehltFallId && (
