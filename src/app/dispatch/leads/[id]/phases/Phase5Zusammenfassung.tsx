@@ -190,8 +190,30 @@ export default function Phase5Zusammenfassung() {
     },
   ]
 
+  // AAR-146: Soft-Gate für Kasko-Risiko. Die alte Haftpflicht-Hard-Gate ist
+  // entfallen; wenn der MA „unklar" wählt, ist die Chance auf einen Kasko-Fall
+  // erhöht. Keine automatische Blockade (Spec-Vorgabe), aber ein sichtbarer
+  // Reminder vor dem FlowLink-Versand.
+  const schuldfrageUnklar = l.schuldfrage === 'unklar'
+
   return (
     <div className="space-y-4">
+      {schuldfrageUnklar && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-1">
+          <div className="flex items-center gap-2">
+            <AlertTriangleIcon className="w-4 h-4 text-amber-600" />
+            <p className="text-sm font-semibold text-amber-900">
+              Schuldfrage unklar — Haftpflicht-Check
+            </p>
+          </div>
+          <p className="text-xs text-amber-800">
+            Ist sichergestellt, dass es ein Haftpflichtschaden der Gegenseite ist? Wenn Kasko
+            oder eigene Versicherung zuständig ist, jetzt über die Sidebar
+            <strong> „Disqualifizieren"</strong> mit Grund <em>Kasko / eigene Versicherung</em>.
+          </p>
+        </div>
+      )}
+
       {/* Summary */}
       <div className="bg-white border border-gray-200 rounded-xl p-5">
         <div className="flex items-center gap-2 mb-4">
