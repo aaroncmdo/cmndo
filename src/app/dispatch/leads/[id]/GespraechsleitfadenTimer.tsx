@@ -116,10 +116,15 @@ export default function GespraechsleitfadenTimer({
     return (
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 flex items-center gap-3">
         <PhoneOffIcon className="w-4 h-4 text-gray-500 shrink-0" />
-        <div className="flex-1">
+        <div className="flex-1 space-y-0.5">
           <p className="text-xs text-gray-700">
             Gespräch beendet — Dauer <strong className="font-mono">{formatTime(dauerSekunden ?? sekunden)}</strong>
             {(dauerSekunden ?? sekunden) > 480 && <span className="text-red-600 ml-1">(überzogen)</span>}
+          </p>
+          {/* AAR-189: Nach dem Beenden weiß der MA sonst nicht was als
+              nächstes ansteht. Kompakter Pfeil-Hinweis auf Phase 5 + Versand. */}
+          <p className="text-[10px] text-gray-400">
+            → Nächster Schritt: Phase 5 öffnen → Zusammenfassung prüfen → FlowLink senden
           </p>
         </div>
       </div>
