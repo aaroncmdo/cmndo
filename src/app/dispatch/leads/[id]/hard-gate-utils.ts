@@ -1,5 +1,14 @@
-// AAR-80 + AAR-114: Dispatch Schritt 0 Hard Gate — Helpers (pure functions)
-// Notion-Spec validiert 14.04.2026 mit Nicolas Kitta.
+// AAR-80 + AAR-114: Dispatch Schritt 0 Hard Gate — Helpers (pure functions).
+// AAR-136 / W2: @deprecated — bitte `lib/qualification-engine.ts` nutzen.
+// Diese Datei bleibt temporär für Backward-Compat bis W8 alle Consumer migriert
+// sind (page.tsx + SvDispatchPanel + LeadDetailActions + Schritt0HardGate).
+// Danach löschen.
+
+import {
+  computeQualificationStatus,
+  type LeadLike,
+  type AktiverTerminLike,
+} from './lib/qualification-engine'
 
 export type HardGateStatus = {
   q1Complete: boolean
@@ -9,31 +18,26 @@ export type HardGateStatus = {
   disqualifiziert: boolean
 }
 
-export function computeHardGateStatus(lead: {
-  unfallhergang?: string | null
-  schuldfrage?: string | null
-  aufklaerung_teilschuld_bestaetigt?: boolean | null
-  schaden_sichtbar?: boolean | null
-  personenschaden_flag?: boolean | null
-  mietwagen_flag?: boolean | null
-  nutzungsausfall?: boolean | null
+/**
+ * @deprecated Use `computeQualificationStatus` from `./lib/qualification-engine` instead.
+ * Behält die alten Q1/Q2/Q3-Felder als Alias zu den ersten 3 neuen Bedingungen.
+ * Der alte Code kannte nur 3 Fragen, der neue 6 — aber `allComplete` hier heißt
+ * weiterhin nur "Q1 + Q2 + Q3", damit existing UIs nicht brechen.
+ */
+export function computeHardGateStatus(lead: LeadLike & {
   hat_haftpflicht?: boolean | null
-  qualifizierungs_phase?: string | null
 }): HardGateStatus {
-  const q1Complete =
-    !!lead.unfallhergang &&
-    !!lead.schuldfrage &&
-    (lead.schuldfrage !== 'unklar' || lead.aufklaerung_teilschuld_bestaetigt === true)
-
-  const q2Complete = lead.schaden_sichtbar !== null && lead.schaden_sichtbar !== undefined
+  const r = computeQualificationStatus(lead, null)
   const q3Complete = lead.hat_haftpflicht !== null && lead.hat_haftpflicht !== undefined
-  const disqualifiziert = lead.qualifizierungs_phase === 'disqualifiziert'
-
   return {
-    q1Complete,
-    q2Complete,
+    q1Complete: r.q1_schuldfrage,
+    q2Complete: r.q2_schaden,
     q3Complete,
-    allComplete: q1Complete && q2Complete && q3Complete && !disqualifiziert,
-    disqualifiziert,
+    allComplete: r.q1_schuldfrage && r.q2_schaden && q3Complete && !r.disqualifiziert,
+    disqualifiziert: r.disqualifiziert,
   }
 }
+
+// Re-Export neue API für Consumer die schon migriert haben
+export { computeQualificationStatus }
+export type { LeadLike, AktiverTerminLike }
