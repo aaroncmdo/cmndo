@@ -141,21 +141,18 @@ export default function KarteHubClient({
   const [showOverlays, setShowOverlays] = useState(false)
   const [selected, setSelected] = useState<Selected>(null)
 
-  // AAR-131: SV-Sidebar State (Suche + Status-Filter + Typ-Filter)
+  // AAR-131 + AAR-151: SV-Sidebar State (Suche + Status-Filter + Typ-Filter).
+  // AAR-151 Anpassung: Typ-Filter ist jetzt Single-Select-Chip-Row mit 5
+  // Optionen (Alle + 4 Typen) statt Multi-Toggle-Set — matcht die Spec-UI
+  // und vereinfacht die Semantik („Alle" zeigt alles, sonst genau 1 Typ).
   const [search, setSearch] = useState('')
   const [svFilter, setSvFilter] = useState<SvStatusFilter>('aktive')
-  const [visibleTypes, setVisibleTypes] = useState<Set<string>>(new Set(Object.keys(TYP_COLORS)))
+  const [typFilter, setTypFilter] = useState<string | null>(null) // null = Alle
   // AAR-151: NeuSvDrawer (Slide-out) statt Navigation zur alten /neu-Page
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const toggleType = (typ: string) =>
-    setVisibleTypes((prev) => {
-      const next = new Set(prev)
-      if (next.has(typ)) next.delete(typ)
-      else next.add(typ)
-      return next
-    })
 
-  // AAR-131: gefilterte SVs für Sidebar + Marker (Status + Typ + Search)
+  // AAR-131 + AAR-151: gefilterte SVs für Sidebar + Marker.
+  // typFilter=null → kein Typ-Filter aktiv; sonst genau dieser gutachter_typ.
   const filteredSvs = useMemo(() => {
     return svs.filter((sv) => {
       const istGesperrt = !!sv.gesperrtSeit
@@ -163,11 +160,11 @@ export default function KarteHubClient({
       if (svFilter === 'gesperrt' && !istGesperrt) return false
       if (svFilter === 'aktive' && (istGesperrt || istDeaktiviert)) return false
       if (svFilter === 'deaktivierte' && (istGesperrt || !istDeaktiviert)) return false
-      if (!visibleTypes.has(sv.gutachterTyp ?? 'kfz-gutachter')) return false
+      if (typFilter && (sv.gutachterTyp ?? 'kfz-gutachter') !== typFilter) return false
       if (search && !sv.name.toLowerCase().includes(search.toLowerCase())) return false
       return true
     })
-  }, [svs, svFilter, visibleTypes, search])
+  }, [svs, svFilter, typFilter, search])
 
   // ─── Map init (runs once) ──────────────────────────────────────
   useEffect(() => {
@@ -478,8 +475,8 @@ export default function KarteHubClient({
           setSearch={setSearch}
           svFilter={svFilter}
           setSvFilter={setSvFilter}
-          visibleTypes={visibleTypes}
-          toggleType={toggleType}
+          typFilter={typFilter}
+          setTypFilter={setTypFilter}
           selectedId={selected?.kind === 'sv' ? selected.item.id : null}
           onSelect={panToSv}
           onOpenDrawer={() => setDrawerOpen(true)}
@@ -501,7 +498,7 @@ export default function KarteHubClient({
   )
 }
 
-// AAR-131: Sidebar mit Suche + 4-Stufen-Status-Filter + Typ-Toggles + SV-Liste
+// AAR-131 + AAR-151: Sidebar mit Suche + Status-Filter + Typ-Chip-Row + Liste
 function SvSidebar({
   svs,
   filteredSvs,
@@ -509,8 +506,8 @@ function SvSidebar({
   setSearch,
   svFilter,
   setSvFilter,
-  visibleTypes,
-  toggleType,
+  typFilter,
+  setTypFilter,
   selectedId,
   onSelect,
   onOpenDrawer,
@@ -521,8 +518,8 @@ function SvSidebar({
   setSearch: (v: string) => void
   svFilter: SvStatusFilter
   setSvFilter: (v: SvStatusFilter) => void
-  visibleTypes: Set<string>
-  toggleType: (typ: string) => void
+  typFilter: string | null
+  setTypFilter: (v: string | null) => void
   selectedId: string | null
   onSelect: (sv: SvMarker) => void
   onOpenDrawer: () => void
@@ -578,22 +575,47 @@ function SvSidebar({
           </button>
         ))}
       </div>
-      {/* Typ-Toggles (4 SV-Typen) */}
+      {/* AAR-151: Typ-Filter Chip-Row unter den Status-Tabs.
+          Single-Select: „Alle" (null) zeigt alles, sonst genau 1 Typ.
+          Chip-Farbe matcht den gutachter_typ damit Legende + Marker-Farben
+          zusammenpassen. */}
       <div className="px-4 pb-2 border-b border-gray-200">
-        <p className="text-[9px] font-semibold text-gray-500 uppercase mb-1">Typen</p>
-        <div className="flex flex-wrap gap-1.5">
-          {Object.entries(TYP_COLORS).map(([key, val]) => (
-            <button
-              key={key}
-              onClick={() => toggleType(key)}
-              className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded hover:bg-gray-100"
-            >
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: val.fill }} />
-              <span className={visibleTypes.has(key) ? 'text-gray-700' : 'text-gray-400 line-through'}>
+        <div className="flex flex-wrap gap-1">
+          <button
+            type="button"
+            onClick={() => setTypFilter(null)}
+            className={`px-2 py-0.5 rounded-full text-[11px] font-medium transition-colors ${
+              typFilter === null
+                ? 'bg-[#4573A2] text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            Alle
+          </button>
+          {Object.entries(TYP_COLORS).map(([key, val]) => {
+            const active = typFilter === key
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setTypFilter(active ? null : key)}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium transition-colors ${
+                  active
+                    ? 'text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+                style={active ? { backgroundColor: val.fill } : undefined}
+              >
+                {!active && (
+                  <span
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ backgroundColor: val.fill }}
+                  />
+                )}
                 {val.label}
-              </span>
-            </button>
-          ))}
+              </button>
+            )
+          })}
         </div>
       </div>
       {/* SV-Liste */}
