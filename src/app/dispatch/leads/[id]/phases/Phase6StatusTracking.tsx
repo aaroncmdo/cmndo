@@ -58,6 +58,7 @@ export default function Phase6StatusTracking({
   const l = lead as unknown as {
     service_typ?: 'komplett' | 'nur_gutachter' | string | null
     telefon?: string | null
+    email?: string | null
     vorname?: string | null
     nachname?: string | null
   }
