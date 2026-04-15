@@ -1,9 +1,8 @@
 'use client'
 
 // AAR-162 / W2: Fallakte-Shell — 2-Column Layout mit 5 Tabs + Sidebar.
-// Ersetzt den 210-KB-Monolithen FallakteClient.tsx als neue Einstiegs-
-// Component. Der Monolith bleibt als Fallback (FallakteClient.old.tsx)
-// bis alle Tabs vollständig extrahiert sind (spätestens nach W4+W5).
+// AAR-172: Ersetzt den 210-KB-Monolithen FallakteClient.tsx endgültig
+// (Monolith wurde gelöscht, siehe AAR-172 Commit).
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'

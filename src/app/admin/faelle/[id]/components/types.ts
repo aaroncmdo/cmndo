@@ -1,5 +1,6 @@
-// AAR-56 Welle 1: Zentrale Types fuer die FallakteClient Sub-Komponenten
-// Extrahiert aus FallakteClient.tsx. Kann spaeter weitere Felder ergaenzen.
+// AAR-56 Welle 1: Zentrale Types für die Fallakte-Sub-Komponenten.
+// AAR-172: Ursprünglich aus FallakteClient.tsx extrahiert — Monolith ist
+// gelöscht, Types werden jetzt von den neuen Shell-Tabs konsumiert.
 
 export type Fall = Record<string, unknown> & {
   id: string

@@ -1,8 +1,7 @@
 // AAR-162 / W2: Fallakte Server-Page.
-// Lädt alle Fall-Daten und delegiert an FallakteShell. Der 210-KB-Monolith
-// FallakteClient.old.tsx bleibt vorerst im Repository als Fallback — siehe
-// „Regel 12"-Vorgabe in der Notion-Spec: nichts löschen bevor die neue
-// Version komplett lauffähig ist.
+// Lädt alle Fall-Daten und delegiert an FallakteShell.
+// AAR-172: Der 210-KB-Monolith FallakteClient.old.tsx wurde gelöscht, nachdem
+// die neue Shell-Architektur alle W2-W5-Tickets abdeckt.
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
