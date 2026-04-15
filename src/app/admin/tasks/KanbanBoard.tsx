@@ -1,15 +1,23 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { createTask, updateTaskStatus, deleteTask } from './actions'
+// AAR-154: Task-Kanban Rewrite.
+// - Status-Dropdown entfernt, Statuswechsel ausschliesslich per Drag & Drop
+// - Task-Card hat Objekt-Link (Fall / Lead / SV) prominent dargestellt
+// - Tasks ohne Objekt-Bezug (weder fall_id/lead_id noch entity_id) werden
+//   ausgeblendet — das waren die „Abkommen" / Alt-System-Einträge
 
-// ─── Types ──────────────────────────────────────────────────────────────────
+import { useState, useTransition } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
+import { createTask, updateTaskStatus, deleteTask } from './actions'
 
 type Task = {
   id: string
   fall_id: string | null
+  lead_id: string | null
   typ: string
+  task_typ: string | null
   titel: string
   beschreibung: string | null
   status: string
@@ -26,8 +34,6 @@ type Task = {
 type Fall = { id: string; fall_nummer: string | null }
 type Admin = { id: string; vorname: string | null; nachname: string | null }
 
-// ─── Constants ──────────────────────────────────────────────────────────────
-
 const COLUMNS: { key: string; label: string }[] = [
   { key: 'offen', label: 'Offen' },
   { key: 'in-bearbeitung', label: 'In Bearbeitung' },
@@ -36,6 +42,7 @@ const COLUMNS: { key: string; label: string }[] = [
 ]
 
 const TYP_LABEL: Record<string, string> = {
+  dispatch: 'Dispatch',
   filmcheck: 'Filmcheck',
   'kanzlei-anschlussschreiben': 'Anschlussschreiben',
   'kanzlei-nachfrage': 'Kanzlei Nachfrage',
@@ -46,13 +53,14 @@ const TYP_LABEL: Record<string, string> = {
 }
 
 const TYP_COLOR: Record<string, string> = {
-  filmcheck: 'bg-yellow-50 text-yellow-300',
-  'kanzlei-anschlussschreiben': 'bg-green-50 text-green-300',
-  'kanzlei-nachfrage': 'bg-emerald-50 text-emerald-300',
-  'versicherung-kontakt': 'bg-[#4573A2]/5 text-[#7BA3CC]',
-  'kunde-rueckfrage': 'bg-violet-50 text-violet-300',
-  'sv-termin': 'bg-cyan-50 text-cyan-300',
-  'zahlung-pruefen': 'bg-amber-50 text-amber-300',
+  dispatch: 'bg-blue-50 text-blue-600',
+  filmcheck: 'bg-yellow-50 text-yellow-600',
+  'kanzlei-anschlussschreiben': 'bg-green-50 text-green-600',
+  'kanzlei-nachfrage': 'bg-emerald-50 text-emerald-600',
+  'versicherung-kontakt': 'bg-[#4573A2]/10 text-[#4573A2]',
+  'kunde-rueckfrage': 'bg-violet-50 text-violet-600',
+  'sv-termin': 'bg-cyan-50 text-cyan-600',
+  'zahlung-pruefen': 'bg-amber-50 text-amber-600',
 }
 
 const TASK_TYPES = [
@@ -67,12 +75,10 @@ const TASK_TYPES = [
 
 const COLUMN_HEADER_COLOR: Record<string, string> = {
   offen: 'text-[#7BA3CC]',
-  'in-bearbeitung': 'text-amber-400',
-  erledigt: 'text-green-400',
-  blockiert: 'text-red-400',
+  'in-bearbeitung': 'text-amber-500',
+  erledigt: 'text-green-500',
+  blockiert: 'text-red-500',
 }
-
-// ─── Helpers ────────────────────────────────────────────────────────────────
 
 function isOverdue(faelligAm: string | null): boolean {
   if (!faelligAm) return false
@@ -84,41 +90,104 @@ function fmtDate(d: string | null) {
   return new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
 }
 
-// ─── Main ───────────────────────────────────────────────────────────────────
+/**
+ * Ermittelt aus Task das zu verlinkende Objekt + dessen Route.
+ * Reihenfolge: entity_type/entity_id → fall_id → lead_id.
+ * Return null wenn keine Referenz → Task wird nicht im Kanban gezeigt.
+ */
+function resolveObjectLink(
+  task: Task,
+  fallMap: Record<string, string>,
+  leadMap: Record<string, string>,
+  svMap: Record<string, string>,
+): { href: string; label: string; kind: 'Fall' | 'Lead' | 'SV' } | null {
+  const et = task.entity_type
+  const eid = task.entity_id
+
+  if (et === 'fall' && eid) {
+    return { href: `/admin/faelle/${eid}`, label: fallMap[eid] ?? eid.slice(0, 8), kind: 'Fall' }
+  }
+  if (et === 'lead' && eid) {
+    return { href: `/admin/dispatch/lead/${eid}`, label: leadMap[eid] ?? eid.slice(0, 8), kind: 'Lead' }
+  }
+  if ((et === 'sv' || et === 'gutachter') && eid) {
+    return {
+      href: `/admin/sachverstaendige/${eid}`,
+      label: svMap[eid] ?? eid.slice(0, 8),
+      kind: 'SV',
+    }
+  }
+  // Fallbacks für Alt-Daten: fall_id / lead_id direkt gesetzt
+  if (task.fall_id) {
+    return {
+      href: `/admin/faelle/${task.fall_id}`,
+      label: fallMap[task.fall_id] ?? task.fall_id.slice(0, 8),
+      kind: 'Fall',
+    }
+  }
+  if (task.lead_id) {
+    return {
+      href: `/admin/dispatch/lead/${task.lead_id}`,
+      label: leadMap[task.lead_id] ?? task.lead_id.slice(0, 8),
+      kind: 'Lead',
+    }
+  }
+  return null
+}
 
 export default function KanbanBoard({
   tasks,
   faelle,
   fallMap,
   adminMap,
+  leadMap,
+  svMap,
   admins,
 }: {
   tasks: Task[]
   faelle: Fall[]
   fallMap: Record<string, string>
   adminMap: Record<string, string>
+  leadMap: Record<string, string>
+  svMap: Record<string, string>
   admins: Admin[]
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  // KFZ-151: Auto-erledigte Tasks default ausgeblendet
   const [showAutoResolved, setShowAutoResolved] = useState(false)
 
-  // KFZ-151: Filter Auto-Resolved aus 'erledigt' Spalte (default OFF)
+  // AAR-154: Nur Tasks mit verlinkbarem Objekt zeigen.
+  const linked = tasks.filter((t) => resolveObjectLink(t, fallMap, leadMap, svMap) !== null)
   const visibleTasks = showAutoResolved
-    ? tasks
-    : tasks.filter(t => !(t.status === 'erledigt' && t.auto_resolved_am))
+    ? linked
+    : linked.filter((t) => !(t.status === 'erledigt' && t.auto_resolved_am))
 
-  function handleStatusChange(taskId: string, newStatus: string) {
-    setError(null)
+  // Optimistic-Update für Drag & Drop — ohne das springt die Card nach Release
+  // zurück in die Ursprungsspalte bis der Server antwortet.
+  const [localTasks, setLocalTasks] = useState(visibleTasks)
+  // Sync wenn Parent neue Tasks liefert (z. B. nach router.refresh)
+  if (localTasks !== visibleTasks && !isPending) {
+    setLocalTasks(visibleTasks)
+  }
+
+  function onDragEnd(result: DropResult) {
+    const { draggableId, destination, source } = result
+    if (!destination) return
+    if (destination.droppableId === source.droppableId) return
+    const newStatus = destination.droppableId
+    setLocalTasks((prev) =>
+      prev.map((t) => (t.id === draggableId ? { ...t, status: newStatus } : t)),
+    )
     startTransition(async () => {
       try {
-        await updateTaskStatus(taskId, newStatus)
+        await updateTaskStatus(draggableId, newStatus)
         router.refresh()
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Fehler')
+        setError(e instanceof Error ? e.message : 'Statuswechsel fehlgeschlagen')
+        // Bei Fehler lokalen State zurücksetzen
+        setLocalTasks(visibleTasks)
       }
     })
   }
@@ -151,20 +220,24 @@ export default function KanbanBoard({
   return (
     <div className="h-full overflow-y-auto px-4 py-8">
       <div className="max-w-[1400px] mx-auto">
-
-        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-xl font-semibold text-gray-900">Tasks</h1>
-            <p className="text-gray-500 text-sm mt-0.5">{visibleTasks.length} von {tasks.length} Aufgaben</p>
+            <p className="text-gray-500 text-sm mt-0.5">
+              {localTasks.length} von {tasks.length} Aufgaben
+              {tasks.length !== linked.length && (
+                <span className="ml-1 text-[10px] text-gray-400">
+                  ({tasks.length - linked.length} ohne Objekt-Bezug ausgeblendet)
+                </span>
+              )}
+            </p>
           </div>
           <div className="flex items-center gap-3">
-            {/* KFZ-151: Auto-erledigt Toggle */}
             <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={showAutoResolved}
-                onChange={e => setShowAutoResolved(e.target.checked)}
+                onChange={(e) => setShowAutoResolved(e.target.checked)}
                 className="rounded border-gray-300"
               />
               Auto-erledigte anzeigen
@@ -179,61 +252,82 @@ export default function KanbanBoard({
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-800 rounded-xl p-3 mb-4">
-            <p className="text-red-300 text-sm">{error}</p>
+          <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4">
+            <p className="text-red-600 text-sm">{error}</p>
           </div>
         )}
 
-        {/* Kanban columns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-          {COLUMNS.map(col => {
-            const colTasks = visibleTasks.filter(t => t.status === col.key)
-            return (
-              <div key={col.key} className="min-w-0">
-                {/* Column header */}
-                <div className="flex items-center gap-2 mb-3 px-1">
-                  <span className={`text-sm font-semibold ${COLUMN_HEADER_COLOR[col.key] ?? 'text-gray-500'}`}>
-                    {col.label}
-                  </span>
-                  <span className="text-gray-400 text-xs font-medium bg-gray-100 px-2 py-0.5 rounded-full">
-                    {colTasks.length}
-                  </span>
-                </div>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            {COLUMNS.map((col) => {
+              const colTasks = localTasks.filter((t) => t.status === col.key)
+              return (
+                <div key={col.key} className="min-w-0">
+                  <div className="flex items-center gap-2 mb-3 px-1">
+                    <span
+                      className={`text-sm font-semibold ${COLUMN_HEADER_COLOR[col.key] ?? 'text-gray-500'}`}
+                    >
+                      {col.label}
+                    </span>
+                    <span className="text-gray-400 text-xs font-medium bg-gray-100 px-2 py-0.5 rounded-full">
+                      {colTasks.length}
+                    </span>
+                  </div>
 
-                {/* Cards */}
-                <div className="space-y-2 min-h-24">
-                  {colTasks.length === 0 && (
-                    <div className="rounded-xl border border-dashed border-gray-200 p-6 text-center">
-                      <p className="text-gray-300 text-xs">Keine Tasks</p>
-                    </div>
-                  )}
-                  {colTasks.map(task => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      fallMap={fallMap}
-                      adminMap={adminMap}
-                      onStatusChange={handleStatusChange}
-                      onDelete={handleDelete}
-                      isPending={isPending}
-                    />
-                  ))}
+                  <Droppable droppableId={col.key}>
+                    {(dp, snap) => (
+                      <div
+                        ref={dp.innerRef}
+                        {...dp.droppableProps}
+                        className={`space-y-2 min-h-32 rounded-xl p-1 transition-colors ${
+                          snap.isDraggingOver ? 'bg-[#4573A2]/5' : ''
+                        }`}
+                      >
+                        {colTasks.length === 0 && (
+                          <div className="rounded-xl border border-dashed border-gray-200 p-6 text-center">
+                            <p className="text-gray-400 text-xs">Keine Tasks</p>
+                          </div>
+                        )}
+                        {colTasks.map((task, i) => (
+                          <Draggable key={task.id} draggableId={task.id} index={i}>
+                            {(draggable, dragSnap) => (
+                              <div
+                                ref={draggable.innerRef}
+                                {...draggable.draggableProps}
+                                {...draggable.dragHandleProps}
+                                className={dragSnap.isDragging ? 'shadow-xl' : ''}
+                              >
+                                <TaskCard
+                                  task={task}
+                                  link={resolveObjectLink(task, fallMap, leadMap, svMap)!}
+                                  adminMap={adminMap}
+                                  onDelete={handleDelete}
+                                />
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {dp.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
                 </div>
-              </div>
-            )
-          })}
-        </div>
+              )
+            })}
+          </div>
+        </DragDropContext>
 
-        {/* New task dialog */}
         {dialogOpen && (
           <NewTaskDialog
             faelle={faelle}
-            fallMap={fallMap}
             admins={admins}
             adminMap={adminMap}
             error={error}
             onSubmit={handleCreate}
-            onClose={() => { setDialogOpen(false); setError(null) }}
+            onClose={() => {
+              setDialogOpen(false)
+              setError(null)
+            }}
           />
         )}
       </div>
@@ -241,90 +335,131 @@ export default function KanbanBoard({
   )
 }
 
-// ─── Task Card ──────────────────────────────────────────────────────────────
-
 function TaskCard({
   task,
-  fallMap,
+  link,
   adminMap,
-  onStatusChange,
   onDelete,
-  isPending,
 }: {
   task: Task
-  fallMap: Record<string, string>
+  link: { href: string; label: string; kind: 'Fall' | 'Lead' | 'SV' }
   adminMap: Record<string, string>
-  onStatusChange: (taskId: string, status: string) => void
   onDelete: (taskId: string) => void
-  isPending: boolean
 }) {
   const overdue = isOverdue(task.faellig_am) && task.status !== 'erledigt'
-  // KFZ-151: Hinweis-Banner wenn assigned-Task obsolet wurde aber noch offen ist
   const obsoleteHint = task.status === 'offen' && task.auto_resolved_am
-  // KFZ-151: Auto-resolved Marker fuer geschlossene Tasks
   const isAutoResolved = task.status === 'erledigt' && task.auto_resolved_am
 
   return (
-    <div className={`bg-white rounded-xl p-4 border transition-colors ${
-      overdue ? 'border-red-800/60' : isAutoResolved ? 'border-gray-100' : 'border-gray-200'
-    }`}>
-      {/* Typ badge + delete */}
+    <div
+      className={`bg-white rounded-xl p-4 border transition-colors cursor-grab active:cursor-grabbing ${
+        overdue ? 'border-red-300' : isAutoResolved ? 'border-gray-100' : 'border-gray-200'
+      }`}
+    >
       <div className="flex items-start justify-between gap-2 mb-2">
-        <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium whitespace-nowrap ${
-          TYP_COLOR[task.typ] ?? 'bg-gray-100 text-gray-700'
-        }`}>
+        <span
+          className={`px-2 py-0.5 rounded-full text-[10px] font-medium whitespace-nowrap ${
+            TYP_COLOR[task.typ] ?? 'bg-gray-100 text-gray-700'
+          }`}
+        >
           {TYP_LABEL[task.typ] ?? task.typ}
         </span>
         <button
           onClick={() => onDelete(task.id)}
-          className="text-gray-300 hover:text-red-400 transition-colors p-0.5 -mr-1 -mt-0.5"
+          className="text-gray-300 hover:text-red-500 transition-colors p-0.5 -mr-1 -mt-0.5"
           title="Löschen"
         >
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg
+            width="14"
+            height="14"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
-      {/* Title */}
       <p className="text-gray-800 text-sm font-medium leading-snug mb-2">{task.titel}</p>
 
-      {/* KFZ-151: Hinweis-Banner — Task ist eventuell obsolet (assigned auto-resolved) */}
       {obsoleteHint && (
         <div className="mb-2 px-2 py-1.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700 text-[10px] leading-tight">
           <strong>Eventuell schon erledigt:</strong> {task.auto_resolved_grund}
-          <br/>Schliessen oder offen lassen falls du noch dran bist.
+          <br />
+          Schließen oder offen lassen falls du noch dran bist.
         </div>
       )}
 
-      {/* KFZ-151: Auto-Resolved Marker fuer geschlossene Tasks */}
       {isAutoResolved && (
         <div
           className="mb-2 inline-flex items-center gap-1 text-[10px] text-gray-400"
           title={`Automatisch erledigt am ${task.auto_resolved_am ? new Date(task.auto_resolved_am).toLocaleString('de-DE') : ''} weil ${task.auto_resolved_grund ?? ''}`}
         >
-          <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          <svg
+            width="10"
+            height="10"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M13 10V3L4 14h7v7l9-11h-7z"
+            />
           </svg>
           Auto-erledigt
         </div>
       )}
 
-      {/* Fall number */}
-      <div className="flex items-center gap-1.5 mb-2">
-        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="text-gray-400">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+      {/* AAR-154: Prominenter Objekt-Link statt früher nur dem Fall-Label-Span.
+          onClick stoppt propagation damit das Drag-Handle nicht auslöst. */}
+      <Link
+        href={link.href}
+        onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        className="flex items-center gap-1.5 mb-2 text-[#4573A2] hover:text-[#0D1B3E] hover:underline"
+      >
+        <svg
+          width="12"
+          height="12"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+          />
         </svg>
-        <span className="text-gray-500 text-xs font-mono">{task.fall_id ? fallMap[task.fall_id] ?? '—' : (task.entity_type ?? '—')}</span>
-      </div>
+        <span className="text-[10px] uppercase tracking-wider text-gray-400">{link.kind}:</span>
+        <span className="text-xs font-medium truncate">{link.label}</span>
+      </Link>
 
-      {/* Meta row: due date + assignee */}
       <div className="flex items-center justify-between gap-2 text-xs">
         <div className="flex items-center gap-3">
           {task.faellig_am && (
-            <span className={`flex items-center gap-1 ${overdue ? 'text-red-400' : 'text-gray-500'}`}>
-              <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <span
+              className={`flex items-center gap-1 ${overdue ? 'text-red-600' : 'text-gray-500'}`}
+            >
+              <svg
+                width="12"
+                height="12"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
               </svg>
               {fmtDate(task.faellig_am)}
             </span>
@@ -336,29 +471,12 @@ function TaskCard({
           )}
         </div>
       </div>
-
-      {/* Status dropdown */}
-      <div className="mt-3 pt-3 border-t border-gray-200/50">
-        <select
-          value={task.status}
-          disabled={isPending}
-          onChange={e => onStatusChange(task.id, e.target.value)}
-          className="w-full bg-gray-100 border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#1E3A5F] cursor-pointer disabled:opacity-50"
-        >
-          {COLUMNS.map(col => (
-            <option key={col.key} value={col.key}>{col.label}</option>
-          ))}
-        </select>
-      </div>
     </div>
   )
 }
 
-// ─── New Task Dialog ────────────────────────────────────────────────────────
-
 function NewTaskDialog({
   faelle,
-  fallMap,
   admins,
   adminMap,
   error,
@@ -366,7 +484,6 @@ function NewTaskDialog({
   onClose,
 }: {
   faelle: { id: string; fall_nummer: string | null }[]
-  fallMap: Record<string, string>
   admins: { id: string; vorname: string | null; nachname: string | null }[]
   adminMap: Record<string, string>
   error: string | null
@@ -387,26 +504,36 @@ function NewTaskDialog({
 
   return (
     <>
-      {/* Backdrop */}
       <div className="fixed inset-0 bg-black/60 z-50" onClick={onClose} />
-
-      {/* Dialog */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
           className="bg-white border border-gray-200 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
-          onClick={e => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
         >
           <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
             <h2 className="text-gray-900 font-semibold">Neuer Task</h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              <svg
+                width="20"
+                height="20"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="p-5 space-y-4">
-            {/* Typ */}
             <div>
               <label className="block text-gray-500 text-sm mb-1.5">Typ</label>
               <select
@@ -415,13 +542,14 @@ function NewTaskDialog({
                 className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               >
                 <option value="">Bitte wählen...</option>
-                {TASK_TYPES.map(t => (
-                  <option key={t} value={t}>{TYP_LABEL[t]}</option>
+                {TASK_TYPES.map((t) => (
+                  <option key={t} value={t}>
+                    {TYP_LABEL[t]}
+                  </option>
                 ))}
               </select>
             </div>
 
-            {/* Fall */}
             <div>
               <label className="block text-gray-500 text-sm mb-1.5">Fall</label>
               <select
@@ -430,7 +558,7 @@ function NewTaskDialog({
                 className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               >
                 <option value="">Fall auswählen...</option>
-                {faelle.map(f => (
+                {faelle.map((f) => (
                   <option key={f.id} value={f.id}>
                     {f.fall_nummer ?? f.id.slice(0, 8)}
                   </option>
@@ -438,7 +566,6 @@ function NewTaskDialog({
               </select>
             </div>
 
-            {/* Titel */}
             <div>
               <label className="block text-gray-500 text-sm mb-1.5">Titel</label>
               <input
@@ -450,9 +577,10 @@ function NewTaskDialog({
               />
             </div>
 
-            {/* Beschreibung */}
             <div>
-              <label className="block text-gray-500 text-sm mb-1.5">Beschreibung (optional)</label>
+              <label className="block text-gray-500 text-sm mb-1.5">
+                Beschreibung (optional)
+              </label>
               <textarea
                 name="beschreibung"
                 rows={3}
@@ -461,7 +589,6 @@ function NewTaskDialog({
               />
             </div>
 
-            {/* Fällig am */}
             <div>
               <label className="block text-gray-500 text-sm mb-1.5">Fällig am (optional)</label>
               <input
@@ -471,15 +598,16 @@ function NewTaskDialog({
               />
             </div>
 
-            {/* Zugewiesen an */}
             <div>
-              <label className="block text-gray-500 text-sm mb-1.5">Zugewiesen an (optional)</label>
+              <label className="block text-gray-500 text-sm mb-1.5">
+                Zugewiesen an (optional)
+              </label>
               <select
                 name="zugewiesen_an"
                 className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               >
                 <option value="">Nicht zugewiesen</option>
-                {admins.map(a => (
+                {admins.map((a) => (
                   <option key={a.id} value={a.id}>
                     {adminMap[a.id]}
                   </option>
@@ -487,7 +615,7 @@ function NewTaskDialog({
               </select>
             </div>
 
-            {error && <p className="text-red-400 text-sm">{error}</p>}
+            {error && <p className="text-red-500 text-sm">{error}</p>}
 
             <button
               type="submit"
