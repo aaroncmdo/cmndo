@@ -22,6 +22,8 @@ export type LeadLike = {
   // Phase 4 / Gegner
   gegner_kennzeichen?: string | null
   fahrerflucht?: boolean | null
+  // AAR-176: Treffpunkt-Hinweis für den SV (Phase 2)
+  sv_treffpunkt?: string | null
 }
 
 export type AktiverTerminLike = {

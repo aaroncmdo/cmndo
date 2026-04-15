@@ -5,7 +5,7 @@
 // einen ✏️-Button der zur jeweiligen Phase zurückspringt. Letzter Check vor
 // Versand: WA-Nummer inline editierbar.
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect, useRef } from 'react'
 import { useDispatchPhase } from '../lib/phase-context'
 import { sendFlowLinkMultiChannel, saveStammdaten } from '../actions'
 import {
@@ -63,6 +63,11 @@ export default function Phase5Zusammenfassung() {
   const [email, setEmail] = useState(l.email ?? '')
   const [savingNummer, setSavingNummer] = useState(false)
   const [savingEmail, setSavingEmail] = useState(false)
+  // AAR-179 Audit-Fix: Fehler aus saveStammdaten sichtbar machen — vorher
+  // verschluckte das try/finally jeden Server-Fehler und der MA dachte der
+  // Save sei erfolgreich.
+  const [nummerError, setNummerError] = useState<string | null>(null)
+  const [emailError, setEmailError] = useState<string | null>(null)
   const [, startTransition] = useTransition()
   const [sendStatus, setSendStatus] = useState<{ kanal: string | null; text: string; ok: boolean }>({
     kanal: null,
@@ -74,12 +79,14 @@ export default function Phase5Zusammenfassung() {
   function saveWaNummer() {
     if (waNummer === (l.telefon ?? '')) return
     setSavingNummer(true)
+    setNummerError(null)
     startTransition(async () => {
       try {
-        await saveStammdaten(lead.id, { telefon: waNummer || null })
+        const r = await saveStammdaten(lead.id, { telefon: waNummer || null })
+        if (!r.success) setNummerError(r.error ?? 'Telefon speichern fehlgeschlagen')
+      } catch (err) {
+        setNummerError(err instanceof Error ? err.message : 'Telefon speichern fehlgeschlagen')
       } finally {
-        // Spinner immer zurücksetzen — auch wenn saveStammdaten throwt, sonst
-        // bleibt der „Speichern..."-Hinweis dauerhaft stehen.
         setSavingNummer(false)
       }
     })
@@ -91,17 +98,33 @@ export default function Phase5Zusammenfassung() {
   function saveEmail() {
     if (email === (l.email ?? '')) return
     setSavingEmail(true)
+    setEmailError(null)
     startTransition(async () => {
       try {
-        await saveStammdaten(lead.id, { email: email.trim() || null })
+        const r = await saveStammdaten(lead.id, { email: email.trim() || null })
+        if (!r.success) setEmailError(r.error ?? 'Email speichern fehlgeschlagen')
+      } catch (err) {
+        setEmailError(err instanceof Error ? err.message : 'Email speichern fehlgeschlagen')
       } finally {
         setSavingEmail(false)
       }
     })
   }
 
+  // AAR-179 Audit-Fix: Auto-Advance-Timeout wird beim Unmount/Re-Send
+  // aufgeräumt damit nicht ein stale setPhase(6) den User überschreibt.
+  const advanceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => {
+    return () => {
+      if (advanceTimeoutRef.current) clearTimeout(advanceTimeoutRef.current)
+    }
+  }, [])
+
   function send(kanal: 'whatsapp' | 'sms' | 'email') {
     if (!qualification.canSendFlowLink) return
+    // Vorherigen Auto-Advance-Timer canceln falls User mehrmals nacheinander
+    // auf Send klickt.
+    if (advanceTimeoutRef.current) clearTimeout(advanceTimeoutRef.current)
     startSend(async () => {
       const r = await sendFlowLinkMultiChannel(lead.id, kanal, waNummer || null)
       setSendStatus({
@@ -112,7 +135,7 @@ export default function Phase5Zusammenfassung() {
       // AAR-178 P3-B: Auto-Advance zu Phase 6 nach erfolgreichem Versand
       // (der Dispatcher sieht sofort das Status-Tracking statt Phase 5 nochmal).
       if (r.success) {
-        setTimeout(() => setPhase(6), 600)
+        advanceTimeoutRef.current = setTimeout(() => setPhase(6), 600)
       }
     })
   }
@@ -294,8 +317,8 @@ export default function Phase5Zusammenfassung() {
             placeholder="+49 170 1234567"
             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
           />
-          <p className="text-[10px] text-gray-400 mt-0.5">
-            {savingNummer ? 'Speichern ...' : 'Änderung wird beim Verlassen des Feldes gespeichert.'}
+          <p className={`text-[10px] mt-0.5 ${nummerError ? 'text-red-600' : 'text-gray-400'}`}>
+            {nummerError ? nummerError : savingNummer ? 'Speichern ...' : 'Änderung wird beim Verlassen des Feldes gespeichert.'}
           </p>
         </div>
         {/* AAR-178 P2-K: Email inline editierbar */}
@@ -311,8 +334,8 @@ export default function Phase5Zusammenfassung() {
             placeholder="name@example.de"
             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
           />
-          <p className="text-[10px] text-gray-400 mt-0.5">
-            {savingEmail ? 'Speichern ...' : 'Änderung wird beim Verlassen des Feldes gespeichert.'}
+          <p className={`text-[10px] mt-0.5 ${emailError ? 'text-red-600' : 'text-gray-400'}`}>
+            {emailError ? emailError : savingEmail ? 'Speichern ...' : 'Änderung wird beim Verlassen des Feldes gespeichert.'}
           </p>
         </div>
       </div>

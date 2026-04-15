@@ -135,11 +135,20 @@ export default function Phase6StatusTracking({
       return
     }
     startResend(async () => {
-      const r = await sendFlowLinkMultiChannel(lead.id, 'whatsapp')
-      setResendStatus({
-        ok: r.success,
-        text: r.success ? 'FlowLink erneut per WhatsApp gesendet' : r.error ?? 'Versand fehlgeschlagen',
-      })
+      // AAR-179 Audit-Fix: throw sauber abfangen, sonst hängt der pending-
+      // State ewig und der User sieht keinen Fehler.
+      try {
+        const r = await sendFlowLinkMultiChannel(lead.id, 'whatsapp', null)
+        setResendStatus({
+          ok: r.success,
+          text: r.success ? 'FlowLink erneut per WhatsApp gesendet' : r.error ?? 'Versand fehlgeschlagen',
+        })
+      } catch (err) {
+        setResendStatus({
+          ok: false,
+          text: err instanceof Error ? err.message : 'Versand fehlgeschlagen',
+        })
+      }
     })
   }
 

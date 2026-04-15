@@ -8,6 +8,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { PhoneIcon, ExternalLinkIcon, LayoutGridIcon, ListIcon } from 'lucide-react'
+import { PHASE_BADGES, PHASE_LABELS, KANBAN_PHASEN } from './leadPhaseConstants'
 
 type Lead = {
   id: string
@@ -24,39 +25,6 @@ type Lead = {
   created_at: string
   updated_at: string
 }
-
-const PHASE_BADGES: Record<string, string> = {
-  'neu': 'bg-blue-100 text-blue-700',
-  'nicht-erreicht': 'bg-gray-100 text-gray-600',
-  'rueckruf': 'bg-amber-100 text-amber-700',
-  'in-qualifizierung': 'bg-violet-100 text-violet-700',
-  'flow-versendet': 'bg-emerald-100 text-emerald-700',
-  'sa-ausstehend': 'bg-cyan-100 text-cyan-700',
-  'konvertiert': 'bg-green-100 text-green-800',
-  'disqualifiziert': 'bg-red-100 text-red-700',
-  'kalt': 'bg-gray-200 text-gray-500',
-}
-
-const PHASE_LABELS: Record<string, string> = {
-  'neu': 'Neu',
-  'rueckruf': 'Rückruf',
-  'in-qualifizierung': 'In Qualifizierung',
-  'flow-versendet': 'Flow gesendet',
-  'nicht-erreicht': 'Nicht erreicht',
-  'kalt': 'Kalt',
-  'disqualifiziert': 'Disqualifiziert',
-  'konvertiert': 'Konvertiert',
-}
-
-// Kanban-Reihenfolge: Funnel von links nach rechts
-const KANBAN_PHASEN = [
-  'neu',
-  'rueckruf',
-  'in-qualifizierung',
-  'flow-versendet',
-  'konvertiert',
-  'disqualifiziert',
-]
 
 function flowLinkBadge(offen: boolean | null, abgeschlossen: boolean | null): { label: string; cls: string } {
   if (abgeschlossen) return { label: 'Abgeschlossen', cls: 'bg-green-100 text-green-700' }
@@ -172,18 +140,30 @@ function ListView({ leads }: { leads: Lead[] }) {
 }
 
 function KanbanView({ leads }: { leads: Lead[] }) {
+  // Kanban-Bucketing: jede DB-Phase muss eine eigene Spalte haben damit Leads
+  // nicht stillschweigend in 'neu' verschwinden (Audit-Fix AAR-179 Follow-up).
   const gruppen: Record<string, Lead[]> = {}
   for (const p of KANBAN_PHASEN) gruppen[p] = []
   for (const lead of leads) {
     const k = lead.qualifizierungs_phase ?? 'neu'
     if (gruppen[k]) gruppen[k].push(lead)
-    else gruppen['neu'].push(lead)
+    else {
+      // Unerwarteter Phase-Wert (neue DB-Enum, fehlt in KANBAN_PHASEN).
+      // Wir legen on-the-fly eine Spalte an damit nichts verloren geht.
+      gruppen[k] = [lead]
+    }
   }
+
+  // Unbekannte Phase-Werte ans Ende hängen damit sie in der UI sichtbar werden
+  const phasenOrder = [
+    ...KANBAN_PHASEN,
+    ...Object.keys(gruppen).filter((k) => !KANBAN_PHASEN.includes(k as typeof KANBAN_PHASEN[number])),
+  ]
 
   return (
     <div className="flex gap-3 overflow-x-auto pb-2">
-      {KANBAN_PHASEN.map((phase) => {
-        const bucket = gruppen[phase]
+      {phasenOrder.map((phase) => {
+        const bucket = gruppen[phase] ?? []
         return (
           <div key={phase} className="min-w-[260px] w-[260px] bg-gray-50 rounded-xl p-2 space-y-2 flex-shrink-0">
             <div className="flex items-center justify-between px-1">

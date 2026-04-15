@@ -70,15 +70,26 @@ export default function GespraechsleitfadenTimer({
   const progressPct = Math.min(100, (sekunden / 480) * 100)
 
   const [showSummary, setShowSummary] = useState(false)
+  const [summaryError, setSummaryError] = useState<string | null>(null)
   function starte() { startTransition(async () => { await startGespraech(leadId) }) }
   function beende() {
     // AAR-176 P3-F: Zusammenfassung bevor wir wirklich beenden — verhindert
     // dass der MA das Gespräch im Affekt beendet ohne Stand zu prüfen.
+    setSummaryError(null)
     setShowSummary(true)
   }
   function bestaetigeBeenden() {
-    setShowSummary(false)
-    startTransition(async () => { await endeGespraech(leadId) })
+    // AAR-179 Audit-Fix: Fehler aus endeGespraech sichtbar machen statt
+    // Modal voreilig zu schließen. Bei Erfolg schließen, bei Fehler bleibt
+    // Modal offen + zeigt die Fehlermeldung.
+    startTransition(async () => {
+      try {
+        await endeGespraech(leadId)
+        setShowSummary(false)
+      } catch (err) {
+        setSummaryError(err instanceof Error ? err.message : 'Beenden fehlgeschlagen')
+      }
+    })
   }
 
   if (!gestartetAm) {
@@ -179,6 +190,11 @@ export default function GespraechsleitfadenTimer({
                 Hat der Kunde den FlowLink per WA erhalten? Wenn nein → jetzt aktiv nachziehen statt
                 im nächsten Gespräch nachschlagen.
               </p>
+              {summaryError && (
+                <p className="text-[11px] text-red-700 bg-red-50 border border-red-200 rounded p-2">
+                  Beenden fehlgeschlagen: {summaryError}
+                </p>
+              )}
             </div>
             <div className="flex gap-2">
               <button

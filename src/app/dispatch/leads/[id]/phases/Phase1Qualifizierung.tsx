@@ -162,10 +162,18 @@ export default function Phase1Qualifizierung() {
               key={b.label}
               type="button"
               onClick={() =>
-                setDraft((d) => ({
-                  ...d,
-                  unfallhergang: (d.unfallhergang ? d.unfallhergang + '\n' : '') + b.prompt,
-                }))
+                setDraft((d) => {
+                  // AAR-179 Audit-Fix: Doppelten Baustein nicht zweimal anhängen —
+                  // wenn der Prompt-Anfang schon im Text steht, ist der Klick ein
+                  // No-Op. MA kann Bausteine gezielt wiederverwenden indem er
+                  // den ersten Satz löscht.
+                  const existing = d.unfallhergang ?? ''
+                  if (existing.includes(b.prompt.trim())) return d
+                  return {
+                    ...d,
+                    unfallhergang: (existing ? existing + '\n' : '') + b.prompt,
+                  }
+                })
               }
               className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100"
               title={`„${b.prompt.trim()}" ans Textfeld anhängen`}

@@ -5,18 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import NeuLeadDrawer from './_components/NeuLeadDrawer'
 import LeadsViewToggle from './_components/LeadsViewToggle'
-
-const PHASE_OPTIONS = [
-  { value: '', label: 'Alle' },
-  { value: 'neu', label: 'Neu' },
-  { value: 'rueckruf', label: 'Rückruf' },
-  { value: 'in-qualifizierung', label: 'In Qualifizierung' },
-  { value: 'flow-versendet', label: 'Flow gesendet' },
-  { value: 'nicht-erreicht', label: 'Nicht erreicht' },
-  { value: 'kalt', label: 'Kalt' },
-  { value: 'disqualifiziert', label: 'Disqualifiziert' },
-  { value: 'konvertiert', label: 'Konvertiert' },
-]
+import { PHASE_OPTIONS } from './_components/leadPhaseConstants'
 
 export default async function DispatchLeads({
   searchParams,
