@@ -63,6 +63,7 @@ export async function saveHardGate(
     ...(data.polizei_vor_ort !== undefined && { polizei_vor_ort: data.polizei_vor_ort }),
     ...(data.polizei_aktenzeichen !== undefined && { polizei_aktenzeichen: data.polizei_aktenzeichen }),
     ...(data.fahrzeug_fahrbereit !== undefined && { fahrzeug_fahrbereit: data.fahrzeug_fahrbereit }),
+    ...(data.sv_treffpunkt !== undefined && { sv_treffpunkt: data.sv_treffpunkt }),
     updated_at: new Date().toISOString(),
   }
 

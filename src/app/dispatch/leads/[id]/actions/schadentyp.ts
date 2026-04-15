@@ -26,6 +26,21 @@ export async function saveSchadentyp(
     schadentyp_freitext: schadentyp === 'sonstiges' ? freitext ?? null : null,
     updated_at: new Date().toISOString(),
   }
+  // AAR-176 P2-B: unfallort_kategorie automatisch aus schadentyp ableiten —
+  // der MA muss den Ort nicht mehr doppelt pflegen. Nur setzen, wenn aus dem
+  // Schadentyp eine eindeutige Ortskategorie folgt; für „sonstiges" bleibt
+  // der Wert unverändert (könnte z. B. vom Kunden-Portal eingepflegt sein).
+  const KATEGORIE_AUTO: Record<string, string | null> = {
+    spurwechsel: 'strasse',
+    auffahrunfall: 'strasse',
+    vorfahrtsverletzung: 'kreuzung',
+    parkplatz: 'parkplatz',
+    sonstiges: null,
+  }
+  const autoKategorie = KATEGORIE_AUTO[schadentyp]
+  if (autoKategorie) {
+    updates.unfallort_kategorie = autoKategorie
+  }
   if (schadentyp === 'parkplatz' && parkplatzKamera !== undefined) {
     updates.parkplatz_kamera = parkplatzKamera
     if (parkplatzKamera === false) {

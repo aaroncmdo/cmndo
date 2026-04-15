@@ -11,7 +11,10 @@
 // aber in der neuen UI nicht mehr aktiv abgefragt — Q3 ist jetzt Polizei.
 
 import { useState, useTransition } from 'react'
-import { saveHardGate, type HardGateData, type UnfallortKategorie } from '../actions'
+// AAR-176 P2-B: UnfallortKategorie-Import raus — die Spalte wird jetzt auto
+// aus schadentyp abgeleitet (saveSchadentyp setzt kategorie mit, Dropdown
+// ist in der UI weg).
+import { saveHardGate, type HardGateData } from '../actions'
 import { useDispatchPhase } from '../lib/phase-context'
 import {
   CheckCircleIcon,
@@ -28,16 +31,6 @@ import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 // jetzt das volle 4-Punkte-Skript mit Copy-Button (Notion-Spec §2.Q1).
 import ExitSkript from '../ExitSkript'
 
-const UNFALLORT_KATEGORIEN: { value: UnfallortKategorie; label: string }[] = [
-  { value: 'parkplatz', label: 'Parkplatz' },
-  { value: 'strasse', label: 'Straße' },
-  { value: 'autobahn', label: 'Autobahn' },
-  { value: 'kreuzung', label: 'Kreuzung' },
-  { value: 'tankstelle', label: 'Tankstelle' },
-  { value: 'innenstadt', label: 'Innenstadt' },
-  { value: 'sonstiges', label: 'Sonstiges' },
-]
-
 type LeadFields = {
   id: string
   unfallhergang?: string | null
@@ -48,7 +41,6 @@ type LeadFields = {
   mietwagen_flag?: boolean | null
   nutzungsausfall?: boolean | null
   unfallort?: string | null
-  unfallort_kategorie?: UnfallortKategorie | null
   unfallort_lat?: number | null
   unfallort_lng?: number | null
   polizei_vor_ort?: boolean | null
@@ -60,7 +52,7 @@ type LeadFields = {
 }
 
 export default function Phase1Qualifizierung() {
-  const { lead, qualification } = useDispatchPhase()
+  const { lead, qualification, setPhase } = useDispatchPhase()
   const l = lead as unknown as LeadFields
   const [pending, startTransition] = useTransition()
   const [draft, setDraft] = useState<HardGateData & { polizeibericht_vorhanden?: boolean | null }>({
@@ -72,7 +64,6 @@ export default function Phase1Qualifizierung() {
     mietwagen_flag: l.mietwagen_flag ?? false,
     nutzungsausfall: l.nutzungsausfall ?? false,
     unfallort: l.unfallort ?? '',
-    unfallort_kategorie: l.unfallort_kategorie ?? undefined,
     unfallort_lat: l.unfallort_lat ?? null,
     unfallort_lng: l.unfallort_lng ?? null,
     polizei_vor_ort: l.polizei_vor_ort ?? undefined,
@@ -113,6 +104,11 @@ export default function Phase1Qualifizierung() {
       const r = await saveHardGate(lead.id, toSave)
       if (r.success) {
         setToast(r.disqualifiziert ? 'Disqualifiziert — Exit-Skript wird angezeigt' : 'Gespeichert')
+        // AAR-176 P3-A: Auto-Advance zu Phase 2 nach erfolgreichem Save
+        // sobald alle 3 Fragen beantwortet sind und kein Disqualifier greift.
+        if (!r.disqualifiziert && allComplete) {
+          setTimeout(() => setPhase(2), 400)
+        }
       } else {
         setToast(r.error ?? 'Fehler')
       }
@@ -282,36 +278,22 @@ export default function Phase1Qualifizierung() {
           <MapPinIcon className="w-4 h-4 text-[#4573A2]" />
           <h3 className="text-xs font-semibold text-gray-700">Unfallort</h3>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-[1fr_160px] gap-2">
-          <GooglePlaceAutocomplete
-            defaultValue={draft.unfallort ?? ''}
-            placeholder="Wo ist es passiert? (Adresse wählen)"
-            onSelect={(r) =>
-              setDraft((d) => ({
-                ...d,
-                unfallort: r.adresse,
-                unfallort_lat: r.lat,
-                unfallort_lng: r.lng,
-              }))
-            }
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
-          />
-          <select
-            value={draft.unfallort_kategorie ?? ''}
-            onChange={(e) =>
-              setDraft((d) => ({
-                ...d,
-                unfallort_kategorie: (e.target.value || undefined) as UnfallortKategorie | undefined,
-              }))
-            }
-            className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white"
-          >
-            <option value="">Kategorie ...</option>
-            {UNFALLORT_KATEGORIEN.map((k) => (
-              <option key={k.value} value={k.value}>{k.label}</option>
-            ))}
-          </select>
-        </div>
+        {/* AAR-176 P2-B: Kategorie-Dropdown entfernt — wird automatisch aus
+            schadentyp abgeleitet (saveSchadentyp schreibt unfallort_kategorie
+            mit). Der MA muss die Location-Kategorie nicht mehr doppelt pflegen. */}
+        <GooglePlaceAutocomplete
+          defaultValue={draft.unfallort ?? ''}
+          placeholder="Wo ist es passiert? (Adresse wählen)"
+          onSelect={(r) =>
+            setDraft((d) => ({
+              ...d,
+              unfallort: r.adresse,
+              unfallort_lat: r.lat,
+              unfallort_lng: r.lng,
+            }))
+          }
+          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+        />
         {draft.unfallort && (draft.unfallort_lat == null || draft.unfallort_lng == null) && (
           <p className="text-[10px] text-amber-700 flex items-start gap-1">
             <InfoIcon className="w-3 h-3 mt-0.5 shrink-0" />

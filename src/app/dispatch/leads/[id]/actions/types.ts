@@ -29,6 +29,8 @@ export type HardGateData = {
   polizei_aktenzeichen?: string | null
   polizeibericht_pflicht?: boolean
   fahrzeug_fahrbereit?: boolean
+  // AAR-176 P2-C: Freitext-Treffpunkt für den SV (Phase 2).
+  sv_treffpunkt?: string | null
 }
 
 export type SvSuggestion = {

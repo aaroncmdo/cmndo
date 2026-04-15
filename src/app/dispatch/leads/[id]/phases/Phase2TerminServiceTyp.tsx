@@ -1,9 +1,9 @@
 'use client'
 
 // AAR-139 / W5: Phase 2 — SV-Termin + Service-Typ (Pfad A/B).
-// Wrapper um den bestehenden SvDispatchPanel + extrahierte Service-Typ-Cards
-// aus LeadDetailActions. Zusätzlich ein Besichtigungsadressen-Input damit
-// findBestSV verlässliche Koordinaten hat (fällt sonst auf Kunden-Adresse zurück).
+// AAR-176 P2-C: Besichtigungsadresse wird jetzt direkt im onSelect gespeichert
+// (kein separater Speichern-Button mehr) + zusätzliches Freitextfeld
+// sv_treffpunkt für konkrete Treffpunkt-Hinweise (Parkhaus-Ebene etc.).
 
 import { useState, useTransition } from 'react'
 import SvDispatchPanel from '../SvDispatchPanel'
@@ -13,17 +13,19 @@ import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { MapPinIcon, CheckCircle2Icon, ScaleIcon } from 'lucide-react'
 
 export default function Phase2TerminServiceTyp() {
-  const { lead, aktiverTermin, qualification } = useDispatchPhase()
+  const { lead, aktiverTermin, qualification, setPhase } = useDispatchPhase()
   const l = lead as unknown as {
     unfallort?: string | null
     unfallort_lat?: number | null
     unfallort_lng?: number | null
+    sv_treffpunkt?: string | null
     service_typ?: 'komplett' | 'nur_gutachter' | null
   }
   const [pending, startTransition] = useTransition()
   const [unfallortDraft, setUnfallortDraft] = useState(l.unfallort ?? '')
   const [unfallortLat, setUnfallortLat] = useState<number | null>(l.unfallort_lat ?? null)
   const [unfallortLng, setUnfallortLng] = useState<number | null>(l.unfallort_lng ?? null)
+  const [svTreffpunkt, setSvTreffpunkt] = useState<string>(l.sv_treffpunkt ?? '')
   const [serviceTyp, setServiceTypLocal] = useState<'komplett' | 'nur_gutachter'>(
     l.service_typ ?? 'komplett',
   )
@@ -34,15 +36,27 @@ export default function Phase2TerminServiceTyp() {
 
   const hasKoordinaten = unfallortLat != null && unfallortLng != null
 
-  function saveBesichtigungsadresse() {
+  // AAR-176 P2-C: Auto-Save direkt im onSelect — kein Speichern-Button mehr
+  function autoSaveAdresse(adresse: string, lat: number, lng: number) {
+    setUnfallortDraft(adresse)
+    setUnfallortLat(lat)
+    setUnfallortLng(lng)
     startTransition(async () => {
       const r = await saveHardGate(lead.id, {
-        unfallort: unfallortDraft,
-        unfallort_lat: unfallortLat,
-        unfallort_lng: unfallortLng,
+        unfallort: adresse,
+        unfallort_lat: lat,
+        unfallort_lng: lng,
       })
-      setToast(r.success ? 'Besichtigungsadresse gespeichert' : r.error ?? 'Fehler')
-      setTimeout(() => setToast(''), 2500)
+      setToast(r.success ? 'Adresse gespeichert' : r.error ?? 'Fehler')
+      setTimeout(() => setToast(''), 2000)
+    })
+  }
+
+  function saveTreffpunkt() {
+    startTransition(async () => {
+      const r = await saveHardGate(lead.id, { sv_treffpunkt: svTreffpunkt.trim() || null })
+      setToast(r.success ? 'Treffpunkt gespeichert' : r.error ?? 'Fehler')
+      setTimeout(() => setToast(''), 2000)
     })
   }
 
@@ -52,6 +66,11 @@ export default function Phase2TerminServiceTyp() {
       try {
         await setServiceTyp(lead.id, typ)
         setToast('Service-Typ gespeichert')
+        // AAR-176 P3-A: Auto-Advance zu Phase 3 sobald alles in Phase 2 steht
+        // (Adresse mit Koordinaten + aktiver Termin + Service-Typ gewählt).
+        if (hasKoordinaten && aktiverTermin) {
+          setPhase(3)
+        }
       } catch (err) {
         setToast(err instanceof Error ? err.message : 'Fehler')
       }
@@ -79,20 +98,23 @@ export default function Phase2TerminServiceTyp() {
         <GooglePlaceAutocomplete
           defaultValue={unfallortDraft}
           placeholder="Adresse wählen ..."
-          onSelect={(r) => {
-            setUnfallortDraft(r.adresse)
-            setUnfallortLat(r.lat)
-            setUnfallortLng(r.lng)
-          }}
+          onSelect={(r) => autoSaveAdresse(r.adresse, r.lat, r.lng)}
           className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
         />
-        <button
-          disabled={pending || !hasKoordinaten}
-          onClick={saveBesichtigungsadresse}
-          className="w-full px-3 py-1.5 rounded-lg bg-[#4573A2] text-white text-xs font-medium hover:bg-[#3a6290] disabled:opacity-50"
-        >
-          {pending ? 'Speichern...' : 'Besichtigungsadresse speichern'}
-        </button>
+        {/* AAR-176 P2-C: sv_treffpunkt Freitextfeld — wird beim Blur gespeichert */}
+        <div className="space-y-1">
+          <label className="text-[10px] uppercase tracking-wider text-gray-500 block">
+            Zusätzlicher Treffpunkt-Hinweis (optional)
+          </label>
+          <input
+            type="text"
+            value={svTreffpunkt}
+            onChange={(e) => setSvTreffpunkt(e.target.value)}
+            onBlur={saveTreffpunkt}
+            placeholder='z. B. „Parkhaus Ebene 3, Stellplatz 42" oder „Einfahrt links neben Apotheke"'
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+          />
+        </div>
       </div>
 
       {/* SV + Termin */}
