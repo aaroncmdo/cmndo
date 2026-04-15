@@ -49,6 +49,11 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // dieses Refactoring vermeiden soll. unfallort_kategorie existiert sowohl
   // auf leads als auch auf faelle.
   'unfallort_kategorie',
+  // Hinweis: lead.unfallort wird via RENAMED-Mapping auf faelle.schadens_ort
+  // geschrieben (BUG-73-Pattern). faelle.unfallort wird bewusst NICHT befüllt
+  // — Original-signSAandCreateFall hat das auch nicht getan, vermutlich um
+  // schadens_ort (für SV-Dispatch) und unfallort (für Hergangs-Doku) getrennt
+  // zu halten. Wenn das geändert werden soll: eigenes Issue.
   // BUG-73 Schadens-Detaildaten
   'schadensursache',
   'firma_name',
@@ -90,7 +95,7 @@ export const LEAD_TO_FALL_DEFAULT_FIELDS: Record<string, unknown> = {
 }
 
 // ─── 3. RENAMED — Fall-Spalte ≠ Lead-Spalte ────────────────────────────────
-// Format: { fallSpalte: leadSpalte }
+// Format: { fallSpalte: leadSpalte } — übernimmt mit `?? null`
 export const LEAD_TO_FALL_RENAMED_FIELDS: Record<string, string> = {
   // BUG-58: Spalten die in faelle anders heißen
   versicherung_name: 'eigene_versicherung',
@@ -104,9 +109,18 @@ export const LEAD_TO_FALL_RENAMED_FIELDS: Record<string, string> = {
   schadens_plz: 'fahrzeug_standort_plz',
   schadens_ort: 'unfallort',
   fin_vin: 'fin',
-  // semantisch fragwürdig (siehe AAR-127-Audit) aber bestehende Befüllung beibehalten:
-  // "vorhanden" wird mit "pflicht" befüllt — eigenes Cleanup-Issue
-  polizei_bericht_vorhanden: 'polizeibericht_pflicht',
+}
+
+// ─── 3b. RENAMED + DEFAULT — Fall-Spalte ≠ Lead-Spalte mit NOT-NULL-Fallback
+// Format: { fallSpalte: { leadField, default } }
+export const LEAD_TO_FALL_RENAMED_DEFAULT_FIELDS: Record<
+  string,
+  { leadField: string; default: unknown }
+> = {
+  // semantisch fragwürdig (siehe AAR-127-Audit) — "vorhanden" wird mit "pflicht"
+  // befüllt. Bestehende Befüllung beibehalten inkl. Default false (matcht
+  // DB-Default + Original-signSAandCreateFall-Verhalten). Eigenes Cleanup-Issue.
+  polizei_bericht_vorhanden: { leadField: 'polizeibericht_pflicht', default: false },
 }
 
 // ─── 4. TRANSFORM — Wert wird konvertiert ──────────────────────────────────
@@ -179,6 +193,11 @@ export function buildFallInsertFromLead(
   // 3. RENAMED — fallField ← lead[leadField] ?? null
   for (const [fallField, leadField] of Object.entries(LEAD_TO_FALL_RENAMED_FIELDS)) {
     insert[fallField] = lead[leadField] ?? null
+  }
+
+  // 3b. RENAMED + DEFAULT — fallField ← lead[leadField] ?? defaultValue
+  for (const [fallField, cfg] of Object.entries(LEAD_TO_FALL_RENAMED_DEFAULT_FIELDS)) {
+    insert[fallField] = lead[cfg.leadField] ?? cfg.default
   }
 
   // 4. TRANSFORM

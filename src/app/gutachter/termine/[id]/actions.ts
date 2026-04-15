@@ -24,7 +24,10 @@ export async function uploadPolizeiberichtAsSv(
     return { success: false, error: 'Keine Datei ausgewählt' }
   }
 
-  // Auth: SV muss für diesen Fall zuständig sein
+  // Auth: SV muss für diesen Fall zuständig sein.
+  // Robusterer Check: entweder via faelle.sv_id ODER via gutachter_termine.sv_id
+  // (für Pre-FlowLink-Termine wo der Termin SV-zugewiesen ist aber der Fall
+  // noch keinen sv_id hat — siehe AAR-115 Reservierungs-Flow)
   const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
   if (!sv) return { success: false, error: 'Kein Sachverständigen-Profil' }
 
@@ -35,8 +38,21 @@ export async function uploadPolizeiberichtAsSv(
     .eq('id', fallId)
     .single()
 
-  if (!fall || fall.sv_id !== sv.id) {
-    return { success: false, error: 'Fall nicht gefunden oder nicht zugewiesen' }
+  if (!fall) return { success: false, error: 'Fall nicht gefunden' }
+
+  let svIstZustaendig = fall.sv_id === sv.id
+  if (!svIstZustaendig) {
+    const { data: terminMatch } = await adminDb
+      .from('gutachter_termine')
+      .select('id')
+      .eq('fall_id', fallId)
+      .eq('sv_id', sv.id)
+      .limit(1)
+      .maybeSingle()
+    svIstZustaendig = !!terminMatch
+  }
+  if (!svIstZustaendig) {
+    return { success: false, error: 'SV nicht für diesen Fall zugewiesen' }
   }
 
   // Storage-Upload
