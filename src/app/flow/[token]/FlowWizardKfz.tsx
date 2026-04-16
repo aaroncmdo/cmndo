@@ -468,7 +468,10 @@ export default function FlowWizardKfz({
                               continue
                             }
                             const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
-                            const path = `schadensfotos-lead/${lead.id}/${Date.now()}-${crypto.randomUUID()}.${ext}`
+                            // AAR-305/Audit-M1: Pfad-Prefix `flow/` ist Pflicht
+                            // damit Storage-Policy „Flow anon upload" greift —
+                            // der Kunde ist in diesem Step noch nicht auth'd.
+                            const path = `flow/schadensfotos-lead/${lead.id}/${Date.now()}-${crypto.randomUUID()}.${ext}`
                             const { error: upErr } = await supabase.storage
                               .from('dokumente')
                               .upload(path, file, { contentType: file.type })

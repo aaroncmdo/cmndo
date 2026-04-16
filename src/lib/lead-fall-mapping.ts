@@ -93,10 +93,11 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'gegner_versicherung_anfrage_datum',
   // AAR-316: Kundensprache — wird auch an flow_links.sprache weitergereicht
   'sprache',
-  // AAR-317: Unfallskizze aus Phase 5 — SVG + Freigabe-Metadaten in den Fall übertragen
+  // AAR-317: Unfallskizze aus Phase 5 — SVG + Metadaten in den Fall übertragen.
+  // bestaetigt lebt separat im DEFAULT_FIELDS-Block damit DB-Default `false`
+  // nicht von ?? null überschrieben wird.
   'unfallskizze_svg',
   'unfallskizze_url',
-  'unfallskizze_bestaetigt',
   'unfallskizze_ablehnung_grund',
   'unfallskizze_generiert_am',
 ] as const
@@ -118,6 +119,8 @@ export const LEAD_TO_FALL_DEFAULT_FIELDS: Record<string, unknown> = {
   vorsteuerabzugsberechtigt: false,
   // KFZ-202
   hat_vorschaeden: false,
+  // AAR-317 Audit-M2: Default false statt null — DB-Default matcht „nicht bestätigt"
+  unfallskizze_bestaetigt: false,
 }
 
 // ─── 3. RENAMED — Fall-Spalte ≠ Lead-Spalte ────────────────────────────────

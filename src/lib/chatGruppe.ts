@@ -13,33 +13,6 @@ import { createAdminClient } from '@/lib/supabase/admin'
 // - System-Nachrichten in nachrichten mit kanal='gruppenchat', is_system=true
 
 /**
- * AAR-310 (legacy): Stub für Backwards-Compat. Gibt fallId zurück (es gibt
- * genau eine Gruppe pro Fall, also ist die fallId die Gruppen-ID).
- */
-export async function ensureChatGruppe(fallId: string): Promise<string> {
-  return fallId
-}
-
-/**
- * AAR-310 (legacy): No-op. Teilnehmer werden aus faelle abgeleitet, nicht
- * separat gespeichert.
- */
-export async function addChatTeilnehmer(
-  _gruppeId: string,
-  _userId: string,
-  _rolle: 'kunde' | 'kundenbetreuer' | 'gutachter' | 'admin',
-): Promise<void> {
-  // No-op: chat_teilnehmer-Tabelle existiert nicht mehr.
-}
-
-/**
- * AAR-310 (legacy): No-op. Teilnehmer werden aus faelle abgeleitet.
- */
-export async function syncChatTeilnehmer(fallId: string): Promise<string> {
-  return fallId
-}
-
-/**
  * AAR-310: Postet eine System-Nachricht im Gruppenchat eines Falls.
  * Ersetzt die alte Implementierung die in chat_gruppen/nachrichten.gruppe_id
  * insertete (beides existiert nicht mehr).

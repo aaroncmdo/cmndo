@@ -222,7 +222,7 @@ export default function FallDetailClient(props: Props) {
             fallId={fall.id as string}
             hatTermin={!!(fall.sv_termin as string | null)}
           />
-          {/* AAR-315: SV-Post-Termin-Block — self-gating ab gutachten-erstellen */}
+          {/* AAR-315: SV-Post-Termin-Block — self-gating ab Subphase 'vor-ort' */}
           <AbrechnungsartCard
             fall={{
               id: fall.id as string,
