@@ -20,7 +20,8 @@ export default function Phase3Schadentyp() {
   }
   // AAR-268: Lokal nachhalten — sobald Save durch ist, zeigen wir den Weiter-
   // Button auch wenn die Qualification-Engine noch nicht refresht ist.
-  const [showWeiter, setShowWeiter] = useState<boolean>(qualification.q4_schadentyp ?? false)
+  // q4_schadentyp ist immer boolean (kein null/undefined möglich).
+  const [showWeiter, setShowWeiter] = useState<boolean>(qualification.q4_schadentyp)
 
   return (
     <div className="space-y-3">

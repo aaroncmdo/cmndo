@@ -166,6 +166,60 @@ export async function POST(req: NextRequest) {
         route = 'polizeibericht'
       }
 
+      // AAR-263 Audit-Fix: Mehrfachbild-Edge-Case. Wenn beide Status bereits
+      // 'hochgeladen' sind und der Kunde noch ein Foto schickt (Vorder-/
+      // Rückseite, weiteres Detail), würde route=null den ganzen Webhook
+      // schweigend beenden + die Datei ginge verloren. Stattdessen: in
+      // Storage als generischen Lead-Anhang sichern + Notification an den
+      // Dispatcher (er entscheidet was es ist).
+      if (!route && (leadRow?.zb1_status === 'hochgeladen' || leadRow?.polizeibericht_status === 'hochgeladen')) {
+        try {
+          const twilioSid = process.env.TWILIO_ACCOUNT_SID
+          const twilioToken = process.env.TWILIO_AUTH_TOKEN
+          const basicAuth = twilioSid && twilioToken
+            ? 'Basic ' + Buffer.from(`${twilioSid}:${twilioToken}`).toString('base64')
+            : null
+          const savedPaths: string[] = []
+          for (let i = 0; i < mediaUrls.length; i++) {
+            const url = mediaUrls[i]
+            const contentType = body[`MediaContentType${i}`] ?? 'image/jpeg'
+            const ext =
+              contentType === 'image/png' ? 'png'
+              : contentType === 'image/webp' ? 'webp'
+              : contentType === 'application/pdf' ? 'pdf'
+              : 'jpg'
+            const res = await fetch(url, basicAuth ? { headers: { Authorization: basicAuth } } : undefined)
+            if (!res.ok) continue
+            const buf = Buffer.from(await res.arrayBuffer())
+            const ts = Date.now()
+            const path = `leads/${matchedLeadId}/zusatz_${ts}_${i}.${ext}`
+            const { error: upErr } = await db.storage
+              .from('dokumente')
+              .upload(path, buf, { contentType, upsert: false })
+            if (!upErr) savedPaths.push(path)
+          }
+          if (savedPaths.length > 0 && leadRow?.zugewiesen_an) {
+            const { createNotification } = await import('@/lib/notifications')
+            await createNotification(
+              leadRow.zugewiesen_an,
+              'lead-zusatz-foto',
+              `Zusatz-Foto vom Lead: ${leadRow.vorname ?? ''} ${leadRow.nachname ?? ''}`.trim(),
+              `${savedPaths.length} weitere(s) Foto(s) per WhatsApp eingegangen — bitte prüfen und manuell zuordnen.`,
+              `/dispatch/leads/${matchedLeadId}`,
+            ).catch(() => {})
+          }
+          if (inbound?.id) {
+            await db.from('whatsapp_inbound_messages').update({
+              processed: true,
+              processed_at: new Date().toISOString(),
+            }).eq('id', inbound.id)
+          }
+          return new NextResponse(EMPTY_TWIML, { status: 200, headers: { 'Content-Type': 'text/xml' } })
+        } catch (err) {
+          console.error('[AAR-263] Mehrfachbild-Fallback Fehler:', err)
+        }
+      }
+
       // AAR-263: Polizeibericht-Pfad — Bild speichern, kein OCR (erstmal),
       // Status setzen, Timeline + Mitteilung. Wenn der Kunde mehrere Bilder
       // schickt, setzt das ERSTE auf 'hochgeladen', weitere kommen als
@@ -424,7 +478,10 @@ export async function POST(req: NextRequest) {
           datei_name: `WhatsApp ${new Date(ts).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}.${ext}`,
           datei_groesse: buf.byteLength,
           hochgeladen_von_rolle: 'kunde',
-          sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
+          // AAR-263 Audit: kanzlei fehlte hier — Konsistenz mit Step 6e in
+          // signSAandCreateFall (alle WhatsApp-Uploads müssen für Kanzlei
+          // sichtbar sein für die Regulierung).
+          sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde'],
           beschreibung: 'Via WhatsApp eingegangen',
         })
         gespeichert.push(path)

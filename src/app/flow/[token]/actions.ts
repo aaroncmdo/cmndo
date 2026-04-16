@@ -791,9 +791,11 @@ async function createDefaultPflichtdokumente(
   // - schadensfotos: SV macht Fotos vor Ort (kein Kunden-Upload nötig)
   const defaults: { dokument_typ: string; pflicht: boolean }[] = []
 
-  // 1. Fahrzeugschein (ZB1) — nur wenn nicht schon durch Dispatch Phase 4 erhoben
+  // 1. Fahrzeugschein (ZB1) — Pflicht solange weder 'bestätigt' noch 'hochgeladen'.
+  // AAR-263 Audit: Drift-Fix — admin/dispatch nutzt die strengere Variante,
+  // flow akzeptierte vorher 'gesendet'/'geoeffnet' fälschlich als „erfasst".
   const zb1Status = lead?.zb1_status as string | null ?? null
-  if (!zb1Status || zb1Status === 'angefordert') {
+  if (zb1Status !== 'bestaetigt' && zb1Status !== 'hochgeladen') {
     defaults.push({ dokument_typ: 'fahrzeugschein', pflicht: true })
   }
 

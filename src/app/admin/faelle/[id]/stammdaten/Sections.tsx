@@ -11,6 +11,7 @@
 // die zugehörige Section-Id in der Liste steht.
 
 import type { ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import {
   UserIcon,
   CarIcon,
@@ -20,9 +21,13 @@ import {
   MapPinIcon,
   CalculatorIcon,
   FileTextIcon,
+  PhoneIcon,
+  MailIcon,
+  HashIcon,
 } from 'lucide-react'
 import { useFall } from '../FallContext'
 import InlineEditField from './InlineEditField'
+import { getVersicherungById, type VersicherungSuggestion } from '@/app/dispatch/leads/[id]/actions/versicherungen'
 
 function Card({
   icon,
@@ -126,10 +131,80 @@ export function UnfallSection() {
   )
 }
 
+// AAR-265 W5: Stammdaten-Anzeige der Gegner-Versicherung (Hotline/Email/BaFin)
+// aus der versicherungen-Tabelle wenn faelle.gegner_versicherung_id gesetzt ist.
+// Wenn nur Freitext (kein FK), zeigen wir einen Hinweis dass keine Stammdaten
+// hinterlegt sind — Kanzlei muss dann manuell recherchieren.
+function VersicherungStammdaten({ versicherungId }: { versicherungId: string | null }) {
+  const [data, setData] = useState<VersicherungSuggestion | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!versicherungId) {
+      setData(null)
+      return
+    }
+    let cancelled = false
+    setLoading(true)
+    getVersicherungById(versicherungId)
+      .then((r) => { if (!cancelled) setData(r) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [versicherungId])
+
+  if (!versicherungId) {
+    return (
+      <div className="sm:col-span-2 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 flex items-start gap-1.5">
+        <AlertTriangleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+        Keine Stammdaten hinterlegt — Schaden-Hotline und BaFin-Nummer müssen
+        recherchiert werden (Versicherung war Freitext-Eintrag, kein
+        Stammdaten-Match aus dem Autocomplete).
+      </div>
+    )
+  }
+  if (loading) {
+    return <p className="sm:col-span-2 text-[11px] text-gray-400">Lade Stammdaten ...</p>
+  }
+  if (!data) {
+    return (
+      <p className="sm:col-span-2 text-[11px] text-red-600">
+        Stammdaten konnten nicht geladen werden (FK-ID veraltet).
+      </p>
+    )
+  }
+  return (
+    <div className="sm:col-span-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 space-y-1">
+      <p className="text-[10px] uppercase tracking-wider text-blue-900 font-semibold">
+        Stammdaten (aus versicherungen-Tabelle)
+      </p>
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-blue-900">
+        {data.schaden_telefon && (
+          <span className="flex items-center gap-1">
+            <PhoneIcon className="w-3 h-3" /> {data.schaden_telefon}
+          </span>
+        )}
+        {data.schaden_email && (
+          <a href={`mailto:${data.schaden_email}`} className="flex items-center gap-1 hover:underline">
+            <MailIcon className="w-3 h-3" /> {data.schaden_email}
+          </a>
+        )}
+        {data.bafin_nummer && (
+          <span className="flex items-center gap-1">
+            <HashIcon className="w-3 h-3" /> BaFin: {data.bafin_nummer}
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export function GegnerSection() {
   const { fall } = useFall()
   // DB-Schema: gegner_name (1 Spalte, kein Vor-/Nachname-Split),
   // schadennummer_versicherung (statt gegner_schadennummer)
+  // AAR-265: gegner_versicherung_id FK auf versicherungen — wenn gesetzt,
+  // zeigen wir Hotline + Email + BaFin als zusätzliche Card-Zeile.
+  const versicherungId = (fall as Record<string, unknown>).gegner_versicherung_id as string | null ?? null
   return (
     <Card icon={<ShieldIcon className="w-4 h-4 text-gray-400" />} title="Gegner & Versicherung">
       <div className="sm:col-span-2">
@@ -140,6 +215,7 @@ export function GegnerSection() {
       <InlineEditField label="Gegner Versicherung" fieldName="gegner_versicherung" value={f(fall, 'gegner_versicherung')} />
       <InlineEditField label="Schadennr. (Versicherung)" fieldName="schadennummer_versicherung" value={f(fall, 'schadennummer_versicherung')} />
       <InlineEditField label="VS-Schadennummer (intern)" fieldName="versicherung_schaden_nr" value={f(fall, 'versicherung_schaden_nr')} />
+      <VersicherungStammdaten versicherungId={versicherungId} />
     </Card>
   )
 }
