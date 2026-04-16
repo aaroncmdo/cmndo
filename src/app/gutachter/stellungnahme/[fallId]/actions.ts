@@ -48,18 +48,23 @@ export async function uploadTechnischeStellungnahme(
 
   if (uploadErr) return { success: false, error: `Upload fehlgeschlagen: ${uploadErr.message}` }
 
-  const { data: urlData } = db.storage.from('dokumente').getPublicUrl(storagePath)
-
-  // Dokument in DB speichern
+  // AAR-290 W0: fall_dokumente-Schema verifiziert (information_schema):
+  // dokument_typ statt typ, ist_pflicht NOT NULL, storage_path statt datei_url
+  // (Bucket-Path nicht Public-URL!), original_filename statt datei_name,
+  // groesse_bytes statt datei_groesse, hochgeladen_von_user_id statt hochgeladen_von,
+  // uploaded_by_sv statt hochgeladen_von_rolle.
   await db.from('fall_dokumente').insert({
     fall_id: fallId,
-    typ: 'technische_stellungnahme',
-    kategorie: 'technische_stellungnahme',
-    datei_url: urlData.publicUrl,
-    datei_name: file.name,
-    datei_groesse: file.size,
-    hochgeladen_von: user.id,
-    hochgeladen_von_rolle: 'gutachter',
+    dokument_typ: 'technische_stellungnahme',
+    ist_pflicht: false,
+    ab_phase: '5',
+    storage_path: storagePath,
+    original_filename: file.name,
+    mime_type: file.type || 'application/pdf',
+    groesse_bytes: file.size,
+    hochgeladen_von_user_id: user.id,
+    uploaded_by_sv: true,
+    uploaded_by_kunde: false,
   })
 
   // Status aktualisieren
