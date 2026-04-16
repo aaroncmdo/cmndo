@@ -695,8 +695,12 @@ export default function Phase4Stammdaten() {
             fieldName="fin"
             leadId={leadId}
             placeholder="WVWZZZ3CZWE123456"
-            transform={(raw) => raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 17)}
-            hint="17 Zeichen, normalerweise aus ZB1/Fahrzeugschein"
+            // AAR-347: FIN-Regex nach ISO 3779 — I/O/Q sind nicht erlaubt
+            // (werden mit 1/0/9 verwechselt). Muss identisch sein zu
+            // isValidFIN() in zb1-fields.ts, sonst lehnt Cardentity-API
+            // den Eintrag später ab.
+            transform={(raw) => raw.toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g, '').slice(0, 17)}
+            hint="17 Zeichen (keine I/O/Q), normalerweise aus ZB1/Fahrzeugschein"
           />
 
           <InlineField
@@ -961,11 +965,10 @@ export default function Phase4Stammdaten() {
             />
           </div>
 
-          {(l.hsn || l.tsn) && (
-            <p className="text-[10px] text-gray-500 pt-1 border-t border-blue-200/50">
-              HSN/TSN: {l.hsn ?? '—'} / {l.tsn ?? '—'}
-            </p>
-          )}
+          {/* AAR-347 Folge-Cleanup: Read-only-Anzeige "HSN/TSN: X / Y"
+              entfernt — HSN und TSN haben jetzt eigene Inline-Edit-Felder
+              im Fahrzeugdaten-Block (oben), die Read-only-Zeile im Halter-
+              Block war damit redundant. */}
 
           {l.nachname && l.halter_nachname && l.ist_fahrzeughalter !== true &&
             l.halter_nachname.trim().toLowerCase() !== l.nachname.trim().toLowerCase() && (
