@@ -359,6 +359,18 @@ export default function Phase4Stammdaten() {
   // AAR-194: CarQuery-Dropdowns für Marke + Modell gefiltert nach Baujahr.
   // KFZ_MARKEN-Fallback bleibt als `datalist` falls CarQuery langsam/offline.
   const marke = l.fahrzeug_hersteller ?? ''
+  // AAR-274: Controlled Input statt defaultValue (uncontrolled) — verhindert
+  // Stale-State-Bug wenn React den Input nach Server-Update neu mountet
+  // bevor onBlur durchgekommen ist. useEffect-Sync wie AAR-272.
+  const [markeDraft, setMarkeDraft] = useState(marke)
+  const [modellDraft, setModellDraft] = useState(l.fahrzeug_modell ?? '')
+  useEffect(() => {
+    setMarkeDraft((prev) => (prev === '' || prev === marke ? marke : prev))
+  }, [marke])
+  useEffect(() => {
+    const server = l.fahrzeug_modell ?? ''
+    setModellDraft((prev) => (prev === '' || prev === server ? server : prev))
+  }, [l.fahrzeug_modell])
   const isMarkeInList = marke !== '' && (KFZ_MARKEN as readonly string[]).includes(marke)
   const [markeMode, setMarkeMode] = useState<'dropdown' | 'freitext'>(
     marke === '' ? 'dropdown' : isMarkeInList ? 'dropdown' : 'freitext',
@@ -446,7 +458,8 @@ export default function Phase4Stammdaten() {
                 <input
                   type="text"
                   list="carquery-marken"
-                  defaultValue={marke}
+                  value={markeDraft}
+                  onChange={(e) => setMarkeDraft(e.target.value)}
                   onBlur={(e) => {
                     const v = e.target.value.trim()
                     if (v === '__freitext__' || v === 'Sonstiges') {
@@ -485,7 +498,8 @@ export default function Phase4Stammdaten() {
             <input
               type="text"
               list="carquery-modelle"
-              defaultValue={l.fahrzeug_modell ?? ''}
+              value={modellDraft}
+              onChange={(e) => setModellDraft(e.target.value)}
               onBlur={(e) => {
                 const v = e.target.value.trim()
                 if (v !== (l.fahrzeug_modell ?? '')) {
