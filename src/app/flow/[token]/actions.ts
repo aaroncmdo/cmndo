@@ -647,6 +647,9 @@ export async function signSAandCreateFall(
   try {
     const { sendFallCommunication } = await import('@/lib/communications/send-fall')
     await sendFallCommunication(fall.id, 'fall_eroeffnet')
+    // AAR-312: Info-Nachricht direkt im Anschluss — Erklärt Zwei-Stufen-Zahlung
+    // und dass der Gutachter zum Kunden kommt. Reduziert Rückfragen ans KB.
+    await sendFallCommunication(fall.id, 'info_nach_sa')
   } catch { /* */ }
 
   // 10. WhatsApp an Gutachter: Termin bestätigt + Ablehnen-Link (KFZ-118)

@@ -9,6 +9,11 @@ const TEMPLATES: Record<TemplateName, (vars: Record<string, string>) => string> 
   fall_eroeffnet: (v) =>
     `Hallo ${v['1'] ?? 'Kunde'}, Ihr Fall ${v['2'] ?? ''} wurde bei Claimondo eroeffnet. Wir kuemmern uns um alles Weitere. Bei Fragen antworten Sie einfach auf diese Nachricht.`,
 
+  // AAR-312: Direkt nach SA — erklärt Zwei-Stufen-Zahlung + Sachverständiger kommt.
+  // Variablen: 1=Vorname, 2=Portal-Link
+  info_nach_sa: (v) =>
+    `Noch ein kurzer Hinweis, ${v['1'] ?? ''}: Sie zahlen für die Schadenabwicklung NICHTS. Die gegnerische Versicherung übernimmt alle Kosten. Die Auszahlung erfolgt häufig in zwei Schritten (erste Teilzahlung schnell, Rest nach Abschluss). Der Gutachter kommt direkt zu Ihnen — Sie müssen nirgendwo hinfahren. Alle Updates in Ihrem Portal: ${v['2'] ?? ''}`,
+
   flowlink_versand: (v) =>
     // AAR-116: Template erwartet 6 Variablen (Vorname, SV-Vorname, SV-Nachname, Datum, Uhrzeit, FlowLink-URL)
     `Hallo ${v['1'] ?? ''}, Ihr Gutachtertermin mit ${v['2'] ?? ''} ${v['3'] ?? ''} am ${v['4'] ?? ''} um ${v['5'] ?? ''} Uhr steht. Bitte füllen Sie jetzt das Formular aus um Ihren Schadenfall zu vervollständigen: ${v['6'] ?? ''}`,

@@ -9,6 +9,8 @@
 export type TemplateName =
   | 'flowlink_versand'
   | 'fall_eroeffnet'
+  // AAR-312: Info-Nachricht direkt nach SA-Unterschrift — Erklärung Zwei-Stufen-Zahlung
+  | 'info_nach_sa'
   | 'sv_beauftragt'
   | 'termin_bestaetigt'
   | 'reminder_24h'
@@ -57,6 +59,9 @@ type TemplateConfig = {
 export const TEMPLATE_CONFIGS: Record<TemplateName, TemplateConfig> = {
   flowlink_versand:       { envKey: 'TWILIO_TPL_FLOWLINK_VERSAND', variableCount: 6, beschreibung: 'T1: FlowLink-Versand (Vorname, SV-Vorname, SV-Nachname, Datum, Uhrzeit, FlowLink-URL)' },
   fall_eroeffnet:         { envKey: 'TWILIO_TPL_FALL_EROEFFNET', variableCount: 2, beschreibung: 'T2: Fall eroeffnet (Vorname, Portal-Link)' },
+  // AAR-312: Direkt nach SA-Unterschrift — Erklärung "Sie zahlen nichts, Zahlung
+  // läuft oft in 2 Schritten, Gutachter kommt zu Ihnen". Variablen: Vorname, Portal-Link
+  info_nach_sa:           { envKey: 'TWILIO_TPL_INFO_NACH_SA', variableCount: 2, beschreibung: 'T2b: Info nach SA — Zwei-Stufen-Zahlung-Erklaerung (Vorname, Portal-Link)' },
   sv_beauftragt:          { envKey: 'TWILIO_TPL_SV_BEAUFTRAGT', variableCount: 3, beschreibung: 'T3: SV beauftragt (Vorname, SV-Vorname, Portal-Link)' },
   termin_bestaetigt:      { envKey: 'TWILIO_TPL_TERMIN_BESTAETIGT', variableCount: 6, beschreibung: 'T4: Termin bestaetigt (Vorname, Datum, Uhrzeit, SV-Vorname, Adresse, Portal-Link)' },
   reminder_24h:           { envKey: 'TWILIO_TPL_REMINDER_24H', variableCount: 4, beschreibung: 'T5: 24h Erinnerung (Vorname, SV-Vorname, Uhrzeit, Portal-Link)' },

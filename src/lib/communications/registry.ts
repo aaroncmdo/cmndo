@@ -27,6 +27,19 @@ export const COMMUNICATION_REGISTRY: Record<string, TriggerConfig> = {
     description: 'T2: Fall wurde eroeffnet — Willkommensnachricht',
   },
 
+  // AAR-312: Direkt nach SA-Unterschrift — erklaert dem Kunden dass keine
+  // Kosten anfallen, dass die Versicherung oft in 2 Stufen zahlt und dass der
+  // Gutachter zu ihm kommt. Reduziert Rueckfragen und Verunsicherung.
+  info_nach_sa: {
+    trigger_name: 'info_nach_sa',
+    channel: 'whatsapp',
+    recipient: 'kunde',
+    t_number: 2,
+    whatsapp_template_name: 'info_nach_sa',
+    has_attachment: false,
+    description: 'T2b: Info nach SA — Zwei-Stufen-Zahlung Erklaerung',
+  },
+
   termin_bestaetigt: {
     trigger_name: 'termin_bestaetigt',
     channel: 'whatsapp',
