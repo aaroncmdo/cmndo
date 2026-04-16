@@ -150,7 +150,12 @@ export default function FlowWizardKfz({
     setCreatingAccount(true)
     setError(null)
     try {
+      // AAR-308/309: createKundeAccount wirft NIE — sauberes Result-Object.
       const result = await createKundeAccount(fallId, accountEmail, editVorname || lead.vorname, editNachname || lead.nachname, editTelefon || lead.telefon || null)
+      if (!result.success) {
+        setError(result.error)
+        return
+      }
       setAccountPassword(result.password)
       setAccountCreated(true)
     } catch (err) {

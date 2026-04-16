@@ -151,10 +151,33 @@ export async function notifyNeuerFall(fallId: string) {
   }
 }
 
+// AAR-308/309: Anzeigenamen für Account-Hijack-Fehlermeldung
+const ROLLE_LABEL: Record<string, string> = {
+  admin: 'Administrator',
+  leadbearbeiter: 'Lead-Bearbeiter',
+  kundenbetreuer: 'Kundenbetreuer',
+  sachverstaendiger: 'Sachverständigen',
+  kanzlei: 'Kanzlei',
+  dispatch: 'Dispatch',
+}
+
+export type CreateKundeAccountResult =
+  | { success: true; password: string }
+  | { success: false; error: string }
+
 /**
- * Creates a Supabase Auth user for the customer after flow completion.
- * Sets kunde_id on the case and creates default pflichtdokumente.
- * Returns the generated password so the flow can display it.
+ * AAR-308/309: Erstellt einen Supabase-Auth-Account für den Kunden nach
+ * Flow-Abschluss, setzt kunde_id auf den Fall und legt Pflichtdokumente an.
+ *
+ * Bricht NIE mit `throw` ab — Server-Actions die throwen lösen den generischen
+ * "Server Components render"-Fehler aus. Stattdessen sauberes Result-Object,
+ * der FlowWizard rendert die Fehlermeldung.
+ *
+ * Pflichten:
+ * - Idempotent: Refresh nach Browser-Reload kollidiert nicht mit "User exists".
+ * - Profile-Lookup VOR createUser (statt brüchigem Error-Message-Matching).
+ * - Account-Hijack-Schutz: existierende Nicht-Kunden-Accounts dürfen NICHT
+ *   still zu rolle='kunde' herabgesetzt werden.
  */
 export async function createKundeAccount(
   fallId: string,
@@ -162,75 +185,97 @@ export async function createKundeAccount(
   vorname: string,
   nachname: string,
   telefon: string | null
-): Promise<{ password: string }> {
-  // BUG-70: Validierung vor signUp
+): Promise<CreateKundeAccountResult> {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    throw new Error('Bitte geben Sie eine gültige E-Mail-Adresse ein.')
+    return { success: false, error: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.' }
   }
-  if (!fallId) throw new Error('Fall-ID fehlt.')
+  if (!fallId) return { success: false, error: 'Fall-ID fehlt.' }
 
-  const admin = createAdminClient()
+  try {
+    const admin = createAdminClient()
+    const password = generatePassword()
+    const normalizedEmail = email.trim().toLowerCase()
 
-  // Generate a random password
-  const password = generatePassword()
-
-  // Create auth user
-  const { data: authUser, error: authError } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-    user_metadata: { vorname, nachname },
-  })
-
-  if (authError) {
-    // If user already exists, that's ok - just get the existing user
-    if (authError.message?.includes('already been registered') || authError.message?.includes('already exists')) {
-      const { data: existingUsers } = await admin.auth.admin.listUsers()
-      const existing = existingUsers?.users?.find(u => u.email === email)
-      if (existing) {
-        // Update password for the existing user so the flow can show it
-        await admin.auth.admin.updateUserById(existing.id, { password })
-
-        // Ensure profile exists with rolle=kunde
-        await admin.from('profiles').upsert({
-          id: existing.id,
-          rolle: 'kunde',
-          vorname,
-          nachname,
-          email,
-          telefon: telefon || null,
-          force_password_change: true,
-          auth_provider: 'email',
-        }, { onConflict: 'id' })
-
-        // Set kunde_id on the case
-        await admin.from('faelle').update({ kunde_id: existing.id }).eq('id', fallId)
-
-        // AAR-125: Lead laden für conditional Polizeibericht
-        const { data: leadForDocs } = await admin
-          .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht, polizeibericht_status, personenschaden_flag, hat_vorschaeden, zb1_status, service_typ, wa_gesendet, mietwagen_flag, nutzungsausfall)').eq('id', fallId).single()
-        const lRaw = (leadForDocs as { leads: unknown } | null)?.leads
-        const leadDocs = (Array.isArray(lRaw) ? lRaw[0] : lRaw) as Record<string, unknown> | null
-        await createDefaultPflichtdokumente(admin, fallId, leadDocs)
-
-        // KFZ-129: Kunde als Chat-Teilnehmer hinzufuegen
-        try {
-          const { syncChatTeilnehmer } = await import('@/lib/chatGruppe')
-          await syncChatTeilnehmer(fallId)
-        } catch (e) { console.error('[KFZ-129] syncChatTeilnehmer:', e) }
-
-        // AAR-127: Welcome-Mail mit Magic-Link + Zugangsdaten
-        await sendWelcomeWithLogin(admin, fallId, email, password)
-
-        return { password }
+    // 1. Idempotenz: Falls der Fall schon mit einem Kunden verknüpft ist
+    //    (Browser-Reload nach SA-Unterschrift), nur Passwort refreshen.
+    //    Defensive Check: kunde_id muss tatsächlich auf einen rolle='kunde'-
+    //    Account zeigen, sonst nicht anfassen.
+    const { data: existingFall } = await admin
+      .from('faelle').select('kunde_id').eq('id', fallId).maybeSingle()
+    if (existingFall?.kunde_id) {
+      const { data: linkedProfile } = await admin
+        .from('profiles').select('rolle').eq('id', existingFall.kunde_id).maybeSingle()
+      if (linkedProfile?.rolle === 'kunde' || linkedProfile?.rolle == null) {
+        await admin.auth.admin.updateUserById(existingFall.kunde_id, { password })
+        return { success: true, password }
+      }
+      // kunde_id zeigt auf einen Nicht-Kunden — Account-Hijack-Verdacht, abbrechen
+      return {
+        success: false,
+        error: 'Konto konnte nicht erstellt werden (interner Konflikt). Bitte kontaktieren Sie uns.',
       }
     }
-    throw new Error(`Konto konnte nicht erstellt werden: ${authError.message}`)
+
+    // 2. profiles-Lookup VOR createUser — statt brüchigem Error-Message-Matching.
+    const { data: existingProfile } = await admin
+      .from('profiles').select('id, rolle').eq('email', normalizedEmail).maybeSingle()
+
+    if (existingProfile) {
+      // 2a. Account-Hijack-Schutz: Existierender Nicht-Kunden-Account
+      if (existingProfile.rolle && existingProfile.rolle !== 'kunde') {
+        const rolleLabel = ROLLE_LABEL[existingProfile.rolle] ?? existingProfile.rolle
+        return {
+          success: false,
+          error: `Diese E-Mail wird bereits für einen ${rolleLabel}-Account verwendet. Bitte verwenden Sie eine andere E-Mail-Adresse.`,
+        }
+      }
+      // 2b. Existierender Kunden-Account (oder Profile ohne Rolle): verknüpfen + Passwort refreshen
+      await admin.auth.admin.updateUserById(existingProfile.id, { password })
+      await finalizeKundeSetup(admin, fallId, existingProfile.id, normalizedEmail, vorname, nachname, telefon, password)
+      return { success: true, password }
+    }
+
+    // 3. Neuer User
+    const { data: authUser, error: authError } = await admin.auth.admin.createUser({
+      email: normalizedEmail,
+      password,
+      email_confirm: true,
+      user_metadata: { vorname, nachname },
+    })
+
+    if (authError || !authUser?.user) {
+      console.error('[createKundeAccount] createUser fehlgeschlagen:', authError)
+      return {
+        success: false,
+        error: 'Konto konnte nicht erstellt werden. Bitte versuchen Sie es erneut oder kontaktieren Sie uns.',
+      }
+    }
+
+    await finalizeKundeSetup(admin, fallId, authUser.user.id, normalizedEmail, vorname, nachname, telefon, password)
+    return { success: true, password }
+  } catch (err) {
+    console.error('[createKundeAccount] unerwarteter Fehler:', err)
+    return {
+      success: false,
+      error: 'Konto konnte nicht erstellt werden. Bitte versuchen Sie es erneut oder kontaktieren Sie uns.',
+    }
   }
+}
 
-  const userId = authUser.user.id
-
-  // Create profile
+/**
+ * AAR-308/309: Shared Setup nach Account-Erstellung/-Verknüpfung.
+ * Profile, kunde_id, Pflichtdokumente, Chat-Teilnehmer, Welcome-Mail.
+ */
+async function finalizeKundeSetup(
+  admin: ReturnType<typeof createAdminClient>,
+  fallId: string,
+  userId: string,
+  email: string,
+  vorname: string,
+  nachname: string,
+  telefon: string | null,
+  password: string,
+): Promise<void> {
   await admin.from('profiles').upsert({
     id: userId,
     rolle: 'kunde',
@@ -242,17 +287,16 @@ export async function createKundeAccount(
     auth_provider: 'email',
   }, { onConflict: 'id' })
 
-  // Set kunde_id on the case
   await admin.from('faelle').update({ kunde_id: userId }).eq('id', fallId)
 
-  // AAR-125: Lead laden für conditional Polizeibericht (auch im new-user-Pfad)
-  const { data: leadForDocsNew } = await admin
+  // AAR-125: Lead laden für conditional Polizeibericht
+  const { data: leadForDocs } = await admin
     .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht, polizeibericht_status, personenschaden_flag, hat_vorschaeden, zb1_status, service_typ, wa_gesendet, mietwagen_flag, nutzungsausfall)').eq('id', fallId).single()
-  const lRawNew = (leadForDocsNew as { leads: unknown } | null)?.leads
-  const leadDocsNew = (Array.isArray(lRawNew) ? lRawNew[0] : lRawNew) as Record<string, unknown> | null
-  await createDefaultPflichtdokumente(admin, fallId, leadDocsNew)
+  const lRaw = (leadForDocs as { leads: unknown } | null)?.leads
+  const leadDocs = (Array.isArray(lRaw) ? lRaw[0] : lRaw) as Record<string, unknown> | null
+  await createDefaultPflichtdokumente(admin, fallId, leadDocs)
 
-  // KFZ-129: Kunde als Chat-Teilnehmer hinzufuegen
+  // KFZ-129: Kunde als Chat-Teilnehmer hinzufügen (idempotent)
   try {
     const { syncChatTeilnehmer } = await import('@/lib/chatGruppe')
     await syncChatTeilnehmer(fallId)
@@ -260,8 +304,6 @@ export async function createKundeAccount(
 
   // AAR-127: Welcome-Mail mit Magic-Link + Zugangsdaten
   await sendWelcomeWithLogin(admin, fallId, email, password)
-
-  return { password }
 }
 
 // AAR-127: Helper — generiert Magic-Link via Supabase Auth Admin API
