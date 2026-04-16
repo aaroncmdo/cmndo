@@ -94,19 +94,22 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
     erstellt_von: user.id,
   })
 
-  // AAR-229 W4: Mitteilung an Admin + Kanzlei bei Gutachten-Upload
+  // AAR-229 W4: Mitteilung an Admin (Kundenbetreuer) bei Gutachten-Upload.
+  // Kanzlei-Empfänger bewusst weggelassen: faelle.kanzlei_id referenziert
+  // die kanzleien-Tabelle, nicht profiles — mitteilungen.empfaenger_id
+  // hat aber FK auf profiles.id. Kanzlei-Benachrichtigung läuft via Email
+  // separat (send-gutachten-an-kanzlei).
   try {
-    const { createMitteilungMulti } = await import('@/lib/mitteilungen/create-mitteilung')
+    const { createMitteilung } = await import('@/lib/mitteilungen/create-mitteilung')
     const { data: fallForMitteilung } = await supabase
       .from('faelle')
-      .select('kundenbetreuer_id, kanzlei_id')
+      .select('kundenbetreuer_id')
       .eq('id', fallId)
       .single()
-    const empfaenger: Array<{ id: string; rolle: 'admin' | 'kanzlei' }> = []
-    if (fallForMitteilung?.kundenbetreuer_id) empfaenger.push({ id: fallForMitteilung.kundenbetreuer_id, rolle: 'admin' })
-    if (fallForMitteilung?.kanzlei_id) empfaenger.push({ id: fallForMitteilung.kanzlei_id, rolle: 'kanzlei' })
-    if (empfaenger.length) {
-      await createMitteilungMulti(empfaenger, {
+    if (fallForMitteilung?.kundenbetreuer_id) {
+      await createMitteilung({
+        empfaenger_id: fallForMitteilung.kundenbetreuer_id,
+        empfaenger_rolle: 'admin',
         kategorie: 'update', titel: 'Gutachten fertiggestellt',
         inhalt: `${svName} — ${betragFmt}`,
         kontext_typ: 'fall', kontext_id: fallId,

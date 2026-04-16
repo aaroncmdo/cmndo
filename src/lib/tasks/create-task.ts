@@ -73,10 +73,15 @@ export async function createLinkedTask(params: CreateLinkedTaskParams): Promise<
 
   // AAR-229 W4: Mitteilung bei Task-Erstellung an den Empfänger.
   if (data?.id && params.empfaenger_user_id) {
+    // AAR-229 Audit: empfaenger_rolle kann admin/kundenbetreuer/dispatch/
+    // sachverstaendiger/kanzlei/kunde sein — alle sind valide EmpfaengerRolle-
+    // Werte für mitteilungen. Cast auf den Union-Type statt nur admin|SV.
+    const rolleValue = (params.empfaenger_rolle ?? 'admin') as
+      'admin' | 'dispatch' | 'kundenbetreuer' | 'sachverstaendiger' | 'kanzlei' | 'kunde'
     import('@/lib/mitteilungen/create-mitteilung')
       .then(({ createMitteilung }) => createMitteilung({
         empfaenger_id: params.empfaenger_user_id!,
-        empfaenger_rolle: (params.empfaenger_rolle as 'admin' | 'sachverstaendiger') ?? 'admin',
+        empfaenger_rolle: rolleValue,
         kategorie: 'task',
         titel: params.titel,
         inhalt: params.beschreibung ?? undefined,
