@@ -35,7 +35,8 @@ export default function GutachterCockpit() {
   const [mTab, setMTab] = useState<'route' | 'kunde' | 'uploads'>('route')
 
   const load = useCallback(async () => {
-    const user = (await supabase.auth.getUser())?.data?.user ?? null; if (!user) return
+    try {
+    const user = (await supabase.auth.getUser())?.data?.user ?? null; if (!user) { setLoading(false); return }
     let { data: sv } = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, offene_faelle, max_faelle_monat').eq('profile_id', user.id).single()
     if (!sv) { const r = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, offene_faelle, max_faelle_monat').eq('user_id', user.id).single(); sv = r.data }
     if (!sv) { setLoading(false); return }
@@ -117,6 +118,13 @@ export default function GutachterCockpit() {
     setTlEvents(tl.slice(0, 50))
 
     setLoading(false)
+    } catch (err) {
+      // AAR-260: Spinner hing wenn irgendein Query fehlschlug. Try/catch +
+      // setLoading(false) in beiden Pfaden (success + error) sichert dass
+      // die Seite immer rendert, auch bei Teilausfall der Queries.
+      console.error('[AAR-260] Gutachter-Dashboard load fehlgeschlagen:', err)
+      setLoading(false)
+    }
   }, [supabase, selectedDate])
 
   useEffect(() => { load() }, [load])

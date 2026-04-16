@@ -13,18 +13,39 @@ export default function VertragPage() {
   const [signed, setSigned] = useState(false)
   const [saving, setSaving] = useState(false)
   const [svData, setSvData] = useState<{ id: string; paket: string; name: string; anzahlung: number } | null>(null)
+  // AAR-258: Spinner-Timeout — wenn nach 5s weder svData noch alreadySigned
+  // vorhanden sind, zeigen wir einen Fehler-State statt endless Spinner.
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [alreadySigned, setAlreadySigned] = useState(false)
   const [drawing, setDrawing] = useState(false)
 
   useEffect(() => {
     async function load() {
-      const user = (await supabase.auth.getUser())?.data?.user ?? null
-      if (!user) return
-      const { data: sv } = await supabase.from('sachverstaendige').select('id, paket, paket_faelle_gesamt, anzahlung_faellig').or(`profile_id.eq.${user.id},user_id.eq.${user.id}`).single()
-      const { data: p } = await supabase.from('profiles').select('vorname, nachname').eq('id', user.id).single()
-      if (sv) setSvData({ id: sv.id, paket: sv.paket ?? 'standard', name: [p?.vorname, p?.nachname].filter(Boolean).join(' ') || '', anzahlung: Number(sv.anzahlung_faellig ?? 750) })
+      try {
+        const user = (await supabase.auth.getUser())?.data?.user ?? null
+        if (!user) { setLoadError('Nicht angemeldet'); return }
+        const { data: sv } = await supabase
+          .from('sachverstaendige')
+          .select('id, paket, paket_faelle_gesamt, anzahlung_faellig, vertrag_unterschrieben')
+          .or(`profile_id.eq.${user.id},user_id.eq.${user.id}`)
+          .maybeSingle()
+        if (!sv) { setLoadError('Kein SV-Profil gefunden'); return }
+        // AAR-258: Vertrag bereits unterschrieben → direkt zum Dashboard,
+        // nicht ewig im Spinner hängen
+        if (sv.vertrag_unterschrieben) {
+          setAlreadySigned(true)
+          router.replace('/gutachter')
+          return
+        }
+        const { data: p } = await supabase.from('profiles').select('vorname, nachname').eq('id', user.id).single()
+        setSvData({ id: sv.id, paket: sv.paket ?? 'standard', name: [p?.vorname, p?.nachname].filter(Boolean).join(' ') || '', anzahlung: Number(sv.anzahlung_faellig ?? 750) })
+      } catch (err) {
+        console.error('[AAR-258] Vertrag-Load fehlgeschlagen:', err)
+        setLoadError(err instanceof Error ? err.message : 'Laden fehlgeschlagen')
+      }
     }
     load()
-  }, [supabase])
+  }, [supabase, router])
 
   // Canvas drawing
   useEffect(() => {
@@ -78,6 +99,20 @@ export default function VertragPage() {
 
   const PAKET_LABEL: Record<string, string> = { standard: 'Standard (10 Fälle/Monat)', 'starter-10': 'Standard (10 Fälle/Monat)', pro: 'Pro (25 Fälle/Monat)', 'standard-25': 'Pro (25 Fälle/Monat)', premium: 'Premium (50 Fälle/Monat)', 'premium-50': 'Premium (50 Fälle/Monat)' }
 
+  // AAR-258: Klare States statt endless Spinner.
+  if (alreadySigned) {
+    return <div className="flex items-center justify-center h-screen text-sm text-gray-500">Vertrag bereits unterschrieben — Weiterleitung zum Dashboard …</div>
+  }
+  if (loadError) {
+    return (
+      <div className="flex items-center justify-center h-screen p-6">
+        <div className="bg-white border border-red-200 rounded-xl p-6 max-w-md">
+          <p className="text-sm font-semibold text-red-900">Vertrag konnte nicht geladen werden</p>
+          <p className="text-xs text-red-700 mt-1">{loadError}</p>
+        </div>
+      </div>
+    )
+  }
   if (!svData) return <div className="flex items-center justify-center h-screen"><div className="w-6 h-6 border-2 border-[#4573A2] border-t-transparent rounded-full animate-spin" /></div>
 
   return (

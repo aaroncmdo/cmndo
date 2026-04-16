@@ -65,29 +65,33 @@ export default function GebietPage() {
   const [mapReady, setMapReady] = useState(false)
 
   // Load own data + all neighbors
+  // AAR-253: Error-Handling — Spinner hing wenn Queries fehlschlugen.
   const load = useCallback(async () => {
-    const user = (await supabase.auth.getUser())?.data?.user ?? null
-    if (!user) return
-    const { data: sv } = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket, isochrone_polygon, anzahlung_faellig, radius_km').or(`profile_id.eq.${user.id},user_id.eq.${user.id}`).single()
-    if (sv?.standort_lat) {
-      const paketInfo = getPaket(sv.paket ?? 'standard')
-      setSvData({ id: sv.id, lat: Number(sv.standort_lat), lng: Number(sv.standort_lng), paket: sv.paket ?? 'standard', iso: sv.isochrone_polygon, anzahlungBezahlt: Number(sv.anzahlung_faellig ?? 750), radius_km: sv.radius_km ?? paketInfo.radius_km })
-      // Load all active neighbors with isochrone
-      const { data: allSvs } = await supabase.from('sachverstaendige').select('id, gutachter_typ, paket, standort_lat, standort_lng, isochrone_polygon, radius_km').neq('id', sv.id).eq('ist_aktiv', true).not('standort_lat', 'is', null)
-      const ns: Neighbor[] = (allSvs ?? []).filter(n => n.isochrone_polygon && Array.isArray(n.isochrone_polygon)).map(n => ({
-        id: n.id, typ: n.gutachter_typ ?? '', paket: n.paket ?? 'standard',
-        lat: Number(n.standort_lat), lng: Number(n.standort_lng),
-        iso: n.isochrone_polygon as { lat: number; lng: number }[],
-        radius_km: n.radius_km ?? getPaket(n.paket ?? 'standard').radius_km,
-      }))
-      setNeighbors(ns)
-      // Filter touching neighbors
-      if (sv.isochrone_polygon && Array.isArray(sv.isochrone_polygon)) {
-        const ownPoly = sv.isochrone_polygon as { lat: number; lng: number }[]
-        setTouchingNeighbors(ns.filter(n => polygonsTouching(ownPoly, n.iso)))
+    try {
+      const user = (await supabase.auth.getUser())?.data?.user ?? null
+      if (!user) { setLoading(false); return }
+      const { data: sv } = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket, isochrone_polygon, anzahlung_faellig, radius_km').or(`profile_id.eq.${user.id},user_id.eq.${user.id}`).single()
+      if (sv?.standort_lat) {
+        const paketInfo = getPaket(sv.paket ?? 'standard')
+        setSvData({ id: sv.id, lat: Number(sv.standort_lat), lng: Number(sv.standort_lng), paket: sv.paket ?? 'standard', iso: sv.isochrone_polygon, anzahlungBezahlt: Number(sv.anzahlung_faellig ?? 750), radius_km: sv.radius_km ?? paketInfo.radius_km })
+        const { data: allSvs } = await supabase.from('sachverstaendige').select('id, gutachter_typ, paket, standort_lat, standort_lng, isochrone_polygon, radius_km').neq('id', sv.id).eq('ist_aktiv', true).not('standort_lat', 'is', null)
+        const ns: Neighbor[] = (allSvs ?? []).filter(n => n.isochrone_polygon && Array.isArray(n.isochrone_polygon)).map(n => ({
+          id: n.id, typ: n.gutachter_typ ?? '', paket: n.paket ?? 'standard',
+          lat: Number(n.standort_lat), lng: Number(n.standort_lng),
+          iso: n.isochrone_polygon as { lat: number; lng: number }[],
+          radius_km: n.radius_km ?? getPaket(n.paket ?? 'standard').radius_km,
+        }))
+        setNeighbors(ns)
+        if (sv.isochrone_polygon && Array.isArray(sv.isochrone_polygon)) {
+          const ownPoly = sv.isochrone_polygon as { lat: number; lng: number }[]
+          setTouchingNeighbors(ns.filter(n => polygonsTouching(ownPoly, n.iso)))
+        }
       }
+    } catch (err) {
+      console.error('[AAR-253] Gebiet-Load fehlgeschlagen:', err)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }, [supabase])
 
   useEffect(() => { load() }, [load])
