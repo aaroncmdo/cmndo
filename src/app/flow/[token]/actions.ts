@@ -391,17 +391,23 @@ export async function signSAandCreateFall(
     kundenbetreuerId = min.id
   }
 
-  // 4a. SV-Zuweisung aus gutachter_termine laden (falls Termin vor SA vereinbart wurde)
+  // 4a. AAR-345: SV-Zuweisung aus gutachter_termine laden — direkt über
+  // gutachter_termine.lead_id statt via Legacy-Feld leads.gutachter_termin
+  // (der Dispatcher kann den Termin-Eintrag anlegen ohne das Timestamp-Feld
+  // auf leads zu pflegen). Vorher wurde in diesem Fall sv_id=NULL gesetzt
+  // und der Status blieb auf „ersterfassung".
   let svIdFromTermin: string | null = null
-  if (lead.gutachter_termin) {
+  let aktiverTerminId: string | null = null
+  {
     const { data: existingTermin } = await admin.from('gutachter_termine')
-      .select('sv_id')
+      .select('id, sv_id')
       .eq('lead_id', leadId)
       .in('status', ['reserviert', 'bestaetigt'])
       .order('start_zeit', { ascending: false })
       .limit(1)
       .maybeSingle()
     svIdFromTermin = existingTermin?.sv_id ?? null
+    aktiverTerminId = existingTermin?.id ?? null
   }
 
   // 4aa. AAR-155: Entity-FKs auflösen (versicherung/kanzlei/organisation/
@@ -427,8 +433,11 @@ export async function signSAandCreateFall(
     .single()
   if (fallErr || !fall) throw new Error(`Fall-Erstellung fehlgeschlagen: ${fallErr?.message}`)
 
-  // 5. KFZ-192: Termin-State-Machine basierend auf service_typ
-  if (lead.gutachter_termin) {
+  // 5. KFZ-192 + AAR-345: Termin-State-Machine basierend auf service_typ.
+  // Guard auf aktiverTerminId statt Legacy-Feld lead.gutachter_termin —
+  // damit auch Dispatcher-Termine ohne lead.gutachter_termin-Timestamp
+  // beim Fall-Anlegen sauber verknüpft werden.
+  if (aktiverTerminId) {
     const serviceTyp = lead.service_typ ?? 'komplett'
 
     if (serviceTyp === 'nur_gutachter') {
@@ -457,7 +466,8 @@ export async function signSAandCreateFall(
         .update({ gutachter_termin_status: 'bestaetigt' })
         .eq('id', fall.id)
     } else {
-      // komplett: SA unterschrieben → Termin bleibt 'reserviert', wartet auf Vollmacht
+      // komplett: SA unterschrieben → Termin bleibt 'reserviert', wartet auf Vollmacht.
+      // fall_id setzen damit der Termin in der Fallakte sichtbar wird.
       await admin.from('gutachter_termine')
         .update({ fall_id: fall.id })
         .eq('lead_id', leadId)
