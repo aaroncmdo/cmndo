@@ -82,11 +82,13 @@ export default function Zb1UploadCard({
         Fahrzeugschein
       </h2>
 
-      {/* Status-Badge falls bereits versendet/hochgeladen */}
+      {/* Status-Badge falls bereits versendet/hochgeladen.
+          AAR-273: Reset-Button rechts — MA kann Status zurücksetzen
+          falls falsch gesetzt oder neuer Anlauf nötig. */}
       {statusCfg && (
-        <div className={`flex items-center gap-2 rounded-lg border p-2 ${statusCfg.bg}`}>
-          <statusCfg.icon className={`w-4 h-4 shrink-0 ${statusCfg.text}`} />
-          <p className={`text-[11px] font-medium ${statusCfg.text}`}>
+        <div className={`flex items-start gap-2 rounded-lg border p-2 ${statusCfg.bg}`}>
+          <statusCfg.icon className={`w-4 h-4 shrink-0 mt-0.5 ${statusCfg.text}`} />
+          <p className={`text-[11px] font-medium flex-1 ${statusCfg.text}`}>
             {statusCfg.label}
             {zb1HochgeladenAm && zb1Status === 'hochgeladen' && (
               <span className="block text-[10px] text-gray-500 font-normal mt-0.5">
@@ -94,6 +96,22 @@ export default function Zb1UploadCard({
               </span>
             )}
           </p>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => {
+              if (!confirm('ZB1-Status wirklich zurücksetzen? Bisherige Anfragen bleiben in der Timeline, aber die Karte zeigt wieder den Toggle „zur Hand?".')) return
+              startTransition(async () => {
+                const r = await saveStammdaten(leadId, { zb1_status: null })
+                if (r.success) { setToggle(null); router.refresh() }
+                else setFeedback({ ok: false, text: r.error ?? 'Reset fehlgeschlagen' })
+              })
+            }}
+            className="text-[10px] px-2 py-0.5 rounded border border-current opacity-70 hover:opacity-100 disabled:opacity-30"
+            title="Status zurücksetzen"
+          >
+            Reset
+          </button>
         </div>
       )}
 
