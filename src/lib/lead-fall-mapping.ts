@@ -93,6 +93,12 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'gegner_versicherung_anfrage_datum',
   // AAR-316: Kundensprache — wird auch an flow_links.sprache weitergereicht
   'sprache',
+  // AAR-317: Unfallskizze aus Phase 5 — SVG + Freigabe-Metadaten in den Fall übertragen
+  'unfallskizze_svg',
+  'unfallskizze_url',
+  'unfallskizze_bestaetigt',
+  'unfallskizze_ablehnung_grund',
+  'unfallskizze_generiert_am',
 ] as const
 
 // ─── 2. DEFAULT — Feldname gleich, NOT-NULL fallback ────────────────────────

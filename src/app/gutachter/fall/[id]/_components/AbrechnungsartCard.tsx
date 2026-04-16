@@ -19,7 +19,11 @@ const OPTIONS: { value: Abrechnungsart; label: string; hint: string }[] = [
   { value: 'noch-offen', label: 'Noch offen', hint: 'Kunde überlegt noch — Rückruf erforderlich' },
 ]
 
+// AAR-315 Audit-Fix: vor-ort als früheste Subphase — SV kann die
+// Abrechnungsart direkt während/nach dem Termin vor Ort eintragen
+// statt erst beim Gutachten-Erstellen.
 const RELEVANTE_SUBPHASEN = new Set([
+  'vor-ort',
   'gutachten-erstellen',
   'kanzlei-uebergeben',
   'anspruchsschreiben',
