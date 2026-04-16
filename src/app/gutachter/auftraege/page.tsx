@@ -146,7 +146,7 @@ export default async function AuftraegePage({
                         >
                           <td className="px-4 py-3">
                             <Link
-                              href={`/gutachter/auftrag/${fall.id}`}
+                              href={`/gutachter/fall/${fall.id}`}
                               className="text-[#7BA3CC] hover:text-[#7BA3CC] font-mono text-xs"
                             >
                               {fall.fall_nummer ?? fall.id.slice(0, 8)}
@@ -191,7 +191,7 @@ export default async function AuftraegePage({
                 return (
                   <Link
                     key={fall.id}
-                    href={`/gutachter/auftrag/${fall.id}`}
+                    href={`/gutachter/fall/${fall.id}`}
                     className="block bg-white rounded-2xl p-4 border border-gray-200 hover:border-gray-300 transition-colors"
                   >
                     <div className="flex items-start justify-between mb-2">
