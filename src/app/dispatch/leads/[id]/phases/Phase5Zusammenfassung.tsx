@@ -8,6 +8,8 @@
 import { useState, useTransition, useEffect, useRef } from 'react'
 import { useDispatchPhase } from '../lib/phase-context'
 import { sendFlowLinkMultiChannel, saveStammdaten } from '../actions'
+// AAR-317: Unfallskizze-Card (Claude-API-Generator + MA-Freigabe)
+import { UnfallskizzeCard } from './UnfallskizzeCard'
 import {
   CheckCircle2Icon,
   AlertTriangleIcon,
@@ -18,6 +20,7 @@ import {
 } from 'lucide-react'
 
 type LeadSnapshot = {
+  id: string
   vorname?: string | null
   nachname?: string | null
   telefon?: string | null
@@ -40,6 +43,11 @@ type LeadSnapshot = {
   hat_vorschaeden?: boolean | null
   zeugen?: boolean | null
   unfallort?: string | null
+  // AAR-317: Unfallskizze (KI-generiert)
+  unfallhergang?: string | null
+  unfallskizze_svg?: string | null
+  unfallskizze_bestaetigt?: boolean | null
+  unfallskizze_generiert_am?: string | null
 }
 
 type AktiverTermin = {
@@ -367,6 +375,16 @@ export default function Phase5Zusammenfassung() {
           </p>
         </div>
       </div>
+
+      {/* AAR-317: Unfallskizze (KI-generiert) — optional, muss nicht freigegeben
+          sein bevor der FlowLink versendet wird. */}
+      <UnfallskizzeCard
+        leadId={l.id}
+        unfallhergang={l.unfallhergang ?? null}
+        initialSvg={l.unfallskizze_svg ?? null}
+        initialBestaetigt={l.unfallskizze_bestaetigt ?? false}
+        initialGeneriertAm={l.unfallskizze_generiert_am ?? null}
+      />
 
       {/* 3 Versand-Buttons */}
       <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
