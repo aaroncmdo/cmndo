@@ -12,6 +12,13 @@ const nextConfig: NextConfig = {
         destination: '/gutachter/fall/:id',
         permanent: true,
       },
+      // AAR-338: Admin-Dispatch-Board gibt's nicht mehr als Admin-Layout —
+      // /dispatch/* ist jetzt das einzige Dispatch-Frontend (Full-Screen).
+      {
+        source: '/admin/dispatch',
+        destination: '/dispatch/dashboard',
+        permanent: true,
+      },
     ]
   },
 };

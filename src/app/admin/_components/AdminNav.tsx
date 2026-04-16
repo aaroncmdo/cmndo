@@ -8,18 +8,21 @@ import {
   BarChart3Icon, UsersIcon, BuildingIcon, Building2Icon, ReceiptIcon,
   ShieldCheckIcon, MessageCircleIcon, SettingsIcon, AlertCircleIcon,
   LifeBuoyIcon, ListChecksIcon, CheckSquareIcon,
-  TimerIcon, ScaleIcon,
+  TimerIcon, ScaleIcon, ExternalLinkIcon,
 } from 'lucide-react'
 
 // AAR-57: 4 Sektionen — Navigation, Operations, Stammdaten, Verwaltung
-type NavItem = { href: string; label: string; icon: typeof LayoutDashboardIcon; exact?: boolean }
+// AAR-338: external-Flag für Links die in neuem Tab öffnen (Dispatch hat
+// ein eigenes Full-Screen-Layout ohne Admin-Sidebar)
+type NavItem = { href: string; label: string; icon: typeof LayoutDashboardIcon; exact?: boolean; external?: boolean }
 
 // AAR-123: /admin/karte und /admin/sv-onboarding sind jetzt Tabs unter
 // /admin/sachverstaendige. Die alten Nav-Items sind entfernt; der
 // Sachverständige-Hub enthält nun alle drei Views.
 const NAV_NAVIGATION: NavItem[] = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboardIcon, exact: true },
-  { href: '/admin/dispatch', label: 'Dispatch', icon: GitBranchIcon },
+  // AAR-338: Dispatch hat eigenes Full-Screen-Layout — neuer Tab ohne Admin-Chrome
+  { href: '/dispatch/dashboard', label: 'Dispatch', icon: GitBranchIcon, external: true },
   { href: '/admin/faelle', label: 'Fälle', icon: FolderOpenIcon },
   { href: '/admin/kalender', label: 'Kalender', icon: CalendarIcon },
   { href: '/admin/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon },
@@ -72,13 +75,30 @@ export default function AdminNav({ email, initials, unreadNachrichten }: { email
 
   function renderItem(item: NavItem) {
     const active = isActive(item.href, item.exact)
+    const className = `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-500 ${
+      active ? 'bg-[#1E3A5F] text-white font-semibold' : 'text-[#7BA3CC] hover:bg-white/5 hover:text-white'
+    }`
+    // AAR-338: external öffnet in neuem Tab ohne Next-Link-Prefetch
+    if (item.external) {
+      return (
+        <a
+          key={item.href}
+          href={item.href}
+          target="_blank"
+          rel="noopener"
+          className={className}
+        >
+          <item.icon style={{ width: 17, height: 17 }} />
+          {item.label}
+          <ExternalLinkIcon style={{ width: 12, height: 12 }} className="ml-auto opacity-40" />
+        </a>
+      )
+    }
     return (
       <Link
         key={item.href}
         href={item.href}
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-500 ${
-          active ? 'bg-[#1E3A5F] text-white font-semibold' : 'text-[#7BA3CC] hover:bg-white/5 hover:text-white'
-        }`}
+        className={className}
       >
         <item.icon style={{ width: 17, height: 17 }} />
         {item.label}
@@ -93,7 +113,8 @@ export default function AdminNav({ email, initials, unreadNachrichten }: { email
 
   // AAR-72: Mobile-Items per href-Lookup (nicht Array-Index)
   // AAR-123: /admin/karte ist weg (nun Tab im SV-Hub) — stattdessen der Hub selbst.
-  const MOBILE_HREFS = ['/admin', '/admin/dispatch', '/admin/faelle', '/admin/nachrichten', '/admin/sachverstaendige']
+  // AAR-338: Dispatch hat jetzt href='/dispatch/dashboard' (external)
+  const MOBILE_HREFS = ['/admin', '/dispatch/dashboard', '/admin/faelle', '/admin/nachrichten', '/admin/sachverstaendige']
   const mobileItems: NavItem[] = MOBILE_HREFS
     .map(h => NAV_NAVIGATION.find(i => i.href === h))
     .filter((i): i is NavItem => !!i)
@@ -146,13 +167,29 @@ export default function AdminNav({ email, initials, unreadNachrichten }: { email
       >
         {mobileItems.map((item) => {
           const active = isActive(item.href, item.exact)
+          const mobClassName = `flex flex-col items-center justify-center gap-0.5 min-w-[48px] min-h-[48px] px-2 py-1 rounded-xl transition-all ${
+            active ? 'text-white bg-[#1E3A5F]' : 'text-[#7BA3CC]'
+          }`
+          // AAR-338: external-Links öffnen in neuem Tab
+          if (item.external) {
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                target="_blank"
+                rel="noopener"
+                className={mobClassName}
+              >
+                <item.icon style={{ width: 20, height: 20 }} />
+                <span className="text-[9px] font-medium">{item.label}</span>
+              </a>
+            )
+          }
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center gap-0.5 min-w-[48px] min-h-[48px] px-2 py-1 rounded-xl transition-all ${
-                active ? 'text-white bg-[#1E3A5F]' : 'text-[#7BA3CC]'
-              }`}
+              className={mobClassName}
             >
               <item.icon style={{ width: 20, height: 20 }} />
               <span className="text-[9px] font-medium">{item.label}</span>
