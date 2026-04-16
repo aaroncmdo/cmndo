@@ -4,6 +4,9 @@ import { headers } from 'next/headers'
 import Link from 'next/link'
 import NotificationBell from '@/app/admin/_components/NotificationBell'
 import KundeNav from './_components/KundeNav'
+// AAR-316 W3: Sprach-Banner mit Google-Translate-Fallback
+import { SprachBanner } from '@/components/i18n/SprachBanner'
+import type { SpracheCode } from '@/lib/i18n/sprach-banner'
 
 export default async function KundeLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -27,6 +30,17 @@ export default async function KundeLayout({ children }: { children: React.ReactN
 
   const displayName = [profile?.vorname, profile?.nachname].filter(Boolean).join(' ') || user.email?.split('@')[0] || 'Kunde'
   const initials = [profile?.vorname?.[0], profile?.nachname?.[0]].filter(Boolean).join('').toUpperCase() || 'K'
+
+  // AAR-316 W3: Sprache des Kunden aus seinem neuesten Fall laden.
+  // Profile hat keine eigene Sprache — der Fall trägt sie aus leads.sprache.
+  const { data: fallSprache } = await supabase
+    .from('faelle')
+    .select('sprache')
+    .eq('kunde_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  const kundenSprache = ((fallSprache?.sprache as string | null) ?? 'de') as SpracheCode
 
   return (
     <div className="flex min-h-screen bg-[#f8f9fb]">
@@ -70,6 +84,8 @@ export default async function KundeLayout({ children }: { children: React.ReactN
 
       {/* Hauptinhalt — offset by sidebar on desktop, offset by header on mobile */}
       <main className="flex-1 md:ml-64 pt-14 md:pt-0 pb-20 md:pb-6">
+        {/* AAR-316 W3: Sprach-Banner rendert sich nur bei sprache !== 'de' */}
+        <SprachBanner sprache={kundenSprache} />
         {children}
       </main>
 

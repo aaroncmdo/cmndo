@@ -1,6 +1,8 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import FlowWizardKfz from './FlowWizardKfz'
+// AAR-316 W2: Sprach-Banner für nicht-deutsche Kunden
+import { SprachBanner } from '@/components/i18n/SprachBanner'
 
 export default async function FlowPage({
   params,
@@ -13,9 +15,10 @@ export default async function FlowPage({
   const svc = createServiceClient()
 
   // 1. Look up flow_links by token + check expiry (BUG-100)
+  // AAR-316: sprache mitladen für Sprach-Banner (Google-Translate-Fallback)
   const { data: flowLink } = await svc
     .from('flow_links')
-    .select('id, lead_id, status, geoeffnet_am, expires_at')
+    .select('id, lead_id, status, geoeffnet_am, expires_at, sprache')
     .eq('token', token)
     .maybeSingle()
 
@@ -134,8 +137,14 @@ export default async function FlowPage({
     }
   }
 
+  // AAR-316: Sprach-Priorität flow_links.sprache > lead.sprache > 'de'
+  const sprache =
+    (flowLink?.sprache as string | null) ?? (lead.sprache as string | null) ?? 'de'
+
   return (
-    <FlowWizardKfz
+    <>
+      <SprachBanner sprache={sprache as Parameters<typeof SprachBanner>[0]['sprache']} />
+      <FlowWizardKfz
       token={token}
       flowLinkId={flowLinkId}
       gutachter={gutachter}
@@ -165,7 +174,8 @@ export default async function FlowPage({
         // AAR-305: steuert Mietwagen-Empfehlungs-Box im neuen Step „Weitere Angaben"
         fahrzeug_fahrbereit: lead.fahrzeug_fahrbereit ?? null,
       }}
-    />
+      />
+    </>
   )
 
   } catch (err) {
