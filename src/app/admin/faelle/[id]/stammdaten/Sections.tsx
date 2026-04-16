@@ -28,6 +28,8 @@ import {
 import { useFall } from '../FallContext'
 import InlineEditField from './InlineEditField'
 import { getVersicherungById, type VersicherungSuggestion } from '@/app/dispatch/leads/[id]/actions/versicherungen'
+import { CardentityTypBButton } from '@/components/cardentity/CardentityTypBButton'
+import { requestCardentityTypBForFall } from '../actions/dokumente'
 
 function Card({
   icon,
@@ -81,9 +83,12 @@ export function KundendatenSection() {
 }
 
 export function FahrzeugdatenSection() {
-  const { fall } = useFall()
+  const { fall, lead } = useFall()
   // FIN-Spalte heißt fin_vin (nicht fin); HSN/TSN existieren auf leads, nicht
   // auf faelle — daher in der Fallakte nicht editierbar.
+  // AAR-311: Cardentity Typ-B (15€) als manueller Trigger im Fahrzeug-Block.
+  // Status (vorschaden_*) lebt auf leads — gemeinsam mit Dispatch + SV-Sicht.
+  const fin = (fall.fin_vin as string | null) ?? (lead?.fin as string | null) ?? null
   return (
     <Card
       icon={<CarIcon className="w-4 h-4 text-gray-400" />}
@@ -103,6 +108,21 @@ export function FahrzeugdatenSection() {
       <InlineEditField label="Halter Straße" fieldName="halter_strasse" value={f(fall, 'halter_strasse')} />
       <InlineEditField label="Halter PLZ" fieldName="halter_plz" value={f(fall, 'halter_plz')} />
       <InlineEditField label="Halter Stadt" fieldName="halter_stadt" value={f(fall, 'halter_stadt')} />
+      <div className="sm:col-span-2 pt-2 border-t border-gray-100">
+        <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-1.5">
+          Vorschaden-Detailbericht (Cardentity Typ-B)
+        </p>
+        <CardentityTypBButton
+          action={() => requestCardentityTypBForFall(fall.id)}
+          finVorhanden={!!fin}
+          initial={{
+            fetchedAt: (lead?.cardentity_abfrage_am as string | null) ?? null,
+            vorschadenVorhanden: (lead?.vorschaden_vorhanden as boolean | null) ?? null,
+            vorschadenAnzahl: (lead?.vorschaden_anzahl as number | null) ?? null,
+            letzterVorschadenDatum: (lead?.vorschaden_letzter_datum as string | null) ?? null,
+          }}
+        />
+      </div>
     </Card>
   )
 }

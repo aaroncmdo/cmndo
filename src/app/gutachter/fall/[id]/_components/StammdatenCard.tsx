@@ -2,14 +2,24 @@
 
 // AAR-289: Kompakte Stammdaten-Übersicht für die rechte Spalte. Detail-Edit
 // findet weiter im Akte-Drawer / Admin-Portal statt — diese Card ist read-only.
+// AAR-311: SV kann Cardentity Typ-B (15€) nach dem Termin manuell triggern
+// wenn er bei der Vor-Ort-Besichtigung Vorschadenhinweise gefunden hat.
 
 import { UserIcon, CarIcon, ShieldIcon, MailIcon, PhoneIcon } from 'lucide-react'
+import { CardentityTypBButton } from '@/components/cardentity/CardentityTypBButton'
+import { requestCardentityTypBForFallSv } from '../cardentity-actions'
 
 type Lead = {
   vorname: string | null
   nachname: string | null
   email: string | null
   telefon: string | null
+  fin?: string | null
+  vorschaden_typ_b_bericht?: Record<string, unknown> | null
+  vorschaden_vorhanden?: boolean | null
+  vorschaden_anzahl?: number | null
+  vorschaden_letzter_datum?: string | null
+  cardentity_abfrage_am?: string | null
 } | null
 
 type Kundenbetreuer = {
@@ -80,17 +90,31 @@ export function StammdatenCard({
       {/* Fahrzeug */}
       <div className="flex items-start gap-3 pt-3 border-t border-gray-100">
         <CarIcon className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
-        <div className="flex-1 min-w-0 text-xs">
-          <p className="text-gray-900 font-medium">{fahrzeug || '—'}</p>
-          <p className="text-gray-500 mt-0.5">
-            KZ: <span className="font-mono">{kennzeichen}</span>
-            {fin !== '—' && (
-              <>
-                {' · '}FIN: <span className="font-mono text-[10px]">{fin}</span>
-              </>
-            )}
-          </p>
-          <p className="text-gray-500">Schadensort: {ort}</p>
+        <div className="flex-1 min-w-0 text-xs space-y-2">
+          <div>
+            <p className="text-gray-900 font-medium">{fahrzeug || '—'}</p>
+            <p className="text-gray-500 mt-0.5">
+              KZ: <span className="font-mono">{kennzeichen}</span>
+              {fin !== '—' && (
+                <>
+                  {' · '}FIN: <span className="font-mono text-[10px]">{fin}</span>
+                </>
+              )}
+            </p>
+            <p className="text-gray-500">Schadensort: {ort}</p>
+          </div>
+          {/* AAR-311: Cardentity-Typ-B-Trigger (SV kann Vorschaden-Bericht
+              nach Termin abrufen wenn Verdacht besteht). */}
+          <CardentityTypBButton
+            action={() => requestCardentityTypBForFallSv(fall.id as string)}
+            finVorhanden={fin !== '—' || !!lead?.fin}
+            initial={{
+              fetchedAt: lead?.cardentity_abfrage_am ?? null,
+              vorschadenVorhanden: lead?.vorschaden_vorhanden ?? null,
+              vorschadenAnzahl: lead?.vorschaden_anzahl ?? null,
+              letzterVorschadenDatum: lead?.vorschaden_letzter_datum ?? null,
+            }}
+          />
         </div>
       </div>
 

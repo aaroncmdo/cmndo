@@ -14,7 +14,10 @@ import { useCarQuery } from '../hooks/useCarQuery'
 // AAR-177 Fix #1: CardentityButton-Import entfernt (Button war nicht
 // funktionsreif und Text irritierte — Cardentity läuft jetzt im Hintergrund
 // via ZB1-OCR-Trigger in /api/ocr-fahrzeugschein Step 6).
+// AAR-311: Manueller Cardentity-Typ-B-Trigger als shared Komponente.
 import Zb1UploadCard from './Zb1UploadCard'
+import { CardentityTypBButton } from '@/components/cardentity/CardentityTypBButton'
+import { requestCardentityTypBForLead } from '../actions/cardentity'
 import PolizeiberichtUploadCard from './PolizeiberichtUploadCard'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import VersicherungAutocomplete, { type VersicherungSelection } from '@/components/VersicherungAutocomplete'
@@ -57,6 +60,12 @@ type LeadFields = {
   polizeibericht_status?: string | null
   polizeibericht_hochgeladen_am?: string | null
   cardentity_enriched_at?: string | null
+  // AAR-311: Cardentity Typ-B Status für den manuellen Trigger-Button
+  vorschaden_typ_b_bericht?: Record<string, unknown> | null
+  vorschaden_vorhanden?: boolean | null
+  vorschaden_anzahl?: number | null
+  vorschaden_letzter_datum?: string | null
+  cardentity_abfrage_am?: string | null
   hat_vorschaeden?: boolean | null
   vorschaeden_beschreibung?: string | null
   finanzierung_leasing?: 'keine' | 'finanzierung' | 'leasing' | string | null
@@ -819,8 +828,25 @@ export default function Phase4Stammdaten() {
           </div>
         )}
 
-        {/* AAR-177 Fix #1: CardentityButton entfernt — Anreicherung läuft
-            automatisch nach ZB1-OCR, kein manueller Trigger mehr nötig. */}
+        {/* AAR-177 Fix #1: CardentityButton (Typ-A) entfernt — Anreicherung
+            läuft automatisch nach ZB1-OCR.
+            AAR-311: Cardentity Typ-B (15€/Detailbericht) als manueller Trigger
+            für Vorschadenverdacht im Erstgespräch. */}
+        <div className="sm:col-span-2 pt-2 border-t border-gray-100">
+          <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-1.5">
+            Vorschaden-Detailbericht
+          </p>
+          <CardentityTypBButton
+            action={() => requestCardentityTypBForLead(leadId)}
+            finVorhanden={!!l.fin}
+            initial={{
+              fetchedAt: l.cardentity_abfrage_am ?? null,
+              vorschadenVorhanden: l.vorschaden_vorhanden ?? null,
+              vorschadenAnzahl: l.vorschaden_anzahl ?? null,
+              letzterVorschadenDatum: l.vorschaden_letzter_datum ?? null,
+            }}
+          />
+        </div>
       </Card>
 
       {/* 3. Gegner & Unfall */}

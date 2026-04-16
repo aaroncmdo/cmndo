@@ -4,13 +4,12 @@
 // - triggerFinCallForFall: ruft Cardentity DAT/Audatex über enrichFallByFin
 // - markDokumentNachgereicht: setzt nachgereicht_status auf pflichtdokumente
 //   (AAR-163 Nachreichen-Flow)
-//
-// OCR + WA-Medien Auto-Filing bleiben Follow-ups:
-// - Echter OCR-Impl (Tesseract.js / Google Vision) → braucht Provider-Wahl
-// - Twilio-Inbound-Webhook erweitern → eigenes Ticket AAR-158
+// AAR-311: requestCardentityTypBForFall — manueller Typ-B-Trigger aus der
+// KB-Fallakte (Admin + Kundenbetreuer dürfen).
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import type { RequestTypBResult } from '@/lib/cardentity/typ-b'
 
 export async function triggerFinCallForFall(
   fallId: string,
@@ -76,4 +75,27 @@ export async function markDokumentNachgereicht(
   if (error) return { success: false, error: error.message }
   revalidatePath(`/admin/faelle/${pdok.fall_id}`)
   return { success: true }
+}
+
+export async function requestCardentityTypBForFall(
+  fallId: string,
+): Promise<RequestTypBResult> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('rolle')
+    .eq('id', user.id)
+    .single()
+  const rolle = profile?.rolle as string | undefined
+  if (!['admin', 'kundenbetreuer'].includes(rolle ?? '')) {
+    return { success: false, error: 'Nur KB/Admin dürfen Typ-B triggern' }
+  }
+
+  const { requestCardentityTypB } = await import('@/lib/cardentity/typ-b')
+  const result = await requestCardentityTypB('fall', fallId)
+  if (result.success) revalidatePath(`/admin/faelle/${fallId}`)
+  return result
 }
