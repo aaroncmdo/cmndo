@@ -57,6 +57,29 @@ export default async function FlowPage({
     if (!flowLink.geoeffnet_am) {
       await svc.from('flow_links').update({ geoeffnet_am: new Date().toISOString(), status: 'geoeffnet' }).eq('id', flowLink.id)
       await svc.from('leads').update({ flow_link_geoeffnet: true, updated_at: new Date().toISOString() }).eq('id', leadId)
+
+      // AAR-229 W4: Mitteilung an zugewiesenen MA + SV
+      try {
+        const { data: zugehFall } = await svc.from('faelle').select('id, sv_id').eq('lead_id', leadId).limit(1).maybeSingle()
+        const { data: leadForName } = await svc.from('leads').select('vorname, nachname, zugewiesen_an').eq('id', leadId).single()
+        const name = [leadForName?.vorname, leadForName?.nachname].filter(Boolean).join(' ') || 'Kunde'
+        const { createMitteilungMulti } = await import('@/lib/mitteilungen/create-mitteilung')
+        const empfaenger: Array<{ id: string; rolle: 'admin' | 'sachverstaendiger' }> = []
+        if (leadForName?.zugewiesen_an) empfaenger.push({ id: leadForName.zugewiesen_an, rolle: 'admin' })
+        if (zugehFall?.sv_id) {
+          const { data: svP } = await svc.from('sachverstaendige').select('profile_id').eq('id', zugehFall.sv_id).single()
+          if (svP?.profile_id) empfaenger.push({ id: svP.profile_id, rolle: 'sachverstaendiger' })
+        }
+        if (empfaenger.length) {
+          await createMitteilungMulti(empfaenger, {
+            kategorie: 'update',
+            titel: 'Kunde hat FlowLink geöffnet',
+            inhalt: name,
+            kontext_typ: 'fall',
+            kontext_id: zugehFall?.id,
+          })
+        }
+      } catch { /* non-critical */ }
     }
 
     // KFZ-207: Auto-Reaktivierung kalt-Lead wenn FlowLink geöffnet wird

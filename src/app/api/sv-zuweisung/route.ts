@@ -288,13 +288,28 @@ export async function POST(request: Request) {
         ).catch(() => {})
       }
 
-      // Gutachter-Mitteilung
+      // Gutachter-Mitteilung (Legacy-Tabelle)
       createGutachterMitteilung(bestSv.id, 'neuer_auftrag', fallId, {
         kunde_name: kundeName || undefined,
         schadentyp: fallFull.schadens_ursache ?? undefined,
         adresse: adresse || undefined,
         fall_nummer: fallFull.fall_nummer ?? undefined,
       }).catch(() => {})
+
+      // AAR-229 W4: Mitteilung in neue zentrale Tabelle (Dual-Write).
+      if (svProfileData?.profile_id) {
+        import('@/lib/mitteilungen/create-mitteilung')
+          .then(({ createMitteilung }) => createMitteilung({
+            empfaenger_id: svProfileData.profile_id,
+            empfaenger_rolle: 'sachverstaendiger',
+            kategorie: 'update',
+            titel: 'Neuer Auftrag zugewiesen',
+            inhalt: kundeName ? `${kundeName} — ${fallFull.kennzeichen ?? ''} — ${adresse}` : undefined,
+            kontext_typ: 'fall',
+            kontext_id: fallId,
+          }))
+          .catch(err => console.error('[AAR-229] createMitteilung fehlgeschlagen:', err))
+      }
 
       // WhatsApp an Kunden
       sendFallCommunication(fallId, 'sv_losgefahren').catch(() => {})
