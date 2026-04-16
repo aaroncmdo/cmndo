@@ -1,0 +1,1230 @@
+'use client'
+
+import { useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import {
+  FileTextIcon,
+  UploadIcon,
+  ClockIcon,
+  CheckCircle2Icon,
+  AlertTriangleIcon,
+  XCircleIcon,
+  CameraIcon,
+  ScaleIcon,
+  GavelIcon,
+  ImageIcon,
+  MessageSquareIcon,
+  SendIcon,
+  DownloadIcon,
+  FolderOpenIcon,
+} from 'lucide-react'
+import { uploadGutachten, uploadDokument, uploadDatei, saveFinVinGutachter, sendChatNachricht } from './actions'
+import { terminAblehnen, terminGegenvorschlag, terminAnnehmen } from '@/lib/actions/termin-actions'
+import VorOrtPanel from '@/components/VorOrtPanel'
+import ChatChannel from '@/components/ChatChannel'
+import FallActivityFeed, { buildActivityEvents } from '@/components/faelle/FallActivityFeed'
+import FallDokumenteSidebar, { type FallDokumentRow } from '@/components/faelle/FallDokumenteSidebar'
+
+const DOKUMENT_TYP_LABEL: Record<string, string> = {
+  fahrzeugschein: 'Fahrzeugschein',
+  fuehrerschein: 'Führerschein',
+  schadensfotos: 'Schadensfotos',
+  gegner_daten: 'Gegnerdaten',
+  polizeibericht: 'Polizeibericht',
+  leasingvertrag: 'Leasingvertrag',
+  finanzierungsvertrag: 'Finanzierungsvertrag',
+  gewerbenachweis: 'Gewerbenachweis',
+  gf_vollmacht: 'GF-Vollmacht',
+  halter_vollmacht: 'Halter-Vollmacht',
+  halter_ausweis: 'Halter-Ausweis',
+  aerztliches_attest: 'Ärztl. Attest',
+  krankenhausbericht: 'Krankenhausbericht',
+  au_bescheinigung: 'AU-Bescheinigung',
+  gutachten: 'Gutachten',
+}
+
+const STATUS_BADGE: Record<string, string> = {
+  ausstehend: 'bg-red-50 text-red-300',
+  hochgeladen: 'bg-green-50 text-green-300',
+  geprueft: 'bg-[#4573A2]/5 text-[#7BA3CC]',
+  abgelehnt: 'bg-amber-50 text-amber-300',
+}
+
+const KANZLEI_STEPS = [
+  { key: 'kanzlei-uebergeben', label: 'Kanzlei-Übergabe', desc: 'Akte an Kanzlei übergeben' },
+  { key: 'anschlussschreiben', label: 'Anschlussschreiben', desc: 'Kanzlei hat AS an Versicherung gesendet' },
+  { key: 'regulierung', label: 'Regulierung', desc: 'Versicherung bearbeitet den Anspruch' },
+  { key: 'abgeschlossen', label: 'Zahlung eingegangen', desc: 'Regulierung abgeschlossen, Zahlung da' },
+]
+
+type TerminInfo = {
+  id: string; status: string; start_zeit: string; end_zeit: string
+  vorgeschlagenes_datum: string | null; gegenvorschlag_von: string | null; gegenvorschlag_grund: string | null
+}
+
+type TabKey = 'uebersicht' | 'dokumente' | 'dateien' | 'gutachten' | 'kanzlei' | 'timeline' | 'chat'
+
+// AAR-289: ehemals FallDetailClient. Bleibt als „voller Detail-Block" mit
+// Tabs in der neuen Shell erhalten. Children 2/3/4 (AAR-291/293/294)
+// migrieren die Tabs schrittweise in phasen-spezifische Sub-Komponenten.
+export default function FallakteVollClient({
+  fall,
+  lead,
+  dokumente,
+  pflichtdokumente,
+  parteien,
+  timeline,
+  nachrichten,
+  kundenbetreuer,
+  chatTeilnehmer,
+  aktiverTermin,
+  fallDokumente,
+}: {
+  fall: Record<string, unknown>
+  lead: { vorname: string | null; nachname: string | null; email: string | null; telefon: string | null } | null
+  dokumente: Record<string, unknown>[]
+  pflichtdokumente: Record<string, unknown>[]
+  parteien: Record<string, unknown>[]
+  timeline: Record<string, unknown>[]
+  nachrichten: Record<string, unknown>[]
+  kundenbetreuer?: { vorname: string | null; nachname: string | null; email: string | null; telefon: string | null } | null
+  chatTeilnehmer?: { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url: string | null }[]
+  aktiverTermin?: TerminInfo | null
+  fallDokumente?: FallDokumentRow[]
+}) {
+  const [tab, setTab] = useState<TabKey>('uebersicht')
+
+  // KFZ-182: Mark fall as read on mount (badges verschwinden)
+  useEffect(() => {
+    import('@/lib/faelle/mark-read-action').then(m => m.markFallAsReadAction(fall.id as string)).catch(() => {})
+  }, [fall.id])
+
+  const [uploading, setUploading] = useState(false)
+  const [uploadingDoc, setUploadingDoc] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const [finInput, setFinInput] = useState('')
+  const [finSaving, setFinSaving] = useState(false)
+  // AAR-166: ZB1-Foto-vor-Ort + OCR
+  const [zb1Uploading, setZb1Uploading] = useState(false)
+  const [zb1Result, setZb1Result] = useState<{
+    extracted: Record<string, string | null>
+    message: string
+    fieldsFound: number
+  } | null>(null)
+  const [chatInput, setChatInput] = useState('')
+  const [chatSending, setChatSending] = useState(false)
+  const [dateiUploading, setDateiUploading] = useState(false)
+  const [dateiKategorie, setDateiKategorie] = useState<string>('gutachter-foto')
+  const [showVorOrt, setShowVorOrt] = useState(false)
+  const gutachtenFormRef = useRef<HTMLFormElement>(null)
+  const docInputRef = useRef<HTMLInputElement>(null)
+  const dateiInputRef = useRef<HTMLInputElement>(null)
+  const chatEndRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
+
+  const kundenName = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : '—'
+  const fallId = fall.id as string
+  const hasGutachten = !!(fall.gutachten_eingegangen_am)
+
+  const tabs: { key: TabKey; label: string }[] = [
+    { key: 'uebersicht', label: 'Übersicht' },
+    { key: 'dokumente', label: `Dokumente (${pflichtdokumente.length})` },
+    { key: 'dateien', label: `Dateien (${dokumente.length})` },
+    { key: 'gutachten', label: 'Gutachten' },
+    { key: 'kanzlei', label: 'Kanzlei-Status' },
+    { key: 'timeline', label: 'Timeline' },
+    { key: 'chat', label: `Chat (${nachrichten.length})` },
+  ]
+
+  // Determine which kanzlei step is active
+  const kanzleiStatusOrder = ['kanzlei-uebergeben', 'anschlussschreiben', 'regulierung', 'abgeschlossen']
+  const currentStatusIndex = kanzleiStatusOrder.indexOf(fall.status as string)
+
+  // Separate pflichtdokumente into uploaded and missing
+  const uploadedDocs = pflichtdokumente.filter(d => d.status !== 'ausstehend')
+  const missingDocs = pflichtdokumente.filter(d => d.status === 'ausstehend')
+
+  // Schadensfotos from dokumente
+  const fotos = dokumente.filter(d => {
+    const typ = d.typ as string
+    return typ === 'schadensfotos' || typ === 'foto' || (d.datei_name as string)?.match(/\.(jpg|jpeg|png|webp)$/i)
+  })
+
+  async function handleGutachtenSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setError(null)
+    setSuccess(null)
+    setUploading(true)
+    try {
+      const formData = new FormData(e.currentTarget)
+      await uploadGutachten(fallId, formData)
+      setSuccess('Gutachten erfolgreich hochgeladen!')
+      gutachtenFormRef.current?.reset()
+      router.refresh()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload fehlgeschlagen')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  async function handleDocUpload(e: React.ChangeEvent<HTMLInputElement>, pflichtdokumentId?: string) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setError(null)
+    setSuccess(null)
+    setUploadingDoc(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      if (pflichtdokumentId) formData.append('pflichtdokument_id', pflichtdokumentId)
+      await uploadDokument(fallId, formData)
+      setSuccess(`"${file.name}" hochgeladen!`)
+      if (docInputRef.current) docInputRef.current.value = ''
+      router.refresh()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload fehlgeschlagen')
+    } finally {
+      setUploadingDoc(false)
+    }
+  }
+
+  async function handleChatSend() {
+    if (!chatInput.trim() || chatSending) return
+    setError(null)
+    setChatSending(true)
+    try {
+      await sendChatNachricht(fallId, chatInput)
+      setChatInput('')
+      router.refresh()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Nachricht konnte nicht gesendet werden')
+    } finally {
+      setChatSending(false)
+    }
+  }
+
+  // AAR-166: SV nimmt ZB1-Foto vor Ort auf — Base64 an /api/ocr-fahrzeugschein
+  async function handleZb1Foto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setError(null)
+    setSuccess(null)
+    setZb1Result(null)
+    setZb1Uploading(true)
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '')
+        reader.onerror = () => reject(reader.error)
+        reader.readAsDataURL(file)
+      })
+      const resp = await fetch('/api/ocr-fahrzeugschein', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fall_id: fallId, image_base64: base64 }),
+      })
+      const json = await resp.json()
+      if (json?.success && json.extracted) {
+        setZb1Result({
+          extracted: json.extracted,
+          message: json.message ?? 'Fahrzeugschein gelesen',
+          fieldsFound: json.fields_found ?? 0,
+        })
+        setSuccess('ZB1 erfolgreich ausgelesen')
+        router.refresh()
+      } else {
+        setError(json?.error ?? json?.message ?? 'OCR fehlgeschlagen')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'ZB1-Upload fehlgeschlagen')
+    } finally {
+      setZb1Uploading(false)
+      e.target.value = ''
+    }
+  }
+
+  async function handleDateiUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setError(null)
+    setSuccess(null)
+    setDateiUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('kategorie', dateiKategorie)
+      await uploadDatei(fallId, formData)
+      setSuccess(`"${file.name}" hochgeladen!`)
+      if (dateiInputRef.current) dateiInputRef.current.value = ''
+      router.refresh()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload fehlgeschlagen')
+    } finally {
+      setDateiUploading(false)
+    }
+  }
+
+  // Auto-scroll chat to bottom when messages change or tab switches to chat
+  useEffect(() => {
+    if (tab === 'chat') {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [tab, nachrichten.length])
+
+  return (
+    <div className="h-full flex flex-col">
+      <div className="w-full">
+        <Link href="/gutachter/faelle" className="text-sm text-gray-500 hover:text-gray-800 transition-colors mb-6 inline-block">
+          ← Zurück zu Fälle
+        </Link>
+
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900">
+              {(fall.fall_nummer as string) ?? (fall.id as string).slice(0, 8)}
+            </h1>
+            <p className="text-gray-500 text-sm mt-0.5">{kundenName}</p>
+          </div>
+          <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#4573A2]/5 text-[#7BA3CC]">
+            {fall.status as string}
+          </span>
+        </div>
+
+        {/* KFZ-134: Termin-Aktionen (Ablehnen + Gegenvorschlag + Kunden-Gegenvorschlag-Banner) */}
+        {aktiverTermin != null && (aktiverTermin.status === 'reserviert' || aktiverTermin.status === 'gegenvorschlag') && (
+          <TerminActionsPanel fallId={fallId} termin={aktiverTermin} />
+        )}
+
+        {/* Vor-Ort Button */}
+        {!!fall.sv_termin && !hasGutachten && (fall.status === 'sv-termin' || fall.status === 'sv-zugewiesen') && (
+          <div className="flex gap-2 mb-4">
+            <button onClick={() => setShowVorOrt(true)}
+              className="flex-1 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
+              <CameraIcon className="w-4 h-4" /> Bin angekommen — Vor-Ort Erfassung
+            </button>
+            <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent([fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', '))}`}
+              target="_blank" rel="noopener noreferrer"
+              className="bg-green-600 hover:bg-green-500 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2">
+              Navigieren
+            </a>
+          </div>
+        )}
+
+        {/* VorOrt Panel */}
+        {showVorOrt && (
+          <VorOrtPanel
+            fallId={fallId}
+            kundeName={kundenName}
+            kennzeichen={(fall.kennzeichen as string) ?? null}
+            adresse={[fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') || null}
+            onClose={() => setShowVorOrt(false)}
+            onComplete={() => { setShowVorOrt(false); router.refresh() }}
+          />
+        )}
+
+        {/* Vorschaden Warning */}
+        {(fall.vorschaden_vorhanden as boolean) && (
+          <div className="bg-red-50 border border-red-800 rounded-xl p-4 mb-5 flex items-center gap-3">
+            <AlertTriangleIcon className="w-5 h-5 text-red-400 shrink-0" />
+            <div>
+              <p className="text-red-300 font-medium text-sm">VORSCHADEN GEFUNDEN</p>
+              <p className="text-red-400 text-xs mt-0.5">
+                {fall.vorschaden_anzahl ? `${fall.vorschaden_anzahl} Vorschäden bekannt` : 'Details prüfen'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Feedback messages */}
+        {error && (
+          <div className="bg-red-50 border border-red-800 rounded-xl p-3 mb-4 flex items-center gap-2">
+            <XCircleIcon className="w-4 h-4 text-red-400 shrink-0" />
+            <p className="text-red-300 text-sm">{error}</p>
+          </div>
+        )}
+        {success && (
+          <div className="bg-green-50 border border-green-800 rounded-xl p-3 mb-4 flex items-center gap-2">
+            <CheckCircle2Icon className="w-4 h-4 text-green-400 shrink-0" />
+            <p className="text-green-300 text-sm">{success}</p>
+          </div>
+        )}
+
+        {/* KFZ-172: Activity + Pflichtdokumente Sidebar (inline, vor Tabs) */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 mb-4">
+          <FallActivityFeed
+            fallId={fall.id as string}
+            events={buildActivityEvents(
+              timeline as { id: string; typ: string; titel: string; beschreibung?: string | null; erstellt_von?: string | null; lead_id?: string | null; created_at: string }[],
+              [],
+              nachrichten as { id: string; kanal: string; sender_rolle?: string | null; nachricht: string; lead_id?: string | null; created_at: string }[],
+            )}
+            maxItems={8}
+          />
+          <FallDokumenteSidebar
+            fallId={fall.id as string}
+            aktuellePhase={fall.aktuelle_phase as string | null}
+            szenario={fall.szenario as string | null}
+            dokumente={fallDokumente ?? []}
+          />
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-1 mb-6 bg-white rounded-xl p-1 border border-gray-200 overflow-x-auto">
+          {tabs.map(t => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`flex-1 py-2 px-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
+                tab === t.key ? 'bg-zinc-700 text-gray-900' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab: Uebersicht */}
+        {tab === 'uebersicht' && (
+          <div className="space-y-5">
+            {/* Stammdaten */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <h2 className="text-sm font-medium text-gray-500 mb-4">Stammdaten</h2>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <InfoRow label="Kunde" value={kundenName} />
+                <InfoRow label="Telefon" value={lead?.telefon ?? '—'} />
+                <InfoRow label="E-Mail" value={lead?.email ?? '—'} />
+                <InfoRow label="Schadensart" value={(fall.schadens_ursache as string) ?? '—'} />
+                <InfoRow label="Kennzeichen" value={(fall.kennzeichen as string) ?? '—'} />
+                <InfoRow label="Fahrzeug" value={[fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || '—'} />
+                <InfoRow label="Schadenfall-Typ" value={(fall.schadenfall_typ as string) ?? '—'} />
+                <InfoRow label="Adresse" value={[fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') || '—'} />
+              </div>
+            </div>
+
+            {/* Schadensfotos */}
+            {fotos.length > 0 && (
+              <div className="bg-white border border-gray-200 rounded-2xl p-5">
+                <h2 className="text-sm font-medium text-gray-500 mb-3">Schadensfotos</h2>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {fotos.map(foto => (
+                    <a
+                      key={foto.id as string}
+                      href={foto.datei_url as string}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="aspect-square bg-gray-100 rounded-xl overflow-hidden hover:opacity-80 transition-opacity flex items-center justify-center"
+                    >
+                      <ImageIcon className="w-8 h-8 text-gray-400" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Flags */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <h2 className="text-sm font-medium text-gray-500 mb-3">Flags</h2>
+              <div className="flex flex-wrap gap-2">
+                {fall.personenschaden_flag ? <Badge label="Personenschaden" color="bg-red-50 text-red-300" /> : null}
+                {fall.mietwagen_flag ? <Badge label="Mietwagen" color="bg-[#4573A2]/5 text-[#7BA3CC]" /> : null}
+                {fall.leasing_flag ? <Badge label="Leasing" color="bg-violet-50 text-violet-300" /> : null}
+                {fall.finanzierung_flag ? <Badge label="Finanzierung" color="bg-amber-50 text-amber-300" /> : null}
+                {fall.gewerbe_flag ? <Badge label="Gewerbe" color="bg-cyan-50 text-cyan-300" /> : null}
+                {fall.halter_ungleich_fahrer_flag ? <Badge label="Halter != Fahrer" color="bg-orange-50 text-orange-300" /> : null}
+                {!fall.gegner_bekannt ? <Badge label="Gegner unbekannt" color="bg-gray-100 text-gray-500" /> : null}
+              </div>
+            </div>
+
+            {/* Ansprechpartner bei Claimondo */}
+            {kundenbetreuer && (
+              <div className="bg-white border border-gray-200 rounded-2xl p-5">
+                <h2 className="text-sm font-medium text-gray-500 mb-3">Ihr Ansprechpartner bei Claimondo</h2>
+                <div className="space-y-2">
+                  <p className="text-gray-900 text-sm font-medium">
+                    {`${kundenbetreuer.vorname ?? ''} ${kundenbetreuer.nachname ?? ''}`.trim() || '—'}
+                  </p>
+                  {kundenbetreuer.telefon && (
+                    <a href={`tel:${kundenbetreuer.telefon}`} className="flex items-center gap-2 text-[#7BA3CC] text-sm hover:text-[#7BA3CC]">
+                      <span className="text-gray-500 text-xs">Tel:</span> {kundenbetreuer.telefon}
+                    </a>
+                  )}
+                  {kundenbetreuer.email && (
+                    <a href={`mailto:${kundenbetreuer.email}`} className="flex items-center gap-2 text-[#7BA3CC] text-sm hover:text-[#7BA3CC] truncate">
+                      <span className="text-gray-500 text-xs">Mail:</span> {kundenbetreuer.email}
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* FIN/VIN Eingabe */}
+            {!(fall.fin_vin) && (
+              <div className="bg-white border border-gray-200 rounded-2xl p-5">
+                <h2 className="text-sm font-medium text-gray-500 mb-3">FIN / VIN eingeben</h2>
+                <p className="text-gray-500 text-xs mb-3">
+                  Fahrzeug-Identifikationsnummer (17 Zeichen) für Vorschaden-Prüfung
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    value={finInput}
+                    onChange={(e) => setFinInput(e.target.value.toUpperCase())}
+                    placeholder="WBA1234567890ABCD"
+                    maxLength={17}
+                    className="flex-1 bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                  />
+                  <button
+                    onClick={async () => {
+                      setFinSaving(true); setError(null)
+                      try {
+                        await saveFinVinGutachter(fallId, finInput)
+                        setSuccess('FIN gespeichert. Vorschaden-Prüfung gestartet.')
+                        setFinInput('')
+                        router.refresh()
+                      } catch (err) {
+                        setError(err instanceof Error ? err.message : 'Fehler')
+                      } finally {
+                        setFinSaving(false)
+                      }
+                    }}
+                    disabled={finSaving || finInput.length !== 17}
+                    className="bg-[#4573A2] hover:bg-[#4573A2] disabled:bg-zinc-700 disabled:text-gray-500 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
+                  >
+                    {finSaving ? '...' : 'Speichern'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* FIN vorhanden */}
+            {!!(fall.fin_vin) && (
+              <div className="bg-white border border-gray-200 rounded-2xl p-5">
+                <h2 className="text-sm font-medium text-gray-500 mb-2">FIN / VIN</h2>
+                <p className="text-gray-900 font-mono tracking-wider text-sm">{String(fall.fin_vin)}</p>
+                <p className="text-gray-400 text-xs mt-1">
+                  Quelle: {String(fall.fin_quelle ?? '—')}
+                  {fall.vorschaden_geprueft
+                    ? fall.vorschaden_vorhanden
+                      ? ` · Vorschaden: ${fall.vorschaden_anzahl ?? '?'} gefunden`
+                      : ' · Vorschadenfrei'
+                    : ' · Prüfung läuft...'}
+                </p>
+              </div>
+            )}
+
+            {/* Aktueller Status */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <h2 className="text-sm font-medium text-gray-500 mb-3">Aktueller Status</h2>
+              <div className="text-sm text-gray-800">
+                <InfoRow label="Status" value={(fall.status as string) ?? '—'} />
+                <div className="mt-2">
+                  <InfoRow label="SV-Termin" value={fall.sv_termin ? new Date(fall.sv_termin as string).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'} />
+                </div>
+                {!!fall.gutachten_eingegangen_am && (
+                  <div className="mt-2">
+                    <InfoRow label="Gutachten eingegangen" value={new Date(fall.gutachten_eingegangen_am as string).toLocaleDateString('de-DE')} />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab: Dokumente */}
+        {tab === 'dokumente' && (
+          <div className="space-y-5">
+            {/* AAR-166: ZB1-Foto vor Ort aufnehmen (SV macht Foto wenn Kunde
+                nicht nachgereicht hat) — Base64 → /api/ocr-fahrzeugschein,
+                Halter + FIN + Kennzeichen werden direkt auf faelle geschrieben. */}
+            <div className="bg-blue-50/50 border border-blue-200 rounded-xl p-4">
+              <h3 className="text-sm font-semibold text-blue-900 mb-1 flex items-center gap-2">
+                <UploadIcon className="w-4 h-4" /> ZB1-Foto vor Ort
+              </h3>
+              <p className="text-xs text-blue-700/80 mb-3">
+                Falls der Kunde den Fahrzeugschein nicht hochgeladen hat —
+                Foto aufnehmen, OCR extrahiert Halter + FIN + Kennzeichen automatisch.
+              </p>
+              <label className="inline-flex items-center gap-2 bg-[#4573A2] hover:bg-[#0D1B3E] text-white text-sm font-medium py-2 px-4 rounded-lg cursor-pointer transition-colors">
+                <UploadIcon className="w-4 h-4" />
+                {zb1Uploading ? 'Wird ausgewertet...' : 'ZB1-Foto aufnehmen / hochladen'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  disabled={zb1Uploading}
+                  onChange={handleZb1Foto}
+                />
+              </label>
+              {zb1Result && (
+                <div className="mt-3 rounded-lg bg-white border border-emerald-200 p-3">
+                  <p className="text-xs font-semibold text-emerald-800 mb-2">
+                    {zb1Result.fieldsFound} Felder erkannt
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    {zb1Result.extracted.kennzeichen && (<div><span className="text-gray-500 block">KZ</span><span className="font-medium text-gray-900">{zb1Result.extracted.kennzeichen}</span></div>)}
+                    {zb1Result.extracted.fin_vin && (<div><span className="text-gray-500 block">FIN</span><span className="font-mono font-medium text-gray-900">{zb1Result.extracted.fin_vin}</span></div>)}
+                    {zb1Result.extracted.fahrzeug_hersteller && (<div><span className="text-gray-500 block">Marke</span><span className="font-medium text-gray-900">{zb1Result.extracted.fahrzeug_hersteller}</span></div>)}
+                    {zb1Result.extracted.fahrzeug_modell && (<div><span className="text-gray-500 block">Modell</span><span className="font-medium text-gray-900">{zb1Result.extracted.fahrzeug_modell}</span></div>)}
+                    {zb1Result.extracted.halter_nachname && (<div className="col-span-2"><span className="text-gray-500 block">Halter</span><span className="font-medium text-gray-900">{zb1Result.extracted.halter_vorname} {zb1Result.extracted.halter_nachname}</span></div>)}
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* Missing docs as red cards */}
+            {missingDocs.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium text-red-400 mb-3 flex items-center gap-2">
+                  <AlertTriangleIcon className="w-4 h-4" />
+                  Fehlende Dokumente ({missingDocs.length})
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {missingDocs.map(doc => (
+                    <div key={doc.id as string} className="bg-red-50/30 border border-red-900/50 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <FileTextIcon className="w-4 h-4 text-red-400" />
+                        <span className="text-red-300 text-sm font-medium">
+                          {DOKUMENT_TYP_LABEL[doc.dokument_typ as string] ?? doc.dokument_typ}
+                        </span>
+                      </div>
+                      <p className="text-red-400/60 text-xs mb-3">
+                        {doc.pflicht ? 'Pflichtdokument' : 'Optional'} · Noch nicht hochgeladen
+                      </p>
+                      <label className="flex items-center justify-center gap-2 bg-red-900/50 hover:bg-red-900/70 text-red-300 text-sm font-medium py-2 px-3 rounded-lg cursor-pointer transition-colors">
+                        <UploadIcon className="w-4 h-4" />
+                        Hochladen
+                        <input
+                          type="file"
+                          className="hidden"
+                          onChange={(e) => handleDocUpload(e, doc.id as string)}
+                          disabled={uploadingDoc}
+                        />
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Uploaded docs */}
+            {uploadedDocs.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 mb-3">Vorhandene Dokumente ({uploadedDocs.length})</h3>
+                <div className="space-y-2">
+                  {uploadedDocs.map(doc => (
+                    <div key={doc.id as string} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <FileTextIcon className="w-4 h-4 text-gray-500" />
+                        <div>
+                          <p className="text-gray-800 text-sm font-medium">
+                            {DOKUMENT_TYP_LABEL[doc.dokument_typ as string] ?? doc.dokument_typ}
+                          </p>
+                          {doc.hochgeladen_am ? (
+                            <p className="text-gray-400 text-xs">{new Date(doc.hochgeladen_am as string).toLocaleDateString('de-DE')}</p>
+                          ) : null}
+                          {doc.quelle ? (
+                            <span className="text-gray-400 text-xs">Quelle: {String(doc.quelle)}</span>
+                          ) : null}
+                        </div>
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${STATUS_BADGE[doc.status as string] ?? 'bg-gray-100 text-gray-500'}`}>
+                        {doc.status as string}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Upload additional document */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <h3 className="text-sm font-medium text-gray-500 mb-3">Dokument hochladen (vor Ort eingesammelt)</h3>
+              <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-300 hover:border-zinc-500 rounded-xl p-6 cursor-pointer transition-colors">
+                <UploadIcon className="w-6 h-6 text-gray-500" />
+                <span className="text-gray-500 text-sm">{uploadingDoc ? 'Wird hochgeladen...' : 'Datei auswählen oder hierher ziehen'}</span>
+                <input
+                  ref={docInputRef}
+                  type="file"
+                  className="hidden"
+                  onChange={handleDocUpload}
+                  disabled={uploadingDoc}
+                />
+              </label>
+            </div>
+
+            {pflichtdokumente.length === 0 && uploadedDocs.length === 0 && (
+              <p className="text-gray-500 text-sm text-center py-8">Keine Pflichtdokumente vorhanden.</p>
+            )}
+          </div>
+        )}
+
+        {/* Tab: Dateien */}
+        {tab === 'dateien' && (
+          <div className="space-y-5">
+            {/* Upload section */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <UploadIcon className="w-4 h-4 text-gray-500" />
+                <h3 className="text-sm font-medium text-gray-500">Datei hochladen</h3>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <select
+                  value={dateiKategorie}
+                  onChange={(e) => setDateiKategorie(e.target.value)}
+                  className="bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                >
+                  <option value="gutachter-foto">Gutachter-Foto</option>
+                  <option value="gutachten">Gutachten</option>
+                  <option value="sonstiges">Sonstiges</option>
+                </select>
+                <label className="flex-1 flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 hover:border-zinc-500 rounded-xl p-4 cursor-pointer transition-colors">
+                  <UploadIcon className="w-5 h-5 text-gray-500" />
+                  <span className="text-gray-500 text-sm">{dateiUploading ? 'Wird hochgeladen...' : 'Datei auswählen'}</span>
+                  <input
+                    ref={dateiInputRef}
+                    type="file"
+                    className="hidden"
+                    onChange={handleDateiUpload}
+                    disabled={dateiUploading}
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* Documents grouped by kategorie */}
+            {(() => {
+              const KATEGORIE_LABEL: Record<string, string> = {
+                'kundendokument': 'Kundendokument',
+                'schadensfoto': 'Schadensfoto',
+                'gutachten': 'Gutachten',
+                'kanzlei': 'Kanzlei',
+                'gutachter-foto': 'Gutachter-Foto',
+                'unterschrift': 'Unterschrift',
+                'whatsapp-foto': 'WhatsApp-Foto',
+                'sonstiges': 'Sonstiges',
+              }
+
+              const KATEGORIE_COLOR: Record<string, string> = {
+                'kundendokument': 'bg-[#4573A2]/5 text-[#7BA3CC]',
+                'schadensfoto': 'bg-amber-50 text-amber-300',
+                'gutachten': 'bg-violet-50 text-violet-300',
+                'kanzlei': 'bg-cyan-50 text-cyan-300',
+                'gutachter-foto': 'bg-green-50 text-green-300',
+                'unterschrift': 'bg-pink-950 text-pink-300',
+                'whatsapp-foto': 'bg-emerald-50 text-emerald-300',
+                'sonstiges': 'bg-gray-100 text-gray-500',
+              }
+
+              const QUELLE_COLOR: Record<string, string> = {
+                'flowlink': 'bg-[#4573A2]/5 text-[#7BA3CC]',
+                'portal': 'bg-violet-50 text-violet-400',
+                'whatsapp': 'bg-emerald-50 text-emerald-400',
+                'gutachter': 'bg-green-50 text-green-400',
+                'admin': 'bg-amber-50 text-amber-400',
+                'kanzlei': 'bg-cyan-50 text-cyan-400',
+              }
+
+              // Group documents by kategorie
+              const grouped: Record<string, Record<string, unknown>[]> = {}
+              for (const doc of dokumente) {
+                const kat = (doc.kategorie as string) ?? 'sonstiges'
+                if (!grouped[kat]) grouped[kat] = []
+                grouped[kat].push(doc)
+              }
+
+              const kategorieOrder = ['kundendokument', 'schadensfoto', 'gutachten', 'kanzlei', 'gutachter-foto', 'unterschrift', 'whatsapp-foto', 'sonstiges']
+              const sortedKeys = Object.keys(grouped).sort(
+                (a, b) => (kategorieOrder.indexOf(a) === -1 ? 99 : kategorieOrder.indexOf(a)) - (kategorieOrder.indexOf(b) === -1 ? 99 : kategorieOrder.indexOf(b))
+              )
+
+              if (dokumente.length === 0) {
+                return (
+                  <div className="text-center py-12">
+                    <FolderOpenIcon className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500 text-sm">Noch keine Dateien vorhanden.</p>
+                  </div>
+                )
+              }
+
+              return sortedKeys.map(kat => (
+                <div key={kat}>
+                  <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
+                    <FolderOpenIcon className="w-4 h-4" />
+                    {KATEGORIE_LABEL[kat] ?? kat} ({grouped[kat].length})
+                  </h3>
+                  <div className="space-y-2">
+                    {grouped[kat].map(doc => (
+                      <div
+                        key={doc.id as string}
+                        className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between gap-3"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <FileTextIcon className="w-4 h-4 text-gray-500 shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-gray-800 text-sm font-medium truncate">{doc.datei_name as string}</p>
+                            <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${KATEGORIE_COLOR[(doc.kategorie as string) ?? 'sonstiges'] ?? 'bg-gray-100 text-gray-500'}`}>
+                                {KATEGORIE_LABEL[(doc.kategorie as string) ?? 'sonstiges'] ?? doc.kategorie ?? 'Sonstiges'}
+                              </span>
+                              {!!(doc.quelle) && (
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${QUELLE_COLOR[doc.quelle as string] ?? 'bg-gray-100 text-gray-500'}`}>
+                                  {String(doc.quelle)}
+                                </span>
+                              )}
+                              <span className="text-gray-400 text-[10px]">
+                                {new Date(doc.created_at as string).toLocaleDateString('de-DE')}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <a
+                          href={doc.datei_url as string}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="shrink-0 flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium px-3 py-2 rounded-lg transition-colors"
+                        >
+                          <DownloadIcon className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Download</span>
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
+            })()}
+          </div>
+        )}
+
+        {/* Tab: Gutachten */}
+        {tab === 'gutachten' && (
+          <div className="space-y-5">
+            {hasGutachten ? (
+              <>
+                {/* Already submitted */}
+                <div className="bg-green-50/30 border border-green-900/50 rounded-2xl p-6 flex items-center gap-4">
+                  <CheckCircle2Icon className="w-8 h-8 text-green-400 shrink-0" />
+                  <div>
+                    <p className="text-green-300 font-medium">Gutachten eingereicht</p>
+                    <p className="text-green-400/60 text-sm mt-0.5">
+                      Eingegangen am {new Date(fall.gutachten_eingegangen_am as string).toLocaleDateString('de-DE')}
+                      {fall.gutachten_betrag != null && (
+                        <> · Schadenhöhe: {Number(fall.gutachten_betrag).toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR</>
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Gutachten documents */}
+                {dokumente.filter(d => (d.typ as string) === 'gutachten').map(doc => (
+                  <div key={doc.id as string} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <FileTextIcon className="w-4 h-4 text-gray-500" />
+                      <div>
+                        <p className="text-gray-800 text-sm font-medium">{doc.datei_name as string}</p>
+                        <p className="text-gray-400 text-xs">{new Date(doc.created_at as string).toLocaleDateString('de-DE')}</p>
+                      </div>
+                    </div>
+                    <a
+                      href={doc.datei_url as string}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#7BA3CC] hover:text-[#7BA3CC] text-xs"
+                    >
+                      Öffnen
+                    </a>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <>
+                {/* Upload form */}
+                <div className="bg-white border border-gray-200 rounded-2xl p-6">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
+                      <ScaleIcon className="w-5 h-5 text-violet-400" />
+                    </div>
+                    <div>
+                      <h2 className="text-gray-900 font-medium">Gutachten hochladen</h2>
+                      <p className="text-gray-500 text-xs">PDF-Datei mit Ihrem Gutachten und Schadenhöhe</p>
+                    </div>
+                  </div>
+
+                  <form ref={gutachtenFormRef} onSubmit={handleGutachtenSubmit} className="space-y-4">
+                    {/* PDF Upload */}
+                    <div>
+                      <label className="text-sm text-gray-500 mb-2 block">Gutachten-PDF *</label>
+                      <input
+                        type="file"
+                        name="datei"
+                        accept="application/pdf"
+                        required
+                        className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-700 file:font-medium hover:file:bg-zinc-700 file:cursor-pointer file:transition-colors"
+                      />
+                    </div>
+
+                    {/* Schadenhöhe */}
+                    <div>
+                      <label className="text-sm text-gray-500 mb-2 block">Schadenhöhe (Netto-RK) *</label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          name="betrag"
+                          step="0.01"
+                          min="0"
+                          required
+                          placeholder="0,00"
+                          className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm pr-12 focus:outline-none focus:ring-2 focus:ring-[#4573A2]/50 focus:border-[#4573A2]"
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">EUR</span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={uploading}
+                      className="w-full bg-[#4573A2] hover:bg-[#4573A2] disabled:bg-zinc-700 disabled:text-gray-500 text-white font-medium py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2"
+                    >
+                      <UploadIcon className="w-4 h-4" />
+                      {uploading ? 'Wird hochgeladen...' : 'Gutachten einreichen'}
+                    </button>
+                  </form>
+                </div>
+              </>
+            )}
+
+            {/* Vor-Ort Fotos upload */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <CameraIcon className="w-4 h-4 text-gray-500" />
+                <h3 className="text-sm font-medium text-gray-500">Vor-Ort Fotos hochladen</h3>
+              </div>
+              <p className="text-gray-400 text-xs mb-3">Fotos die Sie bei der Besichtigung vor Ort gemacht haben</p>
+              <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 hover:border-zinc-500 rounded-xl p-4 cursor-pointer transition-colors">
+                <CameraIcon className="w-5 h-5 text-gray-500" />
+                <span className="text-gray-500 text-sm">{uploadingDoc ? 'Wird hochgeladen...' : 'Fotos auswählen'}</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleDocUpload}
+                  disabled={uploadingDoc}
+                />
+              </label>
+            </div>
+          </div>
+        )}
+
+        {/* Tab: Kanzlei-Status */}
+        {tab === 'kanzlei' && (
+          <div className="space-y-5">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center">
+                  <GavelIcon className="w-5 h-5 text-cyan-400" />
+                </div>
+                <div>
+                  <h2 className="text-gray-900 font-medium">Kanzlei-Bearbeitung</h2>
+                  <p className="text-gray-500 text-xs">Aktueller Stand der rechtlichen Bearbeitung</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {KANZLEI_STEPS.map((step, idx) => {
+                  const stepIdx = kanzleiStatusOrder.indexOf(step.key)
+                  const isCompleted = currentStatusIndex >= 0 && stepIdx <= currentStatusIndex
+                  const isCurrent = (fall.status as string) === step.key
+
+                  return (
+                    <div key={step.key} className="flex items-start gap-4">
+                      {/* Step indicator */}
+                      <div className="flex flex-col items-center">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                          isCompleted
+                            ? 'bg-green-600 text-white'
+                            : isCurrent
+                              ? 'bg-[#1E3A5F] text-white'
+                              : 'bg-gray-100 text-gray-400'
+                        }`}>
+                          {isCompleted ? (
+                            <CheckCircle2Icon className="w-4 h-4" />
+                          ) : (
+                            <span className="text-xs font-bold">{idx + 1}</span>
+                          )}
+                        </div>
+                        {idx < KANZLEI_STEPS.length - 1 && (
+                          <div className={`w-px h-8 mt-1 ${isCompleted ? 'bg-green-700' : 'bg-gray-100'}`} />
+                        )}
+                      </div>
+
+                      {/* Step content */}
+                      <div className="pt-1">
+                        <p className={`text-sm font-medium ${
+                          isCompleted ? 'text-green-300' : isCurrent ? 'text-[#7BA3CC]' : 'text-gray-500'
+                        }`}>
+                          {step.label}
+                        </p>
+                        <p className="text-gray-400 text-xs mt-0.5">{step.desc}</p>
+                        {isCurrent && step.key === 'regulierung' && !!fall.regulierung_am && (
+                          <p className="text-amber-400 text-xs mt-1">
+                            Seit {new Date(fall.regulierung_am as string).toLocaleDateString('de-DE')}
+                            {' · '}
+                            Tag {Math.floor((Date.now() - new Date(fall.regulierung_am as string).getTime()) / (1000 * 60 * 60 * 24))} von 14
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {currentStatusIndex < 0 && (
+                <div className="mt-6 bg-gray-100 rounded-xl p-4">
+                  <p className="text-gray-500 text-sm">
+                    Die Kanzlei-Bearbeitung hat noch nicht begonnen. Der Fall wird nach erfolgreichem Filmcheck an die Kanzlei übergeben.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Financial info for gutachter */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <h3 className="text-sm font-medium text-gray-500 mb-3">Ihre Abrechnung für diesen Fall</h3>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <InfoRow label="Gutachten-Betrag" value={fall.gutachten_betrag != null ? `${Number(fall.gutachten_betrag).toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR` : '—'} />
+                <InfoRow label="Leadpreis" value={
+                  (fall as Record<string, unknown>)._leadpreis != null
+                    ? `${Number((fall as Record<string, unknown>)._leadpreis).toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR${(fall as Record<string, unknown>)._preistyp === 'einzel' ? ' (Einzel)' : ''}`
+                    : 'Wird berechnet'
+                } />
+                <InfoRow label="Status" value={currentStatusIndex >= 3 ? 'Bezahlt' : currentStatusIndex >= 0 ? 'In Bearbeitung' : 'Ausstehend'} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab: Timeline */}
+        {tab === 'timeline' && (
+          <div className="space-y-3">
+            {timeline.map(entry => (
+              <div key={entry.id as string} className="bg-white border border-gray-200 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-gray-800 text-sm font-medium">{entry.titel as string}</p>
+                  <span className="text-gray-400 text-xs">
+                    {new Date(entry.created_at as string).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+                {entry.beschreibung ? <p className="text-gray-500 text-xs">{String(entry.beschreibung)}</p> : null}
+              </div>
+            ))}
+            {timeline.length === 0 && (
+              <p className="text-gray-500 text-sm text-center py-8">Keine Einträge.</p>
+            )}
+          </div>
+        )}
+
+        {/* Tab: Chat */}
+        {tab === 'chat' && (
+          <GutachterChatTabs fallId={fallId} teilnehmer={chatTeilnehmer ?? []} />
+        )}
+      </div>
+    </div>
+  )
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-xs text-gray-500 mb-0.5">{label}</p>
+      <p className="text-gray-800 text-sm">{value}</p>
+    </div>
+  )
+}
+
+function Badge({ label, color }: { label: string; color: string }) {
+  return <span className={`px-2.5 py-1 rounded-full text-[10px] font-medium ${color}`}>{label}</span>
+}
+
+type GutachterTeilnehmer = { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url: string | null }
+
+function GutachterChatTabs({ fallId, teilnehmer }: { fallId: string; teilnehmer: GutachterTeilnehmer[] }) {
+  const [ch, setCh] = useState<'alle' | 'portal-kunde-gutachter' | 'portal-kunde-claimondo'>('alle')
+  const [userId, setUserId] = useState('')
+  useEffect(() => { createClient().auth.getUser().then(({ data: { user } }) => { if (user) setUserId(user.id) }) }, [])
+  if (!userId) return null
+
+  // Andere Teilnehmer (nicht der SV selbst)
+  const otherTeilnehmer = teilnehmer.filter(t => t.user_id !== userId)
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-2xl flex flex-col" style={{ height: '70vh' }}>
+      {/* KFZ-129: Teilnehmer-Header */}
+      {otherTeilnehmer.length > 0 && (
+        <div className="px-4 py-3 border-b border-gray-200 bg-gray-50/50">
+          <div className="flex flex-wrap gap-3">
+            {otherTeilnehmer.map(t => {
+              const name = [t.vorname, t.nachname].filter(Boolean).join(' ') || 'Unbekannt'
+              const initials = [t.vorname?.[0], t.nachname?.[0]].filter(Boolean).join('').toUpperCase() || '?'
+              const rolleText = t.rolle === 'kundenbetreuer' ? 'KB' : t.rolle === 'kunde' ? 'Kunde' : t.rolle === 'admin' ? 'Admin' : t.rolle
+              return (
+                <div key={t.user_id} className="flex items-center gap-1.5">
+                  {t.avatar_url ? (
+                    <img src={t.avatar_url} alt={name} className="w-6 h-6 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-[#1E3A5F] flex items-center justify-center text-white text-[9px] font-bold">{initials}</div>
+                  )}
+                  <span className="text-xs text-gray-700">{name}</span>
+                  <span className="text-[9px] text-gray-400">({rolleText})</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+      <div className="flex border-b border-gray-200 shrink-0">
+        <button onClick={() => setCh('alle')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'alle' ? 'border-[#4573A2] text-[#4573A2]' : 'border-transparent text-gray-400'}`}>Alle</button>
+        <button onClick={() => setCh('portal-kunde-claimondo')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'portal-kunde-claimondo' ? 'border-[#4573A2] text-[#4573A2]' : 'border-transparent text-gray-400'}`}>Claimondo</button>
+        <button onClick={() => setCh('portal-kunde-gutachter')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'portal-kunde-gutachter' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-400'}`}>Kunde</button>
+      </div>
+      <div className="flex-1 min-h-0">
+        <ChatChannel fallId={fallId} kanal={ch} currentUserId={userId} />
+      </div>
+    </div>
+  )
+}
+
+// ─── KFZ-134: Termin-Aktionen Panel ────────────────────────────────────────
+
+function TerminActionsPanel({ fallId, termin }: { fallId: string; termin: TerminInfo }) {
+  const router = useRouter()
+  const [modal, setModal] = useState<'ablehnen' | 'gegenvorschlag' | null>(null)
+  const [grund, setGrund] = useState('')
+  const [neuerTermin, setNeuerTermin] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const isKundenGegenvorschlag = termin.status === 'gegenvorschlag' && termin.gegenvorschlag_von === 'kunde'
+
+  async function handleAblehnen() {
+    setLoading(true)
+    const result = await terminAblehnen({ grund, source: 'sv_portal', fallId })
+    setLoading(false)
+    if (result.success) { setModal(null); router.refresh() }
+  }
+
+  async function handleGegenvorschlag() {
+    if (!neuerTermin) return
+    setLoading(true)
+    const result = await terminGegenvorschlag({ neuesDatum: neuerTermin, grund, source: 'sv_portal', fallId })
+    setLoading(false)
+    if (result.success) { setModal(null); router.refresh() }
+  }
+
+  async function handleAnnehmen() {
+    setLoading(true)
+    const result = await terminAnnehmen({ source: 'sv_portal', fallId })
+    setLoading(false)
+    if (result.success) router.refresh()
+  }
+
+  return (
+    <div className="mb-4 space-y-3">
+      {/* Kunden-Gegenvorschlag Banner */}
+      {isKundenGegenvorschlag && termin.vorgeschlagenes_datum && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <p className="text-sm font-medium text-amber-800 mb-1">Der Kunde hat einen Gegenvorschlag gemacht</p>
+          <p className="text-sm text-amber-700">
+            Neues Datum: {new Date(termin.vorgeschlagenes_datum).toLocaleString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+          </p>
+          {termin.gegenvorschlag_grund && (
+            <p className="text-xs text-amber-600 mt-1">Grund: {termin.gegenvorschlag_grund}</p>
+          )}
+          <div className="flex gap-2 mt-3">
+            <button onClick={handleAnnehmen} disabled={loading}
+              className="flex-1 py-2 rounded-lg text-sm font-medium text-white bg-[#1E3A5F] hover:bg-[#4573A2] transition-colors disabled:opacity-50">
+              {loading ? '...' : 'Annehmen'}
+            </button>
+            <button onClick={() => setModal('gegenvorschlag')} disabled={loading}
+              className="flex-1 py-2 rounded-lg text-sm font-medium text-[#1E3A5F] bg-white border border-[#1E3A5F] hover:bg-[#f8f9fb] transition-colors disabled:opacity-50">
+              Erneut gegenvorschlagen
+            </button>
+            <button onClick={() => setModal('ablehnen')} disabled={loading}
+              className="py-2 px-3 rounded-lg text-sm font-medium text-red-600 bg-white border border-red-200 hover:bg-red-50 transition-colors disabled:opacity-50">
+              Ablehnen
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Hinweistext + Buttons (nur bei reserviert) */}
+      {termin.status === 'reserviert' && (
+        <>
+          <div className="bg-[#4573A2]/5 border border-[#7BA3CC]/30 rounded-xl px-4 py-3">
+            <p className="text-xs text-[#1E3A5F]">
+              Termin ist standardmäßig bestätigt. Hier nur eingreifen wenn Sie ablehnen oder verschieben möchten.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => setModal('ablehnen')}
+              className="flex-1 flex items-center justify-center gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 text-sm py-2.5 rounded-lg transition-colors border border-red-200">
+              <XCircleIcon className="w-4 h-4" /> Termin ablehnen
+            </button>
+            <button onClick={() => setModal('gegenvorschlag')}
+              className="flex-1 flex items-center justify-center gap-2 text-[#1E3A5F] hover:bg-[#4573A2]/5 text-sm py-2.5 rounded-lg transition-colors border border-[#4573A2]">
+              <ClockIcon className="w-4 h-4" /> Gegenvorschlag
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* Ablehnen Modal */}
+      {modal === 'ablehnen' && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Termin ablehnen?</h3>
+            <p className="text-sm text-gray-500 mb-4">Claimondo wird einen anderen Gutachter zuweisen.</p>
+            <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 mb-4 focus:outline-none focus:border-[#4573A2] resize-none" rows={3} />
+            <div className="flex gap-2">
+              <button onClick={() => setModal(null)}
+                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
+                Abbrechen
+              </button>
+              <button onClick={handleAblehnen} disabled={loading}
+                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-50">
+                {loading ? 'Wird abgelehnt...' : 'Ja, ablehnen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Gegenvorschlag Modal */}
+      {modal === 'gegenvorschlag' && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Gegenvorschlag</h3>
+            <p className="text-sm text-gray-500 mb-4">Schlagen Sie einen alternativen Termin vor:</p>
+            <input type="datetime-local" value={neuerTermin} onChange={e => setNeuerTermin(e.target.value)}
+              min={new Date().toISOString().slice(0, 16)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 mb-3 focus:outline-none focus:border-[#4573A2]" />
+            <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 mb-4 focus:outline-none focus:border-[#4573A2] resize-none" rows={2} />
+            <div className="flex gap-2">
+              <button onClick={() => setModal(null)}
+                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
+                Abbrechen
+              </button>
+              <button onClick={handleGegenvorschlag} disabled={loading || !neuerTermin}
+                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-[#1E3A5F] hover:bg-[#4573A2] transition-colors disabled:opacity-50">
+                {loading ? 'Wird gesendet...' : 'Gegenvorschlag senden'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

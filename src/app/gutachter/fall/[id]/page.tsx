@@ -67,7 +67,7 @@ export default async function GutachterFallPage({
       .order('created_at', { ascending: false }),
     supabase
       .from('gutachter_abrechnungen')
-      .select('leadpreis, preistyp')
+      .select('leadpreis, preistyp, ausgezahlt_am')
       .eq('fall_id', id)
       .eq('sv_id', sv.id)
       .maybeSingle(),
@@ -136,14 +136,15 @@ export default async function GutachterFallPage({
       fall={fallWithAbrechnung}
       lead={lead}
       dokumente={dokumente ?? []}
-      pflichtdokumente={pflichtdokumente ?? []}
+      pflichtdokumente={(pflichtdokumente ?? []) as unknown as Parameters<typeof FallDetailClient>[0]['pflichtdokumente']}
       parteien={parteien ?? []}
-      timeline={timeline ?? []}
+      timeline={(timeline ?? []) as unknown as Parameters<typeof FallDetailClient>[0]['timeline']}
       nachrichten={nachrichten ?? []}
       kundenbetreuer={kundenbetreuer}
       chatTeilnehmer={chatTeilnehmer}
       aktiverTermin={aktiverTermin}
       fallDokumente={fallDokumente}
+      abrechnungAusgezahltAm={(abrechnung as { ausgezahlt_am?: string | null } | null)?.ausgezahlt_am ?? null}
     />
   )
 }
