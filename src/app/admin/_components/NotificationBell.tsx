@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { BellIcon, MessageSquareIcon, ActivityIcon } from 'lucide-react'
+import { BellIcon, MessageSquareIcon, ActivityIcon, CheckSquareIcon } from 'lucide-react'
 
 type Notification = {
   id: string
@@ -15,7 +15,20 @@ type Notification = {
   erstellt_am: string
 }
 
-type Tab = 'updates' | 'nachrichten'
+// AAR-225: Tasks-Tab — eigene Tabelle (tasks) statt benachrichtigungen.
+type TaskItem = {
+  id: string
+  titel: string
+  beschreibung: string | null
+  status: string | null
+  prioritaet: number | null
+  deadline: string | null
+  fall_id: string | null
+  lead_id: string | null
+  created_at: string
+}
+
+type Tab = 'updates' | 'tasks' | 'nachrichten'
 
 const TYP_ICONS: Record<string, string> = {
   'neuer-lead': '📋', 'neuer-fall': '📁', 'gutachten-upload': '📄', 'qc-bestanden': '✅',
@@ -33,10 +46,14 @@ export default function NotificationBell({ variant = 'light' }: { variant?: 'lig
   const [tab, setTab] = useState<Tab>('updates')
   const [items, setItems] = useState<Notification[]>([])
   const [unread, setUnread] = useState(0)
+  // AAR-225: Tasks-State (offene Tasks für aktuellen User).
+  const [tasks, setTasks] = useState<TaskItem[]>([])
   const ref = useRef<HTMLDivElement>(null)
 
   const load = useCallback(async () => {
-    const [{ data }, { count }] = await Promise.all([
+    const user = (await supabase.auth.getUser())?.data?.user
+    const userId = user?.id
+    const [{ data: notifData }, { count }, { data: taskData }] = await Promise.all([
       supabase
         .from('benachrichtigungen')
         .select('id, typ, titel, beschreibung, link, gelesen, erstellt_am')
@@ -46,18 +63,31 @@ export default function NotificationBell({ variant = 'light' }: { variant?: 'lig
         .from('benachrichtigungen')
         .select('id', { count: 'exact', head: true })
         .eq('gelesen', false),
+      // AAR-225: Tasks für aktuellen User (zugewiesen_an ODER empfaenger_user_id),
+      // nur offene (status != 'erledigt'). Limit 20 für Performance.
+      userId
+        ? supabase
+            .from('tasks')
+            .select('id, titel, beschreibung, status, prioritaet, deadline, fall_id, lead_id, created_at')
+            .or(`zugewiesen_an.eq.${userId},empfaenger_user_id.eq.${userId}`)
+            .neq('status', 'erledigt')
+            .order('deadline', { ascending: true, nullsFirst: false })
+            .limit(20)
+        : Promise.resolve({ data: [] }),
     ])
-    setItems(data ?? [])
+    setItems(notifData ?? [])
     setUnread(count ?? 0)
+    setTasks((taskData ?? []) as TaskItem[])
   }, [supabase])
 
   useEffect(() => { load() }, [load])
 
-  // Realtime
+  // Realtime — auf benachrichtigungen UND tasks
   useEffect(() => {
     const channel = supabase
-      .channel('notifications')
+      .channel('notifications-and-tasks')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'benachrichtigungen' }, () => load())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => load())
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [supabase, load])
@@ -136,7 +166,20 @@ export default function NotificationBell({ variant = 'light' }: { variant?: 'lig
     return item && !item.gelesen
   })).length
 
-  const visibleItems = tab === 'nachrichten' ? null : updates // null = use bundled view
+  // AAR-225: Task-Click → routet zum relevanten Fall/Lead-Kontext.
+  function taskLink(task: TaskItem): string | null {
+    if (task.fall_id) return `/admin/faelle/${task.fall_id}#tasks`
+    if (task.lead_id) return `/dispatch/leads/${task.lead_id}`
+    return null
+  }
+  async function handleTaskClick(task: TaskItem) {
+    setOpen(false)
+    const link = taskLink(task)
+    if (link) router.push(link)
+  }
+  // Überfällige Tasks für Badge-Counter.
+  const now = new Date()
+  const tasksOverdueCount = tasks.filter(t => t.deadline && new Date(t.deadline) < now).length
 
   return (
     <div ref={ref} className="relative">
@@ -170,19 +213,31 @@ export default function NotificationBell({ variant = 'light' }: { variant?: 'lig
                 </button>
               )}
             </div>
+            {/* AAR-225: 3 Tabs (Updates / Tasks / Nachrichten) mit Tab-spezifischen
+                Badge-Countern. Tasks zeigt rote Badge nur für überfällige. */}
             <div className="flex gap-4">
-              <button onClick={() => setTab('updates')}
-                className={`pb-2 text-xs font-medium border-b-2 transition-colors flex items-center gap-1.5 ${
-                  tab === 'updates' ? 'border-[#4573A2] text-[#4573A2]' : 'border-transparent text-gray-400 hover:text-gray-600'
-                }`}>
-                <ActivityIcon className="w-3.5 h-3.5" /> Updates
-              </button>
-              <button onClick={() => setTab('nachrichten')}
-                className={`pb-2 text-xs font-medium border-b-2 transition-colors flex items-center gap-1.5 ${
-                  tab === 'nachrichten' ? 'border-[#4573A2] text-[#4573A2]' : 'border-transparent text-gray-400 hover:text-gray-600'
-                }`}>
-                <MessageSquareIcon className="w-3.5 h-3.5" /> Nachrichten
-              </button>
+              <TabButton
+                active={tab === 'updates'}
+                onClick={() => setTab('updates')}
+                icon={<ActivityIcon className="w-3.5 h-3.5" />}
+                label="Updates"
+                badge={updates.filter(u => !u.gelesen).length}
+              />
+              <TabButton
+                active={tab === 'tasks'}
+                onClick={() => setTab('tasks')}
+                icon={<CheckSquareIcon className="w-3.5 h-3.5" />}
+                label="Tasks"
+                badge={tasks.length}
+                badgeColor={tasksOverdueCount > 0 ? 'red' : 'blue'}
+              />
+              <TabButton
+                active={tab === 'nachrichten'}
+                onClick={() => setTab('nachrichten')}
+                icon={<MessageSquareIcon className="w-3.5 h-3.5" />}
+                label="Nachrichten"
+                badge={bundledUnreadCount}
+              />
             </div>
           </div>
 
@@ -214,6 +269,43 @@ export default function NotificationBell({ variant = 'light' }: { variant?: 'lig
                     </div>
                   </button>
                 ))
+              )
+            ) : tab === 'tasks' ? (
+              /* AAR-225: Tasks Tab — offene Tasks für aktuellen User */
+              tasks.length === 0 ? (
+                <div className="px-4 py-8 text-center">
+                  <p className="text-gray-400 text-sm">Keine offenen Tasks</p>
+                </div>
+              ) : (
+                tasks.map(t => {
+                  const overdue = t.deadline && new Date(t.deadline) < now
+                  return (
+                    <button key={t.id} onClick={() => handleTaskClick(t)}
+                      className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors ${overdue ? 'bg-red-50/50' : ''}`}>
+                      <div className="flex items-start gap-3">
+                        {overdue ? (
+                          <div className="w-2 h-2 rounded-full bg-red-500 mt-1.5 shrink-0" />
+                        ) : (
+                          <div className="w-2 shrink-0" />
+                        )}
+                        <div className="w-6 h-6 flex items-center justify-center text-sm shrink-0">
+                          {overdue ? '⚠️' : '📌'}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm leading-snug text-gray-900 font-medium">{t.titel}</p>
+                          {t.beschreibung && <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">{t.beschreibung}</p>}
+                          <p className={`text-[11px] mt-1 ${overdue ? 'text-red-600 font-semibold' : 'text-gray-300'}`}>
+                            {t.deadline
+                              ? overdue
+                                ? `Überfällig seit ${timeAgo(t.deadline)}`
+                                : `Fällig ${new Date(t.deadline).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}`
+                              : 'Ohne Frist'}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  )
+                })
               )
             ) : (
               /* KFZ-130: Nachrichten Tab — gebuendelt */
@@ -258,6 +350,36 @@ export default function NotificationBell({ variant = 'light' }: { variant?: 'lig
         </div>
       )}
     </div>
+  )
+}
+
+// AAR-225: TabButton mit optionalem Badge-Counter (Anzahl unread/Tasks).
+function TabButton({
+  active, onClick, icon, label, badge, badgeColor = 'blue',
+}: {
+  active: boolean
+  onClick: () => void
+  icon: React.ReactNode
+  label: string
+  badge: number
+  badgeColor?: 'red' | 'blue'
+}) {
+  const badgeClass = badgeColor === 'red' ? 'bg-red-500' : 'bg-[#4573A2]'
+  return (
+    <button
+      onClick={onClick}
+      className={`pb-2 text-xs font-medium border-b-2 transition-colors flex items-center gap-1.5 ${
+        active ? 'border-[#4573A2] text-[#4573A2]' : 'border-transparent text-gray-400 hover:text-gray-600'
+      }`}
+    >
+      {icon}
+      {label}
+      {badge > 0 && (
+        <span className={`inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full ${badgeClass} text-[9px] font-bold text-white leading-none`}>
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
+    </button>
   )
 }
 

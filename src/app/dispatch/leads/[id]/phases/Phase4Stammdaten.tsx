@@ -232,16 +232,24 @@ export default function Phase4Stammdaten() {
   const [gegnerKzDraft, setGegnerKzDraft] = useState(l.gegner_kennzeichen ?? '')
   const [, startTransition] = useTransition()
 
-  // Live-Flags aus gegner-kz-flags — bei jedem Tippen neu berechnet
-  const kzFlags = checkKZFlags(gegnerKzDraft, l.schadentyp ?? null)
+  // AAR-217 Bug 2: Gegner-KZ wird beim Blur formatiert (gleicher Pfad wie
+  // Eigenes-KZ via formatKennzeichen) — vorher wurde nur uppercase + trim
+  // gemacht, also "B AB 1234" landete als "B AB 1234" in der DB (statt
+  // "B-AB 1234"). Auch die Live-Flags laufen jetzt auf dem formatierten
+  // Wert (sonst sah die Auto-Format-Anzeige schöner aus aber die
+  // Auslandskennzeichen-Logik bekam noch den Roh-Draft).
+  const kzFlags = checkKZFlags(formatKennzeichen(gegnerKzDraft), l.schadentyp ?? null)
 
   function saveGegnerKz() {
-    const normalized = gegnerKzDraft.toUpperCase().trim()
-    if (normalized === (l.gegner_kennzeichen ?? '')) return
-    const flags = checkKZFlags(normalized, l.schadentyp ?? null)
+    const formatted = formatKennzeichen(gegnerKzDraft)
+    // Draft visuell auf den formatierten Wert ziehen (analog zu InlineField
+    // nach AAR-223 Fix), damit der MA sofort die finale Schreibweise sieht.
+    if (formatted !== gegnerKzDraft) setGegnerKzDraft(formatted)
+    if (formatted === (l.gegner_kennzeichen ?? '')) return
+    const flags = checkKZFlags(formatted, l.schadentyp ?? null)
     startTransition(async () => {
       await saveStammdaten(leadId, {
-        gegner_kennzeichen: normalized || null,
+        gegner_kennzeichen: formatted || null,
         fahrerflucht: flags.fahrerflucht,
         auslandskennzeichen: flags.auslandskennzeichen,
       })
