@@ -298,6 +298,18 @@ export default function Phase4Stammdaten() {
   const l = lead as unknown as LeadFields
   const leadId = lead.id
   const [gegnerKzDraft, setGegnerKzDraft] = useState(l.gegner_kennzeichen ?? '')
+  // AAR-272: Sync mit Server-Props nach router.refresh() — sonst bleibt der
+  // Draft stale (z.B. nach OCR-Update via ZB1 oder nach manuellem
+  // Supabase-Insert). Nur syncen wenn der MA das Feld nicht gerade tippt
+  // (sonst überschreibt der Sync seine Eingabe).
+  useEffect(() => {
+    setGegnerKzDraft((prev) => {
+      const serverValue = l.gegner_kennzeichen ?? ''
+      // Nur überschreiben wenn der lokale Draft leer ist ODER bereits dem
+      // bisherigen Server-Wert entsprach (= MA hat nichts angefangen zu tippen).
+      return prev === '' || prev === serverValue ? serverValue : prev
+    })
+  }, [l.gegner_kennzeichen])
   const [, startTransition] = useTransition()
 
   // AAR-217 Bug 2: Gegner-KZ wird beim Blur formatiert (gleicher Pfad wie
