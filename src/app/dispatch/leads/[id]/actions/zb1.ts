@@ -40,7 +40,7 @@ export async function triggerZb1UploadRequest(
   const db = createAdminClient()
   const { data: lead } = await db
     .from('leads')
-    .select('id, vorname, nachname, telefon, email, zb1_token')
+    .select('id, vorname, nachname, telefon, email, zb1_token, zb1_token_expires_at, zb1_status')
     .eq('id', leadId)
     .single()
   if (!lead) return { success: false, error: 'Lead nicht gefunden' }
@@ -53,17 +53,25 @@ export async function triggerZb1UploadRequest(
     return { success: false, error: 'Keine Email-Adresse am Lead' }
   }
 
-  // Token erzeugen (oder vorhandenen wiederverwenden) — der Kunde erhält
-  // keinen Link sondern antwortet direkt per WA. Token ist nur für Tracking
-  // + ggf. spätere Portal-Upload-Route.
+  // AAR-296: Token-Lifecycle — wiederverwenden wenn noch gültig + nicht
+  // schon hochgeladen, sonst neu generieren. Expiry 7 Tage.
   const { randomBytes } = await import('crypto')
-  const token = lead.zb1_token ?? randomBytes(24).toString('hex')
+  const expired =
+    !lead.zb1_token_expires_at ||
+    new Date(lead.zb1_token_expires_at).getTime() < Date.now()
+  const reuseToken =
+    lead.zb1_token && !expired && lead.zb1_status !== 'hochgeladen'
+  const token = reuseToken ? lead.zb1_token : randomBytes(24).toString('hex')
+  const expiresAt = reuseToken
+    ? lead.zb1_token_expires_at
+    : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 
   const now = new Date().toISOString()
   const { error: updErr } = await db
     .from('leads')
     .update({
       zb1_token: token,
+      zb1_token_expires_at: expiresAt,
       zb1_status: 'gesendet',
       zb1_gesendet_am: now,
       updated_at: now,
@@ -71,14 +79,25 @@ export async function triggerZb1UploadRequest(
     .eq('id', leadId)
   if (updErr) return { success: false, error: updErr.message }
 
+  // AAR-296: Upload-Link für Web-Page (primärer Weg, Twilio bleibt Fallback)
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
+  const uploadUrl = `${baseUrl}/upload/zb1/${token}`
+
   // Versand (non-critical für den Status — wenn das Template fehlt oder
   // Twilio down ist, soll der Dispatcher nicht komplett blockiert werden).
+  // AAR-296: Web-Upload-Link wird in SMS/Email mitgeschickt (primärer Weg).
+  // WhatsApp-Template muss den Link als zweite Variable haben — bis das
+  // Template upgraded ist, bleibt der WA-Inbound-Webhook der Fallback.
   try {
     if (kanal === 'whatsapp') {
       const { sendCommunication } = await import('@/lib/communications/send')
       await sendCommunication('zb1_upload_anfrage', {
         telefon: telefon!,
         '1': lead.vorname ?? '',
+        // AAR-296: zweite Variable für Upload-Link — Template muss {{2}}
+        // enthalten. Falls Template nur {{1}} hat, wird {{2}} ignoriert
+        // (Twilio Content API ist tolerant).
+        '2': uploadUrl,
       })
     } else if (kanal === 'sms') {
       const accountSid = process.env.TWILIO_ACCOUNT_SID
@@ -90,7 +109,8 @@ export async function triggerZb1UploadRequest(
       let normalTo = telefon!.replace(/\s/g, '')
       if (normalTo.startsWith('0')) normalTo = '+49' + normalTo.slice(1)
       else if (!normalTo.startsWith('+')) normalTo = '+' + normalTo
-      const body = `Hallo ${lead.vorname ?? ''}, bitte schicken Sie uns ein Foto Ihres Fahrzeugscheins (Vorderseite) als Antwort auf diese Nachricht. Claimondo.`
+      // AAR-296: SMS enthält direkten Upload-Link statt nur Aufforderung zur Antwort.
+      const body = `Hallo ${lead.vorname ?? ''}, bitte fotografieren Sie Ihren Fahrzeugschein (Vorderseite) und laden ihn hier hoch: ${uploadUrl} (Link gültig 7 Tage). Claimondo.`
       const params = new URLSearchParams()
       params.set('From', smsFrom)
       params.set('To', normalTo)
@@ -111,15 +131,14 @@ export async function triggerZb1UploadRequest(
         return { success: false, error: `Twilio-SMS Fehler ${resp.status}: ${text.slice(0, 200)}` }
       }
     } else if (kanal === 'email') {
-      // Minimal: Nutze sendEmail mit einem einfachen Text-Body. Eigenes
-      // Template kann später über /lib/email/google/templates nachgereicht werden.
+      // AAR-296: Email enthält jetzt einen Web-Upload-Link statt „antworten Sie".
       const { sendEmail } = await import('@/lib/email/google/client')
-      const text = `Hallo ${lead.vorname ?? ''},\n\nBitte antworten Sie kurz auf diese Mail mit einem Foto Ihres Fahrzeugscheins (Vorderseite). Wir lesen die Daten automatisch aus und setzen Ihren Fall fort.\n\nDanke!\nClaimondo`
+      const text = `Hallo ${lead.vorname ?? ''},\n\nbitte fotografieren Sie Ihren Fahrzeugschein (Vorderseite) und laden ihn über folgenden Link hoch:\n\n${uploadUrl}\n\n(Link ist 7 Tage gültig.)\n\nWir lesen die Daten automatisch aus und setzen Ihren Fall fort.\n\nDanke!\nClaimondo`
       await sendEmail({
         to: lead.email!,
         subject: 'Foto Ihres Fahrzeugscheins — Claimondo',
         text,
-        html: `<p>Hallo ${lead.vorname ?? ''},</p><p>Bitte antworten Sie kurz auf diese Mail mit einem Foto Ihres Fahrzeugscheins (Vorderseite). Wir lesen die Daten automatisch aus und setzen Ihren Fall fort.</p><p>Danke!<br/>Claimondo</p>`,
+        html: `<p>Hallo ${lead.vorname ?? ''},</p><p>bitte fotografieren Sie Ihren Fahrzeugschein (Vorderseite) und laden ihn über den folgenden Link hoch:</p><p><a href="${uploadUrl}" style="display:inline-block;background:#0D1B3E;color:#fff;padding:10px 20px;text-decoration:none;border-radius:8px;">Fahrzeugschein hochladen</a></p><p style="font-size:12px;color:#666;">Link ist 7 Tage gültig.</p><p>Danke!<br/>Claimondo</p>`,
       })
     }
   } catch (err) {

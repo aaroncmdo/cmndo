@@ -9,7 +9,7 @@
 // dem Lead. Nach Upload wird zb1_status='hochgeladen' und der Dispatcher
 // bekommt eine Benachrichtigung.
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { triggerZb1UploadRequest, saveStammdaten } from '../actions'
 import {
@@ -48,6 +48,15 @@ export default function Zb1UploadCard({
   const [kanal, setKanal] = useState<'whatsapp' | 'sms' | 'email'>('whatsapp')
   const [pending, startTransition] = useTransition()
   const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null)
+
+  // AAR-296 W4: Polling während Status='gesendet'/'geoeffnet' — alle 10s
+  // router.refresh() um Kunden-Upload sofort zu sehen. Stoppt automatisch
+  // wenn Status wechselt.
+  useEffect(() => {
+    if (zb1Status !== 'gesendet' && zb1Status !== 'geoeffnet') return
+    const iv = setInterval(() => router.refresh(), 10_000)
+    return () => clearInterval(iv)
+  }, [zb1Status, router])
 
   function chooseManuell() {
     setToggle(false)
