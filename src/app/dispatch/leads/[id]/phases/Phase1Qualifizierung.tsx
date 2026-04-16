@@ -228,22 +228,9 @@ export default function Phase1Qualifizierung() {
           className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm h-28 resize-none font-mono"
           placeholder={'Wie ist es passiert? (offene Beschreibung — Sprachregel: niemals „Schuld")'}
         />
-        <div className="flex flex-wrap gap-2 text-[10px]">
-          {HERGANG_BAUSTEINE.map((b) => {
-            const hit = (draft.unfallhergang ?? '').includes(b.match)
-            return (
-              <span
-                key={b.label}
-                className={`flex items-center gap-1 px-1.5 py-0.5 rounded ${
-                  hit ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-400'
-                }`}
-              >
-                {hit ? <CheckCircleIcon className="w-3 h-3" /> : <span className="w-3 h-3 inline-block" />}
-                {b.label.replace(/\?$/, '')}
-              </span>
-            )
-          })}
-        </div>
+        {/* AAR-261: Checkliste-Labels darunter entfernt — die Chips oben
+            erfüllen beide Funktionen (Klick + Visual). Die Dopplung war
+            visuell verwirrend. */}
         <div className="flex gap-2">
           {([
             { v: 'gegner', label: 'Gegner hat verursacht' },
