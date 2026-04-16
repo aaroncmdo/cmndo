@@ -44,4 +44,7 @@ export type SvSuggestion = {
   ablehnungen30d: number
   score: number
   reasons: string[]
+  // AAR-264: Wunschtermin-Verfügbarkeit (nur gesetzt wenn Lead Wunschtermin hat)
+  verfuegbarAmWunschtermin?: boolean
+  naechsterFreierSlot?: string | null
 }

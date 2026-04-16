@@ -20,7 +20,7 @@ export async function listSvSuggestionsForLead(leadId: string): Promise<{
 
   const { data: lead } = await supabase
     .from('leads')
-    .select('unfallort_lat, unfallort_lng, kunde_lat, kunde_lng')
+    .select('unfallort_lat, unfallort_lng, kunde_lat, kunde_lng, wunschtermin')
     .eq('id', leadId)
     .single()
 
@@ -35,8 +35,13 @@ export async function listSvSuggestionsForLead(leadId: string): Promise<{
     return { success: false, error: 'Lead hat keine Koordinaten (Unfallort/Kunden-Adresse fehlt)' }
   }
 
+  // AAR-264: Wunschtermin durchreichen — findBestSV macht Kalender-Check + Score-Bonus
+  const wunschterminIso = (lead as { wunschtermin: string | null }).wunschtermin
   const { findBestSV } = await import('@/lib/dispatch/findBestSV')
-  const candidates = await findBestSV({ fallLat: Number(lat), fallLng: Number(lng) }, 8)
+  const candidates = await findBestSV(
+    { fallLat: Number(lat), fallLng: Number(lng), wunschterminIso },
+    8,
+  )
 
   return { success: true, suggestions: candidates as SvSuggestion[] }
 }

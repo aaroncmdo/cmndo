@@ -22,6 +22,8 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   // AAR-265: FK auf versicherungen-Stammdaten (Autocomplete in Phase 4)
   'gegner_versicherung_id',
   'gegner_schadennummer', 'unfalldatum', 'unfall_uhrzeit',
+  // AAR-264: Wunschtermin in Phase 2 — wird auch fürs SV-Matching genutzt
+  'wunschtermin',
   'unfallort', 'unfallort_lat', 'unfallort_lng', 'unfallort_kategorie',
   // AAR-135 Auto-Flags (von gegner-kz-flags.ts berechnet)
   'fahrerflucht', 'auslandskennzeichen',

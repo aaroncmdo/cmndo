@@ -5,13 +5,13 @@
 // (kein separater Speichern-Button mehr) + zusätzliches Freitextfeld
 // sv_treffpunkt für konkrete Treffpunkt-Hinweise (Parkhaus-Ebene etc.).
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import SvDispatchPanel from '../SvDispatchPanel'
 import { useDispatchPhase } from '../lib/phase-context'
-import { saveHardGate, setServiceTyp } from '../actions'
+import { saveHardGate, setServiceTyp, saveStammdaten } from '../actions'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
-import { MapPinIcon, CheckCircle2Icon, ScaleIcon } from 'lucide-react'
+import { MapPinIcon, CheckCircle2Icon, ScaleIcon, CalendarIcon } from 'lucide-react'
 
 export default function Phase2TerminServiceTyp() {
   const router = useRouter()
@@ -22,6 +22,8 @@ export default function Phase2TerminServiceTyp() {
     unfallort_lng?: number | null
     sv_treffpunkt?: string | null
     service_typ?: 'komplett' | 'nur_gutachter' | null
+    // AAR-264: Wunschtermin des Kunden — fließt ins SV-Matching ein
+    wunschtermin?: string | null
   }
   const [pending, startTransition] = useTransition()
   const [unfallortDraft, setUnfallortDraft] = useState(l.unfallort ?? '')
@@ -31,7 +33,37 @@ export default function Phase2TerminServiceTyp() {
   const [serviceTyp, setServiceTypLocal] = useState<'komplett' | 'nur_gutachter'>(
     l.service_typ ?? 'komplett',
   )
+  // AAR-264: Wunschtermin als datetime-local-String (YYYY-MM-DDTHH:mm).
+  // DB liefert ISO mit Sekunden + Z-Suffix → wir slicen für das Input-Format.
+  const [wunschtermin, setWunschtermin] = useState<string>(
+    l.wunschtermin ? l.wunschtermin.slice(0, 16) : '',
+  )
+  const wunschterminDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [toast, setToast] = useState('')
+
+  // AAR-264: Debounced auto-save (500ms) für Wunschtermin
+  useEffect(() => {
+    if (wunschterminDebounceRef.current) clearTimeout(wunschterminDebounceRef.current)
+    const dbValue = l.wunschtermin ? l.wunschtermin.slice(0, 16) : ''
+    if (wunschtermin === dbValue) return
+    wunschterminDebounceRef.current = setTimeout(() => {
+      const isoOrNull = wunschtermin ? new Date(wunschtermin).toISOString() : null
+      startTransition(async () => {
+        const r = await saveStammdaten(lead.id, { wunschtermin: isoOrNull })
+        if (r.success) {
+          setToast('Wunschtermin gespeichert')
+          router.refresh()
+        } else {
+          setToast(r.error ?? 'Fehler beim Speichern')
+        }
+        setTimeout(() => setToast(''), 2000)
+      })
+    }, 500)
+    return () => {
+      if (wunschterminDebounceRef.current) clearTimeout(wunschterminDebounceRef.current)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wunschtermin])
 
   const hardGateOk =
     qualification.q1_schuldfrage && qualification.q2_schaden && qualification.q3_polizei
@@ -120,8 +152,37 @@ export default function Phase2TerminServiceTyp() {
     })
   }
 
+  // datetime-local min-Wert: jetzt (lokale Zeit, ohne Sekunden)
+  const nowLocal = new Date()
+  nowLocal.setMinutes(nowLocal.getMinutes() - nowLocal.getTimezoneOffset())
+  const minDatetime = nowLocal.toISOString().slice(0, 16)
+
   return (
     <div className="space-y-4">
+      {/* AAR-264: Wunschtermin GANZ OBEN — „Wann" ist wichtiger als „Wo" für
+          das Gespräch. Auto-Save 500ms Debounce. Der Wunschtermin fließt
+          ins SV-Matching ein (verfuegbarAmWunschtermin + Score-Bonus). */}
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-2">
+        <h3 className="text-xs font-semibold text-blue-900 flex items-center gap-2">
+          <CalendarIcon className="w-4 h-4" /> Wunschtermin des Kunden
+        </h3>
+        <p className="text-[11px] text-blue-800 italic">
+          Frage-Guidance: „Wann passt es Ihnen am besten? Je konkreter, desto schneller kommt der Termin."
+        </p>
+        <input
+          type="datetime-local"
+          value={wunschtermin}
+          onChange={(e) => setWunschtermin(e.target.value)}
+          min={minDatetime}
+          className="w-full px-3 py-2 border border-blue-300 rounded-lg text-sm bg-white"
+        />
+        {wunschtermin && (
+          <p className="text-[10px] text-blue-700">
+            SV-Matching bevorzugt Gutachter die zu diesem Termin verfügbar sind.
+          </p>
+        )}
+      </div>
+
       {/* Besichtigungsadresse für SV-Dispatch */}
       <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
         <div className="flex items-center gap-2">
@@ -173,6 +234,7 @@ export default function Phase2TerminServiceTyp() {
         leadId={lead.id}
         hardGateOk={hardGateOk}
         aktiverTermin={aktiverTermin as Parameters<typeof SvDispatchPanel>[0]['aktiverTermin']}
+        wunschterminIso={l.wunschtermin ?? null}
       />
 
       {/* Service-Typ (Pfad A/B) — prominent nach SV-Auswahl */}

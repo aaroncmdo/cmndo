@@ -14,6 +14,10 @@ export type SvMatchInput = {
   fallLat: number
   fallLng: number
   terminDatum?: string // ISO-Datum optional (für Urlaub-Check)
+  // AAR-264: Wunschtermin des Kunden — wenn gesetzt, prüfen wir pro SV ob er
+  // im ±wunschterminFensterMin-Fenster bereits einen anderen Termin hat.
+  wunschterminIso?: string | null
+  wunschterminFensterMin?: number
 }
 
 export type SvMatchCandidate = {
@@ -28,6 +32,9 @@ export type SvMatchCandidate = {
   score: number
   // Badge-Gründe für UI
   reasons: string[]
+  // AAR-264: Wunschtermin-Verfügbarkeit (nur gesetzt wenn wunschterminIso übergeben)
+  verfuegbarAmWunschtermin?: boolean
+  naechsterFreierSlot?: string | null
 }
 
 const PAKET_PRIO: Record<string, number> = {
@@ -62,7 +69,24 @@ function pointInPolygon(point: [number, number], polygon: [number, number][]): b
 
 export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatchCandidate[]> {
   const db = createAdminClient()
-  const { fallLat, fallLng, terminDatum } = input
+  const { fallLat, fallLng, terminDatum, wunschterminIso, wunschterminFensterMin = 30 } = input
+
+  // AAR-264: Wunschtermin-Fenster für Kalender-Check pro SV.
+  // Wenn der Kunde z. B. 2026-04-18 10:00 möchte, sperrt jeder bestehende
+  // SV-Termin im Fenster 09:30–10:30 die Verfügbarkeit (für 30min default).
+  let wunschterminStart: Date | null = null
+  let wunschterminEnd: Date | null = null
+  let wunschterminWindowStart: string | null = null
+  let wunschterminWindowEnd: string | null = null
+  if (wunschterminIso) {
+    const wt = new Date(wunschterminIso)
+    if (!Number.isNaN(wt.getTime())) {
+      wunschterminStart = wt
+      wunschterminEnd = new Date(wt.getTime() + wunschterminFensterMin * 60_000)
+      wunschterminWindowStart = new Date(wt.getTime() - wunschterminFensterMin * 60_000).toISOString()
+      wunschterminWindowEnd = new Date(wt.getTime() + wunschterminFensterMin * 60_000).toISOString()
+    }
+  }
 
   const { data: svsRaw } = await db
     .from('sachverstaendige')
@@ -125,9 +149,34 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
     const paketPrio = PAKET_PRIO[paket] ?? 1
     const ablehnungen = Number(sv.ablehnungen_30_tage) || 0
 
+    // AAR-264: Wunschtermin-Verfügbarkeit prüfen
+    let verfuegbarAmWunschtermin: boolean | undefined
+    let naechsterFreierSlot: string | null | undefined
+    let wunschterminBonus = 0
+    if (wunschterminStart && wunschterminEnd && wunschterminWindowStart && wunschterminWindowEnd) {
+      const { data: konflikte } = await db
+        .from('gutachter_termine')
+        .select('start_zeit')
+        .eq('sv_id', sv.id as string)
+        .not('status', 'in', '("storniert","abgelehnt","abgesagt")')
+        .lt('start_zeit', wunschterminWindowEnd)
+        .gt('end_zeit', wunschterminWindowStart)
+        .limit(1)
+      verfuegbarAmWunschtermin = !konflikte || konflikte.length === 0
+      if (verfuegbarAmWunschtermin) {
+        wunschterminBonus = 40
+        reasons.push(`am Wunschtermin frei`)
+      } else {
+        // Nächsten freien Slot ab Wunschtermin suchen — einfacher Helper
+        // inline um keine zirkuläre Action-Abhängigkeit zu bauen.
+        naechsterFreierSlot = await findNextFreeSlotForSv(db, sv.id as string, wunschterminStart)
+        reasons.push(`am Wunschtermin belegt`)
+      }
+    }
+
     // Score: höher = besser
-    // +100 pro Paket-Stufe, -2 pro offenem Fall, -2 pro Ablehnung, -1 pro km
-    const score = paketPrio * 100 - kontingentGenutzt * 2 - ablehnungen * 2 - distanzKm
+    // +100 pro Paket-Stufe, -2 pro offenem Fall, -2 pro Ablehnung, -1 pro km, +40 wenn am Wunschtermin frei
+    const score = paketPrio * 100 - kontingentGenutzt * 2 - ablehnungen * 2 - distanzKm + wunschterminBonus
     reasons.push(`Paket: ${paket}`)
     reasons.push(`${kontingentFrei}/${kontingentGesamt} frei`)
 
@@ -143,9 +192,54 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
       ablehnungen30d: ablehnungen,
       score,
       reasons,
+      verfuegbarAmWunschtermin,
+      naechsterFreierSlot,
     })
   }
 
   candidates.sort((a, b) => b.score - a.score)
   return candidates.slice(0, limit)
+}
+
+// AAR-264: Sucht den nächsten freien 2h-Slot ab einem Startzeitpunkt für einen SV.
+// Werktage Mo–Fr 09:00–16:00 Start. Inline statt Action-Import um zirkuläre
+// 'use server'-Abhängigkeit zu vermeiden.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function findNextFreeSlotForSv(db: any, svId: string, ab: Date): Promise<string | null> {
+  const slotDauerMin = 120
+  const inZwoelfWochen = new Date(ab.getTime() + 12 * 7 * 24 * 60 * 60 * 1000)
+
+  const { data: bestehend } = await db
+    .from('gutachter_termine')
+    .select('start_zeit, end_zeit')
+    .eq('sv_id', svId)
+    .not('status', 'in', '("storniert","abgelehnt","abgesagt")')
+    .gte('start_zeit', ab.toISOString())
+    .lte('start_zeit', inZwoelfWochen.toISOString())
+    .order('start_zeit', { ascending: true })
+
+  const kandidat = new Date(ab)
+  // Bei Konflikt am exakten Wunschtermin → ab nächstem ganzen Stundenslot suchen
+  kandidat.setMinutes(0, 0, 0)
+  kandidat.setTime(kandidat.getTime() + 60 * 60_000)
+
+  const maxIter = 12 * 7 * 24
+  let i = 0
+  while (kandidat < inZwoelfWochen && i < maxIter) {
+    i++
+    const wochentag = kandidat.getDay()
+    if (wochentag !== 0 && wochentag !== 6 && kandidat.getHours() >= 9 && kandidat.getHours() < 16) {
+      const slotEnd = new Date(kandidat.getTime() + slotDauerMin * 60_000)
+      const konflikt = ((bestehend ?? []) as { start_zeit: string; end_zeit: string }[]).some((b) =>
+        new Date(b.start_zeit) < slotEnd && new Date(b.end_zeit) > kandidat,
+      )
+      if (!konflikt) return kandidat.toISOString()
+    }
+    kandidat.setTime(kandidat.getTime() + 60 * 60_000)
+    if (kandidat.getHours() >= 17) {
+      kandidat.setDate(kandidat.getDate() + 1)
+      kandidat.setHours(9, 0, 0, 0)
+    }
+  }
+  return null
 }

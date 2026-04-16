@@ -44,10 +44,14 @@ export default function SvDispatchPanel({
   leadId,
   hardGateOk,
   aktiverTermin,
+  wunschterminIso,
 }: {
   leadId: string
   hardGateOk: boolean
   aktiverTermin: AktiverTermin | null
+  // AAR-264: Wunschtermin des Kunden — wenn gesetzt, wird der Slot-Picker
+  // damit vorbelegt und Verfügbarkeits-Badges werden angezeigt.
+  wunschterminIso?: string | null
 }) {
   const [pending, startTransition] = useTransition()
   const [suggestions, setSuggestions] = useState<SvSuggestion[] | null>(null)
@@ -97,14 +101,21 @@ export default function SvDispatchPanel({
     })
   }
 
-  // Defaults: morgen 09:00 als erster Slot
+  // Defaults: Wunschtermin (AAR-264) > morgen 09:00 als erster Slot
   useEffect(() => {
-    if (!startDatum) {
-      const morgen = new Date()
-      morgen.setDate(morgen.getDate() + 1)
-      setStartDatum(morgen.toISOString().slice(0, 10))
+    if (startDatum) return
+    if (wunschterminIso) {
+      const wt = new Date(wunschterminIso)
+      if (!Number.isNaN(wt.getTime())) {
+        setStartDatum(wt.toISOString().slice(0, 10))
+        setStartZeit(wt.toTimeString().slice(0, 5))
+        return
+      }
     }
-  }, [startDatum])
+    const morgen = new Date()
+    morgen.setDate(morgen.getDate() + 1)
+    setStartDatum(morgen.toISOString().slice(0, 10))
+  }, [startDatum, wunschterminIso])
 
   function loadSuggestions() {
     setLoadError(null)
@@ -373,6 +384,25 @@ export default function SvDispatchPanel({
                         <span>{s.kontingentFrei} frei</span>
                         <span>{s.offeneFaelle} offen</span>
                       </div>
+                      {/* AAR-264: Wunschtermin-Verfügbarkeits-Badge */}
+                      {s.verfuegbarAmWunschtermin === true && wunschterminIso && (
+                        <div className={`mt-1.5 inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                          isSel ? 'bg-emerald-200 text-emerald-900' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        }`}>
+                          <CheckIcon className="w-3 h-3" />
+                          Frei am {new Date(wunschterminIso).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      )}
+                      {s.verfuegbarAmWunschtermin === false && (
+                        <div className={`mt-1.5 inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                          isSel ? 'bg-amber-200 text-amber-900' : 'bg-amber-50 text-amber-700 border border-amber-200'
+                        }`}>
+                          <ClockIcon className="w-3 h-3" />
+                          {s.naechsterFreierSlot
+                            ? `Nächster Slot: ${new Date(s.naechsterFreierSlot).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}`
+                            : 'Am Wunschtermin belegt'}
+                        </div>
+                      )}
                     </button>
                   )
                 })}
