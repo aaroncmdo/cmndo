@@ -335,7 +335,10 @@ export default function Phase5Zusammenfassung() {
         </div>
       </div>
 
-      {/* WA-Nummer + Email Inline-Edit */}
+      {/* WA-Nummer + Email Inline-Edit.
+          AAR-348: Explizite gelbe Warnbanner wenn Tel/Email leer sind —
+          zuvor wurden die Buttons nur stumm disabled, der MA hatte keinen
+          Hinweis WARUM der Kanal nicht verfügbar ist. */}
       <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
         <div className="flex items-center gap-2">
           <PhoneIcon className="w-4 h-4 text-gray-400" />
@@ -374,6 +377,24 @@ export default function Phase5Zusammenfassung() {
             {emailError ? emailError : savingEmail ? 'Speichern ...' : 'Änderung wird beim Verlassen des Feldes gespeichert.'}
           </p>
         </div>
+        {/* AAR-348: Gelbe Warnbanner wenn Felder leer — macht dem MA klar,
+            dass er den betroffenen Kanal nicht versenden kann. */}
+        {!waNummer.trim() && (
+          <div className="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
+            <AlertTriangleIcon className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
+            <p className="text-[11px] text-amber-800">
+              Keine Telefonnummer hinterlegt — FlowLink kann nicht per WhatsApp/SMS versendet werden.
+            </p>
+          </div>
+        )}
+        {!email.trim() && (
+          <div className="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
+            <AlertTriangleIcon className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
+            <p className="text-[11px] text-amber-800">
+              Keine Email hinterlegt — FlowLink kann nicht per Email versendet werden.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* AAR-317: Unfallskizze (KI-generiert) — optional, muss nicht freigegeben
