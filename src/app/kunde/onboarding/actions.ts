@@ -159,22 +159,14 @@ export async function uploadPflichtdokument(
 
     const { data: { publicUrl } } = admin.storage.from('dokumente').getPublicUrl(path)
 
-    // AAR-323: Slot-Typ + Sichtbarkeit aus dokument_katalog laden, damit der
-    // fall_dokumente-Eintrag den korrekten dokument_typ UND die Katalog-
-    // Sichtbarkeit bekommt (statt generischem 'kunde-upload' + hardcoded Array).
+    // AAR-323: Slot-Typ aus pflichtdokumente laden, damit der
+    // fall_dokumente-Eintrag den korrekten dokument_typ bekommt.
     const { data: pd } = await admin
       .from('pflichtdokumente')
       .select('dokument_typ, status')
       .eq('id', pflichtdokumentId)
       .single()
-    const slotTyp = pd?.dokument_typ ?? 'kunde-upload'
-    const { data: katalog } = await admin
-      .from('dokument_katalog')
-      .select('sichtbar_fuer')
-      .eq('slot_id', slotTyp)
-      .maybeSingle()
-    const sichtbarFuer = katalog?.sichtbar_fuer
-      ?? ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde']
+    const slotTyp = pd?.dokument_typ ?? 'kunde-nachreichung'
 
     // Pflichtdokument aktualisieren — Replace setzt status=hochgeladen
     // auch wenn vorher 'abgelehnt'. Alter fall_dokumente-Eintrag bleibt als
@@ -185,16 +177,21 @@ export async function uploadPflichtdokument(
       hochgeladen_am: new Date().toISOString(),
     }).eq('id', pflichtdokumentId)
 
-    // fall_dokumente-Eintrag mit korrektem Slot-Typ + Katalog-Sichtbarkeit
+    // AAR-323 + AAR-325: fall_dokumente-Eintrag mit echten Tabellen-Spalten
+    // (storage_path, original_filename, uploaded_by_kunde). Vorher waren hier
+    // Spalten aus der alten `dokumente`-Tabelle gemischt → Insert schlug still
+    // fehl und fall_dokumente blieb leer. AAR-325-Trigger feuert auf
+    // uploaded_by_kunde=true und erzeugt den KB-Task automatisch.
     await admin.from('fall_dokumente').insert({
       fall_id: fallId,
-      typ: slotTyp,
-      kategorie: 'kundendokument',
-      datei_url: publicUrl,
-      datei_name: fileName,
-      quelle: 'kunde-onboarding',
-      hochgeladen_von_rolle: 'kunde',
-      sichtbar_fuer: sichtbarFuer,
+      dokument_typ: slotTyp,
+      storage_path: path,
+      original_filename: fileName,
+      mime_type: contentType,
+      groesse_bytes: buffer.length,
+      hochgeladen_von_user_id: user.id,
+      uploaded_by_kunde: true,
+      hochgeladen_am: new Date().toISOString(),
     })
 
     revalidatePath('/kunde/onboarding')
