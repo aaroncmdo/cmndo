@@ -87,6 +87,10 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
   const [kamera, setKamera] = useState<boolean | null>(initialKamera ?? null)
   const [pending, startTransition] = useTransition()
   const [toast, setToast] = useState('')
+  // AAR-215: dedizierter Error-State für DB-Constraint-Violations & Co. —
+  // vorher landeten alle Meldungen im selben "toast" und Errors waren visuell
+  // kaum von "Gespeichert" zu unterscheiden.
+  const [error, setError] = useState<string | null>(null)
 
   // AAR-83: Parkplatz ohne Kennzeichen → Kamera-Check Pflicht
   const isParkplatzOhneKz = typ === 'parkplatz' && !gegnerKennzeichen?.trim()
@@ -106,9 +110,16 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
       setTimeout(() => setToast(''), 2500)
       return
     }
+    setError(null)
     startTransition(async () => {
       const r = await saveSchadentyp(leadId, typ, typ === 'sonstiges' ? freitext : null, kamera)
-      setToast(r.success ? (r.disqualifiziert ? 'Disqualifiziert — Exit-Skript wird angezeigt' : 'Gespeichert') : (r.error ?? 'Fehler'))
+      if (!r.success) {
+        // AAR-215: Fehler in eigenes State + nicht auto-dismiss (User muss
+        // den Fehler sehen + schließen können — vorher verschwand er nach 3s).
+        setError(r.error ?? 'Speichern fehlgeschlagen')
+        return
+      }
+      setToast(r.disqualifiziert ? 'Disqualifiziert — Exit-Skript wird angezeigt' : 'Gespeichert')
       setTimeout(() => setToast(''), 3000)
     })
   }
@@ -175,6 +186,20 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
         </div>
       )}
 
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start justify-between gap-2">
+          <div className="flex-1">
+            <p className="text-xs font-semibold text-red-900">Speichern fehlgeschlagen</p>
+            <p className="text-xs text-red-700 mt-0.5">{error}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setError(null)}
+            className="text-red-700 hover:text-red-900 text-lg leading-none"
+            aria-label="Schließen"
+          >×</button>
+        </div>
+      )}
       {toast && <p className={`text-xs ${toast === 'Gespeichert' ? 'text-green-700' : 'text-amber-800'}`}>{toast}</p>}
 
       <button

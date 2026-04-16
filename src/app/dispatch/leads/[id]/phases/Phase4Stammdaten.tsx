@@ -81,13 +81,28 @@ type LeadFields = {
 
 // Auto-Format für deutsche Kennzeichen mit Pattern-Matching.
 // AAR-188 Fix #4: Aus „KAB1234" / „ko ab 123" → „K-AB 1234" / „KO-AB 123".
+// AAR-224: Greedy-Backtracking-Bug behoben — vorher matchte „KAB1234" als
+// (KA)(B)(1234) → „KA-B 1234" statt korrekt „K-AB 1234". Jetzt zerlegen wir
+// strikt aus den BEKANNTEN Teilen: hinten Ziffern (+ optional E/H), davor
+// 1-2 Buchstaben (Erkennung), davor 1-3 Buchstaben (Stadt).
 // Bei unvollständiger / nicht erkennbarer Eingabe geben wir cleaned Uppercase
 // zurück (ohne Spaces/Bindestriche) damit der MA korrigieren kann.
 function formatKennzeichen(raw: string): string {
   const clean = raw.replace(/[\s-]/g, '').toUpperCase()
-  const m = clean.match(/^([A-ZÄÖÜ]{1,3})([A-Z]{1,2})(\d{1,4}[A-Z]?)$/)
-  if (m) return `${m[1]}-${m[2]} ${m[3]}`
-  return clean
+  // Schritt 1: Ziffern + optional Suffix-Buchstabe (E=Elektro, H=Historisch) ans Ende.
+  const tail = clean.match(/(\d{1,4})([EH]?)$/)
+  if (!tail) return clean
+  const ziffern = tail[1] + tail[2]
+  const buchstaben = clean.slice(0, clean.length - ziffern.length)
+  // Schritt 2: Buchstaben in Stadt (1-3) + Erkennung (1-2) splitten.
+  // Erkennung greedy hinten = letzte 1-2 Buchstaben, Stadt = Rest.
+  // Beispiel KAB → Stadt=K, Erkennung=AB | KOAB → Stadt=KO, Erkennung=AB
+  const erkennung = buchstaben.slice(-2).match(/^[A-ZÄÖÜ]{1,2}$/) ? buchstaben.slice(-2) : buchstaben.slice(-1)
+  const stadt = buchstaben.slice(0, buchstaben.length - erkennung.length)
+  if (!stadt || !erkennung || !/^[A-ZÄÖÜ]{1,3}$/.test(stadt) || !/^[A-ZÄÖÜ]{1,2}$/.test(erkennung)) {
+    return clean
+  }
+  return `${stadt}-${erkennung} ${ziffern}`
 }
 
 // AAR-181: Baujahr-Input kommt als String rein, DB-Spalte ist INTEGER.
@@ -138,6 +153,14 @@ function InlineField({
 
   function handleBlur() {
     const final = transform ? transform(draft) : draft
+    // AAR-223: Draft auf den transformierten Wert setzen, damit der MA nach
+    // dem Blur die formatierte Variante sieht (z.B. „K AB 1234" → „K-AB 1234")
+    // statt seinem Roh-Input. Auch wenn keine DB-Änderung nötig ist, müssen
+    // wir hier den Draft normalisieren — sonst bleibt die Anzeige asymmetrisch
+    // zur DB.
+    if (transform && final !== draft) {
+      setDraft(final)
+    }
     if (final === (value ?? '')) return
     setStatus('saving')
     startTransition(async () => {

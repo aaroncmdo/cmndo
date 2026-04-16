@@ -6,13 +6,16 @@ import { useRouter } from 'next/navigation'
 import { PlusIcon, XIcon } from 'lucide-react'
 import { createManualLead, type CreateManualLeadInput } from '../actions'
 
+// AAR-216: schadenfall_typ aus dem Initial-State entfernt — der MA kennt den
+// Schadentyp beim Lead-Anlegen noch nicht (Kunde wurde noch nicht gesprochen).
+// Der echte Schadentyp wird in Phase 2 via SchadentypPicker erfasst (in das
+// neue Feld leads.schadentyp). Der alte SF-Wert (schadenfall_typ) ist Legacy.
 const INITIAL: CreateManualLeadInput = {
   vorname: '',
   nachname: '',
   telefon: '',
   email: '',
   plz: '',
-  schadenfall_typ: 'auffahrunfall',
   service_typ: 'komplett',
   source_channel: 'manuell',
   notizen: '',
@@ -72,20 +75,8 @@ export default function NeuLeadDrawer() {
           <InputField label="E-Mail" value={data.email} onChange={v => setData({ ...data, email: v })} type="email" />
           <InputField label="PLZ" value={data.plz} onChange={v => setData({ ...data, plz: v })} />
 
-          <div>
-            <label className="block text-xs text-gray-500 mb-1.5">Schadentyp</label>
-            <select
-              value={data.schadenfall_typ}
-              onChange={e => setData({ ...data, schadenfall_typ: e.target.value })}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
-            >
-              <option value="spurwechsel">Spurwechsel</option>
-              <option value="auffahrunfall">Auffahrunfall</option>
-              <option value="vorfahrtsverletzung">Vorfahrtsverletzung</option>
-              <option value="parkplatz">Parkplatz</option>
-              <option value="sonstiges">Sonstiges</option>
-            </select>
-          </div>
+          {/* AAR-216: Schadentyp-Dropdown entfernt — wird in Phase 2 erfasst,
+              wenn der MA den Kunden tatsächlich spricht. */}
 
           <div>
             <label className="block text-xs text-gray-500 mb-1.5">Service-Typ</label>

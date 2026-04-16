@@ -39,6 +39,10 @@ export default function Phase2TerminServiceTyp() {
   const hasKoordinaten = unfallortLat != null && unfallortLng != null
 
   // AAR-176 P2-C: Auto-Save direkt im onSelect — kein Speichern-Button mehr
+  // AAR-221: router.refresh() nach Save — sonst liest SvDispatchPanel weiterhin
+  // den alten Server-State (lead.unfallort_lat=null) und zeigt fälschlich
+  // „Lead hat keine Koordinaten", obwohl der lokale Badge schon „Koordinaten ok"
+  // anzeigt. Nach dem Refresh werden die DB-Koordinaten überall sichtbar.
   function autoSaveAdresse(adresse: string, lat: number, lng: number) {
     setUnfallortDraft(adresse)
     setUnfallortLat(lat)
@@ -49,7 +53,12 @@ export default function Phase2TerminServiceTyp() {
         unfallort_lat: lat,
         unfallort_lng: lng,
       })
-      setToast(r.success ? 'Adresse gespeichert' : r.error ?? 'Fehler')
+      if (r.success) {
+        setToast('Adresse gespeichert')
+        router.refresh()
+      } else {
+        setToast(r.error ?? 'Fehler')
+      }
       setTimeout(() => setToast(''), 2000)
     })
   }

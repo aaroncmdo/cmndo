@@ -1,0 +1,87 @@
+{
+  "test_sv": {
+    "profile_id": "b87237a7-db62-4c8a-a538-f7a6779b24f0",
+    "email": "aaron.sprafke@claimondo.de",
+    "sv_id": "2f2051bd-475e-495f-b80c-6a80a5b6e1c1",
+    "rolle": "sachverstaendiger"
+  },
+  "test_admin": {
+    "email": "lupus.674music@gmail.com",
+    "rolle": "admin"
+  },
+  "mitteilungen_seed": [
+    {
+      "empfaenger_id": "b87237a7-db62-4c8a-a538-f7a6779b24f0",
+      "empfaenger_rolle": "sachverstaendiger",
+      "kategorie": "update",
+      "titel": "Neuer Auftrag zugewiesen",
+      "inhalt": "Fall SF-2026-120: Max Mustermann, VW Golf, Aachener Str. 50, Köln",
+      "kontext_typ": "auftrag",
+      "kontext_id": "00000000-0000-0000-0000-000000000001",
+      "route_url": "/gutachter/auftrag/00000000-0000-0000-0000-000000000001",
+      "icon": "ClipboardList",
+      "gelesen": false
+    },
+    {
+      "empfaenger_id": "b87237a7-db62-4c8a-a538-f7a6779b24f0",
+      "empfaenger_rolle": "sachverstaendiger",
+      "kategorie": "update",
+      "titel": "Kunde hat FlowLink geöffnet",
+      "inhalt": "Max Mustermann hat die Schadensaufnahme geöffnet",
+      "kontext_typ": "fall",
+      "kontext_id": "00000000-0000-0000-0000-000000000002",
+      "route_url": "/gutachter/fall/00000000-0000-0000-0000-000000000002",
+      "icon": "ExternalLink",
+      "gelesen": true
+    },
+    {
+      "empfaenger_id": "b87237a7-db62-4c8a-a538-f7a6779b24f0",
+      "empfaenger_rolle": "sachverstaendiger",
+      "kategorie": "task",
+      "titel": "Gutachten erstellen: Mustermann",
+      "inhalt": "Fällig: morgen 18:00",
+      "kontext_typ": "fall",
+      "kontext_id": "00000000-0000-0000-0000-000000000002",
+      "route_url": "/gutachter/fall/00000000-0000-0000-0000-000000000002",
+      "icon": "FileText",
+      "prioritaet": "hoch",
+      "gelesen": false
+    },
+    {
+      "empfaenger_id": "b87237a7-db62-4c8a-a538-f7a6779b24f0",
+      "empfaenger_rolle": "sachverstaendiger",
+      "kategorie": "nachricht",
+      "titel": "Claimondo Support",
+      "inhalt": "Willkommen bei Claimondo! Bei Fragen stehen wir Ihnen gerne zur Verfügung.",
+      "kontext_typ": "nachricht",
+      "route_url": "/gutachter/nachrichten",
+      "absender_name": "Claimondo Support",
+      "icon": "MessageCircle",
+      "gelesen": false
+    },
+    {
+      "empfaenger_id": "ADMIN_PROFILE_ID",
+      "empfaenger_rolle": "admin",
+      "kategorie": "anruf",
+      "titel": "Verpasster Anruf: +49 176 12345678",
+      "inhalt": "Unbekannte Nummer, kein Lead zugeordnet",
+      "route_url": "/admin/dispatch",
+      "icon": "PhoneMissed",
+      "gelesen": false
+    }
+  ],
+  "expected_counts": {
+    "sv_updates": 2,
+    "sv_tasks": 1,
+    "sv_nachrichten": 1,
+    "sv_total_unread": 3,
+    "admin_anrufe": 1
+  },
+  "expected_sidebar_items": {
+    "tagesgeschaeft": ["Heute", "Aufträge", "Meine Fälle", "Kalender"],
+    "kommunikation": ["Nachrichten"],
+    "finanzen": ["Abrechnung", "Lead-Preise"],
+    "verwaltung": ["Mein Gebiet", "Vertrag", "Statistiken", "Reklamationen"]
+  },
+  "removed_nav_items": ["Dashboard", "Mitteilungen", "Stellungnahmen", "Termine", "Route", "Tasks"]
+}

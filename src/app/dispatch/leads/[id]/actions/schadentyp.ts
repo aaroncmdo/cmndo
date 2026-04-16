@@ -33,11 +33,19 @@ export async function saveSchadentyp(
   // AAR-179 Audit-Fix #6: Nur überschreiben wenn noch leer — sonst
   // überschreibt ein späterer Schadentyp-Wechsel eine manuell gepflegte
   // Kategorie (Daten-Race zwischen Phase 1 und Phase 3).
+  // AAR-215: KATEGORIE_AUTO muss exakt dem CHECK-Constraint von
+  // unfallort_kategorie entsprechen (Migration aar74_unfallskizze_zeugen.sql):
+  //   parkluecke | kreuzung | autobahn | landstrasse | innerorts | sonstiges
+  // Vorher schrieben spurwechsel + auffahrunfall = 'strasse' und parkplatz =
+  // 'parkplatz' — beides nicht im Constraint → silent DB-Constraint-Violation,
+  // Save schlug ohne UI-Feedback fehl. spurwechsel + auffahrunfall haben
+  // keinen eindeutigen Ort (kann Innerorts/Landstraße/Autobahn sein) → null,
+  // der MA setzt es manuell in Phase 4.
   const KATEGORIE_AUTO: Record<string, string | null> = {
-    spurwechsel: 'strasse',
-    auffahrunfall: 'strasse',
+    spurwechsel: null,
+    auffahrunfall: null,
     vorfahrtsverletzung: 'kreuzung',
-    parkplatz: 'parkplatz',
+    parkplatz: 'parkluecke',
     sonstiges: null,
   }
   const autoKategorie = KATEGORIE_AUTO[schadentyp]

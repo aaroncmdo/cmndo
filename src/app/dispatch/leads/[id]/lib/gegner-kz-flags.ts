@@ -13,10 +13,13 @@ export type KZFlagResult = {
   warnung: string | null
 }
 
-// Deutsches Kennzeichen-Muster: 1-3 Buchstaben, Bindestrich, 1-2 Buchstaben, 1-4 Ziffern.
-// Trennzeichen können Leerzeichen oder Bindestriche sein, das Regex erlaubt beides
-// indem wir vorher Whitespace entfernen.
-const DEUTSCHES_KZ = /^[A-ZÄÖÜ]{1,3}-[A-ZÄÖÜ]{1,2}\d{1,4}$/i
+// AAR-217: Deutsches Kennzeichen-Muster — Bindestrich + Leerzeichen sind
+// OPTIONAL. Vorher war der `-` Pflicht im Regex und der Code entfernte
+// Whitespace VOR der Prüfung — bei Eingabe "B AB 1234" → normalize "BAB1234"
+// → kein Bindestrich → galt fälschlich als Auslandskennzeichen. Jetzt:
+// alle Trenner raus + Pattern ohne Bindestrich.
+// Format: 1-3 Buchstaben (Stadt) + 1-2 Buchstaben (Erkennung) + 1-4 Ziffern + optional E (E-Auto) / H (Historisch)
+const DEUTSCHES_KZ = /^[A-ZÄÖÜ]{1,3}[A-ZÄÖÜ]{1,2}\d{1,4}[EH]?$/i
 
 export function checkKZFlags(
   gegnerKz: string | null | undefined,
@@ -43,8 +46,10 @@ export function checkKZFlags(
     }
   }
 
-  // KZ ist vorhanden — prüfen ob deutsches Format
-  const normalized = trimmed.replace(/\s+/g, '')
+  // KZ ist vorhanden — prüfen ob deutsches Format. Trennzeichen (Space + -)
+  // werden für die Prüfung entfernt, sodass alle Eingabe-Varianten
+  // ("B AB 1234", "B-AB 1234", "BAB1234") gleich behandelt werden.
+  const normalized = trimmed.replace(/[\s-]+/g, '')
   const isDeutsch = DEUTSCHES_KZ.test(normalized)
 
   if (isDeutsch) {
