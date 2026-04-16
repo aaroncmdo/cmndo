@@ -59,11 +59,9 @@ const KATEGORIE_REIHENFOLGE = [
 
 // AAR-323: Labels kommen jetzt aus dokument_katalog.label (via
 // getPflichtdokumenteStand). Fallback-Labels nur noch für Slots, die nicht
-// im Katalog sind (leasingvertrag/finanzierungsvertrag/... — werden in einem
-// Folge-Ticket in den Katalog migriert).
+// im Katalog sind. AAR-353: leasingvertrag/finanzierungsvertrag durch Katalog-
+// Slot freigabe_bank ersetzt; Gewerbe/Halter bleiben supplementär.
 const LEGACY_DOKTYP_LABELS: Record<string, string> = {
-  leasingvertrag: 'Leasingvertrag',
-  finanzierungsvertrag: 'Finanzierungsvertrag',
   gewerbenachweis: 'Gewerbenachweis',
   gf_vollmacht: 'Geschäftsführer-Vollmacht',
   halter_vollmacht: 'Halter-Vollmacht',

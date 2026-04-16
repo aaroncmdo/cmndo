@@ -262,12 +262,16 @@ export async function uploadDokument(fallId: string, formData: FormData) {
 
   // Determine kategorie and sichtbarkeit from typ
   const typToKat: Record<string, string> = {
-    fahrzeugschein: 'kundendokument', fuehrerschein: 'kundendokument',
+    fahrzeugschein: 'kundendokument',
     schadensfotos: 'schadensfoto', schadensfoto: 'schadensfoto',
-    polizeibericht: 'kundendokument', leasingvertrag: 'kundendokument',
-    finanzierungsvertrag: 'kundendokument', gewerbenachweis: 'kundendokument',
+    polizeibericht: 'kundendokument',
+    gewerbenachweis: 'kundendokument',
     gutachten: 'gutachten', 'gutachter-foto': 'gutachter-foto',
     'gf-vollmacht': 'unterschrift', 'halter-ausweis': 'kundendokument',
+    // AAR-353
+    reparaturrechnung_vorschaden: 'kundendokument',
+    kaufvertrag: 'kundendokument',
+    freigabe_bank: 'kundendokument',
   }
   const kat = typToKat[dokumentTyp] ?? 'sonstiges'
   const sichtbarMap: Record<string, string[]> = {

@@ -29,12 +29,9 @@ import FallDokumenteSidebar, { type FallDokumentRow } from '@/components/faelle/
 
 const DOKUMENT_TYP_LABEL: Record<string, string> = {
   fahrzeugschein: 'Fahrzeugschein',
-  fuehrerschein: 'Führerschein',
   schadensfotos: 'Schadensfotos',
   gegner_daten: 'Gegnerdaten',
   polizeibericht: 'Polizeibericht',
-  leasingvertrag: 'Leasingvertrag',
-  finanzierungsvertrag: 'Finanzierungsvertrag',
   gewerbenachweis: 'Gewerbenachweis',
   gf_vollmacht: 'GF-Vollmacht',
   halter_vollmacht: 'Halter-Vollmacht',
@@ -43,6 +40,10 @@ const DOKUMENT_TYP_LABEL: Record<string, string> = {
   krankenhausbericht: 'Krankenhausbericht',
   au_bescheinigung: 'AU-Bescheinigung',
   gutachten: 'Gutachten',
+  // AAR-353
+  reparaturrechnung_vorschaden: 'Reparaturrechnung (Vorschaden)',
+  kaufvertrag: 'Kaufvertrag',
+  freigabe_bank: 'Freigabe Bank',
 }
 
 const STATUS_BADGE: Record<string, string> = {

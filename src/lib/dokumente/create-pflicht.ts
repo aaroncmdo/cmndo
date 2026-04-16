@@ -3,9 +3,11 @@
 // flow/[token]/actions.ts + createPflichtdokumente in admin/dispatch/actions.ts).
 //
 // Quelle der Wahrheit ist der dokument_katalog mit JSON-Rule-DSL.
-// Slots die der Katalog noch nicht abdeckt (leasingvertrag, finanzierungsvertrag,
-// gewerbenachweis, gf_vollmacht, halter_*) werden supplementär ergänzt —
-// ein späterer Katalog-Ausbau verschiebt sie dann komplett in den Katalog.
+// AAR-353: Leasing-/Finanzierungsverträge ersetzt durch Katalog-Slot
+// freigabe_bank (triggert auf finanzierung_leasing ∈ {leasing,finanzierung}).
+// Supplementär bleiben nur Slots die (noch) nicht im Katalog sind:
+// gewerbenachweis, gf_vollmacht, halter_vollmacht, halter_ausweis +
+// Fahrerflucht-Polizeibericht.
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getAlleSlots } from './katalog'
@@ -71,13 +73,7 @@ export async function createPflichtdokumenteFromKatalog(
     seen.add(typ)
   }
 
-  // 2a. Leasing / Finanzierung / Gewerbe
-  if (lead?.leasing_flag === true || lead?.finanzierung_leasing === 'leasing') {
-    add('leasingvertrag', true)
-  }
-  if (lead?.finanzierung_flag === true || lead?.finanzierung_leasing === 'finanzierung') {
-    add('finanzierungsvertrag', true)
-  }
+  // 2a. Gewerbe — Leasing/Finanzierung läuft via Katalog-Slot freigabe_bank (AAR-353)
   if (lead?.gewerbe_flag === true || lead?.vorsteuerabzugsberechtigt === true) {
     add('gewerbenachweis', true)
     add('gf_vollmacht', true)

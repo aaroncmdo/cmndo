@@ -25,12 +25,16 @@ export type Rolle =
 export const DOKUMENT_SICHTBAR_FUER: Record<string, Rolle[]> = {
   // Kunden-Uploads (Basis der Fallbearbeitung — alle sehen sie)
   fahrzeugschein: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
-  fuehrerschein: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   schadensfotos: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   polizeibericht: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   polizeiliche_unfallmitteilung: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   gewerbenachweis: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   mietwagenrechnung: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  // AAR-353: Vorschaden-Dokumente (CarDentity-Trigger) + Kaufvertrag als Beleg
+  reparaturrechnung_vorschaden: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
+  kaufvertrag: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
+  // AAR-353: Freigabe der Bank bei Leasing/Finanzierung (kein SV/Kanzlei)
+  freigabe_bank: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'kunde'],
 
   // WhatsApp-Foto/Datei generisch (AAR-158-Webhook-Pfad)
   'whatsapp-foto': ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
@@ -44,16 +48,13 @@ export const DOKUMENT_SICHTBAR_FUER: Record<string, Rolle[]> = {
   halter_vollmacht: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'kunde', 'kanzlei'],
   halter_ausweis: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'kunde', 'kanzlei'],
   gf_vollmacht: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'kunde', 'kanzlei'],
-  leasingvertrag: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'kunde', 'kanzlei'],
-  finanzierungsvertrag: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'kunde', 'kanzlei'],
 
   // Personenschaden — Kunde + KB + Kanzlei
   aerztliches_attest: ['admin', 'kundenbetreuer', 'kunde', 'kanzlei'],
   krankenhausbericht: ['admin', 'kundenbetreuer', 'kunde', 'kanzlei'],
   au_bescheinigung: ['admin', 'kundenbetreuer', 'kunde', 'kanzlei'],
 
-  // Vorschäden — Kunde NICHT (interne Recherche)
-  reparaturrechnungen_vorschaeden: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei'],
+  // Vorschäden-interne Dokumente — Kunde NICHT (Recherche-Artefakte)
   vorschaden_bericht: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei'],
   cardentity_report: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei'],
 
@@ -65,7 +66,8 @@ export const DOKUMENT_SICHTBAR_FUER: Record<string, Rolle[]> = {
   // OCR-Snapshots
   'ocr-fahrzeugschein': ['admin', 'kundenbetreuer', 'sachverstaendiger'],
 
-  // Kanzlei-Prozess (Webhook-Dokumente)
+  // Kanzlei-Prozess (Webhook-Dokumente). AAR-353: anspruchsschreiben ist kein
+  // Katalog-Slot mehr, kommt aber weiterhin als dokumente.typ via Kanzlei-Webhook.
   anspruchsschreiben: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   regulierungsbescheid: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   // AAR-263: Polizeibericht-Foto via WA

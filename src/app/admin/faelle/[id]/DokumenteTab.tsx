@@ -96,14 +96,17 @@ const QC_FIELDS: { key: keyof QcCheckliste; label: string }[] = [
 // DB-Keys bleiben ASCII (CHECK-Constraint auf pflichtdokumente.dokument_typ),
 // UI-Labels nutzen echte Umlaute (Claimondo-Sprachregel).
 const DOK_LABELS: Record<string, string> = {
-  fahrzeugschein: 'Fahrzeugschein', fuehrerschein: 'Führerschein',
+  fahrzeugschein: 'Fahrzeugschein',
   schadensfotos: 'Schadensfotos (min. 4)', polizeibericht: 'Polizeibericht',
   gegner_daten: 'Gegner-Daten', eigene_versicherung: 'Eigene Versicherung',
-  leasingvertrag: 'Leasingvertrag', finanzierungsvertrag: 'Finanzierungsvertrag',
   gewerbenachweis: 'Gewerbenachweis', 'gf_vollmacht': 'GF-Vollmacht',
   halter_vollmacht: 'Halter-Vollmacht', halter_ausweis: 'Halter-Ausweis',
   aerztliches_attest: 'Ärztliches Attest', krankenhausbericht: 'Krankenhausbericht',
   au_bescheinigung: 'AU-Bescheinigung', anschlussschreiben: 'Anschlussschreiben',
+  // AAR-353: neue Katalog-Slots (Vorschaden-Trigger + Leasing/Finanzierung)
+  reparaturrechnung_vorschaden: 'Reparaturrechnung (Vorschaden)',
+  kaufvertrag: 'Kaufvertrag',
+  freigabe_bank: 'Freigabe Bank',
 }
 
 const STATUS_CFG: Record<string, { bg: string; text: string; icon: typeof CheckCircle2Icon }> = {

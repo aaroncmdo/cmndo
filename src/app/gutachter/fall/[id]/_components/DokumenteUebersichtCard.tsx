@@ -14,7 +14,6 @@ type Pflichtdoc = {
 
 const TYP_LABEL: Record<string, string> = {
   fahrzeugschein: 'Fahrzeugschein',
-  fuehrerschein: 'Führerschein',
   schadensfotos: 'Schadensfotos',
   polizeibericht: 'Polizeibericht',
   polizeiliche_unfallmitteilung: 'Polizeibericht',
@@ -25,10 +24,11 @@ const TYP_LABEL: Record<string, string> = {
   aerztliches_attest: 'Ärztl. Attest',
   krankenhausbericht: 'Krankenhausbericht',
   au_bescheinigung: 'AU-Bescheinigung',
-  leasingvertrag: 'Leasingvertrag',
-  finanzierungsvertrag: 'Finanzierungsvertrag',
-  reparaturrechnungen_vorschaeden: 'Reparaturrechnungen Vorschäden',
   mietwagenrechnung: 'Mietwagenrechnung',
+  // AAR-353
+  reparaturrechnung_vorschaden: 'Reparaturrechnung (Vorschaden)',
+  kaufvertrag: 'Kaufvertrag',
+  freigabe_bank: 'Freigabe Bank',
 }
 
 export function DokumenteUebersichtCard({
