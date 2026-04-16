@@ -187,6 +187,10 @@ export default async function FlowPage({
         unfallhergang: lead.unfallhergang ?? '',
         // AAR-305: steuert Mietwagen-Empfehlungs-Box im neuen Step „Weitere Angaben"
         fahrzeug_fahrbereit: lead.fahrzeug_fahrbereit ?? null,
+        // AAR-336: Schritt 1 als Review-Ansicht — Dispatch-Werte readonly zeigen
+        unfall_konstellation: lead.unfall_konstellation ?? null,
+        gegner_anzahl_beteiligte: lead.gegner_anzahl_beteiligte ?? null,
+        gegner_fahrzeugtyp: lead.gegner_fahrzeugtyp ?? null,
       }}
       />
     </>
