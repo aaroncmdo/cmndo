@@ -8,6 +8,39 @@ const PLZ_ORT_REGEX = /\b(\d{5})\s+(.+)/
 const HSN_REGEX = /\b(\d{4})\b/
 const TSN_REGEX = /\b([A-Z0-9]{3})\b/i
 
+// AAR-351: Hersteller-Keywords für Fallback-Extraktion, wenn das Label-
+// basierte Matching (^D.1$ auf eigener Zeile) an der Vision-API-Fließtext-
+// Ausgabe scheitert. Patterns decken ZB1-typische OCR-Varianten ab
+// (z.B. "BAYER.MOT.WERKE" für BMW). Reihenfolge: spezifischere zuerst
+// damit "MERCEDES-BENZ" vor "MERCEDES" matcht, "VOLKSWAGEN" vor "VW".
+const HERSTELLER_KEYWORDS: Array<{ patterns: RegExp[]; normalized: string }> = [
+  { patterns: [/BAYER\.?\s*MOT\.?\s*WERKE/i, /\bBMW\b/], normalized: 'BMW' },
+  { patterns: [/\bMERCEDES[-\s]?BENZ\b/i, /\bDAIMLER\b/i, /\bMERCEDES\b/i], normalized: 'Mercedes-Benz' },
+  { patterns: [/\bVOLKSWAGEN\b/i, /\bVOLKSW\b/i, /\bVW\b/], normalized: 'VW' },
+  { patterns: [/\bAUDI\b/i], normalized: 'Audi' },
+  { patterns: [/\bPORSCHE\b/i], normalized: 'Porsche' },
+  { patterns: [/\bOPEL\b/i], normalized: 'Opel' },
+  { patterns: [/\bFORD\b/i], normalized: 'Ford' },
+  { patterns: [/\bTOYOTA\b/i], normalized: 'Toyota' },
+  { patterns: [/\bMAZDA\b/i], normalized: 'Mazda' },
+  { patterns: [/\bHYUNDAI\b/i], normalized: 'Hyundai' },
+  { patterns: [/\bKIA\b/i], normalized: 'Kia' },
+  { patterns: [/\bŠKODA\b/i, /\bSKODA\b/i], normalized: 'Skoda' },
+  { patterns: [/\bSEAT\b/i], normalized: 'Seat' },
+  { patterns: [/\bRENAULT\b/i], normalized: 'Renault' },
+  { patterns: [/\bPEUGEOT\b/i], normalized: 'Peugeot' },
+  { patterns: [/\bCITROËN\b/i, /\bCITROEN\b/i], normalized: 'Citroën' },
+  { patterns: [/\bFIAT\b/i], normalized: 'Fiat' },
+  { patterns: [/\bVOLVO\b/i], normalized: 'Volvo' },
+  { patterns: [/\bNISSAN\b/i], normalized: 'Nissan' },
+  { patterns: [/\bHONDA\b/i], normalized: 'Honda' },
+  { patterns: [/\bSUZUKI\b/i], normalized: 'Suzuki' },
+  { patterns: [/\bDACIA\b/i], normalized: 'Dacia' },
+  { patterns: [/\bMINI\b/i], normalized: 'Mini' },
+  { patterns: [/\bSMART\b/i], normalized: 'Smart' },
+  { patterns: [/\bTESLA\b/i], normalized: 'Tesla' },
+]
+
 export interface ZB1ExtractedData {
   kennzeichen: string | null
   erstzulassung: string | null
@@ -94,6 +127,89 @@ export function parseZB1Fields(fullText: string): ZB1ExtractedData {
   if (!result.kennzeichen) {
     const kzMatch = fullText.match(/\b([A-ZÄÖÜ]{1,3})[\s-]([A-Z]{1,2})[\s]?(\d{1,4})\b/)
     if (kzMatch) result.kennzeichen = `${kzMatch[1]}-${kzMatch[2]} ${kzMatch[3]}`
+  }
+
+  // AAR-351: Fallback-Runde für Felder die ohne Label-Match null geblieben
+  // sind. Vision API liefert ZB1-Feld-Codes oft nicht auf eigenen Zeilen —
+  // die Heuristiken hier springen dann als Backup ein.
+
+  // Hersteller-Fallback: OCR-Keywords im Fließtext
+  if (!result.fahrzeug_hersteller) {
+    for (const { patterns, normalized } of HERSTELLER_KEYWORDS) {
+      if (patterns.some((p) => p.test(fullText))) {
+        result.fahrzeug_hersteller = normalized
+        break
+      }
+    }
+  }
+
+  // Erstzulassung-Fallback: ältestes plausibles DD.MM.YYYY-Datum. Erstzulassung
+  // ist per Definition älter als Ausstellungsdatum (I.1) oder TÜV-Termin —
+  // daher nehmen wir das Datum mit dem frühesten Timestamp, sofern 1980..jetzt+1.
+  if (!result.erstzulassung) {
+    const dates = Array.from(fullText.matchAll(/\b(\d{2})\.(\d{2})\.(\d{4})\b/g))
+    const maxYear = new Date().getFullYear() + 1
+    let oldest: { str: string; ts: number } | null = null
+    for (const [full, dd, mm, yyyy] of dates) {
+      const year = Number(yyyy)
+      if (year < 1980 || year > maxYear) continue
+      const ts = Date.parse(`${yyyy}-${mm}-${dd}`)
+      if (Number.isNaN(ts)) continue
+      if (!oldest || ts < oldest.ts) oldest = { str: full, ts }
+    }
+    if (oldest) result.erstzulassung = oldest.str
+  }
+
+  // Halter-Adresse-Fallback über PLZ-Anker. Deutsche PLZ sind 5-stellig +
+  // Ortsname. Wir suchen die erste Zeile im Text die exakt so beginnt und
+  // nehmen die Zeile davor als Straße, die Zeile zwei drüber als Name.
+  // Das matcht das ZB1-Layout C.1 (Name) → C.3 (Straße) → PLZ + Ort.
+  if (!result.halter_plz) {
+    for (let i = 0; i < lines.length; i++) {
+      const plzMatch = lines[i].match(/^(\d{5})\s+(\S.*)$/)
+      if (!plzMatch) continue
+      result.halter_plz = plzMatch[1]
+      result.halter_stadt = plzMatch[2].trim()
+
+      // Zeile davor = Straße (nicht wenn es ein Feld-Label wie "C.3" ist)
+      if (!result.halter_strasse && i > 0) {
+        const prev = lines[i - 1]
+        if (prev && !/^[A-Z]\.?\d*$/i.test(prev) && prev.length > 2) {
+          result.halter_strasse = prev
+        }
+      }
+
+      // 2 Zeilen davor = Name (optional Vorname nach Komma)
+      if (!result.halter_nachname && i > 1) {
+        const nameLine = lines[i - 2]
+        const isLabel = /^[A-Z]\.?\d*$/i.test(nameLine)
+        const isNumeric = /^\d+$/.test(nameLine)
+        if (nameLine && !isLabel && !isNumeric && nameLine.length > 1) {
+          const parts = nameLine.split(/[,;]/).map((p) => p.trim()).filter(Boolean)
+          if (parts.length >= 2) {
+            result.halter_nachname = parts[0]
+            result.halter_vorname = parts[1]
+          } else {
+            result.halter_nachname = nameLine
+          }
+        }
+      }
+      break
+    }
+  }
+
+  // HSN-Fallback: erste 4-stellige Zahl auf eigener Zeile, die kein Jahr
+  // ist (1900-2100 ausgeschlossen). ZB1 listet HSN üblicherweise als
+  // Standalone-Token direkt nach Feld "2.1".
+  if (!result.hsn) {
+    for (const line of lines) {
+      const m = line.match(/^(\d{4})$/)
+      if (!m) continue
+      const n = Number(m[1])
+      if (n >= 1900 && n <= 2100) continue
+      result.hsn = m[1]
+      break
+    }
   }
 
   // AAR-181: Baujahr aus Erstzulassung ableiten (DD.MM.YYYY → YYYY)
