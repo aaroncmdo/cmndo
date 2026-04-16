@@ -749,21 +749,6 @@ async function findLeastBusyKundenbetreuer(
   return eligible.reduce((min, p) => (counts[p.id] < counts[min.id] ? p : min), eligible[0]).id
 }
 
-// ─── Pflichtdokumente automatisch erstellen ─────────────────────────────────
-
-// AAR-322: Katalog-driven — delegiert an createPflichtdokumenteFromKatalog.
-// Der dokument_katalog + JSON-Rule-DSL ist die Quelle der Wahrheit; vorher
-// war die Logik hier + in flow/[token]/actions.ts dupliziert.
-// Export bleibt bestehen, damit flow/[token]/actions.ts den gleichen
-// Einstiegspunkt nutzen kann.
-export async function createPflichtdokumente(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  fallId: string,
-  lead: Record<string, unknown>,
-) {
-  await createPflichtdokumenteFromKatalog(supabase, fallId, lead)
-}
-
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 async function getProfileName(

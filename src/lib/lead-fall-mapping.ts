@@ -121,6 +121,11 @@ export const LEAD_TO_FALL_DEFAULT_FIELDS: Record<string, unknown> = {
   hat_vorschaeden: false,
   // AAR-317 Audit-M2: Default false statt null — DB-Default matcht „nicht bestätigt"
   unfallskizze_bestaetigt: false,
+  // AAR-321/322 Audit-Fix: zeugen_vorhanden wird beim Fall-Anlegen vom Lead
+  // übernommen — essenziell, weil die Katalog-Rule für `zeugenbericht` auf
+  // fall.zeugen_vorhanden ODER lead.zeugen_vorhanden schaut. Ohne Mapping
+  // bliebe der zeugenbericht-Slot nie freigeschaltet.
+  zeugen_vorhanden: false,
 }
 
 // ─── 3. RENAMED — Fall-Spalte ≠ Lead-Spalte ────────────────────────────────
