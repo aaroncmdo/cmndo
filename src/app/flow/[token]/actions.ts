@@ -554,6 +554,43 @@ export async function signSAandCreateFall(
     beschreibung: `Fallnummer ${fallNummer}. SA digital unterschrieben via FlowLink.${lead.gutachter_termin ? ' Termin bestätigt.' : ''}`,
   })
 
+  // 8a. AAR-306: Auto-Task „Bei Versicherung anrufen" für Kundenbetreuer
+  // Idempotent — bei wiederholten Calls (sollte nicht passieren, aber safe)
+  // wird kein zweiter Task angelegt.
+  try {
+    const { count: existingTaskCount } = await admin
+      .from('tasks')
+      .select('id', { count: 'exact', head: true })
+      .eq('fall_id', fall.id)
+      .eq('task_typ', 'versicherung-anrufen')
+    if (!existingTaskCount || existingTaskCount === 0) {
+      const leadAny = lead as Record<string, unknown>
+      const kundenName = [leadAny.vorname, leadAny.nachname].filter(Boolean).join(' ') || '—'
+      const telefon = (leadAny.telefon as string) ?? '—'
+      const gegnerVS = (leadAny.gegner_versicherung as string) ?? '—'
+      const schadensDatum = leadAny.unfalldatum ? String(leadAny.unfalldatum).slice(0, 10) : '—'
+      await admin.from('tasks').insert({
+        fall_id: fall.id,
+        typ: 'system',
+        task_typ: 'versicherung-anrufen',
+        titel: 'Bei Versicherung anrufen und Schadennummer holen',
+        beschreibung: [
+          `Gegnerische Versicherung: ${gegnerVS}`,
+          `Kunde: ${kundenName}, Tel: ${telefon}`,
+          `Schadensdatum: ${schadensDatum}`,
+        ].join('\n'),
+        status: 'offen',
+        empfaenger_rolle: 'kundenbetreuer',
+        empfaenger_user_id: kundenbetreuerId,
+        auto_erstellt: true,
+        prioritaet: 'hoch',
+        phase: 'fallakten-start',
+      })
+    }
+  } catch (err) {
+    console.error('[AAR-306] Auto-Task versicherung-anrufen fehlgeschlagen:', err)
+  }
+
   // 8b. KFZ-129: Chat-Gruppe erstellen + Teilnehmer synchronisieren + System-Nachricht
   try {
     const { syncChatTeilnehmer, sendSystemNachricht } = await import('@/lib/chatGruppe')
