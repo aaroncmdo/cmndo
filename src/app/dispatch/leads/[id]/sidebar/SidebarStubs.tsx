@@ -241,8 +241,39 @@ const GESPRAECHSHILFEN: Record<Phase, { titel: string; opener: string; folge: st
 }
 
 export function GespraechshilfePanel() {
-  const { currentPhase } = useDispatchPhase()
+  const { currentPhase, lead } = useDispatchPhase()
   const hilfe = GESPRAECHSHILFEN[currentPhase]
+  const l = lead as unknown as {
+    schaden_sichtbar?: boolean | null
+    zeugen?: boolean | null
+    mietwagen_flag?: boolean | null
+    polizei_vor_ort?: boolean | null
+    personenschaden_flag?: boolean | null
+  }
+
+  // AAR-302: Conditional Closing-Sätze in Phase 5 — basierend auf Lead-Flags
+  const closingSaetze: string[] = []
+  if (currentPhase === 5) {
+    closingSaetze.push('„Ich schicke Ihnen jetzt den Link — SA unterschreiben dauert 3 Minuten, dann sind Sie startklar."')
+    closingSaetze.push('„Außerdem schicke ich Ihnen einen zweiten Link für Ihren Fahrzeugschein — einfach abfotografieren und absenden."')
+    if (l.schaden_sichtbar === true) {
+      closingSaetze.push('„Bitte fotografieren Sie noch heute Ihr Auto von allen Seiten — vorne, hinten, beide Seiten + den Schaden nah dran. Diese Fotos sichern Ihre Ansprüche."')
+    }
+    if (l.zeugen === true) {
+      closingSaetze.push('„Können Sie mir kurz Name und Telefonnummer des Zeugen geben? Ich trage das gleich ein."')
+    }
+    if (l.mietwagen_flag === true) {
+      closingSaetze.push('„Die Mietwagenrechnung schicken Sie uns bitte sobald Sie das Fahrzeug zurückgeben — einfach per WhatsApp an diese Nummer."')
+    }
+    if (l.personenschaden_flag === true) {
+      closingSaetze.push('„Lassen Sie sich bitte von einem Arzt untersuchen — auch wenn es sich erst gut anfühlt. Das Attest brauchen wir für Schmerzensgeld."')
+    }
+    if (l.polizei_vor_ort === true) {
+      closingSaetze.push('„Sie können den Polizeibericht später nachreichen — wir schicken Ihnen einen Link sobald Sie ihn von der Polizei bekommen haben."')
+    }
+    closingSaetze.push('„Bei Fragen erreichen Sie uns jederzeit per WhatsApp unter dieser Nummer — auch außerhalb der Geschäftszeiten."')
+  }
+
   return (
     <details className="bg-white rounded-xl border border-gray-200 p-3 group" open>
       <summary className="text-xs font-semibold text-gray-700 flex items-center gap-2 cursor-pointer list-none">
@@ -260,6 +291,22 @@ export function GespraechshilfePanel() {
             </li>
           ))}
         </ul>
+        {/* AAR-302: Conditional Closing-Skript für Phase 5 */}
+        {closingSaetze.length > 0 && (
+          <div className="pt-2 border-t border-blue-200">
+            <p className="text-[10px] uppercase tracking-wider text-blue-700 font-semibold mb-1.5">
+              Closing — am Gesprächsende sagen:
+            </p>
+            <ul className="space-y-1.5">
+              {closingSaetze.map((s, i) => (
+                <li key={i} className="text-[11px] text-blue-900 italic leading-relaxed flex gap-1.5">
+                  <span className="text-blue-400 shrink-0">→</span>
+                  <span>{s}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </details>
   )
