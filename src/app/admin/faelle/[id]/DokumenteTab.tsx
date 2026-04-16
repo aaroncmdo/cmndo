@@ -22,6 +22,16 @@ import AnforderungenListe, {
   type AnforderungsItem,
 } from '@/components/dokumente/AnforderungenListe'
 import type { AnforderbarerSlot } from '@/components/dokumente/AnforderungsModal'
+// AAR-326: KB-Zuordnungs-UI + QC-Modal + Drag&Drop
+import DokumenteUnzugeordnetBox from '@/components/dokumente/DokumenteUnzugeordnetBox'
+import DokumenteListeSortierbar, {
+  type SortierbarPflicht,
+} from '@/components/dokumente/DokumenteListeSortierbar'
+import DokumenteQcModal, { type QcDoc } from '@/components/dokumente/DokumenteQcModal'
+import type {
+  UnzugeordnetDoc,
+  ZuordnungsSlot,
+} from '@/components/dokumente/DokumenteZuordnungsModal'
 
 type Pflichtdok = {
   id: string
@@ -123,6 +133,10 @@ export default function DokumenteTab({
   anforderbareSlots,
   anforderungenVonMir,
   rolleLabel,
+  unzugeordneteUploads,
+  zuPruefendeUploads,
+  uploadbareSlots,
+  sortierbareItems,
 }: {
   fallId: string
   pflichtdokumente: Pflichtdok[]
@@ -135,6 +149,14 @@ export default function DokumenteTab({
   anforderungenVonMir: AnforderungsItem[]
   // AAR-327: Anzeige-Label der Rolle im Modal ("Claimondo", "Kanzlei", …)
   rolleLabel: string
+  // AAR-326: fall_dokumente-Rows mit dokument_typ IN ('kunde-nachreichung','sonstiges')
+  unzugeordneteUploads: UnzugeordnetDoc[]
+  // AAR-326: Bereits einem Slot zugeordnete Uploads mit pflicht.status='hochgeladen'
+  zuPruefendeUploads: QcDoc[]
+  // AAR-326: Katalog-Slots die KB/Kunde hochladen dürfen (uploadbar_von)
+  uploadbareSlots: ZuordnungsSlot[]
+  // AAR-326: Pflichtdokumente im drag&drop-fähigen Shape
+  sortierbareItems: SortierbarPflicht[]
 }) {
   const router = useRouter()
   const [uploading, setUploading] = useState<string | null>(null)
@@ -217,6 +239,13 @@ export default function DokumenteTab({
   const pflichtCount = pflichtdokumente.length
   const hochgeladenCount = pflichtdokumente.filter(d => d.status !== 'ausstehend').length
   const pct = pflichtCount > 0 ? Math.round((hochgeladenCount / pflichtCount) * 100) : 0
+
+  // AAR-326: QC-Modal-State (welches fall_dokument wird gerade geprüft)
+  const [qcDoc, setQcDoc] = useState<QcDoc | null>(null)
+  const [qcOpen, setQcOpen] = useState(false)
+  // AAR-326: Drag&Drop-Sortierung ist optional (ausklappbar), damit der
+  // bestehende Upload/Nachreichen-Flow oben unverändert sichtbar bleibt.
+  const [sortierbarOpen, setSortierbarOpen] = useState(false)
 
   async function handleFileUpload(file: File, pflichtdokId: string) {
     setUploading(pflichtdokId)
@@ -379,12 +408,82 @@ export default function DokumenteTab({
         </div>
       </div>
 
+      {/* AAR-326: Unzugeordnete Kunden-Uploads — KB weist einem Slot zu. */}
+      <DokumenteUnzugeordnetBox docs={unzugeordneteUploads} slots={uploadbareSlots} />
+
+      {/* AAR-326: Zu prüfende Uploads — zugeordnete Kunden-Uploads die noch
+          auf QC warten (pflicht.status='hochgeladen'). Klick öffnet QC-Modal. */}
+      {zuPruefendeUploads.length > 0 && (
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+              <FileCheckIcon className="w-3.5 h-3.5" /> Zu prüfende Uploads
+              <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-[#4573A2]/10 text-[#4573A2] text-[10px] tabular-nums">
+                {zuPruefendeUploads.length}
+              </span>
+            </h3>
+          </div>
+          <div className="divide-y divide-gray-50">
+            {zuPruefendeUploads.map((d) => (
+              <div key={d.id} className="px-4 py-2.5 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <FileTextIcon className="w-4 h-4 text-gray-400 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm text-gray-800 truncate">{d.label}</p>
+                    <p className="text-[10px] text-gray-500 truncate">
+                      {d.original_filename ?? 'Unbenannt'} ·{' '}
+                      {new Date(d.hochgeladen_am).toLocaleDateString('de-DE')}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQcDoc(d)
+                    setQcOpen(true)
+                  }}
+                  className="text-[10px] font-medium text-white bg-[#4573A2] hover:bg-[#1E3A5F] px-2.5 py-1 rounded-md shrink-0"
+                >
+                  Prüfen
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* AAR-326: Reihenfolge anpassen (drag&drop) — ausklappbar */}
+      <div>
+        <button
+          type="button"
+          onClick={() => setSortierbarOpen((v) => !v)}
+          className="text-[11px] font-medium text-[#4573A2] hover:text-[#1E3A5F] inline-flex items-center gap-1"
+        >
+          {sortierbarOpen ? '− Reihenfolge verbergen' : '+ Reihenfolge anpassen'}
+        </button>
+        {sortierbarOpen && (
+          <div className="mt-2">
+            <DokumenteListeSortierbar fallId={fallId} items={sortierbareItems} />
+          </div>
+        )}
+      </div>
+
       {/* AAR-327: Meine Anforderungen — Modal-Trigger + Liste bestehender Anforderungen */}
       <AnforderungenListe
         fallId={fallId}
         rolleLabel={rolleLabel}
         slotsVerfuegbar={anforderbareSlots}
         anforderungen={anforderungenVonMir}
+      />
+
+      {/* AAR-326: Mount-Point für QC-Modal (Single-Instance, zentral gesteuert) */}
+      <DokumenteQcModal
+        doc={qcDoc}
+        open={qcOpen}
+        onOpenChange={(v) => {
+          setQcOpen(v)
+          if (!v) setQcDoc(null)
+        }}
       />
 
       {/* Alle Dateien */}

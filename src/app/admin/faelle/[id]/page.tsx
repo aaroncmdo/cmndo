@@ -39,6 +39,7 @@ export default async function FallaktePage({
     { data: timeline },
     { data: pflichtdokumente },
     { data: qcCheckliste },
+    { data: fallDokumenteRaw },
     leadResult,
     svResult,
     kundenbetreuerResult,
@@ -68,6 +69,13 @@ export default async function FallaktePage({
       .select('*')
       .eq('fall_id', id)
       .maybeSingle(),
+    // AAR-326: fall_dokumente für Unzugeordnet-Box + Zu-Prüfen-Liste
+    supabase
+      .from('fall_dokumente')
+      .select('id, dokument_typ, storage_path, original_filename, beschreibung, hochgeladen_am, mime_type')
+      .eq('fall_id', id)
+      .is('geloescht_am', null)
+      .order('hochgeladen_am', { ascending: false }),
     fall.lead_id
       ? supabase
           .from('leads')
@@ -161,6 +169,81 @@ export default async function FallaktePage({
   }
   const rolleLabel = rolleLabelForModal[userRolle] ?? 'Claimondo'
 
+  // AAR-326: KB-Zuordnungs-UI — Katalog-Slots vorbereiten, fall_dokumente
+  // aufteilen (unzugeordnet / zu prüfen) und Pflichtdokumente in sort-Shape
+  // umformen. Preview-URLs kommen aus dem Bucket 'fall-dokumente'.
+  const katalogAlleSlots = await getAlleSlots(supabase)
+  const uploadbareSlots = katalogAlleSlots
+    .filter((s) => s.uploadbar_von.includes('kundenbetreuer') || s.uploadbar_von.includes('kunde'))
+    .map((s) => ({
+      slot_id: s.slot_id,
+      label: s.label,
+      beschreibung: s.beschreibung,
+      kategorie: s.kategorie as string,
+    }))
+  const slotLabelMap = new Map(katalogAlleSlots.map((s) => [s.slot_id, s.label]))
+  const slotKategorieMap = new Map(katalogAlleSlots.map((s) => [s.slot_id, s.kategorie as string]))
+
+  type FallDokumentRow = {
+    id: string
+    dokument_typ: string
+    storage_path: string
+    original_filename: string | null
+    beschreibung: string | null
+    hochgeladen_am: string
+  }
+  const fallDokumenteRows = (fallDokumenteRaw ?? []) as unknown as FallDokumentRow[]
+  const publicUrlFor = (path: string): string | null => {
+    const { data } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
+    return data?.publicUrl ?? null
+  }
+  const unzugeordneteUploads = fallDokumenteRows
+    .filter((r) => r.dokument_typ === 'kunde-nachreichung' || r.dokument_typ === 'sonstiges')
+    .map((r) => ({
+      id: r.id,
+      original_filename: r.original_filename,
+      previewUrl: publicUrlFor(r.storage_path),
+      dokument_typ: r.dokument_typ,
+      beschreibung: r.beschreibung,
+      hochgeladen_am: r.hochgeladen_am,
+    }))
+
+  // Zu prüfende Uploads: fall_dokumente mit Slot-Zuordnung, deren passender
+  // Pflicht-Eintrag noch auf 'hochgeladen' steht.
+  const pflichtHochgeladenSlots = new Set<string>()
+  for (const p of (pflichtdokumente ?? []) as Array<{ dokument_typ: string; status: string }>) {
+    if (p.status === 'hochgeladen') pflichtHochgeladenSlots.add(p.dokument_typ)
+  }
+  const zuPruefendeUploads = fallDokumenteRows
+    .filter(
+      (r) =>
+        r.dokument_typ !== 'kunde-nachreichung' &&
+        r.dokument_typ !== 'sonstiges' &&
+        pflichtHochgeladenSlots.has(r.dokument_typ),
+    )
+    .map((r) => ({
+      id: r.id,
+      label: slotLabelMap.get(r.dokument_typ) ?? r.dokument_typ,
+      original_filename: r.original_filename,
+      previewUrl: publicUrlFor(r.storage_path),
+      hochgeladen_am: r.hochgeladen_am,
+    }))
+
+  // Drag&Drop-Items: pflichtdokumente in Shape mit kategorie + sort_order.
+  type PflichtSortRow = {
+    id: string
+    dokument_typ: string
+    status: string
+    sort_order: number | null
+  }
+  const sortierbareItems = ((pflichtdokumente ?? []) as unknown as PflichtSortRow[]).map((r, idx) => ({
+    id: r.id,
+    label: slotLabelMap.get(r.dokument_typ) ?? r.dokument_typ,
+    kategorie: slotKategorieMap.get(r.dokument_typ) ?? 'sonstiges',
+    status: r.status,
+    sort_order: r.sort_order ?? idx + 1,
+  }))
+
   // AAR-103 + W2-Audit-Fix: Banner für andere offene Fälle desselben Kunden.
   // War im alten page.tsx oberhalb des Monolithen — beim Shell-Refactor
   // versehentlich rausgefallen.
@@ -225,6 +308,11 @@ export default async function FallaktePage({
           anforderbareSlots,
           anforderungenVonMir,
           rolleLabel,
+          // AAR-326: KB-Zuordnungs-UI
+          unzugeordneteUploads,
+          zuPruefendeUploads,
+          uploadbareSlots,
+          sortierbareItems,
         }}
       />
     </>

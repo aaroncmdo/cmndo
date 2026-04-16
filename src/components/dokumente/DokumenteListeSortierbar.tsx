@@ -1,0 +1,181 @@
+// AAR-326 (Child 6 von AAR-320): Drag&drop-sortierbare Pflichtdokumenten-
+// Liste für den KB.
+//
+// Zeigt pflichtdokumente gruppiert nach Kategorie. Jede Zeile ist per
+// @hello-pangea/dnd verschiebbar (innerhalb der gleichen Kategorie).
+// Nach dem Drop persistiert updateDokumentSortOrder() die neue Reihenfolge
+// in pflichtdokumente.sort_order.
+//
+// Gedacht als separates „Reihenfolge anpassen"-Widget/Modal neben der
+// bestehenden Pflichtdokumente-Checkliste, damit der bestehende Upload-
+// Flow unangetastet bleibt.
+
+'use client'
+
+import { useMemo, useState, useTransition } from 'react'
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  type DropResult,
+} from '@hello-pangea/dnd'
+import { GripVerticalIcon, Loader2Icon, CheckIcon } from 'lucide-react'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
+import { updateDokumentSortOrder } from '@/lib/dokumente/zuordnung'
+
+export type SortierbarPflicht = {
+  id: string
+  label: string
+  kategorie: string
+  status: string
+  sort_order: number
+}
+
+export default function DokumenteListeSortierbar({
+  fallId,
+  items,
+}: {
+  fallId: string
+  items: SortierbarPflicht[]
+}) {
+  const [local, setLocal] = useState<SortierbarPflicht[]>(() =>
+    [...items].sort((a, b) => a.sort_order - b.sort_order),
+  )
+  const [pending, startTransition] = useTransition()
+  const router = useRouter()
+
+  const grouped = useMemo(() => {
+    const map = new Map<string, SortierbarPflicht[]>()
+    for (const it of local) {
+      const key = it.kategorie || 'sonstiges'
+      if (!map.has(key)) map.set(key, [])
+      map.get(key)!.push(it)
+    }
+    return Array.from(map.entries())
+  }, [local])
+
+  function onDragEnd(result: DropResult) {
+    if (!result.destination) return
+    const srcKat = result.source.droppableId
+    const dstKat = result.destination.droppableId
+    // Nur Reorder innerhalb derselben Kategorie (Cross-Kategorie-Moves
+    // verschieben die fachliche Zuordnung — nicht Teil dieses Tickets).
+    if (srcKat !== dstKat) {
+      toast.error('Verschieben über Kategorien hinweg ist nicht möglich')
+      return
+    }
+    const katItems = local.filter((it) => (it.kategorie || 'sonstiges') === srcKat)
+    const [moved] = katItems.splice(result.source.index, 1)
+    katItems.splice(result.destination.index, 0, moved)
+
+    // Neue global-Liste: behalte andere Kategorien in ursprünglicher
+    // Reihenfolge, ersetze nur die betroffene Kategorie.
+    const others = local.filter((it) => (it.kategorie || 'sonstiges') !== srcKat)
+    const next = [...others, ...katItems]
+    setLocal(next)
+
+    // Payload bauen: alle betroffenen Items mit neuem sort_order
+    const payload = next.map((it, idx) => ({
+      pflichtId: it.id,
+      sortOrder: idx + 1,
+    }))
+    startTransition(async () => {
+      const res = await updateDokumentSortOrder(fallId, payload)
+      if (res.success) {
+        toast.success('Reihenfolge gespeichert')
+        router.refresh()
+      } else {
+        toast.error(res.error ?? 'Speichern fehlgeschlagen')
+      }
+    })
+  }
+
+  if (local.length === 0) {
+    return (
+      <p className="px-4 py-6 text-center text-gray-400 text-xs">
+        Keine Pflichtdokumente definiert.
+      </p>
+    )
+  }
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          Reihenfolge anpassen
+        </h3>
+        <span className="text-[10px] text-gray-400 flex items-center gap-1">
+          {pending ? (
+            <>
+              <Loader2Icon className="w-3 h-3 animate-spin" /> Speichert…
+            </>
+          ) : (
+            <>
+              <CheckIcon className="w-3 h-3 text-emerald-500" /> Auto-Save
+            </>
+          )}
+        </span>
+      </div>
+
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="p-3 space-y-4">
+          {grouped.map(([kat, entries]) => (
+            <div key={kat}>
+              <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1 px-1">
+                {kat}
+              </p>
+              <Droppable droppableId={kat}>
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className="space-y-1"
+                  >
+                    {entries.map((it, idx) => (
+                      <Draggable draggableId={it.id} index={idx} key={it.id}>
+                        {(prov, snap) => (
+                          <div
+                            ref={prov.innerRef}
+                            {...prov.draggableProps}
+                            className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs ${
+                              snap.isDragging
+                                ? 'bg-[#4573A2]/5 border-[#4573A2] shadow-sm'
+                                : 'bg-[#f8f9fb] border-gray-200'
+                            }`}
+                          >
+                            <span
+                              {...prov.dragHandleProps}
+                              className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing"
+                            >
+                              <GripVerticalIcon className="w-3.5 h-3.5" />
+                            </span>
+                            <span className="flex-1 truncate text-gray-800">{it.label}</span>
+                            <span
+                              className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${
+                                it.status === 'hochgeladen' || it.status === 'geprueft'
+                                  ? 'bg-emerald-50 text-emerald-600'
+                                  : 'bg-amber-50 text-amber-600'
+                              }`}
+                            >
+                              {it.status === 'geprueft'
+                                ? 'Geprüft'
+                                : it.status === 'hochgeladen'
+                                ? 'Hochgeladen'
+                                : 'Ausstehend'}
+                            </span>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </div>
+          ))}
+        </div>
+      </DragDropContext>
+    </div>
+  )
+}
