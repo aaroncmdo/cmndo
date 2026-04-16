@@ -82,6 +82,8 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'finanzierungsgeber_vertragsnr',
   // KFZ-202 Vorschäden
   'vorschaeden_beschreibung',
+  // AAR-298 Zeugen-Kontakte (JSONB-Array)
+  'zeugen_kontakte',
 ] as const
 
 // ─── 2. DEFAULT — Feldname gleich, NOT-NULL fallback ────────────────────────
