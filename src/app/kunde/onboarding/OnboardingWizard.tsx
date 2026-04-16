@@ -8,19 +8,53 @@ import {
   CheckIcon, UploadCloudIcon, CalendarIcon, FileTextIcon, SparklesIcon, FolderOpenIcon,
   AlertCircleIcon, ClockIcon, RefreshCwIcon,
 } from 'lucide-react'
-import { completeOnboarding, uploadPflichtdokument, type PflichtdokumentStand } from './actions'
+import {
+  completeOnboarding,
+  uploadPflichtdokument,
+  uploadKundenDokument,
+  type PflichtdokumentStand,
+  type FreierSlot,
+} from './actions'
 
 type Fall = { id: string; fall_nummer: string | null; kennzeichen: string | null; fahrzeug: string }
 type Termin = { datum: string; svName: string | null }
 // AAR-323: PflichtDoc ist jetzt der Katalog-angereicherte Stand (siehe actions.ts).
 type PflichtDoc = PflichtdokumentStand
 
+// AAR-324: Schritt 'weitere-dokumente' kommt NACH dem Pflicht-Step. Zeigt
+// alle katalog-gefilterten, conditional freigeschalteten Slots (Attest bei
+// Personenschaden, Zeugenbericht bei zeugen_vorhanden, Mietwagenrechnung bei
+// mietwagen_flag etc.) — alle optional.
 const STEPS = [
   { id: 'welcome', label: 'Willkommen' },
   { id: 'fall', label: 'Ihr Fall' },
   { id: 'termin', label: 'Termin' },
   { id: 'dokumente', label: 'Dokumente' },
+  { id: 'weitere-dokumente', label: 'Weitere Dokumente' },
   { id: 'fertig', label: 'Fertig' },
+] as const
+
+// AAR-324: Gruppen-Labels für die Kategorie-Überschriften in Step 4.
+// Reihenfolge = Render-Reihenfolge im UI (orientiert an dokument_katalog.sort_order).
+const KATEGORIE_LABELS: Record<string, { label: string; emoji: string }> = {
+  stammdaten: { label: 'Stammdaten', emoji: '📌' },
+  unfall: { label: 'Unfall', emoji: '🚗' },
+  personenschaden: { label: 'Personenschaden', emoji: '🏥' },
+  fahrzeug: { label: 'Fahrzeug', emoji: '🔧' },
+  kosten: { label: 'Kosten', emoji: '💶' },
+  gutachten: { label: 'Gutachten', emoji: '📄' },
+  kanzlei: { label: 'Kanzlei', emoji: '⚖️' },
+  sonstiges: { label: 'Sonstiges', emoji: '📎' },
+}
+const KATEGORIE_REIHENFOLGE = [
+  'stammdaten',
+  'unfall',
+  'personenschaden',
+  'fahrzeug',
+  'kosten',
+  'gutachten',
+  'kanzlei',
+  'sonstiges',
 ] as const
 
 // AAR-323: Labels kommen jetzt aus dokument_katalog.label (via
@@ -55,12 +89,13 @@ type VorbereitungsInfo = {
 }
 
 export default function OnboardingWizard({
-  vorname, fall, termin, pflichtDocs, vorbereitung,
+  vorname, fall, termin, pflichtDocs, freieSlots, vorbereitung,
 }: {
   vorname: string
   fall: Fall | null
   termin: Termin | null
   pflichtDocs: PflichtDoc[]
+  freieSlots: FreierSlot[]
   vorbereitung?: VorbereitungsInfo
 }) {
   const router = useRouter()
@@ -81,6 +116,15 @@ export default function OnboardingWizard({
   const [docStatus, setDocStatus] = useState<Record<string, string>>(
     Object.fromEntries(pflichtDocs.map(d => [d.id, d.status])),
   )
+  // AAR-324: Lokale Counts pro Slot im Optional-Step — wird bei Upload inkrementiert,
+  // damit der Kunde ohne Reload sieht "Hochgeladen (2)" bei multi_file-Slots.
+  const [slotCounts, setSlotCounts] = useState<Record<string, number>>(
+    Object.fromEntries(freieSlots.map(s => [s.slot_id, s.hochgeladene_anzahl])),
+  )
+  const [uploadingSlot, setUploadingSlot] = useState<string | null>(null)
+  const [sonstigesBeschreibung, setSonstigesBeschreibung] = useState('')
+  const [sonstigesCount, setSonstigesCount] = useState(0)
+  const [sonstigesError, setSonstigesError] = useState<string | null>(null)
 
   const currentStep = STEPS[stepIndex]
   const progress = Math.round(((stepIndex + 1) / STEPS.length) * 100)
@@ -124,6 +168,41 @@ export default function OnboardingWizard({
           }
         }
         setUploadingId(null)
+      })
+    }
+    reader.readAsDataURL(file)
+  }
+
+  // AAR-324: Upload in einen freien (optionalen) Katalog-Slot.
+  // slotId=null → 'kunde-nachreichung' mit Freitext-Beschreibung.
+  function handleFreiUpload(slotId: string | null, file: File, beschreibung?: string) {
+    if (!fall?.id) return
+    const loadingKey = slotId ?? '__sonstiges__'
+    setUploadingSlot(loadingKey)
+    if (slotId === null) setSonstigesError(null)
+    const reader = new FileReader()
+    reader.onload = () => {
+      const base64 = typeof reader.result === 'string' ? reader.result : ''
+      startTransition(async () => {
+        const res = await uploadKundenDokument(
+          fall.id,
+          slotId,
+          base64,
+          file.name,
+          file.type,
+          beschreibung,
+        )
+        if (res.success) {
+          if (slotId) {
+            setSlotCounts(prev => ({ ...prev, [slotId]: (prev[slotId] ?? 0) + 1 }))
+          } else {
+            setSonstigesCount(prev => prev + 1)
+            setSonstigesBeschreibung('')
+          }
+        } else if (slotId === null) {
+          setSonstigesError(res.error ?? 'Upload fehlgeschlagen')
+        }
+        setUploadingSlot(null)
       })
     }
     reader.readAsDataURL(file)
@@ -452,6 +531,203 @@ export default function OnboardingWizard({
                   onClick={() => setStepIndex(4)}
                   className="mt-4 w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >Weiter</button>
+              </div>
+            )}
+
+            {/* Weitere Dokumente — AAR-324: conditional Slots aus dokument_katalog */}
+            {currentStep.id === 'weitere-dokumente' && (
+              <div>
+                <div className="mb-4"><FolderOpenIcon className="w-10 h-10 text-[#4573A2]" /></div>
+                <h1 className="text-2xl font-semibold text-gray-900">Weitere Dokumente</h1>
+                <p className="mt-2 text-sm text-gray-500">
+                  Optional — laden Sie weitere Dokumente oder Fotos hoch, die zu Ihrem Fall passen.
+                  Sie können diesen Schritt auch überspringen und später im Dashboard nachreichen.
+                </p>
+
+                {/* Katalog-Slots nach Kategorie gruppiert */}
+                <div className="mt-5 space-y-5">
+                  {KATEGORIE_REIHENFOLGE.map(kat => {
+                    const slotsInKat = freieSlots.filter(s => s.kategorie === kat)
+                    if (slotsInKat.length === 0) return null
+                    const katMeta = KATEGORIE_LABELS[kat]
+                    return (
+                      <div key={kat}>
+                        <p className="text-xs font-semibold text-[#0D1B3E] uppercase tracking-wider mb-2">
+                          {katMeta.emoji} {katMeta.label}
+                        </p>
+                        <div className="space-y-2.5">
+                          {slotsInKat.map(slot => {
+                            const count = slotCounts[slot.slot_id] ?? 0
+                            const hochgeladen = count > 0
+                            const loading = uploadingSlot === slot.slot_id
+                            // multi_file=false + bereits 1 hochgeladen → Upload-Button wird zu "Ersetzen"
+                            const kannMehr = slot.multi_file || count === 0
+                            const acceptString = slot.akzeptierte_mime_types.join(',')
+                            return (
+                              <div
+                                key={slot.slot_id}
+                                className={`rounded-xl border p-3 ${
+                                  hochgeladen ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-gray-200'
+                                }`}
+                              >
+                                <div className="flex items-start gap-3">
+                                  <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                    hochgeladen ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400'
+                                  }`}>
+                                    {hochgeladen ? <CheckIcon className="w-4 h-4" /> : <UploadCloudIcon className="w-4 h-4" />}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <p className="text-sm font-medium text-gray-900">{slot.label}</p>
+                                      {hochgeladen && (
+                                        <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                                          {slot.multi_file ? `${count} hochgeladen` : 'Hochgeladen'}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {slot.beschreibung && (
+                                      <p className="text-xs text-gray-500 mt-0.5">{slot.beschreibung}</p>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="mt-2.5 flex gap-2">
+                                  {kannMehr && (
+                                    <>
+                                      <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-[#0D1B3E] text-white hover:bg-[#1E3A5F] cursor-pointer text-center">
+                                        {loading ? 'Lädt...' : '📷 Foto aufnehmen'}
+                                        <input
+                                          type="file"
+                                          accept="image/*"
+                                          capture="environment"
+                                          className="hidden"
+                                          disabled={loading}
+                                          onChange={e => {
+                                            const f = e.target.files?.[0]
+                                            if (f) handleFreiUpload(slot.slot_id, f)
+                                            e.target.value = ''
+                                          }}
+                                        />
+                                      </label>
+                                      <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-white border border-[#0D1B3E] text-[#0D1B3E] hover:bg-blue-50 cursor-pointer text-center">
+                                        {loading ? 'Lädt...' : '📁 Datei wählen'}
+                                        <input
+                                          type="file"
+                                          accept={acceptString}
+                                          className="hidden"
+                                          disabled={loading}
+                                          onChange={e => {
+                                            const f = e.target.files?.[0]
+                                            if (f) handleFreiUpload(slot.slot_id, f)
+                                            e.target.value = ''
+                                          }}
+                                        />
+                                      </label>
+                                    </>
+                                  )}
+                                  {!kannMehr && (
+                                    <label className="text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 cursor-pointer inline-flex items-center gap-1.5">
+                                      <RefreshCwIcon className="w-3 h-3" />
+                                      {loading ? 'Lädt...' : 'Ersetzen'}
+                                      <input
+                                        type="file"
+                                        accept={acceptString}
+                                        className="hidden"
+                                        disabled={loading}
+                                        onChange={e => {
+                                          const f = e.target.files?.[0]
+                                          if (f) handleFreiUpload(slot.slot_id, f)
+                                          e.target.value = ''
+                                        }}
+                                      />
+                                    </label>
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )
+                  })}
+
+                  {/* Sonstiges — immer sichtbar, nutzt kunde-nachreichung Slot */}
+                  <div>
+                    <p className="text-xs font-semibold text-[#0D1B3E] uppercase tracking-wider mb-2">
+                      📎 Sonstiges
+                    </p>
+                    <div className="rounded-xl border border-gray-200 bg-white p-3">
+                      <p className="text-sm font-medium text-gray-900">Andere Datei hochladen</p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Alles was zu Ihrem Fall gehört und oben nicht auftaucht — z.B. Rechnungen, Berichte, Fotos.
+                        Ihr Betreuer ordnet die Datei anschließend zu.
+                      </p>
+                      <div className="mt-2.5">
+                        <label className="block text-[11px] font-medium text-gray-600 mb-1">
+                          Worum geht es? (optional)
+                        </label>
+                        <textarea
+                          value={sonstigesBeschreibung}
+                          onChange={e => setSonstigesBeschreibung(e.target.value)}
+                          rows={2}
+                          placeholder="z.B. 'Attest vom Hausarzt, erhalten am 15.04.'"
+                          className="w-full text-xs rounded-md border border-gray-200 px-2 py-1.5 outline-none focus:border-[#4573A2]"
+                          maxLength={500}
+                        />
+                      </div>
+                      {sonstigesCount > 0 && (
+                        <p className="mt-2 text-[11px] text-emerald-700 flex items-center gap-1">
+                          <CheckIcon className="w-3 h-3" /> {sonstigesCount} Datei{sonstigesCount === 1 ? '' : 'en'} hochgeladen
+                        </p>
+                      )}
+                      {sonstigesError && (
+                        <p className="mt-2 text-[11px] text-rose-700 flex items-center gap-1">
+                          <AlertCircleIcon className="w-3 h-3" /> {sonstigesError}
+                        </p>
+                      )}
+                      <div className="mt-2.5 flex gap-2">
+                        <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-[#0D1B3E] text-white hover:bg-[#1E3A5F] cursor-pointer text-center">
+                          {uploadingSlot === '__sonstiges__' ? 'Lädt...' : '📷 Foto aufnehmen'}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            className="hidden"
+                            disabled={uploadingSlot === '__sonstiges__'}
+                            onChange={e => {
+                              const f = e.target.files?.[0]
+                              if (f) handleFreiUpload(null, f, sonstigesBeschreibung)
+                              e.target.value = ''
+                            }}
+                          />
+                        </label>
+                        <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-white border border-[#0D1B3E] text-[#0D1B3E] hover:bg-blue-50 cursor-pointer text-center">
+                          {uploadingSlot === '__sonstiges__' ? 'Lädt...' : '📁 Datei wählen'}
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/heic,application/pdf"
+                            className="hidden"
+                            disabled={uploadingSlot === '__sonstiges__'}
+                            onChange={e => {
+                              const f = e.target.files?.[0]
+                              if (f) handleFreiUpload(null, f, sonstigesBeschreibung)
+                              e.target.value = ''
+                            }}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setStepIndex(5)}
+                  className="mt-5 w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
+                >Weiter</button>
+                <button
+                  onClick={() => setStepIndex(5)}
+                  className="mt-2 w-full py-3 text-xs text-gray-500 hover:text-gray-700"
+                >Überspringen</button>
               </div>
             )}
 

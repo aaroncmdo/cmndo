@@ -2,7 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import OnboardingWizard from './OnboardingWizard'
-import { getPflichtdokumenteStand } from './actions'
+import { getPflichtdokumenteStand, getFreieSlotsFuerKunde } from './actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -71,6 +71,11 @@ export default async function OnboardingPage() {
   // Plain-Select aus pflichtdokumente.
   const pflichtDocs = fall?.id ? await getPflichtdokumenteStand(fall.id) : []
 
+  // AAR-324: Freie (conditional freigeschaltete) Slots für den optional-Step.
+  // Evaluiert freigeschaltet_wenn gegen lead+fall; filtert auf 'kunde' in
+  // uploadbar_von und schließt Slots aus, die bereits Pflicht sind (sonst doppelt).
+  const freieSlots = fall?.id ? await getFreieSlotsFuerKunde(fall.id) : []
+
   // AAR-231: Vorbereitungs-Flags aus Pflichtdokumenten + Fall-Feldern ableiten.
   // AAR-231 Audit: zb1Hochgeladen = fahrzeugschein-Doc MIT URL ODER
   // zb1_status='bestaetigt' (via Dispatch Phase 4) — sonst würde der
@@ -88,6 +93,7 @@ export default async function OnboardingPage() {
       fall={fall ? { id: fall.id, fall_nummer: fall.fall_nummer, kennzeichen: fall.kennzeichen, fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') } : null}
       termin={terminDatum ? { datum: terminDatum, svName } : null}
       pflichtDocs={pflichtDocs}
+      freieSlots={freieSlots}
       vorbereitung={{
         zb1Hochgeladen,
         polizeiVorOrt: !!fall?.polizei_vor_ort,
