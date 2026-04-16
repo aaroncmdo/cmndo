@@ -1,9 +1,16 @@
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import SVKalenderClient from './SVKalenderClient'
 
-export default async function SVKalenderPage() {
+// AAR-229 W5 / F-12: Kalender + Termine merge mit View-Toggle.
+export default async function SVKalenderPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string }>
+}) {
+  const { view = 'kalender' } = await searchParams
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
@@ -42,20 +49,73 @@ export default async function SVKalenderPage() {
     leadMap[l.id] = `${l.vorname ?? ''} ${l.nachname ?? ''}`.trim() || '—'
   }
 
+  // AAR-229 W5 / F-12: Liste = chronologische Termine (Subset der Fälle mit sv_termin)
+  const terminListe = (faelle ?? [])
+    .filter(f => f.sv_termin)
+    .sort((a, b) => new Date(a.sv_termin!).getTime() - new Date(b.sv_termin!).getTime())
+
   return (
-    <SVKalenderClient
-      faelle={faelle ?? []}
-      leadMap={leadMap}
-      svId={sv.id}
-      gcalConnected={!!sv.gcal_connected}
-      standortLat={sv.standort_lat ? Number(sv.standort_lat) : null}
-      standortLng={sv.standort_lng ? Number(sv.standort_lng) : null}
-      termine={(termine ?? []).map(t => ({
-        id: t.id as string,
-        fall_id: t.fall_id as string,
-        status: t.status as string,
-        final_verbindlich_ab: t.final_verbindlich_ab as string | null,
-      }))}
-    />
+    <div className="h-full flex flex-col">
+      {/* View-Toggle */}
+      <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200 shrink-0">
+        <h1 className="text-sm font-semibold text-gray-900">Kalender</h1>
+        <div className="flex gap-1 bg-gray-100 rounded-lg p-0.5">
+          <Link
+            href="/gutachter/kalender?view=kalender"
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              view === 'kalender' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
+            }`}
+          >Kalender</Link>
+          <Link
+            href="/gutachter/kalender?view=liste"
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              view === 'liste' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
+            }`}
+          >Liste</Link>
+        </div>
+      </div>
+
+      {view === 'kalender' ? (
+        <SVKalenderClient
+          faelle={faelle ?? []}
+          leadMap={leadMap}
+          svId={sv.id}
+          gcalConnected={!!sv.gcal_connected}
+          standortLat={sv.standort_lat ? Number(sv.standort_lat) : null}
+          standortLng={sv.standort_lng ? Number(sv.standort_lng) : null}
+          termine={(termine ?? []).map(t => ({
+            id: t.id as string,
+            fall_id: t.fall_id as string,
+            status: t.status as string,
+            final_verbindlich_ab: t.final_verbindlich_ab as string | null,
+          }))}
+        />
+      ) : (
+        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          {terminListe.length === 0 ? (
+            <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
+              <p className="text-gray-500">Keine Termine vorhanden.</p>
+            </div>
+          ) : terminListe.map(fall => {
+            const t = new Date(fall.sv_termin!)
+            const name = fall.lead_id && leadMap[fall.lead_id] ? leadMap[fall.lead_id] : '—'
+            return (
+              <Link key={fall.id} href={`/gutachter/fall/${fall.id}`}
+                className="block bg-white rounded-xl border border-gray-200 p-4 hover:bg-gray-50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {t.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })} — {t.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">{name} · {fall.schadens_ort ?? '—'}</p>
+                  </div>
+                  <span className="text-[10px] text-[#4573A2]">{fall.fall_nummer ?? fall.id.slice(0, 8)}</span>
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+      )}
+    </div>
   )
 }

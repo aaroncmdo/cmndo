@@ -53,12 +53,13 @@ const FILTER_TABS: [FilterKey, string][] = [
   ['abgeschlossen', 'Abgeschlossen'],
 ]
 
+// AAR-229 W5 / F-11: Tabs auf der Fälle-Seite (Fälle | Stellungnahmen | Tasks)
 export default async function GutachterFaellePage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string }>
+  searchParams: Promise<{ filter?: string; tab?: string }>
 }) {
-  const { filter } = await searchParams
+  const { filter, tab: activeTab = 'faelle' } = await searchParams
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
@@ -130,10 +131,43 @@ export default async function GutachterFaellePage({
     : { data: [] }
   const leadMap = Object.fromEntries((leads ?? []).map(l => [l.id, l]))
 
+  // AAR-229 W5 / F-11: Tasks des SVs laden wenn Tasks-Tab aktiv
+  let svTasks: Array<{ id: string; titel: string; status: string; fall_id: string | null; prioritaet: string | null; deadline: string | null }> = []
+  if (activeTab === 'tasks') {
+    const { data: taskData } = await supabase
+      .from('tasks')
+      .select('id, titel, status, fall_id, prioritaet, deadline')
+      .or(`zugewiesen_an.eq.${user.id},empfaenger_user_id.eq.${user.id}`)
+      .neq('status', 'erledigt')
+      .order('deadline', { ascending: true, nullsFirst: false })
+      .limit(50)
+    svTasks = (taskData ?? []) as typeof svTasks
+  }
+
+  // Stellungnahmen: Fälle die Status 'anschlussschreiben' oder 'vs-kuerzt' haben
+  const stellungnahmenFaelle = activeTab === 'stellungnahmen'
+    ? faelle.filter(f => ['anschlussschreiben', 'vs-kuerzt', 'nachbesichtigung-laeuft'].includes(f.status))
+    : []
+
   return (
     <div className="h-full flex flex-col">
-      {/* Sticky Topbar */}
-      <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200 shrink-0">
+      {/* AAR-229 W5 / F-11: Tab-Bar (Fälle | Stellungnahmen | Tasks) */}
+      <div className="flex gap-4 px-4 pt-3 pb-0 bg-white border-b border-gray-100 shrink-0">
+        {(['faelle', 'stellungnahmen', 'tasks'] as const).map(t => (
+          <Link
+            key={t}
+            href={`/gutachter/faelle?tab=${t}`}
+            className={`pb-2 text-xs font-medium border-b-2 transition-colors ${
+              activeTab === t ? 'border-[#4573A2] text-[#4573A2]' : 'border-transparent text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            {t === 'faelle' ? 'Fälle' : t === 'stellungnahmen' ? 'Stellungnahmen' : 'Tasks'}
+          </Link>
+        ))}
+      </div>
+
+      {/* Sticky Topbar — nur im Fälle-Tab (Filter-Buttons) */}
+      {activeTab === 'faelle' && <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200 shrink-0">
         <div>
           <h1 className="text-sm font-semibold text-gray-900">Meine Fälle</h1>
           <p className="text-gray-500 text-xs">{faelle?.length ?? 0} Fälle</p>
@@ -154,10 +188,10 @@ export default async function GutachterFaellePage({
             </Link>
           ))}
         </div>
-      </div>
+      </div>}
 
-      {/* Scrollable Content */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-4">
+      {/* Scrollable Content — nur im Fälle-Tab */}
+      {activeTab === 'faelle' && <div className="flex-1 min-h-0 overflow-y-auto p-4">
         {/* KFZ-158: XL-Karten fuer Faelle mit anstehenden Terminen (naechste 7 Tage) */}
         {(() => {
           const now = new Date()
@@ -361,7 +395,75 @@ export default async function GutachterFaellePage({
             </div>
           </div>
         )}
-      </div>
+      </div>}
+
+      {/* AAR-229 W5 / F-11: Stellungnahmen-Tab */}
+      {activeTab === 'stellungnahmen' && (
+        <div className="flex-1 min-h-0 overflow-y-auto p-4">
+          {stellungnahmenFaelle.length === 0 ? (
+            <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
+              <p className="text-gray-500">Keine Fälle mit offener Stellungnahme.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {stellungnahmenFaelle.map(fall => {
+                const lead = fall.lead_id ? leadMap[fall.lead_id] : null
+                const name = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : '—'
+                return (
+                  <Link key={fall.id} href={`/gutachter/fall/${fall.id}`}
+                    className="block bg-white rounded-xl border border-gray-200 p-4 hover:bg-gray-50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{name}</p>
+                        <p className="text-xs text-gray-500">{fall.fall_nummer ?? fall.id.slice(0, 8)} · {fall.schadens_ort ?? '—'}</p>
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLOR[fall.status] ?? 'bg-gray-100 text-gray-700'}`}>
+                        {STATUS_LABEL[fall.status] ?? fall.status}
+                      </span>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* AAR-229 W5 / F-11: Tasks-Tab */}
+      {activeTab === 'tasks' && (
+        <div className="flex-1 min-h-0 overflow-y-auto p-4">
+          {svTasks.length === 0 ? (
+            <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
+              <p className="text-gray-500">Keine offenen Tasks.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {svTasks.map(task => {
+                const overdue = task.deadline && new Date(task.deadline) < new Date()
+                return (
+                  <div key={task.id} className={`bg-white rounded-xl border p-4 ${overdue ? 'border-red-300 bg-red-50/30' : 'border-gray-200'}`}>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900">{task.titel}</p>
+                        {task.deadline && (
+                          <p className={`text-xs mt-0.5 ${overdue ? 'text-red-600 font-semibold' : 'text-gray-500'}`}>
+                            {overdue ? 'Überfällig — ' : 'Fällig: '}{new Date(task.deadline).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
+                          </p>
+                        )}
+                      </div>
+                      {task.fall_id && (
+                        <Link href={`/gutachter/fall/${task.fall_id}`} className="text-[10px] text-[#4573A2] hover:underline shrink-0 ml-2">
+                          Zum Fall →
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
