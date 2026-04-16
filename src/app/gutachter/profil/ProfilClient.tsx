@@ -10,9 +10,11 @@ import { ANREDE_OPTIONEN, TITEL_OPTIONEN, QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHA
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { LoadingButton } from '@/components/ui/loading-button'
 import PhoneVerificationModal from '@/components/auth/PhoneVerificationModal'
+// AAR-344: 2FA-Nummer-Änderung (Self-Service, eingeloggter User)
+import { TwoFaPhoneChange } from '@/components/auth/TwoFaPhoneChange'
 import { MapPinIcon, InfoIcon } from 'lucide-react'
 
-type Profile = { anrede: string | null; titel: string | null; vorname: string | null; nachname: string | null; telefon: string | null; rolle: string }
+type Profile = { anrede: string | null; titel: string | null; vorname: string | null; nachname: string | null; telefon: string | null; rolle: string; twofa_telefon?: string | null }
 type SV = { id: string; paket: string; gebiet_plz: string | null; ist_aktiv: boolean; max_faelle_monat: number; offene_faelle: number; kalender_typ: string; kalender_sync_aktiv: boolean; kalender_sync_letzte: string | null; qualifikationen_neu: string[] | null; spezifikationen: string[] | null; schadenarten: string[] | null; standort_adresse: string | null; standort_plz: string | null; standort_lat: number | null; standort_lng: number | null; standort_place_id: string | null; firmenname: string | null; rechtsform: string | null; steuernummer: string | null; ust_id: string | null; hrb: string | null; rolle_in_organisation: string | null; community_anonym: boolean }
 
 // BUG-91: Klassische deutsche Rechtsformen + 'Einzelunternehmen' als Default
@@ -419,6 +421,13 @@ export default function ProfilClient({
           <GpsTrackingToggle svId={sv.id} initial={(sv as Record<string, unknown>).live_tracking_enabled !== false} />
         </div>
 
+        {/* AAR-344: 2FA-Nummer-Änderungs-Flow (eigenes Panel, nutzt shared Component) */}
+        <div className="mt-5">
+          <TwoFaPhoneChange
+            aktuelleTwofaTelefon={profile.twofa_telefon ?? null}
+            fallbackTelefon={profile.telefon}
+          />
+        </div>
         {/* KFZ-184: Telefon-Verifizierung fuer 2FA */}
         <TwoFaPhoneSection />
 

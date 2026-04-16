@@ -9,7 +9,8 @@ export default async function ProfilPage() {
   const [{ data: profile }, sv, faelleResult] = await Promise.all([
     supabase
       .from('profiles')
-      .select('anrede, titel, vorname, nachname, telefon, rolle')
+      // AAR-344: twofa_telefon für „Nummer ändern"-Komponente
+      .select('anrede, titel, vorname, nachname, telefon, rolle, twofa_telefon')
       .eq('id', user!.id)
       .single(),
     getGutachterForUser(supabase, user!.id, 'id, paket, gebiet_plz, ist_aktiv, max_faelle_monat, offene_faelle, kalender_typ, kalender_sync_aktiv, kalender_sync_letzte, qualifikationen_neu, spezifikationen, schadenarten, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, firmenname, rechtsform, steuernummer, ust_id, hrb, rolle_in_organisation, community_anonym'),
@@ -34,7 +35,7 @@ export default async function ProfilPage() {
   return (
     <ProfilClient
       email={user!.email ?? ''}
-      profile={profile ?? { anrede: null, titel: null, vorname: null, nachname: null, telefon: null, rolle: 'sachverstaendiger' }}
+      profile={profile ?? { anrede: null, titel: null, vorname: null, nachname: null, telefon: null, rolle: 'sachverstaendiger', twofa_telefon: null }}
       sv={(sv as never) ?? { id: '', paket: '', gebiet_plz: null, ist_aktiv: true, max_faelle_monat: 10, offene_faelle: 0, kalender_typ: 'keiner', kalender_sync_aktiv: false, kalender_sync_letzte: null, qualifikationen_neu: [], spezifikationen: [], schadenarten: [], standort_adresse: null, standort_plz: null, standort_lat: null, standort_lng: null, standort_place_id: null, firmenname: null, rechtsform: null, steuernummer: null, ust_id: null, hrb: null, rolle_in_organisation: null, community_anonym: false }}
       faelleCount={faelleResult.count ?? 0}
       pendingTermine={pendingTermine}

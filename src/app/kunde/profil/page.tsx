@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+// AAR-344: 2FA-Nummer-Änderung (Self-Service)
+import { TwoFaPhoneChange } from '@/components/auth/TwoFaPhoneChange'
 
 export default async function ProfilPage() {
   const supabase = await createClient()
@@ -8,7 +10,8 @@ export default async function ProfilPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('vorname, nachname, email, telefon')
+    // AAR-344: twofa_telefon mitladen
+    .select('vorname, nachname, email, telefon, twofa_telefon')
     .eq('id', user.id)
     .single()
 
@@ -22,6 +25,12 @@ export default async function ProfilPage() {
         <div><span className="text-sm text-gray-500">E-Mail</span><p className="text-[#0D1B3E]">{profile?.email ?? user.email ?? '—'}</p></div>
         {profile?.telefon && <div><span className="text-sm text-gray-500">Telefon</span><p className="text-[#0D1B3E]">{profile.telefon}</p></div>}
       </div>
+
+      {/* AAR-344: 2FA-Nummer-Änderungs-Flow */}
+      <TwoFaPhoneChange
+        aktuelleTwofaTelefon={profile?.twofa_telefon ?? null}
+        fallbackTelefon={profile?.telefon ?? null}
+      />
     </div>
   )
 }
