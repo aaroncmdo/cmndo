@@ -71,5 +71,21 @@ export async function createLinkedTask(params: CreateLinkedTaskParams): Promise<
     return { task_id: null }
   }
 
+  // AAR-229 W4: Mitteilung bei Task-Erstellung an den Empfänger.
+  if (data?.id && params.empfaenger_user_id) {
+    import('@/lib/mitteilungen/create-mitteilung')
+      .then(({ createMitteilung }) => createMitteilung({
+        empfaenger_id: params.empfaenger_user_id!,
+        empfaenger_rolle: (params.empfaenger_rolle as 'admin' | 'sachverstaendiger') ?? 'admin',
+        kategorie: 'task',
+        titel: params.titel,
+        inhalt: params.beschreibung ?? undefined,
+        kontext_typ: 'fall',
+        kontext_id: params.fall_id ?? undefined,
+        prioritaet: params.prioritaet === 'kritisch' ? 'dringend' : 'normal',
+      }))
+      .catch(err => console.error('[AAR-229] createMitteilung fehlgeschlagen:', err))
+  }
+
   return { task_id: data?.id ?? null }
 }

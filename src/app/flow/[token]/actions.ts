@@ -442,6 +442,26 @@ export async function signSAandCreateFall(
     updated_at: new Date().toISOString(),
   }).eq('id', leadId)
 
+  // AAR-229 W4: SA-Unterschrift Mitteilung an Admin + SV
+  try {
+    const { createMitteilungMulti } = await import('@/lib/mitteilungen/create-mitteilung')
+    const empfaenger: Array<{ id: string; rolle: 'admin' | 'sachverstaendiger' }> = []
+    if (lead.zugewiesen_an) empfaenger.push({ id: lead.zugewiesen_an as string, rolle: 'admin' })
+    const { data: fallSv } = await admin.from('faelle').select('sv_id').eq('id', fall.id).single()
+    if (fallSv?.sv_id) {
+      const { data: svP } = await admin.from('sachverstaendige').select('profile_id').eq('id', fallSv.sv_id).single()
+      if (svP?.profile_id) empfaenger.push({ id: svP.profile_id, rolle: 'sachverstaendiger' })
+    }
+    const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Kunde'
+    if (empfaenger.length) {
+      await createMitteilungMulti(empfaenger, {
+        kategorie: 'update', titel: 'Schadensaufnahme unterschrieben',
+        inhalt: `${name} hat die SA unterschrieben.`,
+        kontext_typ: 'fall', kontext_id: fall.id,
+      })
+    }
+  } catch { /* non-critical */ }
+
   // 6b. KFZ-146: Alle Lead-Side-Channel-Daten an den neuen Fall zuordnen
   const { error: linkErr } = await admin.rpc('link_lead_data_to_fall', { p_lead_id: leadId, p_fall_id: fall.id })
   if (linkErr) console.error('[KFZ-146] link_lead_data_to_fall:', linkErr.message)

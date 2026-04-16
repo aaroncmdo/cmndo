@@ -94,6 +94,26 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
     erstellt_von: user.id,
   })
 
+  // AAR-229 W4: Mitteilung an Admin + Kanzlei bei Gutachten-Upload
+  try {
+    const { createMitteilungMulti } = await import('@/lib/mitteilungen/create-mitteilung')
+    const { data: fallForMitteilung } = await supabase
+      .from('faelle')
+      .select('kundenbetreuer_id, kanzlei_id')
+      .eq('id', fallId)
+      .single()
+    const empfaenger: Array<{ id: string; rolle: 'admin' | 'kanzlei' }> = []
+    if (fallForMitteilung?.kundenbetreuer_id) empfaenger.push({ id: fallForMitteilung.kundenbetreuer_id, rolle: 'admin' })
+    if (fallForMitteilung?.kanzlei_id) empfaenger.push({ id: fallForMitteilung.kanzlei_id, rolle: 'kanzlei' })
+    if (empfaenger.length) {
+      await createMitteilungMulti(empfaenger, {
+        kategorie: 'update', titel: 'Gutachten fertiggestellt',
+        inhalt: `${svName} — ${betragFmt}`,
+        kontext_typ: 'fall', kontext_id: fallId,
+      })
+    }
+  } catch { /* non-critical */ }
+
   // KFZ-204: QC-Task fuer KB "Filmcheck durchfuehren"
   const { data: fallForTask } = await supabase
     .from('faelle')
