@@ -2,6 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import OnboardingWizard from './OnboardingWizard'
+import { getPflichtdokumenteStand } from './actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -65,33 +66,28 @@ export default async function OnboardingPage() {
     }
   }
 
-  // Pflichtdokumente des Falls
-  const { data: pflichtDocs } = fall?.id
-    ? await supabase
-        .from('pflichtdokumente')
-        .select('id, dokument_typ, status, pflicht, dokument_url, hochgeladen_am')
-        .eq('fall_id', fall.id)
-        .order('pflicht', { ascending: false })
-    : { data: [] }
+  // AAR-323: Pflichtdokumente mit Katalog-Metadaten (Label, Beschreibung,
+  // Frist, Begründung, max_mb, accepted mimes). Ersetzt den vorherigen
+  // Plain-Select aus pflichtdokumente.
+  const pflichtDocs = fall?.id ? await getPflichtdokumenteStand(fall.id) : []
 
   // AAR-231: Vorbereitungs-Flags aus Pflichtdokumenten + Fall-Feldern ableiten.
   // AAR-231 Audit: zb1Hochgeladen = fahrzeugschein-Doc MIT URL ODER
   // zb1_status='bestaetigt' (via Dispatch Phase 4) — sonst würde der
   // Kunde den Checklist-Hinweis "Fahrzeugschein hochladen" sehen obwohl
   // der ZB1 via Dispatch bereits da ist.
-  const docs = pflichtDocs ?? []
   const zb1Hochgeladen =
     zb1StatusLead === 'bestaetigt' ||
-    docs.some(d => d.dokument_typ === 'fahrzeugschein' && !!d.dokument_url)
-  const polizeiberichtHochgeladen = docs.some(d => d.dokument_typ === 'polizeibericht' && !!d.dokument_url)
-  const attestHochgeladen = docs.some(d => d.dokument_typ === 'aerztliches_attest' && !!d.dokument_url)
+    pflichtDocs.some(d => d.slot_id === 'fahrzeugschein' && !!d.dokument_url)
+  const polizeiberichtHochgeladen = pflichtDocs.some(d => d.slot_id === 'polizeibericht' && !!d.dokument_url)
+  const attestHochgeladen = pflichtDocs.some(d => d.slot_id === 'aerztliches_attest' && !!d.dokument_url)
 
   return (
     <OnboardingWizard
       vorname={profile?.vorname ?? ''}
       fall={fall ? { id: fall.id, fall_nummer: fall.fall_nummer, kennzeichen: fall.kennzeichen, fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') } : null}
       termin={terminDatum ? { datum: terminDatum, svName } : null}
-      pflichtDocs={(pflichtDocs ?? []) as Parameters<typeof OnboardingWizard>[0]['pflichtDocs']}
+      pflichtDocs={pflichtDocs}
       vorbereitung={{
         zb1Hochgeladen,
         polizeiVorOrt: !!fall?.polizei_vor_ort,

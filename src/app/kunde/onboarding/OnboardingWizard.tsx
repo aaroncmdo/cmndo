@@ -6,19 +6,14 @@ import { useState, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   CheckIcon, UploadCloudIcon, CalendarIcon, FileTextIcon, SparklesIcon, FolderOpenIcon,
+  AlertCircleIcon, ClockIcon, RefreshCwIcon,
 } from 'lucide-react'
-import { completeOnboarding, uploadPflichtdokument } from './actions'
+import { completeOnboarding, uploadPflichtdokument, type PflichtdokumentStand } from './actions'
 
 type Fall = { id: string; fall_nummer: string | null; kennzeichen: string | null; fahrzeug: string }
 type Termin = { datum: string; svName: string | null }
-type PflichtDoc = {
-  id: string
-  dokument_typ: string
-  status: string | null
-  pflicht: boolean
-  dokument_url: string | null
-  hochgeladen_am: string | null
-}
+// AAR-323: PflichtDoc ist jetzt der Katalog-angereicherte Stand (siehe actions.ts).
+type PflichtDoc = PflichtdokumentStand
 
 const STEPS = [
   { id: 'welcome', label: 'Willkommen' },
@@ -28,44 +23,17 @@ const STEPS = [
   { id: 'fertig', label: 'Fertig' },
 ] as const
 
-// Konsistent zu admin/dispatch/actions.ts createPflichtdokumente — alle dort
-// per add() erzeugten dokument_typ-Werte müssen hier ein schönes Label haben,
-// sonst fällt der Wizard auf den raw dokument_typ zurück (z.B. "schadensfotos"
-// statt "Schadensfotos"). Tippfehler aus der Vorversion korrigiert (schadenfotos
-// → schadensfotos, atteste → aerztliches_attest) + Umlaute eingebaut (AAR-105).
-const DOKTYP_LABELS: Record<string, string> = {
-  // Identität
-  personalausweis: 'Personalausweis',
-  fuehrerschein: 'Führerschein',
-  fahrzeugschein: 'Fahrzeugschein',
-  // Schaden
-  schadensfotos: 'Schadensfotos (mind. 4)',
-  polizeibericht: 'Polizeibericht',
-  // AAR-300: Mietwagenrechnung — Kunde reicht nach Fahrzeugrückgabe nach
-  mietwagenrechnung: 'Mietwagenrechnung (nach Fahrzeugrückgabe)',
-  // Medizin
-  aerztliches_attest: 'Ärztliches Attest',
-  krankenhausbericht: 'Krankenhausbericht',
-  au_bescheinigung: 'AU-Bescheinigung',
-  // Versicherung & Gegner
-  eigene_versicherung: 'Eigene Versicherungspolice',
-  versicherungspolice: 'Versicherungspolice',
-  gegner_daten: 'Daten des Unfallgegners',
-  // Halter / Geschäft
+// AAR-323: Labels kommen jetzt aus dokument_katalog.label (via
+// getPflichtdokumenteStand). Fallback-Labels nur noch für Slots, die nicht
+// im Katalog sind (leasingvertrag/finanzierungsvertrag/... — werden in einem
+// Folge-Ticket in den Katalog migriert).
+const LEGACY_DOKTYP_LABELS: Record<string, string> = {
   leasingvertrag: 'Leasingvertrag',
   finanzierungsvertrag: 'Finanzierungsvertrag',
   gewerbenachweis: 'Gewerbenachweis',
   gf_vollmacht: 'Geschäftsführer-Vollmacht',
   halter_vollmacht: 'Halter-Vollmacht',
   halter_ausweis: 'Halter-Ausweis',
-  // AAR-228: Vorschäden-Dokumentation
-  reparaturrechnungen_vorschaeden: 'Reparaturrechnungen (Vorschäden)',
-  // Allgemein
-  vollmacht: 'Vollmacht',
-  sicherungsabtretung: 'Sicherungsabtretung',
-  mietvertrag: 'Mietvertrag / Eigentumsnachweis',
-  kostenvoranschlag: 'Kostenvoranschlag',
-  sonstiges: 'Sonstiges',
 }
 
 const STATUS_PHASES = [
@@ -107,8 +75,11 @@ export default function OnboardingWizard({
   const [stepIndex, setStepIndex] = useState(initialStepIndex)
   const [pending, startTransition] = useTransition()
   const [uploadingId, setUploadingId] = useState<string | null>(null)
-  const [uploadedIds, setUploadedIds] = useState<Set<string>>(
-    new Set(pflichtDocs.filter(d => d.dokument_url).map(d => d.id)),
+  // AAR-323: Per-Doc-Status als lokaler State, initialisiert aus Server-Daten.
+  // Wird nach erfolgreichem Upload auf 'hochgeladen' gesetzt, damit das UI sofort
+  // reagiert ohne Reload.
+  const [docStatus, setDocStatus] = useState<Record<string, string>>(
+    Object.fromEntries(pflichtDocs.map(d => [d.id, d.status])),
   )
 
   const currentStep = STEPS[stepIndex]
@@ -125,13 +96,13 @@ export default function OnboardingWizard({
     if (!fall?.id) return
     setUploadingId(dokId)
     const doc = pflichtDocs.find((d) => d.id === dokId)
-    const istFahrzeugschein = doc?.dokument_typ === 'fahrzeugschein'
+    const istFahrzeugschein = doc?.slot_id === 'fahrzeugschein'
     const reader = new FileReader()
     reader.onload = () => {
       const base64 = typeof reader.result === 'string' ? reader.result : ''
       startTransition(async () => {
         const res = await uploadPflichtdokument(dokId, fall.id, base64, file.name, file.type)
-        if (res.success) setUploadedIds((prev) => new Set(prev).add(dokId))
+        if (res.success) setDocStatus((prev) => ({ ...prev, [dokId]: 'hochgeladen' }))
         // AAR-166: wenn ZB1 → OCR triggern und Ergebnis inline anzeigen
         if (res.success && istFahrzeugschein) {
           setZb1Result(null)
@@ -166,7 +137,7 @@ export default function OnboardingWizard({
     })
   }
 
-  const pflichtBlocked = pflichtDocs.filter(d => d.pflicht && !uploadedIds.has(d.id))
+  const pflichtBlocked = pflichtDocs.filter(d => d.pflicht && docStatus[d.id] !== 'hochgeladen')
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
@@ -316,65 +287,124 @@ export default function OnboardingWizard({
               </div>
             )}
 
-            {/* Dokumente */}
+            {/* Dokumente — AAR-323: Katalog-driven Status-Übersicht */}
             {currentStep.id === 'dokumente' && (
               <div>
                 <div className="mb-4"><FileTextIcon className="w-10 h-10 text-[#4573A2]" /></div>
-                <h1 className="text-2xl font-semibold text-gray-900">Dokumente</h1>
+                <h1 className="text-2xl font-semibold text-gray-900">Pflichtdokumente</h1>
                 <p className="mt-2 text-sm text-gray-500">
-                  Laden Sie jetzt die benoetigten Unterlagen hoch. Sie koennen das auch spaeter im Dashboard nachholen.
+                  Laden Sie Ihre Unterlagen hoch. Sie können das auch später im Dashboard nachholen.
                 </p>
                 <div className="mt-5 space-y-3">
                   {pflichtDocs.length === 0 && (
                     <p className="text-sm text-gray-400 text-center py-4">Keine Pflichtdokumente erforderlich.</p>
                   )}
                   {pflichtDocs.map(doc => {
-                    const done = uploadedIds.has(doc.id)
+                    const status = docStatus[doc.id] ?? 'ausstehend'
+                    const istHochgeladen = status === 'hochgeladen'
+                    const istAbgelehnt = status === 'abgelehnt'
                     const loading = uploadingId === doc.id
-                    const label = DOKTYP_LABELS[doc.dokument_typ] ?? doc.dokument_typ
+                    const label = doc.label || LEGACY_DOKTYP_LABELS[doc.slot_id] || doc.slot_id
+                    const acceptString = doc.akzeptierte_mime_types.join(',')
+                    const fristText = doc.frist ? new Date(doc.frist).toLocaleDateString('de-DE', {
+                      day: '2-digit', month: '2-digit', year: 'numeric',
+                    }) : null
                     return (
-                      <div key={doc.id} className={`flex items-center gap-3 p-3 rounded-xl border ${done ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-gray-200'}`}>
-                        <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${done ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400'}`}>
-                          {done ? <CheckIcon className="w-4 h-4" /> : <UploadCloudIcon className="w-4 h-4" />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900">{label}</p>
-                          <p className="text-xs text-gray-500">{doc.pflicht ? 'Pflicht' : 'Optional'}</p>
-                        </div>
-                        {!done && (
-                          <div className="flex flex-col gap-1.5 flex-shrink-0">
-                            {/* AAR-303: Kamera-Direkt-Button (capture=environment)
-                                + getrennter Datei-Wahl-Button. Mobile öffnet sofort
-                                die Rückkamera; Desktop fällt auf normalen Picker. */}
-                            <label className="text-[11px] font-medium px-3 py-1.5 rounded-lg bg-[#0D1B3E] text-white hover:bg-[#1E3A5F] cursor-pointer text-center">
-                              {loading ? 'Lade...' : '📷 Foto'}
-                              <input
-                                type="file"
-                                accept="image/*"
-                                capture="environment"
-                                className="hidden"
-                                disabled={loading}
-                                onChange={e => {
-                                  const f = e.target.files?.[0]
-                                  if (f) handleFileUpload(doc.id, f)
-                                }}
-                              />
-                            </label>
-                            <label className="text-[11px] font-medium px-3 py-1.5 rounded-lg bg-white border border-[#0D1B3E] text-[#0D1B3E] hover:bg-blue-50 cursor-pointer text-center">
-                              📁 Datei
-                              <input
-                                type="file"
-                                accept="image/*,application/pdf"
-                                className="hidden"
-                                disabled={loading}
-                                onChange={e => {
-                                  const f = e.target.files?.[0]
-                                  if (f) handleFileUpload(doc.id, f)
-                                }}
-                              />
-                            </label>
+                      <div
+                        key={doc.id}
+                        className={`rounded-xl border p-3 ${
+                          istHochgeladen ? 'bg-emerald-50 border-emerald-200'
+                          : istAbgelehnt ? 'bg-rose-50 border-rose-200'
+                          : 'bg-white border-gray-200'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
+                            istHochgeladen ? 'bg-emerald-500 text-white'
+                            : istAbgelehnt ? 'bg-rose-500 text-white'
+                            : 'bg-gray-100 text-gray-400'
+                          }`}>
+                            {istHochgeladen ? <CheckIcon className="w-4 h-4" />
+                              : istAbgelehnt ? <AlertCircleIcon className="w-4 h-4" />
+                              : <UploadCloudIcon className="w-4 h-4" />}
                           </div>
-                        )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="text-sm font-medium text-gray-900">{label}</p>
+                              {doc.pflicht && !istHochgeladen && (
+                                <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">Pflicht</span>
+                              )}
+                              {istHochgeladen && (
+                                <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">Hochgeladen</span>
+                              )}
+                              {istAbgelehnt && (
+                                <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-rose-100 text-rose-800">Abgelehnt</span>
+                              )}
+                            </div>
+                            {doc.beschreibung && (
+                              <p className="text-xs text-gray-500 mt-0.5">{doc.beschreibung}</p>
+                            )}
+                            {doc.begruendung && (
+                              <p className="text-xs text-gray-700 mt-1 italic">„{doc.begruendung}"</p>
+                            )}
+                            {fristText && (
+                              <p className="text-xs text-amber-700 mt-1 flex items-center gap-1">
+                                <ClockIcon className="w-3 h-3" /> Frist: {fristText}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Action-Buttons — ausstehend/abgelehnt: Upload; hochgeladen: Ersetzen */}
+                        <div className="mt-2.5 flex gap-2">
+                          {!istHochgeladen && (
+                            <>
+                              <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-[#0D1B3E] text-white hover:bg-[#1E3A5F] cursor-pointer text-center">
+                                {loading ? 'Lädt...' : '📷 Foto aufnehmen'}
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  capture="environment"
+                                  className="hidden"
+                                  disabled={loading}
+                                  onChange={e => {
+                                    const f = e.target.files?.[0]
+                                    if (f) handleFileUpload(doc.id, f)
+                                  }}
+                                />
+                              </label>
+                              <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-white border border-[#0D1B3E] text-[#0D1B3E] hover:bg-blue-50 cursor-pointer text-center">
+                                📁 Datei wählen
+                                <input
+                                  type="file"
+                                  accept={acceptString}
+                                  className="hidden"
+                                  disabled={loading}
+                                  onChange={e => {
+                                    const f = e.target.files?.[0]
+                                    if (f) handleFileUpload(doc.id, f)
+                                  }}
+                                />
+                              </label>
+                            </>
+                          )}
+                          {istHochgeladen && (
+                            <label className="text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 cursor-pointer inline-flex items-center gap-1.5">
+                              <RefreshCwIcon className="w-3 h-3" />
+                              {loading ? 'Lädt...' : 'Ersetzen'}
+                              <input
+                                type="file"
+                                accept={acceptString}
+                                className="hidden"
+                                disabled={loading}
+                                onChange={e => {
+                                  const f = e.target.files?.[0]
+                                  if (f) handleFileUpload(doc.id, f)
+                                }}
+                              />
+                            </label>
+                          )}
+                        </div>
                       </div>
                     )
                   })}
