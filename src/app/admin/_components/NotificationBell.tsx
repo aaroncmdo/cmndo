@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { BellIcon, MessageSquareIcon, ActivityIcon, CheckSquareIcon } from 'lucide-react'
 
@@ -41,7 +41,17 @@ const TYP_ICONS: Record<string, string> = {
 // 'light' = grau-outline (Admin/weisse Header); 'dark' = weiß-gefüllt für Navy.
 export default function NotificationBell({ variant = 'light' }: { variant?: 'light' | 'dark' } = {}) {
   const router = useRouter()
+  const pathname = usePathname()
   const supabase = useMemo(() => createClient(), [])
+
+  // AAR-225 Audit: Bell wird in 4 Shells montiert (admin/gutachter/kunde/dispatch).
+  // Tasks-Click muss role-aware routen, sonst landen Sub-Rollen auf 403-
+  // Routen ihrer Schwesterportale.
+  const portalPrefix =
+    pathname?.startsWith('/gutachter') ? 'gutachter' :
+    pathname?.startsWith('/kunde') ? 'kunde' :
+    pathname?.startsWith('/dispatch') ? 'dispatch' :
+    'admin'
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<Tab>('updates')
   const [items, setItems] = useState<Notification[]>([])
@@ -166,10 +176,22 @@ export default function NotificationBell({ variant = 'light' }: { variant?: 'lig
     return item && !item.gelesen
   })).length
 
-  // AAR-225: Task-Click → routet zum relevanten Fall/Lead-Kontext.
+  // AAR-225: Task-Click → routet zum relevanten Fall/Lead-Kontext, role-aware.
+  // - admin/dispatch → /admin/faelle/[id] bzw /dispatch/leads/[id]
+  // - gutachter      → /gutachter/fall/[id] (kein Lead-Kontext für SV)
+  // - kunde          → /kunde/fall/[id]
   function taskLink(task: TaskItem): string | null {
-    if (task.fall_id) return `/admin/faelle/${task.fall_id}#tasks`
-    if (task.lead_id) return `/dispatch/leads/${task.lead_id}`
+    if (task.fall_id) {
+      if (portalPrefix === 'gutachter') return `/gutachter/fall/${task.fall_id}`
+      if (portalPrefix === 'kunde') return `/kunde/fall/${task.fall_id}`
+      return `/admin/faelle/${task.fall_id}#tasks`
+    }
+    if (task.lead_id) {
+      // SVs haben keinen Lead-Zugriff — fallback Dashboard.
+      if (portalPrefix === 'gutachter') return '/gutachter'
+      if (portalPrefix === 'kunde') return '/kunde'
+      return `/dispatch/leads/${task.lead_id}`
+    }
     return null
   }
   async function handleTaskClick(task: TaskItem) {
@@ -194,9 +216,16 @@ export default function NotificationBell({ variant = 'light' }: { variant?: 'lig
           className="w-4.5 h-4.5"
           fill={variant === 'dark' ? 'currentColor' : 'none'}
         />
-        {unread > 0 && (
+        {/* AAR-225 Audit: Bell-Badge = Summe ALLER Tabs (unread + überfällige
+            Tasks + ungelesene Nachrichten-Bundles) — vorher zählte sie nur
+            unread benachrichtigungen, überfällige Tasks blieben unsichtbar
+            wenn das Updates-Tab leer war. */}
+        {(unread + tasksOverdueCount + bundledUnreadCount) > 0 && (
           <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-[10px] font-bold text-white leading-none">
-            {unread > 99 ? '99+' : unread}
+            {(() => {
+              const total = unread + tasksOverdueCount + bundledUnreadCount
+              return total > 99 ? '99+' : total
+            })()}
           </span>
         )}
       </button>
