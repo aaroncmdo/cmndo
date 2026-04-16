@@ -122,7 +122,16 @@ export default async function FlowPage({
     .limit(1)
     .maybeSingle()
 
-  let gutachter: { vorname: string; avatarUrl: string | null; terminDatum: string | null } | null = null
+  // AAR-341: Besichtigungsort im FlowWizard Schritt 2 anzeigen —
+  // Adresse aus lead.unfallort (Dispatch-Phase 1) oder fahrzeug_standort_adresse
+  // (nicht fahrbereit / Werkstatt), Treffpunkt-Hinweis aus sv_treffpunkt (Phase 2).
+  let gutachter: {
+    vorname: string
+    avatarUrl: string | null
+    terminDatum: string | null
+    besichtigungsAdresse: string | null
+    svTreffpunkt: string | null
+  } | null = null
   if (terminMitSv?.sachverstaendige) {
     const svJoin = terminMitSv.sachverstaendige as unknown as { profile_id: string; profiles: { vorname: string | null; avatar_url: string | null } | { vorname: string | null; avatar_url: string | null }[] | null } | { profile_id: string; profiles: unknown }[] | null
     const svRow = Array.isArray(svJoin) ? svJoin[0] : svJoin
@@ -133,6 +142,11 @@ export default async function FlowPage({
         vorname: profileRow.vorname,
         avatarUrl: profileRow.avatar_url ?? null,
         terminDatum: (terminMitSv.start_zeit as string | null) ?? null,
+        besichtigungsAdresse:
+          (lead.unfallort as string | null) ??
+          (lead.fahrzeug_standort_adresse as string | null) ??
+          null,
+        svTreffpunkt: (lead.sv_treffpunkt as string | null) ?? null,
       }
     }
   }

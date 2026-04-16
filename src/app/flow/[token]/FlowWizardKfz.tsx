@@ -54,6 +54,9 @@ export type GutachterInfo = {
   vorname: string
   avatarUrl: string | null
   terminDatum: string | null
+  // AAR-341: Besichtigungsort + SV-Treffpunkt für Schritt 2
+  besichtigungsAdresse: string | null
+  svTreffpunkt: string | null
 }
 
 // AAR-99 + AAR-305: 5-Step Flow (+ weitere-angaben zwischen gutachter und sa)
@@ -350,6 +353,18 @@ export default function FlowWizardKfz({
                         <p className="text-sm text-gray-600">
                           {new Date(gutachter.terminDatum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
                         </p>
+                        {/* AAR-341: Besichtigungsort + optional Treffpunkt */}
+                        {gutachter.besichtigungsAdresse && (
+                          <div className="mt-3 pt-3 border-t border-[#4573A2]/10">
+                            <p className="text-xs text-gray-500 mb-0.5">Besichtigungsort</p>
+                            <p className="text-sm text-[#0D1B3E]">{gutachter.besichtigungsAdresse}</p>
+                            {gutachter.svTreffpunkt && (
+                              <p className="text-xs text-gray-500 mt-0.5">
+                                Treffpunkt: {gutachter.svTreffpunkt}
+                              </p>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
