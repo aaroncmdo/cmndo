@@ -19,6 +19,8 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   'finanzierung_leasing', 'vorsteuerabzugsberechtigt',
   // Gegner + Unfall
   'gegner_bekannt', 'gegner_kennzeichen', 'gegner_versicherung',
+  // AAR-265: FK auf versicherungen-Stammdaten (Autocomplete in Phase 4)
+  'gegner_versicherung_id',
   'gegner_schadennummer', 'unfalldatum', 'unfall_uhrzeit',
   'unfallort', 'unfallort_lat', 'unfallort_lng', 'unfallort_kategorie',
   // AAR-135 Auto-Flags (von gegner-kz-flags.ts berechnet)

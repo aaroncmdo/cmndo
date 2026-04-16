@@ -42,6 +42,10 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // Gegner
   'gegner_name',
   'gegner_versicherung',
+  // AAR-265: FK auf versicherungen-Stammdaten — wird zusätzlich zum
+  // Freitext-Namen kopiert. resolveFallEntityFks() bevorzugt diese FK
+  // gegenüber dem ILIKE-Fuzzy-Match.
+  'gegner_versicherung_id',
   'gegner_kennzeichen',
   // Hergang
   'unfallhergang',

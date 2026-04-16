@@ -16,6 +16,7 @@ import { useCarQuery } from '../hooks/useCarQuery'
 // via ZB1-OCR-Trigger in /api/ocr-fahrzeugschein Step 6).
 import Zb1UploadCard from './Zb1UploadCard'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
+import VersicherungAutocomplete, { type VersicherungSelection } from '@/components/VersicherungAutocomplete'
 import {
   CarIcon,
   ShieldIcon,
@@ -57,6 +58,8 @@ type LeadFields = {
   gegner_bekannt?: boolean | null
   gegner_kennzeichen?: string | null
   gegner_versicherung?: string | null
+  // AAR-265: FK auf versicherungen-Stammdaten (Autocomplete)
+  gegner_versicherung_id?: string | null
   gegner_schadennummer?: string | null
   unfalldatum?: string | null
   unfall_uhrzeit?: string | null
@@ -201,6 +204,65 @@ function InlineField({
         }`}
       />
       {hint && <p className="text-[10px] text-gray-400">{hint}</p>}
+    </div>
+  )
+}
+
+// AAR-265: Wrapper für VersicherungAutocomplete mit auto-save.
+// Speichert sowohl gegner_versicherung_id (FK) als auch gegner_versicherung
+// (denormalisierter Name für Legacy-Kompat + Freitext-Fallback).
+function VersicherungField({
+  leadId,
+  initialId,
+  initialName,
+}: {
+  leadId: string
+  initialId: string | null | undefined
+  initialName: string | null | undefined
+}) {
+  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [, startTransition] = useTransition()
+
+  function save(id: string | null, name: string) {
+    setStatus('saving')
+    startTransition(async () => {
+      const r = await saveStammdaten(leadId, {
+        gegner_versicherung_id: id,
+        gegner_versicherung: name || null,
+      })
+      if (r.success) {
+        setStatus('saved')
+        setTimeout(() => setStatus('idle'), 2000)
+      } else {
+        setStatus('error')
+        setTimeout(() => setStatus('idle'), 3000)
+      }
+    })
+  }
+
+  function onSelect(s: VersicherungSelection) {
+    save(s.id, s.name)
+  }
+
+  function onFreitextConfirm(name: string) {
+    save(null, name)
+  }
+
+  return (
+    <div className="space-y-0.5">
+      <label className="text-[10px] text-gray-400 uppercase tracking-wider flex items-center gap-1">
+        Gegner-Versicherung
+        {status === 'saving' && <LoaderIcon className="w-3 h-3 text-blue-400 animate-spin" />}
+        {status === 'saved' && <CheckIcon className="w-3 h-3 text-green-500" />}
+        {status === 'error' && <span className="text-red-500">Fehler</span>}
+      </label>
+      <VersicherungAutocomplete
+        initialId={initialId}
+        initialName={initialName}
+        onSelect={onSelect}
+        onFreitextConfirm={onFreitextConfirm}
+        status={status}
+      />
     </div>
   )
 }
@@ -672,11 +734,10 @@ export default function Phase4Stammdaten() {
             )}
           </div>
 
-          <InlineField
-            label="Gegner-Versicherung"
-            value={l.gegner_versicherung}
-            fieldName="gegner_versicherung"
+          <VersicherungField
             leadId={leadId}
+            initialId={l.gegner_versicherung_id}
+            initialName={l.gegner_versicherung}
           />
           <InlineField
             label="Schadennummer (optional)"
