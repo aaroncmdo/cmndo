@@ -750,86 +750,61 @@ async function findLeastBusyKundenbetreuer(
 
 // ─── Pflichtdokumente automatisch erstellen ─────────────────────────────────
 
+// AAR-234: Pflichtdokumente-Matrix komplett auf neues Schema umgestellt.
+// SF-Logik (sf-01..sf-05 basierend auf schadenfall_typ) wurde entfernt — das
+// alte Feld ist für alle neuen Dispatch-Leads NULL (AAR-216). Stattdessen
+// direktes Flag-basiertes System (polizei_vor_ort, personenschaden_flag,
+// hat_vorschaeden, zb1_status, etc.) identisch zu createDefaultPflichtdokumente
+// in flow/[token]/actions.ts (AAR-228).
+//
+// ENTFERNT: vollmacht + sicherungsabtretung (FlowLink-signed, bereits als
+// fall_dokument vorhanden), fuehrerschein (LexDrive holt selbst per WA-Bot),
+// schadensfotos (SV macht vor Ort).
 export async function createPflichtdokumente(
   supabase: Awaited<ReturnType<typeof createClient>>,
   fallId: string,
   lead: Record<string, unknown>,
 ) {
-  const docs: { fall_id: string; dokument_typ: string; pflicht: boolean }[] = []
-  const add = (typ: string, pflicht = true) => docs.push({ fall_id: fallId, dokument_typ: typ, pflicht })
+  const docs: { fall_id: string; dokument_typ: string; pflicht: boolean; status: string; quelle: string }[] = []
+  const add = (typ: string, pflicht = true) => docs.push({
+    fall_id: fallId, dokument_typ: typ, pflicht, status: 'ausstehend', quelle: 'system',
+  })
 
-  const sf = String(lead.schadenfall_typ ?? '').toLowerCase()
-  const kk = String(lead.kunden_konstellation ?? 'kk-01').toLowerCase()
-
-  // ─── Immer Pflicht ──────────────────────────────────────────────────────
-  // AAR-75: Vollmacht + Sicherungsabtretung sind Pflichtdokumente fuer JEDEN Fall
-  add('vollmacht')
-  add('sicherungsabtretung')
-  add('fahrzeugschein')
-  add('fuehrerschein')
-  add('schadensfotos') // min 4
-
-  // ─── SF-abhängig ────────────────────────────────────────────────────────
-  // SF-01: Gegnerische Daten PFLICHT
-  if (sf === 'sf-01') {
-    add('gegner_daten')
+  // 1. Fahrzeugschein (ZB1) — nur wenn nicht schon durch Dispatch Phase 4 erhoben
+  if (lead.zb1_status !== 'bestaetigt') {
+    add('fahrzeugschein', true)
   }
 
-  // SF-02: Gegnerische + eigene Versicherungsdaten, Polizeibericht PFLICHT, Anwalt empfohlen
-  if (sf === 'sf-02') {
-    add('gegner_daten')
-    add('eigene_versicherung')
-    add('polizeibericht')
+  // 2. Polizeibericht — wenn Polizei vor Ort war (optional, nachreichbar)
+  if (lead.polizei_vor_ort === true || lead.polizeibericht_pflicht === true) {
+    add('polizeibericht', false)
+  }
+  // Fahrerflucht ohne Polizei → Polizeibericht als Pflicht
+  if (lead.fahrerflucht === true && lead.polizei_vor_ort !== true) {
+    add('polizeibericht', true)
   }
 
-  // SF-03: variante-abhängig
-  if (sf === 'sf-03') {
-    if (lead.gegner_bekannt !== false) {
-      // Variante A: Gegner bekannt
-      add('gegner_daten')
-    } else {
-      // Variante B: Fahrerflucht — Polizeibericht + eigene Kasko PFLICHT
-      add('polizeibericht')
-      add('eigene_versicherung')
-    }
-  }
-
-  // SF-04: Eigene Versicherung PFLICHT
-  if (sf === 'sf-04') {
-    add('eigene_versicherung')
-  }
-
-  // SF-05: Personenschaden — Med. Docs + Anwalt PFLICHT
-  if (sf === 'sf-05' || lead.personenschaden_flag) {
-    add('aerztliches_attest')
+  // 3. Personenschaden-Dokumente
+  if (lead.personenschaden_flag === true) {
+    add('aerztliches_attest', true)
     add('krankenhausbericht', false)
     add('au_bescheinigung', false)
   }
 
-  // Extra: Polizeibericht wenn Flag gesetzt (unabhängig von SF)
-  if (lead.polizeibericht_pflicht && sf !== 'sf-02' && !(sf === 'sf-03' && lead.gegner_bekannt === false)) {
-    add('polizeibericht')
+  // 4. Vorschäden
+  if (lead.hat_vorschaeden === true) {
+    add('reparaturrechnungen_vorschaeden', true)
   }
 
-  // ─── KK-abhängig ───────────────────────────────────────────────────────
-  // KK-02: Leasingvertrag, Leasinggeber-Info
-  if (kk === 'kk-02' || lead.leasing_flag) {
-    add('leasingvertrag')
-  }
-
-  // KK-03: Finanzierungsvertrag, Bank-Abtretung
-  if (kk === 'kk-03' || lead.finanzierung_flag) {
-    add('finanzierungsvertrag')
-  }
-
-  // KK-04: Gewerbenachweis, Vollmacht GF, USt-IdNr
-  if (kk === 'kk-04' || lead.gewerbe_flag) {
+  // 5. Leasing / Finanzierung / Gewerbe / Halter (KK-Matrix bleibt)
+  if (lead.leasing_flag || lead.finanzierung_leasing === 'leasing') add('leasingvertrag')
+  if (lead.finanzierung_flag || lead.finanzierung_leasing === 'finanzierung') add('finanzierungsvertrag')
+  if (lead.gewerbe_flag || lead.vorsteuerabzugsberechtigt === true) {
     add('gewerbenachweis')
     add('gf_vollmacht')
   }
-
-  // KK-05: Vollmacht Halter, Ausweis Halter, SA vom HALTER
-  if (kk === 'kk-05' || lead.halter_ungleich_fahrer_flag) {
+  if (lead.halter_ungleich_fahrer_flag ||
+      (lead.halter_nachname && lead.halter_nachname !== lead.nachname)) {
     add('halter_vollmacht')
     add('halter_ausweis')
   }
