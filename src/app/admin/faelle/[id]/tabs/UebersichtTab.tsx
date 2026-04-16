@@ -19,6 +19,8 @@ import {
   BesichtigungSection,
   KernwerteSection,
   VsStatusSection,
+  // AAR-313: Self-gating Section, rendert nur bei mietwagen_flag/nutzungsausfall
+  NutzungsausfallSection,
 } from '../stammdaten/Sections'
 
 const SECTION_COMPONENTS: Partial<Record<StammdatenSection, () => React.JSX.Element>> = {
@@ -196,6 +198,9 @@ export default function UebersichtTab() {
         if (!Comp) return null
         return <Comp key={id} />
       })}
+
+      {/* AAR-313: Nutzungsausfall — self-gating, immer rendern wenn relevant */}
+      <NutzungsausfallSection />
     </div>
   )
 }

@@ -252,6 +252,96 @@ export function VorschaedenSection() {
   )
 }
 
+// AAR-313: Nutzungsausfall/Mietwagen-Tracking. Self-gating — rendert nur wenn
+// mietwagen_flag oder nutzungsausfall=true. Toggle für fahrzeug_fahrbereit
+// (KB setzt nach SV-Rückmeldung) + Checkbox „Kanzlei informiert" (manueller
+// Workflow, nur Kanzlei darf bei VS anfragen) + Hinweis auf Reparaturnachweis.
+export function NutzungsausfallSection() {
+  const { fall, updateField, canEdit } = useFall()
+  const mietwagen = fall.mietwagen_flag === true
+  const nutzungsausfall = fall.nutzungsausfall === true
+  if (!mietwagen && !nutzungsausfall) return null
+
+  const fahrbereit = fall.fahrzeug_fahrbereit as boolean | null
+  const kanzleiInformiert = fall.mietwagen_kanzlei_informiert === true
+  const editable = canEdit('fahrzeug_fahrbereit')
+
+  return (
+    <Card
+      icon={<WrenchIcon className="w-4 h-4 text-amber-600" />}
+      title="Nutzungsausfall / Mietwagen"
+      hint="Manueller Workflow — nur Kanzlei darf bei VS anfragen"
+    >
+      <div className="sm:col-span-2 space-y-3">
+        <div className="text-xs text-gray-600 bg-amber-50 border border-amber-200 rounded-lg p-3">
+          <p>
+            Kunde hat{' '}
+            {mietwagen && nutzungsausfall
+              ? 'Mietwagen UND Nutzungsausfall'
+              : mietwagen
+                ? 'Mietwagen'
+                : 'Nutzungsausfall'}{' '}
+            geltend gemacht. Nach SV-Rückmeldung „Fahrzeug fahrbereit?" setzen.
+            Falls nicht fahrbereit: Kanzlei informieren — nur die Kanzlei darf
+            bei der Versicherung den Anspruch geltend machen.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] uppercase tracking-wider text-gray-400">
+            Fahrzeug fahrbereit?
+          </span>
+          {(['ja', 'nein', 'unklar'] as const).map((opt) => {
+            const val = opt === 'ja' ? true : opt === 'nein' ? false : null
+            const selected =
+              (opt === 'ja' && fahrbereit === true) ||
+              (opt === 'nein' && fahrbereit === false) ||
+              (opt === 'unklar' && fahrbereit == null)
+            return (
+              <button
+                key={opt}
+                type="button"
+                disabled={!editable}
+                onClick={() => updateField('fahrzeug_fahrbereit', val)}
+                className={`px-3 py-1 rounded-md text-xs font-medium border ${
+                  selected
+                    ? 'bg-[#4573A2] text-white border-[#4573A2]'
+                    : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {opt === 'ja' ? 'Ja' : opt === 'nein' ? 'Nein' : 'Noch unklar'}
+              </button>
+            )
+          })}
+        </div>
+
+        {fahrbereit === false && (
+          <label className="flex items-start gap-2 text-xs text-gray-700 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={kanzleiInformiert}
+              disabled={!canEdit('mietwagen_kanzlei_informiert')}
+              onChange={(e) =>
+                updateField('mietwagen_kanzlei_informiert', e.target.checked)
+              }
+              className="mt-0.5"
+            />
+            <span>
+              Kanzlei wurde informiert, dass Mietwagen-/Nutzungsausfall-Anspruch
+              bei der Versicherung geltend gemacht werden muss
+            </span>
+          </label>
+        )}
+
+        <p className="text-[11px] text-gray-500">
+          Reparaturnachweis: bitte als Pflichtdokument im Dokumente-Tab hochladen
+          sobald die Werkstatt die Reparatur abgeschlossen hat.
+        </p>
+      </div>
+    </Card>
+  )
+}
+
 export function BesichtigungSection() {
   const { fall } = useFall()
   // DB-Schema: besichtigungsort_adresse + besichtigung_datum existieren;

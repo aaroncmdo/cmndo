@@ -152,4 +152,45 @@ export async function transitionFallStatus(
       await completeSla(fallId, 'gutachten_upload')
     }
   } catch (err) { console.error('[AAR-85] SLA Status-Hook:', err) }
+
+  // AAR-313: Auto-Task „Mietwagen / Nutzungsausfall klären" für KB,
+  // sobald die Besichtigung läuft. Idempotent über task_code.
+  if (newStatus === 'besichtigung' || newStatus === 'begutachtung-laeuft') {
+    try {
+      const { data: details } = await db
+        .from('faelle')
+        .select('mietwagen_flag, nutzungsausfall, kundenbetreuer_id, fall_nummer')
+        .eq('id', fallId)
+        .single()
+      const relevant = details?.mietwagen_flag === true || details?.nutzungsausfall === true
+      if (relevant) {
+        const { data: existing } = await db
+          .from('tasks')
+          .select('id')
+          .eq('fall_id', fallId)
+          .eq('task_code', 'mietwagen-klaeren')
+          .maybeSingle()
+        if (!existing) {
+          await db.from('tasks').insert({
+            fall_id: fallId,
+            typ: 'kb',
+            task_code: 'mietwagen-klaeren',
+            titel: 'Nutzungsausfall/Mietwagen klären',
+            beschreibung:
+              'Fahrzeug fahrbereit? Wenn nein: Kanzlei informieren für Versicherungsanfrage Mietwagen. Reparaturnachweis einfordern sobald Reparatur abgeschlossen.',
+            status: 'offen',
+            prioritaet: 'hoch',
+            empfaenger_rolle: 'kundenbetreuer',
+            empfaenger_user_id: details?.kundenbetreuer_id ?? null,
+            zugewiesen_an: details?.kundenbetreuer_id ?? null,
+            auto_erstellt: true,
+            trigger_event: `status:${newStatus}`,
+            phase: 'besichtigung',
+          })
+        }
+      }
+    } catch (err) {
+      console.error('[AAR-313] Mietwagen/Nutzungsausfall Auto-Task fehlgeschlagen:', err)
+    }
+  }
 }

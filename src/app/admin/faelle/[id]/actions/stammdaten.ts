@@ -85,6 +85,11 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'regulierung_betrag',
   // Notizen
   'notizen',
+  // AAR-313: Nutzungsausfall + Mietwagen-Kanzlei-Kommunikation
+  'fahrzeug_fahrbereit',
+  'mietwagen_flag',
+  'nutzungsausfall',
+  'mietwagen_kanzlei_informiert',
 ])
 
 export async function updateFallField(
