@@ -17,7 +17,7 @@ export function useMitteilungen() {
 
   const load = useCallback(async () => {
     const user = (await supabase.auth.getUser())?.data?.user
-    if (!user) return
+    if (!user) { setLoading(false); return }
 
     const [{ data }, { data: countData }] = await Promise.all([
       supabase

@@ -908,9 +908,17 @@ export default function WillkommenClient({
             <LogoUploadStep
               variant={r === 'buero_inhaber' ? 'buero_inhaber' : 'solo'}
               organisationId={organisation?.id ?? null}
+              // AAR-233: Logo ist jetzt Step 2 (nicht mehr letzter Step).
+              // onDone leitet zu Vertrag weiter — außer User ist schon
+              // portal_zugang_freigeschaltet (kam via ?stripe_success zurück
+              // und hatte noch kein Logo), dann zum Dashboard.
               onDone={() => {
-                router.push('/gutachter')
-                router.refresh()
+                if (sv.portal_zugang_freigeschaltet) {
+                  router.push('/gutachter')
+                  router.refresh()
+                } else {
+                  goToStep('vertrag')
+                }
               }}
             />
           )}
@@ -921,10 +929,10 @@ export default function WillkommenClient({
             </div>
           )}
 
-          {/* Buttons — Step 2 (Embedded Checkout) und Step 3 (LogoUploadStep)
-              haben ihre eigenen Buttons; deshalb keine Wizard-Footer-Buttons
-              auf diesen Schritten rendern. */}
-          {step !== 2 && step !== 3 && (
+          {/* AAR-233: Buttons nur auf Konditionen + Vertrag + Sub-AGB.
+              Branding (LogoUploadStep) und Anzahlung (Embedded Checkout)
+              haben eigene Buttons. */}
+          {currentKey !== 'branding' && currentKey !== 'anzahlung' && (
             <div className="flex items-center gap-3 mt-6">
               {step > 0 && (
                 <button

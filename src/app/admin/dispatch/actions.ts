@@ -809,9 +809,18 @@ export async function createPflichtdokumente(
     add('halter_ausweis')
   }
 
-  if (docs.length > 0) {
-    await supabase.from('pflichtdokumente').insert(docs)
-  }
+  if (docs.length === 0) return
+
+  // AAR-234 Audit: Idempotenz — wenn bereits Pflichtdokumente für den Fall
+  // existieren (z.B. aus früherem convertLead-Run), nicht nochmal inserten.
+  const { data: existing } = await supabase
+    .from('pflichtdokumente')
+    .select('id')
+    .eq('fall_id', fallId)
+    .limit(1)
+  if (existing && existing.length > 0) return
+
+  await supabase.from('pflichtdokumente').insert(docs)
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
