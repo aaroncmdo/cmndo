@@ -24,7 +24,7 @@ import { resolveMaxFaelleMonat, resolveUmkreisKm } from '@/lib/sachverstaendige/
 export default async function GutachterWillkommenPage({
   searchParams,
 }: {
-  searchParams: Promise<{ step?: string; stripe_success?: string; session_id?: string }>
+  searchParams: Promise<{ step?: string; stripe_success?: string; session_id?: string; kalender_connected?: string }>
 }) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -41,7 +41,7 @@ export default async function GutachterWillkommenPage({
   // angezeigt werden muss oder bereits ein Logo existiert.
   // BUG-96: firmenname + steuernummer fuer die Stammdaten-Card im Vertrag-Step.
   const svSelect =
-    'id, paket, max_faelle_monat, paket_umkreis_km, onboarding_status, onboarding_anzahlung_betrag, vertrag_unterschrieben, portal_zugang_freigeschaltet, standort_adresse, standort_plz, organisation_id, rolle_in_organisation, logo_url, brand_primary, brand_secondary, use_custom_branding, firmenname, steuernummer'
+    'id, paket, max_faelle_monat, paket_umkreis_km, onboarding_status, onboarding_anzahlung_betrag, vertrag_unterschrieben, portal_zugang_freigeschaltet, standort_adresse, standort_plz, organisation_id, rolle_in_organisation, logo_url, brand_primary, brand_secondary, use_custom_branding, firmenname, steuernummer, gcal_connected'
   const { data: svRows } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
@@ -203,11 +203,15 @@ export default async function GutachterWillkommenPage({
   // URL-Param ?step=stripe ueberschreibt den initial-Step (z.B. nach Stripe-Cancel)
   // KFZ-156: ?stripe_success=1 nach Stripe-Embed-Return → direkt auf Step 4 (Logo)
   const params = await searchParams
-  // AAR-233: Step-Reihenfolge geändert (Logo=1, Vertrag=2, Stripe=3).
-  // ?step=stripe → Index 3 (war 2); ?stripe_success → fertig, kein Override
-  // (portal_zugang_freigeschaltet wird true → Redirect zum Dashboard).
+  // AAR-233: Step-Reihenfolge: konditionen=0, branding=1, vertrag=2,
+  // anzahlung=3, kalender=4 (AAR-242).
+  // ?step=stripe → Index 3; ?stripe_success → Index 4 (Kalender-Step).
+  // ?kalender_connected=1 → Index 4 (Kalender-Step, Komponente zeigt den
+  // Verbunden-State + Weiter-Button).
   let stepOverride: number | undefined
   if (params?.step === 'stripe') stepOverride = 3
+  if (params?.stripe_success === '1') stepOverride = 4
+  if (params?.kalender_connected === '1') stepOverride = 4
 
   // KFZ-156: Stripe Publishable Key kommt aus dem Server (kein
   // NEXT_PUBLIC_-Var, da Vercel ihn nur als STRIPE_PUBLISHABLE_KEY hat).
@@ -235,6 +239,8 @@ export default async function GutachterWillkommenPage({
         // BUG-96: fuer die Stammdaten-Card im Vertrag-Step
         firmenname: svRow.firmenname ?? null,
         steuernummer: svRow.steuernummer ?? null,
+        // AAR-242: Kalender-Status für den Kalender-Step
+        gcal_connected: !!(sv as { gcal_connected?: boolean }).gcal_connected,
       }}
       profile={profile ?? { vorname: null, nachname: null, email: null, telefon: null }}
       organisation={organisation}

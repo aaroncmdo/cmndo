@@ -8,6 +8,7 @@ import {
   FileSignatureIcon,
   CreditCardIcon,
   ImageIcon,
+  CalendarIcon,
   CheckCircle2Icon,
   MapPinIcon,
   UserIcon,
@@ -25,6 +26,7 @@ import { akzeptiereAgbSubSv } from './actions'
 import SignaturePadInput from '@/components/SignaturePadInput'
 import StripeBrandingFooter from '@/components/StripeBrandingFooter'
 import LogoUploadStep from '@/components/LogoUploadStep'
+import KalenderConnectStep from '@/components/KalenderConnectStep'
 import OrderSummaryCard from './OrderSummaryCard'
 import LeadPreisOverlay, { type LeadpreisRow } from './LeadPreisOverlay'
 import { LoadingButton } from '@/components/ui/loading-button'
@@ -72,6 +74,7 @@ type SvData = {
   logo_url: string | null
   // BUG-96: fuer die Stammdaten-Card im Vertrag-Step
   firmenname: string | null
+  gcal_connected: boolean
   steuernummer: string | null
 }
 
@@ -108,11 +111,14 @@ type Organisation = {
 // → Anzahlung → Logo). Sub-Mitarbeiter behalten ihren 2-Step Light-Flow.
 // AAR-233: Logo-Upload von Step 4 auf Step 2 verschoben — SV sieht sein
 // Branding früh im Prozess, Vertrag + Zahlung in seinen Farben.
+// AAR-242: Kalender-Connect-Step nach Anzahlung ergänzt (Google OAuth oder
+// Opt-Out) — Pflicht für Terminvorschläge.
 const STEPS_4: { key: string; label: string; icon: typeof PackageIcon }[] = [
   { key: 'konditionen', label: 'Konditionen', icon: PackageIcon },
   { key: 'branding', label: 'Logo', icon: ImageIcon },
   { key: 'vertrag', label: 'Vertrag', icon: FileSignatureIcon },
   { key: 'anzahlung', label: 'Anzahlung', icon: CreditCardIcon },
+  { key: 'kalender', label: 'Kalender', icon: CalendarIcon },
 ]
 
 const STEPS_2_SUB: { key: string; label: string; icon: typeof PackageIcon }[] = [
@@ -203,6 +209,10 @@ export default function WillkommenClient({
   // Logo noch nicht hochgeladen → Step 1 (Branding)
   if (r !== 'sub_mitarbeiter' && sv.portal_zugang_freigeschaltet && !sv.logo_url) {
     initialStep = 1
+  }
+  // AAR-242: Kalender noch nicht verbunden → Kalender-Step (Index 4)
+  if (r !== 'sub_mitarbeiter' && sv.portal_zugang_freigeschaltet && !sv.gcal_connected) {
+    initialStep = 4
   }
   if (typeof stepOverride === 'number') initialStep = stepOverride
 
@@ -923,16 +933,28 @@ export default function WillkommenClient({
             />
           )}
 
+          {/* AAR-242: Kalender-Step nach Stripe-Anzahlung */}
+          {currentKey === 'kalender' && r !== 'sub_mitarbeiter' && (
+            <KalenderConnectStep
+              svId={sv.id}
+              gcalConnected={sv.gcal_connected}
+              onDone={() => {
+                router.push('/gutachter')
+                router.refresh()
+              }}
+            />
+          )}
+
           {error && (
             <div className="mt-4 px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
               {error}
             </div>
           )}
 
-          {/* AAR-233: Buttons nur auf Konditionen + Vertrag + Sub-AGB.
-              Branding (LogoUploadStep) und Anzahlung (Embedded Checkout)
-              haben eigene Buttons. */}
-          {currentKey !== 'branding' && currentKey !== 'anzahlung' && (
+          {/* AAR-233 + AAR-242: Buttons nur auf Konditionen + Vertrag +
+              Sub-AGB. Branding (LogoUploadStep), Anzahlung (Stripe) und
+              Kalender (KalenderConnectStep) haben eigene Buttons. */}
+          {currentKey !== 'branding' && currentKey !== 'anzahlung' && currentKey !== 'kalender' && (
             <div className="flex items-center gap-3 mt-6">
               {step > 0 && (
                 <button

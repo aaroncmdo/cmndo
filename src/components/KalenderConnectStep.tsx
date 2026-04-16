@@ -1,0 +1,161 @@
+'use client'
+
+// AAR-242: Kalender-Connect-Step im Willkommen-Wizard.
+// Google Calendar via existierendem OAuth-Flow (/api/auth/google-calendar/connect).
+// Microsoft + Apple sind Platzhalter — die OAuth-Integrationen für diese
+// Provider sind noch nicht gebaut. Opt-Out setzt kalender_typ='keiner'.
+
+import { useState, useTransition } from 'react'
+import { CalendarIcon, CheckCircle2Icon, InfoIcon } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { LoadingButton } from '@/components/ui/loading-button'
+
+type Provider = 'google' | 'microsoft' | 'apple' | 'keiner'
+
+export default function KalenderConnectStep({
+  svId,
+  gcalConnected,
+  onDone,
+}: {
+  svId: string
+  gcalConnected: boolean
+  onDone: () => void
+}) {
+  const [selected, setSelected] = useState<Provider | null>(null)
+  const [saving, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+
+  function chooseGoogle() {
+    // OAuth-Redirect — nach Erfolg springt die Callback-Route zurück ins Portal.
+    window.location.href = `/api/auth/google-calendar/connect?return=${encodeURIComponent('/gutachter/willkommen?kalender_connected=1')}`
+  }
+
+  function chooseOptOut() {
+    setError(null)
+    startTransition(async () => {
+      const supabase = createClient()
+      const { error: updErr } = await supabase
+        .from('sachverstaendige')
+        .update({ kalender_typ: 'keiner', kalender_sync_aktiv: false })
+        .eq('id', svId)
+      if (updErr) { setError(updErr.message); return }
+      onDone()
+    })
+  }
+
+  // Wenn schon verbunden: direkt weiter.
+  if (gcalConnected) {
+    return (
+      <div className="space-y-5">
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
+          <CheckCircle2Icon className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-emerald-900">
+            <p className="font-semibold">Google Kalender verbunden</p>
+            <p className="text-xs text-emerald-700 mt-1">
+              Termine werden automatisch synchronisiert. Du kannst die Verbindung jederzeit im Profil ändern.
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={onDone}
+          className="w-full py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold"
+        >
+          Weiter
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-5">
+      <div className="bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-xl p-4 flex items-start gap-3">
+        <CalendarIcon className="w-5 h-5 text-[#4573A2] flex-shrink-0 mt-0.5" />
+        <div className="text-sm text-[#0D1B3E]">
+          <p className="font-semibold">Kalender verbinden</p>
+          <p className="text-xs text-[#1E3A5F] mt-1">
+            Verbinde deinen Kalender, damit wir dir nur Termine in freien Zeitslots vorschlagen.
+            Ohne Kalender bekommst du Termine manuell per E-Mail/WhatsApp.
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <ProviderCard
+          label="Google Calendar"
+          hint="OAuth — Claimondo liest Verfügbarkeit + trägt neue Termine ein"
+          selected={selected === 'google'}
+          onSelect={() => { setSelected('google'); chooseGoogle() }}
+          enabled
+        />
+        <ProviderCard
+          label="Microsoft 365 / Outlook"
+          hint="Kommt bald — aktuell noch nicht verfügbar"
+          selected={false}
+          onSelect={() => {}}
+          enabled={false}
+        />
+        <ProviderCard
+          label="Apple Calendar (CalDAV)"
+          hint="Kommt bald — aktuell noch nicht verfügbar"
+          selected={false}
+          onSelect={() => {}}
+          enabled={false}
+        />
+        <ProviderCard
+          label="Ich nutze keines dieser Tools"
+          hint="Termine erhältst du manuell per E-Mail oder WhatsApp"
+          selected={selected === 'keiner'}
+          onSelect={() => setSelected('keiner')}
+          enabled
+        />
+      </div>
+
+      {error && (
+        <div className="px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>
+      )}
+
+      <LoadingButton
+        isLoading={saving}
+        loadingText="Wird gespeichert ..."
+        onClick={() => { if (selected === 'keiner') chooseOptOut() }}
+        disabled={selected !== 'keiner'}
+        className="w-full py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40"
+      >
+        Weiter ohne Kalender
+      </LoadingButton>
+
+      <p className="text-[11px] text-gray-400 text-center flex items-center justify-center gap-1">
+        <InfoIcon className="w-3 h-3" />
+        Kalender-Einstellung kannst du jederzeit im Profil ändern
+      </p>
+    </div>
+  )
+}
+
+function ProviderCard({
+  label, hint, selected, onSelect, enabled,
+}: {
+  label: string
+  hint: string
+  selected: boolean
+  onSelect: () => void
+  enabled: boolean
+}) {
+  return (
+    <button
+      type="button"
+      disabled={!enabled}
+      onClick={onSelect}
+      className={`w-full text-left rounded-xl border-2 p-4 transition-colors ${
+        !enabled
+          ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+          : selected
+          ? 'border-[#4573A2] bg-[#4573A2]/5'
+          : 'border-gray-200 hover:border-[#4573A2]/50 bg-white'
+      }`}
+    >
+      <p className={`text-sm font-semibold ${enabled ? 'text-gray-900' : 'text-gray-400'}`}>{label}</p>
+      <p className="text-xs text-gray-500 mt-0.5">{hint}</p>
+    </button>
+  )
+}
