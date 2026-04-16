@@ -20,13 +20,28 @@ export default async function OnboardingPage() {
 
   // Aktiver Fall des Kunden — AAR-231: zusätzlich polizei_vor_ort,
   // personenschaden_flag, hat_vorschaeden für Vorbereitungs-Checkliste.
+  // AAR-231 Audit: lead_id mitnehmen um ZB1-Status zu laden (dispatch-ZB1
+  // Upload läuft auf leads.zb1_status, nicht über pflichtdokumente).
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, polizei_vor_ort, personenschaden_flag, hat_vorschaeden')
+    .select('id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, polizei_vor_ort, personenschaden_flag, hat_vorschaeden, lead_id')
     .eq('kunde_id', user.id)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
+
+  // AAR-231 Audit: ZB1-Status direkt aus leads laden — falls via Dispatch
+  // Phase 4 erhoben, gibt es kein fahrzeugschein-Pflichtdokument (AAR-228
+  // Bug 4 Fix), aber zb1_status='bestaetigt'.
+  let zb1StatusLead: string | null = null
+  if (fall?.lead_id) {
+    const { data: zb1Row } = await supabase
+      .from('leads')
+      .select('zb1_status')
+      .eq('id', fall.lead_id)
+      .single()
+    zb1StatusLead = (zb1Row?.zb1_status as string | null) ?? null
+  }
 
   // Reservierter SV-Termin mit Name
   let svName: string | null = null
@@ -60,8 +75,14 @@ export default async function OnboardingPage() {
     : { data: [] }
 
   // AAR-231: Vorbereitungs-Flags aus Pflichtdokumenten + Fall-Feldern ableiten.
+  // AAR-231 Audit: zb1Hochgeladen = fahrzeugschein-Doc MIT URL ODER
+  // zb1_status='bestaetigt' (via Dispatch Phase 4) — sonst würde der
+  // Kunde den Checklist-Hinweis "Fahrzeugschein hochladen" sehen obwohl
+  // der ZB1 via Dispatch bereits da ist.
   const docs = pflichtDocs ?? []
-  const zb1Hochgeladen = docs.some(d => d.dokument_typ === 'fahrzeugschein' && !!d.dokument_url)
+  const zb1Hochgeladen =
+    zb1StatusLead === 'bestaetigt' ||
+    docs.some(d => d.dokument_typ === 'fahrzeugschein' && !!d.dokument_url)
   const polizeiberichtHochgeladen = docs.some(d => d.dokument_typ === 'polizeibericht' && !!d.dokument_url)
   const attestHochgeladen = docs.some(d => d.dokument_typ === 'aerztliches_attest' && !!d.dokument_url)
 

@@ -803,8 +803,11 @@ export async function createPflichtdokumente(
     add('gewerbenachweis')
     add('gf_vollmacht')
   }
-  if (lead.halter_ungleich_fahrer_flag ||
-      (lead.halter_nachname && lead.halter_nachname !== lead.nachname)) {
+  // AAR-234 Audit: case-insensitive Vergleich (konsistent zu Phase4Stammdaten
+  // AAR-208 Halter-Check). Vorher: "Müller" === "müller" wäre false.
+  const halterNach = String(lead.halter_nachname ?? '').trim().toLowerCase()
+  const kundeNach = String(lead.nachname ?? '').trim().toLowerCase()
+  if (lead.halter_ungleich_fahrer_flag || (halterNach && halterNach !== kundeNach)) {
     add('halter_vollmacht')
     add('halter_ausweis')
   }

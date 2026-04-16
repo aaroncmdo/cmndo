@@ -17,6 +17,10 @@ import {
   AlertTriangleIcon,
   Trash2Icon,
 } from 'lucide-react'
+// AAR-238 Audit: Shared Constants statt hartcodierte Liste — vorher hatte
+// dieses Panel eine eigene ALL_QUALIFIKATIONEN-Liste die mit der Wizard-
+// Konstante aus anlegen/constants.ts inkonsistent war.
+import { QUALIFIKATIONEN } from '@/app/admin/sachverstaendige/anlegen/constants'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -59,11 +63,11 @@ const PAKET_LABELS: Record<string, string> = {
   'premium-50': 'Premium', premium: 'Premium',
 }
 
-const ALL_QUALIFIKATIONEN = [
-  'Haftpflichtschaden', 'Leasingrueckgabe', 'Flottenmanagement',
-  'Oldtimer', 'LKW/Nutzfahrzeuge', 'Motorrad', 'Wohnmobil',
-  'Totalschaden-Bewertung', 'Wiederbeschaffungswert', 'Beweissicherung', 'Gerichtsgutachten',
-]
+// AAR-238: ALL_QUALIFIKATIONEN auf shared QUALIFIKATIONEN-Konstante
+// umgestellt (Karosseriebaumeister, Kfz-Meister, B.Eng., M.Eng., etc.).
+// Die vorherige Liste hatte Fachgebiete (Gerichtsgutachten, Oldtimer)
+// fälschlich als Qualifikation — die gehören in SPEZIFIKATIONEN.
+const ALL_QUALIFIKATIONEN = [...QUALIFIKATIONEN]
 
 function getInitials(name: string): string {
   return name.split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().slice(0, 2)

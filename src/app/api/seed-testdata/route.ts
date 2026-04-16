@@ -151,7 +151,7 @@ export async function POST() {
         paket: 'standard-25' as const, paket_faelle_gesamt: 25, paket_umkreis_km: 40,
         guthaben: 3750, anzahlung_status: 'bezahlt' as const,
         onboarding_abgeschlossen: true, ist_parent_account: false,
-        qualifikationen_neu: ['Haftpflichtschaden', 'Bewertungen'],
+        qualifikationen_neu: ['Kfz-Meister'],
       },
       {
         email: 'info@ib-hartmann.de', vorname: 'Stefan', nachname: 'Hartmann',
@@ -162,7 +162,7 @@ export async function POST() {
         paket: 'premium-50' as const, paket_faelle_gesamt: 50, paket_umkreis_km: 100,
         guthaben: 7500, anzahlung_status: 'bezahlt' as const,
         onboarding_abgeschlossen: true, ist_parent_account: true,
-        qualifikationen_neu: ['Haftpflichtschaden', 'Bewertungen'],
+        qualifikationen_neu: ['Kfz-Meister'],
         spezifikationen: ['LKW', 'Nutzfahrzeuge'],
       },
       {
@@ -174,7 +174,7 @@ export async function POST() {
         paket: 'standard' as const, paket_faelle_gesamt: 10, paket_umkreis_km: 15,
         guthaben: 1500, anzahlung_status: 'bezahlt' as const,
         onboarding_abgeschlossen: true, ist_parent_account: false,
-        qualifikationen_neu: ['Haftpflichtschaden', 'Bewertungen'],
+        qualifikationen_neu: ['Kfz-Meister'],
       },
       {
         email: 'fischer@akademie-sv.de', vorname: 'Maria', nachname: 'Fischer',
@@ -185,8 +185,8 @@ export async function POST() {
         paket: 'standard-25' as const, paket_faelle_gesamt: 25, paket_umkreis_km: 40,
         guthaben: 3750, anzahlung_status: 'bezahlt' as const,
         onboarding_abgeschlossen: true, ist_parent_account: false,
-        qualifikationen_neu: ['Haftpflichtschaden', 'Gerichtsgutachten', 'Beweissicherung'],
-        spezifikationen: ['Oldtimer'],
+        qualifikationen_neu: ['Dipl.-Ing.', 'BVSK-Mitglied'],
+        spezifikationen: ['Gerichtsgutachten', 'Oldtimer-Bewertung', 'Oldtimer'],
       },
     ]
 
