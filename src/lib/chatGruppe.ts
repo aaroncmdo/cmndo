@@ -1,152 +1,110 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 
+// AAR-310: Die alten chat_gruppen / chat_teilnehmer Tabellen existieren nicht
+// mehr (Architektur ist seit AAR-102 auf nachrichten.kanal mit CHECK-Constraint
+// auf 5 Kanälen migriert). Dieses Modul war Dead Code und crashte bei jedem
+// Aufruf — sichtbar in Vercel-Logs als "[chatGruppe] Fehler beim Erstellen…".
+//
+// Statt das Modul komplett zu löschen behalten wir die Funktionssignaturen
+// (mehrere Consumer in flow/, kunde/, gutachter/) und implementieren sie auf
+// dem aktuellen Schema:
+// - Eine Gruppe pro Fall (fallId == gruppeId konzeptuell)
+// - Teilnehmer abgeleitet aus faelle.kunde_id / kundenbetreuer_id / sv_id
+// - System-Nachrichten in nachrichten mit kanal='gruppenchat', is_system=true
+
 /**
- * KFZ-129: Erstellt oder holt die Chat-Gruppe fuer einen Fall.
- * Gibt die gruppe_id zurueck.
+ * AAR-310 (legacy): Stub für Backwards-Compat. Gibt fallId zurück (es gibt
+ * genau eine Gruppe pro Fall, also ist die fallId die Gruppen-ID).
  */
 export async function ensureChatGruppe(fallId: string): Promise<string> {
-  const admin = createAdminClient()
-
-  // Pruefen ob Gruppe existiert
-  const { data: existing } = await admin
-    .from('chat_gruppen')
-    .select('id')
-    .eq('fall_id', fallId)
-    .maybeSingle()
-
-  if (existing) return existing.id
-
-  // Neue Gruppe erstellen
-  const { data: created, error } = await admin
-    .from('chat_gruppen')
-    .insert({ fall_id: fallId })
-    .select('id')
-    .single()
-
-  if (error || !created) {
-    console.error('[chatGruppe] Fehler beim Erstellen:', error?.message)
-    throw new Error('Chat-Gruppe konnte nicht erstellt werden')
-  }
-
-  return created.id
+  return fallId
 }
 
 /**
- * Fuegt einen Teilnehmer zur Chat-Gruppe hinzu (idempotent).
+ * AAR-310 (legacy): No-op. Teilnehmer werden aus faelle abgeleitet, nicht
+ * separat gespeichert.
  */
 export async function addChatTeilnehmer(
-  gruppeId: string,
-  userId: string,
-  rolle: 'kunde' | 'kundenbetreuer' | 'gutachter' | 'admin',
+  _gruppeId: string,
+  _userId: string,
+  _rolle: 'kunde' | 'kundenbetreuer' | 'gutachter' | 'admin',
 ): Promise<void> {
+  // No-op: chat_teilnehmer-Tabelle existiert nicht mehr.
+}
+
+/**
+ * AAR-310 (legacy): No-op. Teilnehmer werden aus faelle abgeleitet.
+ */
+export async function syncChatTeilnehmer(fallId: string): Promise<string> {
+  return fallId
+}
+
+/**
+ * AAR-310: Postet eine System-Nachricht im Gruppenchat eines Falls.
+ * Ersetzt die alte Implementierung die in chat_gruppen/nachrichten.gruppe_id
+ * insertete (beides existiert nicht mehr).
+ */
+export async function sendSystemNachricht(fallId: string, nachricht: string): Promise<void> {
   const admin = createAdminClient()
 
-  const { error } = await admin
-    .from('chat_teilnehmer')
-    .upsert(
-      { gruppe_id: gruppeId, user_id: userId, rolle, entfernt_am: null },
-      { onConflict: 'gruppe_id,user_id' },
-    )
+  const { error } = await admin.from('nachrichten').insert({
+    fall_id: fallId,
+    kanal: 'gruppenchat',
+    sender_id: null,
+    sender_rolle: 'system',
+    nachricht,
+    hat_anhang: false,
+    is_system: true,
+  })
 
   if (error) {
-    console.error('[chatGruppe] Teilnehmer hinzufuegen fehlgeschlagen:', error.message)
+    console.error('[chatGruppe] sendSystemNachricht fehlgeschlagen:', error.message)
   }
 }
 
 /**
- * Synchronisiert alle Teilnehmer eines Falls (Kunde, KB, SV) in die Gruppe.
- * Erstellt die Gruppe falls noetig.
+ * AAR-310: Holt alle Chat-Teilnehmer eines Falls — Kunde, KB, SV — direkt aus
+ * faelle + profiles. Es gibt keine separate chat_teilnehmer-Tabelle mehr.
  */
-export async function syncChatTeilnehmer(fallId: string): Promise<string> {
+export async function getChatTeilnehmer(fallId: string): Promise<Array<{
+  user_id: string
+  rolle: 'kunde' | 'kundenbetreuer' | 'gutachter'
+  vorname: string | null
+  nachname: string | null
+  avatar_url: string | null
+}>> {
   const admin = createAdminClient()
-  const gruppeId = await ensureChatGruppe(fallId)
 
   const { data: fall } = await admin
     .from('faelle')
     .select('kunde_id, kundenbetreuer_id, sv_id')
     .eq('id', fallId)
-    .single()
+    .maybeSingle()
 
-  if (!fall) return gruppeId
+  if (!fall) return []
 
-  const tasks: Promise<void>[] = []
+  const teilnehmer: Array<{ user_id: string; rolle: 'kunde' | 'kundenbetreuer' | 'gutachter' }> = []
 
-  if (fall.kunde_id) {
-    tasks.push(addChatTeilnehmer(gruppeId, fall.kunde_id, 'kunde'))
-  }
-
-  if (fall.kundenbetreuer_id) {
-    tasks.push(addChatTeilnehmer(gruppeId, fall.kundenbetreuer_id, 'kundenbetreuer'))
-  }
+  if (fall.kunde_id) teilnehmer.push({ user_id: fall.kunde_id, rolle: 'kunde' })
+  if (fall.kundenbetreuer_id) teilnehmer.push({ user_id: fall.kundenbetreuer_id, rolle: 'kundenbetreuer' })
 
   if (fall.sv_id) {
-    // SV user_id ueber sachverstaendige.profile_id holen
     const { data: sv } = await admin
       .from('sachverstaendige')
       .select('profile_id')
       .eq('id', fall.sv_id)
-      .single()
-
+      .maybeSingle()
     if (sv?.profile_id) {
-      tasks.push(addChatTeilnehmer(gruppeId, sv.profile_id, 'gutachter'))
+      teilnehmer.push({ user_id: sv.profile_id, rolle: 'gutachter' })
     }
   }
 
-  await Promise.all(tasks)
-  return gruppeId
-}
+  if (!teilnehmer.length) return []
 
-/**
- * Erstellt eine System-Nachricht in der Gruppe.
- */
-export async function sendSystemNachricht(fallId: string, nachricht: string): Promise<void> {
-  const admin = createAdminClient()
-
-  // Gruppe holen/erstellen
-  const gruppeId = await ensureChatGruppe(fallId)
-
-  const { error } = await admin.from('nachrichten').insert({
-    fall_id: fallId,
-    gruppe_id: gruppeId,
-    kanal: 'gruppe',
-    sender_id: null,
-    sender_rolle: 'system',
-    nachricht,
-    hat_anhang: false,
-  })
-
-  if (error) {
-    console.error('[chatGruppe] System-Nachricht fehlgeschlagen:', error.message)
-  }
-}
-
-/**
- * Holt alle Teilnehmer einer Gruppe mit Profil-Daten.
- */
-export async function getChatTeilnehmer(fallId: string) {
-  const admin = createAdminClient()
-
-  const { data: gruppe } = await admin
-    .from('chat_gruppen')
-    .select('id')
-    .eq('fall_id', fallId)
-    .maybeSingle()
-
-  if (!gruppe) return []
-
-  const { data: teilnehmer } = await admin
-    .from('chat_teilnehmer')
-    .select('user_id, rolle, hinzugefuegt_am')
-    .eq('gruppe_id', gruppe.id)
-    .is('entfernt_am', null)
-
-  if (!teilnehmer?.length) return []
-
-  // Profile-Daten laden
   const userIds = teilnehmer.map(t => t.user_id)
   const { data: profiles } = await admin
     .from('profiles')
-    .select('id, vorname, nachname, rolle, avatar_url')
+    .select('id, vorname, nachname, avatar_url')
     .in('id', userIds)
 
   const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p]))

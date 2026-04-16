@@ -296,11 +296,8 @@ async function finalizeKundeSetup(
   const leadDocs = (Array.isArray(lRaw) ? lRaw[0] : lRaw) as Record<string, unknown> | null
   await createDefaultPflichtdokumente(admin, fallId, leadDocs)
 
-  // KFZ-129: Kunde als Chat-Teilnehmer hinzufügen (idempotent)
-  try {
-    const { syncChatTeilnehmer } = await import('@/lib/chatGruppe')
-    await syncChatTeilnehmer(fallId)
-  } catch (e) { console.error('[KFZ-129] syncChatTeilnehmer:', e) }
+  // KFZ-129 / AAR-310: Chat-Teilnehmer werden seit AAR-102 aus faelle abgeleitet
+  // (kein chat_teilnehmer-Sync mehr nötig — siehe lib/chatGruppe.ts).
 
   // AAR-127: Welcome-Mail mit Magic-Link + Zugangsdaten
   await sendWelcomeWithLogin(admin, fallId, email, password)
@@ -633,12 +630,18 @@ export async function signSAandCreateFall(
     console.error('[AAR-306] Auto-Task versicherung-anrufen fehlgeschlagen:', err)
   }
 
-  // 8b. KFZ-129: Chat-Gruppe erstellen + Teilnehmer synchronisieren + System-Nachricht
+  // 8b. KFZ-129 / AAR-310: Welcome-System-Message im Gruppenchat.
+  // Teilnehmer-Sync entfällt seit AAR-102 (Teilnehmer werden aus faelle
+  // abgeleitet). Getrenntes Logging pro Stage zur besseren Diagnose.
   try {
-    const { syncChatTeilnehmer, sendSystemNachricht } = await import('@/lib/chatGruppe')
-    await syncChatTeilnehmer(fall.id)
-    await sendSystemNachricht(fall.id, `Fall ${fallNummer} wurde erstellt. Willkommen in Ihrem persönlichen Chat!`)
-  } catch (e) { console.error('[KFZ-129] Chat-Gruppe Fehler:', e) }
+    const { sendSystemNachricht } = await import('@/lib/chatGruppe')
+    await sendSystemNachricht(
+      fall.id,
+      `Fall ${fallNummer} wurde erstellt. Willkommen in Ihrem persönlichen Chat!`,
+    )
+  } catch (e) {
+    console.error('[KFZ-129] sendSystemNachricht (Welcome) fehlgeschlagen:', e)
+  }
 
   // 9. WhatsApp an Kunde: Fall eröffnet (non-critical)
   try {

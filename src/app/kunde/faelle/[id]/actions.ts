@@ -41,44 +41,12 @@ export async function sendNachricht(
 
   if (error) throw new Error(error.message)
 
-  // KFZ-129: Benachrichtigung + WhatsApp an ALLE anderen Gruppen-Teilnehmer
-  try {
-    const admin = createAdminClient()
-    const { data: fall } = await admin.from('faelle').select('fall_nummer').eq('id', fallId).single()
-    const { data: gruppe } = await admin.from('chat_gruppen').select('id').eq('fall_id', fallId).maybeSingle()
-
-    if (gruppe) {
-      const { data: teilnehmer } = await admin
-        .from('chat_teilnehmer')
-        .select('user_id')
-        .eq('gruppe_id', gruppe.id)
-        .is('entfernt_am', null)
-        .neq('user_id', user.id)
-
-      for (const t of teilnehmer ?? []) {
-        // Benachrichtigung
-        await admin.from('benachrichtigungen').insert({
-          user_id: t.user_id,
-          typ: 'nachricht',
-          titel: 'Neue Nachricht vom Kunden',
-          beschreibung: nachricht.trim().slice(0, 100),
-          link: `/admin/faelle/${fallId}`,
-        })
-
-        // WhatsApp Fallback
-        const { data: profile } = await admin.from('profiles').select('telefon').eq('id', t.user_id).single()
-        if (profile?.telefon) {
-          const { sendCommunication } = await import('@/lib/communications/send')
-          await sendCommunication('chat_fallback_kb', {
-            telefon: profile.telefon,
-            fall_id: fallId,
-            '1': fall?.fall_nummer ?? fallId.slice(0, 8),
-            '2': nachricht.trim().slice(0, 200),
-          })
-        }
-      }
-    } else if (empfaengerId) {
-      // Fallback: alte Logik wenn keine Gruppe existiert
+  // KFZ-129 / AAR-310: Benachrichtigung an empfaenger (KB oder SV).
+  // Vorher: Lookup über chat_gruppen/chat_teilnehmer (Tabellen existieren nicht
+  // mehr, immer Fallback). Jetzt direkt empfaenger benachrichtigen.
+  if (empfaengerId) {
+    try {
+      const admin = createAdminClient()
       await admin.from('benachrichtigungen').insert({
         user_id: empfaengerId,
         typ: 'nachricht',
@@ -86,8 +54,8 @@ export async function sendNachricht(
         beschreibung: nachricht.trim().slice(0, 100),
         link: `/admin/faelle/${fallId}`,
       })
-    }
-  } catch { /* non-critical */ }
+    } catch { /* non-critical */ }
+  }
 
   revalidatePath(`/kunde/faelle/${fallId}`)
 }
