@@ -39,7 +39,7 @@ export default function KundeNav({ mobile }: { mobile?: boolean }) {
           const active = isActive(item.href, item.exact)
           return (
             <Link key={item.href} href={item.href}
-              className={`flex flex-col items-center gap-0.5 min-w-[48px] min-h-[48px] px-3 py-2 transition-colors ${
+              className={`flex flex-col items-center gap-0.5 min-w-[48px] min-h-[48px] px-3 py-2 transition-colors duration-500 ${
                 active ? 'text-white' : 'text-[#7BA3CC] hover:text-white'
               }`}>
               <item.icon className="w-5 h-5" />
@@ -59,7 +59,7 @@ export default function KundeNav({ mobile }: { mobile?: boolean }) {
         const active = isActive(item.href, item.exact)
         return (
           <Link key={item.href} href={item.href}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-500 ${
               active ? 'bg-[#4573A2] text-white font-semibold' : 'text-[#7BA3CC] hover:bg-[#1E3A5F] hover:text-white'
             }`}>
             <item.icon style={{ width: 17, height: 17 }} />

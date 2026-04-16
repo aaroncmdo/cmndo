@@ -331,8 +331,8 @@ export default function GutachterShell({
                       style={{
                         backgroundColor: active ? 'var(--brand-secondary)' : undefined,
                         transition: brandTransitioning
-                          ? 'background-color 2s ease, color 200ms ease'
-                          : 'color 200ms ease',
+                          ? 'background-color 2s ease, color 500ms ease'
+                          : 'color 500ms ease',
                       }}
                     >
                       <Icon className="w-5 h-5 shrink-0" />
