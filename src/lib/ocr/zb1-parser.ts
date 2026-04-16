@@ -124,26 +124,56 @@ export async function runZB1Ocr(base64Image: string): Promise<{
   // Strip data URI prefix if present
   const payload = base64Image.includes(',') ? base64Image.split(',')[1] : base64Image
 
-  const response = await fetch(
-    `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        requests: [{
-          image: { content: payload },
-          features: [{ type: 'TEXT_DETECTION', maxResults: 1 }],
-        }],
-      }),
-    },
-  )
+  // AAR-350: fetch() in try/catch — DNS-Fehler, Timeout oder abgeschaltete
+  // Vision-API haben bisher die komplette Server-Action crashen lassen.
+  let response: Response
+  try {
+    response = await fetch(
+      `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requests: [{
+            image: { content: payload },
+            features: [{ type: 'TEXT_DETECTION', maxResults: 1 }],
+          }],
+        }),
+      },
+    )
+  } catch (err) {
+    console.error(
+      '[AAR-350] Vision API fetch crashed:',
+      err instanceof Error ? err.message : err,
+    )
+    return {
+      error: `Netzwerk-Fehler Vision API: ${err instanceof Error ? err.message : 'Unbekannt'}`,
+      status: 502,
+    }
+  }
   if (!response.ok) {
-    const errText = await response.text()
+    const errText = await response.text().catch(() => '<kein Body>')
     console.error('[AAR-182] Vision API error:', errText)
     return { error: `Google Vision API Fehler: ${response.status}`, status: 502 }
   }
-  const data = await response.json()
-  const fullText = data.responses?.[0]?.fullTextAnnotation?.text ?? ''
+  // AAR-350: JSON-Parse ebenfalls defensiv — eine HTML-Fehlerseite (bei
+  // Proxy-/Gateway-Fehlern keine Seltenheit) würde sonst die Action crashen.
+  let data: unknown
+  try {
+    data = await response.json()
+  } catch (err) {
+    console.error(
+      '[AAR-350] Vision API JSON-Parse crashed:',
+      err instanceof Error ? err.message : err,
+    )
+    return {
+      error: `Vision API lieferte ungültiges JSON: ${err instanceof Error ? err.message : 'Unbekannt'}`,
+      status: 502,
+    }
+  }
+  const fullText =
+    (data as { responses?: Array<{ fullTextAnnotation?: { text?: string } }> })
+      .responses?.[0]?.fullTextAnnotation?.text ?? ''
   const extracted = parseZB1Fields(fullText)
   return { fullText, extracted }
 }

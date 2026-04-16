@@ -5,6 +5,7 @@
 // schreibt Ergebnis (nur leere Felder, H6-Regel) in leads.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import type { ZB1ExtractedData } from '@/lib/ocr/zb1-parser'
 
 export type ZB1UploadResult = {
   success: boolean
@@ -65,9 +66,47 @@ export async function uploadZb1ViaToken(
   const { data: publicData } = db.storage.from('dokumente').getPublicUrl(path)
   const publicUrl = publicData.publicUrl
 
-  // 3. OCR aufrufen
-  const { runZB1Ocr } = await import('@/lib/ocr/zb1-parser')
-  const ocrResult = await runZB1Ocr(imageBase64)
+  // 3. OCR aufrufen — AAR-350: mit try/catch damit Storage-Upload nicht
+  // verloren geht, wenn die Vision API wirft (DNS, Timeout, API disabled).
+  // Ohne Wrapper crasht die gesamte Server-Action und der User sieht nur
+  // einen generischen 500er, während `zb1_status` auf 'gesendet' stehen bleibt.
+  let ocrResult:
+    | { fullText: string; extracted: ZB1ExtractedData }
+    | { error: string; status?: number }
+  try {
+    const { runZB1Ocr } = await import('@/lib/ocr/zb1-parser')
+    ocrResult = await runZB1Ocr(imageBase64)
+  } catch (err) {
+    console.error(
+      '[AAR-350] ZB1 OCR CRASH (unhandled):',
+      err instanceof Error ? err.message : err,
+      err instanceof Error ? err.stack : undefined,
+    )
+    // Foto bleibt in Storage, Status auf fehlgeschlagen — KB prüft manuell
+    await db.from('leads').update({
+      zb1_status: 'fehlgeschlagen',
+      zb1_url: publicUrl,
+      zb1_upload_versuche: (lead.zb1_upload_versuche ?? 0) + 1,
+      updated_at: new Date().toISOString(),
+    }).eq('id', lead.id)
+
+    if (lead.zugewiesen_an) {
+      try {
+        const { createNotification } = await import('@/lib/notifications')
+        await createNotification(
+          lead.zugewiesen_an,
+          'zb1-fehlgeschlagen',
+          `ZB1-OCR abgestürzt: ${lead.vorname ?? 'Lead'} ${lead.nachname ?? ''}`.trim(),
+          'Foto angekommen, OCR-Service nicht erreichbar — manuell prüfen.',
+          `/dispatch/leads/${lead.id}`,
+        )
+      } catch { /* non-critical */ }
+    }
+    return {
+      success: false,
+      error: `OCR-Fehler: ${err instanceof Error ? err.message : 'Unbekannt'}`,
+    }
+  }
 
   if ('error' in ocrResult) {
     // AAR-339: Konkreten OCR-Fehler loggen damit Aaron in Vercel-Logs sieht
