@@ -683,6 +683,42 @@ export default function Phase4Stammdaten() {
             </datalist>
           </div>
 
+          {/* AAR-347: FIN/HSN/TSN manuell eintragbar als OCR-Fallback —
+              werden normalerweise aus der ZB1 automatisch extrahiert, aber
+              wenn Upload fehlschlägt oder Kunde keinen Fahrzeugschein hat,
+              muss der Dispatcher sie telefonisch erfragen und eintragen
+              können. Alle drei landen via STAMMDATEN_ALLOWED_FIELDS in
+              leads.fin / leads.hsn / leads.tsn. */}
+          <InlineField
+            label="FIN (Fahrzeug-Ident-Nr.)"
+            value={l.fin}
+            fieldName="fin"
+            leadId={leadId}
+            placeholder="WVWZZZ3CZWE123456"
+            transform={(raw) => raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 17)}
+            hint="17 Zeichen, normalerweise aus ZB1/Fahrzeugschein"
+          />
+
+          <InlineField
+            label="HSN (Herstellerschlüssel)"
+            value={l.hsn}
+            fieldName="hsn"
+            leadId={leadId}
+            placeholder="0603"
+            transform={(raw) => raw.replace(/[^0-9]/g, '').slice(0, 4)}
+            hint="4 Ziffern, Feld 2.1 im Fahrzeugschein"
+          />
+
+          <InlineField
+            label="TSN (Typschlüssel)"
+            value={l.tsn}
+            fieldName="tsn"
+            leadId={leadId}
+            placeholder="BRN"
+            transform={(raw) => raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 3)}
+            hint="3 Zeichen, Feld 2.2 im Fahrzeugschein"
+          />
+
           {/* AAR-177 Fix #3: Eigentümer-Typ mit Info-Tooltip + Label.
               Fix #6: Leasing/Gewerblich kontextuelle Hilfe-Box.
               AAR-188 Fix #3: Label explizit auf Fahrzeug-Eigentümer laut

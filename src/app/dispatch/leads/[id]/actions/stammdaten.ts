@@ -15,6 +15,9 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   'kennzeichen', 'fahrzeug_hersteller', 'fahrzeug_modell',
   // AAR-181: Baujahr ist Pflichtfeld in Phase 4, muss in der Allowlist sein
   'fahrzeug_baujahr', 'erstzulassung',
+  // AAR-347: OCR-Fallback — FIN/HSN/TSN manuell im Dispatch eintragbar,
+  // wenn der ZB1-Upload fehlschlägt oder der Kunde keinen Schein hat.
+  'fin', 'hsn', 'tsn',
   'hat_vorschaeden', 'vorschaeden_beschreibung',
   'finanzierung_leasing', 'vorsteuerabzugsberechtigt',
   // Gegner + Unfall
