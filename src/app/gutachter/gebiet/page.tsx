@@ -63,6 +63,9 @@ export default function GebietPage() {
   const [previewPaket, setPreviewPaket] = useState<string | null>(null)
   const [showAnfrageModal, setShowAnfrageModal] = useState(false)
   const [mapReady, setMapReady] = useState(false)
+  // AAR-346: sichtbares Error-Feedback wenn Maps-Script/-Key scheitert —
+  // vorher silent return → komplett leere Fläche ohne Erklärung.
+  const [mapError, setMapError] = useState<string | null>(null)
 
   // Load own data + all neighbors
   // AAR-253: Error-Handling — Spinner hing wenn Queries fehlschlugen.
@@ -100,7 +103,13 @@ export default function GebietPage() {
   useEffect(() => {
     if (!svData || !mapRef.current || gMapRef.current) return
     const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY
-    if (!key) return
+    if (!key) {
+      // AAR-346: vorher silent return — jetzt sichtbares Overlay damit der SV
+      // nicht auf eine weiße Fläche starrt und Support gleich weiß wo suchen.
+      console.error('[AAR-346] NEXT_PUBLIC_GOOGLE_MAPS_KEY fehlt — Karte kann nicht geladen werden')
+      setMapError('Karten-Konfiguration fehlt — bitte Support kontaktieren (Code: MAPS_KEY_MISSING)')
+      return
+    }
 
     function init() {
       if (typeof google === 'undefined' || !google.maps) return false
@@ -126,10 +135,34 @@ export default function GebietPage() {
     }
 
     if (init()) return
-    if (document.getElementById(MAPS_ID)) { const iv = setInterval(() => { if (init()) clearInterval(iv) }, 200); return }
+    if (document.getElementById(MAPS_ID)) {
+      // AAR-346: Polling-Guard — wenn ein vorheriger Script-Tag nie lädt
+      // (Script blockiert, Key revoked, RefererNotAllowed), sonst Endlos-Spinner.
+      let tries = 0
+      const iv = setInterval(() => {
+        if (init()) { clearInterval(iv); return }
+        if (++tries > 40) {
+          clearInterval(iv)
+          console.error('[AAR-346] Google Maps nicht verfügbar nach ~8s Polling')
+          setMapError('Google Maps konnte nicht geladen werden — Browser-Konsole prüfen (evtl. API-Key abgelaufen oder Domain-Restriction)')
+        }
+      }, 200)
+      return
+    }
     const s = document.createElement('script'); s.id = MAPS_ID
     s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=visualization`
-    s.async = true; s.onload = () => init(); document.head.appendChild(s)
+    s.async = true
+    s.onload = () => {
+      if (!init()) {
+        console.error('[AAR-346] google.maps fehlt nach Script-Load — evtl. falscher Key oder Maps JavaScript API nicht aktiviert')
+        setMapError('Google Maps Initialisierung fehlgeschlagen — Maps JavaScript API nicht aktiviert oder Key ungültig')
+      }
+    }
+    s.onerror = () => {
+      console.error('[AAR-346] Google Maps Script konnte nicht geladen werden (Netzwerk-Fehler)')
+      setMapError('Google Maps Script konnte nicht geladen werden (Netzwerk-Fehler)')
+    }
+    document.head.appendChild(s)
   }, [svData])
 
   // Draw neighbor polygons
@@ -264,6 +297,24 @@ export default function GebietPage() {
       <div className="flex-1 min-h-0 flex" style={{ minHeight: 0 }}>
         <div className="flex-1 relative" style={{ minHeight: 0 }}>
           <div ref={mapRef} className="absolute inset-0" />
+
+          {/* AAR-346: Sichtbares Error-Overlay wenn Maps-Script/-Key scheitert.
+              Vorher war der Bereich komplett leer ohne Feedback an den Nutzer. */}
+          {mapError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-20">
+              <div className="max-w-md mx-4 rounded-xl border border-red-200 bg-white p-5 shadow-sm">
+                <p className="text-sm font-semibold text-red-700 mb-1">Karte konnte nicht geladen werden</p>
+                <p className="text-xs text-gray-600 leading-relaxed">{mapError}</p>
+                <button
+                  type="button"
+                  onClick={() => { setMapError(null); location.reload() }}
+                  className="mt-3 text-[11px] font-medium text-[#4573A2] hover:underline"
+                >
+                  Seite neu laden
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* BUG-90: Fallback-Hinweis wenn Isochrone noch leer ist (z.B.
               direkt nach Anlage / OSRM hat noch nicht durchgerechnet). */}
