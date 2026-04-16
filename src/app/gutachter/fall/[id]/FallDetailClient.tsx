@@ -15,10 +15,12 @@ import { getSvSubphase, type AbrechnungSubphaseInput } from '@/lib/gutachter/sub
 import { getSichtbarFuerRolle } from '@/lib/dokumente/sichtbarkeit'
 import { FallHeader } from './_components/FallHeader'
 import { AktuellePhaseCard } from './_components/AktuellePhaseCard'
+import { JetztZuTunCard } from './_components/JetztZuTunCard'
 import { StammdatenCard } from './_components/StammdatenCard'
 import { DokumenteUebersichtCard } from './_components/DokumenteUebersichtCard'
 import { TimelineVorschauCard } from './_components/TimelineVorschauCard'
 import FallakteVollClient from './FallakteVollClient'
+import type { GutachterTask } from '@/hooks/useGutachterTasks'
 
 type Lead = {
   vorname: string | null
@@ -81,6 +83,8 @@ type Props = {
   fallDokumente?: FallakteVollProps['fallDokumente']
   /** AAR-289: Abrechnungs-Snippet für Subphase-Ableitung (ausgezahlt_am). */
   abrechnungAusgezahltAm?: string | null
+  /** AAR-291: Tasks initial geladen (SSR), Hook refresht via Realtime. */
+  tasks?: GutachterTask[]
 }
 
 export default function FallDetailClient(props: Props) {
@@ -162,8 +166,12 @@ export default function FallDetailClient(props: Props) {
       {/* 2-Spalten-Layout: Desktop ≥1024px sticky-links, Mobile stacked */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_1fr] gap-4 sm:gap-6">
         <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start min-w-0">
+          <JetztZuTunCard
+            fallId={fall.id as string}
+            initialTasks={props.tasks ?? []}
+            subphase={subphase}
+          />
           <AktuellePhaseCard subphase={subphase} />
-          {/* AAR-291 wird hier ein Task-Widget ergänzen */}
         </aside>
 
         <section className="space-y-4 min-w-0">

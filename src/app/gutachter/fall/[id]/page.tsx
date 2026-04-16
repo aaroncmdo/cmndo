@@ -118,6 +118,18 @@ export default async function GutachterFallPage({
   const { getChatTeilnehmer } = await import('@/lib/chatGruppe')
   const chatTeilnehmer = await getChatTeilnehmer(id)
 
+  // AAR-291: Tasks für SV initial laden (Hook refresht via Realtime)
+  const { data: tasksInitial } = await supabase
+    .from('tasks')
+    .select(
+      'id, fall_id, task_typ, titel, beschreibung, status, prioritaet, faellig_am, empfaenger_rolle, created_at, erledigt_am',
+    )
+    .eq('fall_id', id)
+    .in('empfaenger_rolle', ['gutachter', 'sachverstaendiger'])
+    .in('status', ['offen', 'in-bearbeitung'])
+    .order('prioritaet', { ascending: false })
+    .order('faellig_am', { ascending: true, nullsFirst: false })
+
   // KFZ-134: Aktiven gutachter_termine Eintrag laden
   const { createAdminClient } = await import('@/lib/supabase/admin')
   const admin = createAdminClient()
@@ -145,6 +157,7 @@ export default async function GutachterFallPage({
       aktiverTermin={aktiverTermin}
       fallDokumente={fallDokumente}
       abrechnungAusgezahltAm={(abrechnung as { ausgezahlt_am?: string | null } | null)?.ausgezahlt_am ?? null}
+      tasks={(tasksInitial ?? []) as Parameters<typeof FallDetailClient>[0]['tasks']}
     />
   )
 }
