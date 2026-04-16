@@ -30,10 +30,37 @@ export default async function HeutePage() {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  const sv = await getGutachterForUser<{ id: string; standort_lat: number | null; standort_lng: number | null }>(
-    supabase, user.id, 'id, standort_lat, standort_lng',
+  const sv = await getGutachterForUser<{
+    id: string
+    standort_lat: number | null
+    standort_lng: number | null
+    offene_faelle: number | null
+    max_faelle_monat: number | null
+    paket_faelle_gesamt: number | null
+    paket_faelle_genutzt: number | null
+  }>(
+    supabase, user.id,
+    'id, standort_lat, standort_lng, offene_faelle, max_faelle_monat, paket_faelle_gesamt, paket_faelle_genutzt',
   )
   if (!sv) redirect('/gutachter?error=Kein+SV-Profil')
+
+  // AAR-248 / AAR-251 / F-10: Dashboard-KPIs für die Heute-Seite.
+  const monatsStart = new Date()
+  monatsStart.setDate(1)
+  monatsStart.setHours(0, 0, 0, 0)
+  const [{ data: offeneFaelleRaw }, { data: monatsAbrech }] = await Promise.all([
+    supabase.from('faelle').select('id, status').eq('sv_id', sv.id)
+      .not('status', 'in', '("abgeschlossen","storniert")'),
+    supabase.from('gutachter_abrechnungen').select('leadpreis').eq('sv_id', sv.id)
+      .gte('abgerechnet_am', monatsStart.toISOString()),
+  ])
+  const kpis = {
+    offeneFaelle: (offeneFaelleRaw ?? []).length,
+    heutigeTermine: 0, // wird unten nach Termin-Fetch gesetzt
+    monatsUmsatz: (monatsAbrech ?? []).reduce((s, a) => s + Number(a.leadpreis ?? 0), 0),
+    kontingentGesamt: Number(sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10),
+    kontingentGenutzt: Number(sv.paket_faelle_genutzt ?? 0),
+  }
 
   // Termine heute + morgen laden (gutachter_termine + faelle Join)
   const todayStart = new Date()
@@ -93,11 +120,42 @@ export default async function HeutePage() {
     }
   })
 
+  // AAR-248 / AAR-251: heutigeTermine-Count jetzt füllbar (nach Termin-Fetch)
+  kpis.heutigeTermine = heuteTermine.filter(t =>
+    new Date(t.start_zeit).toDateString() === new Date().toDateString(),
+  ).length
+
   return (
-    <HeuteRouteClient
-      termine={heuteTermine}
-      svLat={sv.standort_lat ? Number(sv.standort_lat) : null}
-      svLng={sv.standort_lng ? Number(sv.standort_lng) : null}
-    />
+    <div className="h-full flex flex-col">
+      {/* AAR-248 / AAR-251 / F-10: Dashboard-KPIs oben */}
+      <div className="bg-white border-b border-gray-200 px-4 py-3 grid grid-cols-4 gap-3 shrink-0">
+        <KpiCard label="Offene Fälle" value={String(kpis.offeneFaelle)} />
+        <KpiCard label="Heute" value={`${kpis.heutigeTermine} Termine`} />
+        <KpiCard
+          label="Monatsumsatz"
+          value={new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(kpis.monatsUmsatz)}
+        />
+        <KpiCard
+          label="Kontingent"
+          value={`${kpis.kontingentGenutzt} / ${kpis.kontingentGesamt}`}
+        />
+      </div>
+      <div className="flex-1 min-h-0">
+        <HeuteRouteClient
+          termine={heuteTermine}
+          svLat={sv.standort_lat ? Number(sv.standort_lat) : null}
+          svLng={sv.standort_lng ? Number(sv.standort_lng) : null}
+        />
+      </div>
+    </div>
+  )
+}
+
+function KpiCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[10px] text-gray-500 uppercase tracking-wider">{label}</p>
+      <p className="text-base font-semibold text-gray-900 mt-0.5">{value}</p>
+    </div>
   )
 }
