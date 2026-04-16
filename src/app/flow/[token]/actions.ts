@@ -208,7 +208,7 @@ export async function createKundeAccount(
 
         // AAR-125: Lead laden für conditional Polizeibericht
         const { data: leadForDocs } = await admin
-          .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht)').eq('id', fallId).single()
+          .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht, personenschaden_flag, hat_vorschaeden, zb1_status)').eq('id', fallId).single()
         const lRaw = (leadForDocs as { leads: unknown } | null)?.leads
         const leadDocs = (Array.isArray(lRaw) ? lRaw[0] : lRaw) as Record<string, unknown> | null
         await createDefaultPflichtdokumente(admin, fallId, leadDocs)
@@ -247,7 +247,7 @@ export async function createKundeAccount(
 
   // AAR-125: Lead laden für conditional Polizeibericht (auch im new-user-Pfad)
   const { data: leadForDocsNew } = await admin
-    .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht)').eq('id', fallId).single()
+    .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht, personenschaden_flag, hat_vorschaeden, zb1_status)').eq('id', fallId).single()
   const lRawNew = (leadForDocsNew as { leads: unknown } | null)?.leads
   const leadDocsNew = (Array.isArray(lRawNew) ? lRawNew[0] : lRawNew) as Record<string, unknown> | null
   await createDefaultPflichtdokumente(admin, fallId, leadDocsNew)
@@ -712,21 +712,34 @@ async function createDefaultPflichtdokumente(
   fallId: string,
   lead?: Record<string, unknown> | null,
 ) {
-  // AAR-125: pflichtdokumente Schema hat NUR (id, fall_id, dokument_typ, status,
-  // pflicht, quelle, dokument_url, hochgeladen_am, created_at). Die alten
-  // titel/beschreibung-Inserts hätten geworfen — wurden nur deshalb nicht
-  // bemerkt weil createPflichtdokumente (admin/dispatch) im SA-Flow zuerst läuft
-  // und dann die Idempotenz-Prüfung hier den Insert verhindert hat.
-  // Defaults sind hier deshalb minimaler Safety-Net (KundeAccount-Pfad ohne SA).
-  const defaults: { dokument_typ: string; pflicht: boolean }[] = [
-    { dokument_typ: 'fahrzeugschein', pflicht: true },
-    { dokument_typ: 'fuehrerschein', pflicht: true },
-    { dokument_typ: 'schadensfotos', pflicht: true },
-  ]
+  // AAR-228 Bug 3 + 4: Conditional-Matrix für Pflichtdokumente.
+  // fuehrerschein + schadensfotos wurden entfernt:
+  // - fuehrerschein: LexDrive fordert ihn selbst per WA-Bot an
+  // - schadensfotos: SV macht Fotos vor Ort (kein Kunden-Upload nötig)
+  const defaults: { dokument_typ: string; pflicht: boolean }[] = []
 
-  // AAR-125: Polizeibericht conditional wenn Polizei vor Ort war (siehe AAR-124)
+  // 1. Fahrzeugschein (ZB1) — nur wenn nicht schon durch Dispatch Phase 4 erhoben
+  const zb1Status = lead?.zb1_status as string | null ?? null
+  if (!zb1Status || zb1Status === 'angefordert') {
+    defaults.push({ dokument_typ: 'fahrzeugschein', pflicht: true })
+  }
+
+  // 2. Polizeibericht — wenn Polizei vor Ort war (optional, nachreichbar)
   if (lead?.polizei_vor_ort === true || lead?.polizeibericht_pflicht === true) {
-    defaults.push({ dokument_typ: 'polizeibericht', pflicht: true })
+    defaults.push({ dokument_typ: 'polizeibericht', pflicht: false })
+  }
+
+  // 3. Personenschaden-Dokumente — ärztliches Attest als Pflicht für
+  // Schmerzensgeld-Geltendmachung; Krankenhausbericht + AU optional
+  if (lead?.personenschaden_flag === true) {
+    defaults.push({ dokument_typ: 'aerztliches_attest', pflicht: true })
+    defaults.push({ dokument_typ: 'krankenhausbericht', pflicht: false })
+    defaults.push({ dokument_typ: 'au_bescheinigung', pflicht: false })
+  }
+
+  // 4. Vorschäden-Dokumentation für Regulierung
+  if (lead?.hat_vorschaeden === true) {
+    defaults.push({ dokument_typ: 'reparaturrechnungen_vorschaeden', pflicht: true })
   }
 
   // Idempotenz: keine Defaults wenn schon was existiert (z.B. nach

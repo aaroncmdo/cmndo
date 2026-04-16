@@ -16,6 +16,16 @@ export async function completeOnboarding(): Promise<{ success: boolean; error?: 
     .eq('id', user.id)
 
   if (error) return { success: false, error: error.message }
+
+  // AAR-228 Bug 2: faelle.onboarding_complete MUSS synchron gesetzt werden —
+  // sonst sieht /kunde/page.tsx weiter onboarding_complete=false → Redirect-Loop.
+  // Admin-Client weil Kunde keine direkte Update-Policy auf faelle hat.
+  const admin = createAdminClient()
+  await admin.from('faelle')
+    .update({ onboarding_complete: true })
+    .eq('kunde_id', user.id)
+    .is('onboarding_complete', false)
+
   revalidatePath('/kunde')
   return { success: true }
 }

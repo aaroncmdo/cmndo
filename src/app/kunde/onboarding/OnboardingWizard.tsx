@@ -56,6 +56,8 @@ const DOKTYP_LABELS: Record<string, string> = {
   gf_vollmacht: 'Geschäftsführer-Vollmacht',
   halter_vollmacht: 'Halter-Vollmacht',
   halter_ausweis: 'Halter-Ausweis',
+  // AAR-228: Vorschäden-Dokumentation
+  reparaturrechnungen_vorschaeden: 'Reparaturrechnungen (Vorschäden)',
   // Allgemein
   vollmacht: 'Vollmacht',
   sicherungsabtretung: 'Sicherungsabtretung',

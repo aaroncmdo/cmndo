@@ -2,29 +2,20 @@
 
 import { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { ImageIcon, UploadCloudIcon, XIcon, CheckCircle2Icon } from 'lucide-react'
-import {
-  uploadSvLogo,
-  uploadBueroLogo,
-  saveSvBrandColors,
-  saveBueroBrandColors,
-} from '@/lib/actions/branding-actions'
+import { UploadCloudIcon, XIcon, CheckCircle2Icon } from 'lucide-react'
+import { uploadSvLogo, uploadBueroLogo } from '@/lib/actions/branding-actions'
 import { LoadingButton } from '@/components/ui/loading-button'
 
-// KFZ-157: Logo-Upload-Step im Willkommen-Wizard.
+// KFZ-157 / AAR-220: Logo-Upload-Step im Willkommen-Wizard.
 //
-// Erscheint nach erfolgreicher Stripe-Anzahlung als Step 4 fuer Solo-SVs
-// und Buero-Inhaber. Sub-Mitarbeiter sehen diesen Step NICHT — sie erben
-// das Branding der Org sobald der Inhaber sein Logo hochladet.
+// Erscheint nach erfolgreicher Stripe-Anzahlung als Step 4 für Solo-SVs und
+// Büro-Inhaber. Sub-Mitarbeiter sehen diesen Step NICHT — sie erben das
+// Branding der Org sobald der Inhaber sein Logo hochladet.
 //
-// Flow:
-//   1. Drop-Zone (PNG/SVG/JPG/WebP, max 2 MB) via react-dropzone
-//   2. Upload via Server Action → Logo wandert in Storage, Farben werden
-//      server-seitig via node-vibrant aus dem Bild extrahiert
-//   3. Vorschau-Box zeigt die erkannten Farben mit manueller Override
-//      via Color-Picker
-//   4. 'Speichern' uebernimmt die ggf. veraenderten Farben in die DB
-//   5. 'Spaeter machen' Skip-Button uebergeht den ganzen Schritt
+// AAR-220 Reopen: ColorPicker + manueller "Branding übernehmen"-Zwischenschritt
+// wurden entfernt. Ein-Klick-Flow: Upload → Server extrahiert Farben +
+// generiert Theme + speichert brand_theme JSONB → Portal passt sich an. Der
+// User sieht KEINE Zwischenfarben-UI mehr.
 
 type Props = {
   variant: 'solo' | 'buero_inhaber'
@@ -34,16 +25,13 @@ type Props = {
 
 export default function LogoUploadStep({ variant, organisationId, onDone }: Props) {
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
-  const [primary, setPrimary] = useState<string>('#1E3A5F')
-  const [secondary, setSecondary] = useState<string>('#4573A2')
   const [uploading, setUploading] = useState(false)
-  const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleFile = useCallback(async (file: File) => {
     setError(null)
     if (file.size > 2 * 1024 * 1024) {
-      setError('Datei zu gross — max 2 MB')
+      setError('Datei zu groß — max 2 MB')
       return
     }
 
@@ -55,13 +43,17 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
         fd.append('organisation_id', organisationId)
       }
 
+      // AAR-220: uploadSvLogo/uploadBueroLogo generieren Theme + schreiben
+      // brand_theme JSONB direkt in die DB. Kein zusätzlicher Save-Call.
       const result = variant === 'buero_inhaber'
         ? await uploadBueroLogo(fd)
         : await uploadSvLogo(fd)
 
       setLogoUrl(result.logo_url)
-      setPrimary(result.brand_primary)
-      setSecondary(result.brand_secondary)
+      // Flag für die einmalige 2s-Brand-Transition (siehe GutachterShell).
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('brand-just-changed', String(Date.now()))
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload fehlgeschlagen')
     } finally {
@@ -87,33 +79,8 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
     disabled: uploading,
   })
 
-  async function handleSaveColors() {
-    if (!logoUrl) { onDone(); return }
-    setSaving(true)
-    setError(null)
-    try {
-      if (variant === 'buero_inhaber') {
-        if (!organisationId) throw new Error('Keine Organisation')
-        await saveBueroBrandColors({
-          organisation_id: organisationId,
-          brand_primary: primary,
-          brand_secondary: secondary,
-        })
-      } else {
-        await saveSvBrandColors({ brand_primary: primary, brand_secondary: secondary })
-      }
-      onDone()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Speichern fehlgeschlagen')
-    } finally {
-      setSaving(false)
-    }
-  }
-
   function handleReset() {
     setLogoUrl(null)
-    setPrimary('#1E3A5F')
-    setSecondary('#4573A2')
     setError(null)
   }
 
@@ -153,8 +120,9 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
           )}
         </div>
       ) : (
-        <div className="border border-gray-200 rounded-2xl p-5 space-y-4">
-          {/* Logo + Reset */}
+        <div className="border border-gray-200 rounded-2xl p-5 space-y-3">
+          {/* AAR-220: Nur noch Logo-Vorschau (kein Color-Picker, keine
+              Live-Preview-Box) — der User hat Auto-CD, nichts anzupassen. */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-16 h-16 rounded-xl border border-gray-200 bg-white flex items-center justify-center overflow-hidden">
@@ -166,7 +134,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
                   <CheckCircle2Icon className="w-4 h-4 text-[#4573A2]" />
                   Logo hochgeladen
                 </p>
-                <p className="text-[11px] text-gray-500 mt-0.5">Farben automatisch extrahiert</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">Farben automatisch extrahiert und angewendet</p>
               </div>
             </div>
             <button
@@ -178,30 +146,6 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
               <XIcon className="w-4 h-4" />
             </button>
           </div>
-
-          {/* Erkannte Farben */}
-          <div className="bg-gray-50 rounded-xl p-4">
-            <p className="text-[10px] text-gray-500 uppercase tracking-wide mb-3">
-              Erkannte Farben — bei Bedarf anpassen
-            </p>
-            <div className="flex items-center gap-4">
-              <ColorPickerRow label="Primaer" value={primary} onChange={setPrimary} />
-              <ColorPickerRow label="Akzent" value={secondary} onChange={setSecondary} />
-            </div>
-          </div>
-
-          {/* Live-Preview */}
-          <div className="rounded-xl overflow-hidden border border-gray-200">
-            <div className="px-4 py-2.5 text-white text-xs font-semibold" style={{ backgroundColor: primary }}>
-              Vorschau — so sieht dein Header aus
-            </div>
-            <div className="p-3 bg-white flex items-center gap-2">
-              <div className="text-[11px] px-2 py-1 rounded text-white font-medium" style={{ backgroundColor: secondary }}>
-                Akzent-Button
-              </div>
-              <div className="text-[11px] text-gray-500">Beispiel-Element</div>
-            </div>
-          </div>
         </div>
       )}
 
@@ -211,49 +155,31 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
         </div>
       )}
 
-      {/* Buttons */}
+      {/* Buttons — AAR-220: nach Upload gibt es nur noch "Weiter" (Auto-Save
+          ist bereits passiert), davor "Später machen" für Skip-Pfad. */}
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={onDone}
-          disabled={uploading || saving}
+          disabled={uploading}
           className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50 disabled:opacity-40"
         >
-          Spaeter machen
+          Später machen
         </button>
         <LoadingButton
-          isLoading={saving}
-          loadingText="Wird gespeichert..."
-          onClick={handleSaveColors}
-          disabled={!logoUrl || uploading}
+          isLoading={uploading}
+          loadingText="Wird hochgeladen ..."
+          onClick={onDone}
+          disabled={!logoUrl}
           className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {logoUrl ? 'Branding uebernehmen & weiter' : 'Logo hochladen'}
+          {logoUrl ? 'Weiter' : 'Bitte zuerst Logo hochladen'}
         </LoadingButton>
       </div>
 
-      <p className="text-[11px] text-gray-400 text-center flex items-center justify-center gap-1">
-        <ImageIcon className="w-3 h-3" />
-        Du kannst dein Logo jederzeit unter Profil → Branding aendern
+      <p className="text-[11px] text-gray-400 text-center">
+        Du kannst dein Logo jederzeit unter Profil → Branding ändern
       </p>
     </div>
-  )
-}
-
-function ColorPickerRow({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  return (
-    <label className="flex items-center gap-2 cursor-pointer">
-      <input
-        type="color"
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        className="w-8 h-8 rounded border border-gray-300 cursor-pointer p-0"
-        aria-label={`${label}-Farbe`}
-      />
-      <div>
-        <p className="text-[10px] text-gray-500 uppercase">{label}</p>
-        <p className="text-xs font-mono text-gray-700">{value.toUpperCase()}</p>
-      </div>
-    </label>
   )
 }

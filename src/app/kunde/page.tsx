@@ -62,9 +62,11 @@ export default async function KundeStartseite() {
   } catch { /* non-critical */ }
 
   // Onboarding-Redirect
-  // BUG-63: Redirect auf Fall-Detail statt /kunde/onboarding (Route existiert nicht)
+  // AAR-228 Bug 1: Route /kunde/onboarding existiert (5-Step Wizard), alter
+  // Kommentar "BUG-63: Route existiert nicht" ist veraltet. Korrekt zum
+  // Onboarding routen statt Fall-Detail.
   const needsOnboarding = faelle.find(f => f.onboarding_complete === false)
-  if (needsOnboarding) redirect(`/kunde/faelle/${needsOnboarding.id}`)
+  if (needsOnboarding) redirect('/kunde/onboarding')
 
   // KFZ-128: Ungelesene Nachrichten pro Fall zaehlen (non-critical)
   try {

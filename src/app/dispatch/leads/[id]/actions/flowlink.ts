@@ -68,15 +68,34 @@ export async function sendFlowLinkMultiChannel(
 
   if (kanal === 'whatsapp') {
     if (!telefon) return { success: false, error: 'Keine Telefonnummer für WhatsApp' }
+    // AAR-226: Twilio lehnt Templates mit leeren Placeholdern als "Invalid
+    // Parameter" ab. Vor dem Send alle 6 Pflicht-Placeholder validieren +
+    // klare Fehlermeldung wenn Termin/SV fehlt (statt kryptisches Twilio-
+    // Error beim MA).
+    const vornameVal = (lead.vorname ?? '').trim()
+    const missing: string[] = []
+    if (!vornameVal) missing.push('Vorname des Kunden')
+    if (!svVorname || !svNachname) missing.push('SV-Name (SV-Termin noch nicht reserviert?)')
+    if (!datum || !uhrzeit) missing.push('Termin-Datum/Uhrzeit')
+    if (missing.length > 0) {
+      return {
+        success: false,
+        error: `FlowLink-WhatsApp kann nicht gesendet werden — fehlt: ${missing.join(', ')}. Bitte Phase 2 (SV + Termin) abschließen.`,
+      }
+    }
+    // Telefon auf E.164 normalisieren (Twilio WhatsApp verlangt +49... Format).
+    let waTelefon = telefon.replace(/\s/g, '')
+    if (waTelefon.startsWith('0')) waTelefon = '+49' + waTelefon.slice(1)
+    else if (waTelefon.startsWith('00')) waTelefon = '+' + waTelefon.slice(2)
+    if (!waTelefon.startsWith('+')) waTelefon = '+' + waTelefon
     try {
       const { sendCommunication } = await import('@/lib/communications/send')
       // AAR-175 P0-C: Der vorname-Key war Alt-Last aus pre-numbered-Template-Zeit.
       // Twilio-Templates konsumieren ausschließlich die nummerierten Placeholder
-      // '1'..'6' — der zusätzliche vorname-Key führte dazu, dass Content-API
-      // Warnung loggt und der Key für kein Template gemappt wird.
+      // '1'..'6'.
       await sendCommunication('flowlink_versand', {
-        telefon,
-        '1': lead.vorname ?? '',
+        telefon: waTelefon,
+        '1': vornameVal,
         '2': svVorname,
         '3': svNachname,
         '4': datum,

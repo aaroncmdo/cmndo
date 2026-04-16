@@ -125,10 +125,11 @@ export default function GutachterShell({
     return { ...sec, items: [...sec.items, ...conditional] }
   })
 
-  // AAR-220: Vollständiges Theme via CSS-Vars + sanfte Transition (1.5s).
-  // Wir setzen alle 6 Vars: --brand-primary, --brand-secondary, --brand-accent,
-  // --brand-sidebar-bg, --brand-text-on-primary, --brand-surface. Die alten
-  // --brand-primary/--brand-secondary bleiben für Backward-Compat erhalten.
+  // AAR-220: Vollständiges Theme via CSS-Vars + EINMALIGE 2s-Transition.
+  // Die Transition wird NUR aktiv wenn der User gerade ein neues Logo
+  // hochgeladen hat (localStorage-Flag 'brand-just-changed'). Bei normalem
+  // Navigieren gibt es keine Transition — sonst würde jeder Page-Load
+  // flackern.
   const theme: BrandTheme = brandTheme ?? CLAIMONDO_DEFAULT_THEME
   const useBrand = !!brandTheme
   const themeVars = {
@@ -139,6 +140,22 @@ export default function GutachterShell({
     '--brand-text-on-primary': theme.textOnPrimary,
     '--brand-surface': theme.surface,
   } as React.CSSProperties
+
+  // AAR-220 Fix 5: Einmalige 2s-Transition nach Logo-Upload.
+  const [brandTransitioning, setBrandTransitioning] = useState(false)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const flag = localStorage.getItem('brand-just-changed')
+    if (!flag) return
+    // Flag löschen + Transition 2.5s aktiv halten (2s Transition + 0.5s Puffer).
+    localStorage.removeItem('brand-just-changed')
+    setBrandTransitioning(true)
+    const t = setTimeout(() => setBrandTransitioning(false), 2500)
+    return () => clearTimeout(t)
+  }, [])
+  const transitionStyle: React.CSSProperties = brandTransitioning
+    ? { transition: 'background-color 2s ease, color 2s ease, border-color 2s ease' }
+    : {}
 
   // Fetch 7-day weather
   useEffect(() => {
@@ -256,7 +273,11 @@ export default function GutachterShell({
         style={{
           backgroundColor: 'var(--brand-sidebar-bg)',
           color: 'var(--brand-text-on-primary)',
-          transition: 'background-color 1.5s ease, color 1.5s ease, transform 200ms ease',
+          // Transform-Transition (Sidebar-Slide) immer 200ms, Color-Transition
+          // nur bei frischem Brand-Change (einmalig 2s).
+          transition: brandTransitioning
+            ? 'background-color 2s ease, color 2s ease, transform 200ms ease'
+            : 'transform 200ms ease',
         }}
       >
         <div className="px-5 py-5 border-b border-white/10">
@@ -309,7 +330,9 @@ export default function GutachterShell({
                       }`}
                       style={{
                         backgroundColor: active ? 'var(--brand-secondary)' : undefined,
-                        transition: 'background-color 1.5s ease, color 200ms ease',
+                        transition: brandTransitioning
+                          ? 'background-color 2s ease, color 200ms ease'
+                          : 'color 200ms ease',
                       }}
                     >
                       <Icon className="w-5 h-5 shrink-0" />
@@ -338,7 +361,7 @@ export default function GutachterShell({
               style={{
                 backgroundColor: 'var(--brand-accent)',
                 color: 'var(--brand-text-on-primary)',
-                transition: 'background-color 1.5s ease',
+                ...transitionStyle,
               }}
             >
               {displayName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
@@ -365,7 +388,7 @@ export default function GutachterShell({
           style={{
             backgroundColor: 'var(--brand-sidebar-bg)',
             color: 'var(--brand-text-on-primary)',
-            transition: 'background-color 1.5s ease, color 1.5s ease',
+            ...transitionStyle,
           }}
         >
           <button onClick={() => setSidebarOpen(true)} className="p-2 -ml-2 text-white/70 hover:text-white transition-colors" aria-label="Menü öffnen">
