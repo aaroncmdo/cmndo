@@ -63,6 +63,29 @@ export default function Phase2TerminServiceTyp() {
     })
   }
 
+  // AAR-262: Wenn der Dispatcher die Adresse manuell tippt (kein Google-
+  // Places-Dropdown), fehlen lat/lng → SV-Vorschläge sind blockiert.
+  // onBlur löst Server-Side-Geocoding via Google Maps Geocoding API aus.
+  function geocodeOnBlur(currentValue: string) {
+    const trimmed = currentValue.trim()
+    // Nur wenn Text vorhanden, anders als gespeicherte Adresse, und keine
+    // Koordinaten via Dropdown gesetzt.
+    if (!trimmed || trimmed === (l.unfallort ?? '') || hasKoordinaten) return
+    startTransition(async () => {
+      const { geocodeAndSaveBesichtigung } = await import('../actions/geocode')
+      const r = await geocodeAndSaveBesichtigung(lead.id, trimmed)
+      if (r.success && r.lat != null && r.lng != null) {
+        setUnfallortLat(r.lat)
+        setUnfallortLng(r.lng)
+        setToast('Adresse geocoded + gespeichert')
+        router.refresh()
+      } else {
+        setToast(r.error ?? 'Geocoding fehlgeschlagen')
+      }
+      setTimeout(() => setToast(''), 3000)
+    })
+  }
+
   function saveTreffpunkt() {
     startTransition(async () => {
       const r = await saveHardGate(lead.id, { sv_treffpunkt: svTreffpunkt.trim() || null })
@@ -118,6 +141,15 @@ export default function Phase2TerminServiceTyp() {
           defaultValue={unfallortDraft}
           placeholder="Adresse wählen ..."
           onSelect={(r) => autoSaveAdresse(r.adresse, r.lat, r.lng)}
+          onBlur={(currentValue) => {
+            // AAR-262: Wenn der User getippt aber NICHTS aus dem Dropdown
+            // gewählt hat, läuft Server-Side-Geocoding als Fallback —
+            // damit SV-Vorschläge nicht blockiert sind. currentValue wird
+            // als Parameter übergeben, weil setUnfallortDraft async ist
+            // und der State sonst stale bleibt.
+            setUnfallortDraft(currentValue)
+            geocodeOnBlur(currentValue)
+          }}
           className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
         />
         {/* AAR-176 P2-C: sv_treffpunkt Freitextfeld — wird beim Blur gespeichert */}

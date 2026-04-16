@@ -69,11 +69,15 @@ export default function GooglePlaceAutocomplete({
   defaultValue,
   placeholder,
   onSelect,
+  onBlur,
   className,
 }: {
   defaultValue?: string
   placeholder?: string
   onSelect: (result: PlaceResult) => void
+  // AAR-262: Optionaler Blur-Handler für Server-Side-Geocoding-Fallback
+  // wenn der User Freitext eingibt statt Dropdown-Auswahl.
+  onBlur?: (currentValue: string) => void
   className?: string
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -145,6 +149,8 @@ export default function GooglePlaceAutocomplete({
       // abfangen — Google-Autocomplete-Auswahl läuft nicht über Enter
       // sondern über Click auf die Suggestion.
       onKeyDown={e => { if (e.key === 'Enter') e.preventDefault() }}
+      // AAR-262: Blur-Handler für Server-Side-Geocoding-Fallback.
+      onBlur={() => onBlur?.(value)}
       placeholder={placeholder ?? 'Adresse eingeben...'}
       className={className ?? defaultCls}
     />
