@@ -41,6 +41,8 @@ const DOKTYP_LABELS: Record<string, string> = {
   // Schaden
   schadensfotos: 'Schadensfotos (mind. 4)',
   polizeibericht: 'Polizeibericht',
+  // AAR-300: Mietwagenrechnung — Kunde reicht nach Fahrzeugrückgabe nach
+  mietwagenrechnung: 'Mietwagenrechnung (nach Fahrzeugrückgabe)',
   // Medizin
   aerztliches_attest: 'Ärztliches Attest',
   krankenhausbericht: 'Krankenhausbericht',

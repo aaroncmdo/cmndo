@@ -208,7 +208,7 @@ export async function createKundeAccount(
 
         // AAR-125: Lead laden für conditional Polizeibericht
         const { data: leadForDocs } = await admin
-          .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht, polizeibericht_status, personenschaden_flag, hat_vorschaeden, zb1_status, service_typ, wa_gesendet)').eq('id', fallId).single()
+          .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht, polizeibericht_status, personenschaden_flag, hat_vorschaeden, zb1_status, service_typ, wa_gesendet, mietwagen_flag, nutzungsausfall)').eq('id', fallId).single()
         const lRaw = (leadForDocs as { leads: unknown } | null)?.leads
         const leadDocs = (Array.isArray(lRaw) ? lRaw[0] : lRaw) as Record<string, unknown> | null
         await createDefaultPflichtdokumente(admin, fallId, leadDocs)
@@ -247,7 +247,7 @@ export async function createKundeAccount(
 
   // AAR-125: Lead laden für conditional Polizeibericht (auch im new-user-Pfad)
   const { data: leadForDocsNew } = await admin
-    .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht, polizeibericht_status, personenschaden_flag, hat_vorschaeden, zb1_status, service_typ, wa_gesendet)').eq('id', fallId).single()
+    .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht, polizeibericht_status, personenschaden_flag, hat_vorschaeden, zb1_status, service_typ, wa_gesendet, mietwagen_flag, nutzungsausfall)').eq('id', fallId).single()
   const lRawNew = (leadForDocsNew as { leads: unknown } | null)?.leads
   const leadDocsNew = (Array.isArray(lRawNew) ? lRawNew[0] : lRawNew) as Record<string, unknown> | null
   await createDefaultPflichtdokumente(admin, fallId, leadDocsNew)
@@ -821,6 +821,11 @@ async function createDefaultPflichtdokumente(
 
   // 3b. AAR-299: Schadensfotos vom Kunden (optional, parallel zu SV-Fotos)
   defaults.push({ dokument_typ: 'schadensfotos', pflicht: false })
+
+  // 3c. AAR-300: Mietwagenrechnung — optional Pflichtdoc bei mietwagen_flag
+  if (lead?.mietwagen_flag === true || lead?.nutzungsausfall === true) {
+    defaults.push({ dokument_typ: 'mietwagenrechnung', pflicht: false })
+  }
 
   // 4. Vorschäden-Dokumentation für Regulierung
   if (lead?.hat_vorschaeden === true) {

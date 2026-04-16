@@ -801,6 +801,13 @@ export async function createPflichtdokumente(
   // die Detail-Fahrzeugfotos vor Ort. Beides hat unterschiedlichen Wert.
   add('schadensfotos', false)
 
+  // 3c. AAR-300: Mietwagenrechnung — optionales Pflichtdoc, Kunde reicht
+  // nach Fahrzeugrückgabe nach. Reminder-Logik (KB-Task) als separater
+  // Cron — hier nur das Pflichtdoc anlegen damit es im Dashboard erscheint.
+  if (lead.mietwagen_flag === true || lead.nutzungsausfall === true) {
+    add('mietwagenrechnung', false)
+  }
+
   // 4. Vorschäden
   if (lead.hat_vorschaeden === true) {
     add('reparaturrechnungen_vorschaeden', true)
