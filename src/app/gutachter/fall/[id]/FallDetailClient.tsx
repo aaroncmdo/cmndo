@@ -21,6 +21,9 @@ import { DokumenteUebersichtCard } from './_components/DokumenteUebersichtCard'
 import { TimelineVorschauCard } from './_components/TimelineVorschauCard'
 import { KanzleiRegulierungsStepperCard } from './_components/KanzleiRegulierungsStepperCard'
 import { AbrechnungsCard } from './_components/AbrechnungsCard'
+import { StellungnahmeCard } from './_components/StellungnahmeCard'
+import { NachbesichtigungCard } from './_components/NachbesichtigungCard'
+import { ReklamationsCard } from './_components/ReklamationsCard'
 import FallakteVollClient from './FallakteVollClient'
 import type { GutachterTask } from '@/hooks/useGutachterTasks'
 import type { SvAbrechnungInput } from '@/lib/gutachter/abrechnung'
@@ -175,6 +178,42 @@ export default function FallDetailClient(props: Props) {
             fallId={fall.id as string}
             initialTasks={props.tasks ?? []}
             subphase={subphase}
+          />
+          {/* AAR-294: Conditional Cards — rendern sich selber nur wenn relevant */}
+          <ReklamationsCard
+            fall={{
+              id: fall.id as string,
+              status: (fall.status as string | null) ?? null,
+            }}
+            id="reklamation-card"
+          />
+          <StellungnahmeCard
+            fall={{
+              id: fall.id as string,
+              technische_stellungnahme_status:
+                (fall.technische_stellungnahme_status as string | null) ?? null,
+              technische_stellungnahme_beauftragt_am:
+                (fall.technische_stellungnahme_beauftragt_am as string | null) ?? null,
+              technische_stellungnahme_hochgeladen_am:
+                (fall.technische_stellungnahme_hochgeladen_am as string | null) ?? null,
+              technische_stellungnahme_freigabe_am:
+                (fall.technische_stellungnahme_freigabe_am as string | null) ?? null,
+            }}
+            id="stellungnahme-card"
+          />
+          <NachbesichtigungCard
+            fall={{
+              id: fall.id as string,
+              nachbesichtigung_status:
+                (fall.nachbesichtigung_status as string | null) ?? null,
+              nachbesichtigung_angefordert_am:
+                (fall.nachbesichtigung_angefordert_am as string | null) ?? null,
+              nachbesichtigung_termin_datum:
+                (fall.nachbesichtigung_termin_datum as string | null) ?? null,
+              nachbesichtigung_ergebnis:
+                (fall.nachbesichtigung_ergebnis as string | null) ?? null,
+            }}
+            id="nachbesichtigung-card"
           />
           <AktuellePhaseCard subphase={subphase} />
           {/* AAR-293: Kanzlei-Stepper in Phase 5.x */}
