@@ -8,7 +8,8 @@ export default async function MitarbeiterPage({ params }: { params: Promise<{ id
 
   const { data: mitarbeiter } = await supabase
     .from('profiles')
-    .select('id, email, vorname, nachname, rolle, telefon, position, gehaltsstufe, gehalt_brutto, kategorie, kapazitaet_max, aktiv, eingestellt_am, force_password_change, created_at, twilio_whatsapp_nummer, twilio_phone_sid, twilio_nummer_provisioned_am')
+    // AAR-343: twofa_telefon für 2FA-Reset-Panel
+    .select('id, email, vorname, nachname, rolle, telefon, twofa_telefon, position, gehaltsstufe, gehalt_brutto, kategorie, kapazitaet_max, aktiv, eingestellt_am, force_password_change, created_at, twilio_whatsapp_nummer, twilio_phone_sid, twilio_nummer_provisioned_am')
     .eq('id', id)
     .single()
   if (!mitarbeiter) notFound()

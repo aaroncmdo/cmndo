@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeftIcon, SaveIcon, UserIcon, BarChart3Icon, BriefcaseIcon, ClockIcon, PhoneIcon, Trash2Icon } from 'lucide-react'
-import { updateMitarbeiter, provisionTwilioNummer, releaseTwilioNummer } from '../actions'
+import { ArrowLeftIcon, SaveIcon, UserIcon, BarChart3Icon, BriefcaseIcon, ClockIcon, PhoneIcon, Trash2Icon, ShieldOffIcon } from 'lucide-react'
+import { updateMitarbeiter, provisionTwilioNummer, releaseTwilioNummer, resetTwoFaForUser } from '../actions'
 
 type Perf = { monat: string; jahr: number; leads_qualifiziert: number; leads_konvertiert: number; faelle_abgeschlossen: number; aktive_faelle: number; umsatz_generiert: number }
 
@@ -18,6 +18,10 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
   const [msg, setMsg] = useState<string | null>(null)
   const [twilioLoading, setTwilioLoading] = useState(false)
   const [twilioMsg, setTwilioMsg] = useState<string | null>(null)
+  // AAR-343: 2FA-Reset (neue Nummer optional)
+  const [twofaLoading, setTwofaLoading] = useState(false)
+  const [twofaMsg, setTwofaMsg] = useState<string | null>(null)
+  const [twofaNeuePhone, setTwofaNeuePhone] = useState('')
   const m = mitarbeiter
 
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
@@ -169,6 +173,72 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
             {twilioMsg && <p className={`text-xs mt-2 ${twilioMsg.includes('!') ? 'text-green-600' : 'text-red-500'}`}>{twilioMsg}</p>}
           </div>
         )}
+
+        {/* AAR-343: 2FA-Reset — für Nummern-Wechsel oder wenn User ausgesperrt ist */}
+        <div className="mt-5 bg-white border border-gray-200 rounded-2xl p-5">
+          <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+            <ShieldOffIcon className="w-4 h-4" /> 2FA-Telefonnummer
+          </h3>
+          <p className="text-xs text-gray-500 mb-3">
+            Aktuelle 2FA-Nummer:{' '}
+            <span className="font-mono">
+              {(m.twofa_telefon as string | null) ?? (m.telefon as string | null) ?? '—'}
+            </span>
+            {!m.twofa_telefon && m.telefon ? (
+              <span className="text-gray-400"> (Fallback auf Profil-Telefon)</span>
+            ) : null}
+          </p>
+          <div className="space-y-2">
+            <input
+              type="tel"
+              value={twofaNeuePhone}
+              onChange={(e) => setTwofaNeuePhone(e.target.value)}
+              placeholder="Neue 2FA-Nummer (optional, z. B. +49 151 1234 5678)"
+              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+            />
+            <div className="flex gap-2 flex-wrap">
+              <button
+                type="button"
+                disabled={twofaLoading}
+                onClick={async () => {
+                  const confirmText = twofaNeuePhone.trim()
+                    ? `2FA-Nummer auf "${twofaNeuePhone.trim()}" setzen? Alle Remember-Tokens werden widerrufen.`
+                    : 'Aktuelle 2FA-Nummer entfernen? Beim nächsten Login greift der Fallback auf die Profil-Telefonnummer. Alle Remember-Tokens werden widerrufen.'
+                  if (!confirm(confirmText)) return
+                  setTwofaLoading(true)
+                  setTwofaMsg(null)
+                  try {
+                    const r = await resetTwoFaForUser(m.id as string, twofaNeuePhone || null)
+                    if (!r.success) {
+                      setTwofaMsg(r.error ?? 'Fehler')
+                    } else {
+                      setTwofaMsg(twofaNeuePhone ? 'Neue 2FA-Nummer gesetzt!' : '2FA-Nummer entfernt')
+                      setTwofaNeuePhone('')
+                      router.refresh()
+                    }
+                  } catch (e) {
+                    setTwofaMsg(e instanceof Error ? e.message : 'Fehler')
+                  } finally {
+                    setTwofaLoading(false)
+                  }
+                }}
+                className="flex items-center gap-1.5 bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-40 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
+              >
+                <ShieldOffIcon className="w-4 h-4" />
+                {twofaLoading
+                  ? 'Wird zurückgesetzt …'
+                  : twofaNeuePhone.trim()
+                    ? 'Nummer setzen + Tokens widerrufen'
+                    : 'Zurücksetzen + Tokens widerrufen'}
+              </button>
+            </div>
+            {twofaMsg && (
+              <p className={`text-xs ${twofaMsg.includes('!') || twofaMsg.includes('entfernt') ? 'text-green-600' : 'text-red-500'}`}>
+                {twofaMsg}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
     </div></div>
   )

@@ -102,6 +102,47 @@ export async function toggleIncentive(id: string, aktiv: boolean) {
   if (error) throw new Error(error.message)
 }
 
+// AAR-343: Admin-Reset der 2FA-Telefonnummer (bei Nummern-Wechsel etc).
+// Setzt twofa_telefon zurück und invalidiert alle remember-Tokens — beim
+// nächsten Login greift der Fallback auf profiles.telefon ODER, wenn
+// eine neue Nummer mitgegeben wurde, wird die direkt verwendet.
+export async function resetTwoFaForUser(
+  targetUserId: string,
+  newPhone?: string | null,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await requireAdmin()
+  const admin = createAdminClient()
+
+  const cleanPhone = newPhone?.trim() || null
+  // profile updaten (entweder auf null oder auf neue Nummer)
+  const { error: updErr } = await admin
+    .from('profiles')
+    .update({
+      twofa_telefon: cleanPhone,
+      twofa_telefon_verifiziert_am: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', targetUserId)
+  if (updErr) return { success: false, error: updErr.message }
+
+  // Alle remember-Tokens invalidieren (User muss sich neu per SMS verifizieren)
+  const { revokeAllTokens } = await import('@/lib/auth/twofa/remember-me')
+  await revokeAllTokens(targetUserId)
+
+  // Audit via timeline (ohne fall_id/lead_id — reiner System-Eintrag)
+  const user = (await supabase.auth.getUser())?.data?.user
+  await admin.from('timeline').insert({
+    typ: 'system',
+    titel: '2FA-Telefonnummer zurückgesetzt',
+    beschreibung: cleanPhone
+      ? `Admin hat die 2FA-Nummer geändert (auf ${cleanPhone}). Alle Remember-Tokens wurden widerrufen.`
+      : 'Admin hat die 2FA-Nummer entfernt. Beim nächsten Login greift der Fallback auf die Profil-Telefonnummer. Remember-Tokens wurden widerrufen.',
+    erstellt_von: user?.id ?? null,
+  })
+
+  return { success: true }
+}
+
 // KFZ-182: Twilio WhatsApp-Nummer Provisioning
 export async function provisionTwilioNummer(profileId: string) {
   await requireAdmin()
