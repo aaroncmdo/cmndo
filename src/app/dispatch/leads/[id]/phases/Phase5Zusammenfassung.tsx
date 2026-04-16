@@ -123,21 +123,43 @@ export default function Phase5Zusammenfassung() {
   }, [])
 
   function send(kanal: 'whatsapp' | 'sms' | 'email') {
-    if (!qualification.canSendFlowLink) return
-    // Vorherigen Auto-Advance-Timer canceln falls User mehrmals nacheinander
-    // auf Send klickt.
+    if (!qualification.canSendFlowLink) {
+      // AAR-269: Statt schweigend abzubrechen — Toast mit konkretem Grund.
+      const missing: string[] = []
+      if (!qualification.q1_schuldfrage) missing.push('Hergang/Schuldfrage')
+      if (!qualification.q2_schaden) missing.push('Schaden')
+      if (!qualification.q3_polizei) missing.push('Polizei-Status')
+      if (!qualification.q4_schadentyp) missing.push('Schadentyp')
+      if (!qualification.q5_svTermin) missing.push('SV-Termin')
+      if (!qualification.q6_gegnerKz) missing.push('Gegner-KZ')
+      if (!qualification.q7_fahrzeug) missing.push('Fahrzeug-Pflichtfelder')
+      setSendStatus({ kanal, ok: false, text: `Versand blockiert — fehlt: ${missing.join(', ')}` })
+      return
+    }
+    // AAR-269: Sofortiges Feedback — Aaron berichtete „kein erkennbarer
+    // Versand". Wir zeigen direkt einen „Sende läuft"-Status damit die
+    // Reaktion sichtbar ist BEVOR der Server antwortet.
+    setSendStatus({ kanal, ok: true, text: 'Sende ...' })
     if (advanceTimeoutRef.current) clearTimeout(advanceTimeoutRef.current)
     startSend(async () => {
-      const r = await sendFlowLinkMultiChannel(lead.id, kanal, waNummer || null)
-      setSendStatus({
-        kanal,
-        ok: r.success,
-        text: r.success ? 'FlowLink versendet' : r.error ?? 'Fehler',
-      })
-      // AAR-178 P3-B: Auto-Advance zu Phase 6 nach erfolgreichem Versand
-      // (der Dispatcher sieht sofort das Status-Tracking statt Phase 5 nochmal).
-      if (r.success) {
-        advanceTimeoutRef.current = setTimeout(() => setPhase(6), 600)
+      try {
+        const r = await sendFlowLinkMultiChannel(lead.id, kanal, waNummer || null)
+        setSendStatus({
+          kanal,
+          ok: r.success,
+          text: r.success ? 'FlowLink versendet' : r.error ?? 'Versand fehlgeschlagen (kein Detail)',
+        })
+        if (r.success) {
+          advanceTimeoutRef.current = setTimeout(() => setPhase(6), 600)
+        }
+      } catch (err) {
+        // AAR-269: Action könnte werfen wenn Twilio-Network/Timeout — fangen
+        // damit der MA nicht im stale 'Sende ...' hängen bleibt.
+        setSendStatus({
+          kanal,
+          ok: false,
+          text: err instanceof Error ? `Exception: ${err.message}` : 'Unbekannter Fehler beim Versand',
+        })
       }
     })
   }
@@ -358,28 +380,31 @@ export default function Phase5Zusammenfassung() {
             type="button"
             disabled={pending || !qualification.canSendFlowLink || !waNummer}
             onClick={() => send('whatsapp')}
+            title={!waNummer ? 'Bitte WhatsApp-Nummer eintragen' : !qualification.canSendFlowLink ? 'Erst alle 7/7 Bedingungen erfüllen' : undefined}
             className="flex items-center justify-center gap-2 py-3 rounded-xl bg-[#25D366] text-white text-sm font-bold hover:bg-[#1fa855] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <MessageSquareIcon className="w-4 h-4" />
-            WhatsApp
+            {pending && sendStatus.kanal === 'whatsapp' ? 'Sende ...' : 'WhatsApp'}
           </button>
           <button
             type="button"
             disabled={pending || !qualification.canSendFlowLink || !waNummer}
             onClick={() => send('sms')}
+            title={!waNummer ? 'Bitte Telefonnummer eintragen' : !qualification.canSendFlowLink ? 'Erst alle 7/7 Bedingungen erfüllen' : undefined}
             className="flex items-center justify-center gap-2 py-3 rounded-xl bg-amber-500 text-white text-sm font-bold hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <PhoneIcon className="w-4 h-4" />
-            SMS
+            {pending && sendStatus.kanal === 'sms' ? 'Sende ...' : 'SMS'}
           </button>
           <button
             type="button"
             disabled={pending || !qualification.canSendFlowLink || !email.trim()}
             onClick={() => send('email')}
+            title={!email.trim() ? 'Bitte Email-Adresse eintragen' : !qualification.canSendFlowLink ? 'Erst alle 7/7 Bedingungen erfüllen' : undefined}
             className="flex items-center justify-center gap-2 py-3 rounded-xl bg-[#4573A2] text-white text-sm font-bold hover:bg-[#3a6290] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <MailIcon className="w-4 h-4" />
-            Email
+            {pending && sendStatus.kanal === 'email' ? 'Sende ...' : 'Email'}
           </button>
         </div>
         {sendStatus.kanal && (
