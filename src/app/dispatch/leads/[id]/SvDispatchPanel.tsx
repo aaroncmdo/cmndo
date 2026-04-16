@@ -413,6 +413,34 @@ export default function SvDispatchPanel({
                         <span>{s.kontingentFrei} frei</span>
                         <span>{s.offeneFaelle} offen</span>
                       </div>
+                      {/* AAR-277: Wochentag-Indikator Mo–So. Standard-Verfügbarkeit
+                          ist Mo–Fr (sv_verfuegbarkeit-Tabelle existiert noch nicht
+                          — eigenes Ticket), aber wenn der Dispatcher einen Wunschtag-
+                          Filter gesetzt hat, werden die gewählten Tage hervorgehoben. */}
+                      <div className="flex items-center gap-1 mt-1.5">
+                        {[
+                          { iso: 1, label: 'Mo' },
+                          { iso: 2, label: 'Di' },
+                          { iso: 3, label: 'Mi' },
+                          { iso: 4, label: 'Do' },
+                          { iso: 5, label: 'Fr' },
+                          { iso: 6, label: 'Sa' },
+                          { iso: 7, label: 'So' },
+                        ].map((d) => {
+                          const isWerktag = d.iso <= 5
+                          const isWunsch = wunschterminWochentage?.includes(d.iso) ?? false
+                          const cls = isWunsch
+                            ? (isSel ? 'bg-amber-300 text-amber-900' : 'bg-amber-100 text-amber-800 border border-amber-300')
+                            : isWerktag
+                              ? (isSel ? 'bg-white/20 text-white/80' : 'bg-gray-100 text-gray-600')
+                              : (isSel ? 'bg-white/5 text-white/30' : 'bg-gray-50 text-gray-300')
+                          return (
+                            <span key={d.iso} className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${cls}`}>
+                              {d.label}
+                            </span>
+                          )
+                        })}
+                      </div>
                       {/* AAR-264: Wunschtermin-Verfügbarkeits-Badge */}
                       {s.verfuegbarAmWunschtermin === true && wunschterminIso && (
                         <div className={`mt-1.5 inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-medium ${
