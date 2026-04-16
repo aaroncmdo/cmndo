@@ -1,6 +1,7 @@
 'use client'
 
-export default function FallakteError({ error, reset }: { error: Error; reset: () => void }) {
+// AAR-271: window.location.reload() statt reset()
+export default function FallakteError({ error: _error }: { error: Error }) {
   return (
     <div className="h-full flex items-center justify-center p-8">
       <div className="text-center max-w-md">
@@ -11,9 +12,9 @@ export default function FallakteError({ error, reset }: { error: Error; reset: (
         <p className="text-sm text-gray-500 mb-6">
           Bitte versuchen Sie es erneut. Falls das Problem bestehen bleibt, kontaktieren Sie den Support.
         </p>
-        <button onClick={reset}
+        <button onClick={() => window.location.reload()}
           className="px-6 py-3 bg-[#4573A2] text-white font-medium text-sm rounded-xl hover:bg-[#1E3A5F] transition-colors">
-          Erneut laden
+          Seite neu laden
         </button>
       </div>
     </div>

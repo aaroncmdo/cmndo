@@ -1,6 +1,7 @@
 'use client'
 
-export default function FlowError({ error, reset }: { error: Error; reset: () => void }) {
+// AAR-271: window.location.reload() statt reset()
+export default function FlowError({ error: _error }: { error: Error }) {
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-6">
       <div className="max-w-md w-full bg-white rounded-3xl p-8 text-center shadow-xl shadow-black/10">
@@ -13,9 +14,9 @@ export default function FlowError({ error, reset }: { error: Error; reset: () =>
         <p className="text-sm text-gray-500 mb-6">
           Bitte versuchen Sie es erneut. Falls das Problem weiterhin besteht, kontaktieren Sie uns.
         </p>
-        <button onClick={reset}
+        <button onClick={() => window.location.reload()}
           className="px-6 py-3 bg-[#4573A2] text-white font-medium text-sm rounded-2xl hover:bg-[#1E3A5F] transition-colors">
-          Erneut versuchen
+          Seite neu laden
         </button>
       </div>
     </div>

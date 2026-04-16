@@ -1,11 +1,10 @@
 'use client'
 
+// AAR-271: window.location.reload() statt reset() — siehe globale error.tsx
 export default function SachverstaendigeError({
   error,
-  reset,
 }: {
   error: Error & { digest?: string }
-  reset: () => void
 }) {
   return (
     <div className="px-4 py-8">
@@ -19,7 +18,7 @@ export default function SachverstaendigeError({
             )}
           </p>
           <button
-            onClick={reset}
+            onClick={() => window.location.reload()}
             className="bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium px-6 py-2.5 rounded-xl transition-colors"
           >
             Erneut versuchen

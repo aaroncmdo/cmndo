@@ -2,12 +2,17 @@
 
 import { useEffect } from 'react'
 
+// AAR-271: window.location.reload() statt unstable_retry()/reset() — bei
+// Vercel 503 oder transientem Server-Fehler führt React-Recovery oft erneut
+// zum gleichen Fehler. Full-Reload behält die aktuelle URL bei + Cookies
+// bleiben erhalten → MA verliert keinen Lead-Arbeitsstand.
+// „Zur Startseite"-Link entfernt — der redirected ohne Session auf /login,
+// was bei einem transienten Server-Hick auf einer Lead-Seite nicht passt.
+
 export default function Error({
   error,
-  unstable_retry,
 }: {
   error: Error & { digest?: string }
-  unstable_retry: () => void
 }) {
   useEffect(() => {
     console.error(error)
@@ -31,20 +36,12 @@ export default function Error({
             Fehler-ID: {error.digest}
           </p>
         )}
-        <div className="flex gap-3 justify-center">
-          <button
-            onClick={() => unstable_retry()}
-            className="px-5 py-2.5 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium rounded-xl transition-colors"
-          >
-            Erneut versuchen
-          </button>
-          <a
-            href="/"
-            className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-xl transition-colors"
-          >
-            Zur Startseite
-          </a>
-        </div>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-5 py-2.5 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium rounded-xl transition-colors"
+        >
+          Seite neu laden
+        </button>
       </div>
     </div>
   )
