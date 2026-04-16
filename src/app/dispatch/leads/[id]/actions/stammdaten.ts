@@ -56,6 +56,8 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   'ist_fahrzeughalter',
   // AAR-314: Tracking Anfrage beim Deutschen Büro Grüne Karte (Auslands-KZ)
   'gegner_versicherung_anfrage_datum',
+  // AAR-316: Kundensprache für FlowLink/Portal-Übersetzungen (de/tr/ar/ru/pl/en/other)
+  'sprache',
 ])
 
 export async function saveStammdaten(

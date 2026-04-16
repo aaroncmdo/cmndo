@@ -18,13 +18,15 @@ export async function sendFlowLinkMultiChannel(
 
   const { data: lead } = await supabase
     .from('leads')
-    .select('id, vorname, nachname, telefon, email, service_typ')
+    .select('id, vorname, nachname, telefon, email, service_typ, sprache')
     .eq('id', leadId)
     .single()
   if (!lead) return { success: false, error: 'Lead nicht gefunden' }
 
   const telefon = (telefonOverride?.trim() || lead.telefon) ?? null
   const serviceTyp = (lead.service_typ as string | null) ?? 'komplett'
+  // AAR-316: Kundensprache an den FlowLink vererben — Portal-Page liest sie.
+  const sprache = (lead.sprache as string | null) ?? 'de'
 
   const { data: flowLink, error: flowErr } = await supabase
     .from('flow_links')
@@ -32,6 +34,7 @@ export async function sendFlowLinkMultiChannel(
       lead_id: leadId,
       expires_at: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
       service_typ: serviceTyp,
+      sprache,
     })
     .select('token')
     .single()

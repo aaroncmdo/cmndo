@@ -91,6 +91,8 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'halter_geburtsdatum',
   // AAR-314: Deutsche Büro Grüne Karte — Anfrage-Datum bei Auslandskennzeichen
   'gegner_versicherung_anfrage_datum',
+  // AAR-316: Kundensprache — wird auch an flow_links.sprache weitergereicht
+  'sprache',
 ] as const
 
 // ─── 2. DEFAULT — Feldname gleich, NOT-NULL fallback ────────────────────────

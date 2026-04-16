@@ -15,6 +15,8 @@ import { useState, useTransition, useEffect, useRef } from 'react'
 // aus schadentyp abgeleitet (saveSchadentyp setzt kategorie mit, Dropdown
 // ist in der UI weg).
 import { saveHardGate, type HardGateData } from '../actions'
+// AAR-316: Sprache wird separat via saveStammdaten persistiert (nicht HardGateData)
+import { saveStammdaten } from '../actions'
 import { useDispatchPhase } from '../lib/phase-context'
 import {
   CheckCircleIcon,
@@ -61,7 +63,22 @@ type LeadFields = {
   fahrzeug_fahrbereit?: boolean | null
   schadentyp?: string | null
   fahrerflucht?: boolean | null
+  // AAR-316: Sprache des Kunden (ISO-Code)
+  sprache?: string | null
 }
+
+// AAR-316: Dropdown-Optionen — nur die 7 CHECK-Constraint-erlaubten Werte.
+// Flags sind Unicode-Regional-Indicators (rendern als Flaggen-Emoji in allen
+// aktuellen Browsern — ohne extra Asset-Load).
+const SPRACHEN = [
+  { code: 'de', flag: '🇩🇪', label: 'Deutsch' },
+  { code: 'tr', flag: '🇹🇷', label: 'Türkisch' },
+  { code: 'ar', flag: '🇸🇦', label: 'Arabisch' },
+  { code: 'ru', flag: '🇷🇺', label: 'Russisch' },
+  { code: 'pl', flag: '🇵🇱', label: 'Polnisch' },
+  { code: 'en', flag: '🇬🇧', label: 'Englisch' },
+  { code: 'other', flag: '🌐', label: 'Andere' },
+] as const
 
 export default function Phase1Qualifizierung() {
   const { lead, qualification, setPhase } = useDispatchPhase()
@@ -183,6 +200,39 @@ export default function Phase1Qualifizierung() {
             {[q1Complete, q2Complete, q3Complete].filter(Boolean).length}/3
           </span>
         )}
+      </div>
+
+      {/* AAR-316: Sprache des Kunden. Steuert später FlowLink + Portal-Übersetzungen.
+          Standard = Deutsch. Auto-Save on-change via saveStammdaten. */}
+      <div className="flex items-center gap-2 flex-wrap pb-3 border-b border-gray-100">
+        <span className="text-[10px] uppercase tracking-wider text-gray-400">
+          Sprache des Kunden
+        </span>
+        <div className="flex gap-1 flex-wrap">
+          {SPRACHEN.map((s) => {
+            const selected = (l.sprache ?? 'de') === s.code
+            return (
+              <button
+                key={s.code}
+                type="button"
+                onClick={() =>
+                  startTransition(async () => {
+                    await saveStammdaten(l.id, { sprache: s.code })
+                  })
+                }
+                className={`px-2 py-1 rounded-md text-[11px] font-medium border ${
+                  selected
+                    ? 'bg-[#4573A2] text-white border-[#4573A2]'
+                    : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                }`}
+                title={s.label}
+              >
+                <span className="mr-1">{s.flag}</span>
+                {s.label}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Q1 — Unfallhergang + Verantwortlichkeit */}
