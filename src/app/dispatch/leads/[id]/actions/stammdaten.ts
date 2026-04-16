@@ -54,6 +54,8 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   // AAR-318: Flag „Halter = Kunde" — wenn true werden die Halter-Felder aus
   // den Kundendaten übernommen (Client-side beim Toggeln, persistiert hier)
   'ist_fahrzeughalter',
+  // AAR-314: Tracking Anfrage beim Deutschen Büro Grüne Karte (Auslands-KZ)
+  'gegner_versicherung_anfrage_datum',
 ])
 
 export async function saveStammdaten(

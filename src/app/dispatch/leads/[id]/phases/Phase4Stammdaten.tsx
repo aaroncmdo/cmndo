@@ -18,6 +18,8 @@ import { useCarQuery } from '../hooks/useCarQuery'
 import Zb1UploadCard from './Zb1UploadCard'
 import { CardentityTypBButton } from '@/components/cardentity/CardentityTypBButton'
 import { requestCardentityTypBForLead } from '../actions/cardentity'
+// AAR-314: Auslandskennzeichen — Anfrage an Deutsches Büro Grüne Karte mit Reminder
+import { setGrueneKarteAngefragt } from '../actions/gruene-karte'
 import PolizeiberichtUploadCard from './PolizeiberichtUploadCard'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import VersicherungAutocomplete, { type VersicherungSelection } from '@/components/VersicherungAutocomplete'
@@ -84,6 +86,8 @@ type LeadFields = {
   unfallort_kategorie?: string | null
   fahrerflucht?: boolean | null
   auslandskennzeichen?: boolean | null
+  // AAR-314: Datum der Anfrage beim Deutschen Büro Grüne Karte (10-Tage-Wartezeit)
+  gegner_versicherung_anfrage_datum?: string | null
   schadentyp?: string | null
   parkplatz_kamera?: boolean | null
   zeugen?: boolean | null
@@ -945,6 +949,65 @@ export default function Phase4Stammdaten() {
                 )}
                 <span>{kzFlags.warnung}</span>
               </p>
+            )}
+
+            {/* AAR-314: Auslandskennzeichen — Step-by-Step Anleitung für das
+                Deutsche Büro Grüne Karte + 10-Tage-Reminder-Task. */}
+            {kzFlags.auslandskennzeichen && (
+              <div className="mt-2 rounded-md bg-amber-50 border border-amber-200 p-3 space-y-2">
+                <p className="text-[11px] font-semibold text-amber-900 flex items-center gap-1">
+                  <GlobeIcon className="w-3 h-3" />
+                  Auslandskennzeichen — DE-Eintrittsversicherung ermitteln
+                </p>
+                <ol className="text-[10px] text-amber-900 list-decimal list-inside space-y-0.5">
+                  <li>
+                    <a
+                      href="https://www.deutsches-buero-gruene-karte.de/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline font-medium text-amber-900 hover:text-amber-700"
+                    >
+                      deutsches-buero-gruene-karte.de
+                    </a>{' '}
+                    öffnen
+                  </li>
+                  <li>Gegner-Kennzeichen + Unfalldatum im Formular eingeben</li>
+                  <li>~10 Tage warten — E-Mail mit DE-Eintrittsversicherung folgt</li>
+                  <li>Eingegangene Versicherungsdaten im Fall unter „Gegner" hinterlegen</li>
+                </ol>
+
+                {l.gegner_versicherung_anfrage_datum ? (
+                  <div className="text-[11px] text-emerald-800 bg-white border border-emerald-200 rounded px-2 py-1.5">
+                    ✓ Anfrage gesendet am{' '}
+                    <strong>
+                      {new Date(l.gegner_versicherung_anfrage_datum).toLocaleDateString(
+                        'de-DE',
+                      )}
+                    </strong>{' '}
+                    — KB-Reminder wurde für{' '}
+                    <strong>
+                      {new Date(
+                        new Date(l.gegner_versicherung_anfrage_datum).getTime() +
+                          10 * 24 * 60 * 60 * 1000,
+                      ).toLocaleDateString('de-DE')}
+                    </strong>{' '}
+                    gesetzt.
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      startTransition(async () => {
+                        const r = await setGrueneKarteAngefragt(leadId)
+                        if (!r.success) alert(r.error ?? 'Fehler beim Setzen des Reminders')
+                      })
+                    }
+                    className="px-3 py-1.5 rounded-md bg-[#4573A2] text-white text-[11px] font-medium hover:bg-[#0D1B3E]"
+                  >
+                    Anfrage gesendet — 10-Tage-Reminder setzen
+                  </button>
+                )}
+              </div>
             )}
             {/* AAR-177 Fix #5: Fahrerflucht-Hinweis mit konkreten Handlungs-
                 Schritten für den MA — statt nur „Fahrerflucht!"-Warnung. */}

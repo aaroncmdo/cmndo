@@ -89,6 +89,8 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'fahrzeug_fahrbereit',
   // AAR-318: Halter-Geburtsdatum (Vor-/Nachname/Adresse sind oben schon)
   'halter_geburtsdatum',
+  // AAR-314: Deutsche Büro Grüne Karte — Anfrage-Datum bei Auslandskennzeichen
+  'gegner_versicherung_anfrage_datum',
 ] as const
 
 // ─── 2. DEFAULT — Feldname gleich, NOT-NULL fallback ────────────────────────
