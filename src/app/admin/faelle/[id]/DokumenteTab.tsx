@@ -17,6 +17,11 @@ import {
   DownloadIcon, EyeIcon, SearchIcon, Loader2Icon, FileCheckIcon,
   BellIcon, ClipboardCheckIcon,
 } from 'lucide-react'
+// AAR-327: Wiederverwendbare Dokument-Anforderungs-UI (Modal + Liste)
+import AnforderungenListe, {
+  type AnforderungsItem,
+} from '@/components/dokumente/AnforderungenListe'
+import type { AnforderbarerSlot } from '@/components/dokumente/AnforderungsModal'
 
 type Pflichtdok = {
   id: string
@@ -115,12 +120,21 @@ export default function DokumenteTab({
   dokumente,
   fallAS,
   qcCheckliste,
+  anforderbareSlots,
+  anforderungenVonMir,
+  rolleLabel,
 }: {
   fallId: string
   pflichtdokumente: Pflichtdok[]
   dokumente: Dokument[]
   fallAS: FallAS
   qcCheckliste: QcCheckliste | null
+  // AAR-327: Slot-Liste, die die aktuelle Rolle anfordern darf (aus Katalog)
+  anforderbareSlots: AnforderbarerSlot[]
+  // AAR-327: Bereits gestellte Anforderungen der aktuellen Rolle
+  anforderungenVonMir: AnforderungsItem[]
+  // AAR-327: Anzeige-Label der Rolle im Modal ("Claimondo", "Kanzlei", …)
+  rolleLabel: string
 }) {
   const router = useRouter()
   const [uploading, setUploading] = useState<string | null>(null)
@@ -364,6 +378,14 @@ export default function DokumenteTab({
           )}
         </div>
       </div>
+
+      {/* AAR-327: Meine Anforderungen — Modal-Trigger + Liste bestehender Anforderungen */}
+      <AnforderungenListe
+        fallId={fallId}
+        rolleLabel={rolleLabel}
+        slotsVerfuegbar={anforderbareSlots}
+        anforderungen={anforderungenVonMir}
+      />
 
       {/* Alle Dateien */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">

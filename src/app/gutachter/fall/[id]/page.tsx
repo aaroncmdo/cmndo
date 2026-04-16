@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect, notFound } from 'next/navigation'
 import FallDetailClient from './FallDetailClient'
+// AAR-327: Katalog-Slots die der SV anfordern darf + bestehende Anforderungen
+import { getAlleSlots } from '@/lib/dokumente/katalog'
 
 export default async function GutachterFallPage({
   params,
@@ -54,8 +56,11 @@ export default async function GutachterFallPage({
       .order('created_at'),
     supabase
       .from('pflichtdokumente')
-      .select('id, dokument_typ, status, pflicht, quelle, dokument_url, hochgeladen_am, created_at')
+      // AAR-327: zusätzlich angefordert_* + begruendung + frist für
+      // AnforderungenListe (SV sieht seine eigenen Anforderungen).
+      .select('id, dokument_typ, status, pflicht, quelle, dokument_url, hochgeladen_am, created_at, angefordert_von_rolle, angefordert_von_user_id, angefordert_am, begruendung, frist')
       .eq('fall_id', id)
+      .order('sort_order', { ascending: true })
       .order('created_at'),
     supabase
       .from('parteien')
@@ -144,12 +149,49 @@ export default async function GutachterFallPage({
     .limit(1)
     .maybeSingle()
 
+  // AAR-327: Katalog-Slots für Dokument-Anforderung (rolle=sachverstaendiger).
+  // Cachelayer: getAlleSlots dedupliziert intern (TTL 5 min), daher ist der
+  // zweite Call praktisch kostenlos.
+  const katalogAlleSlots = await getAlleSlots(supabase)
+  const anforderbareSlots = katalogAlleSlots
+    .filter((s) => s.anforderbar_von.includes('sachverstaendiger'))
+    .map((s) => ({
+      slot_id: s.slot_id,
+      label: s.label,
+      beschreibung: s.beschreibung,
+      kategorie: s.kategorie as string,
+    }))
+  const katalogLabels = new Map(katalogAlleSlots.map((s) => [s.slot_id, s.label]))
+
+  type PflichtRow = {
+    id: string
+    dokument_typ: string
+    status: string
+    frist: string | null
+    begruendung: string | null
+    angefordert_am: string | null
+    angefordert_von_user_id: string | null
+  }
+  const anforderungenVonMir = ((pflichtdokumente ?? []) as unknown as PflichtRow[])
+    .filter((r) => r.angefordert_von_user_id === user.id)
+    .map((r) => ({
+      id: r.id,
+      slot_id: r.dokument_typ,
+      label: katalogLabels.get(r.dokument_typ) ?? r.dokument_typ,
+      status: r.status,
+      frist: r.frist,
+      begruendung: r.begruendung,
+      angefordert_am: r.angefordert_am,
+    }))
+
   return (
     <FallDetailClient
       fall={fallWithAbrechnung}
       lead={lead}
       dokumente={dokumente ?? []}
       pflichtdokumente={(pflichtdokumente ?? []) as unknown as Parameters<typeof FallDetailClient>[0]['pflichtdokumente']}
+      anforderbareSlots={anforderbareSlots}
+      anforderungenVonMir={anforderungenVonMir}
       parteien={parteien ?? []}
       timeline={(timeline ?? []) as unknown as Parameters<typeof FallDetailClient>[0]['timeline']}
       nachrichten={nachrichten ?? []}

@@ -7,6 +7,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import FallakteShell from './FallakteShell'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
+// AAR-327: Katalog-driven Slot-Liste für „Dokument anfordern"-Modal
+import { getAlleSlots } from '@/lib/dokumente/katalog'
 
 export default async function FallaktePage({
   params,
@@ -53,8 +55,12 @@ export default async function FallaktePage({
       .order('created_at', { ascending: false }),
     supabase
       .from('pflichtdokumente')
-      .select('id, dokument_typ, status, pflicht, quelle, dokument_url, hochgeladen_am, created_at')
+      // AAR-327: zusätzlich angefordert_* + begruendung + frist für
+      // AnforderungenListe (Filter auf angefordert_von_user_id = current
+      // User erfolgt client-side, damit bestehende Renderer gleich bleiben).
+      .select('id, dokument_typ, status, pflicht, quelle, dokument_url, hochgeladen_am, created_at, angefordert_von_rolle, angefordert_von_user_id, angefordert_am, begruendung, frist')
       .eq('fall_id', id)
+      .order('sort_order', { ascending: true })
       .order('created_at'),
     // AAR-170: QC-Checkliste für Dokumente-Tab-Integration
     supabase
@@ -96,6 +102,64 @@ export default async function FallaktePage({
       : null
     sv = { id: raw.id as string, paket: raw.paket as string, profile: profileNormalized }
   }
+
+  // AAR-327: Katalog-Slots die die aktuelle Rolle anfordern darf, plus die
+  // Anforderungen die DIESER User bereits gestellt hat. Die Liste wird
+  // client-side im DokumenteTab gerendert; Rolle-Check passiert zusätzlich
+  // serverseitig in dokumentAnfordern().
+  // FallakteRolle kennt 'admin' | 'kundenbetreuer' | 'sachverstaendiger' |
+  // 'kunde' | 'dispatch'. Nur die ersten drei dürfen anfordern; Kanzlei hat
+  // kein Fallakten-Portal (Memory: LexDrive-Architektur) — die Rolle wird
+  // trotzdem vom Server akzeptiert für einen späteren Kanzlei-Bereich.
+  const rolleForAnforderung: 'admin' | 'kundenbetreuer' | 'sachverstaendiger' | null =
+    userRolle === 'admin' || userRolle === 'kundenbetreuer' || userRolle === 'sachverstaendiger'
+      ? userRolle
+      : null
+  const anforderbareSlots = rolleForAnforderung
+    ? (await getAlleSlots(supabase))
+        .filter((s) => s.anforderbar_von.includes(rolleForAnforderung))
+        .map((s) => ({
+          slot_id: s.slot_id,
+          label: s.label,
+          beschreibung: s.beschreibung,
+          kategorie: s.kategorie as string,
+        }))
+    : []
+
+  // Katalog-Labels für die Anforderungs-Liste (slot_id → label Mapping)
+  const katalogLabels = new Map<string, string>()
+  for (const s of await getAlleSlots(supabase)) katalogLabels.set(s.slot_id, s.label)
+
+  // Rohdaten aus pflichtdokumente filtern: nur eigene Anforderungen
+  type PflichtRow = {
+    id: string
+    dokument_typ: string
+    status: string
+    frist: string | null
+    begruendung: string | null
+    angefordert_am: string | null
+    angefordert_von_user_id: string | null
+  }
+  const pflichtRows = (pflichtdokumente ?? []) as unknown as PflichtRow[]
+  const anforderungenVonMir = pflichtRows
+    .filter((r) => r.angefordert_von_user_id === user.id)
+    .map((r) => ({
+      id: r.id,
+      slot_id: r.dokument_typ,
+      label: katalogLabels.get(r.dokument_typ) ?? r.dokument_typ,
+      status: r.status,
+      frist: r.frist,
+      begruendung: r.begruendung,
+      angefordert_am: r.angefordert_am,
+    }))
+
+  const rolleLabelForModal: Record<string, string> = {
+    admin: 'Claimondo',
+    kundenbetreuer: 'Kundenbetreuer',
+    sachverstaendiger: 'Gutachter',
+    kanzlei: 'Kanzlei',
+  }
+  const rolleLabel = rolleLabelForModal[userRolle] ?? 'Claimondo'
 
   // AAR-103 + W2-Audit-Fix: Banner für andere offene Fälle desselben Kunden.
   // War im alten page.tsx oberhalb des Monolithen — beim Shell-Refactor
@@ -157,6 +221,10 @@ export default async function FallaktePage({
           },
           // AAR-170: QC-Checkliste direkt im Dokumente-Tab (vorher im Monolithen)
           qcCheckliste: (qcCheckliste ?? null) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['qcCheckliste'],
+          // AAR-327: Dokument-Anforderungs-UI
+          anforderbareSlots,
+          anforderungenVonMir,
+          rolleLabel,
         }}
       />
     </>

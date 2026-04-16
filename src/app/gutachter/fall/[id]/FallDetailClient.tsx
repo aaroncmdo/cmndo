@@ -28,6 +28,11 @@ import { AbrechnungsartCard } from './_components/AbrechnungsartCard'
 import FallakteVollClient from './FallakteVollClient'
 import type { GutachterTask } from '@/hooks/useGutachterTasks'
 import type { SvAbrechnungInput } from '@/lib/gutachter/abrechnung'
+// AAR-327: Dokument-Anforderungs-UI (Modal + Liste, wiederverwendbar)
+import AnforderungenListe, {
+  type AnforderungsItem,
+} from '@/components/dokumente/AnforderungenListe'
+import type { AnforderbarerSlot } from '@/components/dokumente/AnforderungsModal'
 
 type Lead = {
   vorname: string | null
@@ -94,6 +99,10 @@ type Props = {
   tasks?: GutachterTask[]
   /** AAR-293: SV-Abrechnung (Honorar/Lead/Netto) für Phase 6.x Card */
   abrechnung?: SvAbrechnungInput | null
+  /** AAR-327: Katalog-Slots die der SV anfordern darf (serverseitig gefiltert) */
+  anforderbareSlots?: AnforderbarerSlot[]
+  /** AAR-327: Anforderungen die der eingeloggte SV bereits gestellt hat */
+  anforderungenVonMir?: AnforderungsItem[]
 }
 
 export default function FallDetailClient(props: Props) {
@@ -256,6 +265,16 @@ export default function FallDetailClient(props: Props) {
             pflichtdokumente={pflichtdokumente}
             totalDokumente={sichtbarDokumente.length + (sichtbarFallDokumente?.length ?? 0)}
           />
+          {/* AAR-327: SV kann gezielt Dokumente beim Kunden anfordern
+              (z. B. Reparaturrechnungen-Vorschäden, zusätzliche Schadensfotos) */}
+          {props.anforderbareSlots && props.anforderbareSlots.length > 0 && (
+            <AnforderungenListe
+              fallId={fall.id as string}
+              rolleLabel="Gutachter"
+              slotsVerfuegbar={props.anforderbareSlots}
+              anforderungen={props.anforderungenVonMir ?? []}
+            />
+          )}
           <TimelineVorschauCard events={timeline} />
           {/* AAR-293 wird hier Abrechnungs-Block + Kanzlei-Stepper rendern */}
         </section>
