@@ -112,9 +112,15 @@ export default function DispatchShell({
                 {lead.vorname ?? ''} {lead.nachname ?? ''}
               </h1>
               <div className="flex items-center gap-2 mt-1 flex-wrap">
-                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${phaseColor}`}>
-                  {phaseLabel}
-                </span>
+                {/* AAR-276: Phase-Badge nur zeigen wenn FlowLink noch nicht
+                    versendet ist — sobald der FlowStufe-Badge greift, sagt
+                    er das Gleiche granularer (Gesendet/Geöffnet/SA/Vollmacht).
+                    Phase-Label „Flow gesendet" wäre dann doppelt. */}
+                {!flowLinkGesendet && (
+                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${phaseColor}`}>
+                    {phaseLabel}
+                  </span>
+                )}
                 <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${flowStufeBadge.cls}`}>
                   {flowStufeBadge.label}
                 </span>
