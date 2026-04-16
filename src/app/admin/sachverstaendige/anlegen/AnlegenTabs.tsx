@@ -1,18 +1,18 @@
 'use client'
 
 import { useState } from 'react'
-import { UserIcon, Building2Icon, UserPlusIcon, GraduationCapIcon, UsersIcon } from 'lucide-react'
+import { UserIcon, Building2Icon, GraduationCapIcon, UsersIcon } from 'lucide-react'
 import SoloAnlegenWizard from './SoloAnlegenWizard'
 import BueroAnlegenWizard from './BueroAnlegenWizard'
-import SubSvHinzufuegenForm from './SubSvHinzufuegenForm'
 import AkademieAnlegenWizard from './AkademieAnlegenWizard'
 import Link from 'next/link'
 
-// KFZ-152 Phase 2+3: Tab-Switcher mit allen 5 Modi aktiviert.
-// Community wird ueber /admin/communities verwaltet (eigenes Listing) statt
-// als Tab hier — Admin klickt 'Community' Tab und wird verlinkt.
+// KFZ-152 Phase 2+3: Tab-Switcher mit allen Onboarding-Modi.
+// AAR-235: Sub-SV-Tab entfernt — Sub-SVs werden nicht im Onboarding-Flow
+// angelegt, sondern direkt aus der Büro/Akademie/Community-Detailseite
+// als "Mitarbeiter hinzufügen". Community bleibt als Verlinkungs-Tab.
 
-type TabKey = 'solo' | 'buero' | 'sub' | 'akademie' | 'community'
+type TabKey = 'solo' | 'buero' | 'akademie' | 'community'
 
 // AAR-198: Typ-Farben konsistent mit KarteHubClient TYP_COLORS:
 //   kfz-gutachter → #3b82f6 (blau) — Solo-SV + Sub-SV (beides kfz-gutachter)
@@ -24,7 +24,6 @@ type TabKey = 'solo' | 'buero' | 'sub' | 'akademie' | 'community'
 const TAB_COLORS: Record<TabKey, { active: string; idle: string }> = {
   solo:      { active: 'bg-[#3b82f6] text-white border-[#3b82f6]', idle: 'bg-[#3b82f6]/5 text-[#3b82f6] border-[#3b82f6]/20 hover:bg-[#3b82f6]/10' },
   buero:     { active: 'bg-[#a855f7] text-white border-[#a855f7]', idle: 'bg-[#a855f7]/5 text-[#a855f7] border-[#a855f7]/20 hover:bg-[#a855f7]/10' },
-  sub:       { active: 'bg-[#3b82f6] text-white border-[#3b82f6]', idle: 'bg-[#3b82f6]/5 text-[#3b82f6] border-[#3b82f6]/20 hover:bg-[#3b82f6]/10' },
   akademie:  { active: 'bg-[#22c55e] text-white border-[#22c55e]', idle: 'bg-[#22c55e]/5 text-[#22c55e] border-[#22c55e]/20 hover:bg-[#22c55e]/10' },
   community: { active: 'bg-[#0ea5e9] text-white border-[#0ea5e9]', idle: 'bg-[#0ea5e9]/5 text-[#0ea5e9] border-[#0ea5e9]/20 hover:bg-[#0ea5e9]/10' },
 }
@@ -32,16 +31,12 @@ const TAB_COLORS: Record<TabKey, { active: string; idle: string }> = {
 const TABS: { key: TabKey; label: string; icon: typeof UserIcon; disabled: boolean; disabledHint?: string }[] = [
   { key: 'solo', label: 'Solo-SV', icon: UserIcon, disabled: false },
   { key: 'buero', label: 'Büro', icon: Building2Icon, disabled: false },
-  { key: 'sub', label: 'Sub-SV hinzufügen', icon: UserPlusIcon, disabled: false },
   { key: 'akademie', label: 'Akademie', icon: GraduationCapIcon, disabled: false },
   { key: 'community', label: 'Community', icon: UsersIcon, disabled: false },
 ]
 
-export default function AnlegenTabs({ organisationen, onSuccess }: {
-  organisationen: Array<{ id: string; name: string }>
-  // ARCH-1 POLISH Befund 4: optionaler Callback fuer den Drawer-Use-Case.
-  // Wenn gesetzt, ruft der jeweilige Wizard nach erfolgreichem Anlegen
-  // diesen Callback auf — der Drawer kann dann zumachen + Toast feuern.
+export default function AnlegenTabs({ onSuccess }: {
+  // AAR-235: organisationen-Prop entfernt (wurde nur für Sub-SV gebraucht)
   onSuccess?: (info: { name: string; email: string }) => void
 }) {
   const [active, setActive] = useState<TabKey>('solo')
@@ -82,7 +77,6 @@ export default function AnlegenTabs({ organisationen, onSuccess }: {
       {/* Aktiver Tab */}
       {active === 'solo' && <SoloAnlegenWizard onSuccess={onSuccess} />}
       {active === 'buero' && <BueroAnlegenWizard onSuccess={onSuccess} />}
-      {active === 'sub' && <SubSvHinzufuegenForm organisationen={organisationen} onSuccess={onSuccess} />}
       {active === 'akademie' && <AkademieAnlegenWizard onSuccess={onSuccess} />}
       {active === 'community' && (
         <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center">

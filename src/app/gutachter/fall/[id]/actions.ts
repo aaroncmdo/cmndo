@@ -173,18 +173,24 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
       monat,
     })
 
-    // Guthaben und Faelle-Zaehler aktualisieren
+    // AAR-239: Guthaben-Spalte heißt werbebudget_guthaben_netto (nicht
+    // 'guthaben') — der SELECT oben liest korrekt, aber das UPDATE
+    // schrieb auf die nicht-existierende 'guthaben'-Spalte → silent fail,
+    // SV-Abrechnung zeigte immer Ursprungs-Guthaben.
     await supabase
       .from('sachverstaendige')
       .update({
-        guthaben: guthabenNachher,
+        werbebudget_guthaben_netto: guthabenNachher,
         paket_faelle_genutzt: (svData.paket_faelle_genutzt ?? 0) + 1,
       })
       .eq('id', sv.id)
   }
 
   // OCR-Auslesung des Gutachten-PDFs triggern
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  // AAR-240: Production-Fallback cmndo.vercel.app statt localhost — in
+  // Serverless-Functions ohne NEXT_PUBLIC_APP_URL würde localhost einen
+  // ECONNREFUSED geben.
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'
   fetch(`${baseUrl}/api/ocr-gutachten`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -354,7 +360,10 @@ export async function saveFinVinGutachter(fallId: string, finVin: string) {
   })
 
   // Trigger CarDentity
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  // AAR-240: Production-Fallback cmndo.vercel.app statt localhost — in
+  // Serverless-Functions ohne NEXT_PUBLIC_APP_URL würde localhost einen
+  // ECONNREFUSED geben.
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'
   fetch(`${baseUrl}/api/cardentity/typ-a`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -523,11 +532,22 @@ export async function declineTermin(fallId: string, grund: string) {
     })
   } catch { /* */ }
 
-  // 6. Kapazität zurückgeben
+  // 6. Kapazität zurückgeben — AAR-240: increment_field RPC existiert nicht
+  // in der DB. Direktes SELECT + UPDATE mit -1 statt non-existing RPC.
   try {
-    await supabase.rpc('increment_field', { row_id: sv.id, table_name: 'sachverstaendige', field_name: 'paket_faelle_genutzt', amount: -1 })
-  } catch {
-    // RPC may not exist, ignore
+    const { data: svForDecrement } = await supabase
+      .from('sachverstaendige')
+      .select('paket_faelle_genutzt')
+      .eq('id', sv.id)
+      .single()
+    const currentValue = Number(svForDecrement?.paket_faelle_genutzt ?? 0)
+    const newValue = Math.max(0, currentValue - 1)
+    await supabase
+      .from('sachverstaendige')
+      .update({ paket_faelle_genutzt: newValue })
+      .eq('id', sv.id)
+  } catch (err) {
+    console.error('[AAR-240] Kapazität-Decrement fehlgeschlagen:', err)
   }
 
   revalidatePath(`/gutachter/fall/${fallId}`)

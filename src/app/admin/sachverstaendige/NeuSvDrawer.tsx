@@ -3,8 +3,8 @@
 // ARCH-1 POLISH Befund 4: Slide-out Drawer fuer "+ Neu" auf der
 // /admin/sachverstaendige Seite. Importiert die existing AnlegenTabs
 // (NICHT neu bauen) und fired Toast + router.refresh() bei Success.
+// AAR-235: Büro-Orgs-Lazy-Load entfernt (Sub-SV-Tab gibt es nicht mehr).
 
-import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
@@ -15,7 +15,6 @@ import {
   SheetDescription,
 } from '@/components/ui/sheet'
 import AnlegenTabs from './anlegen/AnlegenTabs'
-import { listBueroOrganisationen } from './anlegen/actions'
 
 export default function NeuSvDrawer({
   open,
@@ -25,32 +24,15 @@ export default function NeuSvDrawer({
   onOpenChange: (open: boolean) => void
 }) {
   const router = useRouter()
-  const [organisationen, setOrganisationen] = useState<Array<{ id: string; name: string }>>([])
-  const [loaded, setLoaded] = useState(false)
-
-  // Lazy-load der Buero-Orgs nur wenn der Drawer wirklich geoeffnet wird.
-  useEffect(() => {
-    if (!open || loaded) return
-    let cancelled = false
-    listBueroOrganisationen()
-      .then(orgs => {
-        if (!cancelled) {
-          setOrganisationen(orgs)
-          setLoaded(true)
-        }
-      })
-      .catch(err => {
-        console.error('[NeuSvDrawer] listBueroOrganisationen failed:', err)
-        if (!cancelled) setLoaded(true)
-      })
-    return () => { cancelled = true }
-  }, [open, loaded])
 
   function handleSuccess(info: { name: string; email: string }) {
+    // AAR-237: Drawer NICHT automatisch schließen — sonst sieht der User
+    // den Erfolgs-Screen aus AAR-205 nicht. Nur Toast + Liste im Hintergrund
+    // refreshen; der User schließt den Drawer selbst via "Zur SV-Liste" oder
+    // "Weiteren SV anlegen".
     toast.success(`SV ${info.name} wurde angelegt`, {
       description: `Welcome-Mail an ${info.email} versendet.`,
     })
-    onOpenChange(false)
     router.refresh()
   }
 
@@ -72,13 +54,7 @@ export default function NeuSvDrawer({
         </SheetHeader>
 
         <div className="px-4 pb-6">
-          {loaded ? (
-            <AnlegenTabs organisationen={organisationen} onSuccess={handleSuccess} />
-          ) : (
-            <div className="flex items-center justify-center py-20">
-              <div className="w-6 h-6 border-2 border-[#4573A2] border-t-transparent rounded-full animate-spin" />
-            </div>
-          )}
+          <AnlegenTabs onSuccess={handleSuccess} />
         </div>
       </SheetContent>
     </Sheet>

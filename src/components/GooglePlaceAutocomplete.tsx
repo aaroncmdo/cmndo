@@ -82,6 +82,14 @@ export default function GooglePlaceAutocomplete({
   const onSelectRef = useRef(onSelect)
   onSelectRef.current = onSelect
 
+  // AAR-237: Sync mit defaultValue wenn es sich ändert (z.B. Parent-State-Reset).
+  // Ohne diesen Sync würde der Autocomplete-Value stale bleiben wenn der
+  // Parent das Feld programmatisch ändert.
+  useEffect(() => {
+    if (defaultValue !== undefined && defaultValue !== value) setValue(defaultValue)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultValue])
+
   useEffect(() => {
     let cancelled = false
 
@@ -132,6 +140,11 @@ export default function GooglePlaceAutocomplete({
       type="text"
       value={value}
       onChange={e => setValue(e.target.value)}
+      // AAR-237: Enter im Autocomplete-Feld würde sonst das umgebende
+      // Formular submitten und die Wizard-State resetten. Enter
+      // abfangen — Google-Autocomplete-Auswahl läuft nicht über Enter
+      // sondern über Click auf die Suggestion.
+      onKeyDown={e => { if (e.key === 'Enter') e.preventDefault() }}
       placeholder={placeholder ?? 'Adresse eingeben...'}
       className={className ?? defaultCls}
     />

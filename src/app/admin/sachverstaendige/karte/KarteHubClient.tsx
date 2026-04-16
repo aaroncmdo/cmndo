@@ -479,7 +479,6 @@ export default function KarteHubClient({
           setTypFilter={setTypFilter}
           selectedId={selected?.kind === 'sv' ? selected.item.id : null}
           onSelect={panToSv}
-          onOpenDrawer={() => setDrawerOpen(true)}
         />
 
         <div ref={mapContainerRef} className="flex-1 min-h-0" />
@@ -510,7 +509,6 @@ function SvSidebar({
   setTypFilter,
   selectedId,
   onSelect,
-  onOpenDrawer,
 }: {
   svs: SvMarker[]
   filteredSvs: SvMarker[]
@@ -522,7 +520,6 @@ function SvSidebar({
   setTypFilter: (v: string | null) => void
   selectedId: string | null
   onSelect: (sv: SvMarker) => void
-  onOpenDrawer: () => void
 }) {
   return (
     <aside className="w-72 shrink-0 border-r border-gray-200 bg-[#f8f9fb] flex flex-col overflow-hidden">
@@ -531,15 +528,8 @@ function SvSidebar({
           <h2 className="text-sm font-semibold text-gray-900">Sachverständige</h2>
           <p className="text-[10px] text-gray-500 mt-0.5">{filteredSvs.length} von {svs.length}</p>
         </div>
-        {/* AAR-151: „+ Neuer SV"-Button prominent in der Sidebar oben rechts */}
-        <button
-          type="button"
-          onClick={onOpenDrawer}
-          className="px-2 py-1 rounded-md bg-[#4573A2] text-white text-[11px] font-medium hover:bg-[#0D1B3E] flex items-center gap-1 shrink-0"
-          title="Neuen SV onboarden"
-        >
-          <UserPlusIcon className="w-3 h-3" /> Neu
-        </button>
+        {/* AAR-236: Sidebar-Neu-Button entfernt — war Duplikat zum
+            Toolbar-"+ Neuer SV"-Button oben. */}
       </div>
       {/* Suche */}
       <div className="px-4 pb-2">

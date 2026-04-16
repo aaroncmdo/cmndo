@@ -29,21 +29,31 @@ export function paketKontingent(paket: AnlegePaket, override?: number): number {
 // Quelle der Wahrheit: sachverstaendige.qualifikationen_neu / spezifikationen /
 // schadenarten (TEXT[]). Die alte qualifikationen-Spalte bleibt als Fallback.
 
-// AAR-204: QUALIFIKATIONEN ausgedünnt — die 7 Basics (Haftpflicht,
-// Wertgutachten, Beweissicherung, Reparaturkosten, Leasingrücknahme,
-// Restwert, Wiederbeschaffung) hat JEDER SV. Nur echte Spezialisierungen
-// bleiben im Wizard-UI. DB-Spalte qualifikationen_neu akzeptiert weiterhin
-// freie Werte — falls ein Altbestand diese Keys hat, bleiben sie erhalten.
+// AAR-238: Qualifikationen = berufliche Titel / Mitgliedschaften.
+// Vorher fälschlich: Fachgebiete wie Gerichtsgutachten, Oldtimer-Bewertung
+// etc. — diese sind Spezialisierungen und gehören nach SPEZIFIKATIONEN.
+// DB-Spalte qualifikationen_neu akzeptiert freie Werte — Altbestand mit
+// alten Keys bleibt erhalten.
 export const QUALIFIKATIONEN = [
-  'Bewertungen',
-  'Schiedsgutachten',
+  'Karosseriebaumeister',
+  'Kfz-Meister',
+  'B.Eng.',
+  'M.Eng.',
+  'Dipl.-Ing.',
+  'BVSK-Mitglied',
+  'IHK-zertifiziert',
+  'Öffentlich bestellt und vereidigt',
+] as const
+
+// AAR-238: Fachliche Spezialisierungen + Fahrzeug-Arten zusammengeführt.
+// Die Fachgebiete (Gerichtsgutachten, Oldtimer-Bewertung, Unfallrekonstruktion)
+// kommen von den alten QUALIFIKATIONEN hierher.
+export const SPEZIFIKATIONEN = [
+  // Fachliche Spezialisierungen
   'Gerichtsgutachten',
   'Oldtimer-Bewertung',
   'Unfallrekonstruktion',
-  'Brandursachenermittlung',
-] as const
-
-export const SPEZIFIKATIONEN = [
+  // Fahrzeug-Arten
   'PKW',
   'LKW',
   'Transporter',
