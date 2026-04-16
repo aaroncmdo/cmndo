@@ -203,9 +203,11 @@ export default async function GutachterWillkommenPage({
   // URL-Param ?step=stripe ueberschreibt den initial-Step (z.B. nach Stripe-Cancel)
   // KFZ-156: ?stripe_success=1 nach Stripe-Embed-Return → direkt auf Step 4 (Logo)
   const params = await searchParams
+  // AAR-233: Step-Reihenfolge geändert (Logo=1, Vertrag=2, Stripe=3).
+  // ?step=stripe → Index 3 (war 2); ?stripe_success → fertig, kein Override
+  // (portal_zugang_freigeschaltet wird true → Redirect zum Dashboard).
   let stepOverride: number | undefined
-  if (params?.step === 'stripe') stepOverride = 2
-  if (params?.stripe_success === '1') stepOverride = 3
+  if (params?.step === 'stripe') stepOverride = 3
 
   // KFZ-156: Stripe Publishable Key kommt aus dem Server (kein
   // NEXT_PUBLIC_-Var, da Vercel ihn nur als STRIPE_PUBLISHABLE_KEY hat).

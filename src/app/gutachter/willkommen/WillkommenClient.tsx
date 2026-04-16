@@ -106,11 +106,13 @@ type Organisation = {
 
 // KFZ-157: Solo + Buero-Inhaber haben jetzt 4 Steps (Konditionen → Vertrag
 // → Anzahlung → Logo). Sub-Mitarbeiter behalten ihren 2-Step Light-Flow.
+// AAR-233: Logo-Upload von Step 4 auf Step 2 verschoben — SV sieht sein
+// Branding früh im Prozess, Vertrag + Zahlung in seinen Farben.
 const STEPS_4: { key: string; label: string; icon: typeof PackageIcon }[] = [
   { key: 'konditionen', label: 'Konditionen', icon: PackageIcon },
+  { key: 'branding', label: 'Logo', icon: ImageIcon },
   { key: 'vertrag', label: 'Vertrag', icon: FileSignatureIcon },
   { key: 'anzahlung', label: 'Anzahlung', icon: CreditCardIcon },
-  { key: 'branding', label: 'Logo', icon: ImageIcon },
 ]
 
 const STEPS_2_SUB: { key: string; label: string; icon: typeof PackageIcon }[] = [
@@ -188,21 +190,28 @@ export default function WillkommenClient({
   // - KFZ-157: portal_zugang_freigeschaltet aber kein Logo → Step 3 (Branding)
   // - Sub-Mitarbeiter: bleibt initial bei Step 0 (falls neu) oder landet
   //   ueber den separaten warteAufInhaber-Branch auf der Warte-Page.
+  // AAR-233: Step-Reihenfolge: 0=Konditionen, 1=Logo, 2=Vertrag, 3=Stripe
   let initialStep = 0
   if (r === 'solo' && sv.vertrag_unterschrieben) {
-    initialStep = 2
+    initialStep = 3 // Vertrag durch → Stripe (Index 3)
   } else if (r === 'buero_inhaber') {
     const orgStatus = organisation?.onboarding_status ?? ''
     if (orgStatus === 'vertrag_unterzeichnet' || orgStatus === 'anzahlung_offen') {
-      initialStep = 2
+      initialStep = 3 // → Stripe
     }
   }
+  // Logo noch nicht hochgeladen → Step 1 (Branding)
   if (r !== 'sub_mitarbeiter' && sv.portal_zugang_freigeschaltet && !sv.logo_url) {
-    initialStep = 3
+    initialStep = 1
   }
   if (typeof stepOverride === 'number') initialStep = stepOverride
 
   const [step, setStep] = useState(initialStep)
+  // AAR-233: Key-basierter Step-Navigation-Helper.
+  const goToStep = (key: string) => {
+    const idx = STEPS.findIndex(s => s.key === key)
+    if (idx >= 0) setStep(idx)
+  }
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   // AAR-213: Overlay-State für Lead-Preis-Tabelle + ROI-Rechner
@@ -285,7 +294,7 @@ export default function WillkommenClient({
     setSaving(false)
 
     if (!result.success) { setError(result.error ?? 'Vertrag fehlgeschlagen'); return }
-    setStep(2)
+    goToStep('anzahlung')
   }
 
   // KFZ-156: handleSoloCheckout entfaellt — der Embedded Checkout uebernimmt
@@ -316,7 +325,7 @@ export default function WillkommenClient({
     setSaving(false)
 
     if (!result.success) { setError(result.error ?? 'Vertrag fehlgeschlagen'); return }
-    setStep(2)
+    goToStep('anzahlung')
   }
 
   // KFZ-156: handleInhaberCheckout entfaellt ebenfalls — Embedded Checkout
@@ -393,7 +402,10 @@ export default function WillkommenClient({
   // BUG-98 Folge-Cleanup: Andere Steps von max-w-2xl auf max-w-4xl
   // angehoben — der Wizard war auf 1920px Desktop / Tablet quer zu klein.
   // 4xl (~896px) bleibt für Forms gut lesbar, nutzt aber Desktop ordentlich aus.
-  const wrapperWidth = step === 2 && r !== 'sub_mitarbeiter' ? 'max-w-5xl' : 'max-w-4xl'
+  // AAR-233: Key-basierter Step-Content statt Index — unabhängig von
+  // Reihenfolge-Changes in STEPS_4.
+  const currentKey = STEPS[step]?.key ?? ''
+  const wrapperWidth = currentKey === 'anzahlung' && r !== 'sub_mitarbeiter' ? 'max-w-5xl' : 'max-w-4xl'
 
   return (
     <div className="h-full overflow-y-auto bg-[#f8f9fb] flex items-start justify-center px-4 py-10">
@@ -460,7 +472,7 @@ export default function WillkommenClient({
           {/* ═══════════════════════════════════════════════════════════════
               SCHRITT 0: Konditionen
              ═══════════════════════════════════════════════════════════════ */}
-          {step === 0 && r === 'solo' && (
+          {currentKey === 'konditionen' && r === 'solo' && (
             <div className="space-y-5">
               {/* KFZ-152 Phase 3: Community-Banner wenn der User Mitglied einer Community ist */}
               {rolle === 'community_member' && organisation && (
@@ -516,7 +528,7 @@ export default function WillkommenClient({
           )}
 
           {/* SCHRITT 0 — Buero-Inhaber: Sub-Tabelle + Stammdaten */}
-          {step === 0 && r === 'buero_inhaber' && (
+          {currentKey === 'konditionen' && r === 'buero_inhaber' && (
             <div className="space-y-5">
               {/* Buero-Header */}
               <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-xl p-5">
@@ -592,7 +604,7 @@ export default function WillkommenClient({
           )}
 
           {/* SCHRITT 0 — Sub-Mitarbeiter: eigenes Paket + Org-Hinweis */}
-          {step === 0 && r === 'sub_mitarbeiter' && (
+          {currentKey === 'konditionen' && r === 'sub_mitarbeiter' && (
             <div className="space-y-5">
               {/* Org-Hinweis */}
               {organisation && (
@@ -641,7 +653,7 @@ export default function WillkommenClient({
               BUG-96: Scroll-Lock + Inline-Vertragstexte raus → kompakte
               Auftragszusammenfassung + Modal-Links fuer NB / KV.
              ═══════════════════════════════════════════════════════════════ */}
-          {step === 1 && r !== 'sub_mitarbeiter' && (
+          {currentKey === 'vertrag' && r !== 'sub_mitarbeiter' && (
             <div className="space-y-5">
               {/* BUG-96 + BUG-97: Auftragszusammenfassung als geteilte
                   OrderSummaryCard (compact-Variante). Gleiches Component
@@ -782,7 +794,7 @@ export default function WillkommenClient({
           )}
 
           {/* SCHRITT 1 — Sub-Mitarbeiter: nur Checkbox + Name (kein PDF, keine Sig) */}
-          {step === 1 && r === 'sub_mitarbeiter' && (
+          {currentKey === 'agb' && r === 'sub_mitarbeiter' && (
             <div className="space-y-5">
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-xs text-gray-600 leading-relaxed">
                 Bitte bestätige unsere{' '}
@@ -829,7 +841,7 @@ export default function WillkommenClient({
               hosted Stripe-Page. clientSecret wird in useEffect geholt
               sobald der User Step 2 betritt.
              ═══════════════════════════════════════════════════════════════ */}
-          {step === 2 && r !== 'sub_mitarbeiter' && (
+          {currentKey === 'anzahlung' && r !== 'sub_mitarbeiter' && (
             <div className="space-y-4">
               <div className="bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-xl p-4 flex items-start gap-3">
                 <CheckCircle2Icon className="w-5 h-5 text-[#4573A2] flex-shrink-0 mt-0.5" />
@@ -892,7 +904,7 @@ export default function WillkommenClient({
               Nur fuer Solo + Buero-Inhaber. Sub-Mitarbeiter erben die
               Org-Farben automatisch sobald der Inhaber ein Logo hochlaedt.
              ═══════════════════════════════════════════════════════════════ */}
-          {step === 3 && r !== 'sub_mitarbeiter' && (
+          {currentKey === 'branding' && r !== 'sub_mitarbeiter' && (
             <LogoUploadStep
               variant={r === 'buero_inhaber' ? 'buero_inhaber' : 'solo'}
               organisationId={organisation?.id ?? null}
@@ -928,36 +940,34 @@ export default function WillkommenClient({
                 isLoading={saving}
                 loadingText="Wird verarbeitet..."
                 onClick={() => {
+                  // AAR-233: Key-basierte Navigation
                   if (r === 'sub_mitarbeiter') {
-                    if (step === 0) setStep(1)
+                    if (currentKey === 'konditionen') goToStep('agb')
                     else handleSubAgbSubmit()
-                  } else if (r === 'buero_inhaber') {
-                    if (step === 0) setStep(1)
-                    else if (step === 1) handleInhaberVertragSubmit()
-                  } else {
-                    if (step === 0) setStep(1)
-                    else if (step === 1) handleSoloVertragSubmit()
+                  } else if (currentKey === 'konditionen') {
+                    goToStep('branding')
+                  } else if (currentKey === 'vertrag') {
+                    r === 'buero_inhaber' ? handleInhaberVertragSubmit() : handleSoloVertragSubmit()
                   }
                 }}
                 disabled={
-                  (step === 1 && r !== 'sub_mitarbeiter' && !nbVorlage) ||
-                  // BUG-96: Vertrag-Submit nur wenn Checkbox an + Name + Signatur
-                  (step === 1 && r !== 'sub_mitarbeiter' && (!agbAccepted || !unterschriftName.trim() || !signaturePng)) ||
-                  (step === 0 && r === 'buero_inhaber' && subSvs.length === 0)
+                  (currentKey === 'vertrag' && r !== 'sub_mitarbeiter' && !nbVorlage) ||
+                  (currentKey === 'vertrag' && r !== 'sub_mitarbeiter' && (!agbAccepted || !unterschriftName.trim() || !signaturePng)) ||
+                  (currentKey === 'konditionen' && r === 'buero_inhaber' && subSvs.length === 0)
                 }
                 className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {r === 'sub_mitarbeiter'
-                  ? step === 0
-                    ? 'Weiter zur Bestaetigung'
+                  ? currentKey === 'konditionen'
+                    ? 'Weiter zur Bestätigung'
                     : 'Bedingungen akzeptieren'
-                  : step === 0
+                  : currentKey === 'konditionen'
+                  ? 'Weiter zum Logo-Upload'
+                  : currentKey === 'vertrag'
                   ? r === 'buero_inhaber'
-                    ? 'Weiter zum Buero-Vertrag'
-                    : 'Weiter zum Vertrag'
-                  : r === 'buero_inhaber'
-                  ? 'Buero-Vertrag unterzeichnen'
-                  : 'Vertrag unterzeichnen'}
+                    ? 'Büro-Vertrag unterzeichnen'
+                    : 'Vertrag unterzeichnen'
+                  : 'Weiter'}
               </LoadingButton>
             </div>
           )}
