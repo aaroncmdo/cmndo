@@ -20,8 +20,10 @@ import {
   AlertCircleIcon,
   ClipboardListIcon,
   FileSignatureIcon,
+  ChevronDownIcon,
 } from 'lucide-react'
 import NotificationBell from '@/app/admin/_components/NotificationBell'
+import MitteilungszentralePanel from '@/components/mitteilungszentrale/MitteilungszentralePanel'
 import OutboxBadge from '@/components/offline/OutboxBadge'
 import { CLAIMONDO_DEFAULT_THEME, type BrandTheme } from '@/lib/branding/theme'
 
@@ -113,6 +115,8 @@ export default function GutachterShell({
 }) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  // AAR-229 W1: Verwaltung-Section default collapsed
+  const [verwaltungOpen, setVerwaltungOpen] = useState(false)
   const [weather, setWeather] = useState<{ temp: number; code: number; hourly: Record<string, HourW[]>; daily: DailyW[] } | null>(null)
 
   // AAR-222: Sektions-basierte Nav. Team/Community werden conditional in
@@ -311,12 +315,26 @@ export default function GutachterShell({
         {/* AAR-222: Gruppierte Nav mit Section-Headers + Badge-Counter
             für Aufträge / Nachrichten. */}
         <nav className="flex-1 px-3 py-4 space-y-4 overflow-y-auto">
-          {NAV_SECTIONS.map(section => (
+          {NAV_SECTIONS.map(section => {
+            const isVerwaltung = section.title === 'Verwaltung'
+            const collapsed = isVerwaltung && !verwaltungOpen
+            return (
             <div key={section.title}>
-              <p className="px-3 mb-1.5 text-[10px] uppercase tracking-wider text-white/40 font-semibold">
-                {section.title}
-              </p>
-              <div className="space-y-0.5">
+              {isVerwaltung ? (
+                <button
+                  type="button"
+                  onClick={() => setVerwaltungOpen(o => !o)}
+                  className="w-full px-3 mb-1.5 text-[10px] uppercase tracking-wider text-white/40 font-semibold flex items-center justify-between"
+                >
+                  {section.title}
+                  <ChevronDownIcon className={`w-3 h-3 transition-transform ${verwaltungOpen ? 'rotate-180' : ''}`} />
+                </button>
+              ) : (
+                <p className="px-3 mb-1.5 text-[10px] uppercase tracking-wider text-white/40 font-semibold">
+                  {section.title}
+                </p>
+              )}
+              {!collapsed && <div className="space-y-0.5">
                 {section.items.map(({ href, label, icon: Icon, badgeKey }) => {
                   const active = isActive(href)
                   const badge = badgeKey ? badgeCounts[badgeKey] : 0
@@ -348,9 +366,10 @@ export default function GutachterShell({
                     </Link>
                   )
                 })}
-              </div>
+              </div>}
             </div>
-          ))}
+            )
+          })}
         </nav>
 
         <div className="mt-auto px-3 py-3 border-t border-white/10 space-y-2">
@@ -433,7 +452,7 @@ export default function GutachterShell({
               ))}
             </div>
             {/* Mobile: Outbox + Glocke */}
-            <div className="shrink-0 sm:hidden flex items-center gap-2"><OutboxBadge /><NotificationBell variant="dark" /></div>
+            <div className="shrink-0 sm:hidden flex items-center gap-2"><OutboxBadge /><MitteilungszentralePanel variant="dark" /></div>
             {/* Desktop: Gute Fahrt + Glocke */}
             <div className="shrink-0 text-right hidden sm:flex sm:items-center sm:gap-3">
               <div>
@@ -444,7 +463,7 @@ export default function GutachterShell({
                 )}
               </div>
               <OutboxBadge />
-              <NotificationBell variant="dark" />
+              <MitteilungszentralePanel variant="dark" />
             </div>
           </div>
         )}
