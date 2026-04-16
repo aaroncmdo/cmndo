@@ -64,8 +64,9 @@ const NAV_SECTIONS_BASE: NavSection[] = [
   {
     title: 'Finanzen',
     items: [
+      // AAR-244: Lead-Preise als Tab in Abrechnung integriert (kein eigener
+      // Nav-Punkt mehr). Route /gutachter/leadpreise bleibt für Bookmarks.
       { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
-      { href: '/gutachter/leadpreise', label: 'Lead-Preise', icon: EuroIcon },
     ],
   },
   {
