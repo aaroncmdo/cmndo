@@ -24,6 +24,7 @@ import { AbrechnungsCard } from './_components/AbrechnungsCard'
 import { StellungnahmeCard } from './_components/StellungnahmeCard'
 import { NachbesichtigungCard } from './_components/NachbesichtigungCard'
 import { ReklamationsCard } from './_components/ReklamationsCard'
+import { AbrechnungsartCard } from './_components/AbrechnungsartCard'
 import FallakteVollClient from './FallakteVollClient'
 import type { GutachterTask } from '@/hooks/useGutachterTasks'
 import type { SvAbrechnungInput } from '@/lib/gutachter/abrechnung'
@@ -219,6 +220,18 @@ export default function FallDetailClient(props: Props) {
             subphase={subphase}
             fallId={fall.id as string}
             hatTermin={!!(fall.sv_termin as string | null)}
+          />
+          {/* AAR-315: SV-Post-Termin-Block — self-gating ab gutachten-erstellen */}
+          <AbrechnungsartCard
+            fall={{
+              id: fall.id as string,
+              abrechnungsart_besprochen:
+                (fall.abrechnungsart_besprochen as 'fiktiv' | 'konkret' | 'noch-offen' | null) ?? null,
+              abrechnungsart_notiz: (fall.abrechnungsart_notiz as string | null) ?? null,
+              abrechnungsart_besprochen_am:
+                (fall.abrechnungsart_besprochen_am as string | null) ?? null,
+            }}
+            subphase={subphase}
           />
           {/* AAR-293: Kanzlei-Stepper in Phase 5.x */}
           {subphase.phase === 5 && (
