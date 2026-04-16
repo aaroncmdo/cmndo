@@ -45,6 +45,7 @@ export default function SvDispatchPanel({
   hardGateOk,
   aktiverTermin,
   wunschterminIso,
+  wunschterminWochentage,
 }: {
   leadId: string
   hardGateOk: boolean
@@ -52,6 +53,8 @@ export default function SvDispatchPanel({
   // AAR-264: Wunschtermin des Kunden — wenn gesetzt, wird der Slot-Picker
   // damit vorbelegt und Verfügbarkeits-Badges werden angezeigt.
   wunschterminIso?: string | null
+  // AAR-270: Wochentag-Präferenz (ISO 1=Mo..7=So). Filtert Slot-Vorschläge.
+  wunschterminWochentage?: number[] | null
 }) {
   const [pending, startTransition] = useTransition()
   const [suggestions, setSuggestions] = useState<SvSuggestion[] | null>(null)
@@ -73,9 +76,25 @@ export default function SvDispatchPanel({
     }
     let cancelled = false
     setSlotsLoading(true)
-    getNextFreeSlotsForSv(selectedSv.svId, 3, dauerMin)
+    // AAR-270: Mehr Slots laden wenn Wochentag-Filter aktiv ist — sonst
+    // bekommt der MA evtl. 0 Treffer wenn die nächsten 3 Slots auf nicht
+    // gewünschte Tage fallen. 12 Slots ergeben ~2 Wochen Vorlauf.
+    const requestCount = wunschterminWochentage && wunschterminWochentage.length > 0 ? 12 : 3
+    getNextFreeSlotsForSv(selectedSv.svId, requestCount, dauerMin)
       .then((r) => {
-        if (!cancelled) setFreeSlots(r.success ? r.slots ?? [] : [])
+        if (!cancelled) {
+          let slots = r.success ? r.slots ?? [] : []
+          // AAR-270: Filter auf gewählte Wochentage. Date.getDay() liefert
+          // 0=So..6=Sa — wir mappen auf ISO 1=Mo..7=So.
+          if (wunschterminWochentage && wunschterminWochentage.length > 0) {
+            slots = slots.filter((s) => {
+              const day = new Date(s.start).getDay()
+              const iso = day === 0 ? 7 : day
+              return wunschterminWochentage.includes(iso)
+            }).slice(0, 3)
+          }
+          setFreeSlots(slots)
+        }
       })
       .catch(() => {
         if (!cancelled) setFreeSlots([])
@@ -84,7 +103,7 @@ export default function SvDispatchPanel({
         if (!cancelled) setSlotsLoading(false)
       })
     return () => { cancelled = true }
-  }, [selectedSv, dauerMin])
+  }, [selectedSv, dauerMin, wunschterminWochentage])
 
   function handleReserveSlot(slotStartIso: string) {
     if (!selectedSv) return
@@ -101,7 +120,7 @@ export default function SvDispatchPanel({
     })
   }
 
-  // Defaults: Wunschtermin (AAR-264) > morgen 09:00 als erster Slot
+  // Defaults: Wunschtermin (AAR-264) > Wunschtag (AAR-270) > morgen 09:00
   useEffect(() => {
     if (startDatum) return
     if (wunschterminIso) {
@@ -112,10 +131,20 @@ export default function SvDispatchPanel({
         return
       }
     }
-    const morgen = new Date()
-    morgen.setDate(morgen.getDate() + 1)
-    setStartDatum(morgen.toISOString().slice(0, 10))
-  }, [startDatum, wunschterminIso])
+    // AAR-270: Wenn Wunschtag(e) gesetzt → springe auf nächsten passenden
+    // Tag vor (max 14 Tage Lookahead). Sonst morgen.
+    const kandidat = new Date()
+    kandidat.setDate(kandidat.getDate() + 1)
+    if (wunschterminWochentage && wunschterminWochentage.length > 0) {
+      for (let i = 0; i < 14; i++) {
+        const day = kandidat.getDay()
+        const iso = day === 0 ? 7 : day
+        if (wunschterminWochentage.includes(iso)) break
+        kandidat.setDate(kandidat.getDate() + 1)
+      }
+    }
+    setStartDatum(kandidat.toISOString().slice(0, 10))
+  }, [startDatum, wunschterminIso, wunschterminWochentage])
 
   function loadSuggestions() {
     setLoadError(null)

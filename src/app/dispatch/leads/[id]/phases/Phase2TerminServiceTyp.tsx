@@ -24,6 +24,8 @@ export default function Phase2TerminServiceTyp() {
     service_typ?: 'komplett' | 'nur_gutachter' | null
     // AAR-264: Wunschtermin des Kunden — fließt ins SV-Matching ein
     wunschtermin?: string | null
+    // AAR-270: Wochentag-Präferenz für SV-Slot-Filter (ISO 1=Mo..7=So)
+    wunschtermin_wochentage?: number[] | null
   }
   const [pending, startTransition] = useTransition()
   const [unfallortDraft, setUnfallortDraft] = useState(l.unfallort ?? '')
@@ -38,6 +40,8 @@ export default function Phase2TerminServiceTyp() {
   const [wunschtermin, setWunschtermin] = useState<string>(
     l.wunschtermin ? l.wunschtermin.slice(0, 16) : '',
   )
+  // AAR-270: Wochentag-Präferenz (ISO 1=Mo..7=So). Null/leeres Array = Egal.
+  const [wochentage, setWochentage] = useState<number[]>(l.wunschtermin_wochentage ?? [])
   const wunschterminDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [toast, setToast] = useState('')
 
@@ -147,6 +151,33 @@ export default function Phase2TerminServiceTyp() {
     })
   }
 
+  // AAR-270: Wochentag setzen + sofort speichern
+  function saveWochentage(next: number[]) {
+    setWochentage(next)
+    startTransition(async () => {
+      const r = await saveStammdaten(lead.id, {
+        wunschtermin_wochentage: next.length > 0 ? next : null,
+      })
+      if (r.success) {
+        setToast(next.length > 0 ? `Wunschtage gespeichert: ${next.length}` : 'Wunschtage zurückgesetzt')
+        router.refresh()
+      } else {
+        setToast(r.error ?? 'Fehler')
+      }
+      setTimeout(() => setToast(''), 1500)
+    })
+  }
+  function toggleWochentag(iso: number) {
+    const next = wochentage.includes(iso)
+      ? wochentage.filter((w) => w !== iso)
+      : [...wochentage, iso].sort()
+    saveWochentage(next)
+  }
+  function resetWochentage() {
+    if (wochentage.length === 0) return
+    saveWochentage([])
+  }
+
   // datetime-local min-Wert: jetzt (lokale Zeit, ohne Sekunden)
   const nowLocal = new Date()
   nowLocal.setMinutes(nowLocal.getMinutes() - nowLocal.getTimezoneOffset())
@@ -157,8 +188,57 @@ export default function Phase2TerminServiceTyp() {
       {/* AAR-264: Wunschtermin GANZ OBEN — „Wann" ist wichtiger als „Wo" für
           das Gespräch. Auto-Save 500ms Debounce. Der Wunschtermin fließt
           ins SV-Matching ein (verfuegbarAmWunschtermin + Score-Bonus). */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-2">
-        <h3 className="text-xs font-semibold text-blue-900 flex items-center gap-2">
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-3">
+        {/* AAR-270: Wochentag-Picker — vor dem datetime-local-Input.
+            Mehrfachauswahl, Default=Egal. Filtert die SV-Slot-Vorschläge. */}
+        <div className="space-y-1.5">
+          <label className="text-[10px] uppercase tracking-wider text-blue-900 font-semibold block">
+            Wunschtag des Kunden (optional, Mehrfachauswahl)
+          </label>
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              { iso: 1, label: 'Mo' },
+              { iso: 2, label: 'Di' },
+              { iso: 3, label: 'Mi' },
+              { iso: 4, label: 'Do' },
+              { iso: 5, label: 'Fr' },
+              { iso: 6, label: 'Sa' },
+              { iso: 7, label: 'So' },
+            ].map((d) => {
+              const sel = wochentage.includes(d.iso)
+              return (
+                <button
+                  key={d.iso}
+                  type="button"
+                  onClick={() => toggleWochentag(d.iso)}
+                  disabled={pending}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                    sel
+                      ? 'bg-[#4573A2] text-white border-[#4573A2]'
+                      : 'bg-white text-blue-900 border-blue-200 hover:border-blue-400'
+                  } disabled:opacity-50`}
+                >
+                  {d.label}
+                </button>
+              )
+            })}
+            <button
+              type="button"
+              onClick={resetWochentage}
+              disabled={pending || wochentage.length === 0}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                wochentage.length === 0
+                  ? 'bg-[#4573A2] text-white border-[#4573A2]'
+                  : 'bg-white text-blue-900 border-blue-200 hover:border-blue-400'
+              } disabled:opacity-50`}
+              title="Alle Wochentage zurücksetzen"
+            >
+              Egal
+            </button>
+          </div>
+        </div>
+
+        <h3 className="text-xs font-semibold text-blue-900 flex items-center gap-2 pt-1 border-t border-blue-200">
           <CalendarIcon className="w-4 h-4" /> Wunschtermin des Kunden
         </h3>
         <p className="text-[11px] text-blue-800 italic">
@@ -230,6 +310,7 @@ export default function Phase2TerminServiceTyp() {
         hardGateOk={hardGateOk}
         aktiverTermin={aktiverTermin as Parameters<typeof SvDispatchPanel>[0]['aktiverTermin']}
         wunschterminIso={l.wunschtermin ?? null}
+        wunschterminWochentage={wochentage.length > 0 ? wochentage : null}
       />
 
       {/* Service-Typ (Pfad A/B) — prominent nach SV-Auswahl */}

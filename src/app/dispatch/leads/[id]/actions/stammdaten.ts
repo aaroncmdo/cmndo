@@ -24,6 +24,8 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   'gegner_schadennummer', 'unfalldatum', 'unfall_uhrzeit',
   // AAR-264: Wunschtermin in Phase 2 — wird auch fürs SV-Matching genutzt
   'wunschtermin',
+  // AAR-270: Wochentag-Präferenz für SV-Slot-Filter (ISO 1=Mo..7=So)
+  'wunschtermin_wochentage',
   'unfallort', 'unfallort_lat', 'unfallort_lng', 'unfallort_kategorie',
   // AAR-135 Auto-Flags (von gegner-kz-flags.ts berechnet)
   'fahrerflucht', 'auslandskennzeichen',
