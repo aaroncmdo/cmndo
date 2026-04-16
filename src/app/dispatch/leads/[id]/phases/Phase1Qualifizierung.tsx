@@ -116,11 +116,8 @@ export default function Phase1Qualifizierung() {
       const r = await saveHardGate(lead.id, toSave)
       if (r.success) {
         setToast(r.disqualifiziert ? 'Disqualifiziert — Exit-Skript wird angezeigt' : 'Gespeichert')
-        // AAR-176 P3-A: Auto-Advance zu Phase 2 nach erfolgreichem Save
-        // sobald alle 3 Fragen beantwortet sind und kein Disqualifier greift.
-        if (!r.disqualifiziert && allComplete) {
-          setTimeout(() => setPhase(2), 400)
-        }
+        // AAR-268: Auto-Advance entfernt — MA muss explizit „Weiter zu Phase 2"
+        // klicken (Kontrolle vor Sprung). Auto-Save bleibt im Hintergrund.
       } else {
         setToast(r.error ?? 'Fehler')
       }
@@ -491,6 +488,18 @@ export default function Phase1Qualifizierung() {
             ? <><span className="inline-block w-2 h-2 rounded-full bg-[#4573A2] animate-pulse" /> Auto-Save läuft ...</>
             : <><CheckCircleIcon className="w-3 h-3 text-green-600" /> Änderungen werden automatisch gespeichert.</>}
         </p>
+      )}
+
+      {/* AAR-268: Expliziter „Weiter zu Phase 2"-Button statt Auto-Advance */}
+      {allComplete && !qualification.disqualifiziert && draft.schuldfrage !== 'eigenverantwortung' && (
+        <button
+          type="button"
+          disabled={pending}
+          onClick={() => setPhase(2)}
+          className="w-full mt-2 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          Weiter zu Phase 2 →
+        </button>
       )}
     </div>
   )

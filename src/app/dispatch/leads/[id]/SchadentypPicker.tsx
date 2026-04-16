@@ -75,12 +75,14 @@ const FARBE_CLS: Record<TypDef['farbe'], { wrap: string; label: string; border: 
   gray: { wrap: 'bg-gray-50 text-gray-800', label: 'text-gray-900', border: 'border-gray-200' },
 }
 
-export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, gegnerKennzeichen, initialKamera }: {
+export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, gegnerKennzeichen, initialKamera, onSaved }: {
   leadId: string
   initialTyp?: Schadentyp | null
   initialFreitext?: string | null
   gegnerKennzeichen?: string | null
   initialKamera?: boolean | null
+  // AAR-268: Callback nach erfolgreichem Save (für Phase3-Wrapper Weiter-Button)
+  onSaved?: () => void
 }) {
   const [typ, setTyp] = useState<Schadentyp | null>(initialTyp ?? null)
   const [freitext, setFreitext] = useState(initialFreitext ?? '')
@@ -121,6 +123,12 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
       }
       setToast(r.disqualifiziert ? 'Disqualifiziert — Exit-Skript wird angezeigt' : 'Gespeichert')
       setTimeout(() => setToast(''), 3000)
+      // AAR-268: Phase 3 → 4 Blocker-Fix: Callback an Wrapper, der Weiter-
+      // Button zeigt UND router.refresh() macht (Qualification-Engine bekommt
+      // den frischen schadentyp).
+      if (!r.disqualifiziert) {
+        onSaved?.()
+      }
     })
   }
 

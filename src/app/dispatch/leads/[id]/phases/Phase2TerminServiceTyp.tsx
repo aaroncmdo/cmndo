@@ -131,9 +131,7 @@ export default function Phase2TerminServiceTyp() {
       setServiceTypLocal(typ)
       try {
         await setServiceTyp(lead.id, typ)
-        // AAR-187 Fix: explizites Feedback für alle Zustände + await auf
-        // router.refresh() damit Context frisch ist BEVOR setPhase(3) läuft
-        // (vorher Race — stale aktiverTermin blockte Auto-Advance).
+        // AAR-268: Auto-Advance entfernt — MA klickt explizit „Weiter zu Phase 3"
         if (!aktiverTermin) {
           setToast('Service-Typ gespeichert — bitte noch SV-Termin reservieren')
         } else if (!hasKoordinaten) {
@@ -141,9 +139,6 @@ export default function Phase2TerminServiceTyp() {
         } else {
           setToast('Service-Typ gespeichert')
           await router.refresh()
-          // 200ms Delay damit der Provider die frischen Props übernimmt
-          // bevor Phase 3 gerendert wird.
-          setTimeout(() => setPhase(3), 200)
         }
       } catch (err) {
         setToast(err instanceof Error ? err.message : 'Fehler')
@@ -285,6 +280,19 @@ export default function Phase2TerminServiceTyp() {
         <div className={`text-xs px-3 py-2 rounded-lg ${toast.includes('gespeichert') ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-800'}`}>
           {toast}
         </div>
+      )}
+
+      {/* AAR-268: Expliziter „Weiter zu Phase 3"-Button — sichtbar sobald
+          aktiver Termin vorhanden + Koordinaten gesetzt sind. */}
+      {aktiverTermin && hasKoordinaten && (
+        <button
+          type="button"
+          disabled={pending}
+          onClick={() => setPhase(3)}
+          className="w-full mt-2 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          Weiter zu Phase 3 →
+        </button>
       )}
     </div>
   )
