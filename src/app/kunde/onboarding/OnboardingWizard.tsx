@@ -340,19 +340,38 @@ export default function OnboardingWizard({
                           <p className="text-xs text-gray-500">{doc.pflicht ? 'Pflicht' : 'Optional'}</p>
                         </div>
                         {!done && (
-                          <label className="text-xs font-medium px-3 py-1.5 rounded-lg bg-[#0D1B3E] text-white hover:bg-[#1E3A5F] cursor-pointer flex-shrink-0">
-                            {loading ? 'Lade...' : 'Hochladen'}
-                            <input
-                              type="file"
-                              accept="image/*,application/pdf"
-                              className="hidden"
-                              disabled={loading}
-                              onChange={e => {
-                                const f = e.target.files?.[0]
-                                if (f) handleFileUpload(doc.id, f)
-                              }}
-                            />
-                          </label>
+                          <div className="flex flex-col gap-1.5 flex-shrink-0">
+                            {/* AAR-303: Kamera-Direkt-Button (capture=environment)
+                                + getrennter Datei-Wahl-Button. Mobile öffnet sofort
+                                die Rückkamera; Desktop fällt auf normalen Picker. */}
+                            <label className="text-[11px] font-medium px-3 py-1.5 rounded-lg bg-[#0D1B3E] text-white hover:bg-[#1E3A5F] cursor-pointer text-center">
+                              {loading ? 'Lade...' : '📷 Foto'}
+                              <input
+                                type="file"
+                                accept="image/*"
+                                capture="environment"
+                                className="hidden"
+                                disabled={loading}
+                                onChange={e => {
+                                  const f = e.target.files?.[0]
+                                  if (f) handleFileUpload(doc.id, f)
+                                }}
+                              />
+                            </label>
+                            <label className="text-[11px] font-medium px-3 py-1.5 rounded-lg bg-white border border-[#0D1B3E] text-[#0D1B3E] hover:bg-blue-50 cursor-pointer text-center">
+                              📁 Datei
+                              <input
+                                type="file"
+                                accept="image/*,application/pdf"
+                                className="hidden"
+                                disabled={loading}
+                                onChange={e => {
+                                  const f = e.target.files?.[0]
+                                  if (f) handleFileUpload(doc.id, f)
+                                }}
+                              />
+                            </label>
+                          </div>
                         )}
                       </div>
                     )
