@@ -4,6 +4,7 @@ import { emailNeuerFall } from '@/lib/email'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { buildFallInsertFromLead, resolveFallEntityFks } from '@/lib/lead-fall-mapping'
+import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflicht'
 
 /**
  * AAR-90: FIN im Flow setzen + Cardentity-Anreicherung triggern.
@@ -294,7 +295,7 @@ async function finalizeKundeSetup(
     .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht, polizeibericht_status, personenschaden_flag, hat_vorschaeden, zb1_status, service_typ, wa_gesendet, mietwagen_flag, nutzungsausfall)').eq('id', fallId).single()
   const lRaw = (leadForDocs as { leads: unknown } | null)?.leads
   const leadDocs = (Array.isArray(lRaw) ? lRaw[0] : lRaw) as Record<string, unknown> | null
-  await createDefaultPflichtdokumente(admin, fallId, leadDocs)
+  await createPflichtdokumenteFromKatalog(admin, fallId, leadDocs)
 
   // KFZ-129 / AAR-310: Chat-Teilnehmer werden seit AAR-102 aus faelle abgeleitet
   // (kein chat_teilnehmer-Sync mehr nötig — siehe lib/chatGruppe.ts).
@@ -526,10 +527,9 @@ export async function signSAandCreateFall(
     })
   }
 
-  // 6d. KFZ-140: Pflichtdokumente erstellen (bisher nur im Dispatch-Pfad)
+  // 6d. KFZ-140 / AAR-322: Pflichtdokumente Katalog-driven erstellen
   try {
-    const { createPflichtdokumente } = await import('@/app/admin/dispatch/actions')
-    await createPflichtdokumente(admin, fall.id, lead)
+    await createPflichtdokumenteFromKatalog(admin, fall.id, lead as Record<string, unknown>)
   } catch (err) { console.error('[KFZ-140] Pflichtdokumente im FlowLink-Pfad:', err) }
 
   // 6e. AAR-263 + AAR-182: Dispatch-Uploads (ZB1 + Polizeibericht) als
@@ -914,86 +914,3 @@ function generatePassword(): string {
   return pw
 }
 
-async function createDefaultPflichtdokumente(
-  admin: ReturnType<typeof createAdminClient>,
-  fallId: string,
-  lead?: Record<string, unknown> | null,
-) {
-  // AAR-228 Bug 3 + 4: Conditional-Matrix für Pflichtdokumente.
-  // fuehrerschein + schadensfotos wurden entfernt:
-  // - fuehrerschein: LexDrive fordert ihn selbst per WA-Bot an
-  // - schadensfotos: SV macht Fotos vor Ort (kein Kunden-Upload nötig)
-  const defaults: { dokument_typ: string; pflicht: boolean }[] = []
-
-  // 1. Fahrzeugschein (ZB1) — Pflicht solange weder 'bestätigt' noch 'hochgeladen'.
-  // AAR-263 Audit: Drift-Fix — admin/dispatch nutzt die strengere Variante,
-  // flow akzeptierte vorher 'gesendet'/'geoeffnet' fälschlich als „erfasst".
-  const zb1Status = lead?.zb1_status as string | null ?? null
-  if (zb1Status !== 'bestaetigt' && zb1Status !== 'hochgeladen') {
-    defaults.push({ dokument_typ: 'fahrzeugschein', pflicht: true })
-  }
-
-  // 2. AAR-263: Polizeibericht-Logik nach Dispatch-Status:
-  // - status=hochgeladen → Doku ist schon da, kein Pflichtdokument-Eintrag nötig
-  // - status=abgelehnt + polizeibericht_pflicht=true → Kunde muss nachreichen (PFLICHT)
-  // - polizei_vor_ort=true ohne Status-Kontext → optionales Nachreichen
-  const pbStatus = lead?.polizeibericht_status as string | null ?? null
-  const polizeiVorOrt = lead?.polizei_vor_ort === true
-  const pbPflicht = lead?.polizeibericht_pflicht === true
-  if (pbStatus !== 'hochgeladen' && (polizeiVorOrt || pbPflicht)) {
-    const istPflicht = pbStatus === 'abgelehnt' && pbPflicht
-    defaults.push({ dokument_typ: 'polizeibericht', pflicht: istPflicht })
-  }
-
-  // 3. Personenschaden-Dokumente — ärztliches Attest als Pflicht für
-  // Schmerzensgeld-Geltendmachung; Krankenhausbericht + AU optional
-  if (lead?.personenschaden_flag === true) {
-    defaults.push({ dokument_typ: 'aerztliches_attest', pflicht: true })
-    defaults.push({ dokument_typ: 'krankenhausbericht', pflicht: false })
-    defaults.push({ dokument_typ: 'au_bescheinigung', pflicht: false })
-  }
-
-  // 3b. AAR-299: Schadensfotos vom Kunden (optional, parallel zu SV-Fotos)
-  defaults.push({ dokument_typ: 'schadensfotos', pflicht: false })
-
-  // 3c. AAR-300: Mietwagenrechnung — optional Pflichtdoc bei mietwagen_flag
-  if (lead?.mietwagen_flag === true || lead?.nutzungsausfall === true) {
-    defaults.push({ dokument_typ: 'mietwagenrechnung', pflicht: false })
-  }
-
-  // 4. Vorschäden-Dokumentation für Regulierung
-  if (lead?.hat_vorschaeden === true) {
-    defaults.push({ dokument_typ: 'reparaturrechnungen_vorschaeden', pflicht: true })
-  }
-
-  // 4b. AAR-301: Führerschein-Fallback wenn Pfad A ohne WhatsApp-Versand.
-  // LexDrive holt Führerschein normalerweise per WA-Bot — bei Email/SMS-
-  // Versand greift der Bot nicht → Pflicht-Upload via Onboarding.
-  const istKomplett = (lead?.service_typ ?? 'komplett') === 'komplett'
-  const hatWhatsApp = lead?.wa_gesendet === true
-  if (istKomplett && !hatWhatsApp) {
-    defaults.push({ dokument_typ: 'fuehrerschein', pflicht: true })
-  } else if (istKomplett) {
-    defaults.push({ dokument_typ: 'fuehrerschein', pflicht: false })
-  }
-
-  // Idempotenz: keine Defaults wenn schon was existiert (z.B. nach
-  // createPflichtdokumente in signSAandCreateFall)
-  const { data: existing } = await admin
-    .from('pflichtdokumente')
-    .select('id')
-    .eq('fall_id', fallId)
-    .limit(1)
-
-  if (existing && existing.length > 0) return
-
-  await admin.from('pflichtdokumente').insert(
-    defaults.map((d) => ({
-      fall_id: fallId,
-      dokument_typ: d.dokument_typ,
-      pflicht: d.pflicht,
-      status: 'ausstehend',
-      quelle: 'system',
-    })),
-  )
-}

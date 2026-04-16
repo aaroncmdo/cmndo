@@ -13,6 +13,7 @@ import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { triggerKonversionTasks, triggerGutachterTerminTask, triggerGutachtenUploadTask, triggerQcTask, triggerLeadTasks, triggerOnboardingTasks, resolveGates, autoCompleteTask, triggerKanzleiPaketTask, triggerAsSendedatumTask, triggerArchivierungTask } from '@/lib/tasking'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
+import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflicht'
 
 // ─── Fall Status ────────────────────────────────────────────────────────────
 
@@ -656,8 +657,8 @@ async function convertLeadToFall(
     })
   }
 
-  // 6. Pflichtdokumente erstellen
-  await createPflichtdokumente(supabase, fall.id, lead)
+  // 6. Pflichtdokumente erstellen (AAR-322: Katalog-driven)
+  await createPflichtdokumenteFromKatalog(supabase, fall.id, lead)
 
   // AAR-90: Cardentity-Anreicherung wenn Lead FIN hat (kopiert vom Lead in Fall)
   if (lead.fin) {
@@ -750,110 +751,17 @@ async function findLeastBusyKundenbetreuer(
 
 // ─── Pflichtdokumente automatisch erstellen ─────────────────────────────────
 
-// AAR-234: Pflichtdokumente-Matrix komplett auf neues Schema umgestellt.
-// SF-Logik (sf-01..sf-05 basierend auf schadenfall_typ) wurde entfernt — das
-// alte Feld ist für alle neuen Dispatch-Leads NULL (AAR-216). Stattdessen
-// direktes Flag-basiertes System (polizei_vor_ort, personenschaden_flag,
-// hat_vorschaeden, zb1_status, etc.) identisch zu createDefaultPflichtdokumente
-// in flow/[token]/actions.ts (AAR-228).
-//
-// ENTFERNT: vollmacht + sicherungsabtretung (FlowLink-signed, bereits als
-// fall_dokument vorhanden), fuehrerschein (LexDrive holt selbst per WA-Bot),
-// schadensfotos (SV macht vor Ort).
+// AAR-322: Katalog-driven — delegiert an createPflichtdokumenteFromKatalog.
+// Der dokument_katalog + JSON-Rule-DSL ist die Quelle der Wahrheit; vorher
+// war die Logik hier + in flow/[token]/actions.ts dupliziert.
+// Export bleibt bestehen, damit flow/[token]/actions.ts den gleichen
+// Einstiegspunkt nutzen kann.
 export async function createPflichtdokumente(
   supabase: Awaited<ReturnType<typeof createClient>>,
   fallId: string,
   lead: Record<string, unknown>,
 ) {
-  const docs: { fall_id: string; dokument_typ: string; pflicht: boolean; status: string; quelle: string }[] = []
-  const add = (typ: string, pflicht = true) => docs.push({
-    fall_id: fallId, dokument_typ: typ, pflicht, status: 'ausstehend', quelle: 'system',
-  })
-
-  // 1. Fahrzeugschein (ZB1) — nur wenn nicht schon durch Dispatch Phase 4 erhoben
-  if (lead.zb1_status !== 'bestaetigt' && lead.zb1_status !== 'hochgeladen') {
-    add('fahrzeugschein', true)
-  }
-
-  // 2. AAR-263: Polizeibericht — Status-aware:
-  // - status=hochgeladen → Doku existiert, kein Pflichtdoc-Eintrag
-  // - status=abgelehnt + polizeibericht_pflicht=true → muss nachgereicht werden (PFLICHT)
-  // - polizei_vor_ort=true sonst → optional nachreichen
-  if (lead.polizeibericht_status !== 'hochgeladen' && (lead.polizei_vor_ort === true || lead.polizeibericht_pflicht === true)) {
-    const istPflicht = lead.polizeibericht_status === 'abgelehnt' && lead.polizeibericht_pflicht === true
-    add('polizeibericht', istPflicht)
-  }
-  // Fahrerflucht ohne Polizei → Polizeibericht als Pflicht (unverändert)
-  if (lead.fahrerflucht === true && lead.polizei_vor_ort !== true && lead.polizeibericht_status !== 'hochgeladen') {
-    add('polizeibericht', true)
-  }
-
-  // 3. Personenschaden-Dokumente
-  if (lead.personenschaden_flag === true) {
-    add('aerztliches_attest', true)
-    add('krankenhausbericht', false)
-    add('au_bescheinigung', false)
-  }
-
-  // 3b. AAR-299: Schadensfotos vom Kunden — optional, parallel zu SV-Fotos.
-  // Der Kunde soll SOFORT nach dem Unfall fotografieren (Unfallstelle,
-  // Gegnerfahrzeug, Kennzeichen) bevor der Gegner wegfährt. SV macht später
-  // die Detail-Fahrzeugfotos vor Ort. Beides hat unterschiedlichen Wert.
-  add('schadensfotos', false)
-
-  // 3c. AAR-300: Mietwagenrechnung — optionales Pflichtdoc, Kunde reicht
-  // nach Fahrzeugrückgabe nach. Reminder-Logik (KB-Task) als separater
-  // Cron — hier nur das Pflichtdoc anlegen damit es im Dashboard erscheint.
-  if (lead.mietwagen_flag === true || lead.nutzungsausfall === true) {
-    add('mietwagenrechnung', false)
-  }
-
-  // 4. Vorschäden
-  if (lead.hat_vorschaeden === true) {
-    add('reparaturrechnungen_vorschaeden', true)
-  }
-
-  // 4b. AAR-301: Führerschein-Fallback wenn Pfad A (komplett) ohne WhatsApp.
-  // Standard-Annahme: LexDrive holt den Führerschein per WA-Bot. Bei Email/SMS-
-  // Versand greift der Bot nicht → Pflichtdokument im Onboarding nötig.
-  // Bei Pfad B (nur_gutachter) braucht es keinen Führerschein (kein Kanzlei-Mandat).
-  const istKomplett = (lead.service_typ ?? 'komplett') === 'komplett'
-  const hatWhatsApp = lead.wa_gesendet === true
-  if (istKomplett && !hatWhatsApp) {
-    add('fuehrerschein', true)
-  } else if (istKomplett) {
-    // Optional verfügbar im Onboarding, falls WA-Bot scheitert
-    add('fuehrerschein', false)
-  }
-
-  // 5. Leasing / Finanzierung / Gewerbe / Halter (KK-Matrix bleibt)
-  if (lead.leasing_flag || lead.finanzierung_leasing === 'leasing') add('leasingvertrag')
-  if (lead.finanzierung_flag || lead.finanzierung_leasing === 'finanzierung') add('finanzierungsvertrag')
-  if (lead.gewerbe_flag || lead.vorsteuerabzugsberechtigt === true) {
-    add('gewerbenachweis')
-    add('gf_vollmacht')
-  }
-  // AAR-234 Audit: case-insensitive Vergleich (konsistent zu Phase4Stammdaten
-  // AAR-208 Halter-Check). Vorher: "Müller" === "müller" wäre false.
-  const halterNach = String(lead.halter_nachname ?? '').trim().toLowerCase()
-  const kundeNach = String(lead.nachname ?? '').trim().toLowerCase()
-  if (lead.halter_ungleich_fahrer_flag || (halterNach && halterNach !== kundeNach)) {
-    add('halter_vollmacht')
-    add('halter_ausweis')
-  }
-
-  if (docs.length === 0) return
-
-  // AAR-234 Audit: Idempotenz — wenn bereits Pflichtdokumente für den Fall
-  // existieren (z.B. aus früherem convertLead-Run), nicht nochmal inserten.
-  const { data: existing } = await supabase
-    .from('pflichtdokumente')
-    .select('id')
-    .eq('fall_id', fallId)
-    .limit(1)
-  if (existing && existing.length > 0) return
-
-  await supabase.from('pflichtdokumente').insert(docs)
+  await createPflichtdokumenteFromKatalog(supabase, fallId, lead)
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
