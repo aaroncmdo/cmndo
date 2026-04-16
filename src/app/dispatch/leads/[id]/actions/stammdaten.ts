@@ -44,6 +44,16 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   'zb1_status',
   // AAR-263: polizeibericht_status für „Nein — Kunde reicht später nach"
   'polizeibericht_status',
+  // AAR-318 Teil D: Halter-Editierung in Phase 4 — alle Felder + Geburtsdatum
+  'halter_vorname',
+  'halter_nachname',
+  'halter_geburtsdatum',
+  'halter_strasse',
+  'halter_plz',
+  'halter_stadt',
+  // AAR-318: Flag „Halter = Kunde" — wenn true werden die Halter-Felder aus
+  // den Kundendaten übernommen (Client-side beim Toggeln, persistiert hier)
+  'ist_fahrzeughalter',
 ])
 
 export async function saveStammdaten(

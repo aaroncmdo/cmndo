@@ -18,6 +18,7 @@ import {
   CircleCheckBigIcon,
   XCircleIcon,
   ClockIcon,
+  CalendarPlusIcon,
 } from 'lucide-react'
 import type { SvSubphase } from '@/lib/gutachter/subphase'
 
@@ -101,10 +102,26 @@ const HINTS: Record<SvSubphase['code'], Hint> = {
   },
 }
 
-export function AktuellePhaseCard({ subphase }: { subphase: SvSubphase }) {
+export function AktuellePhaseCard({
+  subphase,
+  fallId,
+  hatTermin,
+}: {
+  subphase: SvSubphase
+  fallId?: string
+  hatTermin?: boolean
+}) {
   const hint = HINTS[subphase.code]
   if (!hint) return null
   const Icon = hint.icon
+
+  // AAR-318 Teil B: iCal-Download nur bei bestätigtem oder bevorstehendem Termin
+  const showIcalDownload =
+    fallId &&
+    hatTermin &&
+    (subphase.code === 'termin-bestaetigt' ||
+      subphase.code === 'vor-ort' ||
+      subphase.code === 'auftrag-eingegangen')
 
   return (
     <div className={`rounded-2xl border p-4 sm:p-5 space-y-2 ${hint.cssAccent}`}>
@@ -120,6 +137,16 @@ export function AktuellePhaseCard({ subphase }: { subphase: SvSubphase }) {
         <p className="text-[11px] italic opacity-70 pt-1 border-t border-current/10">
           ↓ {hint.cta}
         </p>
+      )}
+      {showIcalDownload && (
+        <a
+          href={`/api/gutachter/fall/${fallId}/termin.ics`}
+          download
+          className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/80 border border-current/20 text-xs font-medium hover:bg-white"
+        >
+          <CalendarPlusIcon className="w-3.5 h-3.5" />
+          Termin in Kalender (.ics)
+        </a>
       )}
     </div>
   )

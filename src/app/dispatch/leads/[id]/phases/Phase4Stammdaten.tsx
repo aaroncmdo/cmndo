@@ -93,6 +93,9 @@ type LeadFields = {
   halter_strasse?: string | null
   halter_plz?: string | null
   halter_stadt?: string | null
+  // AAR-318: Geburtsdatum manuell oder aus Kunde übernommen (nicht in ZB1)
+  halter_geburtsdatum?: string | null
+  ist_fahrzeughalter?: boolean | null
   hsn?: string | null
   tsn?: string | null
   // AAR-298: Zeugen-Kontaktdaten als JSONB-Array (zeugen-Flag schon weiter oben)
@@ -792,41 +795,111 @@ export default function Phase4Stammdaten() {
           </div>
         </div>
 
-        {/* AAR-208: Halter-Anzeige aus ZB1-OCR. Wenn Halter-Nachname ≠
-            Anrufer-Nachname → Warnung, weil Vollmacht vom Halter nötig ist. */}
-        {l.halter_nachname && (
-          <div className="mt-3 rounded-lg bg-blue-50 border border-blue-200 p-3 space-y-1">
+        {/* AAR-208 + AAR-318 Teil D: Halter-Block — immer sichtbar.
+            Edit-bar (kommt aus ZB1-OCR oder manuell) + Geburtsdatum (nicht
+            in ZB1, daher manuell oder aus Kunde übernommen). „Gleich wie
+            Kunde"-Toggle füllt die Felder mit den Kundendaten. */}
+        <div className="sm:col-span-2 mt-3 rounded-lg bg-blue-50 border border-blue-200 p-3 space-y-2">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
             <p className="text-[10px] text-blue-700 font-semibold uppercase tracking-wider flex items-center gap-1">
               <UserCheckIcon className="w-3 h-3" />
-              Halter laut ZB1 (Fahrzeugschein)
+              Fahrzeughalter
+              {l.halter_nachname && (
+                <span className="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-medium">
+                  Aus Fahrzeugschein
+                </span>
+              )}
             </p>
-            <p className="text-sm text-gray-900 font-medium">
-              {[l.halter_vorname, l.halter_nachname].filter(Boolean).join(' ')}
-            </p>
-            {(l.halter_strasse || l.halter_plz || l.halter_stadt) && (
-              <p className="text-xs text-gray-600">
-                {l.halter_strasse}
-                {l.halter_strasse && (l.halter_plz || l.halter_stadt) && ', '}
-                {l.halter_plz} {l.halter_stadt}
-              </p>
-            )}
-            {(l.hsn || l.tsn) && (
-              <p className="text-[10px] text-gray-500">
-                HSN/TSN: {l.hsn ?? '—'} / {l.tsn ?? '—'}
-              </p>
-            )}
-            {l.nachname && l.halter_nachname &&
-              l.halter_nachname.trim().toLowerCase() !== l.nachname.trim().toLowerCase() && (
-              <div className="mt-2 rounded-md bg-amber-50 border border-amber-200 p-2 flex items-start gap-1.5">
-                <AlertTriangleIcon className="w-3.5 h-3.5 text-amber-700 mt-0.5 shrink-0" />
-                <p className="text-[11px] text-amber-900">
-                  <strong>Halter ≠ Anrufer</strong> — bitte mit Kunde klären: Ist der Halter
-                  mit der Vertretung einverstanden? Vollmacht wird vom Halter benötigt.
-                </p>
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={() => {
+                const useKunde = !(l.ist_fahrzeughalter === true)
+                if (useKunde) {
+                  // „Gleich wie Kunde" → Halter = Kunde übernehmen
+                  saveStammdaten(leadId, {
+                    ist_fahrzeughalter: true,
+                    halter_vorname: l.vorname ?? null,
+                    halter_nachname: l.nachname ?? null,
+                  })
+                } else {
+                  saveStammdaten(leadId, { ist_fahrzeughalter: false })
+                }
+              }}
+              className={`px-2 py-1 rounded-md text-[11px] font-medium border ${
+                l.ist_fahrzeughalter === true
+                  ? 'bg-[#4573A2] text-white border-[#4573A2]'
+                  : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+              }`}
+              title="Wenn der Anrufer/Kunde gleichzeitig der Fahrzeughalter ist"
+            >
+              {l.ist_fahrzeughalter === true ? '✓ Gleich wie Kunde' : 'Gleich wie Kunde?'}
+            </button>
           </div>
-        )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <InlineField
+              label="Halter Vorname"
+              value={l.halter_vorname}
+              fieldName="halter_vorname"
+              leadId={leadId}
+              placeholder="Vorname"
+            />
+            <InlineField
+              label="Halter Nachname"
+              value={l.halter_nachname}
+              fieldName="halter_nachname"
+              leadId={leadId}
+              placeholder="Nachname"
+            />
+            <InlineField
+              label="Geburtsdatum"
+              value={l.halter_geburtsdatum}
+              fieldName="halter_geburtsdatum"
+              leadId={leadId}
+              placeholder="JJJJ-MM-TT"
+              type="date"
+            />
+            <div /> {/* Spalten-Spacer */}
+            <InlineField
+              label="Straße"
+              value={l.halter_strasse}
+              fieldName="halter_strasse"
+              leadId={leadId}
+              placeholder="Straße + Hausnummer"
+            />
+            <InlineField
+              label="PLZ"
+              value={l.halter_plz}
+              fieldName="halter_plz"
+              leadId={leadId}
+              placeholder="PLZ"
+            />
+            <InlineField
+              label="Ort"
+              value={l.halter_stadt}
+              fieldName="halter_stadt"
+              leadId={leadId}
+              placeholder="Ort"
+            />
+          </div>
+
+          {(l.hsn || l.tsn) && (
+            <p className="text-[10px] text-gray-500 pt-1 border-t border-blue-200/50">
+              HSN/TSN: {l.hsn ?? '—'} / {l.tsn ?? '—'}
+            </p>
+          )}
+
+          {l.nachname && l.halter_nachname && l.ist_fahrzeughalter !== true &&
+            l.halter_nachname.trim().toLowerCase() !== l.nachname.trim().toLowerCase() && (
+            <div className="rounded-md bg-amber-50 border border-amber-200 p-2 flex items-start gap-1.5">
+              <AlertTriangleIcon className="w-3.5 h-3.5 text-amber-700 mt-0.5 shrink-0" />
+              <p className="text-[11px] text-amber-900">
+                <strong>Halter ≠ Anrufer</strong> — bitte mit Kunde klären: Ist der Halter
+                mit der Vertretung einverstanden? Vollmacht wird vom Halter benötigt.
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* AAR-177 Fix #1: CardentityButton (Typ-A) entfernt — Anreicherung
             läuft automatisch nach ZB1-OCR.

@@ -215,7 +215,11 @@ export default function FallDetailClient(props: Props) {
             }}
             id="nachbesichtigung-card"
           />
-          <AktuellePhaseCard subphase={subphase} />
+          <AktuellePhaseCard
+            subphase={subphase}
+            fallId={fall.id as string}
+            hatTermin={!!(fall.sv_termin as string | null)}
+          />
           {/* AAR-293: Kanzlei-Stepper in Phase 5.x */}
           {subphase.phase === 5 && (
             <KanzleiRegulierungsStepperCard

@@ -87,6 +87,8 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // AAR-305 Werkstatt-seit-wann + fahrzeug_fahrbereit für Dispatch-Banner
   'werkstatt_seit_datum',
   'fahrzeug_fahrbereit',
+  // AAR-318: Halter-Geburtsdatum (Vor-/Nachname/Adresse sind oben schon)
+  'halter_geburtsdatum',
 ] as const
 
 // ─── 2. DEFAULT — Feldname gleich, NOT-NULL fallback ────────────────────────
