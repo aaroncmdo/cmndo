@@ -51,7 +51,14 @@ export async function sendWhatsAppTemplate(
       body.set('From', from.startsWith('whatsapp:') ? from : `whatsapp:${from}`)
       body.set('To', `whatsapp:${normalTo}`)
       body.set('ContentSid', contentSid)
-      body.set('ContentVariables', JSON.stringify(variables))
+      // AAR-232: Nur nummerierte Keys ('1','2',...) als ContentVariables —
+      // sendCommunication gibt auch 'telefon' mit, das Twilio Content API
+      // als "Invalid Parameter" ablehnt.
+      const contentVars: Record<string, string> = {}
+      for (const [k, v] of Object.entries(variables)) {
+        if (/^\d+$/.test(k)) contentVars[k] = v
+      }
+      body.set('ContentVariables', JSON.stringify(contentVars))
       // AAR-183: StatusCallback für Delivery-Fehler-Erkennung (bevorzugter_kanal
       // wird zurückgesetzt wenn WA scheitert, sodass der nächste Send auf SMS
       // fällt ohne dass der MA das manuell pflegen muss).
