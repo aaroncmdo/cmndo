@@ -18,10 +18,11 @@ export default async function OnboardingPage() {
 
   if (profile?.onboarding_completed_at) redirect('/kunde')
 
-  // Aktiver Fall des Kunden
+  // Aktiver Fall des Kunden — AAR-231: zusätzlich polizei_vor_ort,
+  // personenschaden_flag, hat_vorschaeden für Vorbereitungs-Checkliste.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin')
+    .select('id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, polizei_vor_ort, personenschaden_flag, hat_vorschaeden')
     .eq('kunde_id', user.id)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -58,12 +59,26 @@ export default async function OnboardingPage() {
         .order('pflicht', { ascending: false })
     : { data: [] }
 
+  // AAR-231: Vorbereitungs-Flags aus Pflichtdokumenten + Fall-Feldern ableiten.
+  const docs = pflichtDocs ?? []
+  const zb1Hochgeladen = docs.some(d => d.dokument_typ === 'fahrzeugschein' && !!d.dokument_url)
+  const polizeiberichtHochgeladen = docs.some(d => d.dokument_typ === 'polizeibericht' && !!d.dokument_url)
+  const attestHochgeladen = docs.some(d => d.dokument_typ === 'aerztliches_attest' && !!d.dokument_url)
+
   return (
     <OnboardingWizard
       vorname={profile?.vorname ?? ''}
       fall={fall ? { id: fall.id, fall_nummer: fall.fall_nummer, kennzeichen: fall.kennzeichen, fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') } : null}
       termin={terminDatum ? { datum: terminDatum, svName } : null}
       pflichtDocs={(pflichtDocs ?? []) as Parameters<typeof OnboardingWizard>[0]['pflichtDocs']}
+      vorbereitung={{
+        zb1Hochgeladen,
+        polizeiVorOrt: !!fall?.polizei_vor_ort,
+        polizeiberichtHochgeladen,
+        personenschaden: !!fall?.personenschaden_flag,
+        attestHochgeladen,
+        hatVorschaeden: !!fall?.hat_vorschaeden,
+      }}
     />
   )
 }

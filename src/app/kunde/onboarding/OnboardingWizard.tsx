@@ -74,13 +74,24 @@ const STATUS_PHASES = [
   { key: 'regulierung', label: 'Regulierung', description: 'Versicherung zahlt' },
 ]
 
+// AAR-231: Vorbereitungs-Flags für Termin-Step
+type VorbereitungsInfo = {
+  zb1Hochgeladen: boolean
+  polizeiVorOrt: boolean
+  polizeiberichtHochgeladen: boolean
+  personenschaden: boolean
+  attestHochgeladen: boolean
+  hatVorschaeden: boolean
+}
+
 export default function OnboardingWizard({
-  vorname, fall, termin, pflichtDocs,
+  vorname, fall, termin, pflichtDocs, vorbereitung,
 }: {
   vorname: string
   fall: Fall | null
   termin: Termin | null
   pflichtDocs: PflichtDoc[]
+  vorbereitung?: VorbereitungsInfo
 }) {
   const router = useRouter()
   // AAR-125: Deep-Link aus Banner ("Polizeibericht hochladen") springt direkt in Step 3
@@ -233,25 +244,68 @@ export default function OnboardingWizard({
               </div>
             )}
 
-            {/* Termin */}
+            {/* Termin + AAR-231: Vorbereitungs-Checkliste */}
             {currentStep.id === 'termin' && (
               <div>
                 <div className="mb-4"><CalendarIcon className="w-10 h-10 text-[#4573A2]" /></div>
                 <h1 className="text-2xl font-semibold text-gray-900">Ihr Termin</h1>
                 {termin ? (
-                  <div className="mt-4 bg-gradient-to-br from-emerald-50 to-emerald-50/50 border border-emerald-200 rounded-2xl p-5">
-                    <p className="text-xs uppercase tracking-wider text-emerald-700 mb-1">Termin reserviert</p>
-                    <p className="text-lg font-bold text-gray-900">
-                      {new Date(termin.datum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
-                    </p>
-                    <p className="text-sm text-gray-700">
-                      {new Date(termin.datum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
-                    </p>
-                    {termin.svName && <p className="mt-3 text-sm text-gray-600">Sachverstaendiger: <strong>{termin.svName}</strong></p>}
-                    <p className="mt-3 text-xs text-gray-500">Wir erinnern Sie 24h vorher per WhatsApp.</p>
-                  </div>
+                  <>
+                    <div className="mt-4 bg-gradient-to-br from-emerald-50 to-emerald-50/50 border border-emerald-200 rounded-2xl p-5">
+                      <p className="text-xs uppercase tracking-wider text-emerald-700 mb-1">Termin reserviert</p>
+                      <p className="text-lg font-bold text-gray-900">
+                        {new Date(termin.datum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
+                      </p>
+                      <p className="text-sm text-gray-700">
+                        {new Date(termin.datum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
+                      </p>
+                      {termin.svName && <p className="mt-3 text-sm text-gray-600">Sachverständiger: <strong>{termin.svName}</strong></p>}
+                      <p className="mt-3 text-xs text-gray-500">Wir erinnern Sie 24h vorher per WhatsApp.</p>
+                    </div>
+
+                    {/* AAR-231: Vorbereitungs-Checkliste */}
+                    <div className="mt-5 bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-2xl p-5 space-y-3">
+                      <p className="text-sm font-semibold text-[#0D1B3E]">Bitte vor dem Termin vorbereiten:</p>
+                      <CheckItem emoji="📍" text="Fahrzeug an der Besichtigungsadresse bereitstellen" done />
+                      <CheckItem emoji="🔑" text="Fahrzeugschlüssel + Fahrzeugpapiere bereithalten" done />
+                      <CheckItem emoji="📞" text="Unter Ihrer Telefonnummer erreichbar sein" done />
+
+                      {vorbereitung && !vorbereitung.zb1Hochgeladen && (
+                        <CheckItem
+                          emoji="📄"
+                          text="Fahrzeugschein noch nicht hochgeladen — bitte vor dem Termin hochladen."
+                          done={false}
+                          action={() => setStepIndex(3)}
+                        />
+                      )}
+                      {vorbereitung?.polizeiVorOrt && !vorbereitung.polizeiberichtHochgeladen && (
+                        <CheckItem
+                          emoji="🚔"
+                          text="Polizeibericht hochladen (falls schon vorhanden)."
+                          done={false}
+                          action={() => setStepIndex(3)}
+                        />
+                      )}
+                      {vorbereitung?.personenschaden && !vorbereitung.attestHochgeladen && (
+                        <CheckItem
+                          emoji="🏥"
+                          text="Ärztliches Attest hochladen (falls vorhanden)."
+                          done={false}
+                          action={() => setStepIndex(3)}
+                        />
+                      )}
+                      {vorbereitung?.hatVorschaeden && (
+                        <CheckItem
+                          emoji="⚠️"
+                          text="Reparaturrechnungen für Vorschäden bereithalten."
+                          done={false}
+                          action={() => setStepIndex(3)}
+                        />
+                      )}
+                    </div>
+                  </>
                 ) : (
-                  <p className="mt-4 text-sm text-gray-500">Wir suchen gerade einen passenden Sachverstaendigen fuer Sie. Sobald wir einen Termin haben, melden wir uns per WhatsApp.</p>
+                  <p className="mt-4 text-sm text-gray-500">Wir suchen gerade einen passenden Sachverständigen für Sie. Sobald wir einen Termin haben, melden wir uns per WhatsApp.</p>
                 )}
                 <button
                   onClick={() => setStepIndex(3)}
@@ -378,8 +432,37 @@ export default function OnboardingWizard({
             <button
               onClick={() => setStepIndex(stepIndex - 1)}
               className="w-full py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors"
-            >Zurueck</button>
+            >Zurück</button>
           </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// AAR-231: Checkliste-Item im Termin-Step.
+// done=true → grüner Haken, done=false → oranges Icon + optionaler action-Button.
+function CheckItem({
+  emoji, text, done, action,
+}: {
+  emoji: string
+  text: string
+  done: boolean
+  action?: () => void
+}) {
+  return (
+    <div className="flex items-start gap-2.5">
+      <span className="text-base shrink-0 mt-0.5">{done ? '✅' : emoji}</span>
+      <div className="flex-1 min-w-0">
+        <p className={`text-sm ${done ? 'text-gray-600' : 'text-gray-800 font-medium'}`}>{text}</p>
+        {!done && action && (
+          <button
+            type="button"
+            onClick={action}
+            className="mt-1 text-xs text-[#4573A2] underline hover:text-[#1E3A5F]"
+          >
+            Jetzt hochladen →
+          </button>
         )}
       </div>
     </div>
