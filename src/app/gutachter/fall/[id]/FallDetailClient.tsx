@@ -19,8 +19,11 @@ import { JetztZuTunCard } from './_components/JetztZuTunCard'
 import { StammdatenCard } from './_components/StammdatenCard'
 import { DokumenteUebersichtCard } from './_components/DokumenteUebersichtCard'
 import { TimelineVorschauCard } from './_components/TimelineVorschauCard'
+import { KanzleiRegulierungsStepperCard } from './_components/KanzleiRegulierungsStepperCard'
+import { AbrechnungsCard } from './_components/AbrechnungsCard'
 import FallakteVollClient from './FallakteVollClient'
 import type { GutachterTask } from '@/hooks/useGutachterTasks'
+import type { SvAbrechnungInput } from '@/lib/gutachter/abrechnung'
 
 type Lead = {
   vorname: string | null
@@ -85,6 +88,8 @@ type Props = {
   abrechnungAusgezahltAm?: string | null
   /** AAR-291: Tasks initial geladen (SSR), Hook refresht via Realtime. */
   tasks?: GutachterTask[]
+  /** AAR-293: SV-Abrechnung (Honorar/Lead/Netto) für Phase 6.x Card */
+  abrechnung?: SvAbrechnungInput | null
 }
 
 export default function FallDetailClient(props: Props) {
@@ -172,6 +177,20 @@ export default function FallDetailClient(props: Props) {
             subphase={subphase}
           />
           <AktuellePhaseCard subphase={subphase} />
+          {/* AAR-293: Kanzlei-Stepper in Phase 5.x */}
+          {subphase.phase === 5 && (
+            <KanzleiRegulierungsStepperCard
+              fall={{
+                status: (fall.status as string | null) ?? null,
+                kanzlei_uebergeben_am: (fall.kanzlei_uebergeben_am as string | null) ?? null,
+              }}
+              subphase={subphase}
+            />
+          )}
+          {/* AAR-293: Abrechnungs-Card ab Phase 6.x */}
+          {subphase.phase === 6 && (
+            <AbrechnungsCard abrechnung={props.abrechnung ?? null} subphase={subphase} />
+          )}
         </aside>
 
         <section className="space-y-4 min-w-0">
