@@ -36,7 +36,18 @@ export async function GET(req: NextRequest) {
       gcal_connected: true,
     }).eq('profile_id', user.id)
 
-    return NextResponse.redirect(new URL('/gutachter/profil?gcal=connected', req.url))
+    // AAR-242 Audit: state-Parameter als return-URL nutzen (z.B. Willkommen-
+    // Wizard) — sonst landet jeder OAuth-Connect immer auf /profil.
+    const stateParam = req.nextUrl.searchParams.get('state')
+    let returnTo = '/gutachter/profil?gcal=connected'
+    if (stateParam) {
+      try {
+        const decoded = decodeURIComponent(stateParam)
+        // Sicherheit: nur relative Pfade unter /gutachter erlauben.
+        if (decoded.startsWith('/gutachter/')) returnTo = decoded
+      } catch { /* invalid state — fallback to profil */ }
+    }
+    return NextResponse.redirect(new URL(returnTo, req.url))
   } catch {
     return NextResponse.redirect(new URL('/gutachter/profil?error=oauth_failed', req.url))
   }

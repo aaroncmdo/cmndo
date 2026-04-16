@@ -30,15 +30,18 @@ export default function VertragPage() {
           .or(`profile_id.eq.${user.id},user_id.eq.${user.id}`)
           .maybeSingle()
         if (!sv) { setLoadError('Kein SV-Profil gefunden'); return }
-        // AAR-258: Vertrag bereits unterschrieben → direkt zum Dashboard,
-        // nicht ewig im Spinner hängen
-        if (sv.vertrag_unterschrieben) {
-          setAlreadySigned(true)
-          router.replace('/gutachter')
-          return
-        }
+        // AAR-258 Audit: Wenn Vertrag bereits unterschrieben → svData
+        // setzen + alreadySigned-Flag, damit User den unterschriebenen
+        // Vertrag SEHEN kann (statt zum Dashboard wegzuleiten — der
+        // User klickt ja "Vertrag" um den Vertrag anzuschauen).
         const { data: p } = await supabase.from('profiles').select('vorname, nachname').eq('id', user.id).single()
-        setSvData({ id: sv.id, paket: sv.paket ?? 'standard', name: [p?.vorname, p?.nachname].filter(Boolean).join(' ') || '', anzahlung: Number(sv.anzahlung_faellig ?? 750) })
+        setSvData({
+          id: sv.id,
+          paket: sv.paket ?? 'standard',
+          name: [p?.vorname, p?.nachname].filter(Boolean).join(' ') || '',
+          anzahlung: Number(sv.anzahlung_faellig ?? 750),
+        })
+        if (sv.vertrag_unterschrieben) setAlreadySigned(true)
       } catch (err) {
         console.error('[AAR-258] Vertrag-Load fehlgeschlagen:', err)
         setLoadError(err instanceof Error ? err.message : 'Laden fehlgeschlagen')
@@ -99,10 +102,7 @@ export default function VertragPage() {
 
   const PAKET_LABEL: Record<string, string> = { standard: 'Standard (10 Fälle/Monat)', 'starter-10': 'Standard (10 Fälle/Monat)', pro: 'Pro (25 Fälle/Monat)', 'standard-25': 'Pro (25 Fälle/Monat)', premium: 'Premium (50 Fälle/Monat)', 'premium-50': 'Premium (50 Fälle/Monat)' }
 
-  // AAR-258: Klare States statt endless Spinner.
-  if (alreadySigned) {
-    return <div className="flex items-center justify-center h-screen text-sm text-gray-500">Vertrag bereits unterschrieben — Weiterleitung zum Dashboard …</div>
-  }
+  // AAR-258 Audit: Klare States statt endless Spinner.
   if (loadError) {
     return (
       <div className="flex items-center justify-center h-screen p-6">
@@ -114,6 +114,37 @@ export default function VertragPage() {
     )
   }
   if (!svData) return <div className="flex items-center justify-center h-screen"><div className="w-6 h-6 border-2 border-[#4573A2] border-t-transparent rounded-full animate-spin" /></div>
+
+  // Bereits unterschriebener Vertrag: read-only Anzeige mit grünem Banner.
+  if (alreadySigned) {
+    return (
+      <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-8 space-y-4">
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
+            <CheckIcon className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-emerald-900">
+              <p className="font-semibold">Vertrag bereits unterzeichnet</p>
+              <p className="text-xs text-emerald-700 mt-1">
+                Du hast den Kooperationsvertrag mit der Claimondo GmbH bereits digital signiert.
+                Bei Fragen wende dich an aaron.sprafke@claimondo.de.
+              </p>
+            </div>
+          </div>
+          <div className="border-t border-gray-200 pt-4 text-sm text-gray-700 space-y-2">
+            <p><strong>Vertragsparteien:</strong> Claimondo GmbH und {svData.name}</p>
+            <p><strong>Paket:</strong> {svData.paket}</p>
+            <p><strong>Anzahlung:</strong> {svData.anzahlung.toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR</p>
+          </div>
+          <button
+            onClick={() => router.push('/gutachter')}
+            className="w-full py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold"
+          >
+            Zurück zum Dashboard
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-4">

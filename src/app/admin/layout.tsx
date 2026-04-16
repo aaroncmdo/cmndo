@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import AdminNav from './_components/AdminNav'
 import NotificationBell from './_components/NotificationBell'
+import MitteilungszentralePanel from '@/components/mitteilungszentrale/MitteilungszentralePanel'
 import Spotlight from '@/components/Spotlight'
 import { PageContainer } from '@/components/PageContainer'
 import OutboxBadge from '@/components/offline/OutboxBadge'
@@ -41,16 +42,20 @@ export default async function AdminLayout({
 
       {/* Main content area — offset by sidebar width on desktop */}
       <div className="md:ml-56 h-screen flex flex-col relative z-10">
+        {/* AAR-225 / AAR-229 W3: Admin nutzt jetzt auch das
+            MitteilungszentralePanel (3 Tabs: Updates/Tasks/Nachrichten)
+            statt der alten NotificationBell. NotificationBell bleibt
+            importiert für ggf. Fallback. */}
         {/* Mobile header */}
         <header className="md:hidden flex items-center justify-between px-4 py-3 bg-[#0D1B3E] shrink-0">
           <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
-          <NotificationBell />
+          <MitteilungszentralePanel variant="dark" />
         </header>
 
-        {/* Desktop: Notification bell + Outbox badge top-right */}
+        {/* Desktop: Mitteilungszentrale + Outbox badge top-right */}
         <div className="hidden md:flex items-center gap-2 fixed top-3 right-4 z-30">
           <OutboxBadge />
-          <NotificationBell />
+          <MitteilungszentralePanel variant="light" />
         </div>
 
         {/* Content — each page decides its own scroll behavior.
