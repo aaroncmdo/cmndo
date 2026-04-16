@@ -57,9 +57,17 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
           <h1 className="text-xl font-bold text-gray-900">Meine Reklamationen</h1>
           <p className="text-sm text-gray-500 mt-1">Reklamationen zu Auftraegen — z.B. Kunde war nicht da, Schaden anders, Mehraufwand.</p>
         </div>
+        {/* AAR-259: Button deaktiviert wenn keine Fälle vorhanden — sonst
+            öffnet der Dialog einen leeren Select und User denkt "Klick tut
+            nichts". Mit Hover-Hint erklären. */}
         <button
+          type="button"
           onClick={() => setShowDialog(true)}
-          className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg bg-[#0D1B3E] text-white hover:bg-[#1E3A5F]"
+          disabled={faelle.length === 0}
+          title={faelle.length === 0
+            ? 'Keine Fälle vorhanden — Reklamationen können nur zu vorhandenen Fällen eingereicht werden.'
+            : 'Neue Reklamation einreichen'}
+          className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg bg-[#0D1B3E] text-white hover:bg-[#1E3A5F] disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           <PlusIcon className="w-4 h-4" />
           Neue Reklamation
