@@ -800,6 +800,19 @@ export async function createPflichtdokumente(
     add('reparaturrechnungen_vorschaeden', true)
   }
 
+  // 4b. AAR-301: Führerschein-Fallback wenn Pfad A (komplett) ohne WhatsApp.
+  // Standard-Annahme: LexDrive holt den Führerschein per WA-Bot. Bei Email/SMS-
+  // Versand greift der Bot nicht → Pflichtdokument im Onboarding nötig.
+  // Bei Pfad B (nur_gutachter) braucht es keinen Führerschein (kein Kanzlei-Mandat).
+  const istKomplett = (lead.service_typ ?? 'komplett') === 'komplett'
+  const hatWhatsApp = lead.wa_gesendet === true
+  if (istKomplett && !hatWhatsApp) {
+    add('fuehrerschein', true)
+  } else if (istKomplett) {
+    // Optional verfügbar im Onboarding, falls WA-Bot scheitert
+    add('fuehrerschein', false)
+  }
+
   // 5. Leasing / Finanzierung / Gewerbe / Halter (KK-Matrix bleibt)
   if (lead.leasing_flag || lead.finanzierung_leasing === 'leasing') add('leasingvertrag')
   if (lead.finanzierung_flag || lead.finanzierung_leasing === 'finanzierung') add('finanzierungsvertrag')
