@@ -15,6 +15,7 @@ import { useCarQuery } from '../hooks/useCarQuery'
 // funktionsreif und Text irritierte — Cardentity läuft jetzt im Hintergrund
 // via ZB1-OCR-Trigger in /api/ocr-fahrzeugschein Step 6).
 import Zb1UploadCard from './Zb1UploadCard'
+import PolizeiberichtUploadCard from './PolizeiberichtUploadCard'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import VersicherungAutocomplete, { type VersicherungSelection } from '@/components/VersicherungAutocomplete'
 import {
@@ -50,6 +51,11 @@ type LeadFields = {
   // AAR-182: ZB1-Upload-Tracking
   zb1_status?: string | null
   zb1_hochgeladen_am?: string | null
+  // AAR-263: Polizeibericht-Upload-Tracking (telefon/email schon oben)
+  polizei_vor_ort?: boolean | null
+  polizeibericht_pflicht?: boolean | null
+  polizeibericht_status?: string | null
+  polizeibericht_hochgeladen_am?: string | null
   cardentity_enriched_at?: string | null
   hat_vorschaeden?: boolean | null
   vorschaeden_beschreibung?: string | null
@@ -372,6 +378,19 @@ export default function Phase4Stammdaten() {
         telefon={l.telefon ?? null}
         email={l.email ?? null}
       />
+
+      {/* AAR-263: Polizeibericht-Upload — nur wenn Polizei vor Ort UND Bericht
+          existiert. Wenn nur Aktenzeichen (polizeibericht_pflicht=false)
+          ist die Karte nicht nötig — das Aktenzeichen reicht aus. */}
+      {l.polizei_vor_ort === true && l.polizeibericht_pflicht === true && (
+        <PolizeiberichtUploadCard
+          leadId={leadId}
+          polizeiberichtStatus={l.polizeibericht_status ?? null}
+          polizeiberichtHochgeladenAm={l.polizeibericht_hochgeladen_am ?? null}
+          telefon={l.telefon ?? null}
+          email={l.email ?? null}
+        />
+      )}
 
       {/* 1. Fahrzeugdaten — AAR-194: Baujahr OBEN, dann Marke + Modell
           dynamisch via CarQuery (gefiltert nach Baujahr falls gesetzt). */}

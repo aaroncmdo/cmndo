@@ -146,10 +146,109 @@ export async function POST(req: NextRequest) {
     try {
       const { data: leadRow } = await db
         .from('leads')
-        .select('id, vorname, zb1_status, zugewiesen_an')
+        .select('id, vorname, nachname, zb1_status, zb1_gesendet_am, polizeibericht_status, polizeibericht_gesendet_am, polizei_aktenzeichen, zugewiesen_an')
         .eq('id', matchedLeadId)
         .single()
-      if (leadRow?.zb1_status === 'gesendet' || leadRow?.zb1_status === 'geoeffnet') {
+
+      // AAR-263: Prio-Logik — wenn beide Anfragen offen, nimm die JÜNGERE.
+      // Ohne dieses Routing würde jedes neue Foto fälschlich als ZB1
+      // interpretiert (alter Pfad-Default).
+      const zb1Open = leadRow?.zb1_status === 'gesendet' || leadRow?.zb1_status === 'geoeffnet'
+      const pbOpen = leadRow?.polizeibericht_status === 'gesendet' || leadRow?.polizeibericht_status === 'geoeffnet'
+      let route: 'zb1' | 'polizeibericht' | null = null
+      if (zb1Open && pbOpen) {
+        const zb1Ts = leadRow?.zb1_gesendet_am ? new Date(leadRow.zb1_gesendet_am).getTime() : 0
+        const pbTs = leadRow?.polizeibericht_gesendet_am ? new Date(leadRow.polizeibericht_gesendet_am).getTime() : 0
+        route = pbTs > zb1Ts ? 'polizeibericht' : 'zb1'
+      } else if (zb1Open) {
+        route = 'zb1'
+      } else if (pbOpen) {
+        route = 'polizeibericht'
+      }
+
+      // AAR-263: Polizeibericht-Pfad — Bild speichern, kein OCR (erstmal),
+      // Status setzen, Timeline + Mitteilung. Wenn der Kunde mehrere Bilder
+      // schickt, setzt das ERSTE auf 'hochgeladen', weitere kommen als
+      // dokumente-Anhänge im Fall-Pfad (separates Routing).
+      if (route === 'polizeibericht') {
+        const twilioSid = process.env.TWILIO_ACCOUNT_SID
+        const twilioToken = process.env.TWILIO_AUTH_TOKEN
+        const basicAuth = twilioSid && twilioToken
+          ? 'Basic ' + Buffer.from(`${twilioSid}:${twilioToken}`).toString('base64')
+          : null
+        const firstImageIdx = mediaUrls.findIndex((_url, i) => {
+          const ct = body[`MediaContentType${i}`] ?? ''
+          return ct.startsWith('image/')
+        })
+        const url = firstImageIdx >= 0 ? mediaUrls[firstImageIdx] : mediaUrls[0]
+        const contentType = body[`MediaContentType${firstImageIdx >= 0 ? firstImageIdx : 0}`] ?? 'image/jpeg'
+        const ext =
+          contentType === 'image/png' ? 'png'
+          : contentType === 'image/webp' ? 'webp'
+          : contentType === 'application/pdf' ? 'pdf'
+          : 'jpg'
+
+        const res = await fetch(url, basicAuth ? { headers: { Authorization: basicAuth } } : undefined)
+        if (!res.ok) {
+          await db.from('leads').update({
+            polizeibericht_status: 'fehlgeschlagen',
+            updated_at: new Date().toISOString(),
+          }).eq('id', matchedLeadId)
+          console.warn('[AAR-263] Twilio-Media Download fehlgeschlagen:', res.status)
+        } else {
+          const buf = Buffer.from(await res.arrayBuffer())
+          const ts = Date.now()
+          const path = `leads/${matchedLeadId}/polizeibericht_${ts}.${ext}`
+          const { error: upErr } = await db.storage
+            .from('dokumente')
+            .upload(path, buf, { contentType, upsert: false })
+          if (upErr) {
+            await db.from('leads').update({
+              polizeibericht_status: 'fehlgeschlagen',
+              updated_at: new Date().toISOString(),
+            }).eq('id', matchedLeadId)
+            console.warn('[AAR-263] Storage-Upload fehlgeschlagen:', upErr.message)
+          } else {
+            const { data: publicData } = db.storage.from('dokumente').getPublicUrl(path)
+            const publicUrl = publicData.publicUrl
+            await db.from('leads').update({
+              polizeibericht_status: 'hochgeladen',
+              polizeibericht_url: publicUrl,
+              polizeibericht_hochgeladen_am: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            }).eq('id', matchedLeadId)
+          }
+        }
+
+        await sendCommunication('chat_fallback_kunde', {
+          telefon: fromPhone,
+          '1': '',
+          '2': 'Danke! Die polizeiliche Unfallmitteilung ist angekommen — der Dispatcher meldet sich.',
+        }).catch(() => {})
+
+        if (leadRow?.zugewiesen_an) {
+          try {
+            const { createNotification } = await import('@/lib/notifications')
+            await createNotification(
+              leadRow.zugewiesen_an,
+              'polizeibericht-hochgeladen',
+              `Polizeibericht eingegangen: ${leadRow.vorname ?? 'Lead'} ${leadRow.nachname ?? ''}`.trim(),
+              'Polizeiliche Unfallmitteilung wurde per WhatsApp eingereicht.',
+              `/dispatch/leads/${matchedLeadId}`,
+            )
+          } catch { /* non-critical */ }
+        }
+
+        if (inbound?.id) {
+          await db.from('whatsapp_inbound_messages').update({
+            processed: true,
+            processed_at: new Date().toISOString(),
+          }).eq('id', inbound.id)
+        }
+        return new NextResponse(EMPTY_TWIML, { status: 200, headers: { 'Content-Type': 'text/xml' } })
+      }
+
+      if (route === 'zb1') {
         const twilioSid = process.env.TWILIO_ACCOUNT_SID
         const twilioToken = process.env.TWILIO_AUTH_TOKEN
         const basicAuth = twilioSid && twilioToken
@@ -245,7 +344,7 @@ export async function POST(req: NextRequest) {
         }).catch(() => {})
 
         // Toast-Notification an Dispatcher (leadbearbeiter)
-        if (leadRow.zugewiesen_an) {
+        if (leadRow?.zugewiesen_an) {
           try {
             const { createNotification } = await import('@/lib/notifications')
             await createNotification(

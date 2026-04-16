@@ -36,6 +36,8 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   // AAR-182 Audit-Fix #2: zb1_status damit „Nein — manuell eintragen" in
   // Zb1UploadCard persistiert werden kann (Wert 'abgelehnt').
   'zb1_status',
+  // AAR-263: polizeibericht_status für „Nein — Kunde reicht später nach"
+  'polizeibericht_status',
 ])
 
 export async function saveStammdaten(

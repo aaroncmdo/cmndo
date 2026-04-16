@@ -208,7 +208,7 @@ export async function createKundeAccount(
 
         // AAR-125: Lead laden für conditional Polizeibericht
         const { data: leadForDocs } = await admin
-          .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht, personenschaden_flag, hat_vorschaeden, zb1_status)').eq('id', fallId).single()
+          .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht, polizeibericht_status, personenschaden_flag, hat_vorschaeden, zb1_status)').eq('id', fallId).single()
         const lRaw = (leadForDocs as { leads: unknown } | null)?.leads
         const leadDocs = (Array.isArray(lRaw) ? lRaw[0] : lRaw) as Record<string, unknown> | null
         await createDefaultPflichtdokumente(admin, fallId, leadDocs)
@@ -247,7 +247,7 @@ export async function createKundeAccount(
 
   // AAR-125: Lead laden für conditional Polizeibericht (auch im new-user-Pfad)
   const { data: leadForDocsNew } = await admin
-    .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht, personenschaden_flag, hat_vorschaeden, zb1_status)').eq('id', fallId).single()
+    .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht, polizeibericht_status, personenschaden_flag, hat_vorschaeden, zb1_status)').eq('id', fallId).single()
   const lRawNew = (leadForDocsNew as { leads: unknown } | null)?.leads
   const leadDocsNew = (Array.isArray(lRawNew) ? lRawNew[0] : lRawNew) as Record<string, unknown> | null
   await createDefaultPflichtdokumente(admin, fallId, leadDocsNew)
@@ -482,6 +482,59 @@ export async function signSAandCreateFall(
     const { createPflichtdokumente } = await import('@/app/admin/dispatch/actions')
     await createPflichtdokumente(admin, fall.id, lead)
   } catch (err) { console.error('[KFZ-140] Pflichtdokumente im FlowLink-Pfad:', err) }
+
+  // 6e. AAR-263 + AAR-182: Dispatch-Uploads (ZB1 + Polizeibericht) als
+  // Dokumente am Fall verfügbar machen — sonst sieht die Kanzlei sie nicht.
+  // Idempotent via datei_url-Check.
+  try {
+    const leadAny = lead as Record<string, unknown>
+    const zb1Url = (leadAny.zb1_url as string | null) ?? null
+    const polizeiberichtUrl = (leadAny.polizeibericht_url as string | null) ?? null
+
+    const docInserts: Record<string, unknown>[] = []
+    if (zb1Url) {
+      docInserts.push({
+        fall_id: fall.id,
+        typ: 'fahrzeugschein',
+        kategorie: 'zulassung',
+        quelle: 'dispatch-wa-upload',
+        datei_url: zb1Url,
+        datei_name: `Fahrzeugschein_${(leadAny.nachname as string) ?? 'unbekannt'}.jpg`,
+        hochgeladen_von_rolle: 'kunde',
+        sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde'],
+        beschreibung: 'Fahrzeugschein-Foto via WhatsApp eingegangen (Dispatch-Phase 4)',
+      })
+    }
+    if (polizeiberichtUrl) {
+      const aktz = leadAny.polizei_aktenzeichen as string | null
+      docInserts.push({
+        fall_id: fall.id,
+        typ: 'polizeiliche_unfallmitteilung',
+        kategorie: 'polizeibericht',
+        quelle: 'dispatch-wa-upload',
+        datei_url: polizeiberichtUrl,
+        datei_name: `Polizeibericht_${(leadAny.nachname as string) ?? 'unbekannt'}_${aktz ?? 'ohne-aktz'}.jpg`,
+        hochgeladen_von_rolle: 'kunde',
+        sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde'],
+        beschreibung: 'Polizeiliche Unfallmitteilung via WhatsApp eingegangen (Dispatch-Phase 4)',
+      })
+    }
+
+    if (docInserts.length > 0) {
+      // Duplikate vermeiden: bestehende dokumente.datei_url für diesen Fall laden
+      const { data: existing } = await admin
+        .from('dokumente')
+        .select('datei_url')
+        .eq('fall_id', fall.id)
+      const existingUrls = new Set((existing ?? []).map((d) => d.datei_url as string))
+      const fresh = docInserts.filter((d) => !existingUrls.has(d.datei_url as string))
+      if (fresh.length > 0) {
+        await admin.from('dokumente').insert(fresh)
+      }
+    }
+  } catch (err) {
+    console.error('[AAR-263] Dispatch-Uploads in dokumente:', err)
+  }
 
   // 7. FlowLink updaten
   if (flowLinkId) {
@@ -744,9 +797,16 @@ async function createDefaultPflichtdokumente(
     defaults.push({ dokument_typ: 'fahrzeugschein', pflicht: true })
   }
 
-  // 2. Polizeibericht — wenn Polizei vor Ort war (optional, nachreichbar)
-  if (lead?.polizei_vor_ort === true || lead?.polizeibericht_pflicht === true) {
-    defaults.push({ dokument_typ: 'polizeibericht', pflicht: false })
+  // 2. AAR-263: Polizeibericht-Logik nach Dispatch-Status:
+  // - status=hochgeladen → Doku ist schon da, kein Pflichtdokument-Eintrag nötig
+  // - status=abgelehnt + polizeibericht_pflicht=true → Kunde muss nachreichen (PFLICHT)
+  // - polizei_vor_ort=true ohne Status-Kontext → optionales Nachreichen
+  const pbStatus = lead?.polizeibericht_status as string | null ?? null
+  const polizeiVorOrt = lead?.polizei_vor_ort === true
+  const pbPflicht = lead?.polizeibericht_pflicht === true
+  if (pbStatus !== 'hochgeladen' && (polizeiVorOrt || pbPflicht)) {
+    const istPflicht = pbStatus === 'abgelehnt' && pbPflicht
+    defaults.push({ dokument_typ: 'polizeibericht', pflicht: istPflicht })
   }
 
   // 3. Personenschaden-Dokumente — ärztliches Attest als Pflicht für

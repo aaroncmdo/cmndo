@@ -771,16 +771,20 @@ export async function createPflichtdokumente(
   })
 
   // 1. Fahrzeugschein (ZB1) — nur wenn nicht schon durch Dispatch Phase 4 erhoben
-  if (lead.zb1_status !== 'bestaetigt') {
+  if (lead.zb1_status !== 'bestaetigt' && lead.zb1_status !== 'hochgeladen') {
     add('fahrzeugschein', true)
   }
 
-  // 2. Polizeibericht — wenn Polizei vor Ort war (optional, nachreichbar)
-  if (lead.polizei_vor_ort === true || lead.polizeibericht_pflicht === true) {
-    add('polizeibericht', false)
+  // 2. AAR-263: Polizeibericht — Status-aware:
+  // - status=hochgeladen → Doku existiert, kein Pflichtdoc-Eintrag
+  // - status=abgelehnt + polizeibericht_pflicht=true → muss nachgereicht werden (PFLICHT)
+  // - polizei_vor_ort=true sonst → optional nachreichen
+  if (lead.polizeibericht_status !== 'hochgeladen' && (lead.polizei_vor_ort === true || lead.polizeibericht_pflicht === true)) {
+    const istPflicht = lead.polizeibericht_status === 'abgelehnt' && lead.polizeibericht_pflicht === true
+    add('polizeibericht', istPflicht)
   }
-  // Fahrerflucht ohne Polizei → Polizeibericht als Pflicht
-  if (lead.fahrerflucht === true && lead.polizei_vor_ort !== true) {
+  // Fahrerflucht ohne Polizei → Polizeibericht als Pflicht (unverändert)
+  if (lead.fahrerflucht === true && lead.polizei_vor_ort !== true && lead.polizeibericht_status !== 'hochgeladen') {
     add('polizeibericht', true)
   }
 

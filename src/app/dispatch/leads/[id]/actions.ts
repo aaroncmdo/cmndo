@@ -28,5 +28,6 @@ export {
 } from './actions/sv-termin'
 export { sendFlowLinkMultiChannel } from './actions/flowlink'
 export { triggerZb1UploadRequest } from './actions/zb1'
+export { triggerPolizeiberichtUploadRequest } from './actions/polizeibericht'
 export { searchVersicherungen, getVersicherungById, type VersicherungSuggestion } from './actions/versicherungen'
 export type { HardGateData, SvSuggestion, UnfallortKategorie } from './actions/types'
