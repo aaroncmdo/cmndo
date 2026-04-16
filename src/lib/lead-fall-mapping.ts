@@ -84,6 +84,9 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'vorschaeden_beschreibung',
   // AAR-298 Zeugen-Kontakte (JSONB-Array)
   'zeugen_kontakte',
+  // AAR-305 Werkstatt-seit-wann + fahrzeug_fahrbereit für Dispatch-Banner
+  'werkstatt_seit_datum',
+  'fahrzeug_fahrbereit',
 ] as const
 
 // ─── 2. DEFAULT — Feldname gleich, NOT-NULL fallback ────────────────────────

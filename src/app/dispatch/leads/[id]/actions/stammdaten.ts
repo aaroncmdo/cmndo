@@ -33,6 +33,8 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   'zeugen',
   // AAR-298: Zeugen-Kontaktdaten (JSONB-Array von {name, telefon, email?, notiz?})
   'zeugen_kontakte',
+  // AAR-305: Werkstatt-seit-wann (Date)
+  'werkstatt_seit_datum',
   // AAR-176 / AAR-179 Audit-Fix #4: sv_treffpunkt wird aktuell nur in Phase 2
   // via saveHardGate gesetzt. Admins brauchen die Möglichkeit den Treffpunkt
   // später auch inline zu editieren — daher auch hier zulassen.
