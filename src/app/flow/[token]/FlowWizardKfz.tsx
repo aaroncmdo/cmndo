@@ -3,6 +3,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { signSAandCreateFall, createKundeAccount, updateLeadStammdaten, generateSAPdf } from './actions'
+// AAR-305: Werkstatt-Angaben + Schadensfotos-Upload
+import { saveWerkstattAngaben, saveSchadensfotoUrls } from './onboarding-extra-actions'
 import {
   CheckIcon,
   FileTextIcon,
@@ -15,6 +17,7 @@ import {
   MailIcon,
   PenToolIcon,
   Trash2Icon,
+  LoaderIcon,
 } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -42,6 +45,9 @@ export type LeadData = {
   gegner_name: string
   gegner_versicherung: string
   unfallhergang: string
+  // AAR-305: Fahrbereit-Flag (aus Dispatch Phase 1) entscheidet ob die
+  // Mietwagen-Empfehlungs-Box im Weitere-Angaben-Step erscheint
+  fahrzeug_fahrbereit?: boolean | null
 }
 
 export type GutachterInfo = {
@@ -50,15 +56,23 @@ export type GutachterInfo = {
   terminDatum: string | null
 }
 
-// AAR-99: 4-Step Flow
-type StepId = 'zusammenfassung' | 'gutachter' | 'sa' | 'account'
+// AAR-99 + AAR-305: 5-Step Flow (+ weitere-angaben zwischen gutachter und sa)
+type StepId = 'zusammenfassung' | 'gutachter' | 'weitere-angaben' | 'sa' | 'account'
 
 const STEPS: { id: StepId; label: string }[] = [
   { id: 'zusammenfassung', label: 'Zusammenfassung' },
   { id: 'gutachter', label: 'Ihr Gutachter' },
+  // AAR-305: Werkstatt-Frage + Schadensfotos-Upload vor der Signatur
+  { id: 'weitere-angaben', label: 'Weitere Angaben' },
   { id: 'sa', label: 'Beauftragung' },
   { id: 'account', label: 'Konto' },
 ]
+
+// AAR-305: stepIndex-ID-Helper damit hardcodierte Indizes (z.B. account=3
+// vor Einfügen, jetzt 4) nicht brechen
+function stepIndexById(id: StepId): number {
+  return STEPS.findIndex((s) => s.id === id)
+}
 
 // ─── Schadentyp Labels (AAR-99: neue ENUM) ──────────────────────────────────
 
@@ -104,6 +118,14 @@ export default function FlowWizardKfz({
   const [creatingAccount, setCreatingAccount] = useState(false)
   const [accountCreated, setAccountCreated] = useState(false)
 
+  // AAR-305: Weitere-Angaben-Step — Werkstatt-Frage + Schadensfotos-Upload
+  const [werkstattJa, setWerkstattJa] = useState<boolean | null>(null)
+  const [werkstattDatum, setWerkstattDatum] = useState('')
+  const [schadensfotos, setSchadensfotos] = useState<string[]>([])
+  const [uploadingFotos, setUploadingFotos] = useState(false)
+  const [fotoError, setFotoError] = useState<string | null>(null)
+  const [savingWeitere, setSavingWeitere] = useState(false)
+
   const currentStep = STEPS[stepIndex]
   const progress = Math.round(((stepIndex + 1) / STEPS.length) * 100)
   const fahrzeug = [lead.fahrzeug_hersteller, lead.fahrzeug_modell].filter(Boolean).join(' ')
@@ -134,8 +156,8 @@ export default function FlowWizardKfz({
       // 3. SA-PDF generieren (Background, non-blocking)
       generateSAPdf(result.fallId, lead.id, publicUrl).catch(() => {})
 
-      // AAR-99: Nach SA → Account-Step (Index 3)
-      setStepIndex(3)
+      // AAR-99 + AAR-305: Nach SA → Account-Step (dynamisch per ID)
+      setStepIndex(stepIndexById('account'))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler bei der Beauftragung')
     } finally {
@@ -341,12 +363,208 @@ export default function FlowWizardKfz({
                   onClick={() => setStepIndex(stepIndex + 1)}
                   className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >
-                  Weiter zur Beauftragung
+                  Weiter
                 </button>
               </div>
             )}
 
-            {/* ═══ SCHRITT 3: SA UNTERSCHREIBEN ═══ */}
+            {/* ═══ AAR-305: SCHRITT 3 — WEITERE ANGABEN (Werkstatt + Fotos) ═══ */}
+            {currentStep.id === 'weitere-angaben' && (
+              <div>
+                <StepHeader
+                  question="Weitere Angaben"
+                  sub="Nur zwei kurze Fragen — diese helfen uns dein Anliegen besser einzuschätzen."
+                  icon={<FileTextIcon className="w-8 h-8 text-[#4573A2]" />}
+                />
+
+                {/* Hinweis-Box: Mietwagen-Empfehlung wenn Fahrzeug nicht fahrbereit */}
+                {lead.fahrzeug_fahrbereit === false && (
+                  <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 mb-5 text-sm text-amber-900">
+                    <p className="font-medium mb-1">🚗💥 Mietwagen-Empfehlung</p>
+                    <p className="text-xs">
+                      Da dein Auto nicht fahrbereit ist, ist ein Mietwagen oft sinnvoll.
+                      Fotos vom Schaden helfen uns dir konkret zu empfehlen welchen
+                      Mietwagen du buchen solltest.
+                    </p>
+                  </div>
+                )}
+
+                {/* Werkstatt-Frage */}
+                <div className="bg-white border border-gray-200 rounded-2xl p-4 mb-4 space-y-3">
+                  <p className="text-sm font-medium text-gray-900">
+                    Steht dein Auto gerade in einer Werkstatt?
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setWerkstattJa(true)}
+                      className={`flex-1 min-h-12 rounded-xl text-sm font-medium border ${
+                        werkstattJa === true
+                          ? 'bg-[#4573A2] text-white border-[#4573A2]'
+                          : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                      }`}
+                    >
+                      Ja
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setWerkstattJa(false)
+                        setWerkstattDatum('')
+                      }}
+                      className={`flex-1 min-h-12 rounded-xl text-sm font-medium border ${
+                        werkstattJa === false
+                          ? 'bg-[#4573A2] text-white border-[#4573A2]'
+                          : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                      }`}
+                    >
+                      Nein
+                    </button>
+                  </div>
+                  {werkstattJa === true && (
+                    <div>
+                      <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">
+                        Seit wann? (optional)
+                      </label>
+                      <input
+                        type="date"
+                        value={werkstattDatum}
+                        onChange={(e) => setWerkstattDatum(e.target.value)}
+                        className="w-full text-sm rounded-xl border border-gray-200 px-3 py-2.5 outline-none focus:border-[#4573A2]"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Schadensfotos-Upload */}
+                <div className="bg-white border border-gray-200 rounded-2xl p-4 mb-5 space-y-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      Hast du Fotos vom Schaden?
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Optional. Max. 10 Fotos, je max. 10 MB. JPEG/PNG/HEIC/WebP.
+                    </p>
+                  </div>
+                  <label className="block cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/heic,image/webp"
+                      multiple
+                      disabled={uploadingFotos || schadensfotos.length >= 10}
+                      onChange={async (e) => {
+                        const files = Array.from(e.target.files ?? [])
+                        if (!files.length) return
+                        const remaining = 10 - schadensfotos.length
+                        const toUpload = files.slice(0, remaining)
+                        setUploadingFotos(true)
+                        setFotoError(null)
+                        try {
+                          const supabase = createClient()
+                          const uploaded: string[] = []
+                          for (const file of toUpload) {
+                            if (file.size > 10 * 1024 * 1024) {
+                              setFotoError(`„${file.name}" ist größer als 10 MB — übersprungen`)
+                              continue
+                            }
+                            const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
+                            const path = `schadensfotos-lead/${lead.id}/${Date.now()}-${crypto.randomUUID()}.${ext}`
+                            const { error: upErr } = await supabase.storage
+                              .from('dokumente')
+                              .upload(path, file, { contentType: file.type })
+                            if (upErr) {
+                              setFotoError(`Upload „${file.name}" fehlgeschlagen: ${upErr.message}`)
+                              continue
+                            }
+                            const { data } = supabase.storage.from('dokumente').getPublicUrl(path)
+                            uploaded.push(data.publicUrl)
+                          }
+                          const next = [...schadensfotos, ...uploaded].slice(0, 10)
+                          setSchadensfotos(next)
+                          // persistieren damit ein Browser-Close die URLs nicht verliert
+                          await saveSchadensfotoUrls(lead.id, next).catch(() => {})
+                        } finally {
+                          setUploadingFotos(false)
+                          e.target.value = ''
+                        }
+                      }}
+                      className="hidden"
+                    />
+                    <div className="rounded-xl border-2 border-dashed border-gray-300 px-4 py-6 text-center hover:border-[#4573A2] bg-gray-50 hover:bg-gray-100 transition-colors">
+                      {uploadingFotos ? (
+                        <p className="text-sm text-gray-500 flex items-center justify-center gap-2">
+                          <LoaderIcon className="w-4 h-4 animate-spin" /> Lade hoch …
+                        </p>
+                      ) : (
+                        <>
+                          <p className="text-sm text-gray-700">📷 Fotos auswählen</p>
+                          <p className="text-[11px] text-gray-500 mt-1">
+                            {schadensfotos.length}/10 hochgeladen
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </label>
+                  {schadensfotos.length > 0 && (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                      {schadensfotos.map((url, i) => (
+                        <div
+                          key={url}
+                          className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              const next = schadensfotos.filter((_, idx) => idx !== i)
+                              setSchadensfotos(next)
+                              await saveSchadensfotoUrls(lead.id, next).catch(() => {})
+                            }}
+                            className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white text-xs hover:bg-black/80"
+                            aria-label="Entfernen"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {fotoError && <p className="text-xs text-red-600">{fotoError}</p>}
+                </div>
+
+                <button
+                  onClick={async () => {
+                    setSavingWeitere(true)
+                    try {
+                      // Werkstatt-Antwort persistieren (nur bei „Ja" + Datum sinnvoll
+                      // zu speichern; „Nein" speichert NULL damit die Frage als
+                      // beantwortet gilt)
+                      await saveWerkstattAngaben(
+                        lead.id,
+                        werkstattJa === true ? werkstattDatum || null : null,
+                      )
+                      // Fotos wurden bereits bei jedem Upload persistiert —
+                      // Safety-Net für den Fall dass ein Upload vor persist abgebrochen wurde
+                      await saveSchadensfotoUrls(lead.id, schadensfotos)
+                    } finally {
+                      setSavingWeitere(false)
+                      setStepIndex(stepIndex + 1)
+                    }
+                  }}
+                  disabled={savingWeitere || uploadingFotos}
+                  className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-50 active:scale-[0.98] transition-all"
+                >
+                  {savingWeitere
+                    ? 'Speichert …'
+                    : schadensfotos.length === 0 && werkstattJa == null
+                      ? 'Weiter ohne Angaben'
+                      : 'Weiter'}
+                </button>
+              </div>
+            )}
+
+            {/* ═══ SCHRITT 4: SA UNTERSCHREIBEN ═══ */}
             {currentStep.id === 'sa' && (
               <div>
                 <StepHeader
@@ -488,8 +706,10 @@ export default function FlowWizardKfz({
           </div>
         )}
 
-        {/* Zurück-Button (auf Schritt 2 und 3) */}
-        {(currentStep.id === 'gutachter' || currentStep.id === 'sa') && (
+        {/* Zurück-Button (auf Schritt 2, 3 und 4) */}
+        {(currentStep.id === 'gutachter' ||
+          currentStep.id === 'weitere-angaben' ||
+          currentStep.id === 'sa') && (
           <div className="pt-2">
             <button
               onClick={() => setStepIndex(stepIndex - 1)}

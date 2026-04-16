@@ -575,6 +575,42 @@ export async function signSAandCreateFall(
     console.error('[AAR-263] Dispatch-Uploads in dokumente:', err)
   }
 
+  // 6b. AAR-305: Schadensfotos aus dem Onboarding-Step in dokumente übertragen
+  try {
+    const fotoUrls = Array.isArray(lead.schadensfoto_urls)
+      ? (lead.schadensfoto_urls as string[])
+      : []
+    if (fotoUrls.length > 0) {
+      const { data: bestehendeFotos } = await admin
+        .from('dokumente')
+        .select('datei_url')
+        .eq('fall_id', fall.id)
+        .eq('typ', 'schadensfotos')
+      const bestehendeUrls = new Set((bestehendeFotos ?? []).map((d) => d.datei_url as string))
+      const neueFotos = fotoUrls
+        .filter((url) => typeof url === 'string' && !bestehendeUrls.has(url))
+        .map((url, i) => ({
+          fall_id: fall.id,
+          typ: 'schadensfotos',
+          kategorie: 'schadensfotos',
+          datei_url: url,
+          datei_name: `schadensfoto-${i + 1}.jpg`,
+          quelle: 'flowlink',
+          hochgeladen_von_rolle: 'kunde',
+          sichtbar_fuer: [
+            'admin',
+            'leadbearbeiter',
+            'kundenbetreuer',
+            'sachverstaendiger',
+            'kanzlei',
+          ],
+        }))
+      if (neueFotos.length > 0) await admin.from('dokumente').insert(neueFotos)
+    }
+  } catch (err) {
+    console.error('[AAR-305] Schadensfotos in dokumente:', err)
+  }
+
   // 7. FlowLink updaten
   if (flowLinkId) {
     await admin.from('flow_links').update({
