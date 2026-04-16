@@ -121,6 +121,9 @@ function isPublicPath(pathname: string): boolean {
     '/kunde/termin',
     // AAR-134: SV-Token-Ablehnung via Email-Link (kein Login nötig)
     '/ablehnen',
+    // AAR-339: ZB1-Upload-Link (/upload/zb1/[token]) — Kunde hat noch keinen
+    // Account beim OCR-Upload; Token-Validierung läuft in der Action selbst
+    '/upload',
     '/agb',
     '/nutzungsbedingungen',
     '/datenschutz',

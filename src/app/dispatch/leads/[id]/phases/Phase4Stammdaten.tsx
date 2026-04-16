@@ -425,7 +425,7 @@ function Card({
 }
 
 export default function Phase4Stammdaten() {
-  const { lead, qualification } = useDispatchPhase()
+  const { lead, qualification, setPhase } = useDispatchPhase()
   const l = lead as unknown as LeadFields
   const leadId = lead.id
   const [gegnerKzDraft, setGegnerKzDraft] = useState(l.gegner_kennzeichen ?? '')
@@ -1188,6 +1188,17 @@ export default function Phase4Stammdaten() {
           Pflichtfelder fehlen: Kennzeichen, Marke und Modell müssen gesetzt sein.
         </p>
       )}
+
+      {/* AAR-340: „Weiter zu Phase 5"-Button — Pflichtfelder q6 + q7 müssen
+          erfüllt sein; Q8 (schadenhergang) wird erst in Phase 5 hart gegatet. */}
+      <button
+        type="button"
+        onClick={() => setPhase(5)}
+        disabled={!qualification.q6_gegnerKz || !qualification.q7_fahrzeug}
+        className="w-full mt-2 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+      >
+        Weiter zu Phase 5 (Zusammenfassung) →
+      </button>
     </div>
   )
 }

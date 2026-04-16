@@ -70,6 +70,15 @@ export async function uploadZb1ViaToken(
   const ocrResult = await runZB1Ocr(imageBase64)
 
   if ('error' in ocrResult) {
+    // AAR-339: Konkreten OCR-Fehler loggen damit Aaron in Vercel-Logs sieht
+    // ob Google-Vision-Key fehlt / abgelaufen / falsches Projekt. User-Meldung
+    // bleibt generisch, der Fehlergrund steht im Log.
+    console.error(
+      '[AAR-339/AAR-296] ZB1 OCR fehlgeschlagen:',
+      ocrResult.error,
+      'status:',
+      'status' in ocrResult ? ocrResult.status : 'unknown',
+    )
     // Bild bleibt in Storage erhalten, MA sieht es manuell
     await db.from('leads').update({
       zb1_status: 'fehlgeschlagen',
