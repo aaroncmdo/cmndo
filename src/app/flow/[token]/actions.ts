@@ -819,6 +819,9 @@ async function createDefaultPflichtdokumente(
     defaults.push({ dokument_typ: 'au_bescheinigung', pflicht: false })
   }
 
+  // 3b. AAR-299: Schadensfotos vom Kunden (optional, parallel zu SV-Fotos)
+  defaults.push({ dokument_typ: 'schadensfotos', pflicht: false })
+
   // 4. Vorschäden-Dokumentation für Regulierung
   if (lead?.hat_vorschaeden === true) {
     defaults.push({ dokument_typ: 'reparaturrechnungen_vorschaeden', pflicht: true })

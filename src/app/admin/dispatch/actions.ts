@@ -795,6 +795,12 @@ export async function createPflichtdokumente(
     add('au_bescheinigung', false)
   }
 
+  // 3b. AAR-299: Schadensfotos vom Kunden — optional, parallel zu SV-Fotos.
+  // Der Kunde soll SOFORT nach dem Unfall fotografieren (Unfallstelle,
+  // Gegnerfahrzeug, Kennzeichen) bevor der Gegner wegfährt. SV macht später
+  // die Detail-Fahrzeugfotos vor Ort. Beides hat unterschiedlichen Wert.
+  add('schadensfotos', false)
+
   // 4. Vorschäden
   if (lead.hat_vorschaeden === true) {
     add('reparaturrechnungen_vorschaeden', true)
