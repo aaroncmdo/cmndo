@@ -53,6 +53,9 @@ type LeadFields = {
   fahrzeug_modell?: string | null
   fahrzeug_baujahr?: number | null
   fin?: string | null
+  // AAR-305: Schadenshergang-Pflicht bei fahrbereitem Fahrzeug (Banner in Phase 4)
+  fahrzeug_fahrbereit?: boolean | null
+  schadenhergang?: string | null
   // AAR-182: ZB1-Upload-Tracking
   zb1_status?: string | null
   zb1_hochgeladen_am?: string | null
@@ -514,8 +517,43 @@ export default function Phase4Stammdaten() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [marke])
 
+  // AAR-305: Schadenshergang-Pflicht wenn das Fahrzeug fahrbereit ist —
+  // der SV braucht die Beschreibung vor dem Termin für die Planung.
+  const schadenhergangPflicht =
+    l.fahrzeug_fahrbereit === true &&
+    (!l.schadenhergang || l.schadenhergang.trim().length < 20)
+
   return (
     <div className="space-y-4">
+      {/* AAR-305: Banner oben wenn Schadenshergang fehlt und Fahrzeug fahrbereit.
+          Der FlowLink-Versand in Phase 5 ist bereits via qualification.q8 gesperrt —
+          dieser Banner macht die Lücke sichtbar und bietet Inline-Edit an. */}
+      {schadenhergangPflicht && (
+        <div className="rounded-xl bg-amber-50 border border-amber-300 p-4 space-y-2">
+          <div className="flex items-start gap-2">
+            <AlertTriangleIcon className="w-4 h-4 text-amber-700 mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-amber-900">
+                Schadensbeschreibung fehlt
+              </p>
+              <p className="text-xs text-amber-800 mt-0.5">
+                Das Fahrzeug ist fahrbereit — bitte ruf den Kunden an und erfrage
+                den Schadenshergang (mind. 20 Zeichen) bevor der FlowLink versendet
+                werden kann.
+              </p>
+            </div>
+          </div>
+          <InlineField
+            label="Schadenshergang"
+            value={l.schadenhergang}
+            fieldName="schadenhergang"
+            leadId={leadId}
+            placeholder="Was ist passiert? Wer war beteiligt? Wie ist der Unfall abgelaufen?"
+            type="text"
+          />
+        </div>
+      )}
+
       {/* AAR-177 Fix #2: Kundendaten-Card entfernt — die 4 Felder
           (Vorname/Nachname/Telefon/Email) werden bereits in Phase 1/5
           erfasst bzw. editiert. Doppelte Eingabe verwirrt den MA. */}

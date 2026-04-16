@@ -133,6 +133,8 @@ export default function Phase5Zusammenfassung() {
       if (!qualification.q5_svTermin) missing.push('SV-Termin')
       if (!qualification.q6_gegnerKz) missing.push('Gegner-KZ')
       if (!qualification.q7_fahrzeug) missing.push('Fahrzeug-Pflichtfelder')
+      // AAR-305: Schadenshergang-Pflicht wenn fahrzeug_fahrbereit=true
+      if (!qualification.q8_schadenhergang) missing.push('Schadenshergang (mind. 20 Zeichen, bei fahrbereitem Fahrzeug Pflicht)')
       setSendStatus({ kanal, ok: false, text: `Versand blockiert — fehlt: ${missing.join(', ')}` })
       return
     }

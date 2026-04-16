@@ -58,6 +58,8 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   'gegner_versicherung_anfrage_datum',
   // AAR-316: Kundensprache für FlowLink/Portal-Übersetzungen (de/tr/ar/ru/pl/en/other)
   'sprache',
+  // AAR-305: Schadenshergang-Pflicht bei fahrbereitem Fahrzeug (Banner in Phase 4)
+  'schadenhergang',
 ])
 
 export async function saveStammdaten(

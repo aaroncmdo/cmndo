@@ -32,6 +32,10 @@ export type LeadLike = {
   // AAR-181 Audit-Fix #5: erstzulassung (DD.MM.YYYY) aus ZB1-OCR, kann als
   // Fallback für Baujahr-Ableitung genutzt werden wenn fahrzeug_baujahr null
   erstzulassung?: string | null
+  // AAR-305: Schadenshergang wird zur Pflicht wenn das Fahrzeug fahrbereit ist
+  // (der SV erwartet vorab eine Beschreibung damit er den Termin sinnvoll plant)
+  fahrzeug_fahrbereit?: boolean | null
+  schadenhergang?: string | null
 }
 
 export type AktiverTerminLike = {
@@ -53,7 +57,9 @@ export type QualificationResult = {
   q6_gegnerKz: boolean
   /** AAR-181 Q7: Fahrzeug-Pflichtfelder (KZ, Marke, Modell, Baujahr) alle gesetzt */
   q7_fahrzeug: boolean
-  /** Alle 7 Bedingungen erfüllt */
+  /** AAR-305 Q8: Schadenshergang-Pflicht wenn fahrzeug_fahrbereit=true (mind. 20 Zeichen) */
+  q8_schadenhergang: boolean
+  /** Alle Bedingungen erfüllt */
   allComplete: boolean
   /** FlowLink-Versand erlaubt (aktuell === allComplete) */
   canSendFlowLink: boolean
@@ -105,11 +111,18 @@ export function computeQualificationStatus(
     !!lead.fahrzeug_hersteller?.trim() &&
     !!lead.fahrzeug_modell?.trim()
 
+  // AAR-305: Wenn das Fahrzeug fahrbereit ist, MUSS der Schadenshergang vor
+  // Versand des FlowLinks erfasst sein (mind. 20 Zeichen). Nicht fahrbereit
+  // → Schadenshergang nicht zwingend, SV sieht sich das ohnehin vor Ort an.
+  const q8_schadenhergang =
+    lead.fahrzeug_fahrbereit !== true ||
+    (typeof lead.schadenhergang === 'string' && lead.schadenhergang.trim().length >= 20)
+
   const disqualifiziert = lead.qualifizierungs_phase === 'disqualifiziert'
 
   const flags = [
     q1_schuldfrage, q2_schaden, q3_polizei,
-    q4_schadentyp, q5_svTermin, q6_gegnerKz, q7_fahrzeug,
+    q4_schadentyp, q5_svTermin, q6_gegnerKz, q7_fahrzeug, q8_schadenhergang,
   ]
   const completedCount = flags.filter(Boolean).length
   const allComplete = completedCount === flags.length && !disqualifiziert
@@ -122,6 +135,7 @@ export function computeQualificationStatus(
     q5_svTermin,
     q6_gegnerKz,
     q7_fahrzeug,
+    q8_schadenhergang,
     allComplete,
     canSendFlowLink: allComplete,
     completedCount,
