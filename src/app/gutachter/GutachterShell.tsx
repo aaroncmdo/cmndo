@@ -420,7 +420,9 @@ export default function GutachterShell({
           ) : (
             <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
           )}
-          <div className="w-8" />
+          {/* AAR-252: Glocke im Mobile-Header — war vorher nur im Wetter-
+              Banner, das aber bei SVs ohne standort_lat nicht rendert. */}
+          <MitteilungszentralePanel variant="dark" />
         </header>
 
         {/* Wetter-Banner (auf ALLEN Seiten sichtbar) */}

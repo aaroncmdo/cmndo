@@ -25,9 +25,18 @@ export default async function GutachterNachrichtenPage() {
 
   const fallIds = (faelle ?? []).map(f => f.id)
   if (fallIds.length === 0) {
+    // AAR-247 / AAR-250: Korrekter Leer-State mit Header + Erklärung.
     return (
-      <div className="py-12 text-center text-gray-400 text-sm">
-        Keine Fälle vorhanden.
+      <div className="h-full flex flex-col items-center justify-center p-6">
+        <div className="max-w-sm text-center">
+          <div className="mx-auto mb-4 w-14 h-14 rounded-2xl bg-[#4573A2]/10 flex items-center justify-center">
+            <span className="text-2xl">💬</span>
+          </div>
+          <h1 className="text-lg font-semibold text-gray-900 mb-1">Noch keine Nachrichten</h1>
+          <p className="text-sm text-gray-500">
+            Sobald Kunden, Kollegen oder der Support dir schreiben, siehst du hier alle Nachrichten zu deinen Fällen.
+          </p>
+        </div>
       </div>
     )
   }

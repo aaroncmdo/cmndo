@@ -32,7 +32,10 @@ export default async function AbrechnungPage() {
     paket_umkreis_km: number | null
     anzahlung_betrag: number | null
     anzahlung_bezahlt_am: string | null
-  }>(supabase, user!.id, 'id, paket, offene_faelle, max_faelle_monat, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, anzahlung_betrag, anzahlung_bezahlt_am')
+    anzahlung_status: string | null
+    onboarding_anzahlung_betrag: number | null
+    stripe_anzahlung_bezahlt_am: string | null
+  }>(supabase, user!.id, 'id, paket, offene_faelle, max_faelle_monat, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, anzahlung_betrag, anzahlung_bezahlt_am, anzahlung_status, onboarding_anzahlung_betrag, stripe_anzahlung_bezahlt_am')
 
   if (!sv) {
     return (
@@ -48,10 +51,15 @@ export default async function AbrechnungPage() {
 
   // ARCH-1 POLISH Befund 2: SV sieht NICHT mehr seinen Live-Werbebudget-Stand,
   // sondern lediglich die einmalig geleistete Anzahlung als Info.
-  const anzahlungBetrag = typeof sv.anzahlung_betrag === 'number'
-    ? sv.anzahlung_betrag
-    : Number(sv.anzahlung_betrag ?? 0)
-  const anzahlungBezahlt = !!sv.anzahlung_bezahlt_am
+  // AAR-243: Mehrere Spalten möglich für Betrag + Status. Fallback-Kette:
+  // - onboarding_anzahlung_betrag (neuer Standard seit Stripe-Integration)
+  // - anzahlung_betrag (legacy)
+  // Status: anzahlung_status='bezahlt' ODER (stripe_)anzahlung_bezahlt_am gesetzt.
+  const anzahlungBetrag = Number(sv.onboarding_anzahlung_betrag ?? sv.anzahlung_betrag ?? 0)
+  const anzahlungBezahlt =
+    sv.anzahlung_status === 'bezahlt' ||
+    !!sv.stripe_anzahlung_bezahlt_am ||
+    !!sv.anzahlung_bezahlt_am
 
   // Fetch abrechnungen from the real billing table
   const { data: abrechnungen } = await supabase

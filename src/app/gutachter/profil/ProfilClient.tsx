@@ -158,6 +158,7 @@ export default function ProfilClient({
         </div>
         {!editing && (
           <button
+            type="button"
             onClick={() => { setEditing(true); setSuccess(false) }}
             className="px-4 py-2 text-xs font-medium text-white bg-[#1E3A5F] hover:bg-[#4573A2] rounded-xl transition-colors"
           >
