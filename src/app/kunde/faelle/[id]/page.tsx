@@ -12,6 +12,9 @@ import SaeuleMeinAnwalt from '@/components/kunde/SaeuleMeinAnwalt'
 import SaeuleMeinGeld from '@/components/kunde/SaeuleMeinGeld'
 import SaeuleMeinBetreuer from '@/components/kunde/SaeuleMeinBetreuer'
 import { saveBankdaten, uploadPflichtdokumentKunde, updateZahlungsweg } from './actions'
+// AAR-319: FAQ-Bot-Card + Historie-Loader
+import { FaqBotCard } from './_components/FaqBotCard'
+import { ladeKundenFaqHistorie } from './faq-bot-actions'
 
 export default async function KundeFallDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -88,6 +91,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()
+
+    // AAR-319: FAQ-Bot-Historie für diesen Kunden + Fall laden (RLS schützt)
+    const faqHistory = await ladeKundenFaqHistorie(id)
 
     // AAR-171: Szenario aus DB übernehmen, aber auto-bump auf ruegefall/klagefall
     // wenn der Status das bereits signalisiert — so muss der KB nicht manuell
@@ -299,6 +305,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             chatTeilnehmer={chatTeilnehmer}
             aktiverTermin={aktiverTermin}
           />
+
+          {/* AAR-319: FAQ-Bot für den Kunden — kennt seinen eigenen Fall */}
+          <FaqBotCard fallId={fall.id as string} initialHistory={faqHistory} />
         </div>
       </div>
     )
