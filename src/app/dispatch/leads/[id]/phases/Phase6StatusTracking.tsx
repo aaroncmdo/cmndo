@@ -64,6 +64,9 @@ export default function Phase6StatusTracking({
     email?: string | null
     vorname?: string | null
     nachname?: string | null
+    // AAR-275: wa_gesendet verrät ob letzter Versand WA war (Twilio-Delivery
+    // möglich) oder Email/SMS (kein WA-Callback).
+    wa_gesendet?: boolean | null
   }
   const latestFlow = flowLinks[0]
 
@@ -89,10 +92,19 @@ export default function Phase6StatusTracking({
     icon: <ClockIcon className="w-4 h-4" />,
   }
 
+  // AAR-275: Twilio-Delivery-Sub nur bei WA-Versand sinnvoll. Email/SMS
+  // haben keinen verlässlichen Delivery-Callback im Webhook — bei Email
+  // gilt „abgeschickt = angekommen" als Best-Guess, kein grünes Häkchen.
+  const versandweg: 'whatsapp' | 'andere' = l.wa_gesendet === true ? 'whatsapp' : 'andere'
+  const deliverySub =
+    versandweg === 'whatsapp'
+      ? 'Twilio Delivery-Bestätigung'
+      : 'Versand abgeschickt — kein Delivery-Callback bei Email/SMS'
   const stepDelivered: Step = {
     ...stepSent,
-    label: 'Link angekommen',
-    sub: 'Twilio Delivery-Bestätigung',
+    label: versandweg === 'whatsapp' ? 'Link angekommen' : 'Versand abgeschickt',
+    sub: deliverySub,
+    state: latestFlow ? (versandweg === 'whatsapp' ? 'done' : 'pending') : 'pending',
     icon: <CheckCircle2Icon className="w-4 h-4" />,
   }
 
