@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { MailIcon, SmartphoneIcon } from 'lucide-react'
 import { LoadingButton } from '@/components/ui/loading-button'
+import { PasswordInput } from '@/components/ui/PasswordInput'
 
 // Submit-Button mit useFormStatus damit der Loading-Spinner waehrend der
 // Server-Action-Ausfuehrung sichtbar ist (BUG-88).
@@ -136,10 +137,9 @@ export default function LoginClient({
           </div>
           <div className="flex flex-col gap-1.5">
             <label htmlFor="password" className="text-sm font-medium text-gray-700">Passwort</label>
-            <input
+            <PasswordInput
               id="password"
               name="password"
-              type="password"
               placeholder="••••••••"
               required
               autoComplete="current-password"

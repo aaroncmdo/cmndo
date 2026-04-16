@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { KeyIcon, CheckCircle2Icon, AlertTriangleIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { LoadingButton } from '@/components/ui/loading-button'
+import { PasswordInput } from '@/components/ui/PasswordInput'
 import { confirmPasswordReset } from '@/lib/actions/auth/reset-password'
 
 type Phase = 'verifying' | 'ready' | 'expired' | 'success' | 'error'
@@ -145,9 +146,8 @@ export default function PasswortZuruecksetzenPage() {
                   <label htmlFor="password" className="text-sm font-medium text-gray-700">
                     Neues Passwort
                   </label>
-                  <input
+                  <PasswordInput
                     id="password"
-                    type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Mindestens 8 Zeichen"
@@ -162,9 +162,8 @@ export default function PasswortZuruecksetzenPage() {
                   <label htmlFor="confirm" className="text-sm font-medium text-gray-700">
                     Passwort bestätigen
                   </label>
-                  <input
+                  <PasswordInput
                     id="confirm"
-                    type="password"
                     value={confirm}
                     onChange={(e) => setConfirm(e.target.value)}
                     placeholder="Passwort wiederholen"

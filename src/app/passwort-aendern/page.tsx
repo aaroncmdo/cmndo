@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { KeyIcon } from 'lucide-react'
 import { LoadingButton } from '@/components/ui/loading-button'
+import { PasswordInput } from '@/components/ui/PasswordInput'
 
 export default function PasswortAendernPage() {
   const [password, setPassword] = useState('')
@@ -87,14 +88,14 @@ export default function PasswortAendernPage() {
               <label htmlFor="password" className="text-sm font-medium text-gray-700">
                 Neues Passwort
               </label>
-              <input
+              <PasswordInput
                 id="password"
-                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Mindestens 8 Zeichen"
                 required
                 minLength={8}
+                autoComplete="new-password"
                 className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-100 text-gray-900 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
               />
             </div>
@@ -103,14 +104,14 @@ export default function PasswortAendernPage() {
               <label htmlFor="confirm" className="text-sm font-medium text-gray-700">
                 Passwort bestätigen
               </label>
-              <input
+              <PasswordInput
                 id="confirm"
-                type="password"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 placeholder="Passwort wiederholen"
                 required
                 minLength={8}
+                autoComplete="new-password"
                 className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-100 text-gray-900 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
               />
             </div>
