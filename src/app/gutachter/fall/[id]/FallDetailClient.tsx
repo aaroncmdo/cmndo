@@ -166,6 +166,7 @@ export default function FallDetailClient(props: Props) {
     <div className="min-h-full bg-[#f8f9fb]">
       <FallHeader
         fallNummer={fallNummer}
+        fallId={fall.id as string}
         kundenName={kundenName}
         ort={ort}
         subphase={subphase}

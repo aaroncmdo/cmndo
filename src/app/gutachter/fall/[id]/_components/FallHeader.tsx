@@ -8,18 +8,22 @@ import { ChevronLeftIcon } from 'lucide-react'
 import { PhasenStepper } from './PhasenStepper'
 import { SubphasenStepper } from './SubphasenStepper'
 import { FallakteDrawer } from './FallakteDrawer'
+// AAR-307: Ad-hoc Task-Anlegen aus dem FallHeader
+import { TaskAnlegenButton } from '@/components/tasks/TaskAnlegenButton'
 import type { SvSubphase } from '@/lib/gutachter/subphase'
 
 type DrawerData = Parameters<typeof FallakteDrawer>[0]
 
 export function FallHeader({
   fallNummer,
+  fallId,
   kundenName,
   ort,
   subphase,
   drawer,
 }: {
   fallNummer: string
+  fallId: string
   kundenName: string
   ort: string
   subphase: SvSubphase
@@ -54,7 +58,8 @@ export function FallHeader({
             </p>
           </div>
         </div>
-        <div className="shrink-0">
+        <div className="shrink-0 flex items-center gap-2">
+          <TaskAnlegenButton fallId={fallId} rolle="sachverstaendiger" label="Task" />
           <FallakteDrawer {...drawer} />
         </div>
       </div>
