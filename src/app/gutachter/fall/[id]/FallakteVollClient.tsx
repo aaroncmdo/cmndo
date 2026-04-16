@@ -1051,7 +1051,8 @@ function Badge({ label, color }: { label: string; color: string }) {
 type GutachterTeilnehmer = { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url: string | null }
 
 function GutachterChatTabs({ fallId, teilnehmer }: { fallId: string; teilnehmer: GutachterTeilnehmer[] }) {
-  const [ch, setCh] = useState<'alle' | 'portal-kunde-gutachter' | 'portal-kunde-claimondo'>('alle')
+  // AAR-102/AAR-310: Kanal-Werte auf die 5 neuen CHECK-erlaubten Werte migriert
+  const [ch, setCh] = useState<'alle' | 'chat_kunde_sv' | 'chat_kb_kunde'>('alle')
   const [userId, setUserId] = useState('')
   useEffect(() => { createClient().auth.getUser().then(({ data: { user } }) => { if (user) setUserId(user.id) }) }, [])
   if (!userId) return null
@@ -1086,8 +1087,8 @@ function GutachterChatTabs({ fallId, teilnehmer }: { fallId: string; teilnehmer:
       )}
       <div className="flex border-b border-gray-200 shrink-0">
         <button onClick={() => setCh('alle')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'alle' ? 'border-[#4573A2] text-[#4573A2]' : 'border-transparent text-gray-400'}`}>Alle</button>
-        <button onClick={() => setCh('portal-kunde-claimondo')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'portal-kunde-claimondo' ? 'border-[#4573A2] text-[#4573A2]' : 'border-transparent text-gray-400'}`}>Claimondo</button>
-        <button onClick={() => setCh('portal-kunde-gutachter')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'portal-kunde-gutachter' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-400'}`}>Kunde</button>
+        <button onClick={() => setCh('chat_kb_kunde')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'chat_kb_kunde' ? 'border-[#4573A2] text-[#4573A2]' : 'border-transparent text-gray-400'}`}>Claimondo</button>
+        <button onClick={() => setCh('chat_kunde_sv')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'chat_kunde_sv' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-400'}`}>Kunde</button>
       </div>
       <div className="flex-1 min-h-0">
         <ChatChannel fallId={fallId} kanal={ch} currentUserId={userId} />

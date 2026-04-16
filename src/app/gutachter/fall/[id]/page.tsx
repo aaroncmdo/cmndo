@@ -76,7 +76,7 @@ export default async function GutachterFallPage({
       .from('nachrichten')
       .select('id, kanal, sender_id, sender_rolle, nachricht, hat_anhang, anhang_url, created_at')
       .eq('fall_id', id)
-      .eq('kanal', 'portal-kunde-gutachter')
+      .eq('kanal', 'chat_kunde_sv')
       .order('created_at', { ascending: true }),
   ])
 

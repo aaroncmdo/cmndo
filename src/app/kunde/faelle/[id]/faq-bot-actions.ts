@@ -53,19 +53,20 @@ export async function askKundenFaq(
     { role: 'assistant', content: result.antwort, ts: new Date().toISOString() },
   ]
 
-  if (existing) {
-    await supabase
-      .from('ki_gespraeche')
-      .update({ nachrichten: nextHistory, updated_at: new Date().toISOString() })
-      .eq('id', existing.id)
-  } else {
-    await supabase.from('ki_gespraeche').insert({
-      fall_id: fallId,
-      rolle: 'kunde',
-      user_id: user.id,
-      nachrichten: nextHistory,
-    })
-  }
+  // AAR-319: upsert statt check-dann-insert, damit Double-Click-Race keine
+  // unique_violation auf (fall_id, rolle, user_id) produziert.
+  await supabase
+    .from('ki_gespraeche')
+    .upsert(
+      {
+        fall_id: fallId,
+        rolle: 'kunde',
+        user_id: user.id,
+        nachrichten: nextHistory,
+        updated_at: now,
+      },
+      { onConflict: 'fall_id,rolle,user_id' },
+    )
 
   revalidatePath(`/kunde/faelle/${fallId}`)
   return { success: true, antwort: result.antwort, history: nextHistory }

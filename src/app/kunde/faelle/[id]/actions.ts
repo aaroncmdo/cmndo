@@ -8,7 +8,9 @@ import { bestaetigeTermin } from '@/lib/termine/bestaetigung'
 export async function sendNachricht(
   fallId: string,
   nachricht: string,
-  kanal: 'portal-kunde-claimondo' | 'portal-kunde-gutachter' = 'portal-kunde-claimondo',
+  // AAR-102/AAR-310: nachrichten.kanal CHECK akzeptiert nur die 5 neuen Werte.
+  // Legacy 'portal-kunde-claimondo' → 'chat_kb_kunde', 'portal-kunde-gutachter' → 'chat_kunde_sv'.
+  kanal: 'chat_kb_kunde' | 'chat_kunde_sv' = 'chat_kb_kunde',
 ) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -21,9 +23,9 @@ export async function sendNachricht(
     const admin = createAdminClient()
     const { data: fall } = await admin.from('faelle').select('kundenbetreuer_id, sv_id').eq('id', fallId).single()
 
-    if (kanal === 'portal-kunde-claimondo' && fall?.kundenbetreuer_id) {
+    if (kanal === 'chat_kb_kunde' && fall?.kundenbetreuer_id) {
       empfaengerId = fall.kundenbetreuer_id
-    } else if (kanal === 'portal-kunde-gutachter' && fall?.sv_id) {
+    } else if (kanal === 'chat_kunde_sv' && fall?.sv_id) {
       // SV profile_id als empfaenger
       const { data: sv } = await admin.from('sachverstaendige').select('profile_id').eq('id', fall.sv_id).single()
       empfaengerId = sv?.profile_id ?? null

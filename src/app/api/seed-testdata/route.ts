@@ -616,13 +616,13 @@ export async function POST() {
       { fall_id: fallIds[0], kanal: 'whatsapp', sender_rolle: 'system', nachricht: 'Ihr Gutachter Thomas Becker wurde zugewiesen.', created_at: daysAgo(12) },
       { fall_id: fallIds[0], kanal: 'whatsapp', sender_id: kundenIds[0], sender_rolle: 'kunde', nachricht: 'Super, ich bin unter der Woche ab 14 Uhr erreichbar.', created_at: daysAgo(11) },
       { fall_id: fallIds[0], kanal: 'whatsapp', sender_rolle: 'system', nachricht: 'Termin bestaetigt: Montag 14:00 Uhr.', created_at: daysAgo(10) },
-      // Fall1: 3 portal-kunde-claimondo messages
-      { fall_id: fallIds[0], kanal: 'portal-kunde-claimondo', sender_id: maxId, sender_rolle: 'kundenbetreuer', nachricht: 'Frau Braun, bitte laden Sie noch den Fahrzeugschein hoch.', created_at: daysAgo(13) },
-      { fall_id: fallIds[0], kanal: 'portal-kunde-claimondo', sender_id: kundenIds[0], sender_rolle: 'kunde', nachricht: 'Erledigt, Fahrzeugschein ist hochgeladen.', created_at: daysAgo(12) },
-      { fall_id: fallIds[0], kanal: 'portal-kunde-claimondo', sender_id: maxId, sender_rolle: 'kundenbetreuer', nachricht: 'Perfekt, vielen Dank!', created_at: daysAgo(12) },
-      // Fall2: 2 portal-kunde-gutachter messages
-      { fall_id: fallIds[1], kanal: 'portal-kunde-gutachter', sender_id: svProfileIds['thomas@gutachter-becker.de'], sender_rolle: 'sachverstaendiger', nachricht: 'Gutachten ist fertig und hochgeladen.', created_at: daysAgo(5) },
-      { fall_id: fallIds[1], kanal: 'portal-kunde-gutachter', sender_id: kundenIds[1], sender_rolle: 'kunde', nachricht: 'Vielen Dank fuer die schnelle Bearbeitung!', created_at: daysAgo(4) },
+      // Fall1: 3 chat_kb_kunde messages (AAR-102: Legacy 'portal-kunde-claimondo')
+      { fall_id: fallIds[0], kanal: 'chat_kb_kunde', sender_id: maxId, sender_rolle: 'kundenbetreuer', nachricht: 'Frau Braun, bitte laden Sie noch den Fahrzeugschein hoch.', created_at: daysAgo(13) },
+      { fall_id: fallIds[0], kanal: 'chat_kb_kunde', sender_id: kundenIds[0], sender_rolle: 'kunde', nachricht: 'Erledigt, Fahrzeugschein ist hochgeladen.', created_at: daysAgo(12) },
+      { fall_id: fallIds[0], kanal: 'chat_kb_kunde', sender_id: maxId, sender_rolle: 'kundenbetreuer', nachricht: 'Perfekt, vielen Dank!', created_at: daysAgo(12) },
+      // Fall2: 2 chat_kunde_sv messages (AAR-102: Legacy 'portal-kunde-gutachter')
+      { fall_id: fallIds[1], kanal: 'chat_kunde_sv', sender_id: svProfileIds['thomas@gutachter-becker.de'], sender_rolle: 'sachverstaendiger', nachricht: 'Gutachten ist fertig und hochgeladen.', created_at: daysAgo(5) },
+      { fall_id: fallIds[1], kanal: 'chat_kunde_sv', sender_id: kundenIds[1], sender_rolle: 'kunde', nachricht: 'Vielen Dank fuer die schnelle Bearbeitung!', created_at: daysAgo(4) },
     ]
     for (const m of chatMessages) {
       await admin.from('nachrichten').insert({

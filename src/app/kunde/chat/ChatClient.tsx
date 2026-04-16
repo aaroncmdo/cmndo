@@ -51,11 +51,11 @@ export default function ChatClient({
 
     const { sendNachricht } = await import('@/app/kunde/faelle/[id]/actions')
     try {
-      await sendNachricht(fallId, text.trim(), 'portal-kunde-claimondo')
+      await sendNachricht(fallId, text.trim(), 'chat_kb_kunde')
       // Optimistic: add message locally
       setMessages(prev => [...prev, {
         id: crypto.randomUUID(),
-        kanal: 'portal-kunde-claimondo',
+        kanal: 'chat_kb_kunde',
         sender_id: userId,
         sender_rolle: 'kunde',
         nachricht: text.trim(),

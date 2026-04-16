@@ -54,7 +54,7 @@ export default async function KundeChatPage() {
     .from('nachrichten')
     .select('id, kanal, sender_id, sender_rolle, nachricht, hat_anhang, anhang_url, created_at')
     .eq('fall_id', fallId)
-    .in('kanal', ['portal-kunde-claimondo', 'portal-kunde-gutachter'])
+    .in('kanal', ['chat_kb_kunde', 'chat_kunde_sv'])
     .order('created_at', { ascending: true })
 
   return <ChatClient fallId={fallId} nachrichten={nachrichten ?? []} userId={user.id} />

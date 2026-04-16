@@ -21,7 +21,8 @@ export async function sendNachrichtFromSvInbox(
 
   const { error: insertErr } = await supabase.from('nachrichten').insert({
     fall_id: fallId,
-    kanal: 'portal-kunde-gutachter',
+    // AAR-102/AAR-310: Kanal-CHECK erlaubt nur die 5 neuen Werte
+    kanal: 'chat_kunde_sv',
     sender_id: user.id,
     sender_rolle: 'gutachter',
     nachricht: nachricht.trim(),

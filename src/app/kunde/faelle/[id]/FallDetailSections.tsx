@@ -199,7 +199,7 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
     setSending(true); setError(null)
     try {
       const { sendNachricht } = await import('./actions')
-      await sendNachricht(fallId, text.trim(), 'portal-kunde-claimondo')
+      await sendNachricht(fallId, text.trim(), 'chat_kb_kunde')
       setMessages(prev => [...prev, {
         id: crypto.randomUUID(), kanal: 'gruppe', sender_id: userId,
         sender_rolle: 'kunde', nachricht: text.trim(), hat_anhang: false, anhang_url: null,

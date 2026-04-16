@@ -685,7 +685,10 @@ export async function signSAandCreateFall(
     await sendFallCommunication(fall.id, 'fall_eroeffnet')
     // AAR-312: Info-Nachricht direkt im Anschluss — Erklärt Zwei-Stufen-Zahlung
     // und dass der Gutachter zum Kunden kommt. Reduziert Rückfragen ans KB.
-    await sendFallCommunication(fall.id, 'info_nach_sa')
+    // Portal-Link explizit via extraData übergeben — sendFallCommunication
+    // setzt '2' sonst auf regulierung_betrag (relevant für fall_eroeffnet).
+    const portalUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/kunde/faelle/${fall.id}`
+    await sendFallCommunication(fall.id, 'info_nach_sa', { '2': portalUrl })
   } catch { /* */ }
 
   // 10. WhatsApp an Gutachter: Termin bestätigt + Ablehnen-Link (KFZ-118)
