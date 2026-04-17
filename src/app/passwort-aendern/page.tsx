@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { KeyIcon } from 'lucide-react'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { PasswordInput } from '@/components/ui/PasswordInput'
+import { roleToPath } from '@/lib/auth/role-redirect'
 
 export default function PasswortAendernPage() {
   const [password, setPassword] = useState('')
@@ -50,13 +51,7 @@ export default function PasswortAendernPage() {
         .eq('id', user!.id)
         .single()
 
-      const dest = profile?.rolle === 'sachverstaendiger'
-        ? '/gutachter'
-        : profile?.rolle === 'kunde'
-          ? '/kunde'
-          : '/admin'
-
-      window.location.href = dest
+      window.location.href = roleToPath(profile?.rolle as string | null | undefined)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler beim Ändern des Passworts')
     } finally {

@@ -4,13 +4,7 @@ import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-
-const ROLE_REDIRECT: Record<string, string> = {
-  admin: '/admin',
-  sachverstaendiger: '/gutachter',
-  kunde: '/kunde',
-  kanzlei: '/admin',
-}
+import { roleToPath } from '@/lib/auth/role-redirect'
 
 // BUG-83 Befund 7: gleiche Konstante wie in supabase/server.ts.
 const REMEMBER_COOKIE_NAME = 'cm_remember'
@@ -92,6 +86,5 @@ export async function login(formData: FormData) {
   // Root Cause: Server Actions revalidieren nur den AKTUELLEN Pfad, nicht
   // den Ziel-Pfad eines redirect(). Bekanntes App-Router Verhalten.
   revalidatePath('/', 'layout')
-  const destination = ROLE_REDIRECT[profile.rolle] ?? '/admin'
-  redirect(destination)
+  redirect(roleToPath(profile.rolle))
 }

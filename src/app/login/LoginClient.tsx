@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { MailIcon, SmartphoneIcon } from 'lucide-react'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { PasswordInput } from '@/components/ui/PasswordInput'
+import { roleToPath } from '@/lib/auth/role-redirect'
 
 // Submit-Button mit useFormStatus damit der Loading-Spinner waehrend der
 // Server-Action-Ausfuehrung sichtbar ist (BUG-88).
@@ -66,8 +67,7 @@ export default function LoginClient({
         // Update auth_provider
         await supabase.from('profiles').update({ auth_provider: 'phone', force_password_change: false }).eq('id', user.id)
         const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
-        const dest = profile?.rolle === 'sachverstaendiger' ? '/gutachter' : profile?.rolle === 'kunde' ? '/kunde' : '/admin'
-        window.location.href = dest
+        window.location.href = roleToPath(profile?.rolle as string | null | undefined)
       }
     } catch (err) {
       setPhoneError(err instanceof Error ? err.message : 'Code ungueltig')
