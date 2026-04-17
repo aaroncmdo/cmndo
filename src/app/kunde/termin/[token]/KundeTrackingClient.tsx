@@ -7,6 +7,7 @@ import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actio
 import LiveTrackingMap from '@/components/maps/LiveTrackingMap'
 import { haversineKm } from '@/lib/gps/geofence'
 import Avatar from '@/components/shared/Avatar'
+import KundeAnfahrtCard from './KundeAnfahrtCard'
 
 // AAR-423: Brand-aware Primary-Akzente via CSS-Vars mit Claimondo-Fallbacks.
 // Surface/Background/Text bleiben Claimondo-Default — nur „Primary"-Elemente
@@ -33,6 +34,9 @@ export default function KundeTrackingClient({
   gegenvorschlagVon,
   vorgeschlagenesDatum,
   notification5minSent,
+  kundenTrackingAngeboten,
+  kundeTrackingAktiviert,
+  kundeBereitsAngekommen,
 }: {
   svId: string
   channelHash: string
@@ -52,6 +56,9 @@ export default function KundeTrackingClient({
   gegenvorschlagVon: string | null
   vorgeschlagenesDatum: string | null
   notification5minSent: boolean
+  kundenTrackingAngeboten: boolean
+  kundeTrackingAktiviert: boolean
+  kundeBereitsAngekommen: boolean
 }) {
   const [svPosition, setSvPosition] = useState<{ lat: number; lng: number } | null>(null)
   const [etaMinutes, setEtaMinutes] = useState<number | null>(null)
@@ -277,6 +284,19 @@ export default function KundeTrackingClient({
         <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
           <MapPinIcon className="w-3 h-3" /> {adresse}
         </p>
+
+        {/* AAR-384: Anfahrt-Tracking für Kunden — nur wenn Termin nicht
+            beim Kunden zuhause ist (z. B. Werkstatt, neutraler Ort). */}
+        {kundenTrackingAngeboten && !kundeBereitsAngekommen && (
+          <div className="mt-3">
+            <KundeAnfahrtCard
+              token={token}
+              terminId={terminId}
+              initiallyAktiviert={kundeTrackingAktiviert}
+              terminAdresse={adresse}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

@@ -5,7 +5,7 @@
 // Dokumente (AAR-386 — Platzhalter), sowie die primären Aktionen Losfahren /
 // Angekommen / Abschließen je nach State.
 
-import { useState, useTransition } from 'react'
+import { useEffect, useMemo, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import {
   PhoneIcon,
@@ -13,9 +13,11 @@ import {
   CheckCircle2Icon,
   PlayCircleIcon,
   MapPinIcon,
+  CarIcon,
 } from 'lucide-react'
 import BriefingStrukturSections from '@/components/fall/BriefingStrukturSections'
 import { formatUhrzeit } from '@/lib/format'
+import { createClient } from '@/lib/supabase/client'
 import type { FeldmodusStop } from './page'
 import type { SessionStatus } from '@/lib/types/field-modus'
 import { startStop, markArrived, completeAndAdvance } from './actions'
@@ -48,6 +50,60 @@ export default function AktuellerStopCard({
 }: AktuellerStopCardProps) {
   const [pending, startTransition] = useTransition()
   const [manuelleAnkunft, setManuelleAnkunft] = useState(false)
+
+  // AAR-384: Kunde-Tracking-State live beobachten (eigene Subscription,
+  // damit die AktuellerStopCard unabhängig vom Parent nachzieht).
+  const supabase = useMemo(() => createClient(), [])
+  const [kundeTracking, setKundeTracking] = useState<{
+    aktiviert: boolean
+    etaMinutes: number | null
+    angekommenAm: string | null
+  }>({ aktiviert: false, etaMinutes: null, angekommenAm: null })
+
+  useEffect(() => {
+    let cancelled = false
+    void supabase
+      .from('gutachter_termine')
+      .select('kunde_tracking_aktiviert, kunde_eta_minuten, kunde_angekommen_am')
+      .eq('id', stop.termin_id)
+      .single()
+      .then(({ data }) => {
+        if (cancelled || !data) return
+        setKundeTracking({
+          aktiviert: !!data.kunde_tracking_aktiviert,
+          etaMinutes: (data.kunde_eta_minuten as number | null) ?? null,
+          angekommenAm: (data.kunde_angekommen_am as string | null) ?? null,
+        })
+      })
+    const channel = supabase
+      .channel(`sv-kunde-eta-${stop.termin_id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'gutachter_termine',
+          filter: `id=eq.${stop.termin_id}`,
+        },
+        (payload) => {
+          const row = payload.new as {
+            kunde_tracking_aktiviert: boolean | null
+            kunde_eta_minuten: number | null
+            kunde_angekommen_am: string | null
+          }
+          setKundeTracking({
+            aktiviert: !!row.kunde_tracking_aktiviert,
+            etaMinutes: row.kunde_eta_minuten ?? null,
+            angekommenAm: row.kunde_angekommen_am ?? null,
+          })
+        },
+      )
+      .subscribe()
+    return () => {
+      cancelled = true
+      void supabase.removeChannel(channel)
+    }
+  }, [supabase, stop.termin_id])
 
   const losgefahren = Boolean(stop.losgefahren_am)
   const angekommen = Boolean(stop.sv_angekommen_am)
@@ -135,6 +191,23 @@ export default function AktuellerStopCard({
         <MapPinIcon className="w-4 h-4 text-[color:var(--brand-primary,#4573A2)] mt-0.5" />
         <p className="flex-1">{stop.adresse}</p>
       </div>
+
+      {/* AAR-384: Kunde-Tracking-Status — zeigt dem SV ob und wann der
+          Kunde ankommt (nur bei Termin außerhalb Kunde-zuhause). */}
+      {kundeTracking.angekommenAm ? (
+        <div className="flex items-center gap-2 text-xs font-medium text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">
+          <CheckCircle2Icon className="w-4 h-4" />
+          Kunde ist vor Ort
+        </div>
+      ) : kundeTracking.aktiviert ? (
+        <div className="flex items-center gap-2 text-xs font-medium text-amber-800 bg-amber-50 rounded-lg px-3 py-2">
+          <CarIcon className="w-4 h-4" />
+          Kunde unterwegs
+          {kundeTracking.etaMinutes != null && (
+            <span className="ml-auto">ETA ca. {kundeTracking.etaMinutes} Min</span>
+          )}
+        </div>
+      ) : null}
 
       {/* Telefonnummer */}
       {stop.kunde_telefon && (

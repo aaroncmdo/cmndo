@@ -6,6 +6,7 @@ import KundenLightBrandingProvider from '@/components/branding/KundenLightBrandi
 import ClaimondoKundenHeader from '@/components/kunde/ClaimondoKundenHeader'
 import type { BrandTheme } from '@/lib/branding/theme'
 import { hydrateTheme } from '@/lib/branding/theme'
+import { terminBeiKundeZuhause } from '@/lib/kunde/termin-heuristik'
 
 // KFZ-179: Kunden-Tracking-Page — oeffentlich via Token, kein Auth noetig.
 // SV-Position wird live via Realtime angezeigt.
@@ -24,7 +25,7 @@ export default async function KundeTerminPage({
 
   const { data: termin } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, start_zeit, status, losgefahren_am, ankunft_zeit, kunden_tracking_token, notification_5min_gesendet_am, vorgeschlagenes_datum, gegenvorschlag_von')
+    .select('id, fall_id, sv_id, start_zeit, status, losgefahren_am, ankunft_zeit, kunden_tracking_token, notification_5min_gesendet_am, vorgeschlagenes_datum, gegenvorschlag_von, kunde_tracking_aktiviert, kunde_angekommen_am')
     .eq('kunden_tracking_token', token)
     .single()
 
@@ -74,9 +75,21 @@ export default async function KundeTerminPage({
   // Fall-Daten laden
   const { data: fall } = await db
     .from('faelle')
-    .select('schadens_adresse, schadens_plz, schadens_ort, kennzeichen')
+    .select('schadens_adresse, schadens_plz, schadens_ort, kennzeichen, besichtigungsort_adresse, lead_id')
     .eq('id', termin.fall_id)
     .single()
+
+  // AAR-384: Halter-Adresse laden für Heuristik "Termin beim Kunden zuhause".
+  // Wenn ja → kein Tracking anbieten (Kunde ist eh da). Wenn nein → Card
+  // einblenden sobald SV losgefahren ist.
+  const { data: lead } = fall?.lead_id
+    ? await db
+        .from('leads')
+        .select('halter_strasse, halter_plz, halter_ort')
+        .eq('id', fall.lead_id)
+        .single()
+    : { data: null }
+  const trackingSinnvoll = !terminBeiKundeZuhause(lead, fall)
 
   // AAR-423: SV-Branding + Profil laden für Light-Branding und Attribution.
   const { data: svRow } = await db
@@ -170,6 +183,9 @@ export default async function KundeTerminPage({
             gegenvorschlagVon={(termin.gegenvorschlag_von as string | null) ?? null}
             vorgeschlagenesDatum={(termin.vorgeschlagenes_datum as string | null) ?? null}
             notification5minSent={!!termin.notification_5min_gesendet_am}
+            kundenTrackingAngeboten={trackingSinnvoll}
+            kundeTrackingAktiviert={!!termin.kunde_tracking_aktiviert}
+            kundeBereitsAngekommen={!!termin.kunde_angekommen_am}
           />
         </div>
       </div>
