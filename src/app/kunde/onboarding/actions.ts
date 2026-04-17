@@ -54,7 +54,7 @@ export async function getPflichtdokumenteStand(
   const admin = createAdminClient()
   const { data: katalog } = await admin
     .from('dokument_katalog')
-    .select('slot_id, label, beschreibung, multi_file, max_mb, akzeptierte_mime_types, sort_order')
+    .select('slot_id, label, beschreibung, multi_file, max_mb, akzeptierte_mime_types, sort_order, uploadbar_von')
     .eq('aktiv', true)
   const byId = new Map<string, {
     slot_id: string
@@ -64,30 +64,50 @@ export async function getPflichtdokumenteStand(
     max_mb: number
     akzeptierte_mime_types: string[]
     sort_order: number
+    uploadbar_von: string[]
   }>()
-  for (const row of katalog ?? []) byId.set(row.slot_id, row)
+  for (const row of katalog ?? []) {
+    byId.set(row.slot_id, {
+      ...row,
+      uploadbar_von: (row.uploadbar_von as string[] | null) ?? [],
+    })
+  }
 
-  const mapped: PflichtdokumentStand[] = docs.map((d) => {
-    const k = byId.get(d.dokument_typ)
-    return {
-      id: d.id,
-      slot_id: d.dokument_typ,
-      label: k?.label ?? d.dokument_typ,
-      beschreibung: k?.beschreibung ?? null,
-      status: d.status ?? 'ausstehend',
-      pflicht: !!d.pflicht,
-      dokument_url: d.dokument_url ?? null,
-      hochgeladen_am: d.hochgeladen_am ?? null,
-      frist: d.frist ?? null,
-      begruendung: d.begruendung ?? null,
-      angefordert_von_rolle: d.angefordert_von_rolle ?? null,
-      angefordert_am: d.angefordert_am ?? null,
-      multi_file: k?.multi_file ?? false,
-      max_mb: k?.max_mb ?? 10,
-      akzeptierte_mime_types: k?.akzeptierte_mime_types ?? ['image/jpeg', 'image/png', 'application/pdf'],
-      sort_order: d.sort_order ?? k?.sort_order ?? 999,
-    }
-  })
+  // AAR-362: Für den Kunden-Onboarding-Step NUR Slots zurückgeben, bei denen
+  // der Kunde tatsächlich selbst hochladen darf. System-interne Slots wie
+  // gutachten/rechnung_gutachten/ki_kalkulation/sa_vollmacht/kanzlei_paket
+  // werden von createPflichtdokumenteFromKatalog als Pflichtdokumente für den
+  // gesamten Fall angelegt — sie gehören aber in die Admin-/SV-Sicht, nicht
+  // in die Kunden-Upload-Maske. Legacy-Slots (gewerbenachweis, halter_*,
+  // gf_vollmacht) sind nicht im Katalog und werden durchgelassen, da sie
+  // Kunden-Pflichtdokumente sind.
+  const mapped: PflichtdokumentStand[] = docs
+    .filter((d) => {
+      const k = byId.get(d.dokument_typ)
+      if (!k) return true // Legacy-Slot ohne Katalog-Eintrag → durchlassen
+      return k.uploadbar_von.includes('kunde')
+    })
+    .map((d) => {
+      const k = byId.get(d.dokument_typ)
+      return {
+        id: d.id,
+        slot_id: d.dokument_typ,
+        label: k?.label ?? d.dokument_typ,
+        beschreibung: k?.beschreibung ?? null,
+        status: d.status ?? 'ausstehend',
+        pflicht: !!d.pflicht,
+        dokument_url: d.dokument_url ?? null,
+        hochgeladen_am: d.hochgeladen_am ?? null,
+        frist: d.frist ?? null,
+        begruendung: d.begruendung ?? null,
+        angefordert_von_rolle: d.angefordert_von_rolle ?? null,
+        angefordert_am: d.angefordert_am ?? null,
+        multi_file: k?.multi_file ?? false,
+        max_mb: k?.max_mb ?? 10,
+        akzeptierte_mime_types: k?.akzeptierte_mime_types ?? ['image/jpeg', 'image/png', 'application/pdf'],
+        sort_order: d.sort_order ?? k?.sort_order ?? 999,
+      }
+    })
 
   mapped.sort((a, b) => {
     // offen → abgelehnt → hochgeladen (Priorität auf das was der Kunde noch tun muss)
