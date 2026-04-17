@@ -104,6 +104,19 @@ export async function uploadTechnischeStellungnahme(
     }
   }
 
+  // AAR-431: Kanzlei-SLA „Rüge-Versand" (2 WT) starten
+  try {
+    const { startKanzleiSla } = await import('@/lib/sla/kanzlei-tracker')
+    const { addWorkingDays } = await import('@/lib/sla/workdays')
+    await startKanzleiSla(fallId, 'kanzlei_ruege_versand', {
+      phase: 'technische_stellungnahme',
+      deadline: addWorkingDays(new Date(), 2),
+      target_rolle: 'kanzlei',
+    })
+  } catch (err) {
+    console.error('[AAR-431] startKanzleiSla(ruege_versand) fehlgeschlagen:', err)
+  }
+
   revalidatePath(`/gutachter/fall/${fallId}`)
   revalidatePath(`/admin/faelle/${fallId}`)
   return { success: true }

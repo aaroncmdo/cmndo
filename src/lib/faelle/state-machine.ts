@@ -153,6 +153,32 @@ export async function transitionFallStatus(
     }
   } catch (err) { console.error('[AAR-85] SLA Status-Hook:', err) }
 
+  // AAR-431: Kanzlei-SLA-Tracking
+  try {
+    const { startKanzleiSla } = await import('@/lib/sla/kanzlei-tracker')
+    const { addWorkingDays } = await import('@/lib/sla/workdays')
+
+    // Bei Kanzlei-Übergabe → AS-Versand-SLA (2 WT)
+    if (newStatus === 'kanzlei-uebergeben') {
+      await startKanzleiSla(fallId, 'kanzlei_as_versand', {
+        phase: 'kanzlei_uebergabe',
+        deadline: addWorkingDays(new Date(), 2),
+        target_rolle: 'kanzlei',
+      })
+    }
+
+    // Bei VS-Kürzung → Kanzlei-Antwort-SLA (3 WT)
+    if (newStatus === 'vs-kuerzt') {
+      await startKanzleiSla(fallId, 'kanzlei_kuerzung_antwort', {
+        phase: 'vs_antwort',
+        deadline: addWorkingDays(new Date(), 3),
+        target_rolle: 'kanzlei',
+      })
+    }
+  } catch (err) {
+    console.error('[AAR-431] Kanzlei-SLA Status-Hook:', err)
+  }
+
   // AAR-313: Auto-Task „Mietwagen / Nutzungsausfall klären" für KB,
   // sobald die Besichtigung läuft. Idempotent über task_code.
   if (newStatus === 'besichtigung' || newStatus === 'begutachtung-laeuft') {

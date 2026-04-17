@@ -101,6 +101,10 @@
       "schedule": "*/15 * * * *"
     },
     {
+      "path": "/api/cron/kanzlei-sla-check",
+      "schedule": "0 8 * * *"
+    },
+    {
       "path": "/api/cron/maik-monatsabrechnung",
       "schedule": "0 9 1 * *"
     },
