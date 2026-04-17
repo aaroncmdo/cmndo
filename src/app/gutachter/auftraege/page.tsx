@@ -7,8 +7,12 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import Link from 'next/link'
 import AuftragCard from './AuftragCard'
+import { FALL_STATUS_LABELS, getUrsacheLabel } from '@/lib/statusLabels'
 
-const STATUS_LABEL: Record<string, string> = {
+// AAR-410: Lokale Kurzform-Labels (weicht bewusst von FALL_STATUS_LABELS ab —
+// Aufträge-Karte will die knappere Variante „Neu"/„Termin" statt „Gutachter
+// zugewiesen"/„Termin vereinbart"). Default-Fallback auf FALL_STATUS_LABELS.
+const AUFTRAEGE_STATUS_KURZ: Record<string, string> = {
   'sv-zugewiesen': 'Neu',
   'sv-termin': 'Termin',
   'gutachten-eingegangen': 'Gutachten',
@@ -18,17 +22,6 @@ const STATUS_LABEL: Record<string, string> = {
   regulierung: 'Regulierung',
   abgeschlossen: 'Abgeschlossen',
   storniert: 'Storniert',
-}
-
-const URSACHE_LABEL: Record<string, string> = {
-  wasserschaden: 'Wasserschaden',
-  sachbeschaedigung: 'Sachbeschädigung',
-  brand: 'Brand',
-  einbruch: 'Einbruch',
-  sturmschaden: 'Sturmschaden',
-  vandalismus: 'Vandalismus',
-  verschleiss: 'Verschleiß',
-  sonstiges: 'Sonstiges',
 }
 
 export default async function AuftraegePage({
@@ -201,10 +194,12 @@ export default async function AuftraegePage({
                         }
                       : null
                   }
-                  ursacheLabel={
-                    URSACHE_LABEL[fall.schadens_ursache ?? ''] ?? '—'
+                  ursacheLabel={getUrsacheLabel(fall.schadens_ursache)}
+                  statusLabel={
+                    AUFTRAEGE_STATUS_KURZ[fall.status] ??
+                    FALL_STATUS_LABELS[fall.status] ??
+                    fall.status
                   }
-                  statusLabel={STATUS_LABEL[fall.status] ?? fall.status}
                 />
               )
             })}

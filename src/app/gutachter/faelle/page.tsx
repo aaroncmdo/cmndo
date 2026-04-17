@@ -10,44 +10,8 @@ import Link from 'next/link'
 import { CalendarIcon, NavigationIcon, PhoneIcon } from 'lucide-react'
 import FaelleFilterBar from './FaelleFilterBar'
 import PhoneButton from '@/components/shared/PhoneButton'
-
-const STATUS_LABEL: Record<string, string> = {
-  'sv-zugewiesen': 'Zugewiesen',
-  'sv-termin': 'Termin vereinbart',
-  besichtigung: 'Besichtigung',
-  'gutachten-eingegangen': 'Gutachten erstellt',
-  filmcheck: 'Im Filmcheck',
-  'kanzlei-uebergeben': 'Bei Kanzlei',
-  anschlussschreiben: 'Anschlussschreiben',
-  regulierung: 'Regulierung',
-  abgeschlossen: 'Abgeschlossen',
-  storniert: 'Storniert',
-}
-
-const STATUS_COLOR: Record<string, string> = {
-  'sv-zugewiesen': 'bg-[#4573A2]/5 text-[#7BA3CC]',
-  'sv-termin': 'bg-[#0D1B3E] text-[#7BA3CC]',
-  besichtigung: 'bg-[#4573A2]/5 text-[#7BA3CC]',
-  'gutachten-eingegangen': 'bg-violet-50 text-violet-300',
-  filmcheck: 'bg-yellow-50 text-yellow-300',
-  'kanzlei-uebergeben': 'bg-green-50 text-green-300',
-  anschlussschreiben: 'bg-green-900 text-green-200',
-  regulierung: 'bg-emerald-50 text-emerald-300',
-  abgeschlossen: 'bg-emerald-900 text-emerald-200',
-  storniert: 'bg-red-50 text-red-300',
-}
-
-const URSACHE_LABEL: Record<string, string> = {
-  wasserschaden: 'Wasserschaden',
-  sachbeschaedigung: 'Sachbeschädigung',
-  brand: 'Brand',
-  einbruch: 'Einbruch',
-  sturmschaden: 'Sturmschaden',
-  vandalismus: 'Vandalismus',
-  verschleiss: 'Verschleiß',
-  sonstiges: 'Sonstiges',
-  kfz: 'Kfz-Schaden',
-}
+import FallStatusBadge from '@/components/shared/FallStatusBadge'
+import SchadensUrsacheBadge from '@/components/shared/SchadensUrsacheBadge'
 
 type FilterKey = 'alle' | 'neue' | 'bearbeitung' | 'gutachten' | 'abgeschlossen'
 
@@ -311,7 +275,7 @@ export default async function GutachterFaellePage({
                           </td>
                           <td className="px-4 py-3 text-gray-800">{name}</td>
                           <td className="px-4 py-3 text-gray-700 whitespace-nowrap">
-                            {URSACHE_LABEL[fall.schadens_ursache ?? ''] ?? '—'}
+                            <SchadensUrsacheBadge ursache={fall.schadens_ursache} plain />
                           </td>
                           <td className="px-4 py-3 text-gray-500 text-xs">
                             {fall.schadens_ort ?? '—'}
@@ -326,13 +290,7 @@ export default async function GutachterFaellePage({
                               : '—'}
                           </td>
                           <td className="px-4 py-3">
-                            <span
-                              className={`px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
-                                STATUS_COLOR[fall.status] ?? 'bg-gray-100 text-gray-700'
-                              }`}
-                            >
-                              {STATUS_LABEL[fall.status] ?? fall.status}
-                            </span>
+                            <FallStatusBadge status={fall.status} size="md" />
                           </td>
                           <td className="px-4 py-3">
                             {fall.ungelesene_nachrichten > 0 && (
@@ -375,17 +333,11 @@ export default async function GutachterFaellePage({
                             {fall.ungelesene_nachrichten}
                           </span>
                         )}
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
-                            STATUS_COLOR[fall.status] ?? 'bg-gray-100 text-gray-700'
-                          }`}
-                        >
-                          {STATUS_LABEL[fall.status] ?? fall.status}
-                        </span>
+                        <FallStatusBadge status={fall.status} size="md" />
                       </div>
                     </div>
                     <div className="flex gap-4 text-xs text-gray-500">
-                      <span>{URSACHE_LABEL[fall.schadens_ursache ?? ''] ?? '—'}</span>
+                      <SchadensUrsacheBadge ursache={fall.schadens_ursache} plain />
                       <span>{fall.schadens_ort ?? '—'}</span>
                       {fall.sv_termin && (
                         <span>

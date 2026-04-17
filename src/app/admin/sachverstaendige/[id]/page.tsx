@@ -2,11 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import SvDetailClient from './SvDetailClient'
-import { FALL_STATUS_LABELS, FALL_STATUS_COLORS } from '@/lib/statusLabels'
 import { getSvStatus } from '@/lib/sv-status'
-
-const STATUS_LABEL = FALL_STATUS_LABELS
-const STATUS_COLOR = FALL_STATUS_COLORS
+import FallStatusBadge from '@/components/shared/FallStatusBadge'
 
 export default async function SvDetailPage({
   params,
@@ -189,9 +186,7 @@ export default async function SvDetailPage({
                         className="block px-3 py-2.5 border-b border-gray-50 hover:bg-gray-50 transition-colors">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-medium text-gray-800 truncate">{kunde}</span>
-                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${STATUS_COLOR[fall.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                            {STATUS_LABEL[fall.status] ?? fall.status}
-                          </span>
+                          <FallStatusBadge status={fall.status} size="xs" />
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-[10px] text-[#4573A2] font-mono">{fall.fall_nummer ?? fall.id.slice(0, 8)}</span>

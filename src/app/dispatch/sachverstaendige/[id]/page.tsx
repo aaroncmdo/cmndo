@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { getSvStatus } from '@/lib/sv-status'
 import PhoneButton from '@/components/shared/PhoneButton'
+import FallStatusBadge from '@/components/shared/FallStatusBadge'
 
 export default async function DispatchSvDetailPage({
   params,
@@ -152,7 +153,7 @@ export default async function DispatchSvDetailPage({
                       <p className="font-medium text-gray-900 truncate">{kundeName}</p>
                       <p className="text-[10px] text-gray-400">Fall {f.fall_nummer ?? f.id.slice(0, 8)}</p>
                     </div>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{f.status}</span>
+                    <FallStatusBadge status={f.status} size="sm" />
                     {f.sv_termin && (
                       <span className="text-[10px] text-gray-500 tabular-nums">
                         {new Date(f.sv_termin).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}

@@ -7,18 +7,8 @@ import {
   PlayIcon, CheckCircle2Icon, SkipForwardIcon, XCircleIcon,
 } from 'lucide-react'
 import RouteNavigator, { type Stop as NavStop } from './RouteNavigator'
-
-const URSACHE_LABEL: Record<string, string> = {
-  wasserschaden: 'Wasserschaden', sachbeschaedigung: 'Sachbeschaedigung', brand: 'Brand',
-  einbruch: 'Einbruch', sturmschaden: 'Sturmschaden', vandalismus: 'Vandalismus',
-  verschleiss: 'Verschleiss', sonstiges: 'Sonstiges',
-}
-const URSACHE_COLOR: Record<string, string> = {
-  wasserschaden: 'bg-[#4573A2]/5 text-[#7BA3CC]', sachbeschaedigung: 'bg-orange-50 text-orange-300',
-  brand: 'bg-red-50 text-red-300', einbruch: 'bg-purple-50 text-purple-300',
-  sturmschaden: 'bg-cyan-50 text-cyan-300', vandalismus: 'bg-pink-950 text-pink-300',
-  verschleiss: 'bg-amber-50 text-amber-300', sonstiges: 'bg-gray-100 text-gray-700',
-}
+import SchadensUrsacheBadge from '@/components/shared/SchadensUrsacheBadge'
+import { getUrsacheLabel } from '@/lib/statusLabels'
 
 export type StopData = {
   id: string
@@ -84,14 +74,14 @@ export default function RouteClient({
         geocoded.push({
           id: s.id, fallNummer: s.fallNummer, name: s.name, address: s.address, time: s.time,
           lat: loc?.lat ?? 50.9375, lng: loc?.lng ?? 6.9603,
-          ursache: s.schadenTyp ? (URSACHE_LABEL[s.schadenTyp] ?? s.schadenTyp) : '',
+          ursache: s.schadenTyp ? getUrsacheLabel(s.schadenTyp) : '',
           telefon: s.telefon, kennzeichen: s.kennzeichen, fahrzeug: s.fahrzeug, vorschaden: s.vorschaden,
         })
       } catch {
         geocoded.push({
           id: s.id, fallNummer: s.fallNummer, name: s.name, address: s.address, time: s.time,
           lat: 50.9375, lng: 6.9603,
-          ursache: s.schadenTyp ? (URSACHE_LABEL[s.schadenTyp] ?? s.schadenTyp) : '',
+          ursache: s.schadenTyp ? getUrsacheLabel(s.schadenTyp) : '',
           telefon: s.telefon, kennzeichen: s.kennzeichen, fahrzeug: s.fahrzeug, vorschaden: s.vorschaden,
         })
       }
@@ -177,9 +167,7 @@ export default function RouteClient({
                       )}
                       <div className="flex flex-wrap items-center gap-2">
                         {stop.schadenTyp && (
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${URSACHE_COLOR[stop.schadenTyp] ?? 'bg-gray-100 text-gray-700'}`}>
-                            {URSACHE_LABEL[stop.schadenTyp] ?? stop.schadenTyp}
-                          </span>
+                          <SchadensUrsacheBadge ursache={stop.schadenTyp} size="md" />
                         )}
                         <span className="text-gray-300 text-xs font-mono">{stop.fallNummer}</span>
                         {stop.status === 'erledigt' && <span className="text-green-500 text-xs">Erledigt</span>}

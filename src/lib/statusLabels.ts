@@ -81,6 +81,38 @@ export const FALL_STATUS_COLORS: Record<string, string> = {
   storniert: 'bg-red-950 text-red-300 border-red-800',
 }
 
+// ─── Schadens-Ursache (Fallakte + Routen + Aufträge) ───────────────────────
+// AAR-410: Zentral statt pro Component hartkodiert.
+
+export const SCHADENS_URSACHE_LABELS: Record<string, string> = {
+  wasserschaden: 'Wasserschaden',
+  sachbeschaedigung: 'Sachbeschädigung',
+  brand: 'Brand',
+  einbruch: 'Einbruch',
+  sturmschaden: 'Sturmschaden',
+  vandalismus: 'Vandalismus',
+  verschleiss: 'Verschleiß',
+  sonstiges: 'Sonstiges',
+  kfz: 'Kfz-Schaden',
+}
+
+export const SCHADENS_URSACHE_COLORS: Record<string, string> = {
+  wasserschaden: 'bg-[#4573A2]/5 text-[#7BA3CC]',
+  sachbeschaedigung: 'bg-orange-50 text-orange-700',
+  brand: 'bg-red-50 text-red-700',
+  einbruch: 'bg-purple-50 text-purple-700',
+  sturmschaden: 'bg-cyan-50 text-cyan-700',
+  vandalismus: 'bg-pink-50 text-pink-700',
+  verschleiss: 'bg-amber-50 text-amber-700',
+  sonstiges: 'bg-gray-100 text-gray-700',
+  kfz: 'bg-[#4573A2]/5 text-[#7BA3CC]',
+}
+
+export function getUrsacheLabel(code: string | null | undefined): string {
+  if (!code) return '—'
+  return SCHADENS_URSACHE_LABELS[code] ?? code
+}
+
 // ─── VS-Timer Schritte (Kanzlei-Ansicht) ───────────────────────────────────
 
 export const VS_STUFEN_LABELS: Record<string, string> = {
