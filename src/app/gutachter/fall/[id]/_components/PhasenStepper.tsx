@@ -1,9 +1,11 @@
 'use client'
 
-// AAR-289: Horizontaler Phasen-Stepper für die SV-Fallakte (Phase 4 → 5 → 6).
-// Aktive Phase Ondo Blue, abgeschlossene grün, zukünftige grau. Mobile
-// scrollbar.
+// AAR-289 / AAR-394: Horizontaler Phasen-Stepper für die SV-Fallakte
+// (Phase 4 → 5 → 6). Aktive Phase Ondo Blue, abgeschlossene grün, zukünftige
+// grau. AAR-394: füllt jetzt die volle Breite (w-full + flex-1 an den
+// Verbindungslinien), damit die Pills sich gleichmäßig verteilen.
 
+import { Fragment } from 'react'
 import { CheckIcon, CircleIcon } from 'lucide-react'
 
 const PHASES = [
@@ -29,7 +31,7 @@ export function PhasenStepper({
 
   return (
     <div
-      className="flex items-center gap-1 sm:gap-2 overflow-x-auto pb-1"
+      className="flex items-center gap-1 sm:gap-2 overflow-x-auto pb-1 w-full"
       role="list"
       aria-label="Fallphasen"
     >
@@ -37,11 +39,12 @@ export function PhasenStepper({
         const isCompleted = p.num < currentPhase
         const isCurrent = p.num === currentPhase
         return (
-          <div key={p.num} className="flex items-center gap-1 sm:gap-2 shrink-0" role="listitem">
+          <Fragment key={p.num}>
             <div
+              role="listitem"
               aria-current={isCurrent ? 'step' : undefined}
               aria-label={`Phase ${p.num} ${p.label} ${isCompleted ? 'abgeschlossen' : isCurrent ? 'aktuell' : 'offen'}`}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-medium ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-medium shrink-0 ${
                 isCurrent
                   ? 'bg-[#4573A2] text-white'
                   : isCompleted
@@ -60,13 +63,13 @@ export function PhasenStepper({
             </div>
             {i < PHASES.length - 1 && (
               <div
-                className={`w-4 sm:w-6 h-px ${
+                className={`w-4 sm:w-auto sm:flex-1 sm:min-w-6 h-px ${
                   isCompleted ? 'bg-emerald-300' : 'bg-gray-200'
                 }`}
                 aria-hidden="true"
               />
             )}
-          </div>
+          </Fragment>
         )
       })}
     </div>
