@@ -1,0 +1,134 @@
+'use client'
+
+// AAR-382: Haupt-Orchestrator für den Fokus-Modus.
+// Verbindet Mapbox-Karte, Sidebar und Live-Tracking-Hook. Verwaltet den
+// aktuellen Stop-Index lokal (initialisiert aus session.aktueller_termin_id),
+// reagiert auf Geofence-Events und leitet Fortschritts-Callbacks durch.
+
+import { useCallback, useMemo, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import type { SvTagesSession } from '@/lib/types/field-modus'
+import type { FeldmodusStop, FeldmodusSV } from './page'
+import FeldmodusMap from './FeldmodusMap'
+import RouteSidebar from './RouteSidebar'
+import { useFieldTracking } from './useFieldTracking'
+import { markArrived } from './actions'
+
+export interface FeldmodusClientProps {
+  session: SvTagesSession
+  sv: FeldmodusSV
+  stops: FeldmodusStop[]
+}
+
+export default function FeldmodusClient({
+  session,
+  sv,
+  stops,
+}: FeldmodusClientProps) {
+  const router = useRouter()
+
+  const initialIndex = useMemo(() => {
+    if (!session.aktueller_termin_id) return 0
+    const idx = stops.findIndex(
+      (s) => s.termin_id === session.aktueller_termin_id,
+    )
+    return idx >= 0 ? idx : 0
+  }, [session.aktueller_termin_id, stops])
+
+  const [aktuellerStopIndex, setAktuellerStopIndex] = useState(initialIndex)
+  const [sessionStatus, setSessionStatus] = useState(session.status)
+  const geofenceLockRef = useRef(false)
+
+  const aktuellerStop = stops[aktuellerStopIndex] ?? null
+  const trackingEnabled =
+    sv.live_tracking_enabled &&
+    sessionStatus !== 'finished' &&
+    sessionStatus !== 'paused'
+
+  const onGeofenceReached = useCallback(
+    async (pos: { lat: number; lng: number }) => {
+      if (!aktuellerStop) return
+      if (geofenceLockRef.current) return
+      geofenceLockRef.current = true
+      const res = await markArrived(
+        session.id,
+        aktuellerStop.termin_id,
+        pos.lat,
+        pos.lng,
+        'geofence',
+      )
+      if (res.success) {
+        toast.success('Ankunft automatisch erkannt (100 m Radius)')
+        setSessionStatus('arrived')
+        router.refresh()
+      } else {
+        geofenceLockRef.current = false
+        toast.error(res.error ?? 'Auto-Ankunft fehlgeschlagen')
+      }
+    },
+    [aktuellerStop, session.id, router],
+  )
+
+  const { position, distanceMeters, permissionState, error } = useFieldTracking({
+    enabled: trackingEnabled,
+    targetLat: aktuellerStop?.lat ?? null,
+    targetLng: aktuellerStop?.lng ?? null,
+    onGeofenceReached,
+  })
+
+  const onAdvanced = useCallback(
+    (nextTerminId: string | null) => {
+      if (!nextTerminId) {
+        setSessionStatus('finished')
+        router.refresh()
+        return
+      }
+      const nextIdx = stops.findIndex((s) => s.termin_id === nextTerminId)
+      if (nextIdx >= 0) {
+        setAktuellerStopIndex(nextIdx)
+        setSessionStatus('idle')
+        geofenceLockRef.current = false
+      }
+      router.refresh()
+    },
+    [stops, router],
+  )
+
+  return (
+    <div className="h-full w-full flex flex-col lg:flex-row">
+      {/* Karte — oben auf mobile, links auf desktop */}
+      <div className="relative h-1/2 lg:h-full lg:flex-1">
+        <FeldmodusMap
+          sv={sv}
+          stops={stops}
+          aktuellerStopIndex={aktuellerStopIndex}
+          svPosition={position}
+        />
+        {permissionState === 'denied' && (
+          <div className="absolute top-2 left-2 right-2 rounded-md bg-red-600/90 text-white text-xs px-3 py-2">
+            GPS-Zugriff verweigert — Auto-Ankunft und Live-Tracking deaktiviert.
+          </div>
+        )}
+        {error && permissionState !== 'denied' && (
+          <div className="absolute top-2 left-2 right-2 rounded-md bg-amber-600/90 text-white text-xs px-3 py-2">
+            GPS-Warnung: {error}
+          </div>
+        )}
+      </div>
+
+      {/* Sidebar — unten auf mobile, rechts auf desktop */}
+      <div className="h-1/2 lg:h-full lg:w-[380px] lg:border-l lg:border-white/10">
+        <RouteSidebar
+          sessionId={session.id}
+          sessionStatus={sessionStatus}
+          stops={stops}
+          aktuellerStopIndex={aktuellerStopIndex}
+          svPosition={position ? { lat: position.lat, lng: position.lng } : null}
+          distanceMeters={distanceMeters}
+          onAdvanced={onAdvanced}
+        />
+      </div>
+    </div>
+  )
+}
