@@ -464,4 +464,17 @@ export const COMMUNICATION_REGISTRY: Record<string, TriggerConfig> = {
     has_attachment: false,
     description: 'Einladungs-Email an neuen Mitarbeiter',
   },
+
+  // AAR-352: Multi-Slot-Upload-Anfrage — ein Link, mehrere Dokumente.
+  // Template muss {{1}} Vorname + {{2}} Upload-Link enthalten. Loest die
+  // Einzel-Templates zb1_upload_anfrage + polizeibericht_upload_anfrage ab.
+  dokumente_upload_anfrage: {
+    trigger_name: 'dokumente_upload_anfrage',
+    channel: 'whatsapp',
+    recipient: 'kunde',
+    t_number: null,
+    whatsapp_template_name: 'dokumente_upload_anfrage',
+    has_attachment: false,
+    description: 'AAR-352: Multi-Slot-Upload-Anfrage (Fahrzeugschein/Polizeibericht/sonstige)',
+  },
 }

@@ -15,12 +15,13 @@ import { useCarQuery } from '../hooks/useCarQuery'
 // funktionsreif und Text irritierte — Cardentity läuft jetzt im Hintergrund
 // via ZB1-OCR-Trigger in /api/ocr-fahrzeugschein Step 6).
 // AAR-311: Manueller Cardentity-Typ-B-Trigger als shared Komponente.
-import Zb1UploadCard from './Zb1UploadCard'
+// AAR-352: Zb1UploadCard + PolizeiberichtUploadCard ersetzt durch
+// DokumenteAnfordernCard (kombinierte Multi-Slot-Anfrage in einem Link).
+import DokumenteAnfordernCard from './DokumenteAnfordernCard'
 import { CardentityTypBButton } from '@/components/cardentity/CardentityTypBButton'
 import { requestCardentityTypBForLead } from '../actions/cardentity'
 // AAR-314: Auslandskennzeichen — Anfrage an Deutsches Büro Grüne Karte mit Reminder
 import { setGrueneKarteAngefragt } from '../actions/gruene-karte'
-import PolizeiberichtUploadCard from './PolizeiberichtUploadCard'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import VersicherungAutocomplete, { type VersicherungSelection } from '@/components/VersicherungAutocomplete'
 import {
@@ -558,29 +559,21 @@ export default function Phase4Stammdaten() {
           (Vorname/Nachname/Telefon/Email) werden bereits in Phase 1/5
           erfasst bzw. editiert. Doppelte Eingabe verwirrt den MA. */}
 
-      {/* AAR-182: ZB1-Upload-Karte — „Fahrzeugschein zur Hand?"-Toggle +
-          WA/SMS/Email-Versand. Kunde antwortet mit Foto → OCR füllt
-          KZ/Marke/Modell/Baujahr/Halter automatisch aus. */}
-      <Zb1UploadCard
+      {/* AAR-352: Kombinierte Dokumenten-Anfrage — Dispatcher wählt Fahrzeugschein
+          (mit/ohne OCR), Polizeibericht und/oder freie Dokumente aus und verschickt
+          einen gemeinsamen Upload-Link. Legacy-WhatsApp-Inbound bleibt intakt, weil
+          die Server-Action die zb1- und polizeibericht-Felder auf leads spiegelt. */}
+      <DokumenteAnfordernCard
         leadId={leadId}
         zb1Status={l.zb1_status ?? null}
         zb1HochgeladenAm={l.zb1_hochgeladen_am ?? null}
+        polizeiberichtStatus={l.polizeibericht_status ?? null}
+        polizeiberichtHochgeladenAm={l.polizeibericht_hochgeladen_am ?? null}
+        zeigePolizeibericht={l.polizei_vor_ort === true && l.polizeibericht_pflicht === true}
         telefon={l.telefon ?? null}
         email={l.email ?? null}
       />
 
-      {/* AAR-263: Polizeibericht-Upload — nur wenn Polizei vor Ort UND Bericht
-          existiert. Wenn nur Aktenzeichen (polizeibericht_pflicht=false)
-          ist die Karte nicht nötig — das Aktenzeichen reicht aus. */}
-      {l.polizei_vor_ort === true && l.polizeibericht_pflicht === true && (
-        <PolizeiberichtUploadCard
-          leadId={leadId}
-          polizeiberichtStatus={l.polizeibericht_status ?? null}
-          polizeiberichtHochgeladenAm={l.polizeibericht_hochgeladen_am ?? null}
-          telefon={l.telefon ?? null}
-          email={l.email ?? null}
-        />
-      )}
 
       {/* 1. Fahrzeugdaten — AAR-194: Baujahr OBEN, dann Marke + Modell
           dynamisch via CarQuery (gefiltert nach Baujahr falls gesetzt). */}

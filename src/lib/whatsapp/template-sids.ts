@@ -42,6 +42,8 @@ export type TemplateName =
   | 'nachbesichtigung_angefordert'
   | 'nachbesichtigung_termin'
   | 'nachbesichtigung_abgeschlossen'
+  // AAR-352: Multi-Slot-Upload-Anfrage (Vorname + Upload-Link)
+  | 'dokumente_upload_anfrage'
   // KFZ-200 → KFZ-201: SV-Navigation Templates konsolidiert zu T21-T25:
   //   sv_nav_unterwegs    → sv_losgefahren (T21)
   //   sv_nav_15min        → sv_fast_da (T22)
@@ -93,6 +95,8 @@ export const TEMPLATE_CONFIGS: Record<TemplateName, TemplateConfig> = {
   nachbesichtigung_angefordert: { envKey: 'TWILIO_TPL_NACHBESICHTIGUNG_ANGEFORDERT', variableCount: 2, beschreibung: 'Nachbesichtigung angefordert (Vorname, Portal-Link)' },
   nachbesichtigung_termin:      { envKey: 'TWILIO_TPL_NACHBESICHTIGUNG_TERMIN', variableCount: 3, beschreibung: 'Nachbesichtigung Termin (Vorname, Datum, Portal-Link)' },
   nachbesichtigung_abgeschlossen: { envKey: 'TWILIO_TPL_NACHBESICHTIGUNG_ABGESCHLOSSEN', variableCount: 2, beschreibung: 'Nachbesichtigung abgeschlossen (Vorname, Portal-Link)' },
+  // AAR-352: Multi-Slot-Upload-Anfrage — Vorname + Upload-Link
+  dokumente_upload_anfrage:     { envKey: 'TWILIO_TPL_DOKUMENTE_UPLOAD_ANFRAGE', variableCount: 2, beschreibung: 'AAR-352: Multi-Slot-Upload-Anfrage (Vorname, Upload-Link)' },
 }
 
 /**

@@ -117,6 +117,10 @@ const TEMPLATES: Record<TemplateName, (vars: Record<string, string>) => string> 
   nachbesichtigung_abgeschlossen: (v) =>
     `Hallo ${v['1'] ?? ''}, die Nachbesichtigung Ihres Fahrzeugs ist abgeschlossen. Wir informieren Sie sobald das Ergebnis vorliegt. Portal: ${v['2'] ?? ''}`,
 
+  // AAR-352: Multi-Slot-Upload-Anfrage — 1=Vorname, 2=Upload-Link
+  dokumente_upload_anfrage: (v) =>
+    `Hallo ${v['1'] ?? ''}, bitte laden Sie die angefragten Dokumente über folgenden Link hoch: ${v['2'] ?? ''} (Link gültig 7 Tage). Claimondo`,
+
 }
 // KFZ-200 → KFZ-201: SV-Navigation Templates (sv_nav_unterwegs, sv_nav_15min,
 // sv_nav_5min, sv_nav_angekommen, sv_begutachtung_fertig) wurden konsolidiert:

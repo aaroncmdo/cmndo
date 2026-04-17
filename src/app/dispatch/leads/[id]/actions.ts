@@ -27,7 +27,9 @@ export {
   getNextFreeSlotsForSv,
 } from './actions/sv-termin'
 export { sendFlowLinkMultiChannel } from './actions/flowlink'
-export { triggerZb1UploadRequest } from './actions/zb1'
-export { triggerPolizeiberichtUploadRequest } from './actions/polizeibericht'
+// AAR-352: triggerZb1UploadRequest + triggerPolizeiberichtUploadRequest ersetzt
+// durch kombinierten Multi-Slot-Trigger. Legacy-Dateien sind gelöscht.
+export { triggerDokumenteUploadRequest } from './actions/dokumente-anfordern'
+export type { SlotEingabe } from './actions/dokumente-anfordern'
 export { searchVersicherungen, getVersicherungById, type VersicherungSuggestion } from './actions/versicherungen'
 export type { HardGateData, SvSuggestion, UnfallortKategorie } from './actions/types'
