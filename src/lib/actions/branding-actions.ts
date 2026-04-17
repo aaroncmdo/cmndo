@@ -71,8 +71,11 @@ export async function saveGutachterBranding(data: {
   // secondary (Color-Picker-Pfad). Vorher wurde brand_theme hier nicht
   // gesetzt → Profil-Save überschrieb brand_primary/secondary aber das
   // Theme blieb stale.
-  const { generateTheme } = await import('@/lib/branding/theme')
-  const theme = { ...generateTheme(data.brand_primary), secondary: data.brand_secondary }
+  // AAR-419 Follow-up: themeFromLegacy(primary, secondary) statt manuellem
+  // Spread — leitet secondaryHover/Active/Soft korrekt vom User-Secondary ab
+  // (vorher blieben sie auf dem Primary-abgeleiteten Auto-Secondary gekeyed).
+  const { themeFromLegacy } = await import('@/lib/branding/theme')
+  const theme = themeFromLegacy(data.brand_primary, data.brand_secondary)
 
   const updateData: Record<string, unknown> = {
     brand_primary: data.brand_primary,
@@ -275,8 +278,9 @@ export async function saveSvBrandColors(params: {
 
   // AAR-220: Theme aus dem manuell gewählten primary regenerieren — secondary
   // bleibt der User-Wert (Override).
-  const { generateTheme: genTheme } = await import('@/lib/branding/theme')
-  const theme = { ...genTheme(params.brand_primary), secondary: params.brand_secondary }
+  // AAR-419 Follow-up: themeFromLegacy() statt Spread — rederived Variants.
+  const { themeFromLegacy } = await import('@/lib/branding/theme')
+  const theme = themeFromLegacy(params.brand_primary, params.brand_secondary)
 
   const db = createAdminClient()
   const { error } = await db.from('sachverstaendige').update({
@@ -315,8 +319,9 @@ export async function saveBueroBrandColors(params: {
   }
 
   // AAR-220: Theme regenerieren mit User-Override für secondary.
-  const { generateTheme: genTheme } = await import('@/lib/branding/theme')
-  const theme = { ...genTheme(params.brand_primary), secondary: params.brand_secondary }
+  // AAR-419 Follow-up: themeFromLegacy() statt Spread — rederived Variants.
+  const { themeFromLegacy } = await import('@/lib/branding/theme')
+  const theme = themeFromLegacy(params.brand_primary, params.brand_secondary)
 
   await db.from('organisationen').update({
     brand_primary: params.brand_primary,

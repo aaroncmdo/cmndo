@@ -63,6 +63,13 @@ export type BrandTheme = {
   danger?: string
   info?: string
 
+  // V2 Typography (AAR-421): Referenz auf ein Paar aus dem Font-Registry
+  // (src/lib/branding/fonts.ts). Null → Claimondo-Default (kanoo_1). Consumer
+  // laden via getFontPair(fontPairId) → cssStack. Die Font-Metadaten selbst
+  // (family, weights) bleiben im Registry, hier nur die ID damit das Theme
+  // portable bleibt und nicht mit Google-Fonts-URLs versionsabhängig wird.
+  fontPairId?: string | null
+
   // V2 Metadata
   contrastSafe?: boolean
   version?: number
@@ -112,6 +119,8 @@ export const CLAIMONDO_DEFAULT_THEME: BrandThemeV2 = {
   warning: '#F59E0B',
   danger: '#EF4444',
   info: '#3B82F6',
+  // Typography — null = Claimondo-Default (kanoo_1, Inter/Inter).
+  fontPairId: null,
 }
 
 // Alias-Name für neue V2-Consumer, die den Schema-Stand explizit referenzieren wollen.
@@ -375,6 +384,9 @@ export function generateTheme(primaryHex: string): BrandThemeV2 {
     warning: status.warning,
     danger: status.danger,
     info: status.info,
+    // Font-Pair wird nicht aus der Primary-Farbe abgeleitet — Claude-Vision
+    // (AAR-420) oder der User setzt das separat. Default null = kanoo_1.
+    fontPairId: null,
   }
 
   const contrastSafe = ensureContrastSafe(baseTheme)
@@ -418,8 +430,19 @@ export function hydrateTheme(
     return themeFromLegacy(fallbackPrimary ?? null, fallbackSecondary ?? null)
   }
 
-  // Voll-Generator auf Basis von stored.primary; dann alle explizit gesetzten
-  // Keys aus stored überschreiben, sodass manuelle User-Anpassungen erhalten bleiben.
+  // V1-Record (kein version-Feld): Behandle stored.secondary als User-Override
+  // und leite Hover/Active/Soft davon ab — sonst bleiben die Variants auf dem
+  // Primary-abgeleiteten Auto-Secondary gekeyed (gleicher Bug wie in
+  // branding-actions.ts Pre-Follow-up).
+  if (stored.version !== 2) {
+    const base = themeFromLegacy(stored.primary, stored.secondary ?? null)
+    // Explizit gesetzte V1-Keys (accent, sidebarBg, textOnPrimary, surface)
+    // als User-Edit respektieren.
+    return { ...base, ...stored, version: 2 } as BrandThemeV2
+  }
+
+  // V2-Record: Voll-Generator auf Basis von stored.primary; dann alle
+  // explizit gesetzten Keys aus stored überschreiben.
   const generated = generateTheme(stored.primary)
   return { ...generated, ...stored, version: 2 } as BrandThemeV2
 }

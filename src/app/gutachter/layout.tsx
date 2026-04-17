@@ -77,10 +77,17 @@ export default async function GutachterLayout({
   }
 
   // AAR-220: Theme + Firmenname nur wenn use_custom_branding aktiv.
+  // AAR-419 Follow-up: hydrateTheme() statt raw-Fallback — garantiert V2-
+  // Volle-Hydrierung auch für alte V1-only brand_theme-Records in der DB
+  // (sonst waren primaryHover/Status/Neutrale undefined im Consumer).
   const useBrand = !!sv?.use_custom_branding
-  const { themeFromLegacy } = await import('@/lib/branding/theme')
+  const { hydrateTheme } = await import('@/lib/branding/theme')
   const brandTheme = useBrand
-    ? (sv?.brand_theme ?? themeFromLegacy(sv?.brand_primary ?? null, sv?.brand_secondary ?? null))
+    ? hydrateTheme(
+        sv?.brand_theme as Parameters<typeof hydrateTheme>[0],
+        sv?.brand_primary ?? null,
+        sv?.brand_secondary ?? null,
+      )
     : null
 
   return (
