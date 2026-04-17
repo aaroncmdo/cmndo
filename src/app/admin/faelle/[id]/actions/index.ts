@@ -19,6 +19,7 @@ export {
   uebergebeFallKlage,
 } from './prozess'
 export { createKbVideoterminByKb } from './termine'
+export { regenerateSvBriefing } from './briefing'
 
 // Re-exports aus dem vorhandenen Monolith (wird später zerlegt):
 export {

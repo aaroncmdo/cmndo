@@ -9,6 +9,8 @@ import { VideoIcon } from 'lucide-react'
 import { FALL_STATUS_LABELS, FALL_STATUS_COLORS } from '@/lib/statusLabels'
 import { useFall } from '../FallContext'
 import { createKbVideoterminByKb } from '../actions/termine'
+// AAR-377: Shared BriefingCard — oben in der Übersicht.
+import BriefingCard from '@/components/fall/BriefingCard'
 import type { StammdatenSection } from '@/lib/fall/phase-config'
 import {
   KundendatenSection,
@@ -37,8 +39,14 @@ const SECTION_COMPONENTS: Partial<Record<StammdatenSection, () => React.JSX.Elem
 }
 
 export default function UebersichtTab() {
-  const { fall, visibleSections, refreshFall } = useFall()
+  const { fall, visibleSections, refreshFall, userRolle } = useFall()
   const status = fall.status ?? 'ersterfassung'
+  // AAR-377: Regenerate-Button nur für Admin + Kundenbetreuer.
+  const canRegenerateBriefing = userRolle === 'admin' || userRolle === 'kundenbetreuer'
+  const briefingText = (fall.sv_briefing_text as string | null) ?? null
+  const briefingGeneratedAt = (fall.sv_briefing_generated_at as string | null) ?? null
+  const briefingModel = (fall.sv_briefing_model as string | null) ?? null
+  const briefingVersion = (fall.sv_briefing_version as number | null) ?? null
   const statusLabel = FALL_STATUS_LABELS[status] ?? status
   const statusCls =
     FALL_STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600 border-gray-200'
@@ -83,6 +91,16 @@ export default function UebersichtTab() {
 
   return (
     <div className="space-y-4">
+      {/* AAR-377: SV-Briefing (AI) — shared Card, oben in der Übersicht */}
+      <BriefingCard
+        fallId={fall.id}
+        briefing={briefingText}
+        generatedAt={briefingGeneratedAt}
+        model={briefingModel}
+        version={briefingVersion}
+        canRegenerate={canRegenerateBriefing}
+      />
+
       {/* Status-Header */}
       <div className="bg-white border border-gray-200 rounded-xl p-5 flex items-start justify-between gap-3 flex-wrap">
         <div>

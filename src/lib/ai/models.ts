@@ -18,6 +18,12 @@ export const AI_MODELS = {
    * Input — Haiku 4.5 reicht, günstig und schnell.
    */
   fall_summary: 'claude-haiku-4-5-20251001',
+  /**
+   * AAR-377: SV-Briefing vor Vor-Ort-Termin. 3-5 Sätze, aus Fall/Lead-Daten
+   * zusammengefasst. Sonnet 4.6 — Qualität und guter deutscher Sprachstil
+   * wichtiger als Speed (Batch-Generierung beim Fall-Anlegen).
+   */
+  sv_briefing: 'claude-sonnet-4-6',
 } as const
 
 export type AiModelKey = keyof typeof AI_MODELS

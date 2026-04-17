@@ -871,6 +871,23 @@ export async function signSAandCreateFall(
     )
   }
 
+  // AAR-377: SV-Briefing asynchron generieren. Der Fall ist bereits angelegt —
+  // wenn die Claude-API Probleme macht, bleibt das Briefing NULL und kann
+  // jederzeit manuell via Regenerate-Button nachgeholt werden.
+  slaPromises.push(
+    (async () => {
+      try {
+        const { generateSvBriefing } = await import('@/lib/ai/briefing')
+        const result = await generateSvBriefing(fall.id)
+        if (!result.success) {
+          console.warn('[AAR-377] Briefing-Generierung nicht erfolgreich:', result.error)
+        }
+      } catch (err) {
+        console.error('[AAR-377] Briefing-Generierung unerwartet:', err)
+      }
+    })(),
+  )
+
   // Alle Trigger parallel ausfuehren — Fehler einzelner Trigger blockieren nicht
   await Promise.allSettled(slaPromises)
 

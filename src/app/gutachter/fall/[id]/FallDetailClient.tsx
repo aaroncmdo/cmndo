@@ -33,6 +33,8 @@ import { NachbesichtigungCard } from './_components/NachbesichtigungCard'
 import { ReklamationsCard } from './_components/ReklamationsCard'
 import { AbrechnungsartCard } from './_components/AbrechnungsartCard'
 import FallakteVollClient from './FallakteVollClient'
+// AAR-377: Shared BriefingCard — in der SV-Fallakte read-only (kein Regenerate).
+import BriefingCard from '@/components/fall/BriefingCard'
 import type { GutachterTask } from '@/hooks/useGutachterTasks'
 import type { SvAbrechnungInput } from '@/lib/gutachter/abrechnung'
 // AAR-327: Dokument-Anforderungs-UI (Modal + Liste, wiederverwendbar)
@@ -238,6 +240,15 @@ export default function FallDetailClient(props: Props) {
       {/* 2-Spalten-Layout: Desktop ≥1024px sticky-links, Mobile stacked */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_1fr] gap-4 sm:gap-6">
         <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start min-w-0">
+          {/* AAR-377: SV-Briefing ganz oben in der Sidebar — read-only für SV */}
+          <BriefingCard
+            fallId={fall.id as string}
+            briefing={(fall.sv_briefing_text as string | null) ?? null}
+            generatedAt={(fall.sv_briefing_generated_at as string | null) ?? null}
+            model={(fall.sv_briefing_model as string | null) ?? null}
+            version={(fall.sv_briefing_version as number | null) ?? null}
+            canRegenerate={false}
+          />
           <JetztZuTunCard
             fallId={fall.id as string}
             initialTasks={props.tasks ?? []}
