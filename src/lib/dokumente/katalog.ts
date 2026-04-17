@@ -22,6 +22,7 @@ export type DokumentKategorie =
   | 'kanzlei'
   | 'gutachten'
   | 'sonstiges'
+  | 'gutachter_verifizierung' // AAR-359: SV-seitige Verifizierungs-Slots
 
 export type DokumentKatalogRow = {
   slot_id: string
