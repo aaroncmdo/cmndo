@@ -455,7 +455,7 @@ export default function GutachterShell({
           </div>
         )}
 
-        <main id="main-content" role="main" className="flex-1 overflow-hidden">{children}</main>
+        <main id="main-content" role="main" className="flex-1 overflow-hidden p-2 sm:p-3 lg:p-4">{children}</main>
       </div>
     </div>
   )
