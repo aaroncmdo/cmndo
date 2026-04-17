@@ -55,6 +55,7 @@ export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon, kbAvatar
           </button>
         </div>
 
+        {/* TODO AAR-412: PhoneButton-Migration — Kunden-facing, low priority */}
         {kbTelefon && (
           <a href={`tel:${kbTelefon}`} className="text-xs text-[#4573A2] hover:underline block">
             {kbTelefon}

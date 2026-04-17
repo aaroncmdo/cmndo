@@ -60,6 +60,7 @@ export default function SaeuleMeinAnwalt({ mandatstyp, serviceTyp, vollmacht_sta
         </a>
 
         <div className="flex gap-3 pt-0.5">
+          {/* TODO AAR-412: PhoneButton-Migration — Kunden-facing, low priority */}
           <a href={`tel:+${LEXDRIVE_WHATSAPP}`} className="flex items-center gap-1.5 text-xs text-[#4573A2] hover:underline">
             <PhoneIcon className="w-3.5 h-3.5" /> Anrufen
           </a>

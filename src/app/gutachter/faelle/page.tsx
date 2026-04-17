@@ -9,6 +9,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CalendarIcon, NavigationIcon, PhoneIcon } from 'lucide-react'
 import FaelleFilterBar from './FaelleFilterBar'
+import PhoneButton from '@/components/shared/PhoneButton'
 
 const STATUS_LABEL: Record<string, string> = {
   'sv-zugewiesen': 'Zugewiesen',
@@ -247,12 +248,12 @@ export default async function GutachterFaellePage({
                         <NavigationIcon className="w-4 h-4" /> Navigation starten
                       </a>
                       {lead?.telefon && (
-                        <a
-                          href={`tel:${lead.telefon}`}
-                          className="flex items-center justify-center gap-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl px-4 py-2.5 text-sm transition-colors"
-                        >
-                          <PhoneIcon className="w-4 h-4" /> Anrufen
-                        </a>
+                        <PhoneButton
+                          nummer={lead.telefon}
+                          variant="card"
+                          label="Anrufen"
+                          className="justify-center !bg-white !border !border-gray-200 hover:!bg-gray-50 !text-gray-700 !rounded-xl !px-4 !py-2.5 text-sm"
+                        />
                       )}
                     </div>
                   </div>

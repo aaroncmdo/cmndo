@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import RueckrufActions from './RueckrufActions'
+import PhoneButton from '@/components/shared/PhoneButton'
 
 export default async function DispatchRueckrufe() {
   const supabase = await createClient()
@@ -30,7 +31,7 @@ export default async function DispatchRueckrufe() {
                 </Link>
                 <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
                   {lead.telefon && (
-                    <a href={`tel:${lead.telefon}`} className="text-[#4573A2] hover:underline">{lead.telefon}</a>
+                    <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} />
                   )}
                   {lead.rueckruf_datum && (
                     <span className={isOverdue ? 'text-red-600 font-medium' : ''}>

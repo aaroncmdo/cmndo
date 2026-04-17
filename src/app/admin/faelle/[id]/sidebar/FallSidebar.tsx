@@ -8,6 +8,7 @@
 // Monolith-Retirement (W3+) extrahiert.
 
 import { PhoneIcon, MailIcon, UserIcon, HardHatIcon, BriefcaseIcon } from 'lucide-react'
+import PhoneButton from '@/components/shared/PhoneButton'
 import Link from 'next/link'
 import { useFall } from '../FallContext'
 import QuickActions from './QuickActions'
@@ -58,9 +59,7 @@ export default function FallSidebar({
           {[lead?.vorname, lead?.nachname].filter(Boolean).join(' ') || '—'}
         </p>
         {lead?.telefon && (
-          <a href={`tel:${lead.telefon}`} className="text-[11px] text-[#4573A2] hover:underline flex items-center gap-1">
-            <PhoneIcon className="w-3 h-3" /> {lead.telefon}
-          </a>
+          <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} className="text-[11px]" />
         )}
         {lead?.email && (
           <a href={`mailto:${lead.email}`} className="text-[11px] text-[#4573A2] hover:underline flex items-center gap-1 truncate">

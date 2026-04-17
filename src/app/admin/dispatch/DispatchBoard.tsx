@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import RueckrufModal from '@/components/RueckrufModal'
+import PhoneButton from '@/components/shared/PhoneButton'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import { updateFallStatus, updateLeadStatus, createLead } from './actions'
 import {
@@ -554,10 +555,13 @@ export default function DispatchBoard({
                     )}
                     <div className="min-w-0 flex-1"><p className="text-gray-800 text-sm truncate">{name}</p></div>
                     {lead.telefon && (
-                      <a href={`tel:${lead.telefon}`} onClick={e => e.stopPropagation()}
-                        className="flex items-center gap-1 px-2 py-1 rounded-lg bg-green-50 text-green-600 text-xs font-medium hover:bg-green-100 shrink-0">
-                        <PhoneIcon className="w-3 h-3" /> Anrufen
-                      </a>
+                      <PhoneButton
+                        nummer={lead.telefon}
+                        variant="card"
+                        label="Anrufen"
+                        stopPropagation
+                        className="!bg-green-50 !text-green-600 hover:!bg-green-100 !px-2 !py-1 !rounded-lg text-xs shrink-0"
+                      />
                     )}
                   </button>
                 )
@@ -788,9 +792,7 @@ export default function DispatchBoard({
                         </td>
                         <td className="py-2 px-2">
                           {lead.telefon && (
-                            <a href={`tel:${lead.telefon}`} onClick={e => e.stopPropagation()} className="text-[#4573A2] hover:underline">
-                              {lead.telefon}
-                            </a>
+                            <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} stopPropagation />
                           )}
                         </td>
                         <td className="py-2 px-2">
@@ -863,11 +865,7 @@ export default function DispatchBoard({
                 {/* Contact Info */}
                 <div className="space-y-2">
                   {selectedLead.telefon && (
-                    <a href={`tel:${selectedLead.telefon}`}
-                      className="flex items-center gap-2 text-sm text-[#4573A2] hover:text-[#1E3A5F] transition-colors">
-                      <PhoneIcon className="w-3.5 h-3.5" />
-                      {selectedLead.telefon}
-                    </a>
+                    <PhoneButton nummer={selectedLead.telefon} variant="inline" label={selectedLead.telefon} className="text-sm" />
                   )}
                   {selectedLead.email && (
                     <a href={`mailto:${selectedLead.email}`}
@@ -999,10 +997,12 @@ export default function DispatchBoard({
                 {/* Quick Actions */}
                 <div className="flex flex-col gap-2 pt-2">
                   {selectedLead.telefon && (
-                    <a href={`tel:${selectedLead.telefon}`}
-                      className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium px-4 py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
-                      <PhoneIcon className="w-3.5 h-3.5" /> Jetzt anrufen
-                    </a>
+                    <PhoneButton
+                      nummer={selectedLead.telefon}
+                      variant="card"
+                      label="Jetzt anrufen"
+                      className="!bg-emerald-500 hover:!bg-emerald-600 !px-4 !py-2.5 !rounded-xl text-xs font-medium"
+                    />
                   )}
                   <Link href={`/admin/dispatch/lead/${selectedLead.id}`}
                     className="bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-xs font-medium px-4 py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
@@ -1051,10 +1051,9 @@ function LeadCard({ lead, columnKey, isSelected }: { lead: Lead; columnKey: stri
 
       {/* Telefon */}
       {lead.telefon && (
-        <a href={`tel:${lead.telefon}`} onClick={e => e.stopPropagation()}
-          className="text-[#4573A2] hover:text-[#4573A2] text-[11px] mb-1.5 block truncate transition-colors">
-          {lead.telefon}
-        </a>
+        <div className="mb-1.5">
+          <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} stopPropagation className="text-[11px]" />
+        </div>
       )}
 
       {/* Badges row */}

@@ -4,12 +4,13 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { APIProvider, Map, Marker, useMap } from '@vis.gl/react-google-maps'
 import {
-  NavigationIcon, PhoneIcon, CameraIcon, FileTextIcon, XIcon,
+  NavigationIcon, CameraIcon, FileTextIcon, XIcon,
   CheckCircle2Icon, SkipForwardIcon, ChevronUpIcon, ChevronDownIcon,
   MapPinIcon, ClockIcon, AlertTriangleIcon, SendIcon, HashIcon, CalculatorIcon,
 } from 'lucide-react'
 import { haversineMeters } from '@/lib/gps/geofence'
 import { markAnkunft, skipStop, completeBesichtigung, uploadFotoVorOrt } from './actions'
+import PhoneButton from '@/components/shared/PhoneButton'
 
 export type Stop = {
   id: string
@@ -444,10 +445,12 @@ export default function RouteNavigator({ stops, apiKey }: { stops: Stop[]; apiKe
                       <SkipForwardIcon className="w-4 h-4" /> Überspringen
                     </button>
                     {currentStop.telefon && (
-                      <a href={`tel:${currentStop.telefon}`}
-                        className="py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors flex items-center justify-center gap-2 min-h-[48px] text-sm">
-                        <PhoneIcon className="w-4 h-4" /> Anrufen
-                      </a>
+                      <PhoneButton
+                        nummer={currentStop.telefon}
+                        variant="inline"
+                        label="Anrufen"
+                        className="!py-3 !bg-gray-100 hover:!bg-gray-200 !text-gray-700 !font-medium !rounded-xl !transition-colors !flex !items-center !justify-center !gap-2 !min-h-[48px] !text-sm"
+                      />
                     )}
                   </div>
                 </div>

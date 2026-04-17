@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
-import { MapPinIcon, PhoneIcon, NavigationIcon, ClockIcon, CarIcon, AlertTriangleIcon, CheckCircleIcon, LocateIcon, HandIcon } from 'lucide-react'
+import { MapPinIcon, NavigationIcon, ClockIcon, CarIcon, AlertTriangleIcon, CheckCircleIcon, LocateIcon, HandIcon } from 'lucide-react'
 import HeuteMap, { type MapTermin } from '@/components/maps/HeuteMap'
 import { useWatchPosition } from '@/lib/gps/use-watch-position'
 import { trackPosition } from '@/lib/gps/track-position'
@@ -14,6 +14,7 @@ import { triggerSvLosgefahren } from '@/lib/termine/trigger-losgefahren'
 import { notifyKundeAngekommen } from '@/lib/termine/notify-kunde-angekommen'
 import type { HeuteTermin } from './page'
 import { formatUhrzeit } from '@/lib/format'
+import PhoneButton from '@/components/shared/PhoneButton'
 
 // KFZ-158 Phase 1: Tagesroute Client-Component.
 // Vollbild-Layout: Map oben (60%), Bottom-Sheet mit Termin-Liste unten (40%).
@@ -220,12 +221,11 @@ export default function HeuteRouteClient({
               <ClockIcon className="w-4 h-4" />
             </button>
             {naechsterTermin.kunde_telefon && (
-              <a
-                href={`tel:${naechsterTermin.kunde_telefon}`}
-                className="flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-[#1E3A5F] border border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold shadow-lg transition-colors"
-              >
-                <PhoneIcon className="w-4 h-4" />
-              </a>
+              <PhoneButton
+                nummer={naechsterTermin.kunde_telefon}
+                variant="iconOnly"
+                className="!flex !items-center !justify-center !gap-2 !bg-white hover:!bg-gray-50 !text-[#1E3A5F] !border !border-gray-200 !rounded-xl !px-4 !py-3 !text-sm !font-semibold !shadow-lg !transition-colors"
+              />
             )}
           </div>
         )}
@@ -302,14 +302,12 @@ export default function HeuteRouteClient({
                       <NavigationIcon className="w-3.5 h-3.5" />
                     </a>
                     {t.kunde_telefon && (
-                      <a
-                        href={`tel:${t.kunde_telefon}`}
-                        onClick={e => e.stopPropagation()}
-                        className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600"
-                        title="Anrufen"
-                      >
-                        <PhoneIcon className="w-3.5 h-3.5" />
-                      </a>
+                      <PhoneButton
+                        nummer={t.kunde_telefon}
+                        variant="iconOnly"
+                        stopPropagation
+                        className="!p-1.5 !rounded-lg !bg-emerald-50 hover:!bg-emerald-100 !text-emerald-600"
+                      />
                     )}
                   </div>
                 </div>

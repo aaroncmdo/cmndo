@@ -9,6 +9,7 @@ import {
   AlertTriangleIcon, UserIcon, CheckCircleIcon,
 } from 'lucide-react'
 import { getSvStatus } from '@/lib/sv-status'
+import PhoneButton from '@/components/shared/PhoneButton'
 
 export default async function DispatchSvDetailPage({
   params,
@@ -86,10 +87,11 @@ export default async function DispatchSvDetailPage({
             <h2 className="text-sm font-semibold text-gray-900">Kontaktdaten</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <div className="flex items-center gap-2">
-                <PhoneIcon className="w-4 h-4 text-gray-400" />
                 {profile?.telefon ? (
-                  <a href={`tel:${profile.telefon}`} className="text-[#4573A2] hover:underline">{profile.telefon}</a>
-                ) : <span className="text-gray-400">—</span>}
+                  <PhoneButton nummer={profile.telefon} variant="inline" label={profile.telefon} />
+                ) : (
+                  <><PhoneIcon className="w-4 h-4 text-gray-400" /><span className="text-gray-400">—</span></>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <MailIcon className="w-4 h-4 text-gray-400" />

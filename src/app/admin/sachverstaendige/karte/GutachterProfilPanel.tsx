@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { updateGutachterProfil, reactivateGutachter, deleteGutachter } from './actions'
 import SvKalenderModal from './SvKalenderModal'
+import PhoneButton from '@/components/shared/PhoneButton'
 import {
   XIcon,
   PhoneIcon,
@@ -416,9 +417,12 @@ export default function GutachterProfilPanel({
             </button>
             <div className="flex gap-2">
               {sv.telefon && (
-                <a href={`tel:${sv.telefon}`} className="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-900 text-sm font-medium py-2.5 rounded-xl transition-colors">
-                  <PhoneIcon className="w-3.5 h-3.5" /> Anrufen
-                </a>
+                <PhoneButton
+                  nummer={sv.telefon}
+                  variant="card"
+                  label="Anrufen"
+                  className="flex-1 justify-center !bg-gray-100 hover:!bg-gray-200 !text-gray-900 text-sm font-medium !py-2.5 !rounded-xl !px-0"
+                />
               )}
               {sv.email && (
                 <a href={`mailto:${sv.email}`} className="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-900 text-sm font-medium py-2.5 rounded-xl transition-colors">

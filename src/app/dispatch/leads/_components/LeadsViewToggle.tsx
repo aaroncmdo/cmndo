@@ -9,6 +9,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { PhoneIcon, ExternalLinkIcon, LayoutGridIcon, ListIcon } from 'lucide-react'
 import { PHASE_BADGES, PHASE_LABELS, KANBAN_PHASEN } from './leadPhaseConstants'
+import PhoneButton from '@/components/shared/PhoneButton'
 
 type Lead = {
   id: string
@@ -97,10 +98,7 @@ function ListView({ leads }: { leads: Lead[] }) {
                   </td>
                   <td className="px-4 py-3">
                     {lead.telefon ? (
-                      <a href={`tel:${lead.telefon}`} className="flex items-center gap-1 text-[#4573A2] hover:underline">
-                        <PhoneIcon className="w-3 h-3" />
-                        {lead.telefon}
-                      </a>
+                      <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} />
                     ) : (
                       <span className="text-gray-300">—</span>
                     )}

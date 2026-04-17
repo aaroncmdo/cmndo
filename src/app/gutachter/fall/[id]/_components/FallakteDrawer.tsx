@@ -19,6 +19,7 @@ import {
   PhoneIcon,
   MailIcon,
 } from 'lucide-react'
+import PhoneButton from '@/components/shared/PhoneButton'
 
 type DocLite = {
   id?: string
@@ -268,13 +269,12 @@ function TeamListe({
                 Direkt chatten
               </button>
               {m.telefon && (
-                <a
-                  href={`tel:${m.telefon}`}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-xs font-medium hover:bg-gray-50"
-                >
-                  <PhoneIcon className="w-3.5 h-3.5" />
-                  Anrufen
-                </a>
+                <PhoneButton
+                  nummer={m.telefon}
+                  variant="inline"
+                  label="Anrufen"
+                  className="!px-3 !py-1.5 !rounded-lg !border !border-gray-200 !bg-white !text-gray-700 !text-xs !font-medium hover:!bg-gray-50"
+                />
               )}
             </div>
           </div>

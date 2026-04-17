@@ -8,7 +8,7 @@ import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useDispatchPhase } from '../lib/phase-context'
 import { sendFlowLinkMultiChannel } from '../actions'
-import AircallCallButton from '@/components/AircallCallButton'
+import PhoneButton from '@/components/shared/PhoneButton'
 import {
   CheckCircle2Icon,
   CircleIcon,
@@ -206,9 +206,8 @@ export default function Phase6StatusTracking({
           </p>
           {l.telefon && (
             <div className="flex items-center gap-2 pt-1">
-              <PhoneIcon className="w-3.5 h-3.5 text-red-700" />
-              <a href={`tel:${l.telefon}`} className="text-xs text-red-700 underline">{l.telefon}</a>
-              <AircallCallButton phoneNumber={l.telefon} leadId={lead.id} variant="icon" />
+              <PhoneButton nummer={l.telefon} variant="inline" className="text-xs text-red-700 underline" />
+              <PhoneButton nummer={l.telefon} mode="aircall" variant="iconOnly" leadId={lead.id} />
             </div>
           )}
         </div>

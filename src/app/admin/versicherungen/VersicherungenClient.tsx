@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { SearchIcon, PhoneIcon, MailIcon, GlobeIcon, PlusIcon, XIcon } from 'lucide-react'
+import PhoneButton from '@/components/shared/PhoneButton'
 
 type Versicherung = {
   id: string
@@ -113,9 +114,7 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
                 <td className="px-4 py-2.5 font-medium text-gray-900 text-xs">{v.name}</td>
                 <td className="px-4 py-2.5 text-xs">
                   {v.schaden_telefon ? (
-                    <a href={`tel:${v.schaden_telefon}`} className="text-[#4573A2] hover:underline flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                      <PhoneIcon className="w-3 h-3" /> {v.schaden_telefon}
-                    </a>
+                    <PhoneButton nummer={v.schaden_telefon} variant="inline" label={v.schaden_telefon} stopPropagation />
                   ) : <span className="text-gray-300">—</span>}
                 </td>
                 <td className="px-4 py-2.5 text-xs">
@@ -229,9 +228,7 @@ function Row({ label, value, type }: { label: string; value: string | null; type
     <div className="flex justify-between items-center py-1.5 border-b border-gray-50">
       <span className="text-xs text-gray-400">{label}</span>
       {type === 'tel' ? (
-        <a href={`tel:${value}`} className="text-xs text-[#4573A2] hover:underline flex items-center gap-1">
-          <PhoneIcon className="w-3 h-3" /> {value}
-        </a>
+        <PhoneButton nummer={value} variant="inline" label={value} className="text-xs" />
       ) : type === 'email' ? (
         <a href={`mailto:${value}`} className="text-xs text-[#4573A2] hover:underline flex items-center gap-1">
           <MailIcon className="w-3 h-3" /> {value}

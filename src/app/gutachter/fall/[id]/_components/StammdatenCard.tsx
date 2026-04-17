@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import { CardentityTypBButton } from '@/components/cardentity/CardentityTypBButton'
 import { requestCardentityTypBForFallSv } from '../cardentity-actions'
+import PhoneButton from '@/components/shared/PhoneButton'
 
 type Lead = {
   vorname: string | null
@@ -131,15 +132,7 @@ export function StammdatenCard({
             )}
             <div className="text-[11px] text-gray-500 space-y-0.5 mt-0.5">
               {lead?.telefon && (
-                <p className="flex items-center gap-1">
-                  <PhoneIcon className="w-3 h-3" />
-                  <a
-                    href={`tel:${lead.telefon}`}
-                    className="hover:text-[#4573A2]"
-                  >
-                    {lead.telefon}
-                  </a>
-                </p>
+                <p><PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} className="!text-gray-500 hover:!text-[#4573A2] hover:!no-underline" /></p>
               )}
               {lead?.email && (
                 <p className="flex items-center gap-1 min-w-0">
@@ -298,13 +291,7 @@ export function StammdatenCard({
             )}
             <div className="text-[11px] text-gray-500 mt-0.5 space-y-0.5">
               {halterTelefon && (
-                <a
-                  href={`tel:${halterTelefon}`}
-                  className="flex items-center gap-1 hover:text-[#4573A2]"
-                >
-                  <PhoneIcon className="w-3 h-3" />
-                  {halterTelefon}
-                </a>
+                <PhoneButton nummer={halterTelefon} variant="inline" label={halterTelefon} className="!text-gray-500 hover:!text-[#4573A2] hover:!no-underline" />
               )}
               {halterEmail && (
                 <a
@@ -329,13 +316,7 @@ export function StammdatenCard({
             <p className="text-gray-900 font-medium">{kbName}</p>
             <div className="text-[11px] text-gray-500 mt-0.5 space-y-0.5">
               {kundenbetreuer?.telefon && (
-                <a
-                  href={`tel:${kundenbetreuer.telefon}`}
-                  className="flex items-center gap-1 hover:text-[#4573A2]"
-                >
-                  <PhoneIcon className="w-3 h-3" />
-                  {kundenbetreuer.telefon}
-                </a>
+                <PhoneButton nummer={kundenbetreuer.telefon} variant="inline" label={kundenbetreuer.telefon} className="!text-gray-500 hover:!text-[#4573A2] hover:!no-underline" />
               )}
               {kundenbetreuer?.email && (
                 <a

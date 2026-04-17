@@ -26,6 +26,7 @@ import VorOrtPanel from '@/components/VorOrtPanel'
 import ChatChannel from '@/components/ChatChannel'
 import FallActivityFeed, { buildActivityEvents } from '@/components/faelle/FallActivityFeed'
 import FallDokumenteSidebar, { type FallDokumentRow } from '@/components/faelle/FallDokumenteSidebar'
+import PhoneButton from '@/components/shared/PhoneButton'
 
 const DOKUMENT_TYP_LABEL: Record<string, string> = {
   fahrzeugschein: 'Fahrzeugschein',
@@ -449,9 +450,12 @@ export default function FallakteVollClient({
                     {`${kundenbetreuer.vorname ?? ''} ${kundenbetreuer.nachname ?? ''}`.trim() || '—'}
                   </p>
                   {kundenbetreuer.telefon && (
-                    <a href={`tel:${kundenbetreuer.telefon}`} className="flex items-center gap-2 text-[#7BA3CC] text-sm hover:text-[#7BA3CC]">
-                      <span className="text-gray-500 text-xs">Tel:</span> {kundenbetreuer.telefon}
-                    </a>
+                    <PhoneButton
+                      nummer={kundenbetreuer.telefon}
+                      variant="inline"
+                      label={kundenbetreuer.telefon}
+                      className="!flex !items-center !gap-2 !text-[#7BA3CC] !text-sm hover:!text-[#7BA3CC]"
+                    />
                   )}
                   {kundenbetreuer.email && (
                     <a href={`mailto:${kundenbetreuer.email}`} className="flex items-center gap-2 text-[#7BA3CC] text-sm hover:text-[#7BA3CC] truncate">

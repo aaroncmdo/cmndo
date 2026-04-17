@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import TerminDetailActions from './TerminDetailActions'
 import PolizeiberichtUpload from './PolizeiberichtUpload'
+import PhoneButton from '@/components/shared/PhoneButton'
 
 // KFZ-200: Termin-Detail-Seite mit "Navigation starten"-Button.
 // AAR-126: Vor-Ort-Polizeibericht-Upload wenn polizei_vor_ort=true und Bericht fehlt.
@@ -166,7 +167,7 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
           {lead?.telefon && (
             <div>
               <p className="text-xs text-gray-400">Telefon</p>
-              <a href={`tel:${lead.telefon}`} className="font-medium text-[#4573A2] hover:underline">{lead.telefon}</a>
+              <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} className="!font-medium !text-[#4573A2] hover:!underline" />
             </div>
           )}
           {lead?.email && (
