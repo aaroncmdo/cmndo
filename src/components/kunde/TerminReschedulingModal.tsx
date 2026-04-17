@@ -93,7 +93,8 @@ export default function TerminReschedulingModal({
                 value={wunsch}
                 onChange={(e) => setWunsch(e.target.value)}
                 placeholder={'z. B. „nächste Woche vormittags" oder „ab 21.04. nach 15 Uhr"'}
-                className="mt-1 w-full rounded-md border px-3 py-2 text-sm min-h-[80px]"
+                // AAR-452: text-base verhindert iOS-Autozoom
+                className="mt-1 w-full rounded-md border px-3 py-2 text-base min-h-[80px]"
                 style={{
                   borderColor: 'var(--brand-border, #e5e7eb)',
                   background: 'var(--brand-surface, #ffffff)',
@@ -117,7 +118,7 @@ export default function TerminReschedulingModal({
                 type="button"
                 onClick={onClose}
                 disabled={pending}
-                className="rounded-md border px-3 py-2 text-sm"
+                className="rounded-md border px-4 min-h-[44px] text-sm"
                 style={{
                   borderColor: 'var(--brand-border, #e5e7eb)',
                   color: 'var(--brand-text-secondary, #4b5563)',
@@ -128,7 +129,7 @@ export default function TerminReschedulingModal({
               <button
                 type="submit"
                 disabled={pending}
-                className="rounded-md px-3 py-2 text-sm font-medium disabled:opacity-60"
+                className="rounded-md px-4 min-h-[44px] text-sm font-medium disabled:opacity-60"
                 style={{
                   background: 'var(--brand-primary, #0D1B3E)',
                   color: 'var(--brand-text-on-primary, #ffffff)',
@@ -150,7 +151,7 @@ export default function TerminReschedulingModal({
             <div className="flex justify-end">
               <button
                 onClick={onClose}
-                className="rounded-md px-3 py-2 text-sm font-medium"
+                className="rounded-md px-4 min-h-[44px] text-sm font-medium"
                 style={{
                   background: 'var(--brand-primary, #0D1B3E)',
                   color: 'var(--brand-text-on-primary, #ffffff)',

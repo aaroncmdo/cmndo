@@ -70,7 +70,8 @@ export default function NachbesichtigungClient({ faelle }: { faelle: Nachbesicht
             min={minDate}
             value={selectedDate}
             onChange={e => setSelectedDate(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#4573A2] focus:border-transparent"
+            // AAR-452: text-base (16px) verhindert iOS-Autozoom beim Fokus
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base min-h-[44px] focus:ring-2 focus:ring-[#4573A2] focus:border-transparent"
           />
         </div>
 

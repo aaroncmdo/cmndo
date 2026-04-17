@@ -129,7 +129,8 @@ export default function GutachtenWeiterleitungButton({ fallId, defaultEmail }: P
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="ihre-email@beispiel.de"
-                    className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+                    // AAR-452: text-base verhindert iOS-Autozoom + min-h 44px
+                    className="mt-1 w-full rounded-md border px-3 min-h-[44px] text-base"
                     style={{
                       borderColor: 'var(--brand-border, #d1d5db)',
                       background: 'var(--brand-surface, #ffffff)',

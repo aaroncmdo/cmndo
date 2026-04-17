@@ -303,7 +303,8 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
         <form onSubmit={handleSend} className="flex gap-2">
           <input type="text" value={text} onChange={e => setText(e.target.value)}
             placeholder="Nachricht schreiben..."
-            className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#0D1B3E] placeholder-gray-400 focus:outline-none focus:border-[#4573A2]" />
+            // AAR-452: text-base (16px) verhindert iOS-Autozoom beim Fokus
+            className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-base text-[#0D1B3E] placeholder-gray-400 focus:outline-none focus:border-[#4573A2]" />
           <button type="submit" disabled={sending || !text.trim()}
             className="px-4 py-3 bg-[#4573A2] hover:bg-[#1E3A5F] text-white rounded-xl transition-colors disabled:opacity-40 min-h-12 flex items-center justify-center">
             {sending ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <SendIcon className="w-5 h-5" />}
@@ -390,20 +391,21 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
             <h3 className="text-lg font-semibold text-[#0D1B3E] mb-2">Anderen Termin vorschlagen</h3>
             <p className="text-sm text-gray-500 mb-4">Wählen Sie einen für Sie passenden Termin:</p>
 
+            {/* AAR-452: text-base (16px) + min-h-[44px] für iOS-Kompatibilität */}
             <input type="datetime-local" value={neuerTermin} onChange={e => setNeuerTermin(e.target.value)}
               min={new Date().toISOString().slice(0, 16)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 mb-3 focus:outline-none focus:border-[#4573A2]" />
+              className="w-full border border-gray-200 rounded-lg px-3 min-h-[44px] text-base text-gray-800 mb-3 focus:outline-none focus:border-[#4573A2]" />
             <textarea value={kundeGrund} onChange={e => setKundeGrund(e.target.value)}
               placeholder="Begründung (optional)"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 mb-4 focus:outline-none focus:border-[#4573A2] resize-none" rows={2} />
+              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-base text-gray-800 mb-4 focus:outline-none focus:border-[#4573A2] resize-none" rows={2} />
 
             <div className="flex gap-2">
               <button onClick={() => setShowModal(false)}
-                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
+                className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
                 Abbrechen
               </button>
               <button onClick={handleGegenvorschlag} disabled={loading || !neuerTermin}
-                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-[#4573A2] hover:bg-[#1E3A5F] transition-colors disabled:opacity-50">
+                className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-white bg-[#4573A2] hover:bg-[#1E3A5F] transition-colors disabled:opacity-50">
                 {loading ? 'Wird gesendet...' : 'Vorschlag senden'}
               </button>
             </div>

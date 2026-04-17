@@ -126,7 +126,8 @@ export default function ChatClient({
             value={text}
             onChange={e => setText(e.target.value)}
             placeholder="Nachricht schreiben..."
-            className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#0D1B3E] placeholder-gray-400 focus:outline-none focus:border-[#4573A2]"
+            // AAR-452: text-base (16px) verhindert iOS-Autozoom beim Fokus
+            className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-base text-[#0D1B3E] placeholder-gray-400 focus:outline-none focus:border-[#4573A2]"
           />
           <button
             type="submit"
