@@ -17,6 +17,7 @@ import { FallHeader } from './_components/FallHeader'
 import { AktuellePhaseCard } from './_components/AktuellePhaseCard'
 import { JetztZuTunCard } from './_components/JetztZuTunCard'
 import { StammdatenCard } from './_components/StammdatenCard'
+import { TerminCard } from './_components/TerminCard'
 import { DokumenteUebersichtCard } from './_components/DokumenteUebersichtCard'
 import { TimelineVorschauCard } from './_components/TimelineVorschauCard'
 import { KanzleiRegulierungsStepperCard } from './_components/KanzleiRegulierungsStepperCard'
@@ -288,6 +289,31 @@ export default function FallDetailClient(props: Props) {
 
         <section className="space-y-4 min-w-0">
           <StammdatenCard lead={lead} fall={fall} kundenbetreuer={kundenbetreuer ?? null} />
+          {/* AAR-397: Read-only Termin-Card zwischen Stammdaten und Dokumenten. */}
+          <TerminCard
+            termin={
+              props.aktiverTermin
+                ? {
+                    id: props.aktiverTermin.id,
+                    status: props.aktiverTermin.status,
+                    start_zeit: props.aktiverTermin.start_zeit ?? null,
+                    end_zeit: props.aktiverTermin.end_zeit ?? null,
+                    vorgeschlagenes_datum:
+                      props.aktiverTermin.vorgeschlagenes_datum ?? null,
+                    gegenvorschlag_von:
+                      props.aktiverTermin.gegenvorschlag_von ?? null,
+                    gegenvorschlag_grund:
+                      props.aktiverTermin.gegenvorschlag_grund ?? null,
+                  }
+                : null
+            }
+            fall={{
+              id: fall.id as string,
+              schadens_adresse: (fall.schadens_adresse as string | null) ?? null,
+              schadens_plz: (fall.schadens_plz as string | null) ?? null,
+              schadens_ort: (fall.schadens_ort as string | null) ?? null,
+            }}
+          />
           <DokumenteUebersichtCard
             pflichtdokumente={pflichtdokumente}
             totalDokumente={sichtbarDokumente.length + (sichtbarFallDokumente?.length ?? 0)}
