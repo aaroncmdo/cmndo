@@ -2,6 +2,10 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { berechneProgress, SZENARIO_PHASEN } from '@/components/kunde/stepperConfig'
+import KundeJetztZuTunCard from '@/components/kunde/KundeJetztZuTunCard'
+import { getKundenJetztZuTun, type KundeAktion, type KundeSlaRecord } from '@/lib/kunde/jetzt-zu-tun'
+
+const AKTION_PRIO: Record<KundeAktion['prioritaet'], number> = { hoch: 3, mittel: 2, niedrig: 1 }
 
 export default async function KundeStartseite() {
   const supabase = await createClient()
@@ -89,52 +93,57 @@ export default async function KundeStartseite() {
     // Seite funktioniert trotzdem — ohne Badges
   }
 
-  // AAR-125: Prüfen ob Polizeibericht fehlt für Fälle mit polizei_vor_ort=true
-  // Banner-Trigger: Fall hat polizei_vor_ort=true UND kein polizeibericht-Doc mit URL.
+  // AAR-432: „Jetzt zu tun"-Datenbasis — pro Fall die aktuellste Aktion
+  // berechnen (konsolidiert AAR-168 Nachreichen, AAR-125 Polizeibericht,
+  // KFZ-200 SV-Live-Status, sowie neue States Termin-Bestätigung / Vollmacht /
+  // VS-Warten / Abschluss).
+  // Polizeibericht-Check
+  const fallIdsAll = faelle.map((f) => f.id as string).filter(Boolean)
   const polizeiFaelleIds = faelle
     .filter((f) => f.polizei_vor_ort === true)
     .map((f) => f.id as string)
-  let polizeiBerichtFehltFallId: string | null = null
+  const polizeiBerichtHat = new Set<string>()
   if (polizeiFaelleIds.length) {
     const { data: dokumente } = await supabase
       .from('pflichtdokumente')
       .select('fall_id, dokument_typ, dokument_url')
       .in('fall_id', polizeiFaelleIds)
       .eq('dokument_typ', 'polizeibericht')
-    const hatBerichtFallIds = new Set(
-      (dokumente ?? []).filter((d) => d.dokument_url).map((d) => d.fall_id as string),
-    )
-    polizeiBerichtFehltFallId = polizeiFaelleIds.find((id) => !hatBerichtFallIds.has(id)) ?? null
+    for (const d of dokumente ?? []) {
+      if (d.dokument_url) polizeiBerichtHat.add(d.fall_id as string)
+    }
   }
-
-  // AAR-168: Nachreichen-Banner — Pflichtdokumente deren Status vom KB auf
-  // „nachgereicht_angefordert" gesetzt wurde brauchen die Aufmerksamkeit des
-  // Kunden. Ein Banner zeigt die erste offene Position.
-  const fallIdsForNachreichen = faelle.map((f) => f.id as string).filter(Boolean)
-  let nachreichenHint: { fallId: string; labels: string[] } | null = null
-  if (fallIdsForNachreichen.length) {
+  // Nachreichen-Check
+  const nachreichFallIds = new Set<string>()
+  if (fallIdsAll.length) {
     const { data: nachreichDocs } = await supabase
       .from('pflichtdokumente')
-      .select('fall_id, dokument_typ')
-      .in('fall_id', fallIdsForNachreichen)
+      .select('fall_id')
+      .in('fall_id', fallIdsAll)
       .eq('status', 'nachgereicht_angefordert')
-    if (nachreichDocs && nachreichDocs.length > 0) {
-      const byFall = new Map<string, string[]>()
-      for (const d of nachreichDocs) {
-        const fid = d.fall_id as string
-        if (!byFall.has(fid)) byFall.set(fid, [])
-        byFall.get(fid)!.push(d.dokument_typ as string)
-      }
-      const [first] = byFall.entries().next().value ?? []
-      if (first) {
-        nachreichenHint = { fallId: first, labels: byFall.get(first) ?? [] }
-      }
-    }
+    for (const d of nachreichDocs ?? []) nachreichFallIds.add(d.fall_id as string)
+  }
+  // SLA-Records aus AAR-431 (Child 2) — nur Kunde-Breaches
+  let kundeSlas: KundeSlaRecord[] = []
+  if (fallIdsAll.length) {
+    try {
+      const { createAdminClient: adminCl } = await import('@/lib/supabase/admin')
+      const adminDb = adminCl()
+      const { data: slas } = await adminDb
+        .from('sla_tracking')
+        .select('fall_id, blocker_rolle, blocker_grund, status, breach_at')
+        .in('fall_id', fallIdsAll)
+        .eq('blocker_rolle', 'kunde')
+        .eq('status', 'breached')
+      kundeSlas = (slas ?? []) as KundeSlaRecord[]
+    } catch { /* non-critical */ }
   }
 
   const vorname = profile?.vorname ?? user.email?.split('@')[0] ?? 'Kunde'
 
-  // KFZ-200: SV unterwegs / vor Ort Status laden (non-critical)
+  // KFZ-200: SV unterwegs / vor Ort Status laden (non-critical) — wird ab
+  // AAR-432 nicht mehr als eigenständiger Banner gezeigt, sondern in die
+  // Jetzt-zu-tun-Matrix eingespeist.
   let svUnterwegsInfo: {
     fallId: string
     svVorname: string
@@ -178,91 +187,45 @@ export default async function KundeStartseite() {
     }
   } catch { /* non-critical */ }
 
+  // AAR-432: Pro Fall die aktuellste Aktion berechnen und die höchst-priorisierte
+  // als Haupt-Card zeigen. SLA + Nachreichen + Polizeibericht + SV-Live-Status
+  // fließen alle in getKundenJetztZuTun ein.
+  const aktionen: KundeAktion[] = []
+  for (const f of faelle) {
+    const fid = f.id as string
+    const svLive = svUnterwegsInfo && svUnterwegsInfo.fallId === fid ? svUnterwegsInfo : null
+    const fallCtx = {
+      id: fid,
+      onboarding_complete: (f.onboarding_complete as boolean | null) ?? null,
+      sa_unterschrieben: (f.sa_unterschrieben as boolean | null) ?? null,
+      vollmacht_signiert_am: (f as Record<string, unknown>).vollmacht_signiert_am as string | null,
+      vollmacht_status: (f as Record<string, unknown>).vollmacht_status as string | null,
+      gutachter_termin_status: (f.gutachter_termin_status as string | null) ?? null,
+      sv_termin: (f.sv_termin as string | null) ?? null,
+      anschlussschreiben_am: (f as Record<string, unknown>).anschlussschreiben_am as string | null,
+      regulierung_am: (f.regulierung_am as string | null) ?? null,
+      polizei_vor_ort: (f.polizei_vor_ort as boolean | null) ?? null,
+      polizeibericht_uploaded: polizeiBerichtHat.has(fid),
+      hat_offene_nachreichung: nachreichFallIds.has(fid),
+      sv_unterwegs_seit: svLive && svLive.svUnterwegs ? new Date().toISOString() : null,
+      sv_angekommen_am: svLive && svLive.svVorOrt ? new Date().toISOString() : null,
+      sv_name: svLive?.svVorname ?? null,
+      sv_eta_minuten: svLive?.etaMinuten ?? null,
+      status: (f.status as string | null) ?? null,
+    }
+    const a = getKundenJetztZuTun(fallCtx, kundeSlas)
+    if (a) aktionen.push(a)
+  }
+  aktionen.sort((a, b) => AKTION_PRIO[b.prioritaet] - AKTION_PRIO[a.prioritaet])
+  const topAktion = aktionen[0] ?? null
+
   return (
     <div className="w-full px-4 md:px-8 py-6 max-w-xl md:max-w-none mx-auto">
       <h1 className="text-xl font-bold text-[#0D1B3E] mb-1">Hallo {vorname}</h1>
       <p className="text-sm text-gray-500 mb-6">Hier sehen Sie den Stand Ihrer Fälle.</p>
 
-      {/* AAR-168: Nachreichen-Banner — KB hat zum Nachreichen aufgefordert */}
-      {nachreichenHint && (
-        <div className="bg-orange-50 border-l-4 border-orange-500 rounded-lg p-4 mb-4">
-          <div className="flex items-start gap-3">
-            <span className="text-xl flex-shrink-0">🔔</span>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-orange-900">
-                Bitte noch {nachreichenHint.labels.length === 1 ? 'ein Dokument' : `${nachreichenHint.labels.length} Dokumente`} nachreichen
-              </p>
-              <p className="text-xs text-orange-700 mt-1">
-                Ihr Betreuer bittet um {nachreichenHint.labels.join(', ')}. Bitte jetzt im Onboarding-Wizard hochladen.
-              </p>
-              <Link
-                href="/kunde/onboarding?step=dokumente"
-                className="inline-flex items-center gap-1 mt-2 text-sm font-medium text-orange-900 hover:text-orange-700"
-              >
-                Jetzt hochladen →
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* AAR-125: Polizeibericht-fehlt Banner */}
-      {polizeiBerichtFehltFallId && (
-        <div className="bg-amber-50 border-l-4 border-amber-500 rounded-lg p-4 mb-4">
-          <div className="flex items-start gap-3">
-            <span className="text-xl flex-shrink-0">⚠️</span>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-amber-900">Polizeibericht fehlt</p>
-              <p className="text-xs text-amber-700 mt-1">
-                Die Polizei war bei Ihrem Unfall vor Ort. Bitte laden Sie den Polizeibericht hoch,
-                sobald Sie ihn haben. Falls er bis zum Besichtigungstermin nicht vorliegt,
-                nimmt der Gutachter die Daten vor Ort auf.
-              </p>
-              <Link
-                href="/kunde/onboarding?step=dokumente"
-                className="inline-flex items-center gap-1 mt-2 text-sm font-medium text-amber-900 hover:text-amber-700"
-              >
-                Jetzt hochladen →
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* KFZ-200: SV unterwegs Banner */}
-      {svUnterwegsInfo?.svUnterwegs && (
-        <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-              <span className="text-lg">🚗</span>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-amber-900">Ihr Gutachter ist unterwegs!</p>
-              <p className="text-xs text-amber-700 mt-0.5">
-                {svUnterwegsInfo.svVorname} ist auf dem Weg zu Ihnen.
-                {svUnterwegsInfo.etaMinuten ? ` Ankunft in ca. ${svUnterwegsInfo.etaMinuten} Min.` : ''}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* KFZ-200: SV vor Ort Banner */}
-      {svUnterwegsInfo?.svVorOrt && (
-        <div className="mb-4 bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-              <span className="text-lg">✅</span>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-emerald-900">Ihr Gutachter ist vor Ort!</p>
-              <p className="text-xs text-emerald-700 mt-0.5">
-                {svUnterwegsInfo.svVorname} führt gerade die Begutachtung durch.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* AAR-432: Jetzt-zu-tun-Matrix — ersetzt AAR-168, AAR-125 und KFZ-200 Banner */}
+      <KundeJetztZuTunCard aktion={topAktion} />
 
       {/* AAR-101: Beratungstermin-Card entfernt (KB bucht Videotermine via Google Calendar) */}
 

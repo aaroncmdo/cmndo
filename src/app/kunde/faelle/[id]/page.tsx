@@ -15,6 +15,10 @@ import { saveBankdaten, uploadPflichtdokumentKunde, updateZahlungsweg } from './
 // AAR-319: FAQ-Bot-Card + Historie-Loader
 import { FaqBotCard } from './_components/FaqBotCard'
 import { ladeKundenFaqHistorie } from './faq-bot-actions'
+// AAR-432: Jetzt-zu-tun-Card + Gutachten-Weiterleitung
+import KundeJetztZuTunCard from '@/components/kunde/KundeJetztZuTunCard'
+import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
+import { getKundenJetztZuTun, type KundeSlaRecord } from '@/lib/kunde/jetzt-zu-tun'
 
 export default async function KundeFallDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -122,6 +126,81 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const phasen = SZENARIO_PHASEN[szenario] ?? SZENARIO_PHASEN.normalfall
     const progress = berechneProgress(fall as Record<string, unknown>, phasen)
 
+    // AAR-432: Jetzt-zu-tun-Aktion für diesen Fall berechnen
+    const { data: polizeiDocs } = await admin
+      .from('pflichtdokumente')
+      .select('dokument_typ, dokument_url, status')
+      .eq('fall_id', id)
+    const polizeiberichtUploaded = !!(polizeiDocs ?? []).find(
+      (d) => d.dokument_typ === 'polizeibericht' && !!d.dokument_url,
+    )
+    const hatOffeneNachreichung = !!(polizeiDocs ?? []).find(
+      (d) => d.status === 'nachgereicht_angefordert',
+    )
+    let kundeSlasDetail: KundeSlaRecord[] = []
+    try {
+      const { data: slas } = await admin
+        .from('sla_tracking')
+        .select('fall_id, blocker_rolle, blocker_grund, status, breach_at')
+        .eq('fall_id', id)
+        .eq('blocker_rolle', 'kunde')
+        .eq('status', 'breached')
+      kundeSlasDetail = (slas ?? []) as KundeSlaRecord[]
+    } catch { /* non-critical */ }
+
+    // SV-Live-Status für diesen Fall (sv_unterwegs/sv_angekommen)
+    let svLive: { unterwegs: boolean; vorOrt: boolean; eta: number | null } = {
+      unterwegs: false,
+      vorOrt: false,
+      eta: null,
+    }
+    try {
+      const { data: termine } = await admin
+        .from('gutachter_termine')
+        .select('sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, durchgefuehrt_am')
+        .eq('fall_id', id)
+        .eq('typ', 'sv_begutachtung')
+        .is('durchgefuehrt_am', null)
+        .not('sv_unterwegs_seit', 'is', null)
+        .order('sv_unterwegs_seit', { ascending: false })
+        .limit(1)
+      const t = termine?.[0]
+      if (t) {
+        svLive = {
+          unterwegs: !t.sv_angekommen_am,
+          vorOrt: !!t.sv_angekommen_am,
+          eta: t.sv_eta_minuten ? Number(t.sv_eta_minuten) : null,
+        }
+      }
+    } catch { /* non-critical */ }
+
+    const aktion = getKundenJetztZuTun(
+      {
+        id: fall.id as string,
+        onboarding_complete: (fall.onboarding_complete as boolean | null) ?? null,
+        sa_unterschrieben: (fall.sa_unterschrieben as boolean | null) ?? null,
+        vollmacht_signiert_am: (fall as Record<string, unknown>).vollmacht_signiert_am as string | null,
+        vollmacht_status: (fall as Record<string, unknown>).vollmacht_status as string | null,
+        gutachter_termin_status: (fall.gutachter_termin_status as string | null) ?? null,
+        sv_termin: (fall.sv_termin as string | null) ?? null,
+        gutachter_termin_bestaetigt_am: (fall as Record<string, unknown>).gutachter_termin_bestaetigt_am as string | null,
+        anschlussschreiben_am: (fall.anschlussschreiben_am as string | null) ?? null,
+        regulierung_am: (fall.regulierung_am as string | null) ?? null,
+        polizei_vor_ort: (fall.polizei_vor_ort as boolean | null) ?? null,
+        polizeibericht_uploaded: polizeiberichtUploaded,
+        hat_offene_nachreichung: hatOffeneNachreichung,
+        sv_unterwegs_seit: svLive.unterwegs ? new Date().toISOString() : null,
+        sv_angekommen_am: svLive.vorOrt ? new Date().toISOString() : null,
+        sv_name: svName,
+        sv_eta_minuten: svLive.eta,
+        status: (fall.status as string | null) ?? null,
+        abgeschlossen_am: fall.abgeschlossen_am as string | null,
+      },
+      kundeSlasDetail,
+    )
+
+    const gutachtenVerfuegbar = !!(fall as Record<string, unknown>).gutachten_eingegangen_am
+
     const kennzeichen = (fall.kennzeichen as string) ?? ''
     const fahrzeug = [(fall.fahrzeug_hersteller as string), (fall.fahrzeug_modell as string)].filter(Boolean).join(' ')
     const adresse = (fall.besichtigungsort_adresse as string) || (fall.unfallort as string) || [(fall.schadens_adresse as string), (fall.schadens_plz as string), (fall.schadens_ort as string)].filter(Boolean).join(', ') || ''
@@ -136,6 +215,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           </h1>
           {adresse && <p className="text-sm text-gray-500 mt-0.5">{adresse}</p>}
         </div>
+
+        {/* AAR-432: Jetzt-zu-tun Matrix — eine konsolidierte Aktions-Card */}
+        <KundeJetztZuTunCard aktion={aktion} />
 
         {/* KFZ-206: Status-Card */}
         <FallStatusCard
@@ -274,6 +356,19 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             kbBeschreibung={kbBeschreibung}
           />
         </div>
+
+        {/* AAR-432: Opt-in Gutachten-Weiterleitung — nur sichtbar wenn Gutachten vorliegt */}
+        {gutachtenVerfuegbar && (
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-[#0D1B3E]">Gutachten erhalten?</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Sie können sich das Gutachten auch per E-Mail an sich selbst oder eine Vertrauensperson senden lassen (48h Magic-Link).
+              </p>
+            </div>
+            <GutachtenWeiterleitungButton fallId={fall.id as string} defaultEmail={user.email ?? null} />
+          </div>
+        )}
 
         {/* S3: Meine Aufgaben (Docs + Bankdaten) */}
         <div className="space-y-4">

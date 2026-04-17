@@ -1,0 +1,335 @@
+// AAR-432 (Child 3 von AAR-429): Zentrale Entscheidungs-Matrix für die
+// „Jetzt zu tun"-Karte im Kunden-Portal. Pure Function, testbar.
+//
+// Analog zu `src/lib/gutachter/jetzt-zu-tun.ts` (SV-Matrix).
+// Die 11 Zustände werden nach Priority-Order ausgewertet (first match wins).
+// SLA-Records aus AAR-431 (Child 2) können passende Aktionen auf „hoch" boosten.
+
+export type KundeAktionsTyp =
+  | 'onboarding-offen'
+  | 'pflichtdokumente-offen'
+  | 'polizeibericht-fehlt'
+  | 'daten-an-kanzlei'
+  | 'termin-vor-ort'
+  | 'termin-unterwegs'
+  | 'termin-bestaetigen'
+  | 'vollmacht-unterschreiben'
+  | 'vs-antwort-abwarten'
+  | 'fall-abgeschlossen'
+  | 'kein-aktionsbedarf'
+
+export type KundeAktionVariant = 'default' | 'live' | 'info'
+export type KundeAktionPrioritaet = 'hoch' | 'mittel' | 'niedrig'
+export type KundeAktionSeverity = 'neutral' | 'warning' | 'critical' | 'success'
+
+export type KundeAktion = {
+  state: KundeAktionsTyp
+  prioritaet: KundeAktionPrioritaet
+  titel: string
+  beschreibung: string
+  cta?: { label: string; href: string } | null
+  variant: KundeAktionVariant
+  severity: KundeAktionSeverity
+  deadline_am?: string | null
+  live_data?: {
+    sv_name?: string
+    eta_minuten?: number | null
+    angekommen_seit?: string | null
+  }
+}
+
+/**
+ * Eingabe-Kontext für die Kunde-JetztZuTun-Matrix. Felder die nicht
+ * existieren dürfen weggelassen werden (undefined) — die Logik interpretiert
+ * sie dann als „nicht gesetzt".
+ */
+export type KundeFallContext = {
+  id: string
+  onboarding_complete?: boolean | null
+  sa_unterschrieben?: boolean | null
+  vollmacht_status?: string | null
+  vollmacht_signiert_am?: string | null
+  gutachter_termin_status?: string | null
+  sv_termin?: string | null
+  gutachter_termin_bestaetigt_am?: string | null
+  anschlussschreiben_am?: string | null
+  regulierung_am?: string | null
+  polizei_vor_ort?: boolean | null
+  polizeibericht_uploaded?: boolean | null
+  hat_offene_nachreichung?: boolean | null
+  sv_unterwegs_seit?: string | null
+  sv_angekommen_am?: string | null
+  sv_name?: string | null
+  sv_eta_minuten?: number | null
+  status?: string | null
+  phase?: string | null
+  abgeschlossen_am?: string | null
+}
+
+export type KundeSlaRecord = {
+  fall_id: string
+  blocker_rolle?: string | null
+  status?: string | null
+  breach_at?: string | null
+  blocker_grund?: string | null
+}
+
+/** Permanent-Minimalisierung nach Fall-Abschluss (in Tagen). */
+const FALL_ABGESCHLOSSEN_MINIMAL_NACH_TAGEN = 30
+/** SV-Termin als „vor Ort": innerhalb der nächsten 60 Minuten bis +2h nach Start. */
+const TERMIN_VOR_ORT_FENSTER_VOR_MS = 60 * 60 * 1000
+const TERMIN_VOR_ORT_FENSTER_NACH_MS = 2 * 60 * 60 * 1000
+/** SV-Termin als „unterwegs" noch 2h nach Start (Fallback wenn kein sv_unterwegs_seit). */
+const TERMIN_UNTERWEGS_FENSTER_MS = 2 * 60 * 60 * 1000
+
+function hasSlaBreachForKunde(slaRecords: KundeSlaRecord[] | undefined, fallId: string): KundeSlaRecord | null {
+  if (!slaRecords) return null
+  return (
+    slaRecords.find(
+      (s) => s.fall_id === fallId && s.blocker_rolle === 'kunde' && s.status === 'breached',
+    ) ?? null
+  )
+}
+
+function fmtDate(iso: string | null | undefined): string {
+  if (!iso) return ''
+  try {
+    return new Date(iso).toLocaleString('de-DE', {
+      weekday: 'short',
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  } catch {
+    return iso
+  }
+}
+
+/**
+ * Liefert die EINE höchst-priorisierte Aktion für den Kunden, oder null
+ * wenn keine Aktion passt. Reihenfolge = Priority.
+ */
+export function getKundenJetztZuTun(
+  fall: KundeFallContext,
+  slaRecords?: KundeSlaRecord[],
+): KundeAktion | null {
+  if (!fall || !fall.id) return null
+
+  const fallHref = `/kunde/faelle/${fall.id}`
+  const now = Date.now()
+
+  // 10. Fall-Abschluss: permanent-minimalisiert nach 30 Tagen. Höchster Vorrang
+  // vor allem anderen, weil ein abgeschlossener Fall nichts mehr auslöst.
+  if (fall.status === 'abgeschlossen' || fall.abgeschlossen_am) {
+    const abgeschlossenAm = fall.abgeschlossen_am ? new Date(fall.abgeschlossen_am).getTime() : now
+    const alterTage = (now - abgeschlossenAm) / (1000 * 60 * 60 * 24)
+    if (alterTage > FALL_ABGESCHLOSSEN_MINIMAL_NACH_TAGEN) return null
+    return {
+      state: 'fall-abgeschlossen',
+      prioritaet: 'niedrig',
+      titel: 'Fall abgeschlossen',
+      beschreibung: 'Ihr Schadensfall ist vollständig reguliert. Danke für Ihr Vertrauen!',
+      variant: 'info',
+      severity: 'success',
+      cta: null,
+    }
+  }
+
+  // Storno/geschlossen — nichts zu tun
+  if (fall.status === 'storniert') return null
+
+  // SLA-Breach gegen Kunde (aus AAR-431): wird zum „daten-an-kanzlei"-State
+  // gleich in Priority 4 eingebunden. Wir cachen hier den Breach-Record für Boost.
+  const kundeSlaBreach = hasSlaBreachForKunde(slaRecords, fall.id)
+
+  // 1. Onboarding nicht durchlaufen
+  if (fall.onboarding_complete === false) {
+    return {
+      state: 'onboarding-offen',
+      prioritaet: 'hoch',
+      titel: 'Onboarding abschließen',
+      beschreibung:
+        'Bitte vervollständigen Sie die noch offenen Angaben zu Ihrem Schadensfall. Ohne diese Daten kann Ihr Betreuer den Fall nicht weiter bearbeiten.',
+      cta: { label: 'Jetzt abschließen', href: '/kunde/onboarding' },
+      variant: 'default',
+      severity: 'warning',
+    }
+  }
+
+  // 2. Pflichtdokumente nachreichen (vom KB angefordert)
+  if (fall.hat_offene_nachreichung) {
+    return {
+      state: 'pflichtdokumente-offen',
+      prioritaet: 'hoch',
+      titel: 'Pflichtdokumente nachreichen',
+      beschreibung:
+        'Ihr Betreuer bittet um weitere Dokumente. Bitte laden Sie diese jetzt hoch, damit wir Ihren Fall zügig abschließen können.',
+      cta: { label: 'Dokumente hochladen', href: '/kunde/onboarding?step=dokumente' },
+      variant: 'default',
+      severity: 'warning',
+    }
+  }
+
+  // 3. Polizeibericht fehlt (polizei_vor_ort=true, aber kein Upload)
+  if (fall.polizei_vor_ort && !fall.polizeibericht_uploaded) {
+    return {
+      state: 'polizeibericht-fehlt',
+      prioritaet: 'mittel',
+      titel: 'Polizeibericht hochladen',
+      beschreibung:
+        'Die Polizei war bei Ihrem Unfall vor Ort. Sobald Sie den Bericht haben, laden Sie ihn bitte hoch. Falls nicht rechtzeitig verfügbar, nimmt der Gutachter die Daten vor Ort auf.',
+      cta: { label: 'Jetzt hochladen', href: '/kunde/onboarding?step=dokumente' },
+      variant: 'default',
+      severity: 'warning',
+    }
+  }
+
+  // 4. Daten an Kanzlei (SLA-Breach mit blocker_rolle=kunde)
+  if (kundeSlaBreach) {
+    return {
+      state: 'daten-an-kanzlei',
+      prioritaet: 'hoch',
+      titel: 'Daten für die Kanzlei benötigt',
+      beschreibung:
+        kundeSlaBreach.blocker_grund ??
+        'Die Partnerkanzlei wartet auf noch fehlende Angaben von Ihnen. Bitte öffnen Sie Ihren Fall und prüfen Sie die offenen Punkte.',
+      cta: { label: 'Fall öffnen', href: fallHref },
+      variant: 'default',
+      severity: 'critical',
+      deadline_am: kundeSlaBreach.breach_at ?? null,
+    }
+  }
+
+  // 5. + 6. Live-Termin (SV vor Ort oder unterwegs) — basierend auf sv_angekommen_am /
+  // sv_unterwegs_seit Flags ODER auf sv_termin-Zeitfenster.
+  if (fall.sv_angekommen_am) {
+    return {
+      state: 'termin-vor-ort',
+      prioritaet: 'hoch',
+      titel: 'Ihr Gutachter ist vor Ort',
+      beschreibung: fall.sv_name
+        ? `${fall.sv_name} führt gerade die Begutachtung durch.`
+        : 'Die Begutachtung wird gerade durchgeführt.',
+      variant: 'live',
+      severity: 'success',
+      cta: null,
+      live_data: {
+        sv_name: fall.sv_name ?? undefined,
+        angekommen_seit: fall.sv_angekommen_am,
+      },
+    }
+  }
+
+  if (fall.sv_unterwegs_seit) {
+    return {
+      state: 'termin-unterwegs',
+      prioritaet: 'hoch',
+      titel: 'Ihr Gutachter ist unterwegs',
+      beschreibung: fall.sv_name
+        ? `${fall.sv_name} ist auf dem Weg zu Ihnen${fall.sv_eta_minuten ? ` — Ankunft in ca. ${fall.sv_eta_minuten} Min.` : '.'}`
+        : `Ihr Gutachter ist auf dem Weg${fall.sv_eta_minuten ? ` — Ankunft in ca. ${fall.sv_eta_minuten} Min.` : '.'}`,
+      variant: 'live',
+      severity: 'neutral',
+      cta: null,
+      live_data: {
+        sv_name: fall.sv_name ?? undefined,
+        eta_minuten: fall.sv_eta_minuten ?? null,
+      },
+    }
+  }
+
+  // 5b. Fallback aus sv_termin: Termin läuft gerade (±Fenster)
+  if (fall.sv_termin) {
+    const terminMs = new Date(fall.sv_termin).getTime()
+    if (!Number.isNaN(terminMs)) {
+      // vor Ort: -1h .. +2h um Termin
+      if (now >= terminMs - TERMIN_VOR_ORT_FENSTER_VOR_MS && now <= terminMs + TERMIN_VOR_ORT_FENSTER_NACH_MS) {
+        return {
+          state: 'termin-vor-ort',
+          prioritaet: 'hoch',
+          titel: 'Ihr Besichtigungstermin läuft',
+          beschreibung: `Termin am ${fmtDate(fall.sv_termin)}. Der Gutachter ist entweder auf dem Weg oder bereits vor Ort.`,
+          variant: 'live',
+          severity: 'success',
+          cta: null,
+        }
+      }
+      // unterwegs-Fenster: Termin in nächsten 2h
+      if (terminMs > now && terminMs - now <= TERMIN_UNTERWEGS_FENSTER_MS) {
+        return {
+          state: 'termin-unterwegs',
+          prioritaet: 'hoch',
+          titel: 'Ihr Besichtigungstermin steht bevor',
+          beschreibung: `Termin am ${fmtDate(fall.sv_termin)}. Ihr Gutachter meldet sich kurz vor Eintreffen.`,
+          variant: 'live',
+          severity: 'neutral',
+          cta: null,
+        }
+      }
+    }
+  }
+
+  // 7. Termin-Vorschlag bestätigen
+  const terminStatus = (fall.gutachter_termin_status ?? '').toLowerCase()
+  const terminBestaetigt = !!fall.gutachter_termin_bestaetigt_am
+  if (fall.sv_termin && !terminBestaetigt && (terminStatus === 'reserviert' || terminStatus === 'vorschlag')) {
+    return {
+      state: 'termin-bestaetigen',
+      prioritaet: 'hoch',
+      titel: 'Besichtigungstermin bestätigen',
+      beschreibung: `Ihr Gutachter schlägt ${fmtDate(fall.sv_termin)} vor. Bitte bestätigen oder einen Gegenvorschlag machen.`,
+      cta: { label: 'Termin öffnen', href: fallHref },
+      variant: 'default',
+      severity: 'warning',
+    }
+  }
+
+  // 8. Vollmacht unterschreiben
+  const vollmachtUnterschrieben =
+    fall.sa_unterschrieben === true ||
+    !!fall.vollmacht_signiert_am ||
+    fall.vollmacht_status === 'unterschrieben'
+  if (!vollmachtUnterschrieben) {
+    return {
+      state: 'vollmacht-unterschreiben',
+      prioritaet: 'hoch',
+      titel: 'Vollmacht unterschreiben',
+      beschreibung:
+        'Damit die Partnerkanzlei mit der Versicherung verhandeln darf, brauchen wir Ihre unterschriebene Vollmacht.',
+      cta: { label: 'Jetzt unterschreiben', href: fallHref },
+      variant: 'default',
+      severity: 'warning',
+    }
+  }
+
+  // 9. VS-Antwort abwarten (informativ)
+  const vsStatus = (fall.status ?? '').toLowerCase()
+  if (
+    vsStatus.startsWith('vs-') ||
+    vsStatus === 'anschlussschreiben-versendet' ||
+    (fall.anschlussschreiben_am && !fall.regulierung_am)
+  ) {
+    return {
+      state: 'vs-antwort-abwarten',
+      prioritaet: 'niedrig',
+      titel: 'Wir warten auf die Versicherung',
+      beschreibung:
+        'Ihr Anschlussschreiben ist raus. Die Versicherung hat jetzt eine gesetzliche Frist zur Reaktion — wir melden uns, sobald wir eine Rückmeldung haben.',
+      variant: 'info',
+      severity: 'neutral',
+      cta: null,
+    }
+  }
+
+  // 11. Default: kein Aktionsbedarf
+  return {
+    state: 'kein-aktionsbedarf',
+    prioritaet: 'niedrig',
+    titel: 'Kein Handlungsbedarf',
+    beschreibung: 'Ihr Fall läuft planmäßig — wir melden uns, sobald etwas von Ihnen benötigt wird.',
+    variant: 'info',
+    severity: 'neutral',
+    cta: null,
+  }
+}
