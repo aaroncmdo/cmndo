@@ -6,7 +6,7 @@ import { useState, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   CheckIcon, UploadCloudIcon, CalendarIcon, FileTextIcon, SparklesIcon, FolderOpenIcon,
-  AlertCircleIcon, ClockIcon, RefreshCwIcon,
+  AlertCircleIcon, ClockIcon, RefreshCwIcon, InfoIcon, XIcon,
 } from 'lucide-react'
 import {
   completeOnboarding,
@@ -68,6 +68,56 @@ const LEGACY_DOKTYP_LABELS: Record<string, string> = {
   halter_ausweis: 'Halter-Ausweis',
 }
 
+// AAR-365: Erklärungs-Texte pro Dokument-Slot für das ⓘ Info-Overlay.
+// "warum" = was wird damit gemacht, "wo" = praktischer Hinweis zur Beschaffung.
+// Fehlende Slot-IDs fallen auf ein generisches Default zurück.
+const DOC_INFO: Record<string, { warum: string; wo: string }> = {
+  fahrzeugschein: {
+    warum: 'Wir benötigen die Zulassungsbescheinigung Teil I (ZB1), um Halter, Kennzeichen und Fahrzeugdaten für das Gutachten und die Versicherung zu verifizieren.',
+    wo: 'Den Fahrzeugschein finden Sie im Fahrzeug (oft im Handschuhfach) oder bei Ihren persönlichen Unterlagen. Wir benötigen die Vorderseite — Foto reicht.',
+  },
+  polizeibericht: {
+    warum: 'Der Polizeibericht belegt den Unfallhergang gegenüber der gegnerischen Versicherung und beschleunigt die Regulierung erheblich.',
+    wo: 'Die polizeiliche Unfallmitteilung erhalten Sie direkt am Unfallort von der Polizei oder nachträglich bei der zuständigen Dienststelle (oft online anforderbar).',
+  },
+  aerztliches_attest: {
+    warum: 'Ein ärztliches Attest dokumentiert Ihre Verletzungen und ist Grundlage für Schmerzensgeld und Heilbehandlungskosten.',
+    wo: 'Lassen Sie sich von Ihrem Hausarzt oder der behandelnden Klinik ein Attest über Art und Dauer der Verletzungen ausstellen.',
+  },
+  reparaturrechnung_vorschaden: {
+    warum: 'Vorschäden müssen dokumentiert sein, damit der Gutachter den neuen Schaden korrekt bewerten kann. Ohne Nachweis können Vorschäden vom aktuellen Schaden abgezogen werden.',
+    wo: 'Die Rechnungen bekommen Sie von der Werkstatt, die den früheren Schaden repariert hat — oft auch nachträglich als Duplikat per E-Mail.',
+  },
+  fuehrerschein: {
+    warum: 'Wir benötigen den Führerschein zur Identifikation des Fahrers zum Unfallzeitpunkt.',
+    wo: 'Ihren Führerschein haben Sie in der Regel bei sich — Vorder- und Rückseite als Foto reichen.',
+  },
+  personalausweis: {
+    warum: 'Der Personalausweis dient der Identitätsprüfung und wird für die Vollmacht zur Regulierung benötigt.',
+    wo: 'Ihren Personalausweis (oder Reisepass) haben Sie in der Regel bei sich — Vorder- und Rückseite als Foto reichen.',
+  },
+  unfallfotos: {
+    warum: 'Fotos vom Unfall dokumentieren Schaden, Endlage der Fahrzeuge und Umgebung — wichtig für Gutachten und Haftungsfrage.',
+    wo: 'Fotos können Sie direkt am Unfallort oder später von Ihrem Fahrzeug machen. Je mehr Perspektiven, desto besser.',
+  },
+  freigabe_bank: {
+    warum: 'Bei finanzierten oder geleasten Fahrzeugen muss die Bank der Abrechnung zustimmen — ohne Freigabe darf die Versicherung nicht direkt an Sie zahlen.',
+    wo: 'Die Freigabe erhalten Sie von Ihrer finanzierenden Bank oder Leasinggesellschaft — oft per Online-Formular oder E-Mail anforderbar.',
+  },
+  zeugenbericht: {
+    warum: 'Zeugenaussagen stärken Ihre Position bei strittiger Haftung und können die Regulierung deutlich beschleunigen.',
+    wo: 'Der Zeuge kann den Bericht formlos schreiben oder unser Formular nutzen — wichtig sind Name, Adresse und Schilderung des Ablaufs.',
+  },
+  mietwagenrechnung: {
+    warum: 'Die Mietwagenkosten werden von der gegnerischen Versicherung erstattet, wenn der Zeitraum und die Klasse nachgewiesen sind.',
+    wo: 'Die Rechnung erhalten Sie von der Mietwagenfirma — meist am Ende der Mietdauer per E-Mail.',
+  },
+}
+const DOC_INFO_DEFAULT = {
+  warum: 'Dieses Dokument hilft uns, Ihren Schaden schneller und vollständiger zu regulieren.',
+  wo: 'Bei Fragen wo Sie das Dokument herbekommen, wenden Sie sich an Ihren Betreuer — wir helfen gerne.',
+}
+
 const STATUS_PHASES = [
   { key: 'ersterfassung', label: 'Aufgenommen', description: 'Ihr Fall wird vorbereitet' },
   { key: 'sv-termin', label: 'Gutachter-Termin', description: 'Termin wurde reserviert' },
@@ -123,6 +173,8 @@ export default function OnboardingWizard({
   const [sonstigesBeschreibung, setSonstigesBeschreibung] = useState('')
   const [sonstigesCount, setSonstigesCount] = useState(0)
   const [sonstigesError, setSonstigesError] = useState<string | null>(null)
+  // AAR-365: Aktuell offenes Info-Overlay — { slotId, label } oder null.
+  const [infoOverlay, setInfoOverlay] = useState<{ slotId: string; label: string } | null>(null)
 
   const currentStep = STEPS[stepIndex]
   const progress = Math.round(((stepIndex + 1) / STEPS.length) * 100)
@@ -386,46 +438,60 @@ export default function OnboardingWizard({
                     const fristText = doc.frist ? new Date(doc.frist).toLocaleDateString('de-DE', {
                       day: '2-digit', month: '2-digit', year: 'numeric',
                     }) : null
+                    // AAR-365: Card-Style prominenter — Amber-Border wenn offen,
+                    // Grün wenn hochgeladen, Rose wenn abgelehnt. ⓘ oben rechts
+                    // öffnet Info-Overlay mit "Warum?" + "Wo finde ich das?".
                     return (
                       <div
                         key={doc.id}
-                        className={`rounded-xl border p-3 ${
-                          istHochgeladen ? 'bg-emerald-50 border-emerald-200'
-                          : istAbgelehnt ? 'bg-rose-50 border-rose-200'
-                          : 'bg-white border-gray-200'
+                        className={`relative rounded-2xl border-2 p-4 transition-colors ${
+                          istHochgeladen ? 'bg-emerald-50 border-emerald-300'
+                          : istAbgelehnt ? 'bg-rose-50 border-rose-300'
+                          : 'bg-amber-50/60 border-amber-300'
                         }`}
                       >
-                        <div className="flex items-start gap-3">
-                          <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        <button
+                          type="button"
+                          onClick={() => setInfoOverlay({ slotId: doc.slot_id, label })}
+                          aria-label={`Info zu ${label}`}
+                          className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/80 border border-gray-200 text-gray-500 hover:text-[#0D1B3E] hover:border-[#4573A2] flex items-center justify-center transition-colors"
+                        >
+                          <InfoIcon className="w-4 h-4" />
+                        </button>
+                        <div className="flex items-start gap-3 pr-9">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                             istHochgeladen ? 'bg-emerald-500 text-white'
                             : istAbgelehnt ? 'bg-rose-500 text-white'
-                            : 'bg-gray-100 text-gray-400'
+                            : 'bg-amber-500 text-white'
                           }`}>
-                            {istHochgeladen ? <CheckIcon className="w-4 h-4" />
-                              : istAbgelehnt ? <AlertCircleIcon className="w-4 h-4" />
-                              : <UploadCloudIcon className="w-4 h-4" />}
+                            {istHochgeladen ? <CheckIcon className="w-5 h-5" />
+                              : istAbgelehnt ? <AlertCircleIcon className="w-5 h-5" />
+                              : <UploadCloudIcon className="w-5 h-5" />}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <p className="text-sm font-medium text-gray-900">{label}</p>
+                              <p className="text-base font-semibold text-gray-900">{label}</p>
                               {doc.pflicht && !istHochgeladen && (
-                                <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">Pflicht</span>
-                              )}
-                              {istHochgeladen && (
-                                <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">Hochgeladen</span>
-                              )}
-                              {istAbgelehnt && (
-                                <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-rose-100 text-rose-800">Abgelehnt</span>
+                                <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-amber-200 text-amber-900">Pflicht</span>
                               )}
                             </div>
+                            <p className={`text-xs mt-0.5 font-medium ${
+                              istHochgeladen ? 'text-emerald-700'
+                              : istAbgelehnt ? 'text-rose-700'
+                              : 'text-amber-700'
+                            }`}>
+                              {istHochgeladen ? '✓ Hochgeladen'
+                                : istAbgelehnt ? '✗ Abgelehnt — bitte neu hochladen'
+                                : 'Noch nicht hochgeladen'}
+                            </p>
                             {doc.beschreibung && (
-                              <p className="text-xs text-gray-500 mt-0.5">{doc.beschreibung}</p>
+                              <p className="text-xs text-gray-600 mt-1">{doc.beschreibung}</p>
                             )}
                             {doc.begruendung && (
                               <p className="text-xs text-gray-700 mt-1 italic">„{doc.begruendung}"</p>
                             )}
                             {fristText && (
-                              <p className="text-xs text-amber-700 mt-1 flex items-center gap-1">
+                              <p className="text-xs text-amber-800 mt-1 flex items-center gap-1 font-medium">
                                 <ClockIcon className="w-3 h-3" /> Frist: {fristText}
                               </p>
                             )}
@@ -433,11 +499,11 @@ export default function OnboardingWizard({
                         </div>
 
                         {/* Action-Buttons — ausstehend/abgelehnt: Upload; hochgeladen: Ersetzen */}
-                        <div className="mt-2.5 flex gap-2">
+                        <div className="mt-3 flex gap-2">
                           {!istHochgeladen && (
                             <>
-                              <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-[#0D1B3E] text-white hover:bg-[#1E3A5F] cursor-pointer text-center">
-                                {loading ? 'Lädt...' : '📷 Foto aufnehmen'}
+                              <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-[#0D1B3E] text-white hover:bg-[#1E3A5F] active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
+                                {loading ? 'Lädt...' : <><span>📷</span> Foto aufnehmen</>}
                                 <input
                                   type="file"
                                   accept="image/*"
@@ -450,8 +516,8 @@ export default function OnboardingWizard({
                                   }}
                                 />
                               </label>
-                              <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-white border border-[#0D1B3E] text-[#0D1B3E] hover:bg-blue-50 cursor-pointer text-center">
-                                📁 Datei wählen
+                              <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-white border-2 border-[#0D1B3E] text-[#0D1B3E] hover:bg-blue-50 active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
+                                <span>📁</span> Datei wählen
                                 <input
                                   type="file"
                                   accept={acceptString}
@@ -466,7 +532,7 @@ export default function OnboardingWizard({
                             </>
                           )}
                           {istHochgeladen && (
-                            <label className="text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 cursor-pointer inline-flex items-center gap-1.5">
+                            <label className="text-xs font-medium px-3 py-2 rounded-lg bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 cursor-pointer inline-flex items-center gap-1.5">
                               <RefreshCwIcon className="w-3 h-3" />
                               {loading ? 'Lädt...' : 'Ersetzen'}
                               <input
@@ -561,14 +627,26 @@ export default function OnboardingWizard({
                             // multi_file=false + bereits 1 hochgeladen → Upload-Button wird zu "Ersetzen"
                             const kannMehr = slot.multi_file || count === 0
                             const acceptString = slot.akzeptierte_mime_types.join(',')
+                            // AAR-365: Auch Optional-Slots mit ⓘ Info-Button ausstatten.
+                            const hasInfo = !!DOC_INFO[slot.slot_id]
                             return (
                               <div
                                 key={slot.slot_id}
-                                className={`rounded-xl border p-3 ${
+                                className={`relative rounded-xl border p-3 ${
                                   hochgeladen ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-gray-200'
                                 }`}
                               >
-                                <div className="flex items-start gap-3">
+                                {hasInfo && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setInfoOverlay({ slotId: slot.slot_id, label: slot.label })}
+                                    aria-label={`Info zu ${slot.label}`}
+                                    className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/80 border border-gray-200 text-gray-500 hover:text-[#0D1B3E] hover:border-[#4573A2] flex items-center justify-center transition-colors"
+                                  >
+                                    <InfoIcon className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                                <div className={`flex items-start gap-3 ${hasInfo ? 'pr-8' : ''}`}>
                                   <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
                                     hochgeladen ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400'
                                   }`}>
@@ -760,6 +838,82 @@ export default function OnboardingWizard({
             >Zurück</button>
           </div>
         )}
+      </div>
+
+      {/* AAR-365: Info-Overlay pro Dokument — Bottomsheet auf Mobile,
+          zentriertes Modal auf Desktop. Schließt über Backdrop-Klick oder X. */}
+      {infoOverlay && (
+        <DokumentInfoOverlay
+          slotId={infoOverlay.slotId}
+          label={infoOverlay.label}
+          onClose={() => setInfoOverlay(null)}
+        />
+      )}
+    </div>
+  )
+}
+
+// AAR-365: Info-Overlay für Upload-Slots. Zeigt "Warum?" + "Wo finde ich das?".
+// Texte kommen aus DOC_INFO; unbekannte Slot-IDs nutzen DOC_INFO_DEFAULT.
+function DokumentInfoOverlay({
+  slotId, label, onClose,
+}: {
+  slotId: string
+  label: string
+  onClose: () => void
+}) {
+  const info = DOC_INFO[slotId] ?? DOC_INFO_DEFAULT
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 animate-in fade-in"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Hinweise zu ${label}`}
+    >
+      <div
+        className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 pb-8 sm:pb-6"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 rounded-full bg-[#4573A2]/10 flex items-center justify-center">
+              <InfoIcon className="w-5 h-5 text-[#4573A2]" />
+            </div>
+            <p className="text-base font-semibold text-[#0D1B3E]">{label}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Schließen"
+            className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500"
+          >
+            <XIcon className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#4573A2] mb-1">
+              Warum benötigen wir das?
+            </p>
+            <p className="text-sm text-gray-700 leading-relaxed">{info.warum}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#4573A2] mb-1">
+              Wo finde ich das?
+            </p>
+            <p className="text-sm text-gray-700 leading-relaxed">{info.wo}</p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-6 w-full py-3 rounded-xl bg-[#0D1B3E] hover:bg-[#1E3A5F] text-white font-semibold text-sm active:scale-[0.98] transition-all"
+        >
+          Verstanden
+        </button>
       </div>
     </div>
   )
