@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import SvDetailClient from './SvDetailClient'
+import VerifizierungsToggle from './VerifizierungsToggle'
 import { getSvStatus } from '@/lib/sv-status'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
 
@@ -15,7 +16,7 @@ export default async function SvDetailPage({
 
   const { data: sv } = await supabase
     .from('sachverstaendige')
-    .select('id, profile_id, radius_km, paket, max_faelle_monat, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, profiles(vorname, nachname, email, telefon)')
+    .select('id, profile_id, radius_km, paket, max_faelle_monat, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, profiles(vorname, nachname, email, telefon)')
     .eq('id', id)
     .single()
 
@@ -104,6 +105,12 @@ export default async function SvDetailPage({
                 <span className={`w-1.5 h-1.5 rounded-full ${onboardingStatus.dot}`} />
                 {onboardingStatus.label}
               </span>
+              {/* AAR-425: Manueller Verifizierungs-Toggle (Whitelabel-Gate) */}
+              <VerifizierungsToggle
+                svId={sv.id}
+                verifiziert={sv.verifiziert ?? false}
+                verifiziertAm={sv.verifiziert_am ?? null}
+              />
               {/* KFZ-153: Gutachten-Mängel Warnung */}
               {(mangelCounts.formal > 0 || mangelCounts.inhaltlich > 0) && (
                 <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-amber-50 text-amber-600" title={`${mangelCounts.formal}x formaler Mangel, ${mangelCounts.inhaltlich}x inhaltlicher Mangel`}>

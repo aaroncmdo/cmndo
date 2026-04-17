@@ -84,3 +84,36 @@ export async function updateSvProfile(svId: string, profileId: string, formData:
 
 // BUG-90: calculateIsochrone wurde nach src/lib/isochrone/calculate-isochrone.ts
 // extrahiert damit auch anlegeSv() und der Profil-Tab dieselbe Logik nutzen.
+
+// AAR-425: Admin-Toggle "SV manuell verifizieren".
+// Gate für Whitelabel-Features auf der Kunden-Seite. Bewusst getrennt vom
+// AAR-359-Verifizierungsflow (sa_vorlage_status / verifizierung_status), der
+// die Dokument-Pflichten abbildet. `verifiziert` hier = "Aaron kennt den SV
+// persönlich" → Whitelabel darf sichtbar sein.
+export async function setzeSvVerifiziert(svId: string, verifiziert: boolean) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' as const }
+
+  const { data: me } = await supabase
+    .from('profiles')
+    .select('rolle')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (me?.rolle !== 'admin') return { success: false, error: 'Nur Admins dürfen den Verifizierungs-Status ändern.' }
+
+  const patch: Record<string, unknown> = verifiziert
+    ? { verifiziert: true, verifiziert_am: new Date().toISOString(), verifiziert_von: user.id }
+    : { verifiziert: false, verifiziert_am: null, verifiziert_von: null }
+
+  const { error } = await supabase
+    .from('sachverstaendige')
+    .update(patch)
+    .eq('id', svId)
+
+  if (error) return { success: false, error: `Update fehlgeschlagen: ${error.message}` }
+
+  revalidatePath(`/admin/sachverstaendige/${svId}`)
+  revalidatePath('/admin/sachverstaendige')
+  return { success: true as const }
+}
