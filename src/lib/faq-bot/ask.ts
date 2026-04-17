@@ -4,6 +4,7 @@
 
 import Anthropic from '@anthropic-ai/sdk'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { AI_MODELS } from '@/lib/ai/models'
 
 export type FaqBotRolle = 'kunde' | 'kundenbetreuer'
 
@@ -175,7 +176,7 @@ export async function askFaqBot(
   try {
     const anthropic = new Anthropic({ apiKey })
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: rolle === 'kunde' ? AI_MODELS.faq_bot_kunde : AI_MODELS.faq_bot_kb,
       max_tokens: 800,
       system: systemPrompt,
       messages,
