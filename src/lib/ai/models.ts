@@ -24,6 +24,12 @@ export const AI_MODELS = {
    * wichtiger als Speed (Batch-Generierung beim Fall-Anlegen).
    */
   sv_briefing: 'claude-sonnet-4-6',
+  /**
+   * AAR-385: Strukturiertes SV-Briefing (kurzversion + hinweise[] +
+   * warnungen[] + checkliste_vor_ort[]). JSON-Response-Format erzwungen via
+   * System-Prompt. Sonnet 4.6 — Qualität > Speed (Batch beim Fall-Anlegen).
+   */
+  sv_briefing_struktur: 'claude-sonnet-4-6',
 } as const
 
 export type AiModelKey = keyof typeof AI_MODELS

@@ -12,6 +12,8 @@
 
 import { SparklesIcon } from 'lucide-react'
 import BriefingRegenerateButton from './BriefingRegenerateButton'
+import BriefingStrukturSections from './BriefingStrukturSections'
+import type { SvBriefingStruktur } from '@/lib/types/field-modus'
 
 export type BriefingCardProps = {
   fallId: string
@@ -25,6 +27,10 @@ export type BriefingCardProps = {
    * ist (UI-Gate).
    */
   canRegenerate: boolean
+  /** AAR-385: strukturierter Briefing-Blob aus `faelle.sv_briefing_struktur`. */
+  struktur?: SvBriefingStruktur | null
+  /** AAR-385: 'ai' | 'fallback' — Badge in Struktur-Section. */
+  strukturGeneratedBy?: 'ai' | 'fallback' | null
 }
 
 function formatGeneratedAt(iso: string | null): string {
@@ -47,6 +53,8 @@ export default function BriefingCard({
   model,
   version,
   canRegenerate,
+  struktur,
+  strukturGeneratedBy,
 }: BriefingCardProps) {
   const hasBriefing = Boolean(briefing && briefing.trim())
 
@@ -86,6 +94,14 @@ export default function BriefingCard({
           <BriefingRegenerateButton fallId={fallId} label="Jetzt generieren" />
         </div>
       )}
+
+      {/* AAR-385: Strukturiertes Briefing (kurzversion + hinweise + warnungen + checkliste) */}
+      <BriefingStrukturSections
+        fallId={fallId}
+        struktur={struktur ?? null}
+        generatedBy={strukturGeneratedBy ?? null}
+        canRegenerate={canRegenerate}
+      />
     </div>
   )
 }

@@ -248,6 +248,30 @@ export default function FallDetailClient(props: Props) {
             model={(fall.sv_briefing_model as string | null) ?? null}
             version={(fall.sv_briefing_version as number | null) ?? null}
             canRegenerate={false}
+            struktur={(() => {
+              // AAR-385: Struktur-Briefing aus jsonb — read-only für SV.
+              const raw = fall.sv_briefing_struktur as
+                | (Record<string, unknown> & { generated_by?: 'ai' | 'fallback' })
+                | null
+                | undefined
+              if (!raw || typeof raw.kurzversion !== 'string') return null
+              return {
+                kurzversion: raw.kurzversion,
+                hinweise: Array.isArray(raw.hinweise)
+                  ? (raw.hinweise as string[])
+                  : [],
+                warnungen: Array.isArray(raw.warnungen)
+                  ? (raw.warnungen as string[])
+                  : [],
+                checkliste_vor_ort: Array.isArray(raw.checkliste_vor_ort)
+                  ? (raw.checkliste_vor_ort as string[])
+                  : [],
+              }
+            })()}
+            strukturGeneratedBy={
+              (fall.sv_briefing_struktur as { generated_by?: 'ai' | 'fallback' } | null)
+                ?.generated_by ?? null
+            }
           />
           <JetztZuTunCard
             fallId={fall.id as string}

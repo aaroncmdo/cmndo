@@ -47,6 +47,27 @@ export default function UebersichtTab() {
   const briefingGeneratedAt = (fall.sv_briefing_generated_at as string | null) ?? null
   const briefingModel = (fall.sv_briefing_model as string | null) ?? null
   const briefingVersion = (fall.sv_briefing_version as number | null) ?? null
+  // AAR-385: Struktur-Briefing aus jsonb-Feld — generated_by ist optional im Blob.
+  const strukturRaw = fall.sv_briefing_struktur as
+    | (Record<string, unknown> & { generated_by?: 'ai' | 'fallback' })
+    | null
+    | undefined
+  const briefingStruktur =
+    strukturRaw && typeof strukturRaw.kurzversion === 'string'
+      ? {
+          kurzversion: strukturRaw.kurzversion,
+          hinweise: Array.isArray(strukturRaw.hinweise)
+            ? (strukturRaw.hinweise as string[])
+            : [],
+          warnungen: Array.isArray(strukturRaw.warnungen)
+            ? (strukturRaw.warnungen as string[])
+            : [],
+          checkliste_vor_ort: Array.isArray(strukturRaw.checkliste_vor_ort)
+            ? (strukturRaw.checkliste_vor_ort as string[])
+            : [],
+        }
+      : null
+  const strukturGeneratedBy = strukturRaw?.generated_by ?? null
   const statusLabel = FALL_STATUS_LABELS[status] ?? status
   const statusCls =
     FALL_STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600 border-gray-200'
@@ -99,6 +120,8 @@ export default function UebersichtTab() {
         model={briefingModel}
         version={briefingVersion}
         canRegenerate={canRegenerateBriefing}
+        struktur={briefingStruktur}
+        strukturGeneratedBy={strukturGeneratedBy}
       />
 
       {/* Status-Header */}
