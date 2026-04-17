@@ -6,7 +6,11 @@ import { getPflichtdokumenteStand, getFreieSlotsFuerKunde } from './actions'
 
 export const dynamic = 'force-dynamic'
 
-export default async function OnboardingPage() {
+export default async function OnboardingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ step?: string }>
+}) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
@@ -17,7 +21,12 @@ export default async function OnboardingPage() {
     .eq('id', user.id)
     .single()
 
-  if (profile?.onboarding_completed_at) redirect('/kunde')
+  // AAR-366: Deep-Link via ?step=<id> (z.B. aus dem Polizeibericht-Banner
+  // auf /kunde) muss auch NACH Abschluss des Onboardings funktionieren.
+  // Ohne den Bypass würde der Banner-Link zurück auf /kunde fallen und
+  // der Kunde hätte keinen Weg, den Polizeibericht nachzureichen.
+  const { step } = await searchParams
+  if (profile?.onboarding_completed_at && !step) redirect('/kunde')
 
   // Aktiver Fall des Kunden — AAR-231: zusätzlich polizei_vor_ort,
   // personenschaden_flag, hat_vorschaeden für Vorbereitungs-Checkliste.
