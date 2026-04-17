@@ -58,15 +58,32 @@ export async function GET(request: Request) {
       continue
     }
 
-    // Offene Pflichtdokumente (pflicht=true, noch keine URL)
+    // Offene Pflichtdokumente (pflicht=true, noch keine URL).
+    // AAR-390: `spaeter_nachreichen_markiert_am` filtern wir NICHT weg — die
+    // Slots sind nach wie vor offen, der Kunde soll vor dem SV-Termin trotzdem
+    // erinnert werden. 48h-Gnadenfrist greift nur für den allgemeinen
+    // pflichtdokumente-reminder (alle-4h-Kadenz), nicht für den einmaligen
+    // 24h-vor-Termin-Anstoß.
     const { data: offen } = await db
       .from('pflichtdokumente')
-      .select('dokument_typ')
+      .select('dokument_typ, spaeter_nachreichen_markiert_am')
       .eq('fall_id', fall.id as string)
       .eq('pflicht', true)
       .is('dokument_url', null)
 
     if (!offen || offen.length === 0) {
+      skippedKeineDocs++
+      continue
+    }
+
+    // Wenn ALLE offenen Pflicht-Slots vom Kunden < 48h auf „später" gesetzt
+    // wurden → Kunde hat gerade aktiv quittiert, nicht erneut spammen.
+    const vor48h_check = new Date(now.getTime() - 48 * 60 * 60 * 1000).toISOString()
+    const alleKuerzlichSnoozed = offen.every((o) => {
+      const m = (o as { spaeter_nachreichen_markiert_am: string | null }).spaeter_nachreichen_markiert_am
+      return !!m && m > vor48h_check
+    })
+    if (alleKuerzlichSnoozed) {
       skippedKeineDocs++
       continue
     }

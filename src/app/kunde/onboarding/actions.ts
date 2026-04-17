@@ -318,6 +318,121 @@ export async function uploadKundenDokument(
   }
 }
 
+/**
+ * AAR-390: Kunde markiert einen einzelnen Pflichtdokument-Slot als
+ * „später nachreichen". Setzt nur den Zeitstempel — pflicht bleibt true,
+ * status bleibt 'ausstehend'. Der W2-Gate bleibt also intakt, aber die
+ * Reminder-Crons (48h-Gnadenfrist, siehe AAR-390 Task #58) überspringen
+ * den Slot temporär.
+ */
+export async function markiereSpaeterNachreichen(
+  fallId: string,
+  pflichtdokumentId: string,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const { data: fall } = await supabase
+    .from('faelle').select('id, kunde_id').eq('id', fallId).single()
+  if (!fall || fall.kunde_id !== user.id) {
+    return { success: false, error: 'Fall nicht zugeordnet' }
+  }
+
+  const admin = createAdminClient()
+
+  // Slot gehört wirklich zu diesem Fall? (Schutz gegen manipuliertes pflichtdokumentId)
+  const { data: pd } = await admin
+    .from('pflichtdokumente')
+    .select('id, fall_id, status, dokument_typ')
+    .eq('id', pflichtdokumentId)
+    .single()
+  if (!pd || pd.fall_id !== fallId) {
+    return { success: false, error: 'Pflichtdokument nicht zugeordnet' }
+  }
+  if (pd.status === 'hochgeladen') {
+    // Bereits erledigt — Nichts zu verschieben.
+    return { success: true }
+  }
+
+  const now = new Date().toISOString()
+  const { error } = await admin
+    .from('pflichtdokumente')
+    .update({ spaeter_nachreichen_markiert_am: now })
+    .eq('id', pflichtdokumentId)
+  if (error) return { success: false, error: error.message }
+
+  // Timeline-Eintrag für Admin-Sicht
+  try {
+    await admin.from('timeline').insert({
+      fall_id: fallId,
+      typ: 'system',
+      titel: 'Dokument: Später nachreichen',
+      beschreibung: `Kunde hat "${pd.dokument_typ}" auf später nachreichen gesetzt.`,
+    })
+  } catch {
+    // Timeline ist nicht kritisch — Status-Update bleibt erhalten.
+  }
+
+  revalidatePath('/kunde/onboarding')
+  revalidatePath('/kunde')
+  return { success: true }
+}
+
+/**
+ * AAR-390: Kunde markiert alle noch offenen Pflicht-Slots in einem Schwung als
+ * „später nachreichen". Nützlich am Ende von Step 3, wenn der Kunde nichts
+ * dabei hat und das Onboarding trotzdem ohne Reminder-Spam durchklicken will.
+ */
+export async function markiereAlleSpaeterNachreichen(
+  fallId: string,
+): Promise<{ success: boolean; count?: number; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const { data: fall } = await supabase
+    .from('faelle').select('id, kunde_id').eq('id', fallId).single()
+  if (!fall || fall.kunde_id !== user.id) {
+    return { success: false, error: 'Fall nicht zugeordnet' }
+  }
+
+  const admin = createAdminClient()
+  const now = new Date().toISOString()
+
+  // Nur offene Pflicht-Slots — hochgeladene nicht anrühren.
+  const { data: offene, error: selErr } = await admin
+    .from('pflichtdokumente')
+    .select('id')
+    .eq('fall_id', fallId)
+    .eq('pflicht', true)
+    .neq('status', 'hochgeladen')
+  if (selErr) return { success: false, error: selErr.message }
+  const ids = (offene ?? []).map((r) => r.id)
+  if (ids.length === 0) return { success: true, count: 0 }
+
+  const { error } = await admin
+    .from('pflichtdokumente')
+    .update({ spaeter_nachreichen_markiert_am: now })
+    .in('id', ids)
+  if (error) return { success: false, error: error.message }
+
+  try {
+    await admin.from('timeline').insert({
+      fall_id: fallId,
+      typ: 'system',
+      titel: 'Dokumente: Später nachreichen',
+      beschreibung: `Kunde hat ${ids.length} Pflichtdokument${ids.length === 1 ? '' : 'e'} auf später nachreichen gesetzt.`,
+    })
+  } catch {
+    // Timeline nicht kritisch.
+  }
+
+  revalidatePath('/kunde/onboarding')
+  revalidatePath('/kunde')
+  return { success: true, count: ids.length }
+}
+
 export async function completeOnboarding(): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null

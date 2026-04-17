@@ -93,7 +93,19 @@ export async function GET(request: Request) {
           // KFZ-181 Trigger 26: WhatsApp an Kunden (max alle 48h)
           const vor48h = new Date(now.getTime() - 48 * 60 * 60 * 1000).toISOString()
           const letzteSendung = (fall as Record<string, unknown>).dokumente_reminder_whatsapp_letzte_sendung as string | null
-          if (!letzteSendung || letzteSendung < vor48h) {
+          // AAR-390: Gnadenfrist — wenn der Kunde innerhalb der letzten 48h
+          // aktiv einen Pflicht-Slot auf „später nachreichen" gesetzt hat,
+          // überspringen wir die Kunden-WA (Task für KB/SV läuft weiter).
+          const { data: snoozed } = await db
+            .from('pflichtdokumente')
+            .select('id')
+            .eq('fall_id', fall.id)
+            .eq('pflicht', true)
+            .not('spaeter_nachreichen_markiert_am', 'is', null)
+            .gt('spaeter_nachreichen_markiert_am', vor48h)
+            .limit(1)
+          const hatKuerzlichGesnoozed = !!snoozed && snoozed.length > 0
+          if (!hatKuerzlichGesnoozed && (!letzteSendung || letzteSendung < vor48h)) {
             // Kunden-Telefon laden
             const { data: fallFull } = await db.from('faelle').select('lead_id').eq('id', fall.id).single()
             if (fallFull?.lead_id) {

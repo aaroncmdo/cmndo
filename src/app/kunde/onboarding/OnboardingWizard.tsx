@@ -12,6 +12,8 @@ import {
   completeOnboarding,
   uploadPflichtdokument,
   uploadKundenDokument,
+  markiereSpaeterNachreichen,
+  markiereAlleSpaeterNachreichen,
   type PflichtdokumentStand,
   type FreierSlot,
 } from './actions'
@@ -192,6 +194,12 @@ export default function OnboardingWizard({
   const [sonstigesError, setSonstigesError] = useState<string | null>(null)
   // AAR-365: Aktuell offenes Info-Overlay — { slotId, label } oder null.
   const [infoOverlay, setInfoOverlay] = useState<{ slotId: string; label: string } | null>(null)
+  // AAR-390: Slot-IDs die der Kunde auf „später nachreichen" gesetzt hat.
+  // Server-Action setzt spaeter_nachreichen_markiert_am; UI markiert sie
+  // lokal sofort, damit der Kunde visuell Feedback bekommt ohne Reload.
+  const [spaeterSlots, setSpaeterSlots] = useState<Set<string>>(new Set())
+  const [spaeterLoading, setSpaeterLoading] = useState<string | null>(null)
+  const [spaeterAlleLoading, setSpaeterAlleLoading] = useState(false)
 
   const currentStep = STEPS[stepIndex]
   const progress = Math.round(((stepIndex + 1) / STEPS.length) * 100)
@@ -273,6 +281,38 @@ export default function OnboardingWizard({
       })
     }
     reader.readAsDataURL(file)
+  }
+
+  // AAR-390: Kunde verschiebt einen einzelnen Pflicht-Slot auf später.
+  // Status bleibt 'ausstehend' (pflichtBlocked bleibt gesetzt), Reminder-Crons
+  // überspringen den Slot aber für 48h.
+  function handleSpaeterNachreichen(pflichtdokumentId: string) {
+    if (!fall?.id) return
+    setSpaeterLoading(pflichtdokumentId)
+    startTransition(async () => {
+      const res = await markiereSpaeterNachreichen(fall.id, pflichtdokumentId)
+      if (res.success) {
+        setSpaeterSlots(prev => new Set(prev).add(pflichtdokumentId))
+      }
+      setSpaeterLoading(null)
+    })
+  }
+
+  function handleAlleSpaeterNachreichen() {
+    if (!fall?.id) return
+    setSpaeterAlleLoading(true)
+    startTransition(async () => {
+      const res = await markiereAlleSpaeterNachreichen(fall.id)
+      if (res.success) {
+        const next = new Set<string>(spaeterSlots)
+        for (const d of pflichtDocs) {
+          if (docStatus[d.id] !== 'hochgeladen') next.add(d.id)
+        }
+        setSpaeterSlots(next)
+        setStepIndex(4)
+      }
+      setSpaeterAlleLoading(false)
+    })
   }
 
   function handleFinish() {
@@ -382,9 +422,17 @@ export default function OnboardingWizard({
                       <p className="mt-3 text-xs text-gray-500">Wir erinnern Sie 24h vorher per WhatsApp.</p>
                     </div>
 
-                    {/* AAR-231: Vorbereitungs-Checkliste */}
-                    <div className="mt-5 bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-2xl p-5 space-y-3">
-                      <p className="text-sm font-semibold text-[#0D1B3E]">Bitte vor dem Termin vorbereiten:</p>
+                    {/* AAR-231: Vorbereitungs-Checkliste
+                        AAR-390: Auf kleinen Screens kann der Block durch die
+                        conditional CheckItems (Vorschaeden/Polizei/Attest)
+                        schnell länger werden als der Viewport und den Weiter-
+                        Button nach unten drücken. max-h + overflow-y + Sticky-
+                        Header sorgen für einen stabilen, scrollbaren Block
+                        ohne die Step-Höhe zu sprengen. */}
+                    <div className="mt-5 bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-2xl p-5 space-y-3 max-h-[60vh] overflow-y-auto">
+                      <p className="sticky top-0 -mx-5 -mt-5 px-5 pt-5 pb-2 bg-[#eef2f8] text-sm font-semibold text-[#0D1B3E] z-10">
+                        Bitte vor dem Termin vorbereiten:
+                      </p>
                       <CheckItem emoji="📍" text="Fahrzeug an der Besichtigungsadresse bereitstellen" done />
                       <CheckItem emoji="🔑" text="Fahrzeugschlüssel + Fahrzeugpapiere bereithalten" done />
                       <CheckItem emoji="📞" text="Unter Ihrer Telefonnummer erreichbar sein" done />
@@ -565,6 +613,27 @@ export default function OnboardingWizard({
                             </label>
                           )}
                         </div>
+
+                        {/* AAR-390: „Später nachreichen"-Link pro offenem Pflicht-Slot.
+                            Nicht bei hochgeladenen Slots — und Text wechselt sobald markiert. */}
+                        {!istHochgeladen && (
+                          <div className="mt-2.5 text-right">
+                            {spaeterSlots.has(doc.id) ? (
+                              <span className="text-[11px] text-gray-500 italic">
+                                ✓ Auf später verschoben — wir erinnern Sie später.
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleSpaeterNachreichen(doc.id)}
+                                disabled={spaeterLoading === doc.id}
+                                className="text-[11px] text-gray-600 hover:text-[#0D1B3E] underline decoration-dotted underline-offset-2 disabled:opacity-50"
+                              >
+                                {spaeterLoading === doc.id ? 'Wird gespeichert…' : 'Später nachreichen'}
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )
                   })}
@@ -612,6 +681,22 @@ export default function OnboardingWizard({
                   onClick={() => setStepIndex(4)}
                   className="mt-4 w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >Weiter</button>
+                {/* AAR-390: Shortcut für Kunden ohne Dokumente zur Hand — markiert
+                    alle offenen Pflicht-Slots als „später nachreichen" und springt
+                    direkt in den optionalen Step 4. pflicht bleibt pflicht, W2-Gate
+                    bleibt zu — wir dedupe nur die Reminder-Welle für 48h. */}
+                {pflichtBlocked.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleAlleSpaeterNachreichen}
+                    disabled={spaeterAlleLoading}
+                    className="mt-2 w-full min-h-11 py-3 rounded-xl bg-white border border-gray-300 text-gray-700 hover:border-[#4573A2] hover:text-[#0D1B3E] text-sm font-medium active:scale-[0.98] transition-all disabled:opacity-60"
+                  >
+                    {spaeterAlleLoading
+                      ? 'Wird gespeichert…'
+                      : `Alle Pflichtdokumente (${pflichtBlocked.length}) später nachreichen`}
+                  </button>
+                )}
               </div>
             )}
 
