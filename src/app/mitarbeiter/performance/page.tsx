@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import PerformanceClient from './PerformanceClient'
-import UeberfaelligeTasks from '@/components/UeberfaelligeTasks'
+import UeberfaelligeTasks from '@/components/tasks/UeberfaelligeTasks'
 
 export default async function MitarbeiterPerformancePage() {
   const supabase = await createClient()
