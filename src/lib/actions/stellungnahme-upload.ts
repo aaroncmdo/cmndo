@@ -1,5 +1,11 @@
 'use server'
 
+// AAR-400: Technische Stellungnahme — Inline-Upload aus der StellungnahmeCard
+// heraus. Ersetzt die frühere Route /gutachter/stellungnahme/[fallId].
+//
+// Flow: PDF in Supabase Storage → fall_dokumente-Row → faelle.technische_
+// stellungnahme_status='hochgeladen' → Timeline + KB-Notification.
+
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
@@ -18,7 +24,6 @@ export async function uploadTechnischeStellungnahme(
 
   const db = createAdminClient()
 
-  // Prüfe Zugehörigkeit + Status
   const { data: fall } = await db
     .from('faelle')
     .select('id, fall_nummer, technische_stellungnahme_status, sv_id, kundenbetreuer_id')
@@ -37,7 +42,6 @@ export async function uploadTechnischeStellungnahme(
 
   const notiz = (formData.get('notiz') as string) ?? ''
 
-  // Upload nach Supabase Storage
   const fileName = `technische_stellungnahme_${Date.now()}.pdf`
   const storagePath = `fall_dokumente/${fallId}/${fileName}`
   const arrayBuffer = await file.arrayBuffer()
@@ -48,11 +52,6 @@ export async function uploadTechnischeStellungnahme(
 
   if (uploadErr) return { success: false, error: `Upload fehlgeschlagen: ${uploadErr.message}` }
 
-  // AAR-290 W0: fall_dokumente-Schema verifiziert (information_schema):
-  // dokument_typ statt typ, ist_pflicht NOT NULL, storage_path statt datei_url
-  // (Bucket-Path nicht Public-URL!), original_filename statt datei_name,
-  // groesse_bytes statt datei_groesse, hochgeladen_von_user_id statt hochgeladen_von,
-  // uploaded_by_sv statt hochgeladen_von_rolle.
   await db.from('fall_dokumente').insert({
     fall_id: fallId,
     dokument_typ: 'technische_stellungnahme',
@@ -67,33 +66,45 @@ export async function uploadTechnischeStellungnahme(
     uploaded_by_kunde: false,
   })
 
-  // Status aktualisieren
-  await db.from('faelle').update({
-    technische_stellungnahme_status: 'hochgeladen',
-    technische_stellungnahme_hochgeladen_am: new Date().toISOString(),
-  }).eq('id', fallId)
-
-  // Timeline
-  await db.from('timeline').insert({
-    fall_id: fallId,
-    typ: 'system',
-    titel: 'Technische Stellungnahme hochgeladen',
-    beschreibung: notiz || 'SV hat technische Stellungnahme eingereicht. KB-Freigabe erforderlich.',
-    erstellt_von: user.id,
-  })
-
-  // KB-Notification
-  if (fall.kundenbetreuer_id) {
-    await db.from('benachrichtigungen').insert({
-      user_id: fall.kundenbetreuer_id,
-      typ: 'stellungnahme-eingegangen',
-      titel: `Stellungnahme eingegangen — Fall ${fall.fall_nummer ?? fallId.slice(0, 8)}`,
-      beschreibung: 'SV hat technische Stellungnahme hochgeladen. Bitte Plausibilitäts-Check durchführen.',
-      link: `/admin/faelle/${fallId}`,
+  await db
+    .from('faelle')
+    .update({
+      technische_stellungnahme_status: 'hochgeladen',
+      technische_stellungnahme_hochgeladen_am: new Date().toISOString(),
     })
+    .eq('id', fallId)
+
+  // Timeline (non-critical)
+  try {
+    await db.from('timeline').insert({
+      fall_id: fallId,
+      typ: 'system',
+      titel: 'Technische Stellungnahme hochgeladen',
+      beschreibung:
+        notiz || 'SV hat technische Stellungnahme eingereicht. KB-Freigabe erforderlich.',
+      erstellt_von: user.id,
+    })
+  } catch (err) {
+    console.error('[uploadTechnischeStellungnahme] Timeline-Insert fehlgeschlagen:', err)
   }
 
-  revalidatePath(`/gutachter/stellungnahme/${fallId}`)
+  // KB-Notification (non-critical)
+  if (fall.kundenbetreuer_id) {
+    try {
+      await db.from('benachrichtigungen').insert({
+        user_id: fall.kundenbetreuer_id,
+        typ: 'stellungnahme-eingegangen',
+        titel: `Stellungnahme eingegangen — Fall ${fall.fall_nummer ?? fallId.slice(0, 8)}`,
+        beschreibung:
+          'SV hat technische Stellungnahme hochgeladen. Bitte Plausibilitäts-Check durchführen.',
+        link: `/admin/faelle/${fallId}`,
+      })
+    } catch (err) {
+      console.error('[uploadTechnischeStellungnahme] Benachrichtigung fehlgeschlagen:', err)
+    }
+  }
+
+  revalidatePath(`/gutachter/fall/${fallId}`)
   revalidatePath(`/admin/faelle/${fallId}`)
   return { success: true }
 }

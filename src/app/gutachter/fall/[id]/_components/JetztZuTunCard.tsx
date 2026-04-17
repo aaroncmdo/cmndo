@@ -32,6 +32,8 @@ import TerminVorschlagModal, {
   type TerminVorschlagMode,
 } from '@/components/fall/TerminVorschlagModal'
 
+// Next.js Link nur im Matrix-Renderer genutzt (Task-Typen scrollen alle intern).
+
 /** Erweitertes Termin-Objekt für Card (id + evtl. vorgeschlagenes_datum
  *  zusätzlich zum TerminCtx für Matrix). */
 type AktiverTerminInput = {
@@ -316,15 +318,7 @@ function TaskItem({ task, fallId }: { task: GutachterTask; fallId: string }) {
           </p>
         )}
       </div>
-      {def && 'navigateTo' in def && def.navigateTo ? (
-        <Link
-          href={def.navigateTo.replace('{fallId}', fallId)}
-          className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#4573A2] text-white text-[11px] font-medium hover:bg-[#1E3A5F]"
-        >
-          {def.cta}
-          <ChevronRightIcon className="w-3 h-3" />
-        </Link>
-      ) : def && 'scrollTo' in def && def.scrollTo ? (
+      {def && 'scrollTo' in def && def.scrollTo ? (
         <button
           type="button"
           onClick={() => handleCtaScroll(def.scrollTo)}

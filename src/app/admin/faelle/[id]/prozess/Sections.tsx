@@ -205,7 +205,8 @@ export function StellungnahmeSection() {
         )}
       </div>
       <p className="text-[11px] text-gray-500">
-        SV-Portal-Route: <code className="text-[10px]">/gutachter/stellungnahme/{String(fall.id).slice(0, 8)}</code>
+        SV-Portal: StellungnahmeCard in Fallakte{' '}
+        <code className="text-[10px]">/gutachter/fall/{String(fall.id).slice(0, 8)}</code>
       </p>
     </Card>
   )

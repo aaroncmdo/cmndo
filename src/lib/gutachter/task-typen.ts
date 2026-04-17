@@ -40,8 +40,8 @@ export const SV_TASK_TYPEN = {
   },
   'technische-stellungnahme': {
     label: 'Technische Stellungnahme erstellen',
-    cta: 'Zur Stellungnahme',
-    navigateTo: '/gutachter/stellungnahme/{fallId}',
+    cta: 'Stellungnahme öffnen',
+    scrollTo: 'stellungnahme-card',
     gMapping: null,
   },
   nachbesichtigung: {
