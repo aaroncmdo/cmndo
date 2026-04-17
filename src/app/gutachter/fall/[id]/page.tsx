@@ -211,6 +211,49 @@ export default async function GutachterFallPage({
       angefordert_am: r.angefordert_am,
     }))
 
+  // AAR-399: SV-uploadbare Katalog-Slots + bestehende pflichtdokumente-Status
+  // zu einer SlotRow-Liste mergen für die DokumenteUebersichtCard (DnD-Upload).
+  type PflichtRowFull = {
+    id: string
+    dokument_typ: string
+    status: string | null
+    pflicht: boolean | null
+    dokument_url: string | null
+    hochgeladen_am: string | null
+  }
+  const pflichtFull = (pflichtdokumente ?? []) as unknown as PflichtRowFull[]
+  type SvSlotStatus =
+    | 'ausstehend'
+    | 'hochgeladen'
+    | 'geprueft'
+    | 'abgelehnt'
+    | 'nachgereicht_angefordert'
+    | 'optional'
+  const svSlots = katalogAlleSlots
+    .filter((s) => s.uploadbar_von.includes('sachverstaendiger'))
+    .map((s) => {
+      const match = pflichtFull.find((r) => r.dokument_typ === s.slot_id)
+      const rawStatus = match?.status ?? 'ausstehend'
+      const status: SvSlotStatus = (
+        ['ausstehend', 'hochgeladen', 'geprueft', 'abgelehnt', 'nachgereicht_angefordert', 'optional'].includes(
+          rawStatus,
+        )
+          ? rawStatus
+          : 'ausstehend'
+      ) as SvSlotStatus
+      return {
+        id: match?.id ?? null,
+        slotId: s.slot_id,
+        label: s.label,
+        beschreibung: s.beschreibung,
+        istPflicht: match?.pflicht ?? false,
+        status,
+        currentFile: match?.dokument_url
+          ? { name: s.label, url: match.dokument_url, size: null }
+          : null,
+      }
+    })
+
   return (
     <FallDetailClient
       fall={fallWithAbrechnung}
@@ -219,6 +262,7 @@ export default async function GutachterFallPage({
       pflichtdokumente={(pflichtdokumente ?? []) as unknown as Parameters<typeof FallDetailClient>[0]['pflichtdokumente']}
       anforderbareSlots={anforderbareSlots}
       anforderungenVonMir={anforderungenVonMir}
+      svSlots={svSlots}
       parteien={parteien ?? []}
       timeline={(timeline ?? []) as unknown as Parameters<typeof FallDetailClient>[0]['timeline']}
       nachrichten={nachrichten ?? []}

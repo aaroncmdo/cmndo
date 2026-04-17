@@ -1,90 +1,90 @@
 'use client'
 
-// AAR-289: Kompakte Dokumente-Status-Übersicht für die rechte Spalte.
-// Zeigt nur Pflicht-Status + Total-Count. Detail im Akte-Drawer.
+// AAR-289 / AAR-399: Dokumente-Übersicht in der rechten Spalte der SV-Fallakte.
+// Zeigt kompakten Pflicht-Fortschritt im Header und darunter die volle
+// DokumentenListe mit DnD-Upload (shared Phase-0-Primitive DokumentSlot).
+// Vorher: reine Status-Liste ohne Upload — Details nur im Drawer.
 
-import { CheckCircle2Icon, CircleIcon, FileTextIcon } from 'lucide-react'
+import { useMemo } from 'react'
+import { FileTextIcon } from 'lucide-react'
+import DokumentenListe, { type SlotRow } from '@/components/fall/DokumentenListe'
 
-type Pflichtdoc = {
-  id: string
-  dokument_typ: string
-  status: string | null
-  pflicht: boolean | null
-}
-
-const TYP_LABEL: Record<string, string> = {
-  fahrzeugschein: 'Fahrzeugschein',
-  schadensfotos: 'Schadensfotos',
-  polizeibericht: 'Polizeibericht',
-  polizeiliche_unfallmitteilung: 'Polizeibericht',
-  gewerbenachweis: 'Gewerbenachweis',
-  gf_vollmacht: 'GF-Vollmacht',
-  halter_vollmacht: 'Halter-Vollmacht',
-  halter_ausweis: 'Halter-Ausweis',
-  aerztliches_attest: 'Ärztl. Attest',
-  krankenhausbericht: 'Krankenhausbericht',
-  au_bescheinigung: 'AU-Bescheinigung',
-  mietwagenrechnung: 'Mietwagenrechnung',
-  // AAR-353
-  reparaturrechnung_vorschaden: 'Reparaturrechnung (Vorschaden)',
-  kaufvertrag: 'Kaufvertrag',
-  freigabe_bank: 'Freigabe Bank',
+type SvSlotRow = {
+  id: string | null
+  slotId: string
+  label: string
+  beschreibung: string | null
+  istPflicht: boolean
+  status:
+    | 'ausstehend'
+    | 'hochgeladen'
+    | 'geprueft'
+    | 'abgelehnt'
+    | 'nachgereicht_angefordert'
+    | 'optional'
+  currentFile: { name: string; url?: string | null; size?: number | null } | null
 }
 
 export function DokumenteUebersichtCard({
-  pflichtdokumente,
+  fallId,
+  svSlots,
   totalDokumente,
 }: {
-  pflichtdokumente: Pflichtdoc[]
+  fallId: string
+  svSlots: SvSlotRow[]
   totalDokumente: number
 }) {
-  const sichtbarePflicht = pflichtdokumente.filter((d) => d.pflicht !== false)
-  const erfuellt = sichtbarePflicht.filter((d) => d.status && d.status !== 'ausstehend')
-  const offen = sichtbarePflicht.filter((d) => !d.status || d.status === 'ausstehend')
+  // Nur Slots anzeigen, die entweder Pflicht sind ODER bereits hochgeladen
+  // wurden — reine „optionale + leere" Slots blasen die Sidebar auf.
+  const sichtbareSlots = useMemo(
+    () =>
+      svSlots.filter((s) => s.istPflicht || (s.currentFile && s.currentFile.url)),
+    [svSlots],
+  )
+
+  const pflichtSlots = sichtbareSlots.filter((s) => s.istPflicht)
+  const erfuellt = pflichtSlots.filter(
+    (s) => s.status === 'hochgeladen' || s.status === 'geprueft',
+  ).length
+  const offen = pflichtSlots.length - erfuellt
+
+  const listeSlots: SlotRow[] = sichtbareSlots.map((s) => ({
+    id: s.id,
+    slotId: s.slotId,
+    label: s.label,
+    beschreibung: s.beschreibung,
+    istPflicht: s.istPflicht,
+    status: s.status,
+    currentFile: s.currentFile,
+  }))
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 space-y-3">
+    <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
           Dokumente
         </h3>
         <span className="text-[10px] text-gray-400">
-          {erfuellt.length}/{sichtbarePflicht.length} Pflicht · {totalDokumente} gesamt
+          {erfuellt}/{pflichtSlots.length} Pflicht · {totalDokumente} gesamt
         </span>
       </div>
 
-      {sichtbarePflicht.length === 0 ? (
+      {sichtbareSlots.length === 0 ? (
         <p className="text-xs text-gray-400 text-center py-2">
           Keine Pflichtdokumente.
         </p>
       ) : (
-        <ul className="space-y-1.5">
-          {sichtbarePflicht.slice(0, 6).map((d) => {
-            const done = d.status && d.status !== 'ausstehend'
-            const label = TYP_LABEL[d.dokument_typ] ?? d.dokument_typ
-            return (
-              <li key={d.id} className="flex items-center gap-2 text-xs">
-                {done ? (
-                  <CheckCircle2Icon className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                ) : (
-                  <CircleIcon className="w-3.5 h-3.5 text-gray-300 shrink-0" />
-                )}
-                <span className={done ? 'text-gray-700' : 'text-gray-500'}>{label}</span>
-              </li>
-            )
-          })}
-          {sichtbarePflicht.length > 6 && (
-            <li className="text-[10px] text-gray-400 italic pt-1">
-              + {sichtbarePflicht.length - 6} weitere — Details in der Akte
-            </li>
-          )}
-        </ul>
+        <DokumentenListe
+          slots={listeSlots}
+          fallId={fallId}
+          rolle="sachverstaendiger"
+        />
       )}
 
-      {offen.length > 0 && (
+      {offen > 0 && (
         <p className="text-[11px] text-amber-700 pt-2 border-t border-gray-100 flex items-center gap-1">
           <FileTextIcon className="w-3 h-3" />
-          {offen.length} {offen.length === 1 ? 'Pflichtdokument fehlt' : 'Pflichtdokumente fehlen'}
+          {offen} {offen === 1 ? 'Pflichtdokument fehlt' : 'Pflichtdokumente fehlen'}
         </p>
       )}
     </div>

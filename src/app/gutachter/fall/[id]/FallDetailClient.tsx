@@ -112,6 +112,25 @@ type Props = {
   anforderungenVonMir?: AnforderungsItem[]
   /** AAR-403: Kürzungs-Positionen (forderungspositionen) für KanzleiStatusCard */
   kuerzungen?: KuerzungsPosition[]
+  /** AAR-399: Katalog-Slots für SV-Upload (merged mit pflichtdokumente-Status) */
+  svSlots?: SvSlotRow[]
+}
+
+/** AAR-399: Lokaler Typ, passt zu DokumentenListe.SlotRow */
+export type SvSlotRow = {
+  id: string | null
+  slotId: string
+  label: string
+  beschreibung: string | null
+  istPflicht: boolean
+  status:
+    | 'ausstehend'
+    | 'hochgeladen'
+    | 'geprueft'
+    | 'abgelehnt'
+    | 'nachgereicht_angefordert'
+    | 'optional'
+  currentFile: { name: string; url?: string | null; size?: number | null } | null
 }
 
 export default function FallDetailClient(props: Props) {
@@ -394,7 +413,8 @@ export default function FallDetailClient(props: Props) {
             }
           />
           <DokumenteUebersichtCard
-            pflichtdokumente={pflichtdokumente}
+            fallId={fall.id as string}
+            svSlots={props.svSlots ?? []}
             totalDokumente={sichtbarDokumente.length + (sichtbarFallDokumente?.length ?? 0)}
           />
           {/* AAR-327: SV kann gezielt Dokumente beim Kunden anfordern
