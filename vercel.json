@@ -57,6 +57,10 @@
       "schedule": "0 */4 * * *"
     },
     {
+      "path": "/api/cron/sv-termin-dokument-reminder",
+      "schedule": "0 7 * * *"
+    },
+    {
       "path": "/api/cron/db-backup",
       "schedule": "0 3 * * *"
     },

@@ -7,6 +7,8 @@ import KundeNav from './_components/KundeNav'
 // AAR-316 W3: Sprach-Banner mit Google-Translate-Fallback
 import { SprachBanner } from '@/components/i18n/SprachBanner'
 import type { SpracheCode } from '@/lib/i18n/sprach-banner'
+// AAR-354: Persistenter Pflichtdokumente-Banner (offene Pflicht-Slots)
+import { PflichtdokumenteBanner } from '@/components/kunde/PflichtdokumenteBanner'
 
 export default async function KundeLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -86,6 +88,9 @@ export default async function KundeLayout({ children }: { children: React.ReactN
       <main className="flex-1 md:ml-64 pt-14 md:pt-0 pb-20 md:pb-6">
         {/* AAR-316 W3: Sprach-Banner rendert sich nur bei sprache !== 'de' */}
         <SprachBanner sprache={kundenSprache} />
+        {/* AAR-354: Banner rendert sich nur wenn offene Pflichtdokumente existieren.
+            Nicht im /onboarding anzeigen — dort ist der Upload-Flow bereits zentral. */}
+        {!pathname.includes('/onboarding') && <PflichtdokumenteBanner />}
         {children}
       </main>
 
