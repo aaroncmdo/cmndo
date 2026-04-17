@@ -19,6 +19,8 @@ import { ladeKundenFaqHistorie } from './faq-bot-actions'
 import KundeJetztZuTunCard from '@/components/kunde/KundeJetztZuTunCard'
 import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
 import { getKundenJetztZuTun, type KundeSlaRecord } from '@/lib/kunde/jetzt-zu-tun'
+// AAR-448: Termin-Detail-Card mit Quick-Actions
+import TerminSectionCard from '@/components/kunde/TerminSectionCard'
 
 export default async function KundeFallDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -174,6 +176,125 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       }
     } catch { /* non-critical */ }
 
+    // AAR-448: Termin-Daten für die Detail-Card (SV + KB)
+    // Nimmt den jeweils frühesten aktiven Termin pro Typ.
+    const aktiveStatus = ['reserviert', 'bestaetigt', 'gegenvorschlag', 'verschoben']
+    const { data: svTermin } = await admin
+      .from('gutachter_termine')
+      .select('id, typ, status, start_zeit, end_zeit, kanal, video_link, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, sv_id, kb_id')
+      .eq('fall_id', id)
+      .eq('typ', 'sv_begutachtung')
+      .in('status', aktiveStatus)
+      .is('durchgefuehrt_am', null)
+      .order('start_zeit', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+    const { data: kbTermin } = await admin
+      .from('gutachter_termine')
+      .select('id, typ, status, start_zeit, end_zeit, kanal, video_link, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, sv_id, kb_id')
+      .eq('fall_id', id)
+      .eq('typ', 'kb_beratung')
+      .in('status', aktiveStatus)
+      .gte('start_zeit', new Date(Date.now() - 60 * 60 * 1000).toISOString())
+      .order('start_zeit', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+
+    // Gegenüber-Daten auflösen (SV-Kontakt + KB-Kontakt)
+    let svKontakt: { name: string | null; telefon: string | null; email: string | null; avatar_url: string | null } | null = null
+    if (svTermin?.sv_id ?? fall.sv_id) {
+      const svId = (svTermin?.sv_id as string | null) ?? (fall.sv_id as string | null)
+      if (svId) {
+        const { data: sv } = await admin.from('sachverstaendige').select('profile_id').eq('id', svId).maybeSingle()
+        if (sv?.profile_id) {
+          const { data: p } = await admin
+            .from('profiles')
+            .select('vorname, nachname, telefon, anzeigename, avatar_url, email')
+            .eq('id', sv.profile_id)
+            .maybeSingle()
+          if (p) {
+            svKontakt = {
+              name: (p.anzeigename as string | null) || [p.vorname, p.nachname].filter(Boolean).join(' ') || null,
+              telefon: p.telefon as string | null,
+              email: p.email as string | null,
+              avatar_url: p.avatar_url as string | null,
+            }
+          }
+        }
+      }
+    }
+    let kbKontakt: { name: string | null; telefon: string | null; email: string | null; avatar_url: string | null } | null = null
+    if (kbTermin?.kb_id ?? fall.kundenbetreuer_id) {
+      const kbId = (kbTermin?.kb_id as string | null) ?? (fall.kundenbetreuer_id as string | null)
+      if (kbId) {
+        const { data: p } = await admin
+          .from('profiles')
+          .select('vorname, nachname, telefon, anzeigename, avatar_url, email')
+          .eq('id', kbId)
+          .maybeSingle()
+        if (p) {
+          kbKontakt = {
+            name: (p.anzeigename as string | null) || [p.vorname, p.nachname].filter(Boolean).join(' ') || null,
+            telefon: p.telefon as string | null,
+            email: p.email as string | null,
+            avatar_url: p.avatar_url as string | null,
+          }
+        }
+      }
+    }
+
+    const terminAdresse =
+      (fall.besichtigungsort_adresse as string | null) ||
+      [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') ||
+      null
+
+    // Sortier-Logik: SV + KB-Termin nach Start-Zeit
+    const terminCards: Array<{
+      termin: React.ComponentProps<typeof TerminSectionCard>['termin']
+      gegenueber: React.ComponentProps<typeof TerminSectionCard>['gegenueber']
+    }> = []
+    if (svTermin) {
+      terminCards.push({
+        termin: {
+          id: svTermin.id as string,
+          typ: 'sv_begutachtung',
+          status: (svTermin.status as string) ?? 'reserviert',
+          start_zeit: svTermin.start_zeit as string | null,
+          end_zeit: svTermin.end_zeit as string | null,
+          kanal: svTermin.kanal as string | null,
+          video_link: svTermin.video_link as string | null,
+          sv_unterwegs_seit: svTermin.sv_unterwegs_seit as string | null,
+          sv_angekommen_am: svTermin.sv_angekommen_am as string | null,
+          sv_eta_minuten: (svTermin.sv_eta_minuten as number | null) ?? null,
+          adresse: terminAdresse,
+        },
+        gegenueber: svKontakt ? { rolle: 'sachverstaendiger', ...svKontakt } : null,
+      })
+    }
+    if (kbTermin) {
+      terminCards.push({
+        termin: {
+          id: kbTermin.id as string,
+          typ: 'kb_beratung',
+          status: (kbTermin.status as string) ?? 'reserviert',
+          start_zeit: kbTermin.start_zeit as string | null,
+          end_zeit: kbTermin.end_zeit as string | null,
+          kanal: kbTermin.kanal as string | null,
+          video_link: kbTermin.video_link as string | null,
+          sv_unterwegs_seit: null,
+          sv_angekommen_am: null,
+          sv_eta_minuten: null,
+          adresse: null,
+        },
+        gegenueber: kbKontakt ? { rolle: 'kundenbetreuer', ...kbKontakt } : null,
+      })
+    }
+    terminCards.sort((a, b) => {
+      const ta = a.termin.start_zeit ? new Date(a.termin.start_zeit).getTime() : Number.MAX_SAFE_INTEGER
+      const tb = b.termin.start_zeit ? new Date(b.termin.start_zeit).getTime() : Number.MAX_SAFE_INTEGER
+      return ta - tb
+    })
+
     const aktion = getKundenJetztZuTun(
       {
         id: fall.id as string,
@@ -218,6 +339,15 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
         {/* AAR-432: Jetzt-zu-tun Matrix — eine konsolidierte Aktions-Card */}
         <KundeJetztZuTunCard aktion={aktion} />
+
+        {/* AAR-448: Termin-Detail-Card(s) — SV- und KB-Termine mit Quick-Actions */}
+        {terminCards.length > 0 && (
+          <div className="space-y-3">
+            {terminCards.map((tc) => (
+              <TerminSectionCard key={tc.termin.id} termin={tc.termin} gegenueber={tc.gegenueber} />
+            ))}
+          </div>
+        )}
 
         {/* KFZ-206: Status-Card */}
         <FallStatusCard
