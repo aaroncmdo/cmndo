@@ -280,7 +280,7 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
             href={termin.video_link}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-md px-4 text-sm font-medium"
             style={{
               background: 'var(--brand-primary, #0D1B3E)',
               color: 'var(--brand-text-on-primary, #ffffff)',
@@ -291,7 +291,7 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
           <button
             type="button"
             onClick={handleCopyMeet}
-            className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-xs ml-0 md:ml-2"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-md border px-3 text-xs ml-0 md:ml-2"
             style={{
               borderColor: 'var(--brand-border, #e5e7eb)',
               color: 'var(--brand-text-secondary, #4b5563)',
@@ -313,7 +313,7 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
               href={mapsHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-2 inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium"
+              className="mt-2 inline-flex min-h-[44px] items-center gap-2 rounded-md px-4 text-xs font-medium"
               style={{
                 background: 'var(--brand-accent, #4573A2)',
                 color: 'var(--brand-text-on-primary, #ffffff)',
