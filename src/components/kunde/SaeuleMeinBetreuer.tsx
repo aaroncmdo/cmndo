@@ -1,7 +1,10 @@
 'use client'
 
-import { HeadphonesIcon, MessageSquareIcon } from 'lucide-react'
+import { useState } from 'react'
+import { HeadphonesIcon, MessageSquareIcon, CalendarPlusIcon } from 'lucide-react'
 import Link from 'next/link'
+// AAR-368: 15/30-Min-Beratungstermin buchen
+import BeratungBuchenSheet from './BeratungBuchenSheet'
 
 type Props = {
   fallId: string
@@ -10,6 +13,8 @@ type Props = {
 }
 
 export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon }: Props) {
+  const [terminSheetOpen, setTerminSheetOpen] = useState(false)
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 space-y-4">
       <div className="flex items-center gap-2">
@@ -31,6 +36,14 @@ export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon }: Props)
             <MessageSquareIcon className="w-4 h-4" />
             Chat öffnen
           </Link>
+          <button
+            type="button"
+            onClick={() => setTerminSheetOpen(true)}
+            className="flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-[#4573A2] text-[#4573A2] text-xs font-medium hover:bg-[#4573A2]/5 transition-colors"
+          >
+            <CalendarPlusIcon className="w-4 h-4" />
+            Termin buchen
+          </button>
         </div>
 
         {kbTelefon && (
@@ -39,6 +52,12 @@ export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon }: Props)
           </a>
         )}
       </div>
+
+      <BeratungBuchenSheet
+        fallId={fallId}
+        open={terminSheetOpen}
+        onClose={() => setTerminSheetOpen(false)}
+      />
     </div>
   )
 }
