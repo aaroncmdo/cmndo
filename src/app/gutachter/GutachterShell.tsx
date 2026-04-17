@@ -20,6 +20,7 @@ import {
   AlertCircleIcon,
   ClipboardListIcon,
   FileSignatureIcon,
+  ShieldCheckIcon,
 } from 'lucide-react'
 import NotificationBell from '@/app/admin/_components/NotificationBell'
 import MitteilungszentralePanel from '@/components/mitteilungszentrale/MitteilungszentralePanel'
@@ -101,6 +102,7 @@ export default function GutachterShell({
   standortLng,
   showTeam,
   showCommunity,
+  showVerifizierung,
 }: {
   displayName: string
   children: React.ReactNode
@@ -115,6 +117,8 @@ export default function GutachterShell({
   // und Community (Member).
   showTeam?: boolean
   showCommunity?: boolean
+  // AAR-359 W5: conditional Verifizierungs-Link solange Verifizierung offen.
+  showVerifizierung?: boolean
 }) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -127,6 +131,7 @@ export default function GutachterShell({
   const NAV_SECTIONS: NavSection[] = NAV_SECTIONS_BASE.map(sec => {
     if (sec.title !== 'Verwaltung') return sec
     const conditional: NavItem[] = []
+    if (showVerifizierung) conditional.push({ href: '/gutachter/verifizierung', label: 'Verifizierung', icon: ShieldCheckIcon })
     if (showTeam) conditional.push({ href: '/gutachter/team', label: 'Team', icon: UsersIcon })
     if (showCommunity) conditional.push({ href: '/gutachter/community', label: 'Community', icon: TrophyIcon })
     return { ...sec, items: [...sec.items, ...conditional] }
