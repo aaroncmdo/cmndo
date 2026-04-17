@@ -1,6 +1,7 @@
 'use client'
 
 import { CalendarIcon, CheckCircleIcon, XCircleIcon, RefreshCwIcon, ClockIcon } from 'lucide-react'
+import { formatDatumUhrzeit } from '@/lib/format'
 
 // KFZ-134: Termin-Pingpong-Historie in der Fall-Detail Right-Sidebar.
 
@@ -24,8 +25,9 @@ const STATUS_ICON: Record<string, { Icon: typeof CalendarIcon; cls: string; labe
   storniert: { Icon: XCircleIcon, cls: 'text-gray-400', label: 'Storniert' },
 }
 
+// AAR-411: delegiert an die zentrale Formatter-Bibliothek (Datum+Uhrzeit).
 function formatKurz(iso: string) {
-  return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+  return formatDatumUhrzeit(iso)
 }
 
 export default function TerminHistorie({ termine }: { termine: TerminHistorieRow[] }) {

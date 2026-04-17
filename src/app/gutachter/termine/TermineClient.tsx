@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { CalendarIcon, CheckIcon, XIcon, RefreshCwIcon, ClockIcon, AlertTriangleIcon } from 'lucide-react'
 import { terminAnnehmen, terminAblehnen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
+import { formatDatumMitWochentag, formatUhrzeit } from '@/lib/format'
 
 // KFZ-134: Gutachter Termine-Liste mit Akzeptieren/Ablehnen/Gegenvorschlag.
 
@@ -34,12 +35,9 @@ const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
   storniert: { label: 'Storniert', cls: 'bg-gray-100 text-gray-500' },
 }
 
-function formatDatum(iso: string) {
-  return new Date(iso).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' })
-}
-function formatZeit(iso: string) {
-  return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-}
+// AAR-411: delegiert an die zentrale Formatter-Bibliothek.
+const formatDatum = formatDatumMitWochentag
+const formatZeit = formatUhrzeit
 
 export default function TermineClient({ termine }: { termine: TerminRow[] }) {
   const router = useRouter()

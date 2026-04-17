@@ -33,6 +33,7 @@ import {
 import { formatEuro, berechneSvNetto, tageSeit } from '@/lib/gutachter/abrechnung'
 import type { SvAbrechnungInput } from '@/lib/gutachter/abrechnung'
 import type { SvSubphase } from '@/lib/gutachter/subphase'
+import { formatDatum } from '@/lib/format'
 
 export type KuerzungsPosition = {
   id: string
@@ -61,17 +62,9 @@ type Props = {
   kuerzungen: KuerzungsPosition[]
 }
 
+// AAR-411: delegiert an die zentrale Formatter-Bibliothek.
 function fmtDate(iso: string | null): string | null {
-  if (!iso) return null
-  try {
-    return new Date(iso).toLocaleDateString('de-DE', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
-  } catch {
-    return iso
-  }
+  return formatDatum(iso) || null
 }
 
 function kuerzungsTon(kuerzungProz: number): 'green' | 'amber' | 'red' {

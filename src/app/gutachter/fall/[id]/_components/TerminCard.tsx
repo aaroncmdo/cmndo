@@ -20,6 +20,7 @@ import {
   PencilIcon,
 } from 'lucide-react'
 import TerminVorschlagModal from '@/components/fall/TerminVorschlagModal'
+import { formatUhrzeit } from '@/lib/format'
 
 export type TerminCardProps = {
   termin: {
@@ -107,16 +108,9 @@ function fmtDate(iso: string | null): string | null {
   }
 }
 
+// AAR-411: delegiert an die zentrale Formatter-Bibliothek.
 function fmtTime(iso: string | null): string | null {
-  if (!iso) return null
-  try {
-    return new Date(iso).toLocaleTimeString('de-DE', {
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  } catch {
-    return null
-  }
+  return formatUhrzeit(iso) || null
 }
 
 export function TerminCard({ termin, fall }: TerminCardProps) {

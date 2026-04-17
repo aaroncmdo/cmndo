@@ -13,13 +13,13 @@ import { meldeVerspaetung } from '@/app/gutachter/fall/[id]/actions'
 import { triggerSvLosgefahren } from '@/lib/termine/trigger-losgefahren'
 import { notifyKundeAngekommen } from '@/lib/termine/notify-kunde-angekommen'
 import type { HeuteTermin } from './page'
+import { formatUhrzeit } from '@/lib/format'
 
 // KFZ-158 Phase 1: Tagesroute Client-Component.
 // Vollbild-Layout: Map oben (60%), Bottom-Sheet mit Termin-Liste unten (40%).
 
-function formatZeit(iso: string): string {
-  return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-}
+// AAR-411: formatZeit delegiert an zentrale Formatter-Bibliothek.
+const formatZeit = formatUhrzeit
 
 function formatDatum(iso: string): string {
   const d = new Date(iso)

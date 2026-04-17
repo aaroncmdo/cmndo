@@ -23,6 +23,7 @@ import {
 import { useGutachterTasks, type GutachterTask } from '@/hooks/useGutachterTasks'
 import { SV_TASK_TYPEN, type SvTaskTyp } from '@/lib/gutachter/task-typen'
 import { erledigeSvTask } from '../task-actions'
+import { formatDatum } from '@/lib/format'
 import type { SvSubphase } from '@/lib/gutachter/subphase'
 import {
   getJetztZuTun,
@@ -314,7 +315,7 @@ function TaskItem({ task, fallId }: { task: GutachterTask; fallId: string }) {
         {task.faellig_am && (
           <p className="text-[10px] text-amber-700 mt-0.5 flex items-center gap-1">
             <ClockIcon className="w-3 h-3" />
-            Fällig: {new Date(task.faellig_am).toLocaleDateString('de-DE')}
+            Fällig: {formatDatum(task.faellig_am)}
           </p>
         )}
       </div>

@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import { tageSeit } from '@/lib/gutachter/abrechnung'
 import { uploadTechnischeStellungnahme } from '@/lib/actions/stellungnahme-upload'
+import { formatDatum } from '@/lib/format'
 
 type Fall = {
   id: string
@@ -118,11 +119,9 @@ export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
         <div className="flex items-center gap-2 text-sm text-emerald-800">
           <CheckCircle2Icon className="w-4 h-4" />
           {fall.technische_stellungnahme_freigabe_am
-            ? `Freigegeben am ${new Date(fall.technische_stellungnahme_freigabe_am).toLocaleDateString('de-DE')}`
+            ? `Freigegeben am ${formatDatum(fall.technische_stellungnahme_freigabe_am)}`
             : `Hochgeladen am ${
-                fall.technische_stellungnahme_hochgeladen_am
-                  ? new Date(fall.technische_stellungnahme_hochgeladen_am).toLocaleDateString('de-DE')
-                  : '—'
+                formatDatum(fall.technische_stellungnahme_hochgeladen_am) || '—'
               }`}
         </div>
       ) : (

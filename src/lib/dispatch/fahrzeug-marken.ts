@@ -7,16 +7,9 @@ export const TOP_KFZ_MARKEN = [
   'Seat', 'Skoda', 'Toyota', 'Volkswagen', 'Volvo',
 ] as const
 
-// Kennzeichen-Auto-Format: K-AB 1234, K AB 1234, KAB1234 -> alle zu "K-AB 1234"
-export function formatKennzeichen(input: string): string {
-  if (!input) return ''
-  // Uppercase + nur Buchstaben/Zahlen/Bindestrich/Leerzeichen
-  const cleaned = input.toUpperCase().replace(/[^A-Z0-9\s-]/g, '').trim()
-  // Pattern: 1-3 Buchstaben (Stadt) - 1-2 Buchstaben - 1-4 Zahlen
-  const m = cleaned.replace(/[\s-]+/g, '').match(/^([A-Z]{1,3})([A-Z]{1,2})(\d{1,4})$/)
-  if (m) return `${m[1]}-${m[2]} ${m[3]}`
-  return cleaned
-}
+// AAR-411: Kennzeichen-Format lebt jetzt in @/lib/format/kennzeichen. Hier
+// nur noch Re-Export zur Rückwärtskompatibilität bestehender Imports.
+export { formatKennzeichen } from '@/lib/format/kennzeichen'
 
 // FlowLink-Status (B-09): 6-stufig
 export type FlowLinkStufe = 'nicht_gesendet' | 'gesendet' | 'geoeffnet' | 'in_bearbeitung' | 'abgeschlossen' | 'abgelaufen'

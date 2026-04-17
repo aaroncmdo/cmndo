@@ -20,6 +20,7 @@ import {
 import DokumentSlot from '@/components/fall/DokumentSlot'
 import { getSignedUrl } from '@/lib/supabase/storage'
 import type { SvSubphase } from '@/lib/gutachter/subphase'
+import { formatDatum } from '@/lib/format'
 
 export type GutachtenDokument = {
   id: string
@@ -36,17 +37,9 @@ type Props = {
   gutachten: GutachtenDokument[]
 }
 
+// AAR-411: delegiert an die zentrale Formatter-Bibliothek.
 function fmtDate(iso: string | null): string {
-  if (!iso) return '—'
-  try {
-    return new Date(iso).toLocaleDateString('de-DE', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
-  } catch {
-    return iso
-  }
+  return formatDatum(iso) || '—'
 }
 
 function istAbGutachtenErstellen(subphase: SvSubphase): boolean {

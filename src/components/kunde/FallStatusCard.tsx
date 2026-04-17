@@ -1,6 +1,7 @@
 'use client'
 
 import { CalendarIcon, TruckIcon, FileTextIcon, ShieldCheckIcon, MailIcon, ClockIcon, BanknoteIcon, XCircleIcon, PartyPopperIcon, CheckCircle2Icon, AlertCircleIcon } from 'lucide-react'
+import { formatDatum, formatDatumUhrzeit } from '@/lib/format'
 
 type StatusFall = {
   id: string
@@ -65,7 +66,7 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
           <CalendarIcon className="w-4 h-4 text-blue-500" />
           <div>
             <p className="text-sm font-semibold text-gray-900">
-              {new Date(fall.sv_termin).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' })}
+              {formatDatumUhrzeit(fall.sv_termin)}
             </p>
             <p className="text-xs text-gray-500">in {daysUntil(fall.sv_termin)} Tagen</p>
           </div>
@@ -75,7 +76,7 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
       {/* AS Frist-Counter */}
       {s === 'anschlussschreiben' && fall.anschlussschreiben_am && (
         <div className="bg-white/60 rounded-xl px-4 py-3">
-          <p className="text-xs text-gray-500">Versendet am {new Date(fall.anschlussschreiben_am).toLocaleDateString('de-DE')}</p>
+          <p className="text-xs text-gray-500">Versendet am {formatDatum(fall.anschlussschreiben_am)}</p>
           <p className="text-sm font-semibold text-gray-900">
             Die Versicherung hat {Math.max(0, 14 - daysSince(fall.anschlussschreiben_am))} Tage Zeit zu antworten
           </p>
@@ -96,7 +97,7 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
           <p className="text-xs text-gray-500">Eingegangener Betrag</p>
           <p className="text-3xl font-bold text-emerald-700">{fall.zahlung_betrag ? fmt(fall.zahlung_betrag) : '—'}</p>
           {fall.zahlung_eingegangen_am && (
-            <p className="text-xs text-gray-400 mt-1">{new Date(fall.zahlung_eingegangen_am).toLocaleDateString('de-DE')}</p>
+            <p className="text-xs text-gray-400 mt-1">{formatDatum(fall.zahlung_eingegangen_am)}</p>
           )}
         </div>
       )}

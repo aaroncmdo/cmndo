@@ -24,6 +24,7 @@ import TerminVorschlagModal, {
   type TerminVorschlagMode,
 } from '@/components/fall/TerminVorschlagModal'
 import { terminAnnehmen } from '@/lib/actions/termin-actions'
+import { formatDatum } from '@/lib/format'
 
 export type AuftragCardProps = {
   fall: {
@@ -184,7 +185,7 @@ export default function AuftragCard(props: AuftragCardProps) {
         {props.fall.schadens_datum && (
           <div className="flex items-center gap-1.5">
             <CalendarIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-            <span>Schaden: {new Date(props.fall.schadens_datum).toLocaleDateString('de-DE')}</span>
+            <span>Schaden: {formatDatum(props.fall.schadens_datum)}</span>
           </div>
         )}
       </div>
