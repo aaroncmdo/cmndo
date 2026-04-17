@@ -14,6 +14,7 @@
 import { getSvSubphase, type AbrechnungSubphaseInput } from '@/lib/gutachter/subphase'
 import { getSichtbarFuerRolle } from '@/lib/dokumente/sichtbarkeit'
 import { FallHeader } from './_components/FallHeader'
+import type { TeamMitglied } from './_components/FallakteDrawer'
 import { AktuellePhaseCard } from './_components/AktuellePhaseCard'
 import { JetztZuTunCard } from './_components/JetztZuTunCard'
 import { StammdatenCard } from './_components/StammdatenCard'
@@ -143,8 +144,33 @@ export default function FallDetailClient(props: Props) {
   const kundenName = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : '—'
   const ort = (fall.schadens_ort as string | null) ?? ''
 
+  // AAR-405: Team-Tab befüllen — Kundenbetreuer + Kunde; Kanzlei folgt mit
+  // eigener Daten-Ladung, sobald Phase 5 (Kanzlei-Integration) live ist.
+  const team: TeamMitglied[] = []
+  if (kundenbetreuer) {
+    const kbName =
+      `${kundenbetreuer.vorname ?? ''} ${kundenbetreuer.nachname ?? ''}`.trim() ||
+      'Kundenbetreuer'
+    team.push({
+      rolle: 'kundenbetreuer',
+      name: kbName,
+      email: kundenbetreuer.email,
+      telefon: kundenbetreuer.telefon,
+    })
+  }
+  if (lead && (lead.vorname || lead.nachname || lead.email || lead.telefon)) {
+    const leadName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || 'Kunde'
+    team.push({
+      rolle: 'kunde',
+      name: leadName,
+      email: lead.email,
+      telefon: lead.telefon,
+    })
+  }
+
   const drawerData = {
     fallNummer,
+    team,
     dokumente: [
       ...sichtbarDokumente.map((d) => ({
         id: (d.id as string) ?? undefined,

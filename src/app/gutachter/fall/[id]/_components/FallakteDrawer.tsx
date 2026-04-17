@@ -1,12 +1,24 @@
 'use client'
 
-// AAR-289: Full-Screen-Drawer „Komplette Akte" — drei Tabs (Dateien / Timeline /
-// Chat). Wird über den [📎 Akte]-Button im FallHeader geöffnet. Backdrop-Click
-// + Escape-Key schließen. Tab-Bar keyboard-navigierbar. 3xl max-width, right-
-// slide-in.
+// AAR-289: Full-Screen-Drawer „Komplette Akte". Wird über den [📎 Akte]-Button
+// im FallHeader geöffnet. Backdrop-Click + Escape-Key schließen. Tab-Bar
+// keyboard-navigierbar. 3xl max-width, right-slide-in.
+// AAR-405: Vierter Tab „Team" an erster Position (Default). Zeigt Kundenbetreuer,
+// Kunde und — wenn Phase 5+ erreicht — die Kanzlei. Pro Person: Direkt-Chat-CTA
+// (wechselt auf Chat-Tab mit Focus-Banner) und Anrufen (tel:-Link).
 
 import { useEffect, useState } from 'react'
-import { PaperclipIcon, XIcon, FileTextIcon, ClockIcon, MessageCircleIcon, DownloadIcon } from 'lucide-react'
+import {
+  PaperclipIcon,
+  XIcon,
+  FileTextIcon,
+  ClockIcon,
+  MessageCircleIcon,
+  DownloadIcon,
+  UsersIcon,
+  PhoneIcon,
+  MailIcon,
+} from 'lucide-react'
 
 type DocLite = {
   id?: string
@@ -40,19 +52,36 @@ type NachrichtLite = {
   erstellt_am?: string | null
 }
 
+// AAR-405: Team-Einträge. `rolle` steuert das Header-Label + den späteren
+// Chat-Filter (Mapping auf multi_channel_chat-Teilnehmer).
+export type TeamMitglied = {
+  rolle: 'kundenbetreuer' | 'kunde' | 'kanzlei'
+  name: string
+  email: string | null
+  telefon: string | null
+}
+
+type DrawerTab = 'team' | 'dateien' | 'timeline' | 'chat'
+
 export function FallakteDrawer({
   fallNummer,
+  team,
   dokumente,
   timeline,
   nachrichten,
 }: {
   fallNummer: string
+  team?: TeamMitglied[]
   dokumente: DocLite[]
   timeline: TimelineEventLite[]
   nachrichten: NachrichtLite[]
 }) {
   const [open, setOpen] = useState(false)
-  const [tab, setTab] = useState<'dateien' | 'timeline' | 'chat'>('dateien')
+  // AAR-405: Team-Tab ist Default, wenn Team-Einträge vorhanden sind — das ist
+  // die häufigste Akte-Aktion laut Aaron („Ansprechpartner direkt kontaktieren").
+  const hasTeam = Boolean(team && team.length > 0)
+  const [tab, setTab] = useState<DrawerTab>(hasTeam ? 'team' : 'dateien')
+  const [chatFocus, setChatFocus] = useState<TeamMitglied | null>(null)
 
   // Escape-Key schließt
   useEffect(() => {
@@ -67,6 +96,24 @@ export function FallakteDrawer({
       document.body.style.overflow = ''
     }
   }, [open])
+
+  // AAR-405: Wenn Drawer geschlossen wird, Focus zurücksetzen, damit das nächste
+  // Öffnen wieder frisch startet.
+  useEffect(() => {
+    if (!open) setChatFocus(null)
+  }, [open])
+
+  function handleDirektChat(m: TeamMitglied) {
+    setChatFocus(m)
+    setTab('chat')
+  }
+
+  const tabs: [DrawerTab, string, typeof FileTextIcon, number | null][] = [
+    ['team', 'Team', UsersIcon, team?.length ?? 0],
+    ['dateien', 'Dateien', FileTextIcon, dokumente.length],
+    ['timeline', 'Timeline', ClockIcon, timeline.length],
+    ['chat', 'Chat', MessageCircleIcon, nachrichten.length],
+  ]
 
   return (
     <>
@@ -108,41 +155,140 @@ export function FallakteDrawer({
             </div>
 
             <div className="flex border-b border-gray-200 shrink-0" role="tablist">
-              {(
-                [
-                  ['dateien', `Dateien (${dokumente.length})`, FileTextIcon],
-                  ['timeline', `Timeline (${timeline.length})`, ClockIcon],
-                  ['chat', `Chat (${nachrichten.length})`, MessageCircleIcon],
-                ] as const
-              ).map(([key, label, Icon]) => (
-                <button
-                  key={key}
-                  type="button"
-                  role="tab"
-                  aria-selected={tab === key}
-                  onClick={() => setTab(key)}
-                  className={`flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 ${
-                    tab === key
-                      ? 'text-[#0D1B3E] border-[#4573A2]'
-                      : 'text-gray-500 border-transparent hover:text-gray-700'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {label}
-                </button>
-              ))}
+              {tabs
+                .filter(([key]) => key !== 'team' || hasTeam)
+                .map(([key, label, Icon, count]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    role="tab"
+                    aria-selected={tab === key}
+                    onClick={() => setTab(key)}
+                    className={`flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 ${
+                      tab === key
+                        ? 'text-[#0D1B3E] border-[#4573A2]'
+                        : 'text-gray-500 border-transparent hover:text-gray-700'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {label}
+                    {count !== null && count > 0 && (
+                      <span className="text-[11px] text-gray-400">({count})</span>
+                    )}
+                  </button>
+                ))}
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 sm:p-6" role="tabpanel">
+              {tab === 'team' && (
+                <TeamListe team={team ?? []} onDirektChat={handleDirektChat} />
+              )}
               {tab === 'dateien' && <DateienListe dokumente={dokumente} />}
               {tab === 'timeline' && <TimelineListe events={timeline} />}
-              {tab === 'chat' && <ChatListe nachrichten={nachrichten} />}
+              {tab === 'chat' && (
+                <ChatListe nachrichten={nachrichten} focus={chatFocus} />
+              )}
             </div>
           </div>
         </div>
       )}
     </>
   )
+}
+
+const ROLLE_LABEL: Record<TeamMitglied['rolle'], string> = {
+  kundenbetreuer: 'Kundenbetreuer',
+  kanzlei: 'Kanzlei',
+  kunde: 'Kunde',
+}
+
+function TeamListe({
+  team,
+  onDirektChat,
+}: {
+  team: TeamMitglied[]
+  onDirektChat: (m: TeamMitglied) => void
+}) {
+  if (team.length === 0) {
+    return (
+      <p className="text-sm text-gray-400 text-center py-8">
+        Noch kein Ansprechpartner hinterlegt.
+      </p>
+    )
+  }
+  // Reihenfolge: Kundenbetreuer → Kanzlei → Kunde (wichtigster Kontakt zuerst)
+  const ordered = [...team].sort((a, b) => {
+    const order: Record<TeamMitglied['rolle'], number> = {
+      kundenbetreuer: 0,
+      kanzlei: 1,
+      kunde: 2,
+    }
+    return order[a.rolle] - order[b.rolle]
+  })
+  return (
+    <ul className="space-y-4">
+      {ordered.map((m, i) => (
+        <li key={`${m.rolle}-${i}`} className="space-y-2">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+            {ROLLE_LABEL[m.rolle]}
+          </p>
+          <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-[#0D1B3E] text-white flex items-center justify-center text-sm font-semibold shrink-0">
+                {initialen(m.name)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-[#0D1B3E] truncate">
+                  {m.name || '—'}
+                </p>
+                {m.email && (
+                  <a
+                    href={`mailto:${m.email}`}
+                    className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-gray-600 hover:text-[#1E3A5F] truncate"
+                  >
+                    <MailIcon className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">{m.email}</span>
+                  </a>
+                )}
+                {m.telefon && (
+                  <p className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-gray-600">
+                    <PhoneIcon className="w-3.5 h-3.5" />
+                    {m.telefon}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => onDirektChat(m)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0D1B3E] text-white text-xs font-medium hover:bg-[#1E3A5F]"
+              >
+                <MessageCircleIcon className="w-3.5 h-3.5" />
+                Direkt chatten
+              </button>
+              {m.telefon && (
+                <a
+                  href={`tel:${m.telefon}`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-xs font-medium hover:bg-gray-50"
+                >
+                  <PhoneIcon className="w-3.5 h-3.5" />
+                  Anrufen
+                </a>
+              )}
+            </div>
+          </div>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function initialen(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length === 0 || !parts[0]) return '—'
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
 function DateienListe({ dokumente }: { dokumente: DocLite[] }) {
@@ -220,34 +366,50 @@ function TimelineListe({ events }: { events: TimelineEventLite[] }) {
   )
 }
 
-function ChatListe({ nachrichten }: { nachrichten: NachrichtLite[] }) {
-  if (nachrichten.length === 0) {
-    return <p className="text-sm text-gray-400 text-center py-8">Noch keine Nachrichten.</p>
-  }
+function ChatListe({
+  nachrichten,
+  focus,
+}: {
+  nachrichten: NachrichtLite[]
+  focus: TeamMitglied | null
+}) {
   return (
-    <ul className="space-y-2">
-      {nachrichten.map((n, i) => {
-        const text = n.inhalt ?? n.text ?? ''
-        const datum = n.created_at ?? n.erstellt_am
-        return (
-          <li
-            key={n.id ?? i}
-            className="p-3 rounded-lg bg-gray-50 border border-gray-200"
-          >
-            <div className="flex items-center justify-between mb-1">
-              <p className="text-xs font-medium text-gray-700">
-                {n.absender_name ?? n.absender_rolle ?? 'System'}
-              </p>
-              {datum && (
-                <p className="text-[10px] text-gray-400">
-                  {new Date(datum).toLocaleString('de-DE')}
-                </p>
-              )}
-            </div>
-            <p className="text-sm text-gray-900">{text}</p>
-          </li>
-        )
-      })}
-    </ul>
+    <div className="space-y-3">
+      {focus && (
+        <div className="rounded-lg border border-[#7BA3CC] bg-[#f4f8fc] px-3 py-2 text-xs text-[#1E3A5F]">
+          Fokus auf <strong>{focus.name}</strong> ({ROLLE_LABEL[focus.rolle]}).
+          Zum Schreiben den Chat im Haupt-Layout nutzen — hier ist die Akten-
+          Ansicht read-only.
+        </div>
+      )}
+      {nachrichten.length === 0 ? (
+        <p className="text-sm text-gray-400 text-center py-8">Noch keine Nachrichten.</p>
+      ) : (
+        <ul className="space-y-2">
+          {nachrichten.map((n, i) => {
+            const text = n.inhalt ?? n.text ?? ''
+            const datum = n.created_at ?? n.erstellt_am
+            return (
+              <li
+                key={n.id ?? i}
+                className="p-3 rounded-lg bg-gray-50 border border-gray-200"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-xs font-medium text-gray-700">
+                    {n.absender_name ?? n.absender_rolle ?? 'System'}
+                  </p>
+                  {datum && (
+                    <p className="text-[10px] text-gray-400">
+                      {new Date(datum).toLocaleString('de-DE')}
+                    </p>
+                  )}
+                </div>
+                <p className="text-sm text-gray-900">{text}</p>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
   )
 }
