@@ -545,6 +545,20 @@ function BrandingSection({ svId }: { svId: string }) {
     <div className="bg-white border border-gray-200 rounded-2xl p-5 mt-5">
       <h2 className="text-sm font-medium text-gray-500 mb-4">Branding</h2>
 
+      {/* AAR-422: Link zum neuen Branding-Editor mit Live-Preview + Font-Picker. */}
+      <a
+        href="/gutachter/profil/branding"
+        className="flex items-center justify-between gap-3 mb-4 p-3 rounded-xl border border-[#4573A2]/30 bg-[#4573A2]/5 hover:bg-[#4573A2]/10 transition-colors"
+      >
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-[#0D1B3E]">Neu: Branding-Editor mit Live-Preview</p>
+          <p className="text-xs text-gray-600 mt-0.5">
+            Lade dein Logo hoch — Farben & Schriftart werden automatisch extrahiert.
+          </p>
+        </div>
+        <span className="text-xs font-medium text-[#4573A2] whitespace-nowrap">Öffnen →</span>
+      </a>
+
       {/* Toggle */}
       <label className="flex items-center gap-3 mb-4 cursor-pointer">
         <div className={`relative w-10 h-5 rounded-full transition-colors ${useCustom ? 'bg-[#4573A2]' : 'bg-gray-300'}`}
