@@ -15,7 +15,7 @@ import {
   LogOutIcon,
   UsersIcon,
   TrophyIcon,
-  MessageCircleIcon,
+  InboxIcon,
   EuroIcon,
   AlertCircleIcon,
   ClipboardListIcon,
@@ -37,7 +37,7 @@ type NavItem = {
   label: string
   icon: typeof MapPinIcon
   // badge: optional Render-Funktion die einen Counter zurückgibt
-  badgeKey?: 'auftraege' | 'nachrichten'
+  badgeKey?: 'auftraege' | 'posteingang'
 }
 
 type NavSection = {
@@ -58,7 +58,10 @@ const NAV_SECTIONS_BASE: NavSection[] = [
   {
     title: 'Kommunikation',
     items: [
-      { href: '/gutachter/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon, badgeKey: 'nachrichten' },
+      // AAR-370: Posteingang vereint System-Mitteilungen + Fall-Chat-Nachrichten
+      // in einer Page mit Tabs. Alte Routen /mitteilungen und /nachrichten
+      // redirecten hierher mit passendem ?tab=-Parameter.
+      { href: '/gutachter/posteingang', label: 'Posteingang', icon: InboxIcon, badgeKey: 'posteingang' },
     ],
   },
   {
@@ -187,13 +190,13 @@ export default function GutachterShell({
       }).catch(() => {})
   }, [standortLat, standortLng])
 
-  // AAR-222: Badge-Counter für Sidebar-Items.
+  // AAR-370: Badge-Counter für Sidebar-Items.
   // - auftraege: Anzahl Fälle mit status='sv-zugewiesen' (noch nicht terminiert)
-  // - nachrichten: Anzahl ungelesener Nachrichten in nachrichten (Mitteilungen
-  //   wandern in die Glocke, deshalb hier KEINE mitteilungen mehr)
-  const [badgeCounts, setBadgeCounts] = useState<{ auftraege: number; nachrichten: number }>({
+  // - posteingang: ungelesene gutachter_mitteilungen + ungelesene nachrichten
+  //   gemeinsam als aggregierter Counter (Tabs Mitteilungen + Nachrichten).
+  const [badgeCounts, setBadgeCounts] = useState<{ auftraege: number; posteingang: number }>({
     auftraege: 0,
-    nachrichten: 0,
+    posteingang: 0,
   })
 
   const loadBadges = useCallback(async () => {
@@ -218,7 +221,14 @@ export default function GutachterShell({
       .in('sv_id', svIds)
       .eq('status', 'sv-zugewiesen')
 
-    // Nachrichten: ungelesene Chat-Nachrichten in nachrichten.
+    // Posteingang Tab 1: ungelesene System-Mitteilungen über alle SV-Rows.
+    const { count: mitteilungenCount } = await supabase
+      .from('gutachter_mitteilungen')
+      .select('id', { count: 'exact', head: true })
+      .in('sv_id', svIds)
+      .eq('gelesen', false)
+
+    // Posteingang Tab 2: ungelesene Chat-Nachrichten.
     const { count: nachrichtenCount } = await supabase
       .from('nachrichten')
       .select('id', { count: 'exact', head: true })
@@ -227,7 +237,7 @@ export default function GutachterShell({
 
     setBadgeCounts({
       auftraege: auftraegeCount ?? 0,
-      nachrichten: nachrichtenCount ?? 0,
+      posteingang: (mitteilungenCount ?? 0) + (nachrichtenCount ?? 0),
     })
   }, [])
 
@@ -238,6 +248,7 @@ export default function GutachterShell({
       .channel('gutachter-sidebar-badges')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'faelle' }, () => loadBadges())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'nachrichten' }, () => loadBadges())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'gutachter_mitteilungen' }, () => loadBadges())
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [loadBadges])

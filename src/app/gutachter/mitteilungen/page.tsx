@@ -1,29 +1,8 @@
-import { createClient } from '@/lib/supabase/server'
-import { getGutachterForUser } from '@/lib/gutachter'
-import MitteilungenClient from './MitteilungenClient'
+import { redirect } from 'next/navigation'
 
-export default async function MitteilungenPage() {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-
-  const sv = await getGutachterForUser(supabase, user!.id, 'id')
-
-  if (!sv) {
-    return (
-      <div className="h-full flex flex-col">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6">
-          <p className="text-yellow-700 text-sm">Sachverständigen-Profil nicht gefunden.</p>
-        </div>
-      </div>
-    )
-  }
-
-  const { data: mitteilungen } = await supabase
-    .from('gutachter_mitteilungen')
-    .select('id, typ, titel, nachricht, gelesen, dringend, link, created_at')
-    .eq('sv_id', sv.id)
-    .order('created_at', { ascending: false })
-    .limit(100)
-
-  return <MitteilungenClient mitteilungen={mitteilungen ?? []} />
+// AAR-370: /gutachter/mitteilungen ist in /gutachter/posteingang?tab=mitteilungen
+// konsolidiert. Diese Route bleibt nur noch als Legacy-Redirect für
+// Bookmarks und Deep-Links bestehen.
+export default function MitteilungenRedirectPage() {
+  redirect('/gutachter/posteingang?tab=mitteilungen')
 }
