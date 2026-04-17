@@ -6,7 +6,6 @@
 // Losfahren → Ankommen → Abschliessen → Pausieren.
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { triggerSvLosgefahren } from '@/lib/termine/trigger-losgefahren'
 import { markArrival } from '@/lib/gps/mark-arrival'
@@ -108,44 +107,3 @@ export async function pauseFokusmodus(sessionId: string): Promise<Result> {
   return { success: true }
 }
 
-/**
- * Live-Position-Schreiber für den Fokus-Modus. Thin wrapper über das
- * bestehende `track-position` (KFZ-158) — Auth/SV-Lookup passiert dort.
- */
-export async function writeLivePosition(input: {
-  lat: number
-  lng: number
-  accuracy_m: number
-  heading: number | null
-  speed_mps: number | null
-}): Promise<Result> {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'unauthorized' }
-
-  const { data: sv } = await supabase
-    .from('sachverstaendige')
-    .select('id, live_tracking_enabled')
-    .eq('profile_id', user.id)
-    .single()
-
-  if (!sv) return { success: false, error: 'no_sv' }
-  if (!sv.live_tracking_enabled) {
-    return { success: false, error: 'tracking_disabled' }
-  }
-
-  const { error } = await supabase.from('sv_live_position').insert({
-    gutachter_id: sv.id,
-    lat: input.lat,
-    lng: input.lng,
-    accuracy_m: input.accuracy_m,
-    heading: input.heading,
-    speed_kmh:
-      input.speed_mps != null
-        ? Math.round(input.speed_mps * 3.6 * 10) / 10
-        : null,
-  })
-
-  if (error) return { success: false, error: error.message }
-  return { success: true }
-}

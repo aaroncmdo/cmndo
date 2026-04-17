@@ -1,15 +1,18 @@
 'use client'
 
-// AAR-382: Fokus-Modus Live-Tracking Hook.
-// Debounced auf 10s: nimmt das aktuelle GPS-Signal aus useWatchPosition und
-// persistiert es via writeLivePosition. Zusätzlich berechnet es die Distanz
-// zum aktuellen Stop (Haversine) — wenn < 100m für >= 30s durchgehend, wird
-// der `onGeofenceReached`-Callback aufgerufen (genau einmal, bis reset).
+// AAR-382 + AAR-388: Fokus-Modus Live-Tracking Hook.
+// Schreibt GPS-Messungen IMMER zuerst in die lokale gps_outbox — der
+// syncGpsOutbox-Worker entscheidet ob direkt an /api/sv/position-batch
+// gesendet wird (online) oder auf Reconnect gewartet wird. So ist Online/
+// Offline der gleiche Code-Pfad. Debounced auf 10s. Distanz-Berechnung
+// (Haversine) + Geofence-Detection (< 100m für >= 30s) triggert
+// `onGeofenceReached` genau einmal pro Target.
 
 import { useEffect, useRef, useState } from 'react'
 import { useWatchPosition } from '@/lib/gps/use-watch-position'
 import { haversineMeters } from '@/lib/gps/geofence'
-import { writeLivePosition } from './actions'
+import { addGpsPosition } from '@/lib/offline/outbox'
+import { syncGpsOutbox } from '@/lib/offline/sync-gps-outbox'
 
 const TRACK_INTERVAL_MS = 10_000
 const GEOFENCE_RADIUS_M = 100
@@ -17,6 +20,8 @@ const GEOFENCE_DURATION_MS = 30_000
 
 export interface UseFieldTrackingArgs {
   enabled: boolean
+  svId: string
+  terminId: string | null
   targetLat: number | null
   targetLng: number | null
   onGeofenceReached?: (pos: { lat: number; lng: number }) => void
@@ -31,6 +36,8 @@ export interface FieldTrackingState {
 
 export function useFieldTracking({
   enabled,
+  svId,
+  terminId,
   targetLat,
   targetLng,
   onGeofenceReached,
@@ -72,20 +79,32 @@ export function useFieldTracking({
     }
   }, [position, targetLat, targetLng, onGeofenceReached])
 
-  // Position debounced auf den Server schreiben
+  // AAR-388: Position debounced in die gps_outbox schreiben, dann Sync anstoßen.
+  // Online/offline-Pfad ist identisch — der Sync-Worker entscheidet.
   useEffect(() => {
     if (!enabled || !position) return
     const now = Date.now()
     if (now - lastSentAtRef.current < TRACK_INTERVAL_MS) return
     lastSentAtRef.current = now
-    void writeLivePosition({
-      lat: position.lat,
-      lng: position.lng,
-      accuracy_m: position.accuracy,
-      heading: position.heading,
-      speed_mps: position.speed,
-    }).catch((err) => console.error('[feldmodus] writeLivePosition:', err))
-  }, [enabled, position])
+    ;(async () => {
+      try {
+        await addGpsPosition({
+          sv_id: svId,
+          termin_id: terminId,
+          lat: position.lat,
+          lng: position.lng,
+          accuracy_m: position.accuracy,
+          heading: position.heading,
+          speed_kmh: position.speed != null ? position.speed * 3.6 : null,
+          captured_at: Date.now(),
+        })
+        // Fire-and-forget: Sync-Versuch, wenn offline schlägt er silent fehl
+        void syncGpsOutbox().catch(() => {})
+      } catch (err) {
+        console.error('[feldmodus] addGpsPosition:', err)
+      }
+    })()
+  }, [enabled, svId, terminId, position])
 
   return {
     position: position

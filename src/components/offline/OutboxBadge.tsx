@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { getPendingCount, getOutboxItems, type OutboxItem } from '@/lib/offline/outbox'
 import { syncOutbox } from '@/lib/offline/sync-outbox'
-import { CloudUploadIcon, XIcon, RefreshCwIcon, CheckCircleIcon, AlertCircleIcon, ClockIcon } from 'lucide-react'
+import { CloudUploadIcon, XIcon, RefreshCwIcon, CheckCircleIcon, AlertCircleIcon, ClockIcon, AlertTriangleIcon } from 'lucide-react'
 
 // KFZ-180: Badge das die Anzahl wartender Outbox-Uploads zeigt.
 // Klick oeffnet Popup mit Liste + Retry.
@@ -42,6 +42,8 @@ export default function OutboxBadge() {
     pending: <ClockIcon className="w-3.5 h-3.5 text-amber-500" />,
     uploading: <RefreshCwIcon className="w-3.5 h-3.5 text-blue-500 animate-spin" />,
     failed: <AlertCircleIcon className="w-3.5 h-3.5 text-red-500" />,
+    // AAR-388: Dead-Letter — 10 Retries fehlgeschlagen
+    dead: <AlertTriangleIcon className="w-3.5 h-3.5 text-red-700" />,
   }
 
   return (

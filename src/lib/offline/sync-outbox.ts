@@ -1,15 +1,24 @@
-// KFZ-180: Background-Sync — Outbox abarbeiten wenn online.
-// Exponentieller Backoff: 1s, 5s, 30s, 2min, 10min max.
+// KFZ-180 + AAR-388: Background-Sync — Outbox abarbeiten wenn online.
+// Exponentieller Backoff: 1s · 5s · 30s · 2min · 10min max.
+// AAR-388: Backoff nutzt last_attempt_at (nicht mehr created_at), Storage-
+// Pfad enthält Idempotency-Key, Dead-Letter nach 10 Retries wird in
+// updateOutboxStatus automatisch gesetzt. 23505-UNIQUE-Conflicts auf
+// idempotency_key werden als „bereits synced" interpretiert (clean delete).
 
 'use client'
 
-import { offlineDB, updateOutboxStatus, removeFromOutbox, type OutboxItem } from './outbox'
+import {
+  offlineDB,
+  updateOutboxStatus,
+  removeFromOutbox,
+  type OutboxItem,
+} from './outbox'
 import { createClient } from '@/lib/supabase/client'
 
 const BACKOFF_MS = [1000, 5000, 30000, 120000, 600000]
 let syncing = false
 
-function getBackoff(retryCount: number): number {
+export function getBackoff(retryCount: number): number {
   return BACKOFF_MS[Math.min(retryCount, BACKOFF_MS.length - 1)]
 }
 
@@ -19,16 +28,15 @@ async function uploadSingleItem(item: OutboxItem): Promise<boolean> {
 
   await updateOutboxStatus(item.id, 'uploading')
 
-  // 1. Upload to Supabase Storage
+  // AAR-388: Storage-Pfad enthält Idempotency-Key, upsert=true macht Retry sicher
   const ext = item.file_name.split('.').pop() ?? 'bin'
-  const timestamp = Date.now()
-  const storagePath = `${item.fall_id}/${item.dokument_typ}_${timestamp}.${ext}`
+  const storagePath = `${item.fall_id}/${item.dokument_typ}_${item.idempotency_key}.${ext}`
 
   const { error: uploadErr } = await supabase.storage
     .from('fall-dokumente')
     .upload(storagePath, item.file_blob, {
       contentType: item.content_type,
-      upsert: false,
+      upsert: true,
     })
 
   if (uploadErr) {
@@ -36,11 +44,11 @@ async function uploadSingleItem(item: OutboxItem): Promise<boolean> {
     return false
   }
 
-  // 2. Insert into fall_dokumente
   const { data: user } = await supabase.auth.getUser()
   const { data: row, error: insertErr } = await supabase
     .from('fall_dokumente')
     .insert({
+      idempotency_key: item.idempotency_key,
       fall_id: item.fall_id,
       dokument_typ: item.dokument_typ,
       ist_pflicht: item.ist_pflicht,
@@ -49,19 +57,40 @@ async function uploadSingleItem(item: OutboxItem): Promise<boolean> {
       original_filename: item.file_name,
       mime_type: item.content_type,
       groesse_bytes: item.file_size,
-      ocr_status: item.content_type === 'application/pdf' || item.content_type.startsWith('image/') ? 'pending' : 'skipped',
+      ocr_status:
+        item.content_type === 'application/pdf' ||
+        item.content_type.startsWith('image/')
+          ? 'pending'
+          : 'skipped',
       hochgeladen_von_user_id: user?.user?.id ?? null,
     })
     .select('id')
     .single()
 
-  if (insertErr || !row) {
-    await updateOutboxStatus(item.id, 'failed', insertErr?.message ?? 'DB-Insert fehlgeschlagen')
+  // AAR-388: 23505 = UNIQUE-Violation auf idempotency_key → schon synced
+  if (insertErr) {
+    const code = (insertErr as { code?: string }).code
+    if (code === '23505') {
+      await removeFromOutbox(item.id)
+      return true
+    }
+    await updateOutboxStatus(
+      item.id,
+      'failed',
+      insertErr.message ?? 'DB-Insert fehlgeschlagen',
+    )
     return false
   }
 
-  // 3. Trigger OCR (fire & forget)
-  if (item.content_type === 'application/pdf' || item.content_type.startsWith('image/')) {
+  if (!row) {
+    await updateOutboxStatus(item.id, 'failed', 'Kein Row zurückgegeben')
+    return false
+  }
+
+  if (
+    item.content_type === 'application/pdf' ||
+    item.content_type.startsWith('image/')
+  ) {
     fetch('/api/ocr-trigger', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -69,14 +98,15 @@ async function uploadSingleItem(item: OutboxItem): Promise<boolean> {
     }).catch(() => {})
   }
 
-  // 4. Remove from Outbox
   await removeFromOutbox(item.id)
   return true
 }
 
 export async function syncOutbox(): Promise<{ synced: number; failed: number }> {
   if (syncing) return { synced: 0, failed: 0 }
-  if (typeof navigator !== 'undefined' && !navigator.onLine) return { synced: 0, failed: 0 }
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    return { synced: 0, failed: 0 }
+  }
 
   syncing = true
   let synced = 0
@@ -91,11 +121,13 @@ export async function syncOutbox(): Promise<{ synced: number; failed: number }> 
     for (const item of items) {
       if (!item.id) continue
 
-      // Skip items that need backoff
+      // AAR-388: Backoff korrekt gegen last_attempt_at
       if (item.status === 'failed' && item.retry_count > 0) {
-        const backoff = getBackoff(item.retry_count)
-        const elapsed = Date.now() - item.created_at - (item.retry_count * backoff)
-        if (elapsed < 0) continue
+        const since =
+          item.last_attempt_at != null
+            ? Date.now() - item.last_attempt_at
+            : Infinity
+        if (since < getBackoff(item.retry_count)) continue
       }
 
       const ok = await uploadSingleItem(item)
@@ -117,11 +149,9 @@ export function registerOnlineSync(): void {
   listenerRegistered = true
 
   window.addEventListener('online', () => {
-    // Small delay to let connection stabilize
     setTimeout(() => syncOutbox(), 1500)
   })
 
-  // Also try on load if already online
   if (navigator.onLine) {
     setTimeout(() => syncOutbox(), 3000)
   }

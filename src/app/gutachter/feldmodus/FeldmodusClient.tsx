@@ -5,15 +5,19 @@
 // aktuellen Stop-Index lokal (initialisiert aus session.aktueller_termin_id),
 // reagiert auf Geofence-Events und leitet Fortschritts-Callbacks durch.
 
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import type { SvTagesSession } from '@/lib/types/field-modus'
 import type { FeldmodusStop, FeldmodusSV } from './page'
 import FeldmodusMap from './FeldmodusMap'
 import RouteSidebar from './RouteSidebar'
+import OfflineStatusBanner from './OfflineStatusBanner'
 import { useFieldTracking } from './useFieldTracking'
 import { markArrived } from './actions'
+import { recoverOutbox } from '@/lib/offline/outbox'
+import { registerOnlineSync, syncOutbox } from '@/lib/offline/sync-outbox'
+import { registerGpsOnlineSync, syncGpsOutbox } from '@/lib/offline/sync-gps-outbox'
 
 export interface FeldmodusClientProps {
   session: SvTagesSession
@@ -72,10 +76,23 @@ export default function FeldmodusClient({
 
   const { position, distanceMeters, permissionState, error } = useFieldTracking({
     enabled: trackingEnabled,
+    svId: sv.id,
+    terminId: aktuellerStop?.termin_id ?? null,
     targetLat: aktuellerStop?.lat ?? null,
     targetLng: aktuellerStop?.lng ?? null,
     onGeofenceReached,
   })
+
+  // AAR-388: Beim Mount Recovery fahren + Sync-Listeners registrieren.
+  // Hängengebliebene 'uploading'-Items aus Tab-Reload zurück auf 'pending'.
+  useEffect(() => {
+    void recoverOutbox().catch(() => {})
+    registerOnlineSync()
+    registerGpsOnlineSync()
+    // Initial-Sync beim Einstieg (deckt Szenario „App offline gestartet, jetzt online")
+    void syncOutbox().catch(() => {})
+    void syncGpsOutbox().catch(() => {})
+  }, [])
 
   const onAdvanced = useCallback(
     (nextTerminId: string | null) => {
@@ -96,7 +113,9 @@ export default function FeldmodusClient({
   )
 
   return (
-    <div className="h-full w-full flex flex-col lg:flex-row">
+    <div className="h-full w-full flex flex-col">
+      <OfflineStatusBanner />
+      <div className="flex-1 flex flex-col lg:flex-row min-h-0">
       {/* Karte — oben auf mobile, links auf desktop */}
       <div className="relative h-1/2 lg:h-full lg:flex-1">
         <FeldmodusMap
@@ -128,6 +147,7 @@ export default function FeldmodusClient({
           distanceMeters={distanceMeters}
           onAdvanced={onAdvanced}
         />
+      </div>
       </div>
     </div>
   )
