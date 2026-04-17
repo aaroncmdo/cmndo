@@ -108,6 +108,33 @@ export default async function GutachterFallPage({
     _preistyp: abrechnung?.preistyp ?? null,
   }
 
+  // AAR-403: Kürzungs-Positionen für KanzleiStatusCard (Phase 5+)
+  let kuerzungen: {
+    id: string
+    typ: string | null
+    bezeichnung: string | null
+    betrag_gefordert: number | null
+    betrag_reguliert: number | null
+    betrag_gekuerzt: number | null
+  }[] = []
+  try {
+    const { data: fp } = await supabase
+      .from('forderungspositionen')
+      .select('id, typ, bezeichnung, betrag_gefordert, betrag_reguliert, betrag_gekuerzt')
+      .eq('fall_id', id)
+      .order('erstellt_am', { ascending: true })
+    kuerzungen = (fp ?? []).map((p) => ({
+      id: p.id as string,
+      typ: (p.typ as string | null) ?? null,
+      bezeichnung: (p.bezeichnung as string | null) ?? null,
+      betrag_gefordert: p.betrag_gefordert != null ? Number(p.betrag_gefordert) : null,
+      betrag_reguliert: p.betrag_reguliert != null ? Number(p.betrag_reguliert) : null,
+      betrag_gekuerzt: p.betrag_gekuerzt != null ? Number(p.betrag_gekuerzt) : null,
+    }))
+  } catch {
+    /* Tabelle kann fehlen — Card fällt dann auf faelle.kuerzungs_betrag zurück. */
+  }
+
   // KFZ-172: fall_dokumente laden
   let fallDokumente: { id: string; dokument_typ: string; ist_pflicht: boolean; ab_phase: string | null; storage_path: string; original_filename: string | null; ocr_status: string | null; hochgeladen_am: string }[] = []
   try {
@@ -199,6 +226,7 @@ export default async function GutachterFallPage({
       chatTeilnehmer={chatTeilnehmer}
       aktiverTermin={aktiverTermin}
       fallDokumente={fallDokumente}
+      kuerzungen={kuerzungen}
       abrechnungAusgezahltAm={(abrechnung as { abgerechnet_am?: string | null } | null)?.abgerechnet_am ?? null}
       tasks={(tasksInitial ?? []) as Parameters<typeof FallDetailClient>[0]['tasks']}
       abrechnung={

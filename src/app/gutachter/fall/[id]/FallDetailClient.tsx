@@ -23,6 +23,10 @@ import { GutachtenCard } from './_components/GutachtenCard'
 import { DokumenteUebersichtCard } from './_components/DokumenteUebersichtCard'
 import { TimelineVorschauCard } from './_components/TimelineVorschauCard'
 import { KanzleiRegulierungsStepperCard } from './_components/KanzleiRegulierungsStepperCard'
+import {
+  KanzleiStatusCard,
+  type KuerzungsPosition,
+} from './_components/KanzleiStatusCard'
 import { AbrechnungsCard } from './_components/AbrechnungsCard'
 import { StellungnahmeCard } from './_components/StellungnahmeCard'
 import { NachbesichtigungCard } from './_components/NachbesichtigungCard'
@@ -106,6 +110,8 @@ type Props = {
   anforderbareSlots?: AnforderbarerSlot[]
   /** AAR-327: Anforderungen die der eingeloggte SV bereits gestellt hat */
   anforderungenVonMir?: AnforderungsItem[]
+  /** AAR-403: Kürzungs-Positionen (forderungspositionen) für KanzleiStatusCard */
+  kuerzungen?: KuerzungsPosition[]
 }
 
 export default function FallDetailClient(props: Props) {
@@ -308,6 +314,35 @@ export default function FallDetailClient(props: Props) {
               subphase={subphase}
             />
           )}
+          {/* AAR-403: Honorar-Transparenz ab Phase 5 — Kürzungen + SV-Honorar */}
+          <KanzleiStatusCard
+            subphase={subphase}
+            fall={{
+              kanzlei_uebergeben_am:
+                (fall.kanzlei_uebergeben_am as string | null) ?? null,
+              vs_anschreiben_datum:
+                (fall.vs_anschreiben_datum as string | null) ?? null,
+              vs_reaktion_am: (fall.vs_reaktion_am as string | null) ?? null,
+              vs_kuerzung_grund:
+                (fall.vs_kuerzung_grund as string | null) ?? null,
+              zahlung_eingegangen_am:
+                (fall.zahlung_eingegangen_am as string | null) ?? null,
+              zahlung_betrag:
+                fall.zahlung_betrag != null
+                  ? Number(fall.zahlung_betrag as number)
+                  : null,
+              kuerzungs_betrag:
+                fall.kuerzungs_betrag != null
+                  ? Number(fall.kuerzungs_betrag as number)
+                  : null,
+              gutachten_betrag:
+                fall.gutachten_betrag != null
+                  ? Number(fall.gutachten_betrag as number)
+                  : null,
+            }}
+            abrechnung={props.abrechnung ?? null}
+            kuerzungen={props.kuerzungen ?? []}
+          />
           {/* AAR-293: Abrechnungs-Card ab Phase 6.x */}
           {subphase.phase === 6 && (
             <AbrechnungsCard abrechnung={props.abrechnung ?? null} subphase={subphase} />
