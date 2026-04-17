@@ -41,7 +41,10 @@ export async function analyzeCallPostHoc(callId: string): Promise<void> {
   })
 
   const anthropic = new Anthropic({ apiKey })
-  const response = await anthropic.messages.create({
+  // AAR-435: SDK-Pattern auf stream() umgestellt — intern identisches
+  // Verhalten für den Aircall-Webhook (Batch-Consumer), aber für spätere
+  // Live-Konsumenten ist die gleiche Lib streaming-ready.
+  const streamHandle = anthropic.messages.stream({
     model: POST_CALL_MODEL,
     max_tokens: 500,
     // AAR-436: statischer System-Prompt wird gecached
@@ -54,6 +57,7 @@ export async function analyzeCallPostHoc(callId: string): Promise<void> {
     ],
     messages: [{ role: 'user', content: userPrompt }],
   })
+  const response = await streamHandle.finalMessage()
 
   const text = response.content[0]?.type === 'text' ? response.content[0].text : ''
 

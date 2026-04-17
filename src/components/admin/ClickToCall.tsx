@@ -19,11 +19,40 @@ export default function ClickToCall({ telefon, fallId, leadId, kundeName }: {
   async function handleOpen() {
     setOpen(true)
     setLoadingBriefing(true)
-    setBriefing(null)
+    setBriefing('')
+
+    // AAR-435: Streaming via /api/copilot/briefing. Fallback auf die
+    // Server-Action wenn der Stream nicht verfügbar ist.
     try {
-      const b = await getCallBriefing({ fallId, leadId })
-      setBriefing(b)
-    } catch { setBriefing('Briefing konnte nicht geladen werden.') }
+      const response = await fetch('/api/copilot/briefing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fallId, leadId }),
+      })
+      if (!response.ok || !response.body) {
+        const b = await getCallBriefing({ fallId, leadId })
+        setBriefing(b)
+      } else {
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+        let acc = ''
+        // Erste Tokens → sofort aus dem Loading-State raus
+        setLoadingBriefing(false)
+        while (true) {
+          const { value, done } = await reader.read()
+          if (done) break
+          acc += decoder.decode(value, { stream: true })
+          setBriefing(acc)
+        }
+      }
+    } catch {
+      try {
+        const b = await getCallBriefing({ fallId, leadId })
+        setBriefing(b)
+      } catch {
+        setBriefing('Briefing konnte nicht geladen werden.')
+      }
+    }
     setLoadingBriefing(false)
   }
 
@@ -68,11 +97,11 @@ export default function ClickToCall({ telefon, fallId, leadId, kundeName }: {
               ) : (
                 <>
                   <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">Pre-Call Briefing</p>
-                  {loadingBriefing ? (
+                  {loadingBriefing && !briefing ? (
                     <div className="flex items-center gap-2 text-sm text-gray-400 py-4">
                       <Loader2Icon className="w-4 h-4 animate-spin" /> Briefing wird generiert...
                     </div>
-                  ) : briefing ? (
+                  ) : briefing && briefing.length > 0 ? (
                     <div className="bg-[#0D1B3E]/5 rounded-xl p-4 text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
                       {briefing}
                     </div>

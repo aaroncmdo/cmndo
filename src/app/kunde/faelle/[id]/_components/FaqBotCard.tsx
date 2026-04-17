@@ -2,8 +2,10 @@
 
 // AAR-319: FAQ-Bot-Card im Kundenportal. Chat-Interface für Fragen zum
 // eigenen Fall — kennt Fallstatus, Termin, Prozess.
+// AAR-435: Streaming via /api/faq-bot/ask (ReadableStream). Server-Action
+// askKundenFaq bleibt als Fallback.
 
-import { useState, useTransition, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { SparklesIcon, SendIcon, LoaderIcon, UserIcon, BotIcon } from 'lucide-react'
 import { askKundenFaq } from '../faq-bot-actions'
 import type { ChatMessage } from '@/lib/faq-bot/ask'
@@ -25,27 +27,94 @@ export function FaqBotCard({
   const [history, setHistory] = useState<ChatMessage[]>(initialHistory)
   const [frage, setFrage] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [pending, startTransition] = useTransition()
+  const [pending, setPending] = useState(false)
+  // AAR-435: Teilweise gestreamter Token-Text der Assistant-Antwort.
+  const [streamingText, setStreamingText] = useState<string>('')
   const scrollRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-  }, [history])
+  }, [history, streamingText])
 
-  function ask(text: string) {
+  async function ask(text: string) {
     if (!text.trim() || pending) return
     setError(null)
-    startTransition(async () => {
-      const r = await askKundenFaq(fallId, text)
-      if (!r.success) {
-        setError(r.error)
+    setPending(true)
+    setStreamingText('')
+
+    const trimmed = text.trim()
+    const optimisticUserMsg: ChatMessage = {
+      role: 'user',
+      content: trimmed,
+      ts: new Date().toISOString(),
+    }
+    const baseHistory = [...history, optimisticUserMsg]
+    setHistory(baseHistory)
+
+    try {
+      const response = await fetch('/api/faq-bot/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fallId, frage: trimmed }),
+      })
+
+      if (!response.ok || !response.body) {
+        // AAR-435: Fallback auf Server-Action
+        const r = await askKundenFaq(fallId, trimmed)
+        if (!r.success) {
+          setError(r.error)
+          // Optimistisches User-Msg wieder entfernen
+          setHistory(history)
+        } else {
+          setHistory(r.history)
+          setFrage('')
+        }
+        setPending(false)
+        setStreamingText('')
         return
       }
-      setHistory(r.history)
+
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let accumulated = ''
+      while (true) {
+        const { value, done } = await reader.read()
+        if (done) break
+        const chunk = decoder.decode(value, { stream: true })
+        accumulated += chunk
+        setStreamingText(accumulated)
+      }
+
+      // Server hat die Historie selbst persistiert. Wir merged im Client
+      // die finale Assistant-Nachricht rein, damit das UI sofort stabil ist.
+      const finalHistory: ChatMessage[] = [
+        ...baseHistory,
+        { role: 'assistant', content: accumulated, ts: new Date().toISOString() },
+      ]
+      setHistory(finalHistory)
+      setStreamingText('')
       setFrage('')
-    })
+    } catch (err) {
+      console.error('[AAR-435] Stream-Lesen fehlgeschlagen, Fallback auf Server-Action:', err)
+      try {
+        const r = await askKundenFaq(fallId, trimmed)
+        if (!r.success) {
+          setError(r.error)
+          setHistory(history)
+        } else {
+          setHistory(r.history)
+          setFrage('')
+        }
+      } catch (err2) {
+        setError(err2 instanceof Error ? err2.message : 'Anfrage fehlgeschlagen')
+        setHistory(history)
+      }
+      setStreamingText('')
+    } finally {
+      setPending(false)
+    }
   }
 
   return (
@@ -109,11 +178,17 @@ export function FaqBotCard({
           ))}
           {pending && (
             <div className="flex gap-2">
-              <div className="w-7 h-7 rounded-full bg-[#4573A2] text-white flex items-center justify-center">
-                <LoaderIcon className="w-4 h-4 animate-spin" />
+              <div className="w-7 h-7 rounded-full bg-[#4573A2] text-white flex items-center justify-center shrink-0">
+                {streamingText ? <BotIcon className="w-4 h-4" /> : <LoaderIcon className="w-4 h-4 animate-spin" />}
               </div>
-              <div className="rounded-2xl px-3 py-2 text-sm bg-white border border-gray-200 text-gray-500 italic">
-                Claimondo-Assistent denkt nach …
+              <div
+                className={`rounded-2xl px-3 py-2 text-sm max-w-[80%] whitespace-pre-wrap ${
+                  streamingText
+                    ? 'bg-white border border-gray-200 text-gray-800 rounded-tl-sm'
+                    : 'bg-white border border-gray-200 text-gray-500 italic'
+                }`}
+              >
+                {streamingText || 'Claimondo-Assistent denkt nach …'}
               </div>
             </div>
           )}

@@ -259,6 +259,118 @@ function buildContextText(
   return lines.join('\n')
 }
 
+/**
+ * AAR-435: Streaming-Variante. Yielded Token-Deltas, persistiert am Ende
+ * die finale Antwort + Usage-Log. Caller ist verantwortlich dafür, die
+ * fertige Antwort in ki_gespraeche zu speichern (siehe
+ * /api/faq-bot/ask/route.ts).
+ *
+ * AAR-444: Off-Topic-Check läuft weiterhin vorab — Preflight-Antworten
+ * kommen als single-chunk stream zurück.
+ */
+export async function* streamFaqBot(
+  fallId: string,
+  frage: string,
+  rolle: FaqBotRolle,
+  historie: ChatMessage[] = [],
+): AsyncGenerator<
+  | { type: 'token'; value: string }
+  | { type: 'done'; antwort: string; inputTokens: number; outputTokens: number; offTopic?: boolean; offTopicReason?: string }
+  | { type: 'error'; error: string }
+> {
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey) {
+    yield { type: 'error', error: 'ANTHROPIC_API_KEY nicht gesetzt' }
+    return
+  }
+  if (!frage.trim()) {
+    yield { type: 'error', error: 'Frage fehlt' }
+    return
+  }
+  if (frage.length > 2000) {
+    yield { type: 'error', error: 'Frage zu lang (max 2000 Zeichen)' }
+    return
+  }
+
+  // AAR-444: Off-Topic-Preflight nur für Kunden.
+  if (rolle === 'kunde') {
+    const check = checkOffTopic(frage)
+    if (check.blocked) {
+      yield { type: 'token', value: check.antwort }
+      yield {
+        type: 'done',
+        antwort: check.antwort,
+        inputTokens: 0,
+        outputTokens: 0,
+        offTopic: true,
+        offTopicReason: check.reason,
+      }
+      return
+    }
+  }
+
+  const ctx = await loadFallContext(fallId, rolle)
+  const contextText = buildContextText(rolle, ctx)
+  const systemStatic = rolle === 'kunde' ? KUNDE_SYSTEM : KB_SYSTEM
+  const systemDynamic = '\n\n— Fall-Kontext —\n' + contextText
+
+  const messages: { role: 'user' | 'assistant'; content: string }[] = []
+  for (const m of historie.slice(-10)) {
+    messages.push({ role: m.role, content: m.content })
+  }
+  messages.push({ role: 'user', content: frage.trim() })
+
+  const model = rolle === 'kunde' ? AI_MODELS.faq_bot_kunde : AI_MODELS.faq_bot_kb
+
+  try {
+    const anthropic = new Anthropic({ apiKey })
+    const stream = anthropic.messages.stream({
+      model,
+      max_tokens: 800,
+      system: [
+        { type: 'text', text: systemStatic, cache_control: { type: 'ephemeral' } },
+        { type: 'text', text: systemDynamic },
+      ],
+      messages,
+    })
+
+    let fullText = ''
+    for await (const event of stream) {
+      if (
+        event.type === 'content_block_delta' &&
+        event.delta.type === 'text_delta'
+      ) {
+        const delta = event.delta.text
+        fullText += delta
+        yield { type: 'token', value: delta }
+      }
+    }
+
+    const finalMessage = await stream.finalMessage()
+
+    // AAR-436: Usage-Log fire-and-forget.
+    void logAiUsage({
+      endpoint: rolle === 'kunde' ? 'faq_bot_kunde' : 'faq_bot_kb',
+      model,
+      fallId,
+      usage: finalMessage.usage,
+    })
+
+    yield {
+      type: 'done',
+      antwort: fullText,
+      inputTokens: finalMessage.usage.input_tokens,
+      outputTokens: finalMessage.usage.output_tokens,
+    }
+  } catch (err) {
+    console.error('[AAR-435] Claude-Streaming fehlgeschlagen:', err)
+    yield {
+      type: 'error',
+      error: err instanceof Error ? err.message : 'Claude-API-Fehler',
+    }
+  }
+}
+
 export async function askFaqBot(
   fallId: string,
   frage: string,
