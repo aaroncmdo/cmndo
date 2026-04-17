@@ -1,39 +1,125 @@
-// AAR-220: Theme-Generator. Aus einer Primary-Hex-Farbe wird via HSL-
-// Manipulation ein vollständiges Whitelabel-Theme abgeleitet:
+// AAR-220 / AAR-419: Theme-Generator. Aus einer Primary-Hex-Farbe wird via HSL-
+// Manipulation ein vollständiges Whitelabel-Theme abgeleitet.
 //
-//   primary         — die Original-Farbe (dominante Logo-Farbe)
-//   secondary       — etwas dunkler (für Hover-States)
-//   accent          — heller + saturierter (für Active/Links/Highlights)
-//   sidebarBg       — sehr dunkle Variante (≈10% Lightness) für Sidebar-Hintergrund
-//   textOnPrimary   — automatisch Schwarz oder Weiß je nach Kontrast
-//   surface         — sehr helle, leicht getönte Variante (≈97% Lightness)
+// V1 (AAR-220, 6 Tokens):
+//   primary, secondary, accent, sidebarBg, textOnPrimary, surface
 //
-// Beispiel Maschmeyer-Rot (#C41E3A):
-//   primary:       #C41E3A
-//   secondary:     #8B1528 (15% dunkler)
-//   accent:        #E8354F (10% heller, +saturated)
-//   sidebarBg:     #1A0A0E (sehr dunkel)
-//   textOnPrimary: #FFFFFF
-//   surface:       #FFF5F7 (sehr hell, getönt)
+// V2 (AAR-419, 24 Farb-Tokens + 2 Metadata):
+//   Core:    primary + {Hover|Active|Soft}, secondary + {Hover|Active|Soft}, accent
+//   Neutral: background, surface, surfaceMuted, border, borderStrong (mit Primary-Tint)
+//   Text:    textPrimary, textSecondary, textMuted, textOnPrimary, textOnAccent
+//   Sidebar: sidebarBg, sidebarText, sidebarActive, sidebarHover
+//   Status:  success, warning, danger, info (Saturation an Primary harmonisiert)
+//   Meta:    contrastSafe, version
+//
+// Backwards-Compat: V1-Keys bleiben PFLICHT, V2-Keys sind OPTIONAL auf BrandTheme.
+// V1-Records in der DB werden von themeFromLegacy()/hydrateTheme() lazy
+// auf V2 erweitert — `generateTheme()` liefert immer volles V2.
+
+import { STATUS_COLOR_ANCHORS } from './defaults'
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────────────────────────────────────
 
 export type BrandTheme = {
+  // V1 — bleiben required damit alte DB-Records (6-Key-JSONB) weiter
+  // assignable sind an `BrandTheme | null`.
   primary: string
   secondary: string
   accent: string
   sidebarBg: string
   textOnPrimary: string
   surface: string
+
+  // V2 Core-Palette
+  primaryHover?: string
+  primaryActive?: string
+  primarySoft?: string
+  secondaryHover?: string
+  secondaryActive?: string
+  secondarySoft?: string
+
+  // V2 Neutrale (mit 3% Primary-Tint)
+  background?: string
+  surfaceMuted?: string
+  border?: string
+  borderStrong?: string
+
+  // V2 Text
+  textPrimary?: string
+  textSecondary?: string
+  textMuted?: string
+  textOnAccent?: string
+
+  // V2 Sidebar
+  sidebarText?: string
+  sidebarActive?: string
+  sidebarHover?: string
+
+  // V2 Status (harmonisiert mit Primary)
+  success?: string
+  warning?: string
+  danger?: string
+  info?: string
+
+  // V2 Metadata
+  contrastSafe?: boolean
+  version?: number
 }
 
-// Default-Claimondo-Theme als Fallback wenn kein use_custom_branding aktiv ist.
-export const CLAIMONDO_DEFAULT_THEME: BrandTheme = {
+// Voll-hydratisiertes V2-Theme (alle Keys present). Ergebnis von
+// generateTheme() und themeFromLegacy(). Für Consumer die V2-Felder garantiert
+// brauchen — zB Full-Branding-Modus im Sidebar.
+export type BrandThemeV2 = Required<BrandTheme>
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Default Claimondo-Theme (V2-vollständig)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const CLAIMONDO_DEFAULT_THEME: BrandThemeV2 = {
+  version: 2,
+  contrastSafe: true,
+  // Core
   primary: '#0D1B3E',
-  secondary: '#1E3A5F',
-  accent: '#4573A2',
-  sidebarBg: '#0D1B3E',
+  primaryHover: '#1A2A55',
+  primaryActive: '#06112B',
+  primarySoft: '#E8EDF5',
+  secondary: '#4573A2',
+  secondaryHover: '#3A6391',
+  secondaryActive: '#2E5278',
+  secondarySoft: '#EEF3F9',
+  accent: '#7BA3CC',
+  // Neutrale
+  background: '#F8F9FB',
+  surface: '#FFFFFF',
+  surfaceMuted: '#F1F3F7',
+  border: '#E4E7ED',
+  borderStrong: '#C9CED7',
+  // Text
+  textPrimary: '#0D1B3E',
+  textSecondary: '#4A5568',
+  textMuted: '#8A93A3',
   textOnPrimary: '#FFFFFF',
-  surface: '#f8f9fb',
+  textOnAccent: '#0D1B3E',
+  // Sidebar
+  sidebarBg: '#0D1B3E',
+  sidebarText: '#FFFFFF',
+  sidebarActive: '#1E3A5F',
+  sidebarHover: 'rgba(255,255,255,0.08)',
+  // Status
+  success: '#10B981',
+  warning: '#F59E0B',
+  danger: '#EF4444',
+  info: '#3B82F6',
 }
+
+// Alias-Name für neue V2-Consumer, die den Schema-Stand explizit referenzieren wollen.
+export const CLAIMONDO_DEFAULT_THEME_V2 = CLAIMONDO_DEFAULT_THEME
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Color-Math (Hex ↔ RGB ↔ HSL, WCAG-Luminance)
+// ─────────────────────────────────────────────────────────────────────────────
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const clean = hex.replace('#', '').padEnd(6, '0').slice(0, 6)
@@ -90,13 +176,23 @@ function hslToRgb(h: number, s: number, l: number): { r: number; g: number; b: n
   }
 }
 
-// WCAG-Relative Luminance für Kontrast-Entscheidung Schwarz vs. Weiß auf primary.
 function relativeLuminance(r: number, g: number, b: number): number {
   const norm = (c: number) => {
     const v = c / 255
     return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
   }
   return 0.2126 * norm(r) + 0.7152 * norm(g) + 0.0722 * norm(b)
+}
+
+// Kontrast-Ratio nach WCAG (1.0 - 21.0). AA normal = 4.5, AA large = 3.0.
+function contrastRatio(hexA: string, hexB: string): number {
+  const a = hexToRgb(hexA)
+  const b = hexToRgb(hexB)
+  const lA = relativeLuminance(a.r, a.g, a.b)
+  const lB = relativeLuminance(b.r, b.g, b.b)
+  const lighter = Math.max(lA, lB)
+  const darker = Math.min(lA, lB)
+  return (lighter + 0.05) / (darker + 0.05)
 }
 
 function adjustHsl(hex: string, dh: number, ds: number, dl: number): string {
@@ -118,7 +214,95 @@ function setLightness(hex: string, targetL: number, sCap?: number): string {
   return rgbToHex(out.r, out.g, out.b)
 }
 
-export function generateTheme(primaryHex: string): BrandTheme {
+function mixWithWhite(hex: string, whiteRatio: number): string {
+  const { r, g, b } = hexToRgb(hex)
+  const w = Math.max(0, Math.min(1, whiteRatio))
+  return rgbToHex(r + (255 - r) * w, g + (255 - g) * w, b + (255 - b) * w)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Sub-Palette-Generators
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Neutrale mit dezentem Primary-Tint (3% Saturation). Macht die UI warm bei
+// warmen Logos und kühl bei kühlen Logos — ohne dominant zu werden.
+export function generateNeutrals(primaryHex: string): {
+  background: string
+  surface: string
+  surfaceMuted: string
+  border: string
+  borderStrong: string
+} {
+  const { r, g, b } = hexToRgb(primaryHex)
+  const { h } = rgbToHsl(r, g, b)
+  // Feste Saturation 3%, nur Hue aus Primary. Alle Lightness-Werte fix.
+  const tint = (l: number) => rgbToHex(
+    hslToRgb(h, 3, l).r,
+    hslToRgb(h, 3, l).g,
+    hslToRgb(h, 3, l).b,
+  )
+  return {
+    background: tint(97),   // dezenter Ambient-BG
+    surface: tint(100),     // reines Weiß für Karten (Tint auf 100% = Weiß, aber konsistent)
+    surfaceMuted: tint(95), // Alt-Rows, Hover
+    border: tint(88),       // Standard-Borders
+    borderStrong: tint(78), // betonte Borders (Divider-Lines)
+  }
+}
+
+// Status-Farben mit harmonisierter Saturation. Anker-Hue bleibt semantisch
+// (grün/gelb/rot/blau) — aber Saturation wird an Primary angeglichen, damit
+// ein hochgesättigtes Logo keine stumpfen Status-Tags bekommt (und umgekehrt).
+export function generateStatus(primaryHex: string): {
+  success: string
+  warning: string
+  danger: string
+  info: string
+} {
+  const { r, g, b } = hexToRgb(primaryHex)
+  const { s: primarySat } = rgbToHsl(r, g, b)
+  // Saturation bleibt zwischen 55% und 85% — hoch genug für Lesbarkeit,
+  // nicht so hoch dass es gegen gedämpfte Primaries billig wirkt.
+  const targetSat = Math.max(55, Math.min(85, primarySat * 0.9 + 20))
+
+  const harmonize = (anchorHex: string) => {
+    const a = hexToRgb(anchorHex)
+    const { h: anchorH, l: anchorL } = rgbToHsl(a.r, a.g, a.b)
+    const out = hslToRgb(anchorH, targetSat, anchorL)
+    return rgbToHex(out.r, out.g, out.b)
+  }
+
+  return {
+    success: harmonize(STATUS_COLOR_ANCHORS.success),
+    warning: harmonize(STATUS_COLOR_ANCHORS.warning),
+    danger: harmonize(STATUS_COLOR_ANCHORS.danger),
+    info: harmonize(STATUS_COLOR_ANCHORS.info),
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WCAG-Validation
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Prüft die kritischen Kontrast-Paarungen im Theme. Schwelle 3.0 = WCAG AA
+// Large Text (unsere Buttons/Badges sind meist >=14pt bold).
+export function ensureContrastSafe(theme: Pick<BrandTheme,
+  'primary' | 'textOnPrimary' | 'sidebarBg' | 'sidebarText' | 'accent' | 'textOnAccent' | 'background' | 'textPrimary'
+>): boolean {
+  const checks: Array<[string, string]> = [
+    [theme.primary, theme.textOnPrimary],
+    [theme.sidebarBg, theme.sidebarText ?? '#FFFFFF'],
+    [theme.accent, theme.textOnAccent ?? '#0D1B3E'],
+    [theme.background ?? '#FFFFFF', theme.textPrimary ?? '#0D1B3E'],
+  ]
+  return checks.every(([a, b]) => contrastRatio(a, b) >= 3.0)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Haupt-Generator
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function generateTheme(primaryHex: string): BrandThemeV2 {
   const primary = primaryHex.toUpperCase()
   const { r, g, b } = hexToRgb(primary)
   const { l: lightness } = rgbToHsl(r, g, b)
@@ -131,24 +315,111 @@ export function generateTheme(primaryHex: string): BrandTheme {
   // Primaries (z.B. Claimondo-Navy L=15) würde -15% L = 0% = schwarz =
   // unsichtbarer Active-State. Daher: bei L<30 → heller statt dunkler.
   const secondary = lightness < 30
-    ? setLightness(primary, Math.min(35, lightness + 15))   // helle Variante für dunkle Primaries
-    : adjustHsl(primary, 0, 0, -15)                          // dunklere Variante für mittlere/helle Primaries
+    ? setLightness(primary, Math.min(35, lightness + 15))
+    : adjustHsl(primary, 0, 0, -15)
 
-  return {
+  const accent = adjustHsl(primary, 0, 10, 10)
+
+  // Primary/Secondary-Varianten
+  const primaryHover = adjustHsl(primary, 0, 0, -8)
+  const primaryActive = adjustHsl(primary, 0, 0, -15)
+  const primarySoft = mixWithWhite(primary, 0.9)      // ~95% L Mischung
+
+  const secondaryHover = adjustHsl(secondary, 0, 0, -6)
+  const secondaryActive = adjustHsl(secondary, 0, 0, -12)
+  const secondarySoft = mixWithWhite(secondary, 0.9)
+
+  // Neutrale + Status (Sub-Palettes)
+  const neutrals = generateNeutrals(primary)
+  const status = generateStatus(primary)
+
+  // Text-Paletten auf neutralen BG
+  const textPrimary = '#0D1B3E'      // dunkel genug auf allen Tint-Weiß-Backgrounds
+  const textSecondary = '#4A5568'
+  const textMuted = '#8A93A3'
+  const textOnAccent = relativeLuminance(
+    hexToRgb(accent).r, hexToRgb(accent).g, hexToRgb(accent).b,
+  ) > 0.5 ? '#0D0D0D' : '#FFFFFF'
+
+  // Sidebar
+  const sidebarBg = setLightness(primary, 8, 50)
+  const sidebarText = '#FFFFFF'
+  const sidebarActive = secondary
+  const sidebarHover = 'rgba(255,255,255,0.08)'
+
+  const baseTheme: Omit<BrandThemeV2, 'contrastSafe' | 'version'> = {
     primary,
+    primaryHover,
+    primaryActive,
+    primarySoft,
     secondary,
-    accent: adjustHsl(primary, 0, 10, 10),        // 10% heller + saturierter
-    sidebarBg: setLightness(primary, 8, 50),      // ~8% Lightness, max 50% sat (sehr dunkel, leicht getönt)
+    secondaryHover,
+    secondaryActive,
+    secondarySoft,
+    accent,
+    background: neutrals.background,
+    surface: neutrals.surface,
+    surfaceMuted: neutrals.surfaceMuted,
+    border: neutrals.border,
+    borderStrong: neutrals.borderStrong,
+    textPrimary,
+    textSecondary,
+    textMuted,
     textOnPrimary,
-    surface: setLightness(primary, 97, 25),       // 97% Lightness, max 25% sat (sehr hell, fast weiß)
+    textOnAccent,
+    sidebarBg,
+    sidebarText,
+    sidebarActive,
+    sidebarHover,
+    success: status.success,
+    warning: status.warning,
+    danger: status.danger,
+    info: status.info,
+  }
+
+  const contrastSafe = ensureContrastSafe(baseTheme)
+
+  return { ...baseTheme, contrastSafe, version: 2 }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Legacy / Hydrate
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Fallback: aus Legacy brand_primary/brand_secondary ein V2-Theme bauen wenn
+// brand_theme noch nicht in der DB ist.
+export function themeFromLegacy(primary: string | null, secondary: string | null): BrandThemeV2 {
+  if (!primary) return CLAIMONDO_DEFAULT_THEME
+  const generated = generateTheme(primary)
+  // Wenn explizite secondary vorhanden, Override (User hat manuell gesetzt) —
+  // aber nur das core-secondary; die abgeleiteten Hover/Active/Soft neu berechnen.
+  if (!secondary) return generated
+  return {
+    ...generated,
+    secondary,
+    secondaryHover: adjustHsl(secondary, 0, 0, -6),
+    secondaryActive: adjustHsl(secondary, 0, 0, -12),
+    secondarySoft: mixWithWhite(secondary, 0.9),
   }
 }
 
-// Fallback: aus Legacy brand_primary/brand_secondary ein Theme bauen wenn
-// brand_theme noch nicht in der DB ist.
-export function themeFromLegacy(primary: string | null, secondary: string | null): BrandTheme {
-  if (!primary) return CLAIMONDO_DEFAULT_THEME
-  const generated = generateTheme(primary)
-  // Wenn explizite secondary vorhanden, override (User hat manuell gesetzt).
-  return secondary ? { ...generated, secondary } : generated
+// AAR-419: Nimmt einen beliebigen rohen brand_theme-Eintrag aus der DB und
+// garantiert ein voll-hydratisiertes V2-Theme zurück.
+// - null/undefined → themeFromLegacy(fallbackPrimary, fallbackSecondary)
+// - V1-Record (6 Keys, kein `version`) → generateTheme(stored.primary) mit
+//   explizit gesetzten V1-Overrides (falls User sie manuell editiert hat)
+// - V2-Record (version===2) → Cast mit Default-Filling für fehlende Keys
+export function hydrateTheme(
+  stored: Partial<BrandTheme> | null | undefined,
+  fallbackPrimary?: string | null,
+  fallbackSecondary?: string | null,
+): BrandThemeV2 {
+  if (!stored || typeof stored !== 'object' || !stored.primary) {
+    return themeFromLegacy(fallbackPrimary ?? null, fallbackSecondary ?? null)
+  }
+
+  // Voll-Generator auf Basis von stored.primary; dann alle explizit gesetzten
+  // Keys aus stored überschreiben, sodass manuelle User-Anpassungen erhalten bleiben.
+  const generated = generateTheme(stored.primary)
+  return { ...generated, ...stored, version: 2 } as BrandThemeV2
 }
