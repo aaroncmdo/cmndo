@@ -82,7 +82,7 @@ export async function PflichtdokumenteBanner() {
                 <span className="text-amber-900 truncate">• {s.label}</span>
                 <Link
                   href={`/kunde/onboarding?step=dokumente`}
-                  className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-600 text-white hover:bg-amber-700 active:scale-[0.98] transition-all"
+                  className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold px-3 min-h-[44px] rounded-lg bg-amber-600 text-white hover:bg-amber-700 active:scale-[0.98] transition-all"
                 >
                   <UploadCloudIcon className="w-3.5 h-3.5" />
                   Jetzt hochladen

@@ -97,7 +97,7 @@ function DokUploadRow({
     <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 border border-red-100">
       <AlertCircleIcon className="w-4 h-4 text-red-500 shrink-0" />
       <span className="text-sm text-red-800 flex-1">{dok.titel}</span>
-      <label className={`flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium cursor-pointer transition-colors ${pending ? 'bg-gray-200 text-gray-500' : 'bg-red-600 text-white hover:bg-red-700'}`}>
+      <label className={`flex items-center gap-1 px-3 min-h-[44px] rounded-lg text-xs font-medium cursor-pointer transition-colors ${pending ? 'bg-gray-200 text-gray-500' : 'bg-red-600 text-white hover:bg-red-700'}`}>
         <UploadIcon className="w-3 h-3" />
         {pending ? 'Lädt...' : 'Hochladen'}
         <input type="file" className="hidden" onChange={handleFile} disabled={pending} accept=".pdf,.jpg,.jpeg,.png" />
