@@ -19,6 +19,7 @@ import { AktuellePhaseCard } from './_components/AktuellePhaseCard'
 import { JetztZuTunCard } from './_components/JetztZuTunCard'
 import { StammdatenCard } from './_components/StammdatenCard'
 import { TerminCard } from './_components/TerminCard'
+import { GutachtenCard } from './_components/GutachtenCard'
 import { DokumenteUebersichtCard } from './_components/DokumenteUebersichtCard'
 import { TimelineVorschauCard } from './_components/TimelineVorschauCard'
 import { KanzleiRegulierungsStepperCard } from './_components/KanzleiRegulierungsStepperCard'
@@ -339,6 +340,23 @@ export default function FallDetailClient(props: Props) {
               schadens_plz: (fall.schadens_plz as string | null) ?? null,
               schadens_ort: (fall.schadens_ort as string | null) ?? null,
             }}
+          />
+          {/* AAR-404: Gutachten prominent zwischen Termin und Dokumenten-Übersicht. */}
+          <GutachtenCard
+            fallId={fall.id as string}
+            fallNummer={fallNummer}
+            subphase={subphase}
+            gutachten={
+              (sichtbarFallDokumente ?? [])
+                .filter((d) => d.dokument_typ === 'gutachten')
+                .map((d) => ({
+                  id: d.id,
+                  dokument_typ: d.dokument_typ,
+                  storage_path: d.storage_path,
+                  original_filename: d.original_filename,
+                  hochgeladen_am: d.hochgeladen_am,
+                }))
+            }
           />
           <DokumenteUebersichtCard
             pflichtdokumente={pflichtdokumente}
