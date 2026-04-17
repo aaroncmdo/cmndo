@@ -86,8 +86,9 @@ export async function GET(request: Request) {
     const uploadLink = `${appUrl}/kunde/onboarding?step=dokumente`
 
     try {
+      // extraData-Keys überschreiben resolved vorname aus send-fall.ts:75 —
+      // deshalb '1' NICHT setzen, damit der Vorname korrekt eingesetzt wird.
       await sendFallCommunication(fall.id as string, 'dokumente_nachreichen', {
-        '1': '', // Template nutzt resolved vorname — bleibt leer, send-fall ersetzt
         '2': labels,
         '3': uploadLink,
       })

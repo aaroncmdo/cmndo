@@ -70,47 +70,64 @@ const LEGACY_DOKTYP_LABELS: Record<string, string> = {
 
 // AAR-365: Erklärungs-Texte pro Dokument-Slot für das ⓘ Info-Overlay.
 // "warum" = was wird damit gemacht, "wo" = praktischer Hinweis zur Beschaffung.
-// Fehlende Slot-IDs fallen auf ein generisches Default zurück.
+// Keys MÜSSEN exakt den slot_ids aus dokument_katalog (AAR-321 Seed +
+// AAR-353 Korrektur) entsprechen — sonst greift nur der Fallback.
 const DOC_INFO: Record<string, { warum: string; wo: string }> = {
   fahrzeugschein: {
     warum: 'Wir benötigen die Zulassungsbescheinigung Teil I (ZB1), um Halter, Kennzeichen und Fahrzeugdaten für das Gutachten und die Versicherung zu verifizieren.',
-    wo: 'Den Fahrzeugschein finden Sie im Fahrzeug (oft im Handschuhfach) oder bei Ihren persönlichen Unterlagen. Wir benötigen die Vorderseite — Foto reicht.',
-  },
-  polizeibericht: {
-    warum: 'Der Polizeibericht belegt den Unfallhergang gegenüber der gegnerischen Versicherung und beschleunigt die Regulierung erheblich.',
-    wo: 'Die polizeiliche Unfallmitteilung erhalten Sie direkt am Unfallort von der Polizei oder nachträglich bei der zuständigen Dienststelle (oft online anforderbar).',
-  },
-  aerztliches_attest: {
-    warum: 'Ein ärztliches Attest dokumentiert Ihre Verletzungen und ist Grundlage für Schmerzensgeld und Heilbehandlungskosten.',
-    wo: 'Lassen Sie sich von Ihrem Hausarzt oder der behandelnden Klinik ein Attest über Art und Dauer der Verletzungen ausstellen.',
-  },
-  reparaturrechnung_vorschaden: {
-    warum: 'Vorschäden müssen dokumentiert sein, damit der Gutachter den neuen Schaden korrekt bewerten kann. Ohne Nachweis können Vorschäden vom aktuellen Schaden abgezogen werden.',
-    wo: 'Die Rechnungen bekommen Sie von der Werkstatt, die den früheren Schaden repariert hat — oft auch nachträglich als Duplikat per E-Mail.',
+    wo: 'Den Fahrzeugschein finden Sie im Fahrzeug (oft im Handschuhfach) oder bei Ihren persönlichen Unterlagen. Beide Seiten als Foto reichen.',
   },
   fuehrerschein: {
     warum: 'Wir benötigen den Führerschein zur Identifikation des Fahrers zum Unfallzeitpunkt.',
     wo: 'Ihren Führerschein haben Sie in der Regel bei sich — Vorder- und Rückseite als Foto reichen.',
   },
-  personalausweis: {
-    warum: 'Der Personalausweis dient der Identitätsprüfung und wird für die Vollmacht zur Regulierung benötigt.',
-    wo: 'Ihren Personalausweis (oder Reisepass) haben Sie in der Regel bei sich — Vorder- und Rückseite als Foto reichen.',
+  polizeibericht: {
+    warum: 'Der Polizeibericht belegt den Unfallhergang gegenüber der gegnerischen Versicherung und beschleunigt die Regulierung erheblich.',
+    wo: 'Die polizeiliche Unfallmitteilung erhalten Sie direkt am Unfallort von der Polizei oder nachträglich bei der zuständigen Dienststelle (oft online anforderbar).',
   },
-  unfallfotos: {
-    warum: 'Fotos vom Unfall dokumentieren Schaden, Endlage der Fahrzeuge und Umgebung — wichtig für Gutachten und Haftungsfrage.',
-    wo: 'Fotos können Sie direkt am Unfallort oder später von Ihrem Fahrzeug machen. Je mehr Perspektiven, desto besser.',
-  },
-  freigabe_bank: {
-    warum: 'Bei finanzierten oder geleasten Fahrzeugen muss die Bank der Abrechnung zustimmen — ohne Freigabe darf die Versicherung nicht direkt an Sie zahlen.',
-    wo: 'Die Freigabe erhalten Sie von Ihrer finanzierenden Bank oder Leasinggesellschaft — oft per Online-Formular oder E-Mail anforderbar.',
+  schadensfotos: {
+    warum: 'Fotos aller Schadenstellen dokumentieren Ausmaß und Position — Grundlage für Kalkulation und spätere Beweisführung.',
+    wo: 'Machen Sie Fotos aus mehreren Perspektiven direkt am Fahrzeug — Nah- und Übersichtsaufnahmen helfen besonders.',
   },
   zeugenbericht: {
     warum: 'Zeugenaussagen stärken Ihre Position bei strittiger Haftung und können die Regulierung deutlich beschleunigen.',
     wo: 'Der Zeuge kann den Bericht formlos schreiben oder unser Formular nutzen — wichtig sind Name, Adresse und Schilderung des Ablaufs.',
   },
+  aerztliches_attest: {
+    warum: 'Ein ärztliches Attest dokumentiert Ihre Verletzungen und ist Grundlage für Schmerzensgeld und Heilbehandlungskosten.',
+    wo: 'Lassen Sie sich von Ihrem Hausarzt oder der behandelnden Klinik ein Attest über Art und Dauer der Verletzungen ausstellen.',
+  },
+  diagnosebericht: {
+    warum: 'Die ärztliche Diagnose konkretisiert Verletzungsart und Heilungsdauer — wichtig für Schmerzensgeld-Bemessung.',
+    wo: 'Den Bericht erhalten Sie von dem Arzt, der Sie nach dem Unfall untersucht hat.',
+  },
+  krankenhausbericht: {
+    warum: 'Bei stationärer Behandlung belegt der Krankenhausbericht Schwere und Dauer der Verletzung.',
+    wo: 'Den Entlassungsbericht erhalten Sie vom Krankenhaus — oft auch nachträglich anforderbar.',
+  },
+  au_bescheinigung: {
+    warum: 'Die Arbeitsunfähigkeitsbescheinigung belegt Verdienstausfall durch den Unfall.',
+    wo: 'Die AU-Bescheinigung bekommen Sie von Ihrem behandelnden Arzt — bei längerer AU mehrere Nachweise.',
+  },
+  reparaturrechnungen_vorschaeden: {
+    warum: 'Vorschäden müssen dokumentiert sein, damit der Gutachter den neuen Schaden korrekt bewerten kann. Ohne Nachweis können Vorschäden vom aktuellen Schaden abgezogen werden.',
+    wo: 'Die Rechnungen bekommen Sie von der Werkstatt, die den früheren Schaden repariert hat — oft auch nachträglich als Duplikat per E-Mail.',
+  },
+  vorschaden_bericht: {
+    warum: 'Der SV-Bericht zu früheren Schäden grenzt Alt- von Neuschaden ab — schützt vor Kürzungen durch die Versicherung.',
+    wo: 'Falls Sie damals ein Gutachten hatten, liegt der Bericht bei Ihren Unterlagen — oder anfordern beim damaligen Sachverständigen.',
+  },
   mietwagenrechnung: {
     warum: 'Die Mietwagenkosten werden von der gegnerischen Versicherung erstattet, wenn der Zeitraum und die Klasse nachgewiesen sind.',
     wo: 'Die Rechnung erhalten Sie von der Mietwagenfirma — meist am Ende der Mietdauer per E-Mail.',
+  },
+  freigabe_bank: {
+    warum: 'Bei finanzierten oder geleasten Fahrzeugen muss die Bank der Abrechnung zustimmen — ohne Freigabe darf die Versicherung nicht direkt an Sie zahlen.',
+    wo: 'Die Freigabe erhalten Sie von Ihrer finanzierenden Bank oder Leasinggesellschaft — oft per Online-Formular oder E-Mail anforderbar.',
+  },
+  sa_vollmacht: {
+    warum: 'Mit der Sicherungsabtretung treten Sie Ihre Ansprüche an Claimondo ab, damit wir die Regulierung direkt für Sie führen können.',
+    wo: 'Das Dokument bekommen Sie von uns per E-Mail oder im Portal — Sie müssen nur unterschreiben und hochladen.',
   },
 }
 const DOC_INFO_DEFAULT = {
@@ -919,8 +936,9 @@ function DokumentInfoOverlay({
   )
 }
 
-// AAR-231: Checkliste-Item im Termin-Step.
-// done=true → grüner Haken, done=false → oranges Icon + optionaler action-Button.
+// AAR-231 / AAR-365: Checkliste-Item im Termin-Step.
+// done=true → grüner Haken, done=false → Warn-Variante mit prominentem
+// Upload-Button statt dem alten kleinen blauen Textlink (Nicolas-Feedback).
 function CheckItem({
   emoji, text, done, action,
 }: {
@@ -929,21 +947,37 @@ function CheckItem({
   done: boolean
   action?: () => void
 }) {
-  return (
-    <div className="flex items-start gap-2.5">
-      <span className="text-base shrink-0 mt-0.5">{done ? '✅' : emoji}</span>
-      <div className="flex-1 min-w-0">
-        <p className={`text-sm ${done ? 'text-gray-600' : 'text-gray-800 font-medium'}`}>{text}</p>
-        {!done && action && (
+  if (done) {
+    return (
+      <div className="flex items-start gap-2.5">
+        <span className="text-base shrink-0 mt-0.5">✅</span>
+        <p className="text-sm text-gray-600 flex-1 min-w-0">{text}</p>
+      </div>
+    )
+  }
+  // Offener Punkt mit Action → hervorgehobene Zeile mit CTA-Button
+  if (action) {
+    return (
+      <div className="flex items-start gap-3 rounded-xl border-2 border-amber-300 bg-amber-50 p-3">
+        <span className="text-lg shrink-0 mt-0.5">{emoji}</span>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-amber-900">{text}</p>
           <button
             type="button"
             onClick={action}
-            className="mt-1 text-xs text-[#4573A2] underline hover:text-[#1E3A5F]"
+            className="mt-2 inline-flex items-center justify-center gap-1.5 min-h-11 px-4 rounded-xl bg-amber-600 text-white text-sm font-semibold hover:bg-amber-700 active:scale-[0.98] transition-all"
           >
-            Jetzt hochladen →
+            Jetzt hochladen
           </button>
-        )}
+        </div>
       </div>
+    )
+  }
+  // Offener Punkt ohne Action (z. B. „bereithalten")
+  return (
+    <div className="flex items-start gap-2.5">
+      <span className="text-base shrink-0 mt-0.5">{emoji}</span>
+      <p className="text-sm text-gray-800 font-medium flex-1 min-w-0">{text}</p>
     </div>
   )
 }

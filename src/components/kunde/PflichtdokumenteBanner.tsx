@@ -26,14 +26,15 @@ export async function PflichtdokumenteBanner() {
   const fallIds = (faelle ?? []).map(f => f.id as string)
   if (fallIds.length === 0) return null
 
-  // Offene Pflichtdokumente (pflicht=true, dokument_url IS NULL).
-  // status='abgelehnt'/'nachgereicht_angefordert' zählt auch als offen.
+  // Offene Pflichtdokumente = alles was NICHT 'hochgeladen' ist.
+  // Deckt 'ausstehend' (keine URL), 'abgelehnt' (URL vorhanden, aber zurückgewiesen)
+  // und 'nachgereicht_angefordert' (URL vorhanden, aber neues Dok angefordert) ab.
   const { data: docs } = await supabase
     .from('pflichtdokumente')
     .select('fall_id, dokument_typ, status')
     .in('fall_id', fallIds)
     .eq('pflicht', true)
-    .is('dokument_url', null)
+    .neq('status', 'hochgeladen')
 
   if (!docs || docs.length === 0) return null
 
