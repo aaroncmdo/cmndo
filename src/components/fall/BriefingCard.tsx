@@ -54,7 +54,7 @@ export default function BriefingCard({
     <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
-          <SparklesIcon className="w-4 h-4 text-[#4573A2]" />
+          <SparklesIcon className="w-4 h-4 text-[color:var(--brand-primary,#4573A2)]" />
           <h3 className="text-sm font-semibold text-gray-900">SV-Briefing</h3>
         </div>
         {canRegenerate && hasBriefing && (
@@ -68,7 +68,7 @@ export default function BriefingCard({
         </p>
       ) : (
         <div className="flex items-center gap-2 text-xs text-gray-500">
-          <span className="inline-block w-3 h-3 rounded-full border-2 border-[#4573A2] border-t-transparent animate-spin" />
+          <span className="inline-block w-3 h-3 rounded-full border-2 border-[color:var(--brand-primary,#4573A2)] border-t-transparent animate-spin" />
           <span>Briefing wird vorbereitet ...</span>
         </div>
       )}
