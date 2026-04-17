@@ -1,15 +1,46 @@
 'use client'
 
-// AAR-291: „Jetzt zu tun"-Widget mit Tasks aus tasks-Tabelle + Realtime-Sync
-// + Fallback-Hints pro Subphase wenn keine Tasks.
+// AAR-291 / AAR-395: „Jetzt zu tun"-Widget.
+//
+// Priorität der Anzeige:
+//   1. Aktive Tasks aus `tasks`-Tabelle (Realtime-Sync) → TaskItem-Liste
+//   2. Kein Task → `getJetztZuTun(ctx)` aus der 10-State-Matrix (Phase 0.5).
+//      Die Matrix rendert genau EINE Aktion mit CTA (Modal/Link) oder einen
+//      passiven Zustand (ohne CTA).
+//   3. Keine Matrix-Aktion → stille Rückfallbox mit Subphase-Hinweis.
 
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import Link from 'next/link'
-import { CheckIcon, ChevronRightIcon, ClockIcon, AlertCircleIcon } from 'lucide-react'
+import {
+  CheckIcon,
+  ChevronRightIcon,
+  ClockIcon,
+  AlertCircleIcon,
+  CalendarIcon,
+  FileTextIcon,
+  PauseIcon,
+} from 'lucide-react'
 import { useGutachterTasks, type GutachterTask } from '@/hooks/useGutachterTasks'
 import { SV_TASK_TYPEN, type SvTaskTyp } from '@/lib/gutachter/task-typen'
 import { erledigeSvTask } from '../task-actions'
 import type { SvSubphase } from '@/lib/gutachter/subphase'
+import {
+  getJetztZuTun,
+  type JetztZuTunAction,
+} from '@/lib/gutachter/jetzt-zu-tun'
+import TerminVorschlagModal, {
+  type TerminVorschlagMode,
+} from '@/components/fall/TerminVorschlagModal'
+
+/** Erweitertes Termin-Objekt für Card (id + evtl. vorgeschlagenes_datum
+ *  zusätzlich zum TerminCtx für Matrix). */
+type AktiverTerminInput = {
+  id: string
+  status: string
+  start_zeit?: string | null
+  vorgeschlagenes_datum?: string | null
+  gegenvorschlag_von?: 'sv' | 'kunde' | null
+} | null
 
 const FALLBACK_HINTS: Record<SvSubphase['code'], string> = {
   'auftrag-eingegangen':
@@ -40,44 +71,190 @@ const PRIO_BADGE: Record<string, string> = {
   niedrig: 'bg-gray-50 text-gray-600 border-gray-200',
 }
 
+type JetztZuTunProps = {
+  fallId: string
+  initialTasks: GutachterTask[]
+  subphase: SvSubphase
+  /** AAR-395: Aktiver Termin (für Action-Matrix + Modal-Prefill). */
+  aktiverTermin?: AktiverTerminInput
+  /** AAR-395: Fall-Snippet für Action-Matrix. */
+  fall?: {
+    status?: string | null
+    technische_stellungnahme_status?: string | null
+    gutachten_final_freigegeben?: boolean | null
+    gutachten_eingegangen_am?: string | null
+    zahlung_eingegangen_am?: string | null
+  }
+}
+
 export function JetztZuTunCard({
   fallId,
   initialTasks,
   subphase,
-}: {
-  fallId: string
-  initialTasks: GutachterTask[]
-  subphase: SvSubphase
-}) {
+  aktiverTermin,
+  fall,
+}: JetztZuTunProps) {
   const { tasks } = useGutachterTasks(fallId, initialTasks)
+  const [terminModal, setTerminModal] = useState<{
+    open: boolean
+    mode: TerminVorschlagMode
+  }>({ open: false, mode: 'erstvorschlag' })
 
-  if (tasks.length === 0) {
-    const hint = FALLBACK_HINTS[subphase.code]
+  if (tasks.length > 0) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 space-y-2">
-        <p className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
-          Jetzt zu tun
-        </p>
-        <p className="text-sm text-gray-700">{hint}</p>
+      <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 space-y-3">
+        <div className="flex items-center justify-between">
+          <p className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
+            Jetzt zu tun
+          </p>
+          <span className="text-[10px] text-gray-400">
+            {tasks.length} {tasks.length === 1 ? 'Task' : 'Tasks'}
+          </span>
+        </div>
+        <ul className="space-y-2">
+          {tasks.map((task) => (
+            <TaskItem key={task.id} task={task} fallId={fallId} />
+          ))}
+        </ul>
       </div>
     )
   }
 
+  // AAR-395: Keine Tasks → Action-Matrix
+  const matrixAction =
+    fall
+      ? getJetztZuTun({
+          subphase: { phase: subphase.phase, subphase: subphase.code },
+          aktiverTermin: aktiverTermin
+            ? {
+                status: aktiverTermin.status,
+                start_zeit: aktiverTermin.start_zeit ?? null,
+                gegenvorschlag_von: aktiverTermin.gegenvorschlag_von ?? null,
+              }
+            : null,
+          fall,
+        })
+      : null
+
+  if (matrixAction) {
+    return (
+      <>
+        <MatrixActionCard
+          action={matrixAction}
+          fallId={fallId}
+          onOpenTerminModal={(mode) => setTerminModal({ open: true, mode })}
+        />
+        {/* Termin-Modal (nur gerendert wenn einmal geöffnet) */}
+        <TerminVorschlagModal
+          fallId={fallId}
+          mode={terminModal.mode}
+          open={terminModal.open}
+          onClose={() => setTerminModal((s) => ({ ...s, open: false }))}
+          existingTermin={aktiverTermin ?? null}
+        />
+      </>
+    )
+  }
+
+  // Fallback: keine Matrix-Aktion → stiller Hinweis
+  const hint = FALLBACK_HINTS[subphase.code]
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
-          Jetzt zu tun
+    <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 space-y-2">
+      <p className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
+        Jetzt zu tun
+      </p>
+      <p className="text-sm text-gray-700">{hint}</p>
+    </div>
+  )
+}
+
+function MatrixActionCard({
+  action,
+  fallId,
+  onOpenTerminModal,
+}: {
+  action: JetztZuTunAction
+  fallId: string
+  onOpenTerminModal: (mode: TerminVorschlagMode) => void
+}) {
+  const Icon = action.passive
+    ? PauseIcon
+    : action.cta?.openModal === 'termin'
+      ? CalendarIcon
+      : action.cta?.openModal === 'gutachten' ||
+          action.cta?.openModal === 'stellungnahme'
+        ? FileTextIcon
+        : ChevronRightIcon
+
+  const passiveCls = action.passive
+    ? 'bg-gray-50 border-gray-200'
+    : 'bg-white border-gray-200'
+
+  function handleCta() {
+    if (!action.cta) return
+    if (action.cta.openModal === 'termin') {
+      const mode: TerminVorschlagMode =
+        action.type === 'termin_vorschlagen'
+          ? 'erstvorschlag'
+          : action.type === 'gegenvorschlag_entscheiden'
+            ? 'gegenvorschlag'
+            : 'bearbeiten'
+      onOpenTerminModal(mode)
+    }
+    // 'gutachten' / 'stellungnahme' werden hier bewusst nicht behandelt —
+    // deren Upload-Flows leben in den jeweiligen Cards (AAR-400/404).
+  }
+
+  return (
+    <div className={`rounded-2xl border ${passiveCls} p-4 sm:p-5 space-y-3`}>
+      <div className="flex items-center gap-2">
+        <Icon
+          className={`w-4 h-4 ${action.passive ? 'text-gray-500' : 'text-[#4573A2]'}`}
+        />
+        <p className="text-xs uppercase tracking-wider font-semibold text-gray-500">
+          {action.passive ? 'Status' : 'Jetzt zu tun'}
         </p>
-        <span className="text-[10px] text-gray-400">
-          {tasks.length} {tasks.length === 1 ? 'Task' : 'Tasks'}
-        </span>
       </div>
-      <ul className="space-y-2">
-        {tasks.map((task) => (
-          <TaskItem key={task.id} task={task} fallId={fallId} />
-        ))}
-      </ul>
+      <div className="space-y-1">
+        <p
+          className={`text-sm font-medium ${
+            action.passive ? 'text-gray-700' : 'text-[#0D1B3E]'
+          }`}
+        >
+          {action.label}
+        </p>
+        {action.beschreibung && (
+          <p className="text-xs text-gray-600">{action.beschreibung}</p>
+        )}
+      </div>
+      {!action.passive && action.cta && (
+        <div className="pt-1">
+          {action.cta.href ? (
+            <Link
+              href={action.cta.href.replace('{fallId}', fallId)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-xs font-medium"
+            >
+              {action.label.split(' ')[0] === 'Gutachten'
+                ? 'Öffnen'
+                : 'Öffnen'}
+              <ChevronRightIcon className="w-3 h-3" />
+            </Link>
+          ) : action.cta.openModal === 'termin' ? (
+            <button
+              type="button"
+              onClick={handleCta}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-xs font-medium"
+            >
+              {action.type === 'termin_vorschlagen'
+                ? 'Termin vorschlagen'
+                : action.type === 'gegenvorschlag_entscheiden'
+                  ? 'Entscheiden'
+                  : 'Termin öffnen'}
+              <ChevronRightIcon className="w-3 h-3" />
+            </button>
+          ) : null}
+        </div>
+      )}
     </div>
   )
 }
@@ -100,7 +277,6 @@ function TaskItem({ task, fallId }: { task: GutachterTask; fallId: string }) {
     const el = document.getElementById(target)
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      // Kurze Highlight-Animation am Ziel
       el.classList.add('ring-2', 'ring-[#4573A2]', 'ring-offset-2', 'transition-all')
       setTimeout(() => {
         el.classList.remove('ring-2', 'ring-[#4573A2]', 'ring-offset-2')
@@ -158,7 +334,6 @@ function TaskItem({ task, fallId }: { task: GutachterTask; fallId: string }) {
           <ChevronRightIcon className="w-3 h-3" />
         </button>
       ) : (
-        // Unbekannter Task-Typ — generischer Hinweis
         <span className="shrink-0 text-[11px] text-gray-400 italic flex items-center gap-1">
           <AlertCircleIcon className="w-3 h-3" />
           Manuell

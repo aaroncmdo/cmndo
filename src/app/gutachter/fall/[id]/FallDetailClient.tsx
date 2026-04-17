@@ -189,6 +189,33 @@ export default function FallDetailClient(props: Props) {
             fallId={fall.id as string}
             initialTasks={props.tasks ?? []}
             subphase={subphase}
+            aktiverTermin={
+              props.aktiverTermin
+                ? {
+                    id: props.aktiverTermin.id,
+                    status: props.aktiverTermin.status,
+                    start_zeit: props.aktiverTermin.start_zeit ?? null,
+                    vorgeschlagenes_datum:
+                      props.aktiverTermin.vorgeschlagenes_datum ?? null,
+                    gegenvorschlag_von:
+                      (props.aktiverTermin.gegenvorschlag_von as
+                        | 'sv'
+                        | 'kunde'
+                        | null) ?? null,
+                  }
+                : null
+            }
+            fall={{
+              status: (fall.status as string | null) ?? null,
+              technische_stellungnahme_status:
+                (fall.technische_stellungnahme_status as string | null) ?? null,
+              gutachten_final_freigegeben:
+                (fall.gutachten_final_freigegeben as boolean | null) ?? null,
+              gutachten_eingegangen_am:
+                (fall.gutachten_eingegangen_am as string | null) ?? null,
+              zahlung_eingegangen_am:
+                (fall.zahlung_eingegangen_am as string | null) ?? null,
+            }}
           />
           {/* AAR-294: Conditional Cards — rendern sich selber nur wenn relevant */}
           <ReklamationsCard
