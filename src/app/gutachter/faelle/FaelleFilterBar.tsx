@@ -8,13 +8,27 @@ import { useEffect, useRef, useState, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { SearchIcon, XIcon } from 'lucide-react'
 
-type FilterKey = 'alle' | 'neue' | 'bearbeitung' | 'gutachten' | 'abgeschlossen'
+// AAR-370: Filter um zwei fallübergreifende Slices erweitert —
+// „Mit offener Stellungnahme" (technische_stellungnahme_status='beauftragt')
+// und „Mit offenen Tasks" (mind. 1 task mit status in (offen,in-bearbeitung)
+// der diesem SV zugewiesen ist). Ersetzt den früheren separaten Sidebar-
+// Einstieg /gutachter/tasks und die Fallakte-Tab-Suche.
+type FilterKey =
+  | 'alle'
+  | 'neue'
+  | 'bearbeitung'
+  | 'gutachten'
+  | 'abgeschlossen'
+  | 'stellungnahme'
+  | 'tasks'
 
 const FILTER_TABS: [FilterKey, string][] = [
   ['alle', 'Alle'],
   ['neue', 'Neue'],
   ['bearbeitung', 'In Bearbeitung'],
   ['gutachten', 'Gutachten erstellt'],
+  ['stellungnahme', 'Offene Stellungnahme'],
+  ['tasks', 'Offene Tasks'],
   ['abgeschlossen', 'Abgeschlossen'],
 ]
 

@@ -14,9 +14,21 @@ import FallStatusBadge from '@/components/shared/FallStatusBadge'
 import SchadensUrsacheBadge from '@/components/shared/SchadensUrsacheBadge'
 import EmptyState from '@/components/shared/EmptyState'
 
-type FilterKey = 'alle' | 'neue' | 'bearbeitung' | 'gutachten' | 'abgeschlossen'
+// AAR-370: Filter um „stellungnahme" (offene technische Stellungnahme) +
+// „tasks" (mind. 1 offener Task auf diesem Fall, zugewiesen an diesen SV)
+// erweitert — ersetzt den früheren Sidebar-Einstieg /gutachter/tasks.
+type FilterKey =
+  | 'alle'
+  | 'neue'
+  | 'bearbeitung'
+  | 'gutachten'
+  | 'abgeschlossen'
+  | 'stellungnahme'
+  | 'tasks'
 
-const FILTER_TO_STATUSES: Record<Exclude<FilterKey, 'alle'>, string[]> = {
+// Reine Status-Mapping-Filter. „stellungnahme" und „tasks" laufen über
+// separate Abfragen (eigenes Spalten-Filter bzw. tasks-Tabelle).
+const FILTER_TO_STATUSES: Record<'neue' | 'bearbeitung' | 'gutachten' | 'abgeschlossen', string[]> = {
   neue: ['sv-zugewiesen'],
   bearbeitung: ['sv-termin', 'besichtigung'],
   gutachten: ['gutachten-eingegangen'],
@@ -24,7 +36,14 @@ const FILTER_TO_STATUSES: Record<Exclude<FilterKey, 'alle'>, string[]> = {
 }
 
 function normalizeFilter(raw: string | undefined): FilterKey {
-  if (raw === 'neue' || raw === 'bearbeitung' || raw === 'gutachten' || raw === 'abgeschlossen') {
+  if (
+    raw === 'neue' ||
+    raw === 'bearbeitung' ||
+    raw === 'gutachten' ||
+    raw === 'abgeschlossen' ||
+    raw === 'stellungnahme' ||
+    raw === 'tasks'
+  ) {
     return raw
   }
   return 'alle'
@@ -63,7 +82,27 @@ export default async function GutachterFaellePage({
     .eq('sv_id', sv.id)
     .order('created_at', { ascending: false })
 
-  if (activeFilter !== 'alle') {
+  if (activeFilter === 'stellungnahme') {
+    // AAR-370: Fälle mit offener technischer Stellungnahme (Status beauftragt —
+    // noch nicht hochgeladen).
+    query = query.eq('technische_stellungnahme_status', 'beauftragt')
+  } else if (activeFilter === 'tasks') {
+    // AAR-370: Fälle mit mindestens 1 offenen Task der diesem SV zugewiesen
+    // ist. task-Tabelle vorab abfragen, fall_ids einschränken.
+    const { data: offeneTasks } = await supabase
+      .from('tasks')
+      .select('fall_id')
+      .or(`zugewiesen_an.eq.${user.id},empfaenger_user_id.eq.${user.id}`)
+      .in('status', ['offen', 'in-bearbeitung'])
+      .not('fall_id', 'is', null)
+    const taskFallIds = Array.from(new Set((offeneTasks ?? []).map(t => t.fall_id).filter(Boolean) as string[]))
+    if (taskFallIds.length === 0) {
+      // Kein Fall hat offene Tasks → leere Ergebnisliste
+      query = query.eq('id', '00000000-0000-0000-0000-000000000000')
+    } else {
+      query = query.in('id', taskFallIds)
+    }
+  } else if (activeFilter !== 'alle') {
     query = query.in('status', FILTER_TO_STATUSES[activeFilter])
   }
 
