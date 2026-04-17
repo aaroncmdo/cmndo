@@ -9,8 +9,8 @@ import {
   upsertQcCheckliste,
   qcBestanden,
   qcNachbesserung,
-} from './actions'
-import { markDokumentNachgereicht } from './actions/dokumente'
+} from '../_actions'
+import { markDokumentNachgereicht } from '../_actions/dokumente'
 import { useRouter } from 'next/navigation'
 import {
   FileTextIcon, UploadIcon, CheckCircle2Icon, ClockIcon,

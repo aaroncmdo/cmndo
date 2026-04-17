@@ -18,6 +18,8 @@ import { toast } from 'sonner'
 import { getVisibleSections, type StammdatenSection } from '@/lib/fall/phase-config'
 import { canEditField, type FallakteRolle } from '@/lib/fall/field-permissions'
 import { updateFallField } from './actions/stammdaten'
+// AAR-428 / W4: Zentrale Permission-Matrix für die Fallakte
+import { canPerform as canPerformPermission, type FallAction } from './_lib/permissions'
 
 export type FallLike = Record<string, unknown> & {
   id: string
@@ -46,6 +48,8 @@ type FallContextValue = {
   visibleSections: StammdatenSection[]
   userRolle: FallakteRolle
   canEdit: (field: string) => boolean
+  // AAR-428: UI-Gate für destruktive/rollenspezifische Actions
+  canPerform: (action: FallAction) => boolean
   updateField: (field: string, value: unknown) => Promise<{ success: boolean; error?: string }>
   refreshFall: () => void
 }
@@ -79,6 +83,12 @@ export function FallProvider({
     [userRolle, phase],
   )
 
+  // AAR-428 / W4: Zentrale Permission-Gate-Funktion
+  const canPerform = useCallback(
+    (action: FallAction) => canPerformPermission(action, userRolle),
+    [userRolle],
+  )
+
   const updateField = useCallback(
     async (field: string, value: unknown) => {
       if (!canEdit(field)) {
@@ -104,6 +114,7 @@ export function FallProvider({
     visibleSections,
     userRolle,
     canEdit,
+    canPerform,
     updateField,
     refreshFall,
   }

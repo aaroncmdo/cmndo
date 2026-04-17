@@ -13,7 +13,7 @@ import UebersichtTab from './tabs/UebersichtTab'
 import KommunikationTab from './tabs/KommunikationTab'
 import TimelineTab from './tabs/TimelineTab'
 import ProzessTab from './tabs/ProzessTab'
-import DokumenteTab from './DokumenteTab'
+import DokumenteTab from './_tabs/DokumenteTab'
 import FallSidebar from './sidebar/FallSidebar'
 // AAR-307: Ad-hoc Task-Anlegen aus der Tab-Bar
 import { TaskAnlegenButton } from '@/components/tasks/TaskAnlegenButton'
