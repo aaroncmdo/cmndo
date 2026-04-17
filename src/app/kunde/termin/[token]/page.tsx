@@ -2,9 +2,15 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createHmac } from 'crypto'
 import { notFound } from 'next/navigation'
 import KundeTrackingClient from './KundeTrackingClient'
+import KundenLightBrandingProvider from '@/components/branding/KundenLightBrandingProvider'
+import ClaimondoKundenHeader from '@/components/kunde/ClaimondoKundenHeader'
+import type { BrandTheme } from '@/lib/branding/theme'
+import { hydrateTheme } from '@/lib/branding/theme'
 
 // KFZ-179: Kunden-Tracking-Page — oeffentlich via Token, kein Auth noetig.
 // SV-Position wird live via Realtime angezeigt.
+// AAR-423: Light-Branding — Primary-Akzent aus SV-Theme wenn verifiziert,
+// Claimondo-Logo + Attribution bleiben immer dominant.
 
 export const dynamic = 'force-dynamic'
 
@@ -65,20 +71,59 @@ export default async function KundeTerminPage({
     }
   }
 
-  // Fall-Daten + SV-Name laden
+  // Fall-Daten laden
   const { data: fall } = await db
     .from('faelle')
     .select('schadens_adresse, schadens_plz, schadens_ort, kennzeichen')
     .eq('id', termin.fall_id)
     .single()
 
-  const { data: svRow } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.sv_id).single()
+  // AAR-423: SV-Branding + Profil laden für Light-Branding und Attribution.
+  const { data: svRow } = await db
+    .from('sachverstaendige')
+    .select('profile_id, brand_theme, brand_primary, brand_secondary, use_custom_branding, verifiziert_am')
+    .eq('id', termin.sv_id)
+    .single()
+
   let svVorname = 'Gutachter'
   let svNachname = ''
+  let svAvatarUrl: string | null = null
+  let svAnzeigename = ''
   if (svRow?.profile_id) {
-    const { data: p } = await db.from('profiles').select('vorname, nachname').eq('id', svRow.profile_id).single()
-    if (p) { svVorname = p.vorname ?? 'Gutachter'; svNachname = p.nachname ?? '' }
+    const { data: p } = await db
+      .from('profiles')
+      .select('vorname, nachname, avatar_url, anzeigename')
+      .eq('id', svRow.profile_id)
+      .single()
+    if (p) {
+      svVorname = p.vorname ?? 'Gutachter'
+      svNachname = p.nachname ?? ''
+      svAvatarUrl = (p.avatar_url as string | null) ?? null
+      const fallbackName = [p.vorname, p.nachname].filter(Boolean).join(' ')
+      svAnzeigename = (p.anzeigename as string | null) ?? fallbackName ?? svVorname
+    }
   }
+
+  // Light-Branding nur wenn SV verifiziert + Custom-Branding aktiv.
+  const svVerifiziert = !!svRow?.verifiziert_am
+  const brandEnabled = svVerifiziert && !!svRow?.use_custom_branding
+
+  const lightTheme: Pick<BrandTheme, 'primary' | 'primaryHover' | 'primaryActive' | 'primarySoft'> | null =
+    brandEnabled
+      ? (() => {
+          const hydrated = hydrateTheme(
+            svRow?.brand_theme as Parameters<typeof hydrateTheme>[0],
+            svRow?.brand_primary ?? null,
+            svRow?.brand_secondary ?? null,
+          )
+          return {
+            primary: hydrated.primary,
+            primaryHover: hydrated.primaryHover,
+            primaryActive: hydrated.primaryActive,
+            primarySoft: hydrated.primarySoft,
+          }
+        })()
+      : null
 
   // PLZ-basierte Fallback-Koordinaten
   const PLZ_FALLBACK: Record<string, { lat: number; lng: number }> = {
@@ -99,23 +144,35 @@ export default async function KundeTerminPage({
     .slice(0, 16)
 
   return (
-    <KundeTrackingClient
-      svId={termin.sv_id}
-      channelHash={channelHash}
-      svVorname={svVorname}
-      svNachname={svNachname}
-      terminLat={plzGeo?.lat ?? 50.9375}
-      terminLng={plzGeo?.lng ?? 6.9603}
-      adresse={[fall?.schadens_adresse, fall?.schadens_plz, fall?.schadens_ort].filter(Boolean).join(', ') || '—'}
-      angekommen={!!termin.ankunft_zeit}
-      losgefahren={!!termin.losgefahren_am}
-      token={token}
-      terminId={termin.id as string}
-      fallId={termin.fall_id as string}
-      terminStatus={(termin.status as string) ?? 'bestaetigt'}
-      gegenvorschlagVon={(termin.gegenvorschlag_von as string | null) ?? null}
-      vorgeschlagenesDatum={(termin.vorgeschlagenes_datum as string | null) ?? null}
-      notification5minSent={!!termin.notification_5min_gesendet_am}
-    />
+    <KundenLightBrandingProvider enabled={brandEnabled} theme={lightTheme}>
+      <div className="min-h-screen flex flex-col bg-[#f8f9fb]">
+        <ClaimondoKundenHeader
+          svAnzeigename={svAnzeigename || `${svVorname} ${svNachname}`.trim()}
+          svAvatarUrl={svAvatarUrl}
+        />
+        <div className="flex-1 min-h-0 flex flex-col">
+          <KundeTrackingClient
+            svId={termin.sv_id}
+            channelHash={channelHash}
+            svVorname={svVorname}
+            svNachname={svNachname}
+            svAvatarUrl={svAvatarUrl}
+            svAnzeigename={svAnzeigename || `${svVorname} ${svNachname}`.trim()}
+            terminLat={plzGeo?.lat ?? 50.9375}
+            terminLng={plzGeo?.lng ?? 6.9603}
+            adresse={[fall?.schadens_adresse, fall?.schadens_plz, fall?.schadens_ort].filter(Boolean).join(', ') || '—'}
+            angekommen={!!termin.ankunft_zeit}
+            losgefahren={!!termin.losgefahren_am}
+            token={token}
+            terminId={termin.id as string}
+            fallId={termin.fall_id as string}
+            terminStatus={(termin.status as string) ?? 'bestaetigt'}
+            gegenvorschlagVon={(termin.gegenvorschlag_von as string | null) ?? null}
+            vorgeschlagenesDatum={(termin.vorgeschlagenes_datum as string | null) ?? null}
+            notification5minSent={!!termin.notification_5min_gesendet_am}
+          />
+        </div>
+      </div>
+    </KundenLightBrandingProvider>
   )
 }

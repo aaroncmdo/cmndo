@@ -6,12 +6,21 @@ import { createClient } from '@/lib/supabase/client'
 import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
 import LiveTrackingMap from '@/components/maps/LiveTrackingMap'
 import { haversineKm } from '@/lib/gps/geofence'
+import Avatar from '@/components/shared/Avatar'
+
+// AAR-423: Brand-aware Primary-Akzente via CSS-Vars mit Claimondo-Fallbacks.
+// Surface/Background/Text bleiben Claimondo-Default — nur „Primary"-Elemente
+// (Call-to-Action, Avatar-Akzent, Tracking-Header) übernehmen SV-Theme.
+const brandPrimary = 'var(--brand-primary, #0D1B3E)'
+const brandPrimaryHover = 'var(--brand-primary-hover, #1A2A55)'
 
 export default function KundeTrackingClient({
   svId,
   channelHash,
   svVorname,
   svNachname,
+  svAvatarUrl,
+  svAnzeigename,
   terminLat,
   terminLng,
   adresse,
@@ -29,6 +38,8 @@ export default function KundeTrackingClient({
   channelHash: string
   svVorname: string
   svNachname: string
+  svAvatarUrl: string | null
+  svAnzeigename: string
   terminLat: number
   terminLng: number
   adresse: string
@@ -81,7 +92,7 @@ export default function KundeTrackingClient({
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [svId, supabase])
+  }, [svId, supabase, channelHash])
 
   // ETA berechnen + 5-Min-Notification
   useEffect(() => {
@@ -104,7 +115,7 @@ export default function KundeTrackingClient({
 
   if (isAngekommen) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8f9fb] px-6">
+      <div className="flex-1 flex items-center justify-center px-6 py-10">
         <div className="max-w-md text-center">
           <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircleIcon className="w-8 h-8 text-emerald-600" />
@@ -121,7 +132,7 @@ export default function KundeTrackingClient({
 
   if (actionDone) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8f9fb] px-6">
+      <div className="flex-1 flex items-center justify-center px-6 py-10">
         <div className="max-w-md text-center">
           <CheckCircleIcon className="w-12 h-12 text-emerald-500 mx-auto mb-4" />
           <h1 className="text-xl font-bold text-[#0D1B3E] mb-2">{actionDone}</h1>
@@ -135,15 +146,15 @@ export default function KundeTrackingClient({
     const terminDisplay = terminDatum ? new Date(terminDatum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' }) : ''
 
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8f9fb] px-6">
+      <div className="flex-1 flex items-center justify-center px-6 py-10">
         <div className="max-w-md w-full">
           <div className="text-center mb-6">
-            <CalendarIcon className="w-12 h-12 text-[#4573A2] mx-auto mb-4" />
+            <CalendarIcon className="w-12 h-12 mx-auto mb-4" style={{ color: brandPrimary }} />
             <h1 className="text-xl font-bold text-[#0D1B3E] mb-2">
               {isSvVorschlag ? 'Terminvorschlag' : 'Termin vorbereitet'}
             </h1>
             {terminDisplay && <p className="text-sm text-gray-700 font-medium mb-1">{terminDisplay}</p>}
-            <p className="text-sm text-gray-500">Sachverständiger: {svVorname} {svNachname}</p>
+            <p className="text-sm text-gray-500">Sachverständiger: {svAnzeigename || `${svVorname} ${svNachname}`.trim()}</p>
             <p className="text-xs text-gray-400 mt-1">{adresse}</p>
           </div>
 
@@ -156,7 +167,10 @@ export default function KundeTrackingClient({
                   setActionDone('Termin bestätigt!')
                 }}
                 disabled={actionPending}
-                className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-3 text-sm font-semibold transition-colors disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 text-white rounded-xl py-3 text-sm font-semibold transition-colors disabled:opacity-50"
+                style={{ backgroundColor: brandPrimary }}
+                onMouseEnter={e => (e.currentTarget.style.backgroundColor = brandPrimaryHover)}
+                onMouseLeave={e => (e.currentTarget.style.backgroundColor = brandPrimary)}
               >
                 <CheckCircleIcon className="w-4 h-4" /> Termin annehmen
               </button>
@@ -175,9 +189,11 @@ export default function KundeTrackingClient({
               <h3 className="text-sm font-semibold text-gray-900">Alternativen Termin vorschlagen</h3>
               <input type="datetime-local" value={gegenDatum} onChange={e => setGegenDatum(e.target.value)}
                 min={new Date().toISOString().slice(0, 16)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#4573A2]" />
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none"
+                style={{ outlineColor: brandPrimary }} />
               <textarea value={gegenGrund} onChange={e => setGegenGrund(e.target.value)} placeholder="Begründung (optional)"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-[#4573A2]" rows={2} />
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none"
+                style={{ outlineColor: brandPrimary }} rows={2} />
               <div className="flex gap-2">
                 <button onClick={() => setShowGegenvorschlag(false)} className="flex-1 py-2 rounded-xl text-sm bg-gray-100 text-gray-600">Abbrechen</button>
                 <button
@@ -207,14 +223,17 @@ export default function KundeTrackingClient({
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#f8f9fb]">
-      {/* Header */}
-      <div className="bg-[#0D1B3E] text-white px-5 py-4 flex-shrink-0">
+    <div className="flex-1 flex flex-col min-h-0">
+      {/* Tracking-Header: Primary-Surface (SV-Primary wenn verifiziert, sonst Claimondo-Navy) */}
+      <div
+        className="text-white px-5 py-4 flex-shrink-0"
+        style={{ backgroundColor: brandPrimary }}
+      >
         <div className="flex items-center gap-3">
-          <CarIcon className="w-6 h-6 text-[#7BA3CC]" />
+          <CarIcon className="w-6 h-6 text-white/70" />
           <div>
             <h1 className="text-lg font-bold">{svVorname} ist unterwegs</h1>
-            <p className="text-sm text-[#7BA3CC]">
+            <p className="text-sm text-white/70">
               {etaMinutes != null ? `ETA: ca. ${etaMinutes} Minuten` : 'Position wird geladen...'}
             </p>
           </div>
@@ -230,14 +249,21 @@ export default function KundeTrackingClient({
         />
       </div>
 
-      {/* Footer */}
+      {/* Footer: Avatar-Akzent in SV-Primary */}
       <div className="bg-white border-t border-gray-200 px-5 py-4 flex-shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#4573A2] flex items-center justify-center text-white font-bold text-sm">
-            {svVorname[0]}{svNachname?.[0] ?? ''}
-          </div>
+          {svAvatarUrl ? (
+            <Avatar url={svAvatarUrl} name={svAnzeigename || svVorname} size="sm" />
+          ) : (
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
+              style={{ backgroundColor: brandPrimary }}
+            >
+              {svVorname[0]}{svNachname?.[0] ?? ''}
+            </div>
+          )}
           <div className="flex-1">
-            <p className="text-sm font-semibold text-[#0D1B3E]">{svVorname} {svNachname}</p>
+            <p className="text-sm font-semibold text-[#0D1B3E]">{svAnzeigename || `${svVorname} ${svNachname}`.trim()}</p>
             <p className="text-xs text-gray-500">Ihr KFZ-Sachverständiger</p>
           </div>
           {etaMinutes != null && (
