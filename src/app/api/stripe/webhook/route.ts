@@ -119,29 +119,61 @@ export async function POST(request: Request) {
             console.error('[ARCH-1 FR-5] Werbebudget-Init Buero-Branch:', err)
           }
 
-          // Email an Inhaber
+          // AAR-401: Onboarding-Rechnung + KV + NB als Mail-Anhänge (ersetzt die
+          // alte AnzahlungEingegangen-Mail im Buero-Branch).
           try {
             const { data: org } = await db.from('organisationen')
-              .select('name, hauptansprechpartner_user_id')
+              .select('name, hauptansprechpartner_user_id, akademie_erst_anzahlung_eur')
               .eq('id', orgId)
               .single()
             if (org?.hauptansprechpartner_user_id) {
               const { data: p } = await db.from('profiles').select('email, vorname').eq('id', org.hauptansprechpartner_user_id).single()
               if (p?.email) {
-                const { render } = await import('@react-email/render')
-                const { AnzahlungEingegangenEmail, subject: anzahlungSubject } = await import('@/lib/email/google/templates/AnzahlungEingegangen')
-                const { sendCommunication } = await import('@/lib/communications/send')
-                const props = { vorname: p.vorname ?? null, typ: 'buero' as const, orgName: org.name }
-                const html = await render(AnzahlungEingegangenEmail(props))
-                await sendCommunication('welcome_sv_buero', {
-                  email: p.email,
-                  vorname: p.vorname ?? '',
-                  subject: anzahlungSubject(props),
-                  html,
+                // Netto-Summe aller Sub-SV-Anzahlungen + Kontingent
+                const { data: subs } = await db.from('sachverstaendige')
+                  .select('onboarding_anzahlung_betrag, paket, max_faelle_monat, ist_parent_account, rolle_in_organisation')
+                  .eq('organisation_id', orgId)
+                const paySubs = (subs ?? []).filter(s => {
+                  const r = (s.rolle_in_organisation ?? '').toLowerCase()
+                  return !s.ist_parent_account && r !== 'inhaber'
                 })
+                const nettoEuro = paySubs.reduce((sum, s) => sum + Number(s.onboarding_anzahlung_betrag ?? 0), 0)
+                const kontingent = paySubs.reduce((sum, s) => sum + Number(s.max_faelle_monat ?? 0), 0)
+                const paket = paySubs[0]?.paket ?? null
+
+                if (nettoEuro > 0) {
+                  const { createOnboardingRechnung } = await import('@/lib/billing/create-onboarding-rechnung')
+                  const { sendOnboardingRechnungEmail } = await import('@/lib/billing/send-onboarding-rechnung-email')
+                  const rechn = await createOnboardingRechnung({
+                    typ: 'buero',
+                    organisation_id: orgId,
+                    stripe_session_id: (session.id as string) ?? null,
+                    stripe_payment_intent_id: (session.payment_intent as string) ?? null,
+                    netto_euro: nettoEuro,
+                    paket,
+                    kontingent,
+                    bezahlt_am: new Date(),
+                  })
+                  if (rechn.success) {
+                    await sendOnboardingRechnungEmail({
+                      rechnung_id: rechn.rechnung_id,
+                      rechnungs_nr: rechn.rechnungs_nr,
+                      rechnungs_pdf: rechn.pdf_buffer,
+                      empfaenger_email: p.email,
+                      vorname: p.vorname ?? null,
+                      typ: 'buero',
+                      orgName: org.name,
+                      paket,
+                      brutto_cent: rechn.brutto_cent,
+                      organisation_id: orgId,
+                    })
+                  } else {
+                    console.error('[AAR-401] Buero-Rechnung fehlgeschlagen:', rechn.error)
+                  }
+                }
               }
             }
-          } catch (err) { console.error('[KFZ-152] Buero confirm-mail:', err) }
+          } catch (err) { console.error('[AAR-401] Buero Rechnung/Mail:', err) }
 
           // KFZ-151: Auto-Resolve etwaiger offener Onboarding-Tasks zur Org
           try {
@@ -215,28 +247,58 @@ export async function POST(request: Request) {
             }
           } catch (err) { console.error('[KFZ-152 akademie] Werbebudget-Init:', err) }
 
-          // Welcome-Confirm-Mail an Verwalter
+          // AAR-401: Onboarding-Rechnung + KV + NB als Mail-Anhänge (Akademie).
           try {
             const { data: org } = await db.from('organisationen')
-              .select('name, hauptansprechpartner_user_id')
+              .select('name, hauptansprechpartner_user_id, akademie_erst_anzahlung_eur')
               .eq('id', orgId).single()
             if (org?.hauptansprechpartner_user_id) {
               const { data: p } = await db.from('profiles').select('email, vorname').eq('id', org.hauptansprechpartner_user_id).single()
               if (p?.email) {
-                const { render } = await import('@react-email/render')
-                const { AnzahlungEingegangenEmail, subject: anzahlungSubject } = await import('@/lib/email/google/templates/AnzahlungEingegangen')
-                const { sendCommunication } = await import('@/lib/communications/send')
-                const props = { vorname: p.vorname ?? null, typ: 'akademie' as const, orgName: org.name }
-                const html = await render(AnzahlungEingegangenEmail(props))
-                await sendCommunication('welcome_sv_buero', {
-                  email: p.email,
-                  vorname: p.vorname ?? '',
-                  subject: anzahlungSubject(props),
-                  html,
-                })
+                // Primär: akademie_erst_anzahlung_eur auf der Organisation
+                const { data: subs } = await db.from('sachverstaendige')
+                  .select('onboarding_anzahlung_betrag, paket, max_faelle_monat, ist_parent_account')
+                  .eq('organisation_id', orgId)
+                const nettoFromSubs = (subs ?? [])
+                  .filter(s => !s.ist_parent_account)
+                  .reduce((sum, s) => sum + Number(s.onboarding_anzahlung_betrag ?? 0), 0)
+                const nettoEuro = Number(org.akademie_erst_anzahlung_eur ?? 0) || nettoFromSubs
+                const kontingent = (subs ?? []).reduce((sum, s) => sum + Number(s.max_faelle_monat ?? 0), 0)
+                const paket = (subs ?? [])[0]?.paket ?? null
+
+                if (nettoEuro > 0) {
+                  const { createOnboardingRechnung } = await import('@/lib/billing/create-onboarding-rechnung')
+                  const { sendOnboardingRechnungEmail } = await import('@/lib/billing/send-onboarding-rechnung-email')
+                  const rechn = await createOnboardingRechnung({
+                    typ: 'akademie',
+                    organisation_id: orgId,
+                    stripe_session_id: (session.id as string) ?? null,
+                    stripe_payment_intent_id: (session.payment_intent as string) ?? null,
+                    netto_euro: nettoEuro,
+                    paket,
+                    kontingent,
+                    bezahlt_am: new Date(),
+                  })
+                  if (rechn.success) {
+                    await sendOnboardingRechnungEmail({
+                      rechnung_id: rechn.rechnung_id,
+                      rechnungs_nr: rechn.rechnungs_nr,
+                      rechnungs_pdf: rechn.pdf_buffer,
+                      empfaenger_email: p.email,
+                      vorname: p.vorname ?? null,
+                      typ: 'akademie',
+                      orgName: org.name,
+                      paket,
+                      brutto_cent: rechn.brutto_cent,
+                      organisation_id: orgId,
+                    })
+                  } else {
+                    console.error('[AAR-401] Akademie-Rechnung fehlgeschlagen:', rechn.error)
+                  }
+                }
               }
             }
-          } catch (err) { console.error('[KFZ-152 akademie] Confirm-mail:', err) }
+          } catch (err) { console.error('[AAR-401] Akademie Rechnung/Mail:', err) }
 
           try {
             const { resolveTasksForEntity } = await import('@/lib/tasks/resolve-tasks')
@@ -360,26 +422,50 @@ export async function POST(request: Request) {
             await resolveTasksForEntity('sv_onboarding', svId, 'Anzahlung eingegangen')
           } catch (err) { console.error('[KFZ-151] resolveTasks sv_onboarding:', err) }
 
-          // Email an SV: Portal freigeschaltet
+          // AAR-401: Onboarding-Rechnung + KV + NB als 3 Mail-Anhänge (Solo-SV).
           try {
-            const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', svId).single()
+            const { data: sv } = await db.from('sachverstaendige')
+              .select('profile_id, paket, max_faelle_monat, onboarding_anzahlung_betrag')
+              .eq('id', svId).single()
             if (sv?.profile_id) {
               const { data: p } = await db.from('profiles').select('email, vorname').eq('id', sv.profile_id).single()
               if (p?.email) {
-                const { render } = await import('@react-email/render')
-                const { AnzahlungEingegangenEmail, subject: anzahlungSubject } = await import('@/lib/email/google/templates/AnzahlungEingegangen')
-                const { sendCommunication } = await import('@/lib/communications/send')
-                const props = { vorname: p.vorname ?? null, typ: 'solo' as const }
-                const html = await render(AnzahlungEingegangenEmail(props))
-                await sendCommunication('welcome_sv_solo', {
-                  email: p.email,
-                  vorname: p.vorname ?? '',
-                  subject: anzahlungSubject(props),
-                  html,
-                })
+                const nettoEuro = Number(sv.onboarding_anzahlung_betrag ?? 0)
+                const kontingent = Number(sv.max_faelle_monat ?? 0)
+                const paket = (sv.paket as string | null) ?? null
+
+                if (nettoEuro > 0) {
+                  const { createOnboardingRechnung } = await import('@/lib/billing/create-onboarding-rechnung')
+                  const { sendOnboardingRechnungEmail } = await import('@/lib/billing/send-onboarding-rechnung-email')
+                  const rechn = await createOnboardingRechnung({
+                    typ: 'solo',
+                    sv_id: svId,
+                    stripe_session_id: (session.id as string) ?? null,
+                    stripe_payment_intent_id: (session.payment_intent as string) ?? null,
+                    netto_euro: nettoEuro,
+                    paket,
+                    kontingent,
+                    bezahlt_am: new Date(),
+                  })
+                  if (rechn.success) {
+                    await sendOnboardingRechnungEmail({
+                      rechnung_id: rechn.rechnung_id,
+                      rechnungs_nr: rechn.rechnungs_nr,
+                      rechnungs_pdf: rechn.pdf_buffer,
+                      empfaenger_email: p.email,
+                      vorname: p.vorname ?? null,
+                      typ: 'solo',
+                      paket,
+                      brutto_cent: rechn.brutto_cent,
+                      sv_id: svId,
+                    })
+                  } else {
+                    console.error('[AAR-401] Solo-Rechnung fehlgeschlagen:', rechn.error)
+                  }
+                }
               }
             }
-          } catch (err) { console.error('[KFZ-148] Bestätigungs-Email:', err) }
+          } catch (err) { console.error('[AAR-401] Solo Rechnung/Mail:', err) }
 
           // Admin-Notification
           try {

@@ -98,9 +98,12 @@ export async function signAndStoreContract(ctx: SignContext): Promise<SignResult
     throw new Error(`Storage-Upload fehlgeschlagen: ${uploadErr.message}`)
   }
 
-  // 5. pdf_storage_path nachziehen
+  // 5. pdf_storage_path + pdf_generiert_am nachziehen (AAR-401)
   await db.from('vertraege_unterzeichnet')
-    .update({ pdf_storage_path: pathSegment })
+    .update({
+      pdf_storage_path: pathSegment,
+      pdf_generiert_am: new Date().toISOString(),
+    })
     .eq('id', vertrag.id)
 
   return {
