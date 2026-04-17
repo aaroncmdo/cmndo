@@ -104,7 +104,7 @@ export default function KundeJetztZuTunCard({ aktion }: Props) {
       {aktion.cta?.href && (
         <Link
           href={aktion.cta.href}
-          className="inline-flex items-center gap-1 mt-3 text-sm font-medium rounded-md px-3 py-1.5 transition-colors"
+          className="inline-flex items-center gap-1 mt-3 text-sm font-medium rounded-md px-4 min-h-[44px] transition-colors"
           style={{
             background: accent,
             color: 'var(--brand-text-on-primary, #ffffff)',
