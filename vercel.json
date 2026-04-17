@@ -26,7 +26,7 @@
     },
     {
       "path": "/api/cron/zahlungspruefung",
-      "schedule": "0 8 * * *"
+      "schedule": "10 8 * * *"
     },
     {
       "path": "/api/cron/send-reminders",
@@ -46,7 +46,7 @@
     },
     {
       "path": "/api/cron/abrechnung-einzug",
-      "schedule": "0 8 * * *"
+      "schedule": "20 8 * * *"
     },
     {
       "path": "/api/cron/community-leaderboard-update",
@@ -70,7 +70,7 @@
     },
     {
       "path": "/api/cron/abrechnung-kanzlei-reminder",
-      "schedule": "0 9 * * *"
+      "schedule": "10 9 * * *"
     },
     {
       "path": "/api/cron/vollmacht-reminder",
@@ -102,7 +102,7 @@
     },
     {
       "path": "/api/cron/kanzlei-sla-check",
-      "schedule": "0 8 * * *"
+      "schedule": "30 8 * * *"
     },
     {
       "path": "/api/cron/maik-monatsabrechnung",
@@ -110,11 +110,11 @@
     },
     {
       "path": "/api/cron/verifizierung-reminder",
-      "schedule": "0 9 * * *"
+      "schedule": "20 9 * * *"
     },
     {
       "path": "/api/cron/haftpflicht-ablauf",
-      "schedule": "0 9 * * *"
+      "schedule": "40 9 * * *"
     },
     {
       "path": "/api/cron/reklamation-frist-check",
