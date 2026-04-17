@@ -72,7 +72,9 @@ export default function ChatClient({
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] max-w-lg mx-auto">
+    // AAR-452: 100dvh statt 100vh (iOS Dynamic Viewport) + 8.5rem deckt
+    // Mobile-Header (3.5rem pt) + Bottom-Nav-Padding (~5rem pb) sauber ab.
+    <div className="flex flex-col h-[calc(100dvh-8.5rem)] md:h-[calc(100vh-3rem)] max-w-lg mx-auto">
       {/* Header */}
       <div className="px-5 pt-5 pb-3">
         <h1 className="text-xl font-bold text-[#0D1B3E]">Chat</h1>
