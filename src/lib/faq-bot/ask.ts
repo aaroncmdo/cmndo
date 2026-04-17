@@ -10,6 +10,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { AI_MODELS } from '@/lib/ai/models'
+import { logAiUsage } from '@/lib/ai/usage-log'
 import { checkOffTopic } from './off-topic-guard'
 
 export type FaqBotRolle = 'kunde' | 'kundenbetreuer'
@@ -286,8 +287,12 @@ export async function askFaqBot(
 
   const ctx = await loadFallContext(fallId, rolle)
   const contextText = buildContextText(rolle, ctx)
-  const systemPrompt = (rolle === 'kunde' ? KUNDE_SYSTEM : KB_SYSTEM) +
-    '\n\n— Fall-Kontext —\n' + contextText
+
+  // AAR-436: System-Prompt in statisch (cached) + dynamisch (pro Fall) splitten.
+  // Statischer Teil ist identisch über alle Anfragen einer Rolle — wird mit
+  // cache_control: ephemeral markiert und bleibt 5min warm.
+  const systemStatic = rolle === 'kunde' ? KUNDE_SYSTEM : KB_SYSTEM
+  const systemDynamic = '\n\n— Fall-Kontext —\n' + contextText
 
   const messages: { role: 'user' | 'assistant'; content: string }[] = []
   for (const m of historie.slice(-10)) {
@@ -295,16 +300,32 @@ export async function askFaqBot(
   }
   messages.push({ role: 'user', content: frage.trim() })
 
+  const model = rolle === 'kunde' ? AI_MODELS.faq_bot_kunde : AI_MODELS.faq_bot_kb
+
   try {
     const anthropic = new Anthropic({ apiKey })
     const response = await anthropic.messages.create({
-      model: rolle === 'kunde' ? AI_MODELS.faq_bot_kunde : AI_MODELS.faq_bot_kb,
+      model,
       max_tokens: 800,
-      system: systemPrompt,
+      system: [
+        // AAR-436: statischer Teil — gecached.
+        { type: 'text', text: systemStatic, cache_control: { type: 'ephemeral' } },
+        // Dynamischer Fall-Kontext — nicht gecached (ändert sich pro Fall).
+        { type: 'text', text: systemDynamic },
+      ],
       messages,
     })
     const antwort = response.content[0]?.type === 'text' ? response.content[0].text : ''
     if (!antwort) return { success: false, error: 'Claude hat keine Antwort geliefert' }
+
+    // AAR-436: Usage-Log fire-and-forget.
+    void logAiUsage({
+      endpoint: rolle === 'kunde' ? 'faq_bot_kunde' : 'faq_bot_kb',
+      model,
+      fallId,
+      usage: response.usage,
+    })
+
     return {
       success: true,
       antwort,

@@ -1,9 +1,14 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { buildPreCallPrompt } from './prompts'
+import { buildPreCallStaticSystem, buildPreCallUser } from './prompts'
+import { logAiUsage } from '@/lib/ai/usage-log'
+
+const BRIEFING_MODEL = 'claude-sonnet-4-20250514'
 
 /**
  * KFZ-143: Generiert ein Pre-Call Briefing via Claude.
+ * AAR-436: Statischer System-Prompt gecached (ephemeral), dynamischer
+ * Kontext als User-Message. Usage wird nach dem Call geloggt.
  */
 export async function getPreCallBriefing(opts: { fallId?: string; leadId?: string }): Promise<{
   briefing: string
@@ -66,10 +71,10 @@ export async function getPreCallBriefing(opts: { fallId?: string; leadId?: strin
     }
   }
 
-  const prompt = buildPreCallPrompt({
+  const ctx = {
     kundeName, fallNummer, status, fahrzeug, schadenhoehe, terminDatum,
     letzteNachrichten, aktivePhase, subProzesse,
-  })
+  }
 
   // Claude API Call
   const apiKey = process.env.ANTHROPIC_API_KEY
@@ -79,11 +84,27 @@ export async function getPreCallBriefing(opts: { fallId?: string; leadId?: strin
 
   const anthropic = new Anthropic({ apiKey })
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: BRIEFING_MODEL,
     max_tokens: 800,
-    messages: [{ role: 'user', content: prompt }],
+    // AAR-436: statischer System-Prompt wird gecached
+    system: [
+      {
+        type: 'text',
+        text: buildPreCallStaticSystem(),
+        cache_control: { type: 'ephemeral' },
+      },
+    ],
+    messages: [{ role: 'user', content: buildPreCallUser(ctx) }],
   })
 
   const briefing = response.content[0]?.type === 'text' ? response.content[0].text : 'Briefing konnte nicht generiert werden.'
+
+  void logAiUsage({
+    endpoint: 'pre_call_briefing',
+    model: BRIEFING_MODEL,
+    fallId: opts.fallId ?? null,
+    usage: response.usage,
+  })
+
   return { briefing }
 }

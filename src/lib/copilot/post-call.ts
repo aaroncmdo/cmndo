@@ -1,9 +1,13 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { buildPostCallPrompt } from './prompts'
+import { POST_CALL_STATIC_SYSTEM, buildPostCallUser } from './prompts'
+import { logAiUsage } from '@/lib/ai/usage-log'
+
+const POST_CALL_MODEL = 'claude-sonnet-4-20250514'
 
 /**
  * KFZ-143: Post-Call AI Analyse. Wird nach call.ended automatisch getriggert.
+ * AAR-436: Statischer System-Prompt gecached, dynamisches Transkript als User-Message.
  */
 export async function analyzeCallPostHoc(callId: string): Promise<void> {
   const db = createAdminClient()
@@ -29,7 +33,7 @@ export async function analyzeCallPostHoc(callId: string): Promise<void> {
     }
   }
 
-  const prompt = buildPostCallPrompt({
+  const userPrompt = buildPostCallUser({
     fallNummer,
     transkript: call.transkript_text,
     dauer: call.dauer_sekunden ?? 0,
@@ -38,9 +42,17 @@ export async function analyzeCallPostHoc(callId: string): Promise<void> {
 
   const anthropic = new Anthropic({ apiKey })
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: POST_CALL_MODEL,
     max_tokens: 500,
-    messages: [{ role: 'user', content: prompt }],
+    // AAR-436: statischer System-Prompt wird gecached
+    system: [
+      {
+        type: 'text',
+        text: POST_CALL_STATIC_SYSTEM,
+        cache_control: { type: 'ephemeral' },
+      },
+    ],
+    messages: [{ role: 'user', content: userPrompt }],
   })
 
   const text = response.content[0]?.type === 'text' ? response.content[0].text : ''
@@ -65,6 +77,13 @@ export async function analyzeCallPostHoc(callId: string): Promise<void> {
     sentiment,
     updated_at: new Date().toISOString(),
   }).eq('id', callId)
+
+  void logAiUsage({
+    endpoint: 'post_call_summary',
+    model: POST_CALL_MODEL,
+    fallId: call.fall_id ?? null,
+    usage: response.usage,
+  })
 
   console.log(`[KFZ-143] Post-Call Analyse für ${callId} abgeschlossen`)
 }
