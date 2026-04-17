@@ -13,6 +13,11 @@ export const AI_MODELS = {
   faq_bot_kunde: 'claude-haiku-4-5-20251001',
   /** FAQ-Bot KB — tiefe Antworten, Qualität wichtiger als Speed. */
   faq_bot_kb: 'claude-sonnet-4-6',
+  /**
+   * AAR-445: Fall-Analyse nach Bot-Sessions. JSON-Output, klar strukturierter
+   * Input — Haiku 4.5 reicht, günstig und schnell.
+   */
+  fall_summary: 'claude-haiku-4-5-20251001',
 } as const
 
 export type AiModelKey = keyof typeof AI_MODELS

@@ -488,9 +488,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         </div>
 
         {/* AAR-432: Opt-in Gutachten-Weiterleitung — nur sichtbar wenn Gutachten vorliegt */}
+        {/* AAR-452: flex-col auf Mobile, damit der Button auf 375px nicht den Text quetscht. */}
         {gutachtenVerfuegbar && (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex items-center justify-between gap-3">
-            <div>
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div className="min-w-0">
               <p className="text-sm font-semibold text-[#0D1B3E]">Gutachten erhalten?</p>
               <p className="text-xs text-gray-500 mt-0.5">
                 Sie können sich das Gutachten auch per E-Mail an sich selbst oder eine Vertrauensperson senden lassen (48h Magic-Link).

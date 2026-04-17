@@ -12,6 +12,7 @@ import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { streamFaqBot, type ChatMessage } from '@/lib/faq-bot/ask'
+import { maybeAnalyseBotInteraktion } from '@/lib/faq-bot/analyse'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -114,6 +115,11 @@ export async function POST(req: NextRequest) {
             },
             { onConflict: 'fall_id,rolle,user_id' },
           )
+
+        // AAR-445: Fall-Analyse im Hintergrund triggern. Fire-and-forget —
+        // blockiert den Stream-Close nicht, Fehler werden in der Analyse
+        // selbst geswallowt und geloggt.
+        void maybeAnalyseBotInteraktion(fallId, nextHistory, user.id)
 
         controller.close()
       } catch (err) {

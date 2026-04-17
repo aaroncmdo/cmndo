@@ -57,7 +57,7 @@ export default function GutachtenWeiterleitungButton({ fallId, defaultEmail }: P
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 text-sm font-medium rounded-md px-3 py-1.5 border transition-colors"
+        className="inline-flex items-center gap-2 text-sm font-medium rounded-md px-4 min-h-[44px] border transition-colors"
         style={{
           borderColor: 'var(--brand-border-strong, #d1d5db)',
           color: 'var(--brand-text-primary, #0D1B3E)',
@@ -151,7 +151,7 @@ export default function GutachtenWeiterleitungButton({ fallId, defaultEmail }: P
                   <button
                     type="button"
                     onClick={onClose}
-                    className="text-sm px-3 py-1.5 rounded-md"
+                    className="text-sm px-4 min-h-[44px] rounded-md"
                     style={{ color: 'var(--brand-text-secondary, #4b5563)' }}
                   >
                     Abbrechen
@@ -159,7 +159,7 @@ export default function GutachtenWeiterleitungButton({ fallId, defaultEmail }: P
                   <button
                     type="submit"
                     disabled={isPending || !email}
-                    className="text-sm font-medium px-3 py-1.5 rounded-md disabled:opacity-60"
+                    className="text-sm font-medium px-4 min-h-[44px] rounded-md disabled:opacity-60"
                     style={{
                       background: 'var(--brand-primary, #0D1B3E)',
                       color: 'var(--brand-text-on-primary, #ffffff)',
