@@ -12,6 +12,8 @@ import type { FallakteRolle } from '@/lib/fall/field-permissions'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 // AAR-433 (Child 4 AAR-429): KB Phase-State-Audit oberhalb der Tabs
 import KbPhaseAuditCard from '@/components/kb/KbPhaseAuditCard'
+// AAR-446: FAQ-Bot-Analyse-Card (liest letzte fall_summaries-Row des Kunden)
+import FaqBotAnalyseCard from '@/components/admin/FaqBotAnalyseCard'
 import {
   getKbPhaseAudit,
   type KbTask,
@@ -313,9 +315,14 @@ export default async function FallaktePage({
     }
   }
 
+  // AAR-446: FAQ-Bot-Analyse-Card — nur für Admin/KB sichtbar (Kunden sehen
+  // ihre eigene Akte anderswo, SV/Kanzlei brauchen die Analyse nicht).
+  const zeigeAnalyseCard = userRolle === 'admin' || userRolle === 'kundenbetreuer'
+
   return (
     <>
       {kbAktion && <KbPhaseAuditCard aktion={kbAktion} />}
+      {zeigeAnalyseCard && <FaqBotAnalyseCard fallId={id} />}
       {otherKundeFaelle.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 mb-4 flex items-center justify-between text-sm flex-wrap gap-2">
           <span className="text-amber-900">

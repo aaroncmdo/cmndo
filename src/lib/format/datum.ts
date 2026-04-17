@@ -76,6 +76,27 @@ export function formatDatumUhrzeit(iso: string | null | undefined): string {
   })
 }
 
+/**
+ * AAR-446: Formatiert einen Zeitpunkt als „vor X min/h/Tagen"-String
+ * (feingranular bis auf die Minute, grob ab einem Tag). Für Cards die
+ * anzeigen, wie alt eine Analyse / Nachricht / ein Event ist.
+ */
+export function formatVorZeit(iso: string | null | undefined): string {
+  const d = toDate(iso)
+  if (!d) return ''
+  const diffMs = Date.now() - d.getTime()
+  if (diffMs < 0) return 'gerade eben'
+  const min = Math.floor(diffMs / 60_000)
+  if (min < 1) return 'gerade eben'
+  if (min < 60) return `vor ${min} min`
+  const h = Math.floor(min / 60)
+  if (h < 24) return `vor ${h} h`
+  const days = Math.floor(h / 24)
+  if (days < 30) return `vor ${days} Tag${days === 1 ? '' : 'en'}`
+  const months = Math.floor(days / 30)
+  return `vor ${months} Monat${months === 1 ? '' : 'en'}`
+}
+
 /** Formatiert Datum mit Wochentag: "Mo., 17.04.2026". Praktisch für Terminlisten. */
 export function formatDatumMitWochentag(iso: string | null | undefined): string {
   const d = toDate(iso)

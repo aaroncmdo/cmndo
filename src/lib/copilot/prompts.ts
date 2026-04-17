@@ -16,6 +16,15 @@ export type PreCallContext = {
   letzteNachrichten: string[]
   aktivePhase: string
   subProzesse: string[]
+  // AAR-446: Letzte FAQ-Bot-Analyse aus `fall_summaries` (Child 2 = AAR-445).
+  // Optional — wenn der Kunde in den letzten 7 Tagen nicht gechattet hat,
+  // bleibt das Feld null und der Analyse-Block wird im Prompt weggelassen.
+  letzteAnalyse?: {
+    anliegen: string
+    zusammenfassung: string
+    naechsteSchritte: string
+    generatedAt: string
+  } | null
 }
 
 export function buildPreCallStaticSystem(): string {
@@ -41,6 +50,17 @@ ${fachbegriffeList}`
 }
 
 export function buildPreCallUser(context: PreCallContext): string {
+  // AAR-446: Analyse-Block nur wenn letzte Bot-Analyse bekannt ist.
+  const analyseBlock = context.letzteAnalyse
+    ? `\n=== LETZTE BOT-CHAT-ANALYSE (${formatAnalyseAlter(context.letzteAnalyse.generatedAt)}) ===
+Kunden-Anliegen: ${context.letzteAnalyse.anliegen}
+
+Zusammenfassung: ${context.letzteAnalyse.zusammenfassung}
+
+Vorgeschlagene nächste Schritte (aus Bot-Analyse):
+${context.letzteAnalyse.naechsteSchritte}\n`
+    : ''
+
   return `=== FALL-KONTEXT ===
 Kunde: ${context.kundeName}
 Fall: ${context.fallNummer}
@@ -53,8 +73,24 @@ ${context.subProzesse.length > 0 ? `Aktive Subprozesse: ${context.subProzesse.jo
 
 === LETZTE KOMMUNIKATION ===
 ${context.letzteNachrichten.length > 0 ? context.letzteNachrichten.join('\n') : 'Keine bisherige Kommunikation.'}
+${analyseBlock}
+Erstelle jetzt das Briefing nach dem oben beschriebenen Schema. Wenn eine
+Bot-Analyse vorliegt, berücksichtige das Kunden-Anliegen und erwähne es
+explizit im Briefing-Punkt „Anrufziel".`
+}
 
-Erstelle jetzt das Briefing nach dem oben beschriebenen Schema.`
+// AAR-446: Formatierung-Helper für den Prompt-Block. Die UI nutzt die
+// Funktion aus @/lib/format/datum — hier bleibt eine leichte Dopplung, damit
+// das Prompt-Modul keine UI-Abhängigkeit bekommt.
+function formatAnalyseAlter(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime()
+  const min = Math.floor(diffMs / 60_000)
+  if (min < 1) return 'gerade eben'
+  if (min < 60) return `vor ${min} min`
+  const h = Math.floor(min / 60)
+  if (h < 24) return `vor ${h} h`
+  const d = Math.floor(h / 24)
+  return `vor ${d} Tag${d === 1 ? '' : 'en'}`
 }
 
 /**
