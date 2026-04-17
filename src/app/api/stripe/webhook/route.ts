@@ -74,6 +74,11 @@ export async function POST(request: Request) {
             updated_at: new Date().toISOString(),
           }).eq('id', orgId)
 
+          // AAR-359 W2: Tier-2-Frist für alle Sub-SVs starten. 14 Tage ab
+          // Anzahlung-Eingang — danach löst der Verifizierungs-Cron den
+          // Banner-Countdown bzw. den frist_ueberschritten-Hard-Blocker aus.
+          const verifizierungFristBis = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+
           // Alle Sub-SVs (mitarbeiter) + Inhaber freischalten
           // BUG-92: vertrag_unterschrieben=true defensiv mitziehen — falls der
           // Sub-SV/Inhaber den AGB-Step nicht durchlaufen hat, ist der State
@@ -86,6 +91,8 @@ export async function POST(request: Request) {
             ist_aktiv: true,
             vertrag_unterschrieben: true,
             vertrag_unterschrieben_am: new Date().toISOString(),
+            verifizierung_status: 'ausstehend',
+            verifizierung_frist_bis: verifizierungFristBis,
           }).eq('organisation_id', orgId)
 
           // ARCH-1 FR-5: Werbebudget pro Sub-SV mit dem jeweiligen
@@ -176,6 +183,9 @@ export async function POST(request: Request) {
             updated_at: new Date().toISOString(),
           }).eq('id', orgId)
 
+          // AAR-359 W2: Tier-2-Frist auch im Akademie-Branch.
+          const verifizierungFristBisAkademie = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+
           // Alle Akademie-Mitglieder + Verwalter freischalten
           await db.from('sachverstaendige').update({
             onboarding_status: 'bezahlt',
@@ -185,6 +195,8 @@ export async function POST(request: Request) {
             ist_aktiv: true,
             vertrag_unterschrieben: true,
             vertrag_unterschrieben_am: new Date().toISOString(),
+            verifizierung_status: 'ausstehend',
+            verifizierung_frist_bis: verifizierungFristBisAkademie,
           }).eq('organisation_id', orgId)
 
           // Werbebudget-Init pro Sub-SV (analog FR-5 Buero-Branch).
@@ -322,6 +334,9 @@ export async function POST(request: Request) {
             .single()
           const initGuthaben = Number(svBefore?.onboarding_anzahlung_betrag ?? 0)
 
+          // AAR-359 W2: Tier-2-Frist für Solo-SV starten (14 Tage ab Anzahlung).
+          const verifizierungFristBisSolo = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+
           // Portal freischalten
           // BUG-92: vertrag_unterschrieben=true defensiv mitziehen — falls der
           // Solo-SV den Vertrag-Step uebersprungen hat (sollte nicht vorkommen,
@@ -335,6 +350,8 @@ export async function POST(request: Request) {
             werbebudget_guthaben_netto: initGuthaben,
             vertrag_unterschrieben: true,
             vertrag_unterschrieben_am: new Date().toISOString(),
+            verifizierung_status: 'ausstehend',
+            verifizierung_frist_bis: verifizierungFristBisSolo,
           }).eq('id', svId)
 
           // KFZ-151: Auto-Resolve aller offenen Tasks zu diesem Onboarding
