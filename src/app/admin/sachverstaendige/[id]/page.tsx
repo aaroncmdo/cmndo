@@ -1,22 +1,31 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import SvDetailClient from './SvDetailClient'
 import VerifizierungsToggle from './VerifizierungsToggle'
+import VerifizierungsTab, { type Tier2Slot } from './VerifizierungsTab'
 import { getSvStatus } from '@/lib/sv-status'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
+import { getAlleSlots } from '@/lib/dokumente/katalog'
+
+type SvSearchParams = { tab?: string }
 
 export default async function SvDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams?: Promise<SvSearchParams>
 }) {
   const { id } = await params
+  const sp = (await searchParams) ?? {}
+  const activeTab = sp.tab === 'verifizierung' ? 'verifizierung' : 'stammdaten'
   const supabase = await createClient()
 
   const { data: sv } = await supabase
     .from('sachverstaendige')
-    .select('id, profile_id, radius_km, paket, max_faelle_monat, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, profiles(vorname, nachname, email, telefon)')
+    .select('id, profile_id, radius_km, paket, max_faelle_monat, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, sa_vorlage_status, sa_vorlage_storage_path, sa_vorlage_hochgeladen_am, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, gesperrt_am, gesperrt_grund, profiles(vorname, nachname, email, telefon)')
     .eq('id', id)
     .single()
 
@@ -75,6 +84,70 @@ export default async function SvDetailPage({
     gesperrt_seit: sv.gesperrt_seit,
   })
 
+  // AAR-359 W6: Verifizierungs-Tab-Daten (nur wenn aktiv — spart Queries sonst)
+  let verifizierungsData: {
+    saVorlageSignedUrl: string | null
+    tier2Slots: Tier2Slot[]
+  } = { saVorlageSignedUrl: null, tier2Slots: [] }
+
+  if (activeTab === 'verifizierung') {
+    const dbAdmin = createAdminClient()
+
+    // SA-Vorlage Signed URL (5 Min gültig für Admin-Preview)
+    let signedUrl: string | null = null
+    if (sv.sa_vorlage_storage_path) {
+      const { data: sig } = await dbAdmin.storage
+        .from('dokumente')
+        .createSignedUrl(sv.sa_vorlage_storage_path, 300)
+      signedUrl = sig?.signedUrl ?? null
+    }
+
+    // Tier-2-Slots aus Katalog + bereits angeforderte pflichtdokumente-Rows
+    const [alleSlots, pflichtRes] = await Promise.all([
+      getAlleSlots(supabase),
+      dbAdmin.from('pflichtdokumente')
+        .select('id, dokument_typ, status, hochgeladen_am')
+        .eq('gutachter_id', id),
+    ])
+    const pflichtRows = (pflichtRes.data ?? []) as Array<{
+      id: string
+      dokument_typ: string
+      status: Tier2Slot['status']
+      hochgeladen_am: string | null
+    }>
+
+    // Upload-Counts pro pflichtdokument-Row
+    const pflichtIds = pflichtRows.map(r => r.id)
+    const uploadCounts: Record<string, number> = {}
+    if (pflichtIds.length > 0) {
+      const { data: uploads } = await dbAdmin.from('dokumente')
+        .select('pflichtdokument_id')
+        .in('pflichtdokument_id', pflichtIds)
+      for (const u of uploads ?? []) {
+        const pid = u.pflichtdokument_id as string | null
+        if (pid) uploadCounts[pid] = (uploadCounts[pid] ?? 0) + 1
+      }
+    }
+
+    const verifizierungsSlots = alleSlots.filter(s =>
+      s.kategorie === 'gutachter_verifizierung' && s.slot_id !== 'sv_sa_vorlage',
+    )
+    const tier2Slots: Tier2Slot[] = verifizierungsSlots.map(s => {
+      const row = pflichtRows.find(p => p.dokument_typ === s.slot_id)
+      return {
+        slotId: s.slot_id,
+        label: s.label,
+        beschreibung: s.beschreibung,
+        pflichtdokId: row?.id ?? null,
+        status: row?.status ?? null,
+        hochgeladenAm: row?.hochgeladen_am ?? null,
+        uploadCount: row ? (uploadCounts[row.id] ?? 0) : 0,
+      }
+    })
+
+    verifizierungsData = { saVorlageSignedUrl: signedUrl, tier2Slots }
+  }
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* ── Sticky Header ──────────────────────────────────────────── */}
@@ -127,7 +200,53 @@ export default async function SvDetailPage({
         </div>
       </div>
 
-      {/* ── Split Layout: Form LEFT + Fälle/Tasks RIGHT ────────────── */}
+      {/* ── Tab-Navigation (AAR-359 W6) ────────────────────────────── */}
+      <div className="border-b border-gray-200 bg-white flex-shrink-0 px-4">
+        <div className="max-w-6xl mx-auto flex gap-1">
+          <Link
+            href={`/admin/sachverstaendige/${id}`}
+            className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
+              activeTab === 'stammdaten'
+                ? 'border-[#4573A2] text-[#1E3A5F]'
+                : 'border-transparent text-gray-500 hover:text-gray-800'
+            }`}
+          >
+            Stammdaten
+          </Link>
+          <Link
+            href={`/admin/sachverstaendige/${id}?tab=verifizierung`}
+            className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
+              activeTab === 'verifizierung'
+                ? 'border-[#4573A2] text-[#1E3A5F]'
+                : 'border-transparent text-gray-500 hover:text-gray-800'
+            }`}
+          >
+            Verifizierung
+          </Link>
+        </div>
+      </div>
+
+      {/* ── Tab-Content ──────────────────────────────────────────── */}
+      {activeTab === 'verifizierung' ? (
+        <div className="flex-1 overflow-y-auto p-4 bg-gray-50/30">
+          <div className="max-w-4xl mx-auto">
+            <VerifizierungsTab
+              svId={sv.id}
+              saVorlageStatus={(sv.sa_vorlage_status as 'ausstehend' | 'geprueft' | 'zurueckgewiesen' | null) ?? null}
+              saVorlageStoragePath={sv.sa_vorlage_storage_path ?? null}
+              saVorlageSignedUrl={verifizierungsData.saVorlageSignedUrl}
+              saVorlageAdminNotiz={sv.sa_vorlage_admin_notiz ?? null}
+              saVorlageHochgeladenAm={sv.sa_vorlage_hochgeladen_am ?? null}
+              verifizierungStatus={(sv.verifizierung_status as 'ausstehend' | 'geprueft' | 'frist_ueberschritten' | null) ?? null}
+              verifizierungFristBis={sv.verifizierung_frist_bis ?? null}
+              verifiziertAm={sv.verifiziert_am ?? null}
+              tier2Slots={verifizierungsData.tier2Slots}
+              gesperrtAm={sv.gesperrt_am ?? null}
+              gesperrtGrund={sv.gesperrt_grund ?? null}
+            />
+          </div>
+        </div>
+      ) : (
       <div className="flex-1 overflow-hidden">
         <div className="h-full max-w-6xl mx-auto flex">
           {/* LEFT: Edit Form */}
@@ -241,6 +360,7 @@ export default async function SvDetailPage({
           </div>
         </div>
       </div>
+      )}
     </div>
   )
 }
