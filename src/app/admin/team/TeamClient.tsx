@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { UserPlusIcon, UsersIcon, ShieldCheckIcon, TrophyIcon, GiftIcon, ActivityIcon } from 'lucide-react'
+import { UserPlusIcon, UsersIcon, ShieldCheckIcon, TrophyIcon, GiftIcon, ActivityIcon, AlertTriangleIcon } from 'lucide-react'
 import { createMitarbeiter } from './actions'
 
 const ROLLE_LABELS: Record<string, string> = { admin: 'Admin', kundenbetreuer: 'Kundenbetreuer', leadbearbeiter: 'Leadbearbeiter', kanzlei: 'Kanzlei' }
@@ -18,12 +18,13 @@ type Mitarbeiter = {
   kapazitaet_max: number | null; aktiv: boolean | null; eingestellt_am: string | null
 }
 
-export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUser, abgeschlossenByUser, monatLabel }: {
+export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUser, abgeschlossenByUser, monatLabel, kbFallbackAktiv }: {
   mitarbeiter: Mitarbeiter[]
   leadsByUser: Record<string, { total: number; konvertiert: number }>
   aktiveFaelleByUser: Record<string, number>
   abgeschlossenByUser: Record<string, number>
   monatLabel: string
+  kbFallbackAktiv: number
 }) {
   const router = useRouter()
   const [showDialog, setShowDialog] = useState(false)
@@ -66,6 +67,21 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
       </div>
 
       {success && <div className="bg-green-50 border border-green-800 rounded-xl p-4 mb-4"><p className="text-green-300 text-sm">{success}</p></div>}
+
+      {/* AAR-427: KPI-Banner — wieviele Fälle laufen aktuell im Admin-Fallback-Modus? */}
+      {kbFallbackAktiv > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4 flex items-center gap-3">
+          <AlertTriangleIcon className="w-4 h-4 text-amber-500 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-amber-900 text-sm font-medium">
+              {kbFallbackAktiv} aktive{kbFallbackAktiv === 1 ? 'r Fall' : ' Fälle'} im KB-Fallback-Modus
+            </p>
+            <p className="text-amber-700 text-xs mt-0.5">
+              Diese Fälle werden vorübergehend von einem Admin betreut, weil bei der Konversion kein Kundenbetreuer verfügbar war. Sobald ein KB frei ist, manuell re-assignen.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-2 mb-4">
         {['alle', 'dispatch', 'kundenbetreuer', 'admin', 'entwicklung'].map(k => (

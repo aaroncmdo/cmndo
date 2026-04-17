@@ -13,6 +13,7 @@ export default async function TeamPage() {
     { data: leadsRaw },
     { data: faelleAktivRaw },
     { data: faelleAbgRaw },
+    { count: fallbackCount },
   ] = await Promise.all([
     supabase
       .from('profiles')
@@ -22,6 +23,12 @@ export default async function TeamPage() {
     supabase.from('leads').select('zugewiesen_an, status').gte('created_at', monatStr),
     supabase.from('faelle').select('kundenbetreuer_id').not('status', 'in', '("abgeschlossen","storniert")'),
     supabase.from('faelle').select('kundenbetreuer_id').eq('status', 'abgeschlossen').gte('abgeschlossen_am', monatStr),
+    // AAR-427: KPI — aktive Fälle die aktuell im Admin-Fallback laufen
+    supabase
+      .from('faelle')
+      .select('id', { count: 'exact', head: true })
+      .eq('kundenbetreuer_fallback_flag', true)
+      .not('status', 'in', '("abgeschlossen","storniert")'),
   ])
 
   const leadsByUser: Record<string, { total: number; konvertiert: number }> = {}
@@ -47,6 +54,7 @@ export default async function TeamPage() {
       aktiveFaelleByUser={aktiveFaelleByUser}
       abgeschlossenByUser={abgeschlossenByUser}
       monatLabel={`${monat} ${jahr}`}
+      kbFallbackAktiv={fallbackCount ?? 0}
     />
   )
 }

@@ -14,6 +14,7 @@ import { triggerKonversionTasks, triggerGutachterTerminTask, triggerGutachtenUpl
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflicht'
+import { assignKundenbetreuer } from '@/lib/faelle/kb-assignment'
 
 // ─── Fall Status ────────────────────────────────────────────────────────────
 
@@ -527,8 +528,13 @@ async function convertLeadToFall(
   const nr = String((count ?? 0) + 1).padStart(3, '0')
   const fallNummer = `CLM-${dateStr}-${nr}`
 
-  // 3. Kundenbetreuer per Round-Robin zuweisen
-  const kundenbetreuerId = await findNextKundenbetreuer(supabase)
+  // 3. Kundenbetreuer per Round-Robin zuweisen (AAR-427: mit Admin-Fallback)
+  const kbAssignment = await assignKundenbetreuer(supabase, /* fallId noch nicht bekannt */ '', {
+    writeToFall: false,
+    logToTimeline: false,
+  })
+  const kundenbetreuerId = kbAssignment.kundenbetreuer_id
+  const kbFallbackFlag = kbAssignment.fallback_used === 'admin'
 
   // 4. Fall erstellen mit Lead-Daten
   const { data: fall, error: fallErr } = await supabase
@@ -612,6 +618,10 @@ async function convertLeadToFall(
       // Konversions-Metadaten
       leadbearbeiter_id: userId,
       kundenbetreuer_id: kundenbetreuerId,
+      // AAR-427: Fallback-Flag + Zuweisungs-Zeitpunkt. Flag = true wenn
+      // ein Admin stellvertretend die KB-Rolle übernimmt (kein aktiver KB).
+      kundenbetreuer_fallback_flag: kbFallbackFlag,
+      kundenbetreuer_zugewiesen_am: kundenbetreuerId ? new Date().toISOString() : null,
       konvertiert_am: new Date().toISOString(),
       konvertiert_von_lead: leadId,
       // SV-Termin übernehmen falls gesetzt
@@ -688,6 +698,37 @@ async function convertLeadToFall(
     erstellt_von: userId,
   })
 
+  // 7b. AAR-427: Bei Admin-Fallback separat loggen + Admin notifizieren,
+  // damit die Übernahme nicht stillschweigend passiert.
+  if (kbFallbackFlag && kundenbetreuerId) {
+    await supabase.from('timeline').insert({
+      fall_id: fall.id,
+      lead_id: leadId,
+      typ: 'system',
+      titel: 'KB-Fallback auf Admin',
+      beschreibung: `Kein Kundenbetreuer verfügbar — Admin ${betreuerName} übernimmt vorübergehend die KB-Rolle. Bitte nach KB-Einstellung / Urlaubsrückkehr manuell re-assignen.`,
+      erstellt_von: userId,
+    })
+    createNotification(
+      kundenbetreuerId,
+      'fallback_kb_zuweisung',
+      'Fall als KB-Fallback zugewiesen',
+      `Fall ${fallNummer} wurde dir als Fallback zugewiesen, weil aktuell kein Kundenbetreuer verfügbar ist.`,
+      `/admin/faelle/${fall.id}`,
+    ).catch(() => {})
+  } else if (kbAssignment.fallback_used === 'error') {
+    // Kein KB und kein Admin — Timeline + Error-Log, Fall bleibt unbezogen.
+    await supabase.from('timeline').insert({
+      fall_id: fall.id,
+      lead_id: leadId,
+      typ: 'system',
+      titel: 'KB-Zuweisung fehlgeschlagen',
+      beschreibung: 'Kein aktiver Kundenbetreuer und kein aktiver Admin verfügbar — Fall bleibt unbezogen. Bitte manuell zuweisen.',
+      erstellt_von: userId,
+    })
+    console.error('[AAR-427] Fall ohne Owner angelegt:', { fallId: fall.id, fallNummer })
+  }
+
   // 8. WhatsApp: Unterlagen eingegangen + Gutachter wird beauftragt
   sendFallCommunication(fall.id, 'fall_eroeffnet').catch(() => {})
 
@@ -697,59 +738,10 @@ async function convertLeadToFall(
   return { fallId: fall.id, linked }
 }
 
-// ─── Kundenbetreuer Load Balancing ──────────────────────────────────────────
-
-async function findNextKundenbetreuer(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-): Promise<string | null> {
-  const { data: betreuer } = await supabase
-    .from('profiles')
-    .select('id, kapazitaet_max')
-    .eq('rolle', 'kundenbetreuer')
-    .eq('aktiv', true)
-
-  if (!betreuer || betreuer.length === 0) {
-    const { data: admins } = await supabase
-      .from('profiles')
-      .select('id, kapazitaet_max')
-      .eq('rolle', 'admin')
-      .eq('aktiv', true)
-    if (!admins || admins.length === 0) return null
-    return await findLeastBusyKundenbetreuer(supabase, admins)
-  }
-
-  return await findLeastBusyKundenbetreuer(supabase, betreuer)
-}
-
-async function findLeastBusyKundenbetreuer(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  profiles: { id: string; kapazitaet_max: number | null }[],
-): Promise<string | null> {
-  if (profiles.length === 0) return null
-
-  const ids = profiles.map(p => p.id)
-  const { data: faelle } = await supabase
-    .from('faelle')
-    .select('kundenbetreuer_id')
-    .in('kundenbetreuer_id', ids)
-    .not('status', 'in', '("abgeschlossen","storniert")')
-
-  const counts: Record<string, number> = {}
-  for (const id of ids) counts[id] = 0
-  for (const f of faelle ?? []) {
-    if (f.kundenbetreuer_id) counts[f.kundenbetreuer_id] = (counts[f.kundenbetreuer_id] ?? 0) + 1
-  }
-
-  // Nur Betreuer unter Kapazitaetsgrenze, dann wenigste offene Faelle
-  const eligible = profiles.filter(p => counts[p.id] < (p.kapazitaet_max ?? 100))
-  if (eligible.length === 0) {
-    // Fallback: der mit den wenigsten Faellen (auch ueber Kapazitaet)
-    return ids.reduce((min, id) => (counts[id] < counts[min] ? id : min), ids[0])
-  }
-  return eligible.reduce((min, p) => (counts[p.id] < counts[min.id] ? p : min), eligible[0]).id
-}
-
 // ─── Helpers ────────────────────────────────────────────────────────────────
+// AAR-427: findNextKundenbetreuer + findLeastBusyKundenbetreuer wurden nach
+// src/lib/faelle/kb-assignment.ts extrahiert — mit Admin-Fallback-Flag und
+// explizitem Error-Pfad.
 
 async function getProfileName(
   supabase: Awaited<ReturnType<typeof createClient>>,
