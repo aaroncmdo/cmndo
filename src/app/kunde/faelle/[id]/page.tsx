@@ -53,11 +53,23 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     }
 
     // KB-Daten laden
+    // AAR-369: anzeigename + avatar_url mitladen, damit Kunde echten Betreuer sieht
     let kbName: string | null = null
     let kbTelefon: string | null = null
+    let kbAvatarUrl: string | null = null
+    let kbBeschreibung: string | null = null
     if (fall.kundenbetreuer_id) {
-      const { data: kb } = await admin.from('profiles').select('vorname, nachname, telefon').eq('id', fall.kundenbetreuer_id).single()
-      if (kb) { kbName = [kb.vorname, kb.nachname].filter(Boolean).join(' ') || null; kbTelefon = kb.telefon }
+      const { data: kb } = await admin
+        .from('profiles')
+        .select('vorname, nachname, telefon, anzeigename, avatar_url, profilbeschreibung')
+        .eq('id', fall.kundenbetreuer_id)
+        .single()
+      if (kb) {
+        kbName = (kb.anzeigename as string | null) || [kb.vorname, kb.nachname].filter(Boolean).join(' ') || null
+        kbTelefon = kb.telefon
+        kbAvatarUrl = (kb.avatar_url as string | null) ?? null
+        kbBeschreibung = (kb.profilbeschreibung as string | null) ?? null
+      }
     }
 
     // Dokumente laden
@@ -258,6 +270,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             fallId={fall.id as string}
             kbName={kbName}
             kbTelefon={kbTelefon}
+            kbAvatarUrl={kbAvatarUrl}
+            kbBeschreibung={kbBeschreibung}
           />
         </div>
 

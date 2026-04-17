@@ -31,6 +31,9 @@ export type UpdateOwnProfileInput = {
   standort_lat?: number | null
   standort_lng?: number | null
   standort_place_id?: string | null
+  // AAR-369: optionale Anzeige-Felder für Kunden-UI
+  anzeigename?: string | null
+  profilbeschreibung?: string | null
 }
 
 export async function updateOwnProfile(
@@ -56,6 +59,9 @@ export async function updateOwnProfile(
       vorname: input.vorname.trim(),
       nachname: input.nachname.trim(),
       telefon: input.telefon?.trim() || null,
+      // AAR-369: Anzeigename + Profilbeschreibung (für Kunden-UI)
+      anzeigename: input.anzeigename?.trim() || null,
+      profilbeschreibung: input.profilbeschreibung?.trim() || null,
     })
     .eq('id', user.id)
 

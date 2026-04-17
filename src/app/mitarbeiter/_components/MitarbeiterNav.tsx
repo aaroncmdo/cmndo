@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboardIcon, FolderOpenIcon, CheckSquareIcon,
-  MessageCircleIcon, BarChart3Icon, AlertCircleIcon,
+  MessageCircleIcon, BarChart3Icon, AlertCircleIcon, UserIcon,
 } from 'lucide-react'
 
 type NavItem = { href: string; label: string; icon: typeof LayoutDashboardIcon; exact?: boolean }
@@ -17,6 +17,8 @@ const ITEMS: NavItem[] = [
   { href: '/mitarbeiter/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon },
   { href: '/mitarbeiter/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
   { href: '/mitarbeiter/performance', label: 'Performance', icon: BarChart3Icon },
+  // AAR-369: Eigenes Profil (Avatar + Anzeige-Infos) für KB/Admin
+  { href: '/mitarbeiter/profil', label: 'Mein Profil', icon: UserIcon },
 ]
 
 export default function MitarbeiterNav({ unreadNachrichten }: { unreadNachrichten?: number }) {

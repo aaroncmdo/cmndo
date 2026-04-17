@@ -5,15 +5,21 @@ import { HeadphonesIcon, MessageSquareIcon, CalendarPlusIcon } from 'lucide-reac
 import Link from 'next/link'
 // AAR-368: 15/30-Min-Beratungstermin buchen
 import BeratungBuchenSheet from './BeratungBuchenSheet'
+// AAR-369: Echtes Profilbild des KB (Initialen-Fallback wenn keins hinterlegt)
+import Avatar from '@/components/shared/Avatar'
 
 type Props = {
   fallId: string
   kbName: string | null
   kbTelefon: string | null
+  kbAvatarUrl?: string | null
+  kbBeschreibung?: string | null
 }
 
-export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon }: Props) {
+export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon, kbAvatarUrl, kbBeschreibung }: Props) {
   const [terminSheetOpen, setTerminSheetOpen] = useState(false)
+  const displayName = kbName ?? 'Claimondo Team'
+  const description = kbBeschreibung ?? 'Ihr persönlicher Ansprechpartner'
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 space-y-4">
@@ -23,9 +29,12 @@ export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon }: Props)
       </div>
 
       <div className="space-y-3">
-        <div>
-          <p className="text-xs text-gray-500">Ihr persönlicher Ansprechpartner</p>
-          <p className="font-semibold text-gray-900">{kbName ?? 'Claimondo Team'}</p>
+        <div className="flex items-center gap-3">
+          <Avatar url={kbAvatarUrl ?? null} name={displayName} size="md" />
+          <div className="min-w-0">
+            <p className="text-xs text-gray-500 truncate">{description}</p>
+            <p className="font-semibold text-gray-900 truncate">{displayName}</p>
+          </div>
         </div>
 
         <div className="flex flex-col gap-2">

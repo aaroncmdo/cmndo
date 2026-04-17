@@ -13,8 +13,10 @@ import PhoneVerificationModal from '@/components/auth/PhoneVerificationModal'
 // AAR-344: 2FA-Nummer-Änderung (Self-Service, eingeloggter User)
 import { TwoFaPhoneChange } from '@/components/auth/TwoFaPhoneChange'
 import { MapPinIcon, InfoIcon } from 'lucide-react'
+// AAR-369: Profilbild-Upload + Anzeige-Felder
+import AvatarUpload from '@/components/shared/AvatarUpload'
 
-type Profile = { anrede: string | null; titel: string | null; vorname: string | null; nachname: string | null; telefon: string | null; rolle: string; twofa_telefon?: string | null }
+type Profile = { anrede: string | null; titel: string | null; vorname: string | null; nachname: string | null; telefon: string | null; rolle: string; twofa_telefon?: string | null; avatar_url?: string | null; anzeigename?: string | null; profilbeschreibung?: string | null }
 type SV = { id: string; paket: string; gebiet_plz: string | null; ist_aktiv: boolean; max_faelle_monat: number; offene_faelle: number; kalender_typ: string; kalender_sync_aktiv: boolean; kalender_sync_letzte: string | null; qualifikationen_neu: string[] | null; spezifikationen: string[] | null; schadenarten: string[] | null; standort_adresse: string | null; standort_plz: string | null; standort_lat: number | null; standort_lng: number | null; standort_place_id: string | null; firmenname: string | null; rechtsform: string | null; steuernummer: string | null; ust_id: string | null; hrb: string | null; rolle_in_organisation: string | null; community_anonym: boolean }
 
 // BUG-91: Klassische deutsche Rechtsformen + 'Einzelunternehmen' als Default
@@ -78,6 +80,9 @@ export default function ProfilClient({
     steuernummer: sv.steuernummer ?? '',
     ust_id: sv.ust_id ?? '',
     hrb: sv.hrb ?? '',
+    // AAR-369: Anzeige-Felder
+    anzeigename: profile.anzeigename ?? '',
+    profilbeschreibung: profile.profilbeschreibung ?? '',
   })
 
   const [standort, setStandort] = useState({
@@ -124,6 +129,9 @@ export default function ProfilClient({
         standort_lat: standort.lat,
         standort_lng: standort.lng,
         standort_place_id: standort.place_id || null,
+        // AAR-369
+        anzeigename: form.anzeigename || null,
+        profilbeschreibung: form.profilbeschreibung || null,
       })
       if (!result.success) {
         setError(result.error ?? 'Fehler beim Speichern')
@@ -182,11 +190,13 @@ export default function ProfilClient({
 
         <form onSubmit={handleSave} className="max-w-4xl">
           <div className="bg-white rounded-2xl p-6 border border-gray-200 space-y-4">
-            {/* Avatar */}
+            {/* Avatar — AAR-369: Upload statt statischer Initialen-Kreis */}
             <div className="flex items-center gap-4 pb-4 border-b border-gray-200">
-              <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-xl font-semibold">
-                {initials}
-              </div>
+              <AvatarUpload
+                currentUrl={profile.avatar_url ?? null}
+                initials={initials || '??'}
+                size="md"
+              />
               <div>
                 <p className="text-gray-900 font-medium text-lg">{fullName}</p>
                 <p className="text-gray-500 text-sm">Sachverständiger</p>
@@ -253,7 +263,25 @@ export default function ProfilClient({
                     </div>
                   </div>
 
-                  {/* Firmen-Stammdaten */}
+                  {/* AAR-369: Anzeige-Name + Profilbeschreibung (sichtbar für Kunden) */}
+                  <ControlledRow
+                    label="Anzeigename"
+                    value={form.anzeigename}
+                    onChange={v => updateField('anzeigename', v)}
+                    placeholder="z.B. Max M. — Fallback: Vor- + Nachname"
+                  />
+                  <div className="flex gap-2 py-2 border-b border-gray-200/50">
+                    <span className="text-gray-500 text-sm w-36 shrink-0 pt-2">Profiltext</span>
+                    <textarea
+                      value={form.profilbeschreibung}
+                      onChange={e => updateField('profilbeschreibung', e.target.value)}
+                      placeholder="z.B. Ihr persönlicher Sachverständiger mit 15 Jahren Erfahrung"
+                      rows={2}
+                      maxLength={200}
+                      className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] resize-none"
+                    />
+                  </div>
+
                   <div className="pt-3 mt-3 border-t border-gray-200">
                     <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1 px-1">Firma / Steuerliches</p>
                   </div>
@@ -276,6 +304,9 @@ export default function ProfilClient({
                   <FieldRow label="Nachname" value={profile.nachname ?? '—'} />
                   <FieldRow label="Telefon" value={profile.telefon ?? '—'} />
                   <FieldRow label="Anschrift" value={sv.standort_adresse ?? '—'} />
+                  {/* AAR-369 */}
+                  <FieldRow label="Anzeigename" value={profile.anzeigename ?? '—'} />
+                  <FieldRow label="Profiltext" value={profile.profilbeschreibung ?? '—'} />
                   <div className="pt-3 mt-3 border-t border-gray-200">
                     <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1 px-1">Firma / Steuerliches</p>
                   </div>
