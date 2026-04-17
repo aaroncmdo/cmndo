@@ -1,28 +1,43 @@
+// AAR-381: Heute-Tab als vertikaler Tageskalender.
+// Ersetzt den alten HeuteRouteClient (Map+GPS+Ankommen-Modal) — diese
+// Live-Features ziehen in den Fokus-Modus (AAR-382). Hier: reine Planungs-
+// Ansicht + Einstieg.
+
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
-import { redirect } from 'next/navigation'
-import HeuteRouteClient from './HeuteRouteClient'
-
-// KFZ-158 Phase 1: Tagesroute — zeigt alle Termine des heutigen Tages
-// als optimierte Route auf einer Vollbild-Karte.
+import HeuteClient from './HeuteClient'
 
 export const dynamic = 'force-dynamic'
 
-export type HeuteTermin = {
+export type HeuteTerminFull = {
   id: string
   fall_id: string
-  fall_nummer: string
   start_zeit: string
-  end_zeit: string
+  end_zeit: string | null
   status: string
+  // Kunden-Infos
   kunde_name: string
   kunde_telefon: string | null
+  // Fall-Infos
+  fall_nummer: string
+  kennzeichen: string | null
+  fahrzeug: string | null
+  schadentyp: string | null
+  // Adresse (Primär: besichtigungsort_*, Fallback: schadens_*)
+  besichtigungsort_adresse: string | null
+  besichtigungsort_place_id: string | null
+  besichtigungsort_lat: number | null
+  besichtigungsort_lng: number | null
   schadens_adresse: string | null
   schadens_plz: string | null
   schadens_ort: string | null
-  kennzeichen: string | null
-  fahrzeug: string | null
-  szenario: string | null
+  // AAR-377 Kurz-Briefing (2 Zeilen in TerminCard)
+  sv_briefing_text: string | null
+}
+
+function isoDate(d: Date): string {
+  return d.toISOString().slice(0, 10)
 }
 
 export default async function HeutePage() {
@@ -34,63 +49,60 @@ export default async function HeutePage() {
     id: string
     standort_lat: number | null
     standort_lng: number | null
-    offene_faelle: number | null
-    max_faelle_monat: number | null
-    paket_faelle_gesamt: number | null
-    paket_faelle_genutzt: number | null
-  }>(
-    supabase, user.id,
-    'id, standort_lat, standort_lng, offene_faelle, max_faelle_monat, paket_faelle_gesamt, paket_faelle_genutzt',
-  )
+  }>(supabase, user.id, 'id, standort_lat, standort_lng')
   if (!sv) redirect('/gutachter?error=Kein+SV-Profil')
 
-  // AAR-248 / AAR-251 / F-10: Dashboard-KPIs für die Heute-Seite.
-  const monatsStart = new Date()
-  monatsStart.setDate(1)
-  monatsStart.setHours(0, 0, 0, 0)
-  const [{ data: offeneFaelleRaw }, { data: monatsAbrech }] = await Promise.all([
-    supabase.from('faelle').select('id, status').eq('sv_id', sv.id)
-      .not('status', 'in', '("abgeschlossen","storniert")'),
-    supabase.from('gutachter_abrechnungen').select('leadpreis').eq('sv_id', sv.id)
-      .gte('abgerechnet_am', monatsStart.toISOString()),
-  ])
-  const kpis = {
-    offeneFaelle: (offeneFaelleRaw ?? []).length,
-    heutigeTermine: 0, // wird unten nach Termin-Fetch gesetzt
-    monatsUmsatz: (monatsAbrech ?? []).reduce((s, a) => s + Number(a.leadpreis ?? 0), 0),
-    kontingentGesamt: Number(sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10),
-    kontingentGenutzt: Number(sv.paket_faelle_genutzt ?? 0),
-  }
-
-  // Termine heute + morgen laden (gutachter_termine + faelle Join)
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
-  const tomorrowEnd = new Date(todayStart)
-  tomorrowEnd.setDate(tomorrowEnd.getDate() + 2)
+  const tomorrowStart = new Date(todayStart)
+  tomorrowStart.setDate(tomorrowStart.getDate() + 1)
 
+  // Aktive Session für heute (AAR-380)
+  const { data: session } = await supabase
+    .from('sv_tages_session')
+    .select('id, status')
+    .eq('sv_id', sv.id)
+    .eq('datum', isoDate(todayStart))
+    .maybeSingle()
+
+  const hasActiveSession = Boolean(
+    session && session.status !== 'idle' && session.status !== 'finished',
+  )
+
+  // Heutige Termine
   const { data: termine } = await supabase
     .from('gutachter_termine')
     .select('id, fall_id, start_zeit, end_zeit, status')
     .eq('sv_id', sv.id)
-    .in('status', ['reserviert', 'bestaetigt', 'vorschlag'])
+    .in('status', ['reserviert', 'bestaetigt', 'vorschlag', 'abgeschlossen'])
     .gte('start_zeit', todayStart.toISOString())
-    .lt('start_zeit', tomorrowEnd.toISOString())
+    .lt('start_zeit', tomorrowStart.toISOString())
     .order('start_zeit', { ascending: true })
 
   // Fall-Daten nachladen
-  const fallIds = (termine ?? []).map(t => t.fall_id).filter(Boolean) as string[]
+  const fallIds = (termine ?? [])
+    .map((t) => t.fall_id)
+    .filter(Boolean) as string[]
   const fallMap = new Map<string, Record<string, unknown>>()
   if (fallIds.length) {
     const { data: faelle } = await supabase
       .from('faelle')
-      .select('id, fall_nummer, schadens_adresse, schadens_plz, schadens_ort, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id')
+      .select(
+        'id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort, sv_briefing_text',
+      )
       .in('id', fallIds)
-    for (const f of faelle ?? []) fallMap.set(f.id as string, f)
+    const faelleRows = (faelle ?? []) as unknown as Record<string, unknown>[]
+    for (const f of faelleRows) fallMap.set(f.id as string, f)
   }
 
   // Lead-Namen nachladen
-  const leadIds = [...fallMap.values()].map(f => f.lead_id).filter(Boolean) as string[]
-  const leadMap = new Map<string, { vorname: string | null; nachname: string | null; telefon: string | null }>()
+  const leadIds = [...fallMap.values()]
+    .map((f) => f.lead_id)
+    .filter(Boolean) as string[]
+  const leadMap = new Map<
+    string,
+    { vorname: string | null; nachname: string | null; telefon: string | null }
+  >()
   if (leadIds.length) {
     const { data: leads } = await supabase
       .from('leads')
@@ -99,63 +111,57 @@ export default async function HeutePage() {
     for (const l of leads ?? []) leadMap.set(l.id, l)
   }
 
-  const heuteTermine: HeuteTermin[] = (termine ?? []).map(t => {
+  const heuteTermine: HeuteTerminFull[] = (termine ?? []).map((t) => {
     const fall = fallMap.get(t.fall_id as string)
-    const lead = fall?.lead_id ? leadMap.get(fall.lead_id as string) : null
+    const lead = fall?.lead_id
+      ? leadMap.get(fall.lead_id as string)
+      : null
     return {
       id: t.id as string,
       fall_id: (t.fall_id ?? '') as string,
-      fall_nummer: (fall?.fall_nummer as string) ?? (t.fall_id as string).slice(0, 8),
       start_zeit: t.start_zeit as string,
-      end_zeit: t.end_zeit as string,
+      end_zeit: (t.end_zeit as string) ?? null,
       status: t.status as string,
-      kunde_name: lead ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—' : '—',
+      kunde_name: lead
+        ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
+        : '—',
       kunde_telefon: lead?.telefon ?? null,
+      fall_nummer:
+        (fall?.fall_nummer as string) ??
+        ((t.fall_id as string) ?? '').slice(0, 8),
+      kennzeichen: (fall?.kennzeichen as string) ?? null,
+      fahrzeug:
+        [fall?.fahrzeug_hersteller, fall?.fahrzeug_modell]
+          .filter(Boolean)
+          .join(' ') || null,
+      schadentyp: (fall?.szenario as string) ?? null,
+      besichtigungsort_adresse:
+        (fall?.besichtigungsort_adresse as string) ?? null,
+      besichtigungsort_place_id:
+        (fall?.besichtigungsort_place_id as string) ?? null,
+      besichtigungsort_lat:
+        fall?.besichtigungsort_lat != null
+          ? Number(fall.besichtigungsort_lat)
+          : null,
+      besichtigungsort_lng:
+        fall?.besichtigungsort_lng != null
+          ? Number(fall.besichtigungsort_lng)
+          : null,
       schadens_adresse: (fall?.schadens_adresse as string) ?? null,
       schadens_plz: (fall?.schadens_plz as string) ?? null,
       schadens_ort: (fall?.schadens_ort as string) ?? null,
-      kennzeichen: (fall?.kennzeichen as string) ?? null,
-      fahrzeug: [fall?.fahrzeug_hersteller, fall?.fahrzeug_modell].filter(Boolean).join(' ') || null,
-      szenario: (fall?.szenario as string) ?? null,
+      sv_briefing_text: (fall?.sv_briefing_text as string) ?? null,
     }
   })
 
-  // AAR-248 / AAR-251: heutigeTermine-Count jetzt füllbar (nach Termin-Fetch)
-  kpis.heutigeTermine = heuteTermine.filter(t =>
-    new Date(t.start_zeit).toDateString() === new Date().toDateString(),
-  ).length
-
   return (
-    <div className="h-full flex flex-col">
-      {/* AAR-248 / AAR-251 / F-10: Dashboard-KPIs oben */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 grid grid-cols-4 gap-3 shrink-0">
-        <KpiCard label="Offene Fälle" value={String(kpis.offeneFaelle)} />
-        <KpiCard label="Heute" value={`${kpis.heutigeTermine} Termine`} />
-        <KpiCard
-          label="Monatsumsatz"
-          value={new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(kpis.monatsUmsatz)}
-        />
-        <KpiCard
-          label="Kontingent"
-          value={`${kpis.kontingentGenutzt} / ${kpis.kontingentGesamt}`}
-        />
-      </div>
-      <div className="flex-1 min-h-0">
-        <HeuteRouteClient
-          termine={heuteTermine}
-          svLat={sv.standort_lat ? Number(sv.standort_lat) : null}
-          svLng={sv.standort_lng ? Number(sv.standort_lng) : null}
-        />
-      </div>
-    </div>
-  )
-}
-
-function KpiCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-[10px] text-gray-500 uppercase tracking-wider">{label}</p>
-      <p className="text-base font-semibold text-gray-900 mt-0.5">{value}</p>
-    </div>
+    <HeuteClient
+      termine={heuteTermine}
+      svStandort={{
+        lat: sv.standort_lat != null ? Number(sv.standort_lat) : null,
+        lng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
+      }}
+      hasActiveSession={hasActiveSession}
+    />
   )
 }
