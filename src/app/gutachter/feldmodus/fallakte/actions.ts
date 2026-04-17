@@ -20,6 +20,8 @@ export type FeldmodusFallakteFall = {
   szenario: string | null
   notizen: string | null
   filmcheck_notizen: string | null
+  /** AAR-386: Dedizierte Spalte für SV-Vor-Ort-Notizen (getrennt von faelle.notizen). */
+  sv_notizen_vor_ort: string | null
   kunde_name: string
   kunde_telefon: string | null
   besichtigungsort_adresse: string | null
@@ -58,7 +60,7 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
   const { data: fall, error: fallErr } = await supabase
     .from('faelle')
     .select(
-      'id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, notizen, filmcheck_notizen, lead_id, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, sv_briefing_text, sv_id',
+      'id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, notizen, filmcheck_notizen, sv_notizen_vor_ort, lead_id, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, sv_briefing_text, sv_id',
     )
     .eq('id', fallId)
     .single()
@@ -137,6 +139,9 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
     szenario: fall.szenario,
     notizen: fall.notizen,
     filmcheck_notizen: fall.filmcheck_notizen,
+    sv_notizen_vor_ort: (fall as Record<string, unknown>).sv_notizen_vor_ort as
+      | string
+      | null ?? null,
     kunde_name: lead
       ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
       : '—',
@@ -154,10 +159,9 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
 }
 
 /**
- * Speichert Vor-Ort-Notizen vom SV. Schreibt auf `faelle.notizen` (allgemeines
- * Notizfeld — separate `sv_notizen_vor_ort`-Spalte existiert nicht). Bewusste
- * Entscheidung: MVP nutzt das bestehende Feld. Bei Bedarf kann später eine
- * dedizierte Spalte per Migration ergänzt werden.
+ * Speichert Vor-Ort-Notizen vom SV auf der dedizierten Spalte
+ * `faelle.sv_notizen_vor_ort` (AAR-386 Migration). Bleibt bewusst getrennt
+ * von `faelle.notizen` (Kundenbetreuer/Dispatch) und `faelle.filmcheck_notizen`.
  */
 export async function saveFeldmodusNotizen(
   fallId: string,
@@ -182,7 +186,7 @@ export async function saveFeldmodusNotizen(
 
   const { error } = await supabase
     .from('faelle')
-    .update({ notizen: notizen.trim() || null })
+    .update({ sv_notizen_vor_ort: notizen.trim() || null })
     .eq('id', fallId)
 
   if (error) return { success: false, error: error.message }
