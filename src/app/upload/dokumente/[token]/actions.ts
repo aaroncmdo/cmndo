@@ -11,6 +11,7 @@
 // Am Ende wird der Slot im JSONB-Array als hochgeladen markiert und der
 // Gesamt-Status der Anfrage (teilweise/komplett) nachgezogen.
 
+import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { ZB1ExtractedData } from '@/lib/ocr/zb1-parser'
 
@@ -214,6 +215,7 @@ export async function uploadDokumentViaAnfrageToken(
     } catch { /* non-critical */ }
   }
 
+  revalidatePath(`/dispatch/leads/${anfrage.lead_id}`)
   return { success: true, extracted, alle_hochgeladen: alleHochgeladen }
 }
 

@@ -9,6 +9,7 @@
 // = 'gesendet' lauscht) weiter funktioniert, wenn der Kunde direkt per WA
 // antwortet statt den Link zu nutzen.
 
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -191,5 +192,6 @@ export async function triggerDokumenteUploadRequest(
     erstellt_von: auth.user.id,
   }).then(() => {}, () => {})
 
+  revalidatePath(`/dispatch/leads/${leadId}`)
   return { success: true, token }
 }

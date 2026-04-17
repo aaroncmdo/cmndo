@@ -17,6 +17,60 @@ async function parseTwilioBody(req: NextRequest): Promise<Record<string, string>
 
 const EMPTY_TWIML = '<Response/>'
 
+// AAR-352: Synchronisiert einen eingehenden WA-Upload mit der neuen
+// dokument_upload_anfragen-Tabelle. Der Kunde kann auf die Anfrage entweder
+// über den Web-Upload-Link oder per WA-Foto antworten — beide Pfade müssen
+// dieselbe JSONB-Slot-Liste aktualisieren, sonst erscheint der Dispatch-
+// Status als "offen" obwohl das Foto via WA eingegangen ist.
+type AnfrageSlot = {
+  slot_id: 'fahrzeugschein' | 'polizeibericht' | 'sonstiges'
+  label: string
+  ocr: boolean
+  hochgeladen: boolean
+  doc_url: string | null
+  hochgeladen_am: string | null
+}
+async function syncDokumentUploadAnfrage(
+  db: ReturnType<typeof createAdminClient>,
+  leadId: string,
+  slotId: AnfrageSlot['slot_id'],
+  publicUrl: string,
+): Promise<void> {
+  try {
+    const { data: anfragen } = await db
+      .from('dokument_upload_anfragen')
+      .select('id, slots, status, expires_at')
+      .eq('lead_id', leadId)
+      .in('status', ['gesendet', 'teilweise'])
+      .order('erstellt_am', { ascending: false })
+      .limit(5)
+    if (!anfragen || anfragen.length === 0) return
+    const now = Date.now()
+    const offene = anfragen.filter((a) => {
+      if (!a.expires_at) return true
+      return new Date(a.expires_at as string).getTime() >= now
+    })
+    for (const a of offene) {
+      const slots = (a.slots as AnfrageSlot[]) ?? []
+      const idx = slots.findIndex((s) => s.slot_id === slotId && !s.hochgeladen)
+      if (idx === -1) continue
+      const tsIso = new Date().toISOString()
+      const updated = slots.map((s, i) =>
+        i === idx ? { ...s, hochgeladen: true, doc_url: publicUrl, hochgeladen_am: tsIso } : s,
+      )
+      const alle = updated.every((s) => s.hochgeladen)
+      await db.from('dokument_upload_anfragen').update({
+        slots: updated,
+        status: alle ? 'komplett' : 'teilweise',
+        updated_at: tsIso,
+      }).eq('id', a.id as string)
+      return  // Nur die erste passende Anfrage aktualisieren
+    }
+  } catch (err) {
+    console.warn('[AAR-352] syncDokumentUploadAnfrage failed:', err instanceof Error ? err.message : err)
+  }
+}
+
 export async function POST(req: NextRequest) {
   const body = await parseTwilioBody(req)
   const messageSid = body.MessageSid
@@ -271,6 +325,7 @@ export async function POST(req: NextRequest) {
               polizeibericht_hochgeladen_am: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             }).eq('id', matchedLeadId)
+            await syncDokumentUploadAnfrage(db, matchedLeadId, 'polizeibericht', publicUrl)
           }
         }
 
@@ -378,6 +433,7 @@ export async function POST(req: NextRequest) {
               if (extracted.hsn) leadUpdate.hsn = extracted.hsn
               if (extracted.tsn) leadUpdate.tsn = extracted.tsn
               await db.from('leads').update(leadUpdate).eq('id', matchedLeadId)
+              await syncDokumentUploadAnfrage(db, matchedLeadId, 'fahrzeugschein', publicUrl)
 
               // AAR-208 Bug 1: Cardentity-Auto-Trigger wenn FIN gefunden —
               // Vorschaden-Check für den Lead. Non-blocking.
