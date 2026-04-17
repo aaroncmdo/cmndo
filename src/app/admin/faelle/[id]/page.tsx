@@ -4,11 +4,20 @@
 // die neue Shell-Architektur alle W2-W5-Tickets abdeckt.
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 import FallakteShell from './FallakteShell'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
 // AAR-327: Katalog-driven Slot-Liste für „Dokument anfordern"-Modal
 import { getAlleSlots } from '@/lib/dokumente/katalog'
+// AAR-433 (Child 4 AAR-429): KB Phase-State-Audit oberhalb der Tabs
+import KbPhaseAuditCard from '@/components/kb/KbPhaseAuditCard'
+import {
+  getKbPhaseAudit,
+  type KbTask,
+  type KbSlaRecord,
+} from '@/lib/kb/phase-audit'
+import { getStepperState } from '@/lib/fall/stepper-state'
 
 export default async function FallaktePage({
   params,
@@ -264,8 +273,49 @@ export default async function FallaktePage({
     otherKundeFaelle = others ?? []
   }
 
+  // AAR-433: KB Phase-State-Audit — nur für Admin und KB sichtbar.
+  // Lädt parallel Tasks, SLA-Records und Stepper-State, verkettet dann via
+  // Pure-Function getKbPhaseAudit.
+  let kbAktion: ReturnType<typeof getKbPhaseAudit> | null = null
+  if (userRolle === 'admin' || userRolle === 'kundenbetreuer') {
+    try {
+      const admin = createAdminClient()
+      const [tasksRes, slaRes, stepper] = await Promise.all([
+        admin
+          .from('tasks')
+          .select('id, fall_id, titel, status, empfaenger_rolle, faellig_am, prioritaet')
+          .eq('fall_id', id)
+          .eq('empfaenger_rolle', 'kundenbetreuer')
+          .in('status', ['offen', 'in-bearbeitung']),
+        admin
+          .from('sla_tracking')
+          .select('fall_id, target_rolle, blocker_rolle, blocker_grund, status, breach_at, phase, blocker_seit')
+          .eq('fall_id', id)
+          .in('status', ['pending', 'breached']),
+        getStepperState(id),
+      ])
+      kbAktion = getKbPhaseAudit(
+        {
+          id: fall.id as string,
+          status: (fall.status as string | null) ?? null,
+          updated_at: (fall as Record<string, unknown>).updated_at as string | null,
+          abgeschlossen_am: fall.abgeschlossen_am as string | null,
+          anschlussschreiben_am: fall.anschlussschreiben_am as string | null,
+          regulierung_am: fall.regulierung_am as string | null,
+        },
+        (tasksRes.data ?? []) as KbTask[],
+        (slaRes.data ?? []) as KbSlaRecord[],
+        stepper,
+      )
+    } catch (err) {
+      // Non-critical: Card darf fehlen wenn Ladefehler auftritt
+      console.error('[AAR-433] KB-Audit-Laden fehlgeschlagen:', err)
+    }
+  }
+
   return (
     <>
+      {kbAktion && <KbPhaseAuditCard aktion={kbAktion} />}
       {otherKundeFaelle.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 mb-4 flex items-center justify-between text-sm flex-wrap gap-2">
           <span className="text-amber-900">
