@@ -8,6 +8,7 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import Link from 'next/link'
 import AuftragCard from './AuftragCard'
 import { FALL_STATUS_LABELS, getUrsacheLabel } from '@/lib/statusLabels'
+import EmptyState from '@/components/shared/EmptyState'
 
 // AAR-410: Lokale Kurzform-Labels (weicht bewusst von FALL_STATUS_LABELS ab —
 // Aufträge-Karte will die knappere Variante „Neu"/„Termin" statt „Gutachter
@@ -38,9 +39,7 @@ export default async function AuftraegePage({
   if (!sv) {
     return (
       <div className="h-full flex flex-col">
-        <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
-          <p className="text-gray-500">Kein Sachverständigen-Profil gefunden.</p>
-        </div>
+        <EmptyState title="Kein Sachverständigen-Profil gefunden." />
       </div>
     )
   }
@@ -155,9 +154,7 @@ export default async function AuftraegePage({
         </div>
 
         {fallList.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
-            <p className="text-gray-500">Keine Aufträge gefunden.</p>
-          </div>
+          <EmptyState title="Keine Aufträge gefunden." />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             {fallList.map((fall) => {

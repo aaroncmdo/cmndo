@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { WalletIcon, PackageIcon, FileTextIcon, DownloadIcon, InfoIcon } from 'lucide-react'
+import EmptyState from '@/components/shared/EmptyState'
 
 const PAKET_LABELS: Record<string, string> = {
   standard: 'Standard (10 Fälle/Monat)', 'starter-10': 'Standard (10 Fälle/Monat)',
@@ -41,9 +42,7 @@ export default async function AbrechnungPage() {
     return (
       <div className="h-full flex flex-col">
         <div className="w-full">
-          <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
-            <p className="text-gray-500">Kein Sachverständigen-Profil gefunden.</p>
-          </div>
+          <EmptyState title="Kein Sachverständigen-Profil gefunden." />
         </div>
       </div>
     )
@@ -221,9 +220,7 @@ export default async function AbrechnungPage() {
           </div>
 
           {!completedFaelle?.length ? (
-            <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
-              <p className="text-gray-500">Noch keine abgerechneten Fälle vorhanden.</p>
-            </div>
+            <EmptyState title="Noch keine abgerechneten Fälle vorhanden." />
           ) : (
             <>
               {/* Desktop table */}

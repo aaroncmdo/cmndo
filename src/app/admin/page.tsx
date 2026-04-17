@@ -7,22 +7,22 @@ import AusstehendeZahlungenWidget from './_components/AusstehendeZahlungenWidget
 import WichtigeUpdatesWidget from './_components/WichtigeUpdatesWidget'
 import DashboardStats from './_components/DashboardStats'
 import TageskalenderWidget from './_components/TageskalenderWidget'
+import LoadingSkeleton from '@/components/shared/LoadingSkeleton'
 
-// KFZ-155: Admin-Dashboard Rework — komplett ueberarbeitet.
+// KFZ-155: Admin-Dashboard Rework — komplett überarbeitet.
+// AAR-414: WidgetSkeleton auf <LoadingSkeleton variant="block" /> migriert
 //
-// 4-Row Layout (oben nach unten, fuellt den ganzen Viewport):
+// 4-Row Layout (oben nach unten, füllt den ganzen Viewport):
 //   Row 1 (conditional): Kritische Updates rote Box, full-width
 //   Row 2: 4 KPI-Cards
 //   Row 3: Ausstehende Zahlungen (links) + Wichtige Updates (rechts)
 //   Row 4: Lead-Konversion + Umsatz-Verlauf (Charts/Stats)
 //
 // Alle Widgets sind Server-Components mit eigenen Daten-Fetches und in
-// <Suspense> gewrapped, sodass die einzelnen Boxen unabhaengig laden.
+// <Suspense> gewrapped, sodass die einzelnen Boxen unabhängig laden.
 
 function WidgetSkeleton({ height = 'h-48' }: { height?: string }) {
-  return (
-    <div className={`bg-white border border-gray-200 rounded-2xl ${height} animate-pulse`} />
-  )
+  return <LoadingSkeleton variant="block" height={height} />
 }
 
 export default async function AdminDashboardPage() {

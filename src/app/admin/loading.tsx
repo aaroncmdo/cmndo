@@ -1,3 +1,6 @@
+import LoadingSkeleton from '@/components/shared/LoadingSkeleton'
+
+// AAR-414: auf LoadingSkeleton-Primitive migriert
 export default function AdminLoading() {
   return (
     <div className="px-4 py-8">
@@ -20,20 +23,7 @@ export default function AdminLoading() {
           ))}
         </div>
         {/* Table skeleton */}
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-          <div className="border-b border-gray-200 px-4 py-3 flex gap-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-4 bg-gray-100 rounded animate-pulse flex-1" />
-            ))}
-          </div>
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="border-b border-gray-200/50 px-4 py-4 flex gap-4">
-              {[...Array(5)].map((_, j) => (
-                <div key={j} className="h-4 bg-gray-100/50 rounded animate-pulse flex-1" />
-              ))}
-            </div>
-          ))}
-        </div>
+        <LoadingSkeleton variant="table" rows={5} cols={5} />
       </div>
     </div>
   )

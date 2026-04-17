@@ -9,6 +9,7 @@ import StripeConnectStatusWidget from '../_components/StripeConnectStatusWidget'
 import LeadPreiseVerteilungWidget from '../_components/LeadPreiseVerteilungWidget'
 import WerbebudgetAggregatWidget from '../_components/WerbebudgetAggregatWidget'
 import MonatsUmsatzForecast from '../_components/MonatsUmsatzForecast'
+import LoadingSkeleton from '@/components/shared/LoadingSkeleton'
 
 const PAKET_PREIS: Record<string, number> = {
   standard: 750, 'starter-10': 750,
@@ -707,13 +708,13 @@ export default async function FinancePage() {
       {/* KFZ-155: Ausstehende Zahlungen — volle Tabelle ganz oben im Finance-Tab */}
       <div className="px-4 pt-6 pb-2">
         <div>
-          <Suspense fallback={<div className="h-48 bg-white border border-gray-200 rounded-2xl animate-pulse" />}>
+          <Suspense fallback={<LoadingSkeleton variant="block" />}>
             <AusstehendeZahlungenTable />
           </Suspense>
         </div>
       </div>
       {/* KFZ-155: Monats-Umsatz laufend + geplant Forecast */}
-      <Suspense fallback={<div className="pb-8"><div className="h-48 bg-white border border-gray-200 rounded-2xl animate-pulse" /></div>}>
+      <Suspense fallback={<div className="pb-8"><LoadingSkeleton variant="block" /></div>}>
         <MonatsUmsatzForecast />
       </Suspense>
       <FinanceClient
@@ -745,13 +746,13 @@ export default async function FinancePage() {
       <GutachterAbrechnungen svRows={svRows} gutachterAnzahlungenGesamt={gutachterAnzahlungenGesamt} />
       <AbrechnungenSectionWrapper />
       {/* KFZ-155: Stripe-Connect Health, Lead-Preise Verteilung, Werbebudget */}
-      <Suspense fallback={<div className="pb-8"><div className="h-48 bg-white border border-gray-200 rounded-2xl animate-pulse" /></div>}>
+      <Suspense fallback={<div className="pb-8"><LoadingSkeleton variant="block" /></div>}>
         <StripeConnectStatusWidget />
       </Suspense>
-      <Suspense fallback={<div className="pb-8"><div className="h-48 bg-white border border-gray-200 rounded-2xl animate-pulse" /></div>}>
+      <Suspense fallback={<div className="pb-8"><LoadingSkeleton variant="block" /></div>}>
         <LeadPreiseVerteilungWidget />
       </Suspense>
-      <Suspense fallback={<div className="pb-8"><div className="h-48 bg-white border border-gray-200 rounded-2xl animate-pulse" /></div>}>
+      <Suspense fallback={<div className="pb-8"><LoadingSkeleton variant="block" /></div>}>
         <WerbebudgetAggregatWidget />
       </Suspense>
       <IndividuelleAnfragenSection anfragen={individuelleAnfragen} />

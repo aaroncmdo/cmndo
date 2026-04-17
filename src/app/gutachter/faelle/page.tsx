@@ -12,6 +12,7 @@ import FaelleFilterBar from './FaelleFilterBar'
 import PhoneButton from '@/components/shared/PhoneButton'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
 import SchadensUrsacheBadge from '@/components/shared/SchadensUrsacheBadge'
+import EmptyState from '@/components/shared/EmptyState'
 
 type FilterKey = 'alle' | 'neue' | 'bearbeitung' | 'gutachten' | 'abgeschlossen'
 
@@ -45,9 +46,7 @@ export default async function GutachterFaellePage({
     return (
       <div className="h-full flex flex-col">
         <div className="w-full">
-          <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
-            <p className="text-gray-500">Kein Sachverständigen-Profil gefunden.</p>
-          </div>
+          <EmptyState title="Kein Sachverständigen-Profil gefunden." />
         </div>
       </div>
     )
@@ -228,13 +227,13 @@ export default async function GutachterFaellePage({
         })()}
 
         {faelle.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
-            <p className="text-gray-500">
-              {searchTerm
-                ? `Keine Fälle passen zu "${searchTerm}".`
-                : 'Keine Fälle gefunden.'}
-            </p>
-          </div>
+          <EmptyState
+            title={
+              searchTerm
+                ? `Keine Fälle passen zu „${searchTerm}".`
+                : 'Keine Fälle gefunden.'
+            }
+          />
         ) : (
           <div className="space-y-3 sm:space-y-0">
             {/* Desktop-Tabelle */}

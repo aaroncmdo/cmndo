@@ -3,6 +3,7 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import SVKalenderClient from './SVKalenderClient'
+import EmptyState from '@/components/shared/EmptyState'
 
 // AAR-229 W5 / F-12: Kalender + Termine merge mit View-Toggle.
 export default async function SVKalenderPage({
@@ -93,9 +94,7 @@ export default async function SVKalenderPage({
       ) : (
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {terminListe.length === 0 ? (
-            <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
-              <p className="text-gray-500">Keine Termine vorhanden.</p>
-            </div>
+            <EmptyState title="Keine Termine vorhanden." />
           ) : terminListe.map(fall => {
             const t = new Date(fall.sv_termin!)
             const name = fall.lead_id && leadMap[fall.lead_id] ? leadMap[fall.lead_id] : '—'

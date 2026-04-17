@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import RouteNavigator, { type Stop as NavStop } from './RouteNavigator'
 import SchadensUrsacheBadge from '@/components/shared/SchadensUrsacheBadge'
+import EmptyState from '@/components/shared/EmptyState'
 import { getUrsacheLabel } from '@/lib/statusLabels'
 
 export type StopData = {
@@ -127,11 +128,11 @@ export default function RouteClient({
       )}
 
       {stops.length === 0 ? (
-        <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
-          <MapPinIcon className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500 font-medium">Keine Termine heute</p>
-          <p className="text-gray-400 text-sm mt-1">Für heute sind keine Vor-Ort-Besichtigungen geplant.</p>
-        </div>
+        <EmptyState
+          icon={MapPinIcon}
+          title="Keine Termine heute"
+          description="Für heute sind keine Vor-Ort-Besichtigungen geplant."
+        />
       ) : (
         <div className="space-y-3">
           {stops.map((stop, index) => {
