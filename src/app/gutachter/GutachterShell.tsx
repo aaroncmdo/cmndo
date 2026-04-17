@@ -26,6 +26,7 @@ import NotificationBell from '@/app/admin/_components/NotificationBell'
 import MitteilungszentralePanel from '@/components/mitteilungszentrale/MitteilungszentralePanel'
 import OutboxBadge from '@/components/offline/OutboxBadge'
 import { CLAIMONDO_DEFAULT_THEME, type BrandTheme } from '@/lib/branding/theme'
+import { generateCssVars } from '@/lib/branding/css-vars'
 
 // AAR-222: Sidebar-Refactor von 18 flachen Items auf 10 in 4 Sektionen.
 // Removed Items (Dashboard, Mitteilungen, Tasks, Stellungnahmen, Termine,
@@ -144,14 +145,11 @@ export default function GutachterShell({
   // flackern.
   const theme: BrandTheme = brandTheme ?? CLAIMONDO_DEFAULT_THEME
   const useBrand = !!brandTheme
-  const themeVars = {
-    '--brand-primary': theme.primary,
-    '--brand-secondary': theme.secondary,
-    '--brand-accent': theme.accent,
-    '--brand-sidebar-bg': theme.sidebarBg,
-    '--brand-text-on-primary': theme.textOnPrimary,
-    '--brand-surface': theme.surface,
-  } as React.CSSProperties
+  // AAR-424: Alle 25 V2-CSS-Vars (inkl. der V1-Aliase --brand-primary,
+  // --brand-sidebar-bg, --brand-surface, --brand-text-on-primary) — dadurch
+  // stehen jetzt auch --brand-success/--brand-text-muted/etc. allen Children
+  // der Shell zur Verfügung ohne dass einzelne Consumer das Theme re-importieren.
+  const themeVars = generateCssVars(theme, 'full')
 
   // AAR-220 Fix 5: Einmalige 2s-Transition nach Logo-Upload.
   const [brandTransitioning, setBrandTransitioning] = useState(false)
