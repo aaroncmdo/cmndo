@@ -3,9 +3,10 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Script from 'next/script'
-import { updateSvProfile } from './actions'
+import { toast } from 'sonner'
+import { updateSvProfile, resendWelcomeMail } from './actions'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
-import { MapPinIcon } from 'lucide-react'
+import { MapPinIcon, MailIcon } from 'lucide-react'
 import { LoadingButton } from '@/components/ui/loading-button'
 
 const PAKET_OPTIONS = [
@@ -37,6 +38,34 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  // AAR-364 SUB-4: Resend-Welcome-Mail
+  const [resending, setResending] = useState(false)
+  const [resendNotice, setResendNotice] = useState<{ ok: boolean; text: string } | null>(null)
+
+  async function handleResendWelcome() {
+    if (resending) return
+    if (!window.confirm('Willkommens-Mail mit neuem Initial-Passwort an den SV senden? Das alte Passwort wird dadurch ungültig.')) return
+    setResending(true)
+    setResendNotice(null)
+    try {
+      const r = await resendWelcomeMail(sv.id)
+      if (!r.success) {
+        setResendNotice({ ok: false, text: r.error ?? 'Versand fehlgeschlagen' })
+        toast.error('Versand fehlgeschlagen', { description: r.error })
+      } else {
+        setResendNotice({ ok: true, text: 'Willkommens-Mail wurde erneut versendet (neues Initial-Passwort gesetzt).' })
+        toast.success('Willkommens-Mail erneut versendet', {
+          description: 'Der SV wird beim nächsten Login ein neues Passwort setzen müssen.',
+        })
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Fehler beim Versand'
+      setResendNotice({ ok: false, text: msg })
+      toast.error('Versand fehlgeschlagen', { description: msg })
+    } finally {
+      setResending(false)
+    }
+  }
 
   // Standort state (updated by Google Places)
   const [standort, setStandort] = useState({
@@ -169,6 +198,40 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
           Änderungen speichern
         </LoadingButton>
       </form>
+
+      {/* AAR-364 SUB-4: Willkommens-Mail erneut senden */}
+      <div className="mt-6 pt-5 border-t border-gray-200">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#4573A2]/10 flex items-center justify-center flex-shrink-0">
+              <MailIcon className="w-4 h-4 text-[#4573A2]" />
+            </div>
+            <div className="text-xs text-gray-500 leading-relaxed">
+              <strong className="text-gray-800 block mb-0.5">Willkommens-Mail erneut senden</strong>
+              Generiert ein neues Initial-Passwort und versendet die Willkommens-Mail mit den aktuellen Konditionen.
+              Der SV muss beim nächsten Login ein neues Passwort setzen.
+            </div>
+          </div>
+          <LoadingButton
+            type="button"
+            onClick={handleResendWelcome}
+            isLoading={resending}
+            loadingText="Sendet…"
+            className="flex-shrink-0 px-3 py-2 rounded-xl border border-[#4573A2]/40 text-[#1E3A5F] text-xs font-semibold hover:bg-[#4573A2]/5 disabled:opacity-40"
+          >
+            Erneut senden
+          </LoadingButton>
+        </div>
+        {resendNotice && (
+          <div className={`mt-3 px-3 py-2 rounded-xl text-xs ${
+            resendNotice.ok
+              ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+              : 'bg-red-50 border border-red-200 text-red-600'
+          }`}>
+            {resendNotice.text}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

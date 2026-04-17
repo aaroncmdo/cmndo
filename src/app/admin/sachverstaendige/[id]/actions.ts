@@ -1,8 +1,11 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
+import { randomBytes } from 'node:crypto'
 import { calculateIsochrone } from '@/lib/isochrone/calculate-isochrone'
+import { PAKET_KONFIG } from '../anlegen/constants'
 
 const PAKET_KM: Record<string, number> = {
   standard: 15, 'starter-10': 15,
@@ -116,4 +119,135 @@ export async function setzeSvVerifiziert(svId: string, verifiziert: boolean) {
   revalidatePath(`/admin/sachverstaendige/${svId}`)
   revalidatePath('/admin/sachverstaendige')
   return { success: true as const }
+}
+
+// ─── AAR-364 SUB-4: Willkommens-Mail erneut senden ─────────────────────────
+
+/**
+ * Generiert ein neues Initial-Passwort, setzt es per Admin-API auf dem
+ * auth.user, flaggt `force_password_change = true` und versendet die
+ * WillkommenSv-Mail erneut mit den aktuellen Konditionen. Nur fuer Admins.
+ */
+function randomPassword(length = 16): string {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!#$%&*+-='
+  const bytes = randomBytes(length)
+  let pw = ''
+  for (let i = 0; i < length; i++) {
+    pw += alphabet[bytes[i] % alphabet.length]
+  }
+  return pw
+}
+
+export async function resendWelcomeMail(
+  svId: string,
+): Promise<{ success: boolean; error?: string; initial_password?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const { data: me } = await supabase
+    .from('profiles')
+    .select('rolle, vorname, nachname')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (me?.rolle !== 'admin') {
+    return { success: false, error: 'Nur Admins dürfen Willkommens-Mails erneut senden.' }
+  }
+  const adminName = [me.vorname, me.nachname].filter(Boolean).join(' ') || 'Admin'
+
+  const adminDb = createAdminClient()
+  const { data: sv, error: svErr } = await adminDb
+    .from('sachverstaendige')
+    .select('id, profile_id, paket, paket_faelle_gesamt, max_faelle_monat, paket_umkreis_km, radius_km, onboarding_anzahlung_betrag, anzahlung_faellig, organisation_id, profiles(email, vorname, nachname, anrede, titel)')
+    .eq('id', svId)
+    .maybeSingle()
+
+  if (svErr || !sv) {
+    return { success: false, error: `SV nicht gefunden: ${svErr?.message ?? 'unbekannt'}` }
+  }
+
+  const profileRaw = sv.profiles as unknown
+  const profile = (Array.isArray(profileRaw) ? profileRaw[0] : profileRaw) as {
+    email: string | null
+    vorname: string | null
+    nachname: string | null
+    anrede: string | null
+    titel: string | null
+  } | null
+
+  if (!profile?.email) {
+    return { success: false, error: 'SV hat keine Email-Adresse im Profil.' }
+  }
+  if (!sv.profile_id) {
+    return { success: false, error: 'SV hat keine profile_id (Auth-User kann nicht aktualisiert werden).' }
+  }
+
+  const initialPassword = randomPassword(16)
+
+  // Passwort zuruecksetzen + force_password_change = true
+  const { error: authErr } = await adminDb.auth.admin.updateUserById(sv.profile_id, {
+    password: initialPassword,
+    user_metadata: { force_password_change: true, welcome_resent_by: user.id, welcome_resent_at: new Date().toISOString() },
+  })
+  if (authErr) {
+    return { success: false, error: `Passwort-Reset fehlgeschlagen: ${authErr.message}` }
+  }
+
+  await adminDb
+    .from('profiles')
+    .update({ force_password_change: true })
+    .eq('id', sv.profile_id)
+
+  // Organisation (fuer Sub-SV-Pfad → "du gehoerst zu Buero X")
+  let organisationName: string | null = null
+  let rolleInOrganisation: string | null = null
+  if (sv.organisation_id) {
+    const { data: org } = await adminDb
+      .from('organisationen')
+      .select('name')
+      .eq('id', sv.organisation_id)
+      .maybeSingle()
+    organisationName = org?.name ?? null
+    rolleInOrganisation = 'Mitarbeiter'
+  }
+
+  // Paket-Name + Konditionen aus DB-Feldern (Paket-Override kann hier nicht mehr
+  // unterschieden werden — wir nehmen die effektiven Werte aus `sachverstaendige`).
+  const paketKey = (sv.paket as string | null) ?? 'standard'
+  const paketName = paketKey.charAt(0).toUpperCase() + paketKey.slice(1)
+  const kontingent = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? (
+    PAKET_KONFIG[paketKey as keyof typeof PAKET_KONFIG]?.kontingent ?? 10
+  )
+  const radiusKm = sv.paket_umkreis_km ?? sv.radius_km ?? (
+    PAKET_KONFIG[paketKey as keyof typeof PAKET_KONFIG]?.radius_km ?? 15
+  )
+  const anzahlung = sv.onboarding_anzahlung_betrag ?? sv.anzahlung_faellig ?? (
+    PAKET_KONFIG[paketKey as keyof typeof PAKET_KONFIG]?.preis_anzahlung_eur ?? 1500
+  )
+
+  try {
+    const { sendWillkommenSv } = await import('@/lib/email/google/flows')
+    await sendWillkommenSv({
+      to: profile.email,
+      anrede: profile.anrede ?? undefined,
+      titel: profile.titel ?? undefined,
+      vorname: profile.vorname ?? '',
+      nachname: profile.nachname ?? '',
+      paket_name: paketName,
+      kontingent: Number(kontingent),
+      radius_km: Number(radiusKm),
+      anzahlung_betrag_eur: Number(anzahlung),
+      initial_password: initialPassword,
+      organisation_name: organisationName,
+      rolle_in_organisation: rolleInOrganisation,
+      von_admin_name: adminName,
+    })
+  } catch (err) {
+    console.error('[AAR-364 SUB-4] Welcome-Mail-Resend fehlgeschlagen:', err)
+    const msg = err instanceof Error ? err.message : 'Email-Versand fehlgeschlagen'
+    return { success: false, error: msg }
+  }
+
+  revalidatePath(`/admin/sachverstaendige/${svId}`)
+  return { success: true, initial_password: initialPassword }
 }

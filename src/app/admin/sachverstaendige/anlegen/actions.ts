@@ -1301,3 +1301,185 @@ export async function listCommunities(): Promise<Array<{
     created_at: o.created_at,
   }))
 }
+
+// ─── AAR-364 SUB-1: Isochrone-Preview fuer den Anlegen-Wizard ──────────────
+
+export type IsochronePreviewResult =
+  | {
+      success: true
+      mode: 'isochrone'
+      polygon: { lat: number; lng: number }[]
+      radius_km: number
+    }
+  | {
+      success: true
+      mode: 'fallback-circle'
+      center: { lat: number; lng: number }
+      radius_km: number
+      reason: string
+    }
+  | { success: false; error: string }
+
+/**
+ * AAR-364 SUB-1: Berechnet fuer den Admin-Wizard eine Live-Isochrone bei
+ * gegebenem Standort + Radius. Faellt bei fehlendem HERE_API_KEY oder API-
+ * Fehler auf einen einfachen Kreis-Mode zurueck, damit die Karte trotzdem
+ * eine Vorschau anzeigen kann. Nur fuer Admins.
+ */
+export async function previewIsochrone(input: {
+  lat: number
+  lng: number
+  radius_km: number
+}): Promise<IsochronePreviewResult> {
+  const auth = await ensureAdmin()
+  if (!auth.ok) return { success: false, error: auth.error }
+
+  if (
+    typeof input.lat !== 'number' ||
+    typeof input.lng !== 'number' ||
+    !input.radius_km ||
+    input.radius_km <= 0
+  ) {
+    return { success: false, error: 'lat, lng, radius_km sind Pflicht' }
+  }
+
+  try {
+    const points = await calculateIsochrone(input.lat, input.lng, input.radius_km)
+    if (points.length >= 3) {
+      return {
+        success: true,
+        mode: 'isochrone',
+        polygon: points,
+        radius_km: input.radius_km,
+      }
+    }
+    return {
+      success: true,
+      mode: 'fallback-circle',
+      center: { lat: input.lat, lng: input.lng },
+      radius_km: input.radius_km,
+      reason: 'Isochrone lieferte kein nutzbares Polygon — Radius-Vorschau',
+    }
+  } catch (err) {
+    // HERE-Key fehlt oder API-Fehler → Circle-Fallback damit der Admin
+    // wenigstens den Radius sieht. Caller zeichnet in dem Fall einen Kreis.
+    const msg = err instanceof Error ? err.message : 'Isochrone fehlgeschlagen'
+    return {
+      success: true,
+      mode: 'fallback-circle',
+      center: { lat: input.lat, lng: input.lng },
+      radius_km: input.radius_km,
+      reason: msg,
+    }
+  }
+}
+
+// ─── AAR-364 SUB-3: Email-Duplikat-Check ───────────────────────────────────
+
+export type CheckEmailExistsResult =
+  | { success: true; exists: false }
+  | { success: true; exists: true; profile_id: string; rolle: string | null; sv_id: string | null }
+  | { success: false; error: string }
+
+/**
+ * AAR-364 SUB-3: Prueft ob eine Email bereits in `profiles` existiert.
+ * Admin-only — liefert bei Treffer profile_id + Rolle + sv_id (falls SV)
+ * damit die UI direkt auf den existierenden Datensatz verlinken kann.
+ */
+export async function checkEmailExists(email: string): Promise<CheckEmailExistsResult> {
+  const auth = await ensureAdmin()
+  if (!auth.ok) return { success: false, error: auth.error }
+
+  const normalized = email.trim().toLowerCase()
+  if (!normalized || !normalized.includes('@')) {
+    return { success: true, exists: false }
+  }
+
+  const adminDb = createAdminClient()
+  const { data: profile, error } = await adminDb
+    .from('profiles')
+    .select('id, rolle')
+    .ilike('email', normalized)
+    .maybeSingle()
+
+  if (error) return { success: false, error: `Email-Check fehlgeschlagen: ${error.message}` }
+  if (!profile) return { success: true, exists: false }
+
+  // Falls SV → sachverstaendige.id nachladen fuer Deep-Link in die UI
+  let svId: string | null = null
+  if (profile.rolle === 'sachverstaendiger') {
+    const { data: sv } = await adminDb
+      .from('sachverstaendige')
+      .select('id')
+      .eq('profile_id', profile.id)
+      .maybeSingle()
+    svId = sv?.id ?? null
+  }
+
+  return {
+    success: true,
+    exists: true,
+    profile_id: profile.id,
+    rolle: profile.rolle ?? null,
+    sv_id: svId,
+  }
+}
+
+// ─── AAR-364 SUB-2: Welcome-Mail-Preview-HTML fuer das Vorab-Modal ─────────
+
+export type WelcomeMailPreviewInput = {
+  anrede?: string
+  titel?: string
+  vorname: string
+  nachname: string
+  email: string
+  paket: AnlegePaket
+  paket_override_kontingent?: number
+  paket_override_radius_km?: number
+  paket_override_anzahlung_eur?: number
+}
+
+/**
+ * AAR-364 SUB-2: Rendert den WillkommenSv-Email-Inhalt als HTML-String
+ * damit der Admin den Inhalt vor dem „SV anlegen"-Klick pruefen kann.
+ * Das Initial-Passwort ist ein Platzhalter (echtes PW wird erst beim
+ * tatsaechlichen Anlegen generiert).
+ */
+export async function renderWillkommenSvPreview(
+  input: WelcomeMailPreviewInput,
+): Promise<{ success: boolean; html?: string; subject?: string; error?: string }> {
+  const auth = await ensureAdmin()
+  if (!auth.ok) return { success: false, error: auth.error }
+
+  const cfg = paketKonfig(input.paket, {
+    kontingent: input.paket_override_kontingent,
+    radius_km: input.paket_override_radius_km,
+    preis_anzahlung_eur: input.paket_override_anzahlung_eur,
+  })
+
+  try {
+    const [{ render }, { WillkommenSvEmail, subject }] = await Promise.all([
+      import('@react-email/render'),
+      import('@/lib/email/google/templates/WillkommenSv'),
+    ])
+    const props = {
+      anrede: input.anrede,
+      titel: input.titel,
+      vorname: input.vorname,
+      nachname: input.nachname,
+      paket_name: input.paket === 'individuell' ? 'Individuell' : input.paket.charAt(0).toUpperCase() + input.paket.slice(1),
+      kontingent: cfg.kontingent,
+      radius_km: cfg.radius_km,
+      anzahlung_betrag_eur: cfg.preis_anzahlung_eur,
+      initial_password: '••••••••••••••••',
+      organisation_name: null,
+      rolle_in_organisation: null,
+      von_admin_name: auth.admin_name,
+    }
+    const html = await render(WillkommenSvEmail(props))
+    return { success: true, html, subject: subject(props) }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Render-Fehler'
+    return { success: false, error: `Preview-Render fehlgeschlagen: ${msg}` }
+  }
+}

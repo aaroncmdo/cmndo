@@ -1,15 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import Link from 'next/link'
 import {
   UserIcon, PackageIcon, ShieldCheckIcon, CheckCircle2Icon,
-  MailIcon,
+  MailIcon, AlertCircleIcon, MapPinIcon,
 } from 'lucide-react'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { LoadingButton } from '@/components/ui/loading-button'
-import { anlegeSv } from './actions'
+import IsochronePreviewMap from '@/components/maps/IsochronePreviewMap'
+import { anlegeSv, checkEmailExists, type CheckEmailExistsResult } from './actions'
+import WelcomeMailPreviewModal from './WelcomeMailPreviewModal'
 import { PAKET_KONFIG, paketAnzahlung, paketKontingent, QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN, ANREDE_OPTIONEN, TITEL_OPTIONEN, type AnlegePaket, type GutachterTyp, type AnlegeSvFormData } from './constants'
 
 // ARCH-1 Phase 2 (BLOCK C): 4-Step Solo-Anlegen Wizard fuer den Admin.
@@ -73,10 +76,32 @@ export default function SoloAnlegenWizard({ onSuccess }: {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<{ sv_id: string; initial_password: string } | null>(null)
+  // AAR-364 SUB-3: Email-Duplikat-Check (500ms debounced)
+  const [emailCheck, setEmailCheck] = useState<CheckEmailExistsResult | null>(null)
+  const [emailChecking, setEmailChecking] = useState(false)
+  // AAR-364 SUB-2: Welcome-Mail-Preview-Modal
+  const [showPreviewModal, setShowPreviewModal] = useState(false)
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setData(prev => ({ ...prev, [key]: value }))
   }
+
+  // AAR-364 SUB-3: Email-Duplikat-Check mit 500ms Debounce.
+  useEffect(() => {
+    const email = data.email.trim().toLowerCase()
+    if (!email || !email.includes('@') || email.length < 5) {
+      setEmailCheck(null)
+      setEmailChecking(false)
+      return
+    }
+    setEmailChecking(true)
+    const handle = setTimeout(async () => {
+      const r = await checkEmailExists(email)
+      setEmailCheck(r)
+      setEmailChecking(false)
+    }, 500)
+    return () => clearTimeout(handle)
+  }, [data.email])
 
   function toggleQualifikation(q: string) {
     setData(prev => ({
@@ -104,8 +129,18 @@ export default function SoloAnlegenWizard({ onSuccess }: {
   const overrideKontingent = data.paket_override_kontingent
     ? parseInt(data.paket_override_kontingent, 10)
     : undefined
+  const overrideRadius = data.paket_override_radius_km
+    ? parseInt(data.paket_override_radius_km, 10)
+    : undefined
   const liveAnzahlung = paketAnzahlung(data.paket, overrideAnzahlung)
   const liveKontingent = paketKontingent(data.paket, overrideKontingent)
+  // AAR-364 SUB-1: Live-Radius fuer die Isochrone-Preview.
+  const livePaketRadius = data.paket === 'individuell'
+    ? (overrideRadius ?? 15)
+    : (overrideRadius ?? PAKET_KONFIG[data.paket].radius_km)
+  const livePaketLabel = data.paket === 'individuell'
+    ? 'Individuell'
+    : data.paket.charAt(0).toUpperCase() + data.paket.slice(1)
 
   function canNext(): boolean {
     if (step === 0) return !!(data.anrede && data.vorname && data.nachname && data.email && data.steuernummer && data.anschrift && data.anschrift_lat !== null)
@@ -255,7 +290,32 @@ export default function SoloAnlegenWizard({ onSuccess }: {
               />
               <Field label="Vorname *" value={data.vorname} onChange={v => update('vorname', v)} />
               <Field label="Nachname *" value={data.nachname} onChange={v => update('nachname', v)} />
-              <Field label="Email *" type="email" value={data.email} onChange={v => update('email', v)} className="sm:col-span-2" />
+              <div className="sm:col-span-2">
+                <Field label="Email *" type="email" value={data.email} onChange={v => update('email', v)} />
+                {/* AAR-364 SUB-3: Email-Duplikat-Warnung */}
+                {emailChecking && (
+                  <p className="mt-1 text-[10px] text-gray-400">Prüfe, ob Email bereits vorhanden…</p>
+                )}
+                {!emailChecking && emailCheck?.success && emailCheck.exists && (
+                  <div className="mt-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs flex items-start gap-2">
+                    <AlertCircleIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <strong>Email bereits vorhanden.</strong> Rolle: {emailCheck.rolle ?? 'unbekannt'}.
+                      {emailCheck.sv_id && (
+                        <>
+                          {' '}
+                          <Link
+                            href={`/admin/sachverstaendige/${emailCheck.sv_id}`}
+                            className="underline hover:text-amber-800 font-semibold"
+                          >
+                            Zum existierenden SV-Profil
+                          </Link>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
               <Field label="Telefon" type="tel" value={data.telefon} onChange={v => update('telefon', v)} className="sm:col-span-2" />
             </div>
             <div className="pt-4 mt-4 border-t border-gray-200">
@@ -286,6 +346,23 @@ export default function SoloAnlegenWizard({ onSuccess }: {
                 <Field label="HRB (optional)" value={data.hrb} onChange={v => update('hrb', v)} className="sm:col-span-2" />
               </div>
             </div>
+
+            {/* AAR-364 SUB-1: Live-Karte mit Isochrone-Preview sobald Adresse gesetzt */}
+            {data.anschrift_lat !== null && data.anschrift_lng !== null && (
+              <div className="pt-4 mt-4 border-t border-gray-200">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <MapPinIcon className="w-3.5 h-3.5 text-[#4573A2]" />
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Einsatzgebiet</p>
+                </div>
+                <IsochronePreviewMap
+                  lat={data.anschrift_lat}
+                  lng={data.anschrift_lng}
+                  radius_km={livePaketRadius}
+                  adresse={data.anschrift}
+                  paketLabel={livePaketLabel}
+                />
+              </div>
+            )}
           </div>
         )}
 
@@ -384,6 +461,17 @@ export default function SoloAnlegenWizard({ onSuccess }: {
                 </div>
               </div>
             </div>
+
+            {/* AAR-364 SUB-1: Isochrone-Preview reagiert live auf Paket-Wechsel */}
+            {data.anschrift_lat !== null && data.anschrift_lng !== null && (
+              <IsochronePreviewMap
+                lat={data.anschrift_lat}
+                lng={data.anschrift_lng}
+                radius_km={livePaketRadius}
+                adresse={data.anschrift}
+                paketLabel={livePaketLabel}
+              />
+            )}
           </div>
         )}
 
@@ -472,17 +560,39 @@ export default function SoloAnlegenWizard({ onSuccess }: {
             type="button"
             onClick={() => {
               if (step < STEPS.length - 1) setStep(step + 1)
-              else handleSubmit()
+              else setShowPreviewModal(true) // AAR-364 SUB-2: Preview-Modal vor Anlage
             }}
             disabled={!canNext()}
-            isLoading={saving}
+            isLoading={saving && !showPreviewModal}
             loadingText="Wird angelegt..."
             className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40"
           >
-            {step < STEPS.length - 1 ? 'Weiter' : 'Anlegen + Welcome-Mail senden'}
+            {step < STEPS.length - 1 ? 'Weiter' : 'Welcome-Mail Vorschau anzeigen'}
           </LoadingButton>
         </div>
       </div>
+
+      {/* AAR-364 SUB-2: Welcome-Mail-Preview-Modal */}
+      <WelcomeMailPreviewModal
+        open={showPreviewModal}
+        saving={saving}
+        input={{
+          anrede: data.anrede || undefined,
+          titel: data.titel || undefined,
+          vorname: data.vorname,
+          nachname: data.nachname,
+          email: data.email,
+          paket: data.paket,
+          paket_override_kontingent: overrideKontingent,
+          paket_override_radius_km: overrideRadius,
+          paket_override_anzahlung_eur: overrideAnzahlung,
+        }}
+        onCancel={() => { if (!saving) setShowPreviewModal(false) }}
+        onConfirm={async () => {
+          await handleSubmit()
+          setShowPreviewModal(false)
+        }}
+      />
     </div>
   )
 }
