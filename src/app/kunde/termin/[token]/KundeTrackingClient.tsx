@@ -187,15 +187,16 @@ export default function KundeTrackingClient({
           {showGegenvorschlag && (
             <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
               <h3 className="text-sm font-semibold text-gray-900">Alternativen Termin vorschlagen</h3>
+              {/* AAR-452: text-base + min-h-[44px] für iOS-Zoom + Touch-Target */}
               <input type="datetime-local" value={gegenDatum} onChange={e => setGegenDatum(e.target.value)}
                 min={new Date().toISOString().slice(0, 16)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none"
+                className="w-full border border-gray-200 rounded-lg px-3 min-h-[44px] text-base focus:outline-none"
                 style={{ outlineColor: brandPrimary }} />
               <textarea value={gegenGrund} onChange={e => setGegenGrund(e.target.value)} placeholder="Begründung (optional)"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-base resize-none focus:outline-none"
                 style={{ outlineColor: brandPrimary }} rows={2} />
               <div className="flex gap-2">
-                <button onClick={() => setShowGegenvorschlag(false)} className="flex-1 py-2 rounded-xl text-sm bg-gray-100 text-gray-600">Abbrechen</button>
+                <button onClick={() => setShowGegenvorschlag(false)} className="flex-1 min-h-[44px] rounded-xl text-sm bg-gray-100 text-gray-600">Abbrechen</button>
                 <button
                   onClick={async () => {
                     if (!gegenDatum) return
@@ -204,7 +205,7 @@ export default function KundeTrackingClient({
                     setActionDone('Gegenvorschlag gesendet!')
                   }}
                   disabled={actionPending || !gegenDatum}
-                  className="flex-1 py-2 rounded-xl text-sm font-semibold bg-amber-500 text-white disabled:opacity-50"
+                  className="flex-1 min-h-[44px] rounded-xl text-sm font-semibold bg-amber-500 text-white disabled:opacity-50"
                 >
                   Vorschlagen
                 </button>
