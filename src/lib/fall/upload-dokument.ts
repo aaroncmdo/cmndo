@@ -20,8 +20,9 @@ export type UploadResult =
 
 /**
  * Lädt eine Datei für einen Fall hoch. Wenn `slotId` gesetzt ist, wird
- * zusätzlich `pflichtdokumente.datei_url/datei_name/datei_groesse/status`
- * aktualisiert.
+ * zusätzlich `pflichtdokumente.dokument_url/hochgeladen_am/status`
+ * aktualisiert (reale Spaltennamen — AAR-386 Audit hat den Drift
+ * aufgedeckt, Vorgänger-Code schrieb auf nicht-existente Spalten).
  *
  * Idempotenz: Der Storage-Pfad in `uploadFallDokument` enthält einen
  * Timestamp, deshalb ist jede Ausführung eindeutig. Falls derselbe Upload
@@ -60,11 +61,10 @@ export async function uploadDokumentToOutbox(
   if (slotId) {
     const supabase = await createClient()
 
-    // Public URL holen — Storage-Pfad kennen wir nicht direkt hier, also
-    // lesen wir die gerade angelegte fall_dokumente-Row.
+    // Storage-Pfad der gerade angelegten fall_dokumente-Row lesen.
     const { data: doc } = await supabase
       .from('fall_dokumente')
-      .select('storage_path, original_filename, groesse_bytes')
+      .select('storage_path')
       .eq('id', upload.dokumentId)
       .single()
 
@@ -73,9 +73,8 @@ export async function uploadDokumentToOutbox(
         .from('pflichtdokumente')
         .update({
           status: 'hochgeladen',
-          datei_url: doc.storage_path,
-          datei_name: doc.original_filename,
-          datei_groesse: doc.groesse_bytes,
+          dokument_url: doc.storage_path,
+          hochgeladen_am: new Date().toISOString(),
         })
         .eq('id', slotId)
         .eq('fall_id', fallId)
@@ -89,6 +88,7 @@ export async function uploadDokumentToOutbox(
   }
 
   revalidatePath(`/gutachter/fall/${fallId}`)
+  revalidatePath(`/gutachter/feldmodus`)
   revalidatePath(`/kunde/faelle/${fallId}`)
   revalidatePath(`/admin/faelle/${fallId}`)
 

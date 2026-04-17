@@ -13,8 +13,9 @@ import type { FeldmodusStop, FeldmodusSV } from './page'
 import FeldmodusMap from './FeldmodusMap'
 import RouteSidebar from './RouteSidebar'
 import OfflineStatusBanner from './OfflineStatusBanner'
+import SvFallakteView from './SvFallakteView'
 import { useFieldTracking } from './useFieldTracking'
-import { markArrived } from './actions'
+import { markArrived, pauseFokusmodus } from './actions'
 import { recoverOutbox } from '@/lib/offline/outbox'
 import { registerOnlineSync, syncOutbox } from '@/lib/offline/sync-outbox'
 import { registerGpsOnlineSync, syncGpsOutbox } from '@/lib/offline/sync-gps-outbox'
@@ -136,17 +137,36 @@ export default function FeldmodusClient({
         )}
       </div>
 
-      {/* Sidebar — unten auf mobile, rechts auf desktop */}
+      {/* Sidebar — unten auf mobile, rechts auf desktop.
+          AAR-386: Im arrived-State zeigt SvFallakteView statt RouteSidebar. */}
       <div className="h-1/2 lg:h-full lg:w-[380px] lg:border-l lg:border-white/10">
-        <RouteSidebar
-          sessionId={session.id}
-          sessionStatus={sessionStatus}
-          stops={stops}
-          aktuellerStopIndex={aktuellerStopIndex}
-          svPosition={position ? { lat: position.lat, lng: position.lng } : null}
-          distanceMeters={distanceMeters}
-          onAdvanced={onAdvanced}
-        />
+        {sessionStatus === 'arrived' && aktuellerStop ? (
+          <SvFallakteView
+            fallId={aktuellerStop.fall_id}
+            sessionId={session.id}
+            terminId={aktuellerStop.termin_id}
+            onAdvanced={onAdvanced}
+            onPauseBackToRoute={async () => {
+              const res = await pauseFokusmodus(session.id)
+              if (res.success) {
+                setSessionStatus('paused')
+                router.push('/gutachter/heute?info=Fokus-Modus+pausiert')
+              } else {
+                toast.error(res.error ?? 'Pausieren fehlgeschlagen')
+              }
+            }}
+          />
+        ) : (
+          <RouteSidebar
+            sessionId={session.id}
+            sessionStatus={sessionStatus}
+            stops={stops}
+            aktuellerStopIndex={aktuellerStopIndex}
+            svPosition={position ? { lat: position.lat, lng: position.lng } : null}
+            distanceMeters={distanceMeters}
+            onAdvanced={onAdvanced}
+          />
+        )}
       </div>
       </div>
     </div>
