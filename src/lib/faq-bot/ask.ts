@@ -62,8 +62,21 @@ Format:
 - Konkrete Action-Items als Liste
 - Bei Standardantwort-Formulierung: in Anführungszeichen, SIE-Form`
 
-async function loadFallContext(fallId: string) {
+async function loadFallContext(fallId: string, rolle: FaqBotRolle) {
   const admin = createAdminClient()
+
+  // AAR-438: Timeline bei Kunden-Rolle direkt auf typ='system' filtern
+  // (spart Round-Trip-Payload gegenüber nachträglichem JS-Filter).
+  const timelineQuery = admin
+    .from('timeline')
+    .select('typ, titel, beschreibung, created_at')
+    .eq('fall_id', fallId)
+    .order('created_at', { ascending: false })
+    .limit(rolle === 'kunde' ? 5 : 10)
+  const timelineQueryScoped = rolle === 'kunde'
+    ? timelineQuery.eq('typ', 'system')
+    : timelineQuery
+
   const [fallRes, leadRes, timelineRes, tasksRes] = await Promise.all([
     admin.from('faelle').select('*').eq('id', fallId).maybeSingle(),
     admin
@@ -71,23 +84,37 @@ async function loadFallContext(fallId: string) {
       .select('lead_id, leads(vorname, nachname, email, telefon, unfallhergang, schadentyp)')
       .eq('id', fallId)
       .maybeSingle(),
-    admin
-      .from('timeline')
-      .select('typ, titel, beschreibung, created_at')
-      .eq('fall_id', fallId)
-      .order('created_at', { ascending: false })
-      .limit(10),
+    timelineQueryScoped,
+    // AAR-438: Tasks nach Fälligkeit sortiert — Priorität (TEXT kritisch/dringend/normal)
+    // wird in JS gewichtet sortiert, da alphabetisches DESC falsch wäre (normal > kritisch).
     admin
       .from('tasks')
       .select('titel, status, empfaenger_rolle, faellig_am, prioritaet')
       .eq('fall_id', fallId)
-      .eq('status', 'offen'),
+      .eq('status', 'offen')
+      .order('faellig_am', { ascending: true, nullsFirst: false })
+      .limit(50),
   ])
 
   const fall = fallRes.data as Record<string, unknown> | null
   const leadRaw = (leadRes.data as { leads: unknown } | null)?.leads
   const lead = (Array.isArray(leadRaw) ? leadRaw[0] : leadRaw) as Record<string, unknown> | null
-  return { fall, lead, timeline: timelineRes.data ?? [], tasks: tasksRes.data ?? [] }
+
+  // AAR-438: Top-10 Tasks nach Priorität (kritisch > dringend > normal), dann Fälligkeit.
+  const prioGewicht: Record<string, number> = { kritisch: 3, dringend: 2, normal: 1 }
+  const tasksSortiert = (tasksRes.data ?? [])
+    .slice()
+    .sort((a, b) => {
+      const pa = prioGewicht[(a.prioritaet as string) ?? 'normal'] ?? 0
+      const pb = prioGewicht[(b.prioritaet as string) ?? 'normal'] ?? 0
+      if (pa !== pb) return pb - pa
+      const da = a.faellig_am ? new Date(a.faellig_am as string).getTime() : Infinity
+      const db = b.faellig_am ? new Date(b.faellig_am as string).getTime() : Infinity
+      return da - db
+    })
+    .slice(0, 10)
+
+  return { fall, lead, timeline: timelineRes.data ?? [], tasks: tasksSortiert }
 }
 
 function buildContextText(
@@ -138,11 +165,10 @@ function buildContextText(
       }
     }
   } else {
-    // Kunde sieht nur gefilterte Timeline (nur system/milestone)
-    const kundenTimeline = timeline.filter((e) => (e.typ as string) === 'system').slice(0, 5)
-    if (kundenTimeline.length > 0) {
+    // Kunde sieht nur System-Events (bereits im Query auf typ='system' gefiltert — AAR-438).
+    if (timeline.length > 0) {
       lines.push('', 'Zeitlicher Ablauf:')
-      for (const e of kundenTimeline) {
+      for (const e of timeline) {
         lines.push(`- ${e.titel}`)
       }
     }
@@ -162,7 +188,7 @@ export async function askFaqBot(
   if (!frage.trim()) return { success: false, error: 'Frage fehlt' }
   if (frage.length > 2000) return { success: false, error: 'Frage zu lang (max 2000 Zeichen)' }
 
-  const ctx = await loadFallContext(fallId)
+  const ctx = await loadFallContext(fallId, rolle)
   const contextText = buildContextText(rolle, ctx)
   const systemPrompt = (rolle === 'kunde' ? KUNDE_SYSTEM : KB_SYSTEM) +
     '\n\n— Fall-Kontext —\n' + contextText
