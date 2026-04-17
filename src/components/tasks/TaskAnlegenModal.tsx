@@ -13,10 +13,12 @@ import {
 } from '@/lib/tasks/create-adhoc'
 import { ladeEntityOptions, type EntityOption } from '@/lib/tasks/entity-loader'
 
+// AAR-402: „Leadbearbeiter" (Phase-1-intern) + „Sachverständiger" (der
+// Ersteller selbst) wurden aus der Empfänger-Auswahl entfernt — sie tauchten
+// im Fall-Kontext nie als sinnvolle Adressaten auf. Der Typ selbst bleibt
+// bestehen, damit Altdaten mit diesen Werten weiter lesbar sind.
 const ROLLEN: { value: EmpfaengerRolle; label: string }[] = [
-  { value: 'leadbearbeiter', label: 'Lead-Bearbeiter' },
   { value: 'kundenbetreuer', label: 'Kundenbetreuer' },
-  { value: 'sachverstaendiger', label: 'Sachverständiger' },
   { value: 'kanzlei', label: 'Kanzlei' },
   { value: 'admin', label: 'Admin' },
 ]
@@ -168,7 +170,7 @@ export function TaskAnlegenModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">
-                Empfänger-Rolle *
+                An wen? *
               </label>
               <select
                 value={empfaengerRolle}
@@ -181,6 +183,9 @@ export function TaskAnlegenModal({
                   </option>
                 ))}
               </select>
+              <p className="text-[10px] text-gray-400 mt-1">
+                Wer erledigt die Aufgabe?
+              </p>
             </div>
             <div>
               <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">
@@ -211,20 +216,23 @@ export function TaskAnlegenModal({
             </div>
             <div>
               <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">
-                Entität-Typ (optional)
+                Bezug (optional)
               </label>
               <select
                 value={entityType}
                 onChange={(e) => setEntityType(e.target.value as EntityType | '')}
                 className="w-full text-sm rounded-md border border-gray-200 px-2 py-1.5 outline-none focus:border-[#4573A2] bg-white"
               >
-                <option value="">— Keine —</option>
+                <option value="">— Keiner —</option>
                 {ENTITY_TYPES.map((t) => (
                   <option key={t.value} value={t.value}>
                     {t.label}
                   </option>
                 ))}
               </select>
+              <p className="text-[10px] text-gray-400 mt-1">
+                Worum geht's fachlich?
+              </p>
             </div>
           </div>
 
