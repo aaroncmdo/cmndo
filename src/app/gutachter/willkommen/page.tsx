@@ -40,8 +40,11 @@ export default async function GutachterWillkommenPage({
   // KFZ-157: logo_url aufnehmen damit der Wizard weiss ob Step 4 noch
   // angezeigt werden muss oder bereits ein Logo existiert.
   // BUG-96: firmenname + steuernummer fuer die Stammdaten-Card im Vertrag-Step.
+  // AAR-359 W3: sa_vorlage_status + sa_vorlage_admin_notiz aufnehmen damit
+  // der Wizard weiss ob Step 5 (SA-Vorlage) noch angezeigt werden muss und
+  // bei status='zurueckgewiesen' den Ablehnungsgrund einblenden kann.
   const svSelect =
-    'id, paket, max_faelle_monat, paket_umkreis_km, onboarding_status, onboarding_anzahlung_betrag, vertrag_unterschrieben, portal_zugang_freigeschaltet, standort_adresse, standort_plz, organisation_id, rolle_in_organisation, logo_url, brand_primary, brand_secondary, use_custom_branding, firmenname, steuernummer, gcal_connected'
+    'id, paket, max_faelle_monat, paket_umkreis_km, onboarding_status, onboarding_anzahlung_betrag, vertrag_unterschrieben, portal_zugang_freigeschaltet, standort_adresse, standort_plz, organisation_id, rolle_in_organisation, logo_url, brand_primary, brand_secondary, use_custom_branding, firmenname, steuernummer, gcal_connected, sa_vorlage_status, sa_vorlage_admin_notiz'
   const { data: svRows } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
@@ -92,7 +95,14 @@ export default async function GutachterWillkommenPage({
   // Sub-Mitarbeiter sehen Step 4 NIE — sie erben das Branding der Org.
   const needsLogoStep =
     rolle !== 'sub_mitarbeiter' && !((sv as { logo_url?: string | null }).logo_url)
-  if (sv.portal_zugang_freigeschaltet && !needsLogoStep) {
+  // AAR-359 W3: Zusätzliches Gate — SA-Vorlage fehlt oder wurde
+  // zurückgewiesen. Sub-Mitarbeiter uploaden ihre SA in W5 via
+  // /gutachter/verifizierung, nicht im Willkommen-Flow.
+  const saVorlageStatus = (sv as { sa_vorlage_status?: string | null }).sa_vorlage_status ?? null
+  const needsSaVorlageStep =
+    rolle !== 'sub_mitarbeiter'
+    && (saVorlageStatus === null || saVorlageStatus === 'zurueckgewiesen')
+  if (sv.portal_zugang_freigeschaltet && !needsLogoStep && !needsSaVorlageStep) {
     redirect('/gutachter')
   }
 
@@ -201,24 +211,30 @@ export default async function GutachterWillkommenPage({
   }))
 
   // URL-Param ?step=stripe ueberschreibt den initial-Step (z.B. nach Stripe-Cancel)
-  // KFZ-156: ?stripe_success=1 nach Stripe-Embed-Return → direkt auf Step 4 (Logo)
+  // KFZ-156: ?stripe_success=1 nach Stripe-Embed-Return
   const params = await searchParams
-  // AAR-233: Step-Reihenfolge: konditionen=0, branding=1, vertrag=2,
-  // anzahlung=3, kalender=4 (AAR-242).
-  // ?step=stripe → Index 3; ?stripe_success → Index 4 (Kalender-Step).
-  // ?kalender_connected=1 → Index 4 (Kalender-Step, Komponente zeigt den
+  // AAR-359 W3 Step-Reihenfolge: konditionen=0, branding=1, vertrag=2,
+  // anzahlung=3, sa_vorlage=4 (NEU), kalender=5.
+  // ?step=stripe → Index 3; ?stripe_success → Index 4 (SA-Vorlage-Step).
+  // ?kalender_connected=1 → Index 5 (Kalender-Step, Komponente zeigt den
   // Verbunden-State + Weiter-Button).
   let stepOverride: number | undefined
   if (params?.step === 'stripe') stepOverride = 3
   if (params?.stripe_success === '1') stepOverride = 4
-  if (params?.kalender_connected === '1') stepOverride = 4
+  if (params?.kalender_connected === '1') stepOverride = 5
 
   // KFZ-156: Stripe Publishable Key kommt aus dem Server (kein
   // NEXT_PUBLIC_-Var, da Vercel ihn nur als STRIPE_PUBLISHABLE_KEY hat).
   // Wir reichen ihn als Prop in den Client-Wizard.
   const stripePublishableKey = process.env.STRIPE_PUBLISHABLE_KEY ?? ''
 
-  const svRow = sv as typeof sv & { logo_url?: string | null; firmenname?: string | null; steuernummer?: string | null }
+  const svRow = sv as typeof sv & {
+    logo_url?: string | null
+    firmenname?: string | null
+    steuernummer?: string | null
+    sa_vorlage_status?: 'ausstehend' | 'geprueft' | 'zurueckgewiesen' | null
+    sa_vorlage_admin_notiz?: string | null
+  }
 
   return (
     <WillkommenClient
@@ -241,6 +257,9 @@ export default async function GutachterWillkommenPage({
         steuernummer: svRow.steuernummer ?? null,
         // AAR-242: Kalender-Status für den Kalender-Step
         gcal_connected: !!(sv as { gcal_connected?: boolean }).gcal_connected,
+        // AAR-359 W3: SA-Vorlage-Status für den neuen Step 5
+        sa_vorlage_status: svRow.sa_vorlage_status ?? null,
+        sa_vorlage_admin_notiz: svRow.sa_vorlage_admin_notiz ?? null,
       }}
       profile={profile ?? { vorname: null, nachname: null, email: null, telefon: null }}
       organisation={organisation}
