@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createAutoTask, resolveGates } from '@/lib/tasking'
 import { createNotification } from '@/lib/notifications'
+import { cancelRemindersForTask } from '@/lib/tasks/reminder-generator'
 
 /**
  * SV-01: Neuer Auftrag — wird getriggert wenn Admin sv_id setzt
@@ -101,6 +102,12 @@ export async function completeSVTask(fallId: string, taskCode: string) {
   const { data: task } = await db.from('tasks').select('id').eq('fall_id', fallId).eq('task_code', taskCode).in('status', ['offen', 'in-bearbeitung']).limit(1).maybeSingle()
   if (task) {
     await db.from('tasks').update({ status: 'erledigt', erledigt_am: new Date().toISOString() }).eq('id', task.id)
+    // AAR-430: pending Reminder stornieren
+    try {
+      await cancelRemindersForTask(task.id)
+    } catch (err) {
+      console.error('[AAR-430] cancelRemindersForTask (completeSVTask) fehlgeschlagen:', err)
+    }
     await resolveGates(task.id)
   }
 }

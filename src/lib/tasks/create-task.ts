@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { TaskEntityType, TaskPrioritaet } from './types'
+import { generateReminderForTask } from './reminder-generator'
 
 type CreateLinkedTaskParams = {
   titel: string
@@ -69,6 +70,15 @@ export async function createLinkedTask(params: CreateLinkedTaskParams): Promise<
   if (error) {
     console.error(`[KFZ-151] createLinkedTask insert fehlgeschlagen: ${error.message}`)
     return { task_id: null }
+  }
+
+  // AAR-430: Reminder-Kaskade generieren (best-effort, non-blocking)
+  if (data?.id && faelligAmIso) {
+    try {
+      await generateReminderForTask(data.id)
+    } catch (err) {
+      console.error('[AAR-430] generateReminderForTask (createLinkedTask) fehlgeschlagen:', err)
+    }
   }
 
   // AAR-229 W4: Mitteilung bei Task-Erstellung an den Empfänger.

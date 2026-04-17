@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { generateReminderForTask, cancelRemindersForTask } from '@/lib/tasks/reminder-generator'
 
 type AutoTaskParams = {
   fall_id: string
@@ -16,11 +17,12 @@ type AutoTaskParams = {
 /**
  * Zentrale Funktion zum Erstellen automatischer Tasks.
  * Erstellt einen Task in der tasks-Tabelle und einen Timeline-Eintrag.
+ * AAR-430: Gibt die neue Task-ID zurück und generiert Reminder-Kaskade.
  */
-export async function createAutoTask(params: AutoTaskParams) {
+export async function createAutoTask(params: AutoTaskParams): Promise<{ id: string } | null> {
   const supabase = createAdminClient()
 
-  const { error } = await supabase.from('tasks').insert({
+  const { data, error } = await supabase.from('tasks').insert({
     fall_id: params.fall_id,
     typ: params.task_typ,
     titel: params.titel,
@@ -37,11 +39,11 @@ export async function createAutoTask(params: AutoTaskParams) {
     // KFZ-151: Implizite Entity-Verknuepfung damit der zentrale Resolver greift
     entity_type: 'fall',
     entity_id: params.fall_id,
-  })
+  }).select('id').single()
 
-  if (error) {
-    console.error(`[tasking] Failed to create auto-task: ${error.message}`)
-    return
+  if (error || !data?.id) {
+    console.error(`[tasking] Failed to create auto-task: ${error?.message ?? 'kein id zurück'}`)
+    return null
   }
 
   await supabase.from('timeline').insert({
@@ -50,6 +52,15 @@ export async function createAutoTask(params: AutoTaskParams) {
     titel: `Auto-Task: ${params.titel}`,
     beschreibung: `Zugewiesen an ${params.empfaenger_rolle}. Deadline: ${params.deadline.toLocaleDateString('de-DE')}.`,
   })
+
+  // AAR-430: Reminder-Kaskade generieren
+  try {
+    await generateReminderForTask(data.id)
+  } catch (err) {
+    console.error('[AAR-430] generateReminderForTask fehlgeschlagen:', err)
+  }
+
+  return { id: data.id }
 }
 
 // ─── Phase: Konversion ───────────────────────────────────────────────────────
@@ -269,6 +280,13 @@ export async function autoCompleteTask(fallId: string, eventType: string) {
       status: 'erledigt',
       erledigt_am: new Date().toISOString(),
     }).eq('id', task.id)
+
+    // AAR-430: pending Reminder stornieren, da Task abgeschlossen
+    try {
+      await cancelRemindersForTask(task.id)
+    } catch (err) {
+      console.error('[AAR-430] cancelRemindersForTask fehlgeschlagen:', err)
+    }
 
     await supabase.from('timeline').insert({
       fall_id: fallId,

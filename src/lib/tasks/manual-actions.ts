@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { cancelRemindersForTask, generateReminderForTask } from '@/lib/tasks/reminder-generator'
 
 // KFZ-175: Server Actions fuer manuelle Tasks.
 
@@ -39,6 +40,15 @@ export async function createManualTask(input: {
   if (input.fall_id) revalidatePath(`/admin/faelle/${input.fall_id}`)
   if (input.lead_id) revalidatePath(`/admin/dispatch/lead/${input.lead_id}`)
 
+  // AAR-430: Reminder-Kaskade für manuell erstellten Task mit Deadline
+  if (data?.id && input.faellig_am) {
+    try {
+      await generateReminderForTask(data.id)
+    } catch (err) {
+      console.error('[AAR-430] generateReminderForTask (manual) fehlgeschlagen:', err)
+    }
+  }
+
   return { success: true, id: data?.id }
 }
 
@@ -55,6 +65,18 @@ export async function updateManualTaskStatus(
 
   const { error } = await supabase.from('tasks').update(update).eq('id', taskId)
   if (error) return { error: error.message }
+
+  // AAR-430: Reminder canceln bei Abschluss/Block, regenerieren bei Wieder-Öffnen
+  try {
+    if (['erledigt', 'blockiert'].includes(status)) {
+      await cancelRemindersForTask(taskId)
+    } else if (status === 'offen' || status === 'in-bearbeitung') {
+      await cancelRemindersForTask(taskId)
+      await generateReminderForTask(taskId)
+    }
+  } catch (err) {
+    console.error('[AAR-430] updateManualTaskStatus Reminder-Hook fehlgeschlagen:', err)
+  }
   return { success: true }
 }
 
