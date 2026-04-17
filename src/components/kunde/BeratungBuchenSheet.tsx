@@ -174,7 +174,8 @@ export default function BeratungBuchenSheet({
                   onChange={(e) => setBeschreibung(e.target.value.slice(0, 200))}
                   rows={3}
                   placeholder="z. B. ‚Ich habe eine Rückfrage zur Höhe der Regulierung'"
-                  className="w-full px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-[#4573A2] focus:outline-none text-sm resize-none"
+                  // AAR-452: text-base verhindert iOS-Autozoom beim Fokus
+                  className="w-full px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-[#4573A2] focus:outline-none text-base resize-none"
                 />
                 <p className="mt-1 text-xs text-gray-500">{beschreibung.length}/200 Zeichen</p>
               </div>

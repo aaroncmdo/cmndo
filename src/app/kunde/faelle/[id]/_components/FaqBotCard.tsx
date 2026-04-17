@@ -132,6 +132,7 @@ export function FaqBotCard({
       {history.length === 0 && (
         <div className="rounded-lg bg-gray-50 border border-gray-200 p-3 space-y-2">
           <p className="text-[11px] uppercase tracking-wider text-gray-400">Beispielfragen</p>
+          {/* AAR-452: min-h-[36px] + px-3 für tappable Chips auf Mobile */}
           <div className="flex flex-wrap gap-1.5">
             {BEISPIEL_FRAGEN.map((f) => (
               <button
@@ -139,7 +140,7 @@ export function FaqBotCard({
                 type="button"
                 onClick={() => ask(f)}
                 disabled={pending}
-                className="px-2.5 py-1 rounded-full text-[11px] bg-white border border-gray-200 text-gray-700 hover:bg-[#4573A2] hover:text-white hover:border-[#4573A2] disabled:opacity-50"
+                className="inline-flex items-center px-3 min-h-[36px] rounded-full text-xs bg-white border border-gray-200 text-gray-700 hover:bg-[#4573A2] hover:text-white hover:border-[#4573A2] disabled:opacity-50"
               >
                 {f}
               </button>
@@ -209,12 +210,13 @@ export function FaqBotCard({
           disabled={pending}
           maxLength={2000}
           placeholder="Ihre Frage …"
-          className="flex-1 text-sm rounded-lg border border-gray-200 px-3 py-2 outline-none focus:border-[#4573A2] disabled:bg-gray-50"
+          // AAR-452: text-base (iOS-Zoom-Fix) + min-h-[44px]
+          className="flex-1 text-base rounded-lg border border-gray-200 px-3 min-h-[44px] outline-none focus:border-[#4573A2] disabled:bg-gray-50"
         />
         <button
           type="submit"
           disabled={pending || !frage.trim()}
-          className="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-[#4573A2] text-white text-sm font-medium hover:bg-[#0D1B3E] disabled:opacity-40 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1 px-4 min-h-[44px] rounded-lg bg-[#4573A2] text-white text-sm font-medium hover:bg-[#0D1B3E] disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {pending ? <LoaderIcon className="w-4 h-4 animate-spin" /> : <SendIcon className="w-4 h-4" />}
         </button>
