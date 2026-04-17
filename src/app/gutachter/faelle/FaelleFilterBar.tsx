@@ -1,0 +1,119 @@
+'use client'
+
+// AAR-409: Filter- + Such-Leiste für das SV-Fälle-Archiv. Schreibt alle
+// Filter-Änderungen in die URL (router.replace, debounce für Text-Input),
+// damit Bookmarks/Refresh-Verhalten konsistent bleibt.
+
+import { useEffect, useRef, useState, useTransition } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { SearchIcon, XIcon } from 'lucide-react'
+
+type FilterKey = 'alle' | 'neue' | 'bearbeitung' | 'gutachten' | 'abgeschlossen'
+
+const FILTER_TABS: [FilterKey, string][] = [
+  ['alle', 'Alle'],
+  ['neue', 'Neue'],
+  ['bearbeitung', 'In Bearbeitung'],
+  ['gutachten', 'Gutachten erstellt'],
+  ['abgeschlossen', 'Abgeschlossen'],
+]
+
+export default function FaelleFilterBar({
+  faelleCount,
+  initialFilter,
+  initialQuery,
+}: {
+  faelleCount: number
+  initialFilter: FilterKey
+  initialQuery: string
+}) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const [, startTransition] = useTransition()
+  const [query, setQuery] = useState(initialQuery)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Push Query in URL (debounced) ohne Full-Reload.
+  useEffect(() => {
+    if (query === initialQuery) return
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      const params = new URLSearchParams(searchParams?.toString() ?? '')
+      if (query.trim()) {
+        params.set('q', query.trim())
+      } else {
+        params.delete('q')
+      }
+      startTransition(() => {
+        router.replace(`${pathname}?${params.toString()}`)
+      })
+    }, 300)
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [query, initialQuery, pathname, router, searchParams])
+
+  function setFilter(key: FilterKey) {
+    const params = new URLSearchParams(searchParams?.toString() ?? '')
+    if (key === 'alle') {
+      params.delete('filter')
+    } else {
+      params.set('filter', key)
+    }
+    startTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`)
+    })
+  }
+
+  return (
+    <div className="bg-white border-b border-gray-200 px-4 py-3 space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-sm font-semibold text-gray-900">Meine Fälle</h1>
+          <p className="text-gray-500 text-xs">
+            {faelleCount} {faelleCount === 1 ? 'Fall' : 'Fälle'}
+          </p>
+        </div>
+
+        <div className="relative flex-1 max-w-sm">
+          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Fall-Nr, Kunde oder Ort"
+            className="w-full pl-9 pr-8 py-2 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4573A2] focus:bg-white"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery('')}
+              aria-label="Suche löschen"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              <XIcon className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="flex gap-2 overflow-x-auto pb-0.5">
+        {FILTER_TABS.map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setFilter(key)}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-colors ${
+              initialFilter === key
+                ? 'bg-[#0D1B3E] text-white'
+                : 'bg-white text-gray-600 hover:text-gray-900 border border-gray-200'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
