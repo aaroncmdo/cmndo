@@ -150,7 +150,7 @@ export default function VsRegulierungTab({ fall }: { fall: VsFall }) {
       )}
 
       {/* ═══ Tech. Stellungnahme Card (wenn beauftragt/hochgeladen) ═══ */}
-      {fall.technische_stellungnahme_status && fall.technische_stellungnahme_status !== 'nicht_benoetigt' && (
+      {fall.technische_stellungnahme_status && fall.technische_stellungnahme_status !== 'nicht-angefordert' && (
         <div className="bg-violet-50 rounded-xl border border-violet-200 p-5 space-y-3">
           <h3 className="text-xs font-semibold text-violet-800 uppercase flex items-center gap-2">
             <FileTextIcon className="w-4 h-4" /> Technische Stellungnahme

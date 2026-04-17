@@ -1,7 +1,10 @@
 'use client'
 
-// AAR-294: Conditional NachbesichtigungCard. DB-Felder verifiziert:
+// AAR-294 / AAR-398: Conditional NachbesichtigungCard. DB-Felder verifiziert:
 // nachbesichtigung_status, _angefordert_am, _termin_datum, _ergebnis.
+// Self-Gating über Whitelist aktiver States — robust gegen DB-Drift
+// (vorheriger Blacklist-Check hat 'nicht_angefordert' (Underscore) ≠
+// 'nicht-angefordert' (Bindestrich) nicht gefangen).
 
 import { RefreshCwIcon, ClockIcon, CheckCircle2Icon, CalendarIcon } from 'lucide-react'
 import { tageSeit } from '@/lib/gutachter/abrechnung'
@@ -14,12 +17,21 @@ type Fall = {
   nachbesichtigung_ergebnis?: string | null
 }
 
+const AKTIVE_STATES = new Set([
+  'angefordert',
+  'termin-gewaehlt',
+  'durchgefuehrt',
+  'ergebnis-eingegangen',
+])
+
 export function NachbesichtigungCard({ fall, id }: { fall: Fall; id?: string }) {
   const status = fall.nachbesichtigung_status
-  if (!status || status === 'nicht-angefordert') return null
+  if (!status || !AKTIVE_STATES.has(status)) return null
 
   const durchgefuehrt =
-    status === 'durchgefuehrt' || Boolean(fall.nachbesichtigung_ergebnis)
+    status === 'durchgefuehrt' ||
+    status === 'ergebnis-eingegangen' ||
+    Boolean(fall.nachbesichtigung_ergebnis)
   const terminSet = Boolean(fall.nachbesichtigung_termin_datum)
   const tage = tageSeit(fall.nachbesichtigung_angefordert_am)
 

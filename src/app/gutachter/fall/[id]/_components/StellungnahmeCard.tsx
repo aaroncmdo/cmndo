@@ -1,14 +1,16 @@
 'use client'
 
-// AAR-294 / AAR-400: Technische Stellungnahme — Inline-Upload in der Fallakte.
+// AAR-294 / AAR-400 / AAR-398: Technische Stellungnahme — Inline-Upload in der Fallakte.
 // Ersetzt die frühere dedizierte Route /gutachter/stellungnahme/[fallId].
 //
-// Self-Gating: rendert nur, wenn technische_stellungnahme_status gesetzt ist
-// und nicht 'nicht-angefordert'.
+// Self-Gating über Whitelist aktiver States — robust gegen DB-Drift
+// (früherer Blacklist-Check hat 'nicht_benoetigt' (Underscore) ≠
+// 'nicht-angefordert' (Bindestrich) nicht gefangen → Card rendert falsch).
 //
 // States:
 //   - 'beauftragt' → Inline-Upload (PDF + Notiz)
 //   - 'hochgeladen' / 'freigegeben' → grüne Erfolgs-Ansicht mit Datum
+//   - 'abgelehnt' → rot (KB hat abgelehnt)
 
 import { useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
@@ -34,6 +36,8 @@ type Fall = {
 
 const MAX_BYTES = 20 * 1024 * 1024
 
+const AKTIVE_STATES = new Set(['beauftragt', 'hochgeladen', 'freigegeben', 'abgelehnt'])
+
 export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
   const router = useRouter()
   const status = fall.technische_stellungnahme_status
@@ -42,7 +46,7 @@ export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
   const [notiz, setNotiz] = useState('')
   const inputRef = useRef<HTMLInputElement | null>(null)
 
-  if (!status || status === 'nicht-angefordert') return null
+  if (!status || !AKTIVE_STATES.has(status)) return null
 
   const hochgeladen =
     status === 'hochgeladen' ||

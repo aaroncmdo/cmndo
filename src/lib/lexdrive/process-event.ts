@@ -119,7 +119,7 @@ function computeFieldUpdates(eventType: LexDriveEvent, payload: LexDriveEventPay
   }
   // AAR-165 / W5: Ergebnis-Event schreibt das W1-Feld nachbesichtigung_ergebnis
   if (eventType === 'vs_nachbesichtigung_ergebnis') {
-    updates.nachbesichtigung_status = 'ergebnis_eingegangen'
+    updates.nachbesichtigung_status = 'ergebnis-eingegangen'
     if (payload.beschreibung) updates.nachbesichtigung_ergebnis = payload.beschreibung
     if (payload.grund) updates.nachbesichtigung_ergebnis = payload.grund
     if (payload.betrag) updates.regulierung_betrag = Number(payload.betrag)

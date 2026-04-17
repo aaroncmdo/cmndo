@@ -42,7 +42,7 @@ export async function waehleNachbesichtigungsTermin(
 
   await db.from('faelle').update({
     nachbesichtigung_termin_datum: datum,
-    nachbesichtigung_status: 'termin_gewaehlt',
+    nachbesichtigung_status: 'termin-gewaehlt',
   }).eq('id', fallId)
 
   await db.from('timeline').insert({

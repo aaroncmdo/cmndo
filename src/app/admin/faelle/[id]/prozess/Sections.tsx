@@ -159,7 +159,7 @@ export function StellungnahmeSection() {
   const beauftragtAm = fmtDate(fall.technische_stellungnahme_beauftragt_am)
   const hochgeladenAm = fmtDate(fall.technische_stellungnahme_hochgeladen_am)
   const freigabeAm = fmtDate(fall.technische_stellungnahme_freigabe_am)
-  const kannBeauftragen = !status || status === 'ausstehend'
+  const kannBeauftragen = !status || status === 'nicht-angefordert'
   const kannFreigeben = status === 'hochgeladen'
   function trigger(action: () => Promise<{ success: boolean; error?: string }>, label: string) {
     startTransition(async () => {
