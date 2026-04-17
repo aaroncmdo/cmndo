@@ -135,7 +135,50 @@ export default function GutachterCockpit() {
   const isToday = selectedDate.toDateString() === new Date().toDateString()
   function startNav(t: Termin) { if (!isToday) return; setActive(t); setMode('navigation'); setFotos({}); setFin(''); setKm(''); setNotizen(''); setMTab('route') }
 
-  async function handleFoto(slot: string, file: File) { if (!active) return; setUploading(true); try { const ext = file.name.split('.').pop() ?? 'jpg'; const path = `${active.id}/gutachter-fotos/${slot.toLowerCase()}_${Date.now()}.${ext}`; await supabase.storage.from('dokumente').upload(path, file, { contentType: file.type }); const { data: { publicUrl } } = supabase.storage.from('dokumente').getPublicUrl(path); await supabase.from('dokumente').insert({ fall_id: active.id, typ: 'schadensfoto', datei_url: publicUrl, datei_name: `${slot}.${ext}`, datei_groesse: file.size, kategorie: 'schadensfotos', hochgeladen_von_rolle: 'sachverstaendiger', quelle: 'gutachter-app' }); setFotos(p => ({ ...p, [slot]: true })) } catch { /* */ } setUploading(false) }
+  async function handleFoto(slot: string, file: File) {
+    if (!active) return
+    setUploading(true)
+    try {
+      // AAR-363: Offline-Fallback — wenn Browser keine Verbindung sieht, den
+      // Upload in die IndexedDB-Outbox legen statt direkt zu versuchen.
+      // Der sync-outbox-Listener arbeitet die Queue bei Online-Wiederkehr ab.
+      const ext = file.name.split('.').pop() ?? 'jpg'
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        const { addToOutbox } = await import('@/lib/offline/outbox')
+        await addToOutbox({
+          fall_id: active.id,
+          dokument_typ: `schadensfoto_${slot.toLowerCase()}`,
+          file_blob: file,
+          file_name: `${slot}.${ext}`,
+          file_size: file.size,
+          content_type: file.type || 'image/jpeg',
+          ist_pflicht: false,
+          ab_phase: null,
+        })
+        setFotos(p => ({ ...p, [slot]: true }))
+        setUploading(false)
+        return
+      }
+      // Online-Pfad: direkt zum Dokumente-Bucket (bestehendes Verhalten)
+      const path = `${active.id}/gutachter-fotos/${slot.toLowerCase()}_${Date.now()}.${ext}`
+      await supabase.storage.from('dokumente').upload(path, file, { contentType: file.type })
+      const { data: { publicUrl } } = supabase.storage.from('dokumente').getPublicUrl(path)
+      await supabase.from('dokumente').insert({
+        fall_id: active.id,
+        typ: 'schadensfoto',
+        datei_url: publicUrl,
+        datei_name: `${slot}.${ext}`,
+        datei_groesse: file.size,
+        kategorie: 'schadensfotos',
+        hochgeladen_von_rolle: 'sachverstaendiger',
+        quelle: 'gutachter-app',
+      })
+      setFotos(p => ({ ...p, [slot]: true }))
+    } catch {
+      /* */
+    }
+    setUploading(false)
+  }
 
   async function complete() { if (!active) return; setCompleting(true); try { const u: Record<string, unknown> = {}; if (fin.length === 17) u.fin_vin = fin.toUpperCase(); if (Object.keys(u).length) await supabase.from('faelle').update(u).eq('id', active.id); const { transitionFallStatus } = await import('@/lib/faelle/state-machine'); try { await transitionFallStatus(active.id, 'besichtigung') } catch { /* Transition evtl. nicht erlaubt */ }; setMode('overview'); setActive(null); load() } catch { /* */ } setCompleting(false) }
 

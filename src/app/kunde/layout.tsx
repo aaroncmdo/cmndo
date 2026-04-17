@@ -4,6 +4,8 @@ import { headers } from 'next/headers'
 import Link from 'next/link'
 import NotificationBell from '@/app/admin/_components/NotificationBell'
 import KundeNav from './_components/KundeNav'
+// AAR-363: Outbox-Badge für offline-wartende Uploads (Pflichtdokumente etc.)
+import OutboxBadge from '@/components/offline/OutboxBadge'
 // AAR-316 W3: Sprach-Banner mit Google-Translate-Fallback
 import { SprachBanner } from '@/components/i18n/SprachBanner'
 import type { SpracheCode } from '@/lib/i18n/sprach-banner'
@@ -68,6 +70,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-medium truncate">{displayName}</p>
             </div>
+            <OutboxBadge />
             <NotificationBell />
           </div>
         </div>
@@ -81,7 +84,10 @@ export default async function KundeLayout({ children }: { children: React.ReactN
             <span className="text-[#4573A2]">ondo</span>
           </span>
         </Link>
-        <NotificationBell />
+        <div className="flex items-center gap-2">
+          <OutboxBadge />
+          <NotificationBell />
+        </div>
       </header>
 
       {/* Hauptinhalt — offset by sidebar on desktop, offset by header on mobile */}
