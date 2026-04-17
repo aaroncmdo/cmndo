@@ -12,7 +12,10 @@ export function subject(_p: Props) {
 }
 
 export function SvPortalFreigeschaltetEmail(props: Props) {
-  const url = props.portalUrl ?? `${APP_URL}/gutachter/onboarding`
+  // AAR-371: Legacy-Pfad /gutachter/onboarding leitet zwar noch per Redirect
+  // auf /gutachter/willkommen, aber im Mail-Default direkt auf den aktuellen
+  // Flow zeigen — spart einen Redirect und ist semantisch korrekter.
+  const url = props.portalUrl ?? `${APP_URL}/gutachter/willkommen`
 
   return (
     <EmailLayout preview="Vertragsunterlagen & nächster Schritt: Anzahlung">

@@ -108,7 +108,9 @@ export async function signSvVertrag({
     }
   } catch (err) { console.error('[KFZ-148] Welcome-Mail:', err) }
 
-  revalidatePath('/gutachter/onboarding')
+  // AAR-371: /gutachter/onboarding ist nur noch Redirect-Page — der aktive
+  // Flow läuft auf /gutachter/willkommen.
+  revalidatePath('/gutachter/willkommen')
   // BUG-92: Admin-Listing muss frische Daten sehen sobald der SV unterzeichnet hat,
   // sonst zeigt das Status-Badge dort weiter 'Wartet auf Vertrag'.
   revalidatePath('/admin/sachverstaendige', 'page')
