@@ -1,6 +1,15 @@
 {
   "landing": {
-    "hero": {},
+    "hero": {
+      "trust_badge": "Deutschlandweit über 50 Partner-Gutachter",
+      "headline": "Unverschuldet im Blech? Claimondo regelt das.",
+      "subheadline": "Gutachten. Anwalt. Regulierung. Alles aus einer Hand. 0 € für Sie — der Gegner zahlt.",
+      "cta_primary": "Schaden melden",
+      "cta_secondary": "Beraten lassen",
+      "cta_authenticated": "Weiter zu meinem Portal",
+      "phone_label": "Oder rufen Sie uns an:",
+      "phone_aria": "Claimondo Hotline anrufen"
+    },
     "trust": {},
     "steps": {},
     "dat_teaser": {},
