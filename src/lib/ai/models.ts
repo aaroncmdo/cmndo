@@ -73,6 +73,12 @@ export const AI_MODELS = {
    * Multimodal → Sonnet 4.6.
    */
   vision_lead: 'claude-sonnet-4-6',
+  /**
+   * AAR-470 (C4): Struktur-Extraktion aus dem Voice-Transkript im Kunden-Flow
+   * Schritt 1. Sonnet 4.6 — deutscher Sprachstil, konservative Null-Felder
+   * wenn Info fehlt.
+   */
+  voice_extract: 'claude-sonnet-4-6',
 } as const
 
 export type AiModelKey = keyof typeof AI_MODELS
