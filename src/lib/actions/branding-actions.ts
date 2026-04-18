@@ -14,93 +14,10 @@ async function requireGutachter() {
   return { supabase, userId: user.id, svId: sv.id }
 }
 
-export async function uploadGutachterLogo(formData: FormData): Promise<{
-  logo_url: string
-  primary: string
-  secondary: string
-}> {
-  const { svId } = await requireGutachter()
-
-  const file = formData.get('logo') as File
-  if (!file || file.size === 0) throw new Error('Keine Datei ausgewählt')
-  if (file.size > 2 * 1024 * 1024) throw new Error('Datei zu groß (max 2 MB)')
-
-  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png'
-  if (!['png', 'jpg', 'jpeg', 'svg', 'webp'].includes(ext)) throw new Error('Nur PNG, JPG, SVG oder WebP erlaubt')
-
-  // AAR-218: Storage-Upload über Admin-Client — Identität wurde in
-  // requireGutachter() bereits verifiziert, und die SSR-Client/Storage-Kombi
-  // hat JWT-Weitergabe-Probleme verursacht (400 auf /object/gutachter-logos/*).
-  const admin = createAdminClient()
-  const path = `${svId}/${Date.now()}.${ext}`
-  const { error: uploadErr } = await admin.storage.from('gutachter-logos').upload(path, file, { contentType: file.type })
-  if (uploadErr) throw new Error(`Upload fehlgeschlagen: ${uploadErr.message}`)
-
-  const { data: urlData } = admin.storage.from('gutachter-logos').getPublicUrl(path)
-  const logoUrl = urlData.publicUrl
-
-  // Color Extraction
-  let primary = '#0D1B3E'
-  let secondary = '#4573A2'
-  try {
-    const { extractTwoColors } = await import('@/lib/branding/extract-colors')
-    const colors = await extractTwoColors(logoUrl)
-    primary = colors.primary
-    secondary = colors.secondary
-  } catch (err) {
-    console.error('[KFZ-139] Color-Extraction fehlgeschlagen, Defaults verwendet:', err)
-  }
-
-  return { logo_url: logoUrl, primary, secondary }
-}
-
-export async function saveGutachterBranding(data: {
-  logo_url?: string
-  brand_primary: string
-  brand_secondary: string
-  use_custom_branding: boolean
-}): Promise<void> {
-  const { supabase, svId } = await requireGutachter()
-
-  // Hex-Validierung
-  const hexRe = /^#[0-9a-fA-F]{6}$/
-  if (!hexRe.test(data.brand_primary)) throw new Error('Primaerfarbe ungueltig')
-  if (!hexRe.test(data.brand_secondary)) throw new Error('Sekundaerfarbe ungueltig')
-
-  // AAR-220 Audit: Theme aus primary regenerieren mit User-Override für
-  // secondary (Color-Picker-Pfad). Vorher wurde brand_theme hier nicht
-  // gesetzt → Profil-Save überschrieb brand_primary/secondary aber das
-  // Theme blieb stale.
-  // AAR-419 Follow-up: themeFromLegacy(primary, secondary) statt manuellem
-  // Spread — leitet secondaryHover/Active/Soft korrekt vom User-Secondary ab
-  // (vorher blieben sie auf dem Primary-abgeleiteten Auto-Secondary gekeyed).
-  const { themeFromLegacy } = await import('@/lib/branding/theme')
-  const theme = themeFromLegacy(data.brand_primary, data.brand_secondary)
-
-  const updateData: Record<string, unknown> = {
-    brand_primary: data.brand_primary,
-    brand_secondary: data.brand_secondary,
-    brand_accent: theme.accent,
-    brand_theme: theme,
-    use_custom_branding: data.use_custom_branding,
-  }
-  if (data.logo_url) updateData.logo_url = data.logo_url
-
-  const { error } = await supabase.from('sachverstaendige').update(updateData).eq('id', svId)
-  if (error) throw new Error(error.message)
-
-  revalidatePath('/gutachter')
-  revalidatePath('/gutachter/profil')
-}
-
-export async function toggleCustomBranding(enabled: boolean): Promise<void> {
-  const { supabase, svId } = await requireGutachter()
-  const { error } = await supabase.from('sachverstaendige').update({ use_custom_branding: enabled }).eq('id', svId)
-  if (error) throw new Error(error.message)
-
-  revalidatePath('/gutachter')
-  revalidatePath('/gutachter/profil')
-}
+// AAR-454: uploadGutachterLogo / saveGutachterBranding / toggleCustomBranding
+// entfernt — wurden ausschliesslich vom alten V1-Branding-UI auf /gutachter/profil
+// genutzt, das jetzt zugunsten des AAR-422-Editors unter /gutachter/profil/branding
+// ersetzt wurde. Die neuen Editor-Actions liegen in src/lib/actions/sv-branding/*.
 
 // ── KFZ-157: Logo-Upload-Step im Willkommen-Flow ────────────────────────
 
