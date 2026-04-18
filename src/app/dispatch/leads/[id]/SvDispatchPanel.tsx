@@ -17,6 +17,7 @@ import {
   AlertTriangleIcon,
   XCircleIcon,
   CheckIcon,
+  SearchIcon,
 } from 'lucide-react'
 import {
   listSvSuggestionsForLead,
@@ -24,8 +25,10 @@ import {
   cancelSvTerminForLead,
   acceptGegenvorschlag,
   getNextFreeSlotsForSv,
+  debugSvMatching,
   type SvSuggestion,
 } from './actions'
+import type { DebugSvMatchingResponse } from '@/lib/dispatch/debugSvMatching'
 
 type AktiverTermin = {
   id: string
@@ -67,6 +70,25 @@ export default function SvDispatchPanel({
   // AAR-195: Vorgeschlagene Slots für den ausgewählten SV
   const [freeSlots, setFreeSlots] = useState<{ start: string; end: string }[]>([])
   const [slotsLoading, setSlotsLoading] = useState(false)
+  // AAR-521: Debug-Modal fuer "Warum keine SVs?"
+  const [debugOpen, setDebugOpen] = useState(false)
+  const [debugData, setDebugData] = useState<DebugSvMatchingResponse | null>(null)
+  const [debugLoading, setDebugLoading] = useState(false)
+  const [debugError, setDebugError] = useState<string | null>(null)
+
+  function openDebugModal() {
+    setDebugOpen(true)
+    setDebugLoading(true)
+    setDebugError(null)
+    setDebugData(null)
+    debugSvMatching(leadId)
+      .then((r) => {
+        if (r.success && r.data) setDebugData(r.data)
+        else setDebugError(r.error ?? 'Debug fehlgeschlagen')
+      })
+      .catch((e) => setDebugError(e instanceof Error ? e.message : 'Debug fehlgeschlagen'))
+      .finally(() => setDebugLoading(false))
+  }
 
   // Slots nachladen sobald SV ausgewählt ist (oder Dauer wechselt)
   useEffect(() => {
@@ -366,9 +388,16 @@ export default function SvDispatchPanel({
           )}
 
           {suggestions && suggestions.length === 0 && !loadError && (
-            <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">
-              Keine SVs in Reichweite gefunden. Prüfe Kontingent, Urlaub oder Isochrone-Polygone.
-            </p>
+            <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2 space-y-1.5">
+              <p>Keine SVs in Reichweite gefunden. Prüfe Kontingent, Urlaub oder Isochrone-Polygone.</p>
+              <button
+                type="button"
+                onClick={openDebugModal}
+                className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-900 underline hover:no-underline"
+              >
+                <SearchIcon className="w-3 h-3" /> Warum? (Debug-Details)
+              </button>
+            </div>
           )}
 
           {/* Schritt 2: SV-Liste */}
@@ -577,6 +606,88 @@ export default function SvDispatchPanel({
             </div>
           )}
         </>
+      )}
+
+      {debugOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+          onClick={() => setDebugOpen(false)}
+        >
+          <div
+            className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200">
+              <h3 className="text-sm font-semibold text-[#0D1B3E]">SV-Matching Debug</h3>
+              <button
+                type="button"
+                onClick={() => setDebugOpen(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <XIcon className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="overflow-y-auto px-5 py-3 space-y-3">
+              {debugLoading && <p className="text-xs text-gray-500">Lade Debug-Daten…</p>}
+              {debugError && (
+                <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg p-2">
+                  {debugError}
+                </p>
+              )}
+              {debugData && (
+                <>
+                  <div className="text-xs text-gray-600 bg-gray-50 rounded-lg p-2">
+                    <div>Fall-Koordinaten: {debugData.fallLat.toFixed(5)}, {debugData.fallLng.toFixed(5)}</div>
+                    <div>
+                      {debugData.passend} von {debugData.gesamt} aktiven SVs passen.
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    {debugData.results.map((r) => {
+                      const ok = r.status === 'passt'
+                      return (
+                        <div
+                          key={r.svId}
+                          className={`text-xs rounded-lg border p-2 ${
+                            ok
+                              ? 'border-emerald-200 bg-emerald-50'
+                              : 'border-gray-200 bg-white'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-medium text-[#0D1B3E]">{r.name}</span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                              {r.paket}
+                            </span>
+                          </div>
+                          <div className={`mt-0.5 ${ok ? 'text-emerald-800' : 'text-gray-700'}`}>
+                            {ok ? '✓ ' : '✕ '}
+                            {r.grund}
+                          </div>
+                          <div className="mt-1 text-[10px] text-gray-500 flex flex-wrap gap-x-2 gap-y-0.5">
+                            <span>Distanz: {r.distanzKm != null ? `${r.distanzKm}km` : '—'}</span>
+                            <span>Radius: {r.radius}km</span>
+                            <span>Kontingent frei: {r.kontingentFrei}</span>
+                            <span>
+                              Isochrone: {r.hatIsochrone
+                                ? r.isochroneValid
+                                  ? r.imPolygon
+                                    ? 'im Polygon'
+                                    : 'ausserhalb'
+                                  : 'unlesbar'
+                                : 'keine'}
+                            </span>
+                            {r.imUrlaub && <span className="text-amber-700">Urlaub aktiv</span>}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
