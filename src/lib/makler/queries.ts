@@ -192,6 +192,177 @@ export function provisionFuerServiceTyp(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// AAR-486 (M4) — Akten-Liste
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type AktenFilter = 'aktiv' | 'abgeschlossen' | 'storniert'
+
+export type MaklerAkteRow = {
+  id: string
+  fall_nummer: string | null
+  status: string
+  aktuelle_phase: string | null
+  service_typ: string | null
+  fahrzeug_hersteller: string | null
+  fahrzeug_modell: string | null
+  sv_termin: string | null
+  schadenhoehe_netto: number | null
+  updated_at: string | null
+  created_at: string
+  kunde_vorname: string | null
+  kunde_nachname: string | null
+  consent_scope: string
+}
+
+/**
+ * Status-Gruppen für die drei Filter-Chips. Wir mappen auf den tatsächlichen
+ * faelle.status-Enum (siehe DB): alles was nicht „abgeschlossen"/„storniert"/
+ * „zahlung-eingegangen" ist, gilt als „aktiv".
+ */
+const AKTEN_FILTER_STATUS: Record<AktenFilter, string[]> = {
+  aktiv: [
+    'ersterfassung',
+    'onboarding',
+    'sv-gesucht',
+    'sv-zugewiesen',
+    'sv-termin',
+    'besichtigung',
+    'begutachtung-laeuft',
+    'gutachten-eingegangen',
+    'filmcheck',
+    'qc-pruefung',
+    'kanzlei-uebergeben',
+    'anschlussschreiben',
+    'regulierung',
+    'regulierung-laeuft',
+    'nachbesichtigung-laeuft',
+    'vs-abgelehnt',
+  ],
+  abgeschlossen: ['abgeschlossen', 'zahlung-eingegangen'],
+  storniert: ['storniert'],
+}
+
+/**
+ * AAR-486: Akten des Maklers für einen Filter — Zwei-Schritt-Query:
+ * erst fall-ids via makler_fall_consent (aktiver Consent), dann faelle mit
+ * Status-Filter + Lead-Join. Vermeidet Supabase-Foreign-Table-Order-Pain.
+ */
+export async function getMaklerFaelleList(
+  maklerId: string,
+  filter: AktenFilter,
+): Promise<MaklerAkteRow[]> {
+  const supabase = await createClient()
+
+  const { data: consentRows } = await supabase
+    .from('makler_fall_consent')
+    .select('fall_id, consent_scope')
+    .eq('makler_id', maklerId)
+    .is('widerrufen_am', null)
+
+  const scopeByFall = new Map<string, string>()
+  for (const row of consentRows ?? []) {
+    if (row.fall_id) scopeByFall.set(row.fall_id, row.consent_scope)
+  }
+  const fallIds = Array.from(scopeByFall.keys())
+  if (fallIds.length === 0) return []
+
+  const { data } = await supabase
+    .from('faelle')
+    .select(`
+      id, fall_nummer, status, aktuelle_phase, service_typ,
+      fahrzeug_hersteller, fahrzeug_modell,
+      sv_termin, schadenhoehe_netto, updated_at, created_at,
+      lead:leads(vorname, nachname)
+    `)
+    .in('id', fallIds)
+    .in('status', AKTEN_FILTER_STATUS[filter])
+    .order('updated_at', { ascending: false, nullsFirst: false })
+
+  type Row = {
+    id: string
+    fall_nummer: string | null
+    status: string
+    aktuelle_phase: string | null
+    service_typ: string | null
+    fahrzeug_hersteller: string | null
+    fahrzeug_modell: string | null
+    sv_termin: string | null
+    schadenhoehe_netto: number | null
+    updated_at: string | null
+    created_at: string
+    lead:
+      | { vorname: string | null; nachname: string | null }[]
+      | { vorname: string | null; nachname: string | null }
+      | null
+  }
+
+  return ((data ?? []) as Row[]).map((r) => {
+    const lead = Array.isArray(r.lead) ? r.lead[0] : r.lead
+    return {
+      id: r.id,
+      fall_nummer: r.fall_nummer,
+      status: r.status,
+      aktuelle_phase: r.aktuelle_phase,
+      service_typ: r.service_typ,
+      fahrzeug_hersteller: r.fahrzeug_hersteller,
+      fahrzeug_modell: r.fahrzeug_modell,
+      sv_termin: r.sv_termin,
+      schadenhoehe_netto:
+        r.schadenhoehe_netto !== null ? Number(r.schadenhoehe_netto) : null,
+      updated_at: r.updated_at,
+      created_at: r.created_at,
+      kunde_vorname: lead?.vorname ?? null,
+      kunde_nachname: lead?.nachname ?? null,
+      consent_scope: scopeByFall.get(r.id) ?? 'minimal',
+    }
+  })
+}
+
+/**
+ * Parallele Counts für die Filter-Chips.
+ */
+export async function getMaklerFaelleCounts(
+  maklerId: string,
+): Promise<Record<AktenFilter, number>> {
+  const supabase = await createClient()
+  const { data: consentRows } = await supabase
+    .from('makler_fall_consent')
+    .select('fall_id')
+    .eq('makler_id', maklerId)
+    .is('widerrufen_am', null)
+  const fallIds = (consentRows ?? [])
+    .map((r) => r.fall_id)
+    .filter((x): x is string => !!x)
+  if (fallIds.length === 0) {
+    return { aktiv: 0, abgeschlossen: 0, storniert: 0 }
+  }
+
+  const [aktivRes, abgRes, storRes] = await Promise.all([
+    supabase
+      .from('faelle')
+      .select('id', { count: 'exact', head: true })
+      .in('id', fallIds)
+      .in('status', AKTEN_FILTER_STATUS.aktiv),
+    supabase
+      .from('faelle')
+      .select('id', { count: 'exact', head: true })
+      .in('id', fallIds)
+      .in('status', AKTEN_FILTER_STATUS.abgeschlossen),
+    supabase
+      .from('faelle')
+      .select('id', { count: 'exact', head: true })
+      .in('id', fallIds)
+      .in('status', AKTEN_FILTER_STATUS.storniert),
+  ])
+
+  return {
+    aktiv: aktivRes.count ?? 0,
+    abgeschlossen: abgRes.count ?? 0,
+    storniert: storRes.count ?? 0,
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // AAR-484 (M2) — Dashboard-Daten
 // ─────────────────────────────────────────────────────────────────────────────
 
