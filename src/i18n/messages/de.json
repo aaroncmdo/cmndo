@@ -120,7 +120,24 @@
       }
     },
     "step2b": {},
-    "step2c": {},
+    "step2c": {
+      "heading": "Daten des Unfallgegners",
+      "sub": "Je mehr wir über den Gegner wissen, desto schneller läuft die Regulierung.",
+      "fahrerflucht_label": "Fahrerflucht — der Unfallgegner hat sich unerlaubt entfernt",
+      "auslandskennzeichen_label": "Auslandskennzeichen — das gegnerische Fahrzeug hatte ein ausländisches Kennzeichen",
+      "fahrerflucht_hint": "Polizei-Aktenzeichen wird zur Weiterverarbeitung dringend benötigt.",
+      "auslandskennzeichen_hint": "Ausländisches Kennzeichen — geben Sie es so gut wie möglich ein.",
+      "gegner_name": "Name des Unfallgegners",
+      "gegner_kennzeichen": "Kennzeichen",
+      "gegner_versicherung": "Versicherung des Gegners",
+      "gegner_versicherung_hint": "Aus der ZB1 / Versicherungs-Karte ablesbar. Falls unbekannt, freilassen.",
+      "gegner_schadennummer": "Schadennummer der gegnerischen Versicherung (optional)",
+      "zeugen_heading": "Zeugen",
+      "zeuge_hinzufuegen": "Zeuge hinzufügen",
+      "keine_zeugen": "Keine Zeugen erfasst. Maximal 5 möglich.",
+      "weiter": "Weiter zu ZB1",
+      "saving": "Wird gespeichert …"
+    },
     "step3": {},
     "step4": {},
     "abort": {
