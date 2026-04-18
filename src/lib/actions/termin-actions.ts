@@ -7,6 +7,7 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { postChatSystemMessage } from '@/lib/chat/system-messages'
 import { generateReminderForTermin, cancelRemindersForTermin } from '@/lib/reminders/generate'
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
+import { emitEvent } from '@/lib/notifications/emit'
 import { revalidatePath } from 'next/cache'
 
 type ActionResult = { success: boolean; error?: string }
@@ -221,6 +222,17 @@ export async function terminAblehnen({
     })
   } catch { /* non-critical */ }
 
+  // AAR-501 N6: Event emittieren
+  try {
+    await emitEvent(
+      'termin.sv_abgelehnt',
+      { fallId: fId, terminId: tId, grund: grund || undefined },
+      { fallId: fId },
+    )
+  } catch (err) {
+    console.error('[AAR-501] emitEvent termin.sv_abgelehnt failed:', err)
+  }
+
   revalidateTerminPaths(fId)
   return { success: true }
 }
@@ -380,6 +392,19 @@ export async function terminGegenvorschlag({
     }
   } catch { /* non-critical */ }
 
+  // AAR-501 N6: Event emittieren
+  try {
+    const altDatum = neueStartZeit.toISOString().slice(0, 10)
+    const altUhrzeit = neueStartZeit.toISOString().slice(11, 16)
+    await emitEvent(
+      'termin.sv_gegenvorschlag',
+      { fallId: fId, terminId: tId, alt_datum: altDatum, alt_uhrzeit: altUhrzeit, grund: grund || undefined },
+      { fallId: fId, triggeredBy: kundeId ?? undefined },
+    )
+  } catch (err) {
+    console.error('[AAR-501] emitEvent termin.sv_gegenvorschlag failed:', err)
+  }
+
   revalidateTerminPaths(fId)
   return { success: true }
 }
@@ -527,6 +552,40 @@ export async function terminAnnehmen({
     }
   } catch { /* non-critical */ }
 
+  // AAR-501 N6: Event emittieren
+  try {
+    const { data: termin } = await admin
+      .from('gutachter_termine')
+      .select('start_zeit')
+      .eq('id', tId)
+      .single()
+    const startIso = (termin?.start_zeit as string | null) ?? new Date().toISOString()
+    const dt = new Date(startIso)
+    const svName = svId ? await getSvName(admin, svId) : 'Gutachter'
+    const { data: ortRow } = await admin
+      .from('faelle')
+      .select('schadens_adresse, schadens_plz, schadens_ort')
+      .eq('id', fId)
+      .single()
+    const ort = [ortRow?.schadens_adresse, ortRow?.schadens_plz, ortRow?.schadens_ort]
+      .filter(Boolean)
+      .join(', ')
+    await emitEvent(
+      'termin.sv_bestaetigt',
+      {
+        fallId: fId,
+        terminId: tId,
+        datum: dt.toISOString().slice(0, 10),
+        uhrzeit: dt.toISOString().slice(11, 16),
+        ort: ort || '—',
+        svName,
+      },
+      { fallId: fId },
+    )
+  } catch (err) {
+    console.error('[AAR-501] emitEvent termin.sv_bestaetigt failed:', err)
+  }
+
   revalidateTerminPaths(fId)
   return { success: true }
 }
@@ -629,6 +688,33 @@ export async function terminBuchen({
       }
     }
   } catch { /* non-critical */ }
+
+  // AAR-501 N6: Event emittieren
+  try {
+    const svName = svId ? await getSvName(admin, svId) : 'Gutachter'
+    const { data: ortRow } = await admin
+      .from('faelle')
+      .select('schadens_adresse, schadens_plz, schadens_ort')
+      .eq('id', fId)
+      .single()
+    const ort = [ortRow?.schadens_adresse, ortRow?.schadens_plz, ortRow?.schadens_ort]
+      .filter(Boolean)
+      .join(', ')
+    await emitEvent(
+      'termin.sv_bestaetigt',
+      {
+        fallId: fId,
+        terminId: termin.id,
+        datum: slotDate.toISOString().slice(0, 10),
+        uhrzeit: slotDate.toISOString().slice(11, 16),
+        ort: ort || '—',
+        svName,
+      },
+      { fallId: fId, triggeredBy: auth.userId },
+    )
+  } catch (err) {
+    console.error('[AAR-501] emitEvent termin.sv_bestaetigt failed:', err)
+  }
 
   revalidateTerminPaths(fId)
   return { success: true }

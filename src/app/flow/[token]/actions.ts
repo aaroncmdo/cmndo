@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { buildFallInsertFromLead, resolveFallEntityFks } from '@/lib/lead-fall-mapping'
 import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflicht'
+import { emitEvent } from '@/lib/notifications/emit'
 
 /**
  * AAR-90: FIN im Flow setzen + Cardentity-Anreicherung triggern.
@@ -904,6 +905,16 @@ export async function signSAandCreateFall(
 
   // Alle Trigger parallel ausfuehren — Fehler einzelner Trigger blockieren nicht
   await Promise.allSettled(slaPromises)
+
+  // AAR-501 N6: fall.created + sa.signed Events (parallel, fire-and-forget)
+  try {
+    await Promise.allSettled([
+      emitEvent('fall.created', { fallId: fall.id, leadId }, { fallId: fall.id }),
+      emitEvent('sa.signed', { fallId: fall.id }, { fallId: fall.id }),
+    ])
+  } catch (err) {
+    console.error('[AAR-501] emitEvent fall.created/sa.signed failed:', err)
+  }
 
   return { fallId: fall.id }
 

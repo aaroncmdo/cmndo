@@ -1,8 +1,14 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { emitEvent } from '@/lib/notifications/emit'
 
 /**
  * KFZ-202: Zentrale State-Machine fuer faelle.status.
  * Validiert alle Uebergaenge, setzt Timestamps, schreibt Timeline.
+ *
+ * AAR-501 N6: Jeder Übergang emittet das entsprechende Notification-Event
+ * (fall.status_changed / fall.storniert / kanzlei.uebergabe / regulierung.ergebnis),
+ * damit alle Caller automatisch den Event-Bus benutzen. Fehler im Emit werden
+ * geloggt — der Status-Übergang bleibt atomar.
  */
 
 export const FALL_STATUS_TRANSITIONS: Record<string, string[]> = {
@@ -125,6 +131,38 @@ export async function transitionFallStatus(
     beschreibung: metadata?.grund ?? null,
     erstellt_von: metadata?.user_id ?? null,
   })
+
+  // AAR-501 N6: Notification-Event emittieren. Generische fall.status_changed
+  // für jeden Übergang + spezifische Events für Storno und Kanzlei-Übergabe.
+  // Emit-Fehler dürfen den Übergang nicht brechen.
+  try {
+    if (newStatus === 'storniert') {
+      await emitEvent(
+        'fall.storniert',
+        { fallId, grund: metadata?.grund ?? 'storniert' },
+        { fallId, triggeredBy: metadata?.user_id },
+      )
+    } else if (newStatus === 'kanzlei-uebergeben') {
+      await emitEvent(
+        'kanzlei.uebergabe',
+        { fallId },
+        { fallId, triggeredBy: metadata?.user_id },
+      )
+      await emitEvent(
+        'fall.status_changed',
+        { fallId, oldStatus: currentStatus, newStatus },
+        { fallId, triggeredBy: metadata?.user_id },
+      )
+    } else {
+      await emitEvent(
+        'fall.status_changed',
+        { fallId, oldStatus: currentStatus, newStatus },
+        { fallId, triggeredBy: metadata?.user_id },
+      )
+    }
+  } catch (err) {
+    console.error('[AAR-501] emitEvent fall.status_changed failed:', err)
+  }
 
   // AAR-77: LexDrive-Email bei Status-Wechsel auf kanzlei-uebergeben
   if (newStatus === 'kanzlei-uebergeben') {

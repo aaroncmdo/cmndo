@@ -7,6 +7,7 @@ import { haversineMeters } from '@/lib/gps/geofence'
 import { calculateEtaMinutes } from '@/lib/eta/calculate-eta'
 import { sendCommunication } from '@/lib/communications/send'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
+import { emitEvent } from '@/lib/notifications/emit'
 
 // KFZ-200: Server Actions für SV-Navigation, Vor-Ort-Modus, Begutachtung.
 
@@ -71,6 +72,17 @@ export async function startNavigation(
       }
     }
   } catch { /* non-critical */ }
+
+  // AAR-501 N6: Event emittieren (SV ist unterwegs, ETA noch unbekannt)
+  try {
+    await emitEvent(
+      'termin.sv_unterwegs',
+      { fallId: termin.fall_id, terminId: termin.id, etaMinuten: 0 },
+      { fallId: termin.fall_id, triggeredBy: user.id },
+    )
+  } catch (err) {
+    console.error('[AAR-501] emitEvent termin.sv_unterwegs failed:', err)
+  }
 
   return {
     success: true,
@@ -260,6 +272,17 @@ export async function arrived(terminId: string): Promise<{ success?: boolean; er
     }
   } catch { /* non-critical */ }
 
+  // AAR-501 N6: Event emittieren
+  try {
+    await emitEvent(
+      'termin.sv_angekommen',
+      { fallId: termin.fall_id, terminId: termin.id },
+      { fallId: termin.fall_id, triggeredBy: user.id },
+    )
+  } catch (err) {
+    console.error('[AAR-501] emitEvent termin.sv_angekommen failed:', err)
+  }
+
   return { success: true }
 }
 
@@ -347,6 +370,17 @@ export async function completeBegutachtung(
       beschreibung: `SV hat die Begutachtung als abgeschlossen markiert.${discrepancyNote}`,
     })
   } catch { /* non-critical */ }
+
+  // AAR-501 N6: Event emittieren
+  try {
+    await emitEvent(
+      'termin.sv_abgeschlossen',
+      { fallId: termin.fall_id, terminId: termin.id },
+      { fallId: termin.fall_id, triggeredBy: user.id },
+    )
+  } catch (err) {
+    console.error('[AAR-501] emitEvent termin.sv_abgeschlossen failed:', err)
+  }
 
   return { success: true }
 }
