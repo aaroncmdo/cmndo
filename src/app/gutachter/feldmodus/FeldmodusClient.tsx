@@ -14,6 +14,7 @@ import FeldmodusMap from './FeldmodusMap'
 import RouteSidebar from './RouteSidebar'
 import OfflineStatusBanner from './OfflineStatusBanner'
 import SvFallakteView from './SvFallakteView'
+import FokusChatPanel from './FokusChatPanel'
 import { useFieldTracking } from './useFieldTracking'
 import { markArrived, pauseFokusmodus } from './actions'
 import { recoverOutbox } from '@/lib/offline/outbox'
@@ -24,12 +25,14 @@ export interface FeldmodusClientProps {
   session: SvTagesSession
   sv: FeldmodusSV
   stops: FeldmodusStop[]
+  userId: string
 }
 
 export default function FeldmodusClient({
   session,
   sv,
   stops,
+  userId,
 }: FeldmodusClientProps) {
   const router = useRouter()
 
@@ -169,6 +172,23 @@ export default function FeldmodusClient({
         )}
       </div>
       </div>
+
+      {/* AAR-383: Fokus-Chat als fixes Bottom-Panel — immer sichtbar
+          solange Session aktiv, Auto-Collapse beim arrived-State. */}
+      {aktuellerStop && sessionStatus !== 'finished' && (
+        <FokusChatPanel
+          fallId={aktuellerStop.fall_id}
+          sessionStatus={sessionStatus}
+          etaMinutes={
+            distanceMeters != null
+              ? Math.max(0, Math.round((distanceMeters / 1000 / 25) * 60))
+              : null
+          }
+          terminAddress={aktuellerStop.adresse}
+          customerName={aktuellerStop.kunde_name}
+          currentUserId={userId}
+        />
+      )}
     </div>
   )
 }

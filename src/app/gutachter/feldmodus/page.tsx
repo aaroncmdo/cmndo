@@ -218,6 +218,7 @@ export default async function FeldmodusPage() {
       session={session}
       sv={feldmodusSv}
       stops={stops}
+      userId={user.id}
     />
   )
 }
