@@ -1,9 +1,12 @@
 // AAR-317 MVP: Unfallskizze via Claude-API. Generiert ein einfaches SVG
 // mit Fahrzeug-Symbolen + Pfeilen basierend auf unfallhergang + schadentyp.
 // Animation (GIF) ist Follow-up — MVP speichert das rohe SVG als Inline-String.
+//
+// AAR-472 C6: nutzt jetzt den shared Anthropic-Helper aus src/lib/ai/vision/client.
+// Gleiches Modell (Sonnet 4.6), nur zentralisierte Instanziierung.
 
-import Anthropic from '@anthropic-ai/sdk'
 import { AI_MODELS } from '@/lib/ai/models'
+import { getAnthropicVisionClient } from '@/lib/ai/vision/client'
 
 export type UnfallskizzeInput = {
   unfallhergang: string | null
@@ -45,8 +48,8 @@ const TYP_LABELS: Record<string, string> = {
 export async function generateUnfallskizze(
   input: UnfallskizzeInput,
 ): Promise<UnfallskizzeResult> {
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  if (!apiKey) {
+  const anthropic = getAnthropicVisionClient()
+  if (!anthropic) {
     return { success: false, error: 'ANTHROPIC_API_KEY nicht gesetzt' }
   }
 
@@ -68,7 +71,6 @@ export async function generateUnfallskizze(
   ].join('\n')
 
   try {
-    const anthropic = new Anthropic({ apiKey })
     const response = await anthropic.messages.create({
       model: AI_MODELS.unfallskizze,
       max_tokens: 2000,

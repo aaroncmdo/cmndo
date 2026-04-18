@@ -67,6 +67,12 @@ export const AI_MODELS = {
    * komplexer Prompt — Sonnet 4.6.
    */
   makler_copilot: 'claude-sonnet-4-6',
+  /**
+   * AAR-472 (C6): Vision-Analyse der Schadensfotos im Kunden-Flow Schritt 2b.
+   * Liefert strukturiertes JSON (beschaedigte_teile, schweregrad, fahrzeug_hinweise).
+   * Multimodal → Sonnet 4.6.
+   */
+  vision_lead: 'claude-sonnet-4-6',
 } as const
 
 export type AiModelKey = keyof typeof AI_MODELS

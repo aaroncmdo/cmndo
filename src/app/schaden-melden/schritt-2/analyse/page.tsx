@@ -1,13 +1,15 @@
 import { FlowShell } from '../../_components/FlowShell'
+import { AnalyseGuard } from './AnalyseGuard'
 
-// AAR-467 C1 Stub — Inhalt kommt in AAR-472 (C6: Vision-Loading) und
-// AAR-473 (C7: DAT + Ergebnis).
+// AAR-472 C6: Schritt 2b — Claude-Vision-Analyse der Schadensfotos.
+// Der eigentliche Guard (leadId + fotos.length >= 3) ist client-seitig,
+// weil diese Daten im Flow-Store (sessionStorage) leben. Server-seitig
+// liefert die FlowShell nur die Außenhülle.
 
 export default function Schritt2AnalysePage() {
   return (
     <FlowShell step={2}>
-      <h1 className="text-2xl font-bold text-claimondo-navy">Schritt 2b — KI-Analyse</h1>
-      <p className="mt-2 text-slate-600">Platzhalter. Wird in AAR-472/AAR-473 befüllt.</p>
+      <AnalyseGuard />
     </FlowShell>
   )
 }
