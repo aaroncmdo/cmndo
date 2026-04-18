@@ -55,10 +55,10 @@ export default function GutachterCockpit() {
     const de = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + 1).toISOString()
 
     const [tR, nR, tkR, fR, doneR] = await Promise.all([
-      supabase.from('faelle').select('id, fall_nummer, schadens_adresse, schadens_plz, schadens_ort, sv_termin, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_fall_typ').eq('sv_id', sv.id).gte('sv_termin', ds).lt('sv_termin', de).not('status', 'in', '("abgeschlossen","storniert")').order('sv_termin', { ascending: true }),
-      supabase.from('faelle').select('id, lead_id, kennzeichen, schadens_fall_typ, created_at').eq('sv_id', sv.id).is('sv_termin', null).not('status', 'in', '("abgeschlossen","storniert")').limit(10),
+      supabase.from('v_faelle_mit_aktuellem_termin').select('id, fall_nummer, schadens_adresse, schadens_plz, schadens_ort, sv_termin, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_fall_typ').eq('sv_id', sv.id).gte('sv_termin', ds).lt('sv_termin', de).not('status', 'in', '("abgeschlossen","storniert")').order('sv_termin', { ascending: true }),
+      supabase.from('v_faelle_mit_aktuellem_termin').select('id, lead_id, kennzeichen, schadens_fall_typ, created_at').eq('sv_id', sv.id).is('sv_termin', null).not('status', 'in', '("abgeschlossen","storniert")').limit(10),
       supabase.from('tasks').select('id, titel, fall_id, faellig_am').or(`zugewiesen_an.eq.${user.id},empfaenger_user_id.eq.${user.id}`).in('status', ['offen', 'in-bearbeitung']).lte('faellig_am', de).limit(15),
-      supabase.from('faelle').select('id, lead_id').eq('sv_id', sv.id).not('sv_termin', 'is', null).lt('sv_termin', now.toISOString()).is('gutachten_eingegangen_am', null).not('status', 'in', '("abgeschlossen","storniert")').limit(1),
+      supabase.from('v_faelle_mit_aktuellem_termin').select('id, lead_id').eq('sv_id', sv.id).not('sv_termin', 'is', null).lt('sv_termin', now.toISOString()).is('gutachten_eingegangen_am', null).not('status', 'in', '("abgeschlossen","storniert")').limit(1),
       supabase.from('tasks').select('id, titel, updated_at').or(`zugewiesen_an.eq.${user.id},empfaenger_user_id.eq.${user.id}`).eq('status', 'erledigt').gte('updated_at', ds).lt('updated_at', de).limit(10),
     ])
 

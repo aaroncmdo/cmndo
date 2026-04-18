@@ -33,7 +33,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const admin = createAdminClient()
 
     // Fall laden
-    const { data: fall } = await supabase.from('faelle').select('*').eq('id', id).single()
+    const { data: fall } = await supabase.from('v_faelle_mit_aktuellem_termin').select('*').eq('id', id).single()
     if (!fall) notFound()
 
     // Ownership: kunde_id oder lead-email

@@ -52,7 +52,7 @@ export async function generateSvBriefing(
   const admin = createAdminClient()
 
   const { data: fall, error: fallErr } = await admin
-    .from('faelle')
+    .from('v_faelle_mit_aktuellem_termin')
     .select('*')
     .eq('id', fallId)
     .single()

@@ -22,7 +22,7 @@ export default async function GutachterFallPage({
 
   // Fetch case and verify sv_id match
   const { data: fall } = await supabase
-    .from('faelle')
+    .from('v_faelle_mit_aktuellem_termin')
     .select('*')
     .eq('id', id)
     .eq('sv_id', sv.id)

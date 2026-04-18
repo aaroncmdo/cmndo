@@ -162,7 +162,7 @@ export async function sendSvAuftragszusammenfassung(fallId: string, gutachterId:
   const { data: existing } = await db.from('email_log').select('id').eq('fall_id', fallId).eq('template', 'sv_auftrag').eq('status', 'sent').limit(1).maybeSingle()
   if (existing) return
 
-  const { data: fall } = await db.from('faelle').select('fall_nummer, lead_id, sv_termin, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen').eq('id', fallId).single()
+  const { data: fall } = await db.from('v_faelle_mit_aktuellem_termin').select('fall_nummer, lead_id, sv_termin, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen').eq('id', fallId).single()
   if (!fall) return
 
   const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', gutachterId).single()

@@ -31,7 +31,7 @@ export default async function FallaktePage({
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  const { data: fall } = await supabase.from('faelle').select('*').eq('id', id).single()
+  const { data: fall } = await supabase.from('v_faelle_mit_aktuellem_termin').select('*').eq('id', id).single()
   if (!fall) notFound()
 
   // Rolle des eingeloggten Users für field-permissions

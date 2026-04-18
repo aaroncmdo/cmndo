@@ -136,7 +136,7 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
     // ── Parallel queries ──
     const [gtR, rueckR, termineR, tasksR, neueR, leadsC, faelleC, konvR] = await Promise.all([
       // Gutachter-Termine
-      supabase.from('faelle')
+      supabase.from('v_faelle_mit_aktuellem_termin')
         .select('id, fall_nummer, sv_termin, sv_id, schadens_adresse, schadens_plz, schadens_ort, lead_id, kennzeichen, status')
         .not('sv_termin', 'is', null)
         .gte('sv_termin', ds).lt('sv_termin', de)

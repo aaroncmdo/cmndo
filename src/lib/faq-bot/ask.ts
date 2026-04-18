@@ -137,7 +137,7 @@ async function loadFallContext(fallId: string, rolle: FaqBotRolle) {
     : timelineQuery
 
   const [fallRes, leadRes, timelineRes, tasksRes] = await Promise.all([
-    admin.from('faelle').select('*').eq('id', fallId).maybeSingle(),
+    admin.from('v_faelle_mit_aktuellem_termin').select('*').eq('id', fallId).maybeSingle(),
     admin
       .from('faelle')
       .select('lead_id, leads(vorname, nachname, email, telefon, unfallhergang, schadentyp)')

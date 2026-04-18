@@ -45,7 +45,7 @@ export default async function AuftraegePage({
   }
 
   let query = supabase
-    .from('faelle')
+    .from('v_faelle_mit_aktuellem_termin')
     .select(
       'id, fall_nummer, status, schadens_ursache, schadens_datum, schadens_ort, sv_termin, gutachten_eingegangen_am, created_at, lead_id',
     )

@@ -23,7 +23,7 @@ export async function stornoFall(fallId: string, grund: string): Promise<{ succe
   if (!sv) return { success: false, typ: '', error: 'Kein SV-Profil' }
 
   const db = createAdminClient()
-  const { data: fall } = await db.from('faelle').select('id, sv_id, sv_termin').eq('id', fallId).eq('sv_id', sv.id).single()
+  const { data: fall } = await db.from('v_faelle_mit_aktuellem_termin').select('id, sv_id, sv_termin').eq('id', fallId).eq('sv_id', sv.id).single()
   if (!fall) return { success: false, typ: '', error: 'Fall nicht gefunden' }
 
   // Check: wie viel Zeit bis zum Termin?

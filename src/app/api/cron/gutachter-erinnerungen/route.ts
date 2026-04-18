@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
 
   // Get today's SV termine
   const { data: termine } = await svc
-    .from('faelle')
+    .from('v_faelle_mit_aktuellem_termin')
     .select('id, sv_id, sv_termin, schadens_adresse, schadens_plz, schadens_ort, losfahren_erinnerung_gesendet, termin_erinnerung_5min_gesendet, geschaetzte_fahrzeit_min, lead_id')
     .not('sv_id', 'is', null)
     .not('sv_termin', 'is', null)
@@ -112,7 +112,7 @@ export async function GET(req: NextRequest) {
   try {
     const in24h = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString()
     const { data: sv02Faelle } = await svc
-      .from('faelle')
+      .from('v_faelle_mit_aktuellem_termin')
       .select('id, sv_id, sv_termin')
       .eq('status', 'sv-termin')
       .not('sv_id', 'is', null)

@@ -26,7 +26,7 @@ export async function GET(
 
   const admin = createAdminClient()
   const { data: fall } = await admin
-    .from('faelle')
+    .from('v_faelle_mit_aktuellem_termin')
     .select('id, fall_nummer, kennzeichen, schadens_ort, schadens_adresse, sv_termin, sv_id, lead_id')
     .eq('id', fallId)
     .maybeSingle()

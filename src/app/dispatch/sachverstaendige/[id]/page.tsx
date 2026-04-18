@@ -36,7 +36,7 @@ export default async function DispatchSvDetailPage({
   const name = profile ? `${profile.vorname ?? ''} ${profile.nachname ?? ''}`.trim() : 'Unbekannt'
 
   const { data: faelle } = await supabase
-    .from('faelle')
+    .from('v_faelle_mit_aktuellem_termin')
     .select('id, fall_nummer, status, schadens_ursache, sv_termin, created_at, leads(vorname, nachname)')
     .eq('sv_id', id)
     .not('status', 'in', '("abgeschlossen","storniert")')

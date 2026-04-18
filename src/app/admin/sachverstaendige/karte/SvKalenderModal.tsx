@@ -64,7 +64,7 @@ export default function SvKalenderModal({ svId, svName, onClose }: { svId: strin
       supabase.from('gutachter_termine').select('id, start_zeit, end_zeit, status, fall_id')
         .eq('sv_id', svId).gte('start_zeit', ds.toISOString()).lt('start_zeit', de.toISOString())
         .not('status', 'eq', 'storniert'),
-      supabase.from('faelle').select('id, fall_nummer, sv_termin, lead_id, leads(vorname, nachname)')
+      supabase.from('v_faelle_mit_aktuellem_termin').select('id, fall_nummer, sv_termin, lead_id, leads(vorname, nachname)')
         .eq('sv_id', svId).not('sv_termin', 'is', null)
         .gte('sv_termin', ds.toISOString()).lt('sv_termin', de.toISOString()),
       supabase.from('faelle').select('id, fall_nummer, lead_id, leads(vorname, nachname)')

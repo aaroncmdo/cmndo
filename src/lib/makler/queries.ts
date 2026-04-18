@@ -302,7 +302,7 @@ export async function getMaklerFallDetail(
   if (!consent) return null
 
   const { data: fall } = await supabase
-    .from('faelle')
+    .from('v_faelle_mit_aktuellem_termin')
     .select(`
       id, fall_nummer, status, aktuelle_phase, service_typ,
       created_at, updated_at, unfalldatum, unfallort, schadens_art,
@@ -531,7 +531,7 @@ export async function getMaklerFaelleList(
   if (fallIds.length === 0) return []
 
   const { data } = await supabase
-    .from('faelle')
+    .from('v_faelle_mit_aktuellem_termin')
     .select(`
       id, fall_nummer, status, aktuelle_phase, service_typ,
       fahrzeug_hersteller, fahrzeug_modell,

@@ -23,7 +23,7 @@ export default async function SVKalenderPage({
 
   // Fetch all cases assigned to this SV with appointment dates
   const { data: faelle } = await supabase
-    .from('faelle')
+    .from('v_faelle_mit_aktuellem_termin')
     .select('id, fall_nummer, sv_termin, status, schadens_ort, schadens_adresse, lead_id, gutachter_termin_status')
     .eq('sv_id', sv.id)
     .not('status', 'in', '("abgeschlossen","storniert")')

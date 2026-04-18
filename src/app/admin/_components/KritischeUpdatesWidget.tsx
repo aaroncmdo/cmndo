@@ -37,7 +37,7 @@ async function loadAlerts(): Promise<Alert[]> {
   // den Termin bestaetigt hat (gutachter_termin_bestaetigt=false).
   try {
     const { count: hangingFaelle } = await supabase
-      .from('faelle')
+      .from('v_faelle_mit_aktuellem_termin')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'sv-zugewiesen')
       .eq('gutachter_termin_bestaetigt', false)

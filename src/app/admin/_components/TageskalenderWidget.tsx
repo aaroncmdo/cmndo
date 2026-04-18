@@ -17,7 +17,7 @@ export default async function TageskalenderWidget() {
       .lte('datum', todayEnd)
       .order('datum'),
     supabase
-      .from('faelle')
+      .from('v_faelle_mit_aktuellem_termin')
       .select('id, fall_nummer, sv_termin, kennzeichen')
       .gte('sv_termin', todayStart)
       .lte('sv_termin', todayEnd)

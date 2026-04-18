@@ -176,7 +176,7 @@ export async function POST(request: Request) {
       .lte('start_zeit', dayEnd.toISOString())
       .not('status', 'eq', 'storniert')
       .not('status', 'eq', 'abgelehnt'),
-    supabase.from('faelle').select('sv_id, sv_termin')
+    supabase.from('v_faelle_mit_aktuellem_termin').select('sv_id, sv_termin')
       .in('sv_id', svIds)
       .not('sv_termin', 'is', null)
       .not('status', 'in', '("abgeschlossen","storniert")')

@@ -77,7 +77,7 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
   if (newStatus === 'sv-termin') {
     sendFallCommunication(fallId, 'termin_bestaetigt').catch(() => {})
     // Gutachter-Mitteilung: Termin bestaetigt
-    const { data: fallInfo } = await supabase.from('faelle').select('sv_id, fall_nummer, sv_termin').eq('id', fallId).single()
+    const { data: fallInfo } = await supabase.from('v_faelle_mit_aktuellem_termin').select('sv_id, fall_nummer, sv_termin').eq('id', fallId).single()
     if (fallInfo?.sv_id) {
       const terminDate = fallInfo.sv_termin ? new Date(fallInfo.sv_termin) : null
       createGutachterMitteilung(fallInfo.sv_id, 'termin_bestaetigt', fallId, {

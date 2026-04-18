@@ -53,7 +53,7 @@ async function loadBriefingContext(opts: { fallId?: string; leadId?: string }): 
   let letzteAnalyse: PreCallContext['letzteAnalyse'] = null
 
   if (opts.fallId) {
-    const { data: fall } = await db.from('faelle').select('fall_nummer, status, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, gutachten_betrag, sv_termin, lead_id').eq('id', opts.fallId).single()
+    const { data: fall } = await db.from('v_faelle_mit_aktuellem_termin').select('fall_nummer, status, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, gutachten_betrag, sv_termin, lead_id').eq('id', opts.fallId).single()
     if (fall) {
       fallNummer = fall.fall_nummer ?? opts.fallId.slice(0, 8)
       status = fall.status
