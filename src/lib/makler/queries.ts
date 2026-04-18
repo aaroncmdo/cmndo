@@ -1066,3 +1066,83 @@ export async function getUngeleseneChatCount(
     .neq('sender_id', userId)
   return count ?? 0
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AAR-491 (M9) — Promo & QR-Code: Stats + Code-Lookup
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type PromoCodeRow = {
+  id: string
+  code: string
+  aktiv: boolean
+}
+
+export type PromoStats = {
+  clicks: number
+  leads: number
+  akten: number
+  konversion: number // akten / leads (0..1)
+}
+
+/**
+ * Liefert den primären aktiven Promo-Code des Maklers (bei mehreren
+ * Codes den zuerst angelegten). Im MVP-Flow hat jeder Makler genau einen.
+ */
+export async function getMaklerPrimaryPromoCode(
+  maklerId: string,
+): Promise<PromoCodeRow | null> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('promotion_codes')
+    .select('id, code, aktiv')
+    .eq('makler_id', maklerId)
+    .eq('aktiv', true)
+    .order('erstellt_am', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+  return (data as PromoCodeRow | null) ?? null
+}
+
+/**
+ * Aggregiert Klicks/Leads/Akten für einen Promo-Code. leads-Count ist
+ * via promotion_code_id direkt. akten-Count geht über leads→faelle per
+ * lead_id. konversion = akten / leads (0 wenn keine Leads).
+ */
+export async function getPromoStats(promoCodeId: string): Promise<PromoStats> {
+  const supabase = await createClient()
+
+  const [clicksRes, leadsRes, leadIdsRes] = await Promise.all([
+    supabase
+      .from('promo_clicks')
+      .select('id', { count: 'exact', head: true })
+      .eq('promotion_code_id', promoCodeId),
+    supabase
+      .from('leads')
+      .select('id', { count: 'exact', head: true })
+      .eq('promotion_code_id', promoCodeId),
+    supabase
+      .from('leads')
+      .select('id')
+      .eq('promotion_code_id', promoCodeId),
+  ])
+
+  const leadIds = (leadIdsRes.data ?? []).map((r) => r.id as string)
+  let aktenCount = 0
+  if (leadIds.length > 0) {
+    const { count } = await supabase
+      .from('faelle')
+      .select('id', { count: 'exact', head: true })
+      .in('lead_id', leadIds)
+    aktenCount = count ?? 0
+  }
+
+  const leads = leadsRes.count ?? 0
+  const konversion = leads > 0 ? aktenCount / leads : 0
+
+  return {
+    clicks: clicksRes.count ?? 0,
+    leads,
+    akten: aktenCount,
+    konversion,
+  }
+}
