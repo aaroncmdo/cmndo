@@ -1479,7 +1479,6 @@ export type Database = {
           halter_email?: string | null
           halter_geburtsdatum?: string | null
           halter_nachname?: string | null
-          halter_name?: string | null
           halter_plz?: string | null
           halter_stadt?: string | null
           halter_strasse?: string | null
@@ -1766,7 +1765,6 @@ export type Database = {
           halter_email?: string | null
           halter_geburtsdatum?: string | null
           halter_nachname?: string | null
-          halter_name?: string | null
           halter_plz?: string | null
           halter_stadt?: string | null
           halter_strasse?: string | null
@@ -3790,8 +3788,8 @@ export type Database = {
           gutachter_termin?: string | null
           halter_email?: string | null
           halter_geburtsdatum?: string | null
-          halter_nachname?: string | null
           halter_name?: string | null
+          halter_nachname?: string | null
           halter_plz?: string | null
           halter_stadt?: string | null
           halter_strasse?: string | null
@@ -3976,8 +3974,8 @@ export type Database = {
           gutachter_termin?: string | null
           halter_email?: string | null
           halter_geburtsdatum?: string | null
-          halter_nachname?: string | null
           halter_name?: string | null
+          halter_nachname?: string | null
           halter_plz?: string | null
           halter_stadt?: string | null
           halter_strasse?: string | null

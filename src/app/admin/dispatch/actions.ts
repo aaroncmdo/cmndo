@@ -581,7 +581,8 @@ async function convertLeadToFall(
       bank_name: lead.finanzierung_bank ?? null,
       firma_name: lead.firma_name ?? null,
       ust_id: lead.firma_ustid ?? null,
-      halter_name: lead.halter_name ?? null,
+      // AAR-548 D7: halter_name ist jetzt GENERATED aus halter_vorname+halter_nachname.
+      // Kein manueller Write mehr — lead.halter_name wandert via halter_vorname/halter_nachname.
       // KFZ-146: Erweiterte Fahrzeugdaten
       fahrzeug_farbe: lead.fahrzeug_farbe ?? null,
       erstzulassung: lead.erstzulassung ?? null,

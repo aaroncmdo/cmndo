@@ -65,7 +65,8 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // AAR-548 D4: schadensursache auf faelle ist weg — Mapping lebt jetzt in
   // LEAD_TO_FALL_RENAMED_FIELDS (fall.schadens_ursache ← lead.schadensursache).
   'firma_name',
-  'halter_name',
+  // AAR-548 D7: halter_name ist GENERATED aus halter_vorname + halter_nachname —
+  // kein manueller Write mehr. Die Einzelfelder werden weiter unten gemappt.
   'wunschtermin',
   'source_channel',
   'source_domain',

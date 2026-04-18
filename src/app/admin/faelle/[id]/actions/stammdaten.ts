@@ -35,10 +35,9 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'fin_vin',
   'erstzulassung',
   'kilometerstand',
-  // Halter (ZB1-OCR)
+  // Halter (ZB1-OCR) — AAR-548 D7: halter_name ist GENERATED (nicht editierbar).
   'halter_vorname',
   'halter_nachname',
-  'halter_name',
   'halter_strasse',
   'halter_plz',
   'halter_stadt',
