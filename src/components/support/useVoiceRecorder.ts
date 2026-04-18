@@ -1,6 +1,6 @@
 'use client'
 
-// AAR-520 (S3): MediaRecorder-Hook fuer den Support-Chat.
+// AAR-520 (S3): MediaRecorder-Hook für den Support-Chat.
 // 60s Safety-Auto-Stop, Stream wird nach Stop sauber geschlossen (kein Hot-Mic),
 // Transkript via /api/support/voice-transcribe (Groq Whisper).
 //
@@ -8,9 +8,9 @@
 //   isRecording       boolean
 //   isTranscribing    boolean (nach Stop bis Transkript da ist)
 //   error             string | null
-//   isSupported       boolean  — MediaRecorder im Browser verfuegbar?
+//   isSupported       boolean  — MediaRecorder im Browser verfügbar?
 //   start             Aufnahme starten
-//   stopAndTranscribe Stop + Transkription, gibt Transcript zurueck (oder null)
+//   stopAndTranscribe Stop + Transkription, gibt Transcript zurück (oder null)
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 

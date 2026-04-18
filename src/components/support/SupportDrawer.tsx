@@ -1,7 +1,7 @@
 'use client'
 
 // AAR-519 (S2): Slide-in-Drawer rechts — 420px Desktop, full-screen Mobile.
-// Focus-Trap: Fokus auf Close-Button beim Oeffnen, Esc schliesst, Backdrop-Click schliesst.
+// Focus-Trap: Fokus auf Close-Button beim Öffnen, Esc schließt, Backdrop-Click schließt.
 
 import { useEffect, useRef } from 'react'
 import { XIcon } from 'lucide-react'

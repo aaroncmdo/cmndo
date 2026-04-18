@@ -3,12 +3,12 @@
 -- support_rate_limits: pro User+Stunde Counter, 10/h Default-Limit.
 -- support_ticket_log:  Audit-Log aller Bot-Interaktionen (new/comment/no_action).
 --   linear_issue_id ist nullable, damit "no_action"-Turns (z.B. reine
---   Rueckfragen ohne Ticket) trotzdem geloggt werden koennen.
+--   Rückfragen ohne Ticket) trotzdem geloggt werden können.
 --
 -- RLS:
 --   - Nutzer sehen eigene Log-Zeilen (SELECT auf support_ticket_log).
 --   - Admin + Kundenbetreuer sehen alles (beide Tabellen).
---   - Writes laufen ausschliesslich ueber Service-Role (kein INSERT-Policy).
+--   - Writes laufen ausschließlich über Service-Role (kein INSERT-Policy).
 
 CREATE TABLE IF NOT EXISTS public.support_rate_limits (
   user_id     uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,

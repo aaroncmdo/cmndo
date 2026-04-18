@@ -1,13 +1,13 @@
-// AAR-519 (S2): Hook fuer Screenshot-Capture via html2canvas.
-// Viewport-only (nicht Full-Page), scale 0.5 fuer kleine Files (<500KB).
+// AAR-519 (S2): Hook für Screenshot-Capture via html2canvas.
+// Viewport-only (nicht Full-Page), scale 0.5 für kleine Files (<500KB).
 // Default-Export: { screenshot, capture, clearScreenshot, isCapturing, error }.
 
 'use client'
 
 import { useCallback, useState } from 'react'
 
-// html2canvas wird dynamisch importiert, damit der Bundle-Cost nur anfaellt
-// wenn der Support-Drawer tatsaechlich geoeffnet wird.
+// html2canvas wird dynamisch importiert, damit der Bundle-Cost nur anfällt
+// wenn der Support-Drawer tatsächlich geöffnet wird.
 export function useScreenshot() {
   const [screenshot, setScreenshot] = useState<string | null>(null)
   const [isCapturing, setIsCapturing] = useState(false)

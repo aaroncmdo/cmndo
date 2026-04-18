@@ -16,6 +16,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
   // Beim Mount einmal Screenshot ziehen — User darf jederzeit neu aufnehmen.
+  // (Aufnahme = "Screenshot aufnehmen", nicht Audio.)
   useEffect(() => {
     capture()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -44,7 +45,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
     }
   }
 
-  // AAR-520: Transkript wird an bestehenden Text angehaengt (nicht ersetzt),
+  // AAR-520: Transkript wird an bestehenden Text angehängt (nicht ersetzt),
   // User kann dann noch editieren bevor er auf "Senden" klickt.
   function handleTranscript(transcript: string) {
     setInput((prev) => (prev.trim() ? `${prev}\n\n${transcript}` : transcript))

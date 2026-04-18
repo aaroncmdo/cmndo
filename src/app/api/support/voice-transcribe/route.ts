@@ -1,13 +1,13 @@
-// AAR-520 (S3): Thin Voice-Transcribe-Endpoint fuer den Support-Bot.
+// AAR-520 (S3): Thin Voice-Transcribe-Endpoint für den Support-Bot.
 //
 // Im Gegensatz zu /api/schaden-melden/voice-transcribe (AAR-470) machen wir
 // hier KEINE Claude-Struktur-Extraktion — der Support-Bot will nur den
-// rohen Transkript-Text, um ihn ins Chat-Feld einzufuegen. Claude laeuft
+// rohen Transkript-Text, um ihn ins Chat-Feld einzufügen. Claude läuft
 // dann erst im Support-Chat-Flow.
 //
 // FormData:
 //   audio   Blob (audio/webm, max 10 MB)
-//   language  'de' (default, Rest waere ueber AAR-470 spaeter nachruestbar)
+//   language  'de' (default, Rest wäre über AAR-470 später nachrüstbar)
 //
 // Auth: nur eingeloggte SV/Admin/Kundenbetreuer, analog /api/support/chat.
 

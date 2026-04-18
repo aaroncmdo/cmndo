@@ -64,7 +64,7 @@ export async function resolveLabelIds(names: string[]): Promise<string[]> {
   for (const wanted of lowerNames) {
     const id = byName.get(wanted)
     if (id) ids.push(id)
-    else console.warn(`[AAR-518] Linear-Label "${wanted}" nicht gefunden — wird uebersprungen.`)
+    else console.warn(`[AAR-518] Linear-Label "${wanted}" nicht gefunden — wird übersprungen.`)
   }
   return ids
 }

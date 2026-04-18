@@ -1,8 +1,8 @@
 // AAR-521: Debug-Variante von findBestSV.
-// Statt nur die Treffer zurueckzugeben, liefert diese Funktion pro SV den
+// Statt nur die Treffer zurückzugeben, liefert diese Funktion pro SV den
 // Filter-Grund — damit Dispatch/Admin im UI sehen kann warum ein bestimmter
 // SV NICHT in der Liste auftaucht (Urlaub, Kontingent, kein Standort,
-// ausserhalb Isochrone+Radius, Koordinaten-Problem).
+// außerhalb Isochrone+Radius, Koordinaten-Problem).
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { parseIsochrone } from './isochrone-parse'
@@ -151,7 +151,7 @@ export async function debugSvMatchingByCoords(
     if (!polygonHit && !radiusHit) {
       const polygonInfo = hatIsochrone
         ? isochroneValid
-          ? 'ausserhalb Isochrone'
+          ? 'außerhalb Isochrone'
           : 'Isochrone-Format unlesbar'
         : 'keine Isochrone'
       results.push({
