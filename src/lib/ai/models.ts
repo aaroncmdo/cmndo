@@ -79,6 +79,13 @@ export const AI_MODELS = {
    * wenn Info fehlt.
    */
   voice_extract: 'claude-sonnet-4-6',
+  /**
+   * AAR-518 (S1): Support-Bot fürs Bug/Feature-Widget. 4-Tool-Flow mit
+   * Duplikat-Check (search_similar_issues → ask_clarifying_question →
+   * comment_on_issue | create_linear_issue). Multimodal (Screenshot) +
+   * Qualität der Ticket-Beschreibung wichtig → Sonnet 4.6.
+   */
+  support_bot: 'claude-sonnet-4-6',
 } as const
 
 export type AiModelKey = keyof typeof AI_MODELS
