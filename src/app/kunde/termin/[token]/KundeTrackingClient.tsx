@@ -1,13 +1,14 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import { MapPinIcon, ClockIcon, CheckCircleIcon, CarIcon, RefreshCwIcon, XCircleIcon, CalendarIcon } from 'lucide-react'
+import { MapPinIcon, ClockIcon, CheckCircleIcon, CarIcon, RefreshCwIcon, XCircleIcon, CalendarIcon, MapIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
 import LiveTrackingMap from '@/components/maps/LiveTrackingMap'
 import { haversineKm } from '@/lib/gps/geofence'
 import Avatar from '@/components/shared/Avatar'
 import KundeAnfahrtCard from './KundeAnfahrtCard'
+import LiveAnsichtOverlay from './LiveAnsichtOverlay'
 
 // AAR-423: Brand-aware Primary-Akzente via CSS-Vars mit Claimondo-Fallbacks.
 // Surface/Background/Text bleiben Claimondo-Default — nur „Primary"-Elemente
@@ -69,7 +70,21 @@ export default function KundeTrackingClient({
   const [gegenGrund, setGegenGrund] = useState('')
   const [actionPending, setActionPending] = useState(false)
   const [actionDone, setActionDone] = useState<string | null>(null)
+  const [liveOverlayOpen, setLiveOverlayOpen] = useState(false)
   const supabase = useMemo(() => createClient(), [])
+
+  // AAR-387: Mapbox-Overlay nur anbieten wenn Public-Token im Build verfügbar.
+  const mapboxVerfuegbar =
+    typeof process !== 'undefined' &&
+    !!process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+
+  // AAR-387: Deep-Link via ?live=1 — auto-öffnet das Overlay beim Mount.
+  useEffect(() => {
+    if (!mapboxVerfuegbar) return
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('live') === '1') setLiveOverlayOpen(true)
+  }, [mapboxVerfuegbar])
 
   // Initial: letzte Position laden + Realtime
   useEffect(() => {
@@ -239,12 +254,23 @@ export default function KundeTrackingClient({
       >
         <div className="flex items-center gap-3">
           <CarIcon className="w-6 h-6 text-white/70" />
-          <div>
+          <div className="flex-1">
             <h1 className="text-lg font-bold">{svVorname} ist unterwegs</h1>
             <p className="text-sm text-white/70">
               {etaMinutes != null ? `ETA: ca. ${etaMinutes} Minuten` : 'Position wird geladen...'}
             </p>
           </div>
+          {mapboxVerfuegbar && (
+            <button
+              type="button"
+              onClick={() => setLiveOverlayOpen(true)}
+              className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold backdrop-blur-sm"
+              aria-label="Live-Ansicht öffnen"
+            >
+              <MapIcon className="w-4 h-4" />
+              Live-Ansicht
+            </button>
+          )}
         </div>
       </div>
 
@@ -298,6 +324,22 @@ export default function KundeTrackingClient({
           </div>
         )}
       </div>
+
+      {/* AAR-387: Fullscreen-Mapbox-Overlay mit Vogelperspektive */}
+      {liveOverlayOpen && mapboxVerfuegbar && (
+        <LiveAnsichtOverlay
+          onClose={() => setLiveOverlayOpen(false)}
+          svId={svId}
+          svVorname={svVorname}
+          svAvatarUrl={svAvatarUrl}
+          terminId={terminId}
+          terminLat={terminLat}
+          terminLng={terminLng}
+          terminAdresse={adresse}
+          channelHash={channelHash}
+          initialSvPosition={svPosition}
+        />
+      )}
     </div>
   )
 }
