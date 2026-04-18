@@ -1066,6 +1066,33 @@ export type Database = {
           },
         ]
       }
+      email_otp_codes: {
+        Row: {
+          code_hash: string
+          created_at: string
+          expires_at: string
+          id: string
+          user_id: string
+          verifiziert_am: string | null
+        }
+        Insert: {
+          code_hash: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          user_id: string
+          verifiziert_am?: string | null
+        }
+        Update: {
+          code_hash?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          user_id?: string
+          verifiziert_am?: string | null
+        }
+        Relationships: []
+      }
       faelle: {
         Row: {
           abgeschlossen_am: string | null
@@ -1262,6 +1289,8 @@ export type Database = {
           sa_unterschrieben: boolean | null
           sa_unterschrieben_am: string | null
           sa_unterschrift_url: string | null
+          sachschaden_beschreibung: string | null
+          sachschaden_flag: boolean
           schadenart: string | null
           schadenfall_typ: string | null
           schadenhergang: string | null
@@ -1562,6 +1591,8 @@ export type Database = {
           sa_unterschrieben?: boolean | null
           sa_unterschrieben_am?: string | null
           sa_unterschrift_url?: string | null
+          sachschaden_beschreibung?: string | null
+          sachschaden_flag?: boolean
           schadenart?: string | null
           schadenfall_typ?: string | null
           schadenhergang?: string | null
@@ -1862,6 +1893,8 @@ export type Database = {
           sa_unterschrieben?: boolean | null
           sa_unterschrieben_am?: string | null
           sa_unterschrift_url?: string | null
+          sachschaden_beschreibung?: string | null
+          sachschaden_flag?: boolean
           schadenart?: string | null
           schadenfall_typ?: string | null
           schadenhergang?: string | null
@@ -3672,6 +3705,10 @@ export type Database = {
           promotion_code_id: string | null
           qualifizierung_data: Json | null
           qualifizierungs_phase: string | null
+          reminder_1_sent_at: string | null
+          reminder_2_sent_at: string | null
+          reminder_3_sent_at: string | null
+          reminder_token: string | null
           rueckruf_datum: string | null
           rueckruf_erledigt: boolean | null
           rueckruf_notiz: string | null
@@ -3680,6 +3717,8 @@ export type Database = {
           sa_signiert: boolean | null
           sa_unterschrieben: boolean | null
           sa_unterschrieben_am: string | null
+          sachschaden_beschreibung: string | null
+          sachschaden_flag: boolean
           schaden_sichtbar: boolean | null
           schadenart: string | null
           schadenfall_typ: string | null
@@ -3852,6 +3891,10 @@ export type Database = {
           promotion_code_id?: string | null
           qualifizierung_data?: Json | null
           qualifizierungs_phase?: string | null
+          reminder_1_sent_at?: string | null
+          reminder_2_sent_at?: string | null
+          reminder_3_sent_at?: string | null
+          reminder_token?: string | null
           rueckruf_datum?: string | null
           rueckruf_erledigt?: boolean | null
           rueckruf_notiz?: string | null
@@ -3860,6 +3903,8 @@ export type Database = {
           sa_signiert?: boolean | null
           sa_unterschrieben?: boolean | null
           sa_unterschrieben_am?: string | null
+          sachschaden_beschreibung?: string | null
+          sachschaden_flag?: boolean
           schaden_sichtbar?: boolean | null
           schadenart?: string | null
           schadenfall_typ?: string | null
@@ -4032,6 +4077,10 @@ export type Database = {
           promotion_code_id?: string | null
           qualifizierung_data?: Json | null
           qualifizierungs_phase?: string | null
+          reminder_1_sent_at?: string | null
+          reminder_2_sent_at?: string | null
+          reminder_3_sent_at?: string | null
+          reminder_token?: string | null
           rueckruf_datum?: string | null
           rueckruf_erledigt?: boolean | null
           rueckruf_notiz?: string | null
@@ -4040,6 +4089,8 @@ export type Database = {
           sa_signiert?: boolean | null
           sa_unterschrieben?: boolean | null
           sa_unterschrieben_am?: string | null
+          sachschaden_beschreibung?: string | null
+          sachschaden_flag?: boolean
           schaden_sichtbar?: boolean | null
           schadenart?: string | null
           schadenfall_typ?: string | null
@@ -4162,6 +4213,7 @@ export type Database = {
           gesperrt_grund: string | null
           id: string
           ihk_nummer: string | null
+          notification_preferences: Json | null
           provision_aktiv: boolean
           provision_betrag_komplett_netto: number
           provision_betrag_nur_gutachter_netto: number
@@ -4188,6 +4240,7 @@ export type Database = {
           gesperrt_grund?: string | null
           id?: string
           ihk_nummer?: string | null
+          notification_preferences?: Json | null
           provision_aktiv?: boolean
           provision_betrag_komplett_netto?: number
           provision_betrag_nur_gutachter_netto?: number
@@ -4214,6 +4267,7 @@ export type Database = {
           gesperrt_grund?: string | null
           id?: string
           ihk_nummer?: string | null
+          notification_preferences?: Json | null
           provision_aktiv?: boolean
           provision_betrag_komplett_netto?: number
           provision_betrag_nur_gutachter_netto?: number
@@ -4568,6 +4622,136 @@ export type Database = {
           },
         ]
       }
+      notification_deliveries: {
+        Row: {
+          channel: string
+          created_at: string
+          error_message: string | null
+          event_id: string
+          external_id: string | null
+          id: string
+          recipient_role: string
+          recipient_user_id: string
+          sent_at: string | null
+          skip_reason: string | null
+          status: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          error_message?: string | null
+          event_id: string
+          external_id?: string | null
+          id?: string
+          recipient_role: string
+          recipient_user_id: string
+          sent_at?: string | null
+          skip_reason?: string | null
+          status?: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          error_message?: string | null
+          event_id?: string
+          external_id?: string | null
+          id?: string
+          recipient_role?: string
+          recipient_user_id?: string
+          sent_at?: string | null
+          skip_reason?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_deliveries_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "notification_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_events: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          event_type: string
+          fall_id: string | null
+          id: string
+          next_retry_at: string | null
+          payload: Json
+          processed_at: string | null
+          retry_count: number
+          status: string
+          triggered_by_user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          event_type: string
+          fall_id?: string | null
+          id?: string
+          next_retry_at?: string | null
+          payload: Json
+          processed_at?: string | null
+          retry_count?: number
+          status?: string
+          triggered_by_user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          event_type?: string
+          fall_id?: string | null
+          id?: string
+          next_retry_at?: string | null
+          payload?: Json
+          processed_at?: string | null
+          retry_count?: number
+          status?: string
+          triggered_by_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_events_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_preferences: {
+        Row: {
+          channel_opt_outs: Json
+          event_opt_outs: Json
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          timezone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channel_opt_outs?: Json
+          event_opt_outs?: Json
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          timezone?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channel_opt_outs?: Json
+          event_opt_outs?: Json
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       organisationen: {
         Row: {
           akademie_erst_anzahlung_eur: number | null
@@ -4812,6 +4996,63 @@ export type Database = {
           },
         ]
       }
+      personenschaden_personen: {
+        Row: {
+          created_at: string
+          fall_id: string | null
+          geburtsdatum: string | null
+          id: string
+          ist_fahrzeuginsasse: boolean
+          lead_id: string | null
+          nachname: string | null
+          notizen: string | null
+          updated_at: string
+          verletzungsart: string | null
+          vorname: string | null
+        }
+        Insert: {
+          created_at?: string
+          fall_id?: string | null
+          geburtsdatum?: string | null
+          id?: string
+          ist_fahrzeuginsasse?: boolean
+          lead_id?: string | null
+          nachname?: string | null
+          notizen?: string | null
+          updated_at?: string
+          verletzungsart?: string | null
+          vorname?: string | null
+        }
+        Update: {
+          created_at?: string
+          fall_id?: string | null
+          geburtsdatum?: string | null
+          id?: string
+          ist_fahrzeuginsasse?: boolean
+          lead_id?: string | null
+          nachname?: string | null
+          notizen?: string | null
+          updated_at?: string
+          verletzungsart?: string | null
+          vorname?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personenschaden_personen_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "personenschaden_personen_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pflichtdokumente: {
         Row: {
           angefordert_am: string | null
@@ -4827,6 +5068,7 @@ export type Database = {
           gutachter_id: string | null
           hochgeladen_am: string | null
           id: string
+          person_id: string | null
           pflicht: boolean | null
           quelle: string | null
           sort_order: number
@@ -4847,6 +5089,7 @@ export type Database = {
           gutachter_id?: string | null
           hochgeladen_am?: string | null
           id?: string
+          person_id?: string | null
           pflicht?: boolean | null
           quelle?: string | null
           sort_order?: number
@@ -4867,6 +5110,7 @@ export type Database = {
           gutachter_id?: string | null
           hochgeladen_am?: string | null
           id?: string
+          person_id?: string | null
           pflicht?: boolean | null
           quelle?: string | null
           sort_order?: number
@@ -4893,6 +5137,13 @@ export type Database = {
             columns: ["gutachter_id"]
             isOneToOne: false
             referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pflichtdokumente_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "personenschaden_personen"
             referencedColumns: ["id"]
           },
         ]
@@ -4954,6 +5205,8 @@ export type Database = {
           twilio_phone_sid: string | null
           twilio_whatsapp_nummer: string | null
           twofa_aktiviert: boolean
+          twofa_email_aktiviert: boolean
+          twofa_email_verifiziert_am: string | null
           twofa_telefon: string | null
           twofa_telefon_verifiziert_am: string | null
           updated_at: string | null
@@ -4998,6 +5251,8 @@ export type Database = {
           twilio_phone_sid?: string | null
           twilio_whatsapp_nummer?: string | null
           twofa_aktiviert?: boolean
+          twofa_email_aktiviert?: boolean
+          twofa_email_verifiziert_am?: string | null
           twofa_telefon?: string | null
           twofa_telefon_verifiziert_am?: string | null
           updated_at?: string | null
@@ -5042,6 +5297,8 @@ export type Database = {
           twilio_phone_sid?: string | null
           twilio_whatsapp_nummer?: string | null
           twofa_aktiviert?: boolean
+          twofa_email_aktiviert?: boolean
+          twofa_email_verifiziert_am?: string | null
           twofa_telefon?: string | null
           twofa_telefon_verifiziert_am?: string | null
           updated_at?: string | null
@@ -5049,6 +5306,41 @@ export type Database = {
           working_hours?: Json | null
         }
         Relationships: []
+      }
+      promo_clicks: {
+        Row: {
+          clicked_at: string
+          id: string
+          ip_hash: string | null
+          promotion_code_id: string
+          referer: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          clicked_at?: string
+          id?: string
+          ip_hash?: string | null
+          promotion_code_id: string
+          referer?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          clicked_at?: string
+          id?: string
+          ip_hash?: string | null
+          promotion_code_id?: string
+          referer?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_clicks_promotion_code_id_fkey"
+            columns: ["promotion_code_id"]
+            isOneToOne: false
+            referencedRelation: "promotion_codes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       promotion_codes: {
         Row: {
@@ -5134,6 +5426,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      push_subscriptions: {
+        Row: {
+          auth_key: string
+          created_at: string
+          endpoint: string
+          expired_at: string | null
+          id: string
+          last_used_at: string | null
+          p256dh_key: string
+          platform: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth_key: string
+          created_at?: string
+          endpoint: string
+          expired_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          p256dh_key: string
+          platform?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth_key?: string
+          created_at?: string
+          endpoint?: string
+          expired_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          p256dh_key?: string
+          platform?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       qc_checkliste: {
         Row: {
@@ -5966,6 +6297,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      support_rate_limits: {
+        Row: {
+          count: number
+          hour_bucket: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          hour_bucket: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          hour_bucket?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      support_ticket_log: {
+        Row: {
+          action_type: string
+          created_at: string
+          has_screenshot: boolean
+          has_voice: boolean
+          id: number
+          linear_issue_id: string | null
+          page_url: string | null
+          turn_count: number
+          user_id: string
+        }
+        Insert: {
+          action_type?: string
+          created_at?: string
+          has_screenshot?: boolean
+          has_voice?: boolean
+          id?: number
+          linear_issue_id?: string | null
+          page_url?: string | null
+          turn_count?: number
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          has_screenshot?: boolean
+          has_voice?: boolean
+          id?: number
+          linear_issue_id?: string | null
+          page_url?: string | null
+          turn_count?: number
+          user_id?: string
+        }
+        Relationships: []
       }
       sv_live_position: {
         Row: {
@@ -7010,6 +7395,7 @@ export type Database = {
         Args: { p_fall_id: string; p_lead_id: string }
         Returns: Json
       }
+      mark_expired_leads: { Args: never; Returns: undefined }
       next_rechnungs_nr: {
         Args: { p_jahr: number; p_serie: string }
         Returns: number
