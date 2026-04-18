@@ -8,6 +8,7 @@ import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { berechneLeadpreis } from '@/lib/leadpreis'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { createNotification } from '@/lib/notifications'
+import { emitEvent } from '@/lib/notifications/emit'
 
 export async function uploadGutachten(fallId: string, formData: FormData) {
   const supabase = await createClient()
@@ -51,7 +52,7 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
     .getPublicUrl(filePath)
 
   // Create document record
-  const { error: docError } = await supabase.from('dokumente').insert({
+  const { data: insertedDoc, error: docError } = await supabase.from('dokumente').insert({
     fall_id: fallId,
     typ: 'gutachten',
     datei_url: urlData.publicUrl,
@@ -62,7 +63,7 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
     hochgeladen_von: user.id,
     hochgeladen_von_rolle: 'sachverstaendiger',
     sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
-  })
+  }).select('id').single()
 
   if (docError) throw new Error(`Dokument-Eintrag fehlgeschlagen: ${docError.message}`)
 
@@ -208,6 +209,25 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
   // WhatsApp: Gutachten erstellt, wird an Kanzlei uebergeben
   sendFallCommunication(fallId, 'gutachten_fertig').catch(() => {})
 
+  // AAR-501 N6: gutachten.fertig + dokument.hochgeladen Events
+  try {
+    const gutachtenId = (insertedDoc?.id as string) ?? ''
+    await Promise.allSettled([
+      emitEvent(
+        'gutachten.fertig',
+        { fallId, gutachtenId, pdfUrl: urlData.publicUrl },
+        { fallId, triggeredBy: user.id },
+      ),
+      emitEvent(
+        'dokument.hochgeladen',
+        { fallId, dokumentId: gutachtenId, typ: 'gutachten', uploadedByUserId: user.id },
+        { fallId, triggeredBy: user.id },
+      ),
+    ])
+  } catch (err) {
+    console.error('[AAR-501] emitEvent gutachten.fertig failed:', err)
+  }
+
   revalidatePath(`/gutachter/fall/${fallId}`)
   revalidatePath('/gutachter/faelle')
   revalidatePath('/gutachter')
@@ -284,7 +304,7 @@ export async function uploadDokument(fallId: string, formData: FormData) {
   }
 
   // Create document record with quelle='gutachter'
-  const { error: insertErr } = await supabase.from('dokumente').insert({
+  const { data: insertedUpload, error: insertErr } = await supabase.from('dokumente').insert({
     fall_id: fallId,
     typ: dokumentTyp,
     datei_url: urlData.publicUrl,
@@ -295,9 +315,25 @@ export async function uploadDokument(fallId: string, formData: FormData) {
     hochgeladen_von: user.id,
     hochgeladen_von_rolle: 'sachverstaendiger',
     sichtbar_fuer: sichtbarMap[kat] ?? ['admin', 'kundenbetreuer'],
-  })
+  }).select('id').single()
 
   if (insertErr) throw new Error(`Dokument-Eintrag fehlgeschlagen: ${insertErr.message}`)
+
+  // AAR-501 N6: dokument.hochgeladen Event
+  try {
+    await emitEvent(
+      'dokument.hochgeladen',
+      {
+        fallId,
+        dokumentId: (insertedUpload?.id as string) ?? '',
+        typ: dokumentTyp,
+        uploadedByUserId: user.id,
+      },
+      { fallId, triggeredBy: user.id },
+    )
+  } catch (err) {
+    console.error('[AAR-501] emitEvent dokument.hochgeladen failed:', err)
+  }
 
   // Update pflichtdokumente entry if this was for a specific required doc
   if (pflichtdokumentId) {

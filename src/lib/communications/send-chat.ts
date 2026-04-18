@@ -24,7 +24,7 @@ export async function sendChatMessage(params: {
     .eq('id', user.id)
     .single()
 
-  const { error } = await supabase.from('nachrichten').insert({
+  const { data: inserted, error } = await supabase.from('nachrichten').insert({
     fall_id: params.fallId,
     kanal: params.kanal,
     sender_id: user.id,
@@ -33,8 +33,26 @@ export async function sendChatMessage(params: {
     nachricht: params.nachricht,
     richtung: 'outbound',
     gelesen: false,
-  })
+  }).select('id').single()
   if (error) return { success: false, error: error.message }
+
+  // AAR-501 N6: nachricht.received Event (self-notification-Filter im Worker via triggeredBy)
+  try {
+    const { emitEvent } = await import('@/lib/notifications/emit')
+    await emitEvent(
+      'nachricht.received',
+      {
+        fallId: params.fallId,
+        nachrichtId: inserted?.id as string,
+        senderUserId: user.id,
+        senderRolle: (profile?.rolle as string) ?? 'admin',
+        inhaltPreview: params.nachricht.slice(0, 120),
+      },
+      { fallId: params.fallId, triggeredBy: user.id },
+    )
+  } catch (err) {
+    console.error('[AAR-501] emitEvent nachricht.received failed:', err)
+  }
 
   // Bei WhatsApp: zusaetzlich via Twilio outbound
   if (params.kanal === 'whatsapp') {

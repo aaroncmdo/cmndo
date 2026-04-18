@@ -81,6 +81,29 @@ export async function createLinkedTask(params: CreateLinkedTaskParams): Promise<
     }
   }
 
+  // AAR-501 N6: task.created Event (nur bei bekanntem Empfänger + Fall)
+  if (data?.id && params.empfaenger_user_id && params.fall_id) {
+    try {
+      const { emitEvent } = await import('@/lib/notifications/emit')
+      const rolle = (params.empfaenger_rolle ?? 'admin') as
+        'kunde' | 'sachverstaendiger' | 'makler' | 'kundenbetreuer' | 'admin'
+      await emitEvent(
+        'task.created',
+        {
+          fallId: params.fall_id,
+          taskId: data.id as string,
+          taskTyp: params.typ ?? 'allgemein',
+          empfaengerRolle: rolle,
+          empfaengerUserId: params.empfaenger_user_id,
+          deadline: faelligAmIso ?? undefined,
+        },
+        { fallId: params.fall_id },
+      )
+    } catch (err) {
+      console.error('[AAR-501] emitEvent task.created failed:', err)
+    }
+  }
+
   // AAR-229 W4: Mitteilung bei Task-Erstellung an den Empfänger.
   if (data?.id && params.empfaenger_user_id) {
     // AAR-229 Audit: empfaenger_rolle kann admin/kundenbetreuer/dispatch/

@@ -118,7 +118,7 @@ export async function POST(req: Request) {
   }
 
   // 4. Insert into nachrichten
-  await db.from('nachrichten').insert({
+  const { data: insertedNachricht } = await db.from('nachrichten').insert({
     fall_id: fallId, // Can be null if no fall found
     kanal: 'whatsapp',
     richtung: 'inbound',
@@ -129,13 +129,33 @@ export async function POST(req: Request) {
     anhang_url: mediaUrls.length > 0 ? mediaUrls[0] : null,
     kb_empfaenger_id: kb?.id ?? null,
     external_id: messageSid,
-  })
+  }).select('id').single()
 
   // 5. Update fall.updated_at if fall found
   if (fallId) {
     await db.from('faelle').update({
       updated_at: new Date().toISOString(),
     }).eq('id', fallId)
+  }
+
+  // AAR-501 N6: nachricht.received Event — nur wenn fallId bekannt
+  if (fallId && insertedNachricht?.id) {
+    try {
+      const { emitEvent } = await import('@/lib/notifications/emit')
+      await emitEvent(
+        'nachricht.received',
+        {
+          fallId,
+          nachrichtId: insertedNachricht.id as string,
+          senderUserId: kundenId ?? '',
+          senderRolle: 'kunde',
+          inhaltPreview: (msgBody || '(Medien-Nachricht)').slice(0, 120),
+        },
+        { fallId, triggeredBy: kundenId ?? undefined },
+      )
+    } catch (err) {
+      console.error('[AAR-501] emitEvent nachricht.received (inbound) failed:', err)
+    }
   }
 
   // 6. If no fall found — create notification for all KBs
