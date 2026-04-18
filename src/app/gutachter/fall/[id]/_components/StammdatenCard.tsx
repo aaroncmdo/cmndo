@@ -87,9 +87,10 @@ export function StammdatenCard({
   const kennzeichen = str(fall.kennzeichen)
   const fin = str(fall.fin_vin) ?? str(lead?.fin)
   const fahrbereit = bool(fall.fahrzeug_fahrbereit)
-  const leasing = bool(fall.leasing_flag)
+  // AAR-548 D10: faelle.leasing_flag + finanzierung_flag gedropt — finanzierung_leasing-Enum ist Truth
+  const leasing = fall.finanzierung_leasing === 'leasing'
   const leasinggeber = str(fall.leasinggeber_name)
-  const finanzierung = bool(fall.finanzierung_flag)
+  const finanzierung = fall.finanzierung_leasing === 'finanzierung'
   const finanzierungsgeber = str(fall.finanzierungsgeber_name)
 
   // Schadens-Adresse zusammensetzen (Straße, PLZ + Ort).

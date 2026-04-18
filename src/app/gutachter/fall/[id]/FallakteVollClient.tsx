@@ -433,8 +433,8 @@ export default function FallakteVollClient({
               <div className="flex flex-wrap gap-2">
                 {fall.personenschaden_flag ? <Badge label="Personenschaden" color="bg-red-50 text-red-300" /> : null}
                 {fall.mietwagen_flag ? <Badge label="Mietwagen" color="bg-[var(--brand-secondary)]/5 text-[var(--brand-accent)]" /> : null}
-                {fall.leasing_flag ? <Badge label="Leasing" color="bg-violet-50 text-violet-300" /> : null}
-                {fall.finanzierung_flag ? <Badge label="Finanzierung" color="bg-amber-50 text-amber-300" /> : null}
+                {fall.finanzierung_leasing === 'leasing' ? <Badge label="Leasing" color="bg-violet-50 text-violet-300" /> : null}
+                {fall.finanzierung_leasing === 'finanzierung' ? <Badge label="Finanzierung" color="bg-amber-50 text-amber-300" /> : null}
                 {fall.gewerbe_flag ? <Badge label="Gewerbe" color="bg-cyan-50 text-cyan-300" /> : null}
                 {fall.halter_ungleich_fahrer_flag ? <Badge label="Halter != Fahrer" color="bg-orange-50 text-orange-300" /> : null}
                 {!fall.gegner_bekannt ? <Badge label="Gegner unbekannt" color="bg-gray-100 text-gray-500" /> : null}

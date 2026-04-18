@@ -1153,7 +1153,6 @@ export type Database = {
           fin_extrahiert_am: string | null
           fin_quelle: string | null
           fin_vin: string | null
-          finanzierung_flag: boolean | null
           finanzierung_leasing: string | null
           finanzierungsgeber_adresse: string | null
           finanzierungsgeber_name: string | null
@@ -1234,7 +1233,6 @@ export type Database = {
           lead_preis_netto: number | null
           lead_preis_typ: string | null
           leadbearbeiter_id: string | null
-          leasing_flag: boolean | null
           leasinggeber_informiert: boolean | null
           leasinggeber_name: string | null
           lexdrive_case_id: string | null
@@ -1439,7 +1437,6 @@ export type Database = {
           fin_extrahiert_am?: string | null
           fin_quelle?: string | null
           fin_vin?: string | null
-          finanzierung_flag?: boolean | null
           finanzierung_leasing?: string | null
           finanzierungsgeber_adresse?: string | null
           finanzierungsgeber_name?: string | null
@@ -1519,7 +1516,6 @@ export type Database = {
           lead_preis_netto?: number | null
           lead_preis_typ?: string | null
           leadbearbeiter_id?: string | null
-          leasing_flag?: boolean | null
           leasinggeber_informiert?: boolean | null
           leasinggeber_name?: string | null
           lexdrive_case_id?: string | null
@@ -1724,7 +1720,6 @@ export type Database = {
           fin_extrahiert_am?: string | null
           fin_quelle?: string | null
           fin_vin?: string | null
-          finanzierung_flag?: boolean | null
           finanzierung_leasing?: string | null
           finanzierungsgeber_adresse?: string | null
           finanzierungsgeber_name?: string | null
@@ -1804,7 +1799,6 @@ export type Database = {
           lead_preis_netto?: number | null
           lead_preis_typ?: string | null
           leadbearbeiter_id?: string | null
-          leasing_flag?: boolean | null
           leasinggeber_informiert?: boolean | null
           leasinggeber_name?: string | null
           lexdrive_case_id?: string | null

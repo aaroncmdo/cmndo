@@ -103,7 +103,7 @@ ${JSON.stringify({
     gegner_kennzeichen: fall.gegner_kennzeichen,
     personenschaden: fall.personenschaden_flag,
     mietwagen: fall.mietwagen_flag,
-    leasing: fall.leasing_flag,
+    leasing: fall.finanzierung_leasing === 'leasing',
     abtretung_signiert_am: fall.abtretung_signiert_am,
     vollmacht_unterschrieben: fall.vollmacht_unterschrieben,
   }, null, 2)}

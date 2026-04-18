@@ -488,7 +488,8 @@ export async function POST() {
         fahrzeug_baujahr: f.fahrzeug_baujahr, kennzeichen: f.kennzeichen,
         schadenfall_typ: f.schadenfall_typ, kunden_konstellation: f.kunden_konstellation,
         schadens_datum: f.schadens_datum,
-        leasing_flag: (f as Record<string, unknown>).leasing_flag ?? false,
+        // AAR-548 D10: faelle.leasing_flag gedropt — finanzierung_leasing ist Truth.
+        finanzierung_leasing: (f as Record<string, unknown>).leasing_flag ? 'leasing' : 'keine',
         personenschaden_flag: (f as Record<string, unknown>).personenschaden_flag ?? false,
         sv_zugewiesen_am: f.sv_zugewiesen_am ?? null,
         gutachten_eingegangen_am: (f as Record<string, unknown>).gutachten_eingegangen_am ?? null,
