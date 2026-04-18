@@ -243,6 +243,11 @@ export default function WillkommenClient({
   if (typeof stepOverride === 'number') initialStep = stepOverride
 
   const [step, setStep] = useState(initialStep)
+  // AAR-509: currentKey vor die Stripe-Effects gezogen damit der Anzahlung-
+  // Trigger keybasiert statt index-basiert prüfen kann — sonst hängt der
+  // Checkout, weil `anzahlung` nach Einführung von `branding`/`sa_vorlage`
+  // nicht mehr Index 2 ist.
+  const currentKey = STEPS[step]?.key ?? ''
   // AAR-233: Key-basierter Step-Navigation-Helper.
   const goToStep = (key: string) => {
     const idx = STEPS.findIndex(s => s.key === key)
@@ -278,9 +283,12 @@ export default function WillkommenClient({
 
   const checkoutOptions = useMemo(() => ({ fetchClientSecret }), [fetchClientSecret])
 
-  // Beim Wechsel auf Step 2 ein client_secret holen damit der Provider mounten kann.
+  // AAR-509: Beim Betreten des Anzahlung-Steps ein client_secret holen damit der
+  // Provider mounten kann. Vorher wurde hart auf `step === 2` geprüft — seit
+  // AAR-233/AAR-242/AAR-359 ist `anzahlung` aber Index 3 (nicht 2), wodurch
+  // der Checkout nie initialisiert wurde und auf "wird geladen..." hängen blieb.
   useEffect(() => {
-    if (step !== 2 || r === 'sub_mitarbeiter') return
+    if (currentKey !== 'anzahlung' || r === 'sub_mitarbeiter') return
     if (clientSecret) return
     let cancelled = false
     setSaving(true)
@@ -290,7 +298,15 @@ export default function WillkommenClient({
       .catch(err => { if (!cancelled) setError(err instanceof Error ? err.message : 'Stripe-Fehler') })
       .finally(() => { if (!cancelled) setSaving(false) })
     return () => { cancelled = true }
-  }, [step, rolle, clientSecret, fetchClientSecret])
+  }, [currentKey, r, clientSecret, fetchClientSecret])
+
+  // AAR-509: Retry-Handler für den Fall, dass die Session-Creation fehlschlägt
+  // (z.B. 401 beim Session-Refresh, transiente Stripe-API-Fehler). Statt
+  // Endlos-Spinner kann der User die Initialisierung mit einem Klick neu anstoßen.
+  const retryCheckout = useCallback(() => {
+    setError(null)
+    setClientSecret(null)
+  }, [])
 
   // Vertrag-Form (Solo + Inhaber)
   const [unterschriftName, setUnterschriftName] = useState(
@@ -438,9 +454,8 @@ export default function WillkommenClient({
   // BUG-98 Folge-Cleanup: Andere Steps von max-w-2xl auf max-w-4xl
   // angehoben — der Wizard war auf 1920px Desktop / Tablet quer zu klein.
   // 4xl (~896px) bleibt für Forms gut lesbar, nutzt aber Desktop ordentlich aus.
-  // AAR-233: Key-basierter Step-Content statt Index — unabhängig von
-  // Reihenfolge-Changes in STEPS_4.
-  const currentKey = STEPS[step]?.key ?? ''
+  // AAR-509: `currentKey` wird oben für den Stripe-Effect gebraucht — hier
+  // nur noch die wrapperWidth-Zuordnung.
   const wrapperWidth = currentKey === 'anzahlung' && r !== 'sub_mitarbeiter' ? 'max-w-5xl' : 'max-w-4xl'
 
   return (
@@ -917,6 +932,32 @@ export default function WillkommenClient({
                     <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm">
                       Stripe-Konfiguration fehlt (STRIPE_PUBLISHABLE_KEY). Bitte aaron.sprafke@claimondo.de kontaktieren.
                     </div>
+                  ) : error ? (
+                    // AAR-509: Sichtbare Fehlermeldung + Retry-Button statt
+                    // Endlos-Spinner, falls startStripeCheckout fehlschlägt.
+                    <div className="rounded-xl border border-red-200 bg-red-50 p-5 space-y-3">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangleIcon className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                        <div className="text-sm text-red-800">
+                          <p className="font-semibold mb-1">Checkout konnte nicht initialisiert werden.</p>
+                          <p className="text-xs text-red-700">{error}</p>
+                          <p className="text-[11px] text-red-700 mt-2">
+                            Falls der Fehler anhält, schreib uns an{' '}
+                            <a href="mailto:aaron.sprafke@claimondo.de" className="underline">
+                              aaron.sprafke@claimondo.de
+                            </a>.
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={retryCheckout}
+                        disabled={saving}
+                        className="w-full py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold disabled:opacity-50"
+                      >
+                        {saving ? 'Wird geladen ...' : 'Erneut versuchen'}
+                      </button>
+                    </div>
                   ) : !clientSecret ? (
                     <div className="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center text-sm text-gray-500">
                       Checkout wird geladen ...
@@ -992,7 +1033,9 @@ export default function WillkommenClient({
             />
           )}
 
-          {error && (
+          {/* AAR-509: Anzahlungs-Step hat eigenes Error-UI mit Retry — sonst
+              würde der Fehler doppelt erscheinen. */}
+          {error && currentKey !== 'anzahlung' && (
             <div className="mt-4 px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
               {error}
             </div>
