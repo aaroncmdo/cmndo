@@ -1,5 +1,5 @@
 // AAR-521: Normalisiert Isochrone-Polygone aus DB (sachverstaendige.isochrone_polygon)
-// in ein einheitliches Format [lng, lat][] fuer pointInPolygon().
+// in ein einheitliches Format [lng, lat][] für pointInPolygon().
 //
 // Historisch kennt die DB drei Formate:
 //   Format A: [{ lat, lng }, ...]                       (alte Mapbox-Route)

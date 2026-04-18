@@ -1,6 +1,6 @@
 'use client'
 
-// AAR-519 (S2): State-Container fuers Support-Widget.
+// AAR-519 (S2): State-Container fürs Support-Widget.
 // Keine Persistenz — State lebt nur solange der Drawer offen ist.
 // Bei `ticket_created`/`commented` wird Input deaktiviert, "Neu starten" reset't.
 

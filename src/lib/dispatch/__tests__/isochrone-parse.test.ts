@@ -1,4 +1,4 @@
-// AAR-521: Unit-Tests fuer parseIsochrone — Format A, B, C und Invalid.
+// AAR-521: Unit-Tests für parseIsochrone — Format A, B, C und Invalid.
 
 import { describe, it, expect } from 'vitest'
 import { parseIsochrone } from '../isochrone-parse'
@@ -59,7 +59,7 @@ describe('parseIsochrone', () => {
     ])
   })
 
-  it('gibt null zurueck bei null / undefined / leerem Input', () => {
+  it('gibt null zurück bei null / undefined / leerem Input', () => {
     expect(parseIsochrone(null)).toBeNull()
     expect(parseIsochrone(undefined)).toBeNull()
     expect(parseIsochrone([])).toBeNull()
@@ -67,14 +67,14 @@ describe('parseIsochrone', () => {
     expect(parseIsochrone({ coordinates: [] })).toBeNull()
   })
 
-  it('gibt null zurueck bei unbekannten Formaten', () => {
+  it('gibt null zurück bei unbekannten Formaten', () => {
     expect(parseIsochrone('irgendein-string')).toBeNull()
     expect(parseIsochrone(42)).toBeNull()
     expect(parseIsochrone({ foo: 'bar' })).toBeNull()
     expect(parseIsochrone([{ foo: 'bar' }])).toBeNull()
   })
 
-  it('gibt null zurueck wenn Polygon < 3 Punkte hat', () => {
+  it('gibt null zurück wenn Polygon < 3 Punkte hat', () => {
     expect(parseIsochrone([{ lat: 1, lng: 2 }])).toBeNull()
     expect(
       parseIsochrone([

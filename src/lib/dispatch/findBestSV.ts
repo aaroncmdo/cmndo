@@ -137,7 +137,7 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
     // Vorher wurde nur Format B erkannt → Polygone in Format A/C liefen in den
     // else-Branch und Radius-Fallback wurde NICHT gezogen. Jetzt:
     // 1) parseIsochrone normalisiert auf [lng,lat][]
-    // 2) Radius-Fallback greift IMMER wenn Polygon fehlt ODER Fall ausserhalb ist
+    // 2) Radius-Fallback greift IMMER wenn Polygon fehlt ODER Fall außerhalb ist
     const polygon = parseIsochrone(sv.isochrone_polygon)
     let imGebiet = false
     if (polygon) {

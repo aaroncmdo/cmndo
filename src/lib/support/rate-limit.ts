@@ -1,6 +1,6 @@
 // AAR-518 (S1): Rate-Limit-Check fürs Support-Bot-Widget.
 // 10 Requests pro Stunde pro User. Bucket = volle Stunde in UTC.
-// Writes laufen ausschliesslich ueber Service-Role (RLS verbietet INSERT).
+// Writes laufen ausschließlich über Service-Role (RLS verbietet INSERT).
 
 import { createAdminClient } from '@/lib/supabase/admin'
 

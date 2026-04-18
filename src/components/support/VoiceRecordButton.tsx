@@ -1,8 +1,8 @@
 'use client'
 
-// AAR-520 (S3): Mikrofon-Button fuer den Support-Chat.
-// Click toggelt Aufnahme/Stop. Nach Stop wird der Transkript-Text ueber
-// onTranscript zurueckgegeben — der Chat fuegt ihn dann an den Textarea-Wert.
+// AAR-520 (S3): Mikrofon-Button für den Support-Chat.
+// Click toggelt Aufnahme/Stop. Nach Stop wird der Transkript-Text über
+// onTranscript zurückgegeben — der Chat fügt ihn dann an den Textarea-Wert.
 
 import { MicIcon, SquareIcon, Loader2Icon } from 'lucide-react'
 import { useVoiceRecorder } from './useVoiceRecorder'

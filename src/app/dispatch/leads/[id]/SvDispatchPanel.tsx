@@ -70,7 +70,7 @@ export default function SvDispatchPanel({
   // AAR-195: Vorgeschlagene Slots für den ausgewählten SV
   const [freeSlots, setFreeSlots] = useState<{ start: string; end: string }[]>([])
   const [slotsLoading, setSlotsLoading] = useState(false)
-  // AAR-521: Debug-Modal fuer "Warum keine SVs?"
+  // AAR-521: Debug-Modal für "Warum keine SVs?"
   const [debugOpen, setDebugOpen] = useState(false)
   const [debugData, setDebugData] = useState<DebugSvMatchingResponse | null>(null)
   const [debugLoading, setDebugLoading] = useState(false)
@@ -673,7 +673,7 @@ export default function SvDispatchPanel({
                                 ? r.isochroneValid
                                   ? r.imPolygon
                                     ? 'im Polygon'
-                                    : 'ausserhalb'
+                                    : 'außerhalb'
                                   : 'unlesbar'
                                 : 'keine'}
                             </span>

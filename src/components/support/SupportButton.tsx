@@ -1,10 +1,10 @@
 'use client'
 
 // AAR-519 (S2): Support-Button + Drawer-Trigger.
-// Wird in GutachterShell + AdminNav vor der User-Card eingehaengt.
+// Wird in GutachterShell + AdminNav vor der User-Card eingehängt.
 //
 // Variante "dark" (Default) passt zu Navy-Sidebars (Gutachter + Admin).
-// Variante "light" fuer helle Sidebars falls spaeter benoetigt.
+// Variante "light" für helle Sidebars falls später benötigt.
 
 import { useState } from 'react'
 import { MessageSquareIcon } from 'lucide-react'

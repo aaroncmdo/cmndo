@@ -1,7 +1,7 @@
 'use server'
 
-// AAR-521: Server-Action fuer den "Warum?"-Button im SvDispatchPanel.
-// Nur fuer Admin + Dispatch sichtbar — zeigt warum SVs gefiltert wurden.
+// AAR-521: Server-Action für den "Warum?"-Button im SvDispatchPanel.
+// Nur für Admin + Dispatch sichtbar — zeigt warum SVs gefiltert wurden.
 
 import { createClient } from '@/lib/supabase/server'
 import { debugSvMatchingByCoords, type DebugSvMatchingResponse } from '@/lib/dispatch/debugSvMatching'
