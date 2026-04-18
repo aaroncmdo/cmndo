@@ -66,6 +66,132 @@ export async function getMaklerFaelle(maklerId: string) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// AAR-485 (M3) — Leads mit Consent-Status
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type ConsentLabel = 'kein_account' | 'minimal' | 'vollzugriff' | 'widerrufen'
+
+export type MaklerLeadRow = {
+  id: string
+  vorname: string | null
+  nachname: string | null
+  fahrzeug_hersteller: string | null
+  fahrzeug_modell: string | null
+  unfalldatum: string | null
+  status: string
+  created_at: string
+  disqualifiziert: boolean | null
+  fall_id: string | null
+  fall_service_typ: string | null
+  consent_label: ConsentLabel
+}
+
+type LeadRowRaw = {
+  id: string
+  vorname: string | null
+  nachname: string | null
+  fahrzeug_hersteller: string | null
+  fahrzeug_modell: string | null
+  unfalldatum: string | null
+  status: string
+  created_at: string
+  disqualifiziert: boolean | null
+  fall:
+    | {
+        id: string
+        service_typ: string
+        makler_consent:
+          | { consent_scope: string; widerrufen_am: string | null }[]
+          | { consent_scope: string; widerrufen_am: string | null }
+          | null
+      }[]
+    | {
+        id: string
+        service_typ: string
+        makler_consent:
+          | { consent_scope: string; widerrufen_am: string | null }[]
+          | { consent_scope: string; widerrufen_am: string | null }
+          | null
+      }
+    | null
+}
+
+/**
+ * AAR-485: Leads des Maklers + verknüpfte Fall + makler_fall_consent Scope.
+ * Supabase Cardinality kann Arrays oder Objects zurückgeben — beides
+ * normalisieren.
+ */
+export async function getMaklerLeadsWithConsent(maklerId: string): Promise<MaklerLeadRow[]> {
+  const supabase = await createClient()
+
+  const { data: promoRows } = await supabase
+    .from('promotion_codes')
+    .select('id')
+    .eq('makler_id', maklerId)
+  const promoIds = (promoRows ?? []).map((p) => p.id)
+  if (promoIds.length === 0) return []
+
+  const { data } = await supabase
+    .from('leads')
+    .select(`
+      id, vorname, nachname, fahrzeug_hersteller, fahrzeug_modell,
+      unfalldatum, status, created_at, disqualifiziert,
+      fall:faelle(
+        id, service_typ,
+        makler_consent:makler_fall_consent(consent_scope, widerrufen_am)
+      )
+    `)
+    .in('promotion_code_id', promoIds)
+    .order('created_at', { ascending: false })
+
+  return ((data ?? []) as LeadRowRaw[]).map((lead) => {
+    const fall = Array.isArray(lead.fall) ? lead.fall[0] : lead.fall
+    const rawConsent = fall?.makler_consent
+    const consent = rawConsent
+      ? Array.isArray(rawConsent)
+        ? rawConsent[0]
+        : rawConsent
+      : null
+
+    let consent_label: ConsentLabel = 'kein_account'
+    if (!fall) consent_label = 'kein_account'
+    else if (consent?.widerrufen_am) consent_label = 'widerrufen'
+    else if (consent?.consent_scope === 'minimal') consent_label = 'minimal'
+    else if (consent?.consent_scope === 'vollzugriff') consent_label = 'vollzugriff'
+
+    return {
+      id: lead.id,
+      vorname: lead.vorname,
+      nachname: lead.nachname,
+      fahrzeug_hersteller: lead.fahrzeug_hersteller,
+      fahrzeug_modell: lead.fahrzeug_modell,
+      unfalldatum: lead.unfalldatum,
+      status: lead.status,
+      created_at: lead.created_at,
+      disqualifiziert: lead.disqualifiziert,
+      fall_id: fall?.id ?? null,
+      fall_service_typ: fall?.service_typ ?? null,
+      consent_label,
+    }
+  })
+}
+
+/**
+ * AAR-485: Provisions-Betrag für einen Fall basierend auf Makler-Sätzen
+ * und service_typ. Wenn der Fall `komplett` (Vollservice) ist → komplett-
+ * Betrag, sonst Gutachter-Betrag (fallback für unbekannte Service-Typen).
+ */
+export function provisionFuerServiceTyp(
+  makler: { provision_betrag_komplett_netto: number | null; provision_betrag_nur_gutachter_netto: number | null },
+  serviceTyp: string | null,
+): number {
+  const full = Number(makler.provision_betrag_komplett_netto ?? 0)
+  const partial = Number(makler.provision_betrag_nur_gutachter_netto ?? 0)
+  if (!serviceTyp) return partial
+  return serviceTyp.toLowerCase().includes('komplett') ? full : partial
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // AAR-484 (M2) — Dashboard-Daten
 // ─────────────────────────────────────────────────────────────────────────────
 
