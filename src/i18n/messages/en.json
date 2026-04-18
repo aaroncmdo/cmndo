@@ -138,7 +138,27 @@
       "weiter": "Continue to ZB1",
       "saving": "Saving …"
     },
-    "step3": {},
+    "step3": {
+      "heading": "Vehicle registration (ZB1)",
+      "sub": "We need the vehicle data from your ZB1.",
+      "scan_heading": "Scan vehicle registration",
+      "scan_hint": "We only need the front side (ZB1). Fields A, B, E and 2.1/2.2 must be clearly legible.",
+      "scan_camera_cta": "Scan with camera",
+      "scan_upload_cta": "Upload file",
+      "manual_cta": "I don't have my vehicle registration handy — enter manually",
+      "ocr_loading_title": "Reading your vehicle registration …",
+      "ocr_loading_sub": "Usually takes 5–10 seconds.",
+      "ocr_success": "Vehicle registration successfully scanned.",
+      "ocr_low_confidence": "Some fields were not recognised with confidence — please check and complete.",
+      "hsn_label": "HSN (field 2.1, 4 digits)",
+      "tsn_label": "TSN (field 2.2, 3 characters)",
+      "fin_label": "VIN (field E, 17 characters)",
+      "erstzulassung_label": "First registration (field B)",
+      "kennzeichen_label": "Licence plate (field A, optional)",
+      "retry_cta": "Try a different photo",
+      "weiter": "Continue to account",
+      "saving": "Saving …"
+    },
     "step4": {},
     "abort": {
       "heading": "For self-caused accidents, we're not the right place",
