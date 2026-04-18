@@ -469,7 +469,12 @@ export default function GutachterShell({
           </div>
         )}
 
-        <main id="main-content" role="main" className="flex-1 overflow-hidden p-2 sm:p-3 lg:p-4">{children}</main>
+        {/* AAR-457: overflow-y-auto (statt overflow-hidden) — sonst wird
+            alles unterhalb des Viewports auf Seiten ohne eigenen Scroll-
+            Container abgeschnitten (zB /gutachter/profil/branding). Map-
+            basierte Seiten (Heute/Gebiet) setzen inner-Container auf
+            absolute inset-0 und sind nicht betroffen. */}
+        <main id="main-content" role="main" className="flex-1 overflow-y-auto p-2 sm:p-3 lg:p-4">{children}</main>
       </div>
     </div>
   )
