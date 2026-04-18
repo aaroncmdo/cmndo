@@ -788,6 +788,182 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// AAR-490 (M8) — Abrechnungen: Provisions-Historie + Monats-Summary
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type ProvisionStatus = 'pending' | 'freigegeben' | 'storniert' | 'ausgezahlt'
+
+export type MaklerProvisionRow = {
+  id: string
+  betrag_netto_eur: number
+  status: ProvisionStatus
+  service_typ: string | null
+  trigger_event: string | null
+  trigger_at: string | null
+  hold_until: string | null
+  storniert_am: string | null
+  storno_grund: string | null
+  fall_id: string | null
+  fall_nummer: string | null
+  fall_status: string | null
+  kunde_name: string | null
+}
+
+export type MaklerAbrechnungsData = {
+  monthPending: number
+  monthReleased: number
+  lifetimeTotal: number
+  auszahlungNext: string
+  currentMonth: string
+  provisionen: MaklerProvisionRow[]
+}
+
+/**
+ * Bildet yyyy-mm für den aktuellen (oder explizit angefragten) Monat sowie
+ * Monatsstart/Ende und das Auszahlungs-Datum (1. des Folgemonats).
+ */
+function monthRange(monthIso: string | undefined): {
+  current: string
+  startIso: string
+  endIso: string
+  auszahlungIso: string
+} {
+  const now = new Date()
+  let year: number
+  let month0: number
+  if (monthIso && /^\d{4}-\d{2}$/.test(monthIso)) {
+    year = Number(monthIso.slice(0, 4))
+    month0 = Number(monthIso.slice(5, 7)) - 1
+  } else {
+    year = now.getFullYear()
+    month0 = now.getMonth()
+  }
+  const start = new Date(Date.UTC(year, month0, 1))
+  const end = new Date(Date.UTC(year, month0 + 1, 1))
+  const auszahlung = new Date(Date.UTC(year, month0 + 1, 1))
+  return {
+    current: `${start.getUTCFullYear()}-${String(start.getUTCMonth() + 1).padStart(2, '0')}`,
+    startIso: start.toISOString(),
+    endIso: end.toISOString(),
+    auszahlungIso: auszahlung.toISOString(),
+  }
+}
+
+function sumBetrag(
+  rows: Array<{ betrag_netto_eur: number | string | null }> | null,
+): number {
+  if (!rows) return 0
+  return rows.reduce((s, r) => s + Number(r.betrag_netto_eur ?? 0), 0)
+}
+
+export async function getMaklerAbrechnungsData(
+  maklerId: string,
+  monthIso?: string,
+): Promise<MaklerAbrechnungsData> {
+  const supabase = await createClient()
+  const range = monthRange(monthIso)
+
+  const [pendingRes, releasedRes, totalRes, rowsRes] = await Promise.all([
+    supabase
+      .from('makler_provisionen')
+      .select('betrag_netto_eur')
+      .eq('makler_id', maklerId)
+      .eq('status', 'pending'),
+    supabase
+      .from('makler_provisionen')
+      .select('betrag_netto_eur')
+      .eq('makler_id', maklerId)
+      .in('status', ['freigegeben', 'ausgezahlt'])
+      .gte('trigger_at', range.startIso)
+      .lt('trigger_at', range.endIso),
+    supabase
+      .from('makler_provisionen')
+      .select('betrag_netto_eur')
+      .eq('makler_id', maklerId)
+      .in('status', ['freigegeben', 'ausgezahlt']),
+    supabase
+      .from('makler_provisionen')
+      .select(
+        `
+        id, betrag_netto_eur, status, service_typ, trigger_event,
+        trigger_at, hold_until, storniert_am, storno_grund,
+        fall:faelle!makler_provisionen_fall_id_fkey(
+          id, fall_nummer, status,
+          leads(vorname, nachname),
+          kunde:profiles!faelle_kunde_id_fkey(vorname, nachname)
+        )
+      `,
+      )
+      .eq('makler_id', maklerId)
+      .order('trigger_at', { ascending: false, nullsFirst: false })
+      .limit(200),
+  ])
+
+  const provisionen: MaklerProvisionRow[] = (rowsRes.data ?? []).map((row) => {
+    const fallRaw = (row as { fall?: unknown }).fall
+    const fall = (Array.isArray(fallRaw) ? fallRaw[0] : fallRaw) as
+      | {
+          id: string | null
+          fall_nummer: string | null
+          status: string | null
+          leads?:
+            | Array<{ vorname: string | null; nachname: string | null }>
+            | { vorname: string | null; nachname: string | null }
+            | null
+          kunde?:
+            | Array<{ vorname: string | null; nachname: string | null }>
+            | { vorname: string | null; nachname: string | null }
+            | null
+        }
+      | null
+      | undefined
+
+    const leadRaw = fall?.leads
+    const lead = (Array.isArray(leadRaw) ? leadRaw[0] : leadRaw) as
+      | { vorname: string | null; nachname: string | null }
+      | null
+      | undefined
+    const kundeRaw = fall?.kunde
+    const kunde = (Array.isArray(kundeRaw) ? kundeRaw[0] : kundeRaw) as
+      | { vorname: string | null; nachname: string | null }
+      | null
+      | undefined
+
+    const namen = [kunde?.vorname, kunde?.nachname]
+      .filter(Boolean)
+      .join(' ')
+      .trim()
+    const leadName = [lead?.vorname, lead?.nachname].filter(Boolean).join(' ').trim()
+    const kundeName = namen || leadName || null
+
+    return {
+      id: row.id as string,
+      betrag_netto_eur: Number(row.betrag_netto_eur ?? 0),
+      status: (row.status as ProvisionStatus) ?? 'pending',
+      service_typ: (row.service_typ as string | null) ?? null,
+      trigger_event: (row.trigger_event as string | null) ?? null,
+      trigger_at: (row.trigger_at as string | null) ?? null,
+      hold_until: (row.hold_until as string | null) ?? null,
+      storniert_am: (row.storniert_am as string | null) ?? null,
+      storno_grund: (row.storno_grund as string | null) ?? null,
+      fall_id: fall?.id ?? null,
+      fall_nummer: fall?.fall_nummer ?? null,
+      fall_status: fall?.status ?? null,
+      kunde_name: kundeName,
+    }
+  })
+
+  return {
+    monthPending: sumBetrag(pendingRes.data),
+    monthReleased: sumBetrag(releasedRes.data),
+    lifetimeTotal: sumBetrag(totalRes.data),
+    auszahlungNext: range.auszahlungIso,
+    currentMonth: range.current,
+    provisionen,
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // AAR-488 (M6) — Chat-Tab: Gruppenchat-Integration
 // ─────────────────────────────────────────────────────────────────────────────
 
