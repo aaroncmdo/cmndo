@@ -1166,9 +1166,11 @@ export type Database = {
           gegner_fahrzeugtyp: string | null
           gegner_kennzeichen: string | null
           gegner_name: string | null
+          gegner_schadennummer: string | null
           gegner_versicherung: string | null
           gegner_versicherung_anfrage_datum: string | null
           gegner_versicherung_id: string | null
+          gegner_versicherungsnummer: string | null
           geschaetzte_fahrdistanz_km: number | null
           geschaetzte_fahrzeit_min: number | null
           geschlossen_grund: string | null
@@ -1295,7 +1297,6 @@ export type Database = {
           schadenfall_typ: string | null
           schadenhergang: string | null
           schadenhoehe_netto: number | null
-          schadennummer_versicherung: string | null
           schadens_adresse: string | null
           schadens_beschreibung: string | null
           schadens_datum: string | null
@@ -1346,11 +1347,6 @@ export type Database = {
           unfallskizze_url: string | null
           updated_at: string | null
           ust_id: string | null
-          versicherung_gegner_name: string | null
-          versicherung_id: string | null
-          versicherung_name: string | null
-          versicherung_schaden_nr: string | null
-          versicherungsnummer_gegner: string | null
           vollmacht_geprueft_am: string | null
           vollmacht_geprueft_von: string | null
           vollmacht_pdf: string | null
@@ -1462,9 +1458,11 @@ export type Database = {
           gegner_fahrzeugtyp?: string | null
           gegner_kennzeichen?: string | null
           gegner_name?: string | null
+          gegner_schadennummer?: string | null
           gegner_versicherung?: string | null
           gegner_versicherung_anfrage_datum?: string | null
           gegner_versicherung_id?: string | null
+          gegner_versicherungsnummer?: string | null
           geschaetzte_fahrdistanz_km?: number | null
           geschaetzte_fahrzeit_min?: number | null
           geschlossen_grund?: string | null
@@ -1591,7 +1589,6 @@ export type Database = {
           schadenfall_typ?: string | null
           schadenhergang?: string | null
           schadenhoehe_netto?: number | null
-          schadennummer_versicherung?: string | null
           schadens_adresse?: string | null
           schadens_beschreibung?: string | null
           schadens_datum?: string | null
@@ -1642,11 +1639,6 @@ export type Database = {
           unfallskizze_url?: string | null
           updated_at?: string | null
           ust_id?: string | null
-          versicherung_gegner_name?: string | null
-          versicherung_id?: string | null
-          versicherung_name?: string | null
-          versicherung_schaden_nr?: string | null
-          versicherungsnummer_gegner?: string | null
           vollmacht_geprueft_am?: string | null
           vollmacht_geprueft_von?: string | null
           vollmacht_pdf?: string | null
@@ -1758,9 +1750,11 @@ export type Database = {
           gegner_fahrzeugtyp?: string | null
           gegner_kennzeichen?: string | null
           gegner_name?: string | null
+          gegner_schadennummer?: string | null
           gegner_versicherung?: string | null
           gegner_versicherung_anfrage_datum?: string | null
           gegner_versicherung_id?: string | null
+          gegner_versicherungsnummer?: string | null
           geschaetzte_fahrdistanz_km?: number | null
           geschaetzte_fahrzeit_min?: number | null
           geschlossen_grund?: string | null
@@ -1887,7 +1881,6 @@ export type Database = {
           schadenfall_typ?: string | null
           schadenhergang?: string | null
           schadenhoehe_netto?: number | null
-          schadennummer_versicherung?: string | null
           schadens_adresse?: string | null
           schadens_beschreibung?: string | null
           schadens_datum?: string | null
@@ -1938,11 +1931,6 @@ export type Database = {
           unfallskizze_url?: string | null
           updated_at?: string | null
           ust_id?: string | null
-          versicherung_gegner_name?: string | null
-          versicherung_id?: string | null
-          versicherung_name?: string | null
-          versicherung_schaden_nr?: string | null
-          versicherungsnummer_gegner?: string | null
           vollmacht_geprueft_am?: string | null
           vollmacht_geprueft_von?: string | null
           vollmacht_pdf?: string | null
@@ -2049,13 +2037,6 @@ export type Database = {
             columns: ["sv_id"]
             isOneToOne: false
             referencedRelation: "sachverstaendige"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_versicherung_id_fkey"
-            columns: ["versicherung_id"]
-            isOneToOne: false
-            referencedRelation: "versicherungen"
             referencedColumns: ["id"]
           },
         ]
