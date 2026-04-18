@@ -30,7 +30,9 @@ import type {
   FallDetailDocument,
   TimelineEvent,
   MaklerRow,
+  MaklerChatMessage,
 } from '@/lib/makler/queries'
+import { MaklerChatTab } from './MaklerChatTab'
 
 type TabKey = 'overview' | 'timeline' | 'documents' | 'chat' | 'copilot'
 
@@ -39,6 +41,8 @@ type Props = {
   signedUrls: Record<string, string | null>
   initialTab: TabKey
   makler: MaklerRow
+  currentUserId: string
+  initialChatMessages: MaklerChatMessage[]
 }
 
 const EUR = new Intl.NumberFormat('de-DE', {
@@ -83,7 +87,13 @@ function fullName(
   return [p.vorname, p.nachname].filter(Boolean).join(' ') || '–'
 }
 
-export function MaklerAkteDetail({ detail, signedUrls, initialTab }: Props) {
+export function MaklerAkteDetail({
+  detail,
+  signedUrls,
+  initialTab,
+  currentUserId,
+  initialChatMessages,
+}: Props) {
   const [tab, setTab] = useState<TabKey>(initialTab)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -235,7 +245,13 @@ export function MaklerAkteDetail({ detail, signedUrls, initialTab }: Props) {
       {tab === 'documents' ? (
         <DocumentsPanel docs={documents} signedUrls={signedUrls} />
       ) : null}
-      {tab === 'chat' ? <PlaceholderPanel milestone="M6" feature="Chat" /> : null}
+      {tab === 'chat' ? (
+        <MaklerChatTab
+          fallId={fall.id}
+          currentUserId={currentUserId}
+          initialMessages={initialChatMessages}
+        />
+      ) : null}
       {tab === 'copilot' ? (
         <PlaceholderPanel milestone="M7" feature="Copilot" />
       ) : null}
