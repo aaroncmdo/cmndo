@@ -13,6 +13,8 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { computeRecipients } from '@/lib/notifications/fan-out'
 import { CHANNEL_HANDLERS } from '@/lib/notifications/channels'
+import { EVENT_MATRIX } from '@/lib/notifications/channel-matrix'
+import { decideDeliveries } from '@/lib/notifications/preferences'
 import type { Channel, EventType, NotificationEvent, Role } from '@/lib/notifications/types'
 
 export const dynamic = 'force-dynamic'
@@ -33,22 +35,38 @@ async function processSingleEvent(event: NotificationEvent): Promise<{ ok: boole
   try {
     const recipients = await computeRecipients(event)
 
-    // Bulk-Insert aller Delivery-Zeilen auf einmal (status=pending).
-    const deliveryRows: Array<{
+    // AAR-500 N5: Pro Empfänger Preferences auswerten. Skipped-Rows werden
+    // trotzdem eingetragen (status='skipped' + skip_reason), damit der Audit-
+    // Log nachvollziehbar bleibt — aber NICHT dispatched.
+    const priority = EVENT_MATRIX[event.event_type as EventType]?.priority ?? 'normal'
+    const now = new Date()
+    type PreparedRow = {
       event_id: string
       recipient_user_id: string
       recipient_role: string
       channel: Channel
-    }> = []
+      status: 'pending' | 'skipped'
+      skip_reason: string | null
+    }
+    const deliveryRows: PreparedRow[] = []
     for (const r of recipients) {
-      for (const ch of r.channels) {
+      const items = r.channels.map((channel) => ({
+        eventType: event.event_type as EventType,
+        channel,
+        priority,
+      }))
+      const decisions = await decideDeliveries(r.userId, items, now)
+      r.channels.forEach((channel, idx) => {
+        const decision = decisions[idx]
         deliveryRows.push({
           event_id: event.id,
           recipient_user_id: r.userId,
           recipient_role: r.role,
-          channel: ch,
+          channel,
+          status: decision.deliver ? 'pending' : 'skipped',
+          skip_reason: decision.deliver ? null : decision.skipReason ?? null,
         })
-      }
+      })
     }
 
     if (deliveryRows.length === 0) {
@@ -62,15 +80,16 @@ async function processSingleEvent(event: NotificationEvent): Promise<{ ok: boole
     const { data: inserted, error: insertErr } = await supabase
       .from('notification_deliveries')
       .insert(deliveryRows)
-      .select('id, recipient_user_id, recipient_role, channel')
+      .select('id, recipient_user_id, recipient_role, channel, status, skip_reason')
 
     if (insertErr || !inserted) {
       throw insertErr ?? new Error('delivery insert failed')
     }
 
-    // Channels parallel dispatchen.
+    // Channels parallel dispatchen — nur status='pending'. Skipped-Rows bleiben wie sie sind.
     await Promise.allSettled(
       inserted.map(async (d) => {
+        if (d.status === 'skipped') return
         const channel = d.channel as Channel
         const handler = CHANNEL_HANDLERS[channel]
         if (!handler) {

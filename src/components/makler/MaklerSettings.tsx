@@ -32,6 +32,12 @@ import {
   revokeMaklerConsent,
   updateMaklerNotificationPrefs,
 } from '@/lib/actions/makler-settings'
+// AAR-500 N5: neue Benachrichtigungs-Präferenzen (Quiet-Hours + Channel-/Event-
+// Opt-Outs). Ersetzt nicht die bestehenden Email-Flags unten — wirkt zusätzlich.
+import {
+  NotificationPreferencesForm,
+  type NotificationPreferencesFormValue,
+} from '@/components/notifications/NotificationPreferencesForm'
 
 const DATE_SHORT = new Intl.DateTimeFormat('de-DE', {
   day: '2-digit',
@@ -52,9 +58,11 @@ type SaveState = {
 export function MaklerSettings({
   profile,
   consents,
+  notificationPrefs,
 }: {
   profile: MaklerFullProfile
   consents: AktiveConsentRow[]
+  notificationPrefs?: NotificationPreferencesFormValue
 }) {
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-5">
@@ -72,9 +80,29 @@ export function MaklerSettings({
       <PasswortCard />
       <ConsentsCard consents={consents} />
       <NotificationsCard prefs={profile.notification_preferences} />
+      {notificationPrefs ? (
+        <NotificationPreferencesCard initial={notificationPrefs} />
+      ) : null}
       <LogoutCard />
       <AccountLoeschenCard firma={profile.firma} email={profile.email} />
     </div>
+  )
+}
+
+// AAR-500 N5: Kanal-Präferenzen + Ruhezeiten + Event-Feintuning.
+function NotificationPreferencesCard({
+  initial,
+}: {
+  initial: NotificationPreferencesFormValue
+}) {
+  return (
+    <SectionCard
+      icon={<BellIcon width={16} height={16} />}
+      title="Kanäle & Ruhezeiten"
+      subtitle="Wann und auf welchem Kanal sollen Sie benachrichtigt werden?"
+    >
+      <NotificationPreferencesForm role="makler" initial={initial} />
+    </SectionCard>
   )
 }
 

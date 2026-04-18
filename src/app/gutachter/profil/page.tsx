@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import ProfilClient from './ProfilClient'
+// AAR-500 N5: Benachrichtigungs-Präferenzen in Settings-Section laden
+import { getMyNotificationPreferences } from '@/lib/actions/notification-preferences'
 
 export default async function ProfilPage() {
   const supabase = await createClient()
@@ -33,6 +35,8 @@ export default async function ProfilPage() {
     pendingTermine = termine ?? []
   }
 
+  const prefsRes = await getMyNotificationPreferences()
+
   return (
     <ProfilClient
       email={user!.email ?? ''}
@@ -40,6 +44,15 @@ export default async function ProfilPage() {
       sv={(sv as never) ?? { id: '', paket: '', gebiet_plz: null, ist_aktiv: true, max_faelle_monat: 10, offene_faelle: 0, kalender_typ: 'keiner', kalender_sync_aktiv: false, kalender_sync_letzte: null, qualifikationen_neu: [], spezifikationen: [], schadenarten: [], standort_adresse: null, standort_plz: null, standort_lat: null, standort_lng: null, standort_place_id: null, firmenname: null, rechtsform: null, steuernummer: null, ust_id: null, hrb: null, rolle_in_organisation: null, community_anonym: false }}
       faelleCount={faelleResult.count ?? 0}
       pendingTermine={pendingTermine}
+      notificationPrefs={
+        prefsRes.prefs ?? {
+          quiet_hours_start: null,
+          quiet_hours_end: null,
+          timezone: 'Europe/Berlin',
+          channel_opt_outs: [],
+          event_opt_outs: {},
+        }
+      }
     />
   )
 }
