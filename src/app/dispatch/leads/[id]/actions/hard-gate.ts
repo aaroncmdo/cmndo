@@ -53,6 +53,8 @@ export async function saveHardGate(
     ...(data.aufklaerung_teilschuld_bestaetigt !== undefined && { aufklaerung_teilschuld_bestaetigt: data.aufklaerung_teilschuld_bestaetigt }),
     ...(data.schaden_sichtbar !== undefined && { schaden_sichtbar: data.schaden_sichtbar }),
     ...(data.personenschaden_flag !== undefined && { personenschaden_flag: data.personenschaden_flag }),
+    ...(data.sachschaden_flag !== undefined && { sachschaden_flag: data.sachschaden_flag }),
+    ...(data.sachschaden_beschreibung !== undefined && { sachschaden_beschreibung: data.sachschaden_beschreibung }),
     ...(data.mietwagen_flag !== undefined && { mietwagen_flag: data.mietwagen_flag }),
     ...(data.nutzungsausfall !== undefined && { nutzungsausfall: data.nutzungsausfall }),
     ...(data.hat_haftpflicht !== undefined && { hat_haftpflicht: data.hat_haftpflicht }),
