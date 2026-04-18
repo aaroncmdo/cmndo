@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic'
  * Auth: Authorization: Bearer ${CRON_SECRET}.
  *
  * Prüft alle pflichtdokumente mit gueltig_bis IS NOT NULL und
- * dokument_typ='sv_berufshaftpflicht' (+ verknüpftem gutachter_id).
+ * dokument_typ='sv_berufshaftpflicht' (+ verknüpftem sv_id).
  * Legt pro Stufe (-30 / -14 / -7 / 0 Tage) genau einen Auto-Task
  * für den SV an. Doppel-Schutz über task_code + entity_id (das
  * pflichtdokument selbst) + status != 'erledigt'.
@@ -65,10 +65,10 @@ export async function GET(request: Request) {
   // Nur Dokumente mit gueltig_bis und relevantem Typ + SV-Zuordnung
   const { data: docs, error } = await db
     .from('pflichtdokumente')
-    .select('id, dokument_typ, gueltig_bis, gutachter_id')
+    .select('id, dokument_typ, gueltig_bis, sv_id')
     .in('dokument_typ', BETROFFENE_TYPEN)
     .not('gueltig_bis', 'is', null)
-    .not('gutachter_id', 'is', null)
+    .not('sv_id', 'is', null)
 
   if (error) {
     console.error('[AAR-389] Query-Fehler:', error.message)
@@ -83,7 +83,7 @@ export async function GET(request: Request) {
   let uebersprungen = 0
 
   for (const doc of docs) {
-    if (!doc.gueltig_bis || !doc.gutachter_id) continue
+    if (!doc.gueltig_bis || !doc.sv_id) continue
 
     const ablaufDatum = new Date(doc.gueltig_bis + 'T00:00:00Z')
     const tageBisAblauf = Math.floor(
@@ -113,7 +113,7 @@ export async function GET(request: Request) {
     const { data: sv } = await db
       .from('sachverstaendige')
       .select('id, profile_id')
-      .eq('id', doc.gutachter_id)
+      .eq('id', doc.sv_id)
       .maybeSingle()
 
     if (!sv?.profile_id) {

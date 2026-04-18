@@ -12,11 +12,11 @@ export default async function AdminReklamationenPage() {
 
   const db = createAdminClient()
   const { data: reklamationen } = await db.from('reklamationen')
-    .select('id, fall_id, gutachter_id, grund, begruendung, eingereicht_am, status, frist_bis, admin_begruendung')
+    .select('id, fall_id, sv_id, grund, begruendung, eingereicht_am, status, frist_bis, admin_begruendung')
     .order('eingereicht_am', { ascending: false })
 
   // SV-Namen + Fall-Nummern laden
-  const svIds = [...new Set((reklamationen ?? []).map(r => r.gutachter_id))]
+  const svIds = [...new Set((reklamationen ?? []).map(r => r.sv_id))]
   const fallIds = [...new Set((reklamationen ?? []).map(r => r.fall_id))]
 
   const svNameMap: Record<string, string> = {}

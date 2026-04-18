@@ -91,7 +91,7 @@ export default function KundeTrackingClient({
     supabase
       .from('sv_live_position')
       .select('lat, lng')
-      .eq('gutachter_id', svId)
+      .eq('sv_id', svId)
       .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle()
@@ -106,7 +106,7 @@ export default function KundeTrackingClient({
         event: 'INSERT',
         schema: 'public',
         table: 'sv_live_position',
-        filter: `gutachter_id=eq.${svId}`,
+        filter: `sv_id=eq.${svId}`,
       }, (payload) => {
         const row = payload.new as { lat: string; lng: string }
         setSvPosition({ lat: Number(row.lat), lng: Number(row.lng) })

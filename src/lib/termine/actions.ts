@@ -147,7 +147,7 @@ export async function updateLivePosition(
   const { error: posErr } = await db
     .from('sv_live_position')
     .upsert({
-      gutachter_id: sv.id,
+      sv_id: sv.id,
       lat,
       lng,
       accuracy_m: 0,
@@ -155,7 +155,7 @@ export async function updateLivePosition(
       speed_kmh: null,
       updated_at: now,
       ...(distanceMeters !== null ? { distance_to_target_meters: distanceMeters } : {}),
-    }, { onConflict: 'gutachter_id' })
+    }, { onConflict: 'sv_id' })
 
   if (posErr) console.error('[updateLivePosition] upsert error:', posErr.message)
 

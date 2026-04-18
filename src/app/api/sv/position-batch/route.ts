@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     )
 
     const rows = sorted.map((p) => ({
-      gutachter_id: sv.id,
+      sv_id: sv.id,
       lat: p.lat,
       lng: p.lng,
       accuracy_m: p.accuracy_m,

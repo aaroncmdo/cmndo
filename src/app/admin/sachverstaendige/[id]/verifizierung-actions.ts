@@ -153,7 +153,7 @@ export async function tier2DokumentNachfordern(
   const { data: existing } = await db
     .from('pflichtdokumente')
     .select('id')
-    .eq('gutachter_id', svId)
+    .eq('sv_id', svId)
     .eq('dokument_typ', slotId)
     .eq('status', 'ausstehend')
     .maybeSingle()
@@ -164,7 +164,7 @@ export async function tier2DokumentNachfordern(
   const { data: maxRow } = await db
     .from('pflichtdokumente')
     .select('sort_order')
-    .eq('gutachter_id', svId)
+    .eq('sv_id', svId)
     .order('sort_order', { ascending: false })
     .limit(1)
     .maybeSingle()
@@ -173,7 +173,7 @@ export async function tier2DokumentNachfordern(
   const { data: inserted, error: insErr } = await db
     .from('pflichtdokumente')
     .insert({
-      gutachter_id: svId,
+      sv_id: svId,
       dokument_typ: slotId,
       status: 'ausstehend',
       pflicht: true,

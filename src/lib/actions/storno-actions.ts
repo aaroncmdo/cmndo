@@ -147,7 +147,7 @@ export async function einreicheReklamation(data: {
 
   const { data: rekl, error } = await db.from('reklamationen').insert({
     fall_id: data.fallId,
-    gutachter_id: sv.id,
+    sv_id: sv.id,
     grund: data.grund,
     begruendung: data.begruendung,
     frist_bis: fristBis.toISOString(),
@@ -183,7 +183,7 @@ export async function entscheideReklamation(reklamationId: string, entscheidung:
   if (profile?.rolle !== 'admin') return { success: false, error: 'Kein Zugriff' }
 
   const db = createAdminClient()
-  const { data: rekl } = await db.from('reklamationen').select('id, fall_id, gutachter_id, status').eq('id', reklamationId).single()
+  const { data: rekl } = await db.from('reklamationen').select('id, fall_id, sv_id, status').eq('id', reklamationId).single()
   if (!rekl) return { success: false, error: 'Reklamation nicht gefunden' }
   if (!['eingereicht', 'pruefung'].includes(rekl.status)) return { success: false, error: 'Reklamation bereits bearbeitet' }
 

@@ -51,7 +51,7 @@ export async function GET() {
 
       // Idempotenz: schon gesendet?
       const { data: existing } = await db.from('sv_payment_reminders')
-        .select('id').eq('gutachter_id', sv.id).eq('reminder_typ', trigger.typ).limit(1).maybeSingle()
+        .select('id').eq('sv_id', sv.id).eq('reminder_typ', trigger.typ).limit(1).maybeSingle()
       if (existing) continue
 
       // Reminder senden
@@ -81,7 +81,7 @@ export async function GET() {
       }
 
       // Als gesendet markieren
-      await db.from('sv_payment_reminders').insert({ gutachter_id: sv.id, reminder_typ: trigger.typ })
+      await db.from('sv_payment_reminders').insert({ sv_id: sv.id, reminder_typ: trigger.typ })
       sent++
     }
 

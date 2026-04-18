@@ -359,14 +359,14 @@ export default function KarteHubClient({
     // Initial: letzte Position pro SV laden, 30-Min-Cutoff
     supabase
       .from('sv_live_position')
-      .select('gutachter_id, lat, lng, updated_at')
+      .select('sv_id, lat, lng, updated_at')
       .order('updated_at', { ascending: false })
       .then(({ data }) => {
         if (!data) return
         const latest = new Map<string, { lat: number; lng: number; updated_at: string }>()
         for (const row of data) {
-          if (!latest.has(row.gutachter_id)) {
-            latest.set(row.gutachter_id, {
+          if (!latest.has(row.sv_id)) {
+            latest.set(row.sv_id, {
               lat: Number(row.lat),
               lng: Number(row.lng),
               updated_at: row.updated_at,
@@ -388,9 +388,9 @@ export default function KarteHubClient({
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'sv_live_position' },
         (payload) => {
-          const row = payload.new as { gutachter_id: string; lat: string; lng: string }
-          const svName = svs.find((s) => s.id === row.gutachter_id)?.name ?? 'SV'
-          upsertLiveMarker(row.gutachter_id, Number(row.lat), Number(row.lng), svName)
+          const row = payload.new as { sv_id: string; lat: string; lng: string }
+          const svName = svs.find((s) => s.id === row.sv_id)?.name ?? 'SV'
+          upsertLiveMarker(row.sv_id, Number(row.lat), Number(row.lng), svName)
         },
       )
       .subscribe()

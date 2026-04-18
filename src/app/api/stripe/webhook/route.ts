@@ -42,7 +42,7 @@ export async function POST(request: Request) {
   await db.from('stripe_events').insert({
     stripe_event_id: event.id,
     event_type: event.type,
-    gutachter_id: gutachterId,
+    sv_id: gutachterId,
     payload: event.data.object,
   })
 

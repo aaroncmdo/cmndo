@@ -2981,13 +2981,13 @@ export type Database = {
           betrag_netto: number
           created_at: string
           grund: string
-          gutachter_id: string
           id: string
           mwst_betrag: number
           referenz_abrechnung_id: string | null
           referenz_fall_id: string | null
           status: string
           stripe_refund_id: string | null
+          sv_id: string
           updated_at: string
           verrechnet_in_abrechnung_id: string | null
         }
@@ -2997,13 +2997,13 @@ export type Database = {
           betrag_netto: number
           created_at?: string
           grund: string
-          gutachter_id: string
           id?: string
           mwst_betrag: number
           referenz_abrechnung_id?: string | null
           referenz_fall_id?: string | null
           status?: string
           stripe_refund_id?: string | null
+          sv_id: string
           updated_at?: string
           verrechnet_in_abrechnung_id?: string | null
         }
@@ -3013,24 +3013,17 @@ export type Database = {
           betrag_netto?: number
           created_at?: string
           grund?: string
-          gutachter_id?: string
           id?: string
           mwst_betrag?: number
           referenz_abrechnung_id?: string | null
           referenz_fall_id?: string | null
           status?: string
           stripe_refund_id?: string | null
+          sv_id?: string
           updated_at?: string
           verrechnet_in_abrechnung_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "gutschriften_gutachter_id_fkey"
-            columns: ["gutachter_id"]
-            isOneToOne: false
-            referencedRelation: "sachverstaendige"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "gutschriften_referenz_abrechnung_id_fkey"
             columns: ["referenz_abrechnung_id"]
@@ -3050,6 +3043,13 @@ export type Database = {
             columns: ["referenz_fall_id"]
             isOneToOne: false
             referencedRelation: "v_faelle_mit_aktuellem_termin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutschriften_sv_id_fkey"
+            columns: ["sv_id"]
+            isOneToOne: false
+            referencedRelation: "sachverstaendige"
             referencedColumns: ["id"]
           },
         ]
@@ -5109,7 +5109,6 @@ export type Database = {
           fall_id: string | null
           frist: string | null
           gueltig_bis: string | null
-          gutachter_id: string | null
           hochgeladen_am: string | null
           id: string
           person_id: string | null
@@ -5118,6 +5117,7 @@ export type Database = {
           sort_order: number
           spaeter_nachreichen_markiert_am: string | null
           status: string | null
+          sv_id: string | null
         }
         Insert: {
           angefordert_am?: string | null
@@ -5130,7 +5130,6 @@ export type Database = {
           fall_id?: string | null
           frist?: string | null
           gueltig_bis?: string | null
-          gutachter_id?: string | null
           hochgeladen_am?: string | null
           id?: string
           person_id?: string | null
@@ -5139,6 +5138,7 @@ export type Database = {
           sort_order?: number
           spaeter_nachreichen_markiert_am?: string | null
           status?: string | null
+          sv_id?: string | null
         }
         Update: {
           angefordert_am?: string | null
@@ -5151,7 +5151,6 @@ export type Database = {
           fall_id?: string | null
           frist?: string | null
           gueltig_bis?: string | null
-          gutachter_id?: string | null
           hochgeladen_am?: string | null
           id?: string
           person_id?: string | null
@@ -5160,6 +5159,7 @@ export type Database = {
           sort_order?: number
           spaeter_nachreichen_markiert_am?: string | null
           status?: string | null
+          sv_id?: string | null
         }
         Relationships: [
           {
@@ -5184,17 +5184,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "pflichtdokumente_gutachter_id_fkey"
-            columns: ["gutachter_id"]
-            isOneToOne: false
-            referencedRelation: "sachverstaendige"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "pflichtdokumente_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
             referencedRelation: "personenschaden_personen"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pflichtdokumente_sv_id_fkey"
+            columns: ["sv_id"]
+            isOneToOne: false
+            referencedRelation: "sachverstaendige"
             referencedColumns: ["id"]
           },
         ]
@@ -5757,10 +5757,10 @@ export type Database = {
           fall_id: string
           frist_bis: string
           grund: string
-          gutachter_id: string
           id: string
           nachweis_storage_path: string | null
           status: string
+          sv_id: string
         }
         Insert: {
           admin_begruendung?: string | null
@@ -5772,10 +5772,10 @@ export type Database = {
           fall_id: string
           frist_bis: string
           grund: string
-          gutachter_id: string
           id?: string
           nachweis_storage_path?: string | null
           status?: string
+          sv_id: string
         }
         Update: {
           admin_begruendung?: string | null
@@ -5787,10 +5787,10 @@ export type Database = {
           fall_id?: string
           frist_bis?: string
           grund?: string
-          gutachter_id?: string
           id?: string
           nachweis_storage_path?: string | null
           status?: string
+          sv_id?: string
         }
         Relationships: [
           {
@@ -5808,8 +5808,8 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "reklamationen_gutachter_id_fkey"
-            columns: ["gutachter_id"]
+            foreignKeyName: "reklamationen_sv_id_fkey"
+            columns: ["sv_id"]
             isOneToOne: false
             referencedRelation: "sachverstaendige"
             referencedColumns: ["id"]
@@ -6311,36 +6311,36 @@ export type Database = {
           empfangen_am: string
           event_type: string
           fehler: string | null
-          gutachter_id: string | null
           id: string
           payload: Json
           stripe_event_id: string
+          sv_id: string | null
           verarbeitet: boolean
         }
         Insert: {
           empfangen_am?: string
           event_type: string
           fehler?: string | null
-          gutachter_id?: string | null
           id?: string
           payload: Json
           stripe_event_id: string
+          sv_id?: string | null
           verarbeitet?: boolean
         }
         Update: {
           empfangen_am?: string
           event_type?: string
           fehler?: string | null
-          gutachter_id?: string | null
           id?: string
           payload?: Json
           stripe_event_id?: string
+          sv_id?: string | null
           verarbeitet?: boolean
         }
         Relationships: [
           {
-            foreignKeyName: "stripe_events_gutachter_id_fkey"
-            columns: ["gutachter_id"]
+            foreignKeyName: "stripe_events_sv_id_fkey"
+            columns: ["sv_id"]
             isOneToOne: false
             referencedRelation: "sachverstaendige"
             referencedColumns: ["id"]
@@ -6406,45 +6406,45 @@ export type Database = {
           accuracy_m: number | null
           captured_at: string | null
           distance_to_target_meters: number | null
-          gutachter_id: string
           heading: number | null
           id: string
           lat: number
           lng: number
           route_polyline: string | null
           speed_kmh: number | null
+          sv_id: string
           updated_at: string
         }
         Insert: {
           accuracy_m?: number | null
           captured_at?: string | null
           distance_to_target_meters?: number | null
-          gutachter_id: string
           heading?: number | null
           id?: string
           lat: number
           lng: number
           route_polyline?: string | null
           speed_kmh?: number | null
+          sv_id: string
           updated_at?: string
         }
         Update: {
           accuracy_m?: number | null
           captured_at?: string | null
           distance_to_target_meters?: number | null
-          gutachter_id?: string
           heading?: number | null
           id?: string
           lat?: number
           lng?: number
           route_polyline?: string | null
           speed_kmh?: number | null
+          sv_id?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "sv_live_position_gutachter_id_fkey"
-            columns: ["gutachter_id"]
+            foreignKeyName: "sv_live_position_sv_id_fkey"
+            columns: ["sv_id"]
             isOneToOne: false
             referencedRelation: "sachverstaendige"
             referencedColumns: ["id"]
@@ -6550,27 +6550,27 @@ export type Database = {
       }
       sv_payment_reminders: {
         Row: {
-          gutachter_id: string
           id: string
           reminder_typ: string
+          sv_id: string
           versendet_am: string
         }
         Insert: {
-          gutachter_id: string
           id?: string
           reminder_typ: string
+          sv_id: string
           versendet_am?: string
         }
         Update: {
-          gutachter_id?: string
           id?: string
           reminder_typ?: string
+          sv_id?: string
           versendet_am?: string
         }
         Relationships: [
           {
-            foreignKeyName: "sv_payment_reminders_gutachter_id_fkey"
-            columns: ["gutachter_id"]
+            foreignKeyName: "sv_payment_reminders_sv_id_fkey"
+            columns: ["sv_id"]
             isOneToOne: false
             referencedRelation: "sachverstaendige"
             referencedColumns: ["id"]
@@ -7132,11 +7132,11 @@ export type Database = {
         Row: {
           created_at: string
           email_log_id: string | null
-          gutachter_id: string | null
           id: string
           organisation_id: string | null
           pdf_generiert_am: string | null
           pdf_storage_path: string | null
+          sv_id: string | null
           unterschrift_datum: string
           unterschrift_ip: string | null
           unterschrift_name: string
@@ -7148,11 +7148,11 @@ export type Database = {
         Insert: {
           created_at?: string
           email_log_id?: string | null
-          gutachter_id?: string | null
           id?: string
           organisation_id?: string | null
           pdf_generiert_am?: string | null
           pdf_storage_path?: string | null
+          sv_id?: string | null
           unterschrift_datum?: string
           unterschrift_ip?: string | null
           unterschrift_name: string
@@ -7164,11 +7164,11 @@ export type Database = {
         Update: {
           created_at?: string
           email_log_id?: string | null
-          gutachter_id?: string | null
           id?: string
           organisation_id?: string | null
           pdf_generiert_am?: string | null
           pdf_storage_path?: string | null
+          sv_id?: string | null
           unterschrift_datum?: string
           unterschrift_ip?: string | null
           unterschrift_name?: string
@@ -7179,17 +7179,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "vertraege_unterzeichnet_gutachter_id_fkey"
-            columns: ["gutachter_id"]
-            isOneToOne: false
-            referencedRelation: "sachverstaendige"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "vertraege_unterzeichnet_organisation_id_fkey"
             columns: ["organisation_id"]
             isOneToOne: false
             referencedRelation: "organisationen"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vertraege_unterzeichnet_sv_id_fkey"
+            columns: ["sv_id"]
+            isOneToOne: false
+            referencedRelation: "sachverstaendige"
             referencedColumns: ["id"]
           },
           {

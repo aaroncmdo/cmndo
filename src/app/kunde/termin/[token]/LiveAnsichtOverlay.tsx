@@ -53,7 +53,7 @@ export default function LiveAnsichtOverlay({
     void supabase
       .from('sv_live_position')
       .select('lat, lng')
-      .eq('gutachter_id', svId)
+      .eq('sv_id', svId)
       .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle()
@@ -69,7 +69,7 @@ export default function LiveAnsichtOverlay({
           event: 'INSERT',
           schema: 'public',
           table: 'sv_live_position',
-          filter: `gutachter_id=eq.${svId}`,
+          filter: `sv_id=eq.${svId}`,
         },
         (payload) => {
           const row = payload.new as { lat: string; lng: string }

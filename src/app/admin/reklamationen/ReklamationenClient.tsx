@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { entscheideReklamation } from '@/lib/actions/storno-actions'
 
 type Reklamation = {
-  id: string; fall_id: string; gutachter_id: string; grund: string
+  id: string; fall_id: string; sv_id: string; grund: string
   begruendung: string; eingereicht_am: string; status: string; frist_bis: string; admin_begruendung: string | null
 }
 
@@ -67,7 +67,7 @@ export default function ReklamationenClient({ reklamationen, svNameMap, fallNrMa
               <div key={r.id} className="bg-white border border-gray-200 rounded-xl p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{svNameMap[r.gutachter_id] ?? '—'} — Fall {fallNrMap[r.fall_id] ?? r.fall_id.slice(0, 8)}</p>
+                    <p className="text-sm font-medium text-gray-900">{svNameMap[r.sv_id] ?? '—'} — Fall {fallNrMap[r.fall_id] ?? r.fall_id.slice(0, 8)}</p>
                     <p className="text-xs text-gray-500">{GRUND_LABELS[r.grund] ?? r.grund} · {new Date(r.eingereicht_am).toLocaleDateString('de-DE')}</p>
                   </div>
                   <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${badge.color}`}>{badge.label}</span>

@@ -107,7 +107,7 @@ export default async function SvDetailPage({
       getAlleSlots(supabase),
       dbAdmin.from('pflichtdokumente')
         .select('id, dokument_typ, status, hochgeladen_am')
-        .eq('gutachter_id', id),
+        .eq('sv_id', id),
     ])
     const pflichtRows = (pflichtRes.data ?? []) as Array<{
       id: string

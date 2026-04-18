@@ -95,7 +95,7 @@ export async function revertCaseBilling(
       const { FINANCE } = await import('@/lib/finance/constants')
       const mwst = Math.round(nachzahlung * (FINANCE.MWST_PROZENT / 100) * 100) / 100
       const { data: gs } = await db.from('gutschriften').insert({
-        gutachter_id: abr.gutachter_id,
+        sv_id: abr.gutachter_id,
         betrag_netto: nachzahlung,
         mwst_betrag: mwst,
         betrag_brutto: Math.round((nachzahlung + mwst) * 100) / 100,

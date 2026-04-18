@@ -26,7 +26,7 @@ export async function trackPosition(input: {
   if (!sv.live_tracking_enabled) return { error: 'tracking_disabled' }
 
   const { error } = await supabase.from('sv_live_position').insert({
-    gutachter_id: sv.id,
+    sv_id: sv.id,
     lat: input.lat,
     lng: input.lng,
     accuracy_m: input.accuracy_m,

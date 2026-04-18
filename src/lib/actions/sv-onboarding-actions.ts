@@ -50,7 +50,7 @@ export async function signSvVertrag({
       unterschrift_ip: ip,
       unterschrift_user_agent: userAgent,
       signature_png_data_uri: signaturePngDataUri,
-      gutachter_id: sv.id,
+      sv_id: sv.id,
       rolle: 'Solo-Sachverstaendiger',
     })
   } catch (err) {
@@ -66,7 +66,7 @@ export async function signSvVertrag({
     .maybeSingle()
   if (kvVorlage) {
     await db.from('vertraege_unterzeichnet').insert({
-      gutachter_id: sv.id,
+      sv_id: sv.id,
       vorlage_id: kvVorlage.id,
       vorlage_typ: 'kooperationsvertrag_muster_gelesen',
       vorlage_version: kvVorlage.version,
@@ -164,7 +164,7 @@ export async function getOnboardingData() {
   // Bereits unterzeichnet?
   const { data: unterzeichnet } = await db.from('vertraege_unterzeichnet')
     .select('id, vorlage_typ')
-    .eq('gutachter_id', sv.id as string)
+    .eq('sv_id', sv.id as string)
 
   // Anzahlung berechnen (pro Fall im Kontingent)
   const { FINANCE } = await import('@/lib/finance/constants')
