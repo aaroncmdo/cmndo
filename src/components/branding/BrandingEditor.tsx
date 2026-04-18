@@ -200,7 +200,7 @@ export default function BrandingEditor({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-[#0D1B3E]">Branding</h1>
+          <h1 className="text-xl font-semibold text-[var(--brand-primary)]">Branding</h1>
           <p className="text-sm text-gray-500">
             Lade dein Logo hoch — Farben & Schriftart werden automatisch extrahiert.
           </p>
@@ -212,14 +212,14 @@ export default function BrandingEditor({
               <button
                 type="button"
                 onClick={() => { setScope('sv'); setDirty(true) }}
-                className={`px-3 py-1 ${scope === 'sv' ? 'bg-[#4573A2] text-white' : 'bg-white text-gray-700'}`}
+                className={`px-3 py-1 ${scope === 'sv' ? 'bg-[var(--brand-secondary)] text-white' : 'bg-white text-gray-700'}`}
               >
                 Nur ich
               </button>
               <button
                 type="button"
                 onClick={() => { setScope('org'); setDirty(true) }}
-                className={`px-3 py-1 ${scope === 'org' ? 'bg-[#4573A2] text-white' : 'bg-white text-gray-700'}`}
+                className={`px-3 py-1 ${scope === 'org' ? 'bg-[var(--brand-secondary)] text-white' : 'bg-white text-gray-700'}`}
               >
                 Ganzes Büro
               </button>
@@ -260,7 +260,7 @@ export default function BrandingEditor({
             onClear={() => { setLogoUrl(null); setDirty(true); setSaved(false) }}
           />
           {extracting && (
-            <div className="flex items-center gap-2 text-xs text-[#4573A2]">
+            <div className="flex items-center gap-2 text-xs text-[var(--brand-secondary)]">
               <Loader2Icon className="w-3.5 h-3.5 animate-spin" />
               Farben & Stil werden analysiert …
             </div>
@@ -317,7 +317,7 @@ export default function BrandingEditor({
           type="button"
           onClick={handleSave}
           disabled={!dirty || busy}
-          className="px-5 py-2 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+          className="px-5 py-2 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
         >
           {saving ? (
             <>

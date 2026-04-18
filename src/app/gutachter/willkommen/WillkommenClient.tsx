@@ -423,7 +423,7 @@ export default function WillkommenClient({
 
             <div className="mt-5 text-xs text-gray-500 text-center">
               Du kannst dieses Fenster schließen. Bei Fragen erreichst du uns unter{' '}
-              <a href="mailto:aaron.sprafke@claimondo.de" className="text-[#1E3A5F] underline">
+              <a href="mailto:aaron.sprafke@claimondo.de" className="text-[var(--brand-primary)] underline">
                 aaron.sprafke@claimondo.de
               </a>
             </div>
@@ -470,8 +470,8 @@ export default function WillkommenClient({
         )}
 
         {/* BUG-95 KORREKTUR: Stepper in Claimondo-CI ohne Grün.
-            done   → #4573A2 (Ondo Blue) + Checkmark, weiß
-            aktiv  → #0D1B3E (Navy Primary) + Step-Nummer, weiß
+            done   → var(--brand-secondary) (Ondo Blue) + Checkmark, weiß
+            aktiv  → var(--brand-primary) (Navy Primary) + Step-Nummer, weiß
             naechst → gray-200 + Step-Nummer, gray-500
             Connector zwischen done Steps Ondo-Blue, sonst gray-300 */}
         <div className="flex items-center justify-center gap-0 mb-8 font-[Montserrat]">
@@ -483,9 +483,9 @@ export default function WillkommenClient({
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors text-xs font-semibold ${
                     isDone
-                      ? 'bg-[#4573A2] text-white'
+                      ? 'bg-[var(--brand-secondary)] text-white'
                       : isActive
-                      ? 'bg-[#0D1B3E] text-white'
+                      ? 'bg-[var(--brand-primary)] text-white'
                       : 'bg-gray-200 text-gray-500'
                   }`}
                   aria-current={isActive ? 'step' : undefined}
@@ -494,7 +494,7 @@ export default function WillkommenClient({
                   {isDone ? <CheckIcon className="w-4 h-4" /> : i + 1}
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div className={`w-10 h-0.5 transition-colors ${isDone ? 'bg-[#4573A2]' : 'bg-gray-300'}`} />
+                  <div className={`w-10 h-0.5 transition-colors ${isDone ? 'bg-[var(--brand-secondary)]' : 'bg-gray-300'}`} />
                 )}
               </div>
             )
@@ -525,7 +525,7 @@ export default function WillkommenClient({
               )}
 
               {/* Konditionen-Card */}
-              <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-xl p-5">
+              <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-xl p-5">
                 <p className="text-xs text-gray-500 uppercase tracking-wide mb-3">Deine Konditionen</p>
                 <div className="grid grid-cols-2 gap-y-3 gap-x-4">
                   <Kondition label="Paket" value={paketLabel} />
@@ -533,11 +533,11 @@ export default function WillkommenClient({
                   <Kondition label="Radius" value={`${sv.paket_umkreis_km} km`} />
                   <Kondition label="Anzahlung" value={fmtEur(sv.onboarding_anzahlung_betrag)} highlight />
                 </div>
-                <div className="mt-4 pt-4 border-t border-[#1E3A5F]/10">
+                <div className="mt-4 pt-4 border-t border-[var(--brand-primary)]/10">
                   <button
                     type="button"
                     onClick={() => setShowLeadPreisOverlay(true)}
-                    className="text-xs text-[#1E3A5F] underline hover:text-[#4573A2]"
+                    className="text-xs text-[var(--brand-primary)] underline hover:text-[var(--brand-secondary)]"
                   >
                     → Lead-Preis-Tabelle + ROI-Rechner
                   </button>
@@ -567,7 +567,7 @@ export default function WillkommenClient({
           {currentKey === 'konditionen' && r === 'buero_inhaber' && (
             <div className="space-y-5">
               {/* Buero-Header */}
-              <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-xl p-5">
+              <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-xl p-5">
                 <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Du verwaltest</p>
                 <p className="text-base font-semibold text-gray-900">
                   {organisation?.name ?? '—'} <span className="text-sm text-gray-500 font-normal">mit {subSvs.length} {subSvs.length === 1 ? 'Standort' : 'Standorten'}</span>
@@ -613,7 +613,7 @@ export default function WillkommenClient({
               )}
 
               {/* Gesamt-Anzahlung groß hervorgehoben */}
-              <div className="bg-[#1E3A5F] text-white rounded-xl p-5">
+              <div className="bg-[var(--brand-primary)] text-white rounded-xl p-5">
                 <p className="text-xs text-white/70 uppercase tracking-wide">Gesamt-Anzahlung (alle Sub-Standorte)</p>
                 <p className="text-3xl font-bold mt-1">{fmtEur(gesamtAnzahlung)} <span className="text-sm font-normal text-white/70">netto</span></p>
                 <p className="text-[11px] text-white/70 mt-2">
@@ -644,8 +644,8 @@ export default function WillkommenClient({
             <div className="space-y-5">
               {/* Org-Hinweis */}
               {organisation && (
-                <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-xl p-5 flex items-start gap-3">
-                  <Building2Icon className="w-5 h-5 text-[#1E3A5F] flex-shrink-0 mt-0.5" />
+                <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-xl p-5 flex items-start gap-3">
+                  <Building2Icon className="w-5 h-5 text-[var(--brand-primary)] flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-gray-700">
                     <p>
                       Du gehoerst zu <strong>{organisation.name}</strong>. Dein{' '}
@@ -707,7 +707,7 @@ export default function WillkommenClient({
               {/* Hinweis fuer Buero-Inhaber: stellvertretend fuer alle Sub-Standorte */}
               {r === 'buero_inhaber' && organisation && (
                 <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-start gap-3">
-                  <Building2Icon className="w-5 h-5 text-[#4573A2] flex-shrink-0 mt-0.5" />
+                  <Building2Icon className="w-5 h-5 text-[var(--brand-secondary)] flex-shrink-0 mt-0.5" />
                   <div className="text-xs text-gray-700">
                     Du unterzeichnest stellvertretend fuer <strong>{organisation.name}</strong> und alle{' '}
                     {subSvs.length} {subSvs.length === 1 ? 'Sub-Standort' : 'Sub-Standorte'}.
@@ -766,7 +766,7 @@ export default function WillkommenClient({
                   type="text"
                   value={unterschriftName}
                   onChange={e => setUnterschriftName(e.target.value)}
-                  className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                  className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                 />
               </div>
 
@@ -797,7 +797,7 @@ export default function WillkommenClient({
                     <button
                       type="button"
                       onClick={(e) => { e.preventDefault(); setVertragModal('nb') }}
-                      className="font-semibold text-[#1E3A5F] underline hover:text-[#4573A2]"
+                      className="font-semibold text-[var(--brand-primary)] underline hover:text-[var(--brand-secondary)]"
                     >
                       Nutzungsbedingungen
                     </button>
@@ -809,7 +809,7 @@ export default function WillkommenClient({
                     <button
                       type="button"
                       onClick={(e) => { e.preventDefault(); setVertragModal('kv') }}
-                      className="font-semibold text-[#1E3A5F] underline hover:text-[#4573A2]"
+                      className="font-semibold text-[var(--brand-primary)] underline hover:text-[var(--brand-secondary)]"
                     >
                       den Kooperationsvertrag
                     </button>
@@ -817,7 +817,7 @@ export default function WillkommenClient({
                     <strong>den Kooperationsvertrag</strong>
                   )}
                   {' '}und die{' '}
-                  <Link href="/datenschutz" target="_blank" className="font-semibold text-[#1E3A5F] underline hover:text-[#4573A2]">
+                  <Link href="/datenschutz" target="_blank" className="font-semibold text-[var(--brand-primary)] underline hover:text-[var(--brand-secondary)]">
                     Datenschutzerklaerung
                   </Link>
                   . Mit meiner Unterschrift bestaetige ich rechtsverbindlich die Annahme
@@ -834,9 +834,9 @@ export default function WillkommenClient({
             <div className="space-y-5">
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-xs text-gray-600 leading-relaxed">
                 Bitte bestätige unsere{' '}
-                <Link href="/nutzungsbedingungen" target="_blank" className="text-[#1E3A5F] underline">Nutzungsbedingungen</Link>,
-                die <Link href="/agb" target="_blank" className="text-[#1E3A5F] underline">AGB</Link>{' '}
-                und die <Link href="/datenschutz" target="_blank" className="text-[#1E3A5F] underline">Datenschutzerklärung</Link>.
+                <Link href="/nutzungsbedingungen" target="_blank" className="text-[var(--brand-primary)] underline">Nutzungsbedingungen</Link>,
+                die <Link href="/agb" target="_blank" className="text-[var(--brand-primary)] underline">AGB</Link>{' '}
+                und die <Link href="/datenschutz" target="_blank" className="text-[var(--brand-primary)] underline">Datenschutzerklärung</Link>.
                 <br /><br />
                 Den vollständigen Vertrag inkl. Anzahlung schließt dein
                 {organisation?.typ === 'akademie' ? ' Verwalter' : ' Inhaber'} für dich ab — du musst
@@ -852,7 +852,7 @@ export default function WillkommenClient({
                   type="text"
                   value={unterschriftName}
                   onChange={e => setUnterschriftName(e.target.value)}
-                  className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                  className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                 />
               </div>
 
@@ -879,9 +879,9 @@ export default function WillkommenClient({
              ═══════════════════════════════════════════════════════════════ */}
           {currentKey === 'anzahlung' && r !== 'sub_mitarbeiter' && (
             <div className="space-y-4">
-              <div className="bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-xl p-4 flex items-start gap-3">
-                <CheckCircle2Icon className="w-5 h-5 text-[#4573A2] flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-[#0D1B3E]">
+              <div className="bg-[var(--brand-secondary)]/5 border border-[var(--brand-secondary)]/20 rounded-xl p-4 flex items-start gap-3">
+                <CheckCircle2Icon className="w-5 h-5 text-[var(--brand-secondary)] flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-[var(--brand-primary)]">
                   {r === 'buero_inhaber' ? (
                     <><strong>Buero-Vertrag unterzeichnet.</strong> Bitte schliesse jetzt die zentrale Anzahlung fuer alle Sub-Standorte ab.</>
                   ) : (
@@ -1033,7 +1033,7 @@ export default function WillkommenClient({
                   (currentKey === 'vertrag' && r !== 'sub_mitarbeiter' && (!agbAccepted || !unterschriftName.trim() || !signaturePng)) ||
                   (currentKey === 'konditionen' && r === 'buero_inhaber' && subSvs.length === 0)
                 }
-                className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex-1 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {r === 'sub_mitarbeiter'
                   ? currentKey === 'konditionen'
@@ -1100,7 +1100,7 @@ function Kondition({ label, value, highlight }: { label: string; value: string; 
   return (
     <div>
       <p className="text-[10px] text-gray-500 uppercase">{label}</p>
-      <p className={`text-sm font-semibold mt-0.5 ${highlight ? 'text-[#1E3A5F]' : 'text-gray-900'}`}>{value}</p>
+      <p className={`text-sm font-semibold mt-0.5 ${highlight ? 'text-[var(--brand-primary)]' : 'text-gray-900'}`}>{value}</p>
     </div>
   )
 }
@@ -1119,7 +1119,7 @@ function KontaktHinweis() {
   return (
     <div className="text-xs text-gray-500 bg-amber-50 border border-amber-200 rounded-xl p-4">
       <strong>Stimmt etwas nicht?</strong> Schreib uns an{' '}
-      <a href="mailto:aaron.sprafke@claimondo.de" className="text-[#1E3A5F] underline">
+      <a href="mailto:aaron.sprafke@claimondo.de" className="text-[var(--brand-primary)] underline">
         aaron.sprafke@claimondo.de
       </a>
       {' '}— wir korrigieren deine Stammdaten bevor du den Vertrag unterzeichnest.

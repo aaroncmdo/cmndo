@@ -161,7 +161,7 @@ export default function VorOrtClient({
       {/* Header */}
       <div className="px-4 pt-5 pb-3">
         <div className="flex items-center gap-2 mb-1">
-          <Link href={`/gutachter/termine/${terminId}`} className="text-sm text-[#4573A2] hover:underline">← Termin</Link>
+          <Link href={`/gutachter/termine/${terminId}`} className="text-sm text-[var(--brand-secondary)] hover:underline">← Termin</Link>
         </div>
         <h1 className="text-xl font-bold text-gray-900">Vor-Ort-Modus</h1>
         <p className="text-sm text-gray-500">{leadName} · {fahrzeug || kennzeichen || fallNummer}</p>
@@ -227,7 +227,7 @@ export default function VorOrtClient({
                     <button
                       onClick={() => handleCameraClick(doc.key)}
                       disabled={isUploading}
-                      className="flex items-center gap-1.5 bg-[#4573A2] hover:bg-[#3a5f87] text-white rounded-lg px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                      className="flex items-center gap-1.5 bg-[var(--brand-secondary)] hover:bg-[#3a5f87] text-white rounded-lg px-3 py-1.5 text-xs font-medium disabled:opacity-50"
                     >
                       <CameraIcon className="w-3.5 h-3.5" />
                       {isUploading ? 'Lädt...' : 'Aufnehmen'}
@@ -242,7 +242,7 @@ export default function VorOrtClient({
                       <select
                         value={schadenPositions[doc.key] ?? ''}
                         onChange={e => setSchadenPositions(prev => ({ ...prev, [doc.key]: e.target.value }))}
-                        className="w-full text-xs border border-gray-200 rounded-lg px-2 py-1.5 appearance-none bg-gray-50 focus:outline-none focus:border-[#4573A2]"
+                        className="w-full text-xs border border-gray-200 rounded-lg px-2 py-1.5 appearance-none bg-gray-50 focus:outline-none focus:border-[var(--brand-secondary)]"
                       >
                         <option value="">Schaden-Position wählen...</option>
                         {SCHADEN_POSITIONEN.map(p => (
@@ -283,7 +283,7 @@ export default function VorOrtClient({
           onChange={e => setNotizen(e.target.value)}
           placeholder="Notizen zur Begutachtung..."
           rows={4}
-          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:border-[#4573A2] bg-white"
+          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:border-[var(--brand-secondary)] bg-white"
         />
         <div className="flex flex-wrap gap-2 mt-2">
           {NOTIZEN_TAGS.map(tag => (
@@ -292,8 +292,8 @@ export default function VorOrtClient({
               onClick={() => toggleTag(tag)}
               className={`text-xs px-3 py-1 rounded-full border transition-colors ${
                 selectedTags.has(tag)
-                  ? 'bg-[#4573A2] text-white border-[#4573A2]'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-[#4573A2]'
+                  ? 'bg-[var(--brand-secondary)] text-white border-[var(--brand-secondary)]'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-[var(--brand-secondary)]'
               }`}
             >
               {tag}
@@ -315,7 +315,7 @@ export default function VorOrtClient({
               className="h-full rounded-full transition-all duration-300"
               style={{
                 width: `${progressPct}%`,
-                backgroundColor: progressPct === 100 ? '#10b981' : '#4573A2',
+                backgroundColor: progressPct === 100 ? '#10b981' : 'var(--brand-secondary)',
               }}
             />
           </div>
@@ -327,7 +327,7 @@ export default function VorOrtClient({
           className={`w-full flex items-center justify-center gap-2 rounded-2xl py-3.5 text-base font-bold transition-colors ${
             progressPct === 100
               ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-              : 'bg-[#1E3A5F] hover:bg-[#162d4a] text-white'
+              : 'bg-[var(--brand-primary)] hover:bg-[#162d4a] text-white'
           }`}
         >
           <ClipboardListIcon className="w-5 h-5" />

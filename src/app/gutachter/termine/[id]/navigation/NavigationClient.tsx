@@ -92,7 +92,7 @@ export default function NavigationClient({
     <div className="flex flex-col h-[calc(100vh-4rem)] bg-gray-900">
 
       {/* ETA Bar at top */}
-      <div className="bg-[#1E3A5F] text-white px-4 py-3 flex items-center justify-between z-10">
+      <div className="bg-[var(--brand-primary)] text-white px-4 py-3 flex items-center justify-between z-10">
         <div className="flex items-center gap-2">
           <Link href={`/gutachter/termine/${terminId}`} className="text-white/70 text-sm hover:text-white">←</Link>
           <div>
@@ -139,7 +139,7 @@ export default function NavigationClient({
                 href={`https://maps.google.com/?q=${encodeURIComponent(adresse)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-[#4573A2] text-white px-4 py-2 rounded-xl text-sm font-medium"
+                className="bg-[var(--brand-secondary)] text-white px-4 py-2 rounded-xl text-sm font-medium"
               >
                 In Google Maps öffnen
               </a>
@@ -162,7 +162,7 @@ export default function NavigationClient({
       </div>
 
       {/* Bottom: Manual Arrived Button */}
-      <div className="bg-[#1E3A5F] px-4 py-4 safe-area-bottom space-y-3">
+      <div className="bg-[var(--brand-primary)] px-4 py-4 safe-area-bottom space-y-3">
         {distanceMeters !== null && distanceMeters < 200 && (
           <div className="bg-emerald-900/50 border border-emerald-700 rounded-xl p-3 text-center">
             <p className="text-emerald-300 text-sm font-medium">Du bist fast da! ({distanceMeters} m)</p>

@@ -112,8 +112,8 @@ export function GutachtenCard({ fallId, fallNummer, subphase, gutachten }: Props
       {current ? (
         <>
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-lg bg-[#0D1B3E]/5 flex items-center justify-center shrink-0">
-              <FileTextIcon className="w-5 h-5 text-[#0D1B3E]" />
+            <div className="w-10 h-10 rounded-lg bg-[var(--brand-primary)]/5 flex items-center justify-center shrink-0">
+              <FileTextIcon className="w-5 h-5 text-[var(--brand-primary)]" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">
@@ -130,7 +130,7 @@ export function GutachtenCard({ fallId, fallNummer, subphase, gutachten }: Props
               type="button"
               disabled={busyAction !== null}
               onClick={() => handleOpen(current, 'download')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0D1B3E] text-white text-xs font-medium hover:bg-[#1E3A5F] disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--brand-primary)] text-white text-xs font-medium hover:bg-[var(--brand-primary)] disabled:opacity-60"
             >
               {busyAction === 'download' ? (
                 <Loader2Icon className="w-3.5 h-3.5 animate-spin" />
@@ -143,7 +143,7 @@ export function GutachtenCard({ fallId, fallNummer, subphase, gutachten }: Props
               type="button"
               disabled={busyAction !== null}
               onClick={() => handleOpen(current, 'view')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#4573A2] text-[#4573A2] text-xs font-medium hover:bg-[#4573A2]/5 disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--brand-secondary)] text-[var(--brand-secondary)] text-xs font-medium hover:bg-[var(--brand-secondary)]/5 disabled:opacity-60"
             >
               {busyAction === 'view' ? (
                 <Loader2Icon className="w-3.5 h-3.5 animate-spin" />
@@ -187,7 +187,7 @@ export function GutachtenCard({ fallId, fallNummer, subphase, gutachten }: Props
                         type="button"
                         disabled={busyAction !== null}
                         onClick={() => handleOpen(doc, 'view')}
-                        className="text-[#4573A2] hover:text-[#0D1B3E] disabled:opacity-60"
+                        className="text-[var(--brand-secondary)] hover:text-[var(--brand-primary)] disabled:opacity-60"
                         aria-label="Ansehen"
                       >
                         <EyeIcon className="w-3.5 h-3.5" />

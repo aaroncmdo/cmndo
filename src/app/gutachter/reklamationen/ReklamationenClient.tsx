@@ -67,7 +67,7 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
           title={faelle.length === 0
             ? 'Keine Fälle vorhanden — Reklamationen können nur zu vorhandenen Fällen eingereicht werden.'
             : 'Neue Reklamation einreichen'}
-          className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg bg-[#0D1B3E] text-white hover:bg-[#1E3A5F] disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary)] disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           <PlusIcon className="w-4 h-4" />
           Neue Reklamation
@@ -169,7 +169,7 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
                 Abbrechen
               </button>
               <button type="submit" disabled={pending}
-                className="px-4 py-2 text-sm font-medium bg-[#0D1B3E] text-white rounded-lg hover:bg-[#1E3A5F] disabled:opacity-50">
+                className="px-4 py-2 text-sm font-medium bg-[var(--brand-primary)] text-white rounded-lg hover:bg-[var(--brand-primary)] disabled:opacity-50">
                 {pending ? 'Sende...' : 'Reklamation einreichen'}
               </button>
             </div>

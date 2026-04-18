@@ -51,9 +51,9 @@ export default function TagesrouteStartCard({
       : `${terminIds.length} Stops`
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-gradient-to-br from-[#0D1B3E] to-[#1E3A5F] p-4 text-white shadow-sm">
+    <div className="rounded-xl border border-gray-200 bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary)] p-4 text-white shadow-sm">
       <div className="flex items-center gap-2 mb-2">
-        <MapIcon className="w-4 h-4 text-[#7BA3CC]" />
+        <MapIcon className="w-4 h-4 text-[var(--brand-accent)]" />
         <h3 className="text-sm font-semibold">Tagesroute</h3>
       </div>
       <p className="text-xs text-gray-300 mb-3">{subLabel}</p>
@@ -65,7 +65,7 @@ export default function TagesrouteStartCard({
         className={`w-full inline-flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-colors ${
           disabled
             ? 'bg-white/10 text-gray-300 cursor-not-allowed'
-            : 'bg-[#4573A2] hover:bg-[#7BA3CC] text-white'
+            : 'bg-[var(--brand-secondary)] hover:bg-[var(--brand-accent)] text-white'
         }`}
       >
         <PlayCircleIcon className="w-4 h-4" />

@@ -39,11 +39,11 @@ export default async function VerifizierungPage() {
   return (
     <div className="max-w-3xl mx-auto py-6 px-4 space-y-6">
       <header className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-[#4573A2]/10 text-[#0D1B3E] flex items-center justify-center">
+        <div className="w-10 h-10 rounded-full bg-[var(--brand-secondary)]/10 text-[var(--brand-primary)] flex items-center justify-center">
           <ShieldCheckIcon className="w-5 h-5" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-[#0D1B3E]">Verifizierung</h1>
+          <h1 className="text-2xl font-bold text-[var(--brand-primary)]">Verifizierung</h1>
           <p className="text-sm text-gray-600">Status Ihrer Zulassungs-Unterlagen</p>
         </div>
       </header>
@@ -52,7 +52,7 @@ export default async function VerifizierungPage() {
       <section className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold text-[#0D1B3E]">Tier 1 — SA-Vorlage</h2>
+            <h2 className="text-base font-semibold text-[var(--brand-primary)]">Tier 1 — SA-Vorlage</h2>
             <p className="text-xs text-gray-500">
               Pflicht vor Dispatch-Freigabe. Ihre persönliche Schadenaufnahme-Vorlage als PDF.
             </p>
@@ -90,7 +90,7 @@ export default async function VerifizierungPage() {
       <section className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold text-[#0D1B3E]">Tier 2 — Verifizierungs-Unterlagen</h2>
+            <h2 className="text-base font-semibold text-[var(--brand-primary)]">Tier 2 — Verifizierungs-Unterlagen</h2>
             <p className="text-xs text-gray-500">
               Berufshaftpflicht, Gewerbeanmeldung und ggf. Bestellungsurkunde. 14-Tage-Frist ab Anzahlung.
             </p>

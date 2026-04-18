@@ -170,7 +170,7 @@ export default function ProfilClient({
           <button
             type="button"
             onClick={() => { setEditing(true); setSuccess(false) }}
-            className="px-4 py-2 text-xs font-medium text-white bg-[#1E3A5F] hover:bg-[#4573A2] rounded-xl transition-colors"
+            className="px-4 py-2 text-xs font-medium text-white bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] rounded-xl transition-colors"
           >
             Bearbeiten
           </button>
@@ -183,8 +183,8 @@ export default function ProfilClient({
           fuer das einspaltige Profil-Form gut lesbar. */}
       <div className="flex-1 min-h-0 overflow-y-auto p-6 max-w-full">
         {success && (
-          <div className="bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-xl p-3 mb-4 max-w-4xl">
-            <p className="text-[#0D1B3E] text-sm">Profil gespeichert.</p>
+          <div className="bg-[var(--brand-secondary)]/5 border border-[var(--brand-secondary)]/20 rounded-xl p-3 mb-4 max-w-4xl">
+            <p className="text-[var(--brand-primary)] text-sm">Profil gespeichert.</p>
           </div>
         )}
 
@@ -212,7 +212,7 @@ export default function ProfilClient({
                   <span className="text-gray-800 text-sm">{email}</span>
                   <p className="text-gray-400 text-[10px] mt-0.5 flex items-center gap-1">
                     <InfoIcon className="w-3 h-3" />
-                    Email-Änderung via Support: <span className="text-[#4573A2]">aaron.sprafke@claimondo.de</span>
+                    Email-Änderung via Support: <span className="text-[var(--brand-secondary)]">aaron.sprafke@claimondo.de</span>
                   </p>
                 </div>
               </div>
@@ -243,7 +243,7 @@ export default function ProfilClient({
                           defaultValue={standort.adresse}
                           placeholder="Büro-/Wohnadresse eingeben"
                           onSelect={onPlaceSelect}
-                          className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                          className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                         />
                       ) : (
                         <input
@@ -251,7 +251,7 @@ export default function ProfilClient({
                           value={standort.adresse}
                           onChange={e => setStandort(prev => ({ ...prev, adresse: e.target.value }))}
                           placeholder="Büro-/Wohnadresse eingeben"
-                          className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                          className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                         />
                       )}
                       {standort.lat != null && (
@@ -278,7 +278,7 @@ export default function ProfilClient({
                       placeholder="z.B. Ihr persönlicher Sachverständiger mit 15 Jahren Erfahrung"
                       rows={2}
                       maxLength={200}
-                      className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] resize-none"
+                      className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] resize-none"
                     />
                   </div>
 
@@ -340,7 +340,7 @@ export default function ProfilClient({
                   type="submit"
                   isLoading={saving}
                   loadingText="Wird gespeichert..."
-                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[#1E3A5F] hover:bg-[#4573A2] text-white transition-colors disabled:opacity-40"
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white transition-colors disabled:opacity-40"
                 >
                   Speichern
                 </LoadingButton>
@@ -487,8 +487,8 @@ export default function ProfilClient({
 function BrandingSection({ svId }: { svId: string }) {
   const router = useRouter()
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
-  const [primary, setPrimary] = useState('#0D1B3E')
-  const [secondary, setSecondary] = useState('#4573A2')
+  const [primary, setPrimary] = useState('var(--brand-primary)')
+  const [secondary, setSecondary] = useState('var(--brand-secondary)')
   const [useCustom, setUseCustom] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -548,20 +548,20 @@ function BrandingSection({ svId }: { svId: string }) {
       {/* AAR-422: Link zum neuen Branding-Editor mit Live-Preview + Font-Picker. */}
       <a
         href="/gutachter/profil/branding"
-        className="flex items-center justify-between gap-3 mb-4 p-3 rounded-xl border border-[#4573A2]/30 bg-[#4573A2]/5 hover:bg-[#4573A2]/10 transition-colors"
+        className="flex items-center justify-between gap-3 mb-4 p-3 rounded-xl border border-[var(--brand-secondary)]/30 bg-[var(--brand-secondary)]/5 hover:bg-[var(--brand-secondary)]/10 transition-colors"
       >
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-[#0D1B3E]">Neu: Branding-Editor mit Live-Preview</p>
+          <p className="text-sm font-semibold text-[var(--brand-primary)]">Neu: Branding-Editor mit Live-Preview</p>
           <p className="text-xs text-gray-600 mt-0.5">
             Lade dein Logo hoch — Farben & Schriftart werden automatisch extrahiert.
           </p>
         </div>
-        <span className="text-xs font-medium text-[#4573A2] whitespace-nowrap">Öffnen →</span>
+        <span className="text-xs font-medium text-[var(--brand-secondary)] whitespace-nowrap">Öffnen →</span>
       </a>
 
       {/* Toggle */}
       <label className="flex items-center gap-3 mb-4 cursor-pointer">
-        <div className={`relative w-10 h-5 rounded-full transition-colors ${useCustom ? 'bg-[#4573A2]' : 'bg-gray-300'}`}
+        <div className={`relative w-10 h-5 rounded-full transition-colors ${useCustom ? 'bg-[var(--brand-secondary)]' : 'bg-gray-300'}`}
           onClick={() => setUseCustom(!useCustom)}>
           <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${useCustom ? 'translate-x-5' : 'translate-x-0.5'}`} />
         </div>
@@ -579,7 +579,7 @@ function BrandingSection({ svId }: { svId: string }) {
               ) : (
                 <div className="h-12 w-24 bg-gray-100 rounded border border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-xs">Kein Logo</div>
               )}
-              <label className="px-3 py-1.5 text-xs font-medium text-[#4573A2] border border-[#4573A2] rounded-lg cursor-pointer hover:bg-[#4573A2]/5 transition-colors">
+              <label className="px-3 py-1.5 text-xs font-medium text-[var(--brand-secondary)] border border-[var(--brand-secondary)] rounded-lg cursor-pointer hover:bg-[var(--brand-secondary)]/5 transition-colors">
                 {uploading ? 'Wird hochgeladen...' : 'Logo hochladen'}
                 <input type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" className="hidden" onChange={handleUpload} disabled={uploading} />
               </label>
@@ -594,7 +594,7 @@ function BrandingSection({ svId }: { svId: string }) {
                 <input type="color" value={primary} onChange={e => setPrimary(e.target.value)}
                   className="w-8 h-8 rounded border border-gray-200 cursor-pointer" />
                 <input value={primary} onChange={e => setPrimary(e.target.value)} maxLength={7}
-                  className="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-xs font-mono text-gray-700 focus:outline-none focus:border-[#4573A2]" />
+                  className="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-xs font-mono text-gray-700 focus:outline-none focus:border-[var(--brand-secondary)]" />
               </div>
             </div>
             <div>
@@ -603,7 +603,7 @@ function BrandingSection({ svId }: { svId: string }) {
                 <input type="color" value={secondary} onChange={e => setSecondary(e.target.value)}
                   className="w-8 h-8 rounded border border-gray-200 cursor-pointer" />
                 <input value={secondary} onChange={e => setSecondary(e.target.value)} maxLength={7}
-                  className="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-xs font-mono text-gray-700 focus:outline-none focus:border-[#4573A2]" />
+                  className="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-xs font-mono text-gray-700 focus:outline-none focus:border-[var(--brand-secondary)]" />
               </div>
             </div>
           </div>
@@ -633,7 +633,7 @@ function BrandingSection({ svId }: { svId: string }) {
       {/* Save */}
       <div className="flex items-center gap-2 mt-4">
         <button onClick={handleSave} disabled={saving}
-          className="px-4 py-2 text-xs font-medium text-white bg-[#4573A2] rounded-lg hover:bg-[#1E3A5F] transition-colors disabled:opacity-50">
+          className="px-4 py-2 text-xs font-medium text-white bg-[var(--brand-secondary)] rounded-lg hover:bg-[var(--brand-primary)] transition-colors disabled:opacity-50">
           {saving ? 'Wird gespeichert...' : 'Branding speichern'}
         </button>
         {saved && <span className="text-green-600 text-xs">Gespeichert!</span>}
@@ -714,14 +714,14 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
             value={ablehnungsgrund}
             onChange={e => setAblehnungsgrund(e.target.value)}
             placeholder="Grund (optional)"
-            className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#1E3A5F]"
+            className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-[var(--brand-primary)]"
           />
           <input
             type="datetime-local"
             value={gegenvorschlag}
             onChange={e => setGegenvorschlag(e.target.value)}
             required
-            className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#1E3A5F]"
+            className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-[var(--brand-primary)]"
           />
           <p className="text-gray-500 text-xs">Gegenvorschlag ist Pflicht</p>
           <div className="flex gap-2">
@@ -807,7 +807,7 @@ function TwoFaPhoneSection() {
       <h2 className="text-sm font-medium text-gray-500 mb-1">Zwei-Faktor-Authentifizierung</h2>
       <p className="text-xs text-gray-400 mb-4">Verifizieren Sie Ihre Telefonnummer für den SMS-Login-Code.</p>
       <button onClick={() => setShowModal(true)}
-        className="px-4 py-2 rounded-xl bg-[#4573A2] hover:bg-[#1E3A5F] text-white text-sm font-semibold transition-colors">
+        className="px-4 py-2 rounded-xl bg-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] text-white text-sm font-semibold transition-colors">
         Telefon verifizieren
       </button>
       {showModal && <PhoneVerificationModal onClose={() => setShowModal(false)} />}
@@ -833,7 +833,7 @@ function GpsTrackingToggle({ svId, initial }: { svId: string; initial: boolean }
   return (
     <div>
       <button type="button" onClick={toggle} disabled={saving}
-        className={`relative inline-flex items-center w-12 h-6 rounded-full transition-colors disabled:opacity-50 ${active ? 'bg-[#4573A2]' : 'bg-gray-300'}`}>
+        className={`relative inline-flex items-center w-12 h-6 rounded-full transition-colors disabled:opacity-50 ${active ? 'bg-[var(--brand-secondary)]' : 'bg-gray-300'}`}>
         <span className={`inline-block w-5 h-5 rounded-full bg-white shadow transform transition-transform ${active ? 'translate-x-6' : 'translate-x-0.5'}`} />
       </button>
       <span className="ml-3 text-sm text-gray-700">
@@ -904,7 +904,7 @@ function SpezSection({
               disabled={saving}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-60 ${
                 active
-                  ? 'bg-[#4573A2] text-white'
+                  ? 'bg-[var(--brand-secondary)] text-white'
                   : 'bg-gray-100 text-gray-500 hover:text-gray-800'
               }`}
             >
@@ -938,7 +938,7 @@ function EditRow({ label, name, defaultValue, type = 'text', placeholder }: {
         name={name}
         defaultValue={defaultValue}
         placeholder={placeholder}
-        className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+        className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
       />
     </div>
   )
@@ -958,7 +958,7 @@ function ControlledRow({ label, value, onChange, type = 'text', placeholder }: {
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+        className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
       />
     </div>
   )
@@ -976,7 +976,7 @@ function SelectRow({ label, value, onChange, options }: {
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+        className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
       >
         {options.map(o => (
           <option key={o.value} value={o.value}>{o.label}</option>

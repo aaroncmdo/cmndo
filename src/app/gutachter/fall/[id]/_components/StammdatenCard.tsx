@@ -132,14 +132,14 @@ export function StammdatenCard({
             )}
             <div className="text-[11px] text-gray-500 space-y-0.5 mt-0.5">
               {lead?.telefon && (
-                <p><PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} className="!text-gray-500 hover:!text-[#4573A2] hover:!no-underline" /></p>
+                <p><PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} className="!text-gray-500 hover:!text-[var(--brand-secondary)] hover:!no-underline" /></p>
               )}
               {lead?.email && (
                 <p className="flex items-center gap-1 min-w-0">
                   <MailIcon className="w-3 h-3 shrink-0" />
                   <a
                     href={`mailto:${lead.email}`}
-                    className="truncate hover:text-[#4573A2]"
+                    className="truncate hover:text-[var(--brand-secondary)]"
                   >
                     {lead.email}
                   </a>
@@ -291,12 +291,12 @@ export function StammdatenCard({
             )}
             <div className="text-[11px] text-gray-500 mt-0.5 space-y-0.5">
               {halterTelefon && (
-                <PhoneButton nummer={halterTelefon} variant="inline" label={halterTelefon} className="!text-gray-500 hover:!text-[#4573A2] hover:!no-underline" />
+                <PhoneButton nummer={halterTelefon} variant="inline" label={halterTelefon} className="!text-gray-500 hover:!text-[var(--brand-secondary)] hover:!no-underline" />
               )}
               {halterEmail && (
                 <a
                   href={`mailto:${halterEmail}`}
-                  className="flex items-center gap-1 hover:text-[#4573A2] min-w-0"
+                  className="flex items-center gap-1 hover:text-[var(--brand-secondary)] min-w-0"
                 >
                   <MailIcon className="w-3 h-3 shrink-0" />
                   <span className="truncate">{halterEmail}</span>
@@ -310,18 +310,18 @@ export function StammdatenCard({
       {/* Kundenbetreuer */}
       {kbName && (
         <div className="flex items-start gap-3 pt-3 border-t border-gray-100">
-          <UserIcon className="w-4 h-4 text-[#4573A2] mt-0.5 shrink-0" />
+          <UserIcon className="w-4 h-4 text-[var(--brand-secondary)] mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0 text-xs">
             <p className="text-gray-500">Kundenbetreuer</p>
             <p className="text-gray-900 font-medium">{kbName}</p>
             <div className="text-[11px] text-gray-500 mt-0.5 space-y-0.5">
               {kundenbetreuer?.telefon && (
-                <PhoneButton nummer={kundenbetreuer.telefon} variant="inline" label={kundenbetreuer.telefon} className="!text-gray-500 hover:!text-[#4573A2] hover:!no-underline" />
+                <PhoneButton nummer={kundenbetreuer.telefon} variant="inline" label={kundenbetreuer.telefon} className="!text-gray-500 hover:!text-[var(--brand-secondary)] hover:!no-underline" />
               )}
               {kundenbetreuer?.email && (
                 <a
                   href={`mailto:${kundenbetreuer.email}`}
-                  className="flex items-center gap-1 hover:text-[#4573A2] min-w-0"
+                  className="flex items-center gap-1 hover:text-[var(--brand-secondary)] min-w-0"
                 >
                   <MailIcon className="w-3 h-3 shrink-0" />
                   <span className="truncate">{kundenbetreuer.email}</span>

@@ -139,8 +139,8 @@ export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
           >
             {file ? (
               <div className="flex items-center justify-center gap-2">
-                <FileTextIcon className="w-4 h-4 text-[#4573A2]" />
-                <span className="text-sm font-medium text-[#0D1B3E] truncate max-w-[220px]">
+                <FileTextIcon className="w-4 h-4 text-[var(--brand-secondary)]" />
+                <span className="text-sm font-medium text-[var(--brand-primary)] truncate max-w-[220px]">
                   {file.name}
                 </span>
                 <span className="text-[10px] text-gray-500">
@@ -175,7 +175,7 @@ export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
             type="button"
             onClick={handleSubmit}
             disabled={!file || isPending}
-            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold disabled:opacity-50"
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold disabled:opacity-50"
           >
             {isPending && <Loader2Icon className="w-4 h-4 animate-spin" />}
             Stellungnahme einreichen

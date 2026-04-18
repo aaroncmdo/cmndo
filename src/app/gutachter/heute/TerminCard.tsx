@@ -69,7 +69,7 @@ export default function TerminCard({
       className={`absolute left-16 right-2 rounded-xl border px-3 py-2 shadow-sm transition-opacity ${
         vergangen
           ? 'bg-gray-50 border-gray-200 opacity-60'
-          : 'bg-white border-gray-200 hover:border-[color:var(--brand-primary,#4573A2)]'
+          : 'bg-white border-gray-200 hover:border-[color:var(--brand-primary,var(--brand-secondary))]'
       }`}
       style={{ top: `${topPx}px`, minHeight: `${heightPx}px` }}
     >
@@ -85,7 +85,7 @@ export default function TerminCard({
               {badge.label}
             </span>
             {termin.schadentyp && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium bg-[color:var(--brand-primary,#4573A2)]/10 text-[color:var(--brand-primary,#4573A2)] uppercase">
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium bg-[color:var(--brand-primary,var(--brand-secondary))]/10 text-[color:var(--brand-primary,var(--brand-secondary))] uppercase">
                 {termin.schadentyp}
               </span>
             )}
@@ -113,14 +113,14 @@ export default function TerminCard({
           href={link}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-xs text-white bg-[color:var(--brand-primary,#4573A2)] hover:bg-[#3a6290] rounded-lg px-2.5 py-1 font-medium"
+          className="inline-flex items-center gap-1 text-xs text-white bg-[color:var(--brand-primary,var(--brand-secondary))] hover:bg-[#3a6290] rounded-lg px-2.5 py-1 font-medium"
           onClick={(e) => e.stopPropagation()}
         >
           <NavigationIcon className="w-3 h-3" /> Route starten
         </a>
         <Link
           href={`/gutachter/fall/${termin.fall_id}`}
-          className="inline-flex items-center gap-1 text-xs text-[color:var(--brand-primary,#4573A2)] hover:text-[#0D1B3E] rounded-lg px-2 py-1 font-medium"
+          className="inline-flex items-center gap-1 text-xs text-[color:var(--brand-primary,var(--brand-secondary))] hover:text-[var(--brand-primary)] rounded-lg px-2 py-1 font-medium"
         >
           <ExternalLinkIcon className="w-3 h-3" /> Fall öffnen
         </Link>

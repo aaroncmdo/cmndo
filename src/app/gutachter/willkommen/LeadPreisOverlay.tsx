@@ -61,7 +61,7 @@ export default function LeadPreisOverlay({
       role="dialog"
       aria-modal="true"
       aria-labelledby="leadpreis-overlay-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0D1B3E]/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--brand-primary)]/60 backdrop-blur-sm"
       onClick={(e) => {
         // Klick aufs Backdrop schließt — Klicks in Content nicht.
         if (e.target === e.currentTarget) onClose()
@@ -69,7 +69,7 @@ export default function LeadPreisOverlay({
     >
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#0D1B3E] to-[#1E3A5F] text-white shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-primary)] text-white shrink-0">
           <div>
             <h2 id="leadpreis-overlay-title" className="text-lg font-semibold">Lead-Preis-Tabelle + ROI-Rechner</h2>
             <p className="text-[11px] text-white/70 mt-0.5">{rows.length} Stufen · Paket {paketLabel} · {maxFaelleMonat} Fälle im Kontingent</p>
@@ -86,12 +86,12 @@ export default function LeadPreisOverlay({
         {/* Content scrollbar */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* ROI-Rechner */}
-          <section className="bg-gradient-to-br from-[#4573A2]/5 to-[#7BA3CC]/5 border border-[#7BA3CC]/30 rounded-xl p-5">
+          <section className="bg-gradient-to-br from-[var(--brand-secondary)]/5 to-[var(--brand-accent)]/5 border border-[var(--brand-accent)]/30 rounded-xl p-5">
             <div className="flex items-center gap-2 mb-3">
-              <CalculatorIcon className="w-4 h-4 text-[#0D1B3E]" />
-              <h3 className="text-sm font-semibold text-[#0D1B3E]">ROI-Rechner — was bleibt bei dir?</h3>
+              <CalculatorIcon className="w-4 h-4 text-[var(--brand-primary)]" />
+              <h3 className="text-sm font-semibold text-[var(--brand-primary)]">ROI-Rechner — was bleibt bei dir?</h3>
             </div>
-            <p className="text-xs text-[#1E3A5F] mb-4">
+            <p className="text-xs text-[var(--brand-primary)] mb-4">
               Trage dein durchschnittliches Gutachter-Honorar ein. Wir ziehen den Claimondo-Lead-Preis
               für die passende Schadenstufe ab und zeigen dir, was du netto pro Fall und pro Monat behältst.
             </p>
@@ -107,7 +107,7 @@ export default function LeadPreisOverlay({
                   onChange={(e) => setAvgSchaden(Math.max(0, Number(e.target.value) || 0))}
                   min={0}
                   step={100}
-                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
                 />
               </div>
               <div>
@@ -120,7 +120,7 @@ export default function LeadPreisOverlay({
                   onChange={(e) => setAvgHonorar(Math.max(0, Number(e.target.value) || 0))}
                   min={0}
                   step={10}
-                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
                 />
               </div>
             </div>
@@ -137,7 +137,7 @@ export default function LeadPreisOverlay({
               />
             </div>
             {nettoProFall > 0 ? (
-              <div className="mt-3 flex items-center gap-2 text-[11px] text-[#0D1B3E]">
+              <div className="mt-3 flex items-center gap-2 text-[11px] text-[var(--brand-primary)]">
                 <TrendingUpIcon className="w-3.5 h-3.5" />
                 <span>
                   Du verdienst das <strong>{roiFaktor}-fache</strong> deines Lead-Preises. Jeder Fall ist profitabel.
@@ -154,7 +154,7 @@ export default function LeadPreisOverlay({
             )}
 
             {/* Honorar-Upload Hinweis (Phase 2) */}
-            <p className="mt-4 pt-3 border-t border-[#7BA3CC]/20 text-[10px] text-gray-500">
+            <p className="mt-4 pt-3 border-t border-[var(--brand-accent)]/20 text-[10px] text-gray-500">
               Tipp: Du kannst deine eigene Honorartabelle (pro Schadenstufe) später im Profil hinterlegen —
               dann rechnen wir automatisch stufenweise und zeigen dir die exakte Marge je Fall.
             </p>
@@ -162,7 +162,7 @@ export default function LeadPreisOverlay({
 
           {/* Erläuterung */}
           <section className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-            <p className="text-sm font-medium text-[#0D1B3E] mb-2">Wie funktioniert die Berechnung?</p>
+            <p className="text-sm font-medium text-[var(--brand-primary)] mb-2">Wie funktioniert die Berechnung?</p>
             <ul className="text-xs text-gray-700 space-y-1.5 list-disc pl-4">
               <li>
                 Solange du innerhalb deines monatlichen Kontingents (<strong>{paketLabel}</strong>) bist, gilt
@@ -218,7 +218,7 @@ export default function LeadPreisOverlay({
 
 function Stat({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className={`rounded-lg p-2.5 ${highlight ? 'bg-[#0D1B3E] text-white' : 'bg-white border border-gray-200'}`}>
+    <div className={`rounded-lg p-2.5 ${highlight ? 'bg-[var(--brand-primary)] text-white' : 'bg-white border border-gray-200'}`}>
       <p className={`text-[9px] uppercase tracking-wider ${highlight ? 'text-white/60' : 'text-gray-500'}`}>{label}</p>
       <p className={`text-sm font-semibold mt-0.5 ${highlight ? 'text-white' : 'text-gray-900'}`}>{value}</p>
     </div>

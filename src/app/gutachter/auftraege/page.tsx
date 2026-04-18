@@ -144,7 +144,7 @@ export default async function AuftraegePage({
               }
               className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
                 activeFilter === key
-                  ? 'bg-[#0D1B3E] text-white'
+                  ? 'bg-[var(--brand-primary)] text-white'
                   : 'bg-white text-gray-500 hover:text-gray-800 border border-gray-200'
               }`}
             >

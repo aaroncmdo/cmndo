@@ -34,7 +34,7 @@ export default function RouteSidebar({
   const erledigte = stops.slice(0, aktuellerStopIndex)
 
   return (
-    <div className="flex flex-col h-full bg-[#0D1B3E]/95 backdrop-blur-md">
+    <div className="flex flex-col h-full bg-[var(--brand-primary)]/95 backdrop-blur-md">
       <FokusHeader
         sessionId={sessionId}
         sessionStatus={sessionStatus}

@@ -212,7 +212,7 @@ function MatrixActionCard({
     <div className={`rounded-2xl border ${passiveCls} p-4 sm:p-5 space-y-3`}>
       <div className="flex items-center gap-2">
         <Icon
-          className={`w-4 h-4 ${action.passive ? 'text-gray-500' : 'text-[#4573A2]'}`}
+          className={`w-4 h-4 ${action.passive ? 'text-gray-500' : 'text-[var(--brand-secondary)]'}`}
         />
         <p className="text-xs uppercase tracking-wider font-semibold text-gray-500">
           {action.passive ? 'Status' : 'Jetzt zu tun'}
@@ -221,7 +221,7 @@ function MatrixActionCard({
       <div className="space-y-1">
         <p
           className={`text-sm font-medium ${
-            action.passive ? 'text-gray-700' : 'text-[#0D1B3E]'
+            action.passive ? 'text-gray-700' : 'text-[var(--brand-primary)]'
           }`}
         >
           {action.label}
@@ -235,7 +235,7 @@ function MatrixActionCard({
           {action.cta.href ? (
             <Link
               href={action.cta.href.replace('{fallId}', fallId)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-xs font-medium"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-xs font-medium"
             >
               {action.label.split(' ')[0] === 'Gutachten'
                 ? 'Öffnen'
@@ -246,7 +246,7 @@ function MatrixActionCard({
             <button
               type="button"
               onClick={handleCta}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-xs font-medium"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-xs font-medium"
             >
               {action.type === 'termin_vorschlagen'
                 ? 'Termin vorschlagen'
@@ -280,9 +280,9 @@ function TaskItem({ task, fallId }: { task: GutachterTask; fallId: string }) {
     const el = document.getElementById(target)
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      el.classList.add('ring-2', 'ring-[#4573A2]', 'ring-offset-2', 'transition-all')
+      el.classList.add('ring-2', 'ring-[var(--brand-secondary)]', 'ring-offset-2', 'transition-all')
       setTimeout(() => {
-        el.classList.remove('ring-2', 'ring-[#4573A2]', 'ring-offset-2')
+        el.classList.remove('ring-2', 'ring-[var(--brand-secondary)]', 'ring-offset-2')
       }, 1500)
     }
   }
@@ -294,9 +294,9 @@ function TaskItem({ task, fallId }: { task: GutachterTask; fallId: string }) {
         onClick={handleDone}
         disabled={isPending}
         aria-label="Task erledigen"
-        className="mt-0.5 w-5 h-5 rounded-md border border-gray-300 hover:border-[#4573A2] flex items-center justify-center bg-white disabled:opacity-50 shrink-0"
+        className="mt-0.5 w-5 h-5 rounded-md border border-gray-300 hover:border-[var(--brand-secondary)] flex items-center justify-center bg-white disabled:opacity-50 shrink-0"
       >
-        {isPending && <CheckIcon className="w-3 h-3 text-[#4573A2]" />}
+        {isPending && <CheckIcon className="w-3 h-3 text-[var(--brand-secondary)]" />}
       </button>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
@@ -323,7 +323,7 @@ function TaskItem({ task, fallId }: { task: GutachterTask; fallId: string }) {
         <button
           type="button"
           onClick={() => handleCtaScroll(def.scrollTo)}
-          className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#4573A2] text-white text-[11px] font-medium hover:bg-[#1E3A5F]"
+          className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[var(--brand-secondary)] text-white text-[11px] font-medium hover:bg-[var(--brand-primary)]"
         >
           {def.cta}
           <ChevronRightIcon className="w-3 h-3" />

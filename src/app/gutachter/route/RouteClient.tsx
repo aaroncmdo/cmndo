@@ -37,7 +37,7 @@ const STATUS_ICON: Record<string, typeof CheckCircle2Icon> = {
 const STATUS_COLOR: Record<string, string> = {
   erledigt: 'text-green-400',
   uebersprungen: 'text-red-400',
-  'vor-ort': 'text-[#7BA3CC]',
+  'vor-ort': 'text-[var(--brand-accent)]',
   ausstehend: 'text-gray-400',
 }
 
@@ -150,7 +150,7 @@ export default function RouteClient({
                 <div className={`bg-white rounded-2xl border p-4 transition-colors ${
                   stop.status === 'erledigt' ? 'border-green-800/30' :
                   stop.status === 'uebersprungen' ? 'border-red-800/30 opacity-60' :
-                  stop.status === 'vor-ort' ? 'border-[#1E3A5F]/30' :
+                  stop.status === 'vor-ort' ? 'border-[var(--brand-primary)]/30' :
                   'border-gray-200'
                 }`}>
                   <div className="flex items-start gap-3">

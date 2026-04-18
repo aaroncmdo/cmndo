@@ -206,11 +206,11 @@ export default function FokusChatPanel({
       <button
         type="button"
         onClick={() => setExpanded(true)}
-        className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#0D1B3E]/20 shadow-lg px-4 py-2 flex items-center gap-3 hover:bg-gray-50"
+        className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[var(--brand-primary)]/20 shadow-lg px-4 py-2 flex items-center gap-3 hover:bg-gray-50"
         aria-label="Chat öffnen"
       >
         <div className="relative">
-          <MessageCircleIcon className="w-5 h-5 text-[#4573A2]" />
+          <MessageCircleIcon className="w-5 h-5 text-[var(--brand-secondary)]" />
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 bg-[#FF4444] text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
               {unreadCount > 9 ? '9+' : unreadCount}
@@ -221,7 +221,7 @@ export default function FokusChatPanel({
           <p className="text-[10px] uppercase tracking-wider text-gray-500 leading-tight">
             Chat mit {customerName || 'Kunde'}
           </p>
-          <p className="text-xs text-[#0D1B3E] truncate">
+          <p className="text-xs text-[var(--brand-primary)] truncate">
             {lastInbound
               ? lastInbound.nachricht
               : 'Tippen zum Öffnen · Quick-Replies verfügbar'}
@@ -233,10 +233,10 @@ export default function FokusChatPanel({
   }
 
   return (
-    <div className="fixed inset-x-0 bottom-0 top-[10vh] z-40 bg-white border-t border-[#0D1B3E]/20 shadow-2xl flex flex-col">
+    <div className="fixed inset-x-0 bottom-0 top-[10vh] z-40 bg-white border-t border-[var(--brand-primary)]/20 shadow-2xl flex flex-col">
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-200 flex items-center gap-2">
-        <MessageCircleIcon className="w-4 h-4 text-[#4573A2]" />
+        <MessageCircleIcon className="w-4 h-4 text-[var(--brand-secondary)]" />
         <div className="flex-1 min-w-0">
           <p className="text-[10px] uppercase tracking-wider text-gray-500">
             Chat · {customerName || 'Kunde'}
@@ -275,8 +275,8 @@ export default function FokusChatPanel({
                 <div
                   className={`max-w-[80%] rounded-2xl px-3 py-2 text-xs leading-relaxed ${
                     isOwn
-                      ? 'bg-[#4573A2] text-white rounded-br-sm'
-                      : 'bg-white border border-gray-200 text-[#0D1B3E] rounded-bl-sm'
+                      ? 'bg-[var(--brand-secondary)] text-white rounded-br-sm'
+                      : 'bg-white border border-gray-200 text-[var(--brand-primary)] rounded-bl-sm'
                   }`}
                 >
                   <p className="whitespace-pre-wrap">{m.nachricht}</p>
@@ -295,7 +295,7 @@ export default function FokusChatPanel({
             type="button"
             onClick={() => doSend(qr.resolvedText)}
             disabled={sending}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#4573A2]/10 hover:bg-[#4573A2]/20 text-[#0D1B3E] text-xs font-medium disabled:opacity-50 flex-shrink-0"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[var(--brand-secondary)]/10 hover:bg-[var(--brand-secondary)]/20 text-[var(--brand-primary)] text-xs font-medium disabled:opacity-50 flex-shrink-0"
           >
             <span>{qr.emoji}</span>
             {qr.label}
@@ -316,13 +316,13 @@ export default function FokusChatPanel({
             }
           }}
           placeholder="Eigene Nachricht tippen…"
-          className="flex-1 min-h-[44px] text-base rounded-lg border border-gray-200 px-3 focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+          className="flex-1 min-h-[44px] text-base rounded-lg border border-gray-200 px-3 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
         />
         <button
           type="button"
           onClick={() => doSend(input)}
           disabled={sending || !input.trim()}
-          className="p-2.5 rounded-lg bg-[#0D1B3E] hover:bg-[#1A2A55] text-white disabled:opacity-50"
+          className="p-2.5 rounded-lg bg-[var(--brand-primary)] hover:bg-[#1A2A55] text-white disabled:opacity-50"
           aria-label="Senden"
         >
           {sending ? (

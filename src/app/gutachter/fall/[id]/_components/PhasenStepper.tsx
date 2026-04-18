@@ -46,7 +46,7 @@ export function PhasenStepper({
               aria-label={`Phase ${p.num} ${p.label} ${isCompleted ? 'abgeschlossen' : isCurrent ? 'aktuell' : 'offen'}`}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-medium shrink-0 ${
                 isCurrent
-                  ? 'bg-[#4573A2] text-white'
+                  ? 'bg-[var(--brand-secondary)] text-white'
                   : isCompleted
                     ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                     : 'bg-gray-100 text-gray-500'

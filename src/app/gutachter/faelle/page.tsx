@@ -204,13 +204,13 @@ export default async function GutachterFaellePage({
                 return (
                   <div
                     key={fall.id}
-                    className={`rounded-2xl border-2 p-5 ${isHeute ? 'border-[#4573A2] bg-[#4573A2]/5' : 'border-gray-200 bg-white'}`}
+                    className={`rounded-2xl border-2 p-5 ${isHeute ? 'border-[var(--brand-secondary)] bg-[var(--brand-secondary)]/5' : 'border-gray-200 bg-white'}`}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <div className="flex items-center gap-2">
                           <span
-                            className={`text-lg font-bold ${isHeute ? 'text-[#1E3A5F]' : 'text-gray-900'}`}
+                            className={`text-lg font-bold ${isHeute ? 'text-[var(--brand-primary)]' : 'text-gray-900'}`}
                           >
                             {termin.toLocaleTimeString('de-DE', {
                               hour: '2-digit',
@@ -219,7 +219,7 @@ export default async function GutachterFaellePage({
                             Uhr
                           </span>
                           <span
-                            className={`text-xs px-2 py-0.5 rounded-full font-medium ${isHeute ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-gray-600'}`}
+                            className={`text-xs px-2 py-0.5 rounded-full font-medium ${isHeute ? 'bg-[var(--brand-secondary)] text-white' : 'bg-gray-100 text-gray-600'}`}
                           >
                             {isHeute
                               ? 'HEUTE'
@@ -235,7 +235,7 @@ export default async function GutachterFaellePage({
                       </div>
                       <Link
                         href={`/gutachter/fall/${fall.id}`}
-                        className="text-[10px] text-[#4573A2] hover:underline"
+                        className="text-[10px] text-[var(--brand-secondary)] hover:underline"
                       >
                         {fall.fall_nummer ?? fall.id.slice(0, 8)}
                       </Link>
@@ -245,7 +245,7 @@ export default async function GutachterFaellePage({
                         href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(adresse)}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 flex items-center justify-center gap-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white rounded-xl py-2.5 text-sm font-semibold transition-colors"
+                        className="flex-1 flex items-center justify-center gap-2 bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white rounded-xl py-2.5 text-sm font-semibold transition-colors"
                       >
                         <NavigationIcon className="w-4 h-4" /> Navigation starten
                       </a>
@@ -306,7 +306,7 @@ export default async function GutachterFaellePage({
                           <td className="px-4 py-3">
                             <Link
                               href={`/gutachter/fall/${fall.id}`}
-                              className="text-[#7BA3CC] hover:text-[#7BA3CC] font-mono text-xs"
+                              className="text-[var(--brand-accent)] hover:text-[var(--brand-accent)] font-mono text-xs"
                             >
                               {fall.fall_nummer ?? fall.id.slice(0, 8)}
                             </Link>
@@ -332,7 +332,7 @@ export default async function GutachterFaellePage({
                           </td>
                           <td className="px-4 py-3">
                             {fall.ungelesene_nachrichten > 0 && (
-                              <span className="inline-flex items-center gap-0.5 bg-[#4573A2] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                              <span className="inline-flex items-center gap-0.5 bg-[var(--brand-secondary)] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                                 {fall.ungelesene_nachrichten}
                               </span>
                             )}
@@ -360,14 +360,14 @@ export default async function GutachterFaellePage({
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <span className="text-[#7BA3CC] font-mono text-xs">
+                        <span className="text-[var(--brand-accent)] font-mono text-xs">
                           {fall.fall_nummer ?? fall.id.slice(0, 8)}
                         </span>
                         <p className="text-gray-900 text-sm font-medium mt-0.5">{name}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         {fall.ungelesene_nachrichten > 0 && (
-                          <span className="inline-flex items-center gap-0.5 bg-[#4573A2] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                          <span className="inline-flex items-center gap-0.5 bg-[var(--brand-secondary)] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                             {fall.ungelesene_nachrichten}
                           </span>
                         )}

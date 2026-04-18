@@ -71,7 +71,7 @@ export function KanzleiRegulierungsStepperCard({
                 {isDone ? (
                   <CheckCircle2Icon className="w-5 h-5 text-emerald-500" />
                 ) : isActive ? (
-                  <div className="w-5 h-5 rounded-full bg-[#4573A2] flex items-center justify-center">
+                  <div className="w-5 h-5 rounded-full bg-[var(--brand-secondary)] flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
                   </div>
                 ) : (

@@ -196,7 +196,7 @@ export default function SVKalenderClient({
                   <div className="px-2 py-2 border-b border-gray-200/50 text-center">
                     <span className="text-gray-500 text-[10px] uppercase">{format(day, 'EEE', { locale: de })}</span>
                     <div className={`text-sm font-medium mt-0.5 w-7 h-7 mx-auto flex items-center justify-center rounded-full ${
-                      today ? 'bg-[#1E3A5F] text-white' : 'text-gray-700'
+                      today ? 'bg-[var(--brand-primary)] text-white' : 'text-gray-700'
                     }`}>
                       {format(day, 'd')}
                     </div>
@@ -226,7 +226,7 @@ export default function SVKalenderClient({
                                 ? 'bg-red-50/80 text-red-300 hover:bg-red-900/80'
                                 : isReserviert
                                   ? 'bg-amber-50 text-amber-600 hover:bg-amber-100'
-                                  : 'bg-[#4573A2]/10 text-[#7BA3CC] hover:bg-[#0D1B3E]/80'
+                                  : 'bg-[var(--brand-secondary)]/10 text-[var(--brand-accent)] hover:bg-[var(--brand-primary)]/80'
                             }`}
                           >
                             <div className="font-medium">{time}{isReserviert && <span className="ml-1 text-[8px] opacity-70">(reserviert)</span>}</div>
@@ -268,7 +268,7 @@ export default function SVKalenderClient({
               {ohneTermin.map(fall => (
                 <div key={fall.id} className="flex items-center justify-between gap-3 py-2.5 px-3 rounded-xl bg-gray-100/40">
                   <div className="min-w-0">
-                    <Link href={`/gutachter/fall/${fall.id}`} className="text-[#7BA3CC] hover:text-[#7BA3CC] text-xs font-mono">
+                    <Link href={`/gutachter/fall/${fall.id}`} className="text-[var(--brand-accent)] hover:text-[var(--brand-accent)] text-xs font-mono">
                       {fall.fall_nummer ?? fall.id.slice(0, 8)}
                     </Link>
                     <p className="text-gray-500 text-xs truncate">
@@ -277,7 +277,7 @@ export default function SVKalenderClient({
                   </div>
                   <button
                     onClick={() => { setDialogFall(fall); setTerminDate(''); setTerminTime('10:00') }}
-                    className="px-3 py-1.5 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap"
+                    className="px-3 py-1.5 bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap"
                   >
                     Termin setzen
                   </button>
@@ -305,7 +305,7 @@ export default function SVKalenderClient({
                       type="date"
                       value={terminDate}
                       onChange={e => setTerminDate(e.target.value)}
-                      className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                      className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                     />
                   </div>
                   <div>
@@ -314,7 +314,7 @@ export default function SVKalenderClient({
                       type="time"
                       value={terminTime}
                       onChange={e => setTerminTime(e.target.value)}
-                      className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                      className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                     />
                   </div>
                 </div>
@@ -328,7 +328,7 @@ export default function SVKalenderClient({
                   <button
                     onClick={handleSetTermin}
                     disabled={saving || !terminDate}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[#1E3A5F] hover:bg-[#4573A2] text-white transition-colors disabled:opacity-40"
+                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white transition-colors disabled:opacity-40"
                   >
                     {saving ? 'Wird gesetzt...' : 'Speichern'}
                   </button>
@@ -390,13 +390,13 @@ export default function SVKalenderClient({
                         type="date"
                         value={slot.datum}
                         onChange={e => setGegSlots(prev => prev.map((s, i) => i === idx ? { ...s, datum: e.target.value } : s))}
-                        className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+                        className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
                       />
                       <input
                         type="time"
                         value={slot.uhrzeit}
                         onChange={e => setGegSlots(prev => prev.map((s, i) => i === idx ? { ...s, uhrzeit: e.target.value } : s))}
-                        className="w-24 bg-gray-100 border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+                        className="w-24 bg-gray-100 border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
                       />
                       {gegSlots.length > 1 && (
                         <button onClick={() => setGegSlots(prev => prev.filter((_, i) => i !== idx))} className="text-gray-400 hover:text-red-500 text-xs px-1">✕</button>
@@ -406,7 +406,7 @@ export default function SVKalenderClient({
                   {gegSlots.length < 3 && (
                     <button
                       onClick={() => setGegSlots(prev => [...prev, { datum: '', uhrzeit: '10:00' }])}
-                      className="text-xs text-[#4573A2] hover:underline mt-1"
+                      className="text-xs text-[var(--brand-secondary)] hover:underline mt-1"
                     >
                       + Weiteren Termin hinzufügen
                     </button>

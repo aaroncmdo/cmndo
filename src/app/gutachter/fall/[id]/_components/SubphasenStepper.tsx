@@ -30,7 +30,7 @@ export function SubphasenStepper({ currentSubphase }: { currentSubphase: SvSubph
               aria-label={`${sp.label} ${isCompleted ? 'abgeschlossen' : isCurrent ? 'aktuell' : 'offen'}`}
               className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium transition-colors ${
                 isCurrent
-                  ? 'bg-[#4573A2]/10 text-[#1E3A5F] ring-1 ring-[#4573A2]'
+                  ? 'bg-[var(--brand-secondary)]/10 text-[var(--brand-primary)] ring-1 ring-[var(--brand-secondary)]'
                   : isCompleted
                     ? 'text-emerald-700'
                     : 'text-gray-400'
@@ -39,7 +39,7 @@ export function SubphasenStepper({ currentSubphase }: { currentSubphase: SvSubph
               {isCompleted ? (
                 <CheckIcon className="w-3 h-3" />
               ) : isCurrent ? (
-                <span className="w-2 h-2 rounded-full bg-[#4573A2] animate-pulse" aria-hidden="true" />
+                <span className="w-2 h-2 rounded-full bg-[var(--brand-secondary)] animate-pulse" aria-hidden="true" />
               ) : (
                 <span className="w-2 h-2 rounded-full bg-gray-300" aria-hidden="true" />
               )}

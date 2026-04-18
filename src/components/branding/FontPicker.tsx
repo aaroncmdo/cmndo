@@ -39,19 +39,19 @@ export default function FontPicker({ selectedPairId, recommendedCategory, onChan
               onClick={() => onChange(defaultPair)}
               className={`text-left p-3 rounded-xl border transition-colors ${
                 isActive
-                  ? 'border-[#4573A2] bg-[#4573A2]/5'
+                  ? 'border-[var(--brand-secondary)] bg-[var(--brand-secondary)]/5'
                   : 'border-gray-200 bg-white hover:border-gray-300'
               }`}
             >
               <div className="flex items-center justify-between mb-1">
                 <span
                   className="text-sm font-semibold"
-                  style={{ color: isActive ? '#1E3A5F' : '#0D1B3E' }}
+                  style={{ color: isActive ? 'var(--brand-primary)' : 'var(--brand-primary)' }}
                 >
                   {FONT_CATEGORY_LABELS[cat]}
                 </span>
                 {isRecommended && (
-                  <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[#4573A2]">
+                  <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[var(--brand-secondary)]">
                     <SparklesIcon className="w-3 h-3" />
                     Empfohlen
                   </span>
@@ -62,7 +62,7 @@ export default function FontPicker({ selectedPairId, recommendedCategory, onChan
                 style={{
                   fontFamily: defaultPair.cssStack.heading,
                   fontWeight: 700,
-                  color: '#0D1B3E',
+                  color: 'var(--brand-primary)',
                 }}
               >
                 {defaultPair.label}
@@ -91,7 +91,7 @@ export default function FontPicker({ selectedPairId, recommendedCategory, onChan
                 onClick={() => onChange(pair)}
                 className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${
                   isSelected
-                    ? 'border-[#4573A2] bg-[#4573A2] text-white'
+                    ? 'border-[var(--brand-secondary)] bg-[var(--brand-secondary)] text-white'
                     : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
                 }`}
                 style={{ fontFamily: pair.cssStack.heading, fontWeight: 600 }}

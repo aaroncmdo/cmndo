@@ -189,7 +189,7 @@ export default function BueroOnboardingClient({
             return (
               <div key={s.key} className="flex items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                  i < step ? 'bg-green-600' : i === step ? 'bg-[#1E3A5F]' : 'bg-gray-100'
+                  i < step ? 'bg-green-600' : i === step ? 'bg-[var(--brand-primary)]' : 'bg-gray-100'
                 }`}>
                   <Icon className="w-4 h-4 text-white" />
                 </div>
@@ -223,7 +223,7 @@ export default function BueroOnboardingClient({
                   <button
                     type="button"
                     onClick={addStandort}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#1E3A5F]/5 hover:bg-[#1E3A5F]/10 text-[#1E3A5F] text-xs font-medium"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--brand-primary)]/5 hover:bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] text-xs font-medium"
                   >
                     <PlusIcon className="w-3.5 h-3.5" />
                     Standort
@@ -262,7 +262,7 @@ export default function BueroOnboardingClient({
                           defaultValue={std.anschrift}
                           placeholder="Adresse via Auswahl waehlen..."
                           onSelect={place => setStandortPlace(std.id, place)}
-                          className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                          className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                         />
                         {std.anschrift && (std.lat === null || std.lng === null) && (
                           <p className="text-[10px] text-amber-600 mt-1">
@@ -280,7 +280,7 @@ export default function BueroOnboardingClient({
                               onClick={() => updateStandort(std.id, 'paket', p.key)}
                               className={`px-3 py-2 rounded-lg border text-xs transition-colors ${
                                 std.paket === p.key
-                                  ? 'border-[#1E3A5F] bg-[#1E3A5F]/5 text-[#1E3A5F] font-semibold'
+                                  ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)]/5 text-[var(--brand-primary)] font-semibold'
                                   : 'border-gray-200 text-gray-500 hover:border-gray-300'
                               }`}
                             >
@@ -296,11 +296,11 @@ export default function BueroOnboardingClient({
               </div>
 
               {/* Gesamt-Anzahlung Box */}
-              <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-xl p-4">
+              <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-xl p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs text-gray-500">Gesamt-Anzahlung (einmalig)</p>
-                    <p className="text-2xl font-bold text-[#1E3A5F] mt-1">
+                    <p className="text-2xl font-bold text-[var(--brand-primary)] mt-1">
                       {gesamtAnzahlung.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })}
                     </p>
                   </div>
@@ -375,9 +375,9 @@ export default function BueroOnboardingClient({
                 </div>
               </div>
 
-              <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-xl p-4">
+              <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-xl p-4">
                 <p className="text-xs text-gray-500">Zu zahlender Gesamt-Betrag</p>
-                <p className="text-2xl font-bold text-[#1E3A5F] mt-1">
+                <p className="text-2xl font-bold text-[var(--brand-primary)] mt-1">
                   {gesamtAnzahlung.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })}
                 </p>
                 <p className="text-[11px] text-gray-500 mt-2">
@@ -413,7 +413,7 @@ export default function BueroOnboardingClient({
                 else handleCheckout()
               }}
               disabled={saving}
-              className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40"
+              className="flex-1 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold transition-colors disabled:opacity-40"
             >
               {saving
                 ? 'Wird verarbeitet...'
@@ -461,7 +461,7 @@ function Field({
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] disabled:opacity-50"
+        className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] disabled:opacity-50"
       />
     </div>
   )

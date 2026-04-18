@@ -108,7 +108,7 @@ export default async function SVKalenderPage({
                     </p>
                     <p className="text-xs text-gray-500 mt-0.5">{name} · {fall.schadens_ort ?? '—'}</p>
                   </div>
-                  <span className="text-[10px] text-[#4573A2]">{fall.fall_nummer ?? fall.id.slice(0, 8)}</span>
+                  <span className="text-[10px] text-[var(--brand-secondary)]">{fall.fall_nummer ?? fall.id.slice(0, 8)}</span>
                 </div>
               </Link>
             )

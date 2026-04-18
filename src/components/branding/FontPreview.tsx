@@ -46,8 +46,8 @@ export default function FontPreview({ theme, fontPair, className }: Props) {
     setHref(url)
   }, [fontPair])
 
-  const primary = theme.primary ?? '#0D1B3E'
-  const secondary = theme.secondary ?? '#4573A2'
+  const primary = theme.primary ?? 'var(--brand-primary)'
+  const secondary = theme.secondary ?? 'var(--brand-secondary)'
   const surface = theme.surface ?? '#FFFFFF'
   const textOnPrimary = theme.textOnPrimary ?? '#FFFFFF'
 
@@ -57,7 +57,7 @@ export default function FontPreview({ theme, fontPair, className }: Props) {
       style={{ background: surface }}
       data-loaded={href != null}
     >
-      <div className="px-5 py-4 space-y-3" style={{ color: '#0D1B3E' }}>
+      <div className="px-5 py-4 space-y-3" style={{ color: 'var(--brand-primary)' }}>
         <h3 style={{ fontFamily: fontPair.cssStack.heading, fontWeight: 700, fontSize: 22, lineHeight: 1.2 }}>
           Claimondo Portal
         </h3>
@@ -66,7 +66,7 @@ export default function FontPreview({ theme, fontPair, className }: Props) {
         </p>
 
         <div className="pt-2 space-y-1">
-          <p style={{ fontFamily: fontPair.cssStack.heading, fontWeight: 600, fontSize: 13, color: '#0D1B3E' }}>
+          <p style={{ fontFamily: fontPair.cssStack.heading, fontWeight: 600, fontSize: 13, color: 'var(--brand-primary)' }}>
             Nächste Termine
           </p>
           <ul style={{ fontFamily: fontPair.cssStack.body, fontSize: 13, color: '#4A5568' }} className="space-y-0.5">
