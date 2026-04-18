@@ -1108,7 +1108,6 @@ export type Database = {
           anschlussschreiben_sendedatum: string | null
           anschlussschreiben_unterschrift: boolean | null
           anschlussschreiben_url: string | null
-          anwalt_status: string | null
           as_frist: string | null
           as_geforderte_summe: number | null
           as_salesforce_id: string | null
@@ -1393,7 +1392,6 @@ export type Database = {
           anschlussschreiben_sendedatum?: string | null
           anschlussschreiben_unterschrift?: boolean | null
           anschlussschreiben_url?: string | null
-          anwalt_status?: string | null
           as_frist?: string | null
           as_geforderte_summe?: number | null
           as_salesforce_id?: string | null
@@ -1679,7 +1677,6 @@ export type Database = {
           anschlussschreiben_sendedatum?: string | null
           anschlussschreiben_unterschrift?: boolean | null
           anschlussschreiben_url?: string | null
-          anwalt_status?: string | null
           as_frist?: string | null
           as_geforderte_summe?: number | null
           as_salesforce_id?: string | null
