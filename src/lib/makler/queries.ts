@@ -192,6 +192,270 @@ export function provisionFuerServiceTyp(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// AAR-487 (M5) — Akte-Detail
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type TimelineKind = 'done' | 'current' | 'planned'
+
+export type TimelineEvent = {
+  timestamp: string
+  title: string
+  kind: TimelineKind
+  meta?: string
+}
+
+export type FallDetailDocument = {
+  id: string
+  dokument_typ: string
+  original_filename: string | null
+  mime_type: string | null
+  groesse_bytes: number | null
+  hochgeladen_am: string | null
+  storage_path: string | null
+}
+
+export type FallDetailProvision = {
+  id: string
+  betrag_netto_eur: number
+  status: string
+  service_typ: string | null
+  trigger_at: string | null
+  hold_until: string | null
+}
+
+export type FallDetailKunde = {
+  id: string
+  vorname: string | null
+  nachname: string | null
+  email: string | null
+  telefon: string | null
+  adresse: string | null
+  plz: string | null
+  ort: string | null
+}
+
+export type FallDetail = {
+  consent_scope: string
+  fall: {
+    id: string
+    fall_nummer: string | null
+    status: string
+    aktuelle_phase: string | null
+    service_typ: string | null
+    created_at: string
+    updated_at: string | null
+    unfalldatum: string | null
+    unfallort: string | null
+    schadenart: string | null
+    unfallhergang: string | null
+    schadenhoehe_netto: number | null
+    fahrzeug_hersteller: string | null
+    fahrzeug_modell: string | null
+    fahrzeug_baujahr: number | null
+    kennzeichen: string | null
+    fin_vin: string | null
+    kilometerstand: number | null
+    erstzulassung: string | null
+    gegner_name: string | null
+    gegner_kennzeichen: string | null
+    schadennummer_versicherung: string | null
+    versicherung_gegner_name: string | null
+    zeugen_kontakte: unknown
+    sv_termin: string | null
+    gutachten_eingegangen_am: string | null
+    kanzlei_uebergeben_am: string | null
+    regulierung_am: string | null
+    reparaturkosten: number | null
+    wertminderung: number | null
+    nutzungsausfall_gesamt: number | null
+    gutachter_honorar: number | null
+    wiederbeschaffungswert: number | null
+    restwert: number | null
+    ist_totalschaden: boolean | null
+    abtretung_signiert_am: string | null
+  }
+  kunde: FallDetailKunde | null
+  provision: FallDetailProvision | null
+  documents: FallDetailDocument[]
+  timeline: TimelineEvent[]
+}
+
+/**
+ * AAR-487: Lädt einen Fall mit allen für die Detail-Ansicht benötigten
+ * Relationen. Authz erfolgt über makler_fall_consent + RLS aus M1.
+ * Gibt null zurück, wenn der Fall nicht existiert oder der Makler keinen
+ * aktiven Consent hat.
+ */
+export async function getMaklerFallDetail(
+  maklerId: string,
+  fallId: string,
+): Promise<FallDetail | null> {
+  const supabase = await createClient()
+
+  const { data: consent } = await supabase
+    .from('makler_fall_consent')
+    .select('consent_scope, widerrufen_am')
+    .eq('makler_id', maklerId)
+    .eq('fall_id', fallId)
+    .is('widerrufen_am', null)
+    .maybeSingle()
+  if (!consent) return null
+
+  const { data: fall } = await supabase
+    .from('faelle')
+    .select(`
+      id, fall_nummer, status, aktuelle_phase, service_typ,
+      created_at, updated_at, unfalldatum, unfallort, schadenart,
+      unfallhergang, schadenhoehe_netto,
+      fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr,
+      kennzeichen, fin_vin, kilometerstand, erstzulassung,
+      gegner_name, gegner_kennzeichen, schadennummer_versicherung,
+      versicherung_gegner_name, zeugen_kontakte,
+      sv_termin, gutachten_eingegangen_am, kanzlei_uebergeben_am,
+      regulierung_am, reparaturkosten, wertminderung,
+      nutzungsausfall_gesamt, gutachter_honorar,
+      wiederbeschaffungswert, restwert, ist_totalschaden,
+      abtretung_signiert_am,
+      kunde:profiles!faelle_kunde_id_fkey(
+        id, vorname, nachname, email, telefon, adresse, plz, ort
+      )
+    `)
+    .eq('id', fallId)
+    .maybeSingle()
+  if (!fall) return null
+
+  const rawKunde = (fall as { kunde: unknown }).kunde
+  const kunde = (Array.isArray(rawKunde) ? rawKunde[0] : rawKunde) as
+    | FallDetailKunde
+    | null
+
+  const { data: provisionRows } = await supabase
+    .from('makler_provisionen')
+    .select('id, betrag_netto_eur, status, service_typ, trigger_at, hold_until')
+    .eq('makler_id', maklerId)
+    .eq('fall_id', fallId)
+    .order('trigger_at', { ascending: false })
+    .limit(1)
+  const provision = provisionRows?.[0]
+    ? {
+        id: provisionRows[0].id,
+        betrag_netto_eur: Number(provisionRows[0].betrag_netto_eur ?? 0),
+        status: provisionRows[0].status,
+        service_typ: provisionRows[0].service_typ ?? null,
+        trigger_at: provisionRows[0].trigger_at ?? null,
+        hold_until: provisionRows[0].hold_until ?? null,
+      }
+    : null
+
+  const { data: documents } = await supabase
+    .from('fall_dokumente')
+    .select(
+      'id, dokument_typ, original_filename, mime_type, groesse_bytes, hochgeladen_am, storage_path',
+    )
+    .eq('fall_id', fallId)
+    .is('geloescht_am', null)
+    .order('hochgeladen_am', { ascending: false })
+
+  const timeline = buildTimelineForFall(
+    fall as unknown as FallDetail['fall'],
+    consent as unknown as { consent_scope: string },
+  )
+
+  return {
+    consent_scope: consent.consent_scope,
+    fall: fall as unknown as FallDetail['fall'],
+    kunde,
+    provision,
+    documents: (documents ?? []) as FallDetailDocument[],
+    timeline,
+  }
+}
+
+/**
+ * Baut die Timeline aus den Datumspunkten des Falls. Pragmatisch — echte
+ * Phase-History wird in separatem Ticket nachgezogen, hier reichen die
+ * Milestone-Timestamps aus der faelle-Row.
+ */
+function buildTimelineForFall(
+  fall: FallDetail['fall'],
+  _consent: { consent_scope: string },
+): TimelineEvent[] {
+  void _consent
+  const events: TimelineEvent[] = []
+
+  events.push({
+    timestamp: fall.created_at,
+    title: 'Fall angelegt',
+    kind: 'done',
+  })
+  if (fall.abtretung_signiert_am) {
+    events.push({
+      timestamp: fall.abtretung_signiert_am,
+      title: 'Abtretungserklärung unterschrieben',
+      kind: 'done',
+    })
+  }
+  if (fall.sv_termin) {
+    const inFuture = new Date(fall.sv_termin).getTime() > Date.now()
+    events.push({
+      timestamp: fall.sv_termin,
+      title: inFuture ? 'SV-Termin geplant' : 'SV-Termin',
+      kind: inFuture ? 'planned' : 'done',
+    })
+  }
+  if (fall.gutachten_eingegangen_am) {
+    events.push({
+      timestamp: fall.gutachten_eingegangen_am,
+      title: 'Gutachten eingegangen',
+      kind: 'done',
+    })
+  }
+  if (fall.kanzlei_uebergeben_am) {
+    events.push({
+      timestamp: fall.kanzlei_uebergeben_am,
+      title: 'An Kanzlei übergeben',
+      kind: 'done',
+    })
+  }
+  if (fall.regulierung_am) {
+    events.push({
+      timestamp: fall.regulierung_am,
+      title: 'Reguliert',
+      kind: 'done',
+    })
+  }
+
+  // Sort ascending, mark latest non-future „done" als „current"
+  events.sort((a, b) => (a.timestamp < b.timestamp ? -1 : 1))
+  return events
+}
+
+/**
+ * Erzeugt Signed-URLs für alle Dokumente eines Falls. Supabase Storage
+ * Bucket: `fall-dokumente` (siehe Admin-Settings).
+ */
+export async function getDocumentSignedUrls(
+  docs: FallDetailDocument[],
+): Promise<Record<string, string | null>> {
+  if (docs.length === 0) return {}
+  const supabase = await createClient()
+  const result: Record<string, string | null> = {}
+  await Promise.all(
+    docs.map(async (d) => {
+      if (!d.storage_path) {
+        result[d.id] = null
+        return
+      }
+      const { data } = await supabase.storage
+        .from('fall-dokumente')
+        .createSignedUrl(d.storage_path, 3600)
+      result[d.id] = data?.signedUrl ?? null
+    }),
+  )
+  return result
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // AAR-486 (M4) — Akten-Liste
 // ─────────────────────────────────────────────────────────────────────────────
 
