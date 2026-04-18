@@ -359,7 +359,7 @@ export function BesichtigungSection() {
 export function KernwerteSection() {
   const { fall } = useFall()
   // DB-Schema: reparaturkosten / wiederbeschaffungswert / restwert / wertminderung /
-  // schadenshoehe / schadenhoehe_netto — kein kernwert_-Prefix
+  // schadenhoehe_netto — kein kernwert_-Prefix
   return (
     <Card
       icon={<CalculatorIcon className="w-4 h-4 text-gray-400" />}
@@ -370,7 +370,6 @@ export function KernwerteSection() {
       <InlineEditField label="Wiederbeschaffungswert (€)" fieldName="wiederbeschaffungswert" value={f(fall, 'wiederbeschaffungswert')} type="number" />
       <InlineEditField label="Restwert (€)" fieldName="restwert" value={f(fall, 'restwert')} type="number" />
       <InlineEditField label="Wertminderung (€)" fieldName="wertminderung" value={f(fall, 'wertminderung')} type="number" />
-      <InlineEditField label="Schadenhöhe brutto (€)" fieldName="schadenshoehe" value={f(fall, 'schadenshoehe')} type="number" />
       <InlineEditField label="Schadenhöhe netto (€)" fieldName="schadenhoehe_netto" value={f(fall, 'schadenhoehe_netto')} type="number" />
     </Card>
   )

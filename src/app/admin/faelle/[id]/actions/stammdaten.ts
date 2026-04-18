@@ -75,7 +75,6 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'wiederbeschaffungswert',
   'restwert',
   'wertminderung',
-  'schadenshoehe',
   'schadenhoehe_netto',
   // VS-Status-Felder (AAR-161 W1 neu)
   'vs_kuerzung_grund',
