@@ -21,11 +21,11 @@ export type LeadRow = Record<string, unknown>
 
 // ─── 1. DIRECT — Feldname gleich, lead[field] ?? null ───────────────────────
 export const LEAD_TO_FALL_DIRECT_FIELDS = [
-  'schadenfall_typ',
+  'schadens_fall_typ',
   'kunden_konstellation',
   // KFZ-154 Spezifikation + Schadenart für Dispatcher-Match
   'spezifikation',
-  'schadenart',
+  'schadens_art',
   // KFZ-153 Unfall + Gegner Detaildaten
   'unfall_konstellation',
   'gegner_anzahl_beteiligte',
@@ -71,7 +71,7 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'source_channel',
   'source_domain',
   // KFZ-208 Mandantenfragebogen-Detaildaten
-  'schadenhergang',
+  'schadens_hergang',
   'halter_vorname',
   'halter_nachname',
   'halter_strasse',

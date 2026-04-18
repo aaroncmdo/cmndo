@@ -167,7 +167,7 @@ function buildContextText(ctx: LoadedContext, maklerFirma: string): string {
   if (fall.unfallhergang) {
     lines.push(`- Hergang: ${String(fall.unfallhergang)}`)
   }
-  lines.push(`- Schadenart: ${(fall.schadenart as string | null) ?? '–'}`)
+  lines.push(`- Schadenart: ${(fall.schadens_art as string | null) ?? '–'}`)
   lines.push(`- Service-Typ: ${(fall.service_typ as string | null) ?? '–'}`)
   lines.push(
     `- Fahrzeug: ${fahrzeug}${

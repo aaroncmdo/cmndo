@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
     // Get Kunde name
     let kundeName = 'Kunde'
     if (termin.lead_id) {
-      const { data: lead } = await svc.from('leads').select('vorname, nachname, telefon, kennzeichen, schadenfall_typ').eq('id', termin.lead_id).single()
+      const { data: lead } = await svc.from('leads').select('vorname, nachname, telefon, kennzeichen, schadens_fall_typ').eq('id', termin.lead_id).single()
       if (lead) kundeName = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Kunde'
     }
 

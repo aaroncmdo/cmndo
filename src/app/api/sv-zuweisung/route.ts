@@ -41,10 +41,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'fall_id fehlt' }, { status: 400 })
   }
 
-  // 1. Fall laden — KFZ-154: zusaetzlich spezifikation + schadenart fuer Match
+  // 1. Fall laden — KFZ-154: zusätzlich spezifikation + schadens_art für Match
   const { data: fall, error: fallErr } = await supabase
     .from('faelle')
-    .select('id, schadens_plz, sv_id, status, spezifikation, schadenart')
+    .select('id, schadens_plz, sv_id, status, spezifikation, schadens_art')
     .eq('id', fallId)
     .single()
 
@@ -107,7 +107,7 @@ export async function POST(request: Request) {
   }
 
   // 4. Filtern: Kapazität + Umkreis 40 km
-  // KFZ-154: spezifikation als Hard-Filter mit Fallback, schadenart als Soft-Priority
+  // KFZ-154: spezifikation als Hard-Filter mit Fallback, schadens_art als Soft-Priority
   type Candidate = (typeof svList)[number] & { distanz_km: number | null; spez_match: boolean; schaden_match: boolean }
 
   const candidates: Candidate[] = []
@@ -147,7 +147,7 @@ export async function POST(request: Request) {
       const svSpez = (sv.spezifikationen as string[] | null) ?? []
       const svSchaden = (sv.schadenarten as string[] | null) ?? []
       const spezMatch = !fall.spezifikation || svSpez.includes(fall.spezifikation)
-      const schadenMatch = !!fall.schadenart && svSchaden.includes(fall.schadenart)
+      const schadenMatch = !!fall.schadens_art && svSchaden.includes(fall.schadens_art)
       candidates.push({ ...sv, distanz_km: distanz, spez_match: spezMatch, schaden_match: schadenMatch })
     }
   }
@@ -173,7 +173,7 @@ export async function POST(request: Request) {
     }
   }
 
-  // 5. Sortieren: schadenart-Match (true vor false), dann partner_seit ASC
+  // 5. Sortieren: schadens_art-Match (true vor false), dann partner_seit ASC
   matchedCandidates.sort((a, b) => {
     if (a.schaden_match !== b.schaden_match) return a.schaden_match ? -1 : 1
     const da = a.partner_seit ? new Date(a.partner_seit).getTime() : Infinity

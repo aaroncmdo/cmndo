@@ -225,12 +225,12 @@ export async function createLead(data: {
   telefon: string
   email: string
   source_channel: string
-  schadenfall_typ?: string
-  // KFZ-154: Spezifikation + Schadenart fuer Dispatcher-Match. Optional bei
-  // schnellem Quick-Add (kann nachtraeglich via LeadInlineFields gesetzt werden)
+  schadens_fall_typ?: string
+  // KFZ-154: Spezifikation + Schadensart für Dispatcher-Match. Optional bei
+  // schnellem Quick-Add (kann nachträglich via LeadInlineFields gesetzt werden)
   // oder beim manuellen Anlegen direkt mitgegeben werden.
   spezifikation?: string
-  schadenart?: string
+  schadens_art?: string
   // AAR-90: optional FIN bei manuellem Lead-Anlegen → Cardentity-Anreicherung
   fin?: string
 }) {
@@ -244,9 +244,9 @@ export async function createLead(data: {
     telefon: data.telefon || null,
     email: data.email || null,
     source_channel: data.source_channel || 'telefon',
-    schadenfall_typ: data.schadenfall_typ || null,
+    schadens_fall_typ: data.schadens_fall_typ || null,
     spezifikation: data.spezifikation || null,
-    schadenart: data.schadenart || null,
+    schadens_art: data.schadens_art || null,
     fin: data.fin ? data.fin.toUpperCase() : null,
     status: 'neu',
     qualifizierungs_phase: 'neu',
@@ -260,7 +260,7 @@ export async function createLead(data: {
   const { data: newLead } = await supabase.from('leads').select('id').eq('vorname', data.vorname).eq('nachname', data.nachname).order('created_at', { ascending: false }).limit(1).single()
   if (newLead) {
     triggerLeadTasks(newLead.id, user.id).catch(() => {})
-    createNotification(user.id, 'neuer-lead', `Neuer Lead: ${data.vorname} ${data.nachname}`, `${data.source_channel} · ${data.schadenfall_typ || 'Kein Typ'}`, `/admin/dispatch/lead/${newLead.id}`).catch(() => {})
+    createNotification(user.id, 'neuer-lead', `Neuer Lead: ${data.vorname} ${data.nachname}`, `${data.source_channel} · ${data.schadens_fall_typ || 'Kein Typ'}`, `/admin/dispatch/lead/${newLead.id}`).catch(() => {})
 
     // AAR-90: Cardentity-Anreicherung wenn FIN angegeben
     if (data.fin) {
@@ -544,16 +544,16 @@ async function convertLeadToFall(
       lead_id: leadId,
       status: 'ersterfassung',
       // Stammdaten vom Lead
-      schadenfall_typ: lead.schadenfall_typ,
+      schadens_fall_typ: lead.schadens_fall_typ,
       kunden_konstellation: lead.kunden_konstellation,
       kennzeichen: lead.kennzeichen,
       fahrzeug_hersteller: lead.fahrzeug_hersteller,
       fahrzeug_modell: lead.fahrzeug_modell,
-      // KFZ-154: Spezifikation + Schadenart fuer den Dispatcher-Match.
-      // Werden vom Lead uebernommen wenn der Lead-Import die Felder mitliefert,
-      // sonst null (Dispatcher faellt ohne Spez-Filter zurueck).
+      // KFZ-154: Spezifikation + Schadensart für den Dispatcher-Match.
+      // Werden vom Lead übernommen wenn der Lead-Import die Felder mitliefert,
+      // sonst null (Dispatcher fällt ohne Spez-Filter zurück).
       spezifikation: lead.spezifikation ?? null,
-      schadenart: lead.schadenart ?? null,
+      schadens_art: lead.schadens_art ?? null,
       // KFZ-153: Unfall + Gegner Daten vom Lead
       unfall_konstellation: lead.unfall_konstellation ?? null,
       gegner_anzahl_beteiligte: lead.gegner_anzahl_beteiligte ?? null,
@@ -607,7 +607,7 @@ async function convertLeadToFall(
         lead.finanzierung_leasing ??
         (lead.leasing_flag ? 'leasing' : lead.finanzierung_flag ? 'finanzierung' : 'keine'),
       vorsteuerabzugsberechtigt: lead.vorsteuerabzugsberechtigt ?? false,
-      schadenhergang: lead.schadenhergang ?? null,
+      schadens_hergang: lead.schadens_hergang ?? null,
       halter_vorname: lead.halter_vorname ?? null,
       halter_nachname: lead.halter_nachname ?? null,
       halter_strasse: lead.halter_strasse ?? null,

@@ -16,7 +16,7 @@ type LeadSummary = {
   email: string | null
   kennzeichen: string | null
   fahrzeug: string | null
-  schadenfall_typ: string | null
+  schadens_fall_typ: string | null
   source_channel: string | null
 }
 
@@ -102,10 +102,10 @@ export default function LeadKonvertierenModal({
                 {lead.fahrzeug && <span className="text-gray-400 text-xs">{lead.fahrzeug}</span>}
               </div>
             )}
-            {lead.schadenfall_typ && (
+            {lead.schadens_fall_typ && (
               <div className="flex items-center gap-2">
                 <FileTextIcon className="w-3.5 h-3.5 text-gray-400" />
-                <span className="text-gray-600 text-xs">{lead.schadenfall_typ}</span>
+                <span className="text-gray-600 text-xs">{lead.schadens_fall_typ}</span>
               </div>
             )}
             {lead.source_channel && (

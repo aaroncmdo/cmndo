@@ -35,7 +35,7 @@ export type LeadLike = {
   // AAR-305: Schadenshergang wird zur Pflicht wenn das Fahrzeug fahrbereit ist
   // (der SV erwartet vorab eine Beschreibung damit er den Termin sinnvoll plant)
   fahrzeug_fahrbereit?: boolean | null
-  schadenhergang?: string | null
+  schadens_hergang?: string | null
 }
 
 export type AktiverTerminLike = {
@@ -116,7 +116,7 @@ export function computeQualificationStatus(
   // → Schadenshergang nicht zwingend, SV sieht sich das ohnehin vor Ort an.
   const q8_schadenhergang =
     lead.fahrzeug_fahrbereit !== true ||
-    (typeof lead.schadenhergang === 'string' && lead.schadenhergang.trim().length >= 20)
+    (typeof lead.schadens_hergang === 'string' && lead.schadens_hergang.trim().length >= 20)
 
   const disqualifiziert = lead.qualifizierungs_phase === 'disqualifiziert'
 

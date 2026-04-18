@@ -28,7 +28,7 @@ export type LeadData = {
   nachname: string
   email: string
   telefon: string
-  schadenfall_typ: string
+  schadens_fall_typ: string
   schadentyp: string | null
   schadentyp_freitext: string | null
   kunden_konstellation: string

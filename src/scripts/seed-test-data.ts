@@ -207,7 +207,7 @@ async function main() {
       schadens_datum: new Date(Date.now() - 20 * 86400000).toISOString().slice(0, 10),
       gegner_versicherung: 'AXA',
       anschlussschreiben_am: vor16Tagen,
-      schadenhoehe_netto: 15000,
+      schadens_hoehe_netto: 15000,
       hat_vorschaeden: true,
       vorschaeden_beschreibung: 'Leichte Delle an Fahrerseite (repariert 2024)',
       service_typ: 'komplett',

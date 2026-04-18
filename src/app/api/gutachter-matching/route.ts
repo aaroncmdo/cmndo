@@ -52,11 +52,11 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null)
   const plz: string | undefined = body?.plz
   const wunschtermin: string | undefined = body?.wunschtermin
-  const schadenfallTyp: string | undefined = body?.schadenfall_typ
-  // KFZ-154: zusaetzlich Spezifikation (Hard-Filter mit Fallback) und
-  // Schadenart (Soft-Score Bonus) per Body-Param.
+  const schadensFallTyp: string | undefined = body?.schadens_fall_typ
+  // KFZ-154: zusätzlich Spezifikation (Hard-Filter mit Fallback) und
+  // Schadensart (Soft-Score Bonus) per Body-Param.
   const spezifikation: string | undefined = body?.spezifikation
-  const schadenart: string | undefined = body?.schadenart
+  const schadensArt: string | undefined = body?.schadens_art
   const directLat: number | undefined = body?.lat
   const directLng: number | undefined = body?.lng
 
@@ -119,14 +119,14 @@ export async function POST(request: Request) {
     const svSchaden = (sv.schadenarten as string[] | null) ?? []
     const svQualNeu = (sv.qualifikationen_neu as string[] | null) ?? []
     const spezMatch = !spezifikation || svSpez.includes(spezifikation)
-    const schadenMatch = !!schadenart && svSchaden.includes(schadenart)
+    const schadenMatch = !!schadensArt && svSchaden.includes(schadensArt)
 
     let score = 0
     if (sv.partner_seit) score -= Math.min((Date.now() - new Date(sv.partner_seit).getTime()) / (365.25 * 86400000), 10) * 10
     score -= (maxFaelle > 0 ? 1 - (genutztFaelle / maxFaelle) : 0.5) * 30
-    // KFZ-154: schadenfall_typ-Match gegen qualifikationen_neu
-    if (schadenfallTyp && svQualNeu.includes(schadenfallTyp)) score -= 50
-    // KFZ-154: schadenart-Match Bonus (Soft-Priority -40)
+    // KFZ-154: schadens_fall_typ-Match gegen qualifikationen_neu
+    if (schadensFallTyp && svQualNeu.includes(schadensFallTyp)) score -= 50
+    // KFZ-154: schadens_art-Match Bonus (Soft-Priority -40)
     if (schadenMatch) score -= 40
     if (distanz != null) score += distanz
 

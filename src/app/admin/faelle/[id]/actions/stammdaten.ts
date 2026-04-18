@@ -50,8 +50,8 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'schadens_ort',
   'schadens_ursache',
   'schadens_beschreibung',
-  'schadenhergang',
-  'schadenart',
+  'schadens_hergang',
+  'schadens_art',
   // Gegner / Versicherung
   'gegner_name',
   'gegner_kennzeichen',
@@ -74,7 +74,7 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'wiederbeschaffungswert',
   'restwert',
   'wertminderung',
-  'schadenhoehe_netto',
+  'schadens_hoehe_netto',
   // VS-Status-Felder (AAR-161 W1 neu)
   'vs_kuerzung_grund',
   'geschlossen_grund',

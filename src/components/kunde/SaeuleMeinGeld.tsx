@@ -6,7 +6,7 @@ import { BanknoteIcon, AlertTriangleIcon } from 'lucide-react'
 type Props = {
   fallId: string
   status: string
-  schadenhoehe_netto: number | null
+  schadens_hoehe_netto: number | null
   regulierung_betrag: number | null
   kuerzungs_betrag: number | null
   zahlung_betrag: number | null
@@ -19,17 +19,17 @@ function fmt(n: number): string {
   return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(n)
 }
 
-export default function SaeuleMeinGeld({ fallId, status, schadenhoehe_netto, regulierung_betrag, kuerzungs_betrag, zahlung_betrag, totalschaden, zahlungsweg, onZahlungswegSave }: Props) {
+export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, regulierung_betrag, kuerzungs_betrag, zahlung_betrag, totalschaden, zahlungsweg, onZahlungswegSave }: Props) {
   const [pending, startTransition] = useTransition()
   const [weg, setWeg] = useState<string | null>(zahlungsweg)
   const [saved, setSaved] = useState(!!zahlungsweg)
 
-  const gefordert = schadenhoehe_netto ?? 0
+  const gefordert = schadens_hoehe_netto ?? 0
   const anerkannt = regulierung_betrag ?? 0
   const kuerzung = kuerzungs_betrag ?? 0
   const eingegangen = zahlung_betrag ?? 0
 
-  const showGefordert = !!schadenhoehe_netto
+  const showGefordert = !!schadens_hoehe_netto
   const showAnerkannt = ['regulierung-laeuft', 'regulierung', 'zahlung-eingegangen', 'abgeschlossen'].includes(status)
   const showZahlung = ['zahlung-eingegangen', 'abgeschlossen'].includes(status)
   const showKuerzung = kuerzung > 0

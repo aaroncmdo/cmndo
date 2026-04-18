@@ -34,7 +34,7 @@ erwähnt wurde, setze es auf null — rate nicht. Antworte AUSSCHLIESSLICH mit e
 JSON-Objekt nach diesem Schema (Umlaute in Strings bitte echt: ä/ö/ü/ß):
 
 {
-  "schadenhergang": string,                         // wörtlich aus dem Transkript zusammengefasst, max. 2000 Zeichen
+  "schadens_hergang": string,                       // wörtlich aus dem Transkript zusammengefasst, max. 2000 Zeichen
   "unfall_datum": string | null,                    // ISO YYYY-MM-DD, null wenn nicht genannt
   "unfall_ort": string | null,                      // Stadt/Straße, null wenn nicht genannt
   "schuldfrage": "gegner" | "geteilt" | "selbst" | "unklar" | null,

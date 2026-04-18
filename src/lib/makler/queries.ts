@@ -246,9 +246,9 @@ export type FallDetail = {
     updated_at: string | null
     unfalldatum: string | null
     unfallort: string | null
-    schadenart: string | null
+    schadens_art: string | null
     unfallhergang: string | null
-    schadenhoehe_netto: number | null
+    schadens_hoehe_netto: number | null
     fahrzeug_hersteller: string | null
     fahrzeug_modell: string | null
     fahrzeug_baujahr: number | null
@@ -305,8 +305,8 @@ export async function getMaklerFallDetail(
     .from('faelle')
     .select(`
       id, fall_nummer, status, aktuelle_phase, service_typ,
-      created_at, updated_at, unfalldatum, unfallort, schadenart,
-      unfallhergang, schadenhoehe_netto,
+      created_at, updated_at, unfalldatum, unfallort, schadens_art,
+      unfallhergang, schadens_hoehe_netto,
       fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr,
       kennzeichen, fin_vin, kilometerstand, erstzulassung,
       gegner_name, gegner_kennzeichen, gegner_schadennummer,
@@ -470,7 +470,7 @@ export type MaklerAkteRow = {
   fahrzeug_hersteller: string | null
   fahrzeug_modell: string | null
   sv_termin: string | null
-  schadenhoehe_netto: number | null
+  schadens_hoehe_netto: number | null
   updated_at: string | null
   created_at: string
   kunde_vorname: string | null
@@ -535,7 +535,7 @@ export async function getMaklerFaelleList(
     .select(`
       id, fall_nummer, status, aktuelle_phase, service_typ,
       fahrzeug_hersteller, fahrzeug_modell,
-      sv_termin, schadenhoehe_netto, updated_at, created_at,
+      sv_termin, schadens_hoehe_netto, updated_at, created_at,
       lead:leads(vorname, nachname)
     `)
     .in('id', fallIds)
@@ -551,7 +551,7 @@ export async function getMaklerFaelleList(
     fahrzeug_hersteller: string | null
     fahrzeug_modell: string | null
     sv_termin: string | null
-    schadenhoehe_netto: number | null
+    schadens_hoehe_netto: number | null
     updated_at: string | null
     created_at: string
     lead:
@@ -571,8 +571,8 @@ export async function getMaklerFaelleList(
       fahrzeug_hersteller: r.fahrzeug_hersteller,
       fahrzeug_modell: r.fahrzeug_modell,
       sv_termin: r.sv_termin,
-      schadenhoehe_netto:
-        r.schadenhoehe_netto !== null ? Number(r.schadenhoehe_netto) : null,
+      schadens_hoehe_netto:
+        r.schadens_hoehe_netto !== null ? Number(r.schadens_hoehe_netto) : null,
       updated_at: r.updated_at,
       created_at: r.created_at,
       kunde_vorname: lead?.vorname ?? null,

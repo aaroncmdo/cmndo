@@ -468,7 +468,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           <SaeuleMeinGeld
             fallId={fall.id as string}
             status={(fall.status as string) ?? ''}
-            schadenhoehe_netto={fall.schadenhoehe_netto as number | null}
+            schadens_hoehe_netto={fall.schadens_hoehe_netto as number | null}
             regulierung_betrag={fall.regulierung_betrag as number | null}
             kuerzungs_betrag={(fall as Record<string, unknown>).kuerzungs_betrag as number | null}
             zahlung_betrag={(fall as Record<string, unknown>).zahlung_betrag as number | null}

@@ -18,7 +18,7 @@ type Lead = {
   telefon: string | null
   email: string | null
   qualifizierungs_phase: string | null
-  schadenfall_typ: string | null
+  schadens_fall_typ: string | null
   service_typ: string | null
   source_channel: string | null
   flow_link_geoeffnet: boolean | null
@@ -92,8 +92,8 @@ function ListView({ leads }: { leads: Lead[] }) {
                     <Link href={`/dispatch/leads/${lead.id}`} className="font-medium text-gray-900 hover:text-[#4573A2]">
                       {lead.vorname} {lead.nachname}
                     </Link>
-                    {lead.schadenfall_typ && (
-                      <span className="ml-2 text-[10px] text-gray-400">{lead.schadenfall_typ}</span>
+                    {lead.schadens_fall_typ && (
+                      <span className="ml-2 text-[10px] text-gray-400">{lead.schadens_fall_typ}</span>
                     )}
                   </td>
                   <td className="px-4 py-3">

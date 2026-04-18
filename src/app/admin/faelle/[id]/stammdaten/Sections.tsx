@@ -132,7 +132,7 @@ export function UnfallSection() {
   return (
     <Card icon={<AlertTriangleIcon className="w-4 h-4 text-gray-400" />} title="Unfall">
       <InlineEditField label="Schadensdatum" fieldName="schadens_datum" value={typeof fall.schadens_datum === 'string' ? fall.schadens_datum.slice(0, 10) : null} type="date" />
-      <InlineEditField label="Schadenart" fieldName="schadenart" value={f(fall, 'schadenart')} />
+      <InlineEditField label="Schadensart" fieldName="schadens_art" value={f(fall, 'schadens_art')} />
       <div className="sm:col-span-2">
         <InlineEditField label="Schadens-Adresse" fieldName="schadens_adresse" value={f(fall, 'schadens_adresse')} />
       </div>
@@ -142,7 +142,7 @@ export function UnfallSection() {
         <InlineEditField label="Schadens-Ursache" fieldName="schadens_ursache" value={f(fall, 'schadens_ursache')} type="textarea" />
       </div>
       <div className="sm:col-span-2">
-        <InlineEditField label="Schadenhergang" fieldName="schadenhergang" value={f(fall, 'schadenhergang')} type="textarea" />
+        <InlineEditField label="Schadenshergang" fieldName="schadens_hergang" value={f(fall, 'schadens_hergang')} type="textarea" />
       </div>
       <div className="sm:col-span-2">
         <InlineEditField label="Beschreibung" fieldName="schadens_beschreibung" value={f(fall, 'schadens_beschreibung')} type="textarea" />
@@ -358,7 +358,7 @@ export function BesichtigungSection() {
 export function KernwerteSection() {
   const { fall } = useFall()
   // DB-Schema: reparaturkosten / wiederbeschaffungswert / restwert / wertminderung /
-  // schadenhoehe_netto — kein kernwert_-Prefix
+  // schadens_hoehe_netto — kein kernwert_-Prefix
   return (
     <Card
       icon={<CalculatorIcon className="w-4 h-4 text-gray-400" />}
@@ -369,7 +369,7 @@ export function KernwerteSection() {
       <InlineEditField label="Wiederbeschaffungswert (€)" fieldName="wiederbeschaffungswert" value={f(fall, 'wiederbeschaffungswert')} type="number" />
       <InlineEditField label="Restwert (€)" fieldName="restwert" value={f(fall, 'restwert')} type="number" />
       <InlineEditField label="Wertminderung (€)" fieldName="wertminderung" value={f(fall, 'wertminderung')} type="number" />
-      <InlineEditField label="Schadenhöhe netto (€)" fieldName="schadenhoehe_netto" value={f(fall, 'schadenhoehe_netto')} type="number" />
+      <InlineEditField label="Schadenshöhe netto (€)" fieldName="schadens_hoehe_netto" value={f(fall, 'schadens_hoehe_netto')} type="number" />
     </Card>
   )
 }

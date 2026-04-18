@@ -27,7 +27,7 @@ export function buildFallbackBriefing(input: BriefingInput): SvBriefingStruktur 
 
   // Kurzversion aus Schadenhergang oder Schadentyp ableiten
   const hergang =
-    input.schadenhergang?.trim() ||
+    input.schadens_hergang?.trim() ||
     input.unfallhergang?.trim() ||
     input.schadens_beschreibung?.trim() ||
     null

@@ -13,7 +13,7 @@ export async function checkLeadAutoPhase(leadId: string) {
   const phase = lead.qualifizierungs_phase as string | null
   const updates: Record<string, unknown> = {}
 
-  if (lead.schadenfall_typ && (phase === 'neu' || phase === 'nicht-erreicht')) {
+  if (lead.schadens_fall_typ && (phase === 'neu' || phase === 'nicht-erreicht')) {
     updates.qualifizierungs_phase = 'in-qualifizierung'
   }
   if (lead.flow_token && phase === 'in-qualifizierung') {

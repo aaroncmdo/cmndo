@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
-// AAR-216: schadenfall_typ aus dem Manual-Lead-Input entfernt — der MA kennt
+// AAR-216: schadens_fall_typ aus dem Manual-Lead-Input entfernt — der MA kennt
 // den Schadentyp beim Anlegen noch nicht, dieser wird in Phase 2 erfasst
 // (leads.schadentyp via SchadentypPicker).
 export interface CreateManualLeadInput {

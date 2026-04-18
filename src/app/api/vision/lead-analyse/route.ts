@@ -72,7 +72,7 @@ export async function POST(req: Request): Promise<Response> {
   const { data: lead, error: loadErr } = await supabase
     .from('leads')
     .select(
-      'id, schadensfoto_urls, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, schadenhergang',
+      'id, schadensfoto_urls, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, schadens_hergang',
     )
     .eq('id', leadId)
     .single()
@@ -96,7 +96,7 @@ export async function POST(req: Request): Promise<Response> {
 
   const kontext = [
     `Fahrzeug: ${lead.fahrzeug_hersteller ?? 'unbekannt'} ${lead.fahrzeug_modell ?? ''} ${lead.fahrzeug_baujahr ?? ''}`.trim(),
-    lead.schadenhergang ? `Hergang (vom Kunden): ${lead.schadenhergang}` : null,
+    lead.schadens_hergang ? `Hergang (vom Kunden): ${lead.schadens_hergang}` : null,
   ]
     .filter(Boolean)
     .join('\n')

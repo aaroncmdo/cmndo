@@ -402,7 +402,7 @@ export default function FallakteVollClient({
                 <InfoRow label="Schadensart" value={(fall.schadens_ursache as string) ?? '—'} />
                 <InfoRow label="Kennzeichen" value={(fall.kennzeichen as string) ?? '—'} />
                 <InfoRow label="Fahrzeug" value={[fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || '—'} />
-                <InfoRow label="Schadenfall-Typ" value={(fall.schadenfall_typ as string) ?? '—'} />
+                <InfoRow label="Schadenfall-Typ" value={(fall.schadens_fall_typ as string) ?? '—'} />
                 <InfoRow label="Adresse" value={[fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') || '—'} />
               </div>
             </div>

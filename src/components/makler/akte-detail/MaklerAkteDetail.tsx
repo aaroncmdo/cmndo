@@ -124,7 +124,7 @@ export function MaklerAkteDetail({
     return sum > 0 ? sum : null
   }, [fall])
 
-  const estimateShown = fall.schadenhoehe_netto ?? gesamtforderung
+  const estimateShown = fall.schadens_hoehe_netto ?? gesamtforderung
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
@@ -377,7 +377,7 @@ function OverviewPanel({
         <InfoCard title="Fall">
           <InfoRow label="Unfalldatum" value={fmtDate(fall.unfalldatum)} />
           <InfoRow label="Ort" value={fall.unfallort ?? '–'} />
-          <InfoRow label="Schadenart" value={fall.schadenart ?? '–'} />
+          <InfoRow label="Schadenart" value={fall.schadens_art ?? '–'} />
           <InfoRow label="Service" value={fall.service_typ ?? '–'} />
           {fall.unfallhergang ? (
             <div className="pt-2 border-t border-[#e4e7ef] mt-2">

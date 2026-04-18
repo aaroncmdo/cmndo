@@ -25,7 +25,7 @@ export async function processCaseBilling(fallId: string): Promise<{
 
   // Fall laden
   const { data: fall } = await db.from('faelle')
-    .select('id, sv_id, gutachten_betrag, schadenhoehe_netto, created_at, lead_preis_netto')
+    .select('id, sv_id, gutachten_betrag, schadens_hoehe_netto, created_at, lead_preis_netto')
     .eq('id', fallId)
     .single()
 
@@ -34,7 +34,7 @@ export async function processCaseBilling(fallId: string): Promise<{
   // Bereits berechnet?
   if (fall.lead_preis_netto != null) return null
 
-  const schadenhoehe = Number(fall.schadenhoehe_netto ?? fall.gutachten_betrag ?? 0)
+  const schadenhoehe = Number(fall.schadens_hoehe_netto ?? fall.gutachten_betrag ?? 0)
   if (schadenhoehe <= 0) return null
 
   // Kontingent prüfen

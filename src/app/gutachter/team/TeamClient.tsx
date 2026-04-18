@@ -29,7 +29,7 @@ export type PoolLeadData = {
   kennzeichen: string | null
   fahrzeug: string | null
   spezifikation: string | null
-  schadenart: string | null
+  schadens_art: string | null
   created_at: string | null
 }
 
@@ -159,8 +159,8 @@ export default function TeamClient({
                     </td>
                     <td className="px-4 py-3 text-xs">
                       {l.spezifikation && <div className="text-[var(--brand-secondary)]">{l.spezifikation}</div>}
-                      {l.schadenart && <div className="text-amber-700">{l.schadenart}</div>}
-                      {!l.spezifikation && !l.schadenart && <span className="text-gray-400">—</span>}
+                      {l.schadens_art && <div className="text-amber-700">{l.schadens_art}</div>}
+                      {!l.spezifikation && !l.schadens_art && <span className="text-gray-400">—</span>}
                     </td>
                     <td className="px-4 py-3 text-[10px] text-gray-400">
                       {l.created_at ? new Date(l.created_at).toLocaleDateString('de-DE') : '—'}

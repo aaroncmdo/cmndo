@@ -80,7 +80,7 @@ function mapVoiceToForm(
     unfalldatum,
     unfallort: payload.unfall_ort ?? undefined,
     schadentyp,
-    schadenhergang: payload.schadenhergang || payload.transcript,
+    schadens_hergang: payload.schadens_hergang || payload.transcript,
     polizei_vor_ort: payload.polizei_vor_ort ?? undefined,
     polizei_aktenzeichen: payload.polizei_aktenzeichen ?? undefined,
     schuldfrage,
@@ -121,7 +121,7 @@ export function Schritt1Client() {
       unfalldatum: TODAY_LOCAL_DATETIME,
       unfallort: '',
       schadentyp: 'auffahrunfall',
-      schadenhergang: '',
+      schadens_hergang: '',
       polizei_vor_ort: false,
       polizei_aktenzeichen: '',
       schuldfrage: 'gegner',
@@ -277,15 +277,15 @@ export function Schritt1Client() {
 
       {/* Hergang */}
       <div>
-        <Label htmlFor="schadenhergang">Was ist passiert?</Label>
+        <Label htmlFor="schadens_hergang">Was ist passiert?</Label>
         <Textarea
-          id="schadenhergang"
+          id="schadens_hergang"
           rows={5}
           placeholder="Beschreibe kurz den Unfallhergang …"
-          {...register('schadenhergang')}
+          {...register('schadens_hergang')}
         />
-        {errors.schadenhergang ? (
-          <p className="mt-1 text-sm text-red-600">{errors.schadenhergang.message}</p>
+        {errors.schadens_hergang ? (
+          <p className="mt-1 text-sm text-red-600">{errors.schadens_hergang.message}</p>
         ) : null}
       </div>
 

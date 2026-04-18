@@ -9,10 +9,10 @@
 
 export type BriefingInput = {
   // Schaden
-  schadenhergang: string | null
+  schadens_hergang: string | null
   unfallhergang: string | null
-  schadenart: string | null
-  schadenfall_typ: string | null
+  schadens_art: string | null
+  schadens_fall_typ: string | null
   unfall_konstellation: string | null
   schadens_beschreibung: string | null
   // Kunde
@@ -84,10 +84,10 @@ export function buildBriefingInput(
   const gegnerKennzeichen = pick<string>('gegner_kennzeichen')
 
   return {
-    schadenhergang: pick<string>('schadenhergang'),
+    schadens_hergang: pick<string>('schadens_hergang'),
     unfallhergang: pick<string>('unfallhergang'),
-    schadenart: pick<string>('schadenart'),
-    schadenfall_typ: pick<string>('schadenfall_typ'),
+    schadens_art: pick<string>('schadens_art'),
+    schadens_fall_typ: pick<string>('schadens_fall_typ'),
     unfall_konstellation: pick<string>('unfall_konstellation'),
     schadens_beschreibung: pick<string>('schadens_beschreibung'),
     halter_vorname: pick<string>('halter_vorname'),

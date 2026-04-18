@@ -168,7 +168,7 @@ export default async function FlowPage({
         nachname: lead.nachname ?? '',
         email: lead.email ?? '',
         telefon: lead.telefon ?? '',
-        schadenfall_typ: lead.schadenfall_typ ?? 'sf-01',
+        schadens_fall_typ: lead.schadens_fall_typ ?? 'sf-01',
         schadentyp: lead.schadentyp ?? null,
         schadentyp_freitext: lead.schadentyp_freitext ?? null,
         kunden_konstellation: lead.kunden_konstellation ?? 'kk-01',

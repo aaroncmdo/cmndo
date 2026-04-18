@@ -1286,10 +1286,10 @@ export type Database = {
           sa_unterschrift_url: string | null
           sachschaden_beschreibung: string | null
           sachschaden_flag: boolean
-          schadenart: string | null
-          schadenfall_typ: string | null
-          schadenhergang: string | null
-          schadenhoehe_netto: number | null
+          schadens_art: string | null
+          schadens_fall_typ: string | null
+          schadens_hergang: string | null
+          schadens_hoehe_netto: number | null
           schadens_adresse: string | null
           schadens_beschreibung: string | null
           schadens_datum: string | null
@@ -1565,10 +1565,10 @@ export type Database = {
           sa_unterschrift_url?: string | null
           sachschaden_beschreibung?: string | null
           sachschaden_flag?: boolean
-          schadenart?: string | null
-          schadenfall_typ?: string | null
-          schadenhergang?: string | null
-          schadenhoehe_netto?: number | null
+          schadens_art?: string | null
+          schadens_fall_typ?: string | null
+          schadens_hergang?: string | null
+          schadens_hoehe_netto?: number | null
           schadens_adresse?: string | null
           schadens_beschreibung?: string | null
           schadens_datum?: string | null
@@ -1844,10 +1844,10 @@ export type Database = {
           sa_unterschrift_url?: string | null
           sachschaden_beschreibung?: string | null
           sachschaden_flag?: boolean
-          schadenart?: string | null
-          schadenfall_typ?: string | null
-          schadenhergang?: string | null
-          schadenhoehe_netto?: number | null
+          schadens_art?: string | null
+          schadens_fall_typ?: string | null
+          schadens_hergang?: string | null
+          schadens_hoehe_netto?: number | null
           schadens_adresse?: string | null
           schadens_beschreibung?: string | null
           schadens_datum?: string | null
@@ -3645,9 +3645,9 @@ export type Database = {
           sachschaden_beschreibung: string | null
           sachschaden_flag: boolean
           schaden_sichtbar: boolean | null
-          schadenart: string | null
-          schadenfall_typ: string | null
-          schadenhergang: string | null
+          schadens_art: string | null
+          schadens_fall_typ: string | null
+          schadens_hergang: string | null
           schadensfoto_urls: Json | null
           schadensursache: string | null
           schadentyp: string | null
@@ -3831,9 +3831,9 @@ export type Database = {
           sachschaden_beschreibung?: string | null
           sachschaden_flag?: boolean
           schaden_sichtbar?: boolean | null
-          schadenart?: string | null
-          schadenfall_typ?: string | null
-          schadenhergang?: string | null
+          schadens_art?: string | null
+          schadens_fall_typ?: string | null
+          schadens_hergang?: string | null
           schadensfoto_urls?: Json | null
           schadensursache?: string | null
           schadentyp?: string | null
@@ -4017,9 +4017,9 @@ export type Database = {
           sachschaden_beschreibung?: string | null
           sachschaden_flag?: boolean
           schaden_sichtbar?: boolean | null
-          schadenart?: string | null
-          schadenfall_typ?: string | null
-          schadenhergang?: string | null
+          schadens_art?: string | null
+          schadens_fall_typ?: string | null
+          schadens_hergang?: string | null
           schadensfoto_urls?: Json | null
           schadensursache?: string | null
           schadentyp?: string | null

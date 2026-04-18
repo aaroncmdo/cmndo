@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 export type FallFinanzen = {
   // Umsatz
   schadenhoehe: number | null
-  schadenhoehe_netto: number | null
+  schadens_hoehe_netto: number | null
   wiederbeschaffungswert: number | null
   restwert: number | null
   reparaturkosten: number | null
@@ -40,7 +40,7 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
 
   // Fall-Daten
   const { data: fall } = await db.from('faelle')
-    .select('gutachten_betrag, schadenhoehe_netto, wiederbeschaffungswert, restwert, reparaturkosten, wertminderung, nutzungsausfall_tage, nutzungsausfall_tagessatz, kanzlei_honorar, marketing_provision, marketing_quelle, zahlung_betrag, zahlung_eingegangen_am, zahlung_erwartet_am, regulierung_betrag, regulierung_am, sv_id')
+    .select('gutachten_betrag, schadens_hoehe_netto, wiederbeschaffungswert, restwert, reparaturkosten, wertminderung, nutzungsausfall_tage, nutzungsausfall_tagessatz, kanzlei_honorar, marketing_provision, marketing_quelle, zahlung_betrag, zahlung_eingegangen_am, zahlung_erwartet_am, regulierung_betrag, regulierung_am, sv_id')
     .eq('id', fallId)
     .single()
 
@@ -85,7 +85,7 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
     : null
 
   // Schadenhoehe (bester Wert)
-  const schadenhoehe = Number(fall.gutachten_betrag) || Number(fall.schadenhoehe_netto) || null
+  const schadenhoehe = Number(fall.gutachten_betrag) || Number(fall.schadens_hoehe_netto) || null
 
   // Kosten
   const kanzleiHonorar = Number(fall.kanzlei_honorar) || null
@@ -113,7 +113,7 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
 
   return {
     schadenhoehe,
-    schadenhoehe_netto: Number(fall.schadenhoehe_netto) || null,
+    schadens_hoehe_netto: Number(fall.schadens_hoehe_netto) || null,
     wiederbeschaffungswert: Number(fall.wiederbeschaffungswert) || null,
     restwert: Number(fall.restwert) || null,
     reparaturkosten: Number(fall.reparaturkosten) || null,
@@ -136,7 +136,7 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
 
 function emptyFinanzen(): FallFinanzen {
   return {
-    schadenhoehe: null, schadenhoehe_netto: null, wiederbeschaffungswert: null,
+    schadenhoehe: null, schadens_hoehe_netto: null, wiederbeschaffungswert: null,
     restwert: null, reparaturkosten: null, wertminderung: null, nutzungsausfallGesamt: null,
     svHonorar: null, svLeadpreis: null, svPreistyp: null, kanzleiHonorar: null, marketingProvision: null,
     nettoMarge: null, zahlungErwartet: null, zahlungEingegangen: null,

@@ -6,10 +6,10 @@ import { useRouter } from 'next/navigation'
 import { PlusIcon, XIcon } from 'lucide-react'
 import { createManualLead, type CreateManualLeadInput } from '../actions'
 
-// AAR-216: schadenfall_typ aus dem Initial-State entfernt — der MA kennt den
+// AAR-216: schadens_fall_typ aus dem Initial-State entfernt — der MA kennt den
 // Schadentyp beim Lead-Anlegen noch nicht (Kunde wurde noch nicht gesprochen).
 // Der echte Schadentyp wird in Phase 2 via SchadentypPicker erfasst (in das
-// neue Feld leads.schadentyp). Der alte SF-Wert (schadenfall_typ) ist Legacy.
+// neue Feld leads.schadentyp). Der alte SF-Wert (schadens_fall_typ) ist Legacy.
 const INITIAL: CreateManualLeadInput = {
   vorname: '',
   nachname: '',

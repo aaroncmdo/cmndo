@@ -24,7 +24,7 @@ export default function AnlegenFallClient() {
     schadens_ort: '',
     schadensursache: '',
     spezifikation: '',
-    schadenart: '',
+    schadens_art: '',
     notiz: '',
   })
   const [error, setError] = useState<string | null>(null)
@@ -47,7 +47,7 @@ export default function AnlegenFallClient() {
         schadens_ort: form.schadens_ort?.trim() || undefined,
         schadensursache: form.schadensursache?.trim() || undefined,
         spezifikation: form.spezifikation || undefined,
-        schadenart: form.schadenart || undefined,
+        schadens_art: form.schadens_art || undefined,
         notiz: form.notiz?.trim() || undefined,
       })
       if (r.success) {
@@ -85,7 +85,7 @@ export default function AnlegenFallClient() {
                     setForm({
                       vorname: '', nachname: '', telefon: '', email: '', kennzeichen: '',
                       schadens_adresse: '', schadens_plz: '', schadens_ort: '',
-                      schadensursache: '', spezifikation: '', schadenart: '', notiz: '',
+                      schadensursache: '', spezifikation: '', schadens_art: '', notiz: '',
                     })
                   }}
                   className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50"
@@ -150,8 +150,8 @@ export default function AnlegenFallClient() {
             />
             <SelectField
               label="Schadenart"
-              value={form.schadenart ?? ''}
-              onChange={v => update('schadenart', v)}
+              value={form.schadens_art ?? ''}
+              onChange={v => update('schadens_art', v)}
               options={SCHADENARTEN}
               placeholder="keine Angabe"
             />

@@ -89,7 +89,7 @@ export default async function TeamPage() {
   // aber noch keinem konkreten Sub-SV zugewiesen sind)
   const { data: poolFaelle } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, status, schadens_plz, schadens_ort, schadens_adresse, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, spezifikation, schadenart, created_at')
+    .select('id, fall_nummer, status, schadens_plz, schadens_ort, schadens_adresse, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, spezifikation, schadens_art, created_at')
     .eq('organisation_id', sv.organisation_id)
     .is('sv_id', null)
     .order('created_at', { ascending: false })
@@ -105,7 +105,7 @@ export default async function TeamPage() {
     kennzeichen: (f.kennzeichen as string) ?? null,
     fahrzeug: [f.fahrzeug_hersteller, f.fahrzeug_modell].filter(Boolean).join(' ') || null,
     spezifikation: (f.spezifikation as string) ?? null,
-    schadenart: (f.schadenart as string) ?? null,
+    schadens_art: (f.schadens_art as string) ?? null,
     created_at: (f.created_at as string) ?? null,
   }))
 

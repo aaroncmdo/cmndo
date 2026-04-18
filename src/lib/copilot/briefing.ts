@@ -86,7 +86,7 @@ async function loadBriefingContext(opts: { fallId?: string; leadId?: string }): 
       letzteAnalyse = await ladeLetzteAnalyse(opts.fallId)
     }
   } else if (opts.leadId) {
-    const { data: lead } = await db.from('leads').select('vorname, nachname, schadenfall_typ, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, status').eq('id', opts.leadId).single()
+    const { data: lead } = await db.from('leads').select('vorname, nachname, schadens_fall_typ, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, status').eq('id', opts.leadId).single()
     if (lead) {
       kundeName = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
       fallNummer = `Lead ${opts.leadId.slice(0, 8)}`
