@@ -131,6 +131,10 @@
     {
       "path": "/api/cron/abrechnung-erstellen",
       "schedule": "30 18 28-31 * *"
+    },
+    {
+      "path": "/api/cron/release-makler-provisionen",
+      "schedule": "0 2 * * *"
     }
   ]
 }
