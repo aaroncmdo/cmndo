@@ -102,17 +102,39 @@ function toRawSwatch(s: { hex: string; population: number; hsl: [number, number,
   return { hex: s.hex.toUpperCase(), population: s.population ?? 0, hsl: [h, sat, l] }
 }
 
-// Ranking: Population gewichtet + Saturation-Bonus. Ein saturierter Akzent
-// kann den dominanten "langweiligen" Hintergrund überholen wenn die
-// Population ähnlich ist.
+// AAR-455: Neutral-Detection. Ein Swatch gilt als Hintergrund-Kandidat wenn
+// er entweder sehr hell (Lightness ≥ 0.92), sehr dunkel (≤ 0.08) oder sehr
+// desaturiert (Saturation < 0.15) ist. Solche Kandidaten dürfen die Primary
+// nur dann gewinnen wenn gar keine echten Markenfarben vorhanden sind.
+function isLikelyBackground(s: RawSwatch): boolean {
+  const [, sat, l] = s.hsl
+  return l >= 0.92 || l <= 0.08 || sat < 0.15
+}
+
+// AAR-455 Fix: Das alte Ranking (population*0.6 + saturation*0.4) ließ
+// Hintergrund-Farben (weißer Canvas, schwarzer PNG-Layer) die Primary
+// "gewinnen" wenn die Population-Differenz groß genug war — selbst bei
+// saturation=0 gewann Weiß gegen eine saturierte Markenfarbe mit kleiner
+// Population. Ergebnis: Primary wurde Weiß/Schwarz, WCAG-Cascade dunkelte
+// das auf Grau/Navy ab, Live-Vorschau wirkte wie Claimondo-Default.
+//
+// Neue Logik: Brand-Swatches (nicht-Hintergrund) werden immer bevorzugt.
+// Fallback auf Hintergrund-Swatches nur wenn nichts anderes da ist. Das
+// Saturation-Gewicht innerhalb der Brand-Gruppe bleibt erhalten damit
+// kleine-aber-bunte Akzente den dominanten-aber-matten Body überholen.
 function rankByPopulationAndSaturation(swatches: RawSwatch[]): RawSwatch[] {
   if (swatches.length === 0) return []
+  const brand = swatches.filter(s => !isLikelyBackground(s))
+  const background = swatches.filter(isLikelyBackground)
   const maxPop = Math.max(...swatches.map(s => s.population)) || 1
-  return [...swatches].sort((a, b) => {
-    const scoreA = (a.population / maxPop) * 0.6 + a.hsl[1] * 0.4
-    const scoreB = (b.population / maxPop) * 0.6 + b.hsl[1] * 0.4
-    return scoreB - scoreA
-  })
+
+  const score = (s: RawSwatch) =>
+    (s.population / maxPop) * 0.6 + s.hsl[1] * 0.4
+
+  const sortedBrand = [...brand].sort((a, b) => score(b) - score(a))
+  const sortedBg = [...background].sort((a, b) => score(b) - score(a))
+
+  return [...sortedBrand, ...sortedBg]
 }
 
 // Triadische Ableitung: Primary + 120° Hue + 240° Hue. Wird genutzt wenn
