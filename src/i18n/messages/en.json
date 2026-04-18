@@ -10,8 +10,39 @@
       "phone_label": "Or call us:",
       "phone_aria": "Call the Claimondo hotline"
     },
-    "trust": {},
-    "steps": {},
+    "trust": {
+      "heading": "Why Claimondo?",
+      "independent": {
+        "title": "Independent assessors",
+        "description": "Partner experts committed only to your case."
+      },
+      "regulation": {
+        "title": "Real settlement",
+        "description": "Law firm represents you until full payout."
+      },
+      "all_in_one": {
+        "title": "All in one place",
+        "description": "Assessment, lawyer, settlement — one point of contact."
+      }
+    },
+    "steps": {
+      "heading": "Here's how it works",
+      "subheading": "Three steps to a completed assessment.",
+      "step1": {
+        "title": "Capture the damage",
+        "description": "Upload photos or just dictate — your choice."
+      },
+      "step2": {
+        "title": "AI first estimate",
+        "description": "Free, in seconds. Repair cost + replacement value."
+      },
+      "step3": {
+        "title": "Assessor on site",
+        "description": "Appointment in your region, report within 48 hours."
+      },
+      "cta": "Report damage now",
+      "duration_hint": "Takes about 3 minutes"
+    },
     "dat_teaser": {},
     "seo": {},
     "footer": {}
