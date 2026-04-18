@@ -85,7 +85,8 @@ export async function POST() {
         await admin.from('tasks').delete().in('fall_id', fallIdsToDelete)
         await admin.from('nachrichten').delete().in('fall_id', fallIdsToDelete)
         await admin.from('pflichtdokumente').delete().in('fall_id', fallIdsToDelete)
-        await admin.from('dokumente').delete().in('fall_id', fallIdsToDelete)
+        // AAR-553: dokumente durch fall_dokumente ersetzt
+        await admin.from('fall_dokumente').delete().in('fall_id', fallIdsToDelete)
         await admin.from('qc_checkliste').delete().in('fall_id', fallIdsToDelete)
         await admin.from('faelle').delete().in('id', fallIdsToDelete)
       }
@@ -552,7 +553,9 @@ export async function POST() {
       }
     }
 
-    // Dokumente in dokumente-Tabelle (actual files)
+    // AAR-553: fall_dokumente statt dokumente. storage_path zeigt auf einen
+    // Seed-Platzhalter-Pfad im fall-dokumente-Bucket (Files selbst werden
+    // nicht hochgeladen — nur DB-Rows als Test-Fixture).
     const dokumenteDefs = [
       { fall_id: fallIds[1], typ: 'gutachten' as const, datei_name: 'Gutachten_BMW3er.pdf', kategorie: 'gutachten', sichtbar_fuer: ['admin', 'kanzlei', 'sachverstaendiger'] },
       { fall_id: fallIds[2], typ: 'gutachten' as const, datei_name: 'Gutachten_AudiA4.pdf', kategorie: 'gutachten', sichtbar_fuer: ['admin', 'kanzlei', 'sachverstaendiger'] },
@@ -563,15 +566,16 @@ export async function POST() {
       { fall_id: fallIds[4], typ: 'regulierungsbescheid' as const, datei_name: 'Regulierung_CLM-005.pdf', kategorie: 'kanzlei', sichtbar_fuer: ['admin', 'kanzlei'] },
     ]
     for (const d of dokumenteDefs) {
-      await admin.from('dokumente').insert({
+      await admin.from('fall_dokumente').insert({
         fall_id: d.fall_id,
-        typ: d.typ,
-        datei_url: `https://placeholder.com/docs/${d.datei_name}`,
-        datei_name: d.datei_name,
-        datei_groesse: Math.floor(Math.random() * 5000000) + 500000,
+        dokument_typ: d.typ,
+        storage_path: `seed/${d.fall_id}/${d.datei_name}`,
+        original_filename: d.datei_name,
+        groesse_bytes: Math.floor(Math.random() * 5000000) + 500000,
+        mime_type: 'application/pdf',
         kategorie: d.kategorie,
         sichtbar_fuer: d.sichtbar_fuer,
-        hochgeladen_von_rolle: 'admin',
+        quelle: 'seed',
       })
     }
     summary.push(`Dokumente: ${dokCount} Pflichtdokumente + ${dokumenteDefs.length} Dokumente`)

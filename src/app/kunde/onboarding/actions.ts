@@ -288,11 +288,11 @@ export async function uploadKundenDokument(
   try {
     const buffer = Buffer.from(fileBase64.split(',').pop() ?? fileBase64, 'base64')
     const { error: upErr } = await admin.storage
-      .from('dokumente')
+      .from('fall-dokumente')
       .upload(path, buffer, { contentType, upsert: false })
     if (upErr) return { success: false, error: upErr.message }
 
-    const { data: { publicUrl } } = admin.storage.from('dokumente').getPublicUrl(path)
+    const { data: { publicUrl } } = admin.storage.from('fall-dokumente').getPublicUrl(path)
 
     // AAR-324: Insert ohne pflichtdokumente-Update — das sind optionale Slots.
     // AAR-325-Trigger feuert auf uploaded_by_kunde=true → dokument-pruefen Task
@@ -489,11 +489,11 @@ export async function uploadPflichtdokument(
   try {
     const buffer = Buffer.from(fileBase64.split(',').pop() ?? fileBase64, 'base64')
     const { error: upErr } = await admin.storage
-      .from('dokumente')
+      .from('fall-dokumente')
       .upload(path, buffer, { contentType, upsert: false })
     if (upErr) return { success: false, error: upErr.message }
 
-    const { data: { publicUrl } } = admin.storage.from('dokumente').getPublicUrl(path)
+    const { data: { publicUrl } } = admin.storage.from('fall-dokumente').getPublicUrl(path)
 
     // AAR-323: Slot-Typ aus pflichtdokumente laden, damit der
     // fall_dokumente-Eintrag den korrekten dokument_typ bekommt.

@@ -54,7 +54,7 @@ export async function uploadZb1ViaToken(
   const path = `leads/${lead.id}/zb1_${ts}.${ext}`
   const buf = Buffer.from(imageBase64, 'base64')
   const { error: upErr } = await db.storage
-    .from('dokumente')
+    .from('fall-dokumente')
     .upload(path, buf, { contentType, upsert: false })
   if (upErr) {
     await db.from('leads').update({
@@ -63,7 +63,7 @@ export async function uploadZb1ViaToken(
     }).eq('id', lead.id)
     return { success: false, error: `Upload fehlgeschlagen: ${upErr.message}` }
   }
-  const { data: publicData } = db.storage.from('dokumente').getPublicUrl(path)
+  const { data: publicData } = db.storage.from('fall-dokumente').getPublicUrl(path)
   const publicUrl = publicData.publicUrl
 
   // 3. OCR aufrufen — AAR-350: mit try/catch damit Storage-Upload nicht

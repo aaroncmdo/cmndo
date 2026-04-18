@@ -99,21 +99,28 @@ export async function uploadPflichtdokumentKunde(fallId: string, pflichtdokument
 
   const ext = file.name.split('.').pop() ?? 'bin'
   const path = `kunden-dokumente/${fallId}/${Date.now()}.${ext}`
-  const { error: uploadErr } = await supabase.storage.from('dokumente').upload(path, file)
+  const { error: uploadErr } = await supabase.storage.from('fall-dokumente').upload(path, file)
   if (uploadErr) throw new Error(uploadErr.message)
 
-  const { data: urlData } = supabase.storage.from('dokumente').getPublicUrl(path)
+  const { data: urlData } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
   const { data: pd } = await supabase.from('pflichtdokumente').select('titel').eq('id', pflichtdokumentId).single()
 
   await supabase.from('pflichtdokumente').update({
     status: 'hochgeladen', datei_url: urlData.publicUrl, datei_name: file.name,
   }).eq('id', pflichtdokumentId)
 
-  await supabase.from('dokumente').insert({
-    fall_id: fallId, typ: pd?.titel ?? 'kundendokument',
-    datei_url: urlData.publicUrl, datei_name: file.name, datei_groesse: file.size,
-    kategorie: 'kundendokument', quelle: 'kunde',
-    hochgeladen_von: user.id, hochgeladen_von_rolle: 'kunde',
+  // AAR-553: fall_dokumente statt dokumente
+  await supabase.from('fall_dokumente').insert({
+    fall_id: fallId,
+    dokument_typ: pd?.titel ?? 'kundendokument',
+    storage_path: path,
+    original_filename: file.name,
+    groesse_bytes: file.size,
+    mime_type: file.type || null,
+    kategorie: 'kundendokument',
+    quelle: 'kunde',
+    hochgeladen_von_user_id: user.id,
+    uploaded_by_kunde: true,
     sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
   })
   revalidatePath(`/kunde/faelle/${fallId}`)

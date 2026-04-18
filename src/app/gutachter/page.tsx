@@ -159,18 +159,18 @@ export default function GutachterCockpit() {
         setUploading(false)
         return
       }
-      // Online-Pfad: direkt zum Dokumente-Bucket (bestehendes Verhalten)
+      // Online-Pfad (AAR-553: fall-dokumente-Bucket + fall_dokumente-Tabelle)
       const path = `${active.id}/gutachter-fotos/${slot.toLowerCase()}_${Date.now()}.${ext}`
-      await supabase.storage.from('dokumente').upload(path, file, { contentType: file.type })
-      const { data: { publicUrl } } = supabase.storage.from('dokumente').getPublicUrl(path)
-      await supabase.from('dokumente').insert({
+      await supabase.storage.from('fall-dokumente').upload(path, file, { contentType: file.type })
+      await supabase.from('fall_dokumente').insert({
         fall_id: active.id,
-        typ: 'schadensfoto',
-        datei_url: publicUrl,
-        datei_name: `${slot}.${ext}`,
-        datei_groesse: file.size,
+        dokument_typ: 'schadensfoto',
+        storage_path: path,
+        original_filename: `${slot}.${ext}`,
+        groesse_bytes: file.size,
+        mime_type: file.type || 'image/jpeg',
         kategorie: 'schadensfotos',
-        hochgeladen_von_rolle: 'sachverstaendiger',
+        uploaded_by_sv: true,
         quelle: 'gutachter-app',
       })
       setFotos(p => ({ ...p, [slot]: true }))

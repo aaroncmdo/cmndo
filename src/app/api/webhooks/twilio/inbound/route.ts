@@ -1,7 +1,7 @@
 // AAR-94: Twilio Inbound Webhook für WhatsApp-Replies (JA/NEIN/Foto/...)
 // AAR-158: Media-Attachments werden downloaded + in Supabase Storage abgelegt
-// + als Row in `dokumente` (quelle='whatsapp') eingetragen — damit die
-// Fallakte sie im Dokumente-Tab anzeigt (nicht mehr fall_dokumente).
+// + als Row in `fall_dokumente` (quelle='whatsapp') eingetragen — damit
+// die Fallakte sie im Dokumente-Tab anzeigt. (AAR-553)
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendCommunication } from '@/lib/communications/send'
@@ -248,7 +248,7 @@ export async function POST(req: NextRequest) {
             const ts = Date.now()
             const path = `leads/${matchedLeadId}/zusatz_${ts}_${i}.${ext}`
             const { error: upErr } = await db.storage
-              .from('dokumente')
+              .from('fall-dokumente')
               .upload(path, buf, { contentType, upsert: false })
             if (!upErr) savedPaths.push(path)
           }
@@ -308,7 +308,7 @@ export async function POST(req: NextRequest) {
           const ts = Date.now()
           const path = `leads/${matchedLeadId}/polizeibericht_${ts}.${ext}`
           const { error: upErr } = await db.storage
-            .from('dokumente')
+            .from('fall-dokumente')
             .upload(path, buf, { contentType, upsert: false })
           if (upErr) {
             await db.from('leads').update({
@@ -317,7 +317,7 @@ export async function POST(req: NextRequest) {
             }).eq('id', matchedLeadId)
             console.warn('[AAR-263] Storage-Upload fehlgeschlagen:', upErr.message)
           } else {
-            const { data: publicData } = db.storage.from('dokumente').getPublicUrl(path)
+            const { data: publicData } = db.storage.from('fall-dokumente').getPublicUrl(path)
             const publicUrl = publicData.publicUrl
             await db.from('leads').update({
               polizeibericht_status: 'hochgeladen',
@@ -389,12 +389,12 @@ export async function POST(req: NextRequest) {
           const ts = Date.now()
           const path = `leads/${matchedLeadId}/zb1_${ts}.${ext}`
           const { error: upErr } = await db.storage
-            .from('dokumente')
+            .from('fall-dokumente')
             .upload(path, buf, { contentType, upsert: false })
           if (upErr) {
             console.warn('[AAR-182] Storage-Upload fehlgeschlagen:', upErr.message)
           } else {
-            const { data: publicData } = db.storage.from('dokumente').getPublicUrl(path)
+            const { data: publicData } = db.storage.from('fall-dokumente').getPublicUrl(path)
             const publicUrl = publicData.publicUrl
 
             // OCR direkt aus dem Buffer laufen lassen (shared parser)
@@ -482,10 +482,10 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // AAR-158: WA-Medien in Supabase Storage + dokumente-Row (nicht mehr
-  // fall_dokumente — die Fallakte liest aus `dokumente`). Media von Twilio
-  // werden downloaded (Basic-Auth mit Account-SID + Auth-Token) und unter
-  // Bucket `dokumente` als `{fall_id}/wa_{timestamp}_{n}.{ext}` abgelegt.
+  // AAR-158 / AAR-553: WA-Medien in Supabase Storage + fall_dokumente-Row.
+  // Media von Twilio werden downloaded (Basic-Auth mit Account-SID +
+  // Auth-Token) und unter Bucket `fall-dokumente` als
+  // `{fall_id}/wa_{timestamp}_{n}.{ext}` abgelegt.
   if (matchedFallId && intent === 'dokument_upload' && mediaUrls.length > 0) {
     const twilioSid = process.env.TWILIO_ACCOUNT_SID
     const twilioToken = process.env.TWILIO_AUTH_TOKEN
@@ -515,25 +515,24 @@ export async function POST(req: NextRequest) {
         const ts = Date.now()
         const path = `${matchedFallId}/wa_${ts}_${i}.${ext}`
         const { error: upErr } = await db.storage
-          .from('dokumente')
+          .from('fall-dokumente')
           .upload(path, buf, { contentType, upsert: false })
         if (upErr) {
           console.warn('[AAR-158] Storage-Upload fehlgeschlagen:', upErr.message)
           continue
         }
-        const { data: publicData } = db.storage.from('dokumente').getPublicUrl(path)
-        const publicUrl = publicData.publicUrl
 
         const kategorie = contentType.startsWith('image/') ? 'whatsapp-foto' : 'kundendokument'
-        await db.from('dokumente').insert({
+        await db.from('fall_dokumente').insert({
           fall_id: matchedFallId,
-          typ: contentType.startsWith('image/') ? 'whatsapp-foto' : 'whatsapp-datei',
+          dokument_typ: contentType.startsWith('image/') ? 'whatsapp-foto' : 'whatsapp-datei',
           kategorie,
           quelle: 'whatsapp',
-          datei_url: publicUrl,
-          datei_name: `WhatsApp ${new Date(ts).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}.${ext}`,
-          datei_groesse: buf.byteLength,
-          hochgeladen_von_rolle: 'kunde',
+          storage_path: path,
+          original_filename: `WhatsApp ${new Date(ts).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}.${ext}`,
+          groesse_bytes: buf.byteLength,
+          mime_type: contentType,
+          uploaded_by_kunde: true,
           // AAR-263 Audit: kanzlei fehlte hier — Konsistenz mit Step 6e in
           // signSAandCreateFall (alle WhatsApp-Uploads müssen für Kanzlei
           // sichtbar sein für die Regulierung).

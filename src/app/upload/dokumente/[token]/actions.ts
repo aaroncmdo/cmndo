@@ -128,10 +128,10 @@ export async function uploadDokumentViaAnfrageToken(
   const path = `leads/${anfrage.lead_id}/${slotId}_${ts}.${ext}`
   const buf = Buffer.from(imageBase64, 'base64')
   const { error: upErr } = await db.storage
-    .from('dokumente')
+    .from('fall-dokumente')
     .upload(path, buf, { contentType, upsert: false })
   if (upErr) return { success: false, error: `Upload fehlgeschlagen: ${upErr.message}` }
-  const { data: publicData } = db.storage.from('dokumente').getPublicUrl(path)
+  const { data: publicData } = db.storage.from('fall-dokumente').getPublicUrl(path)
   const publicUrl = publicData.publicUrl
 
   // 3. Zugehörigen Fall finden (falls vorhanden — für fall_dokumente-Insert)

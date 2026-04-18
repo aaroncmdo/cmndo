@@ -953,86 +953,6 @@ export type Database = {
           },
         ]
       }
-      dokumente: {
-        Row: {
-          beschreibung: string | null
-          created_at: string | null
-          datei_groesse: number | null
-          datei_name: string | null
-          datei_url: string
-          fall_id: string
-          hochgeladen_von: string | null
-          hochgeladen_von_rolle: string | null
-          id: string
-          kategorie: string | null
-          position_id: string | null
-          quelle: string | null
-          sichtbar_fuer: string[] | null
-          typ: Database["public"]["Enums"]["dokument_typ"]
-        }
-        Insert: {
-          beschreibung?: string | null
-          created_at?: string | null
-          datei_groesse?: number | null
-          datei_name?: string | null
-          datei_url: string
-          fall_id: string
-          hochgeladen_von?: string | null
-          hochgeladen_von_rolle?: string | null
-          id?: string
-          kategorie?: string | null
-          position_id?: string | null
-          quelle?: string | null
-          sichtbar_fuer?: string[] | null
-          typ: Database["public"]["Enums"]["dokument_typ"]
-        }
-        Update: {
-          beschreibung?: string | null
-          created_at?: string | null
-          datei_groesse?: number | null
-          datei_name?: string | null
-          datei_url?: string
-          fall_id?: string
-          hochgeladen_von?: string | null
-          hochgeladen_von_rolle?: string | null
-          id?: string
-          kategorie?: string | null
-          position_id?: string | null
-          quelle?: string | null
-          sichtbar_fuer?: string[] | null
-          typ?: Database["public"]["Enums"]["dokument_typ"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "dokumente_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "dokumente_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "v_faelle_mit_aktuellem_termin"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "dokumente_hochgeladen_von_fkey"
-            columns: ["hochgeladen_von"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "dokumente_position_id_fkey"
-            columns: ["position_id"]
-            isOneToOne: false
-            referencedRelation: "schadenspositionen"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       email_log: {
         Row: {
           attachments: Json | null
@@ -2068,6 +1988,7 @@ export type Database = {
           id: string
           idempotency_key: string | null
           ist_pflicht: boolean
+          kategorie: string | null
           lead_id: string | null
           mime_type: string | null
           ocr_extracted_data: Json | null
@@ -2075,7 +1996,10 @@ export type Database = {
           ocr_result: Json | null
           ocr_status: string | null
           original_filename: string | null
+          position_id: string | null
+          quelle: string | null
           schaden_position: string | null
+          sichtbar_fuer: string[] | null
           storage_path: string
           uploaded_by_kunde: boolean | null
           uploaded_by_sv: boolean | null
@@ -2093,6 +2017,7 @@ export type Database = {
           id?: string
           idempotency_key?: string | null
           ist_pflicht?: boolean
+          kategorie?: string | null
           lead_id?: string | null
           mime_type?: string | null
           ocr_extracted_data?: Json | null
@@ -2100,7 +2025,10 @@ export type Database = {
           ocr_result?: Json | null
           ocr_status?: string | null
           original_filename?: string | null
+          position_id?: string | null
+          quelle?: string | null
           schaden_position?: string | null
+          sichtbar_fuer?: string[] | null
           storage_path: string
           uploaded_by_kunde?: boolean | null
           uploaded_by_sv?: boolean | null
@@ -2118,6 +2046,7 @@ export type Database = {
           id?: string
           idempotency_key?: string | null
           ist_pflicht?: boolean
+          kategorie?: string | null
           lead_id?: string | null
           mime_type?: string | null
           ocr_extracted_data?: Json | null
@@ -2125,7 +2054,10 @@ export type Database = {
           ocr_result?: Json | null
           ocr_status?: string | null
           original_filename?: string | null
+          position_id?: string | null
+          quelle?: string | null
           schaden_position?: string | null
+          sichtbar_fuer?: string[] | null
           storage_path?: string
           uploaded_by_kunde?: boolean | null
           uploaded_by_sv?: boolean | null
@@ -2150,6 +2082,13 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fall_dokumente_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "schadenspositionen"
             referencedColumns: ["id"]
           },
         ]

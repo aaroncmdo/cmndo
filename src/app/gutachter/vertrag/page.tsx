@@ -82,8 +82,8 @@ export default function VertragPage() {
         const blob = await new Promise<Blob | null>(r => canvas.toBlob(r, 'image/png'))
         if (blob) {
           const path = `gutachter/${svData.id}/vertrag_unterschrift_${Date.now()}.png`
-          await supabase.storage.from('dokumente').upload(path, blob, { contentType: 'image/png' })
-          const { data: { publicUrl } } = supabase.storage.from('dokumente').getPublicUrl(path)
+          await supabase.storage.from('fall-dokumente').upload(path, blob, { contentType: 'image/png' })
+          const { data: { publicUrl } } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
           await supabase.from('sachverstaendige').update({ unterschrift_url: publicUrl }).eq('id', svData.id)
         }
       }

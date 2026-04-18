@@ -55,11 +55,14 @@ export default async function FallaktePage({
     svResult,
     kundenbetreuerResult,
   ] = await Promise.all([
+    // AAR-553: fall_dokumente ersetzt dokumente. Downstream (dokumenteTabProps,
+    // systemDokumente) erwartet Legacy-Shape — Transform erfolgt unten.
     supabase
-      .from('dokumente')
-      .select('id, typ, datei_url, datei_name, datei_groesse, created_at, kategorie, hochgeladen_von, hochgeladen_von_rolle, quelle, sichtbar_fuer')
+      .from('fall_dokumente')
+      .select('id, dokument_typ, storage_path, original_filename, groesse_bytes, hochgeladen_am, kategorie, hochgeladen_von_user_id, uploaded_by_sv, uploaded_by_kunde, quelle, sichtbar_fuer')
       .eq('fall_id', id)
-      .order('created_at'),
+      .is('geloescht_am', null)
+      .order('hochgeladen_am'),
     supabase
       .from('timeline')
       .select('id, typ, titel, beschreibung, erstellt_von, metadata, lead_id, created_at')
@@ -110,6 +113,27 @@ export default async function FallaktePage({
           .single()
       : Promise.resolve({ data: null }),
   ])
+
+  // AAR-553: fall_dokumente → Legacy-Shape für DokumenteTab + systemDokumente
+  const dokumenteLegacy = (dokumente ?? []).map(d => ({
+    id: d.id as string,
+    typ: (d.dokument_typ as string | null) ?? null,
+    datei_url: d.storage_path
+      ? supabase.storage.from('fall-dokumente').getPublicUrl(d.storage_path as string).data.publicUrl
+      : null,
+    datei_name: (d.original_filename as string | null) ?? null,
+    datei_groesse: (d.groesse_bytes as number | null) ?? null,
+    created_at: (d.hochgeladen_am as string | null) ?? null,
+    kategorie: (d.kategorie as string | null) ?? null,
+    hochgeladen_von: (d.hochgeladen_von_user_id as string | null) ?? null,
+    hochgeladen_von_rolle: d.uploaded_by_sv
+      ? 'sachverstaendiger'
+      : d.uploaded_by_kunde
+        ? 'kunde'
+        : null,
+    quelle: (d.quelle as string | null) ?? null,
+    sichtbar_fuer: (d.sichtbar_fuer as string[] | null) ?? null,
+  }))
 
   // SV-Profil normalisieren (Supabase liefert nested FK als Array oder Objekt)
   let sv: Parameters<typeof FallakteShell>[0]['sv'] = null
@@ -268,7 +292,7 @@ export default async function FallaktePage({
     kategorie: string
     created_at: string
   }
-  const dokRows = (dokumente ?? []) as unknown as DokumentRow[]
+  const dokRows = dokumenteLegacy as unknown as DokumentRow[]
   const gutachtenDok =
     dokRows.find((d) => d.kategorie === 'gutachten' || d.typ === 'gutachten') ?? null
   const kanzleiDok =
@@ -394,7 +418,7 @@ export default async function FallaktePage({
         dokumenteTabProps={{
           fallId: id,
           pflichtdokumente: (pflichtdokumente ?? []) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['pflichtdokumente'],
-          dokumente: (dokumente ?? []) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['dokumente'],
+          dokumente: dokumenteLegacy as unknown as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['dokumente'],
           fallAS: {
             anschlussschreiben_url: (fall.anschlussschreiben_url as string | null) ?? null,
             anschlussschreiben_sendedatum: (fall.anschlussschreiben_sendedatum as string | null) ?? null,

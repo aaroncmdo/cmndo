@@ -23,19 +23,22 @@ export async function GET(_req: Request, context: { params: Promise<{ token: str
   const expired = new Date(request.expires_at as string).getTime() < Date.now()
   if (expired) return gonePage('Dieser Link ist abgelaufen. Bitte fordern Sie das Gutachten erneut an.')
 
-  // Gutachten-Dokument aus dokumente-Tabelle laden (typ=gutachten)
+  // Gutachten-Dokument aus fall_dokumente laden (dokument_typ=gutachten)
   const { data: gutachten } = await admin
-    .from('dokumente')
-    .select('id, datei_url, datei_name')
+    .from('fall_dokumente')
+    .select('id, storage_path, original_filename')
     .eq('fall_id', request.fall_id)
-    .eq('typ', 'gutachten')
-    .order('created_at', { ascending: false })
+    .eq('dokument_typ', 'gutachten')
+    .is('geloescht_am', null)
+    .order('hochgeladen_am', { ascending: false })
     .limit(1)
     .maybeSingle()
 
-  if (!gutachten?.datei_url) {
+  const storagePath = gutachten?.storage_path as string | null | undefined
+  if (!storagePath) {
     return gonePage('Das Gutachten konnte nicht geladen werden. Bitte kontaktieren Sie Ihren Betreuer.')
   }
+  const gutachtenUrl = admin.storage.from('fall-dokumente').getPublicUrl(storagePath).data.publicUrl
 
   // accessed_at idempotent setzen (nur beim ersten Abruf)
   if (!request.accessed_at) {
@@ -49,12 +52,12 @@ export async function GET(_req: Request, context: { params: Promise<{ token: str
 
   // PDF per Fetch laden und weiterstreamen
   try {
-    const res = await fetch(gutachten.datei_url as string)
+    const res = await fetch(gutachtenUrl)
     if (!res.ok || !res.body) return gonePage('Gutachten-Download fehlgeschlagen.')
 
     const headers = new Headers()
     headers.set('Content-Type', 'application/pdf')
-    const fileName = (gutachten.datei_name as string | null) ?? 'gutachten.pdf'
+    const fileName = (gutachten?.original_filename as string | null) ?? 'gutachten.pdf'
     headers.set('Content-Disposition', `inline; filename="${sanitizeFilename(fileName)}"`)
     headers.set('Cache-Control', 'private, no-store')
 

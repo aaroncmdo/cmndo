@@ -272,9 +272,9 @@ export default function DokumenteTab({
     const supabase = createClient()
     const ext = file.name.split('.').pop() ?? 'pdf'
     const path = `faelle/${fallId}/${pflichtdokId}_${Date.now()}.${ext}`
-    const { error: upErr } = await supabase.storage.from('dokumente').upload(path, file)
+    const { error: upErr } = await supabase.storage.from('fall-dokumente').upload(path, file)
     if (upErr) { setUploading(null); return }
-    const { data: urlData } = supabase.storage.from('dokumente').getPublicUrl(path)
+    const { data: urlData } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
     await uploadPflichtdokument(fallId, pflichtdokId, urlData.publicUrl)
     router.refresh()
     setUploading(null)
@@ -285,9 +285,9 @@ export default function DokumenteTab({
     const supabase = createClient()
     const ext = file.name.split('.').pop() ?? 'pdf'
     const path = `faelle/${fallId}/anschlussschreiben_${Date.now()}.${ext}`
-    const { error: upErr } = await supabase.storage.from('dokumente').upload(path, file)
+    const { error: upErr } = await supabase.storage.from('fall-dokumente').upload(path, file)
     if (upErr) { setUploading(null); return }
-    const { data: urlData } = supabase.storage.from('dokumente').getPublicUrl(path)
+    const { data: urlData } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
     await uploadAnschlussschreiben(fallId, urlData.publicUrl, file.name)
     router.refresh()
     setUploading(null)

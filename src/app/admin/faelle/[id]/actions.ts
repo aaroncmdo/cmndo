@@ -137,16 +137,19 @@ export async function uploadAnschlussschreiben(fallId: string, fileUrl: string, 
     updated_at: new Date().toISOString(),
   }).eq('id', fallId)
 
-  // 2. Dokument-Eintrag erstellen
-  await supabase.from('dokumente').insert({
+  // 2. AAR-553: fall_dokumente statt dokumente. fileUrl ist die public-URL
+  // des bereits hochgeladenen Files — storage_path daraus extrahieren.
+  const pathMatch = fileUrl.match(/\/storage\/v1\/object\/public\/(?:dokumente|fall-dokumente)\/(.+)$/)
+  const storagePath = pathMatch ? decodeURIComponent(pathMatch[1]) : fileName
+  await supabase.from('fall_dokumente').insert({
     fall_id: fallId,
-    typ: 'anschlussschreiben',
-    datei_url: fileUrl,
-    datei_name: fileName,
+    dokument_typ: 'anschlussschreiben',
+    storage_path: storagePath,
+    original_filename: fileName,
+    mime_type: 'application/pdf',
     kategorie: 'kanzlei',
     quelle: 'admin-upload',
-    hochgeladen_von: user.id,
-    hochgeladen_von_rolle: 'admin',
+    hochgeladen_von_user_id: user.id,
     sichtbar_fuer: ['admin', 'kundenbetreuer', 'kanzlei'],
   })
 
@@ -705,28 +708,31 @@ export async function uploadDatei(fallId: string, formData: FormData) {
   // Determine sichtbar_fuer based on kategorie
   const sichtbar_fuer = KATEGORIE_SICHTBARKEIT[kategorie] ?? ['admin', 'kundenbetreuer']
 
-  // Upload file to Supabase Storage
+  // Upload file to Supabase Storage (AAR-553: fall-dokumente-Bucket)
   const ext = file.name.split('.').pop() ?? 'bin'
   const timestamp = Date.now()
   const storagePath = `admin/${fallId}/${timestamp}.${ext}`
 
   const { error: uploadErr } = await supabase.storage
-    .from('dokumente')
+    .from('fall-dokumente')
     .upload(storagePath, file, { contentType: file.type })
   if (uploadErr) throw new Error(uploadErr.message)
 
-  const { data: { publicUrl } } = supabase.storage.from('dokumente').getPublicUrl(storagePath)
-
-  // Insert into dokumente table
-  const { error: insertErr } = await supabase.from('dokumente').insert({
+  // AAR-553: fall_dokumente statt dokumente. hochgeladen_von_rolle wird
+  // nicht mehr persistiert (fall_dokumente hat nur uploaded_by_sv/_kunde);
+  // bei Admin/Kundenbetreuer-Uploads ist der rolle-Trail via
+  // hochgeladen_von_user_id → profiles.rolle ableitbar.
+  const { error: insertErr } = await supabase.from('fall_dokumente').insert({
     fall_id: fallId,
-    typ: kategorie,
-    datei_url: publicUrl,
-    datei_name: file.name,
-    datei_groesse: file.size,
+    dokument_typ: kategorie,
+    storage_path: storagePath,
+    original_filename: file.name,
+    groesse_bytes: file.size,
+    mime_type: file.type || null,
     kategorie,
-    hochgeladen_von: user.id,
-    hochgeladen_von_rolle,
+    hochgeladen_von_user_id: user.id,
+    uploaded_by_sv: hochgeladen_von_rolle === 'sachverstaendiger',
+    uploaded_by_kunde: hochgeladen_von_rolle === 'kunde',
     quelle: 'admin',
     sichtbar_fuer,
   })
@@ -1088,7 +1094,7 @@ export async function deleteFall(fallId: string): Promise<{ success: boolean; er
         'lead_historie', 'pflichtdokumente', 'qc_checkliste', 'forderungspositionen',
         'zahlungseingaenge', 'technische_probleme', 'gutachter_abrechnungspositionen',
         'gutachter_abrechnungen', 'gutachter_termine', 'gutachter_mitteilungen',
-        'benachrichtigungen', 'timeline', 'tasks', 'nachrichten', 'dokumente',
+        'benachrichtigungen', 'timeline', 'tasks', 'nachrichten', 'fall_dokumente',
         'termine', 'flow_links',
       ]
       for (const table of tables) {

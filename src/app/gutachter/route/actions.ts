@@ -128,21 +128,23 @@ export async function uploadFotoVorOrt(fallId: string, formData: FormData) {
 
   const ext = file.name.split('.').pop() ?? 'jpg'
   const path = `gutachter-fotos/${fallId}/${Date.now()}.${ext}`
-  const { error: uploadError } = await supabase.storage.from('dokumente').upload(path, file)
+  const { error: uploadError } = await supabase.storage.from('fall-dokumente').upload(path, file)
   if (uploadError) throw new Error(uploadError.message)
 
-  const { data: { publicUrl } } = supabase.storage.from('dokumente').getPublicUrl(path)
+  const { data: { publicUrl } } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
 
-  await supabase.from('dokumente').insert({
+  // AAR-553: fall_dokumente statt dokumente
+  await supabase.from('fall_dokumente').insert({
     fall_id: fallId,
-    typ: 'schadensfoto',
-    datei_url: publicUrl,
-    datei_name: file.name,
-    datei_groesse: file.size,
+    dokument_typ: 'schadensfoto',
+    storage_path: path,
+    original_filename: file.name,
+    groesse_bytes: file.size,
+    mime_type: file.type || null,
     kategorie: 'gutachter-foto',
     quelle: 'gutachter',
-    hochgeladen_von: user.id,
-    hochgeladen_von_rolle: 'sachverstaendiger',
+    hochgeladen_von_user_id: user.id,
+    uploaded_by_sv: true,
     sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger'],
   })
 

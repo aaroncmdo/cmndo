@@ -78,11 +78,20 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       }
     }
 
-    // Dokumente laden
-    const { data: dokumente } = await admin.from('dokumente')
-      .select('id, typ, datei_url, datei_name, created_at')
+    // AAR-553: Dokumente aus fall_dokumente laden. datei_url wird on-the-
+    // fly aus storage_path via getPublicUrl abgeleitet.
+    const { data: dokumenteRaw } = await admin.from('fall_dokumente')
+      .select('id, dokument_typ, storage_path, original_filename, hochgeladen_am')
       .eq('fall_id', id)
-      .order('created_at')
+      .is('geloescht_am', null)
+      .order('hochgeladen_am')
+    const dokumente = (dokumenteRaw ?? []).map(d => ({
+      id: d.id as string,
+      typ: d.dokument_typ as string,
+      datei_url: admin.storage.from('fall-dokumente').getPublicUrl(d.storage_path as string).data.publicUrl,
+      datei_name: (d.original_filename as string | null) ?? null,
+      created_at: d.hochgeladen_am as string,
+    }))
 
     // Nachrichten laden (alle Kanaele inkl. Gruppe)
     const { data: nachrichten } = await admin.from('nachrichten')

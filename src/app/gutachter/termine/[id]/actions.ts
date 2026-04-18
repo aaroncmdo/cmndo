@@ -208,15 +208,15 @@ export async function uploadPolizeiberichtAsSv(
     return { success: false, error: 'SV nicht für diesen Fall zugewiesen' }
   }
 
-  // Storage-Upload
+  // Storage-Upload (AAR-553: fall-dokumente-Bucket)
   const ext = file.name.split('.').pop() ?? 'bin'
   const path = `gutachter/${fallId}/polizeibericht_${Date.now()}.${ext}`
   const { error: uploadErr } = await adminDb.storage
-    .from('dokumente')
+    .from('fall-dokumente')
     .upload(path, file)
   if (uploadErr) return { success: false, error: `Upload fehlgeschlagen: ${uploadErr.message}` }
 
-  const { data: urlData } = adminDb.storage.from('dokumente').getPublicUrl(path)
+  const { data: urlData } = adminDb.storage.from('fall-dokumente').getPublicUrl(path)
   const dokumentUrl = urlData.publicUrl
 
   // Pflichtdokumente-Row updaten ODER neu anlegen (für Pre-AAR-125 Fälle)
@@ -252,17 +252,18 @@ export async function uploadPolizeiberichtAsSv(
     if (insErr) return { success: false, error: `pflichtdokumente-Insert: ${insErr.message}` }
   }
 
-  // dokumente-Row für Fallakte-Übersicht (gleicher Pattern wie uploadDokument)
-  await adminDb.from('dokumente').insert({
+  // AAR-553: fall_dokumente-Row für Fallakte-Übersicht
+  await adminDb.from('fall_dokumente').insert({
     fall_id: fallId,
-    typ: 'polizeibericht',
-    datei_url: dokumentUrl,
-    datei_name: file.name,
-    datei_groesse: file.size,
+    dokument_typ: 'polizeibericht',
+    storage_path: path,
+    original_filename: file.name,
+    groesse_bytes: file.size,
+    mime_type: file.type || null,
     kategorie: 'kundendokument',
     quelle: 'gutachter',
-    hochgeladen_von: user.id,
-    hochgeladen_von_rolle: 'sachverstaendiger',
+    hochgeladen_von_user_id: user.id,
+    uploaded_by_sv: true,
     sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   }).then(() => {}, () => {})
 

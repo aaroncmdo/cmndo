@@ -10,12 +10,12 @@
 // 1. SV-Datensatz laden (sa_vorlage_storage_path, sa_vorlage_status,
 //    sa_vorlage_signatur_konfig) — nur wenn status='geprueft' und path
 //    gesetzt, wird gemerged.
-// 2. Gutachter-SA-Vorlage-PDF aus Storage laden (Bucket 'dokumente').
+// 2. Gutachter-SA-Vorlage-PDF aus Storage laden (Bucket 'fall-dokumente').
 // 3. Kunden-Unterschrift-PNG aus Storage laden (Bucket 'unterschriften').
 // 4. pdf-lib: Unterschrift + Datum + Kundenname auf die konfigurierte
 //    Position zeichnen (Fallback: Default-Position unten links).
-// 5. Fertiges PDF nach dokumente/sa-dokumente/{fall_id}/sa_gutachter_...
-//    speichern + dokumente-Row anlegen (sichtbar_fuer = Kunde, SV, KB,
+// 5. Fertiges PDF nach fall-dokumente/sa-dokumente/{fall_id}/sa_gutachter_...
+//    speichern + fall_dokumente-Row anlegen (sichtbar_fuer = Kunde, SV, KB,
 //    Kanzlei, Admin).
 //
 // Fehlerbehandlung: Kein throw nach aussen — Return-Object. Der Aufrufer
@@ -107,7 +107,7 @@ export async function generateGutachterSA({
     // 3. PDF-Vorlage laden (Storage-Download via storage-API, da Pfad ohne
     // Bucket-Präfix gespeichert ist — siehe uploadSaVorlage).
     const { data: pdfBlob, error: pdfDlErr } = await admin.storage
-      .from('dokumente')
+      .from('fall-dokumente')
       .download(sv.sa_vorlage_storage_path as string)
     if (pdfDlErr || !pdfBlob) {
       return { success: false, error: `SA-Vorlage-Download fehlgeschlagen: ${pdfDlErr?.message ?? 'no data'}` }
@@ -176,36 +176,36 @@ export async function generateGutachterSA({
     const outPath = `sa-dokumente/${fallId}/sa_gutachter_${svId}_${ts}.pdf`
     const outBlob = new Blob([outBytes as BlobPart], { type: 'application/pdf' })
     const { error: upErr } = await admin.storage
-      .from('dokumente')
+      .from('fall-dokumente')
       .upload(outPath, outBlob, { contentType: 'application/pdf', upsert: true })
     if (upErr) {
       return { success: false, error: `Upload fehlgeschlagen: ${upErr.message}` }
     }
-    const { data: { publicUrl } } = admin.storage.from('dokumente').getPublicUrl(outPath)
+    const { data: { publicUrl } } = admin.storage.from('fall-dokumente').getPublicUrl(outPath)
 
-    // 7. dokumente-Row anlegen
-    // typ='abtretung' ist der bestehende Enum-Wert für SA-artige Dokumente.
+    // 7. fall_dokumente-Row anlegen (AAR-553: dokumente-Tabelle gedroppt)
+    // dokument_typ='abtretung' ist der bestehende Enum-Wert für SA-artige Dokumente.
     // kategorie='sa-gutachter' differenziert gegen die generische Kunden-SA
     // (kategorie='unterschrift' aus generateSAPdf).
     const dateiName = `SA_Gutachter_${fallRow.fall_nummer ?? fallId.slice(0, 8)}.pdf`
     const { data: dokRow, error: insErr } = await admin
-      .from('dokumente')
+      .from('fall_dokumente')
       .insert({
         fall_id: fallId,
-        typ: 'abtretung',
+        dokument_typ: 'abtretung',
         kategorie: 'sa-gutachter',
         quelle: 'sa-tool',
-        datei_url: publicUrl,
-        datei_name: dateiName,
-        datei_groesse: outBytes.byteLength,
-        hochgeladen_von_rolle: 'system',
+        storage_path: outPath,
+        original_filename: dateiName,
+        groesse_bytes: outBytes.byteLength,
+        mime_type: 'application/pdf',
         sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde'],
         beschreibung: 'AAR-360: Kunden-Unterschrift auf Gutachter-SA-Vorlage (pdf-lib Merge)',
       })
       .select('id')
       .single()
     if (insErr || !dokRow) {
-      return { success: false, error: `dokumente-Insert fehlgeschlagen: ${insErr?.message ?? 'no row'}` }
+      return { success: false, error: `fall_dokumente-Insert fehlgeschlagen: ${insErr?.message ?? 'no row'}` }
     }
 
     return { success: true, storagePath: outPath, publicUrl, dokumentId: dokRow.id as string }

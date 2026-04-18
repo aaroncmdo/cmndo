@@ -97,7 +97,7 @@ export default async function SvDetailPage({
     let signedUrl: string | null = null
     if (sv.sa_vorlage_storage_path) {
       const { data: sig } = await dbAdmin.storage
-        .from('dokumente')
+        .from('fall-dokumente')
         .createSignedUrl(sv.sa_vorlage_storage_path, 300)
       signedUrl = sig?.signedUrl ?? null
     }
@@ -116,18 +116,12 @@ export default async function SvDetailPage({
       hochgeladen_am: string | null
     }>
 
-    // Upload-Counts pro pflichtdokument-Row
-    const pflichtIds = pflichtRows.map(r => r.id)
+    // AAR-553: Upload-Counts wurden früher via dokumente.pflichtdokument_id
+    // geführt — die Spalte existiert jedoch weder in der alten dokumente-
+    // Tabelle (verifiziert) noch in fall_dokumente. Rückwirkend bestätigt:
+    // Counts waren immer 0. Wir lassen sie leer, bis AAR-XXX einen echten
+    // Link (fall_dokumente.pflichtdokument_id) einzieht.
     const uploadCounts: Record<string, number> = {}
-    if (pflichtIds.length > 0) {
-      const { data: uploads } = await dbAdmin.from('dokumente')
-        .select('pflichtdokument_id')
-        .in('pflichtdokument_id', pflichtIds)
-      for (const u of uploads ?? []) {
-        const pid = u.pflichtdokument_id as string | null
-        if (pid) uploadCounts[pid] = (uploadCounts[pid] ?? 0) + 1
-      }
-    }
 
     const verifizierungsSlots = alleSlots.filter(s =>
       s.kategorie === 'gutachter_verifizierung' && s.slot_id !== 'sv_sa_vorlage',
