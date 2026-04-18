@@ -100,12 +100,17 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'unfallskizze_url',
   'unfallskizze_ablehnung_grund',
   'unfallskizze_generiert_am',
+  // AAR-357: Sachschäden an Dritten (Beschreibung-Freitext).
+  // sachschaden_flag wandert über DEFAULT_FIELDS (NOT NULL DEFAULT false).
+  'sachschaden_beschreibung',
 ] as const
 
 // ─── 2. DEFAULT — Feldname gleich, NOT-NULL fallback ────────────────────────
 export const LEAD_TO_FALL_DEFAULT_FIELDS: Record<string, unknown> = {
   gegner_bekannt: true,
   personenschaden_flag: false,
+  // AAR-357: Sachschaden-Flag ist NOT NULL DEFAULT false.
+  sachschaden_flag: false,
   mietwagen_flag: false,
   // AAR-313: Nutzungsausfall war bisher nicht im Mapping — Lead-Flag verlor sich
   leasing_flag: false,

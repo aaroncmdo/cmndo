@@ -18,6 +18,10 @@ export type HardGateData = {
   aufklaerung_teilschuld_bestaetigt?: boolean
   schaden_sichtbar?: boolean
   personenschaden_flag?: boolean
+  // AAR-357: Sachschäden an Dritten (Leitplanke, Zaun, Handy etc.) —
+  // unabhängig vom KFZ-Schaden. Schaltet zwei Katalog-Slots frei.
+  sachschaden_flag?: boolean
+  sachschaden_beschreibung?: string | null
   mietwagen_flag?: boolean
   nutzungsausfall?: boolean
   hat_haftpflicht?: boolean

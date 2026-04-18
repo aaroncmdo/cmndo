@@ -26,6 +26,7 @@ import {
   ShieldAlertIcon,
   CarFrontIcon,
   UserPlusIcon,
+  PackageIcon,
 } from 'lucide-react'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 // AAR-175 P1-B: ExitSkript inline rendern sobald die MA Eigenverantwortung
@@ -52,6 +53,9 @@ type LeadFields = {
   aufklaerung_teilschuld_bestaetigt?: boolean | null
   schaden_sichtbar?: boolean | null
   personenschaden_flag?: boolean | null
+  // AAR-357: Sachschäden an Dritten (Leitplanke, Zaun, Handy etc.)
+  sachschaden_flag?: boolean | null
+  sachschaden_beschreibung?: string | null
   mietwagen_flag?: boolean | null
   nutzungsausfall?: boolean | null
   unfallort?: string | null
@@ -90,6 +94,8 @@ export default function Phase1Qualifizierung() {
     aufklaerung_teilschuld_bestaetigt: l.aufklaerung_teilschuld_bestaetigt ?? false,
     schaden_sichtbar: l.schaden_sichtbar ?? undefined,
     personenschaden_flag: l.personenschaden_flag ?? false,
+    sachschaden_flag: l.sachschaden_flag ?? false,
+    sachschaden_beschreibung: l.sachschaden_beschreibung ?? '',
     mietwagen_flag: l.mietwagen_flag ?? false,
     nutzungsausfall: l.nutzungsausfall ?? false,
     unfallort: l.unfallort ?? '',
@@ -154,6 +160,8 @@ export default function Phase1Qualifizierung() {
     aufklaerung_teilschuld_bestaetigt: draft.aufklaerung_teilschuld_bestaetigt,
     schaden_sichtbar: draft.schaden_sichtbar,
     personenschaden_flag: draft.personenschaden_flag,
+    sachschaden_flag: draft.sachschaden_flag,
+    sachschaden_beschreibung: draft.sachschaden_beschreibung,
     mietwagen_flag: draft.mietwagen_flag,
     nutzungsausfall: draft.nutzungsausfall,
     fahrzeug_fahrbereit: draft.fahrzeug_fahrbereit,
@@ -394,6 +402,67 @@ export default function Phase1Qualifizierung() {
                 Nutzungsausfall
               </label>
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* AAR-357: Sachschäden an Dritten — unabhängig vom KFZ-Schaden.
+          Leitplanke, Zaun, Handy, Brille etc. Schaltet zwei Katalog-Slots
+          (sachschaden_rechnung, sachschaden_foto) frei. */}
+      <div className="space-y-2 border-t border-gray-100 pt-4">
+        <div className="flex items-center gap-2">
+          <PackageIcon className="w-4 h-4 text-[#4573A2]" />
+          <h3 className="text-xs font-semibold text-gray-700">
+            Sachschäden an Dritten?
+          </h3>
+          <span className="text-[10px] text-gray-400">
+            (Leitplanke, Zaun, Handy, Brille …)
+          </span>
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setDraft((d) => ({ ...d, sachschaden_flag: true }))}
+            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
+              draft.sachschaden_flag === true
+                ? 'bg-[#0D1B3E] text-white'
+                : 'bg-gray-100 text-gray-600'
+            }`}
+          >
+            Ja — Sachschaden vorhanden
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              setDraft((d) => ({
+                ...d,
+                sachschaden_flag: false,
+                sachschaden_beschreibung: '',
+              }))
+            }
+            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
+              draft.sachschaden_flag === false
+                ? 'bg-[#0D1B3E] text-white'
+                : 'bg-gray-100 text-gray-600'
+            }`}
+          >
+            Nein
+          </button>
+        </div>
+        {draft.sachschaden_flag === true && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-2">
+            <textarea
+              value={draft.sachschaden_beschreibung ?? ''}
+              onChange={(e) =>
+                setDraft((d) => ({ ...d, sachschaden_beschreibung: e.target.value }))
+              }
+              placeholder="Was wurde beschädigt? (z.B. Leitplanke Höhe km 42, iPhone des Beifahrers …)"
+              className="w-full px-3 py-2 border border-amber-300 rounded-lg text-xs bg-white h-20 resize-none"
+            />
+            <p className="text-[10px] text-amber-800 flex items-start gap-1">
+              <InfoIcon className="w-3 h-3 mt-0.5 shrink-0" />
+              Portal fordert zwei Pflicht-Dokumente an: Rechnung/KV + Foto des Schadens.
+            </p>
           </div>
         )}
       </div>
