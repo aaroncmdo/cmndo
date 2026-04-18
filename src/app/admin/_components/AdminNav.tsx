@@ -10,6 +10,7 @@ import {
   LifeBuoyIcon, ListChecksIcon, CheckSquareIcon,
   TimerIcon, ScaleIcon, ExternalLinkIcon,
 } from 'lucide-react'
+import { SupportButton } from '@/components/support/SupportButton'
 
 // AAR-57: 4 Sektionen — Navigation, Operations, Stammdaten, Verwaltung
 // AAR-338: external-Flag für Links die in neuem Tab öffnen (Dispatch hat
@@ -138,6 +139,7 @@ export default function AdminNav({ email, initials, unreadNachrichten }: { email
         </nav>
 
         <div className="px-3 pb-4 space-y-2 border-t border-white/10 pt-3">
+          <SupportButton userName={email} />
           <div className="flex items-center gap-3 px-3 py-2.5">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold bg-[#4573A2] text-white">
               {initials}

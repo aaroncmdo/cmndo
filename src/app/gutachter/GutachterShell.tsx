@@ -25,6 +25,7 @@ import {
 import NotificationBell from '@/app/admin/_components/NotificationBell'
 import MitteilungszentralePanel from '@/components/mitteilungszentrale/MitteilungszentralePanel'
 import OutboxBadge from '@/components/offline/OutboxBadge'
+import { SupportButton } from '@/components/support/SupportButton'
 import { CLAIMONDO_DEFAULT_THEME, type BrandTheme } from '@/lib/branding/theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
 
@@ -372,6 +373,7 @@ export default function GutachterShell({
         </nav>
 
         <div className="mt-auto px-3 py-3 border-t border-white/10 space-y-2">
+          <SupportButton userName={displayName} />
           <Link href="/gutachter/profil" onClick={() => setSidebarOpen(false)}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-colors group">
             <div
