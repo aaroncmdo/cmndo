@@ -57,7 +57,6 @@ export async function updateSvProfile(svId: string, profileId: string, formData:
     standort_lng: standortLng,
     standort_place_id: standortPlaceId,
     paket_umkreis_km: radiusKm,
-    radius_km: radiusKm,
   }
 
   const { error: svErr } = await supabase
@@ -158,7 +157,7 @@ export async function resendWelcomeMail(
   const adminDb = createAdminClient()
   const { data: sv, error: svErr } = await adminDb
     .from('sachverstaendige')
-    .select('id, profile_id, paket, paket_faelle_gesamt, max_faelle_monat, paket_umkreis_km, radius_km, onboarding_anzahlung_betrag, anzahlung_faellig, organisation_id, profiles(email, vorname, nachname, anrede, titel)')
+    .select('id, profile_id, paket, paket_faelle_gesamt, max_faelle_monat, paket_umkreis_km, onboarding_anzahlung_betrag, anzahlung_faellig, organisation_id, profiles(email, vorname, nachname, anrede, titel)')
     .eq('id', svId)
     .maybeSingle()
 
@@ -218,7 +217,7 @@ export async function resendWelcomeMail(
   const kontingent = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? (
     PAKET_KONFIG[paketKey as keyof typeof PAKET_KONFIG]?.kontingent ?? 10
   )
-  const radiusKm = sv.paket_umkreis_km ?? sv.radius_km ?? (
+  const radiusKm = sv.paket_umkreis_km ?? (
     PAKET_KONFIG[paketKey as keyof typeof PAKET_KONFIG]?.radius_km ?? 15
   )
   const anzahlung = sv.onboarding_anzahlung_betrag ?? sv.anzahlung_faellig ?? (

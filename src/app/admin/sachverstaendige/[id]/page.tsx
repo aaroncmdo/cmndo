@@ -25,7 +25,7 @@ export default async function SvDetailPage({
 
   const { data: sv } = await supabase
     .from('sachverstaendige')
-    .select('id, profile_id, radius_km, paket, max_faelle_monat, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, sa_vorlage_status, sa_vorlage_storage_path, sa_vorlage_hochgeladen_am, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, gesperrt_am, gesperrt_grund, profiles(vorname, nachname, email, telefon)')
+    .select('id, profile_id, paket, max_faelle_monat, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, sa_vorlage_status, sa_vorlage_storage_path, sa_vorlage_hochgeladen_am, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, gesperrt_am, gesperrt_grund, profiles(vorname, nachname, email, telefon)')
     .eq('id', id)
     .single()
 
@@ -287,7 +287,7 @@ export default async function SvDetailPage({
                 standortLat: sv.standort_lat != null ? Number(sv.standort_lat) : null,
                 standortLng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
                 standortPlaceId: sv.standort_place_id ?? '',
-                paketUmkreisKm: sv.paket_umkreis_km ?? sv.radius_km ?? 15,
+                paketUmkreisKm: sv.paket_umkreis_km ?? 15,
               }}
             />
           </div>

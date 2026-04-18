@@ -5745,13 +5745,11 @@ export type Database = {
           paket_faelle_genutzt: number | null
           paket_faelle_gesamt: number | null
           paket_preis: number | null
-          paket_radius_km: number | null
           paket_umkreis_km: number | null
           partner_seit: string
           portal_zugang_freigeschaltet: boolean
           profile_id: string | null
           qualifikationen_neu: string[]
-          radius_km: number
           rechtsform: string | null
           rolle_in_organisation: string | null
           sa_vorlage_admin_notiz: string | null
@@ -5848,13 +5846,11 @@ export type Database = {
           paket_faelle_genutzt?: number | null
           paket_faelle_gesamt?: number | null
           paket_preis?: number | null
-          paket_radius_km?: number | null
           paket_umkreis_km?: number | null
           partner_seit?: string
           portal_zugang_freigeschaltet?: boolean
           profile_id?: string | null
           qualifikationen_neu?: string[]
-          radius_km?: number
           rechtsform?: string | null
           rolle_in_organisation?: string | null
           sa_vorlage_admin_notiz?: string | null
@@ -5951,13 +5947,11 @@ export type Database = {
           paket_faelle_genutzt?: number | null
           paket_faelle_gesamt?: number | null
           paket_preis?: number | null
-          paket_radius_km?: number | null
           paket_umkreis_km?: number | null
           partner_seit?: string
           portal_zugang_freigeschaltet?: boolean
           profile_id?: string | null
           qualifikationen_neu?: string[]
-          radius_km?: number
           rechtsform?: string | null
           rolle_in_organisation?: string | null
           sa_vorlage_admin_notiz?: string | null
