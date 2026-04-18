@@ -31,11 +31,10 @@ export default async function AbrechnungPage() {
     paket_faelle_gesamt: number | null
     paket_umkreis_km: number | null
     anzahlung_betrag: number | null
-    anzahlung_bezahlt_am: string | null
     anzahlung_status: string | null
     onboarding_anzahlung_betrag: number | null
     stripe_anzahlung_bezahlt_am: string | null
-  }>(supabase, user!.id, 'id, paket, offene_faelle, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, anzahlung_betrag, anzahlung_bezahlt_am, anzahlung_status, onboarding_anzahlung_betrag, stripe_anzahlung_bezahlt_am')
+  }>(supabase, user!.id, 'id, paket, offene_faelle, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, anzahlung_betrag, anzahlung_status, onboarding_anzahlung_betrag, stripe_anzahlung_bezahlt_am')
 
   if (!sv) {
     return (
@@ -52,12 +51,11 @@ export default async function AbrechnungPage() {
   // AAR-243: Mehrere Spalten möglich für Betrag + Status. Fallback-Kette:
   // - onboarding_anzahlung_betrag (neuer Standard seit Stripe-Integration)
   // - anzahlung_betrag (legacy)
-  // Status: anzahlung_status='bezahlt' ODER (stripe_)anzahlung_bezahlt_am gesetzt.
+  // Status: anzahlung_status='bezahlt' ODER stripe_anzahlung_bezahlt_am gesetzt.
   const anzahlungBetrag = Number(sv.onboarding_anzahlung_betrag ?? sv.anzahlung_betrag ?? 0)
   const anzahlungBezahlt =
     sv.anzahlung_status === 'bezahlt' ||
-    !!sv.stripe_anzahlung_bezahlt_am ||
-    !!sv.anzahlung_bezahlt_am
+    !!sv.stripe_anzahlung_bezahlt_am
 
   // Fetch abrechnungen from the real billing table
   const { data: abrechnungen } = await supabase

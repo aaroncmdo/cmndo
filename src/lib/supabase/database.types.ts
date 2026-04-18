@@ -5694,7 +5694,6 @@ export type Database = {
         Row: {
           ablehnungen_30_tage: number
           anzahlung_betrag: number | null
-          anzahlung_bezahlt_am: string | null
           anzahlung_faellig: number | null
           anzahlung_status: string | null
           brand_accent: string | null
@@ -5792,7 +5791,6 @@ export type Database = {
         Insert: {
           ablehnungen_30_tage?: number
           anzahlung_betrag?: number | null
-          anzahlung_bezahlt_am?: string | null
           anzahlung_faellig?: number | null
           anzahlung_status?: string | null
           brand_accent?: string | null
@@ -5890,7 +5888,6 @@ export type Database = {
         Update: {
           ablehnungen_30_tage?: number
           anzahlung_betrag?: number | null
-          anzahlung_bezahlt_am?: string | null
           anzahlung_faellig?: number | null
           anzahlung_status?: string | null
           brand_accent?: string | null
