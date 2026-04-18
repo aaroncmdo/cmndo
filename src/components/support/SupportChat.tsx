@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { SendIcon, RefreshCwIcon, XCircleIcon, CheckCircle2Icon, ExternalLinkIcon, ImageIcon, Loader2Icon } from 'lucide-react'
 import { useSupport } from './SupportContext'
 import { useScreenshot } from './useScreenshot'
+import { VoiceRecordButton } from './VoiceRecordButton'
 
 export function SupportChat({ userName }: { userName?: string | null }) {
   const { messages, isLoading, error, isClosed, send, reset } = useSupport()
@@ -41,6 +42,13 @@ export function SupportChat({ userName }: { userName?: string | null }) {
       e.preventDefault()
       handleSubmit(e)
     }
+  }
+
+  // AAR-520: Transkript wird an bestehenden Text angehaengt (nicht ersetzt),
+  // User kann dann noch editieren bevor er auf "Senden" klickt.
+  function handleTranscript(transcript: string) {
+    setInput((prev) => (prev.trim() ? `${prev}\n\n${transcript}` : transcript))
+    textareaRef.current?.focus()
   }
 
   const placeholder = messages.length === 0
@@ -208,15 +216,18 @@ export function SupportChat({ userName }: { userName?: string | null }) {
               disabled={isLoading}
               className="w-full resize-none text-sm px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4573A2] focus:border-transparent disabled:bg-gray-50"
             />
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] text-gray-400">Enter zum Senden · Shift+Enter = neue Zeile</p>
-              <button
-                type="submit"
-                disabled={isLoading || !input.trim()}
-                className="text-sm font-medium px-3 py-1.5 rounded-lg bg-[#0D1B3E] text-white hover:bg-[#12265a] disabled:opacity-40 inline-flex items-center gap-1.5"
-              >
-                <SendIcon className="w-3.5 h-3.5" /> Senden
-              </button>
+            <div className="flex items-end justify-between gap-2">
+              <VoiceRecordButton onTranscript={handleTranscript} disabled={isLoading} />
+              <div className="flex flex-col items-end gap-1">
+                <p className="text-[10px] text-gray-400">Enter zum Senden · Shift+Enter = neue Zeile</p>
+                <button
+                  type="submit"
+                  disabled={isLoading || !input.trim()}
+                  className="text-sm font-medium px-3 py-1.5 rounded-lg bg-[#0D1B3E] text-white hover:bg-[#12265a] disabled:opacity-40 inline-flex items-center gap-1.5"
+                >
+                  <SendIcon className="w-3.5 h-3.5" /> Senden
+                </button>
+              </div>
             </div>
           </>
         )}
