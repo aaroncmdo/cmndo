@@ -135,6 +135,10 @@
     {
       "path": "/api/cron/release-makler-provisionen",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/send-lead-reminders",
+      "schedule": "0 * * * *"
     }
   ]
 }
