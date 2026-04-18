@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState, useTransition } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -26,6 +26,66 @@ import {
 } from '@/lib/flow/schemas/schritt1'
 import { createLeadFromSchritt1 } from '@/lib/actions/create-lead'
 import { useFlowStore } from '@/lib/flow/flow-store'
+import type { VoiceExtraction } from '@/lib/flow/schemas/voice-extraction'
+
+// AAR-470 C4: wird von /schritt-1/voice befüllt, bevor per ?prefilled=1
+// hierher zurückgeleitet wird.
+const VOICE_PREFILL_KEY = 'claimondo-voice-prefill'
+
+type VoicePrefillPayload = VoiceExtraction & { transcript: string }
+
+// Mapping Voice-Extraktion → schritt1-Form:
+// Schuldfrage kennt im Voice-Schema zusätzlich "geteilt"/"selbst" — die lassen
+// wir bewusst weg (User entscheidet nachträglich manuell). Schadentyp kennt
+// Voice zusätzlich "spurwechsel"/"wildunfall" → in "sonstiges" einsortieren.
+function mapVoiceToForm(
+  payload: VoicePrefillPayload,
+): Partial<Schritt1Input> {
+  const schadentyp: Schritt1Input['schadentyp'] | undefined = (() => {
+    switch (payload.schadentyp) {
+      case 'auffahrunfall':
+      case 'kreuzung':
+      case 'parkschaden':
+        return payload.schadentyp
+      case 'spurwechsel':
+      case 'wildunfall':
+      case 'sonstiges':
+        return 'sonstiges'
+      default:
+        return undefined
+    }
+  })()
+  const schuldfrage: Schritt1Input['schuldfrage'] | undefined = (() => {
+    switch (payload.schuldfrage) {
+      case 'gegner':
+        return 'gegner'
+      case 'selbst':
+        return 'eigenverantwortung'
+      case 'geteilt':
+      case 'unklar':
+        return 'unklar'
+      default:
+        return undefined
+    }
+  })()
+
+  let unfalldatum: string | undefined
+  if (payload.unfall_datum && !Number.isNaN(Date.parse(payload.unfall_datum))) {
+    const d = new Date(payload.unfall_datum)
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset())
+    unfalldatum = d.toISOString().slice(0, 16)
+  }
+
+  return {
+    unfalldatum,
+    unfallort: payload.unfall_ort ?? undefined,
+    schadentyp,
+    schadenhergang: payload.schadenhergang || payload.transcript,
+    polizei_vor_ort: payload.polizei_vor_ort ?? undefined,
+    polizei_aktenzeichen: payload.polizei_aktenzeichen ?? undefined,
+    schuldfrage,
+  }
+}
 
 // AAR-468 C2: Schritt 1 Tippen-Modus. React-Hook-Form + Zod-Resolver +
 // Server-Action. Voice-Toggle leitet auf /schritt-1/voice (AAR-470 C4).
@@ -40,15 +100,19 @@ const TODAY_LOCAL_DATETIME = (() => {
 
 export function Schritt1Client() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const setLeadId = useFlowStore((s) => s.setLeadId)
+  const setSchadenhergang = useFlowStore((s) => s.setSchadenhergang)
   const [isPending, startTransition] = useTransition()
   const [serverError, setServerError] = useState<string | null>(null)
+  const [voiceBanner, setVoiceBanner] = useState<string | null>(null)
 
   const {
     register,
     handleSubmit,
     control,
     watch,
+    reset,
     formState: { errors, isValid },
   } = useForm<Schritt1Input>({
     resolver: zodResolver(schritt1Schema),
@@ -76,6 +140,26 @@ export function Schritt1Client() {
   const polizeiVorOrt = watch('polizei_vor_ort')
   const dsgvoConsent = watch('dsgvo_consent')
 
+  useEffect(() => {
+    if (searchParams.get('prefilled') !== '1') return
+    try {
+      const raw = sessionStorage.getItem(VOICE_PREFILL_KEY)
+      if (!raw) return
+      sessionStorage.removeItem(VOICE_PREFILL_KEY)
+      const payload = JSON.parse(raw) as VoicePrefillPayload
+      const patch = mapVoiceToForm(payload)
+      reset((prev) => ({ ...prev, ...patch }), { keepDefaultValues: true })
+      if (payload.transcript) {
+        setSchadenhergang('voice', payload.transcript)
+      }
+      setVoiceBanner(
+        'Wir haben Ihre Aufnahme transkribiert und das Formular vorausgefüllt. Bitte kontrollieren Sie die Werte.',
+      )
+    } catch (err) {
+      console.warn('[AAR-470] Prefill-Parse fehlgeschlagen:', err)
+    }
+  }, [searchParams, reset, setSchadenhergang])
+
   const onSubmit = handleSubmit((values) => {
     setServerError(null)
     startTransition(async () => {
@@ -96,6 +180,14 @@ export function Schritt1Client() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-8" noValidate>
+      {voiceBanner ? (
+        <div
+          role="status"
+          className="rounded-md border border-claimondo-ondo/30 bg-claimondo-ondo/5 p-3 text-sm text-claimondo-navy"
+        >
+          {voiceBanner}
+        </div>
+      ) : null}
       {/* Mode-Toggle */}
       <div className="flex gap-2 rounded-lg bg-claimondo-bg p-1">
         <button
