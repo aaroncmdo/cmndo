@@ -1368,14 +1368,11 @@ export type Database = {
           vorschaeden_beschreibung: string | null
           vorsteuerabzugsberechtigt: boolean | null
           vs_ablehnungsgrund: string | null
-          vs_antwort_datum: string | null
-          vs_eskalation_am: string | null
           vs_eskalationsstufe: string | null
           vs_frist_bis: string | null
           vs_kuerzung_grund: string | null
           vs_reaktion_am: string | null
           vs_reaktion_typ: string | null
-          vs_timer_stufe: string | null
           werkstatt_seit_datum: string | null
           wertminderung: number | null
           wiederbeschaffungswert: number | null
@@ -1667,14 +1664,11 @@ export type Database = {
           vorschaeden_beschreibung?: string | null
           vorsteuerabzugsberechtigt?: boolean | null
           vs_ablehnungsgrund?: string | null
-          vs_antwort_datum?: string | null
-          vs_eskalation_am?: string | null
           vs_eskalationsstufe?: string | null
           vs_frist_bis?: string | null
           vs_kuerzung_grund?: string | null
           vs_reaktion_am?: string | null
           vs_reaktion_typ?: string | null
-          vs_timer_stufe?: string | null
           werkstatt_seit_datum?: string | null
           wertminderung?: number | null
           wiederbeschaffungswert?: number | null
@@ -1966,14 +1960,11 @@ export type Database = {
           vorschaeden_beschreibung?: string | null
           vorsteuerabzugsberechtigt?: boolean | null
           vs_ablehnungsgrund?: string | null
-          vs_antwort_datum?: string | null
-          vs_eskalation_am?: string | null
           vs_eskalationsstufe?: string | null
           vs_frist_bis?: string | null
           vs_kuerzung_grund?: string | null
           vs_reaktion_am?: string | null
           vs_reaktion_typ?: string | null
-          vs_timer_stufe?: string | null
           werkstatt_seit_datum?: string | null
           wertminderung?: number | null
           wiederbeschaffungswert?: number | null
