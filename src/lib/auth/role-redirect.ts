@@ -12,6 +12,7 @@ export type Rolle =
   | 'sachverstaendiger'
   | 'kunde'
   | 'kanzlei'
+  | 'makler'
   | string
 
 export function roleToPath(rolle: Rolle | null | undefined): string {
@@ -22,6 +23,10 @@ export function roleToPath(rolle: Rolle | null | undefined): string {
       return '/kunde'
     case 'dispatch':
       return '/dispatch/dashboard'
+    // AAR-462 F4: Makler-Portal bekommt eigenen Einstiegspunkt. Rolle
+    // kommt aus AAR-461 F3 (user_role-Enum-Erweiterung).
+    case 'makler':
+      return '/makler'
     case 'kundenbetreuer':
     case 'admin':
     case 'kanzlei':
