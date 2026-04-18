@@ -181,7 +181,7 @@ async function main() {
       schadens_datum: vor3Tagen,
       schadens_ort: 'Koeln, Aachener Str.',
       gegner_versicherung: 'Allianz',
-      sv_termin: morgen,
+      // AAR-552: sv_termin ersatzlos entfernt — Seed-Termin muesste via gutachter_termine angelegt werden
     },
     {
       fall_nummer: 'TEST-002',

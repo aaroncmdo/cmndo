@@ -119,7 +119,7 @@ export default function SvKalenderModal({ svId, svName, onClose }: { svId: strin
     startDate.setHours(Math.floor(bookingSlot.minute / 60), bookingSlot.minute % 60, 0, 0)
     const endDate = new Date(startDate.getTime() + 120 * 60000)
     const { data: inserted } = await supabase.from('gutachter_termine').insert({ sv_id: svId, fall_id: bookingFallId, start_zeit: startDate.toISOString(), end_zeit: endDate.toISOString(), status: 'reserviert', ablehnen_token_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() }).select('id').single()
-    await supabase.from('faelle').update({ sv_id: svId, sv_termin: startDate.toISOString(), sv_zugewiesen_am: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', bookingFallId)
+    await supabase.from('faelle').update({ sv_id: svId, sv_zugewiesen_am: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', bookingFallId)
     // KFZ-202 Fix: Status via Server Action statt direkt
     try { const { transitionFallStatus } = await import('@/lib/faelle/state-machine'); await transitionFallStatus(bookingFallId, 'sv-termin') } catch { /* Transition evtl. nicht erlaubt */ }
     // KFZ-136: Reminder generieren (fire & forget via internal API)

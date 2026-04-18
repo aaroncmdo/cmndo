@@ -1084,7 +1084,6 @@ export type Database = {
           as_zuletzt_synced_am: string | null
           bank_name: string | null
           bankdaten_hinterlegt_am: string | null
-          besichtigung_datum: string | null
           besichtigungsort_adresse: string | null
           besichtigungsort_lat: number | null
           besichtigungsort_lng: number | null
@@ -1150,11 +1149,7 @@ export type Database = {
           gutachten_positionen: Json | null
           gutachten_stundensatz: number | null
           gutachten_vorhanden: boolean | null
-          gutachter_gegenvorschlag_datum: string | null
-          gutachter_gegenvorschlag_grund: string | null
           gutachter_honorar: number | null
-          gutachter_termin_bestaetigt: boolean | null
-          gutachter_termin_status: string | null
           guthaben_verrechnet_netto: number
           halter_email: string | null
           halter_geburtsdatum: string | null
@@ -1285,7 +1280,6 @@ export type Database = {
           sv_id: string | null
           sv_nachzahlung_netto: number | null
           sv_notizen_vor_ort: string | null
-          sv_termin: string | null
           sv_termin_dokument_reminder_gesendet_am: string | null
           sv_zugewiesen_am: string | null
           szenario: string | null
@@ -1362,7 +1356,6 @@ export type Database = {
           as_zuletzt_synced_am?: string | null
           bank_name?: string | null
           bankdaten_hinterlegt_am?: string | null
-          besichtigung_datum?: string | null
           besichtigungsort_adresse?: string | null
           besichtigungsort_lat?: number | null
           besichtigungsort_lng?: number | null
@@ -1430,11 +1423,7 @@ export type Database = {
           gutachten_positionen?: Json | null
           gutachten_stundensatz?: number | null
           gutachten_vorhanden?: boolean | null
-          gutachter_gegenvorschlag_datum?: string | null
-          gutachter_gegenvorschlag_grund?: string | null
           gutachter_honorar?: number | null
-          gutachter_termin_bestaetigt?: boolean | null
-          gutachter_termin_status?: string | null
           guthaben_verrechnet_netto?: number
           halter_email?: string | null
           halter_geburtsdatum?: string | null
@@ -1565,7 +1554,6 @@ export type Database = {
           sv_id?: string | null
           sv_nachzahlung_netto?: number | null
           sv_notizen_vor_ort?: string | null
-          sv_termin?: string | null
           sv_termin_dokument_reminder_gesendet_am?: string | null
           sv_zugewiesen_am?: string | null
           szenario?: string | null
@@ -1642,7 +1630,6 @@ export type Database = {
           as_zuletzt_synced_am?: string | null
           bank_name?: string | null
           bankdaten_hinterlegt_am?: string | null
-          besichtigung_datum?: string | null
           besichtigungsort_adresse?: string | null
           besichtigungsort_lat?: number | null
           besichtigungsort_lng?: number | null
@@ -1710,11 +1697,7 @@ export type Database = {
           gutachten_positionen?: Json | null
           gutachten_stundensatz?: number | null
           gutachten_vorhanden?: boolean | null
-          gutachter_gegenvorschlag_datum?: string | null
-          gutachter_gegenvorschlag_grund?: string | null
           gutachter_honorar?: number | null
-          gutachter_termin_bestaetigt?: boolean | null
-          gutachter_termin_status?: string | null
           guthaben_verrechnet_netto?: number
           halter_email?: string | null
           halter_geburtsdatum?: string | null
@@ -1845,7 +1828,6 @@ export type Database = {
           sv_id?: string | null
           sv_nachzahlung_netto?: number | null
           sv_notizen_vor_ort?: string | null
-          sv_termin?: string | null
           sv_termin_dokument_reminder_gesendet_am?: string | null
           sv_zugewiesen_am?: string | null
           szenario?: string | null
@@ -7537,7 +7519,6 @@ export type Database = {
           as_zuletzt_synced_am: string | null
           bank_name: string | null
           bankdaten_hinterlegt_am: string | null
-          besichtigung_datum: string | null
           besichtigungsort_adresse: string | null
           besichtigungsort_lat: number | null
           besichtigungsort_lng: number | null

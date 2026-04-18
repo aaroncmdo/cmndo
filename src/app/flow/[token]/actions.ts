@@ -465,9 +465,7 @@ export async function signSAandCreateFall(
         for (const t of upgradedTermine ?? []) { await generateReminderForTermin(t.id) }
       } catch (err) { console.error('[KFZ-136] Reminder-Gen:', err) }
 
-      await admin.from('faelle')
-        .update({ gutachter_termin_status: 'bestaetigt' })
-        .eq('id', fall.id)
+      // Fall-Status spiegelt die View aus gutachter_termine
     } else {
       // komplett: SA unterschrieben → Termin bleibt 'reserviert', wartet auf Vollmacht.
       // fall_id setzen damit der Termin in der Fallakte sichtbar wird.
@@ -475,11 +473,6 @@ export async function signSAandCreateFall(
         .update({ fall_id: fall.id })
         .eq('lead_id', leadId)
         .eq('status', 'reserviert')
-
-      // Fall: gutachter_termin_status bleibt reserviert
-      await admin.from('faelle')
-        .update({ gutachter_termin_status: 'reserviert' })
-        .eq('id', fall.id)
     }
   }
 
@@ -983,9 +976,9 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   const { bestaetigeTermin } = await import('@/lib/termine/bestaetigung')
   await bestaetigeTermin(termin.id)
 
-  // Fall: gutachter_termin_status → bestaetigt
+  // Fall: Vollmacht markieren — Termin-Status spiegelt die View aus gutachter_termine
   await admin.from('faelle')
-    .update({ gutachter_termin_status: 'bestaetigt', vollmacht_unterschrieben: true, vollmacht_datum: new Date().toISOString() })
+    .update({ vollmacht_unterschrieben: true, vollmacht_datum: new Date().toISOString() })
     .eq('id', fallId)
 
   // KFZ-136: Reminder generieren

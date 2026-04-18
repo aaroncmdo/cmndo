@@ -343,14 +343,14 @@ export function NutzungsausfallSection() {
 
 export function BesichtigungSection() {
   const { fall } = useFall()
-  // DB-Schema: besichtigungsort_adresse + besichtigung_datum existieren;
-  // besichtigungsort_plz/stadt + fahrzeug_standort_* gibt es NICHT.
+  // DB-Schema: nur besichtigungsort_adresse existiert auf faelle.
+  // AAR-552 Cluster E: besichtigung_datum ersatzlos entfernt — Termin-Datum
+  // kommt via v_faelle_mit_aktuellem_termin.aktueller_termin_start.
   return (
     <Card icon={<MapPinIcon className="w-4 h-4 text-gray-400" />} title="Besichtigung">
       <div className="sm:col-span-2">
         <InlineEditField label="Besichtigungsort-Adresse" fieldName="besichtigungsort_adresse" value={f(fall, 'besichtigungsort_adresse')} />
       </div>
-      <InlineEditField label="Besichtigungsdatum" fieldName="besichtigung_datum" value={typeof fall.besichtigung_datum === 'string' ? fall.besichtigung_datum.slice(0, 10) : null} type="date" />
     </Card>
   )
 }

@@ -199,13 +199,13 @@ export function fallComputedFields(lead: LeadRow, options: BuildFallOptions): Re
     status: options.svIdFromTermin ? 'sv-termin' : 'ersterfassung',
     sv_id: options.svIdFromTermin,
     sv_zugewiesen_am: options.svIdFromTermin ? now : null,
-    gutachter_termin_status: lead.gutachter_termin ? 'reserviert' : null,
+    // AAR-552: gutachter_termin_status und sv_termin ersatzlos entfernt —
+    // spiegelt die View v_faelle_mit_aktuellem_termin aus gutachter_termine.
     // KFZ-192: service_typ aus Lead kopieren
     service_typ: lead.service_typ ?? 'komplett',
     kundenbetreuer_id: options.kundenbetreuerId,
     konvertiert_am: now,
     konvertiert_von_lead: lead.id,
-    sv_termin: lead.gutachter_termin,
     abtretung_pdf: options.signatureUrl,
     abtretung_signiert_am: now,
     sa_unterschrieben: true,

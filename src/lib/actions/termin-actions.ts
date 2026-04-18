@@ -158,10 +158,9 @@ export async function terminAblehnen({
   // KFZ-136: Reminder stornieren
   try { await cancelRemindersForTermin(tId) } catch (err) { console.error('[KFZ-136] Reminder-Cancel fehlgeschlagen:', err) }
 
-  // 2. Fall updaten
+  // 2. Fall updaten — sv_id freigeben; Termin-Status spiegelt die View aus gutachter_termine
   await admin.from('faelle').update({
     sv_id: null,
-    gutachter_termin_status: 'abgelehnt',
     updated_at: new Date().toISOString(),
   }).eq('id', fId)
 
@@ -317,9 +316,8 @@ export async function terminGegenvorschlag({
   // KFZ-136: Bestehende Reminder stornieren (Termin noch nicht final)
   try { await cancelRemindersForTermin(tId) } catch (err) { console.error('[KFZ-136] Reminder-Cancel fehlgeschlagen:', err) }
 
-  // 2. Fall updaten
+  // 2. Fall touchen — Termin-Status spiegelt die View aus gutachter_termine
   await admin.from('faelle').update({
-    gutachter_termin_status: 'gegenvorschlag',
     updated_at: new Date().toISOString(),
   }).eq('id', fId)
 
@@ -495,9 +493,8 @@ export async function terminAnnehmen({
   // KFZ-151: Auto-Resolve aller offenen Termin-Tasks (z.B. "Termin bestaetigen")
   try { await resolveTasksForEntity('termin', tId, 'Termin bestaetigt') } catch (err) { console.error('[KFZ-151] resolveTasks termin:', err) }
 
-  // Fall updaten
+  // Fall touchen — Termin-Status spiegelt die View aus gutachter_termine
   await admin.from('faelle').update({
-    gutachter_termin_status: 'bestaetigt',
     updated_at: new Date().toISOString(),
   }).eq('id', fId)
 
@@ -644,10 +641,8 @@ export async function terminBuchen({
     if (svId) await sendSvAuftragszusammenfassung(fId, svId)
   } catch (err) { console.error('[KFZ-137] SV-Email fehlgeschlagen:', err) }
 
-  // 2. Fall updaten
+  // 2. Fall touchen — Termin-Datum + Status spiegelt die View aus gutachter_termine
   await admin.from('faelle').update({
-    gutachter_termin_status: 'bestaetigt',
-    sv_termin: slotDate.toISOString(),
     updated_at: new Date().toISOString(),
   }).eq('id', fId)
 

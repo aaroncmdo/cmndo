@@ -142,8 +142,7 @@ export async function POST() {
         datenschutz_akzeptiert_am: now,
         sv_id: sv.id,
         sv_zugewiesen_am: now,
-        sv_termin: morgenISO,
-        gutachter_termin_status: 'bestaetigt',
+        // AAR-552: sv_termin + gutachter_termin_status ersatzlos entfernt — gutachter_termine.insert unten ist Source of Truth
         besichtigungsort_adresse: 'Musterstrasse 10, 50667 Koeln',
         besichtigungsort_lat: 50.9375,
         besichtigungsort_lng: 6.9603,

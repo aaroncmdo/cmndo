@@ -524,10 +524,9 @@ export async function declineTermin(fallId: string, grund: string) {
     for (const t of activeTermine ?? []) { await cancelRemindersForTermin(t.id) }
   } catch (err) { console.error('[KFZ-136] Reminder-Cancel:', err) }
 
-  // 2. Fall: sv_id NULL, gutachter_termin_status = abgelehnt
+  // 2. Fall: sv_id freigeben — Termin-Status spiegelt die View aus gutachter_termine
   await supabase.from('faelle').update({
     sv_id: null,
-    gutachter_termin_status: 'abgelehnt',
     updated_at: new Date().toISOString(),
   }).eq('id', fallId)
 

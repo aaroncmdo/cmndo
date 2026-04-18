@@ -27,7 +27,7 @@ export default async function KundeStartseite() {
   let faelle: Record<string, unknown>[] = []
 
   const { data: directFaelle } = await supabase
-    .from('faelle')
+    .from('v_faelle_mit_aktuellem_termin')
     .select(FALL_SELECT)
     .eq('kunde_id', user.id)
     .order('created_at', { ascending: false })

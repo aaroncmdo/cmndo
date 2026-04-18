@@ -63,12 +63,12 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   // Vorschäden
   'hat_vorschaeden',
   'vorschaden_anzahl',
-  // Besichtigung (DB-verifiziert: Adresse + Lat/Lng/PlaceID + Datum)
+  // Besichtigung (DB-verifiziert: Adresse + Lat/Lng/PlaceID)
+  // AAR-552 Cluster E: besichtigung_datum ersatzlos entfernt (kein Daten-Konsument).
   'besichtigungsort_adresse',
   'besichtigungsort_lat',
   'besichtigungsort_lng',
   'besichtigungsort_place_id',
-  'besichtigung_datum',
   // Kernwerte (LexDrive-Webhook schreibt; Admin-Override)
   'reparaturkosten',
   'wiederbeschaffungswert',

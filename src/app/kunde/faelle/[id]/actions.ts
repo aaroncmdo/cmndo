@@ -166,13 +166,9 @@ export async function waehleGegenvorschlagSlot(
     // Termin bestätigen (setzt status='bestaetigt' + final_verbindlich_ab)
     await bestaetigeTermin(terminId)
 
-    // Fall + Lead aktualisieren
+    // Fall touchen + Lead-Termin updaten — Termin-Datum + Status spiegelt die View aus gutachter_termine
     await admin.from('faelle')
-      .update({
-        sv_termin: startZeit,
-        gutachter_termin_status: 'bestaetigt',
-        updated_at: new Date().toISOString(),
-      })
+      .update({ updated_at: new Date().toISOString() })
       .eq('id', fallId)
 
     if (fall.lead_id) {

@@ -630,8 +630,7 @@ async function convertLeadToFall(
       kundenbetreuer_zugewiesen_am: kundenbetreuerId ? new Date().toISOString() : null,
       konvertiert_am: new Date().toISOString(),
       konvertiert_von_lead: leadId,
-      // SV-Termin übernehmen falls gesetzt
-      sv_termin: lead.gutachter_termin,
+      // AAR-552: sv_termin ersatzlos entfernt — Termin-Datum spiegelt die View aus gutachter_termine
     })
     .select('id')
     .single()
