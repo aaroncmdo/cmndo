@@ -43,9 +43,53 @@
       "cta": "Report damage now",
       "duration_hint": "Takes about 3 minutes"
     },
-    "dat_teaser": {},
-    "seo": {},
-    "footer": {}
+    "dat_teaser": {
+      "heading": "Just a first estimate? Free in 2 minutes.",
+      "description": "Vehicle data and 2 photos — we estimate repair cost and replacement value. No account. No commitment.",
+      "cta": "Get an estimate now",
+      "duration_hint": "No account required"
+    },
+    "seo": {
+      "heading": "Key questions after a crash",
+      "subheading": "Answers from our daily work.",
+      "polizei": {
+        "question": "Do I have to call the police?",
+        "teaser": "If the other party is at fault and damage exceeds €1,500: yes. When exactly — read on."
+      },
+      "werkstatt": {
+        "question": "Which workshop can I choose?",
+        "teaser": "Free choice of workshop is legally protected — even against the insurer's wishes."
+      },
+      "rechtsschutz": {
+        "question": "Do I need legal insurance?",
+        "teaser": "For liability claims, no — the other side pays. We explain when it becomes relevant."
+      },
+      "totalschaden": {
+        "question": "What is an economic total loss?",
+        "teaser": "When does it get critical? And what are your options?"
+      },
+      "read_more": "Read more"
+    },
+    "footer": {
+      "tagline": "Car damage management. Simple. Fair. Nationwide.",
+      "product": {
+        "heading": "Product",
+        "melden": "Report damage",
+        "einschaetzung": "First estimate",
+        "beratung": "Request consultation"
+      },
+      "partner": {
+        "heading": "Partners",
+        "makler": "Become a broker",
+        "gutachter": "Become an assessor",
+        "login": "Partner login"
+      },
+      "legal": {
+        "heading": "Legal",
+        "datenschutz": "Privacy"
+      },
+      "rights": "All rights reserved."
+    }
   },
   "flow": {
     "step0": {},
