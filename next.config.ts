@@ -1,5 +1,12 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
+import createNextIntlPlugin from "next-intl/plugin";
+
+// AAR-459 F1: next-intl v4 Plugin. Registriert `src/i18n/request.ts` als
+// Server-Config (liest Cookie `claimondo-locale`, fallback 'de').
+// URL-Locale-Präfix ist bewusst NICHT aktiviert — Sprache wird per Cookie
+// geführt, damit `/`, `/flow/...`, `/schaden-melden` unverändert bleiben.
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   /* KFZ-177: ignoreBuildErrors entfernt — tsc ist jetzt sauber */
@@ -23,6 +30,8 @@ const nextConfig: NextConfig = {
   },
 };
 
+const withIntl = withNextIntl(nextConfig);
+
 export default process.env.SENTRY_AUTH_TOKEN
-  ? withSentryConfig(nextConfig, { silent: true })
-  : nextConfig;
+  ? withSentryConfig(withIntl, { silent: true })
+  : withIntl;

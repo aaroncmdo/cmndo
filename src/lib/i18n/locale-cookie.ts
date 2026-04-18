@@ -11,7 +11,7 @@ export type SupportedLocale = Locale
 
 export { DEFAULT_LOCALE }
 
-const LOCALE_COOKIE = 'claimondo_locale'
+const LOCALE_COOKIE = 'claimondo-locale'
 
 export async function getLocaleCookie(): Promise<SupportedLocale> {
   const cookieStore = await cookies()
