@@ -93,8 +93,65 @@ UI-Verstecken reicht nicht. Jede Write-Server-Action (`updateStammdaten`,
 aufrufen und bei `false` mit `{ success: false, error: 'kein Zugriff' }`
 antworten. Bypass via direktem Fetch wäre sonst möglich.
 
+## Aktions-Matrix (Section-Guards)
+
+Ergänzend zu den Feld-Permissions gibt es grobkörnige Action-Flags für
+Buttons/Sections/Tabs — aus `src/app/admin/faelle/[id]/_lib/permissions.ts`
+(AAR-428/W4). UI-Consumer gatet mit `canPerform('canDeactivate', rolle)`.
+
+| Aktion                    | admin | kundenbetreuer | dispatch | sachverstaendiger | kunde |
+| ------------------------- | :---: | :------------: | :------: | :---------------: | :---: |
+| `canDelete`               |   ✅  |       —        |    —     |         —         |   —   |
+| `canDeactivate`           |   ✅  |       —        |    —     |         —         |   —   |
+| `canReactivate`           |   ✅  |       —        |    —     |         —         |   —   |
+| `canAssignRoles`          |   ✅  |       —        |    —     |         —         |   —   |
+| `canPerformQc`            |   ✅  |       —        |    —     |         —         |   —   |
+| `canRunFilmcheck`         |   ✅  |       —        |    —     |         —         |   —   |
+| `canEditAbrechnung`       |   ✅  |       —        |    —     |         —         |   —   |
+| `canViewAbrechnung`       |   ✅  |       —        |    —     |         —         |   —   |
+| `canRegenerateBriefing`   |   ✅  |       —        |    —     |         —         |   —   |
+| `canEditVsRegulierung`    |   ✅  |       ✅       |    —     |         —         |   —   |
+| `canUploadDokumente`      |   ✅  |       ✅       |    —     |         —         |   —   |
+| `canViewDokumente`        |   ✅  |       ✅       |    ✅    |         —         |   —   |
+| `canRequestDokumente`     |   ✅  |       ✅       |    —     |         —         |   —   |
+| `canSendChat`             |   ✅  |       ✅       |    —     |         —         |   —   |
+| `canViewChat`             |   ✅  |       ✅       |    ✅    |         —         |   —   |
+| `canEditStammdaten`       |   ✅  |       ✅       |    —     |         —         |   —   |
+
+Dispatch landet normalerweise nicht auf `/admin/faelle` (eigenes Portal vor
+Fallerstellung); falls doch, sieht er Dokumente + Chat read-only als Fallback.
+`sachverstaendiger` und `kunde` haben **keinen** Admin-Fallakten-Zugang —
+beide fallen auf `READONLY_PERMISSIONS` zurück, werden aber bereits vom
+Admin-Layout-Gate (`src/app/admin/layout.tsx`) abgefangen.
+
+## Per-Portal-Übersicht Fallakte-Views
+
+Jede Rolle hat ihren eigenen Fallakte-Einstiegspunkt. Nur der Admin-Pfad
+konsumiert die beiden Permission-Layer oben; die anderen Portale haben
+eigene Views mit vereinfachter Rolle-ist-bekannt-Logik (Middleware-Gate).
+
+| Portal        | Route                           | Rolle(n)                        | Permission-Layer                        |
+| ------------- | ------------------------------- | ------------------------------- | --------------------------------------- |
+| Admin         | `/admin/faelle/[id]`            | admin, kundenbetreuer           | FallContext + canPerform + canEditField |
+| Mitarbeiter   | `/mitarbeiter/faelle`           | kundenbetreuer, leadbearbeiter, admin | Layout-Gate, keine eigene Fallakte (weiter zu /admin) |
+| Dispatch      | `/dispatch/*` (keine Fallakte)  | dispatch, admin                 | Pre-Fall-Arbeit, kein Fallakte-Zugriff |
+| Gutachter     | `/gutachter/fall/[id]`          | sachverstaendiger               | Eigene read-mostly-View, SV-Felder editierbar |
+| Gutachter     | `/gutachter/feldmodus/fallakte` | sachverstaendiger               | Mobile-Feldmodus, nur SV-Felder |
+| Kunde         | `/kunde/faelle/[id]`            | kunde                           | Read-only, eigene Komponenten |
+
+Layout-Gates (Middleware-Ebene):
+
+- `src/app/admin/layout.tsx`: dispatch → redirect `/dispatch/dashboard`;
+  sonst alle Rollen zugelassen, FallContext diskriminiert fein.
+- `src/app/dispatch/layout.tsx`: nur `dispatch` + `admin`.
+- `src/app/gutachter/layout.tsx`: nur `sachverstaendiger`.
+- `src/app/kunde/layout.tsx`: nur `kunde`.
+- `src/app/mitarbeiter/layout.tsx`: nur `kundenbetreuer`, `leadbearbeiter`, `admin`.
+
 ## Siehe auch
 
-- `src/lib/fall/field-permissions.ts` — Source of Truth
-- `src/app/admin/faelle/[id]/_lib/permissions.ts` — Section-weite Guards
+- `src/lib/fall/field-permissions.ts` — Source of Truth (Feld-Ebene)
+- `src/app/admin/faelle/[id]/_lib/permissions.ts` — Section-/Action-Guards
 - `src/app/admin/faelle/[id]/FallContext.tsx` — Client-Side-Konsument
+- `src/app/{admin,dispatch,gutachter,kunde,mitarbeiter}/layout.tsx` — Portal-Gates
+
