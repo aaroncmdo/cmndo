@@ -54,8 +54,14 @@ export async function GET(req: NextRequest) {
 
       positionen.push({ fall_id: fall.id, kunde_name: kundeName, kennzeichen: fall.kennzeichen ?? '', schadenshoehe: schaden, leadpreis: preis, leadpreis_typ: typ, termin_datum: fall.sv_termin ?? '' })
 
-      // Update Fall with leadpreis
-      await svc.from('faelle').update({ leadpreis: preis, leadpreis_typ: typ }).eq('id', fall.id)
+      // Update Fall mit neuer Source-of-Truth (AAR-548 D1: leadpreis/leadpreis_typ
+      // gedropt, Einheitsfelder sind lead_preis_netto + lead_preis_typ +
+      // lead_preis_berechnet_am — konsistent mit process-case-billing.ts).
+      await svc.from('faelle').update({
+        lead_preis_netto: preis,
+        lead_preis_typ: typ,
+        lead_preis_berechnet_am: new Date().toISOString(),
+      }).eq('id', fall.id)
     }
 
     // Create Abrechnung

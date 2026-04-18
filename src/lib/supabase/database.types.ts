@@ -1235,8 +1235,6 @@ export type Database = {
           lead_preis_netto: number | null
           lead_preis_typ: string | null
           leadbearbeiter_id: string | null
-          leadpreis: number | null
-          leadpreis_typ: string | null
           leasing_flag: boolean | null
           leasinggeber_informiert: boolean | null
           leasinggeber_name: string | null
@@ -1524,8 +1522,6 @@ export type Database = {
           lead_preis_netto?: number | null
           lead_preis_typ?: string | null
           leadbearbeiter_id?: string | null
-          leadpreis?: number | null
-          leadpreis_typ?: string | null
           leasing_flag?: boolean | null
           leasinggeber_informiert?: boolean | null
           leasinggeber_name?: string | null
@@ -1813,8 +1809,6 @@ export type Database = {
           lead_preis_netto?: number | null
           lead_preis_typ?: string | null
           leadbearbeiter_id?: string | null
-          leadpreis?: number | null
-          leadpreis_typ?: string | null
           leasing_flag?: boolean | null
           leasinggeber_informiert?: boolean | null
           leasinggeber_name?: string | null
