@@ -1146,3 +1146,167 @@ export async function getPromoStats(promoCodeId: string): Promise<PromoStats> {
     konversion,
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AAR-492 (M10) — Einstellungen: Consents + Full-Profile-Row
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type MaklerFullProfile = {
+  id: string
+  firma: string | null
+  ansprechpartner_vorname: string | null
+  ansprechpartner_nachname: string | null
+  ihk_nummer: string | null
+  email: string | null
+  telefon: string | null
+  adresse_strasse: string | null
+  adresse_plz: string | null
+  adresse_ort: string | null
+  bank_iban: string | null
+  bank_bic: string | null
+  bank_kontoinhaber: string | null
+  notification_preferences: NotificationPreferences
+}
+
+export type NotificationPreferences = {
+  neuer_lead: boolean
+  kanzlei_uebergabe: boolean
+  provision_freigegeben: boolean
+  monats_abrechnung: boolean
+  woechentlicher_report: boolean
+}
+
+const DEFAULT_NOTIFICATION_PREFS: NotificationPreferences = {
+  neuer_lead: true,
+  kanzlei_uebergabe: true,
+  provision_freigegeben: true,
+  monats_abrechnung: true,
+  woechentlicher_report: false,
+}
+
+export function normalizeNotificationPrefs(
+  raw: unknown,
+): NotificationPreferences {
+  if (!raw || typeof raw !== 'object') return { ...DEFAULT_NOTIFICATION_PREFS }
+  const r = raw as Record<string, unknown>
+  return {
+    neuer_lead: r.neuer_lead === undefined ? true : Boolean(r.neuer_lead),
+    kanzlei_uebergabe:
+      r.kanzlei_uebergabe === undefined ? true : Boolean(r.kanzlei_uebergabe),
+    provision_freigegeben:
+      r.provision_freigegeben === undefined
+        ? true
+        : Boolean(r.provision_freigegeben),
+    monats_abrechnung:
+      r.monats_abrechnung === undefined ? true : Boolean(r.monats_abrechnung),
+    woechentlicher_report: Boolean(r.woechentlicher_report),
+  }
+}
+
+export async function getMaklerFullProfile(
+  maklerId: string,
+): Promise<MaklerFullProfile | null> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('makler')
+    .select(
+      'id, firma, ansprechpartner_vorname, ansprechpartner_nachname, ihk_nummer, email, telefon, adresse_strasse, adresse_plz, adresse_ort, bank_iban, bank_bic, bank_kontoinhaber, notification_preferences',
+    )
+    .eq('id', maklerId)
+    .maybeSingle()
+  if (!data) return null
+  return {
+    id: data.id as string,
+    firma: (data.firma as string | null) ?? null,
+    ansprechpartner_vorname:
+      (data.ansprechpartner_vorname as string | null) ?? null,
+    ansprechpartner_nachname:
+      (data.ansprechpartner_nachname as string | null) ?? null,
+    ihk_nummer: (data.ihk_nummer as string | null) ?? null,
+    email: (data.email as string | null) ?? null,
+    telefon: (data.telefon as string | null) ?? null,
+    adresse_strasse: (data.adresse_strasse as string | null) ?? null,
+    adresse_plz: (data.adresse_plz as string | null) ?? null,
+    adresse_ort: (data.adresse_ort as string | null) ?? null,
+    bank_iban: (data.bank_iban as string | null) ?? null,
+    bank_bic: (data.bank_bic as string | null) ?? null,
+    bank_kontoinhaber: (data.bank_kontoinhaber as string | null) ?? null,
+    notification_preferences: normalizeNotificationPrefs(
+      data.notification_preferences,
+    ),
+  }
+}
+
+export type AktiveConsentRow = {
+  id: string
+  consent_scope: string | null
+  consent_gegeben_am: string | null
+  fall_id: string | null
+  fall_nummer: string | null
+  kunde_name: string | null
+}
+
+export async function getMaklerAktiveConsents(
+  maklerId: string,
+): Promise<AktiveConsentRow[]> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('makler_fall_consent')
+    .select(
+      `
+      id, consent_scope, consent_gegeben_am,
+      fall:faelle!makler_fall_consent_fall_id_fkey(
+        id, fall_nummer,
+        leads(vorname, nachname),
+        kunde:profiles!faelle_kunde_id_fkey(vorname, nachname)
+      )
+      `,
+    )
+    .eq('makler_id', maklerId)
+    .is('widerrufen_am', null)
+    .order('consent_gegeben_am', { ascending: false })
+
+  return (data ?? []).map((row) => {
+    const fallRaw = (row as { fall?: unknown }).fall
+    const fall = (Array.isArray(fallRaw) ? fallRaw[0] : fallRaw) as
+      | {
+          id: string | null
+          fall_nummer: string | null
+          leads?:
+            | Array<{ vorname: string | null; nachname: string | null }>
+            | { vorname: string | null; nachname: string | null }
+            | null
+          kunde?:
+            | Array<{ vorname: string | null; nachname: string | null }>
+            | { vorname: string | null; nachname: string | null }
+            | null
+        }
+      | null
+      | undefined
+
+    const leadRaw = fall?.leads
+    const lead = (Array.isArray(leadRaw) ? leadRaw[0] : leadRaw) as
+      | { vorname: string | null; nachname: string | null }
+      | null
+      | undefined
+    const kundeRaw = fall?.kunde
+    const kunde = (Array.isArray(kundeRaw) ? kundeRaw[0] : kundeRaw) as
+      | { vorname: string | null; nachname: string | null }
+      | null
+      | undefined
+
+    const kundeName =
+      [kunde?.vorname, kunde?.nachname].filter(Boolean).join(' ').trim() ||
+      [lead?.vorname, lead?.nachname].filter(Boolean).join(' ').trim() ||
+      null
+
+    return {
+      id: row.id as string,
+      consent_scope: (row.consent_scope as string | null) ?? null,
+      consent_gegeben_am: (row.consent_gegeben_am as string | null) ?? null,
+      fall_id: fall?.id ?? null,
+      fall_nummer: fall?.fall_nummer ?? null,
+      kunde_name: kundeName,
+    }
+  })
+}
