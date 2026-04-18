@@ -5714,7 +5714,6 @@ export type Database = {
           gcal_token_expiry: string | null
           gebiet_plz: string[]
           geloescht_am: string | null
-          gesperrt_am: string | null
           gesperrt_grund: string | null
           gesperrt_seit: string | null
           gesperrt_von_user_id: string | null
@@ -5811,7 +5810,6 @@ export type Database = {
           gcal_token_expiry?: string | null
           gebiet_plz?: string[]
           geloescht_am?: string | null
-          gesperrt_am?: string | null
           gesperrt_grund?: string | null
           gesperrt_seit?: string | null
           gesperrt_von_user_id?: string | null
@@ -5908,7 +5906,6 @@ export type Database = {
           gcal_token_expiry?: string | null
           gebiet_plz?: string[]
           geloescht_am?: string | null
-          gesperrt_am?: string | null
           gesperrt_grund?: string | null
           gesperrt_seit?: string | null
           gesperrt_von_user_id?: string | null

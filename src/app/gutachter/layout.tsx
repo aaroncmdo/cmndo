@@ -31,7 +31,7 @@ export default async function GutachterLayout({
   // AAR-220: brand_theme + firmenname zusätzlich für Whitelabel-Theme + Logo-alt-Text.
   // AAR-359 W5: sa_vorlage_* + verifizierung_* + gesperrt_* Felder für
   // den Verifizierungs-Banner und die Sidebar-Sichtbarkeit.
-  const svSelect = 'logo_url, brand_primary, brand_secondary, brand_theme, firmenname, use_custom_branding, vertrag_unterschrieben, anzahlung_status, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, organisation_id, rolle_in_organisation, ist_parent_account, geloescht_am, sa_vorlage_status, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, verifizierung_admin_notiz, gesperrt_am, gesperrt_grund'
+  const svSelect = 'logo_url, brand_primary, brand_secondary, brand_theme, firmenname, use_custom_branding, vertrag_unterschrieben, anzahlung_status, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, organisation_id, rolle_in_organisation, ist_parent_account, geloescht_am, sa_vorlage_status, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, verifizierung_admin_notiz, gesperrt_seit, gesperrt_grund'
   const { data: sv } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
@@ -110,34 +110,34 @@ export default async function GutachterLayout({
       )}
       {/* AAR-359 W5: Account-Sperre (rot, höchste Priorität) — getrennt von
           verifizierung_status, wird nur manuell vom Admin gesetzt. */}
-      {sv?.gesperrt_am && (
+      {sv?.gesperrt_seit && (
         <div className="bg-red-600 border-b border-red-700 px-4 py-2.5 text-center text-xs text-white font-semibold">
           Ihr Account wurde gesperrt{sv.gesperrt_grund ? `: ${sv.gesperrt_grund}` : '.'} Bitte wenden Sie sich an den Support.
         </div>
       )}
       {/* AAR-359 W5: SA-Vorlage zurückgewiesen (rot) — Dispatch-Gate-Blocker. */}
-      {!sv?.gesperrt_am && sv?.sa_vorlage_status === 'zurueckgewiesen' && (
+      {!sv?.gesperrt_seit && sv?.sa_vorlage_status === 'zurueckgewiesen' && (
         <div className="bg-red-50 border-b border-red-200 px-4 py-2 text-center text-xs text-red-700 font-medium">
           Ihre SA-Vorlage wurde zurückgewiesen{sv.sa_vorlage_admin_notiz ? `: ${sv.sa_vorlage_admin_notiz}` : ''}. Bitte laden Sie eine korrigierte Version hoch.{' '}
           <Link href="/gutachter/verifizierung" className="underline font-semibold">Zur Verifizierung</Link>
         </div>
       )}
       {/* AAR-359 W5: Tier-2-Frist überschritten (rot). */}
-      {!sv?.gesperrt_am && sv?.verifizierung_status === 'frist_ueberschritten' && (
+      {!sv?.gesperrt_seit && sv?.verifizierung_status === 'frist_ueberschritten' && (
         <div className="bg-red-50 border-b border-red-200 px-4 py-2 text-center text-xs text-red-700 font-medium">
           Ihre 14-Tage-Frist für die Verifizierungs-Unterlagen ist abgelaufen. Bitte reichen Sie die fehlenden Dokumente umgehend nach.{' '}
           <Link href="/gutachter/verifizierung" className="underline font-semibold">Zur Verifizierung</Link>
         </div>
       )}
       {/* AAR-359 W5: SA-Vorlage wird geprüft (gelb). */}
-      {!sv?.gesperrt_am && sv?.sa_vorlage_status === 'ausstehend' && (
+      {!sv?.gesperrt_seit && sv?.sa_vorlage_status === 'ausstehend' && (
         <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center text-xs text-amber-700 font-medium">
           Ihre SA-Vorlage wurde hochgeladen und wird vom Admin geprüft. Dispatch wird freigeschaltet, sobald die Freigabe erteilt ist.
         </div>
       )}
       {/* AAR-359 W5: Tier-2-Countdown läuft (gelb) — wenn < 4 Tage bis
           verifizierung_frist_bis. */}
-      {!sv?.gesperrt_am
+      {!sv?.gesperrt_seit
         && sv?.verifizierung_status === 'ausstehend'
         && sv.verifizierung_frist_bis
         && (() => {

@@ -234,7 +234,7 @@ export async function svSperren(
   const { error } = await db
     .from('sachverstaendige')
     .update({
-      gesperrt_am: new Date().toISOString(),
+      gesperrt_seit: new Date().toISOString(),
       gesperrt_grund: trimmed,
       gesperrt_von_user_id: auth.userId,
       ist_aktiv: false,
@@ -254,7 +254,7 @@ export async function svEntsperren(svId: string): Promise<{ success: boolean; er
   const { error } = await db
     .from('sachverstaendige')
     .update({
-      gesperrt_am: null,
+      gesperrt_seit: null,
       gesperrt_grund: null,
       gesperrt_von_user_id: null,
       ist_aktiv: true,
