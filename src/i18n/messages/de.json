@@ -43,9 +43,53 @@
       "cta": "Jetzt Schaden melden",
       "duration_hint": "Dauert ca. 3 Minuten"
     },
-    "dat_teaser": {},
-    "seo": {},
-    "footer": {}
+    "dat_teaser": {
+      "heading": "Nur eine Ersteinschätzung? Kostenlos in 2 Minuten.",
+      "description": "Fahrzeug-Daten und 2 Fotos — wir schätzen Reparaturkosten und Wiederbeschaffungswert. Ohne Account. Ohne Verpflichtung.",
+      "cta": "Jetzt einschätzen lassen",
+      "duration_hint": "Kein Account nötig"
+    },
+    "seo": {
+      "heading": "Wichtige Fragen nach einem Unfall",
+      "subheading": "Antworten aus unserer täglichen Arbeit.",
+      "polizei": {
+        "question": "Muss ich die Polizei rufen?",
+        "teaser": "Bei Fremdverschulden und über 1.500 € Schaden: ja. Wann genau — hier lesen."
+      },
+      "werkstatt": {
+        "question": "Welche Werkstatt darf ich wählen?",
+        "teaser": "Freie Werkstattwahl ist gesetzlich geschützt — auch gegen den Willen der Versicherung."
+      },
+      "rechtsschutz": {
+        "question": "Brauche ich eine Rechtsschutz?",
+        "teaser": "Bei Haftpflicht-Schäden nicht — der Gegner zahlt. Wir erklären wann es relevant wird."
+      },
+      "totalschaden": {
+        "question": "Was ist ein wirtschaftlicher Totalschaden?",
+        "teaser": "Ab wann wird es kritisch? Und was sind Ihre Optionen?"
+      },
+      "read_more": "Mehr lesen"
+    },
+    "footer": {
+      "tagline": "KFZ-Schadenmanagement. Einfach. Fair. Deutschlandweit.",
+      "product": {
+        "heading": "Produkt",
+        "melden": "Schaden melden",
+        "einschaetzung": "Ersteinschätzung",
+        "beratung": "Beratung anfragen"
+      },
+      "partner": {
+        "heading": "Partner",
+        "makler": "Makler werden",
+        "gutachter": "Gutachter werden",
+        "login": "Partner-Login"
+      },
+      "legal": {
+        "heading": "Rechtliches",
+        "datenschutz": "Datenschutz"
+      },
+      "rights": "Alle Rechte vorbehalten."
+    }
   },
   "flow": {
     "step0": {},
