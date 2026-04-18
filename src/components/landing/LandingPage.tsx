@@ -14,10 +14,10 @@ type Props = {
   locale: string
 }
 
-export function LandingPage({ authenticatedUser, locale: _locale }: Props) {
+export function LandingPage({ authenticatedUser, locale }: Props) {
   return (
     <div className="flex min-h-screen flex-col bg-claimondo-bg">
-      <LandingTopbar authenticatedUser={authenticatedUser} />
+      <LandingTopbar authenticatedUser={authenticatedUser} locale={locale} />
 
       <main id="main-content" className="flex-1">
         <section

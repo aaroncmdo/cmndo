@@ -1,19 +1,20 @@
-// AAR-462 F4 Stub: Bis AAR-459 F1 (i18n-Foundation) gemerged ist, liefert
-// dieser Helper fest 'de' zurück. Sobald F1 das echte Cookie-basierte Locale-
-// Lookup bringt, wird diese Datei von F1 überschrieben.
-//
-// Signatur bewusst so gewählt dass F1 sie 1:1 ersetzen kann:
-//   - async (wird später Next.js `cookies()` nutzen)
-//   - SupportedLocale Typ-Export für Components
+import { cookies } from 'next/headers'
+import { DEFAULT_LOCALE, isLocale, type Locale } from '@/i18n/locales'
 
-export type SupportedLocale = 'de' | 'en' | 'tr' | 'ar' | 'ru' | 'pl'
+// AAR-462 F4 / AAR-463 F5 Foundation: Liest die User-Sprach-Präferenz aus
+// dem Cookie `claimondo_locale`. Fällt auf DEFAULT_LOCALE ('de') zurück
+// wenn kein oder ungültiges Cookie vorhanden.
+// AAR-459 F1 wird ggf. next-intl-Integration dazu bauen — die Signatur
+// bleibt gleich.
 
-export const DEFAULT_LOCALE: SupportedLocale = 'de'
+export type SupportedLocale = Locale
 
-/**
- * Liest die User-Sprach-Präferenz aus dem Cookie.
- * AAR-462 F4 Stub — liefert immer 'de' bis AAR-459 F1 gemerged.
- */
+export { DEFAULT_LOCALE }
+
+const LOCALE_COOKIE = 'claimondo_locale'
+
 export async function getLocaleCookie(): Promise<SupportedLocale> {
-  return DEFAULT_LOCALE
+  const cookieStore = await cookies()
+  const value = cookieStore.get(LOCALE_COOKIE)?.value
+  return isLocale(value) ? value : DEFAULT_LOCALE
 }
