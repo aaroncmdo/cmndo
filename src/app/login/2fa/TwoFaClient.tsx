@@ -2,15 +2,33 @@
 
 import { useState, useEffect, useRef, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { ShieldCheckIcon, SmartphoneIcon, RefreshCwIcon } from 'lucide-react'
+import { ShieldCheckIcon, SmartphoneIcon, MailIcon, RefreshCwIcon } from 'lucide-react'
 import { requestTwoFaCode } from '@/lib/auth/twofa/send-code'
 import { verifyTwoFaCode } from '@/lib/auth/twofa/verify-code'
+import { requestEmailOtp, verifyEmailOtp } from '@/lib/auth/twofa/send-email-code'
 import { createRememberToken } from '@/lib/auth/twofa/remember-me'
 
-// KFZ-184: 2FA Code-Eingabe mit Remember-Me.
+// KFZ-184 + AAR-494: 2FA Code-Eingabe mit Remember-Me, Methoden-Wahl SMS/Email.
 
-export default function TwoFaClient({ maskedPhone }: { maskedPhone: string | null }) {
+type Method = 'sms' | 'email'
+
+type Props = {
+  maskedPhone: string | null
+  maskedEmail: string | null
+  smsVerfuegbar: boolean
+  emailVerfuegbar: boolean
+  initialMethod: Method
+}
+
+export default function TwoFaClient({
+  maskedPhone,
+  maskedEmail,
+  smsVerfuegbar,
+  emailVerfuegbar,
+  initialMethod,
+}: Props) {
   const router = useRouter()
+  const [method, setMethod] = useState<Method>(initialMethod)
   const [code, setCode] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -19,17 +37,28 @@ export default function TwoFaClient({ maskedPhone }: { maskedPhone: string | nul
   const [resendCooldown, setResendCooldown] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Auto-send code on mount
-  useEffect(() => {
-    if (!codeSent) {
-      requestTwoFaCode().then(r => {
-        if (r.success) { setCodeSent(true); setResendCooldown(60) }
-        else setError(r.error ?? 'Code konnte nicht gesendet werden')
-      })
-    }
-  }, [codeSent])
+  const beideMethoden = smsVerfuegbar && emailVerfuegbar
 
-  // Resend cooldown timer
+  // Auto-send code on mount oder Methoden-Wechsel
+  useEffect(() => {
+    setCodeSent(false)
+    setError(null)
+    setCode('')
+  }, [method])
+
+  useEffect(() => {
+    if (codeSent) return
+    const request = method === 'sms' ? requestTwoFaCode : requestEmailOtp
+    request().then(r => {
+      if (r.success) {
+        setCodeSent(true)
+        setResendCooldown(60)
+      } else {
+        setError(r.error ?? 'Code konnte nicht gesendet werden')
+      }
+    })
+  }, [codeSent, method])
+
   useEffect(() => {
     if (resendCooldown <= 0) return
     const t = setInterval(() => setResendCooldown(p => Math.max(0, p - 1)), 1000)
@@ -39,7 +68,8 @@ export default function TwoFaClient({ maskedPhone }: { maskedPhone: string | nul
   function handleResend() {
     if (resendCooldown > 0) return
     setError(null)
-    requestTwoFaCode().then(r => {
+    const request = method === 'sms' ? requestTwoFaCode : requestEmailOtp
+    request().then(r => {
       if (r.success) setResendCooldown(60)
       else setError(r.error ?? 'Erneut senden fehlgeschlagen')
     })
@@ -48,14 +78,15 @@ export default function TwoFaClient({ maskedPhone }: { maskedPhone: string | nul
   function handleSubmit() {
     if (code.length !== 6) { setError('Bitte 6-stelligen Code eingeben'); return }
     setError(null)
+    const verify = method === 'sms' ? verifyTwoFaCode : verifyEmailOtp
     startTransition(async () => {
-      const result = await verifyTwoFaCode(code)
+      const result = await verify(code)
       if (result.success) {
         if (rememberMe) {
           await createRememberToken(
-            '', // userId wird serverseitig aus der Session gelesen
+            '',
             typeof navigator !== 'undefined' ? navigator.userAgent : null,
-            null, // IP wird serverseitig ermittelt
+            null,
           )
         }
         router.push('/')
@@ -68,6 +99,11 @@ export default function TwoFaClient({ maskedPhone }: { maskedPhone: string | nul
     })
   }
 
+  const versandZiel =
+    method === 'sms' ? maskedPhone : maskedEmail
+  const versandLabel =
+    method === 'sms' ? 'SMS-Code' : 'E-Mail-Code'
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8f9fb] px-4">
       <div className="w-full max-w-sm">
@@ -77,11 +113,40 @@ export default function TwoFaClient({ maskedPhone }: { maskedPhone: string | nul
           </div>
           <h1 className="text-2xl font-bold text-[#0D1B3E]">Zwei-Faktor-Authentifizierung</h1>
           <p className="text-sm text-gray-500 mt-2">
-            {maskedPhone
-              ? <>Wir haben einen SMS-Code an <strong>{maskedPhone}</strong> gesendet.</>
-              : 'SMS-Code wird gesendet...'}
+            {versandZiel
+              ? <>Wir haben einen {versandLabel} an <strong>{versandZiel}</strong> gesendet.</>
+              : `${versandLabel} wird gesendet...`}
           </p>
         </div>
+
+        {beideMethoden && (
+          <div className="mb-4 flex rounded-xl bg-white border border-gray-200 p-1">
+            <button
+              type="button"
+              onClick={() => setMethod('sms')}
+              className={`flex-1 py-2 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors ${
+                method === 'sms'
+                  ? 'bg-[#0D1B3E] text-white'
+                  : 'text-gray-500 hover:text-[#0D1B3E]'
+              }`}
+            >
+              <SmartphoneIcon className="w-3.5 h-3.5" />
+              SMS
+            </button>
+            <button
+              type="button"
+              onClick={() => setMethod('email')}
+              className={`flex-1 py-2 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors ${
+                method === 'email'
+                  ? 'bg-[#0D1B3E] text-white'
+                  : 'text-gray-500 hover:text-[#0D1B3E]'
+              }`}
+            >
+              <MailIcon className="w-3.5 h-3.5" />
+              E-Mail
+            </button>
+          </div>
+        )}
 
         <div className="bg-white rounded-2xl border border-gray-200 p-6">
           <div className="mb-4">
@@ -135,8 +200,17 @@ export default function TwoFaClient({ maskedPhone }: { maskedPhone: string | nul
         </div>
 
         <p className="text-[10px] text-gray-400 text-center mt-4">
-          <SmartphoneIcon className="w-3 h-3 inline mr-1" />
-          Kein Code erhalten? Prüfe ob die Telefonnummer in deinem Profil korrekt ist.
+          {method === 'sms' ? (
+            <>
+              <SmartphoneIcon className="w-3 h-3 inline mr-1" />
+              Kein Code erhalten? Prüfe, ob die Telefonnummer in deinem Profil korrekt ist.
+            </>
+          ) : (
+            <>
+              <MailIcon className="w-3 h-3 inline mr-1" />
+              Kein Code erhalten? Prüfe auch deinen Spam-Ordner.
+            </>
+          )}
         </p>
       </div>
     </div>
