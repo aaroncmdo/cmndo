@@ -255,6 +255,48 @@ export default async function FallaktePage({
     sort_order: r.sort_order ?? idx + 1,
   }))
 
+  // AAR-356: System-Dokumente-Bucket für den Dokumente-Tab. Vier statische
+  // System-Quellen (SA/Vollmacht aus FlowLink, CarDentity-Vorschaden aus
+  // Typ-B-Abfrage) + zwei dynamische Quellen (Gutachten-PDF, Kanzlei-Paket)
+  // aus der `dokumente`-Tabelle (kategorie-basiert). Kein Schreiben — nur
+  // Download-Links fürs Admin-Team.
+  type DokumentRow = {
+    id: string
+    typ: string
+    datei_url: string
+    datei_name: string
+    kategorie: string
+    created_at: string
+  }
+  const dokRows = (dokumente ?? []) as unknown as DokumentRow[]
+  const gutachtenDok =
+    dokRows.find((d) => d.kategorie === 'gutachten' || d.typ === 'gutachten') ?? null
+  const kanzleiDok =
+    dokRows.find((d) => d.kategorie === 'kanzlei' || d.typ === 'kanzlei_paket') ?? null
+  const systemDokumente = {
+    sa_pdf_url: (fall.sa_pdf_url as string | null) ?? null,
+    sa_unterschrift_url: (fall.sa_unterschrift_url as string | null) ?? null,
+    vollmacht_pdf: (fall.vollmacht_pdf as string | null) ?? null,
+    vorschaden_typ_b_pdf_url: (fall.vorschaden_typ_b_pdf_url as string | null) ?? null,
+    gutachten: gutachtenDok
+      ? {
+          id: gutachtenDok.id,
+          datei_url: gutachtenDok.datei_url,
+          datei_name: gutachtenDok.datei_name,
+          hochgeladen_am:
+            (fall.gutachten_hochgeladen_am as string | null) ?? gutachtenDok.created_at,
+        }
+      : null,
+    kanzleiPaket: kanzleiDok
+      ? {
+          id: kanzleiDok.id,
+          datei_url: kanzleiDok.datei_url,
+          datei_name: kanzleiDok.datei_name,
+          hochgeladen_am: kanzleiDok.created_at,
+        }
+      : null,
+  }
+
   // AAR-103 + W2-Audit-Fix: Banner für andere offene Fälle desselben Kunden.
   // War im alten page.tsx oberhalb des Monolithen — beim Shell-Refactor
   // versehentlich rausgefallen.
@@ -370,6 +412,9 @@ export default async function FallaktePage({
           zuPruefendeUploads,
           uploadbareSlots,
           sortierbareItems,
+          // AAR-356: System-Dokumente (SA, Vollmacht, Gutachten, Kanzlei-Paket,
+          // CarDentity-Vorschaden) in eigener Sektion im Dokumente-Tab
+          systemDokumente,
         }}
       />
     </>
