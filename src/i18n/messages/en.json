@@ -120,7 +120,24 @@
       }
     },
     "step2b": {},
-    "step2c": {},
+    "step2c": {
+      "heading": "Other driver details",
+      "sub": "The more we know about the other driver, the faster settlement goes.",
+      "fahrerflucht_label": "Hit and run — the other driver left the scene",
+      "auslandskennzeichen_label": "Foreign plate — the other vehicle had a non-German licence plate",
+      "fahrerflucht_hint": "The police case number is essential for further processing.",
+      "auslandskennzeichen_hint": "Foreign plate — enter it as best you can.",
+      "gegner_name": "Other driver's name",
+      "gegner_kennzeichen": "Licence plate",
+      "gegner_versicherung": "Other driver's insurer",
+      "gegner_versicherung_hint": "Visible on the ZB1 / insurance card. Leave empty if unknown.",
+      "gegner_schadennummer": "Insurer's claim number (optional)",
+      "zeugen_heading": "Witnesses",
+      "zeuge_hinzufuegen": "Add witness",
+      "keine_zeugen": "No witnesses recorded. Up to 5 allowed.",
+      "weiter": "Continue to ZB1",
+      "saving": "Saving …"
+    },
     "step3": {},
     "step4": {},
     "abort": {
