@@ -47,16 +47,25 @@ self.addEventListener('fetch', (event) => {
   // (App-Daten sollen immer frisch sein)
 })
 
-// Push-Notifications (vorbereitet, wird spaeter aktiviert)
+// AAR-499 N4: Push-Notifications via web-push — Payload kommt aus
+// src/lib/notifications/templates/web-push.ts (buildPushPayload).
 self.addEventListener('push', (event) => {
   if (!event.data) return
-  const data = event.data.json()
+  let data
+  try {
+    data = event.data.json()
+  } catch (e) {
+    data = { title: 'Claimondo', body: event.data.text() }
+  }
   event.waitUntil(
-    self.registration.showNotification(data.title ?? 'Claimondo', {
-      body: data.body ?? '',
+    self.registration.showNotification(data.title || 'Claimondo', {
+      body: data.body || '',
       icon: '/icons/icon.svg',
       badge: '/icons/icon.svg',
-      data: data.url ? { url: data.url } : undefined,
+      tag: data.tag,
+      renotify: !!data.tag,
+      requireInteraction: data.priority === 'urgent',
+      data: { url: data.url || '/', eventId: data.eventId },
     })
   )
 })
