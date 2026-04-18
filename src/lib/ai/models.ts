@@ -61,6 +61,12 @@ export const AI_MODELS = {
    * Kunden-Anliegen-Antwort und Fall-Zusammenfassung. Sonnet 4.6.
    */
   fall_assistant: 'claude-sonnet-4-6',
+  /**
+   * AAR-489 (M7): Makler-Copilot im Akte-Detail. Nutzt vollen Fall-Kontext +
+   * Gutachten + Gruppenchat-Auszug + Eskalations-Playbook. User-facing,
+   * komplexer Prompt — Sonnet 4.6.
+   */
+  makler_copilot: 'claude-sonnet-4-6',
 } as const
 
 export type AiModelKey = keyof typeof AI_MODELS
