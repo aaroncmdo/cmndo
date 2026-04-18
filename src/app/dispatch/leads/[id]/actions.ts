@@ -32,4 +32,12 @@ export { sendFlowLinkMultiChannel } from './actions/flowlink'
 export { triggerDokumenteUploadRequest } from './actions/dokumente-anfordern'
 export type { SlotEingabe } from './actions/dokumente-anfordern'
 export { searchVersicherungen, getVersicherungById, type VersicherungSuggestion } from './actions/versicherungen'
+// AAR-358: Personenschäden-Personen-CRUD
+export {
+  listPersonenForLead,
+  upsertPersonForLead,
+  deletePersonForLead,
+  type PersonenschadenPerson,
+  type PersonenschadenPersonInput,
+} from './actions/personen'
 export type { HardGateData, SvSuggestion, UnfallortKategorie } from './actions/types'
