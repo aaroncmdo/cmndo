@@ -146,7 +146,7 @@ function buildContextText(ctx: LoadedContext, maklerFirma: string): string {
   const gutachterHonorar = fall.gutachter_honorar as number | null | undefined
   const wbw = fall.wiederbeschaffungswert as number | null | undefined
   const restwert = fall.restwert as number | null | undefined
-  const istTotal = fall.ist_totalschaden as boolean | null | undefined
+  const istTotal = fall.totalschaden as boolean | null | undefined
 
   const gesamtforderung =
     [reparaturkosten, wertminderung, nutzungsausfall, gutachterHonorar]

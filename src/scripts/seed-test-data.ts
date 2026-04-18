@@ -193,7 +193,7 @@ async function main() {
       fahrzeug_hersteller: 'VW', fahrzeug_modell: 'Golf',
       schadens_datum: new Date(Date.now() - 10 * 86400000).toISOString().slice(0, 10),
       gegner_versicherung: 'HUK-COBURG',
-      ist_totalschaden: false,
+      totalschaden: false,
       gutachten_eingegangen_am: new Date(Date.now() - 2 * 86400000).toISOString(),
     },
     {

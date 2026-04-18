@@ -445,7 +445,7 @@ function OverviewPanel({
             />
             <InfoRow
               label="Totalschaden"
-              value={fall.ist_totalschaden ? 'Ja' : 'Nein'}
+              value={fall.totalschaden ? 'Ja' : 'Nein'}
             />
             <InfoRow
               label="Gutachter-Honorar"

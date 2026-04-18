@@ -1205,7 +1205,6 @@ export type Database = {
           interne_notizen: string | null
           ist_aktiv: boolean | null
           ist_fahrzeughalter: boolean | null
-          ist_totalschaden: boolean | null
           kanzlei_abrechnung_id: string | null
           kanzlei_ansprechpartner_email: string | null
           kanzlei_ansprechpartner_name: string | null
@@ -1496,7 +1495,6 @@ export type Database = {
           interne_notizen?: string | null
           ist_aktiv?: boolean | null
           ist_fahrzeughalter?: boolean | null
-          ist_totalschaden?: boolean | null
           kanzlei_abrechnung_id?: string | null
           kanzlei_ansprechpartner_email?: string | null
           kanzlei_ansprechpartner_name?: string | null
@@ -1787,7 +1785,6 @@ export type Database = {
           interne_notizen?: string | null
           ist_aktiv?: boolean | null
           ist_fahrzeughalter?: boolean | null
-          ist_totalschaden?: boolean | null
           kanzlei_abrechnung_id?: string | null
           kanzlei_ansprechpartner_email?: string | null
           kanzlei_ansprechpartner_name?: string | null

@@ -271,7 +271,7 @@ export type FallDetail = {
     gutachter_honorar: number | null
     wiederbeschaffungswert: number | null
     restwert: number | null
-    ist_totalschaden: boolean | null
+    totalschaden: boolean | null
     abtretung_signiert_am: string | null
   }
   kunde: FallDetailKunde | null
@@ -314,7 +314,7 @@ export async function getMaklerFallDetail(
       sv_termin, gutachten_eingegangen_am, kanzlei_uebergeben_am,
       regulierung_am, reparaturkosten, wertminderung,
       nutzungsausfall_gesamt, gutachter_honorar,
-      wiederbeschaffungswert, restwert, ist_totalschaden,
+      wiederbeschaffungswert, restwert, totalschaden,
       abtretung_signiert_am,
       kunde:profiles!faelle_kunde_id_fkey(
         id, vorname, nachname, email, telefon, adresse, plz, ort

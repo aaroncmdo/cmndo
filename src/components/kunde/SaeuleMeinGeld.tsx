@@ -10,7 +10,7 @@ type Props = {
   regulierung_betrag: number | null
   kuerzungs_betrag: number | null
   zahlung_betrag: number | null
-  ist_totalschaden: boolean
+  totalschaden: boolean
   zahlungsweg: string | null
   onZahlungswegSave?: (fallId: string, weg: string) => Promise<{ success: boolean }>
 }
@@ -19,7 +19,7 @@ function fmt(n: number): string {
   return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(n)
 }
 
-export default function SaeuleMeinGeld({ fallId, status, schadenhoehe_netto, regulierung_betrag, kuerzungs_betrag, zahlung_betrag, ist_totalschaden, zahlungsweg, onZahlungswegSave }: Props) {
+export default function SaeuleMeinGeld({ fallId, status, schadenhoehe_netto, regulierung_betrag, kuerzungs_betrag, zahlung_betrag, totalschaden, zahlungsweg, onZahlungswegSave }: Props) {
   const [pending, startTransition] = useTransition()
   const [weg, setWeg] = useState<string | null>(zahlungsweg)
   const [saved, setSaved] = useState(!!zahlungsweg)
@@ -50,7 +50,7 @@ export default function SaeuleMeinGeld({ fallId, status, schadenhoehe_netto, reg
         <h2 className="text-sm font-semibold text-[#0D1B3E]">Mein Geld</h2>
       </div>
 
-      {ist_totalschaden && (
+      {totalschaden && (
         <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
           <AlertTriangleIcon className="w-4 h-4 text-red-600 shrink-0" />
           <p className="text-xs text-red-700 font-medium">Ihr Fahrzeug ist ein Totalschaden</p>
