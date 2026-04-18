@@ -92,6 +92,13 @@
     }
   },
   "flow": {
+    "progress": {
+      "aria_label": "Progress in the damage-report flow",
+      "step1": "Incident",
+      "step2": "Photos",
+      "step3": "ZB1",
+      "step4": "Account"
+    },
     "step0": {},
     "step1": {},
     "step2a": {},
