@@ -83,7 +83,7 @@ export function AbrechnungsartCard({
   return (
     <div className="rounded-2xl border bg-white border-gray-200 p-4 sm:p-5 space-y-3">
       <div className="flex items-center gap-2">
-        <CalculatorIcon className="w-4 h-4 text-[#4573A2]" />
+        <CalculatorIcon className="w-4 h-4 text-[var(--brand-secondary)]" />
         <h3 className="text-sm font-semibold text-gray-900">Abrechnungsart (vor Ort besprochen)</h3>
         {pending && <LoaderIcon className="w-3.5 h-3.5 text-gray-400 animate-spin" />}
       </div>
@@ -101,7 +101,7 @@ export function AbrechnungsartCard({
             disabled={pending}
             className={`text-left px-3 py-2 rounded-lg border text-xs ${
               art === o.value
-                ? 'bg-[#4573A2] text-white border-[#4573A2]'
+                ? 'bg-[var(--brand-secondary)] text-white border-[var(--brand-secondary)]'
                 : 'bg-white text-gray-800 border-gray-200 hover:bg-gray-50'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
@@ -123,7 +123,7 @@ export function AbrechnungsartCard({
           onBlur={persistNotiz}
           rows={2}
           placeholder="z.B. Kunde will erst nachdenken, ruft am Donnerstag zurück"
-          className="w-full text-xs rounded-md border border-gray-200 px-2 py-1.5 outline-none focus:border-[#4573A2]"
+          className="w-full text-xs rounded-md border border-gray-200 px-2 py-1.5 outline-none focus:border-[var(--brand-secondary)]"
         />
       </div>
 

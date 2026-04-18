@@ -137,7 +137,7 @@ export function KanzleiStatusCard({
           <ul className="space-y-2 text-sm">
             {uebergebenLabel && (
               <li className="flex items-start gap-2">
-                <BuildingIcon className="w-4 h-4 text-[#4573A2] mt-0.5 shrink-0" />
+                <BuildingIcon className="w-4 h-4 text-[var(--brand-secondary)] mt-0.5 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-gray-900">
                     An Kanzlei übergeben:{' '}
@@ -155,7 +155,7 @@ export function KanzleiStatusCard({
             )}
             {vsAnschreibenLabel && (
               <li className="flex items-start gap-2">
-                <MailIcon className="w-4 h-4 text-[#4573A2] mt-0.5 shrink-0" />
+                <MailIcon className="w-4 h-4 text-[var(--brand-secondary)] mt-0.5 shrink-0" />
                 <p className="text-gray-900">
                   An Versicherung:{' '}
                   <span className="font-medium">{vsAnschreibenLabel}</span>
@@ -164,7 +164,7 @@ export function KanzleiStatusCard({
             )}
             {vsReaktionLabel && (
               <li className="flex items-start gap-2">
-                <ArrowDownRightIcon className="w-4 h-4 text-[#4573A2] mt-0.5 shrink-0" />
+                <ArrowDownRightIcon className="w-4 h-4 text-[var(--brand-secondary)] mt-0.5 shrink-0" />
                 <p className="text-gray-900">
                   VS-Reaktion:{' '}
                   <span className="font-medium">{vsReaktionLabel}</span>
@@ -302,7 +302,7 @@ export function KanzleiStatusCard({
                 </div>
               )}
               {svNetto != null && (
-                <div className="flex items-center justify-between pt-1.5 border-t border-gray-100 font-semibold text-[#0D1B3E]">
+                <div className="flex items-center justify-between pt-1.5 border-t border-gray-100 font-semibold text-[var(--brand-primary)]">
                   <span>Netto-Auszahlung</span>
                   <span>{formatEuro(svNetto)}</span>
                 </div>

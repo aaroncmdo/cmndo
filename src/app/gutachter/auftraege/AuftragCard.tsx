@@ -156,11 +156,11 @@ export default function AuftragCard(props: AuftragCardProps) {
         <div className="min-w-0 flex-1">
           <Link
             href={`/gutachter/fall/${props.fall.id}`}
-            className="text-[#4573A2] hover:text-[#1E3A5F] font-mono text-xs"
+            className="text-[var(--brand-secondary)] hover:text-[var(--brand-primary)] font-mono text-xs"
           >
             {props.fall.fall_nummer ?? props.fall.id.slice(0, 8)}
           </Link>
-          <p className="text-sm font-semibold text-[#0D1B3E] mt-0.5 flex items-center gap-1.5">
+          <p className="text-sm font-semibold text-[var(--brand-primary)] mt-0.5 flex items-center gap-1.5">
             <UserIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
             <span className="truncate">{kundeName}</span>
           </p>
@@ -196,7 +196,7 @@ export default function AuftragCard(props: AuftragCardProps) {
           <button
             type="button"
             onClick={() => setModal({ open: true, mode: 'erstvorschlag' })}
-            className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold"
+            className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold"
           >
             <CalendarIcon className="w-4 h-4" />
             {action.label}
@@ -228,7 +228,7 @@ export default function AuftragCard(props: AuftragCardProps) {
                 type="button"
                 onClick={() => setModal({ open: true, mode: 'gegenvorschlag' })}
                 disabled={isPending}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-[#4573A2] text-[#4573A2] hover:bg-[#4573A2]/5 text-xs font-semibold disabled:opacity-50"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--brand-secondary)] text-[var(--brand-secondary)] hover:bg-[var(--brand-secondary)]/5 text-xs font-semibold disabled:opacity-50"
               >
                 Gegenvorschlag
               </button>

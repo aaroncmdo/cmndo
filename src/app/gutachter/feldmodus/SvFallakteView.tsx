@@ -133,7 +133,7 @@ export default function SvFallakteView({
   }
 
   return (
-    <div className="h-full flex flex-col bg-[#0D1B3E]/95 backdrop-blur-md text-white">
+    <div className="h-full flex flex-col bg-[var(--brand-primary)]/95 backdrop-blur-md text-white">
       {/* Header */}
       <div className="px-4 py-3 border-b border-white/10 flex items-center gap-2">
         <button
@@ -178,14 +178,14 @@ export default function SvFallakteView({
         ) : fall ? (
           <div className="p-4 space-y-4">
             {/* Fall-Card */}
-            <div className="bg-white rounded-2xl p-4 text-[#0D1B3E] space-y-2">
+            <div className="bg-white rounded-2xl p-4 text-[var(--brand-primary)] space-y-2">
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="text-[10px] uppercase tracking-wider text-gray-500">
                     Fall #{fall.fall_nummer}
                   </p>
                   {fall.kennzeichen && (
-                    <p className="text-sm font-semibold text-[#0D1B3E]">
+                    <p className="text-sm font-semibold text-[var(--brand-primary)]">
                       {fall.kennzeichen}
                     </p>
                   )}
@@ -193,7 +193,7 @@ export default function SvFallakteView({
                 {fall.kunde_telefon && (
                   <a
                     href={`tel:${fall.kunde_telefon}`}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-[#4573A2] hover:text-[#1E3A5F]"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-[var(--brand-secondary)] hover:text-[var(--brand-primary)]"
                   >
                     <PhoneIcon className="w-3.5 h-3.5" />
                     {fall.kunde_telefon}
@@ -228,7 +228,7 @@ export default function SvFallakteView({
             )}
 
             {/* Dokumente (shared DokumentenListe) */}
-            <div className="bg-white rounded-2xl p-4 text-[#0D1B3E]">
+            <div className="bg-white rounded-2xl p-4 text-[var(--brand-primary)]">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
                   Dokumente
@@ -268,7 +268,7 @@ export default function SvFallakteView({
             </div>
 
             {/* Notizen */}
-            <div className="bg-white rounded-2xl p-4 text-[#0D1B3E]">
+            <div className="bg-white rounded-2xl p-4 text-[var(--brand-primary)]">
               <div className="flex items-center justify-between mb-2">
                 <label
                   htmlFor="sv-feldmodus-notizen"
@@ -293,13 +293,13 @@ export default function SvFallakteView({
                 onBlur={handleSaveNotizen}
                 rows={5}
                 placeholder="Was ist bei der Besichtigung aufgefallen?"
-                className="w-full text-xs text-[#0D1B3E] border border-gray-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-[#4573A2] resize-none"
+                className="w-full text-xs text-[var(--brand-primary)] border border-gray-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] resize-none"
               />
               <button
                 type="button"
                 onClick={handleSaveNotizen}
                 disabled={!notizenDirty || savingNotizen}
-                className="mt-2 w-full inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white bg-[#4573A2] hover:bg-[#1E3A5F] disabled:bg-gray-300 rounded-lg py-2"
+                className="mt-2 w-full inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white bg-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] disabled:bg-gray-300 rounded-lg py-2"
               >
                 {savingNotizen ? (
                   <Loader2Icon className="w-3.5 h-3.5 animate-spin" />
@@ -314,7 +314,7 @@ export default function SvFallakteView({
       </div>
 
       {/* Sticky Footer mit Abschluss-Button */}
-      <div className="px-4 py-3 border-t border-white/10 bg-[#0D1B3E]">
+      <div className="px-4 py-3 border-t border-white/10 bg-[var(--brand-primary)]">
         <BesichtigungAbschliessenButton
           sessionId={sessionId}
           terminId={terminId}

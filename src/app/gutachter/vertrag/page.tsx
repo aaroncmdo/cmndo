@@ -113,7 +113,7 @@ export default function VertragPage() {
       </div>
     )
   }
-  if (!svData) return <div className="flex items-center justify-center h-screen"><div className="w-6 h-6 border-2 border-[#4573A2] border-t-transparent rounded-full animate-spin" /></div>
+  if (!svData) return <div className="flex items-center justify-center h-screen"><div className="w-6 h-6 border-2 border-[var(--brand-secondary)] border-t-transparent rounded-full animate-spin" /></div>
 
   // Bereits unterschriebener Vertrag: read-only Anzeige mit grünem Banner.
   if (alreadySigned) {
@@ -137,7 +137,7 @@ export default function VertragPage() {
           </div>
           <button
             onClick={() => router.push('/gutachter')}
-            className="w-full py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold"
+            className="w-full py-2.5 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold"
           >
             Zurück zum Dashboard
           </button>
@@ -150,9 +150,9 @@ export default function VertragPage() {
     <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#0D1B3E] to-[#1E3A5F] px-8 py-6 text-white text-center">
-          <span className="text-3xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
-          <p className="text-[#7BA3CC] text-sm mt-2">Kooperationsvereinbarung</p>
+        <div className="bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-primary)] px-8 py-6 text-white text-center">
+          <span className="text-3xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[var(--brand-accent)]">ondo</span></span>
+          <p className="text-[var(--brand-accent)] text-sm mt-2">Kooperationsvereinbarung</p>
         </div>
 
         {/* Contract Text */}
@@ -173,7 +173,7 @@ export default function VertragPage() {
         <div className="px-8 py-6 space-y-4">
           <label className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" checked={accepted} onChange={e => setAccepted(e.target.checked)}
-              className="mt-0.5 w-5 h-5 accent-[#4573A2] rounded" />
+              className="mt-0.5 w-5 h-5 accent-[var(--brand-secondary)] rounded" />
             <span className="text-sm text-gray-700">Ich habe den Vertrag gelesen und akzeptiere die Bedingungen.</span>
           </label>
 
@@ -184,7 +184,7 @@ export default function VertragPage() {
           </div>
 
           <button onClick={handleSign} disabled={saving || !accepted || !signed}
-            className="w-full bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-white text-sm font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+            className="w-full bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] disabled:opacity-50 text-white text-sm font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
             {saving ? 'Wird gespeichert...' : <><CheckIcon className="w-4 h-4" /> Vertrag unterzeichnen</>}
           </button>
         </div>

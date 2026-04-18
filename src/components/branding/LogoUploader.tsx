@@ -50,8 +50,8 @@ export default function LogoUploader({ logoUrl, uploading, onFile, onClear, disa
           {...getRootProps()}
           className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-colors ${
             isDragActive
-              ? 'border-[#4573A2] bg-[#4573A2]/5'
-              : 'border-gray-300 bg-gray-50 hover:border-[#4573A2] hover:bg-gray-100'
+              ? 'border-[var(--brand-secondary)] bg-[var(--brand-secondary)]/5'
+              : 'border-gray-300 bg-gray-50 hover:border-[var(--brand-secondary)] hover:bg-gray-100'
           } ${uploading || disabled ? 'pointer-events-none opacity-60' : ''}`}
         >
           <input {...getInputProps()} />
@@ -60,7 +60,7 @@ export default function LogoUploader({ logoUrl, uploading, onFile, onClear, disa
             {isDragActive ? 'Hier ablegen …' : 'Logo hierher ziehen oder klicken'}
           </p>
           <p className="text-[11px] text-gray-500 mt-1">PNG, JPG, SVG oder WebP — max 2 MB</p>
-          {uploading && <p className="text-xs text-[#4573A2] mt-3">Wird hochgeladen …</p>}
+          {uploading && <p className="text-xs text-[var(--brand-secondary)] mt-3">Wird hochgeladen …</p>}
         </div>
       ) : (
         <div className="border border-gray-200 rounded-2xl p-4 bg-white">
@@ -71,7 +71,7 @@ export default function LogoUploader({ logoUrl, uploading, onFile, onClear, disa
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 flex items-center gap-1.5">
-                <ImageIcon className="w-4 h-4 text-[#4573A2]" />
+                <ImageIcon className="w-4 h-4 text-[var(--brand-secondary)]" />
                 Aktuelles Logo
               </p>
               <p className="text-[11px] text-gray-500 mt-0.5 truncate">{logoUrl.split('/').pop()}</p>

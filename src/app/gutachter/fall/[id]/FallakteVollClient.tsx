@@ -50,7 +50,7 @@ const DOKUMENT_TYP_LABEL: Record<string, string> = {
 const STATUS_BADGE: Record<string, string> = {
   ausstehend: 'bg-red-50 text-red-300',
   hochgeladen: 'bg-green-50 text-green-300',
-  geprueft: 'bg-[#4573A2]/5 text-[#7BA3CC]',
+  geprueft: 'bg-[var(--brand-secondary)]/5 text-[var(--brand-accent)]',
   abgelehnt: 'bg-amber-50 text-amber-300',
 }
 
@@ -291,7 +291,7 @@ export default function FallakteVollClient({
             </h1>
             <p className="text-gray-500 text-sm mt-0.5">{kundenName}</p>
           </div>
-          <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#4573A2]/5 text-[#7BA3CC]">
+          <span className="px-3 py-1 rounded-full text-xs font-medium bg-[var(--brand-secondary)]/5 text-[var(--brand-accent)]">
             {fall.status as string}
           </span>
         </div>
@@ -305,7 +305,7 @@ export default function FallakteVollClient({
         {!!fall.sv_termin && !hasGutachten && (fall.status === 'sv-termin' || fall.status === 'sv-zugewiesen') && (
           <div className="flex gap-2 mb-4">
             <button onClick={() => setShowVorOrt(true)}
-              className="flex-1 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
+              className="flex-1 bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
               <CameraIcon className="w-4 h-4" /> Bin angekommen — Vor-Ort Erfassung
             </button>
             <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent([fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', '))}`}
@@ -432,7 +432,7 @@ export default function FallakteVollClient({
               <h2 className="text-sm font-medium text-gray-500 mb-3">Flags</h2>
               <div className="flex flex-wrap gap-2">
                 {fall.personenschaden_flag ? <Badge label="Personenschaden" color="bg-red-50 text-red-300" /> : null}
-                {fall.mietwagen_flag ? <Badge label="Mietwagen" color="bg-[#4573A2]/5 text-[#7BA3CC]" /> : null}
+                {fall.mietwagen_flag ? <Badge label="Mietwagen" color="bg-[var(--brand-secondary)]/5 text-[var(--brand-accent)]" /> : null}
                 {fall.leasing_flag ? <Badge label="Leasing" color="bg-violet-50 text-violet-300" /> : null}
                 {fall.finanzierung_flag ? <Badge label="Finanzierung" color="bg-amber-50 text-amber-300" /> : null}
                 {fall.gewerbe_flag ? <Badge label="Gewerbe" color="bg-cyan-50 text-cyan-300" /> : null}
@@ -454,11 +454,11 @@ export default function FallakteVollClient({
                       nummer={kundenbetreuer.telefon}
                       variant="inline"
                       label={kundenbetreuer.telefon}
-                      className="!flex !items-center !gap-2 !text-[#7BA3CC] !text-sm hover:!text-[#7BA3CC]"
+                      className="!flex !items-center !gap-2 !text-[var(--brand-accent)] !text-sm hover:!text-[var(--brand-accent)]"
                     />
                   )}
                   {kundenbetreuer.email && (
-                    <a href={`mailto:${kundenbetreuer.email}`} className="flex items-center gap-2 text-[#7BA3CC] text-sm hover:text-[#7BA3CC] truncate">
+                    <a href={`mailto:${kundenbetreuer.email}`} className="flex items-center gap-2 text-[var(--brand-accent)] text-sm hover:text-[var(--brand-accent)] truncate">
                       <span className="text-gray-500 text-xs">Mail:</span> {kundenbetreuer.email}
                     </a>
                   )}
@@ -479,7 +479,7 @@ export default function FallakteVollClient({
                     onChange={(e) => setFinInput(e.target.value.toUpperCase())}
                     placeholder="WBA1234567890ABCD"
                     maxLength={17}
-                    className="flex-1 bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                    className="flex-1 bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                   />
                   <button
                     onClick={async () => {
@@ -496,7 +496,7 @@ export default function FallakteVollClient({
                       }
                     }}
                     disabled={finSaving || finInput.length !== 17}
-                    className="bg-[#4573A2] hover:bg-[#4573A2] disabled:bg-zinc-700 disabled:text-gray-500 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
+                    className="bg-[var(--brand-secondary)] hover:bg-[var(--brand-secondary)] disabled:bg-zinc-700 disabled:text-gray-500 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
                   >
                     {finSaving ? '...' : 'Speichern'}
                   </button>
@@ -552,7 +552,7 @@ export default function FallakteVollClient({
                 Falls der Kunde den Fahrzeugschein nicht hochgeladen hat —
                 Foto aufnehmen, OCR extrahiert Halter + FIN + Kennzeichen automatisch.
               </p>
-              <label className="inline-flex items-center gap-2 bg-[#4573A2] hover:bg-[#0D1B3E] text-white text-sm font-medium py-2 px-4 rounded-lg cursor-pointer transition-colors">
+              <label className="inline-flex items-center gap-2 bg-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] text-white text-sm font-medium py-2 px-4 rounded-lg cursor-pointer transition-colors">
                 <UploadIcon className="w-4 h-4" />
                 {zb1Uploading ? 'Wird ausgewertet...' : 'ZB1-Foto aufnehmen / hochladen'}
                 <input
@@ -679,7 +679,7 @@ export default function FallakteVollClient({
                 <select
                   value={dateiKategorie}
                   onChange={(e) => setDateiKategorie(e.target.value)}
-                  className="bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                  className="bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                 >
                   <option value="gutachter-foto">Gutachter-Foto</option>
                   <option value="gutachten">Gutachten</option>
@@ -713,7 +713,7 @@ export default function FallakteVollClient({
               }
 
               const KATEGORIE_COLOR: Record<string, string> = {
-                'kundendokument': 'bg-[#4573A2]/5 text-[#7BA3CC]',
+                'kundendokument': 'bg-[var(--brand-secondary)]/5 text-[var(--brand-accent)]',
                 'schadensfoto': 'bg-amber-50 text-amber-300',
                 'gutachten': 'bg-violet-50 text-violet-300',
                 'kanzlei': 'bg-cyan-50 text-cyan-300',
@@ -724,7 +724,7 @@ export default function FallakteVollClient({
               }
 
               const QUELLE_COLOR: Record<string, string> = {
-                'flowlink': 'bg-[#4573A2]/5 text-[#7BA3CC]',
+                'flowlink': 'bg-[var(--brand-secondary)]/5 text-[var(--brand-accent)]',
                 'portal': 'bg-violet-50 text-violet-400',
                 'whatsapp': 'bg-emerald-50 text-emerald-400',
                 'gutachter': 'bg-green-50 text-green-400',
@@ -836,7 +836,7 @@ export default function FallakteVollClient({
                       href={doc.datei_url as string}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[#7BA3CC] hover:text-[#7BA3CC] text-xs"
+                      className="text-[var(--brand-accent)] hover:text-[var(--brand-accent)] text-xs"
                     >
                       Öffnen
                     </a>
@@ -881,7 +881,7 @@ export default function FallakteVollClient({
                           min="0"
                           required
                           placeholder="0,00"
-                          className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm pr-12 focus:outline-none focus:ring-2 focus:ring-[#4573A2]/50 focus:border-[#4573A2]"
+                          className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm pr-12 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]/50 focus:border-[var(--brand-secondary)]"
                         />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">EUR</span>
                       </div>
@@ -890,7 +890,7 @@ export default function FallakteVollClient({
                     <button
                       type="submit"
                       disabled={uploading}
-                      className="w-full bg-[#4573A2] hover:bg-[#4573A2] disabled:bg-zinc-700 disabled:text-gray-500 text-white font-medium py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2"
+                      className="w-full bg-[var(--brand-secondary)] hover:bg-[var(--brand-secondary)] disabled:bg-zinc-700 disabled:text-gray-500 text-white font-medium py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2"
                     >
                       <UploadIcon className="w-4 h-4" />
                       {uploading ? 'Wird hochgeladen...' : 'Gutachten einreichen'}
@@ -951,7 +951,7 @@ export default function FallakteVollClient({
                           isCompleted
                             ? 'bg-green-600 text-white'
                             : isCurrent
-                              ? 'bg-[#1E3A5F] text-white'
+                              ? 'bg-[var(--brand-primary)] text-white'
                               : 'bg-gray-100 text-gray-400'
                         }`}>
                           {isCompleted ? (
@@ -968,7 +968,7 @@ export default function FallakteVollClient({
                       {/* Step content */}
                       <div className="pt-1">
                         <p className={`text-sm font-medium ${
-                          isCompleted ? 'text-green-300' : isCurrent ? 'text-[#7BA3CC]' : 'text-gray-500'
+                          isCompleted ? 'text-green-300' : isCurrent ? 'text-[var(--brand-accent)]' : 'text-gray-500'
                         }`}>
                           {step.label}
                         </p>
@@ -1080,7 +1080,7 @@ function GutachterChatTabs({ fallId, teilnehmer }: { fallId: string; teilnehmer:
                   {t.avatar_url ? (
                     <img src={t.avatar_url} alt={name} className="w-6 h-6 rounded-full object-cover" />
                   ) : (
-                    <div className="w-6 h-6 rounded-full bg-[#1E3A5F] flex items-center justify-center text-white text-[9px] font-bold">{initials}</div>
+                    <div className="w-6 h-6 rounded-full bg-[var(--brand-primary)] flex items-center justify-center text-white text-[9px] font-bold">{initials}</div>
                   )}
                   <span className="text-xs text-gray-700">{name}</span>
                   <span className="text-[9px] text-gray-400">({rolleText})</span>
@@ -1091,8 +1091,8 @@ function GutachterChatTabs({ fallId, teilnehmer }: { fallId: string; teilnehmer:
         </div>
       )}
       <div className="flex border-b border-gray-200 shrink-0">
-        <button onClick={() => setCh('alle')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'alle' ? 'border-[#4573A2] text-[#4573A2]' : 'border-transparent text-gray-400'}`}>Alle</button>
-        <button onClick={() => setCh('chat_kb_kunde')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'chat_kb_kunde' ? 'border-[#4573A2] text-[#4573A2]' : 'border-transparent text-gray-400'}`}>Claimondo</button>
+        <button onClick={() => setCh('alle')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'alle' ? 'border-[var(--brand-secondary)] text-[var(--brand-secondary)]' : 'border-transparent text-gray-400'}`}>Alle</button>
+        <button onClick={() => setCh('chat_kb_kunde')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'chat_kb_kunde' ? 'border-[var(--brand-secondary)] text-[var(--brand-secondary)]' : 'border-transparent text-gray-400'}`}>Claimondo</button>
         <button onClick={() => setCh('chat_kunde_sv')} className={`flex-1 py-2 text-xs font-medium border-b-2 ${ch === 'chat_kunde_sv' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-400'}`}>Kunde</button>
       </div>
       <div className="flex-1 min-h-0">
@@ -1149,11 +1149,11 @@ function TerminActionsPanel({ fallId, termin }: { fallId: string; termin: Termin
           )}
           <div className="flex gap-2 mt-3">
             <button onClick={handleAnnehmen} disabled={loading}
-              className="flex-1 py-2 rounded-lg text-sm font-medium text-white bg-[#1E3A5F] hover:bg-[#4573A2] transition-colors disabled:opacity-50">
+              className="flex-1 py-2 rounded-lg text-sm font-medium text-white bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] transition-colors disabled:opacity-50">
               {loading ? '...' : 'Annehmen'}
             </button>
             <button onClick={() => setModal('gegenvorschlag')} disabled={loading}
-              className="flex-1 py-2 rounded-lg text-sm font-medium text-[#1E3A5F] bg-white border border-[#1E3A5F] hover:bg-[#f8f9fb] transition-colors disabled:opacity-50">
+              className="flex-1 py-2 rounded-lg text-sm font-medium text-[var(--brand-primary)] bg-white border border-[var(--brand-primary)] hover:bg-[#f8f9fb] transition-colors disabled:opacity-50">
               Erneut gegenvorschlagen
             </button>
             <button onClick={() => setModal('ablehnen')} disabled={loading}
@@ -1167,8 +1167,8 @@ function TerminActionsPanel({ fallId, termin }: { fallId: string; termin: Termin
       {/* Hinweistext + Buttons (nur bei reserviert) */}
       {termin.status === 'reserviert' && (
         <>
-          <div className="bg-[#4573A2]/5 border border-[#7BA3CC]/30 rounded-xl px-4 py-3">
-            <p className="text-xs text-[#1E3A5F]">
+          <div className="bg-[var(--brand-secondary)]/5 border border-[var(--brand-accent)]/30 rounded-xl px-4 py-3">
+            <p className="text-xs text-[var(--brand-primary)]">
               Termin ist standardmäßig bestätigt. Hier nur eingreifen wenn Sie ablehnen oder verschieben möchten.
             </p>
           </div>
@@ -1178,7 +1178,7 @@ function TerminActionsPanel({ fallId, termin }: { fallId: string; termin: Termin
               <XCircleIcon className="w-4 h-4" /> Termin ablehnen
             </button>
             <button onClick={() => setModal('gegenvorschlag')}
-              className="flex-1 flex items-center justify-center gap-2 text-[#1E3A5F] hover:bg-[#4573A2]/5 text-sm py-2.5 rounded-lg transition-colors border border-[#4573A2]">
+              className="flex-1 flex items-center justify-center gap-2 text-[var(--brand-primary)] hover:bg-[var(--brand-secondary)]/5 text-sm py-2.5 rounded-lg transition-colors border border-[var(--brand-secondary)]">
               <ClockIcon className="w-4 h-4" /> Gegenvorschlag
             </button>
           </div>
@@ -1192,7 +1192,7 @@ function TerminActionsPanel({ fallId, termin }: { fallId: string; termin: Termin
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Termin ablehnen?</h3>
             <p className="text-sm text-gray-500 mb-4">Claimondo wird einen anderen Gutachter zuweisen.</p>
             <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 mb-4 focus:outline-none focus:border-[#4573A2] resize-none" rows={3} />
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 mb-4 focus:outline-none focus:border-[var(--brand-secondary)] resize-none" rows={3} />
             <div className="flex gap-2">
               <button onClick={() => setModal(null)}
                 className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
@@ -1215,16 +1215,16 @@ function TerminActionsPanel({ fallId, termin }: { fallId: string; termin: Termin
             <p className="text-sm text-gray-500 mb-4">Schlagen Sie einen alternativen Termin vor:</p>
             <input type="datetime-local" value={neuerTermin} onChange={e => setNeuerTermin(e.target.value)}
               min={new Date().toISOString().slice(0, 16)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 mb-3 focus:outline-none focus:border-[#4573A2]" />
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 mb-3 focus:outline-none focus:border-[var(--brand-secondary)]" />
             <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 mb-4 focus:outline-none focus:border-[#4573A2] resize-none" rows={2} />
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 mb-4 focus:outline-none focus:border-[var(--brand-secondary)] resize-none" rows={2} />
             <div className="flex gap-2">
               <button onClick={() => setModal(null)}
                 className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
                 Abbrechen
               </button>
               <button onClick={handleGegenvorschlag} disabled={loading || !neuerTermin}
-                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-[#1E3A5F] hover:bg-[#4573A2] transition-colors disabled:opacity-50">
+                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] transition-colors disabled:opacity-50">
                 {loading ? 'Wird gesendet...' : 'Gegenvorschlag senden'}
               </button>
             </div>

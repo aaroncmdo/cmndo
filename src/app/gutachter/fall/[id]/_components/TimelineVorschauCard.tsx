@@ -39,7 +39,7 @@ export function TimelineVorschauCard({
         {letzte.map((e) => (
           <li key={e.id} className="border-l-2 border-gray-200 pl-3 ml-1 relative">
             <span
-              className="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-[#4573A2]"
+              className="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-[var(--brand-secondary)]"
               aria-hidden="true"
             />
             <p className="text-xs font-medium text-gray-900">{e.titel ?? e.typ ?? '—'}</p>

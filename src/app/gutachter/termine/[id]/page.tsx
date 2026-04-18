@@ -135,7 +135,7 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
 
       {/* Header */}
       <div className="flex items-center gap-2 mb-2">
-        <Link href="/gutachter/termine" className="text-sm text-[#4573A2] hover:underline">← Alle Termine</Link>
+        <Link href="/gutachter/termine" className="text-sm text-[var(--brand-secondary)] hover:underline">← Alle Termine</Link>
       </div>
 
       <h1 className="text-xl font-bold text-gray-900">
@@ -167,7 +167,7 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
           {lead?.telefon && (
             <div>
               <p className="text-xs text-gray-400">Telefon</p>
-              <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} className="!font-medium !text-[#4573A2] hover:!underline" />
+              <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} className="!font-medium !text-[var(--brand-secondary)] hover:!underline" />
             </div>
           )}
           {lead?.email && (

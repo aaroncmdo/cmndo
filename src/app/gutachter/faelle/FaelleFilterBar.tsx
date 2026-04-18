@@ -97,7 +97,7 @@ export default function FaelleFilterBar({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Fall-Nr, Kunde oder Ort"
-            className="w-full pl-9 pr-8 py-2 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4573A2] focus:bg-white"
+            className="w-full pl-9 pr-8 py-2 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] focus:bg-white"
           />
           {query && (
             <button
@@ -120,7 +120,7 @@ export default function FaelleFilterBar({
             onClick={() => setFilter(key)}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-colors ${
               initialFilter === key
-                ? 'bg-[#0D1B3E] text-white'
+                ? 'bg-[var(--brand-primary)] text-white'
                 : 'bg-white text-gray-600 hover:text-gray-900 border border-gray-200'
             }`}
           >

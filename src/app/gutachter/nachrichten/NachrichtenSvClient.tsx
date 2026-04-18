@@ -61,7 +61,7 @@ export default function NachrichtenSvClient({ threads }: { threads: Thread[] }) 
             <div className="relative">
               <SearchIcon className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
               <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-                placeholder="Suchen..." className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" />
+                placeholder="Suchen..." className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-[var(--brand-secondary)]" />
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
@@ -70,11 +70,11 @@ export default function NachrichtenSvClient({ threads }: { threads: Thread[] }) 
             ) : (
               filtered.map(t => (
                 <button key={t.fallId} onClick={() => setActiveThread(t)}
-                  className={`w-full text-left px-3 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors ${activeThread?.fallId === t.fallId ? 'bg-[#4573A2]/5' : ''}`}>
+                  className={`w-full text-left px-3 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors ${activeThread?.fallId === t.fallId ? 'bg-[var(--brand-secondary)]/5' : ''}`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-7 h-7 rounded-full bg-[#4573A2]/10 flex items-center justify-center shrink-0">
-                        <UserIcon className="w-3.5 h-3.5 text-[#4573A2]" />
+                      <div className="w-7 h-7 rounded-full bg-[var(--brand-secondary)]/10 flex items-center justify-center shrink-0">
+                        <UserIcon className="w-3.5 h-3.5 text-[var(--brand-secondary)]" />
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">{t.kundeName}</p>
@@ -103,7 +103,7 @@ export default function NachrichtenSvClient({ threads }: { threads: Thread[] }) 
             <>
               <div className="bg-white border-b border-gray-200 px-4 py-3">
                 <p className="text-sm font-semibold text-gray-900">{activeThread.kundeName}</p>
-                <Link href={`/gutachter/fall/${activeThread.fallId}`} className="text-[10px] text-[#4573A2] hover:underline">
+                <Link href={`/gutachter/fall/${activeThread.fallId}`} className="text-[10px] text-[var(--brand-secondary)] hover:underline">
                   {activeThread.fallNummer ?? activeThread.fallId.slice(0, 8)} →
                 </Link>
               </div>
@@ -113,7 +113,7 @@ export default function NachrichtenSvClient({ threads }: { threads: Thread[] }) 
                   return (
                     <div key={msg.id} className={`flex ${isKunde ? 'justify-start' : 'justify-end'}`}>
                       <div className={`max-w-[70%] px-3 py-2 rounded-2xl text-sm ${
-                        isKunde ? 'bg-white border border-gray-200 text-gray-800' : 'bg-[#4573A2] text-white'
+                        isKunde ? 'bg-white border border-gray-200 text-gray-800' : 'bg-[var(--brand-secondary)] text-white'
                       }`}>
                         <p className="whitespace-pre-wrap">{msg.nachricht}</p>
                         <p className={`text-[9px] mt-1 ${isKunde ? 'text-gray-400' : 'text-white/60'}`}>
@@ -136,14 +136,14 @@ export default function NachrichtenSvClient({ threads }: { threads: Thread[] }) 
                         startSend(async () => { await sendNachrichtFromSvInbox(activeThread.fallId, text) })
                       }
                     }}
-                    className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-[#4573A2]" />
+                    className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--brand-secondary)]" />
                   <button disabled={!replyText.trim() || sending}
                     onClick={() => {
                       if (!replyText.trim() || !activeThread) return
                       const text = replyText; setReplyText('')
                       startSend(async () => { await sendNachrichtFromSvInbox(activeThread.fallId, text) })
                     }}
-                    className="p-2 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white disabled:opacity-40 transition-colors">
+                    className="p-2 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white disabled:opacity-40 transition-colors">
                     <SendIcon className="w-4 h-4" />
                   </button>
                 </div>

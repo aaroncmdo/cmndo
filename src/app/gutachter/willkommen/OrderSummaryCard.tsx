@@ -88,8 +88,8 @@ export default function OrderSummaryCard({
 
   if (variant === 'xl') {
     return (
-      <div className={`bg-white border border-[#4573A2]/20 rounded-2xl p-6 ${className}`}>
-        <p className="text-xs text-[#1E3A5F] uppercase tracking-wide font-semibold mb-1">
+      <div className={`bg-white border border-[var(--brand-secondary)]/20 rounded-2xl p-6 ${className}`}>
+        <p className="text-xs text-[var(--brand-primary)] uppercase tracking-wide font-semibold mb-1">
           Dein Auftrag
         </p>
         <p className="text-base font-semibold text-gray-900">{paketLabel}</p>
@@ -108,7 +108,7 @@ export default function OrderSummaryCard({
           <p className="text-[10px] text-gray-500 uppercase tracking-wide font-semibold mb-1">
             {anzahlungLabel}
           </p>
-          <p className="text-4xl font-bold text-[#1E3A5F] tabular-nums leading-tight">
+          <p className="text-4xl font-bold text-[var(--brand-primary)] tabular-nums leading-tight">
             {fmtEur(anzahlungBetrag)}
           </p>
           <p className="text-[11px] text-gray-500 mt-1">netto · einmalig</p>
@@ -143,7 +143,7 @@ export default function OrderSummaryCard({
             </ul>
             <div className="mt-3 pt-3 border-t border-gray-200 flex items-center justify-between text-xs">
               <span className="text-gray-600 font-medium">Gesamt</span>
-              <span className="text-[#1E3A5F] font-bold tabular-nums">{fmtEur(anzahlungBetrag)}</span>
+              <span className="text-[var(--brand-primary)] font-bold tabular-nums">{fmtEur(anzahlungBetrag)}</span>
             </div>
           </div>
         )}
@@ -157,7 +157,7 @@ export default function OrderSummaryCard({
             <button
               type="button"
               onClick={onShowLeadPreise}
-              className="text-[#1E3A5F] underline hover:text-[#4573A2] font-medium"
+              className="text-[var(--brand-primary)] underline hover:text-[var(--brand-secondary)] font-medium"
             >
               → Lead-Preis-Tabelle + ROI-Rechner
             </button>
@@ -165,7 +165,7 @@ export default function OrderSummaryCard({
             <Link
               href="/gutachter/leadpreise"
               target="_blank"
-              className="text-[#1E3A5F] underline hover:text-[#4573A2] font-medium"
+              className="text-[var(--brand-primary)] underline hover:text-[var(--brand-secondary)] font-medium"
             >
               → Lead-Preis-Tabelle einsehen
             </Link>
@@ -177,8 +177,8 @@ export default function OrderSummaryCard({
 
   // ─── compact variant (Vertrag-Step) ────────────────────────────────────
   return (
-    <div className={`bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-xl p-5 ${className}`}>
-      <p className="text-xs text-[#1E3A5F] uppercase tracking-wide font-semibold mb-3">
+    <div className={`bg-[var(--brand-secondary)]/5 border border-[var(--brand-secondary)]/20 rounded-xl p-5 ${className}`}>
+      <p className="text-xs text-[var(--brand-primary)] uppercase tracking-wide font-semibold mb-3">
         Deine Bestellung
       </p>
       <div className="grid grid-cols-2 gap-y-3 gap-x-4">
@@ -194,7 +194,7 @@ export default function OrderSummaryCard({
           Du gehoerst zu <strong>{organisationName}</strong>
         </div>
       )}
-      <div className="mt-4 pt-4 border-t border-[#4573A2]/15 flex items-center justify-between text-xs">
+      <div className="mt-4 pt-4 border-t border-[var(--brand-secondary)]/15 flex items-center justify-between text-xs">
         <span className="text-gray-600">
           Kein monatlicher Grundpreis — nur Lead-Preise pro Fall.
         </span>
@@ -202,7 +202,7 @@ export default function OrderSummaryCard({
           <button
             type="button"
             onClick={onShowLeadPreise}
-            className="text-[#1E3A5F] underline hover:text-[#4573A2] font-medium ml-3 flex-shrink-0"
+            className="text-[var(--brand-primary)] underline hover:text-[var(--brand-secondary)] font-medium ml-3 flex-shrink-0"
           >
             → Lead-Preis-Tabelle
           </button>
@@ -210,7 +210,7 @@ export default function OrderSummaryCard({
           <Link
             href="/gutachter/leadpreise"
             target="_blank"
-            className="text-[#1E3A5F] underline hover:text-[#4573A2] font-medium ml-3 flex-shrink-0"
+            className="text-[var(--brand-primary)] underline hover:text-[var(--brand-secondary)] font-medium ml-3 flex-shrink-0"
           >
             → Lead-Preis-Tabelle
           </Link>
@@ -224,7 +224,7 @@ function Cell({ label, value, highlight }: { label: string; value: string; highl
   return (
     <div>
       <p className="text-[10px] text-gray-500 uppercase">{label}</p>
-      <p className={`text-sm font-semibold mt-0.5 tabular-nums ${highlight ? 'text-[#1E3A5F]' : 'text-gray-900'}`}>
+      <p className={`text-sm font-semibold mt-0.5 tabular-nums ${highlight ? 'text-[var(--brand-primary)]' : 'text-gray-900'}`}>
         {value}
       </p>
     </div>

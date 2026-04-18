@@ -167,7 +167,7 @@ export function FallakteDrawer({
                     onClick={() => setTab(key)}
                     className={`flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 ${
                       tab === key
-                        ? 'text-[#0D1B3E] border-[#4573A2]'
+                        ? 'text-[var(--brand-primary)] border-[var(--brand-secondary)]'
                         : 'text-gray-500 border-transparent hover:text-gray-700'
                     }`}
                   >
@@ -235,17 +235,17 @@ function TeamListe({
           </p>
           <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-3">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#0D1B3E] text-white flex items-center justify-center text-sm font-semibold shrink-0">
+              <div className="w-10 h-10 rounded-full bg-[var(--brand-primary)] text-white flex items-center justify-center text-sm font-semibold shrink-0">
                 {initialen(m.name)}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-[#0D1B3E] truncate">
+                <p className="text-sm font-semibold text-[var(--brand-primary)] truncate">
                   {m.name || '—'}
                 </p>
                 {m.email && (
                   <a
                     href={`mailto:${m.email}`}
-                    className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-gray-600 hover:text-[#1E3A5F] truncate"
+                    className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-gray-600 hover:text-[var(--brand-primary)] truncate"
                   >
                     <MailIcon className="w-3.5 h-3.5 shrink-0" />
                     <span className="truncate">{m.email}</span>
@@ -263,7 +263,7 @@ function TeamListe({
               <button
                 type="button"
                 onClick={() => onDirektChat(m)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0D1B3E] text-white text-xs font-medium hover:bg-[#1E3A5F]"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--brand-primary)] text-white text-xs font-medium hover:bg-[var(--brand-primary)]"
               >
                 <MessageCircleIcon className="w-3.5 h-3.5" />
                 Direkt chatten
@@ -320,7 +320,7 @@ function DateienListe({ dokumente }: { dokumente: DocLite[] }) {
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#4573A2] hover:text-[#0D1B3E] p-1.5"
+                className="text-[var(--brand-secondary)] hover:text-[var(--brand-primary)] p-1.5"
                 aria-label={`${name} herunterladen`}
               >
                 <DownloadIcon className="w-4 h-4" />
@@ -347,7 +347,7 @@ function TimelineListe({ events }: { events: TimelineEventLite[] }) {
             className="border-l-2 border-gray-200 pl-3 ml-1 relative"
           >
             <span
-              className="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-[#4573A2]"
+              className="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-[var(--brand-secondary)]"
               aria-hidden="true"
             />
             <p className="text-sm font-medium text-gray-900">{e.titel ?? e.typ ?? '—'}</p>
@@ -376,7 +376,7 @@ function ChatListe({
   return (
     <div className="space-y-3">
       {focus && (
-        <div className="rounded-lg border border-[#7BA3CC] bg-[#f4f8fc] px-3 py-2 text-xs text-[#1E3A5F]">
+        <div className="rounded-lg border border-[var(--brand-accent)] bg-[#f4f8fc] px-3 py-2 text-xs text-[var(--brand-primary)]">
           Fokus auf <strong>{focus.name}</strong> ({ROLLE_LABEL[focus.rolle]}).
           Zum Schreiben den Chat im Haupt-Layout nutzen — hier ist die Akten-
           Ansicht read-only.

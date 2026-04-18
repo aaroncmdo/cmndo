@@ -49,7 +49,7 @@ const HINTS: Record<SvSubphase['code'], Hint> = {
     title: 'Heute am Termintag — Vor-Ort-Aktionen',
     text: 'Mache Fotos, prüfe FIN + Kilometerstand, hole fehlende Dokumente vom Kunden. Vor-Ort-Panel unten.',
     cta: 'Vor-Ort-Panel unten',
-    cssAccent: 'bg-blue-50 border-blue-200 text-[#1E3A5F]',
+    cssAccent: 'bg-blue-50 border-blue-200 text-[var(--brand-primary)]',
   },
   'gutachten-erstellen': {
     icon: UploadIcon,

@@ -111,7 +111,7 @@ export default async function CommunityDashboardPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-3">
-            <UsersIcon className="w-6 h-6 text-[#4573A2]" /> {org.name}
+            <UsersIcon className="w-6 h-6 text-[var(--brand-secondary)]" /> {org.name}
           </h1>
           <p className="text-sm text-gray-500 mt-1">
             Community-Dashboard · {String(monat).padStart(2, '0')}/{jahr}
@@ -146,7 +146,7 @@ export default async function CommunityDashboardPage() {
                 const isMe = row.sv_id === sv.id
                 const name = [row.vorname, row.nachname].filter(Boolean).join(' ') || 'Anonym'
                 return (
-                  <tr key={row.sv_id} className={isMe ? 'bg-[#4573A2]/5 border-l-4 border-l-[#4573A2]' : ''}>
+                  <tr key={row.sv_id} className={isMe ? 'bg-[var(--brand-secondary)]/5 border-l-4 border-l-[var(--brand-secondary)]' : ''}>
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${
                         row.rang === 1 ? 'bg-amber-100 text-amber-700'
@@ -158,8 +158,8 @@ export default async function CommunityDashboardPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className={`text-sm ${isMe ? 'font-semibold text-[#1E3A5F]' : 'text-gray-900'}`}>
-                        {name}{isMe && <span className="ml-2 text-[10px] text-[#4573A2]">(Du)</span>}
+                      <div className={`text-sm ${isMe ? 'font-semibold text-[var(--brand-primary)]' : 'text-gray-900'}`}>
+                        {name}{isMe && <span className="ml-2 text-[10px] text-[var(--brand-secondary)]">(Du)</span>}
                       </div>
                     </td>
                     <td className="px-4 py-3 text-right font-medium text-gray-900">{row.faelle_count}</td>

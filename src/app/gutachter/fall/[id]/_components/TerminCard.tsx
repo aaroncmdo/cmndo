@@ -193,7 +193,7 @@ export function TerminCard({ termin, fall }: TerminCardProps) {
                 href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapsDestination)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 mt-2 text-[11px] font-medium text-[#4573A2] hover:text-[#1E3A5F]"
+                className="inline-flex items-center gap-1.5 mt-2 text-[11px] font-medium text-[var(--brand-secondary)] hover:text-[var(--brand-primary)]"
               >
                 <NavigationIcon className="w-3.5 h-3.5" /> Route starten
               </a>
@@ -218,7 +218,7 @@ export function TerminCard({ termin, fall }: TerminCardProps) {
         <button
           type="button"
           onClick={() => setModalOpen(true)}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-[#4573A2] hover:text-[#1E3A5F]"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--brand-secondary)] hover:text-[var(--brand-primary)]"
         >
           <PencilIcon className="w-3.5 h-3.5" /> Termin ändern
         </button>

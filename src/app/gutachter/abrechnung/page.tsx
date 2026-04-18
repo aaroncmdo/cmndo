@@ -105,7 +105,7 @@ export default async function AbrechnungPage() {
   const auslastungProzent = maxFaelle > 0 ? Math.min(Math.round((offeneFaelle / maxFaelle) * 100), 100) : 0
 
   // Progress bar color based on utilization
-  let progressColor = 'bg-[#4573A2]'
+  let progressColor = 'bg-[var(--brand-secondary)]'
   if (auslastungProzent >= 90) {
     progressColor = 'bg-red-500'
   } else if (auslastungProzent >= 70) {
@@ -128,7 +128,7 @@ export default async function AbrechnungPage() {
         </div>
         <Link
           href="/gutachter/leadpreise"
-          className="text-xs font-medium text-[#4573A2] hover:text-[#1E3A5F] underline underline-offset-2 whitespace-nowrap"
+          className="text-xs font-medium text-[var(--brand-secondary)] hover:text-[var(--brand-primary)] underline underline-offset-2 whitespace-nowrap"
         >
           Aktuelle Lead-Preis-Tabelle einsehen
         </Link>
@@ -146,8 +146,8 @@ export default async function AbrechnungPage() {
             <p className="text-[10px] text-gray-500 mt-1">Offen</p>
             <p className="text-[9px] text-gray-400">{faelleOffen} Fälle in Regulierung</p>
           </div>
-          <div className="bg-white border border-[#4573A2]/20 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-[#4573A2]">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalEingegangen - totalLeadpreise)}</p>
+          <div className="bg-white border border-[var(--brand-secondary)]/20 rounded-xl p-4 text-center">
+            <p className="text-2xl font-bold text-[var(--brand-secondary)]">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalEingegangen - totalLeadpreise)}</p>
             <p className="text-[10px] text-gray-500 mt-1">Netto-Verdienst</p>
             <p className="text-[9px] text-gray-400">Ø {faelleAbgerechnet > 0 ? Math.round(totalEingegangen / faelleAbgerechnet) : 0}€/Fall</p>
           </div>
@@ -188,8 +188,8 @@ export default async function AbrechnungPage() {
           {/* Paket-Auslastung */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-[#4573A2]/5 flex items-center justify-center">
-                <PackageIcon className="w-5 h-5 text-[#7BA3CC]" />
+              <div className="w-10 h-10 rounded-xl bg-[var(--brand-secondary)]/5 flex items-center justify-center">
+                <PackageIcon className="w-5 h-5 text-[var(--brand-accent)]" />
               </div>
               <div>
                 <p className="text-gray-500 text-sm font-medium">Paket-Auslastung</p>
@@ -272,7 +272,7 @@ export default async function AbrechnungPage() {
                             className="border-b border-gray-200/50 hover:bg-gray-100/40 transition-colors"
                           >
                             <td className="px-4 py-3">
-                              <span className="text-[#7BA3CC] font-mono text-xs">
+                              <span className="text-[var(--brand-accent)] font-mono text-xs">
                                 {fall.fall_nummer ?? fall.id.slice(0, 8)}
                               </span>
                             </td>
@@ -335,7 +335,7 @@ export default async function AbrechnungPage() {
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <span className="text-[#7BA3CC] font-mono text-xs">
+                          <span className="text-[var(--brand-accent)] font-mono text-xs">
                             {fall.fall_nummer ?? fall.id.slice(0, 8)}
                           </span>
                           <p className="text-gray-900 text-sm font-medium mt-0.5">{name}</p>

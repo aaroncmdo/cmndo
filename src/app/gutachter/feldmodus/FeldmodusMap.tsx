@@ -168,7 +168,7 @@ export default function FeldmodusMap({
     <div className="relative w-full h-full">
       <div ref={containerRef} className="absolute inset-0" />
       {tokenMissing.current && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#0D1B3E] text-center px-6">
+        <div className="absolute inset-0 flex items-center justify-center bg-[var(--brand-primary)] text-center px-6">
           <div>
             <p className="text-sm font-semibold mb-2">
               Mapbox-Token fehlt

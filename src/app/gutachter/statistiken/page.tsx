@@ -9,8 +9,8 @@ export default function StatistikenPage() {
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto p-4">
         <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-[#4573A2]/10 flex items-center justify-center mb-4">
-            <BarChart3Icon className="w-7 h-7 text-[#4573A2]" />
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-[var(--brand-secondary)]/10 flex items-center justify-center mb-4">
+            <BarChart3Icon className="w-7 h-7 text-[var(--brand-secondary)]" />
           </div>
           <h2 className="text-lg font-semibold text-gray-900 mb-2">Statistiken werden gerade aufgebaut</h2>
           <p className="text-gray-500 text-sm">

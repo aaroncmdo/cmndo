@@ -67,7 +67,7 @@ export default function FokusHeader({
   const distLabel = formatDistance(distanceMeters)
 
   return (
-    <div className="flex items-center gap-3 px-3 py-2 bg-[#0D1B3E] border-b border-white/10">
+    <div className="flex items-center gap-3 px-3 py-2 bg-[var(--brand-primary)] border-b border-white/10">
       <button
         type="button"
         onClick={onExit}
@@ -93,7 +93,7 @@ export default function FokusHeader({
         </div>
       </div>
 
-      <span className="text-[10px] uppercase tracking-wider rounded-full bg-[color:var(--brand-primary,#4573A2)]/20 text-[color:var(--brand-primary,#7BA3CC)] px-2 py-1">
+      <span className="text-[10px] uppercase tracking-wider rounded-full bg-[color:var(--brand-primary,var(--brand-secondary))]/20 text-[color:var(--brand-primary,var(--brand-accent))] px-2 py-1">
         {statusLabel(sessionStatus)}
       </span>
     </div>

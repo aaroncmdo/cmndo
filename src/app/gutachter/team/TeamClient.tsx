@@ -91,7 +91,7 @@ export default function TeamClient({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-3">
-            <Icon className="w-6 h-6 text-[#4573A2]" /> {orgName}
+            <Icon className="w-6 h-6 text-[var(--brand-secondary)]" /> {orgName}
           </h1>
           <p className="text-sm text-gray-500 mt-1">
             Team-Verwaltung — {orgLabel} mit {subSvs.length} Mitgliedern
@@ -158,7 +158,7 @@ export default function TeamClient({
                       {[l.schadens_adresse, l.schadens_plz, l.schadens_ort].filter(Boolean).join(', ') || '—'}
                     </td>
                     <td className="px-4 py-3 text-xs">
-                      {l.spezifikation && <div className="text-[#4573A2]">{l.spezifikation}</div>}
+                      {l.spezifikation && <div className="text-[var(--brand-secondary)]">{l.spezifikation}</div>}
                       {l.schadenart && <div className="text-amber-700">{l.schadenart}</div>}
                       {!l.spezifikation && !l.schadenart && <span className="text-gray-400">—</span>}
                     </td>
@@ -171,7 +171,7 @@ export default function TeamClient({
                           value={assignTargets[l.id] ?? ''}
                           onChange={e => setAssignTargets(prev => ({ ...prev, [l.id]: e.target.value }))}
                           disabled={pending}
-                          className="text-xs bg-gray-100 border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+                          className="text-xs bg-gray-100 border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand-secondary)]"
                         >
                           <option value="">Wählen...</option>
                           {eligibleTargets.map(s => (
@@ -183,7 +183,7 @@ export default function TeamClient({
                         <button
                           onClick={() => handleAssign(l.id)}
                           disabled={pending || !assignTargets[l.id]}
-                          className="p-1.5 rounded-lg bg-[#4573A2] hover:bg-[#1E3A5F] text-white disabled:opacity-40"
+                          className="p-1.5 rounded-lg bg-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] text-white disabled:opacity-40"
                         >
                           <ArrowRightIcon className="w-3.5 h-3.5" />
                         </button>
@@ -281,7 +281,7 @@ function StatCard({ icon: Icon, label, value, sub, highlight }: {
   return (
     <div className={`rounded-xl border p-4 ${highlight ? 'border-amber-200 bg-amber-50/50' : 'border-gray-200 bg-white'}`}>
       <div className="flex items-center gap-2 mb-2">
-        <Icon className={`w-4 h-4 ${highlight ? 'text-amber-600' : 'text-[#4573A2]'}`} />
+        <Icon className={`w-4 h-4 ${highlight ? 'text-amber-600' : 'text-[var(--brand-secondary)]'}`} />
         <span className="text-[10px] uppercase tracking-wide text-gray-500 font-medium">{label}</span>
       </div>
       <div className="text-lg font-semibold text-gray-900">{value}</div>

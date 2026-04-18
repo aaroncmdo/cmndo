@@ -83,15 +83,15 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
-            <CalendarIcon className="w-6 h-6 text-[#4573A2]" /> Meine Termine
+            <CalendarIcon className="w-6 h-6 text-[var(--brand-secondary)]" /> Meine Termine
           </h1>
           <p className="text-sm text-gray-500 mt-1">{offene.length} offen, {termine.length} gesamt</p>
         </div>
         <div className="inline-flex bg-gray-100 rounded-xl p-0.5 text-xs font-medium">
-          <button onClick={() => setFilter('offen')} className={`px-3 py-1.5 rounded-lg ${filter === 'offen' ? 'bg-white text-[#1E3A5F] shadow' : 'text-gray-500'}`}>
+          <button onClick={() => setFilter('offen')} className={`px-3 py-1.5 rounded-lg ${filter === 'offen' ? 'bg-white text-[var(--brand-primary)] shadow' : 'text-gray-500'}`}>
             Offen ({offene.length})
           </button>
-          <button onClick={() => setFilter('alle')} className={`px-3 py-1.5 rounded-lg ${filter === 'alle' ? 'bg-white text-[#1E3A5F] shadow' : 'text-gray-500'}`}>
+          <button onClick={() => setFilter('alle')} className={`px-3 py-1.5 rounded-lg ${filter === 'alle' ? 'bg-white text-[var(--brand-primary)] shadow' : 'text-gray-500'}`}>
             Alle ({termine.length})
           </button>
         </div>
@@ -110,7 +110,7 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
             const needsAction = ['reserviert', 'vorschlag'].includes(t.status) || isKundenGegenvorschlag
             const displayDatum = t.vorgeschlagenes_datum && t.status === 'gegenvorschlag' ? t.vorgeschlagenes_datum : t.start_zeit
             return (
-              <div key={t.id} className={`bg-white rounded-2xl border p-5 ${needsAction ? 'border-[#4573A2] ring-1 ring-[#4573A2]/20' : 'border-gray-200'}`}>
+              <div key={t.id} className={`bg-white rounded-2xl border p-5 ${needsAction ? 'border-[var(--brand-secondary)] ring-1 ring-[var(--brand-secondary)]/20' : 'border-gray-200'}`}>
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -124,7 +124,7 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
                           Vorreservierung
                         </span>
                       )}
-                      {needsAction && !t.istVorreservierung && <span className="text-[9px] bg-[#4573A2] text-white px-1.5 py-0.5 rounded-full font-medium">Aktion nötig</span>}
+                      {needsAction && !t.istVorreservierung && <span className="text-[9px] bg-[var(--brand-secondary)] text-white px-1.5 py-0.5 rounded-full font-medium">Aktion nötig</span>}
                     </div>
                     <p className="text-sm text-gray-700">{t.kunde_name}</p>
                     {t.gegenvorschlag_grund && (
@@ -134,7 +134,7 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
                   {/* AAR-133: Link nur wenn Fall existiert, sonst zur Termin-Detail-Page (zeigt Lead-Daten) */}
                   <Link
                     href={t.fall_id ? `/gutachter/fall/${t.fall_id}` : `/gutachter/termine/${t.id}`}
-                    className="text-xs text-[#4573A2] hover:underline"
+                    className="text-xs text-[var(--brand-secondary)] hover:underline"
                   >
                     {t.fall_nummer}
                   </Link>
@@ -176,7 +176,7 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
               <AlertTriangleIcon className="w-4 h-4 text-red-500" /> Termin ablehnen
             </h3>
             <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3 resize-none focus:outline-none focus:border-[#4573A2]" rows={2} />
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3 resize-none focus:outline-none focus:border-[var(--brand-secondary)]" rows={2} />
             <div className="flex gap-2">
               <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-xl text-sm bg-gray-100 text-gray-600">Abbrechen</button>
               <button onClick={handleAblehnen} disabled={pending} className="flex-1 py-2 rounded-xl text-sm font-semibold bg-red-600 text-white disabled:opacity-50">Ablehnen</button>
@@ -194,9 +194,9 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
             </h3>
             <input type="datetime-local" value={neuesDatum} onChange={e => setNeuesDatum(e.target.value)}
               min={new Date().toISOString().slice(0, 16)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:border-[#4573A2]" />
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:border-[var(--brand-secondary)]" />
             <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3 resize-none focus:outline-none focus:border-[#4573A2]" rows={2} />
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3 resize-none focus:outline-none focus:border-[var(--brand-secondary)]" rows={2} />
             <div className="flex gap-2">
               <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-xl text-sm bg-gray-100 text-gray-600">Abbrechen</button>
               <button onClick={handleGegenvorschlag} disabled={pending || !neuesDatum} className="flex-1 py-2 rounded-xl text-sm font-semibold bg-amber-500 text-white disabled:opacity-50">Vorschlagen</button>

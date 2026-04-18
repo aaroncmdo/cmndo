@@ -63,7 +63,7 @@ export default function OfflineStatusBanner() {
 
   // Online mit Pending → Sync läuft/bevorsteht
   return (
-    <div className="bg-[color:var(--brand-primary,#4573A2)]/95 text-white text-xs px-3 py-2 flex items-center gap-2">
+    <div className="bg-[color:var(--brand-primary,var(--brand-secondary))]/95 text-white text-xs px-3 py-2 flex items-center gap-2">
       <CloudUploadIcon className="w-4 h-4 flex-shrink-0" />
       <span className="flex-1">
         Synchronisiere {totalPending} {totalPending === 1 ? 'Eintrag' : 'Einträge'}…

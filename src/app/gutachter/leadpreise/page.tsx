@@ -37,9 +37,9 @@ export default async function LeadpreisePage() {
         <p className="text-xs text-gray-400 mb-5">Diese Tabelle ist Bestandteil deines Kooperationsvertrags (Anhang). Änderungen werden dir vorab schriftlich mitgeteilt.</p>
 
         {/* Erläuterung */}
-        <div className="bg-[#4573A2]/5 border border-[#7BA3CC]/30 rounded-xl p-4 mb-5">
-          <p className="text-sm font-medium text-[#0D1B3E] mb-2">Wie funktioniert die Berechnung?</p>
-          <ul className="text-xs text-[#1E3A5F] space-y-1.5 list-disc pl-4">
+        <div className="bg-[var(--brand-secondary)]/5 border border-[var(--brand-accent)]/30 rounded-xl p-4 mb-5">
+          <p className="text-sm font-medium text-[var(--brand-primary)] mb-2">Wie funktioniert die Berechnung?</p>
+          <ul className="text-xs text-[var(--brand-primary)] space-y-1.5 list-disc pl-4">
             <li>Solange du innerhalb deines monatlichen Kontingents ({paketLabel}) bist, gilt der <strong>Paket-Preis</strong>. Ab dem ersten Fall über dem Kontingent gilt der <strong>Einzel-Preis</strong>.</li>
             <li>Pro Fall im Kontingent werden <strong>150 EUR</strong> von deinem Werbebudget verrechnet (solange Guthaben vorhanden), den Rest zahlst du in der Monatsabrechnung.</li>
           </ul>

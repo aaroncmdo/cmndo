@@ -165,14 +165,14 @@ export default function AktuellerStopCard({
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--brand-primary,#4573A2)]">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--brand-primary,var(--brand-secondary))]">
             Aktueller Stop
           </span>
           <span className="text-[11px] text-gray-500">
             {formatUhrzeit(stop.start_zeit)}
           </span>
           {stop.schadentyp && (
-            <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-[color:var(--brand-primary,#4573A2)]/10 text-[color:var(--brand-primary,#4573A2)] uppercase">
+            <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-[color:var(--brand-primary,var(--brand-secondary))]/10 text-[color:var(--brand-primary,var(--brand-secondary))] uppercase">
               {stop.schadentyp}
             </span>
           )}
@@ -188,7 +188,7 @@ export default function AktuellerStopCard({
 
       {/* Adresse */}
       <div className="flex items-start gap-2 text-sm text-gray-800">
-        <MapPinIcon className="w-4 h-4 text-[color:var(--brand-primary,#4573A2)] mt-0.5" />
+        <MapPinIcon className="w-4 h-4 text-[color:var(--brand-primary,var(--brand-secondary))] mt-0.5" />
         <p className="flex-1">{stop.adresse}</p>
       </div>
 
@@ -213,7 +213,7 @@ export default function AktuellerStopCard({
       {stop.kunde_telefon && (
         <a
           href={`tel:${stop.kunde_telefon}`}
-          className="inline-flex items-center gap-2 text-sm font-medium text-[color:var(--brand-primary,#4573A2)] hover:text-[#0D1B3E]"
+          className="inline-flex items-center gap-2 text-sm font-medium text-[color:var(--brand-primary,var(--brand-secondary))] hover:text-[var(--brand-primary)]"
         >
           <PhoneIcon className="w-4 h-4" />
           {stop.kunde_telefon}
@@ -249,7 +249,7 @@ export default function AktuellerStopCard({
             type="button"
             onClick={onLosfahren}
             disabled={pending}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[color:var(--brand-primary,#4573A2)] text-white text-sm font-semibold py-2.5 hover:bg-[#3a6290] disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[color:var(--brand-primary,var(--brand-secondary))] text-white text-sm font-semibold py-2.5 hover:bg-[#3a6290] disabled:opacity-50"
           >
             <PlayCircleIcon className="w-4 h-4" />
             {pending ? 'Starte …' : 'Losfahren & Kunde informieren'}
@@ -273,7 +273,7 @@ export default function AktuellerStopCard({
             type="button"
             onClick={onAbschliessen}
             disabled={pending}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0D1B3E] text-white text-sm font-semibold py-2.5 hover:bg-[#1E3A5F] disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--brand-primary)] text-white text-sm font-semibold py-2.5 hover:bg-[var(--brand-primary)] disabled:opacity-50"
           >
             <CheckCircle2Icon className="w-4 h-4" />
             {pending ? 'Schließe ab …' : 'Besichtigung abschließen'}
