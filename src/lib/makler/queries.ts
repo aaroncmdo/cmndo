@@ -786,3 +786,107 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
     activity,
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AAR-488 (M6) — Chat-Tab: Gruppenchat-Integration
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type ChatSenderRolle =
+  | 'kunde'
+  | 'kundenbetreuer'
+  | 'sachverstaendiger'
+  | 'gutachter'
+  | 'makler'
+  | 'system'
+  | string
+
+export type MaklerChatMessage = {
+  id: string
+  fall_id: string
+  kanal: string
+  nachricht: string
+  created_at: string
+  sender_id: string | null
+  sender_rolle: ChatSenderRolle | null
+  is_system: boolean
+  sender_vorname: string | null
+  sender_nachname: string | null
+  sender_avatar_url: string | null
+}
+
+/**
+ * Lädt den Fall-Gruppenchat für die Makler-Sicht. Liest sowohl den bestehenden
+ * Kanal `gruppenchat` als auch den reservierten `chat_gruppe_mit_makler`
+ * (beide sind im CHECK erlaubt — MVP nutzt `gruppenchat`).
+ *
+ * Consent-Gate läuft in der Detail-Route; diese Funktion liest nur.
+ */
+export async function getFallChat(fallId: string): Promise<MaklerChatMessage[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('nachrichten')
+    .select(
+      `
+      id,
+      fall_id,
+      kanal,
+      nachricht,
+      created_at,
+      sender_id,
+      sender_rolle,
+      is_system,
+      sender:profiles!nachrichten_sender_id_fkey(
+        id, vorname, nachname, avatar_url
+      )
+    `,
+    )
+    .eq('fall_id', fallId)
+    .in('kanal', ['gruppenchat', 'chat_gruppe_mit_makler'])
+    .order('created_at', { ascending: true })
+
+  if (error) {
+    console.error('[getFallChat]', error.message)
+    return []
+  }
+
+  return (data ?? []).map((row) => {
+    const senderRaw = (row as { sender: unknown }).sender
+    const sender = Array.isArray(senderRaw) ? senderRaw[0] : senderRaw
+    const s = (sender ?? null) as
+      | { vorname: string | null; nachname: string | null; avatar_url: string | null }
+      | null
+    return {
+      id: row.id as string,
+      fall_id: row.fall_id as string,
+      kanal: row.kanal as string,
+      nachricht: row.nachricht as string,
+      created_at: row.created_at as string,
+      sender_id: (row.sender_id as string | null) ?? null,
+      sender_rolle: (row.sender_rolle as string | null) ?? null,
+      is_system: Boolean(row.is_system),
+      sender_vorname: s?.vorname ?? null,
+      sender_nachname: s?.nachname ?? null,
+      sender_avatar_url: s?.avatar_url ?? null,
+    }
+  })
+}
+
+/**
+ * Zählt ungelesene Gruppenchat-Nachrichten für den eingeloggten User im
+ * gegebenen Fall. Nutzt die `gelesen`-Spalte auf `nachrichten` (dieselbe
+ * Logik wie MultiChannelChat im Hauptportal).
+ */
+export async function getUngeleseneChatCount(
+  userId: string,
+  fallId: string,
+): Promise<number> {
+  const supabase = await createClient()
+  const { count } = await supabase
+    .from('nachrichten')
+    .select('id', { count: 'exact', head: true })
+    .eq('fall_id', fallId)
+    .in('kanal', ['gruppenchat', 'chat_gruppe_mit_makler'])
+    .eq('gelesen', false)
+    .neq('sender_id', userId)
+  return count ?? 0
+}
