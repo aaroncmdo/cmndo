@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
-import { Shield, Phone } from 'lucide-react'
+import { Shield, Phone, ChevronLeft } from 'lucide-react'
 import { ClearFlowOnMount } from './ClearFlowOnMount'
 
 // AAR-469 C3: Abort-Screen bei Schuldfrage = eigenverantwortung. Freundliche
@@ -58,9 +58,10 @@ export default async function SelbstverschuldenPage() {
         <div className="mt-8">
           <Link
             href="/"
-            className="inline-flex items-center justify-center rounded-xl bg-claimondo-navy px-6 py-3 font-semibold text-white hover:bg-claimondo-shield"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-claimondo-navy px-6 py-3 font-semibold text-white hover:bg-claimondo-shield"
           >
-            ← {t('back_home')}
+            <ChevronLeft className="h-5 w-5 rtl:rotate-180" aria-hidden="true" />
+            {t('back_home')}
           </Link>
         </div>
       </div>

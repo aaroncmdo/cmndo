@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
-import { Phone } from 'lucide-react'
+import { Phone, ChevronRight } from 'lucide-react'
 import { LandingCta } from '@/components/shared/LandingCta'
 import type { AuthenticatedUser } from './LandingTopbar'
 
@@ -48,14 +48,16 @@ export async function LandingHero({ authenticatedUser }: Props) {
           {authenticatedUser ? (
             <Link
               href={authenticatedUser.portalPath}
-              className="inline-flex items-center justify-center rounded-xl bg-claimondo-navy px-6 py-3 text-base font-semibold text-white shadow-[var(--shadow-claimondo-md)] transition-colors hover:bg-claimondo-ondo"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-claimondo-navy px-6 py-3 text-base font-semibold text-white shadow-[var(--shadow-claimondo-md)] transition-colors hover:bg-claimondo-ondo"
             >
-              {t('cta_authenticated')} →
+              {t('cta_authenticated')}
+              <ChevronRight className="h-5 w-5 rtl:rotate-180" aria-hidden="true" />
             </Link>
           ) : (
             <>
               <LandingCta href="/schaden-melden" variant="primary">
-                {t('cta_primary')} →
+                {t('cta_primary')}
+                <ChevronRight className="h-5 w-5 rtl:rotate-180" aria-hidden="true" />
               </LandingCta>
               <LandingCta href="/beratung-anfragen" variant="secondary">
                 {t('cta_secondary')}
