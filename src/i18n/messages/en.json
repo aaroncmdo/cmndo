@@ -1,6 +1,15 @@
 {
   "landing": {
-    "hero": {},
+    "hero": {
+      "trust_badge": "50+ partner assessors across Germany",
+      "headline": "Not at fault in a car crash? Claimondo handles it.",
+      "subheadline": "Assessment. Lawyer. Settlement. All in one place. €0 for you — the other side pays.",
+      "cta_primary": "Report damage",
+      "cta_secondary": "Request consultation",
+      "cta_authenticated": "Continue to my portal",
+      "phone_label": "Or call us:",
+      "phone_aria": "Call the Claimondo hotline"
+    },
     "trust": {},
     "steps": {},
     "dat_teaser": {},
