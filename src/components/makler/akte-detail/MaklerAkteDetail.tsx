@@ -33,6 +33,7 @@ import type {
   MaklerChatMessage,
 } from '@/lib/makler/queries'
 import { MaklerChatTab } from './MaklerChatTab'
+import { MaklerCopilotTab } from './MaklerCopilotTab'
 
 type TabKey = 'overview' | 'timeline' | 'documents' | 'chat' | 'copilot'
 
@@ -253,7 +254,11 @@ export function MaklerAkteDetail({
         />
       ) : null}
       {tab === 'copilot' ? (
-        <PlaceholderPanel milestone="M7" feature="Copilot" />
+        <MaklerCopilotTab
+          fallId={fall.id}
+          gegnerVsName={fall.versicherung_gegner_name}
+          kontextLoaded
+        />
       ) : null}
     </div>
   )
@@ -657,29 +662,3 @@ function DocCard({
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Placeholder (Chat / Copilot)
-// ─────────────────────────────────────────────────────────────────────────────
-
-function PlaceholderPanel({
-  milestone,
-  feature,
-}: {
-  milestone: string
-  feature: string
-}) {
-  return (
-    <div className="bg-white rounded-2xl border border-dashed border-[#4573A2]/40 p-10 text-center">
-      <div className="mx-auto w-12 h-12 rounded-full bg-[#4573A2]/10 flex items-center justify-center text-[#4573A2] mb-3">
-        <SparklesIcon width={22} height={22} />
-      </div>
-      <h2 className="text-base font-semibold text-[#0D1B3E] mb-1">
-        {feature} folgt in {milestone}
-      </h2>
-      <p className="text-sm text-[#4573A2] max-w-sm mx-auto">
-        Dieser Bereich wird im nächsten Milestone aktiviert. Sie werden
-        automatisch benachrichtigt.
-      </p>
-    </div>
-  )
-}
