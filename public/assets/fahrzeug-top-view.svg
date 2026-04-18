@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 600" role="img" aria-labelledby="fahrzeug-title">
+  <title id="fahrzeug-title">Fahrzeug-Draufsicht mit klickbaren Bereichen</title>
+  <!-- AAR-471 C5: Einfache stilisierte Draufsicht eines PKW. 6 Bereiche
+       jeweils als eigener <path data-bereich> — der Client hängt
+       Click-Handler per data-Attribut. -->
+
+  <!-- Silhouette -->
+  <rect x="40" y="40" width="240" height="520" rx="60" ry="60"
+        fill="#f8f9fb" stroke="#0D1B3E" stroke-width="2" />
+
+  <!-- Vorne (oben) -->
+  <path data-bereich="vorne"
+        d="M 40 100 Q 40 40 100 40 L 220 40 Q 280 40 280 100 L 280 140 L 40 140 Z"
+        fill="transparent" stroke="#0D1B3E" stroke-width="1" class="zone" />
+
+  <!-- Hinten (unten) -->
+  <path data-bereich="hinten"
+        d="M 40 460 L 280 460 L 280 500 Q 280 560 220 560 L 100 560 Q 40 560 40 500 Z"
+        fill="transparent" stroke="#0D1B3E" stroke-width="1" class="zone" />
+
+  <!-- Links -->
+  <path data-bereich="links"
+        d="M 40 140 L 120 140 L 120 460 L 40 460 Z"
+        fill="transparent" stroke="#0D1B3E" stroke-width="1" class="zone" />
+
+  <!-- Rechts -->
+  <path data-bereich="rechts"
+        d="M 200 140 L 280 140 L 280 460 L 200 460 Z"
+        fill="transparent" stroke="#0D1B3E" stroke-width="1" class="zone" />
+
+  <!-- Dach (Zentrum) -->
+  <path data-bereich="dach"
+        d="M 120 140 L 200 140 L 200 300 L 120 300 Z"
+        fill="transparent" stroke="#0D1B3E" stroke-width="1" class="zone" />
+
+  <!-- Innen (unterer zentraler Bereich) -->
+  <path data-bereich="innen"
+        d="M 120 300 L 200 300 L 200 460 L 120 460 Z"
+        fill="transparent" stroke="#0D1B3E" stroke-width="1" class="zone" />
+
+  <!-- Deko: Windschutzscheibe + Heckscheibe -->
+  <path d="M 120 150 L 200 150 L 190 200 L 130 200 Z"
+        fill="#7BA3CC" fill-opacity="0.3" pointer-events="none" />
+  <path d="M 130 400 L 190 400 L 200 450 L 120 450 Z"
+        fill="#7BA3CC" fill-opacity="0.3" pointer-events="none" />
+
+  <!-- Labels -->
+  <g font-family="system-ui,sans-serif" font-size="12" fill="#0D1B3E" pointer-events="none">
+    <text x="160" y="95" text-anchor="middle">Vorne</text>
+    <text x="160" y="525" text-anchor="middle">Hinten</text>
+    <text x="80" y="305" text-anchor="middle">Links</text>
+    <text x="240" y="305" text-anchor="middle">Rechts</text>
+    <text x="160" y="225" text-anchor="middle">Dach</text>
+    <text x="160" y="385" text-anchor="middle">Innen</text>
+  </g>
+</svg>
