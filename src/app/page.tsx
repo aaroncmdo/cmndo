@@ -1,9 +1,40 @@
 import type { Metadata } from 'next'
+import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { roleToPath } from '@/lib/auth/role-redirect'
 import { getLocaleCookie } from '@/lib/i18n/locale-cookie'
+import { hashIp } from '@/lib/crypto/hash-ip'
 import { LandingPage } from '@/components/landing/LandingPage'
 import type { AuthenticatedUser } from '@/components/landing/LandingTopbar'
+
+// AAR-491 (M9): Promo-Click-Tracking direkt im Server-Component der
+// Landing-Seite. Fire-and-forget — darf Render nicht verzögern, Fehler
+// werden stillschweigend gefressen.
+const PROMO_CODE_RE = /^MK-[A-Z0-9]{4,12}$/i
+
+async function trackPromoClick(code: string): Promise<void> {
+  try {
+    const normalized = code.trim().toUpperCase()
+    if (!PROMO_CODE_RE.test(normalized)) return
+    const admin = createAdminClient()
+    const { data: pc } = await admin
+      .from('promotion_codes')
+      .select('id, aktiv')
+      .eq('code', normalized)
+      .maybeSingle()
+    if (!pc || !pc.aktiv) return
+    const h = await headers()
+    await admin.from('promo_clicks').insert({
+      promotion_code_id: pc.id as string,
+      user_agent: h.get('user-agent')?.slice(0, 500) ?? null,
+      referer: h.get('referer')?.slice(0, 500) ?? null,
+      ip_hash: hashIp(h.get('x-forwarded-for') ?? h.get('x-real-ip')),
+    })
+  } catch {
+    // fire-and-forget — Tracking darf UX nicht brechen
+  }
+}
 
 // AAR-462 F4: Smart-Root ist jetzt die öffentliche Landing-Page.
 // Vorher war `/` ein Hard-Redirect in das Portal der eingeloggten Rolle
@@ -36,7 +67,16 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function Home() {
+type HomeProps = {
+  searchParams?: Promise<{ p?: string }>
+}
+
+export default async function Home({ searchParams }: HomeProps = {}) {
+  const params = (await searchParams) ?? {}
+  if (params.p) {
+    await trackPromoClick(params.p)
+  }
+
   const locale = await getLocaleCookie()
 
   const supabase = await createClient()
