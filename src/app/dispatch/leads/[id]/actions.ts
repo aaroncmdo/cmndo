@@ -27,6 +27,8 @@ export {
   getNextFreeSlotsForSv,
 } from './actions/sv-termin'
 export { sendFlowLinkMultiChannel } from './actions/flowlink'
+// AAR-521: Debug-Action fuer "Warum?"-Button im SvDispatchPanel.
+export { debugSvMatching } from './actions/debug-sv'
 // AAR-352: triggerZb1UploadRequest + triggerPolizeiberichtUploadRequest ersetzt
 // durch kombinierten Multi-Slot-Trigger. Legacy-Dateien sind gelöscht.
 export { triggerDokumenteUploadRequest } from './actions/dokumente-anfordern'

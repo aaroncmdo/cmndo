@@ -9,6 +9,7 @@
 // - Ablehnungsrate (wenig Ablehnungen bevorzugt)
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { parseIsochrone } from './isochrone-parse'
 
 export type SvMatchInput = {
   fallLat: number
@@ -132,15 +133,20 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
     const distanzKm = haversine(Number(sv.standort_lat), Number(sv.standort_lng), fallLat, fallLng)
     const radius = Number(sv.paket_umkreis_km) || Number(sv.radius_km) || Number(sv.paket_radius_km) || 40
 
-    // Isochrone hat Vorrang wenn vorhanden
+    // AAR-521: Isochrone-Polygone kommen aus DB in 3 Formaten (A/B/C).
+    // Vorher wurde nur Format B erkannt → Polygone in Format A/C liefen in den
+    // else-Branch und Radius-Fallback wurde NICHT gezogen. Jetzt:
+    // 1) parseIsochrone normalisiert auf [lng,lat][]
+    // 2) Radius-Fallback greift IMMER wenn Polygon fehlt ODER Fall ausserhalb ist
+    const polygon = parseIsochrone(sv.isochrone_polygon)
     let imGebiet = false
-    const iso = sv.isochrone_polygon as { coordinates?: [number, number][][] } | null
-    if (iso?.coordinates?.[0]?.length) {
-      imGebiet = pointInPolygon([fallLng, fallLat], iso.coordinates[0])
-      if (imGebiet) reasons.push('im Einsatzgebiet')
-    } else if (distanzKm <= radius) {
+    if (polygon) {
+      imGebiet = pointInPolygon([fallLng, fallLat], polygon)
+      if (imGebiet) reasons.push('im Einsatzgebiet (Isochrone)')
+    }
+    if (!imGebiet && distanzKm <= radius) {
       imGebiet = true
-      reasons.push(`${Math.round(distanzKm)}km (max ${radius})`)
+      reasons.push(`${Math.round(distanzKm)}km (max ${radius}, Radius-Fallback)`)
     }
 
     if (!imGebiet) continue
