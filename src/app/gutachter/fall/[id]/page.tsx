@@ -44,7 +44,9 @@ export default async function GutachterFallPage({
       ? supabase
           .from('leads')
           // AAR-311: vorschaden_* + cardentity_abfrage_am für Typ-B-Button in StammdatenCard
-          .select('vorname, nachname, email, telefon, fin, vorschaden_typ_b_bericht, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, cardentity_abfrage_am')
+          // AAR-545 Cluster D: eigene_versicherung + eigene_policennr für "Eigene
+          // Versicherung"-Block (früher faelle.versicherung_name / _schaden_nr).
+          .select('vorname, nachname, email, telefon, fin, vorschaden_typ_b_bericht, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, cardentity_abfrage_am, eigene_versicherung, eigene_policennr')
           .eq('id', fall.lead_id)
           .single()
       : Promise.resolve({ data: null }),

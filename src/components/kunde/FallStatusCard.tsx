@@ -16,7 +16,8 @@ type StatusFall = {
   storno_grund: string | null
   abgeschlossen_am: string | null
   google_review_gesendet: boolean | null
-  versicherung_name: string | null
+  // AAR-545 Cluster D: Gegner-VS aus faelle.gegner_versicherung (Freitext).
+  gegner_versicherung: string | null
   kanzlei_ansprechpartner_name: string | null
 }
 
@@ -159,7 +160,7 @@ function getStatusConfig(fall: StatusFall, svName?: string): StatusConfig {
     return { icon: ShieldCheckIcon, title: 'Deine Akte ist bei der Kanzlei', description: `${fall.kanzlei_ansprechpartner_name ?? 'Die Partnerkanzlei'} prüft deinen Fall und erstellt das Anspruchsschreiben an die Versicherung.`, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' }
 
   if (s === 'anschlussschreiben')
-    return { icon: MailIcon, title: 'Anspruchsschreiben versendet', description: `Das Anspruchsschreiben wurde an ${fall.versicherung_name ?? 'die Versicherung'} gesendet. Jetzt läuft die gesetzliche Frist.`, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' }
+    return { icon: MailIcon, title: 'Anspruchsschreiben versendet', description: `Das Anspruchsschreiben wurde an ${fall.gegner_versicherung ?? 'die Versicherung'} gesendet. Jetzt läuft die gesetzliche Frist.`, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' }
 
   if (s === 'regulierung-laeuft' || s === 'regulierung')
     return { icon: BanknoteIcon, title: 'Regulierung angekündigt', description: 'Die Versicherung hat die Regulierung angekündigt. Die Zahlung wird in den nächsten Tagen erwartet.', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200' }

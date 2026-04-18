@@ -571,9 +571,9 @@ async function convertLeadToFall(
       gegner_name: lead.gegner_name ?? null,
       gegner_versicherung: lead.gegner_versicherung ?? null,
       gegner_kennzeichen: lead.gegner_kennzeichen ?? null,
-      // BUG-58 Mapping: Lead-Spalten → korrekte Faelle-Spalten
-      versicherung_name: lead.eigene_versicherung ?? null,
-      versicherung_schaden_nr: lead.eigene_policennr ?? null,
+      // AAR-545 Cluster D: faelle.versicherung_name + versicherung_schaden_nr
+      // sind ersatzlos weg — Gegner-Seite ist Source of Truth (gegner_versicherung
+      // oben), Eigene-VS bleibt auf leads.eigene_versicherung / eigene_policennr.
       polizei_aktenzeichen: lead.polizei_aktenzeichen ?? null,
       schadensursache: lead.schadensursache ?? null,
       leasinggeber_name: lead.leasing_geber ?? null,

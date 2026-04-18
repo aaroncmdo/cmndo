@@ -18,7 +18,7 @@ const FIELD_MAP: Record<string, { label: string; column: string }> = {
   hersteller: { label: 'Hersteller', column: 'fahrzeug_hersteller' },
   modell: { label: 'Modell', column: 'fahrzeug_modell' },
   versicherer: { label: 'Versicherer', column: 'gegner_versicherung' },
-  vsnummer: { label: 'VS-Nummer', column: 'versicherung_schaden_nr' },
+  vsnummer: { label: 'VS-Nummer', column: 'gegner_versicherungsnummer' },
   versicherter: { label: 'Versicherter', column: 'halter_name' },
   vorname: { label: 'Vorname', column: 'halter_name' },
   nachname: { label: 'Nachname', column: 'gegner_name' },

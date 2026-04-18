@@ -256,7 +256,7 @@ export function MaklerAkteDetail({
       {tab === 'copilot' ? (
         <MaklerCopilotTab
           fallId={fall.id}
-          gegnerVsName={fall.versicherung_gegner_name}
+          gegnerVsName={fall.gegner_versicherung}
           kontextLoaded
         />
       ) : null}
@@ -420,11 +420,11 @@ function OverviewPanel({
           <InfoRow label="Kennzeichen" value={fall.gegner_kennzeichen ?? '–'} />
           <InfoRow
             label="Versicherung"
-            value={fall.versicherung_gegner_name ?? '–'}
+            value={fall.gegner_versicherung ?? '–'}
           />
           <InfoRow
             label="Schaden-Nr."
-            value={fall.schadennummer_versicherung ?? '–'}
+            value={fall.gegner_schadennummer ?? '–'}
           />
         </InfoCard>
       </div>

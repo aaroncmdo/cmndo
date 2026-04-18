@@ -57,10 +57,10 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'gegner_name',
   'gegner_kennzeichen',
   'gegner_versicherung',
+  'gegner_versicherung_id',
   'gegner_fahrzeugtyp',
-  'schadennummer_versicherung',
-  'versicherung_schaden_nr',
-  'versicherung_id',
+  'gegner_schadennummer',
+  'gegner_versicherungsnummer',
   // Vorschäden
   'hat_vorschaeden',
   'vorschaden_anzahl',

@@ -42,9 +42,9 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // Gegner
   'gegner_name',
   'gegner_versicherung',
-  // AAR-265: FK auf versicherungen-Stammdaten — wird zusätzlich zum
-  // Freitext-Namen kopiert. resolveFallEntityFks() bevorzugt diese FK
-  // gegenüber dem ILIKE-Fuzzy-Match.
+  // AAR-265 + AAR-545 Cluster D: FK auf versicherungen-Stammdaten — Source
+  // of Truth für die Gegner-Versicherung. Fällt auf den ILIKE-Fuzzy-Match
+  // aus resolveFallEntityFks() zurück, wenn das Lead nur Freitext hatte.
   'gegner_versicherung_id',
   'gegner_kennzeichen',
   // Hergang
@@ -137,8 +137,6 @@ export const LEAD_TO_FALL_DEFAULT_FIELDS: Record<string, unknown> = {
 // Format: { fallSpalte: leadSpalte } — übernimmt mit `?? null`
 export const LEAD_TO_FALL_RENAMED_FIELDS: Record<string, string> = {
   // BUG-58: Spalten die in faelle anders heißen
-  versicherung_name: 'eigene_versicherung',
-  versicherung_schaden_nr: 'eigene_policennr',
   leasinggeber_name: 'leasing_geber',
   bank_name: 'finanzierung_bank',
   ust_id: 'firma_ustid',
@@ -181,7 +179,9 @@ export type BuildFallOptions = {
   signatureUrl: string
   // AAR-155: 4 Entity-FK-IDs, resolved via resolveFallEntityFks() BEVOR
   // buildFallInsertFromLead synchron aufgerufen wird.
-  versicherungId?: string | null
+  // AAR-545 Cluster D: versicherungId -> gegnerVersicherungId (semantisch:
+  // FK auf versicherungen-Stammdaten der Gegner-Versicherung).
+  gegnerVersicherungId?: string | null
   kanzleiId?: string | null
   organisationId?: string | null
   leadbearbeiterId?: string | null
@@ -207,7 +207,10 @@ export function fallComputedFields(lead: LeadRow, options: BuildFallOptions): Re
     sa_unterschrieben: true,
     // AAR-155: Entity-FKs — resolveFallEntityFks() muss vorher laufen.
     // Bei Lookup-Miss bleibt der Wert null (nicht-blockierend).
-    versicherung_id: options.versicherungId ?? null,
+    // AAR-545 Cluster D: versicherung_id ersatzlos entfernt —
+    // faelle.gegner_versicherung_id (aus leads.gegner_versicherung_id via
+    // DIRECT_FIELDS) ist die einzige Source-of-Truth. Fallback auf den
+    // Fuzzy-Match passiert in buildFallInsertFromLead.
     kanzlei_id: options.kanzleiId ?? null,
     organisation_id: options.organisationId ?? null,
     leadbearbeiter_id: options.leadbearbeiterId ?? null,
@@ -231,7 +234,7 @@ export async function resolveFallEntityFks(
   lead: LeadRow,
   svIdFromTermin: string | null,
 ): Promise<{
-  versicherungId: string | null
+  gegnerVersicherungId: string | null
   kanzleiId: string | null
   organisationId: string | null
   leadbearbeiterId: string | null
@@ -246,7 +249,7 @@ export async function resolveFallEntityFks(
   // „HUK-Coburg") und der Dispatcher oft nur „allianz" tippt.
   // AAR-155 Audit-Fix #4: LIKE-Wildcards im User-Input escapen damit
   // „Allianz % Co" nicht als Pattern sondern als Literal gesucht wird.
-  let versicherungId: string | null = null
+  let gegnerVersicherungId: string | null = null
   if (gegnerVs.length >= 3) {
     try {
       const escaped = gegnerVs.replace(/[\\%_]/g, '\\$&')
@@ -256,9 +259,9 @@ export async function resolveFallEntityFks(
         .ilike('name', `%${escaped}%`)
         .limit(1)
         .maybeSingle()
-      versicherungId = data?.id ?? null
-      if (!versicherungId) {
-        console.warn('[AAR-155] Versicherung nicht gefunden:', gegnerVs)
+      gegnerVersicherungId = data?.id ?? null
+      if (!gegnerVersicherungId) {
+        console.warn('[AAR-155] Gegner-Versicherung nicht gefunden:', gegnerVs)
       }
     } catch { /* non-blocking */ }
   }
@@ -296,7 +299,7 @@ export async function resolveFallEntityFks(
   // sendFlowLinkMultiChannel automatisch.
   const leadbearbeiterId = zugewiesenAn
 
-  return { versicherungId, kanzleiId, organisationId, leadbearbeiterId }
+  return { gegnerVersicherungId, kanzleiId, organisationId, leadbearbeiterId }
 }
 
 /**
@@ -339,6 +342,14 @@ export function buildFallInsertFromLead(
   // 4. TRANSFORM
   for (const [fallField, { leadField, transform }] of Object.entries(LEAD_TO_FALL_TRANSFORM_FIELDS)) {
     insert[fallField] = transform(lead[leadField])
+  }
+
+  // AAR-545 Cluster D: Fallback für gegner_versicherung_id.
+  // Primär kommt die FK aus DIRECT_FIELDS (lead.gegner_versicherung_id).
+  // Wenn das Lead keine FK hatte (Freitext-Eingabe), nimmt der Fuzzy-Match
+  // aus resolveFallEntityFks() als Fallback.
+  if (!insert.gegner_versicherung_id && options.gegnerVersicherungId) {
+    insert.gegner_versicherung_id = options.gegnerVersicherungId
   }
 
   return insert

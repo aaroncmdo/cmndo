@@ -258,8 +258,8 @@ export type FallDetail = {
     erstzulassung: string | null
     gegner_name: string | null
     gegner_kennzeichen: string | null
-    schadennummer_versicherung: string | null
-    versicherung_gegner_name: string | null
+    gegner_schadennummer: string | null
+    gegner_versicherung: string | null
     zeugen_kontakte: unknown
     sv_termin: string | null
     gutachten_eingegangen_am: string | null
@@ -309,8 +309,8 @@ export async function getMaklerFallDetail(
       unfallhergang, schadenhoehe_netto,
       fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr,
       kennzeichen, fin_vin, kilometerstand, erstzulassung,
-      gegner_name, gegner_kennzeichen, schadennummer_versicherung,
-      versicherung_gegner_name, zeugen_kontakte,
+      gegner_name, gegner_kennzeichen, gegner_schadennummer,
+      gegner_versicherung, zeugen_kontakte,
       sv_termin, gutachten_eingegangen_am, kanzlei_uebergeben_am,
       regulierung_am, reparaturkosten, wertminderung,
       nutzungsausfall_gesamt, gutachter_honorar,

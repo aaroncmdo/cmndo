@@ -35,6 +35,9 @@ type Lead = {
   vorschaden_anzahl?: number | null
   vorschaden_letzter_datum?: string | null
   cardentity_abfrage_am?: string | null
+  // AAR-545 Cluster D: Eigene VS lebt auf leads, nicht mehr auf faelle.
+  eigene_versicherung?: string | null
+  eigene_policennr?: string | null
 } | null
 
 type Kundenbetreuer = {
@@ -95,16 +98,17 @@ export function StammdatenCard({
   const schadensOrt = str(fall.schadens_ort)
   const schadensOrtZeile = [schadensPlz, schadensOrt].filter(Boolean).join(' ')
 
-  const eigeneVs = str(fall.versicherung_name)
-  const eigeneVsSchadenNr =
-    str(fall.schadennummer_versicherung) ?? str(fall.versicherung_schaden_nr)
+  // AAR-545 Cluster D: Eigene VS kommt jetzt aus leads (faelle.versicherung_name
+  // / schadennummer_versicherung / versicherung_schaden_nr sind ersatzlos weg).
+  const eigeneVs = str(lead?.eigene_versicherung)
+  const eigeneVsSchadenNr = str(lead?.eigene_policennr)
 
   const gegnerBekannt = bool(fall.gegner_bekannt) ?? true
   const gegnerName = str(fall.gegner_name)
   const gegnerKz = str(fall.gegner_kennzeichen)
   const gegnerFahrzeugtyp = str(fall.gegner_fahrzeugtyp)
-  const gegnerVs = str(fall.gegner_versicherung) ?? str(fall.versicherung_gegner_name)
-  const gegnerVsNr = str(fall.versicherungsnummer_gegner)
+  const gegnerVs = str(fall.gegner_versicherung)
+  const gegnerVsNr = str(fall.gegner_versicherungsnummer)
 
   const halterAbweichend = bool(fall.halter_ungleich_fahrer_flag) ?? false
   const halterName =

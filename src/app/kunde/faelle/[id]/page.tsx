@@ -364,7 +364,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             storno_grund: fall.storno_grund as string | null,
             abgeschlossen_am: fall.abgeschlossen_am as string | null,
             google_review_gesendet: fall.google_review_gesendet as boolean | null,
-            versicherung_name: fall.versicherung_name as string | null,
+            gegner_versicherung: fall.gegner_versicherung as string | null,
             kanzlei_ansprechpartner_name: fall.kanzlei_ansprechpartner_name as string | null,
           }}
           svName={svName ?? undefined}

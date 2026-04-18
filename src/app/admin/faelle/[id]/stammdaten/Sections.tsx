@@ -220,10 +220,9 @@ function VersicherungStammdaten({ versicherungId }: { versicherungId: string | n
 
 export function GegnerSection() {
   const { fall } = useFall()
-  // DB-Schema: gegner_name (1 Spalte, kein Vor-/Nachname-Split),
-  // schadennummer_versicherung (statt gegner_schadennummer)
-  // AAR-265: gegner_versicherung_id FK auf versicherungen — wenn gesetzt,
-  // zeigen wir Hotline + Email + BaFin als zusätzliche Card-Zeile.
+  // AAR-545 Cluster D: DB-Felder konsolidiert auf gegner_* Namensraum.
+  // schadennummer_versicherung/versicherung_schaden_nr/versicherung_name sind
+  // ersatzlos weg. FK auf versicherungen-Stammdaten: gegner_versicherung_id.
   const versicherungId = (fall as Record<string, unknown>).gegner_versicherung_id as string | null ?? null
   return (
     <Card icon={<ShieldIcon className="w-4 h-4 text-gray-400" />} title="Gegner & Versicherung">
@@ -233,8 +232,8 @@ export function GegnerSection() {
       <InlineEditField label="Gegner-Kennzeichen" fieldName="gegner_kennzeichen" value={f(fall, 'gegner_kennzeichen')} />
       <InlineEditField label="Gegner-Fahrzeugtyp" fieldName="gegner_fahrzeugtyp" value={f(fall, 'gegner_fahrzeugtyp')} />
       <InlineEditField label="Gegner Versicherung" fieldName="gegner_versicherung" value={f(fall, 'gegner_versicherung')} />
-      <InlineEditField label="Schadennr. (Versicherung)" fieldName="schadennummer_versicherung" value={f(fall, 'schadennummer_versicherung')} />
-      <InlineEditField label="VS-Schadennummer (intern)" fieldName="versicherung_schaden_nr" value={f(fall, 'versicherung_schaden_nr')} />
+      <InlineEditField label="Gegner-Versicherungsnummer" fieldName="gegner_versicherungsnummer" value={f(fall, 'gegner_versicherungsnummer')} />
+      <InlineEditField label="Gegner-Schadennummer" fieldName="gegner_schadennummer" value={f(fall, 'gegner_schadennummer')} />
       <VersicherungStammdaten versicherungId={versicherungId} />
     </Card>
   )

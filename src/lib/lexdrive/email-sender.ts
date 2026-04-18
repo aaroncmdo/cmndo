@@ -34,7 +34,7 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
   // Fall + Lead laden
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, kennzeichen, lead_id, gegner_kennzeichen, gegner_name, versicherung_name, versicherung_schaden_nr, zeuge_name, zeuge_anschrift, zeuge_telefon, zeuge_email')
+    .select('id, fall_nummer, kennzeichen, lead_id, gegner_kennzeichen, gegner_name, gegner_versicherung, gegner_schadennummer, zeuge_name, zeuge_anschrift, zeuge_telefon, zeuge_email')
     .eq('id', fallId)
     .single()
 
@@ -87,8 +87,8 @@ Fahrzeug: ${fall.kennzeichen ?? '—'}
 Gegner:
   Name: ${fall.gegner_name ?? '—'}
   Kennzeichen: ${fall.gegner_kennzeichen ?? '—'}
-  VS: ${fall.versicherung_name ?? '—'}
-  Schaden-Nr: ${fall.versicherung_schaden_nr ?? '—'}
+  VS: ${fall.gegner_versicherung ?? '—'}
+  Schaden-Nr: ${fall.gegner_schadennummer ?? '—'}
 ${zeugeBlock}
 Anhaenge: ${attachments.length} (${attachments.map(a => a.filename).join(', ')})
 
