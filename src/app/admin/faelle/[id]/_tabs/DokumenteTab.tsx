@@ -15,7 +15,7 @@ import { useRouter } from 'next/navigation'
 import {
   FileTextIcon, UploadIcon, CheckCircle2Icon, ClockIcon,
   DownloadIcon, EyeIcon, SearchIcon, Loader2Icon, FileCheckIcon,
-  BellIcon, ClipboardCheckIcon,
+  BellIcon, ClipboardCheckIcon, ServerIcon,
 } from 'lucide-react'
 // AAR-327: Wiederverwendbare Dokument-Anforderungs-UI (Modal + Liste)
 import AnforderungenListe, {
@@ -52,6 +52,19 @@ type Dokument = {
   quelle: string | null
   hochgeladen_von_rolle: string | null
   created_at: string
+}
+
+// AAR-356: System-generierte / externe Dokumente die das Admin-Team immer
+// sehen soll, unabhängig vom Pflichtdokumente-Katalog. SA + Vollmacht kommen
+// aus dem FlowLink-Signatur-Flow, CarDentity-Vorschaden aus der Typ-B-Abfrage,
+// Gutachten + Kanzlei-Paket aus der `dokumente`-Tabelle (kategorie-basiert).
+type SystemDokumenteProps = {
+  sa_pdf_url: string | null
+  sa_unterschrift_url: string | null
+  vollmacht_pdf: string | null
+  vorschaden_typ_b_pdf_url: string | null
+  gutachten: { id: string; datei_url: string; datei_name: string; hochgeladen_am: string | null } | null
+  kanzleiPaket: { id: string; datei_url: string; datei_name: string; hochgeladen_am: string | null } | null
 }
 
 type FallAS = {
@@ -140,6 +153,7 @@ export default function DokumenteTab({
   zuPruefendeUploads,
   uploadbareSlots,
   sortierbareItems,
+  systemDokumente,
 }: {
   fallId: string
   pflichtdokumente: Pflichtdok[]
@@ -160,6 +174,9 @@ export default function DokumenteTab({
   uploadbareSlots: ZuordnungsSlot[]
   // AAR-326: Pflichtdokumente im drag&drop-fähigen Shape
   sortierbareItems: SortierbarPflicht[]
+  // AAR-356: System-Dokumente (SA, Vollmacht, Gutachten, Kanzlei-Paket,
+  // CarDentity-Vorschaden) als eigene Sektion oberhalb der Pflichtdokumente
+  systemDokumente: SystemDokumenteProps
 }) {
   const router = useRouter()
   const [uploading, setUploading] = useState<string | null>(null)
@@ -296,6 +313,12 @@ export default function DokumenteTab({
           </div>
         </div>
       </div>
+
+      {/* AAR-356: System-Dokumente — SA, Vollmacht, Gutachten, Kanzlei-Paket,
+          CarDentity-Vorschadenbericht. Reine Übersicht mit Download/Vorschau,
+          kein Upload-Flow — die Files werden von anderen Systemen (FlowLink,
+          SV-Portal, Kanzlei-Paket-Generator, CarDentity-Worker) erzeugt. */}
+      <SystemDokumenteBox systemDokumente={systemDokumente} />
 
       {/* Anschlussschreiben Upload + OCR */}
       <div className={`rounded-xl border p-4 ${fallAS.anschlussschreiben_url ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200'}`}>
@@ -617,6 +640,65 @@ export default function DokumenteTab({
             automatisch + löst Filmcheck-Flow aus (Kanzlei-Paket, AS-Sendedatum).
           </p>
         </div>
+      </div>
+    </div>
+  )
+}
+
+// AAR-356: System-Dokumente-Box. 6 Zeilen, Status-Badge + Vorschau/Download.
+// Keine Schreib-Interaktion — das Admin-Team sieht nur was andere Systeme
+// erzeugt haben. Wenn eine Quelle fehlt, wird ein „ausstehend"-Badge gezeigt.
+function SystemDokumenteBox({ systemDokumente }: { systemDokumente: SystemDokumenteProps }) {
+  const rows: { key: string; label: string; url: string | null; hint: string }[] = [
+    { key: 'sa', label: 'Sachverständigen-Auftrag (SA)', url: systemDokumente.sa_pdf_url, hint: 'aus FlowLink-Signatur' },
+    { key: 'sa_sig', label: 'SA-Unterschrift', url: systemDokumente.sa_unterschrift_url, hint: 'Unterschrift-Bucket' },
+    { key: 'vollmacht', label: 'Vollmacht', url: systemDokumente.vollmacht_pdf, hint: 'aus FlowLink-Signatur' },
+    { key: 'gutachten', label: 'Gutachten-PDF', url: systemDokumente.gutachten?.datei_url ?? null, hint: 'vom Sachverständigen' },
+    { key: 'kanzlei', label: 'Kanzlei-Paket', url: systemDokumente.kanzleiPaket?.datei_url ?? null, hint: 'system-generiert' },
+    { key: 'vorschaden', label: 'Vorschadenbericht (CarDentity)', url: systemDokumente.vorschaden_typ_b_pdf_url, hint: 'Typ-B-Abfrage' },
+  ]
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-gray-100">
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+          <ServerIcon className="w-3.5 h-3.5" /> System-Dokumente
+        </h3>
+      </div>
+      <div className="divide-y divide-gray-50">
+        {rows.map((r) => (
+          <div key={r.key} className="flex items-center justify-between px-4 py-2.5 gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <FileTextIcon className={`w-4 h-4 shrink-0 ${r.url ? 'text-emerald-500' : 'text-gray-300'}`} />
+              <div className="min-w-0">
+                <p className="text-sm text-gray-800 truncate">{r.label}</p>
+                <p className="text-[10px] text-gray-400">{r.hint}</p>
+              </div>
+            </div>
+            {r.url ? (
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href={r.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[10px] font-medium text-[#4573A2] hover:text-[#1E3A5F]"
+                >
+                  <EyeIcon className="w-3 h-3" /> Vorschau
+                </a>
+                <a
+                  href={r.url}
+                  download
+                  className="inline-flex items-center gap-1 text-[10px] font-medium text-gray-500 hover:text-gray-700"
+                >
+                  <DownloadIcon className="w-3 h-3" /> Download
+                </a>
+              </div>
+            ) : (
+              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-gray-50 text-gray-400 shrink-0">
+                Ausstehend
+              </span>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   )
