@@ -169,7 +169,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
           </div>
           <div>
             <label className="block text-gray-500 text-xs mb-1">Max Fälle / Monat</label>
-            <input name="max_faelle_monat" type="number" min="1" defaultValue={sv.maxFaelleMonat} className={inputCls} />
+            <input name="paket_faelle_gesamt" type="number" min="1" defaultValue={sv.maxFaelleMonat} className={inputCls} />
           </div>
         </div>
 

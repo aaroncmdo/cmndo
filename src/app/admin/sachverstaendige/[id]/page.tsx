@@ -25,7 +25,7 @@ export default async function SvDetailPage({
 
   const { data: sv } = await supabase
     .from('sachverstaendige')
-    .select('id, profile_id, paket, max_faelle_monat, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, sa_vorlage_status, sa_vorlage_storage_path, sa_vorlage_hochgeladen_am, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, gesperrt_am, gesperrt_grund, profiles(vorname, nachname, email, telefon)')
+    .select('id, profile_id, paket, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, sa_vorlage_status, sa_vorlage_storage_path, sa_vorlage_hochgeladen_am, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, gesperrt_am, gesperrt_grund, profiles(vorname, nachname, email, telefon)')
     .eq('id', id)
     .single()
 
@@ -72,7 +72,7 @@ export default async function SvDetailPage({
   }
 
   const name = profile ? `${profile.vorname ?? ''} ${profile.nachname ?? ''}`.trim() : ''
-  const maxFaelle = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10
+  const maxFaelle = sv.paket_faelle_gesamt ?? 10
   const genutzt = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
   const pct = maxFaelle > 0 ? Math.round((genutzt / maxFaelle) * 100) : 0
   const now = new Date()
@@ -279,7 +279,7 @@ export default async function SvDetailPage({
                 nachname: profile?.nachname ?? '',
                 telefon: profile?.telefon ?? '',
                 paket: sv.paket,
-                maxFaelleMonat: sv.max_faelle_monat,
+                maxFaelleMonat: sv.paket_faelle_gesamt ?? 10,
                 istAktiv: sv.ist_aktiv ?? true,
                 notizen: sv.notizen ?? '',
                 standortAdresse: sv.standort_adresse ?? '',

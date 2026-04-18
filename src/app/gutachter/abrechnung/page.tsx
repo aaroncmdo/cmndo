@@ -27,7 +27,6 @@ export default async function AbrechnungPage() {
     id: string
     paket: string | null
     offene_faelle: number | null
-    max_faelle_monat: number | null
     paket_faelle_genutzt: number | null
     paket_faelle_gesamt: number | null
     paket_umkreis_km: number | null
@@ -36,7 +35,7 @@ export default async function AbrechnungPage() {
     anzahlung_status: string | null
     onboarding_anzahlung_betrag: number | null
     stripe_anzahlung_bezahlt_am: string | null
-  }>(supabase, user!.id, 'id, paket, offene_faelle, max_faelle_monat, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, anzahlung_betrag, anzahlung_bezahlt_am, anzahlung_status, onboarding_anzahlung_betrag, stripe_anzahlung_bezahlt_am')
+  }>(supabase, user!.id, 'id, paket, offene_faelle, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, anzahlung_betrag, anzahlung_bezahlt_am, anzahlung_status, onboarding_anzahlung_betrag, stripe_anzahlung_bezahlt_am')
 
   if (!sv) {
     return (
@@ -101,7 +100,7 @@ export default async function AbrechnungPage() {
 
   const paketLabel = PAKET_LABELS[sv.paket ?? ''] ?? sv.paket ?? 'Kein Paket'
   const offeneFaelle = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
-  const maxFaelle = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10
+  const maxFaelle = sv.paket_faelle_gesamt ?? 10
   const auslastungProzent = maxFaelle > 0 ? Math.min(Math.round((offeneFaelle / maxFaelle) * 100), 100) : 0
 
   // Progress bar color based on utilization

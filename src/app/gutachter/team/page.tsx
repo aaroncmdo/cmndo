@@ -47,7 +47,7 @@ export default async function TeamPage() {
   // Sub-SVs der Org laden
   const { data: subRows } = await supabase
     .from('sachverstaendige')
-    .select('id, profile_id, paket, rolle_in_organisation, ist_aktiv, portal_zugang_freigeschaltet, max_faelle_monat, paket_faelle_genutzt, werbebudget_guthaben_netto')
+    .select('id, profile_id, paket, rolle_in_organisation, ist_aktiv, portal_zugang_freigeschaltet, paket_faelle_gesamt, paket_faelle_genutzt, werbebudget_guthaben_netto')
     .eq('organisation_id', sv.organisation_id)
     .neq('id', sv.id) // Verwalter selbst raus
 
@@ -77,7 +77,7 @@ export default async function TeamPage() {
     ist_aktiv: !!s.ist_aktiv,
     portal_zugang_freigeschaltet: !!s.portal_zugang_freigeschaltet,
     gesperrt_seit: sperreMap.get(s.id) ?? null,
-    max_faelle_monat: s.max_faelle_monat ?? 0,
+    paket_faelle_gesamt: s.paket_faelle_gesamt ?? 0,
     paket_faelle_genutzt: s.paket_faelle_genutzt,
     werbebudget_guthaben_netto: s.werbebudget_guthaben_netto != null ? Number(s.werbebudget_guthaben_netto) : null,
     vorname: s.profile_id ? profileMap.get(s.profile_id)?.vorname ?? null : null,
@@ -119,7 +119,7 @@ export default async function TeamPage() {
   const aktiveCount = subSvs.filter(s => s.ist_aktiv && !s.gesperrt_seit).length
   const gesperrtCount = subSvs.filter(s => !!s.gesperrt_seit).length
   const totalFaelleGenutzt = subSvs.reduce((sum, s) => sum + (s.paket_faelle_genutzt ?? 0), 0)
-  const totalFaelleMax = subSvs.reduce((sum, s) => sum + s.max_faelle_monat, 0)
+  const totalFaelleMax = subSvs.reduce((sum, s) => sum + s.paket_faelle_gesamt, 0)
   const totalWerbebudget = subSvs.reduce((sum, s) => sum + (s.werbebudget_guthaben_netto ?? 0), 0)
   const auslastungPct = totalFaelleMax > 0 ? Math.round((totalFaelleGenutzt / totalFaelleMax) * 100) : 0
 

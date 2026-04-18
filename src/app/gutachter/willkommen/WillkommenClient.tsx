@@ -64,7 +64,7 @@ const PAKET_LABELS: Record<string, string> = {
 type SvData = {
   id: string
   paket: string
-  max_faelle_monat: number
+  paket_faelle_gesamt: number
   paket_umkreis_km: number
   onboarding_anzahlung_betrag: number
   onboarding_status: string | null
@@ -544,7 +544,7 @@ export default function WillkommenClient({
                 <p className="text-xs text-gray-500 uppercase tracking-wide mb-3">Deine Konditionen</p>
                 <div className="grid grid-cols-2 gap-y-3 gap-x-4">
                   <Kondition label="Paket" value={paketLabel} />
-                  <Kondition label="Fälle / Monat" value={String(sv.max_faelle_monat)} />
+                  <Kondition label="Fälle / Monat" value={String(sv.paket_faelle_gesamt)} />
                   <Kondition label="Radius" value={`${sv.paket_umkreis_km} km`} />
                   <Kondition label="Anzahlung" value={fmtEur(sv.onboarding_anzahlung_betrag)} highlight />
                 </div>
@@ -676,7 +676,7 @@ export default function WillkommenClient({
                 <p className="text-xs text-gray-500 uppercase tracking-wide mb-3">Dein Paket</p>
                 <div className="grid grid-cols-2 gap-y-3 gap-x-4">
                   <Kondition label="Paket" value={paketLabel} />
-                  <Kondition label="Fälle / Monat" value={String(sv.max_faelle_monat)} />
+                  <Kondition label="Fälle / Monat" value={String(sv.paket_faelle_gesamt)} />
                   <Kondition label="Radius" value={`${sv.paket_umkreis_km} km`} />
                   <Kondition
                     label="Standort"
@@ -712,7 +712,7 @@ export default function WillkommenClient({
               <OrderSummaryCard
                 variant="compact"
                 paketLabel={paketLabel}
-                kontingent={sv.max_faelle_monat}
+                kontingent={sv.paket_faelle_gesamt}
                 radiusKm={sv.paket_umkreis_km}
                 anzahlungBetrag={r === 'buero_inhaber' ? gesamtAnzahlung : sv.onboarding_anzahlung_betrag}
                 organisationName={r !== 'buero_inhaber' && organisation ? organisation.name : null}
@@ -919,7 +919,7 @@ export default function WillkommenClient({
                 <OrderSummaryCard
                   variant="xl"
                   paketLabel={paketLabel}
-                  kontingent={sv.max_faelle_monat}
+                  kontingent={sv.paket_faelle_gesamt}
                   radiusKm={sv.paket_umkreis_km}
                   anzahlungBetrag={r === 'buero_inhaber' ? gesamtAnzahlung : sv.onboarding_anzahlung_betrag}
                   subBueros={r === 'buero_inhaber' ? subSvs : undefined}
@@ -1120,7 +1120,7 @@ export default function WillkommenClient({
         open={showLeadPreisOverlay}
         onClose={() => setShowLeadPreisOverlay(false)}
         rows={leadpreise}
-        maxFaelleMonat={sv.max_faelle_monat}
+        maxFaelleMonat={sv.paket_faelle_gesamt}
         paketLabel={paketLabel}
       />
     </div>

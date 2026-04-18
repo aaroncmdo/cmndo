@@ -40,8 +40,8 @@ export default function GutachterCockpit() {
   const load = useCallback(async () => {
     try {
     const user = (await supabase.auth.getUser())?.data?.user ?? null; if (!user) { setLoading(false); return }
-    let { data: sv } = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, offene_faelle, max_faelle_monat').eq('profile_id', user.id).single()
-    if (!sv) { const r = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, offene_faelle, max_faelle_monat').eq('user_id', user.id).single(); sv = r.data }
+    let { data: sv } = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, offene_faelle').eq('profile_id', user.id).single()
+    if (!sv) { const r = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, offene_faelle').eq('user_id', user.id).single(); sv = r.data }
     if (!sv) { setLoading(false); return }
     const { data: p } = await supabase.from('profiles').select('vorname').eq('id', user.id).single()
     const now = new Date(); const h = now.getHours()
@@ -49,7 +49,7 @@ export default function GutachterCockpit() {
     const isToday = selectedDate.toDateString() === now.toDateString()
     setDatum(isToday ? `HEUTE ${selectedDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}` : selectedDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }))
     setSvLat(sv.standort_lat ? Number(sv.standort_lat) : null); setSvLng(sv.standort_lng ? Number(sv.standort_lng) : null)
-    setStats({ faelle: sv.offene_faelle ?? sv.paket_faelle_genutzt ?? 0, max: sv.max_faelle_monat ?? sv.paket_faelle_gesamt ?? 25, monat: 0 })
+    setStats({ faelle: sv.offene_faelle ?? sv.paket_faelle_genutzt ?? 0, max: sv.paket_faelle_gesamt ?? 25, monat: 0 })
 
     const ds = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString()
     const de = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + 1).toISOString()

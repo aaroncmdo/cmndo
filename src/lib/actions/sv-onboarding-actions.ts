@@ -148,7 +148,7 @@ export async function getOnboardingData() {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return null
 
-  const sv = await getGutachterForUser<Record<string, unknown>>(supabase, user.id, 'id, paket, onboarding_status, onboarding_anzahlung_betrag, portal_zugang_freigeschaltet, vertrag_unterschrieben, max_faelle_monat, gebiet_plz, standort_adresse')
+  const sv = await getGutachterForUser<Record<string, unknown>>(supabase, user.id, 'id, paket, onboarding_status, onboarding_anzahlung_betrag, portal_zugang_freigeschaltet, vertrag_unterschrieben, paket_faelle_gesamt, gebiet_plz, standort_adresse')
   if (!sv) return null
 
   const db = createAdminClient()
@@ -168,7 +168,7 @@ export async function getOnboardingData() {
 
   // Anzahlung berechnen (pro Fall im Kontingent)
   const { FINANCE } = await import('@/lib/finance/constants')
-  const maxFaelle = Number(sv.max_faelle_monat ?? 10)
+  const maxFaelle = Number(sv.paket_faelle_gesamt ?? 10)
   const anzahlung = Number(sv.onboarding_anzahlung_betrag ?? maxFaelle * FINANCE.ANZAHLUNG_PRO_KONTINGENT)
 
   return {

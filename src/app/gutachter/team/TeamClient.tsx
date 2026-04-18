@@ -11,7 +11,7 @@ export type SubSvData = {
   ist_aktiv: boolean
   portal_zugang_freigeschaltet: boolean
   gesperrt_seit: string | null
-  max_faelle_monat: number
+  paket_faelle_gesamt: number
   paket_faelle_genutzt: number | null
   werbebudget_guthaben_netto: number | null
   vorname: string | null
@@ -63,7 +63,7 @@ export default function TeamClient({
   // Sub-SV Optionen fuer den Assign-Dropdown
   const eligibleTargets = subSvs.filter(s =>
     s.ist_aktiv && s.portal_zugang_freigeschaltet && !s.gesperrt_seit &&
-    (s.paket_faelle_genutzt ?? 0) < s.max_faelle_monat
+    (s.paket_faelle_genutzt ?? 0) < s.paket_faelle_gesamt
   )
 
   function handleAssign(fallId: string) {
@@ -176,7 +176,7 @@ export default function TeamClient({
                           <option value="">Wählen...</option>
                           {eligibleTargets.map(s => (
                             <option key={s.id} value={s.id}>
-                              {[s.vorname, s.nachname].filter(Boolean).join(' ') || s.id.slice(0, 8)} ({s.paket_faelle_genutzt ?? 0}/{s.max_faelle_monat})
+                              {[s.vorname, s.nachname].filter(Boolean).join(' ') || s.id.slice(0, 8)} ({s.paket_faelle_genutzt ?? 0}/{s.paket_faelle_gesamt})
                             </option>
                           ))}
                         </select>
@@ -239,7 +239,7 @@ export default function TeamClient({
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right text-gray-700">
-                      {s.paket_faelle_genutzt ?? 0} / {s.max_faelle_monat}
+                      {s.paket_faelle_genutzt ?? 0} / {s.paket_faelle_gesamt}
                     </td>
                     <td className="px-4 py-3 text-right text-gray-700">
                       {s.werbebudget_guthaben_netto != null

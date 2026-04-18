@@ -93,8 +93,8 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
     .from('sachverstaendige')
     .select(
       'id, profile_id, paket, standort_lat, standort_lng, isochrone_polygon, ' +
-        'paket_radius_km, paket_umkreis_km, radius_km, ' +
-        'paket_faelle_gesamt, paket_faelle_genutzt, offene_faelle, max_faelle_monat, ' +
+        'paket_umkreis_km, ' +
+        'paket_faelle_gesamt, paket_faelle_genutzt, offene_faelle, ' +
         'urlaub_von, urlaub_bis, ist_aktiv, gesperrt_seit, ablehnungen_30_tage, ' +
         'profiles(vorname, nachname)',
     )
@@ -121,7 +121,7 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
     }
 
     // Kontingent-Check
-    const kontingentGesamt = Number(sv.paket_faelle_gesamt) || Number(sv.max_faelle_monat) || 10
+    const kontingentGesamt = Number(sv.paket_faelle_gesamt) || 10
     const kontingentGenutzt = Number(sv.paket_faelle_genutzt) || Number(sv.offene_faelle) || 0
     const kontingentFrei = kontingentGesamt - kontingentGenutzt
     if (kontingentFrei <= 0) continue
@@ -131,7 +131,7 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
 
     // Distanz-Check (Isochrone oder Radius)
     const distanzKm = haversine(Number(sv.standort_lat), Number(sv.standort_lng), fallLat, fallLng)
-    const radius = Number(sv.paket_umkreis_km) || Number(sv.radius_km) || Number(sv.paket_radius_km) || 40
+    const radius = Number(sv.paket_umkreis_km) || 40
 
     // AAR-521: Isochrone-Polygone kommen aus DB in 3 Formaten (A/B/C).
     // Vorher wurde nur Format B erkannt → Polygone in Format A/C liefen in den

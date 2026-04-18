@@ -5,7 +5,7 @@
 import { createClient } from '@/lib/supabase/server'
 import SachverstaendigeList from '@/components/SachverstaendigeList'
 
-const BASE_SELECT = 'id, profile_id, gebiet_plz, paket, offene_faelle, max_faelle_monat, ist_aktiv, gutachter_typ, qualifikationen_neu, spezifikationen, schadenarten, onboarding_abgeschlossen, anzahlung_status, standort_adresse, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, werbebudget_guthaben_netto, organisation_id, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, ablehnungen_30_tage, deaktiviert_grund, deaktiviert_am, geloescht_am, profiles(vorname, nachname, email, telefon)'
+const BASE_SELECT = 'id, profile_id, gebiet_plz, paket, offene_faelle, ist_aktiv, gutachter_typ, qualifikationen_neu, spezifikationen, schadenarten, onboarding_abgeschlossen, anzahlung_status, standort_adresse, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, werbebudget_guthaben_netto, organisation_id, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, ablehnungen_30_tage, deaktiviert_grund, deaktiviert_am, geloescht_am, profiles(vorname, nachname, email, telefon)'
 
 export default async function DispatchSachverstaendigePage() {
   const supabase = await createClient()
@@ -30,7 +30,7 @@ export default async function DispatchSachverstaendigePage() {
       radiusKm: Number(sv.paket_umkreis_km) || 40,
       paket: sv.paket as string,
       offeneFaelle: Number(sv.paket_faelle_genutzt) || Number(sv.offene_faelle) || 0,
-      maxFaelleMonat: Number(sv.paket_faelle_gesamt) || Number(sv.max_faelle_monat) || 10,
+      maxFaelleMonat: Number(sv.paket_faelle_gesamt) || 10,
       standortLat: sv.standort_lat != null ? Number(sv.standort_lat) : null,
       standortLng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
       organisationId: sv.organisation_id as string | null,

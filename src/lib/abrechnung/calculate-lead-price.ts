@@ -45,11 +45,11 @@ export async function isCaseInKontingent(
   const db = createAdminClient()
 
   const { data: sv } = await db.from('sachverstaendige')
-    .select('kontingent_soll, max_faelle_monat')
+    .select('paket_faelle_gesamt')
     .eq('id', gutachterId)
     .single()
 
-  const kontingent = sv?.kontingent_soll ?? sv?.max_faelle_monat ?? 10
+  const kontingent = sv?.paket_faelle_gesamt ?? 10
 
   // Zähle Fälle im gleichen Kalendermonat vor diesem Fall
   const monthStart = new Date(caseCreatedAt.getFullYear(), caseCreatedAt.getMonth(), 1)

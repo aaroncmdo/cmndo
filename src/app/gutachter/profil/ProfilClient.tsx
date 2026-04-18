@@ -22,7 +22,7 @@ import {
 } from '@/components/notifications/NotificationPreferencesForm'
 
 type Profile = { anrede: string | null; titel: string | null; vorname: string | null; nachname: string | null; telefon: string | null; rolle: string; twofa_telefon?: string | null; avatar_url?: string | null; anzeigename?: string | null; profilbeschreibung?: string | null }
-type SV = { id: string; paket: string; gebiet_plz: string | null; ist_aktiv: boolean; max_faelle_monat: number; offene_faelle: number; kalender_typ: string; kalender_sync_aktiv: boolean; kalender_sync_letzte: string | null; qualifikationen_neu: string[] | null; spezifikationen: string[] | null; schadenarten: string[] | null; standort_adresse: string | null; standort_plz: string | null; standort_lat: number | null; standort_lng: number | null; standort_place_id: string | null; firmenname: string | null; rechtsform: string | null; steuernummer: string | null; ust_id: string | null; hrb: string | null; rolle_in_organisation: string | null; community_anonym: boolean }
+type SV = { id: string; paket: string; gebiet_plz: string | null; ist_aktiv: boolean; paket_faelle_gesamt: number; offene_faelle: number; kalender_typ: string; kalender_sync_aktiv: boolean; kalender_sync_letzte: string | null; qualifikationen_neu: string[] | null; spezifikationen: string[] | null; schadenarten: string[] | null; standort_adresse: string | null; standort_plz: string | null; standort_lat: number | null; standort_lng: number | null; standort_place_id: string | null; firmenname: string | null; rechtsform: string | null; steuernummer: string | null; ust_id: string | null; hrb: string | null; rolle_in_organisation: string | null; community_anonym: boolean }
 
 // BUG-91: Klassische deutsche Rechtsformen + 'Einzelunternehmen' als Default
 // fuer Solo-SVs ohne eigene GmbH/UG.
@@ -329,7 +329,7 @@ export default function ProfilClient({
                 <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1 px-1">Vertrag</p>
               </div>
               <FieldRow label="Paket" value={PAKET_LABELS[sv.paket] ?? sv.paket ?? '—'} />
-              <FieldRow label="Offene Fälle" value={`${sv.offene_faelle} / ${sv.max_faelle_monat}`} />
+              <FieldRow label="Offene Fälle" value={`${sv.offene_faelle} / ${sv.paket_faelle_gesamt}`} />
               <FieldRow label="Zugewiesene Fälle gesamt" value={String(faelleCount)} />
             </div>
 

@@ -28,7 +28,7 @@ export type OnboardingRechnungContext = {
   stripe_payment_intent_id?: string | null
   netto_euro: number       // autoritativ aus Stripe-Session oder onboarding_anzahlung_betrag
   paket?: string | null
-  kontingent: number       // 10/25/50 oder max_faelle_monat
+  kontingent: number       // 10/25/50 oder paket_faelle_gesamt
   bezahlt_am: Date
 }
 

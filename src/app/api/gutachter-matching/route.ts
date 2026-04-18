@@ -27,7 +27,7 @@ const BESICHTIGUNG_MIN = 60
 type GutachterSlot = {
   sv_id: string; name: string; prio: number; partner_seit: string | null
   entfernung_km: number | null; fahrzeit_min: number | null
-  auslastung: string; offene_faelle: number; max_faelle_monat: number; paket: string | null
+  auslastung: string; offene_faelle: number; paket_faelle_gesamt: number; paket: string | null
   termin: string; wunschtermin_moeglich: boolean
   naechster_freier_slot: string | null; route_info: string | null
 }
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
   // KFZ-154 Cleanup: legacy qualifikationen Spalte gedroppt
   const { data: svList } = await supabase
     .from('sachverstaendige')
-    .select('id, partner_seit, offene_faelle, max_faelle_monat, paket, qualifikationen_neu, spezifikationen, schadenarten, ist_aktiv, profile_id, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_lat, standort_lng, isochrone_polygon')
+    .select('id, partner_seit, offene_faelle, paket, qualifikationen_neu, spezifikationen, schadenarten, ist_aktiv, profile_id, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_lat, standort_lng, isochrone_polygon')
     .eq('ist_aktiv', true)
     .eq('portal_zugang_freigeschaltet', true) // KFZ-148: Nur freigeschaltete SVs
 
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
     }
     if (!inRange) continue
 
-    const maxFaelle = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10
+    const maxFaelle = sv.paket_faelle_gesamt ?? 10
     const genutztFaelle = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
     if (genutztFaelle >= maxFaelle) continue
 
@@ -292,7 +292,7 @@ export async function POST(request: Request) {
 
   for (let i = 0; i < topCandidates.length && slots.length < 5; i++) {
     const sv = topCandidates[i]
-    const maxF = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10
+    const maxF = sv.paket_faelle_gesamt ?? 10
     const genutztF = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
     const { info, fahrzeit } = getRouteInfo(sv.id, sv.distanz_km)
     const wunschMoeglich = canDoSlot(sv.id, wDate, fahrzeit)
@@ -307,7 +307,7 @@ export async function POST(request: Request) {
       fahrzeit_min: fahrzeit,
       auslastung: `${genutztF}/${maxF}`,
       offene_faelle: genutztF,
-      max_faelle_monat: maxF,
+      paket_faelle_gesamt: maxF,
       paket: sv.paket,
       termin: wunschMoeglich ? wunschtermin : (nextSlot?.toISOString() ?? wunschtermin),
       wunschtermin_moeglich: wunschMoeglich,

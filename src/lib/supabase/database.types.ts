@@ -5729,10 +5729,8 @@ export type Database = {
           kalender_sync_aktiv: boolean | null
           kalender_sync_letzte: string | null
           kalender_typ: string | null
-          kontingent_soll: number | null
           live_tracking_enabled: boolean | null
           logo_url: string | null
-          max_faelle_monat: number
           notizen: string | null
           offene_faelle: number
           onboarding_abgeschlossen: boolean | null
@@ -5830,10 +5828,8 @@ export type Database = {
           kalender_sync_aktiv?: boolean | null
           kalender_sync_letzte?: string | null
           kalender_typ?: string | null
-          kontingent_soll?: number | null
           live_tracking_enabled?: boolean | null
           logo_url?: string | null
-          max_faelle_monat?: number
           notizen?: string | null
           offene_faelle?: number
           onboarding_abgeschlossen?: boolean | null
@@ -5931,10 +5927,8 @@ export type Database = {
           kalender_sync_aktiv?: boolean | null
           kalender_sync_letzte?: string | null
           kalender_typ?: string | null
-          kontingent_soll?: number | null
           live_tracking_enabled?: boolean | null
           logo_url?: string | null
-          max_faelle_monat?: number
           notizen?: string | null
           offene_faelle?: number
           onboarding_abgeschlossen?: boolean | null

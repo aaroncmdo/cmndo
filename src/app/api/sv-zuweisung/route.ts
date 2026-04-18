@@ -88,7 +88,7 @@ export async function POST(request: Request) {
   // BUG-107: Nur SVs die bezahlt haben UND aktiv sind (kein Pilot-Fall, kein dispatch_aktiv)
   let svQuery = supabase
     .from('sachverstaendige')
-    .select('id, partner_seit, offene_faelle, max_faelle_monat, standort_lat, standort_lng, isochrone_polygon, paket_umkreis_km, spezifikationen, schadenarten, organisation_id, rolle_in_organisation')
+    .select('id, partner_seit, offene_faelle, paket_faelle_gesamt, paket_faelle_genutzt, standort_lat, standort_lng, isochrone_polygon, paket_umkreis_km, spezifikationen, schadenarten, organisation_id, rolle_in_organisation')
     .eq('ist_aktiv', true)
     .eq('portal_zugang_freigeschaltet', true)
 
@@ -114,7 +114,9 @@ export async function POST(request: Request) {
 
   for (const sv of svList) {
     // Kapazitätsprüfung
-    if (sv.offene_faelle >= sv.max_faelle_monat) continue
+    const svMax = sv.paket_faelle_gesamt ?? 0
+    const svGenutzt = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
+    if (svGenutzt >= svMax) continue
 
     let distanz: number | null = null
     let inRange = false
@@ -198,10 +200,9 @@ export async function POST(request: Request) {
       (c.rolle_in_organisation ?? '').toLowerCase() === 'community_member'
     )
     // Sort by 'free capacity' = max - genutzt, hoechster freier Slot zuerst
-    type WithCapacity = (typeof communityCandidates)[number] & { paket_faelle_genutzt?: number | null }
     communityCandidates.sort((a, b) => {
-      const aFree = (a.max_faelle_monat ?? 0) - ((a as WithCapacity).paket_faelle_genutzt ?? a.offene_faelle ?? 0)
-      const bFree = (b.max_faelle_monat ?? 0) - ((b as WithCapacity).paket_faelle_genutzt ?? b.offene_faelle ?? 0)
+      const aFree = (a.paket_faelle_gesamt ?? 0) - (a.paket_faelle_genutzt ?? a.offene_faelle ?? 0)
+      const bFree = (b.paket_faelle_gesamt ?? 0) - (b.paket_faelle_genutzt ?? b.offene_faelle ?? 0)
       return bFree - aFree
     })
     if (communityCandidates.length > 0) bestSv = communityCandidates[0]

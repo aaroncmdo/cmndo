@@ -22,7 +22,7 @@ export async function updateSvProfile(svId: string, profileId: string, formData:
   const nachname = (formData.get('nachname') as string)?.trim() || null
   const telefon = (formData.get('telefon') as string)?.trim() || null
   const paket = formData.get('paket') as string
-  const maxFaelle = parseInt(formData.get('max_faelle_monat') as string) || 10
+  const maxFaelle = parseInt(formData.get('paket_faelle_gesamt') as string) || 10
   const istAktiv = formData.get('ist_aktiv') === 'true'
   const notizen = (formData.get('notizen') as string)?.trim() || null
 
@@ -48,7 +48,7 @@ export async function updateSvProfile(svId: string, profileId: string, formData:
   // Update sachverstaendige
   const svUpdate: Record<string, unknown> = {
     paket,
-    max_faelle_monat: maxFaelle,
+    paket_faelle_gesamt: maxFaelle,
     ist_aktiv: istAktiv,
     notizen,
     standort_adresse: standortAdresse,
@@ -157,7 +157,7 @@ export async function resendWelcomeMail(
   const adminDb = createAdminClient()
   const { data: sv, error: svErr } = await adminDb
     .from('sachverstaendige')
-    .select('id, profile_id, paket, paket_faelle_gesamt, max_faelle_monat, paket_umkreis_km, onboarding_anzahlung_betrag, anzahlung_faellig, organisation_id, profiles(email, vorname, nachname, anrede, titel)')
+    .select('id, profile_id, paket, paket_faelle_gesamt, paket_umkreis_km, onboarding_anzahlung_betrag, anzahlung_faellig, organisation_id, profiles(email, vorname, nachname, anrede, titel)')
     .eq('id', svId)
     .maybeSingle()
 
@@ -214,7 +214,7 @@ export async function resendWelcomeMail(
   // unterschieden werden — wir nehmen die effektiven Werte aus `sachverstaendige`).
   const paketKey = (sv.paket as string | null) ?? 'standard'
   const paketName = paketKey.charAt(0).toUpperCase() + paketKey.slice(1)
-  const kontingent = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? (
+  const kontingent = sv.paket_faelle_gesamt ?? (
     PAKET_KONFIG[paketKey as keyof typeof PAKET_KONFIG]?.kontingent ?? 10
   )
   const radiusKm = sv.paket_umkreis_km ?? (
