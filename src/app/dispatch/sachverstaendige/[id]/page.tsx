@@ -119,7 +119,7 @@ export default async function DispatchSvDetailPage({
               </div>
               <div>
                 <p className="text-[10px] text-gray-400 uppercase">Radius</p>
-                <p className="font-medium">{Number(svRec.paket_umkreis_km) || Number(svRec.radius_km) || 40} km</p>
+                <p className="font-medium">{Number(svRec.paket_umkreis_km) || 40} km</p>
               </div>
             </div>
             {Array.isArray(svRec.gebiet_plz) && (svRec.gebiet_plz as string[]).length > 0 && (

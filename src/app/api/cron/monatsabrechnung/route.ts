@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 
     // Get all Fälle with completed Termin this month
     const { data: faelle } = await svc.from('faelle')
-      .select('id, fall_nummer, schadenshoehe_netto, kennzeichen, sv_termin, lead_id')
+      .select('id, fall_nummer, schadens_hoehe_netto, kennzeichen, sv_termin, lead_id')
       .eq('sv_id', sv.id)
       .gte('sv_termin', monatStart.toISOString())
       .lte('sv_termin', monatEnd.toISOString())
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
     const positionen: { fall_id: string; kunde_name: string; kennzeichen: string; schadenshoehe: number; leadpreis: number; leadpreis_typ: string; termin_datum: string }[] = []
 
     for (const fall of faelle) {
-      const schaden = Number(fall.schadenshoehe_netto) || 0
+      const schaden = Number(fall.schadens_hoehe_netto) || 0
       const istImPaket = paketCount + einzelCount < kontingent
       const preis = berechneLeadpreis(schaden, istImPaket)
       const typ = istImPaket ? 'paket' : 'einzel'
