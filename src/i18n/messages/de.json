@@ -138,7 +138,27 @@
       "weiter": "Weiter zu ZB1",
       "saving": "Wird gespeichert …"
     },
-    "step3": {},
+    "step3": {
+      "heading": "Fahrzeugschein",
+      "sub": "Wir brauchen die Fahrzeugdaten aus Ihrem ZB1.",
+      "scan_heading": "Fahrzeugschein scannen",
+      "scan_hint": "Wir brauchen nur die Vorderseite (ZB1). Felder A, B, E und 2.1/2.2 müssen gut lesbar sein.",
+      "scan_camera_cta": "Mit Kamera scannen",
+      "scan_upload_cta": "Datei hochladen",
+      "manual_cta": "Ich habe keinen Fahrzeugschein zur Hand — manuell eingeben",
+      "ocr_loading_title": "Wir lesen Ihren Fahrzeugschein aus …",
+      "ocr_loading_sub": "Das dauert normalerweise 5–10 Sekunden.",
+      "ocr_success": "Fahrzeugschein erfolgreich ausgelesen.",
+      "ocr_low_confidence": "Einige Felder wurden nicht sicher erkannt — bitte prüfen und ergänzen.",
+      "hsn_label": "HSN (Feld 2.1, 4 Ziffern)",
+      "tsn_label": "TSN (Feld 2.2, 3 Zeichen)",
+      "fin_label": "FIN / Fahrgestellnummer (Feld E, 17 Zeichen)",
+      "erstzulassung_label": "Erstzulassung (Feld B)",
+      "kennzeichen_label": "Kennzeichen (Feld A, optional)",
+      "retry_cta": "Anderes Bild hochladen",
+      "weiter": "Weiter zum Account",
+      "saving": "Wird gespeichert …"
+    },
     "step4": {},
     "abort": {
       "heading": "Bei Selbstverschulden sind wir nicht die richtige Anlaufstelle",
