@@ -5943,7 +5943,6 @@ export type Database = {
           gesperrt_grund: string | null
           gesperrt_seit: string | null
           gesperrt_von_user_id: string | null
-          google_calendar_token: Json | null
           gutachter_typ: string | null
           hrb: string | null
           id: string
@@ -5962,7 +5961,6 @@ export type Database = {
           onboarding_anzahlung_faellig_am: string | null
           onboarding_status: string
           organisation_id: string | null
-          outlook_calendar_token: Json | null
           paket: string
           paket_faelle_genutzt: number | null
           paket_faelle_gesamt: number | null
@@ -6039,7 +6037,6 @@ export type Database = {
           gesperrt_grund?: string | null
           gesperrt_seit?: string | null
           gesperrt_von_user_id?: string | null
-          google_calendar_token?: Json | null
           gutachter_typ?: string | null
           hrb?: string | null
           id?: string
@@ -6058,7 +6055,6 @@ export type Database = {
           onboarding_anzahlung_faellig_am?: string | null
           onboarding_status?: string
           organisation_id?: string | null
-          outlook_calendar_token?: Json | null
           paket?: string
           paket_faelle_genutzt?: number | null
           paket_faelle_gesamt?: number | null
@@ -6135,7 +6131,6 @@ export type Database = {
           gesperrt_grund?: string | null
           gesperrt_seit?: string | null
           gesperrt_von_user_id?: string | null
-          google_calendar_token?: Json | null
           gutachter_typ?: string | null
           hrb?: string | null
           id?: string
@@ -6154,7 +6149,6 @@ export type Database = {
           onboarding_anzahlung_faellig_am?: string | null
           onboarding_status?: string
           organisation_id?: string | null
-          outlook_calendar_token?: Json | null
           paket?: string
           paket_faelle_genutzt?: number | null
           paket_faelle_gesamt?: number | null
