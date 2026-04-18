@@ -2,8 +2,10 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { POST_CALL_STATIC_SYSTEM, buildPostCallUser } from './prompts'
 import { logAiUsage } from '@/lib/ai/usage-log'
+import { AI_MODELS } from '@/lib/ai/models'
 
-const POST_CALL_MODEL = 'claude-sonnet-4-20250514'
+// AAR-437: Modell-Audit Nacht-Shift — ehemals hardcoded 'claude-sonnet-4-20250514'
+const POST_CALL_MODEL = AI_MODELS.post_call_summary
 
 /**
  * KFZ-143: Post-Call AI Analyse. Wird nach call.ended automatisch getriggert.

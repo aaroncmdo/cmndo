@@ -3,6 +3,7 @@
 // Animation (GIF) ist Follow-up — MVP speichert das rohe SVG als Inline-String.
 
 import Anthropic from '@anthropic-ai/sdk'
+import { AI_MODELS } from '@/lib/ai/models'
 
 export type UnfallskizzeInput = {
   unfallhergang: string | null
@@ -69,7 +70,7 @@ export async function generateUnfallskizze(
   try {
     const anthropic = new Anthropic({ apiKey })
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: AI_MODELS.unfallskizze,
       max_tokens: 2000,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: prompt }],
