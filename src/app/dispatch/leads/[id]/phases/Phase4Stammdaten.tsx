@@ -68,11 +68,10 @@ type LeadFields = {
   cardentity_enriched_at?: string | null
   // AAR-311: Cardentity Typ-B Status für den manuellen Trigger-Button
   vorschaden_typ_b_bericht?: Record<string, unknown> | null
-  vorschaden_vorhanden?: boolean | null
+  hat_vorschaeden?: boolean | null
   vorschaden_anzahl?: number | null
   vorschaden_letzter_datum?: string | null
   cardentity_abfrage_am?: string | null
-  hat_vorschaeden?: boolean | null
   vorschaeden_beschreibung?: string | null
   finanzierung_leasing?: 'keine' | 'finanzierung' | 'leasing' | string | null
   vorsteuerabzugsberechtigt?: boolean | null
@@ -988,7 +987,7 @@ export default function Phase4Stammdaten() {
             finVorhanden={!!l.fin}
             initial={{
               fetchedAt: l.cardentity_abfrage_am ?? null,
-              vorschadenVorhanden: l.vorschaden_vorhanden ?? null,
+              vorschadenVorhanden: l.hat_vorschaeden ?? null,
               vorschadenAnzahl: l.vorschaden_anzahl ?? null,
               letzterVorschadenDatum: l.vorschaden_letzter_datum ?? null,
             }}

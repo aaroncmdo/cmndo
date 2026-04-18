@@ -38,7 +38,6 @@ export type BriefingInput = {
   leasing_flag: boolean | null
   gewerbe_flag: boolean | null
   halter_ungleich_fahrer_flag: boolean | null
-  vorschaden_vorhanden: boolean | null
   hat_vorschaeden: boolean | null
   vorschaeden_beschreibung: string | null
   polizei_vor_ort: boolean | null
@@ -110,7 +109,6 @@ export function buildBriefingInput(
     leasing_flag: pick<boolean>('leasing_flag'),
     gewerbe_flag: pick<boolean>('gewerbe_flag'),
     halter_ungleich_fahrer_flag: pick<boolean>('halter_ungleich_fahrer_flag'),
-    vorschaden_vorhanden: pick<boolean>('vorschaden_vorhanden'),
     hat_vorschaeden: pick<boolean>('hat_vorschaeden'),
     vorschaeden_beschreibung: pick<string>('vorschaeden_beschreibung'),
     polizei_vor_ort: pick<boolean>('polizei_vor_ort'),

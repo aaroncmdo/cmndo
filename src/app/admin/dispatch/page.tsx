@@ -18,7 +18,7 @@ export default async function DispatchPage() {
     .order('created_at', { ascending: false })
   let faelleQuery = supabase
     .from('faelle')
-    .select('id, fall_nummer, status, schadens_ursache, sv_id, lead_id, kundenbetreuer_id, onboarding_complete, regulierung_am, anschlussschreiben_am, vs_eskalationsstufe, status_changed_at, updated_at, created_at, vorschaden_vorhanden')
+    .select('id, fall_nummer, status, schadens_ursache, sv_id, lead_id, kundenbetreuer_id, onboarding_complete, regulierung_am, anschlussschreiben_am, vs_eskalationsstufe, status_changed_at, updated_at, created_at, hat_vorschaeden')
     .order('created_at', { ascending: false })
 
   // BUG-104: KB sieht nur eigene Leads/Faelle

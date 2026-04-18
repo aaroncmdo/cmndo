@@ -31,7 +31,7 @@ type Lead = {
   telefon: string | null
   fin?: string | null
   vorschaden_typ_b_bericht?: Record<string, unknown> | null
-  vorschaden_vorhanden?: boolean | null
+  hat_vorschaeden?: boolean | null
   vorschaden_anzahl?: number | null
   vorschaden_letzter_datum?: string | null
   cardentity_abfrage_am?: string | null
@@ -201,7 +201,7 @@ export function StammdatenCard({
             finVorhanden={!!fin}
             initial={{
               fetchedAt: lead?.cardentity_abfrage_am ?? null,
-              vorschadenVorhanden: lead?.vorschaden_vorhanden ?? null,
+              vorschadenVorhanden: lead?.hat_vorschaeden ?? null,
               vorschadenAnzahl: lead?.vorschaden_anzahl ?? null,
               letzterVorschadenDatum: lead?.vorschaden_letzter_datum ?? null,
             }}

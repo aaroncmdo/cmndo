@@ -62,7 +62,7 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'versicherung_schaden_nr',
   'versicherung_id',
   // Vorschäden
-  'vorschaden_vorhanden',
+  'hat_vorschaeden',
   'vorschaden_anzahl',
   // Besichtigung (DB-verifiziert: Adresse + Lat/Lng/PlaceID + Datum)
   'besichtigungsort_adresse',

@@ -77,7 +77,7 @@ type Fall = {
   status_changed_at: string | null
   updated_at: string | null
   created_at: string
-  vorschaden_vorhanden: boolean | null
+  hat_vorschaeden: boolean | null
   vs_eskalationsstufe: string | null
   anschlussschreiben_am: string | null
 }

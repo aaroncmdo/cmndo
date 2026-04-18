@@ -75,7 +75,7 @@ export function buildFallbackBriefing(input: BriefingInput): SvBriefingStruktur 
   if (input.halter_ungleich_fahrer_flag) {
     warnungen.push('Halter ≠ Fahrer')
   }
-  if (input.vorschaden_vorhanden || input.hat_vorschaeden) {
+  if (input.hat_vorschaeden) {
     const desc = input.vorschaeden_beschreibung?.trim()
     warnungen.push(
       desc && desc.length < 80

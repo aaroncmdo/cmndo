@@ -166,7 +166,7 @@ export async function getFreieSlotsFuerKunde(fallId: string): Promise<FreierSlot
   if (fall.lead_id) {
     const { data } = await admin
       .from('leads')
-      .select('zb1_status, service_typ, wa_gesendet, polizei_vor_ort, polizeibericht_pflicht, zeugen_vorhanden, personenschaden_flag, hat_vorschaeden, vorschaden_vorhanden, mietwagen_flag, nutzungsausfall')
+      .select('zb1_status, service_typ, wa_gesendet, polizei_vor_ort, polizeibericht_pflicht, zeugen_vorhanden, personenschaden_flag, hat_vorschaeden, mietwagen_flag, nutzungsausfall')
       .eq('id', fall.lead_id)
       .maybeSingle()
     lead = data

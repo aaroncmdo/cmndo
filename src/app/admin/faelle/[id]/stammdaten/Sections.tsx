@@ -117,7 +117,7 @@ export function FahrzeugdatenSection() {
           finVorhanden={!!fin}
           initial={{
             fetchedAt: (lead?.cardentity_abfrage_am as string | null) ?? null,
-            vorschadenVorhanden: (lead?.vorschaden_vorhanden as boolean | null) ?? null,
+            vorschadenVorhanden: (lead?.hat_vorschaeden as boolean | null) ?? null,
             vorschadenAnzahl: (lead?.vorschaden_anzahl as number | null) ?? null,
             letzterVorschadenDatum: (lead?.vorschaden_letzter_datum as string | null) ?? null,
           }}
@@ -242,11 +242,11 @@ export function GegnerSection() {
 
 export function VorschaedenSection() {
   const { fall } = useFall()
-  // DB-Schema: vorschaden_vorhanden + vorschaden_anzahl + vorschaden_letzter_datum
-  // (kein hat_vorschaeden / vorschaeden_beschreibung — die liegen auf leads)
+  // DB-Schema: hat_vorschaeden + vorschaden_anzahl + vorschaden_letzter_datum
+  // (vorschaeden_beschreibung liegt auf leads, vorschaden_erkannt=CarDentity, vorschaden_geprueft=KB)
   return (
     <Card icon={<WrenchIcon className="w-4 h-4 text-gray-400" />} title="Vorschäden">
-      <InlineEditField label="Vorschäden vorhanden?" fieldName="vorschaden_vorhanden" value={f(fall, 'vorschaden_vorhanden')} placeholder="Ja / Nein" />
+      <InlineEditField label="Vorschäden vorhanden?" fieldName="hat_vorschaeden" value={f(fall, 'hat_vorschaeden')} placeholder="Ja / Nein" />
       <InlineEditField label="Anzahl" fieldName="vorschaden_anzahl" value={f(fall, 'vorschaden_anzahl')} type="number" />
     </Card>
   )

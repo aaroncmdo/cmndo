@@ -329,7 +329,7 @@ export default function FallakteVollClient({
         )}
 
         {/* Vorschaden Warning */}
-        {(fall.vorschaden_vorhanden as boolean) && (
+        {(fall.hat_vorschaeden as boolean) && (
           <div className="bg-red-50 border border-red-800 rounded-xl p-4 mb-5 flex items-center gap-3">
             <AlertTriangleIcon className="w-5 h-5 text-red-400 shrink-0" />
             <div>
@@ -512,7 +512,7 @@ export default function FallakteVollClient({
                 <p className="text-gray-400 text-xs mt-1">
                   Quelle: {String(fall.fin_quelle ?? '—')}
                   {fall.vorschaden_geprueft
-                    ? fall.vorschaden_vorhanden
+                    ? fall.hat_vorschaeden
                       ? ` · Vorschaden: ${fall.vorschaden_anzahl ?? '?'} gefunden`
                       : ' · Vorschadenfrei'
                     : ' · Prüfung läuft...'}
