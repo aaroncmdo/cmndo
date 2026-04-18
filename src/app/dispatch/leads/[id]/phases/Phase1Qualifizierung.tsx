@@ -33,6 +33,8 @@ import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 // auswählt — vorher nur roter Einzeiler ohne konkrete Ausstiegsschritte,
 // jetzt das volle 4-Punkte-Skript mit Copy-Button (Notion-Spec §2.Q1).
 import ExitSkript from '../ExitSkript'
+// AAR-358: Personenschäden-Detail-Formular (erscheint wenn personenschaden_flag=true)
+import Phase1PersonenForm from './Phase1PersonenForm'
 
 // AAR-179 Redundanz-Fix: EIN Array für Hergang-Buttons + Checkliste — vorher
 // zwei parallele Arrays (prompts + matches) mit Drift-Risiko.
@@ -405,6 +407,25 @@ export default function Phase1Qualifizierung() {
           </div>
         )}
       </div>
+
+      {/* AAR-358: Personenschaden-Detail-Erfassung (wenn Flag=true). Lebt außerhalb
+          der Q2-Zweige, damit es sowohl bei sichtbarem Schaden als auch bei
+          „nur Personenschaden"-Fällen (schaden_sichtbar=false + personenschaden_flag)
+          erscheint. */}
+      {draft.personenschaden_flag === true && (
+        <div className="space-y-2 border-t border-gray-100 pt-4">
+          <div className="flex items-center gap-2">
+            <UserPlusIcon className="w-4 h-4 text-rose-600" />
+            <h3 className="text-xs font-semibold text-gray-700">
+              Verletzte Personen
+            </h3>
+            <span className="text-[10px] text-gray-400">
+              Name, Geburtsdatum, Verletzungsart
+            </span>
+          </div>
+          <Phase1PersonenForm leadId={lead.id} />
+        </div>
+      )}
 
       {/* AAR-357: Sachschäden an Dritten — unabhängig vom KFZ-Schaden.
           Leitplanke, Zaun, Handy, Brille etc. Schaltet zwei Katalog-Slots

@@ -481,6 +481,20 @@ export async function signSAandCreateFall(
     }
   }
 
+  // AAR-358: Personenschaden-Personen vom Lead auf den Fall upgraden.
+  // Rows wurden im Dispatch mit lead_id angelegt; fall_id ist zu dem Zeitpunkt
+  // noch NULL. Nach dem Fall-Insert ziehen wir fall_id nach, damit die Daten
+  // in der Fallakte sichtbar werden und RLS-Policies für den Kunden greifen.
+  try {
+    await admin
+      .from('personenschaden_personen')
+      .update({ fall_id: fall.id })
+      .eq('lead_id', leadId)
+      .is('fall_id', null)
+  } catch (err) {
+    console.error('[AAR-358] Personen-Upgrade fehlgeschlagen:', err)
+  }
+
   // 6. Lead-Status updaten
   await admin.from('leads').update({
     status: 'umgewandelt',
