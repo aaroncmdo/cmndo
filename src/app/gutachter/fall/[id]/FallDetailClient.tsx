@@ -375,9 +375,7 @@ export default function FallDetailClient(props: Props) {
               kanzlei_uebergeben_am:
                 (fall.kanzlei_uebergeben_am as string | null) ?? null,
               anschlussschreiben_sendedatum:
-                ((fall.anschlussschreiben_sendedatum as string | null) ??
-                  (fall.vs_anschreiben_datum as string | null)) ??
-                null,
+                (fall.anschlussschreiben_sendedatum as string | null) ?? null,
               vs_reaktion_am: (fall.vs_reaktion_am as string | null) ?? null,
               vs_kuerzung_grund:
                 (fall.vs_kuerzung_grund as string | null) ?? null,

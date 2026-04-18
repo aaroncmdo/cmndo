@@ -1370,7 +1370,6 @@ export type Database = {
           vorschaeden_beschreibung: string | null
           vorsteuerabzugsberechtigt: boolean | null
           vs_ablehnungsgrund: string | null
-          vs_anschreiben_datum: string | null
           vs_antwort_datum: string | null
           vs_eskalation_am: string | null
           vs_eskalationsstufe: string | null
@@ -1672,7 +1671,6 @@ export type Database = {
           vorschaeden_beschreibung?: string | null
           vorsteuerabzugsberechtigt?: boolean | null
           vs_ablehnungsgrund?: string | null
-          vs_anschreiben_datum?: string | null
           vs_antwort_datum?: string | null
           vs_eskalation_am?: string | null
           vs_eskalationsstufe?: string | null
@@ -1974,7 +1972,6 @@ export type Database = {
           vorschaeden_beschreibung?: string | null
           vorsteuerabzugsberechtigt?: boolean | null
           vs_ablehnungsgrund?: string | null
-          vs_anschreiben_datum?: string | null
           vs_antwort_datum?: string | null
           vs_eskalation_am?: string | null
           vs_eskalationsstufe?: string | null
