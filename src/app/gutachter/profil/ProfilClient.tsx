@@ -15,6 +15,11 @@ import { TwoFaPhoneChange } from '@/components/auth/TwoFaPhoneChange'
 import { MapPinIcon, InfoIcon } from 'lucide-react'
 // AAR-369: Profilbild-Upload + Anzeige-Felder
 import AvatarUpload from '@/components/shared/AvatarUpload'
+// AAR-500 N5: Benachrichtigungs-Präferenzen (Quiet-Hours + Channel-Opt-Outs + Feintuning)
+import {
+  NotificationPreferencesForm,
+  type NotificationPreferencesFormValue,
+} from '@/components/notifications/NotificationPreferencesForm'
 
 type Profile = { anrede: string | null; titel: string | null; vorname: string | null; nachname: string | null; telefon: string | null; rolle: string; twofa_telefon?: string | null; avatar_url?: string | null; anzeigename?: string | null; profilbeschreibung?: string | null }
 type SV = { id: string; paket: string; gebiet_plz: string | null; ist_aktiv: boolean; max_faelle_monat: number; offene_faelle: number; kalender_typ: string; kalender_sync_aktiv: boolean; kalender_sync_letzte: string | null; qualifikationen_neu: string[] | null; spezifikationen: string[] | null; schadenarten: string[] | null; standort_adresse: string | null; standort_plz: string | null; standort_lat: number | null; standort_lng: number | null; standort_place_id: string | null; firmenname: string | null; rechtsform: string | null; steuernummer: string | null; ust_id: string | null; hrb: string | null; rolle_in_organisation: string | null; community_anonym: boolean }
@@ -51,12 +56,14 @@ export default function ProfilClient({
   sv,
   faelleCount,
   pendingTermine,
+  notificationPrefs,
 }: {
   email: string
   profile: Profile
   sv: SV
   faelleCount: number
   pendingTermine: PendingTermin[]
+  notificationPrefs: NotificationPreferencesFormValue
 }) {
   const router = useRouter()
   const [editing, setEditing] = useState(false)
@@ -477,7 +484,19 @@ export default function ProfilClient({
         )}
         {/* KFZ-139: Branding Section */}
         <BrandingSection svId={sv.id} />
+        {/* AAR-500 N5: Benachrichtigungs-Präferenzen */}
+        <NotificationSection initial={notificationPrefs} />
       </div>
+    </div>
+  )
+}
+
+// AAR-500 N5: Settings-Section-Wrapper für Benachrichtigungen.
+function NotificationSection({ initial }: { initial: NotificationPreferencesFormValue }) {
+  return (
+    <div className="bg-white border border-gray-200 rounded-2xl p-5 mt-5">
+      <h2 className="text-sm font-medium text-gray-500 mb-4">Benachrichtigungen</h2>
+      <NotificationPreferencesForm role="sachverstaendiger" initial={initial} />
     </div>
   )
 }
