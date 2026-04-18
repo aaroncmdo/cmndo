@@ -70,6 +70,11 @@ export type BrandTheme = {
   // portable bleibt und nicht mit Google-Fonts-URLs versionsabhängig wird.
   fontPairId?: string | null
 
+  // AAR-456: Claude-Vision Empfehlung (racing|elegance|kanoo). Wird
+  // persistiert, damit der "Empfohlen"-Badge im FontPicker auch nach Reload
+  // angezeigt wird — sonst geht die Info nach jedem Page-Refresh verloren.
+  fontCategoryRecommendation?: 'racing' | 'elegance' | 'kanoo' | null
+
   // V2 Metadata
   contrastSafe?: boolean
   version?: number
@@ -121,6 +126,9 @@ export const CLAIMONDO_DEFAULT_THEME: BrandThemeV2 = {
   info: '#3B82F6',
   // Typography — null = Claimondo-Default (kanoo_1, Inter/Inter).
   fontPairId: null,
+  // AAR-456: Default-Theme hat keine Empfehlung — wird erst nach Logo-Upload
+  // via Claude-Vision gesetzt.
+  fontCategoryRecommendation: null,
 }
 
 // Alias-Name für neue V2-Consumer, die den Schema-Stand explizit referenzieren wollen.
@@ -387,6 +395,9 @@ export function generateTheme(primaryHex: string): BrandThemeV2 {
     // Font-Pair wird nicht aus der Primary-Farbe abgeleitet — Claude-Vision
     // (AAR-420) oder der User setzt das separat. Default null = kanoo_1.
     fontPairId: null,
+    // AAR-456: Empfehlung wird in handleFile() aus extractJson gesetzt —
+    // generateTheme selbst kennt die Claude-Antwort nicht.
+    fontCategoryRecommendation: null,
   }
 
   const contrastSafe = ensureContrastSafe(baseTheme)

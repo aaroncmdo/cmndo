@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import BrandingEditor from '@/components/branding/BrandingEditor'
 import type { BrandTheme } from '@/lib/branding/theme'
+import type { FontCategory } from '@/lib/branding/fonts'
 import Link from 'next/link'
 import { ArrowLeftIcon } from 'lucide-react'
 
@@ -38,6 +39,11 @@ export default async function BrandingPage() {
   const storedTheme = (sv.brand_theme as Partial<BrandTheme> | null) ?? null
   const initialFontPairId = (storedTheme?.fontPairId as string | null | undefined) ?? null
 
+  // AAR-456: Persistierte Claude-Vision-Empfehlung → "Empfohlen"-Badge im
+  // FontPicker auch nach Page-Reload anzeigen. Null wenn noch nie analysiert.
+  const initialFontCategoryRecommendation =
+    (storedTheme?.fontCategoryRecommendation as FontCategory | null | undefined) ?? null
+
   // Fallback: wenn brand_theme leer aber brand_primary gesetzt, aus Legacy hydrieren.
   const initialTheme: Partial<BrandTheme> | null = storedTheme
     ?? (sv.brand_primary
@@ -57,6 +63,7 @@ export default async function BrandingPage() {
         initialLogoUrl={sv.logo_url ?? null}
         initialTheme={initialTheme}
         initialFontPairId={initialFontPairId}
+        initialFontCategoryRecommendation={initialFontCategoryRecommendation}
         firmenname={sv.firmenname ?? null}
         canSaveToOrg={!!(sv.ist_parent_account && sv.organisation_id)}
       />

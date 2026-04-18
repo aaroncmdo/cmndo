@@ -40,6 +40,10 @@ type Props = {
   initialLogoUrl: string | null
   initialTheme: Partial<BrandTheme> | null
   initialFontPairId: string | null
+  // AAR-456: Persistierte Claude-Vision-Empfehlung — null wenn noch nie
+  // analysiert oder nach Reset. Wird im FontPicker als "Empfohlen"-Badge
+  // gerendert und hydratisiert den Initial-State.
+  initialFontCategoryRecommendation?: FontCategory | null
   firmenname: string | null
   canSaveToOrg: boolean
 }
@@ -52,6 +56,7 @@ export default function BrandingEditor({
   initialLogoUrl,
   initialTheme,
   initialFontPairId,
+  initialFontCategoryRecommendation,
   firmenname,
   canSaveToOrg,
 }: Props) {
@@ -65,7 +70,13 @@ export default function BrandingEditor({
     const id = initialFontPairId ?? CLAIMONDO_DEFAULT_FONT_PAIR_ID
     return FONT_PAIRS[id] ?? FONT_PAIRS[CLAIMONDO_DEFAULT_FONT_PAIR_ID]
   })
-  const [recommendedCategory, setRecommendedCategory] = useState<FontCategory | null>(null)
+  // AAR-456: Aus persistiertem Theme hydratisieren (statt immer null) — sonst
+  // verschwindet der Empfohlen-Badge nach jedem Page-Reload.
+  const [recommendedCategory, setRecommendedCategory] = useState<FontCategory | null>(
+    initialFontCategoryRecommendation
+      ?? (initialTheme?.fontCategoryRecommendation as FontCategory | null | undefined)
+      ?? null,
+  )
   const [fallbackReason, setFallbackReason] = useState<string | null>(null)
   const [scope, setScope] = useState<'sv' | 'org'>('sv')
 
@@ -100,7 +111,14 @@ export default function BrandingEditor({
       if (!extractRes.ok) throw new Error(extractJson.error ?? 'Extraktion fehlgeschlagen')
 
       const extracted = themeFromLegacy(extractJson.primary, extractJson.secondary)
-      setTheme({ ...extracted, accent: extractJson.accent })
+      // AAR-456: Empfehlung ins Theme schreiben, damit sie beim Speichern
+      // ins brand_theme JSONB persistiert wird (sonst ist der Badge nach
+      // Reload wieder weg).
+      setTheme({
+        ...extracted,
+        accent: extractJson.accent,
+        fontCategoryRecommendation: extractJson.recommendedFontCategory,
+      })
       setRecommendedCategory(extractJson.recommendedFontCategory)
       setFontPair(pickDefaultPairForCategory(extractJson.recommendedFontCategory))
       setFallbackReason(extractJson.fallbackReason ?? null)
@@ -122,7 +140,12 @@ export default function BrandingEditor({
       if (key === 'primary' || key === 'secondary') {
         const nextPrimary = key === 'primary' ? hex : prev.primary
         const nextSecondary = key === 'secondary' ? hex : prev.secondary
-        return themeFromLegacy(nextPrimary, nextSecondary)
+        // AAR-456: Empfehlung übernehmen — themeFromLegacy() würde sie auf
+        // null zurücksetzen, was den Badge beim nächsten Save killen würde.
+        return {
+          ...themeFromLegacy(nextPrimary, nextSecondary),
+          fontCategoryRecommendation: prev.fontCategoryRecommendation,
+        }
       }
       return { ...prev, [key]: hex }
     })
