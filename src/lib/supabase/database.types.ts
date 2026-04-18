@@ -1262,7 +1262,6 @@ export type Database = {
           notizen: string | null
           nutzungsausfall: boolean | null
           nutzungsausfall_gesamt: number | null
-          nutzungsausfall_pro_tag: number | null
           nutzungsausfall_tage: number | null
           nutzungsausfall_tagessatz: number | null
           ocr_extrahiert_am: string | null
@@ -1552,7 +1551,6 @@ export type Database = {
           notizen?: string | null
           nutzungsausfall?: boolean | null
           nutzungsausfall_gesamt?: number | null
-          nutzungsausfall_pro_tag?: number | null
           nutzungsausfall_tage?: number | null
           nutzungsausfall_tagessatz?: number | null
           ocr_extrahiert_am?: string | null
@@ -1842,7 +1840,6 @@ export type Database = {
           notizen?: string | null
           nutzungsausfall?: boolean | null
           nutzungsausfall_gesamt?: number | null
-          nutzungsausfall_pro_tag?: number | null
           nutzungsausfall_tage?: number | null
           nutzungsausfall_tagessatz?: number | null
           ocr_extrahiert_am?: string | null
