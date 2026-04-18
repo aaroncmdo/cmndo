@@ -1,11 +1,12 @@
 import { LandingTopbar, type AuthenticatedUser } from './LandingTopbar'
 import { LandingFooter } from './LandingFooter'
 import { LandingHero } from './LandingHero'
+import { LandingTrust } from './LandingTrust'
+import { LandingSteps } from './LandingSteps'
 
-// AAR-462 F4 → AAR-464 L1: Öffentliche Landing-Page. Die Hero-Section
-// wurde in `LandingHero` extrahiert (Server-Component + next-intl).
-// Weitere Sektionen (Trust, 3-Schritte, DAT-Teaser, SEO) folgen in den
-// nachfolgenden Phase-4-Tickets (AAR-465 ff).
+// AAR-462 F4 → AAR-464 L1 → AAR-465 L2: Öffentliche Landing-Page.
+// Reihenfolge: Topbar → Hero → Trust → Steps → Footer.
+// Weitere Sektionen (DAT-Teaser, SEO-Block) folgen in AAR-466 ff.
 type Props = {
   authenticatedUser: AuthenticatedUser | null
   /** Aktuelles User-Locale aus getLocaleCookie() — LanguageSwitcher-Prop */
@@ -19,6 +20,8 @@ export async function LandingPage({ authenticatedUser, locale }: Props) {
 
       <main id="main-content" className="flex-1">
         <LandingHero authenticatedUser={authenticatedUser} />
+        <LandingTrust />
+        <LandingSteps />
 
         <LandingFooter />
       </main>

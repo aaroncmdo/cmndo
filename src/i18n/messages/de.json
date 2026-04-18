@@ -10,8 +10,39 @@
       "phone_label": "Oder rufen Sie uns an:",
       "phone_aria": "Claimondo Hotline anrufen"
     },
-    "trust": {},
-    "steps": {},
+    "trust": {
+      "heading": "Warum Claimondo?",
+      "independent": {
+        "title": "Unabhängige Gutachter",
+        "description": "Partner-Sachverständige, die nur Ihrem Fall verpflichtet sind."
+      },
+      "regulation": {
+        "title": "Echte Regulierung",
+        "description": "Kanzlei vertritt Sie bis zur vollen Auszahlung."
+      },
+      "all_in_one": {
+        "title": "Alles aus einer Hand",
+        "description": "Gutachten, Anwalt, Regulierung — ein Ansprechpartner."
+      }
+    },
+    "steps": {
+      "heading": "So einfach geht's",
+      "subheading": "In drei Schritten zum fertigen Gutachten.",
+      "step1": {
+        "title": "Schaden erfassen",
+        "description": "Fotos hochladen oder einfach einsprechen — Sie entscheiden."
+      },
+      "step2": {
+        "title": "KI-Ersteinschätzung",
+        "description": "Kostenlos, in Sekunden. Reparaturkosten + Wiederbeschaffungswert."
+      },
+      "step3": {
+        "title": "Gutachter vor Ort",
+        "description": "Termin in Ihrer Region, Gutachten in 48 Stunden."
+      },
+      "cta": "Jetzt Schaden melden",
+      "duration_hint": "Dauert ca. 3 Minuten"
+    },
     "dat_teaser": {},
     "seo": {},
     "footer": {}
