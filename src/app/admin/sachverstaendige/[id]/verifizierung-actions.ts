@@ -108,7 +108,7 @@ export async function tier2Freigeben(svId: string): Promise<{ success: boolean; 
     .update({
       verifizierung_status: 'geprueft',
       verifiziert_am: new Date().toISOString(),
-      verifiziert_von_user_id: auth.userId,
+      verifiziert_von: auth.userId,
       verifizierung_admin_notiz: null,
     })
     .eq('id', svId)

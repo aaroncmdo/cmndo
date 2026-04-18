@@ -5779,7 +5779,6 @@ export type Database = {
           verifiziert: boolean
           verifiziert_am: string | null
           verifiziert_von: string | null
-          verifiziert_von_user_id: string | null
           verifizierung_admin_notiz: string | null
           verifizierung_frist_bis: string | null
           verifizierung_frist_ueberschritten_am: string | null
@@ -5878,7 +5877,6 @@ export type Database = {
           verifiziert?: boolean
           verifiziert_am?: string | null
           verifiziert_von?: string | null
-          verifiziert_von_user_id?: string | null
           verifizierung_admin_notiz?: string | null
           verifizierung_frist_bis?: string | null
           verifizierung_frist_ueberschritten_am?: string | null
@@ -5977,7 +5975,6 @@ export type Database = {
           verifiziert?: boolean
           verifiziert_am?: string | null
           verifiziert_von?: string | null
-          verifiziert_von_user_id?: string | null
           verifizierung_admin_notiz?: string | null
           verifizierung_frist_bis?: string | null
           verifizierung_frist_ueberschritten_am?: string | null
@@ -6020,13 +6017,6 @@ export type Database = {
           {
             foreignKeyName: "sachverstaendige_verifiziert_von_fkey"
             columns: ["verifiziert_von"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "sachverstaendige_verifiziert_von_user_id_fkey"
-            columns: ["verifiziert_von_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
