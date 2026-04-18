@@ -62,7 +62,8 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // schadens_ort (für SV-Dispatch) und unfallort (für Hergangs-Doku) getrennt
   // zu halten. Wenn das geändert werden soll: eigenes Issue.
   // BUG-73 Schadens-Detaildaten
-  'schadensursache',
+  // AAR-548 D4: schadensursache auf faelle ist weg — Mapping lebt jetzt in
+  // LEAD_TO_FALL_RENAMED_FIELDS (fall.schadens_ursache ← lead.schadensursache).
   'firma_name',
   'halter_name',
   'wunschtermin',
@@ -146,6 +147,8 @@ export const LEAD_TO_FALL_RENAMED_FIELDS: Record<string, string> = {
   schadens_plz: 'fahrzeug_standort_plz',
   schadens_ort: 'unfallort',
   fin_vin: 'fin',
+  // AAR-548 D4: leads.schadensursache → faelle.schadens_ursache (Duplikat weg).
+  schadens_ursache: 'schadensursache',
 }
 
 // ─── 3b. RENAMED + DEFAULT — Fall-Spalte ≠ Lead-Spalte mit NOT-NULL-Fallback

@@ -575,7 +575,8 @@ async function convertLeadToFall(
       // sind ersatzlos weg — Gegner-Seite ist Source of Truth (gegner_versicherung
       // oben), Eigene-VS bleibt auf leads.eigene_versicherung / eigene_policennr.
       polizei_aktenzeichen: lead.polizei_aktenzeichen ?? null,
-      schadensursache: lead.schadensursache ?? null,
+      // AAR-548 D4: faelle.schadensursache gedropt — Einheitsfeld ist schadens_ursache.
+      schadens_ursache: lead.schadensursache ?? null,
       leasinggeber_name: lead.leasing_geber ?? null,
       bank_name: lead.finanzierung_bank ?? null,
       firma_name: lead.firma_name ?? null,
