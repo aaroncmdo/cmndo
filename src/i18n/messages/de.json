@@ -101,7 +101,24 @@
     },
     "step0": {},
     "step1": {},
-    "step2a": {},
+    "step2a": {
+      "heading": "Fotos vom Schaden",
+      "sub": "Klicken Sie auf einen Bereich im Fahrzeug, um die passenden Fotos hochzuladen. Mindestens 3 Fotos sind erforderlich.",
+      "dropzone_label": "Fotos hier ablegen oder klicken",
+      "dropzone_hint": "JPG, PNG oder WEBP · max. 10 MB",
+      "min_hint": "Noch {count} Foto(s) bis zum nächsten Schritt",
+      "ready_hint": "Alles bereit für die KI-Analyse",
+      "weiter": "Weiter zur Analyse",
+      "saving": "Wird gespeichert …",
+      "bereich": {
+        "vorne": "Vorne",
+        "hinten": "Hinten",
+        "links": "Links",
+        "rechts": "Rechts",
+        "dach": "Dach",
+        "innen": "Innen"
+      }
+    },
     "step2b": {},
     "step2c": {},
     "step3": {},
