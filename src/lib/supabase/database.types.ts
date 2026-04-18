@@ -1366,7 +1366,6 @@ export type Database = {
           vorschaden_typ_a_ergebnis: Json | null
           vorschaden_typ_b_bericht: Json | null
           vorschaden_typ_b_pdf_url: string | null
-          vorschaden_vorhanden: boolean | null
           vorschaeden_beschreibung: string | null
           vorsteuerabzugsberechtigt: boolean | null
           vs_ablehnungsgrund: string | null
@@ -1667,7 +1666,6 @@ export type Database = {
           vorschaden_typ_a_ergebnis?: Json | null
           vorschaden_typ_b_bericht?: Json | null
           vorschaden_typ_b_pdf_url?: string | null
-          vorschaden_vorhanden?: boolean | null
           vorschaeden_beschreibung?: string | null
           vorsteuerabzugsberechtigt?: boolean | null
           vs_ablehnungsgrund?: string | null
@@ -1968,7 +1966,6 @@ export type Database = {
           vorschaden_typ_a_ergebnis?: Json | null
           vorschaden_typ_b_bericht?: Json | null
           vorschaden_typ_b_pdf_url?: string | null
-          vorschaden_vorhanden?: boolean | null
           vorschaeden_beschreibung?: string | null
           vorsteuerabzugsberechtigt?: boolean | null
           vs_ablehnungsgrund?: string | null
