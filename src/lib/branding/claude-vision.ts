@@ -12,6 +12,7 @@
 // graceful-Degradation-Default ('unbekannt' mood, 'kanoo' category).
 
 import Anthropic from '@anthropic-ai/sdk'
+import { AI_MODELS } from '@/lib/ai/models'
 
 export type ClaudeLogoAnalysis = {
   brandMood: 'sportlich' | 'edel' | 'funktional' | 'unbekannt'
@@ -95,7 +96,7 @@ export async function analyzeLogo(
   try {
     const anthropic = new Anthropic({ apiKey })
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: AI_MODELS.vision_branding,
       max_tokens: 300,
       messages: [
         {

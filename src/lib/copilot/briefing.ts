@@ -2,8 +2,10 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { buildPreCallStaticSystem, buildPreCallUser, type PreCallContext } from './prompts'
 import { logAiUsage } from '@/lib/ai/usage-log'
+import { AI_MODELS } from '@/lib/ai/models'
 
-const BRIEFING_MODEL = 'claude-sonnet-4-20250514'
+// AAR-437: Modell-Audit Nacht-Shift — ehemals hardcoded 'claude-sonnet-4-20250514'
+const BRIEFING_MODEL = AI_MODELS.pre_call_briefing
 
 // AAR-446: Max-Alter der Bot-Analyse, die ins Briefing einfließt. Älter als
 // 7 Tage ist der Chat-Inhalt meistens nicht mehr relevant für den KB-Call.

@@ -5,8 +5,10 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import Anthropic from '@anthropic-ai/sdk'
 import { revalidatePath } from 'next/cache'
+import { AI_MODELS } from '@/lib/ai/models'
 
-const MODEL = 'claude-sonnet-4-5'
+// AAR-437: Modell-Audit Nacht-Shift — ehemals hardcoded 'claude-sonnet-4-5'
+const MODEL = AI_MODELS.fall_assistant
 
 export async function generateFallSummary(
   fallId: string,

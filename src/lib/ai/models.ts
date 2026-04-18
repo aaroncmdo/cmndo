@@ -1,12 +1,13 @@
 // AAR-437: Zentrale Modell-Konfiguration für Claude-API-Aufrufe.
 //
-// Scope dieses Rollouts: nur FAQ-Bot Chat (Kunde + KB). Briefing, Post-Call,
-// OCR, Unfallskizze, Vision und Fall-Summary bleiben vorerst unverändert —
-// werden in Folge-Tickets einzeln auditiert und umgestellt.
+// Vollständiger Rollout Nacht-Shift 17./18.04.2026: Alle sechs KI-Features
+// nutzen nun diese Config statt hardcoded Modell-Strings. Zukünftige Upgrades
+// sind damit ein Ein-Zeilen-Change pro Feature.
 //
-// Auswahl-Matrix für FAQ-Bot:
-//   Kunde → Haiku 4.5 — 2-4 Sätze, Speed kritisch, günstig.
-//   KB    → Sonnet 4.6 — Qualität und Tiefe wichtiger als Speed.
+// Auswahl-Heuristik:
+//   Kunden-facing + Speed-kritisch + kurze Antwort → Haiku 4.5
+//   Interne Tools + Qualität > Speed + strukturierter Output → Sonnet 4.6
+//   Multimodal / komplexe Generierung (SVG/OCR) → Sonnet 4.6
 
 export const AI_MODELS = {
   /** FAQ-Bot Kunde — 2-4 Sätze, Speed kritisch. Haiku 4.5. */
@@ -30,6 +31,36 @@ export const AI_MODELS = {
    * System-Prompt. Sonnet 4.6 — Qualität > Speed (Batch beim Fall-Anlegen).
    */
   sv_briefing_struktur: 'claude-sonnet-4-6',
+  /**
+   * KFZ-143: Pre-Call-Briefing für KB vor Kunden-Call. Strukturierter Output
+   * aus Fall + Lead + letzter Bot-Analyse. Sonnet 4.6 — Entscheidungsgrundlage.
+   */
+  pre_call_briefing: 'claude-sonnet-4-6',
+  /**
+   * KFZ-143: Post-Call-Analyse nach beendetem Call. Zusammenfassung längerer
+   * Transkripte braucht Qualität. Sonnet 4.6.
+   */
+  post_call_summary: 'claude-sonnet-4-6',
+  /**
+   * /api/schadenkalkulation: OCR / Multimodal-Analyse von Schadensfotos + Text-
+   * Schätzung. Multimodal, Qualität bei Dokumenten-Extraktion wichtig. Sonnet 4.6.
+   */
+  ocr: 'claude-sonnet-4-6',
+  /**
+   * KFZ-??: Unfallskizze-SVG-Generator. Komplexe strukturierte Output-Generation
+   * (SVG) — Sonnet 4.6 nötig.
+   */
+  unfallskizze: 'claude-sonnet-4-6',
+  /**
+   * AAR-420: Logo-Vision-Analyse (Brand-Mood + Font-Kategorie + Primary-Check).
+   * Multimodal Sonnet 4.6.
+   */
+  vision_branding: 'claude-sonnet-4-6',
+  /**
+   * AAR-104: Claimondo AI Assistant — Fall-Zusammenfassung in der Fallakte.
+   * Kunden-Anliegen-Antwort und Fall-Zusammenfassung. Sonnet 4.6.
+   */
+  fall_assistant: 'claude-sonnet-4-6',
 } as const
 
 export type AiModelKey = keyof typeof AI_MODELS

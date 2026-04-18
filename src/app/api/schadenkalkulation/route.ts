@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { AI_MODELS } from '@/lib/ai/models'
 
 // ─── POST /api/schadenkalkulation ─────────────────────────────────────────────
 // Modus A: Fotos → Claude Vision analysiert Schadensfotos
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
       }))
 
       const response = await anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: AI_MODELS.ocr,
         max_tokens: 1024,
         system: SYSTEM_PROMPT,
         messages: [{
@@ -83,7 +84,7 @@ export async function POST(request: Request) {
       const prompt = `Basierend auf dieser Schadensbeschreibung an einem ${fahrzeug_hersteller ?? 'unbekannt'} ${fahrzeug_typ ?? ''} Baujahr ${fahrzeug_baujahr ?? 'unbekannt'}, schätze die Reparaturkosten in Euro:\n\n${schadensbeschreibung}`
 
       const response = await anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: AI_MODELS.ocr,
         max_tokens: 1024,
         system: SYSTEM_PROMPT,
         messages: [{ role: 'user', content: prompt }],
