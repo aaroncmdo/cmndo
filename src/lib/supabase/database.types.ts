@@ -5956,7 +5956,6 @@ export type Database = {
           logo_url: string | null
           notizen: string | null
           offene_faelle: number
-          onboarding_abgeschlossen: boolean | null
           onboarding_anzahlung_betrag: number | null
           onboarding_anzahlung_faellig_am: string | null
           onboarding_status: string
@@ -6050,7 +6049,6 @@ export type Database = {
           logo_url?: string | null
           notizen?: string | null
           offene_faelle?: number
-          onboarding_abgeschlossen?: boolean | null
           onboarding_anzahlung_betrag?: number | null
           onboarding_anzahlung_faellig_am?: string | null
           onboarding_status?: string
@@ -6144,7 +6142,6 @@ export type Database = {
           logo_url?: string | null
           notizen?: string | null
           offene_faelle?: number
-          onboarding_abgeschlossen?: boolean | null
           onboarding_anzahlung_betrag?: number | null
           onboarding_anzahlung_faellig_am?: string | null
           onboarding_status?: string

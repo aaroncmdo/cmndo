@@ -5,7 +5,7 @@
 import { createClient } from '@/lib/supabase/server'
 import SachverstaendigeList from '@/components/SachverstaendigeList'
 
-const BASE_SELECT = 'id, profile_id, gebiet_plz, paket, offene_faelle, ist_aktiv, gutachter_typ, qualifikationen_neu, spezifikationen, schadenarten, onboarding_abgeschlossen, anzahlung_status, standort_adresse, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, werbebudget_guthaben_netto, organisation_id, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, ablehnungen_30_tage, deaktiviert_grund, deaktiviert_am, geloescht_am, profiles(vorname, nachname, email, telefon)'
+const BASE_SELECT = 'id, profile_id, gebiet_plz, paket, offene_faelle, ist_aktiv, gutachter_typ, qualifikationen_neu, spezifikationen, schadenarten, onboarding_status, anzahlung_status, standort_adresse, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, werbebudget_guthaben_netto, organisation_id, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, ablehnungen_30_tage, deaktiviert_grund, deaktiviert_am, geloescht_am, profiles(vorname, nachname, email, telefon)'
 
 export default async function DispatchSachverstaendigePage() {
   const supabase = await createClient()

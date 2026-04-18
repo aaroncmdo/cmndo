@@ -199,7 +199,6 @@ export async function anlegeSv(data: AnlegeSvFormData): Promise<{ success: boole
     anzahlung_status: 'offen',
     onboarding_status: 'vom_admin_angelegt', // ARCH-1 neuer Status
     portal_zugang_freigeschaltet: false, // Hard-Blocker bis Vertrag + Stripe
-    onboarding_abgeschlossen: false,
     ist_aktiv: true,
     partner_seit: new Date().toISOString().slice(0, 10),
   }).select('id').single()
@@ -395,7 +394,6 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
     portal_zugang_freigeschaltet: false,
     ist_aktiv: false, // erst aktiv nach Buero-Anzahlung
     ist_parent_account: true,
-    onboarding_abgeschlossen: false,
   }).select('id').single()
 
   if (inhaberSvErr || !inhaberSvRow) {
@@ -502,8 +500,7 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
       portal_zugang_freigeschaltet: false,
       ist_aktiv: false,
       ist_parent_account: false,
-      onboarding_abgeschlossen: false,
-      partner_seit: new Date().toISOString().slice(0, 10),
+        partner_seit: new Date().toISOString().slice(0, 10),
     }).select('id').single()
     if (subSvRow) subSvIds.push(subSvRow.id)
   }
@@ -687,7 +684,6 @@ export async function anlegeSubSv(params: {
     portal_zugang_freigeschaltet: false,
     ist_aktiv: false,
     ist_parent_account: false,
-    onboarding_abgeschlossen: false,
     partner_seit: new Date().toISOString().slice(0, 10),
   }).select('id').single()
 
@@ -883,7 +879,6 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
     portal_zugang_freigeschaltet: false,
     ist_aktiv: false,
     ist_parent_account: true,
-    onboarding_abgeschlossen: false,
   }).select('id').single()
 
   if (verwSvErr || !verwSvRow) {
@@ -965,8 +960,7 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
       portal_zugang_freigeschaltet: false,
       ist_aktiv: false,
       ist_parent_account: false,
-      onboarding_abgeschlossen: false,
-      partner_seit: new Date().toISOString().slice(0, 10),
+        partner_seit: new Date().toISOString().slice(0, 10),
     }).select('id').single()
     if (subSvRow) subSvIds.push(subSvRow.id)
   }
@@ -1203,8 +1197,7 @@ export async function anlegeCommunity(data: AnlegeCommunityFormData): Promise<{
       portal_zugang_freigeschaltet: false,
       ist_aktiv: false,
       ist_parent_account: false,
-      onboarding_abgeschlossen: false,
-      partner_seit: new Date().toISOString().slice(0, 10),
+        partner_seit: new Date().toISOString().slice(0, 10),
     }).select('id').single()
     if (memSvRow) memberSvIds.push(memSvRow.id)
   }
