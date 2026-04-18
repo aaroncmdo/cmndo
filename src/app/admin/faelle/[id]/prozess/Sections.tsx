@@ -103,7 +103,7 @@ export function KanzleiEakteSection() {
 // ─── 2. Anspruchsschreiben (ab as-vorbereitung) ────────────────────────────
 // DB-Verify (2026-04-15): `as_versendet_am`, `as_forderungsbetrag` und
 // `vs_stufe` existieren NICHT. Echte Spalten: `anschlussschreiben_am`,
-// `as_geforderte_summe`, `vs_eskalationsstufe` (bzw. `vs_timer_stufe`).
+// `as_geforderte_summe`, `vs_eskalationsstufe`.
 export function AsSection() {
   const { fall } = useFall()
   const versendetAm = fmtDate(fall.anschlussschreiben_am)
