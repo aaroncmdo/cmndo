@@ -9,7 +9,10 @@ import { isLocale, DEFAULT_LOCALE, type Locale } from '@/i18n/locales'
 // diese Action durch ein next-intl-kompatibles Pendant ersetzen oder
 // erweitern — die Signatur bleibt gleich.
 
-const LOCALE_COOKIE = 'claimondo_locale'
+// AAR-459 F1: Cookie-Name-Konvention `claimondo-locale` (mit Bindestrich)
+// passend zu anderen Projekt-Cookies wie `claimondo_2fa_verified`/`cm_remember`
+// — der Ticket-Spec schreibt Bindestrich vor.
+const LOCALE_COOKIE = 'claimondo-locale'
 const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365
 
 export async function setLocaleAction(
@@ -29,6 +32,7 @@ export async function setLocaleAction(
     maxAge: ONE_YEAR_SECONDS,
     sameSite: 'lax',
     httpOnly: false,
+    secure: process.env.NODE_ENV === 'production',
   })
 
   // Landing + alle Server-Components neu rendern damit die Sprach-UI greift.
