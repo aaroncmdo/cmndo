@@ -8,6 +8,8 @@ import { getLocale, getMessages } from "next-intl/server";
 import { CookieBanner } from "@/components/CookieBanner";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import OfflineBanner from "@/components/offline/OfflineBanner";
+import ServiceWorkerBoot from "@/components/offline/ServiceWorkerBoot";
+import PersistStorageToast from "@/components/offline/PersistStorageToast";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -65,6 +67,8 @@ export default async function RootLayout({
           <CookieBanner />
           <PwaInstallBanner />
           <OfflineBanner />
+          <ServiceWorkerBoot />
+          <PersistStorageToast />
         </NextIntlClientProvider>
         <Analytics />
         <SpeedInsights />
