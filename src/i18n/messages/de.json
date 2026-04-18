@@ -106,7 +106,15 @@
     "step2c": {},
     "step3": {},
     "step4": {},
-    "abort": {}
+    "abort": {
+      "heading": "Bei Selbstverschulden sind wir nicht die richtige Anlaufstelle",
+      "explanation": "Wenn Sie den Unfall selbst verursacht haben, läuft die Schadenabwicklung über Ihre eigene Kaskoversicherung. Claimondo ist spezialisiert auf Haftpflicht-Schäden, bei denen der Gegner oder dessen Versicherung zahlt.",
+      "tip_1": "Melden Sie den Schaden Ihrer Kaskoversicherung so schnell wie möglich.",
+      "tip_2": "Dokumentieren Sie den Unfall mit Fotos und notieren Sie alle Details.",
+      "tip_3": "Holen Sie sich einen Kostenvoranschlag bei einer Werkstatt Ihres Vertrauens ein.",
+      "hotline_hint": "Unsicher ob es wirklich Selbstverschulden war? Rufen Sie uns an:",
+      "back_home": "Zurück zur Startseite"
+    }
   },
   "common": {
     "weiter": "Weiter",
