@@ -1303,7 +1303,6 @@ export type Database = {
           schadens_ort: string | null
           schadens_plz: string | null
           schadens_ursache: string | null
-          schadenshoehe: number | null
           schadensursache: string | null
           schlussabrechnung_am: string | null
           service_typ: string
@@ -1603,7 +1602,6 @@ export type Database = {
           schadens_ort?: string | null
           schadens_plz?: string | null
           schadens_ursache?: string | null
-          schadenshoehe?: number | null
           schadensursache?: string | null
           schlussabrechnung_am?: string | null
           service_typ?: string
@@ -1903,7 +1901,6 @@ export type Database = {
           schadens_ort?: string | null
           schadens_plz?: string | null
           schadens_ursache?: string | null
-          schadenshoehe?: number | null
           schadensursache?: string | null
           schlussabrechnung_am?: string | null
           service_typ?: string
