@@ -1369,10 +1369,6 @@ export type Database = {
           zahlung_eingegangen_am: string | null
           zahlung_erwartet_am: string | null
           zahlungsweg: string | null
-          zeuge_anschrift: string | null
-          zeuge_email: string | null
-          zeuge_name: string | null
-          zeuge_telefon: string | null
           zeugen_kontakte: Json | null
           zeugen_vorhanden: boolean
         }
@@ -1652,10 +1648,6 @@ export type Database = {
           zahlung_eingegangen_am?: string | null
           zahlung_erwartet_am?: string | null
           zahlungsweg?: string | null
-          zeuge_anschrift?: string | null
-          zeuge_email?: string | null
-          zeuge_name?: string | null
-          zeuge_telefon?: string | null
           zeugen_kontakte?: Json | null
           zeugen_vorhanden?: boolean
         }
@@ -1935,10 +1927,6 @@ export type Database = {
           zahlung_eingegangen_am?: string | null
           zahlung_erwartet_am?: string | null
           zahlungsweg?: string | null
-          zeuge_anschrift?: string | null
-          zeuge_email?: string | null
-          zeuge_name?: string | null
-          zeuge_telefon?: string | null
           zeugen_kontakte?: Json | null
           zeugen_vorhanden?: boolean
         }
