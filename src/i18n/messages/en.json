@@ -99,8 +99,114 @@
       "step3": "ZB1",
       "step4": "Account"
     },
-    "step0": {},
-    "step1": {},
+    "common": {
+      "weiter": "Next",
+      "zurueck": "Back",
+      "abbrechen": "Cancel",
+      "laden": "Loading …",
+      "speichern": "Save"
+    },
+    "step0": {
+      "heading": "What happened?",
+      "sub": "Answer a few short questions about the damage — then we'll collect photos and the vehicle registration.",
+      "cta_start": "Start now",
+      "dauer_hint": "Takes about 3 minutes"
+    },
+    "step1": {
+      "heading": "Accident details",
+      "sub": "Tell us what happened — either by voice or by typing.",
+      "toggle_tippen": "Type",
+      "toggle_voice": "Speak",
+      "dsgvo_label": "I consent to Claimondo processing my information for claim review. I can revoke this consent at any time.",
+      "fields": {
+        "hergang_label": "What happened?",
+        "hergang_placeholder": "For example: I was stopped at the traffic light, and the other driver rear-ended me.",
+        "unfall_datum_label": "Accident date",
+        "unfall_zeit_label": "Approximate time",
+        "unfall_ort_label": "Accident location",
+        "unfall_ort_placeholder": "Enter city or street",
+        "marke_label": "Your vehicle's make",
+        "marke_placeholder": "Choose make …",
+        "modell_label": "Model (optional)",
+        "modell_placeholder": "e.g. A4, Golf 7, 3 Series",
+        "schuldfrage_label": "Who caused the accident?"
+      },
+      "errors": {
+        "hergang_required": "Please describe what happened.",
+        "hergang_too_short": "The description is too short — please add a few more details.",
+        "unfall_datum_required": "Please enter the accident date.",
+        "unfall_datum_future": "The accident date cannot be in the future.",
+        "unfall_ort_required": "Please enter the accident location.",
+        "marke_required": "Please choose a make.",
+        "schuldfrage_required": "Please choose who caused the accident.",
+        "dsgvo_required": "Without your consent we're unable to process the case."
+      },
+      "hergang_options": {
+        "auffahrunfall": "Rear-end collision",
+        "vorfahrt": "Failure to yield",
+        "parken": "While parking / manoeuvring",
+        "spurwechsel": "Lane change",
+        "wildunfall": "Animal collision",
+        "sonstiges": "Other"
+      },
+      "schuldfrage_options": {
+        "gegner": {
+          "label": "The other driver",
+          "description": "Ideal for Claimondo — we take over the full settlement."
+        },
+        "ich": {
+          "label": "Myself",
+          "description": "In that case your own comprehensive (Kasko) insurance handles the claim — Claimondo isn't the right place for this."
+        },
+        "teilschuld": {
+          "label": "Both — shared fault",
+          "description": "We can still help with shared fault. The assessor will clarify the split."
+        },
+        "unklar": {
+          "label": "Still unclear",
+          "description": "No problem — we'll clarify the question of fault together with your lawyer."
+        }
+      },
+      "marken": {
+        "audi": "Audi",
+        "bmw": "BMW",
+        "mercedes": "Mercedes-Benz",
+        "vw": "Volkswagen (VW)",
+        "porsche": "Porsche",
+        "opel": "Opel",
+        "ford": "Ford",
+        "skoda": "Škoda",
+        "seat": "Seat",
+        "hyundai": "Hyundai",
+        "kia": "Kia",
+        "toyota": "Toyota",
+        "nissan": "Nissan",
+        "mazda": "Mazda",
+        "honda": "Honda",
+        "peugeot": "Peugeot",
+        "renault": "Renault",
+        "citroen": "Citroën",
+        "fiat": "Fiat",
+        "alfaromeo": "Alfa Romeo",
+        "volvo": "Volvo",
+        "mini": "Mini",
+        "smart": "Smart",
+        "tesla": "Tesla",
+        "dacia": "Dacia",
+        "sonstiges": "Other make"
+      },
+      "voice": {
+        "heading": "Dictate what happened",
+        "idle_hint": "Tap the microphone and simply tell us what happened.",
+        "idle_example": "Example: \"I was stopped at the red light at the intersection. A white BMW came from behind and hit my rear.\"",
+        "recording": "Recording … just speak naturally.",
+        "processing": "Transcribing …",
+        "preview_hint": "Check the text — you can still edit it or record again.",
+        "record_again": "Record again",
+        "switch_to_typing": "Type instead",
+        "permission_denied": "Without microphone access the voice input can't work. You can switch to \"Type\" at any time."
+      }
+    },
     "step2a": {
       "heading": "Damage photos",
       "sub": "Click an area on the vehicle to upload matching photos. At least 3 photos are required.",
@@ -119,7 +225,26 @@
         "innen": "Interior"
       }
     },
-    "step2b": {},
+    "step2b": {
+      "loading": {
+        "heading": "Analysing your damage …",
+        "phase_1": "Checking photos …",
+        "phase_2": "AI estimating repair cost …",
+        "phase_3": "Determining replacement value …",
+        "trust_note": "We read your photos only once — the data stays with us and is not shared.",
+        "error_title": "Analysis failed",
+        "error_retry": "Try again",
+        "error_skip": "Continue without estimate"
+      },
+      "ergebnis": {
+        "vision_title": "Detected damage",
+        "dat_title": "Preliminary valuation",
+        "disclaimer": "This is an AI-based preliminary estimate and does not replace an assessment. The binding value is determined on site by the assessor.",
+        "totalschaden_warning": "Note: Repair cost could exceed replacement value — that would be an economic total loss. Your assessor will clarify this on site.",
+        "pdf_link": "Download estimate as PDF",
+        "weiter": "Continue to accident data"
+      }
+    },
     "step2c": {
       "heading": "Other driver details",
       "sub": "The more we know about the other driver, the faster settlement goes.",
@@ -159,7 +284,35 @@
       "weiter": "Continue to account",
       "saving": "Saving …"
     },
-    "step4": {},
+    "step4": {
+      "heading": "Create account",
+      "sub": "Finally, we need your login — then you can check on the case anytime.",
+      "email_label": "Email address",
+      "email_placeholder": "john.doe@example.com",
+      "email_exists_hint": "This email is already registered with Claimondo — sign in with your password and the case will be linked to your account.",
+      "password_label": "Password",
+      "password_hint": "At least 8 characters, one uppercase letter, one number.",
+      "password_confirm_label": "Confirm password",
+      "agb_label": "I accept the Terms and Conditions.",
+      "datenschutz_label": "I have read the Privacy Policy and agree.",
+      "submit": "Create account and submit case",
+      "submit_loading": "Creating account …",
+      "makler_intro": "Your case is supervised by {maklerName} — our partner broker who referred you to Claimondo.",
+      "makler_explanation": "Choose which information {maklerName} receives. You can revoke sharing at any time in your profile.",
+      "consent_minimal_title": "Status updates only",
+      "consent_minimal_desc": "{maklerName} will only see whether the case is open, completed or cancelled — no damage details.",
+      "consent_full_title": "Full access",
+      "consent_full_desc": "{maklerName} can see damage details, photos and the assessment status to support you better.",
+      "errors": {
+        "email_required": "Please enter your email.",
+        "email_invalid": "That's not a valid email address.",
+        "password_required": "Please choose a password.",
+        "password_weak": "The password is too weak — at least 8 characters, one uppercase letter, one number.",
+        "password_mismatch": "The two passwords do not match.",
+        "agb_required": "Without Terms consent we cannot create the case.",
+        "datenschutz_required": "Please agree to the Privacy Policy."
+      }
+    },
     "abort": {
       "heading": "For self-caused accidents, we're not the right place",
       "explanation": "If you caused the accident yourself, your own comprehensive (Kasko) insurance handles the claim. Claimondo specializes in liability cases where the other party — or their insurer — pays.",
@@ -176,6 +329,9 @@
     "abbrechen": "Cancel",
     "laden": "Loading …",
     "speichern": "Save",
-    "schliessen": "Close"
+    "schliessen": "Close",
+    "bestaetigen": "Confirm",
+    "loeschen": "Delete",
+    "bearbeiten": "Edit"
   }
 }
