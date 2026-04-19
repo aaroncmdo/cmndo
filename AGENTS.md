@@ -1,3 +1,56 @@
+<!-- BEGIN:claimondo-hard-rules -->
+# Harte Regeln (Niemals brechen)
+
+Diese drei Regeln sind nicht verhandelbar. Jede Session, jeder Commit, jede Migration muss sie einhalten. Sie entstanden aus konkreten Incidents — siehe Session-Referenzen.
+
+## Regel 1 — Nie direkt auf `main` pushen
+
+Jede Arbeit läuft auf einem Feature-Branch mit Linear-Ticket-Namensschema (`kitta/aar-<nr>-<slug>`), PR gegen `staging`, Merge erst nach Review. **Direct-Push auf `main` ist verboten**, auch wenn der Commit „sauber" wirkt.
+
+Begründung: Session vom 19.04.2026 — Commits `572cbea` (AAR-582) und `65a876b` (AAR-580) wurden direkt auf `main` gepusht. Inhaltlich sauber, aber der Flow-Bruch zerstört Preview-Deploys + Review-Spur + Rollback-Sicherheit.
+
+Bei Unfall: `git revert` + neuer Branch + PR.
+
+## Regel 2 — DDL nur über supabase-CLI, nie über Management-API
+
+Schema-Änderungen (ADD/DROP/ALTER COLUMN, CREATE/DROP TABLE, CREATE TRIGGER, CREATE FUNCTION, RLS-Policies usw.) ausschließlich via:
+
+```
+npx supabase migration new <name>
+# SQL in die generierte Datei schreiben
+npx supabase db push
+```
+
+Alternativ für einmalige Recovery-Operationen (z. B. Migration die nachträglich gefahren werden muss):
+
+```
+npx supabase db query --linked --file <sql-file>
+npx supabase migration repair --status applied <version>
+```
+
+**Verboten:** `POST /v1/projects/{ref}/database/query` mit DDL-Payload (Supabase Management API), auch wenn es „schneller" geht. **Verboten:** direkte DDL im Supabase Studio ohne korrespondierende Migration-Datei.
+
+Begründung: Direktes Management-API-DDL bypasst `supabase_migrations.schema_migrations` → Drift (AAR-600). Nächstes `supabase db push` fährt Migrations doppelt oder überhaupt nicht, Repo ist nicht mehr reproducible (`db reset` würde das Schema brechen). AAR-600 hat die daraus entstandene Drift nachträglich bereinigt — Mehrarbeit, die durch konsequente CLI-Nutzung vermieden worden wäre.
+
+## Regel 3 — Kein unbegleiteter Stash am Session-Ende
+
+Wenn am Ende einer Session ein `git stash`-Eintrag existiert, der Code-Änderungen enthält, MUSS vor Session-Abschluss:
+
+* entweder der Stash auf einen Branch gepoppt und committed werden (+ PR falls ready)
+* oder der Stash explizit discardet werden (`git stash drop`) mit Begründung im Abschluss-Report
+* **niemals:** Stash liegen lassen und die zugehörige DB-Migration trotzdem applizieren
+
+Begründung: AAR-599 Prod-Breaker — N4-Code (sv_treffpunkt → besichtigungsort_*) lag im `stash@{0}`, DB-Migration wurde trotzdem via Management-API applied. Ergebnis: `main` referenzierte eine gedroppte Spalte, jeder Phase-2-Save + FlowLink-Anzeige warf Runtime-Errors. Die DB war voraus, der Code war zurück — genau die Drift-Konstellation, die Regel 2 verhindern soll.
+
+**Session-Abschluss-Checkliste:**
+
+```
+git status                # Working-Tree clean?
+git stash list            # Leer oder alte persistente Stashes dokumentiert?
+git log --branches --not --remotes   # Alle lokalen Commits auf Remote gepusht?
+```
+<!-- END:claimondo-hard-rules -->
+
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
