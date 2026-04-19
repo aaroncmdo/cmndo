@@ -1,45 +1,20 @@
-'use client'
+// AAR-544 (C7): Timeline-Tab zeigt den unified Event-Stream aus 7 Quellen.
+// Daten kommen aus page.tsx via getFallEventStream() — Component ist
+// client-side nur für Filter-State und Modal.
 
-// AAR-162 / W2: Timeline-Tab — Wrapper um FallActivityFeed (existiert).
-// buildActivityEvents erwartet timeline + tasks + nachrichten; W2 liefert nur
-// die Timeline — Tasks + Nachrichten-Auszug folgen wenn der Shell diese Props
-// durchreicht. Für W2 bleibt der Feed auf Timeline-Events beschränkt.
+import { EventTimeline } from '@/components/admin/fallakte/EventTimeline'
+import type { FallEvent } from '@/lib/fall/event-stream'
 
-import FallActivityFeed, { buildActivityEvents } from '@/components/faelle/FallActivityFeed'
-
-type TimelineRow = {
-  id: string
-  typ: string
-  titel: string
-  beschreibung: string | null
-  erstellt_von: string | null
-  metadata: unknown
-  lead_id: string | null
-  created_at: string
-}
-
-export default function TimelineTab({
-  timeline,
-}: {
-  timeline: TimelineRow[]
-}) {
-  const events = buildActivityEvents(
-    timeline.map((t) => ({
-      id: t.id,
-      typ: t.typ,
-      titel: t.titel,
-      beschreibung: t.beschreibung ?? null,
-      erstellt_von: t.erstellt_von ?? null,
-      lead_id: t.lead_id ?? null,
-      created_at: t.created_at,
-    })),
-    [],
-    [],
-  )
+export default function TimelineTab({ events }: { events: FallEvent[] }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5">
-      <h2 className="text-sm font-semibold text-gray-900 mb-4">Timeline</h2>
-      <FallActivityFeed events={events} />
+    <div>
+      <div className="flex items-baseline justify-between mb-3">
+        <h2 className="text-sm font-semibold text-[#0D1B3E]">
+          Timeline — alle Aktivitäten im Fall
+        </h2>
+        <span className="text-xs text-gray-500">{events.length} Events</span>
+      </div>
+      <EventTimeline events={events} />
     </div>
   )
 }

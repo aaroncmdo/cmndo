@@ -60,7 +60,7 @@ export async function triggerSvLosgefahren(
   const { data: lastPos } = await db
     .from('sv_live_position')
     .select('lat, lng')
-    .eq('gutachter_id', termin.sv_id)
+    .eq('sv_id', termin.sv_id)
     .order('updated_at', { ascending: false })
     .limit(1)
     .maybeSingle()

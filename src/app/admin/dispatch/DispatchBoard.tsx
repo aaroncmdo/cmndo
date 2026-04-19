@@ -47,7 +47,7 @@ type Lead = {
   updated_at: string | null
   created_at: string | null
   qualifizierungs_phase: string | null
-  schadenfall_typ: string | null
+  schadens_fall_typ: string | null
   personenschaden_flag: boolean | null
   mietwagen_flag: boolean | null
   zugewiesen_an: string | null
@@ -77,7 +77,7 @@ type Fall = {
   status_changed_at: string | null
   updated_at: string | null
   created_at: string
-  vorschaden_vorhanden: boolean | null
+  hat_vorschaeden: boolean | null
   vs_eskalationsstufe: string | null
   anschlussschreiben_am: string | null
 }
@@ -223,7 +223,7 @@ export default function DispatchBoard({
   const [error, setError] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [showNewLead, setShowNewLead] = useState(false)
-  const [newLead, setNewLead] = useState({ vorname: '', nachname: '', telefon: '', email: '', source_channel: 'telefon', schadenfall_typ: '' })
+  const [newLead, setNewLead] = useState({ vorname: '', nachname: '', telefon: '', email: '', source_channel: 'telefon', schadens_fall_typ: '' })
   const [newLeadSaving, setNewLeadSaving] = useState(false)
   const [showDisqualifiziert, setShowDisqualifiziert] = useState(false)
   const [rueckrufModalLead, setRueckrufModalLead] = useState<Lead | null>(null)
@@ -271,7 +271,7 @@ export default function DispatchBoard({
       // Source filter
       if (filterSources.length > 0 && !filterSources.includes(l.source_channel ?? '')) return false
       // Schadentyp filter
-      if (filterSchadenTyp.length > 0 && !filterSchadenTyp.includes(l.schadenfall_typ ?? '')) return false
+      if (filterSchadenTyp.length > 0 && !filterSchadenTyp.includes(l.schadens_fall_typ ?? '')) return false
       // Flag filters
       if (filterPersonenschaden && !l.personenschaden_flag) return false
       if (filterMietwagen && !l.mietwagen_flag) return false
@@ -329,7 +329,7 @@ export default function DispatchBoard({
       }
     }
     if (newPhase === 'flow-versendet') {
-      if (!lead.schadenfall_typ) {
+      if (!lead.schadens_fall_typ) {
         showToast('Schadentyp muss zuerst gesetzt werden')
         return
       }
@@ -511,7 +511,7 @@ export default function DispatchBoard({
               <select value={newLead.source_channel} onChange={e => setNewLead(p => ({ ...p, source_channel: e.target.value }))} className="bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2">
                 <option value="telefon">Telefon</option><option value="website">Website</option><option value="whatsapp">WhatsApp</option><option value="empfehlung">Empfehlung</option><option value="google-ads">Google Ads</option>
               </select>
-              <select value={newLead.schadenfall_typ} onChange={e => setNewLead(p => ({ ...p, schadenfall_typ: e.target.value }))} className="bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2">
+              <select value={newLead.schadens_fall_typ} onChange={e => setNewLead(p => ({ ...p, schadens_fall_typ: e.target.value }))} className="bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2">
                 <option value="">Schadentyp (optional)</option><option value="sf-01">SF-01 Unfall mit Gegner</option><option value="sf-02">SF-02 Teilschuld</option><option value="sf-03">SF-03 Parkschaden</option><option value="sf-05">SF-05 Personenschaden</option>
               </select>
             </div>
@@ -519,7 +519,7 @@ export default function DispatchBoard({
               <button disabled={newLeadSaving || !newLead.vorname.trim() || !newLead.nachname.trim()}
                 onClick={async () => {
                   setNewLeadSaving(true)
-                  try { await createLead(newLead); setShowNewLead(false); setNewLead({ vorname: '', nachname: '', telefon: '', email: '', source_channel: 'telefon', schadenfall_typ: '' }); router.refresh() }
+                  try { await createLead(newLead); setShowNewLead(false); setNewLead({ vorname: '', nachname: '', telefon: '', email: '', source_channel: 'telefon', schadens_fall_typ: '' }); router.refresh() }
                   catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }
                   setNewLeadSaving(false)
                 }}
@@ -695,9 +695,9 @@ export default function DispatchBoard({
                         <span className="bg-gray-100 text-gray-500 text-[9px] font-medium px-1.5 py-0.5 rounded flex items-center gap-0.5">
                           <SrcIcon className="w-2.5 h-2.5" /> {SOURCE_LABEL[lead.source_channel ?? ''] ?? lead.source_channel}
                         </span>
-                        {lead.schadenfall_typ && (
+                        {lead.schadens_fall_typ && (
                           <span className="bg-[#4573A2]/5 text-[#4573A2] text-[9px] font-medium px-1.5 py-0.5 rounded">
-                            {SF_SHORT[lead.schadenfall_typ] ?? lead.schadenfall_typ}
+                            {SF_SHORT[lead.schadens_fall_typ] ?? lead.schadens_fall_typ}
                           </span>
                         )}
                         {lead.personenschaden_flag && <span className="bg-red-50 text-red-500 text-[9px] px-1 py-0.5 rounded">Pers.</span>}
@@ -766,7 +766,7 @@ export default function DispatchBoard({
                     switch (sortField) {
                       case 'name': return dir * (`${a.vorname ?? ''} ${a.nachname ?? ''}`).localeCompare(`${b.vorname ?? ''} ${b.nachname ?? ''}`)
                       case 'source': return dir * (a.source_channel ?? '').localeCompare(b.source_channel ?? '')
-                      case 'schadentyp': return dir * (a.schadenfall_typ ?? '').localeCompare(b.schadenfall_typ ?? '')
+                      case 'schadentyp': return dir * (a.schadens_fall_typ ?? '').localeCompare(b.schadens_fall_typ ?? '')
                       case 'phase': return dir * (a.qualifizierungs_phase ?? '').localeCompare(b.qualifizierungs_phase ?? '')
                       case 'created_at': return dir * (new Date(a.created_at ?? '0').getTime() - new Date(b.created_at ?? '0').getTime())
                       default: return 0
@@ -799,9 +799,9 @@ export default function DispatchBoard({
                           <span className="text-gray-600">{SOURCE_LABEL[lead.source_channel ?? ''] ?? lead.source_channel ?? '—'}</span>
                         </td>
                         <td className="py-2 px-2">
-                          {lead.schadenfall_typ ? (
+                          {lead.schadens_fall_typ ? (
                             <span className="bg-[#4573A2]/5 text-[#4573A2] text-[10px] font-medium px-1.5 py-0.5 rounded">
-                              {SF_SHORT[lead.schadenfall_typ] ?? lead.schadenfall_typ}
+                              {SF_SHORT[lead.schadens_fall_typ] ?? lead.schadens_fall_typ}
                             </span>
                           ) : <span className="text-gray-300">—</span>}
                         </td>
@@ -898,11 +898,11 @@ export default function DispatchBoard({
                       </span>
                     )
                   })()}
-                  {selectedLead.schadenfall_typ && (
+                  {selectedLead.schadens_fall_typ && (
                     <span className="bg-[#4573A2]/10 text-[#4573A2] text-[10px] font-medium px-2 py-1 rounded-lg">
-                      {SF_SHORT[selectedLead.schadenfall_typ] ?? selectedLead.schadenfall_typ}
-                      {SF_LABELS[selectedLead.schadenfall_typ] && (
-                        <span className="text-[#4573A2]/60 ml-1">{SF_LABELS[selectedLead.schadenfall_typ]}</span>
+                      {SF_SHORT[selectedLead.schadens_fall_typ] ?? selectedLead.schadens_fall_typ}
+                      {SF_LABELS[selectedLead.schadens_fall_typ] && (
+                        <span className="text-[#4573A2]/60 ml-1">{SF_LABELS[selectedLead.schadens_fall_typ]}</span>
                       )}
                     </span>
                   )}
@@ -1061,9 +1061,9 @@ function LeadCard({ lead, columnKey, isSelected }: { lead: Lead; columnKey: stri
         <span className="bg-gray-100 text-gray-500 text-[9px] font-medium px-1.5 py-0.5 rounded flex items-center gap-1">
           <SourceIcon className="w-2.5 h-2.5" /> {SOURCE_LABEL[lead.source_channel ?? ''] ?? lead.source_channel}
         </span>
-        {lead.schadenfall_typ && (
+        {lead.schadens_fall_typ && (
           <span className="bg-[#4573A2]/5 text-[#4573A2] text-[9px] font-medium px-1.5 py-0.5 rounded">
-            {SF_SHORT[lead.schadenfall_typ] ?? lead.schadenfall_typ}
+            {SF_SHORT[lead.schadens_fall_typ] ?? lead.schadens_fall_typ}
           </span>
         )}
         {lead.personenschaden_flag && <span className="bg-red-50 text-red-500 text-[9px] px-1 py-0.5 rounded">Pers.</span>}

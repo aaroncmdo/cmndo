@@ -180,8 +180,8 @@ async function main() {
       fahrzeug_hersteller: 'BMW', fahrzeug_modell: '3er',
       schadens_datum: vor3Tagen,
       schadens_ort: 'Koeln, Aachener Str.',
-      versicherung_name: 'Allianz',
-      sv_termin: morgen,
+      gegner_versicherung: 'Allianz',
+      // AAR-552: sv_termin ersatzlos entfernt — Seed-Termin muesste via gutachter_termine angelegt werden
     },
     {
       fall_nummer: 'TEST-002',
@@ -192,8 +192,8 @@ async function main() {
       kennzeichen: 'K-CD 5678',
       fahrzeug_hersteller: 'VW', fahrzeug_modell: 'Golf',
       schadens_datum: new Date(Date.now() - 10 * 86400000).toISOString().slice(0, 10),
-      versicherung_name: 'HUK-COBURG',
-      ist_totalschaden: false,
+      gegner_versicherung: 'HUK-COBURG',
+      totalschaden: false,
       gutachten_eingegangen_am: new Date(Date.now() - 2 * 86400000).toISOString(),
     },
     {
@@ -205,9 +205,9 @@ async function main() {
       kennzeichen: 'K-EF 9012',
       fahrzeug_hersteller: 'Mercedes', fahrzeug_modell: 'C-Klasse',
       schadens_datum: new Date(Date.now() - 20 * 86400000).toISOString().slice(0, 10),
-      versicherung_name: 'AXA',
+      gegner_versicherung: 'AXA',
       anschlussschreiben_am: vor16Tagen,
-      schadenhoehe_netto: 15000,
+      schadens_hoehe_netto: 15000,
       hat_vorschaeden: true,
       vorschaeden_beschreibung: 'Leichte Delle an Fahrerseite (repariert 2024)',
       service_typ: 'komplett',

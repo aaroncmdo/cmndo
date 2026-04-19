@@ -13,6 +13,7 @@ export type KundeAktionsTyp =
   | 'termin-vor-ort'
   | 'termin-unterwegs'
   | 'termin-bestaetigen'
+  | 'nachbesichtigung-waehlen'
   | 'vollmacht-unterschreiben'
   | 'vs-antwort-abwarten'
   | 'fall-abgeschlossen'
@@ -64,6 +65,8 @@ export type KundeFallContext = {
   status?: string | null
   phase?: string | null
   abgeschlossen_am?: string | null
+  // AAR-558 (C11): Nachbesichtigung-Anforderung (unabhängig vom Fall-Status)
+  nachbesichtigung_status?: string | null
 }
 
 export type KundeSlaRecord = {
@@ -267,6 +270,21 @@ export function getKundenJetztZuTun(
           cta: null,
         }
       }
+    }
+  }
+
+  // 6b. Nachbesichtigung angefordert — Kunde muss Slots vorschlagen (AAR-558 C11).
+  // Greift unabhängig vom Fall-Status (VS kann das vor oder während vs-kuerzt anfordern).
+  if (fall.nachbesichtigung_status === 'angefordert') {
+    return {
+      state: 'nachbesichtigung-waehlen',
+      prioritaet: 'hoch',
+      titel: 'Nachbesichtigung: Termin wählen',
+      beschreibung:
+        'Die Versicherung fordert eine erneute Besichtigung Ihres Fahrzeugs. Bitte schlagen Sie 2–3 passende Termine vor.',
+      cta: { label: 'Termine vorschlagen', href: `/kunde/nachbesichtigung/${fall.id}` },
+      variant: 'default',
+      severity: 'warning',
     }
   }
 

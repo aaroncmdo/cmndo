@@ -146,7 +146,7 @@ function buildContextText(ctx: LoadedContext, maklerFirma: string): string {
   const gutachterHonorar = fall.gutachter_honorar as number | null | undefined
   const wbw = fall.wiederbeschaffungswert as number | null | undefined
   const restwert = fall.restwert as number | null | undefined
-  const istTotal = fall.ist_totalschaden as boolean | null | undefined
+  const istTotal = fall.totalschaden as boolean | null | undefined
 
   const gesamtforderung =
     [reparaturkosten, wertminderung, nutzungsausfall, gutachterHonorar]
@@ -167,7 +167,7 @@ function buildContextText(ctx: LoadedContext, maklerFirma: string): string {
   if (fall.unfallhergang) {
     lines.push(`- Hergang: ${String(fall.unfallhergang)}`)
   }
-  lines.push(`- Schadenart: ${(fall.schadenart as string | null) ?? '–'}`)
+  lines.push(`- Schadenart: ${(fall.schadens_art as string | null) ?? '–'}`)
   lines.push(`- Service-Typ: ${(fall.service_typ as string | null) ?? '–'}`)
   lines.push(
     `- Fahrzeug: ${fahrzeug}${
@@ -177,9 +177,9 @@ function buildContextText(ctx: LoadedContext, maklerFirma: string): string {
   if (fall.gegner_name) {
     lines.push(`- Gegner: ${fall.gegner_name as string}`)
   }
-  if (fall.versicherung_gegner_name) {
+  if (fall.gegner_versicherung) {
     lines.push(
-      `- Gegnerische Versicherung: ${fall.versicherung_gegner_name as string}`,
+      `- Gegnerische Versicherung: ${fall.gegner_versicherung as string}`,
     )
   }
   lines.push(
@@ -235,10 +235,10 @@ export async function getFallGegnerVs(fallId: string): Promise<string | null> {
   const admin = createAdminClient()
   const { data } = await admin
     .from('faelle')
-    .select('versicherung_gegner_name')
+    .select('gegner_versicherung')
     .eq('id', fallId)
     .maybeSingle()
-  return (data?.versicherung_gegner_name as string | null) ?? null
+  return (data?.gegner_versicherung as string | null) ?? null
 }
 
 export async function buildCopilotDynamicSystem(

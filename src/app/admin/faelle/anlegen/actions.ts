@@ -11,7 +11,7 @@ import { revalidatePath } from 'next/cache'
 // schnelle 'Telefonisch reingekommen, sofort als Fall' Workflows.
 //
 // Pflichtfelder: vorname, nachname, telefon, schadens_plz.
-// Optional: kennzeichen, schadens_adresse, spezifikation, schadenart, notiz.
+// Optional: kennzeichen, schadens_adresse, spezifikation, schadens_art, notiz.
 // Spezifikation + Schadenart sind optional aber empfohlen damit der
 // Dispatcher-Hard-Filter (KFZ-154) aktiv wird.
 
@@ -26,7 +26,7 @@ export type AnlegeFallInput = {
   schadens_ort?: string
   schadensursache?: string
   spezifikation?: string
-  schadenart?: string
+  schadens_art?: string
   notiz?: string
 }
 
@@ -60,9 +60,9 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
     telefon: data.telefon.trim(),
     email: data.email?.trim() || null,
     source_channel: 'admin-direkt',
-    schadenfall_typ: null,
+    schadens_fall_typ: null,
     spezifikation: data.spezifikation || null,
-    schadenart: data.schadenart || null,
+    schadens_art: data.schadens_art || null,
     status: 'neu',
     qualifizierungs_phase: 'konvertiert',
     fahrzeug_standort_plz: data.schadens_plz.trim(),
@@ -99,7 +99,7 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
     schadens_ursache: data.schadensursache?.trim() || null,
     // KFZ-154: Spezifikation + Schadenart fuer den Dispatcher-Match
     spezifikation: data.spezifikation || null,
-    schadenart: data.schadenart || null,
+    schadens_art: data.schadens_art || null,
     leadbearbeiter_id: user.id,
     konvertiert_am: new Date().toISOString(),
     konvertiert_von_lead: lead.id,

@@ -27,7 +27,7 @@ const BESICHTIGUNG_MIN = 60
 type GutachterSlot = {
   sv_id: string; name: string; prio: number; partner_seit: string | null
   entfernung_km: number | null; fahrzeit_min: number | null
-  auslastung: string; offene_faelle: number; max_faelle_monat: number; paket: string | null
+  auslastung: string; offene_faelle: number; paket_faelle_gesamt: number; paket: string | null
   termin: string; wunschtermin_moeglich: boolean
   naechster_freier_slot: string | null; route_info: string | null
 }
@@ -52,11 +52,11 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null)
   const plz: string | undefined = body?.plz
   const wunschtermin: string | undefined = body?.wunschtermin
-  const schadenfallTyp: string | undefined = body?.schadenfall_typ
-  // KFZ-154: zusaetzlich Spezifikation (Hard-Filter mit Fallback) und
-  // Schadenart (Soft-Score Bonus) per Body-Param.
+  const schadensFallTyp: string | undefined = body?.schadens_fall_typ
+  // KFZ-154: zusätzlich Spezifikation (Hard-Filter mit Fallback) und
+  // Schadensart (Soft-Score Bonus) per Body-Param.
   const spezifikation: string | undefined = body?.spezifikation
-  const schadenart: string | undefined = body?.schadenart
+  const schadensArt: string | undefined = body?.schadens_art
   const directLat: number | undefined = body?.lat
   const directLng: number | undefined = body?.lng
 
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
   // KFZ-154 Cleanup: legacy qualifikationen Spalte gedroppt
   const { data: svList } = await supabase
     .from('sachverstaendige')
-    .select('id, partner_seit, offene_faelle, max_faelle_monat, paket, qualifikationen_neu, spezifikationen, schadenarten, ist_aktiv, profile_id, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_lat, standort_lng, isochrone_polygon')
+    .select('id, partner_seit, offene_faelle, paket, qualifikationen_neu, spezifikationen, schadenarten, ist_aktiv, profile_id, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_lat, standort_lng, isochrone_polygon')
     .eq('ist_aktiv', true)
     .eq('portal_zugang_freigeschaltet', true) // KFZ-148: Nur freigeschaltete SVs
 
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
     }
     if (!inRange) continue
 
-    const maxFaelle = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10
+    const maxFaelle = sv.paket_faelle_gesamt ?? 10
     const genutztFaelle = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
     if (genutztFaelle >= maxFaelle) continue
 
@@ -119,14 +119,14 @@ export async function POST(request: Request) {
     const svSchaden = (sv.schadenarten as string[] | null) ?? []
     const svQualNeu = (sv.qualifikationen_neu as string[] | null) ?? []
     const spezMatch = !spezifikation || svSpez.includes(spezifikation)
-    const schadenMatch = !!schadenart && svSchaden.includes(schadenart)
+    const schadenMatch = !!schadensArt && svSchaden.includes(schadensArt)
 
     let score = 0
     if (sv.partner_seit) score -= Math.min((Date.now() - new Date(sv.partner_seit).getTime()) / (365.25 * 86400000), 10) * 10
     score -= (maxFaelle > 0 ? 1 - (genutztFaelle / maxFaelle) : 0.5) * 30
-    // KFZ-154: schadenfall_typ-Match gegen qualifikationen_neu
-    if (schadenfallTyp && svQualNeu.includes(schadenfallTyp)) score -= 50
-    // KFZ-154: schadenart-Match Bonus (Soft-Priority -40)
+    // KFZ-154: schadens_fall_typ-Match gegen qualifikationen_neu
+    if (schadensFallTyp && svQualNeu.includes(schadensFallTyp)) score -= 50
+    // KFZ-154: schadens_art-Match Bonus (Soft-Priority -40)
     if (schadenMatch) score -= 40
     if (distanz != null) score += distanz
 
@@ -176,7 +176,7 @@ export async function POST(request: Request) {
       .lte('start_zeit', dayEnd.toISOString())
       .not('status', 'eq', 'storniert')
       .not('status', 'eq', 'abgelehnt'),
-    supabase.from('faelle').select('sv_id, sv_termin')
+    supabase.from('v_faelle_mit_aktuellem_termin').select('sv_id, sv_termin')
       .in('sv_id', svIds)
       .not('sv_termin', 'is', null)
       .not('status', 'in', '("abgeschlossen","storniert")')
@@ -292,7 +292,7 @@ export async function POST(request: Request) {
 
   for (let i = 0; i < topCandidates.length && slots.length < 5; i++) {
     const sv = topCandidates[i]
-    const maxF = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10
+    const maxF = sv.paket_faelle_gesamt ?? 10
     const genutztF = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
     const { info, fahrzeit } = getRouteInfo(sv.id, sv.distanz_km)
     const wunschMoeglich = canDoSlot(sv.id, wDate, fahrzeit)
@@ -307,7 +307,7 @@ export async function POST(request: Request) {
       fahrzeit_min: fahrzeit,
       auslastung: `${genutztF}/${maxF}`,
       offene_faelle: genutztF,
-      max_faelle_monat: maxF,
+      paket_faelle_gesamt: maxF,
       paket: sv.paket,
       termin: wunschMoeglich ? wunschtermin : (nextSlot?.toISOString() ?? wunschtermin),
       wunschtermin_moeglich: wunschMoeglich,

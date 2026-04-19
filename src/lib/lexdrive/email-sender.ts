@@ -34,7 +34,7 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
   // Fall + Lead laden
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, kennzeichen, lead_id, gegner_kennzeichen, gegner_name, versicherung_name, versicherung_schaden_nr, zeuge_name, zeuge_anschrift, zeuge_telefon, zeuge_email')
+    .select('id, fall_nummer, kennzeichen, lead_id, gegner_kennzeichen, gegner_name, gegner_versicherung, gegner_schadennummer, zeugen_kontakte')
     .eq('id', fallId)
     .single()
 
@@ -67,8 +67,14 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
   // Email-Body
   const kundeName = [kunde?.vorname, kunde?.nachname].filter(Boolean).join(' ') || '—'
   const kundeAdr = [kunde?.kunde_strasse, kunde?.kunde_plz, kunde?.kunde_stadt].filter(Boolean).join(', ') || '—'
-  const zeugeBlock = fall.zeuge_name
-    ? `\nZeuge:\n  Name: ${fall.zeuge_name}\n  Anschrift: ${fall.zeuge_anschrift ?? '—'}\n  Telefon: ${fall.zeuge_telefon ?? '—'}\n  Email: ${fall.zeuge_email ?? '—'}\n`
+  // AAR-548 D8: zeuge_* gedropt — Source ist jetzt zeugen_kontakte JSONB-Array.
+  const zeugenArr = Array.isArray(fall.zeugen_kontakte)
+    ? (fall.zeugen_kontakte as Array<{ name?: string | null; anschrift?: string | null; telefon?: string | null; email?: string | null; notiz?: string | null }>)
+    : []
+  const zeugeBlock = zeugenArr.length > 0
+    ? '\nZeugen:\n' + zeugenArr.map((z, i) =>
+        `  [${i + 1}] Name: ${z.name ?? '—'}\n      Anschrift: ${z.anschrift ?? '—'}\n      Telefon: ${z.telefon ?? '—'}\n      Email: ${z.email ?? '—'}`
+      ).join('\n') + '\n'
     : ''
 
   const text = `Neuer Fall zur Bearbeitung — Claimondo
@@ -87,8 +93,8 @@ Fahrzeug: ${fall.kennzeichen ?? '—'}
 Gegner:
   Name: ${fall.gegner_name ?? '—'}
   Kennzeichen: ${fall.gegner_kennzeichen ?? '—'}
-  VS: ${fall.versicherung_name ?? '—'}
-  Schaden-Nr: ${fall.versicherung_schaden_nr ?? '—'}
+  VS: ${fall.gegner_versicherung ?? '—'}
+  Schaden-Nr: ${fall.gegner_schadennummer ?? '—'}
 ${zeugeBlock}
 Anhaenge: ${attachments.length} (${attachments.map(a => a.filename).join(', ')})
 

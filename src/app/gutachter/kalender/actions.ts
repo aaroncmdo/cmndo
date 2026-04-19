@@ -17,19 +17,38 @@ export async function setTermin(fallId: string, termin: string) {
   const { data: fall } = await supabase.from('faelle').select('id').eq('id', fallId).eq('sv_id', sv.id).maybeSingle()
   if (!fall) throw new Error('Nicht autorisiert')
 
-  // sv_termin Datum setzen
-  const { error } = await supabase
-    .from('faelle')
-    .update({ sv_termin: termin })
-    .eq('id', fallId)
+  // Termin-Datum setzen: upsert in gutachter_termine statt auf faelle.sv_termin
+  const startZeit = new Date(termin)
+  const endZeit = new Date(startZeit.getTime() + 90 * 60 * 1000)
 
-  if (error) throw new Error(error.message)
+  const { data: existing } = await supabase
+    .from('gutachter_termine')
+    .select('id')
+    .eq('fall_id', fallId)
+    .eq('sv_id', sv.id)
+    .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (existing) {
+    const { error } = await supabase
+      .from('gutachter_termine')
+      .update({ start_zeit: startZeit.toISOString(), end_zeit: endZeit.toISOString(), status: 'bestaetigt' })
+      .eq('id', existing.id)
+    if (error) throw new Error(error.message)
+  } else {
+    const { error } = await supabase
+      .from('gutachter_termine')
+      .insert({ fall_id: fallId, sv_id: sv.id, start_zeit: startZeit.toISOString(), end_zeit: endZeit.toISOString(), status: 'bestaetigt' })
+    if (error) throw new Error(error.message)
+  }
 
   // KFZ-202: State-Machine statt direktem status-Update
   try {
     await transitionFallStatus(fallId, 'sv-termin', { user_id: user.id })
   } catch {
-    // Transition nicht erlaubt (z.B. Status schon weiter) — sv_termin ist trotzdem gesetzt
+    // Transition nicht erlaubt (z.B. Status schon weiter) — Termin ist trotzdem gesetzt
   }
 
   revalidatePath('/gutachter/kalender')

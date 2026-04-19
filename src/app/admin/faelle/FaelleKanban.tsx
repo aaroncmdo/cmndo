@@ -17,7 +17,7 @@ type Fall = {
   sv_id: string | null
   kundenbetreuer_id: string | null
   mandatsnummer: string | null
-  schadenfall_typ: string | null
+  schadens_fall_typ: string | null
   kennzeichen: string | null
   created_at: string
   ist_aktiv: boolean | null
@@ -240,7 +240,7 @@ function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
           </div>
           <div className="flex flex-wrap gap-1 mt-1">
             {fall.kennzeichen && <span className="bg-gray-100 text-gray-600 text-[9px] px-1 py-0.5 rounded">{fall.kennzeichen}</span>}
-            {fall.schadenfall_typ && <span className="bg-[#4573A2]/5 text-[#4573A2] text-[9px] px-1 py-0.5 rounded">{SF_SHORT[fall.schadenfall_typ] ?? fall.schadenfall_typ}</span>}
+            {fall.schadens_fall_typ && <span className="bg-[#4573A2]/5 text-[#4573A2] text-[9px] px-1 py-0.5 rounded">{SF_SHORT[fall.schadens_fall_typ] ?? fall.schadens_fall_typ}</span>}
           </div>
           {(fall.betreuer_name || fall.sv_name) && (
             <div className="flex gap-2 mt-1 text-[9px] text-gray-400 truncate">

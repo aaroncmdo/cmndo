@@ -13,7 +13,7 @@ export async function checkLeadAutoPhase(leadId: string) {
   const phase = lead.qualifizierungs_phase as string | null
   const updates: Record<string, unknown> = {}
 
-  if (lead.schadenfall_typ && (phase === 'neu' || phase === 'nicht-erreicht')) {
+  if (lead.schadens_fall_typ && (phase === 'neu' || phase === 'nicht-erreicht')) {
     updates.qualifizierungs_phase = 'in-qualifizierung'
   }
   if (lead.flow_token && phase === 'in-qualifizierung') {
@@ -34,7 +34,7 @@ export async function checkLeadAutoPhase(leadId: string) {
  */
 export async function checkFallAutoPhase(fallId: string) {
   const svc = createServiceClient()
-  const { data: fall } = await svc.from('faelle').select('*').eq('id', fallId).single()
+  const { data: fall } = await svc.from('v_faelle_mit_aktuellem_termin').select('*').eq('id', fallId).single()
   if (!fall) return
 
   const status = fall.status as string

@@ -23,7 +23,7 @@ export async function stornoFall(fallId: string, grund: string): Promise<{ succe
   if (!sv) return { success: false, typ: '', error: 'Kein SV-Profil' }
 
   const db = createAdminClient()
-  const { data: fall } = await db.from('faelle').select('id, sv_id, sv_termin').eq('id', fallId).eq('sv_id', sv.id).single()
+  const { data: fall } = await db.from('v_faelle_mit_aktuellem_termin').select('id, sv_id, sv_termin').eq('id', fallId).eq('sv_id', sv.id).single()
   if (!fall) return { success: false, typ: '', error: 'Fall nicht gefunden' }
 
   // Check: wie viel Zeit bis zum Termin?
@@ -147,7 +147,7 @@ export async function einreicheReklamation(data: {
 
   const { data: rekl, error } = await db.from('reklamationen').insert({
     fall_id: data.fallId,
-    gutachter_id: sv.id,
+    sv_id: sv.id,
     grund: data.grund,
     begruendung: data.begruendung,
     frist_bis: fristBis.toISOString(),
@@ -183,7 +183,7 @@ export async function entscheideReklamation(reklamationId: string, entscheidung:
   if (profile?.rolle !== 'admin') return { success: false, error: 'Kein Zugriff' }
 
   const db = createAdminClient()
-  const { data: rekl } = await db.from('reklamationen').select('id, fall_id, gutachter_id, status').eq('id', reklamationId).single()
+  const { data: rekl } = await db.from('reklamationen').select('id, fall_id, sv_id, status').eq('id', reklamationId).single()
   if (!rekl) return { success: false, error: 'Reklamation nicht gefunden' }
   if (!['eingereicht', 'pruefung'].includes(rekl.status)) return { success: false, error: 'Reklamation bereits bearbeitet' }
 

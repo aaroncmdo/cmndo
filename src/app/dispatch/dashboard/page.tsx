@@ -39,7 +39,7 @@ export default async function DispatchDashboard() {
     // Neueste Leads (Live-Feed)
     supabase
       .from('leads')
-      .select('id, vorname, nachname, telefon, qualifizierungs_phase, schadenfall_typ, source_channel, created_at')
+      .select('id, vorname, nachname, telefon, qualifizierungs_phase, schadens_fall_typ, source_channel, created_at')
       .order('created_at', { ascending: false })
       .limit(15),
   ])
@@ -116,7 +116,7 @@ export default async function DispatchDashboard() {
                   <p className="text-sm font-medium text-gray-900 truncate">
                     {lead.vorname} {lead.nachname}
                   </p>
-                  <p className="text-xs text-gray-500">{lead.telefon} {lead.schadenfall_typ ? `· ${lead.schadenfall_typ}` : ''}</p>
+                  <p className="text-xs text-gray-500">{lead.telefon} {lead.schadens_fall_typ ? `· ${lead.schadens_fall_typ}` : ''}</p>
                 </div>
                 <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${phaseColors[lead.qualifizierungs_phase] ?? 'bg-gray-100 text-gray-600'}`}>
                   {phaseLabels[lead.qualifizierungs_phase] ?? lead.qualifizierungs_phase}

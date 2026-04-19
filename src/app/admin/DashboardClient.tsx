@@ -136,7 +136,7 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
     // ── Parallel queries ──
     const [gtR, rueckR, termineR, tasksR, neueR, leadsC, faelleC, konvR] = await Promise.all([
       // Gutachter-Termine
-      supabase.from('faelle')
+      supabase.from('v_faelle_mit_aktuellem_termin')
         .select('id, fall_nummer, sv_termin, sv_id, schadens_adresse, schadens_plz, schadens_ort, lead_id, kennzeichen, status')
         .not('sv_termin', 'is', null)
         .gte('sv_termin', ds).lt('sv_termin', de)
@@ -158,7 +158,7 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
       // Tasks
       supabase.from('tasks').select('id, titel, typ, fall_id, faellig_am, prioritaet, faelle(fall_nummer)').in('status', ['offen', 'in-bearbeitung']).order('faellig_am', { ascending: true }).limit(25),
       // Neue unzugewiesene Fälle
-      supabase.from('faelle').select('id, fall_nummer, lead_id, schadenfall_typ, created_at').is('sv_id', null).not('status', 'in', '("abgeschlossen","storniert")').order('created_at', { ascending: false }).limit(10),
+      supabase.from('faelle').select('id, fall_nummer, lead_id, schadens_fall_typ, created_at').is('sv_id', null).not('status', 'in', '("abgeschlossen","storniert")').order('created_at', { ascending: false }).limit(10),
       // Stats
       supabase.from('leads').select('id', { count: 'exact', head: true }).not('status', 'in', '("disqualifiziert","kalt")'),
       supabase.from('faelle').select('id', { count: 'exact', head: true }).not('status', 'in', '("abgeschlossen","storniert")'),
@@ -249,7 +249,7 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
     // Neue Fälle
     setNeueFaelle((neueR.data ?? []).map(f => ({
       id: f.id, fallNr: f.fall_nummer ?? f.id.slice(0, 8), kunde: leadMap[f.lead_id ?? ''] ?? '—',
-      schadentyp: f.schadenfall_typ ?? null, datum: f.created_at ? new Date(f.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) : '',
+      schadentyp: f.schadens_fall_typ ?? null, datum: f.created_at ? new Date(f.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) : '',
     })))
 
     const ueberfaellig = (tasksR.data ?? []).filter(t => t.faellig_am && new Date(t.faellig_am) < now).length

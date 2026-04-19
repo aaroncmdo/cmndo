@@ -28,7 +28,7 @@ export type LeadData = {
   nachname: string
   email: string
   telefon: string
-  schadenfall_typ: string
+  schadens_fall_typ: string
   schadentyp: string | null
   schadentyp_freitext: string | null
   kunden_konstellation: string
@@ -491,13 +491,13 @@ export default function FlowWizardKfz({
                             // der Kunde ist in diesem Step noch nicht auth'd.
                             const path = `flow/schadensfotos-lead/${lead.id}/${Date.now()}-${crypto.randomUUID()}.${ext}`
                             const { error: upErr } = await supabase.storage
-                              .from('dokumente')
+                              .from('fall-dokumente')
                               .upload(path, file, { contentType: file.type })
                             if (upErr) {
                               setFotoError(`Upload „${file.name}" fehlgeschlagen: ${upErr.message}`)
                               continue
                             }
-                            const { data } = supabase.storage.from('dokumente').getPublicUrl(path)
+                            const { data } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
                             uploaded.push(data.publicUrl)
                           }
                           const next = [...schadensfotos, ...uploaded].slice(0, 10)

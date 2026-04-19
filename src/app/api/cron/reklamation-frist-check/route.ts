@@ -15,7 +15,7 @@ export async function GET() {
 
   // 1. Frist abgelaufen → auto_abgelehnt_frist
   const { data: abgelaufen } = await db.from('reklamationen')
-    .select('id, fall_id, gutachter_id')
+    .select('id, fall_id, sv_id')
     .eq('status', 'eingereicht')
     .lt('frist_bis', now)
 
@@ -27,7 +27,7 @@ export async function GET() {
 
     // Email an SV
     try {
-      const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', r.gutachter_id).single()
+      const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', r.sv_id).single()
       if (sv?.profile_id) {
         const { data: p } = await db.from('profiles').select('email, vorname').eq('id', sv.profile_id).single()
         if (p?.email) {

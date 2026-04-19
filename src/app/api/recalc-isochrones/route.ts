@@ -50,7 +50,7 @@ export async function POST() {
 
   const { data: svList, error } = await admin
     .from('sachverstaendige')
-    .select('id, standort_lat, standort_lng, paket_umkreis_km, radius_km')
+    .select('id, standort_lat, standort_lng, paket_umkreis_km')
     .not('standort_lat', 'is', null)
     .not('standort_lng', 'is', null)
 
@@ -63,7 +63,7 @@ export async function POST() {
   for (const sv of svList ?? []) {
     const lat = sv.standort_lat
     const lng = sv.standort_lng
-    const radiusKm = sv.paket_umkreis_km ?? sv.radius_km ?? 15
+    const radiusKm = sv.paket_umkreis_km ?? 15
 
     if (lat == null || lng == null) continue
 

@@ -53,7 +53,7 @@ export async function sendOnboardingRechnungEmail({
       .select('id, vorlage_typ, pdf_storage_path, vorlage_version')
       .not('pdf_storage_path', 'is', null)
     if (sv_id) {
-      query.eq('gutachter_id', sv_id)
+      query.eq('sv_id', sv_id)
     } else if (organisation_id) {
       query.eq('organisation_id', organisation_id)
     }

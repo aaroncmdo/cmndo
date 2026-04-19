@@ -21,11 +21,11 @@ export type LeadRow = Record<string, unknown>
 
 // ─── 1. DIRECT — Feldname gleich, lead[field] ?? null ───────────────────────
 export const LEAD_TO_FALL_DIRECT_FIELDS = [
-  'schadenfall_typ',
+  'schadens_fall_typ',
   'kunden_konstellation',
   // KFZ-154 Spezifikation + Schadenart für Dispatcher-Match
   'spezifikation',
-  'schadenart',
+  'schadens_art',
   // KFZ-153 Unfall + Gegner Detaildaten
   'unfall_konstellation',
   'gegner_anzahl_beteiligte',
@@ -42,9 +42,9 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // Gegner
   'gegner_name',
   'gegner_versicherung',
-  // AAR-265: FK auf versicherungen-Stammdaten — wird zusätzlich zum
-  // Freitext-Namen kopiert. resolveFallEntityFks() bevorzugt diese FK
-  // gegenüber dem ILIKE-Fuzzy-Match.
+  // AAR-265 + AAR-545 Cluster D: FK auf versicherungen-Stammdaten — Source
+  // of Truth für die Gegner-Versicherung. Fällt auf den ILIKE-Fuzzy-Match
+  // aus resolveFallEntityFks() zurück, wenn das Lead nur Freitext hatte.
   'gegner_versicherung_id',
   'gegner_kennzeichen',
   // Hergang
@@ -62,14 +62,16 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // schadens_ort (für SV-Dispatch) und unfallort (für Hergangs-Doku) getrennt
   // zu halten. Wenn das geändert werden soll: eigenes Issue.
   // BUG-73 Schadens-Detaildaten
-  'schadensursache',
+  // AAR-548 D4: schadensursache auf faelle ist weg — Mapping lebt jetzt in
+  // LEAD_TO_FALL_RENAMED_FIELDS (fall.schadens_ursache ← lead.schadensursache).
   'firma_name',
-  'halter_name',
+  // AAR-548 D7: halter_name ist GENERATED aus halter_vorname + halter_nachname —
+  // kein manueller Write mehr. Die Einzelfelder werden weiter unten gemappt.
   'wunschtermin',
   'source_channel',
   'source_domain',
   // KFZ-208 Mandantenfragebogen-Detaildaten
-  'schadenhergang',
+  'schadens_hergang',
   'halter_vorname',
   'halter_nachname',
   'halter_strasse',
@@ -113,9 +115,9 @@ export const LEAD_TO_FALL_DEFAULT_FIELDS: Record<string, unknown> = {
   sachschaden_flag: false,
   mietwagen_flag: false,
   // AAR-313: Nutzungsausfall war bisher nicht im Mapping — Lead-Flag verlor sich
-  leasing_flag: false,
+  // AAR-548 D10: leasing_flag + finanzierung_flag auf faelle gedropt —
+  // finanzierung_leasing-Enum ist Truth. Defaults unten.
   nutzungsausfall: false,
-  finanzierung_flag: false,
   gewerbe_flag: false,
   halter_ungleich_fahrer_flag: false,
   // KFZ-208
@@ -137,8 +139,6 @@ export const LEAD_TO_FALL_DEFAULT_FIELDS: Record<string, unknown> = {
 // Format: { fallSpalte: leadSpalte } — übernimmt mit `?? null`
 export const LEAD_TO_FALL_RENAMED_FIELDS: Record<string, string> = {
   // BUG-58: Spalten die in faelle anders heißen
-  versicherung_name: 'eigene_versicherung',
-  versicherung_schaden_nr: 'eigene_policennr',
   leasinggeber_name: 'leasing_geber',
   bank_name: 'finanzierung_bank',
   ust_id: 'firma_ustid',
@@ -148,6 +148,8 @@ export const LEAD_TO_FALL_RENAMED_FIELDS: Record<string, string> = {
   schadens_plz: 'fahrzeug_standort_plz',
   schadens_ort: 'unfallort',
   fin_vin: 'fin',
+  // AAR-548 D4: leads.schadensursache → faelle.schadens_ursache (Duplikat weg).
+  schadens_ursache: 'schadensursache',
 }
 
 // ─── 3b. RENAMED + DEFAULT — Fall-Spalte ≠ Lead-Spalte mit NOT-NULL-Fallback
@@ -181,7 +183,9 @@ export type BuildFallOptions = {
   signatureUrl: string
   // AAR-155: 4 Entity-FK-IDs, resolved via resolveFallEntityFks() BEVOR
   // buildFallInsertFromLead synchron aufgerufen wird.
-  versicherungId?: string | null
+  // AAR-545 Cluster D: versicherungId -> gegnerVersicherungId (semantisch:
+  // FK auf versicherungen-Stammdaten der Gegner-Versicherung).
+  gegnerVersicherungId?: string | null
   kanzleiId?: string | null
   organisationId?: string | null
   leadbearbeiterId?: string | null
@@ -195,19 +199,22 @@ export function fallComputedFields(lead: LeadRow, options: BuildFallOptions): Re
     status: options.svIdFromTermin ? 'sv-termin' : 'ersterfassung',
     sv_id: options.svIdFromTermin,
     sv_zugewiesen_am: options.svIdFromTermin ? now : null,
-    gutachter_termin_status: lead.gutachter_termin ? 'reserviert' : null,
+    // AAR-552: gutachter_termin_status und sv_termin ersatzlos entfernt —
+    // spiegelt die View v_faelle_mit_aktuellem_termin aus gutachter_termine.
     // KFZ-192: service_typ aus Lead kopieren
     service_typ: lead.service_typ ?? 'komplett',
     kundenbetreuer_id: options.kundenbetreuerId,
     konvertiert_am: now,
     konvertiert_von_lead: lead.id,
-    sv_termin: lead.gutachter_termin,
     abtretung_pdf: options.signatureUrl,
     abtretung_signiert_am: now,
     sa_unterschrieben: true,
     // AAR-155: Entity-FKs — resolveFallEntityFks() muss vorher laufen.
     // Bei Lookup-Miss bleibt der Wert null (nicht-blockierend).
-    versicherung_id: options.versicherungId ?? null,
+    // AAR-545 Cluster D: versicherung_id ersatzlos entfernt —
+    // faelle.gegner_versicherung_id (aus leads.gegner_versicherung_id via
+    // DIRECT_FIELDS) ist die einzige Source-of-Truth. Fallback auf den
+    // Fuzzy-Match passiert in buildFallInsertFromLead.
     kanzlei_id: options.kanzleiId ?? null,
     organisation_id: options.organisationId ?? null,
     leadbearbeiter_id: options.leadbearbeiterId ?? null,
@@ -231,7 +238,7 @@ export async function resolveFallEntityFks(
   lead: LeadRow,
   svIdFromTermin: string | null,
 ): Promise<{
-  versicherungId: string | null
+  gegnerVersicherungId: string | null
   kanzleiId: string | null
   organisationId: string | null
   leadbearbeiterId: string | null
@@ -246,7 +253,7 @@ export async function resolveFallEntityFks(
   // „HUK-Coburg") und der Dispatcher oft nur „allianz" tippt.
   // AAR-155 Audit-Fix #4: LIKE-Wildcards im User-Input escapen damit
   // „Allianz % Co" nicht als Pattern sondern als Literal gesucht wird.
-  let versicherungId: string | null = null
+  let gegnerVersicherungId: string | null = null
   if (gegnerVs.length >= 3) {
     try {
       const escaped = gegnerVs.replace(/[\\%_]/g, '\\$&')
@@ -256,9 +263,9 @@ export async function resolveFallEntityFks(
         .ilike('name', `%${escaped}%`)
         .limit(1)
         .maybeSingle()
-      versicherungId = data?.id ?? null
-      if (!versicherungId) {
-        console.warn('[AAR-155] Versicherung nicht gefunden:', gegnerVs)
+      gegnerVersicherungId = data?.id ?? null
+      if (!gegnerVersicherungId) {
+        console.warn('[AAR-155] Gegner-Versicherung nicht gefunden:', gegnerVs)
       }
     } catch { /* non-blocking */ }
   }
@@ -296,7 +303,7 @@ export async function resolveFallEntityFks(
   // sendFlowLinkMultiChannel automatisch.
   const leadbearbeiterId = zugewiesenAn
 
-  return { versicherungId, kanzleiId, organisationId, leadbearbeiterId }
+  return { gegnerVersicherungId, kanzleiId, organisationId, leadbearbeiterId }
 }
 
 /**
@@ -339,6 +346,14 @@ export function buildFallInsertFromLead(
   // 4. TRANSFORM
   for (const [fallField, { leadField, transform }] of Object.entries(LEAD_TO_FALL_TRANSFORM_FIELDS)) {
     insert[fallField] = transform(lead[leadField])
+  }
+
+  // AAR-545 Cluster D: Fallback für gegner_versicherung_id.
+  // Primär kommt die FK aus DIRECT_FIELDS (lead.gegner_versicherung_id).
+  // Wenn das Lead keine FK hatte (Freitext-Eingabe), nimmt der Fuzzy-Match
+  // aus resolveFallEntityFks() als Fallback.
+  if (!insert.gegner_versicherung_id && options.gegnerVersicherungId) {
+    insert.gegner_versicherung_id = options.gegnerVersicherungId
   }
 
   return insert

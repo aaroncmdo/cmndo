@@ -31,7 +31,7 @@ export default async function SachverstaendigeHubPage() {
   const { data: svRaw } = await supabase
     .from('sachverstaendige')
     .select(
-      'id, paket, standort_lat, standort_lng, ist_aktiv, organisation_id, isochrone_polygon, paket_umkreis_km, radius_km, paket_radius_km, gutachter_typ, offene_faelle, max_faelle_monat, paket_faelle_genutzt, paket_faelle_gesamt, ablehnungen_30_tage, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, profiles(vorname, nachname)',
+      'id, paket, standort_lat, standort_lng, ist_aktiv, organisation_id, isochrone_polygon, paket_umkreis_km, gutachter_typ, offene_faelle, paket_faelle_genutzt, paket_faelle_gesamt, ablehnungen_30_tage, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, profiles(vorname, nachname)',
     )
     .is('geloescht_am', null)
 
@@ -44,11 +44,8 @@ export default async function SachverstaendigeHubPage() {
     organisation_id: string | null
     isochrone_polygon: unknown
     paket_umkreis_km: number | null
-    radius_km: number | null
-    paket_radius_km: number | null
     gutachter_typ: string | null
     offene_faelle: number | null
-    max_faelle_monat: number | null
     paket_faelle_genutzt: number | null
     paket_faelle_gesamt: number | null
     ablehnungen_30_tage: number | null
@@ -72,11 +69,10 @@ export default async function SachverstaendigeHubPage() {
       lng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
       istAktiv: sv.ist_aktiv !== false,
       isochrone: (sv.isochrone_polygon as SvMarker['isochrone']) ?? null,
-      einsatzKm:
-        Number(sv.paket_umkreis_km) || Number(sv.radius_km) || Number(sv.paket_radius_km) || null,
+      einsatzKm: Number(sv.paket_umkreis_km) || null,
       gutachterTyp: sv.gutachter_typ ?? 'kfz-gutachter',
       offeneFaelle: Number(sv.paket_faelle_genutzt) || Number(sv.offene_faelle) || 0,
-      maxFaelleMonat: Number(sv.paket_faelle_gesamt) || Number(sv.max_faelle_monat) || 10,
+      maxFaelleMonat: Number(sv.paket_faelle_gesamt) || 10,
       ablehnungen30Tage: Number(sv.ablehnungen_30_tage) || 0,
       portalZugangFreigeschaltet: sv.portal_zugang_freigeschaltet ?? null,
       vertragUnterschrieben: sv.vertrag_unterschrieben ?? null,

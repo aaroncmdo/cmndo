@@ -35,10 +35,9 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'fin_vin',
   'erstzulassung',
   'kilometerstand',
-  // Halter (ZB1-OCR)
+  // Halter (ZB1-OCR) — AAR-548 D7: halter_name ist GENERATED (nicht editierbar).
   'halter_vorname',
   'halter_nachname',
-  'halter_name',
   'halter_strasse',
   'halter_plz',
   'halter_stadt',
@@ -51,32 +50,31 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'schadens_ort',
   'schadens_ursache',
   'schadens_beschreibung',
-  'schadenhergang',
-  'schadenart',
+  'schadens_hergang',
+  'schadens_art',
   // Gegner / Versicherung
   'gegner_name',
   'gegner_kennzeichen',
   'gegner_versicherung',
+  'gegner_versicherung_id',
   'gegner_fahrzeugtyp',
-  'schadennummer_versicherung',
-  'versicherung_schaden_nr',
-  'versicherung_id',
+  'gegner_schadennummer',
+  'gegner_versicherungsnummer',
   // Vorschäden
-  'vorschaden_vorhanden',
+  'hat_vorschaeden',
   'vorschaden_anzahl',
-  // Besichtigung (DB-verifiziert: Adresse + Lat/Lng/PlaceID + Datum)
+  // Besichtigung (DB-verifiziert: Adresse + Lat/Lng/PlaceID)
+  // AAR-552 Cluster E: besichtigung_datum ersatzlos entfernt (kein Daten-Konsument).
   'besichtigungsort_adresse',
   'besichtigungsort_lat',
   'besichtigungsort_lng',
   'besichtigungsort_place_id',
-  'besichtigung_datum',
   // Kernwerte (LexDrive-Webhook schreibt; Admin-Override)
   'reparaturkosten',
   'wiederbeschaffungswert',
   'restwert',
   'wertminderung',
-  'schadenshoehe',
-  'schadenhoehe_netto',
+  'schadens_hoehe_netto',
   // VS-Status-Felder (AAR-161 W1 neu)
   'vs_kuerzung_grund',
   'geschlossen_grund',

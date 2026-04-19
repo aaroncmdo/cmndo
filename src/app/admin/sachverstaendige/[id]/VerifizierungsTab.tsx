@@ -54,7 +54,7 @@ type Props = {
   verifiziertAm: string | null
   tier2Slots: Tier2Slot[]
   // Sperre
-  gesperrtAm: string | null
+  gesperrtSeit: string | null
   gesperrtGrund: string | null
 }
 
@@ -423,13 +423,13 @@ function SlotStatusBadge({ status, uploadCount }: { status: Tier2Slot['status'];
 
 // ─── Sperre ──────────────────────────────────────────────────────────
 
-function SperreCard({ svId, gesperrtAm, gesperrtGrund }: Props) {
+function SperreCard({ svId, gesperrtSeit, gesperrtGrund }: Props) {
   const [pending, startTransition] = useTransition()
   const [grund, setGrund] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
 
-  const isGesperrt = Boolean(gesperrtAm)
+  const isGesperrt = Boolean(gesperrtSeit)
 
   function handleSperren() {
     if (grund.trim().length < 10) {
@@ -480,7 +480,7 @@ function SperreCard({ svId, gesperrtAm, gesperrtGrund }: Props) {
           <div className="px-3 py-2 rounded-lg bg-white border border-red-200 text-xs">
             <p className="text-red-800">
               <span className="font-semibold">Gesperrt seit:</span>{' '}
-              {gesperrtAm ? new Date(gesperrtAm).toLocaleDateString('de-DE') : '—'}
+              {gesperrtSeit ? new Date(gesperrtSeit).toLocaleDateString('de-DE') : '—'}
             </p>
             {gesperrtGrund && <p className="text-red-700 mt-1 whitespace-pre-line"><span className="font-semibold">Grund:</span> {gesperrtGrund}</p>}
           </div>

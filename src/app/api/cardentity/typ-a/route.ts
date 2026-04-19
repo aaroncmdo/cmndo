@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     const ergebnis = {
       fin_vin,
       abfrage_zeitpunkt: new Date().toISOString(),
-      vorschaden_vorhanden: hasVorschaden,
+      hat_vorschaeden: hasVorschaden,
       vorschaden_anzahl: anzahl,
       quelle: 'cardentity_typ_a_mock',
       details: hasVorschaden
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       .from('faelle')
       .update({
         vorschaden_geprueft: true,
-        vorschaden_vorhanden: hasVorschaden,
+        hat_vorschaeden: hasVorschaden,
         vorschaden_anzahl: anzahl,
         vorschaden_letzter_datum: letzterDatum,
         vorschaden_typ_a_ergebnis: ergebnis,

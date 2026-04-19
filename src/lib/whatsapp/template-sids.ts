@@ -44,6 +44,12 @@ export type TemplateName =
   | 'nachbesichtigung_abgeschlossen'
   // AAR-352: Multi-Slot-Upload-Anfrage (Vorname + Upload-Link)
   | 'dokumente_upload_anfrage'
+  // AAR-559 (C10): SV erhält Auftrag zur Technischen Stellungnahme
+  | 'stellungnahme_beauftragt'
+  // AAR-561 (C12): SV erhält Anfrage für Konfrontations-Termin bei Nachbesichtigung
+  | 'sv_konfrontation_anfrage'
+  // AAR-561 (C12): Kunde wird informiert dass SV seinen Konfrontations-Termin bestätigt hat
+  | 'sv_konfrontation_bestaetigt_kunde'
   // KFZ-200 → KFZ-201: SV-Navigation Templates konsolidiert zu T21-T25:
   //   sv_nav_unterwegs    → sv_losgefahren (T21)
   //   sv_nav_15min        → sv_fast_da (T22)
@@ -97,6 +103,12 @@ export const TEMPLATE_CONFIGS: Record<TemplateName, TemplateConfig> = {
   nachbesichtigung_abgeschlossen: { envKey: 'TWILIO_TPL_NACHBESICHTIGUNG_ABGESCHLOSSEN', variableCount: 2, beschreibung: 'Nachbesichtigung abgeschlossen (Vorname, Portal-Link)' },
   // AAR-352: Multi-Slot-Upload-Anfrage — Vorname + Upload-Link
   dokumente_upload_anfrage:     { envKey: 'TWILIO_TPL_DOKUMENTE_UPLOAD_ANFRAGE', variableCount: 2, beschreibung: 'AAR-352: Multi-Slot-Upload-Anfrage (Vorname, Upload-Link)' },
+  // AAR-559 (C10): SV-WA für Stellungnahme-Auftrag — SV-Vorname, Fall-Nummer, Kürzungs-Grund-Kurzform, Portal-Link
+  stellungnahme_beauftragt:     { envKey: 'TWILIO_TPL_STELLUNGNAHME_BEAUFTRAGT', variableCount: 4, beschreibung: 'AAR-559 (C10): SV-WA Stellungnahme-Auftrag (SV-Vorname, Fall-Nr, Grund-Kurzform, Portal-Link)' },
+  // AAR-561 (C12): SV-WA für Konfrontations-Termin-Anfrage — SV-Vorname, Fall-Nummer, Termin-Datum+Uhrzeit, Portal-Link
+  sv_konfrontation_anfrage:     { envKey: 'TWILIO_TPL_SV_KONFRONTATION_ANFRAGE', variableCount: 4, beschreibung: 'AAR-561 (C12): SV-WA Konfrontations-Termin-Anfrage (SV-Vorname, Fall-Nr, Termin, Portal-Link)' },
+  // AAR-561 (C12): Kunde-WA — SV hat Konfrontations-Termin bestätigt — Kunden-Vorname, SV-Vorname, Termin-Datum+Uhrzeit, Portal-Link
+  sv_konfrontation_bestaetigt_kunde: { envKey: 'TWILIO_TPL_SV_KONFRONTATION_BESTAETIGT_KUNDE', variableCount: 4, beschreibung: 'AAR-561 (C12): Kunde-WA SV-Konfrontations-Zusage (Kunden-Vorname, SV-Vorname, Termin, Portal-Link)' },
 }
 
 /**

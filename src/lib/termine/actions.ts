@@ -143,11 +143,11 @@ export async function updateLivePosition(
 
   const now = new Date().toISOString()
 
-  // Live-Position aktualisieren
+  // Live-Position aktualisieren (History-Row, konsistent mit /api/sv/position-batch)
   const { error: posErr } = await db
     .from('sv_live_position')
-    .upsert({
-      gutachter_id: sv.id,
+    .insert({
+      sv_id: sv.id,
       lat,
       lng,
       accuracy_m: 0,
@@ -155,9 +155,9 @@ export async function updateLivePosition(
       speed_kmh: null,
       updated_at: now,
       ...(distanceMeters !== null ? { distance_to_target_meters: distanceMeters } : {}),
-    }, { onConflict: 'gutachter_id' })
+    })
 
-  if (posErr) console.error('[updateLivePosition] upsert error:', posErr.message)
+  if (posErr) console.error('[updateLivePosition] insert error:', posErr.message)
 
   // Termin-ETA updaten
   if (etaMinutes !== null) {

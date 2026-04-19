@@ -25,7 +25,7 @@ export default async function SvDetailPage({
 
   const { data: sv } = await supabase
     .from('sachverstaendige')
-    .select('id, profile_id, radius_km, paket, max_faelle_monat, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, sa_vorlage_status, sa_vorlage_storage_path, sa_vorlage_hochgeladen_am, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, gesperrt_am, gesperrt_grund, profiles(vorname, nachname, email, telefon)')
+    .select('id, profile_id, paket, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, sa_vorlage_status, sa_vorlage_storage_path, sa_vorlage_hochgeladen_am, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, gesperrt_grund, profiles(vorname, nachname, email, telefon)')
     .eq('id', id)
     .single()
 
@@ -38,7 +38,7 @@ export default async function SvDetailPage({
 
   // Fälle + Tasks parallel laden
   const [faelleRes, tasksRes] = await Promise.all([
-    supabase.from('faelle')
+    supabase.from('v_faelle_mit_aktuellem_termin')
       .select('id, fall_nummer, status, schadens_ursache, schadens_ort, sv_termin, created_at, lead_id, leads(vorname, nachname)')
       .eq('sv_id', id)
       .not('status', 'in', '("abgeschlossen","storniert")')
@@ -72,7 +72,7 @@ export default async function SvDetailPage({
   }
 
   const name = profile ? `${profile.vorname ?? ''} ${profile.nachname ?? ''}`.trim() : ''
-  const maxFaelle = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10
+  const maxFaelle = sv.paket_faelle_gesamt ?? 10
   const genutzt = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
   const pct = maxFaelle > 0 ? Math.round((genutzt / maxFaelle) * 100) : 0
   const now = new Date()
@@ -97,7 +97,7 @@ export default async function SvDetailPage({
     let signedUrl: string | null = null
     if (sv.sa_vorlage_storage_path) {
       const { data: sig } = await dbAdmin.storage
-        .from('dokumente')
+        .from('fall-dokumente')
         .createSignedUrl(sv.sa_vorlage_storage_path, 300)
       signedUrl = sig?.signedUrl ?? null
     }
@@ -107,7 +107,7 @@ export default async function SvDetailPage({
       getAlleSlots(supabase),
       dbAdmin.from('pflichtdokumente')
         .select('id, dokument_typ, status, hochgeladen_am')
-        .eq('gutachter_id', id),
+        .eq('sv_id', id),
     ])
     const pflichtRows = (pflichtRes.data ?? []) as Array<{
       id: string
@@ -116,18 +116,12 @@ export default async function SvDetailPage({
       hochgeladen_am: string | null
     }>
 
-    // Upload-Counts pro pflichtdokument-Row
-    const pflichtIds = pflichtRows.map(r => r.id)
+    // AAR-553: Upload-Counts wurden früher via dokumente.pflichtdokument_id
+    // geführt — die Spalte existiert jedoch weder in der alten dokumente-
+    // Tabelle (verifiziert) noch in fall_dokumente. Rückwirkend bestätigt:
+    // Counts waren immer 0. Wir lassen sie leer, bis AAR-XXX einen echten
+    // Link (fall_dokumente.pflichtdokument_id) einzieht.
     const uploadCounts: Record<string, number> = {}
-    if (pflichtIds.length > 0) {
-      const { data: uploads } = await dbAdmin.from('dokumente')
-        .select('pflichtdokument_id')
-        .in('pflichtdokument_id', pflichtIds)
-      for (const u of uploads ?? []) {
-        const pid = u.pflichtdokument_id as string | null
-        if (pid) uploadCounts[pid] = (uploadCounts[pid] ?? 0) + 1
-      }
-    }
 
     const verifizierungsSlots = alleSlots.filter(s =>
       s.kategorie === 'gutachter_verifizierung' && s.slot_id !== 'sv_sa_vorlage',
@@ -241,7 +235,7 @@ export default async function SvDetailPage({
               verifizierungFristBis={sv.verifizierung_frist_bis ?? null}
               verifiziertAm={sv.verifiziert_am ?? null}
               tier2Slots={verifizierungsData.tier2Slots}
-              gesperrtAm={sv.gesperrt_am ?? null}
+              gesperrtSeit={sv.gesperrt_seit ?? null}
               gesperrtGrund={sv.gesperrt_grund ?? null}
             />
           </div>
@@ -279,7 +273,7 @@ export default async function SvDetailPage({
                 nachname: profile?.nachname ?? '',
                 telefon: profile?.telefon ?? '',
                 paket: sv.paket,
-                maxFaelleMonat: sv.max_faelle_monat,
+                maxFaelleMonat: sv.paket_faelle_gesamt ?? 10,
                 istAktiv: sv.ist_aktiv ?? true,
                 notizen: sv.notizen ?? '',
                 standortAdresse: sv.standort_adresse ?? '',
@@ -287,7 +281,7 @@ export default async function SvDetailPage({
                 standortLat: sv.standort_lat != null ? Number(sv.standort_lat) : null,
                 standortLng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
                 standortPlaceId: sv.standort_place_id ?? '',
-                paketUmkreisKm: sv.paket_umkreis_km ?? sv.radius_km ?? 15,
+                paketUmkreisKm: sv.paket_umkreis_km ?? 15,
               }}
             />
           </div>

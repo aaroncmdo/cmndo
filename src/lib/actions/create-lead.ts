@@ -46,7 +46,7 @@ export async function createLeadFromSchritt1(
       unfalldatum: data.unfalldatum,
       unfallort: data.unfallort,
       schadentyp: data.schadentyp,
-      schadenhergang: data.schadenhergang,
+      schadens_hergang: data.schadens_hergang,
       polizei_vor_ort: data.polizei_vor_ort,
       polizei_aktenzeichen: data.polizei_aktenzeichen || null,
       schuldfrage: data.schuldfrage,

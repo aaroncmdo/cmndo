@@ -77,7 +77,7 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
   if (newStatus === 'sv-termin') {
     sendFallCommunication(fallId, 'termin_bestaetigt').catch(() => {})
     // Gutachter-Mitteilung: Termin bestaetigt
-    const { data: fallInfo } = await supabase.from('faelle').select('sv_id, fall_nummer, sv_termin').eq('id', fallId).single()
+    const { data: fallInfo } = await supabase.from('v_faelle_mit_aktuellem_termin').select('sv_id, fall_nummer, sv_termin').eq('id', fallId).single()
     if (fallInfo?.sv_id) {
       const terminDate = fallInfo.sv_termin ? new Date(fallInfo.sv_termin) : null
       createGutachterMitteilung(fallInfo.sv_id, 'termin_bestaetigt', fallId, {
@@ -225,12 +225,12 @@ export async function createLead(data: {
   telefon: string
   email: string
   source_channel: string
-  schadenfall_typ?: string
-  // KFZ-154: Spezifikation + Schadenart fuer Dispatcher-Match. Optional bei
-  // schnellem Quick-Add (kann nachtraeglich via LeadInlineFields gesetzt werden)
+  schadens_fall_typ?: string
+  // KFZ-154: Spezifikation + Schadensart für Dispatcher-Match. Optional bei
+  // schnellem Quick-Add (kann nachträglich via LeadInlineFields gesetzt werden)
   // oder beim manuellen Anlegen direkt mitgegeben werden.
   spezifikation?: string
-  schadenart?: string
+  schadens_art?: string
   // AAR-90: optional FIN bei manuellem Lead-Anlegen → Cardentity-Anreicherung
   fin?: string
 }) {
@@ -244,9 +244,9 @@ export async function createLead(data: {
     telefon: data.telefon || null,
     email: data.email || null,
     source_channel: data.source_channel || 'telefon',
-    schadenfall_typ: data.schadenfall_typ || null,
+    schadens_fall_typ: data.schadens_fall_typ || null,
     spezifikation: data.spezifikation || null,
-    schadenart: data.schadenart || null,
+    schadens_art: data.schadens_art || null,
     fin: data.fin ? data.fin.toUpperCase() : null,
     status: 'neu',
     qualifizierungs_phase: 'neu',
@@ -260,7 +260,7 @@ export async function createLead(data: {
   const { data: newLead } = await supabase.from('leads').select('id').eq('vorname', data.vorname).eq('nachname', data.nachname).order('created_at', { ascending: false }).limit(1).single()
   if (newLead) {
     triggerLeadTasks(newLead.id, user.id).catch(() => {})
-    createNotification(user.id, 'neuer-lead', `Neuer Lead: ${data.vorname} ${data.nachname}`, `${data.source_channel} · ${data.schadenfall_typ || 'Kein Typ'}`, `/admin/dispatch/lead/${newLead.id}`).catch(() => {})
+    createNotification(user.id, 'neuer-lead', `Neuer Lead: ${data.vorname} ${data.nachname}`, `${data.source_channel} · ${data.schadens_fall_typ || 'Kein Typ'}`, `/admin/dispatch/lead/${newLead.id}`).catch(() => {})
 
     // AAR-90: Cardentity-Anreicherung wenn FIN angegeben
     if (data.fin) {
@@ -544,16 +544,16 @@ async function convertLeadToFall(
       lead_id: leadId,
       status: 'ersterfassung',
       // Stammdaten vom Lead
-      schadenfall_typ: lead.schadenfall_typ,
+      schadens_fall_typ: lead.schadens_fall_typ,
       kunden_konstellation: lead.kunden_konstellation,
       kennzeichen: lead.kennzeichen,
       fahrzeug_hersteller: lead.fahrzeug_hersteller,
       fahrzeug_modell: lead.fahrzeug_modell,
-      // KFZ-154: Spezifikation + Schadenart fuer den Dispatcher-Match.
-      // Werden vom Lead uebernommen wenn der Lead-Import die Felder mitliefert,
-      // sonst null (Dispatcher faellt ohne Spez-Filter zurueck).
+      // KFZ-154: Spezifikation + Schadensart für den Dispatcher-Match.
+      // Werden vom Lead übernommen wenn der Lead-Import die Felder mitliefert,
+      // sonst null (Dispatcher fällt ohne Spez-Filter zurück).
       spezifikation: lead.spezifikation ?? null,
-      schadenart: lead.schadenart ?? null,
+      schadens_art: lead.schadens_art ?? null,
       // KFZ-153: Unfall + Gegner Daten vom Lead
       unfall_konstellation: lead.unfall_konstellation ?? null,
       gegner_anzahl_beteiligte: lead.gegner_anzahl_beteiligte ?? null,
@@ -562,8 +562,8 @@ async function convertLeadToFall(
       gegner_bekannt: lead.gegner_bekannt ?? true,
       personenschaden_flag: lead.personenschaden_flag ?? false,
       mietwagen_flag: lead.mietwagen_flag ?? false,
-      leasing_flag: lead.leasing_flag ?? false,
-      finanzierung_flag: lead.finanzierung_flag ?? false,
+      // AAR-548 D10: faelle.leasing_flag + finanzierung_flag gedropt — finanzierung_leasing
+      // (siehe unten, Zeile mit `lead.finanzierung_leasing ?? 'keine'`) ist Truth.
       gewerbe_flag: lead.gewerbe_flag ?? false,
       halter_ungleich_fahrer_flag: lead.halter_ungleich_fahrer_flag ?? false,
       polizei_bericht_vorhanden: lead.polizeibericht_pflicht ?? false,
@@ -571,16 +571,18 @@ async function convertLeadToFall(
       gegner_name: lead.gegner_name ?? null,
       gegner_versicherung: lead.gegner_versicherung ?? null,
       gegner_kennzeichen: lead.gegner_kennzeichen ?? null,
-      // BUG-58 Mapping: Lead-Spalten → korrekte Faelle-Spalten
-      versicherung_name: lead.eigene_versicherung ?? null,
-      versicherung_schaden_nr: lead.eigene_policennr ?? null,
+      // AAR-545 Cluster D: faelle.versicherung_name + versicherung_schaden_nr
+      // sind ersatzlos weg — Gegner-Seite ist Source of Truth (gegner_versicherung
+      // oben), Eigene-VS bleibt auf leads.eigene_versicherung / eigene_policennr.
       polizei_aktenzeichen: lead.polizei_aktenzeichen ?? null,
-      schadensursache: lead.schadensursache ?? null,
+      // AAR-548 D4: faelle.schadensursache gedropt — Einheitsfeld ist schadens_ursache.
+      schadens_ursache: lead.schadensursache ?? null,
       leasinggeber_name: lead.leasing_geber ?? null,
       bank_name: lead.finanzierung_bank ?? null,
       firma_name: lead.firma_name ?? null,
       ust_id: lead.firma_ustid ?? null,
-      halter_name: lead.halter_name ?? null,
+      // AAR-548 D7: halter_name ist jetzt GENERATED aus halter_vorname+halter_nachname.
+      // Kein manueller Write mehr — lead.halter_name wandert via halter_vorname/halter_nachname.
       // KFZ-146: Erweiterte Fahrzeugdaten
       fahrzeug_farbe: lead.fahrzeug_farbe ?? null,
       erstzulassung: lead.erstzulassung ?? null,
@@ -599,9 +601,13 @@ async function convertLeadToFall(
       source_domain: lead.source_domain ?? null,
       // KFZ-208: Mandantenfragebogen-Felder
       ist_fahrzeughalter: lead.ist_fahrzeughalter ?? true,
-      finanzierung_leasing: lead.finanzierung_leasing ?? 'keine',
+      // AAR-548 D10: Enum ist Truth. Legacy-Booleans auf lead als Fallback,
+      // falls Lead noch vor Enum-Migration erstellt wurde.
+      finanzierung_leasing:
+        lead.finanzierung_leasing ??
+        (lead.leasing_flag ? 'leasing' : lead.finanzierung_flag ? 'finanzierung' : 'keine'),
       vorsteuerabzugsberechtigt: lead.vorsteuerabzugsberechtigt ?? false,
-      schadenhergang: lead.schadenhergang ?? null,
+      schadens_hergang: lead.schadens_hergang ?? null,
       halter_vorname: lead.halter_vorname ?? null,
       halter_nachname: lead.halter_nachname ?? null,
       halter_strasse: lead.halter_strasse ?? null,
@@ -624,8 +630,7 @@ async function convertLeadToFall(
       kundenbetreuer_zugewiesen_am: kundenbetreuerId ? new Date().toISOString() : null,
       konvertiert_am: new Date().toISOString(),
       konvertiert_von_lead: leadId,
-      // SV-Termin übernehmen falls gesetzt
-      sv_termin: lead.gutachter_termin,
+      // AAR-552: sv_termin ersatzlos entfernt — Termin-Datum spiegelt die View aus gutachter_termine
     })
     .select('id')
     .single()

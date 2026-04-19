@@ -129,7 +129,7 @@ export async function POST(request: Request) {
       ocr_rohdaten: { text_length: pdfText.length, extracted },
     }
 
-    if (schadenhoehe_netto != null) updateData.schadenhoehe_netto = schadenhoehe_netto
+    if (schadenhoehe_netto != null) updateData.schadens_hoehe_netto = schadenhoehe_netto
     if (wiederbeschaffungswert != null) updateData.wiederbeschaffungswert = wiederbeschaffungswert
     if (restwert != null) updateData.restwert = restwert
     if (nutzungsausfall_tage != null) updateData.nutzungsausfall_tage = nutzungsausfall_tage

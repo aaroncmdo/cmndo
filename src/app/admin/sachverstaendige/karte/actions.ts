@@ -221,9 +221,11 @@ export async function recalculateIsochrone(
   if (profile?.rolle !== 'admin') return { success: false, error: 'Nur Admins' }
 
   const adminDb = createAdminClient()
-  // Radius-Fallback konsistent zu findBestSV.ts (3 Spalten existieren historisch)
+  // AAR-549 S1: paket_umkreis_km ist kanonische Radius-Quelle (radius_km +
+  // paket_radius_km wurden gedropt, Backfill via GREATEST). Organisationen
+  // haben weiterhin zwei Spalten (einsatzgebiet_km | einsatzgebiet_radius_km).
   const selectCols = entityType === 'sv'
-    ? 'standort_lat, standort_lng, paket_umkreis_km, radius_km, paket_radius_km'
+    ? 'standort_lat, standort_lng, paket_umkreis_km'
     : 'standort_lat, standort_lng, einsatzgebiet_km, einsatzgebiet_radius_km'
   const table = entityType === 'sv' ? 'sachverstaendige' : 'organisationen'
 
@@ -241,7 +243,7 @@ export async function recalculateIsochrone(
   const lat = r.standort_lat
   const lng = r.standort_lng
   const radiusCandidates = entityType === 'sv'
-    ? [r.paket_umkreis_km, r.radius_km, r.paket_radius_km]
+    ? [r.paket_umkreis_km]
     : [r.einsatzgebiet_km, r.einsatzgebiet_radius_km]
   const radiusKm = radiusCandidates.find((v) => v != null && Number(v) > 0) ?? null
 

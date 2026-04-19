@@ -49,7 +49,7 @@ export async function requestCardentityTypB(
 
   const { data: lead } = await db
     .from('leads')
-    .select('id, fin, vorschaden_typ_b_bericht, vorschaden_vorhanden, vorschaden_anzahl, vorschaden_letzter_datum, kilometerstand, erstzulassung')
+    .select('id, fin, vorschaden_typ_b_bericht, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, kilometerstand, erstzulassung')
     .eq('id', leadId)
     .maybeSingle()
   if (!lead) return { success: false, error: 'Lead nicht gefunden' }
@@ -65,7 +65,7 @@ export async function requestCardentityTypB(
       success: true,
       alreadyFetched: true,
       fetchedAt: (bericht.fetchedAt as string) ?? '',
-      vorschadenVorhanden: lead.vorschaden_vorhanden ?? false,
+      vorschadenVorhanden: lead.hat_vorschaeden ?? false,
       vorschadenAnzahl: lead.vorschaden_anzahl ?? 0,
       letzterVorschadenDatum: (lead.vorschaden_letzter_datum as string | null) ?? null,
     }
@@ -90,7 +90,7 @@ export async function requestCardentityTypB(
     const updates: Record<string, unknown> = {
       vorschaden_typ_b_bericht: { ...(report as CardentityReport), fetchedAt },
       vorschaden_geprueft: true,
-      vorschaden_vorhanden: vorschadenVorhanden,
+      hat_vorschaeden: vorschadenVorhanden,
       vorschaden_anzahl: vorschadenAnzahl,
       cardentity_abfrage_am: fetchedAt,
     }

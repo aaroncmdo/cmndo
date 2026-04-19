@@ -42,7 +42,7 @@ export async function POST(request: Request) {
   await db.from('stripe_events').insert({
     stripe_event_id: event.id,
     event_type: event.type,
-    gutachter_id: gutachterId,
+    sv_id: gutachterId,
     payload: event.data.object,
   })
 
@@ -131,14 +131,14 @@ export async function POST(request: Request) {
               if (p?.email) {
                 // Netto-Summe aller Sub-SV-Anzahlungen + Kontingent
                 const { data: subs } = await db.from('sachverstaendige')
-                  .select('onboarding_anzahlung_betrag, paket, max_faelle_monat, ist_parent_account, rolle_in_organisation')
+                  .select('onboarding_anzahlung_betrag, paket, paket_faelle_gesamt, ist_parent_account, rolle_in_organisation')
                   .eq('organisation_id', orgId)
                 const paySubs = (subs ?? []).filter(s => {
                   const r = (s.rolle_in_organisation ?? '').toLowerCase()
                   return !s.ist_parent_account && r !== 'inhaber'
                 })
                 const nettoEuro = paySubs.reduce((sum, s) => sum + Number(s.onboarding_anzahlung_betrag ?? 0), 0)
-                const kontingent = paySubs.reduce((sum, s) => sum + Number(s.max_faelle_monat ?? 0), 0)
+                const kontingent = paySubs.reduce((sum, s) => sum + Number(s.paket_faelle_gesamt ?? 0), 0)
                 const paket = paySubs[0]?.paket ?? null
 
                 if (nettoEuro > 0) {
@@ -257,13 +257,13 @@ export async function POST(request: Request) {
               if (p?.email) {
                 // Primär: akademie_erst_anzahlung_eur auf der Organisation
                 const { data: subs } = await db.from('sachverstaendige')
-                  .select('onboarding_anzahlung_betrag, paket, max_faelle_monat, ist_parent_account')
+                  .select('onboarding_anzahlung_betrag, paket, paket_faelle_gesamt, ist_parent_account')
                   .eq('organisation_id', orgId)
                 const nettoFromSubs = (subs ?? [])
                   .filter(s => !s.ist_parent_account)
                   .reduce((sum, s) => sum + Number(s.onboarding_anzahlung_betrag ?? 0), 0)
                 const nettoEuro = Number(org.akademie_erst_anzahlung_eur ?? 0) || nettoFromSubs
-                const kontingent = (subs ?? []).reduce((sum, s) => sum + Number(s.max_faelle_monat ?? 0), 0)
+                const kontingent = (subs ?? []).reduce((sum, s) => sum + Number(s.paket_faelle_gesamt ?? 0), 0)
                 const paket = (subs ?? [])[0]?.paket ?? null
 
                 if (nettoEuro > 0) {
@@ -425,13 +425,13 @@ export async function POST(request: Request) {
           // AAR-401: Onboarding-Rechnung + KV + NB als 3 Mail-Anhänge (Solo-SV).
           try {
             const { data: sv } = await db.from('sachverstaendige')
-              .select('profile_id, paket, max_faelle_monat, onboarding_anzahlung_betrag')
+              .select('profile_id, paket, paket_faelle_gesamt, onboarding_anzahlung_betrag')
               .eq('id', svId).single()
             if (sv?.profile_id) {
               const { data: p } = await db.from('profiles').select('email, vorname').eq('id', sv.profile_id).single()
               if (p?.email) {
                 const nettoEuro = Number(sv.onboarding_anzahlung_betrag ?? 0)
-                const kontingent = Number(sv.max_faelle_monat ?? 0)
+                const kontingent = Number(sv.paket_faelle_gesamt ?? 0)
                 const paket = (sv.paket as string | null) ?? null
 
                 if (nettoEuro > 0) {

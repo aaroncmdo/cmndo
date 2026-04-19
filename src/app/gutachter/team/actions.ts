@@ -51,12 +51,12 @@ export async function assignPoolLead(fall_id: string, target_sv_id: string): Pro
 
   // Ziel-SV verifizieren
   const { data: targetSv } = await db.from('sachverstaendige')
-    .select('id, organisation_id, max_faelle_monat, paket_faelle_genutzt')
+    .select('id, organisation_id, paket_faelle_gesamt, paket_faelle_genutzt')
     .eq('id', target_sv_id)
     .maybeSingle()
   if (!targetSv) return { success: false, error: 'Ziel-SV nicht gefunden' }
   if (targetSv.organisation_id !== auth.orgId) return { success: false, error: 'Ziel-SV gehoert nicht zu deiner Organisation' }
-  if ((targetSv.paket_faelle_genutzt ?? 0) >= (targetSv.max_faelle_monat ?? 0)) {
+  if ((targetSv.paket_faelle_genutzt ?? 0) >= (targetSv.paket_faelle_gesamt ?? 0)) {
     return { success: false, error: 'Ziel-SV hat sein Monats-Kontingent erreicht' }
   }
 

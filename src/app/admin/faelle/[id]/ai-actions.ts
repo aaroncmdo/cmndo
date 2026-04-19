@@ -24,7 +24,7 @@ export async function generateFallSummary(
   const admin = createAdminClient()
 
   // 1. Fall + Lead laden
-  const { data: fall } = await admin.from('faelle').select('*').eq('id', fallId).single()
+  const { data: fall } = await admin.from('v_faelle_mit_aktuellem_termin').select('*').eq('id', fallId).single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
 
   const leadP = fall.lead_id
@@ -103,7 +103,7 @@ ${JSON.stringify({
     gegner_kennzeichen: fall.gegner_kennzeichen,
     personenschaden: fall.personenschaden_flag,
     mietwagen: fall.mietwagen_flag,
-    leasing: fall.leasing_flag,
+    leasing: fall.finanzierung_leasing === 'leasing',
     abtretung_signiert_am: fall.abtretung_signiert_am,
     vollmacht_unterschrieben: fall.vollmacht_unterschrieben,
   }, null, 2)}

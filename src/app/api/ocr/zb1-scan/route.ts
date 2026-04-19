@@ -5,9 +5,9 @@ import { createClient } from '@/lib/supabase/server'
 // AAR-475 C9: Lead-seitige ZB1-OCR. Spiegelt /api/ocr-fahrzeugschein (das auf
 // faelle schreibt), aber für den Self-Service-Flow: schreibt in leads.
 // Wiederverwendet `runZB1Ocr` aus @/lib/ocr/zb1-parser (Google Vision).
-// Bild wird zuätzlich im `dokumente`-Bucket unter leads/{leadId}/zb1/ persistiert.
+// Bild wird zuätzlich im `fall-dokumente`-Bucket unter leads/{leadId}/zb1/ persistiert.
 
-const BUCKET = 'dokumente'
+const BUCKET = 'fall-dokumente'
 
 export async function POST(req: NextRequest) {
   try {

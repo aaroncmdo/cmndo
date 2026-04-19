@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
     const { error: uploadErr } = await db
       .storage
-      .from('dokumente')
+      .from('fall-dokumente')
       .upload(storagePath, fileBytes, {
         contentType: file.type || 'image/jpeg',
         upsert: true,
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Get public URL
-    const { data: { publicUrl } } = db.storage.from('dokumente').getPublicUrl(storagePath)
+    const { data: { publicUrl } } = db.storage.from('fall-dokumente').getPublicUrl(storagePath)
 
     // Run OCR
     const base64 = Buffer.from(fileBytes).toString('base64')

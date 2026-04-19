@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
       .limit(5),
     supabase
       .from('leads')
-      .select('id, vorname, nachname, telefon, email, schadenfall_typ, qualifizierungs_phase')
+      .select('id, vorname, nachname, telefon, email, schadens_fall_typ, qualifizierungs_phase')
       .or(`vorname.ilike.${pattern},nachname.ilike.${pattern},telefon.ilike.${pattern},email.ilike.${pattern}`)
       .limit(5),
     supabase
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
     leads: (leadsRes.data ?? []).map(l => ({
       id: l.id,
       label: [l.vorname, l.nachname].filter(Boolean).join(' ') || l.email || l.id.slice(0, 8),
-      sub: [l.telefon, l.schadenfall_typ].filter(Boolean).join(' · '),
+      sub: [l.telefon, l.schadens_fall_typ].filter(Boolean).join(' · '),
       status: l.qualifizierungs_phase,
     })),
     sv: svFiltered.map(sv => {

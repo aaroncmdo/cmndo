@@ -69,10 +69,10 @@ export async function uploadSaVorlage(formData: FormData): Promise<{
     || svFirmenname
     || 'Unbekannter SV'
 
-  // Upload in 'dokumente'-Bucket mit sv-vorlagen-Prefix
+  // Upload in 'fall-dokumente'-Bucket mit sv-vorlagen-Prefix (AAR-553)
   const path = `sv-vorlagen/${svId}/${Date.now()}.${ext}`
   const { error: uploadErr } = await db.storage
-    .from('dokumente')
+    .from('fall-dokumente')
     .upload(path, file, { contentType: 'application/pdf', upsert: true })
   if (uploadErr) throw new Error(`Upload fehlgeschlagen: ${uploadErr.message}`)
 

@@ -1,11 +1,14 @@
 'use client'
 
 // AAR-164 / W4: ProzessTab Sections (8 Stück).
-// AAR-167: Trigger-Buttons für Stellungnahme / Rüge / Klage sind jetzt
-// verdrahtet. E-Akte-Übergabe + Nachbesichtigung-Koordination folgen, sobald
-// die entsprechenden Server-Actions existieren.
+// AAR-167: Trigger-Buttons für Stellungnahme / Rüge / Klage.
+// AAR-543 (C6) — 19.04.2026:
+// - VsReaktionSection rendert jetzt Quote-Pfad + Pflicht-Banner für
+//   vs_kuerzungs_typ + conditional Stellungnahme/Rüge-Action-Buttons
+// - NachbesichtigungSection rendert JSONB Kunden-Termin-Vorschläge
+// - AuszahlungSection zeigt Split + Rollen-Sichtbarkeits-Hinweis
+// - Kritische Felder inline editierbar via InlineEditField
 
-import Link from 'next/link'
 import { useTransition, type ReactNode } from 'react'
 import { toast } from 'sonner'
 import {
@@ -17,6 +20,8 @@ import {
   MapPinIcon,
   BanknoteIcon,
   ShieldAlertIcon,
+  AlertTriangleIcon,
+  EyeIcon,
 } from 'lucide-react'
 import { useFall } from '../FallContext'
 import {
@@ -25,6 +30,11 @@ import {
   startRuege,
   uebergebeFallKlage,
 } from '../actions/prozess'
+import { triggerLexDriveEventManually } from '../lexdrive-actions'
+// AAR-561 (C12): Konfrontations-Dispatch-Lite-Trigger aus KB-Seite
+import { triggerKonfrontationFromAdmin } from '../actions/konfrontation-trigger'
+import EndpointRegister from '../_components/LexDriveTriggerPanel'
+import InlineEditField from '../stammdaten/InlineEditField'
 
 function Card({
   icon,
@@ -75,39 +85,46 @@ function fmtDate(v: unknown): string | null {
   }
 }
 
-// ─── 1. Kanzlei + E-Akte (ab akte-uebergeben) ──────────────────────────────
+function fmtEuro(v: unknown): string | null {
+  if (typeof v !== 'number' || !Number.isFinite(v)) return null
+  return v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
+}
+
+const KUERZUNGSTYP_LABEL: Record<string, { label: string; color: string }> = {
+  technisch: { label: 'Technisch', color: 'bg-blue-50 text-blue-800 border-blue-200' },
+  argumentativ: { label: 'Argumentativ', color: 'bg-purple-50 text-purple-800 border-purple-200' },
+  gemischt: { label: 'Gemischt', color: 'bg-amber-50 text-amber-800 border-amber-200' },
+}
+
+// ─── 1. Kanzlei + E-Akte ───────────────────────────────────────────────────
 export function KanzleiEakteSection() {
-  const { fall } = useFall()
+  const { fall, userRolle } = useFall()
   const mandatsnummer = fall.mandatsnummer as string | null
   const uebergebenAm = fmtDate(fall.kanzlei_uebergeben_am)
+  const canTrigger = userRolle === 'admin' || userRolle === 'kundenbetreuer'
   return (
     <Card
       icon={<ScaleIcon className="w-4 h-4 text-[#4573A2]" />}
       title="Kanzlei + E-Akte"
-      subtitle="LexDrive-Partnerkanzlei, 11 Webhook-Events"
+      subtitle="LexDrive-Partnerkanzlei, 24+ Events (manuell + Webhook)"
     >
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Info label="Mandatsnummer" value={mandatsnummer} />
         <Info label="E-Akte übergeben" value={uebergebenAm} />
         <Info label="Service-Typ" value={(fall.service_typ as string) ?? 'komplett'} />
       </div>
-      <p className="text-[11px] text-gray-500 italic">
-        LexDriveTriggerPanel + E-Akte-Checkliste werden über das W2-Monolith-
-        Fallback weiterhin erreichbar sein; volle Extraktion folgt zusammen mit
-        W5 (Webhook-Handler-Erweiterung).
-      </p>
+      {canTrigger && (
+        <div className="pt-2">
+          <EndpointRegister fallId={fall.id} />
+        </div>
+      )}
     </Card>
   )
 }
 
-// ─── 2. Anspruchsschreiben (ab as-vorbereitung) ────────────────────────────
-// DB-Verify (2026-04-15): `as_versendet_am`, `as_forderungsbetrag` und
-// `vs_stufe` existieren NICHT. Echte Spalten: `anschlussschreiben_am`,
-// `as_geforderte_summe`, `vs_eskalationsstufe` (bzw. `vs_timer_stufe`).
+// ─── 2. Anspruchsschreiben ─────────────────────────────────────────────────
 export function AsSection() {
   const { fall } = useFall()
-  const versendetAm = fmtDate(fall.anschlussschreiben_am)
-  const betrag = (fall.as_geforderte_summe as number | null) ?? null
   return (
     <Card
       icon={<SendIcon className="w-4 h-4 text-[#4573A2]" />}
@@ -115,43 +132,191 @@ export function AsSection() {
       subtitle="1-2 Werktage nach E-Akte-Übergabe (SLA)"
     >
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <Info label="AS versendet am" value={versendetAm} />
-        <Info label="Forderungsbetrag (€)" value={betrag} />
+        <InlineEditField
+          label="AS versendet am"
+          fieldName="anschlussschreiben_am"
+          value={fall.anschlussschreiben_am as string | null}
+          type="date"
+        />
+        <InlineEditField
+          label="Forderungsbetrag (€)"
+          fieldName="as_geforderte_summe"
+          value={fall.as_geforderte_summe as number | null}
+          type="number"
+        />
         <Info label="Eskalationsstufe" value={fall.vs_eskalationsstufe as string | null} />
       </div>
     </Card>
   )
 }
 
-// ─── 3. VS-Reaktion (ab vs-reaktion) ───────────────────────────────────────
+// ─── 3. VS-Reaktion (inkl. Quote + Pflicht-Banner) ─────────────────────────
 export function VsReaktionSection() {
-  const { fall } = useFall()
-  const reguliert = fall.regulierung_am
-  const kuerzt = fall.kuerzungs_betrag != null
-  const kuerzungGrund = fall.vs_kuerzung_grund as string | null
+  const { fall, refreshFall } = useFall()
+  const [pending, startTransition] = useTransition()
+  const reaktionTyp = fall.vs_reaktion_typ as string | null
+  const kuerzungstyp = fall.vs_kuerzungs_typ as string | null
+  const isQuote = reaktionTyp === 'quotiert'
+  const isKuerzt = reaktionTyp === 'gekuerzt'
+
+  // Quote-Berechnung: Quote-Betrag = as_geforderte_summe * prozent / 100
+  const quoteProzent = fall.vs_quote_prozent as number | null
+  const geforderteSumme = fall.as_geforderte_summe as number | null
+  const quoteBetrag =
+    typeof quoteProzent === 'number' && typeof geforderteSumme === 'number'
+      ? (geforderteSumme * quoteProzent) / 100
+      : null
+  const quoteAkzeptiertAm = fmtDate(fall.vs_quote_akzeptiert_am)
+
+  function trigger(action: () => Promise<{ success: boolean; error?: string }>, label: string) {
+    startTransition(async () => {
+      const r = await action()
+      if (r.success) {
+        toast.success(`${label} erfolgreich`)
+        refreshFall()
+      } else toast.error(r.error ?? `${label} fehlgeschlagen`)
+    })
+  }
+
+  function triggerQuoteAkzeptieren() {
+    trigger(
+      () =>
+        triggerLexDriveEventManually(fall.id, 'vs_quote_akzeptiert', {
+          akzeptiert_am: new Date().toISOString().slice(0, 10),
+        }),
+      'Quote akzeptiert',
+    )
+  }
+
+  function triggerTechnischeStellungnahme() {
+    trigger(() => requestTechnischeStellungnahme(fall.id), 'Stellungnahme beauftragt')
+  }
+
   return (
     <Card
       icon={<ShieldAlertIcon className="w-4 h-4 text-amber-600" />}
       title="VS-Reaktion"
-      subtitle="Reguliert / Kürzt / Ablehnt / Schweigt"
+      subtitle="Reguliert / Kürzt / Quotiert / Ablehnt / Schweigt"
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <Info label="Regulierung am" value={fmtDate(reguliert)} />
-        <Info label="Kürzungsbetrag (€)" value={fall.kuerzungs_betrag as number | null} />
-        <Info label="Regulierung-Betrag (€)" value={fall.regulierung_betrag as number | null} />
-        <Info label="Status" value={kuerzt ? 'Gekürzt' : reguliert ? 'Reguliert' : 'Offen'} />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Info label="Reaktions-Typ" value={reaktionTyp ?? 'offen'} />
+        <InlineEditField
+          label="Regulierung-Betrag (€)"
+          fieldName="regulierung_betrag"
+          value={fall.regulierung_betrag as number | null}
+          type="number"
+        />
+        <InlineEditField
+          label="Kürzungs-Betrag (€)"
+          fieldName="kuerzungs_betrag"
+          value={fall.kuerzungs_betrag as number | null}
+          type="number"
+        />
       </div>
-      {kuerzungGrund && (
-        <div className="rounded-md bg-amber-50 border border-amber-200 p-3 text-[11px] text-amber-800">
-          <strong className="block mb-1">Kürzungsgrund:</strong>
-          {kuerzungGrund}
+
+      {/* Quote-Pfad */}
+      {isQuote && (
+        <div className="rounded-md border border-purple-200 bg-purple-50 p-3 space-y-2">
+          <h4 className="text-xs font-semibold text-purple-900">VS quotiert</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <Info label="Quote (%)" value={quoteProzent} />
+            <Info label="Geforderte Summe" value={fmtEuro(geforderteSumme)} />
+            <Info label="Quote-Betrag" value={fmtEuro(quoteBetrag)} />
+          </div>
+          <InlineEditField
+            label="Quote-Begründung"
+            fieldName="vs_quote_grund"
+            value={fall.vs_quote_grund as string | null}
+            type="textarea"
+          />
+          {quoteAkzeptiertAm ? (
+            <div className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 rounded p-2">
+              ✓ Quote akzeptiert am {quoteAkzeptiertAm}
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={pending}
+                onClick={triggerQuoteAkzeptieren}
+                className="px-3 py-1.5 rounded-md bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
+              >
+                Quote akzeptieren
+              </button>
+              <p className="text-[11px] text-purple-700 self-center">
+                Ablehnen → öffnet Rüge-Vorbereitung (Phase-Header „Kanzlei-Paket einlesen").
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Kürzungs-Pfad mit Pflicht-Banner für vs_kuerzungs_typ */}
+      {isKuerzt && (
+        <div className="rounded-md border border-amber-200 bg-amber-50 p-3 space-y-2">
+          <h4 className="text-xs font-semibold text-amber-900">VS kürzt</h4>
+          <InlineEditField
+            label="Kürzungs-Grund"
+            fieldName="vs_kuerzung_grund"
+            value={fall.vs_kuerzung_grund as string | null}
+            type="textarea"
+          />
+          {kuerzungstyp && KUERZUNGSTYP_LABEL[kuerzungstyp] ? (
+            <span
+              className={`inline-block text-[11px] font-medium px-2 py-0.5 rounded border ${KUERZUNGSTYP_LABEL[kuerzungstyp].color}`}
+            >
+              Typ: {KUERZUNGSTYP_LABEL[kuerzungstyp].label}
+            </span>
+          ) : (
+            <div className="rounded-md border border-red-300 bg-red-50 p-2 flex items-start gap-2">
+              <AlertTriangleIcon className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+              <div className="flex-1 space-y-1">
+                <p className="text-[11px] font-semibold text-red-800">
+                  Kürzungstyp fehlt — bitte ergänzen, damit Stellungnahme-Logik greifen kann.
+                </p>
+                <InlineEditField
+                  label="vs_kuerzungs_typ (technisch | argumentativ | gemischt)"
+                  fieldName="vs_kuerzungs_typ"
+                  value={kuerzungstyp}
+                  placeholder="technisch"
+                />
+              </div>
+            </div>
+          )}
+          <div className="flex flex-wrap gap-2">
+            {(kuerzungstyp === 'technisch' || kuerzungstyp === 'gemischt') &&
+              !fall.technische_stellungnahme_status && (
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={triggerTechnischeStellungnahme}
+                  className="px-3 py-1.5 rounded-md bg-[#4573A2] text-white text-xs font-medium hover:bg-[#0D1B3E] disabled:opacity-50"
+                >
+                  Stellungnahme von SV anfordern
+                </button>
+              )}
+            {kuerzungstyp === 'argumentativ' && !fall.ruege_gesendet_am && (
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() =>
+                  toast.info(
+                    'Rüge 1 ohne Stellungnahme: Paket im Phase-Header unter „Kanzlei-Paket einlesen" → Rüge 1.',
+                  )
+                }
+                className="px-3 py-1.5 rounded-md bg-orange-600 text-white text-xs font-medium hover:bg-orange-700 disabled:opacity-50"
+              >
+                Rüge 1 vorbereiten (ohne Stellungnahme)
+              </button>
+            )}
+          </div>
         </div>
       )}
     </Card>
   )
 }
 
-// ─── 4. Technische Stellungnahme (NEU, ab vs-kuerzt + technisch) ───────────
+// ─── 4. Technische Stellungnahme ───────────────────────────────────────────
 export function StellungnahmeSection() {
   const { fall, refreshFall } = useFall()
   const [pending, startTransition] = useTransition()
@@ -187,7 +352,9 @@ export function StellungnahmeSection() {
           <button
             type="button"
             disabled={pending}
-            onClick={() => trigger(() => requestTechnischeStellungnahme(fall.id), 'Stellungnahme beauftragt')}
+            onClick={() =>
+              trigger(() => requestTechnischeStellungnahme(fall.id), 'Stellungnahme beauftragt')
+            }
             className="px-3 py-1.5 rounded-md bg-[#4573A2] text-white text-xs font-medium hover:bg-[#0D1B3E] disabled:opacity-50"
           >
             SV mit Stellungnahme beauftragen
@@ -212,7 +379,7 @@ export function StellungnahmeSection() {
   )
 }
 
-// ─── 5. Rüge (Refactoring, ab vs-kuerzt) ──────────────────────────────────
+// ─── 5. Rüge ───────────────────────────────────────────────────────────────
 export function RuegeSection() {
   const { fall, refreshFall } = useFall()
   const [pending, startTransition] = useTransition()
@@ -256,44 +423,127 @@ export function RuegeSection() {
   )
 }
 
-// ─── 6. Nachbesichtigung (NEU, ab nachbesichtigung-laeuft) ─────────────────
+// ─── 6. Nachbesichtigung (mit JSONB-Vorschläge + Konfrontations-Flow) ─────
 export function NachbesichtigungSection() {
-  const { fall } = useFall()
+  const { fall, refreshFall } = useFall()
+  const [pending, startTransition] = useTransition()
   const status = fall.nachbesichtigung_status as string | null
   const angefordertAm = fmtDate(fall.nachbesichtigung_angefordert_am)
   const terminAm = fmtDate(fall.nachbesichtigung_termin_datum)
+  const svKonfroGewuenscht = fall.nachbesichtigung_sv_konfrontation_gewuenscht as boolean | null
   const konfrontation = fall.nachbesichtigung_konfrontation as boolean | null
   const ergebnis = fall.nachbesichtigung_ergebnis as string | null
+
+  // JSONB-Array: [{ datum: 'YYYY-MM-DD', uhrzeit: 'HH:mm' }]
+  const vorschlaegeRaw = fall.nachbesichtigung_kunde_termin_vorschlaege
+  const vorschlaege: Array<{ datum: string; uhrzeit: string }> = Array.isArray(vorschlaegeRaw)
+    ? (vorschlaegeRaw as Array<{ datum: string; uhrzeit: string }>)
+    : []
+
+  function bestaetige(termin: { datum: string; uhrzeit: string }) {
+    const iso = `${termin.datum}T${termin.uhrzeit}:00`
+    startTransition(async () => {
+      const r = await triggerLexDriveEventManually(fall.id, 'vs_nachbesichtigung_ergebnis', {
+        datum: iso,
+        bestaetigt_am: new Date().toISOString(),
+        nachbesichtigung_termin: iso,
+        konfrontation: !!svKonfroGewuenscht,
+      })
+      if (!r.success) {
+        toast.error(r.error ?? 'Bestätigung fehlgeschlagen')
+        return
+      }
+      toast.success(`Termin ${termin.datum} ${termin.uhrzeit} bestätigt`)
+
+      // AAR-561 (C12): Konfrontations-Dispatch-Lite — nur wenn Kunde (via C9)
+      // SV-Präsenz gewünscht hat. Erstellt einen gutachter_termine-Row mit
+      // typ='konfrontation', bezahlt=false, und triggert SV-Mitteilung.
+      if (svKonfroGewuenscht) {
+        const konfro = await triggerKonfrontationFromAdmin({
+          fallId: fall.id,
+          terminIso: new Date(iso).toISOString(),
+        })
+        if (konfro.success) {
+          toast.success('Konfrontations-Dispatch-Lite ausgelöst — SV wurde benachrichtigt')
+        } else {
+          toast.error(konfro.error ?? 'Konfrontations-Dispatch-Lite fehlgeschlagen')
+        }
+      }
+
+      refreshFall()
+    })
+  }
+
   return (
     <Card
       icon={<MapPinIcon className="w-4 h-4 text-violet-600" />}
       title="Nachbesichtigung"
-      subtitle="Kunde wählt Termin im Portal (KEIN Dispatch); Konfrontations-Termin KB-Entscheidung"
+      subtitle="Kunde wählt Termin im Portal; Konfrontations-Termin löst Dispatch-Lite (C12) aus"
     >
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Info label="Status" value={status ?? 'offen'} />
         <Info label="Angefordert am" value={angefordertAm} />
         <Info label="Termin" value={terminAm} />
         <Info
-          label="Konfrontation"
-          value={konfrontation === true ? 'Ja' : konfrontation === false ? 'Nein' : null}
+          label="SV-Konfrontation gewünscht"
+          value={
+            svKonfroGewuenscht === true
+              ? 'Ja (triggert Dispatch-Lite)'
+              : svKonfroGewuenscht === false
+                ? 'Nein'
+                : null
+          }
         />
       </div>
+
+      {vorschlaege.length > 0 && !terminAm && (
+        <div className="rounded-md border border-violet-200 bg-violet-50 p-3 space-y-2">
+          <h4 className="text-xs font-semibold text-violet-900">Termin-Vorschläge vom Kunden</h4>
+          <ul className="space-y-1.5">
+            {vorschlaege.map((t, i) => (
+              <li
+                key={`${t.datum}-${t.uhrzeit}-${i}`}
+                className="flex items-center justify-between gap-2 text-[11px] bg-white border border-violet-100 rounded px-2 py-1.5"
+              >
+                <span className="font-medium text-gray-800">
+                  {fmtDate(t.datum)} · {t.uhrzeit}
+                </span>
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={() => bestaetige(t)}
+                  className="px-2 py-1 rounded bg-violet-600 text-white text-[10px] font-medium hover:bg-violet-700 disabled:opacity-50"
+                >
+                  Bestätigen
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {ergebnis && (
         <div className="rounded-md bg-gray-50 border border-gray-200 p-3 text-[11px] text-gray-700">
           <strong className="block mb-1">Ergebnis:</strong>
           {ergebnis}
         </div>
       )}
+
+      {konfrontation === true && (
+        <div className="rounded-md bg-violet-50 border border-violet-200 p-2 text-[11px] text-violet-800">
+          Konfrontations-Termin aktiv — SV-Dispatch-Lite (AAR-561 C12) wurde
+          ausgelöst. SV wurde benachrichtigt und kann in seiner Fallakte annehmen.
+        </div>
+      )}
+
       <p className="text-[11px] text-gray-500">
-        Kunden-Portal-Route: <code className="text-[10px]">/kunde/nachbesichtigung</code> —
-        existiert, Slot-Picker wird in W5 verkabelt.
+        Kunden-Portal-Route: <code className="text-[10px]">/kunde/nachbesichtigung</code>
       </p>
     </Card>
   )
 }
 
-// ─── 7. Klage-Übergabe (NEU, ab klage) ─────────────────────────────────────
+// ─── 7. Klage-Übergabe ─────────────────────────────────────────────────────
 export function KlageSection() {
   const { fall, refreshFall } = useFall()
   const [pending, startTransition] = useTransition()
@@ -340,26 +590,88 @@ export function KlageSection() {
   )
 }
 
-// ─── 8. Auszahlung (Refactoring, ab zahlung-eingegangen) ───────────────────
-// DB-Verify (2026-04-15): `abrechnungsbetrag` existiert NICHT auf faelle —
-// die Kanzlei-Abrechnung lebt via FK `kanzlei_abrechnung_id` in einer eigenen
-// Tabelle. Für die Fallakte reichen zahlung_betrag + regulierung_betrag.
+// ─── 8. Auszahlung (mit Split + Rollen-Sichtbarkeits-Banner) ──────────────
 export function AuszahlungSection() {
-  const { fall } = useFall()
-  const betrag = fall.zahlung_betrag as number | null
-  const eingangAm = fmtDate(fall.zahlung_eingegangen_am)
+  const { fall, userRolle } = useFall()
+  const regulierungAm = fmtDate(fall.regulierung_am)
   const regulierungBetrag = fall.regulierung_betrag as number | null
+  const zahlungsweg = fall.zahlungsweg as string | null
+  const kundenBetrag = fall.auszahlung_kunde_betrag as number | null
+  const kundenEingangAm = fmtDate(fall.auszahlung_kunde_eingegangen_am)
+  const honorar = fall.gutachter_honorar as number | null
+  const svEingangAm = fmtDate(fall.auszahlung_gutachter_eingegangen_am)
+
+  const isAdminSicht = userRolle === 'admin' || userRolle === 'kundenbetreuer'
+
   return (
     <Card
       icon={<BanknoteIcon className="w-4 h-4 text-green-600" />}
-      title="Auszahlung an Kunden"
-      subtitle="Kanzlei überweist (Teilbetrag bei Kürzung möglich) — Info-WA an Kunde"
+      title="Auszahlung"
+      subtitle="Brutto von VS → Split an Kunde + SV-Honorar. Info-WA an Kunde bei Eingang."
     >
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <Info label="Zahlung eingegangen" value={eingangAm} />
-        <Info label="Betrag (€)" value={betrag} />
-        <Info label="Regulierungs-Betrag (€)" value={regulierungBetrag} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Info label="Brutto-Regulierung von VS" value={fmtEuro(regulierungBetrag)} />
+        <Info label="Regulierung am" value={regulierungAm} />
+        <Info label="Zahlungsweg" value={zahlungsweg} />
       </div>
+
+      {isAdminSicht ? (
+        <div className="rounded-md border border-[#EBF1F8] bg-[#f8f9fb] p-3 space-y-2">
+          <h4 className="text-xs font-semibold text-[#0D1B3E]">Split (Admin-Sicht)</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="rounded border border-gray-200 bg-white p-2 space-y-1">
+              <p className="text-[10px] uppercase tracking-wider text-gray-400">Kunde</p>
+              <InlineEditField
+                label="Betrag (€)"
+                fieldName="auszahlung_kunde_betrag"
+                value={kundenBetrag}
+                type="number"
+              />
+              <InlineEditField
+                label="Eingegangen am"
+                fieldName="auszahlung_kunde_eingegangen_am"
+                value={fall.auszahlung_kunde_eingegangen_am as string | null}
+                type="date"
+              />
+              <p className="text-[11px] text-gray-600">
+                {kundenEingangAm ? `✓ ${kundenEingangAm}` : '⏳ ausstehend'}
+              </p>
+            </div>
+            <div className="rounded border border-gray-200 bg-white p-2 space-y-1">
+              <p className="text-[10px] uppercase tracking-wider text-gray-400">SV / Gutachter</p>
+              <InlineEditField
+                label="Honorar Soll (€)"
+                fieldName="gutachter_honorar"
+                value={honorar}
+                type="number"
+              />
+              <InlineEditField
+                label="Eingegangen am"
+                fieldName="auszahlung_gutachter_eingegangen_am"
+                value={fall.auszahlung_gutachter_eingegangen_am as string | null}
+                type="date"
+              />
+              <p className="text-[11px] text-gray-600">
+                {svEingangAm ? `✓ ${svEingangAm}` : '⏳ ausstehend'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-start gap-2 rounded-md border border-[#EBF1F8] bg-white p-2">
+            <EyeIcon className="w-3.5 h-3.5 text-[#4573A2] mt-0.5 shrink-0" />
+            <p className="text-[11px] text-gray-600">
+              Sichtbarkeit: Kunde sieht nur Kunden-Betrag (<code>faelle_kunde_view</code>),
+              SV nur das Honorar (<code>faelle_sv_view</code>). Admin/KB sehen den vollen Split.
+            </p>
+          </div>
+          <p className="text-[11px] text-gray-500">
+            Split eintragen: Phase-Header „Kanzlei-Paket einlesen" → „Auszahlung eingegangen (Split)".
+          </p>
+        </div>
+      ) : (
+        <div className="rounded-md border border-gray-200 bg-gray-50 p-3 text-[11px] text-gray-700">
+          Split-Anzeige nur für Admin + Kundenbetreuer sichtbar.
+        </div>
+      )}
     </Card>
   )
 }

@@ -106,21 +106,22 @@ Ansprüche gegenüber der Versicherung geltend zu machen, und Zahlungen entgegen
   // Als HTML in Storage speichern
   const path = `sa-dokumente/${fallId}/sicherungsabtretung_${Date.now()}.html`
   const blob = new Blob([html], { type: 'text/html' })
-  await admin.storage.from('dokumente').upload(path, blob, { contentType: 'text/html' })
-  const { data: { publicUrl } } = admin.storage.from('dokumente').getPublicUrl(path)
+  await admin.storage.from('fall-dokumente').upload(path, blob, { contentType: 'text/html' })
+  const { data: { publicUrl } } = admin.storage.from('fall-dokumente').getPublicUrl(path)
 
   // Fall updaten mit SA-PDF URL
   await admin.from('faelle').update({ abtretung_pdf: publicUrl }).eq('id', fallId)
 
-  // Dokumente-Eintrag
-  await admin.from('dokumente').insert({
+  // AAR-553: fall_dokumente-Eintrag (dokumente-Tabelle gedroppt)
+  await admin.from('fall_dokumente').insert({
     fall_id: fallId,
-    typ: 'sicherungsabtretung',
-    datei_url: publicUrl,
-    datei_name: `Sicherungsabtretung_${name.replace(/\s/g, '_')}_${datum}.html`,
+    dokument_typ: 'sicherungsabtretung',
+    storage_path: path,
+    original_filename: `Sicherungsabtretung_${name.replace(/\s/g, '_')}_${datum}.html`,
+    mime_type: 'text/html',
     kategorie: 'unterschrift',
     quelle: 'flowlink',
-    hochgeladen_von_rolle: 'kunde',
+    uploaded_by_kunde: true,
     sichtbar_fuer: ['admin', 'kundenbetreuer', 'kanzlei'],
   })
 
@@ -464,9 +465,7 @@ export async function signSAandCreateFall(
         for (const t of upgradedTermine ?? []) { await generateReminderForTermin(t.id) }
       } catch (err) { console.error('[KFZ-136] Reminder-Gen:', err) }
 
-      await admin.from('faelle')
-        .update({ gutachter_termin_status: 'bestaetigt' })
-        .eq('id', fall.id)
+      // Fall-Status spiegelt die View aus gutachter_termine
     } else {
       // komplett: SA unterschrieben → Termin bleibt 'reserviert', wartet auf Vollmacht.
       // fall_id setzen damit der Termin in der Fallakte sichtbar wird.
@@ -474,11 +473,6 @@ export async function signSAandCreateFall(
         .update({ fall_id: fall.id })
         .eq('lead_id', leadId)
         .eq('status', 'reserviert')
-
-      // Fall: gutachter_termin_status bleibt reserviert
-      await admin.from('faelle')
-        .update({ gutachter_termin_status: 'reserviert' })
-        .eq('id', fall.id)
     }
   }
 
@@ -547,9 +541,15 @@ export async function signSAandCreateFall(
     await createPflichtdokumenteFromKatalog(admin, fall.id, lead as Record<string, unknown>)
   } catch (err) { console.error('[KFZ-140] Pflichtdokumente im FlowLink-Pfad:', err) }
 
-  // 6e. AAR-263 + AAR-182: Dispatch-Uploads (ZB1 + Polizeibericht) als
-  // Dokumente am Fall verfügbar machen — sonst sieht die Kanzlei sie nicht.
-  // Idempotent via datei_url-Check.
+  // 6e. AAR-263 + AAR-182 + AAR-553: Dispatch-Uploads (ZB1 + Polizeibericht)
+  // als Dokumente am Fall verfügbar machen — sonst sieht die Kanzlei sie
+  // nicht. URLs zeigen auf den (ehemaligen) `dokumente`-Bucket, die Files
+  // wurden von AAR-553 G1.5 nach `fall-dokumente` kopiert — daher denselben
+  // internen Pfad verwenden. Idempotent via storage_path-Check.
+  const urlToPath = (url: string): string | null => {
+    const m = url.match(/\/storage\/v1\/object\/public\/(?:dokumente|fall-dokumente)\/(.+)$/)
+    return m ? decodeURIComponent(m[1]) : null
+  }
   try {
     const leadAny = lead as Record<string, unknown>
     const zb1Url = (leadAny.zb1_url as string | null) ?? null
@@ -557,83 +557,96 @@ export async function signSAandCreateFall(
 
     const docInserts: Record<string, unknown>[] = []
     if (zb1Url) {
-      docInserts.push({
-        fall_id: fall.id,
-        typ: 'fahrzeugschein',
-        kategorie: 'zulassung',
-        quelle: 'dispatch-wa-upload',
-        datei_url: zb1Url,
-        datei_name: `Fahrzeugschein_${(leadAny.nachname as string) ?? 'unbekannt'}.jpg`,
-        hochgeladen_von_rolle: 'kunde',
-        sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde'],
-        beschreibung: 'Fahrzeugschein-Foto via WhatsApp eingegangen (Dispatch-Phase 4)',
-      })
+      const sp = urlToPath(zb1Url)
+      if (sp) {
+        docInserts.push({
+          fall_id: fall.id,
+          dokument_typ: 'fahrzeugschein',
+          kategorie: 'zulassung',
+          quelle: 'dispatch-wa-upload',
+          storage_path: sp,
+          original_filename: `Fahrzeugschein_${(leadAny.nachname as string) ?? 'unbekannt'}.jpg`,
+          mime_type: 'image/jpeg',
+          uploaded_by_kunde: true,
+          sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde'],
+          beschreibung: 'Fahrzeugschein-Foto via WhatsApp eingegangen (Dispatch-Phase 4)',
+        })
+      }
     }
     if (polizeiberichtUrl) {
-      const aktz = leadAny.polizei_aktenzeichen as string | null
-      docInserts.push({
-        fall_id: fall.id,
-        typ: 'polizeiliche_unfallmitteilung',
-        kategorie: 'polizeibericht',
-        quelle: 'dispatch-wa-upload',
-        datei_url: polizeiberichtUrl,
-        datei_name: `Polizeibericht_${(leadAny.nachname as string) ?? 'unbekannt'}_${aktz ?? 'ohne-aktz'}.jpg`,
-        hochgeladen_von_rolle: 'kunde',
-        sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde'],
-        beschreibung: 'Polizeiliche Unfallmitteilung via WhatsApp eingegangen (Dispatch-Phase 4)',
-      })
+      const sp = urlToPath(polizeiberichtUrl)
+      if (sp) {
+        const aktz = leadAny.polizei_aktenzeichen as string | null
+        docInserts.push({
+          fall_id: fall.id,
+          dokument_typ: 'polizeiliche_unfallmitteilung',
+          kategorie: 'polizeibericht',
+          quelle: 'dispatch-wa-upload',
+          storage_path: sp,
+          original_filename: `Polizeibericht_${(leadAny.nachname as string) ?? 'unbekannt'}_${aktz ?? 'ohne-aktz'}.jpg`,
+          mime_type: 'image/jpeg',
+          uploaded_by_kunde: true,
+          sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde'],
+          beschreibung: 'Polizeiliche Unfallmitteilung via WhatsApp eingegangen (Dispatch-Phase 4)',
+        })
+      }
     }
 
     if (docInserts.length > 0) {
-      // Duplikate vermeiden: bestehende dokumente.datei_url für diesen Fall laden
       const { data: existing } = await admin
-        .from('dokumente')
-        .select('datei_url')
+        .from('fall_dokumente')
+        .select('storage_path')
         .eq('fall_id', fall.id)
-      const existingUrls = new Set((existing ?? []).map((d) => d.datei_url as string))
-      const fresh = docInserts.filter((d) => !existingUrls.has(d.datei_url as string))
+      const existingPaths = new Set((existing ?? []).map((d) => d.storage_path as string))
+      const fresh = docInserts.filter((d) => !existingPaths.has(d.storage_path as string))
       if (fresh.length > 0) {
-        await admin.from('dokumente').insert(fresh)
+        await admin.from('fall_dokumente').insert(fresh)
       }
     }
   } catch (err) {
-    console.error('[AAR-263] Dispatch-Uploads in dokumente:', err)
+    console.error('[AAR-263] Dispatch-Uploads in fall_dokumente:', err)
   }
 
-  // 6b. AAR-305: Schadensfotos aus dem Onboarding-Step in dokumente übertragen
+  // 6b. AAR-305 / AAR-553: Schadensfotos aus dem Onboarding-Step in
+  // fall_dokumente übertragen.
   try {
     const fotoUrls = Array.isArray(lead.schadensfoto_urls)
       ? (lead.schadensfoto_urls as string[])
       : []
     if (fotoUrls.length > 0) {
       const { data: bestehendeFotos } = await admin
-        .from('dokumente')
-        .select('datei_url')
+        .from('fall_dokumente')
+        .select('storage_path')
         .eq('fall_id', fall.id)
-        .eq('typ', 'schadensfotos')
-      const bestehendeUrls = new Set((bestehendeFotos ?? []).map((d) => d.datei_url as string))
+        .eq('dokument_typ', 'schadensfotos')
+      const bestehendePaths = new Set((bestehendeFotos ?? []).map((d) => d.storage_path as string))
       const neueFotos = fotoUrls
-        .filter((url) => typeof url === 'string' && !bestehendeUrls.has(url))
-        .map((url, i) => ({
-          fall_id: fall.id,
-          typ: 'schadensfotos',
-          kategorie: 'schadensfotos',
-          datei_url: url,
-          datei_name: `schadensfoto-${i + 1}.jpg`,
-          quelle: 'flowlink',
-          hochgeladen_von_rolle: 'kunde',
-          sichtbar_fuer: [
-            'admin',
-            'leadbearbeiter',
-            'kundenbetreuer',
-            'sachverstaendiger',
-            'kanzlei',
-          ],
-        }))
-      if (neueFotos.length > 0) await admin.from('dokumente').insert(neueFotos)
+        .map((url, i) => {
+          const sp = typeof url === 'string' ? urlToPath(url) : null
+          if (!sp || bestehendePaths.has(sp)) return null
+          return {
+            fall_id: fall.id,
+            dokument_typ: 'schadensfotos',
+            kategorie: 'schadensfotos',
+            storage_path: sp,
+            original_filename: `schadensfoto-${i + 1}.jpg`,
+            mime_type: 'image/jpeg',
+            quelle: 'flowlink',
+            uploaded_by_kunde: true,
+            sichtbar_fuer: [
+              'admin',
+              'leadbearbeiter',
+              'kundenbetreuer',
+              'sachverstaendiger',
+              'kanzlei',
+            ],
+          }
+        })
+        .filter((d): d is NonNullable<typeof d> => d !== null)
+      if (neueFotos.length > 0) await admin.from('fall_dokumente').insert(neueFotos)
     }
   } catch (err) {
-    console.error('[AAR-305] Schadensfotos in dokumente:', err)
+    console.error('[AAR-305] Schadensfotos in fall_dokumente:', err)
   }
 
   // 7. FlowLink updaten
@@ -963,9 +976,9 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   const { bestaetigeTermin } = await import('@/lib/termine/bestaetigung')
   await bestaetigeTermin(termin.id)
 
-  // Fall: gutachter_termin_status → bestaetigt
+  // Fall: Vollmacht markieren — Termin-Status spiegelt die View aus gutachter_termine
   await admin.from('faelle')
-    .update({ gutachter_termin_status: 'bestaetigt', vollmacht_unterschrieben: true, vollmacht_datum: new Date().toISOString() })
+    .update({ vollmacht_unterschrieben: true, vollmacht_datum: new Date().toISOString() })
     .eq('id', fallId)
 
   // KFZ-136: Reminder generieren

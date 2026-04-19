@@ -108,7 +108,7 @@ export async function tier2Freigeben(svId: string): Promise<{ success: boolean; 
     .update({
       verifizierung_status: 'geprueft',
       verifiziert_am: new Date().toISOString(),
-      verifiziert_von_user_id: auth.userId,
+      verifiziert_von: auth.userId,
       verifizierung_admin_notiz: null,
     })
     .eq('id', svId)
@@ -153,7 +153,7 @@ export async function tier2DokumentNachfordern(
   const { data: existing } = await db
     .from('pflichtdokumente')
     .select('id')
-    .eq('gutachter_id', svId)
+    .eq('sv_id', svId)
     .eq('dokument_typ', slotId)
     .eq('status', 'ausstehend')
     .maybeSingle()
@@ -164,7 +164,7 @@ export async function tier2DokumentNachfordern(
   const { data: maxRow } = await db
     .from('pflichtdokumente')
     .select('sort_order')
-    .eq('gutachter_id', svId)
+    .eq('sv_id', svId)
     .order('sort_order', { ascending: false })
     .limit(1)
     .maybeSingle()
@@ -173,7 +173,7 @@ export async function tier2DokumentNachfordern(
   const { data: inserted, error: insErr } = await db
     .from('pflichtdokumente')
     .insert({
-      gutachter_id: svId,
+      sv_id: svId,
       dokument_typ: slotId,
       status: 'ausstehend',
       pflicht: true,
@@ -234,7 +234,7 @@ export async function svSperren(
   const { error } = await db
     .from('sachverstaendige')
     .update({
-      gesperrt_am: new Date().toISOString(),
+      gesperrt_seit: new Date().toISOString(),
       gesperrt_grund: trimmed,
       gesperrt_von_user_id: auth.userId,
       ist_aktiv: false,
@@ -254,7 +254,7 @@ export async function svEntsperren(svId: string): Promise<{ success: boolean; er
   const { error } = await db
     .from('sachverstaendige')
     .update({
-      gesperrt_am: null,
+      gesperrt_seit: null,
       gesperrt_grund: null,
       gesperrt_von_user_id: null,
       ist_aktiv: true,

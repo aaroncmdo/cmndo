@@ -7,7 +7,7 @@ export default async function KalenderPage() {
 
   const [{ data: faelle }, { data: tasks }, { data: termine }] = await Promise.all([
     supabase
-      .from('faelle')
+      .from('v_faelle_mit_aktuellem_termin')
       .select('id, fall_nummer, sv_termin, sv_id, status')
       .not('sv_termin', 'is', null),
     supabase

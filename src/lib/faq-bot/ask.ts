@@ -137,7 +137,7 @@ async function loadFallContext(fallId: string, rolle: FaqBotRolle) {
     : timelineQuery
 
   const [fallRes, leadRes, timelineRes, tasksRes] = await Promise.all([
-    admin.from('faelle').select('*').eq('id', fallId).maybeSingle(),
+    admin.from('v_faelle_mit_aktuellem_termin').select('*').eq('id', fallId).maybeSingle(),
     admin
       .from('faelle')
       .select('lead_id, leads(vorname, nachname, email, telefon, unfallhergang, schadentyp)')
@@ -199,7 +199,7 @@ function buildContextText(
   const fallNr = (fall.fall_nummer as string | null) ?? ''
   const status = (fall.status as string | null) ?? '—'
   const fahrzeug = [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ')
-  const schadentyp = (fall.schadenart as string | null) ?? (lead?.schadentyp as string | null) ?? '—'
+  const schadentyp = (fall.schadens_art as string | null) ?? (lead?.schadentyp as string | null) ?? '—'
   const svTermin = fall.sv_termin ? new Date(fall.sv_termin as string).toLocaleString('de-DE') : 'nicht gesetzt'
   const gegnerVS = (fall.gegner_versicherung as string | null) ?? '—'
   const reparaturkosten = (fall.reparaturkosten as number | null) ?? null

@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
  */
 export async function GET() {
   const db = createAdminClient()
-  const { data: faelle } = await db.from('faelle')
+  const { data: faelle } = await db.from('v_faelle_mit_aktuellem_termin')
     .select('id, no_show_gemeldet_am, sv_termin')
     .not('no_show_gemeldet_am', 'is', null)
     .is('storniert_am', null)

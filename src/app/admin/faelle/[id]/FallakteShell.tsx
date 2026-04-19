@@ -10,13 +10,18 @@ import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIco
 import { FallProvider, type FallLike, type LeadLike } from './FallContext'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
 import UebersichtTab from './tabs/UebersichtTab'
-import KommunikationTab from './tabs/KommunikationTab'
+import KommunikationTab, { type FallTeilnehmer } from './tabs/KommunikationTab'
 import TimelineTab from './tabs/TimelineTab'
 import ProzessTab from './tabs/ProzessTab'
 import DokumenteTab from './_tabs/DokumenteTab'
 import FallSidebar from './sidebar/FallSidebar'
 // AAR-307: Ad-hoc Task-Anlegen aus der Tab-Bar
 import { TaskAnlegenButton } from '@/components/tasks/TaskAnlegenButton'
+// AAR-538 (C1): sticky Phase-Header + Subphase-Resolver
+import { PhaseHeader } from '@/components/admin/fallakte/PhaseHeader'
+import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
+// AAR-544 (C7): unified Event-Stream für den Timeline-Tab
+import type { FallEvent } from '@/lib/fall/event-stream'
 
 type TabId = 'uebersicht' | 'dokumente' | 'kommunikation' | 'prozess' | 'timeline'
 
@@ -52,8 +57,14 @@ type ShellProps = {
       telefon: string | null
     } | null
   } | null
-  timeline: Parameters<typeof TimelineTab>[0]['timeline']
+  // AAR-544 (C7): unified Event-Stream aus 7 Quellen
+  events: FallEvent[]
   dokumenteTabProps: React.ComponentProps<typeof DokumenteTab>
+  // AAR-538 (C1): vom Server berechnete Subphase
+  subphase: SubphaseResult
+  // AAR-541 (C4): Kommunikations-Tab Props (currentUserId + Teilnehmer)
+  currentUserId: string | null
+  teilnehmer: FallTeilnehmer[]
 }
 
 export default function FallakteShell({
@@ -62,8 +73,11 @@ export default function FallakteShell({
   userRolle,
   kundenbetreuer,
   sv,
-  timeline,
+  events,
   dokumenteTabProps,
+  subphase,
+  currentUserId,
+  teilnehmer,
 }: ShellProps) {
   const router = useRouter()
   const search = useSearchParams()
@@ -85,8 +99,12 @@ export default function FallakteShell({
       <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-96px)] gap-0">
         {/* Haupt-Column: Tabs + Content */}
         <main className="flex-1 overflow-y-auto min-w-0">
+          {/* AAR-538 (C1): sticky Phase-Header — steht OBERHALB der Tab-Bar.
+              Tab-Bar ist nicht mehr sticky, damit beide nicht am gleichen
+              Anker konkurrieren. */}
+          <PhaseHeader result={subphase} fallId={fall.id} />
           {/* Tab-Bar */}
-          <nav className="border-b border-gray-200 bg-white sticky top-0 z-10">
+          <nav className="border-b border-gray-200 bg-white">
             <div className="flex items-center justify-between gap-3 px-4">
               <ul className="flex items-center gap-0 overflow-x-auto">
                 {TABS.map((tab) => {
@@ -121,9 +139,11 @@ export default function FallakteShell({
           <div className="px-4 sm:px-6 py-6">
             {activeTab === 'uebersicht' && <UebersichtTab />}
             {activeTab === 'dokumente' && <DokumenteTab {...dokumenteTabProps} />}
-            {activeTab === 'kommunikation' && <KommunikationTab />}
-            {activeTab === 'prozess' && <ProzessTab />}
-            {activeTab === 'timeline' && <TimelineTab timeline={timeline} />}
+            {activeTab === 'kommunikation' && (
+              <KommunikationTab currentUserId={currentUserId} teilnehmer={teilnehmer} />
+            )}
+            {activeTab === 'prozess' && <ProzessTab subphase={subphase} />}
+            {activeTab === 'timeline' && <TimelineTab events={events} />}
           </div>
         </main>
 

@@ -52,7 +52,7 @@ export async function createBueroOrganisation(data: {
     organisation_id: org.id,
     rolle_in_organisation: 'inhaber',
     paket: 'standard', // Pflichtfeld, wird nicht genutzt
-    max_faelle_monat: 0, // Inhaber bekommt keine Faelle persoenlich
+    paket_faelle_gesamt: 0, // Inhaber bekommt keine Fälle persönlich
     onboarding_status: 'pending',
     onboarding_anzahlung_betrag: 0,
     ist_aktiv: false,
@@ -75,7 +75,7 @@ export async function createBueroOrganisation(data: {
       organisation_id: org.id,
       rolle_in_organisation: 'mitarbeiter',
       paket: std.paket,
-      max_faelle_monat: PAKET_KONTINGENT[std.paket],
+      paket_faelle_gesamt: PAKET_KONTINGENT[std.paket],
       standort_adresse: std.anschrift || null,
       standort_plz: std.plz || null,
       standort_lat: std.lat,

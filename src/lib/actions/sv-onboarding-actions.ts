@@ -50,7 +50,7 @@ export async function signSvVertrag({
       unterschrift_ip: ip,
       unterschrift_user_agent: userAgent,
       signature_png_data_uri: signaturePngDataUri,
-      gutachter_id: sv.id,
+      sv_id: sv.id,
       rolle: 'Solo-Sachverstaendiger',
     })
   } catch (err) {
@@ -66,7 +66,7 @@ export async function signSvVertrag({
     .maybeSingle()
   if (kvVorlage) {
     await db.from('vertraege_unterzeichnet').insert({
-      gutachter_id: sv.id,
+      sv_id: sv.id,
       vorlage_id: kvVorlage.id,
       vorlage_typ: 'kooperationsvertrag_muster_gelesen',
       vorlage_version: kvVorlage.version,
@@ -148,7 +148,7 @@ export async function getOnboardingData() {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return null
 
-  const sv = await getGutachterForUser<Record<string, unknown>>(supabase, user.id, 'id, paket, onboarding_status, onboarding_anzahlung_betrag, portal_zugang_freigeschaltet, vertrag_unterschrieben, max_faelle_monat, gebiet_plz, standort_adresse')
+  const sv = await getGutachterForUser<Record<string, unknown>>(supabase, user.id, 'id, paket, onboarding_status, onboarding_anzahlung_betrag, portal_zugang_freigeschaltet, vertrag_unterschrieben, paket_faelle_gesamt, gebiet_plz, standort_adresse')
   if (!sv) return null
 
   const db = createAdminClient()
@@ -164,11 +164,11 @@ export async function getOnboardingData() {
   // Bereits unterzeichnet?
   const { data: unterzeichnet } = await db.from('vertraege_unterzeichnet')
     .select('id, vorlage_typ')
-    .eq('gutachter_id', sv.id as string)
+    .eq('sv_id', sv.id as string)
 
   // Anzahlung berechnen (pro Fall im Kontingent)
   const { FINANCE } = await import('@/lib/finance/constants')
-  const maxFaelle = Number(sv.max_faelle_monat ?? 10)
+  const maxFaelle = Number(sv.paket_faelle_gesamt ?? 10)
   const anzahlung = Number(sv.onboarding_anzahlung_betrag ?? maxFaelle * FINANCE.ANZAHLUNG_PRO_KONTINGENT)
 
   return {

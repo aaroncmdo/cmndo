@@ -12,7 +12,7 @@ type SignContext = {
   // Wird direkt ins PDF eingebrannt. Wenn null/undefined: PDF zeigt Linie + Name.
   signature_png_data_uri?: string | null
   // Genau eines der beiden:
-  gutachter_id?: string | null
+  sv_id?: string | null
   organisation_id?: string | null
   // Optional fuer PDF-Header
   rolle?: string                        // 'Solo-Sachverstaendiger' | 'Buero-Inhaber'
@@ -35,8 +35,8 @@ type SignResult = {
  * Email-Versand mit dem Buffer macht der Caller (siehe sendContractEmail).
  */
 export async function signAndStoreContract(ctx: SignContext): Promise<SignResult> {
-  if (!ctx.gutachter_id && !ctx.organisation_id) {
-    throw new Error('signAndStoreContract: gutachter_id oder organisation_id muss gesetzt sein')
+  if (!ctx.sv_id && !ctx.organisation_id) {
+    throw new Error('signAndStoreContract: sv_id oder organisation_id muss gesetzt sein')
   }
 
   const db = createAdminClient()
@@ -54,7 +54,7 @@ export async function signAndStoreContract(ctx: SignContext): Promise<SignResult
 
   // 2. vertraege_unterzeichnet-Eintrag (ohne pdf_storage_path — wird gleich nachgezogen)
   const { data: vertrag, error: vertragErr } = await db.from('vertraege_unterzeichnet').insert({
-    gutachter_id: ctx.gutachter_id ?? null,
+    sv_id: ctx.sv_id ?? null,
     organisation_id: ctx.organisation_id ?? null,
     vorlage_id: vorlage.id,
     vorlage_typ: ctx.vorlage_typ,
@@ -82,10 +82,10 @@ export async function signAndStoreContract(ctx: SignContext): Promise<SignResult
   }
   const pdfBuffer = await generateContractPdf(pdfData)
 
-  // 4. Storage-Upload nach vertraege/<gutachter_id>/<id>.pdf
+  // 4. Storage-Upload nach vertraege/<sv_id>/<id>.pdf
   //    bzw. vertraege/orgs/<organisation_id>/<id>.pdf
-  const pathSegment = ctx.gutachter_id
-    ? `${ctx.gutachter_id}/${vertrag.id}.pdf`
+  const pathSegment = ctx.sv_id
+    ? `${ctx.sv_id}/${vertrag.id}.pdf`
     : `orgs/${ctx.organisation_id}/${vertrag.id}.pdf`
 
   const { error: uploadErr } = await db.storage

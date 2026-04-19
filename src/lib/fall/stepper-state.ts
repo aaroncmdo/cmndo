@@ -75,7 +75,7 @@ function fallStatusToPhaseIndex(status: string): number {
 export async function getStepperState(fallId: string): Promise<StepperState> {
   const admin = createAdminClient()
 
-  const { data: fall } = await admin.from('faelle').select(
+  const { data: fall } = await admin.from('v_faelle_mit_aktuellem_termin').select(
     'status, lead_id, sv_id, sv_zugewiesen_am, sv_termin, gutachten_eingegangen_am, filmcheck_ok, filmcheck_am, kanzlei_uebergeben_am, anschlussschreiben_am, regulierung_am, regulierung_betrag, abtretung_signiert_am, konvertiert_am, gutachter_termin_status'
   ).eq('id', fallId).single()
 

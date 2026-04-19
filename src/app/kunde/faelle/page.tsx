@@ -13,7 +13,7 @@ export default async function KundeFaelleListe() {
   if (!user) redirect('/login')
 
   const { data: faelle } = await supabase
-    .from('faelle')
+    .from('v_faelle_mit_aktuellem_termin')
     .select(
       'id, fall_nummer, status, schadens_datum, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, gutachter_termin_status, gutachter_termin_bestaetigt_am, onboarding_complete, sa_unterschrieben, vollmacht_status, vollmacht_signiert_am, anschlussschreiben_am, regulierung_am, polizei_vor_ort, abgeschlossen_am, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, created_at',
     )

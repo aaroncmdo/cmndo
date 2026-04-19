@@ -81,7 +81,7 @@ export async function GET() {
   for (const sv of svs ?? []) {
     // Fälle dieses Monats mit Lead-Preis, noch nicht abgerechnet
     const { data: faelle } = await db.from('faelle')
-      .select('id, created_at, kennzeichen, gutachten_betrag, schadenhoehe_netto, lead_preis_netto, lead_preis_typ, guthaben_verrechnet_netto, sv_nachzahlung_netto')
+      .select('id, created_at, kennzeichen, gutachten_betrag, schadens_hoehe_netto, lead_preis_netto, lead_preis_typ, guthaben_verrechnet_netto, sv_nachzahlung_netto')
       .eq('sv_id', sv.id)
       .gte('created_at', monthStart)
       .lt('created_at', monthEnd)
@@ -126,7 +126,7 @@ export async function GET() {
           fall_id: f.id,
           fall_datum: new Date(f.created_at).toISOString().slice(0, 10),
           kennzeichen: f.kennzeichen ?? null,
-          schadenhoehe_netto: Number(f.schadenhoehe_netto ?? f.gutachten_betrag ?? 0),
+          schadenhoehe_netto: Number(f.schadens_hoehe_netto ?? f.gutachten_betrag ?? 0),
           lead_preis_netto: Number(f.lead_preis_netto),
           lead_preis_typ: f.lead_preis_typ ?? 'paket',
           guthaben_verrechnet_netto: Number(f.guthaben_verrechnet_netto ?? 0),
@@ -160,7 +160,7 @@ export async function GET() {
       fall_id: f.id,
       fall_datum: new Date(f.created_at).toISOString().slice(0, 10),
       kennzeichen: f.kennzeichen ?? null,
-      schadenhoehe_netto: Number(f.schadenhoehe_netto ?? f.gutachten_betrag ?? 0),
+      schadenhoehe_netto: Number(f.schadens_hoehe_netto ?? f.gutachten_betrag ?? 0),
       lead_preis_netto: Number(f.lead_preis_netto),
       lead_preis_typ: f.lead_preis_typ ?? 'paket',
       guthaben_verrechnet_netto: Number(f.guthaben_verrechnet_netto ?? 0),
@@ -201,7 +201,7 @@ export async function GET() {
         fall_id: f.id,
         fall_datum: new Date(f.created_at).toISOString().slice(0, 10),
         kennzeichen: f.kennzeichen ?? null,
-        schadenhoehe_netto: Number(f.schadenhoehe_netto ?? f.gutachten_betrag ?? 0),
+        schadenhoehe_netto: Number(f.schadens_hoehe_netto ?? f.gutachten_betrag ?? 0),
         lead_preis_netto: Number(f.lead_preis_netto),
         lead_preis_typ: f.lead_preis_typ ?? 'paket',
         guthaben_verrechnet_netto: Number(f.guthaben_verrechnet_netto ?? 0),

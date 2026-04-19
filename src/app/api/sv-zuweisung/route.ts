@@ -41,10 +41,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'fall_id fehlt' }, { status: 400 })
   }
 
-  // 1. Fall laden — KFZ-154: zusaetzlich spezifikation + schadenart fuer Match
+  // 1. Fall laden — KFZ-154: zusätzlich spezifikation + schadens_art für Match
   const { data: fall, error: fallErr } = await supabase
     .from('faelle')
-    .select('id, schadens_plz, sv_id, status, spezifikation, schadenart')
+    .select('id, schadens_plz, sv_id, status, spezifikation, schadens_art')
     .eq('id', fallId)
     .single()
 
@@ -88,7 +88,7 @@ export async function POST(request: Request) {
   // BUG-107: Nur SVs die bezahlt haben UND aktiv sind (kein Pilot-Fall, kein dispatch_aktiv)
   let svQuery = supabase
     .from('sachverstaendige')
-    .select('id, partner_seit, offene_faelle, max_faelle_monat, standort_lat, standort_lng, isochrone_polygon, paket_umkreis_km, spezifikationen, schadenarten, organisation_id, rolle_in_organisation')
+    .select('id, partner_seit, offene_faelle, paket_faelle_gesamt, paket_faelle_genutzt, standort_lat, standort_lng, isochrone_polygon, paket_umkreis_km, spezifikationen, schadenarten, organisation_id, rolle_in_organisation')
     .eq('ist_aktiv', true)
     .eq('portal_zugang_freigeschaltet', true)
 
@@ -107,14 +107,16 @@ export async function POST(request: Request) {
   }
 
   // 4. Filtern: Kapazität + Umkreis 40 km
-  // KFZ-154: spezifikation als Hard-Filter mit Fallback, schadenart als Soft-Priority
+  // KFZ-154: spezifikation als Hard-Filter mit Fallback, schadens_art als Soft-Priority
   type Candidate = (typeof svList)[number] & { distanz_km: number | null; spez_match: boolean; schaden_match: boolean }
 
   const candidates: Candidate[] = []
 
   for (const sv of svList) {
     // Kapazitätsprüfung
-    if (sv.offene_faelle >= sv.max_faelle_monat) continue
+    const svMax = sv.paket_faelle_gesamt ?? 0
+    const svGenutzt = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
+    if (svGenutzt >= svMax) continue
 
     let distanz: number | null = null
     let inRange = false
@@ -147,7 +149,7 @@ export async function POST(request: Request) {
       const svSpez = (sv.spezifikationen as string[] | null) ?? []
       const svSchaden = (sv.schadenarten as string[] | null) ?? []
       const spezMatch = !fall.spezifikation || svSpez.includes(fall.spezifikation)
-      const schadenMatch = !!fall.schadenart && svSchaden.includes(fall.schadenart)
+      const schadenMatch = !!fall.schadens_art && svSchaden.includes(fall.schadens_art)
       candidates.push({ ...sv, distanz_km: distanz, spez_match: spezMatch, schaden_match: schadenMatch })
     }
   }
@@ -173,7 +175,7 @@ export async function POST(request: Request) {
     }
   }
 
-  // 5. Sortieren: schadenart-Match (true vor false), dann partner_seit ASC
+  // 5. Sortieren: schadens_art-Match (true vor false), dann partner_seit ASC
   matchedCandidates.sort((a, b) => {
     if (a.schaden_match !== b.schaden_match) return a.schaden_match ? -1 : 1
     const da = a.partner_seit ? new Date(a.partner_seit).getTime() : Infinity
@@ -198,10 +200,9 @@ export async function POST(request: Request) {
       (c.rolle_in_organisation ?? '').toLowerCase() === 'community_member'
     )
     // Sort by 'free capacity' = max - genutzt, hoechster freier Slot zuerst
-    type WithCapacity = (typeof communityCandidates)[number] & { paket_faelle_genutzt?: number | null }
     communityCandidates.sort((a, b) => {
-      const aFree = (a.max_faelle_monat ?? 0) - ((a as WithCapacity).paket_faelle_genutzt ?? a.offene_faelle ?? 0)
-      const bFree = (b.max_faelle_monat ?? 0) - ((b as WithCapacity).paket_faelle_genutzt ?? b.offene_faelle ?? 0)
+      const aFree = (a.paket_faelle_gesamt ?? 0) - (a.paket_faelle_genutzt ?? a.offene_faelle ?? 0)
+      const bFree = (b.paket_faelle_gesamt ?? 0) - (b.paket_faelle_genutzt ?? b.offene_faelle ?? 0)
       return bFree - aFree
     })
     if (communityCandidates.length > 0) bestSv = communityCandidates[0]

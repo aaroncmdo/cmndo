@@ -64,8 +64,8 @@ export async function debugSvMatchingByCoords(
     .from('sachverstaendige')
     .select(
       'id, paket, standort_lat, standort_lng, isochrone_polygon, ' +
-        'paket_radius_km, paket_umkreis_km, radius_km, ' +
-        'paket_faelle_gesamt, paket_faelle_genutzt, offene_faelle, max_faelle_monat, ' +
+        'paket_umkreis_km, ' +
+        'paket_faelle_gesamt, paket_faelle_genutzt, offene_faelle, ' +
         'urlaub_von, urlaub_bis, ist_aktiv, gesperrt_seit, ' +
         'profiles(vorname, nachname)',
     )
@@ -86,11 +86,9 @@ export async function debugSvMatchingByCoords(
       ? `${(profile as { vorname?: string }).vorname ?? ''} ${(profile as { nachname?: string }).nachname ?? ''}`.trim() || '—'
       : '—'
     const paket = (sv.paket as string) || 'standard'
-    const radius =
-      Number(sv.paket_umkreis_km) || Number(sv.radius_km) || Number(sv.paket_radius_km) || 40
+    const radius = Number(sv.paket_umkreis_km) || 40
 
-    const kontingentGesamt =
-      Number(sv.paket_faelle_gesamt) || Number(sv.max_faelle_monat) || 10
+    const kontingentGesamt = Number(sv.paket_faelle_gesamt) || 10
     const kontingentGenutzt =
       Number(sv.paket_faelle_genutzt) || Number(sv.offene_faelle) || 0
     const kontingentFrei = kontingentGesamt - kontingentGenutzt

@@ -9,10 +9,10 @@
 
 export type BriefingInput = {
   // Schaden
-  schadenhergang: string | null
+  schadens_hergang: string | null
   unfallhergang: string | null
-  schadenart: string | null
-  schadenfall_typ: string | null
+  schadens_art: string | null
+  schadens_fall_typ: string | null
   unfall_konstellation: string | null
   schadens_beschreibung: string | null
   // Kunde
@@ -38,7 +38,6 @@ export type BriefingInput = {
   leasing_flag: boolean | null
   gewerbe_flag: boolean | null
   halter_ungleich_fahrer_flag: boolean | null
-  vorschaden_vorhanden: boolean | null
   hat_vorschaeden: boolean | null
   vorschaeden_beschreibung: string | null
   polizei_vor_ort: boolean | null
@@ -85,10 +84,10 @@ export function buildBriefingInput(
   const gegnerKennzeichen = pick<string>('gegner_kennzeichen')
 
   return {
-    schadenhergang: pick<string>('schadenhergang'),
+    schadens_hergang: pick<string>('schadens_hergang'),
     unfallhergang: pick<string>('unfallhergang'),
-    schadenart: pick<string>('schadenart'),
-    schadenfall_typ: pick<string>('schadenfall_typ'),
+    schadens_art: pick<string>('schadens_art'),
+    schadens_fall_typ: pick<string>('schadens_fall_typ'),
     unfall_konstellation: pick<string>('unfall_konstellation'),
     schadens_beschreibung: pick<string>('schadens_beschreibung'),
     halter_vorname: pick<string>('halter_vorname'),
@@ -107,10 +106,14 @@ export function buildBriefingInput(
     gegner_kennzeichen_auslaendisch: isAuslaendischesKennzeichen(gegnerKennzeichen),
     personenschaden_flag: pick<boolean>('personenschaden_flag'),
     mietwagen_flag: pick<boolean>('mietwagen_flag'),
-    leasing_flag: pick<boolean>('leasing_flag'),
+    // AAR-548 D10: faelle.leasing_flag gedropt — finanzierung_leasing ist Truth.
+    // Fallback auf lead.leasing_flag (Lead-Tabelle behält das Feld vorerst).
+    leasing_flag:
+      pick<string>('finanzierung_leasing') === 'leasing'
+        ? true
+        : pick<boolean>('leasing_flag'),
     gewerbe_flag: pick<boolean>('gewerbe_flag'),
     halter_ungleich_fahrer_flag: pick<boolean>('halter_ungleich_fahrer_flag'),
-    vorschaden_vorhanden: pick<boolean>('vorschaden_vorhanden'),
     hat_vorschaeden: pick<boolean>('hat_vorschaeden'),
     vorschaeden_beschreibung: pick<string>('vorschaeden_beschreibung'),
     polizei_vor_ort: pick<boolean>('polizei_vor_ort'),

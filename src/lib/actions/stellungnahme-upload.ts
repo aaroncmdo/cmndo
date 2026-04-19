@@ -47,7 +47,7 @@ export async function uploadTechnischeStellungnahme(
   const arrayBuffer = await file.arrayBuffer()
 
   const { error: uploadErr } = await db.storage
-    .from('dokumente')
+    .from('fall-dokumente')
     .upload(storagePath, arrayBuffer, { contentType: file.type || 'application/pdf' })
 
   if (uploadErr) return { success: false, error: `Upload fehlgeschlagen: ${uploadErr.message}` }

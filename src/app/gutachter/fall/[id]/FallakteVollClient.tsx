@@ -329,7 +329,7 @@ export default function FallakteVollClient({
         )}
 
         {/* Vorschaden Warning */}
-        {(fall.vorschaden_vorhanden as boolean) && (
+        {(fall.hat_vorschaeden as boolean) && (
           <div className="bg-red-50 border border-red-800 rounded-xl p-4 mb-5 flex items-center gap-3">
             <AlertTriangleIcon className="w-5 h-5 text-red-400 shrink-0" />
             <div>
@@ -402,7 +402,7 @@ export default function FallakteVollClient({
                 <InfoRow label="Schadensart" value={(fall.schadens_ursache as string) ?? '—'} />
                 <InfoRow label="Kennzeichen" value={(fall.kennzeichen as string) ?? '—'} />
                 <InfoRow label="Fahrzeug" value={[fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || '—'} />
-                <InfoRow label="Schadenfall-Typ" value={(fall.schadenfall_typ as string) ?? '—'} />
+                <InfoRow label="Schadenfall-Typ" value={(fall.schadens_fall_typ as string) ?? '—'} />
                 <InfoRow label="Adresse" value={[fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') || '—'} />
               </div>
             </div>
@@ -433,8 +433,8 @@ export default function FallakteVollClient({
               <div className="flex flex-wrap gap-2">
                 {fall.personenschaden_flag ? <Badge label="Personenschaden" color="bg-red-50 text-red-300" /> : null}
                 {fall.mietwagen_flag ? <Badge label="Mietwagen" color="bg-[var(--brand-secondary)]/5 text-[var(--brand-accent)]" /> : null}
-                {fall.leasing_flag ? <Badge label="Leasing" color="bg-violet-50 text-violet-300" /> : null}
-                {fall.finanzierung_flag ? <Badge label="Finanzierung" color="bg-amber-50 text-amber-300" /> : null}
+                {fall.finanzierung_leasing === 'leasing' ? <Badge label="Leasing" color="bg-violet-50 text-violet-300" /> : null}
+                {fall.finanzierung_leasing === 'finanzierung' ? <Badge label="Finanzierung" color="bg-amber-50 text-amber-300" /> : null}
                 {fall.gewerbe_flag ? <Badge label="Gewerbe" color="bg-cyan-50 text-cyan-300" /> : null}
                 {fall.halter_ungleich_fahrer_flag ? <Badge label="Halter != Fahrer" color="bg-orange-50 text-orange-300" /> : null}
                 {!fall.gegner_bekannt ? <Badge label="Gegner unbekannt" color="bg-gray-100 text-gray-500" /> : null}
@@ -512,7 +512,7 @@ export default function FallakteVollClient({
                 <p className="text-gray-400 text-xs mt-1">
                   Quelle: {String(fall.fin_quelle ?? '—')}
                   {fall.vorschaden_geprueft
-                    ? fall.vorschaden_vorhanden
+                    ? fall.hat_vorschaeden
                       ? ` · Vorschaden: ${fall.vorschaden_anzahl ?? '?'} gefunden`
                       : ' · Vorschadenfrei'
                     : ' · Prüfung läuft...'}

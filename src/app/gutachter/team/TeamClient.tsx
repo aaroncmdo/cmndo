@@ -11,7 +11,7 @@ export type SubSvData = {
   ist_aktiv: boolean
   portal_zugang_freigeschaltet: boolean
   gesperrt_seit: string | null
-  max_faelle_monat: number
+  paket_faelle_gesamt: number
   paket_faelle_genutzt: number | null
   werbebudget_guthaben_netto: number | null
   vorname: string | null
@@ -29,7 +29,7 @@ export type PoolLeadData = {
   kennzeichen: string | null
   fahrzeug: string | null
   spezifikation: string | null
-  schadenart: string | null
+  schadens_art: string | null
   created_at: string | null
 }
 
@@ -63,7 +63,7 @@ export default function TeamClient({
   // Sub-SV Optionen fuer den Assign-Dropdown
   const eligibleTargets = subSvs.filter(s =>
     s.ist_aktiv && s.portal_zugang_freigeschaltet && !s.gesperrt_seit &&
-    (s.paket_faelle_genutzt ?? 0) < s.max_faelle_monat
+    (s.paket_faelle_genutzt ?? 0) < s.paket_faelle_gesamt
   )
 
   function handleAssign(fallId: string) {
@@ -159,8 +159,8 @@ export default function TeamClient({
                     </td>
                     <td className="px-4 py-3 text-xs">
                       {l.spezifikation && <div className="text-[var(--brand-secondary)]">{l.spezifikation}</div>}
-                      {l.schadenart && <div className="text-amber-700">{l.schadenart}</div>}
-                      {!l.spezifikation && !l.schadenart && <span className="text-gray-400">—</span>}
+                      {l.schadens_art && <div className="text-amber-700">{l.schadens_art}</div>}
+                      {!l.spezifikation && !l.schadens_art && <span className="text-gray-400">—</span>}
                     </td>
                     <td className="px-4 py-3 text-[10px] text-gray-400">
                       {l.created_at ? new Date(l.created_at).toLocaleDateString('de-DE') : '—'}
@@ -176,7 +176,7 @@ export default function TeamClient({
                           <option value="">Wählen...</option>
                           {eligibleTargets.map(s => (
                             <option key={s.id} value={s.id}>
-                              {[s.vorname, s.nachname].filter(Boolean).join(' ') || s.id.slice(0, 8)} ({s.paket_faelle_genutzt ?? 0}/{s.max_faelle_monat})
+                              {[s.vorname, s.nachname].filter(Boolean).join(' ') || s.id.slice(0, 8)} ({s.paket_faelle_genutzt ?? 0}/{s.paket_faelle_gesamt})
                             </option>
                           ))}
                         </select>
@@ -239,7 +239,7 @@ export default function TeamClient({
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right text-gray-700">
-                      {s.paket_faelle_genutzt ?? 0} / {s.max_faelle_monat}
+                      {s.paket_faelle_genutzt ?? 0} / {s.paket_faelle_gesamt}
                     </td>
                     <td className="px-4 py-3 text-right text-gray-700">
                       {s.werbebudget_guthaben_netto != null

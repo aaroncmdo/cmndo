@@ -7,9 +7,9 @@
 // Netto, Auszahlungs-Status).
 //
 // Schema-Anker (verifiziert via information_schema):
-// - faelle.kanzlei_uebergeben_am / vs_anschreiben_datum / vs_reaktion_am /
-//   zahlung_eingegangen_am / zahlung_betrag / kuerzungs_betrag /
-//   gutachten_betrag / vs_kuerzung_grund
+// - faelle.kanzlei_uebergeben_am / anschlussschreiben_sendedatum /
+//   vs_reaktion_am / zahlung_eingegangen_am / zahlung_betrag /
+//   kuerzungs_betrag / gutachten_betrag / vs_kuerzung_grund
 // - forderungspositionen: fall_id, typ, bezeichnung, betrag_gefordert,
 //   betrag_reguliert, betrag_gekuerzt
 // - gutachter_abrechnungen: leadpreis, preistyp, abgerechnet_am
@@ -46,7 +46,7 @@ export type KuerzungsPosition = {
 
 export type KanzleiStatusInput = {
   kanzlei_uebergeben_am: string | null
-  vs_anschreiben_datum: string | null
+  anschlussschreiben_sendedatum: string | null
   vs_reaktion_am: string | null
   vs_kuerzung_grund: string | null
   zahlung_eingegangen_am: string | null
@@ -84,7 +84,7 @@ export function KanzleiStatusCard({
   if (subphase.phase < 5) return null
 
   const uebergebenLabel = fmtDate(fall.kanzlei_uebergeben_am)
-  const vsAnschreibenLabel = fmtDate(fall.vs_anschreiben_datum)
+  const vsAnschreibenLabel = fmtDate(fall.anschlussschreiben_sendedatum)
   const vsReaktionLabel = fmtDate(fall.vs_reaktion_am)
   const zahlungLabel = fmtDate(fall.zahlung_eingegangen_am)
 

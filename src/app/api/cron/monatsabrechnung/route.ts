@@ -23,8 +23,8 @@ export async function GET(req: NextRequest) {
     if (existing) continue
 
     // Get all Fälle with completed Termin this month
-    const { data: faelle } = await svc.from('faelle')
-      .select('id, fall_nummer, schadenshoehe_netto, kennzeichen, sv_termin, lead_id')
+    const { data: faelle } = await svc.from('v_faelle_mit_aktuellem_termin')
+      .select('id, fall_nummer, schadens_hoehe_netto, kennzeichen, sv_termin, lead_id')
       .eq('sv_id', sv.id)
       .gte('sv_termin', monatStart.toISOString())
       .lte('sv_termin', monatEnd.toISOString())
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
     const positionen: { fall_id: string; kunde_name: string; kennzeichen: string; schadenshoehe: number; leadpreis: number; leadpreis_typ: string; termin_datum: string }[] = []
 
     for (const fall of faelle) {
-      const schaden = Number(fall.schadenshoehe_netto) || 0
+      const schaden = Number(fall.schadens_hoehe_netto) || 0
       const istImPaket = paketCount + einzelCount < kontingent
       const preis = berechneLeadpreis(schaden, istImPaket)
       const typ = istImPaket ? 'paket' : 'einzel'
@@ -54,8 +54,14 @@ export async function GET(req: NextRequest) {
 
       positionen.push({ fall_id: fall.id, kunde_name: kundeName, kennzeichen: fall.kennzeichen ?? '', schadenshoehe: schaden, leadpreis: preis, leadpreis_typ: typ, termin_datum: fall.sv_termin ?? '' })
 
-      // Update Fall with leadpreis
-      await svc.from('faelle').update({ leadpreis: preis, leadpreis_typ: typ }).eq('id', fall.id)
+      // Update Fall mit neuer Source-of-Truth (AAR-548 D1: leadpreis/leadpreis_typ
+      // gedropt, Einheitsfelder sind lead_preis_netto + lead_preis_typ +
+      // lead_preis_berechnet_am — konsistent mit process-case-billing.ts).
+      await svc.from('faelle').update({
+        lead_preis_netto: preis,
+        lead_preis_typ: typ,
+        lead_preis_berechnet_am: new Date().toISOString(),
+      }).eq('id', fall.id)
     }
 
     // Create Abrechnung

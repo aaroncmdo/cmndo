@@ -117,7 +117,7 @@ export function FahrzeugdatenSection() {
           finVorhanden={!!fin}
           initial={{
             fetchedAt: (lead?.cardentity_abfrage_am as string | null) ?? null,
-            vorschadenVorhanden: (lead?.vorschaden_vorhanden as boolean | null) ?? null,
+            vorschadenVorhanden: (lead?.hat_vorschaeden as boolean | null) ?? null,
             vorschadenAnzahl: (lead?.vorschaden_anzahl as number | null) ?? null,
             letzterVorschadenDatum: (lead?.vorschaden_letzter_datum as string | null) ?? null,
           }}
@@ -132,7 +132,7 @@ export function UnfallSection() {
   return (
     <Card icon={<AlertTriangleIcon className="w-4 h-4 text-gray-400" />} title="Unfall">
       <InlineEditField label="Schadensdatum" fieldName="schadens_datum" value={typeof fall.schadens_datum === 'string' ? fall.schadens_datum.slice(0, 10) : null} type="date" />
-      <InlineEditField label="Schadenart" fieldName="schadenart" value={f(fall, 'schadenart')} />
+      <InlineEditField label="Schadensart" fieldName="schadens_art" value={f(fall, 'schadens_art')} />
       <div className="sm:col-span-2">
         <InlineEditField label="Schadens-Adresse" fieldName="schadens_adresse" value={f(fall, 'schadens_adresse')} />
       </div>
@@ -142,7 +142,7 @@ export function UnfallSection() {
         <InlineEditField label="Schadens-Ursache" fieldName="schadens_ursache" value={f(fall, 'schadens_ursache')} type="textarea" />
       </div>
       <div className="sm:col-span-2">
-        <InlineEditField label="Schadenhergang" fieldName="schadenhergang" value={f(fall, 'schadenhergang')} type="textarea" />
+        <InlineEditField label="Schadenshergang" fieldName="schadens_hergang" value={f(fall, 'schadens_hergang')} type="textarea" />
       </div>
       <div className="sm:col-span-2">
         <InlineEditField label="Beschreibung" fieldName="schadens_beschreibung" value={f(fall, 'schadens_beschreibung')} type="textarea" />
@@ -220,10 +220,9 @@ function VersicherungStammdaten({ versicherungId }: { versicherungId: string | n
 
 export function GegnerSection() {
   const { fall } = useFall()
-  // DB-Schema: gegner_name (1 Spalte, kein Vor-/Nachname-Split),
-  // schadennummer_versicherung (statt gegner_schadennummer)
-  // AAR-265: gegner_versicherung_id FK auf versicherungen — wenn gesetzt,
-  // zeigen wir Hotline + Email + BaFin als zusätzliche Card-Zeile.
+  // AAR-545 Cluster D: DB-Felder konsolidiert auf gegner_* Namensraum.
+  // schadennummer_versicherung/versicherung_schaden_nr/versicherung_name sind
+  // ersatzlos weg. FK auf versicherungen-Stammdaten: gegner_versicherung_id.
   const versicherungId = (fall as Record<string, unknown>).gegner_versicherung_id as string | null ?? null
   return (
     <Card icon={<ShieldIcon className="w-4 h-4 text-gray-400" />} title="Gegner & Versicherung">
@@ -233,8 +232,8 @@ export function GegnerSection() {
       <InlineEditField label="Gegner-Kennzeichen" fieldName="gegner_kennzeichen" value={f(fall, 'gegner_kennzeichen')} />
       <InlineEditField label="Gegner-Fahrzeugtyp" fieldName="gegner_fahrzeugtyp" value={f(fall, 'gegner_fahrzeugtyp')} />
       <InlineEditField label="Gegner Versicherung" fieldName="gegner_versicherung" value={f(fall, 'gegner_versicherung')} />
-      <InlineEditField label="Schadennr. (Versicherung)" fieldName="schadennummer_versicherung" value={f(fall, 'schadennummer_versicherung')} />
-      <InlineEditField label="VS-Schadennummer (intern)" fieldName="versicherung_schaden_nr" value={f(fall, 'versicherung_schaden_nr')} />
+      <InlineEditField label="Gegner-Versicherungsnummer" fieldName="gegner_versicherungsnummer" value={f(fall, 'gegner_versicherungsnummer')} />
+      <InlineEditField label="Gegner-Schadennummer" fieldName="gegner_schadennummer" value={f(fall, 'gegner_schadennummer')} />
       <VersicherungStammdaten versicherungId={versicherungId} />
     </Card>
   )
@@ -242,11 +241,11 @@ export function GegnerSection() {
 
 export function VorschaedenSection() {
   const { fall } = useFall()
-  // DB-Schema: vorschaden_vorhanden + vorschaden_anzahl + vorschaden_letzter_datum
-  // (kein hat_vorschaeden / vorschaeden_beschreibung — die liegen auf leads)
+  // DB-Schema: hat_vorschaeden + vorschaden_anzahl + vorschaden_letzter_datum
+  // (vorschaeden_beschreibung liegt auf leads, vorschaden_erkannt=CarDentity, vorschaden_geprueft=KB)
   return (
     <Card icon={<WrenchIcon className="w-4 h-4 text-gray-400" />} title="Vorschäden">
-      <InlineEditField label="Vorschäden vorhanden?" fieldName="vorschaden_vorhanden" value={f(fall, 'vorschaden_vorhanden')} placeholder="Ja / Nein" />
+      <InlineEditField label="Vorschäden vorhanden?" fieldName="hat_vorschaeden" value={f(fall, 'hat_vorschaeden')} placeholder="Ja / Nein" />
       <InlineEditField label="Anzahl" fieldName="vorschaden_anzahl" value={f(fall, 'vorschaden_anzahl')} type="number" />
     </Card>
   )
@@ -344,14 +343,14 @@ export function NutzungsausfallSection() {
 
 export function BesichtigungSection() {
   const { fall } = useFall()
-  // DB-Schema: besichtigungsort_adresse + besichtigung_datum existieren;
-  // besichtigungsort_plz/stadt + fahrzeug_standort_* gibt es NICHT.
+  // DB-Schema: nur besichtigungsort_adresse existiert auf faelle.
+  // AAR-552 Cluster E: besichtigung_datum ersatzlos entfernt — Termin-Datum
+  // kommt via v_faelle_mit_aktuellem_termin.aktueller_termin_start.
   return (
     <Card icon={<MapPinIcon className="w-4 h-4 text-gray-400" />} title="Besichtigung">
       <div className="sm:col-span-2">
         <InlineEditField label="Besichtigungsort-Adresse" fieldName="besichtigungsort_adresse" value={f(fall, 'besichtigungsort_adresse')} />
       </div>
-      <InlineEditField label="Besichtigungsdatum" fieldName="besichtigung_datum" value={typeof fall.besichtigung_datum === 'string' ? fall.besichtigung_datum.slice(0, 10) : null} type="date" />
     </Card>
   )
 }
@@ -359,7 +358,7 @@ export function BesichtigungSection() {
 export function KernwerteSection() {
   const { fall } = useFall()
   // DB-Schema: reparaturkosten / wiederbeschaffungswert / restwert / wertminderung /
-  // schadenshoehe / schadenhoehe_netto — kein kernwert_-Prefix
+  // schadens_hoehe_netto — kein kernwert_-Prefix
   return (
     <Card
       icon={<CalculatorIcon className="w-4 h-4 text-gray-400" />}
@@ -370,8 +369,7 @@ export function KernwerteSection() {
       <InlineEditField label="Wiederbeschaffungswert (€)" fieldName="wiederbeschaffungswert" value={f(fall, 'wiederbeschaffungswert')} type="number" />
       <InlineEditField label="Restwert (€)" fieldName="restwert" value={f(fall, 'restwert')} type="number" />
       <InlineEditField label="Wertminderung (€)" fieldName="wertminderung" value={f(fall, 'wertminderung')} type="number" />
-      <InlineEditField label="Schadenhöhe brutto (€)" fieldName="schadenshoehe" value={f(fall, 'schadenshoehe')} type="number" />
-      <InlineEditField label="Schadenhöhe netto (€)" fieldName="schadenhoehe_netto" value={f(fall, 'schadenhoehe_netto')} type="number" />
+      <InlineEditField label="Schadenshöhe netto (€)" fieldName="schadens_hoehe_netto" value={f(fall, 'schadens_hoehe_netto')} type="number" />
     </Card>
   )
 }

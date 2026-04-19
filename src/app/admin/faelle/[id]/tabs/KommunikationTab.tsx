@@ -1,24 +1,107 @@
 'use client'
 
-// AAR-162 / W2: Kommunikations-Tab — dünner Wrapper um MultiChannelChat.
-// Der Chat-Component existiert bereits (AAR-129 Chat-Gruppe). Wir nutzen die
-// Fall-ID aus dem Context als Primärschlüssel für die Chat-Gruppe.
+// AAR-541 (C4): Admin/KB-Sicht auf den MultiChannelChat.
+// Rendert den Shared-Component mit rollenabhängigem Kanal-Whitelist,
+// einer Teilnehmer-Liste und URL-Param-Deep-Link (?kanal=kb_sv_intern).
 
+import { useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useFall } from '../FallContext'
+import MultiChannelChat from '@/components/chat/MultiChannelChat'
+import type { ChatKanal } from '@/lib/communications/channels'
+import { getKanaeleForRolle, resolveKanalAlias } from '@/lib/chat/kanal-routing'
 
-// Platzhalter: MultiChannelChat-Integration folgt sobald der entsprechende
-// Component-Pfad verifiziert ist. Der W2-Scope ist die Shell/Tabs; das
-// Verkabeln des Chats kommt mit W5 (Cross-Portal-Verkabelung).
+export type FallTeilnehmer = {
+  user_id: string
+  rolle: 'kunde' | 'kundenbetreuer' | 'gutachter'
+  vorname: string | null
+  nachname: string | null
+  avatar_url: string | null
+}
 
-export default function KommunikationTab() {
-  const { fall } = useFall()
+const ROLLE_LABEL: Record<FallTeilnehmer['rolle'], string> = {
+  kunde: 'Kunde',
+  kundenbetreuer: 'Kundenbetreuer',
+  gutachter: 'Gutachter',
+}
+
+export default function KommunikationTab({
+  currentUserId,
+  teilnehmer,
+}: {
+  currentUserId: string | null
+  teilnehmer: FallTeilnehmer[]
+}) {
+  const { fall, userRolle } = useFall()
+  const search = useSearchParams()
+
+  const visibleKanaele = useMemo<ChatKanal[]>(
+    () => getKanaeleForRolle(userRolle),
+    [userRolle],
+  )
+
+  const defaultKanal = useMemo<ChatKanal>(() => {
+    const aliased = resolveKanalAlias(search?.get('kanal'))
+    if (aliased && visibleKanaele.includes(aliased)) return aliased
+    return visibleKanaele[0] ?? 'whatsapp'
+  }, [search, visibleKanaele])
+
+  // AAR-541: Admin/KB = Super-User → interner Kanal explizit erlauben
+  const showInternal = visibleKanaele.includes('chat_kb_sv')
+
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-2">
-      <h2 className="text-sm font-semibold text-gray-900">Kommunikation</h2>
-      <p className="text-xs text-gray-500">
-        Multi-Channel-Chat (WhatsApp / SMS / Email / Interner Chat / Portal) —
-        Integration folgt in W5. Fall-ID: <code className="text-[10px]">{fall.id.slice(0, 8)}</code>
-      </p>
+    <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_260px] gap-4">
+      <div>
+        <MultiChannelChat
+          fallId={fall.id}
+          currentUserId={currentUserId}
+          showInternalKbSvChat={showInternal}
+          defaultKanal={defaultKanal}
+          visibleKanaele={visibleKanaele}
+        />
+      </div>
+
+      <aside className="bg-white border border-gray-200 rounded-xl p-4 h-fit">
+        <h3 className="text-xs font-semibold text-[#0D1B3E] uppercase tracking-wider mb-3">
+          Teilnehmer ({teilnehmer.length})
+        </h3>
+        {teilnehmer.length === 0 ? (
+          <p className="text-xs text-gray-500 italic">Noch keine Teilnehmer zugeordnet.</p>
+        ) : (
+          <ul className="space-y-2">
+            {teilnehmer.map((t) => {
+              const name = [t.vorname, t.nachname].filter(Boolean).join(' ') || '—'
+              const initials = [t.vorname?.[0], t.nachname?.[0]].filter(Boolean).join('').toUpperCase() || '?'
+              return (
+                <li key={t.user_id} className="flex items-center gap-2.5">
+                  {t.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={t.avatar_url}
+                      alt={name}
+                      className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                    />
+                  ) : (
+                    <span className="w-8 h-8 rounded-full bg-[#EBF1F8] text-[#0D1B3E] flex items-center justify-center text-xs font-semibold">
+                      {initials}
+                    </span>
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-[#0D1B3E] truncate">{name}</p>
+                    <p className="text-[10px] text-gray-500">{ROLLE_LABEL[t.rolle]}</p>
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+        <div className="mt-4 pt-3 border-t border-gray-100">
+          <p className="text-[10px] text-gray-400 leading-snug">
+            Admin + KB sehen alle fünf Kanäle inklusive des internen KB↔SV-Chats.
+            System-Nachrichten werden als Separator dargestellt.
+          </p>
+        </div>
+      </aside>
     </div>
   )
 }

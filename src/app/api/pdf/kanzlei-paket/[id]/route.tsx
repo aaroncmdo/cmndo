@@ -34,9 +34,10 @@ export async function GET(
       .select('kategorie, bezeichnung, beschreibung, geschaetzter_wert, reparaturkosten')
       .eq('fall_id', id)
       .order('sort_order'),
-    supabase.from('dokumente')
-      .select('typ, datei_url, datei_name')
-      .eq('fall_id', id),
+    supabase.from('fall_dokumente')
+      .select('dokument_typ, storage_path, original_filename')
+      .eq('fall_id', id)
+      .is('geloescht_am', null),
     supabase.from('parteien')
       .select('rolle, name, versicherung_name, versicherung_nr, telefon, email')
       .eq('fall_id', id),
@@ -69,8 +70,15 @@ export async function GET(
     ? { name: schaedigerPartei.name, versicherung: schaedigerPartei.versicherung_name, versicherungNr: schaedigerPartei.versicherung_nr, telefon: schaedigerPartei.telefon, email: schaedigerPartei.email }
     : null
 
-  const fotos = (dokumente ?? []).filter(d => d.typ?.startsWith('foto'))
-  const beweise = (dokumente ?? []).filter(d => !d.typ?.startsWith('foto'))
+  const dokumenteMapped = (dokumente ?? []).map(d => ({
+    typ: d.dokument_typ as string | null,
+    datei_url: d.storage_path
+      ? supabase.storage.from('fall-dokumente').getPublicUrl(d.storage_path as string).data.publicUrl
+      : null,
+    datei_name: (d.original_filename as string | null) ?? null,
+  }))
+  const fotos = dokumenteMapped.filter(d => d.typ?.startsWith('foto'))
+  const beweise = dokumenteMapped.filter(d => !d.typ?.startsWith('foto'))
 
   const data: KanzleiPaketData = {
     fallNummer: fall.fall_nummer ?? id.slice(0, 8),
@@ -93,8 +101,8 @@ export async function GET(
     gutachtenBetrag: fall.gutachten_betrag,
     gutachtenDatum: fall.gutachten_eingegangen_am,
     svName,
-    beweise: beweise.map(d => ({ typ: d.typ, name: d.datei_name })),
-    fotoUrls: fotos.map(d => d.datei_url).filter(Boolean),
+    beweise: beweise.map(d => ({ typ: d.typ ?? 'dokument', name: d.datei_name })),
+    fotoUrls: fotos.map(d => d.datei_url).filter((u): u is string => Boolean(u)),
   }
 
   const buffer = await renderToBuffer(<KanzleiPaketPDF data={data} />)

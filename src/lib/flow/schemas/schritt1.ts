@@ -58,7 +58,7 @@ export const schritt1Schema = z
       .refine((v) => !Number.isNaN(Date.parse(v)), 'Ungültiges Datum'),
     unfallort: z.string().trim().min(3, 'Unfallort ist zu kurz').max(200),
     schadentyp: z.enum(SCHADENTYP_VALUES),
-    schadenhergang: z
+    schadens_hergang: z
       .string()
       .trim()
       .min(10, 'Bitte beschreibe den Hergang (mindestens 10 Zeichen)')

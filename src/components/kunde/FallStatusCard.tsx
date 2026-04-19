@@ -1,6 +1,9 @@
 'use client'
 
-import { CalendarIcon, TruckIcon, FileTextIcon, ShieldCheckIcon, MailIcon, ClockIcon, BanknoteIcon, XCircleIcon, PartyPopperIcon, CheckCircle2Icon, AlertCircleIcon } from 'lucide-react'
+// AAR-558 (C9) Brutto-Leak-Fix: Keine `regulierung_betrag` / `zahlung_betrag`-
+// Felder mehr — Kunde sieht Brutto-Beträge nicht. Die Auszahlungs-Summe kommt
+// ausschließlich aus AuszahlungCard (auszahlung_kunde_betrag aus faelle_kunde_view).
+import { CalendarIcon, TruckIcon, FileTextIcon, ShieldCheckIcon, MailIcon, ClockIcon, XCircleIcon, PartyPopperIcon, CheckCircle2Icon, AlertCircleIcon } from 'lucide-react'
 import { formatDatum, formatDatumUhrzeit } from '@/lib/format'
 
 type StatusFall = {
@@ -10,13 +13,11 @@ type StatusFall = {
   sv_termin: string | null
   anschlussschreiben_am: string | null
   vs_ablehnungsgrund: string | null
-  regulierung_betrag: number | null
-  zahlung_betrag: number | null
-  zahlung_eingegangen_am: string | null
   storno_grund: string | null
   abgeschlossen_am: string | null
   google_review_gesendet: boolean | null
-  versicherung_name: string | null
+  // AAR-545 Cluster D: Gegner-VS aus faelle.gegner_versicherung (Freitext).
+  gegner_versicherung: string | null
   kanzlei_ansprechpartner_name: string | null
 }
 
@@ -37,10 +38,6 @@ function daysSince(d: string): number {
 
 function daysUntil(d: string): number {
   return Math.max(0, Math.ceil((new Date(d).getTime() - Date.now()) / 86400000))
-}
-
-function fmt(n: number): string {
-  return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(n)
 }
 
 export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svName?: string }) {
@@ -83,24 +80,9 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
         </div>
       )}
 
-      {/* Regulierungsbetrag */}
-      {(s === 'regulierung-laeuft' || s === 'regulierung') && fall.regulierung_betrag && (
-        <div className="bg-white/60 rounded-xl px-4 py-3 text-center">
-          <p className="text-xs text-gray-500">Angekündigter Betrag</p>
-          <p className="text-2xl font-bold text-emerald-700">{fmt(fall.regulierung_betrag)}</p>
-        </div>
-      )}
-
-      {/* Zahlung */}
-      {s === 'zahlung-eingegangen' && (
-        <div className="bg-white/60 rounded-xl px-4 py-3 text-center">
-          <p className="text-xs text-gray-500">Eingegangener Betrag</p>
-          <p className="text-3xl font-bold text-emerald-700">{fall.zahlung_betrag ? fmt(fall.zahlung_betrag) : '—'}</p>
-          {fall.zahlung_eingegangen_am && (
-            <p className="text-xs text-gray-400 mt-1">{formatDatum(fall.zahlung_eingegangen_am)}</p>
-          )}
-        </div>
-      )}
+      {/* AAR-558 (C9) Brutto-Leak-Fix: Regulierungs-/Zahlungs-Betrag entfernt —
+          die Netto-Kunden-Auszahlung wird von AuszahlungCard aus
+          auszahlung_kunde_betrag (faelle_kunde_view) angezeigt. */}
 
       {/* VS-Ablehnung Grund */}
       {s === 'vs-abgelehnt' && fall.vs_ablehnungsgrund && (
@@ -159,19 +141,19 @@ function getStatusConfig(fall: StatusFall, svName?: string): StatusConfig {
     return { icon: ShieldCheckIcon, title: 'Deine Akte ist bei der Kanzlei', description: `${fall.kanzlei_ansprechpartner_name ?? 'Die Partnerkanzlei'} prüft deinen Fall und erstellt das Anspruchsschreiben an die Versicherung.`, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' }
 
   if (s === 'anschlussschreiben')
-    return { icon: MailIcon, title: 'Anspruchsschreiben versendet', description: `Das Anspruchsschreiben wurde an ${fall.versicherung_name ?? 'die Versicherung'} gesendet. Jetzt läuft die gesetzliche Frist.`, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' }
+    return { icon: MailIcon, title: 'Anspruchsschreiben versendet', description: `Das Anspruchsschreiben wurde an ${fall.gegner_versicherung ?? 'die Versicherung'} gesendet. Jetzt läuft die gesetzliche Frist.`, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' }
 
   if (s === 'regulierung-laeuft' || s === 'regulierung')
-    return { icon: BanknoteIcon, title: 'Regulierung angekündigt', description: 'Die Versicherung hat die Regulierung angekündigt. Die Zahlung wird in den nächsten Tagen erwartet.', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200' }
+    return { icon: PartyPopperIcon, title: 'Regulierung angekündigt', description: 'Die Versicherung hat die Regulierung angekündigt. Ihre Auszahlung wird in den nächsten Tagen erwartet.', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200' }
 
   if (s === 'vs-abgelehnt')
     return { icon: XCircleIcon, title: 'Die Versicherung hat abgelehnt', description: 'Dein Kundenberater meldet sich bei dir um die nächsten Schritte zu besprechen. Eventuell wird eine Klage eingereicht.', color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200' }
 
   if (s === 'zahlung-eingegangen')
-    return { icon: PartyPopperIcon, title: 'Zahlung eingegangen!', description: 'Die Versicherung hat gezahlt! Die Schlussabrechnung wird erstellt.', action: 'Prüfe deine Bankdaten im Bereich unten.', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200' }
+    return { icon: PartyPopperIcon, title: 'Zahlung eingegangen!', description: 'Die Versicherung hat gezahlt! Die Schlussabrechnung wird erstellt. Den ausgezahlten Netto-Anteil sehen Sie in der Auszahlungs-Card.', action: 'Prüfe deine Bankdaten im Bereich unten.', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200' }
 
   if (s === 'abgeschlossen')
-    return { icon: CheckCircle2Icon, title: 'Dein Fall ist abgeschlossen!', description: `Alles erledigt${fall.zahlung_betrag ? ` — ${fmt(fall.zahlung_betrag)} wurden an dich ausgezahlt` : ''}. Vielen Dank für dein Vertrauen!`, color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200' }
+    return { icon: CheckCircle2Icon, title: 'Dein Fall ist abgeschlossen!', description: 'Alles erledigt. Vielen Dank für dein Vertrauen!', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200' }
 
   if (s === 'storniert')
     return { icon: AlertCircleIcon, title: 'Dein Fall wurde storniert', description: 'Bei Rückfragen erreichst du uns jederzeit per WhatsApp oder Telefon.', color: 'text-gray-500', bg: 'bg-gray-50', border: 'border-gray-200' }

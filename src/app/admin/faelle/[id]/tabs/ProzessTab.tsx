@@ -1,14 +1,14 @@
 'use client'
 
 // AAR-164 / W4: Prozess-Tab — 8 Sections phase-dynamisch.
-// Ersetzt den ProzessTabStub aus W2. Sichtbarkeit je Section folgt der
-// visibleSections-Map aus phase-config.ts — ab akte-uebergeben zeigt sich
-// Kanzlei+E-Akte, ab as-vorbereitung AS, ab vs-kuerzt Kürzung+Rüge+Stellung-
-// nahme, etc.
-//
-// Section-Components liegen in ../prozess/Sections.tsx.
+// AAR-543 (C6): Sichtbarkeits-Map aus prozess-section-visibility.ts statt
+// der Stammdaten-PHASE_VISIBLE_SECTIONS — Sections folgen jetzt der vom
+// Server berechneten Subphase + den Daten-Flags (vs_kuerzungs_typ,
+// Auszahlungs-Split, usw).
 
 import { useFall } from '../FallContext'
+import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
+import { getVisibleProzessSections } from '@/lib/fall/prozess-section-visibility'
 import {
   KanzleiEakteSection,
   AsSection,
@@ -20,27 +20,11 @@ import {
   AuszahlungSection,
 } from '../prozess/Sections'
 
-export default function ProzessTab() {
-  const { visibleSections, phase } = useFall()
+export default function ProzessTab({ subphase }: { subphase: SubphaseResult }) {
+  const { fall, phase } = useFall()
+  const visible = getVisibleProzessSections(subphase, fall)
 
-  // Kanzlei+E-Akte erscheint ab „as-status" (war ab akte-uebergeben in der
-  // Spec — Alias-Mapping via phase-config visibleSections).
-  const showKanzlei = visibleSections.includes('as-status') || visibleSections.includes('kernwerte')
-  const showAs = visibleSections.includes('as-status')
-  const showVsReaktion = visibleSections.includes('kuerzung') ||
-    visibleSections.includes('regulierung')
-  const showStellungnahme = visibleSections.includes('stellungnahme')
-  const showRuege = visibleSections.includes('ruege')
-  const showNachbesichtigung = visibleSections.includes('nachbesichtigung')
-  const showKlage = visibleSections.includes('klage')
-  const showAuszahlung = visibleSections.includes('auszahlung') ||
-    visibleSections.includes('regulierung')
-
-  const anythingVisible =
-    showKanzlei || showAs || showVsReaktion || showStellungnahme || showRuege ||
-    showNachbesichtigung || showKlage || showAuszahlung
-
-  if (!anythingVisible) {
+  if (visible.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-2">
         <h2 className="text-sm font-semibold text-gray-900">Prozess</h2>
@@ -48,7 +32,7 @@ export default function ProzessTab() {
           Der Prozess-Tab zeigt Kanzlei, Anspruchsschreiben, VS-Reaktion, Rüge,
           Stellungnahme, Nachbesichtigung, Klage und Auszahlung — sobald der Fall
           die jeweilige Phase erreicht. Aktueller Status:{' '}
-          <code className="text-[10px]">{phase}</code>.
+          <code className="text-[10px]">{phase}</code> (Subphase {subphase.subphase}).
         </p>
       </div>
     )
@@ -56,14 +40,14 @@ export default function ProzessTab() {
 
   return (
     <div className="space-y-4">
-      {showKanzlei && <KanzleiEakteSection />}
-      {showAs && <AsSection />}
-      {showVsReaktion && <VsReaktionSection />}
-      {showStellungnahme && <StellungnahmeSection />}
-      {showRuege && <RuegeSection />}
-      {showNachbesichtigung && <NachbesichtigungSection />}
-      {showKlage && <KlageSection />}
-      {showAuszahlung && <AuszahlungSection />}
+      {visible.includes('kanzlei') && <KanzleiEakteSection />}
+      {visible.includes('as') && <AsSection />}
+      {visible.includes('vs_reaktion') && <VsReaktionSection />}
+      {visible.includes('stellungnahme') && <StellungnahmeSection />}
+      {visible.includes('ruege') && <RuegeSection />}
+      {visible.includes('nachbesichtigung') && <NachbesichtigungSection />}
+      {visible.includes('klage') && <KlageSection />}
+      {visible.includes('auszahlung') && <AuszahlungSection />}
     </div>
   )
 }

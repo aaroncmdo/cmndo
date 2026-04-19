@@ -121,6 +121,18 @@ const TEMPLATES: Record<TemplateName, (vars: Record<string, string>) => string> 
   dokumente_upload_anfrage: (v) =>
     `Hallo ${v['1'] ?? ''}, bitte laden Sie die angefragten Dokumente über folgenden Link hoch: ${v['2'] ?? ''} (Link gültig 7 Tage). Claimondo`,
 
+  // AAR-559 (C10): SV-Auftrag Technische Stellungnahme — 1=SV-Vorname, 2=Fall-Nr, 3=Grund-Kurzform, 4=Portal-Link
+  stellungnahme_beauftragt: (v) =>
+    `Hallo ${v['1'] ?? ''}, für Fall ${v['2'] ?? ''} wird eine technische Stellungnahme benötigt (Grund: ${v['3'] ?? ''}). Details im Portal: ${v['4'] ?? ''}`,
+
+  // AAR-561 (C12): SV-Konfrontations-Anfrage — 1=SV-Vorname, 2=Fall-Nr, 3=Termin, 4=Portal-Link
+  sv_konfrontation_anfrage: (v) =>
+    `Hallo ${v['1'] ?? ''}, für Fall ${v['2'] ?? ''} ist ein Konfrontations-Termin mit dem VS-Gutachter am ${v['3'] ?? ''} geplant. Bitte bestätigen Sie im Portal: ${v['4'] ?? ''}`,
+
+  // AAR-561 (C12): Kunde-Zusage SV-Konfrontation — 1=Kunden-Vorname, 2=SV-Vorname, 3=Termin, 4=Portal-Link
+  sv_konfrontation_bestaetigt_kunde: (v) =>
+    `Hallo ${v['1'] ?? ''}, Ihr Gutachter ${v['2'] ?? ''} begleitet Sie am ${v['3'] ?? ''} zur Nachbesichtigung mit dem VS-Gutachter. Details: ${v['4'] ?? ''}`,
+
 }
 // KFZ-200 → KFZ-201: SV-Navigation Templates (sv_nav_unterwegs, sv_nav_15min,
 // sv_nav_5min, sv_nav_angekommen, sv_begutachtung_fertig) wurden konsolidiert:

@@ -22,7 +22,7 @@ export default async function GutachterFallPage({
 
   // Fetch case and verify sv_id match
   const { data: fall } = await supabase
-    .from('faelle')
+    .from('v_faelle_mit_aktuellem_termin')
     .select('*')
     .eq('id', id)
     .eq('sv_id', sv.id)
@@ -39,21 +39,28 @@ export default async function GutachterFallPage({
     { data: timeline },
     { data: abrechnung },
     { data: nachrichten },
+    { data: svView },
   ] = await Promise.all([
     fall.lead_id
       ? supabase
           .from('leads')
           // AAR-311: vorschaden_* + cardentity_abfrage_am für Typ-B-Button in StammdatenCard
-          .select('vorname, nachname, email, telefon, fin, vorschaden_typ_b_bericht, vorschaden_vorhanden, vorschaden_anzahl, vorschaden_letzter_datum, cardentity_abfrage_am')
+          // AAR-545 Cluster D: eigene_versicherung + eigene_policennr für "Eigene
+          // Versicherung"-Block (früher faelle.versicherung_name / _schaden_nr).
+          .select('vorname, nachname, email, telefon, fin, vorschaden_typ_b_bericht, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, cardentity_abfrage_am, eigene_versicherung, eigene_policennr')
           .eq('id', fall.lead_id)
           .single()
       : Promise.resolve({ data: null }),
+    // AAR-553: fall_dokumente ersetzt dokumente. Legacy-Shape bleibt für
+    // FallDetailClient/FallakteVollClient/FallakteDrawer erhalten (typ,
+    // datei_url, datei_name, datei_groesse, created_at, hochgeladen_von_rolle).
     supabase
-      .from('dokumente')
-      .select('id, typ, datei_url, datei_name, datei_groesse, kategorie, quelle, sichtbar_fuer, hochgeladen_von_rolle, created_at')
+      .from('fall_dokumente')
+      .select('id, dokument_typ, storage_path, original_filename, groesse_bytes, kategorie, quelle, sichtbar_fuer, uploaded_by_sv, uploaded_by_kunde, hochgeladen_am')
       .eq('fall_id', id)
+      .is('geloescht_am', null)
       .contains('sichtbar_fuer', ['sachverstaendiger'])
-      .order('created_at'),
+      .order('hochgeladen_am'),
     supabase
       .from('pflichtdokumente')
       // AAR-327: zusätzlich angefordert_* + begruendung + frist für
@@ -83,6 +90,16 @@ export default async function GutachterFallPage({
       .eq('fall_id', id)
       .eq('kanal', 'chat_kunde_sv')
       .order('created_at', { ascending: true }),
+    // AAR-559 (C10): SV-View mit Column-Filter (C8/AAR-557) — liefert nur
+    // SV-relevante Felder: SV-Honorar, Konfrontations-Wunsch + Kunden-Slots.
+    // Niemals auszahlung_kunde_betrag oder regulierung_betrag sichtbar.
+    supabase
+      .from('faelle_sv_view')
+      .select(
+        'auszahlung_gutachter_betrag, auszahlung_gutachter_eingegangen_am, nachbesichtigung_sv_konfrontation_gewuenscht, nachbesichtigung_sv_termin_vereinbart_am, nachbesichtigung_kunde_termin_vorschlaege',
+      )
+      .eq('id', id)
+      .maybeSingle(),
   ])
 
   // Fetch kundenbetreuer profile
@@ -254,11 +271,47 @@ export default async function GutachterFallPage({
       }
     })
 
+  // AAR-553: fall_dokumente → Legacy-Shape für FallDetailClient-Konsumenten
+  const dokumenteLegacy = (dokumente ?? []).map(d => ({
+    id: d.id as string,
+    typ: (d.dokument_typ as string | null) ?? null,
+    datei_url: d.storage_path
+      ? supabase.storage.from('fall-dokumente').getPublicUrl(d.storage_path as string).data.publicUrl
+      : null,
+    datei_name: (d.original_filename as string | null) ?? null,
+    datei_groesse: (d.groesse_bytes as number | null) ?? null,
+    kategorie: (d.kategorie as string | null) ?? null,
+    quelle: (d.quelle as string | null) ?? null,
+    sichtbar_fuer: (d.sichtbar_fuer as string[] | null) ?? null,
+    hochgeladen_von_rolle: d.uploaded_by_sv
+      ? 'sachverstaendiger'
+      : d.uploaded_by_kunde
+        ? 'kunde'
+        : null,
+    created_at: (d.hochgeladen_am as string | null) ?? null,
+  }))
+
+  // AAR-559 (C10): SV-View-Felder für SvHonorarCard + KonfrontationsTerminCard.
+  // terminVorschlaege kommt als JSONB — auf {datum, uhrzeit}-Array normalisieren.
+  const svHonorarBetrag = svView?.auszahlung_gutachter_betrag != null
+    ? Number(svView.auszahlung_gutachter_betrag as number)
+    : null
+  const svHonorarEingegangenAm = (svView?.auszahlung_gutachter_eingegangen_am as string | null) ?? null
+  const konfrontationGewuenscht = !!svView?.nachbesichtigung_sv_konfrontation_gewuenscht
+  const konfrontationTerminVereinbartAm =
+    (svView?.nachbesichtigung_sv_termin_vereinbart_am as string | null) ?? null
+  const terminVorschlaegeRaw = svView?.nachbesichtigung_kunde_termin_vorschlaege
+  const terminVorschlaege = Array.isArray(terminVorschlaegeRaw)
+    ? (terminVorschlaegeRaw as Array<{ datum: string; uhrzeit: string }>).filter(
+        (s) => s && typeof s.datum === 'string' && typeof s.uhrzeit === 'string',
+      )
+    : null
+
   return (
     <FallDetailClient
       fall={fallWithAbrechnung}
       lead={lead}
-      dokumente={dokumente ?? []}
+      dokumente={dokumenteLegacy}
       pflichtdokumente={(pflichtdokumente ?? []) as unknown as Parameters<typeof FallDetailClient>[0]['pflichtdokumente']}
       anforderbareSlots={anforderbareSlots}
       anforderungenVonMir={anforderungenVonMir}
@@ -285,6 +338,11 @@ export default async function GutachterFallPage({
             }
           : null
       }
+      svHonorarBetrag={svHonorarBetrag}
+      svHonorarEingegangenAm={svHonorarEingegangenAm}
+      konfrontationGewuenscht={konfrontationGewuenscht}
+      konfrontationTerminVereinbartAm={konfrontationTerminVereinbartAm}
+      konfrontationTerminVorschlaege={terminVorschlaege}
     />
   )
 }

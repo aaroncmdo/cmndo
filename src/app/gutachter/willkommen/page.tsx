@@ -44,7 +44,7 @@ export default async function GutachterWillkommenPage({
   // der Wizard weiss ob Step 5 (SA-Vorlage) noch angezeigt werden muss und
   // bei status='zurueckgewiesen' den Ablehnungsgrund einblenden kann.
   const svSelect =
-    'id, paket, max_faelle_monat, paket_umkreis_km, onboarding_status, onboarding_anzahlung_betrag, vertrag_unterschrieben, portal_zugang_freigeschaltet, standort_adresse, standort_plz, organisation_id, rolle_in_organisation, logo_url, brand_primary, brand_secondary, use_custom_branding, firmenname, steuernummer, gcal_connected, sa_vorlage_status, sa_vorlage_admin_notiz'
+    'id, paket, paket_faelle_gesamt, paket_umkreis_km, onboarding_status, onboarding_anzahlung_betrag, vertrag_unterschrieben, portal_zugang_freigeschaltet, standort_adresse, standort_plz, organisation_id, rolle_in_organisation, logo_url, brand_primary, brand_secondary, use_custom_branding, firmenname, steuernummer, gcal_connected, sa_vorlage_status, sa_vorlage_admin_notiz'
   const { data: svRows } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
@@ -242,7 +242,7 @@ export default async function GutachterWillkommenPage({
       sv={{
         id: sv.id,
         paket: sv.paket ?? 'standard',
-        max_faelle_monat: resolveMaxFaelleMonat(sv),
+        paket_faelle_gesamt: resolveMaxFaelleMonat(sv),
         paket_umkreis_km: resolveUmkreisKm(sv),
         onboarding_anzahlung_betrag: Number(sv.onboarding_anzahlung_betrag ?? 0),
         onboarding_status: sv.onboarding_status,

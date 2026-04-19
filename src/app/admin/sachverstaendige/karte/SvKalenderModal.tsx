@@ -64,7 +64,7 @@ export default function SvKalenderModal({ svId, svName, onClose }: { svId: strin
       supabase.from('gutachter_termine').select('id, start_zeit, end_zeit, status, fall_id')
         .eq('sv_id', svId).gte('start_zeit', ds.toISOString()).lt('start_zeit', de.toISOString())
         .not('status', 'eq', 'storniert'),
-      supabase.from('faelle').select('id, fall_nummer, sv_termin, lead_id, leads(vorname, nachname)')
+      supabase.from('v_faelle_mit_aktuellem_termin').select('id, fall_nummer, sv_termin, lead_id, leads(vorname, nachname)')
         .eq('sv_id', svId).not('sv_termin', 'is', null)
         .gte('sv_termin', ds.toISOString()).lt('sv_termin', de.toISOString()),
       supabase.from('faelle').select('id, fall_nummer, lead_id, leads(vorname, nachname)')
@@ -118,8 +118,10 @@ export default function SvKalenderModal({ svId, svName, onClose }: { svId: strin
     const startDate = new Date(bookingSlot.day)
     startDate.setHours(Math.floor(bookingSlot.minute / 60), bookingSlot.minute % 60, 0, 0)
     const endDate = new Date(startDate.getTime() + 120 * 60000)
-    const { data: inserted } = await supabase.from('gutachter_termine').insert({ sv_id: svId, fall_id: bookingFallId, start_zeit: startDate.toISOString(), end_zeit: endDate.toISOString(), status: 'reserviert', ablehnen_token_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() }).select('id').single()
-    await supabase.from('faelle').update({ sv_id: svId, sv_termin: startDate.toISOString(), sv_zugewiesen_am: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', bookingFallId)
+    // AAR-561 (C12): typ=erstbesichtigung explizit setzen — sonst NULL, was
+    // typ-basierte Filter (z. B. Konfrontations-Listen) durchlaufen lässt.
+    const { data: inserted } = await supabase.from('gutachter_termine').insert({ sv_id: svId, fall_id: bookingFallId, start_zeit: startDate.toISOString(), end_zeit: endDate.toISOString(), status: 'reserviert', typ: 'erstbesichtigung', ablehnen_token_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() }).select('id').single()
+    await supabase.from('faelle').update({ sv_id: svId, sv_zugewiesen_am: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', bookingFallId)
     // KFZ-202 Fix: Status via Server Action statt direkt
     try { const { transitionFallStatus } = await import('@/lib/faelle/state-machine'); await transitionFallStatus(bookingFallId, 'sv-termin') } catch { /* Transition evtl. nicht erlaubt */ }
     // KFZ-136: Reminder generieren (fire & forget via internal API)

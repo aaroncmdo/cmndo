@@ -27,16 +27,14 @@ export default async function AbrechnungPage() {
     id: string
     paket: string | null
     offene_faelle: number | null
-    max_faelle_monat: number | null
     paket_faelle_genutzt: number | null
     paket_faelle_gesamt: number | null
     paket_umkreis_km: number | null
     anzahlung_betrag: number | null
-    anzahlung_bezahlt_am: string | null
     anzahlung_status: string | null
     onboarding_anzahlung_betrag: number | null
     stripe_anzahlung_bezahlt_am: string | null
-  }>(supabase, user!.id, 'id, paket, offene_faelle, max_faelle_monat, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, anzahlung_betrag, anzahlung_bezahlt_am, anzahlung_status, onboarding_anzahlung_betrag, stripe_anzahlung_bezahlt_am')
+  }>(supabase, user!.id, 'id, paket, offene_faelle, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, anzahlung_betrag, anzahlung_status, onboarding_anzahlung_betrag, stripe_anzahlung_bezahlt_am')
 
   if (!sv) {
     return (
@@ -53,12 +51,11 @@ export default async function AbrechnungPage() {
   // AAR-243: Mehrere Spalten möglich für Betrag + Status. Fallback-Kette:
   // - onboarding_anzahlung_betrag (neuer Standard seit Stripe-Integration)
   // - anzahlung_betrag (legacy)
-  // Status: anzahlung_status='bezahlt' ODER (stripe_)anzahlung_bezahlt_am gesetzt.
+  // Status: anzahlung_status='bezahlt' ODER stripe_anzahlung_bezahlt_am gesetzt.
   const anzahlungBetrag = Number(sv.onboarding_anzahlung_betrag ?? sv.anzahlung_betrag ?? 0)
   const anzahlungBezahlt =
     sv.anzahlung_status === 'bezahlt' ||
-    !!sv.stripe_anzahlung_bezahlt_am ||
-    !!sv.anzahlung_bezahlt_am
+    !!sv.stripe_anzahlung_bezahlt_am
 
   // Fetch abrechnungen from the real billing table
   const { data: abrechnungen } = await supabase
@@ -88,6 +85,17 @@ export default async function AbrechnungPage() {
     .eq('sv_id', sv.id)
     .order('eingezahlt_am', { ascending: false })
 
+  // AAR-559 (C10): Technische Stellungnahmen — Aufträge + Status für diesen SV.
+  // Kein separates Honorar-Feld in der DB, daher nur Status-Übersicht.
+  const { data: stellungnahmen } = await supabase
+    .from('faelle')
+    .select(
+      'id, fall_nummer, technische_stellungnahme_status, technische_stellungnahme_beauftragt_am, technische_stellungnahme_hochgeladen_am, technische_stellungnahme_freigabe_am, vs_kuerzungs_typ',
+    )
+    .eq('sv_id', sv.id)
+    .not('technische_stellungnahme_status', 'is', null)
+    .order('technische_stellungnahme_beauftragt_am', { ascending: false })
+
   // Fetch lead names
   const leadIds = [...new Set((completedFaelle ?? []).map((f) => f.lead_id).filter(Boolean))] as string[]
   const { data: leads } = leadIds.length > 0
@@ -101,7 +109,7 @@ export default async function AbrechnungPage() {
 
   const paketLabel = PAKET_LABELS[sv.paket ?? ''] ?? sv.paket ?? 'Kein Paket'
   const offeneFaelle = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
-  const maxFaelle = sv.paket_faelle_gesamt ?? sv.max_faelle_monat ?? 10
+  const maxFaelle = sv.paket_faelle_gesamt ?? 10
   const auslastungProzent = maxFaelle > 0 ? Math.min(Math.round((offeneFaelle / maxFaelle) * 100), 100) : 0
 
   // Progress bar color based on utilization
@@ -361,6 +369,121 @@ export default async function AbrechnungPage() {
             </>
           )}
         </div>
+
+        {/* AAR-559 (C10): Technische Stellungnahmen — Status-Übersicht.
+            Kein Honorar-Feld vorhanden, daher rein informativ. */}
+        {(stellungnahmen?.length ?? 0) > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <FileTextIcon className="w-5 h-5 text-gray-500" />
+              <h2 className="text-lg font-semibold text-gray-900">Technische Stellungnahmen</h2>
+              <span className="text-gray-400 text-sm ml-auto">{stellungnahmen?.length ?? 0} Aufträge</span>
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden sm:block bg-white rounded-2xl overflow-hidden border border-gray-200">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Fall-Nr.</th>
+                    <th className="text-left px-4 py-3 text-gray-500 font-medium">Anlass</th>
+                    <th className="text-left px-4 py-3 text-gray-500 font-medium">Status</th>
+                    <th className="text-left px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Beauftragt</th>
+                    <th className="text-left px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Hochgeladen</th>
+                    <th className="text-left px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Freigegeben</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stellungnahmen!.map((s) => {
+                    const status = (s.technische_stellungnahme_status ?? '') as string
+                    const statusLabel =
+                      status === 'beauftragt' ? 'Beauftragt' :
+                      status === 'hochgeladen' ? 'Hochgeladen' :
+                      status === 'freigegeben' ? 'Freigegeben' : status
+                    const statusColor =
+                      status === 'beauftragt' ? 'bg-amber-50 text-amber-700' :
+                      status === 'hochgeladen' ? 'bg-blue-50 text-blue-700' :
+                      status === 'freigegeben' ? 'bg-emerald-50 text-emerald-700' :
+                      'bg-gray-50 text-gray-700'
+                    const fmt = (iso: string | null) =>
+                      iso
+                        ? new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                        : '—'
+                    return (
+                      <tr key={s.id} className="border-b border-gray-200/50 hover:bg-gray-100/40 transition-colors">
+                        <td className="px-4 py-3">
+                          <Link
+                            href={`/gutachter/faelle/${s.id}`}
+                            className="text-[var(--brand-accent)] font-mono text-xs hover:underline"
+                          >
+                            {s.fall_nummer ?? (s.id as string).slice(0, 8)}
+                          </Link>
+                        </td>
+                        <td className="px-4 py-3 text-gray-700 text-xs">
+                          {((s.vs_kuerzungs_typ as string | null) ?? 'technisch')}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${statusColor}`}>
+                            {statusLabel}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{fmt(s.technische_stellungnahme_beauftragt_am as string | null)}</td>
+                        <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{fmt(s.technische_stellungnahme_hochgeladen_am as string | null)}</td>
+                        <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{fmt(s.technische_stellungnahme_freigabe_am as string | null)}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="sm:hidden space-y-3">
+              {stellungnahmen!.map((s) => {
+                const status = (s.technische_stellungnahme_status ?? '') as string
+                const statusLabel =
+                  status === 'beauftragt' ? 'Beauftragt' :
+                  status === 'hochgeladen' ? 'Hochgeladen' :
+                  status === 'freigegeben' ? 'Freigegeben' : status
+                const statusColor =
+                  status === 'beauftragt' ? 'bg-amber-50 text-amber-700' :
+                  status === 'hochgeladen' ? 'bg-blue-50 text-blue-700' :
+                  status === 'freigegeben' ? 'bg-emerald-50 text-emerald-700' :
+                  'bg-gray-50 text-gray-700'
+                const fmt = (iso: string | null) =>
+                  iso
+                    ? new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                    : '—'
+                return (
+                  <div key={s.id} className="bg-white rounded-2xl p-4 border border-gray-200">
+                    <div className="flex items-start justify-between mb-2">
+                      <Link href={`/gutachter/faelle/${s.id}`} className="text-[var(--brand-accent)] font-mono text-xs hover:underline">
+                        {s.fall_nummer ?? (s.id as string).slice(0, 8)}
+                      </Link>
+                      <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${statusColor}`}>
+                        {statusLabel}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-[11px]">
+                      <div>
+                        <p className="text-gray-400">Beauftragt</p>
+                        <p className="text-gray-700">{fmt(s.technische_stellungnahme_beauftragt_am as string | null)}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400">Hochgeladen</p>
+                        <p className="text-gray-700">{fmt(s.technische_stellungnahme_hochgeladen_am as string | null)}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400">Freigegeben</p>
+                        <p className="text-gray-700">{fmt(s.technische_stellungnahme_freigabe_am as string | null)}</p>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Einzahlungen */}
         {(einzahlungen?.length ?? 0) > 0 && (

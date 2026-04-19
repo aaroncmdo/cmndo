@@ -191,17 +191,14 @@ export async function anlegeSv(data: AnlegeSvFormData): Promise<{ success: boole
     standort_lng: data.anschrift_lng,
     standort_place_id: data.anschrift_place_id || null,
     gebiet_plz: data.anschrift_plz ? [data.anschrift_plz] : [],
-    max_faelle_monat: cfg.kontingent,
     paket_faelle_gesamt: cfg.kontingent,
     paket_faelle_genutzt: 0,
     paket_umkreis_km: cfg.radius_km,
-    radius_km: cfg.radius_km,
     anzahlung_faellig: cfg.preis_anzahlung_eur,
     onboarding_anzahlung_betrag: cfg.preis_anzahlung_eur, // KFZ-149 BUG-FOLLOW-4
     anzahlung_status: 'offen',
     onboarding_status: 'vom_admin_angelegt', // ARCH-1 neuer Status
     portal_zugang_freigeschaltet: false, // Hard-Blocker bis Vertrag + Stripe
-    onboarding_abgeschlossen: false,
     ist_aktiv: true,
     partner_seit: new Date().toISOString().slice(0, 10),
   }).select('id').single()
@@ -388,7 +385,6 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
     rolle_in_organisation: 'inhaber',
     paket: 'standard', // Pflichtfeld, wird nicht genutzt
     gebiet_plz: [],
-    max_faelle_monat: 0,
     paket_faelle_gesamt: 0,
     paket_faelle_genutzt: 0,
     paket_umkreis_km: 0,
@@ -398,7 +394,6 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
     portal_zugang_freigeschaltet: false,
     ist_aktiv: false, // erst aktiv nach Buero-Anzahlung
     ist_parent_account: true,
-    onboarding_abgeschlossen: false,
   }).select('id').single()
 
   if (inhaberSvErr || !inhaberSvRow) {
@@ -490,11 +485,9 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
       spezifikationen: std.spezifikationen ?? [],
       schadenarten: std.schadenarten ?? [],
       gebiet_plz: std.anschrift_plz ? [std.anschrift_plz] : [],
-      max_faelle_monat: subCfg.kontingent,
       paket_faelle_gesamt: subCfg.kontingent,
       paket_faelle_genutzt: 0,
       paket_umkreis_km: subCfg.radius_km,
-      radius_km: subCfg.radius_km,
       standort_adresse: std.anschrift,
       standort_plz: std.anschrift_plz,
       standort_lat: std.anschrift_lat,
@@ -507,8 +500,7 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
       portal_zugang_freigeschaltet: false,
       ist_aktiv: false,
       ist_parent_account: false,
-      onboarding_abgeschlossen: false,
-      partner_seit: new Date().toISOString().slice(0, 10),
+        partner_seit: new Date().toISOString().slice(0, 10),
     }).select('id').single()
     if (subSvRow) subSvIds.push(subSvRow.id)
   }
@@ -677,11 +669,9 @@ export async function anlegeSubSv(params: {
     spezifikationen: params.spezifikationen ?? [],
     schadenarten: params.schadenarten ?? [],
     gebiet_plz: params.anschrift_plz ? [params.anschrift_plz] : [],
-    max_faelle_monat: cfg.kontingent,
     paket_faelle_gesamt: cfg.kontingent,
     paket_faelle_genutzt: 0,
     paket_umkreis_km: cfg.radius_km,
-    radius_km: cfg.radius_km,
     standort_adresse: params.anschrift,
     standort_plz: params.anschrift_plz,
     standort_lat: params.anschrift_lat,
@@ -694,7 +684,6 @@ export async function anlegeSubSv(params: {
     portal_zugang_freigeschaltet: false,
     ist_aktiv: false,
     ist_parent_account: false,
-    onboarding_abgeschlossen: false,
     partner_seit: new Date().toISOString().slice(0, 10),
   }).select('id').single()
 
@@ -874,7 +863,6 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
     rolle_in_organisation: 'inhaber',
     paket: 'standard',
     gebiet_plz: data.anschrift_plz ? [data.anschrift_plz] : [],
-    max_faelle_monat: 0,
     paket_faelle_gesamt: 0,
     paket_faelle_genutzt: 0,
     paket_umkreis_km: 0,
@@ -891,7 +879,6 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
     portal_zugang_freigeschaltet: false,
     ist_aktiv: false,
     ist_parent_account: true,
-    onboarding_abgeschlossen: false,
   }).select('id').single()
 
   if (verwSvErr || !verwSvRow) {
@@ -959,11 +946,9 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
       spezifikationen: data.spezifikationen,
       schadenarten: data.schadenarten,
       gebiet_plz: data.anschrift_plz ? [data.anschrift_plz] : [],
-      max_faelle_monat: subCfg.kontingent,
       paket_faelle_gesamt: subCfg.kontingent,
       paket_faelle_genutzt: 0,
       paket_umkreis_km: data.radius_km,
-      radius_km: data.radius_km,
       standort_adresse: data.anschrift,
       standort_plz: data.anschrift_plz,
       standort_lat: data.anschrift_lat,
@@ -975,8 +960,7 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
       portal_zugang_freigeschaltet: false,
       ist_aktiv: false,
       ist_parent_account: false,
-      onboarding_abgeschlossen: false,
-      partner_seit: new Date().toISOString().slice(0, 10),
+        partner_seit: new Date().toISOString().slice(0, 10),
     }).select('id').single()
     if (subSvRow) subSvIds.push(subSvRow.id)
   }
@@ -1199,11 +1183,9 @@ export async function anlegeCommunity(data: AnlegeCommunityFormData): Promise<{
       paket: m.paket === 'individuell' ? 'standard' : m.paket,
       gutachter_typ: 'kfz-gutachter',
       gebiet_plz: [],
-      max_faelle_monat: cfg.kontingent,
       paket_faelle_gesamt: cfg.kontingent,
       paket_faelle_genutzt: 0,
       paket_umkreis_km: data.radius_km,
-      radius_km: data.radius_km,
       standort_lat: data.zentrum_lat,
       standort_lng: data.zentrum_lng,
       standort_adresse: data.zentrum_anschrift,
@@ -1215,8 +1197,7 @@ export async function anlegeCommunity(data: AnlegeCommunityFormData): Promise<{
       portal_zugang_freigeschaltet: false,
       ist_aktiv: false,
       ist_parent_account: false,
-      onboarding_abgeschlossen: false,
-      partner_seit: new Date().toISOString().slice(0, 10),
+        partner_seit: new Date().toISOString().slice(0, 10),
     }).select('id').single()
     if (memSvRow) memberSvIds.push(memSvRow.id)
   }

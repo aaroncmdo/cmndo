@@ -33,7 +33,7 @@ export default async function OnboardingPage({
   // AAR-231 Audit: lead_id mitnehmen um ZB1-Status zu laden (dispatch-ZB1
   // Upload läuft auf leads.zb1_status, nicht über pflichtdokumente).
   const { data: fall } = await supabase
-    .from('faelle')
+    .from('v_faelle_mit_aktuellem_termin')
     .select('id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, polizei_vor_ort, personenschaden_flag, hat_vorschaeden, lead_id')
     .eq('kunde_id', user.id)
     .order('created_at', { ascending: false })

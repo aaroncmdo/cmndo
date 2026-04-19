@@ -23,7 +23,7 @@ export default async function GutachterReklamationen() {
   const { data: reklamationen } = await supabase
     .from('reklamationen')
     .select('id, fall_id, grund, begruendung, status, eingereicht_am, bearbeitet_am, admin_begruendung, faelle(fall_nummer, kennzeichen)')
-    .eq('gutachter_id', sv.id)
+    .eq('sv_id', sv.id)
     .order('eingereicht_am', { ascending: false })
 
   // Eigene Faelle (offen) fuer Auswahl

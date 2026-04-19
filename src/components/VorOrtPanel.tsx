@@ -34,19 +34,19 @@ export default function VorOrtPanel({ fallId, kundeName, kennzeichen, adresse, o
       // Compress: use canvas if needed (simplified here)
       const ext = file.name.split('.').pop() ?? 'jpg'
       const path = `${fallId}/gutachter/${perspektive.toLowerCase()}_${Date.now()}.${ext}`
-      await supabase.storage.from('schadensfotos').upload(path, file, { contentType: file.type })
+      await supabase.storage.from('fall-dokumente').upload(path, file, { contentType: file.type })
 
-      // Also insert into dokumente
-      const { data: { publicUrl } } = supabase.storage.from('schadensfotos').getPublicUrl(path)
-      await supabase.from('dokumente').insert({
+      // AAR-553: Insert in fall_dokumente (dokumente-Tabelle gedroppt)
+      await supabase.from('fall_dokumente').insert({
         fall_id: fallId,
-        typ: 'schadensfoto',
-        datei_url: publicUrl,
-        datei_name: `${perspektive}.${ext}`,
-        datei_groesse: file.size,
+        dokument_typ: 'schadensfoto',
+        storage_path: path,
+        original_filename: `${perspektive}.${ext}`,
+        groesse_bytes: file.size,
+        mime_type: file.type,
         kategorie: 'schadensfotos',
-        hochgeladen_von_rolle: 'sachverstaendiger',
         quelle: 'gutachter-app',
+        uploaded_by_sv: true,
       })
 
       setFotos(prev => ({ ...prev, [perspektive]: true }))

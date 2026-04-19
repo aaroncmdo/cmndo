@@ -20,6 +20,14 @@ import {
   type KbSlaRecord,
 } from '@/lib/kb/phase-audit'
 import { getStepperState } from '@/lib/fall/stepper-state'
+// AAR-538 (C1): Subphase-Resolver — Server-seitig berechnet, an Shell übergeben
+import { resolveSubphase, type GutachterTerminRow, type WebhookEventRow, type FallRow, type LeadRow } from '@/lib/fall/subphase-resolver'
+// AAR-544 (C7): unified Event-Stream aus 7 Quellen für Timeline-Tab
+import { getFallEventStream } from '@/lib/fall/event-stream'
+// AAR-541 (C4): Chat-Teilnehmer für den Kommunikations-Tab
+import { getChatTeilnehmer } from '@/lib/chatGruppe'
+// AAR-542 (C5): Pflicht-Matrix — Katalog-Regel-Auswertung serverseitig
+import { evaluatePflichtdocs } from '@/lib/dokumente/pflicht-evaluator'
 
 export default async function FallaktePage({
   params,
@@ -31,7 +39,7 @@ export default async function FallaktePage({
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  const { data: fall } = await supabase.from('faelle').select('*').eq('id', id).single()
+  const { data: fall } = await supabase.from('v_faelle_mit_aktuellem_termin').select('*').eq('id', id).single()
   if (!fall) notFound()
 
   // Rolle des eingeloggten Users für field-permissions
@@ -47,24 +55,27 @@ export default async function FallaktePage({
   // Der Shell + die Übersicht brauchen nur fall + lead + sv + kundenbetreuer.
   const [
     { data: dokumente },
-    { data: timeline },
+    events,
     { data: pflichtdokumente },
     { data: qcCheckliste },
     { data: fallDokumenteRaw },
     leadResult,
     svResult,
     kundenbetreuerResult,
+    // AAR-538 (C1): für Subphase-Resolver
+    { data: gutachterTermineRaw },
+    { data: webhookEventsRaw },
   ] = await Promise.all([
+    // AAR-553: fall_dokumente ersetzt dokumente. Downstream (dokumenteTabProps,
+    // systemDokumente) erwartet Legacy-Shape — Transform erfolgt unten.
     supabase
-      .from('dokumente')
-      .select('id, typ, datei_url, datei_name, datei_groesse, created_at, kategorie, hochgeladen_von, hochgeladen_von_rolle, quelle, sichtbar_fuer')
+      .from('fall_dokumente')
+      .select('id, dokument_typ, storage_path, original_filename, groesse_bytes, hochgeladen_am, kategorie, hochgeladen_von_user_id, uploaded_by_sv, uploaded_by_kunde, quelle, sichtbar_fuer')
       .eq('fall_id', id)
-      .order('created_at'),
-    supabase
-      .from('timeline')
-      .select('id, typ, titel, beschreibung, erstellt_von, metadata, lead_id, created_at')
-      .eq('fall_id', id)
-      .order('created_at', { ascending: false }),
+      .is('geloescht_am', null)
+      .order('hochgeladen_am'),
+    // AAR-544 (C7): unified Event-Stream ersetzt die rohe timeline-Query
+    getFallEventStream(supabase, id),
     supabase
       .from('pflichtdokumente')
       // AAR-327: zusätzlich angefordert_* + begruendung + frist für
@@ -91,7 +102,7 @@ export default async function FallaktePage({
       ? supabase
           .from('leads')
           // AAR-311: vorschaden_* + cardentity_abfrage_am für Typ-B-Button
-          .select('id, vorname, nachname, email, telefon, fin, vorschaden_typ_b_bericht, vorschaden_vorhanden, vorschaden_anzahl, vorschaden_letzter_datum, cardentity_abfrage_am')
+          .select('id, vorname, nachname, email, telefon, fin, vorschaden_typ_b_bericht, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, cardentity_abfrage_am')
           .eq('id', fall.lead_id)
           .single()
       : Promise.resolve({ data: null }),
@@ -109,7 +120,44 @@ export default async function FallaktePage({
           .eq('id', fall.kundenbetreuer_id)
           .single()
       : Promise.resolve({ data: null }),
+    // AAR-538 (C1): Termine für 3.1/3.2/3.3 — aktiver Termin wird im Resolver ausgewählt
+    supabase
+      .from('gutachter_termine')
+      .select('id, typ, sv_unterwegs_seit, sv_angekommen_am, durchgefuehrt_am, status')
+      .eq('fall_id', id),
+    // AAR-538 (C1): webhook_events für kb_filmcheck_bestanden (Erweiterung 4)
+    supabase
+      .from('webhook_events')
+      .select('event_type, fall_id, processed_at, source')
+      .eq('fall_id', id)
+      .in('event_type', ['kb_filmcheck_bestanden']),
   ])
+
+  // AAR-541 (C4): Chat-Teilnehmer parallel zu den restlichen Queries hätten
+  // gut gepasst, liegen aber auf einer anderen Client-Instanz (Admin) — daher
+  // separat und erst nach Auth-Check.
+  const teilnehmer = await getChatTeilnehmer(id)
+
+  // AAR-553: fall_dokumente → Legacy-Shape für DokumenteTab + systemDokumente
+  const dokumenteLegacy = (dokumente ?? []).map(d => ({
+    id: d.id as string,
+    typ: (d.dokument_typ as string | null) ?? null,
+    datei_url: d.storage_path
+      ? supabase.storage.from('fall-dokumente').getPublicUrl(d.storage_path as string).data.publicUrl
+      : null,
+    datei_name: (d.original_filename as string | null) ?? null,
+    datei_groesse: (d.groesse_bytes as number | null) ?? null,
+    created_at: (d.hochgeladen_am as string | null) ?? null,
+    kategorie: (d.kategorie as string | null) ?? null,
+    hochgeladen_von: (d.hochgeladen_von_user_id as string | null) ?? null,
+    hochgeladen_von_rolle: d.uploaded_by_sv
+      ? 'sachverstaendiger'
+      : d.uploaded_by_kunde
+        ? 'kunde'
+        : null,
+    quelle: (d.quelle as string | null) ?? null,
+    sichtbar_fuer: (d.sichtbar_fuer as string[] | null) ?? null,
+  }))
 
   // SV-Profil normalisieren (Supabase liefert nested FK als Array oder Objekt)
   let sv: Parameters<typeof FallakteShell>[0]['sv'] = null
@@ -268,7 +316,7 @@ export default async function FallaktePage({
     kategorie: string
     created_at: string
   }
-  const dokRows = (dokumente ?? []) as unknown as DokumentRow[]
+  const dokRows = dokumenteLegacy as unknown as DokumentRow[]
   const gutachtenDok =
     dokRows.find((d) => d.kategorie === 'gutachten' || d.typ === 'gutachten') ?? null
   const kanzleiDok =
@@ -361,6 +409,29 @@ export default async function FallaktePage({
   // ihre eigene Akte anderswo, SV/Kanzlei brauchen die Analyse nicht).
   const zeigeAnalyseCard = userRolle === 'admin' || userRolle === 'kundenbetreuer'
 
+  // AAR-542 (C5): Pflicht-Matrix evaluieren — vor return, nach allen Queries.
+  // Nutzt den bereits geladenen Katalog (katalogAlleSlots) + die bestehenden
+  // pflichtdokumente-Rows + fall/lead. Alle 30 Slots × Regel = <10ms JS-Work.
+  const pflichtMatrix = evaluatePflichtdocs({
+    katalog: katalogAlleSlots,
+    fall: fall as unknown as Record<string, unknown>,
+    lead: (leadResult.data ?? null) as Record<string, unknown> | null,
+    pflichtdokumente: (pflichtdokumente ?? []) as Array<{
+      id: string
+      dokument_typ: string
+      status: string | null
+      pflicht: boolean | null
+    }>,
+  })
+
+  // AAR-538 (C1): Subphase + next_hint berechnen (pure function)
+  const subphase = resolveSubphase({
+    fall: fall as unknown as FallRow,
+    lead: (leadResult.data ?? null) as LeadRow | null,
+    gutachter_termine: (gutachterTermineRaw ?? []) as unknown as GutachterTerminRow[],
+    webhook_events: (webhookEventsRaw ?? []) as unknown as WebhookEventRow[],
+  })
+
   return (
     <>
       {kbAktion && <KbPhaseAuditCard aktion={kbAktion} />}
@@ -390,11 +461,14 @@ export default async function FallaktePage({
         userRolle={userRolle}
         kundenbetreuer={kundenbetreuerResult.data}
         sv={sv}
-        timeline={timeline ?? []}
+        events={events}
+        subphase={subphase}
+        currentUserId={user.id}
+        teilnehmer={teilnehmer}
         dokumenteTabProps={{
           fallId: id,
           pflichtdokumente: (pflichtdokumente ?? []) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['pflichtdokumente'],
-          dokumente: (dokumente ?? []) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['dokumente'],
+          dokumente: dokumenteLegacy as unknown as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['dokumente'],
           fallAS: {
             anschlussschreiben_url: (fall.anschlussschreiben_url as string | null) ?? null,
             anschlussschreiben_sendedatum: (fall.anschlussschreiben_sendedatum as string | null) ?? null,
@@ -415,6 +489,9 @@ export default async function FallaktePage({
           // AAR-356: System-Dokumente (SA, Vollmacht, Gutachten, Kanzlei-Paket,
           // CarDentity-Vorschaden) in eigener Sektion im Dokumente-Tab
           systemDokumente,
+          // AAR-542 (C5): Pflicht-Matrix + Admin-Flag fürs Debug-Modal
+          pflichtMatrix,
+          isAdmin: userRolle === 'admin' || userRolle === 'kundenbetreuer',
         }}
       />
     </>

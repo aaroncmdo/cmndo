@@ -192,7 +192,7 @@ function AkteRow({
       </td>
       <td className="px-4 py-3 text-[#4573A2]">{formatDate(akte.sv_termin)}</td>
       <td className="px-4 py-3 text-[#0D1B3E]">
-        {formatAmount(akte.schadenhoehe_netto)}
+        {formatAmount(akte.schadens_hoehe_netto)}
       </td>
       <td className="px-4 py-3 text-[#4573A2]">
         {relativeFromNow(akte.updated_at ?? akte.created_at)}
@@ -229,7 +229,7 @@ function AkteCard({
       <div className="flex items-center gap-2 text-xs text-[#4573A2] flex-wrap">
         <span>SV: {formatDate(akte.sv_termin)}</span>
         <span aria-hidden>·</span>
-        <span>{formatAmount(akte.schadenhoehe_netto)}</span>
+        <span>{formatAmount(akte.schadens_hoehe_netto)}</span>
         <span aria-hidden>·</span>
         <span>{relativeFromNow(akte.updated_at ?? akte.created_at)}</span>
       </div>

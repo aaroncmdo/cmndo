@@ -27,7 +27,7 @@ export function buildFallbackBriefing(input: BriefingInput): SvBriefingStruktur 
 
   // Kurzversion aus Schadenhergang oder Schadentyp ableiten
   const hergang =
-    input.schadenhergang?.trim() ||
+    input.schadens_hergang?.trim() ||
     input.unfallhergang?.trim() ||
     input.schadens_beschreibung?.trim() ||
     null
@@ -75,7 +75,7 @@ export function buildFallbackBriefing(input: BriefingInput): SvBriefingStruktur 
   if (input.halter_ungleich_fahrer_flag) {
     warnungen.push('Halter ≠ Fahrer')
   }
-  if (input.vorschaden_vorhanden || input.hat_vorschaeden) {
+  if (input.hat_vorschaeden) {
     const desc = input.vorschaeden_beschreibung?.trim()
     warnungen.push(
       desc && desc.length < 80

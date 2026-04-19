@@ -156,6 +156,59 @@ describe('evaluateKatalogRule', () => {
     expect(evaluateKatalogRule({ op: 'eq', field: 'lead.anzahl', value: '2' }, ctx2)).toBe(true)
     expect(evaluateKatalogRule({ op: 'eq', field: 'lead.anzahl', value: 2 }, ctx2)).toBe(true)
   })
+
+  // AAR-542 (C5): neue Operatoren aus dem erweiterten JSONB-Schema
+  describe('AAR-542 — numerische und Null-Checks', () => {
+    const numCtx: EvalContext = {
+      'lead.gegner_anzahl_beteiligte': 3,
+      'lead.kilometerstand_string': '125000',
+      'lead.zb1_status': null,
+      'fall.abschlepp_kosten': 0,
+      'fall.schaden_summe': 12500,
+    }
+
+    it('gt: numerischer Vergleich', () => {
+      expect(evaluateKatalogRule({ op: 'gt', field: 'lead.gegner_anzahl_beteiligte', value: 2 }, numCtx)).toBe(true)
+      expect(evaluateKatalogRule({ op: 'gt', field: 'lead.gegner_anzahl_beteiligte', value: 3 }, numCtx)).toBe(false)
+    })
+
+    it('lt: numerischer Vergleich', () => {
+      expect(evaluateKatalogRule({ op: 'lt', field: 'fall.abschlepp_kosten', value: 100 }, numCtx)).toBe(true)
+      expect(evaluateKatalogRule({ op: 'lt', field: 'fall.schaden_summe', value: 100 }, numCtx)).toBe(false)
+    })
+
+    it('gte / lte: inklusive Grenzen', () => {
+      expect(evaluateKatalogRule({ op: 'gte', field: 'lead.gegner_anzahl_beteiligte', value: 3 }, numCtx)).toBe(true)
+      expect(evaluateKatalogRule({ op: 'lte', field: 'fall.schaden_summe', value: 12500 }, numCtx)).toBe(true)
+      expect(evaluateKatalogRule({ op: 'lte', field: 'fall.schaden_summe', value: 12499 }, numCtx)).toBe(false)
+    })
+
+    it('gt: akzeptiert numerischen String', () => {
+      expect(evaluateKatalogRule({ op: 'gt', field: 'lead.kilometerstand_string', value: 100000 }, numCtx)).toBe(true)
+      expect(evaluateKatalogRule({ op: 'gt', field: 'lead.kilometerstand_string', value: 200000 }, numCtx)).toBe(false)
+    })
+
+    it('gt / lt mit fehlendem Feld → false', () => {
+      expect(evaluateKatalogRule({ op: 'gt', field: 'lead.nicht_existiert', value: 0 }, numCtx)).toBe(false)
+      expect(evaluateKatalogRule({ op: 'lt', field: 'lead.zb1_status', value: 0 }, numCtx)).toBe(false)
+    })
+
+    it('is_null: null-Feld → true, Wert-Feld → false', () => {
+      expect(evaluateKatalogRule({ op: 'is_null', field: 'lead.zb1_status' }, numCtx)).toBe(true)
+      expect(evaluateKatalogRule({ op: 'is_null', field: 'lead.gegner_anzahl_beteiligte' }, numCtx)).toBe(false)
+    })
+
+    it('is_not_null: Wert → true, null → false', () => {
+      expect(evaluateKatalogRule({ op: 'is_not_null', field: 'fall.schaden_summe' }, numCtx)).toBe(true)
+      expect(evaluateKatalogRule({ op: 'is_not_null', field: 'lead.zb1_status' }, numCtx)).toBe(false)
+      expect(evaluateKatalogRule({ op: 'is_not_null', field: 'lead.fehlendes_feld' }, numCtx)).toBe(false)
+    })
+
+    it('leeres Objekt {} → true (sv_sa_vorlage-Pattern)', () => {
+      // JSONB kann `{}` liefern — wird als „immer wahr" behandelt.
+      expect(evaluateKatalogRule({} as unknown as Rule, numCtx)).toBe(true)
+    })
+  })
 })
 
 describe('buildKatalogContext', () => {

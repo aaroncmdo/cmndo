@@ -11,9 +11,8 @@ export default async function LeadpreisePage() {
   // AAR-209: paket_faelle_gesamt zusätzlich laden für konsistenten
   // Kontingent-Resolver (dieselben Quellen wie willkommen + dashboard).
   const sv = await getGutachterForUser<{
-    id: string; paket: string; kontingent_soll: number | null;
-    max_faelle_monat: number | null; paket_faelle_gesamt: number | null;
-  }>(supabase, user.id, 'id, paket, kontingent_soll, max_faelle_monat, paket_faelle_gesamt')
+    id: string; paket: string; paket_faelle_gesamt: number | null;
+  }>(supabase, user.id, 'id, paket, paket_faelle_gesamt')
   if (!sv) redirect('/gutachter')
 
   const { data: tabelle } = await supabase.from('leadpreise_tabelle')

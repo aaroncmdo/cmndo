@@ -25,7 +25,7 @@ export async function reissueAbrechnung(
   // 2. Verbleibende aktive Fälle im gleichen Zeitraum für denselben Empfänger
   //    (Fälle die auf diese Abrechnung zeigen ODER im gleichen Monat sind)
   const query = db.from('faelle')
-    .select('id, created_at, kennzeichen, schadenhoehe_netto, lead_preis_netto, lead_preis_typ, guthaben_verrechnet_netto, sv_nachzahlung_netto')
+    .select('id, created_at, kennzeichen, schadens_hoehe_netto, lead_preis_netto, lead_preis_typ, guthaben_verrechnet_netto, sv_nachzahlung_netto')
     .eq('abrechnung_id', alteAbrechnungId)
     .is('storniert_am', null)
 
@@ -53,7 +53,7 @@ export async function reissueAbrechnung(
     fall_id: f.id,
     fall_datum: f.created_at,
     kennzeichen: f.kennzeichen,
-    schadenhoehe_netto: Number(f.schadenhoehe_netto ?? 0),
+    schadenhoehe_netto: Number(f.schadens_hoehe_netto ?? 0),
     lead_preis_netto: Number(f.lead_preis_netto ?? 0),
     lead_preis_typ: f.lead_preis_typ,
     guthaben_verrechnet_netto: Number(f.guthaben_verrechnet_netto ?? 0),

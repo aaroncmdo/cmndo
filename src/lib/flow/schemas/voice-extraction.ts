@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 // AAR-470 C4: Zod-Schema für Claude-Extraktion aus dem Voice-Transkript.
-// Alle Felder außer schadenhergang sind nullable — Claude soll nicht raten.
+// Alle Felder außer schadens_hergang sind nullable — Claude soll nicht raten.
 // Die Feld-Namen sind absichtlich gleich wie in schritt1.ts damit das Prefill
 // 1:1 in die Form gefüttert werden kann.
 
@@ -22,7 +22,7 @@ export const SCHULDFRAGE_VOICE_VALUES = [
 ] as const
 
 export const voiceExtractionSchema = z.object({
-  schadenhergang: z.string().max(2000),
+  schadens_hergang: z.string().max(2000),
   unfall_datum: z.string().nullable(),
   unfall_ort: z.string().max(200).nullable(),
   schuldfrage: z.enum(SCHULDFRAGE_VOICE_VALUES).nullable(),

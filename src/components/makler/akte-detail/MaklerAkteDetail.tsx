@@ -124,7 +124,7 @@ export function MaklerAkteDetail({
     return sum > 0 ? sum : null
   }, [fall])
 
-  const estimateShown = fall.schadenhoehe_netto ?? gesamtforderung
+  const estimateShown = fall.schadens_hoehe_netto ?? gesamtforderung
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
@@ -256,7 +256,7 @@ export function MaklerAkteDetail({
       {tab === 'copilot' ? (
         <MaklerCopilotTab
           fallId={fall.id}
-          gegnerVsName={fall.versicherung_gegner_name}
+          gegnerVsName={fall.gegner_versicherung}
           kontextLoaded
         />
       ) : null}
@@ -377,7 +377,7 @@ function OverviewPanel({
         <InfoCard title="Fall">
           <InfoRow label="Unfalldatum" value={fmtDate(fall.unfalldatum)} />
           <InfoRow label="Ort" value={fall.unfallort ?? '–'} />
-          <InfoRow label="Schadenart" value={fall.schadenart ?? '–'} />
+          <InfoRow label="Schadenart" value={fall.schadens_art ?? '–'} />
           <InfoRow label="Service" value={fall.service_typ ?? '–'} />
           {fall.unfallhergang ? (
             <div className="pt-2 border-t border-[#e4e7ef] mt-2">
@@ -420,11 +420,11 @@ function OverviewPanel({
           <InfoRow label="Kennzeichen" value={fall.gegner_kennzeichen ?? '–'} />
           <InfoRow
             label="Versicherung"
-            value={fall.versicherung_gegner_name ?? '–'}
+            value={fall.gegner_versicherung ?? '–'}
           />
           <InfoRow
             label="Schaden-Nr."
-            value={fall.schadennummer_versicherung ?? '–'}
+            value={fall.gegner_schadennummer ?? '–'}
           />
         </InfoCard>
       </div>
@@ -445,7 +445,7 @@ function OverviewPanel({
             />
             <InfoRow
               label="Totalschaden"
-              value={fall.ist_totalschaden ? 'Ja' : 'Nein'}
+              value={fall.totalschaden ? 'Ja' : 'Nein'}
             />
             <InfoRow
               label="Gutachter-Honorar"

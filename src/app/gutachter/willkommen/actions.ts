@@ -68,7 +68,7 @@ export async function akzeptiereAgbSubSv(
 
   // 3. vertraege_unterzeichnet-Eintrag schreiben (kein PDF, keine Signatur)
   const { error: insertErr } = await db.from('vertraege_unterzeichnet').insert({
-    gutachter_id: sv.id,
+    sv_id: sv.id,
     organisation_id: sv.organisation_id,
     vorlage_id: vorlage.id,
     vorlage_typ: 'agb_sub_mitarbeiter',

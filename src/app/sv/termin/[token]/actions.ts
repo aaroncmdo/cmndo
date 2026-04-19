@@ -145,7 +145,6 @@ export async function ablehnenTermin(
   if (termin.fall_id) {
     await svc.from('faelle').update({
       sv_id: null,
-      gutachter_termin_status: 'abgelehnt',
       updated_at: new Date().toISOString(),
     }).eq('id', termin.fall_id)
 
@@ -231,7 +230,6 @@ export async function bestaetigenTermin(
 
   if (termin.fall_id) {
     await svc.from('faelle').update({
-      gutachter_termin_status: 'bestaetigt',
       updated_at: new Date().toISOString(),
     }).eq('id', termin.fall_id)
 
@@ -285,7 +283,6 @@ export async function gegenvorschlagTermin(
 
   if (termin.fall_id) {
     await svc.from('faelle').update({
-      gutachter_termin_status: 'gegenvorschlag',
       updated_at: new Date().toISOString(),
     }).eq('id', termin.fall_id)
 

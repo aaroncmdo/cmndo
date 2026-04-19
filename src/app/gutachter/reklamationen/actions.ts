@@ -41,7 +41,7 @@ export async function createReklamation(data: {
     .from('reklamationen')
     .insert({
       fall_id: data.fallId,
-      gutachter_id: svData.id,
+      sv_id: svData.id,
       grund: data.grund,
       begruendung: data.begruendung.trim(),
       nachweis_storage_path: data.nachweisStoragePath ?? null,

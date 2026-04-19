@@ -22,7 +22,7 @@ export default async function DispatchSvDetailPage({
 
   const { data: sv } = await supabase
     .from('sachverstaendige')
-    .select('id, profile_id, paket, max_faelle_monat, offene_faelle, ist_aktiv, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, radius_km, standort_adresse, standort_plz, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, gebiet_plz, urlaub_von, urlaub_bis, profiles(vorname, nachname, email, telefon)')
+    .select('id, profile_id, paket, offene_faelle, ist_aktiv, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, gebiet_plz, urlaub_von, urlaub_bis, profiles(vorname, nachname, email, telefon)')
     .eq('id', id)
     .is('geloescht_am', null)
     .maybeSingle()
@@ -36,7 +36,7 @@ export default async function DispatchSvDetailPage({
   const name = profile ? `${profile.vorname ?? ''} ${profile.nachname ?? ''}`.trim() : 'Unbekannt'
 
   const { data: faelle } = await supabase
-    .from('faelle')
+    .from('v_faelle_mit_aktuellem_termin')
     .select('id, fall_nummer, status, schadens_ursache, sv_termin, created_at, leads(vorname, nachname)')
     .eq('sv_id', id)
     .not('status', 'in', '("abgeschlossen","storniert")')
@@ -49,7 +49,7 @@ export default async function DispatchSvDetailPage({
     vertrag_unterschrieben: svRec.vertrag_unterschrieben as boolean | null,
     gesperrt_seit: svRec.gesperrt_seit as string | null,
   })
-  const paketFaelleGesamt = Number(svRec.paket_faelle_gesamt) || Number(svRec.max_faelle_monat) || 10
+  const paketFaelleGesamt = Number(svRec.paket_faelle_gesamt) || 10
   const paketFaelleGenutzt = Number(svRec.paket_faelle_genutzt) || Number(svRec.offene_faelle) || 0
   const auslastungProzent = paketFaelleGesamt > 0 ? Math.round((paketFaelleGenutzt / paketFaelleGesamt) * 100) : 0
   const istUrlaub = svRec.urlaub_von && svRec.urlaub_bis
@@ -119,7 +119,7 @@ export default async function DispatchSvDetailPage({
               </div>
               <div>
                 <p className="text-[10px] text-gray-400 uppercase">Radius</p>
-                <p className="font-medium">{Number(svRec.paket_umkreis_km) || Number(svRec.radius_km) || 40} km</p>
+                <p className="font-medium">{Number(svRec.paket_umkreis_km) || 40} km</p>
               </div>
             </div>
             {Array.isArray(svRec.gebiet_plz) && (svRec.gebiet_plz as string[]).length > 0 && (

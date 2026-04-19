@@ -345,6 +345,45 @@ export const COMMUNICATION_REGISTRY: Record<string, TriggerConfig> = {
     description: 'T7: Tagesroute an SV',
   },
 
+  // AAR-559 (C10): SV bekommt Auftrag für Technische Stellungnahme (bei
+  // VS-Kürzung 'technisch' oder 'gemischt'). Trigger: LexDrive-Event
+  // technische_stellungnahme_benoetigt. Variablen: SV-Vorname, Fall-Nr,
+  // Grund-Kurzform, Portal-Link.
+  stellungnahme_beauftragt: {
+    trigger_name: 'stellungnahme_beauftragt',
+    channel: 'whatsapp',
+    recipient: 'sv',
+    t_number: null,
+    whatsapp_template_name: 'stellungnahme_beauftragt',
+    has_attachment: false,
+    description: 'AAR-559 (C10): SV-WA Technische-Stellungnahme-Auftrag',
+  },
+
+  // AAR-561 (C12): SV bekommt Konfrontations-Termin-Anfrage (Kunde hat
+  // SV-Begleitung bei Nachbesichtigung gewünscht, KB hat Slot bestätigt).
+  // Trigger: LexDrive-Event sv_konfrontation_anfrage_versendet.
+  sv_konfrontation_anfrage: {
+    trigger_name: 'sv_konfrontation_anfrage',
+    channel: 'whatsapp',
+    recipient: 'sv',
+    t_number: null,
+    whatsapp_template_name: 'sv_konfrontation_anfrage',
+    has_attachment: false,
+    description: 'AAR-561 (C12): SV-WA Konfrontations-Termin-Anfrage',
+  },
+
+  // AAR-561 (C12): Kunde wird informiert dass SV den Konfrontations-Termin
+  // angenommen hat. Trigger: LexDrive-Event sv_konfrontation_bestaetigt.
+  sv_konfrontation_bestaetigt_kunde: {
+    trigger_name: 'sv_konfrontation_bestaetigt_kunde',
+    channel: 'whatsapp',
+    recipient: 'kunde',
+    t_number: null,
+    whatsapp_template_name: 'sv_konfrontation_bestaetigt_kunde',
+    has_attachment: false,
+    description: 'AAR-561 (C12): Kunde-WA SV-Konfrontation-Zusage',
+  },
+
   // ─── WhatsApp: KB ────────────────────────────────────────────────────────
 
   chat_fallback_kb: {

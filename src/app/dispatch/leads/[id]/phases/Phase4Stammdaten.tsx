@@ -56,7 +56,7 @@ type LeadFields = {
   fin?: string | null
   // AAR-305: Schadenshergang-Pflicht bei fahrbereitem Fahrzeug (Banner in Phase 4)
   fahrzeug_fahrbereit?: boolean | null
-  schadenhergang?: string | null
+  schadens_hergang?: string | null
   // AAR-182: ZB1-Upload-Tracking
   zb1_status?: string | null
   zb1_hochgeladen_am?: string | null
@@ -68,11 +68,10 @@ type LeadFields = {
   cardentity_enriched_at?: string | null
   // AAR-311: Cardentity Typ-B Status für den manuellen Trigger-Button
   vorschaden_typ_b_bericht?: Record<string, unknown> | null
-  vorschaden_vorhanden?: boolean | null
+  hat_vorschaeden?: boolean | null
   vorschaden_anzahl?: number | null
   vorschaden_letzter_datum?: string | null
   cardentity_abfrage_am?: string | null
-  hat_vorschaeden?: boolean | null
   vorschaeden_beschreibung?: string | null
   finanzierung_leasing?: 'keine' | 'finanzierung' | 'leasing' | string | null
   vorsteuerabzugsberechtigt?: boolean | null
@@ -522,7 +521,7 @@ export default function Phase4Stammdaten() {
   // der SV braucht die Beschreibung vor dem Termin für die Planung.
   const schadenhergangPflicht =
     l.fahrzeug_fahrbereit === true &&
-    (!l.schadenhergang || l.schadenhergang.trim().length < 20)
+    (!l.schadens_hergang || l.schadens_hergang.trim().length < 20)
 
   return (
     <div className="space-y-4">
@@ -546,8 +545,8 @@ export default function Phase4Stammdaten() {
           </div>
           <InlineField
             label="Schadenshergang"
-            value={l.schadenhergang}
-            fieldName="schadenhergang"
+            value={l.schadens_hergang}
+            fieldName="schadens_hergang"
             leadId={leadId}
             placeholder="Was ist passiert? Wer war beteiligt? Wie ist der Unfall abgelaufen?"
             type="text"
@@ -988,7 +987,7 @@ export default function Phase4Stammdaten() {
             finVorhanden={!!l.fin}
             initial={{
               fetchedAt: l.cardentity_abfrage_am ?? null,
-              vorschadenVorhanden: l.vorschaden_vorhanden ?? null,
+              vorschadenVorhanden: l.hat_vorschaeden ?? null,
               vorschadenAnzahl: l.vorschaden_anzahl ?? null,
               letzterVorschadenDatum: l.vorschaden_letzter_datum ?? null,
             }}
@@ -1222,7 +1221,7 @@ export default function Phase4Stammdaten() {
       )}
 
       {/* AAR-340: „Weiter zu Phase 5"-Button — Pflichtfelder q6 + q7 müssen
-          erfüllt sein; Q8 (schadenhergang) wird erst in Phase 5 hart gegatet. */}
+          erfüllt sein; Q8 (schadens_hergang) wird erst in Phase 5 hart gegatet. */}
       <button
         type="button"
         onClick={() => setPhase(5)}

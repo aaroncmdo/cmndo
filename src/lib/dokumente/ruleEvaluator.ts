@@ -1,6 +1,10 @@
 // AAR-322: JSON-Rule-DSL Evaluator für dokument_katalog.
 // Rule-Format siehe Migration aar_321_dokument_katalog_seed.
 //
+// AAR-542 (C5): Erweitert um gt/lt/gte/lte + is_null/is_not_null — die
+// JSON-Schema-Erweiterung des Epics AAR-537. Leeres Objekt `{}` wird als
+// „immer wahr" akzeptiert (entspricht sv_sa_vorlage-Seed).
+//
 // Kontext-Keys: Wir flachen Lead + Fall in einen Object mit Prefix-Keys
 // ("lead.col" / "fall.col"). Seeds referenzieren Felder explizit mit
 // Prefix, damit das gleiche Feld auf leads + faelle unterschiedliche
@@ -11,6 +15,12 @@ export type Rule =
   | { op: 'neq'; field: string; value: string | number | boolean | null }
   | { op: 'in'; field: string; value: Array<string | number | boolean> }
   | { op: 'not_in'; field: string; value: Array<string | number | boolean> }
+  | { op: 'gt'; field: string; value: number }
+  | { op: 'lt'; field: string; value: number }
+  | { op: 'gte'; field: string; value: number }
+  | { op: 'lte'; field: string; value: number }
+  | { op: 'is_null'; field: string }
+  | { op: 'is_not_null'; field: string }
   | { op: 'truthy'; field: string }
   | { op: 'falsy'; field: string }
   | { op: 'and'; conditions: Rule[] }
@@ -29,6 +39,11 @@ export function evaluateKatalogRule(
   context: EvalContext,
 ): boolean {
   if (rule == null) return true
+  // AAR-542: Leeres Objekt aus JSONB = „immer wahr" (wird so aus dem
+  // Katalog-Seed geliefert, z. B. sv_sa_vorlage).
+  if (typeof rule === 'object' && !('op' in (rule as Record<string, unknown>))) {
+    return true
+  }
 
   switch (rule.op) {
     case 'eq':
@@ -45,6 +60,26 @@ export function evaluateKatalogRule(
       if (v == null) return true
       return !rule.value.some((candidate) => equals(v, candidate))
     }
+    case 'gt': {
+      const n = toNumber(context[rule.field])
+      return n != null && n > rule.value
+    }
+    case 'lt': {
+      const n = toNumber(context[rule.field])
+      return n != null && n < rule.value
+    }
+    case 'gte': {
+      const n = toNumber(context[rule.field])
+      return n != null && n >= rule.value
+    }
+    case 'lte': {
+      const n = toNumber(context[rule.field])
+      return n != null && n <= rule.value
+    }
+    case 'is_null':
+      return context[rule.field] == null
+    case 'is_not_null':
+      return context[rule.field] != null
     case 'truthy':
       return isTruthy(context[rule.field])
     case 'falsy':
@@ -61,6 +96,15 @@ export function evaluateKatalogRule(
       return false
     }
   }
+}
+
+function toNumber(v: unknown): number | null {
+  if (typeof v === 'number' && Number.isFinite(v)) return v
+  if (typeof v === 'string' && v.trim().length > 0) {
+    const n = Number(v)
+    return Number.isFinite(n) ? n : null
+  }
+  return null
 }
 
 function equals(a: unknown, b: unknown): boolean {

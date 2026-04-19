@@ -13,15 +13,18 @@ import { createClient } from '@/lib/supabase/client'
 const FIELD_MAP: Record<string, { label: string; column: string }> = {
   fin: { label: 'FIN / VIN', column: 'fin' },
   kennzeichen: { label: 'Kennzeichen', column: 'kennzeichen' },
-  halter: { label: 'Halter', column: 'halter_name' },
+  // AAR-548 D7: halter_name ist GENERATED (vorname + nachname) — OCR mappt
+  // jetzt direkt auf die Einzelfelder. `halter`/`versicherter` werden als
+  // Nachname interpretiert (ohne sicheren Split); User kann im Modal korrigieren.
+  halter: { label: 'Halter', column: 'halter_nachname' },
   erstzulassung: { label: 'Erstzulassung', column: 'erstzulassung' },
   hersteller: { label: 'Hersteller', column: 'fahrzeug_hersteller' },
   modell: { label: 'Modell', column: 'fahrzeug_modell' },
   versicherer: { label: 'Versicherer', column: 'gegner_versicherung' },
-  vsnummer: { label: 'VS-Nummer', column: 'versicherung_schaden_nr' },
-  versicherter: { label: 'Versicherter', column: 'halter_name' },
-  vorname: { label: 'Vorname', column: 'halter_name' },
-  nachname: { label: 'Nachname', column: 'gegner_name' },
+  vsnummer: { label: 'VS-Nummer', column: 'gegner_versicherungsnummer' },
+  versicherter: { label: 'Versicherter', column: 'halter_nachname' },
+  vorname: { label: 'Vorname', column: 'halter_vorname' },
+  nachname: { label: 'Nachname', column: 'halter_nachname' },
   geburtsdatum: { label: 'Geburtsdatum', column: '' },
   klasse: { label: 'Führerschein-Klasse', column: '' },
   datum: { label: 'Unfalldatum', column: 'schadens_datum' },

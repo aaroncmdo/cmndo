@@ -41,27 +41,27 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
   const filePath = `gutachten/${fallId}/${timestamp}-${file.name}`
 
   const { error: uploadError } = await supabase.storage
-    .from('dokumente')
+    .from('fall-dokumente')
     .upload(filePath, file)
 
   if (uploadError) throw new Error(`Upload fehlgeschlagen: ${uploadError.message}`)
 
-  // Get public URL
   const { data: urlData } = supabase.storage
-    .from('dokumente')
+    .from('fall-dokumente')
     .getPublicUrl(filePath)
 
-  // Create document record
-  const { data: insertedDoc, error: docError } = await supabase.from('dokumente').insert({
+  // AAR-553: fall_dokumente statt dokumente
+  const { data: insertedDoc, error: docError } = await supabase.from('fall_dokumente').insert({
     fall_id: fallId,
-    typ: 'gutachten',
-    datei_url: urlData.publicUrl,
-    datei_name: file.name,
-    datei_groesse: file.size,
+    dokument_typ: 'gutachten',
+    storage_path: filePath,
+    original_filename: file.name,
+    groesse_bytes: file.size,
+    mime_type: file.type || null,
     kategorie: 'gutachten',
     quelle: 'gutachter',
-    hochgeladen_von: user.id,
-    hochgeladen_von_rolle: 'sachverstaendiger',
+    hochgeladen_von_user_id: user.id,
+    uploaded_by_sv: true,
     sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   }).select('id').single()
 
@@ -257,17 +257,17 @@ export async function uploadDokument(fallId: string, formData: FormData) {
 
   if (!fall) throw new Error('Fall nicht gefunden')
 
-  // Upload file to storage
+  // Upload file to storage (AAR-553: fall-dokumente-Bucket)
   const ext = file.name.split('.').pop() ?? 'bin'
   const path = `gutachter/${fallId}/${Date.now()}.${ext}`
 
   const { error: uploadErr } = await supabase.storage
-    .from('dokumente')
+    .from('fall-dokumente')
     .upload(path, file)
 
   if (uploadErr) throw new Error(`Upload fehlgeschlagen: ${uploadErr.message}`)
 
-  const { data: urlData } = supabase.storage.from('dokumente').getPublicUrl(path)
+  const { data: urlData } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
 
   // Determine document type from pflichtdokument if provided
   let dokumentTyp = 'gutachter-dokument'
@@ -303,17 +303,18 @@ export async function uploadDokument(fallId: string, formData: FormData) {
     sonstiges: ['admin', 'kundenbetreuer'],
   }
 
-  // Create document record with quelle='gutachter'
-  const { data: insertedUpload, error: insertErr } = await supabase.from('dokumente').insert({
+  // AAR-553: fall_dokumente statt dokumente
+  const { data: insertedUpload, error: insertErr } = await supabase.from('fall_dokumente').insert({
     fall_id: fallId,
-    typ: dokumentTyp,
-    datei_url: urlData.publicUrl,
-    datei_name: file.name,
-    datei_groesse: file.size,
+    dokument_typ: dokumentTyp,
+    storage_path: path,
+    original_filename: file.name,
+    groesse_bytes: file.size,
+    mime_type: file.type || null,
     kategorie: kat,
     quelle: 'gutachter',
-    hochgeladen_von: user.id,
-    hochgeladen_von_rolle: 'sachverstaendiger',
+    hochgeladen_von_user_id: user.id,
+    uploaded_by_sv: true,
     sichtbar_fuer: sichtbarMap[kat] ?? ['admin', 'kundenbetreuer'],
   }).select('id').single()
 
@@ -437,17 +438,15 @@ export async function uploadDatei(fallId: string, formData: FormData) {
 
   if (!fall) throw new Error('Fall nicht gefunden')
 
-  // Upload file to storage
+  // Upload file to storage (AAR-553: fall-dokumente-Bucket)
   const ext = file.name.split('.').pop() ?? 'bin'
   const path = `gutachter-dateien/${fallId}/${Date.now()}.${ext}`
 
   const { error: uploadErr } = await supabase.storage
-    .from('dokumente')
+    .from('fall-dokumente')
     .upload(path, file)
 
   if (uploadErr) throw new Error(`Upload fehlgeschlagen: ${uploadErr.message}`)
-
-  const { data: urlData } = supabase.storage.from('dokumente').getPublicUrl(path)
 
   // Determine sichtbar_fuer based on kategorie
   const sichtbarMap: Record<string, string[]> = {
@@ -457,17 +456,18 @@ export async function uploadDatei(fallId: string, formData: FormData) {
   }
   const sichtbar_fuer = sichtbarMap[kategorie] ?? ['admin', 'kundenbetreuer', 'sachverstaendiger']
 
-  // Insert document record
-  const { error: insertErr } = await supabase.from('dokumente').insert({
+  // AAR-553: fall_dokumente statt dokumente
+  const { error: insertErr } = await supabase.from('fall_dokumente').insert({
     fall_id: fallId,
-    typ: kategorie,
-    datei_url: urlData.publicUrl,
-    datei_name: file.name,
-    datei_groesse: file.size,
+    dokument_typ: kategorie,
+    storage_path: path,
+    original_filename: file.name,
+    groesse_bytes: file.size,
+    mime_type: file.type || null,
     kategorie,
     quelle: 'gutachter',
-    hochgeladen_von: user.id,
-    hochgeladen_von_rolle: 'sachverstaendiger',
+    hochgeladen_von_user_id: user.id,
+    uploaded_by_sv: true,
     sichtbar_fuer,
   })
 
@@ -524,10 +524,9 @@ export async function declineTermin(fallId: string, grund: string) {
     for (const t of activeTermine ?? []) { await cancelRemindersForTermin(t.id) }
   } catch (err) { console.error('[KFZ-136] Reminder-Cancel:', err) }
 
-  // 2. Fall: sv_id NULL, gutachter_termin_status = abgelehnt
+  // 2. Fall: sv_id freigeben — Termin-Status spiegelt die View aus gutachter_termine
   await supabase.from('faelle').update({
     sv_id: null,
-    gutachter_termin_status: 'abgelehnt',
     updated_at: new Date().toISOString(),
   }).eq('id', fallId)
 
