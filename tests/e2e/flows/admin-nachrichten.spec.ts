@@ -8,8 +8,8 @@ test('Admin: Nachrichten-Inbox rendert', async ({ adminPage }) => {
   // halten die Verbindung offen, networkidle feuert nie → Test-Timeout.
   await adminPage.waitForLoadState('domcontentloaded')
 
-  // Page title should be visible
-  await expect(adminPage.locator('text=Nachrichten')).toBeVisible({ timeout: 10_000 })
+  // Page title should be visible (h1 — sidebar-Nav matcht sonst auch "Nachrichten")
+  await expect(adminPage.getByRole('heading', { name: 'Nachrichten', level: 1 })).toBeVisible({ timeout: 10_000 })
 
   // No server errors
   await expect(adminPage.locator('text=Application Error')).not.toBeVisible({ timeout: 3000 }).catch(() => {})
