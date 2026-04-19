@@ -1,5 +1,11 @@
 'use client'
 
+// AAR-558 (C9) Brutto-Leak-Fix: Diese Säule zeigt dem Kunden KEINE Brutto-
+// Beträge mehr (regulierung_betrag / zahlung_betrag / kuerzungs_betrag).
+// Die Netto-Auszahlung kommt aus AuszahlungCard (auszahlung_kunde_betrag aus
+// faelle_kunde_view). Hier bleibt nur die eigene Forderung (schadens_hoehe_netto),
+// der Totalschaden-Badge und die Zahlungsweg-Wahl (die vor Auszahlung nötig ist).
+
 import { useState, useTransition } from 'react'
 import { BanknoteIcon, AlertTriangleIcon } from 'lucide-react'
 
@@ -7,9 +13,6 @@ type Props = {
   fallId: string
   status: string
   schadens_hoehe_netto: number | null
-  regulierung_betrag: number | null
-  kuerzungs_betrag: number | null
-  zahlung_betrag: number | null
   totalschaden: boolean
   zahlungsweg: string | null
   onZahlungswegSave?: (fallId: string, weg: string) => Promise<{ success: boolean }>
@@ -19,20 +22,13 @@ function fmt(n: number): string {
   return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(n)
 }
 
-export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, regulierung_betrag, kuerzungs_betrag, zahlung_betrag, totalschaden, zahlungsweg, onZahlungswegSave }: Props) {
+export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, totalschaden, zahlungsweg, onZahlungswegSave }: Props) {
   const [pending, startTransition] = useTransition()
   const [weg, setWeg] = useState<string | null>(zahlungsweg)
   const [saved, setSaved] = useState(!!zahlungsweg)
 
   const gefordert = schadens_hoehe_netto ?? 0
-  const anerkannt = regulierung_betrag ?? 0
-  const kuerzung = kuerzungs_betrag ?? 0
-  const eingegangen = zahlung_betrag ?? 0
-
   const showGefordert = !!schadens_hoehe_netto
-  const showAnerkannt = ['regulierung-laeuft', 'regulierung', 'zahlung-eingegangen', 'abgeschlossen'].includes(status)
-  const showZahlung = ['zahlung-eingegangen', 'abgeschlossen'].includes(status)
-  const showKuerzung = kuerzung > 0
   const showZahlungswegWahl = ['regulierung-laeuft', 'regulierung', 'zahlung-eingegangen'].includes(status) && !saved && onZahlungswegSave
 
   function handleSaveWeg(selected: string) {
@@ -58,11 +54,17 @@ export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, r
       )}
 
       <div className="space-y-3">
-        {showGefordert && <Row label="Gefordert" value={fmt(gefordert)} color="text-gray-900" />}
-        {showAnerkannt && <Row label="Anerkannt" value={fmt(anerkannt)} color="text-green-700" />}
-        {showKuerzung && <Row label="Kürzung" value={`-${fmt(kuerzung)}`} color="text-amber-700" />}
-        {showZahlung && <Row label="Eingegangen" value={fmt(eingegangen)} color="text-emerald-700" bold />}
-        {!showGefordert && <p className="text-xs text-gray-400">Beträge werden nach Gutachten-Erstellung angezeigt.</p>}
+        {showGefordert ? (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-500">Ihre Forderung</span>
+            <span className="text-gray-900 font-semibold">{fmt(gefordert)}</span>
+          </div>
+        ) : (
+          <p className="text-xs text-gray-400">Beträge werden nach Gutachten-Erstellung angezeigt.</p>
+        )}
+        <p className="text-[11px] text-gray-500">
+          Die ausgezahlte Summe sehen Sie nach der Regulierung in der Auszahlungs-Card.
+        </p>
       </div>
 
       {saved && weg && (
@@ -78,15 +80,6 @@ export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, r
           </div>
         </div>
       )}
-    </div>
-  )
-}
-
-function Row({ label, value, color, bold }: { label: string; value: string; color: string; bold?: boolean }) {
-  return (
-    <div className="flex items-center justify-between text-sm">
-      <span className="text-gray-500">{label}</span>
-      <span className={`${color} ${bold ? 'font-bold text-base' : 'font-semibold'}`}>{value}</span>
     </div>
   )
 }

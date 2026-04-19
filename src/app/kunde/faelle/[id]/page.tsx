@@ -35,8 +35,15 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
     const admin = createAdminClient()
 
-    // Fall laden
-    const { data: fall } = await supabase.from('v_faelle_mit_aktuellem_termin').select('*').eq('id', id).single()
+    // Fall laden — AAR-558 (C9) Brutto-Leak-Fix: explizite Spaltenliste OHNE
+    // regulierung_betrag, zahlung_betrag, kuerzungs_betrag, gutachter_honorar,
+    // auszahlung_gutachter_*, vs_quote_betrag_ausgezahlt. Der Kunde sieht die
+    // Netto-Auszahlung ausschließlich über AuszahlungCard (faelle_kunde_view).
+    const { data: fall } = await supabase
+      .from('v_faelle_mit_aktuellem_termin')
+      .select('id,fall_nummer,status,szenario,aktuelle_phase,kunde_id,lead_id,sv_id,kundenbetreuer_id,schadens_beschreibung,schadens_datum,schadens_hoehe_netto,schadens_adresse,schadens_plz,schadens_ort,kennzeichen,fahrzeug_hersteller,fahrzeug_modell,fahrzeug_baujahr,unfallort,besichtigungsort_adresse,sv_termin,gutachter_termin_status,gutachter_termin_bestaetigt_am,gutachten_eingegangen_am,onboarding_complete,sa_unterschrieben,vollmacht_signiert_am,vollmacht_status,anschlussschreiben_am,regulierung_am,vs_ablehnungsgrund,vs_kuerzung_grund,storno_grund,abgeschlossen_am,google_review_gesendet,gegner_versicherung,kanzlei_ansprechpartner_name,mandatstyp,service_typ,polizei_vor_ort,bankdaten_hinterlegt_am,zahlungsweg,totalschaden,zahlung_eingegangen_am,aktueller_termin_id,aktueller_termin_start,aktueller_termin_end,aktueller_termin_status,aktueller_termin_sv_id,aktueller_termin_kanal,aktueller_termin_typ,aktueller_termin_final_verbindlich_ab')
+      .eq('id', id)
+      .single()
     if (!fall) notFound()
 
     // Ownership: kunde_id oder lead-email
@@ -372,7 +379,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           </div>
         )}
 
-        {/* KFZ-206: Status-Card */}
+        {/* KFZ-206: Status-Card — AAR-558 (C9): Brutto-Betrags-Felder entfernt,
+            Auszahlungs-Summe kommt aus AuszahlungCard. */}
         <FallStatusCard
           fall={{
             id: fall.id as string,
@@ -381,9 +389,6 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             sv_termin: fall.sv_termin as string | null,
             anschlussschreiben_am: fall.anschlussschreiben_am as string | null,
             vs_ablehnungsgrund: (fall as Record<string, unknown>).vs_ablehnungsgrund as string | null,
-            regulierung_betrag: fall.regulierung_betrag as number | null,
-            zahlung_betrag: (fall as Record<string, unknown>).zahlung_betrag as number | null,
-            zahlung_eingegangen_am: (fall as Record<string, unknown>).zahlung_eingegangen_am as string | null,
             storno_grund: fall.storno_grund as string | null,
             abgeschlossen_am: fall.abgeschlossen_am as string | null,
             google_review_gesendet: fall.google_review_gesendet as boolean | null,
@@ -435,44 +440,15 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         )}
 
-        {/* AAR-171: VS-Kürzung / VS-Ablehnung — Kunde transparent informieren
-            welchen Betrag die Versicherung gekürzt hat und dass die Kanzlei
-            bereits an der Rüge arbeitet. */}
+        {/* AAR-558 (C9) Brutto-Leak-Fix: VS-Kürzung — Kürzungs-/Teilregulierungs-
+            Beträge (Brutto) werden dem Kunden nicht mehr angezeigt; nur noch
+            der Begründungs-Text und der Hinweis auf die Kanzlei-Rüge. Die
+            ausgezahlte Netto-Summe erscheint nach Regulierung in AuszahlungCard. */}
         {(fall.status as string) === 'vs-kuerzt' && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 space-y-2">
             <div className="flex items-center gap-2">
               <span className="text-amber-700 text-lg">&#9888;</span>
               <p className="text-sm font-semibold text-amber-900">Versicherung hat gekürzt</p>
-            </div>
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              {/* Postgres liefert NUMERIC als string → erst parsen, dann auf > 0 prüfen
-                  damit 0-Werte (wenig aussagekräftig) nicht als „0,00 EUR" angezeigt werden */}
-              {(() => {
-                const raw = (fall as Record<string, unknown>).kuerzungs_betrag
-                const n = raw == null ? null : Number(raw)
-                if (n == null || Number.isNaN(n) || n <= 0) return null
-                return (
-                  <div>
-                    <p className="text-amber-700">Kürzungsbetrag</p>
-                    <p className="text-amber-900 font-semibold">
-                      {n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
-                    </p>
-                  </div>
-                )
-              })()}
-              {(() => {
-                const raw = (fall as Record<string, unknown>).regulierung_betrag
-                const n = raw == null ? null : Number(raw)
-                if (n == null || Number.isNaN(n) || n <= 0) return null
-                return (
-                  <div>
-                    <p className="text-amber-700">Teilregulierung</p>
-                    <p className="text-amber-900 font-semibold">
-                      {n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
-                    </p>
-                  </div>
-                )
-              })()}
             </div>
             {typeof (fall as Record<string, unknown>).vs_kuerzung_grund === 'string' &&
               ((fall as Record<string, unknown>).vs_kuerzung_grund as string) && (
@@ -518,14 +494,12 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             kanzlei_name={fall.kanzlei_ansprechpartner_name as string | null}
           />
 
-          {/* S2: Mein Geld */}
+          {/* S2: Mein Geld — AAR-558 (C9): Nur eigene Forderung + Zahlungsweg,
+              keine Brutto-Beträge mehr. Auszahlungs-Summe kommt aus AuszahlungCard. */}
           <SaeuleMeinGeld
             fallId={fall.id as string}
             status={(fall.status as string) ?? ''}
             schadens_hoehe_netto={fall.schadens_hoehe_netto as number | null}
-            regulierung_betrag={fall.regulierung_betrag as number | null}
-            kuerzungs_betrag={(fall as Record<string, unknown>).kuerzungs_betrag as number | null}
-            zahlung_betrag={(fall as Record<string, unknown>).zahlung_betrag as number | null}
             totalschaden={!!((fall as Record<string, unknown>).totalschaden)}
             zahlungsweg={(fall as Record<string, unknown>).zahlungsweg as string | null}
             onZahlungswegSave={updateZahlungsweg}
