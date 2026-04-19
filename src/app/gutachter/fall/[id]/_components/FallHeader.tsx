@@ -1,16 +1,20 @@
 'use client'
 
-// AAR-289: Header für die SV-Fallakte. Breadcrumb + Titel + Phasen-Stepper +
-// Akte-Button. Mobile: Stepper horizontal scrollbar.
+// AAR-289 / AAR-568 (V2): Header für die SV-Fallakte. Breadcrumb + Titel +
+// <PhasePipeline /> (horizontal, rolle='sv') + Akte-Button.
+// Die alten PhasenStepper / SubphasenStepper sind entfernt — die shared
+// PhasePipeline-Library zeigt dem SV jetzt alle 10 Phasen (mit Rollen-
+// Sichtbarkeits-Filter aus subphase-visibility.ts).
 
 import Link from 'next/link'
 import { ChevronLeftIcon } from 'lucide-react'
-import { PhasenStepper } from './PhasenStepper'
-import { SubphasenStepper } from './SubphasenStepper'
 import { FallakteDrawer } from './FallakteDrawer'
 // AAR-307: Ad-hoc Task-Anlegen aus dem FallHeader
 import { TaskAnlegenButton } from '@/components/tasks/TaskAnlegenButton'
 import type { SvSubphase } from '@/lib/gutachter/subphase'
+// AAR-568 (V2): Shared PhasePipeline ersetzt die SV-eigenen Stepper.
+import { PhasePipeline } from '@/components/shared/fall-phases'
+import type { PhaseStepData } from '@/components/shared/fall-phases'
 
 type DrawerData = Parameters<typeof FallakteDrawer>[0]
 
@@ -21,6 +25,8 @@ export function FallHeader({
   ort,
   subphase,
   drawer,
+  pipelinePhases,
+  aktuellePhaseSnake,
 }: {
   fallNummer: string
   fallId: string
@@ -28,6 +34,9 @@ export function FallHeader({
   ort: string
   subphase: SvSubphase
   drawer: DrawerData
+  // AAR-568 (V2): vorberechnete Pipeline-Daten aus buildPhasePipelineData().
+  pipelinePhases: PhaseStepData[]
+  aktuellePhaseSnake: string | null
 }) {
   const isTerminal: 'abgeschlossen' | 'storniert' | undefined =
     subphase.code === 'storniert'
@@ -64,10 +73,22 @@ export function FallHeader({
         </div>
       </div>
 
-      <div className="px-4 sm:px-6 pb-3 space-y-1.5">
-        <PhasenStepper currentPhase={subphase.phase} isTerminal={isTerminal} />
-        {!isTerminal && <SubphasenStepper currentSubphase={subphase} />}
-      </div>
+      {isTerminal === 'storniert' ? (
+        <div className="px-4 sm:px-6 pb-3">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium w-fit">
+            Fall storniert
+          </div>
+        </div>
+      ) : (
+        <div className="px-4 sm:px-6 pb-3">
+          <PhasePipeline
+            fall={{ id: fallId, aktuelle_phase: aktuellePhaseSnake }}
+            rolle="sv"
+            phases={pipelinePhases}
+            variant="horizontal"
+          />
+        </div>
+      )}
     </div>
   )
 }

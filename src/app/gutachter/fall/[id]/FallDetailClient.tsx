@@ -13,6 +13,8 @@
 
 import { getSvSubphase, type AbrechnungSubphaseInput } from '@/lib/gutachter/subphase'
 import { getSichtbarFuerRolle } from '@/lib/dokumente/sichtbarkeit'
+// AAR-568 (V2): Shared Phase-Pipeline für den SV-Header
+import { buildPhasePipelineData } from '@/lib/fall/subphase-visibility'
 import { FallHeader } from './_components/FallHeader'
 import type { TeamMitglied } from './_components/FallakteDrawer'
 import { AktuellePhaseCard } from './_components/AktuellePhaseCard'
@@ -172,6 +174,21 @@ export default function FallDetailClient(props: Props) {
     abrechnung,
   )
 
+  // AAR-568 (V2): Shared Pipeline-Daten für den SV-Header berechnen.
+  // getSvSubphase liefert den aktuellen Stand des SV-Resolvers (intern); die
+  // Visibility-Matrix filtert daraus die für rolle='sv' sichtbaren Subphasen.
+  const aktuellePhaseSnake =
+    (fall.aktuelle_phase as string | null | undefined) ?? null
+  const pipelinePhases = buildPhasePipelineData(
+    {
+      id: fall.id as string,
+      aktuelle_phase: aktuellePhaseSnake,
+      phase_nummer: subphase.phase,
+      abgeschlossen_am: (fall.abgeschlossen_am as string | null | undefined) ?? null,
+    },
+    'sv',
+  )
+
   // AAR-289: Sichtbarkeits-Filter (zweite Ebene zusätzlich zu DB-sichtbar_fuer)
   const sichtbarDokumente = getSichtbarFuerRolle(dokumente, 'sachverstaendiger')
   const sichtbarFallDokumente = props.fallDokumente
@@ -245,6 +262,8 @@ export default function FallDetailClient(props: Props) {
         ort={ort}
         subphase={subphase}
         drawer={drawerData}
+        pipelinePhases={pipelinePhases}
+        aktuellePhaseSnake={aktuellePhaseSnake}
       />
 
       {/* 2-Spalten-Layout: Desktop ≥1024px sticky-links, Mobile stacked */}
