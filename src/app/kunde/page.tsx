@@ -22,7 +22,7 @@ export default async function KundeStartseite() {
 
   // Alle Faelle des Kunden — inkl. der Felder, die FallKarte + getKundenJetztZuTun benötigen.
   const FALL_SELECT =
-    'id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_datum, sa_unterschrieben, sv_id, sv_termin, gutachten_eingegangen_am, gutachter_termin_status, gutachter_termin_bestaetigt_am, regulierung_am, anschlussschreiben_am, szenario, onboarding_complete, kunde_id, kundenbetreuer_id, polizei_vor_ort, vollmacht_status, vollmacht_signiert_am, abgeschlossen_am, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, created_at'
+    'id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_datum, sa_unterschrieben, sv_id, sv_termin, gutachten_eingegangen_am, gutachter_termin_status, gutachter_termin_bestaetigt_am, regulierung_am, anschlussschreiben_am, szenario, onboarding_complete, kunde_id, kundenbetreuer_id, polizei_vor_ort, vollmacht_status, vollmacht_signiert_am, abgeschlossen_am, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, nachbesichtigung_status, created_at'
 
   let faelle: Record<string, unknown>[] = []
 
@@ -130,6 +130,7 @@ export default async function KundeStartseite() {
     schadens_adresse: f.schadens_adresse as string | null,
     schadens_plz: f.schadens_plz as string | null,
     schadens_ort: f.schadens_ort as string | null,
+    nachbesichtigung_status: f.nachbesichtigung_status as string | null,
   }))
   const metaByFall = await ladeFallKartenMeta(metaInput)
 

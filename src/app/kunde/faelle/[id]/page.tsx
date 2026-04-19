@@ -41,7 +41,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     // Netto-Auszahlung ausschließlich über AuszahlungCard (faelle_kunde_view).
     const { data: fall } = await supabase
       .from('v_faelle_mit_aktuellem_termin')
-      .select('id,fall_nummer,status,szenario,aktuelle_phase,kunde_id,lead_id,sv_id,kundenbetreuer_id,schadens_beschreibung,schadens_datum,schadens_hoehe_netto,schadens_adresse,schadens_plz,schadens_ort,kennzeichen,fahrzeug_hersteller,fahrzeug_modell,fahrzeug_baujahr,unfallort,besichtigungsort_adresse,sv_termin,gutachter_termin_status,gutachter_termin_bestaetigt_am,gutachten_eingegangen_am,onboarding_complete,sa_unterschrieben,vollmacht_signiert_am,vollmacht_status,anschlussschreiben_am,regulierung_am,vs_ablehnungsgrund,vs_kuerzung_grund,storno_grund,abgeschlossen_am,google_review_gesendet,gegner_versicherung,kanzlei_ansprechpartner_name,mandatstyp,service_typ,polizei_vor_ort,bankdaten_hinterlegt_am,zahlungsweg,totalschaden,zahlung_eingegangen_am,aktueller_termin_id,aktueller_termin_start,aktueller_termin_end,aktueller_termin_status,aktueller_termin_sv_id,aktueller_termin_kanal,aktueller_termin_typ,aktueller_termin_final_verbindlich_ab')
+      .select('id,fall_nummer,status,szenario,aktuelle_phase,kunde_id,lead_id,sv_id,kundenbetreuer_id,schadens_beschreibung,schadens_datum,schadens_hoehe_netto,schadens_adresse,schadens_plz,schadens_ort,kennzeichen,fahrzeug_hersteller,fahrzeug_modell,fahrzeug_baujahr,unfallort,besichtigungsort_adresse,sv_termin,gutachter_termin_status,gutachter_termin_bestaetigt_am,gutachten_eingegangen_am,onboarding_complete,sa_unterschrieben,vollmacht_signiert_am,vollmacht_status,anschlussschreiben_am,regulierung_am,vs_ablehnungsgrund,vs_kuerzung_grund,storno_grund,abgeschlossen_am,google_review_gesendet,gegner_versicherung,kanzlei_ansprechpartner_name,mandatstyp,service_typ,polizei_vor_ort,bankdaten_hinterlegt_am,zahlungsweg,totalschaden,zahlung_eingegangen_am,nachbesichtigung_status,nachbesichtigung_termin_datum,nachbesichtigung_angefordert_am,aktueller_termin_id,aktueller_termin_start,aktueller_termin_end,aktueller_termin_status,aktueller_termin_sv_id,aktueller_termin_kanal,aktueller_termin_typ,aktueller_termin_final_verbindlich_ab')
       .eq('id', id)
       .single()
     if (!fall) notFound()
@@ -346,6 +346,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         sv_eta_minuten: svLive.eta,
         status: (fall.status as string | null) ?? null,
         abgeschlossen_am: fall.abgeschlossen_am as string | null,
+        nachbesichtigung_status: (fall as Record<string, unknown>).nachbesichtigung_status as string | null,
       },
       kundeSlasDetail,
     )
@@ -398,8 +399,12 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           svName={svName ?? undefined}
         />
 
-        {/* KFZ-210: Nachbesichtigung Soft-Blocker */}
-        {(fall.status as string) === 'nachbesichtigung-laeuft' && (
+        {/* KFZ-210: Nachbesichtigung Soft-Blocker. AAR-558 (C11): Banner greift
+            sobald nachbesichtigung_status = 'angefordert' ODER Fall-Status
+            nachbesichtigung-laeuft — vorher nur letzteres, was Fälle verpasste
+            bei denen der Kunde-Status noch nicht umgeschaltet wurde. */}
+        {((fall.status as string) === 'nachbesichtigung-laeuft' ||
+          (fall as Record<string, unknown>).nachbesichtigung_status === 'angefordert') && (
           <div className="bg-violet-50 border border-violet-200 rounded-xl px-4 py-3 space-y-2">
             <div className="flex items-center gap-3">
               <span className="text-violet-600 text-lg">&#9888;</span>
@@ -408,7 +413,6 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
                 <p className="text-xs text-violet-600">Die Versicherung hat eine erneute Besichtigung angefordert. Ihr Fall wird fortgesetzt sobald das Ergebnis vorliegt.</p>
               </div>
             </div>
-            {/* AAR-558 (C9): CTA zum Slot-Picker — nur wenn noch nicht eingereicht */}
             <Link
               href={`/kunde/nachbesichtigung/${fall.id as string}`}
               className="inline-flex items-center text-xs font-medium rounded-md bg-violet-600 text-white px-3 py-1.5 hover:bg-violet-700"

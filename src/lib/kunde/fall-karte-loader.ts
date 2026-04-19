@@ -34,6 +34,8 @@ export type FallKarteMetaInput = {
   schadens_adresse?: string | null
   schadens_plz?: string | null
   schadens_ort?: string | null
+  // AAR-558 (C11): Nachbesichtigungs-Anforderung durchreichen
+  nachbesichtigung_status?: string | null
 }
 
 export type FallKarteMeta = {
@@ -156,6 +158,7 @@ export async function ladeFallKartenMeta(
         sv_eta_minuten: nextT?.sv_eta_minuten ?? null,
         status: f.status ?? null,
         abgeschlossen_am: f.abgeschlossen_am ?? null,
+        nachbesichtigung_status: f.nachbesichtigung_status ?? null,
       },
       slaRecords,
     )
