@@ -57,7 +57,7 @@ async function ensureUser(u: TestUser): Promise<string> {
     const { data: authRows } = await db.rpc('exec_sql', { query: `SELECT id::text FROM auth.users WHERE email = '${u.email}' LIMIT 1` })
     if (authRows?.[0]?.id) {
       u.userId = authRows[0].id
-      await db.from('profiles').upsert({ id: authRows[0].id, email: u.email, vorname: u.vorname, nachname: u.nachname, telefon: TEST_PHONE, rolle: u.rolle }, { onConflict: 'id' })
+      await db.from('profiles').upsert({ id: authRows[0].id, email: u.email, vorname: u.vorname, nachname: u.nachname, telefon: TEST_PHONE, rolle: u.rolle, twofa_aktiviert: false, twofa_email_aktiviert: false }, { onConflict: 'id' })
       console.log(`  [SKIP+PROFILE] ${u.email} (${authRows[0].id})`)
       return authRows[0].id
     }
@@ -68,7 +68,7 @@ async function ensureUser(u: TestUser): Promise<string> {
       const found = list?.users?.find(x => x.email === u.email)
       if (found) {
         u.userId = found.id
-        await db.from('profiles').upsert({ id: found.id, email: u.email, vorname: u.vorname, nachname: u.nachname, telefon: TEST_PHONE, rolle: u.rolle }, { onConflict: 'id' })
+        await db.from('profiles').upsert({ id: found.id, email: u.email, vorname: u.vorname, nachname: u.nachname, telefon: TEST_PHONE, rolle: u.rolle, twofa_aktiviert: false, twofa_email_aktiviert: false }, { onConflict: 'id' })
         console.log(`  [SKIP+PROFILE] ${u.email} (${found.id})`)
         return found.id
       }
@@ -86,6 +86,8 @@ async function ensureUser(u: TestUser): Promise<string> {
   await db.from('profiles').upsert({
     id: created.user.id, email: u.email, vorname: u.vorname, nachname: u.nachname,
     telefon: TEST_PHONE, rolle: u.rolle,
+    // AAR-562: 2FA explizit aus — E2E-Login-Fixture kennt keinen OTP-Flow.
+    twofa_aktiviert: false, twofa_email_aktiviert: false,
   }, { onConflict: 'id' })
 
   return created.user.id
