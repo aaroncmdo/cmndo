@@ -24,6 +24,8 @@ import { getStepperState } from '@/lib/fall/stepper-state'
 import { resolveSubphase, type GutachterTerminRow, type WebhookEventRow, type FallRow, type LeadRow } from '@/lib/fall/subphase-resolver'
 // AAR-544 (C7): unified Event-Stream aus 7 Quellen für Timeline-Tab
 import { getFallEventStream } from '@/lib/fall/event-stream'
+// AAR-541 (C4): Chat-Teilnehmer für den Kommunikations-Tab
+import { getChatTeilnehmer } from '@/lib/chatGruppe'
 
 export default async function FallaktePage({
   params,
@@ -128,6 +130,11 @@ export default async function FallaktePage({
       .eq('fall_id', id)
       .in('event_type', ['kb_filmcheck_bestanden']),
   ])
+
+  // AAR-541 (C4): Chat-Teilnehmer parallel zu den restlichen Queries hätten
+  // gut gepasst, liegen aber auf einer anderen Client-Instanz (Admin) — daher
+  // separat und erst nach Auth-Check.
+  const teilnehmer = await getChatTeilnehmer(id)
 
   // AAR-553: fall_dokumente → Legacy-Shape für DokumenteTab + systemDokumente
   const dokumenteLegacy = (dokumente ?? []).map(d => ({
@@ -439,6 +446,8 @@ export default async function FallaktePage({
         sv={sv}
         events={events}
         subphase={subphase}
+        currentUserId={user.id}
+        teilnehmer={teilnehmer}
         dokumenteTabProps={{
           fallId: id,
           pflichtdokumente: (pflichtdokumente ?? []) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['pflichtdokumente'],

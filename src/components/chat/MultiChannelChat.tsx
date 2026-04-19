@@ -31,12 +31,17 @@ export default function MultiChannelChat({
   showInternalKbSvChat = false,
   defaultKanal = 'whatsapp',
   empfaengerHints,
+  visibleKanaele,
 }: {
   fallId: string
   currentUserId: string | null
   showInternalKbSvChat?: boolean
   defaultKanal?: ChatKanal
   empfaengerHints?: Partial<Record<ChatKanal, string | null>>
+  // AAR-541 (C4): expliziter Whitelist-Override für rollenabhängige Sichten.
+  // Wenn gesetzt, wird die Channel-Liste ausschließlich aus dieser Menge
+  // gebildet (showInternalKbSvChat bleibt zusätzlich additiv).
+  visibleKanaele?: ChatKanal[]
 }) {
   const [activeKanal, setActiveKanal] = useState<ChatKanal>(defaultKanal)
   const [messages, setMessages] = useState<Nachricht[]>([])
@@ -45,9 +50,11 @@ export default function MultiChannelChat({
   const [sending, setSending] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  const visibleChannels = CHAT_KANAELE.filter(c =>
-    c.id === 'chat_kb_sv' ? showInternalKbSvChat : c.visibleInInbox,
-  )
+  const visibleChannels = visibleKanaele
+    ? CHAT_KANAELE.filter(c => visibleKanaele.includes(c.id))
+    : CHAT_KANAELE.filter(c =>
+        c.id === 'chat_kb_sv' ? showInternalKbSvChat : c.visibleInInbox,
+      )
 
   const loadMessages = useCallback(async (kanal: ChatKanal) => {
     const supabase = createClient()

@@ -10,7 +10,7 @@ import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIco
 import { FallProvider, type FallLike, type LeadLike } from './FallContext'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
 import UebersichtTab from './tabs/UebersichtTab'
-import KommunikationTab from './tabs/KommunikationTab'
+import KommunikationTab, { type FallTeilnehmer } from './tabs/KommunikationTab'
 import TimelineTab from './tabs/TimelineTab'
 import ProzessTab from './tabs/ProzessTab'
 import DokumenteTab from './_tabs/DokumenteTab'
@@ -62,6 +62,9 @@ type ShellProps = {
   dokumenteTabProps: React.ComponentProps<typeof DokumenteTab>
   // AAR-538 (C1): vom Server berechnete Subphase
   subphase: SubphaseResult
+  // AAR-541 (C4): Kommunikations-Tab Props (currentUserId + Teilnehmer)
+  currentUserId: string | null
+  teilnehmer: FallTeilnehmer[]
 }
 
 export default function FallakteShell({
@@ -73,6 +76,8 @@ export default function FallakteShell({
   events,
   dokumenteTabProps,
   subphase,
+  currentUserId,
+  teilnehmer,
 }: ShellProps) {
   const router = useRouter()
   const search = useSearchParams()
@@ -134,7 +139,9 @@ export default function FallakteShell({
           <div className="px-4 sm:px-6 py-6">
             {activeTab === 'uebersicht' && <UebersichtTab />}
             {activeTab === 'dokumente' && <DokumenteTab {...dokumenteTabProps} />}
-            {activeTab === 'kommunikation' && <KommunikationTab />}
+            {activeTab === 'kommunikation' && (
+              <KommunikationTab currentUserId={currentUserId} teilnehmer={teilnehmer} />
+            )}
             {activeTab === 'prozess' && <ProzessTab />}
             {activeTab === 'timeline' && <TimelineTab events={events} />}
           </div>
