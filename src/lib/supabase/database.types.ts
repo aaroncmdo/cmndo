@@ -3956,6 +3956,10 @@ export type Database = {
           anruf_versuche: number | null
           aufklaerung_teilschuld_bestaetigt: boolean | null
           auslandskennzeichen: boolean | null
+          besichtigungsort_adresse: string | null
+          besichtigungsort_lat: number | null
+          besichtigungsort_lng: number | null
+          besichtigungsort_place_id: string | null
           bevorzugter_kanal: string | null
           cardentity_enriched_at: string | null
           cardentity_report: Json | null
@@ -4085,7 +4089,6 @@ export type Database = {
           spezifikation: string | null
           sprache: string | null
           status: Database["public"]["Enums"]["lead_status"]
-          sv_treffpunkt: string | null
           telefon: string | null
           timeline: Json | null
           tsn: string | null
@@ -4138,6 +4141,10 @@ export type Database = {
           anruf_versuche?: number | null
           aufklaerung_teilschuld_bestaetigt?: boolean | null
           auslandskennzeichen?: boolean | null
+          besichtigungsort_adresse?: string | null
+          besichtigungsort_lat?: number | null
+          besichtigungsort_lng?: number | null
+          besichtigungsort_place_id?: string | null
           bevorzugter_kanal?: string | null
           cardentity_enriched_at?: string | null
           cardentity_report?: Json | null
@@ -4267,7 +4274,6 @@ export type Database = {
           spezifikation?: string | null
           sprache?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
-          sv_treffpunkt?: string | null
           telefon?: string | null
           timeline?: Json | null
           tsn?: string | null
@@ -4320,6 +4326,10 @@ export type Database = {
           anruf_versuche?: number | null
           aufklaerung_teilschuld_bestaetigt?: boolean | null
           auslandskennzeichen?: boolean | null
+          besichtigungsort_adresse?: string | null
+          besichtigungsort_lat?: number | null
+          besichtigungsort_lng?: number | null
+          besichtigungsort_place_id?: string | null
           bevorzugter_kanal?: string | null
           cardentity_enriched_at?: string | null
           cardentity_report?: Json | null
@@ -4449,7 +4459,6 @@ export type Database = {
           spezifikation?: string | null
           sprache?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
-          sv_treffpunkt?: string | null
           telefon?: string | null
           timeline?: Json | null
           tsn?: string | null
