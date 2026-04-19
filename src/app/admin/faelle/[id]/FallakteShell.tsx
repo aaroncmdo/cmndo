@@ -20,6 +20,8 @@ import { TaskAnlegenButton } from '@/components/tasks/TaskAnlegenButton'
 // AAR-538 (C1): sticky Phase-Header + Subphase-Resolver
 import { PhaseHeader } from '@/components/admin/fallakte/PhaseHeader'
 import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
+// AAR-544 (C7): unified Event-Stream für den Timeline-Tab
+import type { FallEvent } from '@/lib/fall/event-stream'
 
 type TabId = 'uebersicht' | 'dokumente' | 'kommunikation' | 'prozess' | 'timeline'
 
@@ -55,7 +57,8 @@ type ShellProps = {
       telefon: string | null
     } | null
   } | null
-  timeline: Parameters<typeof TimelineTab>[0]['timeline']
+  // AAR-544 (C7): unified Event-Stream aus 7 Quellen
+  events: FallEvent[]
   dokumenteTabProps: React.ComponentProps<typeof DokumenteTab>
   // AAR-538 (C1): vom Server berechnete Subphase
   subphase: SubphaseResult
@@ -67,7 +70,7 @@ export default function FallakteShell({
   userRolle,
   kundenbetreuer,
   sv,
-  timeline,
+  events,
   dokumenteTabProps,
   subphase,
 }: ShellProps) {
@@ -133,7 +136,7 @@ export default function FallakteShell({
             {activeTab === 'dokumente' && <DokumenteTab {...dokumenteTabProps} />}
             {activeTab === 'kommunikation' && <KommunikationTab />}
             {activeTab === 'prozess' && <ProzessTab />}
-            {activeTab === 'timeline' && <TimelineTab timeline={timeline} />}
+            {activeTab === 'timeline' && <TimelineTab events={events} />}
           </div>
         </main>
 

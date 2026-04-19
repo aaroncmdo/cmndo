@@ -22,6 +22,8 @@ import {
 import { getStepperState } from '@/lib/fall/stepper-state'
 // AAR-538 (C1): Subphase-Resolver — Server-seitig berechnet, an Shell übergeben
 import { resolveSubphase, type GutachterTerminRow, type WebhookEventRow, type FallRow, type LeadRow } from '@/lib/fall/subphase-resolver'
+// AAR-544 (C7): unified Event-Stream aus 7 Quellen für Timeline-Tab
+import { getFallEventStream } from '@/lib/fall/event-stream'
 
 export default async function FallaktePage({
   params,
@@ -49,7 +51,7 @@ export default async function FallaktePage({
   // Der Shell + die Übersicht brauchen nur fall + lead + sv + kundenbetreuer.
   const [
     { data: dokumente },
-    { data: timeline },
+    events,
     { data: pflichtdokumente },
     { data: qcCheckliste },
     { data: fallDokumenteRaw },
@@ -68,11 +70,8 @@ export default async function FallaktePage({
       .eq('fall_id', id)
       .is('geloescht_am', null)
       .order('hochgeladen_am'),
-    supabase
-      .from('timeline')
-      .select('id, typ, titel, beschreibung, erstellt_von, metadata, lead_id, created_at')
-      .eq('fall_id', id)
-      .order('created_at', { ascending: false }),
+    // AAR-544 (C7): unified Event-Stream ersetzt die rohe timeline-Query
+    getFallEventStream(supabase, id),
     supabase
       .from('pflichtdokumente')
       // AAR-327: zusätzlich angefordert_* + begruendung + frist für
@@ -438,7 +437,7 @@ export default async function FallaktePage({
         userRolle={userRolle}
         kundenbetreuer={kundenbetreuerResult.data}
         sv={sv}
-        timeline={timeline ?? []}
+        events={events}
         subphase={subphase}
         dokumenteTabProps={{
           fallId: id,
