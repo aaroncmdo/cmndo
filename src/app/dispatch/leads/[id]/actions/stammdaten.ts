@@ -38,10 +38,13 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   'zeugen_kontakte',
   // AAR-305: Werkstatt-seit-wann (Date)
   'werkstatt_seit_datum',
-  // AAR-176 / AAR-179 Audit-Fix #4: sv_treffpunkt wird aktuell nur in Phase 2
-  // via saveHardGate gesetzt. Admins brauchen die Möglichkeit den Treffpunkt
-  // später auch inline zu editieren — daher auch hier zulassen.
-  'sv_treffpunkt',
+  // AAR-176 / AAR-581 (N4): Besichtigungsort wird primär in Phase 2 via
+  // saveHardGate gesetzt. Admins dürfen später auch inline via Stammdaten
+  // editieren — alle 4 strukturierten Felder zulassen.
+  'besichtigungsort_adresse',
+  'besichtigungsort_lat',
+  'besichtigungsort_lng',
+  'besichtigungsort_place_id',
   // AAR-182 Audit-Fix #2: zb1_status damit „Nein — manuell eintragen" in
   // Zb1UploadCard persistiert werden kann (Wert 'abgelehnt').
   'zb1_status',

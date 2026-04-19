@@ -1,16 +1,17 @@
 'use client'
 
 // AAR-139 / W5: Phase 2 — SV-Termin + Service-Typ (Pfad A/B).
-// AAR-176 P2-C: Besichtigungsadresse wird jetzt direkt im onSelect gespeichert
-// (kein separater Speichern-Button mehr) + zusätzliches Freitextfeld
-// sv_treffpunkt für konkrete Treffpunkt-Hinweise (Parkhaus-Ebene etc.).
+// AAR-176 P2-C: Besichtigungsadresse wird direkt im onSelect gespeichert
+// (kein separater Speichern-Button mehr).
+// AAR-581 (N4): Strukturierter Besichtigungsort ersetzt Legacy-Freitext
+// `sv_treffpunkt` — Autocomplete liefert adresse + lat/lng + place_id.
 
 import { useState, useTransition, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import SvDispatchPanel from '../SvDispatchPanel'
 import { useDispatchPhase } from '../lib/phase-context'
 import { saveHardGate, setServiceTyp, saveStammdaten } from '../actions'
-import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
+import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { MapPinIcon, CheckCircle2Icon, ScaleIcon, CalendarIcon } from 'lucide-react'
 
 export default function Phase2TerminServiceTyp() {
@@ -20,7 +21,10 @@ export default function Phase2TerminServiceTyp() {
     unfallort?: string | null
     unfallort_lat?: number | null
     unfallort_lng?: number | null
-    sv_treffpunkt?: string | null
+    besichtigungsort_adresse?: string | null
+    besichtigungsort_lat?: number | null
+    besichtigungsort_lng?: number | null
+    besichtigungsort_place_id?: string | null
     service_typ?: 'komplett' | 'nur_gutachter' | null
     // AAR-264: Wunschtermin des Kunden — fließt ins SV-Matching ein
     wunschtermin?: string | null
@@ -31,7 +35,9 @@ export default function Phase2TerminServiceTyp() {
   const [unfallortDraft, setUnfallortDraft] = useState(l.unfallort ?? '')
   const [unfallortLat, setUnfallortLat] = useState<number | null>(l.unfallort_lat ?? null)
   const [unfallortLng, setUnfallortLng] = useState<number | null>(l.unfallort_lng ?? null)
-  const [svTreffpunkt, setSvTreffpunkt] = useState<string>(l.sv_treffpunkt ?? '')
+  const [besichtigungsortAdresse, setBesichtigungsortAdresse] = useState<string>(
+    l.besichtigungsort_adresse ?? '',
+  )
   const [serviceTyp, setServiceTypLocal] = useState<'komplett' | 'nur_gutachter'>(
     l.service_typ ?? 'komplett',
   )
@@ -122,11 +128,30 @@ export default function Phase2TerminServiceTyp() {
     })
   }
 
-  function saveTreffpunkt() {
+  function saveBesichtigungsort(place: PlaceResult) {
+    setBesichtigungsortAdresse(place.adresse)
     startTransition(async () => {
-      const r = await saveHardGate(lead.id, { sv_treffpunkt: svTreffpunkt.trim() || null })
-      setToast(r.success ? 'Treffpunkt gespeichert' : r.error ?? 'Fehler')
+      const r = await saveHardGate(lead.id, {
+        besichtigungsort_adresse: place.adresse,
+        besichtigungsort_lat: place.lat,
+        besichtigungsort_lng: place.lng,
+        besichtigungsort_place_id: place.place_id || null,
+      })
+      setToast(r.success ? 'Besichtigungsort gespeichert' : r.error ?? 'Fehler')
       setTimeout(() => setToast(''), 2000)
+    })
+  }
+
+  function clearBesichtigungsort() {
+    if (!besichtigungsortAdresse) return
+    setBesichtigungsortAdresse('')
+    startTransition(async () => {
+      await saveHardGate(lead.id, {
+        besichtigungsort_adresse: null,
+        besichtigungsort_lat: null,
+        besichtigungsort_lng: null,
+        besichtigungsort_place_id: null,
+      })
     })
   }
 
@@ -288,17 +313,20 @@ export default function Phase2TerminServiceTyp() {
           }}
           className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
         />
-        {/* AAR-176 P2-C: sv_treffpunkt Freitextfeld — wird beim Blur gespeichert */}
+        {/* AAR-581 (N4): Strukturierter SV-Besichtigungsort — Autocomplete
+            liefert Adresse + Koordinaten + place_id. Pflichtfeld wenn der
+            Besichtigungsort vom Unfallort abweicht. */}
         <div className="space-y-1">
           <label className="text-[10px] uppercase tracking-wider text-gray-500 block">
-            Zusätzlicher Treffpunkt-Hinweis (optional)
+            SV-Besichtigungsort (optional, wenn abweichend vom Unfallort)
           </label>
-          <input
-            type="text"
-            value={svTreffpunkt}
-            onChange={(e) => setSvTreffpunkt(e.target.value)}
-            onBlur={saveTreffpunkt}
-            placeholder='z. B. „Parkhaus Ebene 3, Stellplatz 42" oder „Einfahrt links neben Apotheke"'
+          <GooglePlaceAutocomplete
+            defaultValue={besichtigungsortAdresse}
+            placeholder='z. B. „Werkstatt Müller, Musterstr. 1, 80331 München"'
+            onSelect={saveBesichtigungsort}
+            onBlur={(current) => {
+              if (!current.trim()) clearBesichtigungsort()
+            }}
             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
           />
         </div>

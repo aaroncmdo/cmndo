@@ -119,6 +119,13 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'kunde_adresse',
   'kunde_lat',
   'kunde_lng',
+  // AAR-581 (N4): Besichtigungsort ist strukturiert (Adresse + Koordinaten +
+  // Google-place_id) statt vorher `sv_treffpunkt`-Freitext. Gleicher Spaltenname
+  // in leads + faelle — wird direkt beim Fall-Erzeugen übernommen.
+  'besichtigungsort_adresse',
+  'besichtigungsort_lat',
+  'besichtigungsort_lng',
+  'besichtigungsort_place_id',
 ] as const
 
 // ─── 2. DEFAULT — Feldname gleich, NOT-NULL fallback ────────────────────────
