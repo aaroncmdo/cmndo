@@ -13,7 +13,8 @@ export default async function AdminFaellePage() {
 
   let query = supabase
     .from('faelle')
-    .select('id, fall_nummer, status, schadens_ursache, schadens_ort, sv_id, kundenbetreuer_id, mandatsnummer, schadens_fall_typ, kennzeichen, created_at, kunde_id, lead_id, ist_aktiv, deaktiviert_grund')
+    // AAR-572 (V6): aktuelle_phase + abgeschlossen_am für Pipeline-Overlay
+    .select('id, fall_nummer, status, schadens_ursache, schadens_ort, sv_id, kundenbetreuer_id, mandatsnummer, schadens_fall_typ, kennzeichen, created_at, kunde_id, lead_id, ist_aktiv, deaktiviert_grund, aktuelle_phase, abgeschlossen_am')
     .not('status', 'eq', 'storniert')
     .order('created_at', { ascending: false })
 
@@ -82,6 +83,8 @@ export default async function AdminFaellePage() {
     created_at: f.created_at as string,
     ist_aktiv: (f as Record<string, unknown>).ist_aktiv as boolean | null,
     deaktiviert_grund: (f as Record<string, unknown>).deaktiviert_grund as string | null,
+    aktuelle_phase: (f as Record<string, unknown>).aktuelle_phase as string | null,
+    abgeschlossen_am: (f as Record<string, unknown>).abgeschlossen_am as string | null,
     kunde_name: f.lead_id ? (leadMap[f.lead_id] ?? null) : null,
     betreuer_name: f.kundenbetreuer_id ? (kbMap[f.kundenbetreuer_id] ?? null) : null,
     sv_name: f.sv_id ? (svMap[f.sv_id] ?? null) : null,

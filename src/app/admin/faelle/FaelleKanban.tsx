@@ -7,6 +7,9 @@ import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-p
 import { updateFallStatus } from '../dispatch/actions'
 import { deleteFall, deactivateFall } from './[id]/actions'
 import FallCardBadges, { NotificationDot } from '@/components/faelle/FallCardBadges'
+// AAR-572 (V6): Shared PhasePipeline als Hover-Overlay auf den Kanban-Karten
+import { PhasePipeline } from '@/components/shared/fall-phases'
+import { buildPhasePipelineData } from '@/lib/fall/subphase-visibility'
 
 type Fall = {
   id: string
@@ -27,6 +30,8 @@ type Fall = {
   sv_name: string | null
   ungelesene_nachrichten?: number
   ungelesene_updates?: number
+  aktuelle_phase?: string | null
+  abgeschlossen_am?: string | null
 }
 
 // BUG-05: Kanban-Columns nach faelle.status Enum
@@ -202,6 +207,21 @@ function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
   const [error, setError] = useState('')
   const menuRef = useRef<HTMLDivElement>(null)
 
+  // AAR-572 (V6): Pipeline-Daten für das Hover-Overlay lazily berechnen.
+  // Nur für den Admin-Hover-Blick — Kanban bleibt ansonsten schlank.
+  const pipelinePhases = useMemo(
+    () =>
+      buildPhasePipelineData(
+        {
+          id: fall.id,
+          aktuelle_phase: fall.aktuelle_phase ?? null,
+          abgeschlossen_am: fall.abgeschlossen_am ?? null,
+        },
+        'admin',
+      ),
+    [fall.id, fall.aktuelle_phase, fall.abgeschlossen_am],
+  )
+
   useEffect(() => {
     function h(e: MouseEvent) { if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false) }
     document.addEventListener('mousedown', h)
@@ -210,7 +230,7 @@ function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
 
   return (
     <>
-      <div className={`relative rounded-lg border hover:shadow-sm transition-all ${
+      <div className={`group relative rounded-lg border hover:shadow-sm transition-all ${
         fall.ist_aktiv === false ? 'bg-red-50/60 border-red-200 opacity-60' : 'bg-white border-gray-200 hover:border-gray-300'
       }`} style={{ padding: '6px 8px' }}>
         {/* KFZ-182: Roter Dot wenn Chat UND Updates > 0 */}
@@ -249,6 +269,23 @@ function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
             </div>
           )}
         </Link>
+        {/* AAR-572 (V6): Pipeline-Overlay — erscheint rechts neben der Karte
+            beim Hover. `pointer-events-none` damit Drag&Drop auf der Karte
+            nicht gestört wird. */}
+        <div
+          className="absolute left-full top-0 ml-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-40 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity pointer-events-none"
+          aria-hidden="true"
+        >
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">
+            Phasen-Verlauf
+          </p>
+          <PhasePipeline
+            fall={{ id: fall.id, aktuelle_phase: fall.aktuelle_phase ?? null }}
+            rolle="admin"
+            phases={pipelinePhases}
+            variant="compact"
+          />
+        </div>
       </div>
 
       {/* Delete Confirmation */}
