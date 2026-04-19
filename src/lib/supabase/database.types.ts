@@ -4068,7 +4068,6 @@ export type Database = {
           rueckruf_notiz: string | null
           rueckruf_termin: string | null
           sa_datum: string | null
-          sa_signiert: boolean | null
           sa_unterschrieben: boolean | null
           sa_unterschrieben_am: string | null
           sachschaden_beschreibung: string | null
@@ -4254,7 +4253,6 @@ export type Database = {
           rueckruf_notiz?: string | null
           rueckruf_termin?: string | null
           sa_datum?: string | null
-          sa_signiert?: boolean | null
           sa_unterschrieben?: boolean | null
           sa_unterschrieben_am?: string | null
           sachschaden_beschreibung?: string | null
@@ -4440,7 +4438,6 @@ export type Database = {
           rueckruf_notiz?: string | null
           rueckruf_termin?: string | null
           sa_datum?: string | null
-          sa_signiert?: boolean | null
           sa_unterschrieben?: boolean | null
           sa_unterschrieben_am?: string | null
           sachschaden_beschreibung?: string | null
