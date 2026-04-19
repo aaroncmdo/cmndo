@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
-  PhoneIcon, CalendarIcon, CheckIcon, ClipboardListIcon, FolderOpenIcon,
-  AlertTriangleIcon, MessageCircleIcon, BanknoteIcon, ClockIcon,
-  ChevronLeftIcon, ChevronRightIcon, UserIcon, WrenchIcon, PhoneCallIcon, VideoIcon, BuildingIcon,
+  CalendarIcon, ClipboardListIcon, FolderOpenIcon,
+  AlertTriangleIcon,
+  ChevronLeftIcon, ChevronRightIcon, UserIcon, WrenchIcon, PhoneCallIcon,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -48,8 +48,6 @@ function minuteToY(min: number): number {
   const offset = min - HOUR_START * 60
   return Math.max(0, Math.min(TOTAL_PX, (offset / TOTAL_MINUTES) * TOTAL_PX))
 }
-
-const fmt = (d: string | null) => d ? new Date(d).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '—'
 
 /* ── Component ─────────────────────────────────────────────────────────── */
 export default function DashboardClient({ userId, userRolle = 'admin' }: { userId: string; userRolle?: string }) {
