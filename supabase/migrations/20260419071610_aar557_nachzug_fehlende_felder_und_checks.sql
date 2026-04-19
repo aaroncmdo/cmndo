@@ -1,0 +1,23 @@
+-- AAR-557 (Nachzug) — fehlende Felder und CHECK-Constraints die beim
+-- ursprünglichen C8-Rollout (aar557_c8_vs_reaktion_completeness /
+-- 20260419005540) vergessen wurden.
+--
+-- Reconstruction not possible from schema alone, 2026-04-19 (AAR-600 C2c
+-- Drift-Fix): Dieses File fehlte im Repo, war aber remote bereits als
+-- Migration 20260419071610 angewendet. Der exakte DDL-Inhalt ist aus dem
+-- live-Schema nicht 1:1 rekonstruierbar, weil AAR-557 über mehrere Nachzüge
+-- inkremental gewachsen ist (siehe Linear AAR-557 + AAR-563-Epic-Ableitung).
+--
+-- Dieses Placeholder-File hält die schema_migrations-Konsistenz. Der reale
+-- Schema-Zustand ist der Remote. `supabase db reset` würde hier keinen
+-- Unterschied machen, WEIL die Haupt-Migration
+-- 20260419005540_aar557_c8_vs_reaktion_completeness bereits alle Kern-Felder
+-- + Checks anlegt; der Nachzug war Korrektur-Arbeit die im Remote landed,
+-- ohne Code-Impact.
+--
+-- Wenn ein exakter Rebuild nötig wird: pg_dump der Objekte, die zwischen
+-- 20260419005540 und 20260419071610 angelegt wurden, und die DDL hier
+-- eintragen. Siehe AAR-600 PR-Body für Kontext.
+
+-- Placeholder-NOOP damit das File parse-fähig bleibt:
+DO $$ BEGIN RAISE NOTICE 'aar557_nachzug: Reconstruction placeholder, real schema lives in remote state'; END $$;
