@@ -23,7 +23,8 @@ export default async function TwoFaPage() {
     .eq('id', user.id)
     .single()
 
-  // 2FA nicht aktiviert: direkt durch
+  // 2FA nicht aktiviert: direkt durch (Middleware-Cookie wird bereits in
+  // der Login-Action gesetzt, AAR-562).
   if (profile?.twofa_aktiviert === false && profile?.twofa_email_aktiviert === false) {
     redirect('/')
   }

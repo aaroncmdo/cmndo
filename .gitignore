@@ -45,3 +45,7 @@ next-env.d.ts
 playwright/.auth/
 playwright-report/
 test-results/
+
+# lokale Arbeitsordner (Skript-Wegwerf, Claude-Hilfsdateien)
+.tmp/
+.claude/scheduled_tasks.lock

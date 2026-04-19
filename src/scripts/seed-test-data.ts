@@ -19,11 +19,14 @@ if (!SUPABASE_URL || !SERVICE_KEY) {
 const db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { autoRefreshToken: false, persistSession: false } })
 
 const TEST_PHONE = '+4915562740016'
-const TEST_PW = 'Claimondo2024!'
+// Passwort muss zu den GitHub-Secrets TEST_ADMIN_PASSWORD / TEST_SV_PASSWORD
+// passen (siehe .env.example) — sonst fallen die E2E-Tests um.
+const TEST_PW = 'Test1234!'
 
 type TestUser = { email: string; rolle: string; vorname: string; nachname: string; userId?: string }
 
 const USERS: TestUser[] = [
+  { email: 'test-admin@claimondo.de', rolle: 'admin', vorname: 'Admin', nachname: 'Test' },
   { email: 'test-kb@claimondo.de', rolle: 'kundenbetreuer', vorname: 'Anna', nachname: 'Weber' },
   { email: 'test-dispatch@claimondo.de', rolle: 'dispatch', vorname: 'Max', nachname: 'Fischer' },
   { email: 'test-sv@claimondo.de', rolle: 'sachverstaendiger', vorname: 'Thomas', nachname: 'Schmidt' },
@@ -54,7 +57,7 @@ async function ensureUser(u: TestUser): Promise<string> {
     const { data: authRows } = await db.rpc('exec_sql', { query: `SELECT id::text FROM auth.users WHERE email = '${u.email}' LIMIT 1` })
     if (authRows?.[0]?.id) {
       u.userId = authRows[0].id
-      await db.from('profiles').upsert({ id: authRows[0].id, email: u.email, vorname: u.vorname, nachname: u.nachname, telefon: TEST_PHONE, rolle: u.rolle }, { onConflict: 'id' })
+      await db.from('profiles').upsert({ id: authRows[0].id, email: u.email, vorname: u.vorname, nachname: u.nachname, telefon: TEST_PHONE, rolle: u.rolle, twofa_aktiviert: false, twofa_email_aktiviert: false }, { onConflict: 'id' })
       console.log(`  [SKIP+PROFILE] ${u.email} (${authRows[0].id})`)
       return authRows[0].id
     }
@@ -65,7 +68,7 @@ async function ensureUser(u: TestUser): Promise<string> {
       const found = list?.users?.find(x => x.email === u.email)
       if (found) {
         u.userId = found.id
-        await db.from('profiles').upsert({ id: found.id, email: u.email, vorname: u.vorname, nachname: u.nachname, telefon: TEST_PHONE, rolle: u.rolle }, { onConflict: 'id' })
+        await db.from('profiles').upsert({ id: found.id, email: u.email, vorname: u.vorname, nachname: u.nachname, telefon: TEST_PHONE, rolle: u.rolle, twofa_aktiviert: false, twofa_email_aktiviert: false }, { onConflict: 'id' })
         console.log(`  [SKIP+PROFILE] ${u.email} (${found.id})`)
         return found.id
       }
@@ -83,6 +86,8 @@ async function ensureUser(u: TestUser): Promise<string> {
   await db.from('profiles').upsert({
     id: created.user.id, email: u.email, vorname: u.vorname, nachname: u.nachname,
     telefon: TEST_PHONE, rolle: u.rolle,
+    // AAR-562: 2FA explizit aus — E2E-Login-Fixture kennt keinen OTP-Flow.
+    twofa_aktiviert: false, twofa_email_aktiviert: false,
   }, { onConflict: 'id' })
 
   return created.user.id
@@ -115,12 +120,12 @@ async function main() {
       profile_id: svUserId,
       standort_lat: 50.9375,
       standort_lng: 6.9603,
-      radius_km: 40,
       paket: 'pro',
       onboarding_status: 'abgeschlossen',
       portal_zugang_freigeschaltet: true,
       vertrag_unterschrieben: true,
       ist_aktiv: true,
+      verifiziert: true,
     }).select('id').single()
     if (svErr) throw new Error(`SV: ${svErr.message}`)
     svId = newSv.id
@@ -226,8 +231,8 @@ async function main() {
   }
 
   console.log('\n=== SEED ABGESCHLOSSEN ===\n')
-  console.log('TEST-USERS:')
-  console.log('  Admin:    lupus.674music@gmail.com (bestehend)')
+  console.log('TEST-USERS (Passwort einheitlich):')
+  console.log(`  Admin:    test-admin@claimondo.de / ${TEST_PW}`)
   console.log(`  KB:       test-kb@claimondo.de / ${TEST_PW}`)
   console.log(`  Dispatch: test-dispatch@claimondo.de / ${TEST_PW}`)
   console.log(`  SV:       test-sv@claimondo.de / ${TEST_PW}`)
