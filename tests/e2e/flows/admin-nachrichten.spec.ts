@@ -4,7 +4,9 @@ import { test, expect } from '../fixtures'
 
 test('Admin: Nachrichten-Inbox rendert', async ({ adminPage }) => {
   await adminPage.goto('/admin/nachrichten')
-  await adminPage.waitForLoadState('networkidle')
+  // AAR-562: nicht auf 'networkidle' warten — Supabase Realtime-Websockets
+  // halten die Verbindung offen, networkidle feuert nie → Test-Timeout.
+  await adminPage.waitForLoadState('domcontentloaded')
 
   // Page title should be visible
   await expect(adminPage.locator('text=Nachrichten')).toBeVisible({ timeout: 10_000 })
