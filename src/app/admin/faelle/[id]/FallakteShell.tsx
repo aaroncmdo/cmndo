@@ -17,6 +17,9 @@ import DokumenteTab from './_tabs/DokumenteTab'
 import FallSidebar from './sidebar/FallSidebar'
 // AAR-307: Ad-hoc Task-Anlegen aus der Tab-Bar
 import { TaskAnlegenButton } from '@/components/tasks/TaskAnlegenButton'
+// AAR-538 (C1): sticky Phase-Header + Subphase-Resolver
+import { PhaseHeader } from '@/components/admin/fallakte/PhaseHeader'
+import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
 
 type TabId = 'uebersicht' | 'dokumente' | 'kommunikation' | 'prozess' | 'timeline'
 
@@ -54,6 +57,8 @@ type ShellProps = {
   } | null
   timeline: Parameters<typeof TimelineTab>[0]['timeline']
   dokumenteTabProps: React.ComponentProps<typeof DokumenteTab>
+  // AAR-538 (C1): vom Server berechnete Subphase
+  subphase: SubphaseResult
 }
 
 export default function FallakteShell({
@@ -64,6 +69,7 @@ export default function FallakteShell({
   sv,
   timeline,
   dokumenteTabProps,
+  subphase,
 }: ShellProps) {
   const router = useRouter()
   const search = useSearchParams()
@@ -85,8 +91,12 @@ export default function FallakteShell({
       <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-96px)] gap-0">
         {/* Haupt-Column: Tabs + Content */}
         <main className="flex-1 overflow-y-auto min-w-0">
+          {/* AAR-538 (C1): sticky Phase-Header — steht OBERHALB der Tab-Bar.
+              Tab-Bar ist nicht mehr sticky, damit beide nicht am gleichen
+              Anker konkurrieren. */}
+          <PhaseHeader result={subphase} />
           {/* Tab-Bar */}
-          <nav className="border-b border-gray-200 bg-white sticky top-0 z-10">
+          <nav className="border-b border-gray-200 bg-white">
             <div className="flex items-center justify-between gap-3 px-4">
               <ul className="flex items-center gap-0 overflow-x-auto">
                 {TABS.map((tab) => {
