@@ -300,7 +300,7 @@ export async function POST() {
         fahrzeug_hersteller: 'Skoda', fahrzeug_modell: 'Octavia',
         schadens_fall_typ: 'sf-04', kunden_konstellation: 'kk-01',
         status: 'disqualifiziert' as const, qualifizierungs_phase: 'schadentyp-erfasst',
-        disqualifizierung_grund: 'Kein Anspruch - Eigenverschulden', created_at: daysAgo(10),
+        disqualifiziert_grund: 'Kein Anspruch - Eigenverschulden', created_at: daysAgo(10),
       },
       {
         vorname: 'Stefan', nachname: 'Koch', telefon: '+491633628571', email: 'stefan@email.de',
@@ -334,7 +334,7 @@ export async function POST() {
         gewerbe_flag: lx.gewerbe_flag ?? false,
         sa_unterschrieben: lx.sa_unterschrieben ?? false,
         polizeibericht_pflicht: lx.polizeibericht_pflicht ?? false,
-        disqualifizierung_grund: lx.disqualifizierung_grund ?? null,
+        disqualifiziert_grund: lx.disqualifiziert_grund ?? null,
         rueckruf_datum: lx.rueckruf_datum ?? null,
         rueckruf_notiz: lx.rueckruf_notiz ?? null,
         rueckruf_erledigt: false,
