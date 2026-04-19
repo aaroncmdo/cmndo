@@ -4110,7 +4110,6 @@ export type Database = {
           verpasste_anrufe: number | null
           voice_input_quelle: boolean
           vollmacht_datum: string | null
-          vollmacht_signiert: boolean | null
           vollmacht_signiert_am: string | null
           vorname: string | null
           vorschaeden_beschreibung: string | null
@@ -4295,7 +4294,6 @@ export type Database = {
           verpasste_anrufe?: number | null
           voice_input_quelle?: boolean
           vollmacht_datum?: string | null
-          vollmacht_signiert?: boolean | null
           vollmacht_signiert_am?: string | null
           vorname?: string | null
           vorschaeden_beschreibung?: string | null
@@ -4480,7 +4478,6 @@ export type Database = {
           verpasste_anrufe?: number | null
           voice_input_quelle?: boolean
           vollmacht_datum?: string | null
-          vollmacht_signiert?: boolean | null
           vollmacht_signiert_am?: string | null
           vorname?: string | null
           vorschaeden_beschreibung?: string | null
