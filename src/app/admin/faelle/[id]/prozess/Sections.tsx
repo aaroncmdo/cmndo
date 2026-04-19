@@ -25,6 +25,10 @@ import {
   startRuege,
   uebergebeFallKlage,
 } from '../actions/prozess'
+// AAR-540 (C3): Endpoint-Register direkt in der Kanzlei+E-Akte-Section,
+// erlaubt Admin/KB alle 24+ Events manuell zu triggern (identische Handler-
+// Logik wie die echten LexDrive-Webhooks).
+import EndpointRegister from '../_components/LexDriveTriggerPanel'
 
 function Card({
   icon,
@@ -77,25 +81,27 @@ function fmtDate(v: unknown): string | null {
 
 // ─── 1. Kanzlei + E-Akte (ab akte-uebergeben) ──────────────────────────────
 export function KanzleiEakteSection() {
-  const { fall } = useFall()
+  const { fall, userRolle } = useFall()
   const mandatsnummer = fall.mandatsnummer as string | null
   const uebergebenAm = fmtDate(fall.kanzlei_uebergeben_am)
+  // AAR-540 (C3): Endpoint-Register nur für Admin + Kundenbetreuer
+  const canTrigger = userRolle === 'admin' || userRolle === 'kundenbetreuer'
   return (
     <Card
       icon={<ScaleIcon className="w-4 h-4 text-[#4573A2]" />}
       title="Kanzlei + E-Akte"
-      subtitle="LexDrive-Partnerkanzlei, 11 Webhook-Events"
+      subtitle="LexDrive-Partnerkanzlei, 24+ Events (manuell + Webhook)"
     >
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Info label="Mandatsnummer" value={mandatsnummer} />
         <Info label="E-Akte übergeben" value={uebergebenAm} />
         <Info label="Service-Typ" value={(fall.service_typ as string) ?? 'komplett'} />
       </div>
-      <p className="text-[11px] text-gray-500 italic">
-        LexDriveTriggerPanel + E-Akte-Checkliste werden über das W2-Monolith-
-        Fallback weiterhin erreichbar sein; volle Extraktion folgt zusammen mit
-        W5 (Webhook-Handler-Erweiterung).
-      </p>
+      {canTrigger && (
+        <div className="pt-2">
+          <EndpointRegister fallId={fall.id} />
+        </div>
+      )}
     </Card>
   )
 }
