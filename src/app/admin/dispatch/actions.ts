@@ -430,7 +430,7 @@ export async function sendFlowLink(leadId: string) {
     // Template leer und Twilio wuerde die Nachricht mit leeren Placeholdern rendern.
     const { data: terminRaw } = await supabase
       .from('gutachter_termine')
-      .select('start_zeit, sachverstaendige(profiles(vorname, nachname))')
+      .select('start_zeit, sv_id, sachverstaendige(profile_id, profiles(vorname, nachname))')
       .eq('lead_id', leadId)
       .in('status', ['reserviert', 'bestaetigt'])
       .order('start_zeit', { ascending: true })
@@ -438,15 +438,28 @@ export async function sendFlowLink(leadId: string) {
       .maybeSingle()
     // Nested-FK-Relations kommen je nach Cardinality als Array ODER Objekt zurück.
     // Safe-Normalisierung via Array.isArray (siehe SvKalenderModal.tsx Pattern).
-    const termin = terminRaw as { start_zeit: string; sachverstaendige: unknown } | null
+    const termin = terminRaw as { start_zeit: string; sv_id: string | null; sachverstaendige: unknown } | null
     const svRaw = termin?.sachverstaendige
-    const sv = (Array.isArray(svRaw) ? svRaw[0] : svRaw) as { profiles: unknown } | null
+    const sv = (Array.isArray(svRaw) ? svRaw[0] : svRaw) as { profile_id: string | null; profiles: unknown } | null
     const profileRaw = sv?.profiles
-    const profile = (Array.isArray(profileRaw) ? profileRaw[0] : profileRaw) as
+    let profile = (Array.isArray(profileRaw) ? profileRaw[0] : profileRaw) as
       | { vorname: string | null; nachname: string | null }
       | null
+    // AAR-607 B2: Wenn Nested-FK leer ist, Profile separat per profile_id laden —
+    // sonst kommt die FlowLink-Email mit leeren Placeholder-Namen raus.
+    if (!profile && sv?.profile_id) {
+      const { data: p } = await supabase
+        .from('profiles')
+        .select('vorname, nachname')
+        .eq('id', sv.profile_id)
+        .maybeSingle()
+      profile = p
+    }
     const svVorname = profile?.vorname ?? ''
     const svNachname = profile?.nachname ?? ''
+    if (termin && !svVorname && !svNachname) {
+      console.warn('[sendFlowLink] SV-Name nicht auflösbar für Termin', { leadId, svId: termin.sv_id })
+    }
     const terminDate = termin?.start_zeit ? new Date(termin.start_zeit) : null
     const datum = terminDate ? terminDate.toLocaleDateString('de-DE') : ''
     const uhrzeit = terminDate

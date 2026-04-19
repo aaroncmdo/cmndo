@@ -12,14 +12,19 @@ export const dynamic = 'force-dynamic'
 
 export type HeuteTerminFull = {
   id: string
+  // AAR-607 B4: Pre-FlowLink-Termine haben nur lead_id (Fall kommt erst nach
+  // SA-Unterschrift). fall_id kann leer sein — UI soll dann lead-basierte Daten
+  // zeigen und den Termin als „Provisorisch (SA ausstehend)" markieren.
   fall_id: string
+  lead_id: string | null
+  pre_flowlink: boolean
   start_zeit: string
   end_zeit: string | null
   status: string
   // Kunden-Infos
   kunde_name: string
   kunde_telefon: string | null
-  // Fall-Infos
+  // Fall-Infos (evtl. leer bei pre_flowlink=true)
   fall_nummer: string
   kennzeichen: string | null
   fahrzeug: string | null
@@ -70,9 +75,11 @@ export default async function HeutePage() {
   )
 
   // Heutige Termine
+  // AAR-607 B4: lead_id mitladen — Pre-FlowLink-Termine haben nur lead_id (kein
+  // fall_id), sonst sieht der SV den Termin bis zur SA-Unterschrift nicht.
   const { data: termine } = await supabase
     .from('gutachter_termine')
-    .select('id, fall_id, start_zeit, end_zeit, status')
+    .select('id, fall_id, lead_id, start_zeit, end_zeit, status')
     .eq('sv_id', sv.id)
     .in('status', ['reserviert', 'bestaetigt', 'vorschlag', 'abgeschlossen'])
     .gte('start_zeit', todayStart.toISOString())
@@ -95,61 +102,72 @@ export default async function HeutePage() {
     for (const f of faelleRows) fallMap.set(f.id as string, f)
   }
 
-  // Lead-Namen nachladen
-  const leadIds = [...fallMap.values()]
+  // Lead-Daten nachladen — sowohl für Fall-gebundene als auch für Pre-FlowLink-Termine.
+  // AAR-607 B4: Lead-only-Termine haben keinen Fall → Lead muss volle Fahrzeug-,
+  // Schadens-, Besichtigungsort-Infos liefern.
+  const leadIdsFromFaelle = [...fallMap.values()]
     .map((f) => f.lead_id)
     .filter(Boolean) as string[]
-  const leadMap = new Map<
-    string,
-    { vorname: string | null; nachname: string | null; telefon: string | null }
-  >()
+  const leadIdsFromTermine = (termine ?? [])
+    .filter((t) => !t.fall_id && t.lead_id)
+    .map((t) => t.lead_id as string)
+  const leadIds = Array.from(new Set([...leadIdsFromFaelle, ...leadIdsFromTermine]))
+  const leadMap = new Map<string, Record<string, unknown>>()
   if (leadIds.length) {
     const { data: leads } = await supabase
       .from('leads')
-      .select('id, vorname, nachname, telefon')
+      .select('id, vorname, nachname, telefon, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_fall_typ, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort')
       .in('id', leadIds)
-    for (const l of leads ?? []) leadMap.set(l.id, l)
+    for (const l of (leads ?? []) as unknown as Record<string, unknown>[]) {
+      leadMap.set(l.id as string, l)
+    }
   }
 
   const heuteTermine: HeuteTerminFull[] = (termine ?? []).map((t) => {
     const fall = fallMap.get(t.fall_id as string)
-    const lead = fall?.lead_id
-      ? leadMap.get(fall.lead_id as string)
-      : null
+    const leadIdResolved = (fall?.lead_id as string | null) ?? (t.lead_id as string | null) ?? null
+    const lead = leadIdResolved ? leadMap.get(leadIdResolved) : null
+    const preFlowlink = !fall && !!t.lead_id
+    // Besichtigungsort/Fahrzeug: Fall bevorzugt, sonst aus Lead (pre-flowlink)
+    const besichtigungAdresse =
+      (fall?.besichtigungsort_adresse as string) ?? (lead?.besichtigungsort_adresse as string) ?? null
+    const besichtigungPlaceId =
+      (fall?.besichtigungsort_place_id as string) ?? (lead?.besichtigungsort_place_id as string) ?? null
+    const besichtigungLat =
+      (fall?.besichtigungsort_lat as number | null) ?? (lead?.besichtigungsort_lat as number | null) ?? null
+    const besichtigungLng =
+      (fall?.besichtigungsort_lng as number | null) ?? (lead?.besichtigungsort_lng as number | null) ?? null
     return {
       id: t.id as string,
       fall_id: (t.fall_id ?? '') as string,
+      lead_id: (t.lead_id as string | null) ?? null,
+      pre_flowlink: preFlowlink,
       start_zeit: t.start_zeit as string,
       end_zeit: (t.end_zeit as string) ?? null,
       status: t.status as string,
       kunde_name: lead
         ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
         : '—',
-      kunde_telefon: lead?.telefon ?? null,
+      kunde_telefon: (lead?.telefon as string | null) ?? null,
       fall_nummer:
         (fall?.fall_nummer as string) ??
-        ((t.fall_id as string) ?? '').slice(0, 8),
-      kennzeichen: (fall?.kennzeichen as string) ?? null,
+        (preFlowlink ? 'Provisorisch' : ((t.fall_id as string) ?? '').slice(0, 8)),
+      kennzeichen: (fall?.kennzeichen as string) ?? (lead?.kennzeichen as string) ?? null,
       fahrzeug:
-        [fall?.fahrzeug_hersteller, fall?.fahrzeug_modell]
+        [
+          fall?.fahrzeug_hersteller ?? lead?.fahrzeug_hersteller,
+          fall?.fahrzeug_modell ?? lead?.fahrzeug_modell,
+        ]
           .filter(Boolean)
           .join(' ') || null,
-      schadentyp: (fall?.szenario as string) ?? null,
-      besichtigungsort_adresse:
-        (fall?.besichtigungsort_adresse as string) ?? null,
-      besichtigungsort_place_id:
-        (fall?.besichtigungsort_place_id as string) ?? null,
-      besichtigungsort_lat:
-        fall?.besichtigungsort_lat != null
-          ? Number(fall.besichtigungsort_lat)
-          : null,
-      besichtigungsort_lng:
-        fall?.besichtigungsort_lng != null
-          ? Number(fall.besichtigungsort_lng)
-          : null,
-      schadens_adresse: (fall?.schadens_adresse as string) ?? null,
-      schadens_plz: (fall?.schadens_plz as string) ?? null,
-      schadens_ort: (fall?.schadens_ort as string) ?? null,
+      schadentyp: (fall?.szenario as string) ?? (lead?.schadens_fall_typ as string) ?? null,
+      besichtigungsort_adresse: besichtigungAdresse,
+      besichtigungsort_place_id: besichtigungPlaceId,
+      besichtigungsort_lat: besichtigungLat != null ? Number(besichtigungLat) : null,
+      besichtigungsort_lng: besichtigungLng != null ? Number(besichtigungLng) : null,
+      schadens_adresse: (fall?.schadens_adresse as string) ?? (lead?.schadens_adresse as string) ?? null,
+      schadens_plz: (fall?.schadens_plz as string) ?? (lead?.schadens_plz as string) ?? null,
+      schadens_ort: (fall?.schadens_ort as string) ?? (lead?.schadens_ort as string) ?? null,
       sv_briefing_text: (fall?.sv_briefing_text as string) ?? null,
     }
   })

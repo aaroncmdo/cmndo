@@ -242,6 +242,9 @@ export function fallComputedFields(lead: LeadRow, options: BuildFallOptions): Re
     abtretung_pdf: options.signatureUrl,
     abtretung_signiert_am: now,
     sa_unterschrieben: true,
+    // AAR-607 A1: Timestamp war NULL → Subphase-Resolver + Automations-Trigger
+    // die auf sa_unterschrieben_am warten, haben nie gefeuert.
+    sa_unterschrieben_am: now,
     // AAR-155: Entity-FKs — resolveFallEntityFks() muss vorher laufen.
     // Bei Lookup-Miss bleibt der Wert null (nicht-blockierend).
     // AAR-545 Cluster D: versicherung_id ersatzlos entfernt —
