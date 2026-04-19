@@ -19,7 +19,9 @@ export async function checkLeadAutoPhase(leadId: string) {
   if (lead.flow_token && phase === 'in-qualifizierung') {
     updates.qualifizierungs_phase = 'flow-versendet'
   }
-  if (lead.sa_unterschrieben && lead.vollmacht_unterschrieben && phase !== 'konvertiert' && phase !== 'disqualifiziert') {
+  // AAR-583 (N6): vollmacht_unterschrieben-Bool → vollmacht_signiert_am-Timestamp.
+  // Bool-Semantik bleibt: Vollmacht erhalten wenn Timestamp gesetzt.
+  if (lead.sa_unterschrieben && !!lead.vollmacht_signiert_am && phase !== 'konvertiert' && phase !== 'disqualifiziert') {
     updates.qualifizierungs_phase = 'konvertiert'
   }
 

@@ -4108,7 +4108,7 @@ export type Database = {
           voice_input_quelle: boolean
           vollmacht_datum: string | null
           vollmacht_signiert: boolean | null
-          vollmacht_unterschrieben: boolean | null
+          vollmacht_signiert_am: string | null
           vorname: string | null
           vorschaeden_beschreibung: string | null
           vorsteuerabzugsberechtigt: boolean | null
@@ -4290,7 +4290,7 @@ export type Database = {
           voice_input_quelle?: boolean
           vollmacht_datum?: string | null
           vollmacht_signiert?: boolean | null
-          vollmacht_unterschrieben?: boolean | null
+          vollmacht_signiert_am?: string | null
           vorname?: string | null
           vorschaeden_beschreibung?: string | null
           vorsteuerabzugsberechtigt?: boolean | null
@@ -4472,7 +4472,7 @@ export type Database = {
           voice_input_quelle?: boolean
           vollmacht_datum?: string | null
           vollmacht_signiert?: boolean | null
-          vollmacht_unterschrieben?: boolean | null
+          vollmacht_signiert_am?: string | null
           vorname?: string | null
           vorschaeden_beschreibung?: string | null
           vorsteuerabzugsberechtigt?: boolean | null

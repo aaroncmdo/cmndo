@@ -39,7 +39,9 @@ type FlowLinkRow = {
 
 type FallSnapshot = {
   sa_unterschrieben?: boolean | null
-  vollmacht_unterschrieben?: boolean | null
+  // AAR-583 (N6): vollmacht_unterschrieben (bool) → vollmacht_signiert_am
+  // (timestamptz). Bool-Semantik wird im Consumer via IS NOT NULL abgeleitet.
+  vollmacht_signiert_am?: string | null
 }
 
 const PHASE_LABELS: Record<string, string> = {

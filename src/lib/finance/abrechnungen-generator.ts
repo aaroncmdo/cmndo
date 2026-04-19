@@ -76,11 +76,12 @@ export async function generiereMarketingAbrechnung(monat: string): Promise<{ abr
     return { abrechnungId: existing.id }
   }
 
-  // Alle Leads mit unterschriebener Vollmacht im Monat
+  // Alle Leads mit unterschriebener Vollmacht im Monat.
+  // AAR-583 (N6): leads.vollmacht_unterschrieben gedroppt — filter auf _am.
   const { data: leads } = await supabase
     .from('leads')
     .select('id, vorname, nachname, vollmacht_datum')
-    .eq('vollmacht_unterschrieben', true)
+    .not('vollmacht_signiert_am', 'is', null)
     .gte('vollmacht_datum', `${start}T00:00:00`)
     .lte('vollmacht_datum', `${ende}T23:59:59`)
 

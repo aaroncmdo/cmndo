@@ -28,7 +28,8 @@ type FlowLinkRow = {
 
 type FallSnapshot = {
   sa_unterschrieben?: boolean | null
-  vollmacht_unterschrieben?: boolean | null
+  // AAR-583 (N6): siehe DispatchShell.tsx — vollmacht_signiert_am als Timestamp.
+  vollmacht_signiert_am?: string | null
 }
 
 function DisqualifiziertOverlay() {

@@ -60,7 +60,7 @@ type Lead = {
   flow_link_geoeffnet: boolean | null
   flow_link_abgeschlossen: boolean | null
   sa_unterschrieben: boolean | null
-  vollmacht_unterschrieben: boolean | null
+  vollmacht_signiert_am: string | null
   finanzierung_leasing: string | null
 }
 
@@ -323,7 +323,7 @@ export default function DispatchBoard({
     if (!lead) return
 
     if (newPhase === 'konvertiert') {
-      if (!lead.sa_unterschrieben || !lead.vollmacht_unterschrieben) {
+      if (!lead.sa_unterschrieben || !lead.vollmacht_signiert_am) {
         showToast('SA und Vollmacht muessen zuerst unterschrieben sein')
         return
       }
@@ -707,7 +707,7 @@ export default function DispatchBoard({
                       {/* Signatures */}
                       <div className="flex items-center gap-2 mt-2 text-[9px]">
                         <span className={lead.sa_unterschrieben ? 'text-emerald-600' : 'text-gray-300'}>SA {lead.sa_unterschrieben ? '\u2713' : '\u2717'}</span>
-                        <span className={lead.vollmacht_unterschrieben ? 'text-emerald-600' : 'text-gray-300'}>VM {lead.vollmacht_unterschrieben ? '\u2713' : '\u2717'}</span>
+                        <span className={lead.vollmacht_signiert_am ? 'text-emerald-600' : 'text-gray-300'}>VM {lead.vollmacht_signiert_am ? '\u2713' : '\u2717'}</span>
                       </div>
                     </button>
                   )
@@ -824,7 +824,7 @@ export default function DispatchBoard({
                         <td className="py-2 px-2">
                           <span className={lead.sa_unterschrieben ? 'text-emerald-600' : 'text-gray-300'}>SA{lead.sa_unterschrieben ? '\u2713' : '\u2717'}</span>
                           {' '}
-                          <span className={lead.vollmacht_unterschrieben ? 'text-emerald-600' : 'text-gray-300'}>VM{lead.vollmacht_unterschrieben ? '\u2713' : '\u2717'}</span>
+                          <span className={lead.vollmacht_signiert_am ? 'text-emerald-600' : 'text-gray-300'}>VM{lead.vollmacht_signiert_am ? '\u2713' : '\u2717'}</span>
                         </td>
                         <td className="py-2 px-2 text-gray-400">
                           {lead.created_at ? new Date(lead.created_at).toLocaleDateString('de-DE') : '—'}
@@ -975,8 +975,8 @@ export default function DispatchBoard({
                     </div>
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-gray-500">Vollmacht</span>
-                      <span className={selectedLead.vollmacht_unterschrieben ? 'text-emerald-600 font-medium' : 'text-gray-400'}>
-                        {selectedLead.vollmacht_unterschrieben ? 'Unterschrieben' : 'Ausstehend'}
+                      <span className={selectedLead.vollmacht_signiert_am ? 'text-emerald-600 font-medium' : 'text-gray-400'}>
+                        {selectedLead.vollmacht_signiert_am ? 'Unterschrieben' : 'Ausstehend'}
                       </span>
                     </div>
                   </div>
@@ -1090,7 +1090,7 @@ function LeadCard({ lead, columnKey, isSelected }: { lead: Lead; columnKey: stri
       )}
       {columnKey === 'sa-ausstehend' && (
         <div className="text-[10px] text-orange-500 mb-1">
-          {!lead.sa_unterschrieben && !lead.vollmacht_unterschrieben ? 'SA + Vollmacht fehlen'
+          {!lead.sa_unterschrieben && !lead.vollmacht_signiert_am ? 'SA + Vollmacht fehlen'
             : !lead.sa_unterschrieben ? 'SA fehlt'
             : 'Vollmacht fehlt'}
         </div>

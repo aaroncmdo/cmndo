@@ -997,9 +997,13 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   const { bestaetigeTermin } = await import('@/lib/termine/bestaetigung')
   await bestaetigeTermin(termin.id)
 
-  // Fall: Vollmacht markieren — Termin-Status spiegelt die View aus gutachter_termine
+  // Fall: Vollmacht markieren — Termin-Status spiegelt die View aus gutachter_termine.
+  // AAR-583 (N6): `faelle.vollmacht_unterschrieben` existierte in der DB nie als
+  // eigene Spalte (pre-existing Drift). Canonical ist `vollmacht_signiert_am`
+  // (Timestamp). Bool-Semantik wird aus IS NOT NULL abgeleitet.
+  const nowIso = new Date().toISOString()
   await admin.from('faelle')
-    .update({ vollmacht_unterschrieben: true, vollmacht_datum: new Date().toISOString() })
+    .update({ vollmacht_signiert_am: nowIso, vollmacht_datum: nowIso })
     .eq('id', fallId)
 
   // KFZ-136: Reminder generieren
