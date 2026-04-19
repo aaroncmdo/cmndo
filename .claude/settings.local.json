@@ -33,5 +33,7 @@
       "C:\\Users\\Aaron Sprafke\\.claude",
       "c:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\app\\flow\\signatur"
     ]
-  }
+  },
+  "spinnerTipsEnabled": true,
+  "prefersReducedMotion": false
 }
