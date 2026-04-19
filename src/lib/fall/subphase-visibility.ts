@@ -597,9 +597,10 @@ export interface FallForPipeline {
  *    - sonst upcoming
  *
  * Die Subphasen-Timeline (Parameter `reached`) ist optional. Ohne Timeline
- * markieren wir nur die aktuelle + alle Subphasen mit niedrigerem phase-Wert
- * als done (grobe Heuristik). Der Phase-Resolver (AAR-538) kann präzisere
- * Timelines liefern.
+ * markieren wir die aktuelle + alle Subphasen mit niedrigerem phase-Wert
+ * UND — innerhalb der aktuellen Haupt-Phase — alle Subphasen vor der aktuellen
+ * (gemäß Insertion-Order in SUBPHASE_VISIBILITY) als done. Der Phase-Resolver
+ * (AAR-538) kann präzisere Timelines liefern.
  */
 export function buildPhasePipelineData(
   fall: FallForPipeline,
@@ -618,15 +619,22 @@ export function buildPhasePipelineData(
   return phaseNumbers.map((phaseNr) => {
     const phaseName = PHASE_META[phaseNr].name
     const subRules = Object.entries(SUBPHASE_VISIBILITY).filter(([, r]) => r.phase === phaseNr)
+    // Index der aktuellen Subphase innerhalb dieser Haupt-Phase — erlaubt uns,
+    // frühere Subphasen derselben Phase korrekt als done zu markieren
+    // (Insertion-Order in SUBPHASE_VISIBILITY = zeitlicher Ablauf).
+    const aktuellerIdx =
+      phaseNr === aktuellePhaseNr && aktuelleSubphase
+        ? subRules.findIndex(([id]) => id === aktuelleSubphase)
+        : -1
 
-    const subphases: SubphaseData[] = subRules.map(([id, rule]) => {
+    const subphases: SubphaseData[] = subRules.map(([id, rule], idx) => {
       const rolleRule = rule.rollen[rolle] ?? { visible: false }
       const reached = reachedMap.get(id)
       let subState: PhaseState
       if (id === aktuelleSubphase) subState = 'active'
       else if (reached) subState = 'done'
       else if (phaseNr < aktuellePhaseNr) subState = 'done'
-      else if (phaseNr > aktuellePhaseNr) subState = 'upcoming'
+      else if (phaseNr === aktuellePhaseNr && aktuellerIdx >= 0 && idx < aktuellerIdx) subState = 'done'
       else subState = 'upcoming'
       return {
         id,

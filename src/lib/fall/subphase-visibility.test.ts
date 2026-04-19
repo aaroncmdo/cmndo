@@ -165,4 +165,20 @@ describe('buildPhasePipelineData', () => {
     expect(data[0].name).toBe('Ersterfassung & Termin')
     expect(data[9].name).toBe('Auszahlung & Abschluss')
   })
+
+  it('markiert frühere Subphasen derselben Haupt-Phase als done (Insertion-Order)', () => {
+    // warten_auf_vs ist innerhalb Phase 5 NACH anschlussschreiben_versendet
+    // definiert — ohne reached-Timeline muss buildPhasePipelineData das
+    // aus der Insertion-Order ableiten, sonst zeigt die UI „Warten auf VS"
+    // aktiv, aber „Anschlussschreiben versendet" fälschlich als ausstehend.
+    const data = buildPhasePipelineData(
+      { id: 'f1', aktuelle_phase: 'warten_auf_vs' },
+      'admin',
+    )
+    const phase5 = data.find((p) => p.phase === 5)!
+    const versendet = phase5.subphases!.find((s) => s.id === 'anschlussschreiben_versendet')!
+    const wartend = phase5.subphases!.find((s) => s.id === 'warten_auf_vs')!
+    expect(versendet.state).toBe('done')
+    expect(wartend.state).toBe('active')
+  })
 })

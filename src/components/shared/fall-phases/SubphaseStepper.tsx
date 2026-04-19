@@ -18,7 +18,7 @@ export function SubphaseStepper({
   return (
     <ul className="mt-1.5 ml-6 space-y-1 border-l border-claimondo-border pl-3">
       {sichtbar.map((sub) => (
-        <li key={sub.id} className="flex items-center gap-2">
+        <li key={sub.id} className="flex items-center gap-2" data-subphase-id={sub.id}>
           <PhaseStatusDot state={sub.state} size="xs" />
           <span
             className={
@@ -31,7 +31,7 @@ export function SubphaseStepper({
                     : 'text-[12px] text-gray-400'
             }
           >
-            {sub.id} — {sub.label}
+            {sub.label}
           </span>
           {showTimestamps && sub.reachedAt && (
             <span className="text-[10px] text-gray-400 ml-auto">
