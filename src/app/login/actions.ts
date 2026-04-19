@@ -54,7 +54,7 @@ export async function login(formData: FormData) {
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('rolle, force_password_change, auth_provider')
+    .select('rolle, force_password_change, auth_provider, twofa_aktiviert, twofa_email_aktiviert')
     .eq('id', user.id)
     .single()
 
@@ -78,6 +78,25 @@ export async function login(formData: FormData) {
     redirect('/passwort-aendern')
   }
 
+  // AAR-562: Wenn der User kein 2FA aktiviert hat, setzen wir das
+  // claimondo_2fa_verified-Cookie hier direkt (Server Action darf Cookies
+  // schreiben, /login/2fa-Page als Server Component in Next.js 16 nicht
+  // zuverlässig). Ohne diesen Cookie redirected die Middleware jede
+  // /admin/*-Navigation zurück auf /login/2fa → /-Loop.
+  // Google-OAuth-User durchlaufen diesen Flow nicht — für sie wird das
+  // Cookie beim OAuth-Callback gesetzt (bzw. der 2FA-Flow übersprungen).
+  const zweiFaInaktiv =
+    profile.twofa_aktiviert === false && profile.twofa_email_aktiviert === false
+  if (zweiFaInaktiv) {
+    cookieStore.set('claimondo_2fa_verified', '1', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 3 * 24 * 60 * 60,
+    })
+  }
+
   // BUG-82: revalidatePath('/', 'layout') vor dem redirect() ist NOTWENDIG
   // damit der Next.js Router-Cache die alte RSC-Payload fuer den Ziel-Pfad
   // (z.B. /gutachter, das vor dem Login als 'redirect to /login' gecached
@@ -86,5 +105,7 @@ export async function login(formData: FormData) {
   // Root Cause: Server Actions revalidieren nur den AKTUELLEN Pfad, nicht
   // den Ziel-Pfad eines redirect(). Bekanntes App-Router Verhalten.
   revalidatePath('/', 'layout')
+  // Wenn 2FA aktiv ist und noch nicht verifiziert, schickt die Middleware
+  // den User sowieso nach /login/2fa — wir redirecten direkt zur Ziel-Rolle.
   redirect(roleToPath(profile.rolle))
 }
