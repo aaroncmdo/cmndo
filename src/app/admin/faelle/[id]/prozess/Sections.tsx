@@ -31,6 +31,8 @@ import {
   uebergebeFallKlage,
 } from '../actions/prozess'
 import { triggerLexDriveEventManually } from '../lexdrive-actions'
+// AAR-561 (C12): Konfrontations-Dispatch-Lite-Trigger aus KB-Seite
+import { triggerKonfrontationFromAdmin } from '../actions/konfrontation-trigger'
 import EndpointRegister from '../_components/LexDriveTriggerPanel'
 import InlineEditField from '../stammdaten/InlineEditField'
 
@@ -447,14 +449,28 @@ export function NachbesichtigungSection() {
         nachbesichtigung_termin: iso,
         konfrontation: !!svKonfroGewuenscht,
       })
-      if (r.success) {
-        toast.success(`Termin ${termin.datum} ${termin.uhrzeit} bestätigt`)
-        if (svKonfroGewuenscht) {
-          // AAR-561 (C12): Konfrontations-Dispatch — Stub bis C12 fertig
-          toast.info('Konfrontations-Dispatch (AAR-561 C12) wird bei Fertigstellung automatisch getriggert.')
+      if (!r.success) {
+        toast.error(r.error ?? 'Bestätigung fehlgeschlagen')
+        return
+      }
+      toast.success(`Termin ${termin.datum} ${termin.uhrzeit} bestätigt`)
+
+      // AAR-561 (C12): Konfrontations-Dispatch-Lite — nur wenn Kunde (via C9)
+      // SV-Präsenz gewünscht hat. Erstellt einen gutachter_termine-Row mit
+      // typ='konfrontation', bezahlt=false, und triggert SV-Mitteilung.
+      if (svKonfroGewuenscht) {
+        const konfro = await triggerKonfrontationFromAdmin({
+          fallId: fall.id,
+          terminIso: new Date(iso).toISOString(),
+        })
+        if (konfro.success) {
+          toast.success('Konfrontations-Dispatch-Lite ausgelöst — SV wurde benachrichtigt')
+        } else {
+          toast.error(konfro.error ?? 'Konfrontations-Dispatch-Lite fehlgeschlagen')
         }
-        refreshFall()
-      } else toast.error(r.error ?? 'Bestätigung fehlgeschlagen')
+      }
+
+      refreshFall()
     })
   }
 
@@ -515,8 +531,8 @@ export function NachbesichtigungSection() {
 
       {konfrontation === true && (
         <div className="rounded-md bg-violet-50 border border-violet-200 p-2 text-[11px] text-violet-800">
-          Konfrontations-Termin: SV-Dispatch-Lite via AAR-561 (C12) ohne zusätzliche
-          Bezahlung – Stub bis C12 fertig.
+          Konfrontations-Termin aktiv — SV-Dispatch-Lite (AAR-561 C12) wurde
+          ausgelöst. SV wurde benachrichtigt und kann in seiner Fallakte annehmen.
         </div>
       )}
 

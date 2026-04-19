@@ -430,6 +430,107 @@ async function sendKbMitteilung(
 }
 
 /**
+ * AAR-561 (C12): SV bekommt eine Mitteilung, dass der Kunde ihn um
+ * Konfrontations-Begleitung bei der Nachbesichtigung gebeten hat.
+ * Der SV sieht den Termin + Annehmen/Ablehnen direkt in der SV-Fallakte
+ * (KonfrontationsTerminCard aus C10/AAR-559).
+ */
+async function sendSvKonfrontationsAnfrage(
+  fallId: string,
+  payload: LexDriveEventPayload,
+): Promise<void> {
+  const db = createAdminClient()
+  const { data: fall } = await db
+    .from('faelle')
+    .select('id, fall_nummer, sv_id')
+    .eq('id', fallId)
+    .single()
+  if (!fall?.sv_id) return
+
+  const terminDatumRaw = (payload as Record<string, unknown>).termin_datum
+  const terminLabel =
+    typeof terminDatumRaw === 'string' && terminDatumRaw
+      ? new Date(terminDatumRaw).toLocaleString('de-DE', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : 'offen'
+
+  await createMitteilung({
+    empfaenger_id: fall.sv_id as string,
+    empfaenger_rolle: 'sachverstaendiger',
+    kategorie: 'task',
+    titel: 'Konfrontations-Begleitung angefragt',
+    inhalt:
+      `Der Kunde wünscht deine Begleitung bei der Nachbesichtigung am ${terminLabel}. ` +
+      'Kein neuer Auftrag — Begleitung über bestehenden Fall. Bitte in der Fallakte annehmen oder ablehnen.',
+    kontext_typ: 'fall',
+    kontext_id: fallId,
+    prioritaet: 'hoch',
+  })
+}
+
+/**
+ * AAR-561 (C12): SV hat den Konfrontations-Termin bestätigt — setzt die
+ * zugehörige gutachter_termine-Row von 'reserviert' auf 'bestaetigt'.
+ * Wird nicht-fatal behandelt (wenn keine Row existiert, weil der Dispatch-
+ * Lite nie gelaufen ist, bleibt die faelle-Spalte trotzdem gepflegt).
+ */
+async function syncKonfrontationsTerminBestaetigt(
+  fallId: string,
+  _payload: LexDriveEventPayload,
+): Promise<void> {
+  const db = createAdminClient()
+  await db
+    .from('gutachter_termine')
+    .update({ status: 'bestaetigt' })
+    .eq('fall_id', fallId)
+    .eq('typ', 'konfrontation')
+    .in('status', ['reserviert', 'gegenvorschlag'])
+}
+
+/**
+ * AAR-561 (C12): Kunde bekommt eine Mitteilung, dass sein SV bei der
+ * Nachbesichtigung dabei ist. WA-Template (T-Konfrontation-Bestaetigung-Kunde)
+ * folgt separat (Template muss in Twilio-Console angelegt + ENV gesetzt werden).
+ */
+async function sendKundeKonfrontationBestaetigt(
+  fallId: string,
+  payload: LexDriveEventPayload,
+): Promise<void> {
+  const db = createAdminClient()
+  const { data: fall } = await db
+    .from('faelle')
+    .select('kunde_id, nachbesichtigung_sv_termin_vereinbart_am')
+    .eq('id', fallId)
+    .single()
+  if (!fall?.kunde_id) return
+
+  const datumIso = (fall.nachbesichtigung_sv_termin_vereinbart_am as string | null) ??
+    (payload.bestaetigt_am as string | undefined) ??
+    new Date().toISOString()
+  const datumLabel = new Date(datumIso).toLocaleDateString('de-DE', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+
+  await createMitteilung({
+    empfaenger_id: fall.kunde_id as string,
+    empfaenger_rolle: 'kunde',
+    kategorie: 'update',
+    titel: 'Dein Sachverständiger ist bei der Nachbesichtigung dabei',
+    inhalt: `Dein Sachverständiger hat bestätigt, dass er dich bei der Nachbesichtigung am ${datumLabel} begleitet.`,
+    kontext_typ: 'fall',
+    kontext_id: fallId,
+    prioritaet: 'normal',
+  })
+}
+
+/**
  * AAR-540: vs_kuerzt Pflichtfeld-Validation + conditional Auto-Trigger.
  * - vs_kuerzungs_typ MUSS gesetzt sein
  * - bei 'technisch' oder 'gemischt' → Auto-Trigger technische_stellungnahme_benoetigt
@@ -613,9 +714,21 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       await sendKbMitteilung(
         input.fallId,
         'SV hat Konfrontation abgelehnt',
-        input.payload.grund ?? 'Bitte alternative Schritte evaluieren.',
+        input.payload.grund ?? input.payload.notiz_sv ?? 'Bitte alternative Schritte evaluieren.',
         'hoch',
       )
+    }
+    // AAR-561 (C12): SV bekommt Mitteilung mit Termin-Datum + Fallnummer,
+    // sobald der KB den Konfrontations-Dispatch-Lite ausgelöst hat.
+    if (input.eventType === 'sv_konfrontation_anfrage_versendet') {
+      await sendSvKonfrontationsAnfrage(input.fallId, input.payload)
+    }
+    // AAR-561 (C12): SV-Annahme → gutachter_termine-Row auf 'bestaetigt' + Kunde
+    // informieren. Die DB-Feld-Updates für faelle (vereinbart_am) passieren
+    // bereits in computeFieldUpdates oben.
+    if (input.eventType === 'sv_konfrontation_bestaetigt') {
+      await syncKonfrontationsTerminBestaetigt(input.fallId, input.payload)
+      await sendKundeKonfrontationBestaetigt(input.fallId, input.payload)
     }
     if (input.eventType === 'kunde_nachbesichtigung_termine_eingereicht') {
       const inhalt = input.payload.sv_konfrontation_gewuenscht
