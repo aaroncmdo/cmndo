@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useCallback, useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
@@ -206,6 +207,15 @@ function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState('')
   const menuRef = useRef<HTMLDivElement>(null)
+  // AAR-572 Fix: Overlay per Portal aus dem Column-Scroll-Container rausheben —
+  // `overflow-y:auto` auf der Column erzwingt auch horizontales Clipping, der
+  // alte `left-full`-Trick wurde deshalb abgeschnitten. Position wird beim
+  // Hover aus der Card-BoundingRect berechnet.
+  const cardRef = useRef<HTMLDivElement>(null)
+  const [overlayPos, setOverlayPos] = useState<{ top: number; left: number } | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
 
   // AAR-572 (V6): Pipeline-Daten für das Hover-Overlay lazily berechnen.
   // Nur für den Admin-Hover-Blick — Kanban bleibt ansonsten schlank.
@@ -222,6 +232,20 @@ function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
     [fall.id, fall.aktuelle_phase, fall.abgeschlossen_am],
   )
 
+  function handleMouseEnter() {
+    const r = cardRef.current?.getBoundingClientRect()
+    if (!r) return
+    const overlayW = 260
+    const gap = 8
+    // Wenn rechts kein Platz mehr (überlaufende Rand-Spalten), links anzeigen.
+    const overflowRight = r.right + gap + overlayW > window.innerWidth
+    const left = overflowRight ? r.left - overlayW - gap : r.right + gap
+    setOverlayPos({ top: r.top, left: Math.max(8, left) })
+  }
+  function handleMouseLeave() {
+    setOverlayPos(null)
+  }
+
   useEffect(() => {
     function h(e: MouseEvent) { if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false) }
     document.addEventListener('mousedown', h)
@@ -230,9 +254,15 @@ function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
 
   return (
     <>
-      <div className={`group relative rounded-lg border hover:shadow-sm transition-all ${
-        fall.ist_aktiv === false ? 'bg-red-50/60 border-red-200 opacity-60' : 'bg-white border-gray-200 hover:border-gray-300'
-      }`} style={{ padding: '6px 8px' }}>
+      <div
+        ref={cardRef}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className={`group relative rounded-lg border hover:shadow-sm transition-all ${
+          fall.ist_aktiv === false ? 'bg-red-50/60 border-red-200 opacity-60' : 'bg-white border-gray-200 hover:border-gray-300'
+        }`}
+        style={{ padding: '6px 8px' }}
+      >
         {/* KFZ-182: Roter Dot wenn Chat UND Updates > 0 */}
         {(fall.ungelesene_nachrichten ?? 0) > 0 && (fall.ungelesene_updates ?? 0) > 0 && <NotificationDot />}
         <div className="flex items-center justify-between mb-0.5">
@@ -269,11 +299,16 @@ function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
             </div>
           )}
         </Link>
-        {/* AAR-572 (V6): Pipeline-Overlay — erscheint rechts neben der Karte
-            beim Hover. `pointer-events-none` damit Drag&Drop auf der Karte
-            nicht gestört wird. */}
+      </div>
+
+      {/* AAR-572 (V6 Fix): Pipeline-Overlay via Portal in document.body —
+          entkommt dem `overflow:auto`-Clipping des Column-Scroll-Containers.
+          `pointer-events-none` damit Drag&Drop auf der Karte nicht gestört
+          wird. Position wird bei Hover aus der Card-BoundingRect berechnet. */}
+      {mounted && overlayPos && createPortal(
         <div
-          className="absolute left-full top-0 ml-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-40 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity pointer-events-none"
+          className="fixed z-[60] w-[260px] bg-white border border-gray-200 rounded-lg shadow-lg p-3 pointer-events-none"
+          style={{ top: overlayPos.top, left: overlayPos.left }}
           aria-hidden="true"
         >
           <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">
@@ -285,8 +320,9 @@ function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
             phases={pipelinePhases}
             variant="compact"
           />
-        </div>
-      </div>
+        </div>,
+        document.body,
+      )}
 
       {/* Delete Confirmation */}
       {modal === 'delete' && (
