@@ -751,6 +751,16 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
         'hoch',
       )
     }
+    // Phase 8 Audit-Fix: vs_quote_akzeptiert war vorher "silent event" — setzte
+    // DB-Feld + Status 'regulierung-laeuft', aber KB bekam keine Mitteilung.
+    if (input.eventType === 'vs_quote_akzeptiert') {
+      await sendKbMitteilung(
+        input.fallId,
+        'VS-Quote akzeptiert',
+        `Die Quotierung wurde akzeptiert — Fall geht in Regulierung. ${input.payload.vs_quote_prozent != null ? `Quote: ${input.payload.vs_quote_prozent}%.` : ''}`.trim(),
+        'normal',
+      )
+    }
 
     // WA-Template
     const commTrigger = EVENT_COMM_MAP[input.eventType]
