@@ -10,7 +10,10 @@ import {
   qcBestanden,
   qcNachbesserung,
 } from '../_actions'
-import { markDokumentNachgereicht } from '../_actions/dokumente'
+import { markDokumentNachgereicht, syncPflichtdokumenteForFall } from '../_actions/dokumente'
+// AAR-542 (C5): Pflicht-Matrix-UI oberhalb aller Dokument-Sektionen
+import PflichtDocMatrix from '@/components/admin/fallakte/PflichtDocMatrix'
+import type { PflichtDocMatrixEntry } from '@/lib/dokumente/pflicht-evaluator'
 import { useRouter } from 'next/navigation'
 import {
   FileTextIcon, UploadIcon, CheckCircle2Icon, ClockIcon,
@@ -154,6 +157,8 @@ export default function DokumenteTab({
   uploadbareSlots,
   sortierbareItems,
   systemDokumente,
+  pflichtMatrix,
+  isAdmin,
 }: {
   fallId: string
   pflichtdokumente: Pflichtdok[]
@@ -177,10 +182,31 @@ export default function DokumenteTab({
   // AAR-356: System-Dokumente (SA, Vollmacht, Gutachten, Kanzlei-Paket,
   // CarDentity-Vorschaden) als eigene Sektion oberhalb der Pflichtdokumente
   systemDokumente: SystemDokumenteProps
+  // AAR-542 (C5): vom Server evaluierte Pflicht-Matrix
+  pflichtMatrix: PflichtDocMatrixEntry[]
+  // AAR-542 (C5): Admin darf Debug-Modal + Re-Evaluate nutzen
+  isAdmin: boolean
 }) {
   const router = useRouter()
   const [uploading, setUploading] = useState<string | null>(null)
   const [filter, setFilter] = useState('')
+  // AAR-542 (C5): Transition für Matrix-Sync-Button
+  const [matrixSyncPending, startMatrixSyncTransition] = useTransition()
+  function handleMatrixReEvaluate() {
+    startMatrixSyncTransition(async () => {
+      const r = await syncPflichtdokumenteForFall(fallId)
+      if (!r.success) {
+        toast.error(r.error ?? 'Matrix-Sync fehlgeschlagen')
+        return
+      }
+      if (r.created && r.created > 0) {
+        toast.success(`${r.created} fehlende Pflicht-Slot${r.created > 1 ? 's' : ''} angelegt`)
+      } else {
+        toast.success('Matrix ist synchron')
+      }
+      router.refresh()
+    })
+  }
   const fileRef = useRef<HTMLInputElement>(null)
   const asFileRef = useRef<HTMLInputElement>(null)
   const [uploadTarget, setUploadTarget] = useState<{ id: string; typ: string } | null>(null)
@@ -313,6 +339,17 @@ export default function DokumenteTab({
           </div>
         </div>
       </div>
+
+      {/* AAR-542 (C5): Pflicht-Matrix — automatische Auswertung pflicht_wenn /
+          freigeschaltet_wenn aus dem dokument_katalog gegen Fall + Lead. */}
+      <PflichtDocMatrix
+        entries={pflichtMatrix}
+        isAdmin={isAdmin}
+        onReEvaluate={isAdmin ? handleMatrixReEvaluate : undefined}
+      />
+      {matrixSyncPending && (
+        <p className="text-[10px] text-gray-400 -mt-3">Matrix wird synchronisiert …</p>
+      )}
 
       {/* AAR-356: System-Dokumente — SA, Vollmacht, Gutachten, Kanzlei-Paket,
           CarDentity-Vorschadenbericht. Reine Übersicht mit Download/Vorschau,

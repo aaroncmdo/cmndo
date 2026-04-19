@@ -77,6 +77,83 @@ export async function markDokumentNachgereicht(
   return { success: true }
 }
 
+/**
+ * AAR-542 (C5): Synchronisiert pflichtdokumente-Rows mit der Katalog-Regel-
+ * Auswertung. Legt fehlende Rows für „regel_pflicht_ohne_db"-Slots an.
+ * Idempotent — bestehende Rows werden nicht verändert.
+ * Wird vom „Neu evaluieren"-Button der PflichtDocMatrix getriggert.
+ */
+export async function syncPflichtdokumenteForFall(
+  fallId: string,
+): Promise<{ success: boolean; error?: string; created?: number }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('rolle')
+    .eq('id', user.id)
+    .single()
+  const rolle = profile?.rolle as string | undefined
+  if (!['admin', 'kundenbetreuer'].includes(rolle ?? '')) {
+    return { success: false, error: 'Nur KB/Admin dürfen die Matrix synchronisieren' }
+  }
+
+  const { data: fall } = await supabase
+    .from('faelle')
+    .select('id, lead_id, vorschaden_erkannt, technische_stellungnahme_status, zeugen_vorhanden')
+    .eq('id', fallId)
+    .single()
+  if (!fall) return { success: false, error: 'Fall nicht gefunden' }
+
+  const { data: lead } = fall.lead_id
+    ? await supabase.from('leads').select('*').eq('id', fall.lead_id).single()
+    : { data: null }
+
+  const { getAlleSlots } = await import('@/lib/dokumente/katalog')
+  const { evaluatePflichtdocs } = await import('@/lib/dokumente/pflicht-evaluator')
+
+  const [katalog, existing] = await Promise.all([
+    getAlleSlots(supabase),
+    supabase
+      .from('pflichtdokumente')
+      .select('id, dokument_typ, status, pflicht')
+      .eq('fall_id', fallId),
+  ])
+
+  const matrix = evaluatePflichtdocs({
+    katalog,
+    fall: fall as unknown as Record<string, unknown>,
+    lead: (lead ?? null) as Record<string, unknown> | null,
+    pflichtdokumente: (existing.data ?? []) as Array<{
+      id: string
+      dokument_typ: string
+      status: string | null
+      pflicht: boolean | null
+    }>,
+  })
+
+  const fehlend = matrix.filter((e) => e.inkonsistenz === 'regel_pflicht_ohne_db')
+  if (fehlend.length === 0) {
+    return { success: true, created: 0 }
+  }
+
+  const rows = fehlend.map((e) => ({
+    fall_id: fallId,
+    dokument_typ: e.slot_id,
+    pflicht: true,
+    status: 'ausstehend',
+    quelle: 'system-regel-sync',
+  }))
+
+  const { error } = await supabase.from('pflichtdokumente').insert(rows)
+  if (error) return { success: false, error: error.message }
+
+  revalidatePath(`/admin/faelle/${fallId}`)
+  return { success: true, created: fehlend.length }
+}
+
 export async function requestCardentityTypBForFall(
   fallId: string,
 ): Promise<RequestTypBResult> {

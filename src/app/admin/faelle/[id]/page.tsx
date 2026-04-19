@@ -26,6 +26,8 @@ import { resolveSubphase, type GutachterTerminRow, type WebhookEventRow, type Fa
 import { getFallEventStream } from '@/lib/fall/event-stream'
 // AAR-541 (C4): Chat-Teilnehmer für den Kommunikations-Tab
 import { getChatTeilnehmer } from '@/lib/chatGruppe'
+// AAR-542 (C5): Pflicht-Matrix — Katalog-Regel-Auswertung serverseitig
+import { evaluatePflichtdocs } from '@/lib/dokumente/pflicht-evaluator'
 
 export default async function FallaktePage({
   params,
@@ -407,6 +409,21 @@ export default async function FallaktePage({
   // ihre eigene Akte anderswo, SV/Kanzlei brauchen die Analyse nicht).
   const zeigeAnalyseCard = userRolle === 'admin' || userRolle === 'kundenbetreuer'
 
+  // AAR-542 (C5): Pflicht-Matrix evaluieren — vor return, nach allen Queries.
+  // Nutzt den bereits geladenen Katalog (katalogAlleSlots) + die bestehenden
+  // pflichtdokumente-Rows + fall/lead. Alle 30 Slots × Regel = <10ms JS-Work.
+  const pflichtMatrix = evaluatePflichtdocs({
+    katalog: katalogAlleSlots,
+    fall: fall as unknown as Record<string, unknown>,
+    lead: (leadResult.data ?? null) as Record<string, unknown> | null,
+    pflichtdokumente: (pflichtdokumente ?? []) as Array<{
+      id: string
+      dokument_typ: string
+      status: string | null
+      pflicht: boolean | null
+    }>,
+  })
+
   // AAR-538 (C1): Subphase + next_hint berechnen (pure function)
   const subphase = resolveSubphase({
     fall: fall as unknown as FallRow,
@@ -472,6 +489,9 @@ export default async function FallaktePage({
           // AAR-356: System-Dokumente (SA, Vollmacht, Gutachten, Kanzlei-Paket,
           // CarDentity-Vorschaden) in eigener Sektion im Dokumente-Tab
           systemDokumente,
+          // AAR-542 (C5): Pflicht-Matrix + Admin-Flag fürs Debug-Modal
+          pflichtMatrix,
+          isAdmin: userRolle === 'admin' || userRolle === 'kundenbetreuer',
         }}
       />
     </>
