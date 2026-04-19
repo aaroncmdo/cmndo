@@ -6,7 +6,6 @@
 // Die Phasen-Darstellung wandert in die linke <PhasePipeline />-Spalte.
 
 import { useState } from 'react'
-import { toast } from 'sonner'
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -18,6 +17,7 @@ import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
 import { PhaseTriggerList } from './PhaseTriggerList'
 import { KanzleiPaketModal } from './KanzleiPaketModal'
 import { ManualStatusOverrideModal } from './ManualStatusOverrideModal'
+import { ManualPhaseOverrideModal } from './ManualPhaseOverrideModal'
 import { useFall } from '@/app/admin/faelle/[id]/FallContext'
 
 const SZENARIO_LABEL: Record<string, string> = {
@@ -37,9 +37,11 @@ export function FallActionBar({ result, fallId }: { result: SubphaseResult; fall
   const [triggerOpen, setTriggerOpen] = useState(false)
   const [paketOpen, setPaketOpen] = useState(false)
   const [overrideOpen, setOverrideOpen] = useState(false)
+  const [phaseOverrideOpen, setPhaseOverrideOpen] = useState(false)
 
   const isAdmin = userRolle === 'admin'
   const currentStatus = fall.status ?? 'unbekannt'
+  const currentSubphase = (fall as { aktuelle_phase?: string | null }).aktuelle_phase ?? null
 
   return (
     <div className="bg-white border-b border-gray-200">
@@ -85,14 +87,17 @@ export function FallActionBar({ result, fallId }: { result: SubphaseResult; fall
             <InboxIcon className="w-3.5 h-3.5" />
             Kanzlei-Paket einlesen
           </button>
-          <button
-            type="button"
-            onClick={() => toast.info('Phase vorrücken: kommt mit AAR-573 (V7)')}
-            className="inline-flex items-center gap-1.5 text-xs font-medium rounded-md bg-[#0D1B3E] text-white px-2.5 py-1.5 hover:bg-[#162857]"
-          >
-            Phase vorrücken
-            <ArrowRightIcon className="w-3.5 h-3.5" />
-          </button>
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={() => setPhaseOverrideOpen(true)}
+              className="inline-flex items-center gap-1.5 text-xs font-medium rounded-md bg-[#0D1B3E] text-white px-2.5 py-1.5 hover:bg-[#162857]"
+              title="Subphase manuell überschreiben (Admin-only, umgeht Subphase-Resolver)"
+            >
+              Phase vorrücken
+              <ArrowRightIcon className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -113,12 +118,20 @@ export function FallActionBar({ result, fallId }: { result: SubphaseResult; fall
       />
 
       {isAdmin && (
-        <ManualStatusOverrideModal
-          open={overrideOpen}
-          onOpenChange={setOverrideOpen}
-          fallId={fallId}
-          currentStatus={currentStatus}
-        />
+        <>
+          <ManualStatusOverrideModal
+            open={overrideOpen}
+            onOpenChange={setOverrideOpen}
+            fallId={fallId}
+            currentStatus={currentStatus}
+          />
+          <ManualPhaseOverrideModal
+            open={phaseOverrideOpen}
+            onOpenChange={setPhaseOverrideOpen}
+            fallId={fallId}
+            currentSubphase={currentSubphase}
+          />
+        </>
       )}
     </div>
   )
