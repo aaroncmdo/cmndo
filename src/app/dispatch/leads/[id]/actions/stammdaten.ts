@@ -2,7 +2,7 @@
 
 // AAR-143: Stammdaten-Inline-Edit extrahiert aus actions.ts (AAR-140 / W6).
 // Allowlist verhindert dass User über dieses Endpoint kritische Felder wie
-// qualifizierungs_phase / status / disqualifikations_grund_key manipulieren —
+// qualifizierungs_phase / status / disqualifiziert_grund_key manipulieren —
 // diese gehen ausschließlich über die jeweiligen dedizierten Actions.
 
 import { createClient } from '@/lib/supabase/server'

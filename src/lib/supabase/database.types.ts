@@ -3963,11 +3963,10 @@ export type Database = {
           created_at: string | null
           dat_einschaetzung: Json | null
           dat_pdf_url: string | null
-          disqualifikations_grund: string | null
-          disqualifikations_grund_key: string | null
           disqualifiziert: boolean | null
           disqualifiziert_am: string | null
           disqualifiziert_grund: string | null
+          disqualifiziert_grund_key: string | null
           disqualifiziert_notiz: string | null
           disqualifizierung_grund: string | null
           eigene_policennr: string | null
@@ -4148,11 +4147,10 @@ export type Database = {
           created_at?: string | null
           dat_einschaetzung?: Json | null
           dat_pdf_url?: string | null
-          disqualifikations_grund?: string | null
-          disqualifikations_grund_key?: string | null
           disqualifiziert?: boolean | null
           disqualifiziert_am?: string | null
           disqualifiziert_grund?: string | null
+          disqualifiziert_grund_key?: string | null
           disqualifiziert_notiz?: string | null
           disqualifizierung_grund?: string | null
           eigene_policennr?: string | null
@@ -4333,11 +4331,10 @@ export type Database = {
           created_at?: string | null
           dat_einschaetzung?: Json | null
           dat_pdf_url?: string | null
-          disqualifikations_grund?: string | null
-          disqualifikations_grund_key?: string | null
           disqualifiziert?: boolean | null
           disqualifiziert_am?: string | null
           disqualifiziert_grund?: string | null
+          disqualifiziert_grund_key?: string | null
           disqualifiziert_notiz?: string | null
           disqualifizierung_grund?: string | null
           eigene_policennr?: string | null

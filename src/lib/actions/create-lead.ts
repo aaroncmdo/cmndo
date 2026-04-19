@@ -63,7 +63,7 @@ export async function createLeadFromSchritt1(
       qualifizierungs_phase: 'erstkontakt',
       status: isAbort ? 'disqualifiziert' : 'neu',
       disqualifiziert: isAbort ? true : false,
-      disqualifikations_grund_key: isAbort ? 'eigenverantwortung' : null,
+      disqualifiziert_grund_key: isAbort ? 'eigenverantwortung' : null,
       disqualifiziert_am: isAbort ? new Date().toISOString() : null,
       promotion_code_id: promotionCodeId,
       voice_input_quelle: voiceInputQuelle,

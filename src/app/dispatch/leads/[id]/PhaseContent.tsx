@@ -33,8 +33,8 @@ type FallSnapshot = {
 
 function DisqualifiziertOverlay() {
   const { lead } = useDispatchPhase()
-  const grund = (lead as { disqualifikations_grund_key?: string | null })
-    .disqualifikations_grund_key as DisqualifikationsGrund | null
+  const grund = (lead as { disqualifiziert_grund_key?: string | null })
+    .disqualifiziert_grund_key as DisqualifikationsGrund | null
   if (!grund) return null
   return <ExitSkript grund={grund} />
 }

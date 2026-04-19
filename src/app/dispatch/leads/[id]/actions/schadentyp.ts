@@ -69,8 +69,8 @@ export async function saveSchadentyp(
         .maybeSingle()
       if (!lead?.gegner_kennzeichen?.trim()) {
         updates.qualifizierungs_phase = 'disqualifiziert'
-        updates.disqualifikations_grund = 'Parkplatz ohne Kennzeichen + keine Überwachungskamera'
-        updates.disqualifikations_grund_key = 'parkplatz_ohne_kamera'
+        updates.disqualifiziert_grund = 'Parkplatz ohne Kennzeichen + keine Überwachungskamera'
+        updates.disqualifiziert_grund_key = 'parkplatz_ohne_kamera'
         disqualifiziert = true
       }
     }

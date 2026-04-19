@@ -82,8 +82,8 @@ export async function saveHardGate(
 
   if (disqualifiziert) {
     updates.qualifizierungs_phase = 'disqualifiziert'
-    updates.disqualifikations_grund = grund
-    updates.disqualifikations_grund_key = grundKey
+    updates.disqualifiziert_grund = grund
+    updates.disqualifiziert_grund_key = grundKey
   } else {
     // AAR-114 + AAR-138/W4: Q3 ist Polizei-vor-Ort, gilt als beantwortet
     // sobald polizei_vor_ort true ODER false gesetzt ist.
