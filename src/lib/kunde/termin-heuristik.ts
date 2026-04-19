@@ -13,7 +13,9 @@
 type MinLead = {
   halter_strasse?: string | null
   halter_plz?: string | null
-  halter_ort?: string | null
+  // AAR-598: kanonisch ist `halter_stadt` auf `leads` (und `faelle`) —
+  // `halter_ort` existiert in keiner der beiden Tabellen.
+  halter_stadt?: string | null
 }
 
 type MinFall = {

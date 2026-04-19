@@ -82,13 +82,21 @@ export default async function KundeTerminPage({
   // AAR-384: Halter-Adresse laden für Heuristik "Termin beim Kunden zuhause".
   // Wenn ja → kein Tracking anbieten (Kunde ist eh da). Wenn nein → Card
   // einblenden sobald SV losgefahren ist.
-  const { data: lead } = fall?.lead_id
+  // AAR-598: vorher wurde `halter_ort` selectiert — existiert nicht in `leads`
+  // (canonical ist `halter_stadt`). Query scheiterte stumm, `lead` war null,
+  // trackingSinnvoll defaultete auf true. Fix + Error-Logging damit ein Regress
+  // diesmal sichtbar wird.
+  const leadRes = fall?.lead_id
     ? await db
         .from('leads')
-        .select('halter_strasse, halter_plz, halter_ort')
+        .select('halter_strasse, halter_plz, halter_stadt')
         .eq('id', fall.lead_id)
         .single()
-    : { data: null }
+    : null
+  if (leadRes?.error) {
+    console.error('[AAR-598] kunde/termin halter-Adresse load failed:', leadRes.error)
+  }
+  const lead = leadRes?.data ?? null
   const trackingSinnvoll = !terminBeiKundeZuhause(lead, fall)
 
   // AAR-423: SV-Branding + Profil laden für Light-Branding und Attribution.
