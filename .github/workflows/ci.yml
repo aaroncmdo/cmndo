@@ -18,6 +18,16 @@ jobs:
 
       - run: npm ci
 
+      # Next.js-Build-Cache — webpack + SWC wiederverwenden wenn
+      # Source-Hash gleich. Spart ~50% Build-Zeit bei incremental Changes.
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('src/**/*.{ts,tsx,js,jsx}', 'public/**/*', 'next.config.*', 'tsconfig.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
       - name: Typecheck
         run: npm run typecheck
 
@@ -48,8 +58,24 @@ jobs:
 
       - run: npm ci
 
+      # Playwright Browser-Binaries cachen — Chromium-Install
+      # dauert sonst 30-60s pro Run.
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+
       - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
+        # Bei Cache-Hit nur System-Dependencies (apt) neu installieren, keine
+        # Browser-Binaries. Sonst voller Install.
+        run: |
+          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" = "true" ]; then
+            npx playwright install-deps chromium
+          else
+            npx playwright install --with-deps chromium
+          fi
 
       - name: Run E2E Tests
         run: npx playwright test
