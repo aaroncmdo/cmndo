@@ -4,6 +4,11 @@
 // Wenn du ein neues Feld in `leads` hinzufügst das beim Fall-Erzeugen
 // kopiert werden soll, ergänze es HIER — nicht inline in actions.ts.
 //
+// Menschen-lesbare Doku: ../../docs/lead-fall-handoff-mapping.md (AAR-584 C1).
+// Diese enthält alle 5 Kategorien als Tabelle inkl. Defaults, Renames,
+// Transforms, Computed-Felder, Entity-Resolver und Lead-only/Fallakte-only
+// Abgrenzung. Bei Code-Änderung hier → die Doku parallel nachziehen.
+//
 // Vier Kategorien:
 //   1. DIRECT_FIELDS         — Feldname identisch in leads + faelle, kein Default,
 //                               wird übernommen wenn Lead-Wert !== undefined ist
