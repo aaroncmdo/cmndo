@@ -105,7 +105,9 @@ ${JSON.stringify({
     mietwagen: fall.mietwagen_flag,
     leasing: fall.finanzierung_leasing === 'leasing',
     abtretung_signiert_am: fall.abtretung_signiert_am,
-    vollmacht_unterschrieben: fall.vollmacht_unterschrieben,
+    // AAR-583 (N6): faelle.vollmacht_unterschrieben existierte nie — abgeleiteter
+    // Bool aus Timestamp für LLM-Context-Lesbarkeit.
+    vollmacht_unterschrieben: !!fall.vollmacht_signiert_am,
   }, null, 2)}
 
 ## Lead-Daten (Original)

@@ -37,7 +37,8 @@ type FlowLinkRow = {
 
 type FallSnapshot = {
   sa_unterschrieben?: boolean | null
-  vollmacht_unterschrieben?: boolean | null
+  // AAR-583 (N6): bool → timestamptz, Semantik via IS NOT NULL.
+  vollmacht_signiert_am?: string | null
 }
 
 type StepState = 'pending' | 'done' | 'warning' | 'disabled'
@@ -133,12 +134,12 @@ export default function Phase6StatusTracking({
     label: 'Vollmacht unterschrieben',
     sub: isPfadB
       ? 'Nicht relevant bei Pfad B — Kunde hat keine Kanzlei-Vollmacht'
-      : fall?.vollmacht_unterschrieben
+      : fall?.vollmacht_signiert_am
         ? 'LexDrive-Vollmacht erteilt'
         : 'LexDrive WhatsApp-Bot sendet Vollmacht',
     state: isPfadB
       ? 'disabled'
-      : fall?.vollmacht_unterschrieben ? 'done' : 'pending',
+      : fall?.vollmacht_signiert_am ? 'done' : 'pending',
     icon: isPfadB ? <MinusCircleIcon className="w-4 h-4" /> : <ScaleIcon className="w-4 h-4" />,
   }
 

@@ -641,17 +641,18 @@ export default async function FinancePage() {
   const gutachterAnzahlungenGesamt = (allEinzahlungen ?? []).reduce((s, e) => s + Number(e.betrag), 0)
 
   // ── Kanzlei-Provision: 150€ pro unterschriebene Vollmacht (mandatstyp=kanzlei-claimondo) ──
+  // AAR-583 (N6): leads.vollmacht_unterschrieben gedroppt — Filter auf vollmacht_signiert_am IS NOT NULL.
   const [{ data: kanzleiVollmachtenGesamt }, { data: kanzleiVollmachtenMonat }] = await Promise.all([
     supabase
       .from('leads')
       .select('id, vorname, nachname, vollmacht_datum, created_at')
-      .eq('vollmacht_unterschrieben', true)
+      .not('vollmacht_signiert_am', 'is', null)
       .eq('mandatstyp', 'kanzlei-claimondo')
       .order('vollmacht_datum', { ascending: false }),
     supabase
       .from('leads')
       .select('id')
-      .eq('vollmacht_unterschrieben', true)
+      .not('vollmacht_signiert_am', 'is', null)
       .eq('mandatstyp', 'kanzlei-claimondo')
       .gte('vollmacht_datum', monatStart)
       .lte('vollmacht_datum', monatEnde),
