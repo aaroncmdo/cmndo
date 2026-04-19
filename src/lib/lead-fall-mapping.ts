@@ -105,6 +105,16 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // AAR-357: Sachschäden an Dritten (Beschreibung-Freitext).
   // sachschaden_flag wandert über DEFAULT_FIELDS (NOT NULL DEFAULT false).
   'sachschaden_beschreibung',
+  // AAR-575 (A1): Kunde-Anschrift retten, wenn Kunde ≠ Halter.
+  // Gleicher Spaltenname in leads + faelle — Lead-Converter füllt sie nur,
+  // wenn `ist_fahrzeughalter=false` im Lead gesetzt war (bei Halter=Kunde
+  // bleiben die Felder null, weil lead.kunde_* dann auch null ist).
+  'kunde_strasse',
+  'kunde_plz',
+  'kunde_stadt',
+  'kunde_adresse',
+  'kunde_lat',
+  'kunde_lng',
 ] as const
 
 // ─── 2. DEFAULT — Feldname gleich, NOT-NULL fallback ────────────────────────
@@ -150,6 +160,13 @@ export const LEAD_TO_FALL_RENAMED_FIELDS: Record<string, string> = {
   fin_vin: 'fin',
   // AAR-548 D4: leads.schadensursache → faelle.schadens_ursache (Duplikat weg).
   schadens_ursache: 'schadensursache',
+  // AAR-575 (A1): Kunden-Identität wird auf Lead in `vorname/nachname/email/
+  // telefon` geführt (dort unabhängig von `ist_fahrzeughalter`); in faelle
+  // prefixen wir mit `kunde_` um sie klar von halter_* abzugrenzen.
+  kunde_vorname: 'vorname',
+  kunde_nachname: 'nachname',
+  kunde_email: 'email',
+  kunde_telefon: 'telefon',
 }
 
 // ─── 3b. RENAMED + DEFAULT — Fall-Spalte ≠ Lead-Spalte mit NOT-NULL-Fallback

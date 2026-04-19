@@ -64,20 +64,36 @@ function f(fall: Record<string, unknown>, key: string): string | number | null {
 }
 
 export function KundendatenSection() {
-  const { lead } = useFall()
-  // Kunde-Daten leben auf profiles bzw. leads — KEINE kunde_*-Spalten auf
-  // faelle. Inline-Edit der Kunde-Felder läuft nicht über die Fall-Allowlist
-  // (siehe stammdaten.ts) — daher hier nur Read-Only-Anzeige aus dem Lead.
-  // Bearbeitung über den Lead-Detail bzw. profiles separat.
+  const { fall, lead } = useFall()
+  // AAR-575 (A1): fall.kunde_* sind jetzt Snapshot-Spalten — werden beim
+  // Lead→Fall-Convert gefüllt. Kunde-Identität (vorname/nachname/email/telefon)
+  // kommt aus dem Converter; Kunde-Anschrift wird nur gesetzt, wenn im Lead
+  // ist_fahrzeughalter=false war (sonst null → Halter-Anschrift gilt).
+  // Bearbeitung weiterhin über den Lead-Detail bzw. profiles.
+  const vorname = (fall.kunde_vorname as string | null) ?? (lead?.vorname as string | null) ?? null
+  const nachname = (fall.kunde_nachname as string | null) ?? (lead?.nachname as string | null) ?? null
+  const email = (fall.kunde_email as string | null) ?? (lead?.email as string | null) ?? null
+  const telefon = (fall.kunde_telefon as string | null) ?? (lead?.telefon as string | null) ?? null
+  const kundeStrasse = (fall.kunde_strasse as string | null) ?? null
+  const kundePlz = (fall.kunde_plz as string | null) ?? null
+  const kundeStadt = (fall.kunde_stadt as string | null) ?? null
+  const halterStrasse = (fall.halter_strasse as string | null) ?? null
+  const kundeAbweichend = !!kundeStrasse && kundeStrasse !== halterStrasse
   return (
     <Card icon={<UserIcon className="w-4 h-4 text-gray-400" />} title="Kundendaten" hint="Bearbeiten über Lead-Detail">
       <div className="text-xs space-y-2">
-        <div><span className="text-[10px] uppercase tracking-wider text-gray-400 block">Name</span><span className="text-gray-800 font-medium">{[lead?.vorname, lead?.nachname].filter(Boolean).join(' ') || '—'}</span></div>
-        <div><span className="text-[10px] uppercase tracking-wider text-gray-400 block">E-Mail</span><span className="text-gray-800 font-medium">{lead?.email ?? '—'}</span></div>
+        <div><span className="text-[10px] uppercase tracking-wider text-gray-400 block">Name</span><span className="text-gray-800 font-medium">{[vorname, nachname].filter(Boolean).join(' ') || '—'}</span></div>
+        <div><span className="text-[10px] uppercase tracking-wider text-gray-400 block">E-Mail</span><span className="text-gray-800 font-medium">{email ?? '—'}</span></div>
       </div>
       <div className="text-xs space-y-2">
-        <div><span className="text-[10px] uppercase tracking-wider text-gray-400 block">Telefon</span><span className="text-gray-800 font-medium">{lead?.telefon ?? '—'}</span></div>
+        <div><span className="text-[10px] uppercase tracking-wider text-gray-400 block">Telefon</span><span className="text-gray-800 font-medium">{telefon ?? '—'}</span></div>
       </div>
+      {kundeAbweichend && (
+        <div className="sm:col-span-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+          <p className="text-[10px] uppercase tracking-wider text-amber-800 font-semibold mb-1">Kunde wohnt woanders als Halter</p>
+          <p className="text-xs text-amber-900">{[kundeStrasse, [kundePlz, kundeStadt].filter(Boolean).join(' ')].filter(Boolean).join(', ')}</p>
+        </div>
+      )}
     </Card>
   )
 }
