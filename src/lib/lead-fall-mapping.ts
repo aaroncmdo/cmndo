@@ -39,6 +39,10 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // AAR-181: Baujahr wird jetzt in Phase 4 als Pflichtfeld erfasst und muss
   // beim Fall-Erstellen übernommen werden
   'fahrzeug_baujahr',
+  // AAR-576 (A2): HSN/TSN aus ZB1-OCR — DAT-API-Blocker. Gleicher Spaltenname
+  // in leads + faelle.
+  'hsn',
+  'tsn',
   // Gegner
   'gegner_name',
   'gegner_versicherung',

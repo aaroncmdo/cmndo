@@ -100,11 +100,13 @@ export function KundendatenSection() {
 
 export function FahrzeugdatenSection() {
   const { fall, lead } = useFall()
-  // FIN-Spalte heißt fin_vin (nicht fin); HSN/TSN existieren auf leads, nicht
-  // auf faelle — daher in der Fallakte nicht editierbar.
+  // FIN-Spalte heißt fin_vin (nicht fin). AAR-576 (A2): hsn + tsn wandern jetzt
+  // vom Lead auf den Fall (DAT-API-Blocker) — Anzeige mit Fall→Lead-Fallback.
   // AAR-311: Cardentity Typ-B (15€) als manueller Trigger im Fahrzeug-Block.
   // Status (vorschaden_*) lebt auf leads — gemeinsam mit Dispatch + SV-Sicht.
   const fin = (fall.fin_vin as string | null) ?? (lead?.fin as string | null) ?? null
+  const hsn = (fall.hsn as string | null) ?? (lead?.hsn as string | null) ?? null
+  const tsn = (fall.tsn as string | null) ?? (lead?.tsn as string | null) ?? null
   return (
     <Card
       icon={<CarIcon className="w-4 h-4 text-gray-400" />}
@@ -115,6 +117,8 @@ export function FahrzeugdatenSection() {
       <InlineEditField label="Hersteller" fieldName="fahrzeug_hersteller" value={f(fall, 'fahrzeug_hersteller')} />
       <InlineEditField label="Modell" fieldName="fahrzeug_modell" value={f(fall, 'fahrzeug_modell')} />
       <InlineEditField label="FIN/VIN" fieldName="fin_vin" value={f(fall, 'fin_vin')} />
+      <InlineEditField label="HSN" fieldName="hsn" value={hsn} hint="AAR-576: DAT-API" />
+      <InlineEditField label="TSN" fieldName="tsn" value={tsn} hint="AAR-576: DAT-API" />
       <InlineEditField label="Baujahr *" fieldName="fahrzeug_baujahr" value={f(fall, 'fahrzeug_baujahr')} type="number" hint="AAR-181: Pflichtfeld" />
       <InlineEditField label="Farbe" fieldName="fahrzeug_farbe" value={f(fall, 'fahrzeug_farbe')} />
       <InlineEditField label="Erstzulassung" fieldName="erstzulassung" value={f(fall, 'erstzulassung')} type="date" />

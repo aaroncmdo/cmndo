@@ -16,9 +16,10 @@ import { canEditField, type FallakteRolle } from '@/lib/fall/field-permissions'
  *
  * WICHTIG: Diese Liste wurde gegen das echte faelle-Schema verifiziert
  * (information_schema.columns). Frühere Versionen enthielten zahlreiche
- * Felder die auf faelle gar nicht existieren (kunde_*, kernwert_*,
- * gegner_vorname/nachname, fin, hsn, tsn) — Saves wären serverseitig still
- * mit „column does not exist"-Fehler ausgestiegen.
+ * Felder die auf faelle gar nicht existieren (kernwert_*, gegner_vorname/
+ * nachname, fin) — Saves wären serverseitig still mit „column does not
+ * exist"-Fehler ausgestiegen. AAR-575 (kunde_*) und AAR-576 (hsn/tsn)
+ * haben die passenden Spalten inzwischen angelegt.
  *
  * Kunde-Stammdaten leben auf profiles bzw. leads — das fall-Objekt liefert
  * sie via JOIN, Inline-Edit der Kunde-Felder läuft daher gegen profiles
@@ -33,6 +34,9 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'fahrzeug_typ',
   'kennzeichen',
   'fin_vin',
+  // AAR-576 (A2): HSN/TSN aus ZB1-OCR, Admin-Override für DAT-API.
+  'hsn',
+  'tsn',
   'erstzulassung',
   'kilometerstand',
   // Halter (ZB1-OCR) — AAR-548 D7: halter_name ist GENERATED (nicht editierbar).
