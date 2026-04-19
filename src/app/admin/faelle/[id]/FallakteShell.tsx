@@ -142,7 +142,7 @@ export default function FallakteShell({
             {activeTab === 'kommunikation' && (
               <KommunikationTab currentUserId={currentUserId} teilnehmer={teilnehmer} />
             )}
-            {activeTab === 'prozess' && <ProzessTab />}
+            {activeTab === 'prozess' && <ProzessTab subphase={subphase} />}
             {activeTab === 'timeline' && <TimelineTab events={events} />}
           </div>
         </main>
