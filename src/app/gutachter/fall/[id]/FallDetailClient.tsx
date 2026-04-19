@@ -30,6 +30,9 @@ import {
 import { AbrechnungsCard } from './_components/AbrechnungsCard'
 import { StellungnahmeCard } from './_components/StellungnahmeCard'
 import { NachbesichtigungCard } from './_components/NachbesichtigungCard'
+// AAR-559 (C10): SV-Honorar-Card (nur SV-Anteil) + Konfrontations-Termin-Card
+import { SvHonorarCard } from '@/components/gutachter/SvHonorarCard'
+import { KonfrontationsTerminCard } from '@/components/gutachter/KonfrontationsTerminCard'
 import { ReklamationsCard } from './_components/ReklamationsCard'
 import { AbrechnungsartCard } from './_components/AbrechnungsartCard'
 import FallakteVollClient from './FallakteVollClient'
@@ -116,6 +119,13 @@ type Props = {
   kuerzungen?: KuerzungsPosition[]
   /** AAR-399: Katalog-Slots für SV-Upload (merged mit pflichtdokumente-Status) */
   svSlots?: SvSlotRow[]
+  /** AAR-559 (C10): SV-Honorar (nur SV-Anteil, nie Brutto) */
+  svHonorarBetrag?: number | null
+  svHonorarEingegangenAm?: string | null
+  /** AAR-559 (C10): Konfrontations-Wunsch des Kunden (C9) */
+  konfrontationGewuenscht?: boolean
+  konfrontationTerminVereinbartAm?: string | null
+  konfrontationTerminVorschlaege?: Array<{ datum: string; uhrzeit: string }> | null
 }
 
 /** AAR-399: Lokaler Typ, passt zu DokumentenListe.SlotRow */
@@ -341,6 +351,14 @@ export default function FallDetailClient(props: Props) {
             }}
             id="nachbesichtigung-card"
           />
+          {/* AAR-559 (C10): Konfrontations-Termin-Annahme/Ablehnung, wenn
+              der Kunde im Kunde-Portal (C9) SV-Präsenz gewünscht hat. */}
+          <KonfrontationsTerminCard
+            fallId={fall.id as string}
+            konfrontationGewuenscht={props.konfrontationGewuenscht ?? false}
+            terminVereinbartAm={props.konfrontationTerminVereinbartAm ?? null}
+            terminVorschlaege={props.konfrontationTerminVorschlaege ?? null}
+          />
           <AktuellePhaseCard
             subphase={subphase}
             fallId={fall.id as string}
@@ -401,6 +419,13 @@ export default function FallDetailClient(props: Props) {
           {subphase.phase === 6 && (
             <AbrechnungsCard abrechnung={props.abrechnung ?? null} subphase={subphase} />
           )}
+          {/* AAR-559 (C10): SV-Honorar-Anteil (nur gutachter_betrag/eingegangen_am,
+              nie auszahlung_kunde_betrag oder regulierung_betrag). Rendert
+              sich selbst nur wenn Betrag > 0 oder bereits eingegangen. */}
+          <SvHonorarCard
+            betrag={props.svHonorarBetrag ?? null}
+            eingegangenAm={props.svHonorarEingegangenAm ?? null}
+          />
         </aside>
 
         <section className="space-y-4 min-w-0">

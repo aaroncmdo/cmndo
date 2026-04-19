@@ -39,6 +39,7 @@ export default async function GutachterFallPage({
     { data: timeline },
     { data: abrechnung },
     { data: nachrichten },
+    { data: svView },
   ] = await Promise.all([
     fall.lead_id
       ? supabase
@@ -89,6 +90,16 @@ export default async function GutachterFallPage({
       .eq('fall_id', id)
       .eq('kanal', 'chat_kunde_sv')
       .order('created_at', { ascending: true }),
+    // AAR-559 (C10): SV-View mit Column-Filter (C8/AAR-557) — liefert nur
+    // SV-relevante Felder: SV-Honorar, Konfrontations-Wunsch + Kunden-Slots.
+    // Niemals auszahlung_kunde_betrag oder regulierung_betrag sichtbar.
+    supabase
+      .from('faelle_sv_view')
+      .select(
+        'auszahlung_gutachter_betrag, auszahlung_gutachter_eingegangen_am, nachbesichtigung_sv_konfrontation_gewuenscht, nachbesichtigung_sv_termin_vereinbart_am, nachbesichtigung_kunde_termin_vorschlaege',
+      )
+      .eq('id', id)
+      .maybeSingle(),
   ])
 
   // Fetch kundenbetreuer profile
@@ -280,6 +291,22 @@ export default async function GutachterFallPage({
     created_at: (d.hochgeladen_am as string | null) ?? null,
   }))
 
+  // AAR-559 (C10): SV-View-Felder für SvHonorarCard + KonfrontationsTerminCard.
+  // terminVorschlaege kommt als JSONB — auf {datum, uhrzeit}-Array normalisieren.
+  const svHonorarBetrag = svView?.auszahlung_gutachter_betrag != null
+    ? Number(svView.auszahlung_gutachter_betrag as number)
+    : null
+  const svHonorarEingegangenAm = (svView?.auszahlung_gutachter_eingegangen_am as string | null) ?? null
+  const konfrontationGewuenscht = !!svView?.nachbesichtigung_sv_konfrontation_gewuenscht
+  const konfrontationTerminVereinbartAm =
+    (svView?.nachbesichtigung_sv_termin_vereinbart_am as string | null) ?? null
+  const terminVorschlaegeRaw = svView?.nachbesichtigung_kunde_termin_vorschlaege
+  const terminVorschlaege = Array.isArray(terminVorschlaegeRaw)
+    ? (terminVorschlaegeRaw as Array<{ datum: string; uhrzeit: string }>).filter(
+        (s) => s && typeof s.datum === 'string' && typeof s.uhrzeit === 'string',
+      )
+    : null
+
   return (
     <FallDetailClient
       fall={fallWithAbrechnung}
@@ -311,6 +338,11 @@ export default async function GutachterFallPage({
             }
           : null
       }
+      svHonorarBetrag={svHonorarBetrag}
+      svHonorarEingegangenAm={svHonorarEingegangenAm}
+      konfrontationGewuenscht={konfrontationGewuenscht}
+      konfrontationTerminVereinbartAm={konfrontationTerminVereinbartAm}
+      konfrontationTerminVorschlaege={terminVorschlaege}
     />
   )
 }
