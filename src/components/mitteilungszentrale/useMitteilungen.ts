@@ -3,7 +3,7 @@
 // AAR-229 W3 / F-03: Hook für die Mitteilungszentrale.
 // Initialer Fetch + Counts pro Kategorie + Realtime-Subscription.
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Mitteilung, MitteilungKategorie } from '@/lib/mitteilungen/types'
 
@@ -11,6 +11,12 @@ type Counts = Record<MitteilungKategorie, number>
 
 export function useMitteilungen() {
   const supabase = useMemo(() => createClient(), [])
+  // AAR-562: Jede Hook-Instanz bekommt ihren eigenen Channel-Namen. Sonst
+  // teilen sich mehrere Consumer (z. B. Admin-Layout rendert den Panel
+  // zweimal — Mobile + Desktop) denselben Channel, und der zweite `.on()`
+  // greift auf einen bereits subscribed-Channel zu → "cannot add
+  // `postgres_changes` callbacks after `subscribe()`" + Error-Boundary.
+  const channelId = useId()
   const [items, setItems] = useState<Mitteilung[]>([])
   const [counts, setCounts] = useState<Counts>({ update: 0, task: 0, nachricht: 0, anruf: 0 })
   const [loading, setLoading] = useState(true)
@@ -49,12 +55,12 @@ export function useMitteilungen() {
   // Realtime — auf INSERT + UPDATE Events für eigene mitteilungen.
   useEffect(() => {
     const channel = supabase
-      .channel('mitteilungen-realtime')
+      .channel(`mitteilungen-realtime-${channelId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mitteilungen' }, () => load())
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'mitteilungen' }, () => load())
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [supabase, load])
+  }, [supabase, load, channelId])
 
   const totalUnread = counts.update + counts.task + counts.nachricht + counts.anruf
 
