@@ -95,6 +95,32 @@ describe('getKundenJetztZuTun — 11 States', () => {
     expect(a?.beschreibung).toContain('25')
   })
 
+  it('6b. nachbesichtigung-waehlen: nachbesichtigung_status=angefordert (AAR-558 C11)', () => {
+    const a = getKundenJetztZuTun(
+      makeFall({ nachbesichtigung_status: 'angefordert' }),
+    )
+    expect(a?.state).toBe('nachbesichtigung-waehlen')
+    expect(a?.prioritaet).toBe('hoch')
+    expect(a?.cta?.href).toBe('/kunde/nachbesichtigung/fall-test-1')
+  })
+
+  it('6b. nachbesichtigung-waehlen greift unabhängig vom Fall-Status', () => {
+    const a = getKundenJetztZuTun(
+      makeFall({
+        nachbesichtigung_status: 'angefordert',
+        status: 'regulierung-laeuft',
+      }),
+    )
+    expect(a?.state).toBe('nachbesichtigung-waehlen')
+  })
+
+  it('6b. nachbesichtigung-waehlen NICHT wenn status != angefordert', () => {
+    const a = getKundenJetztZuTun(
+      makeFall({ nachbesichtigung_status: 'termin-eingereicht' }),
+    )
+    expect(a?.state).not.toBe('nachbesichtigung-waehlen')
+  })
+
   it('7. termin-bestaetigen: sv_termin + status=reserviert, nicht bestätigt', () => {
     const inZukunft = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString()
     const a = getKundenJetztZuTun(
