@@ -102,7 +102,7 @@ export default function FallakteShell({
           {/* AAR-538 (C1): sticky Phase-Header — steht OBERHALB der Tab-Bar.
               Tab-Bar ist nicht mehr sticky, damit beide nicht am gleichen
               Anker konkurrieren. */}
-          <PhaseHeader result={subphase} />
+          <PhaseHeader result={subphase} fallId={fall.id} />
           {/* Tab-Bar */}
           <nav className="border-b border-gray-200 bg-white">
             <div className="flex items-center justify-between gap-3 px-4">

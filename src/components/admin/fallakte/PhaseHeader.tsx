@@ -1,14 +1,15 @@
 'use client'
 
 // AAR-538 (C1): Sticky Phase-Header oben in der Admin-Fallakte.
-// Zeigt Phase+Subphase+Label, Szenario-Badge, Trigger-Felder (collapsible)
-// und zwei Aktions-Stubs für C2/C3.
+// Zeigt Phase+Subphase+Label, Szenario-Badge, Trigger-Felder (collapsible).
+// AAR-539 (C2): „Kanzlei-Paket einlesen" öffnet KanzleiPaketModal.
 
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { ChevronDownIcon, ChevronUpIcon, InboxIcon, ArrowRightIcon } from 'lucide-react'
 import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
 import { PhaseTriggerList } from './PhaseTriggerList'
+import { KanzleiPaketModal } from './KanzleiPaketModal'
 
 const SZENARIO_LABEL: Record<string, string> = {
   normalfall: 'Normalfall',
@@ -22,8 +23,9 @@ const SZENARIO_LABEL: Record<string, string> = {
   gerichtsgutachten: 'Gerichtsgutachten',
 }
 
-export function PhaseHeader({ result }: { result: SubphaseResult }) {
+export function PhaseHeader({ result, fallId }: { result: SubphaseResult; fallId: string }) {
   const [open, setOpen] = useState(false)
+  const [paketOpen, setPaketOpen] = useState(false)
 
   return (
     <div className="sticky top-0 z-20 bg-white border-b border-gray-200">
@@ -48,7 +50,7 @@ export function PhaseHeader({ result }: { result: SubphaseResult }) {
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
-              onClick={() => toast.info('Kanzlei-Paket-Reader: kommt mit AAR-539 (C2)')}
+              onClick={() => setPaketOpen(true)}
               className="inline-flex items-center gap-1.5 text-xs font-medium rounded-md border border-gray-200 bg-white px-2.5 py-1.5 hover:bg-gray-50 text-[#0D1B3E]"
             >
               <InboxIcon className="w-3.5 h-3.5" />
@@ -79,6 +81,14 @@ export function PhaseHeader({ result }: { result: SubphaseResult }) {
           </div>
         )}
       </div>
+
+      <KanzleiPaketModal
+        open={paketOpen}
+        onOpenChange={setPaketOpen}
+        fallId={fallId}
+        phase={result.phase}
+        subphase={result.subphase}
+      />
     </div>
   )
 }
