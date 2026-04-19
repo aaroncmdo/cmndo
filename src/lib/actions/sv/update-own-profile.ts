@@ -105,12 +105,12 @@ export async function updateOwnProfile(
     try {
       const { data: svRow } = await supabase
         .from('sachverstaendige')
-        .select('id, paket_umkreis_km, radius_km')
+        .select('id, paket_umkreis_km')
         .eq('profile_id', user.id)
         .limit(1)
         .maybeSingle()
       if (svRow) {
-        const radiusKm = svRow.paket_umkreis_km ?? svRow.radius_km ?? 15
+        const radiusKm = svRow.paket_umkreis_km ?? 15
         const polygon = await calculateIsochrone(
           input.standort_lat,
           input.standort_lng,
