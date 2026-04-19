@@ -61,7 +61,7 @@ type Lead = {
   flow_link_abgeschlossen: boolean | null
   sa_unterschrieben: boolean | null
   vollmacht_unterschrieben: boolean | null
-  leasing_flag: boolean | null
+  finanzierung_leasing: string | null
 }
 
 type Fall = {
@@ -275,7 +275,7 @@ export default function DispatchBoard({
       // Flag filters
       if (filterPersonenschaden && !l.personenschaden_flag) return false
       if (filterMietwagen && !l.mietwagen_flag) return false
-      if (filterLeasing && !l.leasing_flag) return false
+      if (filterLeasing && l.finanzierung_leasing !== 'leasing') return false
       return true
     })
   }, [localLeads, search, filterSources, filterSchadenTyp, filterPersonenschaden, filterMietwagen, filterLeasing])
@@ -702,7 +702,7 @@ export default function DispatchBoard({
                         )}
                         {lead.personenschaden_flag && <span className="bg-red-50 text-red-500 text-[9px] px-1 py-0.5 rounded">Pers.</span>}
                         {lead.mietwagen_flag && <span className="bg-amber-50 text-amber-500 text-[9px] px-1 py-0.5 rounded">MW</span>}
-                        {lead.leasing_flag && <span className="bg-purple-50 text-purple-500 text-[9px] px-1 py-0.5 rounded">Leasing</span>}
+                        {lead.finanzierung_leasing === 'leasing' && <span className="bg-purple-50 text-purple-500 text-[9px] px-1 py-0.5 rounded">Leasing</span>}
                       </div>
                       {/* Signatures */}
                       <div className="flex items-center gap-2 mt-2 text-[9px]">
@@ -817,8 +817,8 @@ export default function DispatchBoard({
                           <div className="flex gap-1">
                             {lead.personenschaden_flag && <span className="bg-red-50 text-red-500 text-[9px] px-1 py-0.5 rounded">Pers.</span>}
                             {lead.mietwagen_flag && <span className="bg-amber-50 text-amber-500 text-[9px] px-1 py-0.5 rounded">MW</span>}
-                            {lead.leasing_flag && <span className="bg-purple-50 text-purple-500 text-[9px] px-1 py-0.5 rounded">Leas.</span>}
-                            {!lead.personenschaden_flag && !lead.mietwagen_flag && !lead.leasing_flag && <span className="text-gray-300">—</span>}
+                            {lead.finanzierung_leasing === 'leasing' && <span className="bg-purple-50 text-purple-500 text-[9px] px-1 py-0.5 rounded">Leas.</span>}
+                            {!lead.personenschaden_flag && !lead.mietwagen_flag && lead.finanzierung_leasing !== 'leasing' && <span className="text-gray-300">—</span>}
                           </div>
                         </td>
                         <td className="py-2 px-2">
@@ -916,7 +916,7 @@ export default function DispatchBoard({
                       <CarIcon className="w-3 h-3" /> Mietwagen
                     </span>
                   )}
-                  {selectedLead.leasing_flag && (
+                  {selectedLead.finanzierung_leasing === 'leasing' && (
                     <span className="bg-purple-50 text-purple-500 text-[10px] font-medium px-2 py-1 rounded-lg">Leasing</span>
                   )}
                 </div>
@@ -1068,7 +1068,7 @@ function LeadCard({ lead, columnKey, isSelected }: { lead: Lead; columnKey: stri
         )}
         {lead.personenschaden_flag && <span className="bg-red-50 text-red-500 text-[9px] px-1 py-0.5 rounded">Pers.</span>}
         {lead.mietwagen_flag && <span className="bg-amber-50 text-amber-500 text-[9px] px-1 py-0.5 rounded">MW</span>}
-        {lead.leasing_flag && <span className="bg-purple-50 text-purple-500 text-[9px] px-1 py-0.5 rounded">Leasing</span>}
+        {lead.finanzierung_leasing === 'leasing' && <span className="bg-purple-50 text-purple-500 text-[9px] px-1 py-0.5 rounded">Leasing</span>}
       </div>
 
       {/* Column-specific info */}

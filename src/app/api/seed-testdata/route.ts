@@ -271,7 +271,7 @@ export async function POST() {
         fahrzeug_hersteller: 'Mercedes', fahrzeug_modell: 'C-Klasse',
         schadens_fall_typ: 'sf-01', kunden_konstellation: 'kk-02',
         status: 'umgewandelt' as const, qualifizierungs_phase: 'konvertiert',
-        leasing_flag: true, personenschaden_flag: true, created_at: daysAgo(15),
+        finanzierung_leasing: 'leasing', personenschaden_flag: true, created_at: daysAgo(15),
       },
       {
         vorname: 'Thomas', nachname: 'Neumann', telefon: '+491633628571', email: 'thomas.n@email.de',
@@ -329,7 +329,7 @@ export async function POST() {
         source_channel: 'google-ads',
         qualifizierungs_phase: lx.qualifizierungs_phase ?? 'neu',
         mietwagen_flag: lx.mietwagen_flag ?? false,
-        leasing_flag: lx.leasing_flag ?? false,
+        finanzierung_leasing: lx.finanzierung_leasing ?? 'keine',
         personenschaden_flag: lx.personenschaden_flag ?? false,
         gewerbe_flag: lx.gewerbe_flag ?? false,
         sa_unterschrieben: lx.sa_unterschrieben ?? false,
@@ -389,7 +389,7 @@ export async function POST() {
         fahrzeug_hersteller: 'Mercedes', fahrzeug_modell: 'C-Klasse', fahrzeug_baujahr: 2022,
         kennzeichen: 'K-JB-2022',
         schadens_fall_typ: 'sf-01', kunden_konstellation: 'kk-02',
-        leasing_flag: true, personenschaden_flag: true,
+        finanzierung_leasing: 'leasing', personenschaden_flag: true,
         schadens_datum: daysAgo(16).split('T')[0],
         sv_zugewiesen_am: daysAgo(12),
         konvertiert_am: daysAgo(14), konvertiert_von_lead: leadIds[3],
@@ -487,8 +487,8 @@ export async function POST() {
         fahrzeug_baujahr: f.fahrzeug_baujahr, kennzeichen: f.kennzeichen,
         schadens_fall_typ: f.schadens_fall_typ, kunden_konstellation: f.kunden_konstellation,
         schadens_datum: f.schadens_datum,
-        // AAR-548 D10: faelle.leasing_flag gedropt — finanzierung_leasing ist Truth.
-        finanzierung_leasing: (f as Record<string, unknown>).leasing_flag ? 'leasing' : 'keine',
+        // AAR-548 D10 + AAR-580 N3: finanzierung_leasing ist Truth auf leads + faelle.
+        finanzierung_leasing: (f as Record<string, unknown>).finanzierung_leasing ?? 'keine',
         personenschaden_flag: (f as Record<string, unknown>).personenschaden_flag ?? false,
         sv_zugewiesen_am: f.sv_zugewiesen_am ?? null,
         gutachten_eingegangen_am: (f as Record<string, unknown>).gutachten_eingegangen_am ?? null,

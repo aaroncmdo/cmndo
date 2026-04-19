@@ -129,8 +129,8 @@ export const LEAD_TO_FALL_DEFAULT_FIELDS: Record<string, unknown> = {
   sachschaden_flag: false,
   mietwagen_flag: false,
   // AAR-313: Nutzungsausfall war bisher nicht im Mapping — Lead-Flag verlor sich
-  // AAR-548 D10: leasing_flag + finanzierung_flag auf faelle gedropt —
-  // finanzierung_leasing-Enum ist Truth. Defaults unten.
+  // AAR-548 D10 + AAR-580 N3: leasing_flag + finanzierung_flag auf leads +
+  // faelle gedropt — finanzierung_leasing-Enum ist einzige Truth. Default unten.
   nutzungsausfall: false,
   gewerbe_flag: false,
   halter_ungleich_fahrer_flag: false,

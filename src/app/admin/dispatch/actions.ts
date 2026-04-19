@@ -562,8 +562,6 @@ async function convertLeadToFall(
       gegner_bekannt: lead.gegner_bekannt ?? true,
       personenschaden_flag: lead.personenschaden_flag ?? false,
       mietwagen_flag: lead.mietwagen_flag ?? false,
-      // AAR-548 D10: faelle.leasing_flag + finanzierung_flag gedropt — finanzierung_leasing
-      // (siehe unten, Zeile mit `lead.finanzierung_leasing ?? 'keine'`) ist Truth.
       gewerbe_flag: lead.gewerbe_flag ?? false,
       halter_ungleich_fahrer_flag: lead.halter_ungleich_fahrer_flag ?? false,
       polizei_bericht_vorhanden: lead.polizeibericht_pflicht ?? false,
@@ -601,11 +599,9 @@ async function convertLeadToFall(
       source_domain: lead.source_domain ?? null,
       // KFZ-208: Mandantenfragebogen-Felder
       ist_fahrzeughalter: lead.ist_fahrzeughalter ?? true,
-      // AAR-548 D10: Enum ist Truth. Legacy-Booleans auf lead als Fallback,
-      // falls Lead noch vor Enum-Migration erstellt wurde.
-      finanzierung_leasing:
-        lead.finanzierung_leasing ??
-        (lead.leasing_flag ? 'leasing' : lead.finanzierung_flag ? 'finanzierung' : 'keine'),
+      // AAR-548 D10 + AAR-580 N3: finanzierung_leasing-Enum ist auf leads +
+      // faelle die einzige Source of Truth — Legacy-Bools gedroppt.
+      finanzierung_leasing: lead.finanzierung_leasing ?? 'keine',
       vorsteuerabzugsberechtigt: lead.vorsteuerabzugsberechtigt ?? false,
       schadens_hergang: lead.schadens_hergang ?? null,
       halter_vorname: lead.halter_vorname ?? null,

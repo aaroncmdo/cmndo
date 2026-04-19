@@ -87,7 +87,7 @@ export function StammdatenCard({
   const kennzeichen = str(fall.kennzeichen)
   const fin = str(fall.fin_vin) ?? str(lead?.fin)
   const fahrbereit = bool(fall.fahrzeug_fahrbereit)
-  // AAR-548 D10: faelle.leasing_flag + finanzierung_flag gedropt — finanzierung_leasing-Enum ist Truth
+  // AAR-548 D10 + AAR-580 N3: leasing_flag + finanzierung_flag auf leads + faelle gedropt — finanzierung_leasing-Enum ist Truth
   const leasing = fall.finanzierung_leasing === 'leasing'
   const leasinggeber = str(fall.leasinggeber_name)
   const finanzierung = fall.finanzierung_leasing === 'finanzierung'

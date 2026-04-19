@@ -3984,7 +3984,6 @@ export type Database = {
           fahrzeug_standort_plz: string | null
           fin: string | null
           finanzierung_bank: string | null
-          finanzierung_flag: boolean | null
           finanzierung_leasing: string | null
           finanzierungsgeber_adresse: string | null
           finanzierungsgeber_name: string | null
@@ -4034,7 +4033,6 @@ export type Database = {
           kunde_stadt: string | null
           kunde_strasse: string | null
           kunden_konstellation: string | null
-          leasing_flag: boolean | null
           leasing_geber: string | null
           letzter_anruf_am: string | null
           letzter_anruf_status: string | null
@@ -4168,7 +4166,6 @@ export type Database = {
           fahrzeug_standort_plz?: string | null
           fin?: string | null
           finanzierung_bank?: string | null
-          finanzierung_flag?: boolean | null
           finanzierung_leasing?: string | null
           finanzierungsgeber_adresse?: string | null
           finanzierungsgeber_name?: string | null
@@ -4218,7 +4215,6 @@ export type Database = {
           kunde_stadt?: string | null
           kunde_strasse?: string | null
           kunden_konstellation?: string | null
-          leasing_flag?: boolean | null
           leasing_geber?: string | null
           letzter_anruf_am?: string | null
           letzter_anruf_status?: string | null
@@ -4352,7 +4348,6 @@ export type Database = {
           fahrzeug_standort_plz?: string | null
           fin?: string | null
           finanzierung_bank?: string | null
-          finanzierung_flag?: boolean | null
           finanzierung_leasing?: string | null
           finanzierungsgeber_adresse?: string | null
           finanzierungsgeber_name?: string | null
@@ -4402,7 +4397,6 @@ export type Database = {
           kunde_stadt?: string | null
           kunde_strasse?: string | null
           kunden_konstellation?: string | null
-          leasing_flag?: boolean | null
           leasing_geber?: string | null
           letzter_anruf_am?: string | null
           letzter_anruf_status?: string | null

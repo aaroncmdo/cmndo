@@ -106,12 +106,9 @@ export function buildBriefingInput(
     gegner_kennzeichen_auslaendisch: isAuslaendischesKennzeichen(gegnerKennzeichen),
     personenschaden_flag: pick<boolean>('personenschaden_flag'),
     mietwagen_flag: pick<boolean>('mietwagen_flag'),
-    // AAR-548 D10: faelle.leasing_flag gedropt — finanzierung_leasing ist Truth.
-    // Fallback auf lead.leasing_flag (Lead-Tabelle behält das Feld vorerst).
-    leasing_flag:
-      pick<string>('finanzierung_leasing') === 'leasing'
-        ? true
-        : pick<boolean>('leasing_flag'),
+    // AAR-548 D10 + AAR-580 N3: finanzierung_leasing ist auf leads + faelle
+    // die einzige Source of Truth — BriefingInput hält den Bool für LLM-Lesbarkeit.
+    leasing_flag: pick<string>('finanzierung_leasing') === 'leasing',
     gewerbe_flag: pick<boolean>('gewerbe_flag'),
     halter_ungleich_fahrer_flag: pick<boolean>('halter_ungleich_fahrer_flag'),
     hat_vorschaeden: pick<boolean>('hat_vorschaeden'),
