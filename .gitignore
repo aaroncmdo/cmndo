@@ -49,3 +49,7 @@ test-results/
 # lokale Arbeitsordner (Skript-Wegwerf, Claude-Hilfsdateien)
 .tmp/
 .claude/scheduled_tasks.lock
+.claude/agents/
+
+# AAR-600: Supabase CLI local scratch (linked-project state, caches)
+supabase/.temp/
