@@ -1,12 +1,13 @@
+/* AAR-480 I3: Noto Sans Arabic für AR-Locale. Wir laden nur Arabisch-Glyphen
+   (Google Fonts `subset=arabic`), damit Latin-Schriftart (Montserrat) für
+   alle anderen Locales unverändert bleibt.
+   AAR-607: Remote @import muss VOR allen anderen @import-Statements stehen,
+   sonst verwirft PostCSS/Tailwind ihn still. */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "./glass.css";
-
-/* AAR-480 I3: Noto Sans Arabic für AR-Locale. Wir laden nur Arabisch-Glyphen
-   (Google Fonts `subset=arabic`), damit Latin-Schriftart (Montserrat) für
-   alle anderen Locales unverändert bleibt. */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
 
 html[lang="ar"] {
   font-family: 'Noto Sans Arabic', var(--font-montserrat), system-ui, sans-serif;
