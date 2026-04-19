@@ -573,6 +573,12 @@ export interface FallForPipeline {
   aktuelle_phase: string | null
   status?: string | null
   abgeschlossen_am?: string | null
+  /**
+   * Optional: Bereits vom Phase-Resolver (AAR-538) ermittelte Haupt-Phasen-Nr
+   * (1-10). Fallback wenn aktuelle_phase (snake_case) in der DB noch nicht
+   * befüllt ist — erlaubt trotzdem eine plausible Pipeline-Darstellung.
+   */
+  phase_nummer?: number | null
   // Optional: Timeline von bereits erreichten Subphasen. Wenn nicht geliefert,
   // wird nur `aktuelle_phase` markiert.
   reached?: Array<{ subphase: string; at: string; by?: string }>
@@ -601,7 +607,7 @@ export function buildPhasePipelineData(
 ): PhaseStepData[] {
   const aktuelleSubphase = fall.aktuelle_phase ?? null
   const aktuelleRule = aktuelleSubphase ? SUBPHASE_VISIBILITY[aktuelleSubphase] : null
-  const aktuellePhaseNr = aktuelleRule?.phase ?? 0
+  const aktuellePhaseNr = aktuelleRule?.phase ?? fall.phase_nummer ?? 0
   const reachedMap = new Map<string, { at: string; by?: string }>()
   for (const r of fall.reached ?? []) {
     reachedMap.set(r.subphase, { at: r.at, by: r.by })

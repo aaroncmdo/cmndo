@@ -17,9 +17,22 @@ import DokumenteTab from './_tabs/DokumenteTab'
 import FallSidebar from './sidebar/FallSidebar'
 // AAR-307: Ad-hoc Task-Anlegen aus der Tab-Bar
 import { TaskAnlegenButton } from '@/components/tasks/TaskAnlegenButton'
-// AAR-538 (C1): sticky Phase-Header + Subphase-Resolver
-import { PhaseHeader } from '@/components/admin/fallakte/PhaseHeader'
+// AAR-567 (V1): PhasePipeline als linke Spalte + FallActionBar über der Tab-Bar
+import { PhasePipeline } from '@/components/shared/fall-phases'
+import type { Rolle as PhasenRolle } from '@/components/shared/fall-phases'
+import { buildPhasePipelineData } from '@/lib/fall/subphase-visibility'
+import { FallActionBar } from '@/components/admin/fallakte/FallActionBar'
 import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
+
+// Mapping FallakteRolle → shared PhasenRolle.
+// Admin-Route sieht im Normalfall nur admin + kundenbetreuer; dispatch und
+// sachverstaendiger werden defensiv auf admin gemappt (Sichtbarkeit = max).
+function toPhasenRolle(r: FallakteRolle): PhasenRolle {
+  if (r === 'kundenbetreuer') return 'kb'
+  if (r === 'sachverstaendiger') return 'sv'
+  if (r === 'kunde') return 'kunde'
+  return 'admin'
+}
 // AAR-544 (C7): unified Event-Stream für den Timeline-Tab
 import type { FallEvent } from '@/lib/fall/event-stream'
 
@@ -94,15 +107,46 @@ export default function FallakteShell({
     router.replace(`?${params.toString()}`, { scroll: false })
   }
 
+  // AAR-567 (V1): Pipeline-Daten aus Visibility-Matrix ableiten.
+  // `aktuelle_phase` (snake_case) ist die Quelle; falls noch nicht gesetzt,
+  // dient `subphase.phase` (vom Resolver) als Fallback für die Phase-Nummer.
+  const phasenRolle = toPhasenRolle(userRolle)
+  const aktuellePhaseSnake = (fall.aktuelle_phase as string | null | undefined) ?? null
+  const pipelinePhases = buildPhasePipelineData(
+    {
+      id: fall.id,
+      aktuelle_phase: aktuellePhaseSnake,
+      phase_nummer: subphase.phase,
+      abgeschlossen_am: fall.abgeschlossen_am ?? null,
+    },
+    phasenRolle,
+  )
+
   return (
     <FallProvider fall={fall} lead={lead} userRolle={userRolle}>
       <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-96px)] gap-0">
-        {/* Haupt-Column: Tabs + Content */}
+        {/* AAR-567 (V1): Linke Spalte — PhasePipeline (vertical) */}
+        <aside className="lg:w-72 xl:w-80 shrink-0 border-b lg:border-b-0 lg:border-r border-gray-200 bg-white overflow-y-auto">
+          <div className="px-4 py-4">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
+              Phasen
+            </h3>
+            <PhasePipeline
+              fall={{ id: fall.id, aktuelle_phase: aktuellePhaseSnake }}
+              rolle={phasenRolle}
+              phases={pipelinePhases}
+              variant="vertical"
+              showTimestamps
+            />
+          </div>
+        </aside>
+
+        {/* Haupt-Column: Action-Bar + Tabs + Content */}
         <main className="flex-1 overflow-y-auto min-w-0">
-          {/* AAR-538 (C1): sticky Phase-Header — steht OBERHALB der Tab-Bar.
-              Tab-Bar ist nicht mehr sticky, damit beide nicht am gleichen
-              Anker konkurrieren. */}
-          <PhaseHeader result={subphase} fallId={fall.id} />
+          {/* AAR-567 (V1): Action-Bar ersetzt den Phase-Text-Badge. Status-
+              Override, Kanzlei-Paket, Phase vorrücken und Trigger-Felder-
+              Diagnostik. Phase-Darstellung ist in der linken Spalte. */}
+          <FallActionBar result={subphase} fallId={fall.id} />
           {/* Tab-Bar */}
           <nav className="border-b border-gray-200 bg-white">
             <div className="flex items-center justify-between gap-3 px-4">
