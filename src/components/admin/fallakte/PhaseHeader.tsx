@@ -3,13 +3,22 @@
 // AAR-538 (C1): Sticky Phase-Header oben in der Admin-Fallakte.
 // Zeigt Phase+Subphase+Label, Szenario-Badge, Trigger-Felder (collapsible).
 // AAR-539 (C2): „Kanzlei-Paket einlesen" öffnet KanzleiPaketModal.
+// AAR-560 (C11): „Status-Override" öffnet ManualStatusOverrideModal (Admin-only).
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { ChevronDownIcon, ChevronUpIcon, InboxIcon, ArrowRightIcon } from 'lucide-react'
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  InboxIcon,
+  ArrowRightIcon,
+  AlertTriangleIcon,
+} from 'lucide-react'
 import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
 import { PhaseTriggerList } from './PhaseTriggerList'
 import { KanzleiPaketModal } from './KanzleiPaketModal'
+import { ManualStatusOverrideModal } from './ManualStatusOverrideModal'
+import { useFall } from '@/app/admin/faelle/[id]/FallContext'
 
 const SZENARIO_LABEL: Record<string, string> = {
   normalfall: 'Normalfall',
@@ -24,8 +33,13 @@ const SZENARIO_LABEL: Record<string, string> = {
 }
 
 export function PhaseHeader({ result, fallId }: { result: SubphaseResult; fallId: string }) {
+  const { fall, userRolle } = useFall()
   const [open, setOpen] = useState(false)
   const [paketOpen, setPaketOpen] = useState(false)
+  const [overrideOpen, setOverrideOpen] = useState(false)
+
+  const isAdmin = userRolle === 'admin'
+  const currentStatus = fall.status ?? 'unbekannt'
 
   return (
     <div className="sticky top-0 z-20 bg-white border-b border-gray-200">
@@ -48,6 +62,17 @@ export function PhaseHeader({ result, fallId }: { result: SubphaseResult; fallId
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => setOverrideOpen(true)}
+                className="inline-flex items-center gap-1.5 text-xs font-medium rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1.5 hover:bg-amber-100 text-amber-900"
+                title="Status manuell überschreiben (Admin-only, umgeht State-Machine)"
+              >
+                <AlertTriangleIcon className="w-3.5 h-3.5" />
+                Status-Override
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setPaketOpen(true)}
@@ -89,6 +114,15 @@ export function PhaseHeader({ result, fallId }: { result: SubphaseResult; fallId
         phase={result.phase}
         subphase={result.subphase}
       />
+
+      {isAdmin && (
+        <ManualStatusOverrideModal
+          open={overrideOpen}
+          onOpenChange={setOverrideOpen}
+          fallId={fallId}
+          currentStatus={currentStatus}
+        />
+      )}
     </div>
   )
 }

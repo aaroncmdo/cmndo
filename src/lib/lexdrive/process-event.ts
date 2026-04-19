@@ -548,13 +548,29 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       } catch { /* ungueltiger Uebergang ignorieren */ }
     }
 
-    // AAR-540: manual_status_override — explizites Status-Setzen ohne Validation
+    // AAR-540 + AAR-560 (C11): manual_status_override — explizites Status-Setzen,
+    // bewusst OHNE State-Machine-Validation. Direkter UPDATE weil der Admin genau
+    // dafür den Override-Weg nutzt — unzulässige Transitionen wie
+    // abgeschlossen→ersterfassung müssen möglich sein (Legacy-Migration,
+    // außergerichtliche Einigung, Test/Staging). Keine Auto-Side-Effects (WA,
+    // SLA) — nur Status + abgeschlossen_am/storniert_am Bookkeeping.
     if (input.eventType === 'manual_status_override' && typeof input.payload.neuer_status === 'string') {
-      try {
-        await transitionFallStatus(input.fallId, input.payload.neuer_status, {
-          grund: input.payload.override_grund ?? 'Manueller Status-Override',
-        })
-      } catch { /* State-Machine darf Override ablehnen — Audit bleibt erhalten */ }
+      const neuerStatus = input.payload.neuer_status
+      const now = new Date().toISOString()
+      const overrideUpdate: Record<string, unknown> = {
+        status: neuerStatus,
+        status_changed_at: now,
+        updated_at: now,
+      }
+      if (neuerStatus === 'abgeschlossen') {
+        overrideUpdate.abgeschlossen_am = now
+        if (input.payload.override_grund) overrideUpdate.geschlossen_grund = input.payload.override_grund
+      }
+      if (neuerStatus === 'storniert') {
+        overrideUpdate.storniert_am = now
+        if (input.payload.override_grund) overrideUpdate.storno_grund = input.payload.override_grund
+      }
+      await db.from('faelle').update(overrideUpdate).eq('id', input.fallId)
     }
 
     // Feld-Updates
