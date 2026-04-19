@@ -11,6 +11,9 @@ import DokumenteSection from '@/components/kunde/DokumenteSection'
 import SaeuleMeinAnwalt from '@/components/kunde/SaeuleMeinAnwalt'
 import SaeuleMeinGeld from '@/components/kunde/SaeuleMeinGeld'
 import SaeuleMeinBetreuer from '@/components/kunde/SaeuleMeinBetreuer'
+// AAR-558 (C9): Auszahlungs- + Eskalations-Ergebnis-Card aus faelle_kunde_view
+import AuszahlungCard from '@/components/kunde/AuszahlungCard'
+import EskalationsErgebnisCard from '@/components/kunde/EskalationsErgebnisCard'
 import { saveBankdaten, uploadPflichtdokumentKunde, updateZahlungsweg } from './actions'
 // AAR-319: FAQ-Bot-Card + Historie-Loader
 import { FaqBotCard } from './_components/FaqBotCard'
@@ -121,6 +124,17 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
     // AAR-319: FAQ-Bot-Historie für diesen Kunden + Fall laden (RLS schützt)
     const faqHistory = await ladeKundenFaqHistorie(id)
+
+    // AAR-558 (C9): Kunden-sichere Felder aus faelle_kunde_view laden.
+    // Die View erzwingt per Column-Filter dass NUR auszahlung_kunde_betrag
+    // sichtbar ist (nicht Brutto-regulierung, nicht Gutachter-Honorar).
+    const { data: kundeView } = await supabase
+      .from('faelle_kunde_view')
+      .select(
+        'auszahlung_kunde_betrag, auszahlung_kunde_eingegangen_am, auszahlung_zahlungsweg, eskalation_tag_14_ergebnis, eskalation_tag_14_ergebnis_am, eskalation_tag_21_ergebnis, eskalation_tag_21_ergebnis_am, eskalation_tag_28_ergebnis, eskalation_tag_28_ergebnis_am',
+      )
+      .eq('id', id)
+      .maybeSingle()
 
     // AAR-171: Szenario aus DB übernehmen, aber auto-bump auf ruegefall/klagefall
     // wenn der Status das bereits signalisiert — so muss der KB nicht manuell
@@ -381,13 +395,44 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
         {/* KFZ-210: Nachbesichtigung Soft-Blocker */}
         {(fall.status as string) === 'nachbesichtigung-laeuft' && (
-          <div className="bg-violet-50 border border-violet-200 rounded-xl px-4 py-3 flex items-center gap-3">
-            <span className="text-violet-600 text-lg">&#9888;</span>
-            <div>
-              <p className="text-sm font-semibold text-violet-800">Nachbesichtigung läuft</p>
-              <p className="text-xs text-violet-600">Die Versicherung hat eine erneute Besichtigung angefordert. Ihr Fall wird fortgesetzt sobald das Ergebnis vorliegt.</p>
+          <div className="bg-violet-50 border border-violet-200 rounded-xl px-4 py-3 space-y-2">
+            <div className="flex items-center gap-3">
+              <span className="text-violet-600 text-lg">&#9888;</span>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-violet-800">Nachbesichtigung läuft</p>
+                <p className="text-xs text-violet-600">Die Versicherung hat eine erneute Besichtigung angefordert. Ihr Fall wird fortgesetzt sobald das Ergebnis vorliegt.</p>
+              </div>
             </div>
+            {/* AAR-558 (C9): CTA zum Slot-Picker — nur wenn noch nicht eingereicht */}
+            <Link
+              href={`/kunde/nachbesichtigung/${fall.id as string}`}
+              className="inline-flex items-center text-xs font-medium rounded-md bg-violet-600 text-white px-3 py-1.5 hover:bg-violet-700"
+            >
+              Termine vorschlagen
+            </Link>
           </div>
+        )}
+
+        {/* AAR-558 (C9): Eskalations-Ergebnis-Card — sichtbar sobald Kanzlei
+            ein Tag-14/21/28-Ergebnis eingetragen hat. */}
+        {kundeView && (
+          <EskalationsErgebnisCard
+            tag14Ergebnis={(kundeView.eskalation_tag_14_ergebnis as string | null) ?? null}
+            tag14Am={(kundeView.eskalation_tag_14_ergebnis_am as string | null) ?? null}
+            tag21Ergebnis={(kundeView.eskalation_tag_21_ergebnis as string | null) ?? null}
+            tag21Am={(kundeView.eskalation_tag_21_ergebnis_am as string | null) ?? null}
+            tag28Ergebnis={(kundeView.eskalation_tag_28_ergebnis as string | null) ?? null}
+            tag28Am={(kundeView.eskalation_tag_28_ergebnis_am as string | null) ?? null}
+          />
+        )}
+
+        {/* AAR-558 (C9): Auszahlungs-Card — nur Netto-Kunden-Anteil. */}
+        {kundeView && (
+          <AuszahlungCard
+            betrag={(kundeView.auszahlung_kunde_betrag as number | null) ?? null}
+            eingegangenAm={(kundeView.auszahlung_kunde_eingegangen_am as string | null) ?? null}
+            zahlungsweg={(kundeView.auszahlung_zahlungsweg as string | null) ?? null}
+          />
         )}
 
         {/* AAR-171: VS-Kürzung / VS-Ablehnung — Kunde transparent informieren

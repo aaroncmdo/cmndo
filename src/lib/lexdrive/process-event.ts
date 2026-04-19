@@ -267,8 +267,11 @@ function computeFieldUpdates(eventType: LexDriveEvent, payload: LexDriveEventPay
       updates.nachbesichtigung_kunde_termin_vorschlaege = payload.termin_vorschlaege as unknown as Record<string, unknown>
     }
     updates.nachbesichtigung_kunde_termin_eingereicht_am = payload.eingereicht_am ?? now
+    // AAR-558: Kunden-Wunsch-Feld ist nachbesichtigung_sv_konfrontation_gewuenscht
+    // (aus C8-Migration). nachbesichtigung_konfrontation ist das SV-bestätigte
+    // Ergebnis-Feld und wird im C12-Flow separat gesetzt.
     if (typeof payload.sv_konfrontation_gewuenscht === 'boolean') {
-      updates.nachbesichtigung_konfrontation = payload.sv_konfrontation_gewuenscht
+      updates.nachbesichtigung_sv_konfrontation_gewuenscht = payload.sv_konfrontation_gewuenscht
     }
   }
   if (eventType === 'sv_stellungnahme_eingereicht') {
