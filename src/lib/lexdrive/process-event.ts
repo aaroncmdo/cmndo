@@ -122,6 +122,12 @@ const EVENT_COMM_MAP: Partial<Record<LexDriveEvent, string>> = {
   // AAR-540: neue Events
   vs_quotiert: 'vs_quotiert',
   kb_filmcheck_bestanden: 'filmcheck_bestanden',
+  // AAR-559 (C10): SV bekommt Auftrag für Technische Stellungnahme
+  technische_stellungnahme_benoetigt: 'stellungnahme_beauftragt',
+  // AAR-561 (C12): SV bekommt Konfrontations-Termin-Anfrage
+  sv_konfrontation_anfrage_versendet: 'sv_konfrontation_anfrage',
+  // AAR-561 (C12): Kunde wird über SV-Zusage informiert
+  sv_konfrontation_bestaetigt: 'sv_konfrontation_bestaetigt_kunde',
 }
 
 const EVENT_STATUS_MAP: Partial<Record<LexDriveEvent, string>> = {

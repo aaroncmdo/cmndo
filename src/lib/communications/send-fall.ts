@@ -1,17 +1,16 @@
 // KFZ-201: Fall-aware sendCommunication helper.
-// Loads telefon + Kundenname from a fall_id and calls sendCommunication().
+// Loads contact data from a fall_id based on the registry's recipient type
+// (kunde / sv / kb) and calls sendCommunication().
 // Use this in business code instead of sendStatusWhatsApp().
+//
+// AAR-559/561: Erweitert um SV- und KB-Recipient-Resolution, damit WA-Templates
+// an SV (stellungnahme_beauftragt, sv_konfrontation_anfrage) und KB korrekt
+// das Telefon des tatsächlichen Empfängers verwenden, nicht das des Kunden.
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendCommunication } from './send'
+import { COMMUNICATION_REGISTRY } from './registry'
 
-/**
- * Resolves customer contact data from a fall_id, then calls sendCommunication.
- *
- * @param fallId    UUID of the fall
- * @param triggerName  Registry trigger name (e.g. 'fall_eroeffnet')
- * @param extraData  Any extra template variables to pass (merged with resolved data)
- */
 export async function sendFallCommunication(
   fallId: string,
   triggerName: string,
@@ -19,10 +18,15 @@ export async function sendFallCommunication(
 ): Promise<void> {
   try {
     const supabase = createAdminClient()
+    const config = COMMUNICATION_REGISTRY[triggerName]
+    if (!config) {
+      console.warn(`[sendFallCommunication] Unknown trigger: ${triggerName}`)
+      return
+    }
 
     const { data: fall } = await supabase
       .from('faelle')
-      .select('id, fall_nummer, lead_id, sv_id, kunde_id, regulierung_betrag')
+      .select('id, fall_nummer, lead_id, sv_id, kunde_id, kundenbetreuer_id, regulierung_betrag')
       .eq('id', fallId)
       .single()
 
@@ -31,34 +35,71 @@ export async function sendFallCommunication(
     let vorname = ''
     let nachname = ''
     let telefon: string | null = null
+    let email: string | null = null
 
-    if (fall.lead_id) {
-      const { data: lead } = await supabase
-        .from('leads')
-        .select('vorname, nachname, telefon')
-        .eq('id', fall.lead_id)
+    if (config.recipient === 'sv' && fall.sv_id) {
+      const { data: sv } = await supabase
+        .from('sachverstaendige')
+        .select('profile_id')
+        .eq('id', fall.sv_id)
         .single()
-      if (lead) {
-        vorname = lead.vorname ?? ''
-        nachname = lead.nachname ?? ''
-        telefon = lead.telefon
+      if (sv?.profile_id) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('vorname, nachname, telefon, email')
+          .eq('id', sv.profile_id)
+          .single()
+        if (profile) {
+          vorname = profile.vorname ?? ''
+          nachname = profile.nachname ?? ''
+          telefon = profile.telefon
+          email = profile.email
+        }
       }
-    }
-
-    if (!telefon && fall.kunde_id) {
+    } else if (config.recipient === 'kb' && fall.kundenbetreuer_id) {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('vorname, nachname, telefon')
-        .eq('id', fall.kunde_id)
+        .select('vorname, nachname, telefon, email')
+        .eq('id', fall.kundenbetreuer_id)
         .single()
       if (profile) {
-        vorname = vorname || profile.vorname || ''
-        nachname = nachname || profile.nachname || ''
+        vorname = profile.vorname ?? ''
+        nachname = profile.nachname ?? ''
         telefon = profile.telefon
+        email = profile.email
+      }
+    } else {
+      // Default: Kunde (recipient === 'kunde' or anything else falls back to Kunde)
+      if (fall.lead_id) {
+        const { data: lead } = await supabase
+          .from('leads')
+          .select('vorname, nachname, telefon, email')
+          .eq('id', fall.lead_id)
+          .single()
+        if (lead) {
+          vorname = lead.vorname ?? ''
+          nachname = lead.nachname ?? ''
+          telefon = lead.telefon
+          email = lead.email
+        }
+      }
+
+      if (!telefon && fall.kunde_id) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('vorname, nachname, telefon, email')
+          .eq('id', fall.kunde_id)
+          .single()
+        if (profile) {
+          vorname = vorname || profile.vorname || ''
+          nachname = nachname || profile.nachname || ''
+          telefon = telefon || profile.telefon
+          email = email || profile.email
+        }
       }
     }
 
-    if (!telefon) return
+    if (!telefon && !email) return
 
     const betragFormatted = fall.regulierung_betrag
       ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
@@ -67,13 +108,14 @@ export async function sendFallCommunication(
       : ''
 
     const data: Record<string, string> = {
-      telefon,
       fall_id: fallId,
       fall_nummer: fall.fall_nummer ?? '',
       vorname,
       nachname,
-      '1': vorname || 'Kunde',
+      '1': vorname || 'Empfänger',
       '2': betragFormatted,
+      ...(telefon ? { telefon } : {}),
+      ...(email ? { email } : {}),
       ...extraData,
     }
 

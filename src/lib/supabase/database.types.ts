@@ -3036,6 +3036,7 @@ export type Database = {
           abschluss_zeit: string | null
           ankunft_via: string | null
           ankunft_zeit: string | null
+          bezahlt: boolean
           cancelled_at: string | null
           created_at: string | null
           durchgefuehrt_am: string | null
@@ -3051,6 +3052,7 @@ export type Database = {
           gegenvorschlag_zeit: string | null
           gps_lat_ankunft: number | null
           gps_lng_ankunft: number | null
+          honorar_betrag: number | null
           id: string
           kanal: string | null
           kb_id: string | null
@@ -3100,6 +3102,7 @@ export type Database = {
           abschluss_zeit?: string | null
           ankunft_via?: string | null
           ankunft_zeit?: string | null
+          bezahlt?: boolean
           cancelled_at?: string | null
           created_at?: string | null
           durchgefuehrt_am?: string | null
@@ -3115,6 +3118,7 @@ export type Database = {
           gegenvorschlag_zeit?: string | null
           gps_lat_ankunft?: number | null
           gps_lng_ankunft?: number | null
+          honorar_betrag?: number | null
           id?: string
           kanal?: string | null
           kb_id?: string | null
@@ -3164,6 +3168,7 @@ export type Database = {
           abschluss_zeit?: string | null
           ankunft_via?: string | null
           ankunft_zeit?: string | null
+          bezahlt?: boolean
           cancelled_at?: string | null
           created_at?: string | null
           durchgefuehrt_am?: string | null
@@ -3179,6 +3184,7 @@ export type Database = {
           gegenvorschlag_zeit?: string | null
           gps_lat_ankunft?: number | null
           gps_lng_ankunft?: number | null
+          honorar_betrag?: number | null
           id?: string
           kanal?: string | null
           kb_id?: string | null
