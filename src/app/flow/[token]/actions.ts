@@ -607,8 +607,19 @@ export async function signSAandCreateFall(
     console.error('[AAR-263] Dispatch-Uploads in fall_dokumente:', err)
   }
 
-  // 6b. AAR-305 / AAR-553: Schadensfotos aus dem Onboarding-Step in
-  // fall_dokumente übertragen.
+  // 6b. AAR-305 / AAR-553 / AAR-577: Schadensfotos aus dem Onboarding-Step
+  // in fall_dokumente übertragen. Bis AAR-577 lag eine regressive urlToPath-
+  // Regex hier im Einsatz, die nur den `dokumente`/`fall-dokumente`-Bucket
+  // erkannte — Schadensfotos leben aber im `schadensfotos`-Bucket, ihre URLs
+  // wurden still zu null gemappt und gar nicht in fall_dokumente eingetragen.
+  // Fix: Pfad aus schadensfotos-URL ziehen, Datei server-seitig nach
+  // `fall-dokumente` kopieren (Supabase storage.copy mit destinationBucket —
+  // kein Bandbreiten-Roundtrip), dann mit dem neuen Pfad inserten. Downstream
+  // getPublicUrl('fall-dokumente') erzeugt jetzt valide Preview-URLs.
+  const schadensfotoPath = (url: string): string | null => {
+    const m = url.match(/\/storage\/v1\/object\/public\/schadensfotos\/(.+)$/)
+    return m ? decodeURIComponent(m[1]) : null
+  }
   try {
     const fotoUrls = Array.isArray(lead.schadensfoto_urls)
       ? (lead.schadensfoto_urls as string[])
@@ -620,29 +631,39 @@ export async function signSAandCreateFall(
         .eq('fall_id', fall.id)
         .eq('dokument_typ', 'schadensfotos')
       const bestehendePaths = new Set((bestehendeFotos ?? []).map((d) => d.storage_path as string))
-      const neueFotos = fotoUrls
-        .map((url, i) => {
-          const sp = typeof url === 'string' ? urlToPath(url) : null
-          if (!sp || bestehendePaths.has(sp)) return null
-          return {
-            fall_id: fall.id,
-            dokument_typ: 'schadensfotos',
-            kategorie: 'schadensfotos',
-            storage_path: sp,
-            original_filename: `schadensfoto-${i + 1}.jpg`,
-            mime_type: 'image/jpeg',
-            quelle: 'flowlink',
-            uploaded_by_kunde: true,
-            sichtbar_fuer: [
-              'admin',
-              'leadbearbeiter',
-              'kundenbetreuer',
-              'sachverstaendiger',
-              'kanzlei',
-            ],
-          }
+      const neueFotos: Record<string, unknown>[] = []
+      for (let i = 0; i < fotoUrls.length; i++) {
+        const url = fotoUrls[i]
+        const srcPath = typeof url === 'string' ? schadensfotoPath(url) : null
+        if (!srcPath) continue
+        const basename = srcPath.split('/').pop() ?? `schadensfoto-${i + 1}.jpg`
+        const destPath = `fall/${fall.id}/schadensfotos/${basename}`
+        if (bestehendePaths.has(destPath)) continue
+        const copy = await admin.storage
+          .from('schadensfotos')
+          .copy(srcPath, destPath, { destinationBucket: 'fall-dokumente' })
+        if (copy.error && !/resource already exists/i.test(copy.error.message)) {
+          console.error('[AAR-577] Schadensfoto-Copy:', copy.error.message, { srcPath, destPath })
+          continue
+        }
+        neueFotos.push({
+          fall_id: fall.id,
+          dokument_typ: 'schadensfotos',
+          kategorie: 'schadensfotos',
+          storage_path: destPath,
+          original_filename: `schadensfoto-${i + 1}.jpg`,
+          mime_type: 'image/jpeg',
+          quelle: 'flowlink',
+          uploaded_by_kunde: true,
+          sichtbar_fuer: [
+            'admin',
+            'leadbearbeiter',
+            'kundenbetreuer',
+            'sachverstaendiger',
+            'kanzlei',
+          ],
         })
-        .filter((d): d is NonNullable<typeof d> => d !== null)
+      }
       if (neueFotos.length > 0) await admin.from('fall_dokumente').insert(neueFotos)
     }
   } catch (err) {
