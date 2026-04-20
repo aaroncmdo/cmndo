@@ -7,14 +7,22 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
+// AAR-619: Actions geben jetzt { success, error } zurück statt zu throwen —
+// der Client kann Errors inline anzeigen (Toast, rote Inline-Meldung) ohne
+// globalen Error-Boundary. Vorher war der catch-Block im RueckrufSection
+// leer (`catch { /* */ }`) → Fehler wurden stumm geschluckt und der User
+// sah weder Erfolg noch Fehler.
+
+export type RueckrufActionResult = { success: boolean; error?: string }
+
 export async function saveRueckruf(
   leadId: string,
   datumIso: string | null,
   notiz: string | null,
-) {
+): Promise<RueckrufActionResult> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const { error } = await supabase
     .from('leads')
@@ -27,15 +35,16 @@ export async function saveRueckruf(
     })
     .eq('id', leadId)
 
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
   revalidatePath(`/dispatch/leads/${leadId}`)
   revalidatePath('/dispatch/rueckrufe')
+  return { success: true }
 }
 
-export async function markRueckrufErledigt(leadId: string) {
+export async function markRueckrufErledigt(leadId: string): Promise<RueckrufActionResult> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const { error } = await supabase
     .from('leads')
@@ -45,7 +54,8 @@ export async function markRueckrufErledigt(leadId: string) {
     })
     .eq('id', leadId)
 
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
   revalidatePath(`/dispatch/leads/${leadId}`)
   revalidatePath('/dispatch/rueckrufe')
+  return { success: true }
 }

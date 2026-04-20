@@ -21,6 +21,10 @@ export default function RueckrufSection({
   const [notiz, setNotiz] = useState(lead.rueckruf_notiz ?? '')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  // AAR-619: Error-State statt stumm geschlucktem Fehler. Vorher catch { }
+  // → User sah weder Erfolg noch Misserfolg. Jetzt wird die DB-Error-Message
+  // direkt inline angezeigt.
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   const isErledigt = lead.rueckruf_erledigt ?? false
   const hasDatum = !!lead.rueckruf_datum
@@ -28,21 +32,39 @@ export default function RueckrufSection({
 
   async function handleSave() {
     setSaving(true)
+    setErrorMsg(null)
     try {
-      await saveRueckruf(lead.id, datum ? new Date(datum).toISOString() : null, notiz || null)
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
-      router.refresh()
-    } catch { /* */ }
+      const r = await saveRueckruf(
+        lead.id,
+        datum ? new Date(datum).toISOString() : null,
+        notiz || null,
+      )
+      if (r.success) {
+        setSaved(true)
+        setTimeout(() => setSaved(false), 2500)
+        router.refresh()
+      } else {
+        setErrorMsg(r.error ?? 'Speichern fehlgeschlagen')
+      }
+    } catch (e) {
+      setErrorMsg(e instanceof Error ? e.message : 'Unerwarteter Fehler')
+    }
     setSaving(false)
   }
 
   async function handleErledigt() {
     setSaving(true)
+    setErrorMsg(null)
     try {
-      await markRueckrufErledigt(lead.id)
-      router.refresh()
-    } catch { /* */ }
+      const r = await markRueckrufErledigt(lead.id)
+      if (r.success) {
+        router.refresh()
+      } else {
+        setErrorMsg(r.error ?? 'Konnte nicht als erledigt markiert werden')
+      }
+    } catch (e) {
+      setErrorMsg(e instanceof Error ? e.message : 'Unerwarteter Fehler')
+    }
     setSaving(false)
   }
 
@@ -102,6 +124,11 @@ export default function RueckrufSection({
         )}
 
         {saved && <span className="text-emerald-500 text-xs">Gespeichert</span>}
+        {errorMsg && (
+          <span className="text-red-600 text-xs" role="alert">
+            Fehler: {errorMsg}
+          </span>
+        )}
       </div>
     </div>
   )
