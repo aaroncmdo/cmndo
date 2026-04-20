@@ -58,6 +58,22 @@ jobs:
 
       - run: npm ci
 
+      # AAR-616: Dynamische Vercel-Preview-URL je PR.
+      # Vorher: statischer `PLAYWRIGHT_BASE_URL`-Secret → zeigte auf fixe
+      # Staging/Prod-URL, E2E validierte nie den PR-Code.
+      # Jetzt: warten bis Vercel den Preview-Deploy fertig hat, URL als
+      # Step-Output weiterreichen an den Playwright-Run. Für Push auf
+      # main/staging (Production/Staging-Deploys) Fallback auf das
+      # PLAYWRIGHT_BASE_URL-Secret wenn noch vorhanden.
+      - name: Wait for Vercel Preview (PR)
+        if: github.event_name == 'pull_request'
+        id: vercel-preview
+        uses: patrickedqvist/wait-for-vercel-preview@v1.3.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          max_timeout: 600
+          check_interval: 15
+
       # Playwright Browser-Binaries cachen — Chromium-Install
       # dauert sonst 30-60s pro Run.
       - name: Cache Playwright browsers
@@ -80,7 +96,8 @@ jobs:
       - name: Run E2E Tests
         run: npx playwright test
         env:
-          PLAYWRIGHT_BASE_URL: ${{ secrets.PLAYWRIGHT_BASE_URL }}
+          # AAR-616: Preview-URL > Fallback-Secret > Default in playwright.config.ts
+          PLAYWRIGHT_BASE_URL: ${{ steps.vercel-preview.outputs.url || secrets.PLAYWRIGHT_BASE_URL }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
