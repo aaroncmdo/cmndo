@@ -94,9 +94,13 @@ async function loadAusstehende(): Promise<{ rows: Eintrag[]; gesamt: number; tot
       betrag: Number(r.summe_brutto ?? 0),
       faelligSeitTage: tageSeit(r.faellig_am),
       status: failed ? 'einzug_failed' : 'rechnung_ueberfaellig',
-      href: r.empfaenger_typ === 'gutachter' && r.empfaenger_id
-        ? `/admin/sachverstaendige/${r.empfaenger_id}`
-        : '/admin/abrechnungen',
+      // AAR-614: Vorher wurde auf /admin/sachverstaendige/{empfaenger_id}
+      // gelinkt wenn empfaenger_typ === 'gutachter'. Zwei Probleme:
+      // (a) Inserts setzen empfaenger_typ = 'sv' (nicht 'gutachter') → Check tot.
+      // (b) Bei SV-Sammelabrechnungen ist empfaenger_id die Organisations-ID,
+      //     nicht sachverstaendige.id → 404.
+      // Klick auf die Zeile → immer Abrechnungs-Tabelle (Detail-Drilldown).
+      href: '/admin/abrechnungen',
     })
   }
 

@@ -159,9 +159,9 @@ async function loadAusstehendeFull() {
       betrag: Number(r.summe_brutto ?? 0),
       faelligSeitTage: tageSeit(r.faellig_am),
       status: failed ? 'einzug_failed' : 'rechnung_ueberfaellig',
-      href: r.empfaenger_typ === 'gutachter' && r.empfaenger_id
-        ? `/admin/sachverstaendige/${r.empfaenger_id}`
-        : '/admin/abrechnungen',
+      // AAR-614: Siehe AusstehendeZahlungenWidget — Link immer auf
+      // /admin/abrechnungen (Detail-Drilldown), nicht auf tote SV-Route.
+      href: '/admin/abrechnungen',
     })
   }
 

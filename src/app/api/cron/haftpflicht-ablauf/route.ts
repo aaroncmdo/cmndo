@@ -93,23 +93,7 @@ export async function GET(request: Request) {
     const stufe = bestimmeStufe(tageBisAblauf)
     if (!stufe) continue // zu weit in der Zukunft oder zu weit abgelaufen
 
-    // Doppel-Task-Schutz: ein Task pro Dokument pro Stufe, solange offen
-    const { data: bestehend } = await db
-      .from('tasks')
-      .select('id')
-      .eq('task_code', stufe.code)
-      .eq('entity_type', 'gutachter')
-      .eq('entity_id', doc.id)
-      .neq('status', 'erledigt')
-      .limit(1)
-      .maybeSingle()
-
-    if (bestehend) {
-      uebersprungen++
-      continue
-    }
-
-    // SV → profile_id laden (Task zugewiesen_an = profile)
+    // SV → profile_id laden (Task zugewiesen_an = profile, Navigation-Target = SV-PK)
     const { data: sv } = await db
       .from('sachverstaendige')
       .select('id, profile_id')
@@ -117,6 +101,25 @@ export async function GET(request: Request) {
       .maybeSingle()
 
     if (!sv?.profile_id) {
+      uebersprungen++
+      continue
+    }
+
+    // AAR-614: Dupe-Schutz über task_code + zugewiesen_an statt entity_id.
+    // Vorher wurde entity_id = doc.id (pflichtdokumente.id) für Dedupe + Navigation
+    // genutzt — Klick auf den Task führte dann auf /admin/sachverstaendige/{doc.id}
+    // = 404. Navigation braucht sachverstaendige.id; Dedupe läuft SV-basiert
+    // (1 Haftpflicht-Reminder pro Stufe pro SV reicht).
+    const { data: bestehend } = await db
+      .from('tasks')
+      .select('id')
+      .eq('task_code', stufe.code)
+      .eq('zugewiesen_an', sv.profile_id)
+      .neq('status', 'erledigt')
+      .limit(1)
+      .maybeSingle()
+
+    if (bestehend) {
       uebersprungen++
       continue
     }
@@ -143,8 +146,9 @@ export async function GET(request: Request) {
       zugewiesen_an: sv.profile_id,
       empfaenger_rolle: 'sachverstaendiger',
       empfaenger_user_id: sv.profile_id,
+      // AAR-614: Navigation-Target ist SV-Profil, nicht das Dokument.
       entity_type: 'gutachter',
-      entity_id: doc.id,
+      entity_id: sv.id,
       trigger_event: 'haftpflicht_ablauf_reminder',
     })
 
