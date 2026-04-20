@@ -122,9 +122,13 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
   }, [localFaelle])
 
   return (
-    <div style={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-      {/* Header: exactly 40px */}
-      <div className="flex items-center justify-between px-4 py-2 h-10 flex-shrink-0">
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* Header: exactly 40px.
+          AAR-612: Breakout auf 100 % der Main-Breite — 125 % von 80 % = 100 %,
+          -12.5 % von 80 % = -10 %. Kompensiert den 10 %-Inset des PageContainers.
+          Overflow:hidden wandert in den Body-Wrapper, damit das Kanban-Scrolling
+          funktioniert. */}
+      <div className="flex items-center justify-between px-4 py-2 h-10 flex-shrink-0 md:w-[125%] md:-ml-[12.5%]">
         <div className="flex items-center gap-2">
           <h1 className="text-sm font-semibold text-gray-900">Fälle</h1>
           <span className="text-gray-400 text-xs">{filtered.length}</span>
