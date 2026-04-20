@@ -1,9 +1,11 @@
-// AAR-121 / AAR-246 / AAR-249: Shared responsive content wrapper.
+// AAR-121 / AAR-246 / AAR-249 / AAR-612: Shared responsive content wrapper.
 //
-// AAR-246/249: Horizontale Marge komplett auf 0 — Content nutzt volle
-// Breite. Die Seiten selbst setzen ihr eigenes Innen-Padding falls
-// nötig (z.B. p-4 im Content-Container). Vorher hatten wir px-4/6/8
-// als Sicherheits-Padding, das aber Aaron als "5% Marge" wahrnahm.
+// AAR-612: Desktop-Content ist 80% breit und zentriert → 10% Abstand zur
+// Sidebar und 10% zum rechten Rand. Mobile bleibt voll (kein Inset). Pages,
+// die einen Full-Width-Header brauchen (z. B. Kanban-Title-Bar), brechen
+// via `md:w-[125%] md:-ml-[12.5%]` aus dem 80%-Rahmen aus — 125 % von 80 %
+// = 100 % der Main-Breite, -12.5 % von 80 % = -10 % (zieht den Header bis
+// zur linken Main-Kante zurück).
 
 import type { ReactNode } from 'react'
 
@@ -14,7 +16,7 @@ type Props = {
 
 export function PageContainer({ children, className = '' }: Props) {
   return (
-    <div className={`w-full ${className}`}>
+    <div className={`w-full md:w-[80%] md:mx-auto ${className}`}>
       {children}
     </div>
   )
