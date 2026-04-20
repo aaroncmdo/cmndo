@@ -43,6 +43,6 @@ export async function triggerLexDriveEventManually(
 
   if (!result.success) return { success: false, error: result.error }
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   return { success: true }
 }

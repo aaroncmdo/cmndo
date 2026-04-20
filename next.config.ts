@@ -63,6 +63,24 @@ const nextConfig: NextConfig = {
       // Aufgaben-Hub (AAR-531):
       { source: '/admin/meine-tasks', destination: '/admin/aufgaben/meine', permanent: true },
       { source: '/admin/tasks', destination: '/admin/aufgaben/alle', permanent: true },
+      // AAR-628: Fallakte-Route-Konsolidierung. Die Detail-Route wird
+      // aus /admin/faelle/[id] rausgezogen in die neutrale Route /faelle/[id],
+      // damit KB + Kanzlei ihre eigene Shell bekommen. Der Redirect muss
+      // Sub-Pfade (z.B. ?tab=dokumente) mitnehmen — Query-Strings behält
+      // Next automatisch, nur zusätzliche Pfad-Segmente brauchen :path*.
+      //
+      // Die Liste/Kanban bleibt unter /admin/faelle/(hub) — nur der
+      // [id]-Branch wird umgezogen. Deshalb präzises UUID-like Match.
+      {
+        source: '/admin/faelle/:id([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/:path*',
+        destination: '/faelle/:id/:path*',
+        permanent: true,
+      },
+      {
+        source: '/admin/faelle/:id([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
+        destination: '/faelle/:id',
+        permanent: true,
+      },
     ]
   },
 };

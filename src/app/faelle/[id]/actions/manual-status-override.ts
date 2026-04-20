@@ -142,9 +142,9 @@ export async function manualStatusOverride(input: OverrideInput): Promise<{
     // Mitteilungen sind non-critical — Audit liegt bereits in webhook_events
   }
 
-  revalidatePath(`/admin/faelle/${input.fallId}`)
-  revalidatePath(`/admin/faelle/${input.fallId}/prozess`)
-  revalidatePath(`/admin/faelle/${input.fallId}/timeline`)
+  revalidatePath(`/faelle/${input.fallId}`)
+  revalidatePath(`/faelle/${input.fallId}/prozess`)
+  revalidatePath(`/faelle/${input.fallId}/timeline`)
 
   return { success: true, alterStatus }
 }

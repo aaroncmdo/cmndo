@@ -97,7 +97,7 @@ export async function uploadTechnischeStellungnahme(
         titel: `Stellungnahme eingegangen — Fall ${fall.fall_nummer ?? fallId.slice(0, 8)}`,
         beschreibung:
           'SV hat technische Stellungnahme hochgeladen. Bitte Plausibilitäts-Check durchführen.',
-        link: `/admin/faelle/${fallId}`,
+        link: `/faelle/${fallId}`,
       })
     } catch (err) {
       console.error('[uploadTechnischeStellungnahme] Benachrichtigung fehlgeschlagen:', err)
@@ -118,6 +118,6 @@ export async function uploadTechnischeStellungnahme(
   }
 
   revalidatePath(`/gutachter/fall/${fallId}`)
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   return { success: true }
 }

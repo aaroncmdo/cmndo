@@ -86,7 +86,7 @@ export async function getKalenderTermine(
         gutachterName: t.sv_id ? svNameMap[t.sv_id] : undefined,
         fallId: t.fall_id,
         fallNummer: fallNrMap[t.fall_id],
-        link: t.fall_id ? `/admin/faelle/${t.fall_id}` : undefined,
+        link: t.fall_id ? `/faelle/${t.fall_id}` : undefined,
         status: t.status,
       })
     }
@@ -125,7 +125,7 @@ export async function getKalenderTermine(
         farbe: FARBEN[t.typ] ?? FARBEN.intern,
         fallId: t.fall_id,
         fallNummer: t.fall_id ? fallNrMap[t.fall_id] : undefined,
-        link: t.fall_id ? `/admin/faelle/${t.fall_id}` : undefined,
+        link: t.fall_id ? `/faelle/${t.fall_id}` : undefined,
         status: t.status,
       })
     }
@@ -160,7 +160,7 @@ export async function getKalenderTermine(
         farbe: FARBEN.kb_beratung,
         fallId: t.fall_id,
         fallNummer: kbFallNrMap[t.fall_id],
-        link: t.fall_id ? `/admin/faelle/${t.fall_id}` : undefined,
+        link: t.fall_id ? `/faelle/${t.fall_id}` : undefined,
         status: t.status,
       })
     }

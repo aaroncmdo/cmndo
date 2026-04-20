@@ -50,7 +50,7 @@ export default async function MitarbeiterReklamationen() {
               return (
                 <tr key={r.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3">
-                    <Link href={`/admin/faelle/${r.fall_id}`} className="text-[#4573A2] hover:underline font-medium">
+                    <Link href={`/faelle/${r.fall_id}`} className="text-[#4573A2] hover:underline font-medium">
                       {fall?.fall_nummer ?? (r.fall_id as string).slice(0, 8)}
                     </Link>
                   </td>

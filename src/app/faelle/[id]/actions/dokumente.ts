@@ -33,7 +33,7 @@ export async function triggerFinCallForFall(
   const result = await enrichFallByFin(fallId)
   if (!result.success) return { success: false, error: result.error }
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   return { success: true, updatedFields: result.updatedFields }
 }
 
@@ -73,7 +73,7 @@ export async function markDokumentNachgereicht(
     .eq('id', pflichtdokId)
 
   if (error) return { success: false, error: error.message }
-  revalidatePath(`/admin/faelle/${pdok.fall_id}`)
+  revalidatePath(`/faelle/${pdok.fall_id}`)
   return { success: true }
 }
 
@@ -150,7 +150,7 @@ export async function syncPflichtdokumenteForFall(
   const { error } = await supabase.from('pflichtdokumente').insert(rows)
   if (error) return { success: false, error: error.message }
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   return { success: true, created: fehlend.length }
 }
 
@@ -173,6 +173,6 @@ export async function requestCardentityTypBForFall(
 
   const { requestCardentityTypB } = await import('@/lib/cardentity/typ-b')
   const result = await requestCardentityTypB('fall', fallId)
-  if (result.success) revalidatePath(`/admin/faelle/${fallId}`)
+  if (result.success) revalidatePath(`/faelle/${fallId}`)
   return result
 }

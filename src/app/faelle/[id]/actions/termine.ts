@@ -118,6 +118,6 @@ export async function createKbVideoterminByKb(
     }
   }
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   return { success: true, terminId: termin.id, videoLink }
 }

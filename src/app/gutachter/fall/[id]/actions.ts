@@ -144,7 +144,7 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
       'filmcheck',
       `Gutachten bereit: Fall ${fallNrForTask}`,
       `${svName} hat das Gutachten hochgeladen. Filmcheck erforderlich.`,
-      `/admin/faelle/${fallId}`,
+      `/faelle/${fallId}`,
     ).catch(() => {})
   }
 

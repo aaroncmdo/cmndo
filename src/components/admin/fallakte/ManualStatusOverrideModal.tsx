@@ -13,7 +13,7 @@ import {
   manualStatusOverride,
   ALLOWED_STATUS_VALUES,
   type FallStatusValue,
-} from '@/app/admin/faelle/[id]/actions/manual-status-override'
+} from '@/app/faelle/[id]/actions/manual-status-override'
 import {
   Dialog,
   DialogContent,

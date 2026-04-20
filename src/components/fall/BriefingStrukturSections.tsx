@@ -16,7 +16,7 @@ import {
   SparklesIcon,
 } from 'lucide-react'
 import type { SvBriefingStruktur } from '@/lib/types/field-modus'
-import { regenerateSvBriefingStruktur } from '@/app/admin/faelle/[id]/actions/briefing'
+import { regenerateSvBriefingStruktur } from '@/app/faelle/[id]/actions/briefing'
 
 export type BriefingStrukturSectionsProps = {
   fallId: string

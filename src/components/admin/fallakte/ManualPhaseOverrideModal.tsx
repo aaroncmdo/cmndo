@@ -16,7 +16,7 @@ import { AlertTriangleIcon } from 'lucide-react'
 import {
   manualPhaseOverride,
   ALLOWED_PHASE_VALUES,
-} from '@/app/admin/faelle/[id]/actions/manual-phase-override'
+} from '@/app/faelle/[id]/actions/manual-phase-override'
 import { SUBPHASE_VISIBILITY, PHASE_META } from '@/lib/fall/subphase-visibility'
 import {
   Dialog,

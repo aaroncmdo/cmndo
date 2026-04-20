@@ -50,8 +50,8 @@ export async function triggerKonfrontationFromAdmin(
   })
 
   if (result.success) {
-    revalidatePath(`/admin/faelle/${input.fallId}`)
-    revalidatePath(`/admin/faelle/${input.fallId}/prozess`)
+    revalidatePath(`/faelle/${input.fallId}`)
+    revalidatePath(`/faelle/${input.fallId}/prozess`)
     revalidatePath(`/gutachter/fall/${input.fallId}`)
   }
 

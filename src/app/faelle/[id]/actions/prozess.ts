@@ -55,7 +55,7 @@ export async function requestTechnischeStellungnahme(
     erstellt_von: auth.user.id,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   return { success: true }
 }
 
@@ -86,7 +86,7 @@ export async function freigebeTechnischeStellungnahme(
     erstellt_von: auth.user.id,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   return { success: true }
 }
 
@@ -133,7 +133,7 @@ export async function startRuege(
     erstellt_von: auth.user.id,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   return { success: true, runde: nextCounter }
 }
 
@@ -176,6 +176,6 @@ export async function uebergebeFallKlage(
     erstellt_von: auth.user.id,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   return { success: true }
 }

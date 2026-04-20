@@ -37,7 +37,7 @@ export async function createManualTask(input: {
 
   if (error) return { error: error.message }
 
-  if (input.fall_id) revalidatePath(`/admin/faelle/${input.fall_id}`)
+  if (input.fall_id) revalidatePath(`/faelle/${input.fall_id}`)
   if (input.lead_id) revalidatePath(`/admin/dispatch/lead/${input.lead_id}`)
 
   // AAR-430: Reminder-Kaskade für manuell erstellten Task mit Deadline

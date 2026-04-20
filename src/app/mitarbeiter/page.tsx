@@ -69,7 +69,7 @@ export default async function MitarbeiterDashboard() {
         </div>
         <div className="divide-y divide-gray-50">
           {(faelle ?? []).map(f => (
-            <Link key={f.id} href={`/admin/faelle/${f.id}`} className="block px-4 py-3 hover:bg-gray-50 transition-colors">
+            <Link key={f.id} href={`/faelle/${f.id}`} className="block px-4 py-3 hover:bg-gray-50 transition-colors">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-900">{f.fall_nummer ?? f.id.slice(0, 8)}</p>

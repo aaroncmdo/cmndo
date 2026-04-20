@@ -145,9 +145,9 @@ export async function manualPhaseOverride(input: OverrideInput): Promise<{
     // Mitteilungen non-critical — Audit liegt in webhook_events
   }
 
-  revalidatePath(`/admin/faelle/${input.fallId}`)
-  revalidatePath(`/admin/faelle/${input.fallId}/prozess`)
-  revalidatePath(`/admin/faelle/${input.fallId}/timeline`)
+  revalidatePath(`/faelle/${input.fallId}`)
+  revalidatePath(`/faelle/${input.fallId}/prozess`)
+  revalidatePath(`/faelle/${input.fallId}/timeline`)
 
   return { success: true, alteSubphase }
 }

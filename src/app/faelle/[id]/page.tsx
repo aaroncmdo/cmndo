@@ -453,7 +453,7 @@ export default async function FallaktePage({
             {otherKundeFaelle.map((f) => (
               <a
                 key={f.id}
-                href={`/admin/faelle/${f.id}`}
+                href={`/faelle/${f.id}`}
                 className="text-[#4573A2] hover:underline font-medium text-sm"
               >
                 {f.fall_nummer ?? f.id.slice(0, 8)}

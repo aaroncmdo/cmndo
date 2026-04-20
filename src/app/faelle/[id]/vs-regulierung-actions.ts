@@ -32,7 +32,7 @@ export async function vsReguliertVoll(fallId: string, betrag: number) {
     erstellt_von: user.id,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 export async function vsKuerzt(fallId: string, originalBetrag: number, anerkanntBetrag: number) {
@@ -63,7 +63,7 @@ export async function vsKuerzt(fallId: string, originalBetrag: number, anerkannt
     erstellt_von: user.id,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 export async function vsLehntAb(fallId: string, grund: string) {
@@ -93,7 +93,7 @@ export async function vsLehntAb(fallId: string, grund: string) {
     entity_id: fallId,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 export async function vsBrauchtMehrZeit(fallId: string, fristBis: string) {
@@ -115,7 +115,7 @@ export async function vsBrauchtMehrZeit(fallId: string, fristBis: string) {
     erstellt_von: user.id,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 export async function vsWillNachbesichtigung(fallId: string, details: string, konfrontation?: boolean) {
@@ -177,7 +177,7 @@ export async function vsWillNachbesichtigung(fallId: string, details: string, ko
     erstellt_von: user.id,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 // ─── Phase A: Rüge-Sub-Flow ────────────────────────────────────────────────
@@ -198,7 +198,7 @@ export async function ruegeAkzeptiert(fallId: string) {
   // T11: Regulierung angekuendigt
   sendFallCommunication(fallId, 'regulierung_angekuendigt').catch(() => {})
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 export async function ruegeAbgelehnt(fallId: string) {
@@ -245,7 +245,7 @@ export async function ruegeAbgelehnt(fallId: string) {
     erstellt_von: user.id,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 // KFZ-205: KB gibt Technische Stellungnahme frei → Rüge geht an Kanzlei
@@ -267,7 +267,7 @@ export async function techStellungnahmeFreigeben(fallId: string) {
     erstellt_von: user.id,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 // KFZ-205: AS-Versand manuell eintragen
@@ -292,7 +292,7 @@ export async function asVersandManuell(fallId: string, datum: string) {
     erstellt_von: user.id,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 // ─── Phase B: Zahlungseingang ───────────────────────────────────────────────
@@ -325,7 +325,7 @@ export async function zahlungEingegangen(fallId: string, betrag: number, datum: 
     zugewiesen_an: fallInfo?.kundenbetreuer_id ?? null,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 export async function schlussabrechnungErstellt(fallId: string) {
@@ -349,7 +349,7 @@ export async function schlussabrechnungErstellt(fallId: string) {
     erstellt_von: user.id,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 // ─── Phase C: VS-Ablehnung Actions ──────────────────────────────────────────
@@ -367,7 +367,7 @@ export async function klageEingeleitet(fallId: string, notiz: string) {
     erstellt_von: user.id,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 export async function fallStornieren(fallId: string, grund: string) {
@@ -377,7 +377,7 @@ export async function fallStornieren(fallId: string, grund: string) {
 
   await transitionFallStatus(fallId, 'storniert', { grund: `vs_ablehnung_storno: ${grund}`, user_id: user.id })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────

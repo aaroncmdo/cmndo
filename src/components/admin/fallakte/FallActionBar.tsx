@@ -18,7 +18,7 @@ import { PhaseTriggerList } from './PhaseTriggerList'
 import { KanzleiPaketModal } from './KanzleiPaketModal'
 import { ManualStatusOverrideModal } from './ManualStatusOverrideModal'
 import { ManualPhaseOverrideModal } from './ManualPhaseOverrideModal'
-import { useFall } from '@/app/admin/faelle/[id]/FallContext'
+import { useFall } from '@/app/faelle/[id]/FallContext'
 
 const SZENARIO_LABEL: Record<string, string> = {
   normalfall: 'Normalfall',

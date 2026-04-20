@@ -195,7 +195,7 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
         dauer: 60, // default 1h
         label: leadMap[f.lead_id ?? ''] ?? '—',
         sublabel: `SV: ${svMap[f.sv_id ?? ''] ?? '—'}${f.kennzeichen ? ` · ${f.kennzeichen}` : ''}`,
-        link: `/admin/faelle/${f.id}`,
+        link: `/faelle/${f.id}`,
       })
     }
 
@@ -232,7 +232,7 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
         dauer: t.dauer_minuten ?? 30,
         label: t.betreff ?? (t.typ === 'rueckruf' ? 'Rückruf' : t.typ === 'intern' ? 'Intern' : 'Kundentermin'),
         sublabel: t.typ === 'intern' ? `${teilnehmerArr.length} Teilnehmer · ${ortLabel}` : (t.typ ?? ''),
-        link: t.fall_id ? `/admin/faelle/${t.fall_id}` : '#',
+        link: t.fall_id ? `/faelle/${t.fall_id}` : '#',
       })
     }
 
@@ -420,7 +420,7 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
           ) : tasks.map(t => {
             const overdue = t.deadline && new Date(t.deadline) < new Date()
             return (
-              <Link key={t.id} href={t.fallId ? `/admin/faelle/${t.fallId}${t.typ ? `?highlight=${t.typ}` : ''}` : '#'}
+              <Link key={t.id} href={t.fallId ? `/faelle/${t.fallId}${t.typ ? `?highlight=${t.typ}` : ''}` : '#'}
                 className={`block px-3 py-2 border-b border-gray-50 hover:bg-gray-50 transition-colors ${overdue ? 'bg-red-50/30' : ''}`}>
                 <p className="text-xs text-[#0D1B3E] font-medium truncate">{t.titel}</p>
                 <div className="flex items-center gap-2 mt-0.5 text-[10px]">
@@ -445,7 +445,7 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
           </div>
           <div className="max-h-48 overflow-y-auto">
             {neueFaelle.map(f => (
-              <Link key={f.id} href={`/admin/faelle/${f.id}`}
+              <Link key={f.id} href={`/faelle/${f.id}`}
                 className="block px-3 py-2 border-b border-gray-50 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-[#0D1B3E] font-medium truncate">{f.kunde}</p>

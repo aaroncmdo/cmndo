@@ -97,7 +97,7 @@ export default async function MitarbeiterPerformancePage() {
       label: t.betreff ?? (t.typ === 'video-call' ? 'Video-Call' : 'Telefonat'),
       detail: `${kundeName} · ${t.dauer_minuten} Min`,
       color: t.typ === 'video-call' ? 'purple' : 'blue',
-      link: t.fall_id ? `/admin/faelle/${t.fall_id}` : undefined,
+      link: t.fall_id ? `/faelle/${t.fall_id}` : undefined,
       meetLink: t.meet_link ?? undefined,
     })
   }
@@ -110,7 +110,7 @@ export default async function MitarbeiterPerformancePage() {
       label: t.titel,
       detail: fallRaw?.fall_nummer ? `Fall ${fallRaw.fall_nummer}` : '',
       color: t.prioritaet === 'kritisch' || t.prioritaet === 'hoch' ? 'red' : 'amber',
-      link: t.fall_id ? `/admin/faelle/${t.fall_id}` : undefined,
+      link: t.fall_id ? `/faelle/${t.fall_id}` : undefined,
     })
   }
 
@@ -121,7 +121,7 @@ export default async function MitarbeiterPerformancePage() {
       label: 'Gutachtertermin',
       detail: `Fall ${(t.faelle as unknown as Record<string, unknown>)?.fall_nummer ?? ''}`,
       color: 'orange',
-      link: t.fall_id ? `/admin/faelle/${t.fall_id}` : undefined,
+      link: t.fall_id ? `/faelle/${t.fall_id}` : undefined,
     })
   }
 

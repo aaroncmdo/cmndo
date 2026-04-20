@@ -137,9 +137,9 @@ export async function applyKanzleiPaket(
     return { success: false, error: result.error, uploadedFilePath }
   }
 
-  revalidatePath(`/admin/faelle/${fallId}`)
-  revalidatePath(`/admin/faelle/${fallId}/prozess`)
-  revalidatePath(`/admin/faelle/${fallId}/dokumente`)
+  revalidatePath(`/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}/prozess`)
+  revalidatePath(`/faelle/${fallId}/dokumente`)
 
   return {
     success: true,

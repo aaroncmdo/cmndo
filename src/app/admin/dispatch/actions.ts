@@ -206,13 +206,13 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
         'vs-abgelehnt',
         `VS Ablehnung — Fall ${fallInfo.fall_nummer ?? fallId.slice(0, 8)}`,
         'Versicherung hat abgelehnt. Bitte Eskalations-Schritte einleiten.',
-        `/admin/faelle/${fallId}`,
+        `/faelle/${fallId}`,
       ).catch(() => {})
     }
   }
 
   revalidatePath('/admin/dispatch')
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 // ─── Lead Status ────────────────────────────────────────────────────────────
@@ -751,7 +751,7 @@ async function convertLeadToFall(
       'fallback_kb_zuweisung',
       'Fall als KB-Fallback zugewiesen',
       `Fall ${fallNummer} wurde dir als Fallback zugewiesen, weil aktuell kein Kundenbetreuer verfügbar ist.`,
-      `/admin/faelle/${fall.id}`,
+      `/faelle/${fall.id}`,
     ).catch(() => {})
   } else if (kbAssignment.fallback_used === 'error') {
     // Kein KB und kein Admin — Timeline + Error-Log, Fall bleibt unbezogen.

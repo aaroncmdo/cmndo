@@ -94,7 +94,7 @@ export default async function UeberfaelligeTasks({
                     <>
                       <span className="text-red-800">·</span>
                       <Link
-                        href={`/admin/faelle/${task.fall_id}`}
+                        href={`/faelle/${task.fall_id}`}
                         className="text-red-400 hover:text-red-300"
                       >
                         {task.fall_nummer}

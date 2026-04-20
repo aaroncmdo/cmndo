@@ -17,7 +17,7 @@ export function subject(p: Props) {
 
 export function DispatcherTerminAbgelehntEmail(props: Props) {
   const targetUrl = props.fallId
-    ? `${APP_URL}/admin/faelle/${props.fallId}`
+    ? `${APP_URL}/faelle/${props.fallId}`
     : props.leadId
       ? `${APP_URL}/dispatch/leads/${props.leadId}`
       : `${APP_URL}/dispatch/leads`

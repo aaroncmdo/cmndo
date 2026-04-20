@@ -38,7 +38,7 @@ export function KanzleiAuftragszusammenfassungEmail(props: Props) {
 
       <Paragraph>{props.svBerichtHinweis}</Paragraph>
 
-      <Button href={`${APP_URL}/admin/faelle/${props.fallId}`}>Fallakte im Portal öffnen</Button>
+      <Button href={`${APP_URL}/faelle/${props.fallId}`}>Fallakte im Portal öffnen</Button>
 
       <Divider />
       <Paragraph>

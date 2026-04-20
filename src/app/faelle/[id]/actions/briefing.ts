@@ -38,7 +38,7 @@ export async function regenerateSvBriefing(
     return { success: false, error: result.error ?? 'Generierung fehlgeschlagen' }
   }
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   revalidatePath(`/gutachter/fall/${fallId}`)
 
   return {
@@ -101,7 +101,7 @@ export async function regenerateSvBriefingStruktur(fallId: string): Promise<{
     return { success: false, error: result.error ?? 'Generierung fehlgeschlagen' }
   }
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   revalidatePath(`/gutachter/fall/${fallId}`)
 
   return {
