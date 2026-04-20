@@ -215,7 +215,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
               placeholder={placeholder}
               rows={3}
               disabled={isLoading}
-              className="w-full resize-none text-sm px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4573A2] focus:border-transparent disabled:bg-gray-50"
+              className="w-full resize-none text-sm text-gray-900 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4573A2] focus:border-transparent disabled:bg-gray-50"
             />
             <div className="flex items-end justify-between gap-2">
               <VoiceRecordButton onTranscript={handleTranscript} disabled={isLoading} />
