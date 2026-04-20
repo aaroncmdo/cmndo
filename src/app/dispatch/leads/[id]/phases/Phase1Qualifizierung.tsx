@@ -11,6 +11,7 @@
 // aber in der neuen UI nicht mehr aktiv abgefragt — Q3 ist jetzt Polizei.
 
 import { useState, useTransition, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 // AAR-176 P2-B: UnfallortKategorie-Import raus — die Spalte wird jetzt auto
 // aus schadentyp abgeleitet (saveSchadentyp setzt kategorie mit, Dropdown
 // ist in der UI weg).
@@ -87,6 +88,7 @@ const SPRACHEN = [
 ] as const
 
 export default function Phase1Qualifizierung() {
+  const router = useRouter()
   const { lead, qualification, setPhase } = useDispatchPhase()
   const l = lead as unknown as LeadFields
   const [pending, startTransition] = useTransition()
@@ -143,6 +145,11 @@ export default function Phase1Qualifizierung() {
         setToast(r.disqualifiziert ? 'Disqualifiziert — Exit-Skript wird angezeigt' : 'Gespeichert')
         // AAR-268: Auto-Advance entfernt — MA muss explizit „Weiter zu Phase 2"
         // klicken (Kontrolle vor Sprung). Auto-Save bleibt im Hintergrund.
+        // AAR-622: router.refresh() damit DispatchPhaseProvider frische
+        // initialLead-Props bekommt — sonst rechnet die Qualification-Engine
+        // weiterhin mit dem Stand vom Page-Load und Phase 2 sieht den Hard
+        // Gate als nicht erfüllt, obwohl Phase 1 bereits gespeichert hat.
+        router.refresh()
       } else {
         setToast(r.error ?? 'Fehler')
       }
