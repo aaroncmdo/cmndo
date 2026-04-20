@@ -7,7 +7,7 @@ import {
   CarFrontIcon, LogOutIcon, GitBranchIcon, CalendarIcon,
   BarChart3Icon, UsersIcon, BuildingIcon, Building2Icon, ReceiptIcon,
   ShieldCheckIcon, MessageCircleIcon, SettingsIcon, AlertCircleIcon,
-  LifeBuoyIcon, ListChecksIcon, CheckSquareIcon,
+  LifeBuoyIcon, ClipboardListIcon,
   TimerIcon, ScaleIcon, ExternalLinkIcon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
@@ -28,11 +28,11 @@ const NAV_NAVIGATION: NavItem[] = [
   { href: '/admin/kalender', label: 'Kalender', icon: CalendarIcon },
   { href: '/admin/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon },
   { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: CarFrontIcon },
-  { href: '/admin/meine-tasks', label: 'Meine Tasks', icon: CheckSquareIcon },
+  // AAR-531: Meine Tasks + Alle Tasks zusammengeführt zu Aufgaben-Hub
+  { href: '/admin/aufgaben', label: 'Aufgaben', icon: ClipboardListIcon },
 ]
 
 const NAV_OPERATIONS: NavItem[] = [
-  { href: '/admin/tasks', label: 'Alle Tasks', icon: ListChecksIcon },
   { href: '/admin/sla', label: 'SLA-Monitoring', icon: TimerIcon },
   { href: '/admin/kanzlei-board', label: 'Kanzlei-Board', icon: ScaleIcon },
   { href: '/admin/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
@@ -66,7 +66,7 @@ const SECTIONS: { label: string; items: NavItem[]; showBorder?: boolean }[] = [
   { label: 'Verwaltung', items: NAV_VERWALTUNG, showBorder: true },
 ]
 
-export default function AdminNav({ email, initials, unreadNachrichten }: { email: string; initials: string; unreadNachrichten?: number }) {
+export default function AdminNav({ email, initials, unreadNachrichten, meineTasksCount }: { email: string; initials: string; unreadNachrichten?: number; meineTasksCount?: number }) {
   const pathname = usePathname()
 
   function isActive(href: string, exact?: boolean) {
@@ -106,6 +106,11 @@ export default function AdminNav({ email, initials, unreadNachrichten }: { email
         {item.label === 'Nachrichten' && (unreadNachrichten ?? 0) > 0 && (
           <span className="ml-auto bg-[#4573A2] text-white text-[9px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
             {unreadNachrichten! > 99 ? '99+' : unreadNachrichten}
+          </span>
+        )}
+        {item.label === 'Aufgaben' && (meineTasksCount ?? 0) > 0 && (
+          <span className="ml-auto bg-[#4573A2] text-white text-[9px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
+            {meineTasksCount! > 99 ? '99+' : meineTasksCount}
           </span>
         )}
       </Link>
