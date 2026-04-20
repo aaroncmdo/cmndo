@@ -26,6 +26,20 @@ const nextConfig: NextConfig = {
         destination: '/dispatch/dashboard',
         permanent: true,
       },
+      // AAR-524: Legacy-Redirects die vorher als runtime-`redirect()` in
+      // page.tsx-Files hingen. Als HTTP-301 in next.config effizienter und
+      // für SEO/Bookmarks sauberer — die Route wird gar nicht erst
+      // gerendert.
+      {
+        source: '/admin/karte',
+        destination: '/admin/sachverstaendige',
+        permanent: true,
+      },
+      {
+        source: '/admin/sv-onboarding',
+        destination: '/admin/sachverstaendige/neu',
+        permanent: true,
+      },
     ]
   },
 };
