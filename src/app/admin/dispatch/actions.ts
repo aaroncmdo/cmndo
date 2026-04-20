@@ -618,9 +618,18 @@ async function convertLeadToFall(
       fahrzeug_baujahr: lead.fahrzeug_baujahr ?? null,
       fahrzeug_fahrbereit: lead.fahrzeug_fahrbereit ?? null,
       service_typ: (lead.service_typ as string | null) ?? 'komplett',
-      besichtigungsort_adresse: lead.besichtigungsort_adresse ?? null,
-      besichtigungsort_lat: lead.besichtigungsort_lat ?? null,
-      besichtigungsort_lng: lead.besichtigungsort_lng ?? null,
+      // Semantik-Fix 2026-04-21: Wenn lead.besichtigungsort_* leer ist,
+      // Fallback auf unfallort — Default-Annahme „Auto steht am Unfallort".
+      // Der Gutachter braucht eine Adresse für Navigation, ICS, Reminder.
+      // Backfill-Migration hat historische Leads bereits gemappt; dieser
+      // Fallback fängt den Fall ab wo der Dispatcher vor der Conversion
+      // keinen Besichtigungsort setzt.
+      besichtigungsort_adresse:
+        lead.besichtigungsort_adresse ?? (lead.unfallort as string | null) ?? null,
+      besichtigungsort_lat:
+        lead.besichtigungsort_lat ?? (lead.unfallort_lat as number | null) ?? null,
+      besichtigungsort_lng:
+        lead.besichtigungsort_lng ?? (lead.unfallort_lng as number | null) ?? null,
       besichtigungsort_place_id: lead.besichtigungsort_place_id ?? null,
       sprache: lead.sprache ?? null,
       // AAR-630: 6 weitere Lead-Felder die bisher beim Convert verloren gingen
