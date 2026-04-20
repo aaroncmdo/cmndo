@@ -99,10 +99,12 @@ function KundendatenEditBlock({
   leadId,
   l,
   saveStammdaten: save,
+  patchLead,
 }: {
   leadId: string
   l: LeadFields
   saveStammdaten: typeof saveStammdaten
+  patchLead: (patch: Record<string, unknown>) => void
 }) {
   const [, startT] = useTransition()
   function field(name: keyof LeadFields, initial: string | null | undefined) {
@@ -111,6 +113,9 @@ function KundendatenEditBlock({
       onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const val = e.target.value.trim() || null
         if (val === (initial ?? null)) return
+        // AAR-realtime: Provider-State patchen damit Qualification + Phase-
+        // Gate den gerade eingegebenen Wert bei einem Phase-Wechsel sehen.
+        patchLead({ [name]: val })
         startT(async () => { await save(leadId, { [name]: val }) })
       },
     }
@@ -213,15 +218,17 @@ export default function Phase1Qualifizierung() {
           toSave.polizeibericht_pflicht = false
         }
       }
+      // AAR-realtime: Provider-State SOFORT patchen, damit die Qualification-
+      // Engine + Phase-Gate bei einem Phase-Wechsel mit den frischen Werten
+      // rechnen. router.refresh() danach bringt nur die Server-Props auf
+      // Stand — die werden wegen Provider-useState nicht automatisch
+      // übernommen, deshalb ist dieser optimistic patch kritisch.
+      patchLead(toSave as Partial<typeof lead>)
       const r = await saveHardGate(lead.id, toSave)
       if (r.success) {
         setToast(r.disqualifiziert ? 'Disqualifiziert — Exit-Skript wird angezeigt' : 'Gespeichert')
         // AAR-268: Auto-Advance entfernt — MA muss explizit „Weiter zu Phase 2"
         // klicken (Kontrolle vor Sprung). Auto-Save bleibt im Hintergrund.
-        // AAR-622: router.refresh() damit DispatchPhaseProvider frische
-        // initialLead-Props bekommt — sonst rechnet die Qualification-Engine
-        // weiterhin mit dem Stand vom Page-Load und Phase 2 sieht den Hard
-        // Gate als nicht erfüllt, obwohl Phase 1 bereits gespeichert hat.
         router.refresh()
       } else {
         setToast(r.error ?? 'Fehler')
@@ -299,6 +306,10 @@ export default function Phase1Qualifizierung() {
         if (polizeibericht_vorhanden === true) toSave.polizeibericht_pflicht = true
         else if (polizeibericht_vorhanden === false) toSave.polizeibericht_pflicht = false
       }
+      // AAR-realtime: Provider-State vor dem DB-Write patchen damit die
+      // nächste Phase den aktuellen Stand sieht — der Provider lebt weiter
+      // auch wenn Phase 1 unmountet.
+      patchLead(toSave as Partial<typeof lead>)
       saveHardGate(lead.id, toSave).catch(err =>
         console.error('[AAR-624] unmount-flush saveHardGate failed:', err),
       )
@@ -331,7 +342,7 @@ export default function Phase1Qualifizierung() {
       </div>
 
       {/* Kundendaten — Name, Kontakt, Adresse. onBlur-Save via saveStammdaten. */}
-      <KundendatenEditBlock leadId={l.id} l={l} saveStammdaten={saveStammdaten} />
+      <KundendatenEditBlock leadId={l.id} l={l} saveStammdaten={saveStammdaten} patchLead={patchLead as (p: Record<string, unknown>) => void} />
 
       {/* AAR-316: Sprache des Kunden. Steuert später FlowLink + Portal-Übersetzungen.
           Standard = Deutsch. Auto-Save on-change via saveStammdaten. */}
