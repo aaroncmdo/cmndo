@@ -4,7 +4,7 @@ import { useMemo, useCallback, useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
+import { DragDropContext, Droppable, Draggable, type DropResult, type DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
 import { updateFallStatus } from '../dispatch/actions'
 import { deleteFall, deactivateFall } from './[id]/actions'
 import FallCardBadges, { NotificationDot } from '@/components/faelle/FallCardBadges'
@@ -177,9 +177,9 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
                         {items.map((fall, i) => (
                           <Draggable key={fall.id} draggableId={fall.id} index={i}>
                             {(dp, ds) => (
-                              <div ref={dp.innerRef} {...dp.draggableProps} {...dp.dragHandleProps}
+                              <div ref={dp.innerRef} {...dp.draggableProps}
                                 className={`transition-shadow ${ds.isDragging ? 'opacity-80 shadow-xl' : ''}`}>
-                                <FallCard fall={fall} onRefresh={() => router.refresh()} />
+                                <FallCard fall={fall} onRefresh={() => router.refresh()} dragHandleProps={dp.dragHandleProps} />
                               </div>
                             )}
                           </Draggable>
@@ -198,7 +198,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
   )
 }
 
-function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
+function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh: () => void; dragHandleProps: DraggableProvidedDragHandleProps | null | undefined }) {
   const router = useRouter()
   const label = fall.mandatsnummer ?? fall.fall_nummer ?? fall.id.slice(0, 8)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -266,9 +266,24 @@ function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
         {/* KFZ-182: Roter Dot wenn Chat UND Updates > 0 */}
         {(fall.ungelesene_nachrichten ?? 0) > 0 && (fall.ungelesene_updates ?? 0) > 0 && <NotificationDot />}
         <div className="flex items-center justify-between mb-0.5">
-          <Link href={`/admin/faelle/${fall.id}`} className="text-xs font-mono text-[#4573A2] truncate hover:underline" onClick={e => e.stopPropagation()}>
-            {label}
-          </Link>
+          <div className="flex items-center gap-1 min-w-0 flex-1">
+            {/* AAR-610: Drag-Handle nur auf Grip-Icon — sonst schluckt dnd
+                den Link-Klick via mousedown preventDefault */}
+            <span
+              {...(dragHandleProps ?? {})}
+              className="shrink-0 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing select-none"
+              aria-label="Karte verschieben"
+            >
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <circle cx="6" cy="5" r="1.2"/><circle cx="14" cy="5" r="1.2"/>
+                <circle cx="6" cy="10" r="1.2"/><circle cx="14" cy="10" r="1.2"/>
+                <circle cx="6" cy="15" r="1.2"/><circle cx="14" cy="15" r="1.2"/>
+              </svg>
+            </span>
+            <Link href={`/admin/faelle/${fall.id}`} className="text-xs font-mono text-[#4573A2] truncate hover:underline min-w-0">
+              {label}
+            </Link>
+          </div>
           <div className="flex items-center gap-1 shrink-0 ml-1" ref={menuRef}>
             {fall.ist_aktiv === false && <span className="text-[8px] bg-red-100 text-red-500 px-1 py-0.5 rounded font-medium">Deaktiviert</span>}
             <button onClick={e => { e.stopPropagation(); setMenuOpen(!menuOpen) }} className="p-0.5 text-gray-300 hover:text-gray-500 transition-colors">

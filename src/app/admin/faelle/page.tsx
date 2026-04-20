@@ -25,48 +25,48 @@ export default async function AdminFaellePage() {
   const { data: faelle } = await query
   const allFaelle = faelle ?? []
 
-  // KFZ-195a: Batch-Lookups statt N+1
+  // AAR-611: Batch-Lookups parallel in Promise.all statt 5× sequenziellem await.
+  // Vorher: 5 Roundtrips × ~3-4s EU-Supabase-Latenz = 15-20s Wall-Clock.
+  // Jetzt: 1 Roundtrip-Zyklus ≈ 3-4s. Daten-Volumen ist winzig (14 Fälle,
+  // 9 Nachrichten, 6 Read-States) — reiner Netzwerk-Overhead.
   const admin = createAdminClient()
 
-  // 1. Alle Lead-Namen in einem Query
   const leadIds = [...new Set(allFaelle.map(f => f.lead_id).filter(Boolean))] as string[]
-  const { data: leads } = leadIds.length > 0
-    ? await supabase.from('leads').select('id, vorname, nachname').in('id', leadIds)
-    : { data: [] }
-  const leadMap = Object.fromEntries((leads ?? []).map(l => [l.id, `${l.vorname ?? ''} ${l.nachname ?? ''}`.trim() || null]))
-
-  // 2. Alle Betreuer-Namen in einem Query
   const kbIds = [...new Set(allFaelle.map(f => f.kundenbetreuer_id).filter(Boolean))] as string[]
-  const { data: kbProfiles } = kbIds.length > 0
-    ? await supabase.from('profiles').select('id, vorname, nachname').in('id', kbIds)
-    : { data: [] }
-  const kbMap = Object.fromEntries((kbProfiles ?? []).map(p => [p.id, `${p.vorname ?? ''} ${p.nachname ?? ''}`.trim() || null]))
-
-  // 3. Alle SV-Namen in einem Query
   const svIds = [...new Set(allFaelle.map(f => f.sv_id).filter(Boolean))] as string[]
-  const { data: svs } = svIds.length > 0
-    ? await supabase.from('sachverstaendige').select('id, profiles(vorname, nachname)').in('id', svIds)
-    : { data: [] }
+  const fallIds = allFaelle.map(f => f.id)
+
+  const emptyRes = { data: [] as never[] }
+  const [
+    { data: leads },
+    { data: kbProfiles },
+    { data: svs },
+    { data: unreadMsgs },
+  ] = await Promise.all([
+    leadIds.length > 0
+      ? supabase.from('leads').select('id, vorname, nachname').in('id', leadIds)
+      : Promise.resolve(emptyRes),
+    kbIds.length > 0
+      ? supabase.from('profiles').select('id, vorname, nachname').in('id', kbIds)
+      : Promise.resolve(emptyRes),
+    svIds.length > 0
+      ? supabase.from('sachverstaendige').select('id, profiles(vorname, nachname)').in('id', svIds)
+      : Promise.resolve(emptyRes),
+    fallIds.length > 0
+      ? admin.from('nachrichten').select('fall_id').eq('gelesen', false).eq('sender_rolle', 'kunde').in('fall_id', fallIds)
+      : Promise.resolve(emptyRes),
+  ])
+
+  const leadMap = Object.fromEntries((leads ?? []).map(l => [l.id, `${l.vorname ?? ''} ${l.nachname ?? ''}`.trim() || null]))
+  const kbMap = Object.fromEntries((kbProfiles ?? []).map(p => [p.id, `${p.vorname ?? ''} ${p.nachname ?? ''}`.trim() || null]))
   const svMap = Object.fromEntries((svs ?? []).map(sv => {
     const pr = (Array.isArray(sv.profiles) ? sv.profiles[0] : sv.profiles) as { vorname: string | null; nachname: string | null } | null
     return [sv.id, pr ? `${pr.vorname ?? ''} ${pr.nachname ?? ''}`.trim() || null : null]
   }))
-
-  // 4. Alle ungelesenen Nachrichten in einem Query
-  const fallIds = allFaelle.map(f => f.id)
-  const { data: unreadMsgs } = fallIds.length > 0
-    ? await admin.from('nachrichten').select('fall_id').eq('gelesen', false).eq('sender_rolle', 'kunde').in('fall_id', fallIds)
-    : { data: [] }
   const unreadMap: Record<string, number> = {}
   for (const msg of unreadMsgs ?? []) {
     unreadMap[msg.fall_id] = (unreadMap[msg.fall_id] ?? 0) + 1
   }
-
-  // 5. Alle read_state in einem Query
-  const { data: readStates } = fallIds.length > 0
-    ? await admin.from('fall_read_state').select('fall_id, last_read_update_at').in('fall_id', fallIds)
-    : { data: [] }
-  const readStateMap = Object.fromEntries((readStates ?? []).map(rs => [rs.fall_id, rs.last_read_update_at]))
 
   // Zusammenbauen (kein N+1 mehr)
   const enriched = allFaelle.map(f => ({
