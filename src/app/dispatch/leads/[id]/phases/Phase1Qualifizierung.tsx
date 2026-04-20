@@ -177,7 +177,9 @@ export default function Phase1Qualifizierung() {
     polizei_vor_ort: draft.polizei_vor_ort,
     polizei_aktenzeichen: draft.polizei_aktenzeichen,
     polizeibericht_vorhanden: draft.polizeibericht_vorhanden,
-    unfallort: draft.unfallort,
+    // unfallort bewusst NICHT im Hash — Phase 2 ist Owner des Unfallorts.
+    // Beide Phases zu includen führte zu Überschreib-Race wenn Phase1 Unmount-
+    // Flush feuert nachdem Phase2 bereits eine neue Adresse gespeichert hat.
   })
   const autoSavedHashRef = useRef<string>(draftHash)
   const draftRef = useRef(draft)
@@ -217,7 +219,6 @@ export default function Phase1Qualifizierung() {
         polizei_vor_ort: currentDraft.polizei_vor_ort,
         polizei_aktenzeichen: currentDraft.polizei_aktenzeichen,
         polizeibericht_vorhanden: currentDraft.polizeibericht_vorhanden,
-        unfallort: currentDraft.unfallort,
       })
       if (autoSavedHashRef.current === currentHash) return
       const { polizeibericht_vorhanden, ...toSave } = currentDraft
