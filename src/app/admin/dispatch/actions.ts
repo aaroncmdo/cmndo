@@ -615,6 +615,9 @@ async function convertLeadToFall(
       nutzungsausfall: lead.nutzungsausfall ?? null,
       hat_haftpflicht: lead.hat_haftpflicht ?? null,
       schadentyp: lead.schadentyp ?? null,
+      // AAR-504/505: BKat-Unfallart (15-Werte-Enum) mitziehen. Kann auch
+      // null sein wenn der Dispatcher die KI-Analyse nicht ausgefuehrt hat.
+      bkat_unfallart: (lead.bkat_unfallart as string | null) ?? null,
       fahrzeug_baujahr: lead.fahrzeug_baujahr ?? null,
       fahrzeug_fahrbereit: lead.fahrzeug_fahrbereit ?? null,
       service_typ: (lead.service_typ as string | null) ?? 'komplett',
