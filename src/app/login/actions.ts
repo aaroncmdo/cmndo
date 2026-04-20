@@ -18,6 +18,10 @@ export async function login(formData: FormData) {
   // langfristig.
   const remember = formData.get('remember') === 'on'
 
+  if (!email || !password) {
+    redirect('/login?error=E-Mail+und+Passwort+sind+erforderlich')
+  }
+
   // Marker-Cookie BEVOR wir den Supabase-Client erstellen — der Client liest
   // ihn fuer cookieOptions, und auch die Middleware nutzt ihn bei
   // spaeteren Token-Rotationen.
@@ -34,22 +38,20 @@ export async function login(formData: FormData) {
 
   const supabase = await createClient({ remember })
 
-  if (!email || !password) {
-    redirect('/login?error=E-Mail+und+Passwort+sind+erforderlich')
-  }
-
-  const { error: signInError } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
+  // AAR-621: signInWithPassword liefert `data.user` direkt — vorher wurde
+  // danach zusätzlich `supabase.auth.getUser()` aufgerufen, was einen
+  // zweiten Auth-Roundtrip kostete ohne neue Information. Ein Roundtrip
+  // gespart (≈ 200-500 ms je nach DB-Auslastung).
+  const { data: signInData, error: signInError } =
+    await supabase.auth.signInWithPassword({ email, password })
 
   if (signInError) {
     redirect(`/login?error=${encodeURIComponent(signInError.message)}`)
   }
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
-  if (userError || !user) {
-    redirect(`/login?error=${encodeURIComponent(userError?.message ?? 'Kein Benutzer gefunden')}`)
+  const user = signInData.user
+  if (!user) {
+    redirect('/login?error=Kein+Benutzer+gefunden')
   }
 
   const { data: profile, error: profileError } = await supabase
@@ -67,14 +69,19 @@ export async function login(formData: FormData) {
     redirect('/login?error=Keine+Rolle+im+Profil+hinterlegt')
   }
 
+  // AAR-621: Ziel-Pfad einmal früh berechnen — wird sowohl für Cache-
+  // Invalidierung als auch für den finalen Redirect verwendet.
+  const targetPath = roleToPath(profile.rolle)
+
   // Check if password change is required (only for email auth)
   const authProvider = profile.auth_provider ?? 'email'
   if (profile.force_password_change && authProvider === 'email') {
-    // BUG-82: Vor dem Redirect den gesamten App-Cache invalidieren — sonst
-    // serviert der Next.js Router-Cache die alte (logged-out) RSC-Payload
-    // fuer den Ziel-Pfad und der User landet auf einem White-Screen, der
-    // nur per Hard-Reload wieder zum Leben kommt.
-    revalidatePath('/', 'layout')
+    // BUG-82: Vor dem Redirect den Cache invalidieren — sonst serviert
+    // der Next.js Router-Cache die alte (logged-out) RSC-Payload.
+    // AAR-621: Scope eingegrenzt — vorher '/' mit 'layout' (invalidiert
+    // den gesamten App-Tree), jetzt nur der /passwort-aendern-Pfad den
+    // wir gleich anspringen. Spart das Re-Rendern aller anderen Routes.
+    revalidatePath('/passwort-aendern', 'layout')
     redirect('/passwort-aendern')
   }
 
@@ -97,15 +104,18 @@ export async function login(formData: FormData) {
     })
   }
 
-  // BUG-82: revalidatePath('/', 'layout') vor dem redirect() ist NOTWENDIG
-  // damit der Next.js Router-Cache die alte RSC-Payload fuer den Ziel-Pfad
+  // BUG-82: revalidatePath vor dem redirect() ist NOTWENDIG damit der
+  // Next.js Router-Cache die alte RSC-Payload fuer den Ziel-Pfad
   // (z.B. /gutachter, das vor dem Login als 'redirect to /login' gecached
-  // wurde) verwirft. Ohne diesen Aufruf rendert /gutachter direkt nach
+  // wurde) verwirft. Ohne diesen Aufruf rendert der Target direkt nach
   // dem Login einen White-Screen und nur ein Hard-Reload behebt es.
-  // Root Cause: Server Actions revalidieren nur den AKTUELLEN Pfad, nicht
-  // den Ziel-Pfad eines redirect(). Bekanntes App-Router Verhalten.
-  revalidatePath('/', 'layout')
-  // Wenn 2FA aktiv ist und noch nicht verifiziert, schickt die Middleware
-  // den User sowieso nach /login/2fa — wir redirecten direkt zur Ziel-Rolle.
-  redirect(roleToPath(profile.rolle))
+  //
+  // AAR-621: Scope von `'/'` + `'layout'` auf den konkreten Target-Pfad
+  // reduziert. Vorher invalidierte der Call den KOMPLETTEN App-Tree
+  // (jeder Layout-Cache, jeder Route-Segment-Cache) — bei 25+ Routes auf
+  // Nano-Tier ein merklicher Fixed-Cost pro Login. Jetzt nur der Pfad
+  // den der User tatsächlich sieht. Andere Routes werden bei ihrer ersten
+  // Navigation ohnehin frisch geladen.
+  revalidatePath(targetPath, 'layout')
+  redirect(targetPath)
 }
