@@ -11,7 +11,7 @@
 // die zugehörige Section-Id in der Liste steht.
 
 import type { ReactNode } from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import {
   UserIcon,
   CarIcon,
@@ -24,6 +24,10 @@ import {
   PhoneIcon,
   MailIcon,
   HashIcon,
+  UsersIcon,
+  PlusIcon,
+  Trash2Icon,
+  StickyNoteIcon,
 } from 'lucide-react'
 import { useFall } from '../FallContext'
 import InlineEditField from './InlineEditField'
@@ -409,6 +413,136 @@ export function KernwerteSection() {
       <InlineEditField label="Restwert (€)" fieldName="restwert" value={f(fall, 'restwert')} type="number" />
       <InlineEditField label="Wertminderung (€)" fieldName="wertminderung" value={f(fall, 'wertminderung')} type="number" />
       <InlineEditField label="Schadenshöhe netto (€)" fieldName="schadens_hoehe_netto" value={f(fall, 'schadens_hoehe_netto')} type="number" />
+    </Card>
+  )
+}
+
+// AAR-633: Freitext-Notizen pro Fall. Admin/KB editierbar, volle Breite.
+export function NotizenSection() {
+  const { fall } = useFall()
+  return (
+    <Card icon={<StickyNoteIcon className="w-4 h-4 text-gray-400" />} title="Notizen">
+      <div className="sm:col-span-2">
+        <InlineEditField
+          label="Interne Notiz"
+          fieldName="notizen"
+          value={f(fall, 'notizen')}
+          type="textarea"
+          hint="Freitext — für KB/Admin interne Kommunikation"
+        />
+      </div>
+    </Card>
+  )
+}
+
+// AAR-633: Zeugen-Kontakte als editierbare Liste. Die Daten liegen in
+// faelle.zeugen_kontakte (JSONB-Array). Custom-UI mit Add/Remove, weil
+// InlineEditField nur Skalare kann.
+type ZeugeKontakt = { name: string; telefon: string; email?: string; notiz?: string }
+
+export function ZeugenKontakteSection() {
+  const { fall, canEdit, updateField } = useFall()
+  const editable = canEdit('zeugen_kontakte')
+  const initial = (fall.zeugen_kontakte as ZeugeKontakt[] | null) ?? []
+  const [zeugen, setZeugen] = useState<ZeugeKontakt[]>(initial)
+  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [, startTransition] = useTransition()
+
+  function persist(next: ZeugeKontakt[]) {
+    setZeugen(next)
+    setStatus('saving')
+    startTransition(async () => {
+      const r = await updateField('zeugen_kontakte', next)
+      if (r.success) {
+        setStatus('saved')
+        setTimeout(() => setStatus('idle'), 2000)
+      } else {
+        setStatus('error')
+        setTimeout(() => setStatus('idle'), 3000)
+      }
+    })
+  }
+
+  function updateZeuge(idx: number, patch: Partial<ZeugeKontakt>) {
+    const next = zeugen.map((z, i) => (i === idx ? { ...z, ...patch } : z))
+    persist(next)
+  }
+
+  function addZeuge() {
+    persist([...zeugen, { name: '', telefon: '', email: '', notiz: '' }])
+  }
+
+  function removeZeuge(idx: number) {
+    persist(zeugen.filter((_, i) => i !== idx))
+  }
+
+  return (
+    <Card
+      icon={<UsersIcon className="w-4 h-4 text-gray-400" />}
+      title="Zeugen-Kontakte"
+      hint={status === 'saving' ? 'Speichert …' : status === 'saved' ? 'Gespeichert' : status === 'error' ? 'Fehler' : undefined}
+    >
+      <div className="sm:col-span-2 space-y-3">
+        {zeugen.length === 0 && (
+          <p className="text-xs text-gray-400">Noch keine Zeugen erfasst.</p>
+        )}
+        {zeugen.map((z, idx) => (
+          <div
+            key={idx}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 rounded-lg border border-gray-100 bg-gray-50"
+          >
+            <input
+              className="text-sm px-2 py-1 rounded bg-white border border-gray-200"
+              placeholder="Name"
+              defaultValue={z.name}
+              disabled={!editable}
+              onBlur={(e) => updateZeuge(idx, { name: e.target.value })}
+            />
+            <input
+              className="text-sm px-2 py-1 rounded bg-white border border-gray-200"
+              placeholder="Telefon"
+              defaultValue={z.telefon}
+              disabled={!editable}
+              onBlur={(e) => updateZeuge(idx, { telefon: e.target.value })}
+            />
+            <input
+              className="text-sm px-2 py-1 rounded bg-white border border-gray-200"
+              placeholder="E-Mail (optional)"
+              defaultValue={z.email ?? ''}
+              disabled={!editable}
+              onBlur={(e) => updateZeuge(idx, { email: e.target.value })}
+            />
+            <div className="flex gap-2">
+              <input
+                className="flex-1 text-sm px-2 py-1 rounded bg-white border border-gray-200"
+                placeholder="Notiz (optional)"
+                defaultValue={z.notiz ?? ''}
+                disabled={!editable}
+                onBlur={(e) => updateZeuge(idx, { notiz: e.target.value })}
+              />
+              {editable && (
+                <button
+                  type="button"
+                  onClick={() => removeZeuge(idx)}
+                  className="px-2 py-1 rounded bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                  aria-label="Zeuge entfernen"
+                >
+                  <Trash2Icon className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+        {editable && (
+          <button
+            type="button"
+            onClick={addZeuge}
+            className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-[#4573A2] text-white hover:bg-[#1E3A5F] transition-colors"
+          >
+            <PlusIcon className="w-3.5 h-3.5" /> Zeuge hinzufügen
+          </button>
+        )}
+      </div>
     </Card>
   )
 }

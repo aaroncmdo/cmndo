@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { UserPlusIcon, UsersIcon, ShieldCheckIcon, TrophyIcon, GiftIcon, ActivityIcon, AlertTriangleIcon } from 'lucide-react'
-import { createMitarbeiter } from './actions'
+import { UserPlusIcon, UsersIcon, ShieldCheckIcon, TrophyIcon, GiftIcon, ActivityIcon, AlertTriangleIcon, PowerIcon } from 'lucide-react'
+import { createMitarbeiter, deactivateKbWithReassign } from './actions'
 
 const ROLLE_LABELS: Record<string, string> = { admin: 'Admin', kundenbetreuer: 'Kundenbetreuer', leadbearbeiter: 'Leadbearbeiter', kanzlei: 'Kanzlei' }
 const ROLLE_COLORS: Record<string, string> = { admin: 'bg-red-50 text-red-300', kundenbetreuer: 'bg-green-50 text-green-300', leadbearbeiter: 'bg-amber-50 text-amber-300', kanzlei: 'bg-violet-50 text-violet-300' }
@@ -121,7 +121,15 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
                       ? <div className="flex items-center gap-1.5 text-xs"><ActivityIcon className="w-3.5 h-3.5 text-amber-400" /><span className="text-gray-700">{leads?.total ?? 0} Leads</span><span className="text-gray-400">·</span><span className="text-green-400">{leads?.konvertiert ?? 0} konv.</span></div>
                       : <div className="flex items-center gap-1.5 text-xs"><ActivityIcon className="w-3.5 h-3.5 text-green-400" /><span className="text-gray-700">{aktive} aktiv</span><span className="text-gray-400">·</span><span className="text-green-400">{abg} abg.</span></div>
                     }</td>
-                    <td className="px-4 py-3">{m.aktiv === false ? <span className="text-red-400 text-xs">Inaktiv</span> : m.force_password_change ? <span className="text-amber-400 text-xs">Einladung</span> : <span className="text-green-400 text-xs flex items-center gap-1"><ShieldCheckIcon className="w-3 h-3" />Aktiv</span>}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        {m.aktiv === false ? <span className="text-red-400 text-xs">Inaktiv</span> : m.force_password_change ? <span className="text-amber-400 text-xs">Einladung</span> : <span className="text-green-400 text-xs flex items-center gap-1"><ShieldCheckIcon className="w-3 h-3" />Aktiv</span>}
+                        {/* AAR-634: „Deaktivieren + Fälle verteilen" nur für aktive KB/LB */}
+                        {m.aktiv !== false && (m.rolle === 'kundenbetreuer' || m.rolle === 'leadbearbeiter') && (
+                          <DeactivateReassignButton mitarbeiterId={m.id} name={name(m)} />
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 )
               })}
@@ -132,6 +140,7 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
       </div>
 
       {showDialog && <>
+
         <div className="fixed inset-0 bg-black/60 z-50" onClick={() => setShowDialog(false)} />
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6">
@@ -157,5 +166,52 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
         </div>
       </>}
     </div></div>
+  )
+}
+
+// AAR-634: Inline-Button + Bestätigungsdialog für KB-Deaktivierung.
+// Ein-Click-Workflow: Klick zeigt Confirm, OK triggert Action + zeigt Toast.
+function DeactivateReassignButton({ mitarbeiterId, name }: { mitarbeiterId: string; name: string }) {
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  const [toast, setToast] = useState<string | null>(null)
+
+  async function handleClick(e: React.MouseEvent) {
+    e.stopPropagation()
+    if (!window.confirm(`${name} wirklich deaktivieren? Alle offenen Fälle + Tasks werden auf andere KBs neu verteilt.`)) return
+    setLoading(true)
+    try {
+      const r = await deactivateKbWithReassign(mitarbeiterId)
+      if (r.success) {
+        setToast(`${r.reassigned_count} Fälle + ${r.tasks_reassigned} Tasks neu verteilt${r.failed_count ? ` (${r.failed_count} ohne Zuweisung)` : ''}`)
+        setTimeout(() => setToast(null), 5000)
+        router.refresh()
+      } else {
+        setToast(`Fehler: ${r.error ?? 'Unbekannt'}`)
+        setTimeout(() => setToast(null), 5000)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={loading}
+        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-50 transition-colors"
+        title="Deaktivieren + Fälle neu verteilen"
+      >
+        <PowerIcon className="w-3 h-3" />
+        {loading ? '…' : 'Deakt.'}
+      </button>
+      {toast && (
+        <div className="fixed top-4 right-4 z-50 bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-lg max-w-sm">
+          <p className="text-gray-800 text-sm">{toast}</p>
+        </div>
+      )}
+    </>
   )
 }
