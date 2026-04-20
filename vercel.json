@@ -14,7 +14,7 @@
     },
     {
       "path": "/api/cron/task-erinnerungen",
-      "schedule": "0 * * * *"
+      "schedule": "15 * * * *"
     },
     {
       "path": "/api/cron/gutachter-erinnerungen",
@@ -38,7 +38,7 @@
     },
     {
       "path": "/api/cron/abrechnungen-faellig-check",
-      "schedule": "0 9 * * *"
+      "schedule": "0 13 * * *"
     },
     {
       "path": "/api/cron/abrechnung-reminder",
@@ -54,7 +54,7 @@
     },
     {
       "path": "/api/cron/pflichtdokumente-reminder",
-      "schedule": "0 */4 * * *"
+      "schedule": "30 */4 * * *"
     },
     {
       "path": "/api/cron/sv-termin-dokument-reminder",
@@ -70,7 +70,7 @@
     },
     {
       "path": "/api/cron/abrechnung-kanzlei-reminder",
-      "schedule": "10 9 * * *"
+      "schedule": "10 14 * * *"
     },
     {
       "path": "/api/cron/vollmacht-reminder",
@@ -78,7 +78,7 @@
     },
     {
       "path": "/api/cron/kb-termin-reminder",
-      "schedule": "0 * * * *"
+      "schedule": "30 * * * *"
     },
     {
       "path": "/api/cron/kb-termin-reminder-1h",
@@ -102,7 +102,7 @@
     },
     {
       "path": "/api/cron/kanzlei-sla-check",
-      "schedule": "30 8 * * *"
+      "schedule": "30 14 * * *"
     },
     {
       "path": "/api/cron/maik-monatsabrechnung",
@@ -110,23 +110,23 @@
     },
     {
       "path": "/api/cron/verifizierung-reminder",
-      "schedule": "20 9 * * *"
+      "schedule": "20 11 * * *"
     },
     {
       "path": "/api/cron/haftpflicht-ablauf",
-      "schedule": "40 9 * * *"
+      "schedule": "40 15 * * *"
     },
     {
       "path": "/api/cron/reklamation-frist-check",
-      "schedule": "0 10 * * *"
+      "schedule": "0 16 * * *"
     },
     {
       "path": "/api/cron/no-show-timeout",
-      "schedule": "15 10 * * *"
+      "schedule": "15 17 * * *"
     },
     {
       "path": "/api/cron/sv-payment-reminders",
-      "schedule": "30 9 * * *"
+      "schedule": "30 16 * * *"
     },
     {
       "path": "/api/cron/abrechnung-erstellen",
@@ -138,11 +138,11 @@
     },
     {
       "path": "/api/cron/send-lead-reminders",
-      "schedule": "0 * * * *"
+      "schedule": "45 * * * *"
     },
     {
       "path": "/api/notifications/process",
-      "schedule": "*/5 * * * *"
+      "schedule": "*/10 * * * *"
     }
   ]
 }
