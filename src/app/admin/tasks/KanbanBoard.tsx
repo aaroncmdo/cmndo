@@ -6,7 +6,7 @@
 // - Tasks ohne Objekt-Bezug (weder fall_id/lead_id noch entity_id) werden
 //   ausgeblendet — das waren die „Abkommen" / Alt-System-Einträge
 
-import { useState, useTransition } from 'react'
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
@@ -170,18 +170,44 @@ export default function KanbanBoard({
   const [showAutoResolved, setShowAutoResolved] = useState(false)
 
   // AAR-154: Nur Tasks mit verlinkbarem Objekt zeigen.
-  const linked = tasks.filter((t) => resolveObjectLink(t, fallMap, leadMap, svMap) !== null)
-  const visibleTasks = showAutoResolved
-    ? linked
-    : linked.filter((t) => !(t.status === 'erledigt' && t.auto_resolved_am))
+  // AAR-620/612: useMemo damit visibleTasks nicht bei jedem Render als neue
+  // Array-Referenz erzeugt wird — das hat die Sync-Schleife unten in eine
+  // Endlos-Rerender-Loop gezwungen (React Error #301).
+  const linked = useMemo(
+    () => tasks.filter((t) => resolveObjectLink(t, fallMap, leadMap, svMap) !== null),
+    [tasks, fallMap, leadMap, svMap],
+  )
+  const visibleTasks = useMemo(
+    () =>
+      showAutoResolved
+        ? linked
+        : linked.filter((t) => !(t.status === 'erledigt' && t.auto_resolved_am)),
+    [linked, showAutoResolved],
+  )
 
   // Optimistic-Update für Drag & Drop — ohne das springt die Card nach Release
   // zurück in die Ursprungsspalte bis der Server antwortet.
   const [localTasks, setLocalTasks] = useState(visibleTasks)
-  // Sync wenn Parent neue Tasks liefert (z. B. nach router.refresh)
-  if (localTasks !== visibleTasks && !isPending) {
+  // AAR-620/612: Sync jetzt in useEffect statt im Render-Body. Der vorherige
+  // `if (localTasks !== visibleTasks) setLocalTasks(...)` im Render führte
+  // zu Render→setState→Render-Loops weil visibleTasks bei jedem Render als
+  // neue Array-Referenz erzeugt wurde und `!==` damit IMMER true war. React
+  // erkennt das irgendwann als infinite loop → Error #301.
+  //
+  // Signatur des Sync-Fingerprint: join aus (id, status). Ändert sich nur
+  // wenn tasks tatsächlich neu sind oder Status-Updates vom Server kommen.
+  // Die Drag&Drop-interne Status-Änderung läuft weiter direkt über setLocalTasks.
+  const visibleFingerprint = useMemo(
+    () => visibleTasks.map((t) => `${t.id}:${t.status}`).join('|'),
+    [visibleTasks],
+  )
+  const lastSyncedFingerprintRef = useRef<string>(visibleFingerprint)
+  useEffect(() => {
+    if (isPending) return
+    if (lastSyncedFingerprintRef.current === visibleFingerprint) return
+    lastSyncedFingerprintRef.current = visibleFingerprint
     setLocalTasks(visibleTasks)
-  }
+  }, [visibleTasks, visibleFingerprint, isPending])
 
   function onDragEnd(result: DropResult) {
     const { draggableId, destination, source } = result
