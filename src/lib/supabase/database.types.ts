@@ -651,6 +651,66 @@ export type Database = {
         }
         Relationships: []
       }
+      bkat_tatbestaende: {
+        Row: {
+          aktualisiert_am: string | null
+          bezeichnung: string
+          bkat_version: string
+          bussgeld_cent: number | null
+          erstellt_am: string | null
+          fahrverbot_monate: number | null
+          kurzform: string
+          mit_gefaehrdung: boolean | null
+          mit_sachbeschaedigung: boolean | null
+          mit_unfall: boolean | null
+          paragraph: string
+          paragraph_num: number
+          punkte: number | null
+          schuldindiz: Database["public"]["Enums"]["bkat_schuldindiz"]
+          tbnr: string
+          unfallart: Database["public"]["Enums"]["bkat_unfallart"]
+          vorschrift: string
+        }
+        Insert: {
+          aktualisiert_am?: string | null
+          bezeichnung: string
+          bkat_version?: string
+          bussgeld_cent?: number | null
+          erstellt_am?: string | null
+          fahrverbot_monate?: number | null
+          kurzform: string
+          mit_gefaehrdung?: boolean | null
+          mit_sachbeschaedigung?: boolean | null
+          mit_unfall?: boolean | null
+          paragraph: string
+          paragraph_num: number
+          punkte?: number | null
+          schuldindiz: Database["public"]["Enums"]["bkat_schuldindiz"]
+          tbnr: string
+          unfallart: Database["public"]["Enums"]["bkat_unfallart"]
+          vorschrift: string
+        }
+        Update: {
+          aktualisiert_am?: string | null
+          bezeichnung?: string
+          bkat_version?: string
+          bussgeld_cent?: number | null
+          erstellt_am?: string | null
+          fahrverbot_monate?: number | null
+          kurzform?: string
+          mit_gefaehrdung?: boolean | null
+          mit_sachbeschaedigung?: boolean | null
+          mit_unfall?: boolean | null
+          paragraph?: string
+          paragraph_num?: number
+          punkte?: number | null
+          schuldindiz?: Database["public"]["Enums"]["bkat_schuldindiz"]
+          tbnr?: string
+          unfallart?: Database["public"]["Enums"]["bkat_unfallart"]
+          vorschrift?: string
+        }
+        Relationships: []
+      }
       branchen_benchmarks: {
         Row: {
           beschreibung: string
@@ -1427,6 +1487,7 @@ export type Database = {
           technische_stellungnahme_beauftragt_am: string | null
           technische_stellungnahme_freigabe_am: string | null
           technische_stellungnahme_hochgeladen_am: string | null
+          technische_stellungnahme_notiz_sv: string | null
           technische_stellungnahme_status: string | null
           termin_erinnerung_5min_gesendet: boolean | null
           totalschaden: boolean | null
@@ -1739,6 +1800,7 @@ export type Database = {
           technische_stellungnahme_beauftragt_am?: string | null
           technische_stellungnahme_freigabe_am?: string | null
           technische_stellungnahme_hochgeladen_am?: string | null
+          technische_stellungnahme_notiz_sv?: string | null
           technische_stellungnahme_status?: string | null
           termin_erinnerung_5min_gesendet?: boolean | null
           totalschaden?: boolean | null
@@ -2051,6 +2113,7 @@ export type Database = {
           technische_stellungnahme_beauftragt_am?: string | null
           technische_stellungnahme_freigabe_am?: string | null
           technische_stellungnahme_hochgeladen_am?: string | null
+          technische_stellungnahme_notiz_sv?: string | null
           technische_stellungnahme_status?: string | null
           termin_erinnerung_5min_gesendet?: boolean | null
           totalschaden?: boolean | null
@@ -8966,6 +9029,28 @@ export type Database = {
     }
     Enums: {
       betreuungspaket: "vollservice" | "sv-only"
+      bkat_schuldindiz:
+        | "gegner_klar"
+        | "gegner_wahrscheinlich"
+        | "geteilt"
+        | "kunde_verdacht"
+        | "neutral"
+      bkat_unfallart:
+        | "auffahrunfall"
+        | "vorfahrt"
+        | "kreuzung_rotlicht"
+        | "spurwechsel"
+        | "ueberholen"
+        | "abbiegen"
+        | "rueckwaerts_parken"
+        | "einfahren_anfahren"
+        | "dooring"
+        | "fussgaenger"
+        | "geschwindigkeit"
+        | "fahrerflucht"
+        | "alkohol_drogen"
+        | "grundregeln"
+        | "sonstiges"
       dokument_kategorie:
         | "stammdaten"
         | "unfall"
@@ -9222,6 +9307,30 @@ export const Constants = {
   public: {
     Enums: {
       betreuungspaket: ["vollservice", "sv-only"],
+      bkat_schuldindiz: [
+        "gegner_klar",
+        "gegner_wahrscheinlich",
+        "geteilt",
+        "kunde_verdacht",
+        "neutral",
+      ],
+      bkat_unfallart: [
+        "auffahrunfall",
+        "vorfahrt",
+        "kreuzung_rotlicht",
+        "spurwechsel",
+        "ueberholen",
+        "abbiegen",
+        "rueckwaerts_parken",
+        "einfahren_anfahren",
+        "dooring",
+        "fussgaenger",
+        "geschwindigkeit",
+        "fahrerflucht",
+        "alkohol_drogen",
+        "grundregeln",
+        "sonstiges",
+      ],
       dokument_kategorie: [
         "stammdaten",
         "unfall",
