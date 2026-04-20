@@ -36,15 +36,25 @@ export default function Phase3Schadentyp() {
           router.refresh()
         }}
       />
-      {showWeiter && (
+      {/* AAR-617: Zurück-/Weiter-Row */}
+      <div className="flex gap-2">
         <button
           type="button"
-          onClick={() => setPhase(4)}
-          className="w-full px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] flex items-center justify-center gap-2"
+          onClick={() => setPhase(2)}
+          className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-semibold flex items-center justify-center gap-2"
         >
-          Weiter zu Phase 4 →
+          ← Zurück zu Phase 2
         </button>
-      )}
+        {showWeiter && (
+          <button
+            type="button"
+            onClick={() => setPhase(4)}
+            className="flex-1 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] flex items-center justify-center gap-2"
+          >
+            Weiter zu Phase 4 →
+          </button>
+        )}
+      </div>
     </div>
   )
 }
