@@ -111,9 +111,20 @@ function resolveObjectLink(
     return { href: `/admin/dispatch/lead/${eid}`, label: leadMap[eid] ?? eid.slice(0, 8), kind: 'Lead' }
   }
   if ((et === 'sv' || et === 'gutachter') && eid) {
+    // AAR-614: Nur linken wenn svMap den entity_id kennt — Legacy-Tasks (vor
+    // Cron-Fix in haftpflicht-ablauf/route.ts) haben entity_id = pflichtdokumente.id
+    // gesetzt, Klick würde auf /admin/sachverstaendige/{doc.id} = 404 führen.
+    // Bei unbekanntem entity_id fallen wir auf Task-Liste zurück.
+    if (svMap[eid]) {
+      return {
+        href: `/admin/sachverstaendige/${eid}`,
+        label: svMap[eid],
+        kind: 'SV',
+      }
+    }
     return {
-      href: `/admin/sachverstaendige/${eid}`,
-      label: svMap[eid] ?? eid.slice(0, 8),
+      href: '/admin/tasks',
+      label: eid.slice(0, 8),
       kind: 'SV',
     }
   }
