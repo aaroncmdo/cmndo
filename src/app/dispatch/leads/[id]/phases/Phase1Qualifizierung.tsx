@@ -157,12 +157,12 @@ export default function Phase1Qualifizierung() {
     })
   }
 
-  // AAR-192: Auto-Save mit 800ms Debounce sobald Phase komplett.
-  // Der Speichern-Button fliegt raus — MA füllt die Felder, nach kurzem
-  // Nichtstun wird automatisch gespeichert und zu Phase 2 weitergeschickt.
-  // autoSavedHash verhindert dass identische drafts mehrfach gespeichert
-  // werden (z.B. wenn nur nicht-relevante Felder sich ändern).
-  const autoSavedHashRef = useRef<string>('')
+  // AAR-192: Auto-Save mit 800ms Debounce bei jeder Änderung.
+  // AAR-624: Frühere Version saved erst bei allComplete — Teileingaben gingen
+  // verloren beim Phase-Wechsel. Jetzt speichern wir jedes Feld sofort mit
+  // 800ms Debounce, damit der MA jederzeit zwischen Phasen wechseln kann.
+  // autoSavedHash verhindert identische Re-Saves, initial = aktueller Hash
+  // damit der Mount-Effekt keinen unnötigen Save triggert.
   const draftHash = JSON.stringify({
     unfallhergang: draft.unfallhergang,
     schuldfrage: draft.schuldfrage,
@@ -179,12 +179,13 @@ export default function Phase1Qualifizierung() {
     polizeibericht_vorhanden: draft.polizeibericht_vorhanden,
     unfallort: draft.unfallort,
   })
+  const autoSavedHashRef = useRef<string>(draftHash)
+  const draftRef = useRef(draft)
+  useEffect(() => { draftRef.current = draft }, [draft])
   useEffect(() => {
-    if (!allComplete) return
     // AAR-203: NIE auto-speichern bei Eigenverantwortung — saveHardGate
     // würde den Lead sofort disqualifizieren bevor der MA das Exit-Skript
-    // vorlesen konnte. MA muss manuell via Sidebar-Button „Disqualifizieren"
-    // speichern wenn er das Skript verlesen hat.
+    // vorlesen konnte. MA muss manuell via Sidebar-Button „Disqualifizieren".
     if (draft.schuldfrage === 'eigenverantwortung') return
     if (autoSavedHashRef.current === draftHash) return
     const t = setTimeout(() => {
@@ -193,7 +194,43 @@ export default function Phase1Qualifizierung() {
     }, 800)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allComplete, draftHash])
+  }, [draftHash])
+
+  // AAR-624: Unmount-Flush — falls MA innerhalb der 800ms-Debounce die Phase
+  // wechselt, würde der Save-Timer gecleared und die Eingabe ginge verloren.
+  // Beim Unmount den aktuellen Draft direkt in die DB schieben (fire-and-forget).
+  useEffect(() => {
+    return () => {
+      const currentDraft = draftRef.current
+      if (currentDraft.schuldfrage === 'eigenverantwortung') return
+      const currentHash = JSON.stringify({
+        unfallhergang: currentDraft.unfallhergang,
+        schuldfrage: currentDraft.schuldfrage,
+        aufklaerung_teilschuld_bestaetigt: currentDraft.aufklaerung_teilschuld_bestaetigt,
+        schaden_sichtbar: currentDraft.schaden_sichtbar,
+        personenschaden_flag: currentDraft.personenschaden_flag,
+        sachschaden_flag: currentDraft.sachschaden_flag,
+        sachschaden_beschreibung: currentDraft.sachschaden_beschreibung,
+        mietwagen_flag: currentDraft.mietwagen_flag,
+        nutzungsausfall: currentDraft.nutzungsausfall,
+        fahrzeug_fahrbereit: currentDraft.fahrzeug_fahrbereit,
+        polizei_vor_ort: currentDraft.polizei_vor_ort,
+        polizei_aktenzeichen: currentDraft.polizei_aktenzeichen,
+        polizeibericht_vorhanden: currentDraft.polizeibericht_vorhanden,
+        unfallort: currentDraft.unfallort,
+      })
+      if (autoSavedHashRef.current === currentHash) return
+      const { polizeibericht_vorhanden, ...toSave } = currentDraft
+      if (toSave.polizei_vor_ort === true) {
+        if (polizeibericht_vorhanden === true) toSave.polizeibericht_pflicht = true
+        else if (polizeibericht_vorhanden === false) toSave.polizeibericht_pflicht = false
+      }
+      saveHardGate(lead.id, toSave).catch(err =>
+        console.error('[AAR-624] unmount-flush saveHardGate failed:', err),
+      )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   if (qualification.disqualifiziert) {
     // Overlay kommt über DispatchShell → PhaseContent → DisqualifiziertOverlay;
