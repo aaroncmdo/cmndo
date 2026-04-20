@@ -108,7 +108,7 @@ function resolveObjectLink(
     return { href: `/faelle/${eid}`, label: fallMap[eid] ?? eid.slice(0, 8), kind: 'Fall' }
   }
   if (et === 'lead' && eid) {
-    return { href: `/admin/dispatch/lead/${eid}`, label: leadMap[eid] ?? eid.slice(0, 8), kind: 'Lead' }
+    return { href: `/dispatch/leads/${eid}`, label: leadMap[eid] ?? eid.slice(0, 8), kind: 'Lead' }
   }
   if ((et === 'sv' || et === 'gutachter') && eid) {
     // AAR-614: Nur linken wenn svMap den entity_id kennt — Legacy-Tasks (vor
@@ -138,7 +138,7 @@ function resolveObjectLink(
   }
   if (task.lead_id) {
     return {
-      href: `/admin/dispatch/lead/${task.lead_id}`,
+      href: `/dispatch/leads/${task.lead_id}`,
       label: leadMap[task.lead_id] ?? task.lead_id.slice(0, 8),
       kind: 'Lead',
     }
