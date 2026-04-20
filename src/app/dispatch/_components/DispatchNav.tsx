@@ -6,6 +6,7 @@ import {
   LayoutDashboardIcon, UsersIcon, PhoneIcon, LogOutIcon,
   MapIcon, CarFrontIcon, TargetIcon,
 } from 'lucide-react'
+import { SupportButton } from '@/components/support/SupportButton'
 
 // AAR-63: /dispatch/einstellungen Link entfernt (Route existiert nicht → 404)
 // AAR-112: Karte + Sachverständige + Isochrone ergänzt
@@ -54,6 +55,7 @@ export default function DispatchNav({ email, initials }: { email: string; initia
         </nav>
 
         <div className="px-3 pb-4 space-y-2 border-t border-white/10 pt-3">
+          <SupportButton userName={email} />
           <div className="flex items-center gap-3 px-3 py-2.5">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold bg-[#4573A2] text-white">
               {initials}

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import NotificationBell from '@/app/admin/_components/NotificationBell'
+import { SupportButton } from '@/components/support/SupportButton'
 import KundeNav from './_components/KundeNav'
 // AAR-363: Outbox-Badge für offline-wartende Uploads (Pflichtdokumente etc.)
 import OutboxBadge from '@/components/offline/OutboxBadge'
@@ -63,6 +64,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
 
         {/* Profil + Notification unten */}
         <div className="mt-auto px-3 pb-4 space-y-2 border-t border-white/10 pt-3">
+          <SupportButton userName={displayName} />
           <div className="flex items-center gap-3 px-3 py-2">
             <div className="w-8 h-8 rounded-full bg-[#4573A2] flex items-center justify-center text-white text-xs font-bold shrink-0">
               {initials}
