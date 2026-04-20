@@ -1,0 +1,23 @@
+-- AAR-617: Dashboard-Sessions (postgres-User) auf 10s statement_timeout begrenzen.
+--
+-- Incident 20.04.2026: Supabase-Dashboard-Advisor-Linter feuerte eine 42s
+-- UNION ALL über pg_catalog + paralleles pg_available_extensions (16-17s).
+-- Connection-Pool komplett belegt → supabase_auth_admin + PostgREST
+-- bekamen keine Connections mehr → 504 auf /token und /user, Login tot.
+--
+-- Fix: Das Dashboard meldet sich als `postgres`-User an. Mit dem Timeout
+-- werden alle neuen Dashboard-Sessions nach 10s abgebrochen statt die DB
+-- zu blockieren. Andere Rollen (authenticator/supabase_auth_admin/
+-- service_role) bleiben unberührt — diese haben eigene Defaults oder
+-- nutzen PG-Bouncer-Pools.
+--
+-- Hinweis: Die Einstellung greift nur für NEUE postgres-Sessions. Aktuell
+-- laufende Dashboard-Verbindungen müssen reconnecten (= Browser-Tab
+-- reloaden) damit der Timeout greift.
+
+-- COMMENT ON ROLE entfernt — braucht ADMIN-Option auf dem postgres-Role,
+-- die der supabase-CLI-Migrator nicht hat. Das ALTER selbst wurde am
+-- 20.04.2026 13:45 UTC via Supabase-MCP applied und die Migration via
+-- `supabase migration repair --status applied 20260420134548` als
+-- angewandt markiert (Recovery-Pfad per AGENTS.md Regel 2).
+ALTER ROLE postgres SET statement_timeout = '10s';
