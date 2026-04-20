@@ -79,6 +79,10 @@ export function KundendatenSection() {
       <InlineEditField label="Straße" fieldName="kunde_strasse" value={f(fall, 'kunde_strasse')} />
       <InlineEditField label="PLZ" fieldName="kunde_plz" value={f(fall, 'kunde_plz')} />
       <InlineEditField label="Stadt" fieldName="kunde_stadt" value={f(fall, 'kunde_stadt')} />
+      {/* AAR-629 (1a): Kundensprache für Portal-Übersetzungen. Enum auf DB:
+         de/tr/ar/ru/pl/en/other — editierbar als Freitext, Validierung
+         serverseitig. Eigener Dropdown = nice-to-have Follow-up. */}
+      <InlineEditField label="Sprache (de/tr/ar/ru/pl/en/other)" fieldName="sprache" value={f(fall, 'sprache')} hint="AAR-316: Portal-Übersetzung" />
     </Card>
   )
 }
@@ -106,13 +110,23 @@ export function FahrzeugdatenSection() {
       <InlineEditField label="TSN" fieldName="tsn" value={tsn} hint="AAR-576: DAT-API" />
       <InlineEditField label="Baujahr *" fieldName="fahrzeug_baujahr" value={f(fall, 'fahrzeug_baujahr')} type="number" hint="AAR-181: Pflichtfeld" />
       <InlineEditField label="Farbe" fieldName="fahrzeug_farbe" value={f(fall, 'fahrzeug_farbe')} />
+      <InlineEditField label="Karosserie-Typ" fieldName="fahrzeug_typ" value={f(fall, 'fahrzeug_typ')} hint="PKW, Transporter, Motorrad …" />
       <InlineEditField label="Erstzulassung" fieldName="erstzulassung" value={f(fall, 'erstzulassung')} type="date" />
       <InlineEditField label="Kilometerstand" fieldName="kilometerstand" value={f(fall, 'kilometerstand')} type="number" />
+      {/* AAR-629 (1a): Finanzierung/Leasing + Vorsteuer. Auf leads schon
+         länger editierbar, jetzt auch auf faelle. */}
+      <InlineEditField label="Finanzierung / Leasing" fieldName="finanzierung_leasing" value={f(fall, 'finanzierung_leasing')} hint="finanzierung / leasing / weder" />
+      <InlineEditField label="Vorsteuerabzugsberechtigt?" fieldName="vorsteuerabzugsberechtigt" value={f(fall, 'vorsteuerabzugsberechtigt')} placeholder="Ja / Nein" />
       <InlineEditField label="Halter Vorname" fieldName="halter_vorname" value={f(fall, 'halter_vorname')} />
       <InlineEditField label="Halter Nachname" fieldName="halter_nachname" value={f(fall, 'halter_nachname')} />
+      <InlineEditField label="Halter Geburtsdatum" fieldName="halter_geburtsdatum" value={typeof fall.halter_geburtsdatum === 'string' ? fall.halter_geburtsdatum.slice(0, 10) : null} type="date" hint="AAR-318: Halter-Info" />
+      <InlineEditField label="Halter E-Mail" fieldName="halter_email" value={f(fall, 'halter_email')} />
+      <InlineEditField label="Halter Telefon" fieldName="halter_telefon" value={f(fall, 'halter_telefon')} />
       <InlineEditField label="Halter Straße" fieldName="halter_strasse" value={f(fall, 'halter_strasse')} />
       <InlineEditField label="Halter PLZ" fieldName="halter_plz" value={f(fall, 'halter_plz')} />
       <InlineEditField label="Halter Stadt" fieldName="halter_stadt" value={f(fall, 'halter_stadt')} />
+      <InlineEditField label="Halter = Kunde?" fieldName="ist_fahrzeughalter" value={f(fall, 'ist_fahrzeughalter')} placeholder="Ja / Nein" hint="AAR-318: Flag" />
+      <InlineEditField label="Werkstatt seit (Datum)" fieldName="werkstatt_seit_datum" value={typeof fall.werkstatt_seit_datum === 'string' ? fall.werkstatt_seit_datum.slice(0, 10) : null} type="date" hint="AAR-305" />
       <div className="sm:col-span-2 pt-2 border-t border-gray-100">
         <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-1.5">
           Vorschaden-Detailbericht (Cardentity Typ-B)
@@ -143,6 +157,11 @@ export function UnfallSection() {
       </div>
       <InlineEditField label="PLZ" fieldName="schadens_plz" value={f(fall, 'schadens_plz')} />
       <InlineEditField label="Ort" fieldName="schadens_ort" value={f(fall, 'schadens_ort')} />
+      {/* AAR-629 (1a): Unfallort + Kategorie (Dispatch legt es an, Admin-Override) */}
+      <div className="sm:col-span-2">
+        <InlineEditField label="Unfallort (strukturiert)" fieldName="unfallort" value={f(fall, 'unfallort')} hint="von Dispatch in Phase 1 gesetzt" />
+      </div>
+      <InlineEditField label="Unfallort-Kategorie" fieldName="unfallort_kategorie" value={f(fall, 'unfallort_kategorie')} hint="Autobahn / Stadt / Land / Parkplatz" />
       <div className="sm:col-span-2">
         <InlineEditField label="Schadens-Ursache" fieldName="schadens_ursache" value={f(fall, 'schadens_ursache')} type="textarea" />
       </div>
@@ -231,6 +250,7 @@ export function GegnerSection() {
   const versicherungId = (fall as Record<string, unknown>).gegner_versicherung_id as string | null ?? null
   return (
     <Card icon={<ShieldIcon className="w-4 h-4 text-gray-400" />} title="Gegner & Versicherung">
+      <InlineEditField label="Gegner bekannt?" fieldName="gegner_bekannt" value={f(fall, 'gegner_bekannt')} placeholder="Ja / Nein" />
       <div className="sm:col-span-2">
         <InlineEditField label="Gegner Name" fieldName="gegner_name" value={f(fall, 'gegner_name')} />
       </div>
@@ -239,6 +259,9 @@ export function GegnerSection() {
       <InlineEditField label="Gegner Versicherung" fieldName="gegner_versicherung" value={f(fall, 'gegner_versicherung')} />
       <InlineEditField label="Gegner-Versicherungsnummer" fieldName="gegner_versicherungsnummer" value={f(fall, 'gegner_versicherungsnummer')} />
       <InlineEditField label="Gegner-Schadennummer" fieldName="gegner_schadennummer" value={f(fall, 'gegner_schadennummer')} />
+      {/* AAR-314 (via AAR-629 1a): Anfrage-Datum beim Deutschen Büro Grüne
+         Karte — relevant bei Auslandskennzeichen. */}
+      <InlineEditField label="Grüne-Karte-Anfrage" fieldName="gegner_versicherung_anfrage_datum" value={typeof fall.gegner_versicherung_anfrage_datum === 'string' ? fall.gegner_versicherung_anfrage_datum.slice(0, 10) : null} type="date" hint="AAR-314: Auslands-KZ" />
       <VersicherungStammdaten versicherungId={versicherungId} />
     </Card>
   )
@@ -252,6 +275,9 @@ export function VorschaedenSection() {
     <Card icon={<WrenchIcon className="w-4 h-4 text-gray-400" />} title="Vorschäden">
       <InlineEditField label="Vorschäden vorhanden?" fieldName="hat_vorschaeden" value={f(fall, 'hat_vorschaeden')} placeholder="Ja / Nein" />
       <InlineEditField label="Anzahl" fieldName="vorschaden_anzahl" value={f(fall, 'vorschaden_anzahl')} type="number" />
+      <div className="sm:col-span-2">
+        <InlineEditField label="Beschreibung" fieldName="vorschaeden_beschreibung" value={f(fall, 'vorschaeden_beschreibung')} type="textarea" />
+      </div>
     </Card>
   )
 }
