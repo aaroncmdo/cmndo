@@ -518,7 +518,41 @@ export default function WillkommenClient({
 
         {/* Content Card */}
         <div className="bg-white border border-gray-200 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-5">{STEPS[step].label}</h2>
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-lg font-semibold text-gray-900">{STEPS[step].label}</h2>
+            {/* AAR-513: Globaler Zurück-Button — funktioniert auf allen Steps
+                (Branding/Anzahlung/SA-Vorlage/Kalender haben keine eigenen
+                Navigations-Buttons weil ihre Sub-Components sie übernehmen).
+                Disabled wenn der vorherige Step bereits committed ist
+                (Vertrag unterschrieben → Vertrag-Step locked, Anzahlung bezahlt
+                → Anzahlung-Step locked, etc.). Auf Step 0 + Sub-Mitarbeiter-
+                Warte-Branch wird die Leiste ausgeblendet. */}
+            {step > 0 && r !== 'sub_mitarbeiter' && (() => {
+              const prevKey = STEPS[step - 1]?.key ?? ''
+              const prevCommitted =
+                (prevKey === 'vertrag' && sv.vertrag_unterschrieben) ||
+                (prevKey === 'anzahlung' && sv.portal_zugang_freigeschaltet) ||
+                (prevKey === 'sa_vorlage' && sv.sa_vorlage_status === 'geprueft')
+              const tooltip = prevCommitted
+                ? 'Dieser Schritt ist bereits abgeschlossen und kann nicht mehr bearbeitet werden'
+                : `Zurück zu „${STEPS[step - 1].label}"`
+              return (
+                <button
+                  type="button"
+                  onClick={() => !prevCommitted && setStep(step - 1)}
+                  disabled={saving || prevCommitted}
+                  title={tooltip}
+                  className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  aria-label={tooltip}
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Zurück
+                </button>
+              )
+            })()}
+          </div>
 
           {/* ═══════════════════════════════════════════════════════════════
               SCHRITT 0: Konditionen
@@ -1047,7 +1081,9 @@ export default function WillkommenClient({
               haben eigene Buttons. */}
           {currentKey !== 'branding' && currentKey !== 'anzahlung' && currentKey !== 'sa_vorlage' && currentKey !== 'kalender' && (
             <div className="flex items-center gap-3 mt-6">
-              {step > 0 && (
+              {/* AAR-513: Bottom-Zurück nur noch für sub_mitarbeiter — alle
+                  anderen Rollen nutzen den globalen Zurück-Pfeil oben rechts. */}
+              {step > 0 && r === 'sub_mitarbeiter' && (
                 <button
                   type="button"
                   onClick={() => setStep(step - 1)}
