@@ -25,12 +25,23 @@ export default async function AdminLayout({
     : 'U'
 
   // KFZ-182: Unread nachrichten count for sidebar badge
-  const { count: unreadNachrichten } = await supabase
-    .from('nachrichten')
-    .select('*', { count: 'exact', head: true })
-    .eq('kanal', 'whatsapp')
-    .eq('richtung', 'inbound')
-    .eq('gelesen', false)
+  // AAR-531: Meine offene Tasks für Aufgaben-Badge parallel laden
+  const [
+    { count: unreadNachrichten },
+    { count: meineTasksCount },
+  ] = await Promise.all([
+    supabase
+      .from('nachrichten')
+      .select('*', { count: 'exact', head: true })
+      .eq('kanal', 'whatsapp')
+      .eq('richtung', 'inbound')
+      .eq('gelesen', false),
+    supabase
+      .from('tasks')
+      .select('*', { count: 'exact', head: true })
+      .eq('zugewiesen_an', user.id)
+      .in('status', ['offen', 'in-bearbeitung']),
+  ])
 
   return (
     <div className="h-screen bg-[#f8f9fb] relative overflow-hidden">
@@ -38,7 +49,7 @@ export default async function AdminLayout({
       <Spotlight />
 
       {/* Client-side nav with usePathname for active state */}
-      <AdminNav email={user.email ?? ''} initials={initials} unreadNachrichten={unreadNachrichten ?? 0} />
+      <AdminNav email={user.email ?? ''} initials={initials} unreadNachrichten={unreadNachrichten ?? 0} meineTasksCount={meineTasksCount ?? 0} />
 
       {/* Main content area — offset by sidebar width on desktop */}
       <div className="md:ml-56 h-screen flex flex-col relative z-10">
