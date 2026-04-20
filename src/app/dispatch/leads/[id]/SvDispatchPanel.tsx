@@ -46,12 +46,15 @@ type AktiverTermin = {
 export default function SvDispatchPanel({
   leadId,
   hardGateOk,
+  hardGateDetails,
   aktiverTermin,
   wunschterminIso,
   wunschterminWochentage,
 }: {
   leadId: string
   hardGateOk: boolean
+  // AAR-615: Einzelne q1/q2/q3-Flags für präzise Fehlermeldung
+  hardGateDetails?: { q1: boolean; q2: boolean; q3: boolean } | null
   aktiverTermin: AktiverTermin | null
   // AAR-264: Wunschtermin des Kunden — wenn gesetzt, wird der Slot-Picker
   // damit vorbelegt und Verfügbarkeits-Badges werden angezeigt.
@@ -362,10 +365,34 @@ export default function SvDispatchPanel({
       </div>
 
       {!hardGateOk ? (
-        <p className="text-xs text-gray-500 flex items-start gap-2">
-          <AlertTriangleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-          Schritt 0 (Hard Gate) muss vollständig beantwortet sein bevor ein SV reserviert werden kann.
-        </p>
+        <div className="space-y-2">
+          <p className="text-xs text-gray-500 flex items-start gap-2">
+            <AlertTriangleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+            Folgende Punkte in Schritt 0 (Hard Gate) müssen noch beantwortet werden:
+          </p>
+          {hardGateDetails && (
+            <ul className="space-y-1 pl-1">
+              {!hardGateDetails.q1 && (
+                <li className="text-xs text-amber-800 flex items-center gap-2">
+                  <span className="w-4 h-4 flex items-center justify-center rounded-full bg-amber-100 text-[10px] font-bold shrink-0">1</span>
+                  Unfallhergang + Schuldfrage fehlt (oder Teilschuld noch nicht bestätigt)
+                </li>
+              )}
+              {!hardGateDetails.q2 && (
+                <li className="text-xs text-amber-800 flex items-center gap-2">
+                  <span className="w-4 h-4 flex items-center justify-center rounded-full bg-amber-100 text-[10px] font-bold shrink-0">2</span>
+                  Schaden nicht bestätigt (Schaden sichtbar, Personenschaden, Mietwagen oder Nutzungsausfall)
+                </li>
+              )}
+              {!hardGateDetails.q3 && (
+                <li className="text-xs text-amber-800 flex items-center gap-2">
+                  <span className="w-4 h-4 flex items-center justify-center rounded-full bg-amber-100 text-[10px] font-bold shrink-0">3</span>
+                  Polizei vor Ort — noch nicht beantwortet (Ja oder Nein)
+                </li>
+              )}
+            </ul>
+          )}
+        </div>
       ) : (
         <>
           {/* Schritt 1: SV-Vorschlaege laden */}
