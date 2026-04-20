@@ -623,6 +623,15 @@ async function convertLeadToFall(
       besichtigungsort_lng: lead.besichtigungsort_lng ?? null,
       besichtigungsort_place_id: lead.besichtigungsort_place_id ?? null,
       sprache: lead.sprache ?? null,
+      // AAR-630: 6 weitere Lead-Felder die bisher beim Convert verloren gingen
+      // (fahrerflucht lief schon vorher, aber ohne faelle-Spalte). Migration
+      // 20260420211923 hat die Spalten angelegt, jetzt vollstaendiges Mapping.
+      auslandskennzeichen: lead.auslandskennzeichen ?? null,
+      polizeibericht_status: lead.polizeibericht_status ?? null,
+      zb1_status: lead.zb1_status ?? null,
+      unfall_uhrzeit: lead.unfall_uhrzeit ?? null,
+      unfallort_lat: lead.unfallort_lat ?? null,
+      unfallort_lng: lead.unfallort_lng ?? null,
       // KFZ-140: Fehlende Felder aus signSAandCreateFall uebernehmen
       schadens_datum: lead.unfalldatum ?? null,
       schadens_adresse: lead.fahrzeug_standort_adresse ?? null,

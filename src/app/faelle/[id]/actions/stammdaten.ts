@@ -124,6 +124,17 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'sprache',
   // Zeugen-Kontaktdaten (JSONB-Array):
   'zeugen_kontakte',
+  // AAR-630 (1b): 7 neue Fall-Spalten (Migration 20260420211923).
+  // Auto-Flags (fahrerflucht, auslandskennzeichen) sind read-only im UI —
+  // werden vom Kennzeichen-Analyse-Trigger gesetzt, aber Admin-Override
+  // via Allowlist moeglich falls falsch geflaggt.
+  'fahrerflucht',
+  'auslandskennzeichen',
+  'polizeibericht_status',
+  'zb1_status',
+  'unfall_uhrzeit',
+  'unfallort_lat',
+  'unfallort_lng',
 ])
 
 export async function updateFallField(
