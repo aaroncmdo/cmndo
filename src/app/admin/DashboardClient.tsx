@@ -211,7 +211,7 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
         dauer: 15,
         label: name,
         sublabel: r.telefon ?? '',
-        link: `/admin/dispatch/lead/${r.id}`,
+        link: `/dispatch/leads/${r.id}`,
       })
     }
 

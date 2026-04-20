@@ -132,7 +132,7 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
               return (
                 <tr key={p.id}>
                   <td className="px-4 py-3">
-                    <Link href={`/admin/dispatch/leads/${p.lead_id}`} className="text-[#4573A2] hover:underline font-medium">
+                    <Link href={`/dispatch/leads/${p.lead_id}`} className="text-[#4573A2] hover:underline font-medium">
                       {name}
                     </Link>
                   </td>

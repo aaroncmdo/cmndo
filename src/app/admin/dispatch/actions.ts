@@ -260,7 +260,7 @@ export async function createLead(data: {
   const { data: newLead } = await supabase.from('leads').select('id').eq('vorname', data.vorname).eq('nachname', data.nachname).order('created_at', { ascending: false }).limit(1).single()
   if (newLead) {
     triggerLeadTasks(newLead.id, user.id).catch(() => {})
-    createNotification(user.id, 'neuer-lead', `Neuer Lead: ${data.vorname} ${data.nachname}`, `${data.source_channel} · ${data.schadens_fall_typ || 'Kein Typ'}`, `/admin/dispatch/lead/${newLead.id}`).catch(() => {})
+    createNotification(user.id, 'neuer-lead', `Neuer Lead: ${data.vorname} ${data.nachname}`, `${data.source_channel} · ${data.schadens_fall_typ || 'Kein Typ'}`, `/dispatch/leads/${newLead.id}`).catch(() => {})
 
     // AAR-90: Cardentity-Anreicherung wenn FIN angegeben
     if (data.fin) {
@@ -383,7 +383,7 @@ export async function updateServiceTyp(
 
   if (error) throw new Error(error.message)
 
-  revalidatePath(`/admin/dispatch/lead/${leadId}`)
+  revalidatePath(`/dispatch/leads/${leadId}`)
   revalidatePath('/admin/dispatch')
 }
 
@@ -505,7 +505,7 @@ export async function sendFlowLink(leadId: string) {
     }
   }
   revalidatePath('/admin/dispatch')
-  revalidatePath(`/admin/dispatch/lead/${leadId}`)
+  revalidatePath(`/dispatch/leads/${leadId}`)
 
   return { token: flowLink.token, url: flowUrl }
 }
