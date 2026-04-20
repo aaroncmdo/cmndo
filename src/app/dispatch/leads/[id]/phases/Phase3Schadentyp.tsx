@@ -7,6 +7,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import SchadentypPicker from '../SchadentypPicker'
+import BkatAnalysePanel from './BkatAnalysePanel'
 import { useDispatchPhase } from '../lib/phase-context'
 
 export default function Phase3Schadentyp() {
@@ -17,6 +18,7 @@ export default function Phase3Schadentyp() {
     schadentyp_freitext?: string | null
     gegner_kennzeichen?: string | null
     parkplatz_kamera?: boolean | null
+    polizei_vor_ort?: boolean | null
   }
   // AAR-268: Lokal nachhalten — sobald Save durch ist, zeigen wir den Weiter-
   // Button auch wenn die Qualification-Engine noch nicht refresht ist.
@@ -25,6 +27,17 @@ export default function Phase3Schadentyp() {
 
   return (
     <div className="space-y-3">
+      {/* AAR-504/505: KI-Analyse (OCR first, LLM-Fallback auf unfallhergang).
+         Zeigt Unfallart-Vorschlag + TBNR-Kandidaten. TBNRs werden nur
+         gespeichert wenn Polizei vor Ort war + OCR-Quelle. */}
+      <BkatAnalysePanel
+        leadId={lead.id}
+        polizeiVorOrt={l.polizei_vor_ort ?? null}
+        onSchadentypGesetzt={() => {
+          setShowWeiter(true)
+          router.refresh()
+        }}
+      />
       <SchadentypPicker
         leadId={lead.id}
         initialTyp={l.schadentyp as Parameters<typeof SchadentypPicker>[0]['initialTyp']}
