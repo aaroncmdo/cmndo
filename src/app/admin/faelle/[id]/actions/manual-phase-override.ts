@@ -77,6 +77,22 @@ export async function manualPhaseOverride(input: OverrideInput): Promise<{
     return { success: false, error: updateErr.message, alteSubphase }
   }
 
+  // AAR-585 (Variante A): Phase-Transition in phase_transitions schreiben.
+  // Gibt der Timeline-History (AAR-571) echte Rows für manuell gesetzte Phasen.
+  // Non-critical — Fehler hier darf den Override nicht blockieren.
+  await supabase.from('phase_transitions').insert({
+    fall_id: input.fallId,
+    from_phase: alteSubphase,
+    to_phase: input.neueSubphase,
+    trigger_type: 'manual_admin',
+    transitioned_by: user.id,
+    actor_rolle: 'admin',
+    grund: begruendung,
+    payload: { override_grund: begruendung, alte_subphase: alteSubphase },
+  }).then(({ error }) => {
+    if (error) console.error('phase_transitions insert failed (non-critical):', error.message)
+  })
+
   // Audit-Eintrag direkt in webhook_events — LexDrive-Processor nicht nötig,
   // da keine Auto-Side-Effects laufen sollen.
   await supabase.from('webhook_events').insert({
