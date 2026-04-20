@@ -74,7 +74,7 @@ export function MaklerShell({ makler, email, children }: MaklerShellProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-300 ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-500 ${
                   active
                     ? 'bg-[#1E3A5F] text-white font-semibold'
                     : 'text-[#7BA3CC] hover:bg-white/5 hover:text-white'
