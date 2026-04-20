@@ -67,12 +67,14 @@ export default async function GutachterLayout({
   // ARCH-1 Phase 1: /gutachter/willkommen ist der neue Onboarding-Pfad
   // (3-Step Konditionen → Vertrag → Stripe). /gutachter/onboarding ist nur
   // noch eine Redirect-Logik, bleibt aber whitelisted fuer Backwards-Compat.
+  // AAR-510: pathname einmal laden für Hard-Blocker-Redirect + Banner-
+  // Unterdrückung auf der Willkommens-Seite (doppelter Hinweis sonst).
+  const h = await headers()
+  const pathname = h.get('x-pathname') ?? h.get('x-next-url') ?? h.get('x-invoke-path') ?? ''
+  const isWillkommenPath = pathname.includes('/gutachter/willkommen')
+  const isOnboardingPath = isWillkommenPath || pathname.includes('/gutachter/onboarding')
+
   if (!sv || sv.portal_zugang_freigeschaltet === false) {
-    const h = await headers()
-    const pathname = h.get('x-pathname') ?? h.get('x-next-url') ?? h.get('x-invoke-path') ?? ''
-    const isOnboardingPath =
-      pathname.includes('/gutachter/onboarding') ||
-      pathname.includes('/gutachter/willkommen')
     if (!isOnboardingPath) {
       redirect('/gutachter/willkommen')
     }
@@ -166,6 +168,7 @@ export default async function GutachterLayout({
         && sv?.sa_vorlage_status !== 'zurueckgewiesen'
         && sv?.sa_vorlage_status !== 'ausstehend'
         && sv?.verifizierung_status !== 'frist_ueberschritten'
+        && !isWillkommenPath
         && sv
         && !isOnboardingComplete(sv)
         && (
