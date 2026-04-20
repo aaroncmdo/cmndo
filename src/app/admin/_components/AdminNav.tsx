@@ -5,65 +5,40 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboardIcon, FolderOpenIcon, BadgeEuroIcon,
   CarFrontIcon, LogOutIcon, GitBranchIcon, CalendarIcon,
-  BarChart3Icon, UsersIcon, BuildingIcon, Building2Icon, ReceiptIcon,
-  ShieldCheckIcon, MessageCircleIcon, SettingsIcon, AlertCircleIcon,
-  LifeBuoyIcon, ClipboardListIcon,
-  TimerIcon, ScaleIcon, ExternalLinkIcon,
+  UsersIcon, Building2Icon,
+  MessageCircleIcon, SettingsIcon,
+  ClipboardListIcon, ExternalLinkIcon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
 
-// AAR-57: 4 Sektionen — Navigation, Operations, Stammdaten, Verwaltung
-// AAR-338: external-Flag für Links die in neuem Tab öffnen (Dispatch hat
-// ein eigenes Full-Screen-Layout ohne Admin-Sidebar)
+// AAR-529 (A5): Cutover 21 → 11 flache Items (1 Sektion).
+// Hub-URLs sind alle live aus AAR-525/526/527/528/531 — SLA, Kanzlei-Board,
+// Reklamationen, Abrechnungen, Kanzlei-Abr., Statistiken, Organisationen,
+// Versicherer, Communities, Meine-Tasks, Alle-Tasks sind jetzt Tabs unter
+// den Haupt-Hubs und fliegen aus der Sidebar.
+//
+// Support fällt als Nav-Item raus — der SupportButton unten in der Sidebar
+// (AAR-519) übernimmt den Einstieg ins Support-Widget.
 type NavItem = { href: string; label: string; icon: typeof LayoutDashboardIcon; exact?: boolean; external?: boolean }
 
-// AAR-123: /admin/karte und /admin/sv-onboarding sind jetzt Tabs unter
-// /admin/sachverstaendige. Die alten Nav-Items sind entfernt; der
-// Sachverständige-Hub enthält nun alle drei Views.
-const NAV_NAVIGATION: NavItem[] = [
+const NAV_ITEMS: NavItem[] = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboardIcon, exact: true },
   // AAR-338: Dispatch hat eigenes Full-Screen-Layout — neuer Tab ohne Admin-Chrome
   { href: '/dispatch/dashboard', label: 'Dispatch', icon: GitBranchIcon, external: true },
+  // AAR-526: Fälle-Hub mit Tabs (Liste/SLA/Statistiken/Kanzlei-Board/Reklamationen)
   { href: '/admin/faelle', label: 'Fälle', icon: FolderOpenIcon },
-  { href: '/admin/kalender', label: 'Kalender', icon: CalendarIcon },
-  { href: '/admin/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon },
-  { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: CarFrontIcon },
-  // AAR-531: Meine Tasks + Alle Tasks zusammengeführt zu Aufgaben-Hub
+  // AAR-531: Aufgaben-Hub (Meine-Tasks + Alle-Tasks)
   { href: '/admin/aufgaben', label: 'Aufgaben', icon: ClipboardListIcon },
-]
-
-const NAV_OPERATIONS: NavItem[] = [
-  { href: '/admin/sla', label: 'SLA-Monitoring', icon: TimerIcon },
-  { href: '/admin/kanzlei-board', label: 'Kanzlei-Board', icon: ScaleIcon },
-  { href: '/admin/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
-  { href: '/admin/support', label: 'Support', icon: LifeBuoyIcon },
-]
-
-const NAV_STAMMDATEN: NavItem[] = [
-  // AAR-123: SV-Onboarding ist jetzt Tab im Sachverständige-Hub.
-  { href: '/admin/organisationen', label: 'Organisationen', icon: Building2Icon },
-  { href: '/admin/team', label: 'Team', icon: UsersIcon },
-  { href: '/admin/versicherungen', label: 'Versicherer', icon: BuildingIcon },
-  { href: '/admin/communities', label: 'Communities', icon: ShieldCheckIcon },
-]
-
-// AAR-153: „Provisionen Maik" war ein eigener Top-Level-Eintrag — jetzt als
-// Sub-Link innerhalb der Finanzen-Page (FinanceClient zeigt dafür einen Button
-// „Partner-Provisionen verwalten"). Die Route /admin/finance/provisionen-maik
-// bleibt intakt für direkte Bookmarks.
-const NAV_VERWALTUNG: NavItem[] = [
+  // AAR-525: Nachrichten-Hub (MultiChannelChat pro Fall)
+  { href: '/admin/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon },
+  { href: '/admin/kalender', label: 'Kalender', icon: CalendarIcon },
+  { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: CarFrontIcon },
+  // AAR-527: Partner-Hub (Organisationen/Versicherer/Communities)
+  { href: '/admin/partner', label: 'Partner', icon: Building2Icon },
+  // AAR-528: Finanzen-Hub (Übersicht/Abrechnungen/Kanzlei-Abr./Provisionen)
   { href: '/admin/finance', label: 'Finanzen', icon: BadgeEuroIcon },
-  { href: '/admin/abrechnungen', label: 'Abrechnungen', icon: ReceiptIcon },
-  { href: '/admin/kanzlei-abrechnungen', label: 'Kanzlei-Abr.', icon: ReceiptIcon },
-  { href: '/admin/statistiken', label: 'Statistiken', icon: BarChart3Icon },
+  { href: '/admin/team', label: 'Team', icon: UsersIcon },
   { href: '/admin/einstellungen', label: 'Einstellungen', icon: SettingsIcon },
-]
-
-const SECTIONS: { label: string; items: NavItem[]; showBorder?: boolean }[] = [
-  { label: 'Navigation', items: NAV_NAVIGATION },
-  { label: 'Operations', items: NAV_OPERATIONS, showBorder: true },
-  { label: 'Stammdaten', items: NAV_STAMMDATEN, showBorder: true },
-  { label: 'Verwaltung', items: NAV_VERWALTUNG, showBorder: true },
 ]
 
 export default function AdminNav({ email, initials, unreadNachrichten, meineTasksCount }: { email: string; initials: string; unreadNachrichten?: number; meineTasksCount?: number }) {
@@ -117,12 +92,11 @@ export default function AdminNav({ email, initials, unreadNachrichten, meineTask
     )
   }
 
-  // AAR-72: Mobile-Items per href-Lookup (nicht Array-Index)
-  // AAR-123: /admin/karte ist weg (nun Tab im SV-Hub) — stattdessen der Hub selbst.
-  // AAR-338: Dispatch hat jetzt href='/dispatch/dashboard' (external)
-  const MOBILE_HREFS = ['/admin', '/dispatch/dashboard', '/admin/faelle', '/admin/nachrichten', '/admin/sachverstaendige']
+  // AAR-529 (A5): Mobile-Top-5 — Dashboard, Fälle, Aufgaben, Nachrichten, Sachverständige.
+  // Dispatch fällt aus Mobile raus (eigenes Full-Screen-Layout, mobil nicht praktikabel).
+  const MOBILE_HREFS = ['/admin', '/admin/faelle', '/admin/aufgaben', '/admin/nachrichten', '/admin/sachverstaendige']
   const mobileItems: NavItem[] = MOBILE_HREFS
-    .map(h => NAV_NAVIGATION.find(i => i.href === h))
+    .map(h => NAV_ITEMS.find(i => i.href === h))
     .filter((i): i is NavItem => !!i)
 
   return (
@@ -135,12 +109,7 @@ export default function AdminNav({ email, initials, unreadNachrichten, meineTask
         </div>
 
         <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto pb-4">
-          {SECTIONS.map((section, idx) => (
-            <div key={section.label} className={section.showBorder ? 'mt-5 pt-4 border-t border-white/10' : idx === 0 ? '' : 'mt-3'}>
-              <p className="text-xs font-semibold uppercase tracking-wider text-white/60 px-3 pb-2">{section.label}</p>
-              {section.items.map(renderItem)}
-            </div>
-          ))}
+          {NAV_ITEMS.map(renderItem)}
         </nav>
 
         <div className="px-3 pb-4 space-y-2 border-t border-white/10 pt-3">
