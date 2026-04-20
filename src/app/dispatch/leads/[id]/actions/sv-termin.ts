@@ -253,11 +253,30 @@ export async function acceptGegenvorschlag(
 // die NICHT mit bestehenden reservierten/bestätigten Terminen kollidieren.
 // Werktage Mo–Fr 09:00–16:00 Start-Zeit (letzter Slot startet spätestens
 // 16:00 damit 2h-Termin bis 18:00 endet). Weekend bleibt ohne Slots.
+//
+// AAR-522: Erweitert um Wunschtermin-Priorisierung + Wochentag-Filter.
+// Ranking bei gesetztem wunschterminIso:
+//   1 'wunschtermin'  — exakter Match ±30min
+//   2 'gleicher_tag'  — anderer Slot am selben Tag
+//   3 'nahe'          — Tag davor/danach
+//   4 'nach'          — sonst, nächste freie
+// Ohne wunschterminIso liefern alle Slots matchType 'nach'.
+
+export type SlotMatchType = 'wunschtermin' | 'gleicher_tag' | 'nahe' | 'nach'
+export type SlotCandidate = { start: string; end: string; matchType: SlotMatchType }
+
+export type NextFreeSlotsOpts = {
+  wunschterminIso?: string | null
+  wunschterminWochentage?: number[] | null
+  prioritizeAroundWunschtermin?: boolean
+}
+
 export async function getNextFreeSlotsForSv(
   svId: string,
   count: number = 3,
   slotDauerMin: number = 120,
-): Promise<{ success: boolean; slots?: { start: string; end: string }[]; error?: string }> {
+  opts?: NextFreeSlotsOpts,
+): Promise<{ success: boolean; slots?: SlotCandidate[]; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
@@ -274,29 +293,50 @@ export async function getNextFreeSlotsForSv(
     .lte('start_zeit', inZwoelfWochen.toISOString())
     .order('start_zeit', { ascending: true })
 
-  const freieSlots: { start: string; end: string }[] = []
+  const wunschterminIso = opts?.wunschterminIso ?? null
+  const wunschtermin = wunschterminIso ? new Date(wunschterminIso) : null
+  const useWunschtermin =
+    wunschtermin != null &&
+    !Number.isNaN(wunschtermin.getTime()) &&
+    (opts?.prioritizeAroundWunschtermin ?? true)
+
+  const wochentageFilter = opts?.wunschterminWochentage?.length
+    ? new Set(opts.wunschterminWochentage)
+    : null
+
+  const alleKandidaten: SlotCandidate[] = []
   const kandidat = new Date(now)
   // Frühestens morgen 09:00 — heute anzurufen + morgen Termin ist normales
-  // Dispatch-Tempo. Falls heute noch 14:00 ist, würde sonst „heute 16:00"
-  // vorgeschlagen — der SV hat aber keine Vorlaufzeit.
+  // Dispatch-Tempo.
   kandidat.setDate(kandidat.getDate() + 1)
   kandidat.setHours(9, 0, 0, 0)
 
-  const maxIter = 12 * 7 * 24 // Sicherung gegen Endlos-Schleife
+  const maxIter = 12 * 7 * 24
   let i = 0
-  while (freieSlots.length < count && kandidat < inZwoelfWochen && i < maxIter) {
+  // Obergrenze deutlich höher als `count`, damit wir genug Rohdaten für
+  // die Sortierung nach matchType haben. Ohne Wunschtermin wird der Loop
+  // ohnehin nach count Treffern verlassen — siehe break unten.
+  const rohdatenLimit = useWunschtermin ? Math.max(count * 6, 12) : count
+
+  while (alleKandidaten.length < rohdatenLimit && kandidat < inZwoelfWochen && i < maxIter) {
     i++
     const wochentag = kandidat.getDay()
-    if (wochentag !== 0 && wochentag !== 6 && kandidat.getHours() < 16) {
+    const iso = wochentag === 0 ? 7 : wochentag
+    const istWerktag = wochentag !== 0 && wochentag !== 6
+    const passtWochentag = wochentageFilter ? wochentageFilter.has(iso) : istWerktag
+    if (passtWochentag && kandidat.getHours() < 16) {
       const slotEnd = new Date(kandidat.getTime() + slotDauerMin * 60_000)
-      const konflikt = (bestehend ?? []).some((b) =>
-        new Date(b.start_zeit) < slotEnd && new Date(b.end_zeit) > kandidat,
+      const konflikt = (bestehend ?? []).some(
+        (b) => new Date(b.start_zeit) < slotEnd && new Date(b.end_zeit) > kandidat,
       )
       if (!konflikt) {
-        freieSlots.push({ start: kandidat.toISOString(), end: slotEnd.toISOString() })
+        alleKandidaten.push({
+          start: kandidat.toISOString(),
+          end: slotEnd.toISOString(),
+          matchType: classify(kandidat, wunschtermin, useWunschtermin),
+        })
       }
     }
-    // Nächster Kandidat: +1h. Nach 16:00 → nächster Tag 09:00.
     kandidat.setTime(kandidat.getTime() + 60 * 60_000)
     if (kandidat.getHours() >= 17) {
       kandidat.setDate(kandidat.getDate() + 1)
@@ -304,5 +344,94 @@ export async function getNextFreeSlotsForSv(
     }
   }
 
-  return { success: true, slots: freieSlots }
+  // Ranking: wunschtermin > gleicher_tag > nahe > nach. Bei gleichem Match-Typ
+  // nach zeitlicher Nähe zum Wunschtermin (oder absolut aufsteigend ohne).
+  const priority: Record<SlotMatchType, number> = {
+    wunschtermin: 0,
+    gleicher_tag: 1,
+    nahe: 2,
+    nach: 3,
+  }
+  const sorted = alleKandidaten.sort((a, b) => {
+    const pa = priority[a.matchType]
+    const pb = priority[b.matchType]
+    if (pa !== pb) return pa - pb
+    if (useWunschtermin && wunschtermin) {
+      const diffA = Math.abs(new Date(a.start).getTime() - wunschtermin.getTime())
+      const diffB = Math.abs(new Date(b.start).getTime() - wunschtermin.getTime())
+      return diffA - diffB
+    }
+    return new Date(a.start).getTime() - new Date(b.start).getTime()
+  })
+
+  return { success: true, slots: sorted.slice(0, count) }
+}
+
+function classify(
+  slotStart: Date,
+  wunschtermin: Date | null,
+  useWunschtermin: boolean,
+): SlotMatchType {
+  if (!useWunschtermin || !wunschtermin) return 'nach'
+  const diffMs = Math.abs(slotStart.getTime() - wunschtermin.getTime())
+  if (diffMs <= 30 * 60_000) return 'wunschtermin'
+  const sameDay =
+    slotStart.getFullYear() === wunschtermin.getFullYear() &&
+    slotStart.getMonth() === wunschtermin.getMonth() &&
+    slotStart.getDate() === wunschtermin.getDate()
+  if (sameDay) return 'gleicher_tag'
+  const oneDayMs = 24 * 60 * 60_000
+  if (diffMs <= oneDayMs * 1.5) return 'nahe'
+  return 'nach'
+}
+
+// AAR-522: Kombinierte Action — SV-Vorschläge UND Slots in einem Roundtrip.
+// Dispatcher sieht beim Mount direkt die Top-SVs mit ihren besten Slots.
+export async function getSvSuggestionsWithSlots(
+  leadId: string,
+  opts?: { slotsPerSv?: number; maxSvs?: number; slotDauerMin?: number },
+): Promise<{
+  success: boolean
+  suggestions?: Array<SvSuggestion & { slots: SlotCandidate[] }>
+  error?: string
+}> {
+  const slotsPerSv = opts?.slotsPerSv ?? 3
+  const maxSvs = opts?.maxSvs ?? 3
+  const slotDauer = opts?.slotDauerMin ?? 120
+
+  const basisResult = await listSvSuggestionsForLead(leadId)
+  if (!basisResult.success) {
+    return { success: false, error: basisResult.error ?? 'SV-Suche fehlgeschlagen' }
+  }
+  const basis = basisResult.suggestions ?? []
+  if (basis.length === 0) return { success: true, suggestions: [] }
+
+  // Wunschtermin + Wochentage aus leads laden — gleicher Payload den
+  // SvDispatchPanel bereits kennt, aber hier zentral gebündelt.
+  const supabase = await createClient()
+  const { data: lead } = await supabase
+    .from('leads')
+    .select('wunschtermin, wunschtermin_wochentage')
+    .eq('id', leadId)
+    .single()
+  const wunschterminIso = (lead as { wunschtermin: string | null } | null)?.wunschtermin ?? null
+  const wunschterminWochentage =
+    ((lead as { wunschtermin_wochentage: number[] | null } | null)?.wunschtermin_wochentage) ?? null
+
+  const top = basis.slice(0, maxSvs)
+  const slotsPerCandidate = await Promise.all(
+    top.map(async (cand) => {
+      const r = await getNextFreeSlotsForSv(cand.svId, slotsPerSv, slotDauer, {
+        wunschterminIso,
+        wunschterminWochentage,
+        prioritizeAroundWunschtermin: true,
+      })
+      return { cand, slots: r.success ? r.slots ?? [] : [] }
+    }),
+  )
+
+  return {
+    success: true,
+    suggestions: slotsPerCandidate.map(({ cand, slots }) => ({ ...cand, slots })),
+  }
 }
