@@ -5,8 +5,8 @@ import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { DragDropContext, Droppable, Draggable, type DropResult, type DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
-import { updateFallStatus } from '../dispatch/actions'
-import { deleteFall, deactivateFall } from './[id]/actions'
+import { updateFallStatus } from '../../dispatch/actions'
+import { deleteFall, deactivateFall } from '../[id]/actions'
 import FallCardBadges, { NotificationDot } from '@/components/faelle/FallCardBadges'
 // AAR-572 (V6): Shared PhasePipeline als Hover-Overlay auf den Kanban-Karten
 import { PhasePipeline } from '@/components/shared/fall-phases'
@@ -114,7 +114,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
     const snapshot = [...localFaelle]
     setLocalFaelle(prev => prev.map(f => f.id === draggableId ? { ...f, status: newStatus } : f))
 
-    updateFallStatus(draggableId, newStatus).catch(e => {
+    updateFallStatus(draggableId, newStatus).catch((e: unknown) => {
       setLocalFaelle(snapshot)
       setToast(e instanceof Error ? e.message : 'Fehler')
       setTimeout(() => setToast(null), 3000)
