@@ -168,6 +168,16 @@ export async function uploadDokumentViaAnfrageToken(
       polizeibericht_hochgeladen_am: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }).eq('id', anfrage.lead_id)
+    // AAR-504: Auto-OCR im Hintergrund. Keine UI für den Kunden — nur intern
+    // für den Dispatcher. Fire-and-forget, errors werden geloggt.
+    try {
+      const { triggerAutoBkatOcr } = await import('@/lib/bkat/auto-trigger')
+      triggerAutoBkatOcr(db, anfrage.lead_id, publicUrl).catch((err) =>
+        console.error('[AAR-504] auto-bkat upload-dokumente:', err),
+      )
+    } catch (err) {
+      console.error('[AAR-504] auto-bkat module load:', err)
+    }
   } else {
     // sonstiges → fall_dokumente ohne Slot-Mapping (KB ordnet manuell zu)
     await insertFallDokument(db, fallId, 'kunde-nachreichung', path, contentType, buf.length, slot.label)
