@@ -58,16 +58,14 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // AAR-622: getSession() statt getUser() — liest JWT lokal aus dem Cookie
-  // und ruft GoTrue NUR bei Token-Ablauf auf (alle ~60 Min pro User-Session).
-  // getUser() rief bei jedem Request /auth/v1/user ab → GoTrue-Bottleneck.
-  // Middleware macht nur Redirects (keine DB-Writes), daher ist die lokale
-  // Session-Verifikation sicher genug; RLS + Server-Actions sind der
-  // eigentliche Security-Layer.
+  // AAR-622: getUser() bleibt für geschützte Pfade — getSession() kann bei
+  // abgelaufenem Token null zurückgeben ohne GoTrue zu fragen, was jeden
+  // eingeloggten User fälschlicherweise auf /login schickt. Der große Gewinn
+  // (Crons, public paths) kommt vom Early-Return oben, nicht von hier.
   let user = null
   try {
-    const { data: { session } } = await supabase.auth.getSession()
-    user = session?.user ?? null
+    const result = await supabase.auth.getUser()
+    user = result?.data?.user ?? null
   } catch {
     user = null
   }
