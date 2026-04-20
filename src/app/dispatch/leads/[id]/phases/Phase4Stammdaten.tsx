@@ -425,7 +425,7 @@ function Card({
 }
 
 export default function Phase4Stammdaten() {
-  const { lead, qualification, setPhase } = useDispatchPhase()
+  const { lead, qualification, setPhase, patchLead } = useDispatchPhase()
   const l = lead as unknown as LeadFields
   const leadId = lead.id
   const [gegnerKzDraft, setGegnerKzDraft] = useState(l.gegner_kennzeichen ?? '')
@@ -458,6 +458,12 @@ export default function Phase4Stammdaten() {
     if (formatted !== gegnerKzDraft) setGegnerKzDraft(formatted)
     if (formatted === (l.gegner_kennzeichen ?? '')) return
     const flags = checkKZFlags(formatted, l.schadentyp ?? null)
+    // AAR-realtime: Provider-State sofort patchen
+    patchLead({
+      gegner_kennzeichen: formatted || null,
+      fahrerflucht: flags.fahrerflucht,
+      auslandskennzeichen: flags.auslandskennzeichen,
+    } as Partial<typeof lead>)
     startTransition(async () => {
       await saveStammdaten(leadId, {
         gegner_kennzeichen: formatted || null,
@@ -468,6 +474,8 @@ export default function Phase4Stammdaten() {
   }
 
   function saveToggle(field: string, value: boolean | string | null) {
+    // AAR-realtime: Provider-State sofort patchen
+    patchLead({ [field]: value } as Partial<typeof lead>)
     startTransition(async () => {
       await saveStammdaten(leadId, { [field]: value })
     })

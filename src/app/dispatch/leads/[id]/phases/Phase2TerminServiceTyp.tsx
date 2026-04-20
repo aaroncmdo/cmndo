@@ -17,7 +17,7 @@ import { MapPinIcon, CheckCircle2Icon, ScaleIcon, CalendarIcon } from 'lucide-re
 
 export default function Phase2TerminServiceTyp() {
   const router = useRouter()
-  const { lead, aktiverTermin, qualification, setPhase } = useDispatchPhase()
+  const { lead, aktiverTermin, qualification, setPhase, patchLead } = useDispatchPhase()
   const l = lead as unknown as {
     unfallort?: string | null
     unfallort_lat?: number | null
@@ -59,6 +59,8 @@ export default function Phase2TerminServiceTyp() {
     if (wunschtermin === dbValue) return
     wunschterminDebounceRef.current = setTimeout(() => {
       const isoOrNull = wunschtermin ? new Date(wunschtermin).toISOString() : null
+      // AAR-realtime: Provider-State sofort patchen (Context-Sync vor Server-Roundtrip)
+      patchLead({ wunschtermin: isoOrNull } as Partial<typeof lead>)
       startTransition(async () => {
         const r = await saveStammdaten(lead.id, { wunschtermin: isoOrNull })
         if (r.success) {
@@ -90,6 +92,8 @@ export default function Phase2TerminServiceTyp() {
     setUnfallortDraft(adresse)
     setUnfallortLat(lat)
     setUnfallortLng(lng)
+    // AAR-realtime: Provider sofort patchen
+    patchLead({ unfallort: adresse, unfallort_lat: lat, unfallort_lng: lng } as Partial<typeof lead>)
     startTransition(async () => {
       const r = await saveStammdaten(lead.id, {
         unfallort: adresse,
@@ -130,6 +134,13 @@ export default function Phase2TerminServiceTyp() {
 
   function saveBesichtigungsort(place: PlaceResult) {
     setBesichtigungsortAdresse(place.adresse)
+    // AAR-realtime: Provider sofort patchen
+    patchLead({
+      besichtigungsort_adresse: place.adresse,
+      besichtigungsort_lat: place.lat,
+      besichtigungsort_lng: place.lng,
+      besichtigungsort_place_id: place.place_id || null,
+    } as Partial<typeof lead>)
     startTransition(async () => {
       const r = await saveStammdaten(lead.id, {
         besichtigungsort_adresse: place.adresse,
@@ -179,6 +190,8 @@ export default function Phase2TerminServiceTyp() {
   // AAR-270: Wochentag setzen + sofort speichern
   function saveWochentage(next: number[]) {
     setWochentage(next)
+    // AAR-realtime: Provider sofort patchen
+    patchLead({ wunschtermin_wochentage: next.length > 0 ? next : null } as Partial<typeof lead>)
     startTransition(async () => {
       const r = await saveStammdaten(lead.id, {
         wunschtermin_wochentage: next.length > 0 ? next : null,

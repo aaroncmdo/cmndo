@@ -94,7 +94,7 @@ export default function MyTasksClient({
                     </td>
                     <td className="px-4 py-3">
                       {t.fall_id && t.fall_nummer && (
-                        <Link href={`/faelle/${t.fall_id}`} className="text-[#4573A2] hover:underline text-xs flex items-center gap-1">
+                        <Link href={`/faelle/${t.fall_id}`} target="_blank" rel="noopener" className="text-[#4573A2] hover:underline text-xs flex items-center gap-1">
                           {t.fall_nummer} <ExternalLinkIcon className="w-3 h-3" />
                         </Link>
                       )}

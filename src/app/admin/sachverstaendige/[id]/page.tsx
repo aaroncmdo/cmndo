@@ -302,7 +302,7 @@ export default async function SvDetailPage({
                     const lead = (Array.isArray(leadRaw) ? leadRaw[0] : leadRaw) as { vorname: string | null; nachname: string | null } | null
                     const kunde = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : '—'
                     return (
-                      <Link key={fall.id} href={`/faelle/${fall.id}`}
+                      <Link key={fall.id} href={`/faelle/${fall.id}`} target="_blank" rel="noopener"
                         className="block px-3 py-2.5 border-b border-gray-50 hover:bg-gray-50 transition-colors">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-medium text-gray-800 truncate">{kunde}</span>

@@ -211,6 +211,8 @@ export default function FinanceClient({
                         <td className="px-5 py-3">
                           <Link
                             href={`/faelle/${row.id}`}
+                            target="_blank"
+                            rel="noopener"
                             className="text-[#7BA3CC] hover:text-[#7BA3CC] font-mono text-xs"
                           >
                             {row.fall_nummer ?? row.id.slice(0, 8)}
@@ -244,6 +246,8 @@ export default function FinanceClient({
                   <Link
                     key={row.id}
                     href={`/faelle/${row.id}`}
+                    target="_blank"
+                    rel="noopener"
                     className="block px-5 py-4 hover:bg-gray-100/40 transition-colors"
                   >
                     <div className="flex items-start justify-between mb-1">
