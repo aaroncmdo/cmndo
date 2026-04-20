@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { markiereAlsBezahlt, storniereAbrechnung, manuellVersenden, manuellGenerieren } from './abrechnungen-actions'
+import { markiereAlsBezahlt, storniereAbrechnung, manuellVersenden, manuellGenerieren } from '../abrechnungen-actions'
 
 type Abrechnung = {
   id: string
