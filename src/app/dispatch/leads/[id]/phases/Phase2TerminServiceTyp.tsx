@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation'
 import SvDispatchPanel from '../SvDispatchPanel'
 import { useDispatchPhase } from '../lib/phase-context'
 import { setServiceTyp, saveStammdaten } from '../actions'
-import { geocodeAndSaveBesichtigung } from '../actions/geocode'
+import { geocodeAndSaveUnfallort } from '../actions/geocode'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { MapPinIcon, CheckCircle2Icon, ScaleIcon, CalendarIcon } from 'lucide-react'
 
@@ -119,7 +119,7 @@ export default function Phase2TerminServiceTyp() {
     // Koordinaten via Dropdown gesetzt.
     if (!trimmed || trimmed === (l.unfallort ?? '') || hasKoordinaten) return
     startTransition(async () => {
-      const r = await geocodeAndSaveBesichtigung(lead.id, trimmed)
+      const r = await geocodeAndSaveUnfallort(lead.id, trimmed)
       if (r.success && r.lat != null && r.lng != null) {
         setUnfallortLat(r.lat)
         setUnfallortLng(r.lng)
