@@ -13,7 +13,7 @@
 // Beim Zurücknavigieren re-initialisiert useState() aus initialLead — der
 // noch den alten Wert hält → Wert springt zurück.
 
-import { createContext, useContext, useMemo, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useMemo, useState, useCallback, useEffect, type ReactNode } from 'react'
 import {
   computeQualificationStatus,
   type LeadLike,
@@ -54,8 +54,36 @@ export function DispatchPhaseProvider({
   const [currentPhase, setPhase] = useState<Phase>(initialPhase)
   const [lead, setLead] = useState<LeadLike & { id: string }>(initialLead)
 
+  // AAR-realtime: Safety-Net. `useState(initialLead)` initialisiert nur beim
+  // Mount — nach `router.refresh()` (Server-Component lädt frische Daten)
+  // würde der Provider-State stale bleiben. Wir syncen daher auf
+  // `initialLead.updated_at`-Changes. Das ist Defense-in-Depth; der saubere
+  // Pfad bleibt `patchLead({...})` direkt nach einem erfolgreichen Write
+  // damit der Context sofort sync ist, ohne auf den Server-Roundtrip zu
+  // warten. Wir überschreiben nur wenn Server eine neuere updated_at liefert
+  // (sonst racen optimistic patches gegen den State).
+  useEffect(() => {
+    const serverUpdated = (initialLead as Record<string, unknown>).updated_at as string | null | undefined
+    setLead((prev) => {
+      const prevUpdated = (prev as Record<string, unknown>).updated_at as string | null | undefined
+      if (!serverUpdated) return prev
+      if (prev.id !== initialLead.id) return initialLead
+      if (!prevUpdated || new Date(serverUpdated) >= new Date(prevUpdated)) {
+        return { ...prev, ...initialLead }
+      }
+      return prev
+    })
+  }, [initialLead])
+
   const patchLead = useCallback((patch: Partial<LeadLike & { id: string }>) => {
-    setLead((prev) => ({ ...prev, ...patch }))
+    setLead((prev) => ({
+      ...prev,
+      ...patch,
+      // Optimistisch die updated_at hochziehen damit der useEffect-Sync
+      // unseren gerade gepatchten State nicht sofort mit Server-Stand
+      // überschreibt (der könnte noch vom letzten Roundtrip sein).
+      updated_at: new Date().toISOString(),
+    } as LeadLike & { id: string }))
   }, [])
 
   const qualification = useMemo(
