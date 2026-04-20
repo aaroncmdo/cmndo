@@ -336,6 +336,7 @@ export default function Phase2TerminServiceTyp() {
       <SvDispatchPanel
         leadId={lead.id}
         hardGateOk={hardGateOk}
+        hardGateDetails={{ q1: qualification.q1_schuldfrage, q2: qualification.q2_schaden, q3: qualification.q3_polizei }}
         aktiverTermin={aktiverTermin as Parameters<typeof SvDispatchPanel>[0]['aktiverTermin']}
         wunschterminIso={l.wunschtermin ?? null}
         wunschterminWochentage={wochentage.length > 0 ? wochentage : null}
