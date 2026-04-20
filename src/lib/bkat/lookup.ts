@@ -80,3 +80,24 @@ export function aggregateSchuldindiz(
   }
   return { primaer: null, kundeVerdacht }
 }
+
+/** Mapped die 15 bkat_unfallart-Werte auf die 5 Legacy-schadentyp-Werte. */
+export function bkatToLegacySchadentyp(u: BkatUnfallart): string {
+  switch (u) {
+    case 'auffahrunfall':
+      return 'auffahrunfall'
+    case 'vorfahrt':
+    case 'kreuzung_rotlicht':
+    case 'abbiegen':
+      return 'vorfahrtsverletzung'
+    case 'spurwechsel':
+    case 'ueberholen':
+      return 'spurwechsel'
+    case 'rueckwaerts_parken':
+    case 'einfahren_anfahren':
+    case 'dooring':
+      return 'parkplatz'
+    default:
+      return 'sonstiges'
+  }
+}
