@@ -162,6 +162,14 @@ export function UnfallSection() {
         <InlineEditField label="Unfallort (strukturiert)" fieldName="unfallort" value={f(fall, 'unfallort')} hint="von Dispatch in Phase 1 gesetzt" />
       </div>
       <InlineEditField label="Unfallort-Kategorie" fieldName="unfallort_kategorie" value={f(fall, 'unfallort_kategorie')} hint="Autobahn / Stadt / Land / Parkplatz" />
+      {/* AAR-630 (1b): neue Fall-Spalten (Migration 20260420211923) */}
+      <InlineEditField label="Unfall-Uhrzeit" fieldName="unfall_uhrzeit" value={f(fall, 'unfall_uhrzeit')} hint="z.B. 14:30" />
+      <InlineEditField label="Unfallort Lat" fieldName="unfallort_lat" value={f(fall, 'unfallort_lat')} type="number" />
+      <InlineEditField label="Unfallort Lng" fieldName="unfallort_lng" value={f(fall, 'unfallort_lng')} type="number" />
+      <InlineEditField label="Polizeibericht-Status" fieldName="polizeibericht_status" value={f(fall, 'polizeibericht_status')} hint="abgelehnt / offen / hochgeladen" />
+      <InlineEditField label="ZB1-Status" fieldName="zb1_status" value={f(fall, 'zb1_status')} hint="abgelehnt / offen / hochgeladen" />
+      <InlineEditField label="Fahrerflucht?" fieldName="fahrerflucht" value={f(fall, 'fahrerflucht')} placeholder="Ja / Nein" hint="AAR-135 Auto-Flag, Admin-Override" />
+      <InlineEditField label="Auslandskennzeichen?" fieldName="auslandskennzeichen" value={f(fall, 'auslandskennzeichen')} placeholder="Ja / Nein" hint="AAR-135 Auto-Flag, Admin-Override" />
       <div className="sm:col-span-2">
         <InlineEditField label="Schadens-Ursache" fieldName="schadens_ursache" value={f(fall, 'schadens_ursache')} type="textarea" />
       </div>
