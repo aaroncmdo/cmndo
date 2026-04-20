@@ -90,7 +90,7 @@ export async function uploadDokumentToOutbox(
   revalidatePath(`/gutachter/fall/${fallId}`)
   revalidatePath(`/gutachter/feldmodus`)
   revalidatePath(`/kunde/faelle/${fallId}`)
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 
   return { ok: true, dokumentId: upload.dokumentId, pflichtdokumentId: slotId ?? null }
 }

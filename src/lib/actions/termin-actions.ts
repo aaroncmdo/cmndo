@@ -44,7 +44,7 @@ function revalidateTerminPaths(fallId: string) {
   revalidatePath('/gutachter')
   revalidatePath(`/kunde/faelle/${fallId}`)
   revalidatePath('/kunde')
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 // ─── AUTH: SV Portal ────────────────────────────────────────────────────────

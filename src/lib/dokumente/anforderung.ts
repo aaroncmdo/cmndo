@@ -213,7 +213,7 @@ export async function dokumentAnfordern(
   }
 
   // --- 8. Cache invalidieren -------------------------------------------
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   revalidatePath(`/gutachter/fall/${fallId}`)
   revalidatePath('/kunde')
   revalidatePath('/kunde/onboarding')

@@ -173,7 +173,7 @@ Bitte erstelle die Zusammenfassung nach der im System-Prompt vorgegebenen Strukt
 
     if (error) return { success: false, error: error.message }
 
-    revalidatePath(`/admin/faelle/${fallId}`)
+    revalidatePath(`/faelle/${fallId}`)
     return { success: true, summaryId: summary.id, zusammenfassung }
   } catch (err) {
     console.error('[AAR-104] Claude API Fehler:', err)

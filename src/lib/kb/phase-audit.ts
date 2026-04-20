@@ -133,7 +133,7 @@ export function getKbPhaseAudit(
   slaRecords: KbSlaRecord[] | undefined,
   stepperState: StepperState | null | undefined,
 ): KbAktion {
-  const fallHref = `/admin/faelle/${fall.id}`
+  const fallHref = `/faelle/${fall.id}`
   const now = Date.now()
 
   const ownTasks = (tasks ?? []).filter(

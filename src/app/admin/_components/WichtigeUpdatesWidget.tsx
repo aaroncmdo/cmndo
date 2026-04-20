@@ -148,7 +148,7 @@ async function loadEvents(): Promise<LoadResult> {
       key: `fall-${f.id}`,
       type: 'fall_neu',
       text: `Neuer Fall ${f.fall_nummer ?? ''}`.trim(),
-      href: `/admin/faelle/${f.id}`,
+      href: `/faelle/${f.id}`,
       ts: f.created_at,
     })
   }
@@ -169,7 +169,7 @@ async function loadEvents(): Promise<LoadResult> {
       key: `abg-${f.id}`,
       type: 'fall_abgeschlossen',
       text: `Fall ${f.fall_nummer ?? ''} abgeschlossen${betragStr}`,
-      href: `/admin/faelle/${f.id}`,
+      href: `/faelle/${f.id}`,
       ts: f.regulierung_am,
     })
   }

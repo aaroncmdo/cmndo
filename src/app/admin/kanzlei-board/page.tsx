@@ -72,7 +72,7 @@ export default async function KanzleiBoard() {
               return (
                 <tr key={p.id}>
                   <td className="px-4 py-3">
-                    <Link href={`/admin/faelle/${p.fall_id}`} className="text-[#4573A2] hover:underline font-medium">
+                    <Link href={`/faelle/${p.fall_id}`} className="text-[#4573A2] hover:underline font-medium">
                       {fall?.fall_nummer ?? (p.fall_id as string).slice(0, 8)}
                     </Link>
                     {fall?.kennzeichen && <p className="text-xs text-gray-400">{fall.kennzeichen}</p>}
@@ -139,7 +139,7 @@ export default async function KanzleiBoard() {
         </div>
         <div className="divide-y divide-gray-50">
           {(lexdriveTasks ?? []).map(t => (
-            <Link key={t.id} href={`/admin/faelle/${t.fall_id}`} className="block px-4 py-3 hover:bg-gray-50 transition-colors text-sm">
+            <Link key={t.id} href={`/faelle/${t.fall_id}`} className="block px-4 py-3 hover:bg-gray-50 transition-colors text-sm">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-gray-900">{t.titel}</p>

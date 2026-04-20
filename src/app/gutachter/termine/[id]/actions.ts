@@ -290,7 +290,7 @@ export async function uploadPolizeiberichtAsSv(
   revalidatePath(`/gutachter/fall/${fallId}`)
   revalidatePath('/kunde')
   revalidatePath(`/kunde/faelle/${fallId}`)
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 
   return { success: true }
 }

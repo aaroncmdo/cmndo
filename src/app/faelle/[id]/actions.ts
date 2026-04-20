@@ -89,7 +89,7 @@ export async function saveFilmcheck(fallId: string, notizen: string) {
   autoCompleteTask(fallId, 'qc_bestanden').catch(() => {})
   checkFallAutoPhase(fallId).catch(() => {})
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   revalidatePath('/admin/faelle')
   revalidatePath('/admin/tasks')
 }
@@ -112,7 +112,7 @@ export async function addTimelineEntry(
   })
 
   if (error) throw new Error(error.message)
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 // ─── Manuelle WhatsApp-Nachricht senden (KFZ-114) ───────────────────────────
@@ -188,7 +188,7 @@ export async function uploadAnschlussschreiben(fallId: string, fileUrl: string, 
     erstellt_von: user.id,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 function extractSendedatum(text: string): string | null {
@@ -257,7 +257,7 @@ export async function uploadPflichtdokument(
     .eq('id', pflichtdokumentId)
 
   if (error) throw new Error(error.message)
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 export async function setAnschlussschreibenDatum(fallId: string) {
@@ -288,7 +288,7 @@ export async function setAnschlussschreibenDatum(fallId: string) {
     }).catch(() => {})
   }
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 export async function recordZahlung(fallId: string, betrag: number) {
@@ -322,7 +322,7 @@ export async function recordZahlung(fallId: string, betrag: number) {
     }).catch(() => {})
   }
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 export async function updateSchadensAdresse(
@@ -352,7 +352,7 @@ export async function updateSchadensAdresse(
     erstellt_von: user.id,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 export async function saveFinVin(fallId: string, finVin: string) {
@@ -391,7 +391,7 @@ export async function saveFinVin(fallId: string, finVin: string) {
     enrichFallByFin(fallId).catch(() => {})
   } catch (err) { console.error('[AAR-90] enrichFallByFin:', err) }
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 export async function sendChatNachricht(fallId: string, kanal: string, nachricht: string) {
@@ -444,7 +444,7 @@ export async function sendChatNachricht(fallId: string, kanal: string, nachricht
         typ: 'chat',
         titel: `Neue Nachricht von ${senderName}`,
         beschreibung: nachricht.slice(0, 100),
-        link: e.isKunde ? `/kunde/faelle/${fallId}` : `/admin/faelle/${fallId}`,
+        link: e.isKunde ? `/kunde/faelle/${fallId}` : `/faelle/${fallId}`,
       })
 
       if (e.isKunde && fall?.lead_id) {
@@ -473,7 +473,7 @@ export async function sendChatNachricht(fallId: string, kanal: string, nachricht
     }
   } catch { /* non-critical */ }
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 export async function eskalation(fallId: string, stufe: string) {
@@ -496,7 +496,7 @@ export async function eskalation(fallId: string, stufe: string) {
     erstellt_von: user.id,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 // ─── QC Checkliste ───────────────────────────────────────────────────────────
@@ -530,7 +530,7 @@ export async function upsertQcCheckliste(
     if (error) throw new Error(error.message)
   }
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 export async function qcBestanden(fallId: string, kommentar: string) {
@@ -672,7 +672,7 @@ export async function qcNachbesserung(fallId: string, kommentar: string) {
     }
   }
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   revalidatePath('/admin/tasks')
 }
 
@@ -739,7 +739,7 @@ export async function uploadDatei(fallId: string, formData: FormData) {
 
   if (insertErr) throw new Error(insertErr.message)
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   revalidatePath('/admin/faelle')
 }
 
@@ -768,7 +768,7 @@ export async function saveKanzleiAnsprechpartner(
 
   if (error) throw new Error(error.message)
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   revalidatePath(`/kunde/fall/${fallId}`)
 }
 
@@ -804,7 +804,7 @@ export async function createFallTask(
     erstellt_von: user.id,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 export async function updateTaskStatus(taskId: string, newStatus: string) {
@@ -831,7 +831,7 @@ export async function updateTaskStatus(taskId: string, newStatus: string) {
   // Gate-Logik: Blockierte Folge-Tasks freischalten
   if (newStatus === 'erledigt') resolveGates(taskId).catch(() => {})
 
-  if (task?.fall_id) revalidatePath(`/admin/faelle/${task.fall_id}`)
+  if (task?.fall_id) revalidatePath(`/faelle/${task.fall_id}`)
 }
 
 // ─── Zahlungseingang (KFZ-65) ─────────────────────────────────────────────
@@ -897,7 +897,7 @@ export async function erfasseZahlungseingang(
   // Auto-Phase
   checkFallAutoPhase(fallId).catch(() => {})
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   return { kuerzung, gekuerztePositionen }
 }
 
@@ -1003,7 +1003,7 @@ export async function createTermin(
     '4': terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
   }).catch(() => {})
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   revalidatePath('/mitarbeiter/performance')
   revalidatePath('/kunde')
 }
@@ -1054,7 +1054,7 @@ export async function updateTerminStatus(
       erstellt_von: user.id,
     })
 
-    revalidatePath(`/admin/faelle/${termin.fall_id}`)
+    revalidatePath(`/faelle/${termin.fall_id}`)
   }
   revalidatePath('/mitarbeiter/performance')
   revalidatePath('/kunde')
@@ -1131,7 +1131,7 @@ export async function deactivateFall(fallId: string, grund: string, notiz: strin
     erstellt_von: user.id,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   revalidatePath('/admin/faelle')
 }
 
@@ -1152,7 +1152,7 @@ export async function reactivateFall(fallId: string) {
     beschreibung: 'Fall wurde reaktiviert.', erstellt_von: user.id,
   })
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   revalidatePath('/admin/faelle')
 }
 
@@ -1190,7 +1190,7 @@ export async function saveRegulierungsKlassifizierung(fallId: string, data: {
 
   if (error) throw new Error(error.message)
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 // ─── AAR-49: Generisches Fall-Update (KEIN Status!) ──────────────────────────
@@ -1235,6 +1235,6 @@ export async function updateFall(
     })
   }
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   return { success: true }
 }

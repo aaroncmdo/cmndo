@@ -178,7 +178,7 @@ export async function POST(req: NextRequest) {
         'kunde-termin-abgelehnt',
         `Kunde lehnt Termin ab: Fall ${fall.fall_nummer ?? matchedFallId.slice(0, 8)}`,
         `WhatsApp-Antwort: "${messageBody}". Bitte Kunde für neuen Termin kontaktieren.`,
-        `/admin/faelle/${matchedFallId}`,
+        `/faelle/${matchedFallId}`,
       ).catch(() => {})
     }
     await sendCommunication('chat_fallback_kunde', {
@@ -553,7 +553,7 @@ export async function POST(req: NextRequest) {
         'kunde-dokument-upload',
         `Kunde hat ${gespeichert.length} Dokument(e) gesendet: Fall ${fall.fall_nummer ?? matchedFallId.slice(0, 8)}`,
         'Per WhatsApp eingegangen. Bitte prüfen.',
-        `/admin/faelle/${matchedFallId}?tab=dokumente`,
+        `/faelle/${matchedFallId}?tab=dokumente`,
       ).catch(() => {})
     }
 

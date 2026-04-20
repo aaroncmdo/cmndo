@@ -202,7 +202,7 @@ export default function StatistikenClient({
         sublabel: f?.status ?? '',
         betrag: f?.regulierung_betrag ?? undefined,
         datum: f?.created_at,
-        link: `/admin/faelle/${id}`,
+        link: `/faelle/${id}`,
       }
     })
     const summe = items.reduce((s, i) => s + (i.betrag ?? 0), 0)

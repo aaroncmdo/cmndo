@@ -109,7 +109,7 @@ export async function submitStellungnahme(
 
   revalidatePath(`/gutachter/fall/${input.fallId}`)
   revalidatePath(`/gutachter/fall/${input.fallId}/stellungnahme`)
-  revalidatePath(`/admin/faelle/${input.fallId}`)
-  revalidatePath(`/admin/faelle/${input.fallId}/prozess`)
+  revalidatePath(`/faelle/${input.fallId}`)
+  revalidatePath(`/faelle/${input.fallId}/prozess`)
   return { success: true }
 }

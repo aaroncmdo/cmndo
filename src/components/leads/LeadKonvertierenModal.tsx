@@ -54,7 +54,7 @@ export default function LeadKonvertierenModal({
         } else {
           toast.success('Lead zu Kundenakte konvertiert.')
         }
-        router.push(`/admin/faelle/${result.fallId}`)
+        router.push(`/faelle/${result.fallId}`)
       } else {
         setError(result.error ?? 'Konvertierung fehlgeschlagen')
       }

@@ -37,7 +37,7 @@ export default async function MitarbeiterFaelle() {
             {(faelle ?? []).map(f => (
               <tr key={f.id} className="hover:bg-gray-50">
                 <td className="px-4 py-3">
-                  <Link href={`/admin/faelle/${f.id}`} className="text-[#4573A2] hover:underline font-medium">
+                  <Link href={`/faelle/${f.id}`} className="text-[#4573A2] hover:underline font-medium">
                     {f.fall_nummer ?? f.id.slice(0, 8)}
                   </Link>
                   {f.kennzeichen && <p className="text-xs text-gray-400">{f.kennzeichen}</p>}

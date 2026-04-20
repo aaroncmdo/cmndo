@@ -16,9 +16,20 @@ export default async function AdminLayout({
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  // KFZ-203 Fix: Dispatch-User dürfen nicht auf /admin/* (Layout-Level Guard)
+  // KFZ-203 + AAR-628: Rollen-Guard für /admin/*.
+  // Dispatch → eigenes Portal /dispatch/dashboard.
+  // Kundenbetreuer → eigenes Portal /mitarbeiter (Fallakte-Detail teilen
+  //   sich admin/kb/kanzlei unter /faelle/[id], aber die restlichen
+  //   /admin/*-Seiten sind Admin-only).
+  // Sachverständiger / Kunde / Makler sollten hier sowieso nicht ankommen,
+  //   Login-Redirect fängt das ab — zur Sicherheit trotzdem explizit.
   const { data: profileCheck } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
-  if (profileCheck?.rolle === 'dispatch') redirect('/dispatch/dashboard')
+  const profileRolle = profileCheck?.rolle as string | undefined
+  if (profileRolle === 'dispatch') redirect('/dispatch/dashboard')
+  if (profileRolle === 'kundenbetreuer') redirect('/mitarbeiter')
+  if (profileRolle === 'sachverstaendiger') redirect('/gutachter')
+  if (profileRolle === 'kunde') redirect('/kunde')
+  if (profileRolle === 'makler') redirect('/makler')
 
   const initials = user.email
     ? user.email.substring(0, 2).toUpperCase()

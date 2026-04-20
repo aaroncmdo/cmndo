@@ -144,6 +144,6 @@ export async function updateFallField(
     .eq('id', fallId)
 
   if (error) return { success: false, error: error.message }
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   return { success: true }
 }

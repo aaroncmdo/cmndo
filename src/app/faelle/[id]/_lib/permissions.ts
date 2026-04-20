@@ -6,7 +6,7 @@
 // obwohl RLS den Call ohnehin blockieren würde.
 //
 // Verwendung:
-//   import { canPerform } from '@/app/admin/faelle/[id]/_lib/permissions'
+//   import { canPerform } from '@/app/faelle/[id]/_lib/permissions'
 //   {canPerform('canDeactivate', rolle) && <DeactivateButton />}
 //
 // Neue Aktionen: Flag hier in FALL_PERMISSIONS ergänzen, Rollen-Matrix

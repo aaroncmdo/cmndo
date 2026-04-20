@@ -93,8 +93,8 @@ export async function submitNachbesichtigungsTermine(
 
   revalidatePath(`/kunde/nachbesichtigung/${input.fallId}`)
   revalidatePath(`/kunde/faelle/${input.fallId}`)
-  revalidatePath(`/admin/faelle/${input.fallId}`)
-  revalidatePath(`/admin/faelle/${input.fallId}/prozess`)
+  revalidatePath(`/faelle/${input.fallId}`)
+  revalidatePath(`/faelle/${input.fallId}/prozess`)
 
   return { success: true }
 }

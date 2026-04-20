@@ -70,7 +70,7 @@ export async function uploadFallDokument(
     return { success: false, error: `DB-Eintrag fehlgeschlagen: ${insertErr?.message}` }
   }
 
-  revalidatePath(`/admin/faelle/${fallId}`, 'page')
+  revalidatePath(`/faelle/${fallId}`, 'page')
   revalidatePath(`/gutachter/fall/${fallId}`, 'page')
 
   // KFZ-172 Phase 3: OCR triggern (fire & forget, async)
@@ -101,7 +101,7 @@ export async function deleteFallDokument(
 
   if (error) return { success: false, error: error.message }
 
-  revalidatePath(`/admin/faelle/${fallId}`, 'page')
+  revalidatePath(`/faelle/${fallId}`, 'page')
   revalidatePath(`/gutachter/fall/${fallId}`, 'page')
 
   return { success: true }

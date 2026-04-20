@@ -148,14 +148,14 @@ export default function NachrichtenInboxClient({
           {selected ? (
             <>
               <div className="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center justify-between">
-                <Link href={`/admin/faelle/${selected.fallId}`} className="min-w-0 group">
+                <Link href={`/faelle/${selected.fallId}`} className="min-w-0 group">
                   <h2 className="text-base font-semibold text-gray-900 group-hover:underline">{selected.kundeName}</h2>
                   <p className="text-xs text-gray-500">
                     Fall: {selected.fallNummer ?? selected.fallId.slice(0, 8)}
                     {selected.kennzeichen && ` · ${selected.kennzeichen}`}
                   </p>
                 </Link>
-                <Link href={`/admin/faelle/${selected.fallId}`} className="text-xs text-[#4573A2] hover:underline inline-flex items-center gap-1">
+                <Link href={`/faelle/${selected.fallId}`} className="text-xs text-[#4573A2] hover:underline inline-flex items-center gap-1">
                   Fallakte oeffnen <ArrowRightIcon className="w-3 h-3" />
                 </Link>
               </div>

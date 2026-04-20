@@ -14,7 +14,7 @@ import {
   type PaketTyp,
   type FieldDef,
 } from '@/lib/fall/kanzlei-paket-config'
-import { applyKanzleiPaket } from '@/app/admin/faelle/[id]/actions/kanzlei-paket'
+import { applyKanzleiPaket } from '@/app/faelle/[id]/actions/kanzlei-paket'
 import {
   Dialog,
   DialogContent,

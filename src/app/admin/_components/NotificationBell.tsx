@@ -184,7 +184,7 @@ export default function NotificationBell({ variant = 'light' }: { variant?: 'lig
     if (task.fall_id) {
       if (portalPrefix === 'gutachter') return `/gutachter/fall/${task.fall_id}`
       if (portalPrefix === 'kunde') return `/kunde/fall/${task.fall_id}`
-      return `/admin/faelle/${task.fall_id}#tasks`
+      return `/faelle/${task.fall_id}#tasks`
     }
     if (task.lead_id) {
       // SVs haben keinen Lead-Zugriff — fallback Dashboard.

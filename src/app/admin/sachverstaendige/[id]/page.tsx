@@ -302,7 +302,7 @@ export default async function SvDetailPage({
                     const lead = (Array.isArray(leadRaw) ? leadRaw[0] : leadRaw) as { vorname: string | null; nachname: string | null } | null
                     const kunde = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : '—'
                     return (
-                      <Link key={fall.id} href={`/admin/faelle/${fall.id}`}
+                      <Link key={fall.id} href={`/faelle/${fall.id}`}
                         className="block px-3 py-2.5 border-b border-gray-50 hover:bg-gray-50 transition-colors">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-medium text-gray-800 truncate">{kunde}</span>
@@ -333,7 +333,7 @@ export default async function SvDetailPage({
                     const fallNr = (fr?.fall_nummer as string) ?? '—'
                     const overdue = t.faellig_am && new Date(t.faellig_am) < now
                     return (
-                      <Link key={t.id} href={t.fall_id ? `/admin/faelle/${t.fall_id}` : '#'}
+                      <Link key={t.id} href={t.fall_id ? `/faelle/${t.fall_id}` : '#'}
                         className={`block px-3 py-2.5 border-b border-gray-50 hover:bg-gray-50 transition-colors ${overdue ? 'bg-red-50/30' : ''}`}>
                         <p className="text-xs text-gray-800 font-medium truncate">{t.titel}</p>
                         <div className="flex items-center gap-2 mt-0.5 text-[10px]">

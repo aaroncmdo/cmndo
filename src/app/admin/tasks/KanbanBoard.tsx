@@ -105,7 +105,7 @@ function resolveObjectLink(
   const eid = task.entity_id
 
   if (et === 'fall' && eid) {
-    return { href: `/admin/faelle/${eid}`, label: fallMap[eid] ?? eid.slice(0, 8), kind: 'Fall' }
+    return { href: `/faelle/${eid}`, label: fallMap[eid] ?? eid.slice(0, 8), kind: 'Fall' }
   }
   if (et === 'lead' && eid) {
     return { href: `/admin/dispatch/lead/${eid}`, label: leadMap[eid] ?? eid.slice(0, 8), kind: 'Lead' }
@@ -131,7 +131,7 @@ function resolveObjectLink(
   // Fallbacks für Alt-Daten: fall_id / lead_id direkt gesetzt
   if (task.fall_id) {
     return {
-      href: `/admin/faelle/${task.fall_id}`,
+      href: `/faelle/${task.fall_id}`,
       label: fallMap[task.fall_id] ?? task.fall_id.slice(0, 8),
       kind: 'Fall',
     }
