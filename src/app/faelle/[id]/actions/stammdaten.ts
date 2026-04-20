@@ -100,6 +100,30 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'mietwagen_flag',
   'nutzungsausfall',
   'mietwagen_kanzlei_informiert',
+  // AAR-629 (1a): 12 weitere bereits existierende faelle-Spalten die nach
+  // AAR-49 editierbar sein sollten, aber aus der Allowlist rausgefallen sind.
+  // DB-Check 2026-04-20 bestätigt: alle Spalten sind auf `faelle` vorhanden.
+  //
+  // Finanzierung/Leasing + Steuer-Status (vorher nur auf leads editierbar):
+  'finanzierung_leasing',
+  'vorsteuerabzugsberechtigt',
+  // Gegner-Kenntnis + Anfrage-Tracking (Auslandskennzeichen-Workflow):
+  'gegner_bekannt',
+  'gegner_versicherung_anfrage_datum',
+  // Halter-Geburtsdatum + Flag „Halter = Kunde":
+  'halter_geburtsdatum',
+  'ist_fahrzeughalter',
+  // Unfallort strukturiert (Dispatch legt es an, Admin-Override möglich):
+  'unfallort',
+  'unfallort_kategorie',
+  // Vorschäden-Details:
+  'vorschaeden_beschreibung',
+  // Werkstatt-Kontext:
+  'werkstatt_seit_datum',
+  // Kundensprache für Portal-Übersetzungen (war bisher nur über Lead-Edit):
+  'sprache',
+  // Zeugen-Kontaktdaten (JSONB-Array):
+  'zeugen_kontakte',
 ])
 
 export async function updateFallField(
