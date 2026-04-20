@@ -27,23 +27,28 @@ export async function debugSvMatching(
 
   const { data: lead } = await supabase
     .from('leads')
-    .select('unfallort_lat, unfallort_lng, kunde_lat, kunde_lng, wunschtermin')
+    .select('besichtigungsort_lat, besichtigungsort_lng, unfallort_lat, unfallort_lng, kunde_lat, kunde_lng, wunschtermin')
     .eq('id', leadId)
     .single()
 
   if (!lead) return { success: false, error: 'Lead nicht gefunden' }
 
+  // Semantik-Fix 2026-04-21: debug-SV-Matching muss die gleichen Koordinaten
+  // nutzen wie listSvSuggestionsForLead, sonst zeigt das Debug-Panel eine
+  // andere Distanz-/Kandidaten-Liste als die tatsächliche SV-Auswahl.
   const l = lead as {
+    besichtigungsort_lat: number | null
+    besichtigungsort_lng: number | null
     unfallort_lat: number | null
     unfallort_lng: number | null
     kunde_lat: number | null
     kunde_lng: number | null
     wunschtermin: string | null
   }
-  const lat = l.unfallort_lat ?? l.kunde_lat
-  const lng = l.unfallort_lng ?? l.kunde_lng
+  const lat = l.besichtigungsort_lat ?? l.unfallort_lat ?? l.kunde_lat
+  const lng = l.besichtigungsort_lng ?? l.unfallort_lng ?? l.kunde_lng
   if (lat == null || lng == null) {
-    return { success: false, error: 'Lead hat keine Koordinaten (Unfallort/Kunden-Adresse fehlt)' }
+    return { success: false, error: 'Lead hat keine Koordinaten (Besichtigungsort/Unfallort/Kunde fehlt)' }
   }
 
   const result = await debugSvMatchingByCoords(
