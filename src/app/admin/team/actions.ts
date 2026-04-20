@@ -143,6 +143,42 @@ export async function resetTwoFaForUser(
   return { success: true }
 }
 
+// AAR-634: Admin deaktiviert KB + Fälle werden sofort neu verteilt (statt
+// auf den nächtlichen Cron zu warten). Nutzt den Shared-Helper aus
+// kb-assignment.ts — gleicher Round-Robin wie bei Conversion.
+export async function deactivateKbWithReassign(
+  kbId: string,
+): Promise<{
+  success: boolean
+  error?: string
+  reassigned_count?: number
+  tasks_reassigned?: number
+  failed_count?: number
+}> {
+  try {
+    await requireAdmin()
+    const admin = createAdminClient()
+
+    const { error: updateErr } = await admin
+      .from('profiles')
+      .update({ aktiv: false, updated_at: new Date().toISOString() })
+      .eq('id', kbId)
+    if (updateErr) return { success: false, error: updateErr.message }
+
+    const { reassignAllFaelleForInactiveKbs } = await import('@/lib/faelle/kb-assignment')
+    const result = await reassignAllFaelleForInactiveKbs(admin)
+
+    return {
+      success: true,
+      reassigned_count: result.reassigned_count,
+      tasks_reassigned: result.tasks_reassigned,
+      failed_count: result.failed_count,
+    }
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Unbekannter Fehler' }
+  }
+}
+
 // KFZ-182: Twilio WhatsApp-Nummer Provisioning
 export async function provisionTwilioNummer(profileId: string) {
   await requireAdmin()

@@ -181,6 +181,7 @@ export type ReassignResult = {
   scanned_count: number
   reassigned_count: number
   failed_count: number
+  tasks_reassigned: number
   details: Array<{ fall_id: string; from_kb: string; to_kb: string | null; fallback: KbAssignmentFallback }>
 }
 
@@ -188,11 +189,12 @@ export type ReassignResult = {
  * Findet alle offenen Fälle deren `kundenbetreuer_id` auf einen inaktiven
  * User zeigt und weist sie neu zu. Genutzt:
  *   - als Cron (`/api/cron/kb-reassign-inactive`) als tägliches Safety-Net
- *   - manuell aus Admin-Team-Page wenn Admin einen KB deaktiviert
+ *   - manuell aus Admin-Team-Page wenn Admin einen KB deaktiviert (AAR-634)
  *
- * Tasks der betroffenen Fälle werden NICHT re-assigned — dafür gibt es
- * `createAutoTask`-Fallback (neue Tasks landen bei neuem KB) und manuelle
- * Task-Umverteilung via Admin-UI. Orphaned-Tasks-Cron räumt Legacy-Tasks auf.
+ * AAR-635: neben Fällen werden auch die offenen Tasks der betroffenen Fälle
+ * vom alten KB auf den neuen KB umgehängt, damit nichts beim inaktiven User
+ * hängen bleibt. Orphaned-Tasks ohne Fall (`fall_id=null` oder Lead-Tasks)
+ * werden via separater Logik im createAutoTask-Fallback addressiert.
  */
 export async function reassignAllFaelleForInactiveKbs(
   supabase: AnySupabase,
@@ -204,7 +206,7 @@ export async function reassignAllFaelleForInactiveKbs(
     .eq('aktiv', false)
   const inactiveIds = (inactiveUsers ?? []).map((u: { id: string }) => u.id)
   if (inactiveIds.length === 0) {
-    return { scanned_count: 0, reassigned_count: 0, failed_count: 0, details: [] }
+    return { scanned_count: 0, reassigned_count: 0, failed_count: 0, tasks_reassigned: 0, details: [] }
   }
 
   // 2. Alle offenen Fälle laden mit inaktivem KB
@@ -219,10 +221,12 @@ export async function reassignAllFaelleForInactiveKbs(
     scanned_count: list.length,
     reassigned_count: 0,
     failed_count: 0,
+    tasks_reassigned: 0,
     details: [],
   }
 
-  // 3. Pro Fall neu zuweisen (Round-Robin via assignKundenbetreuer)
+  // 3. Pro Fall neu zuweisen (Round-Robin via assignKundenbetreuer) +
+  // AAR-635: offene Tasks vom alten KB auf den neuen umhängen.
   for (const fall of list) {
     const ass = await assignKundenbetreuer(supabase, fall.id, {
       writeToFall: true,
@@ -236,6 +240,23 @@ export async function reassignAllFaelleForInactiveKbs(
         to_kb: ass.kundenbetreuer_id,
         fallback: ass.fallback_used,
       })
+
+      // AAR-635: Tasks dieses Falls vom alten KB auf den neuen KB umhängen
+      const { data: taskRows, error: taskErr } = await supabase
+        .from('tasks')
+        .update({
+          zugewiesen_an: ass.kundenbetreuer_id,
+          empfaenger_user_id: ass.kundenbetreuer_id,
+        })
+        .eq('fall_id', fall.id)
+        .eq('zugewiesen_an', fall.kundenbetreuer_id)
+        .eq('status', 'offen')
+        .select('id')
+      if (taskErr) {
+        console.error(`[AAR-635] Task-Reassign für Fall ${fall.id} fehlgeschlagen:`, taskErr.message)
+      } else if (taskRows) {
+        result.tasks_reassigned += taskRows.length
+      }
     } else {
       result.failed_count += 1
       result.details.push({
@@ -247,8 +268,10 @@ export async function reassignAllFaelleForInactiveKbs(
     }
   }
 
-  if (result.reassigned_count > 0) {
-    console.warn(`[AAR-632] KB-Reassignment: ${result.reassigned_count}/${result.scanned_count} Fälle neu zugewiesen`)
+  if (result.reassigned_count > 0 || result.tasks_reassigned > 0) {
+    console.warn(
+      `[AAR-632/635] KB-Reassignment: ${result.reassigned_count}/${result.scanned_count} Fälle + ${result.tasks_reassigned} Tasks neu zugewiesen`,
+    )
   }
   return result
 }
