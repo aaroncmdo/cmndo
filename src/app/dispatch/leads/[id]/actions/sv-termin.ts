@@ -20,19 +20,29 @@ export async function listSvSuggestionsForLead(leadId: string): Promise<{
 
   const { data: lead } = await supabase
     .from('leads')
-    .select('unfallort_lat, unfallort_lng, kunde_lat, kunde_lng, wunschtermin')
+    .select('besichtigungsort_lat, besichtigungsort_lng, unfallort_lat, unfallort_lng, kunde_lat, kunde_lng, wunschtermin')
     .eq('id', leadId)
     .single()
 
   if (!lead) return { success: false, error: 'Lead nicht gefunden' }
 
-  const lat = (lead as { unfallort_lat: number | null; kunde_lat: number | null }).unfallort_lat
-    ?? (lead as { kunde_lat: number | null }).kunde_lat
-  const lng = (lead as { unfallort_lng: number | null; kunde_lng: number | null }).unfallort_lng
-    ?? (lead as { kunde_lng: number | null }).kunde_lng
+  // Semantik-Fix 2026-04-21: SV-Matching nutzt primaer den Besichtigungsort
+  // (wo das Auto steht). unfallort ist fachlich die Unfallstelle und nur
+  // fuer die Unfallskizze relevant — der SV faehrt dort nicht hin.
+  // Fallback-Chain fuer Legacy-Leads: besichtigungsort → unfallort → kunde.
+  const l = lead as {
+    besichtigungsort_lat: number | null
+    besichtigungsort_lng: number | null
+    unfallort_lat: number | null
+    unfallort_lng: number | null
+    kunde_lat: number | null
+    kunde_lng: number | null
+  }
+  const lat = l.besichtigungsort_lat ?? l.unfallort_lat ?? l.kunde_lat
+  const lng = l.besichtigungsort_lng ?? l.unfallort_lng ?? l.kunde_lng
 
   if (lat == null || lng == null) {
-    return { success: false, error: 'Lead hat keine Koordinaten (Unfallort/Kunden-Adresse fehlt)' }
+    return { success: false, error: 'Lead hat keine Koordinaten (Besichtigungsort/Unfallort/Kunde fehlt)' }
   }
 
   // AAR-264: Wunschtermin durchreichen — findBestSV macht Kalender-Check + Score-Bonus
