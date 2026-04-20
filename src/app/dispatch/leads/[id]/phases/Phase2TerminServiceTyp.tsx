@@ -392,18 +392,31 @@ export default function Phase2TerminServiceTyp() {
         </div>
       )}
 
-      {/* AAR-268: Expliziter „Weiter zu Phase 3"-Button — sichtbar sobald
-          aktiver Termin vorhanden + Koordinaten gesetzt sind. */}
-      {aktiverTermin && hasKoordinaten && (
+      {/* AAR-617: Zurück-/Weiter-Row — Zurück-Button war vorher nur über den
+          Phase-Header-Stepper erreichbar, was für neue User nicht offensichtlich
+          ist. Jetzt explizit innerhalb der Phase sichtbar. State-Persistenz
+          ist bereits durch AAR-624 + die autoSave-Hooks dieser Phase garantiert
+          — beim Klick gehen keine Eingaben verloren. */}
+      <div className="flex gap-2 mt-2">
         <button
           type="button"
           disabled={pending}
-          onClick={() => setPhase(3)}
-          className="w-full mt-2 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-50 flex items-center justify-center gap-2"
+          onClick={() => setPhase(1)}
+          className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
         >
-          Weiter zu Phase 3 →
+          ← Zurück zu Phase 1
         </button>
-      )}
+        {aktiverTermin && hasKoordinaten && (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => setPhase(3)}
+            className="flex-1 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            Weiter zu Phase 3 →
+          </button>
+        )}
+      </div>
     </div>
   )
 }
