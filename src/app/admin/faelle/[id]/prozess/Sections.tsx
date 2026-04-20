@@ -244,7 +244,7 @@ export function VsReaktionSection() {
                 Quote akzeptieren
               </button>
               <p className="text-[11px] text-purple-700 self-center">
-                Ablehnen → öffnet Rüge-Vorbereitung (Phase-Header „Kanzlei-Paket einlesen").
+                Ablehnen → öffnet Rüge-Vorbereitung (Phase-Header „Kanzlei-Paket einlesen&quot;).
               </p>
             </div>
           )}
@@ -664,7 +664,7 @@ export function AuszahlungSection() {
             </p>
           </div>
           <p className="text-[11px] text-gray-500">
-            Split eintragen: Phase-Header „Kanzlei-Paket einlesen" → „Auszahlung eingegangen (Split)".
+            Split eintragen: Phase-Header „Kanzlei-Paket einlesen&quot; → „Auszahlung eingegangen (Split)&quot;.
           </p>
         </div>
       ) : (

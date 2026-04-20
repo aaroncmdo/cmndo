@@ -55,7 +55,7 @@ export async function GET(request: Request) {
 
   const counts: Record<ReminderTier, number> = { reminder_7d: 0, reminder_3d: 0, reminder_1d: 0 }
   let skipped = 0
-  let failed = 0
+  const failed = 0
 
   for (const abr of faellig ?? []) {
     if (!abr.empfaenger_email || !abr.faellig_am) { skipped++; continue }

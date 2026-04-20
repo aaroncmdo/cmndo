@@ -54,7 +54,7 @@ self.addEventListener('push', (event) => {
   let data
   try {
     data = event.data.json()
-  } catch (e) {
+  } catch {
     data = { title: 'Claimondo', body: event.data.text() }
   }
   event.waitUntil(

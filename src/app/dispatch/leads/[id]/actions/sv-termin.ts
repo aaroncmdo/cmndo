@@ -60,11 +60,14 @@ export async function reserveSvTerminForLead(
   if (Number.isNaN(startDate.getTime())) return { success: false, error: 'Ungültiges Startdatum' }
   const endDate = new Date(startDate.getTime() + durationMin * 60_000)
 
+  // AAR-607 B3: Terminal-Status (abgelehnt, abgesagt) dürfen neue Reservierung
+  // nicht mehr blockieren — sonst kann Dispatcher nach SV-Ablehnung keinen neuen
+  // SV im selben Zeitfenster buchen.
   const { data: konflikt } = await supabase
     .from('gutachter_termine')
     .select('id')
     .eq('sv_id', svId)
-    .not('status', 'eq', 'storniert')
+    .not('status', 'in', '("storniert","abgelehnt","abgesagt","no_show")')
     .lt('start_zeit', endDate.toISOString())
     .gt('end_zeit', startDate.toISOString())
     .limit(1)

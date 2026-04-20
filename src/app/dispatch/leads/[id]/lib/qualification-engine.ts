@@ -22,8 +22,12 @@ export type LeadLike = {
   // Phase 4 / Gegner
   gegner_kennzeichen?: string | null
   fahrerflucht?: boolean | null
-  // AAR-176: Treffpunkt-Hinweis für den SV (Phase 2)
-  sv_treffpunkt?: string | null
+  // AAR-581 (N4): Besichtigungsort strukturiert (Adresse + Koordinaten) —
+  // ersetzt Legacy-Freitext `sv_treffpunkt`.
+  besichtigungsort_adresse?: string | null
+  besichtigungsort_lat?: number | null
+  besichtigungsort_lng?: number | null
+  besichtigungsort_place_id?: string | null
   // AAR-181: Fahrzeug-Stammdaten die Phase 4 als Pflichtfelder prüft
   kennzeichen?: string | null
   fahrzeug_hersteller?: string | null

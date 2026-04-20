@@ -85,7 +85,8 @@ export async function POST() {
         sa_unterschrieben: true,
         sa_unterschrieben_am: now,
         sa_datum: now,
-        vollmacht_unterschrieben: true,
+        // AAR-583 (N6): faelle.vollmacht_unterschrieben existiert nicht — canonical ist _am.
+        vollmacht_signiert_am: now,
         vollmacht_datum: now,
         gutachter_termin: morgenISO,
         fahrzeug_standort_adresse: 'Musterstrasse 10, 50667 Koeln',

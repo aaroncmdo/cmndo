@@ -48,18 +48,17 @@ export default async function DispatchLeadDetail({
     fall_id: (fl.fall_id ?? null) as string | null,
   }))
 
-  // Phase 6 Status-Tracking Snapshot. Sowohl sa_unterschrieben als auch
-  // vollmacht_unterschrieben leben auf der leads-Tabelle (siehe BUG-15
-  // Migration 20260330). Die faelle-Tabelle kennt zwar sa_unterschrieben,
-  // aber KEIN vollmacht_unterschrieben (nur vollmacht_geprueft_am +
-  // vollmacht_pruefung_status von LexDrive/AAR-69). Für die Dispatch-Ansicht
-  // ist das leads-Flag die relevante Quelle — setzt autoPhase und der
-  // FlowWizard setzt es nach SA/Vollmacht-Unterschrift.
+  // Phase 6 Status-Tracking Snapshot. sa_unterschrieben + vollmacht_signiert_am
+  // leben auf leads (siehe BUG-15 Migration 20260330, AAR-583 N6).
+  // AAR-583 (N6): Legacy `vollmacht_unterschrieben` (bool) ersetzt durch
+  // `vollmacht_signiert_am` (timestamptz) — Bool-Semantik via IS NOT NULL.
+  // Für die Dispatch-Ansicht ist das leads-Feld weiterhin die relevante Quelle
+  // (autoPhase + FlowWizard setzen es nach SA/Vollmacht-Unterschrift).
   const unterschriftenSnapshot =
-    lead.sa_unterschrieben || lead.vollmacht_unterschrieben
+    lead.sa_unterschrieben || lead.vollmacht_signiert_am
       ? {
           sa_unterschrieben: lead.sa_unterschrieben ?? null,
-          vollmacht_unterschrieben: lead.vollmacht_unterschrieben ?? null,
+          vollmacht_signiert_am: (lead.vollmacht_signiert_am as string | null) ?? null,
         }
       : null
 

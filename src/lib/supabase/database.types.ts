@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.4"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       abrechnung_positionen: {
@@ -1166,6 +1191,7 @@ export type Database = {
           as_salesforce_id: string | null
           as_vs_reaktion_text: string | null
           as_zuletzt_synced_am: string | null
+          auszahlung_gutachter_betrag: number | null
           auszahlung_gutachter_eingegangen_am: string | null
           auszahlung_kunde_betrag: number | null
           auszahlung_kunde_eingegangen_am: string | null
@@ -1212,6 +1238,7 @@ export type Database = {
           fahrzeug_modell: string | null
           fahrzeug_typ: string | null
           fall_nummer: string | null
+          fallakte_angelegt_am: string | null
           filmcheck_am: string | null
           filmcheck_notizen: string | null
           filmcheck_ok: boolean | null
@@ -1259,6 +1286,7 @@ export type Database = {
           halter_ungleich_fahrer_flag: boolean | null
           halter_vorname: string | null
           hat_vorschaeden: boolean | null
+          hsn: string | null
           iban: string | null
           id: string
           interne_notizen: string | null
@@ -1280,11 +1308,22 @@ export type Database = {
           ki_kalkulation: Json | null
           ki_kalkulation_am: string | null
           kilometerstand: number | null
+          klage_uebergeben_am: string | null
           kontoinhaber: string | null
           konvertiert_am: string | null
           konvertiert_von_lead: string | null
           kuerzungs_betrag: number | null
+          kunde_adresse: string | null
+          kunde_email: string | null
           kunde_id: string | null
+          kunde_lat: number | null
+          kunde_lng: number | null
+          kunde_nachname: string | null
+          kunde_plz: string | null
+          kunde_stadt: string | null
+          kunde_strasse: string | null
+          kunde_telefon: string | null
+          kunde_vorname: string | null
           kunden_konstellation: string | null
           kundenbetreuer_fallback_flag: boolean
           kundenbetreuer_id: string | null
@@ -1343,6 +1382,7 @@ export type Database = {
           ruege_betrag: number | null
           ruege_counter: number | null
           ruege_erhalten_am: string | null
+          ruege_frist_tage: number | null
           ruege_gesendet_am: string | null
           ruege_grund: string | null
           sa_pdf_url: string | null
@@ -1390,6 +1430,7 @@ export type Database = {
           technische_stellungnahme_status: string | null
           termin_erinnerung_5min_gesendet: boolean | null
           totalschaden: boolean | null
+          tsn: string | null
           unfall_konstellation: string | null
           unfalldatum: string | null
           unfallhergang: string | null
@@ -1460,6 +1501,7 @@ export type Database = {
           as_salesforce_id?: string | null
           as_vs_reaktion_text?: string | null
           as_zuletzt_synced_am?: string | null
+          auszahlung_gutachter_betrag?: number | null
           auszahlung_gutachter_eingegangen_am?: string | null
           auszahlung_kunde_betrag?: number | null
           auszahlung_kunde_eingegangen_am?: string | null
@@ -1508,6 +1550,7 @@ export type Database = {
           fahrzeug_modell?: string | null
           fahrzeug_typ?: string | null
           fall_nummer?: string | null
+          fallakte_angelegt_am?: string | null
           filmcheck_am?: string | null
           filmcheck_notizen?: string | null
           filmcheck_ok?: boolean | null
@@ -1555,6 +1598,7 @@ export type Database = {
           halter_ungleich_fahrer_flag?: boolean | null
           halter_vorname?: string | null
           hat_vorschaeden?: boolean | null
+          hsn?: string | null
           iban?: string | null
           id?: string
           interne_notizen?: string | null
@@ -1576,11 +1620,22 @@ export type Database = {
           ki_kalkulation?: Json | null
           ki_kalkulation_am?: string | null
           kilometerstand?: number | null
+          klage_uebergeben_am?: string | null
           kontoinhaber?: string | null
           konvertiert_am?: string | null
           konvertiert_von_lead?: string | null
           kuerzungs_betrag?: number | null
+          kunde_adresse?: string | null
+          kunde_email?: string | null
           kunde_id?: string | null
+          kunde_lat?: number | null
+          kunde_lng?: number | null
+          kunde_nachname?: string | null
+          kunde_plz?: string | null
+          kunde_stadt?: string | null
+          kunde_strasse?: string | null
+          kunde_telefon?: string | null
+          kunde_vorname?: string | null
           kunden_konstellation?: string | null
           kundenbetreuer_fallback_flag?: boolean
           kundenbetreuer_id?: string | null
@@ -1639,6 +1694,7 @@ export type Database = {
           ruege_betrag?: number | null
           ruege_counter?: number | null
           ruege_erhalten_am?: string | null
+          ruege_frist_tage?: number | null
           ruege_gesendet_am?: string | null
           ruege_grund?: string | null
           sa_pdf_url?: string | null
@@ -1686,6 +1742,7 @@ export type Database = {
           technische_stellungnahme_status?: string | null
           termin_erinnerung_5min_gesendet?: boolean | null
           totalschaden?: boolean | null
+          tsn?: string | null
           unfall_konstellation?: string | null
           unfalldatum?: string | null
           unfallhergang?: string | null
@@ -1756,6 +1813,7 @@ export type Database = {
           as_salesforce_id?: string | null
           as_vs_reaktion_text?: string | null
           as_zuletzt_synced_am?: string | null
+          auszahlung_gutachter_betrag?: number | null
           auszahlung_gutachter_eingegangen_am?: string | null
           auszahlung_kunde_betrag?: number | null
           auszahlung_kunde_eingegangen_am?: string | null
@@ -1804,6 +1862,7 @@ export type Database = {
           fahrzeug_modell?: string | null
           fahrzeug_typ?: string | null
           fall_nummer?: string | null
+          fallakte_angelegt_am?: string | null
           filmcheck_am?: string | null
           filmcheck_notizen?: string | null
           filmcheck_ok?: boolean | null
@@ -1851,6 +1910,7 @@ export type Database = {
           halter_ungleich_fahrer_flag?: boolean | null
           halter_vorname?: string | null
           hat_vorschaeden?: boolean | null
+          hsn?: string | null
           iban?: string | null
           id?: string
           interne_notizen?: string | null
@@ -1872,11 +1932,22 @@ export type Database = {
           ki_kalkulation?: Json | null
           ki_kalkulation_am?: string | null
           kilometerstand?: number | null
+          klage_uebergeben_am?: string | null
           kontoinhaber?: string | null
           konvertiert_am?: string | null
           konvertiert_von_lead?: string | null
           kuerzungs_betrag?: number | null
+          kunde_adresse?: string | null
+          kunde_email?: string | null
           kunde_id?: string | null
+          kunde_lat?: number | null
+          kunde_lng?: number | null
+          kunde_nachname?: string | null
+          kunde_plz?: string | null
+          kunde_stadt?: string | null
+          kunde_strasse?: string | null
+          kunde_telefon?: string | null
+          kunde_vorname?: string | null
           kunden_konstellation?: string | null
           kundenbetreuer_fallback_flag?: boolean
           kundenbetreuer_id?: string | null
@@ -1935,6 +2006,7 @@ export type Database = {
           ruege_betrag?: number | null
           ruege_counter?: number | null
           ruege_erhalten_am?: string | null
+          ruege_frist_tage?: number | null
           ruege_gesendet_am?: string | null
           ruege_grund?: string | null
           sa_pdf_url?: string | null
@@ -1982,6 +2054,7 @@ export type Database = {
           technische_stellungnahme_status?: string | null
           termin_erinnerung_5min_gesendet?: boolean | null
           totalschaden?: boolean | null
+          tsn?: string | null
           unfall_konstellation?: string | null
           unfalldatum?: string | null
           unfallhergang?: string | null
@@ -3956,6 +4029,10 @@ export type Database = {
           anruf_versuche: number | null
           aufklaerung_teilschuld_bestaetigt: boolean | null
           auslandskennzeichen: boolean | null
+          besichtigungsort_adresse: string | null
+          besichtigungsort_lat: number | null
+          besichtigungsort_lng: number | null
+          besichtigungsort_place_id: string | null
           bevorzugter_kanal: string | null
           cardentity_enriched_at: string | null
           cardentity_report: Json | null
@@ -3968,7 +4045,6 @@ export type Database = {
           disqualifiziert_grund: string | null
           disqualifiziert_grund_key: string | null
           disqualifiziert_notiz: string | null
-          disqualifizierung_grund: string | null
           eigene_policennr: string | null
           eigene_versicherung: string | null
           email: string | null
@@ -4085,7 +4161,6 @@ export type Database = {
           spezifikation: string | null
           sprache: string | null
           status: Database["public"]["Enums"]["lead_status"]
-          sv_treffpunkt: string | null
           telefon: string | null
           timeline: Json | null
           tsn: string | null
@@ -4107,8 +4182,7 @@ export type Database = {
           verpasste_anrufe: number | null
           voice_input_quelle: boolean
           vollmacht_datum: string | null
-          vollmacht_signiert: boolean | null
-          vollmacht_unterschrieben: boolean | null
+          vollmacht_signiert_am: string | null
           vorname: string | null
           vorschaeden_beschreibung: string | null
           vorsteuerabzugsberechtigt: boolean | null
@@ -4138,6 +4212,10 @@ export type Database = {
           anruf_versuche?: number | null
           aufklaerung_teilschuld_bestaetigt?: boolean | null
           auslandskennzeichen?: boolean | null
+          besichtigungsort_adresse?: string | null
+          besichtigungsort_lat?: number | null
+          besichtigungsort_lng?: number | null
+          besichtigungsort_place_id?: string | null
           bevorzugter_kanal?: string | null
           cardentity_enriched_at?: string | null
           cardentity_report?: Json | null
@@ -4150,7 +4228,6 @@ export type Database = {
           disqualifiziert_grund?: string | null
           disqualifiziert_grund_key?: string | null
           disqualifiziert_notiz?: string | null
-          disqualifizierung_grund?: string | null
           eigene_policennr?: string | null
           eigene_versicherung?: string | null
           email?: string | null
@@ -4267,7 +4344,6 @@ export type Database = {
           spezifikation?: string | null
           sprache?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
-          sv_treffpunkt?: string | null
           telefon?: string | null
           timeline?: Json | null
           tsn?: string | null
@@ -4289,8 +4365,7 @@ export type Database = {
           verpasste_anrufe?: number | null
           voice_input_quelle?: boolean
           vollmacht_datum?: string | null
-          vollmacht_signiert?: boolean | null
-          vollmacht_unterschrieben?: boolean | null
+          vollmacht_signiert_am?: string | null
           vorname?: string | null
           vorschaeden_beschreibung?: string | null
           vorsteuerabzugsberechtigt?: boolean | null
@@ -4320,6 +4395,10 @@ export type Database = {
           anruf_versuche?: number | null
           aufklaerung_teilschuld_bestaetigt?: boolean | null
           auslandskennzeichen?: boolean | null
+          besichtigungsort_adresse?: string | null
+          besichtigungsort_lat?: number | null
+          besichtigungsort_lng?: number | null
+          besichtigungsort_place_id?: string | null
           bevorzugter_kanal?: string | null
           cardentity_enriched_at?: string | null
           cardentity_report?: Json | null
@@ -4332,7 +4411,6 @@ export type Database = {
           disqualifiziert_grund?: string | null
           disqualifiziert_grund_key?: string | null
           disqualifiziert_notiz?: string | null
-          disqualifizierung_grund?: string | null
           eigene_policennr?: string | null
           eigene_versicherung?: string | null
           email?: string | null
@@ -4449,7 +4527,6 @@ export type Database = {
           spezifikation?: string | null
           sprache?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
-          sv_treffpunkt?: string | null
           telefon?: string | null
           timeline?: Json | null
           tsn?: string | null
@@ -4471,8 +4548,7 @@ export type Database = {
           verpasste_anrufe?: number | null
           voice_input_quelle?: boolean
           vollmacht_datum?: string | null
-          vollmacht_signiert?: boolean | null
-          vollmacht_unterschrieben?: boolean | null
+          vollmacht_signiert_am?: string | null
           vorname?: string | null
           vorschaeden_beschreibung?: string | null
           vorsteuerabzugsberechtigt?: boolean | null
@@ -5654,6 +5730,77 @@ export type Database = {
             columns: ["sv_id"]
             isOneToOne: false
             referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      phase_transitions: {
+        Row: {
+          actor_rolle: string | null
+          created_at: string
+          fall_id: string
+          from_phase: string | null
+          grund: string | null
+          id: string
+          payload: Json | null
+          to_phase: string
+          transition_at: string
+          transitioned_by: string | null
+          trigger_type: string
+        }
+        Insert: {
+          actor_rolle?: string | null
+          created_at?: string
+          fall_id: string
+          from_phase?: string | null
+          grund?: string | null
+          id?: string
+          payload?: Json | null
+          to_phase: string
+          transition_at?: string
+          transitioned_by?: string | null
+          trigger_type: string
+        }
+        Update: {
+          actor_rolle?: string | null
+          created_at?: string
+          fall_id?: string
+          from_phase?: string | null
+          grund?: string | null
+          id?: string
+          payload?: Json | null
+          to_phase?: string
+          transition_at?: string
+          transitioned_by?: string | null
+          trigger_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "phase_transitions_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "phase_transitions_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle_kunde_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "phase_transitions_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle_sv_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "phase_transitions_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "v_faelle_mit_aktuellem_termin"
             referencedColumns: ["id"]
           },
         ]
@@ -9069,6 +9216,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       betreuungspaket: ["vollservice", "sv-only"],

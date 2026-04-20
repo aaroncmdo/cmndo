@@ -22,13 +22,16 @@ export async function GET(request: Request) {
   const db = createAdminClient()
   const now = new Date()
 
-  // Fälle laden: komplett + reservierter Termin + Vollmacht nicht unterschrieben
+  // Fälle laden: komplett + reservierter Termin + Vollmacht nicht unterschrieben.
+  // AAR-583 (N6): `faelle.vollmacht_unterschrieben` gab es in der DB nie als
+  // eigene Spalte (pre-existing Drift) — canonical ist `vollmacht_signiert_am`
+  // (Timestamp, NULL bedeutet „noch nicht unterschrieben").
   const { data: faelle, error: faelleErr } = await db
     .from('faelle')
-    .select('id, fall_nummer, lead_id, kundenbetreuer_id, created_at, vollmacht_unterschrieben')
+    .select('id, fall_nummer, lead_id, kundenbetreuer_id, created_at, vollmacht_signiert_am')
     .eq('service_typ', 'komplett')
     .not('status', 'in', '("abgeschlossen","storniert")')
-    .or('vollmacht_unterschrieben.is.null,vollmacht_unterschrieben.eq.false')
+    .is('vollmacht_signiert_am', null)
 
   if (faelleErr) {
     console.error('[vollmacht-reminder] faelle query:', faelleErr.message)

@@ -4,6 +4,11 @@
 // Wenn du ein neues Feld in `leads` hinzufügst das beim Fall-Erzeugen
 // kopiert werden soll, ergänze es HIER — nicht inline in actions.ts.
 //
+// Menschen-lesbare Doku: ../../docs/lead-fall-handoff-mapping.md (AAR-584 C1).
+// Diese enthält alle 5 Kategorien als Tabelle inkl. Defaults, Renames,
+// Transforms, Computed-Felder, Entity-Resolver und Lead-only/Fallakte-only
+// Abgrenzung. Bei Code-Änderung hier → die Doku parallel nachziehen.
+//
 // Vier Kategorien:
 //   1. DIRECT_FIELDS         — Feldname identisch in leads + faelle, kein Default,
 //                               wird übernommen wenn Lead-Wert !== undefined ist
@@ -119,6 +124,13 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'kunde_adresse',
   'kunde_lat',
   'kunde_lng',
+  // AAR-581 (N4): Besichtigungsort ist strukturiert (Adresse + Koordinaten +
+  // Google-place_id) statt vorher `sv_treffpunkt`-Freitext. Gleicher Spaltenname
+  // in leads + faelle — wird direkt beim Fall-Erzeugen übernommen.
+  'besichtigungsort_adresse',
+  'besichtigungsort_lat',
+  'besichtigungsort_lng',
+  'besichtigungsort_place_id',
 ] as const
 
 // ─── 2. DEFAULT — Feldname gleich, NOT-NULL fallback ────────────────────────
@@ -230,6 +242,9 @@ export function fallComputedFields(lead: LeadRow, options: BuildFallOptions): Re
     abtretung_pdf: options.signatureUrl,
     abtretung_signiert_am: now,
     sa_unterschrieben: true,
+    // AAR-607 A1: Timestamp war NULL → Subphase-Resolver + Automations-Trigger
+    // die auf sa_unterschrieben_am warten, haben nie gefeuert.
+    sa_unterschrieben_am: now,
     // AAR-155: Entity-FKs — resolveFallEntityFks() muss vorher laufen.
     // Bei Lookup-Miss bleibt der Wert null (nicht-blockierend).
     // AAR-545 Cluster D: versicherung_id ersatzlos entfernt —

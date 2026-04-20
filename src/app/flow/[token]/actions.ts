@@ -290,14 +290,31 @@ async function finalizeKundeSetup(
     auth_provider: 'email',
   }, { onConflict: 'id' })
 
+  // AAR-607 A4: force_password_change auch in user_metadata spiegeln —
+  // Supabase-Standard-Pattern; Integrations lesen aus user_metadata,
+  // nicht aus der profiles-Tabelle.
+  try {
+    await admin.auth.admin.updateUserById(userId, {
+      user_metadata: { force_password_change: true },
+    })
+  } catch (err) {
+    console.warn('[finalizeKundeSetup] user_metadata.force_password_change Update fehlgeschlagen:', err)
+  }
+
   await admin.from('faelle').update({ kunde_id: userId }).eq('id', fallId)
 
   // AAR-125: Lead laden für conditional Polizeibericht
+  // AAR-607 A3: .single() throwed bei 0 Rows + leadDocs=null Propagation zu
+  // createPflichtdokumenteFromKatalog war Silent-Fail-Pfad.
   const { data: leadForDocs } = await admin
-    .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht, polizeibericht_status, personenschaden_flag, hat_vorschaeden, zb1_status, service_typ, wa_gesendet, mietwagen_flag, nutzungsausfall)').eq('id', fallId).single()
+    .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht, polizeibericht_status, personenschaden_flag, hat_vorschaeden, zb1_status, service_typ, wa_gesendet, mietwagen_flag, nutzungsausfall)').eq('id', fallId).maybeSingle()
   const lRaw = (leadForDocs as { leads: unknown } | null)?.leads
   const leadDocs = (Array.isArray(lRaw) ? lRaw[0] : lRaw) as Record<string, unknown> | null
-  await createPflichtdokumenteFromKatalog(admin, fallId, leadDocs)
+  if (!leadDocs) {
+    console.warn('[finalizeKundeSetup] Lead-Relation für Fall', fallId, 'nicht gefunden — Pflichtdokumente-Katalog übersprungen')
+  } else {
+    await createPflichtdokumenteFromKatalog(admin, fallId, leadDocs)
+  }
 
   // KFZ-129 / AAR-310: Chat-Teilnehmer werden seit AAR-102 aus faelle abgeleitet
   // (kein chat_teilnehmer-Sync mehr nötig — siehe lib/chatGruppe.ts).
@@ -997,9 +1014,13 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   const { bestaetigeTermin } = await import('@/lib/termine/bestaetigung')
   await bestaetigeTermin(termin.id)
 
-  // Fall: Vollmacht markieren — Termin-Status spiegelt die View aus gutachter_termine
+  // Fall: Vollmacht markieren — Termin-Status spiegelt die View aus gutachter_termine.
+  // AAR-583 (N6): `faelle.vollmacht_unterschrieben` existierte in der DB nie als
+  // eigene Spalte (pre-existing Drift). Canonical ist `vollmacht_signiert_am`
+  // (Timestamp). Bool-Semantik wird aus IS NOT NULL abgeleitet.
+  const nowIso = new Date().toISOString()
   await admin.from('faelle')
-    .update({ vollmacht_unterschrieben: true, vollmacht_datum: new Date().toISOString() })
+    .update({ vollmacht_signiert_am: nowIso, vollmacht_datum: nowIso })
     .eq('id', fallId)
 
   // KFZ-136: Reminder generieren
