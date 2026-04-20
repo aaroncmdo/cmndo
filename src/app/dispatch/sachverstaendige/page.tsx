@@ -4,6 +4,7 @@
 // als Tabellen-Sicht.
 import { createClient } from '@/lib/supabase/server'
 import SachverstaendigeList from '@/components/SachverstaendigeList'
+import ReadOnlyBanner from '../_components/ReadOnlyBanner'
 
 const BASE_SELECT = 'id, profile_id, gebiet_plz, paket, offene_faelle, ist_aktiv, gutachter_typ, qualifikationen_neu, spezifikationen, schadenarten, onboarding_status, anzahlung_status, standort_adresse, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, werbebudget_guthaben_netto, organisation_id, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, ablehnungen_30_tage, deaktiviert_grund, deaktiviert_am, geloescht_am, profiles(vorname, nachname, email, telefon)'
 
@@ -52,5 +53,12 @@ export default async function DispatchSachverstaendigePage() {
     }
   })
 
-  return <SachverstaendigeList sachverstaendige={sachverstaendige} basePath="/dispatch" />
+  return (
+    <div className="py-4 space-y-4">
+      <div className="px-4 md:px-6">
+        <ReadOnlyBanner message="Nur-Lese-Ansicht — Änderungen an Sachverständigen erfolgen im Admin-Portal." />
+      </div>
+      <SachverstaendigeList sachverstaendige={sachverstaendige} basePath="/dispatch" />
+    </div>
+  )
 }

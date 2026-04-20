@@ -7,6 +7,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import IsochroneClient from './IsochroneClient'
+import ReadOnlyBanner from '../_components/ReadOnlyBanner'
 
 export default async function DispatchIsochronePage() {
   const supabase = await createClient()
@@ -38,6 +39,7 @@ export default async function DispatchIsochronePage() {
 
   return (
     <div className="py-6 space-y-6">
+      <ReadOnlyBanner message="Nur-Lese-Ansicht — Isochrone-Polygone werden im Admin-Portal gepflegt." />
       <div>
         <h1 className="text-xl font-bold text-gray-900">Isochrone-Zuweisung</h1>
         <p className="text-sm text-gray-500 mt-1">
