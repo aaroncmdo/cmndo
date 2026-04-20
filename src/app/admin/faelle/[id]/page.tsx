@@ -178,12 +178,20 @@ export default async function FallaktePage({
   // 'kunde' | 'dispatch'. Nur die ersten drei dürfen anfordern; Kanzlei hat
   // kein Fallakten-Portal (Memory: LexDrive-Architektur) — die Rolle wird
   // trotzdem vom Server akzeptiert für einen späteren Kanzlei-Bereich.
+  //
+  // AAR-618: `getAlleSlots(supabase)` wird einmal am Anfang aufgerufen und
+  // für alle Downstream-Consumers (anforderbareSlots / katalogLabels /
+  // katalogAlleSlots) wiederverwendet. Vorher 3× sequenziell → 1× reuse.
+  // `getAlleSlots` hat zwar Cache (5min TTL), spart aber trotzdem 2 await-
+  // Roundtrips im selben Request.
+  const katalogAlleSlots = await getAlleSlots(supabase)
+
   const rolleForAnforderung: 'admin' | 'kundenbetreuer' | 'sachverstaendiger' | null =
     userRolle === 'admin' || userRolle === 'kundenbetreuer' || userRolle === 'sachverstaendiger'
       ? userRolle
       : null
   const anforderbareSlots = rolleForAnforderung
-    ? (await getAlleSlots(supabase))
+    ? katalogAlleSlots
         .filter((s) => s.anforderbar_von.includes(rolleForAnforderung))
         .map((s) => ({
           slot_id: s.slot_id,
@@ -195,7 +203,7 @@ export default async function FallaktePage({
 
   // Katalog-Labels für die Anforderungs-Liste (slot_id → label Mapping)
   const katalogLabels = new Map<string, string>()
-  for (const s of await getAlleSlots(supabase)) katalogLabels.set(s.slot_id, s.label)
+  for (const s of katalogAlleSlots) katalogLabels.set(s.slot_id, s.label)
 
   // Rohdaten aus pflichtdokumente filtern: nur eigene Anforderungen
   type PflichtRow = {
@@ -231,7 +239,7 @@ export default async function FallaktePage({
   // AAR-326: KB-Zuordnungs-UI — Katalog-Slots vorbereiten, fall_dokumente
   // aufteilen (unzugeordnet / zu prüfen) und Pflichtdokumente in sort-Shape
   // umformen. Preview-URLs kommen aus dem Bucket 'fall-dokumente'.
-  const katalogAlleSlots = await getAlleSlots(supabase)
+  // AAR-618: katalogAlleSlots wird oben (vor anforderbareSlots) einmal geladen.
   const uploadbareSlots = katalogAlleSlots
     .filter((s) => s.uploadbar_von.includes('kundenbetreuer') || s.uploadbar_von.includes('kunde'))
     .map((s) => ({
