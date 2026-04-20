@@ -51,6 +51,7 @@ export async function disqualifiziereLead(leadId: string, grund: string) {
 
   revalidatePath(`/dispatch/leads/${leadId}`)
   revalidatePath('/dispatch/leads')
+  revalidatePath('/dispatch/dashboard')
 }
 
 export async function setServiceTyp(leadId: string, serviceTyp: 'komplett' | 'nur_gutachter') {
