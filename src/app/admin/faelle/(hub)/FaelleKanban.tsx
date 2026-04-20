@@ -284,7 +284,7 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
                 <circle cx="6" cy="15" r="1.2"/><circle cx="14" cy="15" r="1.2"/>
               </svg>
             </span>
-            <Link href={`/faelle/${fall.id}`} className="text-xs font-mono text-[#4573A2] truncate hover:underline min-w-0">
+            <Link href={`/faelle/${fall.id}`} target="_blank" rel="noopener" className="text-xs font-mono text-[#4573A2] truncate hover:underline min-w-0">
               {label}
             </Link>
           </div>
@@ -295,14 +295,14 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
             </button>
             {menuOpen && (
               <div className="absolute right-1 top-6 bg-white border border-gray-200 rounded-lg shadow-lg py-1 w-36 z-30">
-                <Link href={`/faelle/${fall.id}`} className="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50">Öffnen</Link>
+                <Link href={`/faelle/${fall.id}`} target="_blank" rel="noopener" className="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50">Öffnen</Link>
                 <button onClick={() => { setMenuOpen(false); setModal('deactivate'); setGrund(''); setError('') }} className="w-full text-left px-3 py-1.5 text-xs text-amber-600 hover:bg-amber-50">Deaktivieren</button>
                 <button onClick={() => { setMenuOpen(false); setModal('delete'); setError('') }} className="w-full text-left px-3 py-1.5 text-xs text-red-500 hover:bg-red-50">Löschen</button>
               </div>
             )}
           </div>
         </div>
-        <Link href={`/faelle/${fall.id}`} onClick={e => e.stopPropagation()}>
+        <Link href={`/faelle/${fall.id}`} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
           <div className="flex items-center gap-2">
             {fall.kunde_name && <p className={`text-xs font-medium truncate ${fall.ist_aktiv === false ? 'text-gray-400 line-through' : 'text-gray-800'}`}>{fall.kunde_name}</p>}
             <FallCardBadges chatCount={fall.ungelesene_nachrichten ?? 0} updateCount={fall.ungelesene_updates ?? 0} />
