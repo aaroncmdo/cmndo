@@ -792,7 +792,7 @@ function DetailPanel({
           onRecalculated={onRecalculated}
         />
         <Link
-          href="/admin/communities"
+          href="/admin/partner/communities"
           className="text-xs text-[#4573A2] hover:underline flex items-center gap-1"
         >
           Zur Communities-Liste <ArrowRightIcon className="w-3 h-3" />
@@ -823,7 +823,7 @@ function DetailPanel({
         onRecalculated={onRecalculated}
       />
       <Link
-        href="/admin/organisationen"
+        href="/admin/partner"
         className="text-xs text-[#4573A2] hover:underline flex items-center gap-1"
       >
         Zur Organisationen-Liste <ArrowRightIcon className="w-3 h-3" />

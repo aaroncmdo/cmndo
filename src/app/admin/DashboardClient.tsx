@@ -412,7 +412,7 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
           <span className="text-xs font-semibold text-[#0D1B3E] flex items-center gap-1.5">
             <AlertTriangleIcon className="w-3.5 h-3.5 text-amber-500" /> Offene Tasks ({tasks.length})
           </span>
-          <Link href="/admin/tasks" className="text-[10px] text-[#4573A2] hover:underline">Alle →</Link>
+          <Link href="/admin/aufgaben/alle" className="text-[10px] text-[#4573A2] hover:underline">Alle →</Link>
         </div>
         <div className="max-h-60 overflow-y-auto">
           {tasks.length === 0 ? (
