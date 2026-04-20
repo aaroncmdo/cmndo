@@ -3,17 +3,24 @@
 // AAR-136 / W2: Phase-Context für die neue Dispatch-Shell.
 // Hält currentPhase + Lead-Snapshot + QualificationResult. Wird in W3
 // (DispatchShell) mit initialLead/initialTermin aus der Server-Page befüllt.
-// Server-Side-Updates (saveHardGate etc.) triggern router.refresh() — dann
-// rendert die Server-Component neu und frische Props fließen in den Context.
 //
-// patchLead(): optimistisches Update das phase-übergreifend überlebt.
-// Problem ohne patchLead: Sprache (und andere Felder) werden per saveStammdaten
-// in die DB geschrieben + router.refresh() gestartet. Navigiert der User
-// schneller zur nächsten Phase als refresh() durchkommt, unmountet Phase 1.
-// Beim Zurücknavigieren re-initialisiert useState() aus initialLead — der
-// noch den alten Wert hält → Wert springt zurück.
+// AAR-636: Das frühere Pattern (useState(initialLead) + router.refresh() +
+// patchLead als Workaround) hatte zwei Failure Modes:
+//   1. router.refresh() updated Server-Props, aber useState re-initialisiert
+//      nicht bei Prop-Change → stale State, Phase-Gate rechnet mit alt
+//   2. Multi-Client: zweiter Admin sieht Dispatcher-Edits erst bei Reload
+//
+// Neues Pattern (hybrid):
+//   - useState(initialLead) bleibt als Optimistic-State (sub-second feedback
+//     bei eigenen Edits via patchLead)
+//   - Supabase-Realtime-Subscription auf leads-Row pusht echte DB-Changes
+//     automatisch in den State (egal ob vom eigenen Client oder extern)
+//   - useEffect-Sync gegen updated_at als Fallback falls WS mal droppt
+//   - patchLead bleibt als API weil Optimistic-UI schneller ist als
+//     Realtime-Roundtrip (Geocoding, Formatter-Effekte bleiben UI-snappy)
 
 import { createContext, useContext, useMemo, useState, useCallback, useEffect, type ReactNode } from 'react'
+import { createBrowserClient } from '@supabase/ssr'
 import {
   computeQualificationStatus,
   type LeadLike,
@@ -54,14 +61,9 @@ export function DispatchPhaseProvider({
   const [currentPhase, setPhase] = useState<Phase>(initialPhase)
   const [lead, setLead] = useState<LeadLike & { id: string }>(initialLead)
 
-  // AAR-realtime: Safety-Net. `useState(initialLead)` initialisiert nur beim
-  // Mount — nach `router.refresh()` (Server-Component lädt frische Daten)
-  // würde der Provider-State stale bleiben. Wir syncen daher auf
-  // `initialLead.updated_at`-Changes. Das ist Defense-in-Depth; der saubere
-  // Pfad bleibt `patchLead({...})` direkt nach einem erfolgreichen Write
-  // damit der Context sofort sync ist, ohne auf den Server-Roundtrip zu
-  // warten. Wir überschreiben nur wenn Server eine neuere updated_at liefert
-  // (sonst racen optimistic patches gegen den State).
+  // AAR-realtime: Safety-Net für Prop-Changes nach router.refresh(). Wird
+  // erzeugt wenn kein Supabase-Realtime-Event ankam (WS-Drop, Tab-Wake nach
+  // Suspend). Überschreibt nur wenn Server-Stand neuer ist als Context.
   useEffect(() => {
     const serverUpdated = (initialLead as Record<string, unknown>).updated_at as string | null | undefined
     setLead((prev) => {
@@ -74,6 +76,43 @@ export function DispatchPhaseProvider({
       return prev
     })
   }, [initialLead])
+
+  // AAR-636: Supabase-Realtime-Subscription. Bei jedem UPDATE auf der
+  // leads-Row (egal von welchem Client) mergen wir die neuen Spalten in den
+  // State. Das ersetzt router.refresh() als Sync-Mechanismus — DB wird zur
+  // Source of Truth, Client ist Beobachter.
+  //
+  // Wir vergleichen updated_at um zu vermeiden dass wir eigene optimistic
+  // Patches überschreiben die noch nicht in der DB sind.
+  useEffect(() => {
+    const leadId = initialLead.id
+    if (!leadId) return
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    )
+    const channel = supabase
+      .channel(`dispatch-lead:${leadId}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'leads', filter: `id=eq.${leadId}` },
+        (payload) => {
+          const next = payload.new as Record<string, unknown>
+          setLead((prev) => {
+            const prevUpdated = (prev as Record<string, unknown>).updated_at as string | null | undefined
+            const nextUpdated = next.updated_at as string | null | undefined
+            if (prevUpdated && nextUpdated && new Date(nextUpdated) < new Date(prevUpdated)) {
+              // Eigener optimistic Patch ist neuer — Realtime-Push ignorieren
+              return prev
+            }
+            return { ...prev, ...next } as LeadLike & { id: string }
+          })
+        },
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [initialLead.id])
 
   const patchLead = useCallback((patch: Partial<LeadLike & { id: string }>) => {
     setLead((prev) => ({
