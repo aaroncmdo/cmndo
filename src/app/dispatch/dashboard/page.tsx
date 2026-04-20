@@ -18,12 +18,13 @@ export default async function DispatchDashboard() {
       .from('leads')
       .select('*', { count: 'exact', head: true })
       .gte('created_at', todayStart.toISOString()),
-    // Offene Rueckrufe
+    // Offene Rückrufe (AAR-637: SoT ist admin_termine)
     supabase
-      .from('leads')
+      .from('admin_termine')
       .select('*', { count: 'exact', head: true })
-      .eq('qualifizierungs_phase', 'rueckruf')
-      .or('rueckruf_erledigt.is.null,rueckruf_erledigt.eq.false'),
+      .eq('typ', 'rueckruf')
+      .eq('status', 'offen')
+      .not('lead_id', 'is', null),
     // FlowLinks versendet heute — flow_links benutzt `erstellt_am`, nicht `created_at`
     supabase
       .from('flow_links')

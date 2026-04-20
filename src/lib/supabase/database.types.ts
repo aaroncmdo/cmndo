@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.4"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       abrechnung_positionen: {
@@ -261,6 +236,7 @@ export type Database = {
           fall_id: string | null
           id: string
           kunde_id: string | null
+          lead_id: string | null
           notizen: string | null
           start_zeit: string
           status: string
@@ -278,6 +254,7 @@ export type Database = {
           fall_id?: string | null
           id?: string
           kunde_id?: string | null
+          lead_id?: string | null
           notizen?: string | null
           start_zeit: string
           status?: string
@@ -295,6 +272,7 @@ export type Database = {
           fall_id?: string | null
           id?: string
           kunde_id?: string | null
+          lead_id?: string | null
           notizen?: string | null
           start_zeit?: string
           status?: string
@@ -330,6 +308,13 @@ export type Database = {
             columns: ["fall_id"]
             isOneToOne: false
             referencedRelation: "v_faelle_mit_aktuellem_termin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_termine_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
             referencedColumns: ["id"]
           },
         ]
@@ -1251,6 +1236,7 @@ export type Database = {
           as_salesforce_id: string | null
           as_vs_reaktion_text: string | null
           as_zuletzt_synced_am: string | null
+          auslandskennzeichen: boolean | null
           auszahlung_gutachter_betrag: number | null
           auszahlung_gutachter_eingegangen_am: string | null
           auszahlung_kunde_betrag: number | null
@@ -1265,6 +1251,7 @@ export type Database = {
           betreuungspaket: Database["public"]["Enums"]["betreuungspaket"] | null
           bevorzugter_kanal: string | null
           bic: string | null
+          bkat_unfallart: Database["public"]["Enums"]["bkat_unfallart"] | null
           cardentity_abfrage_am: string | null
           cardentity_enriched_at: string | null
           cardentity_report: Json | null
@@ -1290,6 +1277,7 @@ export type Database = {
           eskalation_tag_28_ergebnis: string | null
           eskalation_tag_28_ergebnis_am: string | null
           eskalation_tag_28_ergebnis_von: string | null
+          fahrerflucht: boolean | null
           fahrzeug_ausstattung: Json | null
           fahrzeug_baujahr: number | null
           fahrzeug_fahrbereit: boolean | null
@@ -1431,6 +1419,7 @@ export type Database = {
           polizei_aktenzeichen: string | null
           polizei_bericht_vorhanden: boolean | null
           polizei_vor_ort: boolean | null
+          polizeibericht_status: string | null
           prioritaet: string | null
           regulierung_am: string | null
           regulierung_angekuendigt_am: string | null
@@ -1493,11 +1482,14 @@ export type Database = {
           totalschaden: boolean | null
           tsn: string | null
           unfall_konstellation: string | null
+          unfall_uhrzeit: string | null
           unfalldatum: string | null
           unfallhergang: string | null
           unfallmitteilung_status: string | null
           unfallort: string | null
           unfallort_kategorie: string | null
+          unfallort_lat: number | null
+          unfallort_lng: number | null
           unfallskizze_ablehnung_grund: string | null
           unfallskizze_bestaetigt: boolean | null
           unfallskizze_generiert_am: string | null
@@ -1540,6 +1532,7 @@ export type Database = {
           zahlung_eingegangen_am: string | null
           zahlung_erwartet_am: string | null
           zahlungsweg: string | null
+          zb1_status: string | null
           zeugen_kontakte: Json | null
           zeugen_vorhanden: boolean
         }
@@ -1562,6 +1555,7 @@ export type Database = {
           as_salesforce_id?: string | null
           as_vs_reaktion_text?: string | null
           as_zuletzt_synced_am?: string | null
+          auslandskennzeichen?: boolean | null
           auszahlung_gutachter_betrag?: number | null
           auszahlung_gutachter_eingegangen_am?: string | null
           auszahlung_kunde_betrag?: number | null
@@ -1578,6 +1572,7 @@ export type Database = {
             | null
           bevorzugter_kanal?: string | null
           bic?: string | null
+          bkat_unfallart?: Database["public"]["Enums"]["bkat_unfallart"] | null
           cardentity_abfrage_am?: string | null
           cardentity_enriched_at?: string | null
           cardentity_report?: Json | null
@@ -1603,6 +1598,7 @@ export type Database = {
           eskalation_tag_28_ergebnis?: string | null
           eskalation_tag_28_ergebnis_am?: string | null
           eskalation_tag_28_ergebnis_von?: string | null
+          fahrerflucht?: boolean | null
           fahrzeug_ausstattung?: Json | null
           fahrzeug_baujahr?: number | null
           fahrzeug_fahrbereit?: boolean | null
@@ -1744,6 +1740,7 @@ export type Database = {
           polizei_aktenzeichen?: string | null
           polizei_bericht_vorhanden?: boolean | null
           polizei_vor_ort?: boolean | null
+          polizeibericht_status?: string | null
           prioritaet?: string | null
           regulierung_am?: string | null
           regulierung_angekuendigt_am?: string | null
@@ -1806,11 +1803,14 @@ export type Database = {
           totalschaden?: boolean | null
           tsn?: string | null
           unfall_konstellation?: string | null
+          unfall_uhrzeit?: string | null
           unfalldatum?: string | null
           unfallhergang?: string | null
           unfallmitteilung_status?: string | null
           unfallort?: string | null
           unfallort_kategorie?: string | null
+          unfallort_lat?: number | null
+          unfallort_lng?: number | null
           unfallskizze_ablehnung_grund?: string | null
           unfallskizze_bestaetigt?: boolean | null
           unfallskizze_generiert_am?: string | null
@@ -1853,6 +1853,7 @@ export type Database = {
           zahlung_eingegangen_am?: string | null
           zahlung_erwartet_am?: string | null
           zahlungsweg?: string | null
+          zb1_status?: string | null
           zeugen_kontakte?: Json | null
           zeugen_vorhanden?: boolean
         }
@@ -1875,6 +1876,7 @@ export type Database = {
           as_salesforce_id?: string | null
           as_vs_reaktion_text?: string | null
           as_zuletzt_synced_am?: string | null
+          auslandskennzeichen?: boolean | null
           auszahlung_gutachter_betrag?: number | null
           auszahlung_gutachter_eingegangen_am?: string | null
           auszahlung_kunde_betrag?: number | null
@@ -1891,6 +1893,7 @@ export type Database = {
             | null
           bevorzugter_kanal?: string | null
           bic?: string | null
+          bkat_unfallart?: Database["public"]["Enums"]["bkat_unfallart"] | null
           cardentity_abfrage_am?: string | null
           cardentity_enriched_at?: string | null
           cardentity_report?: Json | null
@@ -1916,6 +1919,7 @@ export type Database = {
           eskalation_tag_28_ergebnis?: string | null
           eskalation_tag_28_ergebnis_am?: string | null
           eskalation_tag_28_ergebnis_von?: string | null
+          fahrerflucht?: boolean | null
           fahrzeug_ausstattung?: Json | null
           fahrzeug_baujahr?: number | null
           fahrzeug_fahrbereit?: boolean | null
@@ -2057,6 +2061,7 @@ export type Database = {
           polizei_aktenzeichen?: string | null
           polizei_bericht_vorhanden?: boolean | null
           polizei_vor_ort?: boolean | null
+          polizeibericht_status?: string | null
           prioritaet?: string | null
           regulierung_am?: string | null
           regulierung_angekuendigt_am?: string | null
@@ -2119,11 +2124,14 @@ export type Database = {
           totalschaden?: boolean | null
           tsn?: string | null
           unfall_konstellation?: string | null
+          unfall_uhrzeit?: string | null
           unfalldatum?: string | null
           unfallhergang?: string | null
           unfallmitteilung_status?: string | null
           unfallort?: string | null
           unfallort_kategorie?: string | null
+          unfallort_lat?: number | null
+          unfallort_lng?: number | null
           unfallskizze_ablehnung_grund?: string | null
           unfallskizze_bestaetigt?: boolean | null
           unfallskizze_generiert_am?: string | null
@@ -2166,6 +2174,7 @@ export type Database = {
           zahlung_eingegangen_am?: string | null
           zahlung_erwartet_am?: string | null
           zahlungsweg?: string | null
+          zb1_status?: string | null
           zeugen_kontakte?: Json | null
           zeugen_vorhanden?: boolean
         }
@@ -4097,6 +4106,7 @@ export type Database = {
           besichtigungsort_lng: number | null
           besichtigungsort_place_id: string | null
           bevorzugter_kanal: string | null
+          bkat_unfallart: Database["public"]["Enums"]["bkat_unfallart"] | null
           cardentity_enriched_at: string | null
           cardentity_report: Json | null
           claude_vision_analyse: Json | null
@@ -4199,10 +4209,6 @@ export type Database = {
           reminder_2_sent_at: string | null
           reminder_3_sent_at: string | null
           reminder_token: string | null
-          rueckruf_datum: string | null
-          rueckruf_erledigt: boolean | null
-          rueckruf_notiz: string | null
-          rueckruf_termin: string | null
           sa_datum: string | null
           sa_unterschrieben: boolean | null
           sa_unterschrieben_am: string | null
@@ -4280,6 +4286,7 @@ export type Database = {
           besichtigungsort_lng?: number | null
           besichtigungsort_place_id?: string | null
           bevorzugter_kanal?: string | null
+          bkat_unfallart?: Database["public"]["Enums"]["bkat_unfallart"] | null
           cardentity_enriched_at?: string | null
           cardentity_report?: Json | null
           claude_vision_analyse?: Json | null
@@ -4382,10 +4389,6 @@ export type Database = {
           reminder_2_sent_at?: string | null
           reminder_3_sent_at?: string | null
           reminder_token?: string | null
-          rueckruf_datum?: string | null
-          rueckruf_erledigt?: boolean | null
-          rueckruf_notiz?: string | null
-          rueckruf_termin?: string | null
           sa_datum?: string | null
           sa_unterschrieben?: boolean | null
           sa_unterschrieben_am?: string | null
@@ -4463,6 +4466,7 @@ export type Database = {
           besichtigungsort_lng?: number | null
           besichtigungsort_place_id?: string | null
           bevorzugter_kanal?: string | null
+          bkat_unfallart?: Database["public"]["Enums"]["bkat_unfallart"] | null
           cardentity_enriched_at?: string | null
           cardentity_report?: Json | null
           claude_vision_analyse?: Json | null
@@ -4565,10 +4569,6 @@ export type Database = {
           reminder_2_sent_at?: string | null
           reminder_3_sent_at?: string | null
           reminder_token?: string | null
-          rueckruf_datum?: string | null
-          rueckruf_erledigt?: boolean | null
-          rueckruf_notiz?: string | null
-          rueckruf_termin?: string | null
           sa_datum?: string | null
           sa_unterschrieben?: boolean | null
           sa_unterschrieben_am?: string | null
@@ -9301,9 +9301,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       betreuungspaket: ["vollservice", "sv-only"],

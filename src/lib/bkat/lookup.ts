@@ -80,3 +80,29 @@ export function aggregateSchuldindiz(
   }
   return { primaer: null, kundeVerdacht }
 }
+
+/**
+ * Mapped die 15 bkat_unfallart-Werte auf die 5 Legacy-schadentyp-Werte.
+ * Genutzt damit das alte SchadentypPicker-UI weiter greift bis B3b umgebaut
+ * ist. Hier statt im 'use server'-Action-File damit es client-seitig
+ * importierbar bleibt (server-files dürfen nur async-Exports haben).
+ */
+export function bkatToLegacySchadentyp(u: BkatUnfallart): string {
+  switch (u) {
+    case 'auffahrunfall':
+      return 'auffahrunfall'
+    case 'vorfahrt':
+    case 'kreuzung_rotlicht':
+    case 'abbiegen':
+      return 'vorfahrtsverletzung'
+    case 'spurwechsel':
+    case 'ueberholen':
+      return 'spurwechsel'
+    case 'rueckwaerts_parken':
+    case 'einfahren_anfahren':
+    case 'dooring':
+      return 'parkplatz'
+    default:
+      return 'sonstiges'
+  }
+}

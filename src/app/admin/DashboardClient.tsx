@@ -140,13 +140,13 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
         .gte('sv_termin', ds).lt('sv_termin', de)
         .not('status', 'in', '("abgeschlossen","storniert")')
         .order('sv_termin', { ascending: true }),
-      // Rückrufe
-      supabase.from('leads')
-        .select('id, vorname, nachname, telefon, rueckruf_datum, rueckruf_notiz')
-        .not('rueckruf_datum', 'is', null)
-        .or('rueckruf_erledigt.is.null,rueckruf_erledigt.eq.false')
-        .gte('rueckruf_datum', ds).lte('rueckruf_datum', de)
-        .order('rueckruf_datum', { ascending: true }),
+      // Rückrufe (AAR-637: admin_termine typ='rueckruf' ist SoT, lead + fall)
+      supabase.from('admin_termine')
+        .select('id, start_zeit, notizen, lead_id, fall_id, lead:leads!admin_termine_lead_id_fkey(id, vorname, nachname, telefon)')
+        .eq('typ', 'rueckruf')
+        .eq('status', 'offen')
+        .gte('start_zeit', ds).lte('start_zeit', de)
+        .order('start_zeit', { ascending: true }),
       // Kunden-Termine
       supabase.from('termine')
         .select('id, fall_id, betreff, datum, dauer_minuten, typ, status, ort, teilnehmer, meeting_link')
@@ -199,19 +199,22 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
       })
     }
 
-    // Rückrufe → amber
+    // Rückrufe → amber (AAR-637: admin_termine)
     for (const r of rueckR.data ?? []) {
-      const d = new Date(r.rueckruf_datum!)
+      const d = new Date(r.start_zeit)
       const startMin = d.getHours() * 60 + d.getMinutes()
-      const name = [r.vorname, r.nachname].filter(Boolean).join(' ') || '—'
+      const leadRaw = r.lead as unknown
+      const lead = Array.isArray(leadRaw) ? leadRaw[0] ?? null : (leadRaw as { id: string; vorname: string | null; nachname: string | null; telefon: string | null } | null)
+      const name = lead ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—' : (r.notizen?.slice(0, 40) ?? 'Rückruf')
+      const href = lead ? `/dispatch/leads/${lead.id}` : r.fall_id ? `/faelle/${r.fall_id}` : `/admin/kalender`
       calBlocks.push({
         id: `rr-${r.id}`,
         typ: 'rueckruf',
         startMin,
         dauer: 15,
         label: name,
-        sublabel: r.telefon ?? '',
-        link: `/dispatch/leads/${r.id}`,
+        sublabel: lead?.telefon ?? '',
+        link: href,
       })
     }
 

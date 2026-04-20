@@ -4,7 +4,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  LayoutDashboardIcon, FolderOpenIcon, CheckSquareIcon,
+  LayoutDashboardIcon, FolderOpenIcon, CheckSquareIcon, CalendarIcon,
   MessageCircleIcon, BarChart3Icon, AlertCircleIcon, UserIcon,
 } from 'lucide-react'
 
@@ -14,6 +14,7 @@ const ITEMS: NavItem[] = [
   { href: '/mitarbeiter', label: 'Dashboard', icon: LayoutDashboardIcon, exact: true },
   { href: '/mitarbeiter/faelle', label: 'Meine Fälle', icon: FolderOpenIcon },
   { href: '/mitarbeiter/tasks', label: 'Tasks', icon: CheckSquareIcon },
+  { href: '/mitarbeiter/termine', label: 'Termine', icon: CalendarIcon },
   { href: '/mitarbeiter/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon },
   { href: '/mitarbeiter/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
   { href: '/mitarbeiter/performance', label: 'Performance', icon: BarChart3Icon },

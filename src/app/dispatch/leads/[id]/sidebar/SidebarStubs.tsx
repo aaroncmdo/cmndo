@@ -157,21 +157,9 @@ export function DisqualifizierenButton() {
 
 export function RueckrufButton() {
   const { lead } = useDispatchPhase()
-  const l = lead as unknown as {
-    rueckruf_datum?: string | null
-    rueckruf_notiz?: string | null
-    rueckruf_erledigt?: boolean | null
-  }
-  return (
-    <RueckrufSection
-      lead={{
-        id: lead.id,
-        rueckruf_datum: l.rueckruf_datum ?? null,
-        rueckruf_notiz: l.rueckruf_notiz ?? null,
-        rueckruf_erledigt: l.rueckruf_erledigt ?? null,
-      }}
-    />
-  )
+  // AAR-637: Rückruf-Daten kommen jetzt aus admin_termine, nicht mehr vom
+  // Lead-Snapshot. RueckrufSection lädt den offenen Termin selbst.
+  return <RueckrufSection leadId={lead.id} />
 }
 
 // ─── Gesprächshilfen pro Phase (Notion-Spec Sektion 4) ──────────────────────
