@@ -15,6 +15,8 @@ import {
   SettingsIcon,
   LogOutIcon,
 } from 'lucide-react'
+import { SupportButton } from '@/components/support/SupportButton'
+import NotificationBell from '@/app/admin/_components/NotificationBell'
 
 type MaklerShellProps = {
   makler: {
@@ -88,6 +90,7 @@ export function MaklerShell({ makler, email, children }: MaklerShellProps) {
         </nav>
 
         <div className="px-3 pb-4 space-y-2 border-t border-white/10 pt-3">
+          <SupportButton userName={makler.ansprechpartner_vorname} />
           <div className="flex items-center gap-3 px-3 py-2.5">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold bg-[#4573A2] text-white">
               {initials}
@@ -98,6 +101,7 @@ export function MaklerShell({ makler, email, children }: MaklerShellProps) {
               </p>
               <p className="text-[11px] text-[#7BA3CC] truncate">{email}</p>
             </div>
+            <NotificationBell />
           </div>
           <form action="/api/auth/logout" method="POST">
             <button
