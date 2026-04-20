@@ -324,10 +324,9 @@ export default function WillkommenClient({
   const paketLabel = PAKET_LABELS[sv.paket] ?? sv.paket
   const fullName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || '—'
 
-  // FR-2: Banner sichtbar fuer Solo + Inhaber, NICHT fuer Sub-Mitarbeiter,
-  // und nur solange portal_zugang_freigeschaltet=false ist.
-  const showAnzahlungBanner =
-    (r === 'solo' || r === 'buero_inhaber') && !sv.portal_zugang_freigeschaltet
+  // AAR-512: showAnzahlungBanner entfernt — der globale Onboarding-Banner im
+  // Layout (`src/app/gutachter/layout.tsx`) rendert denselben Hinweis, nur
+  // generalisiert + klickbar. Inline-Duplikat an dieser Stelle war redundant.
 
   // ── Solo-Handler (existing) ────────────────────────────────────────────
   async function handleSoloVertragSubmit() {
@@ -469,20 +468,8 @@ export default function WillkommenClient({
           <p className="text-gray-500 text-sm mt-1">Schritt {step + 1} von {STEPS.length}</p>
         </div>
 
-        {/* FR-2: Anzahlung-Warn-Banner (Solo + Inhaber, vor Anzahlung) */}
-        {showAnzahlungBanner && (
-          <div className="mb-5 bg-amber-50 border border-amber-300 rounded-xl p-4 flex items-start gap-3">
-            <AlertTriangleIcon className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-amber-800">
-              <strong>Sie erhalten erst Fälle von uns, sobald Sie angezahlt haben!</strong>
-              <p className="text-xs text-amber-700 mt-1">
-                {r === 'buero_inhaber'
-                  ? 'Sobald die Büro-Anzahlung eingegangen ist, werden alle Sub-Standorte gleichzeitig freigeschaltet.'
-                  : 'Sobald die Anzahlung eingegangen ist, ist dein Portal-Zugang sofort freigeschaltet.'}
-              </p>
-            </div>
-          </div>
-        )}
+        {/* AAR-512: Inline-Anzahlung-Banner entfernt — der globale Onboarding-
+            Banner im Layout deckt den Hinweis ab, klickbar + generalisiert. */}
 
         {/* BUG-95 KORREKTUR: Stepper in Claimondo-CI ohne Grün.
             done   → var(--brand-secondary) (Ondo Blue) + Checkmark, weiß
