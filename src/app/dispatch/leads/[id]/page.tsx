@@ -108,6 +108,19 @@ export default async function DispatchLeadDetail({
   const flowLinkGesendet = !!latestFlow && latestFlow.status !== 'abgelaufen'
   const saUnterschrieben = !!lead.sa_unterschrieben
 
+  // AAR-631: Wenn SA unterschrieben → Fall-ID laden damit der Shell einen
+  // Banner mit Fallakte-Link anzeigen kann (Lead-Edit nach Conversion ist
+  // gesperrt, Dispatcher muss zur Fallakte).
+  let fallIdFuerBanner: string | null = null
+  if (saUnterschrieben) {
+    const { data: fallRow } = await supabase
+      .from('faelle')
+      .select('id')
+      .eq('lead_id', id)
+      .maybeSingle()
+    fallIdFuerBanner = fallRow?.id ?? null
+  }
+
   let initialPhase: Phase = 1
   if (!(qual.q1_schuldfrage && qual.q2_schaden && qual.q3_polizei)) initialPhase = 1
   else if (!qual.q5_svTermin) initialPhase = 2
@@ -124,6 +137,7 @@ export default async function DispatchLeadDetail({
       fall={unterschriftenSnapshot}
       initialPhase={initialPhase}
       saUnterschrieben={saUnterschrieben}
+      fallIdFuerBanner={fallIdFuerBanner}
     />
   )
 }

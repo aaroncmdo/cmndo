@@ -53,6 +53,7 @@ export default function DispatchShell({
   fall,
   initialPhase,
   saUnterschrieben,
+  fallIdFuerBanner,
 }: {
   lead: LeadLike & {
     id: string
@@ -65,6 +66,7 @@ export default function DispatchShell({
   fall: FallSnapshot | null
   initialPhase: Phase
   saUnterschrieben: boolean
+  fallIdFuerBanner: string | null
 }) {
   const latestFlow = flowLinks[0]
   const flowStufe = computeFlowLinkStufe(lead as Parameters<typeof computeFlowLinkStufe>[0], latestFlow)
@@ -108,6 +110,28 @@ export default function DispatchShell({
               </div>
             </div>
           </div>
+
+          {/* AAR-631: Lead-Edit-Lockdown nach Conversion — Banner informiert
+              Dispatcher dass Stammdaten-Änderungen ab jetzt über die Fallakte
+              gemacht werden müssen. saveStammdaten verweigert Writes hier. */}
+          {saUnterschrieben && fallIdFuerBanner && (
+            <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex items-start gap-3">
+              <span className="text-amber-600 text-lg leading-none mt-0.5">ℹ</span>
+              <div className="flex-1 text-sm">
+                <p className="font-semibold text-amber-900">Lead ist konvertiert</p>
+                <p className="text-amber-800 mt-0.5">
+                  Stammdaten-Änderungen jetzt in der Fallakte machen — Lead-Daten sind als
+                  Snapshot eingefroren.
+                </p>
+                <Link
+                  href={`/faelle/${fallIdFuerBanner}`}
+                  className="inline-block mt-2 text-[#4573A2] hover:underline font-medium"
+                >
+                  Zur Fallakte →
+                </Link>
+              </div>
+            </div>
+          )}
 
           <PhaseHeader
             flowLinkGesendet={flowLinkGesendet}
