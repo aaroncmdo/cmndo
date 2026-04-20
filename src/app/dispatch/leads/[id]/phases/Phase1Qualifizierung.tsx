@@ -113,6 +113,10 @@ export default function Phase1Qualifizierung() {
       l.polizei_vor_ort === true ? (l.polizeibericht_pflicht ?? null) : null,
   })
   const [toast, setToast] = useState('')
+  // AAR-616: Lokaler Sprach-State für optimistisches UI. Ohne diesen
+  // Spiegel bleibt der `selected`-Check auf `l.sprache` so lange stale,
+  // bis router.refresh() durchgekommen ist — User sieht seinen Klick nicht.
+  const [spracheDraft, setSpracheDraft] = useState<string | null>(l.sprache ?? null)
 
   const q1Complete =
     !!draft.unfallhergang?.trim() &&
@@ -264,21 +268,35 @@ export default function Phase1Qualifizierung() {
         </span>
         <div className="flex gap-1 flex-wrap">
           {SPRACHEN.map((s) => {
-            const selected = (l.sprache ?? 'de') === s.code
+            // AAR-616: `selected` aus lokalem draft-Mirror statt direkt aus
+            // `l.sprache` (stale bis router.refresh durchkommt) — gibt
+            // sofortiges visuelles Feedback beim Klick.
+            const selected = (spracheDraft ?? l.sprache ?? 'de') === s.code
             return (
               <button
                 key={s.code}
                 type="button"
-                onClick={() =>
+                onClick={() => {
+                  setSpracheDraft(s.code)
                   startTransition(async () => {
-                    await saveStammdaten(l.id, { sprache: s.code })
+                    const r = await saveStammdaten(l.id, { sprache: s.code })
+                    if (r.success) {
+                      router.refresh()
+                    } else {
+                      // Bei Fehler lokalen State zurücksetzen, damit der User
+                      // nicht glaubt die Sprache sei gesetzt.
+                      setSpracheDraft(l.sprache ?? 'de')
+                      setToast(r.error ?? 'Sprache konnte nicht gespeichert werden')
+                      setTimeout(() => setToast(''), 3000)
+                    }
                   })
-                }
-                className={`px-2 py-1 rounded-md text-[11px] font-medium border ${
+                }}
+                disabled={pending}
+                className={`px-2 py-1 rounded-md text-[11px] font-medium border transition-colors ${
                   selected
                     ? 'bg-[#4573A2] text-white border-[#4573A2]'
                     : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-                }`}
+                } disabled:opacity-60`}
                 title={s.label}
               >
                 <span className="mr-1">{s.flag}</span>
