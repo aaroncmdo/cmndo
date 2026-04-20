@@ -26,16 +26,38 @@ export default function LoginPage({
   )
 }
 
+// AAR-609: Defensiv gegen fehlerhaft serialisierte Error-Objekte. Wenn eine
+// Server-Action oder ein externer Callback versehentlich das komplette
+// AuthError-Objekt statt error.message in die URL schreibt, landet hier
+// "{}" oder "undefined" oder "[object Object]" — alles unlesbar. Wir filtern
+// diese Sentinel-Werte raus und zeigen einen generischen Fallback.
+function normalizeLoginError(raw: string | undefined): string | null {
+  if (!raw) return null
+  let decoded: string
+  try {
+    decoded = decodeURIComponent(raw)
+  } catch {
+    decoded = raw
+  }
+  const trimmed = decoded.trim()
+  if (!trimmed) return null
+  if (trimmed === '{}' || trimmed === 'undefined' || trimmed === 'null' || trimmed === '[object Object]') {
+    return 'Login fehlgeschlagen'
+  }
+  return trimmed
+}
+
 async function ErrorMessage({
   searchParams,
 }: {
   searchParams: Promise<{ error?: string }>
 }) {
   const params = await searchParams
-  if (!params.error) return null
+  const message = normalizeLoginError(params.error)
+  if (!message) return null
   return (
     <p className="text-sm text-red-600 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-center mt-4">
-      {decodeURIComponent(params.error)}
+      {message}
     </p>
   )
 }
