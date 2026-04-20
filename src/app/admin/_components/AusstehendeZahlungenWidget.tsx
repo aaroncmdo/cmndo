@@ -100,7 +100,9 @@ async function loadAusstehende(): Promise<{ rows: Eintrag[]; gesamt: number; tot
       // (b) Bei SV-Sammelabrechnungen ist empfaenger_id die Organisations-ID,
       //     nicht sachverstaendige.id → 404.
       // Klick auf die Zeile → immer Abrechnungs-Tabelle (Detail-Drilldown).
-      href: '/admin/abrechnungen',
+      // AAR-audit: Route nach AAR-528 Hub-Konsolidierung jetzt direkt auf
+      // den finalen Pfad (vorher griff der 301-Redirect aus next.config).
+      href: '/admin/finance/abrechnungen',
     })
   }
 

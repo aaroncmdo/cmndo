@@ -83,7 +83,13 @@ const PAKET_LABEL: Record<string, string> = {
   'premium-50': 'Premium', premium: 'Premium',
 }
 
-type SvStatusFilter = 'aktive' | 'deaktivierte' | 'gesperrt' | 'alle'
+// AAR-audit: "onboarding" ergänzt damit SVs die Vertrag unterzeichnet haben
+// aber noch auf Anzahlung / Portal-Freischaltung warten gezielt gefiltert
+// werden können. Vorher wurden sie im „Aktiv"-Filter versteckt (Kriterium
+// war nur ist_aktiv+gesperrt_seit) und waren zwischen 20+ anderen SVs
+// unsichtbar — obwohl das Dashboard-Widget „Ausstehende Anzahlung" sie
+// eindeutig als handlungsbedürftig markiert.
+type SvStatusFilter = 'aktive' | 'onboarding' | 'deaktivierte' | 'gesperrt' | 'alle'
 
 const MAPS_SCRIPT_ID = 'google-maps-script'
 
@@ -153,12 +159,17 @@ export default function KarteHubClient({
 
   // AAR-131 + AAR-151: gefilterte SVs für Sidebar + Marker.
   // typFilter=null → kein Typ-Filter aktiv; sonst genau dieser gutachter_typ.
+  // AAR-audit: "onboarding" = SVs die noch keinen Portal-Zugang haben (egal
+  // ob Vertrag schon unterzeichnet ist oder nicht). Deckt sich mit dem was
+  // das Ausstehende-Anzahlung-Widget als Zielgruppe hat.
   const filteredSvs = useMemo(() => {
     return svs.filter((sv) => {
       const istGesperrt = !!sv.gesperrtSeit
       const istDeaktiviert = sv.istAktiv === false
+      const istOnboarding = !istGesperrt && !istDeaktiviert && sv.portalZugangFreigeschaltet !== true
       if (svFilter === 'gesperrt' && !istGesperrt) return false
-      if (svFilter === 'aktive' && (istGesperrt || istDeaktiviert)) return false
+      if (svFilter === 'aktive' && (istGesperrt || istDeaktiviert || istOnboarding)) return false
+      if (svFilter === 'onboarding' && !istOnboarding) return false
       if (svFilter === 'deaktivierte' && (istGesperrt || !istDeaktiviert)) return false
       if (typFilter && (sv.gutachterTyp ?? 'kfz-gutachter') !== typFilter) return false
       if (search && !sv.name.toLowerCase().includes(search.toLowerCase())) return false
@@ -548,6 +559,10 @@ function SvSidebar({
       <div className="px-4 pb-2 flex gap-1">
         {([
           { k: 'aktive', label: 'Aktiv' },
+          // AAR-audit: Onboarding-Filter — SVs die auf Vertrag oder Anzahlung
+          // warten (portal_zugang_freigeschaltet=false). Matcht 1:1 die
+          // Zielgruppe des Ausstehende-Zahlungen-Widgets im Dashboard.
+          { k: 'onboarding', label: 'Onboarding' },
           { k: 'deaktivierte', label: 'Deaktiv.' },
           { k: 'gesperrt', label: 'Gesperrt' },
           { k: 'alle', label: 'Alle' },
