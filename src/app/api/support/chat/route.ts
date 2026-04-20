@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import type Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { callSupportClaude, SUPPORT_CATEGORY_LABELS } from '@/lib/support/anthropic-client'
+import { callSupportClaude, SUPPORT_CATEGORY_LABELS, SUPPORT_SEVERITY_LABELS } from '@/lib/support/anthropic-client'
 import { buildSystemPrompt } from '@/lib/support/system-prompt'
 import { checkRateLimit, incrementRateLimit } from '@/lib/support/rate-limit'
 import {
@@ -379,6 +379,10 @@ function normaliseLabels(input: string[]): string[] {
     if ((SUPPORT_CATEGORY_LABELS as readonly string[]).includes(l) && !categoryFound) {
       result.add(l)
       categoryFound = true
+    }
+    // AAR-615+: Schweregrad-Labels durchlassen (backend-kritisch, ux-kritisch)
+    if ((SUPPORT_SEVERITY_LABELS as readonly string[]).includes(l)) {
+      result.add(l)
     }
   }
   if (!categoryFound) result.add('question')

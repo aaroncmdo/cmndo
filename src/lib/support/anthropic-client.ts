@@ -9,6 +9,10 @@ import { AI_MODELS } from '@/lib/ai/models'
 export const SUPPORT_CATEGORY_LABELS = ['bug', 'feature-request', 'ux', 'question'] as const
 export type SupportCategoryLabel = (typeof SUPPORT_CATEGORY_LABELS)[number]
 
+// AAR-615+: Schweregrad-Labels — werden zusätzlich zur Kategorie gesetzt
+export const SUPPORT_SEVERITY_LABELS = ['backend-kritisch', 'ux-kritisch'] as const
+export type SupportSeverityLabel = (typeof SUPPORT_SEVERITY_LABELS)[number]
+
 export const SUPPORT_TOOLS: Anthropic.Messages.Tool[] = [
   {
     name: 'ask_clarifying_question',
@@ -86,11 +90,17 @@ export const SUPPORT_TOOLS: Anthropic.Messages.Tool[] = [
           type: 'array',
           items: { type: 'string' },
           description:
-            'IMMER ["user-reported", "ai-created"] plus genau EINE Kategorie aus "bug", "feature-request", "ux", "question".',
+            'IMMER ["user-reported", "ai-created"] plus genau EINE Kategorie aus "bug", "feature-request", "ux", "question". Zusätzlich: "backend-kritisch" wenn Server/DB/Datenkonsistenz betroffen, "ux-kritisch" wenn ein Workflow für den Nutzer komplett blockiert ist. Beides kombinierbar.',
         },
         priority: {
           type: 'integer',
-          description: 'Linear-Priorität: 0 none, 1 urgent, 2 high, 3 medium, 4 low. Default 3.',
+          description:
+            'Linear-Priorität basierend auf Schweregrad-Einschätzung: ' +
+            '1 (urgent) = DB-Inkonsistenz, Datenverlust, kompletter Workflow-Ausfall oder Backend-Fehler der das Tagesgeschäft blockiert. ' +
+            '2 (high) = einzelne Seite/Feature blockiert, wichtiger Workflow stark eingeschränkt, Performance die produktives Arbeiten verhindert. ' +
+            '3 (medium) = störend aber umgehbar, UX-Schwäche ohne Workflow-Blockade. ' +
+            '4 (low) = kosmetisch, nice-to-have. ' +
+            'Default 3. Wenn du "backend-kritisch" oder "ux-kritisch" setzt, muss priority ≤ 2 sein.',
           minimum: 0,
           maximum: 4,
         },
