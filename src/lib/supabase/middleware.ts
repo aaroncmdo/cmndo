@@ -6,6 +6,17 @@ const REMEMBER_COOKIE_NAME = 'cm_remember'
 const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365
 
 export async function updateSession(request: NextRequest) {
+  // AAR-622: Public-Path-Kurzschluss — kein Supabase-Client, kein Auth-Call,
+  // kein GoTrue-Hit für Crons (/api/*), Landing-Pages und Login-Flows.
+  // Vorher lief getUser() (HTTP-Call zu GoTrue) auf JEDEM Request inkl.
+  // der ~15 Cron-Endpoints die alle 5-30 Min feuern → GoTrue-Überlastung.
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-pathname', request.nextUrl.pathname)
+
+  if (isPublicPath(request.nextUrl.pathname)) {
+    return NextResponse.next({ request: { headers: requestHeaders } })
+  }
+
   // Collect cookies that need to be set on the response
   const cookiesToUpdate: { name: string; value: string; options: Record<string, unknown> }[] = []
 
@@ -47,31 +58,29 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // CRITICAL: getUser() kann bei korrupten Cookies intern crashen.
+  // AAR-622: getSession() statt getUser() — liest JWT lokal aus dem Cookie
+  // und ruft GoTrue NUR bei Token-Ablauf auf (alle ~60 Min pro User-Session).
+  // getUser() rief bei jedem Request /auth/v1/user ab → GoTrue-Bottleneck.
+  // Middleware macht nur Redirects (keine DB-Writes), daher ist die lokale
+  // Session-Verifikation sicher genug; RLS + Server-Actions sind der
+  // eigentliche Security-Layer.
   let user = null
   try {
-    const result = await supabase.auth.getUser()
-    user = result?.data?.user ?? null
+    const { data: { session } } = await supabase.auth.getSession()
+    user = session?.user ?? null
   } catch {
     user = null
   }
 
-  // KFZ-148 Lueckenfix (BUG-A.1): x-pathname Header injizieren damit Server
-  // Components / Layouts den aktuellen Pfad zuverlaessig lesen koennen
-  // (statt sich auf non-standard x-next-url / x-invoke-path zu verlassen).
-  const requestHeaders = new Headers(request.headers)
-  requestHeaders.set('x-pathname', request.nextUrl.pathname)
-
-  // Build response
-  let response: NextResponse
-
+  // Build response — public paths sind bereits oben per Early-Return raus.
   // AAR-111: Reihenfolge gefixt — 2FA-Check MUSS vor Admin-Rollen-Check greifen,
   // sonst umgehen Admin-User den 2FA-Flow komplett solange sie unter /admin/* bleiben.
+  let response: NextResponse
 
-  if (!user && !isPublicPath(request.nextUrl.pathname)) {
-    // Nicht eingeloggt + nicht public → /login
+  if (!user) {
+    // Nicht eingeloggt + geschützter Pfad → /login
     response = NextResponse.redirect(new URL('/login', request.url))
-  } else if (user && !isPublicPath(request.nextUrl.pathname) && request.nextUrl.pathname !== '/login/2fa') {
+  } else if (request.nextUrl.pathname !== '/login/2fa') {
     // Eingeloggt + geschützter Pfad (auch /admin/*): ZUERST 2FA-Check (KFZ-184)
     const isGoogleUser = user.app_metadata?.provider === 'google'
     const has2faCookie = request.cookies.get('claimondo_2fa_verified')?.value === '1'
