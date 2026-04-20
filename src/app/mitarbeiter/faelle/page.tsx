@@ -19,8 +19,8 @@ export default async function MitarbeiterFaelle() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-bold text-[#0D1B3E]">Meine Faelle</h1>
-        <p className="text-sm text-gray-500 mt-1">Alle Ihnen zugewiesenen Faelle, sortiert nach Erstellung.</p>
+        <h1 className="text-xl font-bold text-[#0D1B3E]">Meine Fälle</h1>
+        <p className="text-sm text-gray-500 mt-1">Alle Ihnen zugewiesenen Fälle, sortiert nach Erstellung.</p>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -54,7 +54,7 @@ export default async function MitarbeiterFaelle() {
               </tr>
             ))}
             {(!faelle || faelle.length === 0) && (
-              <tr><td colSpan={4} className="px-4 py-12 text-center text-gray-400 text-sm">Keine Faelle zugewiesen</td></tr>
+              <tr><td colSpan={4} className="px-4 py-12 text-center text-gray-400 text-sm">Keine Fälle zugewiesen</td></tr>
             )}
           </tbody>
         </table>

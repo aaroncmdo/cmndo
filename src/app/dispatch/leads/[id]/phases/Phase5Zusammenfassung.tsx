@@ -43,6 +43,7 @@ type LeadSnapshot = {
   hat_vorschaeden?: boolean | null
   zeugen?: boolean | null
   unfallort?: string | null
+  schadens_hergang?: string | null
   // AAR-317: Unfallskizze (KI-generiert)
   unfallhergang?: string | null
   unfallskizze_svg?: string | null
@@ -263,6 +264,14 @@ export default function Phase5Zusammenfassung() {
       jumpToPhase: 4,
     },
     {
+      label: 'Schadenshergang (Pflicht bei fahrbereitem Fahrzeug)',
+      value: l.fahrzeug_fahrbereit !== true
+        ? 'Nicht fahrbereit — kein Pflichtfeld'
+        : (l.schadens_hergang ?? '—'),
+      missing: !qualification.q8_schadenhergang,
+      jumpToPhase: 4,
+    },
+    {
       label: 'Unfallort',
       value: l.unfallort ?? '—',
       missing: !l.unfallort,
@@ -304,8 +313,7 @@ export default function Phase5Zusammenfassung() {
               ? 'bg-green-100 text-green-700'
               : 'bg-amber-100 text-amber-700'
           }`}>
-            {/* AAR-199: /7 seit q7_fahrzeug aus AAR-181 dazu kam. */}
-            {qualification.completedCount}/7 Bedingungen
+            {qualification.completedCount}/8 Bedingungen
           </span>
         </div>
         <div className="divide-y divide-gray-100">

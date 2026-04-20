@@ -112,7 +112,7 @@ export default async function DispatchLeadDetail({
   if (!(qual.q1_schuldfrage && qual.q2_schaden && qual.q3_polizei)) initialPhase = 1
   else if (!qual.q5_svTermin) initialPhase = 2
   else if (!qual.q4_schadentyp) initialPhase = 3
-  else if (!qual.q6_gegnerKz) initialPhase = 4
+  else if (!qual.q6_gegnerKz || !qual.q7_fahrzeug || !qual.q8_schadenhergang) initialPhase = 4
   else if (!flowLinkGesendet) initialPhase = 5
   else initialPhase = 6
 

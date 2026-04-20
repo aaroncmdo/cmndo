@@ -65,10 +65,6 @@ export async function saveHardGate(
     ...(data.polizei_vor_ort !== undefined && { polizei_vor_ort: data.polizei_vor_ort }),
     ...(data.polizei_aktenzeichen !== undefined && { polizei_aktenzeichen: data.polizei_aktenzeichen }),
     ...(data.fahrzeug_fahrbereit !== undefined && { fahrzeug_fahrbereit: data.fahrzeug_fahrbereit }),
-    ...(data.besichtigungsort_adresse !== undefined && { besichtigungsort_adresse: data.besichtigungsort_adresse }),
-    ...(data.besichtigungsort_lat !== undefined && { besichtigungsort_lat: data.besichtigungsort_lat }),
-    ...(data.besichtigungsort_lng !== undefined && { besichtigungsort_lng: data.besichtigungsort_lng }),
-    ...(data.besichtigungsort_place_id !== undefined && { besichtigungsort_place_id: data.besichtigungsort_place_id }),
     updated_at: new Date().toISOString(),
   }
 

@@ -48,7 +48,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
               <div className="flex gap-3 text-xs">
                 <span className="text-[#7BA3CC] font-medium">{tagesSummary.termine} Termine</span>
                 <span className="text-amber-400 font-medium">{tagesSummary.offeneTasks} Tasks</span>
-                {tagesSummary.ueberfaellig > 0 && <span className="text-red-400 font-semibold">{tagesSummary.ueberfaellig} ueberfaellig</span>}
+                {tagesSummary.ueberfaellig > 0 && <span className="text-red-400 font-semibold">{tagesSummary.ueberfaellig} überfällig</span>}
               </div>
             </div>
           )}
@@ -87,7 +87,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
       {timeline && timeline.length === 0 && tagesSummary && (
         <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-6 text-center">
           <CalendarIcon className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-          <p className="text-gray-500 text-sm">Keine Termine oder Tasks fuer heute</p>
+          <p className="text-gray-500 text-sm">Keine Termine oder Tasks für heute</p>
         </div>
       )}
 
@@ -98,9 +98,9 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
           <KPI icon={<BriefcaseIcon className="w-4 h-4 text-green-400" />} label="Konvertiert" value={stats.leadsKonv} />
           <KPI icon={<BarChart3Icon className="w-4 h-4 text-[#7BA3CC]" />} label="Conv. Rate" value={stats.leadsTotal > 0 ? `${Math.round((stats.leadsKonv / stats.leadsTotal) * 100)}%` : '—'} />
         </>) : (<>
-          <KPI icon={<BriefcaseIcon className="w-4 h-4 text-[#7BA3CC]" />} label="Aktive Faelle" value={stats.aktiveFaelle} />
+          <KPI icon={<BriefcaseIcon className="w-4 h-4 text-[#7BA3CC]" />} label="Aktive Fälle" value={stats.aktiveFaelle} />
           <KPI icon={<BarChart3Icon className="w-4 h-4 text-green-400" />} label="Abgeschlossen" value={stats.abgeschlossen} />
-          <KPI icon={<ClockIcon className="w-4 h-4 text-amber-400" />} label="Kapazitaet" value={`${stats.aktiveFaelle}/${profile.kapazitaet_max ?? 100}`} />
+          <KPI icon={<ClockIcon className="w-4 h-4 text-amber-400" />} label="Kapazität" value={`${stats.aktiveFaelle}/${profile.kapazitaet_max ?? 100}`} />
         </>)}
         <KPI icon={<TrophyIcon className="w-4 h-4 text-amber-400" />} label="Rang" value={myRank > 0 ? `#${myRank}` : '—'} />
       </div>
@@ -141,7 +141,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
                 {inc.beschreibung && <p className="text-gray-400 text-xs mt-0.5">{inc.beschreibung}</p>}
               </div>
             ))}
-            {incentives.length === 0 && <div className="px-5 py-8 text-center text-gray-500">Keine Incentives verfuegbar</div>}
+            {incentives.length === 0 && <div className="px-5 py-8 text-center text-gray-500">Keine Incentives verfügbar</div>}
           </div>
         </div>
       </div>

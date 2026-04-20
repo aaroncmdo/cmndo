@@ -65,35 +65,20 @@ function f(fall: Record<string, unknown>, key: string): string | number | null {
 
 export function KundendatenSection() {
   const { fall, lead } = useFall()
-  // AAR-575 (A1): fall.kunde_* sind jetzt Snapshot-Spalten — werden beim
-  // Lead→Fall-Convert gefüllt. Kunde-Identität (vorname/nachname/email/telefon)
-  // kommt aus dem Converter; Kunde-Anschrift wird nur gesetzt, wenn im Lead
-  // ist_fahrzeughalter=false war (sonst null → Halter-Anschrift gilt).
-  // Bearbeitung weiterhin über den Lead-Detail bzw. profiles.
+  // Fallback auf lead.* wenn kunde_* noch nicht gesetzt (Altfälle vor diesem Fix)
   const vorname = (fall.kunde_vorname as string | null) ?? (lead?.vorname as string | null) ?? null
   const nachname = (fall.kunde_nachname as string | null) ?? (lead?.nachname as string | null) ?? null
   const email = (fall.kunde_email as string | null) ?? (lead?.email as string | null) ?? null
   const telefon = (fall.kunde_telefon as string | null) ?? (lead?.telefon as string | null) ?? null
-  const kundeStrasse = (fall.kunde_strasse as string | null) ?? null
-  const kundePlz = (fall.kunde_plz as string | null) ?? null
-  const kundeStadt = (fall.kunde_stadt as string | null) ?? null
-  const halterStrasse = (fall.halter_strasse as string | null) ?? null
-  const kundeAbweichend = !!kundeStrasse && kundeStrasse !== halterStrasse
   return (
-    <Card icon={<UserIcon className="w-4 h-4 text-gray-400" />} title="Kundendaten" hint="Bearbeiten über Lead-Detail">
-      <div className="text-xs space-y-2">
-        <div><span className="text-[10px] uppercase tracking-wider text-gray-400 block">Name</span><span className="text-gray-800 font-medium">{[vorname, nachname].filter(Boolean).join(' ') || '—'}</span></div>
-        <div><span className="text-[10px] uppercase tracking-wider text-gray-400 block">E-Mail</span><span className="text-gray-800 font-medium">{email ?? '—'}</span></div>
-      </div>
-      <div className="text-xs space-y-2">
-        <div><span className="text-[10px] uppercase tracking-wider text-gray-400 block">Telefon</span><span className="text-gray-800 font-medium">{telefon ?? '—'}</span></div>
-      </div>
-      {kundeAbweichend && (
-        <div className="sm:col-span-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
-          <p className="text-[10px] uppercase tracking-wider text-amber-800 font-semibold mb-1">Kunde wohnt woanders als Halter</p>
-          <p className="text-xs text-amber-900">{[kundeStrasse, [kundePlz, kundeStadt].filter(Boolean).join(' ')].filter(Boolean).join(', ')}</p>
-        </div>
-      )}
+    <Card icon={<UserIcon className="w-4 h-4 text-gray-400" />} title="Kundendaten">
+      <InlineEditField label="Vorname" fieldName="kunde_vorname" value={vorname} />
+      <InlineEditField label="Nachname" fieldName="kunde_nachname" value={nachname} />
+      <InlineEditField label="E-Mail" fieldName="kunde_email" value={email} />
+      <InlineEditField label="Telefon" fieldName="kunde_telefon" value={telefon} />
+      <InlineEditField label="Straße" fieldName="kunde_strasse" value={f(fall, 'kunde_strasse')} />
+      <InlineEditField label="PLZ" fieldName="kunde_plz" value={f(fall, 'kunde_plz')} />
+      <InlineEditField label="Stadt" fieldName="kunde_stadt" value={f(fall, 'kunde_stadt')} />
     </Card>
   )
 }

@@ -32,7 +32,7 @@ export default function PhaseHeader({
     1: qualification.q1_schuldfrage && qualification.q2_schaden && qualification.q3_polizei,
     2: qualification.q5_svTermin,
     3: qualification.q4_schadentyp,
-    4: qualification.q6_gegnerKz,
+    4: qualification.q6_gegnerKz && qualification.q7_fahrzeug && qualification.q8_schadenhergang,
     5: flowLinkGesendet,
     6: saUnterschrieben,
   }

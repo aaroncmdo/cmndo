@@ -10,7 +10,8 @@ import { useState, useTransition, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import SvDispatchPanel from '../SvDispatchPanel'
 import { useDispatchPhase } from '../lib/phase-context'
-import { saveHardGate, setServiceTyp, saveStammdaten } from '../actions'
+import { setServiceTyp, saveStammdaten } from '../actions'
+import { geocodeAndSaveBesichtigung } from '../actions/geocode'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { MapPinIcon, CheckCircle2Icon, ScaleIcon, CalendarIcon } from 'lucide-react'
 
@@ -90,7 +91,7 @@ export default function Phase2TerminServiceTyp() {
     setUnfallortLat(lat)
     setUnfallortLng(lng)
     startTransition(async () => {
-      const r = await saveHardGate(lead.id, {
+      const r = await saveStammdaten(lead.id, {
         unfallort: adresse,
         unfallort_lat: lat,
         unfallort_lng: lng,
@@ -114,7 +115,6 @@ export default function Phase2TerminServiceTyp() {
     // Koordinaten via Dropdown gesetzt.
     if (!trimmed || trimmed === (l.unfallort ?? '') || hasKoordinaten) return
     startTransition(async () => {
-      const { geocodeAndSaveBesichtigung } = await import('../actions/geocode')
       const r = await geocodeAndSaveBesichtigung(lead.id, trimmed)
       if (r.success && r.lat != null && r.lng != null) {
         setUnfallortLat(r.lat)
@@ -131,7 +131,7 @@ export default function Phase2TerminServiceTyp() {
   function saveBesichtigungsort(place: PlaceResult) {
     setBesichtigungsortAdresse(place.adresse)
     startTransition(async () => {
-      const r = await saveHardGate(lead.id, {
+      const r = await saveStammdaten(lead.id, {
         besichtigungsort_adresse: place.adresse,
         besichtigungsort_lat: place.lat,
         besichtigungsort_lng: place.lng,
@@ -146,7 +146,7 @@ export default function Phase2TerminServiceTyp() {
     if (!besichtigungsortAdresse) return
     setBesichtigungsortAdresse('')
     startTransition(async () => {
-      await saveHardGate(lead.id, {
+      await saveStammdaten(lead.id, {
         besichtigungsort_adresse: null,
         besichtigungsort_lat: null,
         besichtigungsort_lng: null,

@@ -30,7 +30,7 @@ export default async function MitarbeiterReklamationen() {
     <div className="space-y-4">
       <div>
         <h1 className="text-xl font-bold text-[#0D1B3E]">Reklamationen</h1>
-        <p className="text-sm text-gray-500 mt-1">Reklamationen zu Ihren Faellen.</p>
+        <p className="text-sm text-gray-500 mt-1">Reklamationen zu Ihren Fällen.</p>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">

@@ -9,8 +9,10 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 const STAMMDATEN_ALLOWED_FIELDS = new Set([
-  // Kunde
+  // Kunde — Kontakt + Adresse + Notiz
   'vorname', 'nachname', 'telefon', 'email',
+  'kunde_plz', 'kunde_strasse', 'kunde_stadt',
+  'notiz',
   // Fahrzeug
   'kennzeichen', 'fahrzeug_hersteller', 'fahrzeug_modell',
   // AAR-181: Baujahr ist Pflichtfeld in Phase 4, muss in der Allowlist sein

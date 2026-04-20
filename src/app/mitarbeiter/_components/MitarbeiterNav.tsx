@@ -12,7 +12,7 @@ type NavItem = { href: string; label: string; icon: typeof LayoutDashboardIcon; 
 
 const ITEMS: NavItem[] = [
   { href: '/mitarbeiter', label: 'Dashboard', icon: LayoutDashboardIcon, exact: true },
-  { href: '/mitarbeiter/faelle', label: 'Meine Faelle', icon: FolderOpenIcon },
+  { href: '/mitarbeiter/faelle', label: 'Meine Fälle', icon: FolderOpenIcon },
   { href: '/mitarbeiter/tasks', label: 'Tasks', icon: CheckSquareIcon },
   { href: '/mitarbeiter/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon },
   { href: '/mitarbeiter/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
