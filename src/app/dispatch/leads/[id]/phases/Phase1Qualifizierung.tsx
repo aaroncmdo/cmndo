@@ -89,7 +89,7 @@ const SPRACHEN = [
 
 export default function Phase1Qualifizierung() {
   const router = useRouter()
-  const { lead, qualification, setPhase } = useDispatchPhase()
+  const { lead, qualification, setPhase, patchLead } = useDispatchPhase()
   const l = lead as unknown as LeadFields
   const [pending, startTransition] = useTransition()
   const [draft, setDraft] = useState<HardGateData & { polizeibericht_vorhanden?: boolean | null }>({
@@ -113,10 +113,6 @@ export default function Phase1Qualifizierung() {
       l.polizei_vor_ort === true ? (l.polizeibericht_pflicht ?? null) : null,
   })
   const [toast, setToast] = useState('')
-  // AAR-616: Lokaler Sprach-State für optimistisches UI. Ohne diesen
-  // Spiegel bleibt der `selected`-Check auf `l.sprache` so lange stale,
-  // bis router.refresh() durchgekommen ist — User sieht seinen Klick nicht.
-  const [spracheDraft, setSpracheDraft] = useState<string | null>(l.sprache ?? null)
 
   const q1Complete =
     !!draft.unfallhergang?.trim() &&
@@ -268,24 +264,23 @@ export default function Phase1Qualifizierung() {
         </span>
         <div className="flex gap-1 flex-wrap">
           {SPRACHEN.map((s) => {
-            // AAR-616: `selected` aus lokalem draft-Mirror statt direkt aus
-            // `l.sprache` (stale bis router.refresh durchkommt) — gibt
-            // sofortiges visuelles Feedback beim Klick.
-            const selected = (spracheDraft ?? l.sprache ?? 'de') === s.code
+            // `selected` aus Context-lead — patchLead() aktualisiert ihn
+            // sofort optimistisch und überlebt Phase-Wechsel (kein Re-Init
+            // beim Zurücknavigieren wie bei lokalem useState).
+            const selected = (l.sprache ?? 'de') === s.code
             return (
               <button
                 key={s.code}
                 type="button"
                 onClick={() => {
-                  setSpracheDraft(s.code)
+                  patchLead({ sprache: s.code } as Partial<typeof lead>)
                   startTransition(async () => {
                     const r = await saveStammdaten(l.id, { sprache: s.code })
                     if (r.success) {
                       router.refresh()
                     } else {
-                      // Bei Fehler lokalen State zurücksetzen, damit der User
-                      // nicht glaubt die Sprache sei gesetzt.
-                      setSpracheDraft(l.sprache ?? 'de')
+                      // Bei DB-Fehler: Revert im Context
+                      patchLead({ sprache: l.sprache ?? 'de' } as Partial<typeof lead>)
                       setToast(r.error ?? 'Sprache konnte nicht gespeichert werden')
                       setTimeout(() => setToast(''), 3000)
                     }
