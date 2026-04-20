@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import Link from 'next/link'
 import GutachterShell from './GutachterShell'
 import { PageContainer } from '@/components/PageContainer'
+import { isOnboardingComplete, getOnboardingDeepLink } from '@/lib/gutachter/onboarding-status'
 
 export default async function GutachterLayout({
   children,
@@ -31,7 +32,8 @@ export default async function GutachterLayout({
   // AAR-220: brand_theme + firmenname zusätzlich für Whitelabel-Theme + Logo-alt-Text.
   // AAR-359 W5: sa_vorlage_* + verifizierung_* + gesperrt_* Felder für
   // den Verifizierungs-Banner und die Sidebar-Sichtbarkeit.
-  const svSelect = 'logo_url, brand_primary, brand_secondary, brand_theme, firmenname, use_custom_branding, vertrag_unterschrieben, anzahlung_status, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, organisation_id, rolle_in_organisation, ist_parent_account, geloescht_am, sa_vorlage_status, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, verifizierung_admin_notiz, gesperrt_seit, gesperrt_grund'
+  // AAR-512: `gcal_connected` für den generalisierten Onboarding-Banner ergänzt.
+  const svSelect = 'logo_url, brand_primary, brand_secondary, brand_theme, firmenname, use_custom_branding, vertrag_unterschrieben, anzahlung_status, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, organisation_id, rolle_in_organisation, ist_parent_account, geloescht_am, sa_vorlage_status, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, verifizierung_admin_notiz, gesperrt_seit, gesperrt_grund, gcal_connected'
   const { data: sv } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
@@ -153,12 +155,30 @@ export default async function GutachterLayout({
             </div>
           )
         })()}
-      {/* Anzahlung-Banner */}
-      {!isDeactivated && sv?.vertrag_unterschrieben && sv?.anzahlung_status !== 'bezahlt' && (
-        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center text-xs text-amber-700 font-medium">
-          Ihre Anzahlung ist noch ausstehend. Sie erhalten Fälle sobald die Zahlung eingegangen ist.
-        </div>
-      )}
+      {/* AAR-512: Onboarding-Unvollständig-Banner (generalisiert).
+          Triggert wenn IRGENDEIN Onboarding-Step offen ist (nicht mehr nur
+          Anzahlung). Klickbar, Deep-Link zum nächsten offenen Step. Wird
+          unterdrückt wenn bereits einer der spezifischeren Banner (Sperre,
+          SA-Vorlage zurückgewiesen, SA ausstehend, Tier-2-Countdown) rendert
+          — deren Info ist präziser. */}
+      {!isDeactivated
+        && !sv?.gesperrt_seit
+        && sv?.sa_vorlage_status !== 'zurueckgewiesen'
+        && sv?.sa_vorlage_status !== 'ausstehend'
+        && sv?.verifizierung_status !== 'frist_ueberschritten'
+        && sv
+        && !isOnboardingComplete(sv)
+        && (
+          <Link
+            href={getOnboardingDeepLink(sv)}
+            className="bg-amber-50 hover:bg-amber-100 border-b border-amber-200 px-4 py-2 text-center text-xs text-amber-700 font-medium flex items-center justify-center gap-1.5 transition-colors"
+          >
+            <span>Ihr Onboarding ist noch nicht abgeschlossen. Klicken Sie hier, um es fertigzustellen und Fälle zu erhalten.</span>
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        )}
       {/* BUG-98: PageContainer gibt Desktop ~15-20% horizontale Marge,
           Tablet quer großflächig, Mobile fast volle Breite. Banner liegen
           bewusst außerhalb damit sie weiterhin volle Breite haben. */}
