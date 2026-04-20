@@ -1,5 +1,0 @@
--- KFZ-206: Bankdaten fuer Auszahlung am Fall
-ALTER TABLE faelle ADD COLUMN IF NOT EXISTS iban TEXT;
-ALTER TABLE faelle ADD COLUMN IF NOT EXISTS bic TEXT;
-ALTER TABLE faelle ADD COLUMN IF NOT EXISTS kontoinhaber TEXT;
-ALTER TABLE faelle ADD COLUMN IF NOT EXISTS bankdaten_hinterlegt_am TIMESTAMPTZ;
