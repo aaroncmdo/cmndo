@@ -23,7 +23,7 @@ export function SupportButton({
 
   const className =
     variant === 'dark'
-      ? 'w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 transition-colors'
+      ? 'w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium bg-white text-[#0D1B3E] hover:bg-gray-100 transition-colors'
       : 'w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#4573A2] hover:text-[#0D1B3E] hover:bg-gray-50 transition-colors'
 
   return (

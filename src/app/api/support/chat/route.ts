@@ -373,7 +373,7 @@ function parseDataUrl(input: string): { mediaType: 'image/png' | 'image/jpeg' | 
 
 function normaliseLabels(input: string[]): string[] {
   const lower = input.map(l => l.toLowerCase().trim()).filter(Boolean)
-  const result = new Set<string>(['user-reported', 'ai-created'])
+  const result = new Set<string>(['user-reported', 'ai-created', 'support-widget'])
   let categoryFound = false
   for (const l of lower) {
     if ((SUPPORT_CATEGORY_LABELS as readonly string[]).includes(l) && !categoryFound) {
