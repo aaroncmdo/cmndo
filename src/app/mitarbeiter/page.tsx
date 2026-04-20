@@ -50,12 +50,12 @@ export default async function MitarbeiterDashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-bold text-[#0D1B3E]">Mitarbeiter-Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-1">Uebersicht ueber Ihre Faelle, Tasks und Nachrichten.</p>
+        <p className="text-sm text-gray-500 mt-1">Übersicht über Ihre Fälle, Tasks und Nachrichten.</p>
       </div>
 
       {/* KPI-Boxen */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <KpiBox icon={FolderOpenIcon} label="Aktive Faelle" value={faelleCount ?? 0} href="/mitarbeiter/faelle" color="blue" />
+        <KpiBox icon={FolderOpenIcon} label="Aktive Fälle" value={faelleCount ?? 0} href="/mitarbeiter/faelle" color="blue" />
         <KpiBox icon={CheckSquareIcon} label="Offene Tasks" value={tasksCount ?? 0} href="/mitarbeiter/tasks" color="violet" />
         <KpiBox icon={MessageCircleIcon} label="Ungelesen" value={unreadCount ?? 0} href="/mitarbeiter/nachrichten" color="emerald" />
         <KpiBox icon={AlertCircleIcon} label="Reklamationen" value={reklamationenCount} href="/mitarbeiter/reklamationen" color="amber" />
@@ -64,7 +64,7 @@ export default async function MitarbeiterDashboard() {
       {/* Faelle-Liste */}
       <section className="bg-white rounded-xl border border-gray-200">
         <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-900">Meine aktiven Faelle</h2>
+          <h2 className="text-sm font-semibold text-gray-900">Meine aktiven Fälle</h2>
           <Link href="/mitarbeiter/faelle" className="text-xs text-[#4573A2] hover:underline">Alle anzeigen</Link>
         </div>
         <div className="divide-y divide-gray-50">
@@ -80,7 +80,7 @@ export default async function MitarbeiterDashboard() {
             </Link>
           ))}
           {(!faelle || faelle.length === 0) && (
-            <p className="px-4 py-8 text-sm text-gray-400 text-center">Keine aktiven Faelle</p>
+            <p className="px-4 py-8 text-sm text-gray-400 text-center">Keine aktiven Fälle</p>
           )}
         </div>
       </section>
