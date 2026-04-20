@@ -112,7 +112,7 @@ export default function FinanceClient({
             </div>
           </Link>
           <Link
-            href="/admin/kanzlei-abrechnungen"
+            href="/admin/finance/kanzlei"
             className="group bg-white border border-gray-200 rounded-2xl p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
           >
             <div className="flex items-start justify-between gap-3">

@@ -86,7 +86,7 @@ export default function AnlegenTabs({ onSuccess }: {
             Verwaltung erfolgt im dedizierten Communities-Bereich.
           </p>
           <Link
-            href="/admin/communities"
+            href="/admin/partner/communities"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold"
           >
             <UsersIcon className="w-4 h-4" /> Zu /admin/communities

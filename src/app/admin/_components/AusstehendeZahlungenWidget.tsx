@@ -181,7 +181,7 @@ export default async function AusstehendeZahlungenWidget() {
 
       <div className="px-5 py-3 border-t border-gray-100 bg-gray-50">
         <Link
-          href="/admin/abrechnungen"
+          href="/admin/finance/abrechnungen"
           className="flex items-center justify-center gap-1.5 text-xs font-medium text-[#4573A2] hover:text-[#1E3A5F] transition-colors"
         >
           Alle anzeigen <ArrowRightIcon className="w-3 h-3" />
