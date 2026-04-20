@@ -14,6 +14,7 @@ import { useFall } from '../FallContext'
 import QuickActions from './QuickActions'
 import SlaAlerts from './SlaAlerts'
 import FallRueckrufSection from './FallRueckrufSection'
+import TerminListeClient from '@/components/termine/TerminListeClient'
 
 type Kontakt = {
   id: string
@@ -53,6 +54,14 @@ export default function FallSidebar({
 
       {/* Rückruf (AAR-637) */}
       <FallRueckrufSection fallId={fall.id} />
+
+      {/* Termine (AAR-643): alle admin_termine + gutachter_termine zum Fall */}
+      <TerminListeClient
+        fallId={fall.id}
+        leadId={lead?.id ?? undefined}
+        variant="compact"
+        limit={10}
+      />
 
       {/* Kunde Kurzinfo */}
       <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-1">

@@ -11,6 +11,7 @@
 import { useState, useTransition } from 'react'
 import GespraechsleitfadenTimer from '../GespraechsleitfadenTimer'
 import RueckrufSection from '../RueckrufSection'
+import TerminListeClient from '@/components/termine/TerminListeClient'
 import { useDispatchPhase, type Phase } from '../lib/phase-context'
 import { disqualifiziereLead } from '../actions'
 import {
@@ -160,6 +161,22 @@ export function RueckrufButton() {
   // AAR-637: Rückruf-Daten kommen jetzt aus admin_termine, nicht mehr vom
   // Lead-Snapshot. RueckrufSection lädt den offenen Termin selbst.
   return <RueckrufSection leadId={lead.id} />
+}
+
+// AAR-638: zeigt alle Termine zum Lead (Rückrufe aus admin_termine + ggf.
+// SV-Termine aus gutachter_termine, falls der Lead bereits zu einem Fall
+// konvertiert wurde und gutachter_termine.lead_id gesetzt ist).
+export function TerminListeSidebar() {
+  const { lead } = useDispatchPhase()
+  return (
+    <TerminListeClient
+      leadId={lead.id}
+      variant="compact"
+      title="Termine zum Lead"
+      dispatchLinks
+      limit={8}
+    />
+  )
 }
 
 // ─── Gesprächshilfen pro Phase (Notion-Spec Sektion 4) ──────────────────────

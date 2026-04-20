@@ -46,9 +46,9 @@ export default async function MitarbeiterDashboard() {
     reklamationenCount = count ?? 0
   } catch { /* Tabelle evtl. nicht vorhanden */ }
 
-  // AAR-637: Meine offenen Rückrufe + meine kommenden Termine (admin_termine)
+  // AAR-637 + AAR-640: Rückrufe, Admin-Termine UND KB-Beratungen
   const nowIso = new Date().toISOString()
-  const [rueckrufR, termineR] = await Promise.all([
+  const [rueckrufR, termineR, kbR] = await Promise.all([
     supabase
       .from('admin_termine')
       .select(
@@ -68,9 +68,22 @@ export default async function MitarbeiterDashboard() {
       .gte('start_zeit', nowIso)
       .order('start_zeit', { ascending: true })
       .limit(5),
+    // AAR-640: KB-Beratungen dieses Mitarbeiters
+    supabase
+      .from('gutachter_termine')
+      .select('id, start_zeit, kanal, fall_id, fall:faelle!gutachter_termine_fall_id_fkey(id, fall_nummer)')
+      .eq('typ', 'kb_beratung')
+      .eq('kb_id', user.id)
+      .in('status', ['reserviert', 'bestaetigt'])
+      .is('cancelled_at', null)
+      .gte('start_zeit', nowIso)
+      .order('start_zeit', { ascending: true })
+      .limit(5),
   ])
   const meineRueckrufe = rueckrufR.data ?? []
-  const meineTermine = termineR.data ?? []
+  const meineAdminTermine = termineR.data ?? []
+  const meineKbTermine = kbR.data ?? []
+  const meineTermineAnzahl = meineAdminTermine.length + meineKbTermine.length
 
   return (
     <div className="space-y-6">
@@ -84,13 +97,13 @@ export default async function MitarbeiterDashboard() {
         <KpiBox icon={FolderOpenIcon} label="Aktive Fälle" value={faelleCount ?? 0} href="/mitarbeiter/faelle" color="blue" />
         <KpiBox icon={CheckSquareIcon} label="Offene Tasks" value={tasksCount ?? 0} href="/mitarbeiter/tasks" color="violet" />
         <KpiBox icon={PhoneCallIcon} label="Rückrufe" value={meineRueckrufe.length} href="/mitarbeiter/termine" color="amber" />
-        <KpiBox icon={CalendarIcon} label="Termine" value={meineTermine.length} href="/mitarbeiter/termine" color="blue" />
+        <KpiBox icon={CalendarIcon} label="Termine" value={meineTermineAnzahl} href="/mitarbeiter/termine" color="blue" />
         <KpiBox icon={MessageCircleIcon} label="Ungelesen" value={unreadCount ?? 0} href="/mitarbeiter/nachrichten" color="emerald" />
         <KpiBox icon={AlertCircleIcon} label="Reklamationen" value={reklamationenCount} href="/mitarbeiter/reklamationen" color="amber" />
       </div>
 
       {/* Rückrufe + kommende Termine */}
-      {(meineRueckrufe.length > 0 || meineTermine.length > 0) && (
+      {(meineRueckrufe.length > 0 || meineAdminTermine.length > 0 || meineKbTermine.length > 0) && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <section className="bg-white rounded-xl border border-gray-200">
             <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
@@ -141,7 +154,7 @@ export default async function MitarbeiterDashboard() {
               <Link href="/mitarbeiter/termine" className="text-xs text-[#4573A2] hover:underline">Alle</Link>
             </div>
             <div className="divide-y divide-gray-50">
-              {meineTermine.map((t) => {
+              {meineAdminTermine.map((t) => {
                 const fallRaw = t.fall as unknown
                 const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { id: string; fall_nummer: string | null } | null)
                 const href = fall ? `/faelle/${fall.id}` : '#'
@@ -160,7 +173,7 @@ export default async function MitarbeiterDashboard() {
                   </Link>
                 )
               })}
-              {meineTermine.length === 0 && (
+              {meineTermineAnzahl === 0 && (
                 <p className="px-4 py-8 text-sm text-gray-400 text-center">Keine kommenden Termine</p>
               )}
             </div>

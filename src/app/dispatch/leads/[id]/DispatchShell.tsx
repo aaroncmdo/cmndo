@@ -21,6 +21,7 @@ import {
   TimerWidget,
   DisqualifizierenButton,
   RueckrufButton,
+  TerminListeSidebar,
   GespraechshilfePanel,
   EinwandKarten,
 } from './sidebar/SidebarStubs'
@@ -146,6 +147,7 @@ export default function DispatchShell({
           <TimerWidget />
           <DisqualifizierenButton />
           <RueckrufButton />
+          <TerminListeSidebar />
           <GespraechshilfePanel />
           <EinwandKarten />
         </aside>

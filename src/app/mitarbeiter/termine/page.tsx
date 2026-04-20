@@ -13,6 +13,7 @@ const TYP_META: Record<string, { label: string; icon: typeof PhoneCallIcon; cls:
   rueckruf: { label: 'Rückruf', icon: PhoneCallIcon, cls: 'bg-amber-50 text-amber-700 border-amber-200' },
   kunde: { label: 'Kunde', icon: UsersIcon, cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
   intern: { label: 'Intern', icon: CalendarIcon, cls: 'bg-gray-50 text-gray-700 border-gray-200' },
+  kb_beratung: { label: 'KB-Beratung', icon: CalendarIcon, cls: 'bg-violet-50 text-violet-700 border-violet-200' },
 }
 
 export default async function MitarbeiterTermine() {
@@ -27,7 +28,7 @@ export default async function MitarbeiterTermine() {
     typ: string
     titel: string
     start_zeit: string
-    end_zeit: string
+    end_zeit: string | null
     status: string
     notizen: string | null
     lead_id: string | null
@@ -36,19 +37,90 @@ export default async function MitarbeiterTermine() {
     fall: { id: string; fall_nummer: string | null } | { id: string; fall_nummer: string | null }[] | null
   }
 
-  const { data: rawTermine } = await supabase
-    .from('admin_termine')
-    .select(
-      'id, typ, titel, start_zeit, end_zeit, status, notizen, lead_id, fall_id, ' +
-        'lead:leads!admin_termine_lead_id_fkey(id, vorname, nachname, telefon), ' +
-        'fall:faelle!admin_termine_fall_id_fkey(id, fall_nummer)',
-    )
-    .eq('zugewiesen_an', user.id)
-    .eq('status', 'offen')
-    .gte('start_zeit', new Date(Date.now() - 24 * 3600 * 1000).toISOString())
-    .order('start_zeit', { ascending: true })
+  const sinceIso = new Date(Date.now() - 24 * 3600 * 1000).toISOString()
 
-  const termine = (rawTermine ?? []) as unknown as TerminRow[]
+  const [adminR, kbR] = await Promise.all([
+    supabase
+      .from('admin_termine')
+      .select(
+        'id, typ, titel, start_zeit, end_zeit, status, notizen, lead_id, fall_id, ' +
+          'lead:leads!admin_termine_lead_id_fkey(id, vorname, nachname, telefon), ' +
+          'fall:faelle!admin_termine_fall_id_fkey(id, fall_nummer)',
+      )
+      .eq('zugewiesen_an', user.id)
+      .eq('status', 'offen')
+      .gte('start_zeit', sinceIso)
+      .order('start_zeit', { ascending: true }),
+    // AAR-640: KB-Beratungen (gutachter_termine typ=kb_beratung, kb_id=user)
+    supabase
+      .from('gutachter_termine')
+      .select(
+        'id, start_zeit, end_zeit, status, fall_id, lead_id, kanal, notiz_intern, ' +
+          'fall:faelle!gutachter_termine_fall_id_fkey(id, fall_nummer, lead_id)',
+      )
+      .eq('typ', 'kb_beratung')
+      .eq('kb_id', user.id)
+      .in('status', ['reserviert', 'bestaetigt'])
+      .is('cancelled_at', null)
+      .gte('start_zeit', sinceIso)
+      .order('start_zeit', { ascending: true }),
+  ])
+
+  const adminTermine = (adminR.data ?? []) as unknown as TerminRow[]
+  type KbRow = {
+    id: string
+    start_zeit: string
+    end_zeit: string | null
+    status: string
+    fall_id: string | null
+    lead_id: string | null
+    kanal: string | null
+    notiz_intern: string | null
+    fall: { id: string; fall_nummer: string | null; lead_id: string | null } | { id: string; fall_nummer: string | null; lead_id: string | null }[] | null
+  }
+  const kbTermineRaw = (kbR.data ?? []) as unknown as KbRow[]
+
+  // Namen für KB-Leads laden (via fall.lead_id oder direkt kb.lead_id)
+  const kbLeadIds = [
+    ...new Set(
+      kbTermineRaw
+        .map(k => {
+          const fallRaw = k.fall as unknown
+          const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { lead_id: string | null } | null)
+          return fall?.lead_id ?? k.lead_id
+        })
+        .filter(Boolean) as string[],
+    ),
+  ]
+  const kbLeadNameMap: Record<string, string> = {}
+  if (kbLeadIds.length > 0) {
+    const { data: leads } = await supabase.from('leads').select('id, vorname, nachname').in('id', kbLeadIds)
+    for (const l of leads ?? []) kbLeadNameMap[l.id] = [l.vorname, l.nachname].filter(Boolean).join(' ') || '—'
+  }
+
+  const kbAsTermine: TerminRow[] = kbTermineRaw.map(k => {
+    const fallRaw = k.fall as unknown
+    const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { id: string; fall_nummer: string | null; lead_id: string | null } | null)
+    const namesLeadId = fall?.lead_id ?? k.lead_id
+    const kundenName = namesLeadId ? kbLeadNameMap[namesLeadId] : null
+    return {
+      id: k.id,
+      typ: 'kb_beratung',
+      titel: kundenName ? `KB-Beratung · ${kundenName}` : 'KB-Beratung',
+      start_zeit: k.start_zeit,
+      end_zeit: k.end_zeit,
+      status: k.status,
+      notizen: k.notiz_intern,
+      lead_id: k.lead_id,
+      fall_id: k.fall_id,
+      lead: null,
+      fall: fall ? { id: fall.id, fall_nummer: fall.fall_nummer } : null,
+    }
+  })
+
+  const termine = [...adminTermine, ...kbAsTermine].sort(
+    (a, b) => new Date(a.start_zeit).getTime() - new Date(b.start_zeit).getTime(),
+  )
 
   const groups = new Map<string, TerminRow[]>()
   for (const t of termine) {
