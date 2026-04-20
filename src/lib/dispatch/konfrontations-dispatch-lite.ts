@@ -53,11 +53,13 @@ export async function triggerKonfrontationsDispatch(
   const db = createAdminClient()
 
   // Fall + SV laden (SV muss aktiv sein und der Fall muss einen SV haben)
+  // AAR-607 B1: .single() wirft bei 0 Rows unkontrolliert — stumm failed der
+  // Konfrontations-Dispatch wenn der Fall gerade gelöscht wurde (Race).
   const { data: fall } = await db
     .from('faelle')
     .select('id, fall_nummer, sv_id, nachbesichtigung_sv_konfrontation_gewuenscht, nachbesichtigung_sv_termin_vereinbart_am')
     .eq('id', input.fallId)
-    .single()
+    .maybeSingle()
 
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
   if (!fall.sv_id) {

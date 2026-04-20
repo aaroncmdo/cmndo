@@ -381,7 +381,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                     <div className="border border-emerald-200 rounded-xl p-3 bg-emerald-50/50 space-y-2">
                       <p className="text-xs text-emerald-800">
                         <strong>Bestaetigung:</strong> {fmtEur(selected.summe_brutto)} als bezahlt markieren?
-                        Optional: kurze Notiz (z.B. „Bank-Ueberweisung 09.04.2026").
+                        Optional: kurze Notiz (z.B. „Bank-Ueberweisung 09.04.2026&quot;).
                       </p>
                       <textarea
                         value={bezahltNotiz}

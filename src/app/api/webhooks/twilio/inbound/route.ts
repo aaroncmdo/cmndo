@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
   const { matchInboundToFall } = await import('@/lib/inbound/match-fall')
   const match = await matchInboundToFall(db, fromPhone)
   const matchedLeadId = match.leadId
-  let matchedFallId = match.fallId
+  const matchedFallId = match.fallId
   let matchedTerminId: string | null = null
 
   if (matchedFallId) {

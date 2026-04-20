@@ -708,7 +708,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                   {standorte.map((s, i) => <li key={i}>1× an Sub {s.sub_email} (mit Sub-Initial-Passwort)</li>)}
                 </ul>
                 <p className="mt-2">
-                  Plus {standorte.length} Mail-Kopien an Inhaber: "Du hast einen neuen Mitarbeiter angelegt bekommen".
+                  Plus {standorte.length} Mail-Kopien an Inhaber: &quot;Du hast einen neuen Mitarbeiter angelegt bekommen&quot;.
                 </p>
               </div>
             </div>

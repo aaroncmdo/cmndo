@@ -438,21 +438,24 @@ export async function completeOnboarding(): Promise<{ success: boolean; error?: 
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
+  // AAR-607 A2: faelle-Update ZUERST — das ist die Source-of-Truth für
+  // /kunde/page.tsx. Wenn faelle schreibt aber profiles failed, ist das nur
+  // kosmetisch. Wenn profiles schreibt aber faelle failed, lief der Kunde in
+  // einen Redirect-Loop (gefixt in AAR-228 Bug 2 mit Sync, aber Error war stumm).
+  const admin = createAdminClient()
+  const { error: fallError } = await admin.from('faelle')
+    .update({ onboarding_complete: true })
+    .eq('kunde_id', user.id)
+    .is('onboarding_complete', false)
+
+  if (fallError) return { success: false, error: fallError.message }
+
   const { error } = await supabase
     .from('profiles')
     .update({ onboarding_completed_at: new Date().toISOString() })
     .eq('id', user.id)
 
   if (error) return { success: false, error: error.message }
-
-  // AAR-228 Bug 2: faelle.onboarding_complete MUSS synchron gesetzt werden —
-  // sonst sieht /kunde/page.tsx weiter onboarding_complete=false → Redirect-Loop.
-  // Admin-Client weil Kunde keine direkte Update-Policy auf faelle hat.
-  const admin = createAdminClient()
-  await admin.from('faelle')
-    .update({ onboarding_complete: true })
-    .eq('kunde_id', user.id)
-    .is('onboarding_complete', false)
 
   revalidatePath('/kunde')
   return { success: true }

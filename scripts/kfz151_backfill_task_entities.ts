@@ -88,7 +88,6 @@ async function backfill() {
 
   console.log(`${tasks.length} Tasks ohne entity_type gefunden.\n`)
 
-  let inferredCount = 0
   let skippedCount = 0
   const updates: Array<{ id: string; entity_type: string; entity_id: string; reason: string }> = []
 
@@ -98,7 +97,6 @@ async function backfill() {
       skippedCount++
       continue
     }
-    inferredCount++
     updates.push({ id: task.id, entity_type: inference.entity_type, entity_id: inference.entity_id, reason: inference.reason })
   }
 

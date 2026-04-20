@@ -118,12 +118,23 @@ export default function TerminCard({
         >
           <NavigationIcon className="w-3 h-3" /> Route starten
         </a>
-        <Link
-          href={`/gutachter/fall/${termin.fall_id}`}
-          className="inline-flex items-center gap-1 text-xs text-[color:var(--brand-primary,var(--brand-secondary))] hover:text-[var(--brand-primary)] rounded-lg px-2 py-1 font-medium"
-        >
-          <ExternalLinkIcon className="w-3 h-3" /> Fall öffnen
-        </Link>
+        {/* AAR-607 B4: Pre-FlowLink-Termine (nur Lead) haben noch keinen Fall —
+            „Fall öffnen" würde 404en. Zeigt stattdessen Status-Hinweis. */}
+        {termin.fall_id ? (
+          <Link
+            href={`/gutachter/fall/${termin.fall_id}`}
+            className="inline-flex items-center gap-1 text-xs text-[color:var(--brand-primary,var(--brand-secondary))] hover:text-[var(--brand-primary)] rounded-lg px-2 py-1 font-medium"
+          >
+            <ExternalLinkIcon className="w-3 h-3" /> Fall öffnen
+          </Link>
+        ) : (
+          <span
+            className="inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1 font-medium"
+            title="Termin ist reserviert, aber der Kunde hat die SA noch nicht unterschrieben. Fallakte wird erst danach angelegt."
+          >
+            SA ausstehend
+          </span>
+        )}
       </div>
     </div>
   )
