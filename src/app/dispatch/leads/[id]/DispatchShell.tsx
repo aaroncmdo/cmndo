@@ -25,6 +25,7 @@ import {
   EinwandKarten,
 } from './sidebar/SidebarStubs'
 import { computeFlowLinkStufe, FLOWLINK_STUFE_LABEL } from '@/lib/dispatch/fahrzeug-marken'
+import { PHASE_LABELS as PHASE_LABELS_CONST, PHASE_BADGES } from '../_components/leadPhaseConstants'
 
 type FlowLinkRow = {
   id: string
@@ -44,28 +45,6 @@ type FallSnapshot = {
   vollmacht_signiert_am?: string | null
 }
 
-const PHASE_LABELS: Record<string, string> = {
-  neu: 'Neu',
-  'nicht-erreicht': 'Nicht erreicht',
-  rueckruf: 'Rückruf',
-  'in-qualifizierung': 'In Qualifizierung',
-  'flow-versendet': 'Flow gesendet',
-  'sa-ausstehend': 'SA ausstehend',
-  konvertiert: 'Konvertiert',
-  disqualifiziert: 'Disqualifiziert',
-  kalt: 'Kalt',
-}
-
-const PHASE_COLORS: Record<string, string> = {
-  neu: 'bg-blue-100 text-blue-700',
-  'nicht-erreicht': 'bg-gray-100 text-gray-600',
-  rueckruf: 'bg-amber-100 text-amber-700',
-  'in-qualifizierung': 'bg-violet-100 text-violet-700',
-  'flow-versendet': 'bg-emerald-100 text-emerald-700',
-  konvertiert: 'bg-green-100 text-green-800',
-  disqualifiziert: 'bg-red-100 text-red-700',
-  kalt: 'bg-gray-200 text-gray-500',
-}
 
 export default function DispatchShell({
   lead,
@@ -93,8 +72,8 @@ export default function DispatchShell({
   const flowLinkGesendet = flowStufe !== 'nicht_gesendet'
 
   const phase = lead.qualifizierungs_phase ?? 'neu'
-  const phaseLabel = PHASE_LABELS[phase] ?? phase
-  const phaseColor = PHASE_COLORS[phase] ?? 'bg-gray-100 text-gray-600'
+  const phaseLabel = PHASE_LABELS_CONST[phase] ?? phase
+  const phaseColor = PHASE_BADGES[phase] ?? 'bg-gray-100 text-gray-600'
 
   return (
     <DispatchPhaseProvider

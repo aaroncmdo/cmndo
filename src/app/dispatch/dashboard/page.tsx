@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { UsersIcon, PhoneIcon, LinkIcon, ClockIcon } from 'lucide-react'
+import { PHASE_LABELS, PHASE_BADGES } from '../leads/_components/leadPhaseConstants'
 
 export default async function DispatchDashboard() {
   const supabase = await createClient()
@@ -53,29 +54,6 @@ export default async function DispatchDashboard() {
   const tasks = myTasksRes.data ?? []
   const recentLeads = recentLeadsRes.data ?? []
 
-  const phaseLabels: Record<string, string> = {
-    'neu': 'Neu',
-    'nicht-erreicht': 'Nicht erreicht',
-    'rueckruf': 'Rückruf',
-    'in-qualifizierung': 'In Quali',
-    'flow-versendet': 'Flow gesendet',
-    'sa-ausstehend': 'SA aussteh.',
-    'konvertiert': 'Konvertiert',
-    'disqualifiziert': 'DQ',
-    'kalt': 'Kalt',
-  }
-
-  const phaseColors: Record<string, string> = {
-    'neu': 'bg-blue-100 text-blue-700',
-    'nicht-erreicht': 'bg-gray-100 text-gray-600',
-    'rueckruf': 'bg-amber-100 text-amber-700',
-    'in-qualifizierung': 'bg-violet-100 text-violet-700',
-    'flow-versendet': 'bg-emerald-100 text-emerald-700',
-    'konvertiert': 'bg-green-100 text-green-800',
-    'disqualifiziert': 'bg-red-100 text-red-700',
-    'kalt': 'bg-gray-200 text-gray-500',
-  }
-
   function timeSince(d: string): string {
     const h = Math.floor((Date.now() - new Date(d).getTime()) / 3600000)
     if (h < 1) return `${Math.floor((Date.now() - new Date(d).getTime()) / 60000)}m`
@@ -118,8 +96,8 @@ export default async function DispatchDashboard() {
                   </p>
                   <p className="text-xs text-gray-500">{lead.telefon} {lead.schadens_fall_typ ? `· ${lead.schadens_fall_typ}` : ''}</p>
                 </div>
-                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${phaseColors[lead.qualifizierungs_phase] ?? 'bg-gray-100 text-gray-600'}`}>
-                  {phaseLabels[lead.qualifizierungs_phase] ?? lead.qualifizierungs_phase}
+                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${PHASE_BADGES[lead.qualifizierungs_phase] ?? 'bg-gray-100 text-gray-600'}`}>
+                  {PHASE_LABELS[lead.qualifizierungs_phase] ?? lead.qualifizierungs_phase}
                 </span>
                 <span className="text-[10px] text-gray-400 whitespace-nowrap">{timeSince(lead.created_at)}</span>
               </Link>
