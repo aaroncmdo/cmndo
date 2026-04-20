@@ -174,3 +174,81 @@ export async function assignKundenbetreuer(
     reason: 'Kein aktiver KB und kein aktiver Admin verfügbar.',
   }
 }
+
+// ─── AAR-632: Re-Assignment bei KB-Deaktivierung ─────────────────────────────
+
+export type ReassignResult = {
+  scanned_count: number
+  reassigned_count: number
+  failed_count: number
+  details: Array<{ fall_id: string; from_kb: string; to_kb: string | null; fallback: KbAssignmentFallback }>
+}
+
+/**
+ * Findet alle offenen Fälle deren `kundenbetreuer_id` auf einen inaktiven
+ * User zeigt und weist sie neu zu. Genutzt:
+ *   - als Cron (`/api/cron/kb-reassign-inactive`) als tägliches Safety-Net
+ *   - manuell aus Admin-Team-Page wenn Admin einen KB deaktiviert
+ *
+ * Tasks der betroffenen Fälle werden NICHT re-assigned — dafür gibt es
+ * `createAutoTask`-Fallback (neue Tasks landen bei neuem KB) und manuelle
+ * Task-Umverteilung via Admin-UI. Orphaned-Tasks-Cron räumt Legacy-Tasks auf.
+ */
+export async function reassignAllFaelleForInactiveKbs(
+  supabase: AnySupabase,
+): Promise<ReassignResult> {
+  // 1. Alle inaktiven User-IDs finden, deren Fälle noch nicht umverteilt sind
+  const { data: inactiveUsers } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('aktiv', false)
+  const inactiveIds = (inactiveUsers ?? []).map((u: { id: string }) => u.id)
+  if (inactiveIds.length === 0) {
+    return { scanned_count: 0, reassigned_count: 0, failed_count: 0, details: [] }
+  }
+
+  // 2. Alle offenen Fälle laden mit inaktivem KB
+  const { data: faelle } = await supabase
+    .from('faelle')
+    .select('id, kundenbetreuer_id')
+    .in('kundenbetreuer_id', inactiveIds)
+    .not('status', 'in', '("abgeschlossen","storniert")')
+  const list = (faelle ?? []) as Array<{ id: string; kundenbetreuer_id: string }>
+
+  const result: ReassignResult = {
+    scanned_count: list.length,
+    reassigned_count: 0,
+    failed_count: 0,
+    details: [],
+  }
+
+  // 3. Pro Fall neu zuweisen (Round-Robin via assignKundenbetreuer)
+  for (const fall of list) {
+    const ass = await assignKundenbetreuer(supabase, fall.id, {
+      writeToFall: true,
+      logToTimeline: true,
+    })
+    if (ass.success && ass.kundenbetreuer_id) {
+      result.reassigned_count += 1
+      result.details.push({
+        fall_id: fall.id,
+        from_kb: fall.kundenbetreuer_id,
+        to_kb: ass.kundenbetreuer_id,
+        fallback: ass.fallback_used,
+      })
+    } else {
+      result.failed_count += 1
+      result.details.push({
+        fall_id: fall.id,
+        from_kb: fall.kundenbetreuer_id,
+        to_kb: null,
+        fallback: ass.fallback_used,
+      })
+    }
+  }
+
+  if (result.reassigned_count > 0) {
+    console.warn(`[AAR-632] KB-Reassignment: ${result.reassigned_count}/${result.scanned_count} Fälle neu zugewiesen`)
+  }
+  return result
+}
