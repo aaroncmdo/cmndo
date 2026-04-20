@@ -26,6 +26,14 @@ import { canEditField, type FallakteRolle } from '@/lib/fall/field-permissions'
  * (separater Endpoint, nicht hier).
  */
 const FALL_EDITABLE_FIELDS = new Set<string>([
+  // Kunden-Snapshot (einmalig vom Lead kopiert, danach hier editierbar)
+  'kunde_vorname',
+  'kunde_nachname',
+  'kunde_email',
+  'kunde_telefon',
+  'kunde_plz',
+  'kunde_strasse',
+  'kunde_stadt',
   // Fahrzeug (echte Spalten auf faelle)
   'fahrzeug_hersteller',
   'fahrzeug_modell',

@@ -556,6 +556,14 @@ async function convertLeadToFall(
       fall_nummer: fallNummer,
       lead_id: leadId,
       status: 'ersterfassung',
+      // Kunden-Snapshot — einmalig vom Lead, danach auf faelle editierbar
+      kunde_vorname: lead.vorname ?? null,
+      kunde_nachname: lead.nachname ?? null,
+      kunde_email: lead.email ?? null,
+      kunde_telefon: lead.telefon ?? null,
+      kunde_plz: (lead.kunde_plz as string | null) ?? null,
+      kunde_strasse: (lead.kunde_strasse as string | null) ?? null,
+      kunde_stadt: (lead.kunde_stadt as string | null) ?? null,
       // Stammdaten vom Lead
       schadens_fall_typ: lead.schadens_fall_typ,
       kunden_konstellation: lead.kunden_konstellation,

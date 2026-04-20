@@ -51,6 +51,14 @@ const HERGANG_BAUSTEINE = [
 
 type LeadFields = {
   id: string
+  vorname?: string | null
+  nachname?: string | null
+  telefon?: string | null
+  email?: string | null
+  kunde_plz?: string | null
+  kunde_strasse?: string | null
+  kunde_stadt?: string | null
+  notiz?: string | null
   unfallhergang?: string | null
   schuldfrage?: 'gegner' | 'unklar' | 'eigenverantwortung' | string | null
   aufklaerung_teilschuld_bestaetigt?: boolean | null
@@ -86,6 +94,71 @@ const SPRACHEN = [
   { code: 'en', flag: '🇬🇧', label: 'Englisch' },
   { code: 'other', flag: '🌐', label: 'Andere' },
 ] as const
+
+function KundendatenEditBlock({
+  leadId,
+  l,
+  saveStammdaten: save,
+}: {
+  leadId: string
+  l: LeadFields
+  saveStammdaten: typeof saveStammdaten
+}) {
+  const [, startT] = useTransition()
+  function field(name: keyof LeadFields, initial: string | null | undefined) {
+    return {
+      defaultValue: initial ?? '',
+      onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const val = e.target.value.trim() || null
+        if (val === (initial ?? null)) return
+        startT(async () => { await save(leadId, { [name]: val }) })
+      },
+    }
+  }
+  return (
+    <details className="group border border-gray-100 rounded-lg" open>
+      <summary className="flex items-center gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-gray-500 cursor-pointer list-none select-none hover:bg-gray-50 rounded-lg">
+        Kundendaten bearbeiten
+      </summary>
+      <div className="px-3 pb-3 pt-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-0.5">
+          <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Vorname</label>
+          <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('vorname', l.vorname)} />
+        </div>
+        <div className="space-y-0.5">
+          <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Nachname</label>
+          <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('nachname', l.nachname)} />
+        </div>
+        <div className="space-y-0.5">
+          <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Telefon</label>
+          <input type="tel" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('telefon', l.telefon)} />
+        </div>
+        <div className="space-y-0.5">
+          <label className="text-[10px] text-gray-400 uppercase tracking-wider block">E-Mail</label>
+          <input type="email" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('email', l.email)} />
+        </div>
+        <div className="space-y-0.5">
+          <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Straße</label>
+          <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('kunde_strasse', l.kunde_strasse)} />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-0.5">
+            <label className="text-[10px] text-gray-400 uppercase tracking-wider block">PLZ</label>
+            <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('kunde_plz', l.kunde_plz)} />
+          </div>
+          <div className="space-y-0.5">
+            <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Stadt</label>
+            <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('kunde_stadt', l.kunde_stadt)} />
+          </div>
+        </div>
+        <div className="sm:col-span-2 space-y-0.5">
+          <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Notiz (intern)</label>
+          <textarea rows={2} className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2] resize-none" {...field('notiz', l.notiz)} />
+        </div>
+      </div>
+    </details>
+  )
+}
 
 export default function Phase1Qualifizierung() {
   const router = useRouter()
@@ -256,6 +329,9 @@ export default function Phase1Qualifizierung() {
           </span>
         )}
       </div>
+
+      {/* Kundendaten — Name, Kontakt, Adresse. onBlur-Save via saveStammdaten. */}
+      <KundendatenEditBlock leadId={l.id} l={l} saveStammdaten={saveStammdaten} />
 
       {/* AAR-316: Sprache des Kunden. Steuert später FlowLink + Portal-Übersetzungen.
           Standard = Deutsch. Auto-Save on-change via saveStammdaten. */}
