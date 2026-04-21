@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { getVisibleSections, type StammdatenSection } from '@/lib/fall/phase-config'
 import { canEditField, type FallakteRolle } from '@/lib/fall/field-permissions'
-import { updateFallField } from './actions/stammdaten'
+import { updateFallField } from './_actions/stammdaten'
 // AAR-428 / W4: Zentrale Permission-Matrix für die Fallakte
 import { canPerform as canPerformPermission, type FallAction } from './_lib/permissions'
 

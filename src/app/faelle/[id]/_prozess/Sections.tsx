@@ -29,12 +29,12 @@ import {
   freigebeTechnischeStellungnahme,
   startRuege,
   uebergebeFallKlage,
-} from '../actions/prozess'
+} from '../_actions/prozess'
 import { triggerLexDriveEventManually } from '../lexdrive-actions'
 // AAR-561 (C12): Konfrontations-Dispatch-Lite-Trigger aus KB-Seite
-import { triggerKonfrontationFromAdmin } from '../actions/konfrontation-trigger'
+import { triggerKonfrontationFromAdmin } from '../_actions/konfrontation-trigger'
 import EndpointRegister from '../_components/LexDriveTriggerPanel'
-import InlineEditField from '../stammdaten/InlineEditField'
+import InlineEditField from '../_stammdaten/InlineEditField'
 
 function Card({
   icon,

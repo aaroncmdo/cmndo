@@ -7,7 +7,7 @@
 
 import { useState, useTransition, useRef } from 'react'
 import { ClipboardCheckIcon, UploadCloudIcon, CheckCircleIcon } from 'lucide-react'
-import { uploadPolizeiberichtAsSv } from './actions'
+import { uploadPolizeiberichtAsSv } from './_actions'
 
 export default function PolizeiberichtUpload({
   fallId,

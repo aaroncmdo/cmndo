@@ -1,7 +1,7 @@
 'use client'
 
 import { useTransition, useState } from 'react'
-import { markAngerufen, markNichtErreicht } from './actions'
+import { markAngerufen, markNichtErreicht } from './_actions'
 import { CheckIcon, XIcon } from 'lucide-react'
 
 export default function RueckrufActions({

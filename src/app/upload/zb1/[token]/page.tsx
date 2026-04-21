@@ -1,7 +1,7 @@
 // AAR-296 W1: Server-Component für /upload/zb1/[token].
 // Validiert Token + Status — entweder Upload-UI oder Status-Screen.
 
-import { getZb1TokenStatus } from './actions'
+import { getZb1TokenStatus } from './_actions'
 import Zb1UploadClient from './Zb1UploadClient'
 
 export default async function Zb1UploadPage({

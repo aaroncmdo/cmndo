@@ -13,4 +13,4 @@ export {
   reactivateFall,
   saveRegulierungsKlassifizierung,
   eskalation,
-} from '../actions'
+} from '../_actions'

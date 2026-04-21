@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { XIcon, GaugeIcon } from 'lucide-react'
 import type { SessionStatus } from '@/lib/types/field-modus'
-import { pauseFokusmodus } from './actions'
+import { pauseFokusmodus } from './_actions'
 
 export interface FokusHeaderProps {
   sessionId: string

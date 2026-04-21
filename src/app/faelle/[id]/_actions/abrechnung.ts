@@ -5,4 +5,4 @@
 export {
   saveRegulierungsKlassifizierung,
   erfasseZahlungseingang,
-} from '../actions'
+} from '../_actions'

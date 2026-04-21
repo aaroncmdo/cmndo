@@ -7,10 +7,10 @@
 // gegner-kz-flags.ts berechnet und mitgespeichert.
 
 import { useState, useTransition, useEffect } from 'react'
-import { saveStammdaten } from '../actions'
-import { checkKZFlags } from '../lib/gegner-kz-flags'
-import { useDispatchPhase } from '../lib/phase-context'
-import { useCarQuery } from '../hooks/useCarQuery'
+import { saveStammdaten } from '../_actions'
+import { checkKZFlags } from '../_lib/gegner-kz-flags'
+import { useDispatchPhase } from '../_lib/phase-context'
+import { useCarQuery } from '../_hooks/useCarQuery'
 // AAR-177 Fix #1: CardentityButton-Import entfernt (Button war nicht
 // funktionsreif und Text irritierte — Cardentity läuft jetzt im Hintergrund
 // via ZB1-OCR-Trigger in /api/ocr-fahrzeugschein Step 6).
@@ -19,9 +19,9 @@ import { useCarQuery } from '../hooks/useCarQuery'
 // DokumenteAnfordernCard (kombinierte Multi-Slot-Anfrage in einem Link).
 import DokumenteAnfordernCard from './DokumenteAnfordernCard'
 import { CardentityTypBButton } from '@/components/cardentity/CardentityTypBButton'
-import { requestCardentityTypBForLead } from '../actions/cardentity'
+import { requestCardentityTypBForLead } from '../_actions/cardentity'
 // AAR-314: Auslandskennzeichen — Anfrage an Deutsches Büro Grüne Karte mit Reminder
-import { setGrueneKarteAngefragt } from '../actions/gruene-karte'
+import { setGrueneKarteAngefragt } from '../_actions/gruene-karte'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import VersicherungAutocomplete, { type VersicherungSelection } from '@/components/VersicherungAutocomplete'
 import {

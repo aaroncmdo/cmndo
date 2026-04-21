@@ -9,7 +9,7 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import { CalendarIcon, VideoIcon, MapPinIcon, ExternalLinkIcon, XIcon, Building2Icon } from 'lucide-react'
-import { createKanzleiAdminTermin, cancelKanzleiAdminTermin } from './actions'
+import { createKanzleiAdminTermin, cancelKanzleiAdminTermin } from './_actions'
 
 export interface AdminAuswahl {
   id: string

@@ -7,7 +7,7 @@ import {
   Building2Icon, UsersIcon, CheckCircle2Icon, MailIcon, PlusIcon, TrashIcon, AlertTriangleIcon,
 } from 'lucide-react'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
-import { anlegeBuero } from './actions'
+import { anlegeBuero } from './_actions'
 import { PAKET_KONFIG, paketAnzahlung, ANREDE_OPTIONEN, TITEL_OPTIONEN, QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN, type AnlegePaket, type AnlegeBueroFormData } from './constants'
 
 // ARCH-1 Phase 2 (BLOCK C): 3-Step Buero-Anlegen Wizard fuer den Admin.

@@ -11,7 +11,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { XIcon, MapPinIcon, CarIcon, UserIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { haversineKm } from '@/lib/gps/geofence'
-import KundeLiveMap from './kunde-live-map/KundeLiveMap'
+import KundeLiveMap from './_kunde-live-map/KundeLiveMap'
 
 interface Position {
   lat: number

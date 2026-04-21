@@ -24,7 +24,7 @@ import {
   saveFeldmodusNotizen,
   type FeldmodusFallakteFall,
   type FeldmodusSlot,
-} from './fallakte/actions'
+} from './_fallakte/actions'
 import BesichtigungAbschliessenButton from './BesichtigungAbschliessenButton'
 import FeldmodusDokumentSlot from './FeldmodusDokumentSlot'
 

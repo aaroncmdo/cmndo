@@ -9,7 +9,7 @@
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { CheckCircle2Icon, Loader2Icon } from 'lucide-react'
-import { completeAndAdvance } from './actions'
+import { completeAndAdvance } from './_actions'
 
 interface Props {
   sessionId: string

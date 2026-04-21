@@ -10,9 +10,9 @@ export {
   // AAR-542 (C5): Matrix-Sync — legt fehlende pflichtdokumente-Rows
   // gemäß Katalog-Regel-Auswertung an.
   syncPflichtdokumenteForFall,
-} from '../actions/dokumente'
+} from '../_actions/dokumente'
 
 export {
   uploadPflichtdokument,
   uploadDatei,
-} from '../actions'
+} from '../_actions'

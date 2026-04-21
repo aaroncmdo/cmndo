@@ -4,7 +4,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { PlusIcon, XIcon } from 'lucide-react'
-import { createManualLead, type CreateManualLeadInput } from '../actions'
+import { createManualLead, type CreateManualLeadInput } from '../_actions'
 
 // AAR-216: schadens_fall_typ aus dem Initial-State entfernt — der MA kennt den
 // Schadentyp beim Lead-Anlegen noch nicht (Kunde wurde noch nicht gesprochen).

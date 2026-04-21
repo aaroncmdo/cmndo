@@ -16,7 +16,7 @@ import KommunikationTab, { type FallTeilnehmer } from './_tabs/KommunikationTab'
 import TimelineTab from './_tabs/TimelineTab'
 import ProzessTab from './_tabs/ProzessTab'
 import DokumenteTab from './_tabs/DokumenteTab'
-import FallSidebar from './sidebar/FallSidebar'
+import FallSidebar from './_sidebar/FallSidebar'
 // AAR-307: Ad-hoc Task-Anlegen aus der Tab-Bar
 import { TaskAnlegenButton } from '@/components/tasks/TaskAnlegenButton'
 // AAR-567 (V1): PhasePipeline als linke Spalte + FallActionBar über der Tab-Bar
