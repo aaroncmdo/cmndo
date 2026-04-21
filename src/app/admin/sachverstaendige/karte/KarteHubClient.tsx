@@ -26,6 +26,11 @@ export type GeoPolygon = { type: 'Polygon'; coordinates: number[][][] } | null
 export type SvMarker = {
   id: string
   name: string
+  // AAR-669-P2: für Avatar-Marker brauchen wir Vorname/Nachname getrennt
+  // (Initialen-Fallback) + avatar_url aus profiles.avatar_url.
+  vorname?: string | null
+  nachname?: string | null
+  avatarUrl?: string | null
   paket: string | null
   lat: number | null
   lng: number | null
@@ -86,6 +91,35 @@ const TYP_COLORS: Record<string, { fill: string; label: string }> = {
   'dat-gutachter': { fill: '#f97316', label: 'DAT' },
   akademie: { fill: '#22c55e', label: 'Akademie' },
   gutachterbuero: { fill: '#a855f7', label: 'Büro' },
+}
+
+// AAR-669-P2: Initialen aus Vor-/Nachname (Fallback wenn kein Avatar vorhanden).
+// Umlaute bleiben erhalten (Ü → Ü, nicht Ue). Leere Inputs → '?'.
+function initials(vorname: string | null | undefined, nachname: string | null | undefined): string {
+  const v = (vorname ?? '').trim()
+  const n = (nachname ?? '').trim()
+  const i1 = v ? v.charAt(0).toUpperCase() : ''
+  const i2 = n ? n.charAt(0).toUpperCase() : ''
+  const combined = `${i1}${i2}`
+  return combined || '?'
+}
+
+// AAR-669-P2: Pulse-Keyframes einmalig in den <head> injecten.
+// Marker-Elements sind DOM-Nodes ohne eigenen Styles-Kontext; wir brauchen
+// eine globale CSS-Animation für den Live-Pulse-Ring.
+let livePulseInjected = false
+function ensureLivePulseKeyframes(): void {
+  if (livePulseInjected || typeof document === 'undefined') return
+  const style = document.createElement('style')
+  style.textContent = `
+@keyframes svLivePulse {
+  0%   { transform: scale(0.8); opacity: 0.45; }
+  60%  { transform: scale(1.25); opacity: 0; }
+  100% { transform: scale(1.25); opacity: 0; }
+}
+`
+  document.head.appendChild(style)
+  livePulseInjected = true
 }
 
 // AAR-131: Paket-Label-Legacy-Mapping (alte Keys aus DB konsistent darstellen)
@@ -378,6 +412,144 @@ export default function KarteHubClient({
       return el
     }
 
+    // AAR-669-P2: SV-Marker mit Avatar statt einfachem Kreis.
+    // Ring in Typ-Farbe + Glow + Initialen-Fallback wenn kein Avatar.
+    // Sonderzustände (gesperrt / im Urlaub) überlagern ein Icon-Overlay.
+    function makeAvatarEl(sv: SvMarker): HTMLDivElement {
+      const size = 38
+      const typColor = TYP_COLORS[sv.gutachterTyp ?? 'kfz-gutachter']?.fill ?? LAYER.sv.fill
+      const istGesperrt = !!sv.gesperrtSeit
+      const istDeaktiv = sv.istAktiv === false
+      const ringColor = istGesperrt || istDeaktiv ? '#9ca3af' : typColor
+      const heute = new Date().toISOString().slice(0, 10)
+      const imUrlaub =
+        !!sv.urlaubVon && !!sv.urlaubBis && heute >= sv.urlaubVon && heute <= sv.urlaubBis
+
+      const wrapper = document.createElement('div')
+      wrapper.style.cssText = [
+        'position:relative',
+        `width:${size}px`,
+        `height:${size}px`,
+        'cursor:pointer',
+        'transition:transform .15s',
+      ].join(';')
+      wrapper.title = sv.name
+      wrapper.addEventListener('mouseenter', () => { wrapper.style.transform = 'scale(1.15)' })
+      wrapper.addEventListener('mouseleave', () => { wrapper.style.transform = '' })
+
+      const avatar = document.createElement('div')
+      avatar.style.cssText = [
+        `width:${size}px`,
+        `height:${size}px`,
+        'border-radius:50%',
+        `border:2.5px solid ${ringColor}`,
+        `box-shadow:0 0 0 2px #fff, 0 0 10px 0 ${ringColor}88, 0 2px 6px rgba(0,0,0,.25)`,
+        `background:${ringColor}`,
+        'display:flex',
+        'align-items:center',
+        'justify-content:center',
+        'color:#fff',
+        'font-family:Montserrat, system-ui, sans-serif',
+        'font-weight:700',
+        'font-size:13px',
+        'overflow:hidden',
+        istGesperrt || istDeaktiv ? 'filter:grayscale(1)' : '',
+      ].join(';')
+
+      if (sv.avatarUrl) {
+        const img = document.createElement('img')
+        img.src = sv.avatarUrl
+        img.alt = sv.name
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;'
+        img.onerror = () => {
+          // Fallback auf Initialen wenn das Bild nicht laden will
+          img.remove()
+          avatar.textContent = initials(sv.vorname, sv.nachname)
+        }
+        avatar.appendChild(img)
+      } else {
+        avatar.textContent = initials(sv.vorname, sv.nachname)
+      }
+
+      wrapper.appendChild(avatar)
+
+      // Gesperrt: Diagonal-Strich-Overlay
+      if (istGesperrt) {
+        const strike = document.createElement('div')
+        strike.style.cssText = [
+          'position:absolute',
+          'inset:0',
+          'border-radius:50%',
+          'background:linear-gradient(135deg, transparent 46%, #ef4444 46% 54%, transparent 54%)',
+          'pointer-events:none',
+        ].join(';')
+        wrapper.appendChild(strike)
+      }
+
+      // Im Urlaub: Sonnen-Icon oben rechts
+      if (imUrlaub) {
+        const badge = document.createElement('div')
+        badge.style.cssText = [
+          'position:absolute',
+          'top:-4px',
+          'right:-4px',
+          'width:16px',
+          'height:16px',
+          'border-radius:50%',
+          'background:#f59e0b',
+          'border:2px solid #fff',
+          'display:flex',
+          'align-items:center',
+          'justify-content:center',
+          'font-size:9px',
+          'line-height:1',
+          'box-shadow:0 1px 3px rgba(0,0,0,.3)',
+        ].join(';')
+        badge.textContent = '☀'
+        wrapper.appendChild(badge)
+      }
+
+      // Verifiziert: grüner Check unten rechts
+      if (sv.verifiziert && !istGesperrt && !istDeaktiv) {
+        const verify = document.createElement('div')
+        verify.style.cssText = [
+          'position:absolute',
+          'bottom:-3px',
+          'right:-3px',
+          'width:14px',
+          'height:14px',
+          'border-radius:50%',
+          'background:#10b981',
+          'border:2px solid #fff',
+          'display:flex',
+          'align-items:center',
+          'justify-content:center',
+          'font-size:8px',
+          'color:#fff',
+          'font-weight:700',
+          'line-height:1',
+          'box-shadow:0 1px 2px rgba(0,0,0,.3)',
+        ].join(';')
+        verify.textContent = '✓'
+        wrapper.appendChild(verify)
+      }
+
+      return wrapper
+    }
+
+    function addSvMarker(sv: SvMarker, onClick: () => void) {
+      if (sv.lat == null || sv.lng == null) return
+      const el = makeAvatarEl(sv)
+      el.addEventListener('click', (e) => {
+        e.stopPropagation()
+        onClick()
+      })
+      const marker = new mapboxgl.Marker({ element: el })
+        .setLngLat([sv.lng, sv.lat])
+        .addTo(map) as MapboxMarker
+      markersRef.current.push(marker)
+    }
+
     function addMarker(
       lng: number,
       lat: number,
@@ -397,10 +569,7 @@ export default function KarteHubClient({
     if (showSvs) {
       for (const sv of filteredSvs) {
         if (sv.lat == null || sv.lng == null) continue
-        const color = sv.istAktiv
-          ? (TYP_COLORS[sv.gutachterTyp ?? 'kfz-gutachter']?.fill ?? LAYER.sv.fill)
-          : '#ef4444'
-        addMarker(sv.lng, sv.lat, color, 14, sv.name, () => setSelected({ kind: 'sv', item: sv }))
+        addSvMarker(sv, () => setSelected({ kind: 'sv', item: sv }))
       }
     }
 
@@ -418,6 +587,9 @@ export default function KarteHubClient({
       }
     }
   }, [mapReady, showSvs, showCommunities, showOrgs, filteredSvs, communities, organisationen])
+
+  // AAR-669-P2 Helper: Initialen aus Vor-/Nachname (Fallback wenn kein Avatar)
+  // — definiert außerhalb des useEffect, damit sie stabil ist.
 
   // ─── Polygon-Overlays (AAR-130) ────────────────────────────────────────────
   useEffect(() => {
@@ -485,18 +657,74 @@ export default function KarteHubClient({
         existing.setLngLat([lng, lat])
         return
       }
-      // Pfeil-förmiges Live-Marker-Element (blau, rotiert)
-      const el = document.createElement('div')
-      el.style.cssText = [
-        'width:14px', 'height:14px',
-        'background:#3B82F6',
-        'border:2px solid #fff',
-        'clip-path:polygon(50% 0%,0% 100%,100% 100%)',
+      // AAR-669-P2: Pulsierender Ring statt statischer Pfeil.
+      // Container (position:relative) hält Pulse-Ring + Avatar-Kopf.
+      // Der Pulse-Layer ist ein absolut-positionierter div mit CSS-Animation.
+      // Wir injecten das Keyframe einmal pro Session unter document.head.
+      const sv = svs.find((s) => s.id === svId)
+      ensureLivePulseKeyframes()
+
+      const wrapper = document.createElement('div')
+      wrapper.style.cssText = [
+        'position:relative',
+        'width:44px',
+        'height:44px',
         'cursor:default',
-        'box-shadow:0 1px 4px rgba(0,0,0,.3)',
+        'pointer-events:none',
       ].join(';')
-      el.title = `${name} (Live)`
-      const marker = new mapboxgl.Marker({ element: el })
+      wrapper.title = `${name} (unterwegs)`
+
+      // Pulse-Ring
+      const pulse = document.createElement('div')
+      pulse.style.cssText = [
+        'position:absolute',
+        'inset:0',
+        'border-radius:50%',
+        'background:#3B82F6',
+        'opacity:0.35',
+        'animation:svLivePulse 2.2s cubic-bezier(0,0,.2,1) infinite',
+      ].join(';')
+      wrapper.appendChild(pulse)
+
+      // Avatar-Kopf (wie Standard-Marker, aber blauer Ring für Live)
+      const avatar = document.createElement('div')
+      avatar.style.cssText = [
+        'position:absolute',
+        'top:50%',
+        'left:50%',
+        'transform:translate(-50%,-50%)',
+        'width:32px',
+        'height:32px',
+        'border-radius:50%',
+        'border:2.5px solid #3B82F6',
+        'box-shadow:0 0 0 2px #fff, 0 0 10px 0 #3B82F688, 0 2px 6px rgba(0,0,0,.3)',
+        'background:#3B82F6',
+        'display:flex',
+        'align-items:center',
+        'justify-content:center',
+        'color:#fff',
+        'font-family:Montserrat, system-ui, sans-serif',
+        'font-weight:700',
+        'font-size:11px',
+        'overflow:hidden',
+      ].join(';')
+
+      if (sv?.avatarUrl) {
+        const img = document.createElement('img')
+        img.src = sv.avatarUrl
+        img.alt = name
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;'
+        img.onerror = () => {
+          img.remove()
+          avatar.textContent = initials(sv?.vorname, sv?.nachname)
+        }
+        avatar.appendChild(img)
+      } else {
+        avatar.textContent = initials(sv?.vorname, sv?.nachname)
+      }
+      wrapper.appendChild(avatar)
+
+      const marker = new mapboxgl.Marker({ element: wrapper })
         .setLngLat([lng, lat])
         .addTo(map) as MapboxMarker
       liveMarkersRef.current.set(svId, marker)
