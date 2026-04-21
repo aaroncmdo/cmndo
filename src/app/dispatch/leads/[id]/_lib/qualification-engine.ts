@@ -118,9 +118,16 @@ export function computeQualificationStatus(
   // AAR-305: Wenn das Fahrzeug fahrbereit ist, MUSS der Schadenshergang vor
   // Versand des FlowLinks erfasst sein (mind. 20 Zeichen). Nicht fahrbereit
   // → Schadenshergang nicht zwingend, SV sieht sich das ohnehin vor Ort an.
+  //
+  // AAR-693: Beide Felder akzeptieren — Phase 1 schreibt `unfallhergang`
+  // (Guided-Bausteine + Voice-Input), Legacy-Flows befüllen `schadens_hergang`
+  // direkt. Solange MINDESTENS eins der beiden ≥ 20 Zeichen ist, ist die
+  // Bedingung erfüllt.
+  const hergangText =
+    (typeof lead.unfallhergang === 'string' ? lead.unfallhergang : '').trim() ||
+    (typeof lead.schadens_hergang === 'string' ? lead.schadens_hergang : '').trim()
   const q8_schadenhergang =
-    lead.fahrzeug_fahrbereit !== true ||
-    (typeof lead.schadens_hergang === 'string' && lead.schadens_hergang.trim().length >= 20)
+    lead.fahrzeug_fahrbereit !== true || hergangText.length >= 20
 
   const disqualifiziert = lead.qualifizierungs_phase === 'disqualifiziert'
 
