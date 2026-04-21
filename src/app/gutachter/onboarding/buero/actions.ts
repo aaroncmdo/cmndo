@@ -199,7 +199,7 @@ export async function signBueroVertrag(params: {
   // unterzeichnet hat, sonst zeigt das Status-Badge dort weiter 'Wartet auf Vertrag'.
   revalidatePath('/admin/sachverstaendige', 'page')
   revalidatePath('/admin/sachverstaendige', 'page')
-  revalidatePath('/admin/organisationen', 'page')
+  revalidatePath('/admin/partner', 'page')
 
   return { success: true, vertrag_id: result.vertrag_id, pdf_path: result.pdf_path }
 }

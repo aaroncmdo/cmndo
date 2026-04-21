@@ -139,7 +139,7 @@ export async function uploadSaVorlage(formData: FormData): Promise<{
 
   revalidatePath('/gutachter/willkommen')
   revalidatePath('/gutachter/verifizierung')
-  revalidatePath('/admin/tasks')
+  revalidatePath('/admin/aufgaben/alle')
 
   return { storage_path: path, status: 'ausstehend' }
 }
@@ -281,7 +281,7 @@ export async function uploadSvPflichtdokument(formData: FormData): Promise<{
   }
 
   revalidatePath('/gutachter/verifizierung')
-  revalidatePath('/admin/tasks')
+  revalidatePath('/admin/aufgaben/alle')
   revalidatePath(`/admin/sachverstaendige/${svId}`)
 
   return { slot_id: slotId, storage_path: path, status: 'hochgeladen' }

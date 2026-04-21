@@ -187,7 +187,7 @@ export async function POST(request: Request) {
           try {
             revalidatePath('/admin/sachverstaendige', 'page')
             revalidatePath('/admin/sachverstaendige', 'page')
-            revalidatePath('/admin/organisationen', 'page')
+            revalidatePath('/admin/partner', 'page')
           } catch { /* */ }
 
           break
@@ -308,7 +308,7 @@ export async function POST(request: Request) {
           try {
             revalidatePath('/admin/sachverstaendige', 'page')
             revalidatePath('/admin/sachverstaendige', 'page')
-            revalidatePath('/admin/organisationen', 'page')
+            revalidatePath('/admin/partner', 'page')
           } catch { /* */ }
 
           break
@@ -377,7 +377,7 @@ export async function POST(request: Request) {
           }
 
           try {
-            revalidatePath('/admin/kanzlei-abrechnungen', 'page')
+            revalidatePath('/admin/finance/kanzlei', 'page')
           } catch { /* */ }
 
           break

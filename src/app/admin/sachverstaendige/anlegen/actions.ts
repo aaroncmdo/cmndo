@@ -581,7 +581,7 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
   }
 
   revalidatePath('/admin/sachverstaendige', 'page')
-  revalidatePath('/admin/organisationen', 'page')
+  revalidatePath('/admin/partner', 'page')
 
   return {
     success: true,
@@ -1030,7 +1030,7 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
   }
 
   revalidatePath('/admin/sachverstaendige', 'page')
-  revalidatePath('/admin/organisationen', 'page')
+  revalidatePath('/admin/partner', 'page')
 
   return {
     success: true,
@@ -1234,7 +1234,7 @@ export async function anlegeCommunity(data: AnlegeCommunityFormData): Promise<{
     console.error('[KFZ-152] Welcome-Mails Community fehlgeschlagen:', err)
   }
 
-  revalidatePath('/admin/communities', 'page')
+  revalidatePath('/admin/partner/communities', 'page')
   revalidatePath('/admin/sachverstaendige', 'page')
 
   return {
