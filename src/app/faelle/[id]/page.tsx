@@ -101,8 +101,7 @@ export default async function FallaktePage({
     fall.lead_id
       ? supabase
           .from('leads')
-          // AAR-311: vorschaden_* + cardentity_abfrage_am für Typ-B-Button
-          .select('id, vorname, nachname, email, telefon, fin, vorschaden_typ_b_bericht, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, cardentity_abfrage_am')
+          .select('id, vorname, nachname, email, telefon, fin, hat_vorschaeden, zb1_status')
           .eq('id', fall.lead_id)
           .single()
       : Promise.resolve({ data: null }),
