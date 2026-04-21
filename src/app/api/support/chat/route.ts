@@ -12,7 +12,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { callSupportClaude, SUPPORT_CATEGORY_LABELS, SUPPORT_SEVERITY_LABELS } from '@/lib/support/anthropic-client'
 import { buildSystemPrompt } from '@/lib/support/system-prompt'
-import { checkRateLimit, incrementRateLimit } from '@/lib/support/rate-limit'
+import { checkRateLimit, incrementRateLimit, checkFeatureRateLimit, incrementFeatureRateLimit, FEATURE_REQUEST_LIMIT_PER_DAY } from '@/lib/support/rate-limit'
 import {
   addCommentToIssue,
   attachScreenshotToIssue,
@@ -25,7 +25,10 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 const ALLOWED_ROLES = new Set(['sachverstaendiger', 'admin', 'kundenbetreuer'])
+// AAR-625: Durchdenken-Modus nur für interne Rollen (nicht SV)
+const DURCHDENKEN_ROLES = new Set(['admin', 'kundenbetreuer', 'dispatch'])
 const MAX_AGENT_ITERATIONS = 5
+const DURCHDENKEN_MAX_TURNS = 8
 
 type IncomingMessage = { role: 'user' | 'assistant'; content: string }
 
@@ -68,6 +71,7 @@ export async function POST(req: NextRequest) {
     screenshotUrl?: string | null
     pageUrl?: string | null
     voiceTranscript?: string | null
+    mode?: 'normal' | 'durchdenken'
   }
   try {
     body = await req.json()
@@ -78,6 +82,22 @@ export async function POST(req: NextRequest) {
   const messages = Array.isArray(body.messages) ? body.messages : []
   if (!messages.length || messages[messages.length - 1].role !== 'user') {
     return NextResponse.json({ error: 'Letzte Nachricht muss vom User sein' }, { status: 400 })
+  }
+
+  const mode = body.mode === 'durchdenken' && DURCHDENKEN_ROLES.has(rolle) ? 'durchdenken' : 'normal'
+
+  // AAR-625: Feature-Request-Tageslimit 3/Tag im Durchdenken-Modus
+  if (mode === 'durchdenken') {
+    const featureLimit = await checkFeatureRateLimit(user.id)
+    if (!featureLimit.allowed) {
+      return NextResponse.json(
+        {
+          error: 'Feature-Request-Limit erreicht',
+          message: `Du hast heute bereits ${FEATURE_REQUEST_LIMIT_PER_DAY} Feature-Requests eingereicht. Weitere morgen, oder sprich direkt mit Aaron wenn es dringend ist.`,
+        },
+        { status: 429 },
+      )
+    }
   }
 
   const limit = await checkRateLimit(user.id)
@@ -95,6 +115,7 @@ export async function POST(req: NextRequest) {
 
   const hasScreenshot = !!body.screenshot
   const hasVoice = !!body.voiceTranscript
+  const userTurnCount = messages.filter(m => m.role === 'user').length
   const systemPrompt = buildSystemPrompt({
     userRolle: rolle,
     userName: profile?.anzeigename ?? null,
@@ -102,6 +123,8 @@ export async function POST(req: NextRequest) {
     pageUrl: body.pageUrl ?? null,
     hasScreenshot,
     hasVoice,
+    mode,
+    turnCount: userTurnCount,
   })
 
   // Letzte User-Message mit Screenshot + Voice-Notiz anreichern
@@ -297,9 +320,14 @@ export async function POST(req: NextRequest) {
               console.error('[AAR-518] attachScreenshotToIssue fehlgeschlagen:', err)
             }
           }
+          const isFeature = labels.includes('feature-request')
+          if (isFeature && mode === 'durchdenken') {
+            await incrementFeatureRateLimit(user.id)
+          }
           await logTicketAction({
             userId: user.id,
             actionType: 'new',
+            ticketTyp: isFeature ? 'feature' : 'bug',
             issueId: issue.id,
             pageUrl: body.pageUrl ?? null,
             turnCount: iterations,
@@ -431,6 +459,7 @@ function enrichDescription(
 async function logTicketAction(params: {
   userId: string
   actionType: 'new' | 'comment' | 'no_action'
+  ticketTyp?: 'bug' | 'feature' | 'comment' | 'no_action'
   issueId: string | null
   pageUrl: string | null
   turnCount: number
@@ -442,6 +471,7 @@ async function logTicketAction(params: {
     user_id: params.userId,
     linear_issue_id: params.issueId,
     action_type: params.actionType,
+    ticket_typ: params.ticketTyp ?? (params.actionType === 'comment' ? 'comment' : params.actionType === 'no_action' ? 'no_action' : 'bug'),
     page_url: params.pageUrl,
     turn_count: params.turnCount,
     has_screenshot: params.hasScreenshot,

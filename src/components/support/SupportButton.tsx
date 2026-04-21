@@ -14,9 +14,11 @@ type Variant = 'dark' | 'light'
 
 export function SupportButton({
   userName,
+  rolle,
   variant = 'dark',
 }: {
   userName?: string | null
+  rolle?: string | null
   variant?: Variant
 }) {
   const [open, setOpen] = useState(false)
@@ -37,7 +39,7 @@ export function SupportButton({
         <MessageSquareIcon className="w-4 h-4" />
         Hilfe &amp; Support
       </button>
-      <SupportDrawer open={open} onClose={() => setOpen(false)} userName={userName} />
+      <SupportDrawer open={open} onClose={() => setOpen(false)} userName={userName} rolle={rolle} />
     </>
   )
 }

@@ -19,12 +19,16 @@ type SupportChatResponse =
   | { type: 'created'; message: string; issueIdentifier: string; issueUrl: string; remaining: number }
   | { error: string; message?: string }
 
+export type SupportMode = 'normal' | 'durchdenken'
+
 export type SupportState = {
   messages: SupportMessage[]
   isLoading: boolean
   error: string | null
   remaining: number | null
   isClosed: boolean
+  mode: SupportMode
+  setMode: (m: SupportMode) => void
   send: (text: string, screenshotDataUrl: string | null) => Promise<void>
   reset: () => void
 }
@@ -37,6 +41,7 @@ export function SupportProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null)
   const [remaining, setRemaining] = useState<number | null>(null)
   const [isClosed, setIsClosed] = useState(false)
+  const [mode, setMode] = useState<SupportMode>('normal')
 
   const reset = useCallback(() => {
     setMessages([])
@@ -68,6 +73,7 @@ export function SupportProvider({ children }: { children: ReactNode }) {
           messages: apiMessages,
           screenshot: screenshotDataUrl,
           pageUrl: typeof window !== 'undefined' ? window.location.href : null,
+          mode,
         }),
       })
 
@@ -133,8 +139,8 @@ export function SupportProvider({ children }: { children: ReactNode }) {
   }, [messages, isLoading, isClosed])
 
   const value = useMemo<SupportState>(
-    () => ({ messages, isLoading, error, remaining, isClosed, send, reset }),
-    [messages, isLoading, error, remaining, isClosed, send, reset],
+    () => ({ messages, isLoading, error, remaining, isClosed, mode, setMode, send, reset }),
+    [messages, isLoading, error, remaining, isClosed, mode, send, reset],
   )
 
   return <SupportCtx.Provider value={value}>{children}</SupportCtx.Provider>
