@@ -20,7 +20,8 @@ export type SlotEingabe = {
   // beliebig viele Fotos hochladen; nach dem ersten Upload wird der Slot als
   // „hochgeladen" markiert, aber weitere Uploads werden akzeptiert und in
   // leads.schadensfoto_urls angehängt. Haiku-Vision wertet die Fotos aus und
-  // befüllt leads.sachschaden_beschreibung.
+  // befüllt leads.fahrzeugschaden_beschreibung (separate Spalte seit
+  // AAR-665-Follow — sachschaden_beschreibung ist Drittschaden in Phase 1).
   slot_id: 'fahrzeugschein' | 'polizeibericht' | 'unfallfotos' | 'sonstiges'
   ocr?: boolean
   label?: string  // optional — überschreibt Default-Label (nur für 'sonstiges' relevant)

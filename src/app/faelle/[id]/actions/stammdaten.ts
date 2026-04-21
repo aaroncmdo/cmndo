@@ -63,6 +63,11 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'schadens_ursache',
   'schadens_beschreibung',
   'schadens_hergang',
+  // AAR-665-Follow: getrennte Felder
+  //  - sachschaden_beschreibung = Drittschaden (Leitplanke, Handy), Phase 1 Lead
+  //  - fahrzeugschaden_beschreibung = Eigenschaden am Auto, Phase 4 + Haiku-Vision
+  'sachschaden_beschreibung',
+  'fahrzeugschaden_beschreibung',
   'schadens_art',
   // Gegner / Versicherung
   'gegner_name',
