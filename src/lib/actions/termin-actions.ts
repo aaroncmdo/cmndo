@@ -155,6 +155,13 @@ export async function terminAblehnen({
 
   if (updateErr) return { success: false, error: updateErr.message }
 
+  // AAR-694 Teil B: SV-Kalender-Event löschen (non-critical)
+  import('@/lib/google-calendar/sv-event-sync').then(({ syncSvCalendarEvent }) =>
+    syncSvCalendarEvent(tId).catch((err) =>
+      console.warn('[terminAblehnen] syncSvCalendarEvent:', err instanceof Error ? err.message : err),
+    ),
+  )
+
   // KFZ-136: Reminder stornieren
   try { await cancelRemindersForTermin(tId) } catch (err) { console.error('[KFZ-136] Reminder-Cancel fehlgeschlagen:', err) }
 
@@ -484,6 +491,13 @@ export async function terminAnnehmen({
   // KFZ-136: Reminder neu generieren (Termin ist jetzt bestaetigt)
   try { await generateReminderForTermin(tId) } catch (err) { console.error('[KFZ-136] Reminder-Generierung fehlgeschlagen:', err) }
 
+  // AAR-694 Teil B: SV-Google-Kalender-Event anlegen/aktualisieren (non-critical)
+  import('@/lib/google-calendar/sv-event-sync').then(({ syncSvCalendarEvent }) =>
+    syncSvCalendarEvent(tId).catch((err) =>
+      console.warn('[terminAnnehmen] syncSvCalendarEvent:', err instanceof Error ? err.message : err),
+    ),
+  )
+
   // KFZ-137: SV Auftragszusammenfassung Email
   try {
     const { sendSvAuftragszusammenfassung } = await import('@/lib/email/google/flows')
@@ -634,6 +648,13 @@ export async function terminBuchen({
 
   // KFZ-136: Reminder generieren (Termin gebucht)
   try { await generateReminderForTermin(termin.id) } catch (err) { console.error('[KFZ-136] Reminder-Generierung fehlgeschlagen:', err) }
+
+  // AAR-694 Teil B: SV-Google-Kalender-Event anlegen/aktualisieren (non-critical)
+  import('@/lib/google-calendar/sv-event-sync').then(({ syncSvCalendarEvent }) =>
+    syncSvCalendarEvent(termin.id).catch((err) =>
+      console.warn('[terminBuchen] syncSvCalendarEvent:', err instanceof Error ? err.message : err),
+    ),
+  )
 
   // KFZ-137: SV Auftragszusammenfassung Email
   try {

@@ -11,6 +11,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { parseIsochrone } from './isochrone-parse'
 import { applyDispatchableFilter } from '@/lib/sv/queries'
+import { checkSvFreeBusyBatch } from '@/lib/google-calendar/freebusy'
 
 export type SvMatchInput = {
   fallLat: number
@@ -115,6 +116,20 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
   if (!svsRaw) return []
   const svs = svsRaw as unknown as Array<Record<string, unknown>>
 
+  // AAR-694 Teil A: FreeBusy-Batch-Check wenn Wunschtermin gesetzt.
+  // Parallel für alle Kandidaten, Timeout pro Call 2s. SVs mit „belegt"
+  // fallen raus. „unbekannt" (kein Token / API-Fehler) = fail-open.
+  const freeBusyMap = new Map<string, 'frei' | 'belegt' | 'unbekannt'>()
+  if (wunschterminIso) {
+    const profileIds = svs
+      .map((sv) => sv.profile_id as string | null)
+      .filter((p): p is string => !!p)
+    if (profileIds.length > 0) {
+      const batch = await checkSvFreeBusyBatch(profileIds, wunschterminIso, 60)
+      for (const [id, status] of batch) freeBusyMap.set(id, status)
+    }
+  }
+
   const candidates: SvMatchCandidate[] = []
 
   for (const sv of svs) {
@@ -160,6 +175,13 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
     }
 
     if (!imGebiet) continue
+
+    // AAR-694 Teil A: FreeBusy — SVs deren Google-Kalender laut API belegt
+    // ist, fallen aus dem Match. 'unbekannt' (fail-open) bleibt Kandidat.
+    const profileId = sv.profile_id as string | null
+    if (profileId && freeBusyMap.get(profileId) === 'belegt') {
+      continue
+    }
 
     const paket = (sv.paket as string) || 'standard'
     const paketPrio = PAKET_PRIO[paket] ?? 1
