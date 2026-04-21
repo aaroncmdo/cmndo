@@ -25,7 +25,7 @@ export default async function SvDetailPage({
 
   const { data: sv } = await supabase
     .from('sachverstaendige')
-    .select('id, profile_id, paket, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, sa_vorlage_status, sa_vorlage_storage_path, sa_vorlage_hochgeladen_am, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, gesperrt_grund, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, qualifikationen_neu, profiles(vorname, nachname, email, telefon)')
+    .select('id, profile_id, paket, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, sa_vorlage_status, sa_vorlage_storage_path, sa_vorlage_hochgeladen_am, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, gesperrt_grund, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, qualifikationen_neu, spezifikationen, schadenarten, profiles(vorname, nachname, email, telefon)')
     .eq('id', id)
     .single()
 
@@ -320,6 +320,12 @@ export default async function SvDetailPage({
                 standortLng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
                 standortPlaceId: sv.standort_place_id ?? '',
                 paketUmkreisKm: sv.paket_umkreis_km ?? 15,
+                qualifikationen: (sv.qualifikationen_neu as string[] | null) ?? [],
+                spezifikationen: (sv.spezifikationen as string[] | null) ?? [],
+                schadenarten: (sv.schadenarten as string[] | null) ?? [],
+                bvskMitgliedsnummer: sv.bvsk_mitgliedsnummer ?? '',
+                ihkZertifikatNummer: sv.ihk_zertifikat_nummer ?? '',
+                oebuvBestellungsnummer: sv.oebuv_bestellungsnummer ?? '',
               }}
             />
           </div>
