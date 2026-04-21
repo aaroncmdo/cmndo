@@ -162,8 +162,8 @@ async function loadAusstehendeFull() {
       faelligSeitTage: tageSeit(r.faellig_am),
       status: failed ? 'einzug_failed' : 'rechnung_ueberfaellig',
       // AAR-614: Siehe AusstehendeZahlungenWidget — Link immer auf
-      // /admin/abrechnungen (Detail-Drilldown), nicht auf tote SV-Route.
-      href: '/admin/abrechnungen',
+      // /admin/finance/abrechnungen (Detail-Drilldown), nicht auf tote SV-Route.
+      href: '/admin/finance/abrechnungen',
     })
   }
 

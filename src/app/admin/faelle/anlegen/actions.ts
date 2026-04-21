@@ -112,6 +112,6 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
   }
 
   revalidatePath('/admin/faelle', 'page')
-  revalidatePath('/admin/dispatch', 'page')
+  revalidatePath('/dispatch/dashboard', 'page')
   return { success: true, fall_id: fall.id, fall_nummer: fallNummer }
 }

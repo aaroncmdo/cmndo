@@ -203,7 +203,7 @@ export async function entscheideReklamation(reklamationId: string, entscheidung:
   // KFZ-151: Auto-Resolve aller offenen Tasks zu dieser Reklamation
   await resolveTasksForEntity('reklamation', reklamationId, `Reklamation entschieden: ${entscheidung}`)
 
-  revalidatePath('/admin/reklamationen')
+  revalidatePath('/admin/faelle/reklamationen')
   return { success: true }
 }
 

@@ -46,7 +46,7 @@ async function loadAlerts(): Promise<Alert[]> {
       alerts.push({
         key: 'hanging-cases',
         text: `${hangingFaelle} Faelle warten seit > 24h auf SV-Annahme`,
-        href: '/admin/dispatch',
+        href: '/dispatch/dashboard',
         severity: 'kritisch',
       })
     }
@@ -64,7 +64,7 @@ async function loadAlerts(): Promise<Alert[]> {
       alerts.push({
         key: 'ohne-sv',
         text: `${ohneSv} Dispatcher-Faelle ohne passenden SV im Gebiet`,
-        href: '/admin/dispatch',
+        href: '/dispatch/dashboard',
         severity: 'kritisch',
       })
     }
@@ -84,7 +84,7 @@ async function loadAlerts(): Promise<Alert[]> {
       alerts.push({
         key: 'vs-timer',
         text: `${vsEsk} VS-Timer-Eskalationen ueberfaellig`,
-        href: '/admin/tasks',
+        href: '/admin/aufgaben/alle',
         severity: 'kritisch',
       })
     }
@@ -103,7 +103,7 @@ async function loadAlerts(): Promise<Alert[]> {
       alerts.push({
         key: 'kanzlei-tasks',
         text: `${kanzleiTasks} Kanzlei-Tasks ueberfaellig`,
-        href: '/admin/tasks',
+        href: '/admin/aufgaben/alle',
         severity: 'warnung',
       })
     }
@@ -164,7 +164,7 @@ async function loadAlerts(): Promise<Alert[]> {
       alerts.push({
         key: 'reklamation',
         text: `${reklamation} Faelle in Reklamation`,
-        href: '/admin/reklamationen',
+        href: '/admin/faelle/reklamationen',
         severity: 'warnung',
       })
     }

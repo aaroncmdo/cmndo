@@ -256,8 +256,8 @@ export async function recalculateIsochrone(
     revalidatePath('/admin/sachverstaendige')
     if (entityType === 'sv') revalidatePath('/admin/sachverstaendige')
     if (entityType === 'organisation') {
-      revalidatePath('/admin/organisationen')
-      revalidatePath('/admin/communities')
+      revalidatePath('/admin/partner')
+      revalidatePath('/admin/partner/communities')
     }
     return { success: true, pointCount: points.length }
   } catch (err) {

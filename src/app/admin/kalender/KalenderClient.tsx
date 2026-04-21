@@ -126,7 +126,7 @@ export default function KalenderClient({
         id: `task-${t.id}`, typ: 'task',
         titel: t.titel, start: t.faellig_am, farbe: FARBEN.task,
         fallId: t.fall_id ?? undefined, fallNummer: t.fall_id ? fallMap[t.fall_id] : undefined,
-        link: t.fall_id ? `/faelle/${t.fall_id}` : '/admin/tasks',
+        link: t.fall_id ? `/faelle/${t.fall_id}` : '/admin/aufgaben/alle',
         overdue: isBefore(new Date(t.faellig_am), now) && t.status !== 'erledigt',
       })
     }

@@ -75,7 +75,7 @@ export async function assignPoolLead(fall_id: string, target_sv_id: string): Pro
   }).eq('id', target_sv_id)
 
   revalidatePath('/gutachter/team', 'page')
-  revalidatePath('/admin/dispatch', 'page')
+  revalidatePath('/dispatch/dashboard', 'page')
   return { success: true }
 }
 

@@ -91,7 +91,7 @@ export async function saveFilmcheck(fallId: string, notizen: string) {
 
   revalidatePath(`/faelle/${fallId}`)
   revalidatePath('/admin/faelle')
-  revalidatePath('/admin/tasks')
+  revalidatePath('/admin/aufgaben/alle')
 }
 
 export async function addTimelineEntry(
@@ -673,7 +673,7 @@ export async function qcNachbesserung(fallId: string, kommentar: string) {
   }
 
   revalidatePath(`/faelle/${fallId}`)
-  revalidatePath('/admin/tasks')
+  revalidatePath('/admin/aufgaben/alle')
 }
 
 const KATEGORIE_SICHTBARKEIT: Record<string, string[]> = {

@@ -123,7 +123,7 @@ function resolveObjectLink(
       }
     }
     return {
-      href: '/admin/tasks',
+      href: '/admin/aufgaben/alle',
       label: eid.slice(0, 8),
       kind: 'SV',
     }
