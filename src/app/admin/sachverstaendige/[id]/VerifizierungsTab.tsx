@@ -38,6 +38,15 @@ export type Tier2Slot = {
   hochgeladenAm: string | null
   // optional document_uploads info
   uploadCount: number
+  // AAR-515: Quali-Zuordnung aus dokument_katalog.maps_to_qualifikation +
+  // steuert_kundensichtbarkeit. Bei true schaltet die Freigabe den Quali-
+  // Eintrag in Kundenkommunikation frei. Plausibilisierungs-Nummer aus
+  // sachverstaendige.{bvsk,ihk,oebuv}_nummer wird hier als Read-only
+  // mitgegeben, damit Admin Nummer + Dokument nebeneinander sieht.
+  mapsToQualifikation: string | null
+  steuertKundensichtbarkeit: boolean
+  nummer: string | null
+  nummerLabel: string | null
 }
 
 type Props = {
@@ -322,9 +331,10 @@ function Tier2Card({
           <p className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">Angefordert</p>
           {angefordert.map(slot => (
             <div key={slot.slotId} className="flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200">
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-gray-800">{slot.label}</p>
                 {slot.beschreibung && <p className="text-[10px] text-gray-500">{slot.beschreibung}</p>}
+                <SlotQualiHinweis slot={slot} />
               </div>
               <SlotStatusBadge status={slot.status} uploadCount={slot.uploadCount} />
             </div>
@@ -338,15 +348,16 @@ function Tier2Card({
           <p className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">Noch nicht angefordert</p>
           {offeneSlots.map(slot => (
             <div key={slot.slotId} className="flex items-center justify-between px-3 py-2 rounded-lg border border-dashed border-gray-300">
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-gray-700">{slot.label}</p>
                 {slot.beschreibung && <p className="text-[10px] text-gray-500">{slot.beschreibung}</p>}
+                <SlotQualiHinweis slot={slot} />
               </div>
               <button
                 type="button"
                 onClick={() => setNachforderung({ slotId: slot.slotId, begruendung: '', frist: defaultFrist })}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium text-[#4573A2] hover:bg-[#4573A2]/5 border border-[#4573A2]/20 disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium text-[#4573A2] hover:bg-[#4573A2]/5 border border-[#4573A2]/20 disabled:opacity-50 shrink-0 ml-2"
               >
                 <PlusIcon className="w-3 h-3" />
                 Anfordern
@@ -419,6 +430,31 @@ function SlotStatusBadge({ status, uploadCount }: { status: Tier2Slot['status'];
   if (status === 'eingereicht') return <StatusBadge tone="amber">Eingereicht ({uploadCount})</StatusBadge>
   if (status === 'abgelehnt') return <StatusBadge tone="red">Abgelehnt</StatusBadge>
   return <StatusBadge tone="gray">Ausstehend</StatusBadge>
+}
+
+// AAR-515: Quali-Hinweis + Nummer-Plausibilisierung.
+// Zeigt Admin: „Freigabe → Quali X wird in Kundenkommunikation gezeigt"
+// plus die vom Wizard erfasste Nummer (read-only) direkt neben dem Slot,
+// damit Admin Nummer + Dokument beim Prüfen nebeneinander sehen kann.
+function SlotQualiHinweis({ slot }: { slot: Tier2Slot }) {
+  if (!slot.mapsToQualifikation) return null
+  const isDat = slot.mapsToQualifikation === 'dat-gutachter'
+  const qualiLabel = isDat ? 'DAT-Expert-Badge' : `Quali „${slot.mapsToQualifikation}"`
+
+  return (
+    <div className="mt-1 text-[10px] text-gray-500 space-y-0.5">
+      {slot.steuertKundensichtbarkeit && (
+        <p className="text-[10px] text-[#4573A2]">
+          Freigabe schaltet {qualiLabel} in Kundenkommunikation frei
+        </p>
+      )}
+      {slot.nummer && (
+        <p>
+          {slot.nummerLabel ?? 'Nummer'}: <span className="font-mono text-gray-700">{slot.nummer}</span>
+        </p>
+      )}
+    </div>
+  )
 }
 
 // ─── Sperre ──────────────────────────────────────────────────────────

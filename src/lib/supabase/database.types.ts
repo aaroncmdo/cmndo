@@ -989,12 +989,14 @@ export type Database = {
           freigeschaltet_wenn: Json | null
           kategorie: Database["public"]["Enums"]["dokument_kategorie"]
           label: string
+          maps_to_qualifikation: string | null
           max_mb: number
           multi_file: boolean
           pflicht_wenn: Json | null
           sichtbar_fuer: string[]
           slot_id: string
           sort_order: number
+          steuert_kundensichtbarkeit: boolean
           updated_at: string | null
           uploadbar_von: string[]
         }
@@ -1007,12 +1009,14 @@ export type Database = {
           freigeschaltet_wenn?: Json | null
           kategorie: Database["public"]["Enums"]["dokument_kategorie"]
           label: string
+          maps_to_qualifikation?: string | null
           max_mb?: number
           multi_file?: boolean
           pflicht_wenn?: Json | null
           sichtbar_fuer?: string[]
           slot_id: string
           sort_order?: number
+          steuert_kundensichtbarkeit?: boolean
           updated_at?: string | null
           uploadbar_von?: string[]
         }
@@ -1025,12 +1029,14 @@ export type Database = {
           freigeschaltet_wenn?: Json | null
           kategorie?: Database["public"]["Enums"]["dokument_kategorie"]
           label?: string
+          maps_to_qualifikation?: string | null
           max_mb?: number
           multi_file?: boolean
           pflicht_wenn?: Json | null
           sichtbar_fuer?: string[]
           slot_id?: string
           sort_order?: number
+          steuert_kundensichtbarkeit?: boolean
           updated_at?: string | null
           uploadbar_von?: string[]
         }
@@ -6559,6 +6565,7 @@ export type Database = {
           brand_primary: string | null
           brand_secondary: string | null
           brand_theme: Json | null
+          bvsk_mitgliedsnummer: string | null
           community_anonym: boolean
           created_at: string | null
           dat_nummer: string | null
@@ -6578,6 +6585,7 @@ export type Database = {
           gutachter_typ: string | null
           hrb: string | null
           id: string
+          ihk_zertifikat_nummer: string | null
           isochrone_polygon: Json | null
           ist_aktiv: boolean | null
           ist_parent_account: boolean | null
@@ -6587,6 +6595,7 @@ export type Database = {
           live_tracking_enabled: boolean | null
           logo_url: string | null
           notizen: string | null
+          oebuv_bestellungsnummer: string | null
           offene_faelle: number
           onboarding_anzahlung_betrag: number | null
           onboarding_anzahlung_faellig_am: string | null
@@ -6652,6 +6661,7 @@ export type Database = {
           brand_primary?: string | null
           brand_secondary?: string | null
           brand_theme?: Json | null
+          bvsk_mitgliedsnummer?: string | null
           community_anonym?: boolean
           created_at?: string | null
           dat_nummer?: string | null
@@ -6671,6 +6681,7 @@ export type Database = {
           gutachter_typ?: string | null
           hrb?: string | null
           id?: string
+          ihk_zertifikat_nummer?: string | null
           isochrone_polygon?: Json | null
           ist_aktiv?: boolean | null
           ist_parent_account?: boolean | null
@@ -6680,6 +6691,7 @@ export type Database = {
           live_tracking_enabled?: boolean | null
           logo_url?: string | null
           notizen?: string | null
+          oebuv_bestellungsnummer?: string | null
           offene_faelle?: number
           onboarding_anzahlung_betrag?: number | null
           onboarding_anzahlung_faellig_am?: string | null
@@ -6745,6 +6757,7 @@ export type Database = {
           brand_primary?: string | null
           brand_secondary?: string | null
           brand_theme?: Json | null
+          bvsk_mitgliedsnummer?: string | null
           community_anonym?: boolean
           created_at?: string | null
           dat_nummer?: string | null
@@ -6764,6 +6777,7 @@ export type Database = {
           gutachter_typ?: string | null
           hrb?: string | null
           id?: string
+          ihk_zertifikat_nummer?: string | null
           isochrone_polygon?: Json | null
           ist_aktiv?: boolean | null
           ist_parent_account?: boolean | null
@@ -6773,6 +6787,7 @@ export type Database = {
           live_tracking_enabled?: boolean | null
           logo_url?: string | null
           notizen?: string | null
+          oebuv_bestellungsnummer?: string | null
           offene_faelle?: number
           onboarding_anzahlung_betrag?: number | null
           onboarding_anzahlung_faellig_am?: string | null
@@ -7113,6 +7128,7 @@ export type Database = {
           id: number
           linear_issue_id: string | null
           page_url: string | null
+          ticket_typ: string | null
           turn_count: number
           user_id: string
         }
@@ -7124,6 +7140,7 @@ export type Database = {
           id?: number
           linear_issue_id?: string | null
           page_url?: string | null
+          ticket_typ?: string | null
           turn_count?: number
           user_id: string
         }
@@ -7135,6 +7152,7 @@ export type Database = {
           id?: number
           linear_issue_id?: string | null
           page_url?: string | null
+          ticket_typ?: string | null
           turn_count?: number
           user_id?: string
         }
@@ -8999,6 +9017,10 @@ export type Database = {
         Returns: undefined
       }
       delete_lead_komplett: { Args: { p_lead_id: string }; Returns: undefined }
+      get_sichtbare_qualifikationen: {
+        Args: { p_sv_id: string }
+        Returns: string[]
+      }
       get_sv_id: { Args: never; Returns: string }
       get_user_rolle: { Args: never; Returns: string }
       haversine_km: {
@@ -9010,6 +9032,7 @@ export type Database = {
         Returns: undefined
       }
       is_admin: { Args: never; Returns: boolean }
+      is_dat_badge_sichtbar: { Args: { p_sv_id: string }; Returns: boolean }
       is_kanzlei: { Args: never; Returns: boolean }
       is_staff: { Args: never; Returns: boolean }
       is_sv: { Args: never; Returns: boolean }
