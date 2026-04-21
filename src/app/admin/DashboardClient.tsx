@@ -448,7 +448,7 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
           </div>
           <div className="max-h-48 overflow-y-auto">
             {neueFaelle.map(f => (
-              <Link key={f.id} href={`/faelle/${f.id}`} target="_blank" rel="noopener"
+              <Link key={f.id} href={`/faelle/${f.id}`}
                 className="block px-3 py-2 border-b border-gray-50 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-[#0D1B3E] font-medium truncate">{f.kunde}</p>

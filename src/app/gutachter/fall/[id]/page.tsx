@@ -44,10 +44,13 @@ export default async function GutachterFallPage({
     fall.lead_id
       ? supabase
           .from('leads')
-          // AAR-311: vorschaden_* + cardentity_abfrage_am für Typ-B-Button in StammdatenCard
-          // AAR-545 Cluster D: eigene_versicherung + eigene_policennr für "Eigene
-          // Versicherung"-Block (früher faelle.versicherung_name / _schaden_nr).
-          .select('vorname, nachname, email, telefon, fin, vorschaden_typ_b_bericht, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, cardentity_abfrage_am, eigene_versicherung, eigene_policennr')
+          // Fall-Daten-Konsistenz: vorschaden_* + cardentity_abfrage_am leben
+          // auf faelle (nicht mehr auf leads). Analog AAR-626-Fix für den
+          // Admin-Pfad — SV-Pfad selectierte die 4 Legacy-Spalten weiter und
+          // crashte mit PostgREST-400 + an.map beim SV-Fall-Öffnen.
+          // AAR-545 Cluster D: eigene_versicherung + eigene_policennr für
+          // „Eigene Versicherung"-Block (früher faelle.versicherung_name).
+          .select('vorname, nachname, email, telefon, fin, hat_vorschaeden, zb1_status, eigene_versicherung, eigene_policennr')
           .eq('id', fall.lead_id)
           .single()
       : Promise.resolve({ data: null }),

@@ -75,7 +75,7 @@ export default function AnlegenFallClient() {
               <div className="mt-6 flex gap-3">
                 <Link
                   href={`/faelle/${result.fall_id}`}
-                  target="_blank"
+                 
                   rel="noopener"
                   className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold text-center"
                 >

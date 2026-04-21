@@ -139,10 +139,15 @@ export function FahrzeugdatenSection() {
           action={() => requestCardentityTypBForFall(fall.id)}
           finVorhanden={!!fin}
           initial={{
-            fetchedAt: (lead?.cardentity_abfrage_am as string | null) ?? null,
+            // Fall-Daten-Konsistenz: cardentity_* + vorschaden_* leben auf faelle.
+            // leads hat diese Spalten nicht mehr (gedroppt). hat_vorschaeden
+            // bleibt auf leads (Kunden-Angabe im Schadens-Flow).
+            fetchedAt: (fall.cardentity_abfrage_am as string | null)
+              ?? (fall.cardentity_enriched_at as string | null)
+              ?? null,
             vorschadenVorhanden: (lead?.hat_vorschaeden as boolean | null) ?? null,
-            vorschadenAnzahl: (lead?.vorschaden_anzahl as number | null) ?? null,
-            letzterVorschadenDatum: (lead?.vorschaden_letzter_datum as string | null) ?? null,
+            vorschadenAnzahl: (fall.vorschaden_anzahl as number | null) ?? null,
+            letzterVorschadenDatum: (fall.vorschaden_letzter_datum as string | null) ?? null,
           }}
         />
       </div>
@@ -443,7 +448,11 @@ type ZeugeKontakt = { name: string; telefon: string; email?: string; notiz?: str
 export function ZeugenKontakteSection() {
   const { fall, canEdit, updateField } = useFall()
   const editable = canEdit('zeugen_kontakte')
-  const initial = (fall.zeugen_kontakte as ZeugeKontakt[] | null) ?? []
+  // Defensiv: zeugen_kontakte ist JSONB. Kann null, [], {}, oder kaputtes JSON sein.
+  // Nur als Array akzeptieren, sonst leeres Array — verhindert .map-Crash bei
+  // neu angelegten Fällen oder Legacy-Daten mit Nicht-Array-JSONB.
+  const rawZeugen = fall.zeugen_kontakte as unknown
+  const initial: ZeugeKontakt[] = Array.isArray(rawZeugen) ? (rawZeugen as ZeugeKontakt[]) : []
   const [zeugen, setZeugen] = useState<ZeugeKontakt[]>(initial)
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [, startTransition] = useTransition()

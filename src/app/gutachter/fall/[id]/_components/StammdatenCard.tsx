@@ -30,12 +30,10 @@ type Lead = {
   email: string | null
   telefon: string | null
   fin?: string | null
-  vorschaden_typ_b_bericht?: Record<string, unknown> | null
   hat_vorschaeden?: boolean | null
-  vorschaden_anzahl?: number | null
-  vorschaden_letzter_datum?: string | null
-  cardentity_abfrage_am?: string | null
-  // AAR-545 Cluster D: Eigene VS lebt auf leads, nicht mehr auf faelle.
+  // Fall-Daten-Konsistenz: vorschaden_*/cardentity_* leben auf faelle,
+  // nicht auf leads. Siehe Access-Stelle unten (fall.vorschaden_*).
+  // AAR-545 Cluster D: Eigene VS lebt auf leads.
   eigene_versicherung?: string | null
   eigene_policennr?: string | null
 } | null
@@ -205,10 +203,15 @@ export function StammdatenCard({
             action={() => requestCardentityTypBForFallSv(fall.id as string)}
             finVorhanden={!!fin}
             initial={{
-              fetchedAt: lead?.cardentity_abfrage_am ?? null,
+              // Fall-Daten-Konsistenz: cardentity + vorschaden_* leben auf
+              // faelle (leads-Spalten sind gedroppt). hat_vorschaeden bleibt
+              // auf leads (Kunden-Angabe aus Schadens-Flow).
+              fetchedAt: (fall.cardentity_abfrage_am as string | null)
+                ?? (fall.cardentity_enriched_at as string | null)
+                ?? null,
               vorschadenVorhanden: lead?.hat_vorschaeden ?? null,
-              vorschadenAnzahl: lead?.vorschaden_anzahl ?? null,
-              letzterVorschadenDatum: lead?.vorschaden_letzter_datum ?? null,
+              vorschadenAnzahl: (fall.vorschaden_anzahl as number | null) ?? null,
+              letzterVorschadenDatum: (fall.vorschaden_letzter_datum as string | null) ?? null,
             }}
           />
         </div>
