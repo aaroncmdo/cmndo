@@ -132,6 +132,9 @@ export const FALL_PERMISSIONS: Record<FallakteRolle, PermissionMatrix> = {
   dispatch: DISPATCH_PERMISSIONS,
   sachverstaendiger: READONLY_PERMISSIONS,
   kunde: READONLY_PERMISSIONS,
+  // AAR-kanzlei-portal: Kanzlei strict read-only (Dokumente + Chat nur
+  // lesen, keine Edits, keine Uploads). Gleiche Matrix wie kunde/sv.
+  kanzlei: READONLY_PERMISSIONS,
 }
 
 /**
