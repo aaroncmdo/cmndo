@@ -123,7 +123,7 @@ export default async function FaelleLayout({
         </header>
         <div className="flex">
           <MitarbeiterNav unreadNachrichten={unread} />
-          <main className="flex-1 px-4 md:px-8 py-6 max-w-6xl">{children}</main>
+          <main className="flex-1 px-4 py-6 md:w-[96%] md:mx-auto md:px-0">{children}</main>
         </div>
       </div>
     )
