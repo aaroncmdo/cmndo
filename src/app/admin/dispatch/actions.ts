@@ -677,6 +677,10 @@ async function convertLeadToFall(
       // AAR-unfallfotos: Schadenbeschreibung (was am Auto kaputt ist) —
       // aus dem Dispatch-Flow übernehmen. Wird entweder vom Dispatcher
       // manuell gesetzt oder von Haiku-Vision aus den Unfallfotos erzeugt.
+      // AAR-665-Follow: separate Spalten — fahrzeugschaden_beschreibung
+      // (Eigenschaden am Auto, Phase 4) vs. sachschaden_beschreibung
+      // (Drittschaden-Text, Phase 1).
+      fahrzeugschaden_beschreibung: lead.fahrzeugschaden_beschreibung ?? null,
       sachschaden_beschreibung: lead.sachschaden_beschreibung ?? null,
       // Konversions-Metadaten
       leadbearbeiter_id: userId,

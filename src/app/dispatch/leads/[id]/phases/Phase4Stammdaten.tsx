@@ -57,10 +57,11 @@ type LeadFields = {
   // AAR-305: Schadenshergang-Pflicht bei fahrbereitem Fahrzeug (Banner in Phase 4)
   fahrzeug_fahrbereit?: boolean | null
   schadens_hergang?: string | null
-  // AAR-unfallfotos: Beschreibung WAS AM AUTO KAPUTT IST (nicht Unfallhergang).
-  // Wird entweder manuell vom Dispatcher ausgefüllt oder automatisch durch
-  // Haiku-Vision nach Upload von Unfallfotos gefüllt.
-  sachschaden_beschreibung?: string | null
+  // AAR-665-follow: Separate Spalte fahrzeugschaden_beschreibung für „was am
+  // Auto kaputt ist". sachschaden_beschreibung bleibt in Phase 1 für Dritt-
+  // schaden (Leitplanke, iPhone). Haiku-Vision schreibt in
+  // fahrzeugschaden_beschreibung.
+  fahrzeugschaden_beschreibung?: string | null
   schadensfoto_urls?: string[] | null
   // AAR-182: ZB1-Upload-Tracking
   zb1_status?: string | null
@@ -541,24 +542,70 @@ export default function Phase4Stammdaten() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [marke])
 
-  // AAR-665: Schadenbeschreibung-Feld aus Phase 4 entfernt — sie wird bereits
-  // in Phase 1 (Qualifizierung) erfasst. Die Haiku-Vision-Pipeline schreibt
-  // `leads.sachschaden_beschreibung` weiterhin im Hintergrund, wenn Unfallfotos
-  // hochgeladen werden — Phase 1 zeigt den gefüllten Wert direkt.
-  //
-  // Für Dispatcher, die Unfallfotos anfordern wollen: der „Kunde hat
-  // Unfallfotos"-Trigger lebt jetzt direkt in der DokumenteAnfordernCard am
-  // Ende der Phase (Checkbox „Unfallfotos"). Kein separates Banner hier oben
-  // mehr nötig.
+  // AAR-665-Follow: Schadenbeschreibung bleibt Phase-4-Eigentum.
+  // Phase 1 fragt den Unfallhergang ab (WIE ist es passiert),
+  // Phase 4 die Schadenbeschreibung am Auto (WAS am Fahrzeug kaputt ist).
+  // Kein Hard-Gate — Feld ist optional, Haiku-Vision füllt es aus Unfallfotos.
+  // „Kunde hat Unfallfotos"-Button scrollt runter zur DokumenteAnfordernCard
+  // und setzt die Unfallfotos-Checkbox auf true, damit der Dispatcher mit
+  // einem Klick die Bulk-Anforderung triggern kann.
   const hatUnfallfotos = Array.isArray(l.schadensfoto_urls) && l.schadensfoto_urls.length > 0
-  // AAR-665: Card fordert Unfallfotos jetzt über die eigene Checkbox an — kein
-  // externer Trigger-State mehr nötig. Wert bleibt false, nur um die bestehende
-  // Prop-Signatur der Card nicht zu ändern.
-  const unfallfotosAnfragen = false
+  const [unfallfotosAnfragen, setUnfallfotosAnfragen] = useState(false)
 
   return (
     <div className="space-y-4">
-      {/* AAR-665: Doppelte Schadenbeschreibung raus — Quelle ist Phase 1. */}
+      {/* AAR-665-Follow: Schadenbeschreibungs-Card (WAS am Auto kaputt).
+          Optional, kein Hard-Gate. Mit „Kunde hat Unfallfotos"-Checkmark
+          für Bulk-Anforderung via DokumenteAnfordernCard. */}
+      <div className="rounded-xl bg-white border border-[#e4e7ef] p-4 space-y-3">
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-xs font-semibold text-gray-900 flex items-center gap-1.5">
+            <CameraIcon className="w-3.5 h-3.5 text-[#4573A2]" />
+            Schadenbeschreibung <span className="text-gray-400 font-normal">(was am Auto kaputt ist)</span>
+          </p>
+          {hatUnfallfotos && l.fahrzeugschaden_beschreibung && (
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 font-medium">
+              Aus {l.schadensfoto_urls!.length} Foto{l.schadensfoto_urls!.length === 1 ? '' : 's'} von Claude gefüllt
+            </span>
+          )}
+        </div>
+        <InlineField
+          label=""
+          value={l.fahrzeugschaden_beschreibung}
+          fieldName="fahrzeugschaden_beschreibung"
+          leadId={leadId}
+          placeholder="z. B. Heckstoßstange eingedrückt, Kofferraumklappe lässt sich nicht mehr öffnen, Rückleuchte rechts zersplittert …"
+          type="text"
+        />
+        {/* Checkmark-Button: aktiviert die Unfallfotos-Checkbox in der
+            DokumenteAnfordernCard am Ende der Phase + scrollt dort hin. */}
+        <label className="flex items-start gap-2 cursor-pointer pt-1">
+          <input
+            type="checkbox"
+            checked={unfallfotosAnfragen}
+            onChange={(e) => {
+              const checked = e.target.checked
+              setUnfallfotosAnfragen(checked)
+              if (checked) {
+                requestAnimationFrame(() => {
+                  document
+                    .getElementById('dokumente-anfordern-card')
+                    ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                })
+              }
+            }}
+            className="mt-0.5 w-4 h-4 accent-[#4573A2]"
+          />
+          <span className="text-xs text-gray-700">
+            <span className="font-medium">Kunde hat Unfallfotos</span>
+            <span className="text-gray-500">
+              {' '}— bei Anforderung unten (Fahrzeugschein / Polizei / Fotos in einem
+              Link) werden die Fotos mitgeordert. Claude füllt danach automatisch
+              die Beschreibung.
+            </span>
+          </span>
+        </label>
+      </div>
 
       {/* AAR-177 Fix #2: Kundendaten-Card entfernt — die 4 Felder
           (Vorname/Nachname/Telefon/Email) werden bereits in Phase 1/5
@@ -1255,7 +1302,7 @@ export default function Phase4Stammdaten() {
           unfallfotosVorhanden={hatUnfallfotos}
           unfallfotosAnfragenDefault={unfallfotosAnfragen}
           schadensfotoUrls={l.schadensfoto_urls ?? null}
-          sachschadenBeschreibung={l.sachschaden_beschreibung ?? null}
+          sachschadenBeschreibung={l.fahrzeugschaden_beschreibung ?? null}
         />
       </div>
 

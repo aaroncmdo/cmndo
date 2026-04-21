@@ -6,7 +6,8 @@
 //   2. Nach jedem Upload: URL wird an leads.schadensfoto_urls (jsonb) angehängt
 //   3. Haiku 4.5 liest alle bisherigen Fotos + gibt eine knappe, sachliche
 //      Schaden-am-Auto-Beschreibung (2-3 Sätze) zurück
-//   4. Ergebnis wird in leads.sachschaden_beschreibung gespeichert
+//   4. Ergebnis wird in leads.fahrzeugschaden_beschreibung gespeichert
+//      (separat von sachschaden_beschreibung — siehe AAR-665-Follow)
 //
 // Wichtig: Nur Fahrzeug-Schaden beschreiben — NICHT den Unfallhergang. Das
 // Unfallhergang-Feld (leads.schadens_hergang) wird in Phase 1/Hard-Gate
@@ -38,7 +39,7 @@ export async function appendUnfallfotoAndAnalyze(
 
   const { data: lead } = await db
     .from('leads')
-    .select('id, schadensfoto_urls, sachschaden_beschreibung')
+    .select('id, schadensfoto_urls, fahrzeugschaden_beschreibung')
     .eq('id', leadId)
     .maybeSingle()
   if (!lead) {
@@ -65,7 +66,7 @@ export async function appendUnfallfotoAndAnalyze(
   await db
     .from('leads')
     .update({
-      sachschaden_beschreibung: beschreibung,
+      fahrzeugschaden_beschreibung: beschreibung,
       // AAR-unfallfotos Hard-Gate-Propagation: Wenn Haiku aussagekräftigen
       // Text extrahiert (Längen-Check wird unten bei analyzeFotosToBeschreibung
       // gefiltert — Fallback-Text startet mit „Schaden auf Foto nicht eindeutig"),
