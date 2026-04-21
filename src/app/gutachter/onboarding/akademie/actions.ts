@@ -68,7 +68,7 @@ export async function signAkademieVertrag(params: {
   }).eq('organisation_id', params.organisation_id).eq('ist_parent_account', true)
 
   revalidatePath('/admin/sachverstaendige', 'page')
-  revalidatePath('/admin/sachverstaendige/karte', 'page')
+  revalidatePath('/admin/sachverstaendige', 'page')
   revalidatePath('/admin/organisationen', 'page')
 
   return { success: true, vertrag_id: result.vertrag_id, pdf_path: result.pdf_path }

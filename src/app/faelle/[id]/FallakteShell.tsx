@@ -9,10 +9,12 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIcon } from 'lucide-react'
 import { FallProvider, type FallLike, type LeadLike } from './FallContext'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
-import UebersichtTab from './tabs/UebersichtTab'
-import KommunikationTab, { type FallTeilnehmer } from './tabs/KommunikationTab'
-import TimelineTab from './tabs/TimelineTab'
-import ProzessTab from './tabs/ProzessTab'
+// AAR-687: alle 5 Tabs leben jetzt im _tabs/-Ordner (private-folder-
+// Konvention). Vorher war 4× tabs/ + 1× _tabs/ parallel.
+import UebersichtTab from './_tabs/UebersichtTab'
+import KommunikationTab, { type FallTeilnehmer } from './_tabs/KommunikationTab'
+import TimelineTab from './_tabs/TimelineTab'
+import ProzessTab from './_tabs/ProzessTab'
 import DokumenteTab from './_tabs/DokumenteTab'
 import FallSidebar from './sidebar/FallSidebar'
 // AAR-307: Ad-hoc Task-Anlegen aus der Tab-Bar

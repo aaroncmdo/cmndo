@@ -114,7 +114,7 @@ export async function signSvVertrag({
   // BUG-92: Admin-Listing muss frische Daten sehen sobald der SV unterzeichnet hat,
   // sonst zeigt das Status-Badge dort weiter 'Wartet auf Vertrag'.
   revalidatePath('/admin/sachverstaendige', 'page')
-  revalidatePath('/admin/sachverstaendige/karte', 'page')
+  revalidatePath('/admin/sachverstaendige', 'page')
   return { success: true, vertrag_id: result.vertrag_id, pdf_path: result.pdf_path }
 }
 

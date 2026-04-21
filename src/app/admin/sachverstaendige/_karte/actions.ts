@@ -40,7 +40,7 @@ export async function reactivateGutachter(svId: string) {
   } catch (err) { console.error('[KFZ-151] resolveTasks reactivate:', err) }
 
   revalidatePath('/admin/sachverstaendige')
-  revalidatePath('/admin/sachverstaendige/karte')
+  revalidatePath('/admin/sachverstaendige')
 }
 
 export async function deactivateGutachter(svId: string, grund: string) {
@@ -62,7 +62,7 @@ export async function deactivateGutachter(svId: string, grund: string) {
   if (error) throw new Error(error.message)
 
   revalidatePath('/admin/sachverstaendige')
-  revalidatePath('/admin/sachverstaendige/karte')
+  revalidatePath('/admin/sachverstaendige')
 }
 
 export async function reassignCases(fromSvId: string, toSvId: string) {
@@ -126,7 +126,7 @@ export async function softDeleteGutachter(svId: string) {
   } catch { /* service role key may not be set, or user already deleted */ }
 
   revalidatePath('/admin/sachverstaendige')
-  revalidatePath('/admin/sachverstaendige/karte')
+  revalidatePath('/admin/sachverstaendige')
   revalidatePath('/admin/finance')
 }
 
@@ -175,7 +175,7 @@ export async function deleteGutachter(svId: string): Promise<{ success: boolean;
     }
 
     revalidatePath('/admin/sachverstaendige')
-    revalidatePath('/admin/sachverstaendige/karte')
+    revalidatePath('/admin/sachverstaendige')
     return { success: true }
   } catch (err) {
     console.error('[deleteGutachter] Fehler:', err)
@@ -253,7 +253,7 @@ export async function recalculateIsochrone(
 
     if (upErr) return { success: false, error: upErr.message }
 
-    revalidatePath('/admin/sachverstaendige/karte')
+    revalidatePath('/admin/sachverstaendige')
     if (entityType === 'sv') revalidatePath('/admin/sachverstaendige')
     if (entityType === 'organisation') {
       revalidatePath('/admin/organisationen')
