@@ -391,7 +391,8 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
     <div className="space-y-3">
       {/* KPIs */}
       <div className="grid grid-cols-2 gap-2">
-        <Link href="/admin/dispatch" className="bg-white border border-gray-200 rounded-xl p-3 hover:border-[#4573A2]/30 transition-colors">
+        {/* AAR-660: direkt auf /dispatch/dashboard — Alt-Pfad /admin/dispatch wird zwar per 301 gespiegelt, aber der Direktlink spart den Hop. */}
+        <Link href="/dispatch/dashboard" className="bg-white border border-gray-200 rounded-xl p-3 hover:border-[#4573A2]/30 transition-colors">
           <p className="text-lg font-bold text-[#0D1B3E]">{stats.leads}</p>
           <p className="text-[10px] text-gray-500">Offene Leads</p>
         </Link>
