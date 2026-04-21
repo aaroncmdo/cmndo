@@ -111,14 +111,26 @@ export default async function DispatchLeadDetail({
   // AAR-631: Wenn SA unterschrieben → Fall-ID laden damit der Shell einen
   // Banner mit Fallakte-Link anzeigen kann (Lead-Edit nach Conversion ist
   // gesperrt, Dispatcher muss zur Fallakte).
+  // AAR-653: Zusätzlich Vorschaden-Felder vom Fall in das Lead-Objekt mergen,
+  // damit Phase4 weiter die gewohnten Feldnamen lesen kann — Truth liegt nach
+  // AAR-580/582 auf faelle, nicht mehr auf leads.
   let fallIdFuerBanner: string | null = null
-  if (saUnterschrieben) {
-    const { data: fallRow } = await supabase
-      .from('faelle')
-      .select('id')
-      .eq('lead_id', id)
-      .maybeSingle()
-    fallIdFuerBanner = fallRow?.id ?? null
+  const { data: fallRow } = await supabase
+    .from('faelle')
+    .select(
+      'id, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, vorschaden_typ_b_bericht, cardentity_abfrage_am',
+    )
+    .eq('lead_id', id)
+    .order('erstellt_am', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (fallRow) {
+    if (saUnterschrieben) fallIdFuerBanner = (fallRow.id as string) ?? null
+    lead.hat_vorschaeden = fallRow.hat_vorschaeden ?? lead.hat_vorschaeden ?? null
+    lead.vorschaden_anzahl = fallRow.vorschaden_anzahl ?? null
+    lead.vorschaden_letzter_datum = fallRow.vorschaden_letzter_datum ?? null
+    lead.vorschaden_typ_b_bericht = fallRow.vorschaden_typ_b_bericht ?? null
+    lead.cardentity_abfrage_am = fallRow.cardentity_abfrage_am ?? null
   }
 
   let initialPhase: Phase = 1
