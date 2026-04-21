@@ -28,12 +28,17 @@ export default async function SachverstaendigeHubPage() {
   if (profile?.rolle !== 'admin') redirect('/login?error=Nur+Admins')
 
   // SVs mit Standort + Isochrone + Sidebar-Felder (Kontingent, Ablehnungen, Status)
-  const { data: svRaw } = await supabase
+  // AAR-657: profiles-Embed muss den FK explizit benennen — sachverstaendige
+  // hat 4 FKs auf profiles (profile_id + gesperrt_von_user_id +
+  // sa_vorlage_geprueft_von_user_id + verifiziert_von), Default-Embed wirft
+  // PGRST201 und liefert data=undefined → „0 von 0" in der UI.
+  const { data: svRaw, error: svErr } = await supabase
     .from('sachverstaendige')
     .select(
-      'id, paket, standort_lat, standort_lng, ist_aktiv, organisation_id, isochrone_polygon, paket_umkreis_km, gutachter_typ, offene_faelle, paket_faelle_genutzt, paket_faelle_gesamt, ablehnungen_30_tage, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, profiles(vorname, nachname)',
+      'id, paket, standort_lat, standort_lng, ist_aktiv, organisation_id, isochrone_polygon, paket_umkreis_km, gutachter_typ, offene_faelle, paket_faelle_genutzt, paket_faelle_gesamt, ablehnungen_30_tage, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, profiles!sachverstaendige_profile_id_fkey(vorname, nachname)',
     )
     .is('geloescht_am', null)
+  if (svErr) console.error('[admin/sachverstaendige] SV-Query:', svErr.message)
 
   type SvRow = {
     id: string

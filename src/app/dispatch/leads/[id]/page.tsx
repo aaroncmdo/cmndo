@@ -65,7 +65,7 @@ export default async function DispatchLeadDetail({
   // AAR-115 + AAR-134: aktiver SV-Termin — alle relevanten Status mitlesen
   const { data: svTerminRaw } = await supabase
     .from('gutachter_termine')
-    .select('id, sv_id, start_zeit, end_zeit, status, sv_ablehnung_grund, sv_vorgeschlagene_slots, sachverstaendige(profiles(vorname, nachname))')
+    .select('id, sv_id, start_zeit, end_zeit, status, sv_ablehnung_grund, sv_vorgeschlagene_slots, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
     .eq('lead_id', id)
     .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag', 'abgelehnt'])
     .order('created_at', { ascending: false })

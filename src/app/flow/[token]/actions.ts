@@ -831,7 +831,7 @@ export async function signSAandCreateFall(
   if (lead.gutachter_termin && lead.telefon) {
     try {
       const { data: terminRow } = await admin.from('gutachter_termine')
-        .select('id, sv_id, sachverstaendige(profiles(vorname, nachname))')
+        .select('id, sv_id, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
         .eq('fall_id', fall.id)
         .in('status', ['bestaetigt', 'reserviert'])
         .limit(1)

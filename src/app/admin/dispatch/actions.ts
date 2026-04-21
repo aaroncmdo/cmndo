@@ -430,7 +430,7 @@ export async function sendFlowLink(leadId: string) {
     // Template leer und Twilio wuerde die Nachricht mit leeren Placeholdern rendern.
     const { data: terminRaw } = await supabase
       .from('gutachter_termine')
-      .select('start_zeit, sv_id, sachverstaendige(profile_id, profiles(vorname, nachname))')
+      .select('start_zeit, sv_id, sachverstaendige(profile_id, profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
       .eq('lead_id', leadId)
       .in('status', ['reserviert', 'bestaetigt'])
       .order('start_zeit', { ascending: true })

@@ -50,7 +50,7 @@ export default async function AdminFaellePage() {
       ? supabase.from('profiles').select('id, vorname, nachname').in('id', kbIds)
       : Promise.resolve(emptyRes),
     svIds.length > 0
-      ? supabase.from('sachverstaendige').select('id, profiles(vorname, nachname)').in('id', svIds)
+      ? supabase.from('sachverstaendige').select('id, profiles!sachverstaendige_profile_id_fkey(vorname, nachname)').in('id', svIds)
       : Promise.resolve(emptyRes),
     fallIds.length > 0
       ? admin.from('nachrichten').select('fall_id').eq('gelesen', false).eq('sender_rolle', 'kunde').in('fall_id', fallIds)
