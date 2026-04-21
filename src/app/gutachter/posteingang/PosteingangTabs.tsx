@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { BellIcon, MessageCircleIcon } from 'lucide-react'
-import MitteilungenClient from '../mitteilungen/MitteilungenClient'
-import NachrichtenSvClient from '../nachrichten/NachrichtenSvClient'
+import MitteilungenClient from './_components/MitteilungenClient'
+import NachrichtenSvClient from './_components/NachrichtenSvClient'
 
 // AAR-370: Tab-Wrapper für /gutachter/posteingang. Delegiert an die
 // existierenden Clients MitteilungenClient + NachrichtenSvClient, damit

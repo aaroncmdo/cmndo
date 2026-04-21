@@ -30,6 +30,6 @@ export async function sendNachrichtFromSvInbox(
   })
   if (insertErr) return { success: false, error: insertErr.message }
 
-  revalidatePath('/gutachter/nachrichten', 'page')
+  revalidatePath('/gutachter/posteingang', 'page')
   return { success: true }
 }
