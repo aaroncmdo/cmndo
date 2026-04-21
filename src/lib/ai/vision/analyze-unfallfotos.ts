@@ -66,6 +66,19 @@ export async function appendUnfallfotoAndAnalyze(
     .from('leads')
     .update({
       sachschaden_beschreibung: beschreibung,
+      // AAR-unfallfotos Hard-Gate-Propagation: Wenn Haiku aussagekräftigen
+      // Text extrahiert (Längen-Check wird unten bei analyzeFotosToBeschreibung
+      // gefiltert — Fallback-Text startet mit „Schaden auf Foto nicht eindeutig"),
+      // setzen wir auch die Q5-Flags auf true, damit der Hard-Gate in Phase 1
+      // die Qualifizierung als erfüllt sieht (schaden_sichtbar + sachschaden_flag).
+      // Fallback-Text („nicht eindeutig erkennbar") triggert NICHT, weil der
+      // Prompt vorgibt dass Claude in dem Fall ausdrücklich so antwortet.
+      ...(beschreibung.toLowerCase().startsWith('schaden auf foto nicht')
+        ? {}
+        : {
+            schaden_sichtbar: true,
+            sachschaden_flag: true,
+          }),
       updated_at: new Date().toISOString(),
     })
     .eq('id', leadId)
