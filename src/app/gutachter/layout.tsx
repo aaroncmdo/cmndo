@@ -126,37 +126,19 @@ export default async function GutachterLayout({
           <Link href="/gutachter/verifizierung" className="underline font-semibold">Zur Verifizierung</Link>
         </div>
       )}
-      {/* AAR-359 W5: Tier-2-Frist überschritten (rot). */}
-      {!sv?.gesperrt_seit && sv?.verifizierung_status === 'frist_ueberschritten' && (
-        <div className="bg-red-50 border-b border-red-200 px-4 py-2 text-center text-xs text-red-700 font-medium">
-          Ihre 14-Tage-Frist für die Verifizierungs-Unterlagen ist abgelaufen. Bitte reichen Sie die fehlenden Dokumente umgehend nach.{' '}
-          <Link href="/gutachter/verifizierung" className="underline font-semibold">Zur Verifizierung</Link>
-        </div>
-      )}
       {/* AAR-359 W5: SA-Vorlage wird geprüft (gelb). */}
       {!sv?.gesperrt_seit && sv?.sa_vorlage_status === 'ausstehend' && (
         <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center text-xs text-amber-700 font-medium">
           Ihre SA-Vorlage wurde hochgeladen und wird vom Admin geprüft. Dispatch wird freigeschaltet, sobald die Freigabe erteilt ist.
         </div>
       )}
-      {/* AAR-359 W5: Tier-2-Countdown läuft (gelb) — wenn < 4 Tage bis
-          verifizierung_frist_bis. */}
-      {!sv?.gesperrt_seit
-        && sv?.verifizierung_status === 'ausstehend'
-        && sv.verifizierung_frist_bis
-        && (() => {
-          const tageOffen = Math.max(
-            0,
-            Math.ceil((new Date(sv.verifizierung_frist_bis).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
-          )
-          if (tageOffen > 4) return null
-          return (
-            <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center text-xs text-amber-700 font-medium">
-              Noch {tageOffen} Tag{tageOffen === 1 ? '' : 'e'} bis zum Ablauf Ihrer Verifizierungs-Frist. Bitte reichen Sie die fehlenden Dokumente rechtzeitig nach.{' '}
-              <Link href="/gutachter/verifizierung" className="underline font-semibold">Zur Verifizierung</Link>
-            </div>
-          )
-        })()}
+      {/* AAR-692: Tier-2-Banner (frist_ueberschritten + ausstehend-Countdown)
+          entfernt. Tier 2 (Berufshaftpflicht, Gewerbeanmeldung etc.) ist
+          kein Matching-Blocker — der Dispatchable-Filter lässt SVs durch
+          auch ohne Tier-2-Freigabe. Tier 2 schaltet lediglich das
+          „Verifiziert"-Badge frei (siehe Fallakte-Kunde-Anzeige). Ein
+          rotes Frist-Banner wäre irreführend. SA-Vorlage (Tier 1) bleibt
+          das einzige Hard-Gate mit sichtbarem Banner. */}
       {/* AAR-512: Onboarding-Unvollständig-Banner (generalisiert).
           Triggert wenn IRGENDEIN Onboarding-Step offen ist (nicht mehr nur
           Anzahlung). Klickbar, Deep-Link zum nächsten offenen Step. Wird
@@ -167,7 +149,6 @@ export default async function GutachterLayout({
         && !sv?.gesperrt_seit
         && sv?.sa_vorlage_status !== 'zurueckgewiesen'
         && sv?.sa_vorlage_status !== 'ausstehend'
-        && sv?.verifizierung_status !== 'frist_ueberschritten'
         && !isWillkommenPath
         && sv
         && !isOnboardingComplete(sv)

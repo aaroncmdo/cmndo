@@ -58,12 +58,20 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     // SV-Daten laden
     let svName: string | null = null
     let svTelefon: string | null = null
+    let svVerifiziert = false
     if (fall.sv_id) {
-      const { data: sv } = await admin.from('sachverstaendige').select('profile_id').eq('id', fall.sv_id).single()
+      // AAR-692: verifizierung_status mit laden → „Verifiziert"-Badge beim Kunden
+      // wenn der SV Tier 2 komplett durch hat (Berufshaftpflicht, Gewerbe etc.).
+      const { data: sv } = await admin
+        .from('sachverstaendige')
+        .select('profile_id, verifizierung_status')
+        .eq('id', fall.sv_id)
+        .single()
       if (sv?.profile_id) {
         const { data: p } = await admin.from('profiles').select('vorname, nachname, telefon').eq('id', sv.profile_id).single()
         if (p) { svName = [p.vorname, p.nachname].filter(Boolean).join(' ') || null; svTelefon = p.telefon }
       }
+      svVerifiziert = sv?.verifizierung_status === 'geprueft'
     }
 
     // KB-Daten laden
@@ -594,6 +602,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             fall={fall as Record<string, unknown>}
             svName={svName}
             svTelefon={svTelefon}
+            svVerifiziert={svVerifiziert}
             kbName={kbName}
             dokumente={dokumente ?? []}
             nachrichten={nachrichten ?? []}
