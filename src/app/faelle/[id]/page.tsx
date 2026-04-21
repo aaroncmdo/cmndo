@@ -75,7 +75,12 @@ export default async function FallaktePage({
       .is('geloescht_am', null)
       .order('hochgeladen_am'),
     // AAR-544 (C7): unified Event-Stream ersetzt die rohe timeline-Query
-    getFallEventStream(supabase, id),
+    // AAR-650: defensiv — Event-Stream-Fehler soll nicht die komplette Fallakte
+    // blockieren. Timeline-Tab zeigt dann ein leeres Array.
+    getFallEventStream(supabase, id).catch((err) => {
+      console.error('[AAR-650] getFallEventStream fehlgeschlagen:', err)
+      return []
+    }),
     supabase
       .from('pflichtdokumente')
       // AAR-327: zusätzlich angefordert_* + begruendung + frist für
@@ -135,7 +140,12 @@ export default async function FallaktePage({
   // AAR-541 (C4): Chat-Teilnehmer parallel zu den restlichen Queries hätten
   // gut gepasst, liegen aber auf einer anderen Client-Instanz (Admin) — daher
   // separat und erst nach Auth-Check.
-  const teilnehmer = await getChatTeilnehmer(id)
+  // AAR-650: defensiv — ein Fehler beim Auflösen der Teilnehmer soll nicht
+  // die ganze Fallakte blockieren (Kommunikations-Tab würde leer bleiben).
+  const teilnehmer = await getChatTeilnehmer(id).catch((err) => {
+    console.error('[AAR-650] getChatTeilnehmer fehlgeschlagen:', err)
+    return []
+  })
 
   // AAR-553: fall_dokumente → Legacy-Shape für DokumenteTab + systemDokumente
   const dokumenteLegacy = (dokumente ?? []).map(d => ({
