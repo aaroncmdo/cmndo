@@ -5,7 +5,7 @@ import {
   ReceiptIcon, AlertTriangleIcon, CheckCircle2Icon, ClockIcon, RefreshCwIcon,
   ExternalLinkIcon, XIcon,
 } from 'lucide-react'
-import { retryEinzug, markBezahlt, stornoAbrechnung, reIssueAbrechnung } from './_actions'
+import { retryEinzug, markBezahlt, stornoAbrechnung, reIssueAbrechnung } from './actions'
 
 // KFZ-149 Hund-D: Listing aller SV-Monatsabrechnungen mit Filter,
 // Detail-Modal, manuellem Retry und Manuell-bezahlt Button.

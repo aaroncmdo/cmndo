@@ -7,7 +7,7 @@
 import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useDispatchPhase } from '../_lib/phase-context'
-import { sendFlowLinkMultiChannel } from '../_actions'
+import { sendFlowLinkMultiChannel } from '../actions'
 import PhoneButton from '@/components/shared/PhoneButton'
 import {
   CheckCircle2Icon,

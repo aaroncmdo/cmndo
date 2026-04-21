@@ -13,9 +13,9 @@
 import { useMemo, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { AlertTriangleIcon } from 'lucide-react'
-import { manualPhaseOverride } from '@/app/faelle/[id]/actions/manual-phase-override'
+import { manualPhaseOverride } from '@/app/faelle/[id]/_actions/manual-phase-override'
 // AAR-664 (Folge): Konstante kommt aus non-`'use server'`-Datei.
-import { ALLOWED_PHASE_VALUES } from '@/app/faelle/[id]/actions/manual-phase-override.constants'
+import { ALLOWED_PHASE_VALUES } from '@/app/faelle/[id]/_actions/manual-phase-override.constants'
 import { SUBPHASE_VISIBILITY, PHASE_META } from '@/lib/fall/subphase-visibility'
 import {
   Dialog,

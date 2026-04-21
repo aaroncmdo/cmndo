@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { type TerminData } from './_actions'
+import { type TerminData } from './actions'
 import { terminAblehnen, terminGegenvorschlag, terminAnnehmen } from '@/lib/actions/termin-actions'
 
 type View = 'overview' | 'ablehnen' | 'gegenvorschlag' | 'done'
