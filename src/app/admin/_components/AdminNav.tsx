@@ -26,7 +26,10 @@ const NAV_ITEMS: NavItem[] = [
   // AAR-338: Dispatch hat eigenes Full-Screen-Layout — neuer Tab ohne Admin-Chrome
   { href: '/dispatch/dashboard', label: 'Dispatch', icon: GitBranchIcon, external: true },
   // AAR-526: Fälle-Hub mit Tabs (Liste/SLA/Statistiken/Kanzlei-Board/Reklamationen)
-  { href: '/admin/faelle', label: 'Fälle', icon: FolderOpenIcon },
+  // AAR-648: external analog zu Dispatch — Fälle-Portal öffnet in neuem Tab,
+  // damit Admin die Fallakten-Übersicht parallel zum aktuellen Fall offen
+  // halten kann (war für Dispatch bereits so, für Fälle inkonsistent).
+  { href: '/admin/faelle', label: 'Fälle', icon: FolderOpenIcon, external: true },
   // AAR-531: Aufgaben-Hub (Meine-Tasks + Alle-Tasks)
   { href: '/admin/aufgaben', label: 'Aufgaben', icon: ClipboardListIcon },
   // AAR-525: Nachrichten-Hub (MultiChannelChat pro Fall)
