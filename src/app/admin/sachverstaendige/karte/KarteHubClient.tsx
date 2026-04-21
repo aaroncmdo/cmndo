@@ -4,7 +4,6 @@
 // Drei Filter-Chips oberhalb der Karte, drei Marker-Farben, ein gemeinsames
 // Detail-Panel rechts. Communities/Orgs leiten auf ihre vollen Listing-Pages
 // weiter (Deep-Links bleiben erreichbar, Nav-Items sind konsolidiert).
-// AAR-xxx: Mapbox GL JS v3 ersetzt Google Maps — 3D-Gebäude + Standard-Style.
 
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
@@ -17,8 +16,6 @@ import { recalculateIsochrone } from './actions'
 import { createClient } from '@/lib/supabase/client'
 import { getSvStatus } from '@/lib/sv-status'
 import NeuSvDrawer from '../NeuSvDrawer'
-import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
-import type { Map as MapboxMap, Marker as MapboxMarker, GeoJSONSource as MapboxGeoJSONSource } from 'mapbox-gl'
 
 // AAR-130: GeoJSON-Polygon als optionales Feld auf jedem Marker
 export type GeoPolygon = { type: 'Polygon'; coordinates: number[][][] } | null
@@ -88,17 +85,33 @@ const PAKET_LABEL: Record<string, string> = {
 
 // AAR-audit: "onboarding" ergänzt damit SVs die Vertrag unterzeichnet haben
 // aber noch auf Anzahlung / Portal-Freischaltung warten gezielt gefiltert
-// werden können. Vorher wurden sie im „Aktiv"-Filter versteckt (Kriterium
-// war nur ist_aktiv+gesperrt_seit) und waren zwischen 20+ anderen SVs
-// unsichtbar — obwohl das Dashboard-Widget „Ausstehende Anzahlung" sie
-// eindeutig als handlungsbedürftig markiert.
-// AAR SV-Audit-Konsolidierung: „deaktivierte" gestrichen — `ist_aktiv=false`
-// bedeutet nun „noch im Onboarding" (Stripe noch nicht durch). Der Admin-
-// manuelle Toggle läuft über `gesperrt_seit`. Dadurch reicht: aktiv /
-// onboarding / gesperrt / alle.
+// werden können. AAR SV-Audit-Konsolidierung: „deaktivierte" raus — 4 Tabs
+// reichen (aktiv/onboarding/gesperrt/alle). ist_aktiv=false heißt jetzt
+// „Onboarding noch nicht durch" (Stripe-Hook setzt true nach Anzahlung).
+// Admin-Sperre läuft über `gesperrt_seit`.
 type SvStatusFilter = 'aktive' | 'onboarding' | 'gesperrt' | 'alle'
 
-const OVERLAY_LAYERS = ['sv', 'community', 'org'] as const
+const MAPS_SCRIPT_ID = 'google-maps-script'
+
+function loadGoogleMaps(apiKey: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (typeof google !== 'undefined' && google.maps) { resolve(); return }
+    if (document.getElementById(MAPS_SCRIPT_ID)) {
+      const check = setInterval(() => {
+        if (typeof google !== 'undefined' && google.maps) { clearInterval(check); resolve() }
+      }, 100)
+      return
+    }
+    const s = document.createElement('script')
+    s.id = MAPS_SCRIPT_ID
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`
+    s.async = true
+    s.defer = true
+    s.onload = () => resolve()
+    s.onerror = () => reject(new Error('Google Maps load failed'))
+    document.head.appendChild(s)
+  })
+}
 
 type Selected =
   | { kind: 'sv'; item: SvMarker }
@@ -115,14 +128,16 @@ export default function KarteHubClient({
   communities: CommunityMarker[]
   organisationen: OrgMarker[]
 }) {
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''
   const router = useRouter()
   const mapContainerRef = useRef<HTMLDivElement>(null)
-  const mapRef = useRef<MapboxMap | null>(null)
-  const markersRef = useRef<MapboxMarker[]>([])
-  // Click-Handler pro Entity-ID — wird in Overlay-Effect befüllt, im Map-Init konsumiert
-  const polygonClickHandlersRef = useRef<Map<string, () => void>>(new Map())
+  const mapRef = useRef<google.maps.Map | null>(null)
+  const markersRef = useRef<google.maps.Marker[]>([])
+  // AAR-130: Polygon-Overlays separat tracken damit sie unabhängig von Markern
+  // gecleant werden können (Toggle "Einsatzgebiete" + verschiedene Layer)
+  const polygonsRef = useRef<google.maps.Polygon[]>([])
   // AAR-131 (KFZ-158): Live-Marker für unterwegs-SVs separat tracken
-  const liveMarkersRef = useRef<Map<string, MapboxMarker>>(new Map())
+  const liveMarkersRef = useRef<Map<string, google.maps.Marker>>(new Map())
   const [mapReady, setMapReady] = useState(false)
 
   const [showSvs, setShowSvs] = useState(true)
@@ -149,11 +164,8 @@ export default function KarteHubClient({
   // das Ausstehende-Anzahlung-Widget als Zielgruppe hat.
   const filteredSvs = useMemo(() => {
     return svs.filter((sv) => {
-      // AAR SV-Audit-Konsolidierung: Status-Bucket anhand der 3 Konditionen:
-      //   gesperrt_seit IS NOT NULL → gesperrt (höchste Prio)
-      //   !portal_zugang_freigeschaltet ODER !ist_aktiv → onboarding
-      //   sonst → aktiv
       const istGesperrt = !!sv.gesperrtSeit
+      // Status-Bucket: gesperrt > onboarding (!portal OR !ist_aktiv) > aktiv
       const istOnboarding = !istGesperrt && (sv.portalZugangFreigeschaltet !== true || sv.istAktiv === false)
       if (svFilter === 'gesperrt' && !istGesperrt) return false
       if (svFilter === 'aktive' && (istGesperrt || istOnboarding)) return false
@@ -164,242 +176,167 @@ export default function KarteHubClient({
     })
   }, [svs, svFilter, typFilter, search])
 
-  // ─── Map init (einmalig) ───────────────────────────────────────────────────
+  // ─── Map init (runs once) ──────────────────────────────────────
   useEffect(() => {
-    if (!mapContainerRef.current) return
-
-    const ok = ensureMapboxInitialized()
-    if (!ok) return
-
-    const map = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: 'mapbox://styles/mapbox/standard',
-      center: [10.4515, 51.1657],
-      zoom: 5.5,
-      pitch: 50,
-      bearing: -10,
-      antialias: true,
-    }) as MapboxMap
-
-    mapRef.current = map
-
-    map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'top-right')
-
-    map.on('load', () => {
-      // 3D-Gebäude + Atmosphäre im Mapbox Standard-Style aktivieren
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ;(map as any).setConfigProperty('basemap', 'lightPreset', 'day')
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ;(map as any).setConfigProperty('basemap', 'show3dObjects', true)
-      } catch {
-        // Standard-Style-Config optional — kein harter Fehler
-      }
-
-      // GeoJSON-Quellen + Layer für Isochrone-Overlays (SV / Community / Org)
-      for (const layer of OVERLAY_LAYERS) {
-        map.addSource(`${layer}-overlays`, {
-          type: 'geojson',
-          data: { type: 'FeatureCollection', features: [] },
-          generateId: true,
-        })
-        map.addLayer({
-          id: `${layer}-overlays-fill`,
-          type: 'fill',
-          source: `${layer}-overlays`,
-          paint: {
-            'fill-color': ['get', 'color'],
-            'fill-opacity': [
-              'case',
-              ['boolean', ['feature-state', 'hover'], false],
-              0.28,
-              0.12,
-            ],
-          },
-        })
-        map.addLayer({
-          id: `${layer}-overlays-line`,
-          type: 'line',
-          source: `${layer}-overlays`,
-          paint: {
-            'line-color': ['get', 'color'],
-            'line-width': [
-              'case',
-              ['boolean', ['feature-state', 'hover'], false],
-              3,
-              1.8,
-            ],
-            'line-opacity': 0.7,
-          },
-        })
-      }
-
-      // Hover-State pro Overlay-Layer
-      const hoverState: Record<string, number | string | null> = { sv: null, community: null, org: null }
-
-      for (const layer of OVERLAY_LAYERS) {
-        const fillId = `${layer}-overlays-fill`
-        const src = `${layer}-overlays`
-
-        map.on('mousemove', fillId, (e) => {
-          map.getCanvas().style.cursor = 'pointer'
-          const fid = e.features?.[0]?.id
-          if (hoverState[layer] !== null && hoverState[layer] !== fid) {
-            map.setFeatureState({ source: src, id: hoverState[layer]! }, { hover: false })
-          }
-          hoverState[layer] = fid ?? null
-          if (fid !== undefined && fid !== null) {
-            map.setFeatureState({ source: src, id: fid }, { hover: true })
-          }
-        })
-
-        map.on('mouseleave', fillId, () => {
-          map.getCanvas().style.cursor = ''
-          if (hoverState[layer] !== null) {
-            map.setFeatureState({ source: src, id: hoverState[layer]! }, { hover: false })
-            hoverState[layer] = null
-          }
-        })
-
-        map.on('click', fillId, (e) => {
-          const entityId = e.features?.[0]?.properties?.entityId as string | undefined
-          if (entityId) polygonClickHandlersRef.current.get(entityId)?.()
-        })
-      }
-
+    if (!apiKey || !mapContainerRef.current) return
+    let cancelled = false
+    loadGoogleMaps(apiKey).then(() => {
+      if (cancelled || !mapContainerRef.current || mapRef.current) return
+      mapRef.current = new google.maps.Map(mapContainerRef.current, {
+        center: { lat: 51.1657, lng: 10.4515 },
+        zoom: 6,
+        gestureHandling: 'greedy',
+        disableDefaultUI: false,
+        styles: [
+          { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#c9d8ef' }] },
+          { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#f0f0f0' }] },
+          { featureType: 'road', elementType: 'geometry.fill', stylers: [{ color: '#ffffff' }] },
+          { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+        ],
+      })
       setMapReady(true)
-    })
-
+    }).catch((err) => console.error('[KarteHub]', err))
     return () => {
-      setMapReady(false)
-      map.remove()
-      mapRef.current = null
+      cancelled = true
     }
-  }, [])
+  }, [apiKey])
 
-  // ─── Marker render (dep: showSvs/Communities/Orgs + Daten) ────────────────
+  // ─── Marker render (dep: showSvs/Communities/Orgs + data) ──────
   useEffect(() => {
     if (!mapRef.current || !mapReady) return
     const map = mapRef.current
 
-    // Alte Marker entfernen
-    markersRef.current.forEach((m) => m.remove())
+    // Cleanup old markers
+    markersRef.current.forEach((m) => {
+      google.maps.event.clearInstanceListeners(m)
+      m.setMap(null)
+    })
     markersRef.current = []
 
-    function makeCircleEl(color: string, sizePx: number, title: string): HTMLDivElement {
-      const el = document.createElement('div')
-      el.style.cssText = [
-        `width:${sizePx}px`,
-        `height:${sizePx}px`,
-        `background:${color}`,
-        'border:2.5px solid #fff',
-        'border-radius:50%',
-        'cursor:pointer',
-        'box-shadow:0 1px 5px rgba(0,0,0,.35)',
-        'transition:transform .15s',
-      ].join(';')
-      el.title = title
-      el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.25)' })
-      el.addEventListener('mouseleave', () => { el.style.transform = '' })
-      return el
-    }
-
     function addMarker(
-      lng: number,
-      lat: number,
+      pos: { lat: number; lng: number },
       color: string,
-      sizePx: number,
+      scale: number,
       title: string,
       onClick: () => void,
     ) {
-      const el = makeCircleEl(color, sizePx, title)
-      el.addEventListener('click', (e) => { e.stopPropagation(); onClick() })
-      const marker = new mapboxgl.Marker({ element: el })
-        .setLngLat([lng, lat])
-        .addTo(map) as MapboxMarker
+      const marker = new google.maps.Marker({
+        position: pos,
+        map,
+        title,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale,
+          fillColor: color,
+          fillOpacity: 1,
+          strokeColor: '#fff',
+          strokeWeight: 2,
+        },
+      })
+      marker.addListener('click', onClick)
       markersRef.current.push(marker)
     }
 
     if (showSvs) {
+      // AAR-131: Marker nutzen TYP_COLORS, deaktivierte SVs bleiben rot+gedimt.
+      // Filter wird angewendet — Sidebar + Karte zeigen identischen Subset.
       for (const sv of filteredSvs) {
         if (sv.lat == null || sv.lng == null) continue
-        const color = sv.istAktiv
-          ? (TYP_COLORS[sv.gutachterTyp ?? 'kfz-gutachter']?.fill ?? LAYER.sv.fill)
-          : '#ef4444'
-        addMarker(sv.lng, sv.lat, color, 14, sv.name, () => setSelected({ kind: 'sv', item: sv }))
+        const typColor = TYP_COLORS[sv.gutachterTyp ?? 'kfz-gutachter']?.fill ?? LAYER.sv.fill
+        addMarker(
+          { lat: sv.lat, lng: sv.lng },
+          sv.istAktiv ? typColor : '#ef4444',
+          7,
+          sv.name,
+          () => setSelected({ kind: 'sv', item: sv }),
+        )
       }
     }
 
     if (showCommunities) {
       for (const c of communities) {
         if (c.lat == null || c.lng == null) continue
-        addMarker(c.lng, c.lat, LAYER.community.fill, 18, c.name, () => setSelected({ kind: 'community', item: c }))
+        addMarker(
+          { lat: c.lat, lng: c.lng },
+          LAYER.community.fill,
+          9,
+          c.name,
+          () => setSelected({ kind: 'community', item: c }),
+        )
       }
     }
 
     if (showOrgs) {
       for (const o of organisationen) {
         if (o.lat == null || o.lng == null) continue
-        addMarker(o.lng, o.lat, LAYER.org.fill, 18, o.name, () => setSelected({ kind: 'org', item: o }))
+        addMarker(
+          { lat: o.lat, lng: o.lng },
+          LAYER.org.fill,
+          9,
+          o.name,
+          () => setSelected({ kind: 'org', item: o }),
+        )
       }
     }
   }, [mapReady, showSvs, showCommunities, showOrgs, filteredSvs, communities, organisationen])
 
-  // ─── Polygon-Overlays (AAR-130) ────────────────────────────────────────────
+  // ─── Polygon-Overlays render (AAR-130) ─────────────────────────
+  // Hover-Verhalten + Layer-Farben + clickable=false damit Marker-Click durchgeht.
   useEffect(() => {
     if (!mapRef.current || !mapReady) return
     const map = mapRef.current
 
-    polygonClickHandlersRef.current.clear()
+    // Cleanup
+    polygonsRef.current.forEach((p) => {
+      google.maps.event.clearInstanceListeners(p)
+      p.setMap(null)
+    })
+    polygonsRef.current = []
 
-    function buildFeatures<T extends { id: string; isochrone?: GeoPolygon }>(
-      items: T[],
-      visible: boolean,
-      color: (item: T) => string,
-      handler: (item: T) => void,
+    if (!showOverlays) return
+
+    function addPolygon(
+      geo: GeoPolygon,
+      color: string,
+      layerVisible: boolean,
+      onClick?: () => void,
     ) {
-      if (!visible) return []
-      return items.flatMap((item) => {
-        const coords = item.isochrone?.coordinates?.[0]
-        if (!coords || coords.length < 3) return []
-        polygonClickHandlersRef.current.set(item.id, () => handler(item))
-        return [{
-          type: 'Feature' as const,
-          // isochrone ist hier garantiert non-null (coords-Check oben)
-          geometry: item.isochrone!,
-          properties: { color: color(item), entityId: item.id },
-        }]
+      if (!layerVisible || !geo || !geo.coordinates?.[0]) return
+      // GeoJSON [lng, lat] → Google Maps {lat, lng}
+      const path = geo.coordinates[0].map(([lng, lat]) => ({ lat, lng }))
+      if (path.length < 3) return
+      const polygon = new google.maps.Polygon({
+        paths: path,
+        map,
+        fillColor: color,
+        fillOpacity: 0.12,
+        strokeColor: color,
+        strokeOpacity: 0.6,
+        strokeWeight: 2,
+        // AAR-131: clickable damit Polygon-Click das Detail-Panel öffnet
+        clickable: !!onClick,
       })
+      polygon.addListener('mouseover', () => polygon.setOptions({ fillOpacity: 0.25, strokeWeight: 3 }))
+      polygon.addListener('mouseout', () => polygon.setOptions({ fillOpacity: 0.12, strokeWeight: 2 }))
+      if (onClick) polygon.addListener('click', onClick)
+      polygonsRef.current.push(polygon)
     }
 
-    const svFeatures = buildFeatures(
-      filteredSvs,
-      showOverlays && showSvs,
-      (sv) => TYP_COLORS[sv.gutachterTyp ?? 'kfz-gutachter']?.fill ?? LAYER.sv.fill,
-      (sv) => setSelected({ kind: 'sv', item: sv }),
-    )
-    const communityFeatures = buildFeatures(
-      communities,
-      showOverlays && showCommunities,
-      () => LAYER.community.fill,
-      (c) => setSelected({ kind: 'community', item: c }),
-    )
-    const orgFeatures = buildFeatures(
-      organisationen,
-      showOverlays && showOrgs,
-      () => LAYER.org.fill,
-      (o) => setSelected({ kind: 'org', item: o }),
-    )
-
-    ;(map.getSource('sv-overlays') as MapboxGeoJSONSource | undefined)
-      ?.setData({ type: 'FeatureCollection', features: svFeatures })
-    ;(map.getSource('community-overlays') as MapboxGeoJSONSource | undefined)
-      ?.setData({ type: 'FeatureCollection', features: communityFeatures })
-    ;(map.getSource('org-overlays') as MapboxGeoJSONSource | undefined)
-      ?.setData({ type: 'FeatureCollection', features: orgFeatures })
+    // AAR-131: SV-Polygone respektieren den Status/Typ-Filter (nur filteredSvs)
+    for (const sv of filteredSvs) {
+      addPolygon(sv.isochrone ?? null, TYP_COLORS[sv.gutachterTyp ?? 'kfz-gutachter']?.fill ?? LAYER.sv.fill, showSvs, () => setSelected({ kind: 'sv', item: sv }))
+    }
+    for (const c of communities) {
+      addPolygon(c.isochrone ?? null, LAYER.community.fill, showCommunities, () => setSelected({ kind: 'community', item: c }))
+    }
+    for (const o of organisationen) {
+      addPolygon(o.isochrone ?? null, LAYER.org.fill, showOrgs, () => setSelected({ kind: 'org', item: o }))
+    }
   }, [mapReady, showOverlays, showSvs, showCommunities, showOrgs, filteredSvs, communities, organisationen])
 
-  // ─── KFZ-158: SV Live-Positionen via Realtime (AAR-131 migriert) ──────────
+  // ─── KFZ-158: SV Live-Positionen via Realtime (AAR-131 migriert) ────
+  // Forward-Arrow-Marker in Blau, 30-Min-Cutoff für initiale Positionen.
+  // Realtime-INSERTs auf sv_live_position aktualisieren oder fügen Marker ein.
   useEffect(() => {
     if (!mapRef.current || !mapReady) return
     const map = mapRef.current
@@ -408,27 +345,28 @@ export default function KarteHubClient({
     function upsertLiveMarker(svId: string, lat: number, lng: number, name: string) {
       const existing = liveMarkersRef.current.get(svId)
       if (existing) {
-        existing.setLngLat([lng, lat])
+        existing.setPosition({ lat, lng })
         return
       }
-      // Pfeil-förmiges Live-Marker-Element (blau, rotiert)
-      const el = document.createElement('div')
-      el.style.cssText = [
-        'width:14px', 'height:14px',
-        'background:#3B82F6',
-        'border:2px solid #fff',
-        'clip-path:polygon(50% 0%,0% 100%,100% 100%)',
-        'cursor:default',
-        'box-shadow:0 1px 4px rgba(0,0,0,.3)',
-      ].join(';')
-      el.title = `${name} (Live)`
-      const marker = new mapboxgl.Marker({ element: el })
-        .setLngLat([lng, lat])
-        .addTo(map) as MapboxMarker
+      const marker = new google.maps.Marker({
+        position: { lat, lng },
+        map,
+        icon: {
+          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+          scale: 5,
+          fillColor: '#3B82F6',
+          fillOpacity: 1,
+          strokeColor: '#fff',
+          strokeWeight: 2,
+          rotation: 0,
+        },
+        title: `${name} (Live)`,
+        zIndex: 30,
+      })
       liveMarkersRef.current.set(svId, marker)
     }
 
-    // Initiale Positionen: letzte pro SV, 30-Min-Cutoff
+    // Initial: letzte Position pro SV laden, 30-Min-Cutoff
     supabase
       .from('sv_live_position')
       .select('sv_id, lat, lng, updated_at')
@@ -438,7 +376,11 @@ export default function KarteHubClient({
         const latest = new Map<string, { lat: number; lng: number; updated_at: string }>()
         for (const row of data) {
           if (!latest.has(row.sv_id)) {
-            latest.set(row.sv_id, { lat: Number(row.lat), lng: Number(row.lng), updated_at: row.updated_at })
+            latest.set(row.sv_id, {
+              lat: Number(row.lat),
+              lng: Number(row.lng),
+              updated_at: row.updated_at,
+            })
           }
         }
         const cutoff = Date.now() - 30 * 60 * 1000
@@ -465,7 +407,7 @@ export default function KarteHubClient({
 
     return () => {
       supabase.removeChannel(channel)
-      for (const m of liveMarkersRef.current.values()) m.remove()
+      for (const m of liveMarkersRef.current.values()) m.setMap(null)
       liveMarkersRef.current.clear()
     }
   }, [mapReady, svs])
@@ -474,14 +416,21 @@ export default function KarteHubClient({
   function panToSv(sv: SvMarker) {
     setSelected({ kind: 'sv', item: sv })
     if (mapRef.current && sv.lat != null && sv.lng != null) {
-      mapRef.current.flyTo({ center: [sv.lng, sv.lat], zoom: 12, pitch: 50 })
+      mapRef.current.panTo({ lat: sv.lat, lng: sv.lng })
+      mapRef.current.setZoom(12)
     }
   }
 
-  // AAR SV-Audit-Konsolidierung: Status-Counts für das Banner oben.
-  // Zeigt Admin die Bucket-Verteilung + One-Click-Switch zum Onboarding-Filter
-  // wenn mindestens 1 SV im Onboarding ist (häufige Ursache für „neu angelegt
-  // nicht sichtbar" weil Default-Filter „Aktiv" ist).
+  if (!apiKey) {
+    return (
+      <div className="py-8 text-center text-sm text-red-600">
+        NEXT_PUBLIC_GOOGLE_MAPS_KEY fehlt — Karte kann nicht geladen werden.
+      </div>
+    )
+  }
+
+  // AAR SV-Audit-Konsolidierung: Status-Counts für Banner + One-Click-Filter-Toggle
+  // wenn Onboarding-SVs im Default-Aktiv-Filter unsichtbar sind.
   const statusCounts = svs.reduce(
     (acc, sv) => {
       if (sv.gesperrtSeit) acc.gesperrt++
@@ -494,10 +443,9 @@ export default function KarteHubClient({
   const bannerEmpfehlungOnboarding = svFilter === 'aktive' && statusCounts.onboarding > 0
 
   return (
-    // AAR-123: h-full aus dem Layout-Parent (flex-1 min-h-0) statt viewport-basiert
     <div className="h-full flex flex-col bg-[#f8f9fb] rounded-xl overflow-hidden border border-gray-200">
-      {/* AAR SV-Audit-Konsolidierung: Status-Banner — zeigt Bucket-Counts
-          und bietet One-Click-Filter-Toggle wenn Onboarding-SVs versteckt sind. */}
+      {/* AAR SV-Audit-Konsolidierung: Status-Banner — zeigt Bucket-Counts und
+          bietet One-Click-Filter-Toggle wenn Onboarding-SVs versteckt sind. */}
       {bannerEmpfehlungOnboarding && (
         <div className="flex items-center gap-3 px-4 py-2 bg-amber-50 border-b border-amber-200 text-xs flex-shrink-0">
           <span className="text-amber-800">
@@ -633,8 +581,7 @@ function SvSidebar({
           />
         </div>
       </div>
-      {/* Status-Filter (AAR SV-Audit-Konsolidierung: 4 statt 5 Tabs —
-          „Deaktiv." raus, weil ist_aktiv=false jetzt Onboarding-Status bedeutet). */}
+      {/* 4-Stufen-Status-Filter */}
       <div className="px-4 pb-2 flex gap-1">
         {([
           { k: 'aktive', label: 'Aktiv' },
