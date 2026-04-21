@@ -13,7 +13,8 @@ import {
   CarFrontIcon, ShieldCheckIcon, Building2Icon, UserPlusIcon,
   XIcon, MapPinIcon, ArrowRightIcon, LayersIcon, RefreshCwIcon, SearchIcon,
 } from 'lucide-react'
-import { recalculateIsochrone } from './actions'
+import { recalculateIsochrone, getSvAktiverTermin } from './actions'
+import type { SvAktiverTerminResult } from './actions.types'
 import { createClient } from '@/lib/supabase/client'
 import { getSvStatus } from '@/lib/sv-status'
 import NeuSvDrawer from '../NeuSvDrawer'
@@ -91,6 +92,16 @@ const TYP_COLORS: Record<string, { fill: string; label: string }> = {
   'dat-gutachter': { fill: '#f97316', label: 'DAT' },
   akademie: { fill: '#22c55e', label: 'Akademie' },
   gutachterbuero: { fill: '#a855f7', label: 'Büro' },
+}
+
+// AAR-669-P3: Mini HTML-Escape für Popup-Inhalte
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
 }
 
 // AAR-669-P2: Initialen aus Vor-/Nachname (Fallback wenn kein Avatar vorhanden).
@@ -184,6 +195,25 @@ export default function KarteHubClient({
   const [typFilter, setTypFilter] = useState<string | null>(null) // null = Alle
   // AAR-151: NeuSvDrawer (Slide-out) statt Navigation zur alten /neu-Page
   const [drawerOpen, setDrawerOpen] = useState(false)
+
+  // AAR-669-P3: Route zum aktiven Termin des SVs. Wenn geladen, zeichnet der
+  // Map-Effect unten einen GeoJSON-Linien-Layer + Ziel-Marker + Popup. null =
+  // keine Route sichtbar. Load-Status blockiert den Button während der Fetch.
+  const [activeRoute, setActiveRoute] = useState<
+    | {
+        svId: string
+        termin: Extract<SvAktiverTerminResult, { ok: true }>['termin']
+        ziel: Extract<SvAktiverTerminResult, { ok: true }>['ziel']
+        svPos: Extract<SvAktiverTerminResult, { ok: true }>['sv']
+        geojson: { type: 'Feature'; geometry: { type: 'LineString'; coordinates: number[][] } }
+        distanceMeters: number
+        durationSeconds: number
+      }
+    | null
+  >(null)
+  const [routeLoadingFor, setRouteLoadingFor] = useState<string | null>(null)
+  const [routeError, setRouteError] = useState<string | null>(null)
+  const routeTargetMarkerRef = useRef<MapboxMarker | null>(null)
 
   // AAR-131 + AAR-151: gefilterte SVs für Sidebar + Marker.
   // typFilter=null → kein Typ-Filter aktiv; sonst genau dieser gutachter_typ.
@@ -645,6 +675,141 @@ export default function KarteHubClient({
       ?.setData({ type: 'FeatureCollection', features: orgFeatures })
   }, [mapReady, showOverlays, showSvs, showCommunities, showOrgs, filteredSvs, communities, organisationen])
 
+  // ─── AAR-669-P3: Route-Layer (LineString + Ziel-Pin) ──────────────────────
+  useEffect(() => {
+    if (!mapRef.current || !mapReady) return
+    const map = mapRef.current
+    const SOURCE_ID = 'aar669-route'
+    const GLOW_ID = 'aar669-route-glow'
+    const LINE_ID = 'aar669-route-line'
+
+    // Clear helper
+    function clearLayer() {
+      if (map.getLayer(LINE_ID)) map.removeLayer(LINE_ID)
+      if (map.getLayer(GLOW_ID)) map.removeLayer(GLOW_ID)
+      if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID)
+      if (routeTargetMarkerRef.current) {
+        routeTargetMarkerRef.current.remove()
+        routeTargetMarkerRef.current = null
+      }
+    }
+
+    if (!activeRoute) {
+      clearLayer()
+      return
+    }
+
+    // Source + Layers anlegen (oder Daten erneuern)
+    const existing = map.getSource(SOURCE_ID) as MapboxGeoJSONSource | undefined
+    if (existing) {
+      existing.setData(activeRoute.geojson as GeoJSON.Feature)
+    } else {
+      map.addSource(SOURCE_ID, {
+        type: 'geojson',
+        data: activeRoute.geojson as GeoJSON.Feature,
+        lineMetrics: true,
+      })
+      // Außen-Glow-Layer (Blau, blur)
+      map.addLayer({
+        id: GLOW_ID,
+        type: 'line',
+        source: SOURCE_ID,
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: {
+          'line-color': '#3B82F6',
+          'line-width': 12,
+          'line-blur': 8,
+          'line-opacity': 0.55,
+        },
+      })
+      // Inner-Line
+      map.addLayer({
+        id: LINE_ID,
+        type: 'line',
+        source: SOURCE_ID,
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: {
+          'line-color': '#fff',
+          'line-width': 4,
+          'line-opacity': 0.95,
+          // Gradient für „Laufrichtung" vom SV zum Ziel
+          'line-gradient': [
+            'interpolate',
+            ['linear'],
+            ['line-progress'],
+            0,
+            '#3B82F6',
+            1,
+            '#60A5FA',
+          ],
+        },
+      })
+    }
+
+    // Ziel-Pin (Popup mit ETA + Termin-Typ)
+    const { ziel, termin, distanceMeters, durationSeconds } = activeRoute
+    const pinEl = document.createElement('div')
+    pinEl.style.cssText = [
+      'position:relative',
+      'width:36px',
+      'height:36px',
+      'pointer-events:auto',
+    ].join(';')
+    const pinDot = document.createElement('div')
+    pinDot.style.cssText = [
+      'width:36px',
+      'height:36px',
+      'border-radius:50% 50% 50% 0',
+      'background:#3B82F6',
+      'border:3px solid #fff',
+      'box-shadow:0 0 12px 0 #3B82F688, 0 3px 8px rgba(0,0,0,.35)',
+      'transform:rotate(-45deg)',
+      'display:flex',
+      'align-items:center',
+      'justify-content:center',
+      'color:#fff',
+      'font-size:16px',
+      'font-weight:700',
+    ].join(';')
+    const pinInner = document.createElement('div')
+    pinInner.textContent = '📍'
+    pinInner.style.cssText = 'transform:rotate(45deg);'
+    pinDot.appendChild(pinInner)
+    pinEl.appendChild(pinDot)
+
+    const km = (distanceMeters / 1000).toFixed(1)
+    const min = Math.round(durationSeconds / 60)
+    const typLabel =
+      termin.typ === 'video' ? 'Video' : termin.typ === 'vor_ort' ? 'Vor-Ort' : (termin.typ ?? 'Termin')
+    const popupHtml = `
+      <div style="font-family: Montserrat, system-ui, sans-serif; min-width: 200px;">
+        <p style="font-size:10px; color:#6b7280; margin:0; text-transform:uppercase; letter-spacing:.05em;">
+          Aktiver Termin · ${typLabel}
+        </p>
+        <p style="font-size:13px; font-weight:600; color:#0D1B3E; margin:2px 0 0 0;">
+          ${termin.fallNummer ?? '—'}${termin.kundeName ? ' · ' + escapeHtml(termin.kundeName) : ''}
+        </p>
+        <p style="font-size:12px; color:#374151; margin:4px 0 0 0;">${escapeHtml(ziel.adresse)}</p>
+        <div style="margin-top:8px; display:flex; gap:8px; font-size:11px; color:#4573A2; font-weight:600;">
+          <span>🛣️ ${km} km</span>
+          <span>⏱️ ~${min} Min</span>
+        </div>
+      </div>
+    `
+    const popup = new mapboxgl.Popup({ offset: 24, closeButton: false }).setHTML(popupHtml)
+    const marker = new mapboxgl.Marker({ element: pinEl, anchor: 'bottom' })
+      .setLngLat([ziel.lng, ziel.lat])
+      .setPopup(popup)
+      .addTo(map) as MapboxMarker
+    popup.addTo(map)
+    routeTargetMarkerRef.current = marker
+
+    return () => {
+      clearLayer()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapReady, activeRoute])
+
   // ─── KFZ-158: SV Live-Positionen via Realtime (AAR-131 migriert) ──────────
   useEffect(() => {
     if (!mapRef.current || !mapReady) return
@@ -772,6 +937,89 @@ export default function KarteHubClient({
     }
   }, [mapReady, svs])
 
+  // AAR-669-P3: Route-Load-Handler. Holt aktiven Termin via Server-Action,
+  // ruft Mapbox Directions API fürs Street-Routing + zeichnet das LineString-
+  // GeoJSON in die Map. Popup + Ziel-Pin werden im useEffect unten aus
+  // activeRoute abgeleitet.
+  async function handleZeigeRoute(svId: string): Promise<void> {
+    setRouteError(null)
+    setRouteLoadingFor(svId)
+    try {
+      const r = await getSvAktiverTermin(svId)
+      if (!r.ok) {
+        const msg =
+          r.reason === 'no_termin'
+            ? 'Kein aktiver Termin heute'
+            : r.reason === 'no_fall'
+              ? 'Termin ist keinem Fall zugeordnet'
+              : r.reason === 'no_coords'
+                ? 'Besichtigungsort hat keine Koordinaten'
+                : 'SV-Standort fehlt'
+        setRouteError(msg)
+        return
+      }
+      // Mapbox Directions: streckenbasiertes Routing inkl. Geometry
+      const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+      if (!token) {
+        setRouteError('Mapbox-Token fehlt (NEXT_PUBLIC_MAPBOX_TOKEN)')
+        return
+      }
+      const url =
+        `https://api.mapbox.com/directions/v5/mapbox/driving/` +
+        `${r.sv.lng},${r.sv.lat};${r.ziel.lng},${r.ziel.lat}` +
+        `?geometries=geojson&overview=full&steps=false&access_token=${token}`
+      const resp = await fetch(url)
+      if (!resp.ok) {
+        setRouteError(`Directions-API ${resp.status}`)
+        return
+      }
+      const json = (await resp.json()) as {
+        routes?: Array<{
+          geometry: { type: 'LineString'; coordinates: number[][] }
+          distance: number
+          duration: number
+        }>
+      }
+      const route = json.routes?.[0]
+      if (!route) {
+        setRouteError('Keine Route verfügbar')
+        return
+      }
+      setActiveRoute({
+        svId,
+        termin: r.termin,
+        ziel: r.ziel,
+        svPos: r.sv,
+        geojson: { type: 'Feature', geometry: route.geometry },
+        distanceMeters: route.distance,
+        durationSeconds: route.duration,
+      })
+      // Auto-fit viewport auf die komplette Route
+      if (mapRef.current) {
+        const bounds = new mapboxgl.LngLatBounds(
+          [r.sv.lng, r.sv.lat],
+          [r.sv.lng, r.sv.lat],
+        )
+        bounds.extend([r.ziel.lng, r.ziel.lat])
+        for (const c of route.geometry.coordinates) bounds.extend(c as [number, number])
+        mapRef.current.fitBounds(bounds, {
+          padding: { top: 120, right: 120, bottom: 120, left: 380 },
+          duration: 1200,
+          pitch: 45,
+        })
+      }
+    } catch (err) {
+      setRouteError(err instanceof Error ? err.message : 'Unbekannter Fehler')
+    } finally {
+      setRouteLoadingFor(null)
+    }
+  }
+
+  function handleClearRoute(): void {
+    setActiveRoute(null)
+    setRouteError(null)
+  }
+
   // AAR-131: Pan + Zoom bei Klick in Sidebar-Liste.
   // AAR-669-P1: Smooth flyTo mit Cockpit-Pitch + längerem Ease für
   // cineastische Transition.
@@ -890,7 +1138,16 @@ export default function KarteHubClient({
 
         {selected && (
           <aside className="w-80 border-l border-gray-200 bg-white overflow-y-auto flex-shrink-0">
-            <DetailPanel selected={selected} onClose={() => setSelected(null)} onRecalculated={() => router.refresh()} />
+            <DetailPanel
+              selected={selected}
+              onClose={() => setSelected(null)}
+              onRecalculated={() => router.refresh()}
+              activeRouteSvId={activeRoute?.svId ?? null}
+              routeLoadingFor={routeLoadingFor}
+              routeError={routeError}
+              onZeigeRoute={handleZeigeRoute}
+              onClearRoute={handleClearRoute}
+            />
           </aside>
         )}
       </div>
@@ -1135,10 +1392,22 @@ function DetailPanel({
   selected,
   onClose,
   onRecalculated,
+  // AAR-669-P3: Route-Props — nur für SV-Ansicht relevant, Organisationen
+  // ignorieren sie.
+  activeRouteSvId,
+  routeLoadingFor,
+  routeError,
+  onZeigeRoute,
+  onClearRoute,
 }: {
   selected: NonNullable<Selected>
   onClose: () => void
   onRecalculated: () => void
+  activeRouteSvId?: string | null
+  routeLoadingFor?: string | null
+  routeError?: string | null
+  onZeigeRoute?: (svId: string) => void
+  onClearRoute?: () => void
 }) {
   // AAR-130: Einsatzgebiet-Block + Neu-Berechnen-Button für SVs und Orgs/Communities.
   // Communities/Orgs werden serverseitig als entityType='organisation' behandelt
@@ -1207,6 +1476,40 @@ function DetailPanel({
           hasCoords={sv.lat != null && sv.lng != null}
           onRecalculated={onRecalculated}
         />
+
+        {/* AAR-669-P3: Route zum aktiven Termin */}
+        {onZeigeRoute && onClearRoute && (
+          <div className="border-t border-gray-100 pt-3 space-y-2">
+            <p className="text-[10px] uppercase text-gray-400 flex items-center gap-1">
+              🧭 Aktiver Termin
+            </p>
+            {activeRouteSvId === sv.id ? (
+              <button
+                type="button"
+                onClick={onClearRoute}
+                className="w-full text-xs font-medium px-3 py-1.5 rounded-lg border border-[#4573A2] text-[#4573A2] hover:bg-[#4573A2] hover:text-white transition-colors flex items-center justify-center gap-1.5"
+              >
+                <XIcon className="w-3 h-3" /> Route ausblenden
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onZeigeRoute(sv.id)}
+                disabled={routeLoadingFor === sv.id}
+                className="w-full text-xs font-medium px-3 py-1.5 rounded-lg border border-[#3B82F6] text-[#3B82F6] hover:bg-[#3B82F6] hover:text-white disabled:opacity-50 transition-colors flex items-center justify-center gap-1.5"
+              >
+                <ArrowRightIcon className="w-3 h-3" />
+                {routeLoadingFor === sv.id ? 'Lade Route …' : 'Route zum aktiven Termin'}
+              </button>
+            )}
+            {routeError && activeRouteSvId !== sv.id && (
+              <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                {routeError}
+              </p>
+            )}
+          </div>
+        )}
+
         <Link
           href={`/admin/sachverstaendige/${sv.id}`}
           className="text-xs text-[#4573A2] hover:underline flex items-center gap-1"

@@ -265,3 +265,131 @@ export async function recalculateIsochrone(
     return { success: false, error: err instanceof Error ? err.message : 'Unbekannter Fehler' }
   }
 }
+
+// ──────────────────────────────────────────────────────────────────────────
+// AAR-669-P3: Route-zum-aktiven-Termin
+// ──────────────────────────────────────────────────────────────────────────
+
+// AAR-669-P3: Type aus separater non-`'use server'`-Datei (Memory
+// `feedback_use_server_konstanten.md` — Next.js 15 exportiert nur Function-
+// Stubs aus einer `'use server'`-Datei ans Client-Bundle, Type-Exports
+// landen als undefined und brechen Client-Components).
+import type { SvAktiverTerminResult } from './actions.types'
+
+/**
+ * Nächster oder gerade laufender Termin des SVs inkl. Ziel-Koordinaten
+ * (besichtigungsort aus faelle, SV-Standort aus sachverstaendige oder
+ * sv_live_position).
+ *
+ * Status-Priorität:
+ *   1. 'unterwegs' / 'losgefahren' (läuft jetzt)
+ *   2. 'reserviert' / 'bestaetigt' mit start_zeit HEUTE
+ *   3. 'reserviert' / 'bestaetigt' als nächster kommender Termin
+ */
+export async function getSvAktiverTermin(svId: string): Promise<SvAktiverTerminResult> {
+  const { createClient } = await import('@/lib/supabase/server')
+  const supabase = await createClient()
+
+  // SV-Standort (Fallback falls keine Live-Position verfügbar)
+  const { data: sv } = await supabase
+    .from('sachverstaendige')
+    .select('standort_lat, standort_lng')
+    .eq('id', svId)
+    .maybeSingle()
+  if (!sv?.standort_lat || !sv?.standort_lng) {
+    return { ok: false, reason: 'no_sv' }
+  }
+
+  // Letzte Live-Position (30-Min-Cutoff) — überschreibt SV-Standort wenn vorhanden
+  let svLat = Number(sv.standort_lat)
+  let svLng = Number(sv.standort_lng)
+  const { data: lastPos } = await supabase
+    .from('sv_live_position')
+    .select('lat, lng, updated_at')
+    .eq('sv_id', svId)
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (lastPos?.lat && lastPos?.lng) {
+    const posAge = Date.now() - new Date(lastPos.updated_at as string).getTime()
+    if (posAge < 30 * 60 * 1000) {
+      svLat = Number(lastPos.lat)
+      svLng = Number(lastPos.lng)
+    }
+  }
+
+  // Terminsuche
+  const nowIso = new Date().toISOString()
+  const { data: termine } = await supabase
+    .from('gutachter_termine')
+    .select('id, typ, start_zeit, status, fall_id')
+    .eq('sv_id', svId)
+    .in('status', ['reserviert', 'bestaetigt', 'unterwegs', 'losgefahren'])
+    .gte('start_zeit', new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString())
+    .order('start_zeit', { ascending: true })
+    .limit(10)
+
+  if (!termine || termine.length === 0) {
+    return { ok: false, reason: 'no_termin' }
+  }
+
+  // Priorisierung
+  const unterwegs = termine.find((t) =>
+    ['unterwegs', 'losgefahren'].includes((t.status as string | null) ?? ''),
+  )
+  const heute = new Date().toISOString().slice(0, 10)
+  const heuteKommend = termine.find(
+    (t) => (t.start_zeit as string).slice(0, 10) === heute,
+  )
+  const naechster = termine.find((t) => (t.start_zeit as string) >= nowIso)
+  const gewaehlt = unterwegs ?? heuteKommend ?? naechster ?? termine[0]
+  if (!gewaehlt) return { ok: false, reason: 'no_termin' }
+
+  // Fall + Ziel-Koordinaten laden
+  if (!gewaehlt.fall_id) return { ok: false, reason: 'no_fall' }
+  const { data: fall } = await supabase
+    .from('faelle')
+    .select(
+      'id, fall_nummer, kunde_vorname, kunde_nachname, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_ort, schadens_plz',
+    )
+    .eq('id', gewaehlt.fall_id)
+    .maybeSingle()
+  if (!fall) return { ok: false, reason: 'no_fall' }
+
+  const zielLat =
+    fall.besichtigungsort_lat != null ? Number(fall.besichtigungsort_lat) : null
+  const zielLng =
+    fall.besichtigungsort_lng != null ? Number(fall.besichtigungsort_lng) : null
+  if (zielLat == null || zielLng == null || Number.isNaN(zielLat) || Number.isNaN(zielLng)) {
+    return { ok: false, reason: 'no_coords' }
+  }
+
+  const adresse =
+    ((fall.besichtigungsort_adresse as string | null) ??
+      [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort]
+        .filter(Boolean)
+        .join(', ')) ||
+    'Unbekannte Adresse'
+
+  const kundeName =
+    [fall.kunde_vorname, fall.kunde_nachname].filter(Boolean).join(' ') || null
+
+  return {
+    ok: true,
+    termin: {
+      id: gewaehlt.id as string,
+      typ: (gewaehlt.typ as string | null) ?? null,
+      startZeit: gewaehlt.start_zeit as string,
+      status: (gewaehlt.status as string | null) ?? null,
+      fallId: (fall.id as string) ?? null,
+      fallNummer: (fall.fall_nummer as string | null) ?? null,
+      kundeName,
+    },
+    ziel: {
+      adresse,
+      lat: zielLat,
+      lng: zielLng,
+    },
+    sv: { lat: svLat, lng: svLng },
+  }
+}
