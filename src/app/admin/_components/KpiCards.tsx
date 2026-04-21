@@ -123,7 +123,7 @@ export default async function KpiCards() {
       bg: 'bg-amber-50',
       iconColor: 'text-amber-600',
       hint: 'Anzahlungen + ueberfaellige Rechnungen',
-      href: '/admin/abrechnungen',
+      href: '/admin/finance/abrechnungen',
     },
     {
       label: 'Neue Faelle heute',
