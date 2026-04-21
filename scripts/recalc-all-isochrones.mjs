@@ -1,47 +1,46 @@
 #!/usr/bin/env node
-// AAR-132: Migrations-Script — alle sachverstaendige.isochrone_polygon Einträge
-// einmalig mit HERE API neu berechnen, damit alle SVs nach dem OSRM→HERE-Wechsel
-// auf dem gleichen (präziseren) Stand sind.
+// AAR-661: Bulk-Recalc aller SV-Isochronen via Mapbox Isochrone API.
+// Ersetzt den alten HERE-basierten Script — HERE-Key in Vercel war kein
+// REST-Key sondern OAuth-Credential, Aufrufe gaben 401.
 //
 // Ausführung:
-//   HERE_API_KEY=xxx \
-//   SUPABASE_URL=xxx SUPABASE_SERVICE_ROLE_KEY=xxx \
+//   MAPBOX_ACCESS_TOKEN=... SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
 //     node scripts/recalc-all-isochrones.mjs
 //
-// Rate-Limit: 200 ms zwischen HERE-Calls (HERE Free-Tier erlaubt 5 req/sec).
-// Idempotent — kann mehrfach laufen, überschreibt bestehende Polygone.
+// Schreibt direkt als GeoJSON-Polygon {type, coordinates} — das Format das
+// KarteHubClient erwartet. Altes flaches Point-Array wird überschrieben.
+// Rate-Limit: 300 ms zwischen Calls (Mapbox: 300 req/min auf dem Paid-Tier).
+// Idempotent — kann mehrfach laufen.
 
 import { createClient } from '@supabase/supabase-js'
-import { decode } from '@here/flexpolyline'
 
-const HERE_API_URL = 'https://isoline.router.hereapi.com/v8/isolines'
-const THROTTLE_MS = 200
+const MAPBOX_ISO_URL = 'https://api.mapbox.com/isochrone/v1/mapbox/driving'
+const THROTTLE_MS = 300
+const MAX_METERS = 100_000 // Mapbox-Limit
 
-async function calculateIsochrone(lat, lng, radiusKm, apiKey) {
-  const url = new URL(HERE_API_URL)
-  url.searchParams.set('apiKey', apiKey)
-  url.searchParams.set('transportMode', 'car')
-  url.searchParams.set('origin', `${lat},${lng}`)
-  url.searchParams.set('range[type]', 'distance')
-  url.searchParams.set('range[values]', String(Math.round(radiusKm * 1000)))
-  url.searchParams.set('routingMode', 'fast')
-  url.searchParams.set('shape', 'simple')
+async function calculateIsochrone(lat, lng, radiusKm, token) {
+  const meters = Math.min(MAX_METERS, Math.round(radiusKm * 1000))
+  const url = new URL(`${MAPBOX_ISO_URL}/${lng},${lat}`)
+  url.searchParams.set('contours_meters', String(meters))
+  url.searchParams.set('polygons', 'true')
+  url.searchParams.set('denoise', '1')
+  url.searchParams.set('generalize', '50') // 50m Simplify — genug fürs Admin-Overlay
+  url.searchParams.set('access_token', token)
 
   const res = await fetch(url.toString(), {
     signal: AbortSignal.timeout(8000),
   })
   if (!res.ok) {
     const body = await res.text().catch(() => '')
-    throw new Error(`HERE ${res.status}: ${body.slice(0, 200)}`)
+    throw new Error(`Mapbox ${res.status}: ${body.slice(0, 200)}`)
   }
   const data = await res.json()
-  const outer = data.isolines?.[0]?.polygons?.[0]?.outer
-  if (!outer) throw new Error('Kein Polygon in Response')
-  const decoded = decode(outer)
-  if (!decoded.polyline || decoded.polyline.length < 3) {
-    throw new Error(`Polygon zu klein (${decoded.polyline?.length ?? 0} Punkte)`)
-  }
-  return decoded.polyline.map(([pLat, pLng]) => ({ lat: pLat, lng: pLng }))
+  const feature = data.features?.[0]
+  const geom = feature?.geometry
+  if (!geom || geom.type !== 'Polygon') throw new Error('Kein Polygon in Response')
+  const ring = geom.coordinates?.[0]
+  if (!Array.isArray(ring) || ring.length < 3) throw new Error(`Polygon zu klein (${ring?.length ?? 0} Punkte)`)
+  return { type: 'Polygon', coordinates: [ring] }
 }
 
 function sleep(ms) {
@@ -49,20 +48,22 @@ function sleep(ms) {
 }
 
 async function main() {
-  const hereKey = process.env.HERE_API_KEY
+  const mapboxToken = process.env.MAPBOX_ACCESS_TOKEN
   const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-  if (!hereKey || !supabaseUrl || !serviceKey) {
-    console.error('HERE_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY müssen gesetzt sein')
+  if (!mapboxToken || !supabaseUrl || !serviceKey) {
+    console.error('MAPBOX_ACCESS_TOKEN, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY müssen gesetzt sein')
     process.exit(1)
   }
 
   const db = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } })
 
+  // AAR-657: profiles-Embed mit FK-Hint (4 FKs auf profiles)
+  // AAR-549: paket_umkreis_km ist kanonisch, radius_km wurde gedropt
   const { data: svs, error } = await db
     .from('sachverstaendige')
-    .select('id, standort_lat, standort_lng, paket_umkreis_km, radius_km, profiles(vorname, nachname)')
+    .select('id, standort_lat, standort_lng, paket_umkreis_km, profiles!sachverstaendige_profile_id_fkey(vorname, nachname)')
     .not('standort_lat', 'is', null)
     .not('standort_lng', 'is', null)
     .is('geloescht_am', null)
@@ -85,21 +86,21 @@ async function main() {
     const profileRaw = sv.profiles
     const profile = Array.isArray(profileRaw) ? profileRaw[0] : profileRaw
     const name = profile ? `${profile.vorname ?? ''} ${profile.nachname ?? ''}`.trim() : sv.id
-    const radiusKm = Number(sv.paket_umkreis_km) || Number(sv.radius_km) || 15
+    const radiusKm = Number(sv.paket_umkreis_km) || 15
 
     try {
       const polygon = await calculateIsochrone(
         Number(sv.standort_lat),
         Number(sv.standort_lng),
         radiusKm,
-        hereKey,
+        mapboxToken,
       )
       const { error: upErr } = await db
         .from('sachverstaendige')
         .update({ isochrone_polygon: polygon })
         .eq('id', sv.id)
       if (upErr) throw new Error(upErr.message)
-      console.log(`✓ ${name} (${polygon.length} Punkte, ${radiusKm} km)`)
+      console.log(`✓ ${name} (${polygon.coordinates[0].length} Punkte, ${radiusKm} km)`)
       ok++
     } catch (err) {
       console.error(`✗ ${name}: ${err.message}`)
