@@ -541,96 +541,24 @@ export default function Phase4Stammdaten() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [marke])
 
-  // AAR-unfallfotos: Schadenbeschreibung = „was ist am Auto kaputt". Pflicht-
-  // signal: mind. 20 Zeichen ODER vorhandene Fotos (Haiku füllt das Feld dann
-  // automatisch). Der Unfallhergang (schadens_hergang) wird in Phase 1 erfasst.
+  // AAR-665: Schadenbeschreibung-Feld aus Phase 4 entfernt — sie wird bereits
+  // in Phase 1 (Qualifizierung) erfasst. Die Haiku-Vision-Pipeline schreibt
+  // `leads.sachschaden_beschreibung` weiterhin im Hintergrund, wenn Unfallfotos
+  // hochgeladen werden — Phase 1 zeigt den gefüllten Wert direkt.
+  //
+  // Für Dispatcher, die Unfallfotos anfordern wollen: der „Kunde hat
+  // Unfallfotos"-Trigger lebt jetzt direkt in der DokumenteAnfordernCard am
+  // Ende der Phase (Checkbox „Unfallfotos"). Kein separates Banner hier oben
+  // mehr nötig.
   const hatUnfallfotos = Array.isArray(l.schadensfoto_urls) && l.schadensfoto_urls.length > 0
-  const schadenbeschreibungFehlt =
-    (!l.sachschaden_beschreibung || l.sachschaden_beschreibung.trim().length < 20) &&
-    !hatUnfallfotos
-
-  // AAR-unfallfotos: Dispatcher-Trigger „Kunde hat Unfallfotos" — kreuzt die
-  // Checkbox in der DokumenteAnfordernCard am Ende von Phase 4 an. Wird per
-  // State gehalten, damit das Banner oben und die Card unten gekoppelt sind.
-  const [unfallfotosAnfragen, setUnfallfotosAnfragen] = useState(false)
+  // AAR-665: Card fordert Unfallfotos jetzt über die eigene Checkbox an — kein
+  // externer Trigger-State mehr nötig. Wert bleibt false, nur um die bestehende
+  // Prop-Signatur der Card nicht zu ändern.
+  const unfallfotosAnfragen = false
 
   return (
     <div className="space-y-4">
-      {/* AAR-unfallfotos: Banner für Schadenbeschreibung (WAS ist am Auto kaputt).
-          Zwei Wege zur Erfüllung:
-            (a) Kunde hat Fotos → Dispatcher klickt „Kunde hat Unfallfotos" →
-                Card unten fordert per WA/SMS/Email an → Haiku füllt Feld
-            (b) Keine Fotos → manuelle Beschreibung in diesem Inline-Feld
-          Unfallhergang (wie kam's zum Unfall) steckt in Phase 1 Hard-Gate. */}
-      {schadenbeschreibungFehlt && (
-        <div className="rounded-xl bg-amber-50 border border-amber-300 p-4 space-y-3">
-          <div className="flex items-start gap-2">
-            <AlertTriangleIcon className="w-4 h-4 text-amber-700 mt-0.5 shrink-0" />
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-amber-900">
-                Schadenbeschreibung fehlt
-              </p>
-              <p className="text-xs text-amber-800 mt-0.5">
-                Beschreibe, was am Auto kaputt ist (sichtbare Schäden, Bauteile,
-                Schadensart). Wenn der Kunde Fotos hat, kannst du sie unten in
-                der Dokument-Anfrage ankreuzen — Claude füllt die Beschreibung
-                dann automatisch aus den Bildern.
-              </p>
-            </div>
-          </div>
-          <InlineField
-            label="Schadenbeschreibung (was am Auto kaputt ist)"
-            value={l.sachschaden_beschreibung}
-            fieldName="sachschaden_beschreibung"
-            leadId={leadId}
-            placeholder="z. B. Heckstoßstange eingedrückt, Kofferraumklappe lässt sich nicht mehr öffnen, Rückleuchte rechts zersplittert …"
-            type="text"
-          />
-          <button
-            type="button"
-            onClick={() => {
-              setUnfallfotosAnfragen(true)
-              // Ans Ende der Phase scrollen, damit der Dispatcher den Versand-
-              // Button in der DokumenteAnfordernCard sieht.
-              requestAnimationFrame(() => {
-                document
-                  .getElementById('dokumente-anfordern-card')
-                  ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              })
-            }}
-            className="w-full text-xs font-medium px-3 py-2 rounded-lg bg-white border border-amber-300 text-amber-900 hover:bg-amber-100 flex items-center justify-center gap-2"
-          >
-            <CameraIcon className="w-3.5 h-3.5" />
-            Kunde hat Unfallfotos → unten anfordern
-          </button>
-        </div>
-      )}
-
-      {/* AAR-unfallfotos: Befüllte Beschreibung anzeigen, inkl. AI-Marker wenn
-          sie aus den Fotos kam. Dispatcher kann sie weiterhin inline editieren. */}
-      {!schadenbeschreibungFehlt && (l.sachschaden_beschreibung || hatUnfallfotos) && (
-        <div className="rounded-xl bg-white border border-gray-200 p-4 space-y-2">
-          <div className="flex items-start justify-between gap-2">
-            <p className="text-xs font-semibold text-gray-900 flex items-center gap-1.5">
-              <CameraIcon className="w-3.5 h-3.5 text-[#4573A2]" />
-              Schadenbeschreibung
-            </p>
-            {hatUnfallfotos && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 font-medium">
-                Aus {l.schadensfoto_urls!.length} Foto{l.schadensfoto_urls!.length === 1 ? '' : 's'} von Claude gefüllt
-              </span>
-            )}
-          </div>
-          <InlineField
-            label=""
-            value={l.sachschaden_beschreibung}
-            fieldName="sachschaden_beschreibung"
-            leadId={leadId}
-            placeholder="Was ist am Auto kaputt?"
-            type="text"
-          />
-        </div>
-      )}
+      {/* AAR-665: Doppelte Schadenbeschreibung raus — Quelle ist Phase 1. */}
 
       {/* AAR-177 Fix #2: Kundendaten-Card entfernt — die 4 Felder
           (Vorname/Nachname/Telefon/Email) werden bereits in Phase 1/5
