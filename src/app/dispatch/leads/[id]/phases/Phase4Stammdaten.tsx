@@ -186,6 +186,17 @@ function InlineField({
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [, startTransition] = useTransition()
 
+  // AAR-unfallfotos Sync-Fix: InlineField's lokaler Draft blieb bisher auf
+  // seinem Initial-Wert hängen — wenn der Server die Row ändert (z. B.
+  // Haiku-Vision befüllt sachschaden_beschreibung nach Foto-Upload) und
+  // router.refresh() ein neues `value`-Prop liefert, müssen wir den Draft
+  // nachziehen, solange der MA nicht gerade aktiv tippt.
+  useEffect(() => {
+    if (status !== 'idle') return
+    const incoming = value ?? ''
+    setDraft((prev) => (prev === incoming ? prev : incoming))
+  }, [value, status])
+
   function handleBlur() {
     const final = transform ? transform(draft) : draft
     // AAR-223: Draft auf den transformierten Wert setzen, damit der MA nach
@@ -1289,6 +1300,8 @@ export default function Phase4Stammdaten() {
           email={l.email ?? null}
           unfallfotosVorhanden={hatUnfallfotos}
           unfallfotosAnfragenDefault={unfallfotosAnfragen}
+          schadensfotoUrls={l.schadensfoto_urls ?? null}
+          sachschadenBeschreibung={l.sachschaden_beschreibung ?? null}
         />
       </div>
 

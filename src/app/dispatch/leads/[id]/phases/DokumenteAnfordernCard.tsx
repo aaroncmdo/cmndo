@@ -45,6 +45,11 @@ type Props = {
   // Schadenbeschreibung-Card in Phase 4. Wenn true → unfallfotos-Checkbox
   // wird vorgewählt und die Schadenbeschreibungs-Card scrollt zum Button.
   unfallfotosAnfragenDefault?: boolean
+  // AAR-unfallfotos-callback: Thumbnails + Analyse-Status für den Dispatcher.
+  // Kommt direkt aus den Lead-Spalten — Parent reicht sie durch, damit der
+  // Polling-Refresh den Haiku-Status sichtbar macht.
+  schadensfotoUrls?: string[] | null
+  sachschadenBeschreibung?: string | null
 }
 
 type SonstigesEintrag = { id: number; label: string }
@@ -68,6 +73,8 @@ export default function DokumenteAnfordernCard({
   email,
   unfallfotosVorhanden,
   unfallfotosAnfragenDefault,
+  schadensfotoUrls,
+  sachschadenBeschreibung,
 }: Props) {
   const router = useRouter()
 
@@ -99,15 +106,39 @@ export default function DokumenteAnfordernCard({
   const [pending, startTransition] = useTransition()
   const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null)
 
-  // Polling während offene Anfrage läuft
+  // Polling während offene Anfrage läuft. AAR-unfallfotos-callback: auch
+  // Unfallfoto-Anfragen pollen — der Kunde lädt Fotos einzeln nacheinander
+  // hoch und Haiku braucht ein paar Sekunden, beides soll automatisch
+  // aktualisiert angezeigt werden.
+  const fotosCount = Array.isArray(schadensfotoUrls) ? schadensfotoUrls.length : 0
+  const unfallfotosPollingAktiv = selectUnfallfotos || fotosCount > 0
   useEffect(() => {
     const läuft =
       (zb1Status === 'gesendet' || zb1Status === 'geoeffnet') ||
-      (polizeiberichtStatus === 'gesendet' || polizeiberichtStatus === 'geoeffnet')
+      (polizeiberichtStatus === 'gesendet' || polizeiberichtStatus === 'geoeffnet') ||
+      unfallfotosPollingAktiv
     if (!läuft) return
     const iv = setInterval(() => router.refresh(), 10_000)
     return () => clearInterval(iv)
-  }, [zb1Status, polizeiberichtStatus, router])
+  }, [zb1Status, polizeiberichtStatus, unfallfotosPollingAktiv, router])
+
+  // Analyse-Status des Unfallfoto-Slots:
+  // - fotosCount === 0  → „warte auf Fotos" (falls angefragt) / nichts
+  // - fotosCount > 0 + keine Beschreibung → „Analyse läuft"
+  // - fotosCount > 0 + Beschreibung → „Analyse erfolgreich"
+  // - fotosCount > 0 + Beschreibung startet mit „Schaden auf Foto nicht" → „Analyse unklar"
+  const haikuBeschreibung = sachschadenBeschreibung?.trim() ?? ''
+  const haikuUnklar = haikuBeschreibung.toLowerCase().startsWith('schaden auf foto nicht')
+  const unfallfotosAnalyseStatus: 'warte' | 'laeuft' | 'erfolg' | 'unklar' | null =
+    fotosCount === 0
+      ? selectUnfallfotos
+        ? 'warte'
+        : null
+      : haikuBeschreibung.length === 0
+        ? 'laeuft'
+        : haikuUnklar
+          ? 'unklar'
+          : 'erfolg'
 
   const zb1Cfg = zb1Status && STATUS_UI[zb1Status] ? STATUS_UI[zb1Status] : null
   const poliCfg = polizeiberichtStatus && STATUS_UI[polizeiberichtStatus] ? STATUS_UI[polizeiberichtStatus] : null
@@ -325,7 +356,7 @@ export default function DokumenteAnfordernCard({
         {/* AAR-unfallfotos: Unfallfotos-Slot. Multi-File — Kunde kann mehrere
             Fotos via denselben Link hochladen. Nach Upload läuft Haiku-Vision
             und füllt leads.sachschaden_beschreibung automatisch. */}
-        <div className={`rounded-lg border p-3 ${selectUnfallfotos ? 'border-[#4573A2] bg-blue-50/30' : 'border-gray-200'}`}>
+        <div className={`rounded-lg border p-3 ${selectUnfallfotos || fotosCount > 0 ? 'border-[#4573A2] bg-blue-50/30' : 'border-gray-200'}`}>
           <label className="flex items-start gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -334,12 +365,12 @@ export default function DokumenteAnfordernCard({
               className="mt-0.5 w-4 h-4 accent-[#4573A2]"
             />
             <div className="flex-1">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <CameraIcon className="w-3.5 h-3.5 text-[#4573A2]" />
                 <span className="text-xs font-semibold text-gray-900">Unfallfotos</span>
-                {unfallfotosVorhanden && (
+                {fotosCount > 0 && (
                   <span className="text-[9px] px-1.5 py-0.5 rounded bg-green-50 text-green-700 font-medium">
-                    Fotos vorhanden
+                    {fotosCount} Foto{fotosCount === 1 ? '' : 's'} eingegangen
                   </span>
                 )}
               </div>
@@ -349,6 +380,65 @@ export default function DokumenteAnfordernCard({
               </p>
             </div>
           </label>
+
+          {/* AAR-unfallfotos-callback: Analyse-Status-Badge.
+              warte = Upload-Link ist raus, Kunde hat noch nichts geschickt.
+              laeuft = mind. 1 Foto da, Haiku läuft noch (Beschreibung leer).
+              unklar = Haiku hat „Schaden nicht eindeutig erkennbar" geliefert.
+              erfolg = Haiku hat eine Schadenbeschreibung geschrieben. */}
+          {unfallfotosAnalyseStatus === 'warte' && (
+            <div className="mt-2 flex items-center gap-2 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1.5">
+              <ClockIcon className="w-3 h-3 shrink-0" />
+              <span>Anfrage gesendet — warte auf Fotos vom Kunden …</span>
+            </div>
+          )}
+          {unfallfotosAnalyseStatus === 'laeuft' && (
+            <div className="mt-2 flex items-center gap-2 text-[11px] text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-1.5">
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse shrink-0" />
+              <span>Foto{fotosCount === 1 ? '' : 's'} eingegangen — Claude analysiert den Schaden …</span>
+            </div>
+          )}
+          {unfallfotosAnalyseStatus === 'unklar' && (
+            <div className="mt-2 flex items-start gap-2 text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded px-2 py-1.5">
+              <AlertCircleIcon className="w-3 h-3 shrink-0 mt-0.5" />
+              <span>
+                Schaden auf Foto nicht eindeutig erkennbar — Schadenbeschreibung
+                bitte manuell ergänzen (oder schärfere Fotos nachfordern).
+              </span>
+            </div>
+          )}
+          {unfallfotosAnalyseStatus === 'erfolg' && (
+            <div className="mt-2 flex items-start gap-2 text-[11px] text-green-800 bg-green-50 border border-green-200 rounded px-2 py-1.5">
+              <CheckCircle2Icon className="w-3 h-3 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="font-medium">Analyse erfolgreich — Schadenbeschreibung gefüllt.</p>
+                <p className="text-green-700 mt-0.5 line-clamp-2">{haikuBeschreibung}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Thumbnail-Strip: jedes Foto anklickbar → Original in neuem Tab. */}
+          {fotosCount > 0 && Array.isArray(schadensfotoUrls) && (
+            <div className="mt-2 grid grid-cols-4 sm:grid-cols-6 gap-1.5">
+              {schadensfotoUrls.map((url, i) => (
+                <a
+                  key={`${url}-${i}`}
+                  href={url}
+                  target="_blank"
+                  rel="noopener"
+                  className="relative block aspect-square rounded overflow-hidden border border-gray-200 hover:border-[#4573A2] focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+                  title={`Foto ${i + 1} — klicken zum Vergrößern`}
+                >
+                  <img
+                    src={url}
+                    alt={`Unfallfoto ${i + 1}`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </a>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Freie „Sonstige"-Slots */}
