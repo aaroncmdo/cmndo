@@ -936,16 +936,42 @@ export default function Phase4Stammdaten() {
             Edit-bar (kommt aus ZB1-OCR oder manuell) + Geburtsdatum (nicht
             in ZB1, daher manuell oder aus Kunde übernommen). „Gleich wie
             Kunde"-Toggle füllt die Felder mit den Kundendaten. */}
+        {/* AAR-666: Halter-Block — OCR-Auto-Match setzt `ist_fahrzeughalter`
+            bei Namens-Gleichheit direkt auf true (Upload-Action). Wenn Namen
+            abweichen, zeigt der Badge oben „⚠ Abweichung zum Kunden" statt
+            „Aus Fahrzeugschein". */}
         <div className="sm:col-span-2 mt-3 rounded-lg bg-blue-50 border border-blue-200 p-3 space-y-2">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <p className="text-[10px] text-blue-700 font-semibold uppercase tracking-wider flex items-center gap-1">
               <UserCheckIcon className="w-3 h-3" />
               Fahrzeughalter
-              {l.halter_nachname && (
-                <span className="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-medium">
-                  Aus Fahrzeugschein
-                </span>
-              )}
+              {(() => {
+                const norm = (s: string | null | undefined): string =>
+                  (s ?? '').trim().toLowerCase()
+                const halterNachname = norm(l.halter_nachname)
+                const kundeNachname = norm(l.nachname)
+                const halterVorname = norm(l.halter_vorname)
+                const kundeVorname = norm(l.vorname)
+                const namenAbweichend =
+                  !!halterNachname &&
+                  !!kundeNachname &&
+                  (halterNachname !== kundeNachname || halterVorname !== kundeVorname)
+                if (namenAbweichend && l.ist_fahrzeughalter !== true) {
+                  return (
+                    <span className="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[9px] font-medium">
+                      ⚠ Abweichung zum Kunden
+                    </span>
+                  )
+                }
+                if (l.halter_nachname) {
+                  return (
+                    <span className="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-medium">
+                      Aus Fahrzeugschein
+                    </span>
+                  )
+                }
+                return null
+              })()}
             </p>
             <button
               type="button"
