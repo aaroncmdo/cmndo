@@ -18,9 +18,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
-import { SUBPHASE_VISIBILITY } from '@/lib/fall/subphase-visibility'
-
-export const ALLOWED_PHASE_VALUES = Object.keys(SUBPHASE_VISIBILITY) as readonly string[]
+// AAR-664 (Folge): Konstante in eigene Datei extrahiert (siehe Memory
+// `'use server'-Konstanten-Falle`). Hier nur noch importieren für die
+// serverseitige Validierung — Client importiert direkt aus .constants.
+import { ALLOWED_PHASE_VALUES } from './manual-phase-override.constants'
 
 interface OverrideInput {
   fallId: string
