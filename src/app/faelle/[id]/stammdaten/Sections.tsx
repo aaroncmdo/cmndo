@@ -443,7 +443,11 @@ type ZeugeKontakt = { name: string; telefon: string; email?: string; notiz?: str
 export function ZeugenKontakteSection() {
   const { fall, canEdit, updateField } = useFall()
   const editable = canEdit('zeugen_kontakte')
-  const initial = (fall.zeugen_kontakte as ZeugeKontakt[] | null) ?? []
+  // Defensiv: zeugen_kontakte ist JSONB. Kann null, [], {}, oder kaputtes JSON sein.
+  // Nur als Array akzeptieren, sonst leeres Array — verhindert .map-Crash bei
+  // neu angelegten Fällen oder Legacy-Daten mit Nicht-Array-JSONB.
+  const rawZeugen = fall.zeugen_kontakte as unknown
+  const initial: ZeugeKontakt[] = Array.isArray(rawZeugen) ? (rawZeugen as ZeugeKontakt[]) : []
   const [zeugen, setZeugen] = useState<ZeugeKontakt[]>(initial)
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [, startTransition] = useTransition()
