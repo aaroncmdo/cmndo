@@ -43,7 +43,18 @@ export default function BriefingStrukturSections({
     'ai' | 'fallback' | null
   >(generatedBy ?? null)
 
-  const current = local ?? struktur
+  // Defensive Array-Guards: struktur kommt aus JSONB DB-Spalte, nach
+  // Regenerate aus API-Response. In beiden Fällen können die Arrays
+  // fehlen / null / non-array sein. Fallback auf [] verhindert .map-Crash.
+  const rawCurrent = local ?? struktur
+  const current = rawCurrent
+    ? {
+        kurzversion: typeof rawCurrent.kurzversion === 'string' ? rawCurrent.kurzversion : '',
+        hinweise: Array.isArray(rawCurrent.hinweise) ? rawCurrent.hinweise : [],
+        warnungen: Array.isArray(rawCurrent.warnungen) ? rawCurrent.warnungen : [],
+        checkliste_vor_ort: Array.isArray(rawCurrent.checkliste_vor_ort) ? rawCurrent.checkliste_vor_ort : [],
+      }
+    : null
 
   function onRegenerate() {
     startTransition(async () => {
