@@ -432,15 +432,18 @@ export default function SvDispatchPanel({
       ) : (
         <>
           {/* AAR-zz-SV-Trigger: Initial-CTA wenn Suche noch nicht getriggert wurde.
-              Dispatcher klickt bewusst — keine Auto-Suche beim Mount mehr. */}
-          {topSuggestions === null && !topLoading && !loadError && (
+              Dispatcher klickt bewusst — keine Auto-Suche beim Mount mehr.
+              AAR-696: bei Error bleibt der Button sichtbar (als „Erneut
+              suchen"), damit der Dispatcher nach dem Fix noch einmal
+              triggern kann ohne die Sektion zu verlieren. */}
+          {topSuggestions === null && !topLoading && (
             <button
               type="button"
               onClick={triggerSearch}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#4573A2] hover:bg-[#3a6290] text-white text-sm font-medium"
             >
               <SearchIcon className="w-4 h-4" />
-              Gutachter suchen
+              {loadError ? 'Erneut suchen' : 'Gutachter suchen'}
             </button>
           )}
 

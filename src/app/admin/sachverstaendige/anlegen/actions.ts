@@ -158,6 +158,11 @@ export async function anlegeSv(data: AnlegeSvFormData): Promise<{ success: boole
     nachname: data.nachname,
     telefon: data.telefon || null,
     force_password_change: true,
+    // AAR-697: 2FA explizit AUS beim Admin-Anlegen — sonst landet der SV beim
+    // ersten Login auf /login/2fa und kommt nie ins Onboarding. SV kann
+    // 2FA später freiwillig im Profil aktivieren.
+    twofa_aktiviert: false,
+    twofa_email_aktiviert: false,
   })
   if (profileErr) {
     // Rollback auth user
@@ -342,6 +347,11 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
     nachname: data.inhaber_nachname,
     telefon: data.inhaber_telefon || null,
     force_password_change: true,
+    // AAR-697: 2FA explizit AUS beim Admin-Anlegen — sonst landet der SV beim
+    // ersten Login auf /login/2fa und kommt nie ins Onboarding. SV kann
+    // 2FA später freiwillig im Profil aktivieren.
+    twofa_aktiviert: false,
+    twofa_email_aktiviert: false,
   })
   if (inhaberProfileErr) {
     await adminDb.auth.admin.deleteUser(inhaberUserId)
@@ -649,6 +659,11 @@ export async function anlegeSubSv(params: {
     nachname: params.sub_nachname,
     telefon: params.sub_telefon || null,
     force_password_change: true,
+    // AAR-697: 2FA explizit AUS beim Admin-Anlegen — sonst landet der SV beim
+    // ersten Login auf /login/2fa und kommt nie ins Onboarding. SV kann
+    // 2FA später freiwillig im Profil aktivieren.
+    twofa_aktiviert: false,
+    twofa_email_aktiviert: false,
   })
   if (profileErr) {
     await adminDb.auth.admin.deleteUser(subUserId)
@@ -810,6 +825,11 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
     nachname: data.verwalter_nachname,
     telefon: data.verwalter_telefon || null,
     force_password_change: true,
+    // AAR-697: 2FA explizit AUS beim Admin-Anlegen — sonst landet der SV beim
+    // ersten Login auf /login/2fa und kommt nie ins Onboarding. SV kann
+    // 2FA später freiwillig im Profil aktivieren.
+    twofa_aktiviert: false,
+    twofa_email_aktiviert: false,
   })
   if (verwProfileErr) {
     await adminDb.auth.admin.deleteUser(verwalterUserId)
