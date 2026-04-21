@@ -9,13 +9,13 @@
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { AlertTriangleIcon } from 'lucide-react'
-import { manualStatusOverride } from '@/app/faelle/[id]/actions/manual-status-override'
+import { manualStatusOverride } from '@/app/faelle/[id]/_actions/manual-status-override'
 // AAR-664: Konstanten kommen aus einer non-`'use server'`-Datei, sonst
 // liefert der Client-Bundle-Import undefined statt Array → `.map`-Crash.
 import {
   ALLOWED_STATUS_VALUES,
   type FallStatusValue,
-} from '@/app/faelle/[id]/actions/manual-status-override.constants'
+} from '@/app/faelle/[id]/_actions/manual-status-override.constants'
 import {
   Dialog,
   DialogContent,

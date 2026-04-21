@@ -1,4 +1,4 @@
-import { getTerminByToken } from './_actions'
+import { getTerminByToken } from './actions'
 import TerminClient from './TerminClient'
 
 export default async function TerminPage({ params }: { params: Promise<{ token: string }> }) {

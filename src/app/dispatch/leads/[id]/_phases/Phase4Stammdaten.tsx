@@ -7,7 +7,7 @@
 // gegner-kz-flags.ts berechnet und mitgespeichert.
 
 import { useState, useTransition, useEffect } from 'react'
-import { saveStammdaten } from '../_actions'
+import { saveStammdaten } from '../actions'
 import { checkKZFlags } from '../_lib/gegner-kz-flags'
 import { useDispatchPhase } from '../_lib/phase-context'
 import { useCarQuery } from '../_hooks/useCarQuery'

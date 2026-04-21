@@ -7,7 +7,7 @@ import {
   GraduationCapIcon, UsersIcon, CheckCircle2Icon, MailIcon, PlusIcon, TrashIcon,
 } from 'lucide-react'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
-import { anlegeAkademie } from './_actions'
+import { anlegeAkademie } from './actions'
 import {
   PAKET_KONFIG, paketAnzahlung, ANREDE_OPTIONEN, TITEL_OPTIONEN,
   QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN,

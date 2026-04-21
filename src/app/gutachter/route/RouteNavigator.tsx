@@ -9,7 +9,7 @@ import {
   MapPinIcon, ClockIcon, AlertTriangleIcon, SendIcon, HashIcon, CalculatorIcon,
 } from 'lucide-react'
 import { haversineMeters } from '@/lib/gps/geofence'
-import { markAnkunft, skipStop, completeBesichtigung, uploadFotoVorOrt } from './_actions'
+import { markAnkunft, skipStop, completeBesichtigung, uploadFotoVorOrt } from './actions'
 import PhoneButton from '@/components/shared/PhoneButton'
 
 export type Stop = {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { waehleNachbesichtigungsTermin } from './_actions'
+import { waehleNachbesichtigungsTermin } from './actions'
 import { CalendarIcon, CheckCircleIcon } from 'lucide-react'
 
 type NachbesichtigungFall = {

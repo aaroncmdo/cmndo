@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle2Icon, ArrowLeftIcon } from 'lucide-react'
-import { anlegeFall, type AnlegeFallInput } from './_actions'
+import { anlegeFall, type AnlegeFallInput } from './actions'
 import { SPEZIFIKATIONEN, SCHADENARTEN } from '@/app/admin/sachverstaendige/anlegen/constants'
 
 // KFZ-154 Cleanup-Follow-up: Minimale Fall-Anlage Form fuer Admins.

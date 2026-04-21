@@ -16,7 +16,7 @@ import {
   markiereAlleSpaeterNachreichen,
   type PflichtdokumentStand,
   type FreierSlot,
-} from './_actions'
+} from './actions'
 
 type Fall = { id: string; fall_nummer: string | null; kennzeichen: string | null; fahrzeug: string }
 type Termin = { datum: string; svName: string | null }

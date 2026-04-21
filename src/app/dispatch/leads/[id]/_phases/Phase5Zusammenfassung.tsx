@@ -7,7 +7,7 @@
 
 import { useState, useTransition, useEffect, useRef } from 'react'
 import { useDispatchPhase } from '../_lib/phase-context'
-import { sendFlowLinkMultiChannel, saveStammdaten } from '../_actions'
+import { sendFlowLinkMultiChannel, saveStammdaten } from '../actions'
 // AAR-317: Unfallskizze-Card (Claude-API-Generator + MA-Freigabe)
 import { UnfallskizzeCard } from './UnfallskizzeCard'
 import {

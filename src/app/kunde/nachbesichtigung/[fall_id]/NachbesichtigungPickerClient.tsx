@@ -7,7 +7,7 @@
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { PlusIcon, XIcon } from 'lucide-react'
-import { submitNachbesichtigungsTermine } from './_actions'
+import { submitNachbesichtigungsTermine } from './actions'
 
 interface Slot {
   datum: string

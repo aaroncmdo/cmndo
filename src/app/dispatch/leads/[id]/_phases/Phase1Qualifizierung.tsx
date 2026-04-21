@@ -15,9 +15,9 @@ import { useRouter } from 'next/navigation'
 // AAR-176 P2-B: UnfallortKategorie-Import raus — die Spalte wird jetzt auto
 // aus schadentyp abgeleitet (saveSchadentyp setzt kategorie mit, Dropdown
 // ist in der UI weg).
-import { saveHardGate, type HardGateData } from '../_actions'
+import { saveHardGate, type HardGateData } from '../actions'
 // AAR-316: Sprache wird separat via saveStammdaten persistiert (nicht HardGateData)
-import { saveStammdaten } from '../_actions'
+import { saveStammdaten } from '../actions'
 import { useDispatchPhase } from '../_lib/phase-context'
 import {
   CheckCircleIcon,

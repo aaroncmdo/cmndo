@@ -23,7 +23,7 @@ import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe
 import { signSvVertrag, startStripeCheckout } from '@/lib/actions/sv-onboarding-actions'
 import { signBueroVertrag, startBueroStripeCheckout } from '@/app/gutachter/onboarding/buero/actions'
 import { signAkademieVertrag, startAkademieStripeCheckout } from '@/app/gutachter/onboarding/_akademie/actions'
-import { akzeptiereAgbSubSv } from './_actions'
+import { akzeptiereAgbSubSv } from './actions'
 import SignaturePadInput from '@/components/SignaturePadInput'
 import StripeBrandingFooter from '@/components/StripeBrandingFooter'
 import LogoUploadStep from '@/components/LogoUploadStep'

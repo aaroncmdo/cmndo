@@ -9,7 +9,7 @@ import {
   updateVertragsvorlage,
   setVertragsvorlageAktiv,
   setVertragsvorlageInaktiv,
-} from './_actions'
+} from './actions'
 
 type Vorlage = {
   id: string

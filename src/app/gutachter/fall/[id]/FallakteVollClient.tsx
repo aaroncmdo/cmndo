@@ -20,7 +20,7 @@ import {
   DownloadIcon,
   FolderOpenIcon,
 } from 'lucide-react'
-import { uploadGutachten, uploadDokument, uploadDatei, saveFinVinGutachter, sendChatNachricht } from './_actions'
+import { uploadGutachten, uploadDokument, uploadDatei, saveFinVinGutachter, sendChatNachricht } from './actions'
 import { terminAblehnen, terminGegenvorschlag, terminAnnehmen } from '@/lib/actions/termin-actions'
 import VorOrtPanel from '@/components/VorOrtPanel'
 import ChatChannel from '@/components/ChatChannel'

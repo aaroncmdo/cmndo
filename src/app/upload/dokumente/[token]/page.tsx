@@ -1,7 +1,7 @@
 // AAR-352: Server-Component für /upload/dokumente/[token].
 // Validiert Token + Status — entweder Multi-Slot-Upload-UI oder Status-Screen.
 
-import { getDokumenteAnfrageStatus } from './_actions'
+import { getDokumenteAnfrageStatus } from './actions'
 import MultiSlotUploadClient from './MultiSlotUploadClient'
 
 export default async function DokumenteUploadPage({

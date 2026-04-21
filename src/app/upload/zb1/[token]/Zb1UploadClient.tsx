@@ -6,7 +6,7 @@
 // Client-side Komprimierung auf max ~2MB via canvas.toBlob (H8).
 
 import { useState, useRef } from 'react'
-import { uploadZb1ViaToken } from './_actions'
+import { uploadZb1ViaToken } from './actions'
 import { CameraIcon, ImageIcon, CheckCircle2Icon, AlertCircleIcon, RefreshCwIcon } from 'lucide-react'
 
 type Step = 'hinweise' | 'vorschau' | 'uploading' | 'erfolg' | 'fehler'
