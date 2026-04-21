@@ -77,7 +77,7 @@ export async function sendChatMessage(params: {
     }
   }
 
-  revalidatePath(`/admin/faelle/${params.fallId}`)
+  revalidatePath(`/faelle/${params.fallId}`)
   revalidatePath('/admin/nachrichten')
   revalidatePath('/mitarbeiter/nachrichten')
   return { success: true }
@@ -96,7 +96,7 @@ export async function moveNachrichtToFall(nachrichtId: string, newFallId: string
 
   if (error) return { success: false, error: error.message }
   revalidatePath('/admin/nachrichten')
-  revalidatePath(`/admin/faelle/${newFallId}`)
+  revalidatePath(`/faelle/${newFallId}`)
   return { success: true }
 }
 

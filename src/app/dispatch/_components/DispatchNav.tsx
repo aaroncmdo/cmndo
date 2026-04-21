@@ -6,23 +6,54 @@ import {
   LayoutDashboardIcon, UsersIcon, PhoneIcon, LogOutIcon,
   MapIcon, CarFrontIcon, TargetIcon,
 } from 'lucide-react'
+import { SupportButton } from '@/components/support/SupportButton'
 
 // AAR-63: /dispatch/einstellungen Link entfernt (Route existiert nicht → 404)
 // AAR-112: Karte + Sachverständige + Isochrone ergänzt
-const NAV_ITEMS = [
+// AAR-514: Nav in 2 Sektionen splitten — „Arbeit" (täglich) + „Nachschlagen"
+// (Stammdaten, Read-Only). SV/Isochrone sind Datenhubs, keine Dispatch-Arbeit,
+// deshalb visuell separiert damit der Dispatcher sie nicht als operative
+// Tätigkeit missversteht.
+const NAV_ARBEIT = [
   { href: '/dispatch/dashboard', label: 'Dashboard', icon: LayoutDashboardIcon },
   { href: '/dispatch/leads', label: 'Leads', icon: UsersIcon },
   { href: '/dispatch/rueckrufe', label: 'Rückrufe', icon: PhoneIcon },
   { href: '/dispatch/karte', label: 'Karte', icon: MapIcon },
+]
+
+const NAV_NACHSCHLAGEN = [
   { href: '/dispatch/sachverstaendige', label: 'Sachverständige', icon: CarFrontIcon },
   { href: '/dispatch/isochrone', label: 'Isochrone', icon: TargetIcon },
 ]
+
+// Mobile bottom-nav bleibt bei den 4 Arbeits-Items — Nachschlagen ist Desktop-
+// only, auf Mobile im Dispatch-Kontext nicht praktikabel (SV-Kartenansicht +
+// Isochrone-Polygon brauchen Bildschirmfläche).
+const NAV_MOBILE = NAV_ARBEIT
+
+type NavItem = { href: string; label: string; icon: typeof LayoutDashboardIcon }
 
 export default function DispatchNav({ email, initials }: { email: string; initials: string }) {
   const pathname = usePathname()
 
   function isActive(href: string) {
     return pathname === href || pathname?.startsWith(href + '/')
+  }
+
+  function renderLink(item: NavItem) {
+    const active = isActive(item.href)
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-500 ${
+          active ? 'bg-[#1E3A5F] text-white font-semibold' : 'text-[#7BA3CC] hover:bg-white/5 hover:text-white'
+        }`}
+      >
+        <item.icon style={{ width: 17, height: 17 }} />
+        {item.label}
+      </Link>
+    )
   }
 
   return (
@@ -35,25 +66,23 @@ export default function DispatchNav({ email, initials }: { email: string; initia
           <p className="text-xs mt-1 text-[#7BA3CC]">{email}</p>
         </div>
 
-        <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
-          {NAV_ITEMS.map((item) => {
-            const active = isActive(item.href)
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-500 ${
-                  active ? 'bg-[#1E3A5F] text-white font-semibold' : 'text-[#7BA3CC] hover:bg-white/5 hover:text-white'
-                }`}
-              >
-                <item.icon style={{ width: 17, height: 17 }} />
-                {item.label}
-              </Link>
-            )
-          })}
+        <nav className="flex-1 px-3 overflow-y-auto">
+          <div className="space-y-0.5 pb-3">
+            <p className="px-3 pt-1 pb-1 text-[10px] uppercase tracking-wider text-[#7BA3CC]/70 font-semibold">
+              Arbeit
+            </p>
+            {NAV_ARBEIT.map(renderLink)}
+          </div>
+          <div className="space-y-0.5 pt-3 border-t border-white/10">
+            <p className="px-3 pt-1 pb-1 text-[10px] uppercase tracking-wider text-[#7BA3CC]/70 font-semibold">
+              Nachschlagen
+            </p>
+            {NAV_NACHSCHLAGEN.map(renderLink)}
+          </div>
         </nav>
 
         <div className="px-3 pb-4 space-y-2 border-t border-white/10 pt-3">
+          <SupportButton userName={email} rolle="dispatch" />
           <div className="flex items-center gap-3 px-3 py-2.5">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold bg-[#4573A2] text-white">
               {initials}
@@ -74,11 +103,11 @@ export default function DispatchNav({ email, initials }: { email: string; initia
         </div>
       </aside>
 
-      {/* Mobile bottom nav */}
+      {/* Mobile bottom nav — nur die 4 Arbeits-Items */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center bg-[#0D1B3E]"
         style={{ paddingTop: 8, paddingBottom: 'calc(8px + env(safe-area-inset-bottom))' }}
       >
-        {NAV_ITEMS.slice(0, 4).map((item) => {
+        {NAV_MOBILE.map((item) => {
           const active = isActive(item.href)
           return (
             <Link

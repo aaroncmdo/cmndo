@@ -35,9 +35,9 @@ function portalLinkForRole(role: Role, fallId: string | null): string {
     case 'makler':
       return fallId ? `${base}/makler/akten/${fallId}` : `${base}/makler`
     case 'kundenbetreuer':
-      return fallId ? `${base}/admin/faelle/${fallId}` : `${base}/mitarbeiter`
+      return fallId ? `${base}/faelle/${fallId}` : `${base}/mitarbeiter`
     default:
-      return fallId ? `${base}/admin/faelle/${fallId}` : `${base}/admin`
+      return fallId ? `${base}/faelle/${fallId}` : `${base}/admin`
   }
 }
 

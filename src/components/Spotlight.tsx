@@ -57,8 +57,8 @@ export default function Spotlight() {
 
   function navigate(type: string, id: string) {
     setOpen(false)
-    if (type === 'fall') router.push(`/admin/faelle/${id}`)
-    else if (type === 'lead') router.push(`/admin/dispatch/lead/${id}`)
+    if (type === 'fall') router.push(`/faelle/${id}`)
+    else if (type === 'lead') router.push(`/dispatch/leads/${id}`)
     else if (type === 'sv') router.push(`/admin/sachverstaendige/${id}`)
   }
 

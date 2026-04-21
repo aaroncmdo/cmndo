@@ -32,12 +32,13 @@ export async function akzeptiereAgbSubSv(
   // 1. SV laden + Eigentum verifizieren (profile_id ODER user_id)
   const { data: sv } = await db
     .from('sachverstaendige')
-    .select('id, profile_id, user_id, organisation_id, rolle_in_organisation, portal_zugang_freigeschaltet, onboarding_anzahlung_betrag')
+    .select('id, profile_id, organisation_id, rolle_in_organisation, portal_zugang_freigeschaltet, onboarding_anzahlung_betrag')
     .eq('id', sv_id)
     .maybeSingle()
 
   if (!sv) return { success: false, error: 'SV nicht gefunden' }
-  if (sv.profile_id !== user.id && sv.user_id !== user.id) {
+  // AAR SV-Audit-Follow-up: user_id-Check entfernt — profile_id ist Single Source
+  if (sv.profile_id !== user.id) {
     return { success: false, error: 'Keine Berechtigung' }
   }
   if (!sv.organisation_id) {

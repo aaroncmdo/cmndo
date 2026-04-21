@@ -18,21 +18,13 @@ export default async function GutachterOnboardingPage() {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  // Lade SV-Eintrag (profile_id ODER user_id Fallback)
+  // AAR SV-Audit-Follow-up: nur profile_id, user_id-Fallback entfernt
   const svSelect = 'id, onboarding_status, vertrag_unterschrieben, portal_zugang_freigeschaltet'
-  let { data: sv } = await supabase
+  const { data: sv } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
     .eq('profile_id', user.id)
     .maybeSingle()
-  if (!sv) {
-    const r = await supabase
-      .from('sachverstaendige')
-      .select(svSelect)
-      .eq('user_id', user.id)
-      .maybeSingle()
-    sv = r.data
-  }
 
   // Fall 1: kein SV-Eintrag → Aaron muss Account anlegen
   if (!sv) {

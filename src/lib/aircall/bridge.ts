@@ -38,7 +38,7 @@ export async function startBridgeCall({
     }
   } else {
     // SV muss dem Fall zugewiesen sein
-    const { data: sv } = await db.from('sachverstaendige').select('id').or(`profile_id.eq.${user.id},user_id.eq.${user.id}`).single()
+    const { data: sv } = await db.from('sachverstaendige').select('id').eq('profile_id', user.id).single()
     if (!sv || fall.sv_id !== sv.id) return { error: 'Kein Zugriff' }
   }
 

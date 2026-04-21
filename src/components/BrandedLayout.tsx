@@ -41,7 +41,7 @@ export async function loadBranding(): Promise<BrandingData> {
   const { data: sv } = await supabase
     .from('sachverstaendige')
     .select('organisation_id, logo_url, brand_primary, brand_secondary, brand_accent, use_custom_branding')
-    .or(`profile_id.eq.${user.id},user_id.eq.${user.id}`)
+    .eq('profile_id', user.id)
     .limit(1)
     .maybeSingle()
   if (!sv) return defaultBranding()

@@ -76,8 +76,8 @@ export async function bestaetigeKonfrontationsTermin(
   if (!result.success) return { success: false, error: result.error ?? 'Speichern fehlgeschlagen' }
 
   revalidatePath(`/gutachter/fall/${input.fallId}`)
-  revalidatePath(`/admin/faelle/${input.fallId}`)
-  revalidatePath(`/admin/faelle/${input.fallId}/prozess`)
+  revalidatePath(`/faelle/${input.fallId}`)
+  revalidatePath(`/faelle/${input.fallId}/prozess`)
   return { success: true }
 }
 
@@ -107,7 +107,7 @@ export async function lehneKonfrontationsTermin(
   if (!result.success) return { success: false, error: result.error ?? 'Speichern fehlgeschlagen' }
 
   revalidatePath(`/gutachter/fall/${input.fallId}`)
-  revalidatePath(`/admin/faelle/${input.fallId}`)
-  revalidatePath(`/admin/faelle/${input.fallId}/prozess`)
+  revalidatePath(`/faelle/${input.fallId}`)
+  revalidatePath(`/faelle/${input.fallId}/prozess`)
   return { success: true }
 }

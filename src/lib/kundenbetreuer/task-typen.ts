@@ -12,13 +12,13 @@ export const KB_TASK_TYPEN = {
     cta: 'Zum Dokument',
     // Child 6 baut die Zuordnungs-/QC-UI in der Fallakte; dahin navigieren.
     scrollTo: 'dokumente-card',
-    navigateTo: '/admin/faelle/{fallId}?tab=dokumente',
+    navigateTo: '/faelle/{fallId}?tab=dokumente',
   },
   'dokument-zuordnen': {
     label: 'Dokument einem Slot zuordnen',
     cta: 'Zuordnen',
     scrollTo: 'dokumente-card',
-    navigateTo: '/admin/faelle/{fallId}?tab=dokumente',
+    navigateTo: '/faelle/{fallId}?tab=dokumente',
   },
 } as const
 

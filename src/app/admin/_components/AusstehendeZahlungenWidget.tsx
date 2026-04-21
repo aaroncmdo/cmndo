@@ -43,11 +43,14 @@ async function loadAusstehende(): Promise<{ rows: Eintrag[]; gesamt: number; tot
   const eintraege: Eintrag[] = []
 
   // 1. SVs mit offener Anzahlung — Vertrag unterzeichnet aber nicht freigeschaltet
+  // AAR SV-Audit-Konsolidierung: gelöschte ausschließen — ein gelöschter
+  // SV braucht keine Anzahlungsmahnung mehr.
   const { data: svRows } = await supabase
     .from('sachverstaendige')
     .select('id, profile_id, onboarding_anzahlung_betrag, onboarding_anzahlung_faellig_am, vertrag_unterschrieben_am, vertrag_unterschrieben, portal_zugang_freigeschaltet')
     .eq('vertrag_unterschrieben', true)
     .eq('portal_zugang_freigeschaltet', false)
+    .is('geloescht_am', null)
     .gt('onboarding_anzahlung_betrag', 0)
     .limit(20)
 
@@ -94,9 +97,15 @@ async function loadAusstehende(): Promise<{ rows: Eintrag[]; gesamt: number; tot
       betrag: Number(r.summe_brutto ?? 0),
       faelligSeitTage: tageSeit(r.faellig_am),
       status: failed ? 'einzug_failed' : 'rechnung_ueberfaellig',
-      href: r.empfaenger_typ === 'gutachter' && r.empfaenger_id
-        ? `/admin/sachverstaendige/${r.empfaenger_id}`
-        : '/admin/abrechnungen',
+      // AAR-614: Vorher wurde auf /admin/sachverstaendige/{empfaenger_id}
+      // gelinkt wenn empfaenger_typ === 'gutachter'. Zwei Probleme:
+      // (a) Inserts setzen empfaenger_typ = 'sv' (nicht 'gutachter') → Check tot.
+      // (b) Bei SV-Sammelabrechnungen ist empfaenger_id die Organisations-ID,
+      //     nicht sachverstaendige.id → 404.
+      // Klick auf die Zeile → immer Abrechnungs-Tabelle (Detail-Drilldown).
+      // AAR-audit: Route nach AAR-528 Hub-Konsolidierung jetzt direkt auf
+      // den finalen Pfad (vorher griff der 301-Redirect aus next.config).
+      href: '/admin/finance/abrechnungen',
     })
   }
 
@@ -177,7 +186,7 @@ export default async function AusstehendeZahlungenWidget() {
 
       <div className="px-5 py-3 border-t border-gray-100 bg-gray-50">
         <Link
-          href="/admin/abrechnungen"
+          href="/admin/finance/abrechnungen"
           className="flex items-center justify-center gap-1.5 text-xs font-medium text-[#4573A2] hover:text-[#1E3A5F] transition-colors"
         >
           Alle anzeigen <ArrowRightIcon className="w-3 h-3" />

@@ -144,6 +144,12 @@ export type AnlegeSvFormData = {
   qualifikationen: string[]
   spezifikationen: string[]
   schadenarten: string[]
+  // AAR-515: Optionale Nummern-Felder — erscheinen im Wizard conditional
+  // wenn die entsprechende Quali ausgewählt wird. Plausibilisierung beim
+  // Tier-2-Freigabe (Admin prüft Dokument + Nummer nebeneinander).
+  bvsk_mitgliedsnummer?: string
+  ihk_zertifikat_nummer?: string
+  oebuv_bestellungsnummer?: string
 }
 
 export type AnlegeBueroFormData = {

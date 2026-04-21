@@ -226,7 +226,7 @@ export default function SvKalenderModal({ svId, svName, onClose }: { svId: strin
                         const top = minuteToY(startMin)
                         const height = Math.max(20, minuteToY(endMin) - top)
                         return (
-                          <Link key={appt.id} href={appt.fallId ? `/admin/faelle/${appt.fallId}` : '#'}
+                          <Link key={appt.id} href={appt.fallId ? `/faelle/${appt.fallId}` : '#'}
                             className={`absolute left-0.5 right-0.5 rounded-r z-10 overflow-hidden border-l-[3px] transition-colors ${
                               appt.status === 'reserviert'
                                 ? 'bg-amber-100/60 border-amber-400 hover:bg-amber-100'

@@ -20,6 +20,8 @@ function slot(partial: Partial<DokumentKatalogRow>): DokumentKatalogRow {
     max_mb: partial.max_mb ?? 10,
     sort_order: partial.sort_order ?? 0,
     aktiv: partial.aktiv ?? true,
+    maps_to_qualifikation: partial.maps_to_qualifikation ?? null,
+    steuert_kundensichtbarkeit: partial.steuert_kundensichtbarkeit ?? false,
   }
 }
 

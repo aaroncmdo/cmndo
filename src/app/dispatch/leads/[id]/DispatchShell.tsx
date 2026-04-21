@@ -21,10 +21,12 @@ import {
   TimerWidget,
   DisqualifizierenButton,
   RueckrufButton,
+  TerminListeSidebar,
   GespraechshilfePanel,
   EinwandKarten,
 } from './sidebar/SidebarStubs'
 import { computeFlowLinkStufe, FLOWLINK_STUFE_LABEL } from '@/lib/dispatch/fahrzeug-marken'
+import { PHASE_LABELS as PHASE_LABELS_CONST, PHASE_BADGES } from '../_components/leadPhaseConstants'
 
 type FlowLinkRow = {
   id: string
@@ -44,28 +46,6 @@ type FallSnapshot = {
   vollmacht_signiert_am?: string | null
 }
 
-const PHASE_LABELS: Record<string, string> = {
-  neu: 'Neu',
-  'nicht-erreicht': 'Nicht erreicht',
-  rueckruf: 'Rückruf',
-  'in-qualifizierung': 'In Qualifizierung',
-  'flow-versendet': 'Flow gesendet',
-  'sa-ausstehend': 'SA ausstehend',
-  konvertiert: 'Konvertiert',
-  disqualifiziert: 'Disqualifiziert',
-  kalt: 'Kalt',
-}
-
-const PHASE_COLORS: Record<string, string> = {
-  neu: 'bg-blue-100 text-blue-700',
-  'nicht-erreicht': 'bg-gray-100 text-gray-600',
-  rueckruf: 'bg-amber-100 text-amber-700',
-  'in-qualifizierung': 'bg-violet-100 text-violet-700',
-  'flow-versendet': 'bg-emerald-100 text-emerald-700',
-  konvertiert: 'bg-green-100 text-green-800',
-  disqualifiziert: 'bg-red-100 text-red-700',
-  kalt: 'bg-gray-200 text-gray-500',
-}
 
 export default function DispatchShell({
   lead,
@@ -74,6 +54,7 @@ export default function DispatchShell({
   fall,
   initialPhase,
   saUnterschrieben,
+  fallIdFuerBanner,
 }: {
   lead: LeadLike & {
     id: string
@@ -86,6 +67,7 @@ export default function DispatchShell({
   fall: FallSnapshot | null
   initialPhase: Phase
   saUnterschrieben: boolean
+  fallIdFuerBanner: string | null
 }) {
   const latestFlow = flowLinks[0]
   const flowStufe = computeFlowLinkStufe(lead as Parameters<typeof computeFlowLinkStufe>[0], latestFlow)
@@ -93,8 +75,8 @@ export default function DispatchShell({
   const flowLinkGesendet = flowStufe !== 'nicht_gesendet'
 
   const phase = lead.qualifizierungs_phase ?? 'neu'
-  const phaseLabel = PHASE_LABELS[phase] ?? phase
-  const phaseColor = PHASE_COLORS[phase] ?? 'bg-gray-100 text-gray-600'
+  const phaseLabel = PHASE_LABELS_CONST[phase] ?? phase
+  const phaseColor = PHASE_BADGES[phase] ?? 'bg-gray-100 text-gray-600'
 
   return (
     <DispatchPhaseProvider
@@ -130,6 +112,28 @@ export default function DispatchShell({
             </div>
           </div>
 
+          {/* AAR-631: Lead-Edit-Lockdown nach Conversion — Banner informiert
+              Dispatcher dass Stammdaten-Änderungen ab jetzt über die Fallakte
+              gemacht werden müssen. saveStammdaten verweigert Writes hier. */}
+          {saUnterschrieben && fallIdFuerBanner && (
+            <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex items-start gap-3">
+              <span className="text-amber-600 text-lg leading-none mt-0.5">ℹ</span>
+              <div className="flex-1 text-sm">
+                <p className="font-semibold text-amber-900">Lead ist konvertiert</p>
+                <p className="text-amber-800 mt-0.5">
+                  Stammdaten-Änderungen jetzt in der Fallakte machen — Lead-Daten sind als
+                  Snapshot eingefroren.
+                </p>
+                <Link
+                  href={`/faelle/${fallIdFuerBanner}`}
+                  className="inline-block mt-2 text-[#4573A2] hover:underline font-medium"
+                >
+                  Zur Fallakte →
+                </Link>
+              </div>
+            </div>
+          )}
+
           <PhaseHeader
             flowLinkGesendet={flowLinkGesendet}
             saUnterschrieben={saUnterschrieben}
@@ -143,6 +147,7 @@ export default function DispatchShell({
           <TimerWidget />
           <DisqualifizierenButton />
           <RueckrufButton />
+          <TerminListeSidebar />
           <GespraechshilfePanel />
           <EinwandKarten />
         </aside>

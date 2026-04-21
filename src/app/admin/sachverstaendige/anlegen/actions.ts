@@ -185,6 +185,10 @@ export async function anlegeSv(data: AnlegeSvFormData): Promise<{ success: boole
     qualifikationen_neu: data.qualifikationen,
     spezifikationen: data.spezifikationen ?? [],
     schadenarten: data.schadenarten ?? [],
+    // AAR-515: Quali-Nummern — conditional im Wizard erfasst
+    bvsk_mitgliedsnummer: data.bvsk_mitgliedsnummer?.trim() || null,
+    ihk_zertifikat_nummer: data.ihk_zertifikat_nummer?.trim() || null,
+    oebuv_bestellungsnummer: data.oebuv_bestellungsnummer?.trim() || null,
     standort_adresse: data.anschrift,
     standort_plz: data.anschrift_plz,
     standort_lat: data.anschrift_lat,
@@ -199,7 +203,10 @@ export async function anlegeSv(data: AnlegeSvFormData): Promise<{ success: boole
     anzahlung_status: 'offen',
     onboarding_status: 'vom_admin_angelegt', // ARCH-1 neuer Status
     portal_zugang_freigeschaltet: false, // Hard-Blocker bis Vertrag + Stripe
-    ist_aktiv: true,
+    // AAR SV-Audit-Konsolidierung: ist_aktiv=false beim Anlegen — konsistent
+    // mit Büro/Akademie/Community-Wizards. Stripe-Webhook setzt beides
+    // (portal_zugang_freigeschaltet + ist_aktiv) zusammen auf true nach Zahlung.
+    ist_aktiv: false,
     partner_seit: new Date().toISOString().slice(0, 10),
   }).select('id').single()
 

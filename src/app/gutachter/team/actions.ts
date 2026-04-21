@@ -18,7 +18,7 @@ async function ensureVerwalter(): Promise<{ ok: true; userId: string; svId: stri
   const adminDb = createAdminClient()
   const { data: sv } = await adminDb.from('sachverstaendige')
     .select('id, organisation_id, rolle_in_organisation, ist_parent_account')
-    .or(`profile_id.eq.${user.id},user_id.eq.${user.id}`)
+    .eq('profile_id', user.id)
     .order('ist_parent_account', { ascending: false })
     .limit(1)
     .maybeSingle()

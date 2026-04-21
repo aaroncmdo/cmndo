@@ -109,11 +109,13 @@ async function loadAusstehendeFull() {
 
   const result: Row[] = []
 
+  // AAR SV-Audit-Konsolidierung: gelöschte SVs nicht in der Mahnliste.
   const { data: svRows } = await supabase
     .from('sachverstaendige')
     .select('id, profile_id, onboarding_anzahlung_betrag, vertrag_unterschrieben_am, vertrag_unterschrieben, portal_zugang_freigeschaltet')
     .eq('vertrag_unterschrieben', true)
     .eq('portal_zugang_freigeschaltet', false)
+    .is('geloescht_am', null)
     .gt('onboarding_anzahlung_betrag', 0)
     .limit(200)
 
@@ -159,9 +161,9 @@ async function loadAusstehendeFull() {
       betrag: Number(r.summe_brutto ?? 0),
       faelligSeitTage: tageSeit(r.faellig_am),
       status: failed ? 'einzug_failed' : 'rechnung_ueberfaellig',
-      href: r.empfaenger_typ === 'gutachter' && r.empfaenger_id
-        ? `/admin/sachverstaendige/${r.empfaenger_id}`
-        : '/admin/abrechnungen',
+      // AAR-614: Siehe AusstehendeZahlungenWidget — Link immer auf
+      // /admin/abrechnungen (Detail-Drilldown), nicht auf tote SV-Route.
+      href: '/admin/abrechnungen',
     })
   }
 

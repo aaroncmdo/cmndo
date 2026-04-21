@@ -1,13 +1,23 @@
 'use server'
 
 // AAR-262: Server-side Geocoding-Fallback wenn der Dispatcher die
-// Besichtigungsadresse als Freitext eingibt (nicht via Google-Places-
-// Dropdown). Ohne Koordinaten kann der SV-Vorschläge-Button nicht
-// arbeiten — die Page wäre blockiert.
+// Unfallort-Adresse als Freitext eingibt (nicht via Google-Places-
+// Dropdown). Der Name der Funktion war historisch `geocodeAndSaveBesichtigung`
+// — missverständlich, weil tatsächlich auf `unfallort_*` geschrieben wird.
+// Semantik-Fix 2026-04-21: der Unfallort ist nur für die Unfallskizze
+// relevant; SV-Dispatch nutzt jetzt primär `besichtigungsort_*`, fällt aber
+// auf `unfallort_*` zurück wenn letzterer leer ist (Legacy-Leads). Deshalb
+// darf diese Action weiter auf unfallort schreiben — sie geocoded einen
+// Unfallort-Freitext, keinen Besichtigungsort.
 
 import { createClient } from '@/lib/supabase/server'
 
-export async function geocodeAndSaveBesichtigung(
+/**
+ * Geocodiert einen Unfallort-Freitext und persistiert Adresse + Koordinaten
+ * in `leads.unfallort*`. Wird von Phase 2 aufgerufen wenn der Dispatcher
+ * die Adresse tippt statt aus dem Google-Places-Dropdown auszuwählen.
+ */
+export async function geocodeAndSaveUnfallort(
   leadId: string,
   adresse: string,
 ): Promise<{ success: boolean; lat?: number; lng?: number; error?: string }> {

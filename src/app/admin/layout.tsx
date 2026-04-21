@@ -16,21 +16,43 @@ export default async function AdminLayout({
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  // KFZ-203 Fix: Dispatch-User dürfen nicht auf /admin/* (Layout-Level Guard)
+  // KFZ-203 + AAR-628: Rollen-Guard für /admin/*.
+  // Dispatch → eigenes Portal /dispatch/dashboard.
+  // Kundenbetreuer → eigenes Portal /mitarbeiter (Fallakte-Detail teilen
+  //   sich admin/kb/kanzlei unter /faelle/[id], aber die restlichen
+  //   /admin/*-Seiten sind Admin-only).
+  // Sachverständiger / Kunde / Makler sollten hier sowieso nicht ankommen,
+  //   Login-Redirect fängt das ab — zur Sicherheit trotzdem explizit.
   const { data: profileCheck } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
-  if (profileCheck?.rolle === 'dispatch') redirect('/dispatch/dashboard')
+  const profileRolle = profileCheck?.rolle as string | undefined
+  if (profileRolle === 'dispatch') redirect('/dispatch/dashboard')
+  if (profileRolle === 'kundenbetreuer') redirect('/mitarbeiter')
+  if (profileRolle === 'sachverstaendiger') redirect('/gutachter')
+  if (profileRolle === 'kunde') redirect('/kunde')
+  if (profileRolle === 'makler') redirect('/makler')
 
   const initials = user.email
     ? user.email.substring(0, 2).toUpperCase()
     : 'U'
 
   // KFZ-182: Unread nachrichten count for sidebar badge
-  const { count: unreadNachrichten } = await supabase
-    .from('nachrichten')
-    .select('*', { count: 'exact', head: true })
-    .eq('kanal', 'whatsapp')
-    .eq('richtung', 'inbound')
-    .eq('gelesen', false)
+  // AAR-531: Meine offene Tasks für Aufgaben-Badge parallel laden
+  const [
+    { count: unreadNachrichten },
+    { count: meineTasksCount },
+  ] = await Promise.all([
+    supabase
+      .from('nachrichten')
+      .select('*', { count: 'exact', head: true })
+      .eq('kanal', 'whatsapp')
+      .eq('richtung', 'inbound')
+      .eq('gelesen', false),
+    supabase
+      .from('tasks')
+      .select('*', { count: 'exact', head: true })
+      .eq('zugewiesen_an', user.id)
+      .in('status', ['offen', 'in-bearbeitung']),
+  ])
 
   return (
     <div className="h-screen bg-[#f8f9fb] relative overflow-hidden">
@@ -38,7 +60,7 @@ export default async function AdminLayout({
       <Spotlight />
 
       {/* Client-side nav with usePathname for active state */}
-      <AdminNav email={user.email ?? ''} initials={initials} unreadNachrichten={unreadNachrichten ?? 0} />
+      <AdminNav email={user.email ?? ''} initials={initials} unreadNachrichten={unreadNachrichten ?? 0} meineTasksCount={meineTasksCount ?? 0} />
 
       {/* Main content area — offset by sidebar width on desktop */}
       <div className="md:ml-56 h-screen flex flex-col relative z-10">

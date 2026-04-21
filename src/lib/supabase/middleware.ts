@@ -6,6 +6,17 @@ const REMEMBER_COOKIE_NAME = 'cm_remember'
 const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365
 
 export async function updateSession(request: NextRequest) {
+  // AAR-622: Public-Path-Kurzschluss — kein Supabase-Client, kein Auth-Call,
+  // kein GoTrue-Hit für Crons (/api/*), Landing-Pages und Login-Flows.
+  // Vorher lief getUser() (HTTP-Call zu GoTrue) auf JEDEM Request inkl.
+  // der ~15 Cron-Endpoints die alle 5-30 Min feuern → GoTrue-Überlastung.
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-pathname', request.nextUrl.pathname)
+
+  if (isPublicPath(request.nextUrl.pathname)) {
+    return NextResponse.next({ request: { headers: requestHeaders } })
+  }
+
   // Collect cookies that need to be set on the response
   const cookiesToUpdate: { name: string; value: string; options: Record<string, unknown> }[] = []
 
@@ -47,7 +58,10 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // CRITICAL: getUser() kann bei korrupten Cookies intern crashen.
+  // AAR-622: getUser() bleibt für geschützte Pfade — getSession() kann bei
+  // abgelaufenem Token null zurückgeben ohne GoTrue zu fragen, was jeden
+  // eingeloggten User fälschlicherweise auf /login schickt. Der große Gewinn
+  // (Crons, public paths) kommt vom Early-Return oben, nicht von hier.
   let user = null
   try {
     const result = await supabase.auth.getUser()
@@ -56,22 +70,15 @@ export async function updateSession(request: NextRequest) {
     user = null
   }
 
-  // KFZ-148 Lueckenfix (BUG-A.1): x-pathname Header injizieren damit Server
-  // Components / Layouts den aktuellen Pfad zuverlaessig lesen koennen
-  // (statt sich auf non-standard x-next-url / x-invoke-path zu verlassen).
-  const requestHeaders = new Headers(request.headers)
-  requestHeaders.set('x-pathname', request.nextUrl.pathname)
-
-  // Build response
-  let response: NextResponse
-
+  // Build response — public paths sind bereits oben per Early-Return raus.
   // AAR-111: Reihenfolge gefixt — 2FA-Check MUSS vor Admin-Rollen-Check greifen,
   // sonst umgehen Admin-User den 2FA-Flow komplett solange sie unter /admin/* bleiben.
+  let response: NextResponse
 
-  if (!user && !isPublicPath(request.nextUrl.pathname)) {
-    // Nicht eingeloggt + nicht public → /login
+  if (!user) {
+    // Nicht eingeloggt + geschützter Pfad → /login
     response = NextResponse.redirect(new URL('/login', request.url))
-  } else if (user && !isPublicPath(request.nextUrl.pathname) && request.nextUrl.pathname !== '/login/2fa') {
+  } else if (request.nextUrl.pathname !== '/login/2fa') {
     // Eingeloggt + geschützter Pfad (auch /admin/*): ZUERST 2FA-Check (KFZ-184)
     const isGoogleUser = user.app_metadata?.provider === 'google'
     const has2faCookie = request.cookies.get('claimondo_2fa_verified')?.value === '1'

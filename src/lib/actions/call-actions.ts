@@ -66,7 +66,7 @@ export async function startCall(opts: {
     }
   }
 
-  if (opts.fallId) revalidatePath(`/admin/faelle/${opts.fallId}`)
+  if (opts.fallId) revalidatePath(`/faelle/${opts.fallId}`)
   return { callId: call!.id }
 }
 

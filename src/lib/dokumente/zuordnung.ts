@@ -118,7 +118,7 @@ export async function zuordneDokument(
     .eq('task_typ', 'dokument-zuordnen')
     .in('status', ['offen', 'in-bearbeitung'])
 
-  revalidatePath(`/admin/faelle/${dok.fall_id}`)
+  revalidatePath(`/faelle/${dok.fall_id}`)
   return { success: true, fallId: dok.fall_id as string }
 }
 
@@ -159,7 +159,7 @@ export async function akzeptiereDokument(
     .eq('task_typ', 'dokument-pruefen')
     .in('status', ['offen', 'in-bearbeitung'])
 
-  revalidatePath(`/admin/faelle/${dok.fall_id}`)
+  revalidatePath(`/faelle/${dok.fall_id}`)
   return { success: true, fallId: dok.fall_id as string }
 }
 
@@ -283,7 +283,7 @@ export async function ablehneDokument(
     }
   }
 
-  revalidatePath(`/admin/faelle/${dok.fall_id}`)
+  revalidatePath(`/faelle/${dok.fall_id}`)
   revalidatePath('/kunde/onboarding')
   return { success: true, fallId: dok.fall_id as string }
 }
@@ -320,6 +320,6 @@ export async function updateDokumentSortOrder(
     return { success: false, error: firstErr.error.message }
   }
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   return { success: true }
 }

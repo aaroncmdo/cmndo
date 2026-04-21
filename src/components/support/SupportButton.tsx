@@ -14,16 +14,18 @@ type Variant = 'dark' | 'light'
 
 export function SupportButton({
   userName,
+  rolle,
   variant = 'dark',
 }: {
   userName?: string | null
+  rolle?: string | null
   variant?: Variant
 }) {
   const [open, setOpen] = useState(false)
 
   const className =
     variant === 'dark'
-      ? 'w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 transition-colors'
+      ? 'w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium bg-white text-[#0D1B3E] hover:bg-gray-100 transition-colors'
       : 'w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#4573A2] hover:text-[#0D1B3E] hover:bg-gray-50 transition-colors'
 
   return (
@@ -37,7 +39,7 @@ export function SupportButton({
         <MessageSquareIcon className="w-4 h-4" />
         Hilfe &amp; Support
       </button>
-      <SupportDrawer open={open} onClose={() => setOpen(false)} userName={userName} />
+      <SupportDrawer open={open} onClose={() => setOpen(false)} userName={userName} rolle={rolle} />
     </>
   )
 }

@@ -83,7 +83,7 @@ export default async function SlaMonitoringPage() {
               return (
                 <tr key={sla.id as string} className={isBreached ? 'bg-red-50/40' : ''}>
                   <td className="px-4 py-3">
-                    <Link href={`/admin/faelle/${sla.fall_id}`} className="font-medium text-[#4573A2] hover:underline">
+                    <Link href={`/faelle/${sla.fall_id}`} target="_blank" rel="noopener" className="font-medium text-[#4573A2] hover:underline">
                       {fallNr}
                     </Link>
                   </td>

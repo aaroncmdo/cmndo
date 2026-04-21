@@ -22,9 +22,9 @@ function portalPath(role: Role, fallId: string | null): string {
     case 'makler':
       return fallId ? `/makler/akten/${fallId}` : '/makler'
     case 'kundenbetreuer':
-      return fallId ? `/admin/faelle/${fallId}` : '/mitarbeiter'
+      return fallId ? `/faelle/${fallId}` : '/mitarbeiter'
     default:
-      return fallId ? `/admin/faelle/${fallId}` : '/admin'
+      return fallId ? `/faelle/${fallId}` : '/admin'
   }
 }
 

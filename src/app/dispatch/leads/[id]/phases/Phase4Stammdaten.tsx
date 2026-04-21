@@ -425,7 +425,7 @@ function Card({
 }
 
 export default function Phase4Stammdaten() {
-  const { lead, qualification, setPhase } = useDispatchPhase()
+  const { lead, qualification, setPhase, patchLead } = useDispatchPhase()
   const l = lead as unknown as LeadFields
   const leadId = lead.id
   const [gegnerKzDraft, setGegnerKzDraft] = useState(l.gegner_kennzeichen ?? '')
@@ -458,6 +458,12 @@ export default function Phase4Stammdaten() {
     if (formatted !== gegnerKzDraft) setGegnerKzDraft(formatted)
     if (formatted === (l.gegner_kennzeichen ?? '')) return
     const flags = checkKZFlags(formatted, l.schadentyp ?? null)
+    // AAR-realtime: Provider-State sofort patchen
+    patchLead({
+      gegner_kennzeichen: formatted || null,
+      fahrerflucht: flags.fahrerflucht,
+      auslandskennzeichen: flags.auslandskennzeichen,
+    } as Partial<typeof lead>)
     startTransition(async () => {
       await saveStammdaten(leadId, {
         gegner_kennzeichen: formatted || null,
@@ -468,6 +474,8 @@ export default function Phase4Stammdaten() {
   }
 
   function saveToggle(field: string, value: boolean | string | null) {
+    // AAR-realtime: Provider-State sofort patchen
+    patchLead({ [field]: value } as Partial<typeof lead>)
     startTransition(async () => {
       await saveStammdaten(leadId, { [field]: value })
     })
@@ -1220,16 +1228,26 @@ export default function Phase4Stammdaten() {
         </p>
       )}
 
+      {/* AAR-617: Zurück-/Weiter-Row */}
       {/* AAR-340: „Weiter zu Phase 5"-Button — Pflichtfelder q6 + q7 müssen
           erfüllt sein; Q8 (schadens_hergang) wird erst in Phase 5 hart gegatet. */}
-      <button
-        type="button"
-        onClick={() => setPhase(5)}
-        disabled={!qualification.q6_gegnerKz || !qualification.q7_fahrzeug}
-        className="w-full mt-2 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-      >
-        Weiter zu Phase 5 (Zusammenfassung) →
-      </button>
+      <div className="flex gap-2 mt-2">
+        <button
+          type="button"
+          onClick={() => setPhase(3)}
+          className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-semibold flex items-center justify-center gap-2"
+        >
+          ← Zurück zu Phase 3
+        </button>
+        <button
+          type="button"
+          onClick={() => setPhase(5)}
+          disabled={!qualification.q6_gegnerKz || !qualification.q7_fahrzeug}
+          className="flex-1 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        >
+          Weiter zu Phase 5 →
+        </button>
+      </div>
     </div>
   )
 }
