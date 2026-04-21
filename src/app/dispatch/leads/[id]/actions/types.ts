@@ -33,12 +33,6 @@ export type HardGateData = {
   polizei_aktenzeichen?: string | null
   polizeibericht_pflicht?: boolean
   fahrzeug_fahrbereit?: boolean
-  // AAR-581 (N4): Strukturierter Besichtigungsort mit Koordinaten +
-  // Google-place_id — ersetzt Legacy-Freitext `sv_treffpunkt`.
-  besichtigungsort_adresse?: string | null
-  besichtigungsort_lat?: number | null
-  besichtigungsort_lng?: number | null
-  besichtigungsort_place_id?: string | null
 }
 
 export type SvSuggestion = {

@@ -1,2 +1,0 @@
--- KFZ-112: Kanzlei-Provision Trigger (applied via Supabase MCP)
--- Automatisch 150€ finance_eintraege bei Vollmacht-Unterschrift + mandatstyp=kanzlei-claimondo

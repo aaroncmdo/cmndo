@@ -206,13 +206,13 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
         'vs-abgelehnt',
         `VS Ablehnung — Fall ${fallInfo.fall_nummer ?? fallId.slice(0, 8)}`,
         'Versicherung hat abgelehnt. Bitte Eskalations-Schritte einleiten.',
-        `/admin/faelle/${fallId}`,
+        `/faelle/${fallId}`,
       ).catch(() => {})
     }
   }
 
   revalidatePath('/admin/dispatch')
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
 }
 
 // ─── Lead Status ────────────────────────────────────────────────────────────
@@ -260,7 +260,7 @@ export async function createLead(data: {
   const { data: newLead } = await supabase.from('leads').select('id').eq('vorname', data.vorname).eq('nachname', data.nachname).order('created_at', { ascending: false }).limit(1).single()
   if (newLead) {
     triggerLeadTasks(newLead.id, user.id).catch(() => {})
-    createNotification(user.id, 'neuer-lead', `Neuer Lead: ${data.vorname} ${data.nachname}`, `${data.source_channel} · ${data.schadens_fall_typ || 'Kein Typ'}`, `/admin/dispatch/lead/${newLead.id}`).catch(() => {})
+    createNotification(user.id, 'neuer-lead', `Neuer Lead: ${data.vorname} ${data.nachname}`, `${data.source_channel} · ${data.schadens_fall_typ || 'Kein Typ'}`, `/dispatch/leads/${newLead.id}`).catch(() => {})
 
     // AAR-90: Cardentity-Anreicherung wenn FIN angegeben
     if (data.fin) {
@@ -383,7 +383,7 @@ export async function updateServiceTyp(
 
   if (error) throw new Error(error.message)
 
-  revalidatePath(`/admin/dispatch/lead/${leadId}`)
+  revalidatePath(`/dispatch/leads/${leadId}`)
   revalidatePath('/admin/dispatch')
 }
 
@@ -505,7 +505,7 @@ export async function sendFlowLink(leadId: string) {
     }
   }
   revalidatePath('/admin/dispatch')
-  revalidatePath(`/admin/dispatch/lead/${leadId}`)
+  revalidatePath(`/dispatch/leads/${leadId}`)
 
   return { token: flowLink.token, url: flowUrl }
 }
@@ -556,6 +556,14 @@ async function convertLeadToFall(
       fall_nummer: fallNummer,
       lead_id: leadId,
       status: 'ersterfassung',
+      // Kunden-Snapshot — einmalig vom Lead, danach auf faelle editierbar
+      kunde_vorname: lead.vorname ?? null,
+      kunde_nachname: lead.nachname ?? null,
+      kunde_email: lead.email ?? null,
+      kunde_telefon: lead.telefon ?? null,
+      kunde_plz: (lead.kunde_plz as string | null) ?? null,
+      kunde_strasse: (lead.kunde_strasse as string | null) ?? null,
+      kunde_stadt: (lead.kunde_stadt as string | null) ?? null,
       // Stammdaten vom Lead
       schadens_fall_typ: lead.schadens_fall_typ,
       kunden_konstellation: lead.kunden_konstellation,
@@ -600,6 +608,42 @@ async function convertLeadToFall(
       fin_vin: lead.fin ?? null,
       kilometerstand: lead.kilometerstand ?? null,
       unfallhergang: lead.unfallhergang ?? null,
+      // Dispatch-Qualifizierungs-Felder (Phase 1–4) — fehlten bisher im Convert
+      schuldfrage: lead.schuldfrage ?? null,
+      schaden_sichtbar: lead.schaden_sichtbar ?? null,
+      fahrerflucht: lead.fahrerflucht ?? null,
+      nutzungsausfall: lead.nutzungsausfall ?? null,
+      hat_haftpflicht: lead.hat_haftpflicht ?? null,
+      schadentyp: lead.schadentyp ?? null,
+      // AAR-504/505: BKat-Unfallart (15-Werte-Enum) mitziehen. Kann auch
+      // null sein wenn der Dispatcher die KI-Analyse nicht ausgefuehrt hat.
+      bkat_unfallart: (lead.bkat_unfallart as string | null) ?? null,
+      fahrzeug_baujahr: lead.fahrzeug_baujahr ?? null,
+      fahrzeug_fahrbereit: lead.fahrzeug_fahrbereit ?? null,
+      service_typ: (lead.service_typ as string | null) ?? 'komplett',
+      // Semantik-Fix 2026-04-21: Wenn lead.besichtigungsort_* leer ist,
+      // Fallback auf unfallort — Default-Annahme „Auto steht am Unfallort".
+      // Der Gutachter braucht eine Adresse für Navigation, ICS, Reminder.
+      // Backfill-Migration hat historische Leads bereits gemappt; dieser
+      // Fallback fängt den Fall ab wo der Dispatcher vor der Conversion
+      // keinen Besichtigungsort setzt.
+      besichtigungsort_adresse:
+        lead.besichtigungsort_adresse ?? (lead.unfallort as string | null) ?? null,
+      besichtigungsort_lat:
+        lead.besichtigungsort_lat ?? (lead.unfallort_lat as number | null) ?? null,
+      besichtigungsort_lng:
+        lead.besichtigungsort_lng ?? (lead.unfallort_lng as number | null) ?? null,
+      besichtigungsort_place_id: lead.besichtigungsort_place_id ?? null,
+      sprache: lead.sprache ?? null,
+      // AAR-630: 6 weitere Lead-Felder die bisher beim Convert verloren gingen
+      // (fahrerflucht lief schon vorher, aber ohne faelle-Spalte). Migration
+      // 20260420211923 hat die Spalten angelegt, jetzt vollstaendiges Mapping.
+      auslandskennzeichen: lead.auslandskennzeichen ?? null,
+      polizeibericht_status: lead.polizeibericht_status ?? null,
+      zb1_status: lead.zb1_status ?? null,
+      unfall_uhrzeit: lead.unfall_uhrzeit ?? null,
+      unfallort_lat: lead.unfallort_lat ?? null,
+      unfallort_lng: lead.unfallort_lng ?? null,
       // KFZ-140: Fehlende Felder aus signSAandCreateFall uebernehmen
       schadens_datum: lead.unfalldatum ?? null,
       schadens_adresse: lead.fahrzeug_standort_adresse ?? null,
@@ -728,7 +772,7 @@ async function convertLeadToFall(
       'fallback_kb_zuweisung',
       'Fall als KB-Fallback zugewiesen',
       `Fall ${fallNummer} wurde dir als Fallback zugewiesen, weil aktuell kein Kundenbetreuer verfügbar ist.`,
-      `/admin/faelle/${fall.id}`,
+      `/faelle/${fall.id}`,
     ).catch(() => {})
   } else if (kbAssignment.fallback_used === 'error') {
     // Kein KB und kein Admin — Timeline + Error-Log, Fall bleibt unbezogen.

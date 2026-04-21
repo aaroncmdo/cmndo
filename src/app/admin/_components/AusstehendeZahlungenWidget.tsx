@@ -94,9 +94,15 @@ async function loadAusstehende(): Promise<{ rows: Eintrag[]; gesamt: number; tot
       betrag: Number(r.summe_brutto ?? 0),
       faelligSeitTage: tageSeit(r.faellig_am),
       status: failed ? 'einzug_failed' : 'rechnung_ueberfaellig',
-      href: r.empfaenger_typ === 'gutachter' && r.empfaenger_id
-        ? `/admin/sachverstaendige/${r.empfaenger_id}`
-        : '/admin/abrechnungen',
+      // AAR-614: Vorher wurde auf /admin/sachverstaendige/{empfaenger_id}
+      // gelinkt wenn empfaenger_typ === 'gutachter'. Zwei Probleme:
+      // (a) Inserts setzen empfaenger_typ = 'sv' (nicht 'gutachter') → Check tot.
+      // (b) Bei SV-Sammelabrechnungen ist empfaenger_id die Organisations-ID,
+      //     nicht sachverstaendige.id → 404.
+      // Klick auf die Zeile → immer Abrechnungs-Tabelle (Detail-Drilldown).
+      // AAR-audit: Route nach AAR-528 Hub-Konsolidierung jetzt direkt auf
+      // den finalen Pfad (vorher griff der 301-Redirect aus next.config).
+      href: '/admin/finance/abrechnungen',
     })
   }
 
@@ -177,7 +183,7 @@ export default async function AusstehendeZahlungenWidget() {
 
       <div className="px-5 py-3 border-t border-gray-100 bg-gray-50">
         <Link
-          href="/admin/abrechnungen"
+          href="/admin/finance/abrechnungen"
           className="flex items-center justify-center gap-1.5 text-xs font-medium text-[#4573A2] hover:text-[#1E3A5F] transition-colors"
         >
           Alle anzeigen <ArrowRightIcon className="w-3 h-3" />

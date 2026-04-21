@@ -9,8 +9,10 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 const STAMMDATEN_ALLOWED_FIELDS = new Set([
-  // Kunde
+  // Kunde — Kontakt + Adresse + Notiz
   'vorname', 'nachname', 'telefon', 'email',
+  'kunde_plz', 'kunde_strasse', 'kunde_stadt',
+  'notiz',
   // Fahrzeug
   'kennzeichen', 'fahrzeug_hersteller', 'fahrzeug_modell',
   // AAR-181: Baujahr ist Pflichtfeld in Phase 4, muss in der Allowlist sein
@@ -71,10 +73,35 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
 export async function saveStammdaten(
   leadId: string,
   updates: Record<string, unknown>,
-): Promise<{ success: boolean; error?: string; ignored?: string[] }> {
+): Promise<{ success: boolean; error?: string; ignored?: string[]; fallId?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  // AAR-631: Nach SA-Unterschrift ist der Fall die Source-of-Truth — Lead-Edit
+  // an gemeinsamen Feldern würde Drift erzeugen (Lead bleibt als Snapshot,
+  // Fall ist live). Daher: nach Conversion keine Lead-Stammdaten-Edits mehr
+  // über diesen Endpoint. Der Dispatcher soll über die Fallakte editieren.
+  const { data: lead } = await supabase
+    .from('leads')
+    .select('sa_unterschrieben')
+    .eq('id', leadId)
+    .maybeSingle()
+
+  if (lead?.sa_unterschrieben) {
+    const { data: fall } = await supabase
+      .from('faelle')
+      .select('id')
+      .eq('lead_id', leadId)
+      .maybeSingle()
+    return {
+      success: false,
+      error: fall
+        ? 'Lead ist zu einem Fall konvertiert. Bitte über die Fallakte editieren.'
+        : 'Lead ist abgeschlossen — kein Edit mehr möglich.',
+      fallId: fall?.id,
+    }
+  }
 
   const allowed: Record<string, unknown> = {}
   const ignored: string[] = []

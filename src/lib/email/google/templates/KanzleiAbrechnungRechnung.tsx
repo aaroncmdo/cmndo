@@ -41,7 +41,7 @@ export function KanzleiAbrechnungRechnungEmail(props: Props) {
         </Text>
       </Section>
 
-      <Button href={`${APP_URL}/admin/faelle/${props.fallId}`}>Fallakte öffnen</Button>
+      <Button href={`${APP_URL}/faelle/${props.fallId}`}>Fallakte öffnen</Button>
 
       <Paragraph>
         Die Rechnung liegt dieser Email als PDF bei.

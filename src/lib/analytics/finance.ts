@@ -29,7 +29,7 @@ export async function getUmsatz(filter: AnalyticsFilter): Promise<{
     label: f.fall_nummer ?? f.id.slice(0, 8),
     betrag: Number(f.gutachten_betrag) || 0,
     datum: f.zahlung_eingegangen_am ?? f.gutachten_eingegangen_am,
-    link: `/admin/faelle/${f.id}`,
+    link: `/faelle/${f.id}`,
   }))
 
   return {
@@ -62,7 +62,7 @@ export async function getKosten(filter: AnalyticsFilter): Promise<{
     id: a.fall_id ?? a.id,
     label: `SV-Abr. ${a.monat ?? ''}`,
     betrag: Number(a.leadpreis) || 0,
-    link: a.fall_id ? `/admin/faelle/${a.fall_id}` : undefined,
+    link: a.fall_id ? `/faelle/${a.fall_id}` : undefined,
   }))
 
   // Kanzlei-Kosten aus faelle.kanzlei_honorar

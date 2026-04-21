@@ -140,13 +140,13 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
         .gte('sv_termin', ds).lt('sv_termin', de)
         .not('status', 'in', '("abgeschlossen","storniert")')
         .order('sv_termin', { ascending: true }),
-      // Rückrufe
-      supabase.from('leads')
-        .select('id, vorname, nachname, telefon, rueckruf_datum, rueckruf_notiz')
-        .not('rueckruf_datum', 'is', null)
-        .or('rueckruf_erledigt.is.null,rueckruf_erledigt.eq.false')
-        .gte('rueckruf_datum', ds).lte('rueckruf_datum', de)
-        .order('rueckruf_datum', { ascending: true }),
+      // Rückrufe (AAR-637: admin_termine typ='rueckruf' ist SoT, lead + fall)
+      supabase.from('admin_termine')
+        .select('id, start_zeit, notizen, lead_id, fall_id, lead:leads!admin_termine_lead_id_fkey(id, vorname, nachname, telefon)')
+        .eq('typ', 'rueckruf')
+        .eq('status', 'offen')
+        .gte('start_zeit', ds).lte('start_zeit', de)
+        .order('start_zeit', { ascending: true }),
       // Kunden-Termine
       supabase.from('termine')
         .select('id, fall_id, betreff, datum, dauer_minuten, typ, status, ort, teilnehmer, meeting_link')
@@ -195,23 +195,26 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
         dauer: 60, // default 1h
         label: leadMap[f.lead_id ?? ''] ?? '—',
         sublabel: `SV: ${svMap[f.sv_id ?? ''] ?? '—'}${f.kennzeichen ? ` · ${f.kennzeichen}` : ''}`,
-        link: `/admin/faelle/${f.id}`,
+        link: `/faelle/${f.id}`,
       })
     }
 
-    // Rückrufe → amber
+    // Rückrufe → amber (AAR-637: admin_termine)
     for (const r of rueckR.data ?? []) {
-      const d = new Date(r.rueckruf_datum!)
+      const d = new Date(r.start_zeit)
       const startMin = d.getHours() * 60 + d.getMinutes()
-      const name = [r.vorname, r.nachname].filter(Boolean).join(' ') || '—'
+      const leadRaw = r.lead as unknown
+      const lead = Array.isArray(leadRaw) ? leadRaw[0] ?? null : (leadRaw as { id: string; vorname: string | null; nachname: string | null; telefon: string | null } | null)
+      const name = lead ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—' : (r.notizen?.slice(0, 40) ?? 'Rückruf')
+      const href = lead ? `/dispatch/leads/${lead.id}` : r.fall_id ? `/faelle/${r.fall_id}` : `/admin/kalender`
       calBlocks.push({
         id: `rr-${r.id}`,
         typ: 'rueckruf',
         startMin,
         dauer: 15,
         label: name,
-        sublabel: r.telefon ?? '',
-        link: `/admin/dispatch/lead/${r.id}`,
+        sublabel: lead?.telefon ?? '',
+        link: href,
       })
     }
 
@@ -232,7 +235,7 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
         dauer: t.dauer_minuten ?? 30,
         label: t.betreff ?? (t.typ === 'rueckruf' ? 'Rückruf' : t.typ === 'intern' ? 'Intern' : 'Kundentermin'),
         sublabel: t.typ === 'intern' ? `${teilnehmerArr.length} Teilnehmer · ${ortLabel}` : (t.typ ?? ''),
-        link: t.fall_id ? `/admin/faelle/${t.fall_id}` : '#',
+        link: t.fall_id ? `/faelle/${t.fall_id}` : '#',
       })
     }
 
@@ -412,7 +415,7 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
           <span className="text-xs font-semibold text-[#0D1B3E] flex items-center gap-1.5">
             <AlertTriangleIcon className="w-3.5 h-3.5 text-amber-500" /> Offene Tasks ({tasks.length})
           </span>
-          <Link href="/admin/tasks" className="text-[10px] text-[#4573A2] hover:underline">Alle →</Link>
+          <Link href="/admin/aufgaben/alle" className="text-[10px] text-[#4573A2] hover:underline">Alle →</Link>
         </div>
         <div className="max-h-60 overflow-y-auto">
           {tasks.length === 0 ? (
@@ -420,7 +423,7 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
           ) : tasks.map(t => {
             const overdue = t.deadline && new Date(t.deadline) < new Date()
             return (
-              <Link key={t.id} href={t.fallId ? `/admin/faelle/${t.fallId}${t.typ ? `?highlight=${t.typ}` : ''}` : '#'}
+              <Link key={t.id} href={t.fallId ? `/faelle/${t.fallId}${t.typ ? `?highlight=${t.typ}` : ''}` : '#'}
                 className={`block px-3 py-2 border-b border-gray-50 hover:bg-gray-50 transition-colors ${overdue ? 'bg-red-50/30' : ''}`}>
                 <p className="text-xs text-[#0D1B3E] font-medium truncate">{t.titel}</p>
                 <div className="flex items-center gap-2 mt-0.5 text-[10px]">
@@ -445,7 +448,7 @@ export default function DashboardClient({ userId, userRolle = 'admin' }: { userI
           </div>
           <div className="max-h-48 overflow-y-auto">
             {neueFaelle.map(f => (
-              <Link key={f.id} href={`/admin/faelle/${f.id}`}
+              <Link key={f.id} href={`/faelle/${f.id}`} target="_blank" rel="noopener"
                 className="block px-3 py-2 border-b border-gray-50 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-[#0D1B3E] font-medium truncate">{f.kunde}</p>

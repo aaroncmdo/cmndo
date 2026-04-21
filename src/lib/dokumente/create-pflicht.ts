@@ -104,4 +104,15 @@ export async function createPflichtdokumenteFromKatalog(
 
   if (docs.length === 0) return
   await supabase.from('pflichtdokumente').insert(docs)
+
+  // AAR-623: Konditionale WA-Tasks fuer freigabe_bank + zeugenbericht
+  // triggern — nur fuer Slots die gerade frisch als pflicht angelegt
+  // wurden. Idempotent (prueft Task-Dedup + Upload-Status intern).
+  try {
+    const { triggerKonditionaleDokumentTasks } = await import('./konditional-tasks')
+    const insertedSlots = docs.map((d) => d.dokument_typ)
+    await triggerKonditionaleDokumentTasks(supabase, fallId, insertedSlots)
+  } catch (err) {
+    console.error('[AAR-623] triggerKonditionaleDokumentTasks failed:', err)
+  }
 }

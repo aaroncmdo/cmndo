@@ -324,10 +324,9 @@ export default function WillkommenClient({
   const paketLabel = PAKET_LABELS[sv.paket] ?? sv.paket
   const fullName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || '—'
 
-  // FR-2: Banner sichtbar fuer Solo + Inhaber, NICHT fuer Sub-Mitarbeiter,
-  // und nur solange portal_zugang_freigeschaltet=false ist.
-  const showAnzahlungBanner =
-    (r === 'solo' || r === 'buero_inhaber') && !sv.portal_zugang_freigeschaltet
+  // AAR-512: showAnzahlungBanner entfernt — der globale Onboarding-Banner im
+  // Layout (`src/app/gutachter/layout.tsx`) rendert denselben Hinweis, nur
+  // generalisiert + klickbar. Inline-Duplikat an dieser Stelle war redundant.
 
   // ── Solo-Handler (existing) ────────────────────────────────────────────
   async function handleSoloVertragSubmit() {
@@ -469,20 +468,8 @@ export default function WillkommenClient({
           <p className="text-gray-500 text-sm mt-1">Schritt {step + 1} von {STEPS.length}</p>
         </div>
 
-        {/* FR-2: Anzahlung-Warn-Banner (Solo + Inhaber, vor Anzahlung) */}
-        {showAnzahlungBanner && (
-          <div className="mb-5 bg-amber-50 border border-amber-300 rounded-xl p-4 flex items-start gap-3">
-            <AlertTriangleIcon className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-amber-800">
-              <strong>Sie erhalten erst Fälle von uns, sobald Sie angezahlt haben!</strong>
-              <p className="text-xs text-amber-700 mt-1">
-                {r === 'buero_inhaber'
-                  ? 'Sobald die Büro-Anzahlung eingegangen ist, werden alle Sub-Standorte gleichzeitig freigeschaltet.'
-                  : 'Sobald die Anzahlung eingegangen ist, ist dein Portal-Zugang sofort freigeschaltet.'}
-              </p>
-            </div>
-          </div>
-        )}
+        {/* AAR-512: Inline-Anzahlung-Banner entfernt — der globale Onboarding-
+            Banner im Layout deckt den Hinweis ab, klickbar + generalisiert. */}
 
         {/* BUG-95 KORREKTUR: Stepper in Claimondo-CI ohne Grün.
             done   → var(--brand-secondary) (Ondo Blue) + Checkmark, weiß
@@ -518,7 +505,41 @@ export default function WillkommenClient({
 
         {/* Content Card */}
         <div className="bg-white border border-gray-200 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-5">{STEPS[step].label}</h2>
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-lg font-semibold text-gray-900">{STEPS[step].label}</h2>
+            {/* AAR-513: Globaler Zurück-Button — funktioniert auf allen Steps
+                (Branding/Anzahlung/SA-Vorlage/Kalender haben keine eigenen
+                Navigations-Buttons weil ihre Sub-Components sie übernehmen).
+                Disabled wenn der vorherige Step bereits committed ist
+                (Vertrag unterschrieben → Vertrag-Step locked, Anzahlung bezahlt
+                → Anzahlung-Step locked, etc.). Auf Step 0 + Sub-Mitarbeiter-
+                Warte-Branch wird die Leiste ausgeblendet. */}
+            {step > 0 && r !== 'sub_mitarbeiter' && (() => {
+              const prevKey = STEPS[step - 1]?.key ?? ''
+              const prevCommitted =
+                (prevKey === 'vertrag' && sv.vertrag_unterschrieben) ||
+                (prevKey === 'anzahlung' && sv.portal_zugang_freigeschaltet) ||
+                (prevKey === 'sa_vorlage' && sv.sa_vorlage_status === 'geprueft')
+              const tooltip = prevCommitted
+                ? 'Dieser Schritt ist bereits abgeschlossen und kann nicht mehr bearbeitet werden'
+                : `Zurück zu „${STEPS[step - 1].label}"`
+              return (
+                <button
+                  type="button"
+                  onClick={() => !prevCommitted && setStep(step - 1)}
+                  disabled={saving || prevCommitted}
+                  title={tooltip}
+                  className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  aria-label={tooltip}
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Zurück
+                </button>
+              )
+            })()}
+          </div>
 
           {/* ═══════════════════════════════════════════════════════════════
               SCHRITT 0: Konditionen
@@ -1047,7 +1068,9 @@ export default function WillkommenClient({
               haben eigene Buttons. */}
           {currentKey !== 'branding' && currentKey !== 'anzahlung' && currentKey !== 'sa_vorlage' && currentKey !== 'kalender' && (
             <div className="flex items-center gap-3 mt-6">
-              {step > 0 && (
+              {/* AAR-513: Bottom-Zurück nur noch für sub_mitarbeiter — alle
+                  anderen Rollen nutzen den globalen Zurück-Pfeil oben rechts. */}
+              {step > 0 && r === 'sub_mitarbeiter' && (
                 <button
                   type="button"
                   onClick={() => setStep(step - 1)}

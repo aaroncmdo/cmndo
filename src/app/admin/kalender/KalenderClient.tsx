@@ -114,7 +114,7 @@ export default function KalenderClient({
           start: f.sv_termin, farbe: FARBEN.gutachter,
           gutachterId: f.sv_id ?? undefined, gutachterName: f.sv_id ? svMap[f.sv_id] : undefined,
           fallId: f.id, fallNummer: f.fall_nummer ?? undefined,
-          link: `/admin/faelle/${f.id}`, status: f.status,
+          link: `/faelle/${f.id}`, status: f.status,
           overdue: isBefore(new Date(f.sv_termin), now) && f.status !== 'abgeschlossen',
         })
       }
@@ -126,7 +126,7 @@ export default function KalenderClient({
         id: `task-${t.id}`, typ: 'task',
         titel: t.titel, start: t.faellig_am, farbe: FARBEN.task,
         fallId: t.fall_id ?? undefined, fallNummer: t.fall_id ? fallMap[t.fall_id] : undefined,
-        link: t.fall_id ? `/admin/faelle/${t.fall_id}` : '/admin/tasks',
+        link: t.fall_id ? `/faelle/${t.fall_id}` : '/admin/tasks',
         overdue: isBefore(new Date(t.faellig_am), now) && t.status !== 'erledigt',
       })
     }
@@ -142,7 +142,7 @@ export default function KalenderClient({
         titel: mt.betreff ?? `${mt.typ} (${mt.dauer_minuten} Min)`,
         start: mt.datum, farbe: FARBEN[terminTyp],
         fallId: mt.fall_id ?? undefined, fallNummer: mt.fall_id ? fallMap[mt.fall_id] : undefined,
-        link: mt.fall_id ? `/admin/faelle/${mt.fall_id}` : undefined,
+        link: mt.fall_id ? `/faelle/${mt.fall_id}` : undefined,
       })
     }
 

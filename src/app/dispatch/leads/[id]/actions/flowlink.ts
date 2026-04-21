@@ -185,5 +185,6 @@ export async function sendFlowLinkMultiChannel(
     .then(() => {}, () => {})
 
   revalidatePath(`/dispatch/leads/${leadId}`)
+  revalidatePath('/dispatch/dashboard')
   return { success: true, token: flowLink.token }
 }

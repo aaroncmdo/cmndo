@@ -86,6 +86,18 @@ export const AI_MODELS = {
    * Qualität der Ticket-Beschreibung wichtig → Sonnet 4.6.
    */
   support_bot: 'claude-sonnet-4-6',
+  /**
+   * AAR-504/505 (B2+B3): BKat-Inferenz aus Unfallhergang-Text.
+   * Klassifiziert Unfall in bkat_unfallart und schlägt 1-3 TBNR-Vorschläge
+   * vor. Deutscher Jura-Kontext, strukturierter JSON-Output → Sonnet 4.6.
+   */
+  bkat_inference: 'claude-sonnet-4-6',
+  /**
+   * AAR-504 (B2): Polizeibericht-OCR via Claude Vision — extrahiert TBNRs
+   * aus gescannten/fotografierten Polizeiberichten. Multimodal-OCR mit
+   * Confidence-Handling → Sonnet 4.6.
+   */
+  bkat_ocr: 'claude-sonnet-4-6',
 } as const
 
 export type AiModelKey = keyof typeof AI_MODELS

@@ -132,6 +132,21 @@ export async function transitionFallStatus(
     erstellt_von: metadata?.user_id ?? null,
   })
 
+  // AAR-586 Finding 1: phase_transitions als Audit-Log aller Status-Übergänge.
+  // Non-critical — Fehler blockieren den Übergang nicht.
+  db.from('phase_transitions').insert({
+    fall_id: fallId,
+    from_phase: currentStatus,
+    to_phase: newStatus,
+    trigger_type: 'auto',
+    transitioned_by: metadata?.user_id ?? null,
+    actor_rolle: null,
+    grund: metadata?.grund ?? null,
+    payload: { via: 'transitionFallStatus', metadata: metadata ?? null },
+  }).then(({ error }) => {
+    if (error) console.error('[AAR-586] phase_transitions insert failed (non-critical):', error.message)
+  })
+
   // AAR-501 N6: Notification-Event emittieren. Generische fall.status_changed
   // für jeden Übergang + spezifische Events für Storno und Kanzlei-Übergabe.
   // Emit-Fehler dürfen den Übergang nicht brechen.

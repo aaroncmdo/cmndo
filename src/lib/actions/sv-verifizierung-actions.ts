@@ -106,6 +106,34 @@ export async function uploadSaVorlage(formData: FormData): Promise<{
     auto_erstellt: true,
   })
 
+  // AAR-613: Broadcast-Mitteilung an ALLE Admin-User. Ohne expliziten
+  // empfaenger_user_id an createLinkedTask feuert dessen interner
+  // createMitteilung-Call nicht — daher hier manuell pro Admin.
+  // Non-blocking: Upload + Task sind bereits persistiert; Notification-
+  // Fehler dürfen den Upload-Flow nicht brechen.
+  try {
+    const { data: admins } = await db
+      .from('profiles')
+      .select('id')
+      .eq('rolle', 'admin')
+    if (admins && admins.length > 0) {
+      const { createMitteilungMulti } = await import('@/lib/mitteilungen/create-mitteilung')
+      await createMitteilungMulti(
+        admins.map((a) => ({ id: a.id, rolle: 'admin' as const })),
+        {
+          kategorie: 'task',
+          titel: `Neue SA-Vorlage von ${svName} zu prüfen`,
+          inhalt: 'Bitte im Admin-Portal prüfen und freigeben, damit das Dispatch-Gate öffnet.',
+          route_url: `/admin/sachverstaendige/${svId}?tab=verifizierung`,
+          icon: 'bell',
+          prioritaet: 'normal',
+        },
+      )
+    }
+  } catch (err) {
+    console.error('[AAR-613] Admin-Mitteilung nach SA-Upload fehlgeschlagen:', err)
+  }
+
   revalidatePath('/gutachter/willkommen')
   revalidatePath('/gutachter/verifizierung')
   revalidatePath('/admin/tasks')

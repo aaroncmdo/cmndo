@@ -257,7 +257,7 @@ export async function POST() {
         schadens_fall_typ: 'sf-01', kunden_konstellation: 'kk-01',
         status: 'quali-offen' as const, qualifizierungs_phase: 'rueckruf',
         mietwagen_flag: true, created_at: daysAgo(5),
-        rueckruf_datum: hoursFromNow(1), rueckruf_notiz: 'Kunde ab 14 Uhr erreichbar',
+        _rueckruf_datum: hoursFromNow(1), _rueckruf_notiz: 'Kunde ab 14 Uhr erreichbar',
       },
       {
         vorname: 'Peter', nachname: 'Gross', telefon: '+491633628571', email: 'peter@email.de',
@@ -278,7 +278,7 @@ export async function POST() {
         fahrzeug_hersteller: 'Ford', fahrzeug_modell: 'Focus',
         schadens_fall_typ: 'sf-01', kunden_konstellation: 'kk-01',
         status: 'neu' as const, qualifizierungs_phase: 'rueckruf', created_at: daysAgo(1),
-        rueckruf_datum: hoursFromNow(0.5), rueckruf_notiz: 'Dringend - Unfall gestern',
+        _rueckruf_datum: hoursFromNow(0.5), _rueckruf_notiz: 'Dringend - Unfall gestern',
       },
       {
         vorname: 'Sandra', nachname: 'Hoffmann', telefon: '+491633628571', email: 'sandra@email.de',
@@ -335,9 +335,6 @@ export async function POST() {
         sa_unterschrieben: lx.sa_unterschrieben ?? false,
         polizeibericht_pflicht: lx.polizeibericht_pflicht ?? false,
         disqualifiziert_grund: lx.disqualifiziert_grund ?? null,
-        rueckruf_datum: lx.rueckruf_datum ?? null,
-        rueckruf_notiz: lx.rueckruf_notiz ?? null,
-        rueckruf_erledigt: false,
         anruf_versuche: lx.anruf_versuche ?? 0,
         letzter_anruf_am: lx.letzter_anruf_am ?? null,
         letzter_anruf_status: lx.letzter_anruf_status ?? null,
@@ -347,6 +344,24 @@ export async function POST() {
       const { data: lead, error } = await admin.from('leads').insert(insertData).select('id').single()
       if (error) throw new Error(`Lead ${l.vorname} ${l.nachname}: ${error.message}`)
       leadIds.push(lead!.id)
+
+      // AAR-637: Rückrufe landen in admin_termine, nicht mehr auf leads
+      const rrDatum = lx._rueckruf_datum as string | undefined
+      const rrNotiz = lx._rueckruf_notiz as string | undefined
+      if (rrDatum) {
+        const end = new Date(new Date(rrDatum).getTime() + 15 * 60 * 1000).toISOString()
+        await admin.from('admin_termine').insert({
+          typ: 'rueckruf',
+          titel: `${l.vorname} ${l.nachname}`,
+          start_zeit: rrDatum,
+          end_zeit: end,
+          lead_id: lead!.id,
+          notizen: rrNotiz ?? null,
+          erstellt_von: teamIds['lisa@claimondo.de'],
+          zugewiesen_an: teamIds['lisa@claimondo.de'],
+          status: 'offen',
+        })
+      }
     }
     summary.push(`Leads: ${leadDefs.length} erstellt`)
 

@@ -10,13 +10,14 @@ import { useState, useTransition, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import SvDispatchPanel from '../SvDispatchPanel'
 import { useDispatchPhase } from '../lib/phase-context'
-import { saveHardGate, setServiceTyp, saveStammdaten } from '../actions'
+import { setServiceTyp, saveStammdaten } from '../actions'
+import { geocodeAndSaveUnfallort } from '../actions/geocode'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { MapPinIcon, CheckCircle2Icon, ScaleIcon, CalendarIcon } from 'lucide-react'
 
 export default function Phase2TerminServiceTyp() {
   const router = useRouter()
-  const { lead, aktiverTermin, qualification, setPhase } = useDispatchPhase()
+  const { lead, aktiverTermin, qualification, setPhase, patchLead } = useDispatchPhase()
   const l = lead as unknown as {
     unfallort?: string | null
     unfallort_lat?: number | null
@@ -58,6 +59,8 @@ export default function Phase2TerminServiceTyp() {
     if (wunschtermin === dbValue) return
     wunschterminDebounceRef.current = setTimeout(() => {
       const isoOrNull = wunschtermin ? new Date(wunschtermin).toISOString() : null
+      // AAR-realtime: Provider-State sofort patchen (Context-Sync vor Server-Roundtrip)
+      patchLead({ wunschtermin: isoOrNull } as Partial<typeof lead>)
       startTransition(async () => {
         const r = await saveStammdaten(lead.id, { wunschtermin: isoOrNull })
         if (r.success) {
@@ -89,8 +92,10 @@ export default function Phase2TerminServiceTyp() {
     setUnfallortDraft(adresse)
     setUnfallortLat(lat)
     setUnfallortLng(lng)
+    // AAR-realtime: Provider sofort patchen
+    patchLead({ unfallort: adresse, unfallort_lat: lat, unfallort_lng: lng } as Partial<typeof lead>)
     startTransition(async () => {
-      const r = await saveHardGate(lead.id, {
+      const r = await saveStammdaten(lead.id, {
         unfallort: adresse,
         unfallort_lat: lat,
         unfallort_lng: lng,
@@ -114,8 +119,7 @@ export default function Phase2TerminServiceTyp() {
     // Koordinaten via Dropdown gesetzt.
     if (!trimmed || trimmed === (l.unfallort ?? '') || hasKoordinaten) return
     startTransition(async () => {
-      const { geocodeAndSaveBesichtigung } = await import('../actions/geocode')
-      const r = await geocodeAndSaveBesichtigung(lead.id, trimmed)
+      const r = await geocodeAndSaveUnfallort(lead.id, trimmed)
       if (r.success && r.lat != null && r.lng != null) {
         setUnfallortLat(r.lat)
         setUnfallortLng(r.lng)
@@ -130,8 +134,15 @@ export default function Phase2TerminServiceTyp() {
 
   function saveBesichtigungsort(place: PlaceResult) {
     setBesichtigungsortAdresse(place.adresse)
+    // AAR-realtime: Provider sofort patchen
+    patchLead({
+      besichtigungsort_adresse: place.adresse,
+      besichtigungsort_lat: place.lat,
+      besichtigungsort_lng: place.lng,
+      besichtigungsort_place_id: place.place_id || null,
+    } as Partial<typeof lead>)
     startTransition(async () => {
-      const r = await saveHardGate(lead.id, {
+      const r = await saveStammdaten(lead.id, {
         besichtigungsort_adresse: place.adresse,
         besichtigungsort_lat: place.lat,
         besichtigungsort_lng: place.lng,
@@ -146,7 +157,7 @@ export default function Phase2TerminServiceTyp() {
     if (!besichtigungsortAdresse) return
     setBesichtigungsortAdresse('')
     startTransition(async () => {
-      await saveHardGate(lead.id, {
+      await saveStammdaten(lead.id, {
         besichtigungsort_adresse: null,
         besichtigungsort_lat: null,
         besichtigungsort_lng: null,
@@ -179,6 +190,8 @@ export default function Phase2TerminServiceTyp() {
   // AAR-270: Wochentag setzen + sofort speichern
   function saveWochentage(next: number[]) {
     setWochentage(next)
+    // AAR-realtime: Provider sofort patchen
+    patchLead({ wunschtermin_wochentage: next.length > 0 ? next : null } as Partial<typeof lead>)
     startTransition(async () => {
       const r = await saveStammdaten(lead.id, {
         wunschtermin_wochentage: next.length > 0 ? next : null,
@@ -336,6 +349,7 @@ export default function Phase2TerminServiceTyp() {
       <SvDispatchPanel
         leadId={lead.id}
         hardGateOk={hardGateOk}
+        hardGateDetails={{ q1: qualification.q1_schuldfrage, q2: qualification.q2_schaden, q3: qualification.q3_polizei }}
         aktiverTermin={aktiverTermin as Parameters<typeof SvDispatchPanel>[0]['aktiverTermin']}
         wunschterminIso={l.wunschtermin ?? null}
         wunschterminWochentage={wochentage.length > 0 ? wochentage : null}
@@ -391,18 +405,31 @@ export default function Phase2TerminServiceTyp() {
         </div>
       )}
 
-      {/* AAR-268: Expliziter „Weiter zu Phase 3"-Button — sichtbar sobald
-          aktiver Termin vorhanden + Koordinaten gesetzt sind. */}
-      {aktiverTermin && hasKoordinaten && (
+      {/* AAR-617: Zurück-/Weiter-Row — Zurück-Button war vorher nur über den
+          Phase-Header-Stepper erreichbar, was für neue User nicht offensichtlich
+          ist. Jetzt explizit innerhalb der Phase sichtbar. State-Persistenz
+          ist bereits durch AAR-624 + die autoSave-Hooks dieser Phase garantiert
+          — beim Klick gehen keine Eingaben verloren. */}
+      <div className="flex gap-2 mt-2">
         <button
           type="button"
           disabled={pending}
-          onClick={() => setPhase(3)}
-          className="w-full mt-2 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-50 flex items-center justify-center gap-2"
+          onClick={() => setPhase(1)}
+          className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
         >
-          Weiter zu Phase 3 →
+          ← Zurück zu Phase 1
         </button>
-      )}
+        {aktiverTermin && hasKoordinaten && (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => setPhase(3)}
+            className="flex-1 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            Weiter zu Phase 3 →
+          </button>
+        )}
+      </div>
     </div>
   )
 }

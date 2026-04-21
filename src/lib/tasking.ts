@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { generateReminderForTask, cancelRemindersForTask } from '@/lib/tasks/reminder-generator'
+import { findFirstActiveAdmin } from '@/lib/faelle/kb-assignment'
 
 type AutoTaskParams = {
   fall_id: string
@@ -22,15 +23,43 @@ type AutoTaskParams = {
 export async function createAutoTask(params: AutoTaskParams): Promise<{ id: string } | null> {
   const supabase = createAdminClient()
 
+  // AAR-632: Orphaned-Task-Fix. Wenn kein empfaenger_id angegeben ist, fällt
+  // der Task sonst auf zugewiesen_an=null. Beim nächsten resolveTasksForEntity
+  // (z.B. Fall abgeschlossen) würde er stumm auto-closed — obwohl er evtl.
+  // nie bearbeitet wurde. Fallback: erster aktiver Admin übernimmt, der
+  // kann via Task-Liste selbst umverteilen.
+  let empfaengerId = params.empfaenger_id
+  let fallbackReason: string | null = null
+  if (!empfaengerId) {
+    const admin = await findFirstActiveAdmin(supabase)
+    if (admin?.id) {
+      empfaengerId = admin.id
+      fallbackReason = `AAR-632 Admin-Fallback (kein ${params.empfaenger_rolle} zugewiesen)`
+      console.warn(`[AAR-632] Task ohne empfaenger_id → Admin-Fallback`, {
+        task_typ: params.task_typ,
+        fall_id: params.fall_id,
+        admin_id: admin.id,
+        admin_email: admin.email,
+      })
+    } else {
+      console.error(`[AAR-632] Task ohne empfaenger_id + kein aktiver Admin — Task bleibt unassigned`, {
+        task_typ: params.task_typ,
+        fall_id: params.fall_id,
+      })
+    }
+  }
+
   const { data, error } = await supabase.from('tasks').insert({
     fall_id: params.fall_id,
     typ: params.task_typ,
     titel: params.titel,
-    beschreibung: params.beschreibung,
+    beschreibung: fallbackReason
+      ? `${params.beschreibung}\n\n[${fallbackReason}]`
+      : params.beschreibung,
     status: 'offen',
-    zugewiesen_an: params.empfaenger_id,
+    zugewiesen_an: empfaengerId,
     empfaenger_rolle: params.empfaenger_rolle,
-    empfaenger_user_id: params.empfaenger_id,
+    empfaenger_user_id: empfaengerId,
     faellig_am: params.deadline.toISOString(),
     auto_erstellt: true,
     prioritaet: params.prioritaet ?? 'normal',

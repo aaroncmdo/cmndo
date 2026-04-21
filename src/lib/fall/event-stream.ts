@@ -128,7 +128,7 @@ function normalizeSystemNachrichten(
     },
     severity: 'info',
     icon: 'message-square',
-    route_url: `/admin/faelle/${fallId}?tab=kommunikation`,
+    route_url: `/faelle/${fallId}?tab=kommunikation`,
   }))
 }
 

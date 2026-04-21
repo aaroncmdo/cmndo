@@ -11,6 +11,7 @@
 // aber in der neuen UI nicht mehr aktiv abgefragt — Q3 ist jetzt Polizei.
 
 import { useState, useTransition, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 // AAR-176 P2-B: UnfallortKategorie-Import raus — die Spalte wird jetzt auto
 // aus schadentyp abgeleitet (saveSchadentyp setzt kategorie mit, Dropdown
 // ist in der UI weg).
@@ -50,6 +51,14 @@ const HERGANG_BAUSTEINE = [
 
 type LeadFields = {
   id: string
+  vorname?: string | null
+  nachname?: string | null
+  telefon?: string | null
+  email?: string | null
+  kunde_plz?: string | null
+  kunde_strasse?: string | null
+  kunde_stadt?: string | null
+  notiz?: string | null
   unfallhergang?: string | null
   schuldfrage?: 'gegner' | 'unklar' | 'eigenverantwortung' | string | null
   aufklaerung_teilschuld_bestaetigt?: boolean | null
@@ -86,8 +95,79 @@ const SPRACHEN = [
   { code: 'other', flag: '🌐', label: 'Andere' },
 ] as const
 
+function KundendatenEditBlock({
+  leadId,
+  l,
+  saveStammdaten: save,
+  patchLead,
+}: {
+  leadId: string
+  l: LeadFields
+  saveStammdaten: typeof saveStammdaten
+  patchLead: (patch: Record<string, unknown>) => void
+}) {
+  const [, startT] = useTransition()
+  function field(name: keyof LeadFields, initial: string | null | undefined) {
+    return {
+      defaultValue: initial ?? '',
+      onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const val = e.target.value.trim() || null
+        if (val === (initial ?? null)) return
+        // AAR-realtime: Provider-State patchen damit Qualification + Phase-
+        // Gate den gerade eingegebenen Wert bei einem Phase-Wechsel sehen.
+        patchLead({ [name]: val })
+        startT(async () => { await save(leadId, { [name]: val }) })
+      },
+    }
+  }
+  return (
+    <details className="group border border-gray-100 rounded-lg" open>
+      <summary className="flex items-center gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-gray-500 cursor-pointer list-none select-none hover:bg-gray-50 rounded-lg">
+        Kundendaten bearbeiten
+      </summary>
+      <div className="px-3 pb-3 pt-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-0.5">
+          <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Vorname</label>
+          <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('vorname', l.vorname)} />
+        </div>
+        <div className="space-y-0.5">
+          <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Nachname</label>
+          <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('nachname', l.nachname)} />
+        </div>
+        <div className="space-y-0.5">
+          <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Telefon</label>
+          <input type="tel" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('telefon', l.telefon)} />
+        </div>
+        <div className="space-y-0.5">
+          <label className="text-[10px] text-gray-400 uppercase tracking-wider block">E-Mail</label>
+          <input type="email" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('email', l.email)} />
+        </div>
+        <div className="space-y-0.5">
+          <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Straße</label>
+          <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('kunde_strasse', l.kunde_strasse)} />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-0.5">
+            <label className="text-[10px] text-gray-400 uppercase tracking-wider block">PLZ</label>
+            <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('kunde_plz', l.kunde_plz)} />
+          </div>
+          <div className="space-y-0.5">
+            <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Stadt</label>
+            <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('kunde_stadt', l.kunde_stadt)} />
+          </div>
+        </div>
+        <div className="sm:col-span-2 space-y-0.5">
+          <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Notiz (intern)</label>
+          <textarea rows={2} className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2] resize-none" {...field('notiz', l.notiz)} />
+        </div>
+      </div>
+    </details>
+  )
+}
+
 export default function Phase1Qualifizierung() {
-  const { lead, qualification, setPhase } = useDispatchPhase()
+  const router = useRouter()
+  const { lead, qualification, setPhase, patchLead } = useDispatchPhase()
   const l = lead as unknown as LeadFields
   const [pending, startTransition] = useTransition()
   const [draft, setDraft] = useState<HardGateData & { polizeibericht_vorhanden?: boolean | null }>({
@@ -138,11 +218,18 @@ export default function Phase1Qualifizierung() {
           toSave.polizeibericht_pflicht = false
         }
       }
+      // AAR-realtime: Provider-State SOFORT patchen, damit die Qualification-
+      // Engine + Phase-Gate bei einem Phase-Wechsel mit den frischen Werten
+      // rechnen. router.refresh() danach bringt nur die Server-Props auf
+      // Stand — die werden wegen Provider-useState nicht automatisch
+      // übernommen, deshalb ist dieser optimistic patch kritisch.
+      patchLead(toSave as Partial<typeof lead>)
       const r = await saveHardGate(lead.id, toSave)
       if (r.success) {
         setToast(r.disqualifiziert ? 'Disqualifiziert — Exit-Skript wird angezeigt' : 'Gespeichert')
         // AAR-268: Auto-Advance entfernt — MA muss explizit „Weiter zu Phase 2"
         // klicken (Kontrolle vor Sprung). Auto-Save bleibt im Hintergrund.
+        router.refresh()
       } else {
         setToast(r.error ?? 'Fehler')
       }
@@ -150,12 +237,12 @@ export default function Phase1Qualifizierung() {
     })
   }
 
-  // AAR-192: Auto-Save mit 800ms Debounce sobald Phase komplett.
-  // Der Speichern-Button fliegt raus — MA füllt die Felder, nach kurzem
-  // Nichtstun wird automatisch gespeichert und zu Phase 2 weitergeschickt.
-  // autoSavedHash verhindert dass identische drafts mehrfach gespeichert
-  // werden (z.B. wenn nur nicht-relevante Felder sich ändern).
-  const autoSavedHashRef = useRef<string>('')
+  // AAR-192: Auto-Save mit 800ms Debounce bei jeder Änderung.
+  // AAR-624: Frühere Version saved erst bei allComplete — Teileingaben gingen
+  // verloren beim Phase-Wechsel. Jetzt speichern wir jedes Feld sofort mit
+  // 800ms Debounce, damit der MA jederzeit zwischen Phasen wechseln kann.
+  // autoSavedHash verhindert identische Re-Saves, initial = aktueller Hash
+  // damit der Mount-Effekt keinen unnötigen Save triggert.
   const draftHash = JSON.stringify({
     unfallhergang: draft.unfallhergang,
     schuldfrage: draft.schuldfrage,
@@ -170,14 +257,17 @@ export default function Phase1Qualifizierung() {
     polizei_vor_ort: draft.polizei_vor_ort,
     polizei_aktenzeichen: draft.polizei_aktenzeichen,
     polizeibericht_vorhanden: draft.polizeibericht_vorhanden,
-    unfallort: draft.unfallort,
+    // unfallort bewusst NICHT im Hash — Phase 2 ist Owner des Unfallorts.
+    // Beide Phases zu includen führte zu Überschreib-Race wenn Phase1 Unmount-
+    // Flush feuert nachdem Phase2 bereits eine neue Adresse gespeichert hat.
   })
+  const autoSavedHashRef = useRef<string>(draftHash)
+  const draftRef = useRef(draft)
+  useEffect(() => { draftRef.current = draft }, [draft])
   useEffect(() => {
-    if (!allComplete) return
     // AAR-203: NIE auto-speichern bei Eigenverantwortung — saveHardGate
     // würde den Lead sofort disqualifizieren bevor der MA das Exit-Skript
-    // vorlesen konnte. MA muss manuell via Sidebar-Button „Disqualifizieren"
-    // speichern wenn er das Skript verlesen hat.
+    // vorlesen konnte. MA muss manuell via Sidebar-Button „Disqualifizieren".
     if (draft.schuldfrage === 'eigenverantwortung') return
     if (autoSavedHashRef.current === draftHash) return
     const t = setTimeout(() => {
@@ -186,7 +276,46 @@ export default function Phase1Qualifizierung() {
     }, 800)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allComplete, draftHash])
+  }, [draftHash])
+
+  // AAR-624: Unmount-Flush — falls MA innerhalb der 800ms-Debounce die Phase
+  // wechselt, würde der Save-Timer gecleared und die Eingabe ginge verloren.
+  // Beim Unmount den aktuellen Draft direkt in die DB schieben (fire-and-forget).
+  useEffect(() => {
+    return () => {
+      const currentDraft = draftRef.current
+      if (currentDraft.schuldfrage === 'eigenverantwortung') return
+      const currentHash = JSON.stringify({
+        unfallhergang: currentDraft.unfallhergang,
+        schuldfrage: currentDraft.schuldfrage,
+        aufklaerung_teilschuld_bestaetigt: currentDraft.aufklaerung_teilschuld_bestaetigt,
+        schaden_sichtbar: currentDraft.schaden_sichtbar,
+        personenschaden_flag: currentDraft.personenschaden_flag,
+        sachschaden_flag: currentDraft.sachschaden_flag,
+        sachschaden_beschreibung: currentDraft.sachschaden_beschreibung,
+        mietwagen_flag: currentDraft.mietwagen_flag,
+        nutzungsausfall: currentDraft.nutzungsausfall,
+        fahrzeug_fahrbereit: currentDraft.fahrzeug_fahrbereit,
+        polizei_vor_ort: currentDraft.polizei_vor_ort,
+        polizei_aktenzeichen: currentDraft.polizei_aktenzeichen,
+        polizeibericht_vorhanden: currentDraft.polizeibericht_vorhanden,
+      })
+      if (autoSavedHashRef.current === currentHash) return
+      const { polizeibericht_vorhanden, ...toSave } = currentDraft
+      if (toSave.polizei_vor_ort === true) {
+        if (polizeibericht_vorhanden === true) toSave.polizeibericht_pflicht = true
+        else if (polizeibericht_vorhanden === false) toSave.polizeibericht_pflicht = false
+      }
+      // AAR-realtime: Provider-State vor dem DB-Write patchen damit die
+      // nächste Phase den aktuellen Stand sieht — der Provider lebt weiter
+      // auch wenn Phase 1 unmountet.
+      patchLead(toSave as Partial<typeof lead>)
+      saveHardGate(lead.id, toSave).catch(err =>
+        console.error('[AAR-624] unmount-flush saveHardGate failed:', err),
+      )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   if (qualification.disqualifiziert) {
     // Overlay kommt über DispatchShell → PhaseContent → DisqualifiziertOverlay;
@@ -212,6 +341,9 @@ export default function Phase1Qualifizierung() {
         )}
       </div>
 
+      {/* Kundendaten — Name, Kontakt, Adresse. onBlur-Save via saveStammdaten. */}
+      <KundendatenEditBlock leadId={l.id} l={l} saveStammdaten={saveStammdaten} patchLead={patchLead as (p: Record<string, unknown>) => void} />
+
       {/* AAR-316: Sprache des Kunden. Steuert später FlowLink + Portal-Übersetzungen.
           Standard = Deutsch. Auto-Save on-change via saveStammdaten. */}
       <div className="flex items-center gap-2 flex-wrap pb-3 border-b border-gray-100">
@@ -220,21 +352,34 @@ export default function Phase1Qualifizierung() {
         </span>
         <div className="flex gap-1 flex-wrap">
           {SPRACHEN.map((s) => {
+            // `selected` aus Context-lead — patchLead() aktualisiert ihn
+            // sofort optimistisch und überlebt Phase-Wechsel (kein Re-Init
+            // beim Zurücknavigieren wie bei lokalem useState).
             const selected = (l.sprache ?? 'de') === s.code
             return (
               <button
                 key={s.code}
                 type="button"
-                onClick={() =>
+                onClick={() => {
+                  patchLead({ sprache: s.code } as Partial<typeof lead>)
                   startTransition(async () => {
-                    await saveStammdaten(l.id, { sprache: s.code })
+                    const r = await saveStammdaten(l.id, { sprache: s.code })
+                    if (r.success) {
+                      router.refresh()
+                    } else {
+                      // Bei DB-Fehler: Revert im Context
+                      patchLead({ sprache: l.sprache ?? 'de' } as Partial<typeof lead>)
+                      setToast(r.error ?? 'Sprache konnte nicht gespeichert werden')
+                      setTimeout(() => setToast(''), 3000)
+                    }
                   })
-                }
-                className={`px-2 py-1 rounded-md text-[11px] font-medium border ${
+                }}
+                disabled={pending}
+                className={`px-2 py-1 rounded-md text-[11px] font-medium border transition-colors ${
                   selected
                     ? 'bg-[#4573A2] text-white border-[#4573A2]'
                     : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-                }`}
+                } disabled:opacity-60`}
                 title={s.label}
               >
                 <span className="mr-1">{s.flag}</span>

@@ -27,7 +27,10 @@ export function roleToPath(rolle: Rolle | null | undefined): string {
     // kommt aus AAR-461 F3 (user_role-Enum-Erweiterung).
     case 'makler':
       return '/makler'
+    // KB hat eigenes Portal (/mitarbeiter/*, AAR-61/68) — bis dahin landete KB
+    // im Admin-Portal ohne seine zugewiesenen Fälle/Tasks zu sehen.
     case 'kundenbetreuer':
+      return '/mitarbeiter'
     case 'admin':
     case 'kanzlei':
       return '/admin'

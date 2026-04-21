@@ -85,73 +85,88 @@ export default async function SvDetailPage({
   })
 
   // AAR-359 W6: Verifizierungs-Tab-Daten (nur wenn aktiv — spart Queries sonst)
+  // AAR-644: Komplettes Load defensiv via try/catch — bisher konnte ein Fehler
+  // im createAdminClient (fehlender SERVICE_ROLE_KEY), createSignedUrl, oder
+  // Katalog-Query die gesamte Server-Component zum Crash bringen → error.tsx
+  // wurde angezeigt statt des Verifizierungs-Tabs. Der Support-Bot-Report
+  // interpretierte die „Seite neu laden"-Error-Boundary als 404.
   let verifizierungsData: {
     saVorlageSignedUrl: string | null
     tier2Slots: Tier2Slot[]
-  } = { saVorlageSignedUrl: null, tier2Slots: [] }
+    loadError: string | null
+  } = { saVorlageSignedUrl: null, tier2Slots: [], loadError: null }
 
   if (activeTab === 'verifizierung') {
-    const dbAdmin = createAdminClient()
+    try {
+      const dbAdmin = createAdminClient()
 
-    // SA-Vorlage Signed URL (5 Min gültig für Admin-Preview)
-    let signedUrl: string | null = null
-    if (sv.sa_vorlage_storage_path) {
-      const { data: sig } = await dbAdmin.storage
-        .from('fall-dokumente')
-        .createSignedUrl(sv.sa_vorlage_storage_path, 300)
-      signedUrl = sig?.signedUrl ?? null
-    }
-
-    // Tier-2-Slots aus Katalog + bereits angeforderte pflichtdokumente-Rows
-    const [alleSlots, pflichtRes] = await Promise.all([
-      getAlleSlots(supabase),
-      dbAdmin.from('pflichtdokumente')
-        .select('id, dokument_typ, status, hochgeladen_am')
-        .eq('sv_id', id),
-    ])
-    const pflichtRows = (pflichtRes.data ?? []) as Array<{
-      id: string
-      dokument_typ: string
-      status: Tier2Slot['status']
-      hochgeladen_am: string | null
-    }>
-
-    // AAR-553: Upload-Counts wurden früher via dokumente.pflichtdokument_id
-    // geführt — die Spalte existiert jedoch weder in der alten dokumente-
-    // Tabelle (verifiziert) noch in fall_dokumente. Rückwirkend bestätigt:
-    // Counts waren immer 0. Wir lassen sie leer, bis AAR-XXX einen echten
-    // Link (fall_dokumente.pflichtdokument_id) einzieht.
-    const uploadCounts: Record<string, number> = {}
-
-    const verifizierungsSlots = alleSlots.filter(s =>
-      s.kategorie === 'gutachter_verifizierung' && s.slot_id !== 'sv_sa_vorlage',
-    )
-    // AAR-515: Nummer-Mapping pro Slot. Admin sieht Nummer + Dokument
-    // nebeneinander beim Prüfen — Plausibilisierungs-Hilfe.
-    const nummernMap: Record<string, { nummer: string | null; label: string }> = {
-      sv_bvsk_mitgliedschaft: { nummer: sv.bvsk_mitgliedsnummer ?? null, label: 'BVSK-Mitgliedsnummer' },
-      sv_ihk_zertifikat: { nummer: sv.ihk_zertifikat_nummer ?? null, label: 'IHK-Zertifikats-Nummer' },
-      sv_bestellungsurkunde_oebuv: { nummer: sv.oebuv_bestellungsnummer ?? null, label: 'Bestellungsnummer' },
-    }
-    const tier2Slots: Tier2Slot[] = verifizierungsSlots.map(s => {
-      const row = pflichtRows.find(p => p.dokument_typ === s.slot_id)
-      const nummerInfo = nummernMap[s.slot_id] ?? { nummer: null, label: '' }
-      return {
-        slotId: s.slot_id,
-        label: s.label,
-        beschreibung: s.beschreibung,
-        pflichtdokId: row?.id ?? null,
-        status: row?.status ?? null,
-        hochgeladenAm: row?.hochgeladen_am ?? null,
-        uploadCount: row ? (uploadCounts[row.id] ?? 0) : 0,
-        mapsToQualifikation: s.maps_to_qualifikation,
-        steuertKundensichtbarkeit: s.steuert_kundensichtbarkeit,
-        nummer: nummerInfo.nummer,
-        nummerLabel: nummerInfo.nummer ? nummerInfo.label : null,
+      // SA-Vorlage Signed URL (5 Min gültig für Admin-Preview)
+      let signedUrl: string | null = null
+      if (sv.sa_vorlage_storage_path) {
+        const { data: sig, error: sigErr } = await dbAdmin.storage
+          .from('fall-dokumente')
+          .createSignedUrl(sv.sa_vorlage_storage_path, 300)
+        if (sigErr) console.warn('[sv-verifizierung] createSignedUrl fehlgeschlagen:', sigErr.message)
+        signedUrl = sig?.signedUrl ?? null
       }
-    })
 
-    verifizierungsData = { saVorlageSignedUrl: signedUrl, tier2Slots }
+      // Tier-2-Slots aus Katalog + bereits angeforderte pflichtdokumente-Rows
+      const [alleSlots, pflichtRes] = await Promise.all([
+        getAlleSlots(supabase),
+        dbAdmin.from('pflichtdokumente')
+          .select('id, dokument_typ, status, hochgeladen_am')
+          .eq('sv_id', id),
+      ])
+      const pflichtRows = (pflichtRes.data ?? []) as Array<{
+        id: string
+        dokument_typ: string
+        status: Tier2Slot['status']
+        hochgeladen_am: string | null
+      }>
+
+      // AAR-553: Upload-Counts wurden früher via dokumente.pflichtdokument_id
+      // geführt — die Spalte existiert jedoch weder in der alten dokumente-
+      // Tabelle (verifiziert) noch in fall_dokumente. Rückwirkend bestätigt:
+      // Counts waren immer 0.
+      const uploadCounts: Record<string, number> = {}
+
+      const verifizierungsSlots = alleSlots.filter(s =>
+        s.kategorie === 'gutachter_verifizierung' && s.slot_id !== 'sv_sa_vorlage',
+      )
+      // AAR-515: Nummer-Mapping pro Slot. Admin sieht Nummer + Dokument
+      // nebeneinander beim Prüfen — Plausibilisierungs-Hilfe.
+      const nummernMap: Record<string, { nummer: string | null; label: string }> = {
+        sv_bvsk_mitgliedschaft: { nummer: sv.bvsk_mitgliedsnummer ?? null, label: 'BVSK-Mitgliedsnummer' },
+        sv_ihk_zertifikat: { nummer: sv.ihk_zertifikat_nummer ?? null, label: 'IHK-Zertifikats-Nummer' },
+        sv_bestellungsurkunde_oebuv: { nummer: sv.oebuv_bestellungsnummer ?? null, label: 'Bestellungsnummer' },
+      }
+      const tier2Slots: Tier2Slot[] = verifizierungsSlots.map(s => {
+        const row = pflichtRows.find(p => p.dokument_typ === s.slot_id)
+        const nummerInfo = nummernMap[s.slot_id] ?? { nummer: null, label: '' }
+        return {
+          slotId: s.slot_id,
+          label: s.label,
+          beschreibung: s.beschreibung,
+          pflichtdokId: row?.id ?? null,
+          status: row?.status ?? null,
+          hochgeladenAm: row?.hochgeladen_am ?? null,
+          uploadCount: row ? (uploadCounts[row.id] ?? 0) : 0,
+          mapsToQualifikation: s.maps_to_qualifikation,
+          steuertKundensichtbarkeit: s.steuert_kundensichtbarkeit,
+          nummer: nummerInfo.nummer,
+          nummerLabel: nummerInfo.nummer ? nummerInfo.label : null,
+        }
+      })
+
+      verifizierungsData = { saVorlageSignedUrl: signedUrl, tier2Slots, loadError: null }
+    } catch (err) {
+      console.error('[sv-verifizierung] Tab-Load gescheitert:', err)
+      verifizierungsData = {
+        saVorlageSignedUrl: null,
+        tier2Slots: [],
+        loadError: err instanceof Error ? err.message : 'Unbekannter Fehler',
+      }
+    }
   }
 
   return (
@@ -236,6 +251,15 @@ export default async function SvDetailPage({
       {activeTab === 'verifizierung' ? (
         <div className="flex-1 overflow-y-auto p-4 bg-gray-50/30">
           <div className="max-w-4xl mx-auto">
+            {verifizierungsData.loadError && (
+              <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
+                <p className="font-semibold mb-1">Verifizierungs-Daten teilweise nicht geladen</p>
+                <p className="text-amber-700">{verifizierungsData.loadError}</p>
+                <p className="text-amber-600 mt-1">
+                  Stammdaten sind weiterhin editierbar (Tab „Stammdaten"). SA-Vorlage + Tier-2-Slots werden nicht angezeigt bis Ursache gefixt ist.
+                </p>
+              </div>
+            )}
             <VerifizierungsTab
               svId={sv.id}
               saVorlageStatus={(sv.sa_vorlage_status as 'ausstehend' | 'geprueft' | 'zurueckgewiesen' | null) ?? null}
@@ -314,7 +338,7 @@ export default async function SvDetailPage({
                     const lead = (Array.isArray(leadRaw) ? leadRaw[0] : leadRaw) as { vorname: string | null; nachname: string | null } | null
                     const kunde = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : '—'
                     return (
-                      <Link key={fall.id} href={`/admin/faelle/${fall.id}`}
+                      <Link key={fall.id} href={`/faelle/${fall.id}`} target="_blank" rel="noopener"
                         className="block px-3 py-2.5 border-b border-gray-50 hover:bg-gray-50 transition-colors">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-medium text-gray-800 truncate">{kunde}</span>
@@ -345,7 +369,7 @@ export default async function SvDetailPage({
                     const fallNr = (fr?.fall_nummer as string) ?? '—'
                     const overdue = t.faellig_am && new Date(t.faellig_am) < now
                     return (
-                      <Link key={t.id} href={t.fall_id ? `/admin/faelle/${t.fall_id}` : '#'}
+                      <Link key={t.id} href={t.fall_id ? `/faelle/${t.fall_id}` : '#'}
                         className={`block px-3 py-2.5 border-b border-gray-50 hover:bg-gray-50 transition-colors ${overdue ? 'bg-red-50/30' : ''}`}>
                         <p className="text-xs text-gray-800 font-medium truncate">{t.titel}</p>
                         <div className="flex items-center gap-2 mt-0.5 text-[10px]">

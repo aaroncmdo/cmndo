@@ -6,7 +6,7 @@
 // - Tasks ohne Objekt-Bezug (weder fall_id/lead_id noch entity_id) werden
 //   ausgeblendet — das waren die „Abkommen" / Alt-System-Einträge
 
-import { useState, useTransition } from 'react'
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
@@ -105,29 +105,40 @@ function resolveObjectLink(
   const eid = task.entity_id
 
   if (et === 'fall' && eid) {
-    return { href: `/admin/faelle/${eid}`, label: fallMap[eid] ?? eid.slice(0, 8), kind: 'Fall' }
+    return { href: `/faelle/${eid}`, label: fallMap[eid] ?? eid.slice(0, 8), kind: 'Fall' }
   }
   if (et === 'lead' && eid) {
-    return { href: `/admin/dispatch/lead/${eid}`, label: leadMap[eid] ?? eid.slice(0, 8), kind: 'Lead' }
+    return { href: `/dispatch/leads/${eid}`, label: leadMap[eid] ?? eid.slice(0, 8), kind: 'Lead' }
   }
   if ((et === 'sv' || et === 'gutachter') && eid) {
+    // AAR-614: Nur linken wenn svMap den entity_id kennt — Legacy-Tasks (vor
+    // Cron-Fix in haftpflicht-ablauf/route.ts) haben entity_id = pflichtdokumente.id
+    // gesetzt, Klick würde auf /admin/sachverstaendige/{doc.id} = 404 führen.
+    // Bei unbekanntem entity_id fallen wir auf Task-Liste zurück.
+    if (svMap[eid]) {
+      return {
+        href: `/admin/sachverstaendige/${eid}`,
+        label: svMap[eid],
+        kind: 'SV',
+      }
+    }
     return {
-      href: `/admin/sachverstaendige/${eid}`,
-      label: svMap[eid] ?? eid.slice(0, 8),
+      href: '/admin/tasks',
+      label: eid.slice(0, 8),
       kind: 'SV',
     }
   }
   // Fallbacks für Alt-Daten: fall_id / lead_id direkt gesetzt
   if (task.fall_id) {
     return {
-      href: `/admin/faelle/${task.fall_id}`,
+      href: `/faelle/${task.fall_id}`,
       label: fallMap[task.fall_id] ?? task.fall_id.slice(0, 8),
       kind: 'Fall',
     }
   }
   if (task.lead_id) {
     return {
-      href: `/admin/dispatch/lead/${task.lead_id}`,
+      href: `/dispatch/leads/${task.lead_id}`,
       label: leadMap[task.lead_id] ?? task.lead_id.slice(0, 8),
       kind: 'Lead',
     }
@@ -159,18 +170,44 @@ export default function KanbanBoard({
   const [showAutoResolved, setShowAutoResolved] = useState(false)
 
   // AAR-154: Nur Tasks mit verlinkbarem Objekt zeigen.
-  const linked = tasks.filter((t) => resolveObjectLink(t, fallMap, leadMap, svMap) !== null)
-  const visibleTasks = showAutoResolved
-    ? linked
-    : linked.filter((t) => !(t.status === 'erledigt' && t.auto_resolved_am))
+  // AAR-620/612: useMemo damit visibleTasks nicht bei jedem Render als neue
+  // Array-Referenz erzeugt wird — das hat die Sync-Schleife unten in eine
+  // Endlos-Rerender-Loop gezwungen (React Error #301).
+  const linked = useMemo(
+    () => tasks.filter((t) => resolveObjectLink(t, fallMap, leadMap, svMap) !== null),
+    [tasks, fallMap, leadMap, svMap],
+  )
+  const visibleTasks = useMemo(
+    () =>
+      showAutoResolved
+        ? linked
+        : linked.filter((t) => !(t.status === 'erledigt' && t.auto_resolved_am)),
+    [linked, showAutoResolved],
+  )
 
   // Optimistic-Update für Drag & Drop — ohne das springt die Card nach Release
   // zurück in die Ursprungsspalte bis der Server antwortet.
   const [localTasks, setLocalTasks] = useState(visibleTasks)
-  // Sync wenn Parent neue Tasks liefert (z. B. nach router.refresh)
-  if (localTasks !== visibleTasks && !isPending) {
+  // AAR-620/612: Sync jetzt in useEffect statt im Render-Body. Der vorherige
+  // `if (localTasks !== visibleTasks) setLocalTasks(...)` im Render führte
+  // zu Render→setState→Render-Loops weil visibleTasks bei jedem Render als
+  // neue Array-Referenz erzeugt wurde und `!==` damit IMMER true war. React
+  // erkennt das irgendwann als infinite loop → Error #301.
+  //
+  // Signatur des Sync-Fingerprint: join aus (id, status). Ändert sich nur
+  // wenn tasks tatsächlich neu sind oder Status-Updates vom Server kommen.
+  // Die Drag&Drop-interne Status-Änderung läuft weiter direkt über setLocalTasks.
+  const visibleFingerprint = useMemo(
+    () => visibleTasks.map((t) => `${t.id}:${t.status}`).join('|'),
+    [visibleTasks],
+  )
+  const lastSyncedFingerprintRef = useRef<string>(visibleFingerprint)
+  useEffect(() => {
+    if (isPending) return
+    if (lastSyncedFingerprintRef.current === visibleFingerprint) return
+    lastSyncedFingerprintRef.current = visibleFingerprint
     setLocalTasks(visibleTasks)
-  }
+  }, [visibleTasks, visibleFingerprint, isPending])
 
   function onDragEnd(result: DropResult) {
     const { draggableId, destination, source } = result

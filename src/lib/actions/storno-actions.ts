@@ -222,6 +222,6 @@ export async function adminStornoFall(fallId: string, grund: string): Promise<{ 
   await transitionFallStatus(fallId, 'storniert', { grund: `storno_admin: ${grund}`, user_id: user.id })
   await revertCaseBilling(fallId, `storno_admin: ${grund}`, user.id)
 
-  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
   return { success: true }
 }

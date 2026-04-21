@@ -74,6 +74,6 @@ export async function createAdHocTask(
   if (error || !data) return { ok: false, error: error?.message ?? 'Task konnte nicht angelegt werden' }
 
   revalidatePath(`/gutachter/fall/${input.fallId}`)
-  revalidatePath(`/admin/faelle/${input.fallId}`)
+  revalidatePath(`/faelle/${input.fallId}`)
   return { ok: true, taskId: data.id }
 }

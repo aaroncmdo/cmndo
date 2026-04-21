@@ -136,7 +136,8 @@ export async function POST(req: Request) {
     revalidatePath(`/kunde/faelle/${fall.id}`)
     revalidatePath('/kunde')
     revalidatePath('/kunde/faelle')
-    if (fall.kundenbetreuer_id) revalidatePath(`/kundenbetreuer/faelle/${fall.id}`)
+    // AAR-628: KB + Admin teilen sich /faelle/[id] nach Route-Konsolidierung.
+    if (fall.kundenbetreuer_id) revalidatePath(`/faelle/${fall.id}`)
 
     return NextResponse.json({ success: true })
   } catch (err) {

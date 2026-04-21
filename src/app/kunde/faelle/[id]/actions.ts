@@ -54,7 +54,7 @@ export async function sendNachricht(
         typ: 'nachricht',
         titel: 'Neue Nachricht vom Kunden',
         beschreibung: nachricht.trim().slice(0, 100),
-        link: `/admin/faelle/${fallId}`,
+        link: `/faelle/${fallId}`,
       })
     } catch { /* non-critical */ }
   }

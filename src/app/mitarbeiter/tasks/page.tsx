@@ -50,7 +50,7 @@ export default async function MitarbeiterTasks({ searchParams }: {
 
       <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
         {(tasks ?? []).map(t => (
-          <Link key={t.id} href={t.fall_id ? `/admin/faelle/${t.fall_id}` : '#'}
+          <Link key={t.id} href={t.fall_id ? `/faelle/${t.fall_id}` : '#'}
             className="block px-4 py-3 hover:bg-gray-50 transition-colors">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">

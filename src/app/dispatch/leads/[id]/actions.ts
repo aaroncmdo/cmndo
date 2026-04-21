@@ -25,7 +25,9 @@ export {
   cancelSvTerminForLead,
   acceptGegenvorschlag,
   getNextFreeSlotsForSv,
+  getSvSuggestionsWithSlots,
 } from './actions/sv-termin'
+export type { SlotMatchType, SlotCandidate } from './actions/sv-termin'
 export { sendFlowLinkMultiChannel } from './actions/flowlink'
 // AAR-521: Debug-Action für "Warum?"-Button im SvDispatchPanel.
 export { debugSvMatching } from './actions/debug-sv'

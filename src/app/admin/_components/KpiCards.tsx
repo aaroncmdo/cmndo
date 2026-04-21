@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { UsersIcon, EuroIcon, FolderIcon, TrendingUpIcon, ClipboardCheckIcon } from 'lucide-react'
 
@@ -98,6 +99,8 @@ async function loadKpis() {
 export default async function KpiCards() {
   const kpis = await loadKpis()
 
+  // AAR-618: Jede Karte linkt auf die passende Seite. href zeigt auf den
+  // Bereich wo der Admin die dahinterliegenden Datensätze weiterbearbeitet.
   const cards = [
     {
       label: 'Aktive SVs',
@@ -106,6 +109,7 @@ export default async function KpiCards() {
       bg: 'bg-[#4573A2]/10',
       iconColor: 'text-[#4573A2]',
       hint: 'Portal-Zugang freigeschaltet',
+      href: '/admin/sachverstaendige',
     },
     {
       label: 'Ausstehende Zahlungen',
@@ -114,6 +118,7 @@ export default async function KpiCards() {
       bg: 'bg-amber-50',
       iconColor: 'text-amber-600',
       hint: 'Anzahlungen + ueberfaellige Rechnungen',
+      href: '/admin/abrechnungen',
     },
     {
       label: 'Neue Faelle heute',
@@ -122,6 +127,7 @@ export default async function KpiCards() {
       bg: 'bg-purple-50',
       iconColor: 'text-purple-600',
       hint: 'seit 0:00 Uhr',
+      href: '/admin/faelle',
     },
     {
       label: 'Umsatz aktueller Monat',
@@ -130,6 +136,7 @@ export default async function KpiCards() {
       bg: 'bg-emerald-50',
       iconColor: 'text-emerald-600',
       hint: 'bezahlte Rechnungen',
+      href: '/admin/finance',
     },
     {
       label: 'Gutachten → QC',
@@ -138,6 +145,7 @@ export default async function KpiCards() {
       bg: kpis.pendingQc > 0 ? 'bg-red-50' : 'bg-gray-50',
       iconColor: kpis.pendingQc > 0 ? 'text-red-600' : 'text-gray-400',
       hint: 'warten auf Filmcheck',
+      href: '/admin/faelle/statistiken',
     },
   ]
 
@@ -146,7 +154,11 @@ export default async function KpiCards() {
       {cards.map(c => {
         const Icon = c.icon
         return (
-          <div key={c.label} className="bg-white border border-gray-200 rounded-2xl p-4">
+          <Link
+            key={c.label}
+            href={c.href}
+            className="bg-white border border-gray-200 rounded-2xl p-4 hover:border-[#4573A2] hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4573A2] focus-visible:ring-offset-1"
+          >
             <div className="flex items-center justify-between mb-2">
               <p className="text-[10px] uppercase tracking-wide text-gray-500 font-semibold">{c.label}</p>
               <div className={`w-7 h-7 rounded-full ${c.bg} flex items-center justify-center`}>
@@ -155,7 +167,7 @@ export default async function KpiCards() {
             </div>
             <p className="text-2xl font-bold text-gray-900 tabular-nums">{c.value}</p>
             <p className="text-[10px] text-gray-400 mt-1">{c.hint}</p>
-          </div>
+          </Link>
         )
       })}
     </div>

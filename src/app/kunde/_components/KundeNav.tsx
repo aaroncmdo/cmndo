@@ -2,15 +2,15 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { HomeIcon, MessageSquareIcon, UserIcon, FolderOpenIcon, SearchIcon } from 'lucide-react'
+import { HomeIcon, MessageSquareIcon, UserIcon, FolderOpenIcon, SearchIcon, CalendarIcon } from 'lucide-react'
 
-// AAR-450: "Termine" aus Nav entfernt — Termin-Infos jetzt direkt in FallKarte
-// (Child 2) und Fallakte TerminSectionCard (Child 1). Separater Menüpunkt war
-// redundant.
-// AAR-101: Beratungstermin entfernt (Kunde hat keinen Kalender)
+// AAR-639: "Termine" wieder in Nav — zeigt jetzt eine konsolidierte
+// Übersicht aller Gutachter-Termine des Kunden (inkl. Historie, Status,
+// Gegenvorschläge). Ergänzt die in-Fallakte Kurzanzeige aus AAR-450.
 const NAV_ITEMS = [
   { href: '/kunde', label: 'Meine Fälle', icon: HomeIcon, exact: true },
   { href: '/kunde/faelle', label: 'Alle Fälle', icon: FolderOpenIcon },
+  { href: '/kunde/termine', label: 'Termine', icon: CalendarIcon },
   { href: '/kunde/nachbesichtigung', label: 'Nachbesichtigung', icon: SearchIcon },
   { href: '/kunde/chat', label: 'Nachrichten', icon: MessageSquareIcon },
   { href: '/kunde/profil', label: 'Profil', icon: UserIcon },

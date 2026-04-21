@@ -67,7 +67,7 @@ export async function createReklamation(data: {
       'reklamation-neu',
       `Neue Reklamation: Fall ${fall.fall_nummer ?? ''}`,
       `Grund: ${data.grund}. ${data.begruendung.slice(0, 100)}...`,
-      `/admin/faelle/${data.fallId}?tab=reklamationen`,
+      `/faelle/${data.fallId}?tab=reklamationen`,
     ).catch(() => {})
   }
   const { data: admins } = await admin.from('profiles').select('id').eq('rolle', 'admin')
@@ -77,7 +77,7 @@ export async function createReklamation(data: {
       'reklamation-neu',
       `SV-Reklamation: ${fall?.fall_nummer ?? 'Fall'}`,
       `${data.grund}: ${data.begruendung.slice(0, 100)}`,
-      `/admin/faelle/${data.fallId}?tab=reklamationen`,
+      `/faelle/${data.fallId}?tab=reklamationen`,
     ).catch(() => {})
   }
 
