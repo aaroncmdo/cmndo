@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
       .limit(5),
     supabase
       .from('sachverstaendige')
-      .select('id, standort_adresse, gutachter_typ, profiles(vorname, nachname, email)')
+      .select('id, standort_adresse, gutachter_typ, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, email)')
       .limit(5),
   ])
 

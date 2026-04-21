@@ -116,7 +116,7 @@ export default async function FallaktePage({
     fall.sv_id
       ? supabase
           .from('sachverstaendige')
-          .select('id, paket, profiles(vorname, nachname, telefon, email)')
+          .select('id, paket, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, telefon, email)')
           .eq('id', fall.sv_id)
           .single()
       : Promise.resolve({ data: null }),
