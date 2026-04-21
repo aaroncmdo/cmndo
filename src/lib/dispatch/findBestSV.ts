@@ -95,6 +95,12 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
   // freigeschaltet=true + gesperrt_seit IS NULL + geloescht_am IS NULL.
   // Portal-Gate ist Pflicht — ein SV ohne durchgezogene Anzahlung darf keine
   // Fälle bekommen (Basis des Geschäftsmodells).
+  // AAR-662: profiles-Embed mit FK-Hint. sachverstaendige hat 4 FKs auf
+  // profiles — Default-Embed wirft PGRST201, data=null, `if (!svsRaw) return []`
+  // verschluckte das still. Ergebnis in Prod: jedes findBestSV-Call lieferte
+  // 0 Kandidaten, Dispatch zeigte „Keine SVs in Reichweite" unabhängig vom
+  // Lead-Standort. AAR-657-Scan hat die Stelle verpasst, weil `sachverstaendige`
+  // und `profiles(...)` auf getrennten Zeilen im Template-String stehen.
   const baseQuery = db
     .from('sachverstaendige')
     .select(
@@ -102,10 +108,10 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
         'paket_umkreis_km, ' +
         'paket_faelle_gesamt, paket_faelle_genutzt, offene_faelle, ' +
         'urlaub_von, urlaub_bis, ist_aktiv, gesperrt_seit, ablehnungen_30_tage, ' +
-        'profiles(vorname, nachname)',
+        'profiles!sachverstaendige_profile_id_fkey(vorname, nachname)',
     )
-  const { data: svsRaw } = await applyDispatchableFilter(baseQuery)
-
+  const { data: svsRaw, error: svErr } = await applyDispatchableFilter(baseQuery)
+  if (svErr) console.error('[findBestSV] SV-Query:', svErr.message)
   if (!svsRaw) return []
   const svs = svsRaw as unknown as Array<Record<string, unknown>>
 

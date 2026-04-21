@@ -67,7 +67,7 @@ export async function debugSvMatchingByCoords(
         'paket_umkreis_km, ' +
         'paket_faelle_gesamt, paket_faelle_genutzt, offene_faelle, ' +
         'urlaub_von, urlaub_bis, ist_aktiv, gesperrt_seit, ' +
-        'profiles(vorname, nachname)',
+        'profiles!sachverstaendige_profile_id_fkey(vorname, nachname)',
     )
     .eq('ist_aktiv', true)
     .is('gesperrt_seit', null)
