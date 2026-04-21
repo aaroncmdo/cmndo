@@ -6,15 +6,19 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 // AAR-216: schadens_fall_typ aus dem Manual-Lead-Input entfernt — der MA kennt
-// den Schadentyp beim Anlegen noch nicht, dieser wird in Phase 2 erfasst
-// (leads.schadentyp via SchadentypPicker).
+// den Schadentyp beim Anlegen noch nicht, dieser wird in Phase 2 erfasst.
+// AAR-695: service_typ raus (wird im Lead-Flow gesetzt, ist Endpoint-Sender
+// für die Kanzlei). PLZ-Freitext durch Google-Maps-Auswahl ersetzt
+// (Adresse + PLZ + Lat/Lng als Bundle).
 export interface CreateManualLeadInput {
   vorname: string
   nachname: string
   telefon: string
   email: string
-  plz: string
-  service_typ: string
+  kunde_adresse: string
+  kunde_plz: string
+  kunde_lat: number | null
+  kunde_lng: number | null
   source_channel: string
   notizen: string
 }
@@ -43,9 +47,12 @@ export async function createManualLead(
     nachname: data.nachname || null,
     telefon: data.telefon,
     email: data.email || null,
-    kunde_plz: data.plz || null,
+    kunde_adresse: data.kunde_adresse || null,
+    kunde_plz: data.kunde_plz || null,
+    kunde_lat: data.kunde_lat,
+    kunde_lng: data.kunde_lng,
     // AAR-216: schadentyp NICHT mehr beim Anlegen — wird in Phase 2 gesetzt.
-    service_typ: data.service_typ,
+    // AAR-695: service_typ NICHT mehr beim Anlegen — wird im Lead-Flow gesetzt.
     source_channel: data.source_channel,
     qualifizierungs_phase: 'neu',
     status: 'neu',
