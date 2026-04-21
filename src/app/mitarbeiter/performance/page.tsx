@@ -76,7 +76,7 @@ export default async function MitarbeiterPerformancePage() {
       .order('faellig_am', { ascending: true })
       .limit(20),
     supabase.from('gutachter_termine')
-      .select('id, fall_id, start_zeit, end_zeit, status, faelle(fall_nummer, sv_id, sachverstaendige(profiles(vorname, nachname)))')
+      .select('id, fall_id, start_zeit, end_zeit, status, faelle(fall_nummer, sv_id, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname)))')
       .gte('start_zeit', todayStart)
       .lt('start_zeit', todayEnd)
       .in('status', ['bestaetigt'])

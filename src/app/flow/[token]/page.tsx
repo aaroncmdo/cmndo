@@ -119,7 +119,7 @@ export default async function FlowPage({
   // AAR-99: Reservierten SV+Termin laden fuer Schritt 2
   const { data: terminMitSv } = await svc
     .from('gutachter_termine')
-    .select('id, start_zeit, sv_id, sachverstaendige(profile_id, profiles(vorname, avatar_url))')
+    .select('id, start_zeit, sv_id, sachverstaendige(profile_id, profiles!sachverstaendige_profile_id_fkey(vorname, avatar_url))')
     .eq('lead_id', leadId)
     .in('status', ['reserviert', 'bestaetigt'])
     .order('start_zeit', { ascending: false })
