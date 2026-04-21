@@ -4,7 +4,9 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertCircleIcon, PlusIcon, XIcon } from 'lucide-react'
-import { createReklamation, REKLAMATIONS_GRUENDE } from './actions'
+import { createReklamation } from './actions'
+// AAR-664 (Folge): Konstante aus non-`'use server'`-Datei.
+import { REKLAMATIONS_GRUENDE } from './constants'
 
 type Reklamation = {
   id: string

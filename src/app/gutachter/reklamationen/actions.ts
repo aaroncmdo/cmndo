@@ -6,14 +6,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createNotification } from '@/lib/notifications'
 import { revalidatePath } from 'next/cache'
 
-export const REKLAMATIONS_GRUENDE = [
-  { value: 'kunde-no-show', label: 'Kunde war nicht da (No-Show)' },
-  { value: 'schaden-anders', label: 'Schaden anders als beschrieben' },
-  { value: 'daten-unvollstaendig', label: 'Daten unvollstaendig' },
-  { value: 'doppel-termin', label: 'Doppel-Termin' },
-  { value: 'mehrfach-verschoben', label: 'Termin mehrfach verschoben' },
-  { value: 'sonstiges', label: 'Sonstiges' },
-] as const
+// AAR-664 (Folge): Konstante REKLAMATIONS_GRUENDE in eigene Datei
+// `./constants` extrahiert (Memory: `'use server'-Konstanten-Falle`).
+// Wird in dieser Action nicht referenziert — Client importiert direkt.
 
 export async function createReklamation(data: {
   fallId: string
