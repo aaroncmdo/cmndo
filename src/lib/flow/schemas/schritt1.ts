@@ -74,6 +74,14 @@ export const schritt1Schema = z
       .min(1970, 'Baujahr ab 1970')
       .max(CURRENT_YEAR, `Baujahr höchstens ${CURRENT_YEAR}`),
     fahrzeug_standort_plz: z.string().regex(/^[0-9]{5}$/, 'PLZ muss 5 Ziffern sein'),
+    // AAR-663: Google-Places-Ergebnis optional mitspeichern. Wenn der Kunde das
+    // Autocomplete-Feld nutzt, landet hier Adresse + Koordinaten + place_id.
+    // Koordinaten sind der Schlüssel für Self-Service-Dispatch (findBestSV),
+    // Fallback auf nur-PLZ bleibt möglich wenn Google JS mal nicht lädt.
+    fahrzeug_standort_adresse: z.string().trim().max(200).optional().or(z.literal('')),
+    fahrzeug_standort_lat: z.number().min(-90).max(90).optional().nullable(),
+    fahrzeug_standort_lng: z.number().min(-180).max(180).optional().nullable(),
+    fahrzeug_standort_place_id: z.string().trim().max(200).optional().or(z.literal('')),
     vorname: z.string().trim().min(1, 'Vorname ist erforderlich').max(50),
     nachname: z.string().trim().min(1, 'Nachname ist erforderlich').max(50),
     email: z.email('Ungültige E-Mail-Adresse'),

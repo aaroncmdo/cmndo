@@ -20,29 +20,32 @@ export async function listSvSuggestionsForLead(leadId: string): Promise<{
 
   const { data: lead } = await supabase
     .from('leads')
-    .select('besichtigungsort_lat, besichtigungsort_lng, unfallort_lat, unfallort_lng, kunde_lat, kunde_lng, wunschtermin')
+    .select('besichtigungsort_lat, besichtigungsort_lng, fahrzeug_standort_lat, fahrzeug_standort_lng, unfallort_lat, unfallort_lng, kunde_lat, kunde_lng, wunschtermin')
     .eq('id', leadId)
     .single()
 
   if (!lead) return { success: false, error: 'Lead nicht gefunden' }
 
-  // Semantik-Fix 2026-04-21: SV-Matching nutzt primaer den Besichtigungsort
-  // (wo das Auto steht). unfallort ist fachlich die Unfallstelle und nur
-  // fuer die Unfallskizze relevant — der SV faehrt dort nicht hin.
-  // Fallback-Chain fuer Legacy-Leads: besichtigungsort → unfallort → kunde.
+  // Fallback-Chain für den Ort wohin der SV fährt:
+  //   besichtigungsort (explizit gesetzt, Dispatch-Phase-2 oder vom Kunden)
+  //   → fahrzeug_standort (AAR-663 Self-Service-Schritt 1 via Google-Places)
+  //   → unfallort (Legacy, Unfallstelle — nicht ideal, aber als Fallback OK)
+  //   → kunde (letzter Notnagel, Wohnadresse)
   const l = lead as {
     besichtigungsort_lat: number | null
     besichtigungsort_lng: number | null
+    fahrzeug_standort_lat: number | null
+    fahrzeug_standort_lng: number | null
     unfallort_lat: number | null
     unfallort_lng: number | null
     kunde_lat: number | null
     kunde_lng: number | null
   }
-  const lat = l.besichtigungsort_lat ?? l.unfallort_lat ?? l.kunde_lat
-  const lng = l.besichtigungsort_lng ?? l.unfallort_lng ?? l.kunde_lng
+  const lat = l.besichtigungsort_lat ?? l.fahrzeug_standort_lat ?? l.unfallort_lat ?? l.kunde_lat
+  const lng = l.besichtigungsort_lng ?? l.fahrzeug_standort_lng ?? l.unfallort_lng ?? l.kunde_lng
 
   if (lat == null || lng == null) {
-    return { success: false, error: 'Lead hat keine Koordinaten (Besichtigungsort/Unfallort/Kunde fehlt)' }
+    return { success: false, error: 'Lead hat keine Koordinaten (Besichtigungsort/Fahrzeug-Standort/Unfallort/Kunde fehlt)' }
   }
 
   // AAR-264: Wunschtermin durchreichen — findBestSV macht Kalender-Check + Score-Bonus

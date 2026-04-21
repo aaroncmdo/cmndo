@@ -514,7 +514,11 @@ export default function KarteHubClient({
 
   return (
     // AAR-123: h-full aus dem Layout-Parent (flex-1 min-h-0) statt viewport-basiert
-    <div className="h-full flex flex-col bg-[#f8f9fb] rounded-xl overflow-hidden border border-gray-200">
+    // AAR-664: Breakout aus dem 80%-PageContainer-Inset (10% links + 10% rechts
+    // sind auf der interaktiven Karte verschenkter Platz und produzieren einen
+    // horizontalen Overflow). 125% von 80% = 100% Main-Breite; -12.5% shiftet
+    // um 10% nach links zurück — Trick aus PageContainer.tsx dokumentiert.
+    <div className="h-full flex flex-col bg-[#f8f9fb] rounded-xl overflow-hidden border border-gray-200 md:w-[125%] md:-ml-[12.5%]">
       {/* AAR SV-Audit-Konsolidierung: Status-Banner — zeigt Bucket-Counts
           und bietet One-Click-Filter-Toggle wenn Onboarding-SVs versteckt sind. */}
       {bannerEmpfehlungOnboarding && (
