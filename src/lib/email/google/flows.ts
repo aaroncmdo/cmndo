@@ -319,6 +319,113 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
     schadennummer = partei.versicherung_nr ?? '—'
   }
 
+  // AAR-kanzlei-portal PR 5: Fall-Dokumente laden für Attachments + Download-
+  // Links. Strategie:
+  //   - Kanzlei-Paket (kategorie='kanzlei'|'kanzlei_paket') → Attachment
+  //   - Gutachten (dokument_typ='gutachten'|kategorie='gutachten') → Attachment
+  //   - Alle anderen → Download-Links in der Email (werden nicht attached,
+  //     weil Gmail bei >25 MB Total-Attachments bouncen würde)
+  const { data: dokumenteRows } = await db
+    .from('fall_dokumente')
+    .select('id, dokument_typ, kategorie, storage_path, original_filename, mime_type, groesse_bytes, hochgeladen_am')
+    .eq('fall_id', fallId)
+    .is('geloescht_am', null)
+    .order('hochgeladen_am', { ascending: false })
+
+  type Row = {
+    id: string
+    dokument_typ: string | null
+    kategorie: string | null
+    storage_path: string | null
+    original_filename: string | null
+    mime_type: string | null
+    groesse_bytes: number | null
+    hochgeladen_am: string | null
+  }
+  const dokumente = (dokumenteRows ?? []) as unknown as Row[]
+
+  const isKanzleiPaket = (d: Row): boolean => {
+    const k = (d.dokument_typ ?? d.kategorie ?? '').toLowerCase()
+    return k === 'kanzlei' || k === 'kanzlei_paket'
+  }
+  const isGutachten = (d: Row): boolean => {
+    const k = (d.dokument_typ ?? d.kategorie ?? '').toLowerCase()
+    return k === 'gutachten'
+  }
+
+  const TYP_LABEL: Record<string, string> = {
+    fahrzeugschein: 'Fahrzeugschein (ZB1)',
+    polizeibericht: 'Polizeibericht',
+    schadensfotos: 'Unfallfoto',
+    unfallfoto: 'Unfallfoto',
+    sa_pdf: 'Schadenaufnahme (SA)',
+    anschlussschreiben: 'Anschlussschreiben',
+    vollmacht: 'Vollmacht',
+    'kunde-nachreichung': 'Kunden-Nachreichung',
+    sonstiges: 'Sonstiges',
+  }
+
+  const attachments: Array<{ filename: string; content: Buffer; contentType: string }> = []
+
+  async function attachFromStorage(d: Row, wunschdateiname: string): Promise<void> {
+    if (!d.storage_path) return
+    const { data: pub } = db.storage.from('fall-dokumente').getPublicUrl(d.storage_path)
+    const url = pub.publicUrl
+    try {
+      const res = await fetch(url)
+      if (!res.ok) {
+        console.error('[AAR-kanzlei-portal] Attachment-Download fehlgeschlagen:', res.status, url)
+        return
+      }
+      const buf = Buffer.from(await res.arrayBuffer())
+      // Gmail-Limit beachten: wenn Total > 20 MB, überspringen.
+      const gesamt = attachments.reduce((s, a) => s + a.content.length, 0)
+      if (gesamt + buf.length > 20 * 1024 * 1024) {
+        console.warn('[AAR-kanzlei-portal] Attachment-Total > 20 MB, überspringe', wunschdateiname)
+        return
+      }
+      attachments.push({
+        filename: d.original_filename ?? wunschdateiname,
+        content: buf,
+        contentType: d.mime_type ?? 'application/pdf',
+      })
+    } catch (err) {
+      console.error('[AAR-kanzlei-portal] Attach-Fehler:', err)
+    }
+  }
+
+  const kanzleiPaket = dokumente.find(isKanzleiPaket)
+  const gutachten = dokumente.find(isGutachten)
+  if (kanzleiPaket) {
+    await attachFromStorage(kanzleiPaket, `Kanzlei_Paket_${fall.fall_nummer ?? fallId}.pdf`)
+  }
+  if (gutachten) {
+    await attachFromStorage(gutachten, `Gutachten_${fall.fall_nummer ?? fallId}.pdf`)
+  }
+
+  // Download-Links für alle Nicht-Attachment-Dokumente (+ auch die attachments,
+  // falls der Empfänger den Link bevorzugt)
+  const dokumenteLinks = dokumente
+    .filter((d) => d.storage_path)
+    .map((d) => {
+      const { data: pub } = db.storage.from('fall-dokumente').getPublicUrl(d.storage_path as string)
+      const typKey = (d.dokument_typ ?? d.kategorie ?? '').toLowerCase()
+      const typLabel = TYP_LABEL[typKey] ?? (typKey || 'Dokument')
+      const label = d.original_filename
+        ? `${typLabel}: ${d.original_filename}`
+        : typLabel
+      const sizeMB = d.groesse_bytes ? (d.groesse_bytes / 1024 / 1024).toFixed(1) : null
+      const meta = [d.mime_type?.split('/').pop()?.toUpperCase(), sizeMB ? `${sizeMB} MB` : null]
+        .filter(Boolean)
+        .join(' · ')
+      return {
+        id: d.id,
+        label,
+        url: pub.publicUrl,
+        meta: meta || undefined,
+      }
+    })
+
   const props = {
     fallNummer: fall.fall_nummer ?? fallId.slice(0, 8),
     kundeName,
@@ -327,9 +434,13 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
     fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || fall.kennzeichen || '—',
     versicherung,
     schadennummer,
-    svBerichtHinweis: 'Das Gutachten und alle relevanten Dokumente finden Sie in der digitalen Fallakte.',
+    svBerichtHinweis:
+      attachments.length > 0
+        ? `Als Anhang erhalten Sie: ${attachments.map((a) => a.filename).join(', ')}.`
+        : 'Kanzlei-Paket und Gutachten folgen in Kürze — sie finden sie vorab über den Portal-Link.',
     uebergabeDatum: fmtDate(fall.kanzlei_uebergabe_am),
     fallId,
+    dokumenteLinks,
   }
 
   const html = await render(KanzleiAuftragszusammenfassungEmail(props))
@@ -337,6 +448,7 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
     to: kanzleiEmail,
     subject: kanzleiAuftragSubject(props),
     html,
+    attachments: attachments.length > 0 ? attachments : undefined,
     fallId,
     empfaengerTyp: 'kanzlei',
     template: 'kanzlei_auftrag',
