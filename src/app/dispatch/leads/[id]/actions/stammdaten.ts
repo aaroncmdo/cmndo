@@ -70,6 +70,9 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   'schadens_hergang',
   // AAR-unfallfotos: Schadenbeschreibung (was am Auto kaputt ist) — manuell
   // editierbar und durch Haiku-Vision aus den Unfallfotos gefüllt.
+  // AAR-665-Follow: eigene Spalte fahrzeugschaden_beschreibung getrennt von
+  // sachschaden_beschreibung (= Dritt-Schaden in Phase 1).
+  'fahrzeugschaden_beschreibung',
   'sachschaden_beschreibung',
 ])
 
