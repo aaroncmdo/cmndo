@@ -1,22 +1,24 @@
 'use client'
 
 // AAR-110: Lead manuell anlegen Drawer
+// AAR-695: service_typ raus (wird im Lead-Flow gesetzt, ist Endpoint-Sender
+// für die Kanzlei). Google-Maps-Autocomplete für die Adresse rein.
+
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { PlusIcon, XIcon } from 'lucide-react'
+import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { createManualLead, type CreateManualLeadInput } from '../actions'
 
-// AAR-216: schadens_fall_typ aus dem Initial-State entfernt — der MA kennt den
-// Schadentyp beim Lead-Anlegen noch nicht (Kunde wurde noch nicht gesprochen).
-// Der echte Schadentyp wird in Phase 2 via SchadentypPicker erfasst (in das
-// neue Feld leads.schadentyp). Der alte SF-Wert (schadens_fall_typ) ist Legacy.
 const INITIAL: CreateManualLeadInput = {
   vorname: '',
   nachname: '',
   telefon: '',
   email: '',
-  plz: '',
-  service_typ: 'komplett',
+  kunde_adresse: '',
+  kunde_plz: '',
+  kunde_lat: null,
+  kunde_lng: null,
   source_channel: 'manuell',
   notizen: '',
 }
@@ -40,6 +42,16 @@ export default function NeuLeadDrawer() {
       setOpen(false)
       router.push(`/dispatch/leads/${result.leadId}`)
     })
+  }
+
+  function handlePlaceSelect(p: PlaceResult) {
+    setData((d) => ({
+      ...d,
+      kunde_adresse: p.adresse,
+      kunde_plz: p.plz || d.kunde_plz,
+      kunde_lat: p.lat,
+      kunde_lng: p.lng,
+    }))
   }
 
   if (!open) {
@@ -73,34 +85,29 @@ export default function NeuLeadDrawer() {
           </div>
           <InputField label="Telefon *" value={data.telefon} onChange={v => setData({ ...data, telefon: v })} type="tel" placeholder="+49..." />
           <InputField label="E-Mail" value={data.email} onChange={v => setData({ ...data, email: v })} type="email" />
-          <InputField label="PLZ" value={data.plz} onChange={v => setData({ ...data, plz: v })} />
 
-          {/* AAR-216: Schadentyp-Dropdown entfernt — wird in Phase 2 erfasst,
-              wenn der MA den Kunden tatsächlich spricht. */}
-
+          {/* AAR-695: Google-Maps-Autocomplete für die Kunden-Adresse.
+              Liefert direkt Adresse + PLZ + Lat/Lng — wird in Phase 1 ohnehin
+              für Isochrone-Matching gebraucht. */}
           <div>
-            <label className="block text-xs text-gray-500 mb-1.5">Service-Typ</label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setData({ ...data, service_typ: 'komplett' })}
-                className={`px-3 py-2.5 rounded-xl text-xs font-medium transition-colors ${
-                  data.service_typ === 'komplett' ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-gray-600'
-                }`}
-              >
-                Komplett (SV + Kanzlei)
-              </button>
-              <button
-                type="button"
-                onClick={() => setData({ ...data, service_typ: 'nur_gutachter' })}
-                className={`px-3 py-2.5 rounded-xl text-xs font-medium transition-colors ${
-                  data.service_typ === 'nur_gutachter' ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-gray-600'
-                }`}
-              >
-                Nur Gutachter
-              </button>
-            </div>
+            <label className="block text-xs text-gray-500 mb-1.5">Adresse</label>
+            <GooglePlaceAutocomplete
+              defaultValue={data.kunde_adresse}
+              placeholder="Strasse, PLZ, Stadt"
+              onSelect={handlePlaceSelect}
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
+            />
+            {data.kunde_lat && data.kunde_lng && (
+              <p className="text-[10px] text-gray-400 mt-1">
+                ✓ Koordinaten {data.kunde_lat.toFixed(4)}, {data.kunde_lng.toFixed(4)}
+                {data.kunde_plz && ` · PLZ ${data.kunde_plz}`}
+              </p>
+            )}
           </div>
+
+          {/* AAR-216: Schadentyp-Dropdown wird in Phase 2 erfasst. */}
+          {/* AAR-695: Service-Typ-Dropdown raus — wird im Lead-Flow festgelegt
+              (service_typ ist u. a. Endpoint-Sender für die Kanzlei). */}
 
           <div>
             <label className="block text-xs text-gray-500 mb-1.5">Quelle</label>
