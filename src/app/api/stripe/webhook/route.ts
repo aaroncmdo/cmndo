@@ -408,6 +408,11 @@ export async function POST(request: Request) {
             stripe_anzahlung_payment_intent_id: session.payment_intent as string ?? null,
             stripe_anzahlung_bezahlt_am: new Date().toISOString(),
             portal_zugang_freigeschaltet: true,
+            // AAR SV-Audit-Konsolidierung: ist_aktiv zusammen mit
+            // portal_zugang_freigeschaltet aktivieren — Solo-Wizard setzt
+            // jetzt ist_aktiv=false beim Anlegen, also muss der Webhook
+            // beide auf true setzen (wie die anderen 2 Branches bereits).
+            ist_aktiv: true,
             anzahlung_status: 'bezahlt',
             werbebudget_guthaben_netto: initGuthaben,
             vertrag_unterschrieben: true,

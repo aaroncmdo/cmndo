@@ -47,22 +47,27 @@ export async function updateGutachterProfil(
   revalidatePath('/admin/sachverstaendige/karte')
 }
 
+// AAR SV-Audit-Konsolidierung: Deaktivier-/Aktivier-Flow setzt jetzt
+// gesperrt_seit + gesperrt_grund + gesperrt_von_user_id statt ist_aktiv.
+// `ist_aktiv` ist reserviert für den automatischen Onboarding-Flow
+// (Stripe-Webhook). Admin-manueller Toggle läuft über die Sperr-Felder.
 export async function reactivateGutachter(svId: string) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
-  // Core update (ist_aktiv always exists)
   const { error } = await supabase
     .from('sachverstaendige')
-    .update({ ist_aktiv: true })
+    .update({
+      gesperrt_seit: null,
+      gesperrt_grund: null,
+      gesperrt_von_user_id: null,
+      // Legacy-Felder defensiv mitziehen — falls sie noch irgendwo gelesen werden.
+      deaktiviert_grund: null,
+      deaktiviert_am: null,
+    })
     .eq('id', svId)
   if (error) throw new Error(error.message)
-
-  // Try clearing deactivation fields (columns may not exist yet)
-  try {
-    await supabase.from('sachverstaendige').update({ deaktiviert_grund: null, deaktiviert_am: null }).eq('id', svId)
-  } catch { /* columns may not exist */ }
 
   // KFZ-151: Auto-Resolve Account-Sperr-Tasks (Reminder/Mahn-Tasks die jetzt obsolet sind)
   try {
@@ -79,17 +84,18 @@ export async function deactivateGutachter(svId: string, grund: string) {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
-  // Core update (ist_aktiv always exists)
   const { error } = await supabase
     .from('sachverstaendige')
-    .update({ ist_aktiv: false })
+    .update({
+      gesperrt_seit: new Date().toISOString(),
+      gesperrt_grund: grund || 'Manuell gesperrt',
+      gesperrt_von_user_id: user.id,
+      // Legacy-Felder parallel setzen für Backward-Compat in alten Listings.
+      deaktiviert_grund: grund || 'Manuell gesperrt',
+      deaktiviert_am: new Date().toISOString(),
+    })
     .eq('id', svId)
   if (error) throw new Error(error.message)
-
-  // Try setting deactivation details (columns may not exist yet)
-  try {
-    await supabase.from('sachverstaendige').update({ deaktiviert_grund: grund || 'Manuell deaktiviert', deaktiviert_am: new Date().toISOString() }).eq('id', svId)
-  } catch { /* columns may not exist */ }
 
   revalidatePath('/admin/sachverstaendige')
   revalidatePath('/admin/sachverstaendige/karte')
@@ -128,20 +134,21 @@ export async function softDeleteGutachter(svId: string) {
     throw new Error(`Noch ${count} offene Fälle. Bitte zuerst umverteilen.`)
   }
 
-  // Soft-delete: deactivate (ist_aktiv always exists)
+  // AAR SV-Audit-Konsolidierung: Soft-Delete setzt geloescht_am + Sperr-Felder.
+  // ist_aktiv bleibt unverändert — das Flag ist reserviert für den Onboarding-Flow.
   const { error } = await supabase
     .from('sachverstaendige')
-    .update({ ist_aktiv: false })
+    .update({
+      geloescht_am: new Date().toISOString(),
+      gesperrt_seit: new Date().toISOString(),
+      gesperrt_grund: 'Gelöscht durch Admin',
+      gesperrt_von_user_id: user.id,
+      // Legacy-Felder defensiv.
+      deaktiviert_grund: 'Gelöscht durch Admin',
+      deaktiviert_am: new Date().toISOString(),
+    })
     .eq('id', svId)
   if (error) throw new Error(error.message)
-
-  // Try setting geloescht_am + deaktiviert_grund (columns may not exist yet)
-  try {
-    await supabase.from('sachverstaendige').update({
-      geloescht_am: new Date().toISOString(),
-      deaktiviert_grund: 'Manuell gelöscht durch Admin',
-    }).eq('id', svId)
-  } catch { /* columns may not exist */ }
 
   // Delete the auth user completely so they can never log in again
   try {
@@ -184,10 +191,17 @@ export async function deleteGutachter(svId: string): Promise<{ success: boolean;
     const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
     if (profile?.rolle !== 'admin') return { success: false, error: 'Nur Admins können Gutachter löschen' }
 
-    // Existenz + Deaktiviert prüfen
-    const { data: sv } = await supabase.from('sachverstaendige').select('id, ist_aktiv').eq('id', svId).single()
+    // AAR SV-Audit-Konsolidierung: Precondition ist gesperrt_seit (Admin hat
+     // manuell gesperrt), nicht mehr ist_aktiv=false (das ist der Onboarding-Status).
+    const { data: sv } = await supabase
+      .from('sachverstaendige')
+      .select('id, gesperrt_seit, geloescht_am')
+      .eq('id', svId)
+      .single()
     if (!sv) return { success: false, error: 'Gutachter nicht gefunden' }
-    if (sv.ist_aktiv !== false) return { success: false, error: 'Nur deaktivierte Gutachter können gelöscht werden' }
+    if (!sv.gesperrt_seit && !sv.geloescht_am) {
+      return { success: false, error: 'Nur gesperrte Gutachter können endgültig gelöscht werden. Bitte zuerst sperren.' }
+    }
 
     const { error } = await supabase.rpc('delete_gutachter_komplett', { p_sv_id: svId })
     if (error) {

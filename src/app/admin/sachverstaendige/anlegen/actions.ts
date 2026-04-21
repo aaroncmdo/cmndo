@@ -203,7 +203,10 @@ export async function anlegeSv(data: AnlegeSvFormData): Promise<{ success: boole
     anzahlung_status: 'offen',
     onboarding_status: 'vom_admin_angelegt', // ARCH-1 neuer Status
     portal_zugang_freigeschaltet: false, // Hard-Blocker bis Vertrag + Stripe
-    ist_aktiv: true,
+    // AAR SV-Audit-Konsolidierung: ist_aktiv=false beim Anlegen — konsistent
+    // mit Büro/Akademie/Community-Wizards. Stripe-Webhook setzt beides
+    // (portal_zugang_freigeschaltet + ist_aktiv) zusammen auf true nach Zahlung.
+    ist_aktiv: false,
     partner_seit: new Date().toISOString().slice(0, 10),
   }).select('id').single()
 

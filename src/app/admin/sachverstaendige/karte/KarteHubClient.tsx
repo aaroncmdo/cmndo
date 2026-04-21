@@ -92,7 +92,11 @@ const PAKET_LABEL: Record<string, string> = {
 // war nur ist_aktiv+gesperrt_seit) und waren zwischen 20+ anderen SVs
 // unsichtbar — obwohl das Dashboard-Widget „Ausstehende Anzahlung" sie
 // eindeutig als handlungsbedürftig markiert.
-type SvStatusFilter = 'aktive' | 'onboarding' | 'deaktivierte' | 'gesperrt' | 'alle'
+// AAR SV-Audit-Konsolidierung: „deaktivierte" gestrichen — `ist_aktiv=false`
+// bedeutet nun „noch im Onboarding" (Stripe noch nicht durch). Der Admin-
+// manuelle Toggle läuft über `gesperrt_seit`. Dadurch reicht: aktiv /
+// onboarding / gesperrt / alle.
+type SvStatusFilter = 'aktive' | 'onboarding' | 'gesperrt' | 'alle'
 
 const OVERLAY_LAYERS = ['sv', 'community', 'org'] as const
 
@@ -145,13 +149,15 @@ export default function KarteHubClient({
   // das Ausstehende-Anzahlung-Widget als Zielgruppe hat.
   const filteredSvs = useMemo(() => {
     return svs.filter((sv) => {
+      // AAR SV-Audit-Konsolidierung: Status-Bucket anhand der 3 Konditionen:
+      //   gesperrt_seit IS NOT NULL → gesperrt (höchste Prio)
+      //   !portal_zugang_freigeschaltet ODER !ist_aktiv → onboarding
+      //   sonst → aktiv
       const istGesperrt = !!sv.gesperrtSeit
-      const istDeaktiviert = sv.istAktiv === false
-      const istOnboarding = !istGesperrt && !istDeaktiviert && sv.portalZugangFreigeschaltet !== true
+      const istOnboarding = !istGesperrt && (sv.portalZugangFreigeschaltet !== true || sv.istAktiv === false)
       if (svFilter === 'gesperrt' && !istGesperrt) return false
-      if (svFilter === 'aktive' && (istGesperrt || istDeaktiviert || istOnboarding)) return false
+      if (svFilter === 'aktive' && (istGesperrt || istOnboarding)) return false
       if (svFilter === 'onboarding' && !istOnboarding) return false
-      if (svFilter === 'deaktivierte' && (istGesperrt || !istDeaktiviert)) return false
       if (typFilter && (sv.gutachterTyp ?? 'kfz-gutachter') !== typFilter) return false
       if (search && !sv.name.toLowerCase().includes(search.toLowerCase())) return false
       return true
@@ -472,9 +478,42 @@ export default function KarteHubClient({
     }
   }
 
+  // AAR SV-Audit-Konsolidierung: Status-Counts für das Banner oben.
+  // Zeigt Admin die Bucket-Verteilung + One-Click-Switch zum Onboarding-Filter
+  // wenn mindestens 1 SV im Onboarding ist (häufige Ursache für „neu angelegt
+  // nicht sichtbar" weil Default-Filter „Aktiv" ist).
+  const statusCounts = svs.reduce(
+    (acc, sv) => {
+      if (sv.gesperrtSeit) acc.gesperrt++
+      else if (sv.portalZugangFreigeschaltet !== true || sv.istAktiv === false) acc.onboarding++
+      else acc.aktiv++
+      return acc
+    },
+    { aktiv: 0, onboarding: 0, gesperrt: 0 },
+  )
+  const bannerEmpfehlungOnboarding = svFilter === 'aktive' && statusCounts.onboarding > 0
+
   return (
     // AAR-123: h-full aus dem Layout-Parent (flex-1 min-h-0) statt viewport-basiert
     <div className="h-full flex flex-col bg-[#f8f9fb] rounded-xl overflow-hidden border border-gray-200">
+      {/* AAR SV-Audit-Konsolidierung: Status-Banner — zeigt Bucket-Counts
+          und bietet One-Click-Filter-Toggle wenn Onboarding-SVs versteckt sind. */}
+      {bannerEmpfehlungOnboarding && (
+        <div className="flex items-center gap-3 px-4 py-2 bg-amber-50 border-b border-amber-200 text-xs flex-shrink-0">
+          <span className="text-amber-800">
+            Du siehst aktuell <strong>{statusCounts.aktiv} aktive</strong> Sachverständige —
+            {' '}<strong>{statusCounts.onboarding}</strong> weitere im Onboarding (warten auf Anzahlung).
+          </span>
+          <button
+            type="button"
+            onClick={() => setSvFilter('onboarding')}
+            className="ml-auto px-2.5 py-1 rounded-lg bg-amber-600 text-white text-[11px] font-medium hover:bg-amber-700"
+          >
+            Onboarding anzeigen →
+          </button>
+        </div>
+      )}
+
       {/* Toolbar: Filter-Chips + Onboarden-Button */}
       <div className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-200 bg-white flex-shrink-0 flex-wrap">
         <FilterChip
@@ -594,15 +633,12 @@ function SvSidebar({
           />
         </div>
       </div>
-      {/* 4-Stufen-Status-Filter */}
+      {/* Status-Filter (AAR SV-Audit-Konsolidierung: 4 statt 5 Tabs —
+          „Deaktiv." raus, weil ist_aktiv=false jetzt Onboarding-Status bedeutet). */}
       <div className="px-4 pb-2 flex gap-1">
         {([
           { k: 'aktive', label: 'Aktiv' },
-          // AAR-audit: Onboarding-Filter — SVs die auf Vertrag oder Anzahlung
-          // warten (portal_zugang_freigeschaltet=false). Matcht 1:1 die
-          // Zielgruppe des Ausstehende-Zahlungen-Widgets im Dashboard.
           { k: 'onboarding', label: 'Onboarding' },
-          { k: 'deaktivierte', label: 'Deaktiv.' },
           { k: 'gesperrt', label: 'Gesperrt' },
           { k: 'alle', label: 'Alle' },
         ] as const).map((f) => (

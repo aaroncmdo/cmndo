@@ -7,6 +7,7 @@ import { triggerGutachterTerminTask } from '@/lib/tasking'
 import { triggerSV01, deductLeadpreis } from '@/lib/gutachterTasking'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
+import { applyDispatchableFilter } from '@/lib/sv/queries'
 
 // ─── Point-in-Polygon (Ray Casting) ─────────────────────────────────────────
 
@@ -82,15 +83,13 @@ export async function POST(request: Request) {
     }
   }
 
-  // 3. Alle aktiven SVs mit Kapazität laden
-  // KFZ-154: zusaetzlich spezifikationen + schadenarten fuer den Match
-  // KFZ-152 Phase 3: zusaetzlich organisation_id + rolle_in_organisation fuer Org-Routing
-  // BUG-107: Nur SVs die bezahlt haben UND aktiv sind (kein Pilot-Fall, kein dispatch_aktiv)
-  let svQuery = supabase
+  // 3. Alle dispatchbaren SVs laden — einheitlicher Filter aus lib/sv/queries.
+  // AAR SV-Audit-Konsolidierung: gesperrt_seit + geloescht_am waren hier
+  // bisher nicht gefiltert. Jetzt via applyDispatchableFilter konsistent.
+  const svBaseQuery = supabase
     .from('sachverstaendige')
     .select('id, partner_seit, offene_faelle, paket_faelle_gesamt, paket_faelle_genutzt, standort_lat, standort_lng, isochrone_polygon, paket_umkreis_km, spezifikationen, schadenarten, organisation_id, rolle_in_organisation')
-    .eq('ist_aktiv', true)
-    .eq('portal_zugang_freigeschaltet', true)
+  let svQuery = applyDispatchableFilter(svBaseQuery)
 
   // Wenn Exklusivitaet aktiv: Hard-Filter auf nur die Mitglieder dieser Org
   if (exklusivOrgId) {
