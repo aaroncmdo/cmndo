@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import GutachterShell from './GutachterShell'
-import { PageContainer } from '@/components/PageContainer'
 import { isOnboardingComplete, getOnboardingDeepLink } from '@/lib/gutachter/onboarding-status'
 
 export default async function GutachterLayout({
@@ -163,10 +162,9 @@ export default async function GutachterLayout({
             </svg>
           </Link>
         )}
-      {/* BUG-98: PageContainer gibt Desktop ~15-20% horizontale Marge,
-          Tablet quer großflächig, Mobile fast volle Breite. Banner liegen
-          bewusst außerhalb damit sie weiterhin volle Breite haben. */}
-      <PageContainer className="h-full">{children}</PageContainer>
+      {/* AAR-697: PageContainer raus — Aaron-Vorgabe Gutachter-Portal full
+          width. Banner liegen sowieso außerhalb dieses Wrappers. */}
+      <div className="h-full w-full">{children}</div>
     </GutachterShell>
   )
 }
