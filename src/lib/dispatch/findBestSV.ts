@@ -10,6 +10,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { parseIsochrone } from './isochrone-parse'
+import { applyDispatchableFilter } from '@/lib/sv/queries'
 
 export type SvMatchInput = {
   fallLat: number
@@ -89,7 +90,12 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
     }
   }
 
-  const { data: svsRaw } = await db
+  // AAR SV-Audit-Konsolidierung: applyDispatchableFilter ist die eine Wahrheit
+  // für alle Matching-Endpoints. Filter: ist_aktiv=true + portal_zugang_
+  // freigeschaltet=true + gesperrt_seit IS NULL + geloescht_am IS NULL.
+  // Portal-Gate ist Pflicht — ein SV ohne durchgezogene Anzahlung darf keine
+  // Fälle bekommen (Basis des Geschäftsmodells).
+  const baseQuery = db
     .from('sachverstaendige')
     .select(
       'id, profile_id, paket, standort_lat, standort_lng, isochrone_polygon, ' +
@@ -98,9 +104,7 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
         'urlaub_von, urlaub_bis, ist_aktiv, gesperrt_seit, ablehnungen_30_tage, ' +
         'profiles(vorname, nachname)',
     )
-    .eq('ist_aktiv', true)
-    .is('gesperrt_seit', null)
-    .is('geloescht_am', null)
+  const { data: svsRaw } = await applyDispatchableFilter(baseQuery)
 
   if (!svsRaw) return []
   const svs = svsRaw as unknown as Array<Record<string, unknown>>

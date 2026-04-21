@@ -311,6 +311,8 @@ export default async function SvDetailPage({
                 paket: sv.paket,
                 maxFaelleMonat: sv.paket_faelle_gesamt ?? 10,
                 istAktiv: sv.ist_aktiv ?? true,
+                gesperrtSeit: sv.gesperrt_seit ?? null,
+                gesperrtGrund: sv.gesperrt_grund ?? null,
                 notizen: sv.notizen ?? '',
                 standortAdresse: sv.standort_adresse ?? '',
                 standortPlz: sv.standort_plz ?? '',

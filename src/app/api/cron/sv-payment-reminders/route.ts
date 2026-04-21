@@ -12,10 +12,12 @@ export async function GET() {
   const db = createAdminClient()
 
   // Alle SVs mit offener Anzahlung
+  // AAR SV-Audit-Konsolidierung: gelöschte SVs nicht mehr mahnen.
   const { data: svs } = await db.from('sachverstaendige')
     .select('id, profile_id, onboarding_status, onboarding_anzahlung_faellig_am')
     .eq('onboarding_status', 'anzahlung_offen')
     .eq('portal_zugang_freigeschaltet', false)
+    .is('geloescht_am', null)
 
   if (!svs?.length) return NextResponse.json({ ok: true, count: 0 })
 

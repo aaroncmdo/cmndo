@@ -43,11 +43,14 @@ async function loadAusstehende(): Promise<{ rows: Eintrag[]; gesamt: number; tot
   const eintraege: Eintrag[] = []
 
   // 1. SVs mit offener Anzahlung — Vertrag unterzeichnet aber nicht freigeschaltet
+  // AAR SV-Audit-Konsolidierung: gelöschte ausschließen — ein gelöschter
+  // SV braucht keine Anzahlungsmahnung mehr.
   const { data: svRows } = await supabase
     .from('sachverstaendige')
     .select('id, profile_id, onboarding_anzahlung_betrag, onboarding_anzahlung_faellig_am, vertrag_unterschrieben_am, vertrag_unterschrieben, portal_zugang_freigeschaltet')
     .eq('vertrag_unterschrieben', true)
     .eq('portal_zugang_freigeschaltet', false)
+    .is('geloescht_am', null)
     .gt('onboarding_anzahlung_betrag', 0)
     .limit(20)
 

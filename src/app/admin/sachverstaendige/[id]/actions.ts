@@ -23,7 +23,10 @@ export async function updateSvProfile(svId: string, profileId: string, formData:
   const telefon = (formData.get('telefon') as string)?.trim() || null
   const paket = formData.get('paket') as string
   const maxFaelle = parseInt(formData.get('paket_faelle_gesamt') as string) || 10
-  const istAktiv = formData.get('ist_aktiv') === 'true'
+  // AAR SV-Audit-Konsolidierung: ist_aktiv wird NICHT mehr hier gesetzt.
+  // Das Flag ist reserviert für den Onboarding-Flow (Stripe-Webhook setzt true
+  // nach Anzahlung). Admin-Sperre läuft über deactivateGutachter/reactivateGutachter
+  // in karte/actions.ts → schreibt gesperrt_seit statt ist_aktiv.
   const notizen = (formData.get('notizen') as string)?.trim() || null
 
   // Standort from Google Places
@@ -45,11 +48,10 @@ export async function updateSvProfile(svId: string, profileId: string, formData:
 
   if (profileErr) throw new Error(`Profil-Update fehlgeschlagen: ${profileErr.message}`)
 
-  // Update sachverstaendige
+  // Update sachverstaendige (OHNE ist_aktiv — siehe oben)
   const svUpdate: Record<string, unknown> = {
     paket,
     paket_faelle_gesamt: maxFaelle,
-    ist_aktiv: istAktiv,
     notizen,
     standort_adresse: standortAdresse,
     standort_plz: standortPlz,

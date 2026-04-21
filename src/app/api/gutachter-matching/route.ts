@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { haversineKm } from '@/lib/gps/geofence'
+import { applyDispatchableFilter } from '@/lib/sv/queries'
 
 function pointInPolygon(point: { lat: number; lng: number }, polygon: { lat: number; lng: number }[]): boolean {
   let inside = false
@@ -43,6 +44,16 @@ type MatchResult = {
 type Termin = { start: Date; end: Date }
 
 // ─── POST /api/gutachter-matching ────────────────────────────────────────────
+//
+// AAR SV-Audit-Konsolidierung: DEPRECATED — kein interner Consumer mehr.
+// Der Matching-Haupt-Pfad läuft über lib/dispatch/findBestSV.ts (genutzt von
+// /dispatch/leads, /dispatch/isochrone, /flow/[token]). Dieser Endpoint hat
+// ein anderes Scoring (partner_seit + Quali-Match + invertierte Sortierung)
+// und kann bei Aufruf andere Ergebnisse liefern als findBestSV.
+//
+// Zu tun: Externen Verwendungskontext (falls vorhanden) verifizieren und
+// dann diesen File entfernen ODER die Scoring-Logik auf findBestSV
+// konsolidieren. Aktuell nur der Filter ist harmonisiert (applyDispatchableFilter).
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -76,13 +87,14 @@ export async function POST(request: Request) {
     plzGeo = data
   }
 
-  // 2. Alle aktiven SVs
-  // KFZ-154 Cleanup: legacy qualifikationen Spalte gedroppt
-  const { data: svList } = await supabase
+  // 2. Alle dispatchbaren SVs — einheitlicher Filter aus lib/sv/queries.
+  // AAR SV-Audit-Konsolidierung: früher fehlte hier `gesperrt_seit IS NULL`
+  // und `geloescht_am IS NULL` (findBestSV hatte es, matching-Route nicht —
+  // zwei Wahrheiten). Jetzt beide via applyDispatchableFilter.
+  const baseQuery = supabase
     .from('sachverstaendige')
     .select('id, partner_seit, offene_faelle, paket, qualifikationen_neu, spezifikationen, schadenarten, ist_aktiv, profile_id, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_lat, standort_lng, isochrone_polygon')
-    .eq('ist_aktiv', true)
-    .eq('portal_zugang_freigeschaltet', true) // KFZ-148: Nur freigeschaltete SVs
+  const { data: svList } = await applyDispatchableFilter(baseQuery)
 
   if (!svList?.length) return NextResponse.json({ empfohlen: null, alternative_1: null, alternative_2: null, alle_kandidaten: [], sv_gesucht: true })
 
