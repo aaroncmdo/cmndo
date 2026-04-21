@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
+import { useEffect, useId, useRef, useState, useCallback, useMemo } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { BellIcon, MessageSquareIcon, ActivityIcon, CheckSquareIcon } from 'lucide-react'
@@ -43,6 +43,11 @@ export default function NotificationBell({ variant = 'light' }: { variant?: 'lig
   const router = useRouter()
   const pathname = usePathname()
   const supabase = useMemo(() => createClient(), [])
+  // AAR-701: Channel-Name muss pro Mount eindeutig sein. Bell wird in 4
+  // Portal-Shells gerendert, plus React-Strict-Mode-Doppelmount → ohne
+  // useId() kollidiert der fixe Channel-Name und Supabase wirft
+  // „cannot add postgres_changes callbacks for ... after subscribe()".
+  const channelId = useId()
 
   // AAR-225 Audit: Bell wird in 4 Shells montiert (admin/gutachter/kunde/dispatch).
   // Tasks-Click muss role-aware routen, sonst landen Sub-Rollen auf 403-
@@ -95,12 +100,12 @@ export default function NotificationBell({ variant = 'light' }: { variant?: 'lig
   // Realtime — auf benachrichtigungen UND tasks
   useEffect(() => {
     const channel = supabase
-      .channel('notifications-and-tasks')
+      .channel(`notifications-and-tasks-${channelId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'benachrichtigungen' }, () => load())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => load())
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [supabase, load])
+  }, [supabase, load, channelId])
 
   // Close on outside click
   useEffect(() => {
