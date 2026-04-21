@@ -25,6 +25,7 @@ import {
   type Schritt1Input,
 } from '@/lib/flow/schemas/schritt1'
 import { createLeadFromSchritt1 } from '@/lib/actions/create-lead'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { useFlowStore } from '@/lib/flow/flow-store'
 import type { VoiceExtraction } from '@/lib/flow/schemas/voice-extraction'
 
@@ -113,6 +114,7 @@ export function Schritt1Client() {
     control,
     watch,
     reset,
+    setValue,
     formState: { errors, isValid },
   } = useForm<Schritt1Input>({
     resolver: zodResolver(schritt1Schema),
@@ -129,6 +131,10 @@ export function Schritt1Client() {
       fahrzeug_modell: '',
       fahrzeug_baujahr: new Date().getFullYear(),
       fahrzeug_standort_plz: '',
+      fahrzeug_standort_adresse: '',
+      fahrzeug_standort_lat: null,
+      fahrzeug_standort_lng: null,
+      fahrzeug_standort_place_id: '',
       vorname: '',
       nachname: '',
       email: '',
@@ -451,18 +457,37 @@ export function Schritt1Client() {
             ) : null}
           </div>
 
+          {/* AAR-663: Wo steht das Fahrzeug aktuell? Google-Places-Autocomplete
+              liefert Adresse + PLZ + Koordinaten in einem Step — Koords sind
+              Voraussetzung damit findBestSV ohne Dispatcher-Intervention
+              funktioniert (Self-Service-Dispatch). */}
           <div>
-            <Label htmlFor="fahrzeug_standort_plz">PLZ Fahrzeug-Standort</Label>
-            <Input
-              id="fahrzeug_standort_plz"
-              inputMode="numeric"
-              maxLength={5}
-              placeholder="50667"
-              {...register('fahrzeug_standort_plz')}
+            <Label htmlFor="fahrzeug_standort_adresse">
+              Wo steht das Fahrzeug aktuell?{' '}
+              {watch('fahrzeug_standort_lat') != null && (
+                <span className="text-[#4573A2] text-xs ml-1">✓ Standort erfasst</span>
+              )}
+            </Label>
+            <GooglePlaceAutocomplete
+              defaultValue={watch('fahrzeug_standort_adresse') ?? ''}
+              placeholder="Straße, Hausnr., PLZ, Ort — bitte aus Dropdown wählen"
+              onSelect={(place) => {
+                setValue('fahrzeug_standort_adresse', place.adresse, { shouldValidate: true })
+                setValue('fahrzeug_standort_plz', place.plz, { shouldValidate: true })
+                setValue('fahrzeug_standort_lat', place.lat, { shouldValidate: true })
+                setValue('fahrzeug_standort_lng', place.lng, { shouldValidate: true })
+                setValue('fahrzeug_standort_place_id', place.place_id, { shouldValidate: true })
+              }}
+              className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
             />
+            <p className="mt-1 text-xs text-gray-500">
+              Wir nutzen die Adresse, um direkt einen Gutachter in deiner Nähe vorzuschlagen.
+            </p>
+            {/* Hidden fallback — wenn Autocomplete mal nicht lädt, muss PLZ trotzdem rein */}
+            <input type="hidden" {...register('fahrzeug_standort_plz')} />
             {errors.fahrzeug_standort_plz ? (
               <p className="mt-1 text-sm text-red-600">
-                {errors.fahrzeug_standort_plz.message}
+                Bitte wähle deinen Fahrzeug-Standort aus dem Dropdown.
               </p>
             ) : null}
           </div>

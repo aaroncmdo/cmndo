@@ -892,8 +892,9 @@ export async function signSAandCreateFall(
   } catch (err) { console.error('[AAR-85] SLA-Start Fehler:', err) }
 
   // Dispatch-Matching (best SV finden) parallel — falls noch kein SV
-  const fallLat = (lead.unfallort_lat ?? lead.kunde_lat) as number | null
-  const fallLng = (lead.unfallort_lng ?? lead.kunde_lng) as number | null
+  // AAR-663: fahrzeug_standort_lat/lng aus Self-Service-Schritt 1 priorisieren.
+  const fallLat = (lead.besichtigungsort_lat ?? lead.fahrzeug_standort_lat ?? lead.unfallort_lat ?? lead.kunde_lat) as number | null
+  const fallLng = (lead.besichtigungsort_lng ?? lead.fahrzeug_standort_lng ?? lead.unfallort_lng ?? lead.kunde_lng) as number | null
   if (!svIdFromTermin && fallLat != null && fallLng != null) {
     slaPromises.push(
       (async () => {
