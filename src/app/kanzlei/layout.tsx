@@ -35,9 +35,13 @@ export default async function KanzleiLayout({
   const displayName =
     [profile.vorname, profile.nachname].filter(Boolean).join(' ') || user.email || ''
 
+  // AAR-676: h-screen + overflow-hidden damit die komplette Kanzlei-Shell
+  // nicht das Fenster scrollt. Sidebar + Header bleiben fix, nur der Main-
+  // Content scrollt innen. Das Main hat keinen max-width-Cap mehr — sonst
+  // entsteht rechts ein grauer Balken auf breiten Screens.
   return (
-    <div className="min-h-screen bg-[#f8f9fb]">
-      <header className="bg-[#0D1B3E] px-4 py-3 flex items-center justify-between">
+    <div className="h-screen bg-[#f8f9fb] flex flex-col overflow-hidden">
+      <header className="bg-[#0D1B3E] px-4 py-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <span className="text-xl font-bold tracking-tight">
             <span className="text-white">Claim</span>
@@ -60,9 +64,11 @@ export default async function KanzleiLayout({
           </form>
         </div>
       </header>
-      <div className="flex">
+      <div className="flex flex-1 min-h-0">
         <KanzleiNav />
-        <main className="flex-1 px-4 md:px-8 py-6 max-w-6xl">{children}</main>
+        <main className="flex-1 min-w-0 min-h-0 overflow-y-auto px-4 md:px-8 py-6">
+          {children}
+        </main>
       </div>
     </div>
   )

@@ -34,7 +34,7 @@ export default function KanzleiNav() {
   const pathname = usePathname()
 
   return (
-    <aside className="w-56 shrink-0 border-r border-[#e4e7ef] bg-white min-h-[calc(100vh-56px)]">
+    <aside className="w-56 shrink-0 border-r border-[#e4e7ef] bg-white overflow-y-auto">
       <nav className="flex flex-col gap-0.5 p-3">
         {NAV_ITEMS.map((item) => {
           const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
