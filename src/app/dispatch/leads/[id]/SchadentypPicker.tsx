@@ -5,7 +5,8 @@
 // Plus Parkplatz-Kamera-Check mit woertlicher italic Frage.
 
 import { useState, useTransition } from 'react'
-import { saveSchadentyp } from './actions'
+import { saveSchadentyp, clearSchadentyp } from './actions'
+import { XIcon } from 'lucide-react'
 
 type Schadentyp = 'spurwechsel' | 'auffahrunfall' | 'vorfahrtsverletzung' | 'parkplatz' | 'sonstiges'
 
@@ -100,49 +101,114 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
   const selected = OPTIONS.find(o => o.value === typ)
   const cls = selected ? FARBE_CLS[selected.farbe] : null
 
-  function save() {
-    if (!typ) return
-    if (typ === 'sonstiges' && !freitext.trim()) {
-      setToast('Freitext bei „Sonstiges" ist Pflicht')
-      setTimeout(() => setToast(''), 2500)
+  // AAR-schadentyp-autosave: Auto-Save bei jeder Typ-Auswahl bzw. Kamera-Wahl
+  // bzw. Freitext-Blur. Der alte Bottom-Button „Schadentyp speichern" entfällt.
+  // save() bekommt die Zielwerte per Argument, damit der React-State-Update
+  // nicht erst warten muss (useState ist async — save(typ) aus dem onClick-
+  // Handler würde sonst auf den alten Wert zugreifen).
+  function save(opts: {
+    typ: Schadentyp
+    freitext: string | null
+    kamera: boolean | null
+  }) {
+    if (opts.typ === 'sonstiges' && !(opts.freitext ?? '').trim()) {
+      // Stillschweigend abbrechen — Freitext wird per onBlur nachgereicht,
+      // bis dahin brauchen wir keinen DB-Write.
       return
     }
-    if (isParkplatzOhneKz && kamera === null) {
-      setToast('Kamera-Check ist Pflicht (kein Kennzeichen)')
-      setTimeout(() => setToast(''), 2500)
+    if (opts.typ === 'parkplatz' && !gegnerKennzeichen?.trim() && opts.kamera === null) {
+      // Gleiches Prinzip: Kamera-Wahl fehlt noch → wartet bis der MA Ja/Nein klickt.
       return
     }
     setError(null)
     startTransition(async () => {
-      const r = await saveSchadentyp(leadId, typ, typ === 'sonstiges' ? freitext : null, kamera)
+      const r = await saveSchadentyp(
+        leadId,
+        opts.typ,
+        opts.typ === 'sonstiges' ? opts.freitext : null,
+        opts.kamera,
+      )
       if (!r.success) {
-        // AAR-215: Fehler in eigenes State + nicht auto-dismiss (User muss
-        // den Fehler sehen + schließen können — vorher verschwand er nach 3s).
         setError(r.error ?? 'Speichern fehlgeschlagen')
         return
       }
       setToast(r.disqualifiziert ? 'Disqualifiziert — Exit-Skript wird angezeigt' : 'Gespeichert')
-      setTimeout(() => setToast(''), 3000)
-      // AAR-268: Phase 3 → 4 Blocker-Fix: Callback an Wrapper, der Weiter-
-      // Button zeigt UND router.refresh() macht (Qualification-Engine bekommt
-      // den frischen schadentyp).
+      setTimeout(() => setToast(''), 2000)
       if (!r.disqualifiziert) {
         onSaved?.()
       }
     })
   }
 
+  function handleTypClick(next: Schadentyp) {
+    setTyp(next)
+    // Wenn der neue Typ direkt speicherbar ist (kein Freitext / keine Kamera
+    // nötig), sofort persistieren. Sonderfälle speichern später via Blur/Click.
+    save({ typ: next, freitext, kamera })
+  }
+
+  function handleClear() {
+    setTyp(null)
+    setFreitext('')
+    setKamera(null)
+    setError(null)
+    startTransition(async () => {
+      const r = await clearSchadentyp(leadId)
+      if (!r.success) {
+        setError(r.error ?? 'Zurücksetzen fehlgeschlagen')
+        return
+      }
+      setToast('Zurückgesetzt')
+      setTimeout(() => setToast(''), 1500)
+    })
+  }
+
+  // Freitext-Blur → speichern, wenn der Typ „sonstiges" ist und mind. 3 Zeichen
+  // eingegeben sind. Der Kunde kann im Input weitertippen ohne Re-Save zu triggern.
+  function handleFreitextBlur() {
+    if (typ === 'sonstiges' && freitext.trim().length >= 3) {
+      save({ typ, freitext, kamera })
+    }
+  }
+
+  function handleKameraClick(value: boolean) {
+    setKamera(value)
+    if (typ === 'parkplatz') {
+      save({ typ, freitext, kamera: value })
+    }
+  }
+
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
-      <h3 className="text-xs font-semibold text-gray-700">Schadentyp (MA trägt während Telefonat ein)</h3>
+      {/* AAR-schadentyp-clear: Header-Row mit Clear-Button oben rechts.
+          Ersetzt den alten Bottom-„Schadentyp speichern"-Button — Auswahl
+          speichert jetzt sofort per Click. Clear nur sichtbar wenn ein Typ
+          gesetzt ist, damit die UI ruhig bleibt solange nichts gewählt wurde. */}
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="text-xs font-semibold text-gray-700">
+          Schadentyp <span className="text-gray-400 font-normal">(MA trägt während Telefonat ein)</span>
+        </h3>
+        {typ && (
+          <button
+            type="button"
+            onClick={handleClear}
+            disabled={pending}
+            className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-gray-200 text-[10px] font-medium text-gray-600 hover:bg-gray-50 hover:text-red-700 hover:border-red-200 disabled:opacity-40"
+          >
+            <XIcon className="w-3 h-3" />
+            Clear
+          </button>
+        )}
+      </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
         {OPTIONS.map(o => (
           <button
             key={o.value}
             type="button"
-            onClick={() => setTyp(o.value)}
-            className={`px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-colors flex flex-col items-start gap-1 ${
+            onClick={() => handleTypClick(o.value)}
+            disabled={pending}
+            className={`px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-colors flex flex-col items-start gap-1 disabled:opacity-60 ${
               typ === o.value ? 'bg-[#0D1B3E] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -173,6 +239,7 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
         <textarea
           value={freitext}
           onChange={e => setFreitext(e.target.value)}
+          onBlur={handleFreitextBlur}
           placeholder="Beschreibung (Pflicht — Kanzlei braucht den genauen Typ für das AS)..."
           className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs h-20 resize-none"
         />
@@ -186,8 +253,8 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
             „War auf dem Parkplatz eine Überwachungskamera vorhanden?"
           </p>
           <div className="flex gap-2">
-            <button type="button" onClick={() => setKamera(true)} className={`flex-1 px-3 py-1.5 rounded text-xs font-medium ${kamera === true ? 'bg-green-600 text-white' : 'bg-white text-gray-700 border border-gray-300'}`}>Ja → Fall anlegen</button>
-            <button type="button" onClick={() => setKamera(false)} className={`flex-1 px-3 py-1.5 rounded text-xs font-medium ${kamera === false ? 'bg-red-600 text-white' : 'bg-white text-gray-700 border border-gray-300'}`}>Nein → Disqualifizieren</button>
+            <button type="button" onClick={() => handleKameraClick(true)} disabled={pending} className={`flex-1 px-3 py-1.5 rounded text-xs font-medium disabled:opacity-60 ${kamera === true ? 'bg-green-600 text-white' : 'bg-white text-gray-700 border border-gray-300'}`}>Ja → Fall anlegen</button>
+            <button type="button" onClick={() => handleKameraClick(false)} disabled={pending} className={`flex-1 px-3 py-1.5 rounded text-xs font-medium disabled:opacity-60 ${kamera === false ? 'bg-red-600 text-white' : 'bg-white text-gray-700 border border-gray-300'}`}>Nein → Disqualifizieren</button>
           </div>
           {kamera === true && <p className="text-[10px] text-green-700">Kanzlei/SV kann Betreiber anschreiben. parkplatz_kamera=true wird gesetzt.</p>}
           {kamera === false && <p className="text-[10px] text-red-700">Lead wird disqualifiziert (Parkplatz ohne KZ + ohne Kamera). Exit-Skript wird angezeigt.</p>}
@@ -208,15 +275,7 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
           >×</button>
         </div>
       )}
-      {toast && <p className={`text-xs ${toast === 'Gespeichert' ? 'text-green-700' : 'text-amber-800'}`}>{toast}</p>}
-
-      <button
-        disabled={pending || !typ}
-        onClick={save}
-        className="w-full px-3 py-2 rounded-lg bg-[#4573A2] text-white text-xs font-medium hover:bg-[#3a6290] disabled:opacity-50"
-      >
-        {pending ? '...' : 'Schadentyp speichern'}
-      </button>
+      {toast && <p className={`text-xs ${toast === 'Gespeichert' || toast === 'Zurückgesetzt' ? 'text-green-700' : 'text-amber-800'}`}>{toast}</p>}
     </div>
   )
 }

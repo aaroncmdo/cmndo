@@ -13,7 +13,7 @@
 // Bestehende Imports aus '../actions' funktionieren weiterhin via dieses Barrel.
 
 export { setLeadPhase, disqualifiziereLead, setServiceTyp } from './actions/qualification'
-export { saveSchadentyp } from './actions/schadentyp'
+export { saveSchadentyp, clearSchadentyp } from './actions/schadentyp'
 export { startGespraech, endeGespraech } from './actions/gespraech'
 export { saveRueckruf, markRueckrufErledigt } from './actions/rueckruf'
 export { saveStammdaten } from './actions/stammdaten'
