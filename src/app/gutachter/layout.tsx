@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import GutachterShell from './GutachterShell'
-import { isOnboardingComplete, getOnboardingDeepLink } from '@/lib/gutachter/onboarding-status'
 
 export default async function GutachterLayout({
   children,
@@ -138,30 +137,11 @@ export default async function GutachterLayout({
           „Verifiziert"-Badge frei (siehe Fallakte-Kunde-Anzeige). Ein
           rotes Frist-Banner wäre irreführend. SA-Vorlage (Tier 1) bleibt
           das einzige Hard-Gate mit sichtbarem Banner. */}
-      {/* AAR-512: Onboarding-Unvollständig-Banner (generalisiert).
-          Triggert wenn IRGENDEIN Onboarding-Step offen ist (nicht mehr nur
-          Anzahlung). Klickbar, Deep-Link zum nächsten offenen Step. Wird
-          unterdrückt wenn bereits einer der spezifischeren Banner (Sperre,
-          SA-Vorlage zurückgewiesen, SA ausstehend, Tier-2-Countdown) rendert
-          — deren Info ist präziser. */}
-      {!isDeactivated
-        && !sv?.gesperrt_seit
-        && sv?.sa_vorlage_status !== 'zurueckgewiesen'
-        && sv?.sa_vorlage_status !== 'ausstehend'
-        && !isWillkommenPath
-        && sv
-        && !isOnboardingComplete(sv)
-        && (
-          <Link
-            href={getOnboardingDeepLink(sv)}
-            className="bg-amber-50 hover:bg-amber-100 border-b border-amber-200 px-4 py-2 text-center text-xs text-amber-700 font-medium flex items-center justify-center gap-1.5 transition-colors"
-          >
-            <span>Ihr Onboarding ist noch nicht abgeschlossen. Klicken Sie hier, um es fertigzustellen und Fälle zu erhalten.</span>
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-        )}
+      {/* AAR-700: AAR-512-Onboarding-Banner entfernt — verwies auf nichts
+          Konkretes mehr und blieb auch nach abgeschlossenem Onboarding
+          stehen. Hard-Gate liegt im Layout-Redirect (portal_zugang_
+          freigeschaltet=false → /gutachter/willkommen) + im SA-Vorlage-
+          Banner (Tier 1). */}
       {/* AAR-697: PageContainer raus — Aaron-Vorgabe Gutachter-Portal full
           width. Banner liegen sowieso außerhalb dieses Wrappers. */}
       <div className="h-full w-full">{children}</div>
