@@ -98,6 +98,13 @@ export const AI_MODELS = {
    * Confidence-Handling → Sonnet 4.6.
    */
   bkat_ocr: 'claude-sonnet-4-6',
+  /**
+   * AAR-unfallfotos: Dispatch-Flow Lead-Step-4 — Unfallfotos per WA/SMS/Email
+   * beim Kunden angefordert, nach Upload füllt Haiku 4.5 das Feld
+   * leads.sachschaden_beschreibung. Nur „was ist am Auto kaputt", KEIN
+   * Unfallhergang. Kurze Antwort, Speed + niedrige Kosten → Haiku 4.5.
+   */
+  vision_schadenbeschreibung: 'claude-haiku-4-5-20251001',
 } as const
 
 export type AiModelKey = keyof typeof AI_MODELS
