@@ -5,96 +5,11 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { revalidatePath } from 'next/cache'
 
-// AAR SV-Audit-Konsolidierung: Feldspezifische Inline-Edits aus
-// GutachterProfilPanel (Karten-Detail-Panel). Triggert jetzt automatisch
-// Isochrone-Recalc wenn Standort-Felder (standort_lat/lng/adresse) oder
-// der Paket-Radius (paket_umkreis_km) geändert werden — vorher blieb das
-// Polygon auf den alten Koordinaten, Matching lief dann mit falschem
-// Einsatzgebiet weiter.
-const STANDORT_FIELDS = new Set([
-  'standort_lat',
-  'standort_lng',
-  'standort_adresse',
-  'standort_plz',
-  'standort_place_id',
-  'paket_umkreis_km',
-  'paket', // Paket-Wechsel ändert Default-Radius
-])
-
-// Feld-Whitelist für Updates — verhindert, dass ist_aktiv / portal_zugang_
-// freigeschaltet / gesperrt_seit über den generischen Inline-Edit-Pfad
-// geschrieben werden. Die 3 Flags sind Onboarding-/Admin-Toggle-kontrolliert
-// und haben eigene Actions (Stripe-Webhook, deactivateGutachter).
-const BLOCKED_FIELDS = new Set([
-  'ist_aktiv',
-  'portal_zugang_freigeschaltet',
-  'gesperrt_seit',
-  'gesperrt_grund',
-  'gesperrt_von_user_id',
-  'geloescht_am',
-  'vertrag_unterschrieben',
-  'anzahlung_status',
-  'stripe_anzahlung_bezahlt_am',
-  'verifiziert',
-])
-
-export async function updateGutachterProfil(
-  svId: string,
-  field: string,
-  value: unknown,
-) {
-  if (BLOCKED_FIELDS.has(field)) {
-    throw new Error(
-      `Das Feld "${field}" wird vom Onboarding-/Admin-Flow gesteuert und ` +
-      `kann nicht direkt über updateGutachterProfil geändert werden.`,
-    )
-  }
-
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
-
-  // Fields that live on the profiles table (via profile_id)
-  const profileFields = ['telefon', 'email', 'vorname', 'nachname']
-
-  if (profileFields.includes(field)) {
-    // Get profile_id from sachverstaendige
-    const { data: sv } = await supabase
-      .from('sachverstaendige')
-      .select('profile_id')
-      .eq('id', svId)
-      .single()
-
-    if (!sv?.profile_id) throw new Error('Gutachter-Profil nicht gefunden')
-
-    const { error } = await supabase
-      .from('profiles')
-      .update({ [field]: value })
-      .eq('id', sv.profile_id)
-
-    if (error) throw new Error(error.message)
-  } else {
-    // Fields on sachverstaendige table
-    const { error } = await supabase
-      .from('sachverstaendige')
-      .update({ [field]: value, updated_at: new Date().toISOString() })
-      .eq('id', svId)
-
-    if (error) throw new Error(error.message)
-
-    // AAR SV-Audit-Konsolidierung: Isochrone-Recalc nach Standort-Update.
-    // Fire-and-forget — wenn der HERE-Call failt, bleibt die alte Polygon,
-    // der Admin kann manuell via „Neu berechnen"-Button triggern.
-    if (STANDORT_FIELDS.has(field)) {
-      void recalculateIsochrone('sv', svId).catch((err) => {
-        console.error('[updateGutachterProfil] Isochrone-Recalc nach Standort-Update fehlgeschlagen:', err)
-      })
-    }
-  }
-
-  revalidatePath('/admin/sachverstaendige')
-  revalidatePath('/admin/sachverstaendige/karte')
-}
+// AAR SV-Konsolidierung: updateGutachterProfil (generischer Inline-Edit-
+// Feld-by-Feld-Pfad) wurde gedropt zusammen mit GutachterProfilPanel
+// (dead code, 503 Zeilen). Der einzige lebende Profil-Edit-Pfad ist jetzt
+// updateSvProfile (Full-Form-Submit) aus [id]/actions.ts. Dieser wrappt
+// auch automatisch die Isochrone-Recalc.
 
 // AAR SV-Audit-Konsolidierung: Deaktivier-/Aktivier-Flow setzt jetzt
 // gesperrt_seit + gesperrt_grund + gesperrt_von_user_id statt ist_aktiv.

@@ -29,6 +29,32 @@ export async function updateSvProfile(svId: string, profileId: string, formData:
   // in karte/actions.ts → schreibt gesperrt_seit statt ist_aktiv.
   const notizen = (formData.get('notizen') as string)?.trim() || null
 
+  // AAR SV-Konsolidierung: Qualifikationen + Spezifikationen + Schadenarten
+  // aus JSON-Strings parsen (Client serialisiert Arrays via JSON.stringify).
+  function parseArray(name: string): string[] {
+    const raw = formData.get(name) as string | null
+    if (!raw) return []
+    try {
+      const parsed = JSON.parse(raw)
+      return Array.isArray(parsed) ? parsed.filter(x => typeof x === 'string') : []
+    } catch {
+      return []
+    }
+  }
+  const qualifikationenNeu = parseArray('qualifikationen_neu')
+  const spezifikationen = parseArray('spezifikationen')
+  const schadenarten = parseArray('schadenarten')
+  // Quali-Nummern: nur setzen wenn Gruppe-B-Quali gewählt, sonst null (aufräumen)
+  const bvskNr = qualifikationenNeu.includes('BVSK-Mitglied')
+    ? (formData.get('bvsk_mitgliedsnummer') as string)?.trim() || null
+    : null
+  const ihkNr = qualifikationenNeu.includes('IHK-zertifiziert')
+    ? (formData.get('ihk_zertifikat_nummer') as string)?.trim() || null
+    : null
+  const oebuvNr = qualifikationenNeu.includes('Öffentlich bestellt und vereidigt')
+    ? (formData.get('oebuv_bestellungsnummer') as string)?.trim() || null
+    : null
+
   // Standort from Google Places
   const standortAdresse = (formData.get('standort_adresse') as string)?.trim() || null
   const standortPlz = (formData.get('standort_plz') as string)?.trim() || null
@@ -59,6 +85,14 @@ export async function updateSvProfile(svId: string, profileId: string, formData:
     standort_lng: standortLng,
     standort_place_id: standortPlaceId,
     paket_umkreis_km: radiusKm,
+    // AAR SV-Konsolidierung: Qualifikations-/Spezifikations-/Schadenarten-Arrays
+    // + conditional Nummern (Gruppe B: BVSK/IHK/öbuv)
+    qualifikationen_neu: qualifikationenNeu,
+    spezifikationen,
+    schadenarten,
+    bvsk_mitgliedsnummer: bvskNr,
+    ihk_zertifikat_nummer: ihkNr,
+    oebuv_bestellungsnummer: oebuvNr,
   }
 
   const { error: svErr } = await supabase
