@@ -80,3 +80,27 @@ export async function saveSchadentyp(
   if (error) return { success: false, error: error.message }
   return { success: true, disqualifiziert }
 }
+
+// AAR-schadentyp-clear: Clear-Button im SchadentypPicker ruft das auf.
+// Setzt schadentyp + schadentyp_freitext + parkplatz_kamera zurück. unfallort_
+// kategorie bleibt unverändert — MA kann den Ort manuell gesetzt haben.
+// Disqualifizierungs-Felder werden NICHT zurückgesetzt (separater Reset-Flow).
+export async function clearSchadentyp(
+  leadId: string,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const { error } = await supabase
+    .from('leads')
+    .update({
+      schadentyp: null,
+      schadentyp_freitext: null,
+      parkplatz_kamera: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', leadId)
+  if (error) return { success: false, error: error.message }
+  return { success: true }
+}
