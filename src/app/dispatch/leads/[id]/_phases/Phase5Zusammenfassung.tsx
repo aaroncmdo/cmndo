@@ -143,7 +143,7 @@ export default function Phase5Zusammenfassung() {
       if (!qualification.q6_gegnerKz) missing.push('Gegner-KZ')
       if (!qualification.q7_fahrzeug) missing.push('Fahrzeug-Pflichtfelder')
       // AAR-305: Schadenshergang-Pflicht wenn fahrzeug_fahrbereit=true
-      if (!qualification.q8_schadenhergang) missing.push('Schadenshergang (mind. 20 Zeichen, bei fahrbereitem Fahrzeug Pflicht)')
+      if (!qualification.q8_schadenhergang) missing.push('Unfallhergang (mind. 20 Zeichen, bei fahrbereitem Fahrzeug Pflicht)')
       setSendStatus({ kanal, ok: false, text: `Versand blockiert — fehlt: ${missing.join(', ')}` })
       return
     }
@@ -264,12 +264,14 @@ export default function Phase5Zusammenfassung() {
       jumpToPhase: 4,
     },
     {
-      label: 'Schadenshergang (Pflicht bei fahrbereitem Fahrzeug)',
+      // AAR-693: bevorzugt unfallhergang aus Phase 1 anzeigen, fallback auf
+      // schadens_hergang. q8_schadenhergang akzeptiert beide Felder.
+      label: 'Unfallhergang (Pflicht bei fahrbereitem Fahrzeug)',
       value: l.fahrzeug_fahrbereit !== true
         ? 'Nicht fahrbereit — kein Pflichtfeld'
-        : (l.schadens_hergang ?? '—'),
+        : (l.unfallhergang?.trim() || l.schadens_hergang?.trim() || '—'),
       missing: !qualification.q8_schadenhergang,
-      jumpToPhase: 4,
+      jumpToPhase: 1,
     },
     {
       label: 'Unfallort',
