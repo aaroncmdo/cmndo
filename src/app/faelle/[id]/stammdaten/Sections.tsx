@@ -139,10 +139,15 @@ export function FahrzeugdatenSection() {
           action={() => requestCardentityTypBForFall(fall.id)}
           finVorhanden={!!fin}
           initial={{
-            fetchedAt: (lead?.cardentity_abfrage_am as string | null) ?? null,
+            // Fall-Daten-Konsistenz: cardentity_* + vorschaden_* leben auf faelle.
+            // leads hat diese Spalten nicht mehr (gedroppt). hat_vorschaeden
+            // bleibt auf leads (Kunden-Angabe im Schadens-Flow).
+            fetchedAt: (fall.cardentity_abfrage_am as string | null)
+              ?? (fall.cardentity_enriched_at as string | null)
+              ?? null,
             vorschadenVorhanden: (lead?.hat_vorschaeden as boolean | null) ?? null,
-            vorschadenAnzahl: (lead?.vorschaden_anzahl as number | null) ?? null,
-            letzterVorschadenDatum: (lead?.vorschaden_letzter_datum as string | null) ?? null,
+            vorschadenAnzahl: (fall.vorschaden_anzahl as number | null) ?? null,
+            letzterVorschadenDatum: (fall.vorschaden_letzter_datum as string | null) ?? null,
           }}
         />
       </div>
