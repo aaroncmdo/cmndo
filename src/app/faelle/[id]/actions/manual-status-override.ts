@@ -14,32 +14,11 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { processLexDriveEvent } from '@/lib/lexdrive/process-event'
 import { createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
-
-export const ALLOWED_STATUS_VALUES = [
-  'onboarding',
-  'ersterfassung',
-  'sv-gesucht',
-  'sv-zugewiesen',
-  'sv-termin',
-  'besichtigung',
-  'begutachtung-laeuft',
-  'gutachten-eingegangen',
-  'filmcheck',
-  'qc-pruefung',
-  'kanzlei-uebergeben',
-  'anschlussschreiben',
-  'regulierung',
-  'regulierung-laeuft',
-  'vs-kuerzt',
-  'vs-abgelehnt',
-  'nachbesichtigung-laeuft',
-  'klage',
-  'zahlung-eingegangen',
-  'abgeschlossen',
-  'storniert',
-] as const
-
-export type FallStatusValue = (typeof ALLOWED_STATUS_VALUES)[number]
+// AAR-664: Konstanten in eigene Datei extrahiert, weil `'use server'`
+// non-function Exports nicht ans Client-Bundle weitergibt. KEIN Re-Export
+// hier — Consumer (Client + Server) importieren direkt aus
+// './manual-status-override.constants'.
+import { ALLOWED_STATUS_VALUES, type FallStatusValue } from './manual-status-override.constants'
 
 interface OverrideInput {
   fallId: string
