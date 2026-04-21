@@ -768,6 +768,19 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       )
     }
 
+    // AAR-kanzlei: vollmacht_bestaetigt → Termin auf bestaetigt setzen +
+    // final_verbindlich_ab + Reminders generieren. Siehe confirmVollmacht in
+    // src/app/flow/[token]/actions.ts — dort liegt die zentrale Logik für
+    // beide Pfade (SA-Signatur bei nur_gutachter und Vollmacht bei komplett).
+    if (input.eventType === 'vollmacht_bestaetigt') {
+      try {
+        const { confirmVollmacht } = await import('@/app/flow/[token]/actions')
+        await confirmVollmacht(input.fallId)
+      } catch (err) {
+        console.error('[AAR-kanzlei] confirmVollmacht failed:', err)
+      }
+    }
+
     // WA-Template
     const commTrigger = EVENT_COMM_MAP[input.eventType]
     if (commTrigger) {
