@@ -7,6 +7,7 @@ import {
   FolderPlusIcon,
   CheckCircle2Icon,
   ActivityIcon,
+  ScrollTextIcon,
 } from 'lucide-react'
 
 // KFZ-155: Wichtige Updates Widget — Live-Feed der letzten 48h.
@@ -17,10 +18,11 @@ import {
 //   - Erfolgreiche Anzahlungen (stripe_anzahlung_bezahlt_am)
 //   - Neue Faelle (faelle.created_at)
 //   - Abgeschlossene Faelle (faelle.regulierung_am)
+//   - AAR-645: Abtretungs-Uploads durch SV (fall_dokumente.dokument_typ='abtretung')
 //
 // Maximal 10 Eintraege, sortiert nach Zeitstempel absteigend.
 
-type EventType = 'sv_neu' | 'vertrag_signiert' | 'anzahlung_eingegangen' | 'fall_neu' | 'fall_abgeschlossen'
+type EventType = 'sv_neu' | 'vertrag_signiert' | 'anzahlung_eingegangen' | 'fall_neu' | 'fall_abgeschlossen' | 'abtretung_upload'
 
 type Event = {
   key: string
@@ -36,6 +38,7 @@ const EVENT_META: Record<EventType, { icon: typeof UserPlusIcon; bg: string; ico
   anzahlung_eingegangen: { icon: CreditCardIcon, bg: 'bg-emerald-50', iconColor: 'text-emerald-600', label: 'Anzahlung' },
   fall_neu: { icon: FolderPlusIcon, bg: 'bg-amber-50', iconColor: 'text-amber-600', label: 'Neuer Fall' },
   fall_abgeschlossen: { icon: CheckCircle2Icon, bg: 'bg-emerald-50', iconColor: 'text-emerald-600', label: 'Abgeschlossen' },
+  abtretung_upload: { icon: ScrollTextIcon, bg: 'bg-indigo-50', iconColor: 'text-indigo-600', label: 'Abtretung' },
 }
 
 function timeAgo(iso: string): string {
@@ -153,7 +156,34 @@ async function loadEvents(): Promise<LoadResult> {
     })
   }
 
-  // 5. Abgeschlossene Faelle
+  // AAR-645: 5. Abtretungs-Uploads durch SV — Admin muss prüfen und freigeben.
+  // Gutachter lädt die signierte Abtretung via fall_dokumente hoch
+  // (dokument_typ='abtretung', uploaded_by_sv=true). Bis hier stand das nur
+  // in der Benachrichtigungsglocke unter Tasks — jetzt auch im Dashboard-Feed,
+  // damit Admins die Prüfung direkt auf der Übersicht erkennen.
+  const { data: abtretungen } = await supabase
+    .from('fall_dokumente')
+    .select('id, fall_id, hochgeladen_am, faelle(fall_nummer)')
+    .eq('dokument_typ', 'abtretung')
+    .eq('uploaded_by_sv', true)
+    .is('geloescht_am', null)
+    .gte('hochgeladen_am', since)
+    .order('hochgeladen_am', { ascending: false })
+    .limit(15)
+  for (const d of abtretungen ?? []) {
+    const fRaw = d.faelle as unknown
+    const f = (Array.isArray(fRaw) ? fRaw[0] : fRaw) as { fall_nummer: string | null } | null
+    const nummer = f?.fall_nummer ?? d.fall_id.slice(0, 8)
+    events.push({
+      key: `abt-${d.id}`,
+      type: 'abtretung_upload',
+      text: `Abtretung von SV hochgeladen — Fall ${nummer} prüfen`,
+      href: `/faelle/${d.fall_id}`,
+      ts: d.hochgeladen_am,
+    })
+  }
+
+  // 6. Abgeschlossene Faelle
   const { data: abgeschlossen } = await supabase
     .from('faelle')
     .select('id, fall_nummer, regulierung_am, regulierung_betrag')
