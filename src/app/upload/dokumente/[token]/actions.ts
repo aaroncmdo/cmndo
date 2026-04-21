@@ -301,7 +301,7 @@ async function runZb1OcrAndUpdate(
 ): Promise<{ success: boolean; error?: string; extracted?: DokumentUploadResult['extracted'] }> {
   const { data: lead } = await db
     .from('leads')
-    .select('id, zugewiesen_an, zb1_upload_versuche, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, kennzeichen, fin, erstzulassung, halter_vorname, halter_nachname, halter_strasse, halter_plz, halter_stadt, hsn, tsn')
+    .select('id, zugewiesen_an, zb1_upload_versuche, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, kennzeichen, fin, erstzulassung, halter_vorname, halter_nachname, halter_strasse, halter_plz, halter_stadt, hsn, tsn, vorname, nachname, ist_fahrzeughalter, kunde_strasse, kunde_plz, kunde_stadt')
     .eq('id', leadId)
     .maybeSingle()
   if (!lead) return { success: false, error: 'Lead nicht gefunden' }
@@ -366,6 +366,38 @@ async function runZb1OcrAndUpdate(
   setIfEmpty('halter_stadt', extracted.halter_stadt)
   setIfEmpty('hsn', extracted.hsn)
   setIfEmpty('tsn', extracted.tsn)
+
+  // AAR-666: Auto-Match Halter ↔ Kunde nach OCR.
+  // Wenn der Fahrzeugschein einen Namen liefert, der nach Trim/Case-Insensitive
+  // mit dem Lead-Namen übereinstimmt, setzen wir `ist_fahrzeughalter=true`
+  // automatisch. Der Dispatcher muss den Toggle dann nicht mehr manuell klicken
+  // und die UI springt sofort auf den „Gleich wie Kunde"-Zustand.
+  //
+  // Wenn die Namen unterschiedlich sind, bleibt `ist_fahrzeughalter` unverändert —
+  // UI zeigt dann eine Abweichungs-Warnung (siehe Phase4Stammdaten).
+  const norm = (s: string | null | undefined): string =>
+    (s ?? '').trim().toLowerCase().replace(/\s+/g, ' ')
+  const effektiverHalterVorname = norm(
+    (leadUpdate.halter_vorname as string | undefined) ??
+      (extracted.halter_vorname as string | null) ??
+      (lead.halter_vorname as string | null),
+  )
+  const effektiverHalterNachname = norm(
+    (leadUpdate.halter_nachname as string | undefined) ??
+      (extracted.halter_nachname as string | null) ??
+      (lead.halter_nachname as string | null),
+  )
+  const leadVorname = norm(lead.vorname as string | null)
+  const leadNachname = norm(lead.nachname as string | null)
+  const halterHeisstWieLead =
+    !!leadNachname &&
+    !!effektiverHalterNachname &&
+    leadNachname === effektiverHalterNachname &&
+    // Vorname ist tolerant: exakt gleich ODER einer von beiden leer/initial
+    (!leadVorname || !effektiverHalterVorname || leadVorname === effektiverHalterVorname)
+  if (halterHeisstWieLead && lead.ist_fahrzeughalter !== true) {
+    leadUpdate.ist_fahrzeughalter = true
+  }
 
   await db.from('leads').update(leadUpdate).eq('id', leadId)
 
