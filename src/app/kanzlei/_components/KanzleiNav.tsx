@@ -9,7 +9,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboardIcon, type LucideIcon } from 'lucide-react'
+import { LayoutDashboardIcon, KanbanSquareIcon, type LucideIcon } from 'lucide-react'
 
 interface NavItem {
   href: string
@@ -19,6 +19,8 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { href: '/kanzlei/dashboard', label: 'Mandate', icon: LayoutDashboardIcon },
+  // AAR-kanzlei-portal PR 3: Kanban-Ansicht nach 10 Phasen.
+  { href: '/kanzlei/kanban', label: 'Pipeline', icon: KanbanSquareIcon },
 ]
 
 export default function KanzleiNav() {
