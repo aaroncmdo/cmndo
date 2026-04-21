@@ -970,19 +970,30 @@ export async function signSAandCreateFall(
     console.error('[AAR-501] emitEvent fall.created/sa.signed failed:', err)
   }
 
-  // AAR-kanzlei: Outbound-Push an Kanzlei-API nach SA-Unterschrift.
-  // Nur für service_typ='komplett' (Gatekeeping in push-mandat.ts). Fire-and-
-  // forget — ein Fehler hier darf den SA-Flow NICHT blockieren, weil die
-  // Kanzlei-Anbindung per Feature-Flag (KANZLEI_API_ENABLED) separat live
-  // gehen kann. Fehlversuche landen als Timeline-Warnung, KB kann manuell
-  // nachziehen.
+  // AAR-kanzlei: Outbound-Push an Kanzlei-API + Email-Fallback PARALLEL.
+  // Beide nur für service_typ='komplett' (Gatekeeping in den Sub-Modulen).
+  // Fire-and-forget — Fehler hier blockieren den SA-Flow NICHT.
+  //
+  // Warum beide parallel:
+  //   - API-Push kann per KANZLEI_API_ENABLED-Flag deaktiviert sein (während
+  //     Integration noch nicht live ist)
+  //   - Email läuft IMMER → Audit-Trail für die Kanzlei ab Tag 1, Backup
+  //     falls API-Push 500 oder HMAC-Fehler wirft
+  //   - Nach API-Go-Live bleibt Email als Double-Send erhalten: Duplicate-
+  //     Detection auf Kanzlei-Seite via fall_nr-external-ID
   try {
-    const { pushMandatToKanzlei } = await import('@/lib/kanzlei/push-mandat')
+    const [{ pushMandatToKanzlei }, { sendMandatEmailToKanzlei }] = await Promise.all([
+      import('@/lib/kanzlei/push-mandat'),
+      import('@/lib/kanzlei/email-fallback'),
+    ])
     pushMandatToKanzlei(fall.id).catch((err) =>
       console.error('[AAR-kanzlei] pushMandatToKanzlei unerwartet:', err),
     )
+    sendMandatEmailToKanzlei(fall.id).catch((err) =>
+      console.error('[AAR-kanzlei] sendMandatEmailToKanzlei unerwartet:', err),
+    )
   } catch (err) {
-    console.error('[AAR-kanzlei] push-mandat Modul-Load-Fehler:', err)
+    console.error('[AAR-kanzlei] Kanzlei-Modul-Load-Fehler:', err)
   }
 
   return { fallId: fall.id }
