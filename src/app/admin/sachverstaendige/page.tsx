@@ -34,8 +34,11 @@ export default async function SachverstaendigeHubPage() {
   // PGRST201 und liefert data=undefined → „0 von 0" in der UI.
   const { data: svRaw, error: svErr } = await supabase
     .from('sachverstaendige')
+    // AAR-659: Zusätzlich urlaub_von/bis + verifiziert + sa_vorlage_status +
+    // Quali-Ausweis-Nummern + notizen — Felder die „kann SV aktuell
+    // arbeiten?" mitbestimmen, bisher nur auf der Detail-Seite.
     .select(
-      'id, paket, standort_lat, standort_lng, ist_aktiv, organisation_id, isochrone_polygon, paket_umkreis_km, gutachter_typ, offene_faelle, paket_faelle_genutzt, paket_faelle_gesamt, ablehnungen_30_tage, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, profiles!sachverstaendige_profile_id_fkey(vorname, nachname)',
+      'id, paket, standort_lat, standort_lng, ist_aktiv, organisation_id, isochrone_polygon, paket_umkreis_km, gutachter_typ, offene_faelle, paket_faelle_genutzt, paket_faelle_gesamt, ablehnungen_30_tage, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, urlaub_von, urlaub_bis, verifiziert, sa_vorlage_status, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, notizen, profiles!sachverstaendige_profile_id_fkey(vorname, nachname)',
     )
     .is('geloescht_am', null)
   if (svErr) console.error('[admin/sachverstaendige] SV-Query:', svErr.message)
@@ -57,6 +60,14 @@ export default async function SachverstaendigeHubPage() {
     portal_zugang_freigeschaltet: boolean | null
     vertrag_unterschrieben: boolean | null
     gesperrt_seit: string | null
+    urlaub_von: string | null
+    urlaub_bis: string | null
+    verifiziert: boolean | null
+    sa_vorlage_status: string | null
+    bvsk_mitgliedsnummer: string | null
+    ihk_zertifikat_nummer: string | null
+    oebuv_bestellungsnummer: string | null
+    notizen: string | null
     profiles: unknown
   }
   const svRows = (svRaw ?? []) as unknown as SvRow[]
@@ -82,6 +93,14 @@ export default async function SachverstaendigeHubPage() {
       portalZugangFreigeschaltet: sv.portal_zugang_freigeschaltet ?? null,
       vertragUnterschrieben: sv.vertrag_unterschrieben ?? null,
       gesperrtSeit: sv.gesperrt_seit ?? null,
+      urlaubVon: sv.urlaub_von ?? null,
+      urlaubBis: sv.urlaub_bis ?? null,
+      verifiziert: sv.verifiziert ?? false,
+      saVorlageStatus: sv.sa_vorlage_status ?? null,
+      bvskNr: sv.bvsk_mitgliedsnummer ?? null,
+      ihkNr: sv.ihk_zertifikat_nummer ?? null,
+      oebuvNr: sv.oebuv_bestellungsnummer ?? null,
+      notizen: sv.notizen ?? null,
     }
   })
 

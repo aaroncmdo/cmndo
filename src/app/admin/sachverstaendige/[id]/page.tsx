@@ -23,11 +23,16 @@ export default async function SvDetailPage({
   const activeTab = sp.tab === 'verifizierung' ? 'verifizierung' : 'stammdaten'
   const supabase = await createClient()
 
-  const { data: sv } = await supabase
+  // AAR-659: profiles-Embed mit FK-Hint (Follow-up zu AAR-657 — die Stelle
+  // war im ersten Scan durchgerutscht, weil der Einzel-Abfrage-Effekt auf
+  // einer Detail-Page weniger auffällt als der „0 von 0" auf der Übersicht).
+  // AAR-659: urlaub_von/bis mitladen — für Header-Badge.
+  const { data: sv, error: svErr } = await supabase
     .from('sachverstaendige')
-    .select('id, profile_id, paket, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, sa_vorlage_status, sa_vorlage_storage_path, sa_vorlage_hochgeladen_am, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, gesperrt_grund, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, qualifikationen_neu, spezifikationen, schadenarten, profiles(vorname, nachname, email, telefon)')
+    .select('id, profile_id, paket, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, sa_vorlage_status, sa_vorlage_storage_path, sa_vorlage_hochgeladen_am, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, gesperrt_grund, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, qualifikationen_neu, spezifikationen, schadenarten, urlaub_von, urlaub_bis, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, email, telefon)')
     .eq('id', id)
     .single()
+  if (svErr) console.error('[admin/sv-detail] SV-Query:', svErr.message)
 
   if (!sv) notFound()
 
@@ -180,10 +185,35 @@ export default async function SvDetailPage({
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-lg font-semibold text-gray-900">{name || 'Sachverständiger'}</h1>
-              <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-500">
+              <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-500 flex-wrap">
                 {profile?.email && <span>{profile.email}</span>}
                 {sv.gutachter_typ && <span className="bg-[#4573A2]/5 text-[#4573A2] px-1.5 py-0.5 rounded text-[10px] font-medium">{sv.gutachter_typ}</span>}
                 {sv.paket && <span className="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] font-medium">{sv.paket}</span>}
+                {/* AAR-659: partner_seit + werbebudget waren im SELECT aber nie gerendert — Dead-Load. */}
+                {sv.partner_seit && (
+                  <span className="text-gray-400">
+                    Partner seit {new Date(sv.partner_seit as string).toLocaleDateString('de-DE', { month: '2-digit', year: 'numeric' })}
+                  </span>
+                )}
+                {sv.werbebudget_guthaben_netto != null && Number(sv.werbebudget_guthaben_netto) > 0 && (
+                  <span className="bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                    Werbebudget {Number(sv.werbebudget_guthaben_netto).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                  </span>
+                )}
+                {/* AAR-659: Urlaub-Badge wenn aktiv oder anstehend */}
+                {sv.urlaub_von && sv.urlaub_bis && (() => {
+                  const heute = new Date().toISOString().slice(0, 10)
+                  const von = sv.urlaub_von as string
+                  const bis = sv.urlaub_bis as string
+                  const aktiv = heute >= von && heute <= bis
+                  const anstehend = heute < von
+                  if (!aktiv && !anstehend) return null
+                  return (
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${aktiv ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-600'}`}>
+                      Urlaub {von}–{bis}
+                    </span>
+                  )
+                })()}
               </div>
             </div>
             <div className="flex items-center gap-3">
