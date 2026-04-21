@@ -10,6 +10,11 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   /* KFZ-177: ignoreBuildErrors entfernt — tsc ist jetzt sauber */
+  // Production-Source-Maps einschalten — damit User-Errors wie „an.map is not
+  // a function" auf den echten File + Zeile zurückverfolgt werden können.
+  // Erhöht die Bundle-Größe leicht, aber nur die .map-Files, die werden
+  // nicht zum Client geladen außer DevTools öffnet sie.
+  productionBrowserSourceMaps: true,
   async redirects() {
     return [
       // AAR-295: Alte SV-Auftrag-Detail-Route → einheitliche Fallakte.
