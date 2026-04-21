@@ -40,8 +40,8 @@ export default function GutachterCockpit() {
   const load = useCallback(async () => {
     try {
     const user = (await supabase.auth.getUser())?.data?.user ?? null; if (!user) { setLoading(false); return }
-    let { data: sv } = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, offene_faelle').eq('profile_id', user.id).single()
-    if (!sv) { const r = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, offene_faelle').eq('user_id', user.id).single(); sv = r.data }
+    // AAR SV-Audit-Follow-up: nur profile_id, user_id-Fallback entfernt
+    const { data: sv } = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket_faelle_genutzt, paket_faelle_gesamt, offene_faelle').eq('profile_id', user.id).maybeSingle()
     if (!sv) { setLoading(false); return }
     const { data: p } = await supabase.from('profiles').select('vorname').eq('id', user.id).single()
     const now = new Date(); const h = now.getHours()

@@ -200,9 +200,10 @@ export async function softDeleteGutachter(svId: string) {
   if (error) throw new Error(error.message)
 
   // Delete the auth user completely so they can never log in again
+  // AAR SV-Audit-Follow-up: user_id wird gedropt — profile_id ist Auth-User-Quelle
   try {
-    const { data: svData } = await supabase.from('sachverstaendige').select('user_id, profile_id').eq('id', svId).single()
-    const authUserId = svData?.user_id ?? svData?.profile_id
+    const { data: svData } = await supabase.from('sachverstaendige').select('profile_id').eq('id', svId).single()
+    const authUserId = svData?.profile_id
     if (authUserId) {
       const admin = createAdminClient()
       await admin.auth.admin.deleteUser(authUserId)

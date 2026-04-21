@@ -27,7 +27,7 @@ export async function resolveBrandTheme(
   const { data: sv } = await supabase
     .from('sachverstaendige')
     .select('organisation_id, logo_url, firmenname, brand_primary, brand_secondary, brand_theme, use_custom_branding')
-    .or(`profile_id.eq.${userId},user_id.eq.${userId}`)
+    .eq('profile_id', userId)
     .limit(1)
     .maybeSingle()
 

@@ -13,7 +13,7 @@ export default async function GutachterReklamationen() {
   const { data: sv } = await supabase
     .from('sachverstaendige')
     .select('id')
-    .or(`profile_id.eq.${user.id},user_id.eq.${user.id}`)
+    .eq('profile_id', user.id)
     .maybeSingle()
 
   if (!sv) {

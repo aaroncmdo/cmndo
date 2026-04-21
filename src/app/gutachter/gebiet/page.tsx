@@ -73,7 +73,7 @@ export default function GebietPage() {
     try {
       const user = (await supabase.auth.getUser())?.data?.user ?? null
       if (!user) { setLoading(false); return }
-      const { data: sv } = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket, isochrone_polygon, anzahlung_faellig, paket_umkreis_km').or(`profile_id.eq.${user.id},user_id.eq.${user.id}`).single()
+      const { data: sv } = await supabase.from('sachverstaendige').select('id, standort_lat, standort_lng, paket, isochrone_polygon, anzahlung_faellig, paket_umkreis_km').eq('profile_id', user.id).single()
       if (sv?.standort_lat) {
         const paketInfo = getPaket(sv.paket ?? 'standard')
         setSvData({ id: sv.id, lat: Number(sv.standort_lat), lng: Number(sv.standort_lng), paket: sv.paket ?? 'standard', iso: sv.isochrone_polygon, anzahlungBezahlt: Number(sv.anzahlung_faellig ?? 750), radius_km: sv.paket_umkreis_km ?? paketInfo.radius_km })

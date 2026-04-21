@@ -6636,7 +6636,6 @@ export type Database = {
           urlaub_bis: string | null
           urlaub_von: string | null
           use_custom_branding: boolean
-          user_id: string | null
           ust_id: string | null
           verifiziert: boolean
           verifiziert_am: string | null
@@ -6732,7 +6731,6 @@ export type Database = {
           urlaub_bis?: string | null
           urlaub_von?: string | null
           use_custom_branding?: boolean
-          user_id?: string | null
           ust_id?: string | null
           verifiziert?: boolean
           verifiziert_am?: string | null
@@ -6828,7 +6826,6 @@ export type Database = {
           urlaub_bis?: string | null
           urlaub_von?: string | null
           use_custom_branding?: boolean
-          user_id?: string | null
           ust_id?: string | null
           verifiziert?: boolean
           verifiziert_am?: string | null
