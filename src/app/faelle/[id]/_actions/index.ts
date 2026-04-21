@@ -21,7 +21,10 @@ export {
 export { createKbVideoterminByKb } from './termine'
 export { regenerateSvBriefing } from './briefing'
 
-// Re-exports aus dem vorhandenen Monolith (wird später zerlegt):
+// AAR-684 Phase 2 (Lite): Monolith lebt jetzt als _monolith.ts IM _actions-
+// Ordner — keine Datei mehr außerhalb der Actions-Domain. Thematischer
+// Split der 22 Funktionen in 9 Module (filmcheck/chat/tasks/core/...)
+// bleibt als Follow-up-Ticket — hier nur der Location-Fix.
 export {
   updateFall,
   addTimelineEntry,
@@ -46,4 +49,4 @@ export {
   deactivateFall,
   reactivateFall,
   saveRegulierungsKlassifizierung,
-} from '../actions'
+} from './_monolith'
