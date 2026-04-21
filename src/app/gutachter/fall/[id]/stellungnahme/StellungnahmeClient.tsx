@@ -13,7 +13,7 @@ import {
   AlertTriangleIcon,
   CheckCircle2Icon,
 } from 'lucide-react'
-import { submitStellungnahme } from './actions'
+import { submitStellungnahme } from './_actions'
 import { formatDatum, formatEURausEuro } from '@/lib/format'
 
 type KuerzungsPosition = {

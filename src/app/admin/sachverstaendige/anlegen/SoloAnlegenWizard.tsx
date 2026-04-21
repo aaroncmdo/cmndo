@@ -11,7 +11,7 @@ import {
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { LoadingButton } from '@/components/ui/loading-button'
 import IsochronePreviewMap from '@/components/maps/IsochronePreviewMap'
-import { anlegeSv, checkEmailExists, type CheckEmailExistsResult } from './actions'
+import { anlegeSv, checkEmailExists, type CheckEmailExistsResult } from './_actions'
 import WelcomeMailPreviewModal from './WelcomeMailPreviewModal'
 import { PAKET_KONFIG, paketAnzahlung, paketKontingent, QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN, ANREDE_OPTIONEN, TITEL_OPTIONEN, type AnlegePaket, type GutachterTyp, type AnlegeSvFormData } from './constants'
 import QualiNummernFelder from './QualiNummernFelder'

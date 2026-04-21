@@ -6,13 +6,13 @@
 // in einem separaten PhaseStubs.tsx, das nach der W4-W8-Migration obsolete
 // geworden ist (AAR-144 Cleanup).
 
-import { useDispatchPhase } from './lib/phase-context'
-import Phase1Qualifizierung from './phases/Phase1Qualifizierung'
-import Phase2TerminServiceTyp from './phases/Phase2TerminServiceTyp'
-import Phase3Schadentyp from './phases/Phase3Schadentyp'
-import Phase4Stammdaten from './phases/Phase4Stammdaten'
-import Phase5Zusammenfassung from './phases/Phase5Zusammenfassung'
-import Phase6StatusTracking from './phases/Phase6StatusTracking'
+import { useDispatchPhase } from './_lib/phase-context'
+import Phase1Qualifizierung from './_phases/Phase1Qualifizierung'
+import Phase2TerminServiceTyp from './_phases/Phase2TerminServiceTyp'
+import Phase3Schadentyp from './_phases/Phase3Schadentyp'
+import Phase4Stammdaten from './_phases/Phase4Stammdaten'
+import Phase5Zusammenfassung from './_phases/Phase5Zusammenfassung'
+import Phase6StatusTracking from './_phases/Phase6StatusTracking'
 import ExitSkript, { type DisqualifikationsGrund } from './ExitSkript'
 
 type FlowLinkRow = {

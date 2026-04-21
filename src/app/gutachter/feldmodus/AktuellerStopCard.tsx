@@ -20,7 +20,7 @@ import { formatUhrzeit } from '@/lib/format'
 import { createClient } from '@/lib/supabase/client'
 import type { FeldmodusStop } from './page'
 import type { SessionStatus } from '@/lib/types/field-modus'
-import { startStop, markArrived, completeAndAdvance } from './actions'
+import { startStop, markArrived, completeAndAdvance } from './_actions'
 
 export interface AktuellerStopCardProps {
   stop: FeldmodusStop

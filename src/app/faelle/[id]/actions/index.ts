@@ -6,7 +6,7 @@
 // Dispatch-Lead-Actions-Refactor AAR-143).
 //
 // Consumer können bereits jetzt aus dem Barrel importieren:
-//   import { updateFallField, updateFall } from './actions'  // aus Monolith
+//   import { updateFallField, updateFall } from './_actions'  // aus Monolith
 //
 // Nach dem Follow-up-Split verschwindet nur das Source-File — Imports bleiben.
 
@@ -45,4 +45,4 @@ export {
   deactivateFall,
   reactivateFall,
   saveRegulierungsKlassifizierung,
-} from '../actions'
+} from '../_actions'

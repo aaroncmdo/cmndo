@@ -6,7 +6,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MapIcon, PlayCircleIcon } from 'lucide-react'
-import { startOrResumeTagesSession } from './actions'
+import { startOrResumeTagesSession } from './_actions'
 
 export interface TagesrouteStartCardProps {
   terminIds: string[]

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { signSAandCreateFall, createKundeAccount, updateLeadStammdaten, generateSAPdf } from './actions'
+import { signSAandCreateFall, createKundeAccount, updateLeadStammdaten, generateSAPdf } from './_actions'
 // AAR-305: Werkstatt-Angaben + Schadensfotos-Upload
 import { saveWerkstattAngaben, saveSchadensfotoUrls } from './onboarding-extra-actions'
 import {

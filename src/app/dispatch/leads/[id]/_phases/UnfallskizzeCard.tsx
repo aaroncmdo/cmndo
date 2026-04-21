@@ -10,7 +10,7 @@ import {
   generateAndSaveUnfallskizze,
   approveUnfallskizze,
   clearUnfallskizze,
-} from '../actions/unfallskizze'
+} from '../_actions/unfallskizze'
 
 export function UnfallskizzeCard({
   leadId,

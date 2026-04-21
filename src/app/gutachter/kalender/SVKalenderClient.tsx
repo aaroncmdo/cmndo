@@ -8,7 +8,7 @@ import {
   format, isSameDay, isToday, isBefore, startOfDay,
 } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { setTermin, ablehnTerminAction, gegenvorschlagAction } from './actions'
+import { setTermin, ablehnTerminAction, gegenvorschlagAction } from './_actions'
 
 type Fall = {
   id: string

@@ -17,7 +17,7 @@ import {
   MapPinIcon,
   XCircleIcon,
 } from 'lucide-react'
-import { startKundeTracking, stopKundeTracking } from './actions'
+import { startKundeTracking, stopKundeTracking } from './_actions'
 import { useKundeLivePosition } from './useKundeLivePosition'
 
 interface Props {

@@ -13,7 +13,7 @@ import {
   upsertPersonForLead,
   deletePersonForLead,
   type PersonenschadenPerson,
-} from '../actions'
+} from '../_actions'
 import { PlusIcon, Trash2Icon, UserIcon } from 'lucide-react'
 
 type Draft = {

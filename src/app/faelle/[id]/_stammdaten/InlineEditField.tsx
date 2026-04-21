@@ -1,7 +1,7 @@
 'use client'
 
 // AAR-162 / W2: Generische Inline-Edit-Komponente für Fall-Stammdaten.
-// Adaptiert aus src/app/dispatch/leads/[id]/phases/Phase4Stammdaten.tsx
+// Adaptiert aus src/app/dispatch/leads/[id]/_phases/Phase4Stammdaten.tsx
 // (AAR-140 / W6) — gleiches UX-Pattern, aber gegen FallContext statt gegen
 // eine Lead-Action. Auto-Save on-blur, Status-Dot für Feedback.
 

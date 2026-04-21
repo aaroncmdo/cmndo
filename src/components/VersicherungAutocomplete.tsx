@@ -5,7 +5,7 @@
 // Namen zurück, Freitext-Fallback erlaubt für seltene/unbekannte Versicherer.
 
 import { useEffect, useRef, useState } from 'react'
-import { searchVersicherungen, type VersicherungSuggestion } from '@/app/dispatch/leads/[id]/actions/versicherungen'
+import { searchVersicherungen, type VersicherungSuggestion } from '@/app/dispatch/leads/[id]/_actions/versicherungen'
 import { CheckIcon, AlertTriangleIcon, LoaderIcon } from 'lucide-react'
 
 export type VersicherungSelection = {

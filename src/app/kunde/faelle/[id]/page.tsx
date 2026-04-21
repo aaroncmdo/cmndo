@@ -15,7 +15,7 @@ import SaeuleMeinBetreuer from '@/components/kunde/SaeuleMeinBetreuer'
 // AAR-558 (C9): Auszahlungs- + Eskalations-Ergebnis-Card aus faelle_kunde_view
 import AuszahlungCard from '@/components/kunde/AuszahlungCard'
 import EskalationsErgebnisCard from '@/components/kunde/EskalationsErgebnisCard'
-import { saveBankdaten, uploadPflichtdokumentKunde, updateZahlungsweg } from './actions'
+import { saveBankdaten, uploadPflichtdokumentKunde, updateZahlungsweg } from './_actions'
 // AAR-319: FAQ-Bot-Card + Historie-Loader
 import { FaqBotCard } from './_components/FaqBotCard'
 import { ladeKundenFaqHistorie } from './faq-bot-actions'

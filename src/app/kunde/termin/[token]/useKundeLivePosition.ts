@@ -8,7 +8,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useWatchPosition } from '@/lib/gps/use-watch-position'
-import { updateKundePosition } from './actions'
+import { updateKundePosition } from './_actions'
 
 const TRACK_INTERVAL_MS = 15_000
 const ETA_RECALC_INTERVAL_MS = 60_000

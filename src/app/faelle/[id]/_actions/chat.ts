@@ -4,4 +4,4 @@ export {
   sendChatNachricht,
   addTimelineEntry,
   sendManualWhatsAppAction,
-} from '../actions'
+} from '../_actions'

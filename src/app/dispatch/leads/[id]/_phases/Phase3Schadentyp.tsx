@@ -8,7 +8,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import SchadentypPicker from '../SchadentypPicker'
 import BkatAnalysePanel from './BkatAnalysePanel'
-import { useDispatchPhase } from '../lib/phase-context'
+import { useDispatchPhase } from '../_lib/phase-context'
 
 export default function Phase3Schadentyp() {
   const { lead, qualification, setPhase } = useDispatchPhase()
