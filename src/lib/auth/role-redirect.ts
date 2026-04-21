@@ -31,8 +31,13 @@ export function roleToPath(rolle: Rolle | null | undefined): string {
     // im Admin-Portal ohne seine zugewiesenen Fälle/Tasks zu sehen.
     case 'kundenbetreuer':
       return '/mitarbeiter'
-    case 'admin':
+    // AAR-kanzlei-portal: Kanzlei-Rolle hat jetzt ein eigenes Portal.
+    // Dashboard listet alle komplett-Pakete (RLS in Migration
+    // 20260421151144). Vorher ist Kanzlei-Login auf /admin gelandet,
+    // das war für LexDrive-User unbrauchbar.
     case 'kanzlei':
+      return '/kanzlei/dashboard'
+    case 'admin':
       return '/admin'
     default:
       return '/admin'
