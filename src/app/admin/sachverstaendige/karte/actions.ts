@@ -5,11 +5,51 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { revalidatePath } from 'next/cache'
 
+// AAR SV-Audit-Konsolidierung: Feldspezifische Inline-Edits aus
+// GutachterProfilPanel (Karten-Detail-Panel). Triggert jetzt automatisch
+// Isochrone-Recalc wenn Standort-Felder (standort_lat/lng/adresse) oder
+// der Paket-Radius (paket_umkreis_km) geändert werden — vorher blieb das
+// Polygon auf den alten Koordinaten, Matching lief dann mit falschem
+// Einsatzgebiet weiter.
+const STANDORT_FIELDS = new Set([
+  'standort_lat',
+  'standort_lng',
+  'standort_adresse',
+  'standort_plz',
+  'standort_place_id',
+  'paket_umkreis_km',
+  'paket', // Paket-Wechsel ändert Default-Radius
+])
+
+// Feld-Whitelist für Updates — verhindert, dass ist_aktiv / portal_zugang_
+// freigeschaltet / gesperrt_seit über den generischen Inline-Edit-Pfad
+// geschrieben werden. Die 3 Flags sind Onboarding-/Admin-Toggle-kontrolliert
+// und haben eigene Actions (Stripe-Webhook, deactivateGutachter).
+const BLOCKED_FIELDS = new Set([
+  'ist_aktiv',
+  'portal_zugang_freigeschaltet',
+  'gesperrt_seit',
+  'gesperrt_grund',
+  'gesperrt_von_user_id',
+  'geloescht_am',
+  'vertrag_unterschrieben',
+  'anzahlung_status',
+  'stripe_anzahlung_bezahlt_am',
+  'verifiziert',
+])
+
 export async function updateGutachterProfil(
   svId: string,
   field: string,
   value: unknown,
 ) {
+  if (BLOCKED_FIELDS.has(field)) {
+    throw new Error(
+      `Das Feld "${field}" wird vom Onboarding-/Admin-Flow gesteuert und ` +
+      `kann nicht direkt über updateGutachterProfil geändert werden.`,
+    )
+  }
+
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
@@ -41,6 +81,15 @@ export async function updateGutachterProfil(
       .eq('id', svId)
 
     if (error) throw new Error(error.message)
+
+    // AAR SV-Audit-Konsolidierung: Isochrone-Recalc nach Standort-Update.
+    // Fire-and-forget — wenn der HERE-Call failt, bleibt die alte Polygon,
+    // der Admin kann manuell via „Neu berechnen"-Button triggern.
+    if (STANDORT_FIELDS.has(field)) {
+      void recalculateIsochrone('sv', svId).catch((err) => {
+        console.error('[updateGutachterProfil] Isochrone-Recalc nach Standort-Update fehlgeschlagen:', err)
+      })
+    }
   }
 
   revalidatePath('/admin/sachverstaendige')

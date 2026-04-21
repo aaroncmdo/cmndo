@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Script from 'next/script'
 import { toast } from 'sonner'
 import { updateSvProfile, resendWelcomeMail } from './actions'
+import { deactivateGutachter, reactivateGutachter } from '../karte/actions'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
-import { MapPinIcon, MailIcon } from 'lucide-react'
+import { MapPinIcon, MailIcon, LockIcon, UnlockIcon } from 'lucide-react'
 import { LoadingButton } from '@/components/ui/loading-button'
 
 const PAKET_OPTIONS = [
@@ -24,6 +25,11 @@ type SvData = {
   paket: string
   maxFaelleMonat: number
   istAktiv: boolean
+  // AAR SV-Audit-Konsolidierung: gesperrt_seit + gesperrt_grund ersetzen
+  // das frühere „Aktiv/Inaktiv"-Dropdown. ist_aktiv wird nur noch vom
+  // Stripe-Webhook gesteuert, Admin-Sperren laufen über diese 2 Felder.
+  gesperrtSeit: string | null
+  gesperrtGrund: string | null
   notizen: string
   standortAdresse: string
   standortPlz: string
@@ -41,6 +47,46 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
   // AAR-364 SUB-4: Resend-Welcome-Mail
   const [resending, setResending] = useState(false)
   const [resendNotice, setResendNotice] = useState<{ ok: boolean; text: string } | null>(null)
+  // AAR SV-Audit-Konsolidierung: Sperr-Toggle statt ist_aktiv-Dropdown
+  const [sperrePending, startSperreTransition] = useTransition()
+  const [sperrGrund, setSperrGrund] = useState('')
+  const [showSperrDialog, setShowSperrDialog] = useState(false)
+  const istGesperrt = !!sv.gesperrtSeit
+
+  function handleSperren() {
+    if (!sperrGrund.trim() || sperrGrund.trim().length < 5) {
+      toast.error('Bitte Sperr-Grund angeben (min. 5 Zeichen)')
+      return
+    }
+    startSperreTransition(async () => {
+      try {
+        await deactivateGutachter(sv.id, sperrGrund.trim())
+        toast.success('Sachverständiger gesperrt')
+        setShowSperrDialog(false)
+        setSperrGrund('')
+        router.refresh()
+      } catch (err) {
+        toast.error('Sperren fehlgeschlagen', {
+          description: err instanceof Error ? err.message : 'Unbekannter Fehler',
+        })
+      }
+    })
+  }
+
+  function handleEntsperren() {
+    if (!window.confirm('Sperre aufheben? Der Sachverständige bekommt danach wieder Fälle.')) return
+    startSperreTransition(async () => {
+      try {
+        await reactivateGutachter(sv.id)
+        toast.success('Sperre aufgehoben')
+        router.refresh()
+      } catch (err) {
+        toast.error('Entsperren fehlgeschlagen', {
+          description: err instanceof Error ? err.message : 'Unbekannter Fehler',
+        })
+      }
+    })
+  }
 
   async function handleResendWelcome() {
     if (resending) return
@@ -173,12 +219,91 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
           </div>
         </div>
 
+        {/* AAR SV-Audit-Konsolidierung: Status ist jetzt READ-ONLY + Sperr-Toggle.
+            ist_aktiv wird nur vom Stripe-Webhook gesteuert. Admin-Blockierung
+            läuft über gesperrt_seit (deactivateGutachter / reactivateGutachter). */}
         <div>
           <label className="block text-gray-500 text-xs mb-1">Status</label>
-          <select name="ist_aktiv" defaultValue={sv.istAktiv ? 'true' : 'false'} className={inputCls}>
-            <option value="true">Aktiv</option>
-            <option value="false">Inaktiv</option>
-          </select>
+          <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm">
+            {istGesperrt ? (
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[11px] font-medium">
+                    <LockIcon className="w-3 h-3" /> Gesperrt
+                  </span>
+                  {sv.gesperrtGrund && (
+                    <p className="text-xs text-gray-500 mt-1">Grund: {sv.gesperrtGrund}</p>
+                  )}
+                </div>
+                <LoadingButton
+                  type="button"
+                  onClick={handleEntsperren}
+                  isLoading={sperrePending}
+                  loadingText="…"
+                  className="px-3 py-1.5 rounded-lg border border-emerald-500/40 text-emerald-700 text-xs font-semibold hover:bg-emerald-50 disabled:opacity-40"
+                >
+                  <UnlockIcon className="w-3.5 h-3.5 inline mr-1" /> Entsperren
+                </LoadingButton>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  {sv.istAktiv ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-medium">
+                      Aktiv (Portal freigeschaltet)
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-medium">
+                      Onboarding (Anzahlung ausstehend)
+                    </span>
+                  )}
+                  <p className="text-[10px] text-gray-400 mt-1">
+                    Automatisch — Stripe-Webhook setzt Status nach Anzahlung. Manuelle Sperre über Button rechts.
+                  </p>
+                </div>
+                <LoadingButton
+                  type="button"
+                  onClick={() => setShowSperrDialog(true)}
+                  isLoading={sperrePending && showSperrDialog}
+                  loadingText="…"
+                  className="px-3 py-1.5 rounded-lg border border-red-500/40 text-red-600 text-xs font-semibold hover:bg-red-50 disabled:opacity-40"
+                >
+                  <LockIcon className="w-3.5 h-3.5 inline mr-1" /> Sperren
+                </LoadingButton>
+              </div>
+            )}
+          </div>
+          {showSperrDialog && !istGesperrt && (
+            <div className="mt-2 bg-red-50/50 border border-red-200 rounded-xl px-3 py-2.5 space-y-2">
+              <p className="text-xs font-medium text-red-700">Grund für die Sperre (sichtbar im Admin-Log)</p>
+              <input
+                type="text"
+                value={sperrGrund}
+                onChange={(e) => setSperrGrund(e.target.value)}
+                placeholder="z.B. Wiederholte Ablehnungen, Qualitätsmängel..."
+                className="w-full px-3 py-2 text-xs rounded-lg border border-red-200 bg-white focus:outline-none focus:ring-1 focus:ring-red-400"
+                autoFocus
+              />
+              <div className="flex items-center gap-2 justify-end">
+                <button
+                  type="button"
+                  onClick={() => { setShowSperrDialog(false); setSperrGrund('') }}
+                  className="px-3 py-1.5 rounded-lg text-xs text-gray-600 hover:bg-gray-100"
+                >
+                  Abbrechen
+                </button>
+                <LoadingButton
+                  type="button"
+                  onClick={handleSperren}
+                  isLoading={sperrePending}
+                  loadingText="Sperrt…"
+                  className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-700 disabled:opacity-40"
+                >
+                  Sperre aktivieren
+                </LoadingButton>
+              </div>
+            </div>
+          )}
         </div>
 
         <div>

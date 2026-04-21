@@ -113,7 +113,12 @@ export async function POST(request: Request) {
 
   for (const sv of svList) {
     // Kapazitätsprüfung
-    const svMax = sv.paket_faelle_gesamt ?? 0
+    // AAR SV-Audit-Konsolidierung: Fallback auf 10 (Standard-Paket) statt 0.
+    // Bei ?? 0 wurden alle SVs mit paket_faelle_gesamt=null rausgefiltert,
+    // weil svGenutzt >= 0 immer true ist. Standard-Paket-Default ist konservativ:
+    // der SV kriegt Fälle bis 10, falls max korrekt konfiguriert wird, kommt
+    // der echte Wert bei der nächsten Iteration.
+    const svMax = sv.paket_faelle_gesamt ?? 10
     const svGenutzt = sv.paket_faelle_genutzt ?? sv.offene_faelle ?? 0
     if (svGenutzt >= svMax) continue
 

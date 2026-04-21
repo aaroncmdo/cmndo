@@ -32,16 +32,21 @@ async function loadKpis() {
     umsatzMonat,
     pendingQc,
   ] = await Promise.all([
+    // AAR SV-Audit-Konsolidierung: gelöschte + gesperrte SVs raus aus KPI-Counts.
+    // Vorher zählten soft-deleted + gesperrte SVs als „aktiv".
     supabase
       .from('sachverstaendige')
       .select('id', { count: 'exact', head: true })
-      .eq('portal_zugang_freigeschaltet', true),
+      .eq('portal_zugang_freigeschaltet', true)
+      .is('gesperrt_seit', null)
+      .is('geloescht_am', null),
 
     supabase
       .from('sachverstaendige')
       .select('onboarding_anzahlung_betrag')
       .eq('vertrag_unterschrieben', true)
       .eq('portal_zugang_freigeschaltet', false)
+      .is('geloescht_am', null)
       .gt('onboarding_anzahlung_betrag', 0),
 
     supabase

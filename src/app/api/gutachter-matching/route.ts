@@ -44,6 +44,16 @@ type MatchResult = {
 type Termin = { start: Date; end: Date }
 
 // ─── POST /api/gutachter-matching ────────────────────────────────────────────
+//
+// AAR SV-Audit-Konsolidierung: DEPRECATED — kein interner Consumer mehr.
+// Der Matching-Haupt-Pfad läuft über lib/dispatch/findBestSV.ts (genutzt von
+// /dispatch/leads, /dispatch/isochrone, /flow/[token]). Dieser Endpoint hat
+// ein anderes Scoring (partner_seit + Quali-Match + invertierte Sortierung)
+// und kann bei Aufruf andere Ergebnisse liefern als findBestSV.
+//
+// Zu tun: Externen Verwendungskontext (falls vorhanden) verifizieren und
+// dann diesen File entfernen ODER die Scoring-Logik auf findBestSV
+// konsolidieren. Aktuell nur der Filter ist harmonisiert (applyDispatchableFilter).
 
 export async function POST(request: Request) {
   const supabase = await createClient()
