@@ -68,6 +68,9 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   'sprache',
   // AAR-305: Schadenshergang-Pflicht bei fahrbereitem Fahrzeug (Banner in Phase 4)
   'schadens_hergang',
+  // AAR-unfallfotos: Schadenbeschreibung (was am Auto kaputt ist) — manuell
+  // editierbar und durch Haiku-Vision aus den Unfallfotos gefüllt.
+  'sachschaden_beschreibung',
 ])
 
 export async function saveStammdaten(

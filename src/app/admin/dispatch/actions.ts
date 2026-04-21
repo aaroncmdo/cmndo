@@ -674,6 +674,10 @@ async function convertLeadToFall(
       // KFZ-202: Vorschaeden
       hat_vorschaeden: lead.hat_vorschaeden ?? false,
       vorschaeden_beschreibung: lead.vorschaeden_beschreibung ?? null,
+      // AAR-unfallfotos: Schadenbeschreibung (was am Auto kaputt ist) —
+      // aus dem Dispatch-Flow übernehmen. Wird entweder vom Dispatcher
+      // manuell gesetzt oder von Haiku-Vision aus den Unfallfotos erzeugt.
+      sachschaden_beschreibung: lead.sachschaden_beschreibung ?? null,
       // Konversions-Metadaten
       leadbearbeiter_id: userId,
       kundenbetreuer_id: kundenbetreuerId,
@@ -711,6 +715,41 @@ async function convertLeadToFall(
     console.error('[KFZ-146] link_lead_data_to_fall failed:', linkErr.message)
   } else if (linkData) {
     linked = linkData as unknown as LinkResult
+  }
+
+  // 5b2. AAR-unfallfotos: Unfallfotos aus dem Dispatch-Flow nach fall_dokumente
+  // überführen. In der Dispatch-Phase liegen die Uploads nur als URL-Array in
+  // leads.schadensfoto_urls — fall_dokumente-Rows werden nicht geschrieben
+  // (fallId existiert noch nicht). Hier am Convert nachziehen, damit SV +
+  // Admin + Kunde sie im Dokumente-Tab der Fallakte sehen.
+  const fotoUrls = Array.isArray(lead.schadensfoto_urls)
+    ? (lead.schadensfoto_urls as string[])
+    : []
+  if (fotoUrls.length > 0) {
+    const fotoRows = fotoUrls
+      .map((url) => {
+        const marker = '/public/fall-dokumente/'
+        const idx = url.indexOf(marker)
+        if (idx === -1) return null
+        const storagePath = url.slice(idx + marker.length)
+        return {
+          fall_id: fall.id,
+          dokument_typ: 'schadensfotos',
+          storage_path: storagePath,
+          original_filename: storagePath.split('/').pop() ?? 'unfallfoto.jpg',
+          mime_type: 'image/jpeg',
+          uploaded_by_kunde: true,
+          beschreibung: 'Unfallfoto (Dispatch-Phase)',
+          hochgeladen_am: new Date().toISOString(),
+        }
+      })
+      .filter(<T,>(v: T | null): v is T => v !== null)
+    if (fotoRows.length > 0) {
+      const { error: fotoErr } = await supabase.from('fall_dokumente').insert(fotoRows)
+      if (fotoErr) {
+        console.error('[AAR-unfallfotos] fall_dokumente-Insert fehlgeschlagen:', fotoErr.message)
+      }
+    }
   }
 
   // 5c. KFZ-146: Lead-Notiz als Timeline-Eintrag übertragen

@@ -17,7 +17,7 @@ import {
   FileTextIcon,
 } from 'lucide-react'
 
-type SlotId = 'fahrzeugschein' | 'polizeibericht' | 'sonstiges'
+type SlotId = 'fahrzeugschein' | 'polizeibericht' | 'unfallfotos' | 'sonstiges'
 
 type SlotUi = {
   slot_id: SlotId
@@ -94,6 +94,7 @@ async function compressImage(file: File): Promise<{ base64: string; contentType:
 const SLOT_HINTS: Record<SlotId, string> = {
   fahrzeugschein: 'Zulassungsbescheinigung Teil I (Vorderseite). Alle 4 Ecken sichtbar, gutes Licht, scharf.',
   polizeibericht: 'Der Zettel, den Sie nach dem Unfall von der Polizei bekommen haben.',
+  unfallfotos: 'Fotos vom Fahrzeugschaden — mehrere Ansichten willkommen (Front, Heck, Seiten, Detail). Je mehr Fotos, desto besser die Schadenbeschreibung.',
   sonstiges: 'Beliebiges Dokument zum Fall — z. B. Kaufvertrag, Rechnung, Foto.',
 }
 
@@ -404,6 +405,17 @@ function SlotCard({
                 <p className="text-green-800">Halter: <strong>{state.extracted.halter_name}</strong></p>
               )}
             </div>
+          )}
+          {/* AAR-unfallfotos: Multi-File-Slot — Button für weitere Fotos. */}
+          {slot.slot_id === 'unfallfotos' && (
+            <button
+              type="button"
+              onClick={onReset}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#4573A2] text-[#4573A2] text-xs font-semibold hover:bg-blue-50"
+            >
+              <CameraIcon className="w-3 h-3" />
+              Weiteres Foto hochladen
+            </button>
           )}
         </div>
       )}
