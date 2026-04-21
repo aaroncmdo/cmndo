@@ -183,10 +183,24 @@ export function UnfallSection() {
         <InlineEditField label="Schadens-Ursache" fieldName="schadens_ursache" value={f(fall, 'schadens_ursache')} type="textarea" />
       </div>
       <div className="sm:col-span-2">
-        <InlineEditField label="Schadenshergang" fieldName="schadens_hergang" value={f(fall, 'schadens_hergang')} type="textarea" />
+        <InlineEditField label="Unfallhergang (wie passiert)" fieldName="schadens_hergang" value={f(fall, 'schadens_hergang')} type="textarea" />
+      </div>
+      {/* AAR-665-Follow: Fahrzeugschaden (was am Auto kaputt) — separates
+          Feld, wird von Haiku-Vision aus Unfallfotos automatisch gefüllt. */}
+      <div className="sm:col-span-2">
+        <InlineEditField
+          label="Fahrzeugschaden (was am Auto kaputt ist)"
+          fieldName="fahrzeugschaden_beschreibung"
+          value={f(fall, 'fahrzeugschaden_beschreibung')}
+          type="textarea"
+          hint="Wird automatisch aus Unfallfotos gefüllt (Claude Vision)"
+        />
       </div>
       <div className="sm:col-span-2">
-        <InlineEditField label="Beschreibung" fieldName="schadens_beschreibung" value={f(fall, 'schadens_beschreibung')} type="textarea" />
+        <InlineEditField label="Drittschaden (Leitplanke, Handy etc.)" fieldName="sachschaden_beschreibung" value={f(fall, 'sachschaden_beschreibung')} type="textarea" />
+      </div>
+      <div className="sm:col-span-2">
+        <InlineEditField label="Weitere Anmerkungen" fieldName="schadens_beschreibung" value={f(fall, 'schadens_beschreibung')} type="textarea" />
       </div>
     </Card>
   )

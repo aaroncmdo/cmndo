@@ -355,7 +355,7 @@ export default function DokumenteAnfordernCard({
 
         {/* AAR-unfallfotos: Unfallfotos-Slot. Multi-File — Kunde kann mehrere
             Fotos via denselben Link hochladen. Nach Upload läuft Haiku-Vision
-            und füllt leads.sachschaden_beschreibung automatisch. */}
+            und füllt leads.fahrzeugschaden_beschreibung automatisch. */}
         <div className={`rounded-lg border p-3 ${selectUnfallfotos || fotosCount > 0 ? 'border-[#4573A2] bg-blue-50/30' : 'border-gray-200'}`}>
           <label className="flex items-start gap-2 cursor-pointer">
             <input
