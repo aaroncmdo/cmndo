@@ -54,6 +54,12 @@ export async function createLeadFromSchritt1(
       fahrzeug_modell: data.fahrzeug_modell,
       fahrzeug_baujahr: data.fahrzeug_baujahr,
       fahrzeug_standort_plz: data.fahrzeug_standort_plz,
+      // AAR-663: Google-Places-Adresse + Koordinaten mitspeichern damit
+      // findBestSV Self-Service-Dispatch ohne Phase-2-Geocoding fahren kann.
+      fahrzeug_standort_adresse: data.fahrzeug_standort_adresse || null,
+      fahrzeug_standort_lat: data.fahrzeug_standort_lat ?? null,
+      fahrzeug_standort_lng: data.fahrzeug_standort_lng ?? null,
+      fahrzeug_standort_place_id: data.fahrzeug_standort_place_id || null,
       vorname: data.vorname,
       nachname: data.nachname,
       email: data.email,
