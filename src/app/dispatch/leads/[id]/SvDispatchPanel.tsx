@@ -145,12 +145,18 @@ export default function SvDispatchPanel({
     }
   }, [selectedSv, dauerMin, wunschterminIso, wunschterminWochentage, topSuggestions])
 
-  // AAR-522: Auto-Load Top-3 SVs + Slots beim Mount, sobald Hard Gate offen ist.
-  useEffect(() => {
-    if (!hardGateOk) return
-    if (topSuggestions !== null || topLoading) return
+  // AAR-zz-SV-Trigger: Gutachtersuche explizit vom Dispatcher triggern.
+  // Vorher (AAR-522) lief ein Auto-Load beim Mount, sobald Hard Gate OK war.
+  // Dispatch-Feedback: „rechnet zu früh, ich kann es nicht neu triggern" —
+  // wenn Schadenort/Wunschtermin noch geprüft werden, macht Auto-Suche keinen
+  // Sinn und verschwendet Kontingent-Lookups. Jetzt: Button „Gutachter suchen"
+  // startet die Suche, „Neu suchen" wiederholt sie mit aktuellem Lead-Stand.
+  function triggerSearch() {
+    if (!hardGateOk || topLoading) return
     setTopLoading(true)
     setLoadError(null)
+    setExtraSuggestions(null)
+    setSelectedSv(null)
     getSvSuggestionsWithSlots(leadId, { slotsPerSv: 3, maxSvs: 3, slotDauerMin: dauerMin })
       .then((r) => {
         if (r.success) setTopSuggestions(r.suggestions ?? [])
@@ -164,12 +170,6 @@ export default function SvDispatchPanel({
         setTopSuggestions([])
       })
       .finally(() => setTopLoading(false))
-  }, [hardGateOk, leadId, dauerMin, topSuggestions, topLoading])
-
-  function reloadTop() {
-    setTopSuggestions(null)
-    setExtraSuggestions(null)
-    setSelectedSv(null)
   }
 
   function loadExtraSvs() {
@@ -431,11 +431,23 @@ export default function SvDispatchPanel({
         </div>
       ) : (
         <>
-          {/* AAR-522: Auto-Load-Status */}
+          {/* AAR-zz-SV-Trigger: Initial-CTA wenn Suche noch nicht getriggert wurde.
+              Dispatcher klickt bewusst — keine Auto-Suche beim Mount mehr. */}
+          {topSuggestions === null && !topLoading && !loadError && (
+            <button
+              type="button"
+              onClick={triggerSearch}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#4573A2] hover:bg-[#3a6290] text-white text-sm font-medium"
+            >
+              <SearchIcon className="w-4 h-4" />
+              Gutachter suchen
+            </button>
+          )}
+
           {topLoading && (
             <p className="text-xs text-gray-500 flex items-center gap-2">
               <span className="inline-block w-3 h-3 rounded-full bg-[#4573A2] animate-pulse" />
-              Lade nächste verfügbare SVs …
+              Suche passende Gutachter …
             </p>
           )}
 
@@ -467,22 +479,25 @@ export default function SvDispatchPanel({
                 </p>
                 <button
                   type="button"
-                  onClick={reloadTop}
+                  onClick={triggerSearch}
                   disabled={pending || topLoading}
                   className="text-[10px] text-[#4573A2] hover:text-[#3a6290] flex items-center gap-1"
                 >
-                  <RefreshCwIcon className="w-3 h-3" /> neu laden
+                  <RefreshCwIcon className="w-3 h-3" /> neu suchen
                 </button>
               </div>
 
               <div className="space-y-2">
-                {topSuggestions.map((sv) => (
+                {topSuggestions.map((sv, idx) => (
                   <SvCard
                     key={sv.svId}
                     sv={sv}
                     slots={sv.slots}
                     pending={pending}
                     wunschterminIso={wunschterminIso ?? null}
+                    // AAR-zz-SV-Trigger: Prio-1 = Index 0 (höchster Score
+                    // aus findBestSV) bekommt „Empfehlung"-Badge.
+                    isEmpfehlung={idx === 0}
                     onReserveSlot={(iso) => handleReserveSlot(sv.svId, iso)}
                   />
                 ))}
@@ -793,19 +808,34 @@ function SvCard({
   slots,
   pending,
   wunschterminIso,
+  isEmpfehlung,
   onReserveSlot,
 }: {
   sv: SvSuggestion
   slots: SlotCandidate[]
   pending: boolean
   wunschterminIso: string | null
+  isEmpfehlung?: boolean
   onReserveSlot: (iso: string) => void
 }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-3 space-y-2">
+    <div
+      className={`rounded-lg border p-3 space-y-2 ${
+        isEmpfehlung
+          ? 'border-amber-300 bg-amber-50/40 shadow-sm ring-1 ring-amber-200'
+          : 'border-gray-200 bg-white'
+      }`}
+    >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="text-sm font-medium text-[#0D1B3E] truncate">{sv.name}</p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-sm font-medium text-[#0D1B3E] truncate">{sv.name}</p>
+            {isEmpfehlung && (
+              <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-500 text-white font-semibold shrink-0">
+                ★ Empfehlung
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-3 mt-0.5 text-[11px] text-gray-500">
             <span>{sv.distanzKm.toFixed(1)} km</span>
             <span>Score {sv.score.toFixed(1)}</span>
