@@ -6,22 +6,10 @@
 // AAR-690 v2: Liste rechts immer sichtbar, Hover-Highlight zwischen
 // Listen-Item / Pin / Polygon, fokus-aware Rendering.
 
-import { useEffect, useRef, useState, useTransition, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { toast } from 'sonner'
-import {
-  XIcon, ExternalLinkIcon,
-  RefreshCwIcon, ShieldOffIcon, ShieldCheckIcon, TrashIcon, Loader2Icon,
-  SearchIcon,
-} from 'lucide-react'
-import {
-  reactivateGutachter,
-  deactivateGutachter,
-  softDeleteGutachter,
-  deleteGutachter,
-  recalculateIsochrone,
-  getOpenCasesCount,
-} from './actions'
+import { useRouter } from 'next/navigation'
+import { SearchIcon } from 'lucide-react'
 
 // ─── Types (Shape bleibt kompatibel zur page.tsx-Query) ─────────────────────
 
@@ -144,14 +132,20 @@ type Props = {
 
 export default function KarteHubClient({ svs }: Props) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''
+  const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<google.maps.Map | null>(null)
   const markersRef = useRef<globalThis.Map<string, google.maps.Marker>>(new globalThis.Map())
   const polygonsRef = useRef<globalThis.Map<string, google.maps.Polygon>>(new globalThis.Map())
   const [mapReady, setMapReady] = useState(false)
-  const [selectedSv, setSelectedSv] = useState<SvMarker | null>(null)
   const [hoveredSvId, setHoveredSvId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+
+  // AAR-691: Klick auf Pin oder Listen-Item navigiert zur SV-Detail-URL.
+  // Die Intercepting-Route (@drawer/(.)[id]) fängt die Navigation ab und
+  // öffnet einen Drawer über der Karte. Direkter URL-Aufruf führt zur
+  // Full-Page (Deep-Link-Fallback).
+  const openSv = (id: string) => router.push(`/admin/sachverstaendige/${id}`)
 
   // Nur freigeschaltete + nicht gesperrte SVs mit Koordinaten
   const visibleSvs = svs.filter(
@@ -218,7 +212,7 @@ export default function KarteHubClient({ svs }: Props) {
         icon: markerIcon(color, false),
         title: sv.name,
       })
-      marker.addListener('click', () => setSelectedSv(sv))
+      marker.addListener('click', () => openSv(sv.id))
       marker.addListener('mouseover', () => setHoveredSvId(sv.id))
       marker.addListener('mouseout', () => setHoveredSvId(null))
       markersRef.current.set(sv.id, marker)
@@ -231,7 +225,7 @@ export default function KarteHubClient({ svs }: Props) {
           map,
           clickable: true,
         })
-        polygon.addListener('click', () => setSelectedSv(sv))
+        polygon.addListener('click', () => openSv(sv.id))
         polygon.addListener('mouseover', () => setHoveredSvId(sv.id))
         polygon.addListener('mouseout', () => setHoveredSvId(null))
         polygonsRef.current.set(sv.id, polygon)
@@ -322,20 +316,15 @@ export default function KarteHubClient({ svs }: Props) {
           {filteredList.map((sv) => {
             const color = typColor(sv.gutachterTyp)
             const isHovered = hoveredSvId === sv.id
-            const isSelected = selectedSv?.id === sv.id
             return (
               <button
                 key={sv.id}
                 type="button"
                 onMouseEnter={() => setHoveredSvId(sv.id)}
                 onMouseLeave={() => setHoveredSvId(null)}
-                onClick={() => setSelectedSv(sv)}
+                onClick={() => openSv(sv.id)}
                 className={`w-full text-left px-3 py-2.5 border-b border-gray-100 transition-colors ${
-                  isSelected
-                    ? 'bg-[#4573A2]/10 border-l-2 border-l-[#4573A2]'
-                    : isHovered
-                      ? 'bg-white'
-                      : 'hover:bg-white'
+                  isHovered ? 'bg-white' : 'hover:bg-white'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
@@ -387,289 +376,7 @@ export default function KarteHubClient({ svs }: Props) {
           })}
         </div>
       </aside>
-
-      {selectedSv && (
-        <SvDetailDrawer
-          sv={selectedSv}
-          onClose={() => setSelectedSv(null)}
-        />
-      )}
     </div>
   )
 }
 
-// ─── Detail-Drawer ─────────────────────────────────────────────────────────
-
-function SvDetailDrawer({ sv, onClose }: { sv: SvMarker; onClose: () => void }) {
-  const color = typColor(sv.gutachterTyp)
-  const [pending, startTransition] = useTransition()
-  const [openCases, setOpenCases] = useState<number | null>(null)
-
-  useEffect(() => {
-    getOpenCasesCount(sv.id).then(setOpenCases).catch(() => setOpenCases(null))
-  }, [sv.id])
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [onClose])
-
-  const handleRecalcIso = useCallback(() => {
-    startTransition(async () => {
-      const r = await recalculateIsochrone('sv', sv.id)
-      if (r.success) {
-        toast.success('Isochrone neu berechnet — Seite lädt neu')
-        setTimeout(() => window.location.reload(), 500)
-      } else {
-        toast.error(r.error ?? 'Berechnung fehlgeschlagen')
-      }
-    })
-  }, [sv.id])
-
-  const handleDeactivate = useCallback(() => {
-    const grund = window.prompt('Sperr-Grund:')
-    if (!grund) return
-    startTransition(async () => {
-      try {
-        await deactivateGutachter(sv.id, grund)
-        toast.success('Gesperrt')
-        window.location.reload()
-      } catch (e) {
-        toast.error(e instanceof Error ? e.message : 'Sperren fehlgeschlagen')
-      }
-    })
-  }, [sv.id])
-
-  const handleReactivate = useCallback(() => {
-    startTransition(async () => {
-      try {
-        await reactivateGutachter(sv.id)
-        toast.success('Entsperrt')
-        window.location.reload()
-      } catch (e) {
-        toast.error(e instanceof Error ? e.message : 'Entsperren fehlgeschlagen')
-      }
-    })
-  }, [sv.id])
-
-  const handleSoftDelete = useCallback(() => {
-    if (!window.confirm(`${sv.name} archivieren (Soft-Delete)?`)) return
-    startTransition(async () => {
-      try {
-        await softDeleteGutachter(sv.id)
-        toast.success('Archiviert')
-        window.location.reload()
-      } catch (e) {
-        toast.error(e instanceof Error ? e.message : 'Archivieren fehlgeschlagen')
-      }
-    })
-  }, [sv.id, sv.name])
-
-  const handleHardDelete = useCallback(() => {
-    if (!window.confirm(`${sv.name} endgültig löschen? Nicht umkehrbar.`)) return
-    startTransition(async () => {
-      const r = await deleteGutachter(sv.id)
-      if (r.success) {
-        toast.success('Gelöscht')
-        window.location.reload()
-      } else {
-        toast.error(r.error ?? 'Löschen fehlgeschlagen')
-      }
-    })
-  }, [sv.id, sv.name])
-
-  const isGesperrt = !!sv.gesperrtSeit
-  const einsatzKm = sv.einsatzKm ?? null
-
-  return (
-    <>
-      <div
-        className="fixed inset-0 bg-black/20 z-40"
-        onClick={onClose}
-        aria-hidden
-      />
-      <aside
-        role="dialog"
-        aria-label={`Details zu ${sv.name}`}
-        className="fixed right-0 top-0 h-screen w-full sm:w-[420px] bg-white shadow-2xl z-50 flex flex-col"
-        style={{ animation: 'slideIn 180ms ease-out' }}
-      >
-        <div
-          className="px-5 py-4 border-b border-gray-200 flex items-start justify-between gap-3"
-          style={{ borderTopColor: color.fill, borderTopWidth: 4 }}
-        >
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="inline-block w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color.fill }} />
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
-                {color.label}
-              </span>
-              {sv.paket && (
-                <span className="text-[10px] text-gray-400">· Paket {sv.paket}</span>
-              )}
-            </div>
-            <h3 className="text-lg font-bold text-gray-900 truncate mt-0.5">{sv.name}</h3>
-            {einsatzKm && (
-              <p className="text-[11px] text-gray-500 mt-0.5">
-                Einsatzgebiet {einsatzKm} km
-              </p>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1 rounded-lg hover:bg-gray-100 text-gray-400"
-            aria-label="Schließen"
-          >
-            <XIcon className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
-          <section>
-            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Status</h4>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <StatusPill label="Portal freigeschaltet" on={sv.portalZugangFreigeschaltet === true} />
-              <StatusPill label="Vertrag unterschrieben" on={sv.vertragUnterschrieben === true} />
-              <StatusPill label="Verifiziert" on={sv.verifiziert === true} />
-              <StatusPill label={isGesperrt ? 'Gesperrt' : 'Aktiv'} on={!isGesperrt} danger={isGesperrt} />
-            </div>
-            {sv.urlaubVon && sv.urlaubBis && (
-              <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 mt-2">
-                Urlaub {new Date(sv.urlaubVon).toLocaleDateString('de-DE')} – {new Date(sv.urlaubBis).toLocaleDateString('de-DE')}
-              </p>
-            )}
-          </section>
-
-          {(sv.maxFaelleMonat ?? 0) > 0 && (
-            <section>
-              <h4 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Fallkontingent</h4>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-gray-900">{sv.offeneFaelle ?? 0}</span>
-                <span className="text-gray-400">/</span>
-                <span className="text-gray-600">{sv.maxFaelleMonat} im Monat</span>
-              </div>
-              <p className="text-[11px] text-gray-500 mt-1">
-                {openCases != null ? `${openCases} offene Fälle` : ''}
-                {(sv.ablehnungen30Tage ?? 0) > 0 && (
-                  <span className="ml-2 text-red-600">· {sv.ablehnungen30Tage} Ablehnungen (30 T.)</span>
-                )}
-              </p>
-            </section>
-          )}
-
-          {(sv.bvskNr || sv.ihkNr || sv.oebuvNr) && (
-            <section>
-              <h4 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Qualifikationen</h4>
-              <div className="space-y-1 text-xs text-gray-700">
-                {sv.bvskNr && <div>BVSK: <span className="font-mono">{sv.bvskNr}</span></div>}
-                {sv.ihkNr && <div>IHK: <span className="font-mono">{sv.ihkNr}</span></div>}
-                {sv.oebuvNr && <div>öbuv: <span className="font-mono">{sv.oebuvNr}</span></div>}
-              </div>
-            </section>
-          )}
-
-          {sv.notizen && (
-            <section>
-              <h4 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Notizen</h4>
-              <p className="text-xs text-gray-700 whitespace-pre-wrap">{sv.notizen}</p>
-            </section>
-          )}
-
-          <section>
-            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Aktionen</h4>
-            <div className="grid grid-cols-1 gap-2">
-              <Link
-                href={`/admin/sachverstaendige/${sv.id}`}
-                className="flex items-center justify-between text-xs font-medium px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-700"
-              >
-                <span className="flex items-center gap-2">
-                  <ExternalLinkIcon className="w-3.5 h-3.5" /> Volles Profil öffnen
-                </span>
-              </Link>
-
-              <button
-                type="button"
-                onClick={handleRecalcIso}
-                disabled={pending}
-                className="flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-700 disabled:opacity-50"
-              >
-                {pending ? <Loader2Icon className="w-3.5 h-3.5 animate-spin" /> : <RefreshCwIcon className="w-3.5 h-3.5" />}
-                Isochrone neu berechnen
-              </button>
-
-              {isGesperrt ? (
-                <button
-                  type="button"
-                  onClick={handleReactivate}
-                  disabled={pending}
-                  className="flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 disabled:opacity-50"
-                >
-                  <ShieldCheckIcon className="w-3.5 h-3.5" /> Entsperren
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleDeactivate}
-                  disabled={pending}
-                  className="flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-700 disabled:opacity-50"
-                >
-                  <ShieldOffIcon className="w-3.5 h-3.5" /> Sperren
-                </button>
-              )}
-
-              <button
-                type="button"
-                onClick={handleSoftDelete}
-                disabled={pending}
-                className="flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-700 disabled:opacity-50"
-              >
-                <TrashIcon className="w-3.5 h-3.5" /> Archivieren (Soft-Delete)
-              </button>
-
-              <button
-                type="button"
-                onClick={handleHardDelete}
-                disabled={pending}
-                className="flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 disabled:opacity-50"
-              >
-                <TrashIcon className="w-3.5 h-3.5" /> Endgültig löschen
-              </button>
-            </div>
-          </section>
-        </div>
-      </aside>
-
-      <style jsx>{`
-        @keyframes slideIn {
-          from { transform: translateX(100%); }
-          to { transform: translateX(0); }
-        }
-      `}</style>
-    </>
-  )
-}
-
-function StatusPill({ label, on, danger }: { label: string; on: boolean; danger?: boolean }) {
-  return (
-    <div
-      className={`px-2 py-1.5 rounded-lg border text-[11px] font-medium flex items-center gap-1.5 ${
-        danger
-          ? 'bg-red-50 border-red-200 text-red-700'
-          : on
-            ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-            : 'bg-gray-50 border-gray-200 text-gray-500'
-      }`}
-    >
-      <span
-        className={`w-1.5 h-1.5 rounded-full ${
-          danger ? 'bg-red-500' : on ? 'bg-emerald-500' : 'bg-gray-400'
-        }`}
-      />
-      {label}
-    </div>
-  )
-}
