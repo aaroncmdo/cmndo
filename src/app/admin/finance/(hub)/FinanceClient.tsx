@@ -90,7 +90,7 @@ export default function FinanceClient({
             hat statt zwei getrennter Menüpunkte. */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
           <Link
-            href="/admin/finance/provisionen-maik"
+            href="/admin/finance/provisionen"
             className="group bg-white border border-gray-200 rounded-2xl p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
           >
             <div className="flex items-start justify-between gap-3">
