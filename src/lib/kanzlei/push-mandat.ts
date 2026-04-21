@@ -1,4 +1,12 @@
-// AAR-kanzlei: Outbound-Push an die Kanzlei-Schnittstelle.
+// AAR-kanzlei-oauth: Outbound-Push an die Salesforce-Apex-REST-Schnittstelle
+// der Kanzlei (LexDrive).
+//
+// Stand 2026-04-21 nach Meeting mit LexDrive-Dev:
+//   - Auth: Salesforce OAuth2 Password-Grant (siehe lib/kanzlei/sf-auth.ts),
+//     KEIN HMAC. Token-Cache 4 Min TTL pro Lambda-Instanz.
+//   - Request: Bearer-Token-Header, JSON-Body.
+//   - Erwartete Response: 201 Created + { mandat_id } bei Erstanlage,
+//     200 OK bei Duplicate (gleicher claimondo_fall_nr).
 //
 // Trigger: signSAandCreateFall (src/app/flow/[token]/actions.ts) ruft diese
 // Funktion nach erfolgreichem Fall-Insert, sobald der Kunde die SA
@@ -9,27 +17,20 @@
 // fehlgeschlagener Push landet als Timeline-Warnung + Notification beim KB,
 // damit der Mandat manuell nachgezogen werden kann.
 //
-// Security: HMAC-SHA256 über den Raw-JSON-Body mit Shared-Secret
-// (Env KANZLEI_API_SECRET). Header X-Claimondo-Signature: sha256=<hex>.
-// Die Kanzlei verifiziert die Signatur gegen denselben Secret.
-//
-// Feature-Flag: KANZLEI_API_ENABLED=true. Wenn nicht gesetzt oder
-// KANZLEI_API_URL fehlt → skip mit Log. Damit kann das Feature in
-// Staging getestet werden ohne Prod-Integration live zu schalten.
+// Feature-Flag: KANZLEI_API_ENABLED=true. Wenn nicht gesetzt → skip mit Log.
 
-import { createHmac, randomUUID } from 'crypto'
+import { randomUUID } from 'crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getSfAccessToken } from '@/lib/kanzlei/sf-auth'
 
 export type PushMandatResult =
   | { success: true; kanzlei_mandat_id: string | null }
   | { success: false; error: string; skipped?: boolean }
 
-// Exakt die Felder, die die Kanzlei im ersten Schritt braucht. Der Rest
-// (Schadenshergang, Gegner, Versicherung, Dokumente) kommt via Kanzlei-Paket
-// aus der Email, die wir weiterhin senden — die Integration hier ersetzt das
-// Paket NICHT, sondern legt nur das Mandat an.
+// Minimal-Payload laut Meeting-Vorgabe + Nachtrag Telefon.
+// Alles andere zieht die Kanzlei aus dem Kanzlei-Paket (Email + Portal).
 interface MandatPayload {
-  /** Unsere Canonical-ID. Muss in allen Rück-Events gespiegelt werden. */
+  /** Unsere Canonical-ID. Kanzlei spiegelt sie in allen Rück-Events. */
   claimondo_fall_nr: string
   kunde: {
     anrede: 'Herr' | 'Frau' | 'Divers' | null
@@ -39,6 +40,12 @@ interface MandatPayload {
     plz: string | null
     stadt: string | null
     email: string | null
+    /** Telefonnummer des Kunden. Wird für WA-Vollmacht-Versand durch die Kanzlei benötigt. */
+    telefon: string | null
+    /** Ob diese Nummer WA-fähig ist — wir setzen true default, da Claimondo
+     *  bereits per WA mit dem Kunden kommuniziert hat (Signatur-Flow).
+     */
+    wa_faehig: boolean
   }
   firma: boolean
   vorsteuerabzugsberechtigt: boolean
@@ -46,7 +53,6 @@ interface MandatPayload {
     /** Kennzeichen des Fahrzeughalters */
     kennzeichen: string | null
   }
-  // Optional — hilft der Kanzlei beim Duplikat-Check ohne Rückfrage an uns
   meta: {
     idempotency_key: string
     created_at: string
@@ -54,22 +60,22 @@ interface MandatPayload {
 }
 
 export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatResult> {
-  const apiUrl = process.env.KANZLEI_API_URL
-  const apiSecret = process.env.KANZLEI_API_SECRET
   const enabled = process.env.KANZLEI_API_ENABLED === 'true'
+  const apiUrl = process.env.KANZLEI_SF_API_URL
 
-  if (!enabled || !apiUrl || !apiSecret) {
-    console.info('[AAR-kanzlei] Push übersprungen — API nicht konfiguriert oder disabled')
+  if (!enabled || !apiUrl) {
+    console.info('[AAR-kanzlei-oauth] Push übersprungen — API nicht aktiviert oder URL fehlt')
     return { success: false, skipped: true, error: 'kanzlei_api_not_configured' }
   }
 
   const db = createAdminClient()
 
-  // Fall + Kunde-Anrede laden. kunde_id → profiles.anrede via JOIN.
+  // Fall + Kunde-Anrede laden. Telefon wird aus faelle.kunde_telefon (Fall-
+  // Snapshot aus convertLeadToFall) genommen. Anrede via profiles (kunde_id).
   const { data: fall, error: fallErr } = await db
     .from('faelle')
     .select(
-      'id, fall_nummer, service_typ, kunde_id, kunde_vorname, kunde_nachname, kunde_email, kunde_strasse, kunde_plz, kunde_stadt, firma_name, vorsteuerabzugsberechtigt, kennzeichen',
+      'id, fall_nummer, service_typ, kunde_id, kunde_vorname, kunde_nachname, kunde_email, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, vorsteuerabzugsberechtigt, kennzeichen',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -77,7 +83,6 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
     return { success: false, error: `Fall nicht gefunden: ${fallErr?.message ?? fallId}` }
   }
 
-  // Push nur für komplett-Mandat
   if ((fall.service_typ as string | null) !== 'komplett') {
     return { success: false, skipped: true, error: 'service_typ_not_komplett' }
   }
@@ -103,6 +108,10 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
       plz: (fall.kunde_plz as string | null) ?? null,
       stadt: (fall.kunde_stadt as string | null) ?? null,
       email: (fall.kunde_email as string | null) ?? null,
+      telefon: (fall.kunde_telefon as string | null) ?? null,
+      // Claimondo kommuniziert vor SA-Signatur per WA mit dem Kunden
+      // (FlowLink + Reminder), daher ist die Nummer effektiv WA-verifiziert.
+      wa_faehig: true,
     },
     firma: !!(fall.firma_name as string | null),
     vorsteuerabzugsberechtigt: !!(fall.vorsteuerabzugsberechtigt as boolean | null),
@@ -115,16 +124,24 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
     },
   }
 
-  const body = JSON.stringify(payload)
-  const signature = createHmac('sha256', apiSecret).update(body).digest('hex')
+  // Access-Token holen (Cache-Hit bei 4 Min TTL)
+  const auth = await getSfAccessToken()
+  if (!auth.ok) {
+    await logFailureToTimeline(db, fallId, 0, `Auth: ${auth.error}`)
+    return { success: false, error: auth.error }
+  }
 
-  let responseJson: { mandat_id?: string } = {}
+  const body = JSON.stringify(payload)
+  const instanceUrl = auth.instanceUrl ?? apiUrl.replace(/\/$/, '')
+  const endpoint = `${instanceUrl.replace(/\/$/, '')}/services/apexrest/mandate`
+
+  let responseJson: { mandat_id?: string; mandatId?: string } = {}
   try {
-    const resp = await fetch(`${apiUrl.replace(/\/$/, '')}/mandate`, {
+    const resp = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Claimondo-Signature': `sha256=${signature}`,
+        Authorization: `Bearer ${auth.token}`,
         'X-Claimondo-Event-Id': payload.meta.idempotency_key,
       },
       body,
@@ -145,8 +162,12 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
     return { success: false, error: `Netzwerk-Fehler: ${msg}` }
   }
 
-  // Erfolg: Mandatsnummer (Kanzlei-interne ID) speichern + Timeline
-  const kanzleiMandatId = typeof responseJson.mandat_id === 'string' ? responseJson.mandat_id : null
+  const kanzleiMandatId =
+    typeof responseJson.mandat_id === 'string'
+      ? responseJson.mandat_id
+      : typeof responseJson.mandatId === 'string'
+        ? responseJson.mandatId
+        : null
   if (kanzleiMandatId) {
     await db
       .from('faelle')
@@ -158,8 +179,8 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
     typ: 'webhook',
     titel: 'Mandat an Kanzlei übergeben',
     beschreibung: kanzleiMandatId
-      ? `Kanzlei-Mandat-ID: ${kanzleiMandatId}. Kanzlei versendet Vollmacht an Kunden.`
-      : 'Mandat an Kanzlei übergeben. Kanzlei versendet Vollmacht an Kunden.',
+      ? `Salesforce-Mandat-ID: ${kanzleiMandatId}. Kanzlei versendet Vollmacht per WhatsApp an den Kunden.`
+      : 'Mandat an Kanzlei übergeben. Kanzlei versendet Vollmacht per WhatsApp an den Kunden.',
   })
 
   return { success: true, kanzlei_mandat_id: kanzleiMandatId }
@@ -179,6 +200,6 @@ async function logFailureToTimeline(
       beschreibung: `Status ${status || '—'}. Bitte manuell nachziehen. Detail: ${detail}`,
     })
   } catch (err) {
-    console.error('[AAR-kanzlei] Timeline-Log fehlgeschlagen:', err)
+    console.error('[AAR-kanzlei-oauth] Timeline-Log fehlgeschlagen:', err)
   }
 }

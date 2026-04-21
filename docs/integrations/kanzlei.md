@@ -1,9 +1,15 @@
-# Kanzlei-Integration — Contract v0.1 (Draft)
+# Kanzlei-Integration — Contract v0.2 (Post-Meeting)
 
-Dieses Dokument beschreibt die bidirektionale API-Schnittstelle zwischen **Claimondo** und der Kanzlei-Software (LexDrive / Salesforce-intern). Es ist die Verhandlungsbasis für das Erst-Meeting mit dem Kanzlei-Entwickler.
+Dieses Dokument beschreibt die bidirektionale API-Schnittstelle zwischen **Claimondo** und der Kanzlei-Software (LexDrive / Salesforce-intern).
 
-**Stand:** 2026-04-21 (Draft, vor erstem Meeting)
+**Stand:** 2026-04-21 (v0.2, nach Meeting mit LexDrive-Dev)
 **Status:** nur Schritt 1 + 2 (Mandat anlegen + Vollmacht bestätigen). Alle weiteren Events folgen nach Go-Live.
+
+## Änderungen v0.1 → v0.2
+
+- **Outbound-Auth**: HMAC-SHA256 entfällt → ersetzt durch **Salesforce OAuth2 Password-Grant** auf `test.salesforce.com`. Password wird als `{password}{security_token}` konkateniert. Bearer-Token hat 5 Min TTL.
+- **Outbound-Payload**: `kunde.telefon` + `kunde.wa_faehig` ergänzt — Kanzlei versendet Vollmacht per WhatsApp an die Nummer.
+- **Inbound (vollmacht_bestaetigt)**: bleibt HMAC-geschützt; Confirmation-Hook-Details werden mit LexDrive/Meta abgesprochen.
 
 ---
 
@@ -46,20 +52,36 @@ Dieses Dokument beschreibt die bidirektionale API-Schnittstelle zwischen **Claim
 
 ---
 
-## 2. Endpoint (1): Outbound `POST /mandate`
+## 2. Endpoint (1): Outbound `POST /services/apexrest/mandate`
 
-**Von:** Claimondo → Kanzlei
+**Von:** Claimondo → Salesforce (Apex REST)
 **Trigger:** Kunde signiert SA im FlowLink (service_typ = `komplett`)
-**URL:** `${KANZLEI_API_URL}/mandate`
-**Auth:** HMAC-SHA256 Header (siehe §4)
+**URL:** `${SF_INSTANCE_URL}/services/apexrest/mandate` — `SF_INSTANCE_URL` kommt aus der OAuth-Token-Response (`instance_url`).
+**Auth:** Salesforce OAuth2 Password-Grant + Bearer-Token (siehe §4)
 
-### Request-Header
+### Vor-Auth: Token holen
+
+```
+POST https://test.salesforce.com/services/oauth2/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password
+&client_id={CLIENT_ID}
+&client_secret={CLIENT_SECRET}
+&username={USERNAME}
+&password={PASSWORD}{SECURITY_TOKEN}  ← konkateniert
+```
+
+Response `200` mit `{ access_token, instance_url, issued_at, ... }`.
+Token-TTL laut LexDrive-Dev: **5 Minuten** — Claimondo cached 4 Min in-memory pro Lambda.
+
+### Request-Header (Mandat-Push)
 
 | Header | Wert | Beschreibung |
 |---|---|---|
 | `Content-Type` | `application/json` | — |
-| `X-Claimondo-Signature` | `sha256=<hex>` | HMAC des Raw-Body mit Shared-Secret |
-| `X-Claimondo-Event-Id` | String | Idempotency-Key (UUIDv4). Bei Retry denselben Wert senden. |
+| `Authorization` | `Bearer <access_token>` | Aus OAuth-Token-Response |
+| `X-Claimondo-Event-Id` | UUID | Idempotency-Key (kanzleiseitig in Apex persistieren, siehe §9.1) |
 
 ### Request-Body
 
@@ -73,7 +95,9 @@ Dieses Dokument beschreibt die bidirektionale API-Schnittstelle zwischen **Claim
     "strasse": "Musterstraße 12",
     "plz": "10115",
     "stadt": "Berlin",
-    "email": "max.mustermann@example.de"
+    "email": "max.mustermann@example.de",
+    "telefon": "+491701234567",
+    "wa_faehig": true
   },
   "firma": false,
   "vorsteuerabzugsberechtigt": false,
@@ -96,6 +120,8 @@ Dieses Dokument beschreibt die bidirektionale API-Schnittstelle zwischen **Claim
 | `kunde.vorname`, `kunde.nachname` | string | ✅ | — |
 | `kunde.strasse`, `kunde.plz`, `kunde.stadt` | string\|null | optional | Wenn noch nicht im Lead erfasst |
 | `kunde.email` | string\|null | optional | Für WA-Fallback |
+| `kunde.telefon` | string\|null | ✅ | Claimondo setzt E.164-Format (`+49…`). Wird für WA-Vollmacht-Versand benötigt. |
+| `kunde.wa_faehig` | bool | ✅ | Claimondo setzt `true` nur wenn vor SA-Unterschrift erfolgreich per WA kommuniziert wurde. |
 | `firma` | bool | ✅ | Wenn `true`: Kunde ist Gewerbe |
 | `vorsteuerabzugsberechtigt` | bool | ✅ | Steuerrechtlich relevant für Regulierung |
 | `fahrzeug.kennzeichen` | string\|null | optional | Falls noch kein ZB1-OCR gelaufen |
@@ -191,20 +217,37 @@ Schadenshergang · Gegner-Daten · VS-Policennr · Polizei-Az · Gutachten · Fo
 
 ---
 
-## 4. HMAC-Authentifizierung (beide Richtungen)
+## 4. Authentifizierung
 
-### Prinzip
+### Outbound (Claimondo → Salesforce)
+Salesforce OAuth2 Password-Grant. Keine HMAC-Signatur nötig — der Bearer-Token
+übernimmt die Authentifizierung, Salesforce-Apex-REST validiert den Token
+serverseitig gegen die Connected-App-Scopes.
 
-Jeder Request wird mit einem **Shared-Secret** signiert. Empfänger berechnet dieselbe Signatur aus dem Raw-Body und vergleicht. Verhindert Manipulation + Fälschung.
+**Env-Variablen (Claimondo-Seite):**
 
-### Secrets (getrennt pro Richtung!)
-
-| Env-Variable | Wert | Wo gesetzt |
+| Env-Variable | Wert | Herkunft |
 |---|---|---|
-| `KANZLEI_API_URL` | `https://api.kanzlei.example/v1` | Claimondo (Outbound-Target) |
-| `KANZLEI_API_SECRET` | 64-char Hex, generiert von Kanzlei | Claimondo (Outbound-HMAC) |
-| `KANZLEI_API_ENABLED` | `"true"` | Claimondo (Feature-Flag) |
-| `LEXDRIVE_WEBHOOK_SECRET` | 64-char Hex, generiert von Claimondo | Kanzlei (Inbound-HMAC-Verify) |
+| `KANZLEI_API_ENABLED` | `"true"` | Feature-Flag (Claimondo) |
+| `KANZLEI_SF_AUTH_URL` | `https://test.salesforce.com/services/oauth2/token` (Staging) | SF-Standard |
+| `KANZLEI_SF_API_URL` | Fallback-Basis wenn `instance_url` fehlt (z. B. `https://test.salesforce.com`) | SF-Standard |
+| `KANZLEI_SF_USERNAME` | `aaron.sprafke@lex-drive.com.partial2` | LexDrive |
+| `KANZLEI_SF_PASSWORD` | User-Passwort (ohne Security-Token) | LexDrive |
+| `KANZLEI_SF_SECURITY_TOKEN` | SF-Security-Token des Users | LexDrive |
+| `KANZLEI_SF_CLIENT_ID` | Connected-App Consumer-Key | LexDrive |
+| `KANZLEI_SF_CLIENT_SECRET` | Connected-App Consumer-Secret | LexDrive (⚠️ aktuell offen) |
+
+### Inbound (Salesforce → Claimondo)
+Bleibt HMAC-SHA256. LexDrive-Dev stimmt den Confirmation-Hook mit Meta/Integration-
+Layer ab — finale Header-Benennung + Signatur-Algorithmus werden kurz vor Go-Live
+bestätigt. Claimondo erwartet aktuell `X-Lexdrive-Signature: sha256=<hex>` auf dem
+Raw-Body mit `LEXDRIVE_WEBHOOK_SECRET`.
+
+**Env-Variablen (Claimondo-Seite):**
+
+| Env-Variable | Wert | Herkunft |
+|---|---|---|
+| `LEXDRIVE_WEBHOOK_SECRET` | 64-char Hex | Claimondo generiert, teilt mit LexDrive |
 
 Generierung: `openssl rand -hex 32` → 64 Zeichen Hex-String.
 
