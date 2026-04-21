@@ -28,6 +28,8 @@ import { getFallEventStream } from '@/lib/fall/event-stream'
 import { getChatTeilnehmer } from '@/lib/chatGruppe'
 // AAR-542 (C5): Pflicht-Matrix — Katalog-Regel-Auswertung serverseitig
 import { evaluatePflichtdocs } from '@/lib/dokumente/pflicht-evaluator'
+// AAR-651: Zentrale Fall-Loader-Lib (Single Source of Truth pro Rolle)
+import { getFallById } from '@/lib/fall/queries'
 
 export default async function FallaktePage({
   params,
@@ -39,7 +41,8 @@ export default async function FallaktePage({
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  const { data: fall } = await supabase.from('v_faelle_mit_aktuellem_termin').select('*').eq('id', id).single()
+  // AAR-651: Zentrale Lib statt Direkt-Query — Single Source für Admin/KB/Kanzlei
+  const fall = await getFallById(supabase, id)
   if (!fall) notFound()
 
   // Rolle des eingeloggten Users für field-permissions
@@ -473,7 +476,7 @@ export default async function FallaktePage({
         </div>
       )}
       <FallakteShell
-        fall={fall}
+        fall={fall as Parameters<typeof FallakteShell>[0]['fall']}
         lead={leadResult.data}
         userRolle={userRolle}
         kundenbetreuer={kundenbetreuerResult.data}

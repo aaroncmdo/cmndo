@@ -4,6 +4,8 @@ import { redirect, notFound } from 'next/navigation'
 import FallDetailClient from './FallDetailClient'
 // AAR-327: Katalog-Slots die der SV anfordern darf + bestehende Anforderungen
 import { getAlleSlots } from '@/lib/dokumente/katalog'
+// AAR-651: Zentrale Fall-Loader-Lib
+import { getFallForSv } from '@/lib/fall/queries'
 
 export default async function GutachterFallPage({
   params,
@@ -21,13 +23,8 @@ export default async function GutachterFallPage({
   if (!sv) notFound()
 
   // Fetch case and verify sv_id match
-  const { data: fall } = await supabase
-    .from('v_faelle_mit_aktuellem_termin')
-    .select('*')
-    .eq('id', id)
-    .eq('sv_id', sv.id)
-    .single()
-
+  // AAR-651: Zentrale Lib — sv_id-Filter als Defense-in-Depth über RLS hinaus
+  const fall = await getFallForSv(supabase, id, (sv as { id: string }).id)
   if (!fall) notFound()
 
   // Fetch all related data in parallel
