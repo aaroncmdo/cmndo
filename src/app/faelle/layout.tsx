@@ -58,9 +58,10 @@ export default async function FaelleLayout({
   // Policy in Migration 20260421151144 limitiert die sichtbaren Fälle
   // zusätzlich auf service_typ='komplett'.
   if (rolle === 'kanzlei') {
+    // AAR-676: h-screen + overflow-hidden, nur Main scrollt. max-w-Cap weg.
     return (
-      <div className="min-h-screen bg-[#f8f9fb]">
-        <header className="bg-[#0D1B3E] px-4 py-3 flex items-center justify-between">
+      <div className="h-screen bg-[#f8f9fb] flex flex-col overflow-hidden">
+        <header className="bg-[#0D1B3E] px-4 py-3 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <span className="text-xl font-bold tracking-tight">
               <span className="text-white">Claim</span>
@@ -83,9 +84,11 @@ export default async function FaelleLayout({
             </form>
           </div>
         </header>
-        <div className="flex">
+        <div className="flex flex-1 min-h-0">
           <KanzleiNav />
-          <main className="flex-1 px-4 md:px-8 py-6 max-w-6xl">{children}</main>
+          <main className="flex-1 min-w-0 min-h-0 overflow-y-auto px-4 md:px-8 py-6">
+            {children}
+          </main>
         </div>
       </div>
     )
