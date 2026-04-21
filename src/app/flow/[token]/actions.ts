@@ -510,15 +510,34 @@ export async function signSAandCreateFall(
   }
 
   // 6. Lead-Status updaten
+  const nowIsoSa = new Date().toISOString()
   await admin.from('leads').update({
     status: 'umgewandelt',
     qualifizierungs_phase: 'abgeschlossen',
     sa_unterschrieben: true,
-    sa_datum: new Date().toISOString(),
+    sa_datum: nowIsoSa,
+    sa_unterschrieben_am: nowIsoSa,
     flow_link_abgeschlossen: true,
     konvertiert_zu_fall_id: fall.id,
-    updated_at: new Date().toISOString(),
+    updated_at: nowIsoSa,
   }).eq('id', leadId)
+
+  // AAR-694b: SA-Status auch auf den Fall propagieren — `syncSvCalendarEvent`
+  // liest faelle.sa_unterschrieben + vollmacht_signiert_am für die Entscheidung
+  // ob ein Event in den SV-Google-Kalender geschrieben wird.
+  await admin.from('faelle').update({
+    sa_unterschrieben: true,
+    sa_unterschrieben_am: nowIsoSa,
+  }).eq('id', fall.id)
+
+  // AAR-694b: SV-Google-Kalender-Events für alle aktiven Termine syncen.
+  // Bei service_typ='nur_gutachter' reicht SA → Event entsteht jetzt.
+  // Bei 'komplett' wartet syncSvCalendarEvent intern auf vollmacht_signiert_am.
+  import('@/lib/google-calendar/sv-event-sync').then(({ syncSvCalendarEventsForFall }) =>
+    syncSvCalendarEventsForFall(fall.id).catch((err) =>
+      console.warn('[signSAandCreateFall] syncSvCalendarEventsForFall:', err instanceof Error ? err.message : err),
+    ),
+  )
 
   // AAR-229 W4: SA-Unterschrift Mitteilung an Admin + SV
   try {
@@ -1057,6 +1076,14 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
     const { generateReminderForTermin } = await import('@/lib/reminders/generate')
     await generateReminderForTermin(termin.id)
   } catch (err) { console.error('[KFZ-136] Reminder-Gen nach Vollmacht:', err) }
+
+  // AAR-694b: Bei Komplettpaket war die Vollmacht der finale Trigger für den
+  // Google-Kalender-Event. Jetzt nachschreiben (für alle aktiven Termine).
+  import('@/lib/google-calendar/sv-event-sync').then(({ syncSvCalendarEventsForFall }) =>
+    syncSvCalendarEventsForFall(fallId).catch((err) =>
+      console.warn('[confirmVollmacht] syncSvCalendarEventsForFall:', err instanceof Error ? err.message : err),
+    ),
+  )
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

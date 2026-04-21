@@ -28,11 +28,17 @@ type TerminShape = {
 }
 
 /**
- * Decides what to do based on termin status:
- *   - status = 'bestaetigt' + not cancelled → create or update event
- *   - status = 'reserviert' → keine Aktion (erst bei Bestätigung syncen)
- *   - cancelled_at gesetzt → delete event wenn google_event_id vorhanden
- *   - status = 'abgelehnt' / 'storniert' → delete wenn vorhanden
+ * Decides what to do based on termin status + signature state of the fall:
+ *   - cancelled_at / status='abgelehnt'/'storniert'/'abgesagt' → delete event
+ *   - sonst nur Event erstellen wenn:
+ *       fall.sa_unterschrieben === true UND
+ *       (fall.service_typ !== 'komplett' ODER fall.vollmacht_signiert_am ist gesetzt)
+ *   - Reservierung intern (gutachter_termine status='reserviert') ohne SA →
+ *     KEIN Google-Event. Slot wird intern via gutachter_termine + AAR-264-
+ *     DB-Konflikt-Check geblockt; FreeBusy-Google ist zusätzliche Sicherung
+ *     gegen externe Termine des SV.
+ *   - Wenn die Bedingungen nicht (mehr) erfüllt sind und ein Event existiert
+ *     → Event löschen (defensiv, falls SA zurückgezogen wird).
  */
 export async function syncSvCalendarEvent(terminId: string): Promise<void> {
   const db = createAdminClient()
@@ -47,14 +53,31 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
   if (!termin) return
   const t = termin as unknown as TerminShape
 
-  const shouldDelete =
+  // Hard-Cancel: Event muss weg wenn vorhanden
+  const hardCancelled =
     !!t.cancelled_at ||
     t.status === 'abgelehnt' ||
     t.status === 'storniert' ||
     t.status === 'abgesagt'
 
-  const shouldCreate =
-    !shouldDelete && (t.status === 'bestaetigt' || t.status === 'reserviert')
+  // SA + ggf. Vollmacht-Status vom Fall laden — bestimmt ob Event geschrieben wird
+  let signaturesOk = false
+  if (!hardCancelled && t.fall_id && (t.status === 'bestaetigt' || t.status === 'reserviert')) {
+    const { data: fall } = await db
+      .from('faelle')
+      .select('sa_unterschrieben, vollmacht_signiert_am, service_typ')
+      .eq('id', t.fall_id)
+      .maybeSingle()
+    if (fall) {
+      const saOk = fall.sa_unterschrieben === true
+      const vollmachtOk =
+        fall.service_typ !== 'komplett' || !!fall.vollmacht_signiert_am
+      signaturesOk = saOk && vollmachtOk
+    }
+  }
+
+  const shouldDelete = hardCancelled || (!signaturesOk && !!t.google_event_id)
+  const shouldCreate = !hardCancelled && signaturesOk
 
   // Löschen: existierendes Event im SV-Kalender entfernen
   if (shouldDelete && t.google_event_id && t.sv_id) {
@@ -197,6 +220,26 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
       terminId,
       'fehlgeschlagen:',
       err instanceof Error ? err.message : err,
+    )
+  }
+}
+
+/**
+ * Sync für alle aktiven SV-Termine eines Falls. Wird nach SA-Unterschrift
+ * + Vollmacht-Unterschrift aufgerufen — falls vor der Unterschrift ein
+ * Termin reserviert/bestätigt war, wird das Event jetzt nachgeschrieben.
+ */
+export async function syncSvCalendarEventsForFall(fallId: string): Promise<void> {
+  const db = createAdminClient()
+  const { data: termine } = await db
+    .from('gutachter_termine')
+    .select('id')
+    .eq('fall_id', fallId)
+    .in('status', ['reserviert', 'bestaetigt'])
+    .is('cancelled_at', null)
+  for (const t of termine ?? []) {
+    await syncSvCalendarEvent(t.id as string).catch((err) =>
+      console.warn('[sv-event-sync] for-fall', fallId, t.id, err instanceof Error ? err.message : err),
     )
   }
 }
