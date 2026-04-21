@@ -11,7 +11,7 @@ import KarteHubClient, {
   type SvMarker,
   type CommunityMarker,
   type OrgMarker,
-} from './karte/KarteHubClient'
+} from './_karte/KarteHubClient'
 
 export const dynamic = 'force-dynamic'
 
