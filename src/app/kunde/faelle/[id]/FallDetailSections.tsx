@@ -37,11 +37,12 @@ type TabKey = (typeof TABS)[number]['key']
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export default function FallDetailSections({
-  fall, svName, svTelefon, kbName, dokumente, nachrichten, userId, chatTeilnehmer, aktiverTermin,
+  fall, svName, svTelefon, svVerifiziert = false, kbName, dokumente, nachrichten, userId, chatTeilnehmer, aktiverTermin,
 }: {
   fall: Record<string, unknown>
   svName: string | null
   svTelefon: string | null
+  svVerifiziert?: boolean
   kbName?: string | null
   dokumente: Dokument[]
   nachrichten: Nachricht[]
@@ -95,7 +96,15 @@ export default function FallDetailSections({
 
           {svName && (
             <Section title="Ihr Gutachter">
-              <InfoRow label="Name" value={svName} />
+              <div className="flex items-center gap-2">
+                <InfoRow label="Name" value={svName} />
+                {svVerifiziert && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                    Verifiziert
+                  </span>
+                )}
+              </div>
               {svTelefon && <InfoRow label="Telefon" value={svTelefon} />}
               {!!fall.sv_termin && <InfoRow label="Besichtigungstermin" value={fmtDateTime(fall.sv_termin as string)} />}
               {!!fall.besichtigungsort_adresse && <InfoRow label="Besichtigungsort" value={fall.besichtigungsort_adresse as string} />}
