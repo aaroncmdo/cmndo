@@ -293,3 +293,207 @@ Diese Punkte mit dem Kanzlei-Dev klären:
 - [ ] Kanzlei triggert Webhook `vollmacht_bestaetigt` nach Kundensignatur
 - [ ] `mandat_storniert`-Event-Type gemeinsam spezifizieren (wenn Kunde ablehnt / Timeout)
 - [ ] Monitoring: HMAC-Failures alarmieren auf beiden Seiten
+
+---
+
+## 9. Salesforce-spezifische Umsetzungs-Notizen (für den Kanzlei-Dev)
+
+Die Schnittstelle ist **plain REST + JSON + HMAC** — am Contract ändert Salesforce nichts. Aber die Kanzlei muss das SF-typische Plumbing drumherum bauen. Diese Sektion sammelt alles Salesforce-spezifische an einer Stelle.
+
+**Kern-Aussage:** Nicht Salesforce-Outbound-Messages verwenden (kein HMAC-Header-Support, kein Retry, XML statt JSON). Stattdessen Apex-REST + Apex-Callouts.
+
+### 9.1 Inbound-Endpoint `POST /mandate` bauen
+
+Drei Bauvarianten — eine wählen:
+
+| Variante | Wie | Aufwand | Passt wenn |
+|---|---|---|---|
+| **Apex REST Service** | `@RestResource(urlMapping='/mandate')` + `@HttpPost`-Methode | Klein (1-2 Tage) | Interner API-Traffic überschaubar, keine Middleware vorhanden |
+| **API-Gateway + Apex-Callout** | Nginx / AWS API-Gateway empfängt, validiert HMAC, pusht via REST in SF | Mittel | Bereits Gateway vorhanden, SF-Governor-Limits kritisch |
+| **MuleSoft / Boomi / iPaaS** | iPaaS macht HMAC-Verify + SF-Insert | Groß | Enterprise-iPaaS-Setup schon da |
+
+Apex-REST ist der Standard-Weg.
+
+**Must-haves bei Apex-REST:**
+
+- Raw-Body lesen über `RestContext.request.requestBody.toString()` — **nicht** das bereits geparste JSON-Objekt neu serialisieren, sonst kippt die HMAC-Signatur durch ein Leerzeichen oder andere Key-Reihenfolge
+- Idempotency-Key (`X-Claimondo-Event-Id`) in Custom-Object `Integration_Idempotency__c` persistieren mit Unique-Constraint. Bei Duplicate: gespeicherte `mandat_id` zurückgeben, HTTP 200, **kein** Re-Insert
+- HTTP 401 bei HMAC-Mismatch
+- Response-Body als JSON mit `{ "mandat_id": "KZ-2026-00417" }`
+
+**Apex-HMAC-Hex-Snippet (SHA256, Hex-Output):**
+
+```apex
+String body = RestContext.request.requestBody.toString();
+String secret = getSecretFromNamedCredentialOrCustomMetadata();
+
+Blob mac = Crypto.generateMac('HmacSHA256', Blob.valueOf(body), Blob.valueOf(secret));
+String signatureHex = EncodingUtil.convertToHex(mac);
+
+String providedHeader = RestContext.request.headers.get('X-Claimondo-Signature');
+String provided = providedHeader != null ? providedHeader.replace('sha256=', '') : null;
+
+if (provided == null || !constantTimeEquals(signatureHex, provided)) {
+    RestContext.response.statusCode = 401;
+    RestContext.response.responseBody = Blob.valueOf('{"error":"invalid_signature"}');
+    return;
+}
+
+// constantTimeEquals vermeidet Timing-Attacks. Einfache Apex-Implementation:
+private static Boolean constantTimeEquals(String a, String b) {
+    if (a == null || b == null || a.length() != b.length()) return false;
+    Integer diff = 0;
+    for (Integer i = 0; i < a.length(); i++) {
+        diff |= a.charAt(i) ^ b.charAt(i);
+    }
+    return diff == 0;
+}
+```
+
+**Idempotency-Check in Apex:**
+
+```apex
+String eventId = RestContext.request.headers.get('X-Claimondo-Event-Id');
+List<Integration_Idempotency__c> existing = [
+    SELECT Id, Response_Body__c
+    FROM Integration_Idempotency__c
+    WHERE Event_Id__c = :eventId
+    LIMIT 1
+];
+if (!existing.isEmpty()) {
+    RestContext.response.statusCode = 200;
+    RestContext.response.responseBody = Blob.valueOf(existing[0].Response_Body__c);
+    return;
+}
+// ... neuen Mandat anlegen ...
+insert new Integration_Idempotency__c(
+    Event_Id__c = eventId,
+    Response_Body__c = JSON.serialize(responsePayload)
+);
+```
+
+### 9.2 Outbound-Webhook triggern (SF → Claimondo)
+
+Zwei Varianten:
+
+| Variante | Wann greifen | Wie |
+|---|---|---|
+| **Platform-Event + Apex-Trigger** | Wenn `Vollmacht__c.Status` auf `bestaetigt` wechselt | Trigger ruft async `Queueable` mit `HttpCallout` |
+| **Flow + Apex-Invocable-Action** | Low-Code-Variante via Record-Triggered-Flow | Dieselbe Callout-Logik, nur Flow-Entry |
+
+**Wichtig: Apex-Callouts aus Triggers sind synchron NICHT erlaubt.** Salesforce wirft `CalloutException: You have uncommitted work pending`. Praktischer Ausweg: Trigger schreibt einen Row in `Integration_Outbound_Queue__c`, ein `Queueable`-Job liest die Queue und macht die Callouts async.
+
+**Muss drin sein:**
+
+- **Remote-Site-Setting** anlegen: Setup → Security → Remote Site Settings → Claimondo-Webhook-URL (Staging + Prod jeweils eigene Einträge)
+- HMAC-Signatur im Header `X-Lexdrive-Signature: sha256=<hex>`
+- HTTP-Timeout auf 120s (Default 10s ist zu niedrig bei Cold-Start)
+- Retry-Logic bei 5xx: 3× mit Backoff (Queueable chained, nicht inline sleepen — SF hat kein `sleep()`)
+- Callout-Log in `Integration_Webhook_Log__c` für Audit
+
+**Apex-Outbound-Snippet:**
+
+```apex
+public class VollmachtWebhookCallout implements Queueable, Database.AllowsCallouts {
+    private Id mandatId;
+    private Integer attempt;
+
+    public VollmachtWebhookCallout(Id mandatId, Integer attempt) {
+        this.mandatId = mandatId;
+        this.attempt = attempt;
+    }
+
+    public void execute(QueueableContext ctx) {
+        Mandat__c m = [SELECT Claimondo_Fall_Nr__c, Mandat_Id__c, Vollmacht_Signiert_Am__c
+                      FROM Mandat__c WHERE Id = :mandatId];
+        Map<String, Object> payload = new Map<String, Object>{
+            'event_id' => 'evt_' + GuidUtil.generate(),
+            'event_type' => 'vollmacht_bestaetigt',
+            'fall_nr' => m.Claimondo_Fall_Nr__c,
+            'mandat_id' => m.Mandat_Id__c,
+            'signiert_am' => m.Vollmacht_Signiert_Am__c
+        };
+        String body = JSON.serialize(payload);
+        String secret = getLexdriveWebhookSecret();
+        Blob mac = Crypto.generateMac('HmacSHA256', Blob.valueOf(body), Blob.valueOf(secret));
+        String signatureHex = EncodingUtil.convertToHex(mac);
+
+        HttpRequest req = new HttpRequest();
+        req.setEndpoint('callout:Claimondo_Webhook/api/webhooks/lexdrive');
+        req.setMethod('POST');
+        req.setHeader('Content-Type', 'application/json');
+        req.setHeader('X-Lexdrive-Signature', 'sha256=' + signatureHex);
+        req.setBody(body);
+        req.setTimeout(120000);
+
+        HttpResponse res = new Http().send(req);
+        if (res.getStatusCode() >= 500 && attempt < 3) {
+            // Retry mit Backoff via System.enqueueJob, Minimum-Delay simulieren
+            System.enqueueJob(new VollmachtWebhookCallout(mandatId, attempt + 1));
+        }
+        // Log
+        insert new Integration_Webhook_Log__c(
+            Mandat__c = mandatId,
+            Status_Code__c = res.getStatusCode(),
+            Attempt__c = attempt,
+            Response_Body__c = res.getBody().left(32000)
+        );
+    }
+}
+```
+
+Der Endpunkt `callout:Claimondo_Webhook` ist eine **Named Credential** — dadurch ist die URL konfigurierbar (Staging/Prod) ohne Code-Change.
+
+### 9.3 SF-Custom-Objects (Minimum-Datenmodell)
+
+| Object | Felder (Auswahl) | Zweck |
+|---|---|---|
+| `Mandat__c` | `Claimondo_Fall_Nr__c` (**External ID, Unique**), `Mandat_Id__c`, `Vollmacht_Signiert_Am__c`, `Status__c`, `Kunde__c` (Lookup→Account) | Zentrale Mandat-Row — ein Record pro Claimondo-Fall |
+| `Integration_Idempotency__c` | `Event_Id__c` (Unique), `Response_Body__c`, `Created_Date` (→ Scheduled-Job cleant >30 Tage alte) | Deduplizierung von Inbound-Webhooks |
+| `Integration_Webhook_Log__c` | `Mandat__c` (Lookup), `Direction__c` (in/out), `Event_Type__c`, `Status_Code__c`, `Request_Body__c`, `Response_Body__c`, `Attempt__c`, `Signature_Valid__c` | Audit-Trail für beide Richtungen — debugging-Gold bei Support-Anfragen |
+
+`Claimondo_Fall_Nr__c` als **External ID** zu kennzeichnen ist wichtig — dadurch können sie Upserts auf `Mandat__c` via Claimondo-Fall-Nr statt SF-Id machen.
+
+### 9.4 Secret-Management in SF
+
+**Niemals Secrets in Apex-Code**. SF bietet zwei saubere Wege:
+
+- **Named Credentials + External Credentials** (moderner Weg, SF-Winter-23+) — Secrets sind im Platform verschlüsselt gespeichert, per `callout:NamedCred` in Apex adressiert. Rotation ohne Code-Deploy möglich.
+- **Custom Metadata Types** — einfacher, aber Secret ist read-only für Admins sichtbar. Nur wenn External Credentials nicht verfügbar sind.
+
+**Vermeiden:**
+- `System.debug('Secret: ' + secret);` — Debug-Logs sind für alle SF-User mit Debug-Rechten readable
+- Secrets in Custom Settings — read-only via Profil-Permissions, aber nicht verschlüsselt in der DB
+
+### 9.5 Governor-Limits beachten
+
+Salesforce-typische Fallen:
+
+| Limit | Wert | Relevanz für Integration |
+|---|---|---|
+| Callouts pro Transaction | 100 | Bei Batch-Mandat-Anlage in einem Flow: async machen |
+| Callout-Timeout | 120s | Wir geben Cold-Start-Spielraum, reicht dicke |
+| Max Heap Size (sync) | 6 MB | Webhook-Body > 2 MB → problematisch. Unsere sind < 5 KB, OK |
+| Inbound REST-Request-Size | 6 MB | Selbe Grenze andersrum |
+| Future-Calls pro Transaction | 50 | Wenn Trigger mehrere Fälle batched anlegt: Queueable chained statt future-spray |
+
+### 9.6 Testing
+
+- **Sandbox** zeigt auf Claimondo-Staging-URL (`https://cmndo-staging.vercel.app/api/webhooks/lexdrive`)
+- **Apex-Tests** mit `HttpCalloutMock` für Outbound, `Test.startTest()`/`Test.stopTest()` für Queueable-Assertions
+- **End-to-End-Smoke-Test** durchlaufen:
+  1. Claimondo-Staging sendet `POST /mandate` → SF-Sandbox legt `Mandat__c` an
+  2. Manuell in SF-Sandbox `Vollmacht__c.Status = bestaetigt` setzen
+  3. Prüfen: SF-Queueable feuert Webhook an Claimondo-Staging
+  4. Prüfen: Claimondo-Staging-Fall hat Termin-Status `bestaetigt` + Reminder generiert
+
+### 9.7 Wahrscheinliche Fragen des Kanzlei-Devs
+
+| Frage | Antwort |
+|---|---|
+| „Muss ich `Lead` oder `Account` in SF anlegen?" | Kanzlei-Daten-Modell-Problem, nicht vom Contract vorgegeben — meistens Account + Contact für den Kunden, Custom-Object `Mandat__c` für das Mandat selbst |
+| „Wie lange soll `mandat_id` gültig sein?" | Permanent, solange der Mandat existiert. Nie ändern nach Erst-Vergabe |
+| „Können wir Salesforce-Outbound-Messages statt Apex-Callout nutzen?" | **Nein.** Outbound-Messages sind XML-only, kein HMAC-Header, kein konfigurierbarer Retry. Wir brauchen JSON + HMAC |
+| „Welche SF-API-Version reicht?" | ≥ v50 (Platform Events + Queueable + Named Credentials vorausgesetzt) |
+| „Was wenn SF-Callout timeout't?" | Queueable retry'd. Unser Webhook ist idempotent via `event_id` — Doppelsends werden auf unserer Seite deduped |
+| „Brauche ich eine dedizierte SF-Lizenz für den Integrationsuser?" | Ja — Integration-User mit „API Enabled" + „Apex REST Services" Profil-Permission, getrennt vom normalen User-Login |
