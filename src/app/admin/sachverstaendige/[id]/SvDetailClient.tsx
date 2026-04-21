@@ -7,8 +7,9 @@ import { toast } from 'sonner'
 import { updateSvProfile, resendWelcomeMail } from './actions'
 import { deactivateGutachter, reactivateGutachter } from '../karte/actions'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
-import { MapPinIcon, MailIcon, LockIcon, UnlockIcon } from 'lucide-react'
+import { MapPinIcon, MailIcon, LockIcon, UnlockIcon, IdCardIcon } from 'lucide-react'
 import { LoadingButton } from '@/components/ui/loading-button'
+import { QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN } from '../anlegen/constants'
 
 const PAKET_OPTIONS = [
   { value: 'standard', label: 'Standard (10 Fälle, 15km)' },
@@ -37,6 +38,15 @@ type SvData = {
   standortLng: number | null
   standortPlaceId: string
   paketUmkreisKm: number
+  // AAR SV-Konsolidierung: Qualifikations-/Spezifikations-Pflege migriert
+  // vom gelöschten GutachterProfilPanel. Admin kann jetzt direkt hier alles
+  // pflegen — bisher war das nur im Karten-Inline-Edit möglich der weg ist.
+  qualifikationen: string[]
+  spezifikationen: string[]
+  schadenarten: string[]
+  bvskMitgliedsnummer: string
+  ihkZertifikatNummer: string
+  oebuvBestellungsnummer: string
 }
 
 export default function SvDetailClient({ sv }: { sv: SvData }) {
@@ -52,6 +62,19 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
   const [sperrGrund, setSperrGrund] = useState('')
   const [showSperrDialog, setShowSperrDialog] = useState(false)
   const istGesperrt = !!sv.gesperrtSeit
+
+  // AAR SV-Konsolidierung: Qualifikations-/Spezifikations-State (Multi-Select).
+  // Migration vom gelöschten GutachterProfilPanel — Admin pflegt jetzt alles hier.
+  const [qualifikationen, setQualifikationen] = useState<string[]>(sv.qualifikationen)
+  const [spezifikationen, setSpezifikationen] = useState<string[]>(sv.spezifikationen)
+  const [schadenarten, setSchadenarten] = useState<string[]>(sv.schadenarten)
+  const [bvskNr, setBvskNr] = useState(sv.bvskMitgliedsnummer)
+  const [ihkNr, setIhkNr] = useState(sv.ihkZertifikatNummer)
+  const [oebuvNr, setOebuvNr] = useState(sv.oebuvBestellungsnummer)
+
+  function toggleTag(list: string[], setList: (v: string[]) => void, value: string) {
+    setList(list.includes(value) ? list.filter(x => x !== value) : [...list, value])
+  }
 
   function handleSperren() {
     if (!sperrGrund.trim() || sperrGrund.trim().length < 5) {
@@ -145,6 +168,13 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
       formData.set('standort_lat', standort.lat != null ? String(standort.lat) : '')
       formData.set('standort_lng', standort.lng != null ? String(standort.lng) : '')
       formData.set('standort_place_id', standort.place_id)
+      // AAR SV-Konsolidierung: Qualifikations-/Spezifikations-Arrays + Nummern
+      formData.set('qualifikationen_neu', JSON.stringify(qualifikationen))
+      formData.set('spezifikationen', JSON.stringify(spezifikationen))
+      formData.set('schadenarten', JSON.stringify(schadenarten))
+      formData.set('bvsk_mitgliedsnummer', bvskNr.trim())
+      formData.set('ihk_zertifikat_nummer', ihkNr.trim())
+      formData.set('oebuv_bestellungsnummer', oebuvNr.trim())
       await updateSvProfile(sv.id, sv.profileId, formData)
       setSuccess(true)
       router.refresh()
@@ -306,6 +336,68 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
           )}
         </div>
 
+        {/* AAR SV-Konsolidierung: Qualifikationen, Spezifikationen, Schadenarten
+            + Nummern-Felder (conditional bei Gruppe-B-Qualis). Migriert vom
+            gelöschten GutachterProfilPanel — hier ist jetzt der zentrale
+            Edit-Ort für alle Profil-Daten. */}
+        <div className="border border-gray-200 rounded-xl p-4 bg-gray-50/30 space-y-4">
+          <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Qualifikationen &amp; Spezialisierungen</h3>
+
+          <TagGroup
+            label="Qualifikationen"
+            hint="Was kann der SV fachlich anbieten?"
+            options={QUALIFIKATIONEN}
+            selected={qualifikationen}
+            onToggle={(v) => toggleTag(qualifikationen, setQualifikationen, v)}
+          />
+
+          {/* Conditional Nummern-Felder für Gruppe-B-Qualis */}
+          {(qualifikationen.includes('BVSK-Mitglied') || qualifikationen.includes('IHK-zertifiziert') || qualifikationen.includes('Öffentlich bestellt und vereidigt')) && (
+            <div className="rounded-lg border border-[#4573A2]/20 bg-[#4573A2]/5 px-3 py-2.5 space-y-2">
+              <div className="flex items-center gap-1.5">
+                <IdCardIcon className="w-3 h-3 text-[#4573A2]" />
+                <span className="text-[11px] font-semibold text-[#0D1B3E]">Quali-Nummern (optional)</span>
+              </div>
+              <div className="grid gap-2 md:grid-cols-2">
+                {qualifikationen.includes('BVSK-Mitglied') && (
+                  <label className="block">
+                    <span className="text-[10px] text-gray-600">BVSK-Mitgliedsnummer</span>
+                    <input type="text" value={bvskNr} onChange={e => setBvskNr(e.target.value)} placeholder="z.B. 12345" className={inputCls} />
+                  </label>
+                )}
+                {qualifikationen.includes('IHK-zertifiziert') && (
+                  <label className="block">
+                    <span className="text-[10px] text-gray-600">IHK-Zertifikats-Nummer</span>
+                    <input type="text" value={ihkNr} onChange={e => setIhkNr(e.target.value)} placeholder="z.B. IHK-SV-2024-12345" className={inputCls} />
+                  </label>
+                )}
+                {qualifikationen.includes('Öffentlich bestellt und vereidigt') && (
+                  <label className="block">
+                    <span className="text-[10px] text-gray-600">Bestellungsnummer</span>
+                    <input type="text" value={oebuvNr} onChange={e => setOebuvNr(e.target.value)} placeholder="z.B. IHK Köln 4711" className={inputCls} />
+                  </label>
+                )}
+              </div>
+            </div>
+          )}
+
+          <TagGroup
+            label="Spezifikationen"
+            hint="Fahrzeug-Arten + fachliche Spezialisierungen"
+            options={SPEZIFIKATIONEN}
+            selected={spezifikationen}
+            onToggle={(v) => toggleTag(spezifikationen, setSpezifikationen, v)}
+          />
+
+          <TagGroup
+            label="Schadenarten"
+            hint="Welche Arten von Schäden bearbeitet der SV?"
+            options={SCHADENARTEN}
+            selected={schadenarten}
+            onToggle={(v) => toggleTag(schadenarten, setSchadenarten, v)}
+          />
+        </div>
+
         <div>
           <label className="block text-gray-500 text-xs mb-1">Notizen</label>
           <textarea name="notizen" defaultValue={sv.notizen} rows={3} className={`${inputCls} resize-none`} placeholder="Interne Notizen ..." />
@@ -356,6 +448,51 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
             {resendNotice.text}
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+// AAR SV-Konsolidierung: Chip-Select-Gruppe für Multi-Value-Felder.
+// Identisches Pattern wie im Solo-Wizard (TagSection), aber ohne externen
+// Import damit hier keine Cross-File-Abhängigkeit entsteht.
+function TagGroup({
+  label,
+  hint,
+  options,
+  selected,
+  onToggle,
+}: {
+  label: string
+  hint: string
+  options: readonly string[]
+  selected: string[]
+  onToggle: (v: string) => void
+}) {
+  return (
+    <div>
+      <div className="mb-1.5">
+        <span className="block text-xs font-medium text-gray-700">{label}</span>
+        <span className="block text-[10px] text-gray-500">{hint}</span>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {options.map((opt) => {
+          const active = selected.includes(opt)
+          return (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => onToggle(opt)}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${
+                active
+                  ? 'bg-[#4573A2] text-white border-[#4573A2]'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              {opt}
+            </button>
+          )
+        })}
       </div>
     </div>
   )
