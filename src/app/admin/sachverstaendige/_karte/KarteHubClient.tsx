@@ -2,15 +2,17 @@
 
 // AAR-690: Karten-Rückbau. Google Maps statt Mapbox-3D. Ein Pin pro SV am
 // Büro-Standort, Isochrone-Polygon in derselben Typ-Farbe, Klick →
-// Detail-Drawer rechts mit allen Aktionen. Ersetzt den früheren 1100-Z.-
-// Hub mit Sidebar/Filter/FreeBusy/Live-Tracking.
+// Detail-Drawer rechts mit allen Aktionen.
+// AAR-690 v2: Liste rechts immer sichtbar, Hover-Highlight zwischen
+// Listen-Item / Pin / Polygon, fokus-aware Rendering.
 
 import { useEffect, useRef, useState, useTransition, useCallback } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import {
-  XIcon, MapPinIcon, PhoneIcon, MailIcon, ExternalLinkIcon,
+  XIcon, ExternalLinkIcon,
   RefreshCwIcon, ShieldOffIcon, ShieldCheckIcon, TrashIcon, Loader2Icon,
+  SearchIcon,
 } from 'lucide-react'
 import {
   reactivateGutachter,
@@ -88,7 +90,7 @@ function typColor(typ: string | null | undefined): { fill: string; label: string
   return TYP_COLORS[typ ?? 'kfz-gutachter'] ?? TYP_COLORS['kfz-gutachter']
 }
 
-// ─── Google-Maps-Loader (gleiches Pattern wie IsochronePreviewMap) ──────────
+// ─── Google-Maps-Loader ─────────────────────────────────────────────────────
 
 function loadMaps(apiKey: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -109,8 +111,30 @@ function loadMaps(apiKey: string): Promise<void> {
   })
 }
 
-// Deutschland-Mittelpunkt als Fallback-Center
 const GERMANY_CENTER = { lat: 51.1657, lng: 10.4515 }
+
+// Marker + Polygon Styles pro Zustand
+function markerIcon(color: string, hovered: boolean) {
+  return {
+    path: google.maps.SymbolPath.CIRCLE,
+    scale: hovered ? 13 : 10,
+    fillColor: color,
+    fillOpacity: 1,
+    strokeColor: hovered ? '#0D1B3E' : '#fff',
+    strokeWeight: hovered ? 3.5 : 3,
+  }
+}
+
+function polygonOptions(color: string, hovered: boolean): google.maps.PolygonOptions {
+  return {
+    strokeColor: color,
+    strokeOpacity: hovered ? 1 : 0.8,
+    strokeWeight: hovered ? 2.5 : 1.5,
+    fillColor: color,
+    fillOpacity: hovered ? 0.28 : 0.12,
+    zIndex: hovered ? 99 : 1,
+  }
+}
 
 type Props = {
   svs: SvMarker[]
@@ -122,15 +146,14 @@ export default function KarteHubClient({ svs }: Props) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<google.maps.Map | null>(null)
-  const markersRef = useRef<Map<string, google.maps.Marker>>(new Map())
-  const polygonsRef = useRef<Map<string, google.maps.Polygon>>(new Map())
+  const markersRef = useRef<globalThis.Map<string, google.maps.Marker>>(new globalThis.Map())
+  const polygonsRef = useRef<globalThis.Map<string, google.maps.Polygon>>(new globalThis.Map())
   const [mapReady, setMapReady] = useState(false)
   const [selectedSv, setSelectedSv] = useState<SvMarker | null>(null)
+  const [hoveredSvId, setHoveredSvId] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
 
-  // Nur SVs die auf der Karte sichtbar sein sollen:
-  //   - freigeschaltet
-  //   - nicht gesperrt
-  //   - Koordinaten vorhanden
+  // Nur freigeschaltete + nicht gesperrte SVs mit Koordinaten
   const visibleSvs = svs.filter(
     (s) =>
       s.portalZugangFreigeschaltet === true &&
@@ -138,6 +161,14 @@ export default function KarteHubClient({ svs }: Props) {
       s.lat != null &&
       s.lng != null,
   )
+
+  const filteredList = search.trim()
+    ? visibleSvs.filter((s) =>
+        s.name.toLowerCase().includes(search.toLowerCase()) ||
+        (s.paket ?? '').toLowerCase().includes(search.toLowerCase()) ||
+        (s.gutachterTyp ?? '').toLowerCase().includes(search.toLowerCase()),
+      )
+    : visibleSvs
 
   // ─── Map initialisieren ─────────────────────────────────────────────────
 
@@ -158,17 +189,16 @@ export default function KarteHubClient({ svs }: Props) {
         ],
       })
       setMapReady(true)
-    }).catch(() => { /* silent — Fallback-Hinweis unten */ })
+    }).catch(() => { /* silent */ })
     return () => { cancelled = true }
   }, [apiKey])
 
-  // ─── Pins + Polygone rendern / aktualisieren ─────────────────────────────
+  // ─── Pins + Polygone aufbauen ───────────────────────────────────────────
 
   useEffect(() => {
     if (!mapRef.current || !mapReady) return
     const map = mapRef.current
 
-    // Aktuelle Marker/Polygone aus der Map entfernen
     markersRef.current.forEach((m) => m.setMap(null))
     markersRef.current.clear()
     polygonsRef.current.forEach((p) => p.setMap(null))
@@ -182,36 +212,28 @@ export default function KarteHubClient({ svs }: Props) {
       if (sv.lat == null || sv.lng == null) continue
       const color = typColor(sv.gutachterTyp).fill
 
-      // Pin
       const marker = new google.maps.Marker({
         position: { lat: sv.lat, lng: sv.lng },
         map,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 10,
-          fillColor: color,
-          fillOpacity: 1,
-          strokeColor: '#fff',
-          strokeWeight: 3,
-        },
+        icon: markerIcon(color, false),
         title: sv.name,
       })
       marker.addListener('click', () => setSelectedSv(sv))
+      marker.addListener('mouseover', () => setHoveredSvId(sv.id))
+      marker.addListener('mouseout', () => setHoveredSvId(null))
       markersRef.current.set(sv.id, marker)
 
-      // Isochrone-Polygon (nur wenn vorhanden + GeoJSON-Format)
       if (sv.isochrone && sv.isochrone.type === 'Polygon' && sv.isochrone.coordinates?.[0]) {
         const ring = sv.isochrone.coordinates[0].map(([lng, lat]) => ({ lat, lng }))
         const polygon = new google.maps.Polygon({
+          ...polygonOptions(color, false),
           paths: ring,
-          strokeColor: color,
-          strokeOpacity: 0.8,
-          strokeWeight: 1.5,
-          fillColor: color,
-          fillOpacity: 0.12,
           map,
-          clickable: false,
+          clickable: true,
         })
+        polygon.addListener('click', () => setSelectedSv(sv))
+        polygon.addListener('mouseover', () => setHoveredSvId(sv.id))
+        polygon.addListener('mouseout', () => setHoveredSvId(null))
         polygonsRef.current.set(sv.id, polygon)
         for (const p of ring) bounds.extend(p)
       } else {
@@ -219,11 +241,22 @@ export default function KarteHubClient({ svs }: Props) {
       }
     }
 
-    // Map auf alle Pins zentrieren
     if (!bounds.isEmpty()) {
       map.fitBounds(bounds, 40)
     }
   }, [visibleSvs, mapReady])
+
+  // ─── Hover-State auf Pins + Polygone projizieren ───────────────────────
+
+  useEffect(() => {
+    if (!mapReady) return
+    for (const sv of visibleSvs) {
+      const color = typColor(sv.gutachterTyp).fill
+      const hovered = hoveredSvId === sv.id
+      markersRef.current.get(sv.id)?.setIcon(markerIcon(color, hovered))
+      polygonsRef.current.get(sv.id)?.setOptions(polygonOptions(color, hovered))
+    }
+  }, [hoveredSvId, visibleSvs, mapReady])
 
   // ─── Early-Returns ───────────────────────────────────────────────────────
 
@@ -236,27 +269,23 @@ export default function KarteHubClient({ svs }: Props) {
   }
 
   return (
-    <div className="h-full flex flex-col bg-white rounded-xl overflow-hidden border border-gray-200 relative">
-      {/* Header-Bar mit Legende + Anlegen-Button */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200 bg-[#f8f9fb]/60 shrink-0">
-        <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold text-gray-900">Sachverständige</h2>
-          <span className="text-xs text-gray-500">
-            {visibleSvs.length} von {svs.length} aktiv
-          </span>
-        </div>
-        <div className="flex items-center gap-4">
-          {/* Typ-Legende */}
-          <div className="hidden md:flex items-center gap-3 text-[11px] text-gray-600">
-            {Object.entries(TYP_COLORS).map(([k, v]) => (
-              <div key={k} className="flex items-center gap-1.5">
-                <span
-                  className="w-2.5 h-2.5 rounded-full"
-                  style={{ backgroundColor: v.fill }}
-                />
-                {v.label}
-              </div>
-            ))}
+    <div className="h-full flex flex-col lg:flex-row bg-white rounded-xl overflow-hidden border border-gray-200 relative">
+      {/* Linker Bereich: Header + Karte */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200 bg-[#f8f9fb]/60 shrink-0">
+          <div className="flex items-center gap-3">
+            <h2 className="text-sm font-semibold text-gray-900">Sachverständige</h2>
+            <span className="text-xs text-gray-500">
+              {visibleSvs.length} aktiv
+            </span>
+            <div className="hidden md:flex items-center gap-3 text-[11px] text-gray-600 ml-2">
+              {Object.entries(TYP_COLORS).map(([k, v]) => (
+                <div key={k} className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: v.fill }} />
+                  {v.label}
+                </div>
+              ))}
+            </div>
           </div>
           <Link
             href="/admin/sachverstaendige/anlegen"
@@ -265,12 +294,100 @@ export default function KarteHubClient({ svs }: Props) {
             + Neuer SV
           </Link>
         </div>
+        <div ref={containerRef} className="flex-1 min-h-[400px]" />
       </div>
 
-      {/* Map */}
-      <div ref={containerRef} className="flex-1 min-h-0" />
+      {/* Rechte Spalte: Liste */}
+      <aside className="lg:w-[320px] shrink-0 border-t lg:border-t-0 lg:border-l border-gray-200 bg-[#f8f9fb] flex flex-col">
+        <div className="p-3 border-b border-gray-200 bg-white shrink-0">
+          <div className="relative">
+            <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="SV suchen (Name, Paket, Typ)"
+              className="w-full pl-7 pr-2 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+            />
+          </div>
+          <p className="text-[10px] text-gray-400 mt-1.5">
+            {filteredList.length} von {visibleSvs.length}
+          </p>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          {filteredList.length === 0 && (
+            <p className="px-4 py-6 text-xs text-gray-400 text-center">
+              Keine SVs gefunden
+            </p>
+          )}
+          {filteredList.map((sv) => {
+            const color = typColor(sv.gutachterTyp)
+            const isHovered = hoveredSvId === sv.id
+            const isSelected = selectedSv?.id === sv.id
+            return (
+              <button
+                key={sv.id}
+                type="button"
+                onMouseEnter={() => setHoveredSvId(sv.id)}
+                onMouseLeave={() => setHoveredSvId(null)}
+                onClick={() => setSelectedSv(sv)}
+                className={`w-full text-left px-3 py-2.5 border-b border-gray-100 transition-colors ${
+                  isSelected
+                    ? 'bg-[#4573A2]/10 border-l-2 border-l-[#4573A2]'
+                    : isHovered
+                      ? 'bg-white'
+                      : 'hover:bg-white'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  {sv.avatarUrl ? (
+                    <img
+                      src={sv.avatarUrl}
+                      alt=""
+                      className="w-8 h-8 rounded-full object-cover shrink-0 ring-2"
+                      style={{ borderColor: color.fill }}
+                    />
+                  ) : (
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[11px] font-semibold shrink-0"
+                      style={{ backgroundColor: color.fill }}
+                    >
+                      {(sv.vorname?.[0] ?? '') + (sv.nachname?.[0] ?? '') || '?'}
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-gray-900 truncate">{sv.name}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span
+                        className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded"
+                        style={{ backgroundColor: `${color.fill}15`, color: color.fill }}
+                      >
+                        {color.label}
+                      </span>
+                      {sv.paket && (
+                        <span className="text-[9px] text-gray-400">· {sv.paket}</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-0.5 text-[9px]">
+                    {sv.verifiziert && (
+                      <span className="text-emerald-600">✓ verif.</span>
+                    )}
+                    {(sv.offeneFaelle ?? 0) > 0 && (
+                      <span className="text-gray-500 tabular-nums">
+                        {sv.offeneFaelle}/{sv.maxFaelleMonat ?? '?'}
+                      </span>
+                    )}
+                    {sv.urlaubVon && (
+                      <span className="text-amber-600">Urlaub</span>
+                    )}
+                  </div>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </aside>
 
-      {/* Detail-Drawer rechts */}
       {selectedSv && (
         <SvDetailDrawer
           sv={selectedSv}
@@ -292,7 +409,6 @@ function SvDetailDrawer({ sv, onClose }: { sv: SvMarker; onClose: () => void }) 
     getOpenCasesCount(sv.id).then(setOpenCases).catch(() => setOpenCases(null))
   }, [sv.id])
 
-  // ESC schließt den Drawer
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -370,30 +486,24 @@ function SvDetailDrawer({ sv, onClose }: { sv: SvMarker; onClose: () => void }) 
 
   return (
     <>
-      {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/20 z-40"
         onClick={onClose}
         aria-hidden
       />
-      {/* Drawer */}
       <aside
         role="dialog"
         aria-label={`Details zu ${sv.name}`}
-        className="fixed right-0 top-0 h-screen w-full sm:w-[420px] bg-white shadow-2xl z-50 flex flex-col animate-[slideIn_180ms_ease-out]"
+        className="fixed right-0 top-0 h-screen w-full sm:w-[420px] bg-white shadow-2xl z-50 flex flex-col"
         style={{ animation: 'slideIn 180ms ease-out' }}
       >
-        {/* Header mit Typ-Farbe */}
         <div
           className="px-5 py-4 border-b border-gray-200 flex items-start justify-between gap-3"
           style={{ borderTopColor: color.fill, borderTopWidth: 4 }}
         >
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span
-                className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
-                style={{ backgroundColor: color.fill }}
-              />
+              <span className="inline-block w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color.fill }} />
               <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
                 {color.label}
               </span>
@@ -418,70 +528,42 @@ function SvDetailDrawer({ sv, onClose }: { sv: SvMarker; onClose: () => void }) 
           </button>
         </div>
 
-        {/* Body scrollbar */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
-          {/* Status-Grid */}
           <section>
-            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">
-              Status
-            </h4>
+            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Status</h4>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <StatusPill
-                label="Portal freigeschaltet"
-                on={sv.portalZugangFreigeschaltet === true}
-              />
-              <StatusPill
-                label="Vertrag unterschrieben"
-                on={sv.vertragUnterschrieben === true}
-              />
-              <StatusPill
-                label="Verifiziert"
-                on={sv.verifiziert === true}
-              />
-              <StatusPill
-                label={isGesperrt ? 'Gesperrt' : 'Aktiv'}
-                on={!isGesperrt}
-                danger={isGesperrt}
-              />
+              <StatusPill label="Portal freigeschaltet" on={sv.portalZugangFreigeschaltet === true} />
+              <StatusPill label="Vertrag unterschrieben" on={sv.vertragUnterschrieben === true} />
+              <StatusPill label="Verifiziert" on={sv.verifiziert === true} />
+              <StatusPill label={isGesperrt ? 'Gesperrt' : 'Aktiv'} on={!isGesperrt} danger={isGesperrt} />
             </div>
             {sv.urlaubVon && sv.urlaubBis && (
               <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 mt-2">
-                Urlaub {new Date(sv.urlaubVon).toLocaleDateString('de-DE')} –{' '}
-                {new Date(sv.urlaubBis).toLocaleDateString('de-DE')}
+                Urlaub {new Date(sv.urlaubVon).toLocaleDateString('de-DE')} – {new Date(sv.urlaubBis).toLocaleDateString('de-DE')}
               </p>
             )}
           </section>
 
-          {/* Kontingent */}
           {(sv.maxFaelleMonat ?? 0) > 0 && (
             <section>
-              <h4 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">
-                Fallkontingent
-              </h4>
+              <h4 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Fallkontingent</h4>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-gray-900">
-                  {sv.offeneFaelle ?? 0}
-                </span>
+                <span className="text-2xl font-bold text-gray-900">{sv.offeneFaelle ?? 0}</span>
                 <span className="text-gray-400">/</span>
                 <span className="text-gray-600">{sv.maxFaelleMonat} im Monat</span>
               </div>
               <p className="text-[11px] text-gray-500 mt-1">
                 {openCases != null ? `${openCases} offene Fälle` : ''}
                 {(sv.ablehnungen30Tage ?? 0) > 0 && (
-                  <span className="ml-2 text-red-600">
-                    · {sv.ablehnungen30Tage} Ablehnungen (30 T.)
-                  </span>
+                  <span className="ml-2 text-red-600">· {sv.ablehnungen30Tage} Ablehnungen (30 T.)</span>
                 )}
               </p>
             </section>
           )}
 
-          {/* Qualifikationen */}
           {(sv.bvskNr || sv.ihkNr || sv.oebuvNr) && (
             <section>
-              <h4 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">
-                Qualifikationen
-              </h4>
+              <h4 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Qualifikationen</h4>
               <div className="space-y-1 text-xs text-gray-700">
                 {sv.bvskNr && <div>BVSK: <span className="font-mono">{sv.bvskNr}</span></div>}
                 {sv.ihkNr && <div>IHK: <span className="font-mono">{sv.ihkNr}</span></div>}
@@ -490,28 +572,22 @@ function SvDetailDrawer({ sv, onClose }: { sv: SvMarker; onClose: () => void }) 
             </section>
           )}
 
-          {/* Notizen */}
           {sv.notizen && (
             <section>
-              <h4 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">
-                Notizen
-              </h4>
+              <h4 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Notizen</h4>
               <p className="text-xs text-gray-700 whitespace-pre-wrap">{sv.notizen}</p>
             </section>
           )}
 
-          {/* Aktionen */}
           <section>
-            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">
-              Aktionen
-            </h4>
+            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Aktionen</h4>
             <div className="grid grid-cols-1 gap-2">
               <Link
                 href={`/admin/sachverstaendige/${sv.id}`}
                 className="flex items-center justify-between text-xs font-medium px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-700"
               >
                 <span className="flex items-center gap-2">
-                  <ExternalLinkIcon className="w-3.5 h-3.5" /> Profil öffnen
+                  <ExternalLinkIcon className="w-3.5 h-3.5" /> Volles Profil öffnen
                 </span>
               </Link>
 
@@ -576,8 +652,6 @@ function SvDetailDrawer({ sv, onClose }: { sv: SvMarker; onClose: () => void }) 
     </>
   )
 }
-
-// ─── UI-Helper ─────────────────────────────────────────────────────────────
 
 function StatusPill({ label, on, danger }: { label: string; on: boolean; danger?: boolean }) {
   return (
