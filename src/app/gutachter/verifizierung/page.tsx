@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ShieldCheckIcon, CheckCircleIcon, ClockIcon, XCircleIcon, AlertTriangleIcon, FileTextIcon, IdCardIcon } from 'lucide-react'
+import QualiSlotUpload from './QualiSlotUpload'
 
 // AAR-359 W5 + AAR-515 v4.1: Verifizierungs-Übersicht für SVs.
 // Read-only — zeigt SA-Vorlage-Status und Tier-2-Frist plus die
@@ -23,6 +24,9 @@ type QualiSlot = {
   hochgeladenAm: string | null
   nummer: string | null
   nummerLabel: string | null
+  // AAR-647: pflicht=true für Abtretungs-Slots (nicht Quali-abhängig),
+  // false für die conditional Tier-2-Slots die an Quali-Auswahl hängen.
+  pflicht: boolean
 }
 
 export default async function VerifizierungPage() {
@@ -41,8 +45,30 @@ export default async function VerifizierungPage() {
   if (!sv) redirect('/gutachter/willkommen')
 
   // AAR-515: Conditional Slots abhängig von Quali-Auswahl + gutachter_typ
+  // AAR-647: Plus fixe Abtretungs-Slots die jeder SV im Onboarding hochlädt
   const qualis = (sv.qualifikationen_neu as string[] | null) ?? []
-  const conditionalSlots: Array<{ slotId: string; label: string; quali: string; nummer: string | null; nummerLabel: string }> = []
+  const conditionalSlots: Array<{ slotId: string; label: string; quali: string | null; nummer: string | null; nummerLabel: string | null; pflicht: boolean }> = []
+
+  // AAR-647: Abtretungs-Pflicht-Slots (immer für jeden SV, unabhängig von Quali)
+  conditionalSlots.push(
+    {
+      slotId: 'sv_abtretungserklaerung',
+      label: 'Sachverständigen-Abtretungserklärung',
+      quali: null,
+      nummer: null,
+      nummerLabel: null,
+      pflicht: true,
+    },
+    {
+      slotId: 'sv_sicherungsabtretung',
+      label: 'Sicherungsabtretung',
+      quali: null,
+      nummer: null,
+      nummerLabel: null,
+      pflicht: true,
+    },
+  )
+
   if (qualis.includes('BVSK-Mitglied')) {
     conditionalSlots.push({
       slotId: 'sv_bvsk_mitgliedschaft',
@@ -50,6 +76,7 @@ export default async function VerifizierungPage() {
       quali: 'BVSK-Mitglied',
       nummer: sv.bvsk_mitgliedsnummer ?? null,
       nummerLabel: 'BVSK-Mitgliedsnummer',
+      pflicht: false,
     })
   }
   if (qualis.includes('IHK-zertifiziert')) {
@@ -59,6 +86,7 @@ export default async function VerifizierungPage() {
       quali: 'IHK-zertifiziert',
       nummer: sv.ihk_zertifikat_nummer ?? null,
       nummerLabel: 'IHK-Zertifikats-Nummer',
+      pflicht: false,
     })
   }
   if (qualis.includes('Öffentlich bestellt und vereidigt')) {
@@ -68,6 +96,7 @@ export default async function VerifizierungPage() {
       quali: 'Öffentlich bestellt und vereidigt',
       nummer: sv.oebuv_bestellungsnummer ?? null,
       nummerLabel: 'Bestellungsnummer',
+      pflicht: false,
     })
   }
   if (sv.gutachter_typ === 'dat-gutachter') {
@@ -77,6 +106,7 @@ export default async function VerifizierungPage() {
       quali: 'DAT-Expert',
       nummer: null,
       nummerLabel: 'DAT-Nummer',
+      pflicht: false,
     })
   }
 
@@ -101,6 +131,7 @@ export default async function VerifizierungPage() {
       slotId: s.slotId,
       label: s.label,
       quali: s.quali,
+      pflicht: s.pflicht,
       status: row?.status ?? null,
       hochgeladenAm: row?.hochgeladenAm ?? null,
       nummer: s.nummer,
@@ -207,43 +238,66 @@ export default async function VerifizierungPage() {
         )}
       </section>
 
-      {/* AAR-515: Conditional Tier-2-Slots — BVSK / IHK / öbuv / DAT */}
+      {/* AAR-515 + AAR-647: Abtretungs-Pflicht + Conditional Tier-2-Slots */}
       {qualiSlots.length > 0 && (
         <section className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
           <div>
-            <h2 className="text-base font-semibold text-[var(--brand-primary)]">Qualifikations-Nachweise</h2>
+            <h2 className="text-base font-semibold text-[var(--brand-primary)]">Pflicht-Dokumente &amp; Qualifikations-Nachweise</h2>
             <p className="text-xs text-gray-500">
-              Ihre ausgewählten Qualifikationen erscheinen in der Kundenkommunikation erst, wenn der jeweilige Nachweis vom Admin freigegeben wurde.
+              Abtretungen sind im Onboarding verpflichtend. Qualifikations-Nachweise erscheinen in der Kundenkommunikation erst nach Admin-Freigabe.
             </p>
           </div>
 
           <div className="divide-y divide-gray-100">
-            {qualiSlots.map(slot => (
-              <div key={slot.slotId} className="py-3 flex items-start justify-between gap-3">
-                <div className="flex items-start gap-2.5 flex-1 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-[#4573A2]/10 flex items-center justify-center shrink-0">
-                    <FileTextIcon className="w-4 h-4 text-[#4573A2]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">{slot.label}</p>
-                    <p className="text-[11px] text-gray-500">
-                      Schaltet Quali „{slot.quali}" in Kundenkommunikation frei
-                    </p>
-                    {slot.nummer && (
-                      <p className="text-[11px] text-gray-600 mt-1 flex items-center gap-1">
-                        <IdCardIcon className="w-3 h-3" />
-                        {slot.nummerLabel}: <span className="font-mono">{slot.nummer}</span>
+            {qualiSlots.map(slot => {
+              const istFreigegeben = slot.status === 'geprueft'
+              const istHochgeladen = slot.status === 'hochgeladen' || !!slot.hochgeladenAm
+              return (
+                <div key={slot.slotId} className="py-3 flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-[#4573A2]/10 flex items-center justify-center shrink-0">
+                      <FileTextIcon className="w-4 h-4 text-[#4573A2]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900">
+                        {slot.label}
+                        {slot.pflicht && (
+                          <span className="ml-2 text-[10px] text-red-600 font-semibold">Pflicht</span>
+                        )}
                       </p>
-                    )}
+                      {slot.quali ? (
+                        <p className="text-[11px] text-gray-500">
+                          Schaltet Quali „{slot.quali}" in Kundenkommunikation frei
+                        </p>
+                      ) : (
+                        <p className="text-[11px] text-gray-500">
+                          Wird vom Admin geprüft und freigegeben
+                        </p>
+                      )}
+                      {slot.nummer && (
+                        <p className="text-[11px] text-gray-600 mt-1 flex items-center gap-1">
+                          <IdCardIcon className="w-3 h-3" />
+                          {slot.nummerLabel}: <span className="font-mono">{slot.nummer}</span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <QualiSlotBadge status={slot.status} hochgeladenAm={slot.hochgeladenAm} />
+                    {/* AAR-647: Upload-Button pro Slot — disable nach Freigabe */}
+                    <QualiSlotUpload
+                      slotId={slot.slotId}
+                      disabled={istFreigegeben}
+                      label={istHochgeladen ? 'Neu hochladen' : 'Hochladen'}
+                    />
                   </div>
                 </div>
-                <QualiSlotBadge status={slot.status} hochgeladenAm={slot.hochgeladenAm} />
-              </div>
-            ))}
+              )
+            })}
           </div>
 
           <p className="text-[11px] text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
-            Upload der Nachweise erfolgt im Willkommen-Flow — falls Sie Nachweise nachreichen müssen, wendet sich der Admin mit einer Aufforderung + Frist an Sie.
+            Pro Upload wird automatisch ein Prüf-Task beim Admin erstellt. Nach Freigabe ändert sich der Status auf „Freigegeben".
           </p>
         </section>
       )}
