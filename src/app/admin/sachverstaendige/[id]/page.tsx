@@ -135,8 +135,20 @@ export default async function SvDetailPage({
       // Counts waren immer 0.
       const uploadCounts: Record<string, number> = {}
 
-      const verifizierungsSlots = alleSlots.filter(s =>
-        s.kategorie === 'gutachter_verifizierung' && s.slot_id !== 'sv_sa_vorlage',
+      // AAR-691: Nur Tier-2-Verifizierungs-Slots anzeigen, die echte
+      // Qualifikations-Nachweise sind. SA-Vorlage ist Tier 1 (separates UI).
+      // Abtretungserklärung + Sicherungsabtretung sind Vertrags-Dokumente
+      // (laufen außerhalb der Verifikation) — Admin hat sie nicht im
+      // Verifizierungs-Flow freizugeben.
+      const VERIFIZIERUNG_HIDDEN_SLOTS = new Set([
+        'sv_sa_vorlage',
+        'sv_abtretungserklaerung',
+        'sv_sicherungsabtretung',
+      ])
+      const verifizierungsSlots = alleSlots.filter(
+        (s) =>
+          s.kategorie === 'gutachter_verifizierung' &&
+          !VERIFIZIERUNG_HIDDEN_SLOTS.has(s.slot_id),
       )
       // AAR-515: Nummer-Mapping pro Slot. Admin sieht Nummer + Dokument
       // nebeneinander beim Prüfen — Plausibilisierungs-Hilfe.
