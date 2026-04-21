@@ -176,3 +176,191 @@ export async function requestCardentityTypBForFall(
   if (result.success) revalidatePath(`/faelle/${fallId}`)
   return result
 }
+
+// AAR-684 Phase 2: Datei-Uploads + Anschlussschreiben-OCR + Pflichtdok-Status.
+
+const KATEGORIE_SICHTBARKEIT: Record<string, string[]> = {
+  kundendokument: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
+  schadensfoto: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
+  gutachten: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  'gutachter-foto': ['admin', 'kundenbetreuer', 'sachverstaendiger'],
+  kanzlei: ['admin', 'kundenbetreuer', 'kunde', 'kanzlei'],
+  unterschrift: ['admin', 'kundenbetreuer', 'kanzlei'],
+  sonstiges: ['admin', 'kundenbetreuer'],
+  'whatsapp-foto': ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
+}
+
+export async function uploadDatei(fallId: string, formData: FormData) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const file = formData.get('file') as File | null
+  if (!file || !(file instanceof File)) throw new Error('Keine Datei ausgewaehlt')
+
+  const kategorie = (formData.get('kategorie') as string) || 'sonstiges'
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('rolle')
+    .eq('id', user.id)
+    .single()
+  const hochgeladen_von_rolle = profile?.rolle ?? 'admin'
+
+  const sichtbar_fuer = KATEGORIE_SICHTBARKEIT[kategorie] ?? ['admin', 'kundenbetreuer']
+
+  // AAR-553: fall-dokumente-Bucket
+  const ext = file.name.split('.').pop() ?? 'bin'
+  const timestamp = Date.now()
+  const storagePath = `admin/${fallId}/${timestamp}.${ext}`
+
+  const { error: uploadErr } = await supabase.storage
+    .from('fall-dokumente')
+    .upload(storagePath, file, { contentType: file.type })
+  if (uploadErr) throw new Error(uploadErr.message)
+
+  const { error: insertErr } = await supabase.from('fall_dokumente').insert({
+    fall_id: fallId,
+    dokument_typ: kategorie,
+    storage_path: storagePath,
+    original_filename: file.name,
+    groesse_bytes: file.size,
+    mime_type: file.type || null,
+    kategorie,
+    hochgeladen_von_user_id: user.id,
+    uploaded_by_sv: hochgeladen_von_rolle === 'sachverstaendiger',
+    uploaded_by_kunde: hochgeladen_von_rolle === 'kunde',
+    quelle: 'admin',
+    sichtbar_fuer,
+  })
+
+  if (insertErr) throw new Error(insertErr.message)
+
+  revalidatePath(`/faelle/${fallId}`)
+  revalidatePath('/admin/faelle')
+}
+
+export async function uploadPflichtdokument(
+  fallId: string,
+  pflichtdokumentId: string,
+  url: string,
+) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const { error } = await supabase
+    .from('pflichtdokumente')
+    .update({
+      status: 'hochgeladen',
+      dokument_url: url,
+      hochgeladen_am: new Date().toISOString(),
+    })
+    .eq('id', pflichtdokumentId)
+
+  if (error) throw new Error(error.message)
+  revalidatePath(`/faelle/${fallId}`)
+}
+
+// KFZ-113: Anschlussschreiben-Upload mit OCR-Extraktion (Sendedatum + Signatur)
+export async function uploadAnschlussschreiben(fallId: string, fileUrl: string, fileName: string) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  await supabase.from('faelle').update({
+    anschlussschreiben_url: fileUrl,
+    updated_at: new Date().toISOString(),
+  }).eq('id', fallId)
+
+  // AAR-553: fall_dokumente statt dokumente. storage_path aus public-URL
+  const pathMatch = fileUrl.match(/\/storage\/v1\/object\/public\/(?:dokumente|fall-dokumente)\/(.+)$/)
+  const storagePath = pathMatch ? decodeURIComponent(pathMatch[1]) : fileName
+  await supabase.from('fall_dokumente').insert({
+    fall_id: fallId,
+    dokument_typ: 'anschlussschreiben',
+    storage_path: storagePath,
+    original_filename: fileName,
+    mime_type: 'application/pdf',
+    kategorie: 'kanzlei',
+    quelle: 'admin-upload',
+    hochgeladen_von_user_id: user.id,
+    sichtbar_fuer: ['admin', 'kundenbetreuer', 'kanzlei'],
+  })
+
+  // OCR (non-critical)
+  try {
+    const pdfResponse = await fetch(fileUrl)
+    if (pdfResponse.ok) {
+      const buffer = Buffer.from(await pdfResponse.arrayBuffer())
+      const pdfModule = await import('pdf-parse')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const pdfParse = ((pdfModule as any).default ?? pdfModule) as (buffer: Buffer) => Promise<{ text: string }>
+      const parsed = await pdfParse(buffer)
+      const text = parsed.text
+
+      const sendedatum = extractSendedatum(text)
+      const hatUnterschrift = checkUnterschrift(text)
+
+      await supabase.from('faelle').update({
+        anschlussschreiben_sendedatum: sendedatum,
+        anschlussschreiben_unterschrift: hatUnterschrift,
+        anschlussschreiben_ocr_am: new Date().toISOString(),
+      }).eq('id', fallId)
+    }
+  } catch { /* OCR ist nicht kritisch */ }
+
+  await supabase.from('timeline').insert({
+    fall_id: fallId,
+    typ: 'system',
+    titel: 'Anschlussschreiben hochgeladen',
+    beschreibung: `Datei: ${fileName}. OCR-Extraktion durchgefuehrt.`,
+    erstellt_von: user.id,
+  })
+
+  revalidatePath(`/faelle/${fallId}`)
+}
+
+function extractSendedatum(text: string): string | null {
+  const patterns = [
+    /(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/,
+    /(\d{1,2})\.\s*(Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\s+(\d{4})/i,
+  ]
+  const monateMap: Record<string, string> = {
+    januar: '01', februar: '02', 'märz': '03', april: '04', mai: '05', juni: '06',
+    juli: '07', august: '08', september: '09', oktober: '10', november: '11', dezember: '12',
+  }
+
+  const keywords = ['datum', 'sendedatum', 'gesendet am', 'versandt am', 'unser zeichen', 'ihr zeichen', 'berlin', 'münchen', 'köln', 'hamburg']
+  for (const kw of keywords) {
+    const idx = text.toLowerCase().indexOf(kw)
+    if (idx === -1) continue
+    const window = text.slice(Math.max(0, idx - 50), idx + 200)
+    for (const pattern of patterns) {
+      const match = window.match(pattern)
+      if (match) {
+        if (match[2] && monateMap[match[2].toLowerCase()]) {
+          return `${match[3]}-${monateMap[match[2].toLowerCase()]}-${match[1].padStart(2, '0')}`
+        }
+        return `${match[3]}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}`
+      }
+    }
+  }
+
+  for (const pattern of patterns) {
+    const match = text.match(pattern)
+    if (match) {
+      if (match[2] && monateMap[match[2].toLowerCase()]) {
+        return `${match[3]}-${monateMap[match[2].toLowerCase()]}-${match[1].padStart(2, '0')}`
+      }
+      return `${match[3]}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}`
+    }
+  }
+  return null
+}
+
+function checkUnterschrift(text: string): boolean {
+  const keywords = ['unterschrift', 'unterzeichnet', 'gez.', 'mit freundlichen', 'hochachtungsvoll', 'rechtsanwalt', 'rechtsanwältin']
+  const lower = text.toLowerCase()
+  return keywords.some(kw => lower.includes(kw))
+}

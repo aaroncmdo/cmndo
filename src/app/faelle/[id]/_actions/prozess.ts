@@ -179,3 +179,26 @@ export async function uebergebeFallKlage(
   revalidatePath(`/faelle/${fallId}`)
   return { success: true }
 }
+
+// AAR-684 Phase 2: Eskalation — setzt vs_eskalationsstufe + Timeline.
+export async function eskalation(fallId: string, stufe: string) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const stufeKey = stufe.toLowerCase()
+  await supabase
+    .from('faelle')
+    .update({ vs_eskalationsstufe: stufeKey })
+    .eq('id', fallId)
+
+  await supabase.from('timeline').insert({
+    fall_id: fallId,
+    typ: 'system',
+    titel: `Eskalation ${stufe}`,
+    beschreibung: `Eskalationsstufe ${stufe} manuell eingeleitet.`,
+    erstellt_von: user.id,
+  })
+
+  revalidatePath(`/faelle/${fallId}`)
+}

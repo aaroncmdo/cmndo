@@ -187,3 +187,114 @@ export async function updateFallField(
   revalidatePath(`/faelle/${fallId}`)
   return { success: true }
 }
+
+// AAR-684 Phase 2: drei weitere Stammdaten-Actions aus dem Monolith.
+// - updateFall: Bulk-Update mit blocked-fields-Filter (Status gesperrt)
+// - updateSchadensAdresse: dedizierte Adresse-Update-Action mit Timeline
+// - saveFinVin: FIN-Validierung + Cardentity-Enrichment-Trigger
+
+const BLOCKED_FIELDS = new Set(['id', 'status', 'created_at'])
+
+export async function updateFall(
+  fallId: string,
+  updates: Record<string, unknown>,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const safeUpdates: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(updates)) {
+    if (BLOCKED_FIELDS.has(k)) continue
+    safeUpdates[k] = v
+  }
+
+  if (Object.keys(safeUpdates).length === 0) return { success: true }
+  safeUpdates.updated_at = new Date().toISOString()
+
+  const { error } = await supabase.from('faelle').update(safeUpdates).eq('id', fallId)
+  if (error) return { success: false, error: error.message }
+
+  const changedFields = Object.keys(safeUpdates).filter(k => k !== 'updated_at')
+  if (changedFields.length > 0) {
+    await supabase.from('timeline').insert({
+      fall_id: fallId,
+      typ: 'system',
+      titel: 'Fall aktualisiert',
+      beschreibung: `Felder geaendert: ${changedFields.join(', ')}`,
+      erstellt_von: user.id,
+    })
+  }
+
+  revalidatePath(`/faelle/${fallId}`)
+  return { success: true }
+}
+
+export async function updateSchadensAdresse(
+  fallId: string,
+  data: { adresse: string; plz: string; ort?: string },
+) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const { error } = await supabase
+    .from('faelle')
+    .update({
+      schadens_adresse: data.adresse || null,
+      schadens_plz: data.plz || null,
+      schadens_ort: data.ort || null,
+    })
+    .eq('id', fallId)
+
+  if (error) throw new Error(error.message)
+
+  await supabase.from('timeline').insert({
+    fall_id: fallId,
+    typ: 'system',
+    titel: 'Schadensadresse aktualisiert',
+    beschreibung: [data.adresse, data.plz, data.ort].filter(Boolean).join(', '),
+    erstellt_von: user.id,
+  })
+
+  revalidatePath(`/faelle/${fallId}`)
+}
+
+export async function saveFinVin(fallId: string, finVin: string) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  // FIN-Format: 17 alphanumerisch, ohne I/O/Q
+  const cleaned = finVin.trim().toUpperCase()
+  if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(cleaned)) {
+    throw new Error('Ungueltige FIN. Muss 17 alphanumerische Zeichen lang sein.')
+  }
+
+  const { error } = await supabase
+    .from('faelle')
+    .update({
+      fin_vin: cleaned,
+      fin_quelle: 'manuell',
+      fin_extrahiert_am: new Date().toISOString(),
+    })
+    .eq('id', fallId)
+
+  if (error) throw new Error(error.message)
+
+  await supabase.from('timeline').insert({
+    fall_id: fallId,
+    typ: 'system',
+    titel: 'FIN manuell eingegeben',
+    beschreibung: `FIN/VIN: ${cleaned}`,
+    erstellt_von: user.id,
+  })
+
+  // AAR-90: direkter Cardentity-Lib-Aufruf statt internem fetch
+  try {
+    const { enrichFallByFin } = await import('@/lib/cardentity/enrich-fahrzeug')
+    enrichFallByFin(fallId).catch(() => {})
+  } catch (err) { console.error('[AAR-90] enrichFallByFin:', err) }
+
+  revalidatePath(`/faelle/${fallId}`)
+}
