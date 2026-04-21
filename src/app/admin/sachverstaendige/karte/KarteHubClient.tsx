@@ -180,17 +180,17 @@ export default function KarteHubClient({
     const ok = ensureMapboxInitialized()
     if (!ok) return
 
-    // AAR-661: Vogelperspektive statt Globe — projection: 'mercator' flacht
-    // die Erdkrümmung ab, leichter Pitch + minimales Bearing erhält eine
-    // dezente 3D-Anmutung ohne die alte Weltkugel-Optik.
+    // AAR-669-P1: Cockpit-Modus — steilerer Pitch (55°), leichter Bearing
+    // für cineastische 3D-Anmutung. Start-Zoom 6.0 damit Deutschland-Ansicht
+    // mit der neuen Pitch nicht zu sehr eingeschnitten wirkt.
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: 'mapbox://styles/mapbox/standard',
       projection: 'mercator',
       center: [10.4515, 51.1657],
-      zoom: 5.8,
-      pitch: 35,
-      bearing: 0,
+      zoom: 6.0,
+      pitch: 55,
+      bearing: -15,
       antialias: true,
     }) as MapboxMap
 
@@ -199,14 +199,40 @@ export default function KarteHubClient({
     map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'top-right')
 
     map.on('load', () => {
-      // 3D-Gebäude + Atmosphäre im Mapbox Standard-Style aktivieren
+      // 3D-Gebäude + Atmosphäre + Terrain im Mapbox Standard-Style aktivieren
       try {
+        // AAR-669-P1: dusk-Preset gibt der Karte eine warme
+        // Dämmerungs-Stimmung, die Neon-Isochronen hervorhebt.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ;(map as any).setConfigProperty('basemap', 'lightPreset', 'day')
+        ;(map as any).setConfigProperty('basemap', 'lightPreset', 'dusk')
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ;(map as any).setConfigProperty('basemap', 'show3dObjects', true)
       } catch {
         // Standard-Style-Config optional — kein harter Fehler
+      }
+
+      // AAR-669-P1: Terrain-Source + Fog für Tiefenwirkung. Exaggeration 1.3
+      // reicht aus — höhere Werte verzerren deutsche Landschaft zu stark.
+      try {
+        if (!map.getSource('mapbox-dem')) {
+          map.addSource('mapbox-dem', {
+            type: 'raster-dem',
+            url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+            tileSize: 512,
+            maxzoom: 14,
+          })
+        }
+        map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.3 })
+        map.setFog({
+          range: [0.8, 8],
+          color: 'rgb(255, 245, 230)',
+          'horizon-blend': 0.15,
+          'high-color': 'rgb(200, 215, 235)',
+          'space-color': 'rgb(5, 10, 25)',
+          'star-intensity': 0.15,
+        })
+      } catch {
+        // Terrain optional — kein harter Fehler wenn Token/Style kein Raster-DEM erlaubt
       }
 
       // GeoJSON-Quellen + Layer für Isochrone-Overlays (SV / Community / Org)
@@ -216,24 +242,53 @@ export default function KarteHubClient({
           data: { type: 'FeatureCollection', features: [] },
           generateId: true,
         })
-        // AAR-661: fill-extrusion statt flat fill — gibt Isos eine leichte 3D-
-        // Kuppel. Höhe skaliert dezent (500 m Base, 2500 m Hover) damit sie
-        // in der Vogelperspektive sichtbar werden ohne die Karte zu erschlagen.
+        // AAR-669-P1: fill-extrusion (3D-Kuppel) stärker gesättigt + höhere
+        // Base-Höhe damit die Kuppel deutlicher erkennbar ist.
         map.addLayer({
           id: `${layer}-overlays-fill`,
           type: 'fill-extrusion',
           source: `${layer}-overlays`,
           paint: {
             'fill-extrusion-color': ['get', 'color'],
-            'fill-extrusion-opacity': 0.35,
+            'fill-extrusion-opacity': [
+              'case',
+              ['boolean', ['feature-state', 'hover'], false],
+              0.55,
+              0.38,
+            ],
             'fill-extrusion-height': [
               'case',
               ['boolean', ['feature-state', 'hover'], false],
-              2500,
-              800,
+              3200,
+              1100,
             ],
             'fill-extrusion-base': 0,
             'fill-extrusion-vertical-gradient': true,
+          },
+        })
+        // AAR-669-P1: Neon-Glow-Border. Zwei Line-Layer übereinander:
+        // erst ein breiter, weicher Blur-Layer (Außen-Glow), dann die
+        // harte Kontur obendrauf. Gibt den typischen „leuchtenden Grenz"-
+        // Effekt gegen die dunkle Dusk-Karte.
+        map.addLayer({
+          id: `${layer}-overlays-glow`,
+          type: 'line',
+          source: `${layer}-overlays`,
+          paint: {
+            'line-color': ['get', 'color'],
+            'line-width': [
+              'case',
+              ['boolean', ['feature-state', 'hover'], false],
+              14,
+              8,
+            ],
+            'line-blur': 6,
+            'line-opacity': [
+              'case',
+              ['boolean', ['feature-state', 'hover'], false],
+              0.85,
+              0.55,
+            ],
           },
         })
         map.addLayer({
@@ -245,10 +300,10 @@ export default function KarteHubClient({
             'line-width': [
               'case',
               ['boolean', ['feature-state', 'hover'], false],
-              3,
-              1.8,
+              3.5,
+              2,
             ],
-            'line-opacity': 0.7,
+            'line-opacity': 0.9,
           },
         })
       }
@@ -489,11 +544,21 @@ export default function KarteHubClient({
     }
   }, [mapReady, svs])
 
-  // AAR-131: Pan + Zoom bei Klick in Sidebar-Liste
+  // AAR-131: Pan + Zoom bei Klick in Sidebar-Liste.
+  // AAR-669-P1: Smooth flyTo mit Cockpit-Pitch + längerem Ease für
+  // cineastische Transition.
   function panToSv(sv: SvMarker) {
     setSelected({ kind: 'sv', item: sv })
     if (mapRef.current && sv.lat != null && sv.lng != null) {
-      mapRef.current.flyTo({ center: [sv.lng, sv.lat], zoom: 12, pitch: 50 })
+      mapRef.current.flyTo({
+        center: [sv.lng, sv.lat],
+        zoom: 13,
+        pitch: 60,
+        bearing: -15,
+        duration: 1800,
+        essential: true,
+        curve: 1.6,
+      })
     }
   }
 
