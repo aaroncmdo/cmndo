@@ -185,6 +185,10 @@ export async function anlegeSv(data: AnlegeSvFormData): Promise<{ success: boole
     qualifikationen_neu: data.qualifikationen,
     spezifikationen: data.spezifikationen ?? [],
     schadenarten: data.schadenarten ?? [],
+    // AAR-515: Quali-Nummern — conditional im Wizard erfasst
+    bvsk_mitgliedsnummer: data.bvsk_mitgliedsnummer?.trim() || null,
+    ihk_zertifikat_nummer: data.ihk_zertifikat_nummer?.trim() || null,
+    oebuv_bestellungsnummer: data.oebuv_bestellungsnummer?.trim() || null,
     standort_adresse: data.anschrift,
     standort_plz: data.anschrift_plz,
     standort_lat: data.anschrift_lat,

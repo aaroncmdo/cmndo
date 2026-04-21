@@ -25,7 +25,7 @@ export default async function SvDetailPage({
 
   const { data: sv } = await supabase
     .from('sachverstaendige')
-    .select('id, profile_id, paket, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, sa_vorlage_status, sa_vorlage_storage_path, sa_vorlage_hochgeladen_am, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, gesperrt_grund, profiles(vorname, nachname, email, telefon)')
+    .select('id, profile_id, paket, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, sa_vorlage_status, sa_vorlage_storage_path, sa_vorlage_hochgeladen_am, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, gesperrt_grund, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, qualifikationen_neu, profiles(vorname, nachname, email, telefon)')
     .eq('id', id)
     .single()
 
@@ -126,8 +126,16 @@ export default async function SvDetailPage({
     const verifizierungsSlots = alleSlots.filter(s =>
       s.kategorie === 'gutachter_verifizierung' && s.slot_id !== 'sv_sa_vorlage',
     )
+    // AAR-515: Nummer-Mapping pro Slot. Admin sieht Nummer + Dokument
+    // nebeneinander beim Prüfen — Plausibilisierungs-Hilfe.
+    const nummernMap: Record<string, { nummer: string | null; label: string }> = {
+      sv_bvsk_mitgliedschaft: { nummer: sv.bvsk_mitgliedsnummer ?? null, label: 'BVSK-Mitgliedsnummer' },
+      sv_ihk_zertifikat: { nummer: sv.ihk_zertifikat_nummer ?? null, label: 'IHK-Zertifikats-Nummer' },
+      sv_bestellungsurkunde_oebuv: { nummer: sv.oebuv_bestellungsnummer ?? null, label: 'Bestellungsnummer' },
+    }
     const tier2Slots: Tier2Slot[] = verifizierungsSlots.map(s => {
       const row = pflichtRows.find(p => p.dokument_typ === s.slot_id)
+      const nummerInfo = nummernMap[s.slot_id] ?? { nummer: null, label: '' }
       return {
         slotId: s.slot_id,
         label: s.label,
@@ -136,6 +144,10 @@ export default async function SvDetailPage({
         status: row?.status ?? null,
         hochgeladenAm: row?.hochgeladen_am ?? null,
         uploadCount: row ? (uploadCounts[row.id] ?? 0) : 0,
+        mapsToQualifikation: s.maps_to_qualifikation,
+        steuertKundensichtbarkeit: s.steuert_kundensichtbarkeit,
+        nummer: nummerInfo.nummer,
+        nummerLabel: nummerInfo.nummer ? nummerInfo.label : null,
       }
     })
 

@@ -14,6 +14,7 @@ import IsochronePreviewMap from '@/components/maps/IsochronePreviewMap'
 import { anlegeSv, checkEmailExists, type CheckEmailExistsResult } from './actions'
 import WelcomeMailPreviewModal from './WelcomeMailPreviewModal'
 import { PAKET_KONFIG, paketAnzahlung, paketKontingent, QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN, ANREDE_OPTIONEN, TITEL_OPTIONEN, type AnlegePaket, type GutachterTyp, type AnlegeSvFormData } from './constants'
+import QualiNummernFelder from './QualiNummernFelder'
 
 // ARCH-1 Phase 2 (BLOCK C): 4-Step Solo-Anlegen Wizard fuer den Admin.
 
@@ -49,6 +50,10 @@ type FormState = {
   qualifikationen: string[]
   spezifikationen: string[]
   schadenarten: string[]
+  // AAR-515: Quali-Nummern — conditional Eingabe
+  bvsk_mitgliedsnummer: string
+  ihk_zertifikat_nummer: string
+  oebuv_bestellungsnummer: string
 }
 
 const initialState: FormState = {
@@ -64,6 +69,9 @@ const initialState: FormState = {
   qualifikationen: [],
   spezifikationen: [],
   schadenarten: [],
+  bvsk_mitgliedsnummer: '',
+  ihk_zertifikat_nummer: '',
+  oebuv_bestellungsnummer: '',
 }
 
 export default function SoloAnlegenWizard({ onSuccess }: {
@@ -181,6 +189,11 @@ export default function SoloAnlegenWizard({ onSuccess }: {
       qualifikationen: data.qualifikationen,
       spezifikationen: data.spezifikationen,
       schadenarten: data.schadenarten,
+      // AAR-515: Nummern nur durchreichen wenn Quali gewählt — sonst
+      // hätte ein gelöschter Quali-Haken eine Karteileiche hinterlassen.
+      bvsk_mitgliedsnummer: data.qualifikationen.includes('BVSK-Mitglied') ? data.bvsk_mitgliedsnummer : undefined,
+      ihk_zertifikat_nummer: data.qualifikationen.includes('IHK-zertifiziert') ? data.ihk_zertifikat_nummer : undefined,
+      oebuv_bestellungsnummer: data.qualifikationen.includes('Öffentlich bestellt und vereidigt') ? data.oebuv_bestellungsnummer : undefined,
     }
 
     const r = await anlegeSv(payload)
@@ -484,6 +497,16 @@ export default function SoloAnlegenWizard({ onSuccess }: {
               options={QUALIFIKATIONEN}
               selected={data.qualifikationen}
               onToggle={toggleQualifikation}
+            />
+            {/* AAR-515: Conditional Nummern-Felder bei Gruppe-B-Qualis.
+                Die Nummern sind optional beim Anlegen — Plausibilisierung
+                erfolgt beim Tier-2-Freigabe im Admin-Verifizierungs-Tab. */}
+            <QualiNummernFelder
+              qualifikationen={data.qualifikationen}
+              bvsk={data.bvsk_mitgliedsnummer}
+              ihk={data.ihk_zertifikat_nummer}
+              oebuv={data.oebuv_bestellungsnummer}
+              onChange={(k, v) => update(k, v)}
             />
             <TagSection
               title="Spezifikationen"

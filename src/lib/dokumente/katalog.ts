@@ -39,6 +39,11 @@ export type DokumentKatalogRow = {
   max_mb: number
   sort_order: number
   aktiv: boolean
+  // AAR-515: Quali-Mapping für das Sichtbarkeits-Gate.
+  // Slots mit maps_to_qualifikation != null + steuert_kundensichtbarkeit=true
+  // schalten bei Freigabe die entsprechende Quali in Kundenkommunikation frei.
+  maps_to_qualifikation: string | null
+  steuert_kundensichtbarkeit: boolean
 }
 
 // In-Memory-Cache. Module-Level → überlebt Request-Grenzen innerhalb eines
@@ -71,7 +76,7 @@ export async function getAlleSlots(
   const { data, error } = await supabase
     .from('dokument_katalog')
     .select(
-      'slot_id, label, beschreibung, kategorie, freigeschaltet_wenn, pflicht_wenn, sichtbar_fuer, anforderbar_von, uploadbar_von, multi_file, akzeptierte_mime_types, max_mb, sort_order, aktiv',
+      'slot_id, label, beschreibung, kategorie, freigeschaltet_wenn, pflicht_wenn, sichtbar_fuer, anforderbar_von, uploadbar_von, multi_file, akzeptierte_mime_types, max_mb, sort_order, aktiv, maps_to_qualifikation, steuert_kundensichtbarkeit',
     )
     .eq('aktiv', true)
     .order('sort_order', { ascending: true })

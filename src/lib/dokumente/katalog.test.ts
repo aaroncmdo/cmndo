@@ -38,6 +38,8 @@ const SLOT_FAHRZEUGSCHEIN: DokumentKatalogRow = {
   max_mb: 10,
   sort_order: 1,
   aktiv: true,
+  maps_to_qualifikation: null,
+  steuert_kundensichtbarkeit: false,
 }
 
 const SLOT_AERZTLICHES_ATTEST: DokumentKatalogRow = {
@@ -55,6 +57,8 @@ const SLOT_AERZTLICHES_ATTEST: DokumentKatalogRow = {
   max_mb: 10,
   sort_order: 21,
   aktiv: true,
+  maps_to_qualifikation: null,
+  steuert_kundensichtbarkeit: false,
 }
 
 const SLOT_SCHADENSFOTOS: DokumentKatalogRow = {
@@ -72,6 +76,8 @@ const SLOT_SCHADENSFOTOS: DokumentKatalogRow = {
   max_mb: 20,
   sort_order: 12,
   aktiv: true,
+  maps_to_qualifikation: null,
+  steuert_kundensichtbarkeit: false,
 }
 
 describe('katalog', () => {
