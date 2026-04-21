@@ -17,7 +17,7 @@ export async function setCpl(provisionId: string, cpl: number): Promise<{ succes
     .eq('id', provisionId)
 
   if (error) return { success: false, error: error.message }
-  revalidatePath('/admin/finance/provisionen-maik')
+  revalidatePath('/admin/finance/provisionen')
   return { success: true }
 }
 
@@ -33,7 +33,7 @@ export async function confirmProvision(provisionId: string): Promise<{ success: 
     .eq('status', 'pending')
 
   if (error) return { success: false, error: error.message }
-  revalidatePath('/admin/finance/provisionen-maik')
+  revalidatePath('/admin/finance/provisionen')
   return { success: true }
 }
 
@@ -59,7 +59,7 @@ export async function markMonthAsPaid(
     .select('id')
 
   if (error) return { success: false, count: 0, error: error.message }
-  revalidatePath('/admin/finance/provisionen-maik')
+  revalidatePath('/admin/finance/provisionen')
   return { success: true, count: (data ?? []).length }
 }
 
@@ -79,6 +79,6 @@ export async function reverseProvision(provisionId: string, grund: string): Prom
     .neq('status', 'paid')
 
   if (error) return { success: false, error: error.message }
-  revalidatePath('/admin/finance/provisionen-maik')
+  revalidatePath('/admin/finance/provisionen')
   return { success: true }
 }

@@ -30,7 +30,7 @@ export async function createTask(formData: FormData) {
   })
 
   if (error) throw new Error(error.message)
-  revalidatePath('/admin/tasks')
+  revalidatePath('/admin/aufgaben/alle')
 }
 
 export async function updateTaskStatus(taskId: string, newStatus: string) {
@@ -70,7 +70,7 @@ export async function updateTaskStatus(taskId: string, newStatus: string) {
     })
   }
 
-  revalidatePath('/admin/tasks')
+  revalidatePath('/admin/aufgaben/alle')
 }
 
 export async function deleteTask(taskId: string) {
@@ -80,5 +80,5 @@ export async function deleteTask(taskId: string) {
 
   const { error } = await supabase.from('tasks').delete().eq('id', taskId)
   if (error) throw new Error(error.message)
-  revalidatePath('/admin/tasks')
+  revalidatePath('/admin/aufgaben/alle')
 }

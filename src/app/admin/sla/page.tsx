@@ -107,7 +107,7 @@ export default async function SlaMonitoringPage() {
                   </td>
                   <td className="px-4 py-3">
                     {sla.eskalation_task_id ? (
-                      <Link href={`/admin/tasks?id=${sla.eskalation_task_id}`} className="text-xs text-[#4573A2] hover:underline">
+                      <Link href={`/admin/aufgaben/alle?id=${sla.eskalation_task_id}`} className="text-xs text-[#4573A2] hover:underline">
                         Task ansehen
                       </Link>
                     ) : (

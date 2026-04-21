@@ -94,7 +94,7 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
       {/* Monatsfilter */}
       <div className="flex gap-2 flex-wrap">
         {months.map(m => (
-          <Link key={m} href={`/admin/finance/provisionen-maik?monat=${m}`}
+          <Link key={m} href={`/admin/finance/provisionen?monat=${m}`}
             className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
               monat === m ? 'bg-[#0D1B3E] text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
             }`}>

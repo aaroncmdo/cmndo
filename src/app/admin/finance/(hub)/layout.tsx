@@ -1,6 +1,6 @@
 // AAR-528 (A4): Finanzen-Hub Layout — Tab-Nav über 4 Sub-Views.
-// Route Group (hub) schützt /admin/finance/provisionen-maik (bleibt Legacy-Route)
-// und andere Ausnahmen vor der Tab-Nav.
+// Route Group (hub) schützt /admin/finance/provisionen und andere
+// Ausnahmen vor der Tab-Nav.
 
 import FinanceHubTabs from './FinanceHubTabs'
 

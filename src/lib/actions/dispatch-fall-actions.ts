@@ -211,7 +211,7 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
     }
   }
 
-  revalidatePath('/admin/dispatch')
+  revalidatePath('/dispatch/dashboard')
   revalidatePath(`/faelle/${fallId}`)
 }
 
@@ -283,7 +283,7 @@ export async function createLead(data: {
     }
   }
 
-  revalidatePath('/admin/dispatch')
+  revalidatePath('/dispatch/dashboard')
 }
 
 // Valid qualification phases (BUG-27 new + old for backward compat)
@@ -316,7 +316,7 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
       const { resolveTasksForEntity } = await import('@/lib/tasks/resolve-tasks')
       await resolveTasksForEntity('lead', leadId, 'Lead konvertiert')
     } catch (err) { console.error('[KFZ-151] resolveTasks lead konvertiert:', err) }
-    revalidatePath('/admin/dispatch')
+    revalidatePath('/dispatch/dashboard')
     return { converted: true, fallId: result.fallId, linked: result.linked }
   }
 
@@ -362,7 +362,7 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
     })
   }
 
-  revalidatePath('/admin/dispatch')
+  revalidatePath('/dispatch/dashboard')
   return { converted: false }
 }
 
@@ -384,7 +384,7 @@ export async function updateServiceTyp(
   if (error) throw new Error(error.message)
 
   revalidatePath(`/dispatch/leads/${leadId}`)
-  revalidatePath('/admin/dispatch')
+  revalidatePath('/dispatch/dashboard')
 }
 
 // ─── Flow-Link ──────────────────────────────────────────────────────────────
@@ -504,7 +504,7 @@ export async function sendFlowLink(leadId: string) {
       }
     }
   }
-  revalidatePath('/admin/dispatch')
+  revalidatePath('/dispatch/dashboard')
   revalidatePath(`/dispatch/leads/${leadId}`)
 
   return { token: flowLink.token, url: flowUrl }

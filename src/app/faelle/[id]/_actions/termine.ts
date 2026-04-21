@@ -121,3 +121,161 @@ export async function createKbVideoterminByKb(
   revalidatePath(`/faelle/${fallId}`)
   return { success: true, terminId: termin.id, videoLink }
 }
+
+// AAR-684 Phase 2: KFZ-41 Termine — createTermin (Video-Call via Google
+// Calendar, Phone-Only ohne) + updateTerminStatus (cancel-Flow inkl.
+// Google-Event-Löschung).
+import { sendFallCommunication } from '@/lib/communications/send-fall'
+
+export async function createTermin(
+  fallId: string,
+  data: { typ: string; datum: string; dauer_minuten: number; betreff: string; notiz?: string },
+) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  // AAR-95: Fall + Kunde-Email + KB-Email
+  const { data: fall } = await supabase
+    .from('faelle')
+    .select('kunde_id, fall_nummer, lead_id, kundenbetreuer_id')
+    .eq('id', fallId)
+    .single()
+  if (!fall) throw new Error('Fall nicht gefunden')
+
+  const kbUserId = fall.kundenbetreuer_id ?? user.id
+
+  let meetLink: string | null = null
+  let googleEventId: string | null = null
+  let googleCalendarId: string | null = null
+
+  // AAR-95: Bei video-call → Google Calendar Event
+  if (data.typ === 'video-call') {
+    const { data: kbProfile } = await supabase
+      .from('profiles')
+      .select('email, google_refresh_token')
+      .eq('id', kbUserId)
+      .single()
+    if (!kbProfile?.email) throw new Error('KB-Email fehlt')
+    if (!kbProfile.google_refresh_token) {
+      throw new Error('Du musst zuerst dein Google Konto unter /admin/einstellungen/google verbinden, um Videotermine zu buchen.')
+    }
+
+    let kundeEmail: string | null = null
+    let kundeName = 'Kunde'
+    if (fall.lead_id) {
+      const { data: lead } = await supabase.from('leads').select('vorname, nachname, email').eq('id', fall.lead_id).single()
+      kundeEmail = lead?.email ?? null
+      kundeName = [lead?.vorname, lead?.nachname].filter(Boolean).join(' ') || 'Kunde'
+    }
+    if (!kundeEmail) throw new Error('Kunde-Email fehlt — Termin kann nicht erstellt werden')
+
+    const { createVideoEvent } = await import('@/lib/google-calendar/events')
+    const eventResult = await createVideoEvent({
+      kbUserId,
+      kbEmail: kbProfile.email,
+      kundeEmail,
+      kundeName,
+      fallNummer: fall.fall_nummer ?? fallId.slice(0, 8),
+      startISO: data.datum,
+      dauerMinuten: data.dauer_minuten,
+      beschreibung: data.notiz,
+    })
+    meetLink = eventResult.meetLink
+    googleEventId = eventResult.eventId
+    googleCalendarId = eventResult.calendarId
+  }
+
+  const { error } = await supabase.from('termine').insert({
+    fall_id: fallId,
+    kunde_user_id: fall?.kunde_id ?? null,
+    betreuer_user_id: user.id,
+    typ: data.typ,
+    datum: data.datum,
+    dauer_minuten: data.dauer_minuten,
+    betreff: data.betreff,
+    notiz: data.notiz || null,
+    meet_link: meetLink,
+    google_event_id: googleEventId,
+    google_calendar_id: googleCalendarId,
+    event_synced_at: googleEventId ? new Date().toISOString() : null,
+    event_sync_status: googleEventId ? 'synced' : 'not_synced',
+    status: 'geplant',
+  })
+
+  if (error) throw new Error(error.message)
+
+  await supabase.from('timeline').insert({
+    fall_id: fallId,
+    typ: 'system',
+    titel: `Termin vereinbart: ${data.betreff}`,
+    beschreibung: `${data.typ === 'video-call' ? 'Video-Call' : 'Telefonat'} am ${new Date(data.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} (${data.dauer_minuten} Min)${meetLink ? ` · ${meetLink}` : ''}`,
+    erstellt_von: user.id,
+  })
+
+  const terminDate = new Date(data.datum)
+  sendFallCommunication(fallId, 'kb_termin_bestaetigt', {
+    termin_typ: data.typ,
+    termin_datum: terminDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+    termin_uhrzeit: terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+    meet_link: meetLink ?? '',
+    '3': terminDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+    '4': terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+  }).catch(() => {})
+
+  revalidatePath(`/faelle/${fallId}`)
+  revalidatePath('/mitarbeiter/performance')
+  revalidatePath('/kunde')
+}
+
+export async function updateTerminStatus(
+  terminId: string,
+  status: string,
+  ergebnisNotiz?: string,
+) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) throw new Error('Nicht angemeldet')
+
+  const updateData: Record<string, unknown> = { status }
+  if (ergebnisNotiz) updateData.ergebnis_notiz = ergebnisNotiz
+
+  const { data: termin, error } = await supabase
+    .from('termine')
+    .update(updateData)
+    .eq('id', terminId)
+    .select('fall_id, betreff, typ, google_event_id, google_calendar_id, betreuer_user_id')
+    .single()
+
+  if (error) throw new Error(error.message)
+
+  // AAR-95: Bei Absage Google-Event löschen
+  if (status === 'abgesagt' && termin?.google_event_id && termin?.betreuer_user_id) {
+    try {
+      const { cancelVideoEvent } = await import('@/lib/google-calendar/events')
+      await cancelVideoEvent(
+        termin.betreuer_user_id as string,
+        termin.google_event_id as string,
+        (termin.google_calendar_id as string | null) ?? 'primary',
+      )
+    } catch (err) { console.error('[AAR-95] cancelVideoEvent:', err) }
+  }
+
+  if (termin?.fall_id) {
+    const label = status === 'durchgefuehrt' ? 'Termin durchgefuehrt' :
+                  status === 'abgesagt' ? 'Termin abgesagt' :
+                  status === 'nicht-erschienen' ? 'Termin: Nicht erschienen' : `Termin: ${status}`
+
+    await supabase.from('timeline').insert({
+      fall_id: termin.fall_id,
+      typ: 'system',
+      titel: `${label}: ${termin.betreff ?? ''}`,
+      beschreibung: ergebnisNotiz || null,
+      erstellt_von: user.id,
+    })
+
+    revalidatePath(`/faelle/${termin.fall_id}`)
+  }
+  revalidatePath('/mitarbeiter/performance')
+  revalidatePath('/kunde')
+}
