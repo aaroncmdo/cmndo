@@ -38,7 +38,7 @@ export default async function SachverstaendigeHubPage() {
     // Quali-Ausweis-Nummern + notizen — Felder die „kann SV aktuell
     // arbeiten?" mitbestimmen, bisher nur auf der Detail-Seite.
     .select(
-      'id, paket, standort_lat, standort_lng, ist_aktiv, organisation_id, isochrone_polygon, paket_umkreis_km, gutachter_typ, offene_faelle, paket_faelle_genutzt, paket_faelle_gesamt, ablehnungen_30_tage, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, urlaub_von, urlaub_bis, verifiziert, sa_vorlage_status, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, notizen, profiles!sachverstaendige_profile_id_fkey(vorname, nachname)',
+      'id, paket, standort_lat, standort_lng, ist_aktiv, organisation_id, isochrone_polygon, paket_umkreis_km, gutachter_typ, offene_faelle, paket_faelle_genutzt, paket_faelle_gesamt, ablehnungen_30_tage, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, urlaub_von, urlaub_bis, verifiziert, sa_vorlage_status, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, notizen, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, avatar_url)',
     )
     .is('geloescht_am', null)
   if (svErr) console.error('[admin/sachverstaendige] SV-Query:', svErr.message)
@@ -75,11 +75,14 @@ export default async function SachverstaendigeHubPage() {
   const svs: SvMarker[] = svRows.map((sv) => {
     const pRel = sv.profiles
     const p = (Array.isArray(pRel) ? pRel[0] : pRel) as
-      | { vorname: string | null; nachname: string | null }
+      | { vorname: string | null; nachname: string | null; avatar_url: string | null }
       | null
     return {
       id: sv.id,
       name: p ? `${p.vorname ?? ''} ${p.nachname ?? ''}`.trim() : 'Unbekannt',
+      vorname: p?.vorname ?? null,
+      nachname: p?.nachname ?? null,
+      avatarUrl: p?.avatar_url ?? null,
       paket: sv.paket,
       lat: sv.standort_lat != null ? Number(sv.standort_lat) : null,
       lng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
