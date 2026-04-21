@@ -25,6 +25,9 @@ export type FallakteRolle =
   | 'sachverstaendiger'
   | 'kunde'
   | 'dispatch'
+  // AAR-kanzlei-portal: Kanzlei-Partner (LexDrive / RA Genter).
+  // Read-only auf allen Feldern. RLS gatet auf service_typ='komplett'.
+  | 'kanzlei'
 
 /** System-Felder — NIEMALS editierbar, unabhängig von der Rolle. */
 export const SYSTEM_FIELDS = new Set<string>([
@@ -93,6 +96,9 @@ export function canEditField(
 
     case 'kunde':
     case 'dispatch':
+    // AAR-kanzlei-portal: Kanzlei ist strict read-only auf allen Feldern —
+    // ihre Edits laufen via Salesforce/LexDrive und kommen per Webhook zurück.
+    case 'kanzlei':
       return false
 
     default:
