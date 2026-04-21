@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { MessageCircleIcon, UserIcon, SearchIcon, SendIcon } from 'lucide-react'
 import Link from 'next/link'
-import { sendNachrichtFromSvInbox } from './_actions'
+import { sendNachrichtFromSvInbox } from './actions'
 
 // KFZ-182: SV-Nachrichten-Inbox — nur eigene Fall-Chats.
 

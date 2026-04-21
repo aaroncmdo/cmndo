@@ -1,29 +1,49 @@
-// AAR-428 / W1: Fallakte-Actions-Barrel.
+// AAR-162 / W2: Barrel-Re-Export für alle Fallakte-Actions.
 //
-// 10 thematische Module:
-//   - core         (Fall-Level: update/delete/deactivate/reactivate)
-//   - filmcheck    (QC + Filmcheck)
-//   - kanzlei      (VS-Regulierung, Kanzlei-Handoff, Prozess-Transitions)
-//   - dokumente    (Upload, Pflichtdokumente, FIN-Call, Cardentity)
-//   - termine      (Termin-CRUD)
-//   - tasks        (Task-CRUD)
-//   - chat         (Chat/Nachrichten/Timeline)
-//   - ai           (Fall-Summary + LexDrive-Trigger)
-//   - stammdaten   (Inline-Edit + Legacy-Setters)
-//   - abrechnung   (SV-Abrechnung, Klassifizierung)
+// Schritt 1 des Actions-Domain-Splits: Das neue Inline-Edit (stammdaten.ts)
+// liegt hier, alle anderen Actions bleiben vorläufig in ../actions.ts (46 KB
+// Monolith — wird in einem Follow-up-Commit domain-gesplittet analog zum
+// Dispatch-Lead-Actions-Refactor AAR-143).
 //
-// Consumer importieren entweder ein Sub-Modul direkt (empfohlen, kleinere
-// Client-Bundles) oder aus diesem Barrel. Der historische 44 KB Monolith
-// `../actions.ts` bleibt vorläufig als Source, dieser Barrel ist die neue
-// Import-Oberfläche.
+// Consumer können bereits jetzt aus dem Barrel importieren:
+//   import { updateFallField, updateFall } from './_actions'  // aus Monolith
+//
+// Nach dem Follow-up-Split verschwindet nur das Source-File — Imports bleiben.
 
-export * from './core'
-export * from './filmcheck'
-export * from './kanzlei'
-export * from './dokumente'
-export * from './termine'
-export * from './tasks'
-export * from './chat'
-export * from './ai'
-export * from './stammdaten'
-export * from './abrechnung'
+export { updateFallField } from './stammdaten'
+export { triggerFinCallForFall, markDokumentNachgereicht } from './dokumente'
+export {
+  requestTechnischeStellungnahme,
+  freigebeTechnischeStellungnahme,
+  startRuege,
+  uebergebeFallKlage,
+} from './prozess'
+export { createKbVideoterminByKb } from './termine'
+export { regenerateSvBriefing } from './briefing'
+
+// Re-exports aus dem vorhandenen Monolith (wird später zerlegt):
+export {
+  updateFall,
+  addTimelineEntry,
+  uploadAnschlussschreiben,
+  uploadPflichtdokument,
+  setAnschlussschreibenDatum,
+  recordZahlung,
+  eskalation,
+  updateSchadensAdresse,
+  sendChatNachricht,
+  uploadDatei,
+  upsertQcCheckliste,
+  qcBestanden,
+  qcNachbesserung,
+  saveKanzleiAnsprechpartner,
+  createFallTask,
+  updateTaskStatus,
+  createTermin,
+  updateTerminStatus,
+  erfasseZahlungseingang,
+  deleteFall,
+  deactivateFall,
+  reactivateFall,
+  saveRegulierungsKlassifizierung,
+} from '../actions'

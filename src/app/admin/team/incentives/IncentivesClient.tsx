@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { GiftIcon, UsersIcon, TrophyIcon, PlusIcon, ToggleLeftIcon, ToggleRightIcon } from 'lucide-react'
-import { createIncentive, toggleIncentive } from '../_actions'
+import { createIncentive, toggleIncentive } from '../actions'
 
 type Incentive = {
   id: string; titel: string; beschreibung: string | null; kategorie: string; typ: string

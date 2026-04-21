@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { DragDropContext, Droppable, Draggable, type DropResult, type DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
 import { updateFallStatus } from '../../dispatch/actions'
-import { deleteFall, deactivateFall } from '@/app/faelle/[id]/actions'
+import { deleteFall, deactivateFall } from '@/app/faelle/[id]/_actions'
 import FallCardBadges, { NotificationDot } from '@/components/faelle/FallCardBadges'
 // AAR-572 (V6): Shared PhasePipeline als Hover-Overlay auf den Kanban-Karten
 import { PhasePipeline } from '@/components/shared/fall-phases'

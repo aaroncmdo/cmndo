@@ -9,7 +9,7 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import { PhoneCallIcon, PhoneOffIcon, ClockIcon, XIcon, CheckIcon } from 'lucide-react'
-import { startGespraech, endeGespraech } from './_actions'
+import { startGespraech, endeGespraech } from './actions'
 
 type Phase = {
   von: number

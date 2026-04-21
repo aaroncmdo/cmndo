@@ -7,7 +7,7 @@
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { RefreshCwIcon } from 'lucide-react'
-import { regenerateSvBriefing } from '@/app/faelle/[id]/actions/briefing'
+import { regenerateSvBriefing } from '@/app/faelle/[id]/_actions/briefing'
 
 type Props = {
   fallId: string

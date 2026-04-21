@@ -2,7 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import OnboardingWizard from './OnboardingWizard'
-import { getPflichtdokumenteStand, getFreieSlotsFuerKunde } from './_actions'
+import { getPflichtdokumenteStand, getFreieSlotsFuerKunde } from './actions'
 
 export const dynamic = 'force-dynamic'
 

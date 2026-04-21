@@ -30,7 +30,7 @@ import {
   type SvSuggestion,
   type SlotCandidate,
   type SlotMatchType,
-} from './_actions'
+} from './actions'
 import type { DebugSvMatchingResponse } from '@/lib/dispatch/debugSvMatching'
 
 type SvWithSlots = SvSuggestion & { slots: SlotCandidate[] }
