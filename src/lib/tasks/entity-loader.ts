@@ -20,9 +20,11 @@ export async function ladeEntityOptions(
     case 'kunde': {
       // Kunden-Auswahl ist auf den konkreten Fall begrenzt (nur sein Kunde)
       const admin = createAdminClient()
+      // AAR-658: faelle hat 2 FKs auf leads (lead_id + konvertiert_von_lead),
+      // Embed braucht FK-Hint sonst PGRST201.
       const { data: fall } = await admin
         .from('faelle')
-        .select('kunde_id, lead_id, leads(vorname, nachname)')
+        .select('kunde_id, lead_id, leads!faelle_lead_id_fkey(vorname, nachname)')
         .eq('id', fallId)
         .maybeSingle()
       if (!fall?.kunde_id) return []
@@ -36,10 +38,15 @@ export async function ladeEntityOptions(
     case 'sachverstaendiger': {
       // SV-Liste kommt aus sachverstaendige + profiles (Namen aus profiles)
       const admin = createAdminClient()
-      const { data: svs } = await admin
+      // AAR-658: Spalte heißt `ist_aktiv`, nicht `aktiv` — vorheriges Select
+      // warf 400 und lieferte svs=null, Task-Dropdown war für SV immer leer.
+      // Zusätzlich profiles-Embed disambiguieren (4 FKs auf profiles).
+      const { data: svs, error: svErr } = await admin
         .from('sachverstaendige')
-        .select('id, aktiv, profile_id, profiles(vorname, nachname)')
-        .eq('aktiv', true)
+        .select('id, ist_aktiv, profile_id, profiles!sachverstaendige_profile_id_fkey(vorname, nachname)')
+        .eq('ist_aktiv', true)
+        .is('geloescht_am', null)
+      if (svErr) console.error('[entity-loader] SV-Query:', svErr.message)
       const options: EntityOption[] = []
       for (const s of svs ?? []) {
         const profileRaw = (s as unknown as { profiles: unknown }).profiles
