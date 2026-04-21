@@ -74,6 +74,13 @@ export async function svTerminErstvorschlag(
     return { success: false, error: insertErr?.message ?? 'Termin-Anlage fehlgeschlagen' }
   }
 
+  // AAR-694 Teil B: SV-Google-Kalender-Event anlegen (non-critical, fire-and-forget)
+  import('@/lib/google-calendar/sv-event-sync').then(({ syncSvCalendarEvent }) =>
+    syncSvCalendarEvent(termin.id).catch((err) =>
+      console.warn('[sv-termin-erstvorschlag] syncSvCalendarEvent:', err instanceof Error ? err.message : err),
+    ),
+  )
+
   // Timeline-Eintrag (non-critical)
   try {
     await admin.from('timeline').insert({
