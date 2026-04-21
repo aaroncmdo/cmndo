@@ -213,7 +213,7 @@ export default function GutachterShell({
     const { data: svs } = await supabase
       .from('sachverstaendige')
       .select('id')
-      .or(`profile_id.eq.${user.id},user_id.eq.${user.id}`)
+      .eq('profile_id', user.id)
     const svIds = (svs ?? []).map(s => s.id)
     if (svIds.length === 0) return
 

@@ -2,8 +2,10 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 /**
  * Zentraler Gutachter-Lookup: Findet den sachverstaendige-Eintrag für einen Auth-User.
- * Prüft sowohl profile_id als auch user_id (OR).
- * ALLE Gutachter-Seiten müssen diese Funktion nutzen.
+ *
+ * AAR SV-Audit-Follow-up: Nutzt jetzt nur noch profile_id. Das Legacy-
+ * user_id-Feld wird in der begleitenden Migration gedropt (inkl. RLS-
+ * Policy-Update auf sv_update_own). ALLE Gutachter-Seiten nutzen diese Funktion.
  *
  * ARCH-1 Phase 2 Update: nutzt jetzt .limit(1).maybeSingle() statt .single()
  * weil ein User mehrere SV-Eintraege haben kann (z.B. Buero-Inhaber UND
@@ -26,7 +28,7 @@ export async function getGutachterForUser<T = Record<string, unknown>>(
   const { data } = await supabase
     .from('sachverstaendige')
     .select(select)
-    .or(`profile_id.eq.${userId},user_id.eq.${userId}`)
+    .eq('profile_id', userId)
     .order('ist_parent_account', { ascending: true, nullsFirst: true })
     .order('paket_faelle_gesamt', { ascending: false, nullsFirst: false })
     .limit(1)

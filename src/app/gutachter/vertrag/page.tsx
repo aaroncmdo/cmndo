@@ -27,7 +27,7 @@ export default function VertragPage() {
         const { data: sv } = await supabase
           .from('sachverstaendige')
           .select('id, paket, paket_faelle_gesamt, anzahlung_faellig, vertrag_unterschrieben')
-          .or(`profile_id.eq.${user.id},user_id.eq.${user.id}`)
+          .eq('profile_id', user.id)
           .maybeSingle()
         if (!sv) { setLoadError('Kein SV-Profil gefunden'); return }
         // AAR-258 Audit: Wenn Vertrag bereits unterschrieben → svData

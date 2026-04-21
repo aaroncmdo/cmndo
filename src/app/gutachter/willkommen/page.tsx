@@ -48,7 +48,7 @@ export default async function GutachterWillkommenPage({
   const { data: svRows } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
-    .or(`profile_id.eq.${user.id},user_id.eq.${user.id}`)
+    .eq('profile_id', user.id)
 
   const allSvs = svRows ?? []
 

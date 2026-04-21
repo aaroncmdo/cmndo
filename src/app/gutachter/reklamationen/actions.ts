@@ -33,7 +33,7 @@ export async function createReklamation(data: {
   const { data: svData } = await supabase
     .from('sachverstaendige')
     .select('id')
-    .or(`profile_id.eq.${user.id},user_id.eq.${user.id}`)
+    .eq('profile_id', user.id)
     .maybeSingle()
   if (!svData) return { success: false, error: 'Kein SV-Account gefunden' }
 
