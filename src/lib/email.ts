@@ -124,7 +124,7 @@ export async function emailMaikMonatsabrechnung(
         leadCount === 0 ? 'Diesen Monat keine Auszahlung.' : 'Detailliste in Claimondo unter Admin → Finanzen → Provisionen Maik.',
       ],
       ctaLabel: 'Detailliste oeffnen',
-      ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/admin/finance/provisionen-maik?monat=${monat}`,
+      ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/admin/finance/provisionen?monat=${monat}`,
     })
   } catch (err) {
     console.error('[AAR-92] emailMaikMonatsabrechnung:', err)
