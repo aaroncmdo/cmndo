@@ -16,7 +16,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import type { ZB1ExtractedData } from '@/lib/ocr/zb1-parser'
 
 type Slot = {
-  slot_id: 'fahrzeugschein' | 'polizeibericht' | 'sonstiges'
+  // AAR-unfallfotos: 'unfallfotos' akzeptiert multiple Uploads (Mehr-Foto-Slot).
+  slot_id: 'fahrzeugschein' | 'polizeibericht' | 'unfallfotos' | 'sonstiges'
   label: string
   ocr: boolean
   hochgeladen: boolean
@@ -118,7 +119,10 @@ export async function uploadDokumentViaAnfrageToken(
   const slotIdx = anfrage.slots.findIndex((s) => s.slot_id === slotId)
   if (slotIdx === -1) return { success: false, error: `Slot ${slotId} nicht in dieser Anfrage` }
   const slot = anfrage.slots[slotIdx]
-  if (slot.hochgeladen) {
+  // AAR-unfallfotos: Multi-File-Slot — weitere Fotos werden angehängt statt
+  // abgelehnt. Einzeldokument-Slots (fahrzeugschein/polizeibericht/sonstiges)
+  // bleiben Single-Upload.
+  if (slot.hochgeladen && slotId !== 'unfallfotos') {
     return { success: false, error: 'Dieses Dokument wurde bereits empfangen' }
   }
 
@@ -177,6 +181,24 @@ export async function uploadDokumentViaAnfrageToken(
       )
     } catch (err) {
       console.error('[AAR-504] auto-bkat module load:', err)
+    }
+  } else if (slotId === 'unfallfotos') {
+    // AAR-unfallfotos: Foto landet in fall_dokumente (typ=schadensfotos —
+    // matcht den bestehenden Dokument-Katalog-Slot, siehe
+    // src/lib/dokumente/sichtbarkeit.ts) + URL wird ans jsonb-Array
+    // leads.schadensfoto_urls angehängt. Nach jedem Upload läuft Haiku-Vision
+    // async und aktualisiert leads.sachschaden_beschreibung. Wenn der Fall
+    // noch nicht existiert (Dispatch-Phase), wird der fall_dokumente-Insert
+    // in convertLeadToFall nachgezogen.
+    await insertFallDokument(db, fallId, 'schadensfotos', path, contentType, buf.length, slot.label)
+    try {
+      const { appendUnfallfotoAndAnalyze } = await import('@/lib/ai/vision/analyze-unfallfotos')
+      // Fire-and-forget — Analyse-Fehler darf den Upload nicht blockieren.
+      appendUnfallfotoAndAnalyze(anfrage.lead_id, publicUrl).catch((err) =>
+        console.error('[AAR-unfallfotos] Haiku-Vision-Analyse fehlgeschlagen:', err),
+      )
+    } catch (err) {
+      console.error('[AAR-unfallfotos] analyze-unfallfotos Modul-Load-Fehler:', err)
     }
   } else {
     // sonstiges → fall_dokumente ohne Slot-Mapping (KB ordnet manuell zu)

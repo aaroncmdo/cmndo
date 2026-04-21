@@ -26,6 +26,7 @@ import {
   AlertCircleIcon,
   XCircleIcon,
   XIcon,
+  CameraIcon,
 } from 'lucide-react'
 
 type Props = {
@@ -37,6 +38,13 @@ type Props = {
   zeigePolizeibericht: boolean
   telefon: string | null
   email: string | null
+  // AAR-unfallfotos: Wenn bereits Fotos im Lead liegen, Checkbox nicht auto-
+  // vorwählen; Dispatcher kann sie trotzdem manuell setzen (Nachreichung).
+  unfallfotosVorhanden: boolean
+  // AAR-unfallfotos: Extern gesetzter „Kunde hat Unfallfotos"-Trigger aus der
+  // Schadenbeschreibung-Card in Phase 4. Wenn true → unfallfotos-Checkbox
+  // wird vorgewählt und die Schadenbeschreibungs-Card scrollt zum Button.
+  unfallfotosAnfragenDefault?: boolean
 }
 
 type SonstigesEintrag = { id: number; label: string }
@@ -58,6 +66,8 @@ export default function DokumenteAnfordernCard({
   zeigePolizeibericht,
   telefon,
   email,
+  unfallfotosVorhanden,
+  unfallfotosAnfragenDefault,
 }: Props) {
   const router = useRouter()
 
@@ -69,8 +79,21 @@ export default function DokumenteAnfordernCard({
   const [selectPolizeibericht, setSelectPolizeibericht] = useState(
     zeigePolizeibericht && (!polizeiberichtStatus || ['abgelehnt', 'fehlgeschlagen'].includes(polizeiberichtStatus)),
   )
+  // AAR-unfallfotos: Checkbox für Unfallfoto-Anforderung. Default:
+  // vorgewählt wenn Parent per `unfallfotosAnfragenDefault` signalisiert
+  // (Kunde hat Fotos) UND noch keine im Lead liegen.
+  const [selectUnfallfotos, setSelectUnfallfotos] = useState(
+    !!unfallfotosAnfragenDefault && !unfallfotosVorhanden,
+  )
   const [sonstige, setSonstige] = useState<SonstigesEintrag[]>([])
   const [nextId, setNextId] = useState(1)
+
+  // Parent-Trigger „Kunde hat Unfallfotos" nachträglich aktivieren
+  useEffect(() => {
+    if (unfallfotosAnfragenDefault && !unfallfotosVorhanden) {
+      setSelectUnfallfotos(true)
+    }
+  }, [unfallfotosAnfragenDefault, unfallfotosVorhanden])
 
   const [kanal, setKanal] = useState<'whatsapp' | 'sms' | 'email'>('whatsapp')
   const [pending, startTransition] = useTransition()
@@ -127,6 +150,9 @@ export default function DokumenteAnfordernCard({
     if (selectPolizeibericht) {
       slots.push({ slot_id: 'polizeibericht' })
     }
+    if (selectUnfallfotos) {
+      slots.push({ slot_id: 'unfallfotos' })
+    }
     for (const s of sonstige) {
       const trimmed = s.label.trim()
       if (trimmed.length > 0) {
@@ -154,7 +180,11 @@ export default function DokumenteAnfordernCard({
     })
   }
 
-  const kannAnfragen = selectFahrzeugschein || selectPolizeibericht || sonstige.some((s) => s.label.trim().length > 0)
+  const kannAnfragen =
+    selectFahrzeugschein ||
+    selectPolizeibericht ||
+    selectUnfallfotos ||
+    sonstige.some((s) => s.label.trim().length > 0)
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
@@ -291,6 +321,35 @@ export default function DokumenteAnfordernCard({
             )}
           </div>
         )}
+
+        {/* AAR-unfallfotos: Unfallfotos-Slot. Multi-File — Kunde kann mehrere
+            Fotos via denselben Link hochladen. Nach Upload läuft Haiku-Vision
+            und füllt leads.sachschaden_beschreibung automatisch. */}
+        <div className={`rounded-lg border p-3 ${selectUnfallfotos ? 'border-[#4573A2] bg-blue-50/30' : 'border-gray-200'}`}>
+          <label className="flex items-start gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={selectUnfallfotos}
+              onChange={(e) => setSelectUnfallfotos(e.target.checked)}
+              className="mt-0.5 w-4 h-4 accent-[#4573A2]"
+            />
+            <div className="flex-1">
+              <div className="flex items-center gap-1.5">
+                <CameraIcon className="w-3.5 h-3.5 text-[#4573A2]" />
+                <span className="text-xs font-semibold text-gray-900">Unfallfotos</span>
+                {unfallfotosVorhanden && (
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-green-50 text-green-700 font-medium">
+                    Fotos vorhanden
+                  </span>
+                )}
+              </div>
+              <p className="text-[10px] text-gray-500 mt-0.5">
+                Fotos vom Fahrzeugschaden (mehrere Ansichten möglich). Claude-
+                Vision (Haiku) wertet die Fotos aus und füllt die Schadenbeschreibung.
+              </p>
+            </div>
+          </label>
+        </div>
 
         {/* Freie „Sonstige"-Slots */}
         {sonstige.map((s) => (

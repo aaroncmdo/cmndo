@@ -16,7 +16,12 @@ import { createAdminClient } from '@/lib/supabase/admin'
 type Kanal = 'whatsapp' | 'sms' | 'email'
 
 export type SlotEingabe = {
-  slot_id: 'fahrzeugschein' | 'polizeibericht' | 'sonstiges'
+  // AAR-unfallfotos: „unfallfotos" als Multi-File-Slot ergänzt. Kunde darf
+  // beliebig viele Fotos hochladen; nach dem ersten Upload wird der Slot als
+  // „hochgeladen" markiert, aber weitere Uploads werden akzeptiert und in
+  // leads.schadensfoto_urls angehängt. Haiku-Vision wertet die Fotos aus und
+  // befüllt leads.sachschaden_beschreibung.
+  slot_id: 'fahrzeugschein' | 'polizeibericht' | 'unfallfotos' | 'sonstiges'
   ocr?: boolean
   label?: string  // optional — überschreibt Default-Label (nur für 'sonstiges' relevant)
 }
@@ -26,6 +31,7 @@ type Result = { success: boolean; error?: string; token?: string }
 const DEFAULT_LABELS: Record<SlotEingabe['slot_id'], string> = {
   fahrzeugschein: 'Fahrzeugschein (Vorderseite)',
   polizeibericht: 'Polizeiliche Unfallmitteilung',
+  unfallfotos: 'Unfallfotos (alle Schaden-Ansichten)',
   sonstiges: 'Sonstiges Dokument',
 }
 
@@ -116,6 +122,9 @@ export async function triggerDokumenteUploadRequest(
     legacyUpdate.polizeibericht_status = 'gesendet'
     legacyUpdate.polizeibericht_gesendet_am = now
   }
+  // AAR-unfallfotos: kein eigener Status-Spiegel auf `leads` — der Status
+  // läuft komplett über `dokument_upload_anfragen.status` + das jsonb-Array
+  // leads.schadensfoto_urls (Fotos = vorhanden). Spart eine Migration.
   if (Object.keys(legacyUpdate).length > 1) {
     await db.from('leads').update(legacyUpdate).eq('id', leadId)
   }

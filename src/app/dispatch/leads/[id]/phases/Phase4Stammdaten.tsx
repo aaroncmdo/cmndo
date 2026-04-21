@@ -57,6 +57,11 @@ type LeadFields = {
   // AAR-305: Schadenshergang-Pflicht bei fahrbereitem Fahrzeug (Banner in Phase 4)
   fahrzeug_fahrbereit?: boolean | null
   schadens_hergang?: string | null
+  // AAR-unfallfotos: Beschreibung WAS AM AUTO KAPUTT IST (nicht Unfallhergang).
+  // Wird entweder manuell vom Dispatcher ausgefüllt oder automatisch durch
+  // Haiku-Vision nach Upload von Unfallfotos gefüllt.
+  sachschaden_beschreibung?: string | null
+  schadensfoto_urls?: string[] | null
   // AAR-182: ZB1-Upload-Tracking
   zb1_status?: string | null
   zb1_hochgeladen_am?: string | null
@@ -525,38 +530,92 @@ export default function Phase4Stammdaten() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [marke])
 
-  // AAR-305: Schadenshergang-Pflicht wenn das Fahrzeug fahrbereit ist —
-  // der SV braucht die Beschreibung vor dem Termin für die Planung.
-  const schadenhergangPflicht =
-    l.fahrzeug_fahrbereit === true &&
-    (!l.schadens_hergang || l.schadens_hergang.trim().length < 20)
+  // AAR-unfallfotos: Schadenbeschreibung = „was ist am Auto kaputt". Pflicht-
+  // signal: mind. 20 Zeichen ODER vorhandene Fotos (Haiku füllt das Feld dann
+  // automatisch). Der Unfallhergang (schadens_hergang) wird in Phase 1 erfasst.
+  const hatUnfallfotos = Array.isArray(l.schadensfoto_urls) && l.schadensfoto_urls.length > 0
+  const schadenbeschreibungFehlt =
+    (!l.sachschaden_beschreibung || l.sachschaden_beschreibung.trim().length < 20) &&
+    !hatUnfallfotos
+
+  // AAR-unfallfotos: Dispatcher-Trigger „Kunde hat Unfallfotos" — kreuzt die
+  // Checkbox in der DokumenteAnfordernCard am Ende von Phase 4 an. Wird per
+  // State gehalten, damit das Banner oben und die Card unten gekoppelt sind.
+  const [unfallfotosAnfragen, setUnfallfotosAnfragen] = useState(false)
 
   return (
     <div className="space-y-4">
-      {/* AAR-305: Banner oben wenn Schadenshergang fehlt und Fahrzeug fahrbereit.
-          Der FlowLink-Versand in Phase 5 ist bereits via qualification.q8 gesperrt —
-          dieser Banner macht die Lücke sichtbar und bietet Inline-Edit an. */}
-      {schadenhergangPflicht && (
-        <div className="rounded-xl bg-amber-50 border border-amber-300 p-4 space-y-2">
+      {/* AAR-unfallfotos: Banner für Schadenbeschreibung (WAS ist am Auto kaputt).
+          Zwei Wege zur Erfüllung:
+            (a) Kunde hat Fotos → Dispatcher klickt „Kunde hat Unfallfotos" →
+                Card unten fordert per WA/SMS/Email an → Haiku füllt Feld
+            (b) Keine Fotos → manuelle Beschreibung in diesem Inline-Feld
+          Unfallhergang (wie kam's zum Unfall) steckt in Phase 1 Hard-Gate. */}
+      {schadenbeschreibungFehlt && (
+        <div className="rounded-xl bg-amber-50 border border-amber-300 p-4 space-y-3">
           <div className="flex items-start gap-2">
             <AlertTriangleIcon className="w-4 h-4 text-amber-700 mt-0.5 shrink-0" />
             <div className="flex-1">
               <p className="text-sm font-semibold text-amber-900">
-                Schadensbeschreibung fehlt
+                Schadenbeschreibung fehlt
               </p>
               <p className="text-xs text-amber-800 mt-0.5">
-                Das Fahrzeug ist fahrbereit — bitte ruf den Kunden an und erfrage
-                den Schadenshergang (mind. 20 Zeichen) bevor der FlowLink versendet
-                werden kann.
+                Beschreibe, was am Auto kaputt ist (sichtbare Schäden, Bauteile,
+                Schadensart). Wenn der Kunde Fotos hat, kannst du sie unten in
+                der Dokument-Anfrage ankreuzen — Claude füllt die Beschreibung
+                dann automatisch aus den Bildern.
               </p>
             </div>
           </div>
           <InlineField
-            label="Schadenshergang"
-            value={l.schadens_hergang}
-            fieldName="schadens_hergang"
+            label="Schadenbeschreibung (was am Auto kaputt ist)"
+            value={l.sachschaden_beschreibung}
+            fieldName="sachschaden_beschreibung"
             leadId={leadId}
-            placeholder="Was ist passiert? Wer war beteiligt? Wie ist der Unfall abgelaufen?"
+            placeholder="z. B. Heckstoßstange eingedrückt, Kofferraumklappe lässt sich nicht mehr öffnen, Rückleuchte rechts zersplittert …"
+            type="text"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              setUnfallfotosAnfragen(true)
+              // Ans Ende der Phase scrollen, damit der Dispatcher den Versand-
+              // Button in der DokumenteAnfordernCard sieht.
+              requestAnimationFrame(() => {
+                document
+                  .getElementById('dokumente-anfordern-card')
+                  ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              })
+            }}
+            className="w-full text-xs font-medium px-3 py-2 rounded-lg bg-white border border-amber-300 text-amber-900 hover:bg-amber-100 flex items-center justify-center gap-2"
+          >
+            <CameraIcon className="w-3.5 h-3.5" />
+            Kunde hat Unfallfotos → unten anfordern
+          </button>
+        </div>
+      )}
+
+      {/* AAR-unfallfotos: Befüllte Beschreibung anzeigen, inkl. AI-Marker wenn
+          sie aus den Fotos kam. Dispatcher kann sie weiterhin inline editieren. */}
+      {!schadenbeschreibungFehlt && (l.sachschaden_beschreibung || hatUnfallfotos) && (
+        <div className="rounded-xl bg-white border border-gray-200 p-4 space-y-2">
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-xs font-semibold text-gray-900 flex items-center gap-1.5">
+              <CameraIcon className="w-3.5 h-3.5 text-[#4573A2]" />
+              Schadenbeschreibung
+            </p>
+            {hatUnfallfotos && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 font-medium">
+                Aus {l.schadensfoto_urls!.length} Foto{l.schadensfoto_urls!.length === 1 ? '' : 's'} von Claude gefüllt
+              </span>
+            )}
+          </div>
+          <InlineField
+            label=""
+            value={l.sachschaden_beschreibung}
+            fieldName="sachschaden_beschreibung"
+            leadId={leadId}
+            placeholder="Was ist am Auto kaputt?"
             type="text"
           />
         </div>
@@ -565,21 +624,6 @@ export default function Phase4Stammdaten() {
       {/* AAR-177 Fix #2: Kundendaten-Card entfernt — die 4 Felder
           (Vorname/Nachname/Telefon/Email) werden bereits in Phase 1/5
           erfasst bzw. editiert. Doppelte Eingabe verwirrt den MA. */}
-
-      {/* AAR-352: Kombinierte Dokumenten-Anfrage — Dispatcher wählt Fahrzeugschein
-          (mit/ohne OCR), Polizeibericht und/oder freie Dokumente aus und verschickt
-          einen gemeinsamen Upload-Link. Legacy-WhatsApp-Inbound bleibt intakt, weil
-          die Server-Action die zb1- und polizeibericht-Felder auf leads spiegelt. */}
-      <DokumenteAnfordernCard
-        leadId={leadId}
-        zb1Status={l.zb1_status ?? null}
-        zb1HochgeladenAm={l.zb1_hochgeladen_am ?? null}
-        polizeiberichtStatus={l.polizeibericht_status ?? null}
-        polizeiberichtHochgeladenAm={l.polizeibericht_hochgeladen_am ?? null}
-        zeigePolizeibericht={l.polizei_vor_ort === true && l.polizeibericht_pflicht === true}
-        telefon={l.telefon ?? null}
-        email={l.email ?? null}
-      />
 
 
       {/* 1. Fahrzeugdaten — AAR-194: Baujahr OBEN, dann Marke + Modell
@@ -1227,6 +1271,26 @@ export default function Phase4Stammdaten() {
           Pflichtfelder fehlen: Kennzeichen, Marke und Modell müssen gesetzt sein.
         </p>
       )}
+
+      {/* AAR-unfallfotos: Bulk-Anforderung am Ende von Phase 4. Dispatcher
+          wählt welche Dokumente er beim Kunden anfordert (Fahrzeugschein,
+          Polizeibericht, Unfallfotos, sonstige) und verschickt einen einzigen
+          WA/SMS/Email-Link. Der „Kunde hat Unfallfotos"-Button im Banner oben
+          setzt unfallfotosAnfragen auf true → Checkbox hier vorausgewählt. */}
+      <div id="dokumente-anfordern-card">
+        <DokumenteAnfordernCard
+          leadId={leadId}
+          zb1Status={l.zb1_status ?? null}
+          zb1HochgeladenAm={l.zb1_hochgeladen_am ?? null}
+          polizeiberichtStatus={l.polizeibericht_status ?? null}
+          polizeiberichtHochgeladenAm={l.polizeibericht_hochgeladen_am ?? null}
+          zeigePolizeibericht={l.polizei_vor_ort === true && l.polizeibericht_pflicht === true}
+          telefon={l.telefon ?? null}
+          email={l.email ?? null}
+          unfallfotosVorhanden={hatUnfallfotos}
+          unfallfotosAnfragenDefault={unfallfotosAnfragen}
+        />
+      </div>
 
       {/* AAR-617: Zurück-/Weiter-Row */}
       {/* AAR-340: „Weiter zu Phase 5"-Button — Pflichtfelder q6 + q7 müssen
