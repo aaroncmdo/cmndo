@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { BadgeCheckIcon, ShieldOffIcon } from 'lucide-react'
-import { setzeSvVerifiziert } from './actions'
+import { setzeSvVerifiziert } from './_actions'
 
 // AAR-425: Admin-Toggle für den manuellen Verifizierungs-Status eines SVs.
 // Sitzt in der Header-Badge-Zeile auf /admin/sachverstaendige/[id].

@@ -31,9 +31,9 @@ import {
 } from 'lucide-react'
 import { useFall } from '../FallContext'
 import InlineEditField from './InlineEditField'
-import { getVersicherungById, type VersicherungSuggestion } from '@/app/dispatch/leads/[id]/actions/versicherungen'
+import { getVersicherungById, type VersicherungSuggestion } from '@/app/dispatch/leads/[id]/_actions/versicherungen'
 import { CardentityTypBButton } from '@/components/cardentity/CardentityTypBButton'
-import { requestCardentityTypBForFall } from '../actions/dokumente'
+import { requestCardentityTypBForFall } from '../_actions/dokumente'
 
 function Card({
   icon,

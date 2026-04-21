@@ -14,7 +14,7 @@ import {
   createBueroOrganisation,
   signBueroVertrag,
   startBueroStripeCheckout,
-} from './actions'
+} from './_actions'
 import {
   PAKET_KONTINGENT,
   ANZAHLUNG_PRO_FALL,

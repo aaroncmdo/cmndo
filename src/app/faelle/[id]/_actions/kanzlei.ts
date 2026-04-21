@@ -23,7 +23,7 @@ export {
   recordZahlung,
   erfasseZahlungseingang,
   saveKanzleiAnsprechpartner,
-} from '../actions'
+} from '../_actions'
 
 // Prozess-Subactions (waren schon gesplittet in actions/prozess.ts)
 export {
@@ -31,4 +31,4 @@ export {
   freigebeTechnischeStellungnahme,
   startRuege,
   uebergebeFallKlage,
-} from '../actions/prozess'
+} from '../_actions/prozess'

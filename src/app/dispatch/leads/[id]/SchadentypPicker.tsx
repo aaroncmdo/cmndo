@@ -5,7 +5,7 @@
 // Plus Parkplatz-Kamera-Check mit woertlicher italic Frage.
 
 import { useState, useTransition } from 'react'
-import { saveSchadentyp, clearSchadentyp } from './actions'
+import { saveSchadentyp, clearSchadentyp } from './_actions'
 import { XIcon } from 'lucide-react'
 
 type Schadentyp = 'spurwechsel' | 'auffahrunfall' | 'vorfahrtsverletzung' | 'parkplatz' | 'sonstiges'

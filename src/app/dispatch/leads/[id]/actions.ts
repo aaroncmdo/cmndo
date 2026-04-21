@@ -12,13 +12,13 @@
 //   actions/types.ts          — HardGateData, SvSuggestion, UnfallortKategorie
 // Bestehende Imports aus '../actions' funktionieren weiterhin via dieses Barrel.
 
-export { setLeadPhase, disqualifiziereLead, setServiceTyp } from './actions/qualification'
-export { saveSchadentyp, clearSchadentyp } from './actions/schadentyp'
-export { startGespraech, endeGespraech } from './actions/gespraech'
-export { saveRueckruf, markRueckrufErledigt } from './actions/rueckruf'
-export { saveStammdaten } from './actions/stammdaten'
-export { enrichLeadCardentity } from './actions/cardentity'
-export { saveHardGate } from './actions/hard-gate'
+export { setLeadPhase, disqualifiziereLead, setServiceTyp } from './_actions/qualification'
+export { saveSchadentyp, clearSchadentyp } from './_actions/schadentyp'
+export { startGespraech, endeGespraech } from './_actions/gespraech'
+export { saveRueckruf, markRueckrufErledigt } from './_actions/rueckruf'
+export { saveStammdaten } from './_actions/stammdaten'
+export { enrichLeadCardentity } from './_actions/cardentity'
+export { saveHardGate } from './_actions/hard-gate'
 export {
   listSvSuggestionsForLead,
   reserveSvTerminForLead,
@@ -26,16 +26,16 @@ export {
   acceptGegenvorschlag,
   getNextFreeSlotsForSv,
   getSvSuggestionsWithSlots,
-} from './actions/sv-termin'
-export type { SlotMatchType, SlotCandidate } from './actions/sv-termin'
-export { sendFlowLinkMultiChannel } from './actions/flowlink'
+} from './_actions/sv-termin'
+export type { SlotMatchType, SlotCandidate } from './_actions/sv-termin'
+export { sendFlowLinkMultiChannel } from './_actions/flowlink'
 // AAR-521: Debug-Action für "Warum?"-Button im SvDispatchPanel.
-export { debugSvMatching } from './actions/debug-sv'
+export { debugSvMatching } from './_actions/debug-sv'
 // AAR-352: triggerZb1UploadRequest + triggerPolizeiberichtUploadRequest ersetzt
 // durch kombinierten Multi-Slot-Trigger. Legacy-Dateien sind gelöscht.
-export { triggerDokumenteUploadRequest } from './actions/dokumente-anfordern'
-export type { SlotEingabe } from './actions/dokumente-anfordern'
-export { searchVersicherungen, getVersicherungById, type VersicherungSuggestion } from './actions/versicherungen'
+export { triggerDokumenteUploadRequest } from './_actions/dokumente-anfordern'
+export type { SlotEingabe } from './_actions/dokumente-anfordern'
+export { searchVersicherungen, getVersicherungById, type VersicherungSuggestion } from './_actions/versicherungen'
 // AAR-358: Personenschäden-Personen-CRUD
 export {
   listPersonenForLead,
@@ -43,5 +43,5 @@ export {
   deletePersonForLead,
   type PersonenschadenPerson,
   type PersonenschadenPersonInput,
-} from './actions/personen'
-export type { HardGateData, SvSuggestion, UnfallortKategorie } from './actions/types'
+} from './_actions/personen'
+export type { HardGateData, SvSuggestion, UnfallortKategorie } from './_actions/types'

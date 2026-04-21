@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 import { VideoIcon } from 'lucide-react'
 import { FALL_STATUS_LABELS, FALL_STATUS_COLORS } from '@/lib/statusLabels'
 import { useFall } from '../FallContext'
-import { createKbVideoterminByKb } from '../actions/termine'
+import { createKbVideoterminByKb } from '../_actions/termine'
 // AAR-377: Shared BriefingCard — oben in der Übersicht.
 import BriefingCard from '@/components/fall/BriefingCard'
 import type { StammdatenSection } from '@/lib/fall/phase-config'
@@ -26,7 +26,7 @@ import {
   // AAR-633: Notizen + Zeugen-Kontakte (immer sichtbar)
   NotizenSection,
   ZeugenKontakteSection,
-} from '../stammdaten/Sections'
+} from '../_stammdaten/Sections'
 
 const SECTION_COMPONENTS: Partial<Record<StammdatenSection, () => React.JSX.Element>> = {
   kunde: KundendatenSection,

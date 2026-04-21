@@ -8,7 +8,7 @@
 import { useTransition } from 'react'
 import { toast } from 'sonner'
 import { useFall } from '../FallContext'
-import { triggerFinCallForFall } from '../actions/dokumente'
+import { triggerFinCallForFall } from '../_actions/dokumente'
 
 type QuickAction = {
   label: string

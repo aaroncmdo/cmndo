@@ -12,8 +12,8 @@ import { useState, useTransition } from 'react'
 import GespraechsleitfadenTimer from '../GespraechsleitfadenTimer'
 import RueckrufSection from '../RueckrufSection'
 import TerminListeClient from '@/components/termine/TerminListeClient'
-import { useDispatchPhase, type Phase } from '../lib/phase-context'
-import { disqualifiziereLead } from '../actions'
+import { useDispatchPhase, type Phase } from '../_lib/phase-context'
+import { disqualifiziereLead } from '../_actions'
 import {
   AlertCircleIcon,
   BookOpenIcon,

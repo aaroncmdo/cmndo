@@ -7,7 +7,7 @@
 // disabled, damit der Dispatcher nicht voreilig Phasen überspringt.
 
 import { CheckIcon } from 'lucide-react'
-import { useDispatchPhase, type Phase } from './lib/phase-context'
+import { useDispatchPhase, type Phase } from './_lib/phase-context'
 
 const PHASE_LABELS: { nr: Phase; label: string }[] = [
   { nr: 1, label: 'Qualifizierung' },

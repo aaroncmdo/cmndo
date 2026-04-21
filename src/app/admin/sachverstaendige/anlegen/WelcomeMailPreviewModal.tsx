@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { XIcon, MailIcon, LoaderIcon } from 'lucide-react'
-import { renderWillkommenSvPreview, type WelcomeMailPreviewInput } from './actions'
+import { renderWillkommenSvPreview, type WelcomeMailPreviewInput } from './_actions'
 import { LoadingButton } from '@/components/ui/loading-button'
 
 // AAR-364 SUB-2: Vorab-Preview der Willkommens-Mail. Rendered den echten

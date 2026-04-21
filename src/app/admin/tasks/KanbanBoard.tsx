@@ -10,7 +10,7 @@ import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
-import { createTask, updateTaskStatus, deleteTask } from './actions'
+import { createTask, updateTaskStatus, deleteTask } from './_actions'
 
 type Task = {
   id: string

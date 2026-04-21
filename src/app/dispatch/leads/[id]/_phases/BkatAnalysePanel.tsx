@@ -14,7 +14,7 @@ import { SparklesIcon, AlertTriangleIcon, CheckCircleIcon, ScaleIcon } from 'luc
 import {
   analyzeBkatForLead,
   saveBkatUnfallart,
-} from '../actions/bkat-inference'
+} from '../_actions/bkat-inference'
 import { bkatToLegacySchadentyp } from '@/lib/bkat/lookup'
 
 type Result = Awaited<ReturnType<typeof analyzeBkatForLead>>

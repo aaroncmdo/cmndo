@@ -1,7 +1,7 @@
 // AAR-134 Phase 5: Public Route für SV-Termin-Ablehnung via Email-Link.
 // KEIN Login nötig — der Token IST die Auth.
 import { createAdminClient } from '@/lib/supabase/admin'
-import { ablehneFromForm } from './actions'
+import { ablehneFromForm } from './_actions'
 
 export const dynamic = 'force-dynamic'
 

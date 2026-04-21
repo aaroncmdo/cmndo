@@ -9,9 +9,9 @@
 import { useState, useTransition, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import SvDispatchPanel from '../SvDispatchPanel'
-import { useDispatchPhase } from '../lib/phase-context'
-import { setServiceTyp, saveStammdaten } from '../actions'
-import { geocodeAndSaveUnfallort } from '../actions/geocode'
+import { useDispatchPhase } from '../_lib/phase-context'
+import { setServiceTyp, saveStammdaten } from '../_actions'
+import { geocodeAndSaveUnfallort } from '../_actions/geocode'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { MapPinIcon, CheckCircle2Icon, ScaleIcon, CalendarIcon } from 'lucide-react'
 

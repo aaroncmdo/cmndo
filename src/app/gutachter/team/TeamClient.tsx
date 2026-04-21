@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { Building2Icon, GraduationCapIcon, MailIcon, ShieldOffIcon, ShieldCheckIcon, ArrowRightIcon, InboxIcon, UsersIcon, BarChart3Icon, WalletIcon, ActivityIcon } from 'lucide-react'
-import { assignPoolLead, toggleSubSvSperre } from './actions'
+import { assignPoolLead, toggleSubSvSperre } from './_actions'
 
 export type SubSvData = {
   id: string

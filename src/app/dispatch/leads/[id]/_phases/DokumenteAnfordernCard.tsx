@@ -12,8 +12,8 @@
 
 import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { triggerDokumenteUploadRequest, saveStammdaten } from '../actions'
-import type { SlotEingabe } from '../actions/dokumente-anfordern'
+import { triggerDokumenteUploadRequest, saveStammdaten } from '../_actions'
+import type { SlotEingabe } from '../_actions/dokumente-anfordern'
 import {
   FileTextIcon,
   ShieldAlertIcon,

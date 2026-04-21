@@ -6,8 +6,8 @@
 // Versand: WA-Nummer inline editierbar.
 
 import { useState, useTransition, useEffect, useRef } from 'react'
-import { useDispatchPhase } from '../lib/phase-context'
-import { sendFlowLinkMultiChannel, saveStammdaten } from '../actions'
+import { useDispatchPhase } from '../_lib/phase-context'
+import { sendFlowLinkMultiChannel, saveStammdaten } from '../_actions'
 // AAR-317: Unfallskizze-Card (Claude-API-Generator + MA-Freigabe)
 import { UnfallskizzeCard } from './UnfallskizzeCard'
 import {

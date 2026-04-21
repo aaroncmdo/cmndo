@@ -13,7 +13,7 @@ import {
   CarFrontIcon, ShieldCheckIcon, Building2Icon, UserPlusIcon,
   XIcon, MapPinIcon, ArrowRightIcon, LayersIcon, RefreshCwIcon, SearchIcon,
 } from 'lucide-react'
-import { recalculateIsochrone, getSvAktiverTermin } from './actions'
+import { recalculateIsochrone, getSvAktiverTermin } from './_actions'
 import type { SvAktiverTerminResult } from './actions.types'
 import { createClient } from '@/lib/supabase/client'
 import { getSvStatus } from '@/lib/sv-status'

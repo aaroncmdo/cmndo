@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { SendIcon, FileTextIcon, CalendarIcon } from 'lucide-react'
 import { markNachrichtenGelesen } from '@/lib/markNachrichtenGelesen'
 import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
-import { waehleGegenvorschlagSlot } from './actions'
+import { waehleGegenvorschlagSlot } from './_actions'
 import Link from 'next/link'
 
 type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean | null; anhang_url: string | null; created_at: string }

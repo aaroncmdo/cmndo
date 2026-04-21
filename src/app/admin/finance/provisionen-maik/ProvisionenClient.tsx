@@ -4,7 +4,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { setCpl, confirmProvision, reverseProvision, markMonthAsPaid } from './actions'
+import { setCpl, confirmProvision, reverseProvision, markMonthAsPaid } from './_actions'
 
 type Provision = {
   id: string

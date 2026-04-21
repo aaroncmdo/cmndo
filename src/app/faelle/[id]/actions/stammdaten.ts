@@ -1,7 +1,7 @@
 'use server'
 
 // AAR-162 / W2: Fallakte Stammdaten — Generic Inline-Edit-Action.
-// Analog zu src/app/dispatch/leads/[id]/actions/stammdaten.ts (AAR-140 / W6):
+// Analog zu src/app/dispatch/leads/[id]/_actions/stammdaten.ts (AAR-140 / W6):
 // Allowlist-basierter Update-Endpoint, damit Consumer (InlineEditField) nicht
 // einzeln 15 dedizierte Actions aufrufen müssen. Systemfelder + Status-Felder
 // sind gesperrt — diese gehen über dedizierte Workflows (Webhooks, state-

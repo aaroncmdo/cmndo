@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
-import { saveRueckruf, markRueckrufErledigt } from './actions'
+import { saveRueckruf, markRueckrufErledigt } from './_actions'
 import { PhoneCallIcon, CheckCircle2Icon } from 'lucide-react'
 
 type OffenerTermin = {

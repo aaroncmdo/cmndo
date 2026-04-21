@@ -18,7 +18,7 @@ import {
   NachbesichtigungSection,
   KlageSection,
   AuszahlungSection,
-} from '../prozess/Sections'
+} from '../_prozess/Sections'
 
 export default function ProzessTab({ subphase }: { subphase: SubphaseResult }) {
   const { fall, phase } = useFall()

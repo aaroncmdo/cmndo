@@ -10,11 +10,11 @@ import { ArrowLeftIcon } from 'lucide-react'
 import {
   DispatchPhaseProvider,
   type Phase,
-} from './lib/phase-context'
+} from './_lib/phase-context'
 import type {
   LeadLike,
   AktiverTerminLike,
-} from './lib/qualification-engine'
+} from './_lib/qualification-engine'
 import PhaseHeader from './PhaseHeader'
 import PhaseContent from './PhaseContent'
 import {
@@ -24,7 +24,7 @@ import {
   TerminListeSidebar,
   GespraechshilfePanel,
   EinwandKarten,
-} from './sidebar/SidebarStubs'
+} from './_sidebar/SidebarStubs'
 import { computeFlowLinkStufe, FLOWLINK_STUFE_LABEL } from '@/lib/dispatch/fahrzeug-marken'
 import { PHASE_LABELS as PHASE_LABELS_CONST, PHASE_BADGES } from '../_components/leadPhaseConstants'
 

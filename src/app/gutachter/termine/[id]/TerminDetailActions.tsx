@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { NavigationIcon, MapPinIcon, CheckCircleIcon, XCircleIcon, ClockIcon, AlertTriangleIcon, PlusIcon } from 'lucide-react'
 import { startNavigation } from '@/lib/termine/actions'
-import { svAblehneTermin, svGegenvorschlagTermin } from './actions'
+import { svAblehneTermin, svGegenvorschlagTermin } from './_actions'
 
 // KFZ-200: Client component for Termin-Detail action buttons.
 // AAR-134: Ablehnen + Gegenvorschlag Modals + collapsible Section.

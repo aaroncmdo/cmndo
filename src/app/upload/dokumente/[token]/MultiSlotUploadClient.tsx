@@ -7,7 +7,7 @@
 // gefüllt sind, erscheint der globale Abschluss-Screen.
 
 import { useState, useRef } from 'react'
-import { uploadDokumentViaAnfrageToken } from './actions'
+import { uploadDokumentViaAnfrageToken } from './_actions'
 import {
   CameraIcon,
   ImageIcon,

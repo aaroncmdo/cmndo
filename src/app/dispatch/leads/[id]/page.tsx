@@ -8,8 +8,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import DispatchShell from './DispatchShell'
-import { computeQualificationStatus } from './lib/qualification-engine'
-import type { Phase } from './lib/phase-context'
+import { computeQualificationStatus } from './_lib/qualification-engine'
+import type { Phase } from './_lib/phase-context'
 
 export default async function DispatchLeadDetail({
   params,
