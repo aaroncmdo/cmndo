@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboardIcon, FolderOpenIcon, CheckSquareIcon, CalendarIcon,
   MessageCircleIcon, BarChart3Icon, AlertCircleIcon, UserIcon,
+  MapIcon, UsersRoundIcon,
 } from 'lucide-react'
 
 type NavItem = { href: string; label: string; icon: typeof LayoutDashboardIcon; exact?: boolean }
@@ -15,6 +16,8 @@ const ITEMS: NavItem[] = [
   { href: '/mitarbeiter/faelle', label: 'Meine Fälle', icon: FolderOpenIcon },
   { href: '/mitarbeiter/tasks', label: 'Tasks', icon: CheckSquareIcon },
   { href: '/mitarbeiter/termine', label: 'Termine', icon: CalendarIcon },
+  { href: '/mitarbeiter/kundentermine', label: 'Kundentermine', icon: UsersRoundIcon },
+  { href: '/mitarbeiter/isochrone', label: 'Gebiet', icon: MapIcon },
   { href: '/mitarbeiter/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon },
   { href: '/mitarbeiter/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
   { href: '/mitarbeiter/performance', label: 'Performance', icon: BarChart3Icon },
