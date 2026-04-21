@@ -307,7 +307,9 @@ async function finalizeKundeSetup(
   // AAR-607 A3: .single() throwed bei 0 Rows + leadDocs=null Propagation zu
   // createPflichtdokumenteFromKatalog war Silent-Fail-Pfad.
   const { data: leadForDocs } = await admin
-    .from('faelle').select('lead_id, leads(polizei_vor_ort, polizeibericht_pflicht, polizeibericht_status, personenschaden_flag, hat_vorschaeden, zb1_status, service_typ, wa_gesendet, mietwagen_flag, nutzungsausfall)').eq('id', fallId).maybeSingle()
+    // AAR-658: faelle→leads ist mehrdeutig (lead_id + konvertiert_von_lead),
+    // FK-Hint nötig sonst liefert PostgREST PGRST201 und leadDocs=null.
+    .from('faelle').select('lead_id, leads!faelle_lead_id_fkey(polizei_vor_ort, polizeibericht_pflicht, polizeibericht_status, personenschaden_flag, hat_vorschaeden, zb1_status, service_typ, wa_gesendet, mietwagen_flag, nutzungsausfall)').eq('id', fallId).maybeSingle()
   const lRaw = (leadForDocs as { leads: unknown } | null)?.leads
   const leadDocs = (Array.isArray(lRaw) ? lRaw[0] : lRaw) as Record<string, unknown> | null
   if (!leadDocs) {
@@ -831,7 +833,7 @@ export async function signSAandCreateFall(
   if (lead.gutachter_termin && lead.telefon) {
     try {
       const { data: terminRow } = await admin.from('gutachter_termine')
-        .select('id, sv_id, sachverstaendige(profiles(vorname, nachname))')
+        .select('id, sv_id, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
         .eq('fall_id', fall.id)
         .in('status', ['bestaetigt', 'reserviert'])
         .limit(1)

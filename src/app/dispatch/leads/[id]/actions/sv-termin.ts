@@ -229,7 +229,7 @@ export async function acceptGegenvorschlag(
         let svName = 'Ihrem Gutachter'
         const { data: svRow } = await supabase
           .from('gutachter_termine')
-          .select('sachverstaendige(profiles(vorname, nachname))')
+          .select('sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
           .eq('id', terminId)
           .single()
         const svRel = (svRow as { sachverstaendige: unknown } | null)?.sachverstaendige

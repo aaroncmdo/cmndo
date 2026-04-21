@@ -1,12 +1,15 @@
 // AAR-311: Manueller Cardentity-Typ-B-Detailbericht.
+// AAR-653: Writes jetzt auf `faelle` (Single Source of Truth nach AAR-580/582).
+//
 // Typ-A (automatisch via FIN-OCR) bleibt in enrich-fahrzeug.ts. Typ-B wird
 // nur manuell von Dispatcher / KB / SV in der Fallakte ausgelöst — der Aufruf
 // kostet 15€ pro Abfrage und ist erst nach dem Termin oder bei konkretem
 // Vorschadenverdacht sinnvoll.
 //
-// Speicherung der Wahrheit: leads-Tabelle (vorschaden_typ_b_bericht jsonb).
-// Bei Trigger aus der Fallakte wird die lead_id über faelle aufgelöst — so
-// gibt es nur eine Quelle für Vorschaden-Daten.
+// Speicherung der Wahrheit: faelle-Tabelle (vorschaden_typ_b_bericht jsonb).
+// Bei Trigger aus dem Lead-Dispatch wird der zugehörige Fall aufgelöst —
+// wenn ein Lead noch keinen Fall hat, ist Typ-B nicht sinnvoll abfragbar
+// (ohne FIN und ohne Besichtigung hat man keine Grundlage).
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getVehicleReport, CardentityError, type CardentityReport } from './client'
@@ -30,51 +33,53 @@ export async function requestCardentityTypB(
 ): Promise<RequestTypBResult> {
   const db = createAdminClient()
 
-  let leadId: string | null = null
-  let finFromScope: string | null = null
+  let fallId: string | null = null
 
   if (scope === 'fall') {
+    fallId = id
+  } else {
+    // Lead → neusten Fall auflösen
     const { data: fall } = await db
       .from('faelle')
-      .select('lead_id, fin_vin')
-      .eq('id', id)
+      .select('id')
+      .eq('lead_id', id)
+      .order('erstellt_am', { ascending: false })
+      .limit(1)
       .maybeSingle()
-    if (!fall) return { success: false, error: 'Fall nicht gefunden' }
-    if (!fall.lead_id) return { success: false, error: 'Fall hat keinen Lead' }
-    leadId = fall.lead_id
-    finFromScope = (fall.fin_vin as string | null) ?? null
-  } else {
-    leadId = id
+    if (!fall) return { success: false, error: 'Kein Fall zum Lead — Typ-B erst nach Fallanlage abrufbar' }
+    fallId = fall.id
   }
 
-  const { data: lead } = await db
-    .from('leads')
-    .select('id, fin, vorschaden_typ_b_bericht, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, kilometerstand, erstzulassung')
-    .eq('id', leadId)
+  const { data: fall } = await db
+    .from('faelle')
+    .select(
+      'id, fin_vin, vorschaden_typ_b_bericht, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, kilometerstand, erstzulassung',
+    )
+    .eq('id', fallId)
     .maybeSingle()
-  if (!lead) return { success: false, error: 'Lead nicht gefunden' }
+  if (!fall) return { success: false, error: 'Fall nicht gefunden' }
 
-  const fin = ((finFromScope ?? lead.fin) ?? '').trim().toUpperCase()
+  const fin = ((fall.fin_vin as string | null) ?? '').trim().toUpperCase()
   if (!fin) return { success: false, error: 'Keine FIN vorhanden' }
   if (!VIN_REGEX.test(fin)) return { success: false, error: 'FIN-Format ungültig' }
 
   // Idempotenz: wenn schon abgerufen, nur Stand zurückgeben — keine 2. Abfrage
-  if (lead.vorschaden_typ_b_bericht) {
-    const bericht = lead.vorschaden_typ_b_bericht as Record<string, unknown>
+  if (fall.vorschaden_typ_b_bericht) {
+    const bericht = fall.vorschaden_typ_b_bericht as Record<string, unknown>
     return {
       success: true,
       alreadyFetched: true,
       fetchedAt: (bericht.fetchedAt as string) ?? '',
-      vorschadenVorhanden: lead.hat_vorschaeden ?? false,
-      vorschadenAnzahl: lead.vorschaden_anzahl ?? 0,
-      letzterVorschadenDatum: (lead.vorschaden_letzter_datum as string | null) ?? null,
+      vorschadenVorhanden: fall.hat_vorschaeden ?? false,
+      vorschadenAnzahl: fall.vorschaden_anzahl ?? 0,
+      letzterVorschadenDatum: (fall.vorschaden_letzter_datum as string | null) ?? null,
     }
   }
 
   try {
     const report = await getVehicleReport(fin, {
-      mileage: (lead.kilometerstand as number | null) ?? undefined,
-      firstRegistrationDate: (lead.erstzulassung as string | null) ?? undefined,
+      mileage: (fall.kilometerstand as number | null) ?? undefined,
+      firstRegistrationDate: (fall.erstzulassung as string | null) ?? undefined,
     })
     if (!report) return { success: false, error: 'Kein Bericht verfügbar', code: 404 }
 
@@ -96,7 +101,7 @@ export async function requestCardentityTypB(
     }
     if (letzterDatum) updates.vorschaden_letzter_datum = letzterDatum
 
-    const { error: updErr } = await db.from('leads').update(updates).eq('id', leadId)
+    const { error: updErr } = await db.from('faelle').update(updates).eq('id', fallId)
     if (updErr) return { success: false, error: updErr.message }
 
     return {

@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
     // WhatsApp an Admin
     try {
       const { data: svData } = await svc.from('sachverstaendige')
-        .select('profiles(vorname, nachname)')
+        .select('profiles!sachverstaendige_profile_id_fkey(vorname, nachname)')
         .eq('id', termin.sv_id)
         .single()
       const svP = (Array.isArray(svData?.profiles) ? svData?.profiles[0] : svData?.profiles) as { vorname: string | null; nachname: string | null } | null

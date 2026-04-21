@@ -23,8 +23,16 @@ export default async function AdminLayout({
   //   /admin/*-Seiten sind Admin-only).
   // Sachverständiger / Kunde / Makler sollten hier sowieso nicht ankommen,
   //   Login-Redirect fängt das ab — zur Sicherheit trotzdem explizit.
-  const { data: profileCheck } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
-  const profileRolle = profileCheck?.rolle as string | undefined
+  // AAR-658 Silent-Error-Audit: Query-Error nicht still schlucken — sonst ist
+  // `profileCheck` undefined, keiner der Role-Redirects greift, ein User ohne
+  // Admin-Rolle würde /admin sehen. Defensiv zurück zum Login werfen.
+  const { data: profileCheck, error: profileErr } = await supabase
+    .from('profiles').select('rolle').eq('id', user.id).single()
+  if (profileErr || !profileCheck) {
+    console.error('[admin/layout] Profil-Query:', profileErr?.message ?? 'keine Row')
+    redirect('/login?error=Profil+nicht+ladbar')
+  }
+  const profileRolle = profileCheck.rolle as string | undefined
   if (profileRolle === 'dispatch') redirect('/dispatch/dashboard')
   if (profileRolle === 'kundenbetreuer') redirect('/mitarbeiter')
   if (profileRolle === 'sachverstaendiger') redirect('/gutachter')

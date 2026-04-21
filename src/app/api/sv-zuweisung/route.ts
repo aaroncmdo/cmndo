@@ -329,7 +329,7 @@ export async function POST(request: Request) {
   // 8. SV-Profil laden für Response
   const { data: svProfile } = await supabase
     .from('sachverstaendige')
-    .select('id, paket, profiles(vorname, nachname, telefon, email)')
+    .select('id, paket, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, telefon, email)')
     .eq('id', bestSv.id)
     .single()
 

@@ -21,7 +21,7 @@ export default async function TasksPage() {
       supabase.from('leads').select('id, vorname, nachname, telefon'),
       supabase
         .from('sachverstaendige')
-        .select('id, profile_id, profiles(vorname, nachname)'),
+        .select('id, profile_id, profiles!sachverstaendige_profile_id_fkey(vorname, nachname)'),
     ])
 
   const fallMap = Object.fromEntries(

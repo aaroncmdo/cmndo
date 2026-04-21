@@ -25,6 +25,9 @@ import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleit
 import { getKundenJetztZuTun, type KundeSlaRecord } from '@/lib/kunde/jetzt-zu-tun'
 // AAR-448: Termin-Detail-Card mit Quick-Actions
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
+// AAR-651: Zentrale Fall-Loader-Lib — FALL_SELECT_KUNDE ist die shared
+// Spalten-Liste (52 Felder ohne Brutto-Beträge, AAR-558 C9 Leak-Fix).
+import { getFallById, FALL_SELECT_KUNDE } from '@/lib/fall/queries'
 
 export default async function KundeFallDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -36,15 +39,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
     const admin = createAdminClient()
 
-    // Fall laden — AAR-558 (C9) Brutto-Leak-Fix: explizite Spaltenliste OHNE
-    // regulierung_betrag, zahlung_betrag, kuerzungs_betrag, gutachter_honorar,
-    // auszahlung_gutachter_*, vs_quote_betrag_ausgezahlt. Der Kunde sieht die
-    // Netto-Auszahlung ausschließlich über AuszahlungCard (faelle_kunde_view).
-    const { data: fall } = await supabase
-      .from('v_faelle_mit_aktuellem_termin')
-      .select('id,fall_nummer,status,szenario,aktuelle_phase,kunde_id,lead_id,sv_id,kundenbetreuer_id,schadens_beschreibung,schadens_datum,schadens_hoehe_netto,schadens_adresse,schadens_plz,schadens_ort,kennzeichen,fahrzeug_hersteller,fahrzeug_modell,fahrzeug_baujahr,unfallort,besichtigungsort_adresse,sv_termin,gutachter_termin_status,gutachter_termin_bestaetigt_am,gutachten_eingegangen_am,onboarding_complete,sa_unterschrieben,vollmacht_signiert_am,vollmacht_status,anschlussschreiben_am,regulierung_am,vs_ablehnungsgrund,vs_kuerzung_grund,storno_grund,abgeschlossen_am,google_review_gesendet,gegner_versicherung,kanzlei_ansprechpartner_name,mandatstyp,service_typ,polizei_vor_ort,bankdaten_hinterlegt_am,zahlungsweg,totalschaden,zahlung_eingegangen_am,nachbesichtigung_status,nachbesichtigung_termin_datum,nachbesichtigung_angefordert_am,aktueller_termin_id,aktueller_termin_start,aktueller_termin_end,aktueller_termin_status,aktueller_termin_sv_id,aktueller_termin_kanal,aktueller_termin_typ,aktueller_termin_final_verbindlich_ab')
-      .eq('id', id)
-      .single()
+    // AAR-651: Zentrale Lib mit FALL_SELECT_KUNDE (52 Felder ohne Brutto-Beträge,
+    // AAR-558 C9 Leak-Fix). Ownership-Check bleibt separat unten wegen Email-Fallback.
+    const fall = await getFallById(supabase, id, FALL_SELECT_KUNDE)
     if (!fall) notFound()
 
     // Ownership: kunde_id oder lead-email
@@ -379,7 +376,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         <div>
           <Link href="/kunde" className="text-xs text-gray-400 hover:text-[#4573A2] mb-2 inline-block">&larr; Meine Fälle</Link>
           <h1 className="text-lg font-bold text-[#0D1B3E]">
-            {kennzeichen || fall.fall_nummer || 'Schadensfall'}{fahrzeug ? ` — ${fahrzeug}` : ''}
+            {kennzeichen || (fall.fall_nummer as string | null) || 'Schadensfall'}{fahrzeug ? ` — ${fahrzeug}` : ''}
           </h1>
           {adresse && <p className="text-sm text-gray-500 mt-0.5">{adresse}</p>}
         </div>

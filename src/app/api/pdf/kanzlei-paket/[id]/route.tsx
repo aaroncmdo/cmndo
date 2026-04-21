@@ -45,7 +45,7 @@ export async function GET(
       ? supabase.from('leads').select('vorname, nachname, email, telefon').eq('id', fall.lead_id).single()
       : Promise.resolve({ data: null }),
     fall.sv_id
-      ? supabase.from('sachverstaendige').select('profiles(vorname, nachname)').eq('id', fall.sv_id).single()
+      ? supabase.from('sachverstaendige').select('profiles!sachverstaendige_profile_id_fkey(vorname, nachname)').eq('id', fall.sv_id).single()
       : Promise.resolve({ data: null }),
   ])
 

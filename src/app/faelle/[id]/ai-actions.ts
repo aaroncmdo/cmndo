@@ -41,7 +41,7 @@ export async function generateFallSummary(
     admin.from('pflichtdokumente').select('*').eq('fall_id', fallId).then(r => r.data ?? []),
     admin.from('tasks').select('*').eq('fall_id', fallId).order('created_at', { ascending: false }).limit(20).then(r => r.data ?? []),
     fall.sv_id
-      ? admin.from('sachverstaendige').select('profile_id, profiles(vorname, nachname)').eq('id', fall.sv_id).single().then(r => r.data)
+      ? admin.from('sachverstaendige').select('profile_id, profiles!sachverstaendige_profile_id_fkey(vorname, nachname)').eq('id', fall.sv_id).single().then(r => r.data)
       : Promise.resolve(null),
     fall.kundenbetreuer_id
       ? admin.from('profiles').select('vorname, nachname').eq('id', fall.kundenbetreuer_id).single().then(r => r.data)

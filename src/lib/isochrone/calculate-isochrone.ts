@@ -1,15 +1,15 @@
-// AAR-132: HERE API Isoline statt OSRM + seeded-random Fallback.
+// AAR-661: Mapbox Isochrone API ersetzt HERE.
 //
-// Ruft HERE's Isoline-Endpoint auf und gibt das echte Fahr-Isochronen-Polygon
-// zurück. Kein manuelles Ray-Skalieren mehr, kein seeded-random Fallback.
-// Bei API-Problemen wirft die Funktion IsochroneError — der Caller entscheidet
-// was damit passiert (typischerweise: loggen + Polygon-Speicherung überspringen,
-// findBestSV fällt auf Radius-Check zurück).
+// Der HERE-Key in Vercel war ein OAuth-Credential (base64-Blob), kein
+// REST-Key — Aufrufe gaben 401. Mapbox liefert direkt GeoJSON-Polygon zurück
+// und der MAPBOX_ACCESS_TOKEN war schon gesetzt.
+//
+// Rückgabe-Kontrakt bleibt: IsoPoint[] für Backward-Compat mit
+// `recalculateIsochrone`; der Caller baut daraus das GeoJSON-Polygon.
 
-import { decode } from '@here/flexpolyline'
-
-const HERE_API_URL = 'https://isoline.router.hereapi.com/v8/isolines'
+const MAPBOX_ISO_URL = 'https://api.mapbox.com/isochrone/v1/mapbox/driving'
 const REQUEST_TIMEOUT_MS = 8000
+const MAX_METERS = 100_000 // Mapbox-Limit
 
 export type IsoPoint = { lat: number; lng: number }
 
@@ -23,37 +23,32 @@ export class IsochroneError extends Error {
 }
 
 /**
- * Berechnet ein Fahr-Isochronen-Polygon via HERE API.
+ * Berechnet ein Fahr-Isochronen-Polygon via Mapbox Isochrone API.
  *
  * @param lat       Start-Breitengrad
  * @param lng       Start-Längengrad
- * @param radiusKm  Einsatzradius in Kilometern (wird zu Metern konvertiert)
+ * @param radiusKm  Einsatzradius in Kilometern (Mapbox-Limit: 100 km)
  * @returns Polygon als Array von IsoPoints (>=3 Punkte)
- * @throws IsochroneError wenn HERE_API_KEY fehlt, die API nicht antwortet oder
- *   kein gültiges Polygon liefert. NIE als NEXT_PUBLIC_* setzen — Server-only.
+ * @throws IsochroneError wenn MAPBOX_ACCESS_TOKEN fehlt, die API nicht
+ *   antwortet oder kein gültiges Polygon liefert.
  */
 export async function calculateIsochrone(
   lat: number,
   lng: number,
   radiusKm: number,
 ): Promise<IsoPoint[]> {
-  const apiKey = process.env.HERE_API_KEY
-  if (!apiKey) {
-    throw new IsochroneError(
-      'HERE_API_KEY environment variable nicht gesetzt. Siehe AAR-132.',
-    )
+  const token = process.env.MAPBOX_ACCESS_TOKEN
+  if (!token) {
+    throw new IsochroneError('MAPBOX_ACCESS_TOKEN nicht gesetzt (server-only env).')
   }
 
-  const rangeMeters = Math.round(radiusKm * 1000)
-
-  const url = new URL(HERE_API_URL)
-  url.searchParams.set('apiKey', apiKey)
-  url.searchParams.set('transportMode', 'car')
-  url.searchParams.set('origin', `${lat},${lng}`)
-  url.searchParams.set('range[type]', 'distance')
-  url.searchParams.set('range[values]', String(rangeMeters))
-  url.searchParams.set('routingMode', 'fast')
-  url.searchParams.set('shape', 'simple')
+  const meters = Math.min(MAX_METERS, Math.round(radiusKm * 1000))
+  const url = new URL(`${MAPBOX_ISO_URL}/${lng},${lat}`)
+  url.searchParams.set('contours_meters', String(meters))
+  url.searchParams.set('polygons', 'true')
+  url.searchParams.set('denoise', '1')
+  url.searchParams.set('generalize', '50')
+  url.searchParams.set('access_token', token)
 
   let response: Response
   try {
@@ -61,33 +56,29 @@ export async function calculateIsochrone(
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     })
   } catch (err) {
-    throw new IsochroneError('HERE API nicht erreichbar (Netzwerk/Timeout)', err)
+    throw new IsochroneError('Mapbox API nicht erreichbar (Netzwerk/Timeout)', err)
   }
 
   if (!response.ok) {
     const body = await response.text().catch(() => '')
-    throw new IsochroneError(
-      `HERE API Fehler ${response.status}: ${body.slice(0, 200)}`,
-    )
+    throw new IsochroneError(`Mapbox API Fehler ${response.status}: ${body.slice(0, 200)}`)
   }
 
   const data = (await response.json()) as {
-    isolines?: Array<{
-      polygons?: Array<{ outer: string }>
+    features?: Array<{
+      geometry?: { type: string; coordinates: number[][][] }
     }>
   }
 
-  const outerEncoded = data.isolines?.[0]?.polygons?.[0]?.outer
-  if (!outerEncoded) {
-    throw new IsochroneError('HERE API lieferte kein Polygon zurück')
+  const geom = data.features?.[0]?.geometry
+  if (!geom || geom.type !== 'Polygon') {
+    throw new IsochroneError('Mapbox API lieferte kein Polygon zurück')
+  }
+  const ring = geom.coordinates?.[0]
+  if (!Array.isArray(ring) || ring.length < 3) {
+    throw new IsochroneError(`Mapbox Polygon hat nur ${ring?.length ?? 0} Punkte (min 3 nötig)`)
   }
 
-  const decoded = decode(outerEncoded)
-  if (!decoded.polyline || decoded.polyline.length < 3) {
-    throw new IsochroneError(
-      `HERE API Polygon hat nur ${decoded.polyline?.length ?? 0} Punkte (min 3 nötig)`,
-    )
-  }
-
-  return decoded.polyline.map(([pLat, pLng]) => ({ lat: pLat, lng: pLng }))
+  // GeoJSON liefert [lng, lat] — zurück in IsoPoint-Shape für Caller-Kompatibilität
+  return ring.map(([pLng, pLat]) => ({ lat: pLat, lng: pLng }))
 }

@@ -59,7 +59,7 @@ export default async function OnboardingPage({
   if (fall?.id) {
     const { data: termin } = await supabase
       .from('gutachter_termine')
-      .select('start_zeit, sachverstaendige(profile_id, profiles(vorname))')
+      .select('start_zeit, sachverstaendige(profile_id, profiles!sachverstaendige_profile_id_fkey(vorname))')
       .eq('fall_id', fall.id)
       .in('status', ['reserviert', 'bestaetigt'])
       .order('start_zeit', { ascending: false })

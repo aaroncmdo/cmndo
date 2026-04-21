@@ -176,7 +176,7 @@ export default async function StatistikenPage() {
       .select('metrik, beschreibung, branchen_wert, einheit, quelle'),
     adminClient
       .from('sachverstaendige')
-      .select('id, profiles(vorname, nachname)')
+      .select('id, profiles!sachverstaendige_profile_id_fkey(vorname, nachname)')
       .eq('ist_aktiv', true),
   ])
 

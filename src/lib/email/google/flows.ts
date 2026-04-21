@@ -853,7 +853,7 @@ export async function sendFlowLinkVersand(
   // Aktiver Termin (reserviert oder bestaetigt) um SV-Name + Datum zu zeigen
   const { data: terminRaw } = await db
     .from('gutachter_termine')
-    .select('start_zeit, sachverstaendige(profiles(vorname, nachname))')
+    .select('start_zeit, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
     .eq('lead_id', leadId)
     .in('status', ['reserviert', 'bestaetigt'])
     .order('start_zeit', { ascending: true })

@@ -40,6 +40,15 @@ export type SvMarker = {
   portalZugangFreigeschaltet?: boolean | null
   vertragUnterschrieben?: boolean | null
   gesperrtSeit?: string | null
+  // AAR-659: Dispatch-Blockers + Quali-Signale (Urlaub, SA-Vorlage, Verifizierung, Ausweis-Nummern, Notizen)
+  urlaubVon?: string | null
+  urlaubBis?: string | null
+  verifiziert?: boolean | null
+  saVorlageStatus?: string | null
+  bvskNr?: string | null
+  ihkNr?: string | null
+  oebuvNr?: string | null
+  notizen?: string | null
 }
 
 export type CommunityMarker = {
@@ -171,13 +180,17 @@ export default function KarteHubClient({
     const ok = ensureMapboxInitialized()
     if (!ok) return
 
+    // AAR-661: Vogelperspektive statt Globe — projection: 'mercator' flacht
+    // die Erdkrümmung ab, leichter Pitch + minimales Bearing erhält eine
+    // dezente 3D-Anmutung ohne die alte Weltkugel-Optik.
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: 'mapbox://styles/mapbox/standard',
+      projection: 'mercator',
       center: [10.4515, 51.1657],
-      zoom: 5.5,
-      pitch: 50,
-      bearing: -10,
+      zoom: 5.8,
+      pitch: 35,
+      bearing: 0,
       antialias: true,
     }) as MapboxMap
 
@@ -203,18 +216,24 @@ export default function KarteHubClient({
           data: { type: 'FeatureCollection', features: [] },
           generateId: true,
         })
+        // AAR-661: fill-extrusion statt flat fill — gibt Isos eine leichte 3D-
+        // Kuppel. Höhe skaliert dezent (500 m Base, 2500 m Hover) damit sie
+        // in der Vogelperspektive sichtbar werden ohne die Karte zu erschlagen.
         map.addLayer({
           id: `${layer}-overlays-fill`,
-          type: 'fill',
+          type: 'fill-extrusion',
           source: `${layer}-overlays`,
           paint: {
-            'fill-color': ['get', 'color'],
-            'fill-opacity': [
+            'fill-extrusion-color': ['get', 'color'],
+            'fill-extrusion-opacity': 0.35,
+            'fill-extrusion-height': [
               'case',
               ['boolean', ['feature-state', 'hover'], false],
-              0.28,
-              0.12,
+              2500,
+              800,
             ],
+            'fill-extrusion-base': 0,
+            'fill-extrusion-vertical-gradient': true,
           },
         })
         map.addLayer({
@@ -710,6 +729,10 @@ function SvSidebar({
           const ablehnungen = sv.ablehnungen30Tage ?? 0
           const ablehnungenCls =
             ablehnungen > 2 ? 'bg-red-50 text-red-600' : ablehnungen > 1 ? 'bg-amber-50 text-amber-600' : 'text-gray-400'
+          // AAR-659: Dispatch-Blocker-Signale für die Sidebar (Urlaub + SA-Vorlage offen).
+          const heute = new Date().toISOString().slice(0, 10)
+          const imUrlaub = !!(sv.urlaubVon && sv.urlaubBis && heute >= sv.urlaubVon && heute <= sv.urlaubBis)
+          const saOffen = !!sv.saVorlageStatus && sv.saVorlageStatus !== 'freigegeben'
           return (
             <button
               key={sv.id}
@@ -734,6 +757,20 @@ function SvSidebar({
                 >
                   {sv.name}
                 </span>
+                {/* AAR-659: Dispatch-Blocker-Badges + Verifiziert-Haken */}
+                {imUrlaub && (
+                  <span title={`Urlaub ${sv.urlaubVon} – ${sv.urlaubBis}`} className="text-[8px] bg-amber-50 text-amber-700 px-1 py-0.5 rounded font-medium shrink-0">
+                    Urlaub
+                  </span>
+                )}
+                {saOffen && (
+                  <span title={`SA-Vorlage: ${sv.saVorlageStatus}`} className="text-[8px] bg-orange-50 text-orange-700 px-1 py-0.5 rounded font-medium shrink-0">
+                    SA
+                  </span>
+                )}
+                {sv.verifiziert && (
+                  <span title="Verifiziert" className="text-[10px] text-emerald-600 shrink-0" aria-label="Verifiziert">✓</span>
+                )}
                 {sv.istAktiv === false && (
                   <span className="text-[8px] bg-red-50 text-red-500 px-1 py-0.5 rounded font-medium shrink-0">
                     Deaktiviert
@@ -827,14 +864,42 @@ function DetailPanel({
             <XIcon className="w-4 h-4" />
           </button>
         </div>
-        <div className="flex items-center gap-2 text-xs">
+        <div className="flex items-center gap-2 text-xs flex-wrap">
           <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium">{sv.paket ?? '—'}</span>
           {!sv.istAktiv && <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-700 font-medium">Deaktiviert</span>}
+          {sv.verifiziert && <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-medium">Verifiziert</span>}
+          {sv.urlaubVon && sv.urlaubBis && (() => {
+            const heute = new Date().toISOString().slice(0, 10)
+            const aktiv = heute >= sv.urlaubVon && heute <= sv.urlaubBis
+            return (
+              <span className={`px-2 py-0.5 rounded-full font-medium ${aktiv ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-600'}`}>
+                Urlaub: {sv.urlaubVon} – {sv.urlaubBis}
+              </span>
+            )
+          })()}
+          {sv.saVorlageStatus && sv.saVorlageStatus !== 'freigegeben' && (
+            <span className="px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 font-medium">
+              SA-Vorlage: {sv.saVorlageStatus}
+            </span>
+          )}
         </div>
         {sv.lat != null && sv.lng != null && (
           <p className="text-xs text-gray-500 flex items-center gap-1">
             <MapPinIcon className="w-3 h-3" /> {sv.lat.toFixed(3)}, {sv.lng.toFixed(3)}
           </p>
+        )}
+        {(sv.bvskNr || sv.ihkNr || sv.oebuvNr) && (
+          <div className="flex flex-wrap gap-1 pt-1">
+            {sv.bvskNr && <span className="text-[10px] bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded font-mono">BVSK {sv.bvskNr}</span>}
+            {sv.ihkNr && <span className="text-[10px] bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded font-mono">IHK {sv.ihkNr}</span>}
+            {sv.oebuvNr && <span className="text-[10px] bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded font-mono">öbuv {sv.oebuvNr}</span>}
+          </div>
+        )}
+        {sv.notizen && (
+          <div className="pt-1">
+            <p className="text-[10px] uppercase text-gray-400 mb-0.5">Notizen</p>
+            <p className="text-xs text-gray-600 whitespace-pre-wrap line-clamp-3">{sv.notizen}</p>
+          </div>
         )}
         <EinsatzGebietBlock
           key={sv.id}
