@@ -970,6 +970,21 @@ export async function signSAandCreateFall(
     console.error('[AAR-501] emitEvent fall.created/sa.signed failed:', err)
   }
 
+  // AAR-kanzlei: Outbound-Push an Kanzlei-API nach SA-Unterschrift.
+  // Nur für service_typ='komplett' (Gatekeeping in push-mandat.ts). Fire-and-
+  // forget — ein Fehler hier darf den SA-Flow NICHT blockieren, weil die
+  // Kanzlei-Anbindung per Feature-Flag (KANZLEI_API_ENABLED) separat live
+  // gehen kann. Fehlversuche landen als Timeline-Warnung, KB kann manuell
+  // nachziehen.
+  try {
+    const { pushMandatToKanzlei } = await import('@/lib/kanzlei/push-mandat')
+    pushMandatToKanzlei(fall.id).catch((err) =>
+      console.error('[AAR-kanzlei] pushMandatToKanzlei unerwartet:', err),
+    )
+  } catch (err) {
+    console.error('[AAR-kanzlei] push-mandat Modul-Load-Fehler:', err)
+  }
+
   return { fallId: fall.id }
 
   } catch (err) {
