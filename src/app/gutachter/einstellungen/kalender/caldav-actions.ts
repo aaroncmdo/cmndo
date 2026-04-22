@@ -18,6 +18,30 @@ import { listCalendars, CalDavError, type CalDavCalendar } from '@/lib/kalender/
 import { findProvider, type CalDavProviderId } from '@/lib/kalender/caldav/provider-presets'
 import { revalidatePath } from 'next/cache'
 
+// AAR-722: iCloud verlangt in der Praxis oft das App-Passwort OHNE
+// Bindestriche, obwohl Apple es mit Bindestrichen anzeigt. Wir probieren
+// den User-Input zuerst wie eingegeben, bei Auth-Fail fallback ohne
+// Bindestriche + ohne Whitespace. Nur für iCloud — Custom-Server haben
+// eigene Passwort-Konventionen.
+async function listCalendarsWithIcloudRetry(
+  creds: { serverUrl: string; username: string; password: string },
+  providerId: string,
+) {
+  try {
+    return { calendars: await listCalendars(creds), normalizedPassword: creds.password }
+  } catch (err) {
+    const canRetry = providerId === 'icloud' && err instanceof CalDavError && err.code === 'auth_failed'
+    if (!canRetry) throw err
+    const stripped = creds.password.replace(/[\s-]/g, '')
+    if (stripped === creds.password || stripped.length < 8) throw err
+    // Zweiter Versuch ohne Bindestriche/Whitespace.
+    return {
+      calendars: await listCalendars({ ...creds, password: stripped }),
+      normalizedPassword: stripped,
+    }
+  }
+}
+
 async function requireSv() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -51,11 +75,14 @@ export async function testCaldavConnection(input: {
   }
 
   try {
-    const calendars = await listCalendars({
-      serverUrl,
-      username: input.username.trim(),
-      password: input.password,
-    })
+    const { calendars } = await listCalendarsWithIcloudRetry(
+      {
+        serverUrl,
+        username: input.username.trim(),
+        password: input.password.trim(),
+      },
+      input.providerId,
+    )
     if (calendars.length === 0) {
       return { success: false, error: 'Keine Kalender gefunden', errorCode: 'not_found' }
     }
@@ -90,16 +117,24 @@ export async function saveCaldavConnection(input: {
 
   // Re-Test vor dem Speichern — falls der Modal-State zwischen testConnection
   // und saveConnection abgelaufen ist oder User den Kalender aus einer alten
-  // Session fälscht.
+  // Session fälscht. AAR-722: Wir speichern das NORMALISIERTE Passwort
+  // (ohne Bindestriche bei iCloud) damit der Healthcheck-Cron ebenfalls
+  // mit dem exakt gleichen Passwort arbeitet und nicht auf die Retry-Logik
+  // angewiesen ist.
+  let normalizedPassword: string
   try {
-    await listCalendars({ serverUrl, username: input.username.trim(), password: input.password })
+    const res = await listCalendarsWithIcloudRetry(
+      { serverUrl, username: input.username.trim(), password: input.password.trim() },
+      input.providerId,
+    )
+    normalizedPassword = res.normalizedPassword
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Verbindung fehlgeschlagen'
     return { success: false, error: msg }
   }
 
   const db = createAdminClient()
-  const encrypted = encrypt(input.password)
+  const encrypted = encrypt(normalizedPassword)
   const { error } = await db
     .from('sv_kalender_verbindungen')
     .upsert(
