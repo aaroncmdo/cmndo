@@ -38,31 +38,18 @@ export async function updateTaskStatus(taskId: string, newStatus: string) {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
-  const updateData: Record<string, unknown> = { status: newStatus }
-  if (newStatus === 'erledigt') {
-    updateData.erledigt_am = new Date().toISOString()
-  }
+  // AAR-713 Phase 2: Core-Logik (DB-Update + erledigt_am-Reset + Gate-Resolve)
+  // aus shared lib/tasks/update-status-core.ts. Vorher dupliziert in
+  // faelle/[id]/_actions/tasks.ts mit leicht abweichender Logik —
+  // admin-Pfad setzte erledigt_am beim Reopen NICHT auf null und triggerte
+  // resolveGates nicht. Jetzt einheitlich.
+  const { updateTaskStatusCore } = await import('@/lib/tasks/update-status-core')
+  const result = await updateTaskStatusCore(supabase, taskId, newStatus)
 
-  // Fetch task before update so we know its type and fall_id
-  const { data: task } = await supabase
-    .from('tasks')
-    .select('id, typ, fall_id')
-    .eq('id', taskId)
-    .single()
-
-  if (!task) throw new Error('Task nicht gefunden')
-
-  const { error } = await supabase
-    .from('tasks')
-    .update(updateData)
-    .eq('id', taskId)
-
-  if (error) throw new Error(error.message)
-
-  // Auto-create follow-up: filmcheck → kanzlei-anschlussschreiben
-  if (newStatus === 'erledigt' && task.typ === 'filmcheck') {
+  // Admin-spezifischer Side-Effect: Auto-Follow-up filmcheck → kanzlei-anschlussschreiben.
+  if (newStatus === 'erledigt' && result.typ === 'filmcheck' && result.fallId) {
     await supabase.from('tasks').insert({
-      fall_id: task.fall_id,
+      fall_id: result.fallId,
       typ: 'kanzlei-anschlussschreiben',
       titel: 'Anschlussschreiben an Kanzlei senden',
       beschreibung: 'Automatisch erstellt nach abgeschlossenem Filmcheck.',
