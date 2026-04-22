@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { BellIcon } from 'lucide-react'
 // AAR-344: 2FA-Nummer-Änderung (Self-Service)
 import { TwoFaPhoneChange } from '@/components/auth/TwoFaPhoneChange'
+// AAR-703: Edit-Form für Kontakt-Daten (Telefon + zweit_email)
+import KundeProfilForm from './KundeProfilForm'
 
 export default async function ProfilPage() {
   const supabase = await createClient()
@@ -12,8 +14,8 @@ export default async function ProfilPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    // AAR-344: twofa_telefon mitladen
-    .select('vorname, nachname, email, telefon, twofa_telefon')
+    // AAR-344: twofa_telefon, AAR-703: zweit_email mitladen
+    .select('vorname, nachname, email, telefon, twofa_telefon, zweit_email')
     .eq('id', user.id)
     .single()
 
@@ -24,9 +26,14 @@ export default async function ProfilPage() {
       <h1 className="text-xl font-bold text-[#0D1B3E]">Mein Profil</h1>
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 space-y-3">
         <div><span className="text-sm text-gray-500">Name</span><p className="text-[#0D1B3E] font-medium">{name || '—'}</p></div>
-        <div><span className="text-sm text-gray-500">E-Mail</span><p className="text-[#0D1B3E]">{profile?.email ?? user.email ?? '—'}</p></div>
-        {profile?.telefon && <div><span className="text-sm text-gray-500">Telefon</span><p className="text-[#0D1B3E]">{profile.telefon}</p></div>}
+        <div><span className="text-sm text-gray-500">E-Mail (Login)</span><p className="text-[#0D1B3E]">{profile?.email ?? user.email ?? '—'}</p></div>
       </div>
+
+      {/* AAR-703: Telefon + zweit_email editierbar */}
+      <KundeProfilForm
+        initialTelefon={profile?.telefon ?? null}
+        initialZweitEmail={profile?.zweit_email ?? null}
+      />
 
       {/* AAR-344: 2FA-Nummer-Änderungs-Flow */}
       <TwoFaPhoneChange
