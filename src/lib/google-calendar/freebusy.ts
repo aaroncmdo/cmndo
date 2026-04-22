@@ -12,6 +12,7 @@ import { getGoogleOAuthClientForUser } from '@/lib/google/oauth-client'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { decrypt } from '@/lib/kalender/caldav/encryption'
 import { checkFreeBusy as checkCaldavFreeBusy } from '@/lib/kalender/caldav/client'
+import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
 
 const FREEBUSY_TIMEOUT_MS = 2000
 
@@ -27,10 +28,14 @@ export async function checkSvFreeBusy(
   svProfileId: string,
   terminIso: string,
   pufferMinuten = 60,
+  terminDauerMin = TERMIN_DAUER_MIN,
 ): Promise<'frei' | 'belegt' | 'unbekannt'> {
   const termin = new Date(terminIso)
+  // AAR-718: Asymmetrisches Fenster — Puffer davor, dann Termin-Dauer,
+  // dann Puffer danach. Für 10:00-Termin mit 45 min + 60 min Puffer:
+  // [09:00, 11:45] muss kalenderfrei sein.
   const timeMin = new Date(termin.getTime() - pufferMinuten * 60 * 1000)
-  const timeMax = new Date(termin.getTime() + pufferMinuten * 60 * 1000)
+  const timeMax = new Date(termin.getTime() + (terminDauerMin + pufferMinuten) * 60 * 1000)
 
   // Google zuerst — häufigster Provider.
   const auth = await getGoogleOAuthClientForUser(svProfileId)
@@ -99,9 +104,10 @@ export async function checkSvFreeBusyBatch(
   svProfileIds: string[],
   terminIso: string,
   pufferMinuten = 60,
+  terminDauerMin = TERMIN_DAUER_MIN,
 ): Promise<Map<string, 'frei' | 'belegt' | 'unbekannt'>> {
   const entries = await Promise.all(
-    svProfileIds.map(async (id) => [id, await checkSvFreeBusy(id, terminIso, pufferMinuten)] as const),
+    svProfileIds.map(async (id) => [id, await checkSvFreeBusy(id, terminIso, pufferMinuten, terminDauerMin)] as const),
   )
   return new Map(entries)
 }
