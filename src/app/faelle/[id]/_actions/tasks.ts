@@ -6,7 +6,10 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { resolveGates } from '@/lib/tasking'
+// AAR-713 Phase 2: shared updateTaskStatusCore — vorher dupliziert in
+// admin/tasks/actions.ts mit leicht abweichender Logik (kein erledigt_am-
+// Reset, kein Gate-Resolve). Zentralisiert in lib/tasks/.
+import { updateTaskStatusCore } from '@/lib/tasks/update-status-core'
 
 export async function createFallTask(
   fallId: string,
@@ -45,24 +48,6 @@ export async function updateTaskStatus(taskId: string, newStatus: string) {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
-  const updateData: Record<string, unknown> = { status: newStatus }
-  if (newStatus === 'erledigt') {
-    updateData.erledigt_am = new Date().toISOString()
-  } else {
-    updateData.erledigt_am = null
-  }
-
-  const { data: task, error } = await supabase
-    .from('tasks')
-    .update(updateData)
-    .eq('id', taskId)
-    .select('fall_id')
-    .single()
-
-  if (error) throw new Error(error.message)
-
-  // Gate-Logik: Blockierte Folge-Tasks freischalten
-  if (newStatus === 'erledigt') resolveGates(taskId).catch(() => {})
-
-  if (task?.fall_id) revalidatePath(`/faelle/${task.fall_id}`)
+  const result = await updateTaskStatusCore(supabase, taskId, newStatus)
+  if (result.fallId) revalidatePath(`/faelle/${result.fallId}`)
 }
