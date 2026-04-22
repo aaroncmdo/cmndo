@@ -21,9 +21,20 @@ export async function startOrResumeTagesSession(
 
   if (!sv?.id) return { success: false, error: 'no_sv' }
 
+  if (terminIds.length === 0) {
+    return { success: false, error: 'Keine Termine für heute gefunden.' }
+  }
+
   const today = new Date()
   const session = await ensureTagesSession(sv.id, today, terminIds)
-  if (!session) return { success: false, error: 'create_failed' }
+  if (!session) {
+    // AAR-707: Detail steckt im Server-Log (siehe ensureTagesSession).
+    // User-facing-Hinweis statt nur 'create_failed'.
+    return {
+      success: false,
+      error: 'Tagesroute konnte nicht angelegt werden. Bitte später nochmal versuchen oder Server-Log prüfen.',
+    }
+  }
 
   return { success: true, sessionId: session.id }
 }
