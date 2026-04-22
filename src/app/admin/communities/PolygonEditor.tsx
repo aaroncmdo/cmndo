@@ -35,7 +35,7 @@ function loadGoogleMapsWithDrawing(apiKey: string): Promise<void> {
     }
     const s = document.createElement('script')
     s.id = MAPS_SCRIPT_ID
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=drawing,places`
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=drawing,places&loading=async&v=weekly`
     s.async = true
     s.defer = true
     s.onload = () => resolve()

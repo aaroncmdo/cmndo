@@ -191,7 +191,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-5">
       <Script
-        src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}
+        src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places&loading=async&v=weekly`}
         strategy="lazyOnload"
       />
 

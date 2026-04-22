@@ -91,7 +91,7 @@ function loadMaps(apiKey: string): Promise<void> {
       return
     }
     const s = document.createElement('script')
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&loading=async&v=weekly`
     s.async = true; s.defer = true
     s.onload = () => resolve()
     s.onerror = () => reject(new Error('Maps load failed'))
