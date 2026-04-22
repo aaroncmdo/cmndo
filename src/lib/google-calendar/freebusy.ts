@@ -111,3 +111,100 @@ export async function checkSvFreeBusyBatch(
   )
   return new Map(entries)
 }
+
+// AAR-719: Busy-Zeitfenster eines SVs über einen Zeitraum abrufen.
+// Wird von findNextFreeSlotForSv verwendet, um pro SV in einem einzigen
+// Roundtrip alle privaten Termine zu laden — danach wird clientseitig
+// iteriert. Deutlich günstiger als ein FreeBusy-Call pro Slot-Kandidat.
+//
+// Quellen (parallel): Google Calendar + CalDAV. Ergebnis wird zu einem
+// Array von { start, end } mergiert (Einheit: ISO-Strings).
+//
+// Fail-open: Bei Fehler geben wir leere Liste zurück — der Slot-Finder
+// kann dann zumindest die Claimondo-internen Termine prüfen. Fehler
+// werden ins Server-Log geschrieben.
+export type BusyWindow = { start: string; end: string }
+
+export async function getBusyWindows(
+  svProfileId: string,
+  rangeStartIso: string,
+  rangeEndIso: string,
+): Promise<BusyWindow[]> {
+  const windows: BusyWindow[] = []
+
+  // 1. Google Calendar — falls OAuth-Token vorhanden.
+  try {
+    const auth = await getGoogleOAuthClientForUser(svProfileId)
+    if (auth) {
+      const calendar = google.calendar({ version: 'v3', auth })
+      const result = await Promise.race([
+        calendar.freebusy.query({
+          requestBody: {
+            timeMin: rangeStartIso,
+            timeMax: rangeEndIso,
+            items: [{ id: 'primary' }],
+          },
+        }),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('freebusy-timeout')), FREEBUSY_TIMEOUT_MS * 3),
+        ),
+      ])
+      const busy = result.data.calendars?.primary?.busy ?? []
+      for (const b of busy) {
+        if (b.start && b.end) windows.push({ start: b.start, end: b.end })
+      }
+    }
+  } catch (err) {
+    console.warn('[getBusyWindows] Google-Query für SV', svProfileId, 'fehlgeschlagen:', err instanceof Error ? err.message : err)
+  }
+
+  // 2. CalDAV — falls Verbindung vorhanden.
+  try {
+    const db = createAdminClient()
+    const { data: sv } = await db
+      .from('sachverstaendige')
+      .select('id')
+      .eq('profile_id', svProfileId)
+      .maybeSingle()
+    if (sv) {
+      const { data: verb } = await db
+        .from('sv_kalender_verbindungen')
+        .select('server_url, username, password_encrypted, calendar_url')
+        .eq('sv_id', sv.id as string)
+        .eq('provider', 'caldav')
+        .maybeSingle()
+      if (verb) {
+        const password = decrypt(verb.password_encrypted as string)
+        // CalDAV-Client hat fetchCalendarObjects — wir nutzen den gleichen
+        // Service wie checkCaldavFreeBusy. Für die Range-Variante brauchen
+        // wir eine leicht andere Abfrage. Pragmatisch: wir wiederholen
+        // checkCaldavFreeBusy für den Gesamtzeitraum — liefert zwar nur
+        // „belegt/frei" statt konkrete Windows, reicht aber für den
+        // Slot-Finder (wenn irgendetwas im Range ist, haben wir ein
+        // pessimistisches Gesamt-Busy-Window).
+        const { checkFreeBusy } = await import('@/lib/kalender/caldav/client')
+        const status = await checkFreeBusy(
+          {
+            serverUrl: verb.server_url as string,
+            username: verb.username as string,
+            password,
+          },
+          (verb.calendar_url as string) ?? '',
+          rangeStartIso,
+          rangeEndIso,
+        )
+        if (status === 'belegt') {
+          // Pessimistisch: wir wissen nicht WANN genau belegt — markieren
+          // den ganzen Range als belegt. Für die erste CalDAV-Iteration
+          // akzeptabel, eine feingranulare CalDAV-Event-Liste käme erst
+          // mit einer echten calendar-query/REPORT-Request (AAR-716-Scope).
+          windows.push({ start: rangeStartIso, end: rangeEndIso })
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[getBusyWindows] CalDAV-Query für SV', svProfileId, 'fehlgeschlagen:', err instanceof Error ? err.message : err)
+  }
+
+  return windows
+}
