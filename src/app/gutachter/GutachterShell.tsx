@@ -12,6 +12,7 @@ import {
   ReceiptIcon,
   BarChart3Icon,
   UserIcon,
+  SettingsIcon,
   LogOutIcon,
   UsersIcon,
   TrophyIcon,
@@ -391,6 +392,16 @@ export default function GutachterShell({
               <p className="text-[#7BA3CC] text-xs">Sachverständiger</p>
             </div>
             <UserIcon className="w-4 h-4 text-[#7BA3CC] group-hover:text-white shrink-0" />
+          </Link>
+          {/* AAR-720: Einstellungen-Knopf unter Profil — Hub für Kalender,
+              später weitere Konfigurations-Bereiche (Benachrichtigungen,
+              2FA, etc.). */}
+          <Link
+            href="/gutachter/einstellungen"
+            onClick={() => setSidebarOpen(false)}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#7BA3CC] hover:text-white hover:bg-white/5 transition-colors"
+          >
+            <SettingsIcon className="w-4 h-4" /> Einstellungen
           </Link>
           <button onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#7BA3CC] hover:text-red-400 hover:bg-white/5 transition-colors">
