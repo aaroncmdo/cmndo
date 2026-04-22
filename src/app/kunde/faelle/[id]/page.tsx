@@ -133,10 +133,30 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const chatTeilnehmer = await getChatTeilnehmer(id)
 
     // KFZ-206: Pflichtdokumente laden
-    const { data: pflichtdokumente } = await admin.from('pflichtdokumente')
-      .select('id, titel, status, datei_url, datei_name')
+    // AAR-699: Nur Kunden-uploadbare Slots an DokumenteSection durchreichen.
+    // Vorher tauchten SV-Tier-2-Slots (sv_berufshaftpflicht, sv_sa_vorlage etc.)
+    // im roten „X Dokumente fehlen noch" Block auf, weil pflicht=true gesetzt
+    // war. Filter über dokument_katalog.uploadbar_von @> ['kunde'] — analog
+    // PflichtdokumenteBanner (AAR-709).
+    const { data: pflichtdokumenteAll } = await admin.from('pflichtdokumente')
+      .select('id, titel, status, datei_url, datei_name, dokument_typ')
       .eq('fall_id', id)
       .order('created_at')
+    const slotIdsKunde = Array.from(new Set((pflichtdokumenteAll ?? []).map(d => d.dokument_typ as string)))
+    let kundenSlotSet = new Set<string>()
+    if (slotIdsKunde.length > 0) {
+      const { data: katalog } = await admin
+        .from('dokument_katalog')
+        .select('slot_id, uploadbar_von')
+        .in('slot_id', slotIdsKunde)
+      for (const k of katalog ?? []) {
+        const uploadbar = (k.uploadbar_von as string[] | null) ?? []
+        if (uploadbar.includes('kunde')) kundenSlotSet.add(k.slot_id as string)
+      }
+    }
+    const pflichtdokumente = (pflichtdokumenteAll ?? []).filter(d =>
+      kundenSlotSet.has(d.dokument_typ as string),
+    )
 
     // KFZ-134 + KFZ-192: Aktiven gutachter_termine Eintrag laden (inkl. sv_vorgeschlagene_slots)
     const { data: aktiverTermin } = await admin
