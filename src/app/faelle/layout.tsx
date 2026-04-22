@@ -14,6 +14,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LogOutIcon } from 'lucide-react'
+import { roleToPath } from '@/lib/auth/role-redirect'
 import AdminNav from '@/app/admin/_components/AdminNav'
 import MitarbeiterNav from '@/app/mitarbeiter/_components/MitarbeiterNav'
 import KanzleiNav from '@/app/kanzlei/_components/KanzleiNav'
@@ -38,14 +39,11 @@ export default async function FaelleLayout({
     .single()
   const rolle = profile?.rolle as string | undefined
 
-  // Rollen die hier nichts zu suchen haben: dispatch, sachverstaendiger, kunde
-  // haben eigene Fall-Ansichten (/dispatch/..., /gutachter/..., /kunde/...)
-  if (rolle === 'dispatch') redirect('/dispatch/dashboard')
-  if (rolle === 'sachverstaendiger') redirect('/gutachter')
-  if (rolle === 'kunde') redirect('/kunde')
-  if (rolle === 'makler') redirect('/makler')
+  // AAR-718: Rollen die hier nichts zu suchen haben — per zentrale
+  // roleToPath-Funktion in ihr eigenes Portal. Vorher hardcoded-Switch.
+  // Admin/Kanzlei/KB/Leadbearbeiter dürfen drin bleiben.
   if (!rolle || !['admin', 'kanzlei', 'kundenbetreuer', 'leadbearbeiter'].includes(rolle)) {
-    redirect('/login')
+    redirect(rolle ? roleToPath(rolle) : '/login')
   }
 
   const initials = user.email ? user.email.substring(0, 2).toUpperCase() : 'U'

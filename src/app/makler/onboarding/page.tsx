@@ -4,6 +4,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { roleToPath } from '@/lib/auth/role-redirect'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,7 +18,8 @@ export default async function MaklerOnboardingPage() {
     .select('rolle')
     .eq('id', user.id)
     .single()
-  if (profile?.rolle !== 'makler') redirect('/')
+  // AAR-718: Bei falscher Rolle in eigenes Portal statt auf Landing-Page.
+  if (profile?.rolle !== 'makler') redirect(roleToPath(profile?.rolle as string | null | undefined))
 
   return (
     <main className="min-h-screen bg-[#f8f9fb] flex items-center justify-center px-6 py-12">

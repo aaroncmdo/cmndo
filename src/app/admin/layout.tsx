@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { roleToPath } from '@/lib/auth/role-redirect'
 import AdminNav from './_components/AdminNav'
 import NotificationBell from './_components/NotificationBell'
 import MitteilungszentralePanel from '@/components/mitteilungszentrale/MitteilungszentralePanel'
@@ -32,12 +33,13 @@ export default async function AdminLayout({
     console.error('[admin/layout] Profil-Query:', profileErr?.message ?? 'keine Row')
     redirect('/login?error=Profil+nicht+ladbar')
   }
+  // AAR-718: Dupliziertes Hardcoded-Mapping durch zentrale roleToPath
+  // ersetzt — sonst droht Drift wenn eine neue Rolle nur dort, aber nicht
+  // hier ergänzt wird.
   const profileRolle = profileCheck.rolle as string | undefined
-  if (profileRolle === 'dispatch') redirect('/dispatch/dashboard')
-  if (profileRolle === 'kundenbetreuer') redirect('/mitarbeiter')
-  if (profileRolle === 'sachverstaendiger') redirect('/gutachter')
-  if (profileRolle === 'kunde') redirect('/kunde')
-  if (profileRolle === 'makler') redirect('/makler')
+  if (profileRolle && profileRolle !== 'admin') {
+    redirect(roleToPath(profileRolle))
+  }
 
   const initials = user.email
     ? user.email.substring(0, 2).toUpperCase()

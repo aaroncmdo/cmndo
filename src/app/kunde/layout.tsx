@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
+import { roleToPath } from '@/lib/auth/role-redirect'
 import Image from 'next/image'
 import Link from 'next/link'
 import NotificationBell from '@/app/admin/_components/NotificationBell'
@@ -27,7 +28,9 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     .eq('id', user.id)
     .single()
 
-  if (profile?.rolle !== 'kunde') redirect('/login')
+  // AAR-718: Eingeloggte User mit anderer Rolle in ihr eigenes Portal statt
+  // auf /login — sonst wirkt die Seite „rausgeworfen".
+  if (profile?.rolle !== 'kunde') redirect(roleToPath(profile?.rolle as string | null | undefined))
 
   // AAR-100: Onboarding-Redirect wenn noch nicht abgeschlossen
   const h = await headers()

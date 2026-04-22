@@ -1,12 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { roleToPath } from '@/lib/auth/role-redirect'
 
-const ROLE_REDIRECT: Record<string, string> = {
-  admin: '/admin',
-  sachverstaendiger: '/gutachter',
-  kunde: '/kunde',
-  kanzlei: '/admin',
-}
+// AAR-718: Das frühere lokale ROLE_REDIRECT-Mapping enthielt falsche Ziele
+// (Kanzlei → /admin statt /kanzlei/dashboard) und fehlende Rollen (dispatch,
+// kundenbetreuer, makler). Jetzt nutzt der OAuth-Callback dieselbe zentrale
+// roleToPath-Funktion wie der Email-Login + die 2FA-Page.
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -32,7 +31,7 @@ export async function GET(request: Request) {
           .eq('id', user.id)
           .single()
 
-        const dest = ROLE_REDIRECT[profile?.rolle ?? ''] ?? '/admin'
+        const dest = roleToPath(profile?.rolle as string | null | undefined)
         return NextResponse.redirect(`${origin}${dest}`)
       }
     }

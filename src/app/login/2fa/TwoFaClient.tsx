@@ -18,6 +18,9 @@ type Props = {
   smsVerfuegbar: boolean
   emailVerfuegbar: boolean
   initialMethod: Method
+  // AAR-718: Ziel-Pfad nach erfolgreicher 2FA (roleToPath der eigenen Rolle),
+  // damit der User direkt im eigenen Portal landet statt auf der Landing-Page.
+  targetPath: string
 }
 
 export default function TwoFaClient({
@@ -26,6 +29,7 @@ export default function TwoFaClient({
   smsVerfuegbar,
   emailVerfuegbar,
   initialMethod,
+  targetPath,
 }: Props) {
   const router = useRouter()
   const [method, setMethod] = useState<Method>(initialMethod)
@@ -89,7 +93,8 @@ export default function TwoFaClient({
             null,
           )
         }
-        router.push('/')
+        // AAR-718: direkt ins Rollen-Portal statt auf die Landing-Page
+        router.push(targetPath)
         router.refresh()
       } else {
         setError(result.error ?? 'Ungültiger Code')

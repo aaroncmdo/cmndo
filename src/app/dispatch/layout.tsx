@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { roleToPath } from '@/lib/auth/role-redirect'
 import DispatchNav from './_components/DispatchNav'
 import RealtimeLeadAlert from './_components/RealtimeLeadAlert'
 import { PageContainer } from '@/components/PageContainer'
@@ -19,9 +20,10 @@ export default async function DispatchLayout({
     .eq('id', user.id)
     .single()
 
-  // Nur dispatch + admin duerfen auf /dispatch/*
+  // AAR-718: Nur dispatch + admin dürfen auf /dispatch/*. Andere Rollen in
+  // ihr eigenes Portal, nicht auf /login (sonst „ausgeworfen"-Erlebnis).
   if (!profile || !['dispatch', 'admin'].includes(profile.rolle)) {
-    redirect('/login?error=Kein+Zugriff')
+    redirect(profile?.rolle ? roleToPath(profile.rolle as string) : '/login')
   }
 
   const initials = user.email
