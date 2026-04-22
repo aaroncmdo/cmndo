@@ -488,10 +488,26 @@ export async function signSAandCreateFall(
     } else {
       // komplett: SA unterschrieben → Termin bleibt 'reserviert', wartet auf Vollmacht.
       // fall_id setzen damit der Termin in der Fallakte sichtbar wird.
-      await admin.from('gutachter_termine')
+      const { data: updatedTermine } = await admin.from('gutachter_termine')
         .update({ fall_id: fall.id })
         .eq('lead_id', leadId)
         .eq('status', 'reserviert')
+        .select('id')
+
+      // AAR-713: SV-Bestätigungs-Email feuert jetzt erst hier (vorher schon
+      // bei der Dispatcher-Vorreservierung — das war die verwirrende
+      // „Vorreservierung"-Mail). nur_gutachter triggert die Email automatisch
+      // via bestaetigeTermin oben; komplett wartet auf Vollmacht und braucht
+      // einen separaten Trigger nach SA, damit der SV überhaupt eine Mail mit
+      // Termindaten bekommt sobald die SA unterschrieben ist.
+      try {
+        const { sendSvTerminBestaetigung } = await import('@/lib/email/google/flows')
+        for (const t of updatedTermine ?? []) {
+          if (svIdFromTermin) await sendSvTerminBestaetigung(svIdFromTermin, t.id)
+        }
+      } catch (err) {
+        console.warn('[AAR-713] SV-Email nach SA fehlgeschlagen:', err instanceof Error ? err.message : err)
+      }
     }
   }
 
