@@ -10,14 +10,14 @@ import FallStatusCard from '@/components/kunde/FallStatusCard'
 import BankdatenBanner from '@/components/kunde/BankdatenBanner'
 // AAR-710: Pflichtdokumente-Banner pro Fall (vorher global im Layout).
 import { PflichtdokumenteBanner } from '@/components/kunde/PflichtdokumenteBanner'
-import DokumenteSection from '@/components/kunde/DokumenteSection'
+// AAR-Banner-Doppelung: DokumenteSection-Import entfernt; PflichtdokumenteBanner ist Single Source.
 import SaeuleMeinAnwalt from '@/components/kunde/SaeuleMeinAnwalt'
 import SaeuleMeinGeld from '@/components/kunde/SaeuleMeinGeld'
 import SaeuleMeinBetreuer from '@/components/kunde/SaeuleMeinBetreuer'
 // AAR-558 (C9): Auszahlungs- + Eskalations-Ergebnis-Card aus faelle_kunde_view
 import AuszahlungCard from '@/components/kunde/AuszahlungCard'
 import EskalationsErgebnisCard from '@/components/kunde/EskalationsErgebnisCard'
-import { saveBankdaten, uploadPflichtdokumentKunde, updateZahlungsweg } from './actions'
+import { saveBankdaten, updateZahlungsweg } from './actions'
 // AAR-319: FAQ-Bot-Card + Historie-Loader
 import { FaqBotCard } from './_components/FaqBotCard'
 import { ladeKundenFaqHistorie } from './faq-bot-actions'
@@ -132,31 +132,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const { getChatTeilnehmer } = await import('@/lib/chatGruppe')
     const chatTeilnehmer = await getChatTeilnehmer(id)
 
-    // KFZ-206: Pflichtdokumente laden
-    // AAR-699: Nur Kunden-uploadbare Slots an DokumenteSection durchreichen.
-    // Vorher tauchten SV-Tier-2-Slots (sv_berufshaftpflicht, sv_sa_vorlage etc.)
-    // im roten „X Dokumente fehlen noch" Block auf, weil pflicht=true gesetzt
-    // war. Filter über dokument_katalog.uploadbar_von @> ['kunde'] — analog
-    // PflichtdokumenteBanner (AAR-709).
-    const { data: pflichtdokumenteAll } = await admin.from('pflichtdokumente')
-      .select('id, titel, status, datei_url, datei_name, dokument_typ')
-      .eq('fall_id', id)
-      .order('created_at')
-    const slotIdsKunde = Array.from(new Set((pflichtdokumenteAll ?? []).map(d => d.dokument_typ as string)))
-    let kundenSlotSet = new Set<string>()
-    if (slotIdsKunde.length > 0) {
-      const { data: katalog } = await admin
-        .from('dokument_katalog')
-        .select('slot_id, uploadbar_von')
-        .in('slot_id', slotIdsKunde)
-      for (const k of katalog ?? []) {
-        const uploadbar = (k.uploadbar_von as string[] | null) ?? []
-        if (uploadbar.includes('kunde')) kundenSlotSet.add(k.slot_id as string)
-      }
-    }
-    const pflichtdokumente = (pflichtdokumenteAll ?? []).filter(d =>
-      kundenSlotSet.has(d.dokument_typ as string),
-    )
+    // AAR-Banner-Doppelung: pflichtdokumente-Loader entfernt.
+    // PflichtdokumenteBanner macht eigene Query mit Filter für Kunden-Slots,
+    // DokumenteSection wurde aus dem Render-Tree entfernt. Wenn ein Kunde
+    // hochladen muss, klickt er „Jetzt hochladen" im Banner → Onboarding Step 3.
 
     // KFZ-134 + KFZ-192: Aktiven gutachter_termine Eintrag laden (inkl. sv_vorgeschlagene_slots)
     const { data: aktiverTermin } = await admin
@@ -590,18 +569,17 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           </div>
         )}
 
-        {/* S3: Meine Aufgaben (Docs + Bankdaten) */}
+        {/* S3: Meine Aufgaben (Bankdaten).
+            AAR-Banner-Doppelung: DokumenteSection entfernt — der gelbe
+            PflichtdokumenteBanner oben ist die EINZIGE Source-of-Truth für
+            offene Kunden-Uploads. Doppelte Listen verwirrten den Kunden
+            (Aaron-Vorgabe „nur ein Banner, nur was wir laut Lead brauchen"). */}
         <div className="space-y-4">
           <BankdatenBanner
             fallId={fall.id as string}
             status={(fall.status as string) ?? ''}
             bankdatenHinterlegt={!!(fall as Record<string, unknown>).bankdaten_hinterlegt_am}
             saveBankdaten={saveBankdaten}
-          />
-          <DokumenteSection
-            fallId={fall.id as string}
-            pflichtdokumente={(pflichtdokumente ?? []) as { id: string; titel: string; status: string; datei_url: string | null; datei_name: string | null }[]}
-            uploadDokument={uploadPflichtdokumentKunde}
           />
         </div>
 
