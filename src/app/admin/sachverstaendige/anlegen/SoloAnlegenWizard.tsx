@@ -150,8 +150,22 @@ export default function SoloAnlegenWizard({ onSuccess }: {
     ? 'Individuell'
     : data.paket.charAt(0).toUpperCase() + data.paket.slice(1)
 
+  // AAR-sv-anlegen-step0: anschrift_lat-Anforderung entfernt — vorher
+  // blockierte das den Weiter-Button wenn der Maps-Dropdown nicht geklickt
+  // wurde. Server-Geocoding (siehe AAR-262 onBlur-Pattern) holt die Geo-
+  // Daten beim Speichern nach.
+  function missingStep0Fields(): string[] {
+    const m: string[] = []
+    if (!data.anrede) m.push('Anrede')
+    if (!data.vorname) m.push('Vorname')
+    if (!data.nachname) m.push('Nachname')
+    if (!data.email) m.push('Email')
+    if (!data.steuernummer) m.push('Steuernummer')
+    if (!data.anschrift) m.push('Anschrift')
+    return m
+  }
   function canNext(): boolean {
-    if (step === 0) return !!(data.anrede && data.vorname && data.nachname && data.email && data.steuernummer && data.anschrift && data.anschrift_lat !== null)
+    if (step === 0) return missingStep0Fields().length === 0
     if (step === 1) {
       if (data.paket === 'individuell') return !!(data.paket_override_kontingent && data.paket_override_radius_km && data.paket_override_anzahlung_eur)
       return true
@@ -342,7 +356,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
                   </label>
                   <GooglePlaceAutocomplete
                     defaultValue={data.anschrift}
-                    placeholder="Adresse via Auswahl wählen..."
+                    placeholder="Adresse eingeben (Auswahl optional, wird sonst beim Speichern geocoded)"
                     onSelect={place => setData(prev => ({
                       ...prev,
                       anschrift: place.adresse,
@@ -351,6 +365,14 @@ export default function SoloAnlegenWizard({ onSuccess }: {
                       anschrift_lng: place.lng,
                       anschrift_place_id: place.place_id,
                     }))}
+                    // AAR-sv-anlegen-step0: onBlur sichert manuellen Freitext
+                    // damit der Weiter-Button auch ohne Dropdown-Auswahl
+                    // freigegeben wird. Server-Geocoding holt lat/lng nach.
+                    onBlur={(currentValue) => {
+                      if (currentValue && currentValue !== data.anschrift) {
+                        setData(prev => ({ ...prev, anschrift: currentValue }))
+                      }
+                    }}
                     className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
                   />
                 </div>
@@ -579,19 +601,28 @@ export default function SoloAnlegenWizard({ onSuccess }: {
               Zurück
             </button>
           )}
-          <LoadingButton
-            type="button"
-            onClick={() => {
-              if (step < STEPS.length - 1) setStep(step + 1)
-              else setShowPreviewModal(true) // AAR-364 SUB-2: Preview-Modal vor Anlage
-            }}
-            disabled={!canNext()}
-            isLoading={saving && !showPreviewModal}
-            loadingText="Wird angelegt..."
-            className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40"
-          >
-            {step < STEPS.length - 1 ? 'Weiter' : 'Welcome-Mail Vorschau anzeigen'}
-          </LoadingButton>
+          <div className="flex-1">
+            <LoadingButton
+              type="button"
+              onClick={() => {
+                if (step < STEPS.length - 1) setStep(step + 1)
+                else setShowPreviewModal(true) // AAR-364 SUB-2: Preview-Modal vor Anlage
+              }}
+              disabled={!canNext()}
+              isLoading={saving && !showPreviewModal}
+              loadingText="Wird angelegt..."
+              className="w-full py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40"
+            >
+              {step < STEPS.length - 1 ? 'Weiter' : 'Welcome-Mail Vorschau anzeigen'}
+            </LoadingButton>
+            {/* AAR-sv-anlegen-step0: Sichtbares Hint welche Pflichtfelder noch fehlen,
+                damit Aaron nicht ratend sucht warum der Button disabled ist. */}
+            {step === 0 && !canNext() && missingStep0Fields().length > 0 && (
+              <p className="text-[11px] text-amber-700 mt-1.5 text-center">
+                Pflichtfeld noch leer: {missingStep0Fields().join(', ')}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
