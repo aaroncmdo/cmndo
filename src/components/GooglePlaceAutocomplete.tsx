@@ -49,8 +49,12 @@ function ensureGoogleMapsScript(): Promise<void> {
     }
 
     const s = document.createElement('script')
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places`
+    // loading=async ist seit März 2024 Pflicht — ohne den Param produziert
+    // Google Maps Console-Warnings und kann den Init blockieren wenn der
+    // API-Key nach diesem Datum erstellt wurde.
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places&loading=async&v=weekly`
     s.async = true
+    s.defer = true
     s.onload = () => {
       const iv = setInterval(() => {
         if (typeof google !== 'undefined' && google.maps?.places) {
@@ -82,6 +86,8 @@ export default function GooglePlaceAutocomplete({
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [value, setValue] = useState(defaultValue ?? '')
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null)
   const onSelectRef = useRef(onSelect)
   onSelectRef.current = onSelect
@@ -130,8 +136,20 @@ export default function GooglePlaceAutocomplete({
 
     // Script laden + Autocomplete initialisieren
     ensureGoogleMapsScript()
-      .then(() => { if (!cancelled) initAutocomplete() })
-      .catch(() => {})
+      .then(() => {
+        if (cancelled) return
+        initAutocomplete()
+        setLoading(false)
+        if (!autocompleteRef.current) {
+          setLoadError('Autocomplete-Init fehlgeschlagen — Konsole prüfen (Places API ggf. deaktiviert).')
+        }
+      })
+      .catch((err) => {
+        setLoading(false)
+        const msg = typeof err === 'string' ? err : 'Google Maps konnte nicht geladen werden — bitte Seite neu laden.'
+        setLoadError(msg)
+        console.error('[GooglePlaceAutocomplete]', msg)
+      })
 
     return () => { cancelled = true }
   }, [])
@@ -139,20 +157,28 @@ export default function GooglePlaceAutocomplete({
   const defaultCls = 'w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-[#4573A2] transition-colors'
 
   return (
-    <input
-      ref={inputRef}
-      type="text"
-      value={value}
-      onChange={e => setValue(e.target.value)}
-      // AAR-237: Enter im Autocomplete-Feld würde sonst das umgebende
-      // Formular submitten und die Wizard-State resetten. Enter
-      // abfangen — Google-Autocomplete-Auswahl läuft nicht über Enter
-      // sondern über Click auf die Suggestion.
-      onKeyDown={e => { if (e.key === 'Enter') e.preventDefault() }}
-      // AAR-262: Blur-Handler für Server-Side-Geocoding-Fallback.
-      onBlur={() => onBlur?.(value)}
-      placeholder={placeholder ?? 'Adresse eingeben...'}
-      className={className ?? defaultCls}
-    />
+    <div>
+      <input
+        ref={inputRef}
+        type="text"
+        value={value}
+        onChange={e => setValue(e.target.value)}
+        // AAR-237: Enter im Autocomplete-Feld würde sonst das umgebende
+        // Formular submitten und die Wizard-State resetten. Enter
+        // abfangen — Google-Autocomplete-Auswahl läuft nicht über Enter
+        // sondern über Click auf die Suggestion.
+        onKeyDown={e => { if (e.key === 'Enter') e.preventDefault() }}
+        // AAR-262: Blur-Handler für Server-Side-Geocoding-Fallback.
+        onBlur={() => onBlur?.(value)}
+        placeholder={loading ? 'Google Maps lädt…' : placeholder ?? 'Adresse eingeben...'}
+        className={className ?? defaultCls}
+        disabled={loading && !loadError}
+      />
+      {loadError && (
+        <p className="text-[11px] text-red-600 mt-1">
+          {loadError} — du kannst die Adresse trotzdem manuell eintippen, sie wird beim Speichern serverseitig geocoded.
+        </p>
+      )}
+    </div>
   )
 }
