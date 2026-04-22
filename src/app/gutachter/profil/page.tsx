@@ -3,6 +3,9 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import ProfilClient from './ProfilClient'
 // AAR-500 N5: Benachrichtigungs-Präferenzen in Settings-Section laden
 import { getMyNotificationPreferences } from '@/lib/actions/notification-preferences'
+// AAR-707: Google-Verbindungs-Status aus profiles.google_refresh_token (Single
+// Source of Truth — sachverstaendige.kalender_sync_aktiv ist Legacy-Drift).
+import { isGoogleConnected } from '@/lib/google/oauth-client'
 
 export default async function ProfilPage() {
   const supabase = await createClient()
@@ -36,6 +39,7 @@ export default async function ProfilPage() {
   }
 
   const prefsRes = await getMyNotificationPreferences()
+  const googleConnected = user ? await isGoogleConnected(user.id) : false
 
   return (
     <ProfilClient
@@ -53,6 +57,7 @@ export default async function ProfilPage() {
           event_opt_outs: {},
         }
       }
+      googleConnected={googleConnected}
     />
   )
 }
