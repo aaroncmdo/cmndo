@@ -303,8 +303,16 @@ function TerminCard({
   const badgeCls = STATUS_BADGE[t.status] ?? 'bg-gray-50 text-gray-600 border-gray-200'
   const statusLabel = STATUS_LABEL[t.status] ?? t.status
 
+  // AAR-698: Karte komplett klickbar → Termin-Detail-View.
+  // KB-Beratungstermine haben eine andere Detail-Logik und bleiben vorerst
+  // bei „Zum Fall" (Beratungs-Detail kommt in eigenem Ticket).
+  const targetHref = isKb ? (fall ? `/kunde/faelle/${fall.id}` : '#') : `/kunde/termine/${t.id}`
+
   return (
-    <div className={`bg-white rounded-2xl border border-gray-200 p-4 ${muted ? 'opacity-90' : ''}`}>
+    <Link
+      href={targetHref}
+      className={`block bg-white rounded-2xl border border-gray-200 p-4 hover:border-[#4573A2]/40 hover:shadow-sm transition ${muted ? 'opacity-90' : ''}`}
+    >
       <div className="flex items-start gap-3">
         <div className="w-9 h-9 rounded-xl bg-[#f0f4f8] flex items-center justify-center shrink-0">
           <Icon className="w-4 h-4 text-[#4573A2]" />
@@ -329,11 +337,6 @@ function TerminCard({
             </p>
           )}
           <div className="flex items-center gap-3 mt-2 text-xs">
-            {fall && (
-              <Link href={`/kunde/faelle/${fall.id}`} className="text-[#4573A2] hover:underline">
-                Zum Fall →
-              </Link>
-            )}
             {t.status === 'bestaetigt' && !isKb && (
               <span className="text-gray-400">
                 {isVideo
@@ -341,14 +344,10 @@ function TerminCard({
                   : <><PhoneIcon className="w-3 h-3 inline" /> Vor-Ort-Termin</>}
               </span>
             )}
-            {t.ablehnen_token && t.status === 'reserviert' && (
-              <Link href={`/kunde/termin/${t.ablehnen_token}`} className="text-amber-700 hover:underline">
-                Termin verwalten →
-              </Link>
-            )}
+            <span className="text-[#4573A2] font-medium ml-auto">Details öffnen →</span>
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }
