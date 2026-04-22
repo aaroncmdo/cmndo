@@ -11,7 +11,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { parseIsochrone } from './isochrone-parse'
 import { applyDispatchableFilter } from '@/lib/sv/queries'
-import { checkSvFreeBusyBatch } from '@/lib/google-calendar/freebusy'
+import { checkSvFreeBusyBatch, getBusyWindows, type BusyWindow } from '@/lib/google-calendar/freebusy'
 import {
   TERMIN_DAUER_MIN,
   TERMIN_PUFFER_MIN,
@@ -244,7 +244,7 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
           reasons.push(`am nächsten Werktag 10:00 frei`)
         }
       } else {
-        naechsterFreierSlot = await findNextFreeSlotForSv(db, sv.id as string, wunschterminStart)
+        naechsterFreierSlot = await findNextFreeSlotForSv(db, sv.id as string, wunschterminStart, profileId)
         const belegtWo = !freiInGutachterTermine ? 'Claimondo-Termin' : 'Privatkalender'
         reasons.push(
           hatExplicitWunsch
@@ -281,12 +281,28 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
   return candidates.slice(0, limit)
 }
 
-// AAR-264: Sucht den nächsten freien 2h-Slot ab einem Startzeitpunkt für einen SV.
-// Werktage Mo–Fr 09:00–16:00 Start. Inline statt Action-Import um zirkuläre
-// 'use server'-Abhängigkeit zu vermeiden.
+// AAR-264 + AAR-719: Sucht den nächsten freien Slot ab einem Start-
+// zeitpunkt für einen SV. Berücksichtigt jetzt ZUSÄTZLICH zum
+// gutachter_termine-Check auch den privaten Kalender (Google + CalDAV).
+//
+// Slot-Geometrie (AAR-718):
+//   * Termin-Dauer: TERMIN_DAUER_MIN (45)
+//   * Puffer beidseitig: TERMIN_PUFFER_MIN (60)
+//   * Gesperrtes Fenster um einen Slot-Start `t`: [t - 60min, t + 45min + 60min]
+//
+// Performance: Busy-Windows werden 1x pro SV für die ganze 12-Wochen-
+// Suche vorab geladen — nicht pro Slot ein API-Call.
+//
+// Werktage Mo–Fr 09:00–16:00 Start, 30-min-Grid. Fail-open bei
+// Kalender-Fehler — dann fällt der Slot-Finder auf das vorherige
+// gutachter_termine-Only-Verhalten zurück.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function findNextFreeSlotForSv(db: any, svId: string, ab: Date): Promise<string | null> {
-  const slotDauerMin = 120
+async function findNextFreeSlotForSv(
+  db: any,
+  svId: string,
+  ab: Date,
+  profileId?: string | null,
+): Promise<string | null> {
   const inZwoelfWochen = new Date(ab.getTime() + 12 * 7 * 24 * 60 * 60 * 1000)
 
   const { data: bestehend } = await db
@@ -298,24 +314,37 @@ async function findNextFreeSlotForSv(db: any, svId: string, ab: Date): Promise<s
     .lte('start_zeit', inZwoelfWochen.toISOString())
     .order('start_zeit', { ascending: true })
 
-  const kandidat = new Date(ab)
-  // Bei Konflikt am exakten Wunschtermin → ab nächstem ganzen Stundenslot suchen
-  kandidat.setMinutes(0, 0, 0)
-  kandidat.setTime(kandidat.getTime() + 60 * 60_000)
+  // AAR-719: Private Kalender-Busy-Windows vorab laden.
+  let busyWindows: BusyWindow[] = []
+  if (profileId) {
+    busyWindows = await getBusyWindows(profileId, ab.toISOString(), inZwoelfWochen.toISOString())
+  }
 
-  const maxIter = 12 * 7 * 24
+  const kandidat = new Date(ab)
+  // Bei Konflikt am exakten Wunschtermin → ab nächstem halbstündigem Slot weiter.
+  kandidat.setMinutes(kandidat.getMinutes() >= 30 ? 60 : 30, 0, 0)
+
+  const maxIter = 12 * 7 * 24 * 2 // 30-min-Grid statt 60-min
   let i = 0
   while (kandidat < inZwoelfWochen && i < maxIter) {
     i++
     const wochentag = kandidat.getDay()
     if (wochentag !== 0 && wochentag !== 6 && kandidat.getHours() >= 9 && kandidat.getHours() < 16) {
-      const slotEnd = new Date(kandidat.getTime() + slotDauerMin * 60_000)
-      const konflikt = ((bestehend ?? []) as { start_zeit: string; end_zeit: string }[]).some((b) =>
-        new Date(b.start_zeit) < slotEnd && new Date(b.end_zeit) > kandidat,
+      // Fenster um den Slot-Start: [t-puffer, t+dauer+puffer]
+      const fensterStart = new Date(kandidat.getTime() - TERMIN_PUFFER_MIN * 60_000)
+      const fensterEnd = new Date(kandidat.getTime() + (TERMIN_DAUER_MIN + TERMIN_PUFFER_MIN) * 60_000)
+
+      const konfliktIntern = ((bestehend ?? []) as { start_zeit: string; end_zeit: string }[]).some((b) =>
+        new Date(b.start_zeit) < fensterEnd && new Date(b.end_zeit) > fensterStart,
       )
-      if (!konflikt) return kandidat.toISOString()
+      const konfliktPrivat = busyWindows.some((b) =>
+        new Date(b.start) < fensterEnd && new Date(b.end) > fensterStart,
+      )
+
+      if (!konfliktIntern && !konfliktPrivat) return kandidat.toISOString()
     }
-    kandidat.setTime(kandidat.getTime() + 60 * 60_000)
+    // Zum nächsten 30-min-Slot weiter.
+    kandidat.setTime(kandidat.getTime() + 30 * 60_000)
     if (kandidat.getHours() >= 17) {
       kandidat.setDate(kandidat.getDate() + 1)
       kandidat.setHours(9, 0, 0, 0)
