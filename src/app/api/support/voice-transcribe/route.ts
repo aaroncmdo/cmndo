@@ -9,7 +9,7 @@
 //   audio   Blob (audio/webm, max 10 MB)
 //   language  'de' (default, Rest wäre über AAR-470 später nachrüstbar)
 //
-// Auth: nur eingeloggte SV/Admin/Kundenbetreuer, analog /api/support/chat.
+// Auth: SV/Admin/Kundenbetreuer/Kunde — analog /api/support/chat (AAR-708/712).
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
@@ -20,7 +20,9 @@ export const dynamic = 'force-dynamic'
 const MAX_AUDIO_BYTES = 10 * 1024 * 1024
 const GROQ_URL = 'https://api.groq.com/openai/v1/audio/transcriptions'
 const GROQ_MODEL = 'whisper-large-v3-turbo'
-const ALLOWED_ROLES = new Set(['sachverstaendiger', 'admin', 'kundenbetreuer'])
+// AAR-712: 'kunde' ergänzt — Support-Drawer ist seit AAR-708 für Kunden freigeschaltet,
+// Voice-Transcribe muss konsistent dieselben Rollen erlauben.
+const ALLOWED_ROLES = new Set(['sachverstaendiger', 'admin', 'kundenbetreuer', 'kunde'])
 
 export async function POST(req: Request): Promise<Response> {
   const supabase = await createClient()
