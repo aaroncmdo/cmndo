@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LogOutIcon } from 'lucide-react'
 import MitarbeiterNav from './_components/MitarbeiterNav'
+import { roleToPath } from '@/lib/auth/role-redirect'
 
 export default async function MitarbeiterLayout({
   children,
@@ -19,7 +20,11 @@ export default async function MitarbeiterLayout({
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['kundenbetreuer', 'leadbearbeiter', 'admin'].includes(profile.rolle)) redirect('/login')
+  // AAR-718: Eingeloggte User mit anderer Rolle in ihr eigenes Portal statt
+  // auf /login.
+  if (!profile || !['kundenbetreuer', 'leadbearbeiter', 'admin'].includes(profile.rolle)) {
+    redirect(profile?.rolle ? roleToPath(profile.rolle as string) : '/login')
+  }
 
   const displayName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || user.email || ''
 

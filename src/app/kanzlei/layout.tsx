@@ -12,6 +12,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LogOutIcon } from 'lucide-react'
 import KanzleiNav from './_components/KanzleiNav'
+import { roleToPath } from '@/lib/auth/role-redirect'
 
 export default async function KanzleiLayout({
   children,
@@ -28,8 +29,10 @@ export default async function KanzleiLayout({
     .eq('id', user.id)
     .single()
 
+  // AAR-718: Eingeloggte User mit anderer Rolle in ihr eigenes Portal statt
+  // auf die Login-Page zurück.
   if (!profile || !['kanzlei', 'admin'].includes(profile.rolle)) {
-    redirect('/login')
+    redirect(profile?.rolle ? roleToPath(profile.rolle as string) : '/login')
   }
 
   const displayName =
