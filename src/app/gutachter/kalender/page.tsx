@@ -21,6 +21,29 @@ export default async function SVKalenderPage({
 
   if (!sv) redirect('/login')
 
+  // AAR-google-cal-drift: Source-of-Truth für „verbunden?" sind die
+  // profiles.google_*-Tokens, NICHT sachverstaendige.gcal_connected. Der alte
+  // /api/auth/google-calendar/-Flow schrieb nach der falschen Spalte —
+  // dadurch zeigte die UI „verbunden" während Sync-Helper keinen Token fanden.
+  const { isGoogleConnected } = await import('@/lib/google/oauth-client')
+  const gcalConnected = await isGoogleConnected(user.id)
+
+  // AAR-google-cal-drift: Externe Google-Termine der aktuellen + nächsten
+  // Woche als Busy-Slots laden, damit SV im Kalender-Tab seine private
+  // Belegung sieht. Fail-silent — leerer Array bei nicht-verbunden.
+  let externalBusy: { start: string; end: string }[] = []
+  if (gcalConnected) {
+    const now = new Date()
+    const fromIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString()
+    const toIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 21).toISOString()
+    try {
+      const { getSvBusySlots } = await import('@/lib/google-calendar/busy-slots')
+      externalBusy = await getSvBusySlots(user.id, fromIso, toIso)
+    } catch (err) {
+      console.warn('[gutachter/kalender] Busy-Slots:', err instanceof Error ? err.message : err)
+    }
+  }
+
   // Fetch all cases assigned to this SV with appointment dates
   const { data: faelle } = await supabase
     .from('v_faelle_mit_aktuellem_termin')
@@ -81,7 +104,7 @@ export default async function SVKalenderPage({
           faelle={faelle ?? []}
           leadMap={leadMap}
           svId={sv.id}
-          gcalConnected={!!sv.gcal_connected}
+          gcalConnected={gcalConnected}
           standortLat={sv.standort_lat ? Number(sv.standort_lat) : null}
           standortLng={sv.standort_lng ? Number(sv.standort_lng) : null}
           termine={(termine ?? []).map(t => ({
@@ -90,6 +113,7 @@ export default async function SVKalenderPage({
             status: t.status as string,
             final_verbindlich_ab: t.final_verbindlich_ab as string | null,
           }))}
+          externalBusy={externalBusy}
         />
       ) : (
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
