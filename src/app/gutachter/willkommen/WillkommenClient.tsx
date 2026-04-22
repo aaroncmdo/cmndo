@@ -27,7 +27,7 @@ import { akzeptiereAgbSubSv } from './actions'
 import SignaturePadInput from '@/components/SignaturePadInput'
 import StripeBrandingFooter from '@/components/StripeBrandingFooter'
 import LogoUploadStep from '@/components/LogoUploadStep'
-import SaVorlageUploadStep from '@/components/SaVorlageUploadStep'
+import DokumenteUploadStep, { type DokumentSlotState } from '@/components/DokumenteUploadStep'
 import KalenderConnectStep from '@/components/KalenderConnectStep'
 import OrderSummaryCard from './OrderSummaryCard'
 import LeadPreisOverlay, { type LeadpreisRow } from './LeadPreisOverlay'
@@ -78,9 +78,9 @@ type SvData = {
   firmenname: string | null
   gcal_connected: boolean
   steuernummer: string | null
-  // AAR-359 W3: SA-Vorlage-Status für Step 5
-  sa_vorlage_status: 'ausstehend' | 'geprueft' | 'zurueckgewiesen' | null
-  sa_vorlage_admin_notiz: string | null
+  // AAR-714: Pflichtdokumente-States für den Dokumente-Step
+  dokumenteSlots: DokumentSlotState[]
+  dokumenteKomplett: boolean
 }
 
 type Vorlage = {
@@ -118,15 +118,17 @@ type Organisation = {
 // Branding früh im Prozess, Vertrag + Zahlung in seinen Farben.
 // AAR-242: Kalender-Connect-Step nach Anzahlung ergänzt (Google OAuth oder
 // Opt-Out) — Pflicht für Terminvorschläge.
-// AAR-359 W3: Neuer Step 'sa_vorlage' zwischen Anzahlung und Kalender — der
-// SV lädt seine Schadenaufnahme-Vorlage hoch. Admin-Freigabe öffnet später
-// das Dispatch-Gate. Der Flow hat jetzt 6 Steps für Solo/Inhaber/Akademie.
+// AAR-714: Step 'sa_vorlage' → 'dokumente'. Statt einer SA-PDF werden hier
+// drei Pflichtdokumente (Sicherungsabtretung|Honorarvereinbarung +
+// Datenschutzerklärung + Widerrufsbelehrung) eingesammelt. Nach Admin-
+// Freigabe aller drei setzt dokumenteFreigeben() sachverstaendige.
+// verifiziert=true.
 const STEPS_4: { key: string; label: string; icon: typeof PackageIcon }[] = [
   { key: 'konditionen', label: 'Konditionen', icon: PackageIcon },
   { key: 'branding', label: 'Logo', icon: ImageIcon },
   { key: 'vertrag', label: 'Vertrag', icon: FileSignatureIcon },
   { key: 'anzahlung', label: 'Anzahlung', icon: CreditCardIcon },
-  { key: 'sa_vorlage', label: 'SA-Vorlage', icon: FileTextIcon },
+  { key: 'dokumente', label: 'Dokumente', icon: FileTextIcon },
   { key: 'kalender', label: 'Kalender', icon: CalendarIcon },
 ]
 
@@ -219,23 +221,17 @@ export default function WillkommenClient({
   if (r !== 'sub_mitarbeiter' && sv.portal_zugang_freigeschaltet && !sv.logo_url) {
     initialStep = 1
   }
-  // AAR-359 W3: SA-Vorlage noch nicht hochgeladen oder zurückgewiesen
-  // → Step 4 (SA-Vorlage). Geht VOR dem Kalender-Gate, damit der SV auch
-  // bei vorhandenem Kalender noch die SA nachreicht.
-  if (
-    r !== 'sub_mitarbeiter'
-    && sv.portal_zugang_freigeschaltet
-    && (sv.sa_vorlage_status === null || sv.sa_vorlage_status === 'zurueckgewiesen')
-  ) {
+  // AAR-714: Pflichtdokumente noch nicht vollständig → Step 4 (Dokumente).
+  // Geht VOR dem Kalender-Gate, damit der SV auch bei vorhandenem Kalender
+  // noch die Dokumente nachreicht.
+  if (r !== 'sub_mitarbeiter' && sv.portal_zugang_freigeschaltet && !sv.dokumenteKomplett) {
     initialStep = 4
   }
-  // AAR-242: Kalender noch nicht verbunden → Kalender-Step (AAR-359 W3:
-  // Index ist jetzt 5 weil SA-Vorlage dazugekommen ist).
+  // AAR-242: Kalender noch nicht verbunden → Kalender-Step (Index 5).
   if (
     r !== 'sub_mitarbeiter'
     && sv.portal_zugang_freigeschaltet
-    && sv.sa_vorlage_status !== null
-    && sv.sa_vorlage_status !== 'zurueckgewiesen'
+    && sv.dokumenteKomplett
     && !sv.gcal_connected
   ) {
     initialStep = 5
@@ -245,7 +241,7 @@ export default function WillkommenClient({
   const [step, setStep] = useState(initialStep)
   // AAR-509: currentKey vor die Stripe-Effects gezogen damit der Anzahlung-
   // Trigger keybasiert statt index-basiert prüfen kann — sonst hängt der
-  // Checkout, weil `anzahlung` nach Einführung von `branding`/`sa_vorlage`
+  // Checkout, weil `anzahlung` nach Einführung von `branding`/`dokumente`
   // nicht mehr Index 2 ist.
   const currentKey = STEPS[step]?.key ?? ''
   // AAR-233: Key-basierter Step-Navigation-Helper.
@@ -519,7 +515,7 @@ export default function WillkommenClient({
               const prevCommitted =
                 (prevKey === 'vertrag' && sv.vertrag_unterschrieben) ||
                 (prevKey === 'anzahlung' && sv.portal_zugang_freigeschaltet) ||
-                (prevKey === 'sa_vorlage' && sv.sa_vorlage_status === 'geprueft')
+                (prevKey === 'dokumente' && sv.dokumenteKomplett)
               const tooltip = prevCommitted
                 ? 'Dieser Schritt ist bereits abgeschlossen und kann nicht mehr bearbeitet werden'
                 : `Zurück zu „${STEPS[step - 1].label}"`
@@ -1010,15 +1006,12 @@ export default function WillkommenClient({
               // onDone leitet zu Vertrag weiter — außer User ist schon
               // portal_zugang_freigeschaltet (kam via ?stripe_success zurück
               // und hatte noch kein Logo).
-              // AAR-359 W3: Wenn freigeschaltet + SA noch offen → zu
-              // SA-Vorlage-Step; wenn SA auch durch → Dashboard.
+              // AAR-714: Wenn freigeschaltet + Dokumente noch offen → zu
+              // Dokumente-Step; wenn alles durch → Dashboard.
               onDone={() => {
                 if (sv.portal_zugang_freigeschaltet) {
-                  const saOffen =
-                    sv.sa_vorlage_status === null
-                    || sv.sa_vorlage_status === 'zurueckgewiesen'
-                  if (saOffen) {
-                    goToStep('sa_vorlage')
+                  if (!sv.dokumenteKomplett) {
+                    goToStep('dokumente')
                   } else {
                     router.push('/gutachter')
                     router.refresh()
@@ -1030,14 +1023,13 @@ export default function WillkommenClient({
             />
           )}
 
-          {/* AAR-359 W3: SA-Vorlage-Step zwischen Anzahlung und Kalender.
-              Sub-Mitarbeiter sehen diesen Step NICHT — sie uploaden die
-              SA später in /gutachter/verifizierung (W5). */}
-          {currentKey === 'sa_vorlage' && r !== 'sub_mitarbeiter' && (
-            <SaVorlageUploadStep
-              svId={sv.id}
-              initialStatus={sv.sa_vorlage_status}
-              adminNotiz={sv.sa_vorlage_admin_notiz}
+          {/* AAR-714: Dokumente-Step (Sicherungsabtretung|Honorarvereinbarung
+              + Datenschutzerklärung + Widerrufsbelehrung). Sub-Mitarbeiter
+              sehen diesen Step NICHT — sie laden Pflichtdokumente später in
+              /gutachter/verifizierung hoch. */}
+          {currentKey === 'dokumente' && r !== 'sub_mitarbeiter' && (
+            <DokumenteUploadStep
+              initialSlots={sv.dokumenteSlots}
               onDone={() => goToStep('kalender')}
             />
           )}
@@ -1062,11 +1054,11 @@ export default function WillkommenClient({
             </div>
           )}
 
-          {/* AAR-233 + AAR-242 + AAR-359 W3: Buttons nur auf Konditionen +
+          {/* AAR-233 + AAR-242 + AAR-714: Buttons nur auf Konditionen +
               Vertrag + Sub-AGB. Branding (LogoUploadStep), Anzahlung (Stripe),
-              SA-Vorlage (SaVorlageUploadStep) und Kalender (KalenderConnectStep)
+              Dokumente (DokumenteUploadStep) und Kalender (KalenderConnectStep)
               haben eigene Buttons. */}
-          {currentKey !== 'branding' && currentKey !== 'anzahlung' && currentKey !== 'sa_vorlage' && currentKey !== 'kalender' && (
+          {currentKey !== 'branding' && currentKey !== 'anzahlung' && currentKey !== 'dokumente' && currentKey !== 'kalender' && (
             <div className="flex items-center gap-3 mt-6">
               {/* AAR-513: Bottom-Zurück nur noch für sub_mitarbeiter — alle
                   anderen Rollen nutzen den globalen Zurück-Pfeil oben rechts. */}

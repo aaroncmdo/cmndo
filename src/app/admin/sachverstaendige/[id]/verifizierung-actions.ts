@@ -265,3 +265,164 @@ export async function svEntsperren(svId: string): Promise<{ success: boolean; er
   revalidateBoth(svId)
   return { success: true }
 }
+
+// ─── AAR-714: Pflichtdokumente (Multi-Doc-Onboarding) ─────────────────
+//
+// Drei Slots ersetzen die alte SA-Vorlage:
+//   sv_sicherungsabtretung ODER sv_honorarvereinbarung (eines von beiden)
+//   sv_datenschutzerklaerung
+//   sv_widerrufsbelehrung
+//
+// Admin gibt jedes Dokument einzeln frei oder lehnt es ab. Sobald alle
+// Pflicht-Anforderungen geprüft sind, setzt dokumenteAlleFreigeben()
+// sachverstaendige.verifiziert=true und öffnet damit die „verifizierter
+// Gutachter"-Sichtbarkeit auf der Kundenseite.
+
+const PFLICHT_ABTRETUNG = ['sv_sicherungsabtretung', 'sv_honorarvereinbarung'] as const
+const PFLICHT_SINGLE = ['sv_datenschutzerklaerung', 'sv_widerrufsbelehrung'] as const
+
+export async function pflichtdokumentFreigeben(
+  svId: string,
+  slotId: string,
+): Promise<{ success: boolean; error?: string }> {
+  const auth = await requireAdmin()
+  if (!auth.ok) return { success: false, error: auth.error }
+
+  const db = createAdminClient()
+  const { data: row, error: loadErr } = await db
+    .from('pflichtdokumente')
+    .select('id, status')
+    .eq('sv_id', svId)
+    .eq('dokument_typ', slotId)
+    .maybeSingle()
+  if (loadErr) return { success: false, error: `Lookup fehlgeschlagen: ${loadErr.message}` }
+  if (!row) return { success: false, error: 'Dokument nicht gefunden.' }
+
+  const { error } = await db
+    .from('pflichtdokumente')
+    .update({ status: 'geprueft' })
+    .eq('id', row.id)
+  if (error) return { success: false, error: `Freigabe fehlgeschlagen: ${error.message}` }
+
+  await resolveTasksForEntity('gutachter', svId, `Pflichtdokument ${slotId} freigegeben`)
+
+  revalidateBoth(svId)
+  return { success: true }
+}
+
+export async function pflichtdokumentZurueckweisen(
+  svId: string,
+  slotId: string,
+  begruendung: string,
+): Promise<{ success: boolean; error?: string }> {
+  const auth = await requireAdmin()
+  if (!auth.ok) return { success: false, error: auth.error }
+
+  const trimmed = (begruendung ?? '').trim()
+  if (trimmed.length < 10) {
+    return { success: false, error: 'Ablehnungsgrund muss mindestens 10 Zeichen lang sein.' }
+  }
+
+  const db = createAdminClient()
+  const { data: row } = await db
+    .from('pflichtdokumente')
+    .select('id')
+    .eq('sv_id', svId)
+    .eq('dokument_typ', slotId)
+    .maybeSingle()
+  if (!row) return { success: false, error: 'Dokument nicht gefunden.' }
+
+  const { error } = await db
+    .from('pflichtdokumente')
+    .update({ status: 'abgelehnt', begruendung: trimmed })
+    .eq('id', row.id)
+  if (error) return { success: false, error: `Ablehnung fehlgeschlagen: ${error.message}` }
+
+  // Verifiziert zurücksetzen — eine Ablehnung kippt den gesamten Verifiziert-
+  // Status, bis der SV neu hochlädt und der Admin erneut freigibt.
+  await db
+    .from('sachverstaendige')
+    .update({ verifiziert: false, verifiziert_am: null, verifiziert_von: null })
+    .eq('id', svId)
+
+  // SV-Task: Re-Upload nachreichen (analog tier2DokumentNachfordern, aber
+  // ohne harte Frist — der SV braucht's für Freischaltung, das ist Druck genug).
+  const { data: sv } = await db
+    .from('sachverstaendige')
+    .select('profile_id')
+    .eq('id', svId)
+    .maybeSingle()
+  const slot = await getKatalogSlot(await createClient(), slotId)
+
+  await createLinkedTask({
+    titel: `Dokument erneut hochladen: ${slot?.label ?? slotId}`,
+    beschreibung: trimmed,
+    prioritaet: 'dringend',
+    typ: 'dokument-nachreichen',
+    entity_type: 'gutachter',
+    entity_id: svId,
+    empfaenger_rolle: 'sachverstaendiger',
+    empfaenger_user_id: (sv?.profile_id as string | null) ?? null,
+    auto_erstellt: false,
+    trigger_event: 'sv_pflichtdokument_abgelehnt',
+  })
+
+  revalidateBoth(svId)
+  return { success: true }
+}
+
+export async function dokumenteAlleFreigeben(
+  svId: string,
+): Promise<{ success: boolean; error?: string }> {
+  const auth = await requireAdmin()
+  if (!auth.ok) return { success: false, error: auth.error }
+
+  const db = createAdminClient()
+  const { data: rows, error: loadErr } = await db
+    .from('pflichtdokumente')
+    .select('dokument_typ, status')
+    .eq('sv_id', svId)
+    .in('dokument_typ', [...PFLICHT_ABTRETUNG, ...PFLICHT_SINGLE] as unknown as string[])
+  if (loadErr) return { success: false, error: `Lookup fehlgeschlagen: ${loadErr.message}` }
+
+  const byType = new Map<string, string>()
+  for (const r of rows ?? []) byType.set(r.dokument_typ as string, (r.status as string) ?? '')
+
+  const hatAbtretungOk = PFLICHT_ABTRETUNG.some((s) => {
+    const st = byType.get(s)
+    return st === 'hochgeladen' || st === 'geprueft'
+  })
+  if (!hatAbtretungOk) {
+    return { success: false, error: 'Sicherungsabtretung oder Honorarvereinbarung fehlt.' }
+  }
+  for (const s of PFLICHT_SINGLE) {
+    const st = byType.get(s)
+    if (st !== 'hochgeladen' && st !== 'geprueft') {
+      return { success: false, error: `Pflichtdokument fehlt: ${s}.` }
+    }
+  }
+
+  // Alle vorhandenen hochgeladen/geprueft-Rows auf 'geprueft' setzen.
+  const { error: updErr } = await db
+    .from('pflichtdokumente')
+    .update({ status: 'geprueft' })
+    .eq('sv_id', svId)
+    .in('dokument_typ', [...PFLICHT_ABTRETUNG, ...PFLICHT_SINGLE] as unknown as string[])
+    .in('status', ['hochgeladen', 'geprueft'])
+  if (updErr) return { success: false, error: `Dokumenten-Freigabe fehlgeschlagen: ${updErr.message}` }
+
+  const { error: svErr } = await db
+    .from('sachverstaendige')
+    .update({
+      verifiziert: true,
+      verifiziert_am: new Date().toISOString(),
+      verifiziert_von: auth.userId,
+    })
+    .eq('id', svId)
+  if (svErr) return { success: false, error: `Verifizierungs-Flag konnte nicht gesetzt werden: ${svErr.message}` }
+
+  await resolveTasksForEntity('gutachter', svId, 'Pflichtdokumente vollständig freigegeben')
+
+  revalidateBoth(svId)
+  return { success: true }
+}

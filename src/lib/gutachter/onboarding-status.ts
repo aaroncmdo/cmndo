@@ -4,12 +4,17 @@
 // wenn der SV in einer anderen Onboarding-Stufe hängt (Logo/Vertrag/SA/Kalender).
 // Hier: eine Wahrheit für „Onboarding komplett" + Deep-Link-Berechnung zum
 // nächsten offenen Step im `/gutachter/willkommen`-Wizard.
+//
+// AAR-714: Der frühere SA-Vorlage-Step ist zum Dokumente-Step geworden (drei
+// Pflichtdokumente aus pflichtdokumente-Tabelle). Der Helper nimmt jetzt
+// einen bereits abgeleiteten `dokumente_komplett`-Bool statt der alten
+// `sa_vorlage_status`-Spalte.
 
 export type OnboardingSv = {
   vertrag_unterschrieben: boolean | null
   anzahlung_status: string | null
   portal_zugang_freigeschaltet: boolean | null
-  sa_vorlage_status: 'ausstehend' | 'geprueft' | 'zurueckgewiesen' | null
+  dokumente_komplett: boolean
   gcal_connected: boolean | null
   logo_url: string | null
 }
@@ -20,7 +25,7 @@ export function isOnboardingComplete(sv: OnboardingSv): boolean {
     sv.vertrag_unterschrieben === true &&
     sv.anzahlung_status === 'bezahlt' &&
     sv.portal_zugang_freigeschaltet === true &&
-    sv.sa_vorlage_status === 'geprueft' &&
+    sv.dokumente_komplett === true &&
     sv.gcal_connected === true &&
     !!sv.logo_url
   )
@@ -32,7 +37,7 @@ export type OnboardingStepKey =
   | 'branding'
   | 'vertrag'
   | 'anzahlung'
-  | 'sa_vorlage'
+  | 'dokumente'
   | 'kalender'
 
 /**
@@ -43,7 +48,7 @@ export function getNextOnboardingStep(sv: OnboardingSv): OnboardingStepKey | nul
   if (!sv.logo_url) return 'branding'
   if (!sv.vertrag_unterschrieben) return 'vertrag'
   if (sv.anzahlung_status !== 'bezahlt' || !sv.portal_zugang_freigeschaltet) return 'anzahlung'
-  if (sv.sa_vorlage_status === null || sv.sa_vorlage_status === 'zurueckgewiesen') return 'sa_vorlage'
+  if (!sv.dokumente_komplett) return 'dokumente'
   if (!sv.gcal_connected) return 'kalender'
   return null
 }
@@ -55,7 +60,7 @@ export function getOnboardingDeepLink(sv: OnboardingSv): string {
     branding: 1,
     vertrag: 2,
     anzahlung: 3,
-    sa_vorlage: 4,
+    dokumente: 4,
     kalender: 5,
   }
   const next = getNextOnboardingStep(sv)

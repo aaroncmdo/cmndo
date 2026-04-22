@@ -44,10 +44,12 @@ export default async function GutachterLayout({
   const showTeam = !!(sv?.ist_parent_account || (sv?.rolle_in_organisation === 'inhaber'))
   const showCommunity = sv?.rolle_in_organisation === 'community_member'
 
-  // AAR-359 W5: Verifizierungs-Link in Sidebar, solange ein Verifizierungs-
-  // Zustand aktiv bleibt (SA-Vorlage ausstehend/zurückgewiesen ODER Tier-2
-  // nicht vollständig geprüft). Sobald beide auf 'geprueft' → Link verschwindet.
-  const saVorlageOffen = sv?.sa_vorlage_status !== 'geprueft'
+  // AAR-359 W5 / AAR-714: Verifizierungs-Link in Sidebar, solange ein
+  // Verifizierungs-Zustand aktiv bleibt. Legacy-SA-Vorlage (sv_sa_vorlage_*)
+  // gilt nur noch wenn aktiv ausstehend/zurückgewiesen — null ist seit
+  // AAR-714 der Default für neue SVs (die laufen über Pflichtdokumente).
+  const saVorlageOffen =
+    sv?.sa_vorlage_status === 'ausstehend' || sv?.sa_vorlage_status === 'zurueckgewiesen'
   const tier2Offen = sv?.verifizierung_status && sv.verifizierung_status !== 'geprueft'
   const showVerifizierung = !!(saVorlageOffen || tier2Offen)
 
