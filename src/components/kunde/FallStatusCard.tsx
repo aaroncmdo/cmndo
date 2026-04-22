@@ -4,7 +4,7 @@
 // Felder mehr — Kunde sieht Brutto-Beträge nicht. Die Auszahlungs-Summe kommt
 // ausschließlich aus AuszahlungCard (auszahlung_kunde_betrag aus faelle_kunde_view).
 import { CalendarIcon, TruckIcon, FileTextIcon, ShieldCheckIcon, MailIcon, ClockIcon, XCircleIcon, PartyPopperIcon, CheckCircle2Icon, AlertCircleIcon } from 'lucide-react'
-import { formatDatum, formatDatumUhrzeit } from '@/lib/format'
+import { formatDatum } from '@/lib/format'
 
 type StatusFall = {
   id: string
@@ -36,10 +36,6 @@ function daysSince(d: string): number {
   return Math.floor((Date.now() - new Date(d).getTime()) / 86400000)
 }
 
-function daysUntil(d: string): number {
-  return Math.max(0, Math.ceil((new Date(d).getTime() - Date.now()) / 86400000))
-}
-
 export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svName?: string }) {
   const s = fall.status
 
@@ -57,18 +53,10 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
         </div>
       </div>
 
-      {/* Termin-Countdown */}
-      {(s === 'ersterfassung' || s === 'sv-termin' || s === 'sv-zugewiesen') && fall.sv_termin && (
-        <div className="bg-white/60 rounded-xl px-4 py-3 flex items-center gap-3">
-          <CalendarIcon className="w-4 h-4 text-blue-500" />
-          <div>
-            <p className="text-sm font-semibold text-gray-900">
-              {formatDatumUhrzeit(fall.sv_termin)}
-            </p>
-            <p className="text-xs text-gray-500">in {daysUntil(fall.sv_termin)} Tagen</p>
-          </div>
-        </div>
-      )}
+      {/* AAR-703: Termin-Countdown entfernt — Termin wird bereits prominent
+          via TerminSectionCard (AAR-448) im /kunde/faelle/<id>-Render gezeigt
+          (Card mit Status-Badge, Adresse, Quick-Actions zum Verschieben).
+          Doppelte Anzeige hat Aaron im Live-Test als verwirrend gemeldet. */}
 
       {/* AS Frist-Counter */}
       {s === 'anschlussschreiben' && fall.anschlussschreiben_am && (
