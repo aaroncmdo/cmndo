@@ -46,6 +46,10 @@ export async function ensureTagesSession(
   datum: Date,
   terminIds: string[],
 ): Promise<SvTagesSession | null> {
+  if (terminIds.length === 0) {
+    console.warn('[tages-session] ensureTagesSession ohne terminIds — abgebrochen')
+    return null
+  }
   const existing = await getTagesSession(svId, datum)
   if (existing) return existing
 
@@ -63,7 +67,17 @@ export async function ensureTagesSession(
     .single()
 
   if (error) {
-    console.error('[tages-session] ensureTagesSession:', error.message)
+    // AAR-707: Detail-Log statt nur message — RLS-Fehler haben oft
+    // wichtige Hints im `details`-Feld die der User-facing-Toast braucht.
+    console.error('[tages-session] ensureTagesSession failed:', {
+      svId,
+      datum: isoDate(datum),
+      terminIds,
+      code: (error as { code?: string }).code,
+      message: error.message,
+      details: (error as { details?: string }).details,
+      hint: (error as { hint?: string }).hint,
+    })
     return null
   }
   return data as SvTagesSession
