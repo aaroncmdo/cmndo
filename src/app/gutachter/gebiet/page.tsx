@@ -150,7 +150,7 @@ export default function GebietPage() {
       return
     }
     const s = document.createElement('script'); s.id = MAPS_ID
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=visualization`
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=visualization&loading=async&v=weekly`
     s.async = true
     s.onload = () => {
       if (!init()) {

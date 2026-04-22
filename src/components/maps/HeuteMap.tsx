@@ -22,7 +22,7 @@ function loadGoogleMapsWithDirections(apiKey: string): Promise<void> {
     }
     const s = document.createElement('script')
     s.id = MAPS_SCRIPT_ID
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async&v=weekly`
     s.async = true; s.defer = true
     s.onload = () => resolve()
     s.onerror = () => reject(new Error('Google Maps load failed'))
