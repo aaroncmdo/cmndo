@@ -14,6 +14,16 @@ export default async function KundeStartseite() {
   if (!user) redirect('/login')
 
   try {
+  // AAR-kunde-auto-claim: Alle Fälle mit lead.email=user.email und
+  // kunde_id IS NULL auf user.id claimen, damit RLS sie freigibt. Behebt das
+  // „neuer Kunde sieht Fall + Termine nicht"-Symptom (RLS lässt nur
+  // kunde_id=auth.uid() durch, kein Email-Fallback in der Policy).
+  if (user.email) {
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const { claimFaelleByEmail } = await import('@/lib/kunde/auto-claim')
+    await claimFaelleByEmail(createAdminClient(), user.id, user.email)
+  }
+
   const { data: profile } = await supabase
     .from('profiles')
     .select('vorname')

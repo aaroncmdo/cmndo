@@ -12,6 +12,15 @@ export default async function KundeTermine() {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
+  // AAR-kunde-auto-claim: Defensive Backfill — falls /kunde noch nicht
+  // besucht wurde (Direkt-Link auf /kunde/termine), Fälle hier claimen
+  // damit der RLS-Filter weiter unten den Termin freigibt.
+  if (user.email) {
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const { claimFaelleByEmail } = await import('@/lib/kunde/auto-claim')
+    await claimFaelleByEmail(createAdminClient(), user.id, user.email)
+  }
+
   // Fälle des Kunden
   const { data: faelle } = await supabase
     .from('faelle')
