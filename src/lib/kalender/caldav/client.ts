@@ -152,3 +152,106 @@ export async function checkFreeBusy(
 export async function pingConnection(creds: CalDavCredentials): Promise<void> {
   await createClient(creds)
 }
+
+// AAR-721: Echte Event-Liste mit Start/End-Zeiten aus CalDAV ziehen.
+// Pessimistischer Boolean-Range-Check (checkFreeBusy) war inakzeptabel:
+// ein Termin in 12 Wochen würde alle Dispatch-Slots blockieren.
+//
+// tsdav liefert DAVObject[] mit .data (iCalendar-String). Wir parsen
+// DTSTART/DTEND per Regex — robust gegen kaputte ics-Einträge (einzelne
+// Fehler führen zu skip, nicht zu Gesamtausfall).
+export type CalDavEvent = { start: string; end: string }
+
+const DTSTART_RE = /^DTSTART(?:;[^:]*)?:(.+)$/m
+const DTEND_RE = /^DTEND(?:;[^:]*)?:(.+)$/m
+
+/**
+ * iCalendar-DateTime → ISO-String. Formate die wir akzeptieren:
+ *   20260423T100000Z         (UTC)
+ *   20260423T100000          (Floating, wird als lokal interpretiert)
+ *   20260423                 (DATE-only, ganzer Tag)
+ * Rückgabe null wenn Parsing fehlschlägt.
+ */
+function parseIcalDateTime(raw: string): string | null {
+  const s = raw.trim()
+  // DATE-only: YYYYMMDD
+  const dateOnly = /^(\d{4})(\d{2})(\d{2})$/.exec(s)
+  if (dateOnly) {
+    const [, y, m, d] = dateOnly
+    const iso = new Date(`${y}-${m}-${d}T00:00:00Z`).toISOString()
+    return iso
+  }
+  // DATETIME: YYYYMMDDTHHmmss[Z]
+  const dateTime = /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(Z)?$/.exec(s)
+  if (dateTime) {
+    const [, y, m, d, hh, mm, ss, z] = dateTime
+    const base = `${y}-${m}-${d}T${hh}:${mm}:${ss}${z ? 'Z' : ''}`
+    const parsed = new Date(base)
+    if (Number.isNaN(parsed.getTime())) return null
+    return parsed.toISOString()
+  }
+  return null
+}
+
+/**
+ * Lädt alle Events im angegebenen Zeitraum und extrahiert pro Event
+ * DTSTART/DTEND. Recurring Events (RRULE) werden momentan nur als
+ * „erste Instanz" erkannt — für MVP ausreichend, tiefer RRULE-Expansion
+ * kommt mit AAR-716 (Write-Back-Scope).
+ *
+ * Fail-safe: Parsing-Fehler skippen einzelne Events, gesamte Liste wird
+ * zurückgegeben. Bei Verbindungsfehler throw `CalDavError`.
+ */
+export async function listCalendarEvents(
+  creds: CalDavCredentials,
+  calendarUrl: string,
+  rangeStartIso: string,
+  rangeEndIso: string,
+): Promise<CalDavEvent[]> {
+  const client = await createClient(creds)
+  const calendars = await client.fetchCalendars()
+  const cal = calendars.find((c) => String(c.url) === calendarUrl) ?? calendars[0]
+  if (!cal) return []
+
+  let objects: unknown[]
+  try {
+    objects = (await Promise.race([
+      client.fetchCalendarObjects({
+        calendar: cal,
+        timeRange: { start: rangeStartIso, end: rangeEndIso },
+      }),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), REQUEST_TIMEOUT_MS * 3),
+      ),
+    ])) as unknown[]
+  } catch (err) {
+    throw new CalDavError(
+      `Event-Liste konnte nicht geladen werden: ${err instanceof Error ? err.message : String(err)}`,
+      'other',
+      err,
+    )
+  }
+
+  const events: CalDavEvent[] = []
+  for (const obj of objects) {
+    const data = (obj as { data?: string }).data
+    if (typeof data !== 'string' || !data.includes('BEGIN:VEVENT')) continue
+    // Einfacher Split pro VEVENT-Block — robust gegen mehrere Events in
+    // einer Kalender-Object-Datei (selten, aber tsdav kann das).
+    const blocks = data.split('BEGIN:VEVENT')
+    for (let i = 1; i < blocks.length; i++) {
+      const block = blocks[i].split('END:VEVENT')[0]
+      const startMatch = DTSTART_RE.exec(block)
+      const endMatch = DTEND_RE.exec(block)
+      if (!startMatch) continue
+      const start = parseIcalDateTime(startMatch[1])
+      // Wenn DTEND fehlt (zulässig in iCalendar), nehmen wir start + 1h.
+      const end = endMatch
+        ? parseIcalDateTime(endMatch[1])
+        : (start ? new Date(new Date(start).getTime() + 60 * 60_000).toISOString() : null)
+      if (!start || !end) continue
+      events.push({ start, end })
+    }
+  }
+  return events
+}

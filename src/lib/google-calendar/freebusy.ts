@@ -11,7 +11,7 @@ import { google } from 'googleapis'
 import { getGoogleOAuthClientForUser } from '@/lib/google/oauth-client'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { decrypt } from '@/lib/kalender/caldav/encryption'
-import { checkFreeBusy as checkCaldavFreeBusy } from '@/lib/kalender/caldav/client'
+import { checkFreeBusy as checkCaldavFreeBusy, listCalendarEvents } from '@/lib/kalender/caldav/client'
 import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
 
 const FREEBUSY_TIMEOUT_MS = 2000
@@ -158,7 +158,9 @@ export async function getBusyWindows(
     console.warn('[getBusyWindows] Google-Query für SV', svProfileId, 'fehlgeschlagen:', err instanceof Error ? err.message : err)
   }
 
-  // 2. CalDAV — falls Verbindung vorhanden.
+  // 2. CalDAV — AAR-721: feingranulare Event-Liste mit DTSTART/DTEND
+  // statt pessimistischem Range-Boolean. Pro privatem Event ein einzelnes
+  // BusyWindow.
   try {
     const db = createAdminClient()
     const { data: sv } = await db
@@ -175,15 +177,7 @@ export async function getBusyWindows(
         .maybeSingle()
       if (verb) {
         const password = decrypt(verb.password_encrypted as string)
-        // CalDAV-Client hat fetchCalendarObjects — wir nutzen den gleichen
-        // Service wie checkCaldavFreeBusy. Für die Range-Variante brauchen
-        // wir eine leicht andere Abfrage. Pragmatisch: wir wiederholen
-        // checkCaldavFreeBusy für den Gesamtzeitraum — liefert zwar nur
-        // „belegt/frei" statt konkrete Windows, reicht aber für den
-        // Slot-Finder (wenn irgendetwas im Range ist, haben wir ein
-        // pessimistisches Gesamt-Busy-Window).
-        const { checkFreeBusy } = await import('@/lib/kalender/caldav/client')
-        const status = await checkFreeBusy(
+        const events = await listCalendarEvents(
           {
             serverUrl: verb.server_url as string,
             username: verb.username as string,
@@ -193,12 +187,8 @@ export async function getBusyWindows(
           rangeStartIso,
           rangeEndIso,
         )
-        if (status === 'belegt') {
-          // Pessimistisch: wir wissen nicht WANN genau belegt — markieren
-          // den ganzen Range als belegt. Für die erste CalDAV-Iteration
-          // akzeptabel, eine feingranulare CalDAV-Event-Liste käme erst
-          // mit einer echten calendar-query/REPORT-Request (AAR-716-Scope).
-          windows.push({ start: rangeStartIso, end: rangeEndIso })
+        for (const ev of events) {
+          windows.push({ start: ev.start, end: ev.end })
         }
       }
     }
