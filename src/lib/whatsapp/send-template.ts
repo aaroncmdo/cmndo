@@ -16,8 +16,13 @@ export async function sendWhatsAppTemplate(
   absender_kb_id?: string,
 ): Promise<{ success: boolean; sid?: string; error?: string; provider: 'twilio-template' | 'twilio-legacy' }> {
   const contentSid = getTemplateSid(templateName)
+  // AAR-705: Templates temporär deaktiviert — Aaron's Vercel-Setup hat noch
+  // keine approved WABA-Templates + Sandbox unterstützt sie ohnehin nicht.
+  // Default-Pfad ist jetzt Legacy-Plain-Text. Wieder aktivieren via env-Var
+  // WHATSAPP_USE_TEMPLATES=1 sobald Templates production-ready sind.
+  const templatesEnabled = process.env.WHATSAPP_USE_TEMPLATES === '1'
 
-  if (contentSid) {
+  if (contentSid && templatesEnabled) {
     // ─── Twilio Content API (Template genehmigt) ──────────────────
     const accountSid = process.env.TWILIO_ACCOUNT_SID
     const authToken = process.env.TWILIO_AUTH_TOKEN
