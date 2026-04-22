@@ -42,14 +42,17 @@ export const FALL_SELECT_KUNDE =
   'schadens_adresse,schadens_plz,schadens_ort,' +
   'kennzeichen,fahrzeug_hersteller,fahrzeug_modell,fahrzeug_baujahr,' +
   'unfallort,besichtigungsort_adresse,' +
-  'sv_termin,gutachter_termin_status,gutachter_termin_bestaetigt_am,' +
+  // AAR-711: gutachter_termin_bestaetigt_am existiert nicht auf faelle —
+  // semantisch identisch mit dem View-Computed final_verbindlich_ab.
+  'sv_termin,gutachter_termin_status,gutachter_termin_bestaetigt_am:aktueller_termin_final_verbindlich_ab,' +
   'gutachten_eingegangen_am,' +
   'onboarding_complete,sa_unterschrieben,vollmacht_signiert_am,vollmacht_status,' +
   'anschlussschreiben_am,regulierung_am,' +
   'vs_ablehnungsgrund,vs_kuerzung_grund,storno_grund,' +
   'abgeschlossen_am,google_review_gesendet,' +
   'gegner_versicherung,kanzlei_ansprechpartner_name,' +
-  'mandatstyp,service_typ,polizei_vor_ort,' +
+  // AAR-711: mandatstyp lebt auf leads, nicht auf faelle — Caller lädt bei Bedarf nach.
+  'service_typ,polizei_vor_ort,' +
   'bankdaten_hinterlegt_am,zahlungsweg,totalschaden,zahlung_eingegangen_am,' +
   'nachbesichtigung_status,nachbesichtigung_termin_datum,nachbesichtigung_angefordert_am,' +
   'aktueller_termin_id,aktueller_termin_start,aktueller_termin_end,' +

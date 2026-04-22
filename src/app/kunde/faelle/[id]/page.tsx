@@ -57,6 +57,17 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       }
     }
 
+    // AAR-711: mandatstyp lebt auf leads, nicht auf faelle. Separat laden für SaeuleMeinAnwalt.
+    let mandatstyp: string | null = null
+    if (fall.lead_id) {
+      const { data: leadMandat } = await admin
+        .from('leads')
+        .select('mandatstyp')
+        .eq('id', fall.lead_id)
+        .maybeSingle()
+      mandatstyp = (leadMandat?.mandatstyp as string | null) ?? null
+    }
+
     // SV-Daten laden
     let svName: string | null = null
     let svTelefon: string | null = null
@@ -518,7 +529,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
           {/* S1: Mein Anwalt (nur bei Komplett-Service) */}
           <SaeuleMeinAnwalt
-            mandatstyp={(fall as Record<string, unknown>).mandatstyp as string | null}
+            mandatstyp={mandatstyp}
             serviceTyp={(fall as Record<string, unknown>).service_typ as string | null}
             vollmacht_status={!!(fall as Record<string, unknown>).vollmacht_signiert_am}
             kanzlei_name={fall.kanzlei_ansprechpartner_name as string | null}
