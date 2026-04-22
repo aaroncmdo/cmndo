@@ -20,6 +20,16 @@ export async function sendSmsTemplate(
   if (!accountSid || !authToken || !smsFrom) {
     return { success: false, error: 'Twilio-SMS-Credentials fehlen (TWILIO_SMS_FROM oder MESSAGING_SERVICE_SID)' }
   }
+  // AAR-705: 21660-Schutz — die WhatsApp-Sandbox-Nummer ist KEINE
+  // SMS-fähige Sender-Nummer. Wenn TWILIO_SMS_FROM versehentlich auf
+  // +14155238886 (Sandbox-WA) steht, lehnt Twilio mit 21660 ab. Statt
+  // den Twilio-Crash durchreichen → klare Fehlermeldung.
+  if (smsFrom.includes('14155238886')) {
+    return {
+      success: false,
+      error: 'TWILIO_SMS_FROM zeigt auf die WhatsApp-Sandbox-Nummer (+14155238886) — die kann keine SMS senden. Bitte in Vercel-Env eine SMS-fähige Twilio-Nummer setzen.',
+    }
+  }
 
   // E.164 normalisieren
   let normalTo = to.replace(/\s/g, '')
