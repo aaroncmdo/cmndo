@@ -35,7 +35,12 @@ export default async function KiUsagePage() {
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
-  if (profile?.rolle !== 'admin') redirect('/admin')
+  // AAR-719: Defensiv — Admin-Layout filtert eigentlich schon, aber wenn
+  // ein Nicht-Admin hier durchrutscht, ins eigene Portal statt /admin.
+  if (profile?.rolle !== 'admin') {
+    const { roleToPath } = await import('@/lib/auth/role-redirect')
+    redirect(roleToPath(profile?.rolle as string | null | undefined))
+  }
 
   const admin = createAdminClient()
   const sinceIso = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()

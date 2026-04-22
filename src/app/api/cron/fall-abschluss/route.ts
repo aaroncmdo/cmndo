@@ -33,7 +33,11 @@ export async function GET(request: Request) {
       await transitionFallStatus(fall.id, 'abgeschlossen')
 
       // T13: Fall abgeschlossen
-      sendFallCommunication(fall.id, 'fall_abgeschlossen').catch(() => {})
+      // AAR-719: Silent-Catch durch Logging ersetzt — Benachrichtigungs-
+      // Fehler waren unsichtbar, Kunde bekam kein Abschluss-Email.
+      sendFallCommunication(fall.id, 'fall_abgeschlossen').catch((err) => {
+        console.error('[fall-abschluss-cron] Abschluss-Benachrichtigung für Fall', fall.id, 'fehlgeschlagen —', err instanceof Error ? err.message : err)
+      })
 
       await db.from('timeline').insert({
         fall_id: fall.id,

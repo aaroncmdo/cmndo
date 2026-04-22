@@ -62,14 +62,18 @@ export async function POST(request: Request) {
       beschreibung: `CarDentity Typ-A Pruefung fuer FIN ${fin_vin}. ${hasVorschaden ? `${anzahl} Vorschaeden erkannt.` : 'Fahrzeug ist vorschadenfrei.'}`,
     })
 
-    // If prior damage found, trigger Typ-B for detailed report
+    // If prior damage found, trigger Typ-B for detailed report.
+    // AAR-719: Silent-Catch durch Logging ersetzt — vorher verschwanden
+    // Typ-B-Trigger-Fehler komplett, der Fall lief ohne Detail-Report weiter.
     if (hasVorschaden) {
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
       fetch(`${baseUrl}/api/cardentity/typ-b`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fall_id, fin_vin }),
-      }).catch(() => {})
+      }).catch((err) => {
+        console.error('[cardentity/typ-a] Typ-B-Trigger fehlgeschlagen für Fall', fall_id, '—', err instanceof Error ? err.message : err)
+      })
     }
 
     return NextResponse.json({ success: true, ergebnis })
