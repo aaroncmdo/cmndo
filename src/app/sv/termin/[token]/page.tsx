@@ -1,4 +1,5 @@
-import { getTerminByToken } from './actions'
+// AAR-713 Phase 1: getTerminByToken aus lib/termine/, alte Route-actions.ts gelöscht
+import { getTerminByToken } from '@/lib/termine/get-by-token'
 import TerminClient from './TerminClient'
 
 export default async function TerminPage({ params }: { params: Promise<{ token: string }> }) {
