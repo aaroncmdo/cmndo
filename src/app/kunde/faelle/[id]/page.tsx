@@ -240,26 +240,34 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     } catch { /* non-critical */ }
 
     // AAR-448: Termin-Daten für die Detail-Card (SV + KB)
-    // Nimmt den jeweils frühesten aktiven Termin pro Typ.
+    // AAR-704A: cancelled_at-Filter + Priorisierung „bestaetigt vor reserviert,
+    // dann jüngster created_at". Vorher zog `order start_zeit ASC limit 1`
+    // den ÄLTESTEN aktiven Termin — wenn der SV manuell einen neuen Termin
+    // angelegt hatte ohne den alten zu cancellen (AAR-704C), zeigte die
+    // Fallansicht den veralteten Eintrag.
     const aktiveStatus = ['reserviert', 'bestaetigt', 'gegenvorschlag', 'verschoben']
-    const { data: svTermin } = await admin
+    const { data: svKandidaten } = await admin
       .from('gutachter_termine')
-      .select('id, typ, status, start_zeit, end_zeit, kanal, video_link, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, sv_id, kb_id')
+      .select('id, typ, status, start_zeit, end_zeit, kanal, video_link, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, sv_id, kb_id, created_at')
       .eq('fall_id', id)
       .eq('typ', 'sv_begutachtung')
       .in('status', aktiveStatus)
       .is('durchgefuehrt_am', null)
-      .order('start_zeit', { ascending: true })
-      .limit(1)
-      .maybeSingle()
+      .is('cancelled_at', null)
+      .order('created_at', { ascending: false })
+    const STATUS_PRIO: Record<string, number> = { bestaetigt: 1, gegenvorschlag: 2, reserviert: 3, verschoben: 4 }
+    const svTermin = (svKandidaten ?? []).slice().sort((a, b) =>
+      (STATUS_PRIO[a.status as string] ?? 9) - (STATUS_PRIO[b.status as string] ?? 9),
+    )[0] ?? null
     const { data: kbTermin } = await admin
       .from('gutachter_termine')
       .select('id, typ, status, start_zeit, end_zeit, kanal, video_link, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, sv_id, kb_id')
       .eq('fall_id', id)
       .eq('typ', 'kb_beratung')
       .in('status', aktiveStatus)
+      .is('cancelled_at', null)
       .gte('start_zeit', new Date(Date.now() - 60 * 60 * 1000).toISOString())
-      .order('start_zeit', { ascending: true })
+      .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()
 

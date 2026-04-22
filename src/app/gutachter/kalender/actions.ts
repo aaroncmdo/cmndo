@@ -21,27 +21,46 @@ export async function setTermin(fallId: string, termin: string) {
   const startZeit = new Date(termin)
   const endZeit = new Date(startZeit.getTime() + 90 * 60 * 1000)
 
-  const { data: existing } = await supabase
+  // AAR-704C: ALLE aktiven Termine dieses SVs für diesen Fall holen
+  // (Doppelungs-Bug: vorher wurde nur der jüngste upgedated, ältere blieben
+  // aktiv → Fallansicht zog den falschen Termin). Den jüngsten upgraden,
+  // alle weiteren cancelen.
+  const { data: aktiveTermine } = await supabase
     .from('gutachter_termine')
-    .select('id')
+    .select('id, created_at')
     .eq('fall_id', fallId)
     .eq('sv_id', sv.id)
     .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
+    .is('cancelled_at', null)
     .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
 
-  if (existing) {
+  const aktive = aktiveTermine ?? []
+  const primary = aktive[0] ?? null
+  const altere = aktive.slice(1)
+
+  if (primary) {
     const { error } = await supabase
       .from('gutachter_termine')
       .update({ start_zeit: startZeit.toISOString(), end_zeit: endZeit.toISOString(), status: 'bestaetigt' })
-      .eq('id', existing.id)
+      .eq('id', primary.id)
     if (error) throw new Error(error.message)
   } else {
     const { error } = await supabase
       .from('gutachter_termine')
       .insert({ fall_id: fallId, sv_id: sv.id, start_zeit: startZeit.toISOString(), end_zeit: endZeit.toISOString(), status: 'bestaetigt' })
     if (error) throw new Error(error.message)
+  }
+
+  // AAR-704C: ältere aktive Termine cancellen damit nur einer aktiv bleibt
+  if (altere.length > 0) {
+    await supabase
+      .from('gutachter_termine')
+      .update({
+        status: 'storniert',
+        cancelled_at: new Date().toISOString(),
+        sv_ablehnung_grund: 'Vom SV durch neuen Termin ersetzt (manuelle Verschiebung)',
+      })
+      .in('id', altere.map((t) => t.id as string))
   }
 
   // KFZ-202: State-Machine statt direktem status-Update
