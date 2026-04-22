@@ -151,6 +151,10 @@
     {
       "path": "/api/cron/isochrone-backfill",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/caldav-healthcheck",
+      "schedule": "*/15 * * * *"
     }
   ]
 }

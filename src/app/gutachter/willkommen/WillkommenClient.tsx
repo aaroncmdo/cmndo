@@ -77,6 +77,8 @@ type SvData = {
   // BUG-96: fuer die Stammdaten-Card im Vertrag-Step
   firmenname: string | null
   gcal_connected: boolean
+  // AAR-717: alternativer Kalender-Connect via CalDAV (iCloud etc.)
+  caldav_connected: boolean
   steuernummer: string | null
   // AAR-714: Pflichtdokumente-States für den Dokumente-Step
   dokumenteSlots: DokumentSlotState[]
@@ -233,6 +235,7 @@ export default function WillkommenClient({
     && sv.portal_zugang_freigeschaltet
     && sv.dokumenteKomplett
     && !sv.gcal_connected
+    && !sv.caldav_connected
   ) {
     initialStep = 5
   }
@@ -1039,6 +1042,7 @@ export default function WillkommenClient({
             <KalenderConnectStep
               svId={sv.id}
               gcalConnected={sv.gcal_connected}
+              caldavConnected={sv.caldav_connected}
               onDone={() => {
                 router.push('/gutachter')
                 router.refresh()

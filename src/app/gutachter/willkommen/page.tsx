@@ -117,6 +117,17 @@ export default async function GutachterWillkommenPage({
       notiz: (r.begruendung as string | null) ?? null,
     })
   }
+
+  // AAR-717: CalDAV-Verbindungs-Status abfragen — zusätzlich zum Google-
+  // Connect-Flag gcal_connected auf sachverstaendige. Entweder ein Google-
+  // OAuth-Link oder eine CalDAV-Verbindung reicht als „Kalender verbunden".
+  const { data: caldavRow } = await supabase
+    .from('sv_kalender_verbindungen')
+    .select('id')
+    .eq('sv_id', sv.id)
+    .eq('provider', 'caldav')
+    .maybeSingle()
+  const caldavConnected = !!caldavRow
   const isSlotFilled = (slot: string) => {
     const s = pflichtMap.get(slot)?.status
     return s === 'hochgeladen' || s === 'geprueft'
@@ -292,6 +303,8 @@ export default async function GutachterWillkommenPage({
         steuernummer: svRow.steuernummer ?? null,
         // AAR-242: Kalender-Status für den Kalender-Step
         gcal_connected: !!(sv as { gcal_connected?: boolean }).gcal_connected,
+        // AAR-717: CalDAV-Verbindung (alternativ zu Google)
+        caldav_connected: caldavConnected,
         // AAR-714: Pflichtdokumente-States
         dokumenteSlots,
         dokumenteKomplett: hatAbtretung && hatDatenschutz && hatWiderruf,
