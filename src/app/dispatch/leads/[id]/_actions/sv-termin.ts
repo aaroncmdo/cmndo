@@ -131,13 +131,13 @@ export async function reserveSvTerminForLead(
     console.warn('[reserveSvTerminForLead] Mitteilung fehlgeschlagen:', err)
   }
 
-  // AAR-133: Email an SV (non-blocking)
-  try {
-    const { sendSvTerminBestaetigung } = await import('@/lib/email/google/flows')
-    await sendSvTerminBestaetigung(svId, inserted.id)
-  } catch (err) {
-    console.warn('[reserveSvTerminForLead] Email fehlgeschlagen:', err)
-  }
+  // AAR-713: Keine SV-Email bei reiner Vorreservierung mehr — der SV soll
+  // erst dann per Email die finale Termin-Bestätigung bekommen, wenn der
+  // Kunde im FlowLink die SA unterschrieben hat. Vorher gab es eine
+  // verwirrende „Vorreservierung"-Mail bevor der Auftrag überhaupt feststand.
+  // Die in-App-Mitteilung (createGutachterMitteilung oben) bleibt — der SV
+  // sieht den reservierten Slot in seinem Auftragsfeed/Kalender, fährt aber
+  // nicht los bis die Bestätigungs-Email kommt.
 
   revalidatePath(`/dispatch/leads/${leadId}`)
   return { success: true, terminId: inserted.id }
