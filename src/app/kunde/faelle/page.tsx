@@ -15,7 +15,8 @@ export default async function KundeFaelleListe() {
   const { data: faelle } = await supabase
     .from('v_faelle_mit_aktuellem_termin')
     .select(
-      'id, fall_nummer, status, schadens_datum, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, gutachter_termin_status, gutachter_termin_bestaetigt_am, onboarding_complete, sa_unterschrieben, vollmacht_status, vollmacht_signiert_am, anschlussschreiben_am, regulierung_am, polizei_vor_ort, abgeschlossen_am, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, created_at',
+      // AAR-711: gutachter_termin_bestaetigt_am via View-Alias auf final_verbindlich_ab.
+      'id, fall_nummer, status, schadens_datum, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, gutachter_termin_status, gutachter_termin_bestaetigt_am:aktueller_termin_final_verbindlich_ab, onboarding_complete, sa_unterschrieben, vollmacht_status, vollmacht_signiert_am, anschlussschreiben_am, regulierung_am, polizei_vor_ort, abgeschlossen_am, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, created_at',
     )
     .eq('kunde_id', user.id)
     .order('created_at', { ascending: false })

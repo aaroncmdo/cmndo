@@ -21,27 +21,32 @@ export default async function KundeStartseite() {
     .single()
 
   // Alle Faelle des Kunden — inkl. der Felder, die FallKarte + getKundenJetztZuTun benötigen.
-  const FALL_SELECT =
-    'id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_datum, sa_unterschrieben, sv_id, sv_termin, gutachten_eingegangen_am, gutachter_termin_status, gutachter_termin_bestaetigt_am, regulierung_am, anschlussschreiben_am, szenario, onboarding_complete, kunde_id, kundenbetreuer_id, polizei_vor_ort, vollmacht_status, vollmacht_signiert_am, abgeschlossen_am, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, nachbesichtigung_status, created_at'
+  // AAR-711: gutachter_termin_bestaetigt_am gibt's nur als View-Computed
+  // (final_verbindlich_ab) — Alias auf Query-Ebene + Bare-faelle-Fallback ohne.
+  const FALL_SELECT_VIEW =
+    'id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_datum, sa_unterschrieben, sv_id, sv_termin, gutachten_eingegangen_am, gutachter_termin_status, gutachter_termin_bestaetigt_am:aktueller_termin_final_verbindlich_ab, regulierung_am, anschlussschreiben_am, szenario, onboarding_complete, kunde_id, kundenbetreuer_id, polizei_vor_ort, vollmacht_status, vollmacht_signiert_am, abgeschlossen_am, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, nachbesichtigung_status, created_at'
+  const FALL_SELECT_BARE =
+    'id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_datum, sa_unterschrieben, sv_id, gutachten_eingegangen_am, regulierung_am, anschlussschreiben_am, szenario, onboarding_complete, kunde_id, kundenbetreuer_id, polizei_vor_ort, vollmacht_status, vollmacht_signiert_am, abgeschlossen_am, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, nachbesichtigung_status, created_at'
 
   let faelle: Record<string, unknown>[] = []
 
   const { data: directFaelle } = await supabase
     .from('v_faelle_mit_aktuellem_termin')
-    .select(FALL_SELECT)
+    .select(FALL_SELECT_VIEW)
     .eq('kunde_id', user.id)
     .order('created_at', { ascending: false })
 
   faelle = directFaelle ?? []
 
-  // Fallback via Lead-Email
+  // Fallback via Lead-Email — Bare faelle hat sv_termin/gutachter_termin_*
+  // nicht (View-only Felder). Termin wird im Loader unten via Meta nachgeladen.
   if (faelle.length === 0) {
     const { data: leads } = await supabase.from('leads').select('id').eq('email', user.email!)
     const leadIds = (leads ?? []).map((l) => l.id)
     if (leadIds.length) {
       const { data } = await supabase
         .from('faelle')
-        .select(FALL_SELECT)
+        .select(FALL_SELECT_BARE)
         .in('lead_id', leadIds)
         .order('created_at', { ascending: false })
       faelle = data ?? []
