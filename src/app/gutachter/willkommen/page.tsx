@@ -40,11 +40,10 @@ export default async function GutachterWillkommenPage({
   // KFZ-157: logo_url aufnehmen damit der Wizard weiss ob Step 4 noch
   // angezeigt werden muss oder bereits ein Logo existiert.
   // BUG-96: firmenname + steuernummer fuer die Stammdaten-Card im Vertrag-Step.
-  // AAR-359 W3: sa_vorlage_status + sa_vorlage_admin_notiz aufnehmen damit
-  // der Wizard weiss ob Step 5 (SA-Vorlage) noch angezeigt werden muss und
-  // bei status='zurueckgewiesen' den Ablehnungsgrund einblenden kann.
+  // AAR-714: sa_vorlage_status/_admin_notiz entfernt — Wizard nutzt jetzt
+  // pflichtdokumente (3 Slots) als Dispatch-Gate.
   const svSelect =
-    'id, paket, paket_faelle_gesamt, paket_umkreis_km, onboarding_status, onboarding_anzahlung_betrag, vertrag_unterschrieben, portal_zugang_freigeschaltet, standort_adresse, standort_plz, organisation_id, rolle_in_organisation, logo_url, brand_primary, brand_secondary, use_custom_branding, firmenname, steuernummer, gcal_connected, sa_vorlage_status, sa_vorlage_admin_notiz'
+    'id, paket, paket_faelle_gesamt, paket_umkreis_km, onboarding_status, onboarding_anzahlung_betrag, vertrag_unterschrieben, portal_zugang_freigeschaltet, standort_adresse, standort_plz, organisation_id, rolle_in_organisation, logo_url, brand_primary, brand_secondary, use_custom_branding, firmenname, steuernummer, gcal_connected'
   const { data: svRows } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
@@ -95,14 +94,40 @@ export default async function GutachterWillkommenPage({
   // Sub-Mitarbeiter sehen Step 4 NIE — sie erben das Branding der Org.
   const needsLogoStep =
     rolle !== 'sub_mitarbeiter' && !((sv as { logo_url?: string | null }).logo_url)
-  // AAR-359 W3: Zusätzliches Gate — SA-Vorlage fehlt oder wurde
-  // zurückgewiesen. Sub-Mitarbeiter uploaden ihre SA in W5 via
-  // /gutachter/verifizierung, nicht im Willkommen-Flow.
-  const saVorlageStatus = (sv as { sa_vorlage_status?: string | null }).sa_vorlage_status ?? null
-  const needsSaVorlageStep =
-    rolle !== 'sub_mitarbeiter'
-    && (saVorlageStatus === null || saVorlageStatus === 'zurueckgewiesen')
-  if (sv.portal_zugang_freigeschaltet && !needsLogoStep && !needsSaVorlageStep) {
+  // AAR-714: Gate wechselt vom Single-File SA-Vorlage auf Multi-Doc
+  // Pflichtdokumente (Sicherungsabtretung ODER Honorarvereinbarung +
+  // Datenschutzerklärung + Widerrufsbelehrung). Sub-Mitarbeiter laden
+  // Pflichtdokumente weiter über /gutachter/verifizierung hoch.
+  const PFLICHT_SLOTS = [
+    'sv_sicherungsabtretung',
+    'sv_honorarvereinbarung',
+    'sv_datenschutzerklaerung',
+    'sv_widerrufsbelehrung',
+  ] as const
+  const { data: pflichtdokumenteRows } = await supabase
+    .from('pflichtdokumente')
+    .select('dokument_typ, status, begruendung')
+    .eq('sv_id', sv.id)
+    .in('dokument_typ', PFLICHT_SLOTS as unknown as string[])
+
+  const pflichtMap = new Map<string, { status: string; notiz: string | null }>()
+  for (const r of pflichtdokumenteRows ?? []) {
+    pflichtMap.set(r.dokument_typ as string, {
+      status: (r.status as string) ?? 'ausstehend',
+      notiz: (r.begruendung as string | null) ?? null,
+    })
+  }
+  const isSlotFilled = (slot: string) => {
+    const s = pflichtMap.get(slot)?.status
+    return s === 'hochgeladen' || s === 'geprueft'
+  }
+  const hatAbtretung = isSlotFilled('sv_sicherungsabtretung') || isSlotFilled('sv_honorarvereinbarung')
+  const hatDatenschutz = isSlotFilled('sv_datenschutzerklaerung')
+  const hatWiderruf = isSlotFilled('sv_widerrufsbelehrung')
+  const needsDokumenteStep =
+    rolle !== 'sub_mitarbeiter' && !(hatAbtretung && hatDatenschutz && hatWiderruf)
+
+  if (sv.portal_zugang_freigeschaltet && !needsLogoStep && !needsDokumenteStep) {
     redirect('/gutachter')
   }
 
@@ -232,9 +257,19 @@ export default async function GutachterWillkommenPage({
     logo_url?: string | null
     firmenname?: string | null
     steuernummer?: string | null
-    sa_vorlage_status?: 'ausstehend' | 'geprueft' | 'zurueckgewiesen' | null
-    sa_vorlage_admin_notiz?: string | null
   }
+
+  // AAR-714: Pflichtdokumente-States für den Wizard-Step.
+  const dokumenteSlots = PFLICHT_SLOTS.map((slotId) => {
+    const row = pflichtMap.get(slotId)
+    const dbStatus = row?.status ?? null
+    const status: 'leer' | 'hochgeladen' | 'geprueft' | 'abgelehnt' =
+      dbStatus === 'hochgeladen' ? 'hochgeladen'
+      : dbStatus === 'geprueft' ? 'geprueft'
+      : dbStatus === 'abgelehnt' ? 'abgelehnt'
+      : 'leer'
+    return { slotId, status, adminNotiz: row?.notiz ?? null }
+  })
 
   return (
     <WillkommenClient
@@ -257,9 +292,9 @@ export default async function GutachterWillkommenPage({
         steuernummer: svRow.steuernummer ?? null,
         // AAR-242: Kalender-Status für den Kalender-Step
         gcal_connected: !!(sv as { gcal_connected?: boolean }).gcal_connected,
-        // AAR-359 W3: SA-Vorlage-Status für den neuen Step 5
-        sa_vorlage_status: svRow.sa_vorlage_status ?? null,
-        sa_vorlage_admin_notiz: svRow.sa_vorlage_admin_notiz ?? null,
+        // AAR-714: Pflichtdokumente-States
+        dokumenteSlots,
+        dokumenteKomplett: hatAbtretung && hatDatenschutz && hatWiderruf,
       }}
       profile={profile ?? { vorname: null, nachname: null, email: null, telefon: null }}
       organisation={organisation}

@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import SvDetailClient from './SvDetailClient'
 import VerifizierungsToggle from './VerifizierungsToggle'
-import VerifizierungsTab, { type Tier2Slot } from './VerifizierungsTab'
+import VerifizierungsTab, { type Tier2Slot, type PflichtdokumentSlot } from './VerifizierungsTab'
 import { getSvStatus } from '@/lib/sv-status'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
@@ -98,8 +98,9 @@ export default async function SvDetailPage({
   let verifizierungsData: {
     saVorlageSignedUrl: string | null
     tier2Slots: Tier2Slot[]
+    pflichtdokumente: PflichtdokumentSlot[]
     loadError: string | null
-  } = { saVorlageSignedUrl: null, tier2Slots: [], loadError: null }
+  } = { saVorlageSignedUrl: null, tier2Slots: [], pflichtdokumente: [], loadError: null }
 
   if (activeTab === 'verifizierung') {
     try {
@@ -119,7 +120,7 @@ export default async function SvDetailPage({
       const [alleSlots, pflichtRes] = await Promise.all([
         getAlleSlots(supabase),
         dbAdmin.from('pflichtdokumente')
-          .select('id, dokument_typ, status, hochgeladen_am')
+          .select('id, dokument_typ, status, hochgeladen_am, dokument_url, begruendung')
           .eq('sv_id', id),
       ])
       const pflichtRows = (pflichtRes.data ?? []) as Array<{
@@ -135,15 +136,20 @@ export default async function SvDetailPage({
       // Counts waren immer 0.
       const uploadCounts: Record<string, number> = {}
 
-      // AAR-691: Nur Tier-2-Verifizierungs-Slots anzeigen, die echte
-      // Qualifikations-Nachweise sind. SA-Vorlage ist Tier 1 (separates UI).
-      // Abtretungserklärung + Sicherungsabtretung sind Vertrags-Dokumente
-      // (laufen außerhalb der Verifikation) — Admin hat sie nicht im
-      // Verifizierungs-Flow freizugeben.
-      const VERIFIZIERUNG_HIDDEN_SLOTS = new Set([
+      // AAR-691 / AAR-714: Nur Tier-2-Verifizierungs-Slots (echte
+      // Qualifikations-Nachweise). SA-Vorlage + die 4 neuen Pflicht-Slots
+      // (Sicherungsabtretung, Honorarvereinbarung, Datenschutz, Widerruf)
+      // werden separat als Tier-1-Pflichtdokumente dargestellt.
+      const PFLICHT_SLOT_IDS = [
+        'sv_sicherungsabtretung',
+        'sv_honorarvereinbarung',
+        'sv_datenschutzerklaerung',
+        'sv_widerrufsbelehrung',
+      ] as const
+      const VERIFIZIERUNG_HIDDEN_SLOTS = new Set<string>([
         'sv_sa_vorlage',
         'sv_abtretungserklaerung',
-        'sv_sicherungsabtretung',
+        ...PFLICHT_SLOT_IDS,
       ])
       const verifizierungsSlots = alleSlots.filter(
         (s) =>
@@ -175,12 +181,49 @@ export default async function SvDetailPage({
         }
       })
 
-      verifizierungsData = { saVorlageSignedUrl: signedUrl, tier2Slots, loadError: null }
+      // AAR-714: Tier-1-Pflichtdokumente (4 Slots) zusammenstellen mit
+      // Signed-URL fürs Preview. Slots ohne pflichtdokumente-Row zeigen
+      // wir als „leer" an.
+      const pflichtSlotsAlle = alleSlots.filter((s) =>
+        (PFLICHT_SLOT_IDS as readonly string[]).includes(s.slot_id),
+      )
+      const pflichtdokumente: PflichtdokumentSlot[] = []
+      for (const slot of pflichtSlotsAlle) {
+        const row = pflichtRows.find((p) => p.dokument_typ === slot.slot_id)
+        let signed: string | null = null
+        const dokUrl = (row as { dokument_url?: string | null } | undefined)?.dokument_url ?? null
+        if (dokUrl) {
+          const { data: sig, error: sigErr } = await dbAdmin.storage
+            .from('fall-dokumente')
+            .createSignedUrl(dokUrl, 300)
+          if (sigErr) console.warn('[sv-pflichtdok] createSignedUrl:', sigErr.message)
+          signed = sig?.signedUrl ?? null
+        }
+        pflichtdokumente.push({
+          slotId: slot.slot_id,
+          label: slot.label,
+          beschreibung: slot.beschreibung,
+          pflichtdokId: row?.id ?? null,
+          status: (row?.status as PflichtdokumentSlot['status']) ?? null,
+          hochgeladenAm: row?.hochgeladen_am ?? null,
+          dokumentUrl: dokUrl,
+          signedUrl: signed,
+          adminNotiz: (row as { begruendung?: string | null } | undefined)?.begruendung ?? null,
+        })
+      }
+
+      verifizierungsData = {
+        saVorlageSignedUrl: signedUrl,
+        tier2Slots,
+        pflichtdokumente,
+        loadError: null,
+      }
     } catch (err) {
       console.error('[sv-verifizierung] Tab-Load gescheitert:', err)
       verifizierungsData = {
         saVorlageSignedUrl: null,
         tier2Slots: [],
+        pflichtdokumente: [],
         loadError: err instanceof Error ? err.message : 'Unbekannter Fehler',
       }
     }
@@ -313,6 +356,8 @@ export default async function SvDetailPage({
               verifizierungFristBis={sv.verifizierung_frist_bis ?? null}
               verifiziertAm={sv.verifiziert_am ?? null}
               tier2Slots={verifizierungsData.tier2Slots}
+              pflichtdokumente={verifizierungsData.pflichtdokumente}
+              svVerifiziert={sv.verifiziert ?? false}
               gesperrtSeit={sv.gesperrt_seit ?? null}
               gesperrtGrund={sv.gesperrt_grund ?? null}
             />

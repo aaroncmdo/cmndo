@@ -49,7 +49,9 @@ export default async function VerifizierungPage() {
   const qualis = (sv.qualifikationen_neu as string[] | null) ?? []
   const conditionalSlots: Array<{ slotId: string; label: string; quali: string | null; nummer: string | null; nummerLabel: string | null; pflicht: boolean }> = []
 
-  // AAR-647: Abtretungs-Pflicht-Slots (immer für jeden SV, unabhängig von Quali)
+  // AAR-647 / AAR-714: Pflicht-Dokumente für jeden SV, unabhängig von Quali.
+  // Sicherungsabtretung ODER Honorarvereinbarung reicht (Client entscheidet),
+  // Datenschutz + Widerruf sind immer Pflicht.
   conditionalSlots.push(
     {
       slotId: 'sv_abtretungserklaerung',
@@ -62,6 +64,30 @@ export default async function VerifizierungPage() {
     {
       slotId: 'sv_sicherungsabtretung',
       label: 'Sicherungsabtretung',
+      quali: null,
+      nummer: null,
+      nummerLabel: null,
+      pflicht: true,
+    },
+    {
+      slotId: 'sv_honorarvereinbarung',
+      label: 'Honorarvereinbarung',
+      quali: null,
+      nummer: null,
+      nummerLabel: null,
+      pflicht: true,
+    },
+    {
+      slotId: 'sv_datenschutzerklaerung',
+      label: 'Datenschutzerklärung',
+      quali: null,
+      nummer: null,
+      nummerLabel: null,
+      pflicht: true,
+    },
+    {
+      slotId: 'sv_widerrufsbelehrung',
+      label: 'Widerrufsbelehrung',
       quali: null,
       nummer: null,
       nummerLabel: null,
