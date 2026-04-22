@@ -8,6 +8,8 @@ import { buildPhasePipelineData } from '@/lib/fall/subphase-visibility'
 import FallDetailSections from './FallDetailSections'
 import FallStatusCard from '@/components/kunde/FallStatusCard'
 import BankdatenBanner from '@/components/kunde/BankdatenBanner'
+// AAR-710: Pflichtdokumente-Banner pro Fall (vorher global im Layout).
+import { PflichtdokumenteBanner } from '@/components/kunde/PflichtdokumenteBanner'
 import DokumenteSection from '@/components/kunde/DokumenteSection'
 import SaeuleMeinAnwalt from '@/components/kunde/SaeuleMeinAnwalt'
 import SaeuleMeinGeld from '@/components/kunde/SaeuleMeinGeld'
@@ -391,6 +393,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
         {/* AAR-432: Jetzt-zu-tun Matrix — eine konsolidierte Aktions-Card */}
         <KundeJetztZuTunCard aktion={aktion} />
+
+        {/* AAR-710: Pflichtdokumente-Banner — pro Fall, oben im Detail. */}
+        <PflichtdokumenteBanner fallId={fall.id as string} />
 
         {/* AAR-448: Termin-Detail-Card(s) — SV- und KB-Termine mit Quick-Actions */}
         {terminCards.length > 0 && (
