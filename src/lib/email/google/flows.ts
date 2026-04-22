@@ -799,9 +799,11 @@ export async function sendSvTerminBestaetigung(svId: string, terminId: string): 
     kundenName,
     adresse,
     istVorreservierung,
-    // AAR-134: /ablehnen/{token}-Endpoint existiert jetzt (public route)
+    // AAR-702: Link zeigt jetzt auf /sv/termin/<token> — dort hat der SV
+    // im selben Flow Bestätigen / Ablehnen / Verschieben (Gegenvorschlag).
+    // Vorher (AAR-134) war es nur die /ablehnen-Page.
     ablehnenUrl: termin.ablehnen_token
-      ? `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/ablehnen/${termin.ablehnen_token}`
+      ? `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/sv/termin/${termin.ablehnen_token}`
       : null,
   }
 

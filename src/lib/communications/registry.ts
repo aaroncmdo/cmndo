@@ -450,6 +450,17 @@ export const COMMUNICATION_REGISTRY: Record<string, TriggerConfig> = {
     description: 'S-E6: Terminbestaetigung per Email an SV',
   },
 
+  // AAR-702: Magic-Link an Kunde nach SV-Gegenvorschlag
+  kunde_termin_gegenvorschlag: {
+    trigger_name: 'kunde_termin_gegenvorschlag',
+    channel: 'email',
+    recipient: 'kunde',
+    t_number: null,
+    whatsapp_template_name: null,
+    has_attachment: false,
+    description: 'AAR-702: Email an Kunde mit Token-Link auf /kunde-termin/<token> (annehmen oder Gegenvorschlag)',
+  },
+
   sv_monatsabrechnung: {
     trigger_name: 'sv_monatsabrechnung',
     channel: 'email',
