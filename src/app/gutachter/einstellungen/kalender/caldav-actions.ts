@@ -142,4 +142,6 @@ export async function disconnectCaldav(): Promise<{ success: boolean; error?: st
   return { success: true }
 }
 
-export type { CalDavProviderId }
+// AAR-721: kein type-Re-Export mehr aus dieser 'use server'-Datei —
+// Next.js 15+ erlaubt hier ausschließlich async-Funktionen. Consumer
+// (z.B. CalDavConnectModal) importieren Types direkt aus provider-presets.
