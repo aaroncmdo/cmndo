@@ -1,25 +1,27 @@
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
-import PosteingangTabs from './PosteingangTabs'
+import ChatWithFallSidebar, { type FallThread } from '@/components/chat/ChatWithFallSidebar'
 
-// AAR-370: Posteingang — konsolidiert frühere /mitteilungen (System-Notifications)
-// + /nachrichten (Fall-Chats) in einer Seite mit 2 Tabs + aggregiertem Badge.
-// Alte URLs redirecten auf diese Route mit passendem ?tab=-Parameter.
+// AAR-722 + AAR-726: Gutachter-Posteingang ist jetzt reiner Chat-Bereich.
+// System-Mitteilungen (AAR-370 Mitteilungen-Tab) leben ab jetzt in der
+// Updates-Nav (AAR-725, in Arbeit). Der Posteingang zeigt nur noch
+// Fall-Chats mit dem Kunden + Gruppen-Chat.
+//
+// Sichtbare Kanäle für SV: whatsapp, chat_kunde_sv, gruppenchat.
+// Interne KB-Kommunikation (chat_kb_kunde, chat_kb_sv) bleibt unsichtbar —
+// das ist Aufgabe des KB-Portals bzw. der geteilten Fallakte.
 
 export const dynamic = 'force-dynamic'
 
-type Search = { tab?: string }
+type Search = { fall?: string }
 
 export default async function PosteingangPage({
   searchParams,
 }: {
-  searchParams: Promise<Search>
+  searchParams?: Promise<Search>
 }) {
-  const { tab } = await searchParams
-  const initialTab: 'mitteilungen' | 'nachrichten' =
-    tab === 'nachrichten' ? 'nachrichten' : 'mitteilungen'
-
+  const params = (await searchParams) ?? {}
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
@@ -27,16 +29,7 @@ export default async function PosteingangPage({
   const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
   if (!sv) redirect('/gutachter')
 
-  // System-Mitteilungen
-  const { data: mitteilungenRaw } = await supabase
-    .from('gutachter_mitteilungen')
-    .select('id, typ, titel, nachricht, gelesen, dringend, link, created_at')
-    .eq('sv_id', sv.id)
-    .order('created_at', { ascending: false })
-    .limit(100)
-  const mitteilungen = mitteilungenRaw ?? []
-
-  // Fall-Chat-Threads (identische Logik wie /gutachter/nachrichten)
+  // Fall-Chat-Threads
   const { data: faelle } = await supabase
     .from('faelle')
     .select('id, fall_nummer, lead_id, status')
@@ -45,35 +38,23 @@ export default async function PosteingangPage({
     .order('created_at', { ascending: false })
 
   const fallIds = (faelle ?? []).map(f => f.id)
-  let threads: Array<{
-    fallId: string
-    fallNummer: string | null
-    kundeName: string
-    lastMessage: string
-    lastAt: string
-    unreadCount: number
-    messages: Array<{
-      id: string
-      fall_id: string | null
-      kanal: string
-      sender_id: string | null
-      sender_rolle: string | null
-      nachricht: string | null
-      hat_anhang: boolean
-      created_at: string
-      richtung: string | null
-    }>
-  }> = []
+  const threads: FallThread[] = []
 
   if (fallIds.length > 0) {
+    // AAR-722: Kanal-Filter im Server-Query — SV sieht nur seine drei
+    // sichtbaren Kanäle. KB-interne Kanäle werden gar nicht erst geladen.
+    const svKanaele = ['whatsapp', 'chat_kunde_sv', 'gruppenchat']
     const { data: nachrichten } = await supabase
       .from('nachrichten')
-      .select('id, fall_id, kanal, sender_id, sender_rolle, nachricht, hat_anhang, created_at, richtung')
+      .select('id, fall_id, kanal, sender_id, sender_rolle, nachricht, created_at, richtung, gelesen')
       .in('fall_id', fallIds)
+      .in('kanal', svKanaele)
       .order('created_at', { ascending: false })
       .limit(300)
 
-    const leadIds = Array.from(new Set((faelle ?? []).map(f => f.lead_id).filter(Boolean) as string[]))
+    const leadIds = Array.from(
+      new Set((faelle ?? []).map(f => f.lead_id).filter(Boolean) as string[]),
+    )
     const kundenMap: Record<string, string> = {}
     if (leadIds.length > 0) {
       const { data: leads } = await supabase
@@ -85,7 +66,7 @@ export default async function PosteingangPage({
       }
     }
 
-    const threadMap = new Map<string, (typeof threads)[number]>()
+    const threadMap = new Map<string, FallThread>()
     for (const n of nachrichten ?? []) {
       if (!n.fall_id) continue
       if (!threadMap.has(n.fall_id)) {
@@ -98,38 +79,28 @@ export default async function PosteingangPage({
           lastMessage: n.nachricht?.slice(0, 80) ?? '',
           lastAt: n.created_at,
           unreadCount: 0,
-          messages: [],
         })
       }
       const thread = threadMap.get(n.fall_id)!
-      thread.messages.push({
-        id: n.id,
-        fall_id: n.fall_id,
-        kanal: n.kanal,
-        sender_id: n.sender_id,
-        sender_rolle: n.sender_rolle,
-        nachricht: n.nachricht,
-        hat_anhang: n.hat_anhang,
-        created_at: n.created_at,
-        richtung: n.richtung,
-      })
-      if (n.richtung === 'inbound' || n.sender_rolle === 'kunde') {
+      // Nur die erste (= neueste) Nachricht als lastMessage — Query ist DESC
+      // sortiert, aber wir überschreiben hier nicht, weil erste Iteration
+      // bereits die neueste ist.
+      // Unread: von Kunde geschickt und nicht gelesen
+      if (!n.gelesen && n.sender_id !== user.id) {
         thread.unreadCount++
       }
     }
-    threads = Array.from(threadMap.values()).sort((a, b) => (b.lastAt > a.lastAt ? 1 : -1))
+    for (const t of threadMap.values()) threads.push(t)
+    threads.sort((a, b) => (b.lastAt > a.lastAt ? 1 : -1))
   }
 
-  const ungeleseneMitteilungen = mitteilungen.filter(m => !m.gelesen).length
-  const ungeleseneChats = threads.reduce((acc, t) => acc + t.unreadCount, 0)
-
   return (
-    <PosteingangTabs
-      initialTab={initialTab}
-      mitteilungen={mitteilungen}
+    <ChatWithFallSidebar
       threads={threads}
-      ungeleseneMitteilungen={ungeleseneMitteilungen}
-      ungeleseneChats={ungeleseneChats}
+      currentUserId={user.id}
+      visibleKanaele={['whatsapp', 'chat_kunde_sv', 'gruppenchat']}
+      emptyHint="Noch keine Kunden-Nachrichten. Sobald ein Fall zugewiesen ist, kannst du hier mit dem Kunden kommunizieren."
+      initialFallId={params.fall ?? null}
     />
   )
 }

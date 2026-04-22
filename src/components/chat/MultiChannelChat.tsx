@@ -32,6 +32,7 @@ export default function MultiChannelChat({
   defaultKanal = 'whatsapp',
   empfaengerHints,
   visibleKanaele,
+  smartReplyDefault = false,
 }: {
   fallId: string
   currentUserId: string | null
@@ -42,6 +43,11 @@ export default function MultiChannelChat({
   // Wenn gesetzt, wird die Channel-Liste ausschließlich aus dieser Menge
   // gebildet (showInternalKbSvChat bleibt zusätzlich additiv).
   visibleKanaele?: ChatKanal[]
+  // AAR-726: Smart-Reply. Wenn true, lädt beim Mount die letzte Nachricht
+  // über alle sichtbaren Kanäle und setzt den aktiven Kanal auf den Kanal
+  // dieser Nachricht. So antwortet der User automatisch im Kanal der
+  // letzten Interaktion — default-Setting das am häufigsten gewünscht ist.
+  smartReplyDefault?: boolean
 }) {
   const [activeKanal, setActiveKanal] = useState<ChatKanal>(defaultKanal)
   const [messages, setMessages] = useState<Nachricht[]>([])
@@ -88,6 +94,32 @@ export default function MultiChannelChat({
 
   useEffect(() => { loadMessages(activeKanal) }, [activeKanal, loadMessages])
   useEffect(() => { loadUnreadCounts() }, [loadUnreadCounts])
+
+  // AAR-726: Smart-Reply — beim ersten Mount den Kanal der letzten
+  // Nachricht über alle sichtbaren Kanäle als aktiv setzen. Wir führen
+  // das nur EINMAL aus (Ref-Guard) — danach darf der User frei wechseln.
+  const smartReplyAppliedRef = useRef(false)
+  useEffect(() => {
+    if (!smartReplyDefault || smartReplyAppliedRef.current) return
+    if (visibleChannels.length === 0) return
+    smartReplyAppliedRef.current = true
+    const supabase = createClient()
+    supabase
+      .from('nachrichten')
+      .select('kanal')
+      .eq('fall_id', fallId)
+      .in('kanal', visibleChannels.map(c => c.id))
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        const lastKanal = data?.kanal as ChatKanal | undefined
+        if (lastKanal && visibleChannels.some(c => c.id === lastKanal) && lastKanal !== activeKanal) {
+          setActiveKanal(lastKanal)
+        }
+      })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [smartReplyDefault, fallId])
 
   // Realtime subscription
   useEffect(() => {
