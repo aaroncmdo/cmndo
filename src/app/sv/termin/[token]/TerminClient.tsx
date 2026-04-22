@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { type TerminData } from './actions'
+// AAR-713 Phase 1: TerminData-Type aus lib/termine/
+import { type TerminData } from '@/lib/termine/get-by-token'
 import { terminAblehnen, terminGegenvorschlag, terminAnnehmen } from '@/lib/actions/termin-actions'
 
 type View = 'overview' | 'ablehnen' | 'gegenvorschlag' | 'done'
