@@ -147,7 +147,15 @@ export default async function KundeStartseite() {
     schadens_ort: f.schadens_ort as string | null,
     nachbesichtigung_status: f.nachbesichtigung_status as string | null,
   }))
-  const metaByFall = await ladeFallKartenMeta(metaInput)
+  // AAR-705: Defensive — wenn der Karten-Loader (Termine/Timeline/Pflichtdok)
+  // crasht, soll die Seite trotzdem die Fall-Karten ohne Meta zeigen statt
+  // den großen „Fehler beim Laden"-Catch zu triggern.
+  let metaByFall: Awaited<ReturnType<typeof ladeFallKartenMeta>> = {}
+  try {
+    metaByFall = await ladeFallKartenMeta(metaInput)
+  } catch (e) {
+    console.error('[KundeStartseite] ladeFallKartenMeta:', e)
+  }
 
   // Höchst-priorisierte Aktion über alle Fälle hinweg — speist die Jetzt-zu-tun-Card oben.
   const aktionen: KundeAktion[] = []

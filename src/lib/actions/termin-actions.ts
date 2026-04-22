@@ -307,7 +307,14 @@ export async function terminGegenvorschlag({
     return { success: false, error: 'Ungültige Parameter' }
   }
 
+  // AAR-704B: Backend-Validierung — leeres oder Invalid-Datum führte zu
+  // „leerem Vorschlag" beim SV (Notification mit „Invalid Date" oder NaN).
+  // Frontend hat zwar Date-Picker, aber wir wollen den Bug-Pfad sauber
+  // schließen falls eine Action-Variante doch ohne Datum aufgerufen wird.
   const neueStartZeit = new Date(neuesDatum)
+  if (!neuesDatum || Number.isNaN(neueStartZeit.getTime())) {
+    return { success: false, error: 'Bitte einen gültigen Termin angeben.' }
+  }
   const neueEndZeit = new Date(neueStartZeit.getTime() + 90 * 60 * 1000)
 
   // 1. DB Update
