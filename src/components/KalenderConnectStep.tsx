@@ -1,29 +1,36 @@
 'use client'
 
 // AAR-242: Kalender-Connect-Step im Willkommen-Wizard.
-// Google Calendar via existierendem OAuth-Flow (/api/auth/google-calendar/connect).
-// Microsoft + Apple sind Platzhalter — die OAuth-Integrationen für diese
-// Provider sind noch nicht gebaut. Opt-Out setzt kalender_typ='keiner'.
+// AAR-717: Apple Calendar (CalDAV) aktiviert — eigener Connect-Modal-Flow
+// mit App-Passwort-Eingabe (OAuth gibt's bei Apple nicht).
+// Microsoft ist weiter Platzhalter — AAR-715.
+// Opt-Out setzt kalender_typ='keiner'.
 
+import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { CalendarIcon, CheckCircle2Icon, InfoIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { LoadingButton } from '@/components/ui/loading-button'
+import CalDavConnectModal from '@/components/CalDavConnectModal'
 
 type Provider = 'google' | 'microsoft' | 'apple' | 'keiner'
 
 export default function KalenderConnectStep({
   svId,
   gcalConnected,
+  caldavConnected = false,
   onDone,
 }: {
   svId: string
   gcalConnected: boolean
+  caldavConnected?: boolean
   onDone: () => void
 }) {
+  const router = useRouter()
   const [selected, setSelected] = useState<Provider | null>(null)
   const [saving, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [caldavModalOpen, setCaldavModalOpen] = useState(false)
 
   function chooseGoogle() {
     // OAuth-Redirect — nach Erfolg springt die Callback-Route zurück ins Portal.
@@ -43,14 +50,15 @@ export default function KalenderConnectStep({
     })
   }
 
-  // Wenn schon verbunden: direkt weiter.
-  if (gcalConnected) {
+  // AAR-717: Wenn irgendein Kalender verbunden ist → weiter.
+  if (gcalConnected || caldavConnected) {
+    const providerLabel = gcalConnected ? 'Google Kalender' : 'Apple iCloud (CalDAV)'
     return (
       <div className="space-y-5">
         <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
           <CheckCircle2Icon className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
           <div className="text-sm text-emerald-900">
-            <p className="font-semibold">Google Kalender verbunden</p>
+            <p className="font-semibold">{providerLabel} verbunden</p>
             <p className="text-xs text-emerald-700 mt-1">
               Termine werden automatisch synchronisiert. Du kannst die Verbindung jederzeit im Profil ändern.
             </p>
@@ -96,10 +104,13 @@ export default function KalenderConnectStep({
         />
         <ProviderCard
           label="Apple Calendar (CalDAV)"
-          hint="Kommt bald — aktuell noch nicht verfügbar"
-          selected={false}
-          onSelect={() => {}}
-          enabled={false}
+          hint="App-Passwort aus Apple-ID — Claimondo liest Verfügbarkeit"
+          selected={selected === 'apple'}
+          onSelect={() => {
+            setSelected('apple')
+            setCaldavModalOpen(true)
+          }}
+          enabled
         />
         <ProviderCard
           label="Ich nutze keines dieser Tools"
@@ -128,6 +139,21 @@ export default function KalenderConnectStep({
         <InfoIcon className="w-3 h-3" />
         Kalender-Einstellung kannst du jederzeit im Profil ändern
       </p>
+
+      <CalDavConnectModal
+        open={caldavModalOpen}
+        onClose={() => {
+          setCaldavModalOpen(false)
+          if (selected === 'apple') setSelected(null)
+        }}
+        onSuccess={() => {
+          setCaldavModalOpen(false)
+          // Router-Refresh lädt die Server-Props neu (caldavConnected=true),
+          // danach zeigt die Komponente den „verbunden"-State.
+          router.refresh()
+          onDone()
+        }}
+      />
     </div>
   )
 }

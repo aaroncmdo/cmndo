@@ -36,6 +36,15 @@ export default async function SvDetailPage({
 
   if (!sv) notFound()
 
+  // AAR-717: CalDAV-Verbindungs-Status für Admin-Banner. Wenn last_error
+  // gesetzt ist, zeigen wir einen roten Hinweis im Stammdaten-Tab.
+  const { data: caldavVerbindung } = await supabase
+    .from('sv_kalender_verbindungen')
+    .select('provider_label, calendar_display_name, last_error, last_error_at, connected_at, last_sync_at')
+    .eq('sv_id', id)
+    .eq('provider', 'caldav')
+    .maybeSingle()
+
   const profileRaw = sv.profiles as unknown
   const profile = (Array.isArray(profileRaw) ? profileRaw[0] : profileRaw) as {
     vorname: string | null; nachname: string | null; email: string | null; telefon: string | null
@@ -368,6 +377,32 @@ export default async function SvDetailPage({
         <div className="h-full max-w-6xl mx-auto flex">
           {/* LEFT: Edit Form */}
           <div className="flex-1 overflow-y-auto p-4 space-y-5 min-w-0">
+            {/* AAR-717: CalDAV-Verbindungs-Fehler-Banner */}
+            {caldavVerbindung?.last_error && (
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5 text-red-600">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.67 1.73-3L13.73 4a2 2 0 00-3.46 0L3.2 16c-.77 1.33.19 3 1.73 3z" />
+                  </svg>
+                </div>
+                <div className="flex-1 text-sm">
+                  <p className="font-semibold text-red-800">
+                    Kalender-Verbindung fehlgeschlagen
+                    {caldavVerbindung.last_error_at && (
+                      <span className="text-red-600 font-normal ml-2 text-xs">
+                        (seit {new Date(caldavVerbindung.last_error_at as string).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })})
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-red-700 text-xs mt-1">
+                    {caldavVerbindung.provider_label ?? 'CalDAV'} — {caldavVerbindung.last_error}
+                  </p>
+                  <p className="text-red-600 text-[11px] mt-1">
+                    Dispatch läuft weiter (fail-open), Termin-Überschneidungen können jedoch nicht geprüft werden bis der SV neu verbindet.
+                  </p>
+                </div>
+              </div>
+            )}
             {/* Auslastung */}
             <div className="bg-white border border-gray-200 rounded-2xl p-5">
               <h2 className="text-sm font-medium text-gray-500 mb-3">Auslastung & Paket</h2>
