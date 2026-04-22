@@ -12,7 +12,6 @@ import OutboxBadge from '@/components/offline/OutboxBadge'
 import { SprachBanner } from '@/components/i18n/SprachBanner'
 import type { SpracheCode } from '@/lib/i18n/sprach-banner'
 // AAR-354: Persistenter Pflichtdokumente-Banner (offene Pflicht-Slots)
-import { PflichtdokumenteBanner } from '@/components/kunde/PflichtdokumenteBanner'
 // AAR-536 (K4): SV-Branding im Kunde-Portal — nur bei verifiziertem SV.
 import { resolveKundenTheme } from '@/lib/branding/kunden-theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
@@ -142,9 +141,9 @@ export default async function KundeLayout({ children }: { children: React.ReactN
       <main className="flex-1 md:ml-64 pt-14 md:pt-0 pb-20 md:pb-6">
         {/* AAR-316 W3: Sprach-Banner rendert sich nur bei sprache !== 'de' */}
         <SprachBanner sprache={kundenSprache} />
-        {/* AAR-354: Banner rendert sich nur wenn offene Pflichtdokumente existieren.
-            Nicht im /onboarding anzeigen — dort ist der Upload-Flow bereits zentral. */}
-        {!pathname.includes('/onboarding') && <PflichtdokumenteBanner />}
+        {/* AAR-710: Pflichtdokumente-Banner aus dem globalen Layout entfernt —
+            Aaron-Vorgabe: Banner gehört in den Fall, nicht überall sichtbar.
+            Wird jetzt in /kunde/faelle/[id]/page.tsx pro Fall gerendert. */}
         {children}
       </main>
 

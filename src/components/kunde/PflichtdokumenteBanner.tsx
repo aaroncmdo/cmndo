@@ -13,17 +13,23 @@ type OffenerSlot = {
   fall_id: string
 }
 
-export async function PflichtdokumenteBanner() {
+export async function PflichtdokumenteBanner({ fallId }: { fallId?: string } = {}) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return null
 
-  // Fälle des Kunden
-  const { data: faelle } = await supabase
-    .from('faelle')
-    .select('id')
-    .eq('kunde_id', user.id)
-  const fallIds = (faelle ?? []).map(f => f.id as string)
+  // AAR-710: optional auf einen einzelnen Fall einschränken — wird in der
+  // Fallakte gerendert. Ohne fallId: alle Fälle des Kunden (Legacy-Pfad).
+  let fallIds: string[]
+  if (fallId) {
+    fallIds = [fallId]
+  } else {
+    const { data: faelle } = await supabase
+      .from('faelle')
+      .select('id')
+      .eq('kunde_id', user.id)
+    fallIds = (faelle ?? []).map((f) => f.id as string)
+  }
   if (fallIds.length === 0) return null
 
   // Offene Pflichtdokumente = alles was NICHT 'hochgeladen' ist.

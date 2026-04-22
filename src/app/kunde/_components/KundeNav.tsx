@@ -2,25 +2,23 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { HomeIcon, MessageSquareIcon, UserIcon, FolderOpenIcon, SearchIcon, CalendarIcon } from 'lucide-react'
+import { HomeIcon, MessageSquareIcon, UserIcon, SearchIcon, CalendarIcon } from 'lucide-react'
 
-// AAR-639: "Termine" wieder in Nav — zeigt jetzt eine konsolidierte
-// Übersicht aller Gutachter-Termine des Kunden (inkl. Historie, Status,
-// Gegenvorschläge). Ergänzt die in-Fallakte Kurzanzeige aus AAR-450.
+// AAR-710: „Alle Fälle" entfernt — `/kunde` zeigt schon alle Fälle als
+// FallKarten. Doppelte Nav-Items waren verwirrend. Klick auf Fall-Karte
+// landet weiter direkt in `/kunde/faelle/<id>` (Fallakte mit Phase-Resolver).
 const NAV_ITEMS = [
   { href: '/kunde', label: 'Meine Fälle', icon: HomeIcon, exact: true },
-  { href: '/kunde/faelle', label: 'Alle Fälle', icon: FolderOpenIcon },
   { href: '/kunde/termine', label: 'Termine', icon: CalendarIcon },
   { href: '/kunde/nachbesichtigung', label: 'Nachbesichtigung', icon: SearchIcon },
   { href: '/kunde/chat', label: 'Nachrichten', icon: MessageSquareIcon },
   { href: '/kunde/profil', label: 'Profil', icon: UserIcon },
 ]
 
-// AAR-450: Mobile-Items via href-Lookup (kein hardcoded Index mehr — vermeidet
-// AAR-72-Regression beim Umsortieren von NAV_ITEMS). 4 Items statt 5.
+// Mobile-Bottom-Nav — 4 Items
 const MOBILE_ITEMS = [
   NAV_ITEMS.find(i => i.href === '/kunde')!,
-  NAV_ITEMS.find(i => i.href === '/kunde/faelle')!,
+  NAV_ITEMS.find(i => i.href === '/kunde/termine')!,
   NAV_ITEMS.find(i => i.href === '/kunde/chat')!,
   NAV_ITEMS.find(i => i.href === '/kunde/profil')!,
 ]
