@@ -362,12 +362,102 @@ export async function terminGegenvorschlag({
     const { sendManualWhatsApp } = await import('@/lib/whatsapp')
 
     if (vonWem === 'sv') {
-      // Notification an Kunde
+      // AAR-702: Magic-Link-Token für Kunde-Response generieren + Email senden,
+      // damit der Kunde ohne Login annehmen oder gegenvorschlagen kann.
+      try {
+        const { randomBytes } = await import('crypto')
+        const responseToken = randomBytes(24).toString('hex')
+        const tokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+        await admin
+          .from('gutachter_termine')
+          .update({
+            kunde_response_token: responseToken,
+            kunde_response_token_expires_at: tokenExpiresAt,
+          })
+          .eq('id', tId)
+
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
+        const responseUrl = `${baseUrl}/kunde-termin/${responseToken}`
+
+        // Kunden-Email (anhand fall.lead_id → leads.email, fallback profiles.email)
+        let kundenEmail: string | null = null
+        let kundenVorname: string | null = null
+        const { data: fallEmail } = await admin
+          .from('faelle')
+          .select('lead_id, kunde_id')
+          .eq('id', fId)
+          .single()
+        if (fallEmail?.lead_id) {
+          const { data: lead } = await admin
+            .from('leads')
+            .select('email, vorname')
+            .eq('id', fallEmail.lead_id)
+            .single()
+          kundenEmail = lead?.email ?? null
+          kundenVorname = lead?.vorname ?? null
+        }
+        if (!kundenEmail && fallEmail?.kunde_id) {
+          const { data: prof } = await admin
+            .from('profiles')
+            .select('email, vorname')
+            .eq('id', fallEmail.kunde_id)
+            .single()
+          kundenEmail = prof?.email ?? null
+          kundenVorname = kundenVorname ?? prof?.vorname ?? null
+        }
+
+        if (kundenEmail) {
+          // SV-Name + altes/neues Datum für Template
+          let svNameForMail = 'Ihr Sachverständiger'
+          if (svId) svNameForMail = await getSvName(admin, svId)
+          const { data: terminFull } = await admin
+            .from('gutachter_termine')
+            .select('start_zeit, vorgeschlagenes_datum')
+            .eq('id', tId)
+            .single()
+          const altDate = terminFull?.start_zeit ? new Date(terminFull.start_zeit) : neueStartZeit
+          const neuDate = terminFull?.vorgeschlagenes_datum
+            ? new Date(terminFull.vorgeschlagenes_datum)
+            : neueStartZeit
+
+          const props = {
+            kundenVorname: kundenVorname ?? 'Kunde',
+            fallNummer: fallData?.fall_nummer ?? '—',
+            alterTerminDatum: altDate.toLocaleDateString('de-DE', {
+              weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
+            }),
+            alterTerminUhrzeit: altDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+            neuerTerminDatum: neuDate.toLocaleDateString('de-DE', {
+              weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
+            }),
+            neuerTerminUhrzeit: neuDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+            grund: grund || null,
+            svName: svNameForMail,
+            responseUrl,
+          }
+          const { render } = await import('@react-email/render')
+          const { KundeTerminGegenvorschlagEmail, subject } = await import(
+            '@/lib/email/google/templates/KundeTerminGegenvorschlag'
+          )
+          const html = await render(KundeTerminGegenvorschlagEmail(props))
+          const { sendCommunication } = await import('@/lib/communications/send')
+          await sendCommunication('kunde_termin_gegenvorschlag', {
+            email: kundenEmail,
+            vorname: props.kundenVorname,
+            subject: subject(props),
+            html,
+          })
+        }
+      } catch (mailErr) {
+        console.warn('[AAR-702] Kunde-Response-Email fehlgeschlagen:', mailErr)
+      }
+
+      // Zusätzlich WhatsApp wie bisher
       if (fallData?.kunde_id) {
         const { data: kundeProfile } = await admin.from('profiles').select('telefon').eq('id', fallData.kunde_id).single()
         if (kundeProfile?.telefon) {
           await sendManualWhatsApp(kundeProfile.telefon,
-            `📅 Der Sachverständige schlägt einen neuen Termin vor: ${terminStr}. Bitte prüfen Sie den Vorschlag in Ihrem Portal.`,
+            `📅 Der Sachverständige schlägt einen neuen Termin vor: ${terminStr}. Sie haben eine Email mit Direktlink bekommen.`,
             fId)
         }
       }
