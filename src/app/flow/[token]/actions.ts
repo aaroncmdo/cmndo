@@ -510,10 +510,13 @@ export async function signSAandCreateFall(
   }
 
   // 6. Lead-Status updaten
+  // AAR-702: qualifizierungs_phase auf 'konvertiert' (statt 'abgeschlossen')
+  // sobald die SA unterschrieben ist — der Lead ist damit faktisch zum Fall
+  // konvertiert, egal ob noch ein offener Rückruf existiert.
   const nowIsoSa = new Date().toISOString()
   await admin.from('leads').update({
     status: 'umgewandelt',
-    qualifizierungs_phase: 'abgeschlossen',
+    qualifizierungs_phase: 'konvertiert',
     sa_unterschrieben: true,
     sa_datum: nowIsoSa,
     sa_unterschrieben_am: nowIsoSa,
@@ -521,6 +524,16 @@ export async function signSAandCreateFall(
     konvertiert_zu_fall_id: fall.id,
     updated_at: nowIsoSa,
   }).eq('id', leadId)
+
+  // AAR-702: Offene Rückrufe des Leads zum Fall mitnehmen — fall_id setzen,
+  // damit der Vereinbarende den Termin weiterhin in seinem Kalender + im
+  // Fall-Kontext sieht. Status bleibt 'offen' (nicht erledigt) — der
+  // Rückruf-Anlass kann auch nach SA-Unterschrift noch existieren.
+  await admin.from('admin_termine')
+    .update({ fall_id: fall.id, updated_at: nowIsoSa })
+    .eq('lead_id', leadId)
+    .eq('typ', 'rueckruf')
+    .eq('status', 'offen')
 
   // AAR-694b: SA-Status auch auf den Fall propagieren — `syncSvCalendarEvent`
   // liest faelle.sa_unterschrieben + vollmacht_signiert_am für die Entscheidung
