@@ -264,7 +264,10 @@ export async function POST(request: Request) {
 
     if (fallFull) {
       // Auto-Task: Gutachter soll Termin bestaetigen
-      triggerGutachterTerminTask(fallId, bestSv.id).catch(() => {})
+      // AAR-719: Silent-Catch durch Logging ersetzt.
+      triggerGutachterTerminTask(fallId, bestSv.id).catch((err) => {
+        console.error('[sv-zuweisung] triggerGutachterTerminTask:', err instanceof Error ? err.message : err)
+      })
 
       // Kunde-Daten + Adresse fuer Trigger
       let kundeName = ''
@@ -290,7 +293,9 @@ export async function POST(request: Request) {
           fallFull.kennzeichen ?? '',
           fallFull.schadens_ursache ?? '',
           fallFull.wunschtermin,
-        ).catch(() => {})
+        ).catch((err) => {
+          console.error('[sv-zuweisung] triggerSV01:', err instanceof Error ? err.message : err)
+        })
       }
 
       // Gutachter-Mitteilung (Legacy-Tabelle)
@@ -299,7 +304,9 @@ export async function POST(request: Request) {
         schadentyp: fallFull.schadens_ursache ?? undefined,
         adresse: adresse || undefined,
         fall_nummer: fallFull.fall_nummer ?? undefined,
-      }).catch(() => {})
+      }).catch((err) => {
+        console.error('[sv-zuweisung] createGutachterMitteilung:', err instanceof Error ? err.message : err)
+      })
 
       // AAR-229 W4: Mitteilung in neue zentrale Tabelle (Dual-Write).
       if (svProfileData?.profile_id) {
@@ -317,11 +324,17 @@ export async function POST(request: Request) {
       }
 
       // WhatsApp an Kunden
-      sendFallCommunication(fallId, 'sv_losgefahren').catch(() => {})
+      sendFallCommunication(fallId, 'sv_losgefahren').catch((err) => {
+        console.error('[sv-zuweisung] sv_losgefahren-Benachrichtigung:', err instanceof Error ? err.message : err)
+      })
 
       // Lead-Preis vom SV-Guthaben abziehen
+      // AAR-719: Silent-Catch hier war kritisch — ohne Leadpreis-Abzug würde
+      // ein SV Fälle „umsonst" bekommen. Jetzt wenigstens im Log sichtbar.
       if (fallFull.regulierung_betrag) {
-        deductLeadpreis(bestSv.id, fallId, Number(fallFull.regulierung_betrag), fallFull.fall_nummer ?? fallId.slice(0, 8)).catch(() => {})
+        deductLeadpreis(bestSv.id, fallId, Number(fallFull.regulierung_betrag), fallFull.fall_nummer ?? fallId.slice(0, 8)).catch((err) => {
+          console.error('[sv-zuweisung] deductLeadpreis für SV', bestSv.id, 'Fall', fallId, 'fehlgeschlagen —', err instanceof Error ? err.message : err)
+        })
       }
     }
   }
@@ -358,7 +371,9 @@ export async function POST(request: Request) {
       const fallData = await supabase.from('faelle').select('fall_nummer, schadens_adresse, schadens_plz, schadens_ort').eq('id', fallId).single()
       const fallNr = fallData.data?.fall_nummer ?? fallId.slice(0, 8)
       const adresse = [fallData.data?.schadens_adresse, fallData.data?.schadens_plz, fallData.data?.schadens_ort].filter(Boolean).join(', ') || '—'
-      emailSvZugewiesen(svEmail, fallNr, kundenName, adresse).catch(() => {})
+      emailSvZugewiesen(svEmail, fallNr, kundenName, adresse).catch((err) => {
+        console.error('[sv-zuweisung] emailSvZugewiesen für', svEmail, ':', err instanceof Error ? err.message : err)
+      })
     }
   }
 

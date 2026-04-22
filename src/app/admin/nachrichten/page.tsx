@@ -1,6 +1,7 @@
 // AAR-102: Multi-Channel Inbox mit Split-View + MultiChannelChat
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { roleToPath } from '@/lib/auth/role-redirect'
 import NachrichtenInboxClient from './NachrichtenInboxClient'
 
 export const dynamic = 'force-dynamic'
@@ -18,8 +19,9 @@ export default async function NachrichtenPage() {
     .eq('id', user.id)
     .single()
 
+  // AAR-719: Defensiv — bei falscher Rolle ins eigene Portal statt /admin.
   if (!profile || !['admin', 'kundenbetreuer', 'leadbearbeiter', 'dispatch'].includes(profile.rolle)) {
-    redirect('/admin')
+    redirect(profile?.rolle ? roleToPath(profile.rolle as string) : '/login')
   }
 
   // Fetch letzte 500 Nachrichten in sichtbaren Kanaelen
