@@ -32,6 +32,8 @@ import {
 import TerminVorschlagModal, {
   type TerminVorschlagMode,
 } from '@/components/fall/TerminVorschlagModal'
+// AAR-727 Kandidat 2: Shared Hülle für Jetzt-zu-tun-Cards.
+import { TodoCard } from '@/components/shared/TodoCard'
 
 // Next.js Link nur im Matrix-Renderer genutzt (Task-Typen scrollen alle intern).
 
@@ -105,21 +107,13 @@ export function JetztZuTunCard({
 
   if (tasks.length > 0) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 space-y-3">
-        <div className="flex items-center justify-between">
-          <p className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
-            Jetzt zu tun
-          </p>
-          <span className="text-[10px] text-gray-400">
-            {tasks.length} {tasks.length === 1 ? 'Task' : 'Tasks'}
-          </span>
-        </div>
+      <TodoCard count={tasks.length}>
         <ul className="space-y-2">
           {tasks.map((task) => (
             <TaskItem key={task.id} task={task} fallId={fallId} />
           ))}
         </ul>
-      </div>
+      </TodoCard>
     )
   }
 
@@ -162,12 +156,9 @@ export function JetztZuTunCard({
   // Fallback: keine Matrix-Aktion → stiller Hinweis
   const hint = FALLBACK_HINTS[subphase.code]
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 space-y-2">
-      <p className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
-        Jetzt zu tun
-      </p>
+    <TodoCard severity="info" passive>
       <p className="text-sm text-gray-700">{hint}</p>
-    </div>
+    </TodoCard>
   )
 }
 
@@ -189,10 +180,6 @@ function MatrixActionCard({
         ? FileTextIcon
         : ChevronRightIcon
 
-  const passiveCls = action.passive
-    ? 'bg-gray-50 border-gray-200'
-    : 'bg-white border-gray-200'
-
   function handleCta() {
     if (!action.cta) return
     if (action.cta.openModal === 'termin') {
@@ -209,44 +196,45 @@ function MatrixActionCard({
   }
 
   return (
-    <div className={`rounded-2xl border ${passiveCls} p-4 sm:p-5 space-y-3`}>
-      <div className="flex items-center gap-2">
+    <TodoCard
+      label={action.passive ? 'Status' : 'Jetzt zu tun'}
+      severity={action.passive ? 'info' : 'default'}
+      passive={action.passive}
+    >
+      <div className="flex items-start gap-2">
         <Icon
-          className={`w-4 h-4 ${action.passive ? 'text-gray-500' : 'text-[var(--brand-secondary)]'}`}
-        />
-        <p className="text-xs uppercase tracking-wider font-semibold text-gray-500">
-          {action.passive ? 'Status' : 'Jetzt zu tun'}
-        </p>
-      </div>
-      <div className="space-y-1">
-        <p
-          className={`text-sm font-medium ${
-            action.passive ? 'text-gray-700' : 'text-[var(--brand-primary)]'
+          className={`w-4 h-4 mt-0.5 shrink-0 ${
+            action.passive ? 'text-gray-500' : 'text-claimondo-ondo'
           }`}
-        >
-          {action.label}
-        </p>
-        {action.beschreibung && (
-          <p className="text-xs text-gray-600">{action.beschreibung}</p>
-        )}
+        />
+        <div className="flex-1 space-y-1">
+          <p
+            className={`text-sm font-medium ${
+              action.passive ? 'text-gray-700' : 'text-claimondo-navy'
+            }`}
+          >
+            {action.label}
+          </p>
+          {action.beschreibung && (
+            <p className="text-xs text-gray-600">{action.beschreibung}</p>
+          )}
+        </div>
       </div>
       {!action.passive && action.cta && (
-        <div className="pt-1">
+        <div>
           {action.cta.href ? (
             <Link
               href={action.cta.href.replace('{fallId}', fallId)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-xs font-medium"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-claimondo-navy hover:bg-claimondo-ondo text-white text-xs font-medium transition-colors"
             >
-              {action.label.split(' ')[0] === 'Gutachten'
-                ? 'Öffnen'
-                : 'Öffnen'}
+              Öffnen
               <ChevronRightIcon className="w-3 h-3" />
             </Link>
           ) : action.cta.openModal === 'termin' ? (
             <button
               type="button"
               onClick={handleCta}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-xs font-medium"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-claimondo-navy hover:bg-claimondo-ondo text-white text-xs font-medium transition-colors"
             >
               {action.type === 'termin_vorschlagen'
                 ? 'Termin vorschlagen'
@@ -258,7 +246,7 @@ function MatrixActionCard({
           ) : null}
         </div>
       )}
-    </div>
+    </TodoCard>
   )
 }
 
