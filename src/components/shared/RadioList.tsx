@@ -56,7 +56,7 @@ export function RadioList({
             <div className="min-w-0">
               <div className="font-semibold text-claimondo-navy">{opt.label}</div>
               {opt.description && (
-                <div className="mt-1 text-sm text-slate-600">
+                <div className="mt-1 text-sm text-claimondo-ondo">
                   {opt.description}
                 </div>
               )}

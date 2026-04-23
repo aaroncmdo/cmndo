@@ -46,12 +46,12 @@ export default function TaskReassignDropdown({
 
   return (
     <div className={`flex items-center gap-1.5 ${compact ? 'text-[11px]' : 'text-xs'}`}>
-      <label className="text-gray-500 shrink-0">Weiterleiten an:</label>
+      <label className="text-claimondo-ondo shrink-0">Weiterleiten an:</label>
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
         disabled={pending}
-        className={`flex-1 min-w-0 border border-gray-200 rounded px-1.5 py-0.5 ${compact ? 'text-[11px]' : 'text-xs'} focus:outline-none focus:border-claimondo-ondo`}
+        className={`flex-1 min-w-0 border border-claimondo-border rounded px-1.5 py-0.5 ${compact ? 'text-[11px]' : 'text-xs'} focus:outline-none focus:border-claimondo-ondo`}
       >
         <option value="">— Kollege wählen —</option>
         {sortedCandidates.map(c => (
@@ -60,7 +60,7 @@ export default function TaskReassignDropdown({
           </option>
         ))}
       </select>
-      {msg && <span className="text-[10px] text-gray-500">{msg}</span>}
+      {msg && <span className="text-[10px] text-claimondo-ondo">{msg}</span>}
     </div>
   )
 }

@@ -13,7 +13,7 @@ export function PhaseTimeline({
   const events = phases.filter((p) => p.state !== 'hidden' && p.reachedAt)
   if (events.length === 0) {
     return (
-      <p className="text-xs text-gray-400 italic px-3 py-4">
+      <p className="text-xs text-claimondo-ondo/70 italic px-3 py-4">
         Noch keine Phase abgeschlossen.
       </p>
     )
@@ -28,19 +28,19 @@ export function PhaseTimeline({
           </span>
           <div className="flex items-baseline justify-between gap-3">
             <span className="text-sm text-claimondo-navy">
-              <span className="text-[10px] uppercase tracking-wider text-gray-400 mr-1.5">
+              <span className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 mr-1.5">
                 Phase {p.phase.toString().padStart(2, '0')}
               </span>
               {p.name}
             </span>
-            <time className="text-[11px] text-gray-400 shrink-0">
+            <time className="text-[11px] text-claimondo-ondo/70 shrink-0">
               {p.reachedAt
                 ? new Date(p.reachedAt).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })
                 : '—'}
             </time>
           </div>
           {p.reachedBy && (
-            <p className="text-[11px] text-gray-500 mt-0.5">durch {p.reachedBy}</p>
+            <p className="text-[11px] text-claimondo-ondo mt-0.5">durch {p.reachedBy}</p>
           )}
         </li>
       ))}

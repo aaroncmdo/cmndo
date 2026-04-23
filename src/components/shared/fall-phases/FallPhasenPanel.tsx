@@ -41,7 +41,7 @@ export interface FallPhasenPanelProps {
 }
 
 const TERMINAL_PILL =
-  'inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium w-fit'
+  'inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo text-xs font-medium w-fit'
 
 export function FallPhasenPanel({
   fall,
@@ -86,7 +86,7 @@ export function FallPhasenPanel({
           <p className="text-base font-semibold text-[#0D1B3E]">Mein Fortschritt</p>
           <span className="text-base font-bold text-[#4573A2]">{progressPct}%</span>
         </div>
-        <div className="w-full h-2.5 bg-gray-100/70 rounded-full mb-5">
+        <div className="w-full h-2.5 bg-[#f8f9fb]/70 rounded-full mb-5">
           <div
             className="h-full bg-[#4573A2] rounded-full transition-all duration-700"
             style={{ width: `${progressPct}%` }}
@@ -107,7 +107,7 @@ export function FallPhasenPanel({
   // variant === 'aside'
   return (
     <section className={`glass-light rounded-ios-lg shadow-ios-sm p-4 ${className}`}>
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo/70 mb-3">
         Phasen
       </h3>
       <PhasePipeline

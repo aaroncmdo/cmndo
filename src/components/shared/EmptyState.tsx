@@ -10,9 +10,9 @@ const ACTION_CLASSES: Record<ActionVariant, string> = {
   primary:
     'bg-claimondo-navy hover:bg-claimondo-ondo text-white',
   secondary:
-    'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200',
+    'bg-white hover:bg-[#f8f9fb] text-claimondo-navy border border-claimondo-border',
   ghost:
-    'bg-transparent hover:bg-gray-100 text-claimondo-ondo',
+    'bg-transparent hover:bg-[#f8f9fb] text-claimondo-ondo',
 }
 
 const SIZE_CLASSES = {
@@ -67,17 +67,17 @@ export default function EmptyState({
 
   return (
     <div
-      className={`bg-white rounded-2xl ${padding} text-center border border-gray-200 ${className}`}
+      className={`bg-white rounded-2xl ${padding} text-center border border-claimondo-border ${className}`}
     >
       {Icon && (
         <Icon
-          className={`${variant === 'compact' ? 'w-8 h-8' : 'w-10 h-10'} text-gray-300 mx-auto mb-3`}
+          className={`${variant === 'compact' ? 'w-8 h-8' : 'w-10 h-10'} text-claimondo-light-blue mx-auto mb-3`}
           strokeWidth={1.5}
         />
       )}
-      <p className="text-gray-700 font-medium">{title}</p>
+      <p className="text-claimondo-navy font-medium">{title}</p>
       {description && (
-        <p className="text-gray-400 text-sm mt-1 max-w-md mx-auto">{description}</p>
+        <p className="text-claimondo-ondo/70 text-sm mt-1 max-w-md mx-auto">{description}</p>
       )}
       {actionButton}
     </div>

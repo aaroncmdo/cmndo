@@ -31,7 +31,7 @@ export default function SchadensUrsacheBadge({
   if (plain) {
     return <span className={className}>{label || '—'}</span>
   }
-  const color = SCHADENS_URSACHE_COLORS[code] ?? 'bg-gray-100 text-gray-700'
+  const color = SCHADENS_URSACHE_COLORS[code] ?? 'bg-[#f8f9fb] text-claimondo-navy'
   return (
     <span
       className={`inline-flex items-center rounded-full font-medium whitespace-nowrap ${SIZE_CLASSES[size]} ${color} ${className}`}

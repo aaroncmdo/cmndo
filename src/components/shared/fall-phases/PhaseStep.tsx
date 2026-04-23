@@ -10,8 +10,8 @@ const STATE_ICON_COLOR: Record<string, string> = {
   active: 'text-claimondo-ondo',
   done: 'text-emerald-500',
   blocked: 'text-rose-500',
-  skipped: 'text-gray-300',
-  upcoming: 'text-gray-300',
+  skipped: 'text-claimondo-light-blue',
+  upcoming: 'text-claimondo-light-blue',
 }
 
 export function PhaseStep({
@@ -43,7 +43,7 @@ export function PhaseStep({
     active: 'bg-claimondo-ondo/10',
     done: 'bg-emerald-50',
     blocked: 'bg-rose-50',
-    skipped: 'bg-gray-50 opacity-60',
+    skipped: 'bg-[#f8f9fb] opacity-60',
     upcoming: 'bg-transparent',
   }
   const hoverCls = interactive ? 'hover:bg-claimondo-bg cursor-pointer' : ''
@@ -59,10 +59,10 @@ export function PhaseStep({
     data.state === 'active'
       ? 'font-semibold text-claimondo-navy'
       : data.state === 'done'
-        ? 'text-gray-700'
+        ? 'text-claimondo-navy'
         : data.state === 'blocked'
           ? 'font-medium text-rose-700'
-          : 'text-gray-500'
+          : 'text-claimondo-ondo'
 
   return (
     <Wrapper
@@ -83,7 +83,7 @@ export function PhaseStep({
           <span className="block mt-0.5 text-[11px] text-rose-700">{data.blockReason}</span>
         )}
         {showTimestamps && data.reachedAt && (
-          <span className="block mt-0.5 text-[11px] text-gray-400">
+          <span className="block mt-0.5 text-[11px] text-claimondo-ondo/70">
             {new Date(data.reachedAt).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })}
           </span>
         )}

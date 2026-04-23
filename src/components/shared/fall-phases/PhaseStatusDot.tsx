@@ -16,7 +16,7 @@ const STATE_CLASSES: Record<PhaseState, string> = {
   active: 'bg-claimondo-ondo ring-2 ring-claimondo-ondo/30 animate-pulse',
   done: 'bg-emerald-500',
   blocked: 'bg-rose-500',
-  skipped: 'bg-gray-300',
+  skipped: 'bg-claimondo-border',
   hidden: 'bg-transparent',
 }
 
@@ -42,7 +42,7 @@ export function PhaseStatusDot({ state, size = 'sm', showLabel = false }: {
         role="status"
       />
       {showLabel && (
-        <span className="text-[11px] text-gray-500">{STATE_LABEL[state]}</span>
+        <span className="text-[11px] text-claimondo-ondo">{STATE_LABEL[state]}</span>
       )}
     </span>
   )

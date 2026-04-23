@@ -36,8 +36,8 @@ export default function ErrorState({
         className="w-10 h-10 text-red-400 mx-auto mb-3"
         strokeWidth={1.5}
       />
-      <h2 className="text-gray-900 text-base font-semibold mb-1">{title}</h2>
-      <p className="text-gray-500 text-sm">{description}</p>
+      <h2 className="text-claimondo-navy text-base font-semibold mb-1">{title}</h2>
+      <p className="text-claimondo-ondo text-sm">{description}</p>
       {error?.message && (
         <p className="text-red-400/70 text-xs mt-3 font-mono break-all max-w-md mx-auto">
           {error.message}
