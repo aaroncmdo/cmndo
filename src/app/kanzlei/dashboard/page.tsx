@@ -82,7 +82,7 @@ export default async function KanzleiDashboardPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h1 className="text-2xl font-semibold text-[#0D1B3E]">Mandate</h1>
+          <h1 className="text-2xl font-semibold text-claimondo-navy">Mandate</h1>
           <p className="text-sm text-gray-500 mt-1">
             Alle Komplett-Pakete, bei denen Claimondo das Mandat an euch übergeben hat.
           </p>
@@ -99,9 +99,9 @@ export default async function KanzleiDashboardPage() {
       )}
 
       {!error && faelle && faelle.length === 0 && (
-        <div className="rounded-xl border border-[#e4e7ef] bg-white p-8 text-center">
-          <FolderOpenIcon className="w-10 h-10 mx-auto text-[#7BA3CC] mb-2" />
-          <p className="text-sm font-medium text-[#0D1B3E]">
+        <div className="rounded-xl border border-claimondo-border bg-white p-8 text-center">
+          <FolderOpenIcon className="w-10 h-10 mx-auto text-claimondo-shield mb-2" />
+          <p className="text-sm font-medium text-claimondo-navy">
             Aktuell liegt kein Komplett-Mandat vor.
           </p>
           <p className="text-xs text-gray-500 mt-1">
@@ -111,10 +111,10 @@ export default async function KanzleiDashboardPage() {
       )}
 
       {!error && faelle && faelle.length > 0 && (
-        <div className="rounded-xl border border-[#e4e7ef] bg-white overflow-hidden">
+        <div className="rounded-xl border border-claimondo-border bg-white overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-[#f8f9fb] text-[10px] uppercase tracking-wider text-gray-500">
+              <thead className="bg-claimondo-bg text-[10px] uppercase tracking-wider text-gray-500">
                 <tr>
                   <th className="text-left px-4 py-3 font-semibold">Fall-Nr</th>
                   <th className="text-left px-4 py-3 font-semibold">Kunde</th>
@@ -135,9 +135,9 @@ export default async function KanzleiDashboardPage() {
                   return (
                     <tr
                       key={f.id}
-                      className="border-t border-[#e4e7ef] hover:bg-[#f8f9fb] transition-colors"
+                      className="border-t border-claimondo-border hover:bg-claimondo-bg transition-colors"
                     >
-                      <td className="px-4 py-3 font-mono text-[12px] text-[#0D1B3E]">
+                      <td className="px-4 py-3 font-mono text-[12px] text-claimondo-navy">
                         <Link
                           href={`/kanzlei/fall/${f.id}`}
                           className="hover:underline"

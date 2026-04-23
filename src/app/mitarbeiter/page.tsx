@@ -88,7 +88,7 @@ export default async function MitarbeiterDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-[#0D1B3E]">Mitarbeiter-Dashboard</h1>
+        <h1 className="text-xl font-bold text-claimondo-navy">Mitarbeiter-Dashboard</h1>
         <p className="text-sm text-gray-500 mt-1">Übersicht über Ihre Fälle, Tasks und Nachrichten.</p>
       </div>
 
@@ -111,7 +111,7 @@ export default async function MitarbeiterDashboard() {
                 <PhoneCallIcon className="w-4 h-4 text-amber-500" />
                 Offene Rückrufe
               </h2>
-              <Link href="/mitarbeiter/termine" className="text-xs text-[#4573A2] hover:underline">Alle</Link>
+              <Link href="/mitarbeiter/termine" className="text-xs text-claimondo-ondo hover:underline">Alle</Link>
             </div>
             <div className="divide-y divide-gray-50">
               {meineRueckrufe.map((r) => {
@@ -151,7 +151,7 @@ export default async function MitarbeiterDashboard() {
                 <CalendarIcon className="w-4 h-4 text-blue-500" />
                 Kommende Termine
               </h2>
-              <Link href="/mitarbeiter/termine" className="text-xs text-[#4573A2] hover:underline">Alle</Link>
+              <Link href="/mitarbeiter/termine" className="text-xs text-claimondo-ondo hover:underline">Alle</Link>
             </div>
             <div className="divide-y divide-gray-50">
               {meineAdminTermine.map((t) => {
@@ -185,7 +185,7 @@ export default async function MitarbeiterDashboard() {
       <section className="bg-white rounded-ios-lg shadow-ios-md">
         <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-gray-900">Meine aktiven Fälle</h2>
-          <Link href="/mitarbeiter/faelle" className="text-xs text-[#4573A2] hover:underline">Alle anzeigen</Link>
+          <Link href="/mitarbeiter/faelle" className="text-xs text-claimondo-ondo hover:underline">Alle anzeigen</Link>
         </div>
         <div className="divide-y divide-gray-50">
           {(faelle ?? []).map(f => (
@@ -209,7 +209,7 @@ export default async function MitarbeiterDashboard() {
       <section className="bg-white rounded-ios-lg shadow-ios-md">
         <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-gray-900">Meine offenen Tasks</h2>
-          <Link href="/mitarbeiter/tasks" className="text-xs text-[#4573A2] hover:underline">Alle anzeigen</Link>
+          <Link href="/mitarbeiter/tasks" className="text-xs text-claimondo-ondo hover:underline">Alle anzeigen</Link>
         </div>
         <div className="divide-y divide-gray-50">
           {(tasks ?? []).map(t => (

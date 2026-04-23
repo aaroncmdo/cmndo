@@ -33,7 +33,7 @@ export default async function MitarbeiterTasks({ searchParams }: {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-bold text-[#0D1B3E]">Meine Tasks</h1>
+        <h1 className="text-xl font-bold text-claimondo-navy">Meine Tasks</h1>
         <p className="text-sm text-gray-500 mt-1">Alle Ihnen zugewiesenen Aufgaben.</p>
       </div>
 
@@ -41,7 +41,7 @@ export default async function MitarbeiterTasks({ searchParams }: {
         {tabs.map(t => (
           <Link key={t.key} href={`/mitarbeiter/tasks?status=${t.key}`}
             className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
-              status === t.key ? 'bg-[#0D1B3E] text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+              status === t.key ? 'bg-claimondo-navy text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
             }`}>
             {t.label}
           </Link>

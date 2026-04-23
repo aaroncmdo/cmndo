@@ -90,7 +90,7 @@ export default async function KanzleiTerminPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold text-[#0D1B3E]">Termin mit Admin</h1>
+        <h1 className="text-2xl font-semibold text-claimondo-navy">Termin mit Admin</h1>
         <p className="text-sm text-gray-500 mt-1">
           Buche einen Video- oder Vor-Ort-Termin mit einem Claimondo-Admin.
           Der Termin landet direkt im Kalender des Admins, du erhältst per

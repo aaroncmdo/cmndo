@@ -168,11 +168,11 @@ export default function TerminBuchungClient({
       {/* BUCHUNGS-FORMULAR */}
       <form
         onSubmit={handleSubmit}
-        className="rounded-xl border border-[#e4e7ef] bg-white p-5 space-y-4"
+        className="rounded-xl border border-claimondo-border bg-white p-5 space-y-4"
       >
         <div className="flex items-center gap-2">
-          <CalendarIcon className="w-4 h-4 text-[#4573A2]" />
-          <h2 className="text-sm font-semibold text-[#0D1B3E]">Neuen Termin buchen</h2>
+          <CalendarIcon className="w-4 h-4 text-claimondo-ondo" />
+          <h2 className="text-sm font-semibold text-claimondo-navy">Neuen Termin buchen</h2>
         </div>
 
         <div className="space-y-1.5">
@@ -182,7 +182,7 @@ export default function TerminBuchungClient({
           <select
             value={adminId}
             onChange={(e) => setAdminId(e.target.value)}
-            className="w-full rounded-md border border-[#e4e7ef] px-3 py-2 text-sm bg-white"
+            className="w-full rounded-md border border-claimondo-border px-3 py-2 text-sm bg-white"
             required
           >
             {verfuegbareAdmins.map((a) => (
@@ -203,8 +203,8 @@ export default function TerminBuchungClient({
               onClick={() => setTyp('video')}
               className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium border transition-colors ${
                 typ === 'video'
-                  ? 'bg-[#4573A2] text-white border-[#4573A2]'
-                  : 'bg-white text-gray-700 border-[#e4e7ef] hover:border-gray-300'
+                  ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
+                  : 'bg-white text-gray-700 border-claimondo-border hover:border-gray-300'
               }`}
             >
               <VideoIcon className="w-3.5 h-3.5" />
@@ -215,8 +215,8 @@ export default function TerminBuchungClient({
               onClick={() => setTyp('vor_ort')}
               className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium border transition-colors ${
                 typ === 'vor_ort'
-                  ? 'bg-[#4573A2] text-white border-[#4573A2]'
-                  : 'bg-white text-gray-700 border-[#e4e7ef] hover:border-gray-300'
+                  ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
+                  : 'bg-white text-gray-700 border-claimondo-border hover:border-gray-300'
               }`}
             >
               <MapPinIcon className="w-3.5 h-3.5" />
@@ -235,7 +235,7 @@ export default function TerminBuchungClient({
               value={datum}
               min={minDateStr}
               onChange={(e) => setDatum(e.target.value)}
-              className="w-full rounded-md border border-[#e4e7ef] px-3 py-2 text-sm"
+              className="w-full rounded-md border border-claimondo-border px-3 py-2 text-sm"
               required
             />
           </div>
@@ -248,7 +248,7 @@ export default function TerminBuchungClient({
               value={uhrzeit}
               step={900}
               onChange={(e) => setUhrzeit(e.target.value)}
-              className="w-full rounded-md border border-[#e4e7ef] px-3 py-2 text-sm"
+              className="w-full rounded-md border border-claimondo-border px-3 py-2 text-sm"
               required
             />
           </div>
@@ -266,8 +266,8 @@ export default function TerminBuchungClient({
                 onClick={() => setDauer(d)}
                 className={`px-2.5 py-1 rounded-md text-xs font-medium border ${
                   dauer === d
-                    ? 'bg-[#0D1B3E] text-white border-[#0D1B3E]'
-                    : 'bg-white text-gray-700 border-[#e4e7ef]'
+                    ? 'bg-claimondo-navy text-white border-claimondo-navy'
+                    : 'bg-white text-gray-700 border-claimondo-border'
                 }`}
               >
                 {d} min
@@ -285,7 +285,7 @@ export default function TerminBuchungClient({
             value={titel}
             onChange={(e) => setTitel(e.target.value)}
             placeholder="z. B. Absprache Mandat CLM-20260421-007"
-            className="w-full rounded-md border border-[#e4e7ef] px-3 py-2 text-sm"
+            className="w-full rounded-md border border-claimondo-border px-3 py-2 text-sm"
             required
           />
         </div>
@@ -299,7 +299,7 @@ export default function TerminBuchungClient({
             onChange={(e) => setBeschreibung(e.target.value)}
             rows={3}
             placeholder="Worum geht es? Stichworte reichen."
-            className="w-full rounded-md border border-[#e4e7ef] px-3 py-2 text-sm resize-none"
+            className="w-full rounded-md border border-claimondo-border px-3 py-2 text-sm resize-none"
           />
         </div>
 
@@ -324,7 +324,7 @@ export default function TerminBuchungClient({
         <button
           type="submit"
           disabled={!kannBuchen}
-          className="w-full px-4 py-2.5 rounded-lg bg-[#4573A2] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="w-full px-4 py-2.5 rounded-lg bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-navy disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           {pending ? 'Bucht …' : 'Termin verbindlich buchen'}
         </button>
@@ -335,10 +335,10 @@ export default function TerminBuchungClient({
       </form>
 
       {/* EIGENE TERMINE */}
-      <div className="rounded-xl border border-[#e4e7ef] bg-white p-5 space-y-3">
+      <div className="rounded-xl border border-claimondo-border bg-white p-5 space-y-3">
         <div className="flex items-center gap-2">
-          <Building2Icon className="w-4 h-4 text-[#4573A2]" />
-          <h2 className="text-sm font-semibold text-[#0D1B3E]">Eure kommenden Termine</h2>
+          <Building2Icon className="w-4 h-4 text-claimondo-ondo" />
+          <h2 className="text-sm font-semibold text-claimondo-navy">Eure kommenden Termine</h2>
         </div>
         {eigeneTermine.length === 0 && (
           <p className="text-xs text-gray-500 italic">
@@ -358,14 +358,14 @@ export default function TerminBuchungClient({
             return (
               <div
                 key={t.id}
-                className="rounded-lg border border-[#e4e7ef] p-3 hover:border-[#4573A2] transition-colors"
+                className="rounded-lg border border-claimondo-border p-3 hover:border-claimondo-ondo transition-colors"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="text-[11px] text-gray-500">
                       {dateStr} · {timeStr}
                     </p>
-                    <p className="text-sm font-semibold text-[#0D1B3E] truncate">
+                    <p className="text-sm font-semibold text-claimondo-navy truncate">
                       {t.titel}
                     </p>
                     <p className="text-[11px] text-gray-600 mt-0.5">
@@ -390,7 +390,7 @@ export default function TerminBuchungClient({
                     href={t.google_meet_link}
                     target="_blank"
                     rel="noopener"
-                    className="mt-2 inline-flex items-center gap-1 text-[11px] text-[#4573A2] hover:underline"
+                    className="mt-2 inline-flex items-center gap-1 text-[11px] text-claimondo-ondo hover:underline"
                   >
                     <VideoIcon className="w-3 h-3" />
                     Meet-Link öffnen

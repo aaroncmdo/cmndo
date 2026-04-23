@@ -142,12 +142,12 @@ export default function DokumenteDrawer({
         onClick={onClose}
       />
       <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col">
-        <header className="px-5 py-4 border-b border-[#e4e7ef] flex items-start justify-between gap-2">
+        <header className="px-5 py-4 border-b border-claimondo-border flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="text-[10px] uppercase tracking-wider text-gray-400">
               Dokumente
             </p>
-            <p className="text-sm font-mono text-[#4573A2] mt-0.5">{fallNummer}</p>
+            <p className="text-sm font-mono text-claimondo-ondo mt-0.5">{fallNummer}</p>
             <p className="text-xs text-gray-600 truncate">{kunde}</p>
           </div>
           <button
@@ -231,13 +231,13 @@ function DokumentRow({
     <div
       className={`rounded-lg border p-3 flex items-start gap-3 ${
         highlight
-          ? 'border-[#4573A2] bg-blue-50/40'
-          : 'border-[#e4e7ef] bg-white'
+          ? 'border-claimondo-ondo bg-blue-50/40'
+          : 'border-claimondo-border bg-white'
       }`}
     >
       <div
         className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-          highlight ? 'bg-[#4573A2] text-white' : 'bg-[#f8f9fb] text-[#4573A2]'
+          highlight ? 'bg-claimondo-ondo text-white' : 'bg-claimondo-bg text-claimondo-ondo'
         }`}
       >
         {highlight ? (
@@ -247,7 +247,7 @@ function DokumentRow({
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-[#0D1B3E] truncate" title={name}>
+        <p className="text-sm font-medium text-claimondo-navy truncate" title={name}>
           {name}
         </p>
         <p className="text-[11px] text-gray-500 mt-0.5">
@@ -267,7 +267,7 @@ function DokumentRow({
           target="_blank"
           rel="noopener"
           download={dokument.original_filename ?? undefined}
-          className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#4573A2] text-white text-[11px] font-medium hover:bg-[#1E3A5F] transition-colors"
+          className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-claimondo-ondo text-white text-[11px] font-medium hover:bg-claimondo-navy transition-colors"
           title="Herunterladen / Öffnen"
         >
           <DownloadIcon className="w-3 h-3" />
