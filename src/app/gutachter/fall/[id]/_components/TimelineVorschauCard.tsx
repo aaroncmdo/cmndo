@@ -21,7 +21,7 @@ export function TimelineVorschauCard({
   const letzte = events.slice(0, 3)
   if (letzte.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 space-y-2">
+      <div className="glass-light border border-claimondo-border rounded-ios-md shadow-ios-sm p-4 sm:p-5 space-y-2">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
           Timeline
         </h3>
@@ -31,18 +31,18 @@ export function TimelineVorschauCard({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 space-y-3">
+    <div className="glass-light border border-claimondo-border rounded-ios-md shadow-ios-sm p-4 sm:p-5 space-y-3">
       <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
         Timeline · letzte {letzte.length}
       </h3>
       <ol className="space-y-3">
         {letzte.map((e) => (
-          <li key={e.id} className="border-l-2 border-gray-200 pl-3 ml-1 relative">
+          <li key={e.id} className="border-l-2 border-claimondo-border pl-3 ml-1 relative">
             <span
-              className="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-[var(--brand-secondary)]"
+              className="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-claimondo-ondo"
               aria-hidden="true"
             />
-            <p className="text-xs font-medium text-gray-900">{e.titel ?? e.typ ?? '—'}</p>
+            <p className="text-xs font-medium text-claimondo-navy">{e.titel ?? e.typ ?? '—'}</p>
             {e.beschreibung && (
               <p className="text-[11px] text-gray-600 mt-0.5 line-clamp-2">
                 {e.beschreibung}
