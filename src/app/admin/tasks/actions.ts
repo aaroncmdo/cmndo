@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { logFallEvent } from '@/lib/fall/log-event'
+import { requireRole } from '@/lib/auth/guards'
 
 export async function createTask(formData: FormData) {
   const supabase = await createClient()
@@ -74,15 +76,9 @@ export async function deleteTask(taskId: string) {
 // empfaenger_user_id neu, schreibt Timeline-Eintrag falls der Task an einen
 // Fall hängt. Nur Admins dürfen umleiten — Rollen-Check über profiles.rolle.
 export async function reassignTask(taskId: string, neuerUserId: string) {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
-
-  const { data: actorProfile } = await supabase
-    .from('profiles').select('rolle').eq('id', user.id).maybeSingle()
-  if (actorProfile?.rolle !== 'admin') {
-    return { success: false, error: 'Nur Admins dürfen Tasks weiterleiten' }
-  }
+  const guard = await requireRole(['admin'])
+  if (!guard.success) return { success: false, error: guard.error }
+  const { supabase, user } = guard
 
   if (!taskId || !neuerUserId) {
     return { success: false, error: 'Task und Ziel-User sind Pflicht' }
@@ -116,16 +112,13 @@ export async function reassignTask(taskId: string, neuerUserId: string) {
 
   if (task.fall_id) {
     const zielName = [zielProfile.vorname, zielProfile.nachname].filter(Boolean).join(' ') || 'Unbekannt'
-    try {
-      await supabase.from('timeline').insert({
-        fall_id: task.fall_id,
-        typ: 'system',
-        titel: `Task weitergeleitet: ${task.titel}`,
-        beschreibung: `Manuell weitergeleitet an ${zielName}.`,
-      })
-    } catch (err) {
-      console.error('[AAR-723] Reassign-Timeline-Insert fehlgeschlagen:', err)
-    }
+    await logFallEvent(supabase, {
+      fallId: task.fall_id,
+      typ: 'task',
+      titel: `Task weitergeleitet: ${task.titel}`,
+      beschreibung: `Manuell weitergeleitet an ${zielName}.`,
+      actor: user.id,
+    })
   }
 
   revalidatePath('/admin/aufgaben/alle')

@@ -1,35 +1,17 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import { roleToPath } from '@/lib/auth/role-redirect'
 import DispatchNav from './_components/DispatchNav'
 import RealtimeLeadAlert from './_components/RealtimeLeadAlert'
 import { PageContainer } from '@/components/PageContainer'
 import UpdatesNav from '@/components/updates/UpdatesNav'
+import { requirePortalAccess } from '@/lib/auth/portal-guard'
 
 export default async function DispatchLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('rolle')
-    .eq('id', user.id)
-    .single()
-
-  // AAR-718: Nur dispatch + admin dürfen auf /dispatch/*. Andere Rollen in
-  // ihr eigenes Portal, nicht auf /login (sonst „ausgeworfen"-Erlebnis).
-  if (!profile || !['dispatch', 'admin'].includes(profile.rolle)) {
-    redirect(profile?.rolle ? roleToPath(profile.rolle as string) : '/login')
-  }
-
-  const initials = user.email
-    ? user.email.substring(0, 2).toUpperCase()
-    : 'U'
+  // K5: Auth + Rollen-Guard zentralisiert. Dispatch erlaubt Admin als
+  // Testing-Fallback weiterhin.
+  const { user, initials } = await requirePortalAccess(['dispatch', 'admin'])
 
   return (
     <div className="h-screen bg-[#f8f9fb] relative overflow-hidden">

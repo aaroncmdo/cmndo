@@ -4,7 +4,7 @@ import { headers } from 'next/headers'
 import { roleToPath } from '@/lib/auth/role-redirect'
 import Image from 'next/image'
 import Link from 'next/link'
-import NotificationBell from '@/app/admin/_components/NotificationBell'
+import UpdatesNav from '@/components/updates/UpdatesNav'
 import { SupportButton } from '@/components/support/SupportButton'
 import KundeNav from './_components/KundeNav'
 // AAR-363: Outbox-Badge für offline-wartende Uploads (Pflichtdokumente etc.)
@@ -105,7 +105,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
               <p className="text-white text-sm font-medium truncate">{displayName}</p>
             </div>
             <OutboxBadge />
-            <NotificationBell />
+            <UpdatesNav variant="dark" />
           </div>
         </div>
       </aside>
@@ -136,7 +136,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         </Link>
         <div className="flex items-center gap-2">
           <OutboxBadge />
-          <NotificationBell />
+          <UpdatesNav variant="dark" />
         </div>
       </header>
 
