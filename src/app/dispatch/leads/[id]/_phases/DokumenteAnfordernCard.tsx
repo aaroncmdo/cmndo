@@ -220,7 +220,7 @@ export default function DokumenteAnfordernCard({
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
       <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-        <FileTextIcon className="w-4 h-4 text-[#4573A2]" />
+        <FileTextIcon className="w-4 h-4 text-claimondo-ondo" />
         Dokumente beim Kunden anfordern
       </h2>
 
@@ -277,7 +277,7 @@ export default function DokumenteAnfordernCard({
         </label>
 
         {/* Fahrzeugschein */}
-        <div className={`rounded-lg border p-3 ${selectFahrzeugschein ? 'border-[#4573A2] bg-blue-50/30' : 'border-gray-200'}`}>
+        <div className={`rounded-lg border p-3 ${selectFahrzeugschein ? 'border-claimondo-ondo bg-blue-50/30' : 'border-gray-200'}`}>
           <label className="flex items-start gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -287,7 +287,7 @@ export default function DokumenteAnfordernCard({
             />
             <div className="flex-1">
               <div className="flex items-center gap-1.5">
-                <FileTextIcon className="w-3.5 h-3.5 text-[#4573A2]" />
+                <FileTextIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
                 <span className="text-xs font-semibold text-gray-900">Fahrzeugschein (Vorderseite)</span>
               </div>
               <p className="text-[10px] text-gray-500 mt-0.5">
@@ -322,7 +322,7 @@ export default function DokumenteAnfordernCard({
 
         {/* Polizeibericht — nur wenn polizei_vor_ort=true UND polizeibericht_pflicht=true */}
         {zeigePolizeibericht && (
-          <div className={`rounded-lg border p-3 ${selectPolizeibericht ? 'border-[#4573A2] bg-blue-50/30' : 'border-gray-200'}`}>
+          <div className={`rounded-lg border p-3 ${selectPolizeibericht ? 'border-claimondo-ondo bg-blue-50/30' : 'border-gray-200'}`}>
             <label className="flex items-start gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -332,7 +332,7 @@ export default function DokumenteAnfordernCard({
               />
               <div className="flex-1">
                 <div className="flex items-center gap-1.5">
-                  <ShieldAlertIcon className="w-3.5 h-3.5 text-[#4573A2]" />
+                  <ShieldAlertIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
                   <span className="text-xs font-semibold text-gray-900">Polizeiliche Unfallmitteilung</span>
                 </div>
                 <p className="text-[10px] text-gray-500 mt-0.5">
@@ -356,7 +356,7 @@ export default function DokumenteAnfordernCard({
         {/* AAR-unfallfotos: Unfallfotos-Slot. Multi-File — Kunde kann mehrere
             Fotos via denselben Link hochladen. Nach Upload läuft Haiku-Vision
             und füllt leads.fahrzeugschaden_beschreibung automatisch. */}
-        <div className={`rounded-lg border p-3 ${selectUnfallfotos || fotosCount > 0 ? 'border-[#4573A2] bg-blue-50/30' : 'border-gray-200'}`}>
+        <div className={`rounded-lg border p-3 ${selectUnfallfotos || fotosCount > 0 ? 'border-claimondo-ondo bg-blue-50/30' : 'border-gray-200'}`}>
           <label className="flex items-start gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -366,7 +366,7 @@ export default function DokumenteAnfordernCard({
             />
             <div className="flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <CameraIcon className="w-3.5 h-3.5 text-[#4573A2]" />
+                <CameraIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
                 <span className="text-xs font-semibold text-gray-900">Unfallfotos</span>
                 {fotosCount > 0 && (
                   <span className="text-[9px] px-1.5 py-0.5 rounded bg-green-50 text-green-700 font-medium">
@@ -426,7 +426,7 @@ export default function DokumenteAnfordernCard({
                   href={url}
                   target="_blank"
                   rel="noopener"
-                  className="relative block aspect-square rounded overflow-hidden border border-gray-200 hover:border-[#4573A2] focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+                  className="relative block aspect-square rounded overflow-hidden border border-gray-200 hover:border-claimondo-ondo focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
                   title={`Foto ${i + 1} — klicken zum Vergrößern`}
                 >
                   <img
@@ -444,7 +444,7 @@ export default function DokumenteAnfordernCard({
         {/* Freie „Sonstige"-Slots */}
         {sonstige.map((s) => (
           <div key={s.id} className="rounded-lg border border-gray-200 p-3 flex items-center gap-2">
-            <PlusIcon className="w-3.5 h-3.5 text-[#4573A2] shrink-0" />
+            <PlusIcon className="w-3.5 h-3.5 text-claimondo-ondo shrink-0" />
             <input
               type="text"
               value={s.label}
@@ -466,7 +466,7 @@ export default function DokumenteAnfordernCard({
         <button
           type="button"
           onClick={addSonstiges}
-          className="w-full text-[11px] text-[#4573A2] border border-dashed border-[#4573A2]/50 rounded-lg py-1.5 hover:bg-blue-50 flex items-center justify-center gap-1"
+          className="w-full text-[11px] text-claimondo-ondo border border-dashed border-claimondo-ondo/50 rounded-lg py-1.5 hover:bg-blue-50 flex items-center justify-center gap-1"
         >
           <PlusIcon className="w-3.5 h-3.5" />
           Weiteres Dokument hinzufügen
@@ -507,7 +507,7 @@ export default function DokumenteAnfordernCard({
               onClick={() => setKanal('email')}
               disabled={!email}
               className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg text-[11px] font-medium transition-colors ${
-                kanal === 'email' ? 'bg-[#4573A2] text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                kanal === 'email' ? 'bg-claimondo-ondo text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
               } disabled:opacity-40`}
             >
               <MailIcon className="w-4 h-4" />
@@ -518,7 +518,7 @@ export default function DokumenteAnfordernCard({
             type="button"
             onClick={send}
             disabled={pending || !kannAnfragen}
-            className="w-full px-3 py-2 rounded-lg bg-[#0D1B3E] text-white text-xs font-semibold hover:bg-[#1E3A5F] disabled:opacity-50"
+            className="w-full px-3 py-2 rounded-lg bg-[#0D1B3E] text-white text-xs font-semibold hover:bg-claimondo-navy disabled:opacity-50"
           >
             {pending ? 'Sende ...' : 'Anfrage senden'}
           </button>

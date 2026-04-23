@@ -252,7 +252,7 @@ export default function Phase2TerminServiceTyp() {
                   disabled={pending}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                     sel
-                      ? 'bg-[#4573A2] text-white border-[#4573A2]'
+                      ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
                       : 'bg-white text-blue-900 border-blue-200 hover:border-blue-400'
                   } disabled:opacity-50`}
                 >
@@ -266,7 +266,7 @@ export default function Phase2TerminServiceTyp() {
               disabled={pending || wochentage.length === 0}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                 wochentage.length === 0
-                  ? 'bg-[#4573A2] text-white border-[#4573A2]'
+                  ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
                   : 'bg-white text-blue-900 border-blue-200 hover:border-blue-400'
               } disabled:opacity-50`}
               title="Alle Wochentage zurücksetzen"
@@ -297,9 +297,9 @@ export default function Phase2TerminServiceTyp() {
       </div>
 
       {/* Besichtigungsadresse für SV-Dispatch */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
+      <div className="glass-light border border-claimondo-border rounded-ios-md p-5 space-y-3">
         <div className="flex items-center gap-2">
-          <MapPinIcon className="w-4 h-4 text-[#4573A2]" />
+          <MapPinIcon className="w-4 h-4 text-claimondo-ondo" />
           <h3 className="text-sm font-semibold text-gray-900">Besichtigungsadresse</h3>
           {hasKoordinaten && (
             <span className="ml-auto text-[10px] text-green-600 font-medium flex items-center gap-1">
@@ -356,9 +356,9 @@ export default function Phase2TerminServiceTyp() {
       />
 
       {/* Service-Typ (Pfad A/B) — prominent nach SV-Auswahl */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
+      <div className="glass-light border border-claimondo-border rounded-ios-md p-5 space-y-3">
         <div className="flex items-center gap-2">
-          <ScaleIcon className="w-4 h-4 text-[#4573A2]" />
+          <ScaleIcon className="w-4 h-4 text-claimondo-ondo" />
           <h3 className="text-sm font-semibold text-gray-900">Service-Typ</h3>
           <span className="ml-auto text-[10px] text-gray-400">Standard: Pfad A (Komplett)</span>
         </div>
@@ -369,12 +369,12 @@ export default function Phase2TerminServiceTyp() {
             onClick={() => chooseServiceTyp('komplett')}
             className={`text-left p-4 rounded-xl border-2 transition-colors ${
               serviceTyp === 'komplett'
-                ? 'border-[#4573A2] bg-[#4573A2]/5'
+                ? 'border-claimondo-ondo bg-claimondo-ondo/5'
                 : 'border-gray-200 hover:border-gray-300'
             }`}
           >
             <p className="font-semibold text-sm text-gray-900 flex items-center gap-2">
-              <CheckCircle2Icon className="w-4 h-4 text-[#4573A2]" />
+              <CheckCircle2Icon className="w-4 h-4 text-claimondo-ondo" />
               Pfad A — Komplett
             </p>
             <p className="text-xs text-gray-500 mt-1">
@@ -424,7 +424,7 @@ export default function Phase2TerminServiceTyp() {
             type="button"
             disabled={pending}
             onClick={() => setPhase(3)}
-            className="flex-1 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-50 flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-claimondo-navy disabled:opacity-50 flex items-center justify-center gap-2"
           >
             Weiter zu Phase 3 →
           </button>

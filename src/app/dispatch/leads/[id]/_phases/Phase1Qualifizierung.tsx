@@ -128,37 +128,37 @@ function KundendatenEditBlock({
       <div className="px-3 pb-3 pt-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-0.5">
           <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Vorname</label>
-          <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('vorname', l.vorname)} />
+          <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-claimondo-ondo" {...field('vorname', l.vorname)} />
         </div>
         <div className="space-y-0.5">
           <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Nachname</label>
-          <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('nachname', l.nachname)} />
+          <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-claimondo-ondo" {...field('nachname', l.nachname)} />
         </div>
         <div className="space-y-0.5">
           <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Telefon</label>
-          <input type="tel" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('telefon', l.telefon)} />
+          <input type="tel" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-claimondo-ondo" {...field('telefon', l.telefon)} />
         </div>
         <div className="space-y-0.5">
           <label className="text-[10px] text-gray-400 uppercase tracking-wider block">E-Mail</label>
-          <input type="email" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('email', l.email)} />
+          <input type="email" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-claimondo-ondo" {...field('email', l.email)} />
         </div>
         <div className="space-y-0.5">
           <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Straße</label>
-          <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('kunde_strasse', l.kunde_strasse)} />
+          <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-claimondo-ondo" {...field('kunde_strasse', l.kunde_strasse)} />
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-0.5">
             <label className="text-[10px] text-gray-400 uppercase tracking-wider block">PLZ</label>
-            <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('kunde_plz', l.kunde_plz)} />
+            <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-claimondo-ondo" {...field('kunde_plz', l.kunde_plz)} />
           </div>
           <div className="space-y-0.5">
             <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Stadt</label>
-            <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('kunde_stadt', l.kunde_stadt)} />
+            <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-claimondo-ondo" {...field('kunde_stadt', l.kunde_stadt)} />
           </div>
         </div>
         <div className="sm:col-span-2 space-y-0.5">
           <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Notiz (intern)</label>
-          <textarea rows={2} className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2] resize-none" {...field('notiz', l.notiz)} />
+          <textarea rows={2} className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-claimondo-ondo resize-none" {...field('notiz', l.notiz)} />
         </div>
       </div>
     </details>
@@ -327,7 +327,7 @@ export default function Phase1Qualifizierung() {
   const fahrerflucht = l.fahrerflucht === true
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-6">
+    <div className="glass-light border border-claimondo-border rounded-ios-md p-5 space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-gray-900">Phase 1: Qualifizierung</h2>
         {allComplete ? (
@@ -377,7 +377,7 @@ export default function Phase1Qualifizierung() {
                 disabled={pending}
                 className={`px-2 py-1 rounded-md text-[11px] font-medium border transition-colors ${
                   selected
-                    ? 'bg-[#4573A2] text-white border-[#4573A2]'
+                    ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
                     : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
                 } disabled:opacity-60`}
                 title={s.label}
@@ -499,8 +499,8 @@ export default function Phase1Qualifizierung() {
               <span className="text-[11px] font-semibold text-gray-700">Fahrzeug noch fahrbereit?</span>
             </div>
             <div className="flex gap-2">
-              <button type="button" onClick={() => setDraft(d => ({ ...d, fahrzeug_fahrbereit: true }))} className={`flex-1 px-3 py-1 rounded-lg text-[11px] font-medium ${draft.fahrzeug_fahrbereit === true ? 'bg-[#4573A2] text-white' : 'bg-white border border-gray-200 text-gray-600'}`}>Ja, fahrbereit</button>
-              <button type="button" onClick={() => setDraft(d => ({ ...d, fahrzeug_fahrbereit: false }))} className={`flex-1 px-3 py-1 rounded-lg text-[11px] font-medium ${draft.fahrzeug_fahrbereit === false ? 'bg-[#4573A2] text-white' : 'bg-white border border-gray-200 text-gray-600'}`}>Nein</button>
+              <button type="button" onClick={() => setDraft(d => ({ ...d, fahrzeug_fahrbereit: true }))} className={`flex-1 px-3 py-1 rounded-lg text-[11px] font-medium ${draft.fahrzeug_fahrbereit === true ? 'bg-claimondo-ondo text-white' : 'bg-white border border-gray-200 text-gray-600'}`}>Ja, fahrbereit</button>
+              <button type="button" onClick={() => setDraft(d => ({ ...d, fahrzeug_fahrbereit: false }))} className={`flex-1 px-3 py-1 rounded-lg text-[11px] font-medium ${draft.fahrzeug_fahrbereit === false ? 'bg-claimondo-ondo text-white' : 'bg-white border border-gray-200 text-gray-600'}`}>Nein</button>
             </div>
             {draft.fahrzeug_fahrbereit === false && (
               <div className="bg-orange-50 border border-orange-200 rounded-lg p-2">
@@ -577,7 +577,7 @@ export default function Phase1Qualifizierung() {
           (sachschaden_rechnung, sachschaden_foto) frei. */}
       <div className="space-y-2 border-t border-gray-100 pt-4">
         <div className="flex items-center gap-2">
-          <PackageIcon className="w-4 h-4 text-[#4573A2]" />
+          <PackageIcon className="w-4 h-4 text-claimondo-ondo" />
           <h3 className="text-xs font-semibold text-gray-700">
             Sachschäden an Dritten?
           </h3>
@@ -636,7 +636,7 @@ export default function Phase1Qualifizierung() {
       {/* Unfallort (zwischen Q2 und Q3, wie in Schritt0HardGate) */}
       <div className="space-y-3 border-t border-gray-100 pt-4">
         <div className="flex items-center gap-2">
-          <MapPinIcon className="w-4 h-4 text-[#4573A2]" />
+          <MapPinIcon className="w-4 h-4 text-claimondo-ondo" />
           <h3 className="text-xs font-semibold text-gray-700">Unfallort</h3>
         </div>
         {/* AAR-176 P2-B: Kategorie-Dropdown entfernt — wird automatisch aus
@@ -713,7 +713,7 @@ export default function Phase1Qualifizierung() {
                     polizeibericht_pflicht: true,
                   }))
                 }
-                className={`flex-1 px-3 py-1 rounded-lg text-[11px] font-medium ${draft.polizeibericht_vorhanden === true ? 'bg-[#4573A2] text-white' : 'bg-white border border-blue-200 text-blue-800'}`}
+                className={`flex-1 px-3 py-1 rounded-lg text-[11px] font-medium ${draft.polizeibericht_vorhanden === true ? 'bg-claimondo-ondo text-white' : 'bg-white border border-blue-200 text-blue-800'}`}
               >
                 Ja — Kunde hat Bericht
               </button>
@@ -726,7 +726,7 @@ export default function Phase1Qualifizierung() {
                     polizeibericht_pflicht: false,
                   }))
                 }
-                className={`flex-1 px-3 py-1 rounded-lg text-[11px] font-medium ${draft.polizeibericht_vorhanden === false ? 'bg-[#4573A2] text-white' : 'bg-white border border-blue-200 text-blue-800'}`}
+                className={`flex-1 px-3 py-1 rounded-lg text-[11px] font-medium ${draft.polizeibericht_vorhanden === false ? 'bg-claimondo-ondo text-white' : 'bg-white border border-blue-200 text-blue-800'}`}
               >
                 Nein — nur Aktenzeichen
               </button>
@@ -770,7 +770,7 @@ export default function Phase1Qualifizierung() {
       ) : (
         <p className="text-[10px] text-gray-500 flex items-center gap-1">
           {pending
-            ? <><span className="inline-block w-2 h-2 rounded-full bg-[#4573A2] animate-pulse" /> Auto-Save läuft ...</>
+            ? <><span className="inline-block w-2 h-2 rounded-full bg-claimondo-ondo animate-pulse" /> Auto-Save läuft ...</>
             : <><CheckCircleIcon className="w-3 h-3 text-green-600" /> Änderungen werden automatisch gespeichert.</>}
         </p>
       )}
@@ -781,7 +781,7 @@ export default function Phase1Qualifizierung() {
           type="button"
           disabled={pending}
           onClick={() => setPhase(2)}
-          className="w-full mt-2 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full mt-2 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-claimondo-navy disabled:opacity-50 flex items-center justify-center gap-2"
         >
           Weiter zu Phase 2 →
         </button>
