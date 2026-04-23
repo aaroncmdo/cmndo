@@ -8,6 +8,7 @@ import {
   CheckCircle2Icon,
   ExternalLinkIcon,
 } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 const PRIO_COLORS: Record<string, string> = {
   kritisch: 'bg-red-50 text-red-300 border-red-800',
@@ -66,13 +67,15 @@ export default async function GutachterTasksPage() {
   return (
     <div className="h-full overflow-y-auto py-6 sm:py-8">
       <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <ClipboardListIcon className="w-6 h-6 text-[var(--brand-accent)]" />
-          <h1 className="text-2xl font-semibold text-gray-900">Meine Tasks</h1>
-          <span className="ml-auto bg-gray-100 text-gray-700 text-xs font-medium px-2.5 py-1 rounded-full">
-            {offeneTasks.length} offen
-          </span>
-        </div>
+        <PageHeader
+          title="Meine Tasks"
+          icon={ClipboardListIcon}
+          actions={
+            <span className="bg-gray-100 text-gray-700 text-xs font-medium px-2.5 py-1 rounded-full">
+              {offeneTasks.length} offen
+            </span>
+          }
+        />
 
         {/* Warnungen */}
         {ueberfaellige.length > 0 && (

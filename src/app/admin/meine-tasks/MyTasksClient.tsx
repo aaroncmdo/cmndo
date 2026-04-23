@@ -3,8 +3,9 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircleIcon, CircleDotIcon, ClockIcon, AlertTriangleIcon, ExternalLinkIcon } from 'lucide-react'
+import { CheckCircleIcon, CircleDotIcon, ClockIcon, AlertTriangleIcon, ExternalLinkIcon, ClipboardListIcon } from 'lucide-react'
 import { updateManualTaskStatus } from '@/lib/tasks/manual-actions'
+import PageHeader from '@/components/shared/PageHeader'
 
 // KFZ-175: Meine-Tasks Client — Tabs Zugewiesen/Erstellt.
 
@@ -47,11 +48,14 @@ export default function MyTasksClient({
   }
 
   return (
-    <div className="px-8 py-8 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-1">Meine Tasks</h1>
-      <p className="text-sm text-gray-500 mb-6">{assigned.length} offen zugewiesen, {created.length} von dir erstellt</p>
+    <div className="px-8 py-8 max-w-5xl mx-auto space-y-6">
+      <PageHeader
+        title="Meine Tasks"
+        description={`${assigned.length} offen zugewiesen, ${created.length} von dir erstellt`}
+        icon={ClipboardListIcon}
+      />
 
-      <div className="inline-flex bg-gray-100 rounded-xl p-0.5 text-xs font-medium mb-4">
+      <div className="inline-flex bg-gray-100 rounded-xl p-0.5 text-xs font-medium">
         <button onClick={() => setTab('assigned')}
           className={`px-4 py-1.5 rounded-lg transition-colors ${tab === 'assigned' ? 'bg-white text-[#1E3A5F] shadow' : 'text-gray-500'}`}>
           Mir zugewiesen ({assigned.length})

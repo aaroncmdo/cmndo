@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { TrophyIcon, UsersIcon, GiftIcon, ArrowUpIcon, ArrowDownIcon, MinusIcon } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 type DispatchEntry = { id: string; name: string; leads_qualifiziert: number; leads_konvertiert: number; conversion_rate: number; trend: number }
 type KundenEntry = { id: string; name: string; aktive_faelle: number; faelle_abgeschlossen: number; avg_bearbeitungszeit: number; trend: number }
@@ -20,15 +21,14 @@ export default function LeaderboardClient({ dispatch, kundenbetreuer, monatLabel
   monatLabel: string
 }) {
   return (
-    <div className="py-8"><div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2"><TrophyIcon className="w-5 h-5 text-amber-400" />Leaderboard</h1>
-          <p className="text-gray-500 text-sm mt-0.5">{monatLabel} · vs. Vormonat</p>
-        </div>
-      </div>
+    <div className="py-8"><div className="space-y-6">
+      <PageHeader
+        title="Leaderboard"
+        description={`${monatLabel} · vs. Vormonat`}
+        icon={TrophyIcon}
+      />
 
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2">
         <Link href="/admin/team" className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-500 hover:text-gray-800 text-xs font-medium rounded-lg transition-colors"><UsersIcon className="w-3.5 h-3.5" />Übersicht</Link>
         <Link href="/admin/team/leaderboard" className="px-3 py-1.5 bg-[#1E3A5F] text-white text-xs font-medium rounded-lg"><TrophyIcon className="w-3.5 h-3.5 inline mr-1.5" />Leaderboard</Link>
         <Link href="/admin/team/incentives" className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-500 hover:text-gray-800 text-xs font-medium rounded-lg transition-colors"><GiftIcon className="w-3.5 h-3.5" />Incentives</Link>

@@ -11,6 +11,7 @@ import { de } from 'date-fns/locale'
 import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon, ClipboardListIcon, PhoneIcon, UsersIcon, CoffeeIcon, XIcon, CheckIcon, SearchIcon } from 'lucide-react'
 import { getKalenderTermine } from '@/lib/actions/admin-kalender'
 import { createAdminTermin, updateAdminTermin, deleteAdminTermin } from '@/lib/actions/admin-termine-actions'
+import PageHeader from '@/components/shared/PageHeader'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -199,35 +200,38 @@ export default function KalenderClient({
     <div className="h-full overflow-y-auto py-6">
       <div>
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">Kalender</h1>
-            <p className="text-gray-500 text-sm mt-0.5">Termine & Aufgaben</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="flex bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
-              <button onClick={() => setViewMode('month')}
-                className={`px-3 py-1.5 text-xs font-medium transition-colors ${viewMode === 'month' ? 'bg-[#1E3A5F] text-white' : 'text-gray-500 hover:text-gray-800'}`}>
-                Monat
-              </button>
-              <button onClick={() => setViewMode('week')}
-                className={`px-3 py-1.5 text-xs font-medium transition-colors ${viewMode === 'week' ? 'bg-[#1E3A5F] text-white' : 'text-gray-500 hover:text-gray-800'}`}>
-                Woche
-              </button>
-            </div>
-            <div className="flex items-center gap-1">
-              <button onClick={() => navigate('prev')} className="p-2 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors">
-                <ChevronLeftIcon className="w-4 h-4" />
-              </button>
-              <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">Heute</button>
-              <button onClick={() => navigate('next')} className="p-2 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors">
-                <ChevronRightIcon className="w-4 h-4" />
-              </button>
-            </div>
-            <span className="text-gray-900 text-sm font-medium ml-2">
-              {format(currentDate, viewMode === 'month' ? 'MMMM yyyy' : "'KW' w, MMMM yyyy", { locale: de })}
-            </span>
-          </div>
+        <div className="mb-4">
+          <PageHeader
+            title="Kalender"
+            description="Termine & Aufgaben"
+            icon={CalendarIcon}
+            actions={
+              <>
+                <div className="flex bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
+                  <button onClick={() => setViewMode('month')}
+                    className={`px-3 py-1.5 text-xs font-medium transition-colors ${viewMode === 'month' ? 'bg-[#1E3A5F] text-white' : 'text-gray-500 hover:text-gray-800'}`}>
+                    Monat
+                  </button>
+                  <button onClick={() => setViewMode('week')}
+                    className={`px-3 py-1.5 text-xs font-medium transition-colors ${viewMode === 'week' ? 'bg-[#1E3A5F] text-white' : 'text-gray-500 hover:text-gray-800'}`}>
+                    Woche
+                  </button>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => navigate('prev')} className="p-2 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors">
+                    <ChevronLeftIcon className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">Heute</button>
+                  <button onClick={() => navigate('next')} className="p-2 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors">
+                    <ChevronRightIcon className="w-4 h-4" />
+                  </button>
+                </div>
+                <span className="text-gray-900 text-sm font-medium ml-2">
+                  {format(currentDate, viewMode === 'month' ? 'MMMM yyyy' : "'KW' w, MMMM yyyy", { locale: de })}
+                </span>
+              </>
+            }
+          />
         </div>
 
         {/* KFZ-138: Filter-Bar */}

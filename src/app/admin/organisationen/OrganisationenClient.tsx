@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Building2Icon, GraduationCapIcon, CreditCardIcon, CheckCircleIcon, ClockIcon, AlertCircleIcon } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 type OrgRow = {
   id: string
@@ -29,25 +30,24 @@ export default function OrganisationenClient({ organisationen }: { organisatione
   const filtered = filter === 'alle' ? organisationen : organisationen.filter(o => o.typ === filter)
 
   return (
-    <div className="px-8 py-8 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Organisationen</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Alle Büros und Akademien. Communities haben einen eigenen Bereich.
-          </p>
-        </div>
-        <div className="inline-flex bg-gray-100 rounded-xl p-0.5 text-xs font-medium">
-          {(['alle', 'buero', 'akademie'] as const).map(f => (
-            <button key={f} type="button" onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded-lg transition-colors capitalize ${
-                filter === f ? 'bg-white text-[#1E3A5F] shadow' : 'text-gray-500 hover:text-gray-700'
-              }`}>
-              {f === 'alle' ? `Alle (${organisationen.length})` : f === 'buero' ? `Büros (${organisationen.filter(o => o.typ === 'buero').length})` : `Akademien (${organisationen.filter(o => o.typ === 'akademie').length})`}
-            </button>
-          ))}
-        </div>
-      </div>
+    <div className="px-8 py-8 max-w-6xl mx-auto space-y-6">
+      <PageHeader
+        title="Organisationen"
+        description="Alle Büros und Akademien. Communities haben einen eigenen Bereich."
+        icon={Building2Icon}
+        actions={
+          <div className="inline-flex bg-gray-100 rounded-xl p-0.5 text-xs font-medium">
+            {(['alle', 'buero', 'akademie'] as const).map(f => (
+              <button key={f} type="button" onClick={() => setFilter(f)}
+                className={`px-3 py-1.5 rounded-lg transition-colors capitalize ${
+                  filter === f ? 'bg-white text-[#1E3A5F] shadow' : 'text-gray-500 hover:text-gray-700'
+                }`}>
+                {f === 'alle' ? `Alle (${organisationen.length})` : f === 'buero' ? `Büros (${organisationen.filter(o => o.typ === 'buero').length})` : `Akademien (${organisationen.filter(o => o.typ === 'akademie').length})`}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
         {filtered.length === 0 ? (
