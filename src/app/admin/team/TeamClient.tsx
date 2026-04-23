@@ -208,7 +208,7 @@ function DeactivateReassignButton({ mitarbeiterId, name }: { mitarbeiterId: stri
         {loading ? '…' : 'Deakt.'}
       </button>
       {toast && (
-        <div className="fixed top-4 right-4 z-50 bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-lg max-w-sm">
+        <div className="fixed top-4 right-4 z-50 bg-white rounded-ios-lg shadow-ios-md px-4 py-3 shadow-lg max-w-sm">
           <p className="text-gray-800 text-sm">{toast}</p>
         </div>
       )}

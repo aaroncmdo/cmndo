@@ -205,7 +205,7 @@ export default function KalenderClient({
             <p className="text-gray-500 text-sm mt-0.5">Termine & Aufgaben</p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div className="flex bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
               <button onClick={() => setViewMode('month')}
                 className={`px-3 py-1.5 text-xs font-medium transition-colors ${viewMode === 'month' ? 'bg-[#1E3A5F] text-white' : 'text-gray-500 hover:text-gray-800'}`}>
                 Monat
@@ -266,7 +266,7 @@ export default function KalenderClient({
             </button>
 
             {gutachterOpen && (
-              <div className="absolute top-full left-0 mt-1 w-72 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+              <div className="absolute top-full left-0 mt-1 w-72 bg-white rounded-ios-lg shadow-ios-md shadow-lg z-50 overflow-hidden">
                 <div className="p-2 border-b border-gray-100">
                   <div className="relative">
                     <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />

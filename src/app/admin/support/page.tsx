@@ -35,11 +35,11 @@ export default async function SupportPage() {
         </div>
 
         {(probleme ?? []).length === 0 ? (
-          <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
+          <div className="bg-white rounded-ios-lg shadow-ios-md p-8 text-center">
             <p className="text-gray-400 text-sm">Keine Probleme gemeldet</p>
           </div>
         ) : (
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">

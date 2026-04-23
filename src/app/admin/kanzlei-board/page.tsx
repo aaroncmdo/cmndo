@@ -51,7 +51,7 @@ export default async function KanzleiBoard() {
       </div>
 
       {/* Kanzlei-Parteien */}
-      <section className="bg-white rounded-xl border border-gray-200">
+      <section className="bg-white rounded-ios-lg shadow-ios-md">
         <div className="px-4 py-3 border-b border-gray-100">
           <h2 className="text-sm font-semibold text-gray-900">Zugewiesene Kanzleien</h2>
         </div>
@@ -99,7 +99,7 @@ export default async function KanzleiBoard() {
       </section>
 
       {/* LexDrive-Webhook-History */}
-      <section className="bg-white rounded-xl border border-gray-200">
+      <section className="bg-white rounded-ios-lg shadow-ios-md">
         <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
           <ClockIcon className="w-4 h-4 text-gray-400" />
           <h2 className="text-sm font-semibold text-gray-900">LexDrive Status-History</h2>
@@ -133,7 +133,7 @@ export default async function KanzleiBoard() {
       </section>
 
       {/* LexDrive-Tasks */}
-      <section className="bg-white rounded-xl border border-gray-200">
+      <section className="bg-white rounded-ios-lg shadow-ios-md">
         <div className="px-4 py-3 border-b border-gray-100">
           <h2 className="text-sm font-semibold text-gray-900">Offene LexDrive-Tasks</h2>
         </div>

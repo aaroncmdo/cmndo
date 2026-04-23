@@ -128,7 +128,7 @@ export default async function MitarbeiterKundentermine() {
       </div>
 
       {groups.size === 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 px-6 py-16 text-center">
+        <div className="bg-white rounded-ios-lg shadow-ios-md px-6 py-16 text-center">
           <p className="text-sm text-gray-400">Keine anstehenden Kundentermine</p>
         </div>
       )}
@@ -136,7 +136,7 @@ export default async function MitarbeiterKundentermine() {
       {Array.from(groups.entries()).map(([day, rows]) => {
         const isToday = day === nowIso.slice(0, 10)
         return (
-          <section key={day} className="bg-white rounded-xl border border-gray-200">
+          <section key={day} className="bg-white rounded-ios-lg shadow-ios-md">
             <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-gray-900">
                 {new Date(day + 'T00:00:00').toLocaleDateString('de-DE', {
