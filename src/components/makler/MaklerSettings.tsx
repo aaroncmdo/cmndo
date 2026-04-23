@@ -67,10 +67,10 @@ export function MaklerSettings({
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-5">
       <header>
-        <h1 className="text-xl md:text-2xl font-bold text-[#0D1B3E]">
+        <h1 className="text-xl md:text-2xl font-bold text-claimondo-navy">
           Einstellungen
         </h1>
-        <p className="text-sm text-[#4573A2] mt-0.5">
+        <p className="text-sm text-claimondo-ondo mt-0.5">
           Profil, Bank, Sicherheit und Benachrichtigungen.
         </p>
       </header>
@@ -120,15 +120,15 @@ function SectionCard({
   children: React.ReactNode
 }) {
   return (
-    <section className="bg-white rounded-2xl border border-[#e4e7ef] overflow-hidden">
-      <div className="flex items-start gap-3 px-5 py-4 border-b border-[#e4e7ef]">
-        <span className="shrink-0 w-9 h-9 rounded-xl bg-[#f8f9fb] text-[#4573A2] border border-[#e4e7ef] flex items-center justify-center">
+    <section className="bg-white rounded-ios-md border border-claimondo-border overflow-hidden">
+      <div className="flex items-start gap-3 px-5 py-4 border-b border-claimondo-border">
+        <span className="shrink-0 w-9 h-9 rounded-xl bg-[#f8f9fb] text-claimondo-ondo border border-claimondo-border flex items-center justify-center">
           {icon}
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-semibold text-[#0D1B3E]">{title}</h2>
+          <h2 className="text-sm font-semibold text-claimondo-navy">{title}</h2>
           {subtitle ? (
-            <p className="text-xs text-[#4573A2] mt-0.5">{subtitle}</p>
+            <p className="text-xs text-claimondo-ondo mt-0.5">{subtitle}</p>
           ) : null}
         </div>
       </div>
@@ -142,7 +142,7 @@ function SaveButton({ state }: { state: SaveState }) {
     <button
       type="submit"
       disabled={state.status === 'saving'}
-      className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-50"
+      className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-claimondo-navy text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-50"
     >
       {state.status === 'saving' ? (
         <Loader2Icon width={14} height={14} className="animate-spin" />
@@ -197,7 +197,7 @@ function Input({
 }) {
   return (
     <label className="block">
-      <span className="text-xs uppercase tracking-wider text-[#4573A2] font-medium">
+      <span className="text-xs uppercase tracking-wider text-claimondo-ondo font-medium">
         {label}
         {required ? ' *' : ''}
       </span>
@@ -210,8 +210,8 @@ function Input({
         required={required}
         pattern={pattern}
         autoComplete={autoComplete}
-        className={`mt-1 w-full rounded-lg border border-[#e4e7ef] bg-white px-3 py-2 text-sm text-[#0D1B3E] placeholder:text-[#7BA3CC] focus:outline-none focus:ring-2 focus:ring-[#4573A2]/40 ${
-          readOnly ? 'bg-[#f8f9fb] text-[#4573A2] cursor-not-allowed' : ''
+        className={`mt-1 w-full rounded-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-shield focus:outline-none focus:ring-2 focus:ring-[#4573A2]/40 ${
+          readOnly ? 'bg-[#f8f9fb] text-claimondo-ondo cursor-not-allowed' : ''
         }`}
       />
     </label>
@@ -455,7 +455,7 @@ function PasswortCard() {
           <button
             type="submit"
             disabled={isPending}
-            className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-claimondo-navy text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-50"
           >
             {isPending ? (
               <Loader2Icon width={14} height={14} className="animate-spin" />
@@ -498,19 +498,19 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
       title="Aktive Kunden-Consents"
       subtitle="Übersicht aller Fälle mit aktivem Zugriff. Kunden können den Zugriff jederzeit selbst widerrufen."
     >
-      <p className="text-xs text-[#4573A2] bg-[#f8f9fb] border border-[#e4e7ef] rounded-lg px-3 py-2 mb-3">
+      <p className="text-xs text-claimondo-ondo bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 mb-3">
         Sie können Consents auch von sich aus beenden — z.&nbsp;B. nach
         Abschluss eines Falls zur Datensparsamkeit.
       </p>
       {consents.length === 0 ? (
-        <p className="text-sm text-[#7BA3CC] text-center py-6">
+        <p className="text-sm text-claimondo-shield text-center py-6">
           Keine aktiven Consents.
         </p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="text-xs uppercase tracking-wide text-[#4573A2]">
-              <tr className="border-b border-[#e4e7ef]">
+            <thead className="text-xs uppercase tracking-wide text-claimondo-ondo">
+              <tr className="border-b border-claimondo-border">
                 <th className="text-left py-2 font-semibold">Kunde</th>
                 <th className="text-left py-2 font-semibold">Fall</th>
                 <th className="text-left py-2 font-semibold">Scope</th>
@@ -522,21 +522,21 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
               {consents.map((c) => (
                 <tr
                   key={c.id}
-                  className="border-b border-[#e4e7ef] last:border-b-0"
+                  className="border-b border-claimondo-border last:border-b-0"
                 >
-                  <td className="py-2.5 text-[#0D1B3E]">
+                  <td className="py-2.5 text-claimondo-navy">
                     {c.kunde_name ?? '–'}
                   </td>
                   <td className="py-2.5">
                     {c.fall_id ? (
                       <Link
                         href={`/makler/akten/${c.fall_id}`}
-                        className="text-[#4573A2] hover:text-[#0D1B3E] font-medium"
+                        className="text-claimondo-ondo hover:text-claimondo-navy font-medium"
                       >
                         {c.fall_nummer ?? '–'}
                       </Link>
                     ) : (
-                      <span className="text-[#7BA3CC]">–</span>
+                      <span className="text-claimondo-shield">–</span>
                     )}
                   </td>
                   <td className="py-2.5">
@@ -544,14 +544,14 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
                       className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-full ${
                         c.consent_scope === 'vollzugriff'
                           ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                          : 'bg-[#f8f9fb] text-[#4573A2] border border-[#e4e7ef]'
+                          : 'bg-[#f8f9fb] text-claimondo-ondo border border-claimondo-border'
                       }`}
                     >
                       <ShieldCheckIcon width={10} height={10} />
                       {c.consent_scope === 'vollzugriff' ? 'Vollzugriff' : 'Minimal'}
                     </span>
                   </td>
-                  <td className="py-2.5 text-[#0D1B3E] whitespace-nowrap">
+                  <td className="py-2.5 text-claimondo-navy whitespace-nowrap">
                     {fmtDate(c.consent_gegeben_am)}
                   </td>
                   <td className="py-2.5 text-right">
@@ -589,7 +589,7 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
           onClick={() => setConfirmId(null)}
         >
           <div
-            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6"
+            className="bg-white rounded-ios-md shadow-2xl max-w-md w-full p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start gap-3">
@@ -597,10 +597,10 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
                 <AlertTriangleIcon width={18} height={18} />
               </span>
               <div className="flex-1">
-                <h3 className="text-base font-semibold text-[#0D1B3E]">
+                <h3 className="text-base font-semibold text-claimondo-navy">
                   Consent wirklich widerrufen?
                 </h3>
-                <p className="text-sm text-[#4573A2] mt-1">
+                <p className="text-sm text-claimondo-ondo mt-1">
                   Dieser Consent wird sofort widerrufen und Sie verlieren den
                   Zugriff auf den Fall. Diese Aktion kann nicht rückgängig
                   gemacht werden.
@@ -611,7 +611,7 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
               <button
                 type="button"
                 onClick={() => setConfirmId(null)}
-                className="px-4 h-10 rounded-lg bg-white border border-[#e4e7ef] text-sm text-[#0D1B3E] hover:border-[#4573A2]"
+                className="px-4 h-10 rounded-lg bg-white border border-claimondo-border text-sm text-claimondo-navy hover:border-claimondo-ondo"
               >
                 Abbrechen
               </button>
@@ -684,18 +684,18 @@ function NotificationsCard({ prefs }: { prefs: NotificationPreferences }) {
           {NOTIF_LABELS.map((n) => (
             <label
               key={n.key}
-              className="flex items-start gap-3 p-3 rounded-lg border border-[#e4e7ef] bg-[#f8f9fb] hover:bg-white cursor-pointer"
+              className="flex items-start gap-3 p-3 rounded-lg border border-claimondo-border bg-[#f8f9fb] hover:bg-white cursor-pointer"
             >
               <input
                 type="checkbox"
                 checked={local[n.key]}
                 onChange={() => toggle(n.key)}
-                className="mt-0.5 w-4 h-4 rounded border-[#e4e7ef] text-[#0D1B3E] focus:ring-[#4573A2]/40"
+                className="mt-0.5 w-4 h-4 rounded border-claimondo-border text-claimondo-navy focus:ring-[#4573A2]/40"
               />
               <div className="flex-1">
-                <p className="text-sm text-[#0D1B3E]">{n.label}</p>
+                <p className="text-sm text-claimondo-navy">{n.label}</p>
                 {n.hint ? (
-                  <p className="text-xs text-[#7BA3CC]">{n.hint}</p>
+                  <p className="text-xs text-claimondo-shield">{n.hint}</p>
                 ) : null}
               </div>
             </label>
@@ -722,7 +722,7 @@ function LogoutCard() {
       <form action="/api/auth/logout" method="POST">
         <button
           type="submit"
-          className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-white border border-[#e4e7ef] text-sm font-semibold text-[#0D1B3E] hover:border-[#4573A2]"
+          className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-white border border-claimondo-border text-sm font-semibold text-claimondo-navy hover:border-claimondo-ondo"
         >
           <LogOutIcon width={14} height={14} />
           Jetzt abmelden
@@ -748,7 +748,7 @@ function AccountLoeschenCard({
     `Hallo Claimondo-Team,\n\nich möchte meinen Makler-Account löschen lassen.\n\nFirma: ${firma ?? '-'}\nEmail: ${email ?? '-'}\n\nBitte bestätigen Sie den DSGVO-Löschauftrag.\n\nViele Grüße`,
   )
   return (
-    <section className="bg-white rounded-2xl border border-red-200 overflow-hidden">
+    <section className="bg-white rounded-ios-md border border-red-200 overflow-hidden">
       <div className="flex items-start gap-3 px-5 py-4 border-b border-red-100 bg-red-50/50">
         <span className="shrink-0 w-9 h-9 rounded-xl bg-red-100 text-red-700 border border-red-200 flex items-center justify-center">
           <Trash2Icon width={16} height={16} />
@@ -763,7 +763,7 @@ function AccountLoeschenCard({
         </div>
       </div>
       <div className="p-5 space-y-3">
-        <p className="text-sm text-[#0D1B3E]">
+        <p className="text-sm text-claimondo-navy">
           Die Account-Löschung wird manuell durch unser Team durchgeführt,
           damit alle DSGVO-Aufbewahrungs-Fristen (z.&nbsp;B. offene Fälle)
           beachtet werden können. Klicken Sie unten um per Email anzufragen.

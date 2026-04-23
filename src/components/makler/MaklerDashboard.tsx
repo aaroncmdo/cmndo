@@ -51,10 +51,10 @@ export function MaklerDashboard({ makler, data }: Props) {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
       {/* Greeting */}
       <header>
-        <h1 className="text-2xl font-bold text-[#0D1B3E]">
+        <h1 className="text-2xl font-bold text-claimondo-navy">
           Hallo {makler.ansprechpartner_vorname} <span aria-hidden>👋</span>
         </h1>
-        <p className="text-sm text-[#4573A2] mt-1">Ihre Makler-Übersicht</p>
+        <p className="text-sm text-claimondo-ondo mt-1">Ihre Makler-Übersicht</p>
       </header>
 
       {/* Stat-Grid */}
@@ -87,12 +87,12 @@ export function MaklerDashboard({ makler, data }: Props) {
       {/* Activity + Schnellaktionen als 2-col auf Desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <section aria-label="Aktivität" className="lg:col-span-2">
-          <div className="bg-white rounded-2xl border border-[#e4e7ef] p-6">
-            <h2 className="text-base font-semibold text-[#0D1B3E] mb-4">
+          <div className="bg-white rounded-ios-md border border-claimondo-border p-6">
+            <h2 className="text-base font-semibold text-claimondo-navy mb-4">
               Aktivität
             </h2>
             {activity.length === 0 ? (
-              <p className="text-sm text-[#4573A2]">
+              <p className="text-sm text-claimondo-ondo">
                 Noch keine Aktivität. Sobald Ihre ersten Leads oder Provisionen
                 eintreffen, erscheinen sie hier.
               </p>
@@ -104,20 +104,20 @@ export function MaklerDashboard({ makler, data }: Props) {
                     <div className="flex-1 min-w-0">
                       {a.kind === 'lead' ? (
                         <>
-                          <p className="text-sm text-[#0D1B3E]">
-                            {a.titel} <span className="text-[#4573A2]">— {a.status}</span>
+                          <p className="text-sm text-claimondo-navy">
+                            {a.titel} <span className="text-claimondo-ondo">— {a.status}</span>
                           </p>
-                          <p className="text-xs text-[#4573A2] mt-0.5">
+                          <p className="text-xs text-claimondo-ondo mt-0.5">
                             {relativeFromNow(a.timestamp)}
                           </p>
                         </>
                       ) : (
                         <>
-                          <p className="text-sm text-[#0D1B3E]">
+                          <p className="text-sm text-claimondo-navy">
                             Provision {EUR.format(a.betrag_netto_eur)}{' '}
-                            <span className="text-[#4573A2]">— {a.status}</span>
+                            <span className="text-claimondo-ondo">— {a.status}</span>
                           </p>
-                          <p className="text-xs text-[#4573A2] mt-0.5">
+                          <p className="text-xs text-claimondo-ondo mt-0.5">
                             {relativeFromNow(a.timestamp)}
                           </p>
                         </>
@@ -154,14 +154,14 @@ export function MaklerDashboard({ makler, data }: Props) {
 
       {/* Tipp des Monats */}
       <section aria-label="Tipp des Monats">
-        <div className="bg-[#0D1B3E] text-white rounded-2xl p-6 md:p-8">
-          <p className="text-[11px] uppercase tracking-wider text-[#7BA3CC] mb-2">
+        <div className="bg-claimondo-navy text-white rounded-ios-md p-6 md:p-8">
+          <p className="text-[11px] uppercase tracking-wider text-claimondo-shield mb-2">
             Tipp des Monats
           </p>
           <h3 className="text-lg font-semibold mb-2">
             QR-Code auf dem Beratungsgespräch zeigen
           </h3>
-          <p className="text-sm text-[#7BA3CC] leading-relaxed">
+          <p className="text-sm text-claimondo-shield leading-relaxed">
             Erfahrungswerte zeigen: Makler die ihren persönlichen QR-Code
             direkt im Beratungsgespräch zeigen, erzeugen doppelt so viele
             Leads wie Makler die nur per E-Mail verteilen. Der QR führt
@@ -185,13 +185,13 @@ function StatCard({
   hint?: string
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-[#e4e7ef] p-5">
+    <div className="bg-white rounded-ios-md border border-claimondo-border p-5">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs text-[#4573A2]">{label}</span>
-        <span className="text-[#4573A2]">{icon}</span>
+        <span className="text-xs text-claimondo-ondo">{label}</span>
+        <span className="text-claimondo-ondo">{icon}</span>
       </div>
-      <p className="text-2xl font-semibold text-[#0D1B3E]">{value}</p>
-      {hint ? <p className="text-[11px] text-[#4573A2] mt-1">{hint}</p> : null}
+      <p className="text-2xl font-semibold text-claimondo-navy">{value}</p>
+      {hint ? <p className="text-[11px] text-claimondo-ondo mt-1">{hint}</p> : null}
     </div>
   )
 }
@@ -204,23 +204,23 @@ function StatCardProvisionen({
   freigegeben: number
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-[#e4e7ef] p-5">
+    <div className="bg-white rounded-ios-md border border-claimondo-border p-5">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs text-[#4573A2]">Provisionen diesen Monat</span>
-        <span className="text-[#4573A2]">
+        <span className="text-xs text-claimondo-ondo">Provisionen diesen Monat</span>
+        <span className="text-claimondo-ondo">
           <EuroIcon width={18} height={18} />
         </span>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <p className="text-xs text-amber-600 mb-0.5">Ausstehend</p>
-          <p className="text-lg font-semibold text-[#0D1B3E]">
+          <p className="text-lg font-semibold text-claimondo-navy">
             {EUR.format(pending)}
           </p>
         </div>
         <div>
           <p className="text-xs text-emerald-600 mb-0.5">Freigegeben</p>
-          <p className="text-lg font-semibold text-[#0D1B3E]">
+          <p className="text-lg font-semibold text-claimondo-navy">
             {EUR.format(freigegeben)}
           </p>
         </div>
@@ -232,7 +232,7 @@ function StatCardProvisionen({
 function ActivityBadge({ kind }: { kind: 'lead' | 'provision' }) {
   const cfg =
     kind === 'lead'
-      ? { label: 'Lead', bg: 'bg-[#4573A2]' }
+      ? { label: 'Lead', bg: 'bg-claimondo-ondo' }
       : { label: 'Provision', bg: 'bg-emerald-600' }
   return (
     <span
@@ -257,15 +257,15 @@ function QuickAction({
   return (
     <Link
       href={href}
-      className="block bg-white rounded-2xl border border-[#e4e7ef] p-4 hover:border-[#4573A2] transition-colors"
+      className="block bg-white rounded-ios-md border border-claimondo-border p-4 hover:border-claimondo-ondo transition-colors"
     >
       <div className="flex items-start gap-3">
-        <span className="shrink-0 w-10 h-10 rounded-lg bg-[#f8f9fb] flex items-center justify-center text-[#0D1B3E]">
+        <span className="shrink-0 w-10 h-10 rounded-lg bg-[#f8f9fb] flex items-center justify-center text-claimondo-navy">
           {icon}
         </span>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-[#0D1B3E]">{label}</p>
-          <p className="text-xs text-[#4573A2] mt-0.5">{hint}</p>
+          <p className="text-sm font-semibold text-claimondo-navy">{label}</p>
+          <p className="text-xs text-claimondo-ondo mt-0.5">{hint}</p>
         </div>
       </div>
     </Link>

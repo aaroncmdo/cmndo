@@ -182,10 +182,10 @@ export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
     <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
       <header className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-[#0D1B3E]">
+          <h1 className="text-xl md:text-2xl font-bold text-claimondo-navy">
             Abrechnungen
           </h1>
-          <p className="text-sm text-[#4573A2] mt-0.5">
+          <p className="text-sm text-claimondo-ondo mt-0.5">
             Provisions-Historie, Monats-Übersicht und Auszahlungen
           </p>
         </div>
@@ -193,7 +193,7 @@ export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
           type="button"
           onClick={() => exportCsv(rowsForMonth, currentMonth)}
           disabled={rowsForMonth.length === 0}
-          className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-white border border-[#e4e7ef] text-sm text-[#0D1B3E] hover:border-[#4573A2] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-white border border-claimondo-border text-sm text-claimondo-navy hover:border-[#4573A2] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <DownloadIcon width={14} height={14} />
           CSV-Export
@@ -238,19 +238,19 @@ export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
           type="button"
           onClick={() => gotoMonth(-1)}
           disabled={isPending}
-          className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white border border-[#e4e7ef] text-[#0D1B3E] hover:border-[#4573A2] disabled:opacity-50"
+          className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white border border-claimondo-border text-claimondo-navy hover:border-[#4573A2] disabled:opacity-50"
           aria-label="Vorheriger Monat"
         >
           <ChevronLeftIcon width={16} height={16} />
         </button>
-        <div className="min-w-[160px] text-center text-sm font-semibold text-[#0D1B3E]">
+        <div className="min-w-[160px] text-center text-sm font-semibold text-claimondo-navy">
           {monthLabel}
         </div>
         <button
           type="button"
           onClick={() => gotoMonth(1)}
           disabled={!canGoNext || isPending}
-          className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white border border-[#e4e7ef] text-[#0D1B3E] hover:border-[#4573A2] disabled:opacity-40 disabled:cursor-not-allowed"
+          className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white border border-claimondo-border text-claimondo-navy hover:border-[#4573A2] disabled:opacity-40 disabled:cursor-not-allowed"
           aria-label="Nächster Monat"
         >
           <ChevronRightIcon width={16} height={16} />
@@ -258,30 +258,30 @@ export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
       </div>
 
       {/* Tabelle */}
-      <section className="bg-white rounded-2xl border border-[#e4e7ef] overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#e4e7ef] flex items-center gap-2">
-          <ReceiptIcon width={16} height={16} className="text-[#4573A2]" />
-          <h2 className="text-sm font-semibold text-[#0D1B3E]">
+      <section className="bg-white rounded-ios-md border border-claimondo-border overflow-hidden">
+        <div className="px-5 py-4 border-b border-claimondo-border flex items-center gap-2">
+          <ReceiptIcon width={16} height={16} className="text-claimondo-ondo" />
+          <h2 className="text-sm font-semibold text-claimondo-navy">
             Provisions-Historie
           </h2>
-          <span className="text-xs text-[#7BA3CC] ml-1">
+          <span className="text-xs text-claimondo-shield ml-1">
             ({rowsForMonth.length})
           </span>
         </div>
 
         {rowsForMonth.length === 0 ? (
-          <div className="p-10 text-center text-sm text-[#4573A2]">
+          <div className="p-10 text-center text-sm text-claimondo-ondo">
             <AlertCircleIcon
               width={24}
               height={24}
-              className="mx-auto mb-2 text-[#7BA3CC]"
+              className="mx-auto mb-2 text-claimondo-shield"
             />
             Noch keine Provisionen erfasst.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-[#f8f9fb] text-xs uppercase tracking-wide text-[#4573A2]">
+              <thead className="bg-[#f8f9fb] text-xs uppercase tracking-wide text-claimondo-ondo">
                 <tr>
                   <th className="text-left px-4 py-2.5 font-semibold">Datum</th>
                   <th className="text-left px-4 py-2.5 font-semibold">Fall</th>
@@ -303,32 +303,32 @@ export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
                   return (
                     <tr
                       key={row.id}
-                      className="border-t border-[#e4e7ef] hover:bg-[#f8f9fb]/60"
+                      className="border-t border-claimondo-border hover:bg-[#f8f9fb]/60"
                     >
-                      <td className="px-4 py-2.5 text-[#0D1B3E] whitespace-nowrap">
+                      <td className="px-4 py-2.5 text-claimondo-navy whitespace-nowrap">
                         {fmtDate(row.trigger_at)}
                       </td>
                       <td className="px-4 py-2.5">
                         {row.fall_id ? (
                           <Link
                             href={`/makler/akten/${row.fall_id}`}
-                            className="text-[#4573A2] hover:text-[#0D1B3E] font-medium"
+                            className="text-claimondo-ondo hover:text-claimondo-navy font-medium"
                           >
                             {row.fall_nummer ?? '–'}
                           </Link>
                         ) : (
-                          <span className="text-[#7BA3CC]">
+                          <span className="text-claimondo-shield">
                             {row.fall_nummer ?? '–'}
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-2.5 text-[#0D1B3E]">
+                      <td className="px-4 py-2.5 text-claimondo-navy">
                         {row.kunde_name ?? '–'}
                       </td>
-                      <td className="px-4 py-2.5 text-[#0D1B3E] capitalize">
+                      <td className="px-4 py-2.5 text-claimondo-navy capitalize">
                         {row.service_typ ?? '–'}
                       </td>
-                      <td className="px-4 py-2.5 text-right font-semibold text-[#0D1B3E] whitespace-nowrap">
+                      <td className="px-4 py-2.5 text-right font-semibold text-claimondo-navy whitespace-nowrap">
                         {fmtEur(Number(row.betrag_netto_eur))}
                       </td>
                       <td className="px-4 py-2.5">
@@ -377,8 +377,8 @@ function SummaryCard({
       border: 'border-emerald-200',
     },
     navy: {
-      bg: 'bg-[#0D1B3E]/5',
-      fg: 'text-[#0D1B3E]',
+      bg: 'bg-claimondo-navy/5',
+      fg: 'text-claimondo-navy',
       border: 'border-[#0D1B3E]/10',
     },
     blue: {
@@ -389,7 +389,7 @@ function SummaryCard({
   }
   const c = toneMap[tone]
   return (
-    <div className="bg-white rounded-2xl border border-[#e4e7ef] p-4">
+    <div className="bg-white rounded-ios-md border border-claimondo-border p-4">
       <div className="flex items-start gap-3">
         <span
           className={`shrink-0 w-9 h-9 rounded-xl flex items-center justify-center ${c.bg} ${c.fg} ${c.border} border`}
@@ -397,13 +397,13 @@ function SummaryCard({
           {icon}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] uppercase tracking-wider text-[#4573A2] font-medium">
+          <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo font-medium">
             {label}
           </p>
-          <p className="text-lg md:text-xl font-bold text-[#0D1B3E] mt-0.5 truncate">
+          <p className="text-lg md:text-xl font-bold text-claimondo-navy mt-0.5 truncate">
             {value}
           </p>
-          <p className="text-[11px] text-[#7BA3CC] mt-0.5 truncate">{hint}</p>
+          <p className="text-[11px] text-claimondo-shield mt-0.5 truncate">{hint}</p>
         </div>
       </div>
     </div>

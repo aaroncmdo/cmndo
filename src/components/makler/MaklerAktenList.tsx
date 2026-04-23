@@ -102,11 +102,11 @@ export function MaklerAktenList({ akten, counts, currentFilter }: Props) {
       {akten.length === 0 ? (
         <EmptyState filter={currentFilter} />
       ) : (
-        <div className="bg-white rounded-2xl border border-[#e4e7ef] overflow-hidden">
+        <div className="bg-white rounded-ios-md border border-claimondo-border overflow-hidden">
           {/* Desktop-Tabelle */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-[#f8f9fb] text-left text-xs text-[#4573A2] uppercase tracking-wider">
+              <thead className="bg-[#f8f9fb] text-left text-xs text-claimondo-ondo uppercase tracking-wider">
                 <tr>
                   <th className="px-4 py-3 font-medium">Akte</th>
                   <th className="px-4 py-3 font-medium">Kunde</th>
@@ -177,28 +177,28 @@ function AkteRow({
       className={clickable ? 'hover:bg-[#f8f9fb] cursor-pointer' : 'opacity-80'}
       onClick={clickable ? handleClick : undefined}
     >
-      <td className="px-4 py-3 font-mono text-xs text-[#0D1B3E]">
+      <td className="px-4 py-3 font-mono text-xs text-claimondo-navy">
         {akte.fall_nummer ?? akte.id.slice(0, 8)}
       </td>
-      <td className="px-4 py-3 text-[#0D1B3E]">
+      <td className="px-4 py-3 text-claimondo-navy">
         <div className="flex items-center gap-2">
           <span>{kundeName(akte)}</span>
           {akte.consent_scope === 'minimal' ? <MinimalBadge /> : null}
         </div>
-        <p className="text-xs text-[#4573A2] mt-0.5">{fahrzeugLabel(akte)}</p>
+        <p className="text-xs text-claimondo-ondo mt-0.5">{fahrzeugLabel(akte)}</p>
       </td>
       <td className="px-4 py-3">
         <PhasePill akte={akte} />
       </td>
-      <td className="px-4 py-3 text-[#4573A2]">{formatDate(akte.sv_termin)}</td>
-      <td className="px-4 py-3 text-[#0D1B3E]">
+      <td className="px-4 py-3 text-claimondo-ondo">{formatDate(akte.sv_termin)}</td>
+      <td className="px-4 py-3 text-claimondo-navy">
         {formatAmount(akte.schadens_hoehe_netto)}
       </td>
-      <td className="px-4 py-3 text-[#4573A2]">
+      <td className="px-4 py-3 text-claimondo-ondo">
         {relativeFromNow(akte.updated_at ?? akte.created_at)}
       </td>
       <td className="px-4 py-3 text-right">
-        {clickable ? <span className="text-[#4573A2] text-xs">Öffnen →</span> : null}
+        {clickable ? <span className="text-claimondo-ondo text-xs">Öffnen →</span> : null}
       </td>
     </tr>
   )
@@ -215,18 +215,18 @@ function AkteCard({
     <div className="p-4 space-y-2">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-mono text-[11px] text-[#4573A2]">
+          <p className="font-mono text-[11px] text-claimondo-ondo">
             {akte.fall_nummer ?? akte.id.slice(0, 8)}
           </p>
-          <p className="text-sm font-semibold text-[#0D1B3E] truncate flex items-center gap-2">
+          <p className="text-sm font-semibold text-claimondo-navy truncate flex items-center gap-2">
             {kundeName(akte)}
             {akte.consent_scope === 'minimal' ? <MinimalBadge /> : null}
           </p>
-          <p className="text-xs text-[#4573A2] truncate">{fahrzeugLabel(akte)}</p>
+          <p className="text-xs text-claimondo-ondo truncate">{fahrzeugLabel(akte)}</p>
         </div>
         <PhasePill akte={akte} />
       </div>
-      <div className="flex items-center gap-2 text-xs text-[#4573A2] flex-wrap">
+      <div className="flex items-center gap-2 text-xs text-claimondo-ondo flex-wrap">
         <span>SV: {formatDate(akte.sv_termin)}</span>
         <span aria-hidden>·</span>
         <span>{formatAmount(akte.schadens_hoehe_netto)}</span>
@@ -268,10 +268,10 @@ function AkteCard({
 const PHASE_COLORS: Record<string, { bg: string; text: string; label: string }> = {
   ersterfassung: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Ersterfassung' },
   onboarding: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Onboarding' },
-  'sv-gesucht': { bg: 'bg-[#4573A2]/10', text: 'text-[#0D1B3E]', label: 'SV-Suche' },
-  'sv-zugewiesen': { bg: 'bg-[#4573A2]/10', text: 'text-[#0D1B3E]', label: 'SV zugewiesen' },
-  'sv-termin': { bg: 'bg-[#4573A2]/10', text: 'text-[#0D1B3E]', label: 'SV-Termin' },
-  besichtigung: { bg: 'bg-[#4573A2]/10', text: 'text-[#0D1B3E]', label: 'Besichtigung' },
+  'sv-gesucht': { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy', label: 'SV-Suche' },
+  'sv-zugewiesen': { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy', label: 'SV zugewiesen' },
+  'sv-termin': { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy', label: 'SV-Termin' },
+  besichtigung: { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy', label: 'Besichtigung' },
   'begutachtung-laeuft': {
     bg: 'bg-amber-100',
     text: 'text-amber-700',
@@ -362,12 +362,12 @@ function FilterChip({
       onClick={onClick}
       className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
         active
-          ? 'bg-[#0D1B3E] text-white'
-          : 'bg-white text-[#4573A2] border border-[#e4e7ef] hover:border-[#4573A2]'
+          ? 'bg-claimondo-navy text-white'
+          : 'bg-white text-claimondo-ondo border border-claimondo-border hover:border-claimondo-ondo'
       }`}
     >
       {label}
-      <span className={`ml-1.5 ${active ? 'text-[#7BA3CC]' : 'text-[#0D1B3E]'}`}>
+      <span className={`ml-1.5 ${active ? 'text-claimondo-shield' : 'text-claimondo-navy'}`}>
         {count}
       </span>
     </button>
@@ -394,17 +394,17 @@ function MiniDrawer({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-md p-6 space-y-4"
+        className="bg-white rounded-ios-md w-full max-w-md p-6 space-y-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div>
-          <p className="font-mono text-[11px] text-[#4573A2] mb-1">
+          <p className="font-mono text-[11px] text-claimondo-ondo mb-1">
             {akte.fall_nummer ?? akte.id.slice(0, 8)}
           </p>
-          <h2 id="akte-drawer-title" className="text-lg font-semibold text-[#0D1B3E]">
+          <h2 id="akte-drawer-title" className="text-lg font-semibold text-claimondo-navy">
             {kundeName(akte)}
           </h2>
-          <p className="text-xs text-[#4573A2] mt-1">
+          <p className="text-xs text-claimondo-ondo mt-1">
             Minimal-Consent — Sie sehen nur Basis-Status. Für Vollzugriff bitte
             den Kunden erneut um Freigabe fragen.
           </p>
@@ -421,7 +421,7 @@ function MiniDrawer({
         <button
           type="button"
           onClick={onClose}
-          className="w-full py-2 rounded-lg bg-[#0D1B3E] text-white text-sm font-medium hover:bg-[#1E3A5F]"
+          className="w-full py-2 rounded-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-[#1E3A5F]"
         >
           Schließen
         </button>
@@ -433,8 +433,8 @@ function MiniDrawer({
 function Row({ dt, dd }: { dt: string; dd: React.ReactNode }) {
   return (
     <div className="flex justify-between items-center gap-4">
-      <dt className="text-[#4573A2]">{dt}</dt>
-      <dd className="text-[#0D1B3E] text-right">{dd}</dd>
+      <dt className="text-claimondo-ondo">{dt}</dt>
+      <dd className="text-claimondo-navy text-right">{dd}</dd>
     </div>
   )
 }
@@ -456,12 +456,12 @@ function EmptyState({ filter }: { filter: AktenFilter }) {
   }
   const c = copy[filter]
   return (
-    <div className="bg-white rounded-2xl border border-[#e4e7ef] p-10 text-center">
-      <div className="mx-auto w-12 h-12 rounded-full bg-[#f8f9fb] flex items-center justify-center text-[#4573A2] mb-4">
+    <div className="bg-white rounded-ios-md border border-claimondo-border p-10 text-center">
+      <div className="mx-auto w-12 h-12 rounded-full bg-[#f8f9fb] flex items-center justify-center text-claimondo-ondo mb-4">
         <FolderOpenIcon width={22} height={22} />
       </div>
-      <h2 className="text-base font-semibold text-[#0D1B3E] mb-2">{c.heading}</h2>
-      <p className="text-sm text-[#4573A2] max-w-sm mx-auto">{c.body}</p>
+      <h2 className="text-base font-semibold text-claimondo-navy mb-2">{c.heading}</h2>
+      <p className="text-sm text-claimondo-ondo max-w-sm mx-auto">{c.body}</p>
     </div>
   )
 }

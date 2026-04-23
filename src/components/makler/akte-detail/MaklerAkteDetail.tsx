@@ -128,22 +128,22 @@ export function MaklerAkteDetail({
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
       {/* Breadcrumb */}
-      <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-xs text-[#4573A2]">
-        <Link href="/makler/akten" className="inline-flex items-center gap-1 hover:text-[#0D1B3E]">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-xs text-claimondo-ondo">
+        <Link href="/makler/akten" className="inline-flex items-center gap-1 hover:text-claimondo-navy">
           <ArrowLeftIcon width={12} height={12} /> Meine Akten
         </Link>
         <span aria-hidden>/</span>
-        <span className="text-[#0D1B3E] font-mono">
+        <span className="text-claimondo-navy font-mono">
           {fall.fall_nummer ?? fall.id.slice(0, 8)}
         </span>
       </nav>
 
       {/* Header-Card */}
-      <header className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#0D1B3E] via-[#1E3A5F] to-[#0D1B3E] p-6 md:p-8 text-white">
+      <header className="relative rounded-ios-md overflow-hidden bg-gradient-to-br from-[#0D1B3E] via-[#1E3A5F] to-[#0D1B3E] p-6 md:p-8 text-white">
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div className="min-w-0 flex-1">
             <h1 className="text-2xl font-bold">{fullName(kunde)}</h1>
-            <p className="text-sm text-[#7BA3CC] mt-1 truncate">
+            <p className="text-sm text-claimondo-shield mt-1 truncate">
               <span className="font-mono">
                 {fall.fall_nummer ?? fall.id.slice(0, 8)}
               </span>
@@ -160,7 +160,7 @@ export function MaklerAkteDetail({
           {kunde?.telefon ? (
             <a
               href={`tel:${kunde.telefon}`}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white text-[#0D1B3E] text-sm font-semibold hover:bg-[#7BA3CC]/20"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white text-claimondo-navy text-sm font-semibold hover:bg-[#7BA3CC]/20"
             >
               <PhoneIcon width={16} height={16} />
               Kunde anrufen
@@ -202,7 +202,7 @@ export function MaklerAkteDetail({
       <div
         role="tablist"
         aria-label="Akte-Details"
-        className="flex gap-1 border-b border-[#e4e7ef] overflow-x-auto"
+        className="flex gap-1 border-b border-claimondo-border overflow-x-auto"
       >
         <TabButton
           active={tab === 'overview'}
@@ -281,15 +281,15 @@ function QuickStat({
   valueClass?: string
 }) {
   return (
-    <div className="bg-white rounded-xl border border-[#e4e7ef] p-4">
+    <div className="bg-white rounded-xl border border-claimondo-border p-4">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[11px] text-[#4573A2]">{label}</span>
-        <span className="text-[#4573A2]">{icon}</span>
+        <span className="text-[11px] text-claimondo-ondo">{label}</span>
+        <span className="text-claimondo-ondo">{icon}</span>
       </div>
-      <p className={`text-lg font-semibold text-[#0D1B3E] ${valueClass ?? ''}`}>
+      <p className={`text-lg font-semibold text-claimondo-navy ${valueClass ?? ''}`}>
         {value}
       </p>
-      {hint ? <p className="text-[11px] text-[#4573A2] mt-0.5">{hint}</p> : null}
+      {hint ? <p className="text-[11px] text-claimondo-ondo mt-0.5">{hint}</p> : null}
     </div>
   )
 }
@@ -315,8 +315,8 @@ function TabButton({
       onClick={onClick}
       className={`shrink-0 inline-flex items-center gap-2 px-3 py-2.5 text-sm border-b-2 -mb-px transition-colors ${
         active
-          ? 'border-[#0D1B3E] text-[#0D1B3E] font-semibold'
-          : 'border-transparent text-[#4573A2] hover:text-[#0D1B3E]'
+          ? 'border-[#0D1B3E] text-claimondo-navy font-semibold'
+          : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
       }`}
     >
       {icon}
@@ -324,7 +324,7 @@ function TabButton({
       {count !== undefined && count > 0 ? (
         <span
           className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-medium ${
-            active ? 'bg-[#0D1B3E] text-white' : 'bg-[#e4e7ef] text-[#0D1B3E]'
+            active ? 'bg-claimondo-navy text-white' : 'bg-[#e4e7ef] text-claimondo-navy'
           }`}
         >
           {count}
@@ -379,9 +379,9 @@ function OverviewPanel({
           <InfoRow label="Schadenart" value={fall.schadens_art ?? '–'} />
           <InfoRow label="Service" value={fall.service_typ ?? '–'} />
           {fall.unfallhergang ? (
-            <div className="pt-2 border-t border-[#e4e7ef] mt-2">
-              <p className="text-[11px] text-[#4573A2] mb-1">Hergang</p>
-              <p className="text-sm text-[#0D1B3E] whitespace-pre-wrap">
+            <div className="pt-2 border-t border-claimondo-border mt-2">
+              <p className="text-[11px] text-claimondo-ondo mb-1">Hergang</p>
+              <p className="text-sm text-claimondo-navy whitespace-pre-wrap">
                 {fall.unfallhergang}
               </p>
             </div>
@@ -429,8 +429,8 @@ function OverviewPanel({
       </div>
 
       {hasGutachten ? (
-        <div className="bg-white rounded-2xl border border-[#e4e7ef] p-6">
-          <h2 className="text-base font-semibold text-[#0D1B3E] mb-4">
+        <div className="bg-white rounded-ios-md border border-claimondo-border p-6">
+          <h2 className="text-base font-semibold text-claimondo-navy mb-4">
             Gutachten-Ergebnis
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
@@ -450,11 +450,11 @@ function OverviewPanel({
               label="Gutachter-Honorar"
               value={fmtEur(fall.gutachter_honorar)}
             />
-            <div className="flex justify-between items-center py-1 border-t border-[#e4e7ef] mt-2 pt-3">
-              <span className="text-sm font-semibold text-[#0D1B3E]">
+            <div className="flex justify-between items-center py-1 border-t border-claimondo-border mt-2 pt-3">
+              <span className="text-sm font-semibold text-claimondo-navy">
                 Gesamtforderung
               </span>
-              <span className="text-lg font-bold text-[#0D1B3E]">
+              <span className="text-lg font-bold text-claimondo-navy">
                 {fmtEur(gesamtforderung)}
               </span>
             </div>
@@ -489,15 +489,15 @@ function NextStepBanner({ fall }: { fall: FallDetail['fall'] }) {
   }
   const text = copy[fall.status] ?? `Aktuelle Phase: ${fall.status}`
   return (
-    <div className="rounded-2xl bg-[#4573A2]/10 border border-[#4573A2]/20 p-4 flex items-start gap-3">
-      <span className="shrink-0 mt-0.5 text-[#0D1B3E]">
+    <div className="rounded-ios-md bg-claimondo-ondo/10 border border-claimondo-ondo/20 p-4 flex items-start gap-3">
+      <span className="shrink-0 mt-0.5 text-claimondo-navy">
         <ArrowRightIcon width={18} height={18} />
       </span>
       <div>
-        <p className="text-[11px] uppercase tracking-wider text-[#4573A2] font-medium">
+        <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo font-medium">
           Nächster Schritt
         </p>
-        <p className="text-sm text-[#0D1B3E] mt-0.5">{text}</p>
+        <p className="text-sm text-claimondo-navy mt-0.5">{text}</p>
       </div>
     </div>
   )
@@ -511,8 +511,8 @@ function InfoCard({
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-[#e4e7ef] p-5">
-      <h2 className="text-sm font-semibold text-[#0D1B3E] mb-3">{title}</h2>
+    <div className="bg-white rounded-ios-md border border-claimondo-border p-5">
+      <h2 className="text-sm font-semibold text-claimondo-navy mb-3">{title}</h2>
       <div className="space-y-2">{children}</div>
     </div>
   )
@@ -521,8 +521,8 @@ function InfoCard({
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-4 py-1">
-      <dt className="text-xs text-[#4573A2] shrink-0">{label}</dt>
-      <dd className="text-sm text-[#0D1B3E] text-right break-words">{value}</dd>
+      <dt className="text-xs text-claimondo-ondo shrink-0">{label}</dt>
+      <dd className="text-sm text-claimondo-navy text-right break-words">{value}</dd>
     </div>
   )
 }
@@ -534,15 +534,15 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 function TimelinePanel({ events }: { events: TimelineEvent[] }) {
   if (events.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-[#e4e7ef] p-10 text-center">
-        <p className="text-sm text-[#4573A2]">Noch keine Timeline-Events.</p>
+      <div className="bg-white rounded-ios-md border border-claimondo-border p-10 text-center">
+        <p className="text-sm text-claimondo-ondo">Noch keine Timeline-Events.</p>
       </div>
     )
   }
   return (
-    <div className="bg-white rounded-2xl border border-[#e4e7ef] p-6">
-      <h2 className="text-sm font-semibold text-[#0D1B3E] mb-4">Timeline</h2>
-      <ol className="relative border-l-2 border-[#e4e7ef] pl-6 space-y-4">
+    <div className="bg-white rounded-ios-md border border-claimondo-border p-6">
+      <h2 className="text-sm font-semibold text-claimondo-navy mb-4">Timeline</h2>
+      <ol className="relative border-l-2 border-claimondo-border pl-6 space-y-4">
         {events.map((e, idx) => (
           <li key={`${e.timestamp}-${idx}`} className="relative">
             <span className="absolute -left-[31px] flex items-center justify-center">
@@ -556,7 +556,7 @@ function TimelinePanel({ events }: { events: TimelineEvent[] }) {
                 <CircleDotIcon
                   width={18}
                   height={18}
-                  className="text-[#4573A2] bg-white animate-pulse"
+                  className="text-claimondo-ondo bg-white animate-pulse"
                 />
               ) : (
                 <CircleIcon
@@ -566,8 +566,8 @@ function TimelinePanel({ events }: { events: TimelineEvent[] }) {
                 />
               )}
             </span>
-            <p className="text-sm font-medium text-[#0D1B3E]">{e.title}</p>
-            <p className="text-xs text-[#4573A2] mt-0.5">
+            <p className="text-sm font-medium text-claimondo-navy">{e.title}</p>
+            <p className="text-xs text-claimondo-ondo mt-0.5">
               {fmtDateTime(e.timestamp)}
               {e.meta ? ` · ${e.meta}` : ''}
             </p>

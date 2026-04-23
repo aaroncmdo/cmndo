@@ -101,15 +101,15 @@ export function MaklerLeadsTable({ leads }: Props) {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-[#4573A2] py-8 text-center">
+        <p className="text-sm text-claimondo-ondo py-8 text-center">
           Keine Leads in dieser Kategorie.
         </p>
       ) : (
-        <div className="bg-white rounded-2xl border border-[#e4e7ef] overflow-hidden">
+        <div className="bg-white rounded-ios-md border border-claimondo-border overflow-hidden">
           {/* Desktop-Tabelle */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-[#f8f9fb] text-left text-xs text-[#4573A2] uppercase tracking-wider">
+              <thead className="bg-[#f8f9fb] text-left text-xs text-claimondo-ondo uppercase tracking-wider">
                 <tr>
                   <th className="px-4 py-3 font-medium">Name</th>
                   <th className="px-4 py-3 font-medium">Fahrzeug</th>
@@ -180,10 +180,10 @@ function LeadRow({
 
   return (
     <tr className={rowClass} onClick={clickable ? handleClick : undefined}>
-      <td className="px-4 py-3 text-[#0D1B3E]">{nameLabel(lead)}</td>
-      <td className="px-4 py-3 text-[#4573A2]">{fahrzeugLabel(lead)}</td>
-      <td className="px-4 py-3 text-[#4573A2]">{formatDate(lead.unfalldatum)}</td>
-      <td className="px-4 py-3 text-[#4573A2]">{formatDate(lead.created_at)}</td>
+      <td className="px-4 py-3 text-claimondo-navy">{nameLabel(lead)}</td>
+      <td className="px-4 py-3 text-claimondo-ondo">{fahrzeugLabel(lead)}</td>
+      <td className="px-4 py-3 text-claimondo-ondo">{formatDate(lead.unfalldatum)}</td>
+      <td className="px-4 py-3 text-claimondo-ondo">{formatDate(lead.created_at)}</td>
       <td className="px-4 py-3">
         <StatusPill status={lead.status} disqualifiziert={lead.disqualifiziert} />
       </td>
@@ -191,7 +191,7 @@ function LeadRow({
         <ConsentBadge label={lead.consent_label} />
       </td>
       <td className="px-4 py-3 text-right">
-        {clickable ? <span className="text-[#4573A2] text-xs">Öffnen →</span> : null}
+        {clickable ? <span className="text-claimondo-ondo text-xs">Öffnen →</span> : null}
       </td>
     </tr>
   )
@@ -208,14 +208,14 @@ function LeadCard({
     <div className="p-4 flex flex-col gap-2">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-[#0D1B3E] truncate">
+          <p className="text-sm font-semibold text-claimondo-navy truncate">
             {nameLabel(lead)}
           </p>
-          <p className="text-xs text-[#4573A2] truncate">{fahrzeugLabel(lead)}</p>
+          <p className="text-xs text-claimondo-ondo truncate">{fahrzeugLabel(lead)}</p>
         </div>
         <ConsentBadge label={lead.consent_label} />
       </div>
-      <div className="flex items-center gap-2 text-xs text-[#4573A2]">
+      <div className="flex items-center gap-2 text-xs text-claimondo-ondo">
         <span>Unfall: {formatDate(lead.unfalldatum)}</span>
         <span aria-hidden>·</span>
         <span>Eingang: {formatDate(lead.created_at)}</span>
@@ -275,7 +275,7 @@ function StatusPill({
     )
   }
   const cfg: Record<string, { bg: string; text: string }> = {
-    neu: { bg: 'bg-[#4573A2]/10', text: 'text-[#0D1B3E]' },
+    neu: { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy' },
     qualifiziert: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
     konvertiert: { bg: 'bg-emerald-600/10', text: 'text-emerald-700' },
   }
@@ -339,12 +339,12 @@ function FilterChip({
       onClick={onClick}
       className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
         active
-          ? 'bg-[#0D1B3E] text-white'
-          : 'bg-white text-[#4573A2] border border-[#e4e7ef] hover:border-[#4573A2]'
+          ? 'bg-claimondo-navy text-white'
+          : 'bg-white text-claimondo-ondo border border-claimondo-border hover:border-claimondo-ondo'
       }`}
     >
       {label}
-      <span className={`ml-1.5 ${active ? 'text-[#7BA3CC]' : 'text-[#0D1B3E]'}`}>
+      <span className={`ml-1.5 ${active ? 'text-claimondo-shield' : 'text-claimondo-navy'}`}>
         {count}
       </span>
     </button>
@@ -371,14 +371,14 @@ function MiniDrawer({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-md p-6 space-y-4"
+        className="bg-white rounded-ios-md w-full max-w-md p-6 space-y-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div>
-          <h2 id="mini-drawer-title" className="text-lg font-semibold text-[#0D1B3E]">
+          <h2 id="mini-drawer-title" className="text-lg font-semibold text-claimondo-navy">
             {nameLabel(lead)}
           </h2>
-          <p className="text-xs text-[#4573A2] mt-1">
+          <p className="text-xs text-claimondo-ondo mt-1">
             Minimal-Consent — Sie sehen nur Basis-Infos ohne Fall-Zugriff.
           </p>
         </div>
@@ -392,7 +392,7 @@ function MiniDrawer({
         <button
           type="button"
           onClick={onClose}
-          className="w-full py-2 rounded-lg bg-[#0D1B3E] text-white text-sm font-medium hover:bg-[#1E3A5F]"
+          className="w-full py-2 rounded-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-[#1E3A5F]"
         >
           Schließen
         </button>
@@ -404,8 +404,8 @@ function MiniDrawer({
 function Row({ dt, dd }: { dt: string; dd: string }) {
   return (
     <div className="flex justify-between gap-4">
-      <dt className="text-[#4573A2]">{dt}</dt>
-      <dd className="text-[#0D1B3E] text-right">{dd}</dd>
+      <dt className="text-claimondo-ondo">{dt}</dt>
+      <dd className="text-claimondo-navy text-right">{dd}</dd>
     </div>
   )
 }
@@ -416,20 +416,20 @@ function Row({ dt, dd }: { dt: string; dd: string }) {
 
 function EmptyState() {
   return (
-    <div className="bg-white rounded-2xl border border-[#e4e7ef] p-10 text-center">
-      <div className="mx-auto w-12 h-12 rounded-full bg-[#f8f9fb] flex items-center justify-center text-[#4573A2] mb-4">
+    <div className="bg-white rounded-ios-md border border-claimondo-border p-10 text-center">
+      <div className="mx-auto w-12 h-12 rounded-full bg-[#f8f9fb] flex items-center justify-center text-claimondo-ondo mb-4">
         <UserPlusIcon width={22} height={22} />
       </div>
-      <h2 className="text-base font-semibold text-[#0D1B3E] mb-2">
+      <h2 className="text-base font-semibold text-claimondo-navy mb-2">
         Noch keine Leads
       </h2>
-      <p className="text-sm text-[#4573A2] mb-4 max-w-sm mx-auto">
+      <p className="text-sm text-claimondo-ondo mb-4 max-w-sm mx-auto">
         Sobald Kunden über Ihren Promo-Code einen Schaden melden, erscheinen sie
         hier. Teilen Sie Ihren QR-Code, um den ersten Lead zu erzeugen.
       </p>
       <Link
         href="/makler/promo"
-        className="inline-block px-4 py-2 rounded-lg bg-[#0D1B3E] text-white text-sm font-medium hover:bg-[#1E3A5F]"
+        className="inline-block px-4 py-2 rounded-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-[#1E3A5F]"
       >
         Promo-Code teilen
       </Link>

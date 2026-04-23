@@ -6,8 +6,8 @@ import { AlertCircleIcon, QrCodeIcon } from 'lucide-react'
 export function MaklerPromoEmpty({ firma }: { firma: string }) {
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto">
-      <div className="bg-white rounded-2xl border border-[#e4e7ef] p-8 text-center space-y-4">
-        <span className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-orange-50 text-orange-600 border border-orange-200">
+      <div className="bg-white rounded-ios-md border border-[#e4e7ef] p-8 text-center space-y-4">
+        <span className="inline-flex items-center justify-center w-14 h-14 rounded-ios-md bg-orange-50 text-orange-600 border border-orange-200">
           <QrCodeIcon width={24} height={24} />
         </span>
         <h1 className="text-lg font-bold text-[#0D1B3E]">
@@ -18,7 +18,7 @@ export function MaklerPromoEmpty({ firma }: { firma: string }) {
           Bitte wenden Sie sich an Ihren Claimondo-Kundenbetreuer, damit ein
           Code erzeugt wird.
         </p>
-        <div className="inline-flex items-start gap-2 text-xs text-[#7BA3CC] bg-[#f8f9fb] border border-[#e4e7ef] rounded-lg px-3 py-2 text-left">
+        <div className="inline-flex items-start gap-2 text-xs text-claimondo-shield bg-[#f8f9fb] border border-[#e4e7ef] rounded-lg px-3 py-2 text-left">
           <AlertCircleIcon
             width={14}
             height={14}
