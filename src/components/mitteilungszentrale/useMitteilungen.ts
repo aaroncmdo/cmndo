@@ -20,9 +20,6 @@ export function useMitteilungen() {
   const [items, setItems] = useState<Mitteilung[]>([])
   const [counts, setCounts] = useState<Counts>({ update: 0, task: 0, nachricht: 0, anruf: 0 })
   const [loading, setLoading] = useState(true)
-  // AAR-725: Steigt bei jedem Realtime-INSERT — UpdatesNav hört darauf und
-  // lässt den Button 1× kurz aufleuchten.
-  const [lastInsertTick, setLastInsertTick] = useState(0)
 
   const load = useCallback(async () => {
     const user = (await supabase.auth.getUser())?.data?.user
@@ -59,10 +56,7 @@ export function useMitteilungen() {
   useEffect(() => {
     const channel = supabase
       .channel(`mitteilungen-realtime-${channelId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mitteilungen' }, () => {
-        setLastInsertTick(t => t + 1)
-        load()
-      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mitteilungen' }, () => load())
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'mitteilungen' }, () => load())
       .subscribe()
     return () => { supabase.removeChannel(channel) }
@@ -84,5 +78,5 @@ export function useMitteilungen() {
     setCounts({ update: 0, task: 0, nachricht: 0, anruf: 0 })
   }, [supabase, items])
 
-  return { items, counts, totalUnread, loading, markAsRead, markAllAsRead, lastInsertTick }
+  return { items, counts, totalUnread, loading, markAsRead, markAllAsRead }
 }

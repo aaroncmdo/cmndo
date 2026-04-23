@@ -14,7 +14,6 @@
 // Navigation schließen. Task-Kategorie ist deprecated (AAR-723 Pill).
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   BellIcon,
@@ -52,12 +51,16 @@ function fmtRelative(iso: string) {
 }
 
 export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) {
-  const { items, markAsRead, lastInsertTick } = useMitteilungen()
+  const { items, markAsRead } = useMitteilungen()
   const [open, setOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<TabKey>('aktivitaet')
   const [flashing, setFlashing] = useState(false)
   const popoverRef = useRef<HTMLDivElement | null>(null)
   const buttonRef = useRef<HTMLButtonElement | null>(null)
+  // AAR-725: Previous unread-count um Flash nur bei ECHTEM Zuwachs für DIESEN
+  // User zu triggern. `lastInsertTick` des Hooks schlägt auch bei fremden
+  // Inserts aus — davor schütz die Diff-Logik hier.
+  const prevUnreadRef = useRef<number | null>(null)
   const pathname = usePathname()
   const router = useRouter()
 
@@ -75,14 +78,20 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
   )
   const hasKritisch = kritischUnread.length > 0
 
-  // Flash nur bei neuem INSERT (lastInsertTick > 0), nicht auf initialem
-  // Mount. Das erste useEffect-Run bei tick=0 flashed nicht.
+  // Flash nur wenn der Unread-Count für diesen User GESTIEGEN ist — nicht
+  // bei initialem Mount (prevUnreadRef === null) und nicht wenn ein fremder
+  // mitteilungen-INSERT nur unseren Counter-Tick hochgezogen hat ohne Effekt
+  // auf uns.
   useEffect(() => {
-    if (lastInsertTick === 0) return
-    setFlashing(true)
-    const t = setTimeout(() => setFlashing(false), 1000)
-    return () => clearTimeout(t)
-  }, [lastInsertTick])
+    const current = unreadTotal
+    if (prevUnreadRef.current !== null && current > prevUnreadRef.current) {
+      setFlashing(true)
+      const t = setTimeout(() => setFlashing(false), 1000)
+      prevUnreadRef.current = current
+      return () => clearTimeout(t)
+    }
+    prevUnreadRef.current = current
+  }, [unreadTotal])
 
   // AAR-725: Auto-Close bei Navigation.
   useEffect(() => {
@@ -283,17 +292,6 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
             )}
           </div>
 
-          {unreadTotal > 0 && (
-            <div className="px-4 py-2.5 border-t border-gray-100 bg-gray-50">
-              <Link
-                href="/admin/nachrichten"
-                onClick={() => setOpen(false)}
-                className="block text-center text-[11px] text-[#4573A2] hover:text-[#0D1B3E] font-medium"
-              >
-                Alle Mitteilungen ansehen
-              </Link>
-            </div>
-          )}
         </div>
       )}
     </div>
