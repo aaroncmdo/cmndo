@@ -76,6 +76,13 @@ export default function TerminCard({
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
+            {/* AAR-724: Roter Punkt für noch nicht gesehene Termine. */}
+            {!termin.gesehen_am && (
+              <span
+                className="inline-block w-2 h-2 rounded-full bg-red-500 shrink-0"
+                aria-label="Neu, noch nicht angesehen"
+              />
+            )}
             <span className="text-sm font-semibold text-gray-900">
               {formatUhrzeit(termin.start_zeit)}
             </span>

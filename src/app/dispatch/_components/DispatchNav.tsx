@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
 import TasksPill from '@/components/shared/TasksPill'
+import { DispatchNeueRueckrufeBadge } from '@/components/shared/NeueTermineBadge'
 
 // AAR-63: /dispatch/einstellungen Link entfernt (Route existiert nicht → 404)
 // AAR-112: Karte + Sachverständige + Isochrone ergänzt
@@ -43,6 +44,9 @@ export default function DispatchNav({ email, initials, userId }: { email: string
 
   function renderLink(item: NavItem) {
     const active = isActive(item.href)
+    // AAR-724: Rückrufe-Nav bekommt einen Realtime-Counter für noch nicht
+    // gesehene Rückrufe. Andere Nav-Items bleiben unverändert.
+    const isRueckrufe = item.href === '/dispatch/rueckrufe'
     return (
       <Link
         key={item.href}
@@ -52,7 +56,10 @@ export default function DispatchNav({ email, initials, userId }: { email: string
         }`}
       >
         <item.icon style={{ width: 17, height: 17 }} />
-        {item.label}
+        <span className="flex-1">{item.label}</span>
+        {isRueckrufe && (
+          <DispatchNeueRueckrufeBadge userId={userId} className="shrink-0" />
+        )}
       </Link>
     )
   }
