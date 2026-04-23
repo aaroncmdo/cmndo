@@ -6,6 +6,7 @@ import UpdatesNav from '@/components/updates/UpdatesNav'
 import Spotlight from '@/components/Spotlight'
 import { PageContainer } from '@/components/PageContainer'
 import OutboxBadge from '@/components/offline/OutboxBadge'
+import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
 
 export default async function AdminLayout({
   children,
@@ -95,6 +96,7 @@ export default async function AdminLayout({
           <PageContainer className="h-full">{children}</PageContainer>
         </main>
       </div>
+      <GlobalPosteingangFab currentUserId={user.id} />
     </div>
   )
 }
