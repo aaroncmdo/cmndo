@@ -16,7 +16,7 @@ import {
   LogOutIcon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
-import NotificationBell from '@/app/admin/_components/NotificationBell'
+import UpdatesNav from '@/components/updates/UpdatesNav'
 import TasksPill from '@/components/shared/TasksPill'
 
 type MaklerShellProps = {
@@ -107,7 +107,7 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
               </p>
               <p className="text-[11px] text-[#7BA3CC] truncate">{email}</p>
             </div>
-            <NotificationBell />
+            <UpdatesNav variant="dark" />
           </div>
           <form action="/api/auth/logout" method="POST">
             <button

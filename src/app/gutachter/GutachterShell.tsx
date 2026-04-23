@@ -23,8 +23,7 @@ import {
   FileSignatureIcon,
   ShieldCheckIcon,
 } from 'lucide-react'
-import NotificationBell from '@/app/admin/_components/NotificationBell'
-import MitteilungszentralePanel from '@/components/mitteilungszentrale/MitteilungszentralePanel'
+import UpdatesNav from '@/components/updates/UpdatesNav'
 import OutboxBadge from '@/components/offline/OutboxBadge'
 import { SupportButton } from '@/components/support/SupportButton'
 import TasksPill from '@/components/shared/TasksPill'
@@ -468,7 +467,7 @@ export default function GutachterShell({
           )}
           {/* AAR-252: Glocke im Mobile-Header — war vorher nur im Wetter-
               Banner, das aber bei SVs ohne standort_lat nicht rendert. */}
-          <MitteilungszentralePanel variant="dark" />
+          <UpdatesNav variant="dark" />
         </header>
 
         {/* Wetter-Banner (auf ALLEN Seiten sichtbar) */}
@@ -484,7 +483,7 @@ export default function GutachterShell({
               ))}
             </div>
             {/* Mobile: Outbox + Glocke */}
-            <div className="shrink-0 sm:hidden flex items-center gap-2"><OutboxBadge /><MitteilungszentralePanel variant="dark" /></div>
+            <div className="shrink-0 sm:hidden flex items-center gap-2"><OutboxBadge /><UpdatesNav variant="dark" /></div>
             {/* Desktop: Gute Fahrt + Glocke */}
             <div className="shrink-0 text-right hidden sm:flex sm:items-center sm:gap-3">
               <div>
@@ -495,7 +494,7 @@ export default function GutachterShell({
                 )}
               </div>
               <OutboxBadge />
-              <MitteilungszentralePanel variant="dark" />
+              <UpdatesNav variant="dark" />
             </div>
           </div>
         )}

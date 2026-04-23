@@ -18,7 +18,7 @@ import { roleToPath } from '@/lib/auth/role-redirect'
 import AdminNav from '@/app/admin/_components/AdminNav'
 import MitarbeiterNav from '@/app/mitarbeiter/_components/MitarbeiterNav'
 import KanzleiNav from '@/app/kanzlei/_components/KanzleiNav'
-import MitteilungszentralePanel from '@/components/mitteilungszentrale/MitteilungszentralePanel'
+import UpdatesNav from '@/components/updates/UpdatesNav'
 import Spotlight from '@/components/Spotlight'
 import { PageContainer } from '@/components/PageContainer'
 import OutboxBadge from '@/components/offline/OutboxBadge'
@@ -162,11 +162,11 @@ export default async function FaelleLayout({
           <span className="text-lg font-bold tracking-tight">
             <span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span>
           </span>
-          <MitteilungszentralePanel variant="dark" />
+          <UpdatesNav variant="dark" />
         </header>
         <div className="hidden md:flex items-center gap-2 fixed top-3 right-4 z-30">
           <OutboxBadge />
-          <MitteilungszentralePanel variant="light" />
+          <UpdatesNav variant="light" />
         </div>
         <main id="main-content" role="main" className="flex-1 min-h-0 overflow-y-auto pb-16 md:pb-0">
           <PageContainer className="h-full">{children}</PageContainer>

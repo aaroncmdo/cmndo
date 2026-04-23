@@ -13,6 +13,7 @@ import { redirect } from 'next/navigation'
 import { LogOutIcon } from 'lucide-react'
 import KanzleiNav from './_components/KanzleiNav'
 import TasksPill from '@/components/shared/TasksPill'
+import UpdatesNav from '@/components/updates/UpdatesNav'
 import { roleToPath } from '@/lib/auth/role-redirect'
 
 export default async function KanzleiLayout({
@@ -58,6 +59,7 @@ export default async function KanzleiLayout({
           <TasksPill userId={user.id} href="/kanzlei/dashboard" />
         </div>
         <div className="flex items-center gap-3">
+          <UpdatesNav variant="dark" />
           <span className="text-[#7BA3CC] text-sm">{displayName}</span>
           <form action="/api/auth/logout" method="POST">
             <button
