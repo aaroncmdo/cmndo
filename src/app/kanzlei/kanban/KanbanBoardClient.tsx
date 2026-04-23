@@ -76,21 +76,21 @@ export default function KanbanBoardClient({ karten }: { karten: KanbanKarte[] })
           {spalten.map((s) => (
             <div
               key={s.nr}
-              className="w-72 shrink-0 rounded-xl border border-[#e4e7ef] bg-white overflow-hidden flex flex-col"
+              className="w-72 shrink-0 rounded-xl border border-claimondo-border bg-white overflow-hidden flex flex-col"
             >
               <div
-                className="px-3 py-2 border-b border-[#e4e7ef] flex items-center justify-between"
+                className="px-3 py-2 border-b border-claimondo-border flex items-center justify-between"
                 style={{ backgroundColor: PHASE_ACCENT[s.nr] }}
               >
                 <div className="min-w-0">
                   <p className="text-[10px] uppercase tracking-wider text-gray-500 font-medium">
                     Phase {s.nr}
                   </p>
-                  <p className="text-sm font-semibold text-[#0D1B3E] truncate">
+                  <p className="text-sm font-semibold text-claimondo-navy truncate">
                     {s.name}
                   </p>
                 </div>
-                <span className="text-[11px] font-semibold text-[#0D1B3E] bg-white rounded-full px-2 py-0.5 border border-[#e4e7ef] shrink-0">
+                <span className="text-[11px] font-semibold text-claimondo-navy bg-white rounded-full px-2 py-0.5 border border-claimondo-border shrink-0">
                   {s.karten.length}
                 </span>
               </div>
@@ -134,16 +134,16 @@ function KanbanCard({
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
   return (
-    <div className="rounded-lg border border-[#e4e7ef] bg-white p-3 hover:border-[#4573A2] hover:shadow-sm transition-all">
+    <div className="rounded-lg border border-claimondo-border bg-white p-3 hover:border-claimondo-ondo hover:shadow-sm transition-all">
       <div className="flex items-start justify-between gap-2">
         <Link
           href={`/faelle/${karte.id}`}
           className="min-w-0 flex-1 group"
         >
-          <p className="text-[11px] font-mono text-[#4573A2] group-hover:underline">
+          <p className="text-[11px] font-mono text-claimondo-ondo group-hover:underline">
             {karte.fall_nummer}
           </p>
-          <p className="text-sm font-semibold text-[#0D1B3E] truncate">
+          <p className="text-sm font-semibold text-claimondo-navy truncate">
             {karte.kunde}
           </p>
         </Link>
@@ -154,7 +154,7 @@ function KanbanCard({
               e.stopPropagation()
               setMenuOpen((o) => !o)
             }}
-            className="p-1 -m-1 rounded hover:bg-gray-100 text-gray-400 hover:text-[#0D1B3E]"
+            className="p-1 -m-1 rounded hover:bg-gray-100 text-gray-400 hover:text-claimondo-navy"
             aria-label="Aktionen"
           >
             <MoreVerticalIcon className="w-4 h-4" />
@@ -165,24 +165,24 @@ function KanbanCard({
                 className="fixed inset-0 z-40"
                 onClick={() => setMenuOpen(false)}
               />
-              <div className="absolute right-0 top-full mt-1 z-50 w-56 rounded-lg border border-[#e4e7ef] bg-white shadow-md overflow-hidden">
+              <div className="absolute right-0 top-full mt-1 z-50 w-56 rounded-lg border border-claimondo-border bg-white shadow-md overflow-hidden">
                 <button
                   type="button"
                   onClick={() => {
                     setMenuOpen(false)
                     onOpenDokumente()
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-[12px] text-[#0D1B3E] hover:bg-[#f8f9fb] text-left"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-[12px] text-claimondo-navy hover:bg-claimondo-bg text-left"
                 >
-                  <FolderOpenIcon className="w-3.5 h-3.5 text-[#4573A2]" />
+                  <FolderOpenIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
                   Alle Dokumente öffnen
                 </button>
                 <Link
                   href={`/faelle/${karte.id}`}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-[12px] text-[#0D1B3E] hover:bg-[#f8f9fb] text-left border-t border-[#e4e7ef]"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-[12px] text-claimondo-navy hover:bg-claimondo-bg text-left border-t border-claimondo-border"
                   onClick={() => setMenuOpen(false)}
                 >
-                  <ArrowRightIcon className="w-3.5 h-3.5 text-[#4573A2]" />
+                  <ArrowRightIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
                   Fallakte öffnen
                 </Link>
               </div>
@@ -192,7 +192,7 @@ function KanbanCard({
       </div>
       <div className="mt-2 flex items-center gap-2 flex-wrap text-[11px]">
         {karte.kennzeichen && (
-          <span className="font-mono text-gray-700 bg-[#f8f9fb] px-1.5 py-0.5 rounded">
+          <span className="font-mono text-gray-700 bg-claimondo-bg px-1.5 py-0.5 rounded">
             {karte.kennzeichen}
           </span>
         )}

@@ -133,7 +133,7 @@ export default async function MitarbeiterTermine() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-[#0D1B3E]">Meine Termine</h1>
+        <h1 className="text-xl font-bold text-claimondo-navy">Meine Termine</h1>
         <p className="text-sm text-gray-500 mt-1">
           Rückrufe und Kundentermine, die dir zugewiesen sind.
         </p>
@@ -156,7 +156,7 @@ export default async function MitarbeiterTermine() {
                   day: '2-digit',
                   month: '2-digit',
                 })}
-                {isToday && <span className="ml-2 text-xs text-[#4573A2]">(heute)</span>}
+                {isToday && <span className="ml-2 text-xs text-claimondo-ondo">(heute)</span>}
               </h2>
               <span className="text-xs text-gray-500">{rows?.length ?? 0}</span>
             </div>

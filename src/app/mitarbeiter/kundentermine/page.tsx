@@ -121,7 +121,7 @@ export default async function MitarbeiterKundentermine() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-[#0D1B3E]">Kundentermine</h1>
+        <h1 className="text-xl font-bold text-claimondo-navy">Kundentermine</h1>
         <p className="text-sm text-gray-500 mt-1">
           SV-Besichtigungen der Fälle, die du als Kundenbetreuer begleitest. Nur lesend — Terminänderungen erfolgen im Fall.
         </p>
@@ -144,7 +144,7 @@ export default async function MitarbeiterKundentermine() {
                   day: '2-digit',
                   month: '2-digit',
                 })}
-                {isToday && <span className="ml-2 text-xs text-[#4573A2]">(heute)</span>}
+                {isToday && <span className="ml-2 text-xs text-claimondo-ondo">(heute)</span>}
               </h2>
               <span className="text-xs text-gray-500">{rows?.length ?? 0}</span>
             </div>
@@ -158,7 +158,7 @@ export default async function MitarbeiterKundentermine() {
                 return (
                   <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-gray-50 transition-colors">
                     <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border bg-[#4573A2]/10 text-[#4573A2] border-[#4573A2]/20">
+                      <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border bg-claimondo-ondo/10 text-claimondo-ondo border-claimondo-ondo/20">
                         <CalendarIcon className="w-3 h-3" />
                         SV-Termin
                       </span>
