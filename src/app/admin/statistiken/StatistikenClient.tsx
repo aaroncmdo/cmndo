@@ -834,7 +834,7 @@ export default function StatistikenClient({
 
 function ChartCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-5">
+    <div className="glass-light border border-claimondo-border rounded-ios-md p-5">
       <div className="mb-4">
         <h2 className="text-base font-semibold text-gray-900">{title}</h2>
         {subtitle && <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>}

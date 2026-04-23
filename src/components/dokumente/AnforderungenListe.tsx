@@ -8,6 +8,7 @@
 import { useState } from 'react'
 import { ClockIcon, CheckCircle2Icon, AlertTriangleIcon, XCircleIcon, PlusIcon, FileTextIcon } from 'lucide-react'
 import AnforderungsModal, { type AnforderbarerSlot } from './AnforderungsModal'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 export type AnforderungsItem = {
   id: string
@@ -120,11 +121,9 @@ export default function AnforderungenListe({
                     <span className="text-sm text-gray-800 truncate">{a.label}</span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span
-                      className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${cfg.bg} ${cfg.text}`}
-                    >
+                    <StatusBadge colorCls={`${cfg.bg} ${cfg.text} border`}>
                       {cfg.labelTxt}
-                    </span>
+                    </StatusBadge>
                     {a.frist && (
                       <span
                         className={`text-[10px] tabular-nums ${

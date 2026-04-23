@@ -32,6 +32,7 @@ import {
   type SlotMatchType,
 } from './actions'
 import type { DebugSvMatchingResponse } from '@/lib/dispatch/debugSvMatching'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 type SvWithSlots = SvSuggestion & { slots: SlotCandidate[] }
 
@@ -350,13 +351,9 @@ export default function SvDispatchPanel({
           <h2 className="text-sm font-semibold text-emerald-900 flex items-center gap-2">
             <CalendarCheckIcon className="w-4 h-4" /> SV-Termin reserviert
           </h2>
-          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-            aktiverTermin.status === 'bestaetigt'
-              ? 'bg-emerald-200 text-emerald-800'
-              : 'bg-amber-100 text-amber-700'
-          }`}>
+          <StatusBadge tone={aktiverTermin.status === 'bestaetigt' ? 'success' : 'warning'}>
             {aktiverTermin.status === 'bestaetigt' ? 'Bestätigt' : 'Reserviert'}
-          </span>
+          </StatusBadge>
         </div>
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
