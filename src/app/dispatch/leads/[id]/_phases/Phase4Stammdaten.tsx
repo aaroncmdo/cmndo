@@ -244,7 +244,7 @@ function InlineField({
               ? 'border-green-300'
               : status === 'error'
                 ? 'border-red-300'
-                : 'border-gray-200 hover:border-gray-300 focus:border-[#4573A2]'
+                : 'border-gray-200 hover:border-gray-300 focus:border-claimondo-ondo'
         }`}
       />
       {hint && <p className="text-[10px] text-gray-400">{hint}</p>}
@@ -413,7 +413,7 @@ function ZeugenKontakteEditor({
       <button
         type="button"
         onClick={addKontakt}
-        className="text-[11px] text-[#4573A2] hover:underline"
+        className="text-[11px] text-claimondo-ondo hover:underline"
       >
         + Weiteren Zeugen hinzufügen
       </button>
@@ -560,7 +560,7 @@ export default function Phase4Stammdaten() {
       <div className="rounded-xl bg-white border border-[#e4e7ef] p-4 space-y-3">
         <div className="flex items-start justify-between gap-2">
           <p className="text-xs font-semibold text-gray-900 flex items-center gap-1.5">
-            <CameraIcon className="w-3.5 h-3.5 text-[#4573A2]" />
+            <CameraIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
             Schadenbeschreibung <span className="text-gray-400 font-normal">(was am Auto kaputt ist)</span>
           </p>
           {hatUnfallfotos && l.fahrzeugschaden_beschreibung && (
@@ -665,7 +665,7 @@ export default function Phase4Stammdaten() {
                     if (v !== marke) saveToggle('fahrzeug_hersteller', v || null)
                   }}
                   placeholder={loadingMarken ? 'Lade Marken ...' : 'Marke wählen oder tippen'}
-                  className="text-sm font-medium bg-transparent border-b border-gray-200 hover:border-gray-300 focus:border-[#4573A2] w-full py-0.5 outline-none"
+                  className="text-sm font-medium bg-transparent border-b border-gray-200 hover:border-gray-300 focus:border-claimondo-ondo w-full py-0.5 outline-none"
                 />
                 <datalist id="carquery-marken">
                   {(carMarken.length > 0 ? carMarken : (KFZ_MARKEN as readonly string[])).map((m) => (
@@ -704,7 +704,7 @@ export default function Phase4Stammdaten() {
               }}
               disabled={!marke}
               placeholder={!marke ? 'Erst Marke wählen' : loadingModelle ? 'Lade Modelle ...' : 'Modell wählen oder tippen'}
-              className="text-sm font-medium bg-transparent border-b border-gray-200 hover:border-gray-300 focus:border-[#4573A2] w-full py-0.5 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="text-sm font-medium bg-transparent border-b border-gray-200 hover:border-gray-300 focus:border-claimondo-ondo w-full py-0.5 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <datalist id="carquery-modelle">
               {carModelle.map((m) => (
@@ -785,7 +785,7 @@ export default function Phase4Stammdaten() {
                 }
                 className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
                   (l.finanzierung_leasing ?? 'keine') === 'keine' && !l.vorsteuerabzugsberechtigt
-                    ? 'bg-[#4573A2] text-white'
+                    ? 'bg-claimondo-ondo text-white'
                     : 'bg-gray-100 text-gray-600'
                 }`}
                 title="Kunde ist Eigentümer und nicht vorsteuerabzugsberechtigt — Brutto-Regulierung."
@@ -859,7 +859,7 @@ export default function Phase4Stammdaten() {
               </div>
             )}
             {l.vorsteuerabzugsberechtigt === true && (
-              <div className="mt-2 rounded-md bg-[#0D1B3E]/5 border border-[#4573A2]/30 p-2 space-y-1">
+              <div className="mt-2 rounded-md bg-[#0D1B3E]/5 border border-claimondo-ondo/30 p-2 space-y-1">
                 <p className="text-[11px] font-semibold text-[#0D1B3E] flex items-center gap-1">
                   <InfoIcon className="w-3 h-3" /> Hinweis bei Gewerblich
                 </p>
@@ -880,7 +880,7 @@ export default function Phase4Stammdaten() {
                 type="button"
                 onClick={() => saveToggle('hat_vorschaeden', true)}
                 className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
-                  l.hat_vorschaeden === true ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-gray-600'
+                  l.hat_vorschaeden === true ? 'bg-claimondo-ondo text-white' : 'bg-gray-100 text-gray-600'
                 }`}
               >
                 Ja, Vorschäden
@@ -889,7 +889,7 @@ export default function Phase4Stammdaten() {
                 type="button"
                 onClick={() => saveToggle('hat_vorschaeden', false)}
                 className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
-                  l.hat_vorschaeden === false ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-gray-600'
+                  l.hat_vorschaeden === false ? 'bg-claimondo-ondo text-white' : 'bg-gray-100 text-gray-600'
                 }`}
               >
                 Nein
@@ -965,7 +965,7 @@ export default function Phase4Stammdaten() {
               }}
               className={`px-2 py-1 rounded-md text-[11px] font-medium border ${
                 l.ist_fahrzeughalter === true
-                  ? 'bg-[#4573A2] text-white border-[#4573A2]'
+                  ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
                   : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
               }`}
               title="Wenn der Anrufer/Kunde gleichzeitig der Fahrzeughalter ist"
@@ -1071,7 +1071,7 @@ export default function Phase4Stammdaten() {
               onChange={(e) => setGegnerKzDraft(e.target.value)}
               onBlur={saveGegnerKz}
               placeholder="Kennzeichen oder leer lassen bei Fahrerflucht"
-              className="text-sm font-medium bg-transparent border-b border-gray-200 hover:border-gray-300 focus:border-[#4573A2] w-full py-0.5 outline-none"
+              className="text-sm font-medium bg-transparent border-b border-gray-200 hover:border-gray-300 focus:border-claimondo-ondo w-full py-0.5 outline-none"
             />
             {kzFlags.warnung && (
               <p className={`text-[11px] mt-1 flex items-start gap-1 ${kzFlags.fahrerflucht ? 'text-red-700' : 'text-amber-700'}`}>
@@ -1135,7 +1135,7 @@ export default function Phase4Stammdaten() {
                         if (!r.success) alert(r.error ?? 'Fehler beim Setzen des Reminders')
                       })
                     }
-                    className="px-3 py-1.5 rounded-md bg-[#4573A2] text-white text-[11px] font-medium hover:bg-[#0D1B3E]"
+                    className="px-3 py-1.5 rounded-md bg-claimondo-ondo text-white text-[11px] font-medium hover:bg-[#0D1B3E]"
                   >
                     Anfrage gesendet — 10-Tage-Reminder setzen
                   </button>
@@ -1167,7 +1167,7 @@ export default function Phase4Stammdaten() {
                     type="button"
                     onClick={() => saveParkplatzKamera(true)}
                     className={`flex-1 px-2 py-1 rounded text-[11px] font-medium ${
-                      l.parkplatz_kamera === true ? 'bg-[#4573A2] text-white' : 'bg-white border border-blue-200 text-blue-800'
+                      l.parkplatz_kamera === true ? 'bg-claimondo-ondo text-white' : 'bg-white border border-blue-200 text-blue-800'
                     }`}
                   >
                     Ja, Kamera vorhanden
@@ -1176,7 +1176,7 @@ export default function Phase4Stammdaten() {
                     type="button"
                     onClick={() => saveParkplatzKamera(false)}
                     className={`flex-1 px-2 py-1 rounded text-[11px] font-medium ${
-                      l.parkplatz_kamera === false ? 'bg-[#4573A2] text-white' : 'bg-white border border-blue-200 text-blue-800'
+                      l.parkplatz_kamera === false ? 'bg-claimondo-ondo text-white' : 'bg-white border border-blue-200 text-blue-800'
                     }`}
                   >
                     Nein (⚠️ wird disqualifiziert)
@@ -1244,7 +1244,7 @@ export default function Phase4Stammdaten() {
             type="button"
             onClick={() => saveToggle('zeugen', true)}
             className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
-              l.zeugen === true ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-gray-600'
+              l.zeugen === true ? 'bg-claimondo-ondo text-white' : 'bg-gray-100 text-gray-600'
             }`}
           >
             Ja — Zeugen vorhanden
@@ -1253,7 +1253,7 @@ export default function Phase4Stammdaten() {
             type="button"
             onClick={() => saveToggle('zeugen', false)}
             className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
-              l.zeugen === false ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-gray-600'
+              l.zeugen === false ? 'bg-claimondo-ondo text-white' : 'bg-gray-100 text-gray-600'
             }`}
           >
             Nein
@@ -1321,7 +1321,7 @@ export default function Phase4Stammdaten() {
           type="button"
           onClick={() => setPhase(5)}
           disabled={!qualification.q6_gegnerKz || !qualification.q7_fahrzeug}
-          className="flex-1 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="flex-1 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-claimondo-navy disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           Weiter zu Phase 5 →
         </button>
