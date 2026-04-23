@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { entscheideReklamation } from '@/lib/actions/storno-actions'
+import PageHeader from '@/components/shared/PageHeader'
 
 type Reklamation = {
   id: string; fall_id: string; sv_id: string; grund: string
@@ -48,13 +49,17 @@ export default function ReklamationenClient({ reklamationen, svNameMap, fallNrMa
   return (
     <div className="h-full overflow-y-auto py-6">
       <div>
-        <h1 className="text-xl font-semibold text-gray-900 mb-1">Reklamationen</h1>
-        <p className="text-sm text-gray-500 mb-4">SV-Reklamationen prüfen und entscheiden</p>
+        <div className="mb-4">
+          <PageHeader
+            title="Reklamationen"
+            description="SV-Reklamationen prüfen und entscheiden"
+          />
+        </div>
 
         <div className="flex gap-1.5 mb-4">
           {['eingereicht', 'pruefung', 'berechtigt', 'abgelehnt', 'alle'].map(f => (
             <button key={f} onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium leading-tight text-center rounded-full border transition-colors ${
                 filter === f ? 'bg-[#4573A2] text-white border-[#4573A2]' : 'border-gray-200 text-gray-500'
               }`}>{f === 'alle' ? 'Alle' : STATUS_BADGE[f]?.label ?? f}</button>
           ))}

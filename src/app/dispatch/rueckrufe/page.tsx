@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import RueckrufActions from './RueckrufActions'
 import PhoneButton from '@/components/shared/PhoneButton'
+import PageHeader from '@/components/shared/PageHeader'
 
 // AAR-637: Rückrufe aus admin_termine (typ='rueckruf') lesen statt aus
 // leads.rueckruf_*. Die Legacy-Spalten wurden gedroppt. Admin-Kalender-
@@ -63,10 +64,10 @@ export default async function DispatchRueckrufe() {
 
   return (
     <div className="py-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900">Rückrufe</h1>
-        <span className="text-sm text-gray-500">{termine.length} offen</span>
-      </div>
+      <PageHeader
+        title="Rückrufe"
+        actions={<span className="text-sm text-gray-500">{termine.length} offen</span>}
+      />
 
       <div className="bg-white rounded-ios-lg shadow-ios-md divide-y divide-gray-50">
         {termine.map((t) => {

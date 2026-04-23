@@ -20,9 +20,9 @@ import FallSidebar from './_sidebar/FallSidebar'
 // AAR-307: Ad-hoc Task-Anlegen aus der Tab-Bar
 import { TaskAnlegenButton } from '@/components/tasks/TaskAnlegenButton'
 // AAR-567 (V1): PhasePipeline als linke Spalte + FallActionBar über der Tab-Bar
-import { PhasePipeline } from '@/components/shared/fall-phases'
+// AAR-727 (fallphasen-glass): Aside nutzt shared FallPhasenPanel (glass-light).
+import { FallPhasenPanel } from '@/components/shared/fall-phases'
 import type { Rolle as PhasenRolle } from '@/components/shared/fall-phases'
-import { buildPhasePipelineData } from '@/lib/fall/subphase-visibility'
 import { FallActionBar } from '@/components/admin/fallakte/FallActionBar'
 import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
 
@@ -109,36 +109,27 @@ export default function FallakteShell({
     router.replace(`?${params.toString()}`, { scroll: false })
   }
 
-  // AAR-567 (V1): Pipeline-Daten aus Visibility-Matrix ableiten.
-  // `aktuelle_phase` (snake_case) ist die Quelle; falls noch nicht gesetzt,
-  // dient `subphase.phase` (vom Resolver) als Fallback für die Phase-Nummer.
+  // AAR-567 (V1) / AAR-727: Pipeline-Input für FallPhasenPanel. Die Panel-
+  // Komponente ruft buildPhasePipelineData intern auf.
   const phasenRolle = toPhasenRolle(userRolle)
   const aktuellePhaseSnake = (fall.aktuelle_phase as string | null | undefined) ?? null
-  const pipelinePhases = buildPhasePipelineData(
-    {
-      id: fall.id,
-      aktuelle_phase: aktuellePhaseSnake,
-      phase_nummer: subphase.phase,
-      abgeschlossen_am: fall.abgeschlossen_am ?? null,
-    },
-    phasenRolle,
-  )
+  const phasenFall = {
+    id: fall.id,
+    aktuelle_phase: aktuellePhaseSnake,
+    phase_nummer: subphase.phase,
+    abgeschlossen_am: fall.abgeschlossen_am ?? null,
+  }
 
   return (
     <FallProvider fall={fall} lead={lead} userRolle={userRolle}>
       <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-96px)] gap-0">
-        {/* AAR-567 (V1): Linke Spalte — PhasePipeline (vertical) */}
-        <aside className="lg:w-72 xl:w-80 shrink-0 border-b lg:border-b-0 lg:border-r border-gray-200 bg-white overflow-y-auto">
+        {/* AAR-567 (V1) / AAR-727: Linke Spalte — Glass-Panel (aside). */}
+        <aside className="lg:w-72 xl:w-80 shrink-0 overflow-y-auto">
           <div className="px-4 py-4">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
-              Phasen
-            </h3>
-            <PhasePipeline
-              fall={{ id: fall.id, aktuelle_phase: aktuellePhaseSnake }}
+            <FallPhasenPanel
+              fall={phasenFall}
               rolle={phasenRolle}
-              phases={pipelinePhases}
-              variant="vertical"
-              showTimestamps
+              variant="aside"
             />
           </div>
         </aside>

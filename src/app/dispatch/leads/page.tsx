@@ -47,7 +47,7 @@ export default async function DispatchLeads({
           <Link
             key={opt.value}
             href={opt.value ? `/dispatch/leads?phase=${opt.value}` : '/dispatch/leads'}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-full text-xs font-medium leading-tight text-center transition-colors ${
               activePhase === opt.value
                 ? 'bg-[#0D1B3E] text-white'
                 : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'

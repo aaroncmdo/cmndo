@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { MessageCircleIcon, ArrowRightIcon, SearchIcon } from 'lucide-react'
 import MultiChannelChat from '@/components/chat/MultiChannelChat'
+import PageHeader from '@/components/shared/PageHeader'
 
 type Thread = {
   fallId: string
@@ -73,10 +74,11 @@ export default function NachrichtenInboxClient({
 
   return (
     <div className="py-6 px-4 space-y-4 max-w-7xl mx-auto">
-      <div>
-        <h1 className="text-xl font-bold text-gray-900">Nachrichten</h1>
-        <p className="text-sm text-gray-500 mt-1">Alle Kommunikationskanaele mit Kunden + Gutachter pro Fall.</p>
-      </div>
+      <PageHeader
+        title="Nachrichten"
+        description="Alle Kommunikationskanäle mit Kunden + Gutachter pro Fall."
+        icon={MessageCircleIcon}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Linke Spalte: Conversations */}

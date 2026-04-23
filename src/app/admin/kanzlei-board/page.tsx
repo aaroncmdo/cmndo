@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { ScaleIcon, MailIcon, AlertCircleIcon, ClockIcon } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,12 +37,11 @@ export default async function KanzleiBoard() {
 
   return (
     <div className="py-6 space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-gray-900">Kanzlei-Board</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Admin-Sicht auf zugewiesene Kanzleien und LexDrive-Kommunikation. LexDrive nutzt Salesforce intern — kein eigenes Login-Portal.
-        </p>
-      </div>
+      <PageHeader
+        title="Kanzlei-Board"
+        description="Admin-Sicht auf zugewiesene Kanzleien und LexDrive-Kommunikation. LexDrive nutzt Salesforce intern — kein eigenes Login-Portal."
+        icon={ScaleIcon}
+      />
 
       {/* KPI */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
