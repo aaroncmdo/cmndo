@@ -70,12 +70,16 @@ export function getVisibleProzessSections(
     result.push('ruege')
   }
 
-  // 6. Nachbesichtigung
-  if (
-    fall.vs_reaktion_typ === 'nachbesichtigung' ||
-    fall.nachbesichtigung_status ||
-    fall.nachbesichtigung_angefordert_am
-  ) {
+  // 6. Nachbesichtigung — nur wenn tatsächlich angefordert (Whitelist-Status),
+  // NICHT wenn nachbesichtigung_status z.B. 'nicht-angefordert' (DB-Default).
+  // Spiegelt AKTIVE_STATES aus components/gutachter/NachbesichtigungCard.
+  const nbStatus = fall.nachbesichtigung_status as string | null
+  const nbAngefordert =
+    nbStatus === 'angefordert' ||
+    nbStatus === 'termin-gewaehlt' ||
+    nbStatus === 'durchgefuehrt' ||
+    nbStatus === 'ergebnis-eingegangen'
+  if (fall.vs_reaktion_typ === 'nachbesichtigung' || nbAngefordert) {
     result.push('nachbesichtigung')
   }
 

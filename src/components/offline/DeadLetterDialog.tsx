@@ -61,8 +61,8 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 px-4">
-      <div className="w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/20 backdrop-blur-sm px-4">
+      <div className="w-full max-w-lg glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200">
           <div className="flex items-center gap-2 text-[#0D1B3E]">
             <AlertTriangleIcon className="w-5 h-5 text-red-600" />

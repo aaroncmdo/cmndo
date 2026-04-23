@@ -424,10 +424,23 @@ export function RuegeSection() {
 }
 
 // ─── 6. Nachbesichtigung (mit JSONB-Vorschläge + Konfrontations-Flow) ─────
+// AAR-727: Nur rendern wenn tatsächlich angefordert. Whitelist spiegelt die
+// Self-Gating-Logik aus components/gutachter NachbesichtigungCard.tsx.
+const NACHBESICHTIGUNG_AKTIVE_STATES = new Set([
+  'angefordert',
+  'termin-gewaehlt',
+  'durchgefuehrt',
+  'ergebnis-eingegangen',
+])
+
 export function NachbesichtigungSection() {
   const { fall, refreshFall } = useFall()
   const [pending, startTransition] = useTransition()
   const status = fall.nachbesichtigung_status as string | null
+
+  // Gate: nur rendern wenn Nachbesichtigung aktiv angefordert wurde.
+  if (!status || !NACHBESICHTIGUNG_AKTIVE_STATES.has(status)) return null
+
   const angefordertAm = fmtDate(fall.nachbesichtigung_angefordert_am)
   const terminAm = fmtDate(fall.nachbesichtigung_termin_datum)
   const svKonfroGewuenscht = fall.nachbesichtigung_sv_konfrontation_gewuenscht as boolean | null

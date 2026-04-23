@@ -271,7 +271,7 @@ export default function KalenderClient({
             </button>
 
             {gutachterOpen && (
-              <div className="absolute top-full left-0 mt-1 w-72 bg-white rounded-ios-lg shadow-ios-md shadow-lg z-50 overflow-hidden">
+              <div className="absolute top-full left-0 mt-1 w-72 glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg z-50 overflow-hidden">
                 <div className="p-2 border-b border-gray-100">
                   <div className="relative">
                     <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
@@ -452,7 +452,7 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
       <div className="glass-light border border-claimondo-border rounded-ios-lg p-6 max-w-md w-full shadow-ios-lg" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">
