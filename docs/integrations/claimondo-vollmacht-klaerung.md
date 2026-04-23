@@ -187,10 +187,10 @@ Produktiv-Format auf unserer Seite ist typischerweise `KFZ-YYYY-NNNNNN` (z. B. `
 **Neuer Staging-Secret ist gerade gesetzt:**
 
 ```
-LEXDRIVE_WEBHOOK_SECRET = 26061943365089b2acc51e583fbf1af7bb92a3832228c7f5ebc43260cb47e195
+LEXDRIVE_WEBHOOK_SECRET = <64-Zeichen Hex, via separatem 1Password-Link>
 ```
 
-(64-Zeichen Hex, 32 Bytes Entropie, per `crypto.randomBytes(32)` erzeugt.)
+(32 Bytes Entropie, per `crypto.randomBytes(32)` erzeugt.)
 
 Status bei uns:
 - ✅ In `.env.local` gesetzt (lokal)
