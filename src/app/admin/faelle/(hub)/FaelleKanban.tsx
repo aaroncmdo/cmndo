@@ -38,9 +38,9 @@ type Fall = {
 // BUG-05: Kanban-Columns nach faelle.status Enum
 const COLUMNS = [
   { key: 'ersterfassung', label: 'Offen', color: 'text-gray-600', bg: 'bg-gray-400' },
-  { key: 'sv-zugewiesen', label: 'SV zugew.', color: 'text-[#4573A2]', bg: 'bg-[#4573A2]' },
-  { key: 'sv-termin', label: 'Termin', color: 'text-[#4573A2]', bg: 'bg-[#4573A2]' },
-  { key: 'besichtigung', label: 'Besichtigung', color: 'text-[#1E3A5F]', bg: 'bg-[#4573A2]' },
+  { key: 'sv-zugewiesen', label: 'SV zugew.', color: 'text-claimondo-ondo', bg: 'bg-claimondo-ondo' },
+  { key: 'sv-termin', label: 'Termin', color: 'text-claimondo-ondo', bg: 'bg-claimondo-ondo' },
+  { key: 'besichtigung', label: 'Besichtigung', color: 'text-claimondo-navy', bg: 'bg-claimondo-ondo' },
   { key: 'gutachten-eingegangen', label: 'Gutachten', color: 'text-violet-600', bg: 'bg-violet-500' },
   { key: 'filmcheck', label: 'QC', color: 'text-amber-600', bg: 'bg-amber-500' },
   { key: 'kanzlei-uebergeben', label: 'Kanzlei', color: 'text-green-600', bg: 'bg-green-500' },
@@ -143,7 +143,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
             ))}
           </div>
           <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suche..."
-            className="px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#4573A2] w-40 h-7" />
+            className="px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo w-40 h-7" />
         </div>
       </div>
 
@@ -176,7 +176,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
                         ref={provided.innerRef}
                         {...provided.droppableProps}
                         style={{ flex: 1, overflowY: 'auto', padding: 4, display: 'flex', flexDirection: 'column', gap: 4 }}
-                        className={`transition-colors ${snapshot.isDraggingOver ? 'bg-[#4573A2]/5 border-2 border-dashed border-[#4573A2]/30 rounded-lg' : ''}`}
+                        className={`transition-colors ${snapshot.isDraggingOver ? 'bg-claimondo-ondo/5 border-2 border-dashed border-claimondo-ondo/30 rounded-lg' : ''}`}
                       >
                         {items.map((fall, i) => (
                           <Draggable key={fall.id} draggableId={fall.id} index={i}>
@@ -284,7 +284,7 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
                 <circle cx="6" cy="15" r="1.2"/><circle cx="14" cy="15" r="1.2"/>
               </svg>
             </span>
-            <Link href={`/faelle/${fall.id}`} className="text-xs font-mono text-[#4573A2] truncate hover:underline min-w-0">
+            <Link href={`/faelle/${fall.id}`} className="text-xs font-mono text-claimondo-ondo truncate hover:underline min-w-0">
               {label}
             </Link>
           </div>
@@ -309,7 +309,7 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
           </div>
           <div className="flex flex-wrap gap-1 mt-1">
             {fall.kennzeichen && <span className="bg-gray-100 text-gray-600 text-[9px] px-1 py-0.5 rounded">{fall.kennzeichen}</span>}
-            {fall.schadens_fall_typ && <span className="bg-[#4573A2]/5 text-[#4573A2] text-[9px] px-1 py-0.5 rounded">{SF_SHORT[fall.schadens_fall_typ] ?? fall.schadens_fall_typ}</span>}
+            {fall.schadens_fall_typ && <span className="bg-claimondo-ondo/5 text-claimondo-ondo text-[9px] px-1 py-0.5 rounded">{SF_SHORT[fall.schadens_fall_typ] ?? fall.schadens_fall_typ}</span>}
           </div>
           {(fall.betreuer_name || fall.sv_name) && (
             <div className="flex gap-2 mt-1 text-[9px] text-gray-400 truncate">
@@ -346,7 +346,7 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
       {/* Delete Confirmation */}
       {modal === 'delete' && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setModal(null)}>
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+          <div className="glass-light border border-claimondo-border rounded-ios-lg p-6 max-w-sm w-full shadow-ios-lg" onClick={e => e.stopPropagation()}>
             <h3 className="text-lg font-semibold text-red-600 mb-2">Fall löschen?</h3>
             <p className="text-sm text-gray-600 mb-1"><strong>{label}</strong> — {fall.kunde_name ?? 'Unbekannt'}</p>
             <p className="text-xs text-gray-400 mb-4">Alle Daten werden unwiderruflich entfernt.</p>
@@ -369,7 +369,7 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
       {/* Deactivate Confirmation */}
       {modal === 'deactivate' && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setModal(null)}>
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+          <div className="glass-light border border-claimondo-border rounded-ios-lg p-6 max-w-sm w-full shadow-ios-lg" onClick={e => e.stopPropagation()}>
             <h3 className="text-lg font-semibold text-gray-900 mb-3">Fall deaktivieren</h3>
             <select value={grund} onChange={e => setGrund(e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3">
               <option value="">— Grund —</option>

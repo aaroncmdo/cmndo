@@ -4,18 +4,19 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { entscheideReklamation } from '@/lib/actions/storno-actions'
 import PageHeader from '@/components/shared/PageHeader'
+import { StatusBadge, type StatusBadgeTone } from '@/components/shared/StatusBadge'
 
 type Reklamation = {
   id: string; fall_id: string; sv_id: string; grund: string
   begruendung: string; eingereicht_am: string; status: string; frist_bis: string; admin_begruendung: string | null
 }
 
-const STATUS_BADGE: Record<string, { label: string; color: string }> = {
-  eingereicht: { label: 'Eingereicht', color: 'bg-amber-50 text-amber-600' },
-  pruefung: { label: 'In Prüfung', color: 'bg-blue-50 text-blue-600' },
-  berechtigt: { label: 'Berechtigt', color: 'bg-green-50 text-green-600' },
-  abgelehnt: { label: 'Abgelehnt', color: 'bg-red-50 text-red-600' },
-  auto_abgelehnt_frist: { label: 'Frist abgelaufen', color: 'bg-gray-100 text-gray-500' },
+const STATUS_BADGE: Record<string, { label: string; tone: StatusBadgeTone }> = {
+  eingereicht: { label: 'Eingereicht', tone: 'warning' },
+  pruefung: { label: 'In Prüfung', tone: 'info' },
+  berechtigt: { label: 'Berechtigt', tone: 'success' },
+  abgelehnt: { label: 'Abgelehnt', tone: 'danger' },
+  auto_abgelehnt_frist: { label: 'Frist abgelaufen', tone: 'neutral' },
 }
 
 const GRUND_LABELS: Record<string, string> = {
@@ -75,7 +76,7 @@ export default function ReklamationenClient({ reklamationen, svNameMap, fallNrMa
                     <p className="text-sm font-medium text-gray-900">{svNameMap[r.sv_id] ?? '—'} — Fall {fallNrMap[r.fall_id] ?? r.fall_id.slice(0, 8)}</p>
                     <p className="text-xs text-gray-500">{GRUND_LABELS[r.grund] ?? r.grund} · {new Date(r.eingereicht_am).toLocaleDateString('de-DE')}</p>
                   </div>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${badge.color}`}>{badge.label}</span>
+                  <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
                 </div>
                 <p className="text-xs text-gray-700 mb-2">{r.begruendung}</p>
                 <p className="text-[10px] text-gray-400">Frist bis: {new Date(r.frist_bis).toLocaleDateString('de-DE')}</p>

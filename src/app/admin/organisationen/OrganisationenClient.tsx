@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Building2Icon, GraduationCapIcon, CreditCardIcon, CheckCircleIcon, ClockIcon, AlertCircleIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 type OrgRow = {
   id: string
@@ -76,16 +77,14 @@ export default function OrganisationenClient({ organisationen }: { organisatione
                   <tr key={o.id} className="hover:bg-gray-50/50">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <TypeIcon className="w-4 h-4 text-[#4573A2] flex-shrink-0" />
+                        <TypeIcon className="w-4 h-4 text-claimondo-ondo flex-shrink-0" />
                         <span className="font-medium text-gray-900">{o.name}</span>
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                        o.typ === 'akademie' ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700'
-                      }`}>
+                      <StatusBadge colorCls={o.typ === 'akademie' ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700'}>
                         {o.typ === 'akademie' ? 'Akademie' : 'Büro'}
-                      </span>
+                      </StatusBadge>
                     </td>
                     <td className="px-4 py-3">
                       {o.verwalter_name ? (
@@ -99,9 +98,9 @@ export default function OrganisationenClient({ organisationen }: { organisatione
                     </td>
                     <td className="px-4 py-3 text-right font-medium text-gray-900">{o.member_count}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-medium ${badge.cls}`}>
+                      <StatusBadge colorCls={badge.cls}>
                         <badge.Icon className="w-3 h-3" /> {badge.label}
-                      </span>
+                      </StatusBadge>
                     </td>
                     <td className="px-4 py-3">
                       {o.has_stripe ? (

@@ -91,7 +91,7 @@ export default function FinanceClient({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
           <Link
             href="/admin/finance/provisionen"
-            className="group bg-white border border-gray-200 rounded-2xl p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
+            className="group glass-light border border-claimondo-border rounded-ios-md p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -113,7 +113,7 @@ export default function FinanceClient({
           </Link>
           <Link
             href="/admin/finance/kanzlei"
-            className="group bg-white border border-gray-200 rounded-2xl p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
+            className="group glass-light border border-claimondo-border rounded-ios-md p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -136,7 +136,7 @@ export default function FinanceClient({
         </div>
 
         {/* Chart */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-8">
+        <div className="glass-light border border-claimondo-border rounded-ios-md p-5 mb-8">
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
             Fälle pro Monat
           </h2>
@@ -180,7 +180,7 @@ export default function FinanceClient({
         </div>
 
         {/* Tabelle */}
-        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+        <div className="glass-light border border-claimondo-border rounded-ios-md overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-200">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
               Letzte abgeschlossene Fälle
@@ -289,7 +289,7 @@ function KpiCard({
   accent?: string
 }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-5">
+    <div className="glass-light border border-claimondo-border rounded-ios-md p-5">
       <p className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-2">{label}</p>
       <p className={`text-2xl font-bold tabular-nums ${accent ?? 'text-gray-900'}`}>{value}</p>
       <p className="text-gray-400 text-xs mt-1">{sub}</p>
