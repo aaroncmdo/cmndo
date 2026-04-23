@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { CheckCircle2Icon, ArrowLeftIcon } from 'lucide-react'
 import { anlegeFall, type AnlegeFallInput } from './actions'
 import { SPEZIFIKATIONEN, SCHADENARTEN } from '@/app/admin/sachverstaendige/anlegen/constants'
+import PageHeader from '@/components/shared/PageHeader'
 
 // KFZ-154 Cleanup-Follow-up: Minimale Fall-Anlage Form fuer Admins.
 // Erstellt einen Lead + Fall in einem Rutsch (analog convertLeadToFall).
@@ -107,10 +108,13 @@ export default function AnlegenFallClient() {
       <Link href="/admin/faelle" className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 mb-4">
         <ArrowLeftIcon className="w-3 h-3" /> Zurueck zu Faelle
       </Link>
-      <h1 className="text-2xl font-semibold text-gray-900 mb-1">Neuen Fall anlegen</h1>
-      <p className="text-sm text-gray-500 mb-6">
-        Direkter Eingang ohne Lead-Qualifizierung — typisch fuer telefonisch reingekommene Faelle.
-      </p>
+      <div className="mb-6">
+        <PageHeader
+          title="Neuen Fall anlegen"
+          description="Direkter Eingang ohne Lead-Qualifizierung — typisch für telefonisch reingekommene Fälle."
+          size="lg"
+        />
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Kunde */}

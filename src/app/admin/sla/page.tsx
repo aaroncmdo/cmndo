@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { AlertTriangleIcon, ClockIcon, CheckCircleIcon } from 'lucide-react'
 import { SLA_LABEL, type SlaTyp } from '@/lib/sla/tracker'
+import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,12 +28,10 @@ export default async function SlaMonitoringPage() {
 
   return (
     <div className="py-6 space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-gray-900">SLA-Monitoring</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Pipeline-Fristen ab SA-Unterschrift. Cron alle 15 Min, automatische Eskalations-Tasks bei Verletzung.
-        </p>
-      </div>
+      <PageHeader
+        title="SLA-Monitoring"
+        description="Pipeline-Fristen ab SA-Unterschrift. Cron alle 15 Min, automatische Eskalations-Tasks bei Verletzung."
+      />
 
       {/* KPI-Boxen */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
