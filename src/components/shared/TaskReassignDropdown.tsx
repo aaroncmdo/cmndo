@@ -51,7 +51,7 @@ export default function TaskReassignDropdown({
         value={value}
         onChange={e => onChange(e.target.value)}
         disabled={pending}
-        className={`flex-1 min-w-0 border border-gray-200 rounded px-1.5 py-0.5 ${compact ? 'text-[11px]' : 'text-xs'} focus:outline-none focus:border-[#4573A2]`}
+        className={`flex-1 min-w-0 border border-gray-200 rounded px-1.5 py-0.5 ${compact ? 'text-[11px]' : 'text-xs'} focus:outline-none focus:border-claimondo-ondo`}
       >
         <option value="">— Kollege wählen —</option>
         {sortedCandidates.map(c => (
