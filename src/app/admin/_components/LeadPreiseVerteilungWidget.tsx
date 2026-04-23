@@ -58,7 +58,7 @@ export default async function LeadPreiseVerteilungWidget() {
 
   return (
     <div className="pb-8">
-      <div className="bg-white border border-gray-200 rounded-2xl p-5">
+      <div className="bg-white rounded-ios-lg shadow-ios-md p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <BarChart3Icon className="w-4 h-4 text-[#4573A2]" />

@@ -44,7 +44,7 @@ export default async function TageskalenderWidget() {
   const nowMinutes = today.getHours() * 60 + today.getMinutes()
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+    <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
       <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <CalendarIcon className="w-4 h-4 text-[#4573A2]" />

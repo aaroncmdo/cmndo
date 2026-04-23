@@ -83,7 +83,7 @@ export default async function StripeConnectStatusWidget() {
   return (
     <div className="pb-8">
       <div className="">
-        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+        <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <CreditCardIcon className="w-4 h-4 text-[#4573A2]" />

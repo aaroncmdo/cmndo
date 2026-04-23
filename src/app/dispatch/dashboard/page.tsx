@@ -69,7 +69,7 @@ export default async function DispatchDashboard() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stats.map((s) => (
-          <Link key={s.label} href={s.href} className="bg-white rounded-xl border border-gray-200 p-5 flex items-center gap-4 hover:shadow-sm transition-shadow">
+          <Link key={s.label} href={s.href} className="bg-white rounded-ios-lg shadow-ios-sm p-5 flex items-center gap-4 hover:shadow-ios-md transition-shadow">
             <div className={`w-11 h-11 rounded-lg ${s.bg} flex items-center justify-center`}>
               <s.icon className={`w-5 h-5 ${s.color}`} />
             </div>
@@ -83,7 +83,7 @@ export default async function DispatchDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Live-Feed: Neueste Leads */}
-        <div className="bg-white rounded-xl border border-gray-200">
+        <div className="bg-white rounded-ios-lg shadow-ios-md">
           <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-gray-900">Neueste Leads</h2>
             <Link href="/dispatch/leads" className="text-xs text-[#4573A2] hover:underline">Alle anzeigen</Link>
@@ -110,7 +110,7 @@ export default async function DispatchDashboard() {
         </div>
 
         {/* Meine Tasks */}
-        <div className="bg-white rounded-xl border border-gray-200">
+        <div className="bg-white rounded-ios-lg shadow-ios-md">
           <div className="px-5 py-4 border-b border-gray-100">
             <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
               <ClockIcon className="w-4 h-4 text-gray-400" />

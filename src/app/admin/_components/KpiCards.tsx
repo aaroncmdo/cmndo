@@ -162,7 +162,7 @@ export default async function KpiCards() {
           <Link
             key={c.label}
             href={c.href}
-            className="bg-white border border-gray-200 rounded-2xl p-4 hover:border-[#4573A2] hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4573A2] focus-visible:ring-offset-1"
+            className="bg-white rounded-ios-lg shadow-ios-sm p-4 hover:shadow-ios-md transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4573A2] focus-visible:ring-offset-1"
           >
             <div className="flex items-center justify-between mb-2">
               <p className="text-[10px] uppercase tracking-wide text-gray-500 font-semibold">{c.label}</p>
