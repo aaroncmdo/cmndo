@@ -57,14 +57,19 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   // SV verifiziert + use_custom_branding aktiv + Theme vorhanden.
   const branding = await resolveKundenTheme(user.id)
   const themeStyle = branding.useBrand ? generateCssVars(branding.theme, 'full') : undefined
-  const sidebarBg = branding.useBrand ? 'var(--brand-sidebar-bg, #0D1B3E)' : '#0D1B3E'
+  // AAR-727: Transluzente Basis für Glass-Effekt. `color-mix` mischt 82% Farbe
+  // + 18% Transparenz — zusammen mit `.glass-branded` (blur) entsteht der
+  // iOS-Glass-Look, der Brand-Farbe bleibt dominant.
+  const sidebarBg = branding.useBrand
+    ? 'color-mix(in srgb, var(--brand-sidebar-bg, #0D1B3E) 82%, transparent)'
+    : 'color-mix(in srgb, #0D1B3E 82%, transparent)'
   const accentBg = branding.useBrand ? 'var(--brand-secondary, #4573A2)' : '#4573A2'
 
   return (
     <div className="flex min-h-screen bg-[#f8f9fb]" style={themeStyle}>
       {/* Desktop Sidebar — hidden on mobile */}
       <aside
-        className="hidden md:flex md:flex-col md:w-64 md:shrink-0 fixed top-0 left-0 h-screen z-40"
+        className="hidden md:flex md:flex-col md:w-64 md:shrink-0 fixed top-0 left-0 h-screen z-40 glass-branded"
         style={{ backgroundColor: sidebarBg }}
       >
         <div className="px-5 py-5">
@@ -112,7 +117,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
 
       {/* Mobile Header — hidden on desktop */}
       <header
-        className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 py-3 shadow-md"
+        className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 py-3 shadow-ios-md glass-branded"
         style={{ backgroundColor: sidebarBg }}
       >
         <Link href="/kunde">
@@ -152,7 +157,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
 
       {/* Mobile Bottom-Nav — hidden on desktop */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center glass-branded shadow-ios-md"
         style={{
           backgroundColor: sidebarBg,
           paddingTop: 8,

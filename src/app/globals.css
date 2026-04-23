@@ -274,6 +274,17 @@ html[lang="ar"] {
   -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
 
+/* AAR-727: Branded-Glass — für Portale mit Whitelabel-Branding (Gutachter,
+   Makler-Custom, Kunde). Nimmt `--brand-sidebar-bg` als Basis-Farbton und
+   mischt Transluzenz dazu. backgroundColor wird weiterhin via inline-style
+   gesetzt, damit Brand-Transitions (2s Farbwechsel beim Theme-Swap) weiter
+   funktionieren — diese Klasse liefert nur blur + border. */
+.glass-branded {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
 /* AAR-727 Cleanup: Einzige überlebende Klasse aus der alten glass.css —
    alle anderen (.glass-card, .glass-badge-*, .glass-btn-*, .glass-input,
    .glass-table, .glass-pipeline-card, .glass-bell, .glass-bottom-nav,
