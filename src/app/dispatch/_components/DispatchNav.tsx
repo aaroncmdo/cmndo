@@ -116,7 +116,7 @@ export default function DispatchNav({ email, initials, userId }: { email: string
       </aside>
 
       {/* Mobile bottom nav — nur die 4 Arbeits-Items */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center bg-[#0D1B3E]"
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center glass-dark shadow-ios-md"
         style={{ paddingTop: 8, paddingBottom: 'calc(8px + env(safe-area-inset-bottom))' }}
       >
         {NAV_MOBILE.map((item) => {

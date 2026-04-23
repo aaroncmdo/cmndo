@@ -147,7 +147,7 @@ export default function AdminNav({ email, initials, userId, unreadNachrichten, m
       </aside>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center bg-[#0D1B3E]"
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center glass-dark shadow-ios-md"
         style={{
           paddingTop: 8,
           paddingBottom: 'calc(8px + env(safe-area-inset-bottom))',

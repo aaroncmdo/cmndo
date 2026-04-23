@@ -43,7 +43,7 @@ export default async function MitarbeiterLayout({
 
   return (
     <div className="min-h-screen bg-[#f8f9fb]">
-      <header className="bg-[#0D1B3E] px-4 py-3 flex items-center justify-between">
+      <header className="glass-dark shadow-ios-md px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-xl font-bold tracking-tight">
             <span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span>

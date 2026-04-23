@@ -19,11 +19,11 @@ export default async function DispatchLayout({
       <DispatchNav email={user.email ?? ''} initials={initials} userId={user.id} />
 
       <div className="md:ml-56 h-screen flex flex-col relative z-10">
-        {/* Mobile header */}
-        <header className="md:hidden flex items-center justify-between px-4 py-3 bg-[#0D1B3E] shrink-0">
+        {/* Mobile header — AAR-727 Glass-Dark */}
+        <header className="md:hidden flex items-center justify-between px-4 py-3 glass-dark shadow-ios-md shrink-0">
           <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-wider text-[#7BA3CC] bg-[#1E3A5F] px-2 py-0.5 rounded">Dispatch</span>
+            <span className="text-[10px] uppercase tracking-wider text-[#7BA3CC] bg-[#1E3A5F] px-2 py-0.5 rounded-ios-sm">Dispatch</span>
             <UpdatesNav variant="dark" />
           </div>
         </header>
