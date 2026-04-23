@@ -30,6 +30,10 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+        env:
+          # tsc --noEmit OOMt im Default-2-GB-Heap auf GH-Runnern, seit die
+          # Codebase die Schwelle gerissen hat. 4 GB gibt Puffer.
+          NODE_OPTIONS: --max-old-space-size=4096
 
       - name: Lint
         run: npm run lint
