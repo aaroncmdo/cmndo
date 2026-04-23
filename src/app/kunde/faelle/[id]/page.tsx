@@ -2,9 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-// AAR-569 (V3): Shared PhasePipeline ersetzt den alten Szenario-Stepper.
-import { PhasePipeline } from '@/components/shared/fall-phases'
-import { buildPhasePipelineData } from '@/lib/fall/subphase-visibility'
+// AAR-569 (V3) / AAR-727: Shared FallPhasenPanel (glass-light progress-card)
+// ersetzt den alten Szenario-Stepper + den manuellen Progress-Bar-Wrapper.
+import { FallPhasenPanel } from '@/components/shared/fall-phases'
 import FallDetailSections from './FallDetailSections'
 import FallStatusCard from '@/components/kunde/FallStatusCard'
 import BankdatenBanner from '@/components/kunde/BankdatenBanner'
@@ -174,22 +174,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       szenario = 'ruegefall'
     }
 
-    // AAR-569 (V3): Pipeline-Daten aus Visibility-Matrix ableiten + Progress
-    // als „sichtbare done-Phasen / sichtbare Phasen" berechnen.
+    // AAR-569 (V3) / AAR-727: Panel baut Pipeline-Daten + Progress-% intern.
     const aktuellePhaseSnake = (fall.aktuelle_phase as string | null | undefined) ?? null
-    const pipelinePhases = buildPhasePipelineData(
-      {
-        id: fall.id as string,
-        aktuelle_phase: aktuellePhaseSnake,
-        abgeschlossen_am: (fall.abgeschlossen_am as string | null | undefined) ?? null,
-      },
-      'kunde',
-    )
-    const sichtbarePhasen = pipelinePhases.filter((p) => p.state !== 'hidden')
-    const donePhasen = sichtbarePhasen.filter((p) => p.state === 'done').length
-    const progressPct = sichtbarePhasen.length
-      ? Math.round((donePhasen / sichtbarePhasen.length) * 100)
-      : 0
+    const abgeschlossenAmKunde =
+      (fall.abgeschlossen_am as string | null | undefined) ?? null
 
     // AAR-432: Jetzt-zu-tun-Aktion für diesen Fall berechnen
     const { data: polizeiDocs } = await admin
@@ -593,32 +581,27 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
         {/* S4: Mein Fortschritt + Fall-Details */}
         <div className="grid md:grid-cols-2 gap-5">
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-base font-semibold text-[#0D1B3E]">Mein Fortschritt</p>
-              <span className="text-base font-bold text-[#4573A2]">{progressPct}%</span>
-            </div>
-            <div className="w-full h-2.5 bg-gray-100 rounded-full mb-5">
-              <div
-                className="h-full bg-[#4573A2] rounded-full transition-all duration-700"
-                style={{ width: `${progressPct}%` }}
-              />
-            </div>
-            {/* AAR-569 (V3): Shared PhasePipeline mit rolle='kunde' — Labels
-                sind kundenfreundlich (z. B. „Schaden gemeldet" statt der
-                internen Notion-Subphase „fallakte_angelegt"). */}
-            <PhasePipeline
-              fall={{ id: fall.id as string, aktuelle_phase: aktuellePhaseSnake }}
-              rolle="kunde"
-              phases={pipelinePhases}
-              variant="vertical"
-            />
-            {szenario === 'ruegefall' && (
-              <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                <p className="text-xs text-amber-700 font-medium">Die Versicherung hat Einwände erhoben. Unsere Partnerkanzlei kümmert sich darum.</p>
-              </div>
-            )}
-          </div>
+          {/* AAR-569 (V3) / AAR-727: Glass-Panel mit Progress-Bar + Pipeline.
+              Labels kommen aus der Visibility-Matrix (rolle='kunde') —
+              kundenfreundlich (z. B. „Schaden gemeldet" statt Notion-Subphase). */}
+          <FallPhasenPanel
+            fall={{
+              id: fall.id as string,
+              aktuelle_phase: aktuellePhaseSnake,
+              abgeschlossen_am: abgeschlossenAmKunde,
+            }}
+            rolle="kunde"
+            variant="progress-card"
+            banner={
+              szenario === 'ruegefall' ? (
+                <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                  <p className="text-xs text-amber-700 font-medium">
+                    Die Versicherung hat Einwände erhoben. Unsere Partnerkanzlei kümmert sich darum.
+                  </p>
+                </div>
+              ) : null
+            }
+          />
 
           <FallDetailSections
             fall={fall as Record<string, unknown>}

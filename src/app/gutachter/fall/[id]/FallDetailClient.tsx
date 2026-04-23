@@ -13,8 +13,8 @@
 
 import { getSvSubphase, type AbrechnungSubphaseInput } from '@/lib/gutachter/subphase'
 import { getSichtbarFuerRolle } from '@/lib/dokumente/sichtbarkeit'
-// AAR-568 (V2): Shared Phase-Pipeline für den SV-Header
-import { buildPhasePipelineData } from '@/lib/fall/subphase-visibility'
+// AAR-568 (V2) / AAR-727: Pipeline-Daten baut FallPhasenPanel intern — der
+// FallHeader reicht nur fallId + aktuelle_phase + abgeschlossen_am durch.
 import { FallHeader } from './_components/FallHeader'
 import type { TeamMitglied } from './_components/FallakteDrawer'
 import { AktuellePhaseCard } from './_components/AktuellePhaseCard'
@@ -174,20 +174,12 @@ export default function FallDetailClient(props: Props) {
     abrechnung,
   )
 
-  // AAR-568 (V2): Shared Pipeline-Daten für den SV-Header berechnen.
-  // getSvSubphase liefert den aktuellen Stand des SV-Resolvers (intern); die
-  // Visibility-Matrix filtert daraus die für rolle='sv' sichtbaren Subphasen.
+  // AAR-568 (V2) / AAR-727: Panel-Input — buildPhasePipelineData läuft intern
+  // im FallPhasenPanel, Caller gibt nur die Rohdaten weiter.
   const aktuellePhaseSnake =
     (fall.aktuelle_phase as string | null | undefined) ?? null
-  const pipelinePhases = buildPhasePipelineData(
-    {
-      id: fall.id as string,
-      aktuelle_phase: aktuellePhaseSnake,
-      phase_nummer: subphase.phase,
-      abgeschlossen_am: (fall.abgeschlossen_am as string | null | undefined) ?? null,
-    },
-    'sv',
-  )
+  const abgeschlossenAm =
+    (fall.abgeschlossen_am as string | null | undefined) ?? null
 
   // AAR-289: Sichtbarkeits-Filter (zweite Ebene zusätzlich zu DB-sichtbar_fuer)
   const sichtbarDokumente = getSichtbarFuerRolle(dokumente, 'sachverstaendiger')
@@ -262,8 +254,8 @@ export default function FallDetailClient(props: Props) {
         ort={ort}
         subphase={subphase}
         drawer={drawerData}
-        pipelinePhases={pipelinePhases}
         aktuellePhaseSnake={aktuellePhaseSnake}
+        abgeschlossenAm={abgeschlossenAm}
       />
 
       {/* 2-Spalten-Layout: Desktop ≥1024px sticky-links, Mobile stacked */}

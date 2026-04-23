@@ -1,10 +1,11 @@
 'use client'
 
 // AAR-289 / AAR-568 (V2): Header für die SV-Fallakte. Breadcrumb + Titel +
-// <PhasePipeline /> (horizontal, rolle='sv') + Akte-Button.
-// Die alten PhasenStepper / SubphasenStepper sind entfernt — die shared
-// PhasePipeline-Library zeigt dem SV jetzt alle 10 Phasen (mit Rollen-
-// Sichtbarkeits-Filter aus subphase-visibility.ts).
+// Phasen-Leiste + Akte-Button.
+// AAR-727 (fallphasen-glass): Phasen-Leiste nutzt shared FallPhasenPanel
+// (variant='header-strip', glass-light). Terminal 'storniert' rendert den
+// Badge innerhalb desselben Glass-Panels; 'abgeschlossen' zeigt wie bisher
+// die vollständig done-Pipeline.
 
 import Link from 'next/link'
 import { ChevronLeftIcon } from 'lucide-react'
@@ -12,9 +13,8 @@ import { FallakteDrawer } from './FallakteDrawer'
 // AAR-307: Ad-hoc Task-Anlegen aus dem FallHeader
 import { TaskAnlegenButton } from '@/components/tasks/TaskAnlegenButton'
 import type { SvSubphase } from '@/lib/gutachter/subphase'
-// AAR-568 (V2): Shared PhasePipeline ersetzt die SV-eigenen Stepper.
-import { PhasePipeline } from '@/components/shared/fall-phases'
-import type { PhaseStepData } from '@/components/shared/fall-phases'
+// AAR-727: Shared Glass-Panel — ersetzt direkte PhasePipeline + terminal-Pill.
+import { FallPhasenPanel } from '@/components/shared/fall-phases'
 
 type DrawerData = Parameters<typeof FallakteDrawer>[0]
 
@@ -25,8 +25,8 @@ export function FallHeader({
   ort,
   subphase,
   drawer,
-  pipelinePhases,
   aktuellePhaseSnake,
+  abgeschlossenAm = null,
 }: {
   fallNummer: string
   fallId: string
@@ -34,16 +34,12 @@ export function FallHeader({
   ort: string
   subphase: SvSubphase
   drawer: DrawerData
-  // AAR-568 (V2): vorberechnete Pipeline-Daten aus buildPhasePipelineData().
-  pipelinePhases: PhaseStepData[]
   aktuellePhaseSnake: string | null
+  /** Optional: abgeschlossen_am für korrekte Phase-10-Markierung im Panel. */
+  abgeschlossenAm?: string | null
 }) {
-  const isTerminal: 'abgeschlossen' | 'storniert' | undefined =
-    subphase.code === 'storniert'
-      ? 'storniert'
-      : subphase.code === 'honorar-ueberwiesen'
-        ? 'abgeschlossen'
-        : undefined
+  const terminal: 'storniert' | null =
+    subphase.code === 'storniert' ? 'storniert' : null
 
   return (
     <div className="bg-white border-b border-gray-200">
@@ -73,22 +69,19 @@ export function FallHeader({
         </div>
       </div>
 
-      {isTerminal === 'storniert' ? (
-        <div className="px-4 sm:px-6 pb-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium w-fit">
-            Fall storniert
-          </div>
-        </div>
-      ) : (
-        <div className="px-4 sm:px-6 pb-3">
-          <PhasePipeline
-            fall={{ id: fallId, aktuelle_phase: aktuellePhaseSnake }}
-            rolle="sv"
-            phases={pipelinePhases}
-            variant="horizontal"
-          />
-        </div>
-      )}
+      <div className="px-4 sm:px-6 pb-3">
+        <FallPhasenPanel
+          fall={{
+            id: fallId,
+            aktuelle_phase: aktuellePhaseSnake,
+            phase_nummer: subphase.phase,
+            abgeschlossen_am: abgeschlossenAm,
+          }}
+          rolle="sv"
+          variant="header-strip"
+          terminal={terminal}
+        />
+      </div>
     </div>
   )
 }
