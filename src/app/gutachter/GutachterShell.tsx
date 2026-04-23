@@ -30,6 +30,7 @@ import TasksPill from '@/components/shared/TasksPill'
 import { CLAIMONDO_DEFAULT_THEME, type BrandTheme } from '@/lib/branding/theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
 import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
+import { toInitials } from '@/components/shared/KundeAvatar'
 
 // AAR-222: Sidebar-Refactor von 18 flachen Items auf 10 in 4 Sektionen.
 // Removed Items (Dashboard, Mitteilungen, Tasks, Stellungnahmen, Termine,
@@ -60,15 +61,10 @@ const NAV_SECTIONS_BASE: NavSection[] = [
       { href: '/gutachter/kalender', label: 'Kalender', icon: CalendarIcon, badgeKey: 'neueTermine' },
     ],
   },
-  {
-    title: 'Kommunikation',
-    items: [
-      // AAR-370: Posteingang vereint System-Mitteilungen + Fall-Chat-Nachrichten
-      // in einer Page mit Tabs. Alte Routen /mitteilungen und /nachrichten
-      // redirecten hierher mit passendem ?tab=-Parameter.
-      { href: '/gutachter/posteingang', label: 'Posteingang', icon: InboxIcon, badgeKey: 'posteingang' },
-    ],
-  },
+  // AAR-727: Kommunikations-Sektion entfällt — der GlobalPosteingangFab
+  // (unten rechts) deckt Fall-Chat-Nachrichten global ab. System-Mitteilungen
+  // laufen über UpdatesNav. /gutachter/posteingang bleibt als Route erhalten
+  // (Legacy-Bookmarks), taucht aber nicht mehr in der Sidebar auf.
   {
     title: 'Finanzen',
     items: [
@@ -403,7 +399,7 @@ export default function GutachterShell({
                 ...transitionStyle,
               }}
             >
-              {displayName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+              {toInitials(displayName)}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-semibold truncate">{displayName}</p>

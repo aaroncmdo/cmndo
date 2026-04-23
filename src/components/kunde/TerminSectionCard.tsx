@@ -6,6 +6,7 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import TerminReschedulingModal from './TerminReschedulingModal'
+import { toInitials } from '@/components/shared/KundeAvatar'
 
 export type TerminSectionProps = {
   termin: {
@@ -262,7 +263,7 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
               // eslint-disable-next-line @next/next/no-img-element
               <img src={gegenueber.avatar_url} alt="" className="h-full w-full object-cover" />
             ) : (
-              (gegenueber.name ?? '?').split(' ').map((s) => s[0]).filter(Boolean).slice(0, 2).join('')
+              toInitials(gegenueber.name) || '?'
             )}
           </div>
           <div className="min-w-0 flex-1">

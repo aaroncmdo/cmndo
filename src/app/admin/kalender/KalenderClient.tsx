@@ -12,6 +12,7 @@ import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon, ClipboardListIcon, Pho
 import { getKalenderTermine } from '@/lib/actions/admin-kalender'
 import { createAdminTermin, updateAdminTermin, deleteAdminTermin } from '@/lib/actions/admin-termine-actions'
 import PageHeader from '@/components/shared/PageHeader'
+import { KundeAvatar } from '@/components/shared/KundeAvatar'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -296,9 +297,7 @@ export default function KalenderClient({
                         }`}>
                           {selected && <CheckIcon className="w-3 h-3 text-white" />}
                         </div>
-                        <div className="w-6 h-6 rounded-full bg-[#1E3A5F] flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0">
-                          {g.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                        </div>
+                        <KundeAvatar name={g.name} size={24} />
                         <span className="text-xs text-gray-800 flex-1 truncate">{g.name}</span>
                         {badge && <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${badge.color}`}>{badge.label}</span>}
                       </button>
