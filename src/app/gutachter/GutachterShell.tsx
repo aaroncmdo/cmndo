@@ -29,6 +29,7 @@ import { SupportButton } from '@/components/support/SupportButton'
 import TasksPill from '@/components/shared/TasksPill'
 import { CLAIMONDO_DEFAULT_THEME, type BrandTheme } from '@/lib/branding/theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
+import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
 
 // AAR-222: Sidebar-Refactor von 18 flachen Items auf 10 in 4 Sektionen.
 // Removed Items (Dashboard, Mitteilungen, Tasks, Stellungnahmen, Termine,
@@ -506,6 +507,7 @@ export default function GutachterShell({
             absolute inset-0 und sind nicht betroffen. */}
         <main id="main-content" role="main" className="flex-1 overflow-y-auto p-2 sm:p-3 lg:p-4">{children}</main>
       </div>
+      <GlobalPosteingangFab currentUserId={userId} />
     </div>
   )
 }
