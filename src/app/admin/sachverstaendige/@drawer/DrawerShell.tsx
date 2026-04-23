@@ -38,7 +38,7 @@ export default function DrawerShell({ children, title, widthClass = 'sm:w-[720px
   return (
     <>
       <div
-        className="fixed inset-0 bg-black/30 z-40 backdrop-blur-[1px]"
+        className="fixed inset-0 bg-black/20 z-40 backdrop-blur-sm"
         onClick={close}
         aria-hidden
       />
@@ -46,7 +46,7 @@ export default function DrawerShell({ children, title, widthClass = 'sm:w-[720px
         role="dialog"
         aria-modal="true"
         aria-label={title ?? 'Details'}
-        className={`fixed right-0 top-0 h-screen w-full ${widthClass} bg-white shadow-2xl z-50 flex flex-col overflow-hidden`}
+        className={`fixed right-0 top-0 h-screen w-full ${widthClass} glass-light shadow-ios-lg z-50 flex flex-col overflow-hidden`}
         style={{ animation: 'drawerSlideIn 200ms ease-out' }}
       >
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 shrink-0">
