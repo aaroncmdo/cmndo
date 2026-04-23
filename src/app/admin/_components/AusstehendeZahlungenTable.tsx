@@ -23,7 +23,7 @@ export default async function AusstehendeZahlungenTable() {
     : gesamt
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+    <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
       <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
         <div>
           <h2 className="text-sm font-semibold text-gray-700">Ausstehende Zahlungen</h2>

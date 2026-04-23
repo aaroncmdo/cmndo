@@ -59,7 +59,7 @@ export default async function WerbebudgetAggregatWidget() {
   return (
     <div className="pb-8">
       <div className="">
-        <div className="bg-white border border-gray-200 rounded-2xl p-5">
+        <div className="bg-white rounded-ios-lg shadow-ios-md p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <TargetIcon className="w-4 h-4 text-emerald-600" />

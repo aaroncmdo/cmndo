@@ -238,7 +238,7 @@ export default async function KritischeUpdatesWidget() {
 
   if (alerts.length === 0) {
     return (
-      <div className="bg-emerald-50 border border-emerald-200 rounded-2xl px-5 py-4 flex items-center gap-3">
+      <div className="bg-emerald-50 border border-emerald-200 rounded-ios-lg shadow-ios-sm px-5 py-4 flex items-center gap-3">
         <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
           <CheckCircle2Icon className="w-5 h-5 text-emerald-600" />
         </div>
@@ -254,7 +254,7 @@ export default async function KritischeUpdatesWidget() {
   const restCount = alerts.length - top3.length
 
   return (
-    <div className="bg-red-50 border border-red-200 rounded-2xl overflow-hidden">
+    <div className="bg-red-50 border border-red-200 rounded-ios-lg shadow-ios-sm overflow-hidden">
       <div className="px-5 py-3 border-b border-red-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center">

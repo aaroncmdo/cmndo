@@ -125,7 +125,7 @@ export default async function AusstehendeZahlungenWidget() {
   const { rows, gesamt, total } = await loadAusstehende()
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col h-full">
+    <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden flex flex-col h-full">
       <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <EuroIcon className="w-4 h-4 text-amber-600" />

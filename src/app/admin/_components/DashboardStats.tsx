@@ -73,7 +73,7 @@ export default async function DashboardStats() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-full">
       {/* Lead-Konversion */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-5 flex flex-col">
+      <div className="bg-white rounded-ios-lg shadow-ios-md p-5 flex flex-col">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <BarChart3Icon className="w-4 h-4 text-[#4573A2]" />
@@ -103,7 +103,7 @@ export default async function DashboardStats() {
       </div>
 
       {/* Umsatz-Sparkline */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-5 flex flex-col">
+      <div className="bg-white rounded-ios-lg shadow-ios-md p-5 flex flex-col">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <TrendingUpIcon className="w-4 h-4 text-emerald-600" />
