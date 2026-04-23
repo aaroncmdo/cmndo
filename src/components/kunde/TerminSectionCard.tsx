@@ -81,59 +81,31 @@ function fmtRelativ(iso: string | null): string {
   }
 }
 
-function StatusPill({ termin }: { termin: TerminSectionProps['termin'] }) {
+type StatusConfig = { label: string; cls: string }
+
+function getStatusConfig(termin: TerminSectionProps['termin']): StatusConfig {
   const now = Date.now()
   const startMs = termin.start_zeit ? new Date(termin.start_zeit).getTime() : NaN
   const endMs = termin.end_zeit ? new Date(termin.end_zeit).getTime() : startMs + 60 * 60 * 1000
 
-  let label = ''
-  let bg = 'var(--brand-surface-muted, #f3f4f6)'
-  let color = 'var(--brand-text-secondary, #4b5563)'
-
-  if (termin.sv_angekommen_am) {
-    label = 'Läuft gerade'
-    bg = 'var(--brand-success-soft, #ecfdf5)'
-    color = 'var(--brand-success, #16a34a)'
-  } else if (termin.sv_unterwegs_seit) {
-    label = 'Auf dem Weg'
-    bg = 'var(--brand-primary-soft, #eff6ff)'
-    color = 'var(--brand-accent, #4573A2)'
-  } else if (termin.status === 'reserviert' || termin.status === 'gegenvorschlag') {
-    label = 'Vorgeschlagen'
-    bg = 'var(--brand-warning-soft, #fffbeb)'
-    color = 'var(--brand-warning, #d97706)'
-  } else if (termin.status === 'bestaetigt') {
-    if (!Number.isNaN(startMs) && now >= startMs && now <= endMs) {
-      label = 'Läuft gerade'
-      bg = 'var(--brand-success-soft, #ecfdf5)'
-      color = 'var(--brand-success, #16a34a)'
-    } else if (!Number.isNaN(startMs) && startMs > now && startMs - now < 2 * 3_600_000) {
-      label = 'In Kürze'
-      bg = 'var(--brand-primary-soft, #eff6ff)'
-      color = 'var(--brand-accent, #4573A2)'
-    } else if (!Number.isNaN(startMs) && endMs < now) {
-      label = 'Vergangen'
-    } else {
-      label = 'Bestätigt'
-      bg = 'var(--brand-success-soft, #ecfdf5)'
-      color = 'var(--brand-success, #16a34a)'
-    }
-  } else if (termin.status === 'abgesagt' || termin.status === 'storniert') {
-    label = 'Abgesagt'
-  } else if (termin.status === 'verschoben') {
-    label = 'Verschoben'
-  } else {
-    label = termin.status
+  if (termin.sv_angekommen_am) return { label: 'Läuft gerade', cls: 'bg-emerald-50 text-emerald-700' }
+  if (termin.sv_unterwegs_seit) return { label: 'Auf dem Weg', cls: 'bg-blue-50 text-claimondo-ondo' }
+  if (termin.status === 'reserviert' || termin.status === 'gegenvorschlag')
+    return { label: 'Vorgeschlagen', cls: 'bg-amber-50 text-amber-700' }
+  if (termin.status === 'bestaetigt') {
+    if (!Number.isNaN(startMs) && now >= startMs && now <= endMs)
+      return { label: 'Läuft gerade', cls: 'bg-emerald-50 text-emerald-700' }
+    if (!Number.isNaN(startMs) && startMs > now && startMs - now < 2 * 3_600_000)
+      return { label: 'In Kürze', cls: 'bg-blue-50 text-claimondo-ondo' }
+    if (!Number.isNaN(startMs) && endMs < now)
+      return { label: 'Vergangen', cls: 'bg-gray-100 text-gray-500' }
+    return { label: 'Bestätigt', cls: 'bg-emerald-50 text-emerald-700' }
   }
-
-  return (
-    <span
-      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium"
-      style={{ background: bg, color }}
-    >
-      {label}
-    </span>
-  )
+  if (termin.status === 'abgesagt' || termin.status === 'storniert')
+    return { label: 'Abgesagt', cls: 'bg-red-50 text-red-600' }
+  if (termin.status === 'verschoben')
+    return { label: 'Verschoben', cls: 'bg-amber-50 text-amber-700' }
+  return { label: termin.status, cls: 'bg-gray-100 text-gray-500' }
 }
 
 export default function TerminSectionCard({ termin, gegenueber }: TerminSectionProps) {
@@ -144,7 +116,6 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
   const [copyLinkOk, setCopyLinkOk] = useState(false)
 
   const isVideo = termin.typ === 'kb_beratung' || termin.kanal === 'video'
-  const headerIcon = isVideo ? '🎥' : '🔧'
   const headerTitel = isVideo ? 'Videoberatungstermin' : 'SV-Termin'
 
   const mapsHref = useMemo(() => {
@@ -153,9 +124,7 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
   }, [termin.adresse, isVideo])
 
   const icsHref = `/api/kunde/termin/ics/${termin.id}`
-
-  const effectiveStatus = localStatus
-  const showAktionen = !['abgesagt', 'storniert', 'abgeschlossen'].includes(effectiveStatus)
+  const showAktionen = !['abgesagt', 'storniert', 'abgeschlossen'].includes(localStatus)
 
   function handleAbsagen() {
     if (!window.confirm('Sind Sie sicher, dass Sie den Termin absagen möchten? Ihr Betreuer wird informiert.')) return
@@ -192,26 +161,17 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
 
   const relativ = fmtRelativ(termin.start_zeit)
   const isLive = !!termin.sv_angekommen_am || !!termin.sv_unterwegs_seit
+  const { label: statusLabel, cls: statusCls } = getStatusConfig({ ...termin, status: localStatus })
 
   return (
     <section
-      className="relative rounded-xl border px-4 py-4 shadow-sm"
-      style={{
-        background: 'var(--brand-surface, #ffffff)',
-        borderColor: 'var(--brand-border, #e5e7eb)',
-      }}
+      className="relative glass-light border border-claimondo-border rounded-ios-md shadow-ios-sm px-4 py-4"
       aria-labelledby={`termin-${termin.id}-title`}
     >
       {isLive && (
         <span aria-hidden className="absolute top-3 right-3 inline-flex h-3 w-3">
-          <span
-            className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping"
-            style={{ background: 'var(--brand-success, #16a34a)' }}
-          />
-          <span
-            className="relative inline-flex h-3 w-3 rounded-full"
-            style={{ background: 'var(--brand-success, #16a34a)' }}
-          />
+          <span className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping bg-emerald-500" />
+          <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500" />
         </span>
       )}
 
@@ -219,36 +179,26 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
       <div className="flex items-center justify-between gap-3">
         <h2
           id={`termin-${termin.id}-title`}
-          className="flex items-center gap-2 text-sm font-semibold"
-          style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
+          className="flex items-center gap-2 text-sm font-semibold text-claimondo-navy"
         >
-          <span aria-hidden>{headerIcon}</span>
+          <span aria-hidden>{isVideo ? '🎥' : '🔧'}</span>
           {headerTitel}
         </h2>
-        <StatusPill termin={{ ...termin, status: effectiveStatus }} />
+        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${statusCls}`}>
+          {statusLabel}
+        </span>
       </div>
 
       {/* Datum + Uhrzeit */}
       {termin.start_zeit && (
         <div className="mt-3">
-          <p
-            className="text-base font-semibold"
-            style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
-          >
+          <p className="text-base font-semibold text-claimondo-navy">
             {fmtDatum(termin.start_zeit)}
           </p>
-          <p
-            className="text-sm"
-            style={{ color: 'var(--brand-text-secondary, #4b5563)' }}
-          >
+          <p className="text-sm text-gray-600">
             {fmtZeitRange(termin.start_zeit, termin.end_zeit)}
             {relativ && (
-              <span
-                className="ml-2 text-xs"
-                style={{ color: 'var(--brand-accent, #4573A2)' }}
-              >
-                · {relativ}
-              </span>
+              <span className="ml-2 text-xs text-claimondo-ondo">· {relativ}</span>
             )}
           </p>
         </div>
@@ -256,19 +206,13 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
 
       {/* Live-Info (ETA) */}
       {termin.sv_unterwegs_seit && !termin.sv_angekommen_am && (
-        <p
-          className="mt-2 text-xs font-medium"
-          style={{ color: 'var(--brand-accent, #4573A2)' }}
-        >
+        <p className="mt-2 text-xs font-medium text-claimondo-ondo">
           Ihr Gutachter ist unterwegs
           {termin.sv_eta_minuten != null && ` — Ankunft in ca. ${termin.sv_eta_minuten} Min.`}
         </p>
       )}
       {termin.sv_angekommen_am && (
-        <p
-          className="mt-2 text-xs font-medium"
-          style={{ color: 'var(--brand-success, #16a34a)' }}
-        >
+        <p className="mt-2 text-xs font-medium text-emerald-700">
           Ihr Gutachter ist vor Ort.
         </p>
       )}
@@ -280,32 +224,21 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
             href={termin.video_link}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-md px-4 text-sm font-medium"
-            style={{
-              background: 'var(--brand-primary, #0D1B3E)',
-              color: 'var(--brand-text-on-primary, #ffffff)',
-            }}
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-ios-sm px-4 text-sm font-medium bg-claimondo-navy text-white hover:bg-claimondo-ondo transition-colors"
           >
             <span aria-hidden>🎥</span> Videocall beitreten
           </a>
           <button
             type="button"
             onClick={handleCopyMeet}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-md border px-3 text-xs ml-0 md:ml-2"
-            style={{
-              borderColor: 'var(--brand-border, #e5e7eb)',
-              color: 'var(--brand-text-secondary, #4b5563)',
-            }}
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-ios-sm border border-claimondo-border px-3 text-xs ml-0 md:ml-2 text-gray-600 hover:text-claimondo-navy"
           >
             {copyLinkOk ? 'Link kopiert!' : 'Link kopieren'}
           </button>
         </div>
       ) : termin.adresse ? (
         <div className="mt-4">
-          <p
-            className="text-sm"
-            style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
-          >
+          <p className="text-sm text-claimondo-navy">
             <span aria-hidden>📍</span> {termin.adresse}
           </p>
           {mapsHref && (
@@ -313,11 +246,7 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
               href={mapsHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-2 inline-flex min-h-[44px] items-center gap-2 rounded-md px-4 text-xs font-medium"
-              style={{
-                background: 'var(--brand-accent, #4573A2)',
-                color: 'var(--brand-text-on-primary, #ffffff)',
-              }}
+              className="mt-2 inline-flex min-h-[44px] items-center gap-2 rounded-ios-sm px-4 text-xs font-medium bg-claimondo-ondo text-white hover:bg-claimondo-navy transition-colors"
             >
               Route in Maps öffnen →
             </a>
@@ -327,20 +256,8 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
 
       {/* Gegenüber */}
       {gegenueber && (
-        <div
-          className="mt-4 flex items-center gap-3 rounded-md border p-3"
-          style={{
-            borderColor: 'var(--brand-border, #e5e7eb)',
-            background: 'var(--brand-surface-muted, #f8f9fb)',
-          }}
-        >
-          <div
-            className="flex h-10 w-10 items-center justify-center rounded-full overflow-hidden text-xs font-semibold"
-            style={{
-              background: 'var(--brand-primary, #0D1B3E)',
-              color: 'var(--brand-text-on-primary, #ffffff)',
-            }}
-          >
+        <div className="mt-4 flex items-center gap-3 rounded-ios-sm border border-claimondo-border p-3 bg-claimondo-bg">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full overflow-hidden text-xs font-semibold bg-claimondo-navy text-white">
             {gegenueber.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={gegenueber.avatar_url} alt="" className="h-full w-full object-cover" />
@@ -349,16 +266,10 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p
-              className="text-sm font-medium"
-              style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
-            >
+            <p className="text-sm font-medium text-claimondo-navy">
               {gegenueber.name ?? (gegenueber.rolle === 'sachverstaendiger' ? 'Ihr Gutachter' : 'Ihr Betreuer')}
             </p>
-            <p
-              className="text-[11px]"
-              style={{ color: 'var(--brand-text-secondary, #6b7280)' }}
-            >
+            <p className="text-[11px] text-gray-500">
               {gegenueber.rolle === 'sachverstaendiger' ? 'Ihr Kfz-Sachverständiger' : 'Ihr Kundenbetreuer'}
             </p>
           </div>
@@ -366,11 +277,7 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
             {gegenueber.telefon && (
               <a
                 href={`tel:${gegenueber.telefon}`}
-                className="inline-flex min-h-[44px] items-center gap-1 rounded-md border px-3 text-xs font-medium"
-                style={{
-                  borderColor: 'var(--brand-border, #e5e7eb)',
-                  color: 'var(--brand-text-primary, #0D1B3E)',
-                }}
+                className="inline-flex min-h-[44px] items-center gap-1 rounded-ios-sm border border-claimondo-border px-3 text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg"
                 aria-label={`${gegenueber.name ?? 'Kontakt'} anrufen`}
               >
                 <span aria-hidden>📞</span> Anrufen
@@ -379,11 +286,7 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
             {gegenueber.email && (
               <a
                 href={`mailto:${gegenueber.email}`}
-                className="inline-flex min-h-[44px] items-center gap-1 rounded-md border px-3 text-xs font-medium"
-                style={{
-                  borderColor: 'var(--brand-border, #e5e7eb)',
-                  color: 'var(--brand-text-primary, #0D1B3E)',
-                }}
+                className="inline-flex min-h-[44px] items-center gap-1 rounded-ios-sm border border-claimondo-border px-3 text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg"
                 aria-label="E-Mail schreiben"
               >
                 <span aria-hidden>✉️</span> E-Mail
@@ -395,18 +298,12 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
 
       {/* Vorbereitung */}
       {isVideo ? (
-        <ul
-          className="mt-3 space-y-1 text-xs"
-          style={{ color: 'var(--brand-text-secondary, #4b5563)' }}
-        >
+        <ul className="mt-3 space-y-1 text-xs text-gray-500">
           <li>• Kamera und Mikrofon vor dem Termin testen</li>
           <li>• Ruhige Umgebung mit guter Beleuchtung wählen</li>
         </ul>
       ) : (
-        <ul
-          className="mt-3 space-y-1 text-xs"
-          style={{ color: 'var(--brand-text-secondary, #4b5563)' }}
-        >
+        <ul className="mt-3 space-y-1 text-xs text-gray-500">
           <li>• Alle Schäden am Fahrzeug zugänglich machen</li>
           <li>• Kennzeichen und Fahrzeugschein bereithalten</li>
         </ul>
@@ -414,18 +311,11 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
 
       {/* Quick-Actions Footer */}
       {showAktionen && (
-        <div
-          className="mt-4 flex flex-wrap gap-2 border-t pt-3"
-          style={{ borderColor: 'var(--brand-border, #e5e7eb)' }}
-        >
+        <div className="mt-4 flex flex-wrap gap-2 border-t border-claimondo-border pt-3">
           <button
             type="button"
             onClick={() => setRescheduleOpen(true)}
-            className="inline-flex min-h-[44px] items-center gap-1 rounded-md border px-3 text-xs font-medium"
-            style={{
-              borderColor: 'var(--brand-border, #e5e7eb)',
-              color: 'var(--brand-text-primary, #0D1B3E)',
-            }}
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-ios-sm border border-claimondo-border px-3 text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg"
           >
             <span aria-hidden>📅</span> Verschieben
           </button>
@@ -433,21 +323,13 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
             type="button"
             onClick={handleAbsagen}
             disabled={absagenPending}
-            className="inline-flex min-h-[44px] items-center gap-1 rounded-md border px-3 text-xs font-medium disabled:opacity-60"
-            style={{
-              borderColor: 'var(--brand-danger, #dc2626)',
-              color: 'var(--brand-danger, #dc2626)',
-            }}
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-ios-sm border border-rose-300 px-3 text-xs font-medium text-rose-600 disabled:opacity-60 hover:bg-rose-50"
           >
             {absagenPending ? 'Wird abgesagt…' : 'Absagen'}
           </button>
           <a
             href={icsHref}
-            className="inline-flex min-h-[44px] items-center gap-1 rounded-md border px-3 text-xs font-medium"
-            style={{
-              borderColor: 'var(--brand-border, #e5e7eb)',
-              color: 'var(--brand-text-secondary, #4b5563)',
-            }}
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-ios-sm border border-claimondo-border px-3 text-xs font-medium text-gray-600 hover:bg-claimondo-bg"
           >
             <span aria-hidden>📥</span> Zum Kalender hinzufügen
           </a>
@@ -455,20 +337,12 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
       )}
 
       {localStatus === 'abgesagt' && (
-        <p
-          className="mt-3 text-xs font-medium"
-          style={{ color: 'var(--brand-danger, #dc2626)' }}
-        >
+        <p className="mt-3 text-xs font-medium text-rose-600">
           Termin abgesagt. Ihr Betreuer wurde informiert und meldet sich bei Ihnen.
         </p>
       )}
       {localError && (
-        <p
-          className="mt-3 text-xs"
-          style={{ color: 'var(--brand-danger, #dc2626)' }}
-        >
-          {localError}
-        </p>
+        <p className="mt-3 text-xs text-rose-600">{localError}</p>
       )}
 
       <TerminReschedulingModal
