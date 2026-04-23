@@ -15,6 +15,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
   BellIcon,
   AlertTriangleIcon,
@@ -190,18 +191,23 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
         )}
       </button>
 
-      {open && (
-        <div
-          ref={popoverRef}
-          role="dialog"
-          aria-label="Updates"
-          className="absolute right-0 mt-2 w-[360px] max-w-[92vw] bg-white rounded-2xl shadow-2xl border border-gray-200 z-40 overflow-hidden"
-        >
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            ref={popoverRef}
+            role="dialog"
+            aria-label="Updates"
+            initial={{ opacity: 0, scale: 0.96, y: -4 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97, y: -4 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+            className="absolute right-0 mt-2 w-[360px] max-w-[92vw] glass-light rounded-ios-lg shadow-ios-lg z-40 overflow-hidden"
+          >
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/40">
             <h2 className="text-sm font-semibold text-[#0D1B3E]">Updates</h2>
             <button
               onClick={() => setOpen(false)}
-              className="p-1 -mr-1 text-gray-400 hover:text-gray-700"
+              className="p-1 -mr-1 text-gray-500 hover:text-gray-800"
               aria-label="Schließen"
             >
               <XIcon className="w-4 h-4" />
@@ -292,8 +298,9 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
             )}
           </div>
 
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

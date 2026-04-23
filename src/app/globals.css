@@ -68,6 +68,18 @@ html[lang="ar"] {
   --color-claimondo-bg: var(--claimondo-bg);
   --color-claimondo-card: var(--claimondo-card);
   --color-claimondo-border: var(--claimondo-border);
+
+  /* AAR-727: iOS-Tokens für Tailwind.
+     Nutzung: `rounded-ios-md`, `shadow-ios-lg`, `font-apple`, `ease-ios`. */
+  --radius-ios-sm: var(--radius-ios-sm);
+  --radius-ios-md: var(--radius-ios-md);
+  --radius-ios-lg: var(--radius-ios-lg);
+  --radius-ios-xl: var(--radius-ios-xl);
+  --shadow-ios-sm: var(--shadow-ios-sm);
+  --shadow-ios-md: var(--shadow-ios-md);
+  --shadow-ios-lg: var(--shadow-ios-lg);
+  --font-apple: var(--font-apple);
+  --ease-ios: var(--ease-ios);
 }
 
 :root {
@@ -124,6 +136,22 @@ html[lang="ar"] {
   --shadow-claimondo-sm: 0 1px 2px rgba(13, 27, 62, 0.04), 0 1px 3px rgba(13, 27, 62, 0.06);
   --shadow-claimondo-md: 0 4px 6px -1px rgba(13, 27, 62, 0.06), 0 2px 4px -2px rgba(13, 27, 62, 0.04);
   --shadow-claimondo-lg: 0 10px 25px -5px rgba(13, 27, 62, 0.1), 0 8px 10px -6px rgba(13, 27, 62, 0.06);
+
+  /* AAR-727: iOS-inspirierte Design-Tokens.
+     - Radius: weiche, konsistente Rundungen pro UI-Primitiv.
+     - Shadow: subtile Schatten (kein harter Drop-Shadow).
+     - Ease: iOS-klassisches cubic-bezier.
+     - Glass: light/dark Backdrop-Blur-Layer. */
+  --radius-ios-sm: 12px;
+  --radius-ios-md: 18px;
+  --radius-ios-lg: 24px;
+  --radius-ios-xl: 32px;
+  --shadow-ios-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-ios-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-ios-lg: 0 12px 32px rgba(0, 0, 0, 0.08);
+  --ease-ios: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+    var(--font-montserrat), 'Montserrat', system-ui, sans-serif;
 }
 
 .dark {
@@ -225,4 +253,24 @@ html[lang="ar"] {
 }
 .blink-highlight {
   animation: blink-highlight 1.5s ease-in-out;
+}
+
+/* AAR-727: Glass-Morphism-Utilities.
+   - glass-light: helle Popovers / Modals (weißer Hintergrund-Touch + Blur)
+   - glass-dark: dunkler Nav-Bar / Hero-Layer auf Navy
+   Die Utilities sind bewusst als eigene Klassen und nicht als Tailwind-
+   Custom-Utility modelliert — sie bündeln bg + border + backdrop-filter,
+   was in Tailwind nur über Multi-Step arbeit gehen würde. */
+.glass-light {
+  background-color: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+.glass-dark {
+  background-color: rgba(13, 27, 62, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
