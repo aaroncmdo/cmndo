@@ -33,7 +33,7 @@ export default async function DispatchLayout({
   return (
     <div className="h-screen bg-[#f8f9fb] relative overflow-hidden">
       <RealtimeLeadAlert />
-      <DispatchNav email={user.email ?? ''} initials={initials} />
+      <DispatchNav email={user.email ?? ''} initials={initials} userId={user.id} />
 
       <div className="md:ml-56 h-screen flex flex-col relative z-10">
         {/* Mobile header */}

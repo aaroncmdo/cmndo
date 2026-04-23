@@ -69,3 +69,66 @@ export async function deleteTask(taskId: string) {
   if (error) throw new Error(error.message)
   revalidatePath('/admin/aufgaben/alle')
 }
+
+// AAR-723: Task an Kollegen weiterleiten. Setzt zugewiesen_an +
+// empfaenger_user_id neu, schreibt Timeline-Eintrag falls der Task an einen
+// Fall hängt. Nur Admins dürfen umleiten — Rollen-Check über profiles.rolle.
+export async function reassignTask(taskId: string, neuerUserId: string) {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const { data: actorProfile } = await supabase
+    .from('profiles').select('rolle').eq('id', user.id).single()
+  if (actorProfile?.rolle !== 'admin') {
+    return { success: false, error: 'Nur Admins dürfen Tasks weiterleiten' }
+  }
+
+  if (!taskId || !neuerUserId) {
+    return { success: false, error: 'Task und Ziel-User sind Pflicht' }
+  }
+
+  const { data: task } = await supabase
+    .from('tasks')
+    .select('id, fall_id, zugewiesen_an, titel')
+    .eq('id', taskId)
+    .maybeSingle()
+  if (!task) return { success: false, error: 'Task nicht gefunden' }
+
+  const { data: zielProfile } = await supabase
+    .from('profiles')
+    .select('id, vorname, nachname, rolle')
+    .eq('id', neuerUserId)
+    .single()
+  if (!zielProfile) return { success: false, error: 'Ziel-User nicht gefunden' }
+
+  const { error: updateErr } = await supabase
+    .from('tasks')
+    .update({
+      zugewiesen_an: neuerUserId,
+      empfaenger_user_id: neuerUserId,
+      empfaenger_rolle: zielProfile.rolle,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', taskId)
+
+  if (updateErr) return { success: false, error: updateErr.message }
+
+  if (task.fall_id) {
+    const zielName = [zielProfile.vorname, zielProfile.nachname].filter(Boolean).join(' ') || 'Unbekannt'
+    try {
+      await supabase.from('timeline').insert({
+        fall_id: task.fall_id,
+        typ: 'system',
+        titel: `Task weitergeleitet: ${task.titel}`,
+        beschreibung: `Manuell weitergeleitet an ${zielName}.`,
+      })
+    } catch (err) {
+      console.error('[AAR-723] Reassign-Timeline-Insert fehlgeschlagen:', err)
+    }
+  }
+
+  revalidatePath('/admin/aufgaben/alle')
+  revalidatePath('/admin/meine-tasks')
+  return { success: true }
+}

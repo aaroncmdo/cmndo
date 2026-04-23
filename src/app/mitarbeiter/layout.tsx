@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LogOutIcon } from 'lucide-react'
 import MitarbeiterNav from './_components/MitarbeiterNav'
+import TasksPill from '@/components/shared/TasksPill'
 import { roleToPath } from '@/lib/auth/role-redirect'
 
 export default async function MitarbeiterLayout({
@@ -42,9 +43,13 @@ export default async function MitarbeiterLayout({
   return (
     <div className="min-h-screen bg-[#f8f9fb]">
       <header className="bg-[#0D1B3E] px-4 py-3 flex items-center justify-between">
-        <span className="text-xl font-bold tracking-tight">
-          <span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span>
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xl font-bold tracking-tight">
+            <span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span>
+          </span>
+          {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
+          <TasksPill userId={user.id} href="/mitarbeiter/tasks" />
+        </div>
         <div className="flex items-center gap-3">
           <span className="text-[#7BA3CC] text-sm">{displayName}</span>
           <form action="/api/auth/logout" method="POST">

@@ -3,6 +3,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { TaskEntityType, TaskPrioritaet } from './types'
 import { generateReminderForTask } from './reminder-generator'
+import { chooseAssigneeForRolle } from './auto-assign'
 
 type CreateLinkedTaskParams = {
   titel: string
@@ -48,6 +49,28 @@ export async function createLinkedTask(params: CreateLinkedTaskParams): Promise<
     ? (typeof params.faellig_am === 'string' ? params.faellig_am : params.faellig_am.toISOString())
     : null
 
+  // AAR-723: Auto-Assign. Wenn die Rolle gesetzt ist aber kein konkreter
+  // Empfänger angegeben wurde, wählen wir hier den User mit den wenigsten
+  // offenen Tasks dieser Rolle. So entsteht kein Broadcast-Pool ohne Owner
+  // mehr — jeder Task hat einen eindeutigen Verantwortlichen.
+  let autoAssignedUserId: string | null = null
+  let autoAssignMeta: { rolle: string; fallback_reason: string | null; candidate_count: number } | null = null
+  const hasExplicitAssignee = Boolean(params.zugewiesen_an || params.empfaenger_user_id)
+  if (!hasExplicitAssignee && params.empfaenger_rolle) {
+    const chosen = await chooseAssigneeForRolle(params.empfaenger_rolle)
+    if (chosen) {
+      autoAssignedUserId = chosen.user_id
+      autoAssignMeta = {
+        rolle: chosen.rolle,
+        fallback_reason: chosen.fallback_reason,
+        candidate_count: chosen.candidate_count,
+      }
+    }
+  }
+
+  const finalZugewiesenAn = params.zugewiesen_an ?? autoAssignedUserId ?? null
+  const finalEmpfaengerUserId = params.empfaenger_user_id ?? autoAssignedUserId ?? null
+
   const { data, error } = await db.from('tasks').insert({
     fall_id: params.fall_id ?? null,
     typ: params.typ ?? params.entity_type ?? 'allgemein',
@@ -55,9 +78,9 @@ export async function createLinkedTask(params: CreateLinkedTaskParams): Promise<
     beschreibung: params.beschreibung ?? null,
     status: 'offen',
     prioritaet: params.prioritaet ?? 'normal',
-    zugewiesen_an: params.zugewiesen_an ?? null,
+    zugewiesen_an: finalZugewiesenAn,
     empfaenger_rolle: params.empfaenger_rolle ?? null,
-    empfaenger_user_id: params.empfaenger_user_id ?? null,
+    empfaenger_user_id: finalEmpfaengerUserId,
     faellig_am: faelligAmIso,
     auto_erstellt: params.auto_erstellt ?? true,
     phase: params.phase ?? null,
@@ -82,7 +105,7 @@ export async function createLinkedTask(params: CreateLinkedTaskParams): Promise<
   }
 
   // AAR-501 N6: task.created Event (nur bei bekanntem Empfänger + Fall)
-  if (data?.id && params.empfaenger_user_id && params.fall_id) {
+  if (data?.id && finalEmpfaengerUserId && params.fall_id) {
     try {
       const { emitEvent } = await import('@/lib/notifications/emit')
       const rolle = (params.empfaenger_rolle ?? 'admin') as
@@ -94,7 +117,7 @@ export async function createLinkedTask(params: CreateLinkedTaskParams): Promise<
           taskId: data.id as string,
           taskTyp: params.typ ?? 'allgemein',
           empfaengerRolle: rolle,
-          empfaengerUserId: params.empfaenger_user_id,
+          empfaengerUserId: finalEmpfaengerUserId,
           deadline: faelligAmIso ?? undefined,
         },
         { fallId: params.fall_id },
@@ -105,7 +128,7 @@ export async function createLinkedTask(params: CreateLinkedTaskParams): Promise<
   }
 
   // AAR-229 W4: Mitteilung bei Task-Erstellung an den Empfänger.
-  if (data?.id && params.empfaenger_user_id) {
+  if (data?.id && finalEmpfaengerUserId) {
     // AAR-229 Audit: empfaenger_rolle kann admin/kundenbetreuer/dispatch/
     // sachverstaendiger/kanzlei/kunde sein — alle sind valide EmpfaengerRolle-
     // Werte für mitteilungen. Cast auf den Union-Type statt nur admin|SV.
@@ -113,7 +136,7 @@ export async function createLinkedTask(params: CreateLinkedTaskParams): Promise<
       'admin' | 'dispatch' | 'kundenbetreuer' | 'sachverstaendiger' | 'kanzlei' | 'kunde'
     import('@/lib/mitteilungen/create-mitteilung')
       .then(({ createMitteilung }) => createMitteilung({
-        empfaenger_id: params.empfaenger_user_id!,
+        empfaenger_id: finalEmpfaengerUserId,
         empfaenger_rolle: rolleValue,
         kategorie: 'task',
         titel: params.titel,
@@ -123,6 +146,33 @@ export async function createLinkedTask(params: CreateLinkedTaskParams): Promise<
         prioritaet: params.prioritaet === 'kritisch' ? 'dringend' : 'normal',
       }))
       .catch(err => console.error('[AAR-229] createMitteilung fehlgeschlagen:', err))
+  }
+
+  // AAR-723: Timeline-Eintrag wenn Auto-Assign gegriffen hat. Macht die
+  // Zuweisungs-Entscheidung in der Fallakte nachvollziehbar — inkl. Hinweis
+  // auf Fallback-Konstellation (Rolle ohne aktive User).
+  if (data?.id && autoAssignedUserId && autoAssignMeta && params.fall_id) {
+    try {
+      const { data: assigneeProfile } = await db
+        .from('profiles')
+        .select('vorname, nachname')
+        .eq('id', autoAssignedUserId)
+        .maybeSingle()
+      const assigneeName = assigneeProfile
+        ? [assigneeProfile.vorname, assigneeProfile.nachname].filter(Boolean).join(' ') || 'Unbekannt'
+        : 'Unbekannt'
+      const beschreibung = autoAssignMeta.fallback_reason
+        ? `Automatisch zugewiesen an ${assigneeName} (${autoAssignMeta.rolle}) — Fallback: ${autoAssignMeta.fallback_reason}.`
+        : `Automatisch zugewiesen an ${assigneeName} (Round-Robin, ${autoAssignMeta.candidate_count} Kandidaten in Rolle "${autoAssignMeta.rolle}").`
+      await db.from('timeline').insert({
+        fall_id: params.fall_id,
+        typ: 'system',
+        titel: `Task automatisch zugewiesen: ${params.titel}`,
+        beschreibung,
+      })
+    } catch (err) {
+      console.error('[AAR-723] Timeline-Eintrag Auto-Assign fehlgeschlagen:', err)
+    }
   }
 
   return { task_id: data?.id ?? null }

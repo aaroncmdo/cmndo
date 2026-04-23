@@ -153,6 +153,7 @@ export default async function FaelleLayout({
       <AdminNav
         email={user.email ?? ''}
         initials={initials}
+        userId={user.id}
         unreadNachrichten={unreadNachrichten ?? 0}
         meineTasksCount={meineTasksCount ?? 0}
       />

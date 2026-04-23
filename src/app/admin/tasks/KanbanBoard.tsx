@@ -11,6 +11,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import { createTask, updateTaskStatus, deleteTask } from './actions'
+import TaskReassignDropdown, { type ReassignCandidate } from '@/components/shared/TaskReassignDropdown'
 
 type Task = {
   id: string
@@ -154,6 +155,7 @@ export default function KanbanBoard({
   leadMap,
   svMap,
   admins,
+  reassignCandidates = [],
 }: {
   tasks: Task[]
   faelle: Fall[]
@@ -162,6 +164,7 @@ export default function KanbanBoard({
   leadMap: Record<string, string>
   svMap: Record<string, string>
   admins: Admin[]
+  reassignCandidates?: ReassignCandidate[]
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -339,6 +342,7 @@ export default function KanbanBoard({
                                   link={resolveObjectLink(task, fallMap, leadMap, svMap)!}
                                   adminMap={adminMap}
                                   onDelete={handleDelete}
+                                  reassignCandidates={reassignCandidates}
                                 />
                               </div>
                             )}
@@ -377,11 +381,13 @@ function TaskCard({
   link,
   adminMap,
   onDelete,
+  reassignCandidates,
 }: {
   task: Task
   link: { href: string; label: string; kind: 'Fall' | 'Lead' | 'SV' }
   adminMap: Record<string, string>
   onDelete: (taskId: string) => void
+  reassignCandidates: ReassignCandidate[]
 }) {
   const overdue = isOverdue(task.faellig_am) && task.status !== 'erledigt'
   const obsoleteHint = task.status === 'offen' && task.auto_resolved_am
@@ -508,6 +514,24 @@ function TaskCard({
           )}
         </div>
       </div>
+
+      {/* AAR-723: Reassign-Dropdown — Admin kann den Task hier direkt an
+          einen Kollegen weiterleiten. onClick/onMouseDown stoppen
+          propagation, damit das Drag-Handle nicht auslöst. */}
+      {reassignCandidates.length > 0 && task.status !== 'erledigt' && (
+        <div
+          onClick={e => e.stopPropagation()}
+          onMouseDown={e => e.stopPropagation()}
+          className="mt-2 pt-2 border-t border-gray-100"
+        >
+          <TaskReassignDropdown
+            taskId={task.id}
+            currentAssigneeId={task.zugewiesen_an}
+            candidates={reassignCandidates}
+            compact
+          />
+        </div>
+      )}
     </div>
   )
 }

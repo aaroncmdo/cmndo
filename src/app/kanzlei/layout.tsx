@@ -12,6 +12,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LogOutIcon } from 'lucide-react'
 import KanzleiNav from './_components/KanzleiNav'
+import TasksPill from '@/components/shared/TasksPill'
 import { roleToPath } from '@/lib/auth/role-redirect'
 
 export default async function KanzleiLayout({
@@ -53,6 +54,8 @@ export default async function KanzleiLayout({
           <span className="text-[11px] uppercase tracking-wider text-[#7BA3CC] border border-[#7BA3CC]/30 rounded px-2 py-0.5">
             Kanzlei
           </span>
+          {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
+          <TasksPill userId={user.id} href="/kanzlei/dashboard" />
         </div>
         <div className="flex items-center gap-3">
           <span className="text-[#7BA3CC] text-sm">{displayName}</span>

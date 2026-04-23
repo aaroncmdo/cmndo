@@ -10,6 +10,7 @@ import {
   ClipboardListIcon, ExternalLinkIcon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
+import TasksPill from '@/components/shared/TasksPill'
 
 // AAR-529 (A5): Cutover 21 → 11 flache Items (1 Sektion).
 // Hub-URLs sind alle live aus AAR-525/526/527/528/531 — SLA, Kanzlei-Board,
@@ -43,7 +44,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/admin/einstellungen', label: 'Einstellungen', icon: SettingsIcon },
 ]
 
-export default function AdminNav({ email, initials, unreadNachrichten, meineTasksCount }: { email: string; initials: string; unreadNachrichten?: number; meineTasksCount?: number }) {
+export default function AdminNav({ email, initials, userId, unreadNachrichten, meineTasksCount }: { email: string; initials: string; userId: string; unreadNachrichten?: number; meineTasksCount?: number }) {
   const pathname = usePathname()
 
   function isActive(href: string, exact?: boolean) {
@@ -106,7 +107,11 @@ export default function AdminNav({ email, initials, unreadNachrichten, meineTask
       {/* Desktop Sidebar — Navy */}
       <aside role="navigation" aria-label="Admin-Navigation" className="hidden md:flex flex-col fixed top-0 left-0 h-screen w-56 z-40 bg-[#0D1B3E]">
         <div className="px-5 py-5">
-          <span className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
+          <div className="flex items-center gap-2">
+            <span className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
+            {/* AAR-723: Globale Tasks-Pill oben links neben dem Portal-Logo. */}
+            <TasksPill userId={userId} href="/admin/meine-tasks" initialCount={meineTasksCount ?? 0} />
+          </div>
           <p className="text-xs mt-0.5 text-[#7BA3CC]">{email}</p>
         </div>
 
