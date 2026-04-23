@@ -124,7 +124,7 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
       {/* Content-Bereich */}
       <div className="md:ml-60 h-screen flex flex-col relative z-10">
         {/* Mobile header */}
-        <header className="md:hidden flex items-center justify-between px-4 py-3 bg-[#0D1B3E] shrink-0">
+        <header className="md:hidden flex items-center justify-between px-4 py-3 glass-dark shadow-ios-md shrink-0">
           <span className="text-lg font-bold tracking-tight">
             <span className="text-white">Claim</span>
             <span className="text-[#7BA3CC]">ondo</span>
@@ -145,7 +145,7 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
 
       {/* Mobile bottom nav (erste 4 Items) */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center bg-[#0D1B3E]"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center glass-dark shadow-ios-md"
         style={{ paddingTop: 8, paddingBottom: 'calc(8px + env(safe-area-inset-bottom))' }}
       >
         {NAV_ITEMS.slice(0, 4).map((item) => {

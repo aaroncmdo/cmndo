@@ -300,11 +300,11 @@ export default function GutachterShell({
       <aside
         role="navigation"
         aria-label="Gutachter-Navigation"
-        className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto glass-branded ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         style={{
-          backgroundColor: 'var(--brand-sidebar-bg)',
+          backgroundColor: 'color-mix(in srgb, var(--brand-sidebar-bg) 82%, transparent)',
           color: 'var(--brand-text-on-primary)',
           // Transform-Transition (Sidebar-Slide) immer 200ms, Color-Transition
           // nur bei frischem Brand-Change (einmalig 2s).
@@ -432,9 +432,9 @@ export default function GutachterShell({
         {/* AAR-211 + AAR-220: Header nutzt Theme-Sidebar-Bg (gleicher Look wie
             Sidebar-Hintergrund) mit sanfter 1.5s Color-Transition. */}
         <header
-          className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0"
+          className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0 glass-branded shadow-ios-md"
           style={{
-            backgroundColor: 'var(--brand-sidebar-bg)',
+            backgroundColor: 'color-mix(in srgb, var(--brand-sidebar-bg) 82%, transparent)',
             color: 'var(--brand-text-on-primary)',
             ...transitionStyle,
           }}
