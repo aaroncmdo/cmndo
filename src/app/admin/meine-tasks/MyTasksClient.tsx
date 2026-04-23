@@ -66,7 +66,7 @@ export default function MyTasksClient({
         </button>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+      <div className="glass-light border border-claimondo-border rounded-ios-md overflow-hidden">
         {tasks.length === 0 ? (
           <div className="p-12 text-center text-sm text-gray-400">Keine Tasks in dieser Ansicht.</div>
         ) : (

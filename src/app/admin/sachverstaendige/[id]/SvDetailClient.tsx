@@ -189,7 +189,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
   const inputCls = 'w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#4573A2]'
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-5">
+    <div className="glass-light border border-claimondo-border rounded-ios-md p-5">
       <Script
         src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places&loading=async&v=weekly`}
         strategy="lazyOnload"

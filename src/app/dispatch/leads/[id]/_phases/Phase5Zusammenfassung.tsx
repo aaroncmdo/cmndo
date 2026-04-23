@@ -10,6 +10,7 @@ import { useDispatchPhase } from '../_lib/phase-context'
 import { sendFlowLinkMultiChannel, saveStammdaten } from '../actions'
 // AAR-317: Unfallskizze-Card (Claude-API-Generator + MA-Freigabe)
 import { UnfallskizzeCard } from './UnfallskizzeCard'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import {
   CheckCircle2Icon,
   AlertTriangleIcon,
@@ -310,13 +311,9 @@ export default function Phase5Zusammenfassung() {
         <div className="flex items-center gap-2 mb-4">
           <CheckCircle2Icon className="w-4 h-4 text-[#4573A2]" />
           <h2 className="text-sm font-semibold text-gray-900">Zusammenfassung — letzter Check</h2>
-          <span className={`ml-auto text-[10px] px-2 py-0.5 rounded-full font-medium ${
-            qualification.canSendFlowLink
-              ? 'bg-green-100 text-green-700'
-              : 'bg-amber-100 text-amber-700'
-          }`}>
+          <StatusBadge tone={qualification.canSendFlowLink ? 'success' : 'warning'} className="ml-auto">
             {qualification.completedCount}/8 Bedingungen
-          </span>
+          </StatusBadge>
         </div>
         <div className="divide-y divide-gray-100">
           {rows.map((r, i) => (

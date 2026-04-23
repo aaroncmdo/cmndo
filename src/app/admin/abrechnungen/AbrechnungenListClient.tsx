@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { retryEinzug, markBezahlt, stornoAbrechnung, reIssueAbrechnung } from './actions'
 import PageHeader from '@/components/shared/PageHeader'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 // KFZ-149 Hund-D: Listing aller SV-Monatsabrechnungen mit Filter,
 // Detail-Modal, manuellem Retry und Manuell-bezahlt Button.
@@ -246,10 +247,10 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                     </td>
                     <td className="px-4 py-3 text-right font-medium text-gray-900">{fmtEur(r.summe_brutto)}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded-full font-medium ${badge.bg} ${badge.text}`}>
+                      <StatusBadge colorCls={`${badge.bg} ${badge.text}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
                         {badge.label}
-                      </span>
+                      </StatusBadge>
                     </td>
                     <td className="px-4 py-3 text-gray-600 text-xs">{fmtDate(r.faellig_am)}</td>
                     <td className="px-4 py-3 text-gray-600 text-xs">{fmtDate(r.bezahlt_am)}</td>

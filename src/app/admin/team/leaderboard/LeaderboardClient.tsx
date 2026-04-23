@@ -36,7 +36,7 @@ export default function LeaderboardClient({ dispatch, kundenbetreuer, monatLabel
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Dispatch Leaderboard */}
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+        <div className="glass-light rounded-ios-md border border-claimondo-border overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-200">
             <h2 className="text-gray-900 font-semibold flex items-center gap-2">
               <span className="w-2 h-2 bg-amber-400 rounded-full" />Dispatch
@@ -75,7 +75,7 @@ export default function LeaderboardClient({ dispatch, kundenbetreuer, monatLabel
         </div>
 
         {/* Kundenbetreuer Leaderboard */}
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+        <div className="glass-light rounded-ios-md border border-claimondo-border overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-200">
             <h2 className="text-gray-900 font-semibold flex items-center gap-2">
               <span className="w-2 h-2 bg-green-400 rounded-full" />Kundenbetreuer

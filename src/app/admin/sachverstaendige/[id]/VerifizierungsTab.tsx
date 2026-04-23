@@ -190,7 +190,7 @@ function PflichtdokumenteCard({
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-5">
+    <div className="glass-light border border-claimondo-border rounded-ios-md p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
@@ -405,7 +405,7 @@ function SaVorlageCard({
   }
 
   return (
-    <section className="bg-white border border-gray-200 rounded-2xl p-5">
+    <section className="glass-light border border-claimondo-border rounded-ios-md p-5">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <FileTextIcon className="w-4 h-4 text-[#4573A2]" />
@@ -558,7 +558,7 @@ function Tier2Card({
   const defaultFrist = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 
   return (
-    <section className="bg-white border border-gray-200 rounded-2xl p-5">
+    <section className="glass-light border border-claimondo-border rounded-ios-md p-5">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <ShieldCheckIcon className="w-4 h-4 text-[#4573A2]" />

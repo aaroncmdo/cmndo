@@ -21,6 +21,7 @@ import {
   BellIcon, ClipboardCheckIcon, ServerIcon,
 } from 'lucide-react'
 // AAR-327: Wiederverwendbare Dokument-Anforderungs-UI (Modal + Liste)
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import AnforderungenListe, {
   type AnforderungsItem,
 } from '@/components/dokumente/AnforderungenListe'
@@ -424,9 +425,7 @@ export default function DokumenteTab({
                   {dok.status === 'ausstehend' || dok.status === 'nachgereicht_angefordert' ? (
                     <>
                       {dok.status === 'nachgereicht_angefordert' && (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-orange-50 text-orange-600">
-                          Nachreichen angefordert
-                        </span>
+                        <StatusBadge tone="warning">Nachreichen angefordert</StatusBadge>
                       )}
                       <input ref={uploadTarget?.id === dok.id ? fileRef : undefined} type="file" accept="image/*,.pdf" className="hidden"
                         onChange={e => { const f = e.target.files?.[0]; if (f) handleFileUpload(f, dok.id) }} />
@@ -451,9 +450,9 @@ export default function DokumenteTab({
                     </>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${cfg.bg} ${cfg.text}`}>
+                      <StatusBadge colorCls={`${cfg.bg} ${cfg.text}`}>
                         {dok.status === 'hochgeladen' ? 'Hochgeladen' : 'Geprüft'}
-                      </span>
+                      </StatusBadge>
                       {dok.dokument_url && (
                         <a href={dok.dokument_url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600">
                           <DownloadIcon className="w-3.5 h-3.5" />
@@ -598,17 +597,17 @@ export default function DokumenteTab({
             <ClipboardCheckIcon className="w-3.5 h-3.5" /> QC-Checkliste (Filmcheck)
           </h3>
           {qcStatus && (
-            <span
-              className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+            <StatusBadge
+              tone={
                 qcStatus === 'bestanden'
-                  ? 'bg-emerald-50 text-emerald-600'
+                  ? 'success'
                   : qcStatus === 'nachbesserung'
-                  ? 'bg-orange-50 text-orange-600'
-                  : 'bg-gray-50 text-gray-500'
-              }`}
+                    ? 'warning'
+                    : 'neutral'
+              }
             >
               {qcStatus === 'bestanden' ? 'Bestanden' : qcStatus === 'nachbesserung' ? 'Nachbesserung' : qcStatus}
-            </span>
+            </StatusBadge>
           )}
         </div>
         <div className="p-4 space-y-4">
@@ -730,9 +729,7 @@ function SystemDokumenteBox({ systemDokumente }: { systemDokumente: SystemDokume
                 </a>
               </div>
             ) : (
-              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-gray-50 text-gray-400 shrink-0">
-                Ausstehend
-              </span>
+              <StatusBadge tone="neutral" className="shrink-0">Ausstehend</StatusBadge>
             )}
           </div>
         ))}
