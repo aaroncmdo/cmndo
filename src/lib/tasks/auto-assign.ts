@@ -31,7 +31,7 @@ export async function chooseAssigneeForRolle(
     .from('profiles')
     .select('id, rolle, aktiv')
     .eq('rolle', rolle)
-    .neq('aktiv', false)
+    .not('aktiv', 'is', false)
     .order('id', { ascending: true })
 
   if (candErr) {
@@ -47,7 +47,7 @@ export async function chooseAssigneeForRolle(
       .from('profiles')
       .select('id')
       .eq('rolle', 'admin')
-      .neq('aktiv', false)
+      .not('aktiv', 'is', false)
       .order('id', { ascending: true })
       .limit(1)
       .maybeSingle()

@@ -38,25 +38,18 @@ export default function TasksPill({
     const supabase = createClient()
 
     async function recount() {
-      // Zwei parallele Count-Queries (OR über Filter serverseitig geht via
-      // .or(), aber PostgREST erwartet dann einen komma-separierten String
-      // mit Escapes — einfacher + robust: zwei head:true-Counts summieren und
-      // Dublikaten mit einem zusätzlichen Distinct-Select begegnen).
-      const [assignedRes, empfaengerRes] = await Promise.all([
-        supabase
-          .from('tasks')
-          .select('id', { count: 'exact', head: true })
-          .eq('zugewiesen_an', userId)
-          .in('status', OFFENE_STATUS as unknown as string[]),
-        supabase
-          .from('tasks')
-          .select('id', { count: 'exact', head: true })
-          .eq('empfaenger_user_id', userId)
-          .neq('zugewiesen_an', userId)
-          .in('status', OFFENE_STATUS as unknown as string[]),
-      ])
-      const total = (assignedRes.count ?? 0) + (empfaengerRes.count ?? 0)
-      setCount(total)
+      // Single-Query mit OR — verhindert Double-Counting (jede Zeile erscheint
+      // genau einmal, egal ob sie über zugewiesen_an oder empfaenger_user_id
+      // matcht). Zwei parallele Queries mit anschließendem Summieren wären
+      // falsch: `neq('zugewiesen_an', userId)` würde `NULL != userId` als
+      // NULL werten und Legacy-Tasks mit zugewiesen_an=NULL +
+      // empfaenger_user_id=me komplett ausschließen.
+      const { count: total } = await supabase
+        .from('tasks')
+        .select('id', { count: 'exact', head: true })
+        .or(`zugewiesen_an.eq.${userId},empfaenger_user_id.eq.${userId}`)
+        .in('status', OFFENE_STATUS as unknown as string[])
+      setCount(total ?? 0)
     }
 
     recount()

@@ -79,7 +79,7 @@ export async function reassignTask(taskId: string, neuerUserId: string) {
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const { data: actorProfile } = await supabase
-    .from('profiles').select('rolle').eq('id', user.id).single()
+    .from('profiles').select('rolle').eq('id', user.id).maybeSingle()
   if (actorProfile?.rolle !== 'admin') {
     return { success: false, error: 'Nur Admins dürfen Tasks weiterleiten' }
   }
@@ -99,7 +99,7 @@ export async function reassignTask(taskId: string, neuerUserId: string) {
     .from('profiles')
     .select('id, vorname, nachname, rolle')
     .eq('id', neuerUserId)
-    .single()
+    .maybeSingle()
   if (!zielProfile) return { success: false, error: 'Ziel-User nicht gefunden' }
 
   const { error: updateErr } = await supabase

@@ -28,7 +28,7 @@ export default async function TasksPage() {
       supabase
         .from('profiles')
         .select('id, vorname, nachname, rolle')
-        .neq('aktiv', false)
+        .not('aktiv', 'is', false)
         .in('rolle', ['admin', 'kundenbetreuer', 'dispatch', 'leadbearbeiter', 'kanzlei']),
     ])
 
