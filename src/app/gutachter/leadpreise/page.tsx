@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { TagIcon } from 'lucide-react'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { paketLabelMitKontingent } from '@/lib/sachverstaendige/kontingent'
+import PageHeader from '@/components/shared/PageHeader'
 
 export default async function LeadpreisePage() {
   const supabase = await createClient()
@@ -30,13 +32,18 @@ export default async function LeadpreisePage() {
 
   return (
     <div className="h-full overflow-y-auto py-6">
-      <div>
-        <h1 className="text-xl font-semibold text-gray-900 mb-1">Lead-Preis-Tabelle</h1>
-        <p className="text-sm text-gray-500 mb-1">Stand: {standDatum} (Version {tabelle?.[0]?.version ?? 'v1'})</p>
-        <p className="text-xs text-gray-400 mb-5">Diese Tabelle ist Bestandteil deines Kooperationsvertrags (Anhang). Änderungen werden dir vorab schriftlich mitgeteilt.</p>
+      <div className="space-y-5">
+        <div>
+          <PageHeader
+            title="Lead-Preis-Tabelle"
+            description={`Stand: ${standDatum} (Version ${tabelle?.[0]?.version ?? 'v1'})`}
+            icon={TagIcon}
+          />
+          <p className="text-xs text-gray-400 mt-1">Diese Tabelle ist Bestandteil deines Kooperationsvertrags (Anhang). Änderungen werden dir vorab schriftlich mitgeteilt.</p>
+        </div>
 
         {/* Erläuterung */}
-        <div className="bg-[var(--brand-secondary)]/5 border border-[var(--brand-accent)]/30 rounded-xl p-4 mb-5">
+        <div className="bg-[var(--brand-secondary)]/5 border border-[var(--brand-accent)]/30 rounded-xl p-4">
           <p className="text-sm font-medium text-[var(--brand-primary)] mb-2">Wie funktioniert die Berechnung?</p>
           <ul className="text-xs text-[var(--brand-primary)] space-y-1.5 list-disc pl-4">
             <li>Solange du innerhalb deines monatlichen Kontingents ({paketLabel}) bist, gilt der <strong>Paket-Preis</strong>. Ab dem ersten Fall über dem Kontingent gilt der <strong>Einzel-Preis</strong>.</li>

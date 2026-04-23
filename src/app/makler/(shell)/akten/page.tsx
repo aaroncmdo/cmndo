@@ -1,6 +1,7 @@
 // AAR-486 (M4): Makler-Akten-Liste — Server-Entry. Filter-Param aus URL,
 // lädt Akten-Rows + Counts parallel.
 
+import { FolderIcon } from 'lucide-react'
 import {
   getCurrentMakler,
   getMaklerFaelleList,
@@ -8,6 +9,7 @@ import {
   type AktenFilter,
 } from '@/lib/makler/queries'
 import { MaklerAktenList } from '@/components/makler/MaklerAktenList'
+import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,12 +36,11 @@ export default async function MaklerAktenPage({ searchParams }: Props) {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold text-[#0D1B3E]">Akten</h1>
-        <p className="text-sm text-[#4573A2] mt-1">
-          Ihre aktiven, abgeschlossenen und stornierten Fälle
-        </p>
-      </header>
+      <PageHeader
+        title="Akten"
+        description="Ihre aktiven, abgeschlossenen und stornierten Fälle"
+        icon={FolderIcon}
+      />
 
       <MaklerAktenList akten={akten} counts={counts} currentFilter={filter} />
     </div>

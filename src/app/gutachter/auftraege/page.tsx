@@ -6,9 +6,11 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import Link from 'next/link'
+import { BriefcaseIcon } from 'lucide-react'
 import AuftragCard from './AuftragCard'
 import { FALL_STATUS_LABELS, getUrsacheLabel } from '@/lib/statusLabels'
 import EmptyState from '@/components/shared/EmptyState'
+import PageHeader from '@/components/shared/PageHeader'
 
 // AAR-410: Lokale Kurzform-Labels (weicht bewusst von FALL_STATUS_LABELS ab —
 // Aufträge-Karte will die knappere Variante „Neu"/„Termin" statt „Gutachter
@@ -118,16 +120,15 @@ export default async function AuftraegePage({
 
   return (
     <div className="h-full flex flex-col">
-      <div className="w-full">
-        <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">Meine Aufträge</h1>
-          <p className="text-gray-500 text-sm mt-0.5">
-            {fallList.length} {fallList.length === 1 ? 'Auftrag' : 'Aufträge'}
-          </p>
-        </div>
+      <div className="w-full space-y-6">
+        <PageHeader
+          title="Meine Aufträge"
+          description={`${fallList.length} ${fallList.length === 1 ? 'Auftrag' : 'Aufträge'}`}
+          icon={BriefcaseIcon}
+        />
 
         {/* Filter-Tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto">
+        <div className="flex gap-2 overflow-x-auto">
           {(
             [
               ['alle', 'Alle'],

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { GiftIcon, UsersIcon, TrophyIcon, PlusIcon, ToggleLeftIcon, ToggleRightIcon } from 'lucide-react'
 import { createIncentive, toggleIncentive } from '../actions'
+import PageHeader from '@/components/shared/PageHeader'
 
 type Incentive = {
   id: string; titel: string; beschreibung: string | null; kategorie: string; typ: string
@@ -52,25 +53,26 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
   const fmt = (v: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(v)
 
   return (
-    <div className="py-8"><div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2"><GiftIcon className="w-5 h-5 text-violet-400" />Incentives</h1>
-          <p className="text-gray-500 text-sm mt-0.5">{aktive.length} aktiv · {inaktive.length} inaktiv</p>
-        </div>
-        <button onClick={() => { setShowDialog(true); setError(null) }} className="flex items-center gap-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
-          <PlusIcon className="w-4 h-4" /> Neues Incentive
-        </button>
-      </div>
+    <div className="py-8"><div className="space-y-6">
+      <PageHeader
+        title="Incentives"
+        description={`${aktive.length} aktiv · ${inaktive.length} inaktiv`}
+        icon={GiftIcon}
+        actions={
+          <button onClick={() => { setShowDialog(true); setError(null) }} className="flex items-center gap-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
+            <PlusIcon className="w-4 h-4" /> Neues Incentive
+          </button>
+        }
+      />
 
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2">
         <Link href="/admin/team" className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-500 hover:text-gray-800 text-xs font-medium rounded-lg transition-colors"><UsersIcon className="w-3.5 h-3.5" />Übersicht</Link>
         <Link href="/admin/team/leaderboard" className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-500 hover:text-gray-800 text-xs font-medium rounded-lg transition-colors"><TrophyIcon className="w-3.5 h-3.5" />Leaderboard</Link>
         <Link href="/admin/team/incentives" className="px-3 py-1.5 bg-[#1E3A5F] text-white text-xs font-medium rounded-lg"><GiftIcon className="w-3.5 h-3.5 inline mr-1.5" />Incentives</Link>
       </div>
 
       {/* Aktive Incentives */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {aktive.map(inc => {
           const incAusz = auszahlungen.filter(a => a.incentive_id === inc.id)
           return (

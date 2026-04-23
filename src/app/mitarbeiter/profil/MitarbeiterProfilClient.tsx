@@ -5,9 +5,11 @@
 // Avatar wird separat via AvatarUpload-Komponente gehandhabt.
 
 import { useState, useTransition } from 'react'
+import { UserIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import AvatarUpload from '@/components/shared/AvatarUpload'
+import PageHeader from '@/components/shared/PageHeader'
 import { updateProfilText } from '@/lib/profile/avatar'
 
 const ROLLEN_LABEL: Record<string, string> = {
@@ -53,11 +55,12 @@ export default function MitarbeiterProfilClient({
   }
 
   return (
-    <div className="max-w-3xl">
-      <header className="mb-6">
-        <h1 className="text-lg font-semibold text-[#0D1B3E]">Mein Profil</h1>
-        <p className="text-sm text-gray-500">Profilbild + Anzeige-Infos für Kunden-Ansicht</p>
-      </header>
+    <div className="max-w-3xl space-y-6">
+      <PageHeader
+        title="Mein Profil"
+        description="Profilbild + Anzeige-Infos für Kunden-Ansicht"
+        icon={UserIcon}
+      />
 
       <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-5">
         {/* Avatar-Upload */}

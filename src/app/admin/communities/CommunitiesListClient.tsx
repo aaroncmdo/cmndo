@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { UsersIcon, PlusIcon, ShieldCheckIcon } from 'lucide-react'
 import CommunityAnlegenWizard from './CommunityAnlegenWizard'
+import PageHeader from '@/components/shared/PageHeader'
 
 type Community = {
   id: string
@@ -18,24 +19,23 @@ export default function CommunitiesListClient({ communities }: { communities: Co
   const [showWizard, setShowWizard] = useState(false)
 
   return (
-    <div className="px-8 py-8 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Communities</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Einkaufsgemeinschaften mit gemeinsamem Einsatzgebiet, eigenem Pool und Leaderboard.
-          </p>
-        </div>
-        <button
-          onClick={() => setShowWizard(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold"
-        >
-          <PlusIcon className="w-4 h-4" /> Neue Community
-        </button>
-      </div>
+    <div className="px-8 py-8 max-w-6xl mx-auto space-y-6">
+      <PageHeader
+        title="Communities"
+        description="Einkaufsgemeinschaften mit gemeinsamem Einsatzgebiet, eigenem Pool und Leaderboard."
+        icon={UsersIcon}
+        actions={
+          <button
+            onClick={() => setShowWizard(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold"
+          >
+            <PlusIcon className="w-4 h-4" /> Neue Community
+          </button>
+        }
+      />
 
       {showWizard ? (
-        <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
+        <div className="bg-white border border-gray-200 rounded-2xl p-6">
           <CommunityAnlegenWizard onSuccess={() => setShowWizard(false)} onCancel={() => setShowWizard(false)} />
         </div>
       ) : null}

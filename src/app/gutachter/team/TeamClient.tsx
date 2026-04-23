@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Building2Icon, GraduationCapIcon, MailIcon, ShieldOffIcon, ShieldCheckIcon, ArrowRightIcon, InboxIcon, UsersIcon, BarChart3Icon, WalletIcon, ActivityIcon } from 'lucide-react'
 import { assignPoolLead, toggleSubSvSperre } from './actions'
+import PageHeader from '@/components/shared/PageHeader'
 
 export type SubSvData = {
   id: string
@@ -87,20 +88,15 @@ export default function TeamClient({
   }
 
   return (
-    <div className="px-8 py-8 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-3">
-            <Icon className="w-6 h-6 text-[var(--brand-secondary)]" /> {orgName}
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Team-Verwaltung — {orgLabel} mit {subSvs.length} Mitgliedern
-          </p>
-        </div>
-      </div>
+    <div className="px-8 py-8 max-w-6xl mx-auto space-y-6">
+      <PageHeader
+        title={orgName}
+        description={`Team-Verwaltung — ${orgLabel} mit ${subSvs.length} Mitgliedern`}
+        icon={Icon}
+      />
 
       {/* KFZ-152 Follow-up: Aggregierte Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard icon={UsersIcon} label="Mitglieder" value={`${stats.mitglieder_aktiv} aktiv`} sub={stats.mitglieder_gesperrt > 0 ? `${stats.mitglieder_gesperrt} gesperrt` : `${stats.mitglieder_gesamt} gesamt`} />
         <StatCard icon={BarChart3Icon} label="Fälle Monat" value={`${stats.faelle_genutzt} / ${stats.faelle_max}`} sub={`${stats.auslastung_pct}% Auslastung`} highlight={stats.auslastung_pct >= 80} />
         <StatCard icon={WalletIcon} label="Werbebudget" value={stats.werbebudget_gesamt.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })} sub="Gesamt-Guthaben" />
