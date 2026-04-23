@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { SearchIcon, HardHatIcon, MapPinIcon } from 'lucide-react'
 import { getSvStatus } from '@/lib/sv-status'
 import { KundeAvatar } from '@/components/shared/KundeAvatar'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 // AAR-54: Tabellen-Ansicht für Sachverständige (statt Karte).
 // AAR-151: Aus src/app/admin/sachverstaendige/ verschoben in src/components/,
@@ -169,7 +170,7 @@ export default function SachverstaendigeList({
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${typ.cls}`}>{typ.label}</span>
+                    <StatusBadge colorCls={typ.cls}>{typ.label}</StatusBadge>
                   </td>
                   <td className="px-4 py-3 text-xs text-gray-600">
                     <span className="flex items-center gap-1">
@@ -184,10 +185,10 @@ export default function SachverstaendigeList({
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${status.bg} ${status.text}`}>{status.label}</span>
+                    <StatusBadge colorCls={`${status.bg} ${status.text}`}>{status.label}</StatusBadge>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link href={`${basePath}/sachverstaendige/${sv.id}`} className="text-[#4573A2] hover:underline text-xs">→</Link>
+                    <Link href={`${basePath}/sachverstaendige/${sv.id}`} className="text-claimondo-ondo hover:underline text-xs">→</Link>
                   </td>
                 </tr>
               )

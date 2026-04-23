@@ -35,12 +35,12 @@ export default function CommunitiesListClient({ communities }: { communities: Co
       />
 
       {showWizard ? (
-        <div className="bg-white border border-gray-200 rounded-2xl p-6">
+        <div className="glass-light border border-claimondo-border rounded-ios-md p-6">
           <CommunityAnlegenWizard onSuccess={() => setShowWizard(false)} onCancel={() => setShowWizard(false)} />
         </div>
       ) : null}
 
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+      <div className="glass-light border border-claimondo-border rounded-ios-md overflow-hidden">
         {communities.length === 0 ? (
           <div className="p-12 text-center">
             <UsersIcon className="w-8 h-8 text-gray-300 mx-auto mb-3" />

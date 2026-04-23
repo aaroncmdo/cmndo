@@ -194,7 +194,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
             onClick={() => setFilter(t.key)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
               filter === t.key
-                ? 'bg-[#1E3A5F] text-white'
+                ? 'bg-claimondo-navy text-white'
                 : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300'
             }`}
           >
@@ -215,7 +215,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
       )}
 
       {/* Table */}
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+      <div className="glass-light border border-claimondo-border rounded-ios-md overflow-hidden">
         {filtered.length === 0 ? (
           <div className="p-12 text-center text-sm text-gray-500">Keine Eintraege im Filter <strong>{FILTER_TABS.find(t => t.key === filter)?.label}</strong>.</div>
         ) : (
@@ -256,7 +256,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                     <td className="px-4 py-3 text-right">
                       <button
                         onClick={() => { setSelected(r); setConfirmMarkBezahlt(false); setBezahltNotiz('') }}
-                        className="text-xs text-[#1E3A5F] hover:text-[#4573A2] underline"
+                        className="text-xs text-claimondo-navy hover:text-claimondo-ondo underline"
                       >
                         Details
                       </button>
@@ -276,7 +276,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
           onClick={() => setSelected(null)}
         >
           <div
-            className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[85vh] overflow-y-auto"
+            className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg max-w-2xl w-full max-h-[85vh] overflow-y-auto"
             onClick={e => e.stopPropagation()}
           >
             <div className="px-6 py-4 border-b border-gray-200 flex items-start justify-between">
@@ -342,7 +342,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                     href={`https://dashboard.stripe.com/payments/${selected.stripe_payment_intent_id}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-[#4573A2] hover:text-[#1E3A5F] underline font-mono"
+                    className="inline-flex items-center gap-1 text-xs text-claimondo-ondo hover:text-claimondo-navy underline font-mono"
                   >
                     {selected.stripe_payment_intent_id}
                     <ExternalLinkIcon className="w-3 h-3" />
@@ -365,7 +365,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                     <button
                       onClick={() => handleRetry(selected)}
                       disabled={pending}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#4573A2] hover:bg-[#1E3A5F] text-white text-sm font-medium transition-colors disabled:opacity-40"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-claimondo-ondo hover:bg-claimondo-navy text-white text-sm font-medium transition-colors disabled:opacity-40"
                     >
                       <RefreshCwIcon className="w-4 h-4" />
                       {pending ? 'Wird verarbeitet...' : 'Einzug erneut versuchen'}
@@ -466,14 +466,14 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                         })))
                       }}
                       disabled={pending}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#4573A2] hover:bg-[#1E3A5F] text-white text-sm font-medium transition-colors disabled:opacity-40"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-claimondo-ondo hover:bg-claimondo-navy text-white text-sm font-medium transition-colors disabled:opacity-40"
                     >
                       <RefreshCwIcon className="w-4 h-4" />
                       Korrekturabrechnung erstellen (Re-Issue)
                     </button>
                   )}
                   {!selected.ersetzt_durch_abrechnung_id && showReIssueForm && (
-                    <div className="border border-[#4573A2]/20 rounded-xl p-3 bg-[#4573A2]/5 space-y-3">
+                    <div className="border border-claimondo-ondo/20 rounded-xl p-3 bg-claimondo-ondo/5 space-y-3">
                       <p className="text-xs text-gray-700 font-medium">Korrekturen (optional)</p>
                       <p className="text-[10px] text-gray-500">Positionen können vor dem Re-Issue korrigiert werden. Leer lassen = Originalwert beibehalten.</p>
                       {reIssueKorrekturen.map((k, i) => (
@@ -494,7 +494,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                         <button onClick={() => { setShowReIssueForm(false); setReIssueKorrekturen([]) }} disabled={pending}
                           className="flex-1 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50">Abbrechen</button>
                         <button onClick={() => handleReIssue(selected)} disabled={pending}
-                          className="flex-1 py-1.5 rounded-lg bg-[#4573A2] hover:bg-[#1E3A5F] text-white text-xs font-medium disabled:opacity-40">
+                          className="flex-1 py-1.5 rounded-lg bg-claimondo-ondo hover:bg-claimondo-navy text-white text-xs font-medium disabled:opacity-40">
                           {pending ? 'Erstelle...' : 'Re-Issue erstellen'}
                         </button>
                       </div>
@@ -514,7 +514,7 @@ function Info({ label, value, highlight }: { label: string; value: string; highl
   return (
     <div>
       <p className="text-[10px] uppercase tracking-wide text-gray-400">{label}</p>
-      <p className={`text-sm mt-0.5 ${highlight ? 'font-semibold text-[#1E3A5F]' : 'text-gray-800'}`}>{value}</p>
+      <p className={`text-sm mt-0.5 ${highlight ? 'font-semibold text-claimondo-navy' : 'text-gray-800'}`}>{value}</p>
     </div>
   )
 }
