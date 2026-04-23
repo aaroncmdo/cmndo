@@ -7,6 +7,7 @@
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIcon } from 'lucide-react'
+import { TabDropContent } from '@/components/ui/TabDropContent'
 import { FallProvider, type FallLike, type LeadLike } from './FallContext'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
 // AAR-687: alle 5 Tabs leben jetzt im _tabs/-Ordner (private-folder-
@@ -173,7 +174,7 @@ export default function FallakteShell({
           </nav>
 
           {/* Content */}
-          <div className="px-4 sm:px-6 py-6">
+          <TabDropContent tabKey={activeTab} className="px-4 sm:px-6 py-6">
             {activeTab === 'uebersicht' && <UebersichtTab />}
             {activeTab === 'dokumente' && <DokumenteTab {...dokumenteTabProps} />}
             {activeTab === 'kommunikation' && (
@@ -181,7 +182,7 @@ export default function FallakteShell({
             )}
             {activeTab === 'prozess' && <ProzessTab subphase={subphase} />}
             {activeTab === 'timeline' && <TimelineTab events={events} />}
-          </div>
+          </TabDropContent>
         </main>
 
         {/* Sidebar */}

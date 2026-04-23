@@ -5,16 +5,21 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { InboxIcon, XIcon, PlusIcon, ExternalLinkIcon } from 'lucide-react'
+import { InboxIcon, XIcon, PlusIcon, ExternalLinkIcon, SearchIcon, ArrowLeftIcon } from 'lucide-react'
 import { useGlobalChatStore } from '@/lib/chat/global-chat-store'
 import type { InboxThread } from '@/app/api/chat/inbox-threads/route'
+import type { FallLookupResult } from '@/app/api/chat/fall-lookup/route'
 import { DropletBadge } from '@/components/ui/DropletBadge'
 import { PinnedChatBubble } from '@/components/chat/PinnedChatBubble'
 
 export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string | null }) {
   const [open, setOpen] = useState(false)
+  const [view, setView] = useState<'inbox' | 'new'>('inbox')
   const [threads, setThreads] = useState<InboxThread[]>([])
   const [loading, setLoading] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<FallLookupResult[]>([])
+  const [searching, setSearching] = useState(false)
   const fabRef = useRef<HTMLDivElement>(null)
   const { pinned, pin } = useGlobalChatStore()
 
@@ -59,9 +64,50 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
 
   function handleOpen() {
     setOpen((v) => {
-      if (!v) fetchThreads()
+      if (!v) {
+        fetchThreads()
+        setView('inbox')
+      }
       return !v
     })
+  }
+
+  // Fall-Suche (debounced)
+  useEffect(() => {
+    if (view !== 'new' || searchQuery.trim().length < 2) {
+      setSearchResults([])
+      return
+    }
+    setSearching(true)
+    const handle = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/chat/fall-lookup?q=${encodeURIComponent(searchQuery)}`)
+        const data = await res.json()
+        setSearchResults(data.results ?? [])
+      } catch {
+        setSearchResults([])
+      } finally {
+        setSearching(false)
+      }
+    }, 250)
+    return () => clearTimeout(handle)
+  }, [searchQuery, view])
+
+  function startNewChat(result: FallLookupResult) {
+    // Fall als leeren Thread pinnen — genügt um das Chat-Fenster zu öffnen
+    pin({
+      fallId: result.fallId,
+      fallNummer: result.fallNummer,
+      kundeName: result.kundeName,
+      lastMessage: '',
+      lastAt: new Date().toISOString(),
+      unreadCount: 0,
+      kanaele: [],
+    })
+    setOpen(false)
+    setSearchQuery('')
+    setSearchResults([])
+    setView('inbox')
   }
 
   return (
@@ -99,9 +145,22 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
             >
               {/* Header */}
               <div className="flex items-center gap-2 px-4 py-3 bg-claimondo-navy text-white shrink-0">
-                <InboxIcon className="w-4 h-4 text-[#7BA3CC]" />
-                <span className="flex-1 text-sm font-semibold">Posteingang</span>
-                {totalUnread > 0 && (
+                {view === 'new' ? (
+                  <button
+                    type="button"
+                    onClick={() => { setView('inbox'); setSearchQuery('') }}
+                    className="p-1 hover:bg-white/10 rounded-md transition-colors -ml-1"
+                    aria-label="Zurück"
+                  >
+                    <ArrowLeftIcon className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <InboxIcon className="w-4 h-4 text-[#7BA3CC]" />
+                )}
+                <span className="flex-1 text-sm font-semibold">
+                  {view === 'new' ? 'Neuer Chat' : 'Posteingang'}
+                </span>
+                {view === 'inbox' && totalUnread > 0 && (
                   <DropletBadge count={totalUnread} colorCls="bg-rose-500 text-white" size={18} />
                 )}
                 <button
@@ -114,84 +173,147 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
                 </button>
               </div>
 
-              {/* Thread-Liste */}
-              <div className="flex-1 overflow-y-auto divide-y divide-claimondo-border">
-                {loading && unpinnedThreads.length === 0 && (
-                  <div className="px-4 py-6 text-center text-sm text-gray-400">Lade…</div>
-                )}
-                {!loading && unpinnedThreads.length === 0 && (
-                  <div className="px-4 py-6 text-center text-sm text-gray-400">
-                    Keine offenen Nachrichten
-                  </div>
-                )}
-                {unpinnedThreads.map((thread) => {
-                  const initials = thread.kundeName
-                    .split(' ')
-                    .map((s) => s[0])
-                    .filter(Boolean)
-                    .slice(0, 2)
-                    .join('')
-                    .toUpperCase()
-
-                  return (
-                    <div
-                      key={thread.fallId}
-                      className="flex items-start gap-3 px-4 py-3 hover:bg-claimondo-ondo/5 transition-colors group"
-                    >
-                      <div className="w-8 h-8 rounded-full bg-claimondo-navy flex items-center justify-center text-xs font-bold text-white shrink-0 mt-0.5">
-                        {initials || '?'}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 mb-0.5">
-                          <p className="text-xs font-semibold text-claimondo-navy truncate">
-                            {thread.kundeName}
-                          </p>
-                          {thread.fallNummer && (
-                            <span className="text-[10px] text-gray-400 shrink-0">
-                              #{thread.fallNummer}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-gray-500 truncate leading-tight">
-                          {thread.lastMessage || '…'}
-                        </p>
-                      </div>
-                      <div className="flex flex-col items-end gap-1.5 shrink-0">
-                        {thread.unreadCount > 0 && (
-                          <DropletBadge
-                            count={thread.unreadCount}
-                            colorCls="bg-rose-500 text-white"
-                            size={18}
-                          />
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            pin(thread)
-                            setOpen(false)
-                          }}
-                          className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-claimondo-ondo/10 transition-all"
-                          title="Chat aushängen"
-                          aria-label="Chat aushängen"
-                        >
-                          <ExternalLinkIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
-                        </button>
-                      </div>
+              {/* Body: Inbox oder Neuer-Chat-Suche */}
+              {view === 'inbox' ? (
+                <div className="flex-1 overflow-y-auto divide-y divide-claimondo-border">
+                  {loading && unpinnedThreads.length === 0 && (
+                    <div className="px-4 py-6 text-center text-sm text-gray-400">Lade…</div>
+                  )}
+                  {!loading && unpinnedThreads.length === 0 && (
+                    <div className="px-4 py-6 text-center text-sm text-gray-400">
+                      Keine offenen Nachrichten
                     </div>
-                  )
-                })}
-              </div>
+                  )}
+                  {unpinnedThreads.map((thread) => {
+                    const initials = thread.kundeName
+                      .split(' ')
+                      .map((s) => s[0])
+                      .filter(Boolean)
+                      .slice(0, 2)
+                      .join('')
+                      .toUpperCase()
 
-              {/* Footer */}
-              <div className="px-4 py-3 border-t border-claimondo-border bg-gray-50/60 shrink-0">
-                <button
-                  type="button"
-                  className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-ios-sm bg-claimondo-navy text-white text-xs font-semibold hover:bg-claimondo-ondo transition-colors"
-                >
-                  <PlusIcon className="w-3.5 h-3.5" />
-                  Neuer Chat
-                </button>
-              </div>
+                    return (
+                      <div
+                        key={thread.fallId}
+                        className="flex items-start gap-3 px-4 py-3 hover:bg-claimondo-ondo/5 transition-colors group cursor-pointer"
+                        onClick={() => { pin(thread); setOpen(false) }}
+                      >
+                        <div className="w-8 h-8 rounded-full bg-claimondo-navy flex items-center justify-center text-xs font-bold text-white shrink-0 mt-0.5">
+                          {initials || '?'}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <p className="text-xs font-semibold text-claimondo-navy truncate">
+                              {thread.kundeName}
+                            </p>
+                            {thread.fallNummer && (
+                              <span className="text-[10px] text-gray-400 shrink-0">
+                                #{thread.fallNummer}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-gray-500 truncate leading-tight">
+                            {thread.lastMessage || '…'}
+                          </p>
+                        </div>
+                        <div className="flex flex-col items-end gap-1.5 shrink-0">
+                          {thread.unreadCount > 0 && (
+                            <DropletBadge
+                              count={thread.unreadCount}
+                              colorCls="bg-rose-500 text-white"
+                              size={18}
+                            />
+                          )}
+                          <span
+                            className="opacity-0 group-hover:opacity-100 p-1 transition-all"
+                            title="Chat anheften"
+                          >
+                            <ExternalLinkIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  {/* Suchfeld */}
+                  <div className="px-3 py-2.5 border-b border-claimondo-border shrink-0">
+                    <div className="relative">
+                      <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Kunde oder Fall-Nr. suchen…"
+                        autoFocus
+                        className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-claimondo-border rounded-ios-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40"
+                      />
+                    </div>
+                  </div>
+                  {/* Suchergebnisse */}
+                  <div className="flex-1 overflow-y-auto divide-y divide-claimondo-border">
+                    {searchQuery.trim().length < 2 && (
+                      <div className="px-4 py-6 text-center text-xs text-gray-400">
+                        Mindestens 2 Zeichen eingeben
+                      </div>
+                    )}
+                    {searchQuery.trim().length >= 2 && searching && searchResults.length === 0 && (
+                      <div className="px-4 py-6 text-center text-xs text-gray-400">Suche…</div>
+                    )}
+                    {searchQuery.trim().length >= 2 && !searching && searchResults.length === 0 && (
+                      <div className="px-4 py-6 text-center text-xs text-gray-400">
+                        Keine Fälle gefunden
+                      </div>
+                    )}
+                    {searchResults.map((r) => {
+                      const initials = r.kundeName
+                        .split(' ')
+                        .map((s) => s[0])
+                        .filter(Boolean)
+                        .slice(0, 2)
+                        .join('')
+                        .toUpperCase()
+                      return (
+                        <button
+                          key={r.fallId}
+                          type="button"
+                          onClick={() => startNewChat(r)}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-claimondo-ondo/5 transition-colors text-left"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-claimondo-navy flex items-center justify-center text-xs font-bold text-white shrink-0">
+                            {initials || '?'}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-claimondo-navy truncate">
+                              {r.kundeName}
+                            </p>
+                            {r.fallNummer && (
+                              <p className="text-[10px] text-gray-400">Fall {r.fallNummer}</p>
+                            )}
+                          </div>
+                          <PlusIcon className="w-3.5 h-3.5 text-claimondo-ondo shrink-0" />
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Footer — nur im Inbox-View */}
+              {view === 'inbox' && (
+                <div className="px-4 py-3 border-t border-claimondo-border bg-gray-50/60 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setView('new')}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-ios-sm bg-claimondo-navy text-white text-xs font-semibold hover:bg-claimondo-ondo transition-colors"
+                  >
+                    <PlusIcon className="w-3.5 h-3.5" />
+                    Neuer Chat
+                  </button>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

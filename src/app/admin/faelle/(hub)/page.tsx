@@ -37,11 +37,14 @@ export default async function AdminFaellePage() {
   const fallIds = allFaelle.map(f => f.id)
 
   const emptyRes = { data: [] as never[] }
+  const defaultTime = '1970-01-01T00:00:00Z'
+
   const [
     { data: leads },
     { data: kbProfiles },
     { data: svs },
     { data: unreadMsgs },
+    { data: readStates },
   ] = await Promise.all([
     leadIds.length > 0
       ? supabase.from('leads').select('id, vorname, nachname').in('id', leadIds)
@@ -54,6 +57,9 @@ export default async function AdminFaellePage() {
       : Promise.resolve(emptyRes),
     fallIds.length > 0
       ? admin.from('nachrichten').select('fall_id').eq('gelesen', false).eq('sender_rolle', 'kunde').in('fall_id', fallIds)
+      : Promise.resolve(emptyRes),
+    fallIds.length > 0 && user
+      ? admin.from('fall_read_state').select('fall_id, last_read_update_at').eq('user_id', user.id).in('fall_id', fallIds)
       : Promise.resolve(emptyRes),
   ])
 
@@ -68,7 +74,22 @@ export default async function AdminFaellePage() {
     unreadMap[msg.fall_id] = (unreadMap[msg.fall_id] ?? 0) + 1
   }
 
-  // Zusammenbauen (kein N+1 mehr)
+  // Ungelesene Updates: count_unread_updates RPC für alle Fälle parallel
+  const readStateMap = new Map((readStates ?? []).map(s => [s.fall_id, s.last_read_update_at as string | null]))
+  const updateCounts = fallIds.length > 0
+    ? await Promise.all(
+        fallIds.map(fid =>
+          admin.rpc('count_unread_updates', {
+            p_fall_id: fid,
+            p_since: readStateMap.get(fid) ?? defaultTime,
+          }).then(({ data }) => ({ fid, count: typeof data === 'number' ? data : 0 }))
+        )
+      )
+    : []
+  const updateMap: Record<string, number> = {}
+  for (const { fid, count } of updateCounts) updateMap[fid] = count
+
+  // Zusammenbauen
   const enriched = allFaelle.map(f => ({
     id: f.id as string,
     fall_nummer: f.fall_nummer as string | null,
@@ -89,7 +110,7 @@ export default async function AdminFaellePage() {
     betreuer_name: f.kundenbetreuer_id ? (kbMap[f.kundenbetreuer_id] ?? null) : null,
     sv_name: f.sv_id ? (svMap[f.sv_id] ?? null) : null,
     ungelesene_nachrichten: unreadMap[f.id] ?? 0,
-    ungelesene_updates: 0, // TODO: batch RPC for count_unread_updates
+    ungelesene_updates: updateMap[f.id] ?? 0,
   }))
 
   return <FaelleKanban faelle={enriched} />
