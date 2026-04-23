@@ -25,30 +25,41 @@ export default async function KundeChatPage({
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  // AAR-730: alle Fälle des Kunden laden (nicht nur einen wie vorher).
-  // Ownership via kunde_id oder lead.email.
+  // AAR-730 + AAR-730-hotfix: Alle Fälle des Kunden laden.
+  // Ownership via kunde_id UND lead.email (Kunde kann alte lead-basierte +
+  // neue kunde_id-basierte Fälle haben — wir mergen beide Quellen und
+  // dedupen auf id).
   const admin = createAdminClient()
-  let faelle: Array<{ id: string; fall_nummer: string | null; lead_id: string | null }> = []
 
-  const { data: direktFaelle } = await supabase
-    .from('faelle')
-    .select('id, fall_nummer, lead_id')
-    .eq('kunde_id', user.id)
-    .order('created_at', { ascending: false })
-  if (direktFaelle && direktFaelle.length > 0) {
-    faelle = direktFaelle as typeof faelle
-  } else {
-    const { data: leads } = await admin.from('leads').select('id').eq('email', user.email ?? '')
-    const leadIds = (leads ?? []).map(l => l.id as string)
-    if (leadIds.length > 0) {
-      const { data: fallByLead } = await admin
-        .from('faelle')
-        .select('id, fall_nummer, lead_id')
-        .in('lead_id', leadIds)
-        .order('created_at', { ascending: false })
-      faelle = (fallByLead ?? []) as typeof faelle
-    }
+  const [direktRes, leadsRes] = await Promise.all([
+    supabase
+      .from('faelle')
+      .select('id, fall_nummer, lead_id, created_at')
+      .eq('kunde_id', user.id)
+      .order('created_at', { ascending: false }),
+    user.email
+      ? admin.from('leads').select('id').eq('email', user.email)
+      : Promise.resolve({ data: [] as Array<{ id: string }> }),
+  ])
+  const direktFaelle = (direktRes.data ?? []) as Array<{ id: string; fall_nummer: string | null; lead_id: string | null; created_at: string }>
+  const leadIds = (leadsRes.data ?? []).map(l => l.id as string)
+
+  let leadFaelle: typeof direktFaelle = []
+  if (leadIds.length > 0) {
+    const { data } = await admin
+      .from('faelle')
+      .select('id, fall_nummer, lead_id, created_at')
+      .in('lead_id', leadIds)
+      .order('created_at', { ascending: false })
+    leadFaelle = (data ?? []) as typeof direktFaelle
   }
+
+  // Dedup auf id, chronologisch sortiert.
+  const byId = new Map<string, { id: string; fall_nummer: string | null; lead_id: string | null; created_at: string }>()
+  for (const f of [...direktFaelle, ...leadFaelle]) byId.set(f.id, f)
+  const faelle = Array.from(byId.values())
+    .sort((a, b) => (b.created_at > a.created_at ? 1 : -1))
+    .map(f => ({ id: f.id, fall_nummer: f.fall_nummer, lead_id: f.lead_id }))
 
   if (faelle.length === 0) {
     return (
