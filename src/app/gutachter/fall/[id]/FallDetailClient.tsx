@@ -13,6 +13,9 @@
 
 import { getSvSubphase, type AbrechnungSubphaseInput } from '@/lib/gutachter/subphase'
 import { getSichtbarFuerRolle } from '@/lib/dokumente/sichtbarkeit'
+// AAR-745 (Phase A): Visibility-Single-Source — gleiche Regel wie Admin-ProzessTab,
+// gefiltert auf die SV-Sektionen. Cards self-gaten intern weiter (Defense-in-Depth).
+import { getVisibleFallSections } from '@/lib/fall/section-visibility'
 // AAR-568 (V2) / AAR-727: Pipeline-Daten baut FallPhasenPanel intern — der
 // FallHeader reicht nur fallId + aktuelle_phase + abgeschlossen_am durch.
 import { FallHeader } from './_components/FallHeader'
@@ -174,6 +177,15 @@ export default function FallDetailClient(props: Props) {
     abrechnung,
   )
 
+  // AAR-745: Portal-Sichtbarkeit (SV) × Phase/Trigger-Regeln. Szenario
+  // bleibt null, weil SvSubphase keine Szenario-Ableitung hat — das ist
+  // admin-zentriert und für SV irrelevant (Klage-Section ist ohnehin
+  // nicht in der SV-Whitelist).
+  const visibleSections = getVisibleFallSections(fall, 'sv', {
+    phase: subphase.phase,
+    szenario: null,
+  })
+
   // AAR-568 (V2) / AAR-727: Panel-Input — buildPhasePipelineData läuft intern
   // im FallPhasenPanel, Caller gibt nur die Rohdaten weiter.
   const aktuellePhaseSnake =
@@ -326,7 +338,8 @@ export default function FallDetailClient(props: Props) {
                 (fall.zahlung_eingegangen_am as string | null) ?? null,
             }}
           />
-          {/* AAR-294: Conditional Cards — rendern sich selber nur wenn relevant */}
+          {/* AAR-294 + AAR-745: Conditional Cards. Outer-Gate via Visibility-Map,
+              Cards self-gaten zusätzlich intern (Defense-in-Depth). */}
           <ReklamationsCard
             fall={{
               id: fall.id as string,
@@ -334,34 +347,38 @@ export default function FallDetailClient(props: Props) {
             }}
             id="reklamation-card"
           />
-          <StellungnahmeCard
-            fall={{
-              id: fall.id as string,
-              technische_stellungnahme_status:
-                (fall.technische_stellungnahme_status as string | null) ?? null,
-              technische_stellungnahme_beauftragt_am:
-                (fall.technische_stellungnahme_beauftragt_am as string | null) ?? null,
-              technische_stellungnahme_hochgeladen_am:
-                (fall.technische_stellungnahme_hochgeladen_am as string | null) ?? null,
-              technische_stellungnahme_freigabe_am:
-                (fall.technische_stellungnahme_freigabe_am as string | null) ?? null,
-            }}
-            id="stellungnahme-card"
-          />
-          <NachbesichtigungCard
-            fall={{
-              id: fall.id as string,
-              nachbesichtigung_status:
-                (fall.nachbesichtigung_status as string | null) ?? null,
-              nachbesichtigung_angefordert_am:
-                (fall.nachbesichtigung_angefordert_am as string | null) ?? null,
-              nachbesichtigung_termin_datum:
-                (fall.nachbesichtigung_termin_datum as string | null) ?? null,
-              nachbesichtigung_ergebnis:
-                (fall.nachbesichtigung_ergebnis as string | null) ?? null,
-            }}
-            id="nachbesichtigung-card"
-          />
+          {visibleSections.includes('stellungnahme') && (
+            <StellungnahmeCard
+              fall={{
+                id: fall.id as string,
+                technische_stellungnahme_status:
+                  (fall.technische_stellungnahme_status as string | null) ?? null,
+                technische_stellungnahme_beauftragt_am:
+                  (fall.technische_stellungnahme_beauftragt_am as string | null) ?? null,
+                technische_stellungnahme_hochgeladen_am:
+                  (fall.technische_stellungnahme_hochgeladen_am as string | null) ?? null,
+                technische_stellungnahme_freigabe_am:
+                  (fall.technische_stellungnahme_freigabe_am as string | null) ?? null,
+              }}
+              id="stellungnahme-card"
+            />
+          )}
+          {visibleSections.includes('nachbesichtigung') && (
+            <NachbesichtigungCard
+              fall={{
+                id: fall.id as string,
+                nachbesichtigung_status:
+                  (fall.nachbesichtigung_status as string | null) ?? null,
+                nachbesichtigung_angefordert_am:
+                  (fall.nachbesichtigung_angefordert_am as string | null) ?? null,
+                nachbesichtigung_termin_datum:
+                  (fall.nachbesichtigung_termin_datum as string | null) ?? null,
+                nachbesichtigung_ergebnis:
+                  (fall.nachbesichtigung_ergebnis as string | null) ?? null,
+              }}
+              id="nachbesichtigung-card"
+            />
+          )}
           {/* AAR-559 (C10): Konfrontations-Termin-Annahme/Ablehnung, wenn
               der Kunde im Kunde-Portal (C9) SV-Präsenz gewünscht hat. */}
           <KonfrontationsTerminCard
