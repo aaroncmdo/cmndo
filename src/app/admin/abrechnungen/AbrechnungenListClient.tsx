@@ -6,6 +6,7 @@ import {
   ExternalLinkIcon, XIcon,
 } from 'lucide-react'
 import { retryEinzug, markBezahlt, stornoAbrechnung, reIssueAbrechnung } from './actions'
+import PageHeader from '@/components/shared/PageHeader'
 
 // KFZ-149 Hund-D: Listing aller SV-Monatsabrechnungen mit Filter,
 // Detail-Modal, manuellem Retry und Manuell-bezahlt Button.
@@ -171,15 +172,18 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
 
   return (
     <div className="py-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Abrechnungen</h1>
-          <p className="text-sm text-gray-500 mt-1">SV-Monatsabrechnungen, Reminder + Lastschrift-Einzug</p>
-        </div>
-        <div className="flex items-center gap-2 text-xs text-gray-500">
-          <ReceiptIcon className="w-4 h-4" />
-          {rows.length} Eintrag(e) insgesamt
-        </div>
+      <div className="mb-6">
+        <PageHeader
+          title="Abrechnungen"
+          description="SV-Monatsabrechnungen, Reminder + Lastschrift-Einzug"
+          size="lg"
+          actions={
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <ReceiptIcon className="w-4 h-4" />
+              {rows.length} Eintrag(e) insgesamt
+            </div>
+          }
+        />
       </div>
 
       {/* Filter Tabs */}
