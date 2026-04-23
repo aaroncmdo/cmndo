@@ -64,7 +64,7 @@ export default function ReklamationenClient({ reklamationen, svNameMap, fallNrMa
           {filtered.map(r => {
             const badge = STATUS_BADGE[r.status] ?? STATUS_BADGE.eingereicht
             return (
-              <div key={r.id} className="bg-white border border-gray-200 rounded-xl p-4">
+              <div key={r.id} className="bg-white rounded-ios-lg shadow-ios-md p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <p className="text-sm font-medium text-gray-900">{svNameMap[r.sv_id] ?? '—'} — Fall {fallNrMap[r.fall_id] ?? r.fall_id.slice(0, 8)}</p>

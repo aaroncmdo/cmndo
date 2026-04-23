@@ -68,7 +68,7 @@ export default async function DispatchRueckrufe() {
         <span className="text-sm text-gray-500">{termine.length} offen</span>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-50">
+      <div className="bg-white rounded-ios-lg shadow-ios-md divide-y divide-gray-50">
         {termine.map((t) => {
           const lead = t.lead
           if (!lead) return null

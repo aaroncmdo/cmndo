@@ -105,7 +105,7 @@ export default async function MitarbeiterDashboard() {
       {/* Rückrufe + kommende Termine */}
       {(meineRueckrufe.length > 0 || meineAdminTermine.length > 0 || meineKbTermine.length > 0) && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <section className="bg-white rounded-xl border border-gray-200">
+          <section className="bg-white rounded-ios-lg shadow-ios-md">
             <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                 <PhoneCallIcon className="w-4 h-4 text-amber-500" />
@@ -145,7 +145,7 @@ export default async function MitarbeiterDashboard() {
             </div>
           </section>
 
-          <section className="bg-white rounded-xl border border-gray-200">
+          <section className="bg-white rounded-ios-lg shadow-ios-md">
             <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                 <CalendarIcon className="w-4 h-4 text-blue-500" />
@@ -182,7 +182,7 @@ export default async function MitarbeiterDashboard() {
       )}
 
       {/* Faelle-Liste */}
-      <section className="bg-white rounded-xl border border-gray-200">
+      <section className="bg-white rounded-ios-lg shadow-ios-md">
         <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-gray-900">Meine aktiven Fälle</h2>
           <Link href="/mitarbeiter/faelle" className="text-xs text-[#4573A2] hover:underline">Alle anzeigen</Link>
@@ -206,7 +206,7 @@ export default async function MitarbeiterDashboard() {
       </section>
 
       {/* Tasks-Liste */}
-      <section className="bg-white rounded-xl border border-gray-200">
+      <section className="bg-white rounded-ios-lg shadow-ios-md">
         <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-gray-900">Meine offenen Tasks</h2>
           <Link href="/mitarbeiter/tasks" className="text-xs text-[#4573A2] hover:underline">Alle anzeigen</Link>

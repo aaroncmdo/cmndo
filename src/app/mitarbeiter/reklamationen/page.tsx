@@ -33,7 +33,7 @@ export default async function MitarbeiterReklamationen() {
         <p className="text-sm text-gray-500 mt-1">Reklamationen zu Ihren Fällen.</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-xs uppercase text-gray-500">
             <tr>

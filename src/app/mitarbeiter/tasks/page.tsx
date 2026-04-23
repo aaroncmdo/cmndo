@@ -48,7 +48,7 @@ export default async function MitarbeiterTasks({ searchParams }: {
         ))}
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+      <div className="bg-white rounded-ios-lg shadow-ios-md divide-y divide-gray-100">
         {(tasks ?? []).map(t => (
           <Link key={t.id} href={t.fall_id ? `/faelle/${t.fall_id}` : '#'}
             className="block px-4 py-3 hover:bg-gray-50 transition-colors">

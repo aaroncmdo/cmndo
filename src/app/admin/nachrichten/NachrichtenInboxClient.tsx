@@ -80,7 +80,7 @@ export default function NachrichtenInboxClient({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Linke Spalte: Conversations */}
-        <div className="lg:col-span-1 bg-white rounded-xl border border-gray-200 overflow-hidden h-[600px] flex flex-col">
+        <div className="lg:col-span-1 bg-white rounded-ios-lg shadow-ios-md overflow-hidden h-[600px] flex flex-col">
           {/* AAR-525: Such-Input */}
           <div className="px-3 py-2 border-b border-gray-100">
             <div className="relative">
@@ -147,7 +147,7 @@ export default function NachrichtenInboxClient({
         <div className="lg:col-span-2 space-y-3">
           {selected ? (
             <>
-              <div className="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center justify-between">
+              <div className="bg-white rounded-ios-lg shadow-ios-md px-4 py-3 flex items-center justify-between">
                 <Link href={`/faelle/${selected.fallId}`} className="min-w-0 group">
                   <h2 className="text-base font-semibold text-gray-900 group-hover:underline">{selected.kundeName}</h2>
                   <p className="text-xs text-gray-500">
@@ -167,7 +167,7 @@ export default function NachrichtenInboxClient({
               />
             </>
           ) : (
-            <div className="bg-white rounded-xl border border-gray-200 h-[600px] flex items-center justify-center">
+            <div className="bg-white rounded-ios-lg shadow-ios-md h-[600px] flex items-center justify-center">
               <p className="text-sm text-gray-400">Bitte Konversation links auswaehlen.</p>
             </div>
           )}

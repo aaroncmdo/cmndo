@@ -60,7 +60,7 @@ export default async function SlaMonitoringPage() {
       </div>
 
       {/* Tabelle */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-gray-50">
             <tr className="text-xs uppercase text-gray-500">
