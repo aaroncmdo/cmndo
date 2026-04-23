@@ -6,6 +6,8 @@ import { markNachrichtenGelesen } from '@/lib/markNachrichtenGelesen'
 import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
 import { waehleGegenvorschlagSlot } from './actions'
 import Link from 'next/link'
+// AAR-727 Kandidat 1: Shared Download-Liste — Kunde zeigt flat list.
+import DokumenteDownloadListe, { type DokumentItem } from '@/components/shared/DokumenteDownloadListe'
 
 type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean | null; anhang_url: string | null; created_at: string }
 type Dokument = { id: string; typ: string; datei_url: string; datei_name: string | null; created_at: string }
@@ -135,20 +137,18 @@ export default function FallDetailSections({
 
       {activeTab === 'dokumente' && (
         <Section title="Dokumente">
-          {dokumente.length === 0 ? (
-            <p className="text-sm text-gray-400">Noch keine Dokumente vorhanden.</p>
-          ) : (
-            <div className="space-y-2">
-              {dokumente.map(doc => (
-                <a key={doc.id} href={doc.datei_url} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                  <FileTextIcon className="w-4 h-4 text-[#4573A2] shrink-0" />
-                  <span className="text-sm text-[#0D1B3E] truncate flex-1">{doc.datei_name ?? 'Dokument'}</span>
-                  <span className="text-[10px] text-gray-400">{fmt(doc.created_at)}</span>
-                </a>
-              ))}
-            </div>
-          )}
+          <DokumenteDownloadListe
+            variant="list"
+            rolle="kunde"
+            emptyTitle="Noch keine Dokumente vorhanden."
+            dokumente={dokumente.map<DokumentItem>(doc => ({
+              id: doc.id,
+              name: doc.datei_name ?? 'Dokument',
+              url: doc.datei_url,
+              typ: doc.typ,
+              createdAt: doc.created_at,
+            }))}
+          />
         </Section>
       )}
 

@@ -20,9 +20,6 @@ import {
   CheckCircle2Icon,
   CircleIcon,
   CircleDotIcon,
-  DownloadIcon,
-  FileIcon,
-  ImageIcon,
   ArrowRightIcon,
 } from 'lucide-react'
 import type {
@@ -34,6 +31,8 @@ import type {
 } from '@/lib/makler/queries'
 import { MaklerChatTab } from './MaklerChatTab'
 import { MaklerCopilotTab } from './MaklerCopilotTab'
+// AAR-727 Kandidat 1: Shared Download-Liste — Makler nutzt grid-Variante.
+import DokumenteDownloadListe, { type DokumentItem } from '@/components/shared/DokumenteDownloadListe'
 
 type TabKey = 'overview' | 'timeline' | 'documents' | 'chat' | 'copilot'
 
@@ -580,7 +579,7 @@ function TimelinePanel({ events }: { events: TimelineEvent[] }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Documents Panel
+// Documents Panel — AAR-727 Kandidat 1: shared DokumenteDownloadListe
 // ─────────────────────────────────────────────────────────────────────────────
 
 function DocumentsPanel({
@@ -590,75 +589,23 @@ function DocumentsPanel({
   docs: FallDetailDocument[]
   signedUrls: Record<string, string | null>
 }) {
-  if (docs.length === 0) {
-    return (
-      <div className="bg-white rounded-2xl border border-[#e4e7ef] p-10 text-center">
-        <div className="mx-auto w-12 h-12 rounded-full bg-[#f8f9fb] flex items-center justify-center text-[#4573A2] mb-3">
-          <FileTextIcon width={22} height={22} />
-        </div>
-        <h2 className="text-base font-semibold text-[#0D1B3E] mb-1">
-          Noch keine Dokumente
-        </h2>
-        <p className="text-sm text-[#4573A2]">
-          Dokumente erscheinen hier, sobald Kunde oder SV sie hochladen.
-        </p>
-      </div>
-    )
-  }
+  const items: DokumentItem[] = docs.map((d) => ({
+    id: d.id,
+    name: d.original_filename ?? d.dokument_typ,
+    url: signedUrls[d.id] ?? null,
+    typ: d.dokument_typ,
+    mimeType: d.mime_type,
+    groesseBytes: d.groesse_bytes,
+    createdAt: d.hochgeladen_am,
+  }))
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-      {docs.map((d) => (
-        <DocCard key={d.id} doc={d} url={signedUrls[d.id] ?? null} />
-      ))}
-    </div>
-  )
-}
-
-function DocCard({
-  doc,
-  url,
-}: {
-  doc: FallDetailDocument
-  url: string | null
-}) {
-  const isImage = doc.mime_type?.startsWith('image/') ?? false
-  const Icon = isImage ? ImageIcon : FileIcon
-  const sizeKb = doc.groesse_bytes ? Math.round(doc.groesse_bytes / 1024) : null
-  return (
-    <div className="bg-white rounded-xl border border-[#e4e7ef] p-4 flex flex-col gap-3">
-      <div className="flex items-start gap-3">
-        <span className="shrink-0 w-10 h-10 rounded-lg bg-[#f8f9fb] flex items-center justify-center text-[#4573A2]">
-          <Icon width={20} height={20} />
-        </span>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-[#0D1B3E] truncate">
-            {doc.original_filename ?? doc.dokument_typ}
-          </p>
-          <p className="text-xs text-[#4573A2] mt-0.5">
-            {doc.dokument_typ}
-            {sizeKb ? ` · ${sizeKb} KB` : ''}
-          </p>
-          <p className="text-[11px] text-[#4573A2] mt-0.5">
-            {fmtDate(doc.hochgeladen_am)}
-          </p>
-        </div>
-      </div>
-      {url ? (
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-[#0D1B3E] text-white text-xs font-medium hover:bg-[#1E3A5F]"
-        >
-          <DownloadIcon width={14} height={14} />
-          Herunterladen
-        </a>
-      ) : (
-        <span className="text-xs text-[#4573A2] text-center py-2">
-          Kein Zugriff
-        </span>
-      )}
-    </div>
+    <DokumenteDownloadListe
+      variant="grid"
+      rolle="makler"
+      emptyTitle="Noch keine Dokumente"
+      emptyDescription="Dokumente erscheinen hier, sobald Kunde oder SV sie hochladen."
+      dokumente={items}
+    />
   )
 }
 
