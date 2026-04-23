@@ -42,7 +42,7 @@ export function FallHeader({
     subphase.code === 'storniert' ? 'storniert' : null
 
   return (
-    <div className="bg-white border-b border-gray-200">
+    <div className="border-b border-claimondo-border">
       <div className="px-4 sm:px-6 py-3 flex items-start justify-between gap-3">
         <div className="flex items-start gap-2 min-w-0">
           <Link
