@@ -6,6 +6,7 @@ import Link from 'next/link'
 import NeuLeadDrawer from './_components/NeuLeadDrawer'
 import LeadsViewToggle from './_components/LeadsViewToggle'
 import { PHASE_OPTIONS } from './_components/leadPhaseConstants'
+import PageHeader from '@/components/shared/PageHeader'
 
 export default async function DispatchLeads({
   searchParams,
@@ -30,13 +31,15 @@ export default async function DispatchLeads({
 
   return (
     <div className="py-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900">Leads</h1>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-500">{leads?.length ?? 0} Ergebnisse</span>
-          <NeuLeadDrawer />
-        </div>
-      </div>
+      <PageHeader
+        title="Leads"
+        actions={
+          <>
+            <span className="text-sm text-gray-500">{leads?.length ?? 0} Ergebnisse</span>
+            <NeuLeadDrawer />
+          </>
+        }
+      />
 
       {/* Filter */}
       <div className="flex flex-wrap gap-1.5">
