@@ -142,14 +142,14 @@ export function EventTimeline({ events }: { events: FallEvent[] }) {
       />
 
       {filtered.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-6 text-center">
+        <div className="glass-light border border-claimondo-border rounded-ios-md p-6 text-center">
           <p className="text-sm text-gray-500">Keine Events für den gewählten Filter.</p>
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-xl">
+        <div className="glass-light border border-claimondo-border rounded-ios-md">
           {grouped.map(([day, dayEvents], i) => (
-            <div key={day} className={i > 0 ? 'border-t border-gray-100' : ''}>
-              <div className="sticky top-0 bg-[#f8f9fb] border-b border-gray-200 px-4 py-2 text-xs font-semibold text-[#0D1B3E] uppercase tracking-wider">
+            <div key={day} className={i > 0 ? 'border-t border-claimondo-border' : ''}>
+              <div className="sticky top-0 bg-claimondo-bg border-b border-claimondo-border px-4 py-2 text-xs font-semibold text-claimondo-navy uppercase tracking-wider">
                 {fmtDateHeader(day + 'T12:00:00Z')}
               </div>
               <ul>
@@ -158,7 +158,7 @@ export function EventTimeline({ events }: { events: FallEvent[] }) {
                   return (
                     <li
                       key={ev.id}
-                      className="flex items-start gap-3 px-4 py-2.5 hover:bg-gray-50/70 border-b border-gray-100 last:border-b-0 cursor-pointer"
+                      className="flex items-start gap-3 px-4 py-2.5 hover:bg-gray-50/70 border-b border-claimondo-border last:border-b-0 cursor-pointer"
                       onClick={() => setSelected(ev)}
                     >
                       <span
@@ -171,7 +171,7 @@ export function EventTimeline({ events }: { events: FallEvent[] }) {
                           <span className="text-xs font-mono text-gray-400 shrink-0">
                             {fmtTime(ev.timestamp)}
                           </span>
-                          <span className="text-sm text-[#0D1B3E] font-medium">{ev.titel}</span>
+                          <span className="text-sm text-claimondo-navy font-medium">{ev.titel}</span>
                         </div>
                         {ev.beschreibung && (
                           <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">
@@ -191,11 +191,11 @@ export function EventTimeline({ events }: { events: FallEvent[] }) {
             </div>
           ))}
           {filtered.length > limit && (
-            <div className="p-3 border-t border-gray-100 text-center">
+            <div className="p-3 border-t border-claimondo-border text-center">
               <button
                 type="button"
                 onClick={() => setLimit((l) => l + PAGE_SIZE)}
-                className="text-xs font-medium text-[#4573A2] hover:underline"
+                className="text-xs font-medium text-claimondo-ondo hover:underline"
               >
                 {filtered.length - limit} weitere Events laden
               </button>
