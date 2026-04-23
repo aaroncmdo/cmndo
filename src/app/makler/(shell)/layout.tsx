@@ -37,7 +37,7 @@ export default async function MaklerLayout({
   if (makler.status !== 'aktiv') redirect('/makler/pending')
 
   return (
-    <MaklerShell makler={makler} email={user.email ?? ''}>
+    <MaklerShell makler={makler} email={user.email ?? ''} userId={user.id}>
       {children}
     </MaklerShell>
   )

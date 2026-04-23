@@ -7,6 +7,7 @@ import {
   MapIcon, CarFrontIcon, TargetIcon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
+import TasksPill from '@/components/shared/TasksPill'
 
 // AAR-63: /dispatch/einstellungen Link entfernt (Route existiert nicht → 404)
 // AAR-112: Karte + Sachverständige + Isochrone ergänzt
@@ -33,7 +34,7 @@ const NAV_MOBILE = NAV_ARBEIT
 
 type NavItem = { href: string; label: string; icon: typeof LayoutDashboardIcon }
 
-export default function DispatchNav({ email, initials }: { email: string; initials: string }) {
+export default function DispatchNav({ email, initials, userId }: { email: string; initials: string; userId: string }) {
   const pathname = usePathname()
 
   function isActive(href: string) {
@@ -61,7 +62,11 @@ export default function DispatchNav({ email, initials }: { email: string; initia
       {/* Desktop Sidebar */}
       <aside role="navigation" aria-label="Dispatch-Navigation" className="hidden md:flex flex-col fixed top-0 left-0 h-screen w-56 z-40 bg-[#0D1B3E]">
         <div className="px-5 py-5">
-          <span className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
+          <div className="flex items-center gap-2">
+            <span className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
+            {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
+            <TasksPill userId={userId} href="/dispatch/dashboard" />
+          </div>
           <p className="text-[10px] mt-1 uppercase tracking-wider text-[#7BA3CC] bg-[#1E3A5F] inline-block px-2 py-0.5 rounded">Dispatch</p>
           <p className="text-xs mt-1 text-[#7BA3CC]">{email}</p>
         </div>

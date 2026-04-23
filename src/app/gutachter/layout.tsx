@@ -102,6 +102,7 @@ export default async function GutachterLayout({
   return (
     <GutachterShell
       displayName={displayName}
+      userId={user.id}
       logoUrl={useBrand ? (sv?.logo_url ?? null) : null}
       brandTheme={brandTheme}
       firmenname={useBrand ? (sv?.firmenname ?? null) : null}

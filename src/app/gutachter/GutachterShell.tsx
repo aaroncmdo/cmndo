@@ -27,6 +27,7 @@ import NotificationBell from '@/app/admin/_components/NotificationBell'
 import MitteilungszentralePanel from '@/components/mitteilungszentrale/MitteilungszentralePanel'
 import OutboxBadge from '@/components/offline/OutboxBadge'
 import { SupportButton } from '@/components/support/SupportButton'
+import TasksPill from '@/components/shared/TasksPill'
 import { CLAIMONDO_DEFAULT_THEME, type BrandTheme } from '@/lib/branding/theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
 
@@ -97,6 +98,7 @@ function wLabel(c: number) { return c === 0 ? 'Sonnig' : c <= 3 ? 'Bewölkt' : c
 
 export default function GutachterShell({
   displayName,
+  userId,
   children,
   logoUrl,
   brandTheme,
@@ -108,6 +110,7 @@ export default function GutachterShell({
   showVerifizierung,
 }: {
   displayName: string
+  userId: string
   children: React.ReactNode
   logoUrl?: string | null
   // AAR-220: Vollständiges Theme oder null (= Claimondo-Default).
@@ -304,27 +307,31 @@ export default function GutachterShell({
           {/* AAR-220: Wenn Custom-Branding aktiv → Logo OHNE Filter auf
               weißem rounded-Container damit farbige Logos echt aussehen.
               Sonst (Default Claimondo) → brightness/invert für SVG-Logo. */}
-          {logoUrl ? (
-            <Link href="/gutachter">
-              {useBrand ? (
-                <span className="inline-flex items-center justify-center bg-white rounded-lg p-2 shadow-sm">
+          <div className="flex items-center gap-2">
+            {logoUrl ? (
+              <Link href="/gutachter">
+                {useBrand ? (
+                  <span className="inline-flex items-center justify-center bg-white rounded-lg p-2 shadow-sm">
+                    <img
+                      src={logoUrl}
+                      alt={firmenname ? `${firmenname} Logo` : 'Logo'}
+                      className="h-8 w-auto max-w-32 object-contain"
+                    />
+                  </span>
+                ) : (
                   <img
                     src={logoUrl}
-                    alt={firmenname ? `${firmenname} Logo` : 'Logo'}
-                    className="h-8 w-auto max-w-32 object-contain"
+                    alt="Claimondo Logo"
+                    className="h-8 w-auto max-w-36 object-contain brightness-0 invert"
                   />
-                </span>
-              ) : (
-                <img
-                  src={logoUrl}
-                  alt="Claimondo Logo"
-                  className="h-8 w-auto max-w-36 object-contain brightness-0 invert"
-                />
-              )}
-            </Link>
-          ) : (
-            <Link href="/gutachter" className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></Link>
-          )}
+                )}
+              </Link>
+            ) : (
+              <Link href="/gutachter" className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></Link>
+            )}
+            {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
+            <TasksPill userId={userId} href="/gutachter/tasks" />
+          </div>
           <p className="text-[#7BA3CC] text-xs mt-0.5">{firmenname ?? 'Gutachter-Portal'}</p>
         </div>
 
