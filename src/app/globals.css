@@ -7,7 +7,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "./glass.css";
 
 html[lang="ar"] {
   font-family: 'Noto Sans Arabic', var(--font-montserrat), system-ui, sans-serif;
@@ -273,4 +272,13 @@ html[lang="ar"] {
   border: 1px solid rgba(255, 255, 255, 0.12);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* AAR-727 Cleanup: Einzige überlebende Klasse aus der alten glass.css —
+   alle anderen (.glass-card, .glass-badge-*, .glass-btn-*, .glass-input,
+   .glass-table, .glass-pipeline-card, .glass-bell, .glass-bottom-nav,
+   .kunde-* etc.) waren nicht mehr referenziert. Komplette Datei wurde
+   entfernt, .glass-bg als Body-Surface bleibt hier. */
+.glass-bg {
+  background: #f8f9fb;
 }
