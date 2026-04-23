@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
 import TasksPill from '@/components/shared/TasksPill'
+import { AdminNeueRueckrufeBadge } from '@/components/shared/NeueTermineBadge'
 
 // AAR-529 (A5): Cutover 21 → 11 flache Items (1 Sektion).
 // Hub-URLs sind alle live aus AAR-525/526/527/528/531 — SLA, Kanzlei-Board,
@@ -90,6 +91,10 @@ export default function AdminNav({ email, initials, userId, unreadNachrichten, m
           <span className="ml-auto bg-[#4573A2] text-white text-[9px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
             {meineTasksCount! > 99 ? '99+' : meineTasksCount}
           </span>
+        )}
+        {/* AAR-724: Neue / ungesehene Rückrufe im Kalender-Nav. */}
+        {item.label === 'Kalender' && (
+          <span className="ml-auto"><AdminNeueRueckrufeBadge /></span>
         )}
       </Link>
     )

@@ -27,6 +27,19 @@ export default async function GutachterFallPage({
   const fall = await getFallForSv(supabase, id, (sv as { id: string }).id)
   if (!fall) notFound()
 
+  // AAR-724: Alle ungesehenen Termine dieses Falls auf „gesehen" setzen
+  // sobald der SV die Fallakte öffnet. Best-effort, Fehler nicht blockend.
+  try {
+    await supabase
+      .from('gutachter_termine')
+      .update({ gesehen_am: new Date().toISOString() })
+      .eq('fall_id', id)
+      .eq('sv_id', (sv as { id: string }).id)
+      .is('gesehen_am', null)
+  } catch (err) {
+    console.error('[AAR-724] auto-mark-seen gutachter_termine failed:', err)
+  }
+
   // Fetch all related data in parallel
   const [
     { data: lead },

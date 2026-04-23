@@ -42,7 +42,7 @@ type NavItem = {
   label: string
   icon: typeof MapPinIcon
   // badge: optional Render-Funktion die einen Counter zurückgibt
-  badgeKey?: 'auftraege' | 'posteingang'
+  badgeKey?: 'auftraege' | 'posteingang' | 'neueTermine'
 }
 
 type NavSection = {
@@ -57,7 +57,7 @@ const NAV_SECTIONS_BASE: NavSection[] = [
       { href: '/gutachter/heute', label: 'Heute', icon: MapPinIcon },
       { href: '/gutachter/auftraege', label: 'Aufträge', icon: ClipboardListIcon, badgeKey: 'auftraege' },
       { href: '/gutachter/faelle', label: 'Meine Fälle', icon: FolderOpenIcon },
-      { href: '/gutachter/kalender', label: 'Kalender', icon: CalendarIcon },
+      { href: '/gutachter/kalender', label: 'Kalender', icon: CalendarIcon, badgeKey: 'neueTermine' },
     ],
   },
   {
@@ -202,9 +202,10 @@ export default function GutachterShell({
   // - auftraege: Anzahl Fälle mit status='sv-zugewiesen' (noch nicht terminiert)
   // - posteingang: ungelesene gutachter_mitteilungen + ungelesene nachrichten
   //   gemeinsam als aggregierter Counter (Tabs Mitteilungen + Nachrichten).
-  const [badgeCounts, setBadgeCounts] = useState<{ auftraege: number; posteingang: number }>({
+  const [badgeCounts, setBadgeCounts] = useState<{ auftraege: number; posteingang: number; neueTermine: number }>({
     auftraege: 0,
     posteingang: 0,
+    neueTermine: 0,
   })
 
   const loadBadges = useCallback(async () => {
@@ -243,9 +244,18 @@ export default function GutachterShell({
       .eq('empfaenger_id', user.id)
       .eq('gelesen', false)
 
+    // AAR-724: Neue / ungesehene Termine (gesehen_am IS NULL) über alle
+    // SV-Rows des Users.
+    const { count: neueTermineCount } = await supabase
+      .from('gutachter_termine')
+      .select('id', { count: 'exact', head: true })
+      .in('sv_id', svIds)
+      .is('gesehen_am', null)
+
     setBadgeCounts({
       auftraege: auftraegeCount ?? 0,
       posteingang: (mitteilungenCount ?? 0) + (nachrichtenCount ?? 0),
+      neueTermine: neueTermineCount ?? 0,
     })
   }, [])
 
@@ -257,6 +267,7 @@ export default function GutachterShell({
       .on('postgres_changes', { event: '*', schema: 'public', table: 'faelle' }, () => loadBadges())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'nachrichten' }, () => loadBadges())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'gutachter_mitteilungen' }, () => loadBadges())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'gutachter_termine' }, () => loadBadges())
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [loadBadges])

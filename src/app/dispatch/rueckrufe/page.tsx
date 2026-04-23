@@ -12,6 +12,8 @@ type RueckrufRow = {
   start_zeit: string
   notizen: string | null
   lead_id: string | null
+  // AAR-724: Noch nicht vom Dispatcher angesehen → roter Punkt.
+  gesehen_am: string | null
   lead: {
     id: string
     vorname: string | null
@@ -31,7 +33,7 @@ export default async function DispatchRueckrufe() {
   const { data: raw } = await supabase
     .from('admin_termine')
     .select(
-      'id, start_zeit, notizen, lead_id, lead:leads!admin_termine_lead_id_fkey(id, vorname, nachname, telefon, email, qualifizierungs_phase, anruf_versuche, letzter_anruf_am, letzter_anruf_status)',
+      'id, start_zeit, notizen, lead_id, gesehen_am, lead:leads!admin_termine_lead_id_fkey(id, vorname, nachname, telefon, email, qualifizierungs_phase, anruf_versuche, letzter_anruf_am, letzter_anruf_status)',
     )
     .eq('typ', 'rueckruf')
     .eq('status', 'offen')
@@ -42,6 +44,22 @@ export default async function DispatchRueckrufe() {
     ...t,
     lead: Array.isArray(t.lead) ? t.lead[0] ?? null : t.lead,
   }))
+
+  // AAR-724: Sobald der Dispatcher die Rückrufliste öffnet, markieren wir
+  // alle ungesehenen Rückrufe als „gesehen". Die Render-Daten kommen aus
+  // dem bereits gelesenen `termine`-Snapshot — die roten Punkte bleiben
+  // für diesen Aufruf sichtbar und verschwinden beim nächsten Reload.
+  const ungesehenIds = termine.filter((t) => !t.gesehen_am).map((t) => t.id)
+  if (ungesehenIds.length > 0) {
+    try {
+      await supabase
+        .from('admin_termine')
+        .update({ gesehen_am: new Date().toISOString() })
+        .in('id', ungesehenIds)
+    } catch (err) {
+      console.error('[AAR-724] mark-seen rueckrufe failed:', err)
+    }
+  }
 
   return (
     <div className="py-6 space-y-4">
@@ -58,12 +76,21 @@ export default async function DispatchRueckrufe() {
           return (
             <div key={t.id} className="flex items-center gap-4 px-5 py-4">
               <div className="flex-1 min-w-0">
-                <Link
-                  href={`/dispatch/leads/${lead.id}`}
-                  className="text-sm font-medium text-gray-900 hover:text-[#4573A2]"
-                >
-                  {lead.vorname} {lead.nachname}
-                </Link>
+                <div className="flex items-center gap-2">
+                  {/* AAR-724: Roter Punkt für noch nicht gesehene Rückrufe. */}
+                  {!t.gesehen_am && (
+                    <span
+                      className="inline-block w-2 h-2 rounded-full bg-red-500 shrink-0"
+                      aria-label="Neu, noch nicht angesehen"
+                    />
+                  )}
+                  <Link
+                    href={`/dispatch/leads/${lead.id}`}
+                    className="text-sm font-medium text-gray-900 hover:text-[#4573A2]"
+                  >
+                    {lead.vorname} {lead.nachname}
+                  </Link>
+                </div>
                 <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
                   {lead.telefon && (
                     <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} />
