@@ -37,7 +37,7 @@ export default function Avatar({ url, name, size = 'md', className = '' }: Props
   }
   return (
     <div
-      className={`${boxClass} rounded-full bg-[#4573A2]/10 text-[#0D1B3E] flex items-center justify-center font-semibold ${className}`}
+      className={`${boxClass} rounded-full bg-claimondo-ondo/10 text-claimondo-navy flex items-center justify-center font-semibold ${className}`}
     >
       {computeInitials(name)}
     </div>

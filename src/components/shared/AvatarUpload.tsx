@@ -102,7 +102,7 @@ export default function AvatarUpload({ currentUrl, initials, size = 'md', onChan
           type="button"
           onClick={handlePick}
           disabled={isPending}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#4573A2] text-[#4573A2] text-xs font-medium hover:bg-[#4573A2]/5 transition-colors disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-claimondo-ondo text-claimondo-ondo text-xs font-medium hover:bg-claimondo-ondo/5 transition-colors disabled:opacity-50"
         >
           <CameraIcon className="w-3.5 h-3.5" />
           {previewUrl ? 'Ändern' : 'Hochladen'}

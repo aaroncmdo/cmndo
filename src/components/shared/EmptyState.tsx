@@ -8,11 +8,11 @@ type ActionVariant = 'primary' | 'secondary' | 'ghost'
 
 const ACTION_CLASSES: Record<ActionVariant, string> = {
   primary:
-    'bg-[#0D1B3E] hover:bg-[#4573A2] text-white',
+    'bg-claimondo-navy hover:bg-claimondo-ondo text-white',
   secondary:
     'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200',
   ghost:
-    'bg-transparent hover:bg-gray-100 text-[#4573A2]',
+    'bg-transparent hover:bg-gray-100 text-claimondo-ondo',
 }
 
 const SIZE_CLASSES = {

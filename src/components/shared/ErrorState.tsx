@@ -46,7 +46,7 @@ export default function ErrorState({
       <button
         type="button"
         onClick={handleRetry}
-        className="inline-flex items-center gap-2 bg-[#0D1B3E] hover:bg-[#4573A2] text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors mt-5"
+        className="inline-flex items-center gap-2 bg-claimondo-navy hover:bg-claimondo-ondo text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors mt-5"
       >
         <RefreshCcwIcon className="w-4 h-4" />
         {retryLabel}
