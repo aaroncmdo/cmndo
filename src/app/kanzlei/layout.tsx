@@ -28,7 +28,7 @@ export default async function KanzleiLayout({
   // entsteht rechts ein grauer Balken auf breiten Screens.
   return (
     <div className="h-screen bg-[#f8f9fb] flex flex-col overflow-hidden">
-      <header className="bg-[#0D1B3E] px-4 py-3 flex items-center justify-between shrink-0">
+      <header className="glass-dark shadow-ios-md px-4 py-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <span className="text-xl font-bold tracking-tight">
             <span className="text-white">Claim</span>
