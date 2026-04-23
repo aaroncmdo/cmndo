@@ -8,37 +8,19 @@
 // Guard: Rolle muss 'kanzlei' sein. Admin darf ebenfalls rein, damit wir
 // das Portal im Admin-Modus testen können ohne Rollen-Switch.
 
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import { LogOutIcon } from 'lucide-react'
 import KanzleiNav from './_components/KanzleiNav'
 import TasksPill from '@/components/shared/TasksPill'
 import UpdatesNav from '@/components/updates/UpdatesNav'
-import { roleToPath } from '@/lib/auth/role-redirect'
+import { requirePortalAccess } from '@/lib/auth/portal-guard'
 
 export default async function KanzleiLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('rolle, vorname, nachname')
-    .eq('id', user.id)
-    .single()
-
-  // AAR-718: Eingeloggte User mit anderer Rolle in ihr eigenes Portal statt
-  // auf die Login-Page zurück.
-  if (!profile || !['kanzlei', 'admin'].includes(profile.rolle)) {
-    redirect(profile?.rolle ? roleToPath(profile.rolle as string) : '/login')
-  }
-
-  const displayName =
-    [profile.vorname, profile.nachname].filter(Boolean).join(' ') || user.email || ''
+  // K5: Auth + Rollen-Guard zentralisiert. Admin bleibt erlaubt für Testing.
+  const { user, displayName } = await requirePortalAccess(['kanzlei', 'admin'])
 
   // AAR-676: h-screen + overflow-hidden damit die komplette Kanzlei-Shell
   // nicht das Fenster scrollt. Sidebar + Header bleiben fix, nur der Main-

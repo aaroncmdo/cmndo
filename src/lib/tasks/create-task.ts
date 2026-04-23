@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import type { TaskEntityType, TaskPrioritaet } from './types'
 import { generateReminderForTask } from './reminder-generator'
 import { chooseAssigneeForRolle } from './auto-assign'
+import { logFallEvent } from '@/lib/fall/log-event'
 
 type CreateLinkedTaskParams = {
   titel: string
@@ -164,9 +165,9 @@ export async function createLinkedTask(params: CreateLinkedTaskParams): Promise<
       const beschreibung = autoAssignMeta.fallback_reason
         ? `Automatisch zugewiesen an ${assigneeName} (${autoAssignMeta.rolle}) — Fallback: ${autoAssignMeta.fallback_reason}.`
         : `Automatisch zugewiesen an ${assigneeName} (Round-Robin, ${autoAssignMeta.candidate_count} Kandidaten in Rolle "${autoAssignMeta.rolle}").`
-      await db.from('timeline').insert({
-        fall_id: params.fall_id,
-        typ: 'system',
+      await logFallEvent(db, {
+        fallId: params.fall_id,
+        typ: 'task',
         titel: `Task automatisch zugewiesen: ${params.titel}`,
         beschreibung,
       })
