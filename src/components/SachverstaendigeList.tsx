@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { SearchIcon, HardHatIcon, MapPinIcon } from 'lucide-react'
 import { getSvStatus } from '@/lib/sv-status'
+import { KundeAvatar } from '@/components/shared/KundeAvatar'
 
 // AAR-54: Tabellen-Ansicht für Sachverständige (statt Karte).
 // AAR-151: Aus src/app/admin/sachverstaendige/ verschoben in src/components/,
@@ -160,9 +161,7 @@ export default function SachverstaendigeList({
                 <tr key={sv.id} className="hover:bg-[#f0f4f8] transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-[#4573A2]/10 text-[#4573A2] flex items-center justify-center text-[10px] font-semibold">
-                        {sv.name.split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || '—'}
-                      </div>
+                      <KundeAvatar name={sv.name} size={28} colorCls="bg-claimondo-ondo/10 text-claimondo-ondo" />
                       <div>
                         <p className="text-sm font-medium text-gray-900">{sv.name}</p>
                         {sv.email && <p className="text-[10px] text-gray-400">{sv.email}</p>}

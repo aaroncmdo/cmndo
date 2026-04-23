@@ -127,25 +127,13 @@ export default async function FaelleLayout({
     )
   }
 
-  // admin → Admin-Shell (Kopie der /admin/layout.tsx-Logik,
-  // damit Admin-User ihre gewohnte Umgebung behalten — inkl. Spotlight,
-  // NotificationBell, Task-Badge). Kanzlei wurde oben bereits abgezweigt.
-  const [
-    { count: unreadNachrichten },
-    { count: meineTasksCount },
-  ] = await Promise.all([
-    supabase
-      .from('nachrichten')
-      .select('*', { count: 'exact', head: true })
-      .eq('kanal', 'whatsapp')
-      .eq('richtung', 'inbound')
-      .eq('gelesen', false),
-    supabase
-      .from('tasks')
-      .select('*', { count: 'exact', head: true })
-      .eq('zugewiesen_an', user.id)
-      .in('status', ['offen', 'in-bearbeitung']),
-  ])
+  // admin → Admin-Shell (Kopie der /admin/layout.tsx-Logik). AAR-727:
+  // unreadNachrichten entfernt — Posteingang läuft jetzt über GlobalPosteingangFab.
+  const { count: meineTasksCount } = await supabase
+    .from('tasks')
+    .select('*', { count: 'exact', head: true })
+    .eq('zugewiesen_an', user.id)
+    .in('status', ['offen', 'in-bearbeitung'])
 
   return (
     <div className="h-screen bg-[#f8f9fb] relative overflow-hidden">
@@ -154,7 +142,6 @@ export default async function FaelleLayout({
         email={user.email ?? ''}
         initials={initials}
         userId={user.id}
-        unreadNachrichten={unreadNachrichten ?? 0}
         meineTasksCount={meineTasksCount ?? 0}
       />
       <div className="md:ml-56 h-screen flex flex-col relative z-10">

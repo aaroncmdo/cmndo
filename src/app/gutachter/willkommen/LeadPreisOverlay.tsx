@@ -67,7 +67,7 @@ export default function LeadPreisOverlay({
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-primary)] text-white shrink-0">
           <div>

@@ -6,7 +6,7 @@ import {
   LayoutDashboardIcon, FolderOpenIcon, BadgeEuroIcon,
   CarFrontIcon, LogOutIcon, GitBranchIcon, CalendarIcon,
   UsersIcon, Building2Icon,
-  MessageCircleIcon, SettingsIcon,
+  SettingsIcon,
   ClipboardListIcon, ExternalLinkIcon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
@@ -33,8 +33,10 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/admin/faelle', label: 'Fälle', icon: FolderOpenIcon },
   // AAR-531: Aufgaben-Hub (Meine-Tasks + Alle-Tasks)
   { href: '/admin/aufgaben', label: 'Aufgaben', icon: ClipboardListIcon },
-  // AAR-525: Nachrichten-Hub (MultiChannelChat pro Fall)
-  { href: '/admin/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon },
+  // AAR-525: Nachrichten-Hub via GlobalPosteingangFab (unten rechts). Route
+  // /admin/nachrichten bleibt erreichbar (Bookmarks brechen nicht), der
+  // Side-Nav-Eintrag entfällt weil der FAB die gleiche Funktion global
+  // abdeckt.
   { href: '/admin/kalender', label: 'Kalender', icon: CalendarIcon },
   { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: CarFrontIcon },
   // AAR-527: Partner-Hub (Organisationen/Versicherer/Communities)
@@ -45,7 +47,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/admin/einstellungen', label: 'Einstellungen', icon: SettingsIcon },
 ]
 
-export default function AdminNav({ email, initials, userId, unreadNachrichten, meineTasksCount }: { email: string; initials: string; userId: string; unreadNachrichten?: number; meineTasksCount?: number }) {
+export default function AdminNav({ email, initials, userId, meineTasksCount }: { email: string; initials: string; userId: string; meineTasksCount?: number }) {
   const pathname = usePathname()
 
   function isActive(href: string, exact?: boolean) {
@@ -82,13 +84,8 @@ export default function AdminNav({ email, initials, userId, unreadNachrichten, m
       >
         <item.icon style={{ width: 17, height: 17 }} />
         {item.label}
-        {item.label === 'Nachrichten' && (unreadNachrichten ?? 0) > 0 && (
-          <span className="ml-auto bg-[#4573A2] text-white text-[9px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
-            {unreadNachrichten! > 99 ? '99+' : unreadNachrichten}
-          </span>
-        )}
         {item.label === 'Aufgaben' && (meineTasksCount ?? 0) > 0 && (
-          <span className="ml-auto bg-[#4573A2] text-white text-[9px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
+          <span className="ml-auto bg-claimondo-ondo text-white text-[9px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
             {meineTasksCount! > 99 ? '99+' : meineTasksCount}
           </span>
         )}
@@ -100,9 +97,9 @@ export default function AdminNav({ email, initials, userId, unreadNachrichten, m
     )
   }
 
-  // AAR-529 (A5): Mobile-Top-5 — Dashboard, Fälle, Aufgaben, Nachrichten, Sachverständige.
-  // Dispatch fällt aus Mobile raus (eigenes Full-Screen-Layout, mobil nicht praktikabel).
-  const MOBILE_HREFS = ['/admin', '/admin/faelle', '/admin/aufgaben', '/admin/nachrichten', '/admin/sachverstaendige']
+  // AAR-529 (A5) / AAR-727: Mobile-Top-5 — Nachrichten ersetzt durch
+  // Kalender, weil Posteingang via GlobalPosteingangFab unten rechts lebt.
+  const MOBILE_HREFS = ['/admin', '/admin/faelle', '/admin/aufgaben', '/admin/kalender', '/admin/sachverstaendige']
   const mobileItems: NavItem[] = MOBILE_HREFS
     .map(h => NAV_ITEMS.find(i => i.href === h))
     .filter((i): i is NavItem => !!i)
@@ -127,7 +124,7 @@ export default function AdminNav({ email, initials, userId, unreadNachrichten, m
         <div className="px-3 pb-4 space-y-2 border-t border-white/10 pt-3">
           <SupportButton userName={email} rolle="admin" />
           <div className="flex items-center gap-3 px-3 py-2.5">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold bg-[#4573A2] text-white">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold bg-claimondo-ondo text-white">
               {initials}
             </div>
             <div className="flex-1 min-w-0">
@@ -181,11 +178,6 @@ export default function AdminNav({ email, initials, userId, unreadNachrichten, m
             >
               <item.icon style={{ width: 20, height: 20 }} />
               <span className="text-[9px] font-medium">{item.label}</span>
-              {item.label === 'Nachrichten' && (unreadNachrichten ?? 0) > 0 && (
-                <span className="absolute top-0 right-1 bg-[#4573A2] text-white text-[8px] font-bold min-w-[14px] h-[14px] flex items-center justify-center rounded-full">
-                  {unreadNachrichten! > 9 ? '9+' : unreadNachrichten}
-                </span>
-              )}
             </Link>
           )
         })}
