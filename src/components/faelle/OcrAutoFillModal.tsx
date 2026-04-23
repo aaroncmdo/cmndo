@@ -85,8 +85,8 @@ export default function OcrAutoFillModal({
 
   if (fields.length === 0) {
     return (
-      <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
-        <div className="bg-white rounded-2xl p-6 max-w-sm w-full" onClick={e => e.stopPropagation()}>
+      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+        <div className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg p-6 max-w-sm w-full" onClick={e => e.stopPropagation()}>
           <p className="text-sm text-gray-500">Keine Daten erkannt.</p>
           <button onClick={onClose} className="mt-3 text-xs text-[#4573A2]">Schließen</button>
         </div>
@@ -95,8 +95,8 @@ export default function OcrAutoFillModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl p-5 max-w-md w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg p-5 max-w-md w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
             <SparklesIcon className="w-4 h-4 text-[#4573A2]" />

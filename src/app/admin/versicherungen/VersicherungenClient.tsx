@@ -138,8 +138,8 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
 
       {/* Create-Modal */}
       {creating && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setCreating(false)}>
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setCreating(false)}>
+          <div className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
               <h2 className="text-base font-semibold text-gray-900">Neue Versicherung</h2>
               <button onClick={() => setCreating(false)} className="p-1 text-gray-400 hover:text-gray-600"><XIcon className="w-5 h-5" /></button>
@@ -166,8 +166,8 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
 
       {/* Detail-Panel */}
       {selected && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setSelected(null)}>
+          <div className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
               <h2 className="text-base font-semibold text-gray-900">{selected.name}</h2>
               <button onClick={() => setSelected(null)} className="p-1 text-gray-400 hover:text-gray-600"><XIcon className="w-5 h-5" /></button>

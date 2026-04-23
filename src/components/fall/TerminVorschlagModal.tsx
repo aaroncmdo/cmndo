@@ -141,10 +141,10 @@ export default function TerminVorschlagModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-t-3xl md:rounded-2xl w-full md:max-w-lg max-h-[90vh] overflow-y-auto shadow-xl"
+        className="glass-light border border-claimondo-border rounded-t-3xl md:rounded-ios-lg w-full md:max-w-lg max-h-[90vh] overflow-y-auto shadow-ios-lg"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 sticky top-0 bg-white">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border sticky top-0 bg-white/40 backdrop-blur-sm">
           <div className="flex items-center gap-2">
             <CalendarIcon className="w-5 h-5 text-[#4573A2]" />
             <h2 className="text-base font-semibold text-[#0D1B3E]">{title}</h2>

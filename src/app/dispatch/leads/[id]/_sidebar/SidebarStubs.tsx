@@ -92,9 +92,9 @@ export function DisqualifizierenButton() {
         Disqualifizieren
       </button>
       {open && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setOpen(false)}>
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setOpen(false)}>
           <div
-            className="bg-white rounded-xl shadow-xl max-w-md w-full p-5 space-y-3"
+            className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg max-w-md w-full p-5 space-y-3"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">

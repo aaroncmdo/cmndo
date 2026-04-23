@@ -122,8 +122,8 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
 
       {/* Dialog */}
       {showDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 space-y-4">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <form onSubmit={handleSubmit} className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg max-w-lg w-full p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900">Neue Reklamation</h2>
               <button type="button" onClick={() => setShowDialog(false)} className="text-gray-400 hover:text-gray-600">

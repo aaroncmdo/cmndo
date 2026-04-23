@@ -53,15 +53,14 @@ export default function TerminReschedulingModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm px-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="reschedule-title"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-xl p-5 shadow-xl"
-        style={{ background: 'var(--brand-surface, #ffffff)' }}
+        className="w-full max-w-md glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg p-5"
         onClick={(e) => e.stopPropagation()}
       >
         <h2
