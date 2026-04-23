@@ -27,19 +27,34 @@ export function ChatWindowPanel({ currentUserId }: { currentUserId: string | nul
     return () => document.removeEventListener('keydown', handler)
   }, [chat, close])
 
+  // Click-outside: schließt das Fenster, lässt aber FAB-Column (Bubbles +
+  // FAB-Button) durch — dadurch bleiben Drag-Drop + FAB bedienbar.
+  useEffect(() => {
+    if (!chat) return
+    function handler(e: MouseEvent) {
+      const target = e.target as HTMLElement
+      if (windowRef.current?.contains(target)) return
+      // FAB-Column + Inbox-Popover haben data-chat-outside-ok gesetzt
+      if (target.closest('[data-chat-outside-ok]')) return
+      close(chat!.fallId)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [chat, close])
+
   return (
     <AnimatePresence>
       {chat && (
         <>
-          {/* Backdrop-Blur über dem gesamten Viewport. Klick schließt. */}
+          {/* Backdrop-Blur — pointer-events-none, damit FAB + Bubbles
+              klickbar bleiben. Click-outside läuft über useEffect oben. */}
           <motion.div
             key="chat-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            onClick={() => close(chat.fallId)}
-            className="fixed inset-0 z-[9980] backdrop-blur-sm bg-black/10"
+            className="fixed inset-0 z-[9980] backdrop-blur-sm bg-black/10 pointer-events-none"
             aria-hidden
           />
 
