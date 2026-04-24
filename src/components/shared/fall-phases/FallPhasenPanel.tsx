@@ -41,7 +41,7 @@ export interface FallPhasenPanelProps {
 }
 
 const TERMINAL_PILL =
-  'inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo text-xs font-medium w-fit'
+  'inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-claimondo-bg text-claimondo-ondo text-xs font-medium w-fit'
 
 export function FallPhasenPanel({
   fall,
@@ -83,12 +83,12 @@ export function FallPhasenPanel({
     return (
       <section className={`glass-light rounded-ios-lg shadow-ios-sm p-5 ${className}`}>
         <div className="flex items-center justify-between mb-2">
-          <p className="text-base font-semibold text-[#0D1B3E]">Mein Fortschritt</p>
-          <span className="text-base font-bold text-[#4573A2]">{progressPct}%</span>
+          <p className="text-base font-semibold text-claimondo-navy">Mein Fortschritt</p>
+          <span className="text-base font-bold text-claimondo-ondo">{progressPct}%</span>
         </div>
-        <div className="w-full h-2.5 bg-[#f8f9fb]/70 rounded-full mb-5">
+        <div className="w-full h-2.5 bg-claimondo-bg/70 rounded-full mb-5">
           <div
-            className="h-full bg-[#4573A2] rounded-full transition-all duration-700"
+            className="h-full bg-claimondo-ondo rounded-full transition-all duration-700"
             style={{ width: `${progressPct}%` }}
           />
         </div>

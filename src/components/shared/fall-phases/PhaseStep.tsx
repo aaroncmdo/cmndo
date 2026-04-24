@@ -43,7 +43,7 @@ export function PhaseStep({
     active: 'bg-claimondo-ondo/10',
     done: 'bg-emerald-50',
     blocked: 'bg-rose-50',
-    skipped: 'bg-[#f8f9fb] opacity-60',
+    skipped: 'bg-claimondo-bg opacity-60',
     upcoming: 'bg-transparent',
   }
   const hoverCls = interactive ? 'hover:bg-claimondo-bg cursor-pointer' : ''
