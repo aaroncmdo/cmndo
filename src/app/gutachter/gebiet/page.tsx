@@ -256,8 +256,8 @@ export default function GebietPage() {
     <div className="h-full flex items-center justify-center p-8">
       <div className="bg-white border border-amber-200 rounded-2xl p-8 text-center max-w-md">
         <MapPinIcon className="w-10 h-10 text-amber-400 mx-auto mb-3" />
-        <p className="text-gray-900 font-semibold mb-2">Standort nicht hinterlegt</p>
-        <p className="text-gray-500 text-sm mb-4">Bitte hinterlegen Sie Ihren Standort im Profil, damit wir Ihr Einsatzgebiet berechnen können.</p>
+        <p className="text-claimondo-navy font-semibold mb-2">Standort nicht hinterlegt</p>
+        <p className="text-claimondo-ondo text-sm mb-4">Bitte hinterlegen Sie Ihren Standort im Profil, damit wir Ihr Einsatzgebiet berechnen können.</p>
         <a href="/gutachter/profil" className="inline-block bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-medium px-6 py-2.5 rounded-xl transition-colors">Zum Profil</a>
       </div>
     </div>
@@ -273,10 +273,10 @@ export default function GebietPage() {
     // damit die Karte fullbleed laufen kann.
     <div className="h-full flex flex-col overflow-hidden -mx-4 sm:-mx-6 md:-mx-8 lg:-mx-16 xl:-mx-24">
       {/* Topbar */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
+      <div className="flex-shrink-0 bg-white border-b border-claimondo-border px-4 py-2 flex items-center justify-between">
         <div>
-          <h1 className="text-sm font-semibold text-gray-900">Mein Gebiet</h1>
-          <p className="text-xs text-gray-500">{currentPaket.name} · {currentPaket.radius_km}km Radius · {currentPaket.faelle} Fälle/Monat</p>
+          <h1 className="text-sm font-semibold text-claimondo-navy">Mein Gebiet</h1>
+          <p className="text-xs text-claimondo-ondo">{currentPaket.name} · {currentPaket.radius_km}km Radius · {currentPaket.faelle} Fälle/Monat</p>
         </div>
         <div className="flex gap-1">
           {([
@@ -286,7 +286,7 @@ export default function GebietPage() {
             ['vorschau', 'Vorschau', EyeIcon],
           ] as const).map(([k, l, I]) => (
             <button key={k} onClick={() => setLayers(p => ({ ...p, [k]: !p[k] }))}
-              className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium ${layers[k] ? 'bg-[var(--brand-secondary)]/5 text-[var(--brand-secondary)]' : 'bg-gray-100 text-gray-400'}`}>
+              className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium ${layers[k] ? 'bg-[var(--brand-secondary)]/5 text-[var(--brand-secondary)]' : 'bg-[#f8f9fb] text-claimondo-ondo/70'}`}>
               <I className="w-3 h-3" /> {l}
             </button>
           ))}
@@ -301,10 +301,10 @@ export default function GebietPage() {
           {/* AAR-346: Sichtbares Error-Overlay wenn Maps-Script/-Key scheitert.
               Vorher war der Bereich komplett leer ohne Feedback an den Nutzer. */}
           {mapError && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-20">
+            <div className="absolute inset-0 flex items-center justify-center bg-[#f8f9fb] z-20">
               <div className="max-w-md mx-4 rounded-xl border border-red-200 bg-white p-5 shadow-sm">
                 <p className="text-sm font-semibold text-red-700 mb-1">Karte konnte nicht geladen werden</p>
-                <p className="text-xs text-gray-600 leading-relaxed">{mapError}</p>
+                <p className="text-xs text-claimondo-ondo leading-relaxed">{mapError}</p>
                 <button
                   type="button"
                   onClick={() => { setMapError(null); location.reload() }}
@@ -329,13 +329,13 @@ export default function GebietPage() {
 
           {/* Stats Box */}
           {mapReady && (
-            <div className="absolute top-3 left-3 z-10 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-xl p-3 space-y-1 text-xs max-w-[200px]">
-              <p className="font-semibold text-gray-700 text-[11px]">Gebiet-Statistiken</p>
-              <div className="flex justify-between"><span className="text-gray-500">Ihr Gebiet:</span><span className="text-gray-800 font-medium">{areaKm2.toFixed(0)} km²</span></div>
-              <div className="flex justify-between"><span className="text-gray-500">Nachbar-SV:</span><span className="text-gray-800 font-medium">{touchingNeighbors.length}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500">Überlappung:</span><span className="text-amber-600 font-medium">~{overlapPct}%</span></div>
+            <div className="absolute top-3 left-3 z-10 bg-white/90 backdrop-blur-sm border border-claimondo-border rounded-xl p-3 space-y-1 text-xs max-w-[200px]">
+              <p className="font-semibold text-claimondo-navy text-[11px]">Gebiet-Statistiken</p>
+              <div className="flex justify-between"><span className="text-claimondo-ondo">Ihr Gebiet:</span><span className="text-claimondo-navy font-medium">{areaKm2.toFixed(0)} km²</span></div>
+              <div className="flex justify-between"><span className="text-claimondo-ondo">Nachbar-SV:</span><span className="text-claimondo-navy font-medium">{touchingNeighbors.length}</span></div>
+              <div className="flex justify-between"><span className="text-claimondo-ondo">Überlappung:</span><span className="text-amber-600 font-medium">~{overlapPct}%</span></div>
               {previewPaket && (
-                <div className="flex justify-between border-t border-gray-200 pt-1 mt-1">
+                <div className="flex justify-between border-t border-claimondo-border pt-1 mt-1">
                   <span className="text-[var(--brand-secondary)]">Upgrade-Fläche:</span>
                   <span className="text-[var(--brand-secondary)] font-medium">+{Math.round(Math.PI * getPaket(previewPaket).radius_km ** 2 - areaKm2)} km²</span>
                 </div>
@@ -345,15 +345,15 @@ export default function GebietPage() {
 
           {/* Legende */}
           {mapReady && (
-            <div className="absolute bottom-3 left-3 z-10 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-xl p-3 space-y-1.5">
-              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Legende</p>
+            <div className="absolute bottom-3 left-3 z-10 bg-white/90 backdrop-blur-sm border border-claimondo-border rounded-xl p-3 space-y-1.5">
+              <p className="text-[10px] font-semibold text-claimondo-ondo uppercase tracking-wider mb-1">Legende</p>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-[var(--brand-secondary)] opacity-70" />
-                <span className="text-[11px] text-gray-700">Eigenes Gebiet</span>
+                <span className="text-[11px] text-claimondo-navy">Eigenes Gebiet</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-gray-400 opacity-50" />
-                <span className="text-[11px] text-gray-700">Nachbar-Gebiete</span>
+                <div className="w-3 h-3 rounded-full bg-claimondo-ondo/70 opacity-50" />
+                <span className="text-[11px] text-claimondo-navy">Nachbar-Gebiete</span>
               </div>
               {layers.vorschau && previewPaket && (
                 <div className="flex items-center gap-2">
@@ -361,41 +361,41 @@ export default function GebietPage() {
                   <span className="text-[11px] text-[var(--brand-secondary)]">Upgrade-Vorschau</span>
                 </div>
               )}
-              <div className="border-t border-gray-200 pt-1.5 mt-1.5 space-y-0.5">
-                <p className="text-[10px] text-gray-500">Standard: {PAKETE.standard.radius_km}km</p>
-                <p className="text-[10px] text-gray-500">Pro: {PAKETE.pro.radius_km}km</p>
-                <p className="text-[10px] text-gray-500">Premium: {PAKETE.premium.radius_km}km</p>
+              <div className="border-t border-claimondo-border pt-1.5 mt-1.5 space-y-0.5">
+                <p className="text-[10px] text-claimondo-ondo">Standard: {PAKETE.standard.radius_km}km</p>
+                <p className="text-[10px] text-claimondo-ondo">Pro: {PAKETE.pro.radius_km}km</p>
+                <p className="text-[10px] text-claimondo-ondo">Premium: {PAKETE.premium.radius_km}km</p>
               </div>
             </div>
           )}
         </div>
 
         {/* Info + Upgrade Sidebar */}
-        <div className="w-80 hidden lg:block overflow-y-auto p-3 space-y-3 border-l border-gray-200 bg-white">
+        <div className="w-80 hidden lg:block overflow-y-auto p-3 space-y-3 border-l border-claimondo-border bg-white">
 
           {/* ─── Gebiets-Info ─── */}
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Ihr Gebiet</p>
+            <p className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider mb-2">Ihr Gebiet</p>
             <div className="border-2 border-[var(--brand-secondary)] rounded-xl p-3 mb-2">
               <p className="text-sm font-semibold text-[var(--brand-secondary)]">{currentPaket.name}</p>
-              <p className="text-[10px] text-gray-500">{currentPaket.faelle} Fälle/Mo · {currentPaket.radius_km}km · {currentPaket.preis}€/Mo</p>
+              <p className="text-[10px] text-claimondo-ondo">{currentPaket.faelle} Fälle/Mo · {currentPaket.radius_km}km · {currentPaket.preis}€/Mo</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <div className="bg-gray-50 rounded-lg p-2 text-center">
-                <p className="text-sm font-bold text-gray-900">{currentPaket.radius_km} km</p>
-                <p className="text-[9px] text-gray-500">Einsatzradius</p>
+              <div className="bg-[#f8f9fb] rounded-lg p-2 text-center">
+                <p className="text-sm font-bold text-claimondo-navy">{currentPaket.radius_km} km</p>
+                <p className="text-[9px] text-claimondo-ondo">Einsatzradius</p>
               </div>
-              <div className="bg-gray-50 rounded-lg p-2 text-center">
-                <p className="text-sm font-bold text-gray-900">{areaKm2.toFixed(0)} km²</p>
-                <p className="text-[9px] text-gray-500">Gebietsfläche</p>
+              <div className="bg-[#f8f9fb] rounded-lg p-2 text-center">
+                <p className="text-sm font-bold text-claimondo-navy">{areaKm2.toFixed(0)} km²</p>
+                <p className="text-[9px] text-claimondo-ondo">Gebietsfläche</p>
               </div>
-              <div className="bg-gray-50 rounded-lg p-2 text-center">
-                <p className="text-sm font-bold text-gray-900">{touchingNeighbors.length}</p>
-                <p className="text-[9px] text-gray-500">Nachbar-SV</p>
+              <div className="bg-[#f8f9fb] rounded-lg p-2 text-center">
+                <p className="text-sm font-bold text-claimondo-navy">{touchingNeighbors.length}</p>
+                <p className="text-[9px] text-claimondo-ondo">Nachbar-SV</p>
               </div>
-              <div className="bg-gray-50 rounded-lg p-2 text-center">
+              <div className="bg-[#f8f9fb] rounded-lg p-2 text-center">
                 <p className="text-sm font-bold text-amber-600">~{overlapPct}%</p>
-                <p className="text-[9px] text-gray-500">Überlappung</p>
+                <p className="text-[9px] text-claimondo-ondo">Überlappung</p>
               </div>
             </div>
           </div>
@@ -403,7 +403,7 @@ export default function GebietPage() {
           {/* ─── Upgrade-Bereich ─── */}
           {PAKET_ORDER.indexOf(svData.paket) < PAKET_ORDER.length - 1 && (
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Paket-Upgrade</p>
+              <p className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider mb-2">Paket-Upgrade</p>
               {PAKET_ORDER.filter(k => PAKET_ORDER.indexOf(k) > PAKET_ORDER.indexOf(svData.paket)).map(key => {
                 const info = getPaket(key)
                 const alteAnzahlung = currentPaket.anzahlung
@@ -411,20 +411,20 @@ export default function GebietPage() {
                 const differenz = neueAnzahlung - alteAnzahlung
                 const isPreview = previewPaket === key
                 return (
-                  <div key={key} className={`border rounded-xl p-3 mb-2 transition-colors ${isPreview ? 'border-[var(--brand-secondary)] bg-[var(--brand-secondary)]/10' : 'border-gray-200 hover:border-[var(--brand-secondary)]/30'}`}>
+                  <div key={key} className={`border rounded-xl p-3 mb-2 transition-colors ${isPreview ? 'border-[var(--brand-secondary)] bg-[var(--brand-secondary)]/10' : 'border-claimondo-border hover:border-[var(--brand-secondary)]/30'}`}>
                     <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm font-semibold text-gray-900">{info.name}</p>
+                      <p className="text-sm font-semibold text-claimondo-navy">{info.name}</p>
                       {key === 'pro' && <span className="text-[9px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded-full">Empfohlen</span>}
                     </div>
-                    <p className="text-[10px] text-gray-500 mb-1">{info.faelle} Fälle · {info.radius_km}km · {info.preis}€/Mo</p>
+                    <p className="text-[10px] text-claimondo-ondo mb-1">{info.faelle} Fälle · {info.radius_km}km · {info.preis}€/Mo</p>
                     <div className="bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 mb-2">
-                      <p className="text-[10px] text-gray-600">Neue Anzahlung: <span className="font-medium">{neueAnzahlung.toLocaleString('de-DE')}€</span></p>
-                      <p className="text-[10px] text-gray-600">Bereits bezahlt: <span className="font-medium">{alteAnzahlung.toLocaleString('de-DE')}€</span></p>
+                      <p className="text-[10px] text-claimondo-ondo">Neue Anzahlung: <span className="font-medium">{neueAnzahlung.toLocaleString('de-DE')}€</span></p>
+                      <p className="text-[10px] text-claimondo-ondo">Bereits bezahlt: <span className="font-medium">{alteAnzahlung.toLocaleString('de-DE')}€</span></p>
                       <p className="text-xs font-bold text-amber-700 mt-0.5">Differenz: {differenz.toLocaleString('de-DE')}€</p>
                     </div>
                     <div className="flex gap-1.5">
                       <button onClick={() => { setPreviewPaket(isPreview ? null : key); setLayers(p => ({ ...p, vorschau: true })) }}
-                        className={`flex-1 flex items-center justify-center gap-1 text-xs font-medium py-2 rounded-lg border ${isPreview ? 'border-[var(--brand-secondary)] text-[var(--brand-secondary)] bg-[var(--brand-secondary)]/5' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}>
+                        className={`flex-1 flex items-center justify-center gap-1 text-xs font-medium py-2 rounded-lg border ${isPreview ? 'border-[var(--brand-secondary)] text-[var(--brand-secondary)] bg-[var(--brand-secondary)]/5' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-border'}`}>
                         <EyeIcon className="w-3 h-3" /> Vorschau
                       </button>
                       <button onClick={() => requestUpgrade(key)} disabled={upgrading}
@@ -439,9 +439,9 @@ export default function GebietPage() {
           )}
 
           {/* Individuelles Angebot */}
-          <div className="border-t border-gray-200 pt-3">
+          <div className="border-t border-claimondo-border pt-3">
             <button onClick={() => setShowAnfrageModal(true)}
-              className="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium py-3 rounded-xl transition-colors">
+              className="w-full flex items-center justify-center gap-2 bg-[#f8f9fb] hover:bg-claimondo-border text-claimondo-navy text-xs font-medium py-3 rounded-xl transition-colors">
               <SendIcon className="w-3.5 h-3.5" /> Individuelles Angebot anfragen
             </button>
           </div>
@@ -491,9 +491,9 @@ function IndividuellesAngebotModal({ svId, onClose }: { svId: string; onClose: (
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h3 className="text-sm font-semibold text-gray-900">Individuelles Angebot anfragen</h3>
-          <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600"><XIcon className="w-4 h-4" /></button>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-claimondo-border">
+          <h3 className="text-sm font-semibold text-claimondo-navy">Individuelles Angebot anfragen</h3>
+          <button onClick={onClose} className="p-1 text-claimondo-ondo/70 hover:text-claimondo-ondo"><XIcon className="w-4 h-4" /></button>
         </div>
 
         {sent ? (
@@ -501,8 +501,8 @@ function IndividuellesAngebotModal({ svId, onClose }: { svId: string; onClose: (
             <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-3">
               <SendIcon className="w-6 h-6 text-green-600" />
             </div>
-            <p className="text-gray-900 font-semibold mb-1">Anfrage gesendet!</p>
-            <p className="text-gray-500 text-sm mb-4">Wir melden uns in Kürze mit einem individuellen Angebot.</p>
+            <p className="text-claimondo-navy font-semibold mb-1">Anfrage gesendet!</p>
+            <p className="text-claimondo-ondo text-sm mb-4">Wir melden uns in Kürze mit einem individuellen Angebot.</p>
             <button onClick={onClose} className="px-6 py-2 rounded-xl text-sm font-medium bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-secondary)]">Schließen</button>
           </div>
         ) : (
@@ -510,31 +510,31 @@ function IndividuellesAngebotModal({ svId, onClose }: { svId: string; onClose: (
             {/* Fälle Slider */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm text-gray-700">Gewünschte Fälle / Monat</label>
+                <label className="text-sm text-claimondo-navy">Gewünschte Fälle / Monat</label>
                 <span className="text-sm font-bold text-[var(--brand-secondary)]">{faelle}</span>
               </div>
               <input type="range" min={10} max={100} step={5} value={faelle} onChange={e => setFaelle(Number(e.target.value))}
                 className="w-full accent-[var(--brand-secondary)]" />
-              <div className="flex justify-between text-[10px] text-gray-400"><span>10</span><span>100</span></div>
+              <div className="flex justify-between text-[10px] text-claimondo-ondo/70"><span>10</span><span>100</span></div>
             </div>
 
             {/* Radius Slider */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm text-gray-700">Gewünschter Radius</label>
+                <label className="text-sm text-claimondo-navy">Gewünschter Radius</label>
                 <span className="text-sm font-bold text-[var(--brand-secondary)]">{radius} km</span>
               </div>
               <input type="range" min={20} max={150} step={5} value={radius} onChange={e => setRadius(Number(e.target.value))}
                 className="w-full accent-[var(--brand-secondary)]" />
-              <div className="flex justify-between text-[10px] text-gray-400"><span>20km</span><span>150km</span></div>
+              <div className="flex justify-between text-[10px] text-claimondo-ondo/70"><span>20km</span><span>150km</span></div>
             </div>
 
             {/* Nachricht */}
             <div>
-              <label className="text-sm text-gray-700 mb-1.5 block">Nachricht (optional)</label>
+              <label className="text-sm text-claimondo-navy mb-1.5 block">Nachricht (optional)</label>
               <textarea value={nachricht} onChange={e => setNachricht(e.target.value)}
                 rows={3} placeholder="Besondere Wünsche, zusätzliche Standorte..."
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] resize-none" />
+                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] resize-none" />
             </div>
 
             <button onClick={handleSubmit} disabled={sending}

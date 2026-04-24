@@ -161,14 +161,14 @@ export default function AktuellerStopCard({
   const mapsLink = buildGoogleMapsLink(stop)
 
   return (
-    <div className="rounded-xl bg-white text-gray-900 p-4 shadow-sm space-y-3">
+    <div className="rounded-xl bg-white text-claimondo-navy p-4 shadow-sm space-y-3">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--brand-primary,var(--brand-secondary))]">
             Aktueller Stop
           </span>
-          <span className="text-[11px] text-gray-500">
+          <span className="text-[11px] text-claimondo-ondo">
             {formatUhrzeit(stop.start_zeit)}
           </span>
           {stop.schadentyp && (
@@ -177,17 +177,17 @@ export default function AktuellerStopCard({
             </span>
           )}
         </div>
-        <p className="text-sm font-semibold text-gray-900">
+        <p className="text-sm font-semibold text-claimondo-navy">
           {stop.kennzeichen && (
             <span className="font-mono mr-2">{stop.kennzeichen}</span>
           )}
           {stop.fahrzeug ?? stop.kunde_name}
         </p>
-        <p className="text-xs text-gray-500">{stop.kunde_name}</p>
+        <p className="text-xs text-claimondo-ondo">{stop.kunde_name}</p>
       </div>
 
       {/* Adresse */}
-      <div className="flex items-start gap-2 text-sm text-gray-800">
+      <div className="flex items-start gap-2 text-sm text-claimondo-navy">
         <MapPinIcon className="w-4 h-4 text-[color:var(--brand-primary,var(--brand-secondary))] mt-0.5" />
         <p className="flex-1">{stop.adresse}</p>
       </div>
@@ -222,9 +222,9 @@ export default function AktuellerStopCard({
 
       {/* BriefingCard-Slot (AAR-385) */}
       {(stop.briefing_text || stop.briefing_struktur) && (
-        <div className="border-t border-gray-100 pt-3 space-y-2">
+        <div className="border-t border-claimondo-border pt-3 space-y-2">
           {stop.briefing_text && (
-            <p className="text-xs leading-relaxed text-gray-700 whitespace-pre-wrap">
+            <p className="text-xs leading-relaxed text-claimondo-navy whitespace-pre-wrap">
               {stop.briefing_text}
             </p>
           )}
@@ -238,7 +238,7 @@ export default function AktuellerStopCard({
       )}
 
       {/* Dokumente-Slot (AAR-386 Platzhalter) */}
-      <div className="border-t border-gray-100 pt-3 text-[11px] text-gray-500 italic">
+      <div className="border-t border-claimondo-border pt-3 text-[11px] text-claimondo-ondo italic">
         Dokumenten-Checkliste folgt in AAR-386
       </div>
 
@@ -284,7 +284,7 @@ export default function AktuellerStopCard({
           href={mapsLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium py-2 hover:bg-gray-50"
+          className="inline-flex items-center justify-center gap-2 rounded-lg border border-claimondo-border text-claimondo-navy text-sm font-medium py-2 hover:bg-[#f8f9fb]"
         >
           <NavigationIcon className="w-4 h-4" />
           In Google Maps öffnen

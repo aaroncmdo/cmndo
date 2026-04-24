@@ -146,7 +146,7 @@ export default async function AuftraegePage({
               className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
                 activeFilter === key
                   ? 'bg-[var(--brand-primary)] text-white'
-                  : 'bg-white text-gray-500 hover:text-gray-800 border border-gray-200'
+                  : 'bg-white text-claimondo-ondo hover:text-claimondo-navy border border-claimondo-border'
               }`}
             >
               {label}

@@ -92,27 +92,27 @@ export default function OrderSummaryCard({
         <p className="text-xs text-[var(--brand-primary)] uppercase tracking-wide font-semibold mb-1">
           Dein Auftrag
         </p>
-        <p className="text-base font-semibold text-gray-900">{paketLabel}</p>
-        <p className="text-xs text-gray-500">
+        <p className="text-base font-semibold text-claimondo-navy">{paketLabel}</p>
+        <p className="text-xs text-claimondo-ondo">
           {kontingent} Faelle/Monat · {radiusKm} km Radius
         </p>
 
         {organisationName && !istBuero && (
-          <div className="mt-3 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-[11px] text-gray-600">
+          <div className="mt-3 px-3 py-2 rounded-lg bg-[#f8f9fb] border border-claimondo-border text-[11px] text-claimondo-ondo">
             Du gehoerst zu <strong>{organisationName}</strong>
           </div>
         )}
 
         {/* Anzahlung GROSS */}
-        <div className="mt-5 pt-5 border-t border-gray-200">
-          <p className="text-[10px] text-gray-500 uppercase tracking-wide font-semibold mb-1">
+        <div className="mt-5 pt-5 border-t border-claimondo-border">
+          <p className="text-[10px] text-claimondo-ondo uppercase tracking-wide font-semibold mb-1">
             {anzahlungLabel}
           </p>
           <p className="text-4xl font-bold text-[var(--brand-primary)] tabular-nums leading-tight">
             {fmtEur(anzahlungBetrag)}
           </p>
-          <p className="text-[11px] text-gray-500 mt-1">netto · einmalig</p>
-          <p className="text-[11px] text-gray-500 mt-2 leading-relaxed">
+          <p className="text-[11px] text-claimondo-ondo mt-1">netto · einmalig</p>
+          <p className="text-[11px] text-claimondo-ondo mt-2 leading-relaxed">
             Wird mit den ersten Lead-Gebuehren verrechnet. Sobald die Zahlung
             eingegangen ist, ist dein Portal-Zugang freigeschaltet.
           </p>
@@ -120,37 +120,37 @@ export default function OrderSummaryCard({
 
         {/* Sub-Buero-Tabelle fuer Inhaber */}
         {istBuero && (
-          <div className="mt-5 pt-5 border-t border-gray-200">
-            <p className="text-[10px] text-gray-500 uppercase tracking-wide font-semibold mb-2">
+          <div className="mt-5 pt-5 border-t border-claimondo-border">
+            <p className="text-[10px] text-claimondo-ondo uppercase tracking-wide font-semibold mb-2">
               {subBueros!.length} Sub-Standort(e)
             </p>
-            <ul className="divide-y divide-gray-100">
+            <ul className="divide-y divide-claimondo-border">
               {subBueros!.map((s, i) => (
                 <li key={s.id} className="py-2 flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs text-gray-900 font-medium truncate">
+                    <p className="text-xs text-claimondo-navy font-medium truncate">
                       {i + 1}. {[s.standort_adresse, s.standort_plz].filter(Boolean).join(', ') || s.name || `Standort ${i + 1}`}
                     </p>
-                    <p className="text-[10px] text-gray-500">
+                    <p className="text-[10px] text-claimondo-ondo">
                       {PAKET_LABELS[s.paket] ?? s.paket}
                     </p>
                   </div>
-                  <p className="text-xs text-gray-700 tabular-nums font-medium flex-shrink-0">
+                  <p className="text-xs text-claimondo-navy tabular-nums font-medium flex-shrink-0">
                     {fmtEur(s.onboarding_anzahlung_betrag)}
                   </p>
                 </li>
               ))}
             </ul>
-            <div className="mt-3 pt-3 border-t border-gray-200 flex items-center justify-between text-xs">
-              <span className="text-gray-600 font-medium">Gesamt</span>
+            <div className="mt-3 pt-3 border-t border-claimondo-border flex items-center justify-between text-xs">
+              <span className="text-claimondo-ondo font-medium">Gesamt</span>
               <span className="text-[var(--brand-primary)] font-bold tabular-nums">{fmtEur(anzahlungBetrag)}</span>
             </div>
           </div>
         )}
 
         {/* Lead-Preise */}
-        <div className="mt-5 pt-5 border-t border-gray-200 text-xs">
-          <p className="text-gray-600 leading-relaxed mb-2">
+        <div className="mt-5 pt-5 border-t border-claimondo-border text-xs">
+          <p className="text-claimondo-ondo leading-relaxed mb-2">
             Kein monatlicher Grundpreis — nur Lead-Preise pro Fall (variiert nach Schadenhoehe).
           </p>
           {onShowLeadPreise ? (
@@ -190,12 +190,12 @@ export default function OrderSummaryCard({
         <Cell label="Abrechnung" value="Pay-per-Lead" />
       </div>
       {organisationName && !istBuero && (
-        <div className="mt-3 px-3 py-2 rounded-lg bg-white border border-gray-200 text-[11px] text-gray-700">
+        <div className="mt-3 px-3 py-2 rounded-lg bg-white border border-claimondo-border text-[11px] text-claimondo-navy">
           Du gehoerst zu <strong>{organisationName}</strong>
         </div>
       )}
       <div className="mt-4 pt-4 border-t border-[var(--brand-secondary)]/15 flex items-center justify-between text-xs">
-        <span className="text-gray-600">
+        <span className="text-claimondo-ondo">
           Kein monatlicher Grundpreis — nur Lead-Preise pro Fall.
         </span>
         {onShowLeadPreise ? (
@@ -223,8 +223,8 @@ export default function OrderSummaryCard({
 function Cell({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
     <div>
-      <p className="text-[10px] text-gray-500 uppercase">{label}</p>
-      <p className={`text-sm font-semibold mt-0.5 tabular-nums ${highlight ? 'text-[var(--brand-primary)]' : 'text-gray-900'}`}>
+      <p className="text-[10px] text-claimondo-ondo uppercase">{label}</p>
+      <p className={`text-sm font-semibold mt-0.5 tabular-nums ${highlight ? 'text-[var(--brand-primary)]' : 'text-claimondo-navy'}`}>
         {value}
       </p>
     </div>

@@ -121,7 +121,7 @@ export function FallakteDrawer({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy hover:bg-[#f8f9fb] transition-colors text-sm font-medium"
         aria-label="Komplette Akte öffnen"
       >
         <PaperclipIcon className="w-4 h-4" />
@@ -140,22 +140,22 @@ export function FallakteDrawer({
             className="absolute right-0 top-0 bottom-0 w-full max-w-3xl bg-white shadow-2xl flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-claimondo-border shrink-0">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Komplette Akte</h2>
-                <p className="text-xs text-gray-500">{fallNummer}</p>
+                <h2 className="text-lg font-semibold text-claimondo-navy">Komplette Akte</h2>
+                <p className="text-xs text-claimondo-ondo">{fallNummer}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="p-2 hover:bg-[#f8f9fb] rounded-lg"
                 aria-label="Schließen"
               >
                 <XIcon className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="flex border-b border-gray-200 shrink-0" role="tablist">
+            <div className="flex border-b border-claimondo-border shrink-0" role="tablist">
               {tabs
                 .filter(([key]) => key !== 'team' || hasTeam)
                 .map(([key, label, Icon, count]) => (
@@ -168,13 +168,13 @@ export function FallakteDrawer({
                     className={`flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 ${
                       tab === key
                         ? 'text-[var(--brand-primary)] border-[var(--brand-secondary)]'
-                        : 'text-gray-500 border-transparent hover:text-gray-700'
+                        : 'text-claimondo-ondo border-transparent hover:text-claimondo-navy'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
                     {label}
                     {count !== null && count > 0 && (
-                      <span className="text-[11px] text-gray-400">({count})</span>
+                      <span className="text-[11px] text-claimondo-ondo/70">({count})</span>
                     )}
                   </button>
                 ))}
@@ -212,7 +212,7 @@ function TeamListe({
 }) {
   if (team.length === 0) {
     return (
-      <p className="text-sm text-gray-400 text-center py-8">
+      <p className="text-sm text-claimondo-ondo/70 text-center py-8">
         Noch kein Ansprechpartner hinterlegt.
       </p>
     )
@@ -230,10 +230,10 @@ function TeamListe({
     <ul className="space-y-4">
       {ordered.map((m, i) => (
         <li key={`${m.rolle}-${i}`} className="space-y-2">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">
             {ROLLE_LABEL[m.rolle]}
           </p>
-          <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-3">
+          <div className="rounded-xl border border-claimondo-border bg-white p-4 space-y-3">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-full bg-[var(--brand-primary)] text-white flex items-center justify-center text-sm font-semibold shrink-0">
                 {initialen(m.name)}
@@ -245,14 +245,14 @@ function TeamListe({
                 {m.email && (
                   <a
                     href={`mailto:${m.email}`}
-                    className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-gray-600 hover:text-[var(--brand-primary)] truncate"
+                    className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-claimondo-ondo hover:text-[var(--brand-primary)] truncate"
                   >
                     <MailIcon className="w-3.5 h-3.5 shrink-0" />
                     <span className="truncate">{m.email}</span>
                   </a>
                 )}
                 {m.telefon && (
-                  <p className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-gray-600">
+                  <p className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-claimondo-ondo">
                     <PhoneIcon className="w-3.5 h-3.5" />
                     {m.telefon}
                   </p>
@@ -273,7 +273,7 @@ function TeamListe({
                   nummer={m.telefon}
                   variant="inline"
                   label="Anrufen"
-                  className="!px-3 !py-1.5 !rounded-lg !border !border-gray-200 !bg-white !text-gray-700 !text-xs !font-medium hover:!bg-gray-50"
+                  className="!px-3 !py-1.5 !rounded-lg !border !border-claimondo-border !bg-white !text-claimondo-navy !text-xs !font-medium hover:!bg-[#f8f9fb]"
                 />
               )}
             </div>
@@ -293,7 +293,7 @@ function initialen(name: string): string {
 
 function DateienListe({ dokumente }: { dokumente: DocLite[] }) {
   if (dokumente.length === 0) {
-    return <p className="text-sm text-gray-400 text-center py-8">Noch keine Dateien.</p>
+    return <p className="text-sm text-claimondo-ondo/70 text-center py-8">Noch keine Dateien.</p>
   }
   return (
     <ul className="space-y-2">
@@ -305,12 +305,12 @@ function DateienListe({ dokumente }: { dokumente: DocLite[] }) {
         return (
           <li
             key={d.id ?? i}
-            className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50"
+            className="flex items-center gap-3 p-3 rounded-lg border border-claimondo-border bg-white hover:bg-[#f8f9fb]"
           >
-            <FileTextIcon className="w-5 h-5 text-gray-400 shrink-0" />
+            <FileTextIcon className="w-5 h-5 text-claimondo-ondo/70 shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">{name}</p>
-              <p className="text-[11px] text-gray-500">
+              <p className="text-sm font-medium text-claimondo-navy truncate">{name}</p>
+              <p className="text-[11px] text-claimondo-ondo">
                 {typ}
                 {datum ? ` · ${new Date(datum).toLocaleDateString('de-DE')}` : ''}
               </p>
@@ -335,7 +335,7 @@ function DateienListe({ dokumente }: { dokumente: DocLite[] }) {
 
 function TimelineListe({ events }: { events: TimelineEventLite[] }) {
   if (events.length === 0) {
-    return <p className="text-sm text-gray-400 text-center py-8">Noch keine Events.</p>
+    return <p className="text-sm text-claimondo-ondo/70 text-center py-8">Noch keine Events.</p>
   }
   return (
     <ol className="space-y-3">
@@ -344,18 +344,18 @@ function TimelineListe({ events }: { events: TimelineEventLite[] }) {
         return (
           <li
             key={e.id ?? i}
-            className="border-l-2 border-gray-200 pl-3 ml-1 relative"
+            className="border-l-2 border-claimondo-border pl-3 ml-1 relative"
           >
             <span
               className="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-[var(--brand-secondary)]"
               aria-hidden="true"
             />
-            <p className="text-sm font-medium text-gray-900">{e.titel ?? e.typ ?? '—'}</p>
+            <p className="text-sm font-medium text-claimondo-navy">{e.titel ?? e.typ ?? '—'}</p>
             {e.beschreibung && (
-              <p className="text-xs text-gray-600 mt-0.5">{e.beschreibung}</p>
+              <p className="text-xs text-claimondo-ondo mt-0.5">{e.beschreibung}</p>
             )}
             {datum && (
-              <p className="text-[10px] text-gray-400 mt-1">
+              <p className="text-[10px] text-claimondo-ondo/70 mt-1">
                 {new Date(datum).toLocaleString('de-DE')}
               </p>
             )}
@@ -383,7 +383,7 @@ function ChatListe({
         </div>
       )}
       {nachrichten.length === 0 ? (
-        <p className="text-sm text-gray-400 text-center py-8">Noch keine Nachrichten.</p>
+        <p className="text-sm text-claimondo-ondo/70 text-center py-8">Noch keine Nachrichten.</p>
       ) : (
         <ul className="space-y-2">
           {nachrichten.map((n, i) => {
@@ -392,19 +392,19 @@ function ChatListe({
             return (
               <li
                 key={n.id ?? i}
-                className="p-3 rounded-lg bg-gray-50 border border-gray-200"
+                className="p-3 rounded-lg bg-[#f8f9fb] border border-claimondo-border"
               >
                 <div className="flex items-center justify-between mb-1">
-                  <p className="text-xs font-medium text-gray-700">
+                  <p className="text-xs font-medium text-claimondo-navy">
                     {n.absender_name ?? n.absender_rolle ?? 'System'}
                   </p>
                   {datum && (
-                    <p className="text-[10px] text-gray-400">
+                    <p className="text-[10px] text-claimondo-ondo/70">
                       {new Date(datum).toLocaleString('de-DE')}
                     </p>
                   )}
                 </div>
-                <p className="text-sm text-gray-900">{text}</p>
+                <p className="text-sm text-claimondo-navy">{text}</p>
               </li>
             )
           })}

@@ -81,30 +81,30 @@ export default function FaelleFilterBar({
   }
 
   return (
-    <div className="bg-white border-b border-gray-200 px-4 py-3 space-y-3">
+    <div className="bg-white border-b border-claimondo-border px-4 py-3 space-y-3">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-sm font-semibold text-gray-900">Meine Fälle</h1>
-          <p className="text-gray-500 text-xs">
+          <h1 className="text-sm font-semibold text-claimondo-navy">Meine Fälle</h1>
+          <p className="text-claimondo-ondo text-xs">
             {faelleCount} {faelleCount === 1 ? 'Fall' : 'Fälle'}
           </p>
         </div>
 
         <div className="relative flex-1 max-w-sm">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-claimondo-ondo/70" />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Fall-Nr, Kunde oder Ort"
-            className="w-full pl-9 pr-8 py-2 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] focus:bg-white"
+            className="w-full pl-9 pr-8 py-2 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-sm text-claimondo-navy placeholder:text-claimondo-ondo/70 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] focus:bg-white"
           />
           {query && (
             <button
               type="button"
               onClick={() => setQuery('')}
               aria-label="Suche löschen"
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-claimondo-ondo/70 hover:text-claimondo-ondo"
             >
               <XIcon className="w-4 h-4" />
             </button>
@@ -121,7 +121,7 @@ export default function FaelleFilterBar({
             className={`px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-colors ${
               initialFilter === key
                 ? 'bg-[var(--brand-primary)] text-white'
-                : 'bg-white text-gray-600 hover:text-gray-900 border border-gray-200'
+                : 'bg-white text-claimondo-ondo hover:text-claimondo-navy border border-claimondo-border'
             }`}
           >
             {label}

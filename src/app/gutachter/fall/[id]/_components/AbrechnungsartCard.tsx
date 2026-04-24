@@ -85,9 +85,9 @@ export function AbrechnungsartCard({
       <div className="flex items-center gap-2">
         <CalculatorIcon className="w-4 h-4 text-claimondo-ondo" />
         <h3 className="text-sm font-semibold text-claimondo-navy">Abrechnungsart (vor Ort besprochen)</h3>
-        {pending && <LoaderIcon className="w-3.5 h-3.5 text-gray-400 animate-spin" />}
+        {pending && <LoaderIcon className="w-3.5 h-3.5 text-claimondo-ondo/70 animate-spin" />}
       </div>
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-claimondo-ondo">
         Was hast du mit dem Kunden besprochen? Dispatch hat das bewusst nicht
         abgefragt — das wird vor Ort geklärt.
       </p>
@@ -102,11 +102,11 @@ export function AbrechnungsartCard({
             className={`text-left px-3 py-2 rounded-ios-sm border text-xs transition-colors ${
               art === o.value
                 ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
-                : 'bg-white text-gray-800 border-claimondo-border hover:bg-gray-50'
+                : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-[#f8f9fb]'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             <p className="font-medium">{o.label}</p>
-            <p className={`text-[10px] mt-0.5 ${art === o.value ? 'text-white/80' : 'text-gray-500'}`}>
+            <p className={`text-[10px] mt-0.5 ${art === o.value ? 'text-white/80' : 'text-claimondo-ondo'}`}>
               {o.hint}
             </p>
           </button>
@@ -114,7 +114,7 @@ export function AbrechnungsartCard({
       </div>
 
       <div>
-        <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">
+        <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 block mb-1">
           Notiz (optional)
         </label>
         <textarea
@@ -128,7 +128,7 @@ export function AbrechnungsartCard({
       </div>
 
       {datum && (
-        <p className="text-[10px] text-gray-400">Zuletzt erfasst am {datum}</p>
+        <p className="text-[10px] text-claimondo-ondo/70">Zuletzt erfasst am {datum}</p>
       )}
       {error && <p className="text-[11px] text-red-600">{error}</p>}
     </div>

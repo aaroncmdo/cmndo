@@ -126,7 +126,7 @@ export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
         </div>
       ) : (
         <div className="space-y-3">
-          <p className="text-sm text-gray-800">
+          <p className="text-sm text-claimondo-navy">
             Die Kanzlei hat eine technische Stellungnahme zu deinem Gutachten
             angefordert. Bitte PDF hochladen.
           </p>
@@ -143,14 +143,14 @@ export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
                 <span className="text-sm font-medium text-[var(--brand-primary)] truncate max-w-[220px]">
                   {file.name}
                 </span>
-                <span className="text-[10px] text-gray-500">
+                <span className="text-[10px] text-claimondo-ondo">
                   ({(file.size / 1024 / 1024).toFixed(1)} MB)
                 </span>
               </div>
             ) : (
               <>
                 <UploadCloudIcon className="w-6 h-6 text-amber-600 mx-auto mb-1" />
-                <p className="text-xs text-gray-600">PDF auswählen (max. 20 MB)</p>
+                <p className="text-xs text-claimondo-ondo">PDF auswählen (max. 20 MB)</p>
               </>
             )}
           </button>
@@ -168,7 +168,7 @@ export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
             rows={2}
             maxLength={500}
             placeholder="Anmerkungen (optional) — z. B. Erläuterung zu UPE-Aufschlägen"
-            className="w-full rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
+            className="w-full rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
           />
 
           <button

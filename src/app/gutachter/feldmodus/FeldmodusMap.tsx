@@ -173,7 +173,7 @@ export default function FeldmodusMap({
             <p className="text-sm font-semibold mb-2">
               Mapbox-Token fehlt
             </p>
-            <p className="text-xs text-gray-300 max-w-xs">
+            <p className="text-xs text-claimondo-ondo/50 max-w-xs">
               Die Karte kann nicht geladen werden. Bitte
               NEXT_PUBLIC_MAPBOX_TOKEN in der Umgebung setzen.
             </p>

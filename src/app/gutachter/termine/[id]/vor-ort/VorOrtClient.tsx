@@ -163,27 +163,27 @@ export default function VorOrtClient({
         <div className="flex items-center gap-2 mb-1">
           <Link href={`/gutachter/termine/${terminId}`} className="text-sm text-[var(--brand-secondary)] hover:underline">← Termin</Link>
         </div>
-        <h1 className="text-xl font-bold text-gray-900">Vor-Ort-Modus</h1>
-        <p className="text-sm text-gray-500">{leadName} · {fahrzeug || kennzeichen || fallNummer}</p>
+        <h1 className="text-xl font-bold text-claimondo-navy">Vor-Ort-Modus</h1>
+        <p className="text-sm text-claimondo-ondo">{leadName} · {fahrzeug || kennzeichen || fallNummer}</p>
       </div>
 
       {/* Section 1: Vom Kunden erhalten */}
       <div className="px-4 mb-6">
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
+        <h2 className="text-xs font-semibold text-claimondo-ondo/70 uppercase tracking-wide mb-3">
           Vom Kunden bereits erhalten
         </h2>
         {kundeDokumente.length === 0 ? (
-          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-500 text-center">
+          <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4 text-sm text-claimondo-ondo text-center">
             Keine Dokumente vom Kunden vorhanden.
           </div>
         ) : (
           <div className="space-y-2">
             {kundeDokumente.map(doc => (
-              <div key={doc.id} className={`flex items-center gap-3 bg-white border rounded-xl p-3 ${doc.discrepancy_flag ? 'border-amber-300 bg-amber-50' : 'border-gray-200'}`}>
-                <FileTextIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <div key={doc.id} className={`flex items-center gap-3 bg-white border rounded-xl p-3 ${doc.discrepancy_flag ? 'border-amber-300 bg-amber-50' : 'border-claimondo-border'}`}>
+                <FileTextIcon className="w-4 h-4 text-claimondo-ondo/70 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{doc.dokument_typ}</p>
-                  {doc.dateiname && <p className="text-xs text-gray-400 truncate">{doc.dateiname}</p>}
+                  <p className="text-sm font-medium text-claimondo-navy truncate">{doc.dokument_typ}</p>
+                  {doc.dateiname && <p className="text-xs text-claimondo-ondo/70 truncate">{doc.dateiname}</p>}
                 </div>
                 {doc.discrepancy_flag && (
                   <AlertTriangleIcon className="w-4 h-4 text-amber-500 flex-shrink-0" />
@@ -197,7 +197,7 @@ export default function VorOrtClient({
 
       {/* Section 2: Pflichtdokumente Checklist */}
       <div className="px-4 mb-6">
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
+        <h2 className="text-xs font-semibold text-claimondo-ondo/70 uppercase tracking-wide mb-3">
           Pflichtdokumente aufnehmen
         </h2>
         <div className="space-y-3">
@@ -205,17 +205,17 @@ export default function VorOrtClient({
             const isDone = uploadedDocs.has(doc.key)
             const isUploading = uploading === doc.key
             return (
-              <div key={doc.key} className={`bg-white border rounded-xl p-3 ${isDone ? 'border-emerald-200' : doc.required ? 'border-gray-200' : 'border-gray-100'}`}>
+              <div key={doc.key} className={`bg-white border rounded-xl p-3 ${isDone ? 'border-emerald-200' : doc.required ? 'border-claimondo-border' : 'border-claimondo-border'}`}>
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isDone ? 'bg-emerald-100' : 'bg-gray-100'}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isDone ? 'bg-emerald-100' : 'bg-[#f8f9fb]'}`}>
                     {isDone ? (
                       <CheckCircleIcon className="w-5 h-5 text-emerald-600" />
                     ) : (
-                      <CameraIcon className="w-4 h-4 text-gray-400" />
+                      <CameraIcon className="w-4 h-4 text-claimondo-ondo/70" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-claimondo-navy">
                       {doc.label}
                       {doc.required && !isDone && <span className="text-red-500 ml-1">*</span>}
                     </p>
@@ -242,14 +242,14 @@ export default function VorOrtClient({
                       <select
                         value={schadenPositions[doc.key] ?? ''}
                         onChange={e => setSchadenPositions(prev => ({ ...prev, [doc.key]: e.target.value }))}
-                        className="w-full text-xs border border-gray-200 rounded-lg px-2 py-1.5 appearance-none bg-gray-50 focus:outline-none focus:border-[var(--brand-secondary)]"
+                        className="w-full text-xs border border-claimondo-border rounded-lg px-2 py-1.5 appearance-none bg-[#f8f9fb] focus:outline-none focus:border-[var(--brand-secondary)]"
                       >
                         <option value="">Schaden-Position wählen...</option>
                         {SCHADEN_POSITIONEN.map(p => (
                           <option key={p} value={p}>{p}</option>
                         ))}
                       </select>
-                      <ChevronDownIcon className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" />
+                      <ChevronDownIcon className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-claimondo-ondo/70 pointer-events-none" />
                     </div>
                   </div>
                 )}
@@ -275,7 +275,7 @@ export default function VorOrtClient({
 
       {/* Section 3: SV-Notizen */}
       <div className="px-4 mb-6">
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
+        <h2 className="text-xs font-semibold text-claimondo-ondo/70 uppercase tracking-wide mb-3">
           SV-Notizen
         </h2>
         <textarea
@@ -283,7 +283,7 @@ export default function VorOrtClient({
           onChange={e => setNotizen(e.target.value)}
           placeholder="Notizen zur Begutachtung..."
           rows={4}
-          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:border-[var(--brand-secondary)] bg-white"
+          className="w-full border border-claimondo-border rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:border-[var(--brand-secondary)] bg-white"
         />
         <div className="flex flex-wrap gap-2 mt-2">
           {NOTIZEN_TAGS.map(tag => (
@@ -293,7 +293,7 @@ export default function VorOrtClient({
               className={`text-xs px-3 py-1 rounded-full border transition-colors ${
                 selectedTags.has(tag)
                   ? 'bg-[var(--brand-secondary)] text-white border-[var(--brand-secondary)]'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-[var(--brand-secondary)]'
+                  : 'bg-white text-claimondo-ondo border-claimondo-border hover:border-[var(--brand-secondary)]'
               }`}
             >
               {tag}
@@ -303,14 +303,14 @@ export default function VorOrtClient({
       </div>
 
       {/* Sticky Footer: Progress + Abschliessen */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-4 safe-area-bottom">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-claimondo-border px-4 py-4 safe-area-bottom">
         {/* Progress Bar */}
         <div className="mb-3">
-          <div className="flex justify-between text-xs text-gray-500 mb-1">
+          <div className="flex justify-between text-xs text-claimondo-ondo mb-1">
             <span>{completedRequired}/{totalRequired} Pflichtdokumente</span>
             <span>{progressPct}%</span>
           </div>
-          <div className="h-2 bg-gray-100 rounded-full">
+          <div className="h-2 bg-[#f8f9fb] rounded-full">
             <div
               className="h-full rounded-full transition-all duration-300"
               style={{
@@ -340,9 +340,9 @@ export default function VorOrtClient({
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center p-4">
           <div className="bg-white rounded-2xl p-5 w-full max-w-md">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-base font-semibold text-gray-900">Begutachtung abschliessen?</h3>
+              <h3 className="text-base font-semibold text-claimondo-navy">Begutachtung abschliessen?</h3>
               <button onClick={() => setConfirmModal(false)}>
-                <XIcon className="w-5 h-5 text-gray-400" />
+                <XIcon className="w-5 h-5 text-claimondo-ondo/70" />
               </button>
             </div>
             {progressPct < 100 && (
@@ -353,13 +353,13 @@ export default function VorOrtClient({
                 </p>
               </div>
             )}
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-claimondo-ondo mb-4">
               Die Begutachtung wird als abgeschlossen markiert und der Kunde per WhatsApp benachrichtigt.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setConfirmModal(false)}
-                className="flex-1 py-2.5 rounded-xl text-sm bg-gray-100 text-gray-600 font-medium"
+                className="flex-1 py-2.5 rounded-xl text-sm bg-[#f8f9fb] text-claimondo-ondo font-medium"
               >
                 Abbrechen
               </button>

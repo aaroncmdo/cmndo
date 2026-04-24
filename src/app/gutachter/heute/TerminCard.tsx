@@ -31,14 +31,14 @@ function statusBadge(status: string): { label: string; className: string } {
     case 'abgeschlossen':
       return {
         label: 'Abgeschlossen',
-        className: 'bg-gray-100 text-gray-500',
+        className: 'bg-[#f8f9fb] text-claimondo-ondo',
       }
     case 'abgelehnt':
       return { label: 'Abgelehnt', className: 'bg-red-50 text-red-600' }
     case 'no_show':
       return { label: 'No-Show', className: 'bg-amber-50 text-amber-700' }
     case 'reserviert':
-      return { label: 'Reserviert', className: 'bg-blue-50 text-blue-600' }
+      return { label: 'Reserviert', className: 'bg-[#f8f9fb] text-claimondo-ondo' }
     default:
       return { label: 'Offen', className: 'bg-amber-50 text-amber-700' }
   }
@@ -68,8 +68,8 @@ export default function TerminCard({
     <div
       className={`absolute left-16 right-2 rounded-xl border px-3 py-2 shadow-sm transition-opacity ${
         vergangen
-          ? 'bg-gray-50 border-gray-200 opacity-60'
-          : 'bg-white border-gray-200 hover:border-[color:var(--brand-primary,var(--brand-secondary))]'
+          ? 'bg-[#f8f9fb] border-claimondo-border opacity-60'
+          : 'bg-white border-claimondo-border hover:border-[color:var(--brand-primary,var(--brand-secondary))]'
       }`}
       style={{ top: `${topPx}px`, minHeight: `${heightPx}px` }}
     >
@@ -83,7 +83,7 @@ export default function TerminCard({
                 aria-label="Neu, noch nicht angesehen"
               />
             )}
-            <span className="text-sm font-semibold text-gray-900">
+            <span className="text-sm font-semibold text-claimondo-navy">
               {formatUhrzeit(termin.start_zeit)}
             </span>
             <span
@@ -97,18 +97,18 @@ export default function TerminCard({
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-900 truncate">
+          <p className="text-sm text-claimondo-navy truncate">
             {termin.kennzeichen && (
               <span className="font-mono mr-2">{termin.kennzeichen}</span>
             )}
             {termin.fahrzeug ?? termin.kunde_name}
           </p>
           {termin.kennzeichen && termin.fahrzeug && (
-            <p className="text-xs text-gray-500 truncate">{termin.kunde_name}</p>
+            <p className="text-xs text-claimondo-ondo truncate">{termin.kunde_name}</p>
           )}
-          <p className="text-xs text-gray-500 truncate">{adresse || '—'}</p>
+          <p className="text-xs text-claimondo-ondo truncate">{adresse || '—'}</p>
           {briefingKurz && (
-            <p className="text-[11px] text-gray-600 mt-1 line-clamp-2">
+            <p className="text-[11px] text-claimondo-ondo mt-1 line-clamp-2">
               {briefingKurz}
             </p>
           )}

@@ -97,13 +97,13 @@ export function GutachtenCard({ fallId, fallNummer, subphase, gutachten }: Props
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 space-y-3">
+    <div className="bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
           Gutachten
         </h3>
         {sorted.length > 0 && (
-          <span className="text-[11px] text-gray-400">
+          <span className="text-[11px] text-claimondo-ondo/70">
             Version {sorted.length}
           </span>
         )}
@@ -116,10 +116,10 @@ export function GutachtenCard({ fallId, fallNummer, subphase, gutachten }: Props
               <FileTextIcon className="w-5 h-5 text-[var(--brand-primary)]" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
+              <p className="text-sm font-medium text-claimondo-navy truncate">
                 {current.original_filename || `Gutachten-${fallNummer}.pdf`}
               </p>
-              <p className="text-[11px] text-gray-500 mt-0.5">
+              <p className="text-[11px] text-claimondo-ondo mt-0.5">
                 Hochgeladen {fmtDate(current.hochgeladen_am)}
               </p>
             </div>
@@ -155,11 +155,11 @@ export function GutachtenCard({ fallId, fallNummer, subphase, gutachten }: Props
           </div>
 
           {vorgaengerversionen.length > 0 && (
-            <div className="pt-3 border-t border-gray-100">
+            <div className="pt-3 border-t border-claimondo-border">
               <button
                 type="button"
                 onClick={() => setHistorieOffen((v) => !v)}
-                className="inline-flex items-center gap-1 text-[11px] font-medium text-gray-500 hover:text-gray-700"
+                className="inline-flex items-center gap-1 text-[11px] font-medium text-claimondo-ondo hover:text-claimondo-navy"
               >
                 {historieOffen ? (
                   <ChevronDownIcon className="w-3.5 h-3.5" />
@@ -173,14 +173,14 @@ export function GutachtenCard({ fallId, fallNummer, subphase, gutachten }: Props
                   {vorgaengerversionen.map((doc, i) => (
                     <li
                       key={doc.id}
-                      className="flex items-center gap-2 text-[11px] text-gray-600"
+                      className="flex items-center gap-2 text-[11px] text-claimondo-ondo"
                     >
-                      <FileTextIcon className="w-3 h-3 text-gray-400" />
+                      <FileTextIcon className="w-3 h-3 text-claimondo-ondo/70" />
                       <span className="flex-1 truncate">
                         {doc.original_filename ||
                           `Version ${vorgaengerversionen.length - i}`}
                       </span>
-                      <span className="text-gray-400">
+                      <span className="text-claimondo-ondo/70">
                         {fmtDate(doc.hochgeladen_am)}
                       </span>
                       <button
@@ -199,7 +199,7 @@ export function GutachtenCard({ fallId, fallNummer, subphase, gutachten }: Props
             </div>
           )}
 
-          <p className="text-[11px] text-gray-400 pt-1">
+          <p className="text-[11px] text-claimondo-ondo/70 pt-1">
             Neue Version? Einfach hochladen — die alte bleibt als Vorgänger
             erhalten.
           </p>
@@ -213,7 +213,7 @@ export function GutachtenCard({ fallId, fallNummer, subphase, gutachten }: Props
         </>
       ) : (
         <>
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-claimondo-ondo">
             Lade dein fertiges Gutachten hoch (PDF). Damit wechselt der Fall in
             die Kanzlei-Phase.
           </p>
