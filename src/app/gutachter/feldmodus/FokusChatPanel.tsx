@@ -206,7 +206,7 @@ export default function FokusChatPanel({
       <button
         type="button"
         onClick={() => setExpanded(true)}
-        className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[var(--brand-primary)]/20 shadow-lg px-4 py-2 flex items-center gap-3 hover:bg-gray-50"
+        className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[var(--brand-primary)]/20 shadow-lg px-4 py-2 flex items-center gap-3 hover:bg-[#f8f9fb]"
         aria-label="Chat öffnen"
       >
         <div className="relative">
@@ -218,7 +218,7 @@ export default function FokusChatPanel({
           )}
         </div>
         <div className="flex-1 min-w-0 text-left">
-          <p className="text-[10px] uppercase tracking-wider text-gray-500 leading-tight">
+          <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo leading-tight">
             Chat mit {customerName || 'Kunde'}
           </p>
           <p className="text-xs text-[var(--brand-primary)] truncate">
@@ -227,7 +227,7 @@ export default function FokusChatPanel({
               : 'Tippen zum Öffnen · Quick-Replies verfügbar'}
           </p>
         </div>
-        <ChevronUpIcon className="w-4 h-4 text-gray-400" />
+        <ChevronUpIcon className="w-4 h-4 text-claimondo-ondo/70" />
       </button>
     )
   }
@@ -235,18 +235,18 @@ export default function FokusChatPanel({
   return (
     <div className="fixed inset-x-0 bottom-0 top-[10vh] z-40 bg-white border-t border-[var(--brand-primary)]/20 shadow-2xl flex flex-col">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-200 flex items-center gap-2">
+      <div className="px-4 py-3 border-b border-claimondo-border flex items-center gap-2">
         <MessageCircleIcon className="w-4 h-4 text-[var(--brand-secondary)]" />
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] uppercase tracking-wider text-gray-500">
+          <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
             Chat · {customerName || 'Kunde'}
           </p>
-          <p className="text-xs text-gray-500">Direkt-Chat mit dem Kunden</p>
+          <p className="text-xs text-claimondo-ondo">Direkt-Chat mit dem Kunden</p>
         </div>
         <button
           type="button"
           onClick={() => setExpanded(false)}
-          className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500"
+          className="p-1.5 rounded-lg hover:bg-[#f8f9fb] text-claimondo-ondo"
           aria-label="Chat schließen"
         >
           <XIcon className="w-4 h-4" />
@@ -259,7 +259,7 @@ export default function FokusChatPanel({
         className="flex-1 overflow-y-auto p-4 space-y-2 bg-[#f8f9fb]"
       >
         {messages.length === 0 ? (
-          <p className="text-xs text-gray-400 italic text-center mt-8">
+          <p className="text-xs text-claimondo-ondo/70 italic text-center mt-8">
             Noch keine Nachrichten. Tippen Sie eine Quick-Reply oder
             schreiben Sie eigene Nachricht.
           </p>
@@ -276,7 +276,7 @@ export default function FokusChatPanel({
                   className={`max-w-[80%] rounded-2xl px-3 py-2 text-xs leading-relaxed ${
                     isOwn
                       ? 'bg-[var(--brand-secondary)] text-white rounded-br-sm'
-                      : 'bg-white border border-gray-200 text-[var(--brand-primary)] rounded-bl-sm'
+                      : 'bg-white border border-claimondo-border text-[var(--brand-primary)] rounded-bl-sm'
                   }`}
                 >
                   <p className="whitespace-pre-wrap">{m.nachricht}</p>
@@ -288,7 +288,7 @@ export default function FokusChatPanel({
       </div>
 
       {/* Quick-Reply-Pills */}
-      <div className="px-3 py-2 border-t border-gray-100 overflow-x-auto whitespace-nowrap flex gap-2 scroll-smooth">
+      <div className="px-3 py-2 border-t border-claimondo-border overflow-x-auto whitespace-nowrap flex gap-2 scroll-smooth">
         {quickReplies.map((qr) => (
           <button
             key={qr.id}
@@ -304,7 +304,7 @@ export default function FokusChatPanel({
       </div>
 
       {/* Text-Input */}
-      <div className="px-3 py-2 border-t border-gray-200 bg-white flex items-center gap-2">
+      <div className="px-3 py-2 border-t border-claimondo-border bg-white flex items-center gap-2">
         <input
           type="text"
           value={input}
@@ -316,7 +316,7 @@ export default function FokusChatPanel({
             }
           }}
           placeholder="Eigene Nachricht tippen…"
-          className="flex-1 min-h-[44px] text-base rounded-lg border border-gray-200 px-3 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
+          className="flex-1 min-h-[44px] text-base rounded-lg border border-claimondo-border px-3 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
         />
         <button
           type="button"

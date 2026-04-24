@@ -72,7 +72,7 @@ export default function PolizeiberichtUpload({
               value={aktenzeichen}
               onChange={(e) => setAktenzeichen(e.target.value)}
               placeholder="Aktenzeichen (optional)"
-              className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-xs"
+              className="w-full px-3 py-1.5 border border-claimondo-border rounded-lg text-xs"
             />
             <input
               ref={inputRef}
@@ -80,10 +80,10 @@ export default function PolizeiberichtUpload({
               accept="image/*,application/pdf"
               capture="environment"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              className="block w-full text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-amber-100 file:text-amber-900 file:font-medium hover:file:bg-amber-200"
+              className="block w-full text-xs text-claimondo-ondo file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-amber-100 file:text-amber-900 file:font-medium hover:file:bg-amber-200"
             />
             {file && (
-              <p className="text-[10px] text-gray-500 truncate">
+              <p className="text-[10px] text-claimondo-ondo truncate">
                 Ausgewählt: {file.name} ({(file.size / 1024).toFixed(0)} KB)
               </p>
             )}

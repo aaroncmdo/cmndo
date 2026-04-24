@@ -56,8 +56,8 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
     <div className="py-6 space-y-4 max-w-5xl mx-auto px-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Meine Reklamationen</h1>
-          <p className="text-sm text-gray-500 mt-1">Reklamationen zu Auftraegen — z.B. Kunde war nicht da, Schaden anders, Mehraufwand.</p>
+          <h1 className="text-xl font-bold text-claimondo-navy">Meine Reklamationen</h1>
+          <p className="text-sm text-claimondo-ondo mt-1">Reklamationen zu Auftraegen — z.B. Kunde war nicht da, Schaden anders, Mehraufwand.</p>
         </div>
         {/* AAR-259: Button deaktiviert wenn keine Fälle vorhanden — sonst
             öffnet der Dialog einen leeren Select und User denkt "Klick tut
@@ -69,43 +69,43 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
           title={faelle.length === 0
             ? 'Keine Fälle vorhanden — Reklamationen können nur zu vorhandenen Fällen eingereicht werden.'
             : 'Neue Reklamation einreichen'}
-          className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary)] disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary)] disabled:bg-claimondo-border disabled:cursor-not-allowed"
         >
           <PlusIcon className="w-4 h-4" />
           Neue Reklamation
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-50">
+      <div className="bg-white rounded-xl border border-claimondo-border divide-y divide-claimondo-border">
         {reklamationen.map(r => {
           const fall = Array.isArray(r.faelle) ? r.faelle[0] : r.faelle
           return (
             <div key={r.id} className="p-4 space-y-2">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-claimondo-navy">
                     {fall?.fall_nummer ?? r.fall_id.slice(0, 8)}
-                    {fall?.kennzeichen && <span className="text-xs text-gray-400 ml-2">{fall.kennzeichen}</span>}
+                    {fall?.kennzeichen && <span className="text-xs text-claimondo-ondo/70 ml-2">{fall.kennzeichen}</span>}
                   </p>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-claimondo-ondo mt-0.5">
                     Grund: <span className="font-medium">{REKLAMATIONS_GRUENDE.find(g => g.value === r.grund)?.label ?? r.grund}</span>
                   </p>
                 </div>
                 <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${
                   r.status === 'offen' ? 'bg-amber-100 text-amber-700' :
-                  r.status === 'in-bearbeitung' ? 'bg-blue-100 text-blue-700' :
+                  r.status === 'in-bearbeitung' ? 'bg-[#f8f9fb] text-claimondo-ondo' :
                   r.status === 'erledigt' ? 'bg-emerald-100 text-emerald-700' :
                   'bg-red-100 text-red-700'
                 }`}>{r.status}</span>
               </div>
-              <p className="text-sm text-gray-700">{r.begruendung}</p>
+              <p className="text-sm text-claimondo-navy">{r.begruendung}</p>
               {r.admin_begruendung && (
-                <div className="bg-gray-50 rounded p-2 text-xs">
-                  <p className="font-semibold text-gray-700 mb-0.5">Antwort vom Kundenbetreuer:</p>
-                  <p className="text-gray-600">{r.admin_begruendung}</p>
+                <div className="bg-[#f8f9fb] rounded p-2 text-xs">
+                  <p className="font-semibold text-claimondo-navy mb-0.5">Antwort vom Kundenbetreuer:</p>
+                  <p className="text-claimondo-ondo">{r.admin_begruendung}</p>
                 </div>
               )}
-              <p className="text-[10px] text-gray-400">
+              <p className="text-[10px] text-claimondo-ondo/70">
                 Eingereicht: {new Date(r.eingereicht_am).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 {r.bearbeitet_am && ` · Bearbeitet: ${new Date(r.bearbeitet_am).toLocaleDateString('de-DE')}`}
               </p>
@@ -114,8 +114,8 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
         })}
         {reklamationen.length === 0 && (
           <div className="p-12 text-center">
-            <AlertCircleIcon className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-            <p className="text-sm text-gray-400">Keine Reklamationen vorhanden.</p>
+            <AlertCircleIcon className="w-8 h-8 text-claimondo-ondo/50 mx-auto mb-2" />
+            <p className="text-sm text-claimondo-ondo/70">Keine Reklamationen vorhanden.</p>
           </div>
         )}
       </div>
@@ -125,14 +125,14 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <form onSubmit={handleSubmit} className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg max-w-lg w-full p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">Neue Reklamation</h2>
-              <button type="button" onClick={() => setShowDialog(false)} className="text-gray-400 hover:text-gray-600">
+              <h2 className="text-lg font-semibold text-claimondo-navy">Neue Reklamation</h2>
+              <button type="button" onClick={() => setShowDialog(false)} className="text-claimondo-ondo/70 hover:text-claimondo-ondo">
                 <XIcon className="w-5 h-5" />
               </button>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Fall</label>
+              <label className="block text-xs font-medium text-claimondo-navy mb-1">Fall</label>
               <select value={form.fallId} onChange={e => setForm(f => ({ ...f, fallId: e.target.value }))}
                 className="w-full px-3 py-2 border rounded-lg text-sm" required>
                 <option value="">Bitte Fall waehlen</option>
@@ -145,7 +145,7 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Grund</label>
+              <label className="block text-xs font-medium text-claimondo-navy mb-1">Grund</label>
               <select value={form.grund} onChange={e => setForm(f => ({ ...f, grund: e.target.value }))}
                 className="w-full px-3 py-2 border rounded-lg text-sm" required>
                 <option value="">Bitte Grund waehlen</option>
@@ -156,8 +156,8 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Begruendung <span className="text-gray-400">(min. 30 Zeichen, {form.begruendung.length}/30)</span>
+              <label className="block text-xs font-medium text-claimondo-navy mb-1">
+                Begruendung <span className="text-claimondo-ondo/70">(min. 30 Zeichen, {form.begruendung.length}/30)</span>
               </label>
               <textarea value={form.begruendung} onChange={e => setForm(f => ({ ...f, begruendung: e.target.value }))}
                 rows={4} className="w-full px-3 py-2 border rounded-lg text-sm" required minLength={30} />
@@ -167,7 +167,7 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
 
             <div className="flex gap-2 justify-end">
               <button type="button" onClick={() => setShowDialog(false)}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">
+                className="px-4 py-2 text-sm text-claimondo-ondo hover:text-claimondo-navy">
                 Abbrechen
               </button>
               <button type="submit" disabled={pending}

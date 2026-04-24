@@ -73,7 +73,7 @@ const FALLBACK_HINTS: Record<SvSubphase['code'], string> = {
 const PRIO_BADGE: Record<string, string> = {
   hoch: 'bg-red-50 text-red-700 border-red-200',
   mittel: 'bg-amber-50 text-amber-700 border-amber-200',
-  niedrig: 'bg-gray-50 text-gray-600 border-gray-200',
+  niedrig: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border',
 }
 
 type JetztZuTunProps = {
@@ -157,7 +157,7 @@ export function JetztZuTunCard({
   const hint = FALLBACK_HINTS[subphase.code]
   return (
     <TodoCard severity="info" passive>
-      <p className="text-sm text-gray-700">{hint}</p>
+      <p className="text-sm text-claimondo-navy">{hint}</p>
     </TodoCard>
   )
 }
@@ -204,19 +204,19 @@ function MatrixActionCard({
       <div className="flex items-start gap-2">
         <Icon
           className={`w-4 h-4 mt-0.5 shrink-0 ${
-            action.passive ? 'text-gray-500' : 'text-claimondo-ondo'
+            action.passive ? 'text-claimondo-ondo' : 'text-claimondo-ondo'
           }`}
         />
         <div className="flex-1 space-y-1">
           <p
             className={`text-sm font-medium ${
-              action.passive ? 'text-gray-700' : 'text-claimondo-navy'
+              action.passive ? 'text-claimondo-navy' : 'text-claimondo-navy'
             }`}
           >
             {action.label}
           </p>
           {action.beschreibung && (
-            <p className="text-xs text-gray-600">{action.beschreibung}</p>
+            <p className="text-xs text-claimondo-ondo">{action.beschreibung}</p>
           )}
         </div>
       </div>
@@ -276,19 +276,19 @@ function TaskItem({ task, fallId }: { task: GutachterTask; fallId: string }) {
   }
 
   return (
-    <li className="flex items-start gap-3 p-3 rounded-xl bg-[#f8f9fb] hover:bg-gray-100 transition-colors">
+    <li className="flex items-start gap-3 p-3 rounded-xl bg-[#f8f9fb] hover:bg-[#f8f9fb] transition-colors">
       <button
         type="button"
         onClick={handleDone}
         disabled={isPending}
         aria-label="Task erledigen"
-        className="mt-0.5 w-5 h-5 rounded-md border border-gray-300 hover:border-[var(--brand-secondary)] flex items-center justify-center bg-white disabled:opacity-50 shrink-0"
+        className="mt-0.5 w-5 h-5 rounded-md border border-claimondo-border hover:border-[var(--brand-secondary)] flex items-center justify-center bg-white disabled:opacity-50 shrink-0"
       >
         {isPending && <CheckIcon className="w-3 h-3 text-[var(--brand-secondary)]" />}
       </button>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <p className="text-sm font-medium text-gray-900">{label}</p>
+          <p className="text-sm font-medium text-claimondo-navy">{label}</p>
           {task.prioritaet && task.prioritaet !== 'niedrig' && (
             <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${prioCls}`}>
               {task.prioritaet}
@@ -296,7 +296,7 @@ function TaskItem({ task, fallId }: { task: GutachterTask; fallId: string }) {
           )}
         </div>
         {task.beschreibung && (
-          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2 whitespace-pre-line">
+          <p className="text-xs text-claimondo-ondo mt-0.5 line-clamp-2 whitespace-pre-line">
             {task.beschreibung}
           </p>
         )}
@@ -317,7 +317,7 @@ function TaskItem({ task, fallId }: { task: GutachterTask; fallId: string }) {
           <ChevronRightIcon className="w-3 h-3" />
         </button>
       ) : (
-        <span className="shrink-0 text-[11px] text-gray-400 italic flex items-center gap-1">
+        <span className="shrink-0 text-[11px] text-claimondo-ondo/70 italic flex items-center gap-1">
           <AlertCircleIcon className="w-3 h-3" />
           Manuell
         </span>

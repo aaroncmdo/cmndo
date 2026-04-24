@@ -45,13 +45,13 @@ export function KanzleiRegulierungsStepperCard({
   const tageKanzlei = tageSeit(fall.kanzlei_uebergeben_am)
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 space-y-4">
+    <div className="bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
+        <p className="text-xs uppercase tracking-wider text-claimondo-ondo font-semibold">
           Kanzlei & Regulierung
         </p>
         {tageKanzlei != null && (
-          <span className="inline-flex items-center gap-1 text-[11px] text-gray-500">
+          <span className="inline-flex items-center gap-1 text-[11px] text-claimondo-ondo">
             <ClockIcon className="w-3 h-3" />
             seit {tageKanzlei} {tageKanzlei === 1 ? 'Tag' : 'Tagen'}
           </span>
@@ -75,30 +75,30 @@ export function KanzleiRegulierungsStepperCard({
                     <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
                   </div>
                 ) : (
-                  <CircleIcon className="w-5 h-5 text-gray-300" />
+                  <CircleIcon className="w-5 h-5 text-claimondo-ondo/50" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <p
                   className={`text-sm font-medium ${
                     isActive
-                      ? 'text-gray-900'
+                      ? 'text-claimondo-navy'
                       : isDone
-                        ? 'text-gray-700'
-                        : 'text-gray-500'
+                        ? 'text-claimondo-navy'
+                        : 'text-claimondo-ondo'
                   }`}
                 >
                   {step.label}
                 </p>
-                <p className="text-xs text-gray-500 mt-0.5">{step.description}</p>
+                <p className="text-xs text-claimondo-ondo mt-0.5">{step.description}</p>
               </div>
             </li>
           )
         })}
       </ol>
 
-      <div className="border-t border-gray-100 pt-3">
-        <p className="text-xs text-gray-500">
+      <div className="border-t border-claimondo-border pt-3">
+        <p className="text-xs text-claimondo-ondo">
           Du wirst benachrichtigt sobald die Zahlung eingegangen ist. Keine Aktion nötig.
         </p>
       </div>

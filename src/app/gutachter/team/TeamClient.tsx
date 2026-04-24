@@ -122,18 +122,18 @@ export default function TeamClient({
       {showPoolSection && (
         <div className="mb-6 bg-white border border-amber-200 rounded-2xl overflow-hidden">
           <div className="px-5 py-3 border-b border-amber-200 bg-gradient-to-r from-amber-50 to-white flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
               <InboxIcon className="w-4 h-4 text-amber-600" /> Eingehende Pool-Leads
               <span className="ml-2 text-xs text-amber-700 font-normal">{poolLeads.length} ohne Zuweisung</span>
             </h2>
           </div>
           {poolLeads.length === 0 ? (
-            <div className="p-6 text-center text-xs text-gray-400">
+            <div className="p-6 text-center text-xs text-claimondo-ondo/70">
               Keine offenen Pool-Leads. Neue Leads werden hier sichtbar sobald der Dispatcher sie deiner Organisation zuweist.
             </div>
           ) : (
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-[10px] uppercase tracking-wide text-gray-500">
+              <thead className="bg-[#f8f9fb] text-[10px] uppercase tracking-wide text-claimondo-ondo">
                 <tr>
                   <th className="text-left px-4 py-3">Fall</th>
                   <th className="text-left px-4 py-3">Standort</th>
@@ -142,23 +142,23 @@ export default function TeamClient({
                   <th className="text-left px-4 py-3">Zuweisen an</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-claimondo-border">
                 {poolLeads.map(l => (
                   <tr key={l.id} className="hover:bg-amber-50/30">
                     <td className="px-4 py-3">
-                      <div className="font-mono text-xs text-gray-900">{l.fall_nummer}</div>
-                      {l.kennzeichen && <div className="text-[10px] text-gray-400 font-mono">{l.kennzeichen}</div>}
-                      {l.fahrzeug && <div className="text-[10px] text-gray-500">{l.fahrzeug}</div>}
+                      <div className="font-mono text-xs text-claimondo-navy">{l.fall_nummer}</div>
+                      {l.kennzeichen && <div className="text-[10px] text-claimondo-ondo/70 font-mono">{l.kennzeichen}</div>}
+                      {l.fahrzeug && <div className="text-[10px] text-claimondo-ondo">{l.fahrzeug}</div>}
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-700">
+                    <td className="px-4 py-3 text-xs text-claimondo-navy">
                       {[l.schadens_adresse, l.schadens_plz, l.schadens_ort].filter(Boolean).join(', ') || '—'}
                     </td>
                     <td className="px-4 py-3 text-xs">
                       {l.spezifikation && <div className="text-[var(--brand-secondary)]">{l.spezifikation}</div>}
                       {l.schadens_art && <div className="text-amber-700">{l.schadens_art}</div>}
-                      {!l.spezifikation && !l.schadens_art && <span className="text-gray-400">—</span>}
+                      {!l.spezifikation && !l.schadens_art && <span className="text-claimondo-ondo/70">—</span>}
                     </td>
-                    <td className="px-4 py-3 text-[10px] text-gray-400">
+                    <td className="px-4 py-3 text-[10px] text-claimondo-ondo/70">
                       {l.created_at ? new Date(l.created_at).toLocaleDateString('de-DE') : '—'}
                     </td>
                     <td className="px-4 py-3">
@@ -167,7 +167,7 @@ export default function TeamClient({
                           value={assignTargets[l.id] ?? ''}
                           onChange={e => setAssignTargets(prev => ({ ...prev, [l.id]: e.target.value }))}
                           disabled={pending}
-                          className="text-xs bg-gray-100 border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand-secondary)]"
+                          className="text-xs bg-[#f8f9fb] border border-claimondo-border rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand-secondary)]"
                         >
                           <option value="">Wählen...</option>
                           {eligibleTargets.map(s => (
@@ -194,18 +194,18 @@ export default function TeamClient({
       )}
 
       {/* Mitglieder-Listing */}
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+      <div className="bg-white border border-claimondo-border rounded-2xl overflow-hidden">
         {subSvs.length === 0 ? (
           <div className="p-12 text-center">
-            <MailIcon className="w-8 h-8 text-gray-300 mx-auto mb-3" />
-            <p className="text-sm text-gray-500">Noch keine Mitglieder in deiner Organisation.</p>
-            <p className="text-[11px] text-gray-400 mt-2">
+            <MailIcon className="w-8 h-8 text-claimondo-ondo/50 mx-auto mb-3" />
+            <p className="text-sm text-claimondo-ondo">Noch keine Mitglieder in deiner Organisation.</p>
+            <p className="text-[11px] text-claimondo-ondo/70 mt-2">
               Mitglieder werden vom Admin über das Anlege-UI hinzugefügt.
             </p>
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-[10px] uppercase tracking-wide text-gray-500">
+            <thead className="bg-[#f8f9fb] text-[10px] uppercase tracking-wide text-claimondo-ondo">
               <tr>
                 <th className="text-left px-4 py-3">Name</th>
                 <th className="text-left px-4 py-3">Email</th>
@@ -216,28 +216,28 @@ export default function TeamClient({
                 <th className="text-right px-4 py-3">Aktion</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-claimondo-border">
               {subSvs.map(s => {
                 const name = [s.vorname, s.nachname].filter(Boolean).join(' ') || '—'
                 const isGesperrt = !!s.gesperrt_seit
                 const status = isGesperrt ? { label: 'Gesperrt', cls: 'bg-red-50 text-red-700' }
-                  : !s.ist_aktiv ? { label: 'Inaktiv', cls: 'bg-gray-100 text-gray-500' }
+                  : !s.ist_aktiv ? { label: 'Inaktiv', cls: 'bg-[#f8f9fb] text-claimondo-ondo' }
                   : !s.portal_zugang_freigeschaltet ? { label: 'Wartet auf Onboarding', cls: 'bg-yellow-50 text-yellow-700' }
                   : { label: 'Aktiv', cls: 'bg-emerald-50 text-emerald-700' }
                 return (
-                  <tr key={s.id} className={`hover:bg-gray-50/50 ${isGesperrt ? 'opacity-60' : ''}`}>
-                    <td className="px-4 py-3 text-gray-900">{name}</td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">{s.email ?? '—'}</td>
-                    <td className="px-4 py-3 text-gray-700 capitalize">{s.paket}</td>
+                  <tr key={s.id} className={`hover:bg-[#f8f9fb]/50 ${isGesperrt ? 'opacity-60' : ''}`}>
+                    <td className="px-4 py-3 text-claimondo-navy">{name}</td>
+                    <td className="px-4 py-3 text-claimondo-ondo text-xs">{s.email ?? '—'}</td>
+                    <td className="px-4 py-3 text-claimondo-navy capitalize">{s.paket}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full font-medium ${status.cls}`}>
                         {status.label}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right text-gray-700">
+                    <td className="px-4 py-3 text-right text-claimondo-navy">
                       {s.paket_faelle_genutzt ?? 0} / {s.paket_faelle_gesamt}
                     </td>
-                    <td className="px-4 py-3 text-right text-gray-700">
+                    <td className="px-4 py-3 text-right text-claimondo-navy">
                       {s.werbebudget_guthaben_netto != null
                         ? s.werbebudget_guthaben_netto.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })
                         : '—'}
@@ -263,7 +263,7 @@ export default function TeamClient({
         )}
       </div>
 
-      <p className="text-[10px] text-gray-400 mt-3 text-center">
+      <p className="text-[10px] text-claimondo-ondo/70 mt-3 text-center">
         Pool-Leads werden manuell verteilt. Mitglieder einladen läuft aktuell über den Admin
         (/admin/sachverstaendige).
       </p>
@@ -275,13 +275,13 @@ function StatCard({ icon: Icon, label, value, sub, highlight }: {
   icon: typeof UsersIcon; label: string; value: string; sub: string; highlight?: boolean
 }) {
   return (
-    <div className={`rounded-xl border p-4 ${highlight ? 'border-amber-200 bg-amber-50/50' : 'border-gray-200 bg-white'}`}>
+    <div className={`rounded-xl border p-4 ${highlight ? 'border-amber-200 bg-amber-50/50' : 'border-claimondo-border bg-white'}`}>
       <div className="flex items-center gap-2 mb-2">
         <Icon className={`w-4 h-4 ${highlight ? 'text-amber-600' : 'text-[var(--brand-secondary)]'}`} />
-        <span className="text-[10px] uppercase tracking-wide text-gray-500 font-medium">{label}</span>
+        <span className="text-[10px] uppercase tracking-wide text-claimondo-ondo font-medium">{label}</span>
       </div>
-      <div className="text-lg font-semibold text-gray-900">{value}</div>
-      <div className="text-[11px] text-gray-500 mt-0.5">{sub}</div>
+      <div className="text-lg font-semibold text-claimondo-navy">{value}</div>
+      <div className="text-[11px] text-claimondo-ondo mt-0.5">{sub}</div>
     </div>
   )
 }

@@ -150,7 +150,7 @@ export default function AuftragCard(props: AuftragCardProps) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 space-y-3 hover:border-gray-300 transition-colors">
+    <div className="bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-3 hover:border-claimondo-border transition-colors">
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
@@ -161,37 +161,37 @@ export default function AuftragCard(props: AuftragCardProps) {
             {props.fall.fall_nummer ?? props.fall.id.slice(0, 8)}
           </Link>
           <p className="text-sm font-semibold text-[var(--brand-primary)] mt-0.5 flex items-center gap-1.5">
-            <UserIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+            <UserIcon className="w-3.5 h-3.5 text-claimondo-ondo/70 shrink-0" />
             <span className="truncate">{kundeName}</span>
           </p>
         </div>
-        <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-600 whitespace-nowrap">
+        <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-[#f8f9fb] text-claimondo-ondo whitespace-nowrap">
           {props.statusLabel}
         </span>
       </div>
 
       {/* Meta */}
-      <div className="text-xs text-gray-600 space-y-1">
+      <div className="text-xs text-claimondo-ondo space-y-1">
         <div className="flex items-center gap-1.5">
-          <FileTextIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+          <FileTextIcon className="w-3.5 h-3.5 text-claimondo-ondo/70 shrink-0" />
           <span>{props.ursacheLabel}</span>
         </div>
         {props.fall.schadens_ort && (
           <div className="flex items-center gap-1.5">
-            <MapPinIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+            <MapPinIcon className="w-3.5 h-3.5 text-claimondo-ondo/70 shrink-0" />
             <span className="truncate">{props.fall.schadens_ort}</span>
           </div>
         )}
         {props.fall.schadens_datum && (
           <div className="flex items-center gap-1.5">
-            <CalendarIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+            <CalendarIcon className="w-3.5 h-3.5 text-claimondo-ondo/70 shrink-0" />
             <span>Schaden: {formatDatum(props.fall.schadens_datum)}</span>
           </div>
         )}
       </div>
 
       {/* Action Zone */}
-      <div className="pt-2 border-t border-gray-100">
+      <div className="pt-2 border-t border-claimondo-border">
         {action.type === 'vorschlagen' && (
           <button
             type="button"
@@ -237,10 +237,10 @@ export default function AuftragCard(props: AuftragCardProps) {
         )}
 
         {action.type === 'warten' && (
-          <div className="flex items-start gap-2 text-xs text-gray-600">
-            <ClockIcon className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2 text-xs text-claimondo-ondo">
+            <ClockIcon className="w-4 h-4 text-claimondo-ondo/70 shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="font-medium text-gray-700">{action.label}</p>
+              <p className="font-medium text-claimondo-navy">{action.label}</p>
               <p className="mt-0.5">{action.subLabel}</p>
             </div>
           </div>
@@ -265,7 +265,7 @@ export default function AuftragCard(props: AuftragCardProps) {
         {action.type === 'offen' && (
           <Link
             href={action.href}
-            className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-medium"
+            className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-claimondo-border hover:bg-[#f8f9fb] text-claimondo-navy text-sm font-medium"
           >
             {action.label}
             <ChevronRightIcon className="w-4 h-4" />

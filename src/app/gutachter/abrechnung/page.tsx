@@ -129,10 +129,10 @@ export default async function AbrechnungPage() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between gap-4">
+      <div className="flex-shrink-0 bg-white border-b border-claimondo-border px-4 py-2 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-sm font-semibold text-gray-900">Abrechnung</h1>
-          <p className="text-gray-500 text-xs">Übersicht Ihrer Abrechnungen und Pakete</p>
+          <h1 className="text-sm font-semibold text-claimondo-navy">Abrechnung</h1>
+          <p className="text-claimondo-ondo text-xs">Übersicht Ihrer Abrechnungen und Pakete</p>
         </div>
         <Link
           href="/gutachter/leadpreise"
@@ -146,71 +146,71 @@ export default async function AbrechnungPage() {
         <div className="grid grid-cols-3 gap-3 mb-4">
           <div className="bg-white border border-green-200 rounded-xl p-4 text-center">
             <p className="text-2xl font-bold text-green-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalEingegangen)}</p>
-            <p className="text-[10px] text-gray-500 mt-1">Eingegangen</p>
-            <p className="text-[9px] text-gray-400">{faelleAbgerechnet} Fälle</p>
+            <p className="text-[10px] text-claimondo-ondo mt-1">Eingegangen</p>
+            <p className="text-[9px] text-claimondo-ondo/70">{faelleAbgerechnet} Fälle</p>
           </div>
           <div className="bg-white border border-amber-200 rounded-xl p-4 text-center">
             <p className="text-2xl font-bold text-amber-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalOffen)}</p>
-            <p className="text-[10px] text-gray-500 mt-1">Offen</p>
-            <p className="text-[9px] text-gray-400">{faelleOffen} Fälle in Regulierung</p>
+            <p className="text-[10px] text-claimondo-ondo mt-1">Offen</p>
+            <p className="text-[9px] text-claimondo-ondo/70">{faelleOffen} Fälle in Regulierung</p>
           </div>
           <div className="bg-white border border-[var(--brand-secondary)]/20 rounded-xl p-4 text-center">
             <p className="text-2xl font-bold text-[var(--brand-secondary)]">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalEingegangen - totalLeadpreise)}</p>
-            <p className="text-[10px] text-gray-500 mt-1">Netto-Verdienst</p>
-            <p className="text-[9px] text-gray-400">Ø {faelleAbgerechnet > 0 ? Math.round(totalEingegangen / faelleAbgerechnet) : 0}€/Fall</p>
+            <p className="text-[10px] text-claimondo-ondo mt-1">Netto-Verdienst</p>
+            <p className="text-[9px] text-claimondo-ondo/70">Ø {faelleAbgerechnet > 0 ? Math.round(totalEingegangen / faelleAbgerechnet) : 0}€/Fall</p>
           </div>
         </div>
 
         {/* Top cards grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           {/* Anzahlung (Initial-Wert, KEIN Live-Stand) — ARCH-1 POLISH Befund 2 */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
+          <div className="bg-white rounded-2xl border border-claimondo-border p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
                 <WalletIcon className="w-5 h-5 text-emerald-400" />
               </div>
               <div>
-                <p className="text-gray-500 text-sm font-medium">Anzahlung</p>
-                <p className="text-gray-400 text-[11px]">Einmalig geleistet</p>
+                <p className="text-claimondo-ondo text-sm font-medium">Anzahlung</p>
+                <p className="text-claimondo-ondo/70 text-[11px]">Einmalig geleistet</p>
               </div>
             </div>
             {anzahlungBezahlt && anzahlungBetrag > 0 ? (
               <>
-                <p className="text-3xl font-bold text-gray-900 tabular-nums">
+                <p className="text-3xl font-bold text-claimondo-navy tabular-nums">
                   {anzahlungBetrag.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR
                 </p>
-                <p className="text-gray-500 text-xs mt-1">Du hast einmalig diesen Betrag als Anzahlung geleistet.</p>
+                <p className="text-claimondo-ondo text-xs mt-1">Du hast einmalig diesen Betrag als Anzahlung geleistet.</p>
               </>
             ) : (
               <>
-                <p className="text-3xl font-bold text-gray-400 tabular-nums">— EUR</p>
-                <p className="text-gray-400 text-xs mt-1">Noch keine Anzahlung eingegangen.</p>
+                <p className="text-3xl font-bold text-claimondo-ondo/70 tabular-nums">— EUR</p>
+                <p className="text-claimondo-ondo/70 text-xs mt-1">Noch keine Anzahlung eingegangen.</p>
               </>
             )}
-            <p className="text-gray-400 text-[10px] mt-3 flex items-start gap-1">
+            <p className="text-claimondo-ondo/70 text-[10px] mt-3 flex items-start gap-1">
               <InfoIcon className="w-3 h-3 mt-0.5 shrink-0" />
               <span>Die Verrechnung deiner Lead-Preise findest du in der Monatsabrechnung.</span>
             </p>
           </div>
 
           {/* Paket-Auslastung */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
+          <div className="bg-white rounded-2xl border border-claimondo-border p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-[var(--brand-secondary)]/5 flex items-center justify-center">
                 <PackageIcon className="w-5 h-5 text-[var(--brand-accent)]" />
               </div>
               <div>
-                <p className="text-gray-500 text-sm font-medium">Paket-Auslastung</p>
-                <p className="text-gray-400 text-xs">{paketLabel}</p>
+                <p className="text-claimondo-ondo text-sm font-medium">Paket-Auslastung</p>
+                <p className="text-claimondo-ondo/70 text-xs">{paketLabel}</p>
               </div>
             </div>
             <div className="flex items-end justify-between mb-2">
-              <p className="text-2xl font-bold text-gray-900 tabular-nums">
+              <p className="text-2xl font-bold text-claimondo-navy tabular-nums">
                 {offeneFaelle} / {maxFaelle}
               </p>
-              <p className="text-gray-500 text-sm tabular-nums">{auslastungProzent}%</p>
+              <p className="text-claimondo-ondo text-sm tabular-nums">{auslastungProzent}%</p>
             </div>
-            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-[#f8f9fb] rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all ${progressColor}`}
                 style={{ width: `${auslastungProzent}%` }}
@@ -222,9 +222,9 @@ export default async function AbrechnungPage() {
         {/* Abgerechnete Fälle */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
-            <FileTextIcon className="w-5 h-5 text-gray-500" />
-            <h2 className="text-lg font-semibold text-gray-900">Abgerechnete Fälle</h2>
-            <span className="text-gray-400 text-sm ml-auto">{completedFaelle?.length ?? 0} Fälle</span>
+            <FileTextIcon className="w-5 h-5 text-claimondo-ondo" />
+            <h2 className="text-lg font-semibold text-claimondo-navy">Abgerechnete Fälle</h2>
+            <span className="text-claimondo-ondo/70 text-sm ml-auto">{completedFaelle?.length ?? 0} Fälle</span>
           </div>
 
           {!completedFaelle?.length ? (
@@ -232,16 +232,16 @@ export default async function AbrechnungPage() {
           ) : (
             <>
               {/* Desktop table */}
-              <div className="hidden sm:block bg-white rounded-2xl overflow-hidden border border-gray-200">
+              <div className="hidden sm:block bg-white rounded-2xl overflow-hidden border border-claimondo-border">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Fall-Nr.</th>
-                        <th className="text-left px-4 py-3 text-gray-500 font-medium">Kunde</th>
-                        <th className="text-right px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Schadenhöhe</th>
-                        <th className="text-right px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Leadpreis</th>
-                        <th className="text-left px-4 py-3 text-gray-500 font-medium">Datum</th>
+                      <tr className="border-b border-claimondo-border">
+                        <th className="text-left px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">Fall-Nr.</th>
+                        <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Kunde</th>
+                        <th className="text-right px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">Schadenhöhe</th>
+                        <th className="text-right px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">Leadpreis</th>
+                        <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Datum</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -277,26 +277,26 @@ export default async function AbrechnungPage() {
                         return (
                           <tr
                             key={fall.id}
-                            className="border-b border-gray-200/50 hover:bg-gray-100/40 transition-colors"
+                            className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb]/40 transition-colors"
                           >
                             <td className="px-4 py-3">
                               <span className="text-[var(--brand-accent)] font-mono text-xs">
                                 {fall.fall_nummer ?? fall.id.slice(0, 8)}
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-gray-800">{name}</td>
-                            <td className="px-4 py-3 text-gray-800 text-right tabular-nums">{betrag}</td>
+                            <td className="px-4 py-3 text-claimondo-navy">{name}</td>
+                            <td className="px-4 py-3 text-claimondo-navy text-right tabular-nums">{betrag}</td>
                             <td className="px-4 py-3 text-right tabular-nums">
                               {abr ? (
-                                <span className={abr.preistyp === 'einzel' ? 'text-amber-400' : 'text-gray-800'}>
+                                <span className={abr.preistyp === 'einzel' ? 'text-amber-400' : 'text-claimondo-navy'}>
                                   {leadpreisStr}
                                   {abr.preistyp === 'einzel' && <span className="text-amber-500 text-[10px] ml-1">Einzel</span>}
                                 </span>
                               ) : (
-                                <span className="text-gray-500 text-xs">—</span>
+                                <span className="text-claimondo-ondo text-xs">—</span>
                               )}
                             </td>
-                            <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{datum}</td>
+                            <td className="px-4 py-3 text-claimondo-ondo text-xs whitespace-nowrap">{datum}</td>
                           </tr>
                         )
                       })}
@@ -339,25 +339,25 @@ export default async function AbrechnungPage() {
                   return (
                     <div
                       key={fall.id}
-                      className="bg-white rounded-2xl p-4 border border-gray-200"
+                      className="bg-white rounded-2xl p-4 border border-claimondo-border"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div>
                           <span className="text-[var(--brand-accent)] font-mono text-xs">
                             {fall.fall_nummer ?? fall.id.slice(0, 8)}
                           </span>
-                          <p className="text-gray-900 text-sm font-medium mt-0.5">{name}</p>
+                          <p className="text-claimondo-navy text-sm font-medium mt-0.5">{name}</p>
                         </div>
-                        <span className="text-gray-500 text-xs">{datum}</span>
+                        <span className="text-claimondo-ondo text-xs">{datum}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <div>
-                          <span className="text-gray-500 text-xs">Schadenhöhe</span>
-                          <p className="text-gray-800 tabular-nums">{betrag}</p>
+                          <span className="text-claimondo-ondo text-xs">Schadenhöhe</span>
+                          <p className="text-claimondo-navy tabular-nums">{betrag}</p>
                         </div>
                         <div className="text-right">
-                          <span className="text-gray-500 text-xs">Leadpreis</span>
-                          <p className={abr ? (abr.preistyp === 'einzel' ? 'text-amber-400' : 'text-gray-800') : 'text-gray-500'}>
+                          <span className="text-claimondo-ondo text-xs">Leadpreis</span>
+                          <p className={abr ? (abr.preistyp === 'einzel' ? 'text-amber-400' : 'text-claimondo-navy') : 'text-claimondo-ondo'}>
                             {leadpreisStr}
                           </p>
                         </div>
@@ -375,22 +375,22 @@ export default async function AbrechnungPage() {
         {(stellungnahmen?.length ?? 0) > 0 && (
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
-              <FileTextIcon className="w-5 h-5 text-gray-500" />
-              <h2 className="text-lg font-semibold text-gray-900">Technische Stellungnahmen</h2>
-              <span className="text-gray-400 text-sm ml-auto">{stellungnahmen?.length ?? 0} Aufträge</span>
+              <FileTextIcon className="w-5 h-5 text-claimondo-ondo" />
+              <h2 className="text-lg font-semibold text-claimondo-navy">Technische Stellungnahmen</h2>
+              <span className="text-claimondo-ondo/70 text-sm ml-auto">{stellungnahmen?.length ?? 0} Aufträge</span>
             </div>
 
             {/* Desktop table */}
-            <div className="hidden sm:block bg-white rounded-2xl overflow-hidden border border-gray-200">
+            <div className="hidden sm:block bg-white rounded-2xl overflow-hidden border border-claimondo-border">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Fall-Nr.</th>
-                    <th className="text-left px-4 py-3 text-gray-500 font-medium">Anlass</th>
-                    <th className="text-left px-4 py-3 text-gray-500 font-medium">Status</th>
-                    <th className="text-left px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Beauftragt</th>
-                    <th className="text-left px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Hochgeladen</th>
-                    <th className="text-left px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Freigegeben</th>
+                  <tr className="border-b border-claimondo-border">
+                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">Fall-Nr.</th>
+                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Anlass</th>
+                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Status</th>
+                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">Beauftragt</th>
+                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">Hochgeladen</th>
+                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">Freigegeben</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -402,15 +402,15 @@ export default async function AbrechnungPage() {
                       status === 'freigegeben' ? 'Freigegeben' : status
                     const statusColor =
                       status === 'beauftragt' ? 'bg-amber-50 text-amber-700' :
-                      status === 'hochgeladen' ? 'bg-blue-50 text-blue-700' :
+                      status === 'hochgeladen' ? 'bg-[#f8f9fb] text-claimondo-ondo' :
                       status === 'freigegeben' ? 'bg-emerald-50 text-emerald-700' :
-                      'bg-gray-50 text-gray-700'
+                      'bg-[#f8f9fb] text-claimondo-navy'
                     const fmt = (iso: string | null) =>
                       iso
                         ? new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
                         : '—'
                     return (
-                      <tr key={s.id} className="border-b border-gray-200/50 hover:bg-gray-100/40 transition-colors">
+                      <tr key={s.id} className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb]/40 transition-colors">
                         <td className="px-4 py-3">
                           <Link
                             href={`/gutachter/faelle/${s.id}`}
@@ -419,7 +419,7 @@ export default async function AbrechnungPage() {
                             {s.fall_nummer ?? (s.id as string).slice(0, 8)}
                           </Link>
                         </td>
-                        <td className="px-4 py-3 text-gray-700 text-xs">
+                        <td className="px-4 py-3 text-claimondo-navy text-xs">
                           {((s.vs_kuerzungs_typ as string | null) ?? 'technisch')}
                         </td>
                         <td className="px-4 py-3">
@@ -427,9 +427,9 @@ export default async function AbrechnungPage() {
                             {statusLabel}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{fmt(s.technische_stellungnahme_beauftragt_am as string | null)}</td>
-                        <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{fmt(s.technische_stellungnahme_hochgeladen_am as string | null)}</td>
-                        <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{fmt(s.technische_stellungnahme_freigabe_am as string | null)}</td>
+                        <td className="px-4 py-3 text-claimondo-ondo text-xs whitespace-nowrap">{fmt(s.technische_stellungnahme_beauftragt_am as string | null)}</td>
+                        <td className="px-4 py-3 text-claimondo-ondo text-xs whitespace-nowrap">{fmt(s.technische_stellungnahme_hochgeladen_am as string | null)}</td>
+                        <td className="px-4 py-3 text-claimondo-ondo text-xs whitespace-nowrap">{fmt(s.technische_stellungnahme_freigabe_am as string | null)}</td>
                       </tr>
                     )
                   })}
@@ -447,15 +447,15 @@ export default async function AbrechnungPage() {
                   status === 'freigegeben' ? 'Freigegeben' : status
                 const statusColor =
                   status === 'beauftragt' ? 'bg-amber-50 text-amber-700' :
-                  status === 'hochgeladen' ? 'bg-blue-50 text-blue-700' :
+                  status === 'hochgeladen' ? 'bg-[#f8f9fb] text-claimondo-ondo' :
                   status === 'freigegeben' ? 'bg-emerald-50 text-emerald-700' :
-                  'bg-gray-50 text-gray-700'
+                  'bg-[#f8f9fb] text-claimondo-navy'
                 const fmt = (iso: string | null) =>
                   iso
                     ? new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
                     : '—'
                 return (
-                  <div key={s.id} className="bg-white rounded-2xl p-4 border border-gray-200">
+                  <div key={s.id} className="bg-white rounded-2xl p-4 border border-claimondo-border">
                     <div className="flex items-start justify-between mb-2">
                       <Link href={`/gutachter/faelle/${s.id}`} className="text-[var(--brand-accent)] font-mono text-xs hover:underline">
                         {s.fall_nummer ?? (s.id as string).slice(0, 8)}
@@ -466,16 +466,16 @@ export default async function AbrechnungPage() {
                     </div>
                     <div className="grid grid-cols-3 gap-2 text-[11px]">
                       <div>
-                        <p className="text-gray-400">Beauftragt</p>
-                        <p className="text-gray-700">{fmt(s.technische_stellungnahme_beauftragt_am as string | null)}</p>
+                        <p className="text-claimondo-ondo/70">Beauftragt</p>
+                        <p className="text-claimondo-navy">{fmt(s.technische_stellungnahme_beauftragt_am as string | null)}</p>
                       </div>
                       <div>
-                        <p className="text-gray-400">Hochgeladen</p>
-                        <p className="text-gray-700">{fmt(s.technische_stellungnahme_hochgeladen_am as string | null)}</p>
+                        <p className="text-claimondo-ondo/70">Hochgeladen</p>
+                        <p className="text-claimondo-navy">{fmt(s.technische_stellungnahme_hochgeladen_am as string | null)}</p>
                       </div>
                       <div>
-                        <p className="text-gray-400">Freigegeben</p>
-                        <p className="text-gray-700">{fmt(s.technische_stellungnahme_freigabe_am as string | null)}</p>
+                        <p className="text-claimondo-ondo/70">Freigegeben</p>
+                        <p className="text-claimondo-navy">{fmt(s.technische_stellungnahme_freigabe_am as string | null)}</p>
                       </div>
                     </div>
                   </div>
@@ -488,20 +488,20 @@ export default async function AbrechnungPage() {
         {/* Einzahlungen */}
         {(einzahlungen?.length ?? 0) > 0 && (
           <div className="mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Einzahlungen</h2>
-            <div className="bg-white rounded-2xl overflow-hidden border border-gray-200">
+            <h2 className="text-lg font-semibold text-claimondo-navy mb-4">Einzahlungen</h2>
+            <div className="bg-white rounded-2xl overflow-hidden border border-claimondo-border">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left px-4 py-3 text-gray-500 font-medium">Typ</th>
-                    <th className="text-right px-4 py-3 text-gray-500 font-medium">Betrag</th>
-                    <th className="text-left px-4 py-3 text-gray-500 font-medium">Beschreibung</th>
-                    <th className="text-left px-4 py-3 text-gray-500 font-medium">Datum</th>
+                  <tr className="border-b border-claimondo-border">
+                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Typ</th>
+                    <th className="text-right px-4 py-3 text-claimondo-ondo font-medium">Betrag</th>
+                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Beschreibung</th>
+                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Datum</th>
                   </tr>
                 </thead>
                 <tbody>
                   {einzahlungen!.map(e => (
-                    <tr key={e.id} className="border-b border-gray-200/50">
+                    <tr key={e.id} className="border-b border-claimondo-border/50">
                       <td className="px-4 py-3">
                         <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-400">
                           {e.typ === 'anzahlung' ? 'Anzahlung' : e.typ === 'nachzahlung' ? 'Nachzahlung' : 'Paketwechsel'}
@@ -510,8 +510,8 @@ export default async function AbrechnungPage() {
                       <td className="px-4 py-3 text-emerald-400 text-right tabular-nums font-medium">
                         +{Number(e.betrag).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR
                       </td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">{e.beschreibung ?? '—'}</td>
-                      <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">
+                      <td className="px-4 py-3 text-claimondo-ondo text-xs">{e.beschreibung ?? '—'}</td>
+                      <td className="px-4 py-3 text-claimondo-ondo text-xs whitespace-nowrap">
                         {new Date(e.eingezahlt_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                       </td>
                     </tr>
@@ -523,21 +523,21 @@ export default async function AbrechnungPage() {
         )}
 
         {/* Monatsabrechnung */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <div className="bg-white rounded-2xl border border-claimondo-border p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-gray-900 font-semibold">Monatsabrechnung</h2>
-              <p className="text-gray-500 text-sm mt-0.5">PDF-Export Ihrer monatlichen Abrechnung</p>
+              <h2 className="text-claimondo-navy font-semibold">Monatsabrechnung</h2>
+              <p className="text-claimondo-ondo text-sm mt-0.5">PDF-Export Ihrer monatlichen Abrechnung</p>
             </div>
             <button
               disabled
-              className="flex items-center gap-2 bg-gray-100 text-gray-500 text-sm font-medium py-2.5 px-4 rounded-xl cursor-not-allowed opacity-50"
+              className="flex items-center gap-2 bg-[#f8f9fb] text-claimondo-ondo text-sm font-medium py-2.5 px-4 rounded-xl cursor-not-allowed opacity-50"
             >
               <DownloadIcon className="w-4 h-4" />
               PDF Download
             </button>
           </div>
-          <p className="text-gray-400 text-xs mt-3">Coming soon — PDF-Abrechnungen werden in Kürze verfügbar sein.</p>
+          <p className="text-claimondo-ondo/70 text-xs mt-3">Coming soon — PDF-Abrechnungen werden in Kürze verfügbar sein.</p>
         </div>
       </div>
     </div>

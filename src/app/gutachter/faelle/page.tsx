@@ -190,7 +190,7 @@ export default async function GutachterFaellePage({
           if (xlFaelle.length === 0) return null
           return (
             <div className="mb-4 space-y-3">
-              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+              <h2 className="text-xs font-semibold text-claimondo-ondo/70 uppercase tracking-wider flex items-center gap-1.5">
                 <CalendarIcon className="w-3.5 h-3.5" /> Nächste Termine
               </h2>
               {xlFaelle.map((fall) => {
@@ -204,13 +204,13 @@ export default async function GutachterFaellePage({
                 return (
                   <div
                     key={fall.id}
-                    className={`rounded-2xl border-2 p-5 ${isHeute ? 'border-[var(--brand-secondary)] bg-[var(--brand-secondary)]/5' : 'border-gray-200 bg-white'}`}
+                    className={`rounded-2xl border-2 p-5 ${isHeute ? 'border-[var(--brand-secondary)] bg-[var(--brand-secondary)]/5' : 'border-claimondo-border bg-white'}`}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <div className="flex items-center gap-2">
                           <span
-                            className={`text-lg font-bold ${isHeute ? 'text-[var(--brand-primary)]' : 'text-gray-900'}`}
+                            className={`text-lg font-bold ${isHeute ? 'text-[var(--brand-primary)]' : 'text-claimondo-navy'}`}
                           >
                             {termin.toLocaleTimeString('de-DE', {
                               hour: '2-digit',
@@ -219,7 +219,7 @@ export default async function GutachterFaellePage({
                             Uhr
                           </span>
                           <span
-                            className={`text-xs px-2 py-0.5 rounded-full font-medium ${isHeute ? 'bg-[var(--brand-secondary)] text-white' : 'bg-gray-100 text-gray-600'}`}
+                            className={`text-xs px-2 py-0.5 rounded-full font-medium ${isHeute ? 'bg-[var(--brand-secondary)] text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}
                           >
                             {isHeute
                               ? 'HEUTE'
@@ -230,8 +230,8 @@ export default async function GutachterFaellePage({
                                 })}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-800 mt-1">{name}</p>
-                        <p className="text-xs text-gray-500">{adresse}</p>
+                        <p className="text-sm text-claimondo-navy mt-1">{name}</p>
+                        <p className="text-xs text-claimondo-ondo">{adresse}</p>
                       </div>
                       <Link
                         href={`/gutachter/fall/${fall.id}`}
@@ -254,7 +254,7 @@ export default async function GutachterFaellePage({
                           nummer={lead.telefon}
                           variant="card"
                           label="Anrufen"
-                          className="justify-center !bg-white !border !border-gray-200 hover:!bg-gray-50 !text-gray-700 !rounded-xl !px-4 !py-2.5 text-sm"
+                          className="justify-center !bg-white !border !border-claimondo-border hover:!bg-[#f8f9fb] !text-claimondo-navy !rounded-xl !px-4 !py-2.5 text-sm"
                         />
                       )}
                     </div>
@@ -276,20 +276,20 @@ export default async function GutachterFaellePage({
         ) : (
           <div className="space-y-3 sm:space-y-0">
             {/* Desktop-Tabelle */}
-            <div className="hidden sm:block bg-white rounded-2xl overflow-hidden border border-gray-200">
+            <div className="hidden sm:block bg-white rounded-2xl overflow-hidden border border-claimondo-border">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left px-4 py-3 text-gray-500 font-medium whitespace-nowrap">
+                    <tr className="border-b border-claimondo-border">
+                      <th className="text-left px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">
                         Fall-Nr.
                       </th>
-                      <th className="text-left px-4 py-3 text-gray-500 font-medium">Kunde</th>
-                      <th className="text-left px-4 py-3 text-gray-500 font-medium">Schadentyp</th>
-                      <th className="text-left px-4 py-3 text-gray-500 font-medium">Ort</th>
-                      <th className="text-left px-4 py-3 text-gray-500 font-medium">SV-Termin</th>
-                      <th className="text-left px-4 py-3 text-gray-500 font-medium">Status</th>
-                      <th className="text-left px-4 py-3 text-gray-500 font-medium">Chat</th>
+                      <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Kunde</th>
+                      <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Schadentyp</th>
+                      <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Ort</th>
+                      <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">SV-Termin</th>
+                      <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Status</th>
+                      <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Chat</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -301,7 +301,7 @@ export default async function GutachterFaellePage({
                       return (
                         <tr
                           key={fall.id}
-                          className="border-b border-gray-200/50 hover:bg-gray-100/40 transition-colors"
+                          className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb]/40 transition-colors"
                         >
                           <td className="px-4 py-3">
                             <Link
@@ -311,14 +311,14 @@ export default async function GutachterFaellePage({
                               {fall.fall_nummer ?? fall.id.slice(0, 8)}
                             </Link>
                           </td>
-                          <td className="px-4 py-3 text-gray-800">{name}</td>
-                          <td className="px-4 py-3 text-gray-700 whitespace-nowrap">
+                          <td className="px-4 py-3 text-claimondo-navy">{name}</td>
+                          <td className="px-4 py-3 text-claimondo-navy whitespace-nowrap">
                             <SchadensUrsacheBadge ursache={fall.schadens_ursache} plain />
                           </td>
-                          <td className="px-4 py-3 text-gray-500 text-xs">
+                          <td className="px-4 py-3 text-claimondo-ondo text-xs">
                             {fall.schadens_ort ?? '—'}
                           </td>
-                          <td className="px-4 py-3 text-gray-700 text-xs whitespace-nowrap">
+                          <td className="px-4 py-3 text-claimondo-navy text-xs whitespace-nowrap">
                             {fall.sv_termin
                               ? new Date(fall.sv_termin).toLocaleDateString('de-DE', {
                                   day: '2-digit',
@@ -356,14 +356,14 @@ export default async function GutachterFaellePage({
                   <Link
                     key={fall.id}
                     href={`/gutachter/fall/${fall.id}`}
-                    className="block bg-white rounded-2xl p-4 border border-gray-200 hover:border-gray-300 transition-colors relative"
+                    className="block bg-white rounded-2xl p-4 border border-claimondo-border hover:border-claimondo-border transition-colors relative"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <span className="text-[var(--brand-accent)] font-mono text-xs">
                           {fall.fall_nummer ?? fall.id.slice(0, 8)}
                         </span>
-                        <p className="text-gray-900 text-sm font-medium mt-0.5">{name}</p>
+                        <p className="text-claimondo-navy text-sm font-medium mt-0.5">{name}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         {fall.ungelesene_nachrichten > 0 && (
@@ -374,7 +374,7 @@ export default async function GutachterFaellePage({
                         <FallStatusBadge status={fall.status} size="md" />
                       </div>
                     </div>
-                    <div className="flex gap-4 text-xs text-gray-500">
+                    <div className="flex gap-4 text-xs text-claimondo-ondo">
                       <SchadensUrsacheBadge ursache={fall.schadens_ursache} plain />
                       <span>{fall.schadens_ort ?? '—'}</span>
                       {fall.sv_termin && (

@@ -69,7 +69,7 @@ export default function LeadPreisOverlay({
     >
       <div className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-primary)] text-white shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-claimondo-border bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-primary)] text-white shrink-0">
           <div>
             <h2 id="leadpreis-overlay-title" className="text-lg font-semibold">Lead-Preis-Tabelle + ROI-Rechner</h2>
             <p className="text-[11px] text-white/70 mt-0.5">{rows.length} Stufen · Paket {paketLabel} · {maxFaelleMonat} Fälle im Kontingent</p>
@@ -98,7 +98,7 @@ export default function LeadPreisOverlay({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">
+                <label className="text-[10px] text-claimondo-ondo uppercase tracking-wider block mb-1">
                   Typische Schadenhöhe (netto, EUR)
                 </label>
                 <input
@@ -107,11 +107,11 @@ export default function LeadPreisOverlay({
                   onChange={(e) => setAvgSchaden(Math.max(0, Number(e.target.value) || 0))}
                   min={0}
                   step={100}
-                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
+                  className="w-full bg-white border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
                 />
               </div>
               <div>
-                <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">
+                <label className="text-[10px] text-claimondo-ondo uppercase tracking-wider block mb-1">
                   Dein Gutachter-Honorar pro Fall (netto, EUR)
                 </label>
                 <input
@@ -120,7 +120,7 @@ export default function LeadPreisOverlay({
                   onChange={(e) => setAvgHonorar(Math.max(0, Number(e.target.value) || 0))}
                   min={0}
                   step={10}
-                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
+                  className="w-full bg-white border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
                 />
               </div>
             </div>
@@ -154,16 +154,16 @@ export default function LeadPreisOverlay({
             )}
 
             {/* Honorar-Upload Hinweis (Phase 2) */}
-            <p className="mt-4 pt-3 border-t border-[var(--brand-accent)]/20 text-[10px] text-gray-500">
+            <p className="mt-4 pt-3 border-t border-[var(--brand-accent)]/20 text-[10px] text-claimondo-ondo">
               Tipp: Du kannst deine eigene Honorartabelle (pro Schadenstufe) später im Profil hinterlegen —
               dann rechnen wir automatisch stufenweise und zeigen dir die exakte Marge je Fall.
             </p>
           </section>
 
           {/* Erläuterung */}
-          <section className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+          <section className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4">
             <p className="text-sm font-medium text-[var(--brand-primary)] mb-2">Wie funktioniert die Berechnung?</p>
-            <ul className="text-xs text-gray-700 space-y-1.5 list-disc pl-4">
+            <ul className="text-xs text-claimondo-navy space-y-1.5 list-disc pl-4">
               <li>
                 Solange du innerhalb deines monatlichen Kontingents (<strong>{paketLabel}</strong>) bist, gilt
                 der <strong>Paket-Preis</strong>. Ab dem ersten Fall über dem Kontingent gilt der <strong>Einzel-Preis</strong>.
@@ -177,36 +177,36 @@ export default function LeadPreisOverlay({
 
           {/* Tabelle */}
           <section>
-            <p className="text-[10px] text-gray-500 uppercase tracking-wide font-semibold mb-2">
+            <p className="text-[10px] text-claimondo-ondo uppercase tracking-wide font-semibold mb-2">
               Alle {rows.length} Stufen
             </p>
-            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
               <table className="w-full text-xs">
-                <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
+                <thead className="bg-[#f8f9fb] border-b border-claimondo-border sticky top-0">
                   <tr>
-                    <th className="text-left px-4 py-2.5 text-gray-500 font-medium">Schadenhöhe (Netto-RK bis)</th>
-                    <th className="text-right px-4 py-2.5 text-gray-500 font-medium">Paket-Preis (im Kontingent)</th>
-                    <th className="text-right px-4 py-2.5 text-gray-500 font-medium">Einzel-Preis (über Kontingent)</th>
+                    <th className="text-left px-4 py-2.5 text-claimondo-ondo font-medium">Schadenhöhe (Netto-RK bis)</th>
+                    <th className="text-right px-4 py-2.5 text-claimondo-ondo font-medium">Paket-Preis (im Kontingent)</th>
+                    <th className="text-right px-4 py-2.5 text-claimondo-ondo font-medium">Einzel-Preis (über Kontingent)</th>
                   </tr>
                 </thead>
                 <tbody>
                   {rows.map((row, i) => (
-                    <tr key={i} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50">
-                      <td className="px-4 py-2 text-gray-800 font-medium tabular-nums">
+                    <tr key={i} className="border-b border-claimondo-border last:border-b-0 hover:bg-[#f8f9fb]">
+                      <td className="px-4 py-2 text-claimondo-navy font-medium tabular-nums">
                         {eur(Number(row.schadenhoehe_bis_netto))} EUR
                       </td>
-                      <td className="px-4 py-2 text-right text-gray-700 tabular-nums">
+                      <td className="px-4 py-2 text-right text-claimondo-navy tabular-nums">
                         {eur(Number(row.paketpreis_netto))} EUR
                       </td>
-                      <td className="px-4 py-2 text-right text-gray-700 tabular-nums">
+                      <td className="px-4 py-2 text-right text-claimondo-navy tabular-nums">
                         {eur(Number(row.einzelpreis_netto))} EUR
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <div className="px-4 py-2 bg-gray-50 border-t border-gray-200">
-                <p className="text-[10px] text-gray-400">Alle Preise netto zzgl. 19% MwSt</p>
+              <div className="px-4 py-2 bg-[#f8f9fb] border-t border-claimondo-border">
+                <p className="text-[10px] text-claimondo-ondo/70">Alle Preise netto zzgl. 19% MwSt</p>
               </div>
             </div>
           </section>
@@ -218,9 +218,9 @@ export default function LeadPreisOverlay({
 
 function Stat({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className={`rounded-lg p-2.5 ${highlight ? 'bg-[var(--brand-primary)] text-white' : 'bg-white border border-gray-200'}`}>
-      <p className={`text-[9px] uppercase tracking-wider ${highlight ? 'text-white/60' : 'text-gray-500'}`}>{label}</p>
-      <p className={`text-sm font-semibold mt-0.5 ${highlight ? 'text-white' : 'text-gray-900'}`}>{value}</p>
+    <div className={`rounded-lg p-2.5 ${highlight ? 'bg-[var(--brand-primary)] text-white' : 'bg-white border border-claimondo-border'}`}>
+      <p className={`text-[9px] uppercase tracking-wider ${highlight ? 'text-white/60' : 'text-claimondo-ondo'}`}>{label}</p>
+      <p className={`text-sm font-semibold mt-0.5 ${highlight ? 'text-white' : 'text-claimondo-navy'}`}>{value}</p>
     </div>
   )
 }

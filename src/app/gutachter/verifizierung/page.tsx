@@ -182,16 +182,16 @@ export default async function VerifizierungPage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-[var(--brand-primary)]">Verifizierung</h1>
-          <p className="text-sm text-gray-600">Status Ihrer Zulassungs-Unterlagen</p>
+          <p className="text-sm text-claimondo-ondo">Status Ihrer Zulassungs-Unterlagen</p>
         </div>
       </header>
 
       {/* Tier 1: SA-Vorlage */}
-      <section className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
+      <section className="bg-white rounded-2xl border border-claimondo-border p-5 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold text-[var(--brand-primary)]">Tier 1 — SA-Vorlage</h2>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-claimondo-ondo">
               Pflicht vor Dispatch-Freigabe. Ihre persönliche Schadenaufnahme-Vorlage als PDF.
             </p>
           </div>
@@ -199,12 +199,12 @@ export default async function VerifizierungPage() {
         </div>
 
         {sv.sa_vorlage_status === null && (
-          <p className="text-sm text-gray-700 bg-gray-50 rounded-lg px-3 py-2">
+          <p className="text-sm text-claimondo-navy bg-[#f8f9fb] rounded-lg px-3 py-2">
             Noch nicht hochgeladen. Der Upload erfolgt im Willkommen-Flow nach Abschluss der Anzahlung.
           </p>
         )}
         {sv.sa_vorlage_status === 'ausstehend' && sv.sa_vorlage_hochgeladen_am && (
-          <p className="text-sm text-gray-700 bg-amber-50 rounded-lg px-3 py-2">
+          <p className="text-sm text-claimondo-navy bg-amber-50 rounded-lg px-3 py-2">
             Eingereicht am {formatDatum(sv.sa_vorlage_hochgeladen_am)} — wird vom Admin geprüft.
           </p>
         )}
@@ -225,11 +225,11 @@ export default async function VerifizierungPage() {
       </section>
 
       {/* Tier 2: 14-Tage-Dokumente */}
-      <section className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
+      <section className="bg-white rounded-2xl border border-claimondo-border p-5 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold text-[var(--brand-primary)]">Tier 2 — Verifizierungs-Unterlagen</h2>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-claimondo-ondo">
               Berufshaftpflicht, Gewerbeanmeldung und ggf. Bestellungsurkunde. 14-Tage-Frist ab Anzahlung.
             </p>
           </div>
@@ -237,12 +237,12 @@ export default async function VerifizierungPage() {
         </div>
 
         {sv.verifizierung_status === null && (
-          <p className="text-sm text-gray-700 bg-gray-50 rounded-lg px-3 py-2">
+          <p className="text-sm text-claimondo-navy bg-[#f8f9fb] rounded-lg px-3 py-2">
             Die Frist startet automatisch nach Eingang Ihrer Anzahlung.
           </p>
         )}
         {sv.verifizierung_status === 'ausstehend' && sv.verifizierung_frist_bis && tageOffen !== null && (
-          <div className={`text-sm rounded-lg px-3 py-2 ${tageOffen <= 4 ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700'}`}>
+          <div className={`text-sm rounded-lg px-3 py-2 ${tageOffen <= 4 ? 'bg-amber-50 text-amber-700' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}>
             <p className="font-medium">
               Frist: {formatDatum(sv.verifizierung_frist_bis)} — noch {tageOffen} Tag{tageOffen === 1 ? '' : 'e'} offen
             </p>
@@ -266,15 +266,15 @@ export default async function VerifizierungPage() {
 
       {/* AAR-515 + AAR-647: Abtretungs-Pflicht + Conditional Tier-2-Slots */}
       {qualiSlots.length > 0 && (
-        <section className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
+        <section className="bg-white rounded-2xl border border-claimondo-border p-5 space-y-3">
           <div>
             <h2 className="text-base font-semibold text-[var(--brand-primary)]">Pflicht-Dokumente &amp; Qualifikations-Nachweise</h2>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-claimondo-ondo">
               Abtretungen sind im Onboarding verpflichtend. Qualifikations-Nachweise erscheinen in der Kundenkommunikation erst nach Admin-Freigabe.
             </p>
           </div>
 
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-claimondo-border">
             {qualiSlots.map(slot => {
               const istFreigegeben = slot.status === 'geprueft'
               const istHochgeladen = slot.status === 'hochgeladen' || !!slot.hochgeladenAm
@@ -285,23 +285,23 @@ export default async function VerifizierungPage() {
                       <FileTextIcon className="w-4 h-4 text-[#4573A2]" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-claimondo-navy">
                         {slot.label}
                         {slot.pflicht && (
                           <span className="ml-2 text-[10px] text-red-600 font-semibold">Pflicht</span>
                         )}
                       </p>
                       {slot.quali ? (
-                        <p className="text-[11px] text-gray-500">
+                        <p className="text-[11px] text-claimondo-ondo">
                           Schaltet Quali „{slot.quali}" in Kundenkommunikation frei
                         </p>
                       ) : (
-                        <p className="text-[11px] text-gray-500">
+                        <p className="text-[11px] text-claimondo-ondo">
                           Wird vom Admin geprüft und freigegeben
                         </p>
                       )}
                       {slot.nummer && (
-                        <p className="text-[11px] text-gray-600 mt-1 flex items-center gap-1">
+                        <p className="text-[11px] text-claimondo-ondo mt-1 flex items-center gap-1">
                           <IdCardIcon className="w-3 h-3" />
                           {slot.nummerLabel}: <span className="font-mono">{slot.nummer}</span>
                         </p>
@@ -322,13 +322,13 @@ export default async function VerifizierungPage() {
             })}
           </div>
 
-          <p className="text-[11px] text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
+          <p className="text-[11px] text-claimondo-ondo bg-[#f8f9fb] rounded-lg px-3 py-2">
             Pro Upload wird automatisch ein Prüf-Task beim Admin erstellt. Nach Freigabe ändert sich der Status auf „Freigegeben".
           </p>
         </section>
       )}
 
-      <p className="text-xs text-gray-500 text-center">
+      <p className="text-xs text-claimondo-ondo text-center">
         Fragen zur Verifizierung? Melden Sie sich beim Support.
       </p>
     </div>
@@ -365,7 +365,7 @@ function StatusBadge({ status }: { status: string | null | undefined }) {
     )
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-medium">
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#f8f9fb] text-claimondo-ondo text-xs font-medium">
       Noch offen
     </span>
   )
@@ -393,7 +393,7 @@ function QualiSlotBadge({ status, hochgeladenAm }: { status: string | null; hoch
   }
   if (status === 'hochgeladen' || hochgeladenAm) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-medium shrink-0">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo text-[10px] font-medium shrink-0">
         <ClockIcon className="w-3 h-3" /> In Prüfung
       </span>
     )
@@ -406,7 +406,7 @@ function QualiSlotBadge({ status, hochgeladenAm }: { status: string | null; hoch
     )
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[10px] font-medium shrink-0">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo text-[10px] font-medium shrink-0">
       Noch nicht angefordert
     </span>
   )

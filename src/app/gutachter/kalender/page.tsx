@@ -81,19 +81,19 @@ export default async function SVKalenderPage({
   return (
     <div className="h-full flex flex-col">
       {/* View-Toggle */}
-      <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200 shrink-0">
-        <h1 className="text-sm font-semibold text-gray-900">Kalender</h1>
-        <div className="flex gap-1 bg-gray-100 rounded-lg p-0.5">
+      <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-claimondo-border shrink-0">
+        <h1 className="text-sm font-semibold text-claimondo-navy">Kalender</h1>
+        <div className="flex gap-1 bg-[#f8f9fb] rounded-lg p-0.5">
           <Link
             href="/gutachter/kalender?view=kalender"
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-              view === 'kalender' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
+              view === 'kalender' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'
             }`}
           >Kalender</Link>
           <Link
             href="/gutachter/kalender?view=liste"
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-              view === 'liste' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
+              view === 'liste' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'
             }`}
           >Liste</Link>
         </div>
@@ -124,13 +124,13 @@ export default async function SVKalenderPage({
             const name = fall.lead_id && leadMap[fall.lead_id] ? leadMap[fall.lead_id] : '—'
             return (
               <Link key={fall.id} href={`/gutachter/fall/${fall.id}`}
-                className="block bg-white rounded-xl border border-gray-200 p-4 hover:bg-gray-50 transition-colors">
+                className="block bg-white rounded-xl border border-claimondo-border p-4 hover:bg-[#f8f9fb] transition-colors">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-claimondo-navy">
                       {t.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })} — {t.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
                     </p>
-                    <p className="text-xs text-gray-500 mt-0.5">{name} · {fall.schadens_ort ?? '—'}</p>
+                    <p className="text-xs text-claimondo-ondo mt-0.5">{name} · {fall.schadens_ort ?? '—'}</p>
                   </div>
                   <span className="text-[10px] text-[var(--brand-secondary)]">{fall.fall_nummer ?? fall.id.slice(0, 8)}</span>
                 </div>

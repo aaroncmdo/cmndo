@@ -172,10 +172,10 @@ export default function ProfilClient({
       )}
 
       {/* BUG-91: Sticky Header — bleibt beim Scrollen oben sichtbar */}
-      <div className="flex-shrink-0 sticky top-0 z-20 bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+      <div className="flex-shrink-0 sticky top-0 z-20 bg-white border-b border-claimondo-border px-6 py-3 flex items-center justify-between">
         <div>
-          <h1 className="text-sm font-semibold text-gray-900">Mein Profil</h1>
-          <p className="text-gray-500 text-xs">Stammdaten + Firma + Standort</p>
+          <h1 className="text-sm font-semibold text-claimondo-navy">Mein Profil</h1>
+          <p className="text-claimondo-ondo text-xs">Stammdaten + Firma + Standort</p>
         </div>
         {!editing && (
           <button
@@ -200,28 +200,28 @@ export default function ProfilClient({
         )}
 
         <form onSubmit={handleSave} className="max-w-4xl">
-          <div className="bg-white rounded-2xl p-6 border border-gray-200 space-y-4">
+          <div className="bg-white rounded-2xl p-6 border border-claimondo-border space-y-4">
             {/* Avatar — AAR-369: Upload statt statischer Initialen-Kreis */}
-            <div className="flex items-center gap-4 pb-4 border-b border-gray-200">
+            <div className="flex items-center gap-4 pb-4 border-b border-claimondo-border">
               <AvatarUpload
                 currentUrl={profile.avatar_url ?? null}
                 initials={initials || '??'}
                 size="md"
               />
               <div>
-                <p className="text-gray-900 font-medium text-lg">{fullName}</p>
-                <p className="text-gray-500 text-sm">Sachverständiger</p>
+                <p className="text-claimondo-navy font-medium text-lg">{fullName}</p>
+                <p className="text-claimondo-ondo text-sm">Sachverständiger</p>
               </div>
             </div>
 
             {/* Fields */}
             <div className="space-y-0">
               {/* E-Mail read-only mit Hinweis */}
-              <div className="flex gap-2 py-2.5 border-b border-gray-200/50">
-                <span className="text-gray-500 text-sm w-36 shrink-0">E-Mail</span>
+              <div className="flex gap-2 py-2.5 border-b border-claimondo-border/50">
+                <span className="text-claimondo-ondo text-sm w-36 shrink-0">E-Mail</span>
                 <div className="flex-1">
-                  <span className="text-gray-800 text-sm">{email}</span>
-                  <p className="text-gray-400 text-[10px] mt-0.5 flex items-center gap-1">
+                  <span className="text-claimondo-navy text-sm">{email}</span>
+                  <p className="text-claimondo-ondo/70 text-[10px] mt-0.5 flex items-center gap-1">
                     <InfoIcon className="w-3 h-3" />
                     Email-Änderung via Support: <span className="text-[var(--brand-secondary)]">aaron.sprafke@claimondo.de</span>
                   </p>
@@ -246,15 +246,15 @@ export default function ProfilClient({
                   <ControlledRow label="Vorname" value={form.vorname} onChange={v => updateField('vorname', v)} />
                   <ControlledRow label="Nachname" value={form.nachname} onChange={v => updateField('nachname', v)} />
                   <ControlledRow label="Telefon" type="tel" value={form.telefon} onChange={v => updateField('telefon', v)} />
-                  <div className="flex gap-2 py-2 border-b border-gray-200/50">
-                    <span className="text-gray-500 text-sm w-36 shrink-0 pt-2">Anschrift</span>
+                  <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
+                    <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">Anschrift</span>
                     <div className="flex-1 space-y-2">
                       {mapsReady ? (
                         <GooglePlaceAutocomplete
                           defaultValue={standort.adresse}
                           placeholder="Büro-/Wohnadresse eingeben"
                           onSelect={onPlaceSelect}
-                          className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                          className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                         />
                       ) : (
                         <input
@@ -262,7 +262,7 @@ export default function ProfilClient({
                           value={standort.adresse}
                           onChange={e => setStandort(prev => ({ ...prev, adresse: e.target.value }))}
                           placeholder="Büro-/Wohnadresse eingeben"
-                          className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                          className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                         />
                       )}
                       {standort.lat != null && (
@@ -281,20 +281,20 @@ export default function ProfilClient({
                     onChange={v => updateField('anzeigename', v)}
                     placeholder="z.B. Max M. — Fallback: Vor- + Nachname"
                   />
-                  <div className="flex gap-2 py-2 border-b border-gray-200/50">
-                    <span className="text-gray-500 text-sm w-36 shrink-0 pt-2">Profiltext</span>
+                  <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
+                    <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">Profiltext</span>
                     <textarea
                       value={form.profilbeschreibung}
                       onChange={e => updateField('profilbeschreibung', e.target.value)}
                       placeholder="z.B. Ihr persönlicher Sachverständiger mit 15 Jahren Erfahrung"
                       rows={2}
                       maxLength={200}
-                      className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] resize-none"
+                      className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] resize-none"
                     />
                   </div>
 
-                  <div className="pt-3 mt-3 border-t border-gray-200">
-                    <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1 px-1">Firma / Steuerliches</p>
+                  <div className="pt-3 mt-3 border-t border-claimondo-border">
+                    <p className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wide mb-1 px-1">Firma / Steuerliches</p>
                   </div>
                   <ControlledRow label="Firmenname" value={form.firmenname} onChange={v => updateField('firmenname', v)} />
                   <SelectRow
@@ -318,8 +318,8 @@ export default function ProfilClient({
                   {/* AAR-369 */}
                   <FieldRow label="Anzeigename" value={profile.anzeigename ?? '—'} />
                   <FieldRow label="Profiltext" value={profile.profilbeschreibung ?? '—'} />
-                  <div className="pt-3 mt-3 border-t border-gray-200">
-                    <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1 px-1">Firma / Steuerliches</p>
+                  <div className="pt-3 mt-3 border-t border-claimondo-border">
+                    <p className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wide mb-1 px-1">Firma / Steuerliches</p>
                   </div>
                   <FieldRow label="Firmenname" value={sv.firmenname ?? '—'} />
                   <FieldRow label="Rechtsform" value={sv.rechtsform ?? '—'} />
@@ -329,8 +329,8 @@ export default function ProfilClient({
                 </>
               )}
 
-              <div className="pt-3 mt-3 border-t border-gray-200">
-                <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1 px-1">Vertrag</p>
+              <div className="pt-3 mt-3 border-t border-claimondo-border">
+                <p className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wide mb-1 px-1">Vertrag</p>
               </div>
               <FieldRow label="Paket" value={PAKET_LABELS[sv.paket] ?? sv.paket ?? '—'} />
               <FieldRow label="Offene Fälle" value={`${sv.offene_faelle} / ${sv.paket_faelle_gesamt}`} />
@@ -339,11 +339,11 @@ export default function ProfilClient({
 
             {/* Actions */}
             {editing && (
-              <div className="flex gap-2 pt-4 border-t border-gray-200">
+              <div className="flex gap-2 pt-4 border-t border-claimondo-border">
                 <button
                   type="button"
                   onClick={() => setEditing(false)}
-                  className="flex-1 py-2.5 rounded-xl text-sm text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
+                  className="flex-1 py-2.5 rounded-xl text-sm text-claimondo-ondo hover:text-claimondo-navy hover:bg-[#f8f9fb] transition-colors"
                 >
                   Abbrechen
                 </button>
@@ -370,14 +370,14 @@ export default function ProfilClient({
             noch ein Status-Hinweis mit Deep-Link. */}
         <Link
           href="/gutachter/einstellungen/kalender"
-          className="bg-white rounded-2xl p-4 border border-gray-200 mt-5 flex items-center gap-3 hover:border-[#4573A2] transition-colors group"
+          className="bg-white rounded-2xl p-4 border border-claimondo-border mt-5 flex items-center gap-3 hover:border-[#4573A2] transition-colors group"
         >
           <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${googleConnected ? 'bg-green-500' : 'bg-zinc-400'}`} />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900">
+            <p className="text-sm font-medium text-claimondo-navy">
               Kalender: {googleConnected ? 'Google verbunden' : 'Nicht verbunden'}
             </p>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-claimondo-ondo mt-0.5">
               Verwalten unter Einstellungen → Kalender
             </p>
           </div>
@@ -385,9 +385,9 @@ export default function ProfilClient({
         </Link>
 
         {/* KFZ-154: 3 Spezialisierungs-Listen */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-5">
-          <h2 className="text-sm font-medium text-gray-500 mb-1">Spezialisierungen</h2>
-          <p className="text-xs text-gray-400 mb-4">
+        <div className="bg-white rounded-2xl p-6 border border-claimondo-border mt-5">
+          <h2 className="text-sm font-medium text-claimondo-ondo mb-1">Spezialisierungen</h2>
+          <p className="text-xs text-claimondo-ondo/70 mb-4">
             Wir nutzen diese Angaben um dir passende Fälle zuzuordnen. Änderungen werden sofort gespeichert.
           </p>
           <div className="space-y-5">
@@ -420,9 +420,9 @@ export default function ProfilClient({
 
         {/* KFZ-152 Phase 3 Follow-up: Privacy-Toggle (nur fuer Community-Mitglieder) */}
         {sv.rolle_in_organisation === 'community_member' && (
-          <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-5">
-            <h2 className="text-sm font-medium text-gray-500 mb-1">Community-Privatsphäre</h2>
-            <p className="text-xs text-gray-400 mb-4">
+          <div className="bg-white rounded-2xl p-6 border border-claimondo-border mt-5">
+            <h2 className="text-sm font-medium text-claimondo-ondo mb-1">Community-Privatsphäre</h2>
+            <p className="text-xs text-claimondo-ondo/70 mb-4">
               Wenn aktiv, sehen andere Community-Mitglieder im Leaderboard „Anonym" statt deines Namens.
               Deine Statistiken (Fälle, Umsatz) bleiben sichtbar — nur dein Name wird verborgen.
             </p>
@@ -431,9 +431,9 @@ export default function ProfilClient({
         )}
 
         {/* KFZ-158 Phase 2: GPS-Tracking Privacy-Toggle */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-5">
-          <h2 className="text-sm font-medium text-gray-500 mb-1">Live-Standort</h2>
-          <p className="text-xs text-gray-400 mb-4">
+        <div className="bg-white rounded-2xl p-6 border border-claimondo-border mt-5">
+          <h2 className="text-sm font-medium text-claimondo-ondo mb-1">Live-Standort</h2>
+          <p className="text-xs text-claimondo-ondo/70 mb-4">
             Wenn aktiv, wird dein Standort während Terminen live getrackt.
             Ermöglicht optimierte Routenführung und Admin-Übersicht.
           </p>
@@ -452,8 +452,8 @@ export default function ProfilClient({
 
         {/* Offene Terminanfragen */}
         {pendingTermine.length > 0 && (
-          <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-5">
-            <h2 className="text-sm font-medium text-gray-500 mb-4">
+          <div className="bg-white rounded-2xl p-6 border border-claimondo-border mt-5">
+            <h2 className="text-sm font-medium text-claimondo-ondo mb-4">
               Offene Terminanfragen ({pendingTermine.length})
             </h2>
             <div className="space-y-3">
@@ -475,8 +475,8 @@ export default function ProfilClient({
 // AAR-500 N5: Settings-Section-Wrapper für Benachrichtigungen.
 function NotificationSection({ initial }: { initial: NotificationPreferencesFormValue }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-5 mt-5">
-      <h2 className="text-sm font-medium text-gray-500 mb-4">Benachrichtigungen</h2>
+    <div className="bg-white border border-claimondo-border rounded-2xl p-5 mt-5">
+      <h2 className="text-sm font-medium text-claimondo-ondo mb-4">Benachrichtigungen</h2>
       <NotificationPreferencesForm role="sachverstaendiger" initial={initial} />
     </div>
   )
@@ -489,15 +489,15 @@ function NotificationSection({ initial }: { initial: NotificationPreferencesForm
 
 function BrandingSection({ svId: _svId }: { svId: string }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-5 mt-5">
-      <h2 className="text-sm font-medium text-gray-500 mb-4">Branding</h2>
+    <div className="bg-white border border-claimondo-border rounded-2xl p-5 mt-5">
+      <h2 className="text-sm font-medium text-claimondo-ondo mb-4">Branding</h2>
       <a
         href="/gutachter/profil/branding"
         className="flex items-center justify-between gap-3 p-3 rounded-xl border border-[var(--brand-secondary)]/30 bg-[var(--brand-secondary)]/5 hover:bg-[var(--brand-secondary)]/10 transition-colors"
       >
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-[var(--brand-primary)]">Branding-Editor mit Live-Preview</p>
-          <p className="text-xs text-gray-600 mt-0.5">
+          <p className="text-xs text-claimondo-ondo mt-0.5">
             Logo hochladen — Farben und Schriftart werden automatisch extrahiert.
           </p>
         </div>
@@ -543,9 +543,9 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
   const end = new Date(termin.end_zeit)
 
   return (
-    <div className="bg-gray-100/50 rounded-xl p-4 border border-gray-300">
+    <div className="bg-[#f8f9fb]/50 rounded-xl p-4 border border-claimondo-border">
       <div className="flex items-center justify-between mb-2">
-        <p className="text-gray-800 text-sm font-medium">
+        <p className="text-claimondo-navy text-sm font-medium">
           {start.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}
           {' '}
           {start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
@@ -579,20 +579,20 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
             value={ablehnungsgrund}
             onChange={e => setAblehnungsgrund(e.target.value)}
             placeholder="Grund (optional)"
-            className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-[var(--brand-primary)]"
+            className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-1 focus:ring-[var(--brand-primary)]"
           />
           <input
             type="datetime-local"
             value={gegenvorschlag}
             onChange={e => setGegenvorschlag(e.target.value)}
             required
-            className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-[var(--brand-primary)]"
+            className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-1 focus:ring-[var(--brand-primary)]"
           />
-          <p className="text-gray-500 text-xs">Gegenvorschlag ist Pflicht</p>
+          <p className="text-claimondo-ondo text-xs">Gegenvorschlag ist Pflicht</p>
           <div className="flex gap-2">
             <button
               onClick={() => setShowReject(false)}
-              className="flex-1 py-2 rounded-lg text-xs text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
+              className="flex-1 py-2 rounded-lg text-xs text-claimondo-ondo hover:text-claimondo-navy hover:bg-[#f8f9fb] transition-colors"
             >
               Zurück
             </button>
@@ -647,16 +647,16 @@ function PrivacyToggle({ svId, initial }: { svId: string; initial: boolean }) {
         onClick={toggle}
         disabled={saving}
         className={`relative inline-flex items-center w-12 h-6 rounded-full transition-colors disabled:opacity-50 ${
-          active ? 'bg-emerald-500' : 'bg-gray-300'
+          active ? 'bg-emerald-500' : 'bg-claimondo-border'
         }`}
       >
         <span className={`inline-block w-5 h-5 rounded-full bg-white shadow transform transition-transform ${
           active ? 'translate-x-6' : 'translate-x-0.5'
         }`} />
       </button>
-      <span className="ml-3 text-sm text-gray-700">
+      <span className="ml-3 text-sm text-claimondo-navy">
         {active ? 'Anonym aktiviert' : 'Name sichtbar'}
-        {saving && <span className="text-gray-400 text-xs ml-2">speichert...</span>}
+        {saving && <span className="text-claimondo-ondo/70 text-xs ml-2">speichert...</span>}
       </span>
       {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
     </div>
@@ -668,9 +668,9 @@ function PrivacyToggle({ svId, initial }: { svId: string; initial: boolean }) {
 function TwoFaPhoneSection() {
   const [showModal, setShowModal] = useState(false)
   return (
-    <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-5">
-      <h2 className="text-sm font-medium text-gray-500 mb-1">Zwei-Faktor-Authentifizierung</h2>
-      <p className="text-xs text-gray-400 mb-4">Verifizieren Sie Ihre Telefonnummer für den SMS-Login-Code.</p>
+    <div className="bg-white rounded-2xl p-6 border border-claimondo-border mt-5">
+      <h2 className="text-sm font-medium text-claimondo-ondo mb-1">Zwei-Faktor-Authentifizierung</h2>
+      <p className="text-xs text-claimondo-ondo/70 mb-4">Verifizieren Sie Ihre Telefonnummer für den SMS-Login-Code.</p>
       <button onClick={() => setShowModal(true)}
         className="px-4 py-2 rounded-xl bg-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] text-white text-sm font-semibold transition-colors">
         Telefon verifizieren
@@ -698,12 +698,12 @@ function GpsTrackingToggle({ svId, initial }: { svId: string; initial: boolean }
   return (
     <div>
       <button type="button" onClick={toggle} disabled={saving}
-        className={`relative inline-flex items-center w-12 h-6 rounded-full transition-colors disabled:opacity-50 ${active ? 'bg-[var(--brand-secondary)]' : 'bg-gray-300'}`}>
+        className={`relative inline-flex items-center w-12 h-6 rounded-full transition-colors disabled:opacity-50 ${active ? 'bg-[var(--brand-secondary)]' : 'bg-claimondo-border'}`}>
         <span className={`inline-block w-5 h-5 rounded-full bg-white shadow transform transition-transform ${active ? 'translate-x-6' : 'translate-x-0.5'}`} />
       </button>
-      <span className="ml-3 text-sm text-gray-700">
+      <span className="ml-3 text-sm text-claimondo-navy">
         {active ? 'Live-Tracking aktiv' : 'Tracking deaktiviert'}
-        {saving && <span className="text-gray-400 text-xs ml-2">speichert...</span>}
+        {saving && <span className="text-claimondo-ondo/70 text-xs ml-2">speichert...</span>}
       </span>
     </div>
   )
@@ -752,12 +752,12 @@ function SpezSection({
   return (
     <div>
       <div className="flex items-baseline justify-between mb-1">
-        <h3 className="text-sm font-medium text-gray-800">{title}</h3>
-        <span className="text-[10px] text-gray-400">
+        <h3 className="text-sm font-medium text-claimondo-navy">{title}</h3>
+        <span className="text-[10px] text-claimondo-ondo/70">
           {values.length} gewaehlt{saving ? ' · speichert...' : ''}
         </span>
       </div>
-      <p className="text-xs text-gray-500 mb-2">{hint}</p>
+      <p className="text-xs text-claimondo-ondo mb-2">{hint}</p>
       <div className="flex flex-wrap gap-1.5">
         {options.map(opt => {
           const active = values.includes(opt)
@@ -770,7 +770,7 @@ function SpezSection({
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-60 ${
                 active
                   ? 'bg-[var(--brand-secondary)] text-white'
-                  : 'bg-gray-100 text-gray-500 hover:text-gray-800'
+                  : 'bg-[#f8f9fb] text-claimondo-ondo hover:text-claimondo-navy'
               }`}
             >
               {opt}
@@ -785,9 +785,9 @@ function SpezSection({
 
 function FieldRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex gap-2 py-2.5 border-b border-gray-200/50 last:border-0">
-      <span className="text-gray-500 text-sm w-36 shrink-0">{label}</span>
-      <span className="text-gray-800 text-sm">{value}</span>
+    <div className="flex gap-2 py-2.5 border-b border-claimondo-border/50 last:border-0">
+      <span className="text-claimondo-ondo text-sm w-36 shrink-0">{label}</span>
+      <span className="text-claimondo-navy text-sm">{value}</span>
     </div>
   )
 }
@@ -796,14 +796,14 @@ function EditRow({ label, name, defaultValue, type = 'text', placeholder }: {
   label: string; name: string; defaultValue: string; type?: string; placeholder?: string
 }) {
   return (
-    <div className="flex gap-2 py-2 border-b border-gray-200/50">
-      <span className="text-gray-500 text-sm w-36 shrink-0 pt-2">{label}</span>
+    <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
+      <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">{label}</span>
       <input
         type={type}
         name={name}
         defaultValue={defaultValue}
         placeholder={placeholder}
-        className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+        className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
       />
     </div>
   )
@@ -816,14 +816,14 @@ function ControlledRow({ label, value, onChange, type = 'text', placeholder }: {
   label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string
 }) {
   return (
-    <div className="flex gap-2 py-2 border-b border-gray-200/50">
-      <span className="text-gray-500 text-sm w-36 shrink-0 pt-2">{label}</span>
+    <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
+      <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">{label}</span>
       <input
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+        className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
       />
     </div>
   )
@@ -836,12 +836,12 @@ function SelectRow({ label, value, onChange, options }: {
   options: ReadonlyArray<{ value: string; label: string }>
 }) {
   return (
-    <div className="flex gap-2 py-2 border-b border-gray-200/50">
-      <span className="text-gray-500 text-sm w-36 shrink-0 pt-2">{label}</span>
+    <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
+      <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">{label}</span>
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+        className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
       >
         {options.map(o => (
           <option key={o.value} value={o.value}>{o.label}</option>

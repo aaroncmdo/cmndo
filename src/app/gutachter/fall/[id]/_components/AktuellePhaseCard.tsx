@@ -49,7 +49,7 @@ const HINTS: Record<SvSubphase['code'], Hint> = {
     title: 'Heute am Termintag — Vor-Ort-Aktionen',
     text: 'Mache Fotos, prüfe FIN + Kilometerstand, hole fehlende Dokumente vom Kunden. Vor-Ort-Panel unten.',
     cta: 'Vor-Ort-Panel unten',
-    cssAccent: 'bg-blue-50 border-blue-200 text-claimondo-navy',
+    cssAccent: 'bg-[#f8f9fb] border-claimondo-border text-claimondo-navy',
   },
   'gutachten-erstellen': {
     icon: UploadIcon,
@@ -62,19 +62,19 @@ const HINTS: Record<SvSubphase['code'], Hint> = {
     icon: ScaleIcon,
     title: 'Akte bei Kanzlei',
     text: 'Das Gutachten wurde an LexDrive übergeben. Aktuell keine SV-Aktion nötig — die Kanzlei prüft + schreibt die Versicherung an.',
-    cssAccent: 'bg-gray-50 border-gray-200 text-gray-700',
+    cssAccent: 'bg-[#f8f9fb] border-claimondo-border text-claimondo-navy',
   },
   anspruchsschreiben: {
     icon: ScaleIcon,
     title: 'Anspruchsschreiben versandt',
     text: 'Die Kanzlei hat das Anspruchsschreiben an die Versicherung gesendet. Wir warten auf Reaktion.',
-    cssAccent: 'bg-gray-50 border-gray-200 text-gray-700',
+    cssAccent: 'bg-[#f8f9fb] border-claimondo-border text-claimondo-navy',
   },
   regulierung: {
     icon: ClockIcon,
     title: 'Regulierung läuft',
     text: 'Die Versicherung prüft den Anspruch. Sobald reguliert wird, siehst du es hier — Auszahlung deines Honorars folgt automatisch.',
-    cssAccent: 'bg-gray-50 border-gray-200 text-gray-700',
+    cssAccent: 'bg-[#f8f9fb] border-claimondo-border text-claimondo-navy',
   },
   'zahlung-eingegangen': {
     icon: EuroIcon,
@@ -92,7 +92,7 @@ const HINTS: Record<SvSubphase['code'], Hint> = {
     icon: CircleCheckBigIcon,
     title: 'Fall abgeschlossen',
     text: 'Alle Schritte erledigt. Akte bleibt im Archiv verfügbar.',
-    cssAccent: 'bg-gray-50 border-gray-200 text-gray-700',
+    cssAccent: 'bg-[#f8f9fb] border-claimondo-border text-claimondo-navy',
   },
   storniert: {
     icon: XCircleIcon,

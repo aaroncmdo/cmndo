@@ -115,19 +115,19 @@ export function KanzleiStatusCard({
   const honorarUeberwiesen = Boolean(abrechnung?.abgerechnetAm)
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 space-y-4">
+    <div className="bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-4">
       <button
         type="button"
         onClick={() => setOffen((v) => !v)}
         className="w-full flex items-center justify-between gap-3"
       >
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
           Kanzlei-Verlauf & Honorar
         </h3>
         {offen ? (
-          <ChevronDownIcon className="w-4 h-4 text-gray-400" />
+          <ChevronDownIcon className="w-4 h-4 text-claimondo-ondo/70" />
         ) : (
-          <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+          <ChevronRightIcon className="w-4 h-4 text-claimondo-ondo/70" />
         )}
       </button>
 
@@ -139,13 +139,13 @@ export function KanzleiStatusCard({
               <li className="flex items-start gap-2">
                 <BuildingIcon className="w-4 h-4 text-[var(--brand-secondary)] mt-0.5 shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-gray-900">
+                  <p className="text-claimondo-navy">
                     An Kanzlei übergeben:{' '}
                     <span className="font-medium">{uebergebenLabel}</span>
                   </p>
                   {bearbeitungSeitTage !== null &&
                     !fall.zahlung_eingegangen_am && (
-                      <p className="text-[11px] text-gray-500">
+                      <p className="text-[11px] text-claimondo-ondo">
                         seit {bearbeitungSeitTage}{' '}
                         {bearbeitungSeitTage === 1 ? 'Tag' : 'Tagen'}
                       </p>
@@ -156,7 +156,7 @@ export function KanzleiStatusCard({
             {vsAnschreibenLabel && (
               <li className="flex items-start gap-2">
                 <MailIcon className="w-4 h-4 text-[var(--brand-secondary)] mt-0.5 shrink-0" />
-                <p className="text-gray-900">
+                <p className="text-claimondo-navy">
                   An Versicherung:{' '}
                   <span className="font-medium">{vsAnschreibenLabel}</span>
                 </p>
@@ -165,7 +165,7 @@ export function KanzleiStatusCard({
             {vsReaktionLabel && (
               <li className="flex items-start gap-2">
                 <ArrowDownRightIcon className="w-4 h-4 text-[var(--brand-secondary)] mt-0.5 shrink-0" />
-                <p className="text-gray-900">
+                <p className="text-claimondo-navy">
                   VS-Reaktion:{' '}
                   <span className="font-medium">{vsReaktionLabel}</span>
                 </p>
@@ -174,7 +174,7 @@ export function KanzleiStatusCard({
             {zahlungLabel && (
               <li className="flex items-start gap-2">
                 <CoinsIcon className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-                <p className="text-gray-900">
+                <p className="text-claimondo-navy">
                   Zahlungseingang:{' '}
                   <span className="font-medium">{zahlungLabel}</span>
                 </p>
@@ -184,28 +184,28 @@ export function KanzleiStatusCard({
 
           {/* Sektion 2: Regulierung (Geld-Fluss) */}
           {(fall.gutachten_betrag != null || fall.zahlung_betrag != null) && (
-            <div className="pt-3 border-t border-gray-100 space-y-1.5 text-sm tabular-nums">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 mb-2">
+            <div className="pt-3 border-t border-claimondo-border space-y-1.5 text-sm tabular-nums">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-2">
                 Regulierung
               </p>
-              <div className="flex items-center justify-between text-gray-700">
+              <div className="flex items-center justify-between text-claimondo-navy">
                 <span>Gutachten-Forderung</span>
                 <span>{formatEuro(fall.gutachten_betrag)}</span>
               </div>
               {fall.zahlung_betrag != null && (
-                <div className="flex items-center justify-between text-gray-900 font-medium">
+                <div className="flex items-center justify-between text-claimondo-navy font-medium">
                   <span>Zahlung Versicherung</span>
                   <span>{formatEuro(fall.zahlung_betrag)}</span>
                 </div>
               )}
               {kuerzungsSumme > 0 && (
                 <div
-                  className={`flex items-center justify-between pt-1.5 border-t border-gray-100 font-medium ${
+                  className={`flex items-center justify-between pt-1.5 border-t border-claimondo-border font-medium ${
                     ton === 'red'
                       ? 'text-red-700'
                       : ton === 'amber'
                         ? 'text-amber-700'
-                        : 'text-gray-700'
+                        : 'text-claimondo-navy'
                   }`}
                 >
                   <span className="inline-flex items-center gap-1.5">
@@ -231,8 +231,8 @@ export function KanzleiStatusCard({
 
           {/* Sektion 3: Kürzungsgründe */}
           {strukturierteKuerzungen.length > 0 && (
-            <div className="pt-3 border-t border-gray-100 space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+            <div className="pt-3 border-t border-claimondo-border space-y-2">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">
                 Kürzungsgründe
               </p>
               <ul className="space-y-2">
@@ -264,8 +264,8 @@ export function KanzleiStatusCard({
           {strukturierteKuerzungen.length === 0 &&
             (fall.kuerzungs_betrag ?? 0) > 0 &&
             fall.vs_kuerzung_grund && (
-              <div className="pt-3 border-t border-gray-100 space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+              <div className="pt-3 border-t border-claimondo-border space-y-2">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">
                   Kürzungsgrund
                 </p>
                 <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
@@ -278,22 +278,22 @@ export function KanzleiStatusCard({
 
           {/* Sektion 4: SV-Honorar */}
           {abrechnung && (
-            <div className="pt-3 border-t border-gray-100 space-y-1.5 text-sm tabular-nums">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 mb-2">
+            <div className="pt-3 border-t border-claimondo-border space-y-1.5 text-sm tabular-nums">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-2">
                 Dein Honorar
               </p>
               {abrechnung.honorar != null && (
-                <div className="flex items-center justify-between text-gray-700">
+                <div className="flex items-center justify-between text-claimondo-navy">
                   <span>Honorar (brutto)</span>
                   <span>{formatEuro(abrechnung.honorar)}</span>
                 </div>
               )}
               {abrechnung.leadpreis != null && (
-                <div className="flex items-center justify-between text-gray-700">
+                <div className="flex items-center justify-between text-claimondo-navy">
                   <span>
                     Leadpreis
                     {abrechnung.preistyp && (
-                      <span className="text-[11px] text-gray-400 ml-1">
+                      <span className="text-[11px] text-claimondo-ondo/70 ml-1">
                         ({abrechnung.preistyp})
                       </span>
                     )}
@@ -302,7 +302,7 @@ export function KanzleiStatusCard({
                 </div>
               )}
               {svNetto != null && (
-                <div className="flex items-center justify-between pt-1.5 border-t border-gray-100 font-semibold text-[var(--brand-primary)]">
+                <div className="flex items-center justify-between pt-1.5 border-t border-claimondo-border font-semibold text-[var(--brand-primary)]">
                   <span>Netto-Auszahlung</span>
                   <span>{formatEuro(svNetto)}</span>
                 </div>

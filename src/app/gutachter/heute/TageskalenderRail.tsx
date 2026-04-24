@@ -61,10 +61,10 @@ export default function TageskalenderRail({
         return (
           <div
             key={h}
-            className="absolute left-0 right-0 border-t border-gray-100"
+            className="absolute left-0 right-0 border-t border-claimondo-border"
             style={{ top: `${topPx}px` }}
           >
-            <span className="absolute -top-2 left-0 text-[10px] font-medium text-gray-400 w-14 text-right pr-2">
+            <span className="absolute -top-2 left-0 text-[10px] font-medium text-claimondo-ondo/70 w-14 text-right pr-2">
               {String(h).padStart(2, '0')}:00
             </span>
           </div>

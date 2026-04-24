@@ -53,14 +53,14 @@ export default function RouteSidebar({
             onAdvanced={onAdvanced}
           />
         ) : (
-          <div className="rounded-xl bg-white/10 p-4 text-sm text-gray-200">
+          <div className="rounded-xl bg-white/10 p-4 text-sm text-white/80">
             Kein aktiver Stop.
           </div>
         )}
 
         {kommende.length > 0 && (
           <section className="space-y-2">
-            <h3 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 px-1">
+            <h3 className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo/70 px-1">
               Kommende Stops ({kommende.length})
             </h3>
             <div className="space-y-1.5">
@@ -77,7 +77,7 @@ export default function RouteSidebar({
 
         {erledigte.length > 0 && (
           <section className="space-y-2">
-            <h3 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 px-1">
+            <h3 className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo/70 px-1">
               Erledigt ({erledigte.length})
             </h3>
             <div className="space-y-1.5">

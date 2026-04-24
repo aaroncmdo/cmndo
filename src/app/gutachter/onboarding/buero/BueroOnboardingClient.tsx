@@ -178,8 +178,8 @@ export default function BueroOnboardingClient({
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900">Buero-Onboarding</h1>
-          <p className="text-gray-500 text-sm mt-1">Schritt {step + 1} von {STEPS.length}</p>
+          <h1 className="text-2xl font-semibold text-claimondo-navy">Buero-Onboarding</h1>
+          <p className="text-claimondo-ondo text-sm mt-1">Schritt {step + 1} von {STEPS.length}</p>
         </div>
 
         {/* Stepper */}
@@ -189,12 +189,12 @@ export default function BueroOnboardingClient({
             return (
               <div key={s.key} className="flex items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                  i < step ? 'bg-green-600' : i === step ? 'bg-[var(--brand-primary)]' : 'bg-gray-100'
+                  i < step ? 'bg-green-600' : i === step ? 'bg-[var(--brand-primary)]' : 'bg-[#f8f9fb]'
                 }`}>
                   <Icon className="w-4 h-4 text-white" />
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div className={`w-8 h-0.5 ${i < step ? 'bg-green-600' : 'bg-gray-100'}`} />
+                  <div className={`w-8 h-0.5 ${i < step ? 'bg-green-600' : 'bg-[#f8f9fb]'}`} />
                 )}
               </div>
             )
@@ -202,8 +202,8 @@ export default function BueroOnboardingClient({
         </div>
 
         {/* Content Card */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-5">{STEPS[step].label}</h2>
+        <div className="bg-white border border-claimondo-border rounded-2xl p-6">
+          <h2 className="text-lg font-semibold text-claimondo-navy mb-5">{STEPS[step].label}</h2>
 
           {/* SCHRITT 0: Stammdaten + Standorte */}
           {step === 0 && (
@@ -217,9 +217,9 @@ export default function BueroOnboardingClient({
                 <Field label="Email (Inhaber)" value={email} onChange={() => {}} disabled className="sm:col-span-2" />
               </div>
 
-              <div className="pt-4 border-t border-gray-200">
+              <div className="pt-4 border-t border-claimondo-border">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-gray-900">Standorte</h3>
+                  <h3 className="text-sm font-semibold text-claimondo-navy">Standorte</h3>
                   <button
                     type="button"
                     onClick={addStandort}
@@ -232,14 +232,14 @@ export default function BueroOnboardingClient({
 
                 <div className="space-y-3">
                   {standorte.map((std, idx) => (
-                    <div key={std.id} className="border border-gray-200 rounded-xl p-4 space-y-3">
+                    <div key={std.id} className="border border-claimondo-border rounded-xl p-4 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold text-gray-500">Standort {idx + 1}</span>
+                        <span className="text-xs font-semibold text-claimondo-ondo">Standort {idx + 1}</span>
                         {standorte.length > 1 && (
                           <button
                             type="button"
                             onClick={() => removeStandort(std.id)}
-                            className="text-gray-300 hover:text-red-400 p-0.5"
+                            className="text-claimondo-ondo/50 hover:text-red-400 p-0.5"
                           >
                             <TrashIcon className="w-3.5 h-3.5" />
                           </button>
@@ -252,7 +252,7 @@ export default function BueroOnboardingClient({
                         placeholder="z.B. Standort Köln"
                       />
                       <div>
-                        <label className="text-xs text-gray-500 mb-1.5 block">
+                        <label className="text-xs text-claimondo-ondo mb-1.5 block">
                           Anschrift <span className="text-red-400">*</span>
                           {std.lat !== null && std.lng !== null && (
                             <span className="text-green-600 ml-2">✓ Geo gesetzt</span>
@@ -262,7 +262,7 @@ export default function BueroOnboardingClient({
                           defaultValue={std.anschrift}
                           placeholder="Adresse via Auswahl waehlen..."
                           onSelect={place => setStandortPlace(std.id, place)}
-                          className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                          className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                         />
                         {std.anschrift && (std.lat === null || std.lng === null) && (
                           <p className="text-[10px] text-amber-600 mt-1">
@@ -271,7 +271,7 @@ export default function BueroOnboardingClient({
                         )}
                       </div>
                       <div>
-                        <label className="text-xs text-gray-500 mb-1.5 block">Paket</label>
+                        <label className="text-xs text-claimondo-ondo mb-1.5 block">Paket</label>
                         <div className="grid grid-cols-3 gap-2">
                           {PAKETE.map(p => (
                             <button
@@ -281,7 +281,7 @@ export default function BueroOnboardingClient({
                               className={`px-3 py-2 rounded-lg border text-xs transition-colors ${
                                 std.paket === p.key
                                   ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)]/5 text-[var(--brand-primary)] font-semibold'
-                                  : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                                  : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-border'
                               }`}
                             >
                               <div>{p.label}</div>
@@ -299,12 +299,12 @@ export default function BueroOnboardingClient({
               <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-xl p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-xs text-gray-500">Gesamt-Anzahlung (einmalig)</p>
+                    <p className="text-xs text-claimondo-ondo">Gesamt-Anzahlung (einmalig)</p>
                     <p className="text-2xl font-bold text-[var(--brand-primary)] mt-1">
                       {gesamtAnzahlung.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })}
                     </p>
                   </div>
-                  <p className="text-[10px] text-gray-500 max-w-[180px] text-right leading-tight">
+                  <p className="text-[10px] text-claimondo-ondo max-w-[180px] text-right leading-tight">
                     Du zahlst die Summe einmalig für alle Standorte. Wird mit den ersten Lead-Gebühren verrechnet.
                   </p>
                 </div>
@@ -315,8 +315,8 @@ export default function BueroOnboardingClient({
           {/* SCHRITT 1: Vertrag */}
           {step === 1 && (
             <div className="space-y-4">
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 max-h-64 overflow-y-auto text-xs text-gray-600 leading-relaxed">
-                <h4 className="font-semibold text-gray-800 mb-2">Kooperationsvertrag-Muster (Auszug)</h4>
+              <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4 max-h-64 overflow-y-auto text-xs text-claimondo-ondo leading-relaxed">
+                <h4 className="font-semibold text-claimondo-navy mb-2">Kooperationsvertrag-Muster (Auszug)</h4>
                 <p>
                   Der Bueroinhaber unterzeichnet stellvertretend fuer alle aktuellen und zukuenftigen Standorte
                   des Bueros. Die Anzahlung gilt als Sicherheit gemaess §4 fuer alle Sub-Standorte und wird
@@ -337,7 +337,7 @@ export default function BueroOnboardingClient({
               />
 
               <div>
-                <label className="text-xs text-gray-500 mb-1.5 block">
+                <label className="text-xs text-claimondo-ondo mb-1.5 block">
                   Unterschrift <span className="text-red-400">*</span>
                 </label>
                 <SignaturePadInput
@@ -348,12 +348,12 @@ export default function BueroOnboardingClient({
                 />
               </div>
 
-              <label className="flex items-start gap-2.5 cursor-pointer text-sm text-gray-700">
+              <label className="flex items-start gap-2.5 cursor-pointer text-sm text-claimondo-navy">
                 <input
                   type="checkbox"
                   checked={agbAccepted}
                   onChange={e => setAgbAccepted(e.target.checked)}
-                  className="mt-0.5 rounded border-gray-300"
+                  className="mt-0.5 rounded border-claimondo-border"
                 />
                 <span>
                   Ich akzeptiere die <strong>AGB</strong>, <strong>Nutzungsbedingungen</strong> und
@@ -376,11 +376,11 @@ export default function BueroOnboardingClient({
               </div>
 
               <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-xl p-4">
-                <p className="text-xs text-gray-500">Zu zahlender Gesamt-Betrag</p>
+                <p className="text-xs text-claimondo-ondo">Zu zahlender Gesamt-Betrag</p>
                 <p className="text-2xl font-bold text-[var(--brand-primary)] mt-1">
                   {gesamtAnzahlung.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })}
                 </p>
-                <p className="text-[11px] text-gray-500 mt-2">
+                <p className="text-[11px] text-claimondo-ondo mt-2">
                   Inkl. Speicherung der Zahlungsmethode fuer kuenftige Sammelabrechnungen (off-session).
                 </p>
               </div>
@@ -400,7 +400,7 @@ export default function BueroOnboardingClient({
                 type="button"
                 onClick={() => setStep(step - 1)}
                 disabled={saving}
-                className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50 disabled:opacity-40"
+                className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb] disabled:opacity-40"
               >
                 Zurueck
               </button>
@@ -451,7 +451,7 @@ function Field({
 }) {
   return (
     <div className={className}>
-      <label className="text-xs text-gray-500 mb-1.5 block">
+      <label className="text-xs text-claimondo-ondo mb-1.5 block">
         {label}
         {required && <span className="text-red-400 ml-0.5">*</span>}
       </label>
@@ -461,7 +461,7 @@ function Field({
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] disabled:opacity-50"
+        className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] disabled:opacity-50"
       />
     </div>
   )

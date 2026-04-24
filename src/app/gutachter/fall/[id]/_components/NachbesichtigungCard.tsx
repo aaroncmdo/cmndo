@@ -41,14 +41,14 @@ export function NachbesichtigungCard({ fall, id }: { fall: Fall; id?: string }) 
       className={`rounded-2xl border p-4 sm:p-5 space-y-3 ${
         durchgefuehrt
           ? 'bg-emerald-50 border-emerald-200'
-          : 'bg-blue-50 border-blue-200'
+          : 'bg-[#f8f9fb] border-claimondo-border'
       }`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <RefreshCwIcon
             className={`w-4 h-4 ${
-              durchgefuehrt ? 'text-emerald-600' : 'text-blue-700'
+              durchgefuehrt ? 'text-emerald-600' : 'text-claimondo-ondo'
             }`}
           />
           <p className="text-xs uppercase tracking-wider font-semibold">
@@ -56,7 +56,7 @@ export function NachbesichtigungCard({ fall, id }: { fall: Fall; id?: string }) 
           </p>
         </div>
         {tage != null && !durchgefuehrt && (
-          <span className="inline-flex items-center gap-1 text-[11px] text-blue-700">
+          <span className="inline-flex items-center gap-1 text-[11px] text-claimondo-ondo">
             <ClockIcon className="w-3 h-3" />
             seit {tage} {tage === 1 ? 'Tag' : 'Tagen'}
           </span>
@@ -70,19 +70,19 @@ export function NachbesichtigungCard({ fall, id }: { fall: Fall; id?: string }) 
             Durchgeführt
           </div>
           {fall.nachbesichtigung_ergebnis && (
-            <p className="text-xs text-gray-700 bg-white rounded-lg px-3 py-2 border border-emerald-100">
+            <p className="text-xs text-claimondo-navy bg-white rounded-lg px-3 py-2 border border-emerald-100">
               {fall.nachbesichtigung_ergebnis}
             </p>
           )}
         </div>
       ) : (
         <>
-          <p className="text-sm text-gray-800">
+          <p className="text-sm text-claimondo-navy">
             Eine Nachbesichtigung wurde angefordert.
           </p>
           {terminSet && (
-            <div className="flex items-center gap-2 text-xs text-gray-700 bg-white rounded-lg px-3 py-2 border border-blue-100">
-              <CalendarIcon className="w-3 h-3 text-blue-700" />
+            <div className="flex items-center gap-2 text-xs text-claimondo-navy bg-white rounded-lg px-3 py-2 border border-blue-100">
+              <CalendarIcon className="w-3 h-3 text-claimondo-ondo" />
               Termin:{' '}
               {new Date(fall.nachbesichtigung_termin_datum!).toLocaleString('de-DE', {
                 day: '2-digit',
@@ -93,7 +93,7 @@ export function NachbesichtigungCard({ fall, id }: { fall: Fall; id?: string }) 
               })}
             </div>
           )}
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-claimondo-ondo">
             {terminSet
               ? 'Den Termin bitte wie vereinbart durchführen. Dokumentiere das Ergebnis im Chat.'
               : 'Bitte mit dem Kunden einen Termin vereinbaren (Chat) und danach das Ergebnis dokumentieren.'}

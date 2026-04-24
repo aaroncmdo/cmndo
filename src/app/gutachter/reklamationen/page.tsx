@@ -17,7 +17,7 @@ export default async function GutachterReklamationen() {
     .maybeSingle()
 
   if (!sv) {
-    return <div className="p-6 text-sm text-gray-500">Kein SV-Account gefunden.</div>
+    return <div className="p-6 text-sm text-claimondo-ondo">Kein SV-Account gefunden.</div>
   }
 
   const { data: reklamationen } = await supabase

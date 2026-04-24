@@ -74,18 +74,18 @@ export default function KalenderEinstellungenClient({
         </div>
         <div>
           <h1 className="text-2xl font-bold text-[var(--brand-primary)]">Kalender</h1>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-claimondo-ondo">
             Verbinde einen Kalender, damit wir bei Terminvorschlägen deine private Nicht-Verfügbarkeit berücksichtigen können.
           </p>
         </div>
       </header>
 
       {/* Google */}
-      <section className="bg-white border border-gray-200 rounded-2xl p-5 space-y-3">
+      <section className="bg-white border border-claimondo-border rounded-2xl p-5 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold text-[#0D1B3E]">Google Calendar</h2>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-claimondo-ondo">
               OAuth — Claimondo liest Verfügbarkeit direkt aus deinem Google-Konto.
             </p>
           </div>
@@ -95,13 +95,13 @@ export default function KalenderEinstellungenClient({
               verbunden
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-medium">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#f8f9fb] text-claimondo-ondo text-xs font-medium">
               nicht verbunden
             </span>
           )}
         </div>
         {googleConnected && googleEmail && (
-          <p className="text-xs text-gray-600">{googleEmail}</p>
+          <p className="text-xs text-claimondo-ondo">{googleEmail}</p>
         )}
         <button
           type="button"
@@ -123,11 +123,11 @@ export default function KalenderEinstellungenClient({
       </section>
 
       {/* CalDAV */}
-      <section className="bg-white border border-gray-200 rounded-2xl p-5 space-y-3">
+      <section className="bg-white border border-claimondo-border rounded-2xl p-5 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold text-[#0D1B3E]">Apple iCloud / CalDAV</h2>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-claimondo-ondo">
               App-spezifisches Passwort aus deiner Apple-ID — Claimondo liest Verfügbarkeit.
             </p>
           </div>
@@ -144,14 +144,14 @@ export default function KalenderEinstellungenClient({
               </span>
             )
           ) : (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-medium">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#f8f9fb] text-claimondo-ondo text-xs font-medium">
               nicht verbunden
             </span>
           )}
         </div>
 
         {caldav && (
-          <div className="text-xs text-gray-600 space-y-1">
+          <div className="text-xs text-claimondo-ondo space-y-1">
             <p>
               <span className="font-medium">{caldav.providerLabel}</span> · {caldav.username}
             </p>
@@ -159,7 +159,7 @@ export default function KalenderEinstellungenClient({
               <p>Kalender: {caldav.calendarDisplayName}</p>
             )}
             {caldav.lastSyncAt && (
-              <p className="text-[11px] text-gray-400">
+              <p className="text-[11px] text-claimondo-ondo/70">
                 Letzter Check: {new Date(caldav.lastSyncAt).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })}
               </p>
             )}
@@ -211,7 +211,7 @@ export default function KalenderEinstellungenClient({
         )}
       </section>
 
-      <p className="text-[11px] text-gray-400 text-center">
+      <p className="text-[11px] text-claimondo-ondo/70 text-center">
         Credentials werden verschlüsselt gespeichert (AES-256-GCM). Dispatch-Check läuft Read-only — wir schreiben keine Termine in deinen privaten Kalender.
       </p>
 

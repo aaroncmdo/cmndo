@@ -54,7 +54,7 @@ export default async function BrandingPage() {
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
       <Link
         href="/gutachter/profil"
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900"
+        className="inline-flex items-center gap-1.5 text-sm text-claimondo-ondo hover:text-claimondo-navy"
       >
         <ArrowLeftIcon className="w-4 h-4" />
         Zurück zum Profil

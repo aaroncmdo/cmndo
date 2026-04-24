@@ -98,7 +98,7 @@ export default function StellungnahmeClient({
         <button
           type="button"
           onClick={() => router.back()}
-          className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+          className="p-2 rounded-lg text-claimondo-ondo hover:bg-[#f8f9fb] transition-colors"
           aria-label="Zurück"
         >
           <ArrowLeftIcon className="w-5 h-5" />
@@ -106,7 +106,7 @@ export default function StellungnahmeClient({
         <div>
           <h1 className="text-lg font-bold text-[#0D1B3E]">Technische Stellungnahme</h1>
           {fallNummer && (
-            <p className="text-xs text-gray-500">Fall {fallNummer}</p>
+            <p className="text-xs text-claimondo-ondo">Fall {fallNummer}</p>
           )}
         </div>
       </div>
@@ -138,15 +138,15 @@ export default function StellungnahmeClient({
                 className="flex items-start justify-between gap-2 bg-white rounded-lg px-3 py-2 border border-amber-100 text-sm"
               >
                 <div className="min-w-0">
-                  <p className="font-medium text-gray-900 truncate">
+                  <p className="font-medium text-claimondo-navy truncate">
                     {k.bezeichnung ?? k.typ ?? '—'}
                   </p>
                   {k.typ && k.bezeichnung && (
-                    <p className="text-[11px] text-gray-500">{k.typ}</p>
+                    <p className="text-[11px] text-claimondo-ondo">{k.typ}</p>
                   )}
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-xs text-gray-500 line-through">
+                  <p className="text-xs text-claimondo-ondo line-through">
                     {formatEURausEuro(k.betrag_gefordert)}
                   </p>
                   <p className="text-sm font-semibold text-red-600">
@@ -163,7 +163,7 @@ export default function StellungnahmeClient({
             )}
           </div>
         ) : vsKuerzungGrund ? (
-          <div className="bg-white rounded-lg px-3 py-2 border border-amber-100 text-sm text-gray-800">
+          <div className="bg-white rounded-lg px-3 py-2 border border-amber-100 text-sm text-claimondo-navy">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-700 mb-1">
               Kürzungs-Grund
             </p>
@@ -181,14 +181,14 @@ export default function StellungnahmeClient({
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Datei-Auswahl */}
         <div className="space-y-1">
-          <label className="text-sm font-semibold text-gray-800">
+          <label className="text-sm font-semibold text-claimondo-navy">
             Stellungnahme hochladen <span className="text-red-500">*</span>
           </label>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={isPending}
-            className="w-full rounded-2xl border-2 border-dashed border-gray-300 bg-white hover:border-[#4573A2] px-4 py-6 text-center transition-colors disabled:opacity-50"
+            className="w-full rounded-2xl border-2 border-dashed border-claimondo-border bg-white hover:border-[#4573A2] px-4 py-6 text-center transition-colors disabled:opacity-50"
           >
             {file ? (
               <div className="flex items-center justify-center gap-2">
@@ -196,14 +196,14 @@ export default function StellungnahmeClient({
                 <span className="text-sm font-medium text-[#0D1B3E] truncate max-w-[220px]">
                   {file.name}
                 </span>
-                <span className="text-[11px] text-gray-500">
+                <span className="text-[11px] text-claimondo-ondo">
                   ({(file.size / 1024 / 1024).toFixed(1)} MB)
                 </span>
               </div>
             ) : (
               <>
-                <UploadCloudIcon className="w-7 h-7 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-600">PDF, JPEG oder PNG — max. 20 MB</p>
+                <UploadCloudIcon className="w-7 h-7 text-claimondo-ondo/70 mx-auto mb-2" />
+                <p className="text-sm text-claimondo-ondo">PDF, JPEG oder PNG — max. 20 MB</p>
                 <p className="text-xs text-[#4573A2] mt-1 font-medium">Datei auswählen</p>
               </>
             )}
@@ -222,8 +222,8 @@ export default function StellungnahmeClient({
 
         {/* Optionale Notiz */}
         <div className="space-y-1">
-          <label className="text-sm font-semibold text-gray-800">
-            Anmerkungen <span className="text-gray-400 font-normal">(optional)</span>
+          <label className="text-sm font-semibold text-claimondo-navy">
+            Anmerkungen <span className="text-claimondo-ondo/70 font-normal">(optional)</span>
           </label>
           <textarea
             value={notiz}
@@ -232,9 +232,9 @@ export default function StellungnahmeClient({
             maxLength={500}
             placeholder="z. B. Erläuterung zu UPE-Aufschlägen oder Reparaturkosten"
             disabled={isPending}
-            className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#4573A2] focus:border-transparent resize-none disabled:bg-gray-50"
+            className="w-full rounded-xl border border-claimondo-border bg-white px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#4573A2] focus:border-transparent resize-none disabled:bg-[#f8f9fb]"
           />
-          <p className="text-[10px] text-gray-400 text-right">{notiz.length}/500</p>
+          <p className="text-[10px] text-claimondo-ondo/70 text-right">{notiz.length}/500</p>
         </div>
 
         {/* Bestätigungs-Checkbox */}
@@ -246,7 +246,7 @@ export default function StellungnahmeClient({
             disabled={isPending}
             className="mt-0.5 w-4 h-4 accent-[#0D1B3E]"
           />
-          <span className="text-sm text-gray-700">
+          <span className="text-sm text-claimondo-navy">
             Ich bestätige, dass meine technische Stellungnahme vollständig und korrekt ist
             und der Kanzlei zur Weiterverarbeitung übergeben werden darf.
           </span>

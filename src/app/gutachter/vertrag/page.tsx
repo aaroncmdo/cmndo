@@ -130,7 +130,7 @@ export default function VertragPage() {
               </p>
             </div>
           </div>
-          <div className="border-t border-gray-200 pt-4 text-sm text-gray-700 space-y-2">
+          <div className="border-t border-claimondo-border pt-4 text-sm text-claimondo-navy space-y-2">
             <p><strong>Vertragsparteien:</strong> Claimondo GmbH und {svData.name}</p>
             <p><strong>Paket:</strong> {svData.paket}</p>
             <p><strong>Anzahlung:</strong> {svData.anzahlung.toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR</p>
@@ -156,8 +156,8 @@ export default function VertragPage() {
         </div>
 
         {/* Contract Text */}
-        <div className="px-8 py-6 max-h-[40vh] overflow-y-auto text-sm text-gray-700 space-y-3 border-b border-gray-200">
-          <h2 className="font-semibold text-gray-900">Kooperationsvereinbarung</h2>
+        <div className="px-8 py-6 max-h-[40vh] overflow-y-auto text-sm text-claimondo-navy space-y-3 border-b border-claimondo-border">
+          <h2 className="font-semibold text-claimondo-navy">Kooperationsvereinbarung</h2>
           <p>zwischen der Claimondo GmbH und <strong>{svData.name}</strong></p>
           <ul className="list-disc pl-5 space-y-1">
             <li>Paket: <strong>{PAKET_LABEL[svData.paket] ?? svData.paket}</strong></li>
@@ -166,7 +166,7 @@ export default function VertragPage() {
             <li>Zahlungsfrist für Monatsrechnungen: 14 Tage</li>
             <li>Kündigungsfrist: 3 Monate zum Monatsende</li>
           </ul>
-          <p className="text-xs text-gray-500">Mit der Unterzeichnung bestätigen Sie, dass Sie die Bedingungen gelesen und verstanden haben. Es gelten die AGB der Claimondo GmbH.</p>
+          <p className="text-xs text-claimondo-ondo">Mit der Unterzeichnung bestätigen Sie, dass Sie die Bedingungen gelesen und verstanden haben. Es gelten die AGB der Claimondo GmbH.</p>
         </div>
 
         {/* Checkbox + Signature */}
@@ -174,12 +174,12 @@ export default function VertragPage() {
           <label className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" checked={accepted} onChange={e => setAccepted(e.target.checked)}
               className="mt-0.5 w-5 h-5 accent-[var(--brand-secondary)] rounded" />
-            <span className="text-sm text-gray-700">Ich habe den Vertrag gelesen und akzeptiere die Bedingungen.</span>
+            <span className="text-sm text-claimondo-navy">Ich habe den Vertrag gelesen und akzeptiere die Bedingungen.</span>
           </label>
 
           <div>
-            <p className="text-xs text-gray-500 mb-2">Unterschrift (mit Finger oder Maus zeichnen):</p>
-            <canvas ref={canvasRef} className="w-full h-[120px] border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 cursor-crosshair" />
+            <p className="text-xs text-claimondo-ondo mb-2">Unterschrift (mit Finger oder Maus zeichnen):</p>
+            <canvas ref={canvasRef} className="w-full h-[120px] border-2 border-dashed border-claimondo-border rounded-xl bg-[#f8f9fb] cursor-crosshair" />
             {signed && <p className="text-[10px] text-green-600 mt-1">Unterschrift erfasst</p>}
           </div>
 

@@ -23,11 +23,11 @@ export function AbrechnungsCard({
     <div className="glass-light border border-claimondo-border border-l-4 border-l-claimondo-navy rounded-ios-md shadow-ios-sm p-4 sm:p-5 space-y-4">
       <div className="flex items-center gap-2">
         <EuroIcon className="w-4 h-4 text-claimondo-ondo" />
-        <p className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
+        <p className="text-xs uppercase tracking-wider text-claimondo-ondo font-semibold">
           Deine Abrechnung
         </p>
         {abrechnung?.preistyp && (
-          <span className="ml-auto text-[10px] text-gray-400">
+          <span className="ml-auto text-[10px] text-claimondo-ondo/70">
             {abrechnung.preistyp}
           </span>
         )}
@@ -35,11 +35,11 @@ export function AbrechnungsCard({
 
       <dl className="space-y-2">
         <div className="flex items-baseline justify-between">
-          <dt className="text-sm text-gray-600">Honorar (brutto)</dt>
+          <dt className="text-sm text-claimondo-ondo">Honorar (brutto)</dt>
           <dd className="text-sm font-medium text-claimondo-navy tabular-nums">{formatEuro(honorar)}</dd>
         </div>
         <div className="flex items-baseline justify-between">
-          <dt className="text-sm text-gray-600">− Leadpreis</dt>
+          <dt className="text-sm text-claimondo-ondo">− Leadpreis</dt>
           <dd className="text-sm font-medium text-claimondo-navy tabular-nums">
             {lead != null ? `− ${formatEuro(lead)}` : '—'}
           </dd>
@@ -56,7 +56,7 @@ export function AbrechnungsCard({
             ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
             : subphase.code === 'zahlung-eingegangen'
               ? 'bg-amber-50 text-amber-800 border border-amber-200'
-              : 'bg-gray-50 text-gray-700 border border-gray-200'
+              : 'bg-[#f8f9fb] text-claimondo-navy border border-claimondo-border'
         }`}
       >
         {ausgezahlt ? (
