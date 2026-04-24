@@ -256,7 +256,7 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
-                    className="p-1 hover:bg-black/5 rounded-md transition-colors ml-1 text-gray-500 hover:text-claimondo-navy"
+                    className="p-1 hover:bg-black/5 rounded-md transition-colors ml-1 text-claimondo-ondo hover:text-claimondo-navy"
                     aria-label="Schließen"
                   >
                     <XIcon className="w-3.5 h-3.5" />
@@ -267,10 +267,10 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
                 {view === 'inbox' ? (
                   <div className="flex-1 overflow-y-auto divide-y divide-claimondo-border">
                     {loading && unpinnedThreads.length === 0 && (
-                      <div className="px-4 py-6 text-center text-sm text-gray-400">Lade…</div>
+                      <div className="px-4 py-6 text-center text-sm text-claimondo-ondo/70">Lade…</div>
                     )}
                     {!loading && unpinnedThreads.length === 0 && (
-                      <div className="px-4 py-6 text-center text-sm text-gray-400">
+                      <div className="px-4 py-6 text-center text-sm text-claimondo-ondo/70">
                         Keine offenen Nachrichten
                       </div>
                     )}
@@ -288,12 +288,12 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
                               {thread.kundeName}
                             </p>
                             {thread.fallNummer && (
-                              <span className="text-[10px] text-gray-400 shrink-0">
+                              <span className="text-[10px] text-claimondo-ondo/70 shrink-0">
                                 #{thread.fallNummer}
                               </span>
                             )}
                           </div>
-                          <p className="text-[11px] text-gray-500 truncate leading-tight">
+                          <p className="text-[11px] text-claimondo-ondo truncate leading-tight">
                             {thread.lastMessage || '…'}
                           </p>
                         </div>
@@ -312,7 +312,7 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
                   <div className="flex-1 flex flex-col overflow-hidden">
                     <div className="px-3 py-2.5 border-b border-claimondo-border shrink-0 bg-white/30 backdrop-blur-sm">
                       <div className="relative">
-                        <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                        <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-claimondo-ondo/70" />
                         <input
                           type="text"
                           value={searchQuery}
@@ -325,15 +325,15 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
                     </div>
                     <div className="flex-1 overflow-y-auto divide-y divide-claimondo-border">
                       {searchQuery.trim().length < 2 && (
-                        <div className="px-4 py-6 text-center text-xs text-gray-400">
+                        <div className="px-4 py-6 text-center text-xs text-claimondo-ondo/70">
                           Mindestens 2 Zeichen eingeben
                         </div>
                       )}
                       {searchQuery.trim().length >= 2 && searching && searchResults.length === 0 && (
-                        <div className="px-4 py-6 text-center text-xs text-gray-400">Suche…</div>
+                        <div className="px-4 py-6 text-center text-xs text-claimondo-ondo/70">Suche…</div>
                       )}
                       {searchQuery.trim().length >= 2 && !searching && searchResults.length === 0 && (
-                        <div className="px-4 py-6 text-center text-xs text-gray-400">
+                        <div className="px-4 py-6 text-center text-xs text-claimondo-ondo/70">
                           Keine Fälle gefunden
                         </div>
                       )}
@@ -350,7 +350,7 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
                               {r.kundeName}
                             </p>
                             {r.fallNummer && (
-                              <p className="text-[10px] text-gray-400">Fall {r.fallNummer}</p>
+                              <p className="text-[10px] text-claimondo-ondo/70">Fall {r.fallNummer}</p>
                             )}
                           </div>
                           <PlusIcon className="w-3.5 h-3.5 text-claimondo-ondo shrink-0" />

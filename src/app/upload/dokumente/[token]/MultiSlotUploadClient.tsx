@@ -137,23 +137,23 @@ export default function MultiSlotUploadClient({
             <span className="text-[#0D1B3E]">Claim</span>
             <span className="text-[#7BA3CC]">ondo</span>
           </span>
-          <p className="text-xs text-gray-500 mt-1">Dokumenten-Upload</p>
+          <p className="text-xs text-claimondo-ondo mt-1">Dokumenten-Upload</p>
         </div>
 
         {alleHochgeladen ? (
           <AbschlussCard vorname={vorname} />
         ) : (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
+          <div className="bg-white rounded-2xl shadow-sm border border-claimondo-border p-6 space-y-4">
             <div className="space-y-1">
-              <h1 className="text-lg font-semibold text-gray-900">
+              <h1 className="text-lg font-semibold text-claimondo-navy">
                 Hallo {vorname || 'und willkommen'}!
               </h1>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-claimondo-ondo">
                 Bitte laden Sie die folgenden Dokumente hoch. Sie können das einzeln erledigen —
                 jedes Dokument wird sofort gespeichert.
               </p>
               <div className="pt-2">
-                <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-[#f8f9fb] rounded-full overflow-hidden">
                   <div
                     className="h-full bg-[#4573A2] transition-all"
                     style={{
@@ -161,7 +161,7 @@ export default function MultiSlotUploadClient({
                     }}
                   />
                 </div>
-                <p className="text-[10px] text-gray-400 mt-1">
+                <p className="text-[10px] text-claimondo-ondo/70 mt-1">
                   {slots.filter((s) => s.hochgeladen).length} von {slots.length} hochgeladen
                 </p>
               </div>
@@ -264,7 +264,7 @@ export default function MultiSlotUploadClient({
           </div>
         )}
 
-        <p className="text-[10px] text-gray-400 text-center mt-4">
+        <p className="text-[10px] text-claimondo-ondo/70 text-center mt-4">
           Ihre Daten werden verschlüsselt übertragen und nur für die Bearbeitung Ihres Schadens verwendet.
         </p>
       </div>
@@ -301,12 +301,12 @@ function SlotCard({
   }
 
   return (
-    <div className="rounded-xl border border-gray-200 p-3 space-y-2">
+    <div className="rounded-xl border border-claimondo-border p-3 space-y-2">
       <div className="flex items-start gap-2">
         <FileTextIcon className="w-4 h-4 text-[#4573A2] mt-0.5 shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-gray-900">{slot.label}</p>
-          <p className="text-[11px] text-gray-500">{SLOT_HINTS[slot.slot_id]}</p>
+          <p className="text-sm font-semibold text-claimondo-navy">{slot.label}</p>
+          <p className="text-[11px] text-claimondo-ondo">{SLOT_HINTS[slot.slot_id]}</p>
         </div>
       </div>
 
@@ -324,7 +324,7 @@ function SlotCard({
             <button
               type="button"
               onClick={() => galleryInputRef.current?.click()}
-              className="flex flex-col items-center gap-1 px-2 py-3 rounded-lg bg-white border border-[#4573A2] text-[#4573A2] text-xs font-semibold hover:bg-blue-50"
+              className="flex flex-col items-center gap-1 px-2 py-3 rounded-lg bg-white border border-[#4573A2] text-[#4573A2] text-xs font-semibold hover:bg-[#f8f9fb]"
             >
               <ImageIcon className="w-5 h-5" />
               Galerie
@@ -351,7 +351,7 @@ function SlotCard({
 
       {state.action === 'vorschau' && state.previewUrl && (
         <>
-          <div className="rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+          <div className="rounded-lg overflow-hidden border border-claimondo-border bg-[#f8f9fb]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={state.previewUrl} alt={`${slot.label}-Vorschau`} className="w-full h-auto" />
           </div>
@@ -359,7 +359,7 @@ function SlotCard({
             <button
               type="button"
               onClick={onReset}
-              className="px-2 py-2.5 rounded-lg bg-white border border-gray-300 text-gray-700 text-xs font-semibold hover:bg-gray-50"
+              className="px-2 py-2.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-semibold hover:bg-[#f8f9fb]"
             >
               Nochmal
             </button>
@@ -378,9 +378,9 @@ function SlotCard({
       {state.action === 'uploading' && (
         <div className="py-4 text-center space-y-2">
           <div className="w-8 h-8 mx-auto border-4 border-[#4573A2] border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs font-semibold text-gray-900">Wird hochgeladen ...</p>
+          <p className="text-xs font-semibold text-claimondo-navy">Wird hochgeladen ...</p>
           {slot.slot_id === 'fahrzeugschein' && slot.ocr && (
-            <p className="text-[10px] text-gray-500">Daten werden ausgelesen — bitte warten</p>
+            <p className="text-[10px] text-claimondo-ondo">Daten werden ausgelesen — bitte warten</p>
           )}
         </div>
       )}
@@ -411,7 +411,7 @@ function SlotCard({
             <button
               type="button"
               onClick={onReset}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#4573A2] text-[#4573A2] text-xs font-semibold hover:bg-blue-50"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#4573A2] text-[#4573A2] text-xs font-semibold hover:bg-[#f8f9fb]"
             >
               <CameraIcon className="w-3 h-3" />
               Weiteres Foto hochladen
@@ -425,7 +425,7 @@ function SlotCard({
           <div className="w-10 h-10 mx-auto bg-amber-100 rounded-full flex items-center justify-center">
             <AlertCircleIcon className="w-6 h-6 text-amber-600" />
           </div>
-          <p className="text-xs text-gray-600">{state.errorMsg || 'Upload fehlgeschlagen'}</p>
+          <p className="text-xs text-claimondo-ondo">{state.errorMsg || 'Upload fehlgeschlagen'}</p>
           <button
             type="button"
             onClick={onReset}
@@ -442,17 +442,17 @@ function SlotCard({
 
 function AbschlussCard({ vorname }: { vorname: string }) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 text-center space-y-3">
+    <div className="bg-white rounded-2xl shadow-sm border border-claimondo-border p-6 text-center space-y-3">
       <div className="w-14 h-14 mx-auto bg-green-100 rounded-full flex items-center justify-center">
         <CheckCircle2Icon className="w-8 h-8 text-green-600" />
       </div>
-      <h2 className="text-lg font-semibold text-gray-900">
+      <h2 className="text-lg font-semibold text-claimondo-navy">
         Vielen Dank{vorname ? `, ${vorname}` : ''}!
       </h2>
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-claimondo-ondo">
         Alle Dokumente sind angekommen. Ihr Ansprechpartner meldet sich in Kürze.
       </p>
-      <p className="text-[10px] text-gray-400">Sie können diese Seite jetzt schließen.</p>
+      <p className="text-[10px] text-claimondo-ondo/70">Sie können diese Seite jetzt schließen.</p>
     </div>
   )
 }

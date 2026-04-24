@@ -154,7 +154,7 @@ export default function GooglePlaceAutocomplete({
     return () => { cancelled = true }
   }, [])
 
-  const defaultCls = 'w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-[#4573A2] transition-colors'
+  const defaultCls = 'w-full px-4 py-3 rounded-xl border border-claimondo-border bg-white text-claimondo-navy placeholder-gray-400 text-sm focus:outline-none focus:border-[#4573A2] transition-colors'
 
   return (
     <div>

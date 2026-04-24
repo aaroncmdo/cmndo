@@ -87,7 +87,7 @@ export default function OcrAutoFillModal({
     return (
       <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
         <div className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg p-6 max-w-sm w-full" onClick={e => e.stopPropagation()}>
-          <p className="text-sm text-gray-500">Keine Daten erkannt.</p>
+          <p className="text-sm text-claimondo-ondo">Keine Daten erkannt.</p>
           <button onClick={onClose} className="mt-3 text-xs text-[#4573A2]">Schließen</button>
         </div>
       </div>
@@ -98,11 +98,11 @@ export default function OcrAutoFillModal({
     <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg p-5 max-w-md w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
             <SparklesIcon className="w-4 h-4 text-[#4573A2]" />
             Daten aus {dokumentTyp} übernehmen?
           </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1">
+          <button onClick={onClose} className="text-claimondo-ondo/70 hover:text-claimondo-ondo p-1">
             <XIcon className="w-4 h-4" />
           </button>
         </div>
@@ -114,23 +114,23 @@ export default function OcrAutoFillModal({
             const checked = selectedFields[key] ?? false
             return (
               <div key={key} className={`flex items-start gap-2.5 px-3 py-2 rounded-lg border transition-colors ${
-                checked ? 'border-[#4573A2]/30 bg-[#4573A2]/5' : 'border-gray-200 bg-gray-50/50'
+                checked ? 'border-[#4573A2]/30 bg-[#4573A2]/5' : 'border-claimondo-border bg-[#f8f9fb]/50'
               }`}>
                 <input
                   type="checkbox"
                   checked={checked}
                   onChange={e => setSelectedFields(prev => ({ ...prev, [key]: e.target.checked }))}
                   disabled={!mapping.column}
-                  className="mt-1 rounded border-gray-300 text-[#4573A2] focus:ring-[#4573A2]"
+                  className="mt-1 rounded border-claimondo-border text-[#4573A2] focus:ring-[#4573A2]"
                 />
                 <div className="flex-1 min-w-0">
-                  <label className="text-[10px] text-gray-500 uppercase tracking-wide">{mapping.label}</label>
+                  <label className="text-[10px] text-claimondo-ondo uppercase tracking-wide">{mapping.label}</label>
                   <input
                     type="text"
                     value={editedValues[key] ?? value}
                     onChange={e => setEditedValues(prev => ({ ...prev, [key]: e.target.value }))}
                     disabled={!mapping.column}
-                    className="w-full text-sm text-gray-800 bg-transparent border-none p-0 focus:outline-none focus:ring-0"
+                    className="w-full text-sm text-claimondo-navy bg-transparent border-none p-0 focus:outline-none focus:ring-0"
                   />
                 </div>
               </div>
@@ -140,7 +140,7 @@ export default function OcrAutoFillModal({
 
         <div className="flex gap-2 mt-4">
           <button onClick={onClose} disabled={saving}
-            className="flex-1 py-2 rounded-lg text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
+            className="flex-1 py-2 rounded-lg text-sm text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border transition-colors">
             Abbrechen
           </button>
           <button onClick={handleSubmit} disabled={saving}

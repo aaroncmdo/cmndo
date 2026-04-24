@@ -562,7 +562,7 @@ function TimelinePanel({ events }: { events: TimelineEvent[] }) {
                 <CircleIcon
                   width={18}
                   height={18}
-                  className="text-gray-400 bg-white"
+                  className="text-claimondo-ondo/70 bg-white"
                 />
               )}
             </span>

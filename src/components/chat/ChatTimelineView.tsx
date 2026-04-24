@@ -139,14 +139,14 @@ export default function ChatTimelineView({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 flex flex-col h-[600px]">
+    <div className="bg-white rounded-2xl border border-claimondo-border flex flex-col h-[600px]">
       {/* Filter-Bar */}
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-gray-100 bg-[#f8f9fb]">
-        <span className="text-xs text-gray-500">Fall-Filter:</span>
+      <div className="flex items-center gap-2 px-4 py-2 border-b border-claimondo-border bg-[#f8f9fb]">
+        <span className="text-xs text-claimondo-ondo">Fall-Filter:</span>
         <select
           value={fallFilter}
           onChange={e => setFallFilter(e.target.value)}
-          className="text-xs px-2 py-1 rounded-md border border-gray-200 bg-white focus:outline-none focus:border-[#4573A2]"
+          className="text-xs px-2 py-1 rounded-md border border-claimondo-border bg-white focus:outline-none focus:border-[#4573A2]"
         >
           <option value="alle">Alle Fälle ({fallOptions.length})</option>
           {fallOptions.map(f => (
@@ -160,7 +160,7 @@ export default function ChatTimelineView({
       {/* Timeline */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
         {filteredMessages.length === 0 ? (
-          <p className="text-xs text-gray-400 text-center py-8">Noch keine Nachrichten</p>
+          <p className="text-xs text-claimondo-ondo/70 text-center py-8">Noch keine Nachrichten</p>
         ) : (
           filteredMessages.map(m => {
             const chan = getChannelDef(m.kanal as ChatKanal)
@@ -173,7 +173,7 @@ export default function ChatTimelineView({
                 <div className={`max-w-[75%] ${isOutbound ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
                   {/* Badges: Fall + Kanal */}
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-[10px] font-semibold text-gray-500 bg-gray-100 rounded px-1.5 py-0.5">
+                    <span className="text-[10px] font-semibold text-claimondo-ondo bg-[#f8f9fb] rounded px-1.5 py-0.5">
                       #{fallNummer(m.fall_id)}
                     </span>
                     <span
@@ -182,14 +182,14 @@ export default function ChatTimelineView({
                     >
                       {chan.label}
                     </span>
-                    <span className="text-[10px] text-gray-400">{fmtDateTime(m.created_at)}</span>
+                    <span className="text-[10px] text-claimondo-ondo/70">{fmtDateTime(m.created_at)}</span>
                   </div>
                   {/* Message-Bubble */}
                   <div
                     className={`rounded-2xl px-3 py-2 text-sm ${
                       isOutbound
                         ? 'bg-[#4573A2] text-white'
-                        : 'bg-gray-100 text-gray-900'
+                        : 'bg-[#f8f9fb] text-claimondo-navy'
                     }`}
                   >
                     {m.nachricht}
@@ -202,14 +202,14 @@ export default function ChatTimelineView({
       </div>
 
       {/* Reply-Selector + Input */}
-      <div className="border-t border-gray-100 bg-white p-3 space-y-2">
+      <div className="border-t border-claimondo-border bg-white p-3 space-y-2">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[11px] text-gray-500">Antworten in:</span>
+          <span className="text-[11px] text-claimondo-ondo">Antworten in:</span>
           {fallOptions.length > 1 && (
             <select
               value={replyFallId ?? ''}
               onChange={e => setReplyFallId(e.target.value)}
-              className="text-xs px-2 py-1 rounded-md border border-gray-200 bg-white focus:outline-none focus:border-[#4573A2]"
+              className="text-xs px-2 py-1 rounded-md border border-claimondo-border bg-white focus:outline-none focus:border-[#4573A2]"
             >
               {fallOptions.map(f => (
                 <option key={f.fallId} value={f.fallId}>
@@ -221,7 +221,7 @@ export default function ChatTimelineView({
           <select
             value={replyKanal ?? ''}
             onChange={e => setReplyKanal(e.target.value as ChatKanal)}
-            className="text-xs px-2 py-1 rounded-md border border-gray-200 bg-white focus:outline-none focus:border-[#4573A2]"
+            className="text-xs px-2 py-1 rounded-md border border-claimondo-border bg-white focus:outline-none focus:border-[#4573A2]"
           >
             {visibleChannels.map(c => (
               <option key={c.id} value={c.id}>{c.label}</option>
@@ -237,7 +237,7 @@ export default function ChatTimelineView({
             }}
             placeholder="Nachricht eingeben…"
             rows={2}
-            className="flex-1 resize-none px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]"
+            className="flex-1 resize-none px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:border-[#4573A2]"
           />
           <button
             type="button"

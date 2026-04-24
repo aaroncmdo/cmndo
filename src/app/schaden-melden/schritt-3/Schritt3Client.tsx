@@ -137,7 +137,7 @@ export function Schritt3Client({ leadId }: { leadId: string }) {
         <Loader2 className="h-8 w-8 animate-spin text-claimondo-ondo" />
         <div>
           <p className="font-semibold text-claimondo-navy">Wir lesen Ihren Fahrzeugschein aus …</p>
-          <p className="mt-1 text-sm text-slate-500">Das dauert normalerweise 5–10 Sekunden.</p>
+          <p className="mt-1 text-sm text-claimondo-ondo">Das dauert normalerweise 5–10 Sekunden.</p>
         </div>
       </div>
     )
@@ -150,7 +150,7 @@ export function Schritt3Client({ leadId }: { leadId: string }) {
           <h2 className="mb-2 text-lg font-semibold text-claimondo-navy">
             Fahrzeugschein scannen
           </h2>
-          <p className="mb-4 text-sm text-slate-600">
+          <p className="mb-4 text-sm text-claimondo-ondo">
             Wir brauchen nur die Vorderseite (ZB1). Felder{' '}
             <strong>A</strong> (Kennzeichen), <strong>B</strong> (Erstzulassung),{' '}
             <strong>E</strong> (FIN) und <strong>2.1/2.2</strong> (HSN/TSN) müssen

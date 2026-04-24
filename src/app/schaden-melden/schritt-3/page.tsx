@@ -10,7 +10,7 @@ export default function Schritt3Page() {
     <FlowShell step={3}>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-claimondo-navy">Fahrzeugschein</h1>
-        <p className="mt-2 text-slate-600">
+        <p className="mt-2 text-claimondo-ondo">
           Wir brauchen die Fahrzeugdaten aus Ihrem ZB1. Am schnellsten mit der
           Kamera — oder manuell, wenn der Schein gerade nicht greifbar ist.
         </p>

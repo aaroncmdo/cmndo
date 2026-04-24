@@ -22,12 +22,12 @@ export type ActivityEvent = {
 
 const TYPE_CONFIG: Record<string, { icon: typeof ArrowRightIcon; color: string }> = {
   status: { icon: ArrowRightIcon, color: 'text-[#4573A2]' },
-  kommunikation: { icon: MessageSquareIcon, color: 'text-blue-500' },
+  kommunikation: { icon: MessageSquareIcon, color: 'text-claimondo-ondo' },
   dokument: { icon: FileTextIcon, color: 'text-emerald-500' },
   task: { icon: CheckCircleIcon, color: 'text-amber-500' },
   termin: { icon: CalendarIcon, color: 'text-purple-500' },
   eskalation: { icon: AlertTriangleIcon, color: 'text-red-500' },
-  notiz: { icon: ClockIcon, color: 'text-gray-400' },
+  notiz: { icon: ClockIcon, color: 'text-claimondo-ondo/70' },
 }
 
 function formatRelativ(dateStr: string): string {
@@ -90,30 +90,30 @@ export default function FallActivityFeed({
     .slice(0, maxItems)
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-3">
-      <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+    <div className="bg-white rounded-xl border border-claimondo-border p-3">
+      <h3 className="text-[10px] font-semibold text-claimondo-ondo/70 uppercase tracking-wider mb-2">
         Letzte Aktivitäten
       </h3>
       {sorted.length === 0 ? (
-        <p className="text-xs text-gray-400">Noch keine Aktivitäten.</p>
+        <p className="text-xs text-claimondo-ondo/70">Noch keine Aktivitäten.</p>
       ) : (
         <div className="space-y-0.5">
           {sorted.map(ev => {
             const cfg = TYPE_CONFIG[ev.typ] ?? TYPE_CONFIG.notiz
             const Icon = cfg.icon
             return (
-              <div key={ev.id} className="flex items-start gap-2 px-1 py-1.5 rounded-md hover:bg-gray-50/50">
+              <div key={ev.id} className="flex items-start gap-2 px-1 py-1.5 rounded-md hover:bg-[#f8f9fb]/50">
                 <Icon className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${cfg.color}`} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1">
-                    <p className="text-[11px] text-gray-800 leading-snug truncate">{ev.titel}</p>
+                    <p className="text-[11px] text-claimondo-navy leading-snug truncate">{ev.titel}</p>
                     {ev.from_lead && (
-                      <span className="flex-shrink-0 text-[8px] font-medium text-slate-400 bg-slate-100 px-1 py-0.5 rounded">
+                      <span className="flex-shrink-0 text-[8px] font-medium text-claimondo-ondo/70 bg-[#f8f9fb] px-1 py-0.5 rounded">
                         Aus Lead
                       </span>
                     )}
                   </div>
-                  <p className="text-[9px] text-gray-400 mt-0.5">
+                  <p className="text-[9px] text-claimondo-ondo/70 mt-0.5">
                     {formatRelativ(ev.created_at)}
                     {ev.erstellt_von && <span> · {ev.erstellt_von}</span>}
                   </p>

@@ -51,13 +51,13 @@ export function Schritt4Guard() {
   }, [leadId, zb1Erfasst, router])
 
   if (!leadId || !zb1Erfasst) {
-    return <p className="text-sm text-slate-500">Leite weiter …</p>
+    return <p className="text-sm text-claimondo-ondo">Leite weiter …</p>
   }
   if (loadError) {
     return <p className="text-sm text-red-600">Fehler beim Laden: {loadError}</p>
   }
   if (!lead) {
-    return <p className="text-sm text-slate-500">Lädt …</p>
+    return <p className="text-sm text-claimondo-ondo">Lädt …</p>
   }
 
   return <SignupClient lead={lead} />

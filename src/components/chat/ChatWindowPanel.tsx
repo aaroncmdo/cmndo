@@ -76,13 +76,13 @@ export function ChatWindowPanel({ currentUserId }: { currentUserId: string | nul
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-claimondo-navy truncate">{chat.kundeName}</p>
                 {chat.fallNummer && (
-                  <p className="text-[10px] text-gray-500 truncate">Fall {chat.fallNummer}</p>
+                  <p className="text-[10px] text-claimondo-ondo truncate">Fall {chat.fallNummer}</p>
                 )}
               </div>
               <button
                 type="button"
                 onClick={() => close(chat.fallId)}
-                className="p-1 rounded-md hover:bg-black/5 transition-colors text-gray-500 hover:text-claimondo-navy"
+                className="p-1 rounded-md hover:bg-black/5 transition-colors text-claimondo-ondo hover:text-claimondo-navy"
                 aria-label="Chat minimieren"
                 title="Minimieren"
               >
@@ -91,7 +91,7 @@ export function ChatWindowPanel({ currentUserId }: { currentUserId: string | nul
               <button
                 type="button"
                 onClick={() => unpin(chat.fallId)}
-                className="p-1 rounded-md hover:bg-rose-50 transition-colors text-gray-500 hover:text-rose-600"
+                className="p-1 rounded-md hover:bg-rose-50 transition-colors text-claimondo-ondo hover:text-rose-600"
                 aria-label="Chat schließen und zurück in Posteingang"
                 title="Schließen und in Posteingang"
               >

@@ -246,7 +246,7 @@ export function VoiceRecorderClient() {
         <button
           type="button"
           onClick={() => router.push('/schaden-melden/schritt-1')}
-          className="flex-1 rounded-md px-4 py-2 text-sm font-medium text-slate-600 hover:text-claimondo-navy"
+          className="flex-1 rounded-md px-4 py-2 text-sm font-medium text-claimondo-ondo hover:text-claimondo-navy"
         >
           Tippen
         </button>
@@ -268,7 +268,7 @@ export function VoiceRecorderClient() {
             className="h-24 w-full rounded-md bg-claimondo-bg"
             aria-hidden
           />
-          <p className="text-sm tabular-nums text-slate-600">
+          <p className="text-sm tabular-nums text-claimondo-ondo">
             {formatTime(elapsedMs)} / 03:00
           </p>
           <RecorderControls
@@ -296,7 +296,7 @@ export function VoiceRecorderClient() {
         </div>
       ) : null}
 
-      <p className="text-center text-xs text-slate-500">
+      <p className="text-center text-xs text-claimondo-ondo">
         Ihre Aufnahme wird nur zur Transkription verwendet und nicht gespeichert.
       </p>
     </div>

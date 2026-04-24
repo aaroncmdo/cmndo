@@ -206,7 +206,7 @@ export function Schritt1Client() {
         <button
           type="button"
           onClick={() => router.push('/schaden-melden/schritt-1/voice')}
-          className="flex-1 rounded-md px-4 py-2 text-sm font-medium text-slate-600 hover:text-claimondo-navy"
+          className="flex-1 rounded-md px-4 py-2 text-sm font-medium text-claimondo-ondo hover:text-claimondo-navy"
         >
           Einsprechen
         </button>
@@ -266,7 +266,7 @@ export function Schritt1Client() {
                       'rounded-full border px-4 py-2 text-sm font-medium transition',
                       active
                         ? 'border-claimondo-ondo bg-claimondo-ondo text-white'
-                        : 'border-claimondo-border bg-white text-slate-700 hover:border-claimondo-ondo',
+                        : 'border-claimondo-border bg-white text-claimondo-navy hover:border-claimondo-ondo',
                     ].join(' ')}
                   >
                     {SCHADENTYP_LABELS[v]}
@@ -320,7 +320,7 @@ export function Schritt1Client() {
                       'rounded-md border px-6 py-2 text-sm font-medium',
                       active
                         ? 'border-claimondo-ondo bg-claimondo-ondo text-white'
-                        : 'border-claimondo-border bg-white text-slate-700',
+                        : 'border-claimondo-border bg-white text-claimondo-navy',
                     ].join(' ')}
                   >
                     {opt.label}
@@ -380,7 +380,7 @@ export function Schritt1Client() {
                       <div className="font-medium text-claimondo-navy">
                         {SCHULDFRAGE_LABELS[v].title}
                       </div>
-                      <div className="text-sm text-slate-600">
+                      <div className="text-sm text-claimondo-ondo">
                         {SCHULDFRAGE_LABELS[v].desc}
                       </div>
                     </div>
@@ -478,9 +478,9 @@ export function Schritt1Client() {
                 setValue('fahrzeug_standort_lng', place.lng, { shouldValidate: true })
                 setValue('fahrzeug_standort_place_id', place.place_id, { shouldValidate: true })
               }}
-              className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
+              className="w-full bg-white border border-claimondo-border rounded-md px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
             />
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-claimondo-ondo">
               Wir nutzen die Adresse, um direkt einen Gutachter in deiner Nähe vorzuschlagen.
             </p>
             {/* Hidden fallback — wenn Autocomplete mal nicht lädt, muss PLZ trotzdem rein */}
@@ -564,7 +564,7 @@ export function Schritt1Client() {
               />
             )}
           />
-          <span className="text-sm text-slate-700">
+          <span className="text-sm text-claimondo-navy">
             Ich willige ein, dass meine Daten zur Fall-Bearbeitung gespeichert und
             verarbeitet werden. Die{' '}
             <a href="/datenschutz" className="underline" target="_blank">

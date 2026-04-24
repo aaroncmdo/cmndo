@@ -52,11 +52,11 @@ export default function PhoneVerificationModal({
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-2xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
-        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+        <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
             <SmartphoneIcon className="w-4 h-4 text-[#4573A2]" /> Telefon verifizieren
           </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1"><XIcon className="w-4 h-4" /></button>
+          <button onClick={onClose} className="text-claimondo-ondo/70 hover:text-claimondo-ondo p-1"><XIcon className="w-4 h-4" /></button>
         </div>
 
         <div className="px-5 py-4">
@@ -67,11 +67,11 @@ export default function PhoneVerificationModal({
             </div>
           ) : step === 'phone' ? (
             <div className="space-y-3">
-              <p className="text-xs text-gray-500">Ihre Telefonnummer wird für die Zwei-Faktor-Authentifizierung verwendet.</p>
+              <p className="text-xs text-claimondo-ondo">Ihre Telefonnummer wird für die Zwei-Faktor-Authentifizierung verwendet.</p>
               <input
                 type="tel" value={telefon} onChange={e => setTelefon(e.target.value)}
                 placeholder="+49 163 1234567"
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
               />
               {error && <p className="text-xs text-red-600">{error}</p>}
               <button onClick={handleSendCode} disabled={pending}
@@ -81,12 +81,12 @@ export default function PhoneVerificationModal({
             </div>
           ) : (
             <div className="space-y-3">
-              <p className="text-xs text-gray-500">SMS-Code an {telefon} gesendet.</p>
+              <p className="text-xs text-claimondo-ondo">SMS-Code an {telefon} gesendet.</p>
               <input
                 type="text" inputMode="numeric" maxLength={6} value={code}
                 onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="000000" autoFocus
-                className="w-full text-center text-xl font-mono tracking-[0.4em] bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+                className="w-full text-center text-xl font-mono tracking-[0.4em] bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
               />
               {error && <p className="text-xs text-red-600">{error}</p>}
               <button onClick={handleVerify} disabled={pending || code.length !== 6}
@@ -94,7 +94,7 @@ export default function PhoneVerificationModal({
                 {pending ? 'Wird geprüft...' : 'Verifizieren'}
               </button>
               <button onClick={() => { setStep('phone'); setCode(''); setError(null) }}
-                className="w-full text-xs text-gray-400 hover:text-gray-600">Andere Nummer verwenden</button>
+                className="w-full text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo">Andere Nummer verwenden</button>
             </div>
           )}
         </div>

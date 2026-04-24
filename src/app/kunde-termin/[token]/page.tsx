@@ -20,7 +20,7 @@ export default async function KundeTerminPage({
             <span className="text-2xl text-red-500">✗</span>
           </div>
           <h1 className="text-xl font-semibold text-[#0D1B3E] mb-2">Link nicht mehr gültig</h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-claimondo-ondo">
             {error ?? 'Dieser Link ist ungültig oder abgelaufen.'}
           </p>
         </div>

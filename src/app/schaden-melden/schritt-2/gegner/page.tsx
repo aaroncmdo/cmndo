@@ -23,7 +23,7 @@ export default async function Schritt2GegnerPage() {
         <h1 className="text-2xl font-bold text-claimondo-navy">
           Daten des Unfallgegners
         </h1>
-        <p className="mt-2 text-slate-600">
+        <p className="mt-2 text-claimondo-ondo">
           Je mehr wir über den Gegner wissen, desto schneller läuft die
           Regulierung. Pflicht sind Name und Kennzeichen — außer bei
           Fahrerflucht.

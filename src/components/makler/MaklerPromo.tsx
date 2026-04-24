@@ -315,7 +315,7 @@ function StatCard({
   tone: 'blue' | 'navy' | 'green' | 'orange'
 }) {
   const toneMap: Record<typeof tone, string> = {
-    blue: 'bg-blue-50 text-blue-700 border-blue-200',
+    blue: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border',
     navy: 'bg-claimondo-navy/5 text-claimondo-navy border-[#0D1B3E]/10',
     green: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     orange: 'bg-orange-50 text-orange-700 border-orange-200',

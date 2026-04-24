@@ -108,5 +108,5 @@ export default function LiveTrackingMap({
     mapRef.current.fitBounds(bounds, 60)
   }, [ready, svPosition, terminLat, terminLng])
 
-  return <div ref={containerRef} className="w-full h-full bg-gray-100" />
+  return <div ref={containerRef} className="w-full h-full bg-[#f8f9fb]" />
 }

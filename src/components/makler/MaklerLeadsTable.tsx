@@ -269,7 +269,7 @@ function StatusPill({
 }) {
   if (disqualifiziert) {
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 text-gray-600">
+      <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#f8f9fb] text-claimondo-ondo">
         disqualifiziert
       </span>
     )
@@ -279,7 +279,7 @@ function StatusPill({
     qualifiziert: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
     konvertiert: { bg: 'bg-emerald-600/10', text: 'text-emerald-700' },
   }
-  const entry = cfg[status] ?? { bg: 'bg-gray-100', text: 'text-gray-700' }
+  const entry = cfg[status] ?? { bg: 'bg-[#f8f9fb]', text: 'text-claimondo-navy' }
   return (
     <span
       className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${entry.bg} ${entry.text}`}
@@ -307,8 +307,8 @@ function ConsentBadge({ label }: { label: ConsentLabel }) {
       label: 'Widerrufen',
     },
     kein_account: {
-      bg: 'bg-gray-100',
-      text: 'text-gray-600',
+      bg: 'bg-[#f8f9fb]',
+      text: 'text-claimondo-ondo',
       label: 'Kein Account',
     },
   }

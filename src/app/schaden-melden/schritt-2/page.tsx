@@ -13,7 +13,7 @@ export default async function Schritt2Page() {
     <FlowShell step={2}>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-claimondo-navy">{t('heading')}</h1>
-        <p className="mt-2 text-slate-600">{t('sub')}</p>
+        <p className="mt-2 text-claimondo-ondo">{t('sub')}</p>
       </div>
       <Schritt2aGuard />
     </FlowShell>

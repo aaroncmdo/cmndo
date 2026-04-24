@@ -28,7 +28,7 @@ export async function LandingDatTeaser() {
         >
           {t('cta')} →
         </LandingCta>
-        <p className="mt-3 text-sm text-slate-300">{t('duration_hint')}</p>
+        <p className="mt-3 text-sm text-white/70">{t('duration_hint')}</p>
       </div>
     </section>
   )

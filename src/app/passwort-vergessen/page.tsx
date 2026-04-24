@@ -33,10 +33,10 @@ export default function PasswortVergessenPage() {
             <span className="text-[#0D1B3E]">Claim</span>
             <span className="text-[#4573A2]">ondo</span>
           </h1>
-          <p className="mt-2 text-sm text-gray-500">Passwort zurücksetzen</p>
+          <p className="mt-2 text-sm text-claimondo-ondo">Passwort zurücksetzen</p>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-lg">
+        <div className="bg-white border border-claimondo-border rounded-3xl p-8 shadow-lg">
           {!submitted ? (
             <>
               <div className="flex items-center gap-3 mb-6">
@@ -44,14 +44,14 @@ export default function PasswortVergessenPage() {
                   <MailIcon className="w-5 h-5 text-[#4573A2]" />
                 </div>
                 <div>
-                  <p className="text-gray-900 font-medium text-sm">Reset-Link anfordern</p>
-                  <p className="text-gray-500 text-xs">Wir senden dir einen Link per E-Mail</p>
+                  <p className="text-claimondo-navy font-medium text-sm">Reset-Link anfordern</p>
+                  <p className="text-claimondo-ondo text-xs">Wir senden dir einen Link per E-Mail</p>
                 </div>
               </div>
 
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="email" className="text-sm font-medium text-gray-700">
+                  <label htmlFor="email" className="text-sm font-medium text-claimondo-navy">
                     E-Mail
                   </label>
                   <input
@@ -63,7 +63,7 @@ export default function PasswortVergessenPage() {
                     placeholder="name@beispiel.de"
                     required
                     autoComplete="email"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-100 text-gray-900 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
                   />
                 </div>
 
@@ -83,12 +83,12 @@ export default function PasswortVergessenPage() {
               <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-50 flex items-center justify-center mb-4">
                 <CheckCircle2Icon className="w-7 h-7 text-emerald-500" />
               </div>
-              <p className="text-gray-900 font-semibold text-base mb-2">E-Mail ist unterwegs</p>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p className="text-claimondo-navy font-semibold text-base mb-2">E-Mail ist unterwegs</p>
+              <p className="text-claimondo-ondo text-sm leading-relaxed">
                 Falls ein Account mit dieser E-Mail existiert, wurde ein Link
                 zum Zurücksetzen versendet.
               </p>
-              <p className="text-gray-400 text-xs mt-3">
+              <p className="text-claimondo-ondo/70 text-xs mt-3">
                 Prüfe auch deinen Spam-Ordner.
               </p>
             </div>
@@ -96,14 +96,14 @@ export default function PasswortVergessenPage() {
 
           <Link
             href="/login"
-            className="mt-6 flex items-center justify-center gap-1.5 text-xs text-gray-500 hover:text-[#1E3A5F] transition-colors"
+            className="mt-6 flex items-center justify-center gap-1.5 text-xs text-claimondo-ondo hover:text-[#1E3A5F] transition-colors"
           >
             <ArrowLeftIcon className="w-3 h-3" />
             Zurück zum Login
           </Link>
         </div>
 
-        <p className="text-center text-gray-500 text-xs mt-6">&copy; 2026 Claimondo GmbH</p>
+        <p className="text-center text-claimondo-ondo text-xs mt-6">&copy; 2026 Claimondo GmbH</p>
       </div>
     </div>
   )

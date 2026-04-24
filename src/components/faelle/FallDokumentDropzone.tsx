@@ -112,9 +112,9 @@ export default function FallDokumentDropzone({
   const label = DOKUMENT_LABELS[dokumentTyp] ?? dokumentTyp
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-3">
+    <div className="bg-white rounded-xl border border-claimondo-border p-3">
       <div className="flex items-center justify-between mb-2">
-        <h4 className="text-xs font-semibold text-gray-700">
+        <h4 className="text-xs font-semibold text-claimondo-navy">
           {istPflicht && <span className="text-red-500">*</span>} {label}
         </h4>
         <div className="flex items-center gap-1.5">
@@ -124,7 +124,7 @@ export default function FallDokumentDropzone({
             </span>
           )}
           {onClose && (
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-0.5">
+            <button onClick={onClose} className="text-claimondo-ondo/70 hover:text-claimondo-ondo p-0.5">
               <XIcon className="w-3.5 h-3.5" />
             </button>
           )}
@@ -144,20 +144,20 @@ export default function FallDokumentDropzone({
           {...getRootProps()}
           className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
             isDragActive ? 'border-[#4573A2] bg-[#4573A2]/5' :
-            uploading ? 'border-gray-200 bg-gray-50' :
-            'border-gray-300 hover:border-[#4573A2] hover:bg-gray-50/50'
+            uploading ? 'border-claimondo-border bg-[#f8f9fb]' :
+            'border-claimondo-border hover:border-[#4573A2] hover:bg-[#f8f9fb]/50'
           }`}
         >
           <input {...getInputProps()} />
           {uploading ? (
-            <div className="flex items-center justify-center gap-2 text-gray-500 text-xs">
+            <div className="flex items-center justify-center gap-2 text-claimondo-ondo text-xs">
               <LoaderIcon className="w-4 h-4 animate-spin" /> {isOnline ? 'Wird hochgeladen...' : 'Wird lokal gespeichert...'}
             </div>
           ) : (
-            <div className="text-xs text-gray-500">
-              <UploadIcon className="w-5 h-5 mx-auto mb-1 text-gray-400" />
+            <div className="text-xs text-claimondo-ondo">
+              <UploadIcon className="w-5 h-5 mx-auto mb-1 text-claimondo-ondo/70" />
               <p>{isOnline ? 'Datei hierher ziehen oder klicken' : 'Datei wird lokal gespeichert (offline)'}</p>
-              <p className="text-[10px] text-gray-400 mt-1">JPG, PNG, WebP, PDF — max 10 MB</p>
+              <p className="text-[10px] text-claimondo-ondo/70 mt-1">JPG, PNG, WebP, PDF — max 10 MB</p>
             </div>
           )}
         </div>

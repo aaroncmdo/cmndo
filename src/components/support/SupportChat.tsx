@@ -64,11 +64,11 @@ export function SupportChat({ userName }: { userName?: string | null }) {
         aria-live="polite"
       >
         {messages.length === 0 && !error && (
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-claimondo-ondo">
             <p className="font-medium text-[#0D1B3E] mb-1">
               Hi{userName ? ' ' + userName.split(' ')[0] : ''} — was kann ich für dich tun?
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-claimondo-ondo">
               Beschreibe das Problem oder den Wunsch — ich prüfe, ob es schon ein Ticket gibt,
               und lege sonst eines für dich an.
             </p>
@@ -93,7 +93,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
           if (m.role === 'assistant') {
             return (
               <div key={i} className="flex justify-start">
-                <div className="max-w-[85%] bg-gray-100 text-gray-900 rounded-2xl rounded-bl-sm px-3 py-2 text-sm whitespace-pre-wrap">
+                <div className="max-w-[85%] bg-[#f8f9fb] text-claimondo-navy rounded-2xl rounded-bl-sm px-3 py-2 text-sm whitespace-pre-wrap">
                   {m.text}
                 </div>
               </div>
@@ -130,7 +130,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
 
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 rounded-2xl rounded-bl-sm px-3 py-2 text-xs text-gray-500 inline-flex items-center gap-2">
+            <div className="bg-[#f8f9fb] rounded-2xl rounded-bl-sm px-3 py-2 text-xs text-claimondo-ondo inline-flex items-center gap-2">
               <Loader2Icon className="w-3 h-3 animate-spin" /> Denkt nach…
             </div>
           </div>
@@ -147,11 +147,11 @@ export function SupportChat({ userName }: { userName?: string | null }) {
       </div>
 
       {messages.length === 0 && (
-        <div className="border-t border-gray-200 px-4 py-2 bg-gray-50">
+        <div className="border-t border-claimondo-border px-4 py-2 bg-[#f8f9fb]">
           <div className="flex items-center gap-2">
             <div className="flex-1 min-w-0">
               {isCapturing ? (
-                <p className="text-[11px] text-gray-500 inline-flex items-center gap-1">
+                <p className="text-[11px] text-claimondo-ondo inline-flex items-center gap-1">
                   <Loader2Icon className="w-3 h-3 animate-spin" /> Screenshot wird erstellt…
                 </p>
               ) : screenshot ? (
@@ -159,14 +159,14 @@ export function SupportChat({ userName }: { userName?: string | null }) {
                   <img
                     src={screenshot}
                     alt="Screenshot-Vorschau"
-                    className="w-10 h-10 object-cover rounded border border-gray-300"
+                    className="w-10 h-10 object-cover rounded border border-claimondo-border"
                   />
-                  <p className="text-[11px] text-gray-600 truncate">Screenshot angefügt</p>
+                  <p className="text-[11px] text-claimondo-ondo truncate">Screenshot angefügt</p>
                 </div>
               ) : screenshotError ? (
                 <p className="text-[11px] text-amber-700">{screenshotError}</p>
               ) : (
-                <p className="text-[11px] text-gray-500">Kein Screenshot</p>
+                <p className="text-[11px] text-claimondo-ondo">Kein Screenshot</p>
               )}
             </div>
             <div className="flex items-center gap-1 shrink-0">
@@ -183,7 +183,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
                 <button
                   type="button"
                   onClick={clearScreenshot}
-                  className="text-[11px] text-gray-500 hover:text-red-600"
+                  className="text-[11px] text-claimondo-ondo hover:text-red-600"
                 >
                   entfernen
                 </button>
@@ -195,7 +195,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
 
       <form
         onSubmit={handleSubmit}
-        className="border-t border-gray-200 px-3 py-3 bg-white space-y-2"
+        className="border-t border-claimondo-border px-3 py-3 bg-white space-y-2"
       >
         {isClosed ? (
           <button
@@ -215,12 +215,12 @@ export function SupportChat({ userName }: { userName?: string | null }) {
               placeholder={placeholder}
               rows={3}
               disabled={isLoading}
-              className="w-full resize-none text-sm text-gray-900 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4573A2] focus:border-transparent disabled:bg-gray-50"
+              className="w-full resize-none text-sm text-claimondo-navy px-3 py-2 rounded-lg border border-claimondo-border focus:outline-none focus:ring-2 focus:ring-[#4573A2] focus:border-transparent disabled:bg-[#f8f9fb]"
             />
             <div className="flex items-end justify-between gap-2">
               <VoiceRecordButton onTranscript={handleTranscript} disabled={isLoading} />
               <div className="flex flex-col items-end gap-1">
-                <p className="text-[10px] text-gray-400">Enter zum Senden · Shift+Enter = neue Zeile</p>
+                <p className="text-[10px] text-claimondo-ondo/70">Enter zum Senden · Shift+Enter = neue Zeile</p>
                 <button
                   type="submit"
                   disabled={isLoading || !input.trim()}

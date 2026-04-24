@@ -45,7 +45,7 @@ export default function AGBPage() {
           <p>Es gilt deutsches Recht. Gerichtsstand ist Koeln. Sollten einzelne Bestimmungen unwirksam sein, bleibt die Wirksamkeit der uebrigen Bestimmungen unberuehrt.</p>
         </section>
 
-        <p className="text-xs text-gray-400 mt-8">Stand: April 2026</p>
+        <p className="text-xs text-claimondo-ondo/70 mt-8">Stand: April 2026</p>
       </div>
     </main>
   )

@@ -91,8 +91,8 @@ export default function CalDavConnectModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-gray-200 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-claimondo-border max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border">
           <h2 className="text-base font-semibold text-[#0D1B3E] flex items-center gap-2">
             <CalendarIcon className="w-4 h-4 text-[#4573A2]" />
             Kalender verbinden
@@ -103,7 +103,7 @@ export default function CalDavConnectModal({
               reset()
               onClose()
             }}
-            className="text-gray-400 hover:text-gray-700"
+            className="text-claimondo-ondo/70 hover:text-claimondo-navy"
             aria-label="Schließen"
           >
             <XIcon className="w-4 h-4" />
@@ -114,11 +114,11 @@ export default function CalDavConnectModal({
           {!calendars ? (
             <>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-700">Provider</label>
+                <label className="text-xs font-medium text-claimondo-navy">Provider</label>
                 <select
                   value={providerId}
                   onChange={(e) => setProviderId(e.target.value as CalDavProviderId)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-[#4573A2]"
+                  className="w-full px-3 py-2 rounded-lg border border-claimondo-border bg-white text-sm focus:outline-none focus:border-[#4573A2]"
                 >
                   {CALDAV_PROVIDERS.map((p) => (
                     <option key={p.id} value={p.id}>
@@ -147,19 +147,19 @@ export default function CalDavConnectModal({
 
               {needsServerUrl && (
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-700">Server-URL</label>
+                  <label className="text-xs font-medium text-claimondo-navy">Server-URL</label>
                   <input
                     type="url"
                     value={serverUrl}
                     onChange={(e) => setServerUrl(e.target.value)}
                     placeholder="https://dein-caldav-server.de/dav"
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-[#4573A2]"
+                    className="w-full px-3 py-2 rounded-lg border border-claimondo-border text-sm focus:outline-none focus:border-[#4573A2]"
                   />
                 </div>
               )}
 
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-700">
+                <label className="text-xs font-medium text-claimondo-navy">
                   {providerId === 'icloud' ? 'Apple-ID (E-Mail)' : 'Benutzername'}
                 </label>
                 <input
@@ -167,12 +167,12 @@ export default function CalDavConnectModal({
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   autoComplete="username"
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-[#4573A2]"
+                  className="w-full px-3 py-2 rounded-lg border border-claimondo-border text-sm focus:outline-none focus:border-[#4573A2]"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-700">
+                <label className="text-xs font-medium text-claimondo-navy">
                   {providerId === 'icloud' ? 'App-spezifisches Passwort' : 'Passwort'}
                 </label>
                 <input
@@ -181,7 +181,7 @@ export default function CalDavConnectModal({
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete="new-password"
                   placeholder={providerId === 'icloud' ? 'xxxx-xxxx-xxxx-xxxx' : ''}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-[#4573A2]"
+                  className="w-full px-3 py-2 rounded-lg border border-claimondo-border text-sm focus:outline-none focus:border-[#4573A2]"
                 />
               </div>
 
@@ -215,7 +215,7 @@ export default function CalDavConnectModal({
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-700">Kalender auswählen</label>
+                <label className="text-xs font-medium text-claimondo-navy">Kalender auswählen</label>
                 {calendars.map((cal) => (
                   <button
                     key={cal.url}
@@ -224,11 +224,11 @@ export default function CalDavConnectModal({
                     className={`w-full text-left px-3 py-2.5 rounded-lg border-2 text-sm transition-colors ${
                       selectedCalUrl === cal.url
                         ? 'border-[#4573A2] bg-[#4573A2]/5'
-                        : 'border-gray-200 hover:border-[#4573A2]/50'
+                        : 'border-claimondo-border hover:border-[#4573A2]/50'
                     }`}
                   >
-                    <p className="font-medium text-gray-900">{cal.displayName}</p>
-                    <p className="text-[10px] text-gray-400 truncate">{cal.url}</p>
+                    <p className="font-medium text-claimondo-navy">{cal.displayName}</p>
+                    <p className="text-[10px] text-claimondo-ondo/70 truncate">{cal.url}</p>
                   </button>
                 ))}
               </div>
@@ -243,7 +243,7 @@ export default function CalDavConnectModal({
                 <button
                   type="button"
                   onClick={reset}
-                  className="px-4 py-2.5 rounded-lg border border-gray-200 text-gray-600 text-sm hover:bg-gray-50"
+                  className="px-4 py-2.5 rounded-lg border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb]"
                 >
                   Zurück
                 </button>

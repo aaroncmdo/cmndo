@@ -135,22 +135,22 @@ export default function Zb1UploadClient({
             <span className="text-[#0D1B3E]">Claim</span>
             <span className="text-[#7BA3CC]">ondo</span>
           </span>
-          <p className="text-xs text-gray-500 mt-1">Fahrzeugschein-Upload</p>
+          <p className="text-xs text-claimondo-ondo mt-1">Fahrzeugschein-Upload</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-claimondo-border p-6 space-y-4">
           {step === 'hinweise' && (
             <>
-              <h1 className="text-lg font-semibold text-gray-900">
+              <h1 className="text-lg font-semibold text-claimondo-navy">
                 Hallo {vorname || 'und willkommen'}!
               </h1>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-claimondo-ondo">
                 Bitte fotografieren Sie Ihren <strong>Fahrzeugschein (Zulassungsbescheinigung Teil I, Vorderseite)</strong>.
                 Wir lesen die Daten automatisch aus.
               </p>
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 space-y-1.5">
-                <p className="text-xs font-semibold text-blue-900">Tipps für gute Lesbarkeit:</p>
-                <ul className="text-xs text-blue-800 space-y-1">
+              <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-3 space-y-1.5">
+                <p className="text-xs font-semibold text-claimondo-navy">Tipps für gute Lesbarkeit:</p>
+                <ul className="text-xs text-claimondo-navy space-y-1">
                   <li>✓ Alle 4 Ecken des Dokuments sichtbar</li>
                   <li>✓ Gutes Licht — keine Schatten</li>
                   <li>✓ Scharfes Foto — nicht verwackelt</li>
@@ -169,7 +169,7 @@ export default function Zb1UploadClient({
                 <button
                   type="button"
                   onClick={() => galleryInputRef.current?.click()}
-                  className="flex flex-col items-center gap-1 px-3 py-4 rounded-xl bg-white border border-[#4573A2] text-[#4573A2] text-sm font-semibold hover:bg-blue-50"
+                  className="flex flex-col items-center gap-1 px-3 py-4 rounded-xl bg-white border border-[#4573A2] text-[#4573A2] text-sm font-semibold hover:bg-[#f8f9fb]"
                 >
                   <ImageIcon className="w-6 h-6" />
                   Aus Galerie wählen
@@ -196,9 +196,9 @@ export default function Zb1UploadClient({
 
           {step === 'vorschau' && previewUrl && (
             <>
-              <h2 className="text-base font-semibold text-gray-900">Foto prüfen</h2>
-              <p className="text-xs text-gray-500">Sind alle 4 Ecken gut zu sehen?</p>
-              <div className="rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+              <h2 className="text-base font-semibold text-claimondo-navy">Foto prüfen</h2>
+              <p className="text-xs text-claimondo-ondo">Sind alle 4 Ecken gut zu sehen?</p>
+              <div className="rounded-xl overflow-hidden border border-claimondo-border bg-[#f8f9fb]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={previewUrl} alt="Fahrzeugschein-Vorschau" className="w-full h-auto" />
               </div>
@@ -206,7 +206,7 @@ export default function Zb1UploadClient({
                 <button
                   type="button"
                   onClick={reset}
-                  className="px-3 py-3 rounded-xl bg-white border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-50"
+                  className="px-3 py-3 rounded-xl bg-white border border-claimondo-border text-claimondo-navy text-sm font-semibold hover:bg-[#f8f9fb]"
                 >
                   Nochmal
                 </button>
@@ -226,8 +226,8 @@ export default function Zb1UploadClient({
             <div className="py-8 text-center space-y-4">
               <div className="w-12 h-12 mx-auto border-4 border-[#4573A2] border-t-transparent rounded-full animate-spin" />
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-gray-900">Wird hochgeladen ...</p>
-                <p className="text-xs text-gray-500">Daten werden ausgelesen — bitte warten</p>
+                <p className="text-sm font-semibold text-claimondo-navy">Wird hochgeladen ...</p>
+                <p className="text-xs text-claimondo-ondo">Daten werden ausgelesen — bitte warten</p>
               </div>
             </div>
           )}
@@ -237,8 +237,8 @@ export default function Zb1UploadClient({
               <div className="w-14 h-14 mx-auto bg-green-100 rounded-full flex items-center justify-center">
                 <CheckCircle2Icon className="w-8 h-8 text-green-600" />
               </div>
-              <h2 className="text-lg font-semibold text-gray-900">Vielen Dank!</h2>
-              <p className="text-sm text-gray-600">
+              <h2 className="text-lg font-semibold text-claimondo-navy">Vielen Dank!</h2>
+              <p className="text-sm text-claimondo-ondo">
                 Ihr Fahrzeugschein wurde empfangen. Ihr Ansprechpartner meldet sich in Kürze.
               </p>
               {extracted && (extracted.kennzeichen || extracted.fahrzeug_hersteller) && (
@@ -253,7 +253,7 @@ export default function Zb1UploadClient({
                   {extracted.halter_name && <p className="text-green-800">Halter: <strong>{extracted.halter_name}</strong></p>}
                 </div>
               )}
-              <p className="text-[10px] text-gray-400">Sie können diese Seite jetzt schließen.</p>
+              <p className="text-[10px] text-claimondo-ondo/70">Sie können diese Seite jetzt schließen.</p>
             </div>
           )}
 
@@ -262,9 +262,9 @@ export default function Zb1UploadClient({
               <div className="w-14 h-14 mx-auto bg-amber-100 rounded-full flex items-center justify-center">
                 <AlertCircleIcon className="w-8 h-8 text-amber-600" />
               </div>
-              <h2 className="text-lg font-semibold text-gray-900">Hat nicht geklappt</h2>
-              <p className="text-sm text-gray-600">{errorMsg || 'Daten konnten nicht ausgelesen werden.'}</p>
-              <p className="text-xs text-gray-500">
+              <h2 className="text-lg font-semibold text-claimondo-navy">Hat nicht geklappt</h2>
+              <p className="text-sm text-claimondo-ondo">{errorMsg || 'Daten konnten nicht ausgelesen werden.'}</p>
+              <p className="text-xs text-claimondo-ondo">
                 Tipp: gutes Licht, alle 4 Ecken sichtbar, scharf — bitte erneut versuchen.
               </p>
               <button
@@ -279,7 +279,7 @@ export default function Zb1UploadClient({
           )}
         </div>
 
-        <p className="text-[10px] text-gray-400 text-center mt-4">
+        <p className="text-[10px] text-claimondo-ondo/70 text-center mt-4">
           Ihre Daten werden verschlüsselt übertragen und nur für die Bearbeitung Ihres Schadens verwendet.
         </p>
       </div>

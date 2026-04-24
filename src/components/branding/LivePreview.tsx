@@ -18,7 +18,7 @@ type Props = {
 export default function LivePreview({ theme, fontPair, logoUrl, firmenname }: Props) {
   return (
     <div
-      className="rounded-2xl border border-gray-200 overflow-hidden shadow-sm"
+      className="rounded-2xl border border-claimondo-border overflow-hidden shadow-sm"
       style={{ background: theme.background }}
     >
       {/* Header-Leiste (Brand-Name + Notifications) */}

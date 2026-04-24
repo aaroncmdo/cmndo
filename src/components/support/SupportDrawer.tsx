@@ -20,11 +20,11 @@ function DrawerHeader({ onClose, closeBtnRef, rolle }: {
   const hasStarted = messages.length > 0
 
   return (
-    <div className="px-4 py-3 border-b border-gray-200 shrink-0">
+    <div className="px-4 py-3 border-b border-claimondo-border shrink-0">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-sm font-semibold text-[#0D1B3E]">Hilfe &amp; Support</h2>
-          <p className="text-[11px] text-gray-500">
+          <p className="text-[11px] text-claimondo-ondo">
             {mode === 'durchdenken'
               ? 'Feature durchdenken — bis zu 8 Turns, dann Ticket-Vorschlag.'
               : 'KI-Assistenz — legt bei Bedarf Linear-Tickets an.'}
@@ -35,7 +35,7 @@ function DrawerHeader({ onClose, closeBtnRef, rolle }: {
           type="button"
           onClick={onClose}
           aria-label="Schließen"
-          className="text-gray-400 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100"
+          className="text-claimondo-ondo/70 hover:text-claimondo-navy p-1 rounded-full hover:bg-[#f8f9fb]"
         >
           <XIcon className="w-5 h-5" />
         </button>
@@ -48,7 +48,7 @@ function DrawerHeader({ onClose, closeBtnRef, rolle }: {
             className={`flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-colors ${
               mode === 'durchdenken'
                 ? 'bg-violet-50 text-violet-700 border-violet-200'
-                : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-violet-50 hover:text-violet-700 hover:border-violet-200'
+                : 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border hover:bg-violet-50 hover:text-violet-700 hover:border-violet-200'
             }`}
             aria-pressed={mode === 'durchdenken'}
           >

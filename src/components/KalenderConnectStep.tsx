@@ -135,7 +135,7 @@ export default function KalenderConnectStep({
         Weiter ohne Kalender
       </LoadingButton>
 
-      <p className="text-[11px] text-gray-400 text-center flex items-center justify-center gap-1">
+      <p className="text-[11px] text-claimondo-ondo/70 text-center flex items-center justify-center gap-1">
         <InfoIcon className="w-3 h-3" />
         Kalender-Einstellung kannst du jederzeit im Profil ändern
       </p>
@@ -174,14 +174,14 @@ function ProviderCard({
       onClick={onSelect}
       className={`w-full text-left rounded-xl border-2 p-4 transition-colors ${
         !enabled
-          ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+          ? 'border-claimondo-border bg-[#f8f9fb] text-claimondo-ondo/70 cursor-not-allowed'
           : selected
           ? 'border-[#4573A2] bg-[#4573A2]/5'
-          : 'border-gray-200 hover:border-[#4573A2]/50 bg-white'
+          : 'border-claimondo-border hover:border-[#4573A2]/50 bg-white'
       }`}
     >
-      <p className={`text-sm font-semibold ${enabled ? 'text-gray-900' : 'text-gray-400'}`}>{label}</p>
-      <p className="text-xs text-gray-500 mt-0.5">{hint}</p>
+      <p className={`text-sm font-semibold ${enabled ? 'text-claimondo-navy' : 'text-claimondo-ondo/70'}`}>{label}</p>
+      <p className="text-xs text-claimondo-ondo mt-0.5">{hint}</p>
     </button>
   )
 }

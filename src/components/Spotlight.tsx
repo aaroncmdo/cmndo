@@ -79,10 +79,10 @@ export default function Spotlight() {
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]" onClick={() => setOpen(false)}>
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden" onClick={e => e.stopPropagation()}>
+      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-claimondo-border overflow-hidden" onClick={e => e.stopPropagation()}>
         {/* Search input */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
-          <SearchIcon className="w-5 h-5 text-gray-400 shrink-0" />
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-claimondo-border">
+          <SearchIcon className="w-5 h-5 text-claimondo-ondo/70 shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -90,19 +90,19 @@ export default function Spotlight() {
             onChange={e => { setQuery(e.target.value); search(e.target.value) }}
             onKeyDown={handleKeyDown}
             placeholder="Suche nach Name, Kennzeichen, Aktenzeichen..."
-            className="flex-1 text-sm text-gray-900 placeholder-gray-400 outline-none bg-transparent"
+            className="flex-1 text-sm text-claimondo-navy placeholder-gray-400 outline-none bg-transparent"
           />
-          <kbd className="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded font-mono">ESC</kbd>
+          <kbd className="text-[10px] text-claimondo-ondo/70 bg-[#f8f9fb] px-1.5 py-0.5 rounded font-mono">ESC</kbd>
         </div>
 
         {/* Results */}
-        {loading && <div className="px-4 py-3 text-gray-400 text-xs">Suche...</div>}
+        {loading && <div className="px-4 py-3 text-claimondo-ondo/70 text-xs">Suche...</div>}
 
         {!loading && hasResults && (
           <div className="max-h-80 overflow-y-auto">
             {results.faelle.length > 0 && (
               <div>
-                <p className="px-4 pt-2 pb-1 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Fälle</p>
+                <p className="px-4 pt-2 pb-1 text-[10px] font-semibold text-claimondo-ondo/70 uppercase tracking-wider">Fälle</p>
                 {results.faelle.map((r, i) => {
                   const globalIdx = i
                   return (
@@ -110,10 +110,10 @@ export default function Spotlight() {
                       className={`w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-[#4573A2]/5 transition-colors ${selectedIdx === globalIdx ? 'bg-[#4573A2]/5' : ''}`}>
                       <FileTextIcon className="w-4 h-4 text-[#4573A2] shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm text-gray-900 truncate">{r.label}</p>
-                        {r.sub && <p className="text-[10px] text-gray-400 truncate">{r.sub}</p>}
+                        <p className="text-sm text-claimondo-navy truncate">{r.label}</p>
+                        {r.sub && <p className="text-[10px] text-claimondo-ondo/70 truncate">{r.sub}</p>}
                       </div>
-                      {r.status && <span className="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded shrink-0">{r.status}</span>}
+                      {r.status && <span className="text-[10px] text-claimondo-ondo/70 bg-[#f8f9fb] px-1.5 py-0.5 rounded shrink-0">{r.status}</span>}
                     </button>
                   )
                 })}
@@ -121,7 +121,7 @@ export default function Spotlight() {
             )}
             {results.leads.length > 0 && (
               <div>
-                <p className="px-4 pt-2 pb-1 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Leads</p>
+                <p className="px-4 pt-2 pb-1 text-[10px] font-semibold text-claimondo-ondo/70 uppercase tracking-wider">Leads</p>
                 {results.leads.map((r, i) => {
                   const globalIdx = results.faelle.length + i
                   return (
@@ -129,10 +129,10 @@ export default function Spotlight() {
                       className={`w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-green-50 transition-colors ${selectedIdx === globalIdx ? 'bg-green-50' : ''}`}>
                       <UserIcon className="w-4 h-4 text-green-500 shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm text-gray-900 truncate">{r.label}</p>
-                        {r.sub && <p className="text-[10px] text-gray-400 truncate">{r.sub}</p>}
+                        <p className="text-sm text-claimondo-navy truncate">{r.label}</p>
+                        {r.sub && <p className="text-[10px] text-claimondo-ondo/70 truncate">{r.sub}</p>}
                       </div>
-                      {r.status && <span className="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded shrink-0">{r.status}</span>}
+                      {r.status && <span className="text-[10px] text-claimondo-ondo/70 bg-[#f8f9fb] px-1.5 py-0.5 rounded shrink-0">{r.status}</span>}
                     </button>
                   )
                 })}
@@ -140,7 +140,7 @@ export default function Spotlight() {
             )}
             {results.sv.length > 0 && (
               <div>
-                <p className="px-4 pt-2 pb-1 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Sachverständige</p>
+                <p className="px-4 pt-2 pb-1 text-[10px] font-semibold text-claimondo-ondo/70 uppercase tracking-wider">Sachverständige</p>
                 {results.sv.map((r, i) => {
                   const globalIdx = results.faelle.length + results.leads.length + i
                   return (
@@ -148,8 +148,8 @@ export default function Spotlight() {
                       className={`w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-purple-50 transition-colors ${selectedIdx === globalIdx ? 'bg-purple-50' : ''}`}>
                       <HardHatIcon className="w-4 h-4 text-purple-500 shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm text-gray-900 truncate">{r.label}</p>
-                        {r.sub && <p className="text-[10px] text-gray-400 truncate">{r.sub}</p>}
+                        <p className="text-sm text-claimondo-navy truncate">{r.label}</p>
+                        {r.sub && <p className="text-[10px] text-claimondo-ondo/70 truncate">{r.sub}</p>}
                       </div>
                     </button>
                   )
@@ -160,12 +160,12 @@ export default function Spotlight() {
         )}
 
         {!loading && query.length >= 2 && !hasResults && (
-          <div className="px-4 py-6 text-center text-gray-400 text-sm">Keine Ergebnisse</div>
+          <div className="px-4 py-6 text-center text-claimondo-ondo/70 text-sm">Keine Ergebnisse</div>
         )}
 
         {!loading && query.length < 2 && (
-          <div className="px-4 py-4 text-center text-gray-400 text-xs">
-            Mindestens 2 Zeichen eingeben · <kbd className="bg-gray-100 px-1 py-0.5 rounded font-mono">Cmd+K</kbd>
+          <div className="px-4 py-4 text-center text-claimondo-ondo/70 text-xs">
+            Mindestens 2 Zeichen eingeben · <kbd className="bg-[#f8f9fb] px-1 py-0.5 rounded font-mono">Cmd+K</kbd>
           </div>
         )}
       </div>
