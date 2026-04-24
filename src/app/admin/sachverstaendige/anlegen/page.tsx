@@ -23,8 +23,8 @@ export default async function SachverstaendigeAnlegen() {
       <div>
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">Sachverständigen anlegen</h1>
-          <p className="text-gray-500 text-sm mt-0.5">
+          <h1 className="text-xl font-semibold text-claimondo-navy">Sachverständigen anlegen</h1>
+          <p className="text-claimondo-ondo text-sm mt-0.5">
             Lege einen neuen Solo-SV, ein komplettes Büro oder eine Akademie an.
           </p>
         </div>

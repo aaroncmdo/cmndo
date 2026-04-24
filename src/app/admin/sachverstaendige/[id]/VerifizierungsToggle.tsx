@@ -57,7 +57,7 @@ export default function VerifizierungsToggle({ svId, verifiziert, verifiziertAm 
         onClick={toggle}
         disabled={pending}
         title="Als verifiziert markieren — gibt Whitelabeling auf Kunden-Seite frei"
-        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors disabled:opacity-50"
+        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium bg-[#f8f9fb] text-claimondo-ondo hover:bg-claimondo-border transition-colors disabled:opacity-50"
       >
         <ShieldOffIcon className="w-3 h-3" />
         {pending ? 'Speichern…' : 'Nicht verifiziert'}

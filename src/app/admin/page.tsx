@@ -36,8 +36,8 @@ export default async function AdminDashboardPage() {
         {/* Header */}
         <div className="flex items-center justify-between flex-shrink-0">
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
-            <p className="text-xs text-gray-500">Live-Steuerung &amp; Tagesueberblick</p>
+            <h1 className="text-xl font-semibold text-claimondo-navy">Dashboard</h1>
+            <p className="text-xs text-claimondo-ondo">Live-Steuerung &amp; Tagesueberblick</p>
           </div>
         </div>
 

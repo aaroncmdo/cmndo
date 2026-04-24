@@ -83,11 +83,11 @@ export default async function MonatsUmsatzForecast() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <TrendingUpIcon className="w-4 h-4 text-emerald-600" />
-              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+              <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider">
                 Monats-Umsatz {f.monatName}
               </h2>
             </div>
-            <span className="flex items-center gap-1 text-[11px] text-gray-500">
+            <span className="flex items-center gap-1 text-[11px] text-claimondo-ondo">
               <CalendarIcon className="w-3 h-3" />
               Tag {f.tageBisher} von {f.tageImMonat} ({fortschritt}%)
             </span>
@@ -117,16 +117,16 @@ export default async function MonatsUmsatzForecast() {
 
           {/* Fortschrittsbalken */}
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-[10px] text-gray-500">
+            <div className="flex items-center justify-between text-[10px] text-claimondo-ondo">
               <span>Monats-Fortschritt</span>
               <span className="tabular-nums">
                 {fmtEur(f.gesamtLaufend)} / {fmtEur(f.gesamtForecast)}
                 {remainingForecast > 0 && (
-                  <span className="text-gray-400"> · noch +{fmtEur(remainingForecast)} erwartet</span>
+                  <span className="text-claimondo-ondo/70"> · noch +{fmtEur(remainingForecast)} erwartet</span>
                 )}
               </span>
             </div>
-            <div className="h-3 bg-gray-100 rounded-full overflow-hidden flex">
+            <div className="h-3 bg-[#f8f9fb] rounded-full overflow-hidden flex">
               <div
                 className="bg-emerald-500"
                 style={{ width: `${f.gesamtForecast > 0 ? Math.min(100, (f.gesamtLaufend / f.gesamtForecast) * 100) : 0}%` }}
@@ -136,21 +136,21 @@ export default async function MonatsUmsatzForecast() {
                 style={{ width: `${f.gesamtForecast > 0 ? Math.max(0, ((f.gesamtForecast - f.gesamtLaufend) / f.gesamtForecast) * 100) : 0}%` }}
               />
             </div>
-            <div className="flex justify-between text-[10px] text-gray-400">
+            <div className="flex justify-between text-[10px] text-claimondo-ondo/70">
               <span>laufend (bezahlt)</span>
               <span>geplant (Forecast)</span>
             </div>
           </div>
 
           {/* Breakdown */}
-          <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 gap-4 text-xs">
+          <div className="mt-4 pt-4 border-t border-claimondo-border grid grid-cols-2 gap-4 text-xs">
             <div>
-              <p className="text-gray-500">Regulierungs-Umsatz MTD</p>
-              <p className="text-gray-900 font-semibold tabular-nums">{fmtEur(f.umsatzLaufend)}</p>
+              <p className="text-claimondo-ondo">Regulierungs-Umsatz MTD</p>
+              <p className="text-claimondo-navy font-semibold tabular-nums">{fmtEur(f.umsatzLaufend)}</p>
             </div>
             <div>
-              <p className="text-gray-500">Bezahlte Rechnungen MTD</p>
-              <p className="text-gray-900 font-semibold tabular-nums">{fmtEur(f.rechnungenLaufend)}</p>
+              <p className="text-claimondo-ondo">Bezahlte Rechnungen MTD</p>
+              <p className="text-claimondo-navy font-semibold tabular-nums">{fmtEur(f.rechnungenLaufend)}</p>
             </div>
           </div>
         </div>

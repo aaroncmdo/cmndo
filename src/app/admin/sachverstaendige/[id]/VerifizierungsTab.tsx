@@ -96,7 +96,7 @@ function StatusBadge({ tone, children }: { tone: StatusBadgeTone; children: Reac
     green: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
     amber: 'bg-amber-50 text-amber-700 border border-amber-200',
     red: 'bg-red-50 text-red-700 border border-red-200',
-    gray: 'bg-gray-100 text-gray-600 border border-gray-200',
+    gray: 'bg-[#f8f9fb] text-claimondo-ondo border border-claimondo-border',
   }
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${styles[tone]}`}>
@@ -193,11 +193,11 @@ function PflichtdokumenteCard({
     <div className="glass-light border border-claimondo-border rounded-ios-md p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
             <ShieldCheckIcon className="w-4 h-4 text-[#4573A2]" />
             Pflichtdokumente
           </h2>
-          <p className="text-[11px] text-gray-500 mt-0.5">
+          <p className="text-[11px] text-claimondo-ondo mt-0.5">
             Sicherungsabtretung oder Honorarvereinbarung · Datenschutzerklärung · Widerrufsbelehrung
           </p>
         </div>
@@ -217,14 +217,14 @@ function PflichtdokumenteCard({
         {pflichtdokumente.map((d) => (
           <div
             key={d.slotId}
-            className="flex items-start gap-3 border border-gray-100 rounded-xl p-3 bg-gray-50/40"
+            className="flex items-start gap-3 border border-claimondo-border rounded-xl p-3 bg-[#f8f9fb]/40"
           >
-            <div className="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-lg bg-white border border-claimondo-border flex items-center justify-center flex-shrink-0">
               <FileTextIcon className="w-4 h-4 text-[#4573A2]" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <p className="text-sm font-medium text-gray-900">{d.label}</p>
+                <p className="text-sm font-medium text-claimondo-navy">{d.label}</p>
                 {d.status === 'geprueft' && (
                   <StatusBadge tone="green">
                     <CheckCircle2Icon className="w-3 h-3" />
@@ -248,7 +248,7 @@ function PflichtdokumenteCard({
                 )}
               </div>
               {d.hochgeladenAm && (
-                <p className="text-[10px] text-gray-500 mt-0.5">
+                <p className="text-[10px] text-claimondo-ondo mt-0.5">
                   Hochgeladen: {new Date(d.hochgeladenAm).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })}
                 </p>
               )}
@@ -289,7 +289,7 @@ function PflichtdokumenteCard({
                         setRejectingSlot(null)
                         setRejectNotiz('')
                       }}
-                      className="px-2.5 py-1 text-[11px] rounded-md border border-gray-200 text-gray-600 hover:bg-gray-100"
+                      className="px-2.5 py-1 text-[11px] rounded-md border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb]"
                     >
                       Abbrechen
                     </button>
@@ -332,8 +332,8 @@ function PflichtdokumenteCard({
       )}
 
       {!svVerifiziert && (
-        <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
-          <p className="text-[11px] text-gray-500">
+        <div className="mt-4 flex items-center justify-between border-t border-claimondo-border pt-3">
+          <p className="text-[11px] text-claimondo-ondo">
             Freigabe aller Dokumente setzt <code>sachverstaendige.verifiziert=true</code>.
           </p>
           <button
@@ -409,13 +409,13 @@ function SaVorlageCard({
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <FileTextIcon className="w-4 h-4 text-[#4573A2]" />
-          <h3 className="text-sm font-semibold text-gray-900">Tier 1 — SA-Vorlage (Dispatch-Gate)</h3>
+          <h3 className="text-sm font-semibold text-claimondo-navy">Tier 1 — SA-Vorlage (Dispatch-Gate)</h3>
         </div>
         {badge}
       </div>
 
       {!hochgeladen && (
-        <p className="text-xs text-gray-500 py-3">Der SV hat noch keine SA-Vorlage hochgeladen. Freigabe ist erst nach Upload möglich.</p>
+        <p className="text-xs text-claimondo-ondo py-3">Der SV hat noch keine SA-Vorlage hochgeladen. Freigabe ist erst nach Upload möglich.</p>
       )}
 
       {hochgeladen && (
@@ -432,10 +432,10 @@ function SaVorlageCard({
                 PDF ansehen
               </a>
             ) : (
-              <span className="text-xs text-gray-400">PDF-Link konnte nicht generiert werden</span>
+              <span className="text-xs text-claimondo-ondo/70">PDF-Link konnte nicht generiert werden</span>
             )}
             {hochgeladenDatum && (
-              <span className="text-[11px] text-gray-500">Hochgeladen: {hochgeladenDatum}</span>
+              <span className="text-[11px] text-claimondo-ondo">Hochgeladen: {hochgeladenDatum}</span>
             )}
           </div>
 
@@ -475,7 +475,7 @@ function SaVorlageCard({
                 onChange={e => setNotiz(e.target.value)}
                 placeholder="Ablehnungsgrund (min. 10 Zeichen) — wird dem SV im Banner angezeigt."
                 rows={3}
-                className="w-full text-xs px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#4573A2]"
+                className="w-full text-xs px-3 py-2 rounded-lg border border-claimondo-border focus:outline-none focus:border-[#4573A2]"
               />
               <button
                 type="button"
@@ -562,16 +562,16 @@ function Tier2Card({
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <ShieldCheckIcon className="w-4 h-4 text-[#4573A2]" />
-          <h3 className="text-sm font-semibold text-gray-900">Tier 2 — Verifizierungs-Dokumente</h3>
+          <h3 className="text-sm font-semibold text-claimondo-navy">Tier 2 — Verifizierungs-Dokumente</h3>
         </div>
         {badge}
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-4 text-[11px]">
         {fristDatum && (
-          <div className="px-3 py-2 rounded-lg bg-gray-50 border border-gray-200">
-            <p className="text-gray-500">Frist bis</p>
-            <p className="font-medium text-gray-800">{fristDatum}</p>
+          <div className="px-3 py-2 rounded-lg bg-[#f8f9fb] border border-claimondo-border">
+            <p className="text-claimondo-ondo">Frist bis</p>
+            <p className="font-medium text-claimondo-navy">{fristDatum}</p>
           </div>
         )}
         {verifiziertDatum && (
@@ -585,12 +585,12 @@ function Tier2Card({
       {/* Angeforderte Slots */}
       {angefordert.length > 0 && (
         <div className="space-y-2 mb-4">
-          <p className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">Angefordert</p>
+          <p className="text-[11px] font-semibold text-claimondo-navy uppercase tracking-wide">Angefordert</p>
           {angefordert.map(slot => (
-            <div key={slot.slotId} className="flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200">
+            <div key={slot.slotId} className="flex items-center justify-between px-3 py-2 rounded-lg border border-claimondo-border">
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-gray-800">{slot.label}</p>
-                {slot.beschreibung && <p className="text-[10px] text-gray-500">{slot.beschreibung}</p>}
+                <p className="text-xs font-medium text-claimondo-navy">{slot.label}</p>
+                {slot.beschreibung && <p className="text-[10px] text-claimondo-ondo">{slot.beschreibung}</p>}
                 <SlotQualiHinweis slot={slot} />
               </div>
               <SlotStatusBadge status={slot.status} uploadCount={slot.uploadCount} />
@@ -602,12 +602,12 @@ function Tier2Card({
       {/* Offene Slots zum Nachfordern */}
       {offeneSlots.length > 0 && (
         <div className="space-y-2 mb-4">
-          <p className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">Noch nicht angefordert</p>
+          <p className="text-[11px] font-semibold text-claimondo-navy uppercase tracking-wide">Noch nicht angefordert</p>
           {offeneSlots.map(slot => (
-            <div key={slot.slotId} className="flex items-center justify-between px-3 py-2 rounded-lg border border-dashed border-gray-300">
+            <div key={slot.slotId} className="flex items-center justify-between px-3 py-2 rounded-lg border border-dashed border-claimondo-border">
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-gray-700">{slot.label}</p>
-                {slot.beschreibung && <p className="text-[10px] text-gray-500">{slot.beschreibung}</p>}
+                <p className="text-xs font-medium text-claimondo-navy">{slot.label}</p>
+                {slot.beschreibung && <p className="text-[10px] text-claimondo-ondo">{slot.beschreibung}</p>}
                 <SlotQualiHinweis slot={slot} />
               </div>
               <button
@@ -635,15 +635,15 @@ function Tier2Card({
             onChange={e => setNachforderung({ ...nachforderung, begruendung: e.target.value })}
             placeholder="Begründung (min. 20 Zeichen) — wird dem SV in der Mitteilung angezeigt."
             rows={2}
-            className="w-full text-xs px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#4573A2]"
+            className="w-full text-xs px-3 py-2 rounded-lg border border-claimondo-border focus:outline-none focus:border-[#4573A2]"
           />
           <div className="flex items-center gap-2">
-            <label className="text-[11px] text-gray-600">Frist:</label>
+            <label className="text-[11px] text-claimondo-ondo">Frist:</label>
             <input
               type="date"
               value={nachforderung.frist}
               onChange={e => setNachforderung({ ...nachforderung, frist: e.target.value })}
-              className="text-xs px-2 py-1 rounded-lg border border-gray-300"
+              className="text-xs px-2 py-1 rounded-lg border border-claimondo-border"
             />
             <button
               type="button"
@@ -657,7 +657,7 @@ function Tier2Card({
               type="button"
               onClick={() => setNachforderung(null)}
               disabled={pending}
-              className="text-[11px] text-gray-500 hover:text-gray-700 disabled:opacity-50"
+              className="text-[11px] text-claimondo-ondo hover:text-claimondo-navy disabled:opacity-50"
             >
               Abbrechen
             </button>
@@ -699,7 +699,7 @@ function SlotQualiHinweis({ slot }: { slot: Tier2Slot }) {
   const qualiLabel = isDat ? 'DAT-Expert-Badge' : `Quali „${slot.mapsToQualifikation}"`
 
   return (
-    <div className="mt-1 text-[10px] text-gray-500 space-y-0.5">
+    <div className="mt-1 text-[10px] text-claimondo-ondo space-y-0.5">
       {slot.steuertKundensichtbarkeit && (
         <p className="text-[10px] text-[#4573A2]">
           Freigabe schaltet {qualiLabel} in Kundenkommunikation frei
@@ -707,7 +707,7 @@ function SlotQualiHinweis({ slot }: { slot: Tier2Slot }) {
       )}
       {slot.nummer && (
         <p>
-          {slot.nummerLabel ?? 'Nummer'}: <span className="font-mono text-gray-700">{slot.nummer}</span>
+          {slot.nummerLabel ?? 'Nummer'}: <span className="font-mono text-claimondo-navy">{slot.nummer}</span>
         </p>
       )}
     </div>
@@ -751,15 +751,15 @@ function SperreCard({ svId, gesperrtSeit, gesperrtGrund }: Props) {
   }
 
   return (
-    <section className={`border rounded-2xl p-5 ${isGesperrt ? 'bg-red-50/50 border-red-200' : 'bg-white border-gray-200'}`}>
+    <section className={`border rounded-2xl p-5 ${isGesperrt ? 'bg-red-50/50 border-red-200' : 'bg-white border-claimondo-border'}`}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           {isGesperrt ? (
             <LockIcon className="w-4 h-4 text-red-600" />
           ) : (
-            <UnlockIcon className="w-4 h-4 text-gray-500" />
+            <UnlockIcon className="w-4 h-4 text-claimondo-ondo" />
           )}
-          <h3 className="text-sm font-semibold text-gray-900">Sperre</h3>
+          <h3 className="text-sm font-semibold text-claimondo-navy">Sperre</h3>
         </div>
         {isGesperrt ? (
           <StatusBadge tone="red"><LockIcon className="w-2.5 h-2.5" />Gesperrt</StatusBadge>
@@ -806,7 +806,7 @@ function SperreCard({ svId, gesperrtSeit, gesperrtGrund }: Props) {
                 onChange={e => setGrund(e.target.value)}
                 placeholder="Sperr-Grund (min. 10 Zeichen) — interner Vermerk + Audit."
                 rows={3}
-                className="w-full text-xs px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#4573A2]"
+                className="w-full text-xs px-3 py-2 rounded-lg border border-claimondo-border focus:outline-none focus:border-[#4573A2]"
               />
               <div className="flex items-center gap-2">
                 <button
@@ -822,7 +822,7 @@ function SperreCard({ svId, gesperrtSeit, gesperrtGrund }: Props) {
                   type="button"
                   onClick={() => { setShowForm(false); setGrund(''); setFehler(null) }}
                   disabled={pending}
-                  className="text-[11px] text-gray-500 hover:text-gray-700 disabled:opacity-50"
+                  className="text-[11px] text-claimondo-ondo hover:text-claimondo-navy disabled:opacity-50"
                 >
                   Abbrechen
                 </button>

@@ -43,12 +43,12 @@ export default function CommunitiesListClient({ communities }: { communities: Co
       <div className="glass-light border border-claimondo-border rounded-ios-md overflow-hidden">
         {communities.length === 0 ? (
           <div className="p-12 text-center">
-            <UsersIcon className="w-8 h-8 text-gray-300 mx-auto mb-3" />
-            <p className="text-sm text-gray-500">Noch keine Communities angelegt.</p>
+            <UsersIcon className="w-8 h-8 text-claimondo-ondo/50 mx-auto mb-3" />
+            <p className="text-sm text-claimondo-ondo">Noch keine Communities angelegt.</p>
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-[10px] uppercase tracking-wide text-gray-500">
+            <thead className="bg-[#f8f9fb] text-[10px] uppercase tracking-wide text-claimondo-ondo">
               <tr>
                 <th className="text-left px-4 py-3">Name</th>
                 <th className="text-left px-4 py-3">Mitglieder</th>
@@ -58,23 +58,23 @@ export default function CommunitiesListClient({ communities }: { communities: Co
                 <th className="text-left px-4 py-3">Erstellt</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-claimondo-border">
               {communities.map(c => (
-                <tr key={c.id} className="hover:bg-gray-50/50">
-                  <td className="px-4 py-3 font-medium text-gray-900">{c.name}</td>
-                  <td className="px-4 py-3 text-gray-700">{c.member_count}</td>
-                  <td className="px-4 py-3 text-gray-700">{c.radius_km ? `${c.radius_km} km` : '—'}</td>
-                  <td className="px-4 py-3 text-gray-700">{c.max_faelle_monat ?? '—'}</td>
+                <tr key={c.id} className="hover:bg-[#f8f9fb]/50">
+                  <td className="px-4 py-3 font-medium text-claimondo-navy">{c.name}</td>
+                  <td className="px-4 py-3 text-claimondo-navy">{c.member_count}</td>
+                  <td className="px-4 py-3 text-claimondo-navy">{c.radius_km ? `${c.radius_km} km` : '—'}</td>
+                  <td className="px-4 py-3 text-claimondo-navy">{c.max_faelle_monat ?? '—'}</td>
                   <td className="px-4 py-3">
                     {c.exklusiv ? (
                       <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-medium">
                         <ShieldCheckIcon className="w-3 h-3" /> Exklusiv
                       </span>
                     ) : (
-                      <span className="text-xs text-gray-400">—</span>
+                      <span className="text-xs text-claimondo-ondo/70">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-xs text-gray-500">
+                  <td className="px-4 py-3 text-xs text-claimondo-ondo">
                     {new Date(c.created_at).toLocaleDateString('de-DE')}
                   </td>
                 </tr>

@@ -63,27 +63,27 @@ export default async function WerbebudgetAggregatWidget() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <TargetIcon className="w-4 h-4 text-emerald-600" />
-              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+              <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider">
                 Werbebudget-Verbrauch
               </h2>
             </div>
-            <span className="text-[11px] text-gray-500">
+            <span className="text-[11px] text-claimondo-ondo">
               {data.mitBudget} von {data.aktiveAnzahl} aktiven SVs
             </span>
           </div>
 
           <div className="grid grid-cols-3 gap-4 mb-5">
-            <div className="text-center p-3 bg-gray-50 rounded-xl">
-              <p className="text-gray-500 text-xs mb-1">Gesamt-Guthaben</p>
+            <div className="text-center p-3 bg-[#f8f9fb] rounded-xl">
+              <p className="text-claimondo-ondo text-xs mb-1">Gesamt-Guthaben</p>
               <p className="text-emerald-600 text-2xl font-bold tabular-nums">{fmtEur(data.gesamt)}</p>
             </div>
-            <div className="text-center p-3 bg-gray-50 rounded-xl">
-              <p className="text-gray-500 text-xs mb-1">SVs mit Budget</p>
-              <p className="text-gray-900 text-2xl font-bold tabular-nums">{data.mitBudget}</p>
+            <div className="text-center p-3 bg-[#f8f9fb] rounded-xl">
+              <p className="text-claimondo-ondo text-xs mb-1">SVs mit Budget</p>
+              <p className="text-claimondo-navy text-2xl font-bold tabular-nums">{data.mitBudget}</p>
             </div>
-            <div className="text-center p-3 bg-gray-50 rounded-xl">
-              <p className="text-gray-500 text-xs mb-1">Durchschnitt</p>
-              <p className="text-gray-900 text-2xl font-bold tabular-nums">
+            <div className="text-center p-3 bg-[#f8f9fb] rounded-xl">
+              <p className="text-claimondo-ondo text-xs mb-1">Durchschnitt</p>
+              <p className="text-claimondo-navy text-2xl font-bold tabular-nums">
                 {fmtEur(data.mitBudget > 0 ? data.gesamt / data.mitBudget : 0)}
               </p>
             </div>
@@ -91,7 +91,7 @@ export default async function WerbebudgetAggregatWidget() {
 
           {data.top10Rows.length > 0 ? (
             <div>
-              <p className="text-[10px] text-gray-500 uppercase tracking-wide font-semibold mb-3">
+              <p className="text-[10px] text-claimondo-ondo uppercase tracking-wide font-semibold mb-3">
                 Top 10 SVs nach Guthaben
               </p>
               <div className="space-y-1.5">
@@ -101,16 +101,16 @@ export default async function WerbebudgetAggregatWidget() {
                     <Link
                       key={r.id}
                       href={`/admin/sachverstaendige/${r.id}`}
-                      className="block hover:bg-gray-50 rounded-lg px-2 py-1.5 -mx-2 transition-colors"
+                      className="block hover:bg-[#f8f9fb] rounded-lg px-2 py-1.5 -mx-2 transition-colors"
                     >
                       <div className="flex items-center justify-between text-xs mb-1">
-                        <span className="text-gray-700 font-medium truncate flex items-center gap-2">
-                          <span className="text-gray-400 tabular-nums w-5 text-right">{idx + 1}.</span>
+                        <span className="text-claimondo-navy font-medium truncate flex items-center gap-2">
+                          <span className="text-claimondo-ondo/70 tabular-nums w-5 text-right">{idx + 1}.</span>
                           {r.name}
                         </span>
                         <span className="text-emerald-600 font-semibold tabular-nums">{fmtEur(r.betrag)}</span>
                       </div>
-                      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-1.5 bg-[#f8f9fb] rounded-full overflow-hidden">
                         <div
                           className="h-full bg-emerald-500 transition-all"
                           style={{ width: `${barWidth}%` }}
@@ -122,7 +122,7 @@ export default async function WerbebudgetAggregatWidget() {
               </div>
             </div>
           ) : (
-            <p className="text-xs text-gray-500 text-center py-4">
+            <p className="text-xs text-claimondo-ondo text-center py-4">
               Keine SVs mit Werbebudget-Guthaben.
             </p>
           )}

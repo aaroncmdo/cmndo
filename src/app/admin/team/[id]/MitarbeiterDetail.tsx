@@ -37,13 +37,13 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
 
   return (
     <div className="py-8"><div>
-      <Link href="/admin/team" className="text-gray-500 hover:text-gray-700 text-sm transition-colors flex items-center gap-1 mb-4"><ArrowLeftIcon className="w-4 h-4" />Zurück</Link>
+      <Link href="/admin/team" className="text-claimondo-ondo hover:text-claimondo-navy text-sm transition-colors flex items-center gap-1 mb-4"><ArrowLeftIcon className="w-4 h-4" />Zurück</Link>
 
       <div className="flex items-center gap-4 mb-6">
-        <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center"><UserIcon className="w-7 h-7 text-gray-500" /></div>
+        <div className="w-14 h-14 bg-[#f8f9fb] rounded-full flex items-center justify-center"><UserIcon className="w-7 h-7 text-claimondo-ondo" /></div>
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">{name}</h1>
-          <p className="text-gray-500 text-sm">{m.email as string} · {m.rolle as string}</p>
+          <h1 className="text-xl font-semibold text-claimondo-navy">{name}</h1>
+          <p className="text-claimondo-ondo text-sm">{m.email as string} · {m.rolle as string}</p>
         </div>
       </div>
 
@@ -63,25 +63,25 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
 
       {/* Performance History */}
       {performanceHistory.length > 0 && (
-        <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-6">
-          <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Performance-Verlauf</h3>
+        <div className="bg-white rounded-2xl border border-claimondo-border p-5 mb-6">
+          <h3 className="text-claimondo-ondo text-xs font-semibold uppercase tracking-wider mb-3">Performance-Verlauf</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-gray-200">
-                <th className="text-left px-3 py-2 text-gray-500 font-medium">Monat</th>
-                <th className="text-right px-3 py-2 text-gray-500 font-medium">Leads</th>
-                <th className="text-right px-3 py-2 text-gray-500 font-medium">Konvertiert</th>
-                <th className="text-right px-3 py-2 text-gray-500 font-medium">Abgeschl.</th>
-                <th className="text-right px-3 py-2 text-gray-500 font-medium">Umsatz</th>
+              <thead><tr className="border-b border-claimondo-border">
+                <th className="text-left px-3 py-2 text-claimondo-ondo font-medium">Monat</th>
+                <th className="text-right px-3 py-2 text-claimondo-ondo font-medium">Leads</th>
+                <th className="text-right px-3 py-2 text-claimondo-ondo font-medium">Konvertiert</th>
+                <th className="text-right px-3 py-2 text-claimondo-ondo font-medium">Abgeschl.</th>
+                <th className="text-right px-3 py-2 text-claimondo-ondo font-medium">Umsatz</th>
               </tr></thead>
               <tbody>
                 {performanceHistory.map(p => (
-                  <tr key={`${p.monat}-${p.jahr}`} className="border-b border-gray-200/50">
-                    <td className="px-3 py-2 text-gray-700">{p.monat} {p.jahr}</td>
-                    <td className="px-3 py-2 text-right text-gray-700 tabular-nums">{p.leads_qualifiziert}</td>
+                  <tr key={`${p.monat}-${p.jahr}`} className="border-b border-claimondo-border/50">
+                    <td className="px-3 py-2 text-claimondo-navy">{p.monat} {p.jahr}</td>
+                    <td className="px-3 py-2 text-right text-claimondo-navy tabular-nums">{p.leads_qualifiziert}</td>
                     <td className="px-3 py-2 text-right text-green-400 tabular-nums">{p.leads_konvertiert}</td>
-                    <td className="px-3 py-2 text-right text-gray-700 tabular-nums">{p.faelle_abgeschlossen}</td>
-                    <td className="px-3 py-2 text-right text-gray-700 tabular-nums">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(p.umsatz_generiert ?? 0)}</td>
+                    <td className="px-3 py-2 text-right text-claimondo-navy tabular-nums">{p.faelle_abgeschlossen}</td>
+                    <td className="px-3 py-2 text-right text-claimondo-navy tabular-nums">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(p.umsatz_generiert ?? 0)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -91,8 +91,8 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
       )}
 
       {/* Edit Form */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-5">
-        <h3 className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-4">Profil bearbeiten</h3>
+      <div className="bg-white rounded-2xl border border-claimondo-border p-5">
+        <h3 className="text-claimondo-ondo text-xs font-semibold uppercase tracking-wider mb-4">Profil bearbeiten</h3>
         <form onSubmit={handleSave} className="space-y-3">
           <input type="hidden" name="id" value={m.id as string} />
           <div className="grid grid-cols-2 gap-3">
@@ -105,8 +105,8 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="text-sm text-gray-500 mb-1 block">Kategorie</label>
-              <select name="kategorie" defaultValue={(m.kategorie as string) ?? ''} className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]">
+              <label className="text-sm text-claimondo-ondo mb-1 block">Kategorie</label>
+              <select name="kategorie" defaultValue={(m.kategorie as string) ?? ''} className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]">
                 <option value="">—</option><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="admin">Admin</option><option value="entwicklung">Entwicklung</option>
               </select>
             </div>
@@ -117,8 +117,8 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
             <Field label="Kapazitaet max" name="kapazitaet_max" type="number" defaultValue={String((m.kapazitaet_max as number) ?? 100)} />
             <Field label="Eingestellt am" name="eingestellt_am" type="date" defaultValue={(m.eingestellt_am as string) ?? ''} />
             <div>
-              <label className="text-sm text-gray-500 mb-1 block">Aktiv</label>
-              <select name="aktiv" defaultValue={String(m.aktiv ?? true)} className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]">
+              <label className="text-sm text-claimondo-ondo mb-1 block">Aktiv</label>
+              <select name="aktiv" defaultValue={String(m.aktiv ?? true)} className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]">
                 <option value="true">Ja</option><option value="false">Nein</option>
               </select>
             </div>
@@ -131,13 +131,13 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
 
         {/* KFZ-182: Twilio WhatsApp-Nummer Zuweisung */}
         {(m.rolle === 'kundenbetreuer' || m.rolle === 'admin') && (
-          <div className="mt-5 bg-white border border-gray-200 rounded-2xl p-5">
-            <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2"><PhoneIcon className="w-4 h-4" /> WhatsApp-Nummer</h3>
+          <div className="mt-5 bg-white border border-claimondo-border rounded-2xl p-5">
+            <h3 className="text-sm font-medium text-claimondo-navy mb-3 flex items-center gap-2"><PhoneIcon className="w-4 h-4" /> WhatsApp-Nummer</h3>
             {m.twilio_whatsapp_nummer ? (
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-mono text-gray-900 bg-gray-100 px-3 py-1.5 rounded-lg">{m.twilio_whatsapp_nummer as string}</span>
-                  <span className="text-[10px] text-gray-400">seit {m.twilio_nummer_provisioned_am ? new Date(m.twilio_nummer_provisioned_am as string).toLocaleDateString('de-DE') : '—'}</span>
+                  <span className="text-sm font-mono text-claimondo-navy bg-[#f8f9fb] px-3 py-1.5 rounded-lg">{m.twilio_whatsapp_nummer as string}</span>
+                  <span className="text-[10px] text-claimondo-ondo/70">seit {m.twilio_nummer_provisioned_am ? new Date(m.twilio_nummer_provisioned_am as string).toLocaleDateString('de-DE') : '—'}</span>
                 </div>
                 <button
                   onClick={async () => {
@@ -155,7 +155,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
               </div>
             ) : (
               <div className="space-y-2">
-                <p className="text-xs text-gray-500">Noch keine eigene WhatsApp-Nummer zugewiesen. Kosten: ~1 EUR/Monat via Twilio.</p>
+                <p className="text-xs text-claimondo-ondo">Noch keine eigene WhatsApp-Nummer zugewiesen. Kosten: ~1 EUR/Monat via Twilio.</p>
                 <button
                   onClick={async () => {
                     setTwilioLoading(true); setTwilioMsg(null)
@@ -175,17 +175,17 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
         )}
 
         {/* AAR-343: 2FA-Reset — für Nummern-Wechsel oder wenn User ausgesperrt ist */}
-        <div className="mt-5 bg-white border border-gray-200 rounded-2xl p-5">
-          <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+        <div className="mt-5 bg-white border border-claimondo-border rounded-2xl p-5">
+          <h3 className="text-sm font-medium text-claimondo-navy mb-3 flex items-center gap-2">
             <ShieldOffIcon className="w-4 h-4" /> 2FA-Telefonnummer
           </h3>
-          <p className="text-xs text-gray-500 mb-3">
+          <p className="text-xs text-claimondo-ondo mb-3">
             Aktuelle 2FA-Nummer:{' '}
             <span className="font-mono">
               {(m.twofa_telefon as string | null) ?? (m.telefon as string | null) ?? '—'}
             </span>
             {!m.twofa_telefon && m.telefon ? (
-              <span className="text-gray-400"> (Fallback auf Profil-Telefon)</span>
+              <span className="text-claimondo-ondo/70"> (Fallback auf Profil-Telefon)</span>
             ) : null}
           </p>
           <div className="space-y-2">
@@ -194,7 +194,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
               value={twofaNeuePhone}
               onChange={(e) => setTwofaNeuePhone(e.target.value)}
               placeholder="Neue 2FA-Nummer (optional, z. B. +49 151 1234 5678)"
-              className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+              className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
             />
             <div className="flex gap-2 flex-wrap">
               <button
@@ -246,9 +246,9 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
 
 function KPI({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-4">
-      <div className="flex items-center gap-2 mb-1">{icon}<span className="text-gray-500 text-xs">{label}</span></div>
-      <div className="text-xl font-bold text-gray-900">{value}</div>
+    <div className="bg-white border border-claimondo-border rounded-2xl p-4">
+      <div className="flex items-center gap-2 mb-1">{icon}<span className="text-claimondo-ondo text-xs">{label}</span></div>
+      <div className="text-xl font-bold text-claimondo-navy">{value}</div>
     </div>
   )
 }
@@ -256,8 +256,8 @@ function KPI({ icon, label, value }: { icon: React.ReactNode; label: string; val
 function Field({ label, name, defaultValue, type = 'text' }: { label: string; name: string; defaultValue: string; type?: string }) {
   return (
     <div>
-      <label className="text-sm text-gray-500 mb-1 block">{label}</label>
-      <input name={name} type={type} defaultValue={defaultValue} step={type === 'number' ? 'any' : undefined} className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" />
+      <label className="text-sm text-claimondo-ondo mb-1 block">{label}</label>
+      <input name={name} type={type} defaultValue={defaultValue} step={type === 'number' ? 'any' : undefined} className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" />
     </div>
   )
 }

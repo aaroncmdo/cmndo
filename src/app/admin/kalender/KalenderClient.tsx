@@ -32,7 +32,7 @@ const FARBEN: Record<string, string> = { gutachter: '#4573A2', rueckruf: '#E89B3
 const TYP_LABELS: Record<string, string> = { gutachter: 'Gutachter', rueckruf: 'Rueckruf', kunde: 'Kunde', intern: 'Intern', kb_beratung: 'KB-Beratung' }
 const TYP_ICONS: Record<string, typeof CalendarIcon> = { gutachter: CalendarIcon, rueckruf: PhoneIcon, kunde: UsersIcon, intern: CoffeeIcon, kb_beratung: PhoneIcon }
 const SV_TYP_BADGE: Record<string, { label: string; color: string }> = {
-  'kfz-gutachter': { label: 'KFZ', color: 'bg-blue-100 text-blue-700' },
+  'kfz-gutachter': { label: 'KFZ', color: 'bg-[#f8f9fb] text-claimondo-ondo' },
   'dat-gutachter': { label: 'DAT', color: 'bg-orange-100 text-orange-700' },
   'akademie': { label: 'Akademie', color: 'bg-green-100 text-green-700' },
   'gutachterbuero': { label: 'Buero', color: 'bg-purple-100 text-purple-700' },
@@ -210,24 +210,24 @@ export default function KalenderClient({
               <>
                 <div className="flex bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
                   <button onClick={() => setViewMode('month')}
-                    className={`px-3 py-1.5 text-xs font-medium transition-colors ${viewMode === 'month' ? 'bg-claimondo-navy text-white' : 'text-gray-500 hover:text-gray-800'}`}>
+                    className={`px-3 py-1.5 text-xs font-medium transition-colors ${viewMode === 'month' ? 'bg-claimondo-navy text-white' : 'text-claimondo-ondo hover:text-claimondo-navy'}`}>
                     Monat
                   </button>
                   <button onClick={() => setViewMode('week')}
-                    className={`px-3 py-1.5 text-xs font-medium transition-colors ${viewMode === 'week' ? 'bg-claimondo-navy text-white' : 'text-gray-500 hover:text-gray-800'}`}>
+                    className={`px-3 py-1.5 text-xs font-medium transition-colors ${viewMode === 'week' ? 'bg-claimondo-navy text-white' : 'text-claimondo-ondo hover:text-claimondo-navy'}`}>
                     Woche
                   </button>
                 </div>
                 <div className="flex items-center gap-1">
-                  <button onClick={() => navigate('prev')} className="p-2 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors">
+                  <button onClick={() => navigate('prev')} className="p-2 rounded-lg text-claimondo-ondo hover:text-claimondo-navy hover:bg-[#f8f9fb] transition-colors">
                     <ChevronLeftIcon className="w-4 h-4" />
                   </button>
-                  <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">Heute</button>
-                  <button onClick={() => navigate('next')} className="p-2 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors">
+                  <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1.5 text-xs font-medium text-claimondo-navy hover:bg-[#f8f9fb] rounded-lg transition-colors">Heute</button>
+                  <button onClick={() => navigate('next')} className="p-2 rounded-lg text-claimondo-ondo hover:text-claimondo-navy hover:bg-[#f8f9fb] transition-colors">
                     <ChevronRightIcon className="w-4 h-4" />
                   </button>
                 </div>
-                <span className="text-gray-900 text-sm font-medium ml-2">
+                <span className="text-claimondo-navy text-sm font-medium ml-2">
                   {format(currentDate, viewMode === 'month' ? 'MMMM yyyy' : "'KW' w, MMMM yyyy", { locale: de })}
                 </span>
               </>
@@ -246,7 +246,7 @@ export default function KalenderClient({
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                   active
                     ? `text-white border-transparent`
-                    : `bg-white border-gray-200 text-gray-500 hover:border-gray-300`
+                    : `bg-white border-claimondo-border text-claimondo-ondo hover:border-claimondo-border`
                 }`}
                 style={active ? { backgroundColor: FARBEN[key] } : {}}>
                 <Icon className="w-3.5 h-3.5" />
@@ -262,8 +262,8 @@ export default function KalenderClient({
               disabled={!typFilter.gutachter}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                 typFilter.gutachter
-                  ? 'bg-white border-gray-200 text-gray-700 hover:border-claimondo-ondo'
-                  : 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
+                  ? 'bg-white border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo'
+                  : 'bg-[#f8f9fb] border-claimondo-border text-claimondo-ondo/70 cursor-not-allowed'
               }`}
               title={!typFilter.gutachter ? 'Gutachter-Termine sind ausgeblendet' : undefined}>
               <UsersIcon className="w-3.5 h-3.5" />
@@ -272,14 +272,14 @@ export default function KalenderClient({
 
             {gutachterOpen && (
               <div className="absolute top-full left-0 mt-1 w-72 glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg z-50 overflow-hidden">
-                <div className="p-2 border-b border-gray-100">
+                <div className="p-2 border-b border-claimondo-border">
                   <div className="relative">
-                    <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                    <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-claimondo-ondo/70" />
                     <input value={gutachterSearch} onChange={e => setGutachterSearch(e.target.value)}
-                      placeholder="Suchen..." className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-claimondo-ondo" />
+                      placeholder="Suchen..." className="w-full pl-8 pr-3 py-1.5 text-xs border border-claimondo-border rounded-lg focus:outline-none focus:border-claimondo-ondo" />
                   </div>
                 </div>
-                <div className="px-2 py-1.5 border-b border-gray-100">
+                <div className="px-2 py-1.5 border-b border-claimondo-border">
                   <button onClick={() => setGutachterIds(allGutachterSelected ? [] : [])}
                     className="text-xs text-claimondo-ondo font-medium hover:underline">
                     {allGutachterSelected ? 'Alle abwaehlen' : 'Alle auswaehlen'}
@@ -291,20 +291,20 @@ export default function KalenderClient({
                     const badge = SV_TYP_BADGE[g.typ]
                     return (
                       <button key={g.id} onClick={() => toggleGutachter(g.id)}
-                        className="w-full flex items-center gap-2 px-3 py-1.5 text-left hover:bg-gray-50 transition-colors">
+                        className="w-full flex items-center gap-2 px-3 py-1.5 text-left hover:bg-[#f8f9fb] transition-colors">
                         <div className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
-                          selected ? 'bg-claimondo-ondo border-claimondo-ondo' : 'border-gray-300'
+                          selected ? 'bg-claimondo-ondo border-claimondo-ondo' : 'border-claimondo-border'
                         }`}>
                           {selected && <CheckIcon className="w-3 h-3 text-white" />}
                         </div>
                         <KundeAvatar name={g.name} size={24} />
-                        <span className="text-xs text-gray-800 flex-1 truncate">{g.name}</span>
+                        <span className="text-xs text-claimondo-navy flex-1 truncate">{g.name}</span>
                         {badge && <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${badge.color}`}>{badge.label}</span>}
                       </button>
                     )
                   })}
                 </div>
-                <div className="p-2 border-t border-gray-100">
+                <div className="p-2 border-t border-claimondo-border">
                   <button onClick={() => setGutachterOpen(false)}
                     className="w-full py-1.5 text-xs font-medium text-white bg-claimondo-ondo rounded-lg hover:bg-claimondo-navy transition-colors">
                     Fertig
@@ -317,9 +317,9 @@ export default function KalenderClient({
 
         {/* Calendar grid */}
         <div className="glass-light border border-claimondo-border rounded-ios-md overflow-hidden">
-          <div className="grid grid-cols-7 border-b border-gray-200">
+          <div className="grid grid-cols-7 border-b border-claimondo-border">
             {WEEKDAYS.map(d => (
-              <div key={d} className="px-2 py-2.5 text-center text-gray-500 text-xs font-medium">{d}</div>
+              <div key={d} className="px-2 py-2.5 text-center text-claimondo-ondo text-xs font-medium">{d}</div>
             ))}
           </div>
 
@@ -331,11 +331,11 @@ export default function KalenderClient({
 
               return (
                 <div key={i} onClick={() => setModal({ mode: 'create', date: day })}
-                  className={`border-b border-r border-gray-200/50 p-1.5 cursor-pointer hover:bg-gray-50/50 ${
+                  className={`border-b border-r border-claimondo-border/50 p-1.5 cursor-pointer hover:bg-[#f8f9fb]/50 ${
                     viewMode === 'week' ? 'min-h-48' : 'min-h-24'
                   } ${!isCurrentMonth && viewMode === 'month' ? 'bg-[#f8f9fb]/50' : ''}`}>
                   <div className={`text-xs font-medium mb-1 w-6 h-6 flex items-center justify-center rounded-full ${
-                    todayFlag ? 'bg-claimondo-navy text-white' : isCurrentMonth ? 'text-gray-700' : 'text-gray-300'
+                    todayFlag ? 'bg-claimondo-navy text-white' : isCurrentMonth ? 'text-claimondo-navy' : 'text-claimondo-ondo/50'
                   }`}>
                     {format(day, 'd')}
                   </div>
@@ -363,7 +363,7 @@ export default function KalenderClient({
                       )
                     })}
                     {dayEntries.length > (viewMode === 'week' ? 10 : 3) && (
-                      <span className="text-gray-400 text-[10px] px-1.5">+{dayEntries.length - (viewMode === 'week' ? 10 : 3)} mehr</span>
+                      <span className="text-claimondo-ondo/70 text-[10px] px-1.5">+{dayEntries.length - (viewMode === 'week' ? 10 : 3)} mehr</span>
                     )}
                   </div>
                 </div>
@@ -455,10 +455,10 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
     <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
       <div className="glass-light border border-claimondo-border rounded-ios-lg p-6 max-w-md w-full shadow-ios-lg" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-claimondo-navy">
             {mode === 'create' ? 'Neuer Termin' : 'Termin bearbeiten'}
           </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><XIcon className="w-5 h-5" /></button>
+          <button onClick={onClose} className="text-claimondo-ondo/70 hover:text-claimondo-ondo"><XIcon className="w-5 h-5" /></button>
         </div>
 
         {/* Typ-Pills */}
@@ -466,7 +466,7 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
           {(['rueckruf', 'kunde', 'intern'] as const).map(t => (
             <button key={t} onClick={() => setTyp(t)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                typ === t ? 'text-white border-transparent' : 'bg-white border-gray-200 text-gray-500'
+                typ === t ? 'text-white border-transparent' : 'bg-white border-claimondo-border text-claimondo-ondo'
               }`}
               style={typ === t ? { backgroundColor: FARBEN[t] } : {}}>
               {TYP_LABELS[t]}
@@ -476,11 +476,11 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
 
         <div className="space-y-3">
           <input value={titel} onChange={e => setTitel(e.target.value)} placeholder="Titel *"
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
+            className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
           <input type="datetime-local" value={startZeit} onChange={e => setStartZeit(e.target.value)}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
+            className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
           <select value={dauer} onChange={e => setDauer(Number(e.target.value))}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo">
+            className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo">
             <option value={15}>15 min</option>
             <option value={30}>30 min</option>
             <option value={45}>45 min</option>
@@ -492,13 +492,13 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
 
         {/* Status-Buttons (nur Edit) */}
         {mode === 'edit' && termin && (
-          <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100">
+          <div className="flex gap-2 mt-4 pt-4 border-t border-claimondo-border">
             <button onClick={() => handleStatusChange('erledigt')} disabled={loading}
               className="flex-1 py-2 text-xs font-medium text-green-700 bg-green-50 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50">
               Erledigt
             </button>
             <button onClick={() => handleStatusChange('abgesagt')} disabled={loading}
-              className="flex-1 py-2 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50">
+              className="flex-1 py-2 text-xs font-medium text-claimondo-ondo bg-[#f8f9fb] rounded-lg hover:bg-claimondo-border transition-colors disabled:opacity-50">
               Absagen
             </button>
           </div>
@@ -519,7 +519,7 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
             )
           )}
           <div className="flex-1" />
-          <button onClick={onClose} className="px-4 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+          <button onClick={onClose} className="px-4 py-2.5 text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] rounded-lg hover:bg-claimondo-border transition-colors">
             Abbrechen
           </button>
           <button onClick={handleSave} disabled={loading || !titel.trim()}
