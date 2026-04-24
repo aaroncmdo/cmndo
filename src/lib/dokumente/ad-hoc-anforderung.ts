@@ -164,3 +164,151 @@ export async function requestDokumentFromKunde(
     upload_url: uploadUrl,
   }
 }
+
+// AAR-762 Phase 3: Liste offene Ad-hoc-Anforderungen + Cancel/Resend
+
+export type AdHocAnforderungRow = {
+  id: string
+  kanal: string
+  status: string
+  expires_at: string
+  gesendet_am: string
+  erstellt_am: string
+  token: string
+  belegTyp: BelegTyp | null
+  label: string
+  upload_url: string
+}
+
+export async function listAdHocAnforderungen(
+  fallId: string,
+): Promise<AdHocAnforderungRow[]> {
+  const admin = createAdminClient()
+  const { data: fall } = await admin
+    .from('faelle')
+    .select('lead_id')
+    .eq('id', fallId)
+    .maybeSingle()
+  if (!fall?.lead_id) return []
+
+  const { data: rows } = await admin
+    .from('dokument_upload_anfragen')
+    .select('id, kanal, status, expires_at, gesendet_am, erstellt_am, token, slots')
+    .eq('lead_id', fall.lead_id)
+    .order('erstellt_am', { ascending: false })
+    .limit(20)
+
+  if (!rows) return []
+
+  return rows
+    .map((r): AdHocAnforderungRow | null => {
+      const slotsArr = Array.isArray(r.slots) ? (r.slots as Array<Record<string, unknown>>) : []
+      const first = slotsArr[0]
+      const slotId = typeof first?.slot_id === 'string' ? first.slot_id : ''
+      // Nur Ad-hoc-Anfragen (slot_id beginnt mit ad_hoc_)
+      if (!slotId.startsWith('ad_hoc_')) return null
+      const typ = slotId.replace(/^ad_hoc_/, '') as BelegTyp
+      const label = typeof first?.label === 'string' ? first.label : TYP_LABEL[typ] ?? 'Dokument'
+      return {
+        id: r.id,
+        kanal: r.kanal,
+        status: r.status,
+        expires_at: r.expires_at,
+        gesendet_am: r.gesendet_am,
+        erstellt_am: r.erstellt_am,
+        token: r.token,
+        belegTyp: VALID_TYPS.has(typ) ? typ : null,
+        label,
+        upload_url: buildUploadUrl(r.token),
+      }
+    })
+    .filter((x): x is AdHocAnforderungRow => x !== null)
+}
+
+const VALID_TYPS = new Set<BelegTyp>([
+  'mietwagen_rechnung',
+  'werkstatt_rechnung',
+  'abschlepp_rechnung',
+  'attest',
+  'sonstiges',
+])
+
+export async function cancelAdHocAnforderung(
+  anfrageId: string,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const admin = createAdminClient()
+  const { error } = await admin
+    .from('dokument_upload_anfragen')
+    .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+    .eq('id', anfrageId)
+  if (error) return { success: false, error: error.message }
+  return { success: true }
+}
+
+export async function resendAdHocAnforderung(
+  anfrageId: string,
+  kanalOverride?: AdHocKanal,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const admin = createAdminClient()
+  const { data: anfrage } = await admin
+    .from('dokument_upload_anfragen')
+    .select('id, lead_id, kanal, token, slots, status')
+    .eq('id', anfrageId)
+    .maybeSingle()
+  if (!anfrage) return { success: false, error: 'Anfrage nicht gefunden' }
+  if (anfrage.status !== 'pending') {
+    return { success: false, error: 'Nur pending-Anfragen können erneut gesendet werden' }
+  }
+
+  const slotsArr = Array.isArray(anfrage.slots) ? (anfrage.slots as Array<Record<string, unknown>>) : []
+  const first = slotsArr[0]
+  const slotId = typeof first?.slot_id === 'string' ? first.slot_id : ''
+  const typ = slotId.replace(/^ad_hoc_/, '') as BelegTyp
+  if (!VALID_TYPS.has(typ)) return { success: false, error: 'Ungültiger Beleg-Typ' }
+
+  // Lead → Fall zurück-auflösen für Event-Kontext
+  const { data: fall } = await admin
+    .from('faelle')
+    .select('id')
+    .eq('lead_id', anfrage.lead_id)
+    .maybeSingle()
+  if (!fall?.id) return { success: false, error: 'Fall nicht gefunden' }
+
+  const kanal = kanalOverride ?? (anfrage.kanal as AdHocKanal)
+  const uploadUrl = buildUploadUrl(anfrage.token)
+  const begruendung = typeof first?.beschreibung === 'string' ? first.beschreibung : TYP_DEFAULT_BEGRUENDUNG[typ]
+
+  try {
+    await emitEvent(
+      'dokument.fehlt',
+      {
+        fallId: fall.id,
+        dokumentTyp: typ,
+        anforderungText: `${begruendung} Upload-Link: ${uploadUrl}`,
+        empfaengerRolle: 'kunde',
+      },
+      { fallId: fall.id, triggeredBy: user.id },
+    )
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Resend fehlgeschlagen',
+    }
+  }
+
+  // Kanal-Update + gesendet_am refresh
+  await admin
+    .from('dokument_upload_anfragen')
+    .update({ kanal, gesendet_am: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .eq('id', anfrageId)
+
+  return { success: true }
+}

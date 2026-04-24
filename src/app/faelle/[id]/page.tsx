@@ -28,6 +28,7 @@ import { getFallEventStream } from '@/lib/fall/event-stream'
 import { getChatTeilnehmer } from '@/lib/chatGruppe'
 // AAR-542 (C5): Pflicht-Matrix — Katalog-Regel-Auswertung serverseitig
 import { evaluatePflichtdocs } from '@/lib/dokumente/pflicht-evaluator'
+import { listAdHocAnforderungen } from '@/lib/dokumente/ad-hoc-anforderung'
 // AAR-651: Zentrale Fall-Loader-Lib (Single Source of Truth pro Rolle)
 import { getFallById } from '@/lib/fall/queries'
 
@@ -239,6 +240,14 @@ export default async function FallaktePage({
       begruendung: r.begruendung,
       angefordert_am: r.angefordert_am,
     }))
+
+  // AAR-762 Phase 3: Ad-hoc-Anforderungen für Admin/KB laden. Andere
+  // Rollen bekommen leeres Array — die Liste wird nur im Admin/KB-Kontext
+  // gerendert.
+  const adHocAnforderungen =
+    userRolle === 'admin' || userRolle === 'kundenbetreuer'
+      ? await listAdHocAnforderungen(id)
+      : []
 
   const rolleLabelForModal: Record<string, string> = {
     admin: 'Claimondo',
@@ -501,6 +510,8 @@ export default async function FallaktePage({
           anforderbareSlots,
           anforderungenVonMir,
           rolleLabel,
+          // AAR-762 Phase 3: Ad-hoc-Anforderungen (Admin/KB-only)
+          adHocAnforderungen,
           // AAR-326: KB-Zuordnungs-UI
           unzugeordneteUploads,
           zuPruefendeUploads,
