@@ -145,6 +145,58 @@ export const EVENT_TO_TASK: Partial<Record<EventType, TaskSpec[]>> = {
       prioritaet: 'normal',
     },
   ],
+
+  // ─── 5.12 Mietwagen / Nutzungsausfall (AAR-759) ─────────────────────
+  'mietwagen.rechnung_ausstehend': [
+    {
+      task_typ: 'mietwagen_rechnung_einholen',
+      titel_template: 'Mietwagen-Rechnung von Kunde {vorname} einholen',
+      beschreibung_template:
+        'Kunde hat Mietwagen seit {seit_tage} Tagen. Bitte Rechnung anfordern und prüfen.',
+      empfaenger_rolle: 'kundenbetreuer',
+      deadline_hours: 48,
+      prioritaet: 'normal',
+      reminder_kaskade: [
+        { after_hours: 24, channel: 'whatsapp' },
+        { after_hours: 72, channel: 'whatsapp' },
+      ],
+      eskalation: {
+        nach_stillen_remindern: 3,
+        an_rolle: 'admin',
+        titel_template: 'Eskalation: Mietwagen-Rechnung für Fall {fall_nummer} seit Tagen offen',
+        prioritaet: 'dringend',
+      },
+    },
+  ],
+  'mietwagen.abgabe_naht': [
+    {
+      task_typ: 'mietwagen_abgabe_steuern',
+      titel_template: 'Mietwagen-Abgabe naht: Kunde {vorname} — noch {tage_rest} Tage',
+      beschreibung_template:
+        'Bitte Kunden kontaktieren und Abgabe am Limit-Datum bestätigen. VS-Puffer beachten.',
+      empfaenger_rolle: 'kundenbetreuer',
+      deadline_hours: 24,
+      prioritaet: 'dringend',
+      reminder_kaskade: [{ after_hours: 12, channel: 'in_app' }],
+    },
+  ],
+  'mietwagen.ueber_limit': [
+    {
+      task_typ: 'mietwagen_kunde_eigene_kosten',
+      titel_template: 'Mietwagen über Limit — Kunde {vorname} fährt auf eigene Kosten',
+      beschreibung_template:
+        'Limit seit {tage_ueber} Tagen überschritten. Argumentations-Puffer ausgeschöpft. Kunde hat Benachrichtigung erhalten.',
+      empfaenger_rolle: 'kundenbetreuer',
+      deadline_hours: 4,
+      prioritaet: 'kritisch',
+      eskalation: {
+        nach_stillen_remindern: 1,
+        an_rolle: 'admin',
+        titel_template: 'Admin-Eskalation: Mietwagen-Überlimit Fall {fall_nummer}',
+        prioritaet: 'kritisch',
+      },
+    },
+  ],
 }
 
 /**

@@ -248,6 +248,23 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
     priority: 'normal',
     channels: { makler: ['web_push', 'email', 'in_app'], admin: ['in_app'] },
   },
+  // 5.12 Mietwagen / Nutzungsausfall (AAR-759)
+  'mietwagen.rechnung_ausstehend': {
+    priority: 'normal',
+    channels: { kunde: ['whatsapp', 'in_app'], kundenbetreuer: ['in_app'] },
+  },
+  'mietwagen.abgabe_naht': {
+    priority: 'urgent',
+    channels: { kunde: ['whatsapp', 'email', 'in_app'], kundenbetreuer: ['in_app'] },
+  },
+  'mietwagen.ueber_limit': {
+    priority: 'urgent',
+    channels: {
+      kunde: ['whatsapp', 'email', 'in_app'],
+      kundenbetreuer: ['web_push', 'in_app'],
+      admin: ['in_app'],
+    },
+  },
 }
 
 export function getEventConfig(eventType: EventType): EventConfig {

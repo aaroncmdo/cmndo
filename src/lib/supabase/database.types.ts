@@ -1540,9 +1540,17 @@ export type Database = {
           marketing_provision: number | null
           marketing_provision_status: string | null
           marketing_quelle: string | null
+          mietwagen_argumentations_puffer: number
           mietwagen_flag: boolean | null
+          mietwagen_hat: boolean
           mietwagen_kanzlei_informiert: boolean | null
           mietwagen_kanzlei_informiert_am: string | null
+          mietwagen_limit_grund: string | null
+          mietwagen_limit_tage: number | null
+          mietwagen_rechnung_url: string | null
+          mietwagen_rechnung_vorhanden: boolean
+          mietwagen_seit_datum: string | null
+          mietwagen_vermieter: string | null
           nachbesichtigung_angefordert_am: string | null
           nachbesichtigung_ergebnis: string | null
           nachbesichtigung_konfrontation: boolean | null
@@ -1862,9 +1870,17 @@ export type Database = {
           marketing_provision?: number | null
           marketing_provision_status?: string | null
           marketing_quelle?: string | null
+          mietwagen_argumentations_puffer?: number
           mietwagen_flag?: boolean | null
+          mietwagen_hat?: boolean
           mietwagen_kanzlei_informiert?: boolean | null
           mietwagen_kanzlei_informiert_am?: string | null
+          mietwagen_limit_grund?: string | null
+          mietwagen_limit_tage?: number | null
+          mietwagen_rechnung_url?: string | null
+          mietwagen_rechnung_vorhanden?: boolean
+          mietwagen_seit_datum?: string | null
+          mietwagen_vermieter?: string | null
           nachbesichtigung_angefordert_am?: string | null
           nachbesichtigung_ergebnis?: string | null
           nachbesichtigung_konfrontation?: boolean | null
@@ -2184,9 +2200,17 @@ export type Database = {
           marketing_provision?: number | null
           marketing_provision_status?: string | null
           marketing_quelle?: string | null
+          mietwagen_argumentations_puffer?: number
           mietwagen_flag?: boolean | null
+          mietwagen_hat?: boolean
           mietwagen_kanzlei_informiert?: boolean | null
           mietwagen_kanzlei_informiert_am?: string | null
+          mietwagen_limit_grund?: string | null
+          mietwagen_limit_tage?: number | null
+          mietwagen_rechnung_url?: string | null
+          mietwagen_rechnung_vorhanden?: boolean
+          mietwagen_seit_datum?: string | null
+          mietwagen_vermieter?: string | null
           nachbesichtigung_angefordert_am?: string | null
           nachbesichtigung_ergebnis?: string | null
           nachbesichtigung_konfrontation?: boolean | null

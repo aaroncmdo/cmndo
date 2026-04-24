@@ -12,6 +12,8 @@ import { createKbVideoterminByKb } from '../_actions/termine'
 // AAR-377: Shared BriefingCard — oben in der Übersicht.
 import BriefingCard from '@/components/fall/BriefingCard'
 import type { StammdatenSection } from '@/lib/fall/phase-config'
+// AAR-759: Shared Mietwagen-Status-Card (read-only in Phase 1)
+import { MietwagenStatusCard } from '@/components/shared/mietwagen'
 import {
   KundendatenSection,
   FahrzeugdatenSection,
@@ -242,6 +244,21 @@ export default function UebersichtTab() {
         if (!Comp) return null
         return <Comp key={id} />
       })}
+
+      {/* AAR-759: Mietwagen-Status (Phase 1 read-only) */}
+      <MietwagenStatusCard
+        rolle={userRolle === 'kundenbetreuer' ? 'kb' : userRolle === 'admin' ? 'admin' : 'kb'}
+        fall={{
+          mietwagen_hat: (fall.mietwagen_hat as boolean | null) ?? null,
+          mietwagen_seit_datum: (fall.mietwagen_seit_datum as string | null) ?? null,
+          mietwagen_limit_tage: (fall.mietwagen_limit_tage as number | null) ?? null,
+          mietwagen_limit_grund: (fall.mietwagen_limit_grund as string | null) ?? null,
+          mietwagen_rechnung_vorhanden: (fall.mietwagen_rechnung_vorhanden as boolean | null) ?? null,
+          mietwagen_argumentations_puffer: (fall.mietwagen_argumentations_puffer as number | null) ?? null,
+          mietwagen_vermieter: (fall.mietwagen_vermieter as string | null) ?? null,
+          nutzungsausfall_tage: (fall.nutzungsausfall_tage as number | null) ?? null,
+        }}
+      />
 
       {/* AAR-313: Nutzungsausfall — self-gating, immer rendern wenn relevant */}
       <NutzungsausfallSection />

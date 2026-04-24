@@ -159,6 +159,10 @@
     {
       "path": "/api/cron/task-eskalation",
       "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/mietwagen-tracking",
+      "schedule": "0 9 * * *"
     }
   ]
 }
