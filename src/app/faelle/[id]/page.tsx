@@ -29,6 +29,8 @@ import { getChatTeilnehmer } from '@/lib/chatGruppe'
 // AAR-542 (C5): Pflicht-Matrix — Katalog-Regel-Auswertung serverseitig
 import { evaluatePflichtdocs } from '@/lib/dokumente/pflicht-evaluator'
 import { listAdHocAnforderungen } from '@/lib/dokumente/ad-hoc-anforderung'
+// AAR-761 Phase 3: OCR-Belege zum Review (Admin/KB)
+import { listBelegeZumReview } from '@/lib/beleg-review/actions'
 // AAR-651: Zentrale Fall-Loader-Lib (Single Source of Truth pro Rolle)
 import { getFallById } from '@/lib/fall/queries'
 
@@ -241,12 +243,16 @@ export default async function FallaktePage({
       angefordert_am: r.angefordert_am,
     }))
 
-  // AAR-762 Phase 3: Ad-hoc-Anforderungen für Admin/KB laden. Andere
-  // Rollen bekommen leeres Array — die Liste wird nur im Admin/KB-Kontext
-  // gerendert.
+  // AAR-762 Phase 3: Ad-hoc-Anforderungen für Admin/KB laden.
   const adHocAnforderungen =
     userRolle === 'admin' || userRolle === 'kundenbetreuer'
       ? await listAdHocAnforderungen(id)
+      : []
+
+  // AAR-761 Phase 3: OCR-Belege zum Review (Admin/KB).
+  const belegeZumReview =
+    userRolle === 'admin' || userRolle === 'kundenbetreuer'
+      ? await listBelegeZumReview(id)
       : []
 
   const rolleLabelForModal: Record<string, string> = {
@@ -512,6 +518,8 @@ export default async function FallaktePage({
           rolleLabel,
           // AAR-762 Phase 3: Ad-hoc-Anforderungen (Admin/KB-only)
           adHocAnforderungen,
+          // AAR-761 Phase 3: OCR-Belege zum Review (Admin/KB-only)
+          belegeZumReview,
           // AAR-326: KB-Zuordnungs-UI
           unzugeordneteUploads,
           zuPruefendeUploads,
