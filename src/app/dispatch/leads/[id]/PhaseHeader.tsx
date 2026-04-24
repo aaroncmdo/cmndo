@@ -53,21 +53,21 @@ export default function PhaseHeader({
                 aria-current={isActive ? 'step' : undefined}
                 className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                   isActive
-                    ? 'bg-blue-600 text-white shadow-sm'
+                    ? 'bg-claimondo-ondo text-white shadow-sm'
                     : isDone
                       ? 'bg-green-50 text-green-700 hover:bg-green-100 cursor-pointer'
                       : canNavigate
-                        ? 'bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-pointer'
-                        : 'bg-gray-50 text-gray-300 cursor-not-allowed'
+                        ? 'bg-[#f8f9fb] text-claimondo-ondo hover:bg-claimondo-border cursor-pointer'
+                        : 'bg-[#f8f9fb] text-claimondo-ondo/50 cursor-not-allowed'
                 }`}
               >
                 <span
                   className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold ${
                     isActive
-                      ? 'bg-white text-blue-600'
+                      ? 'bg-white text-claimondo-ondo'
                       : isDone
                         ? 'bg-green-500 text-white'
-                        : 'bg-white text-gray-400 border border-gray-300'
+                        : 'bg-white text-claimondo-ondo/70 border border-claimondo-border'
                   }`}
                 >
                   {isDone && !isActive ? <CheckIcon className="w-3 h-3" /> : nr}
@@ -75,7 +75,7 @@ export default function PhaseHeader({
                 <span className="hidden sm:inline">{label}</span>
               </button>
               {idx < PHASE_LABELS.length - 1 && (
-                <span className={`h-px w-3 sm:w-6 ${isDone ? 'bg-green-300' : 'bg-gray-200'}`} />
+                <span className={`h-px w-3 sm:w-6 ${isDone ? 'bg-green-300' : 'bg-claimondo-border'}`} />
               )}
             </li>
           )

@@ -66,10 +66,10 @@ export default async function DispatchRueckrufe() {
     <div className="py-6 space-y-4">
       <PageHeader
         title="Rückrufe"
-        actions={<span className="text-sm text-gray-500">{termine.length} offen</span>}
+        actions={<span className="text-sm text-claimondo-ondo">{termine.length} offen</span>}
       />
 
-      <div className="bg-white rounded-ios-lg shadow-ios-md divide-y divide-gray-50">
+      <div className="bg-white rounded-ios-lg shadow-ios-md divide-y divide-claimondo-border">
         {termine.map((t) => {
           const lead = t.lead
           if (!lead) return null
@@ -87,12 +87,12 @@ export default async function DispatchRueckrufe() {
                   )}
                   <Link
                     href={`/dispatch/leads/${lead.id}`}
-                    className="text-sm font-medium text-gray-900 hover:text-[#4573A2]"
+                    className="text-sm font-medium text-claimondo-navy hover:text-[#4573A2]"
                   >
                     {lead.vorname} {lead.nachname}
                   </Link>
                 </div>
-                <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                <div className="flex items-center gap-3 mt-1 text-xs text-claimondo-ondo">
                   {lead.telefon && (
                     <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} />
                   )}
@@ -106,10 +106,10 @@ export default async function DispatchRueckrufe() {
                     {isOverdue && ' (überfällig)'}
                   </span>
                   {t.notizen && (
-                    <span className="text-gray-400 truncate max-w-[200px]">{t.notizen}</span>
+                    <span className="text-claimondo-ondo/70 truncate max-w-[200px]">{t.notizen}</span>
                   )}
                 </div>
-                <div className="flex items-center gap-3 mt-1 text-[10px] text-gray-400">
+                <div className="flex items-center gap-3 mt-1 text-[10px] text-claimondo-ondo/70">
                   <span>Versuche: {lead.anruf_versuche ?? 0}</span>
                   {lead.letzter_anruf_am && (
                     <span>
@@ -125,7 +125,7 @@ export default async function DispatchRueckrufe() {
           )
         })}
         {termine.length === 0 && (
-          <p className="px-5 py-12 text-sm text-gray-400 text-center">Keine offenen Rückrufe</p>
+          <p className="px-5 py-12 text-sm text-claimondo-ondo/70 text-center">Keine offenen Rückrufe</p>
         )}
       </div>
     </div>

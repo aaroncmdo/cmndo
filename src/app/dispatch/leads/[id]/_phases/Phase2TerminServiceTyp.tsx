@@ -226,11 +226,11 @@ export default function Phase2TerminServiceTyp() {
       {/* AAR-264: Wunschtermin GANZ OBEN — „Wann" ist wichtiger als „Wo" für
           das Gespräch. Auto-Save 500ms Debounce. Der Wunschtermin fließt
           ins SV-Matching ein (verfuegbarAmWunschtermin + Score-Bonus). */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-3">
+      <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4 space-y-3">
         {/* AAR-270: Wochentag-Picker — vor dem datetime-local-Input.
             Mehrfachauswahl, Default=Egal. Filtert die SV-Slot-Vorschläge. */}
         <div className="space-y-1.5">
-          <label className="text-[10px] uppercase tracking-wider text-blue-900 font-semibold block">
+          <label className="text-[10px] uppercase tracking-wider text-claimondo-navy font-semibold block">
             Wunschtag des Kunden (optional, Mehrfachauswahl)
           </label>
           <div className="flex flex-wrap gap-1.5">
@@ -253,7 +253,7 @@ export default function Phase2TerminServiceTyp() {
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                     sel
                       ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
-                      : 'bg-white text-blue-900 border-blue-200 hover:border-blue-400'
+                      : 'bg-white text-claimondo-navy border-claimondo-border hover:border-blue-400'
                   } disabled:opacity-50`}
                 >
                   {d.label}
@@ -267,7 +267,7 @@ export default function Phase2TerminServiceTyp() {
               className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                 wochentage.length === 0
                   ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
-                  : 'bg-white text-blue-900 border-blue-200 hover:border-blue-400'
+                  : 'bg-white text-claimondo-navy border-claimondo-border hover:border-blue-400'
               } disabled:opacity-50`}
               title="Alle Wochentage zurücksetzen"
             >
@@ -276,10 +276,10 @@ export default function Phase2TerminServiceTyp() {
           </div>
         </div>
 
-        <h3 className="text-xs font-semibold text-blue-900 flex items-center gap-2 pt-1 border-t border-blue-200">
+        <h3 className="text-xs font-semibold text-claimondo-navy flex items-center gap-2 pt-1 border-t border-claimondo-border">
           <CalendarIcon className="w-4 h-4" /> Wunschtermin des Kunden
         </h3>
-        <p className="text-[11px] text-blue-800 italic">
+        <p className="text-[11px] text-claimondo-navy italic">
           Frage-Guidance: „Wann passt es Ihnen am besten? Je konkreter, desto schneller kommt der Termin."
         </p>
         <input
@@ -290,7 +290,7 @@ export default function Phase2TerminServiceTyp() {
           className="w-full px-3 py-2 border border-blue-300 rounded-lg text-sm bg-white"
         />
         {wunschtermin && (
-          <p className="text-[10px] text-blue-700">
+          <p className="text-[10px] text-claimondo-ondo">
             SV-Matching bevorzugt Gutachter die zu diesem Termin verfügbar sind.
           </p>
         )}
@@ -300,14 +300,14 @@ export default function Phase2TerminServiceTyp() {
       <div className="glass-light border border-claimondo-border rounded-ios-md p-5 space-y-3">
         <div className="flex items-center gap-2">
           <MapPinIcon className="w-4 h-4 text-claimondo-ondo" />
-          <h3 className="text-sm font-semibold text-gray-900">Besichtigungsadresse</h3>
+          <h3 className="text-sm font-semibold text-claimondo-navy">Besichtigungsadresse</h3>
           {hasKoordinaten && (
             <span className="ml-auto text-[10px] text-green-600 font-medium flex items-center gap-1">
               <CheckCircle2Icon className="w-3 h-3" /> Koordinaten ok
             </span>
           )}
         </div>
-        <p className="text-[11px] text-gray-500">
+        <p className="text-[11px] text-claimondo-ondo">
           Wo soll der Gutachter das Fahrzeug besichtigen? SV-Vorschläge werden anhand dieser
           Adresse gerankt. Standard = Unfallort aus Phase 1.
         </p>
@@ -324,13 +324,13 @@ export default function Phase2TerminServiceTyp() {
             setUnfallortDraft(currentValue)
             geocodeOnBlur(currentValue)
           }}
-          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+          className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm"
         />
         {/* AAR-581 (N4): Strukturierter SV-Besichtigungsort — Autocomplete
             liefert Adresse + Koordinaten + place_id. Pflichtfeld wenn der
             Besichtigungsort vom Unfallort abweicht. */}
         <div className="space-y-1">
-          <label className="text-[10px] uppercase tracking-wider text-gray-500 block">
+          <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo block">
             SV-Besichtigungsort (optional, wenn abweichend vom Unfallort)
           </label>
           <GooglePlaceAutocomplete
@@ -340,7 +340,7 @@ export default function Phase2TerminServiceTyp() {
             onBlur={(current) => {
               if (!current.trim()) clearBesichtigungsort()
             }}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+            className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm"
           />
         </div>
       </div>
@@ -359,8 +359,8 @@ export default function Phase2TerminServiceTyp() {
       <div className="glass-light border border-claimondo-border rounded-ios-md p-5 space-y-3">
         <div className="flex items-center gap-2">
           <ScaleIcon className="w-4 h-4 text-claimondo-ondo" />
-          <h3 className="text-sm font-semibold text-gray-900">Service-Typ</h3>
-          <span className="ml-auto text-[10px] text-gray-400">Standard: Pfad A (Komplett)</span>
+          <h3 className="text-sm font-semibold text-claimondo-navy">Service-Typ</h3>
+          <span className="ml-auto text-[10px] text-claimondo-ondo/70">Standard: Pfad A (Komplett)</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
@@ -370,14 +370,14 @@ export default function Phase2TerminServiceTyp() {
             className={`text-left p-4 rounded-xl border-2 transition-colors ${
               serviceTyp === 'komplett'
                 ? 'border-claimondo-ondo bg-claimondo-ondo/5'
-                : 'border-gray-200 hover:border-gray-300'
+                : 'border-claimondo-border hover:border-claimondo-border'
             }`}
           >
-            <p className="font-semibold text-sm text-gray-900 flex items-center gap-2">
+            <p className="font-semibold text-sm text-claimondo-navy flex items-center gap-2">
               <CheckCircle2Icon className="w-4 h-4 text-claimondo-ondo" />
               Pfad A — Komplett
             </p>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-claimondo-ondo mt-1">
               Gutachter + LexDrive-Kanzlei · SA + Vollmacht
             </p>
           </button>
@@ -388,11 +388,11 @@ export default function Phase2TerminServiceTyp() {
             className={`text-left p-4 rounded-xl border-2 transition-colors ${
               serviceTyp === 'nur_gutachter'
                 ? 'border-amber-500 bg-amber-50'
-                : 'border-gray-200 hover:border-gray-300'
+                : 'border-claimondo-border hover:border-claimondo-border'
             }`}
           >
-            <p className="font-semibold text-sm text-gray-900">Pfad B — Nur SV</p>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="font-semibold text-sm text-claimondo-navy">Pfad B — Nur SV</p>
+            <p className="text-xs text-claimondo-ondo mt-1">
               Nur Gutachter · Nur SA (kein Kanzlei-Mandat)
             </p>
           </button>
@@ -415,7 +415,7 @@ export default function Phase2TerminServiceTyp() {
           type="button"
           disabled={pending}
           onClick={() => setPhase(1)}
-          className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+          className="flex-1 px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-navy hover:bg-[#f8f9fb] text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
         >
           ← Zurück zu Phase 1
         </button>

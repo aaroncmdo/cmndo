@@ -35,7 +35,7 @@ export default async function DispatchLeads({
         title="Leads"
         actions={
           <>
-            <span className="text-sm text-gray-500">{leads?.length ?? 0} Ergebnisse</span>
+            <span className="text-sm text-claimondo-ondo">{leads?.length ?? 0} Ergebnisse</span>
             <NeuLeadDrawer />
           </>
         }
@@ -50,7 +50,7 @@ export default async function DispatchLeads({
             className={`px-3 py-1.5 rounded-full text-xs font-medium leading-tight text-center transition-colors ${
               activePhase === opt.value
                 ? 'bg-[#0D1B3E] text-white'
-                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                : 'bg-white border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb]'
             }`}
           >
             {opt.label}

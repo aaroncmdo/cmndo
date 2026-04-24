@@ -71,9 +71,9 @@ export default function NeuLeadDrawer() {
       <div className="fixed inset-0 bg-black/40" onClick={() => setOpen(false)} />
 
       <div className="relative bg-white w-full max-w-md h-full overflow-y-auto shadow-2xl">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
+        <div className="sticky top-0 bg-white border-b border-claimondo-border px-6 py-4 flex items-center justify-between z-10">
           <h2 className="text-lg font-semibold text-[#0D1B3E]">Neuer Lead</h2>
-          <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-gray-700">
+          <button onClick={() => setOpen(false)} className="text-claimondo-ondo/70 hover:text-claimondo-navy">
             <XIcon className="w-5 h-5" />
           </button>
         </div>
@@ -90,15 +90,15 @@ export default function NeuLeadDrawer() {
               Liefert direkt Adresse + PLZ + Lat/Lng — wird in Phase 1 ohnehin
               für Isochrone-Matching gebraucht. */}
           <div>
-            <label className="block text-xs text-gray-500 mb-1.5">Adresse</label>
+            <label className="block text-xs text-claimondo-ondo mb-1.5">Adresse</label>
             <GooglePlaceAutocomplete
               defaultValue={data.kunde_adresse}
               placeholder="Strasse, PLZ, Stadt"
               onSelect={handlePlaceSelect}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
+              className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
             />
             {data.kunde_lat && data.kunde_lng && (
-              <p className="text-[10px] text-gray-400 mt-1">
+              <p className="text-[10px] text-claimondo-ondo/70 mt-1">
                 ✓ Koordinaten {data.kunde_lat.toFixed(4)}, {data.kunde_lng.toFixed(4)}
                 {data.kunde_plz && ` · PLZ ${data.kunde_plz}`}
               </p>
@@ -110,11 +110,11 @@ export default function NeuLeadDrawer() {
               (service_typ ist u. a. Endpoint-Sender für die Kanzlei). */}
 
           <div>
-            <label className="block text-xs text-gray-500 mb-1.5">Quelle</label>
+            <label className="block text-xs text-claimondo-ondo mb-1.5">Quelle</label>
             <select
               value={data.source_channel}
               onChange={e => setData({ ...data, source_channel: e.target.value })}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
+              className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
             >
               <option value="manuell">Manuell angelegt</option>
               <option value="telefon">Telefon (kein Aircall)</option>
@@ -127,12 +127,12 @@ export default function NeuLeadDrawer() {
           </div>
 
           <div>
-            <label className="block text-xs text-gray-500 mb-1.5">Notizen</label>
+            <label className="block text-xs text-claimondo-ondo mb-1.5">Notizen</label>
             <textarea
               value={data.notizen}
               onChange={e => setData({ ...data, notizen: e.target.value })}
               rows={3}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
+              className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
               placeholder="Optionale Notizen zum Lead..."
             />
           </div>
@@ -140,7 +140,7 @@ export default function NeuLeadDrawer() {
           {error && <p className="text-red-500 text-sm bg-red-50 p-2 rounded">{error}</p>}
 
           <div className="flex gap-2 pt-2">
-            <button onClick={() => setOpen(false)} className="flex-1 py-2.5 text-sm text-gray-600 hover:bg-gray-100 rounded-xl">
+            <button onClick={() => setOpen(false)} className="flex-1 py-2.5 text-sm text-claimondo-ondo hover:bg-[#f8f9fb] rounded-xl">
               Abbrechen
             </button>
             <button
@@ -166,13 +166,13 @@ function InputField({ label, value, onChange, type = 'text', placeholder }: {
 }) {
   return (
     <div>
-      <label className="block text-xs text-gray-500 mb-1.5">{label}</label>
+      <label className="block text-xs text-claimondo-ondo mb-1.5">{label}</label>
       <input
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
+        className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
       />
     </div>
   )

@@ -22,7 +22,7 @@ type Phase = {
 }
 
 const PHASEN: Phase[] = [
-  { von: 0, bis: 120, kurz: '0:00 – 2:00', label: 'Kunde erzählen lassen. Empathie. Claimondo kurz vorstellen.', bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800' },
+  { von: 0, bis: 120, kurz: '0:00 – 2:00', label: 'Kunde erzählen lassen. Empathie. Claimondo kurz vorstellen.', bg: 'bg-[#f8f9fb]', border: 'border-claimondo-border', text: 'text-claimondo-navy' },
   // AAR-176 P2-E: Q3 ist seit AAR-138 Polizei-vor-Ort, nicht mehr Haftpflicht.
   { von: 120, bis: 240, kurz: '2:00 – 4:00', label: 'Q1 Hergang + Aufklärung, Q2 Schaden, Q3 Polizei.', bg: 'bg-violet-50', border: 'border-violet-200', text: 'text-violet-800' },
   { von: 240, bis: 300, kurz: '4:00 – 5:00', label: 'Nutzenversprechen + SV-Termin vormerken.', bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-800' },
@@ -94,14 +94,14 @@ export default function GespraechsleitfadenTimer({
 
   if (!gestartetAm) {
     return (
-      <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between">
+      <div className="bg-white border border-claimondo-border rounded-xl p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-            <PhoneCallIcon className="w-5 h-5 text-gray-400" />
+          <div className="w-10 h-10 rounded-full bg-[#f8f9fb] flex items-center justify-center">
+            <PhoneCallIcon className="w-5 h-5 text-claimondo-ondo/70" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-900">Gespräch noch nicht gestartet</p>
-            <p className="text-[11px] text-gray-500">8-Minuten-Leitfaden mit Phasen-Anzeige</p>
+            <p className="text-sm font-semibold text-claimondo-navy">Gespräch noch nicht gestartet</p>
+            <p className="text-[11px] text-claimondo-ondo">8-Minuten-Leitfaden mit Phasen-Anzeige</p>
           </div>
         </div>
         <button type="button" disabled={pending} onClick={starte}
@@ -114,16 +114,16 @@ export default function GespraechsleitfadenTimer({
 
   if (beendetAm) {
     return (
-      <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 flex items-center gap-3">
-        <PhoneOffIcon className="w-4 h-4 text-gray-500 shrink-0" />
+      <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-3 flex items-center gap-3">
+        <PhoneOffIcon className="w-4 h-4 text-claimondo-ondo shrink-0" />
         <div className="flex-1 space-y-0.5">
-          <p className="text-xs text-gray-700">
+          <p className="text-xs text-claimondo-navy">
             Gespräch beendet — Dauer <strong className="font-mono">{formatTime(dauerSekunden ?? sekunden)}</strong>
             {(dauerSekunden ?? sekunden) > 480 && <span className="text-red-600 ml-1">(überzogen)</span>}
           </p>
           {/* AAR-189: Nach dem Beenden weiß der MA sonst nicht was als
               nächstes ansteht. Kompakter Pfeil-Hinweis auf Phase 5 + Versand. */}
-          <p className="text-[10px] text-gray-400">
+          <p className="text-[10px] text-claimondo-ondo/70">
             → Nächster Schritt: Phase 5 öffnen → Zusammenfassung prüfen → FlowLink senden
           </p>
         </div>
@@ -132,14 +132,14 @@ export default function GespraechsleitfadenTimer({
   }
 
   return (
-    <div className={`border rounded-xl p-4 space-y-3 ${istUeberzogen ? 'bg-red-50 border-red-300' : 'bg-white border-gray-200'}`}>
+    <div className={`border rounded-xl p-4 space-y-3 ${istUeberzogen ? 'bg-red-50 border-red-300' : 'bg-white border-claimondo-border'}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ClockIcon className={`w-4 h-4 ${istUeberzogen ? 'text-red-600' : 'text-green-600'} animate-pulse`} />
-          <span className={`text-lg font-mono font-bold ${istUeberzogen ? 'text-red-700' : 'text-gray-900'}`}>
+          <span className={`text-lg font-mono font-bold ${istUeberzogen ? 'text-red-700' : 'text-claimondo-navy'}`}>
             {formatTime(sekunden)}
           </span>
-          <span className="text-xs text-gray-400">/ 08:00</span>
+          <span className="text-xs text-claimondo-ondo/70">/ 08:00</span>
           {istUeberzogen && (
             <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wide">
               Überzogen
@@ -147,12 +147,12 @@ export default function GespraechsleitfadenTimer({
           )}
         </div>
         <button type="button" disabled={pending} onClick={beende}
-          className="px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-xs font-medium hover:bg-gray-200 disabled:opacity-50">
+          className="px-3 py-1.5 rounded-lg bg-[#f8f9fb] text-claimondo-navy text-xs font-medium hover:bg-claimondo-border disabled:opacity-50">
           Gespräch beenden
         </button>
       </div>
 
-      <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+      <div className="w-full h-1.5 bg-[#f8f9fb] rounded-full overflow-hidden">
         <div
           className={`h-full transition-all duration-1000 ${istUeberzogen ? 'bg-red-500' : 'bg-[#4573A2]'}`}
           style={{ width: `${progressPct}%` }}
@@ -179,24 +179,24 @@ export default function GespraechsleitfadenTimer({
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setShowSummary(false)}>
           <div className="bg-white rounded-2xl max-w-md w-full p-5 space-y-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-gray-900">Gespräch-Zusammenfassung</h3>
-              <button type="button" onClick={() => setShowSummary(false)} className="text-gray-400 hover:text-gray-700">
+              <h3 className="text-sm font-semibold text-claimondo-navy">Gespräch-Zusammenfassung</h3>
+              <button type="button" onClick={() => setShowSummary(false)} className="text-claimondo-ondo/70 hover:text-claimondo-navy">
                 <XIcon className="w-4 h-4" />
               </button>
             </div>
-            <div className="space-y-2 text-xs text-gray-700">
+            <div className="space-y-2 text-xs text-claimondo-navy">
               <p className="flex items-center gap-2">
-                <ClockIcon className="w-3.5 h-3.5 text-gray-500" />
+                <ClockIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
                 Dauer: <strong className="font-mono">{formatTime(sekunden)}</strong>
                 {sekunden > 480 && <span className="text-red-600">(überzogen)</span>}
               </p>
-              <p className="text-[11px] text-gray-500 border-t border-gray-100 pt-2">
+              <p className="text-[11px] text-claimondo-ondo border-t border-claimondo-border pt-2">
                 Prüfe vor dem Beenden: Ist Phase 1 (Qualifizierung) komplett? Ist ein SV reserviert?
                 Hat der Kunde den FlowLink per WA erhalten? Wenn nein → jetzt aktiv nachziehen statt
                 im nächsten Gespräch nachschlagen.
               </p>
               {pending && (
-                <p className="text-[11px] text-gray-500 italic flex items-center gap-1">
+                <p className="text-[11px] text-claimondo-ondo italic flex items-center gap-1">
                   <ClockIcon className="w-3 h-3 animate-pulse" /> Gespräch wird beendet ...
                 </p>
               )}
@@ -211,7 +211,7 @@ export default function GespraechsleitfadenTimer({
                 type="button"
                 onClick={() => setShowSummary(false)}
                 disabled={pending}
-                className="flex-1 px-3 py-2 rounded-lg bg-gray-100 text-gray-700 text-xs font-medium hover:bg-gray-200 disabled:opacity-50"
+                className="flex-1 px-3 py-2 rounded-lg bg-[#f8f9fb] text-claimondo-navy text-xs font-medium hover:bg-claimondo-border disabled:opacity-50"
               >
                 Weiter sprechen
               </button>

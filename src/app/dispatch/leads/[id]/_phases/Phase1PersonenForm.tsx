@@ -125,13 +125,13 @@ export default function Phase1PersonenForm({ leadId }: { leadId: string }) {
   }
 
   if (loading) {
-    return <p className="text-[11px] text-gray-500">Lade Personen …</p>
+    return <p className="text-[11px] text-claimondo-ondo">Lade Personen …</p>
   }
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-[11px] text-gray-600">
+        <p className="text-[11px] text-claimondo-ondo">
           {drafts.length} {drafts.length === 1 ? 'Person' : 'Personen'} erfasst
         </p>
         <button
@@ -173,14 +173,14 @@ export default function Phase1PersonenForm({ leadId }: { leadId: string }) {
               value={d.vorname}
               onChange={(e) => updateDraft(idx, { vorname: e.target.value })}
               placeholder="Vorname"
-              className="px-2 py-1 border border-gray-200 rounded text-[11px]"
+              className="px-2 py-1 border border-claimondo-border rounded text-[11px]"
             />
             <input
               type="text"
               value={d.nachname}
               onChange={(e) => updateDraft(idx, { nachname: e.target.value })}
               placeholder="Nachname"
-              className="px-2 py-1 border border-gray-200 rounded text-[11px]"
+              className="px-2 py-1 border border-claimondo-border rounded text-[11px]"
             />
           </div>
 
@@ -189,9 +189,9 @@ export default function Phase1PersonenForm({ leadId }: { leadId: string }) {
               type="date"
               value={d.geburtsdatum}
               onChange={(e) => updateDraft(idx, { geburtsdatum: e.target.value })}
-              className="px-2 py-1 border border-gray-200 rounded text-[11px]"
+              className="px-2 py-1 border border-claimondo-border rounded text-[11px]"
             />
-            <label className="flex items-center gap-1.5 text-[11px] text-gray-700 px-2 py-1 border border-gray-200 rounded cursor-pointer">
+            <label className="flex items-center gap-1.5 text-[11px] text-claimondo-navy px-2 py-1 border border-claimondo-border rounded cursor-pointer">
               <input
                 type="checkbox"
                 checked={d.ist_fahrzeuginsasse}
@@ -209,14 +209,14 @@ export default function Phase1PersonenForm({ leadId }: { leadId: string }) {
             value={d.verletzungsart}
             onChange={(e) => updateDraft(idx, { verletzungsart: e.target.value })}
             placeholder="Verletzungsart (z.B. Schleudertrauma, Prellung, Platzwunde)"
-            className="w-full px-2 py-1 border border-gray-200 rounded text-[11px]"
+            className="w-full px-2 py-1 border border-claimondo-border rounded text-[11px]"
           />
 
           <textarea
             value={d.notizen}
             onChange={(e) => updateDraft(idx, { notizen: e.target.value })}
             placeholder="Notizen (optional)"
-            className="w-full px-2 py-1 border border-gray-200 rounded text-[11px] h-14 resize-none"
+            className="w-full px-2 py-1 border border-claimondo-border rounded text-[11px] h-14 resize-none"
           />
 
           <button

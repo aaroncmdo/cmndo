@@ -307,23 +307,23 @@ export default function Phase5Zusammenfassung() {
       )}
 
       {/* Summary */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5">
+      <div className="bg-white border border-claimondo-border rounded-xl p-5">
         <div className="flex items-center gap-2 mb-4">
           <CheckCircle2Icon className="w-4 h-4 text-[#4573A2]" />
-          <h2 className="text-sm font-semibold text-gray-900">Zusammenfassung — letzter Check</h2>
+          <h2 className="text-sm font-semibold text-claimondo-navy">Zusammenfassung — letzter Check</h2>
           <StatusBadge tone={qualification.canSendFlowLink ? 'success' : 'warning'} className="ml-auto">
             {qualification.completedCount}/8 Bedingungen
           </StatusBadge>
         </div>
-        <div className="divide-y divide-gray-100">
+        <div className="divide-y divide-claimondo-border">
           {rows.map((r, i) => (
             <div key={i} className="flex items-start gap-3 py-2">
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] uppercase tracking-wider text-gray-400 flex items-center gap-1">
+                <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 flex items-center gap-1">
                   {r.missing && <AlertTriangleIcon className="w-3 h-3 text-amber-500" />}
                   {r.label}
                 </p>
-                <p className={`text-sm ${r.missing ? 'text-amber-700 font-medium' : 'text-gray-900'}`}>
+                <p className={`text-sm ${r.missing ? 'text-amber-700 font-medium' : 'text-claimondo-navy'}`}>
                   {r.value}
                 </p>
               </div>
@@ -346,13 +346,13 @@ export default function Phase5Zusammenfassung() {
           AAR-348: Explizite gelbe Warnbanner wenn Tel/Email leer sind —
           zuvor wurden die Buttons nur stumm disabled, der MA hatte keinen
           Hinweis WARUM der Kanal nicht verfügbar ist. */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
+      <div className="bg-white border border-claimondo-border rounded-xl p-5 space-y-3">
         <div className="flex items-center gap-2">
-          <PhoneIcon className="w-4 h-4 text-gray-400" />
-          <h3 className="text-sm font-semibold text-gray-900">Kontaktdaten für FlowLink-Versand</h3>
+          <PhoneIcon className="w-4 h-4 text-claimondo-ondo/70" />
+          <h3 className="text-sm font-semibold text-claimondo-navy">Kontaktdaten für FlowLink-Versand</h3>
         </div>
         <div>
-          <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">
+          <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo block mb-1">
             WhatsApp / SMS-Nummer
           </label>
           <input
@@ -361,15 +361,15 @@ export default function Phase5Zusammenfassung() {
             onChange={(e) => setWaNummer(e.target.value)}
             onBlur={saveWaNummer}
             placeholder="+49 170 1234567"
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+            className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm"
           />
-          <p className={`text-[10px] mt-0.5 ${nummerError ? 'text-red-600' : 'text-gray-400'}`}>
+          <p className={`text-[10px] mt-0.5 ${nummerError ? 'text-red-600' : 'text-claimondo-ondo/70'}`}>
             {nummerError ? nummerError : savingNummer ? 'Speichern ...' : 'Änderung wird beim Verlassen des Feldes gespeichert.'}
           </p>
         </div>
         {/* AAR-178 P2-K: Email inline editierbar */}
         <div>
-          <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">
+          <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo block mb-1">
             Email für FlowLink (optional)
           </label>
           <input
@@ -378,9 +378,9 @@ export default function Phase5Zusammenfassung() {
             onChange={(e) => setEmail(e.target.value)}
             onBlur={saveEmail}
             placeholder="name@example.de"
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+            className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm"
           />
-          <p className={`text-[10px] mt-0.5 ${emailError ? 'text-red-600' : 'text-gray-400'}`}>
+          <p className={`text-[10px] mt-0.5 ${emailError ? 'text-red-600' : 'text-claimondo-ondo/70'}`}>
             {emailError ? emailError : savingEmail ? 'Speichern ...' : 'Änderung wird beim Verlassen des Feldes gespeichert.'}
           </p>
         </div>
@@ -415,8 +415,8 @@ export default function Phase5Zusammenfassung() {
       />
 
       {/* 3 Versand-Buttons */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
-        <h3 className="text-sm font-semibold text-gray-900">Versandweg wählen</h3>
+      <div className="bg-white border border-claimondo-border rounded-xl p-5 space-y-3">
+        <h3 className="text-sm font-semibold text-claimondo-navy">Versandweg wählen</h3>
         {!qualification.canSendFlowLink && (
           <p className="text-[11px] text-amber-700 flex items-start gap-1">
             <AlertTriangleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
