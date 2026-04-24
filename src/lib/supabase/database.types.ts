@@ -6150,6 +6150,7 @@ export type Database = {
           audio_settings: Json | null
           auth_provider: string | null
           avatar_url: string | null
+          community_id: string | null
           created_at: string | null
           eingestellt_am: string | null
           email: string
@@ -6172,6 +6173,7 @@ export type Database = {
           position: string | null
           profilbeschreibung: string | null
           rolle: Database["public"]["Enums"]["user_role"]
+          sv_paket: Database["public"]["Enums"]["sv_paket_typ"] | null
           telefon: string | null
           titel: string | null
           twilio_nummer_provisioned_am: string | null
@@ -6197,6 +6199,7 @@ export type Database = {
           audio_settings?: Json | null
           auth_provider?: string | null
           avatar_url?: string | null
+          community_id?: string | null
           created_at?: string | null
           eingestellt_am?: string | null
           email: string
@@ -6219,6 +6222,7 @@ export type Database = {
           position?: string | null
           profilbeschreibung?: string | null
           rolle?: Database["public"]["Enums"]["user_role"]
+          sv_paket?: Database["public"]["Enums"]["sv_paket_typ"] | null
           telefon?: string | null
           titel?: string | null
           twilio_nummer_provisioned_am?: string | null
@@ -6244,6 +6248,7 @@ export type Database = {
           audio_settings?: Json | null
           auth_provider?: string | null
           avatar_url?: string | null
+          community_id?: string | null
           created_at?: string | null
           eingestellt_am?: string | null
           email?: string
@@ -6266,6 +6271,7 @@ export type Database = {
           position?: string | null
           profilbeschreibung?: string | null
           rolle?: Database["public"]["Enums"]["user_role"]
+          sv_paket?: Database["public"]["Enums"]["sv_paket_typ"] | null
           telefon?: string | null
           titel?: string | null
           twilio_nummer_provisioned_am?: string | null
@@ -6281,7 +6287,15 @@ export type Database = {
           working_hours?: Json | null
           zweit_email?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       promo_clicks: {
         Row: {
@@ -9492,6 +9506,12 @@ export type Database = {
         | "vandalismus"
         | "verschleiss"
         | "sonstiges"
+      sv_paket_typ:
+        | "solo"
+        | "buero_inhaber"
+        | "sub_buero"
+        | "akademie_verwalter"
+        | "akademie_sub"
       task_status: "offen" | "in-bearbeitung" | "erledigt" | "blockiert"
       task_typ:
         | "filmcheck"
@@ -9777,6 +9797,13 @@ export const Constants = {
         "vandalismus",
         "verschleiss",
         "sonstiges",
+      ],
+      sv_paket_typ: [
+        "solo",
+        "buero_inhaber",
+        "sub_buero",
+        "akademie_verwalter",
+        "akademie_sub",
       ],
       task_status: ["offen", "in-bearbeitung", "erledigt", "blockiert"],
       task_typ: [
