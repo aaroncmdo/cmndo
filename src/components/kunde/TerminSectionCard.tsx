@@ -90,23 +90,23 @@ function getStatusConfig(termin: TerminSectionProps['termin']): StatusConfig {
   const endMs = termin.end_zeit ? new Date(termin.end_zeit).getTime() : startMs + 60 * 60 * 1000
 
   if (termin.sv_angekommen_am) return { label: 'Läuft gerade', cls: 'bg-emerald-50 text-emerald-700' }
-  if (termin.sv_unterwegs_seit) return { label: 'Auf dem Weg', cls: 'bg-blue-50 text-claimondo-ondo' }
+  if (termin.sv_unterwegs_seit) return { label: 'Auf dem Weg', cls: 'bg-[#f8f9fb] text-claimondo-ondo' }
   if (termin.status === 'reserviert' || termin.status === 'gegenvorschlag')
     return { label: 'Vorgeschlagen', cls: 'bg-amber-50 text-amber-700' }
   if (termin.status === 'bestaetigt') {
     if (!Number.isNaN(startMs) && now >= startMs && now <= endMs)
       return { label: 'Läuft gerade', cls: 'bg-emerald-50 text-emerald-700' }
     if (!Number.isNaN(startMs) && startMs > now && startMs - now < 2 * 3_600_000)
-      return { label: 'In Kürze', cls: 'bg-blue-50 text-claimondo-ondo' }
+      return { label: 'In Kürze', cls: 'bg-[#f8f9fb] text-claimondo-ondo' }
     if (!Number.isNaN(startMs) && endMs < now)
-      return { label: 'Vergangen', cls: 'bg-gray-100 text-gray-500' }
+      return { label: 'Vergangen', cls: 'bg-[#f8f9fb] text-claimondo-ondo' }
     return { label: 'Bestätigt', cls: 'bg-emerald-50 text-emerald-700' }
   }
   if (termin.status === 'abgesagt' || termin.status === 'storniert')
     return { label: 'Abgesagt', cls: 'bg-red-50 text-red-600' }
   if (termin.status === 'verschoben')
     return { label: 'Verschoben', cls: 'bg-amber-50 text-amber-700' }
-  return { label: termin.status, cls: 'bg-gray-100 text-gray-500' }
+  return { label: termin.status, cls: 'bg-[#f8f9fb] text-claimondo-ondo' }
 }
 
 export default function TerminSectionCard({ termin, gegenueber }: TerminSectionProps) {
@@ -196,7 +196,7 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
           <p className="text-base font-semibold text-claimondo-navy">
             {fmtDatum(termin.start_zeit)}
           </p>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-claimondo-ondo">
             {fmtZeitRange(termin.start_zeit, termin.end_zeit)}
             {relativ && (
               <span className="ml-2 text-xs text-claimondo-ondo">· {relativ}</span>
@@ -232,7 +232,7 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
           <button
             type="button"
             onClick={handleCopyMeet}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-ios-sm border border-claimondo-border px-3 text-xs ml-0 md:ml-2 text-gray-600 hover:text-claimondo-navy"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-ios-sm border border-claimondo-border px-3 text-xs ml-0 md:ml-2 text-claimondo-ondo hover:text-claimondo-navy"
           >
             {copyLinkOk ? 'Link kopiert!' : 'Link kopieren'}
           </button>
@@ -270,7 +270,7 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
             <p className="text-sm font-medium text-claimondo-navy">
               {gegenueber.name ?? (gegenueber.rolle === 'sachverstaendiger' ? 'Ihr Gutachter' : 'Ihr Betreuer')}
             </p>
-            <p className="text-[11px] text-gray-500">
+            <p className="text-[11px] text-claimondo-ondo">
               {gegenueber.rolle === 'sachverstaendiger' ? 'Ihr Kfz-Sachverständiger' : 'Ihr Kundenbetreuer'}
             </p>
           </div>
@@ -299,12 +299,12 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
 
       {/* Vorbereitung */}
       {isVideo ? (
-        <ul className="mt-3 space-y-1 text-xs text-gray-500">
+        <ul className="mt-3 space-y-1 text-xs text-claimondo-ondo">
           <li>• Kamera und Mikrofon vor dem Termin testen</li>
           <li>• Ruhige Umgebung mit guter Beleuchtung wählen</li>
         </ul>
       ) : (
-        <ul className="mt-3 space-y-1 text-xs text-gray-500">
+        <ul className="mt-3 space-y-1 text-xs text-claimondo-ondo">
           <li>• Alle Schäden am Fahrzeug zugänglich machen</li>
           <li>• Kennzeichen und Fahrzeugschein bereithalten</li>
         </ul>
@@ -330,7 +330,7 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
           </button>
           <a
             href={icsHref}
-            className="inline-flex min-h-[44px] items-center gap-1 rounded-ios-sm border border-claimondo-border px-3 text-xs font-medium text-gray-600 hover:bg-claimondo-bg"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-ios-sm border border-claimondo-border px-3 text-xs font-medium text-claimondo-ondo hover:bg-claimondo-bg"
           >
             <span aria-hidden>📥</span> Zum Kalender hinzufügen
           </a>

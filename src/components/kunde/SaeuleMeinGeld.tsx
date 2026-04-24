@@ -40,7 +40,7 @@ export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, t
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 space-y-4">
+    <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-5 space-y-4">
       <div className="flex items-center gap-2">
         <BanknoteIcon className="w-5 h-5 text-emerald-600" />
         <h2 className="text-sm font-semibold text-[#0D1B3E]">Mein Geld</h2>
@@ -56,27 +56,27 @@ export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, t
       <div className="space-y-3">
         {showGefordert ? (
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Ihre Forderung</span>
-            <span className="text-gray-900 font-semibold">{fmt(gefordert)}</span>
+            <span className="text-claimondo-ondo">Ihre Forderung</span>
+            <span className="text-claimondo-navy font-semibold">{fmt(gefordert)}</span>
           </div>
         ) : (
-          <p className="text-xs text-gray-400">Beträge werden nach Gutachten-Erstellung angezeigt.</p>
+          <p className="text-xs text-claimondo-ondo/70">Beträge werden nach Gutachten-Erstellung angezeigt.</p>
         )}
-        <p className="text-[11px] text-gray-500">
+        <p className="text-[11px] text-claimondo-ondo">
           Die ausgezahlte Summe sehen Sie nach der Regulierung in der Auszahlungs-Card.
         </p>
       </div>
 
       {saved && weg && (
-        <p className="text-xs text-gray-500">Auszahlung: {weg === 'kundenkonto' ? 'Auf mein Konto' : 'Direkt an Werkstatt'}</p>
+        <p className="text-xs text-claimondo-ondo">Auszahlung: {weg === 'kundenkonto' ? 'Auf mein Konto' : 'Direkt an Werkstatt'}</p>
       )}
 
       {showZahlungswegWahl && (
-        <div className="border-t border-gray-100 pt-3 space-y-2">
-          <p className="text-xs font-semibold text-gray-700">Wohin soll die Auszahlung gehen?</p>
+        <div className="border-t border-claimondo-border pt-3 space-y-2">
+          <p className="text-xs font-semibold text-claimondo-navy">Wohin soll die Auszahlung gehen?</p>
           <div className="flex gap-2">
-            <button disabled={pending} onClick={() => handleSaveWeg('kundenkonto')} className="flex-1 px-3 py-2 rounded-lg border border-gray-300 text-xs font-medium hover:bg-gray-50 disabled:opacity-50">Auf mein Konto</button>
-            <button disabled={pending} onClick={() => handleSaveWeg('werkstatt_direkt')} className="flex-1 px-3 py-2 rounded-lg border border-gray-300 text-xs font-medium hover:bg-gray-50 disabled:opacity-50">Direkt an Werkstatt</button>
+            <button disabled={pending} onClick={() => handleSaveWeg('kundenkonto')} className="flex-1 px-3 py-2 rounded-lg border border-claimondo-border text-xs font-medium hover:bg-[#f8f9fb] disabled:opacity-50">Auf mein Konto</button>
+            <button disabled={pending} onClick={() => handleSaveWeg('werkstatt_direkt')} className="flex-1 px-3 py-2 rounded-lg border border-claimondo-border text-xs font-medium hover:bg-[#f8f9fb] disabled:opacity-50">Direkt an Werkstatt</button>
           </div>
         </div>
       )}

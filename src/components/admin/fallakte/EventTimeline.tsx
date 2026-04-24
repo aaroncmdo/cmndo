@@ -47,7 +47,7 @@ const ICON_BY_NAME: Record<string, typeof FileTextIcon> = {
 }
 
 const SEVERITY_COLOR: Record<FallEventSeverity, string> = {
-  info: 'text-gray-500 bg-gray-100',
+  info: 'text-claimondo-ondo bg-[#f8f9fb]',
   success: 'text-emerald-700 bg-emerald-50',
   warning: 'text-amber-700 bg-amber-50',
   error: 'text-red-700 bg-red-50',
@@ -143,7 +143,7 @@ export function EventTimeline({ events }: { events: FallEvent[] }) {
 
       {filtered.length === 0 ? (
         <div className="glass-light border border-claimondo-border rounded-ios-md p-6 text-center">
-          <p className="text-sm text-gray-500">Keine Events für den gewählten Filter.</p>
+          <p className="text-sm text-claimondo-ondo">Keine Events für den gewählten Filter.</p>
         </div>
       ) : (
         <div className="glass-light border border-claimondo-border rounded-ios-md">
@@ -158,7 +158,7 @@ export function EventTimeline({ events }: { events: FallEvent[] }) {
                   return (
                     <li
                       key={ev.id}
-                      className="flex items-start gap-3 px-4 py-2.5 hover:bg-gray-50/70 border-b border-claimondo-border last:border-b-0 cursor-pointer"
+                      className="flex items-start gap-3 px-4 py-2.5 hover:bg-[#f8f9fb]/70 border-b border-claimondo-border last:border-b-0 cursor-pointer"
                       onClick={() => setSelected(ev)}
                     >
                       <span
@@ -168,17 +168,17 @@ export function EventTimeline({ events }: { events: FallEvent[] }) {
                       </span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-baseline gap-2 flex-wrap">
-                          <span className="text-xs font-mono text-gray-400 shrink-0">
+                          <span className="text-xs font-mono text-claimondo-ondo/70 shrink-0">
                             {fmtTime(ev.timestamp)}
                           </span>
                           <span className="text-sm text-claimondo-navy font-medium">{ev.titel}</span>
                         </div>
                         {ev.beschreibung && (
-                          <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">
+                          <p className="text-xs text-claimondo-ondo mt-0.5 line-clamp-2">
                             {ev.beschreibung}
                           </p>
                         )}
-                        <div className="flex items-center gap-1.5 mt-1 text-[10px] text-gray-400">
+                        <div className="flex items-center gap-1.5 mt-1 text-[10px] text-claimondo-ondo/70">
                           <span className="uppercase tracking-wider">{ev.source}</span>
                           {ev.actor?.name && <span>· {ev.actor.name}</span>}
                           {ev.actor?.rolle && !ev.actor?.name && <span>· {ev.actor.rolle}</span>}

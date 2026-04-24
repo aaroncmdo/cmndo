@@ -27,10 +27,10 @@ export function SvHonorarCard({ betrag, eingegangenAm }: Props) {
   if (!hatBetrag && !eingegangen) return null
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 space-y-3">
+    <div className="bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-3">
       <div className="flex items-center gap-2">
         <EuroIcon className="w-4 h-4 text-[var(--brand-secondary)]" />
-        <p className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
+        <p className="text-xs uppercase tracking-wider text-claimondo-ondo font-semibold">
           Dein Honorar
         </p>
         <span
@@ -46,7 +46,7 @@ export function SvHonorarCard({ betrag, eingegangenAm }: Props) {
 
       {hatBetrag && (
         <div>
-          <p className="text-xs text-gray-500">Dein Anteil</p>
+          <p className="text-xs text-claimondo-ondo">Dein Anteil</p>
           <p className="text-2xl font-bold text-[var(--brand-primary)] tabular-nums">
             {formatEuro(n!)}
           </p>
@@ -54,13 +54,13 @@ export function SvHonorarCard({ betrag, eingegangenAm }: Props) {
       )}
 
       {eingegangenAm && (
-        <div className="text-xs pt-1 border-t border-gray-100">
-          <p className="text-gray-500">Eingang auf deinem Konto</p>
-          <p className="text-gray-900 font-medium">{formatDate(eingegangenAm)}</p>
+        <div className="text-xs pt-1 border-t border-claimondo-border">
+          <p className="text-claimondo-ondo">Eingang auf deinem Konto</p>
+          <p className="text-claimondo-navy font-medium">{formatDate(eingegangenAm)}</p>
         </div>
       )}
 
-      <p className="text-[11px] text-gray-500 pt-1 border-t border-gray-100">
+      <p className="text-[11px] text-claimondo-ondo pt-1 border-t border-claimondo-border">
         Dies ist dein SV-Honorar-Anteil nach Abzug des Leadpreises. Die Regulierung
         an den Kunden ist für dich nicht relevant.
       </p>

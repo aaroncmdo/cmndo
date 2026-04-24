@@ -55,12 +55,12 @@ function statusBadge(entry: PflichtDocMatrixEntry) {
 
 function indicator(entry: PflichtDocMatrixEntry): { glyph: string; color: string; title: string } {
   if (!entry.freigeschaltet) {
-    return { glyph: '⊘', color: 'text-gray-300', title: 'Nicht freigeschaltet' }
+    return { glyph: '⊘', color: 'text-claimondo-ondo/50', title: 'Nicht freigeschaltet' }
   }
   if (entry.pflicht) {
     return { glyph: '●', color: 'text-[#4573A2]', title: 'Pflicht' }
   }
-  return { glyph: '○', color: 'text-gray-400', title: 'Optional (freigeschaltet)' }
+  return { glyph: '○', color: 'text-claimondo-ondo/70', title: 'Optional (freigeschaltet)' }
 }
 
 export default function PflichtDocMatrix({
@@ -81,14 +81,14 @@ export default function PflichtDocMatrix({
   const inkonsistenzen = entries.filter((e) => e.inkonsistenz !== null)
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-      <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between gap-2 flex-wrap">
+    <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
           <ListChecksIcon className="w-3.5 h-3.5 text-[#4573A2]" />
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          <h3 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider">
             Pflicht-Matrix
           </h3>
-          <span className="text-[10px] text-gray-400">
+          <span className="text-[10px] text-claimondo-ondo/70">
             — automatisch aus Fall-Daten abgeleitet
           </span>
         </div>
@@ -121,17 +121,17 @@ export default function PflichtDocMatrix({
         </div>
       )}
 
-      <div className="divide-y divide-gray-100">
+      <div className="divide-y divide-claimondo-border">
         {groups.length === 0 ? (
-          <p className="px-4 py-6 text-center text-xs text-gray-400">
+          <p className="px-4 py-6 text-center text-xs text-claimondo-ondo/70">
             Keine Slots im Katalog — Seed ausstehend.
           </p>
         ) : (
           groups.map((group) => (
             <div key={group.kategorie} className="px-4 py-3">
-              <h4 className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-2">
+              <h4 className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-2">
                 {KATEGORIE_LABEL[group.kategorie] ?? group.kategorie}{' '}
-                <span className="text-gray-400 font-normal">({group.entries.length})</span>
+                <span className="text-claimondo-ondo/70 font-normal">({group.entries.length})</span>
               </h4>
               <ul className="space-y-1">
                 {group.entries.map((e) => {
@@ -143,7 +143,7 @@ export default function PflichtDocMatrix({
                       key={e.slot_id}
                       className={`flex items-center justify-between gap-2 rounded-md px-2 py-1.5 ${
                         !e.freigeschaltet ? 'opacity-60' : ''
-                      } ${isClickable ? 'cursor-pointer hover:bg-gray-50' : ''}`}
+                      } ${isClickable ? 'cursor-pointer hover:bg-[#f8f9fb]' : ''}`}
                       onClick={() => {
                         if (isClickable) setSelected(e)
                       }}
@@ -159,12 +159,12 @@ export default function PflichtDocMatrix({
                         <div className="min-w-0">
                           <p
                             className={`text-sm truncate ${
-                              e.freigeschaltet ? 'text-gray-800' : 'text-gray-500'
+                              e.freigeschaltet ? 'text-claimondo-navy' : 'text-claimondo-ondo'
                             }`}
                           >
                             {e.label}
                           </p>
-                          <p className="text-[10px] text-gray-400 truncate">
+                          <p className="text-[10px] text-claimondo-ondo/70 truncate">
                             {e.regel_erklaerung}
                           </p>
                         </div>
@@ -188,7 +188,7 @@ export default function PflichtDocMatrix({
                           </span>
                         )}
                         {isAdmin && (
-                          <InfoIcon className="w-3 h-3 text-gray-300" aria-label="Details anzeigen" />
+                          <InfoIcon className="w-3 h-3 text-claimondo-ondo/50" aria-label="Details anzeigen" />
                         )}
                       </div>
                     </li>

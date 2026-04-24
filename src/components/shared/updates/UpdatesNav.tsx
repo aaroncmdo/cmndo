@@ -155,7 +155,7 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
   } else {
     buttonClass = variant === 'dark'
       ? 'bg-white/10 hover:bg-white/20 text-white/80'
-      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+      : 'bg-[#f8f9fb] hover:bg-claimondo-border text-claimondo-navy'
   }
 
   const flashClass = flashing
@@ -207,14 +207,14 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
             <h2 className="text-sm font-semibold text-[#0D1B3E]">Updates</h2>
             <button
               onClick={() => setOpen(false)}
-              className="p-1 -mr-1 text-gray-500 hover:text-gray-800"
+              className="p-1 -mr-1 text-claimondo-ondo hover:text-claimondo-navy"
               aria-label="Schließen"
             >
               <XIcon className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="flex border-b border-gray-100">
+          <div className="flex border-b border-claimondo-border">
             {TABS.map(t => {
               const c = tabCount(t.key)
               const active = activeTab === t.key
@@ -228,7 +228,7 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
                       ? isKritisch
                         ? 'text-red-600 border-b-2 border-red-500 bg-red-50/30'
                         : 'text-[#0D1B3E] border-b-2 border-[#4573A2] bg-[#4573A2]/5'
-                      : 'text-gray-500 hover:text-gray-800'
+                      : 'text-claimondo-ondo hover:text-claimondo-navy'
                   }`}
                 >
                   <div className="flex items-center gap-1">
@@ -250,14 +250,14 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
           <div className="max-h-[400px] overflow-y-auto">
             {filtered.length === 0 ? (
               <div className="px-6 py-10 text-center">
-                <BellIcon className="w-8 h-8 mx-auto text-gray-300 mb-2" />
-                <p className="text-xs text-gray-400">Keine Einträge in dieser Kategorie</p>
+                <BellIcon className="w-8 h-8 mx-auto text-claimondo-ondo/50 mb-2" />
+                <p className="text-xs text-claimondo-ondo/70">Keine Einträge in dieser Kategorie</p>
               </div>
             ) : (
               filtered.map(m => (
                 <div
                   key={m.id}
-                  className={`border-b border-gray-50 px-4 py-3 transition-colors ${
+                  className={`border-b border-claimondo-border px-4 py-3 transition-colors ${
                     m.gelesen ? 'bg-white' : 'bg-[#4573A2]/5'
                   }`}
                 >
@@ -269,21 +269,21 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
                           onClick={() => jumpTo(m)}
                           className="text-left flex-1 min-w-0"
                         >
-                          <p className={`text-xs leading-snug ${m.gelesen ? 'text-gray-600' : 'text-gray-900 font-semibold'} truncate`}>
+                          <p className={`text-xs leading-snug ${m.gelesen ? 'text-claimondo-ondo' : 'text-claimondo-navy font-semibold'} truncate`}>
                             {m.prioritaet === 'dringend' && (
                               <span className="inline-block mr-1 text-red-500" aria-label="Kritisch">●</span>
                             )}
                             {m.titel}
                           </p>
                           {m.inhalt && (
-                            <p className="text-[11px] text-gray-500 line-clamp-2 mt-0.5">{m.inhalt}</p>
+                            <p className="text-[11px] text-claimondo-ondo line-clamp-2 mt-0.5">{m.inhalt}</p>
                           )}
-                          <p className="text-[10px] text-gray-400 mt-1">{fmtRelative(m.created_at)}</p>
+                          <p className="text-[10px] text-claimondo-ondo/70 mt-1">{fmtRelative(m.created_at)}</p>
                         </button>
                         {!m.gelesen && (
                           <button
                             onClick={() => markAsRead(m.id)}
-                            className="shrink-0 p-1 text-gray-400 hover:text-green-600"
+                            className="shrink-0 p-1 text-claimondo-ondo/70 hover:text-green-600"
                             aria-label="Als gelesen markieren"
                             title="Als gelesen markieren"
                           >

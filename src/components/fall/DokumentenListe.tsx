@@ -35,7 +35,7 @@ export default function DokumentenListe({ slots, fallId }: Props) {
   return (
     <div className="space-y-4">
       {total > 0 && (
-        <div className="flex items-center justify-between text-xs text-gray-500">
+        <div className="flex items-center justify-between text-xs text-claimondo-ondo">
           <span>Pflichtdokumente</span>
           <span className="font-medium text-[#0D1B3E]">
             {done}/{total} erledigt
@@ -63,7 +63,7 @@ export default function DokumentenListe({ slots, fallId }: Props) {
 
       {optional.length > 0 && (
         <>
-          <div className="flex items-center justify-between text-xs text-gray-500 pt-2">
+          <div className="flex items-center justify-between text-xs text-claimondo-ondo pt-2">
             <span>Optional</span>
           </div>
           <div className="space-y-2">
@@ -85,7 +85,7 @@ export default function DokumentenListe({ slots, fallId }: Props) {
       )}
 
       {slots.length === 0 && (
-        <p className="text-sm text-gray-500 italic">Keine Dokumente angefordert.</p>
+        <p className="text-sm text-claimondo-ondo italic">Keine Dokumente angefordert.</p>
       )}
     </div>
   )

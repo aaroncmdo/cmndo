@@ -126,10 +126,10 @@ export function ManualPhaseOverrideModal({ open, onOpenChange, fallId, currentSu
 
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-[#0D1B3E]">Aktuelle Subphase</label>
-          <div className="w-full rounded-md border border-gray-200 bg-[#f8f9fb] px-3 py-2 text-sm text-gray-700">
+          <div className="w-full rounded-md border border-claimondo-border bg-[#f8f9fb] px-3 py-2 text-sm text-claimondo-navy">
             <span className="font-medium">{currentLabel}</span>
             {currentSubphase && (
-              <span className="ml-2 font-mono text-xs text-gray-500">({currentSubphase})</span>
+              <span className="ml-2 font-mono text-xs text-claimondo-ondo">({currentSubphase})</span>
             )}
           </div>
         </div>
@@ -141,7 +141,7 @@ export function ManualPhaseOverrideModal({ open, onOpenChange, fallId, currentSu
           <select
             value={neueSubphase}
             onChange={(e) => setNeueSubphase(e.target.value)}
-            className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
+            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
           >
             <option value="">– bitte wählen –</option>
             {groups.map((g) => (
@@ -159,16 +159,16 @@ export function ManualPhaseOverrideModal({ open, onOpenChange, fallId, currentSu
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-[#0D1B3E]">
             Begründung <span className="text-red-600">*</span>
-            <span className="text-gray-500 font-normal ml-1">(min. 10 Zeichen)</span>
+            <span className="text-claimondo-ondo font-normal ml-1">(min. 10 Zeichen)</span>
           </label>
           <textarea
             value={begruendung}
             onChange={(e) => setBegruendung(e.target.value)}
             rows={4}
             placeholder="Warum wird die Subphase manuell überschrieben? (z.B. Legacy-Migration, Visibility-Fine-Tuning, …)"
-            className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
+            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
           />
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-claimondo-ondo">
             {begruendung.trim().length} / min. 10 Zeichen —{' '}
             {begruendungOk ? (
               <span className="text-emerald-700">ok</span>
@@ -185,7 +185,7 @@ export function ManualPhaseOverrideModal({ open, onOpenChange, fallId, currentSu
             onChange={(e) => setConfirmed(e.target.checked)}
             className="mt-0.5"
           />
-          <span className="text-xs text-gray-700">
+          <span className="text-xs text-claimondo-navy">
             Ich bestätige, dass ich die Konsequenzen dieser manuellen Subphase-Änderung verstehe und
             dass der Subphase-Resolver bewusst umgangen wird.
           </span>
@@ -196,7 +196,7 @@ export function ManualPhaseOverrideModal({ open, onOpenChange, fallId, currentSu
             type="button"
             onClick={() => handleOpenChange(false)}
             disabled={pending}
-            className="text-sm rounded-md border border-gray-200 bg-white px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50"
+            className="text-sm rounded-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-[#f8f9fb] disabled:opacity-50"
           >
             Abbrechen
           </button>

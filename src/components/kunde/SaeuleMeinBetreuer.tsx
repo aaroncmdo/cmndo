@@ -22,7 +22,7 @@ export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon, kbAvatar
   const description = kbBeschreibung ?? 'Ihr persönlicher Ansprechpartner'
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 space-y-4">
+    <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-5 space-y-4">
       <div className="flex items-center gap-2">
         <HeadphonesIcon className="w-5 h-5 text-[#4573A2]" />
         <h2 className="text-sm font-semibold text-[#0D1B3E]">Mein Betreuer</h2>
@@ -32,8 +32,8 @@ export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon, kbAvatar
         <div className="flex items-center gap-3">
           <Avatar url={kbAvatarUrl ?? null} name={displayName} size="md" />
           <div className="min-w-0">
-            <p className="text-xs text-gray-500 truncate">{description}</p>
-            <p className="font-semibold text-gray-900 truncate">{displayName}</p>
+            <p className="text-xs text-claimondo-ondo truncate">{description}</p>
+            <p className="font-semibold text-claimondo-navy truncate">{displayName}</p>
           </div>
         </div>
 

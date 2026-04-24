@@ -48,8 +48,8 @@ export default function KundeJetztZuTunCard({ aktion }: Props) {
         className="mb-4"
       >
         <div className="space-y-0.5">
-          <p className="text-sm text-gray-700">{aktion.titel}</p>
-          <p className="text-xs text-gray-500">{aktion.beschreibung}</p>
+          <p className="text-sm text-claimondo-navy">{aktion.titel}</p>
+          <p className="text-xs text-claimondo-ondo">{aktion.beschreibung}</p>
         </div>
       </TodoCard>
     )

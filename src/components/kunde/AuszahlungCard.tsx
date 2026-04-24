@@ -34,7 +34,7 @@ export default function AuszahlungCard({ betrag, eingegangenAm, zahlungsweg }: P
   const eingegangen = !!eingegangenAm
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-2">
+    <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-4 space-y-2">
       <div className="flex items-center gap-2">
         <BanknoteIcon className="w-4 h-4 text-emerald-700" />
         <p className="text-sm font-semibold text-[#0D1B3E]">Ihre Auszahlung</p>
@@ -48,20 +48,20 @@ export default function AuszahlungCard({ betrag, eingegangenAm, zahlungsweg }: P
       </div>
 
       <div>
-        <p className="text-xs text-gray-500">Netto-Betrag (Ihr Anteil)</p>
+        <p className="text-xs text-claimondo-ondo">Netto-Betrag (Ihr Anteil)</p>
         <p className="text-2xl font-bold text-[#0D1B3E]">{formatEuro(n)}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 text-xs pt-1">
         {eingegangen && eingegangenAm && (
           <div>
-            <p className="text-gray-500">Eingang</p>
+            <p className="text-claimondo-ondo">Eingang</p>
             <p className="text-[#0D1B3E] font-medium">{formatDate(eingegangenAm)}</p>
           </div>
         )}
         {zahlungsweg && (
           <div>
-            <p className="text-gray-500">Zahlungsweg</p>
+            <p className="text-claimondo-ondo">Zahlungsweg</p>
             <p className="text-[#0D1B3E] font-medium">
               {ZAHLUNGSWEG_LABEL[zahlungsweg] ?? zahlungsweg}
             </p>
@@ -69,7 +69,7 @@ export default function AuszahlungCard({ betrag, eingegangenAm, zahlungsweg }: P
         )}
       </div>
 
-      <p className="text-[11px] text-gray-500 pt-1 border-t border-gray-100">
+      <p className="text-[11px] text-claimondo-ondo pt-1 border-t border-claimondo-border">
         Dies ist Ihr Netto-Anteil nach Abzug von SV-Honorar und Selbstbehalt. Die Brutto-Regulierung
         sehen Sie in Ihrer Fall-Übersicht.
       </p>
