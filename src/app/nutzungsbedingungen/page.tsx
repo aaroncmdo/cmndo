@@ -49,7 +49,7 @@ export default function NutzungsbedingungenPage() {
           </p>
         </section>
 
-        <p className="text-xs text-gray-400 mt-8">Stand: April 2026</p>
+        <p className="text-xs text-claimondo-ondo/70 mt-8">Stand: April 2026</p>
       </div>
     </main>
   )

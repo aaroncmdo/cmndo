@@ -40,7 +40,7 @@ export default function FontPicker({ selectedPairId, recommendedCategory, onChan
               className={`text-left p-3 rounded-xl border transition-colors ${
                 isActive
                   ? 'border-[var(--brand-secondary)] bg-[var(--brand-secondary)]/5'
-                  : 'border-gray-200 bg-white hover:border-gray-300'
+                  : 'border-claimondo-border bg-white hover:border-claimondo-border'
               }`}
             >
               <div className="flex items-center justify-between mb-1">
@@ -68,7 +68,7 @@ export default function FontPicker({ selectedPairId, recommendedCategory, onChan
                 {defaultPair.label}
               </p>
               <p
-                className="text-[11px] text-gray-500 mt-0.5"
+                className="text-[11px] text-claimondo-ondo mt-0.5"
                 style={{ fontFamily: defaultPair.cssStack.body }}
               >
                 {defaultPair.preview}
@@ -92,7 +92,7 @@ export default function FontPicker({ selectedPairId, recommendedCategory, onChan
                 className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${
                   isSelected
                     ? 'border-[var(--brand-secondary)] bg-[var(--brand-secondary)] text-white'
-                    : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                    : 'border-claimondo-border bg-white text-claimondo-navy hover:border-claimondo-border'
                 }`}
                 style={{ fontFamily: pair.cssStack.heading, fontWeight: 600 }}
               >

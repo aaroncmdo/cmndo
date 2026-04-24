@@ -266,8 +266,8 @@ function AkteCard({
 // ─────────────────────────────────────────────────────────────────────────────
 
 const PHASE_COLORS: Record<string, { bg: string; text: string; label: string }> = {
-  ersterfassung: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Ersterfassung' },
-  onboarding: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Onboarding' },
+  ersterfassung: { bg: 'bg-[#f8f9fb]', text: 'text-claimondo-navy', label: 'Ersterfassung' },
+  onboarding: { bg: 'bg-[#f8f9fb]', text: 'text-claimondo-navy', label: 'Onboarding' },
   'sv-gesucht': { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy', label: 'SV-Suche' },
   'sv-zugewiesen': { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy', label: 'SV zugewiesen' },
   'sv-termin': { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy', label: 'SV-Termin' },
@@ -323,7 +323,7 @@ function PhasePill({ akte }: { akte: MaklerAkteRow }) {
   const key = akte.aktuelle_phase ?? akte.status
   const entry =
     PHASE_COLORS[akte.status] ??
-    PHASE_COLORS[key] ?? { bg: 'bg-gray-100', text: 'text-gray-700', label: key }
+    PHASE_COLORS[key] ?? { bg: 'bg-[#f8f9fb]', text: 'text-claimondo-navy', label: key }
   return (
     <span
       className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${entry.bg} ${entry.text}`}

@@ -100,7 +100,7 @@ export function Schritt2aClient({ leadId }: { leadId: string }) {
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[320px_1fr]">
       {/* SVG links */}
       <div className="lg:sticky lg:top-6 lg:self-start">
-        <p className="mb-2 text-sm text-slate-600">Klick auf einen Bereich:</p>
+        <p className="mb-2 text-sm text-claimondo-ondo">Klick auf einen Bereich:</p>
         <div
           onClick={onSvgClick}
           role="presentation"
@@ -131,7 +131,7 @@ export function Schritt2aClient({ leadId }: { leadId: string }) {
         ))}
 
         <div className="sticky bottom-4 flex items-center justify-between rounded-xl border border-claimondo-border bg-white p-4 shadow-[var(--shadow-claimondo-sm)]">
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-claimondo-ondo">
             {fotos.length < MIN_FOTOS
               ? `Noch ${MIN_FOTOS - fotos.length} Foto${MIN_FOTOS - fotos.length === 1 ? '' : 's'} bis zum nächsten Schritt`
               : 'Alles bereit für die KI-Analyse'}
@@ -248,7 +248,7 @@ function BereichSection({
             'rounded-full px-3 py-1 text-xs font-semibold',
             count > 0
               ? 'bg-claimondo-ondo text-white'
-              : 'bg-claimondo-border text-slate-600',
+              : 'bg-claimondo-border text-claimondo-ondo',
           ].join(' ')}
         >
           {count} Foto{count === 1 ? '' : 's'}
@@ -269,7 +269,7 @@ function BereichSection({
         <p className="mt-2 text-sm font-medium text-claimondo-navy">
           Fotos hier ablegen oder klicken
         </p>
-        <p className="mt-1 text-xs text-slate-500">JPG, PNG oder WEBP · max. 10 MB</p>
+        <p className="mt-1 text-xs text-claimondo-ondo">JPG, PNG oder WEBP · max. 10 MB</p>
       </div>
 
       {bereichFotos.length > 0 ? (
@@ -299,7 +299,7 @@ function BereichSection({
       ) : null}
 
       {uploading > 0 ? (
-        <div className="mt-3 flex items-center gap-2 text-sm text-slate-600">
+        <div className="mt-3 flex items-center gap-2 text-sm text-claimondo-ondo">
           <Loader2 className="h-4 w-4 animate-spin text-claimondo-ondo" />
           <span>{uploading} Datei{uploading === 1 ? '' : 'en'} werden hochgeladen …</span>
         </div>

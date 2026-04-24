@@ -71,7 +71,7 @@ export function PinnedChatBubble({ chat }: Props) {
             e.stopPropagation()
             unpin(chat.fallId)
           }}
-          className="absolute -top-1.5 -left-1.5 w-4 h-4 rounded-full bg-gray-700 text-white flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-rose-600 transition-all"
+          className="absolute -top-1.5 -left-1.5 w-4 h-4 rounded-full bg-claimondo-shield text-white flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-rose-600 transition-all"
           aria-label="Chat schließen und zurück in Posteingang"
           title="Chat schließen und zurück in Posteingang"
           style={{ fontSize: 9 }}
@@ -81,7 +81,7 @@ export function PinnedChatBubble({ chat }: Props) {
       </div>
 
       {/* Name label */}
-      <span className="text-[9px] text-gray-500 font-medium max-w-[44px] truncate text-center leading-tight">
+      <span className="text-[9px] text-claimondo-ondo font-medium max-w-[44px] truncate text-center leading-tight">
         {chat.kundeName.split(' ')[0]}
       </span>
     </div>

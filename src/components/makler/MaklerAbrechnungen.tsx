@@ -92,7 +92,7 @@ function statusVisual(row: MaklerProvisionRow): {
   if (status === 'ausgezahlt') {
     return {
       label: 'Ausgezahlt',
-      className: 'bg-blue-50 text-blue-700 border border-blue-200',
+      className: 'bg-[#f8f9fb] text-claimondo-ondo border border-claimondo-border',
       icon: <WalletIcon width={12} height={12} />,
     }
   }
@@ -382,9 +382,9 @@ function SummaryCard({
       border: 'border-[#0D1B3E]/10',
     },
     blue: {
-      bg: 'bg-blue-50',
-      fg: 'text-blue-700',
-      border: 'border-blue-200',
+      bg: 'bg-[#f8f9fb]',
+      fg: 'text-claimondo-ondo',
+      border: 'border-claimondo-border',
     },
   }
   const c = toneMap[tone]

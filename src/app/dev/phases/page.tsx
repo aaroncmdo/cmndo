@@ -78,7 +78,7 @@ export default async function DevPhasesPage() {
         <h1 className="text-xl font-bold text-claimondo-navy">
           Phase-Component-Library — Playground (AAR-565)
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-claimondo-ondo mt-1">
           Alle 4 Rollen × 4 Varianten × 3 Mock-Fälle. Nur Dev-Env.
         </p>
       </header>
@@ -94,7 +94,7 @@ export default async function DevPhasesPage() {
                   className="bg-claimondo-card border border-claimondo-border rounded-xl p-4 shadow-[var(--shadow-claimondo-sm)]"
                 >
                   <header className="flex items-center justify-between mb-3 pb-2 border-b border-claimondo-border">
-                    <span className="text-[11px] uppercase tracking-wider text-gray-400">
+                    <span className="text-[11px] uppercase tracking-wider text-claimondo-ondo/70">
                       {rolle} · {variant}
                     </span>
                   </header>

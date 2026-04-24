@@ -26,7 +26,7 @@ export async function FlowProgress({ current }: Props) {
             <div
               className={[
                 'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold',
-                isActive ? 'bg-claimondo-ondo text-white' : 'bg-claimondo-border text-slate-500',
+                isActive ? 'bg-claimondo-ondo text-white' : 'bg-claimondo-border text-claimondo-ondo',
                 isCurrent ? 'ring-2 ring-claimondo-ondo ring-offset-2' : '',
               ].join(' ')}
               aria-current={isCurrent ? 'step' : undefined}
@@ -36,7 +36,7 @@ export async function FlowProgress({ current }: Props) {
             <span
               className={[
                 'hidden text-sm sm:inline',
-                isActive ? 'text-claimondo-navy font-medium' : 'text-slate-500',
+                isActive ? 'text-claimondo-navy font-medium' : 'text-claimondo-ondo',
               ].join(' ')}
             >
               {t(s.key)}

@@ -13,8 +13,8 @@ export default async function TerminPage({ params }: { params: Promise<{ token: 
           <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
             <span className="text-2xl text-red-500">✗</span>
           </div>
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">Link ungültig</h1>
-          <p className="text-sm text-gray-500">{error || 'Dieser Link ist ungültig oder abgelaufen.'}</p>
+          <h1 className="text-xl font-semibold text-claimondo-navy mb-2">Link ungültig</h1>
+          <p className="text-sm text-claimondo-ondo">{error || 'Dieser Link ist ungültig oder abgelaufen.'}</p>
         </div>
       </div>
     )

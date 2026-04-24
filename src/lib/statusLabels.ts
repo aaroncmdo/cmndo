@@ -44,12 +44,12 @@ export const FALL_STATUS_LABELS: Record<string, string> = {
 }
 
 export const FALL_STATUS_COLORS: Record<string, string> = {
-  ersterfassung: 'bg-blue-950 text-[#7BA3CC] border-[#1E3A5F]',
+  ersterfassung: 'bg-claimondo-navy text-[#7BA3CC] border-[#1E3A5F]',
   'flow-gesendet': 'bg-violet-950 text-violet-300 border-violet-800',
   onboarding: 'bg-pink-950 text-pink-300 border-pink-800',
   // AAR-161: neue Subphasen — gleiche Farblogik wie bestehende Alias-Codes
-  erstgespraech: 'bg-blue-950 text-[#7BA3CC] border-[#1E3A5F]',
-  'sv-gesucht': 'bg-blue-950 text-[#7BA3CC] border-[#1E3A5F]',
+  erstgespraech: 'bg-claimondo-navy text-[#7BA3CC] border-[#1E3A5F]',
+  'sv-gesucht': 'bg-claimondo-navy text-[#7BA3CC] border-[#1E3A5F]',
   'termin-reserviert': 'bg-yellow-950 text-yellow-300 border-yellow-800',
   'besichtigung-laeuft': 'bg-teal-950 text-teal-300 border-teal-800',
   'gutachten-bearbeitung': 'bg-teal-950 text-teal-300 border-teal-800',
@@ -62,7 +62,7 @@ export const FALL_STATUS_COLORS: Record<string, string> = {
   'vs-reguliert': 'bg-green-950 text-green-300 border-green-800',
   klage: 'bg-red-950 text-red-300 border-red-800',
   // Legacy-Codes
-  'sv-zugewiesen': 'bg-blue-950 text-[#7BA3CC] border-[#1E3A5F]',
+  'sv-zugewiesen': 'bg-claimondo-navy text-[#7BA3CC] border-[#1E3A5F]',
   'sv-termin': 'bg-yellow-950 text-yellow-300 border-yellow-800',
   besichtigung: 'bg-teal-950 text-teal-300 border-teal-800',
   'begutachtung-laeuft': 'bg-teal-950 text-teal-300 border-teal-800',
@@ -190,7 +190,7 @@ export const MANDATSTYP_LABELS: Record<string, string> = {
 }
 
 export const MANDATSTYP_COLORS: Record<string, string> = {
-  claimondo: 'bg-blue-950 text-[#7BA3CC]',
+  claimondo: 'bg-claimondo-navy text-[#7BA3CC]',
   'kanzlei-claimondo': 'bg-purple-950 text-purple-300',
 }
 

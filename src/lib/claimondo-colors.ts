@@ -32,7 +32,7 @@ export const claimondoTailwind = {
     navy: 'text-claimondo-navy',
     ondo: 'text-claimondo-ondo',
     white: 'text-white',
-    muted: 'text-slate-600',
+    muted: 'text-claimondo-ondo',
   },
   border: {
     default: 'border-claimondo-border',

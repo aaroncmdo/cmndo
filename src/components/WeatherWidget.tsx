@@ -57,17 +57,17 @@ export default function WeatherWidget({ lat, lng }: { lat: number | null; lng: n
   if (!lat || !lng) return null
   if (error) {
     return (
-      <div className="bg-white/60 border border-gray-200 rounded-2xl p-4 max-w-[300px]">
-        <p className="text-gray-500 text-xs">Wetter konnte nicht geladen werden.</p>
+      <div className="bg-white/60 border border-claimondo-border rounded-2xl p-4 max-w-[300px]">
+        <p className="text-claimondo-ondo text-xs">Wetter konnte nicht geladen werden.</p>
       </div>
     )
   }
   if (!weather) {
     return (
-      <div className="bg-white/60 border border-gray-200 rounded-2xl p-5 max-w-[300px] animate-pulse">
-        <div className="h-4 w-20 bg-gray-100 rounded mb-3" />
-        <div className="h-8 w-16 bg-gray-100 rounded mb-2" />
-        <div className="h-3 w-32 bg-gray-100 rounded" />
+      <div className="bg-white/60 border border-claimondo-border rounded-2xl p-5 max-w-[300px] animate-pulse">
+        <div className="h-4 w-20 bg-[#f8f9fb] rounded mb-3" />
+        <div className="h-8 w-16 bg-[#f8f9fb] rounded mb-2" />
+        <div className="h-3 w-32 bg-[#f8f9fb] rounded" />
       </div>
     )
   }
@@ -75,13 +75,13 @@ export default function WeatherWidget({ lat, lng }: { lat: number | null; lng: n
   const hint = getDrivingHint(weather.weather_id)
 
   return (
-    <div className="bg-white/60 backdrop-blur-md border border-gray-300/50 rounded-2xl p-5 max-w-[300px] w-full">
+    <div className="bg-white/60 backdrop-blur-md border border-claimondo-border/50 rounded-2xl p-5 max-w-[300px] w-full">
       {/* City */}
-      <p className="text-gray-500 text-xs font-medium uppercase tracking-wide mb-2">{weather.city}</p>
+      <p className="text-claimondo-ondo text-xs font-medium uppercase tracking-wide mb-2">{weather.city}</p>
 
       {/* Temp + Icon row */}
       <div className="flex items-center gap-3 mb-2">
-        <span className="text-[32px] font-bold text-gray-900 leading-none tabular-nums">{weather.temp}°</span>
+        <span className="text-[32px] font-bold text-claimondo-navy leading-none tabular-nums">{weather.temp}°</span>
         <img
           src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`}
           alt={weather.description}
@@ -92,10 +92,10 @@ export default function WeatherWidget({ lat, lng }: { lat: number | null; lng: n
       </div>
 
       {/* Description */}
-      <p className="text-gray-700 text-sm capitalize mb-3">{weather.description}</p>
+      <p className="text-claimondo-navy text-sm capitalize mb-3">{weather.description}</p>
 
       {/* Details row */}
-      <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
+      <div className="flex items-center gap-4 text-xs text-claimondo-ondo mb-3">
         <span>Gefühlt {weather.feels_like}°</span>
         <span>Wind {weather.wind} km/h</span>
         <span>{weather.humidity}%</span>
@@ -106,10 +106,10 @@ export default function WeatherWidget({ lat, lng }: { lat: number | null; lng: n
 
       {/* 3h forecast */}
       {weather.forecast.length > 0 && (
-        <div className="flex items-center gap-3 pt-3 border-t border-gray-200">
+        <div className="flex items-center gap-3 pt-3 border-t border-claimondo-border">
           {weather.forecast.map((f, i) => (
             <div key={i} className="flex flex-col items-center gap-0.5 flex-1">
-              <span className="text-gray-500 text-[10px]">{formatForecastTime(f.time)}</span>
+              <span className="text-claimondo-ondo text-[10px]">{formatForecastTime(f.time)}</span>
               <img
                 src={`https://openweathermap.org/img/wn/${f.icon}.png`}
                 alt=""
@@ -117,7 +117,7 @@ export default function WeatherWidget({ lat, lng }: { lat: number | null; lng: n
                 height={28}
                 className="w-7 h-7"
               />
-              <span className="text-gray-700 text-xs font-medium tabular-nums">{f.temp}°</span>
+              <span className="text-claimondo-navy text-xs font-medium tabular-nums">{f.temp}°</span>
             </div>
           ))}
         </div>

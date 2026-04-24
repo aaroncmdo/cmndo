@@ -111,12 +111,12 @@ function Running() {
       <h1 className="text-2xl font-bold text-claimondo-navy">
         KI analysiert Ihre Fotos …
       </h1>
-      <p className="mt-3 max-w-md text-sm text-slate-600">
+      <p className="mt-3 max-w-md text-sm text-claimondo-ondo">
         Claude prüft die Aufnahmen auf sichtbare Schäden, schätzt den
         Schweregrad ein und liest Fahrzeug-Hinweise. Das dauert nur wenige
         Sekunden.
       </p>
-      <ul className="mt-8 grid max-w-sm gap-2 text-left text-sm text-slate-600">
+      <ul className="mt-8 grid max-w-sm gap-2 text-left text-sm text-claimondo-ondo">
         <li className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-claimondo-ondo" aria-hidden />
           Beschädigte Teile erkennen
@@ -151,8 +151,8 @@ function ErrorView({
       <h1 className="text-xl font-bold text-claimondo-navy">
         Analyse konnte nicht abgeschlossen werden
       </h1>
-      <p className="mt-2 text-sm text-slate-600">{message}</p>
-      <p className="mt-4 text-xs text-slate-500">
+      <p className="mt-2 text-sm text-claimondo-ondo">{message}</p>
+      <p className="mt-4 text-xs text-claimondo-ondo">
         Sie können die Analyse erneut starten oder direkt mit dem nächsten
         Schritt fortfahren — die Ersteinschätzung ist für die Meldung nicht
         zwingend erforderlich.
@@ -200,7 +200,7 @@ function Done({
           <h1 className="text-2xl font-bold text-claimondo-navy">
             Analyse abgeschlossen
           </h1>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-claimondo-ondo">
             Das ist die Ersteinschätzung auf Basis Ihrer Fotos.
           </p>
         </div>
@@ -208,7 +208,7 @@ function Done({
 
       <section className="rounded-xl border border-claimondo-border bg-white p-5">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-claimondo-ondo">
             Schweregrad
           </h2>
           <span
@@ -217,12 +217,12 @@ function Done({
             {schweregradLabel[result.schweregrad]}
           </span>
         </div>
-        <p className="text-sm text-slate-700">{result.zusammenfassung}</p>
+        <p className="text-sm text-claimondo-navy">{result.zusammenfassung}</p>
       </section>
 
       {result.beschaedigte_teile.length > 0 ? (
         <section className="mt-4 rounded-xl border border-claimondo-border bg-white p-5">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-claimondo-ondo">
             Erkannte beschädigte Teile
           </h2>
           <ul className="flex flex-wrap gap-2">
@@ -241,13 +241,13 @@ function Done({
       {result.fahrzeug_hinweise &&
       Object.values(result.fahrzeug_hinweise).some(Boolean) ? (
         <section className="mt-4 rounded-xl border border-claimondo-border bg-white p-5">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-claimondo-ondo">
             Fahrzeug-Hinweise
           </h2>
           <dl className="grid grid-cols-2 gap-3 text-sm">
             {result.fahrzeug_hinweise.hersteller ? (
               <div>
-                <dt className="text-xs text-slate-500">Hersteller</dt>
+                <dt className="text-xs text-claimondo-ondo">Hersteller</dt>
                 <dd className="text-claimondo-navy">
                   {result.fahrzeug_hinweise.hersteller}
                 </dd>
@@ -255,7 +255,7 @@ function Done({
             ) : null}
             {result.fahrzeug_hinweise.modell ? (
               <div>
-                <dt className="text-xs text-slate-500">Modell</dt>
+                <dt className="text-xs text-claimondo-ondo">Modell</dt>
                 <dd className="text-claimondo-navy">
                   {result.fahrzeug_hinweise.modell}
                 </dd>
@@ -263,7 +263,7 @@ function Done({
             ) : null}
             {result.fahrzeug_hinweise.farbe ? (
               <div>
-                <dt className="text-xs text-slate-500">Farbe</dt>
+                <dt className="text-xs text-claimondo-ondo">Farbe</dt>
                 <dd className="text-claimondo-navy">
                   {result.fahrzeug_hinweise.farbe}
                 </dd>
@@ -271,7 +271,7 @@ function Done({
             ) : null}
             {result.fahrzeug_hinweise.kennzeichen ? (
               <div>
-                <dt className="text-xs text-slate-500">Kennzeichen</dt>
+                <dt className="text-xs text-claimondo-ondo">Kennzeichen</dt>
                 <dd className="text-claimondo-navy">
                   {result.fahrzeug_hinweise.kennzeichen}
                 </dd>
@@ -281,7 +281,7 @@ function Done({
         </section>
       ) : null}
 
-      <p className="mt-4 text-xs text-slate-500">
+      <p className="mt-4 text-xs text-claimondo-ondo">
         Konfidenz der KI: {(result.confidence * 100).toFixed(0)} %. Die
         endgültige Bewertung trifft der Sachverständige vor Ort.
       </p>

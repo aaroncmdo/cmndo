@@ -62,7 +62,7 @@ export function CardentityTypBButton({
 
   if (!finVorhanden) {
     return (
-      <p className="text-[11px] text-gray-400">
+      <p className="text-[11px] text-claimondo-ondo/70">
         Cardentity Typ-B verfügbar sobald die FIN erfasst ist.
       </p>
     )
@@ -91,7 +91,7 @@ export function CardentityTypBButton({
               : 'Keine Vorschäden in Cardentity'}
           </span>
         </div>
-        <p className="text-[10px] text-gray-500">
+        <p className="text-[10px] text-claimondo-ondo">
           Typ-B abgefragt am {datum}
           {vorhanden && state.letzterVorschadenDatum
             ? ` · letzter Eintrag ${new Date(state.letzterVorschadenDatum).toLocaleDateString('de-DE')}`
@@ -109,7 +109,7 @@ export function CardentityTypBButton({
         type="button"
         onClick={trigger}
         disabled={pending}
-        className={`inline-flex items-center gap-1.5 ${padding} rounded-lg border border-gray-300 bg-white text-xs font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed`}
+        className={`inline-flex items-center gap-1.5 ${padding} rounded-lg border border-claimondo-border bg-white text-xs font-medium text-claimondo-navy hover:bg-[#f8f9fb] disabled:opacity-60 disabled:cursor-not-allowed`}
         title="Cardentity Typ-B kostet 15€ pro Abfrage. Sinnvoll bei konkretem Vorschadenverdacht."
       >
         {pending ? (
@@ -119,7 +119,7 @@ export function CardentityTypBButton({
         )}
         Cardentity Typ-B anfordern
       </button>
-      <p className="text-[10px] text-gray-400">15€ pro Abfrage · einmalig pro Fahrzeug</p>
+      <p className="text-[10px] text-claimondo-ondo/70">15€ pro Abfrage · einmalig pro Fahrzeug</p>
       {error && <p className="text-[11px] text-red-600">{error}</p>}
     </div>
   )

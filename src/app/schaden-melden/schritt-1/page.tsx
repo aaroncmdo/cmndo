@@ -14,7 +14,7 @@ export default function Schritt1Page() {
           <h1 className="text-2xl font-bold text-claimondo-navy">
             Was ist passiert?
           </h1>
-          <p className="mt-2 text-slate-600">
+          <p className="mt-2 text-claimondo-ondo">
             Erzähl uns kurz, was vorgefallen ist. Alle Angaben sind unverbindlich.
           </p>
         </div>

@@ -12,7 +12,7 @@ export default function Schritt1VoicePage() {
           <h1 className="text-2xl font-bold text-claimondo-navy">
             Was ist passiert?
           </h1>
-          <p className="mt-2 text-slate-600">
+          <p className="mt-2 text-claimondo-ondo">
             Sprechen Sie einfach drauflos — unsere KI transkribiert und
             füllt das Formular für Sie vor.
           </p>

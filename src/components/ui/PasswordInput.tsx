@@ -34,7 +34,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           onClick={() => setVisible((v) => !v)}
           tabIndex={-1}
           aria-label={visible ? 'Passwort verbergen' : 'Passwort anzeigen'}
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-claimondo-ondo/70 hover:text-claimondo-ondo focus:outline-none"
         >
           {visible ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
         </button>

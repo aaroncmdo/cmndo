@@ -40,7 +40,7 @@ export async function LandingHero({ authenticatedUser }: Props) {
           {t('headline')}
         </h1>
 
-        <p className="mt-6 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">
+        <p className="mt-6 max-w-2xl text-base leading-relaxed text-claimondo-ondo sm:text-lg">
           {t('subheadline')}
         </p>
 
@@ -66,7 +66,7 @@ export async function LandingHero({ authenticatedUser }: Props) {
           )}
         </div>
 
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-slate-600">
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-claimondo-ondo">
           <Phone className="h-4 w-4" aria-hidden="true" />
           <span>{t('phone_label')}</span>
           <a

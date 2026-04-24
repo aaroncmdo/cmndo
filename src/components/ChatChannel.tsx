@@ -41,7 +41,7 @@ export default function ChatChannel({ fallId, kanal, currentUserId, readOnly }: 
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
-        {messages.length === 0 && <p className="text-center text-gray-400 text-xs py-8">Noch keine Nachrichten</p>}
+        {messages.length === 0 && <p className="text-center text-claimondo-ondo/70 text-xs py-8">Noch keine Nachrichten</p>}
         {messages.map(m => {
           const isOwn = m.sender_id === currentUserId
           const isSystem = m.sender_rolle === 'system' || !m.sender_id
@@ -52,7 +52,7 @@ export default function ChatChannel({ fallId, kanal, currentUserId, readOnly }: 
               <div key={m.id} className="flex justify-center">
                 <div className="bg-[#f8f9fb] border border-[#7BA3CC]/30 rounded-xl px-4 py-2 max-w-[85%]">
                   <p className="text-xs text-[#0D1B3E] text-center whitespace-pre-wrap">{m.nachricht}</p>
-                  <p className="text-[9px] text-gray-400 text-center mt-1">{new Date(m.created_at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</p>
+                  <p className="text-[9px] text-claimondo-ondo/70 text-center mt-1">{new Date(m.created_at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
               </div>
             )
@@ -60,10 +60,10 @@ export default function ChatChannel({ fallId, kanal, currentUserId, readOnly }: 
 
           return (
             <div key={m.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[75%] px-3 py-2 rounded-xl text-sm ${isOwn ? 'bg-[#1E3A5F] text-white rounded-br-sm' : 'bg-gray-100 text-gray-800 rounded-bl-sm'}`}>
+              <div className={`max-w-[75%] px-3 py-2 rounded-xl text-sm ${isOwn ? 'bg-[#1E3A5F] text-white rounded-br-sm' : 'bg-[#f8f9fb] text-claimondo-navy rounded-bl-sm'}`}>
                 {!isOwn && <p className="text-[10px] font-medium mb-0.5 opacity-70">{m.sender_rolle ?? ''}</p>}
                 <p className="whitespace-pre-wrap">{m.nachricht}</p>
-                <p className={`text-[9px] mt-1 ${isOwn ? 'text-[#7BA3CC]' : 'text-gray-400'}`}>{new Date(m.created_at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</p>
+                <p className={`text-[9px] mt-1 ${isOwn ? 'text-[#7BA3CC]' : 'text-claimondo-ondo/70'}`}>{new Date(m.created_at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</p>
               </div>
             </div>
           )
@@ -71,13 +71,13 @@ export default function ChatChannel({ fallId, kanal, currentUserId, readOnly }: 
         <div ref={endRef} />
       </div>
       {!readOnly && (
-        <div className="flex-shrink-0 border-t border-gray-200 p-2 flex gap-2">
+        <div className="flex-shrink-0 border-t border-claimondo-border p-2 flex gap-2">
           <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
-            placeholder="Nachricht..." className="flex-1 bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#4573A2]" />
+            placeholder="Nachricht..." className="flex-1 bg-white border border-claimondo-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#4573A2]" />
           <button onClick={send} disabled={sending || !input.trim()} className="bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-50 text-white p-2 rounded-lg"><SendIcon className="w-4 h-4" /></button>
         </div>
       )}
-      {readOnly && <div className="flex-shrink-0 border-t border-gray-200 p-2 text-center text-gray-400 text-xs">Nur Lesen — dieser Kanal ist zwischen Kunde und Gutachter</div>}
+      {readOnly && <div className="flex-shrink-0 border-t border-claimondo-border p-2 text-center text-claimondo-ondo/70 text-xs">Nur Lesen — dieser Kanal ist zwischen Kunde und Gutachter</div>}
     </div>
   )
 }

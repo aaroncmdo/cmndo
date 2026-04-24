@@ -159,7 +159,7 @@ export default function IsochronePreviewMap({ lat, lng, radius_km, adresse, pake
 
   if (lat == null || lng == null) {
     return (
-      <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 flex items-center justify-center text-xs text-gray-500">
+      <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-6 flex items-center justify-center text-xs text-claimondo-ondo">
         <MapPinIcon className="w-4 h-4 mr-2" />
         Adresse wählen, um Einsatzgebiet-Vorschau zu laden.
       </div>
@@ -168,9 +168,9 @@ export default function IsochronePreviewMap({ lat, lng, radius_km, adresse, pake
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between text-[11px] text-gray-500">
+      <div className="flex items-center justify-between text-[11px] text-claimondo-ondo">
         <span>
-          <strong className="text-gray-700">Einsatzgebiet-Vorschau</strong>
+          <strong className="text-claimondo-navy">Einsatzgebiet-Vorschau</strong>
           {paketLabel && <span className="ml-2 text-[#4573A2]">· {paketLabel}</span>}
           <span className="ml-2">· {radius_km} km</span>
         </span>
@@ -184,7 +184,7 @@ export default function IsochronePreviewMap({ lat, lng, radius_km, adresse, pake
                 : '—'}
         </span>
       </div>
-      <div ref={containerRef} className="w-full h-[280px] rounded-xl border border-gray-200 overflow-hidden bg-gray-50" />
+      <div ref={containerRef} className="w-full h-[280px] rounded-xl border border-claimondo-border overflow-hidden bg-[#f8f9fb]" />
       {preview?.success && preview.mode === 'fallback-circle' && (
         <p className="text-[10px] text-amber-600">
           Isochrone-API nicht verfügbar — Kreis-Approximation als Vorschau ({preview.reason}).

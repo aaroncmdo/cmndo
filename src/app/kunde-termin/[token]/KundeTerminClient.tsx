@@ -74,7 +74,7 @@ export default function KundeTerminClient({
             <span className="text-2xl text-emerald-600">✓</span>
           </div>
           <h1 className="text-xl font-semibold text-[#0D1B3E] mb-2">Geschafft</h1>
-          <p className="text-sm text-gray-600">{doneMsg}</p>
+          <p className="text-sm text-claimondo-ondo">{doneMsg}</p>
         </div>
       </PageWrapper>
     )
@@ -90,27 +90,27 @@ export default function KundeTerminClient({
           <h1 className="text-xl font-semibold text-[#0D1B3E] mt-1">
             Hallo {termin.kunde_vorname}
           </h1>
-          <p className="text-sm text-gray-600 mt-2">
+          <p className="text-sm text-claimondo-ondo mt-2">
             {termin.sv_name} kann den ursprünglichen Termin nicht halten und
             schlägt einen neuen vor.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 space-y-3">
+        <div className="rounded-2xl border border-claimondo-border bg-white p-4 space-y-3">
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-gray-400">
+            <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70">
               Ursprünglicher Termin
             </p>
             <p className="text-sm text-[#0D1B3E] mt-0.5 line-through">{fmt(altDate)}</p>
           </div>
           {neuDate && (
-            <div className="border-t border-gray-100 pt-3">
+            <div className="border-t border-claimondo-border pt-3">
               <p className="text-[10px] uppercase tracking-wider text-[#4573A2]">
                 Neuer Vorschlag
               </p>
               <p className="text-base font-semibold text-[#0D1B3E] mt-0.5">{fmt(neuDate)}</p>
               {termin.gegenvorschlag_grund && (
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-claimondo-ondo mt-2">
                   Begründung: {termin.gegenvorschlag_grund}
                 </p>
               )}
@@ -156,7 +156,7 @@ export default function KundeTerminClient({
                 value={neuesDatum}
                 onChange={(e) => setNeuesDatum(e.target.value)}
                 min={new Date().toISOString().slice(0, 16)}
-                className="w-full rounded-xl border border-gray-200 px-3 min-h-[44px] text-base text-[#0D1B3E] focus:outline-none focus:border-[#4573A2]"
+                className="w-full rounded-xl border border-claimondo-border px-3 min-h-[44px] text-base text-[#0D1B3E] focus:outline-none focus:border-[#4573A2]"
               />
             </div>
             <div>
@@ -168,7 +168,7 @@ export default function KundeTerminClient({
                 value={grund}
                 onChange={(e) => setGrund(e.target.value)}
                 placeholder="z. B. „Bin zu der Zeit beruflich verhindert"
-                className="w-full rounded-xl border border-gray-200 px-3 py-2 text-base text-[#0D1B3E] focus:outline-none focus:border-[#4573A2] resize-none"
+                className="w-full rounded-xl border border-claimondo-border px-3 py-2 text-base text-[#0D1B3E] focus:outline-none focus:border-[#4573A2] resize-none"
               />
             </div>
             <div className="flex gap-2 pt-1">
@@ -176,7 +176,7 @@ export default function KundeTerminClient({
                 type="button"
                 onClick={() => setView('overview')}
                 disabled={pending}
-                className="flex-1 min-h-[44px] rounded-xl bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200"
+                className="flex-1 min-h-[44px] rounded-xl bg-[#f8f9fb] text-claimondo-navy text-sm font-medium hover:bg-claimondo-border"
               >
                 Zurück
               </button>
@@ -199,7 +199,7 @@ export default function KundeTerminClient({
 function PageWrapper({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-3xl p-6 md:p-8 shadow-xl shadow-black/5 border border-gray-100">
+      <div className="max-w-md w-full bg-white rounded-3xl p-6 md:p-8 shadow-xl shadow-black/5 border border-claimondo-border">
         {children}
       </div>
     </div>

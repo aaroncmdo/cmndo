@@ -223,7 +223,7 @@ export default function FlowWizardKfz({
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
       {/* Progress bar */}
-      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-gray-100">
+      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-[#f8f9fb]">
         <div className="h-full bg-[#4573A2] transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
       </div>
 
@@ -235,11 +235,11 @@ export default function FlowWizardKfz({
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
                 i < stepIndex ? 'bg-emerald-500 text-white' :
                 i === stepIndex ? 'bg-[#4573A2] text-white' :
-                'bg-gray-200 text-gray-400'
+                'bg-claimondo-border text-claimondo-ondo/70'
               }`}>
                 {i < stepIndex ? <CheckIcon className="w-3.5 h-3.5" /> : i + 1}
               </div>
-              {i < STEPS.length - 1 && <div className={`w-6 h-0.5 rounded ${i < stepIndex ? 'bg-emerald-400' : 'bg-gray-200'}`} />}
+              {i < STEPS.length - 1 && <div className={`w-6 h-0.5 rounded ${i < stepIndex ? 'bg-emerald-400' : 'bg-claimondo-border'}`} />}
             </div>
           ))}
         </div>
@@ -248,7 +248,7 @@ export default function FlowWizardKfz({
       {/* Content */}
       <div className="flex-1 flex flex-col px-5 pt-16 pb-8 max-w-lg mx-auto w-full">
         <div className="flex-1 flex flex-col justify-center py-4">
-          <div className="bg-white border border-gray-200 rounded-3xl px-6 py-7 shadow-xl shadow-black/5">
+          <div className="bg-white border border-claimondo-border rounded-3xl px-6 py-7 shadow-xl shadow-black/5">
 
             {/* ═══ SCHRITT 1: ZUSAMMENFASSUNG + DATENSCHUTZ ═══ */}
             {currentStep.id === 'zusammenfassung' && (
@@ -303,15 +303,15 @@ export default function FlowWizardKfz({
                 </div>
 
                 {/* Datenschutz */}
-                <div className="border-t border-gray-100 pt-5">
+                <div className="border-t border-claimondo-border pt-5">
                   <label className="flex items-start gap-3 cursor-pointer group">
                     <input
                       type="checkbox"
                       checked={datenschutz}
                       onChange={e => setDatenschutz(e.target.checked)}
-                      className="mt-0.5 w-5 h-5 rounded border-gray-300 accent-[#4573A2] shrink-0"
+                      className="mt-0.5 w-5 h-5 rounded border-claimondo-border accent-[#4573A2] shrink-0"
                     />
-                    <span className="text-sm text-gray-600 leading-relaxed">
+                    <span className="text-sm text-claimondo-ondo leading-relaxed">
                       Ich habe die{' '}
                       <a href="/datenschutz" target="_blank" className="text-[#4573A2] underline">Datenschutzerklärung</a>{' '}
                       gelesen und stimme der Verarbeitung meiner Daten zu. <span className="text-red-400">*</span>
@@ -346,23 +346,23 @@ export default function FlowWizardKfz({
                     )}
                     <p className="text-xs uppercase tracking-wider text-[#4573A2] mb-1">Ihr Sachverstaendiger</p>
                     <h2 className="text-2xl font-bold text-[#0D1B3E] mb-2">{gutachter.vorname}</h2>
-                    <p className="text-sm text-gray-600">Wird sich bei Ihnen melden</p>
+                    <p className="text-sm text-claimondo-ondo">Wird sich bei Ihnen melden</p>
                     {gutachter.terminDatum && (
                       <div className="mt-4 pt-4 border-t border-[#4573A2]/20">
-                        <p className="text-xs text-gray-500 mb-1">Termin reserviert</p>
+                        <p className="text-xs text-claimondo-ondo mb-1">Termin reserviert</p>
                         <p className="text-sm font-semibold text-[#0D1B3E]">
                           {new Date(gutachter.terminDatum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
                         </p>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-claimondo-ondo">
                           {new Date(gutachter.terminDatum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
                         </p>
                         {/* AAR-341: Besichtigungsort + optional Treffpunkt */}
                         {gutachter.besichtigungsAdresse && (
                           <div className="mt-3 pt-3 border-t border-[#4573A2]/10">
-                            <p className="text-xs text-gray-500 mb-0.5">Besichtigungsort</p>
+                            <p className="text-xs text-claimondo-ondo mb-0.5">Besichtigungsort</p>
                             <p className="text-sm text-[#0D1B3E]">{gutachter.besichtigungsAdresse}</p>
                             {gutachter.svTreffpunkt && (
-                              <p className="text-xs text-gray-500 mt-0.5">
+                              <p className="text-xs text-claimondo-ondo mt-0.5">
                                 Treffpunkt: {gutachter.svTreffpunkt}
                               </p>
                             )}
@@ -408,8 +408,8 @@ export default function FlowWizardKfz({
                 )}
 
                 {/* Werkstatt-Frage */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-4 mb-4 space-y-3">
-                  <p className="text-sm font-medium text-gray-900">
+                <div className="bg-white border border-claimondo-border rounded-2xl p-4 mb-4 space-y-3">
+                  <p className="text-sm font-medium text-claimondo-navy">
                     Steht dein Auto gerade in einer Werkstatt?
                   </p>
                   <div className="flex gap-2">
@@ -419,7 +419,7 @@ export default function FlowWizardKfz({
                       className={`flex-1 min-h-12 rounded-xl text-sm font-medium border ${
                         werkstattJa === true
                           ? 'bg-[#4573A2] text-white border-[#4573A2]'
-                          : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                          : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-[#f8f9fb]'
                       }`}
                     >
                       Ja
@@ -433,7 +433,7 @@ export default function FlowWizardKfz({
                       className={`flex-1 min-h-12 rounded-xl text-sm font-medium border ${
                         werkstattJa === false
                           ? 'bg-[#4573A2] text-white border-[#4573A2]'
-                          : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                          : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-[#f8f9fb]'
                       }`}
                     >
                       Nein
@@ -441,26 +441,26 @@ export default function FlowWizardKfz({
                   </div>
                   {werkstattJa === true && (
                     <div>
-                      <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">
+                      <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo block mb-1">
                         Seit wann? (optional)
                       </label>
                       <input
                         type="date"
                         value={werkstattDatum}
                         onChange={(e) => setWerkstattDatum(e.target.value)}
-                        className="w-full text-sm rounded-xl border border-gray-200 px-3 py-2.5 outline-none focus:border-[#4573A2]"
+                        className="w-full text-sm rounded-xl border border-claimondo-border px-3 py-2.5 outline-none focus:border-[#4573A2]"
                       />
                     </div>
                   )}
                 </div>
 
                 {/* Schadensfotos-Upload */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-4 mb-5 space-y-3">
+                <div className="bg-white border border-claimondo-border rounded-2xl p-4 mb-5 space-y-3">
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-claimondo-navy">
                       Hast du Fotos vom Schaden?
                     </p>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs text-claimondo-ondo mt-0.5">
                       Optional. Max. 10 Fotos, je max. 10 MB. JPEG/PNG/HEIC/WebP.
                     </p>
                   </div>
@@ -511,15 +511,15 @@ export default function FlowWizardKfz({
                       }}
                       className="hidden"
                     />
-                    <div className="rounded-xl border-2 border-dashed border-gray-300 px-4 py-6 text-center hover:border-[#4573A2] bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <div className="rounded-xl border-2 border-dashed border-claimondo-border px-4 py-6 text-center hover:border-[#4573A2] bg-[#f8f9fb] hover:bg-[#f8f9fb] transition-colors">
                       {uploadingFotos ? (
-                        <p className="text-sm text-gray-500 flex items-center justify-center gap-2">
+                        <p className="text-sm text-claimondo-ondo flex items-center justify-center gap-2">
                           <LoaderIcon className="w-4 h-4 animate-spin" /> Lade hoch …
                         </p>
                       ) : (
                         <>
-                          <p className="text-sm text-gray-700">📷 Fotos auswählen</p>
-                          <p className="text-[11px] text-gray-500 mt-1">
+                          <p className="text-sm text-claimondo-navy">📷 Fotos auswählen</p>
+                          <p className="text-[11px] text-claimondo-ondo mt-1">
                             {schadensfotos.length}/10 hochgeladen
                           </p>
                         </>
@@ -531,7 +531,7 @@ export default function FlowWizardKfz({
                       {schadensfotos.map((url, i) => (
                         <div
                           key={url}
-                          className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200"
+                          className="relative aspect-square rounded-lg overflow-hidden bg-[#f8f9fb] border border-claimondo-border"
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
@@ -594,8 +594,8 @@ export default function FlowWizardKfz({
                   icon={<PenToolIcon className="w-8 h-8 text-[#4573A2]" />}
                 />
 
-                <div className="bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-2xl px-4 py-4 mb-5 text-sm text-gray-700 leading-relaxed">
-                  <p className="font-medium text-gray-900 mb-2">Zusammenfassung:</p>
+                <div className="bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-2xl px-4 py-4 mb-5 text-sm text-claimondo-navy leading-relaxed">
+                  <p className="font-medium text-claimondo-navy mb-2">Zusammenfassung:</p>
                   <p>Ich beauftrage die Claimondo GmbH mit der Koordination meines KFZ-Schadens.
                   Mir entstehen <strong>keine Kosten</strong>. Die Gutachterkosten werden im Rahmen
                   der Sicherungsabtretung an den Sachverständigen abgetreten und von der gegnerischen
@@ -613,7 +613,7 @@ export default function FlowWizardKfz({
 
                 {/* Unterschrifts-Canvas */}
                 <div className="mb-4">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Ihre Unterschrift</p>
+                  <p className="text-xs text-claimondo-ondo uppercase tracking-wider mb-2">Ihre Unterschrift</p>
                   <SignatureCanvas onSignature={setSignatureBlob} />
                 </div>
 
@@ -623,9 +623,9 @@ export default function FlowWizardKfz({
                     type="checkbox"
                     checked={saAccepted}
                     onChange={e => setSaAccepted(e.target.checked)}
-                    className="mt-0.5 w-5 h-5 rounded border-gray-300 accent-[#4573A2] shrink-0"
+                    className="mt-0.5 w-5 h-5 rounded border-claimondo-border accent-[#4573A2] shrink-0"
                   />
-                  <span className="text-sm text-gray-600 leading-relaxed">
+                  <span className="text-sm text-claimondo-ondo leading-relaxed">
                     Ja, ich möchte den kostenlosen Service nutzen. Alle Kosten trägt die gegnerische Versicherung.
                     Ich stimme den Vertragsbedingungen und der Widerrufsbelehrung zu. <span className="text-red-400">*</span>
                   </span>
@@ -659,11 +659,11 @@ export default function FlowWizardKfz({
 
                 {accountCreated ? (
                   <div className="space-y-4">
-                    <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 text-center">
-                      <p className="text-sm text-gray-500 mb-2">Ihre Zugangsdaten:</p>
-                      <p className="text-sm text-gray-700"><strong>E-Mail:</strong> {accountEmail}</p>
-                      <p className="text-sm text-gray-700"><strong>Passwort:</strong> {accountPassword}</p>
-                      <p className="text-xs text-gray-400 mt-3">Bitte aendern Sie Ihr Passwort nach dem ersten Login.</p>
+                    <div className="bg-[#f8f9fb] border border-claimondo-border rounded-2xl p-5 text-center">
+                      <p className="text-sm text-claimondo-ondo mb-2">Ihre Zugangsdaten:</p>
+                      <p className="text-sm text-claimondo-navy"><strong>E-Mail:</strong> {accountEmail}</p>
+                      <p className="text-sm text-claimondo-navy"><strong>Passwort:</strong> {accountPassword}</p>
+                      <p className="text-xs text-claimondo-ondo/70 mt-3">Bitte aendern Sie Ihr Passwort nach dem ersten Login.</p>
                     </div>
                     <button
                       onClick={() => { window.location.href = '/kunde' }}
@@ -675,14 +675,14 @@ export default function FlowWizardKfz({
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <label className="text-xs text-gray-500 mb-1.5 block">E-Mail</label>
+                      <label className="text-xs text-claimondo-ondo mb-1.5 block">E-Mail</label>
                       <div className="relative">
-                        <MailIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <MailIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-claimondo-ondo/70" />
                         <input
                           type="email"
                           value={accountEmail}
                           onChange={e => setAccountEmail(e.target.value)}
-                          className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-gray-200 bg-gray-50 text-sm text-gray-800 focus:outline-none focus:border-[#4573A2]"
+                          className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-claimondo-border bg-[#f8f9fb] text-sm text-claimondo-navy focus:outline-none focus:border-[#4573A2]"
                         />
                       </div>
                     </div>
@@ -734,7 +734,7 @@ export default function FlowWizardKfz({
           <div className="pt-2">
             <button
               onClick={() => setStepIndex(stepIndex - 1)}
-              className="w-full py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              className="w-full py-3 text-sm text-claimondo-ondo hover:text-claimondo-navy transition-colors"
             >
               Zurueck
             </button>
@@ -751,8 +751,8 @@ function StepHeader({ question, sub, icon }: { question: string; sub?: string; i
   return (
     <div className="mb-7">
       {icon && <div className="mb-3">{icon}</div>}
-      <h1 className="text-2xl font-semibold text-gray-900 leading-snug">{question}</h1>
-      {sub && <p className="mt-2 text-sm text-gray-500">{sub}</p>}
+      <h1 className="text-2xl font-semibold text-claimondo-navy leading-snug">{question}</h1>
+      {sub && <p className="mt-2 text-sm text-claimondo-ondo">{sub}</p>}
     </div>
   )
 }
@@ -760,12 +760,12 @@ function StepHeader({ question, sub, icon }: { question: string; sub?: string; i
 function EditableInput({ label, value, onChange, type = 'text' }: { label: string; value: string; onChange: (v: string) => void; type?: string }) {
   return (
     <div>
-      <label className="block text-xs text-gray-500 mb-1">{label}</label>
+      <label className="block text-xs text-claimondo-ondo mb-1">{label}</label>
       <input
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-800 focus:outline-none focus:border-[#4573A2] focus:bg-white transition-colors"
+        className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-sm text-claimondo-navy focus:outline-none focus:border-[#4573A2] focus:bg-white transition-colors"
       />
     </div>
   )
@@ -773,9 +773,9 @@ function EditableInput({ label, value, onChange, type = 'text' }: { label: strin
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-0.5 px-4 py-3 rounded-xl bg-gray-50 border border-gray-100">
-      <span className="text-xs text-gray-500">{label}</span>
-      <span className="text-sm text-gray-800 break-words">{value}</span>
+    <div className="flex flex-col gap-0.5 px-4 py-3 rounded-xl bg-[#f8f9fb] border border-claimondo-border">
+      <span className="text-xs text-claimondo-ondo">{label}</span>
+      <span className="text-sm text-claimondo-navy break-words">{value}</span>
     </div>
   )
 }
@@ -826,16 +826,16 @@ function SignatureCanvas({ onSignature }: { onSignature: (blob: Blob | null) => 
 
   return (
     <div>
-      <div className="relative border-2 border-gray-200 rounded-2xl overflow-hidden bg-white">
+      <div className="relative border-2 border-claimondo-border rounded-2xl overflow-hidden bg-white">
         <canvas ref={canvasRef} className="w-full h-44 touch-none" />
         {isEmpty && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <p className="text-gray-300 text-sm">Hier unterschreiben</p>
+            <p className="text-claimondo-ondo/50 text-sm">Hier unterschreiben</p>
           </div>
         )}
       </div>
       {!isEmpty && (
-        <button onClick={clearSignature} className="mt-2 text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1">
+        <button onClick={clearSignature} className="mt-2 text-xs text-claimondo-ondo hover:text-claimondo-navy flex items-center gap-1">
           <Trash2Icon className="w-3 h-3" /> Unterschrift löschen
         </button>
       )}

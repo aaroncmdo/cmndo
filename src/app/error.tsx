@@ -22,17 +22,17 @@ export default function Error({
     <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center px-5">
       <div className="text-center max-w-md">
         <div className="text-red-500 text-5xl mb-4">!</div>
-        <h1 className="text-xl font-semibold text-gray-900 mb-2">
+        <h1 className="text-xl font-semibold text-claimondo-navy mb-2">
           Etwas ist schiefgelaufen
         </h1>
-        <p className="text-gray-500 text-sm mb-4">
+        <p className="text-claimondo-ondo text-sm mb-4">
           Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.
         </p>
-        <p className="text-gray-500 text-xs mb-2 font-mono bg-white border border-gray-200 rounded-lg px-4 py-3 text-left break-all">
+        <p className="text-claimondo-ondo text-xs mb-2 font-mono bg-white border border-claimondo-border rounded-lg px-4 py-3 text-left break-all">
           {error.message || 'Unbekannter Fehler'}
         </p>
         {error.digest && (
-          <p className="text-gray-400 text-xs mb-4 font-mono">
+          <p className="text-claimondo-ondo/70 text-xs mb-4 font-mono">
             Fehler-ID: {error.digest}
           </p>
         )}

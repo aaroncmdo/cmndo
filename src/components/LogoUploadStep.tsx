@@ -106,41 +106,41 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
           className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-colors ${
             isDragActive
               ? 'border-[#4573A2] bg-[#4573A2]/5'
-              : 'border-gray-300 bg-gray-50 hover:border-[#4573A2] hover:bg-gray-100'
+              : 'border-claimondo-border bg-[#f8f9fb] hover:border-[#4573A2] hover:bg-[#f8f9fb]'
           } ${uploading ? 'pointer-events-none opacity-60' : ''}`}
         >
           <input {...getInputProps()} />
-          <UploadCloudIcon className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-          <p className="text-sm font-medium text-gray-700">
+          <UploadCloudIcon className="w-10 h-10 text-claimondo-ondo/70 mx-auto mb-3" />
+          <p className="text-sm font-medium text-claimondo-navy">
             {isDragActive ? 'Hier ablegen ...' : 'Logo hierher ziehen oder klicken zum Auswählen'}
           </p>
-          <p className="text-[11px] text-gray-500 mt-1">PNG, JPG, SVG oder WebP — max 2 MB</p>
+          <p className="text-[11px] text-claimondo-ondo mt-1">PNG, JPG, SVG oder WebP — max 2 MB</p>
           {uploading && (
             <p className="text-xs text-[#4573A2] mt-3">Logo wird verarbeitet ...</p>
           )}
         </div>
       ) : (
-        <div className="border border-gray-200 rounded-2xl p-5 space-y-3">
+        <div className="border border-claimondo-border rounded-2xl p-5 space-y-3">
           {/* AAR-220: Nur noch Logo-Vorschau (kein Color-Picker, keine
               Live-Preview-Box) — der User hat Auto-CD, nichts anzupassen. */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-16 h-16 rounded-xl border border-gray-200 bg-white flex items-center justify-center overflow-hidden">
+              <div className="w-16 h-16 rounded-xl border border-claimondo-border bg-white flex items-center justify-center overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={logoUrl} alt="Logo" className="max-w-full max-h-full object-contain" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900 flex items-center gap-1.5">
+                <p className="text-sm font-medium text-claimondo-navy flex items-center gap-1.5">
                   <CheckCircle2Icon className="w-4 h-4 text-[#4573A2]" />
                   Logo hochgeladen
                 </p>
-                <p className="text-[11px] text-gray-500 mt-0.5">Farben automatisch extrahiert und angewendet</p>
+                <p className="text-[11px] text-claimondo-ondo mt-0.5">Farben automatisch extrahiert und angewendet</p>
               </div>
             </div>
             <button
               type="button"
               onClick={handleReset}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-claimondo-ondo/70 hover:text-claimondo-ondo"
               aria-label="Anderes Logo wählen"
             >
               <XIcon className="w-4 h-4" />
@@ -162,7 +162,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
           type="button"
           onClick={onDone}
           disabled={uploading}
-          className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50 disabled:opacity-40"
+          className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb] disabled:opacity-40"
         >
           Später machen
         </button>
@@ -177,7 +177,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
         </LoadingButton>
       </div>
 
-      <p className="text-[11px] text-gray-400 text-center">
+      <p className="text-[11px] text-claimondo-ondo/70 text-center">
         Du kannst dein Logo jederzeit unter Profil → Branding ändern
       </p>
     </div>

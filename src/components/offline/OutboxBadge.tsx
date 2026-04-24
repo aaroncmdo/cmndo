@@ -40,7 +40,7 @@ export default function OutboxBadge() {
 
   const STATUS_ICON = {
     pending: <ClockIcon className="w-3.5 h-3.5 text-amber-500" />,
-    uploading: <RefreshCwIcon className="w-3.5 h-3.5 text-blue-500 animate-spin" />,
+    uploading: <RefreshCwIcon className="w-3.5 h-3.5 text-claimondo-ondo animate-spin" />,
     failed: <AlertCircleIcon className="w-3.5 h-3.5 text-red-500" />,
     // AAR-388: Dead-Letter — 10 Retries fehlgeschlagen
     dead: <AlertTriangleIcon className="w-3.5 h-3.5 text-red-700" />,
@@ -57,24 +57,24 @@ export default function OutboxBadge() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl w-72 z-50">
-          <div className="px-3 py-2 border-b border-gray-100 flex items-center justify-between">
-            <span className="text-xs font-semibold text-gray-800">Upload-Warteschlange</span>
-            <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-gray-600">
+        <div className="absolute right-0 top-full mt-2 bg-white border border-claimondo-border rounded-xl shadow-xl w-72 z-50">
+          <div className="px-3 py-2 border-b border-claimondo-border flex items-center justify-between">
+            <span className="text-xs font-semibold text-claimondo-navy">Upload-Warteschlange</span>
+            <button onClick={() => setOpen(false)} className="text-claimondo-ondo/70 hover:text-claimondo-ondo">
               <XIcon className="w-3.5 h-3.5" />
             </button>
           </div>
 
           <div className="max-h-48 overflow-y-auto">
             {items.length === 0 ? (
-              <p className="text-xs text-gray-400 py-4 text-center">Keine Einträge</p>
+              <p className="text-xs text-claimondo-ondo/70 py-4 text-center">Keine Einträge</p>
             ) : (
               items.map(item => (
-                <div key={item.id} className="px-3 py-2 border-b border-gray-50 flex items-center gap-2">
+                <div key={item.id} className="px-3 py-2 border-b border-claimondo-border flex items-center gap-2">
                   {STATUS_ICON[item.status]}
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-gray-800 truncate">{item.file_name}</p>
-                    <p className="text-[10px] text-gray-400">{(item.file_size / 1024).toFixed(0)} KB — {item.dokument_typ}</p>
+                    <p className="text-xs text-claimondo-navy truncate">{item.file_name}</p>
+                    <p className="text-[10px] text-claimondo-ondo/70">{(item.file_size / 1024).toFixed(0)} KB — {item.dokument_typ}</p>
                   </div>
                   {item.status === 'failed' && (
                     <span className="text-[9px] text-red-500">{item.last_error?.slice(0, 30)}</span>
@@ -84,11 +84,11 @@ export default function OutboxBadge() {
             )}
           </div>
 
-          <div className="px-3 py-2 border-t border-gray-100">
+          <div className="px-3 py-2 border-t border-claimondo-border">
             <button
               onClick={handleRetry}
               disabled={syncing}
-              className="w-full text-xs font-medium text-[#4573A2] hover:text-[#1E3A5F] disabled:text-gray-400 flex items-center justify-center gap-1.5 py-1"
+              className="w-full text-xs font-medium text-[#4573A2] hover:text-[#1E3A5F] disabled:text-claimondo-ondo/70 flex items-center justify-center gap-1.5 py-1"
             >
               <RefreshCwIcon className={`w-3 h-3 ${syncing ? 'animate-spin' : ''}`} />
               {syncing ? 'Synchronisiere...' : 'Jetzt synchronisieren'}

@@ -63,7 +63,7 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/20 backdrop-blur-sm px-4">
       <div className="w-full max-w-lg glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-claimondo-border">
           <div className="flex items-center gap-2 text-[#0D1B3E]">
             <AlertTriangleIcon className="w-5 h-5 text-red-600" />
             <h2 className="text-sm font-semibold">Dauerhaft fehlgeschlagene Uploads</h2>
@@ -71,7 +71,7 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500"
+            className="p-1.5 rounded-md hover:bg-[#f8f9fb] text-claimondo-ondo"
             aria-label="Schließen"
           >
             <XIcon className="w-4 h-4" />
@@ -80,7 +80,7 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
 
         <div className="max-h-[60vh] overflow-y-auto px-5 py-4">
           {items.length === 0 ? (
-            <p className="text-sm text-gray-500">Keine toten Uploads.</p>
+            <p className="text-sm text-claimondo-ondo">Keine toten Uploads.</p>
           ) : (
             <ul className="space-y-3">
               {items.map((item) => (
@@ -93,7 +93,7 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
                       <p className="text-xs font-medium text-[#0D1B3E] truncate">
                         {item.file_name}
                       </p>
-                      <p className="text-[11px] text-gray-500 mt-0.5">
+                      <p className="text-[11px] text-claimondo-ondo mt-0.5">
                         Fall: {item.fall_id.slice(0, 8)}… · {item.dokument_typ} · {item.retry_count} Versuche
                       </p>
                       {item.last_error && (
@@ -129,7 +129,7 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
           )}
         </div>
 
-        <div className="px-5 py-3 border-t border-gray-200 bg-gray-50 text-[11px] text-gray-500">
+        <div className="px-5 py-3 border-t border-claimondo-border bg-[#f8f9fb] text-[11px] text-claimondo-ondo">
           Uploads, die nach 10 Versuchen weiter fehlschlagen, landen hier. Nach „Erneut versuchen" starten wir den Sync sofort.
         </div>
       </div>

@@ -90,12 +90,12 @@ export default function PasswortZuruecksetzenPage() {
             <span className="text-[#0D1B3E]">Claim</span>
             <span className="text-[#4573A2]">ondo</span>
           </h1>
-          <p className="mt-2 text-sm text-gray-500">Neues Passwort setzen</p>
+          <p className="mt-2 text-sm text-claimondo-ondo">Neues Passwort setzen</p>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-lg">
+        <div className="bg-white border border-claimondo-border rounded-3xl p-8 shadow-lg">
           {phase === 'verifying' && (
-            <p className="text-center text-gray-500 text-sm py-8">Reset-Link wird geprüft …</p>
+            <p className="text-center text-claimondo-ondo text-sm py-8">Reset-Link wird geprüft …</p>
           )}
 
           {phase === 'expired' && (
@@ -103,8 +103,8 @@ export default function PasswortZuruecksetzenPage() {
               <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-50 flex items-center justify-center mb-4">
                 <AlertTriangleIcon className="w-7 h-7 text-amber-500" />
               </div>
-              <p className="text-gray-900 font-semibold text-base mb-2">Link abgelaufen</p>
-              <p className="text-gray-600 text-sm leading-relaxed mb-4">
+              <p className="text-claimondo-navy font-semibold text-base mb-2">Link abgelaufen</p>
+              <p className="text-claimondo-ondo text-sm leading-relaxed mb-4">
                 Dieser Reset-Link ist nicht mehr gültig oder wurde bereits
                 verwendet.
               </p>
@@ -122,10 +122,10 @@ export default function PasswortZuruecksetzenPage() {
               <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-50 flex items-center justify-center mb-4">
                 <CheckCircle2Icon className="w-7 h-7 text-emerald-500" />
               </div>
-              <p className="text-gray-900 font-semibold text-base mb-2">
+              <p className="text-claimondo-navy font-semibold text-base mb-2">
                 Passwort erfolgreich geändert
               </p>
-              <p className="text-gray-500 text-sm">Du wirst zum Login weitergeleitet …</p>
+              <p className="text-claimondo-ondo text-sm">Du wirst zum Login weitergeleitet …</p>
             </div>
           )}
 
@@ -136,14 +136,14 @@ export default function PasswortZuruecksetzenPage() {
                   <KeyIcon className="w-5 h-5 text-[#4573A2]" />
                 </div>
                 <div>
-                  <p className="text-gray-900 font-medium text-sm">Neues Passwort setzen</p>
-                  <p className="text-gray-500 text-xs">Mindestens 8 Zeichen</p>
+                  <p className="text-claimondo-navy font-medium text-sm">Neues Passwort setzen</p>
+                  <p className="text-claimondo-ondo text-xs">Mindestens 8 Zeichen</p>
                 </div>
               </div>
 
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="password" className="text-sm font-medium text-gray-700">
+                  <label htmlFor="password" className="text-sm font-medium text-claimondo-navy">
                     Neues Passwort
                   </label>
                   <PasswordInput
@@ -154,12 +154,12 @@ export default function PasswortZuruecksetzenPage() {
                     required
                     minLength={8}
                     autoComplete="new-password"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-100 text-gray-900 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="confirm" className="text-sm font-medium text-gray-700">
+                  <label htmlFor="confirm" className="text-sm font-medium text-claimondo-navy">
                     Passwort bestätigen
                   </label>
                   <PasswordInput
@@ -170,7 +170,7 @@ export default function PasswortZuruecksetzenPage() {
                     required
                     minLength={8}
                     autoComplete="new-password"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-100 text-gray-900 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
                   />
                 </div>
 
@@ -193,7 +193,7 @@ export default function PasswortZuruecksetzenPage() {
           )}
         </div>
 
-        <p className="text-center text-gray-500 text-xs mt-6">&copy; 2026 Claimondo GmbH</p>
+        <p className="text-center text-claimondo-ondo text-xs mt-6">&copy; 2026 Claimondo GmbH</p>
       </div>
     </div>
   )

@@ -136,7 +136,7 @@ export default function DokumenteUploadStep({ initialSlots, onDone }: Props) {
       <section className="space-y-2">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-[#0D1B3E]">
-            Sicherungsabtretung <span className="text-gray-400 font-normal">oder</span> Honorarvereinbarung
+            Sicherungsabtretung <span className="text-claimondo-ondo/70 font-normal">oder</span> Honorarvereinbarung
           </h3>
           <span
             className={`text-[11px] px-2 py-0.5 rounded-full ${
@@ -196,7 +196,7 @@ export default function DokumenteUploadStep({ initialSlots, onDone }: Props) {
         </LoadingButton>
       </div>
 
-      <p className="text-[11px] text-gray-400 text-center">
+      <p className="text-[11px] text-claimondo-ondo/70 text-center">
         Die Dokumente werden von Claimondo geprüft. Du kannst sie später unter Profil → Verifizierung ersetzen.
       </p>
     </div>
@@ -241,14 +241,14 @@ function SlotTile({
   if (istFrisch) {
     const istGeprueft = status === 'geprueft'
     return (
-      <div className="border border-gray-200 rounded-xl p-4 bg-white">
+      <div className="border border-claimondo-border rounded-xl p-4 bg-white">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-lg border border-gray-200 bg-[#f8f9fb] flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-lg border border-claimondo-border bg-[#f8f9fb] flex items-center justify-center flex-shrink-0">
             <FileTextIcon className="w-5 h-5 text-[#4573A2]" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">{def.label}</p>
-            <p className="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5">
+            <p className="text-sm font-medium text-claimondo-navy truncate">{def.label}</p>
+            <p className="text-[11px] text-claimondo-ondo flex items-center gap-1 mt-0.5">
               {istGeprueft ? (
                 <>
                   <CheckCircle2Icon className="w-3.5 h-3.5 text-emerald-600" />
@@ -295,16 +295,16 @@ function SlotTile({
           ? 'border-[#4573A2] bg-[#4573A2]/5'
           : istAbgelehnt
             ? 'border-red-300 bg-red-50 hover:bg-red-100'
-            : 'border-gray-300 bg-gray-50 hover:border-[#4573A2] hover:bg-gray-100'
+            : 'border-claimondo-border bg-[#f8f9fb] hover:border-[#4573A2] hover:bg-[#f8f9fb]'
       } ${uploading ? 'pointer-events-none opacity-60' : ''}`}
     >
       <input {...getInputProps()} />
       <UploadCloudIcon
-        className={`w-7 h-7 mx-auto mb-1.5 ${istAbgelehnt ? 'text-red-500' : 'text-gray-400'}`}
+        className={`w-7 h-7 mx-auto mb-1.5 ${istAbgelehnt ? 'text-red-500' : 'text-claimondo-ondo/70'}`}
       />
-      <p className="text-xs font-medium text-gray-800">{def.label}</p>
-      <p className="text-[10px] text-gray-500 mt-0.5 line-clamp-2">{def.beschreibung}</p>
-      <p className="text-[10px] text-gray-400 mt-1">PDF, JPG, PNG · max {MAX_MB} MB</p>
+      <p className="text-xs font-medium text-claimondo-navy">{def.label}</p>
+      <p className="text-[10px] text-claimondo-ondo mt-0.5 line-clamp-2">{def.beschreibung}</p>
+      <p className="text-[10px] text-claimondo-ondo/70 mt-1">PDF, JPG, PNG · max {MAX_MB} MB</p>
       {uploading && <p className="text-[11px] text-[#4573A2] mt-1.5">Wird hochgeladen ...</p>}
       {istAbgelehnt && state?.adminNotiz && (
         <p className="text-[10px] text-red-700 mt-1.5 font-medium">
