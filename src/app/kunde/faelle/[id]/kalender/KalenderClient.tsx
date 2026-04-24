@@ -93,8 +93,8 @@ export default function KalenderClient({
   return (
     <div className="space-y-4">
       {/* Tage-Auswahl */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-        <p className="text-xs text-gray-500 uppercase tracking-wider mb-3 font-semibold">Tag wählen</p>
+      <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-4">
+        <p className="text-xs text-claimondo-ondo uppercase tracking-wider mb-3 font-semibold">Tag wählen</p>
         <div className="grid grid-cols-7 gap-1.5">
           {arbeitsTage.map(day => {
             const isSelected = selectedDay?.toDateString() === day.toDateString()
@@ -106,11 +106,11 @@ export default function KalenderClient({
                 className={`flex flex-col items-center py-2 px-1 rounded-lg text-xs transition-colors ${
                   isSelected
                     ? 'bg-[#4573A2] text-white'
-                    : 'bg-gray-50 text-gray-700 hover:bg-[#4573A2]/10'
+                    : 'bg-[#f8f9fb] text-claimondo-navy hover:bg-[#4573A2]/10'
                 }`}>
                 <span className="font-medium">{dayName}</span>
                 <span className="text-lg font-bold leading-tight">{dayNum}</span>
-                <span className={`text-[10px] ${isSelected ? 'text-white/70' : 'text-gray-400'}`}>{monthName}</span>
+                <span className={`text-[10px] ${isSelected ? 'text-white/70' : 'text-claimondo-ondo/70'}`}>{monthName}</span>
               </button>
             )
           })}
@@ -119,12 +119,12 @@ export default function KalenderClient({
 
       {/* Slots fuer gewaehlten Tag */}
       {selectedDay && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-3 font-semibold">
+        <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-4">
+          <p className="text-xs text-claimondo-ondo uppercase tracking-wider mb-3 font-semibold">
             Verfügbare Zeiten — {selectedDay.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' })}
           </p>
           {selectedSlots.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-4">Keine verfügbaren Zeiten an diesem Tag.</p>
+            <p className="text-sm text-claimondo-ondo/70 text-center py-4">Keine verfügbaren Zeiten an diesem Tag.</p>
           ) : (
             <div className="grid grid-cols-3 gap-2">
               {selectedSlots.map(slot => {
@@ -139,7 +139,7 @@ export default function KalenderClient({
                         ? 'bg-red-50 text-red-300 cursor-not-allowed'
                         : isSelected
                           ? 'bg-[#4573A2] text-white ring-2 ring-[#4573A2] ring-offset-1'
-                          : 'bg-gray-50 text-gray-700 hover:bg-[#4573A2]/10'
+                          : 'bg-[#f8f9fb] text-claimondo-navy hover:bg-[#4573A2]/10'
                     }`}>
                     {slot.belegt ? (
                       <span className="line-through">{timeStr}</span>
@@ -169,9 +169,9 @@ export default function KalenderClient({
       )}
 
       {/* Legende */}
-      <div className="flex items-center gap-4 text-xs text-gray-400">
+      <div className="flex items-center gap-4 text-xs text-claimondo-ondo/70">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-gray-50 border border-gray-200" />
+          <div className="w-3 h-3 rounded bg-[#f8f9fb] border border-claimondo-border" />
           <span>Frei</span>
         </div>
         <div className="flex items-center gap-1.5">

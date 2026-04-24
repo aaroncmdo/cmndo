@@ -143,7 +143,7 @@ export default function KundeTrackingClient({
             <CheckCircleIcon className="w-8 h-8 text-emerald-600" />
           </div>
           <h1 className="text-2xl font-bold text-[#0D1B3E] mb-2">{svVorname} ist da!</h1>
-          <p className="text-gray-600">Die Besichtigung kann jetzt beginnen.</p>
+          <p className="text-claimondo-ondo">Die Besichtigung kann jetzt beginnen.</p>
         </div>
       </div>
     )
@@ -175,9 +175,9 @@ export default function KundeTrackingClient({
             <h1 className="text-xl font-bold text-[#0D1B3E] mb-2">
               {isSvVorschlag ? 'Terminvorschlag' : 'Termin vorbereitet'}
             </h1>
-            {terminDisplay && <p className="text-sm text-gray-700 font-medium mb-1">{terminDisplay}</p>}
-            <p className="text-sm text-gray-500">Sachverständiger: {svAnzeigename || `${svVorname} ${svNachname}`.trim()}</p>
-            <p className="text-xs text-gray-400 mt-1">{adresse}</p>
+            {terminDisplay && <p className="text-sm text-claimondo-navy font-medium mb-1">{terminDisplay}</p>}
+            <p className="text-sm text-claimondo-ondo">Sachverständiger: {svAnzeigename || `${svVorname} ${svNachname}`.trim()}</p>
+            <p className="text-xs text-claimondo-ondo/70 mt-1">{adresse}</p>
           </div>
 
           {isSvVorschlag && !showGegenvorschlag && (
@@ -199,7 +199,7 @@ export default function KundeTrackingClient({
               <button
                 onClick={() => setShowGegenvorschlag(true)}
                 disabled={actionPending}
-                className="w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-amber-700 border border-amber-200 rounded-xl py-3 text-sm font-medium transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-white hover:bg-[#f8f9fb] text-amber-700 border border-amber-200 rounded-xl py-3 text-sm font-medium transition-colors"
               >
                 <RefreshCwIcon className="w-4 h-4" /> Anderen Termin vorschlagen
               </button>
@@ -207,18 +207,18 @@ export default function KundeTrackingClient({
           )}
 
           {showGegenvorschlag && (
-            <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
-              <h3 className="text-sm font-semibold text-gray-900">Alternativen Termin vorschlagen</h3>
+            <div className="bg-white border border-claimondo-border rounded-2xl p-4 space-y-3">
+              <h3 className="text-sm font-semibold text-claimondo-navy">Alternativen Termin vorschlagen</h3>
               {/* AAR-452: text-base + min-h-[44px] für iOS-Zoom + Touch-Target */}
               <input type="datetime-local" value={gegenDatum} onChange={e => setGegenDatum(e.target.value)}
                 min={new Date().toISOString().slice(0, 16)}
-                className="w-full border border-gray-200 rounded-lg px-3 min-h-[44px] text-base focus:outline-none"
+                className="w-full border border-claimondo-border rounded-lg px-3 min-h-[44px] text-base focus:outline-none"
                 style={{ outlineColor: brandPrimary }} />
               <textarea value={gegenGrund} onChange={e => setGegenGrund(e.target.value)} placeholder="Begründung (optional)"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-base resize-none focus:outline-none"
+                className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-base resize-none focus:outline-none"
                 style={{ outlineColor: brandPrimary }} rows={2} />
               <div className="flex gap-2">
-                <button onClick={() => setShowGegenvorschlag(false)} className="flex-1 min-h-[44px] rounded-xl text-sm bg-gray-100 text-gray-600">Abbrechen</button>
+                <button onClick={() => setShowGegenvorschlag(false)} className="flex-1 min-h-[44px] rounded-xl text-sm bg-[#f8f9fb] text-claimondo-ondo">Abbrechen</button>
                 <button
                   onClick={async () => {
                     if (!gegenDatum) return
@@ -236,7 +236,7 @@ export default function KundeTrackingClient({
           )}
 
           {!isSvVorschlag && (
-            <p className="text-center text-gray-500 text-sm">
+            <p className="text-center text-claimondo-ondo text-sm">
               {svVorname} wird sich auf den Weg machen. Sie werden benachrichtigt sobald es losgeht.
             </p>
           )}
@@ -284,7 +284,7 @@ export default function KundeTrackingClient({
       </div>
 
       {/* Footer: Avatar-Akzent in SV-Primary */}
-      <div className="bg-white border-t border-gray-200 px-5 py-4 flex-shrink-0">
+      <div className="bg-white border-t border-claimondo-border px-5 py-4 flex-shrink-0">
         <div className="flex items-center gap-3">
           {svAvatarUrl ? (
             <Avatar url={svAvatarUrl} name={svAnzeigename || svVorname} size="sm" />
@@ -298,16 +298,16 @@ export default function KundeTrackingClient({
           )}
           <div className="flex-1">
             <p className="text-sm font-semibold text-[#0D1B3E]">{svAnzeigename || `${svVorname} ${svNachname}`.trim()}</p>
-            <p className="text-xs text-gray-500">Ihr KFZ-Sachverständiger</p>
+            <p className="text-xs text-claimondo-ondo">Ihr KFZ-Sachverständiger</p>
           </div>
           {etaMinutes != null && (
             <div className="text-right">
               <p className="text-lg font-bold text-[#0D1B3E]">{etaMinutes} Min</p>
-              <p className="text-[10px] text-gray-400">geschätzte Ankunft</p>
+              <p className="text-[10px] text-claimondo-ondo/70">geschätzte Ankunft</p>
             </div>
           )}
         </div>
-        <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
+        <p className="text-xs text-claimondo-ondo/70 mt-2 flex items-center gap-1">
           <MapPinIcon className="w-3 h-3" /> {adresse}
         </p>
 

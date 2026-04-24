@@ -328,7 +328,7 @@ export default function OnboardingWizard({
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
       {/* Progress */}
-      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-gray-100">
+      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-[#f8f9fb]">
         <div className="h-full bg-[#4573A2] transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
 
@@ -340,11 +340,11 @@ export default function OnboardingWizard({
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
                 i < stepIndex ? 'bg-emerald-500 text-white' :
                 i === stepIndex ? 'bg-[#4573A2] text-white' :
-                'bg-gray-200 text-gray-400'
+                'bg-claimondo-border text-claimondo-ondo/70'
               }`}>
                 {i < stepIndex ? <CheckIcon className="w-3.5 h-3.5" /> : i + 1}
               </div>
-              {i < STEPS.length - 1 && <div className={`w-6 h-0.5 rounded ${i < stepIndex ? 'bg-emerald-400' : 'bg-gray-200'}`} />}
+              {i < STEPS.length - 1 && <div className={`w-6 h-0.5 rounded ${i < stepIndex ? 'bg-emerald-400' : 'bg-claimondo-border'}`} />}
             </div>
           ))}
         </div>
@@ -352,13 +352,13 @@ export default function OnboardingWizard({
 
       <div className="flex-1 flex flex-col px-5 pt-16 pb-8 max-w-lg mx-auto w-full">
         <div className="flex-1 flex flex-col justify-center py-4">
-          <div className="bg-white border border-gray-200 rounded-3xl px-6 py-7 shadow-xl shadow-black/5">
+          <div className="bg-white border border-claimondo-border rounded-3xl px-6 py-7 shadow-xl shadow-black/5">
             {/* Welcome */}
             {currentStep.id === 'welcome' && (
               <div>
                 <div className="mb-4"><SparklesIcon className="w-10 h-10 text-[#4573A2]" /></div>
-                <h1 className="text-2xl font-semibold text-gray-900 leading-snug">Willkommen bei Claimondo, {vorname}!</h1>
-                <p className="mt-3 text-sm text-gray-500 leading-relaxed">
+                <h1 className="text-2xl font-semibold text-claimondo-navy leading-snug">Willkommen bei Claimondo, {vorname}!</h1>
+                <p className="mt-3 text-sm text-claimondo-ondo leading-relaxed">
                   Wir kuemmern uns ab jetzt um die komplette Abwicklung Ihres Schadens.
                   Dieser kurze Einstieg zeigt Ihnen Ihre naechsten Schritte — dauert ca. 3 Minuten.
                 </p>
@@ -373,25 +373,25 @@ export default function OnboardingWizard({
             {currentStep.id === 'fall' && (
               <div>
                 <div className="mb-4"><FolderOpenIcon className="w-10 h-10 text-[#4573A2]" /></div>
-                <h1 className="text-2xl font-semibold text-gray-900">Ihr Fall</h1>
+                <h1 className="text-2xl font-semibold text-claimondo-navy">Ihr Fall</h1>
                 {fall ? (
                   <div className="mt-4 bg-gradient-to-br from-[#4573A2]/10 to-[#1E3A5F]/5 border border-[#4573A2]/20 rounded-2xl p-5">
                     <p className="text-xs uppercase tracking-wider text-[#4573A2] mb-1">Fall-Nummer</p>
                     <p className="text-xl font-bold text-[#0D1B3E]">{fall.fall_nummer ?? fall.id.slice(0, 8)}</p>
-                    {fall.kennzeichen && <p className="text-sm text-gray-600 mt-1">{fall.kennzeichen}</p>}
-                    {fall.fahrzeug && <p className="text-xs text-gray-500">{fall.fahrzeug}</p>}
+                    {fall.kennzeichen && <p className="text-sm text-claimondo-ondo mt-1">{fall.kennzeichen}</p>}
+                    {fall.fahrzeug && <p className="text-xs text-claimondo-ondo">{fall.fahrzeug}</p>}
                   </div>
                 ) : (
-                  <p className="mt-4 text-sm text-gray-500">Ihr Fall wird gerade angelegt — Sie sehen ihn in wenigen Minuten.</p>
+                  <p className="mt-4 text-sm text-claimondo-ondo">Ihr Fall wird gerade angelegt — Sie sehen ihn in wenigen Minuten.</p>
                 )}
                 <div className="mt-6 space-y-2">
-                  <p className="text-sm font-medium text-gray-700">So laeuft es weiter:</p>
+                  <p className="text-sm font-medium text-claimondo-navy">So laeuft es weiter:</p>
                   {STATUS_PHASES.map((phase, i) => (
                     <div key={phase.key} className="flex items-start gap-3 py-2">
                       <div className="w-6 h-6 rounded-full bg-[#4573A2]/10 text-[#4573A2] flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{phase.label}</p>
-                        <p className="text-xs text-gray-500">{phase.description}</p>
+                        <p className="text-sm font-medium text-claimondo-navy">{phase.label}</p>
+                        <p className="text-xs text-claimondo-ondo">{phase.description}</p>
                       </div>
                     </div>
                   ))}
@@ -407,19 +407,19 @@ export default function OnboardingWizard({
             {currentStep.id === 'termin' && (
               <div>
                 <div className="mb-4"><CalendarIcon className="w-10 h-10 text-[#4573A2]" /></div>
-                <h1 className="text-2xl font-semibold text-gray-900">Ihr Termin</h1>
+                <h1 className="text-2xl font-semibold text-claimondo-navy">Ihr Termin</h1>
                 {termin ? (
                   <>
                     <div className="mt-4 bg-gradient-to-br from-emerald-50 to-emerald-50/50 border border-emerald-200 rounded-2xl p-5">
                       <p className="text-xs uppercase tracking-wider text-emerald-700 mb-1">Termin reserviert</p>
-                      <p className="text-lg font-bold text-gray-900">
+                      <p className="text-lg font-bold text-claimondo-navy">
                         {new Date(termin.datum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
                       </p>
-                      <p className="text-sm text-gray-700">
+                      <p className="text-sm text-claimondo-navy">
                         {new Date(termin.datum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
                       </p>
-                      {termin.svName && <p className="mt-3 text-sm text-gray-600">Sachverständiger: <strong>{termin.svName}</strong></p>}
-                      <p className="mt-3 text-xs text-gray-500">Wir erinnern Sie 24h vorher per WhatsApp.</p>
+                      {termin.svName && <p className="mt-3 text-sm text-claimondo-ondo">Sachverständiger: <strong>{termin.svName}</strong></p>}
+                      <p className="mt-3 text-xs text-claimondo-ondo">Wir erinnern Sie 24h vorher per WhatsApp.</p>
                     </div>
 
                     {/* AAR-231: Vorbereitungs-Checkliste
@@ -472,7 +472,7 @@ export default function OnboardingWizard({
                     </div>
                   </>
                 ) : (
-                  <p className="mt-4 text-sm text-gray-500">Wir suchen gerade einen passenden Sachverständigen für Sie. Sobald wir einen Termin haben, melden wir uns per WhatsApp.</p>
+                  <p className="mt-4 text-sm text-claimondo-ondo">Wir suchen gerade einen passenden Sachverständigen für Sie. Sobald wir einen Termin haben, melden wir uns per WhatsApp.</p>
                 )}
                 <button
                   onClick={() => setStepIndex(3)}
@@ -485,13 +485,13 @@ export default function OnboardingWizard({
             {currentStep.id === 'dokumente' && (
               <div>
                 <div className="mb-4"><FileTextIcon className="w-10 h-10 text-[#4573A2]" /></div>
-                <h1 className="text-2xl font-semibold text-gray-900">Pflichtdokumente</h1>
-                <p className="mt-2 text-sm text-gray-500">
+                <h1 className="text-2xl font-semibold text-claimondo-navy">Pflichtdokumente</h1>
+                <p className="mt-2 text-sm text-claimondo-ondo">
                   Laden Sie Ihre Unterlagen hoch. Sie können das auch später im Dashboard nachholen.
                 </p>
                 <div className="mt-5 space-y-3">
                   {pflichtDocs.length === 0 && (
-                    <p className="text-sm text-gray-400 text-center py-4">Keine Pflichtdokumente erforderlich.</p>
+                    <p className="text-sm text-claimondo-ondo/70 text-center py-4">Keine Pflichtdokumente erforderlich.</p>
                   )}
                   {pflichtDocs.map(doc => {
                     const status = docStatus[doc.id] ?? 'ausstehend'
@@ -519,7 +519,7 @@ export default function OnboardingWizard({
                           type="button"
                           onClick={() => setInfoOverlay({ slotId: doc.slot_id, label })}
                           aria-label={`Info zu ${label}`}
-                          className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/80 border border-gray-200 text-gray-500 hover:text-[#0D1B3E] hover:border-[#4573A2] flex items-center justify-center transition-colors"
+                          className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/80 border border-claimondo-border text-claimondo-ondo hover:text-[#0D1B3E] hover:border-[#4573A2] flex items-center justify-center transition-colors"
                         >
                           <InfoIcon className="w-4 h-4" />
                         </button>
@@ -535,7 +535,7 @@ export default function OnboardingWizard({
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <p className="text-base font-semibold text-gray-900">{label}</p>
+                              <p className="text-base font-semibold text-claimondo-navy">{label}</p>
                               {doc.pflicht && !istHochgeladen && (
                                 <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-amber-200 text-amber-900">Pflicht</span>
                               )}
@@ -550,10 +550,10 @@ export default function OnboardingWizard({
                                 : 'Noch nicht hochgeladen'}
                             </p>
                             {doc.beschreibung && (
-                              <p className="text-xs text-gray-600 mt-1">{doc.beschreibung}</p>
+                              <p className="text-xs text-claimondo-ondo mt-1">{doc.beschreibung}</p>
                             )}
                             {doc.begruendung && (
-                              <p className="text-xs text-gray-700 mt-1 italic">„{doc.begruendung}"</p>
+                              <p className="text-xs text-claimondo-navy mt-1 italic">„{doc.begruendung}"</p>
                             )}
                             {fristText && (
                               <p className="text-xs text-amber-800 mt-1 flex items-center gap-1 font-medium">
@@ -581,7 +581,7 @@ export default function OnboardingWizard({
                                   }}
                                 />
                               </label>
-                              <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-white border-2 border-[#0D1B3E] text-[#0D1B3E] hover:bg-blue-50 active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
+                              <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-white border-2 border-[#0D1B3E] text-[#0D1B3E] hover:bg-[#f8f9fb] active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
                                 <span>📁</span> Datei wählen
                                 <input
                                   type="file"
@@ -619,7 +619,7 @@ export default function OnboardingWizard({
                         {!istHochgeladen && (
                           <div className="mt-2.5 text-right">
                             {spaeterSlots.has(doc.id) ? (
-                              <span className="text-[11px] text-gray-500 italic">
+                              <span className="text-[11px] text-claimondo-ondo italic">
                                 ✓ Auf später verschoben — wir erinnern Sie später.
                               </span>
                             ) : (
@@ -627,7 +627,7 @@ export default function OnboardingWizard({
                                 type="button"
                                 onClick={() => handleSpaeterNachreichen(doc.id)}
                                 disabled={spaeterLoading === doc.id}
-                                className="text-[11px] text-gray-600 hover:text-[#0D1B3E] underline decoration-dotted underline-offset-2 disabled:opacity-50"
+                                className="text-[11px] text-claimondo-ondo hover:text-[#0D1B3E] underline decoration-dotted underline-offset-2 disabled:opacity-50"
                               >
                                 {spaeterLoading === doc.id ? 'Wird gespeichert…' : 'Später nachreichen'}
                               </button>
@@ -652,19 +652,19 @@ export default function OnboardingWizard({
                     </p>
                     <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
                       {zb1Result.extracted.kennzeichen && (
-                        <div><span className="text-emerald-700 block">Kennzeichen</span><span className="font-medium text-gray-900">{zb1Result.extracted.kennzeichen}</span></div>
+                        <div><span className="text-emerald-700 block">Kennzeichen</span><span className="font-medium text-claimondo-navy">{zb1Result.extracted.kennzeichen}</span></div>
                       )}
                       {zb1Result.extracted.fin_vin && (
-                        <div><span className="text-emerald-700 block">FIN</span><span className="font-mono font-medium text-gray-900">{zb1Result.extracted.fin_vin}</span></div>
+                        <div><span className="text-emerald-700 block">FIN</span><span className="font-mono font-medium text-claimondo-navy">{zb1Result.extracted.fin_vin}</span></div>
                       )}
                       {zb1Result.extracted.fahrzeug_hersteller && (
-                        <div><span className="text-emerald-700 block">Marke</span><span className="font-medium text-gray-900">{zb1Result.extracted.fahrzeug_hersteller}</span></div>
+                        <div><span className="text-emerald-700 block">Marke</span><span className="font-medium text-claimondo-navy">{zb1Result.extracted.fahrzeug_hersteller}</span></div>
                       )}
                       {zb1Result.extracted.fahrzeug_modell && (
-                        <div><span className="text-emerald-700 block">Modell</span><span className="font-medium text-gray-900">{zb1Result.extracted.fahrzeug_modell}</span></div>
+                        <div><span className="text-emerald-700 block">Modell</span><span className="font-medium text-claimondo-navy">{zb1Result.extracted.fahrzeug_modell}</span></div>
                       )}
                       {zb1Result.extracted.halter_nachname && (
-                        <div className="col-span-2"><span className="text-emerald-700 block">Halter</span><span className="font-medium text-gray-900">{zb1Result.extracted.halter_vorname} {zb1Result.extracted.halter_nachname}</span></div>
+                        <div className="col-span-2"><span className="text-emerald-700 block">Halter</span><span className="font-medium text-claimondo-navy">{zb1Result.extracted.halter_vorname} {zb1Result.extracted.halter_nachname}</span></div>
                       )}
                     </div>
                     <p className="text-[10px] text-emerald-700 mt-3 italic">
@@ -690,7 +690,7 @@ export default function OnboardingWizard({
                     type="button"
                     onClick={handleAlleSpaeterNachreichen}
                     disabled={spaeterAlleLoading}
-                    className="mt-2 w-full min-h-11 py-3 rounded-xl bg-white border border-gray-300 text-gray-700 hover:border-[#4573A2] hover:text-[#0D1B3E] text-sm font-medium active:scale-[0.98] transition-all disabled:opacity-60"
+                    className="mt-2 w-full min-h-11 py-3 rounded-xl bg-white border border-claimondo-border text-claimondo-navy hover:border-[#4573A2] hover:text-[#0D1B3E] text-sm font-medium active:scale-[0.98] transition-all disabled:opacity-60"
                   >
                     {spaeterAlleLoading
                       ? 'Wird gespeichert…'
@@ -704,8 +704,8 @@ export default function OnboardingWizard({
             {currentStep.id === 'weitere-dokumente' && (
               <div>
                 <div className="mb-4"><FolderOpenIcon className="w-10 h-10 text-[#4573A2]" /></div>
-                <h1 className="text-2xl font-semibold text-gray-900">Weitere Dokumente</h1>
-                <p className="mt-2 text-sm text-gray-500">
+                <h1 className="text-2xl font-semibold text-claimondo-navy">Weitere Dokumente</h1>
+                <p className="mt-2 text-sm text-claimondo-ondo">
                   Optional — laden Sie weitere Dokumente oder Fotos hoch, die zu Ihrem Fall passen.
                   Sie können diesen Schritt auch überspringen und später im Dashboard nachreichen.
                 </p>
@@ -735,7 +735,7 @@ export default function OnboardingWizard({
                               <div
                                 key={slot.slot_id}
                                 className={`relative rounded-xl border p-3 ${
-                                  hochgeladen ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-gray-200'
+                                  hochgeladen ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-claimondo-border'
                                 }`}
                               >
                                 {hasInfo && (
@@ -743,20 +743,20 @@ export default function OnboardingWizard({
                                     type="button"
                                     onClick={() => setInfoOverlay({ slotId: slot.slot_id, label: slot.label })}
                                     aria-label={`Info zu ${slot.label}`}
-                                    className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/80 border border-gray-200 text-gray-500 hover:text-[#0D1B3E] hover:border-[#4573A2] flex items-center justify-center transition-colors"
+                                    className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/80 border border-claimondo-border text-claimondo-ondo hover:text-[#0D1B3E] hover:border-[#4573A2] flex items-center justify-center transition-colors"
                                   >
                                     <InfoIcon className="w-3.5 h-3.5" />
                                   </button>
                                 )}
                                 <div className={`flex items-start gap-3 ${hasInfo ? 'pr-8' : ''}`}>
                                   <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                    hochgeladen ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400'
+                                    hochgeladen ? 'bg-emerald-500 text-white' : 'bg-[#f8f9fb] text-claimondo-ondo/70'
                                   }`}>
                                     {hochgeladen ? <CheckIcon className="w-4 h-4" /> : <UploadCloudIcon className="w-4 h-4" />}
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 flex-wrap">
-                                      <p className="text-sm font-medium text-gray-900">{slot.label}</p>
+                                      <p className="text-sm font-medium text-claimondo-navy">{slot.label}</p>
                                       {hochgeladen && (
                                         <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
                                           {slot.multi_file ? `${count} hochgeladen` : 'Hochgeladen'}
@@ -764,7 +764,7 @@ export default function OnboardingWizard({
                                       )}
                                     </div>
                                     {slot.beschreibung && (
-                                      <p className="text-xs text-gray-500 mt-0.5">{slot.beschreibung}</p>
+                                      <p className="text-xs text-claimondo-ondo mt-0.5">{slot.beschreibung}</p>
                                     )}
                                   </div>
                                 </div>
@@ -787,7 +787,7 @@ export default function OnboardingWizard({
                                           }}
                                         />
                                       </label>
-                                      <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-white border border-[#0D1B3E] text-[#0D1B3E] hover:bg-blue-50 cursor-pointer text-center">
+                                      <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-white border border-[#0D1B3E] text-[#0D1B3E] hover:bg-[#f8f9fb] cursor-pointer text-center">
                                         {loading ? 'Lädt...' : '📁 Datei wählen'}
                                         <input
                                           type="file"
@@ -834,14 +834,14 @@ export default function OnboardingWizard({
                     <p className="text-xs font-semibold text-[#0D1B3E] uppercase tracking-wider mb-2">
                       📎 Sonstiges
                     </p>
-                    <div className="rounded-xl border border-gray-200 bg-white p-3">
-                      <p className="text-sm font-medium text-gray-900">Andere Datei hochladen</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
+                    <div className="rounded-xl border border-claimondo-border bg-white p-3">
+                      <p className="text-sm font-medium text-claimondo-navy">Andere Datei hochladen</p>
+                      <p className="text-xs text-claimondo-ondo mt-0.5">
                         Alles was zu Ihrem Fall gehört und oben nicht auftaucht — z.B. Rechnungen, Berichte, Fotos.
                         Ihr Betreuer ordnet die Datei anschließend zu.
                       </p>
                       <div className="mt-2.5">
-                        <label className="block text-[11px] font-medium text-gray-600 mb-1">
+                        <label className="block text-[11px] font-medium text-claimondo-ondo mb-1">
                           Worum geht es? (optional)
                         </label>
                         <textarea
@@ -849,7 +849,7 @@ export default function OnboardingWizard({
                           onChange={e => setSonstigesBeschreibung(e.target.value)}
                           rows={2}
                           placeholder="z.B. 'Attest vom Hausarzt, erhalten am 15.04.'"
-                          className="w-full text-xs rounded-md border border-gray-200 px-2 py-1.5 outline-none focus:border-[#4573A2]"
+                          className="w-full text-xs rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-[#4573A2]"
                           maxLength={500}
                         />
                       </div>
@@ -879,7 +879,7 @@ export default function OnboardingWizard({
                             }}
                           />
                         </label>
-                        <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-white border border-[#0D1B3E] text-[#0D1B3E] hover:bg-blue-50 cursor-pointer text-center">
+                        <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-white border border-[#0D1B3E] text-[#0D1B3E] hover:bg-[#f8f9fb] cursor-pointer text-center">
                           {uploadingSlot === '__sonstiges__' ? 'Lädt...' : '📁 Datei wählen'}
                           <input
                             type="file"
@@ -904,7 +904,7 @@ export default function OnboardingWizard({
                 >Weiter</button>
                 <button
                   onClick={() => setStepIndex(5)}
-                  className="mt-2 w-full py-3 text-xs text-gray-500 hover:text-gray-700"
+                  className="mt-2 w-full py-3 text-xs text-claimondo-ondo hover:text-claimondo-navy"
                 >Überspringen</button>
               </div>
             )}
@@ -915,8 +915,8 @@ export default function OnboardingWizard({
                 <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-5">
                   <CheckIcon className="w-8 h-8 text-emerald-500" />
                 </div>
-                <h1 className="text-2xl font-semibold text-gray-900">Sie sind startklar!</h1>
-                <p className="mt-3 text-sm text-gray-500">
+                <h1 className="text-2xl font-semibold text-claimondo-navy">Sie sind startklar!</h1>
+                <p className="mt-3 text-sm text-claimondo-ondo">
                   Im Dashboard sehen Sie Ihren Fall-Status, Nachrichten und Termine.
                   Wir melden uns bei wichtigen Updates per WhatsApp.
                 </p>
@@ -936,7 +936,7 @@ export default function OnboardingWizard({
           <div className="pt-2">
             <button
               onClick={() => setStepIndex(stepIndex - 1)}
-              className="w-full py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              className="w-full py-3 text-sm text-claimondo-ondo hover:text-claimondo-navy transition-colors"
             >Zurück</button>
           </div>
         )}
@@ -988,7 +988,7 @@ function DokumentInfoOverlay({
             type="button"
             onClick={onClose}
             aria-label="Schließen"
-            className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500"
+            className="w-8 h-8 rounded-full hover:bg-[#f8f9fb] flex items-center justify-center text-claimondo-ondo"
           >
             <XIcon className="w-5 h-5" />
           </button>
@@ -999,13 +999,13 @@ function DokumentInfoOverlay({
             <p className="text-xs font-semibold uppercase tracking-wider text-[#4573A2] mb-1">
               Warum benötigen wir das?
             </p>
-            <p className="text-sm text-gray-700 leading-relaxed">{info.warum}</p>
+            <p className="text-sm text-claimondo-navy leading-relaxed">{info.warum}</p>
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-[#4573A2] mb-1">
               Wo finde ich das?
             </p>
-            <p className="text-sm text-gray-700 leading-relaxed">{info.wo}</p>
+            <p className="text-sm text-claimondo-navy leading-relaxed">{info.wo}</p>
           </div>
         </div>
 
@@ -1036,7 +1036,7 @@ function CheckItem({
     return (
       <div className="flex items-start gap-2.5">
         <span className="text-base shrink-0 mt-0.5">✅</span>
-        <p className="text-sm text-gray-600 flex-1 min-w-0">{text}</p>
+        <p className="text-sm text-claimondo-ondo flex-1 min-w-0">{text}</p>
       </div>
     )
   }
@@ -1062,7 +1062,7 @@ function CheckItem({
   return (
     <div className="flex items-start gap-2.5">
       <span className="text-base shrink-0 mt-0.5">{emoji}</span>
-      <p className="text-sm text-gray-800 font-medium flex-1 min-w-0">{text}</p>
+      <p className="text-sm text-claimondo-navy font-medium flex-1 min-w-0">{text}</p>
     </div>
   )
 }

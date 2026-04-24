@@ -118,20 +118,20 @@ export function FaqBotCard({
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 space-y-3">
+    <div className="bg-white border border-claimondo-border rounded-2xl p-4 sm:p-5 space-y-3">
       <div className="flex items-center gap-2">
         <SparklesIcon className="w-4 h-4 text-[#4573A2]" />
-        <h3 className="text-sm font-semibold text-gray-900">Fragen zu Ihrem Fall</h3>
+        <h3 className="text-sm font-semibold text-claimondo-navy">Fragen zu Ihrem Fall</h3>
       </div>
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-claimondo-ondo">
         Unser Assistent kennt Ihren aktuellen Fall und beantwortet häufige Fragen
         auf Basis Ihrer Daten. Bei komplexen Anliegen meldet sich Ihr
         Kundenbetreuer.
       </p>
 
       {history.length === 0 && (
-        <div className="rounded-lg bg-gray-50 border border-gray-200 p-3 space-y-2">
-          <p className="text-[11px] uppercase tracking-wider text-gray-400">Beispielfragen</p>
+        <div className="rounded-lg bg-[#f8f9fb] border border-claimondo-border p-3 space-y-2">
+          <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo/70">Beispielfragen</p>
           {/* AAR-452: min-h-[36px] + px-3 für tappable Chips auf Mobile */}
           <div className="flex flex-wrap gap-1.5">
             {BEISPIEL_FRAGEN.map((f) => (
@@ -140,7 +140,7 @@ export function FaqBotCard({
                 type="button"
                 onClick={() => ask(f)}
                 disabled={pending}
-                className="inline-flex items-center px-3 min-h-[36px] rounded-full text-xs bg-white border border-gray-200 text-gray-700 hover:bg-[#4573A2] hover:text-white hover:border-[#4573A2] disabled:opacity-50"
+                className="inline-flex items-center px-3 min-h-[36px] rounded-full text-xs bg-white border border-claimondo-border text-claimondo-navy hover:bg-[#4573A2] hover:text-white hover:border-[#4573A2] disabled:opacity-50"
               >
                 {f}
               </button>
@@ -152,7 +152,7 @@ export function FaqBotCard({
       {history.length > 0 && (
         <div
           ref={scrollRef}
-          className="rounded-lg border border-gray-200 bg-gray-50 p-3 space-y-3 max-h-[400px] overflow-y-auto"
+          className="rounded-lg border border-claimondo-border bg-[#f8f9fb] p-3 space-y-3 max-h-[400px] overflow-y-auto"
         >
           {history.map((m, i) => (
             <div key={i} className={`flex gap-2 ${m.role === 'user' ? 'justify-end' : ''}`}>
@@ -165,13 +165,13 @@ export function FaqBotCard({
                 className={`rounded-2xl px-3 py-2 text-sm max-w-[80%] ${
                   m.role === 'user'
                     ? 'bg-[#4573A2] text-white rounded-tr-sm'
-                    : 'bg-white border border-gray-200 text-gray-800 rounded-tl-sm'
+                    : 'bg-white border border-claimondo-border text-claimondo-navy rounded-tl-sm'
                 } whitespace-pre-wrap`}
               >
                 {m.content}
               </div>
               {m.role === 'user' && (
-                <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center shrink-0">
+                <div className="w-7 h-7 rounded-full bg-claimondo-border text-claimondo-ondo flex items-center justify-center shrink-0">
                   <UserIcon className="w-4 h-4" />
                 </div>
               )}
@@ -185,8 +185,8 @@ export function FaqBotCard({
               <div
                 className={`rounded-2xl px-3 py-2 text-sm max-w-[80%] whitespace-pre-wrap ${
                   streamingText
-                    ? 'bg-white border border-gray-200 text-gray-800 rounded-tl-sm'
-                    : 'bg-white border border-gray-200 text-gray-500 italic'
+                    ? 'bg-white border border-claimondo-border text-claimondo-navy rounded-tl-sm'
+                    : 'bg-white border border-claimondo-border text-claimondo-ondo italic'
                 }`}
               >
                 {streamingText || 'Claimondo-Assistent denkt nach …'}
@@ -211,7 +211,7 @@ export function FaqBotCard({
           maxLength={2000}
           placeholder="Ihre Frage …"
           // AAR-452: text-base (iOS-Zoom-Fix) + min-h-[44px]
-          className="flex-1 text-base rounded-lg border border-gray-200 px-3 min-h-[44px] outline-none focus:border-[#4573A2] disabled:bg-gray-50"
+          className="flex-1 text-base rounded-lg border border-claimondo-border px-3 min-h-[44px] outline-none focus:border-[#4573A2] disabled:bg-[#f8f9fb]"
         />
         <button
           type="submit"

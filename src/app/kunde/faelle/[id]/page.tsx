@@ -410,11 +410,11 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl md:max-w-none mx-auto space-y-5">
         {/* Header */}
         <div>
-          <Link href="/kunde" className="text-xs text-gray-400 hover:text-[#4573A2] mb-2 inline-block">&larr; Meine Fälle</Link>
+          <Link href="/kunde" className="text-xs text-claimondo-ondo/70 hover:text-[#4573A2] mb-2 inline-block">&larr; Meine Fälle</Link>
           <h1 className="text-lg font-bold text-[#0D1B3E]">
             {kennzeichen || (fall.fall_nummer as string | null) || 'Schadensfall'}{fahrzeug ? ` — ${fahrzeug}` : ''}
           </h1>
-          {adresse && <p className="text-sm text-gray-500 mt-0.5">{adresse}</p>}
+          {adresse && <p className="text-sm text-claimondo-ondo mt-0.5">{adresse}</p>}
         </div>
 
         {/* AAR-432: Jetzt-zu-tun Matrix — eine konsolidierte Aktions-Card */}
@@ -591,10 +591,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {/* AAR-432: Opt-in Gutachten-Weiterleitung — nur sichtbar wenn Gutachten vorliegt */}
         {/* AAR-452: flex-col auf Mobile, damit der Button auf 375px nicht den Text quetscht. */}
         {gutachtenVerfuegbar && (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div className="min-w-0">
               <p className="text-sm font-semibold text-[#0D1B3E]">Gutachten erhalten?</p>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-claimondo-ondo mt-0.5">
                 Sie können sich das Gutachten auch per E-Mail an sich selbst oder eine Vertrauensperson senden lassen (48h Magic-Link).
               </p>
             </div>
@@ -663,7 +663,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     return (
       <div className="p-8 text-center">
         <p className="text-red-600 font-semibold">Fehler beim Laden</p>
-        <p className="text-sm text-gray-500 mt-1">Bitte versuchen Sie es erneut.</p>
+        <p className="text-sm text-claimondo-ondo mt-1">Bitte versuchen Sie es erneut.</p>
       </div>
     )
   }
