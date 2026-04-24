@@ -11,6 +11,7 @@
 // Alle Farben/Radien über Claimondo-Tokens + iOS-Radius — keine Hex-Literale.
 
 import { FileTextIcon, FileIcon, ImageIcon, DownloadIcon } from 'lucide-react'
+import { Card } from '@/components/primitives'
 
 export type DokumentItem = {
   id: string
@@ -82,13 +83,15 @@ function EmptyState({
     return <p className="text-sm text-claimondo-ondo/70">{title}</p>
   }
   return (
-    <div className="bg-white rounded-ios-md border border-claimondo-border p-10 text-center">
-      <div className="mx-auto w-12 h-12 rounded-full bg-claimondo-bg flex items-center justify-center text-claimondo-ondo mb-3">
-        <FileTextIcon className="w-5 h-5" />
+    <Card p={10}>
+      <div className="text-center">
+        <div className="mx-auto w-12 h-12 rounded-full bg-claimondo-bg flex items-center justify-center text-claimondo-ondo mb-3">
+          <FileTextIcon className="w-5 h-5" />
+        </div>
+        <h2 className="text-base font-semibold text-claimondo-navy mb-1">{title}</h2>
+        {description && <p className="text-sm text-claimondo-ondo">{description}</p>}
       </div>
-      <h2 className="text-base font-semibold text-claimondo-navy mb-1">{title}</h2>
-      {description && <p className="text-sm text-claimondo-ondo">{description}</p>}
-    </div>
+    </Card>
   )
 }
 
@@ -120,10 +123,8 @@ export default function DokumenteDownloadListe({
           const Icon = pickIcon(d.mimeType, d.typ)
           const size = formatSize(d.groesseBytes)
           return (
-            <div
-              key={d.id}
-              className="bg-white rounded-ios-md border border-claimondo-border p-4 flex flex-col gap-3"
-            >
+            <Card key={d.id} p={4}>
+              <div className="flex flex-col gap-3">
               <div className="flex items-start gap-3">
                 <span className="shrink-0 w-10 h-10 rounded-lg bg-claimondo-bg flex items-center justify-center text-claimondo-ondo">
                   <Icon className="w-5 h-5" />
@@ -161,7 +162,8 @@ export default function DokumenteDownloadListe({
                   Kein Zugriff
                 </span>
               )}
-            </div>
+              </div>
+            </Card>
           )
         })}
       </div>
