@@ -42,7 +42,7 @@ export default async function KundeTerminPage({
       <div className="min-h-screen flex items-center justify-center bg-[#f8f9fb] px-6">
         <div className="max-w-md text-center">
           <h1 className="text-2xl font-bold text-[#0D1B3E] mb-4">Link nicht mehr gültig</h1>
-          <p className="text-gray-600">Dieser Tracking-Link ist nur rund um den Termin gültig.</p>
+          <p className="text-claimondo-ondo">Dieser Tracking-Link ist nur rund um den Termin gültig.</p>
         </div>
       </div>
     )
@@ -65,7 +65,7 @@ export default async function KundeTerminPage({
               <span className="text-2xl">✓</span>
             </div>
             <h1 className="text-2xl font-bold text-[#0D1B3E] mb-2">Termin abgeschlossen</h1>
-            <p className="text-gray-600">{svName} war bei Ihnen. Das Gutachten wird jetzt erstellt.</p>
+            <p className="text-claimondo-ondo">{svName} war bei Ihnen. Das Gutachten wird jetzt erstellt.</p>
           </div>
         </div>
       )

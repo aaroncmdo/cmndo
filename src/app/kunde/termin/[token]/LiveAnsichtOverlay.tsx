@@ -135,7 +135,7 @@ export default function LiveAnsichtOverlay({
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 bg-[#0D1B3E] text-white flex-shrink-0">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-claimondo-border bg-[#0D1B3E] text-white flex-shrink-0">
         <MapPinIcon className="w-5 h-5" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold leading-tight">Live-Ansicht</p>
@@ -166,13 +166,13 @@ export default function LiveAnsichtOverlay({
       </div>
 
       {/* ETA-Footer — zweispaltig wenn beide Positionen vorhanden */}
-      <div className="flex-shrink-0 border-t border-gray-200 bg-white px-4 py-3 grid grid-cols-2 gap-3">
+      <div className="flex-shrink-0 border-t border-claimondo-border bg-white px-4 py-3 grid grid-cols-2 gap-3">
         <div className="flex items-center gap-2">
           <div className="w-9 h-9 rounded-full bg-[#4573A2]/10 flex items-center justify-center flex-shrink-0">
             <CarIcon className="w-4 h-4 text-[#4573A2]" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-wider text-gray-500">
+            <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
               {svVorname}
             </p>
             <p className="text-sm font-semibold text-[#0D1B3E]">
@@ -185,7 +185,7 @@ export default function LiveAnsichtOverlay({
             <UserIcon className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-wider text-gray-500">
+            <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
               Sie
             </p>
             <p className="text-sm font-semibold text-[#0D1B3E]">

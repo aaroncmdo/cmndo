@@ -25,7 +25,7 @@ type ChatTeilnehmer = { user_id: string; rolle: string; vorname: string | null; 
 type AktiverTermin = { id: string; status: string; start_zeit: string; end_zeit: string; vorgeschlagenes_datum: string | null; gegenvorschlag_von: string | null; gegenvorschlag_grund: string | null; sv_id: string | null; sv_vorgeschlagene_slots?: Array<{ datum: string; uhrzeit: string }> | null }
 
 const ROLLE_LABEL: Record<string, string> = { kunde: 'Sie', admin: 'Claimondo', kundenbetreuer: 'Ihr Betreuer', gutachter: 'Gutachter', sachverstaendiger: 'Gutachter', system: 'System' }
-const ROLLE_COLOR: Record<string, string> = { kunde: 'bg-[#4573A2]', admin: 'bg-[#0D1B3E]', kundenbetreuer: 'bg-[#1E3A5F]', gutachter: 'bg-[#1E3A5F]', sachverstaendiger: 'bg-[#1E3A5F]', system: 'bg-gray-400' }
+const ROLLE_COLOR: Record<string, string> = { kunde: 'bg-[#4573A2]', admin: 'bg-[#0D1B3E]', kundenbetreuer: 'bg-[#1E3A5F]', gutachter: 'bg-[#1E3A5F]', sachverstaendiger: 'bg-[#1E3A5F]', system: 'bg-claimondo-ondo/70' }
 
 function fmt(val: string | null): string {
   if (!val) return ''
@@ -67,7 +67,7 @@ export default function FallDetailSections({
   return (
     <div>
       {/* Tab-Leiste */}
-      <div className="flex bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-5">
+      <div className="flex bg-white rounded-xl border border-claimondo-border shadow-sm overflow-hidden mb-5">
         {TABS.map(tab => (
           <button key={tab.key} onClick={() => {
             setActiveTab(tab.key)
@@ -76,7 +76,7 @@ export default function FallDetailSections({
             className={`flex-1 py-3 text-sm font-medium transition-colors ${
               activeTab === tab.key
                 ? 'bg-[#4573A2] text-white'
-                : 'text-gray-500 hover:bg-gray-50'
+                : 'text-claimondo-ondo hover:bg-[#f8f9fb]'
             }`}>
             {tab.label}
           </button>
@@ -218,7 +218,7 @@ export default function FallDetailSections({
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+    <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-5">
       <h3 className="text-sm font-semibold text-[#0D1B3E] mb-3">{title}</h3>
       {children}
     </div>
@@ -227,8 +227,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between py-1.5 border-b border-gray-50 last:border-0">
-      <span className="text-sm text-gray-500">{label}</span>
+    <div className="flex justify-between py-1.5 border-b border-claimondo-border last:border-0">
+      <span className="text-sm text-claimondo-ondo">{label}</span>
       <span className="text-sm text-[#0D1B3E] font-medium text-right">{value}</span>
     </div>
   )
@@ -278,16 +278,16 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
   const otherTeilnehmer = teilnehmer.filter(t => t.user_id !== userId)
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl border border-claimondo-border shadow-sm overflow-hidden">
       {/* KFZ-129: Teilnehmer-Header */}
       {otherTeilnehmer.length > 0 && (
-        <div className="px-4 py-3 bg-[#0D1B3E]/5 border-b border-gray-200">
-          <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-2">Ihre Ansprechpartner</p>
+        <div className="px-4 py-3 bg-[#0D1B3E]/5 border-b border-claimondo-border">
+          <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-2">Ihre Ansprechpartner</p>
           <div className="flex flex-wrap gap-3">
             {otherTeilnehmer.map(t => {
               const name = [t.vorname, t.nachname].filter(Boolean).join(' ') || 'Unbekannt'
               const rolleLabel = t.rolle === 'kundenbetreuer' ? 'Kundenbetreuer' : t.rolle === 'gutachter' ? 'Gutachter' : t.rolle === 'admin' ? 'Admin' : t.rolle
-              const avatarBg = ROLLE_COLOR[t.rolle] ?? 'bg-gray-400'
+              const avatarBg = ROLLE_COLOR[t.rolle] ?? 'bg-claimondo-ondo/70'
               const initials = [t.vorname?.[0], t.nachname?.[0]].filter(Boolean).join('').toUpperCase() || '?'
               return (
                 <div key={t.user_id} className="flex items-center gap-2">
@@ -300,7 +300,7 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
                   )}
                   <div>
                     <p className="text-sm font-medium text-[#0D1B3E]">{name}</p>
-                    <p className="text-[10px] text-gray-400">{rolleLabel}</p>
+                    <p className="text-[10px] text-claimondo-ondo/70">{rolleLabel}</p>
                   </div>
                 </div>
               )
@@ -311,7 +311,7 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
 
       {/* Messages — ein Stream fuer alle */}
       <div className="space-y-3 p-4 max-h-96 overflow-y-auto">
-        {messages.length === 0 && <p className="text-sm text-gray-400 text-center py-8">Noch keine Nachrichten. Schreiben Sie uns!</p>}
+        {messages.length === 0 && <p className="text-sm text-claimondo-ondo/70 text-center py-8">Noch keine Nachrichten. Schreiben Sie uns!</p>}
         {messages.map(msg => {
           const isOwn = msg.sender_id === userId
           const isSystem = msg.sender_rolle === 'system'
@@ -323,7 +323,7 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
               <div key={msg.id} className="flex justify-center">
                 <div className="bg-[#f8f9fb] border border-[#7BA3CC]/30 rounded-xl px-4 py-2 max-w-[85%]">
                   <p className="text-xs text-[#0D1B3E] text-center whitespace-pre-wrap">{msg.nachricht}</p>
-                  <p className="text-[9px] text-gray-400 text-center mt-1">
+                  <p className="text-[9px] text-claimondo-ondo/70 text-center mt-1">
                     {new Date(msg.created_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
@@ -332,8 +332,8 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
           }
 
           const senderName = getSenderName(msg)
-          const bubbleColor = isOwn ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-[#0D1B3E]'
-          const lightText = isOwn ? 'text-white/60' : 'text-gray-400'
+          const bubbleColor = isOwn ? 'bg-[#4573A2] text-white' : 'bg-[#f8f9fb] text-[#0D1B3E]'
+          const lightText = isOwn ? 'text-white/60' : 'text-claimondo-ondo/70'
 
           return (
             <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
@@ -362,13 +362,13 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-claimondo-border">
         {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
         <form onSubmit={handleSend} className="flex gap-2">
           <input type="text" value={text} onChange={e => setText(e.target.value)}
             placeholder="Nachricht schreiben..."
             // AAR-452: text-base (16px) verhindert iOS-Autozoom beim Fokus
-            className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-base text-[#0D1B3E] placeholder-gray-400 focus:outline-none focus:border-[#4573A2]" />
+            className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-xl px-4 py-3 text-base text-[#0D1B3E] placeholder-gray-400 focus:outline-none focus:border-[#4573A2]" />
           <button type="submit" disabled={sending || !text.trim()}
             className="px-4 py-3 bg-[#4573A2] hover:bg-[#1E3A5F] text-white rounded-xl transition-colors disabled:opacity-40 min-h-12 flex items-center justify-center">
             {sending ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <SendIcon className="w-5 h-5" />}
@@ -429,7 +429,7 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
         <p className="text-sm text-[#1E3A5F] mb-1">
           {svName} hat einen alternativen Termin vorgeschlagen: <strong>{datumStr}</strong>
         </p>
-        {grund && <p className="text-xs text-gray-500 mb-3">Grund: {grund}</p>}
+        {grund && <p className="text-xs text-claimondo-ondo mb-3">Grund: {grund}</p>}
         {!grund && <div className="mb-3" />}
 
         <div className="space-y-2">
@@ -453,19 +453,19 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
             <h3 className="text-lg font-semibold text-[#0D1B3E] mb-2">Anderen Termin vorschlagen</h3>
-            <p className="text-sm text-gray-500 mb-4">Wählen Sie einen für Sie passenden Termin:</p>
+            <p className="text-sm text-claimondo-ondo mb-4">Wählen Sie einen für Sie passenden Termin:</p>
 
             {/* AAR-452: text-base (16px) + min-h-[44px] für iOS-Kompatibilität */}
             <input type="datetime-local" value={neuerTermin} onChange={e => setNeuerTermin(e.target.value)}
               min={new Date().toISOString().slice(0, 16)}
-              className="w-full border border-gray-200 rounded-lg px-3 min-h-[44px] text-base text-gray-800 mb-3 focus:outline-none focus:border-[#4573A2]" />
+              className="w-full border border-claimondo-border rounded-lg px-3 min-h-[44px] text-base text-claimondo-navy mb-3 focus:outline-none focus:border-[#4573A2]" />
             <textarea value={kundeGrund} onChange={e => setKundeGrund(e.target.value)}
               placeholder="Begründung (optional)"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-base text-gray-800 mb-4 focus:outline-none focus:border-[#4573A2] resize-none" rows={2} />
+              className="w-full border border-claimondo-border rounded-lg px-3 py-2.5 text-base text-claimondo-navy mb-4 focus:outline-none focus:border-[#4573A2] resize-none" rows={2} />
 
             <div className="flex gap-2">
               <button onClick={() => setShowModal(false)}
-                className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
+                className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border transition-colors">
                 Abbrechen
               </button>
               <button onClick={handleGegenvorschlag} disabled={loading || !neuerTermin}
@@ -531,7 +531,7 @@ function SlotAuswahlBanner({
       <p className="text-sm font-semibold text-[#0D1B3E] mb-1">
         {svName} hat alternative Termine vorgeschlagen
       </p>
-      <p className="text-xs text-gray-500 mb-4">
+      <p className="text-xs text-claimondo-ondo mb-4">
         Bitte wählen Sie einen der folgenden Termine:
       </p>
       <div className="space-y-2">

@@ -80,7 +80,7 @@ const STATUS_LABEL: Record<string, { label: string; cls: string; icon: typeof Ch
   },
   abgesagt: {
     label: 'Abgesagt',
-    cls: 'bg-gray-50 text-gray-600 border-gray-200',
+    cls: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border',
     icon: AlertCircleIcon,
   },
   abgeschlossen: {
@@ -113,7 +113,7 @@ export default function KundeTerminDetailClient({
 
   const status = STATUS_LABEL[termin.status] ?? {
     label: termin.status,
-    cls: 'bg-gray-50 text-gray-600 border-gray-200',
+    cls: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border',
     icon: ClockIcon,
   }
   const StatusIcon = status.icon
@@ -132,7 +132,7 @@ export default function KundeTerminDetailClient({
       <div>
         <Link
           href="/kunde/termine"
-          className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-[#4573A2] mb-3"
+          className="inline-flex items-center gap-1 text-xs text-claimondo-ondo hover:text-[#4573A2] mb-3"
         >
           <ArrowLeftIcon className="w-3 h-3" /> Meine Termine
         </Link>
@@ -142,7 +142,7 @@ export default function KundeTerminDetailClient({
               Gutachter-Termin
             </p>
             <h1 className="text-xl md:text-2xl font-bold text-[#0D1B3E] mt-1">{datum}</h1>
-            <p className="text-sm text-gray-600 mt-0.5">
+            <p className="text-sm text-claimondo-ondo mt-0.5">
               <CalendarIcon className="w-3.5 h-3.5 inline-block mr-1 -mt-0.5 text-[#4573A2]" />
               {uhrzeit}{endzeit ? ` – ${endzeit}` : ''} Uhr
             </p>
@@ -156,7 +156,7 @@ export default function KundeTerminDetailClient({
         </div>
 
         {fall.fall_nummer && (
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-claimondo-ondo mt-2">
             Fall {fall.fall_nummer}
             {fall.kennzeichen ? ` · ${fall.kennzeichen}` : ''}
             {fall.fahrzeug ? ` · ${fall.fahrzeug}` : ''}
@@ -192,8 +192,8 @@ export default function KundeTerminDetailClient({
 
       {/* Gutachter-Karte */}
       {sv.name && (
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 md:p-5">
-          <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-3">
+        <div className="rounded-2xl border border-claimondo-border bg-white p-4 md:p-5">
+          <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-3">
             Ihr Sachverständiger
           </p>
           <div className="flex items-center gap-3">
@@ -239,9 +239,9 @@ export default function KundeTerminDetailClient({
 
       {/* Adresse + Karte */}
       {fall.adresse && (
-        <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
-          <div className="p-4 md:p-5 border-b border-gray-100">
-            <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1">
+        <div className="rounded-2xl border border-claimondo-border bg-white overflow-hidden">
+          <div className="p-4 md:p-5 border-b border-claimondo-border">
+            <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-1">
               Besichtigungsort
             </p>
             <p className="text-sm text-[#0D1B3E] flex items-start gap-2">
@@ -250,7 +250,7 @@ export default function KundeTerminDetailClient({
             </p>
           </div>
           {mapsEmbedSrc && (
-            <div className="aspect-video w-full bg-gray-100">
+            <div className="aspect-video w-full bg-[#f8f9fb]">
               <iframe
                 src={mapsEmbedSrc}
                 width="100%"

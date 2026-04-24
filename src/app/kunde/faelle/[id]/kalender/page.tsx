@@ -27,9 +27,9 @@ export default async function KundeKalenderPage({ params }: { params: Promise<{ 
   if (!fall.sv_id) {
     return (
       <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl mx-auto">
-        <Link href={`/kunde/faelle/${id}`} className="text-xs text-gray-400 hover:text-[#4573A2] mb-4 inline-block">&larr; Zurück zum Fall</Link>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">
-          <p className="text-sm text-gray-500">Noch kein Sachverständiger zugewiesen.</p>
+        <Link href={`/kunde/faelle/${id}`} className="text-xs text-claimondo-ondo/70 hover:text-[#4573A2] mb-4 inline-block">&larr; Zurück zum Fall</Link>
+        <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-8 text-center">
+          <p className="text-sm text-claimondo-ondo">Noch kein Sachverständiger zugewiesen.</p>
         </div>
       </div>
     )
@@ -62,9 +62,9 @@ export default async function KundeKalenderPage({ params }: { params: Promise<{ 
 
   return (
     <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl mx-auto">
-      <Link href={`/kunde/faelle/${id}`} className="text-xs text-gray-400 hover:text-[#4573A2] mb-4 inline-block">&larr; Zurück zum Fall</Link>
+      <Link href={`/kunde/faelle/${id}`} className="text-xs text-claimondo-ondo/70 hover:text-[#4573A2] mb-4 inline-block">&larr; Zurück zum Fall</Link>
       <h1 className="text-lg font-bold text-[#0D1B3E] mb-1">Kalender von {svName}</h1>
-      <p className="text-sm text-gray-500 mb-5">Wählen Sie einen freien Termin für Ihren Fall {fall.fall_nummer ?? ''}.</p>
+      <p className="text-sm text-claimondo-ondo mb-5">Wählen Sie einen freien Termin für Ihren Fall {fall.fall_nummer ?? ''}.</p>
 
       <KalenderClient
         fallId={id}

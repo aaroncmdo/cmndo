@@ -65,8 +65,8 @@ export default async function KundeChatPage({
     return (
       <div className="px-5 py-8 max-w-lg mx-auto space-y-4">
         <h1 className="text-xl font-bold text-[#0D1B3E] mb-4">Chat</h1>
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 text-center">
-          <p className="text-gray-500 text-sm">
+        <div className="bg-white rounded-2xl border border-claimondo-border shadow-sm p-8 text-center">
+          <p className="text-claimondo-ondo text-sm">
             Noch kein Schadensfall vorhanden. Sobald Ihr Fall erstellt wurde, können Sie hier
             mit Ihrem Kundenbetreuer und dem Gutachter chatten.
           </p>

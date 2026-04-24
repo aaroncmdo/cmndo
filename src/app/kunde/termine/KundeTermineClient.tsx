@@ -42,7 +42,7 @@ const STATUS_BADGE: Record<string, string> = {
   bestaetigt: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   gegenvorschlag: 'bg-amber-50 text-amber-700 border-amber-200',
   abgelehnt: 'bg-red-50 text-red-700 border-red-200',
-  abgeschlossen: 'bg-gray-50 text-gray-600 border-gray-200',
+  abgeschlossen: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border',
 }
 
 // Dot-Farbe pro Status im Kalender
@@ -51,7 +51,7 @@ const DOT_CLS: Record<string, string> = {
   reserviert: 'bg-amber-400',
   gegenvorschlag: 'bg-amber-400',
   abgelehnt: 'bg-red-400',
-  abgeschlossen: 'bg-gray-300',
+  abgeschlossen: 'bg-claimondo-border',
 }
 
 const DAY_LABELS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
@@ -119,14 +119,14 @@ export default function KundeTermineClient({
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[#0D1B3E]">Meine Termine</h1>
-          <p className="text-sm text-gray-500 mt-1">Alle Gutachter-Termine zu deinen Fällen.</p>
+          <p className="text-sm text-claimondo-ondo mt-1">Alle Gutachter-Termine zu deinen Fällen.</p>
         </div>
-        <div className="flex items-center rounded-xl border border-gray-200 bg-white p-0.5 gap-0.5 shrink-0 mt-1">
+        <div className="flex items-center rounded-xl border border-claimondo-border bg-white p-0.5 gap-0.5 shrink-0 mt-1">
           <button
             type="button"
             onClick={() => setView('liste')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-              view === 'liste' ? 'bg-[#0D1B3E] text-white' : 'text-gray-500 hover:text-gray-800'
+              view === 'liste' ? 'bg-[#0D1B3E] text-white' : 'text-claimondo-ondo hover:text-claimondo-navy'
             }`}
           >
             <ListIcon className="w-3.5 h-3.5" />
@@ -136,7 +136,7 @@ export default function KundeTermineClient({
             type="button"
             onClick={() => setView('kalender')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-              view === 'kalender' ? 'bg-[#0D1B3E] text-white' : 'text-gray-500 hover:text-gray-800'
+              view === 'kalender' ? 'bg-[#0D1B3E] text-white' : 'text-claimondo-ondo hover:text-claimondo-navy'
             }`}
           >
             <CalendarIcon className="w-3.5 h-3.5" />
@@ -146,21 +146,21 @@ export default function KundeTermineClient({
       </div>
 
       {termine.length === 0 && (
-        <div className="bg-white rounded-2xl border border-gray-200 p-10 text-center">
-          <CalendarIcon className="w-6 h-6 text-gray-300 mx-auto mb-2" />
-          <p className="text-sm text-gray-400">Aktuell keine Termine geplant</p>
+        <div className="bg-white rounded-2xl border border-claimondo-border p-10 text-center">
+          <CalendarIcon className="w-6 h-6 text-claimondo-ondo/50 mx-auto mb-2" />
+          <p className="text-sm text-claimondo-ondo/70">Aktuell keine Termine geplant</p>
         </div>
       )}
 
       {/* ── Kalender-View ────────────────────────────────────────────── */}
       {view === 'kalender' && termine.length > 0 && (
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-claimondo-border overflow-hidden">
           {/* Monats-Navigation */}
-          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-claimondo-border">
             <button
               type="button"
               onClick={prevMonth}
-              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-[#f8f9fb] text-claimondo-ondo transition-colors"
               aria-label="Vorheriger Monat"
             >
               <ChevronLeftIcon className="w-4 h-4" />
@@ -171,7 +171,7 @@ export default function KundeTermineClient({
             <button
               type="button"
               onClick={nextMonth}
-              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-[#f8f9fb] text-claimondo-ondo transition-colors"
               aria-label="Nächster Monat"
             >
               <ChevronRightIcon className="w-4 h-4" />
@@ -181,7 +181,7 @@ export default function KundeTermineClient({
           {/* Wochen-Header */}
           <div className="grid grid-cols-7 px-2 pt-2">
             {DAY_LABELS.map(d => (
-              <div key={d} className="text-center text-[10px] font-semibold text-gray-400 py-1.5">
+              <div key={d} className="text-center text-[10px] font-semibold text-claimondo-ondo/70 py-1.5">
                 {d}
               </div>
             ))}
@@ -204,7 +204,7 @@ export default function KundeTermineClient({
                       ? 'bg-[#0D1B3E] text-white'
                       : isToday
                         ? 'bg-[#eef3f9] text-[#0D1B3E] font-bold'
-                        : 'hover:bg-gray-50 text-gray-700'
+                        : 'hover:bg-[#f8f9fb] text-claimondo-navy'
                   } ${dayTermine.length > 0 ? 'cursor-pointer' : 'cursor-default'}`}
                   disabled={dayTermine.length === 0}
                   aria-label={`${cell.date.toLocaleDateString('de-DE')}: ${dayTermine.length} Termin(e)`}
@@ -221,7 +221,7 @@ export default function KundeTermineClient({
                         />
                       ))}
                       {dayTermine.length > 3 && (
-                        <span className={`text-[8px] font-bold ${isSelected ? 'text-white/70' : 'text-gray-400'}`}>
+                        <span className={`text-[8px] font-bold ${isSelected ? 'text-white/70' : 'text-claimondo-ondo/70'}`}>
                           +
                         </span>
                       )}
@@ -234,8 +234,8 @@ export default function KundeTermineClient({
 
           {/* Tages-Detail */}
           {selectedKey && selectedTermine.length > 0 && (
-            <div className="border-t border-gray-100 px-4 py-3 space-y-2">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            <div className="border-t border-claimondo-border px-4 py-3 space-y-2">
+              <p className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider">
                 {new Date(selectedKey + 'T12:00:00').toLocaleDateString('de-DE', {
                   weekday: 'long', day: '2-digit', month: 'long',
                 })}
@@ -247,7 +247,7 @@ export default function KundeTermineClient({
           )}
 
           {/* Legende */}
-          <div className="border-t border-gray-100 px-5 py-2.5 flex gap-4">
+          <div className="border-t border-claimondo-border px-5 py-2.5 flex gap-4">
             {[
               { status: 'bestaetigt', label: 'Bestätigt' },
               { status: 'reserviert', label: 'Reserviert' },
@@ -255,7 +255,7 @@ export default function KundeTermineClient({
             ].map(({ status, label }) => (
               <div key={status} className="flex items-center gap-1.5">
                 <span className={`w-2 h-2 rounded-full ${DOT_CLS[status]}`} />
-                <span className="text-[10px] text-gray-500">{label}</span>
+                <span className="text-[10px] text-claimondo-ondo">{label}</span>
               </div>
             ))}
           </div>
@@ -267,7 +267,7 @@ export default function KundeTermineClient({
         <>
           {kommend.length > 0 && (
             <section>
-              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Kommend</h2>
+              <h2 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider mb-2">Kommend</h2>
               <div className="space-y-2">
                 {kommend.map(t => <TerminCard key={t.id} t={t} fall={fallMap[t.fall_id]} />)}
               </div>
@@ -275,7 +275,7 @@ export default function KundeTermineClient({
           )}
           {vergangen.length > 0 && (
             <section>
-              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Verlauf</h2>
+              <h2 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider mb-2">Verlauf</h2>
               <div className="space-y-2 opacity-80">
                 {vergangen.map(t => <TerminCard key={t.id} t={t} fall={fallMap[t.fall_id]} muted />)}
               </div>
@@ -300,7 +300,7 @@ function TerminCard({
   const isVideo = t.kanal === 'video'
   const Icon = isKb ? VideoIcon : HardHatIcon
   const start = new Date(t.start_zeit)
-  const badgeCls = STATUS_BADGE[t.status] ?? 'bg-gray-50 text-gray-600 border-gray-200'
+  const badgeCls = STATUS_BADGE[t.status] ?? 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border'
   const statusLabel = STATUS_LABEL[t.status] ?? t.status
 
   // AAR-698: Karte komplett klickbar → Termin-Detail-View.
@@ -311,7 +311,7 @@ function TerminCard({
   return (
     <Link
       href={targetHref}
-      className={`block bg-white rounded-2xl border border-gray-200 p-4 hover:border-[#4573A2]/40 hover:shadow-sm transition ${muted ? 'opacity-90' : ''}`}
+      className={`block bg-white rounded-2xl border border-claimondo-border p-4 hover:border-[#4573A2]/40 hover:shadow-sm transition ${muted ? 'opacity-90' : ''}`}
     >
       <div className="flex items-start gap-3">
         <div className="w-9 h-9 rounded-xl bg-[#f0f4f8] flex items-center justify-center shrink-0">
@@ -319,26 +319,26 @@ function TerminCard({
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-semibold text-gray-900">
+            <span className="text-sm font-semibold text-claimondo-navy">
               {isKb ? 'Kunden-Beratung' : 'Gutachter-Termin'}
             </span>
             <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${badgeCls}`}>
               {statusLabel}
             </span>
           </div>
-          <p className="text-sm text-gray-700 mt-1">
+          <p className="text-sm text-claimondo-navy mt-1">
             {start.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' })}
             {' · '}
             {start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
           </p>
           {fall && (
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-claimondo-ondo mt-0.5">
               Fall {fall.fall_nummer ?? fall.id.slice(0, 8)} · {fall.fahrzeug}
             </p>
           )}
           <div className="flex items-center gap-3 mt-2 text-xs">
             {t.status === 'bestaetigt' && !isKb && (
-              <span className="text-gray-400">
+              <span className="text-claimondo-ondo/70">
                 {isVideo
                   ? <><VideoIcon className="w-3 h-3 inline" /> Video-Termin</>
                   : <><PhoneIcon className="w-3 h-3 inline" /> Vor-Ort-Termin</>}

@@ -32,12 +32,12 @@ export default async function NachbesichtigungPickerPage({
   const bereitsEingereicht = !!fall.nachbesichtigung_kunde_termin_eingereicht_am
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-[#f8f9fb] py-8 px-4">
       <div className="max-w-xl mx-auto">
         <div className="mb-6">
-          <p className="text-xs text-gray-400 mb-1">Fall {fall.fall_nummer ?? fall_id.slice(0, 8)}</p>
+          <p className="text-xs text-claimondo-ondo/70 mb-1">Fall {fall.fall_nummer ?? fall_id.slice(0, 8)}</p>
           <h1 className="text-2xl font-bold text-[#0D1B3E]">Nachbesichtigungs-Termin wählen</h1>
-          <p className="text-sm text-gray-600 mt-2">
+          <p className="text-sm text-claimondo-ondo mt-2">
             Die Versicherung hat eine Nachbesichtigung angefordert. Bitte schlagen Sie 1–3 Termine vor,
             zu denen unser Sachverständiger erneut vor Ort sein kann.
           </p>
@@ -46,7 +46,7 @@ export default async function NachbesichtigungPickerPage({
         {bereitsEingereicht ? (
           <div className="bg-white rounded-xl border border-emerald-200 p-5 space-y-2">
             <p className="text-sm font-semibold text-emerald-900">Termine bereits eingereicht</p>
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-claimondo-ondo">
               Ihre Vorschläge sind eingegangen. Wir melden uns, sobald ein Termin mit dem
               Sachverständigen abgestimmt ist.
             </p>
