@@ -30,7 +30,7 @@ type Lead = {
 function flowLinkBadge(offen: boolean | null, abgeschlossen: boolean | null): { label: string; cls: string } {
   if (abgeschlossen) return { label: 'Abgeschlossen', cls: 'bg-green-100 text-green-700' }
   if (offen) return { label: 'Offen', cls: 'bg-amber-100 text-amber-700' }
-  return { label: '—', cls: 'text-gray-300' }
+  return { label: '—', cls: 'text-claimondo-ondo/50' }
 }
 
 export default function LeadsViewToggle({ leads }: { leads: Lead[] }) {
@@ -39,12 +39,12 @@ export default function LeadsViewToggle({ leads }: { leads: Lead[] }) {
   return (
     <div className="space-y-3">
       {/* Toggle */}
-      <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5 w-fit">
+      <div className="flex items-center gap-1 bg-[#f8f9fb] rounded-lg p-0.5 w-fit">
         <button
           type="button"
           onClick={() => setView('liste')}
           className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-            view === 'liste' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+            view === 'liste' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo hover:text-claimondo-navy'
           }`}
         >
           <ListIcon className="w-3.5 h-3.5" />
@@ -54,7 +54,7 @@ export default function LeadsViewToggle({ leads }: { leads: Lead[] }) {
           type="button"
           onClick={() => setView('kanban')}
           className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-            view === 'kanban' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+            view === 'kanban' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo hover:text-claimondo-navy'
           }`}
         >
           <LayoutGridIcon className="w-3.5 h-3.5" />
@@ -73,52 +73,52 @@ function ListView({ leads }: { leads: Lead[] }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/50">
-              <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs">Name</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs">Telefon</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs">Status</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs">FlowLink</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs">Service</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs">Erstellt</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs"></th>
+            <tr className="border-b border-claimondo-border bg-[#f8f9fb]/50">
+              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Name</th>
+              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Telefon</th>
+              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Status</th>
+              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">FlowLink</th>
+              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Service</th>
+              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Erstellt</th>
+              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-claimondo-border">
             {leads.map((lead) => {
               const fl = flowLinkBadge(lead.flow_link_geoeffnet, lead.flow_link_abgeschlossen)
               return (
-                <tr key={lead.id} className="hover:bg-gray-50/50 transition-colors">
+                <tr key={lead.id} className="hover:bg-[#f8f9fb]/50 transition-colors">
                   <td className="px-4 py-3">
-                    <Link href={`/dispatch/leads/${lead.id}`} className="font-medium text-gray-900 hover:text-[#4573A2]">
+                    <Link href={`/dispatch/leads/${lead.id}`} className="font-medium text-claimondo-navy hover:text-[#4573A2]">
                       {lead.vorname} {lead.nachname}
                     </Link>
                     {lead.schadens_fall_typ && (
-                      <span className="ml-2 text-[10px] text-gray-400">{lead.schadens_fall_typ}</span>
+                      <span className="ml-2 text-[10px] text-claimondo-ondo/70">{lead.schadens_fall_typ}</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
                     {lead.telefon ? (
                       <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} />
                     ) : (
-                      <span className="text-gray-300">—</span>
+                      <span className="text-claimondo-ondo/50">—</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${PHASE_BADGES[lead.qualifizierungs_phase ?? ''] ?? 'bg-gray-100 text-gray-600'}`}>
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${PHASE_BADGES[lead.qualifizierungs_phase ?? ''] ?? 'bg-[#f8f9fb] text-claimondo-ondo'}`}>
                       {PHASE_LABELS[lead.qualifizierungs_phase ?? ''] ?? lead.qualifizierungs_phase ?? '—'}
                     </span>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>
                   </td>
-                  <td className="px-4 py-3 text-xs text-gray-500">
+                  <td className="px-4 py-3 text-xs text-claimondo-ondo">
                     {lead.service_typ === 'nur_gutachter' ? 'Nur SV' : 'Komplett'}
                   </td>
-                  <td className="px-4 py-3 text-xs text-gray-400">
+                  <td className="px-4 py-3 text-xs text-claimondo-ondo/70">
                     {new Date(lead.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                   </td>
                   <td className="px-4 py-3">
-                    <Link href={`/dispatch/leads/${lead.id}`} className="text-gray-400 hover:text-[#4573A2]">
+                    <Link href={`/dispatch/leads/${lead.id}`} className="text-claimondo-ondo/70 hover:text-[#4573A2]">
                       <ExternalLinkIcon className="w-4 h-4" />
                     </Link>
                   </td>
@@ -127,7 +127,7 @@ function ListView({ leads }: { leads: Lead[] }) {
             })}
             {leads.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-sm text-gray-400">Keine Leads gefunden</td>
+                <td colSpan={7} className="px-4 py-12 text-center text-sm text-claimondo-ondo/70">Keine Leads gefunden</td>
               </tr>
             )}
           </tbody>
@@ -163,12 +163,12 @@ function KanbanView({ leads }: { leads: Lead[] }) {
       {phasenOrder.map((phase) => {
         const bucket = gruppen[phase] ?? []
         return (
-          <div key={phase} className="min-w-[260px] w-[260px] bg-gray-50 rounded-xl p-2 space-y-2 flex-shrink-0">
+          <div key={phase} className="min-w-[260px] w-[260px] bg-[#f8f9fb] rounded-xl p-2 space-y-2 flex-shrink-0">
             <div className="flex items-center justify-between px-1">
-              <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${PHASE_BADGES[phase] ?? 'bg-gray-200 text-gray-600'}`}>
+              <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${PHASE_BADGES[phase] ?? 'bg-claimondo-border text-claimondo-ondo'}`}>
                 {PHASE_LABELS[phase] ?? phase}
               </span>
-              <span className="text-[10px] text-gray-400 tabular-nums">{bucket.length}</span>
+              <span className="text-[10px] text-claimondo-ondo/70 tabular-nums">{bucket.length}</span>
             </div>
             <div className="space-y-1.5 max-h-[70vh] overflow-y-auto">
               {bucket.map((lead) => {
@@ -177,20 +177,20 @@ function KanbanView({ leads }: { leads: Lead[] }) {
                   <Link
                     key={lead.id}
                     href={`/dispatch/leads/${lead.id}`}
-                    className="block bg-white rounded-lg border border-gray-200 p-2.5 hover:border-[#4573A2] transition-colors"
+                    className="block bg-white rounded-lg border border-claimondo-border p-2.5 hover:border-[#4573A2] transition-colors"
                   >
-                    <p className="text-xs font-medium text-gray-900 truncate">
+                    <p className="text-xs font-medium text-claimondo-navy truncate">
                       {lead.vorname} {lead.nachname}
                     </p>
                     {lead.telefon && (
-                      <p className="text-[10px] text-gray-500 flex items-center gap-1 mt-0.5">
+                      <p className="text-[10px] text-claimondo-ondo flex items-center gap-1 mt-0.5">
                         <PhoneIcon className="w-2.5 h-2.5" />
                         {lead.telefon}
                       </p>
                     )}
                     <div className="flex items-center gap-1 mt-1.5">
                       <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>
-                      <span className="text-[9px] text-gray-400 ml-auto">
+                      <span className="text-[9px] text-claimondo-ondo/70 ml-auto">
                         {new Date(lead.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
                       </span>
                     </div>
@@ -198,7 +198,7 @@ function KanbanView({ leads }: { leads: Lead[] }) {
                 )
               })}
               {bucket.length === 0 && (
-                <p className="text-[10px] text-gray-300 text-center py-4 italic">Keine Leads</p>
+                <p className="text-[10px] text-claimondo-ondo/50 text-center py-4 italic">Keine Leads</p>
               )}
             </div>
           </div>

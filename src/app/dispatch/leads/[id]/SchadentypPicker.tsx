@@ -69,11 +69,11 @@ const OPTIONS: TypDef[] = [
 ]
 
 const FARBE_CLS: Record<TypDef['farbe'], { wrap: string; label: string; border: string }> = {
-  blue: { wrap: 'bg-blue-50 text-blue-800', label: 'text-blue-900', border: 'border-blue-200' },
+  blue: { wrap: 'bg-[#f8f9fb] text-claimondo-navy', label: 'text-claimondo-navy', border: 'border-claimondo-border' },
   green: { wrap: 'bg-green-50 text-green-800', label: 'text-green-900', border: 'border-green-200' },
   amber: { wrap: 'bg-amber-50 text-amber-800', label: 'text-amber-900', border: 'border-amber-200' },
   red: { wrap: 'bg-red-50 text-red-800', label: 'text-red-900', border: 'border-red-200' },
-  gray: { wrap: 'bg-gray-50 text-gray-800', label: 'text-gray-900', border: 'border-gray-200' },
+  gray: { wrap: 'bg-[#f8f9fb] text-claimondo-navy', label: 'text-claimondo-navy', border: 'border-claimondo-border' },
 }
 
 export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, gegnerKennzeichen, initialKamera, onSaved }: {
@@ -179,21 +179,21 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+    <div className="bg-white border border-claimondo-border rounded-xl p-4 space-y-3">
       {/* AAR-schadentyp-clear: Header-Row mit Clear-Button oben rechts.
           Ersetzt den alten Bottom-„Schadentyp speichern"-Button — Auswahl
           speichert jetzt sofort per Click. Clear nur sichtbar wenn ein Typ
           gesetzt ist, damit die UI ruhig bleibt solange nichts gewählt wurde. */}
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-xs font-semibold text-gray-700">
-          Schadentyp <span className="text-gray-400 font-normal">(MA trägt während Telefonat ein)</span>
+        <h3 className="text-xs font-semibold text-claimondo-navy">
+          Schadentyp <span className="text-claimondo-ondo/70 font-normal">(MA trägt während Telefonat ein)</span>
         </h3>
         {typ && (
           <button
             type="button"
             onClick={handleClear}
             disabled={pending}
-            className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-gray-200 text-[10px] font-medium text-gray-600 hover:bg-gray-50 hover:text-red-700 hover:border-red-200 disabled:opacity-40"
+            className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-claimondo-border text-[10px] font-medium text-claimondo-ondo hover:bg-[#f8f9fb] hover:text-red-700 hover:border-red-200 disabled:opacity-40"
           >
             <XIcon className="w-3 h-3" />
             Clear
@@ -209,7 +209,7 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
             onClick={() => handleTypClick(o.value)}
             disabled={pending}
             className={`px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-colors flex flex-col items-start gap-1 disabled:opacity-60 ${
-              typ === o.value ? 'bg-[#0D1B3E] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              typ === o.value ? 'bg-[#0D1B3E] text-white' : 'bg-[#f8f9fb] text-claimondo-navy hover:bg-claimondo-border'
             }`}
           >
             <span className="text-lg leading-none">{o.icon}</span>
@@ -241,7 +241,7 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
           onChange={e => setFreitext(e.target.value)}
           onBlur={handleFreitextBlur}
           placeholder="Beschreibung (Pflicht — Kanzlei braucht den genauen Typ für das AS)..."
-          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs h-20 resize-none"
+          className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-xs h-20 resize-none"
         />
       )}
 
@@ -253,8 +253,8 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
             „War auf dem Parkplatz eine Überwachungskamera vorhanden?"
           </p>
           <div className="flex gap-2">
-            <button type="button" onClick={() => handleKameraClick(true)} disabled={pending} className={`flex-1 px-3 py-1.5 rounded text-xs font-medium disabled:opacity-60 ${kamera === true ? 'bg-green-600 text-white' : 'bg-white text-gray-700 border border-gray-300'}`}>Ja → Fall anlegen</button>
-            <button type="button" onClick={() => handleKameraClick(false)} disabled={pending} className={`flex-1 px-3 py-1.5 rounded text-xs font-medium disabled:opacity-60 ${kamera === false ? 'bg-red-600 text-white' : 'bg-white text-gray-700 border border-gray-300'}`}>Nein → Disqualifizieren</button>
+            <button type="button" onClick={() => handleKameraClick(true)} disabled={pending} className={`flex-1 px-3 py-1.5 rounded text-xs font-medium disabled:opacity-60 ${kamera === true ? 'bg-green-600 text-white' : 'bg-white text-claimondo-navy border border-claimondo-border'}`}>Ja → Fall anlegen</button>
+            <button type="button" onClick={() => handleKameraClick(false)} disabled={pending} className={`flex-1 px-3 py-1.5 rounded text-xs font-medium disabled:opacity-60 ${kamera === false ? 'bg-red-600 text-white' : 'bg-white text-claimondo-navy border border-claimondo-border'}`}>Nein → Disqualifizieren</button>
           </div>
           {kamera === true && <p className="text-[10px] text-green-700">Kanzlei/SV kann Betreiber anschreiben. parkplatz_kamera=true wird gesetzt.</p>}
           {kamera === false && <p className="text-[10px] text-red-700">Lead wird disqualifiziert (Parkplatz ohne KZ + ohne Kamera). Exit-Skript wird angezeigt.</p>}

@@ -43,7 +43,7 @@ export default function RueckrufActions({
       <button
         disabled={pending}
         onClick={() => handle(() => markNichtErreicht(leadId))}
-        className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-300 text-gray-600 text-xs font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+        className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-claimondo-border text-claimondo-ondo text-xs font-medium hover:bg-[#f8f9fb] transition-colors disabled:opacity-50"
       >
         <XIcon className="w-3.5 h-3.5" />
         Nicht erreicht

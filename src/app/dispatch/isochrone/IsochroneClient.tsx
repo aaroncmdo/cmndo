@@ -49,22 +49,22 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Leads-Liste */}
-      <div className="bg-white rounded-xl border border-gray-200 lg:col-span-1">
-        <div className="px-4 py-3 border-b border-gray-100">
+      <div className="bg-white rounded-xl border border-claimondo-border lg:col-span-1">
+        <div className="px-4 py-3 border-b border-claimondo-border">
           <div className="relative">
-            <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+            <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-claimondo-ondo/70" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Lead suchen (Name, PLZ, Schadentyp)"
-              className="w-full pl-7 pr-2 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+              className="w-full pl-7 pr-2 py-1.5 text-xs bg-[#f8f9fb] border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
             />
           </div>
-          <p className="text-[10px] text-gray-400 mt-1.5">{filtered.length} / {leads.length} Leads mit Koordinaten</p>
+          <p className="text-[10px] text-claimondo-ondo/70 mt-1.5">{filtered.length} / {leads.length} Leads mit Koordinaten</p>
         </div>
-        <div className="divide-y divide-gray-50 max-h-[620px] overflow-y-auto">
+        <div className="divide-y divide-claimondo-border max-h-[620px] overflow-y-auto">
           {filtered.length === 0 && (
-            <p className="px-4 py-6 text-xs text-gray-400 text-center">Keine Leads gefunden</p>
+            <p className="px-4 py-6 text-xs text-claimondo-ondo/70 text-center">Keine Leads gefunden</p>
           )}
           {filtered.map((l) => {
             const sel = selectedLead?.id === l.id
@@ -74,14 +74,14 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
                 type="button"
                 onClick={() => pickLead(l)}
                 className={`w-full text-left px-4 py-3 transition-colors ${
-                  sel ? 'bg-[#4573A2]/10 border-l-2 border-[#4573A2]' : 'hover:bg-gray-50'
+                  sel ? 'bg-[#4573A2]/10 border-l-2 border-[#4573A2]' : 'hover:bg-[#f8f9fb]'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-900">{l.name}</span>
-                  <span className="text-[9px] text-gray-400 uppercase">{l.phase}</span>
+                  <span className="text-sm font-medium text-claimondo-navy">{l.name}</span>
+                  <span className="text-[9px] text-claimondo-ondo/70 uppercase">{l.phase}</span>
                 </div>
-                <div className="flex items-center gap-2 mt-0.5 text-[10px] text-gray-500">
+                <div className="flex items-center gap-2 mt-0.5 text-[10px] text-claimondo-ondo">
                   <MapPinIcon className="w-3 h-3" />
                   <span>{l.plz ?? '—'}</span>
                   {l.schadentyp && (
@@ -100,17 +100,17 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
       {/* SV-Vorschlaege */}
       <div className="lg:col-span-2 space-y-4">
         {!selectedLead ? (
-          <div className="bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 p-12 text-center">
-            <TargetIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-            <p className="text-sm text-gray-500">Wähle einen Lead links um die SV-Vorschläge zu laden.</p>
+          <div className="bg-[#f8f9fb] rounded-xl border-2 border-dashed border-claimondo-border p-12 text-center">
+            <TargetIcon className="w-10 h-10 text-claimondo-ondo/50 mx-auto mb-2" />
+            <p className="text-sm text-claimondo-ondo">Wähle einen Lead links um die SV-Vorschläge zu laden.</p>
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-gray-200">
-            <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+          <div className="bg-white rounded-xl border border-claimondo-border">
+            <div className="px-5 py-3 border-b border-claimondo-border flex items-center justify-between">
               <div>
-                <p className="text-[10px] text-gray-400 uppercase">Lead</p>
-                <h2 className="text-sm font-semibold text-gray-900">{selectedLead.name}</h2>
-                <p className="text-[10px] text-gray-500">
+                <p className="text-[10px] text-claimondo-ondo/70 uppercase">Lead</p>
+                <h2 className="text-sm font-semibold text-claimondo-navy">{selectedLead.name}</h2>
+                <p className="text-[10px] text-claimondo-ondo">
                   {selectedLead.plz ?? '—'} · {selectedLead.lat?.toFixed(3)}, {selectedLead.lng?.toFixed(3)}
                 </p>
               </div>
@@ -132,10 +132,10 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
               </div>
             </div>
 
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-claimondo-border">
               {pending && (
                 <div className="flex justify-center py-10">
-                  <div className="w-6 h-6 border-2 border-gray-300 border-t-[#4573A2] rounded-full animate-spin" />
+                  <div className="w-6 h-6 border-2 border-claimondo-border border-t-[#4573A2] rounded-full animate-spin" />
                 </div>
               )}
 
@@ -151,7 +151,7 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
 
               {!pending && suggestions && suggestions.length > 0 && (
                 <>
-                  <div className="px-5 py-2 bg-gray-50 text-[10px] uppercase tracking-wider text-gray-500 grid grid-cols-[2fr_1fr_1fr_1fr_1fr_2fr] gap-3">
+                  <div className="px-5 py-2 bg-[#f8f9fb] text-[10px] uppercase tracking-wider text-claimondo-ondo grid grid-cols-[2fr_1fr_1fr_1fr_1fr_2fr] gap-3">
                     <span>Name</span>
                     <span>Paket</span>
                     <span>Distanz</span>
@@ -160,19 +160,19 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
                     <span>Gründe</span>
                   </div>
                   {suggestions.map((s) => (
-                    <div key={s.svId} className="px-5 py-3 grid grid-cols-[2fr_1fr_1fr_1fr_1fr_2fr] gap-3 items-center text-sm hover:bg-gray-50">
+                    <div key={s.svId} className="px-5 py-3 grid grid-cols-[2fr_1fr_1fr_1fr_1fr_2fr] gap-3 items-center text-sm hover:bg-[#f8f9fb]">
                       <Link href={`/dispatch/sachverstaendige/${s.svId}`} className="text-[#4573A2] hover:underline font-medium truncate">
                         {s.name}
                       </Link>
-                      <span className="text-xs text-gray-600">{s.paket}</span>
+                      <span className="text-xs text-claimondo-ondo">{s.paket}</span>
                       <span className="text-xs tabular-nums">{s.distanzKm.toFixed(1)} km</span>
                       <span className="text-xs tabular-nums font-semibold">{s.score.toFixed(1)}</span>
-                      <span className={`text-xs tabular-nums ${s.kontingentFrei <= 2 ? 'text-red-600 font-semibold' : 'text-gray-700'}`}>
+                      <span className={`text-xs tabular-nums ${s.kontingentFrei <= 2 ? 'text-red-600 font-semibold' : 'text-claimondo-navy'}`}>
                         {s.kontingentFrei}
                       </span>
                       <div className="flex flex-wrap gap-1">
                         {(s.reasons ?? []).slice(0, 3).map((r, i) => (
-                          <span key={i} className="text-[9px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-700">{r}</span>
+                          <span key={i} className="text-[9px] px-1.5 py-0.5 rounded bg-[#f8f9fb] text-claimondo-ondo">{r}</span>
                         ))}
                       </div>
                     </div>

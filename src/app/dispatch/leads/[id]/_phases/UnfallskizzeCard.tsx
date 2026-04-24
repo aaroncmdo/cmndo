@@ -71,10 +71,10 @@ export function UnfallskizzeCard({
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 space-y-3">
+    <div className="bg-white border border-claimondo-border rounded-2xl p-4 sm:p-5 space-y-3">
       <div className="flex items-center gap-2">
         <SparklesIcon className="w-4 h-4 text-[#4573A2]" />
-        <h3 className="text-sm font-semibold text-gray-900">Unfallskizze (KI-generiert)</h3>
+        <h3 className="text-sm font-semibold text-claimondo-navy">Unfallskizze (KI-generiert)</h3>
         {bestaetigt && (
           <span className="ml-auto inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium">
             <CheckCircle2Icon className="w-3 h-3" />
@@ -82,7 +82,7 @@ export function UnfallskizzeCard({
           </span>
         )}
       </div>
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-claimondo-ondo">
         Claude-API erzeugt eine einfache SVG-Darstellung auf Basis von Unfallhergang + Schadentyp.
         Prüfe vor der Freigabe ob sie den Unfall korrekt darstellt.
       </p>
@@ -107,11 +107,11 @@ export function UnfallskizzeCard({
       {svg && (
         <div className="space-y-2">
           <div
-            className="rounded-xl border border-gray-200 bg-white overflow-hidden"
+            className="rounded-xl border border-claimondo-border bg-white overflow-hidden"
             dangerouslySetInnerHTML={{ __html: svg }}
           />
           {generiertAm && (
-            <p className="text-[10px] text-gray-400">
+            <p className="text-[10px] text-claimondo-ondo/70">
               Generiert am {new Date(generiertAm).toLocaleString('de-DE')}
             </p>
           )}
@@ -130,7 +130,7 @@ export function UnfallskizzeCard({
                 type="button"
                 onClick={generate}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-700 text-xs font-medium hover:bg-gray-50 disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-[#f8f9fb] disabled:opacity-50"
               >
                 <RefreshCwIcon className="w-3.5 h-3.5" />
                 Neu generieren
@@ -139,7 +139,7 @@ export function UnfallskizzeCard({
                 type="button"
                 onClick={clear}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-600 text-xs font-medium hover:bg-gray-50 disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-ondo text-xs font-medium hover:bg-[#f8f9fb] disabled:opacity-50"
               >
                 <XIcon className="w-3.5 h-3.5" />
                 Verwerfen
@@ -151,7 +151,7 @@ export function UnfallskizzeCard({
               type="button"
               onClick={clear}
               disabled={pending}
-              className="inline-flex items-center gap-1 text-[11px] text-gray-500 hover:text-gray-700"
+              className="inline-flex items-center gap-1 text-[11px] text-claimondo-ondo hover:text-claimondo-navy"
             >
               <XIcon className="w-3 h-3" />
               Freigabe zurückziehen + neu generieren

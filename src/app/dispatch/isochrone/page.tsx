@@ -44,8 +44,8 @@ export default async function DispatchIsochronePage() {
     <div className="py-6 space-y-6">
       <ReadOnlyBanner message="Nur-Lese-Ansicht — Isochrone-Polygone werden im Admin-Portal gepflegt." />
       <div>
-        <h1 className="text-xl font-bold text-gray-900">Isochrone-Zuweisung</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <h1 className="text-xl font-bold text-claimondo-navy">Isochrone-Zuweisung</h1>
+        <p className="text-sm text-claimondo-ondo mt-1">
           Wähle einen Lead, um die besten SVs im Fahrzeit-Umkreis zu sehen.
           Die Reservierung selbst passiert im{' '}
           <Link href="/dispatch/leads" className="text-[#4573A2] hover:underline">

@@ -100,10 +100,10 @@ export default function RueckrufSection({ leadId }: { leadId: string }) {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-5">
+    <div className="bg-white border border-claimondo-border rounded-2xl p-5 mb-5">
       <div className="flex items-center gap-2 mb-4">
         <PhoneCallIcon className="w-4 h-4 text-amber-400" />
-        <h2 className="text-sm font-medium text-gray-500">Rückruftermin</h2>
+        <h2 className="text-sm font-medium text-claimondo-ondo">Rückruftermin</h2>
         {isErledigt && (
           <span className="ml-auto bg-emerald-50 text-emerald-500 text-xs px-2 py-0.5 rounded-full">
             Erledigt
@@ -118,22 +118,22 @@ export default function RueckrufSection({ leadId }: { leadId: string }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">Datum &amp; Uhrzeit</label>
+          <label className="text-xs text-claimondo-ondo mb-1 block">Datum &amp; Uhrzeit</label>
           <input
             type="datetime-local"
             value={datum}
             onChange={e => setDatum(e.target.value)}
-            className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+            className="w-full bg-[#f8f9fb] border border-claimondo-border text-claimondo-navy text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
           />
         </div>
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">Notiz</label>
+          <label className="text-xs text-claimondo-ondo mb-1 block">Notiz</label>
           <input
             type="text"
             value={notiz}
             onChange={e => setNotiz(e.target.value)}
             placeholder="z.B. Kunde ab 14 Uhr erreichbar"
-            className="w-full bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2] placeholder-gray-400"
+            className="w-full bg-[#f8f9fb] border border-claimondo-border text-claimondo-navy text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#4573A2] placeholder-gray-400"
           />
         </div>
       </div>
