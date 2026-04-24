@@ -253,7 +253,7 @@ export default function Phase2TerminServiceTyp() {
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                     sel
                       ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
-                      : 'bg-white text-claimondo-navy border-claimondo-border hover:border-blue-400'
+                      : 'bg-white text-claimondo-navy border-claimondo-border hover:border-claimondo-ondo'
                   } disabled:opacity-50`}
                 >
                   {d.label}
@@ -267,7 +267,7 @@ export default function Phase2TerminServiceTyp() {
               className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                 wochentage.length === 0
                   ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
-                  : 'bg-white text-claimondo-navy border-claimondo-border hover:border-blue-400'
+                  : 'bg-white text-claimondo-navy border-claimondo-border hover:border-claimondo-ondo'
               } disabled:opacity-50`}
               title="Alle Wochentage zurücksetzen"
             >
@@ -287,7 +287,7 @@ export default function Phase2TerminServiceTyp() {
           value={wunschtermin}
           onChange={(e) => setWunschtermin(e.target.value)}
           min={minDatetime}
-          className="w-full px-3 py-2 border border-blue-300 rounded-lg text-sm bg-white"
+          className="w-full px-3 py-2 border border-claimondo-ondo rounded-lg text-sm bg-white"
         />
         {wunschtermin && (
           <p className="text-[10px] text-claimondo-ondo">
