@@ -72,7 +72,7 @@ export function ChatWindowPanel({ currentUserId }: { currentUserId: string | nul
           >
             {/* Header — glass-light mit leichtem Tint statt solid dark */}
             <div className="flex items-center gap-2 px-3 py-2.5 border-b border-claimondo-border bg-white/40 backdrop-blur-sm shrink-0">
-              <KundeAvatar name={chat.kundeName} size={28} colorCls="bg-claimondo-navy text-white" />
+              <KundeAvatar name={chat.kundeName} size={28} tone="navy-filled" />
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-claimondo-navy truncate">{chat.kundeName}</p>
                 {chat.fallNummer && (

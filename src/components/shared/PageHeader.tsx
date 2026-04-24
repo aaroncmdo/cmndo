@@ -1,10 +1,13 @@
+// AAR-727 / AAR-769 Phase 3 Batch 1: Einheitlicher Seiten-Header fuer
+// alle Portale. Ersetzt inline `<div><h1>...</h1><p>...</p><Actions/></div>`-
+// Pattern das in 8+ Seiten leicht abweichend kopiert war.
+//
+// Baut auf Primitives (Row, Stack, Text, Icon) — erster Migrations-Schritt
+// der Phase 3.
+
 import { type LucideIcon } from 'lucide-react'
 import { type ReactNode } from 'react'
-
-// AAR-727 Shared: Einheitlicher Seiten-Header für alle Portale.
-// Ersetzt inline `<div><h1>...</h1><p>...</p><Actions/></div>`-Pattern,
-// das in 8+ Seiten leicht abweichend kopiert war (font-bold vs.
-// font-semibold, mt-0.5 vs. mt-1, text-xl vs. text-2xl).
+import { Row, Stack, Text, Icon } from '@/components/primitives'
 
 type Props = {
   title: string
@@ -12,8 +15,8 @@ type Props = {
   icon?: LucideIcon
   actions?: ReactNode
   /**
-   * `md` (default) für Sub-Seiten und Portal-Seiten (text-lg mobil, text-xl ab sm).
-   * `lg` für oberste Hub-Seiten (text-xl mobil, text-2xl ab sm).
+   * `md` (default) fuer Sub-Seiten (18px Titel).
+   * `lg` fuer oberste Hub-Seiten (24px Titel).
    */
   size?: 'md' | 'lg'
 }
@@ -21,29 +24,32 @@ type Props = {
 export default function PageHeader({
   title,
   description,
-  icon: Icon,
+  icon: LucideIconRef,
   actions,
   size = 'md',
 }: Props) {
-  const titleSize =
-    size === 'lg' ? 'text-xl sm:text-2xl' : 'text-lg sm:text-xl'
+  const titleVariant = size === 'lg' ? 'headingLg' : 'headingMd'
 
   return (
-    <div className="flex items-start justify-between gap-2 sm:gap-4">
-      <div className="min-w-0">
-        <h1
-          className={`${titleSize} font-semibold text-claimondo-navy flex items-center gap-2`}
-        >
-          {Icon ? <Icon className="w-5 h-5 text-claimondo-ondo shrink-0" /> : null}
-          <span className="truncate">{title}</span>
-        </h1>
+    <Row align="start" justify="between" gap={3}>
+      <Stack gap={1}>
+        <Row gap={2} align="center">
+          {LucideIconRef ? <Icon icon={LucideIconRef} size={20} color="ondo" /> : null}
+          <Text variant={titleVariant} color="navy" truncate>
+            {title}
+          </Text>
+        </Row>
         {description ? (
-          <p className="text-sm text-claimondo-ondo mt-0.5">{description}</p>
+          <Text variant="bodySm" color="ondo">
+            {description}
+          </Text>
         ) : null}
-      </div>
+      </Stack>
       {actions ? (
-        <div className="flex items-center gap-3 shrink-0">{actions}</div>
+        <Row gap={3} align="center">
+          {actions}
+        </Row>
       ) : null}
-    </div>
+    </Row>
   )
 }
