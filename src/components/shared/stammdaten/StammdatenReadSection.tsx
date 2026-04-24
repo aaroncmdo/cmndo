@@ -193,7 +193,7 @@ export function StammdatenReadSection({
                   </span>
                 )}
                 {fahrbereit === false && (
-                  <span className="inline-flex items-center gap-1 text-red-700">
+                  <span className="inline-flex items-center gap-1 text-rose-700">
                     <XCircleIcon className="w-3 h-3" /> nicht fahrbereit
                   </span>
                 )}

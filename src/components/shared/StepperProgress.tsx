@@ -56,7 +56,7 @@ export function StepperProgress({ steps, className, label = 'Fortschritt' }: Pro
             {!isLast && (
               <div
                 aria-hidden="true"
-                className="mx-2 h-px flex-1 bg-slate-300"
+                className="mx-2 h-px flex-1 bg-claimondo-border"
               />
             )}
           </li>

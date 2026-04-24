@@ -175,7 +175,7 @@ function KontaktRow({ icon, label, name, sub, telefon, email, href }: KontaktRow
 
   if (href) {
     return (
-      <Link href={href} className="block hover:bg-[#f8f9fb] -m-1 p-1 rounded-lg transition-colors">
+      <Link href={href} className="block hover:bg-claimondo-bg -m-1 p-1 rounded-lg transition-colors">
         {body}
       </Link>
     )
