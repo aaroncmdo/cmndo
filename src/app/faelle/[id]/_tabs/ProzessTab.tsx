@@ -26,9 +26,9 @@ export default function ProzessTab({ subphase }: { subphase: SubphaseResult }) {
 
   if (visible.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-2">
-        <h2 className="text-sm font-semibold text-gray-900">Prozess</h2>
-        <p className="text-xs text-gray-500">
+      <div className="bg-white rounded-xl border border-claimondo-border p-5 space-y-2">
+        <h2 className="text-sm font-semibold text-claimondo-navy">Prozess</h2>
+        <p className="text-xs text-claimondo-ondo">
           Der Prozess-Tab zeigt Kanzlei, Anspruchsschreiben, VS-Reaktion, Rüge,
           Stellungnahme, Nachbesichtigung, Klage und Auszahlung — sobald der Fall
           die jeweilige Phase erreicht. Aktueller Status:{' '}

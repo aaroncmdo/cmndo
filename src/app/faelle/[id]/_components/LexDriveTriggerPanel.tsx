@@ -171,7 +171,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
   const statusFor = (id: LexDriveEvent) => processedEvents?.[id] === true
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
+    <div className="bg-white rounded-2xl border border-claimondo-border p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-[#0D1B3E]">Endpoint-Register</h3>
         <span className="text-[10px] uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full font-medium">
@@ -179,7 +179,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
         </span>
       </div>
 
-      <p className="text-xs text-gray-500 leading-relaxed">
+      <p className="text-xs text-claimondo-ondo leading-relaxed">
         Bis die LexDrive-Webhook-Integration live ist: alle Events hier manuell auslösen. Trigger-Logik
         (Status, Felder, WhatsApp, Mitteilungen, Timeline) ist identisch zum Webhook. ✓ = Event wurde
         bereits verarbeitet, ⏳ = offen.
@@ -187,7 +187,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
 
       {EVENT_GROUPS.map(group => (
         <div key={group.label}>
-          <p className="text-[10px] uppercase text-gray-400 font-semibold tracking-wider mb-2">{group.label}</p>
+          <p className="text-[10px] uppercase text-claimondo-ondo/70 font-semibold tracking-wider mb-2">{group.label}</p>
           <div className="grid grid-cols-2 gap-2">
             {group.events.map(ev => {
               const Icon = ev.icon
@@ -199,7 +199,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
                   className={`flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg transition-colors text-left ${
                     done
                       ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100'
-                      : 'text-gray-700 bg-gray-50 hover:bg-[#4573A2] hover:text-white'
+                      : 'text-claimondo-navy bg-[#f8f9fb] hover:bg-[#4573A2] hover:text-white'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5 shrink-0" />
@@ -223,13 +223,13 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
           <div className="bg-white rounded-2xl p-6 max-w-md w-full space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-[#0D1B3E]">Auslösen: {activeEvent.label}</h3>
-              <button onClick={() => setActiveEvent(null)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setActiveEvent(null)} className="text-claimondo-ondo/70 hover:text-claimondo-ondo">
                 <XIcon className="w-5 h-5" />
               </button>
             </div>
 
             {activeEvent.fields.length === 0 && (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-claimondo-ondo">
                 <CircleIcon className="w-3 h-3 inline-block mr-1" />
                 Keine zusätzlichen Angaben nötig.
               </p>
@@ -237,7 +237,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
 
             {activeEvent.fields.map(field => (
               <div key={field}>
-                <label className="text-xs font-medium text-gray-700 mb-1 block">
+                <label className="text-xs font-medium text-claimondo-navy mb-1 block">
                   {FIELD_LABELS[field]}
                   {field === 'vs_kuerzungs_typ' && <span className="text-red-500 ml-1">*</span>}
                 </label>
@@ -261,7 +261,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
                   <select
                     value={payload[field] ?? ''}
                     onChange={e => setPayload({ ...payload, [field]: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#4573A2]"
+                    className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:border-[#4573A2]"
                   >
                     <option value="">Bitte wählen</option>
                     <option value="tag14">Tag 14</option>
@@ -272,7 +272,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
                   <select
                     value={payload[field] ?? ''}
                     onChange={e => setPayload({ ...payload, [field]: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#4573A2]"
+                    className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:border-[#4573A2]"
                   >
                     <option value="">Bitte wählen</option>
                     <option value="warten">Warten</option>
@@ -283,7 +283,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
                   <select
                     value={payload[field] ?? ''}
                     onChange={e => setPayload({ ...payload, [field]: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#4573A2]"
+                    className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:border-[#4573A2]"
                   >
                     <option value="">Bitte wählen</option>
                     <option value="banktransfer_direkt">Banktransfer direkt</option>
@@ -296,7 +296,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
                     value={payload[field] ?? ''}
                     onChange={e => setPayload({ ...payload, [field]: e.target.value })}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#4573A2]"
+                    className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:border-[#4573A2]"
                   />
                 ) : (
                   <input
@@ -310,14 +310,14 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
                     }
                     value={payload[field] ?? ''}
                     onChange={e => setPayload({ ...payload, [field]: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#4573A2]"
+                    className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:border-[#4573A2]"
                   />
                 )}
               </div>
             ))}
 
             <div className="flex gap-2 pt-2">
-              <button onClick={() => setActiveEvent(null)} className="flex-1 py-2.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">
+              <button onClick={() => setActiveEvent(null)} className="flex-1 py-2.5 text-sm text-claimondo-ondo hover:bg-[#f8f9fb] rounded-lg">
                 Abbrechen
               </button>
               <button onClick={handleSubmit} disabled={pending}

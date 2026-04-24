@@ -48,13 +48,13 @@ function Card({
   children: ReactNode
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+    <div className="bg-white rounded-xl border border-claimondo-border p-5 space-y-3">
       <div>
-        <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+        <h3 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
           {icon}
           {title}
         </h3>
-        {subtitle && <p className="text-[11px] text-gray-500 mt-0.5">{subtitle}</p>}
+        {subtitle && <p className="text-[11px] text-claimondo-ondo mt-0.5">{subtitle}</p>}
       </div>
       {children}
     </div>
@@ -64,8 +64,8 @@ function Card({
 function Info({ label, value }: { label: string; value: string | number | null | undefined }) {
   return (
     <div className="text-xs">
-      <span className="text-gray-400 uppercase tracking-wider text-[10px] block">{label}</span>
-      <span className="text-gray-800 font-medium">
+      <span className="text-claimondo-ondo/70 uppercase tracking-wider text-[10px] block">{label}</span>
+      <span className="text-claimondo-navy font-medium">
         {value == null || value === '' ? '—' : String(value)}
       </span>
     </div>
@@ -91,7 +91,7 @@ function fmtEuro(v: unknown): string | null {
 }
 
 const KUERZUNGSTYP_LABEL: Record<string, { label: string; color: string }> = {
-  technisch: { label: 'Technisch', color: 'bg-blue-50 text-blue-800 border-blue-200' },
+  technisch: { label: 'Technisch', color: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border' },
   argumentativ: { label: 'Argumentativ', color: 'bg-purple-50 text-purple-800 border-purple-200' },
   gemischt: { label: 'Gemischt', color: 'bg-amber-50 text-amber-800 border-amber-200' },
 }
@@ -371,7 +371,7 @@ export function StellungnahmeSection() {
           </button>
         )}
       </div>
-      <p className="text-[11px] text-gray-500">
+      <p className="text-[11px] text-claimondo-ondo">
         SV-Portal: StellungnahmeCard in Fallakte{' '}
         <code className="text-[10px]">/gutachter/fall/{String(fall.id).slice(0, 8)}</code>
       </p>
@@ -518,7 +518,7 @@ export function NachbesichtigungSection() {
                 key={`${t.datum}-${t.uhrzeit}-${i}`}
                 className="flex items-center justify-between gap-2 text-[11px] bg-white border border-violet-100 rounded px-2 py-1.5"
               >
-                <span className="font-medium text-gray-800">
+                <span className="font-medium text-claimondo-navy">
                   {fmtDate(t.datum)} · {t.uhrzeit}
                 </span>
                 <button
@@ -536,7 +536,7 @@ export function NachbesichtigungSection() {
       )}
 
       {ergebnis && (
-        <div className="rounded-md bg-gray-50 border border-gray-200 p-3 text-[11px] text-gray-700">
+        <div className="rounded-md bg-[#f8f9fb] border border-claimondo-border p-3 text-[11px] text-claimondo-navy">
           <strong className="block mb-1">Ergebnis:</strong>
           {ergebnis}
         </div>
@@ -549,7 +549,7 @@ export function NachbesichtigungSection() {
         </div>
       )}
 
-      <p className="text-[11px] text-gray-500">
+      <p className="text-[11px] text-claimondo-ondo">
         Kunden-Portal-Route: <code className="text-[10px]">/kunde/nachbesichtigung</code>
       </p>
     </Card>
@@ -632,8 +632,8 @@ export function AuszahlungSection() {
         <div className="rounded-md border border-[#EBF1F8] bg-[#f8f9fb] p-3 space-y-2">
           <h4 className="text-xs font-semibold text-[#0D1B3E]">Split (Admin-Sicht)</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="rounded border border-gray-200 bg-white p-2 space-y-1">
-              <p className="text-[10px] uppercase tracking-wider text-gray-400">Kunde</p>
+            <div className="rounded border border-claimondo-border bg-white p-2 space-y-1">
+              <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70">Kunde</p>
               <InlineEditField
                 label="Betrag (€)"
                 fieldName="auszahlung_kunde_betrag"
@@ -646,12 +646,12 @@ export function AuszahlungSection() {
                 value={fall.auszahlung_kunde_eingegangen_am as string | null}
                 type="date"
               />
-              <p className="text-[11px] text-gray-600">
+              <p className="text-[11px] text-claimondo-ondo">
                 {kundenEingangAm ? `✓ ${kundenEingangAm}` : '⏳ ausstehend'}
               </p>
             </div>
-            <div className="rounded border border-gray-200 bg-white p-2 space-y-1">
-              <p className="text-[10px] uppercase tracking-wider text-gray-400">SV / Gutachter</p>
+            <div className="rounded border border-claimondo-border bg-white p-2 space-y-1">
+              <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70">SV / Gutachter</p>
               <InlineEditField
                 label="Honorar Soll (€)"
                 fieldName="gutachter_honorar"
@@ -664,24 +664,24 @@ export function AuszahlungSection() {
                 value={fall.auszahlung_gutachter_eingegangen_am as string | null}
                 type="date"
               />
-              <p className="text-[11px] text-gray-600">
+              <p className="text-[11px] text-claimondo-ondo">
                 {svEingangAm ? `✓ ${svEingangAm}` : '⏳ ausstehend'}
               </p>
             </div>
           </div>
           <div className="flex items-start gap-2 rounded-md border border-[#EBF1F8] bg-white p-2">
             <EyeIcon className="w-3.5 h-3.5 text-[#4573A2] mt-0.5 shrink-0" />
-            <p className="text-[11px] text-gray-600">
+            <p className="text-[11px] text-claimondo-ondo">
               Sichtbarkeit: Kunde sieht nur Kunden-Betrag (<code>faelle_kunde_view</code>),
               SV nur das Honorar (<code>faelle_sv_view</code>). Admin/KB sehen den vollen Split.
             </p>
           </div>
-          <p className="text-[11px] text-gray-500">
+          <p className="text-[11px] text-claimondo-ondo">
             Split eintragen: Phase-Header „Kanzlei-Paket einlesen&quot; → „Auszahlung eingegangen (Split)&quot;.
           </p>
         </div>
       ) : (
-        <div className="rounded-md border border-gray-200 bg-gray-50 p-3 text-[11px] text-gray-700">
+        <div className="rounded-md border border-claimondo-border bg-[#f8f9fb] p-3 text-[11px] text-claimondo-navy">
           Split-Anzeige nur für Admin + Kundenbetreuer sichtbar.
         </div>
       )}
