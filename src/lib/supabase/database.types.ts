@@ -7796,6 +7796,7 @@ export type Database = {
           erinnerung_gesendet: boolean | null
           erledigt_am: string | null
           erstellt_von_id: string | null
+          eskaliert_am: string | null
           faellig_am: string | null
           fall_id: string | null
           gate_task_id: string | null
@@ -7827,6 +7828,7 @@ export type Database = {
           erinnerung_gesendet?: boolean | null
           erledigt_am?: string | null
           erstellt_von_id?: string | null
+          eskaliert_am?: string | null
           faellig_am?: string | null
           fall_id?: string | null
           gate_task_id?: string | null
@@ -7858,6 +7860,7 @@ export type Database = {
           erinnerung_gesendet?: boolean | null
           erledigt_am?: string | null
           erstellt_von_id?: string | null
+          eskaliert_am?: string | null
           faellig_am?: string | null
           fall_id?: string | null
           gate_task_id?: string | null
