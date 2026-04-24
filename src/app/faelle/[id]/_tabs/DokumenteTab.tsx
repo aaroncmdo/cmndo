@@ -37,6 +37,9 @@ import type { AnforderbarerSlot } from '@/components/dokumente/AnforderungsModal
 // AAR-762 Phase 3: Liste offene Ad-hoc-Anforderungen
 import { AdHocAnforderungenListe } from '@/components/admin/fallakte/anforderung'
 import type { AdHocAnforderungRow } from '@/lib/dokumente/ad-hoc-anforderung'
+// AAR-761 Phase 3: Beleg-OCR-Review-Liste
+import { BelegReviewList } from '@/components/admin/fallakte/beleg-review'
+import type { BelegReviewItem } from '@/lib/beleg-review/actions'
 // AAR-326: KB-Zuordnungs-UI + QC-Modal + Drag&Drop
 import DokumenteUnzugeordnetBox from '@/components/dokumente/DokumenteUnzugeordnetBox'
 import DokumenteListeSortierbar, { type SortierbarPflicht } from '@/components/dokumente/DokumenteListeSortierbar'
@@ -111,6 +114,7 @@ type DokumenteTabProps = {
   anforderungenVonMir: AnforderungsItem[]
   rolleLabel: string
   adHocAnforderungen: AdHocAnforderungRow[]
+  belegeZumReview: BelegReviewItem[]
   unzugeordneteUploads: UnzugeordnetDoc[]
   zuPruefendeUploads: QcDoc[]
   uploadbareSlots: ZuordnungsSlot[]
@@ -130,6 +134,7 @@ export default function DokumenteTab({
   anforderungenVonMir,
   rolleLabel,
   adHocAnforderungen,
+  belegeZumReview,
   unzugeordneteUploads,
   zuPruefendeUploads,
   uploadbareSlots,
@@ -394,6 +399,9 @@ export default function DokumenteTab({
           </div>
         )}
       </div>
+
+      {/* AAR-761 Phase 3: OCR-Belege zum Review (Admin/KB) */}
+      <BelegReviewList items={belegeZumReview} />
 
       {/* AAR-327: Meine Anforderungen */}
       <AnforderungenListe
