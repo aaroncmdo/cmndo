@@ -160,7 +160,7 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
               {error && <p className="text-sm text-red-400 bg-red-50/50 border border-red-900 px-4 py-3 rounded-xl">{error}</p>}
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowDialog(false)} className="flex-1 bg-[#f8f9fb] hover:bg-claimondo-border text-claimondo-navy text-sm font-medium py-2.5 rounded-xl transition-colors">Abbrechen</button>
-                <button type="submit" disabled={loading} className="flex-1 bg-[#4573A2] hover:bg-[#4573A2] disabled:bg-zinc-700 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">{loading ? 'Erstelle...' : 'Erstellen'}</button>
+                <button type="submit" disabled={loading} className="flex-1 bg-[#4573A2] hover:bg-[#1E3A5F]  text-white text-sm font-medium py-2.5 rounded-xl transition-colors">{loading ? 'Erstelle...' : 'Erstellen'}</button>
               </div>
             </form>
           </div>

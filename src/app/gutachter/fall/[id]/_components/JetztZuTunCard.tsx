@@ -276,7 +276,7 @@ function TaskItem({ task, fallId }: { task: GutachterTask; fallId: string }) {
   }
 
   return (
-    <li className="flex items-start gap-3 p-3 rounded-xl bg-[#f8f9fb] hover:bg-[#f8f9fb] transition-colors">
+    <li className="flex items-start gap-3 p-3 rounded-xl bg-[#f8f9fb] hover:bg-claimondo-border transition-colors">
       <button
         type="button"
         onClick={handleDone}

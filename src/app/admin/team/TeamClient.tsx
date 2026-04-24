@@ -89,7 +89,7 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
 
       <div className="flex gap-2 mb-4">
         {['alle', 'dispatch', 'kundenbetreuer', 'admin', 'entwicklung'].map(k => (
-          <button key={k} onClick={() => setFilterKat(k)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${filterKat === k ? 'bg-zinc-700 text-claimondo-navy' : 'bg-[#f8f9fb]/50 text-claimondo-ondo hover:text-claimondo-navy'}`}>
+          <button key={k} onClick={() => setFilterKat(k)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${filterKat === k ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb]/50 text-claimondo-ondo hover:text-claimondo-navy'}`}>
             {k === 'alle' ? 'Alle' : KAT_LABELS[k] ?? k}
           </button>
         ))}
@@ -163,7 +163,7 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
               {error && <p className="text-sm text-red-400 bg-red-50/50 border border-red-900 px-4 py-3 rounded-xl">{error}</p>}
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowDialog(false)} className="flex-1 bg-[#f8f9fb] hover:bg-claimondo-border text-claimondo-navy text-sm font-medium py-2.5 rounded-xl transition-colors">Abbrechen</button>
-                <button type="submit" disabled={loading} className="flex-1 bg-[#4573A2] hover:bg-[#4573A2] disabled:bg-zinc-700 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">{loading ? 'Erstelle...' : 'Erstellen'}</button>
+                <button type="submit" disabled={loading} className="flex-1 bg-[#4573A2] hover:bg-[#1E3A5F]  text-white text-sm font-medium py-2.5 rounded-xl transition-colors">{loading ? 'Erstelle...' : 'Erstellen'}</button>
               </div>
             </form>
           </div>
