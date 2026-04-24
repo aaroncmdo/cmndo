@@ -103,7 +103,11 @@ export const PERMISSION_MATRIX: Record<UserRolle, Permission> = {
       stammdaten: 'read',
       abrechnung: 'none',
       dokumente: 'read',
-      chat: 'write',              // Darf Chat schreiben (Lead-Phase)
+      // Chat read-only in der Admin-Fallakte-Sicht (Dispatch ist nach
+      // Fall-Erstellung nicht mehr zuständig). Im Dispatch-Portal
+      // während der Lead-Phase läuft der Chat über eine andere
+      // Permission-Semantik (Lead != Fall).
+      chat: 'read',
       tasks: 'write',
       prozess: 'read',
     },

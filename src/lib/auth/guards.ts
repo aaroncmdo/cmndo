@@ -26,7 +26,6 @@ export type UserRolle =
   | 'admin'
   | 'dispatch'
   | 'kundenbetreuer'
-  | 'dispatch'
   | 'sachverstaendiger'
   | 'kanzlei'
   | 'kunde'
