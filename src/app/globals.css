@@ -121,7 +121,9 @@ html[lang="ar"] {
 
   /* AAR-460 F2: Claimondo-Brand-Palette als CSS-Variablen.
      Wird via @theme inline als Tailwind-Color-Utilities exponiert
-     (`bg-claimondo-navy`, `text-claimondo-ondo`, `border-claimondo-border`). */
+     (`bg-claimondo-navy`, `text-claimondo-ondo`, `border-claimondo-border`).
+     AAR-769: Diese Werte sind mit `src/lib/design-tokens.ts` synchron —
+     dort liegt die Source-of-Truth für alle Plattformen (Web + RN). */
   --claimondo-navy: #0D1B3E;
   --claimondo-ondo: #4573A2;
   --claimondo-shield: #1E3A5F;
