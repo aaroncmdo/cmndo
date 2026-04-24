@@ -33,6 +33,8 @@ type Fall = {
   ungelesene_updates?: number
   aktuelle_phase?: string | null
   abgeschlossen_am?: string | null
+  // AAR-770: Jüngste offene Mitteilung für Hover-Preview
+  mitteilung?: { titel: string; inhalt: string | null; prioritaet: string | null } | null
 }
 
 // BUG-05: Kanban-Columns nach faelle.status Enum
@@ -306,6 +308,30 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
           <div className="flex items-center gap-2">
             {fall.kunde_name && <p className={`text-xs font-medium truncate ${fall.ist_aktiv === false ? 'text-claimondo-ondo/70 line-through' : 'text-claimondo-navy'}`}>{fall.kunde_name}</p>}
             <FallCardBadges chatCount={fall.ungelesene_nachrichten ?? 0} updateCount={fall.ungelesene_updates ?? 0} />
+            {/* AAR-770: Mitteilungs-Pulse — kleiner Punkt wenn offene Mitteilung anliegt */}
+            {fall.mitteilung && (
+              <span
+                className="relative inline-flex w-2 h-2 rounded-full"
+                style={{
+                  backgroundColor:
+                    fall.mitteilung.prioritaet === 'dringend' ? '#dc2626'
+                    : fall.mitteilung.prioritaet === 'hoch' ? '#d97706'
+                    : '#4573A2',
+                }}
+                title={`Mitteilung: ${fall.mitteilung.titel}`}
+                aria-label="Offene Mitteilung"
+              >
+                <span
+                  className="absolute inset-0 rounded-full animate-ping opacity-60"
+                  style={{
+                    backgroundColor:
+                      fall.mitteilung.prioritaet === 'dringend' ? '#dc2626'
+                      : fall.mitteilung.prioritaet === 'hoch' ? '#d97706'
+                      : '#4573A2',
+                  }}
+                />
+              </span>
+            )}
           </div>
           <div className="flex flex-wrap gap-1 mt-1">
             {fall.kennzeichen && <span className="bg-[#f8f9fb] text-claimondo-ondo text-[9px] px-1 py-0.5 rounded">{fall.kennzeichen}</span>}
@@ -326,19 +352,51 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
           wird. Position wird bei Hover aus der Card-BoundingRect berechnet. */}
       {mounted && overlayPos && createPortal(
         <div
-          className="fixed z-[60] w-[260px] bg-white border border-claimondo-border rounded-lg shadow-lg p-3 pointer-events-none"
+          className="fixed z-[60] w-[280px] bg-white border border-claimondo-border rounded-lg shadow-lg p-3 pointer-events-none space-y-3"
           style={{ top: overlayPos.top, left: overlayPos.left }}
           aria-hidden="true"
         >
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo/70 mb-2">
-            Phasen-Verlauf
-          </p>
-          <PhasePipeline
-            fall={{ id: fall.id, aktuelle_phase: fall.aktuelle_phase ?? null }}
-            rolle="admin"
-            phases={pipelinePhases}
-            variant="compact"
-          />
+          {/* AAR-770: Aktuelle Mitteilung für diesen Fall (falls vorhanden) */}
+          {fall.mitteilung && (
+            <div
+              className="rounded-md p-2"
+              style={{
+                backgroundColor:
+                  fall.mitteilung.prioritaet === 'dringend' ? '#fef2f2'
+                  : fall.mitteilung.prioritaet === 'hoch' ? '#fffbeb'
+                  : '#f8f9fb',
+                borderLeft: `3px solid ${
+                  fall.mitteilung.prioritaet === 'dringend' ? '#dc2626'
+                  : fall.mitteilung.prioritaet === 'hoch' ? '#d97706'
+                  : '#4573A2'
+                }`,
+              }}
+            >
+              <p className="text-[9px] font-semibold uppercase tracking-wider text-claimondo-ondo/70 mb-0.5">
+                {fall.mitteilung.prioritaet === 'dringend' ? 'Dringend' : 'Mitteilung'}
+              </p>
+              <p className="text-xs font-semibold text-claimondo-navy leading-snug">
+                {fall.mitteilung.titel}
+              </p>
+              {fall.mitteilung.inhalt && (
+                <p className="text-[11px] text-claimondo-navy/80 mt-0.5 line-clamp-2">
+                  {fall.mitteilung.inhalt}
+                </p>
+              )}
+            </div>
+          )}
+
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo/70 mb-2">
+              Phasen-Verlauf
+            </p>
+            <PhasePipeline
+              fall={{ id: fall.id, aktuelle_phase: fall.aktuelle_phase ?? null }}
+              rolle="admin"
+              phases={pipelinePhases}
+              variant="compact"
+            />
+          </div>
         </div>,
         document.body,
       )}

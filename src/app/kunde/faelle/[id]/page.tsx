@@ -14,6 +14,8 @@ import { PflichtdokumenteBanner } from '@/components/kunde/PflichtdokumenteBanne
 import SaeuleMeinAnwalt from '@/components/kunde/SaeuleMeinAnwalt'
 // AAR-765: Richtige „Meine Kanzlei"-Card mit echten Kontaktdaten
 import { MeineKanzleiCard } from '@/components/kunde/kanzlei'
+// AAR-770: Mitteilungs-Banner ganz oben in der Fallakte
+import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
 import SaeuleMeinGeld from '@/components/kunde/SaeuleMeinGeld'
 import SaeuleMeinBetreuer from '@/components/kunde/SaeuleMeinBetreuer'
 // AAR-558 (C9): Auszahlungs- + Eskalations-Ergebnis-Card aus faelle_kunde_view
@@ -416,6 +418,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           </h1>
           {adresse && <p className="text-sm text-claimondo-ondo mt-0.5">{adresse}</p>}
         </div>
+
+        {/* AAR-770: Mitteilungs-Banner — ganz oben mit Quick-Action */}
+        <FallMitteilungenBanner fallId={fall.id as string} rolle="kunde" />
 
         {/* AAR-432: Jetzt-zu-tun Matrix — eine konsolidierte Aktions-Card */}
         <KundeJetztZuTunCard aktion={aktion} />

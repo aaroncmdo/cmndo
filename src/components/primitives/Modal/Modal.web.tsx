@@ -46,9 +46,9 @@ export function Modal({
         style={{
           position: 'absolute',
           inset: 0,
-          backgroundColor: 'rgba(13, 27, 62, 0.18)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
+          backgroundColor: 'rgba(13, 27, 62, 0.22)',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
         }}
       />
 

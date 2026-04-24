@@ -19,6 +19,8 @@ import { getVisibleFallSections } from '@/lib/fall/section-visibility'
 // AAR-568 (V2) / AAR-727: Pipeline-Daten baut FallPhasenPanel intern — der
 // FallHeader reicht nur fallId + aktuelle_phase + abgeschlossen_am durch.
 import { FallHeader } from './_components/FallHeader'
+// AAR-770: Mitteilungs-Banner ganz oben in der Fallakte (shared)
+import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
 import type { TeamMitglied } from './_components/FallakteDrawer'
 import { AktuellePhaseCard } from './_components/AktuellePhaseCard'
 import { JetztZuTunCard } from './_components/JetztZuTunCard'
@@ -286,6 +288,11 @@ export default function FallDetailClient(props: Props) {
         aktuellePhaseSnake={aktuellePhaseSnake}
         abgeschlossenAm={abgeschlossenAm}
       />
+
+      {/* AAR-770: Mitteilungs-Banner — direkt unter dem Header */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4">
+        <FallMitteilungenBanner fallId={fall.id as string} rolle="sachverstaendiger" />
+      </div>
 
       {/* AAR-757: Phase-gated Banner unter dem Header (vorher in VollClient) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
