@@ -16,7 +16,7 @@ import {
   LogOutIcon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
-import UpdatesNav from '@/components/updates/UpdatesNav'
+import UpdatesNav from '@/components/shared/updates'
 import TasksPill from '@/components/shared/TasksPill'
 
 type MaklerShellProps = {

@@ -11,7 +11,7 @@
 import { LogOutIcon } from 'lucide-react'
 import KanzleiNav from './_components/KanzleiNav'
 import TasksPill from '@/components/shared/TasksPill'
-import UpdatesNav from '@/components/updates/UpdatesNav'
+import UpdatesNav from '@/components/shared/updates'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 
 export default async function KanzleiLayout({

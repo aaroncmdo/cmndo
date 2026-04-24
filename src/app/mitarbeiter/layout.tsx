@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { LogOutIcon } from 'lucide-react'
 import MitarbeiterNav from './_components/MitarbeiterNav'
 import TasksPill from '@/components/shared/TasksPill'
-import UpdatesNav from '@/components/updates/UpdatesNav'
+import UpdatesNav from '@/components/shared/updates'
 import { roleToPath } from '@/lib/auth/role-redirect'
 
 export default async function MitarbeiterLayout({

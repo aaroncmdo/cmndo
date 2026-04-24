@@ -1,7 +1,7 @@
 import DispatchNav from './_components/DispatchNav'
 import RealtimeLeadAlert from './_components/RealtimeLeadAlert'
 import { PageContainer } from '@/components/PageContainer'
-import UpdatesNav from '@/components/updates/UpdatesNav'
+import UpdatesNav from '@/components/shared/updates'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 
 export default async function DispatchLayout({
