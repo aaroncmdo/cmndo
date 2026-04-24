@@ -77,7 +77,7 @@ export default async function MitarbeiterIsochronePage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-bold text-[#0D1B3E]">Gebiets-Übersicht</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-claimondo-ondo mt-1">
           Wähle einen deiner betreuten Fälle, um die grundsätzlich geeigneten SVs im Fahrzeit-Umkreis zu sehen.
           Reservierung + Zuweisung erfolgen im{' '}
           <Link href="/dispatch/isochrone" className="text-[#4573A2] hover:underline">

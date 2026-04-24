@@ -20,12 +20,12 @@ export default async function MitarbeiterFaelle() {
     <div className="space-y-4">
       <div>
         <h1 className="text-xl font-bold text-[#0D1B3E]">Meine Fälle</h1>
-        <p className="text-sm text-gray-500 mt-1">Alle Ihnen zugewiesenen Fälle, sortiert nach Erstellung.</p>
+        <p className="text-sm text-claimondo-ondo mt-1">Alle Ihnen zugewiesenen Fälle, sortiert nach Erstellung.</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-claimondo-border overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-xs uppercase text-gray-500">
+          <thead className="bg-[#f8f9fb] text-xs uppercase text-claimondo-ondo">
             <tr>
               <th className="text-left px-4 py-2">Fall</th>
               <th className="text-left px-4 py-2">Fahrzeug</th>
@@ -33,28 +33,28 @@ export default async function MitarbeiterFaelle() {
               <th className="text-left px-4 py-2">Erstellt</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-claimondo-border">
             {(faelle ?? []).map(f => (
-              <tr key={f.id} className="hover:bg-gray-50">
+              <tr key={f.id} className="hover:bg-[#f8f9fb]">
                 <td className="px-4 py-3">
                   <Link href={`/faelle/${f.id}`} className="text-[#4573A2] hover:underline font-medium">
                     {f.fall_nummer ?? f.id.slice(0, 8)}
                   </Link>
-                  {f.kennzeichen && <p className="text-xs text-gray-400">{f.kennzeichen}</p>}
+                  {f.kennzeichen && <p className="text-xs text-claimondo-ondo/70">{f.kennzeichen}</p>}
                 </td>
-                <td className="px-4 py-3 text-gray-700">
+                <td className="px-4 py-3 text-claimondo-navy">
                   {[f.fahrzeug_hersteller, f.fahrzeug_modell].filter(Boolean).join(' ') || '—'}
                 </td>
                 <td className="px-4 py-3">
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">{f.status}</span>
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo">{f.status}</span>
                 </td>
-                <td className="px-4 py-3 text-xs text-gray-400">
+                <td className="px-4 py-3 text-xs text-claimondo-ondo/70">
                   {new Date(f.created_at).toLocaleDateString('de-DE')}
                 </td>
               </tr>
             ))}
             {(!faelle || faelle.length === 0) && (
-              <tr><td colSpan={4} className="px-4 py-12 text-center text-gray-400 text-sm">Keine Fälle zugewiesen</td></tr>
+              <tr><td colSpan={4} className="px-4 py-12 text-center text-claimondo-ondo/70 text-sm">Keine Fälle zugewiesen</td></tr>
             )}
           </tbody>
         </table>

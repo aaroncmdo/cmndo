@@ -176,7 +176,7 @@ export default function TerminBuchungClient({
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[10px] uppercase tracking-wider text-gray-500">
+          <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
             Admin
           </label>
           <select
@@ -194,7 +194,7 @@ export default function TerminBuchungClient({
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[10px] uppercase tracking-wider text-gray-500">
+          <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
             Termin-Typ
           </label>
           <div className="grid grid-cols-2 gap-2">
@@ -204,7 +204,7 @@ export default function TerminBuchungClient({
               className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium border transition-colors ${
                 typ === 'video'
                   ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
-                  : 'bg-white text-gray-700 border-claimondo-border hover:border-gray-300'
+                  : 'bg-white text-claimondo-navy border-claimondo-border hover:border-claimondo-border'
               }`}
             >
               <VideoIcon className="w-3.5 h-3.5" />
@@ -216,7 +216,7 @@ export default function TerminBuchungClient({
               className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium border transition-colors ${
                 typ === 'vor_ort'
                   ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
-                  : 'bg-white text-gray-700 border-claimondo-border hover:border-gray-300'
+                  : 'bg-white text-claimondo-navy border-claimondo-border hover:border-claimondo-border'
               }`}
             >
               <MapPinIcon className="w-3.5 h-3.5" />
@@ -227,7 +227,7 @@ export default function TerminBuchungClient({
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <label className="text-[10px] uppercase tracking-wider text-gray-500">
+            <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
               Datum
             </label>
             <input
@@ -240,7 +240,7 @@ export default function TerminBuchungClient({
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-[10px] uppercase tracking-wider text-gray-500">
+            <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
               Uhrzeit
             </label>
             <input
@@ -255,7 +255,7 @@ export default function TerminBuchungClient({
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[10px] uppercase tracking-wider text-gray-500">
+          <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
             Dauer
           </label>
           <div className="flex gap-1.5 flex-wrap">
@@ -267,7 +267,7 @@ export default function TerminBuchungClient({
                 className={`px-2.5 py-1 rounded-md text-xs font-medium border ${
                   dauer === d
                     ? 'bg-claimondo-navy text-white border-claimondo-navy'
-                    : 'bg-white text-gray-700 border-claimondo-border'
+                    : 'bg-white text-claimondo-navy border-claimondo-border'
                 }`}
               >
                 {d} min
@@ -277,7 +277,7 @@ export default function TerminBuchungClient({
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[10px] uppercase tracking-wider text-gray-500">
+          <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
             Titel
           </label>
           <input
@@ -291,7 +291,7 @@ export default function TerminBuchungClient({
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[10px] uppercase tracking-wider text-gray-500">
+          <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
             Notiz (optional)
           </label>
           <textarea
@@ -328,7 +328,7 @@ export default function TerminBuchungClient({
         >
           {pending ? 'Bucht …' : 'Termin verbindlich buchen'}
         </button>
-        <p className="text-[10px] text-gray-500 italic">
+        <p className="text-[10px] text-claimondo-ondo italic">
           Der Admin erhält eine Benachrichtigung + Google-Kalender-Einladung.
           Ihr bekommt ebenfalls eine Kalender-Einladung per Email.
         </p>
@@ -341,7 +341,7 @@ export default function TerminBuchungClient({
           <h2 className="text-sm font-semibold text-claimondo-navy">Eure kommenden Termine</h2>
         </div>
         {eigeneTermine.length === 0 && (
-          <p className="text-xs text-gray-500 italic">
+          <p className="text-xs text-claimondo-ondo italic">
             Noch keine Termine gebucht.
           </p>
         )}
@@ -362,15 +362,15 @@ export default function TerminBuchungClient({
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-[11px] text-gray-500">
+                    <p className="text-[11px] text-claimondo-ondo">
                       {dateStr} · {timeStr}
                     </p>
                     <p className="text-sm font-semibold text-claimondo-navy truncate">
                       {t.titel}
                     </p>
-                    <p className="text-[11px] text-gray-600 mt-0.5">
+                    <p className="text-[11px] text-claimondo-ondo mt-0.5">
                       mit {t.admin_name}{' '}
-                      <span className="text-gray-400">
+                      <span className="text-claimondo-ondo/70">
                         · {t.typ === 'video' ? 'Video' : 'Vor Ort'}
                       </span>
                     </p>
@@ -378,7 +378,7 @@ export default function TerminBuchungClient({
                   <button
                     type="button"
                     onClick={() => handleCancel(t.id)}
-                    className="shrink-0 p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-700"
+                    className="shrink-0 p-1 rounded hover:bg-red-50 text-claimondo-ondo/70 hover:text-red-700"
                     aria-label="Absagen"
                     title="Termin absagen"
                   >
@@ -398,7 +398,7 @@ export default function TerminBuchungClient({
                   </a>
                 )}
                 {t.beschreibung && (
-                  <p className="mt-2 text-[11px] text-gray-500 italic line-clamp-2">
+                  <p className="mt-2 text-[11px] text-claimondo-ondo italic line-clamp-2">
                     {t.beschreibung}
                   </p>
                 )}

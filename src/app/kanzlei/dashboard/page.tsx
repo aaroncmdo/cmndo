@@ -83,11 +83,11 @@ export default async function KanzleiDashboardPage() {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-2xl font-semibold text-claimondo-navy">Mandate</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-claimondo-ondo mt-1">
             Alle Komplett-Pakete, bei denen Claimondo das Mandat an euch übergeben hat.
           </p>
         </div>
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-claimondo-ondo">
           {faelle?.length ?? 0} Mandat{(faelle?.length ?? 0) === 1 ? '' : 'e'}
         </span>
       </div>
@@ -104,7 +104,7 @@ export default async function KanzleiDashboardPage() {
           <p className="text-sm font-medium text-claimondo-navy">
             Aktuell liegt kein Komplett-Mandat vor.
           </p>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-claimondo-ondo mt-1">
             Sobald Claimondo ein Mandat an euch übergibt, erscheint es hier.
           </p>
         </div>
@@ -114,7 +114,7 @@ export default async function KanzleiDashboardPage() {
         <div className="rounded-xl border border-claimondo-border bg-white overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-claimondo-bg text-[10px] uppercase tracking-wider text-gray-500">
+              <thead className="bg-claimondo-bg text-[10px] uppercase tracking-wider text-claimondo-ondo">
                 <tr>
                   <th className="text-left px-4 py-3 font-semibold">Fall-Nr</th>
                   <th className="text-left px-4 py-3 font-semibold">Kunde</th>
@@ -145,11 +145,11 @@ export default async function KanzleiDashboardPage() {
                           {f.fall_nummer ?? f.id.slice(0, 8)}
                         </Link>
                       </td>
-                      <td className="px-4 py-3 text-gray-900">{kunde}</td>
-                      <td className="px-4 py-3 font-mono text-[12px] text-gray-700">
+                      <td className="px-4 py-3 text-claimondo-navy">{kunde}</td>
+                      <td className="px-4 py-3 font-mono text-[12px] text-claimondo-navy">
                         {f.kennzeichen ?? '—'}
                       </td>
-                      <td className="px-4 py-3 text-gray-700">{phaseLabel}</td>
+                      <td className="px-4 py-3 text-claimondo-navy">{phaseLabel}</td>
                       <td className="px-4 py-3">
                         {statusCfg ? (
                           <span
@@ -159,16 +159,16 @@ export default async function KanzleiDashboardPage() {
                             {statusCfg.label}
                           </span>
                         ) : (
-                          <span className="text-xs text-gray-400">{f.status ?? '—'}</span>
+                          <span className="text-xs text-claimondo-ondo/70">{f.status ?? '—'}</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 font-mono text-[12px] text-gray-700">
+                      <td className="px-4 py-3 font-mono text-[12px] text-claimondo-navy">
                         {f.mandatsnummer ?? '—'}
                       </td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">
+                      <td className="px-4 py-3 text-claimondo-ondo text-xs">
                         {formatDate((f.updated_at as string | null) ?? (f.created_at as string | null))}
                       </td>
-                      <td className="px-4 py-3 text-gray-400">
+                      <td className="px-4 py-3 text-claimondo-ondo/70">
                         <Link href={`/kanzlei/fall/${f.id}`} aria-label="Öffnen">
                           <ArrowRightIcon className="w-4 h-4" />
                         </Link>

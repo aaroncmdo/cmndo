@@ -64,7 +64,7 @@ export default async function KanzleiKanbanPage() {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-semibold text-[#0D1B3E]">Pipeline</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-claimondo-ondo mt-1">
           Alle Komplett-Mandate nach den 10 Fall-Phasen. Read-only — Karten
           verschieben sich automatisch, sobald Claimondo den Fall-Status aktualisiert.
         </p>
