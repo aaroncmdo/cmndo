@@ -137,10 +137,12 @@ export default function FallakteShell({
           </div>
         </aside>
 
-        {/* Haupt-Column: Identity-Header + Action-Bar + Tabs + Content */}
+        {/* Haupt-Column: Konsolidierter Header + Tabs + Content */}
         <main className="flex-1 overflow-y-auto min-w-0">
-          {/* AAR-746 (Phase B): Shared Identity-Header — Fallnummer · Kunde ·
-              Subphase. Vorher hatte der Admin keinen expliziten Fall-Header. */}
+          {/* AAR-758: Ein gemeinsamer Header-Block statt vorher zwei (IdentityHeader + ActionBar).
+              FallIdentityHeader zeigt Fallnummer · Kunde · Ort, die ActionBar-
+              Buttons landen im actions-Slot rechts. Phase-Label weggelassen —
+              steht bereits in der Aside-Phasen-Pipeline, keine Dopplung mehr. */}
           <FallIdentityHeader
             rolle="admin"
             fallNummer={fall.fall_nummer ?? fall.id.slice(0, 8)}
@@ -150,12 +152,9 @@ export default function FallakteShell({
                 : null
             }
             ort={(fall.schadens_ort as string | null) ?? null}
-            subphaseLabel={`Phase ${subphase.phase} · ${subphase.label}`}
-          />
-          {/* AAR-567 (V1): Action-Bar ersetzt den Phase-Text-Badge. Status-
-              Override, Kanzlei-Paket, Phase vorrücken und Trigger-Felder-
-              Diagnostik. Phase-Darstellung ist in der linken Spalte. */}
-          <FallActionBar result={subphase} fallId={fall.id} />
+          >
+            <FallActionBar result={subphase} fallId={fall.id} compact />
+          </FallIdentityHeader>
           {/* Tab-Bar — AAR-668: visuell verstärkt, aktiver Tab mit Hintergrund */}
           <nav className="border-b border-gray-200 bg-white">
             <div className="flex items-center justify-between gap-3 px-4">
