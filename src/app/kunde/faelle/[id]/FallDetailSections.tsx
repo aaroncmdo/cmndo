@@ -8,6 +8,9 @@ import { waehleGegenvorschlagSlot } from './actions'
 import Link from 'next/link'
 // AAR-727 Kandidat 1: Shared Download-Liste — Kunde zeigt flat list.
 import DokumenteDownloadListe, { type DokumentItem } from '@/components/shared/DokumenteDownloadListe'
+// AAR-746 (Phase B): Shared Identity-Header — löst die "Aktueller Status"-
+// Section ab. KB + Termin bleiben in einer separaten Detail-Section.
+import { FallIdentityHeader } from '@/components/shared/fall-header'
 
 type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean | null; anhang_url: string | null; created_at: string }
 type Dokument = { id: string; typ: string; datei_url: string; datei_name: string | null; created_at: string }
@@ -76,12 +79,24 @@ export default function FallDetailSections({
       {/* Tab-Inhalt */}
       {activeTab === 'uebersicht' && (
         <div className="space-y-5">
-          <Section title="Aktueller Status">
-            <InfoRow label="Fallnummer" value={(fall.fall_nummer as string) ?? (fall.id as string)?.slice(0, 8)} />
-            <InfoRow label="Status" value={(fall.status as string) ?? '—'} />
-            {kbName && <InfoRow label="Ihr Ansprechpartner" value={kbName} />}
-            {!!fall.sv_termin && <InfoRow label="Nächster Termin" value={fmtDateTime(fall.sv_termin as string)} />}
-          </Section>
+          {/* AAR-746: Shared Identity-Header statt handgerollter Aktueller-
+              Status-Section. KB + nächster Termin wandern in die Detail-
+              Section darunter. */}
+          <div className="-mx-4 sm:-mx-0 rounded-none sm:rounded-xl overflow-hidden sm:border sm:border-claimondo-border">
+            <FallIdentityHeader
+              rolle="kunde"
+              fallNummer={(fall.fall_nummer as string) ?? (fall.id as string)?.slice(0, 8)}
+              subphaseLabel={(fall.status as string) ?? null}
+              className="!border-b-0"
+            />
+          </div>
+
+          {(kbName || !!fall.sv_termin) && (
+            <Section title="Kontakt & Termin">
+              {kbName && <InfoRow label="Ihr Ansprechpartner" value={kbName} />}
+              {!!fall.sv_termin && <InfoRow label="Nächster Termin" value={fmtDateTime(fall.sv_termin as string)} />}
+            </Section>
+          )}
 
           <Section title="Fahrzeug">
             {!!fall.kennzeichen && <InfoRow label="Kennzeichen" value={fall.kennzeichen as string} />}

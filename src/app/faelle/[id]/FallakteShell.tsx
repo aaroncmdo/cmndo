@@ -26,6 +26,8 @@ import { FallPhasenPanel } from '@/components/shared/fall-phases'
 import type { Rolle as PhasenRolle } from '@/components/shared/fall-phases'
 import { FallActionBar } from '@/components/admin/fallakte/FallActionBar'
 import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
+// AAR-746 (Phase B): Shared Identity-Header — neu auch im Admin-Portal.
+import { FallIdentityHeader } from '@/components/shared/fall-header'
 
 // Mapping FallakteRolle → shared PhasenRolle.
 // Admin-Route sieht im Normalfall nur admin + kundenbetreuer; dispatch und
@@ -135,8 +137,21 @@ export default function FallakteShell({
           </div>
         </aside>
 
-        {/* Haupt-Column: Action-Bar + Tabs + Content */}
+        {/* Haupt-Column: Identity-Header + Action-Bar + Tabs + Content */}
         <main className="flex-1 overflow-y-auto min-w-0">
+          {/* AAR-746 (Phase B): Shared Identity-Header — Fallnummer · Kunde ·
+              Subphase. Vorher hatte der Admin keinen expliziten Fall-Header. */}
+          <FallIdentityHeader
+            rolle="admin"
+            fallNummer={fall.fall_nummer ?? fall.id.slice(0, 8)}
+            kundenName={
+              lead
+                ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || null
+                : null
+            }
+            ort={(fall.schadens_ort as string | null) ?? null}
+            subphaseLabel={`Phase ${subphase.phase} · ${subphase.label}`}
+          />
           {/* AAR-567 (V1): Action-Bar ersetzt den Phase-Text-Badge. Status-
               Override, Kanzlei-Paket, Phase vorrücken und Trigger-Felder-
               Diagnostik. Phase-Darstellung ist in der linken Spalte. */}
