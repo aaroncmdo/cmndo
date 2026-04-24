@@ -55,7 +55,7 @@ export default function InlineEditField({
   const borderCls = !editable
     ? 'border-transparent'
     : status === 'saving'
-      ? 'border-blue-300'
+      ? 'border-claimondo-ondo'
       : status === 'saved'
         ? 'border-green-300'
         : status === 'error'

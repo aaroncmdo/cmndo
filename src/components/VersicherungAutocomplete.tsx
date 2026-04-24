@@ -142,7 +142,7 @@ export default function VersicherungAutocomplete({
           placeholder={placeholder}
           className={`text-sm font-medium bg-transparent border-b w-full py-0.5 outline-none transition-colors ${
             status === 'saving'
-              ? 'border-blue-300'
+              ? 'border-claimondo-ondo'
               : status === 'saved'
                 ? 'border-green-300'
                 : status === 'error'

@@ -112,7 +112,7 @@ export function KonfrontationsTerminCard({
           </p>
 
           {terminVorschlaege && terminVorschlaege.length > 0 && (
-            <div className="rounded-lg bg-white border border-blue-100 px-3 py-2 space-y-1">
+            <div className="rounded-lg bg-white border border-claimondo-border px-3 py-2 space-y-1">
               <p className="text-[11px] text-claimondo-ondo font-medium">Kunden-Vorschläge:</p>
               <ul className="text-xs text-claimondo-navy space-y-0.5">
                 {terminVorschlaege.map((s, i) => (
@@ -144,7 +144,7 @@ export function KonfrontationsTerminCard({
               </button>
             </div>
           ) : (
-            <div className="space-y-2 rounded-lg bg-white border border-blue-200 p-3">
+            <div className="space-y-2 rounded-lg bg-white border border-claimondo-border p-3">
               <label className="text-xs font-medium text-claimondo-navy">
                 Grund für die Ablehnung{' '}
                 <span className="text-red-600">*</span>
