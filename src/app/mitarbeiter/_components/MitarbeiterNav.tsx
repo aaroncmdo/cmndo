@@ -30,7 +30,7 @@ export default function MitarbeiterNav({ unreadNachrichten }: { unreadNachrichte
   const isActive = (item: NavItem) => item.exact ? pathname === item.href : pathname?.startsWith(item.href)
 
   return (
-    <nav className="hidden md:flex flex-col w-56 bg-white border-r border-gray-200 min-h-[calc(100vh-60px)] p-3 space-y-1">
+    <nav className="hidden md:flex flex-col w-56 bg-white border-r border-claimondo-border min-h-[calc(100vh-60px)] p-3 space-y-1">
       {ITEMS.map((item) => {
         const Icon = item.icon
         const active = isActive(item)
@@ -40,7 +40,7 @@ export default function MitarbeiterNav({ unreadNachrichten }: { unreadNachrichte
             key={item.href}
             href={item.href}
             className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-500 ${
-              active ? 'bg-[#0D1B3E] text-white' : 'text-gray-600 hover:bg-gray-100'
+              active ? 'bg-[#0D1B3E] text-white' : 'text-claimondo-ondo hover:bg-[#f8f9fb]'
             }`}
           >
             <Icon className="w-4 h-4 flex-shrink-0" />

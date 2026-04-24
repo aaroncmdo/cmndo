@@ -83,7 +83,7 @@ export default function KanbanBoardClient({ karten }: { karten: KanbanKarte[] })
                 style={{ backgroundColor: PHASE_ACCENT[s.nr] }}
               >
                 <div className="min-w-0">
-                  <p className="text-[10px] uppercase tracking-wider text-gray-500 font-medium">
+                  <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo font-medium">
                     Phase {s.nr}
                   </p>
                   <p className="text-sm font-semibold text-claimondo-navy truncate">
@@ -96,7 +96,7 @@ export default function KanbanBoardClient({ karten }: { karten: KanbanKarte[] })
               </div>
               <div className="p-2 space-y-2 flex-1 min-h-[120px]">
                 {s.karten.length === 0 && (
-                  <p className="text-[11px] text-gray-400 text-center py-4 italic">
+                  <p className="text-[11px] text-claimondo-ondo/70 text-center py-4 italic">
                     Keine Mandate in dieser Phase
                   </p>
                 )}
@@ -154,7 +154,7 @@ function KanbanCard({
               e.stopPropagation()
               setMenuOpen((o) => !o)
             }}
-            className="p-1 -m-1 rounded hover:bg-gray-100 text-gray-400 hover:text-claimondo-navy"
+            className="p-1 -m-1 rounded hover:bg-[#f8f9fb] text-claimondo-ondo/70 hover:text-claimondo-navy"
             aria-label="Aktionen"
           >
             <MoreVerticalIcon className="w-4 h-4" />
@@ -192,16 +192,16 @@ function KanbanCard({
       </div>
       <div className="mt-2 flex items-center gap-2 flex-wrap text-[11px]">
         {karte.kennzeichen && (
-          <span className="font-mono text-gray-700 bg-claimondo-bg px-1.5 py-0.5 rounded">
+          <span className="font-mono text-claimondo-navy bg-claimondo-bg px-1.5 py-0.5 rounded">
             {karte.kennzeichen}
           </span>
         )}
         {karte.mandatsnummer && (
-          <span className="font-mono text-gray-500" title="Mandat-Nr">
+          <span className="font-mono text-claimondo-ondo" title="Mandat-Nr">
             {karte.mandatsnummer}
           </span>
         )}
-        <span className="text-gray-400 ml-auto">
+        <span className="text-claimondo-ondo/70 ml-auto">
           {formatDate(karte.updated_at)}
         </span>
       </div>

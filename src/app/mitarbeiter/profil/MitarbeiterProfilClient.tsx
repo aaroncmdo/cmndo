@@ -62,59 +62,59 @@ export default function MitarbeiterProfilClient({
         icon={UserIcon}
       />
 
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-5">
+      <div className="bg-white rounded-2xl border border-claimondo-border p-6 space-y-5">
         {/* Avatar-Upload */}
-        <div className="flex items-center gap-4 pb-4 border-b border-gray-200">
+        <div className="flex items-center gap-4 pb-4 border-b border-claimondo-border">
           <AvatarUpload currentUrl={avatarUrl} initials={initials} size="lg" />
           <div>
-            <p className="text-gray-900 font-semibold text-lg">{fullName}</p>
-            <p className="text-gray-500 text-sm">{ROLLEN_LABEL[rolle] ?? rolle}</p>
-            <p className="text-gray-400 text-xs mt-1">{email}</p>
+            <p className="text-claimondo-navy font-semibold text-lg">{fullName}</p>
+            <p className="text-claimondo-ondo text-sm">{ROLLEN_LABEL[rolle] ?? rolle}</p>
+            <p className="text-claimondo-ondo/70 text-xs mt-1">{email}</p>
           </div>
         </div>
 
         {/* Stammdaten (read-only — Änderungen über Support) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
           <div>
-            <span className="text-gray-500 text-xs">Vorname</span>
-            <p className="text-gray-900">{vorname || '—'}</p>
+            <span className="text-claimondo-ondo text-xs">Vorname</span>
+            <p className="text-claimondo-navy">{vorname || '—'}</p>
           </div>
           <div>
-            <span className="text-gray-500 text-xs">Nachname</span>
-            <p className="text-gray-900">{nachname || '—'}</p>
+            <span className="text-claimondo-ondo text-xs">Nachname</span>
+            <p className="text-claimondo-navy">{nachname || '—'}</p>
           </div>
           <div>
-            <span className="text-gray-500 text-xs">Telefon</span>
-            <p className="text-gray-900">{telefon ?? '—'}</p>
+            <span className="text-claimondo-ondo text-xs">Telefon</span>
+            <p className="text-claimondo-navy">{telefon ?? '—'}</p>
           </div>
         </div>
 
-        <div className="pt-4 border-t border-gray-200 space-y-3">
-          <p className="text-xs uppercase tracking-wide text-gray-400">Öffentliche Anzeige (Kunden-Ansicht)</p>
+        <div className="pt-4 border-t border-claimondo-border space-y-3">
+          <p className="text-xs uppercase tracking-wide text-claimondo-ondo/70">Öffentliche Anzeige (Kunden-Ansicht)</p>
 
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Anzeigename</label>
+            <label className="block text-xs text-claimondo-ondo mb-1">Anzeigename</label>
             <input
               type="text"
               value={form.anzeigename}
               onChange={e => setForm({ ...form, anzeigename: e.target.value })}
               placeholder={`z.B. „${vorname} M." — Fallback: ${fullName}`}
               maxLength={80}
-              className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+              className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
             />
           </div>
 
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Profiltext</label>
+            <label className="block text-xs text-claimondo-ondo mb-1">Profiltext</label>
             <textarea
               value={form.profilbeschreibung}
               onChange={e => setForm({ ...form, profilbeschreibung: e.target.value })}
               placeholder="z.B. Ihr persönlicher Kundenbetreuer"
               rows={2}
               maxLength={200}
-              className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#4573A2] resize-none"
+              className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#4573A2] resize-none"
             />
-            <p className="text-[10px] text-gray-400 mt-1">Max. 200 Zeichen. Sichtbar im Kunden-Portal in „Mein Betreuer".</p>
+            <p className="text-[10px] text-claimondo-ondo/70 mt-1">Max. 200 Zeichen. Sichtbar im Kunden-Portal in „Mein Betreuer".</p>
           </div>
 
           <button
