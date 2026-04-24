@@ -12,6 +12,8 @@ import BankdatenBanner from '@/components/kunde/BankdatenBanner'
 import { PflichtdokumenteBanner } from '@/components/kunde/PflichtdokumenteBanner'
 // AAR-Banner-Doppelung: DokumenteSection-Import entfernt; PflichtdokumenteBanner ist Single Source.
 import SaeuleMeinAnwalt from '@/components/kunde/SaeuleMeinAnwalt'
+// AAR-765: Richtige „Meine Kanzlei"-Card mit echten Kontaktdaten
+import { MeineKanzleiCard } from '@/components/kunde/kanzlei'
 import SaeuleMeinGeld from '@/components/kunde/SaeuleMeinGeld'
 import SaeuleMeinBetreuer from '@/components/kunde/SaeuleMeinBetreuer'
 // AAR-558 (C9): Auszahlungs- + Eskalations-Ergebnis-Card aus faelle_kunde_view
@@ -54,6 +56,24 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         if (lead?.email !== user.email) notFound()
       } else {
         notFound()
+      }
+    }
+
+    // AAR-765: Kanzlei-Daten laden (Name, Adresse, Email aus kanzleien-Tabelle)
+    //          wenn dem Fall eine Kanzlei zugeordnet ist.
+    let kanzleiRow: { name: string | null; email: string | null; adresse: string | null } | null = null
+    if (fall.kanzlei_id) {
+      const { data: k } = await admin
+        .from('kanzleien')
+        .select('name, email, adresse')
+        .eq('id', fall.kanzlei_id as string)
+        .maybeSingle()
+      if (k) {
+        kanzleiRow = {
+          name: (k.name as string | null) ?? null,
+          email: (k.email as string | null) ?? null,
+          adresse: (k.adresse as string | null) ?? null,
+        }
       }
     }
 
@@ -518,6 +538,23 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             </p>
           </div>
         )}
+
+        {/* AAR-765: „Meine Kanzlei" — datengetriebene Kontakt-Card mit
+            Ansprechpartner, Telefon, Mail, Adresse. Zeigt sich nur wenn
+            dem Fall eine Kanzlei zugeordnet ist. */}
+        <MeineKanzleiCard
+          kanzlei={kanzleiRow}
+          ansprechpartner={{
+            name: (fall.kanzlei_ansprechpartner_name as string | null) ?? null,
+            position: (fall.kanzlei_ansprechpartner_position as string | null) ?? null,
+            email: (fall.kanzlei_ansprechpartner_email as string | null) ?? null,
+            telefon: (fall.kanzlei_ansprechpartner_telefon as string | null) ?? null,
+          }}
+          vollmachtSigniertAm={
+            (fall as Record<string, unknown>).vollmacht_signiert_am as string | null
+          }
+          uebergebenAm={(fall.kanzlei_uebergeben_am as string | null) ?? null}
+        />
 
         {/* ═══ 5-Säulen Layout (KFZ-206) ═══ */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
