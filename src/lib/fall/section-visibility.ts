@@ -23,7 +23,11 @@ export type FallSectionKey =
   | 'klage'
   | 'auszahlung'
 
-export type FallVisibilityRolle = 'admin' | 'sv' | 'kunde'
+// AAR-750: Makler sieht über Consent (makler_fall_consent) eine begrenzte
+// Auswahl an Sections — Auszahlung für die Provision-Tracking, VS-Reaktion
+// als Kontext-Info zum Kunde. Interne Prozessschritte (Kanzlei, AS, Rüge,
+// Stellungnahme, Nachbesichtigung, Klage) bleiben vorbehalten.
+export type FallVisibilityRolle = 'admin' | 'sv' | 'kunde' | 'makler'
 
 /**
  * Subphase-Input — minimiert auf das was die Visibility braucht, damit
@@ -70,6 +74,14 @@ const ROLLE_SECTION_WHITELIST: Record<FallVisibilityRolle, ReadonlySet<FallSecti
     'vs_reaktion',
     'nachbesichtigung',
     'klage',
+    'auszahlung',
+  ]),
+  // AAR-750: Makler-Portal ist noch nicht live, aber die Whitelist wird
+  // schon hier vorgehalten — sobald das Portal gebaut wird, konsumiert
+  // es diese Map direkt. Minimal-Set: Auszahlung für Provisions-Tracking
+  // + VS-Reaktion als Kontext, keine internen Prozessschritte.
+  makler: new Set<FallSectionKey>([
+    'vs_reaktion',
     'auszahlung',
   ]),
 }
