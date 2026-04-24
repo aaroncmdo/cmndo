@@ -463,7 +463,7 @@ export async function POST(req: NextRequest) {
           '2': 'Danke! Ihr Fahrzeugschein ist angekommen — wir lesen die Daten aus und der Dispatcher meldet sich.',
         }).catch(() => {})
 
-        // Toast-Notification an Dispatcher (leadbearbeiter)
+        // Toast-Notification an Dispatcher (dispatch)
         if (leadRow?.zugewiesen_an) {
           try {
             const { createNotification } = await import('@/lib/notifications')

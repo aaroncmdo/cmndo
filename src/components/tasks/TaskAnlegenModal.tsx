@@ -13,7 +13,7 @@ import {
 } from '@/lib/tasks/create-adhoc'
 import { ladeEntityOptions, type EntityOption } from '@/lib/tasks/entity-loader'
 
-// AAR-402: „Leadbearbeiter" (Phase-1-intern) + „Sachverständiger" (der
+// AAR-402: „Dispatcher" (Phase-1-intern) + „Sachverständiger" (der
 // Ersteller selbst) wurden aus der Empfänger-Auswahl entfernt — sie tauchten
 // im Fall-Kontext nie als sinnvolle Adressaten auf. Der Typ selbst bleibt
 // bestehen, damit Altdaten mit diesen Werten weiter lesbar sind.

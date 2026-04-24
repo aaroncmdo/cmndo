@@ -31,7 +31,7 @@ function autoRouteUrl(
       if (rolle === 'sachverstaendiger') return `/gutachter/fall/${kontextId}`
       if (rolle === 'kunde') return `/kunde/faelle/${kontextId}`
       if (rolle === 'makler') return `/makler/akten/${kontextId}`
-      // admin / kundenbetreuer / leadbearbeiter / kanzlei → geteilte Fallakte
+      // admin / kundenbetreuer / dispatch / kanzlei → geteilte Fallakte
       return `/faelle/${kontextId}`
     case 'lead':
       if (rolle === 'dispatch') return `/dispatch/leads/${kontextId}`
@@ -53,7 +53,7 @@ function autoRouteUrl(
       // Für alle Portale mit Nachrichten-Inbox.
       if (rolle === 'sachverstaendiger') return '/gutachter/posteingang'
       if (rolle === 'kunde') return '/kunde/chat'
-      if (rolle === 'kundenbetreuer' || rolle === 'leadbearbeiter') return '/mitarbeiter/nachrichten'
+      if (rolle === 'kundenbetreuer' || rolle === 'dispatch') return '/mitarbeiter/nachrichten'
       if (rolle === 'admin') return '/admin/nachrichten'
       return null
     default:

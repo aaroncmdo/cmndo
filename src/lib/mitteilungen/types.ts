@@ -3,14 +3,14 @@
 export type MitteilungKategorie = 'update' | 'task' | 'nachricht' | 'anruf'
 export type MitteilungPrioritaet = 'normal' | 'hoch' | 'dringend'
 export type KontextTyp = 'fall' | 'lead' | 'auftrag' | 'termin' | 'abrechnung' | 'nachricht'
-// AAR-720: makler + leadbearbeiter ergänzt — beide haben user_role-Enum-
+// AAR-720: makler + dispatch ergänzt — beide haben user_role-Enum-
 // Einträge und jeweils eigene UI/Portal-Routen. Vorher konnten Mitteilungen
 // nicht an Makler-User geroutet werden, obwohl /makler/* existiert.
 export type EmpfaengerRolle =
   | 'admin'
   | 'dispatch'
   | 'kundenbetreuer'
-  | 'leadbearbeiter'
+  | 'dispatch'
   | 'sachverstaendiger'
   | 'kanzlei'
   | 'kunde'

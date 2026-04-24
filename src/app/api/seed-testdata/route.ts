@@ -122,7 +122,7 @@ export async function POST() {
     // ═══════════════════════════════════════════════════════════════════
     const teamUsers = [
       { email: 'aaron@claimondo.de', vorname: 'Aaron', nachname: 'Sprafke', rolle: 'admin' as const },
-      { email: 'lisa@claimondo.de', vorname: 'Lisa', nachname: 'Mueller', rolle: 'leadbearbeiter' as const },
+      { email: 'lisa@claimondo.de', vorname: 'Lisa', nachname: 'Mueller', rolle: 'dispatch' as const },
       { email: 'max@claimondo.de', vorname: 'Max', nachname: 'Schmidt', rolle: 'kundenbetreuer' as const },
       { email: 'sarah@claimondo.de', vorname: 'Sarah', nachname: 'Weber', rolle: 'kundenbetreuer' as const },
     ]

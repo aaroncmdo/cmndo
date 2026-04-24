@@ -100,7 +100,7 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
     // KFZ-154: Spezifikation + Schadenart fuer den Dispatcher-Match
     spezifikation: data.spezifikation || null,
     schadens_art: data.schadens_art || null,
-    leadbearbeiter_id: user.id,
+    dispatch_id: user.id,
     konvertiert_am: new Date().toISOString(),
     konvertiert_von_lead: lead.id,
   }).select('id').single()

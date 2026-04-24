@@ -18,7 +18,7 @@ export default async function LeaderboardPage() {
     { data: faelleVormonat },
     { data: faelleAktiv },
   ] = await Promise.all([
-    supabase.from('profiles').select('id, vorname, nachname, email').or('kategorie.eq.dispatch,rolle.eq.leadbearbeiter').eq('aktiv', true),
+    supabase.from('profiles').select('id, vorname, nachname, email').or('kategorie.eq.dispatch,rolle.eq.dispatch').eq('aktiv', true),
     supabase.from('profiles').select('id, vorname, nachname, email, kapazitaet_max').or('kategorie.eq.kundenbetreuer,rolle.eq.kundenbetreuer').eq('aktiv', true),
     supabase.from('leads').select('zugewiesen_an, status').gte('created_at', monatStr),
     supabase.from('leads').select('zugewiesen_an, status').gte('created_at', vormonatStr).lt('created_at', vormonatEnd),

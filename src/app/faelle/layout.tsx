@@ -4,7 +4,7 @@
 //   - admin           → volle Admin-Shell (AdminNav + NotificationBell + Spotlight)
 //   - kundenbetreuer  → Mitarbeiter-Shell (MitarbeiterNav + reduzierte Header)
 //   - kanzlei         → Kanzlei-Shell (KanzleiNav, read-only) — PR 2b
-//   - leadbearbeiter  → Mitarbeiter-Shell
+//   - dispatch  → Mitarbeiter-Shell
 //
 // AAR-kanzlei-portal (PR 2b): Kanzlei bekommt eigene Shell mit KanzleiNav,
 // damit sie nicht in der Admin-UI landen. Read-only ist über
@@ -41,8 +41,8 @@ export default async function FaelleLayout({
 
   // AAR-718: Rollen die hier nichts zu suchen haben — per zentrale
   // roleToPath-Funktion in ihr eigenes Portal. Vorher hardcoded-Switch.
-  // Admin/Kanzlei/KB/Leadbearbeiter dürfen drin bleiben.
-  if (!rolle || !['admin', 'kanzlei', 'kundenbetreuer', 'leadbearbeiter'].includes(rolle)) {
+  // Admin/Kanzlei/KB/Dispatcher dürfen drin bleiben.
+  if (!rolle || !['admin', 'kanzlei', 'kundenbetreuer', 'dispatch'].includes(rolle)) {
     redirect(rolle ? roleToPath(rolle) : '/login')
   }
 
@@ -92,8 +92,8 @@ export default async function FaelleLayout({
     )
   }
 
-  // KB / Leadbearbeiter → Mitarbeiter-Shell
-  if (rolle === 'kundenbetreuer' || rolle === 'leadbearbeiter') {
+  // KB / Dispatcher → Mitarbeiter-Shell
+  if (rolle === 'kundenbetreuer' || rolle === 'dispatch') {
     let unread = 0
     try {
       const { count } = await supabase

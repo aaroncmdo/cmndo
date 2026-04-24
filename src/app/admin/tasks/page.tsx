@@ -29,7 +29,7 @@ export default async function TasksPage() {
         .from('profiles')
         .select('id, vorname, nachname, rolle')
         .not('aktiv', 'is', false)
-        .in('rolle', ['admin', 'kundenbetreuer', 'dispatch', 'leadbearbeiter', 'kanzlei']),
+        .in('rolle', ['admin', 'kundenbetreuer', 'dispatch', 'kanzlei']),
     ])
 
   const fallMap = Object.fromEntries(
