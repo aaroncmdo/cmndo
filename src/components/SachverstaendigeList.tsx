@@ -162,7 +162,7 @@ export default function SachverstaendigeList({
                 <tr key={sv.id} className="hover:bg-[#f0f4f8] transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <KundeAvatar name={sv.name} size={28} colorCls="bg-claimondo-ondo/10 text-claimondo-ondo" />
+                      <KundeAvatar name={sv.name} size={28} tone="ondo-subtle" />
                       <div>
                         <p className="text-sm font-medium text-gray-900">{sv.name}</p>
                         {sv.email && <p className="text-[10px] text-gray-400">{sv.email}</p>}
