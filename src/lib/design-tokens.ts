@@ -127,9 +127,11 @@ export const typo = {
  */
 export const glass = {
   light: {
-    bg: 'rgba(255, 255, 255, 0.72)',
-    border: 'rgba(255, 255, 255, 0.4)',
-    blur: 20,
+    // AAR-727 Feedback: Pop-outs sollen weniger verschwommen wirken, damit
+    // der Kontext darunter erkennbar bleibt. Blur 20 → 8.
+    bg: 'rgba(255, 255, 255, 0.85)',
+    border: 'rgba(255, 255, 255, 0.5)',
+    blur: 8,
   },
   dark: {
     bg: '#0D1B3E',

@@ -63,6 +63,31 @@ export default async function AdminFaellePage() {
       : Promise.resolve(emptyRes),
   ])
 
+  // AAR-770: Pro Fall die jüngste offene Mitteilung des aktuellen Users laden
+  // — wird im Kanban-Hover angezeigt damit der KB sofort sieht worum es geht.
+  let mitteilungMap: Record<string, { titel: string; inhalt: string | null; prioritaet: string | null }> = {}
+  if (fallIds.length > 0 && user) {
+    const { data: mitteilungen } = await admin
+      .from('mitteilungen')
+      .select('kontext_id, titel, inhalt, prioritaet, created_at')
+      .eq('empfaenger_id', user.id)
+      .eq('kontext_typ', 'fall')
+      .eq('gelesen', false)
+      .in('kontext_id', fallIds)
+      .order('created_at', { ascending: false })
+    for (const m of mitteilungen ?? []) {
+      const fid = m.kontext_id as string
+      // Erste = jüngste, dank order desc
+      if (!mitteilungMap[fid]) {
+        mitteilungMap[fid] = {
+          titel: m.titel as string,
+          inhalt: (m.inhalt as string | null) ?? null,
+          prioritaet: (m.prioritaet as string | null) ?? null,
+        }
+      }
+    }
+  }
+
   const leadMap = Object.fromEntries((leads ?? []).map(l => [l.id, `${l.vorname ?? ''} ${l.nachname ?? ''}`.trim() || null]))
   const kbMap = Object.fromEntries((kbProfiles ?? []).map(p => [p.id, `${p.vorname ?? ''} ${p.nachname ?? ''}`.trim() || null]))
   const svMap = Object.fromEntries((svs ?? []).map(sv => {
@@ -111,6 +136,8 @@ export default async function AdminFaellePage() {
     sv_name: f.sv_id ? (svMap[f.sv_id] ?? null) : null,
     ungelesene_nachrichten: unreadMap[f.id] ?? 0,
     ungelesene_updates: updateMap[f.id] ?? 0,
+    // AAR-770: Jüngste offene Mitteilung für Hover-Preview
+    mitteilung: mitteilungMap[f.id] ?? null,
   }))
 
   return <FaelleKanban faelle={enriched} />
