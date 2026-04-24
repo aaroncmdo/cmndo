@@ -4,7 +4,7 @@ import { headers } from 'next/headers'
 import { roleToPath } from '@/lib/auth/role-redirect'
 import Image from 'next/image'
 import Link from 'next/link'
-import UpdatesNav from '@/components/updates/UpdatesNav'
+import UpdatesNav from '@/components/shared/updates'
 import { SupportButton } from '@/components/support/SupportButton'
 import KundeNav from './_components/KundeNav'
 // AAR-363: Outbox-Badge für offline-wartende Uploads (Pflichtdokumente etc.)

@@ -23,7 +23,7 @@ import {
   FileSignatureIcon,
   ShieldCheckIcon,
 } from 'lucide-react'
-import UpdatesNav from '@/components/updates/UpdatesNav'
+import UpdatesNav from '@/components/shared/updates'
 import OutboxBadge from '@/components/offline/OutboxBadge'
 import { SupportButton } from '@/components/support/SupportButton'
 import TasksPill from '@/components/shared/TasksPill'
