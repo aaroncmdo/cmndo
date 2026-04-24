@@ -77,16 +77,16 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 shrink-0">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-claimondo-border shrink-0">
         <div>
-          <h1 className="text-sm font-semibold text-gray-900">Versicherer</h1>
-          <p className="text-gray-400 text-xs">{filtered.length} von {versicherungen.length}</p>
+          <h1 className="text-sm font-semibold text-claimondo-navy">Versicherer</h1>
+          <p className="text-claimondo-ondo/70 text-xs">{filtered.length} von {versicherungen.length}</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="relative">
-            <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+            <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-claimondo-ondo/70" />
             <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suchen..."
-              className="pl-8 pr-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#4573A2] w-48" />
+              className="pl-8 pr-3 py-1.5 bg-white border border-claimondo-border rounded-lg text-xs text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#4573A2] w-48" />
           </div>
           <button onClick={() => { setCreating(true); setForm({}) }}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-[#4573A2] text-white rounded-lg text-xs font-medium hover:bg-[#1E3A5F] transition-colors">
@@ -98,33 +98,33 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
       {/* Tabelle */}
       <div className="flex-1 overflow-y-auto">
         <table className="w-full text-sm">
-          <thead className="sticky top-0 bg-white border-b border-gray-200 z-10">
+          <thead className="sticky top-0 bg-white border-b border-claimondo-border z-10">
             <tr>
-              <th className="text-left px-4 py-2 text-gray-500 font-medium text-xs">Name</th>
-              <th className="text-left px-4 py-2 text-gray-500 font-medium text-xs">Schadentelefon</th>
-              <th className="text-left px-4 py-2 text-gray-500 font-medium text-xs">Schaden-Email</th>
-              <th className="text-left px-4 py-2 text-gray-500 font-medium text-xs">Stadt</th>
-              <th className="text-left px-4 py-2 text-gray-500 font-medium text-xs">Status</th>
+              <th className="text-left px-4 py-2 text-claimondo-ondo font-medium text-xs">Name</th>
+              <th className="text-left px-4 py-2 text-claimondo-ondo font-medium text-xs">Schadentelefon</th>
+              <th className="text-left px-4 py-2 text-claimondo-ondo font-medium text-xs">Schaden-Email</th>
+              <th className="text-left px-4 py-2 text-claimondo-ondo font-medium text-xs">Stadt</th>
+              <th className="text-left px-4 py-2 text-claimondo-ondo font-medium text-xs">Status</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map(v => (
               <tr key={v.id} onClick={() => { setSelected(v); setForm(v); setEditing(false) }}
-                className={`border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${!v.ist_aktiv ? 'opacity-50' : ''}`}>
-                <td className="px-4 py-2.5 font-medium text-gray-900 text-xs">{v.name}</td>
+                className={`border-b border-claimondo-border hover:bg-[#f8f9fb] cursor-pointer transition-colors ${!v.ist_aktiv ? 'opacity-50' : ''}`}>
+                <td className="px-4 py-2.5 font-medium text-claimondo-navy text-xs">{v.name}</td>
                 <td className="px-4 py-2.5 text-xs">
                   {v.schaden_telefon ? (
                     <PhoneButton nummer={v.schaden_telefon} variant="inline" label={v.schaden_telefon} stopPropagation />
-                  ) : <span className="text-gray-300">—</span>}
+                  ) : <span className="text-claimondo-ondo/50">—</span>}
                 </td>
                 <td className="px-4 py-2.5 text-xs">
                   {v.schaden_email ? (
                     <a href={`mailto:${v.schaden_email}`} className="text-[#4573A2] hover:underline flex items-center gap-1" onClick={e => e.stopPropagation()}>
                       <MailIcon className="w-3 h-3" /> {v.schaden_email}
                     </a>
-                  ) : <span className="text-gray-300">—</span>}
+                  ) : <span className="text-claimondo-ondo/50">—</span>}
                 </td>
-                <td className="px-4 py-2.5 text-gray-500 text-xs">{v.stadt ?? '—'}</td>
+                <td className="px-4 py-2.5 text-claimondo-ondo text-xs">{v.stadt ?? '—'}</td>
                 <td className="px-4 py-2.5">
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${v.ist_aktiv ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500'}`}>
                     {v.ist_aktiv ? 'Aktiv' : 'Deaktiviert'}
@@ -140,16 +140,16 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
       {creating && (
         <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setCreating(false)}>
           <div className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-              <h2 className="text-base font-semibold text-gray-900">Neue Versicherung</h2>
-              <button onClick={() => setCreating(false)} className="p-1 text-gray-400 hover:text-gray-600"><XIcon className="w-5 h-5" /></button>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border">
+              <h2 className="text-base font-semibold text-claimondo-navy">Neue Versicherung</h2>
+              <button onClick={() => setCreating(false)} className="p-1 text-claimondo-ondo/70 hover:text-claimondo-ondo"><XIcon className="w-5 h-5" /></button>
             </div>
             <div className="p-5 space-y-3">
               {(['name', 'schaden_telefon', 'schaden_email', 'hotline_telefon', 'webseite', 'adresse', 'plz', 'stadt', 'bafin_nummer'] as const).map(key => (
                 <div key={key}>
-                  <label className="text-xs text-gray-500 mb-0.5 block">{key === 'name' ? 'Name *' : key.replace(/_/g, ' ')}</label>
+                  <label className="text-xs text-claimondo-ondo mb-0.5 block">{key === 'name' ? 'Name *' : key.replace(/_/g, ' ')}</label>
                   <input value={(form as Record<string, string | null>)[key] ?? ''} onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value || null }))}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#4573A2]" />
+                    className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#4573A2]" />
                 </div>
               ))}
               <div className="flex gap-2 pt-2">
@@ -157,7 +157,7 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
                   className="flex-1 py-2 bg-[#4573A2] text-white rounded-lg text-sm font-medium hover:bg-[#1E3A5F] disabled:opacity-50">
                   {saving ? 'Speichert...' : 'Erstellen'}
                 </button>
-                <button onClick={() => setCreating(false)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm">Abbrechen</button>
+                <button onClick={() => setCreating(false)} className="px-4 py-2 bg-[#f8f9fb] text-claimondo-navy rounded-lg text-sm">Abbrechen</button>
               </div>
             </div>
           </div>
@@ -168,18 +168,18 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
       {selected && (
         <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setSelected(null)}>
           <div className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-              <h2 className="text-base font-semibold text-gray-900">{selected.name}</h2>
-              <button onClick={() => setSelected(null)} className="p-1 text-gray-400 hover:text-gray-600"><XIcon className="w-5 h-5" /></button>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border">
+              <h2 className="text-base font-semibold text-claimondo-navy">{selected.name}</h2>
+              <button onClick={() => setSelected(null)} className="p-1 text-claimondo-ondo/70 hover:text-claimondo-ondo"><XIcon className="w-5 h-5" /></button>
             </div>
             <div className="p-5 space-y-3">
               {editing ? (
                 <>
                   {(['name', 'schaden_telefon', 'schaden_email', 'hotline_telefon', 'webseite', 'adresse', 'plz', 'stadt', 'bafin_nummer'] as const).map(key => (
                     <div key={key}>
-                      <label className="text-xs text-gray-500 mb-0.5 block">{key.replace(/_/g, ' ')}</label>
+                      <label className="text-xs text-claimondo-ondo mb-0.5 block">{key.replace(/_/g, ' ')}</label>
                       <input value={(form as Record<string, string | null>)[key] ?? ''} onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value || null }))}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#4573A2]" />
+                        className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#4573A2]" />
                     </div>
                   ))}
                   <div className="flex gap-2 pt-2">
@@ -187,7 +187,7 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
                       className="flex-1 py-2 bg-[#4573A2] text-white rounded-lg text-sm font-medium hover:bg-[#1E3A5F] disabled:opacity-50">
                       {saving ? 'Speichert...' : 'Speichern'}
                     </button>
-                    <button onClick={() => setEditing(false)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm">Abbrechen</button>
+                    <button onClick={() => setEditing(false)} className="px-4 py-2 bg-[#f8f9fb] text-claimondo-navy rounded-lg text-sm">Abbrechen</button>
                   </div>
                 </>
               ) : (
@@ -218,15 +218,15 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
 
 function Row({ label, value, type }: { label: string; value: string | null; type?: 'tel' | 'email' | 'link' }) {
   if (!value) return (
-    <div className="flex justify-between py-1.5 border-b border-gray-50">
-      <span className="text-xs text-gray-400">{label}</span>
-      <span className="text-xs text-gray-300">—</span>
+    <div className="flex justify-between py-1.5 border-b border-claimondo-border">
+      <span className="text-xs text-claimondo-ondo/70">{label}</span>
+      <span className="text-xs text-claimondo-ondo/50">—</span>
     </div>
   )
 
   return (
-    <div className="flex justify-between items-center py-1.5 border-b border-gray-50">
-      <span className="text-xs text-gray-400">{label}</span>
+    <div className="flex justify-between items-center py-1.5 border-b border-claimondo-border">
+      <span className="text-xs text-claimondo-ondo/70">{label}</span>
       {type === 'tel' ? (
         <PhoneButton nummer={value} variant="inline" label={value} className="text-xs" />
       ) : type === 'email' ? (
@@ -238,7 +238,7 @@ function Row({ label, value, type }: { label: string; value: string | null; type
           <GlobeIcon className="w-3 h-3" /> Webseite
         </a>
       ) : (
-        <span className="text-xs text-gray-900">{value}</span>
+        <span className="text-xs text-claimondo-navy">{value}</span>
       )}
     </div>
   )

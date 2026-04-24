@@ -68,18 +68,18 @@ export default function QualiNummernFelder({
       <div className="flex items-center gap-2">
         <IdCardIcon className="w-4 h-4 text-[#4573A2]" />
         <h3 className="text-sm font-semibold text-[#0D1B3E]">Quali-Nummern</h3>
-        <span className="text-[10px] text-gray-500">optional · Plausibilisierung beim Tier-2-Freigabe</span>
+        <span className="text-[10px] text-claimondo-ondo">optional · Plausibilisierung beim Tier-2-Freigabe</span>
       </div>
       <div className="grid gap-2.5 md:grid-cols-2">
         {aktiveFelder.map(f => (
           <label key={f.key} className="block">
-            <span className="text-[11px] font-medium text-gray-700">{f.label}</span>
+            <span className="text-[11px] font-medium text-claimondo-navy">{f.label}</span>
             <input
               type="text"
               value={werte[f.key]}
               onChange={e => onChange(f.key, e.target.value)}
               placeholder={f.placeholder}
-              className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-gray-200 bg-white focus:border-[#4573A2] focus:outline-none focus:ring-1 focus:ring-[#4573A2]/20"
+              className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-claimondo-border bg-white focus:border-[#4573A2] focus:outline-none focus:ring-1 focus:ring-[#4573A2]/20"
             />
           </label>
         ))}

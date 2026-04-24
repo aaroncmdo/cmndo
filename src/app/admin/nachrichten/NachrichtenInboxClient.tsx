@@ -84,41 +84,41 @@ export default function NachrichtenInboxClient({
         {/* Linke Spalte: Conversations */}
         <div className="lg:col-span-1 bg-white rounded-ios-lg shadow-ios-md overflow-hidden h-[600px] flex flex-col">
           {/* AAR-525: Such-Input */}
-          <div className="px-3 py-2 border-b border-gray-100">
+          <div className="px-3 py-2 border-b border-claimondo-border">
             <div className="relative">
-              <SearchIcon className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <SearchIcon className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-claimondo-ondo/70" />
               <input
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Suche Kunde / Kennzeichen / Fall…"
-                className="w-full pl-7 pr-2 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2] focus:border-[#4573A2]"
+                className="w-full pl-7 pr-2 py-1.5 text-xs bg-[#f8f9fb] border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2] focus:border-[#4573A2]"
               />
             </div>
           </div>
-          <div className="px-4 py-2 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase">
+          <div className="px-4 py-2 border-b border-claimondo-border text-xs font-semibold text-claimondo-ondo uppercase">
             {filteredThreads.length} von {threads.length} Konversationen
           </div>
-          <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
+          <div className="flex-1 overflow-y-auto divide-y divide-claimondo-border">
             {filteredThreads.map(t => (
               <button
                 key={t.fallId}
                 onClick={() => setSelectedFallId(t.fallId)}
-                className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors ${
-                  selectedFallId === t.fallId ? 'bg-blue-50/50 border-l-4 border-l-[#4573A2]' : ''
+                className={`w-full text-left px-4 py-3 hover:bg-[#f8f9fb] transition-colors ${
+                  selectedFallId === t.fallId ? 'bg-[#f8f9fb]/50 border-l-4 border-l-[#4573A2]' : ''
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900 truncate">{t.kundeName}</p>
-                    <p className="text-xs text-gray-500 truncate mt-0.5">{t.lastMessage || '—'}</p>
-                    <p className="text-[10px] text-gray-400 mt-1">
+                    <p className="text-sm font-medium text-claimondo-navy truncate">{t.kundeName}</p>
+                    <p className="text-xs text-claimondo-ondo truncate mt-0.5">{t.lastMessage || '—'}</p>
+                    <p className="text-[10px] text-claimondo-ondo/70 mt-1">
                       {t.fallNummer ?? t.fallId.slice(0, 8)}
                       {t.kennzeichen && ` · ${t.kennzeichen}`}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                    <span className="text-[10px] text-gray-400">
+                    <span className="text-[10px] text-claimondo-ondo/70">
                       {new Date(t.lastAt).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                     </span>
                     {t.unreadCount > 0 && (
@@ -132,14 +132,14 @@ export default function NachrichtenInboxClient({
             ))}
             {filteredThreads.length === 0 && threads.length > 0 && (
               <div className="p-8 text-center">
-                <SearchIcon className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                <p className="text-sm text-gray-400">Keine Treffer für „{query}".</p>
+                <SearchIcon className="w-8 h-8 text-claimondo-ondo/50 mx-auto mb-2" />
+                <p className="text-sm text-claimondo-ondo/70">Keine Treffer für „{query}".</p>
               </div>
             )}
             {threads.length === 0 && (
               <div className="p-8 text-center">
-                <MessageCircleIcon className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                <p className="text-sm text-gray-400">Keine Nachrichten.</p>
+                <MessageCircleIcon className="w-8 h-8 text-claimondo-ondo/50 mx-auto mb-2" />
+                <p className="text-sm text-claimondo-ondo/70">Keine Nachrichten.</p>
               </div>
             )}
           </div>
@@ -151,8 +151,8 @@ export default function NachrichtenInboxClient({
             <>
               <div className="bg-white rounded-ios-lg shadow-ios-md px-4 py-3 flex items-center justify-between">
                 <Link href={`/faelle/${selected.fallId}`} className="min-w-0 group">
-                  <h2 className="text-base font-semibold text-gray-900 group-hover:underline">{selected.kundeName}</h2>
-                  <p className="text-xs text-gray-500">
+                  <h2 className="text-base font-semibold text-claimondo-navy group-hover:underline">{selected.kundeName}</h2>
+                  <p className="text-xs text-claimondo-ondo">
                     Fall: {selected.fallNummer ?? selected.fallId.slice(0, 8)}
                     {selected.kennzeichen && ` · ${selected.kennzeichen}`}
                   </p>
@@ -170,7 +170,7 @@ export default function NachrichtenInboxClient({
             </>
           ) : (
             <div className="bg-white rounded-ios-lg shadow-ios-md h-[600px] flex items-center justify-center">
-              <p className="text-sm text-gray-400">Bitte Konversation links auswaehlen.</p>
+              <p className="text-sm text-claimondo-ondo/70">Bitte Konversation links auswaehlen.</p>
             </div>
           )}
         </div>

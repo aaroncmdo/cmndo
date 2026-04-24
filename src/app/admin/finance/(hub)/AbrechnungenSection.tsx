@@ -24,11 +24,11 @@ type Props = {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  entwurf: 'bg-gray-100 text-gray-600',
-  versendet: 'bg-blue-50 text-blue-600',
+  entwurf: 'bg-[#f8f9fb] text-claimondo-ondo',
+  versendet: 'bg-[#f8f9fb] text-claimondo-ondo',
   bezahlt: 'bg-emerald-50 text-emerald-600',
   ueberfaellig: 'bg-red-50 text-red-600',
-  storniert: 'bg-gray-100 text-gray-400 line-through',
+  storniert: 'bg-[#f8f9fb] text-claimondo-ondo/70 line-through',
 }
 
 function eur(val: number) {
@@ -92,18 +92,18 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
   return (
     <div className="pb-8">
       <div>
-        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+        <div className="bg-white border border-claimondo-border rounded-2xl overflow-hidden">
 
           {/* Header */}
-          <div className="px-5 py-4 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+          <div className="px-5 py-4 border-b border-claimondo-border flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider">
               Abrechnungen
             </h2>
             <div className="flex items-center gap-2 text-xs">
               <select
                 value={filterTyp}
                 onChange={e => setFilterTyp(e.target.value)}
-                className="border border-gray-200 rounded-lg px-2 py-1 text-gray-700"
+                className="border border-claimondo-border rounded-lg px-2 py-1 text-claimondo-navy"
               >
                 <option value="alle">Alle Typen</option>
                 <option value="marketing">Marketing</option>
@@ -112,7 +112,7 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
               <select
                 value={filterStatus}
                 onChange={e => setFilterStatus(e.target.value)}
-                className="border border-gray-200 rounded-lg px-2 py-1 text-gray-700"
+                className="border border-claimondo-border rounded-lg px-2 py-1 text-claimondo-navy"
               >
                 <option value="alle">Alle Status</option>
                 <option value="entwurf">Entwurf</option>
@@ -125,18 +125,18 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
           </div>
 
           {/* Manuell generieren */}
-          <div className="px-5 py-3 bg-gray-50 border-b border-gray-200 flex flex-wrap items-center gap-2 text-xs">
-            <span className="text-gray-500">Neue Abrechnung:</span>
+          <div className="px-5 py-3 bg-[#f8f9fb] border-b border-claimondo-border flex flex-wrap items-center gap-2 text-xs">
+            <span className="text-claimondo-ondo">Neue Abrechnung:</span>
             <input
               type="month"
               value={genMonat}
               onChange={e => setGenMonat(e.target.value)}
-              className="border border-gray-200 rounded-lg px-2 py-1"
+              className="border border-claimondo-border rounded-lg px-2 py-1"
             />
             <select
               value={genTyp}
               onChange={e => setGenTyp(e.target.value as 'marketing' | 'kanzlei')}
-              className="border border-gray-200 rounded-lg px-2 py-1"
+              className="border border-claimondo-border rounded-lg px-2 py-1"
             >
               <option value="marketing">Marketing</option>
               <option value="kanzlei">Kanzlei</option>
@@ -153,39 +153,39 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
           {/* Tabelle */}
           {filtered.length === 0 ? (
             <div className="p-12 text-center">
-              <p className="text-gray-400 text-sm">Keine Abrechnungen gefunden.</p>
+              <p className="text-claimondo-ondo/70 text-sm">Keine Abrechnungen gefunden.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left px-4 py-3 text-gray-500 font-medium text-xs">Nr.</th>
-                    <th className="text-left px-4 py-3 text-gray-500 font-medium text-xs">Empfänger</th>
-                    <th className="text-left px-4 py-3 text-gray-500 font-medium text-xs">Zeitraum</th>
-                    <th className="text-right px-4 py-3 text-gray-500 font-medium text-xs">Brutto</th>
-                    <th className="text-center px-4 py-3 text-gray-500 font-medium text-xs">Versand</th>
-                    <th className="text-center px-4 py-3 text-gray-500 font-medium text-xs">Fällig</th>
-                    <th className="text-center px-4 py-3 text-gray-500 font-medium text-xs">Status</th>
-                    <th className="text-right px-4 py-3 text-gray-500 font-medium text-xs">Aktionen</th>
+                  <tr className="border-b border-claimondo-border">
+                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium text-xs">Nr.</th>
+                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium text-xs">Empfänger</th>
+                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium text-xs">Zeitraum</th>
+                    <th className="text-right px-4 py-3 text-claimondo-ondo font-medium text-xs">Brutto</th>
+                    <th className="text-center px-4 py-3 text-claimondo-ondo font-medium text-xs">Versand</th>
+                    <th className="text-center px-4 py-3 text-claimondo-ondo font-medium text-xs">Fällig</th>
+                    <th className="text-center px-4 py-3 text-claimondo-ondo font-medium text-xs">Status</th>
+                    <th className="text-right px-4 py-3 text-claimondo-ondo font-medium text-xs">Aktionen</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.map(abr => (
-                    <tr key={abr.id} className="border-b border-gray-200/50 hover:bg-gray-50 transition-colors">
+                    <tr key={abr.id} className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb] transition-colors">
                       <td className="px-4 py-3 font-mono text-xs text-[#4573A2]">{abr.abrechnungs_nr}</td>
-                      <td className="px-4 py-3 text-gray-800 text-xs">
+                      <td className="px-4 py-3 text-claimondo-navy text-xs">
                         <span className="block">{abr.empfaenger_name}</span>
-                        <span className="text-[10px] text-gray-400">{abr.empfaenger_typ}</span>
+                        <span className="text-[10px] text-claimondo-ondo/70">{abr.empfaenger_typ}</span>
                       </td>
-                      <td className="px-4 py-3 text-gray-600 text-xs">
+                      <td className="px-4 py-3 text-claimondo-ondo text-xs">
                         {fmtDate(abr.abrechnungs_zeitraum_start)} — {fmtDate(abr.abrechnungs_zeitraum_ende)}
                       </td>
-                      <td className="px-4 py-3 text-right text-gray-800 tabular-nums text-xs font-semibold">{eur(abr.summe_brutto)}</td>
-                      <td className="px-4 py-3 text-center text-gray-500 text-xs">{fmtDate(abr.versand_datum)}</td>
-                      <td className="px-4 py-3 text-center text-gray-500 text-xs">{fmtDate(abr.faellig_am)}</td>
+                      <td className="px-4 py-3 text-right text-claimondo-navy tabular-nums text-xs font-semibold">{eur(abr.summe_brutto)}</td>
+                      <td className="px-4 py-3 text-center text-claimondo-ondo text-xs">{fmtDate(abr.versand_datum)}</td>
+                      <td className="px-4 py-3 text-center text-claimondo-ondo text-xs">{fmtDate(abr.faellig_am)}</td>
                       <td className="px-4 py-3 text-center">
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${STATUS_COLORS[abr.status] ?? 'bg-gray-100 text-gray-500'}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${STATUS_COLORS[abr.status] ?? 'bg-[#f8f9fb] text-claimondo-ondo'}`}>
                           {abr.status}
                         </span>
                       </td>
@@ -197,7 +197,7 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
                               href={`${pdfBaseUrl}/${abr.pdf_path}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200"
+                              className="text-[10px] px-2 py-0.5 rounded bg-[#f8f9fb] text-claimondo-ondo hover:bg-claimondo-border"
                             >
                               PDF
                             </a>
@@ -207,7 +207,7 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
                             <button
                               onClick={() => handleVersenden(abr.id)}
                               disabled={loading === abr.id}
-                              className="text-[10px] px-2 py-0.5 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 disabled:opacity-50"
+                              className="text-[10px] px-2 py-0.5 rounded bg-[#f8f9fb] text-claimondo-ondo hover:bg-[#f8f9fb] disabled:opacity-50"
                             >
                               {loading === abr.id ? '...' : 'Senden'}
                             </button>
@@ -244,19 +244,19 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
           {bezahltModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
               <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
-                <h3 className="text-sm font-semibold text-gray-900 mb-4">Als bezahlt markieren</h3>
-                <label className="block text-xs text-gray-500 mb-1">Eingegangener Betrag (EUR)</label>
+                <h3 className="text-sm font-semibold text-claimondo-navy mb-4">Als bezahlt markieren</h3>
+                <label className="block text-xs text-claimondo-ondo mb-1">Eingegangener Betrag (EUR)</label>
                 <input
                   type="number"
                   step="0.01"
                   value={bezahltBetrag}
                   onChange={e => setBezahltBetrag(e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-4"
+                  className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm mb-4"
                 />
                 <div className="flex gap-2 justify-end">
                   <button
                     onClick={() => setBezahltModal(null)}
-                    className="px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700"
+                    className="px-3 py-1.5 text-xs text-claimondo-ondo hover:text-claimondo-navy"
                   >
                     Abbrechen
                   </button>

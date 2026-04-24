@@ -56,7 +56,7 @@ export default function AnlegenTabs({ onSuccess }: {
               disabled={t.disabled}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors whitespace-nowrap border ${
                 t.disabled
-                  ? 'bg-gray-100 text-gray-300 border-gray-200 cursor-not-allowed'
+                  ? 'bg-[#f8f9fb] text-claimondo-ondo/50 border-claimondo-border cursor-not-allowed'
                   : isActive
                   ? colors.active
                   : colors.idle
@@ -79,9 +79,9 @@ export default function AnlegenTabs({ onSuccess }: {
       {active === 'buero' && <BueroAnlegenWizard onSuccess={onSuccess} />}
       {active === 'akademie' && <AkademieAnlegenWizard onSuccess={onSuccess} />}
       {active === 'community' && (
-        <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center">
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Communities werden separat verwaltet</h2>
-          <p className="text-sm text-gray-500 mb-5">
+        <div className="bg-white border border-claimondo-border rounded-2xl p-8 text-center">
+          <h2 className="text-lg font-semibold text-claimondo-navy mb-2">Communities werden separat verwaltet</h2>
+          <p className="text-sm text-claimondo-ondo mb-5">
             Communities haben ein gemeinsames Einsatzgebiet und einen eigenen Mitglieder-Pool.
             Verwaltung erfolgt im dedizierten Communities-Bereich.
           </p>

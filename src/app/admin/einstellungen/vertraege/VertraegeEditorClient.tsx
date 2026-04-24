@@ -64,8 +64,8 @@ export default function VertraegeEditorClient({ vorlagen }: { vorlagen: Vorlage[
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">Vertragsvorlagen</h1>
-            <p className="text-gray-500 text-sm mt-0.5">
+            <h1 className="text-xl font-semibold text-claimondo-navy">Vertragsvorlagen</h1>
+            <p className="text-claimondo-ondo text-sm mt-0.5">
               Pro Typ darf nur eine Vorlage aktiv sein. Aktive Vorlagen koennen nicht editiert werden — neue Version anlegen + aktivieren.
             </p>
           </div>
@@ -86,15 +86,15 @@ export default function VertraegeEditorClient({ vorlagen }: { vorlagen: Vorlage[
 
         {/* Gruppen pro typ */}
         {Object.keys(grouped).length === 0 && (
-          <div className="bg-white border border-dashed border-gray-200 rounded-2xl p-12 text-center">
-            <FileTextIcon className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500 text-sm">Noch keine Vertragsvorlagen.</p>
+          <div className="bg-white border border-dashed border-claimondo-border rounded-2xl p-12 text-center">
+            <FileTextIcon className="w-10 h-10 text-claimondo-ondo/50 mx-auto mb-3" />
+            <p className="text-claimondo-ondo text-sm">Noch keine Vertragsvorlagen.</p>
           </div>
         )}
 
         {Object.entries(grouped).map(([typ, list]) => (
           <div key={typ} className="mb-8">
-            <h2 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">{typ}</h2>
+            <h2 className="text-sm font-semibold text-claimondo-navy mb-3 uppercase tracking-wide">{typ}</h2>
             <div className="space-y-2">
               {list.map(v => (
                 <VorlageCard
@@ -175,20 +175,20 @@ function VorlageCard({
           <Field label="Version" value={version} onChange={setVersion} />
         </div>
         <div className="mb-3">
-          <label className="text-xs text-gray-500 mb-1.5 block">Inhalt (HTML)</label>
+          <label className="text-xs text-claimondo-ondo mb-1.5 block">Inhalt (HTML)</label>
           <textarea
             value={inhalt}
             onChange={e => setInhalt(e.target.value)}
             rows={14}
-            className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-sm font-mono text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+            className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm font-mono text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
           />
         </div>
-        <label className="flex items-center gap-2 text-sm text-gray-700 mb-3 cursor-pointer">
+        <label className="flex items-center gap-2 text-sm text-claimondo-navy mb-3 cursor-pointer">
           <input
             type="checkbox"
             checked={pflicht}
             onChange={e => setPflicht(e.target.checked)}
-            className="rounded border-gray-300"
+            className="rounded border-claimondo-border"
           />
           Pflicht-Unterschrift erforderlich
         </label>
@@ -204,7 +204,7 @@ function VorlageCard({
           </LoadingButton>
           <button
             onClick={onCancelEdit}
-            className="px-4 py-2 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50"
+            className="px-4 py-2 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb]"
           >
             Abbrechen
           </button>
@@ -214,24 +214,24 @@ function VorlageCard({
   }
 
   return (
-    <div className={`bg-white border rounded-2xl p-4 ${vorlage.aktiv ? 'border-green-200' : 'border-gray-200'}`}>
+    <div className={`bg-white border rounded-2xl p-4 ${vorlage.aktiv ? 'border-green-200' : 'border-claimondo-border'}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-sm font-semibold text-gray-900">{vorlage.titel}</h3>
-            <span className="text-xs text-gray-400">v{vorlage.version}</span>
+            <h3 className="text-sm font-semibold text-claimondo-navy">{vorlage.titel}</h3>
+            <span className="text-xs text-claimondo-ondo/70">v{vorlage.version}</span>
             {vorlage.aktiv ? (
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-50 text-green-600 font-medium flex items-center gap-1">
                 <CheckCircle2Icon className="w-3 h-3" />
                 Aktiv
               </span>
             ) : (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo font-medium">
                 Inaktiv
               </span>
             )}
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-claimondo-ondo">
             Erstellt {new Date(vorlage.created_at).toLocaleDateString('de-DE')}
             {vorlage.aktiv && ` · Aktiv seit ${new Date(vorlage.gueltig_ab).toLocaleDateString('de-DE')}`}
           </p>
@@ -242,7 +242,7 @@ function VorlageCard({
               <button
                 onClick={onEdit}
                 disabled={isPending}
-                className="px-3 py-1.5 rounded-lg border border-gray-200 text-gray-500 text-xs hover:bg-gray-50"
+                className="px-3 py-1.5 rounded-lg border border-claimondo-border text-claimondo-ondo text-xs hover:bg-[#f8f9fb]"
               >
                 Editieren
               </button>
@@ -307,10 +307,10 @@ function CreateDialog({ onClose, onCreated }: { onClose: () => void; onCreated: 
     <>
       <div className="fixed inset-0 bg-black/60 z-50" onClick={onClose} />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-          <div className="px-5 py-4 border-b border-gray-200">
-            <h2 className="text-gray-900 font-semibold">Neue Vertragsvorlage</h2>
-            <p className="text-gray-500 text-xs mt-1">Wird inaktiv angelegt — Aktivieren in der Liste.</p>
+        <div className="bg-white border border-claimondo-border rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="px-5 py-4 border-b border-claimondo-border">
+            <h2 className="text-claimondo-navy font-semibold">Neue Vertragsvorlage</h2>
+            <p className="text-claimondo-ondo text-xs mt-1">Wird inaktiv angelegt — Aktivieren in der Liste.</p>
           </div>
           <div className="p-5 space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -319,28 +319,28 @@ function CreateDialog({ onClose, onCreated }: { onClose: () => void; onCreated: 
               <Field label="Version" value={version} onChange={setVersion} placeholder="z.B. 1.0" />
             </div>
             <div>
-              <label className="text-xs text-gray-500 mb-1.5 block">Inhalt (HTML)</label>
+              <label className="text-xs text-claimondo-ondo mb-1.5 block">Inhalt (HTML)</label>
               <textarea
                 value={inhalt}
                 onChange={e => setInhalt(e.target.value)}
                 rows={16}
                 placeholder="<p>Vertragstext...</p>"
-                className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-sm font-mono text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm font-mono text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               />
             </div>
-            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+            <label className="flex items-center gap-2 text-sm text-claimondo-navy cursor-pointer">
               <input
                 type="checkbox"
                 checked={pflicht}
                 onChange={e => setPflicht(e.target.checked)}
-                className="rounded border-gray-300"
+                className="rounded border-claimondo-border"
               />
               Pflicht-Unterschrift erforderlich
             </label>
             {err && <p className="text-red-600 text-sm">{err}</p>}
           </div>
-          <div className="px-5 py-4 border-t border-gray-200 flex gap-2 justify-end">
-            <button onClick={onClose} className="px-4 py-2 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50">
+          <div className="px-5 py-4 border-t border-claimondo-border flex gap-2 justify-end">
+            <button onClick={onClose} className="px-4 py-2 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb]">
               Abbrechen
             </button>
             <LoadingButton
@@ -363,13 +363,13 @@ function Field({
 }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
     <div>
-      <label className="text-xs text-gray-500 mb-1.5 block">{label}</label>
+      <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
       <input
         type="text"
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+        className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
       />
     </div>
   )

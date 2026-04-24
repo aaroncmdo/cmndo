@@ -207,8 +207,8 @@ export default function PolygonEditor({
 
   return (
     <div className="space-y-2">
-      <div ref={containerRef} className="w-full h-72 rounded-xl border border-gray-200 overflow-hidden bg-gray-50" />
-      <div className="flex items-center justify-between text-[10px] text-gray-500">
+      <div ref={containerRef} className="w-full h-72 rounded-xl border border-claimondo-border overflow-hidden bg-[#f8f9fb]" />
+      <div className="flex items-center justify-between text-[10px] text-claimondo-ondo">
         <span>
           {hasPolygon
             ? '✓ Polygon gesetzt — Ecken zum Anpassen ziehen, Mitte zum Verschieben.'

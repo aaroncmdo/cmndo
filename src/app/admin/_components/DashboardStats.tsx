@@ -77,24 +77,24 @@ export default async function DashboardStats() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <BarChart3Icon className="w-4 h-4 text-[#4573A2]" />
-            <h3 className="text-sm font-semibold text-gray-700">Lead-Konversion (30 Tage)</h3>
+            <h3 className="text-sm font-semibold text-claimondo-navy">Lead-Konversion (30 Tage)</h3>
           </div>
         </div>
         <div className="flex-1 flex items-center justify-around">
           <div className="text-center">
-            <p className="text-[10px] text-gray-500 uppercase">Leads</p>
-            <p className="text-3xl font-bold text-gray-900 tabular-nums">{s.leads}</p>
+            <p className="text-[10px] text-claimondo-ondo uppercase">Leads</p>
+            <p className="text-3xl font-bold text-claimondo-navy tabular-nums">{s.leads}</p>
           </div>
           <div className="text-center">
-            <p className="text-[10px] text-gray-500 uppercase">Faelle</p>
-            <p className="text-3xl font-bold text-gray-900 tabular-nums">{s.faelle}</p>
+            <p className="text-[10px] text-claimondo-ondo uppercase">Faelle</p>
+            <p className="text-3xl font-bold text-claimondo-navy tabular-nums">{s.faelle}</p>
           </div>
           <div className="text-center">
-            <p className="text-[10px] text-gray-500 uppercase">Konversion</p>
+            <p className="text-[10px] text-claimondo-ondo uppercase">Konversion</p>
             <p className="text-3xl font-bold text-emerald-600 tabular-nums">{s.konversionPct}%</p>
           </div>
         </div>
-        <div className="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className="mt-3 h-2 bg-[#f8f9fb] rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-[#4573A2] to-emerald-500 transition-all"
             style={{ width: `${Math.min(100, s.konversionPct)}%` }}
@@ -107,7 +107,7 @@ export default async function DashboardStats() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <TrendingUpIcon className="w-4 h-4 text-emerald-600" />
-            <h3 className="text-sm font-semibold text-gray-700">Umsatz-Verlauf (30 Tage)</h3>
+            <h3 className="text-sm font-semibold text-claimondo-navy">Umsatz-Verlauf (30 Tage)</h3>
           </div>
           <span className="text-sm font-bold text-emerald-600 tabular-nums">{fmtEur(s.umsatzTotal)}</span>
         </div>
@@ -124,7 +124,7 @@ export default async function DashboardStats() {
             )
           })}
         </div>
-        <div className="mt-2 flex justify-between text-[10px] text-gray-400">
+        <div className="mt-2 flex justify-between text-[10px] text-claimondo-ondo/70">
           <span>vor 30 Tagen</span>
           <span>heute</span>
         </div>

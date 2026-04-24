@@ -62,7 +62,7 @@ export default async function EinstellungenPage() {
             <Link
               key={s.href}
               href={s.href}
-              className="group bg-white border border-gray-200 rounded-2xl p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
+              className="group bg-white border border-claimondo-border rounded-2xl p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
             >
               <div className="flex items-start gap-3">
                 <div className={`w-10 h-10 rounded-xl ${s.iconBg} flex items-center justify-center shrink-0`}>
@@ -73,7 +73,7 @@ export default async function EinstellungenPage() {
                     {s.title}
                     <ArrowRightIcon className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
-                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">{s.description}</p>
+                  <p className="text-xs text-claimondo-ondo mt-1 leading-relaxed">{s.description}</p>
                 </div>
               </div>
             </Link>

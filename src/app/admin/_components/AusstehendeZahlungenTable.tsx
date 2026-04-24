@@ -24,44 +24,44 @@ export default async function AusstehendeZahlungenTable() {
 
   return (
     <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
-      <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+      <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-semibold text-gray-700">Ausstehende Zahlungen</h2>
-          <p className="text-[11px] text-gray-500">Anzahlungen + ueberfaellige Rechnungen + Einzugs-Fehler</p>
+          <h2 className="text-sm font-semibold text-claimondo-navy">Ausstehende Zahlungen</h2>
+          <p className="text-[11px] text-claimondo-ondo">Anzahlungen + ueberfaellige Rechnungen + Einzugs-Fehler</p>
         </div>
         <div className="text-right">
-          <p className="text-[10px] text-gray-500">Gesamt offen</p>
+          <p className="text-[10px] text-claimondo-ondo">Gesamt offen</p>
           <p className="text-lg font-bold text-amber-600 tabular-nums">{fmtEur(totalSum)}</p>
         </div>
       </div>
 
       {rows.length === 0 ? (
         <div className="p-12 text-center">
-          <p className="text-sm text-gray-500">Keine offenen Forderungen.</p>
+          <p className="text-sm text-claimondo-ondo">Keine offenen Forderungen.</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left px-5 py-3 text-[11px] text-gray-500 font-semibold uppercase tracking-wide">Empfaenger</th>
-                <th className="text-left px-5 py-3 text-[11px] text-gray-500 font-semibold uppercase tracking-wide">Email</th>
-                <th className="text-right px-5 py-3 text-[11px] text-gray-500 font-semibold uppercase tracking-wide">Betrag</th>
-                <th className="text-center px-5 py-3 text-[11px] text-gray-500 font-semibold uppercase tracking-wide">Faellig seit</th>
-                <th className="text-left px-5 py-3 text-[11px] text-gray-500 font-semibold uppercase tracking-wide">Status</th>
+              <tr className="border-b border-claimondo-border bg-[#f8f9fb]">
+                <th className="text-left px-5 py-3 text-[11px] text-claimondo-ondo font-semibold uppercase tracking-wide">Empfaenger</th>
+                <th className="text-left px-5 py-3 text-[11px] text-claimondo-ondo font-semibold uppercase tracking-wide">Email</th>
+                <th className="text-right px-5 py-3 text-[11px] text-claimondo-ondo font-semibold uppercase tracking-wide">Betrag</th>
+                <th className="text-center px-5 py-3 text-[11px] text-claimondo-ondo font-semibold uppercase tracking-wide">Faellig seit</th>
+                <th className="text-left px-5 py-3 text-[11px] text-claimondo-ondo font-semibold uppercase tracking-wide">Status</th>
               </tr>
             </thead>
             <tbody>
               {rows.map(r => (
-                <tr key={r.key} className="border-b border-gray-200/50 hover:bg-gray-50 transition-colors">
+                <tr key={r.key} className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb] transition-colors">
                   <td className="px-5 py-3">
-                    <Link href={r.href} className="text-gray-900 font-medium hover:text-[#4573A2]">
+                    <Link href={r.href} className="text-claimondo-navy font-medium hover:text-[#4573A2]">
                       {r.name}
                     </Link>
                   </td>
-                  <td className="px-5 py-3 text-gray-500 text-xs">{r.email ?? '—'}</td>
-                  <td className="px-5 py-3 text-right text-gray-900 font-semibold tabular-nums">{fmtEur(r.betrag)}</td>
-                  <td className="px-5 py-3 text-center text-gray-500 tabular-nums">
+                  <td className="px-5 py-3 text-claimondo-ondo text-xs">{r.email ?? '—'}</td>
+                  <td className="px-5 py-3 text-right text-claimondo-navy font-semibold tabular-nums">{fmtEur(r.betrag)}</td>
+                  <td className="px-5 py-3 text-center text-claimondo-ondo tabular-nums">
                     {r.faelligSeitTage !== null ? `${r.faelligSeitTage} ${r.faelligSeitTage === 1 ? 'Tag' : 'Tage'}` : '—'}
                   </td>
                   <td className="px-5 py-3">
@@ -71,8 +71,8 @@ export default async function AusstehendeZahlungenTable() {
               ))}
             </tbody>
             <tfoot>
-              <tr className="bg-gray-50 border-t border-gray-200">
-                <td colSpan={2} className="px-5 py-2.5 text-xs text-gray-600 font-semibold">
+              <tr className="bg-[#f8f9fb] border-t border-claimondo-border">
+                <td colSpan={2} className="px-5 py-2.5 text-xs text-claimondo-ondo font-semibold">
                   {totalCount} offene Forderungen
                 </td>
                 <td className="px-5 py-2.5 text-right text-amber-600 font-bold tabular-nums">{fmtEur(totalSum)}</td>

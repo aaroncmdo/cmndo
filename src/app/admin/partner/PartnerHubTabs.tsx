@@ -27,7 +27,7 @@ export default function PartnerHubTabs() {
             className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
               active
                 ? 'border-[#0D1B3E] text-[#0D1B3E]'
-                : 'border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300'
+                : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy hover:border-claimondo-border'
             }`}
           >
             {tab.label}

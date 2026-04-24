@@ -62,24 +62,24 @@ export default async function LeadPreiseVerteilungWidget() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <BarChart3Icon className="w-4 h-4 text-[#4573A2]" />
-              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+              <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider">
                 Lead-Preise Verteilung
               </h2>
             </div>
-            <span className="text-[11px] text-gray-500">
+            <span className="text-[11px] text-claimondo-ondo">
               {data.count} Leads · letzte 90 Tage · Umsatz {fmtEur(data.total)}
             </span>
           </div>
 
           {data.count === 0 ? (
-            <p className="text-xs text-gray-500 text-center py-6">
+            <p className="text-xs text-claimondo-ondo text-center py-6">
               Keine abgerechneten Leads in den letzten 90 Tagen.
             </p>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Bucket-Verteilung */}
               <div>
-                <p className="text-[10px] text-gray-500 uppercase tracking-wide font-semibold mb-3">
+                <p className="text-[10px] text-claimondo-ondo uppercase tracking-wide font-semibold mb-3">
                   Nach Preis-Bucket
                 </p>
                 <div className="space-y-2">
@@ -89,12 +89,12 @@ export default async function LeadPreiseVerteilungWidget() {
                     return (
                       <div key={b.label}>
                         <div className="flex items-center justify-between text-xs mb-1">
-                          <span className="text-gray-700 font-medium">{b.label}</span>
-                          <span className="text-gray-500 tabular-nums">
+                          <span className="text-claimondo-navy font-medium">{b.label}</span>
+                          <span className="text-claimondo-ondo tabular-nums">
                             {b.anzahl} · {fmtEur(b.summe)} · {pct.toFixed(0)}%
                           </span>
                         </div>
-                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-2 bg-[#f8f9fb] rounded-full overflow-hidden">
                           <div
                             className="h-full bg-gradient-to-r from-[#4573A2] to-emerald-500 transition-all"
                             style={{ width: `${barWidth}%` }}
@@ -108,27 +108,27 @@ export default async function LeadPreiseVerteilungWidget() {
 
               {/* Nach Preis-Typ */}
               <div>
-                <p className="text-[10px] text-gray-500 uppercase tracking-wide font-semibold mb-3">
+                <p className="text-[10px] text-claimondo-ondo uppercase tracking-wide font-semibold mb-3">
                   Nach Preis-Typ
                 </p>
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-2 text-gray-500 font-medium">Typ</th>
-                      <th className="text-right py-2 text-gray-500 font-medium">Anzahl</th>
-                      <th className="text-right py-2 text-gray-500 font-medium">Summe</th>
-                      <th className="text-right py-2 text-gray-500 font-medium">Anteil</th>
+                    <tr className="border-b border-claimondo-border">
+                      <th className="text-left py-2 text-claimondo-ondo font-medium">Typ</th>
+                      <th className="text-right py-2 text-claimondo-ondo font-medium">Anzahl</th>
+                      <th className="text-right py-2 text-claimondo-ondo font-medium">Summe</th>
+                      <th className="text-right py-2 text-claimondo-ondo font-medium">Anteil</th>
                     </tr>
                   </thead>
                   <tbody>
                     {Object.entries(data.typBreakdown).map(([typ, v]) => {
                       const pct = data.total > 0 ? (v.summe / data.total) * 100 : 0
                       return (
-                        <tr key={typ} className="border-b border-gray-100">
-                          <td className="py-2 text-gray-700 capitalize">{typ}</td>
-                          <td className="py-2 text-right text-gray-700 tabular-nums">{v.anzahl}</td>
-                          <td className="py-2 text-right text-gray-900 font-medium tabular-nums">{fmtEur(v.summe)}</td>
-                          <td className="py-2 text-right text-gray-500 tabular-nums">{pct.toFixed(0)}%</td>
+                        <tr key={typ} className="border-b border-claimondo-border">
+                          <td className="py-2 text-claimondo-navy capitalize">{typ}</td>
+                          <td className="py-2 text-right text-claimondo-navy tabular-nums">{v.anzahl}</td>
+                          <td className="py-2 text-right text-claimondo-navy font-medium tabular-nums">{fmtEur(v.summe)}</td>
+                          <td className="py-2 text-right text-claimondo-ondo tabular-nums">{pct.toFixed(0)}%</td>
                         </tr>
                       )
                     })}

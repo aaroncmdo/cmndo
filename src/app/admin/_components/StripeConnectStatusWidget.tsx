@@ -84,15 +84,15 @@ export default async function StripeConnectStatusWidget() {
     <div className="pb-8">
       <div className="">
         <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+          <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
             <div className="flex items-center gap-2">
               <CreditCardIcon className="w-4 h-4 text-[#4573A2]" />
-              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+              <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider">
                 Stripe-Connect Health
               </h2>
             </div>
             <span className={`flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full ${
-              healthOk ? 'bg-emerald-50 text-emerald-700' : s.failed7d > 0 ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-500'
+              healthOk ? 'bg-emerald-50 text-emerald-700' : s.failed7d > 0 ? 'bg-red-50 text-red-700' : 'bg-[#f8f9fb] text-claimondo-ondo'
             }`}>
               {healthOk ? (
                 <><CheckCircle2Icon className="w-3 h-3" /> healthy</>
@@ -107,16 +107,16 @@ export default async function StripeConnectStatusWidget() {
           <div className="p-5">
             {/* 3 Counter */}
             <div className="grid grid-cols-3 gap-4 mb-5">
-              <div className="text-center p-3 bg-gray-50 rounded-xl">
-                <p className="text-gray-500 text-xs mb-1">Events (7 Tage)</p>
-                <p className="text-gray-900 text-2xl font-bold tabular-nums">{s.total7d}</p>
+              <div className="text-center p-3 bg-[#f8f9fb] rounded-xl">
+                <p className="text-claimondo-ondo text-xs mb-1">Events (7 Tage)</p>
+                <p className="text-claimondo-navy text-2xl font-bold tabular-nums">{s.total7d}</p>
               </div>
               <div className="text-center p-3 bg-emerald-50 rounded-xl">
-                <p className="text-gray-500 text-xs mb-1">Erfolgreich</p>
+                <p className="text-claimondo-ondo text-xs mb-1">Erfolgreich</p>
                 <p className="text-emerald-600 text-2xl font-bold tabular-nums">{s.success7d}</p>
               </div>
               <div className="text-center p-3 bg-red-50 rounded-xl">
-                <p className="text-gray-500 text-xs mb-1">Mit Fehler</p>
+                <p className="text-claimondo-ondo text-xs mb-1">Mit Fehler</p>
                 <p className="text-red-600 text-2xl font-bold tabular-nums">{s.failed7d}</p>
               </div>
             </div>
@@ -145,17 +145,17 @@ export default async function StripeConnectStatusWidget() {
             {/* Letzte Anzahlungen / Einzahlungen */}
             {s.einzahlungen.length > 0 && (
               <div>
-                <p className="text-[10px] text-gray-500 uppercase tracking-wide font-semibold mb-2">
+                <p className="text-[10px] text-claimondo-ondo uppercase tracking-wide font-semibold mb-2">
                   Letzte SV-Einzahlungen via Stripe
                 </p>
                 <table className="w-full text-xs">
                   <tbody>
                     {s.einzahlungen.map(e => (
-                      <tr key={e.id} className="border-b border-gray-100">
-                        <td className="py-2 text-gray-700">{e.typ ?? 'Anzahlung'}</td>
-                        <td className="py-2 text-gray-500 truncate max-w-[280px]">{e.beschreibung ?? '—'}</td>
+                      <tr key={e.id} className="border-b border-claimondo-border">
+                        <td className="py-2 text-claimondo-navy">{e.typ ?? 'Anzahlung'}</td>
+                        <td className="py-2 text-claimondo-ondo truncate max-w-[280px]">{e.beschreibung ?? '—'}</td>
                         <td className="py-2 text-right text-emerald-600 font-semibold tabular-nums">{fmtEur(Number(e.betrag))}</td>
-                        <td className="py-2 text-right text-gray-400 tabular-nums">
+                        <td className="py-2 text-right text-claimondo-ondo/70 tabular-nums">
                           {e.eingezahlt_am ? new Date(e.eingezahlt_am).toLocaleDateString('de-DE') : '—'}
                         </td>
                       </tr>
@@ -166,7 +166,7 @@ export default async function StripeConnectStatusWidget() {
             )}
 
             {s.lastEvents.length === 0 && (
-              <p className="text-xs text-gray-500 text-center py-4">
+              <p className="text-xs text-claimondo-ondo text-center py-4">
                 Noch keine Stripe-Events erfasst.
               </p>
             )}

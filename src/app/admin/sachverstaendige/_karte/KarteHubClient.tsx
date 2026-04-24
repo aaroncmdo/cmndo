@@ -263,16 +263,16 @@ export default function KarteHubClient({ svs }: Props) {
   }
 
   return (
-    <div className="h-full flex flex-col lg:flex-row bg-white rounded-xl overflow-hidden border border-gray-200 relative">
+    <div className="h-full flex flex-col lg:flex-row bg-white rounded-xl overflow-hidden border border-claimondo-border relative">
       {/* Linker Bereich: Header + Karte */}
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200 bg-[#f8f9fb]/60 shrink-0">
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-claimondo-border bg-[#f8f9fb]/60 shrink-0">
           <div className="flex items-center gap-3">
-            <h2 className="text-sm font-semibold text-gray-900">Sachverständige</h2>
-            <span className="text-xs text-gray-500">
+            <h2 className="text-sm font-semibold text-claimondo-navy">Sachverständige</h2>
+            <span className="text-xs text-claimondo-ondo">
               {visibleSvs.length} aktiv
             </span>
-            <div className="hidden md:flex items-center gap-3 text-[11px] text-gray-600 ml-2">
+            <div className="hidden md:flex items-center gap-3 text-[11px] text-claimondo-ondo ml-2">
               {Object.entries(TYP_COLORS).map(([k, v]) => (
                 <div key={k} className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: v.fill }} />
@@ -292,24 +292,24 @@ export default function KarteHubClient({ svs }: Props) {
       </div>
 
       {/* Rechte Spalte: Liste */}
-      <aside className="lg:w-[320px] shrink-0 border-t lg:border-t-0 lg:border-l border-gray-200 bg-[#f8f9fb] flex flex-col">
-        <div className="p-3 border-b border-gray-200 bg-white shrink-0">
+      <aside className="lg:w-[320px] shrink-0 border-t lg:border-t-0 lg:border-l border-claimondo-border bg-[#f8f9fb] flex flex-col">
+        <div className="p-3 border-b border-claimondo-border bg-white shrink-0">
           <div className="relative">
-            <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+            <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-claimondo-ondo/70" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="SV suchen (Name, Paket, Typ)"
-              className="w-full pl-7 pr-2 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+              className="w-full pl-7 pr-2 py-1.5 text-xs bg-[#f8f9fb] border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
             />
           </div>
-          <p className="text-[10px] text-gray-400 mt-1.5">
+          <p className="text-[10px] text-claimondo-ondo/70 mt-1.5">
             {filteredList.length} von {visibleSvs.length}
           </p>
         </div>
         <div className="flex-1 overflow-y-auto">
           {filteredList.length === 0 && (
-            <p className="px-4 py-6 text-xs text-gray-400 text-center">
+            <p className="px-4 py-6 text-xs text-claimondo-ondo/70 text-center">
               Keine SVs gefunden
             </p>
           )}
@@ -323,7 +323,7 @@ export default function KarteHubClient({ svs }: Props) {
                 onMouseEnter={() => setHoveredSvId(sv.id)}
                 onMouseLeave={() => setHoveredSvId(null)}
                 onClick={() => openSv(sv.id)}
-                className={`w-full text-left px-3 py-2.5 border-b border-gray-100 transition-colors ${
+                className={`w-full text-left px-3 py-2.5 border-b border-claimondo-border transition-colors ${
                   isHovered ? 'bg-white' : 'hover:bg-white'
                 }`}
               >
@@ -344,7 +344,7 @@ export default function KarteHubClient({ svs }: Props) {
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-gray-900 truncate">{sv.name}</p>
+                    <p className="text-xs font-medium text-claimondo-navy truncate">{sv.name}</p>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <span
                         className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded"
@@ -353,7 +353,7 @@ export default function KarteHubClient({ svs }: Props) {
                         {color.label}
                       </span>
                       {sv.paket && (
-                        <span className="text-[9px] text-gray-400">· {sv.paket}</span>
+                        <span className="text-[9px] text-claimondo-ondo/70">· {sv.paket}</span>
                       )}
                     </div>
                   </div>
@@ -362,7 +362,7 @@ export default function KarteHubClient({ svs }: Props) {
                       <span className="text-emerald-600">✓ verif.</span>
                     )}
                     {(sv.offeneFaelle ?? 0) > 0 && (
-                      <span className="text-gray-500 tabular-nums">
+                      <span className="text-claimondo-ondo tabular-nums">
                         {sv.offeneFaelle}/{sv.maxFaelleMonat ?? '?'}
                       </span>
                     )}

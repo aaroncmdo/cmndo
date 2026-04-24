@@ -186,7 +186,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
     }
   }
 
-  const inputCls = 'w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#4573A2]'
+  const inputCls = 'w-full bg-white border border-claimondo-border rounded-xl px-4 py-2.5 text-claimondo-navy text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#4573A2]'
 
   return (
     <div className="glass-light border border-claimondo-border rounded-ios-md p-5">
@@ -195,28 +195,28 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
         strategy="lazyOnload"
       />
 
-      <h2 className="text-sm font-medium text-gray-500 mb-4">Profil bearbeiten</h2>
+      <h2 className="text-sm font-medium text-claimondo-ondo mb-4">Profil bearbeiten</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-gray-500 text-xs mb-1">Vorname</label>
+            <label className="block text-claimondo-ondo text-xs mb-1">Vorname</label>
             <input name="vorname" defaultValue={sv.vorname} className={inputCls} />
           </div>
           <div>
-            <label className="block text-gray-500 text-xs mb-1">Nachname</label>
+            <label className="block text-claimondo-ondo text-xs mb-1">Nachname</label>
             <input name="nachname" defaultValue={sv.nachname} className={inputCls} />
           </div>
         </div>
 
         <div>
-          <label className="block text-gray-500 text-xs mb-1">Telefon</label>
+          <label className="block text-claimondo-ondo text-xs mb-1">Telefon</label>
           <input name="telefon" defaultValue={sv.telefon} className={inputCls} />
         </div>
 
         {/* Standort mit Google Places Autocomplete */}
-        <div className="border border-gray-200 rounded-xl p-4 bg-gray-50/50">
-          <label className="flex items-center gap-1.5 text-gray-500 text-xs mb-2">
+        <div className="border border-claimondo-border rounded-xl p-4 bg-[#f8f9fb]/50">
+          <label className="flex items-center gap-1.5 text-claimondo-ondo text-xs mb-2">
             <MapPinIcon className="w-3.5 h-3.5" /> Standort (Google Places)
           </label>
           <GooglePlaceAutocomplete
@@ -226,25 +226,25 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
             className={inputCls}
           />
           {standort.lat != null && standort.lng != null && (
-            <div className="flex items-center gap-3 mt-2 text-[10px] text-gray-400">
+            <div className="flex items-center gap-3 mt-2 text-[10px] text-claimondo-ondo/70">
               <span>PLZ: {standort.plz || '—'}</span>
               <span>Lat: {standort.lat.toFixed(4)}</span>
               <span>Lng: {standort.lng.toFixed(4)}</span>
               <span>Radius: {sv.paketUmkreisKm} km</span>
             </div>
           )}
-          <p className="text-[10px] text-gray-400 mt-1">Einsatzgebiet wird automatisch per Isochrone berechnet</p>
+          <p className="text-[10px] text-claimondo-ondo/70 mt-1">Einsatzgebiet wird automatisch per Isochrone berechnet</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-gray-500 text-xs mb-1">Paket</label>
+            <label className="block text-claimondo-ondo text-xs mb-1">Paket</label>
             <select name="paket" defaultValue={sv.paket} className={inputCls}>
               {PAKET_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-gray-500 text-xs mb-1">Max Fälle / Monat</label>
+            <label className="block text-claimondo-ondo text-xs mb-1">Max Fälle / Monat</label>
             <input name="paket_faelle_gesamt" type="number" min="1" defaultValue={sv.maxFaelleMonat} className={inputCls} />
           </div>
         </div>
@@ -253,8 +253,8 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
             ist_aktiv wird nur vom Stripe-Webhook gesteuert. Admin-Blockierung
             läuft über gesperrt_seit (deactivateGutachter / reactivateGutachter). */}
         <div>
-          <label className="block text-gray-500 text-xs mb-1">Status</label>
-          <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm">
+          <label className="block text-claimondo-ondo text-xs mb-1">Status</label>
+          <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl px-4 py-2.5 text-sm">
             {istGesperrt ? (
               <div className="flex items-center justify-between gap-3">
                 <div>
@@ -262,7 +262,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
                     <LockIcon className="w-3 h-3" /> Gesperrt
                   </span>
                   {sv.gesperrtGrund && (
-                    <p className="text-xs text-gray-500 mt-1">Grund: {sv.gesperrtGrund}</p>
+                    <p className="text-xs text-claimondo-ondo mt-1">Grund: {sv.gesperrtGrund}</p>
                   )}
                 </div>
                 <LoadingButton
@@ -287,7 +287,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
                       Onboarding (Anzahlung ausstehend)
                     </span>
                   )}
-                  <p className="text-[10px] text-gray-400 mt-1">
+                  <p className="text-[10px] text-claimondo-ondo/70 mt-1">
                     Automatisch — Stripe-Webhook setzt Status nach Anzahlung. Manuelle Sperre über Button rechts.
                   </p>
                 </div>
@@ -318,7 +318,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
                 <button
                   type="button"
                   onClick={() => { setShowSperrDialog(false); setSperrGrund('') }}
-                  className="px-3 py-1.5 rounded-lg text-xs text-gray-600 hover:bg-gray-100"
+                  className="px-3 py-1.5 rounded-lg text-xs text-claimondo-ondo hover:bg-[#f8f9fb]"
                 >
                   Abbrechen
                 </button>
@@ -340,8 +340,8 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
             + Nummern-Felder (conditional bei Gruppe-B-Qualis). Migriert vom
             gelöschten GutachterProfilPanel — hier ist jetzt der zentrale
             Edit-Ort für alle Profil-Daten. */}
-        <div className="border border-gray-200 rounded-xl p-4 bg-gray-50/30 space-y-4">
-          <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Qualifikationen &amp; Spezialisierungen</h3>
+        <div className="border border-claimondo-border rounded-xl p-4 bg-[#f8f9fb]/30 space-y-4">
+          <h3 className="text-xs font-semibold text-claimondo-navy uppercase tracking-wide">Qualifikationen &amp; Spezialisierungen</h3>
 
           <TagGroup
             label="Qualifikationen"
@@ -361,19 +361,19 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
               <div className="grid gap-2 md:grid-cols-2">
                 {qualifikationen.includes('BVSK-Mitglied') && (
                   <label className="block">
-                    <span className="text-[10px] text-gray-600">BVSK-Mitgliedsnummer</span>
+                    <span className="text-[10px] text-claimondo-ondo">BVSK-Mitgliedsnummer</span>
                     <input type="text" value={bvskNr} onChange={e => setBvskNr(e.target.value)} placeholder="z.B. 12345" className={inputCls} />
                   </label>
                 )}
                 {qualifikationen.includes('IHK-zertifiziert') && (
                   <label className="block">
-                    <span className="text-[10px] text-gray-600">IHK-Zertifikats-Nummer</span>
+                    <span className="text-[10px] text-claimondo-ondo">IHK-Zertifikats-Nummer</span>
                     <input type="text" value={ihkNr} onChange={e => setIhkNr(e.target.value)} placeholder="z.B. IHK-SV-2024-12345" className={inputCls} />
                   </label>
                 )}
                 {qualifikationen.includes('Öffentlich bestellt und vereidigt') && (
                   <label className="block">
-                    <span className="text-[10px] text-gray-600">Bestellungsnummer</span>
+                    <span className="text-[10px] text-claimondo-ondo">Bestellungsnummer</span>
                     <input type="text" value={oebuvNr} onChange={e => setOebuvNr(e.target.value)} placeholder="z.B. IHK Köln 4711" className={inputCls} />
                   </label>
                 )}
@@ -399,7 +399,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
         </div>
 
         <div>
-          <label className="block text-gray-500 text-xs mb-1">Notizen</label>
+          <label className="block text-claimondo-ondo text-xs mb-1">Notizen</label>
           <textarea name="notizen" defaultValue={sv.notizen} rows={3} className={`${inputCls} resize-none`} placeholder="Interne Notizen ..." />
         </div>
 
@@ -417,14 +417,14 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
       </form>
 
       {/* AAR-364 SUB-4: Willkommens-Mail erneut senden */}
-      <div className="mt-6 pt-5 border-t border-gray-200">
+      <div className="mt-6 pt-5 border-t border-claimondo-border">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-[#4573A2]/10 flex items-center justify-center flex-shrink-0">
               <MailIcon className="w-4 h-4 text-[#4573A2]" />
             </div>
-            <div className="text-xs text-gray-500 leading-relaxed">
-              <strong className="text-gray-800 block mb-0.5">Willkommens-Mail erneut senden</strong>
+            <div className="text-xs text-claimondo-ondo leading-relaxed">
+              <strong className="text-claimondo-navy block mb-0.5">Willkommens-Mail erneut senden</strong>
               Generiert ein neues Initial-Passwort und versendet die Willkommens-Mail mit den aktuellen Konditionen.
               Der SV muss beim nächsten Login ein neues Passwort setzen.
             </div>
@@ -472,8 +472,8 @@ function TagGroup({
   return (
     <div>
       <div className="mb-1.5">
-        <span className="block text-xs font-medium text-gray-700">{label}</span>
-        <span className="block text-[10px] text-gray-500">{hint}</span>
+        <span className="block text-xs font-medium text-claimondo-navy">{label}</span>
+        <span className="block text-[10px] text-claimondo-ondo">{hint}</span>
       </div>
       <div className="flex flex-wrap gap-1.5">
         {options.map((opt) => {
@@ -486,7 +486,7 @@ function TagGroup({
               className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${
                 active
                   ? 'bg-[#4573A2] text-white border-[#4573A2]'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                  : 'bg-white text-claimondo-ondo border-claimondo-border hover:border-claimondo-border'
               }`}
             >
               {opt}

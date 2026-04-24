@@ -49,14 +49,14 @@ export default function DrawerShell({ children, title, widthClass = 'sm:w-[720px
         className={`fixed right-0 top-0 h-screen w-full ${widthClass} glass-light shadow-ios-lg z-50 flex flex-col overflow-hidden`}
         style={{ animation: 'drawerSlideIn 200ms ease-out' }}
       >
-        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 shrink-0">
-          <h2 className="text-sm font-semibold text-gray-900 truncate">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-claimondo-border shrink-0">
+          <h2 className="text-sm font-semibold text-claimondo-navy truncate">
             {title ?? 'Details'}
           </h2>
           <button
             type="button"
             onClick={close}
-            className="p-1 rounded-lg hover:bg-gray-100 text-gray-400"
+            className="p-1 rounded-lg hover:bg-[#f8f9fb] text-claimondo-ondo/70"
             aria-label="Schließen"
           >
             <XIcon className="w-5 h-5" />
