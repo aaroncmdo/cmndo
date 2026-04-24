@@ -267,11 +267,13 @@ html[lang="ar"] {
   -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
 
+/* AAR-766: glass-dark ist nicht mehr transparent.
+   Navbar / Header-Bars müssen global opak bleiben, damit beim Scrollen
+   keine Inhalte durchscheinen (Aaron 2026-04-24). Vorher:
+   rgba(13,27,62,0.78) + backdrop-blur — wurde zu durchsichtig. */
 .glass-dark {
-  background-color: rgba(13, 27, 62, 0.78);
+  background-color: #0D1B3E;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
 
 /* AAR-727: Branded-Glass — für Portale mit Whitelabel-Branding (Gutachter,
