@@ -45,7 +45,7 @@ export function FallIdentityHeader({
 
   return (
     <div
-      className={`border-b border-claimondo-border bg-white ${className}`}
+      className={`border-b border-claimondo-border bg-white relative ${className}`}
       role="banner"
     >
       <div className="px-4 sm:px-6 py-3 flex items-start justify-between gap-3">
