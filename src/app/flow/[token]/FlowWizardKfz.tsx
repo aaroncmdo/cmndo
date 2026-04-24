@@ -511,7 +511,7 @@ export default function FlowWizardKfz({
                       }}
                       className="hidden"
                     />
-                    <div className="rounded-xl border-2 border-dashed border-claimondo-border px-4 py-6 text-center hover:border-[#4573A2] bg-[#f8f9fb] hover:bg-[#f8f9fb] transition-colors">
+                    <div className="rounded-xl border-2 border-dashed border-claimondo-border px-4 py-6 text-center hover:border-[#4573A2] bg-[#f8f9fb] hover:bg-claimondo-border transition-colors">
                       {uploadingFotos ? (
                         <p className="text-sm text-claimondo-ondo flex items-center justify-center gap-2">
                           <LoaderIcon className="w-4 h-4 animate-spin" /> Lade hoch …

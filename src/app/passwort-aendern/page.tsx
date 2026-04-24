@@ -121,7 +121,7 @@ export default function PasswortAendernPage() {
               type="submit"
               isLoading={loading}
               loadingText="Wird gespeichert..."
-              className="w-full py-3.5 rounded-xl bg-white hover:bg-zinc-200 disabled:bg-zinc-700 disabled:text-claimondo-ondo text-zinc-950 font-semibold text-sm active:scale-[0.98] transition-all mt-1"
+              className="w-full py-3.5 rounded-xl bg-claimondo-navy hover:bg-claimondo-shield text-white disabled:opacity-50 font-semibold text-sm active:scale-[0.98] transition-all mt-1"
             >
               Passwort ändern
             </LoadingButton>

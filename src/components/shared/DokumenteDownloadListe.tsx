@@ -181,7 +181,7 @@ export default function DokumenteDownloadListe({
             href={d.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#f8f9fb] hover:bg-[#f8f9fb] transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#f8f9fb] hover:bg-claimondo-border transition-colors"
           >
             <Icon className="w-4 h-4 text-claimondo-ondo shrink-0" />
             <span className="text-sm text-claimondo-navy truncate flex-1">{d.name}</span>

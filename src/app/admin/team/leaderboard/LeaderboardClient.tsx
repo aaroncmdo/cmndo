@@ -7,7 +7,7 @@ import PageHeader from '@/components/shared/PageHeader'
 type DispatchEntry = { id: string; name: string; leads_qualifiziert: number; leads_konvertiert: number; conversion_rate: number; trend: number }
 type KundenEntry = { id: string; name: string; aktive_faelle: number; faelle_abgeschlossen: number; avg_bearbeitungszeit: number; trend: number }
 
-const MEDAL = ['bg-amber-500/20 text-amber-300 border-amber-500/40', 'bg-zinc-400/20 text-claimondo-navy border-zinc-400/40', 'bg-orange-700/20 text-orange-300 border-orange-700/40']
+const MEDAL = ['bg-amber-500/20 text-amber-300 border-amber-500/40', 'bg-claimondo-ondo/20 text-claimondo-navy border-claimondo-ondo/40', 'bg-orange-700/20 text-orange-300 border-orange-700/40']
 
 function TrendBadge({ value }: { value: number }) {
   if (value > 0) return <span className="flex items-center gap-0.5 text-green-400 text-xs"><ArrowUpIcon className="w-3 h-3" />+{value}</span>
