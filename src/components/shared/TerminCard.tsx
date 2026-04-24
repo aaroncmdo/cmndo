@@ -92,7 +92,7 @@ const TONE_CLASSES: Record<StatusUi['tone'], string> = {
   emerald: 'bg-emerald-50 text-emerald-800 border-emerald-200',
   amber: 'bg-amber-50 text-amber-800 border-amber-200',
   red: 'bg-red-50 text-red-800 border-red-200',
-  gray: 'bg-gray-50 text-gray-700 border-gray-200',
+  gray: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border',
 }
 
 function fmtDate(iso: string | null): string | null {
@@ -150,18 +150,18 @@ export function TerminCard({ termin, fall, readOnly = false }: SharedTerminCardP
         role="region"
         aria-label="Termin"
       >
-        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+        <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
           Termin
         </p>
 
         {datumLabel && (
           <div className="flex items-start gap-3">
-            <CalendarIcon className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
+            <CalendarIcon className="w-4 h-4 text-claimondo-ondo/70 mt-0.5 shrink-0" />
             <div className="flex-1 min-w-0 text-sm">
               <p className="text-claimondo-navy font-medium">{datumLabel}</p>
               {(startLabel || endLabel) && (
-                <p className="text-xs text-gray-600 mt-0.5 flex items-center gap-1.5">
-                  <ClockIcon className="w-3.5 h-3.5 text-gray-400" />
+                <p className="text-xs text-claimondo-ondo mt-0.5 flex items-center gap-1.5">
+                  <ClockIcon className="w-3.5 h-3.5 text-claimondo-ondo/70" />
                   {startLabel}
                   {endLabel && startLabel && endLabel !== startLabel
                     ? ` – ${endLabel}`
@@ -175,12 +175,12 @@ export function TerminCard({ termin, fall, readOnly = false }: SharedTerminCardP
 
         {adressteile.length > 0 && (
           <div className="flex items-start gap-3 pt-3 border-t border-claimondo-border">
-            <MapPinIcon className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
+            <MapPinIcon className="w-4 h-4 text-claimondo-ondo/70 mt-0.5 shrink-0" />
             <div className="flex-1 min-w-0 text-xs">
               {adressteile.map((zeile, i) => (
                 <p
                   key={i}
-                  className={i === 0 ? 'text-claimondo-navy' : 'text-gray-600 mt-0.5'}
+                  className={i === 0 ? 'text-claimondo-navy' : 'text-claimondo-ondo mt-0.5'}
                 >
                   {zeile}
                 </p>
@@ -207,7 +207,7 @@ export function TerminCard({ termin, fall, readOnly = false }: SharedTerminCardP
             <span>{statusUi.label}</span>
           </div>
           {statusUi.hint && (
-            <p className="text-[11px] text-gray-500">{statusUi.hint}</p>
+            <p className="text-[11px] text-claimondo-ondo">{statusUi.hint}</p>
           )}
         </div>
 

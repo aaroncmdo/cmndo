@@ -32,13 +32,13 @@ export default function PageHeader({
     <div className="flex items-start justify-between gap-2 sm:gap-4">
       <div className="min-w-0">
         <h1
-          className={`${titleSize} font-semibold text-gray-900 flex items-center gap-2`}
+          className={`${titleSize} font-semibold text-claimondo-navy flex items-center gap-2`}
         >
-          {Icon ? <Icon className="w-5 h-5 text-gray-500 shrink-0" /> : null}
+          {Icon ? <Icon className="w-5 h-5 text-claimondo-ondo shrink-0" /> : null}
           <span className="truncate">{title}</span>
         </h1>
         {description ? (
-          <p className="text-sm text-gray-500 mt-0.5">{description}</p>
+          <p className="text-sm text-claimondo-ondo mt-0.5">{description}</p>
         ) : null}
       </div>
       {actions ? (

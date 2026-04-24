@@ -31,7 +31,7 @@ export default function Avatar({ url, name, size = 'md', className = '' }: Props
       <img
         src={url}
         alt={name ?? 'Profilbild'}
-        className={`${boxClass} rounded-full object-cover bg-gray-100 ${className}`}
+        className={`${boxClass} rounded-full object-cover bg-[#f8f9fb] ${className}`}
       />
     )
   }

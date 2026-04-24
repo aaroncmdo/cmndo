@@ -13,8 +13,8 @@ export type StatusBadgeTone =
   | 'ondo'       // claimondo-ondo — sekundäre Aktion/aktiv
 
 const TONE_CLS: Record<StatusBadgeTone, string> = {
-  neutral: 'bg-gray-100 text-gray-700',
-  info: 'bg-blue-100 text-blue-700',
+  neutral: 'bg-[#f8f9fb] text-claimondo-navy',
+  info: 'bg-claimondo-ondo/20 text-claimondo-navy',
   success: 'bg-emerald-100 text-emerald-700',
   warning: 'bg-amber-100 text-amber-700',
   danger: 'bg-rose-100 text-rose-700',

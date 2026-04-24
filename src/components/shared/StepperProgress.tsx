@@ -36,7 +36,7 @@ export function StepperProgress({ steps, className, label = 'Fortschritt' }: Pro
                   step.status === 'done' && 'bg-claimondo-ondo text-white',
                   step.status === 'active' &&
                     'animate-stepper-pulse bg-claimondo-navy text-white',
-                  step.status === 'todo' && 'bg-slate-200 text-slate-500',
+                  step.status === 'todo' && 'bg-claimondo-border text-claimondo-ondo',
                 )}
                 aria-hidden="true"
               >
@@ -47,7 +47,7 @@ export function StepperProgress({ steps, className, label = 'Fortschritt' }: Pro
                   'truncate text-sm',
                   step.status === 'active'
                     ? 'font-semibold text-claimondo-navy'
-                    : 'text-slate-600',
+                    : 'text-claimondo-ondo',
                 )}
               >
                 {step.label}

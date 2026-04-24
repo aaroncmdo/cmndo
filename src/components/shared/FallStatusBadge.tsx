@@ -22,7 +22,7 @@ export interface FallStatusBadgeProps {
 export default function FallStatusBadge({ status, size = 'sm', className = '' }: FallStatusBadgeProps) {
   const code = status ?? ''
   const label = FALL_STATUS_LABELS[code] ?? code ?? '—'
-  const color = FALL_STATUS_COLORS[code] ?? 'bg-gray-100 text-gray-700 border-gray-200'
+  const color = FALL_STATUS_COLORS[code] ?? 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border'
   return (
     <span
       className={`inline-flex items-center rounded-full font-medium whitespace-nowrap ${SIZE_CLASSES[size]} ${color} ${className}`}

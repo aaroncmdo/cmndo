@@ -57,7 +57,7 @@ export function TodoCard({
   className = '',
 }: TodoCardProps) {
   const surface = passive
-    ? 'bg-gray-50/80 border-claimondo-border'
+    ? 'bg-[#f8f9fb]/80 border-claimondo-border'
     : severity === 'info'
       ? 'bg-white border-claimondo-border'
       : 'glass-light'
@@ -76,11 +76,11 @@ export function TodoCard({
     >
       {hasHeader && (
         <div className="flex items-center justify-between">
-          <p className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
+          <p className="text-xs uppercase tracking-wider text-claimondo-ondo font-semibold">
             {label}
           </p>
           {counterText && (
-            <span className="text-[10px] text-gray-400">{counterText}</span>
+            <span className="text-[10px] text-claimondo-ondo/70">{counterText}</span>
           )}
         </div>
       )}
@@ -108,7 +108,7 @@ export function TodoCardActionBody({
 }) {
   const deadlineColor = {
     default: 'text-claimondo-ondo',
-    info: 'text-gray-500',
+    info: 'text-claimondo-ondo',
     warning: 'text-amber-700',
     critical: 'text-rose-700',
     success: 'text-emerald-700',
@@ -118,7 +118,7 @@ export function TodoCardActionBody({
     <div className="space-y-1">
       <p className="text-sm font-semibold text-claimondo-navy">{title}</p>
       {description && (
-        <p className="text-xs text-gray-600 leading-relaxed">{description}</p>
+        <p className="text-xs text-claimondo-ondo leading-relaxed">{description}</p>
       )}
       {deadline && (
         <p className={`text-[11px] mt-2 font-medium ${deadlineColor}`}>
