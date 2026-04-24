@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
 import { PhaseTriggerList } from './PhaseTriggerList'
+import { AdHocAnforderungsButton } from './anforderung'
 import { KanzleiPaketModal } from './KanzleiPaketModal'
 import { ManualStatusOverrideModal } from './ManualStatusOverrideModal'
 import { ManualPhaseOverrideModal } from './ManualPhaseOverrideModal'
@@ -96,6 +97,7 @@ export function FallActionBar({
         <InboxIcon className="w-3.5 h-3.5" />
         Kanzlei-Paket einlesen
       </button>
+      <AdHocAnforderungsButton fallId={fallId} />
       {isAdmin && (
         <button
           type="button"
