@@ -962,6 +962,74 @@ export type Database = {
           },
         ]
       }
+      communities: {
+        Row: {
+          beschreibung: string | null
+          budget_verteilung: string
+          erstellt_am: string
+          erstellt_von: string | null
+          exklusiv: boolean
+          faelle_genutzt_aktueller_monat: number
+          faelle_pro_monat: number
+          id: string
+          ist_aktiv: boolean
+          name: string
+          polygon: Json | null
+          radius_km: number | null
+          updated_at: string
+          zentrum_adresse: string | null
+          zentrum_lat: number | null
+          zentrum_lng: number | null
+          zentrum_plz: string | null
+        }
+        Insert: {
+          beschreibung?: string | null
+          budget_verteilung?: string
+          erstellt_am?: string
+          erstellt_von?: string | null
+          exklusiv?: boolean
+          faelle_genutzt_aktueller_monat?: number
+          faelle_pro_monat?: number
+          id?: string
+          ist_aktiv?: boolean
+          name: string
+          polygon?: Json | null
+          radius_km?: number | null
+          updated_at?: string
+          zentrum_adresse?: string | null
+          zentrum_lat?: number | null
+          zentrum_lng?: number | null
+          zentrum_plz?: string | null
+        }
+        Update: {
+          beschreibung?: string | null
+          budget_verteilung?: string
+          erstellt_am?: string
+          erstellt_von?: string | null
+          exklusiv?: boolean
+          faelle_genutzt_aktueller_monat?: number
+          faelle_pro_monat?: number
+          id?: string
+          ist_aktiv?: boolean
+          name?: string
+          polygon?: Json | null
+          radius_km?: number | null
+          updated_at?: string
+          zentrum_adresse?: string | null
+          zentrum_lat?: number | null
+          zentrum_lng?: number | null
+          zentrum_plz?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communities_erstellt_von_fkey"
+            columns: ["erstellt_von"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_leaderboard: {
         Row: {
           durchschnitt_bearbeitungsdauer_h: number | null
@@ -1012,6 +1080,42 @@ export type Database = {
             columns: ["sv_id"]
             isOneToOne: false
             referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_memberships: {
+        Row: {
+          beigetreten_am: string
+          community_id: string
+          profile_id: string
+          rolle_in_community: string
+        }
+        Insert: {
+          beigetreten_am?: string
+          community_id: string
+          profile_id: string
+          rolle_in_community?: string
+        }
+        Update: {
+          beigetreten_am?: string
+          community_id?: string
+          profile_id?: string
+          rolle_in_community?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_memberships_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_memberships_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
