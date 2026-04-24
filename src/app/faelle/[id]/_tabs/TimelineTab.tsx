@@ -12,7 +12,7 @@ export default function TimelineTab({ events }: { events: FallEvent[] }) {
         <h2 className="text-sm font-semibold text-claimondo-navy">
           Timeline — alle Aktivitäten im Fall
         </h2>
-        <span className="text-xs text-gray-500">{events.length} Events</span>
+        <span className="text-xs text-claimondo-ondo">{events.length} Events</span>
       </div>
       <EventTimeline events={events} />
     </div>

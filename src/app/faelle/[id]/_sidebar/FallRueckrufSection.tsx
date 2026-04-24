@@ -76,8 +76,8 @@ export default function FallRueckrufSection({ fallId }: { fallId: string }) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-2">
-      <div className="flex items-center gap-2 text-xs font-semibold text-gray-700">
+    <div className="bg-white rounded-xl border border-claimondo-border p-3 space-y-2">
+      <div className="flex items-center gap-2 text-xs font-semibold text-claimondo-navy">
         <PhoneCallIcon className="w-3.5 h-3.5 text-amber-400" /> Rückruf
         {isErledigt && (
           <span className="ml-auto text-[10px] bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded-full">Erledigt</span>
@@ -91,14 +91,14 @@ export default function FallRueckrufSection({ fallId }: { fallId: string }) {
         type="datetime-local"
         value={datum}
         onChange={e => setDatum(e.target.value)}
-        className="w-full bg-gray-50 border border-gray-200 text-gray-800 text-[11px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+        className="w-full bg-[#f8f9fb] border border-claimondo-border text-claimondo-navy text-[11px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
       />
       <input
         type="text"
         value={notiz}
         onChange={e => setNotiz(e.target.value)}
         placeholder="Notiz"
-        className="w-full bg-gray-50 border border-gray-200 text-gray-800 text-[11px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#4573A2] placeholder-gray-400"
+        className="w-full bg-[#f8f9fb] border border-claimondo-border text-claimondo-navy text-[11px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#4573A2] placeholder-gray-400"
       />
 
       <div className="flex gap-2">

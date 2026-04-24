@@ -47,7 +47,7 @@ export default function FallSidebar({
   const { fall, lead } = useFall()
 
   return (
-    <aside className="w-full lg:w-[340px] shrink-0 bg-[#f8f9fb] border-l border-gray-200 overflow-y-auto p-4 space-y-3">
+    <aside className="w-full lg:w-[340px] shrink-0 bg-[#f8f9fb] border-l border-claimondo-border overflow-y-auto p-4 space-y-3">
       {/* Quick Actions (phase-abhängig) */}
       <QuickActions />
 
@@ -66,11 +66,11 @@ export default function FallSidebar({
       />
 
       {/* Kunde Kurzinfo */}
-      <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-1">
-        <div className="flex items-center gap-2 text-xs font-semibold text-gray-700">
-          <UserIcon className="w-3.5 h-3.5 text-gray-400" /> Kunde
+      <div className="bg-white rounded-xl border border-claimondo-border p-3 space-y-1">
+        <div className="flex items-center gap-2 text-xs font-semibold text-claimondo-navy">
+          <UserIcon className="w-3.5 h-3.5 text-claimondo-ondo/70" /> Kunde
         </div>
-        <p className="text-sm font-medium text-gray-900">
+        <p className="text-sm font-medium text-claimondo-navy">
           {[lead?.vorname, lead?.nachname].filter(Boolean).join(' ') || '—'}
         </p>
         {lead?.telefon && (
@@ -84,12 +84,12 @@ export default function FallSidebar({
       </div>
 
       {/* Fahrzeug Kurzinfo */}
-      <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-1">
-        <p className="text-[9px] font-semibold text-gray-500 uppercase">Fahrzeug</p>
-        <p className="text-sm font-medium text-gray-900">
+      <div className="bg-white rounded-xl border border-claimondo-border p-3 space-y-1">
+        <p className="text-[9px] font-semibold text-claimondo-ondo uppercase">Fahrzeug</p>
+        <p className="text-sm font-medium text-claimondo-navy">
           {[fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || '—'}
         </p>
-        <p className="text-[10px] text-gray-500">
+        <p className="text-[10px] text-claimondo-ondo">
           {(fall.kennzeichen as string | null) ?? '—'}
         </p>
       </div>

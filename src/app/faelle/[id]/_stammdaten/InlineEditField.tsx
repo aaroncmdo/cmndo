@@ -60,7 +60,7 @@ export default function InlineEditField({
         ? 'border-green-300'
         : status === 'error'
           ? 'border-red-300'
-          : 'border-gray-200 hover:border-gray-300 focus:border-[#4573A2]'
+          : 'border-claimondo-border hover:border-claimondo-border focus:border-[#4573A2]'
 
   const common = {
     value: draft,
@@ -69,24 +69,24 @@ export default function InlineEditField({
     onBlur: handleBlur,
     disabled: !editable,
     placeholder,
-    className: `text-sm font-medium bg-transparent border-b w-full py-0.5 outline-none transition-colors disabled:cursor-default disabled:text-gray-700 ${borderCls}`,
+    className: `text-sm font-medium bg-transparent border-b w-full py-0.5 outline-none transition-colors disabled:cursor-default disabled:text-claimondo-navy ${borderCls}`,
   }
 
   return (
     <div className="space-y-0.5">
-      <label className="text-[10px] text-gray-400 uppercase tracking-wider flex items-center gap-1">
+      <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider flex items-center gap-1">
         {label}
-        {status === 'saving' && <LoaderIcon className="w-3 h-3 text-blue-400 animate-spin" />}
+        {status === 'saving' && <LoaderIcon className="w-3 h-3 text-claimondo-ondo animate-spin" />}
         {status === 'saved' && <CheckIcon className="w-3 h-3 text-green-500" />}
         {status === 'error' && <span className="text-red-500">Fehler</span>}
-        {!editable && <span className="text-[9px] text-gray-300 ml-auto">read-only</span>}
+        {!editable && <span className="text-[9px] text-claimondo-ondo/50 ml-auto">read-only</span>}
       </label>
       {type === 'textarea' ? (
         <textarea {...common} rows={2} />
       ) : (
         <input type={type} {...common} />
       )}
-      {hint && <p className="text-[10px] text-gray-400">{hint}</p>}
+      {hint && <p className="text-[10px] text-claimondo-ondo/70">{hint}</p>}
     </div>
   )
 }

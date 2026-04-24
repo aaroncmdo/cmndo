@@ -47,11 +47,11 @@ function Card({
   children: ReactNode
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+    <div className="bg-white rounded-xl border border-claimondo-border p-5 space-y-4">
       <div className="flex items-center gap-2">
         {icon}
-        <h2 className="text-sm font-semibold text-gray-900">{title}</h2>
-        {hint && <span className="text-[10px] text-gray-400 ml-auto">{hint}</span>}
+        <h2 className="text-sm font-semibold text-claimondo-navy">{title}</h2>
+        {hint && <span className="text-[10px] text-claimondo-ondo/70 ml-auto">{hint}</span>}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{children}</div>
     </div>
@@ -75,7 +75,7 @@ export function KundendatenSection() {
   const email = (fall.kunde_email as string | null) ?? (lead?.email as string | null) ?? null
   const telefon = (fall.kunde_telefon as string | null) ?? (lead?.telefon as string | null) ?? null
   return (
-    <Card icon={<UserIcon className="w-4 h-4 text-gray-400" />} title="Kundendaten">
+    <Card icon={<UserIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Kundendaten">
       <InlineEditField label="Vorname" fieldName="kunde_vorname" value={vorname} />
       <InlineEditField label="Nachname" fieldName="kunde_nachname" value={nachname} />
       <InlineEditField label="E-Mail" fieldName="kunde_email" value={email} />
@@ -102,7 +102,7 @@ export function FahrzeugdatenSection() {
   const tsn = (fall.tsn as string | null) ?? (lead?.tsn as string | null) ?? null
   return (
     <Card
-      icon={<CarIcon className="w-4 h-4 text-gray-400" />}
+      icon={<CarIcon className="w-4 h-4 text-claimondo-ondo/70" />}
       title="Fahrzeug & Halter"
       hint="ZB1-OCR aus W3 schreibt Halter-Felder + FIN"
     >
@@ -131,8 +131,8 @@ export function FahrzeugdatenSection() {
       <InlineEditField label="Halter Stadt" fieldName="halter_stadt" value={f(fall, 'halter_stadt')} />
       <InlineEditField label="Halter = Kunde?" fieldName="ist_fahrzeughalter" value={f(fall, 'ist_fahrzeughalter')} placeholder="Ja / Nein" hint="AAR-318: Flag" />
       <InlineEditField label="Werkstatt seit (Datum)" fieldName="werkstatt_seit_datum" value={typeof fall.werkstatt_seit_datum === 'string' ? fall.werkstatt_seit_datum.slice(0, 10) : null} type="date" hint="AAR-305" />
-      <div className="sm:col-span-2 pt-2 border-t border-gray-100">
-        <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-1.5">
+      <div className="sm:col-span-2 pt-2 border-t border-claimondo-border">
+        <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 mb-1.5">
           Vorschaden-Detailbericht (Cardentity Typ-B)
         </p>
         <CardentityTypBButton
@@ -158,7 +158,7 @@ export function FahrzeugdatenSection() {
 export function UnfallSection() {
   const { fall } = useFall()
   return (
-    <Card icon={<AlertTriangleIcon className="w-4 h-4 text-gray-400" />} title="Unfall">
+    <Card icon={<AlertTriangleIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Unfall">
       <InlineEditField label="Schadensdatum" fieldName="schadens_datum" value={typeof fall.schadens_datum === 'string' ? fall.schadens_datum.slice(0, 10) : null} type="date" />
       <InlineEditField label="Schadensart" fieldName="schadens_art" value={f(fall, 'schadens_art')} />
       <div className="sm:col-span-2">
@@ -238,7 +238,7 @@ function VersicherungStammdaten({ versicherungId }: { versicherungId: string | n
     )
   }
   if (loading) {
-    return <p className="sm:col-span-2 text-[11px] text-gray-400">Lade Stammdaten ...</p>
+    return <p className="sm:col-span-2 text-[11px] text-claimondo-ondo/70">Lade Stammdaten ...</p>
   }
   if (!data) {
     return (
@@ -248,11 +248,11 @@ function VersicherungStammdaten({ versicherungId }: { versicherungId: string | n
     )
   }
   return (
-    <div className="sm:col-span-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 space-y-1">
-      <p className="text-[10px] uppercase tracking-wider text-blue-900 font-semibold">
+    <div className="sm:col-span-2 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 space-y-1">
+      <p className="text-[10px] uppercase tracking-wider text-claimondo-navy font-semibold">
         Stammdaten (aus versicherungen-Tabelle)
       </p>
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-blue-900">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-claimondo-navy">
         {data.schaden_telefon && (
           <span className="flex items-center gap-1">
             <PhoneIcon className="w-3 h-3" /> {data.schaden_telefon}
@@ -280,7 +280,7 @@ export function GegnerSection() {
   // ersatzlos weg. FK auf versicherungen-Stammdaten: gegner_versicherung_id.
   const versicherungId = (fall as Record<string, unknown>).gegner_versicherung_id as string | null ?? null
   return (
-    <Card icon={<ShieldIcon className="w-4 h-4 text-gray-400" />} title="Gegner & Versicherung">
+    <Card icon={<ShieldIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Gegner & Versicherung">
       <InlineEditField label="Gegner bekannt?" fieldName="gegner_bekannt" value={f(fall, 'gegner_bekannt')} placeholder="Ja / Nein" />
       <div className="sm:col-span-2">
         <InlineEditField label="Gegner Name" fieldName="gegner_name" value={f(fall, 'gegner_name')} />
@@ -303,7 +303,7 @@ export function VorschaedenSection() {
   // DB-Schema: hat_vorschaeden + vorschaden_anzahl + vorschaden_letzter_datum
   // (vorschaeden_beschreibung liegt auf leads, vorschaden_erkannt=CarDentity, vorschaden_geprueft=KB)
   return (
-    <Card icon={<WrenchIcon className="w-4 h-4 text-gray-400" />} title="Vorschäden">
+    <Card icon={<WrenchIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Vorschäden">
       <InlineEditField label="Vorschäden vorhanden?" fieldName="hat_vorschaeden" value={f(fall, 'hat_vorschaeden')} placeholder="Ja / Nein" />
       <InlineEditField label="Anzahl" fieldName="vorschaden_anzahl" value={f(fall, 'vorschaden_anzahl')} type="number" />
       <div className="sm:col-span-2">
@@ -334,7 +334,7 @@ export function NutzungsausfallSection() {
       hint="Manueller Workflow — nur Kanzlei darf bei VS anfragen"
     >
       <div className="sm:col-span-2 space-y-3">
-        <div className="text-xs text-gray-600 bg-amber-50 border border-amber-200 rounded-lg p-3">
+        <div className="text-xs text-claimondo-ondo bg-amber-50 border border-amber-200 rounded-lg p-3">
           <p>
             Kunde hat{' '}
             {mietwagen && nutzungsausfall
@@ -349,7 +349,7 @@ export function NutzungsausfallSection() {
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-[10px] uppercase tracking-wider text-gray-400">
+          <span className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70">
             Fahrzeug fahrbereit?
           </span>
           {(['ja', 'nein', 'unklar'] as const).map((opt) => {
@@ -367,7 +367,7 @@ export function NutzungsausfallSection() {
                 className={`px-3 py-1 rounded-md text-xs font-medium border ${
                   selected
                     ? 'bg-[#4573A2] text-white border-[#4573A2]'
-                    : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                    : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-[#f8f9fb]'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {opt === 'ja' ? 'Ja' : opt === 'nein' ? 'Nein' : 'Noch unklar'}
@@ -377,7 +377,7 @@ export function NutzungsausfallSection() {
         </div>
 
         {fahrbereit === false && (
-          <label className="flex items-start gap-2 text-xs text-gray-700 cursor-pointer">
+          <label className="flex items-start gap-2 text-xs text-claimondo-navy cursor-pointer">
             <input
               type="checkbox"
               checked={kanzleiInformiert}
@@ -394,7 +394,7 @@ export function NutzungsausfallSection() {
           </label>
         )}
 
-        <p className="text-[11px] text-gray-500">
+        <p className="text-[11px] text-claimondo-ondo">
           Reparaturnachweis: bitte als Pflichtdokument im Dokumente-Tab hochladen
           sobald die Werkstatt die Reparatur abgeschlossen hat.
         </p>
@@ -409,7 +409,7 @@ export function BesichtigungSection() {
   // AAR-552 Cluster E: besichtigung_datum ersatzlos entfernt — Termin-Datum
   // kommt via v_faelle_mit_aktuellem_termin.aktueller_termin_start.
   return (
-    <Card icon={<MapPinIcon className="w-4 h-4 text-gray-400" />} title="Besichtigung">
+    <Card icon={<MapPinIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Besichtigung">
       <div className="sm:col-span-2">
         <InlineEditField label="Besichtigungsort-Adresse" fieldName="besichtigungsort_adresse" value={f(fall, 'besichtigungsort_adresse')} />
       </div>
@@ -423,7 +423,7 @@ export function KernwerteSection() {
   // schadens_hoehe_netto — kein kernwert_-Prefix
   return (
     <Card
-      icon={<CalculatorIcon className="w-4 h-4 text-gray-400" />}
+      icon={<CalculatorIcon className="w-4 h-4 text-claimondo-ondo/70" />}
       title="Gutachten-Kernwerte"
       hint="LexDrive-OCR überschreibt automatisch — Admin-Override möglich"
     >
@@ -440,7 +440,7 @@ export function KernwerteSection() {
 export function NotizenSection() {
   const { fall } = useFall()
   return (
-    <Card icon={<StickyNoteIcon className="w-4 h-4 text-gray-400" />} title="Notizen">
+    <Card icon={<StickyNoteIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Notizen">
       <div className="sm:col-span-2">
         <InlineEditField
           label="Interne Notiz"
@@ -501,35 +501,35 @@ export function ZeugenKontakteSection() {
 
   return (
     <Card
-      icon={<UsersIcon className="w-4 h-4 text-gray-400" />}
+      icon={<UsersIcon className="w-4 h-4 text-claimondo-ondo/70" />}
       title="Zeugen-Kontakte"
       hint={status === 'saving' ? 'Speichert …' : status === 'saved' ? 'Gespeichert' : status === 'error' ? 'Fehler' : undefined}
     >
       <div className="sm:col-span-2 space-y-3">
         {zeugen.length === 0 && (
-          <p className="text-xs text-gray-400">Noch keine Zeugen erfasst.</p>
+          <p className="text-xs text-claimondo-ondo/70">Noch keine Zeugen erfasst.</p>
         )}
         {zeugen.map((z, idx) => (
           <div
             key={idx}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 rounded-lg border border-gray-100 bg-gray-50"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 rounded-lg border border-claimondo-border bg-[#f8f9fb]"
           >
             <input
-              className="text-sm px-2 py-1 rounded bg-white border border-gray-200"
+              className="text-sm px-2 py-1 rounded bg-white border border-claimondo-border"
               placeholder="Name"
               defaultValue={z.name}
               disabled={!editable}
               onBlur={(e) => updateZeuge(idx, { name: e.target.value })}
             />
             <input
-              className="text-sm px-2 py-1 rounded bg-white border border-gray-200"
+              className="text-sm px-2 py-1 rounded bg-white border border-claimondo-border"
               placeholder="Telefon"
               defaultValue={z.telefon}
               disabled={!editable}
               onBlur={(e) => updateZeuge(idx, { telefon: e.target.value })}
             />
             <input
-              className="text-sm px-2 py-1 rounded bg-white border border-gray-200"
+              className="text-sm px-2 py-1 rounded bg-white border border-claimondo-border"
               placeholder="E-Mail (optional)"
               defaultValue={z.email ?? ''}
               disabled={!editable}
@@ -537,7 +537,7 @@ export function ZeugenKontakteSection() {
             />
             <div className="flex gap-2">
               <input
-                className="flex-1 text-sm px-2 py-1 rounded bg-white border border-gray-200"
+                className="flex-1 text-sm px-2 py-1 rounded bg-white border border-claimondo-border"
                 placeholder="Notiz (optional)"
                 defaultValue={z.notiz ?? ''}
                 disabled={!editable}
@@ -574,7 +574,7 @@ export function VsStatusSection() {
   const { fall } = useFall()
   return (
     <Card
-      icon={<FileTextIcon className="w-4 h-4 text-gray-400" />}
+      icon={<FileTextIcon className="w-4 h-4 text-claimondo-ondo/70" />}
       title="VS-Status & Regulierung"
     >
       <InlineEditField label="Kürzungsbetrag (€)" fieldName="kuerzungs_betrag" value={f(fall, 'kuerzungs_betrag')} type="number" />

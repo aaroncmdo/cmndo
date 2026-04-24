@@ -67,8 +67,8 @@ export default function SlaAlerts() {
   if (alerts.length === 0) return null
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-2">
-      <p className="text-[9px] font-semibold text-gray-500 uppercase flex items-center gap-1">
+    <div className="bg-white rounded-xl border border-claimondo-border p-3 space-y-2">
+      <p className="text-[9px] font-semibold text-claimondo-ondo uppercase flex items-center gap-1">
         <TimerIcon className="w-3 h-3" /> SLA-Alerts
       </p>
       <div className="space-y-1.5">

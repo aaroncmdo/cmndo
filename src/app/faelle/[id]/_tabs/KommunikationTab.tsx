@@ -61,12 +61,12 @@ export default function KommunikationTab({
         />
       </div>
 
-      <aside className="bg-white border border-gray-200 rounded-xl p-4 h-fit">
+      <aside className="bg-white border border-claimondo-border rounded-xl p-4 h-fit">
         <h3 className="text-xs font-semibold text-[#0D1B3E] uppercase tracking-wider mb-3">
           Teilnehmer ({teilnehmer.length})
         </h3>
         {teilnehmer.length === 0 ? (
-          <p className="text-xs text-gray-500 italic">Noch keine Teilnehmer zugeordnet.</p>
+          <p className="text-xs text-claimondo-ondo italic">Noch keine Teilnehmer zugeordnet.</p>
         ) : (
           <ul className="space-y-2">
             {teilnehmer.map((t) => {
@@ -79,7 +79,7 @@ export default function KommunikationTab({
                     <img
                       src={t.avatar_url}
                       alt={name}
-                      className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                      className="w-8 h-8 rounded-full object-cover border border-claimondo-border"
                     />
                   ) : (
                     <span className="w-8 h-8 rounded-full bg-[#EBF1F8] text-[#0D1B3E] flex items-center justify-center text-xs font-semibold">
@@ -88,15 +88,15 @@ export default function KommunikationTab({
                   )}
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-[#0D1B3E] truncate">{name}</p>
-                    <p className="text-[10px] text-gray-500">{ROLLE_LABEL[t.rolle]}</p>
+                    <p className="text-[10px] text-claimondo-ondo">{ROLLE_LABEL[t.rolle]}</p>
                   </div>
                 </li>
               )
             })}
           </ul>
         )}
-        <div className="mt-4 pt-3 border-t border-gray-100">
-          <p className="text-[10px] text-gray-400 leading-snug">
+        <div className="mt-4 pt-3 border-t border-claimondo-border">
+          <p className="text-[10px] text-claimondo-ondo/70 leading-snug">
             Admin + KB sehen alle fünf Kanäle inklusive des internen KB↔SV-Chats.
             System-Nachrichten werden als Separator dargestellt.
           </p>

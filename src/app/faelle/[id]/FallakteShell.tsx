@@ -156,7 +156,7 @@ export default function FallakteShell({
             <FallActionBar result={subphase} fallId={fall.id} compact />
           </FallIdentityHeader>
           {/* Tab-Bar — AAR-668: visuell verstärkt, aktiver Tab mit Hintergrund */}
-          <nav className="border-b border-gray-200 bg-white">
+          <nav className="border-b border-claimondo-border bg-white">
             <div className="flex items-center justify-between gap-3 px-4">
               <ul className="flex items-center gap-1 overflow-x-auto py-1.5">
                 {TABS.map((tab) => {
@@ -170,10 +170,10 @@ export default function FallakteShell({
                         className={`flex items-center gap-2 px-3.5 py-2 text-sm rounded-lg transition-all whitespace-nowrap ${
                           active
                             ? 'bg-[#4573A2]/10 text-[#0D1B3E] font-semibold ring-1 ring-[#4573A2]/20'
-                            : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50 font-medium'
+                            : 'text-claimondo-ondo hover:text-claimondo-navy hover:bg-[#f8f9fb] font-medium'
                         }`}
                       >
-                        <Icon className={`w-4 h-4 ${active ? 'text-[#4573A2]' : 'text-gray-400'}`} />
+                        <Icon className={`w-4 h-4 ${active ? 'text-[#4573A2]' : 'text-claimondo-ondo/70'}`} />
                         {tab.label}
                       </button>
                     </li>
