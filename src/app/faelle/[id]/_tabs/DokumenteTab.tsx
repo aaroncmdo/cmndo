@@ -34,6 +34,9 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 // AAR-327: Dokument-Anforderungs-UI
 import AnforderungenListe, { type AnforderungsItem } from '@/components/dokumente/AnforderungenListe'
 import type { AnforderbarerSlot } from '@/components/dokumente/AnforderungsModal'
+// AAR-762 Phase 3: Liste offene Ad-hoc-Anforderungen
+import { AdHocAnforderungenListe } from '@/components/admin/fallakte/anforderung'
+import type { AdHocAnforderungRow } from '@/lib/dokumente/ad-hoc-anforderung'
 // AAR-326: KB-Zuordnungs-UI + QC-Modal + Drag&Drop
 import DokumenteUnzugeordnetBox from '@/components/dokumente/DokumenteUnzugeordnetBox'
 import DokumenteListeSortierbar, { type SortierbarPflicht } from '@/components/dokumente/DokumenteListeSortierbar'
@@ -107,6 +110,7 @@ type DokumenteTabProps = {
   anforderbareSlots: AnforderbarerSlot[]
   anforderungenVonMir: AnforderungsItem[]
   rolleLabel: string
+  adHocAnforderungen: AdHocAnforderungRow[]
   unzugeordneteUploads: UnzugeordnetDoc[]
   zuPruefendeUploads: QcDoc[]
   uploadbareSlots: ZuordnungsSlot[]
@@ -125,6 +129,7 @@ export default function DokumenteTab({
   anforderbareSlots,
   anforderungenVonMir,
   rolleLabel,
+  adHocAnforderungen,
   unzugeordneteUploads,
   zuPruefendeUploads,
   uploadbareSlots,
@@ -397,6 +402,9 @@ export default function DokumenteTab({
         slotsVerfuegbar={anforderbareSlots}
         anforderungen={anforderungenVonMir}
       />
+
+      {/* AAR-762 Phase 3: Ad-hoc Dokument-Anforderungen (Admin/KB) */}
+      <AdHocAnforderungenListe anforderungen={adHocAnforderungen} />
 
       {/* AAR-326: Mount-Point für QC-Modal */}
       <DokumenteQcModal
