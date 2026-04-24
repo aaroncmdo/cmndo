@@ -27,7 +27,7 @@ export function TaskAnlegenButton({
 
   const className =
     variant === 'primary'
-      ? 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-xs font-medium text-gray-800 hover:bg-gray-50'
+      ? 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-xs font-medium text-claimondo-navy hover:bg-[#f8f9fb]'
       : 'inline-flex items-center gap-1 text-xs font-medium text-[#4573A2] hover:text-[#0D1B3E]'
 
   return (

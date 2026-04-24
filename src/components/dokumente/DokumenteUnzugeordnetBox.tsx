@@ -48,19 +48,19 @@ export default function DokumenteUnzugeordnetBox({
             <div className="flex items-center gap-2 min-w-0">
               <FileTextIcon className="w-4 h-4 text-amber-700 shrink-0" />
               <div className="min-w-0">
-                <p className="text-sm text-gray-800 truncate">
+                <p className="text-sm text-claimondo-navy truncate">
                   {doc.original_filename ?? 'Unbenannt'}
                 </p>
                 <div className="flex items-center gap-2 mt-0.5">
                   <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium bg-white/70 text-amber-700 border border-amber-200">
                     {doc.dokument_typ === 'kunde-nachreichung' ? 'Nachreichung' : 'Sonstiges'}
                   </span>
-                  <span className="text-[9px] text-gray-500">
+                  <span className="text-[9px] text-claimondo-ondo">
                     {new Date(doc.hochgeladen_am).toLocaleDateString('de-DE')}
                   </span>
                 </div>
                 {doc.beschreibung && (
-                  <p className="text-[11px] text-gray-600 italic mt-0.5 line-clamp-1">
+                  <p className="text-[11px] text-claimondo-ondo italic mt-0.5 line-clamp-1">
                     „{doc.beschreibung}"
                   </p>
                 )}
@@ -72,7 +72,7 @@ export default function DokumenteUnzugeordnetBox({
                   href={doc.previewUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-[#4573A2] p-1"
+                  className="text-claimondo-ondo/70 hover:text-[#4573A2] p-1"
                   title="Dokument öffnen"
                 >
                   <ExternalLinkIcon className="w-3.5 h-3.5" />

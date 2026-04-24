@@ -60,8 +60,8 @@ export function EventFilterBar({
               onClick={() => toggleSource(s.id)}
               className={`inline-flex items-center gap-1 text-xs font-medium rounded-full border px-2.5 py-1 transition-colors ${
                 active
-                  ? 'bg-blue-50 border-claimondo-ondo text-claimondo-navy'
-                  : 'bg-white border-claimondo-border text-gray-500 hover:bg-gray-50'
+                  ? 'bg-[#f8f9fb] border-claimondo-ondo text-claimondo-navy'
+                  : 'bg-white border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb]'
               }`}
             >
               <span>{s.icon}</span>
@@ -84,7 +84,7 @@ export function EventFilterBar({
           <option value="90d">Letzte 90 Tage</option>
         </select>
         <div className="relative flex-1 min-w-[180px]">
-          <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+          <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-claimondo-ondo/70" />
           <input
             type="text"
             value={value.search}
@@ -93,7 +93,7 @@ export function EventFilterBar({
             className="w-full text-xs border border-claimondo-border rounded-md pl-7 pr-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/30"
           />
         </div>
-        <span className="text-xs text-gray-500 shrink-0">
+        <span className="text-xs text-claimondo-ondo shrink-0">
           {shown} / {total}
         </span>
       </div>

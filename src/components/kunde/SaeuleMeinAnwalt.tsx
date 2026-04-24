@@ -24,7 +24,7 @@ export default function SaeuleMeinAnwalt({ mandatstyp, serviceTyp, vollmacht_sta
   const waHref = `https://wa.me/${LEXDRIVE_WHATSAPP}?text=${encodeURIComponent(LEXDRIVE_WHATSAPP_INTRO)}`
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 space-y-4">
+    <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-5 space-y-4">
       <div className="flex items-center gap-2">
         <ScaleIcon className="w-5 h-5 text-[#4573A2]" />
         <h2 className="text-sm font-semibold text-[#0D1B3E]">Meine Kanzlei</h2>
@@ -32,9 +32,9 @@ export default function SaeuleMeinAnwalt({ mandatstyp, serviceTyp, vollmacht_sta
 
       <div className="space-y-3">
         <div>
-          <p className="text-xs text-gray-500">Ihr juristischer Ansprechpartner</p>
-          <p className="font-semibold text-gray-900">{kanzlei_name ?? 'LexDrive'}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Fachanwalt für Verkehrsrecht</p>
+          <p className="text-xs text-claimondo-ondo">Ihr juristischer Ansprechpartner</p>
+          <p className="font-semibold text-claimondo-navy">{kanzlei_name ?? 'LexDrive'}</p>
+          <p className="text-xs text-claimondo-ondo mt-0.5">Fachanwalt für Verkehrsrecht</p>
         </div>
 
         <div className="flex items-center gap-2 text-xs">

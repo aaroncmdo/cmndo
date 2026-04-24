@@ -152,7 +152,7 @@ export default function TerminVorschlagModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-claimondo-ondo/70 hover:text-claimondo-ondo"
             aria-label="Schließen"
           >
             <XIcon className="w-5 h-5" />
@@ -183,33 +183,33 @@ export default function TerminVorschlagModal({
               >
                 Diesen Termin annehmen
               </button>
-              <p className="text-[10px] text-gray-500 mt-2 text-center">
+              <p className="text-[10px] text-claimondo-ondo mt-2 text-center">
                 Oder unten einen anderen Zeitpunkt vorschlagen.
               </p>
             </div>
           )}
 
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Datum &amp; Uhrzeit</label>
+            <label className="block text-xs text-claimondo-ondo mb-1">Datum &amp; Uhrzeit</label>
             <input
               type="datetime-local"
               value={datetime}
               onChange={e => setDatetime(e.target.value)}
               required
-              className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+              className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
             />
           </div>
 
           {mode !== 'erstvorschlag' && (
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Grund / Notiz (optional)</label>
+              <label className="block text-xs text-claimondo-ondo mb-1">Grund / Notiz (optional)</label>
               <textarea
                 value={grund}
                 onChange={e => setGrund(e.target.value)}
                 rows={2}
                 maxLength={200}
                 placeholder="z.B. anderer Zeitpunkt passt besser ins Einsatzgebiet"
-                className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#4573A2] resize-none"
+                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#4573A2] resize-none"
               />
             </div>
           )}
@@ -219,7 +219,7 @@ export default function TerminVorschlagModal({
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="flex-1 py-2.5 rounded-xl text-sm text-gray-500 hover:bg-gray-100 transition-colors"
+              className="flex-1 py-2.5 rounded-xl text-sm text-claimondo-ondo hover:bg-[#f8f9fb] transition-colors"
             >
               Abbrechen
             </button>

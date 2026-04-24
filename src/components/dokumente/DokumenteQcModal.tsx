@@ -108,14 +108,14 @@ export default function DokumenteQcModal({
         {doc && (
           <div className="space-y-4 pt-1">
             {/* Datei-Info */}
-            <div className="rounded-lg border border-gray-200 bg-[#f8f9fb] px-3 py-2.5">
-              <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">
+            <div className="rounded-lg border border-claimondo-border bg-[#f8f9fb] px-3 py-2.5">
+              <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo font-semibold">
                 {doc.label}
               </p>
               <div className="mt-1 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <FileTextIcon className="w-4 h-4 text-gray-400 shrink-0" />
-                  <span className="text-sm text-gray-800 truncate">
+                  <FileTextIcon className="w-4 h-4 text-claimondo-ondo/70 shrink-0" />
+                  <span className="text-sm text-claimondo-navy truncate">
                     {doc.original_filename ?? 'Unbenannt'}
                   </span>
                 </div>
@@ -130,15 +130,15 @@ export default function DokumenteQcModal({
                   </a>
                 )}
               </div>
-              <p className="mt-1 text-[10px] text-gray-500">
+              <p className="mt-1 text-[10px] text-claimondo-ondo">
                 Hochgeladen: {new Date(doc.hochgeladen_am).toLocaleDateString('de-DE')}
               </p>
             </div>
 
             {mode === 'ablehnen' && (
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Begründung <span className="text-gray-400 font-normal">(wird dem Kunden gezeigt)</span>
+                <label className="block text-xs font-medium text-claimondo-navy mb-1">
+                  Begründung <span className="text-claimondo-ondo/70 font-normal">(wird dem Kunden gezeigt)</span>
                 </label>
                 <textarea
                   value={begruendung}
@@ -146,9 +146,9 @@ export default function DokumenteQcModal({
                   rows={3}
                   disabled={pending}
                   placeholder="Was muss der Kunde nachbessern? (min. 10 Zeichen)"
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+                  className="w-full px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
                 />
-                <p className="mt-1 text-[10px] text-gray-400">
+                <p className="mt-1 text-[10px] text-claimondo-ondo/70">
                   Der Kunde bekommt eine WhatsApp/SMS/Email-Benachrichtigung mit dieser Begründung.
                 </p>
               </div>
@@ -170,7 +170,7 @@ export default function DokumenteQcModal({
                 type="button"
                 onClick={() => onOpenChange(false)}
                 disabled={pending}
-                className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                className="px-3 py-1.5 text-xs font-medium text-claimondo-navy bg-white border border-claimondo-border rounded-md hover:bg-[#f8f9fb] disabled:opacity-50"
               >
                 Schließen
               </button>
@@ -207,7 +207,7 @@ export default function DokumenteQcModal({
                   setError(null)
                 }}
                 disabled={pending}
-                className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                className="px-3 py-1.5 text-xs font-medium text-claimondo-navy bg-white border border-claimondo-border rounded-md hover:bg-[#f8f9fb] disabled:opacity-50"
               >
                 Zurück
               </button>

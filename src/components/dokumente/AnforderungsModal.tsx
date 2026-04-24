@@ -97,13 +97,13 @@ export default function AnforderungsModal({
         </DialogHeader>
 
         <div className="space-y-4 pt-1">
-          <div className="text-xs text-gray-500">
-            Angefordert durch: <span className="font-medium text-gray-700">{rolleLabel}</span>
+          <div className="text-xs text-claimondo-ondo">
+            Angefordert durch: <span className="font-medium text-claimondo-navy">{rolleLabel}</span>
           </div>
 
           {/* Slot-Dropdown */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
+            <label className="block text-xs font-medium text-claimondo-navy mb-1">
               Welches Dokument brauchen Sie?
             </label>
             {slots.length === 0 ? (
@@ -115,7 +115,7 @@ export default function AnforderungsModal({
               <select
                 value={slotId}
                 onChange={(e) => setSlotId(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2] bg-white"
+                className="w-full px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2] bg-white"
                 disabled={pending}
               >
                 {slots.map((s) => (
@@ -126,14 +126,14 @@ export default function AnforderungsModal({
               </select>
             )}
             {slotInfo?.beschreibung && (
-              <p className="mt-1 text-[11px] text-gray-500">{slotInfo.beschreibung}</p>
+              <p className="mt-1 text-[11px] text-claimondo-ondo">{slotInfo.beschreibung}</p>
             )}
           </div>
 
           {/* Begründung */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
-              Begründung <span className="text-gray-400 font-normal">(wird dem Kunden gezeigt)</span>
+            <label className="block text-xs font-medium text-claimondo-navy mb-1">
+              Begründung <span className="text-claimondo-ondo/70 font-normal">(wird dem Kunden gezeigt)</span>
             </label>
             <textarea
               value={begruendung}
@@ -141,11 +141,11 @@ export default function AnforderungsModal({
               rows={4}
               disabled={pending}
               placeholder="Bitte erläutern Sie warum Sie das Dokument brauchen (min. 20 Zeichen)"
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+              className="w-full px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
             />
             <p
               className={`mt-1 text-[10px] tabular-nums ${
-                begruendungValid ? 'text-gray-400' : 'text-amber-600'
+                begruendungValid ? 'text-claimondo-ondo/70' : 'text-amber-600'
               }`}
             >
               {begruendungChars}/20 Zeichen min.
@@ -154,16 +154,16 @@ export default function AnforderungsModal({
 
           {/* Frist */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Frist</label>
+            <label className="block text-xs font-medium text-claimondo-navy mb-1">Frist</label>
             <input
               type="date"
               value={frist}
               onChange={(e) => setFrist(e.target.value)}
               disabled={pending}
               min={new Date().toISOString().slice(0, 10)}
-              className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+              className="px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
             />
-            <p className="mt-1 text-[10px] text-gray-400">Default: heute + 14 Tage</p>
+            <p className="mt-1 text-[10px] text-claimondo-ondo/70">Default: heute + 14 Tage</p>
           </div>
 
           {error && (
@@ -179,7 +179,7 @@ export default function AnforderungsModal({
             type="button"
             onClick={() => onOpenChange(false)}
             disabled={pending}
-            className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 disabled:opacity-50"
+            className="px-3 py-1.5 text-xs font-medium text-claimondo-navy bg-white border border-claimondo-border rounded-md hover:bg-[#f8f9fb] disabled:opacity-50"
           >
             Abbrechen
           </button>

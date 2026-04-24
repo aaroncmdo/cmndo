@@ -127,21 +127,21 @@ export function TaskAnlegenModal({
         className="relative glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg w-full max-w-lg max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-gray-100 p-4">
-          <h2 className="text-base font-semibold text-gray-900">Task anlegen</h2>
+        <div className="flex items-center justify-between border-b border-claimondo-border p-4">
+          <h2 className="text-base font-semibold text-claimondo-navy">Task anlegen</h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-md hover:bg-gray-100"
+            className="p-1.5 rounded-md hover:bg-[#f8f9fb]"
             aria-label="Schließen"
           >
-            <XIcon className="w-4 h-4 text-gray-500" />
+            <XIcon className="w-4 h-4 text-claimondo-ondo" />
           </button>
         </div>
 
         <div className="p-4 space-y-3">
           <div>
-            <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">
+            <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 block mb-1">
               Titel *
             </label>
             <input
@@ -150,12 +150,12 @@ export function TaskAnlegenModal({
               onChange={(e) => setTitel(e.target.value)}
               maxLength={200}
               placeholder="Was muss gemacht werden?"
-              className="w-full text-sm rounded-md border border-gray-200 px-2 py-1.5 outline-none focus:border-[#4573A2]"
+              className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-[#4573A2]"
             />
           </div>
 
           <div>
-            <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">
+            <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 block mb-1">
               Beschreibung
             </label>
             <textarea
@@ -163,19 +163,19 @@ export function TaskAnlegenModal({
               onChange={(e) => setBeschreibung(e.target.value)}
               rows={3}
               placeholder="Kontext, Details, Links …"
-              className="w-full text-sm rounded-md border border-gray-200 px-2 py-1.5 outline-none focus:border-[#4573A2]"
+              className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-[#4573A2]"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">
+              <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 block mb-1">
                 An wen? *
               </label>
               <select
                 value={empfaengerRolle}
                 onChange={(e) => setEmpfaengerRolle(e.target.value as EmpfaengerRolle)}
-                className="w-full text-sm rounded-md border border-gray-200 px-2 py-1.5 outline-none focus:border-[#4573A2] bg-white"
+                className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-[#4573A2] bg-white"
               >
                 {ROLLEN.map((r) => (
                   <option key={r.value} value={r.value}>
@@ -183,12 +183,12 @@ export function TaskAnlegenModal({
                   </option>
                 ))}
               </select>
-              <p className="text-[10px] text-gray-400 mt-1">
+              <p className="text-[10px] text-claimondo-ondo/70 mt-1">
                 Wer erledigt die Aufgabe?
               </p>
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">
+              <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 block mb-1">
                 Priorität
               </label>
               <select
@@ -196,7 +196,7 @@ export function TaskAnlegenModal({
                 onChange={(e) =>
                   setPrioritaet(e.target.value as 'niedrig' | 'normal' | 'hoch')
                 }
-                className="w-full text-sm rounded-md border border-gray-200 px-2 py-1.5 outline-none focus:border-[#4573A2] bg-white"
+                className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-[#4573A2] bg-white"
               >
                 <option value="niedrig">Niedrig</option>
                 <option value="normal">Normal</option>
@@ -204,24 +204,24 @@ export function TaskAnlegenModal({
               </select>
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">
+              <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 block mb-1">
                 Deadline (optional)
               </label>
               <input
                 type="date"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
-                className="w-full text-sm rounded-md border border-gray-200 px-2 py-1.5 outline-none focus:border-[#4573A2]"
+                className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-[#4573A2]"
               />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">
+              <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 block mb-1">
                 Bezug (optional)
               </label>
               <select
                 value={entityType}
                 onChange={(e) => setEntityType(e.target.value as EntityType | '')}
-                className="w-full text-sm rounded-md border border-gray-200 px-2 py-1.5 outline-none focus:border-[#4573A2] bg-white"
+                className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-[#4573A2] bg-white"
               >
                 <option value="">— Keiner —</option>
                 {ENTITY_TYPES.map((t) => (
@@ -230,7 +230,7 @@ export function TaskAnlegenModal({
                   </option>
                 ))}
               </select>
-              <p className="text-[10px] text-gray-400 mt-1">
+              <p className="text-[10px] text-claimondo-ondo/70 mt-1">
                 Worum geht's fachlich?
               </p>
             </div>
@@ -238,21 +238,21 @@ export function TaskAnlegenModal({
 
           {entityType && (
             <div>
-              <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">
+              <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 block mb-1">
                 Entität
               </label>
               {loadingEntities ? (
-                <p className="text-xs text-gray-400 flex items-center gap-1">
+                <p className="text-xs text-claimondo-ondo/70 flex items-center gap-1">
                   <LoaderIcon className="w-3 h-3 animate-spin" />
                   Lade …
                 </p>
               ) : entityOptions.length === 0 ? (
-                <p className="text-xs text-gray-500">Keine Optionen verfügbar.</p>
+                <p className="text-xs text-claimondo-ondo">Keine Optionen verfügbar.</p>
               ) : (
                 <select
                   value={entityId}
                   onChange={(e) => setEntityId(e.target.value)}
-                  className="w-full text-sm rounded-md border border-gray-200 px-2 py-1.5 outline-none focus:border-[#4573A2] bg-white"
+                  className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-[#4573A2] bg-white"
                 >
                   <option value="">— Wählen —</option>
                   {entityOptions.map((o) => (
@@ -272,11 +272,11 @@ export function TaskAnlegenModal({
           )}
         </div>
 
-        <div className="flex justify-end gap-2 border-t border-gray-100 p-3">
+        <div className="flex justify-end gap-2 border-t border-claimondo-border p-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-3 py-1.5 rounded-md text-xs font-medium border border-gray-200 text-gray-600 hover:bg-gray-50"
+            className="px-3 py-1.5 rounded-md text-xs font-medium border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb]"
           >
             Abbrechen
           </button>

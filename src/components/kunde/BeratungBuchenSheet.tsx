@@ -133,9 +133,9 @@ export default function BeratungBuchenSheet({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border">
           <div>
-            <p className="text-xs uppercase tracking-wider text-gray-500">Beratungstermin</p>
+            <p className="text-xs uppercase tracking-wider text-claimondo-ondo">Beratungstermin</p>
             <p className="text-sm font-semibold text-[#0D1B3E]">
               {step === 'success' ? 'Termin bestätigt' : `Schritt ${step} von 3`}
             </p>
@@ -143,10 +143,10 @@ export default function BeratungBuchenSheet({
           <button
             type="button"
             onClick={handleClose}
-            className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center"
+            className="w-9 h-9 rounded-full hover:bg-[#f8f9fb] flex items-center justify-center"
             aria-label="Schließen"
           >
-            <XIcon className="w-5 h-5 text-gray-600" />
+            <XIcon className="w-5 h-5 text-claimondo-ondo" />
           </button>
         </div>
 
@@ -159,7 +159,7 @@ export default function BeratungBuchenSheet({
                 <select
                   value={thema}
                   onChange={(e) => setThema(e.target.value)}
-                  className="w-full min-h-11 px-3 rounded-xl border-2 border-gray-200 focus:border-[#4573A2] focus:outline-none bg-white text-sm"
+                  className="w-full min-h-11 px-3 rounded-xl border-2 border-claimondo-border focus:border-[#4573A2] focus:outline-none bg-white text-sm"
                 >
                   {THEMEN.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
@@ -167,7 +167,7 @@ export default function BeratungBuchenSheet({
 
               <div>
                 <label className="block text-sm font-medium text-[#0D1B3E] mb-2">
-                  Kurze Beschreibung <span className="text-xs font-normal text-gray-500">(optional)</span>
+                  Kurze Beschreibung <span className="text-xs font-normal text-claimondo-ondo">(optional)</span>
                 </label>
                 <textarea
                   value={beschreibung}
@@ -175,9 +175,9 @@ export default function BeratungBuchenSheet({
                   rows={3}
                   placeholder="z. B. ‚Ich habe eine Rückfrage zur Höhe der Regulierung'"
                   // AAR-452: text-base verhindert iOS-Autozoom beim Fokus
-                  className="w-full px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-[#4573A2] focus:outline-none text-base resize-none"
+                  className="w-full px-3 py-2 rounded-xl border-2 border-claimondo-border focus:border-[#4573A2] focus:outline-none text-base resize-none"
                 />
-                <p className="mt-1 text-xs text-gray-500">{beschreibung.length}/200 Zeichen</p>
+                <p className="mt-1 text-xs text-claimondo-ondo">{beschreibung.length}/200 Zeichen</p>
               </div>
 
               <div>
@@ -187,7 +187,7 @@ export default function BeratungBuchenSheet({
                     type="button"
                     onClick={() => setKanal('video')}
                     className={`flex items-center justify-center gap-2 min-h-11 rounded-xl border-2 text-sm font-medium transition-all ${
-                      kanal === 'video' ? 'border-[#4573A2] bg-[#4573A2]/5 text-[#0D1B3E]' : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                      kanal === 'video' ? 'border-[#4573A2] bg-[#4573A2]/5 text-[#0D1B3E]' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-ondo/60'
                     }`}
                   >
                     <VideoIcon className="w-4 h-4" /> Video-Call
@@ -196,7 +196,7 @@ export default function BeratungBuchenSheet({
                     type="button"
                     onClick={() => setKanal('telefon')}
                     className={`flex items-center justify-center gap-2 min-h-11 rounded-xl border-2 text-sm font-medium transition-all ${
-                      kanal === 'telefon' ? 'border-[#4573A2] bg-[#4573A2]/5 text-[#0D1B3E]' : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                      kanal === 'telefon' ? 'border-[#4573A2] bg-[#4573A2]/5 text-[#0D1B3E]' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-ondo/60'
                     }`}
                   >
                     <PhoneIcon className="w-4 h-4" /> Telefon
@@ -209,7 +209,7 @@ export default function BeratungBuchenSheet({
           {step === 2 && (
             <div className="space-y-4">
               {loading && (
-                <div className="flex items-center justify-center py-10 text-gray-500">
+                <div className="flex items-center justify-center py-10 text-claimondo-ondo">
                   <LoaderIcon className="w-5 h-5 animate-spin mr-2" /> Verfügbare Termine werden geladen…
                 </div>
               )}
@@ -219,7 +219,7 @@ export default function BeratungBuchenSheet({
                 </div>
               )}
               {!loading && !loadErr && availableDatums.length === 0 && (
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-claimondo-ondo">
                   Aktuell sind keine Termine verfügbar. Bitte kontaktieren Sie uns direkt im Chat.
                 </p>
               )}
@@ -242,10 +242,10 @@ export default function BeratungBuchenSheet({
                               setSelectedUhrzeit(null)
                             }}
                             className={`flex flex-col items-center py-2 rounded-xl border-2 transition-all ${
-                              isSelected ? 'border-[#4573A2] bg-[#4573A2]/5' : 'border-gray-200 hover:border-gray-300'
+                              isSelected ? 'border-[#4573A2] bg-[#4573A2]/5' : 'border-claimondo-border hover:border-claimondo-ondo/60'
                             }`}
                           >
-                            <span className="text-xs text-gray-500 uppercase">
+                            <span className="text-xs text-claimondo-ondo uppercase">
                               {date.toLocaleDateString('de-DE', { weekday: 'short' })}
                             </span>
                             <span className="text-sm font-semibold text-[#0D1B3E]">
@@ -273,7 +273,7 @@ export default function BeratungBuchenSheet({
                               className={`min-h-11 rounded-xl border-2 text-sm font-medium transition-all ${
                                 isSelected
                                   ? 'border-[#4573A2] bg-[#4573A2] text-white'
-                                  : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                                  : 'border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo/60'
                               }`}
                             >
                               {u}
@@ -308,7 +308,7 @@ export default function BeratungBuchenSheet({
                   {bookErr}
                 </div>
               )}
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-claimondo-ondo">
                 Sie erhalten eine WhatsApp-Bestätigung{kanal === 'video' ? ' mit dem Video-Link' : ''}.
               </p>
             </div>
@@ -320,7 +320,7 @@ export default function BeratungBuchenSheet({
                 <CheckIcon className="w-7 h-7 text-emerald-600" strokeWidth={3} />
               </div>
               <p className="text-lg font-semibold text-[#0D1B3E]">Termin gebucht!</p>
-              <p className="mt-1.5 text-sm text-gray-600">
+              <p className="mt-1.5 text-sm text-claimondo-ondo">
                 Sie erhalten in Kürze eine WhatsApp-Bestätigung.
               </p>
             </div>
@@ -329,14 +329,14 @@ export default function BeratungBuchenSheet({
 
         {/* Footer */}
         {step !== 'success' && (
-          <div className="flex items-center justify-between gap-2 px-5 py-4 border-t border-gray-100 bg-gray-50">
+          <div className="flex items-center justify-between gap-2 px-5 py-4 border-t border-claimondo-border bg-[#f8f9fb]">
             <button
               type="button"
               onClick={() => {
                 if (step === 1) handleClose()
                 else setStep((step - 1) as Step)
               }}
-              className="flex items-center gap-1.5 min-h-11 px-4 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+              className="flex items-center gap-1.5 min-h-11 px-4 rounded-xl text-sm font-medium text-claimondo-navy hover:bg-[#f8f9fb] transition-colors"
             >
               {step === 1 ? 'Abbrechen' : (<><ArrowLeftIcon className="w-4 h-4" /> Zurück</>)}
             </button>
@@ -373,7 +373,7 @@ export default function BeratungBuchenSheet({
           </div>
         )}
         {step === 'success' && (
-          <div className="px-5 py-4 border-t border-gray-100 bg-gray-50">
+          <div className="px-5 py-4 border-t border-claimondo-border bg-[#f8f9fb]">
             <button
               type="button"
               onClick={handleClose}
@@ -391,7 +391,7 @@ export default function BeratungBuchenSheet({
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-4 text-sm">
-      <span className="text-gray-600 shrink-0">{label}</span>
+      <span className="text-claimondo-ondo shrink-0">{label}</span>
       <span className="font-medium text-[#0D1B3E] text-right">{value}</span>
     </div>
   )

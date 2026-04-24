@@ -33,8 +33,8 @@ const ERGEBNIS_FARBE: Record<string, string> = {
   zusage: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   teilzusage: 'bg-amber-50 text-amber-700 border-amber-200',
   ablehnung: 'bg-red-50 text-red-700 border-red-200',
-  keine_reaktion: 'bg-gray-50 text-gray-700 border-gray-200',
-  rueckfrage: 'bg-blue-50 text-blue-700 border-blue-200',
+  keine_reaktion: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border',
+  rueckfrage: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border',
   vergleichsangebot: 'bg-violet-50 text-violet-700 border-violet-200',
 }
 
@@ -63,7 +63,7 @@ export default function EskalationsErgebnisCard({
   const juengster = belegt[belegt.length - 1]
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-3">
+    <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-4 space-y-3">
       <div className="flex items-center gap-2">
         <MessageSquareWarningIcon className="w-4 h-4 text-[#4573A2]" />
         <p className="text-sm font-semibold text-[#0D1B3E]">Stand der Eskalation</p>
@@ -71,12 +71,12 @@ export default function EskalationsErgebnisCard({
 
       <div className="space-y-2">
         {schritte.map((s) => {
-          const farbe = s.ergebnis ? ERGEBNIS_FARBE[s.ergebnis] ?? 'bg-gray-50 text-gray-700 border-gray-200' : ''
+          const farbe = s.ergebnis ? ERGEBNIS_FARBE[s.ergebnis] ?? 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border' : ''
           return (
             <div
               key={s.tag}
               className={`rounded-md border px-3 py-2 flex items-start gap-2 ${
-                s.ergebnis ? farbe : 'border-dashed border-gray-200 bg-gray-50/50'
+                s.ergebnis ? farbe : 'border-dashed border-claimondo-border bg-[#f8f9fb]/50'
               }`}
             >
               <span className="text-xs font-mono mt-0.5 shrink-0">Tag {s.tag}</span>
@@ -91,7 +91,7 @@ export default function EskalationsErgebnisCard({
                     )}
                   </>
                 ) : (
-                  <p className="text-xs text-gray-400">ausstehend</p>
+                  <p className="text-xs text-claimondo-ondo/70">ausstehend</p>
                 )}
               </div>
             </div>
@@ -99,7 +99,7 @@ export default function EskalationsErgebnisCard({
         })}
       </div>
 
-      <p className="text-[11px] text-gray-500 pt-1 border-t border-gray-100">
+      <p className="text-[11px] text-claimondo-ondo pt-1 border-t border-claimondo-border">
         {juengster.ergebnis === 'zusage' || juengster.ergebnis === 'teilzusage'
           ? 'Gute Nachrichten — die Versicherung hat positiv reagiert.'
           : 'Unsere Partnerkanzlei ist in direktem Kontakt mit der Versicherung — Sie müssen nichts tun.'}

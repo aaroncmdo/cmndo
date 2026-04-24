@@ -97,11 +97,11 @@ export default function DokumenteZuordnungsModal({
         {doc && (
           <div className="space-y-4 pt-1">
             {/* Datei-Info */}
-            <div className="rounded-lg border border-gray-200 bg-[#f8f9fb] px-3 py-2.5">
+            <div className="rounded-lg border border-claimondo-border bg-[#f8f9fb] px-3 py-2.5">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <FileTextIcon className="w-4 h-4 text-gray-400 shrink-0" />
-                  <span className="text-sm text-gray-800 truncate">
+                  <FileTextIcon className="w-4 h-4 text-claimondo-ondo/70 shrink-0" />
+                  <span className="text-sm text-claimondo-navy truncate">
                     {doc.original_filename ?? 'Unbenannt'}
                   </span>
                 </div>
@@ -116,19 +116,19 @@ export default function DokumenteZuordnungsModal({
                   </a>
                 )}
               </div>
-              <p className="mt-1 text-[10px] text-gray-500">
+              <p className="mt-1 text-[10px] text-claimondo-ondo">
                 Aktuell: <span className="font-medium">{doc.dokument_typ}</span>
                 {' · '}
                 Hochgeladen: {new Date(doc.hochgeladen_am).toLocaleDateString('de-DE')}
               </p>
               {doc.beschreibung && (
-                <p className="mt-1 text-[11px] text-gray-600 italic">„{doc.beschreibung}"</p>
+                <p className="mt-1 text-[11px] text-claimondo-ondo italic">„{doc.beschreibung}"</p>
               )}
             </div>
 
             {/* Slot-Dropdown */}
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
+              <label className="block text-xs font-medium text-claimondo-navy mb-1">
                 Zuordnen zu
               </label>
               {slots.length === 0 ? (
@@ -140,7 +140,7 @@ export default function DokumenteZuordnungsModal({
                 <select
                   value={slotId}
                   onChange={(e) => setSlotId(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2] bg-white"
+                  className="w-full px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2] bg-white"
                   disabled={pending}
                 >
                   {slots.map((s) => (
@@ -151,14 +151,14 @@ export default function DokumenteZuordnungsModal({
                 </select>
               )}
               {slotInfo?.beschreibung && (
-                <p className="mt-1 text-[11px] text-gray-500">{slotInfo.beschreibung}</p>
+                <p className="mt-1 text-[11px] text-claimondo-ondo">{slotInfo.beschreibung}</p>
               )}
             </div>
 
             {/* Notiz optional */}
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Notiz <span className="text-gray-400 font-normal">(optional, interne Dokumentation)</span>
+              <label className="block text-xs font-medium text-claimondo-navy mb-1">
+                Notiz <span className="text-claimondo-ondo/70 font-normal">(optional, interne Dokumentation)</span>
               </label>
               <textarea
                 value={notiz}
@@ -166,7 +166,7 @@ export default function DokumenteZuordnungsModal({
                 rows={2}
                 disabled={pending}
                 placeholder='z.B. „Aus E-Mail vom Kunden nachgereicht"'
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+                className="w-full px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
               />
             </div>
 
@@ -184,7 +184,7 @@ export default function DokumenteZuordnungsModal({
             type="button"
             onClick={() => onOpenChange(false)}
             disabled={pending}
-            className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 disabled:opacity-50"
+            className="px-3 py-1.5 text-xs font-medium text-claimondo-navy bg-white border border-claimondo-border rounded-md hover:bg-[#f8f9fb] disabled:opacity-50"
           >
             Abbrechen
           </button>

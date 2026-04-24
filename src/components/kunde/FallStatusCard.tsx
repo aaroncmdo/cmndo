@@ -48,8 +48,8 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
           <config.icon className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-bold text-gray-900">{config.title}</h2>
-          <p className="text-sm text-gray-600 mt-1">{config.description}</p>
+          <h2 className="text-lg font-bold text-claimondo-navy">{config.title}</h2>
+          <p className="text-sm text-claimondo-ondo mt-1">{config.description}</p>
         </div>
       </div>
 
@@ -61,8 +61,8 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
       {/* AS Frist-Counter */}
       {s === 'anschlussschreiben' && fall.anschlussschreiben_am && (
         <div className="bg-white/60 rounded-xl px-4 py-3">
-          <p className="text-xs text-gray-500">Versendet am {formatDatum(fall.anschlussschreiben_am)}</p>
-          <p className="text-sm font-semibold text-gray-900">
+          <p className="text-xs text-claimondo-ondo">Versendet am {formatDatum(fall.anschlussschreiben_am)}</p>
+          <p className="text-sm font-semibold text-claimondo-navy">
             Die Versicherung hat {Math.max(0, 14 - daysSince(fall.anschlussschreiben_am))} Tage Zeit zu antworten
           </p>
         </div>
@@ -75,16 +75,16 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
       {/* VS-Ablehnung Grund */}
       {s === 'vs-abgelehnt' && fall.vs_ablehnungsgrund && (
         <div className="bg-white/60 rounded-xl px-4 py-3">
-          <p className="text-xs text-gray-500">Ablehnungsgrund</p>
-          <p className="text-sm text-gray-700">{fall.vs_ablehnungsgrund}</p>
+          <p className="text-xs text-claimondo-ondo">Ablehnungsgrund</p>
+          <p className="text-sm text-claimondo-navy">{fall.vs_ablehnungsgrund}</p>
         </div>
       )}
 
       {/* Storno Grund */}
       {s === 'storniert' && fall.storno_grund && (
         <div className="bg-white/60 rounded-xl px-4 py-3">
-          <p className="text-xs text-gray-500">Grund</p>
-          <p className="text-sm text-gray-700">{fall.storno_grund}</p>
+          <p className="text-xs text-claimondo-ondo">Grund</p>
+          <p className="text-sm text-claimondo-navy">{fall.storno_grund}</p>
         </div>
       )}
 
@@ -97,13 +97,13 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
           className="block bg-white rounded-xl px-4 py-3 text-center hover:shadow-sm transition-shadow border border-amber-200"
         >
           <p className="text-sm font-semibold text-amber-700">Zufrieden? Bewerte uns auf Google!</p>
-          <p className="text-xs text-gray-500 mt-0.5">Dein Feedback hilft anderen Geschädigten</p>
+          <p className="text-xs text-claimondo-ondo mt-0.5">Dein Feedback hilft anderen Geschädigten</p>
         </a>
       )}
 
       {/* Action hint */}
       {config.action && (
-        <p className="text-xs text-gray-400 italic">{config.action}</p>
+        <p className="text-xs text-claimondo-ondo/70 italic">{config.action}</p>
       )}
     </div>
   )
@@ -114,10 +114,10 @@ function getStatusConfig(fall: StatusFall, svName?: string): StatusConfig {
   const sv = svName ?? 'Dein Sachverständiger'
 
   if (s === 'ersterfassung' || s === 'sv-gesucht' || s === 'sv-zugewiesen')
-    return { icon: CalendarIcon, title: 'Dein Termin wird vorbereitet', description: 'Wir suchen den besten Sachverständigen in deiner Nähe. Du wirst benachrichtigt sobald der Termin steht.', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' }
+    return { icon: CalendarIcon, title: 'Dein Termin wird vorbereitet', description: 'Wir suchen den besten Sachverständigen in deiner Nähe. Du wirst benachrichtigt sobald der Termin steht.', color: 'text-claimondo-ondo', bg: 'bg-[#f8f9fb]', border: 'border-claimondo-border' }
 
   if (s === 'sv-termin')
-    return { icon: CalendarIcon, title: 'Dein Termin steht!', description: `${sv} kommt zum vereinbarten Termin. Halte dein Fahrzeug bereit und stelle sicher, dass alle Schäden zugänglich sind.`, action: 'Termin verschieben? Ruf uns an.', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' }
+    return { icon: CalendarIcon, title: 'Dein Termin steht!', description: `${sv} kommt zum vereinbarten Termin. Halte dein Fahrzeug bereit und stelle sicher, dass alle Schäden zugänglich sind.`, action: 'Termin verschieben? Ruf uns an.', color: 'text-claimondo-ondo', bg: 'bg-[#f8f9fb]', border: 'border-claimondo-border' }
 
   if (s === 'besichtigung' || s === 'begutachtung-laeuft')
     return { icon: TruckIcon, title: 'Sachverständiger ist unterwegs', description: `${sv} ist auf dem Weg zu dir. Du wirst benachrichtigt wenn er gleich da ist.`, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-200' }
@@ -144,7 +144,7 @@ function getStatusConfig(fall: StatusFall, svName?: string): StatusConfig {
     return { icon: CheckCircle2Icon, title: 'Dein Fall ist abgeschlossen!', description: 'Alles erledigt. Vielen Dank für dein Vertrauen!', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200' }
 
   if (s === 'storniert')
-    return { icon: AlertCircleIcon, title: 'Dein Fall wurde storniert', description: 'Bei Rückfragen erreichst du uns jederzeit per WhatsApp oder Telefon.', color: 'text-gray-500', bg: 'bg-gray-50', border: 'border-gray-200' }
+    return { icon: AlertCircleIcon, title: 'Dein Fall wurde storniert', description: 'Bei Rückfragen erreichst du uns jederzeit per WhatsApp oder Telefon.', color: 'text-claimondo-ondo', bg: 'bg-[#f8f9fb]', border: 'border-claimondo-border' }
 
-  return { icon: ClockIcon, title: 'Dein Fall wird bearbeitet', description: 'Wir kümmern uns um alles. Du wirst über jeden Schritt informiert.', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' }
+  return { icon: ClockIcon, title: 'Dein Fall wird bearbeitet', description: 'Wir kümmern uns um alles. Du wirst über jeden Schritt informiert.', color: 'text-claimondo-ondo', bg: 'bg-[#f8f9fb]', border: 'border-claimondo-border' }
 }

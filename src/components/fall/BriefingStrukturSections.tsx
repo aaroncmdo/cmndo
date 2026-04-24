@@ -76,12 +76,12 @@ export default function BriefingStrukturSections({
   if (!current && !canRegenerate) return null
 
   return (
-    <div className="border-t border-gray-100 pt-3">
+    <div className="border-t border-claimondo-border pt-3">
       <div className="flex items-center justify-between">
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-900"
+          className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo hover:text-claimondo-navy"
         >
           <SparklesIcon className="w-3.5 h-3.5" />
           Struktur
@@ -101,7 +101,7 @@ export default function BriefingStrukturSections({
             type="button"
             onClick={onRegenerate}
             disabled={pending}
-            className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+            className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb] disabled:opacity-50"
           >
             <RefreshCwIcon
               className={`w-3 h-3 ${pending ? 'animate-spin' : ''}`}
@@ -128,7 +128,7 @@ export default function BriefingStrukturSections({
       {expanded && current && (
         <div className="mt-3 space-y-3">
           {current.kurzversion && (
-            <p className="text-sm leading-relaxed text-gray-800">
+            <p className="text-sm leading-relaxed text-claimondo-navy">
               {current.kurzversion}
             </p>
           )}
@@ -139,7 +139,7 @@ export default function BriefingStrukturSections({
                 <CheckCircle2Icon className="w-3.5 h-3.5" />
                 Hinweise
               </div>
-              <ul className="space-y-0.5 text-xs text-gray-800 pl-5 list-disc">
+              <ul className="space-y-0.5 text-xs text-claimondo-navy pl-5 list-disc">
                 {current.hinweise.map((h, i) => (
                   <li key={`h-${i}`}>{h}</li>
                 ))}
@@ -153,7 +153,7 @@ export default function BriefingStrukturSections({
                 <AlertTriangleIcon className="w-3.5 h-3.5" />
                 Achtung
               </div>
-              <ul className="space-y-0.5 text-xs text-gray-800 pl-5 list-disc">
+              <ul className="space-y-0.5 text-xs text-claimondo-navy pl-5 list-disc">
                 {current.warnungen.map((w, i) => (
                   <li key={`w-${i}`}>{w}</li>
                 ))}
@@ -167,7 +167,7 @@ export default function BriefingStrukturSections({
                 <ClipboardListIcon className="w-3.5 h-3.5" />
                 Vor Ort
               </div>
-              <ul className="space-y-0.5 text-xs text-gray-800 pl-5 list-disc">
+              <ul className="space-y-0.5 text-xs text-claimondo-navy pl-5 list-disc">
                 {current.checkliste_vor_ort.map((c, i) => (
                   <li key={`c-${i}`}>{c}</li>
                 ))}

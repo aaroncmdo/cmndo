@@ -50,7 +50,7 @@ const STATUS_BADGE: Record<DokumentSlotStatus, { label: string; className: strin
     label: 'Nachzureichen',
     className: 'bg-orange-50 text-orange-700 border-orange-200',
   },
-  optional: { label: 'Optional', className: 'bg-gray-50 text-gray-500 border-gray-200' },
+  optional: { label: 'Optional', className: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border' },
 }
 
 const ACCEPTED = 'image/jpeg,image/png,image/webp,application/pdf'
@@ -121,7 +121,7 @@ export default function DokumentSlot({
   return (
     <div
       className={`rounded-xl border ${
-        dragOver ? 'border-[#4573A2] bg-[#4573A2]/5' : 'border-gray-200 bg-white'
+        dragOver ? 'border-[#4573A2] bg-[#4573A2]/5' : 'border-claimondo-border bg-white'
       } p-4 transition-colors`}
       onDragOver={e => {
         e.preventDefault()
@@ -138,7 +138,7 @@ export default function DokumentSlot({
               <span className="text-[10px] font-semibold text-red-600 uppercase">Pflicht</span>
             )}
           </div>
-          {beschreibung && <p className="text-xs text-gray-500 mt-0.5">{beschreibung}</p>}
+          {beschreibung && <p className="text-xs text-claimondo-ondo mt-0.5">{beschreibung}</p>}
         </div>
         <span className={`text-[10px] font-medium px-2 py-1 rounded-full border ${badge.className}`}>
           {badge.label}
@@ -146,7 +146,7 @@ export default function DokumentSlot({
       </div>
 
       {hasFile && (
-        <div className="flex items-center gap-2 mb-3 text-xs text-gray-700 bg-gray-50 rounded-lg px-3 py-2">
+        <div className="flex items-center gap-2 mb-3 text-xs text-claimondo-navy bg-[#f8f9fb] rounded-lg px-3 py-2">
           <FileIcon className="w-3.5 h-3.5 text-[#4573A2] flex-shrink-0" />
           <span className="truncate flex-1">{localFile!.name}</span>
           {localStatus === 'hochgeladen' || localStatus === 'geprueft' ? (
@@ -181,7 +181,7 @@ export default function DokumentSlot({
             <CameraIcon className="w-3.5 h-3.5" />
             Foto
           </button>
-          <span className="text-[10px] text-gray-400 self-center hidden md:inline">
+          <span className="text-[10px] text-claimondo-ondo/70 self-center hidden md:inline">
             oder Datei hier rein ziehen
           </span>
         </div>

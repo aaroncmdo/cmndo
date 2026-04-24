@@ -82,12 +82,12 @@ export function KonfrontationsTerminCard({
       className={`rounded-2xl border p-4 sm:p-5 space-y-3 ${
         bestaetigt
           ? 'bg-emerald-50 border-emerald-200'
-          : 'bg-blue-50 border-blue-200'
+          : 'bg-[#f8f9fb] border-claimondo-ondo'
       }`}
     >
       <div className="flex items-center gap-2">
         <UsersIcon
-          className={`w-4 h-4 ${bestaetigt ? 'text-emerald-600' : 'text-blue-700'}`}
+          className={`w-4 h-4 ${bestaetigt ? 'text-emerald-600' : 'text-claimondo-ondo'}`}
         />
         <p className="text-xs uppercase tracking-wider font-semibold">
           Konfrontations-Termin angefragt
@@ -106,15 +106,15 @@ export function KonfrontationsTerminCard({
         </p>
       ) : (
         <>
-          <p className="text-sm text-gray-800">
+          <p className="text-sm text-claimondo-navy">
             Der Kunde wünscht deine Anwesenheit bei der Nachbesichtigung (Konfrontations-Termin
             mit dem VS-Gutachter). Dieser Termin wird dir gesondert vergütet.
           </p>
 
           {terminVorschlaege && terminVorschlaege.length > 0 && (
             <div className="rounded-lg bg-white border border-blue-100 px-3 py-2 space-y-1">
-              <p className="text-[11px] text-gray-500 font-medium">Kunden-Vorschläge:</p>
-              <ul className="text-xs text-gray-700 space-y-0.5">
+              <p className="text-[11px] text-claimondo-ondo font-medium">Kunden-Vorschläge:</p>
+              <ul className="text-xs text-claimondo-navy space-y-0.5">
                 {terminVorschlaege.map((s, i) => (
                   <li key={i}>• {formatSlot(s)}</li>
                 ))}
@@ -137,7 +137,7 @@ export function KonfrontationsTerminCard({
                 type="button"
                 onClick={() => setAblehnenOffen(true)}
                 disabled={pending}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 text-sm font-medium px-4 py-2.5 disabled:opacity-50"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-claimondo-border bg-white hover:bg-[#f8f9fb] text-claimondo-navy text-sm font-medium px-4 py-2.5 disabled:opacity-50"
               >
                 <XIcon className="w-4 h-4" />
                 Ablehnen
@@ -145,10 +145,10 @@ export function KonfrontationsTerminCard({
             </div>
           ) : (
             <div className="space-y-2 rounded-lg bg-white border border-blue-200 p-3">
-              <label className="text-xs font-medium text-gray-700">
+              <label className="text-xs font-medium text-claimondo-navy">
                 Grund für die Ablehnung{' '}
                 <span className="text-red-600">*</span>
-                <span className="text-gray-500 font-normal ml-1">
+                <span className="text-claimondo-ondo font-normal ml-1">
                   (min. 10 Zeichen — geht an KB + Kunde)
                 </span>
               </label>
@@ -157,7 +157,7 @@ export function KonfrontationsTerminCard({
                 onChange={(e) => setGrund(e.target.value)}
                 rows={3}
                 placeholder="z.B. Urlaub im Vorschlags-Zeitraum, Terminkollision, …"
-                className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
+                className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
               />
               <div className="flex gap-2">
                 <button
@@ -167,7 +167,7 @@ export function KonfrontationsTerminCard({
                     setGrund('')
                   }}
                   disabled={pending}
-                  className="text-sm rounded-md border border-gray-200 bg-white px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50"
+                  className="text-sm rounded-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-[#f8f9fb] disabled:opacity-50"
                 >
                   Zurück
                 </button>

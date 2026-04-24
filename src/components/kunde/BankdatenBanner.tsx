@@ -73,7 +73,7 @@ export default function BankdatenBanner({
 
   return (
     <div className="bg-white border-2 border-amber-200 rounded-2xl p-5 space-y-4">
-      <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+      <h3 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
         <BanknoteIcon className="w-4 h-4 text-amber-600" />
         Bankdaten für Auszahlung
       </h3>
@@ -82,41 +82,41 @@ export default function BankdatenBanner({
 
       <div className="space-y-3">
         <div>
-          <label className="block text-xs text-gray-500 mb-1">IBAN *</label>
+          <label className="block text-xs text-claimondo-ondo mb-1">IBAN *</label>
           <input
             type="text"
             value={iban}
             onChange={e => setIban(e.target.value)}
             placeholder="DE89 3704 0044 0532 0130 00"
-            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm font-mono tracking-wider"
+            className="w-full px-3 py-2.5 border border-claimondo-border rounded-lg text-sm font-mono tracking-wider"
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs text-gray-500 mb-1">BIC (optional)</label>
+            <label className="block text-xs text-claimondo-ondo mb-1">BIC (optional)</label>
             <input
               type="text"
               value={bic}
               onChange={e => setBic(e.target.value)}
               placeholder="COBADEFFXXX"
-              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm font-mono"
+              className="w-full px-3 py-2.5 border border-claimondo-border rounded-lg text-sm font-mono"
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Kontoinhaber *</label>
+            <label className="block text-xs text-claimondo-ondo mb-1">Kontoinhaber *</label>
             <input
               type="text"
               value={kontoinhaber}
               onChange={e => setKontoinhaber(e.target.value)}
               placeholder="Max Mustermann"
-              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm"
+              className="w-full px-3 py-2.5 border border-claimondo-border rounded-lg text-sm"
             />
           </div>
         </div>
       </div>
 
       <div className="flex gap-2">
-        <button onClick={() => setShowForm(false)} className="flex-1 px-3 py-2.5 rounded-lg border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50">
+        <button onClick={() => setShowForm(false)} className="flex-1 px-3 py-2.5 rounded-lg border border-claimondo-border text-claimondo-ondo text-sm font-medium hover:bg-[#f8f9fb]">
           Abbrechen
         </button>
         <button disabled={pending} onClick={handleSubmit} className="flex-1 px-3 py-2.5 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700 disabled:opacity-50">
