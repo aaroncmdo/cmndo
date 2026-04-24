@@ -14,6 +14,8 @@ import { FallIdentityHeader } from '@/components/shared/fall-header'
 // AAR-754 (Phase C): Shared Stammdaten + Kontakte.
 import { StammdatenReadSection } from '@/components/shared/stammdaten'
 import { FallKontakteCard } from '@/components/shared/fall-kontakte'
+// AAR-759 (Phase 1): Mietwagen-Status-Anzeige
+import { MietwagenStatusCard } from '@/components/shared/mietwagen'
 
 type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean | null; anhang_url: string | null; created_at: string }
 type Dokument = { id: string; typ: string; datei_url: string; datei_name: string | null; created_at: string }
@@ -134,6 +136,21 @@ export default function FallDetailSections({
             lead={null}
             fall={fall}
             title="Fahrzeug & Unfall"
+          />
+
+          {/* AAR-759: Mietwagen-Status für Kunde (Phase 1 read-only) */}
+          <MietwagenStatusCard
+            rolle="kunde"
+            fall={{
+              mietwagen_hat: (fall.mietwagen_hat as boolean | null) ?? null,
+              mietwagen_seit_datum: (fall.mietwagen_seit_datum as string | null) ?? null,
+              mietwagen_limit_tage: (fall.mietwagen_limit_tage as number | null) ?? null,
+              mietwagen_limit_grund: (fall.mietwagen_limit_grund as string | null) ?? null,
+              mietwagen_rechnung_vorhanden: (fall.mietwagen_rechnung_vorhanden as boolean | null) ?? null,
+              mietwagen_argumentations_puffer: (fall.mietwagen_argumentations_puffer as number | null) ?? null,
+              mietwagen_vermieter: (fall.mietwagen_vermieter as string | null) ?? null,
+              nutzungsausfall_tage: (fall.nutzungsausfall_tage as number | null) ?? null,
+            }}
           />
 
           {!!fall.schadens_beschreibung && (

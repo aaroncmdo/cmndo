@@ -58,6 +58,10 @@ export type EventType =
   // 5.11 Makler
   | 'makler.lead_eingegangen'
   | 'makler.provision_status'
+  // 5.12 Mietwagen / Nutzungsausfall (AAR-759)
+  | 'mietwagen.rechnung_ausstehend'
+  | 'mietwagen.abgabe_naht'
+  | 'mietwagen.ueber_limit'
 
 // ── Payload-Shapes ────────────────────────────────────────────────────────
 export interface EventPayloads {
@@ -104,6 +108,10 @@ export interface EventPayloads {
   // 5.11
   'makler.lead_eingegangen': { leadId: string; maklerId: string; promoCode: string }
   'makler.provision_status': { fallId: string; provisionId: string; maklerId: string; status: 'freigegeben' | 'storniert'; betragEur: number; grund?: string }
+  // 5.12 Mietwagen (AAR-759)
+  'mietwagen.rechnung_ausstehend': { fallId: string; seit_tage: number }
+  'mietwagen.abgabe_naht': { fallId: string; tage_rest: number; limit_datum: string }
+  'mietwagen.ueber_limit': { fallId: string; tage_ueber: number; limit_datum: string }
 }
 
 // ── DB-Row-Shapes ─────────────────────────────────────────────────────────
