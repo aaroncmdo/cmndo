@@ -157,11 +157,10 @@ export async function notifyNeuerFall(fallId: string) {
 // AAR-308/309: Anzeigenamen für Account-Hijack-Fehlermeldung
 const ROLLE_LABEL: Record<string, string> = {
   admin: 'Administrator',
-  leadbearbeiter: 'Lead-Bearbeiter',
+  dispatch: 'Dispatcher',
   kundenbetreuer: 'Kundenbetreuer',
   sachverstaendiger: 'Sachverständigen',
   kanzlei: 'Kanzlei',
-  dispatch: 'Dispatch',
 }
 
 export type CreateKundeAccountResult =
@@ -433,7 +432,7 @@ export async function signSAandCreateFall(
   }
 
   // 4aa. AAR-155: Entity-FKs auflösen (versicherung/kanzlei/organisation/
-  // leadbearbeiter) — siehe resolveFallEntityFks JSDoc. Non-blocking:
+  // dispatch) — siehe resolveFallEntityFks JSDoc. Non-blocking:
   // Misses landen als NULL in faelle, kein Fehler.
   const entityFks = await resolveFallEntityFks(admin, lead, svIdFromTermin)
 
@@ -724,7 +723,7 @@ export async function signSAandCreateFall(
           uploaded_by_kunde: true,
           sichtbar_fuer: [
             'admin',
-            'leadbearbeiter',
+            'dispatch',
             'kundenbetreuer',
             'sachverstaendiger',
             'kanzlei',

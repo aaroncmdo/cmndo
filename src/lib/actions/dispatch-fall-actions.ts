@@ -683,7 +683,7 @@ async function convertLeadToFall(
       fahrzeugschaden_beschreibung: lead.fahrzeugschaden_beschreibung ?? null,
       sachschaden_beschreibung: lead.sachschaden_beschreibung ?? null,
       // Konversions-Metadaten
-      leadbearbeiter_id: userId,
+      dispatch_id: userId,
       kundenbetreuer_id: kundenbetreuerId,
       // AAR-427: Fallback-Flag + Zuweisungs-Zeitpunkt. Flag = true wenn
       // ein Admin stellvertretend die KB-Rolle übernimmt (kein aktiver KB).

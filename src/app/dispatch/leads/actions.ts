@@ -37,7 +37,7 @@ export async function createManualLead(
     .select('rolle')
     .eq('id', user.id)
     .single()
-  if (!['admin', 'kundenbetreuer', 'dispatch', 'leadbearbeiter'].includes(profile?.rolle ?? '')) {
+  if (!['admin', 'kundenbetreuer', 'dispatch'].includes(profile?.rolle ?? '')) {
     return { success: false, error: 'Keine Berechtigung' }
   }
 

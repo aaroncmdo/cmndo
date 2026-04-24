@@ -103,7 +103,7 @@ function last6Months(): string[] {
 function canSee(rolle: UserStatistikRolle, section: 'kuerzung' | 'unfall' | 'gegner' | 'potenziale'): boolean {
   if (rolle === 'admin') return true
   if (rolle === 'kundenbetreuer') return section !== 'potenziale'
-  if (rolle === 'leadbearbeiter') return section === 'unfall' || section === 'gegner'
+  if (rolle === 'dispatch') return section === 'unfall' || section === 'gegner'
   if (section === 'potenziale') {
     return ['sv_solo', 'sv_buero_inhaber', 'sv_sub_buero', 'akademie_verwalter', 'akademie_sub_sv', 'community_member'].includes(rolle)
   }
@@ -132,7 +132,7 @@ export default function StatistikenClient({
   totalLeads: number
 }) {
   const [zeitraum, setZeitraum] = useState(90)
-  const [nurEigene, setNurEigene] = useState(rolle === 'kundenbetreuer' || rolle === 'leadbearbeiter')
+  const [nurEigene, setNurEigene] = useState(rolle === 'kundenbetreuer' || rolle === 'dispatch')
   const [filterSv, setFilterSv] = useState('')
   const [filterVersicherer, setFilterVersicherer] = useState('')
   const [filterPlz, setFilterPlz] = useState('')
@@ -156,8 +156,8 @@ export default function StatistikenClient({
     if (nurEigene && rolle === 'kundenbetreuer') {
       f = f.filter(x => x.kundenbetreuer_id === userId)
     }
-    if (nurEigene && rolle === 'leadbearbeiter') {
-      f = f.filter(x => x.leadbearbeiter_id === userId)
+    if (nurEigene && rolle === 'dispatch') {
+      f = f.filter(x => x.dispatch_id === userId)
     }
     if (filterSv) f = f.filter(x => x.sv_id === filterSv)
     if (filterPlz) f = f.filter(x => x.schadens_plz?.startsWith(filterPlz))
@@ -171,7 +171,7 @@ export default function StatistikenClient({
       if (!f) return false
       if (cutoff && f.created_at < cutoff) return false
       if (nurEigene && rolle === 'kundenbetreuer' && f.kundenbetreuer_id !== userId) return false
-      if (nurEigene && rolle === 'leadbearbeiter' && f.leadbearbeiter_id !== userId) return false
+      if (nurEigene && rolle === 'dispatch' && f.dispatch_id !== userId) return false
       if (filterSv && f.sv_id !== filterSv) return false
       if (filterPlz && !f.schadens_plz?.startsWith(filterPlz)) return false
       if (filterVersicherer && k.versicherer !== filterVersicherer) return false
@@ -482,7 +482,7 @@ export default function StatistikenClient({
                 ))}
               </div>
               {/* Kundenberater / Leadabarbeiter Toggle */}
-              {(rolle === 'kundenbetreuer' || rolle === 'leadbearbeiter') && (
+              {(rolle === 'kundenbetreuer' || rolle === 'dispatch') && (
                 <div className="flex bg-gray-100 rounded-lg p-0.5">
                   <button onClick={() => setNurEigene(true)}
                     className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${nurEigene ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>
@@ -490,7 +490,7 @@ export default function StatistikenClient({
                   </button>
                   <button onClick={() => setNurEigene(false)}
                     className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${!nurEigene ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>
-                    {rolle === 'leadbearbeiter' ? 'Team' : 'Alle Fälle'}
+                    {rolle === 'dispatch' ? 'Team' : 'Alle Fälle'}
                   </button>
                 </div>
               )}

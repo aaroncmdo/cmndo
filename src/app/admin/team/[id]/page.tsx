@@ -16,7 +16,7 @@ export default async function MitarbeiterPage({ params }: { params: Promise<{ id
 
   const now = new Date()
   const monatStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
-  const isDispatch = mitarbeiter.kategorie === 'dispatch' || mitarbeiter.rolle === 'leadbearbeiter'
+  const isDispatch = mitarbeiter.kategorie === 'dispatch' || mitarbeiter.rolle === 'dispatch'
 
   const [{ data: leadsRaw }, { data: faelleAktivRaw }, { data: faelleAbgRaw }, { data: perf }] = await Promise.all([
     supabase.from('leads').select('id, status').eq('zugewiesen_an', id).gte('created_at', monatStr),

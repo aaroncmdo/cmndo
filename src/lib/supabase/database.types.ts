@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.4"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       abrechnung_positionen: {
@@ -234,6 +259,10 @@ export type Database = {
           erinnerung_min_vorher: number | null
           erstellt_von: string
           fall_id: string | null
+          gesehen_am: string | null
+          google_calendar_id: string | null
+          google_event_id: string | null
+          google_event_synced_at: string | null
           id: string
           kunde_id: string | null
           lead_id: string | null
@@ -252,6 +281,10 @@ export type Database = {
           erinnerung_min_vorher?: number | null
           erstellt_von: string
           fall_id?: string | null
+          gesehen_am?: string | null
+          google_calendar_id?: string | null
+          google_event_id?: string | null
+          google_event_synced_at?: string | null
           id?: string
           kunde_id?: string | null
           lead_id?: string | null
@@ -270,6 +303,10 @@ export type Database = {
           erinnerung_min_vorher?: number | null
           erstellt_von?: string
           fall_id?: string | null
+          gesehen_am?: string | null
+          google_calendar_id?: string | null
+          google_event_id?: string | null
+          google_event_synced_at?: string | null
           id?: string
           kunde_id?: string | null
           lead_id?: string | null
@@ -1267,6 +1304,7 @@ export type Database = {
           deaktiviert_am: string | null
           deaktiviert_grund: string | null
           deaktiviert_notiz: string | null
+          dispatch_id: string | null
           dokumente_reminder_whatsapp_letzte_sendung: string | null
           dokumente_vollstaendig_am_phase: string | null
           dokumente_vollstaendig_fuer_phase: string | null
@@ -1291,6 +1329,7 @@ export type Database = {
           fahrzeug_hersteller: string | null
           fahrzeug_modell: string | null
           fahrzeug_typ: string | null
+          fahrzeugschaden_beschreibung: string | null
           fall_nummer: string | null
           fallakte_angelegt_am: string | null
           filmcheck_am: string | null
@@ -1386,7 +1425,6 @@ export type Database = {
           lead_preis_berechnet_am: string | null
           lead_preis_netto: number | null
           lead_preis_typ: string | null
-          leadbearbeiter_id: string | null
           leasinggeber_informiert: boolean | null
           leasinggeber_name: string | null
           lexdrive_case_id: string | null
@@ -1588,6 +1626,7 @@ export type Database = {
           deaktiviert_am?: string | null
           deaktiviert_grund?: string | null
           deaktiviert_notiz?: string | null
+          dispatch_id?: string | null
           dokumente_reminder_whatsapp_letzte_sendung?: string | null
           dokumente_vollstaendig_am_phase?: string | null
           dokumente_vollstaendig_fuer_phase?: string | null
@@ -1612,6 +1651,7 @@ export type Database = {
           fahrzeug_hersteller?: string | null
           fahrzeug_modell?: string | null
           fahrzeug_typ?: string | null
+          fahrzeugschaden_beschreibung?: string | null
           fall_nummer?: string | null
           fallakte_angelegt_am?: string | null
           filmcheck_am?: string | null
@@ -1707,7 +1747,6 @@ export type Database = {
           lead_preis_berechnet_am?: string | null
           lead_preis_netto?: number | null
           lead_preis_typ?: string | null
-          leadbearbeiter_id?: string | null
           leasinggeber_informiert?: boolean | null
           leasinggeber_name?: string | null
           lexdrive_case_id?: string | null
@@ -1909,6 +1948,7 @@ export type Database = {
           deaktiviert_am?: string | null
           deaktiviert_grund?: string | null
           deaktiviert_notiz?: string | null
+          dispatch_id?: string | null
           dokumente_reminder_whatsapp_letzte_sendung?: string | null
           dokumente_vollstaendig_am_phase?: string | null
           dokumente_vollstaendig_fuer_phase?: string | null
@@ -1933,6 +1973,7 @@ export type Database = {
           fahrzeug_hersteller?: string | null
           fahrzeug_modell?: string | null
           fahrzeug_typ?: string | null
+          fahrzeugschaden_beschreibung?: string | null
           fall_nummer?: string | null
           fallakte_angelegt_am?: string | null
           filmcheck_am?: string | null
@@ -2028,7 +2069,6 @@ export type Database = {
           lead_preis_berechnet_am?: string | null
           lead_preis_netto?: number | null
           lead_preis_typ?: string | null
-          leadbearbeiter_id?: string | null
           leasinggeber_informiert?: boolean | null
           leasinggeber_name?: string | null
           lexdrive_case_id?: string | null
@@ -2186,6 +2226,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "faelle_dispatch_id_fkey"
+            columns: ["dispatch_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "faelle_eskalation_tag_14_ergebnis_von_fkey"
             columns: ["eskalation_tag_14_ergebnis_von"]
             isOneToOne: false
@@ -2246,13 +2293,6 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_leadbearbeiter_id_fkey"
-            columns: ["leadbearbeiter_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -3201,6 +3241,10 @@ export type Database = {
           gegenvorschlag_grund: string | null
           gegenvorschlag_von: string | null
           gegenvorschlag_zeit: string | null
+          gesehen_am: string | null
+          google_calendar_id: string | null
+          google_event_id: string | null
+          google_event_synced_at: string | null
           gps_lat_ankunft: number | null
           gps_lng_ankunft: number | null
           honorar_betrag: number | null
@@ -3211,6 +3255,8 @@ export type Database = {
           kunde_eta_letzte_berechnung: string | null
           kunde_eta_minuten: number | null
           kunde_losgefahren_am: string | null
+          kunde_response_token: string | null
+          kunde_response_token_expires_at: string | null
           kunde_tracking_aktiviert: boolean | null
           kunde_verspaetung_gemeldet_am: string | null
           kunden_tracking_token: string | null
@@ -3267,6 +3313,10 @@ export type Database = {
           gegenvorschlag_grund?: string | null
           gegenvorschlag_von?: string | null
           gegenvorschlag_zeit?: string | null
+          gesehen_am?: string | null
+          google_calendar_id?: string | null
+          google_event_id?: string | null
+          google_event_synced_at?: string | null
           gps_lat_ankunft?: number | null
           gps_lng_ankunft?: number | null
           honorar_betrag?: number | null
@@ -3277,6 +3327,8 @@ export type Database = {
           kunde_eta_letzte_berechnung?: string | null
           kunde_eta_minuten?: number | null
           kunde_losgefahren_am?: string | null
+          kunde_response_token?: string | null
+          kunde_response_token_expires_at?: string | null
           kunde_tracking_aktiviert?: boolean | null
           kunde_verspaetung_gemeldet_am?: string | null
           kunden_tracking_token?: string | null
@@ -3333,6 +3385,10 @@ export type Database = {
           gegenvorschlag_grund?: string | null
           gegenvorschlag_von?: string | null
           gegenvorschlag_zeit?: string | null
+          gesehen_am?: string | null
+          google_calendar_id?: string | null
+          google_event_id?: string | null
+          google_event_synced_at?: string | null
           gps_lat_ankunft?: number | null
           gps_lng_ankunft?: number | null
           honorar_betrag?: number | null
@@ -3343,6 +3399,8 @@ export type Database = {
           kunde_eta_letzte_berechnung?: string | null
           kunde_eta_minuten?: number | null
           kunde_losgefahren_am?: string | null
+          kunde_response_token?: string | null
+          kunde_response_token_expires_at?: string | null
           kunde_tracking_aktiviert?: boolean | null
           kunde_verspaetung_gemeldet_am?: string | null
           kunden_tracking_token?: string | null
@@ -3828,6 +3886,86 @@ export type Database = {
           },
         ]
       }
+      kanzlei_admin_termine: {
+        Row: {
+          admin_user_id: string
+          beschreibung: string | null
+          created_at: string
+          end_zeit: string
+          fall_id: string | null
+          google_event_id: string | null
+          google_meet_link: string | null
+          id: string
+          kanzlei_user_id: string
+          start_zeit: string
+          status: string
+          titel: string
+          typ: string
+          updated_at: string
+        }
+        Insert: {
+          admin_user_id: string
+          beschreibung?: string | null
+          created_at?: string
+          end_zeit: string
+          fall_id?: string | null
+          google_event_id?: string | null
+          google_meet_link?: string | null
+          id?: string
+          kanzlei_user_id: string
+          start_zeit: string
+          status?: string
+          titel: string
+          typ: string
+          updated_at?: string
+        }
+        Update: {
+          admin_user_id?: string
+          beschreibung?: string | null
+          created_at?: string
+          end_zeit?: string
+          fall_id?: string | null
+          google_event_id?: string | null
+          google_meet_link?: string | null
+          id?: string
+          kanzlei_user_id?: string
+          start_zeit?: string
+          status?: string
+          titel?: string
+          typ?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kanzlei_admin_termine_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kanzlei_admin_termine_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle_kunde_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kanzlei_admin_termine_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle_sv_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kanzlei_admin_termine_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "v_faelle_mit_aktuellem_termin"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kanzleien: {
         Row: {
           adresse: string | null
@@ -4136,7 +4274,11 @@ export type Database = {
           fahrzeug_hersteller: string | null
           fahrzeug_modell: string | null
           fahrzeug_standort_adresse: string | null
+          fahrzeug_standort_lat: number | null
+          fahrzeug_standort_lng: number | null
+          fahrzeug_standort_place_id: string | null
           fahrzeug_standort_plz: string | null
+          fahrzeugschaden_beschreibung: string | null
           fin: string | null
           finanzierung_bank: string | null
           finanzierung_leasing: string | null
@@ -4316,7 +4458,11 @@ export type Database = {
           fahrzeug_hersteller?: string | null
           fahrzeug_modell?: string | null
           fahrzeug_standort_adresse?: string | null
+          fahrzeug_standort_lat?: number | null
+          fahrzeug_standort_lng?: number | null
+          fahrzeug_standort_place_id?: string | null
           fahrzeug_standort_plz?: string | null
+          fahrzeugschaden_beschreibung?: string | null
           fin?: string | null
           finanzierung_bank?: string | null
           finanzierung_leasing?: string | null
@@ -4496,7 +4642,11 @@ export type Database = {
           fahrzeug_hersteller?: string | null
           fahrzeug_modell?: string | null
           fahrzeug_standort_adresse?: string | null
+          fahrzeug_standort_lat?: number | null
+          fahrzeug_standort_lng?: number | null
+          fahrzeug_standort_place_id?: string | null
           fahrzeug_standort_plz?: string | null
+          fahrzeugschaden_beschreibung?: string | null
           fin?: string | null
           finanzierung_bank?: string | null
           finanzierung_leasing?: string | null
@@ -4687,13 +4837,6 @@ export type Database = {
           },
           {
             foreignKeyName: "leads_zugewiesen_an_fk"
-            columns: ["zugewiesen_an"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "leads_zugewiesen_an_fkey"
             columns: ["zugewiesen_an"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -5938,6 +6081,7 @@ export type Database = {
           updated_at: string | null
           vorname: string | null
           working_hours: Json | null
+          zweit_email: string | null
         }
         Insert: {
           adresse?: string | null
@@ -5984,6 +6128,7 @@ export type Database = {
           updated_at?: string | null
           vorname?: string | null
           working_hours?: Json | null
+          zweit_email?: string | null
         }
         Update: {
           adresse?: string | null
@@ -6030,6 +6175,7 @@ export type Database = {
           updated_at?: string | null
           vorname?: string | null
           working_hours?: Json | null
+          zweit_email?: string | null
         }
         Relationships: []
       }
@@ -7154,6 +7300,78 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      sv_kalender_verbindungen: {
+        Row: {
+          calendar_display_name: string | null
+          calendar_url: string | null
+          connected_at: string
+          created_at: string
+          fehler_task_id: string | null
+          id: string
+          last_error: string | null
+          last_error_at: string | null
+          last_sync_at: string | null
+          password_encrypted: string
+          provider: string
+          provider_label: string | null
+          server_url: string
+          sv_id: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          calendar_display_name?: string | null
+          calendar_url?: string | null
+          connected_at?: string
+          created_at?: string
+          fehler_task_id?: string | null
+          id?: string
+          last_error?: string | null
+          last_error_at?: string | null
+          last_sync_at?: string | null
+          password_encrypted: string
+          provider: string
+          provider_label?: string | null
+          server_url: string
+          sv_id: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          calendar_display_name?: string | null
+          calendar_url?: string | null
+          connected_at?: string
+          created_at?: string
+          fehler_task_id?: string | null
+          id?: string
+          last_error?: string | null
+          last_error_at?: string | null
+          last_sync_at?: string | null
+          password_encrypted?: string
+          provider?: string
+          provider_label?: string | null
+          server_url?: string
+          sv_id?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sv_kalender_verbindungen_fehler_task_id_fkey"
+            columns: ["fehler_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sv_kalender_verbindungen_sv_id_fkey"
+            columns: ["sv_id"]
+            isOneToOne: false
+            referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sv_live_position: {
         Row: {
@@ -8681,6 +8899,7 @@ export type Database = {
           deaktiviert_am: string | null
           deaktiviert_grund: string | null
           deaktiviert_notiz: string | null
+          dispatch_id: string | null
           dokumente_reminder_whatsapp_letzte_sendung: string | null
           dokumente_vollstaendig_am_phase: string | null
           dokumente_vollstaendig_fuer_phase: string | null
@@ -8781,7 +9000,6 @@ export type Database = {
           lead_preis_berechnet_am: string | null
           lead_preis_netto: number | null
           lead_preis_typ: string | null
-          leadbearbeiter_id: string | null
           leasinggeber_informiert: boolean | null
           leasinggeber_name: string | null
           lexdrive_case_id: string | null
@@ -8923,6 +9141,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "faelle_dispatch_id_fkey"
+            columns: ["dispatch_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "faelle_gegner_versicherung_id_fkey"
             columns: ["gegner_versicherung_id"]
             isOneToOne: false
@@ -8962,13 +9187,6 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_leadbearbeiter_id_fkey"
-            columns: ["leadbearbeiter_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -9321,6 +9539,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       betreuungspaket: ["vollservice", "sv-only"],

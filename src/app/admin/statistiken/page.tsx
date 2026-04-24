@@ -9,7 +9,7 @@ import StatistikenClient from './StatistikenClient'
 export type UserStatistikRolle =
   | 'admin'
   | 'kundenbetreuer'
-  | 'leadbearbeiter'
+  | 'dispatch'
   | 'sv_solo'
   | 'sv_buero_inhaber'
   | 'sv_sub_buero'
@@ -35,7 +35,7 @@ export type StatistikFall = {
   gegner_fahrzeugtyp: string | null
   organisation_id: string | null
   fahrzeug_typ: string | null
-  leadbearbeiter_id: string | null
+  dispatch_id: string | null
   lead_id: string | null
 }
 
@@ -73,7 +73,7 @@ async function getUserStatistikRolle(
 
   if (rolle === 'admin') return { rolle: 'admin', svId: null, orgId: null, subSvIds: [] }
   if (rolle === 'kundenbetreuer') return { rolle: 'kundenbetreuer', svId: null, orgId: null, subSvIds: [] }
-  if (rolle === 'leadbearbeiter') return { rolle: 'leadbearbeiter', svId: null, orgId: null, subSvIds: [] }
+  if (rolle === 'dispatch') return { rolle: 'dispatch', svId: null, orgId: null, subSvIds: [] }
 
   // Check if user is an SV
   const sv = await getGutachterForUser<{
@@ -150,7 +150,7 @@ export default async function StatistikenPage() {
   // Fetch faelle
   let faelleQuery = adminClient
     .from('faelle')
-    .select('id, status, sv_id, created_at, regulierung_am, regulierung_betrag, gutachten_betrag, gutachten_eingegangen_am, sv_zugewiesen_am, schadens_ursache, schadens_plz, kundenbetreuer_id, unfall_konstellation, gegner_anzahl_beteiligte, gegner_fahrzeugtyp, organisation_id, fahrzeug_typ, leadbearbeiter_id, lead_id')
+    .select('id, status, sv_id, created_at, regulierung_am, regulierung_betrag, gutachten_betrag, gutachten_eingegangen_am, sv_zugewiesen_am, schadens_ursache, schadens_plz, kundenbetreuer_id, unfall_konstellation, gegner_anzahl_beteiligte, gegner_fahrzeugtyp, organisation_id, fahrzeug_typ, dispatch_id, lead_id')
     .order('created_at', { ascending: false })
 
   if (rolle === 'kundenbetreuer') {

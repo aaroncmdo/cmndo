@@ -18,7 +18,7 @@ export default async function TeamPage() {
     supabase
       .from('profiles')
       .select('id, email, vorname, nachname, rolle, telefon, force_password_change, created_at, position, gehaltsstufe, kategorie, kapazitaet_max, aktiv, eingestellt_am')
-      .in('rolle', ['admin', 'kundenbetreuer', 'leadbearbeiter', 'kanzlei'])
+      .in('rolle', ['admin', 'kundenbetreuer', 'dispatch', 'kanzlei'])
       .order('created_at', { ascending: false }),
     supabase.from('leads').select('zugewiesen_an, status').gte('created_at', monatStr),
     supabase.from('faelle').select('kundenbetreuer_id').not('status', 'in', '("abgeschlossen","storniert")'),

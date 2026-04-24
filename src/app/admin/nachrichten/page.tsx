@@ -20,7 +20,7 @@ export default async function NachrichtenPage() {
     .single()
 
   // AAR-719: Defensiv — bei falscher Rolle ins eigene Portal statt /admin.
-  if (!profile || !['admin', 'kundenbetreuer', 'leadbearbeiter', 'dispatch'].includes(profile.rolle)) {
+  if (!profile || !['admin', 'kundenbetreuer', 'dispatch'].includes(profile.rolle)) {
     redirect(profile?.rolle ? roleToPath(profile.rolle as string) : '/login')
   }
 

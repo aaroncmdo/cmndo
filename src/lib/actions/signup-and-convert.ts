@@ -126,7 +126,7 @@ export async function signupAndConvertLead(input: {
     kundenbetreuerId = min.id
   }
 
-  // 6) Entity-FKs (versicherung/kanzlei/organisation/leadbearbeiter)
+  // 6) Entity-FKs (versicherung/kanzlei/organisation/dispatch)
   const entityFks = await resolveFallEntityFks(admin, leadRaw, null)
 
   // 7) Fall-Insert — SA-Felder überschreiben: beim Signup noch keine SA

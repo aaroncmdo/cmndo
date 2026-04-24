@@ -1,4 +1,4 @@
-// AAR-369: Mitarbeiter-Profilseite (KB, Leadbearbeiter, Admin)
+// AAR-369: Mitarbeiter-Profilseite (KB, Dispatcher, Admin)
 // Avatar-Upload + Anzeigename + Profilbeschreibung.
 // Dispatch/Admin nutzen dieselbe Seite, da sie im mitarbeiter-Layout liegen.
 
@@ -17,7 +17,7 @@ export default async function MitarbeiterProfilPage() {
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['kundenbetreuer', 'leadbearbeiter', 'admin'].includes(profile.rolle)) {
+  if (!profile || !['kundenbetreuer', 'dispatch', 'admin'].includes(profile.rolle)) {
     redirect('/login')
   }
 

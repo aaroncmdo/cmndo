@@ -23,8 +23,8 @@ describe('sichtbarkeit', () => {
     expect(darfSehen('vorschaden_bericht', 'kunde')).toBe(false)
   })
 
-  it('Leadbearbeiter sieht NICHT: gutachten', () => {
-    expect(darfSehen('gutachten', 'leadbearbeiter')).toBe(false)
+  it('Dispatcher sieht NICHT: gutachten', () => {
+    expect(darfSehen('gutachten', 'dispatch')).toBe(false)
   })
 
   it('Unbekannter Typ: nur Admin', () => {

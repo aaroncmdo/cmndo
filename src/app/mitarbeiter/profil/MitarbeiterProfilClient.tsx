@@ -14,7 +14,7 @@ import { updateProfilText } from '@/lib/profile/avatar'
 
 const ROLLEN_LABEL: Record<string, string> = {
   kundenbetreuer: 'Kundenbetreuer',
-  leadbearbeiter: 'Leadbearbeiter (Dispatch)',
+  dispatch: 'Dispatcher (Dispatch)',
   admin: 'Admin',
 }
 

@@ -7,8 +7,8 @@ import { UserPlusIcon, UsersIcon, ShieldCheckIcon, TrophyIcon, GiftIcon, Activit
 import { createMitarbeiter, deactivateKbWithReassign } from './actions'
 import PageHeader from '@/components/shared/PageHeader'
 
-const ROLLE_LABELS: Record<string, string> = { admin: 'Admin', kundenbetreuer: 'Kundenbetreuer', leadbearbeiter: 'Leadbearbeiter', kanzlei: 'Kanzlei' }
-const ROLLE_COLORS: Record<string, string> = { admin: 'bg-red-50 text-red-300', kundenbetreuer: 'bg-green-50 text-green-300', leadbearbeiter: 'bg-amber-50 text-amber-300', kanzlei: 'bg-violet-50 text-violet-300' }
+const ROLLE_LABELS: Record<string, string> = { admin: 'Admin', kundenbetreuer: 'Kundenbetreuer', dispatch: 'Dispatcher', kanzlei: 'Kanzlei' }
+const ROLLE_COLORS: Record<string, string> = { admin: 'bg-red-50 text-red-300', kundenbetreuer: 'bg-green-50 text-green-300', dispatch: 'bg-amber-50 text-amber-300', kanzlei: 'bg-violet-50 text-violet-300' }
 const KAT_LABELS: Record<string, string> = { dispatch: 'Dispatch', kundenbetreuer: 'Kundenbetr.', admin: 'Admin', entwicklung: 'Entwicklung' }
 const KAT_COLORS: Record<string, string> = { dispatch: 'bg-amber-50 text-amber-300', kundenbetreuer: 'bg-green-50 text-green-300', admin: 'bg-red-50 text-red-300', entwicklung: 'bg-[#4573A2]/5 text-[#7BA3CC]' }
 
@@ -111,7 +111,7 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
                 const leads = leadsByUser[m.id]
                 const aktive = aktiveFaelleByUser[m.id] ?? 0
                 const abg = abgeschlossenByUser[m.id] ?? 0
-                const isD = m.kategorie === 'dispatch' || m.rolle === 'leadbearbeiter'
+                const isD = m.kategorie === 'dispatch' || m.rolle === 'dispatch'
                 const load = isD ? (leads?.total ?? 0) : aktive
                 const loadMax = isD ? 50 : (m.kapazitaet_max ?? 100)
                 const pct = loadMax > 0 ? Math.min(100, Math.round((load / loadMax) * 100)) : 0
@@ -129,7 +129,7 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
                       <div className="flex items-center gap-2">
                         {m.aktiv === false ? <span className="text-red-400 text-xs">Inaktiv</span> : m.force_password_change ? <span className="text-amber-400 text-xs">Einladung</span> : <span className="text-green-400 text-xs flex items-center gap-1"><ShieldCheckIcon className="w-3 h-3" />Aktiv</span>}
                         {/* AAR-634: „Deaktivieren + Fälle verteilen" nur für aktive KB/LB */}
-                        {m.aktiv !== false && (m.rolle === 'kundenbetreuer' || m.rolle === 'leadbearbeiter') && (
+                        {m.aktiv !== false && (m.rolle === 'kundenbetreuer' || m.rolle === 'dispatch') && (
                           <DeactivateReassignButton mitarbeiterId={m.id} name={name(m)} />
                         )}
                       </div>
@@ -156,7 +156,7 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
               </div>
               <div><label className="text-sm text-gray-500 mb-1 block">E-Mail</label><input name="email" type="email" required className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" /></div>
               <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-sm text-gray-500 mb-1 block">Rolle</label><select name="rolle" required className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"><option value="kundenbetreuer">Kundenbetreuer</option><option value="leadbearbeiter">Leadbearbeiter</option><option value="admin">Admin</option><option value="kanzlei">Kanzlei</option></select></div>
+                <div><label className="text-sm text-gray-500 mb-1 block">Rolle</label><select name="rolle" required className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"><option value="kundenbetreuer">Kundenbetreuer</option><option value="dispatch">Dispatcher</option><option value="admin">Admin</option><option value="kanzlei">Kanzlei</option></select></div>
                 <div><label className="text-sm text-gray-500 mb-1 block">Kategorie</label><select name="kategorie" className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"><option value="">—</option><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="admin">Admin</option><option value="entwicklung">Entwicklung</option></select></div>
               </div>
               <div><label className="text-sm text-gray-500 mb-1 block">Kapazitaet (max. Faelle)</label><input name="kapazitaet_max" type="number" defaultValue={100} className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" /></div>
