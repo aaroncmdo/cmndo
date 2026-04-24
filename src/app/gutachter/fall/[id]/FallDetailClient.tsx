@@ -40,7 +40,12 @@ import { SvHonorarCard } from '@/components/gutachter/SvHonorarCard'
 import { KonfrontationsTerminCard } from '@/components/gutachter/KonfrontationsTerminCard'
 import { ReklamationsCard } from './_components/ReklamationsCard'
 import { AbrechnungsartCard } from './_components/AbrechnungsartCard'
-import FallakteVollClient from './FallakteVollClient'
+// AAR-757: FallakteVollClient aufgelöst, unique Features extrahiert
+import { TerminActionsPanel } from './_components/TerminActionsPanel'
+import { SvToolsCard } from './_components/SvToolsCard'
+import { VorOrtTriggerCard } from './_components/VorOrtTriggerCard'
+import FallActivityFeed, { buildActivityEvents } from '@/components/faelle/FallActivityFeed'
+import FallDokumenteSidebar, { type FallDokumentRow } from '@/components/faelle/FallDokumenteSidebar'
 // AAR-377: Shared BriefingCard — in der SV-Fallakte read-only (kein Regenerate).
 import BriefingCard from '@/components/fall/BriefingCard'
 import type { GutachterTask } from '@/hooks/useGutachterTasks'
@@ -90,8 +95,6 @@ type TimelineEvent = {
   created_at: string | null
 }
 
-type FallakteVollProps = Parameters<typeof FallakteVollClient>[0]
-
 type Props = {
   fall: Record<string, unknown>
   lead: Lead
@@ -109,7 +112,7 @@ type Props = {
     avatar_url: string | null
   }[]
   aktiverTermin?: TerminInfo | null
-  fallDokumente?: FallakteVollProps['fallDokumente']
+  fallDokumente?: FallDokumentRow[]
   /** AAR-289: Abrechnungs-Snippet für Subphase-Ableitung (ausgezahlt_am). */
   abrechnungAusgezahltAm?: string | null
   /** AAR-291: Tasks initial geladen (SSR), Hook refresht via Realtime. */
@@ -257,6 +260,20 @@ export default function FallDetailClient(props: Props) {
     })),
   }
 
+  // AAR-757: Termin-Actions + Vor-Ort + ActivityFeed-Eingaben
+  const aktiverTermin = props.aktiverTermin ?? null
+  const zeigeTerminActions =
+    aktiverTermin?.status === 'reserviert' || aktiverTermin?.status === 'gegenvorschlag'
+  const hatGutachten = !!fall.gutachten_eingegangen_am
+  const zeigeVorOrt =
+    !!fall.sv_termin &&
+    !hatGutachten &&
+    (fall.status === 'sv-termin' || fall.status === 'sv-zugewiesen')
+  const schadensAdresse =
+    [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort]
+      .filter(Boolean)
+      .join(', ') || null
+
   return (
     <div className="min-h-full bg-[#f8f9fb]">
       <FallHeader
@@ -269,6 +286,21 @@ export default function FallDetailClient(props: Props) {
         aktuellePhaseSnake={aktuellePhaseSnake}
         abgeschlossenAm={abgeschlossenAm}
       />
+
+      {/* AAR-757: Phase-gated Banner unter dem Header (vorher in VollClient) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
+        {zeigeTerminActions && aktiverTermin && (
+          <TerminActionsPanel fallId={fall.id as string} termin={aktiverTermin} />
+        )}
+        {zeigeVorOrt && (
+          <VorOrtTriggerCard
+            fallId={fall.id as string}
+            kundeName={kundenName}
+            kennzeichen={(fall.kennzeichen as string | null) ?? null}
+            adresse={schadensAdresse}
+          />
+        )}
+      </div>
 
       {/* 2-Spalten-Layout: Desktop ≥1024px sticky-links, Mobile stacked */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_1fr] gap-4 sm:gap-6">
@@ -516,34 +548,40 @@ export default function FallDetailClient(props: Props) {
             />
           )}
           <TimelineVorschauCard events={timeline} />
-          {/* AAR-293 wird hier Abrechnungs-Block + Kanzlei-Stepper rendern */}
+
+          {/* AAR-757: SV-Tools-Card (FIN + ZB1 + Gutachten + Datei-Upload)
+              bündelt die Flows die früher über die VollClient-Tabs verstreut waren. */}
+          <SvToolsCard
+            fallId={fall.id as string}
+            fallFin={(fall.fin_vin as string | null) ?? null}
+            finQuelle={(fall.fin_quelle as string | null) ?? null}
+            vorschadenGeprueft={!!fall.vorschaden_geprueft}
+            hatVorschaeden={!!fall.hat_vorschaeden}
+            vorschadenAnzahl={(fall.vorschaden_anzahl as number | null) ?? null}
+            hasGutachten={hatGutachten}
+          />
+
+          {/* AAR-757: Activity-Feed + Dokumente-Sidebar als Reihen-Paar unten */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+            <FallActivityFeed
+              fallId={fall.id as string}
+              events={buildActivityEvents(
+                timeline as { id: string; typ: string; titel: string; beschreibung?: string | null; erstellt_von?: string | null; lead_id?: string | null; created_at: string }[],
+                [],
+                nachrichten as { id: string; kanal: string; sender_rolle?: string | null; nachricht: string; lead_id?: string | null; created_at: string }[],
+              )}
+              maxItems={8}
+            />
+            <FallDokumenteSidebar
+              fallId={fall.id as string}
+              aktuellePhase={fall.aktuelle_phase as string | null}
+              szenario={fall.szenario as string | null}
+              dokumente={props.fallDokumente ?? []}
+            />
+          </div>
         </section>
       </div>
 
-      {/* AAR-289: Bestehende 7-Tabs-Sicht bleibt vorerst als „Detail-Block"
-          unter dem Layout. Children 2/3/4 lösen sie schrittweise auf. */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
-        <details className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-          <summary className="px-4 sm:px-5 py-3 text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-50 select-none">
-            Vollständige Detail-Ansicht (Tabs öffnen)
-          </summary>
-          <div className="border-t border-gray-200">
-            <FallakteVollClient
-              fall={fall}
-              lead={lead}
-              dokumente={dokumente}
-              pflichtdokumente={pflichtdokumente as unknown as Record<string, unknown>[]}
-              parteien={props.parteien}
-              timeline={timeline as unknown as Record<string, unknown>[]}
-              nachrichten={nachrichten}
-              kundenbetreuer={kundenbetreuer ?? null}
-              chatTeilnehmer={props.chatTeilnehmer}
-              aktiverTermin={props.aktiverTermin}
-              fallDokumente={props.fallDokumente}
-            />
-          </div>
-        </details>
-      </div>
     </div>
   )
 }
