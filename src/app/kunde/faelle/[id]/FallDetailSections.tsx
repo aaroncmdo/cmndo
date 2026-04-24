@@ -16,6 +16,8 @@ import { StammdatenReadSection } from '@/components/shared/stammdaten'
 import { FallKontakteCard } from '@/components/shared/fall-kontakte'
 // AAR-759 (Phase 1): Mietwagen-Status-Anzeige
 import { MietwagenStatusCard } from '@/components/shared/mietwagen'
+// AAR-761 Phase 2: Kunde-Upload-Card fuer Belege
+import { BelegUploadCard } from '@/components/kunde/beleg-upload'
 
 type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean | null; anhang_url: string | null; created_at: string }
 type Dokument = { id: string; typ: string; datei_url: string; datei_name: string | null; created_at: string }
@@ -184,20 +186,25 @@ export default function FallDetailSections({
       )}
 
       {activeTab === 'dokumente' && (
-        <Section title="Dokumente">
-          <DokumenteDownloadListe
-            variant="list"
-            rolle="kunde"
-            emptyTitle="Noch keine Dokumente vorhanden."
-            dokumente={dokumente.map<DokumentItem>(doc => ({
-              id: doc.id,
-              name: doc.datei_name ?? 'Dokument',
-              url: doc.datei_url,
-              typ: doc.typ,
-              createdAt: doc.created_at,
-            }))}
-          />
-        </Section>
+        <div className="space-y-5">
+          {/* AAR-761 Phase 2: Upload-Card mit Typ-Auswahl + OCR */}
+          <BelegUploadCard fallId={fall.id as string} />
+
+          <Section title="Hochgeladene Dokumente">
+            <DokumenteDownloadListe
+              variant="list"
+              rolle="kunde"
+              emptyTitle="Noch keine Dokumente vorhanden."
+              dokumente={dokumente.map<DokumentItem>(doc => ({
+                id: doc.id,
+                name: doc.datei_name ?? 'Dokument',
+                url: doc.datei_url,
+                typ: doc.typ,
+                createdAt: doc.created_at,
+              }))}
+            />
+          </Section>
+        </div>
       )}
 
       {activeTab === 'chat' && (
