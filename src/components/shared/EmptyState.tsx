@@ -1,24 +1,20 @@
-// AAR-414: Zentrale Empty-State-Primitive. Ersetzt hardcodete
-// "bg-white rounded-2xl p-12 text-center"-Divs mit einheitlicher Sprache,
-// Icon + Titel + Beschreibung + optionaler Action.
+// AAR-414 / AAR-769 Phase 3: Zentrale Empty-State-Primitive. Vollständig
+// auf Primitives migriert (Card, Stack, Icon, Text, Button) — kein Tailwind
+// mehr im Render. Action mit `href` wird per <a>-Wrapper außerhalb des
+// Buttons unterstützt, weil <Button>-Primitive keinen Link-Modus hat.
 
 import type { LucideIcon } from 'lucide-react'
+import { Button, Card, Icon, Stack, Text } from '@/components/primitives'
+import type { ButtonTone } from '@/components/primitives/Button/Button.types'
+import { tokens } from '@/lib/design-tokens'
 
 type ActionVariant = 'primary' | 'secondary' | 'ghost'
 
-const ACTION_CLASSES: Record<ActionVariant, string> = {
-  primary:
-    'bg-claimondo-navy hover:bg-claimondo-ondo text-white',
-  secondary:
-    'bg-white hover:bg-[#f8f9fb] text-claimondo-navy border border-claimondo-border',
-  ghost:
-    'bg-transparent hover:bg-[#f8f9fb] text-claimondo-ondo',
+const ACTION_TO_TONE: Record<ActionVariant, ButtonTone> = {
+  primary: 'navy',
+  secondary: 'ghost',
+  ghost: 'ghost',
 }
-
-const SIZE_CLASSES = {
-  default: 'p-12',
-  compact: 'p-6',
-} as const
 
 export interface EmptyStateProps {
   icon?: LucideIcon
@@ -30,56 +26,63 @@ export interface EmptyStateProps {
     href?: string
     variant?: ActionVariant
   }
-  variant?: keyof typeof SIZE_CLASSES
+  variant?: 'default' | 'compact'
   className?: string
 }
 
 export default function EmptyState({
-  icon: Icon,
+  icon,
   title,
   description,
   action,
   variant = 'default',
   className = '',
 }: EmptyStateProps) {
-  const padding = SIZE_CLASSES[variant]
-  const actionVariant = action?.variant ?? 'primary'
-  const actionClass = ACTION_CLASSES[actionVariant]
+  const padding = variant === 'compact' ? 6 : 12
+  const iconSize = variant === 'compact' ? 32 : 40
 
-  const actionButton = action && (
+  const actionTone = ACTION_TO_TONE[action?.variant ?? 'primary']
+
+  const actionEl = action ? (
     action.href ? (
       <a
         href={action.href}
-        className={`inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl transition-colors mt-4 ${actionClass}`}
+        style={{ textDecoration: 'none', display: 'inline-block', marginTop: tokens.spacing[4] }}
       >
-        {action.label}
+        <Button tone={actionTone} size="md" onPress={() => {}}>
+          {action.label}
+        </Button>
       </a>
     ) : (
-      <button
-        type="button"
-        onClick={action.onClick}
-        className={`inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl transition-colors mt-4 ${actionClass}`}
-      >
-        {action.label}
-      </button>
+      <div style={{ marginTop: tokens.spacing[4] }}>
+        <Button tone={actionTone} size="md" onPress={action.onClick ?? (() => {})}>
+          {action.label}
+        </Button>
+      </div>
     )
+  ) : null
+
+  const inner = (
+    <Card p={padding}>
+      <Stack gap={2} align="center">
+        {icon && (
+          <Icon icon={icon} size={iconSize} color="lightBlue" />
+        )}
+        <Text variant="headingSm" color="navy" align="center">
+          {title}
+        </Text>
+        {description && (
+          <Text variant="bodySm" color="ondo" align="center">
+            {description}
+          </Text>
+        )}
+        {actionEl}
+      </Stack>
+    </Card>
   )
 
-  return (
-    <div
-      className={`bg-white rounded-2xl ${padding} text-center border border-claimondo-border ${className}`}
-    >
-      {Icon && (
-        <Icon
-          className={`${variant === 'compact' ? 'w-8 h-8' : 'w-10 h-10'} text-claimondo-light-blue mx-auto mb-3`}
-          strokeWidth={1.5}
-        />
-      )}
-      <p className="text-claimondo-navy font-medium">{title}</p>
-      {description && (
-        <p className="text-claimondo-ondo/70 text-sm mt-1 max-w-md mx-auto">{description}</p>
-      )}
-      {actionButton}
-    </div>
-  )
+  if (className) {
+    return <div className={className}>{inner}</div>
+  }
+  return inner
 }

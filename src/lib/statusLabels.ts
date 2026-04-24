@@ -104,7 +104,7 @@ export const SCHADENS_URSACHE_COLORS: Record<string, string> = {
   sturmschaden: 'bg-cyan-50 text-cyan-700',
   vandalismus: 'bg-pink-50 text-pink-700',
   verschleiss: 'bg-amber-50 text-amber-700',
-  sonstiges: 'bg-gray-100 text-gray-700',
+  sonstiges: 'bg-[#f8f9fb] text-claimondo-navy',
   kfz: 'bg-[#4573A2]/5 text-[#7BA3CC]',
 }
 

@@ -1,15 +1,13 @@
-// AAR-727 Kandidat 2: Shared Hülle für „Jetzt zu tun"-Cards.
+// AAR-727 / AAR-769 Phase 3: Shared Hülle für „Jetzt zu tun"-Cards.
 //
 // SV (`JetztZuTunCard`) und Kunde (`KundeJetztZuTunCard`) haben komplett
 // unterschiedliche Innenlogik (Task-Liste + Matrix-Resolver vs. Single-
-// Action mit Severity-Varianten) — aber die gleiche Outer-Card-Struktur:
-//   - Label-Header („Jetzt zu tun") ± Counter-Badge rechts
-//   - optionaler Severity-Border-Accent links (critical/warning/success)
-//   - Card-Surface (glass-light oder passive-muted)
-//
-// Diese Shell liefert NUR diese Hülle. Business-Logik bleibt beim Consumer.
+// Action mit Severity-Varianten) — aber die gleiche Outer-Card-Struktur.
+// Phase 3: Outer-Wrapper läuft jetzt über <Card> aus den Primitives.
 
 import type { ReactNode } from 'react'
+import { Card } from '@/components/primitives'
+import type { ColorName } from '@/lib/design-tokens'
 
 export type TodoCardSeverity =
   | 'default'
@@ -39,12 +37,13 @@ export interface TodoCardProps {
   className?: string
 }
 
-const SEVERITY_ACCENT: Record<TodoCardSeverity, string> = {
-  default: 'border-l-claimondo-navy',
-  info: 'border-l-transparent',
-  warning: 'border-l-amber-500',
-  critical: 'border-l-rose-500',
-  success: 'border-l-emerald-500',
+// Severity → Token-Color für border-left-4 in <Card accentColor>.
+const SEVERITY_ACCENT: Record<TodoCardSeverity, ColorName | undefined> = {
+  default: 'navy',
+  info: undefined,
+  warning: 'warning',
+  critical: 'danger',
+  success: 'success',
 }
 
 export function TodoCard({
@@ -56,26 +55,25 @@ export function TodoCard({
   children,
   className = '',
 }: TodoCardProps) {
-  const surface = passive
-    ? 'bg-[#f8f9fb]/80 border-claimondo-border'
-    : severity === 'info'
-      ? 'bg-white border-claimondo-border'
-      : 'glass-light'
-  const accent = passive ? 'border-l-transparent' : SEVERITY_ACCENT[severity]
+  const accentColor = passive ? undefined : SEVERITY_ACCENT[severity]
+  const isGlass = !passive && severity !== 'info'
   const hasHeader = label || count !== null || countLabel
 
   const counterText =
     countLabel ??
     (typeof count === 'number' ? `${count} ${count === 1 ? 'Task' : 'Tasks'}` : null)
 
-  return (
-    <div
-      className={`${surface} border border-l-4 ${accent} rounded-ios-md shadow-ios-sm p-4 sm:p-5 space-y-3 ${className}`}
-      role="region"
-      aria-label={label}
+  // className wird optional vom Consumer weitergegeben (z. B. zusätzliche
+  // Spacing-/Margin-Klassen). Da <Card> selbst kein className entgegennimmt,
+  // wrappen wir bei Bedarf in ein zusätzliches div.
+  const inner = (
+    <Card
+      glass={isGlass ? 'light' : undefined}
+      accentColor={accentColor}
+      p={4}
     >
       {hasHeader && (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <p className="text-xs uppercase tracking-wider text-claimondo-ondo font-semibold">
             {label}
           </p>
@@ -84,9 +82,14 @@ export function TodoCard({
           )}
         </div>
       )}
-      {children}
-    </div>
+      <div className="space-y-3">{children}</div>
+    </Card>
   )
+
+  if (className) {
+    return <div className={className}>{inner}</div>
+  }
+  return inner
 }
 
 /**

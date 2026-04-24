@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import TerminVorschlagModal from '@/components/fall/TerminVorschlagModal'
 import { formatUhrzeit } from '@/lib/format'
+import { Card } from '@/components/primitives'
 
 export type SharedTerminCardProps = {
   termin: {
@@ -91,7 +92,7 @@ function getStatusUi(
 const TONE_CLASSES: Record<StatusUi['tone'], string> = {
   emerald: 'bg-emerald-50 text-emerald-800 border-emerald-200',
   amber: 'bg-amber-50 text-amber-800 border-amber-200',
-  red: 'bg-red-50 text-red-800 border-red-200',
+  red: 'bg-rose-50 text-rose-800 border-rose-200',
   gray: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border',
 }
 
@@ -145,11 +146,8 @@ export function TerminCard({ termin, fall, readOnly = false }: SharedTerminCardP
 
   return (
     <>
-      <div
-        className="glass-light border border-claimondo-border border-l-4 border-l-claimondo-navy rounded-ios-md shadow-ios-sm p-4 sm:p-5 space-y-3"
-        role="region"
-        aria-label="Termin"
-      >
+      <Card glass="light" accentColor="navy" p={4}>
+        <div className="space-y-3" role="region" aria-label="Termin">
         <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
           Termin
         </p>
@@ -222,7 +220,8 @@ export function TerminCard({ termin, fall, readOnly = false }: SharedTerminCardP
             </button>
           </div>
         )}
-      </div>
+        </div>
+      </Card>
 
       {!readOnly && (
         <TerminVorschlagModal

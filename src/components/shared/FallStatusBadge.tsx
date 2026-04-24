@@ -1,7 +1,9 @@
-// AAR-410: Zentrale Fall-Status-Badge-Primitive.
+// AAR-410 / AAR-769 Phase 3: Zentrale Fall-Status-Badge-Primitive.
 // Zieht Label + Farben aus FALL_STATUS_LABELS/FALL_STATUS_COLORS in
-// src/lib/statusLabels.ts — alle neuen Stellen MÜSSEN diesen Badge nutzen
-// statt eigene Labels/Farben zu definieren.
+// src/lib/statusLabels.ts. Die Map liefert pro Status einen Dark-Mode-
+// Tailwind-Color-String (bg-blue-950 etc.) — der diskrete <Badge>-Primitive
+// kann diese Statusfarben nicht alle abbilden. Render bleibt Span, Token-
+// Sweep der Fallback-Farben unten.
 
 import { FALL_STATUS_LABELS, FALL_STATUS_COLORS } from '@/lib/statusLabels'
 

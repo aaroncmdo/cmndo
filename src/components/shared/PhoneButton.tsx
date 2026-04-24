@@ -1,7 +1,11 @@
 'use client'
 
-// AAR-412: Einheitlicher Telefon-Button. Ersetzt AircallCallButton +
-// BridgeCallButton + die ~20 Inline-`<a href="tel:...">`-Links im Codebase.
+// AAR-412 / AAR-769 Phase 3: Einheitlicher Telefon-Button. Ersetzt
+// AircallCallButton + BridgeCallButton + die ~20 Inline-`<a href="tel:...">`-
+// Links im Codebase. Phase 3: bereits Token-konform (claimondo-*), Migration
+// auf <Button>-Primitive blockiert weil Primitive keinen <a href>-Modus
+// unterstützt — bleibt mit lokalem Tailwind-Style. Wenn Primitive einen
+// `as="a" href=`-Modus bekommt, hier ablösen.
 //
 // Varianten:
 //   - 'inline'   → Unterstrichener Link mit Phone-Icon, für Fliesstext

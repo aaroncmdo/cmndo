@@ -1,39 +1,36 @@
-// Shared-Panel: glass-light Surface mit claimondo-border + iOS-Radius.
-// Ersetzt `bg-white border border-gray-200 rounded-2xl`-Duplikate.
+// AAR-769 Phase 3: GlassPanel ist jetzt ein dünner Wrapper über <Card>.
+//
+// Die alte Public-API (accent, radius, shadow, padded, className, ...rest)
+// wird auf <Card>-Props gemappt. Aktuell hat keine externe Stelle die
+// Component konsumiert (nur sich selbst), wird aber als Convenience-Export
+// für „accent als Severity-Hint"-Use-Cases beibehalten.
 
 import type { ReactNode, HTMLAttributes } from 'react'
+import { Card } from '@/components/primitives'
+import type {
+  ColorName,
+  RadiusName,
+  ShadowName,
+} from '@/lib/design-tokens'
 
 type GlassPanelProps = {
   /** Severity-Akzent links als border-l-4. */
   accent?: 'navy' | 'ondo' | 'emerald' | 'amber' | 'rose' | null
   radius?: 'sm' | 'md' | 'lg'
-  /** Zusätzliche Shadow-Stärke (default: shadow-ios-sm). */
+  /** Zusätzliche Shadow-Stärke (default: shadow.sm). */
   shadow?: 'none' | 'sm' | 'md' | 'lg'
   padded?: boolean
   className?: string
   children: ReactNode
 } & Omit<HTMLAttributes<HTMLDivElement>, 'className' | 'children'>
 
-const ACCENT_CLS = {
-  navy: 'border-l-4 border-l-claimondo-navy',
-  ondo: 'border-l-4 border-l-claimondo-ondo',
-  emerald: 'border-l-4 border-l-emerald-500',
-  amber: 'border-l-4 border-l-amber-500',
-  rose: 'border-l-4 border-l-rose-500',
-} as const
-
-const RADIUS_CLS = {
-  sm: 'rounded-ios-sm',
-  md: 'rounded-ios-md',
-  lg: 'rounded-ios-lg',
-} as const
-
-const SHADOW_CLS = {
-  none: '',
-  sm: 'shadow-ios-sm',
-  md: 'shadow-ios-md',
-  lg: 'shadow-ios-lg',
-} as const
+const ACCENT_TO_COLOR: Record<NonNullable<GlassPanelProps['accent']>, ColorName> = {
+  navy: 'navy',
+  ondo: 'ondo',
+  emerald: 'success',
+  amber: 'warning',
+  rose: 'danger',
+}
 
 export function GlassPanel({
   accent,
@@ -42,16 +39,27 @@ export function GlassPanel({
   padded = false,
   className = '',
   children,
-  ...rest
 }: GlassPanelProps) {
-  const accentCls = accent ? ACCENT_CLS[accent] : ''
-  const pad = padded ? 'p-4' : ''
-  return (
-    <div
-      className={`glass-light border border-claimondo-border ${RADIUS_CLS[radius]} ${SHADOW_CLS[shadow]} ${accentCls} ${pad} ${className}`}
-      {...rest}
+  const accentColor = accent ? ACCENT_TO_COLOR[accent] : undefined
+  // Shadow 'none' wird auf 'sm' gemappt (Card hat kein 'none'); für externes
+  // Schatten-Reset müsste Consumer eigene Card direkt nutzen.
+  const cardShadow: ShadowName = shadow === 'none' ? 'sm' : shadow
+  const cardRadius: RadiusName = radius === 'sm' ? 'sm' : radius === 'lg' ? 'lg' : 'md'
+
+  const inner = (
+    <Card
+      glass="light"
+      accentColor={accentColor}
+      radius={cardRadius}
+      shadow={cardShadow}
+      p={padded ? 4 : 0}
     >
       {children}
-    </div>
+    </Card>
   )
+
+  if (className) {
+    return <div className={className}>{inner}</div>
+  }
+  return inner
 }
