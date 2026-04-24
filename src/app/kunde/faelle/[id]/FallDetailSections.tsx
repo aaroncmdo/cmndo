@@ -11,6 +11,9 @@ import DokumenteDownloadListe, { type DokumentItem } from '@/components/shared/D
 // AAR-746 (Phase B): Shared Identity-Header — löst die "Aktueller Status"-
 // Section ab. KB + Termin bleiben in einer separaten Detail-Section.
 import { FallIdentityHeader } from '@/components/shared/fall-header'
+// AAR-754 (Phase C): Shared Stammdaten + Kontakte.
+import { StammdatenReadSection } from '@/components/shared/stammdaten'
+import { FallKontakteCard } from '@/components/shared/fall-kontakte'
 
 type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean | null; anhang_url: string | null; created_at: string }
 type Dokument = { id: string; typ: string; datei_url: string; datei_name: string | null; created_at: string }
@@ -91,40 +94,53 @@ export default function FallDetailSections({
             />
           </div>
 
-          {(kbName || !!fall.sv_termin) && (
-            <Section title="Kontakt & Termin">
-              {kbName && <InfoRow label="Ihr Ansprechpartner" value={kbName} />}
-              {!!fall.sv_termin && <InfoRow label="Nächster Termin" value={fmtDateTime(fall.sv_termin as string)} />}
+          {/* AAR-754: Shared FallKontakteCard — ersetzt die handgerollten
+              "Ihr Ansprechpartner" + "Ihr Gutachter" Sections. Kunde-Rolle
+              nutzt Labels "Ihr Betreuer" / "Ihr Gutachter" automatisch. */}
+          <FallKontakteCard
+            rolle="kunde"
+            kundenbetreuer={
+              kbName
+                ? { vorname: kbName, nachname: null, telefon: null, email: null }
+                : null
+            }
+            sv={
+              svName
+                ? {
+                    vorname: svName,
+                    nachname: null,
+                    telefon: svTelefon,
+                    email: null,
+                    verifiziert: svVerifiziert,
+                  }
+                : null
+            }
+          />
+
+          {!!fall.sv_termin && (
+            <Section title="Nächster Termin">
+              <InfoRow label="Besichtigung" value={fmtDateTime(fall.sv_termin as string)} />
+              {!!fall.besichtigungsort_adresse && (
+                <InfoRow label="Besichtigungsort" value={fall.besichtigungsort_adresse as string} />
+              )}
             </Section>
           )}
 
-          <Section title="Fahrzeug">
-            {!!fall.kennzeichen && <InfoRow label="Kennzeichen" value={fall.kennzeichen as string} />}
-            {!!fall.fahrzeug_hersteller && <InfoRow label="Marke" value={fall.fahrzeug_hersteller as string} />}
-            {!!fall.fahrzeug_modell && <InfoRow label="Modell" value={fall.fahrzeug_modell as string} />}
-            {!!fall.schadens_datum && <InfoRow label="Schadensdatum" value={fmt(fall.schadens_datum as string)} />}
-            {!!fall.schadens_beschreibung && (
-              <div className="pt-2 border-t border-gray-100">
-                <p className="text-xs text-gray-400 mb-1">Unfallhergang</p>
-                <p className="text-sm text-[#0D1B3E] whitespace-pre-wrap">{fall.schadens_beschreibung as string}</p>
-              </div>
-            )}
-          </Section>
+          {/* AAR-754: Shared StammdatenReadSection — ersetzt die inline
+              Fahrzeug-Section. Kunde-Rolle filtert eigenen Kontakt + Halter
+              automatisch raus. Unfallhergang bleibt separat darunter. */}
+          <StammdatenReadSection
+            rolle="kunde"
+            lead={null}
+            fall={fall}
+            title="Fahrzeug & Unfall"
+          />
 
-          {svName && (
-            <Section title="Ihr Gutachter">
-              <div className="flex items-center gap-2">
-                <InfoRow label="Name" value={svName} />
-                {svVerifiziert && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-                    Verifiziert
-                  </span>
-                )}
-              </div>
-              {svTelefon && <InfoRow label="Telefon" value={svTelefon} />}
-              {!!fall.sv_termin && <InfoRow label="Besichtigungstermin" value={fmtDateTime(fall.sv_termin as string)} />}
-              {!!fall.besichtigungsort_adresse && <InfoRow label="Besichtigungsort" value={fall.besichtigungsort_adresse as string} />}
+          {!!fall.schadens_beschreibung && (
+            <Section title="Unfallhergang">
+              <p className="text-sm text-claimondo-navy whitespace-pre-wrap">
+                {fall.schadens_beschreibung as string}
+              </p>
             </Section>
           )}
 

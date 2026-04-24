@@ -7,14 +7,16 @@
 // (Finanzen, Pflichtdokumente-Status) leben dort weiterhin und werden beim
 // Monolith-Retirement (W3+) extrahiert.
 
-import { PhoneIcon, MailIcon, UserIcon, HardHatIcon, BriefcaseIcon } from 'lucide-react'
+import { MailIcon, UserIcon } from 'lucide-react'
 import PhoneButton from '@/components/shared/PhoneButton'
-import Link from 'next/link'
 import { useFall } from '../FallContext'
 import QuickActions from './QuickActions'
 import SlaAlerts from './SlaAlerts'
 import FallRueckrufSection from './FallRueckrufSection'
 import TerminListeClient from '@/components/termine/TerminListeClient'
+// AAR-754 (Phase C): Shared FallKontakteCard statt handgerollter
+// Ansprechpartner-Block.
+import { FallKontakteCard } from '@/components/shared/fall-kontakte'
 
 type Kontakt = {
   id: string
@@ -92,38 +94,30 @@ export default function FallSidebar({
         </p>
       </div>
 
-      {/* Ansprechpartner */}
-      <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-2">
-        <p className="text-[9px] font-semibold text-gray-500 uppercase">Ansprechpartner</p>
-        {kundenbetreuer && (
-          <div className="flex items-start gap-2 text-[11px]">
-            <BriefcaseIcon className="w-3.5 h-3.5 text-gray-400 mt-0.5" />
-            <div className="min-w-0">
-              <p className="font-medium text-gray-700">
-                {[kundenbetreuer.vorname, kundenbetreuer.nachname].filter(Boolean).join(' ')}
-              </p>
-              <p className="text-gray-400 text-[10px]">KB</p>
-            </div>
-          </div>
-        )}
-        {sv?.profile && (
-          <Link
-            href={`/admin/sachverstaendige/${sv.id}`}
-            className="flex items-start gap-2 text-[11px] hover:bg-gray-50 -m-1 p-1 rounded"
-          >
-            <HardHatIcon className="w-3.5 h-3.5 text-gray-400 mt-0.5" />
-            <div className="min-w-0">
-              <p className="font-medium text-gray-700">
-                {[sv.profile.vorname, sv.profile.nachname].filter(Boolean).join(' ')}
-              </p>
-              <p className="text-gray-400 text-[10px]">SV · {sv.paket}</p>
-            </div>
-          </Link>
-        )}
-        {!kundenbetreuer && !sv?.profile && (
-          <p className="text-[10px] text-gray-400 italic">Noch keine Ansprechpartner zugewiesen</p>
-        )}
-      </div>
+      {/* Ansprechpartner — AAR-754 via shared FallKontakteCard */}
+      <FallKontakteCard
+        rolle="admin"
+        kundenbetreuer={kundenbetreuer}
+        sv={
+          sv?.profile
+            ? {
+                vorname: sv.profile.vorname,
+                nachname: sv.profile.nachname,
+                email: sv.profile.email,
+                telefon: sv.profile.telefon,
+                paket: sv.paket,
+                detailHref: `/admin/sachverstaendige/${sv.id}`,
+              }
+            : null
+        }
+      />
+      {!kundenbetreuer && !sv?.profile && (
+        <div className="bg-white rounded-ios-md border border-claimondo-border p-3">
+          <p className="text-[10px] text-claimondo-ondo italic">
+            Noch keine Ansprechpartner zugewiesen
+          </p>
+        </div>
+      )}
     </aside>
   )
 }
