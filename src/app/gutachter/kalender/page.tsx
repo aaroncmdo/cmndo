@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import SVKalenderClient from './SVKalenderClient'
 import EmptyState from '@/components/shared/EmptyState'
+import PageHeader from '@/components/shared/PageHeader'
 
 // AAR-229 W5 / F-12: Kalender + Termine merge mit View-Toggle.
 export default async function SVKalenderPage({
@@ -81,22 +82,26 @@ export default async function SVKalenderPage({
   return (
     <div className="h-full flex flex-col">
       {/* View-Toggle */}
-      <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-claimondo-border shrink-0">
-        <h1 className="text-sm font-semibold text-claimondo-navy">Kalender</h1>
-        <div className="flex gap-1 bg-[#f8f9fb] rounded-lg p-0.5">
-          <Link
-            href="/gutachter/kalender?view=kalender"
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-              view === 'kalender' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'
-            }`}
-          >Kalender</Link>
-          <Link
-            href="/gutachter/kalender?view=liste"
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-              view === 'liste' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'
-            }`}
-          >Liste</Link>
-        </div>
+      <div className="px-4 py-2 bg-white border-b border-claimondo-border shrink-0">
+        <PageHeader
+          title="Kalender"
+          actions={
+            <div className="flex gap-1 bg-[#f8f9fb] rounded-lg p-0.5">
+              <Link
+                href="/gutachter/kalender?view=kalender"
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                  view === 'kalender' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'
+                }`}
+              >Kalender</Link>
+              <Link
+                href="/gutachter/kalender?view=liste"
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                  view === 'liste' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'
+                }`}
+              >Liste</Link>
+            </div>
+          }
+        />
       </div>
 
       {view === 'kalender' ? (

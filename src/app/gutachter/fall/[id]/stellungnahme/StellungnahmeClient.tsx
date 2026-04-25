@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { submitStellungnahme } from './actions'
 import { formatDatum, formatEURausEuro } from '@/lib/format'
+import PageHeader from '@/components/shared/PageHeader'
 
 type KuerzungsPosition = {
   id: string
@@ -94,22 +95,20 @@ export default function StellungnahmeClient({
   return (
     <div className="max-w-xl mx-auto px-4 py-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="p-2 rounded-lg text-claimondo-ondo hover:bg-[#f8f9fb] transition-colors"
-          aria-label="Zurück"
-        >
-          <ArrowLeftIcon className="w-5 h-5" />
-        </button>
-        <div>
-          <h1 className="text-lg font-bold text-[#0D1B3E]">Technische Stellungnahme</h1>
-          {fallNummer && (
-            <p className="text-xs text-claimondo-ondo">Fall {fallNummer}</p>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        title="Technische Stellungnahme"
+        description={fallNummer ? `Fall ${fallNummer}` : undefined}
+        leadingSlot={
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="p-2 rounded-lg text-claimondo-ondo hover:bg-[#f8f9fb] transition-colors shrink-0"
+            aria-label="Zurück"
+          >
+            <ArrowLeftIcon className="w-5 h-5" />
+          </button>
+        }
+      />
 
       {/* Kontext: Kürzungs-Positionen */}
       <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 space-y-3">

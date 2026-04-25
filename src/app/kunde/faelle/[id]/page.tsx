@@ -5,6 +5,7 @@ import Link from 'next/link'
 // AAR-569 (V3) / AAR-727: Shared FallPhasenPanel (glass-light progress-card)
 // ersetzt den alten Szenario-Stepper + den manuellen Progress-Bar-Wrapper.
 import { FallPhasenPanel } from '@/components/shared/fall-phases'
+import PageHeader from '@/components/shared/PageHeader'
 import FallDetailSections from './FallDetailSections'
 import FallStatusCard from '@/components/kunde/FallStatusCard'
 import BankdatenBanner from '@/components/kunde/BankdatenBanner'
@@ -413,10 +414,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {/* Header */}
         <div>
           <Link href="/kunde" className="text-xs text-claimondo-ondo/70 hover:text-[#4573A2] mb-2 inline-block">&larr; Meine Fälle</Link>
-          <h1 className="text-lg font-bold text-[#0D1B3E]">
-            {kennzeichen || (fall.fall_nummer as string | null) || 'Schadensfall'}{fahrzeug ? ` — ${fahrzeug}` : ''}
-          </h1>
-          {adresse && <p className="text-sm text-claimondo-ondo mt-0.5">{adresse}</p>}
+          <PageHeader
+            title={`${kennzeichen || (fall.fall_nummer as string | null) || 'Schadensfall'}${fahrzeug ? ` — ${fahrzeug}` : ''}`}
+            description={adresse || undefined}
+          />
         </div>
 
         {/* AAR-770: Mitteilungs-Banner — ganz oben mit Quick-Action */}

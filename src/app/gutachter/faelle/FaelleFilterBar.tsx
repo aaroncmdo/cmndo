@@ -7,6 +7,7 @@
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { SearchIcon, XIcon } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 // AAR-370: Filter um zwei fallübergreifende Slices erweitert —
 // „Mit offener Stellungnahme" (technische_stellungnahme_status='beauftragt')
@@ -83,12 +84,10 @@ export default function FaelleFilterBar({
   return (
     <div className="bg-white border-b border-claimondo-border px-4 py-3 space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-sm font-semibold text-claimondo-navy">Meine Fälle</h1>
-          <p className="text-claimondo-ondo text-xs">
-            {faelleCount} {faelleCount === 1 ? 'Fall' : 'Fälle'}
-          </p>
-        </div>
+        <PageHeader
+          title="Meine Fälle"
+          description={`${faelleCount} ${faelleCount === 1 ? 'Fall' : 'Fälle'}`}
+        />
 
         <div className="relative flex-1 max-w-sm">
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-claimondo-ondo/70" />
