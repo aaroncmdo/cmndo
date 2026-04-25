@@ -4,6 +4,7 @@
 // Anon-Route — kein Login nötig. Token = gutachter_termine.kunde_response_token.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { revalidatePath } from 'next/cache'
 
 export type KundeTerminData = {
   id: string
@@ -131,6 +132,11 @@ export async function acceptVorschlagByToken(
     console.error('[AAR-702 acceptVorschlagByToken] bestaetigeTermin:', err)
   }
 
+  // AAR-802: Termin-Update sichtbar in Admin/Dispatch/Gutachter-UIs
+  if (termin.fall_id) revalidatePath(`/admin/faelle/${termin.fall_id}`)
+  revalidatePath('/gutachter/termine')
+  revalidatePath('/gutachter')
+
   return { success: true }
 }
 
@@ -222,6 +228,10 @@ export async function counterByToken(
   } catch (err) {
     console.warn('[AAR-702 counterByToken] SV-Notification:', err)
   }
+
+  // AAR-802: Gegenvorschlag des Kunden sichtbar in Admin/Dispatch/Gutachter-UIs
+  if (termin.fall_id) revalidatePath(`/admin/faelle/${termin.fall_id}`)
+  revalidatePath('/gutachter/termine')
 
   return { success: true }
 }
