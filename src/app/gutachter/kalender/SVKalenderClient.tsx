@@ -10,6 +10,7 @@ import {
 import { de } from 'date-fns/locale'
 import { setTermin, ablehnTerminAction, gegenvorschlagAction } from './actions'
 import { Modal } from '@/components/primitives/Modal'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 type Fall = {
   id: string
@@ -168,7 +169,7 @@ export default function SVKalenderClient({
         </div>
         <div className="flex items-center gap-2">
           {gcalConnected ? (
-            <span className="text-[10px] bg-green-50 text-green-600 px-2 py-1 rounded-full font-medium">Google Calendar verbunden</span>
+            <StatusBadge tone="success">Google Calendar verbunden</StatusBadge>
           ) : (
             <a href="/api/auth/google/connect?return=/gutachter/kalender"
               className="flex items-center gap-2 bg-white border border-claimondo-border hover:shadow-md text-sm font-medium px-3 py-1.5 rounded-lg transition-shadow">

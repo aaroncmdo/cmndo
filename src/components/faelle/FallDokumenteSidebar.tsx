@@ -5,6 +5,7 @@ import { CheckCircle2Icon, CircleDotIcon, AlertCircleIcon, FileTextIcon, ImageIc
 import { getPflichtDokumenteFuerFall, DOKUMENT_LABELS, type Phase, type Szenario } from '@/lib/dokumente/pflicht-dokumente'
 import { createClient } from '@/lib/supabase/client'
 import FallDokumentDropzone from './FallDokumentDropzone'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import OcrAutoFillModal, { type OcrData } from './OcrAutoFillModal'
 
 // KFZ-172: Dokumente-Sidebar fuer die Fall-Akte Right-Sidebar.
@@ -114,13 +115,9 @@ export default function FallDokumenteSidebar({
         <h3 className="text-[10px] font-semibold text-claimondo-ondo/70 uppercase tracking-wider">
           Dokumente
         </h3>
-        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-          erledigtPflicht === totalPflicht && totalPflicht > 0
-            ? 'bg-emerald-50 text-emerald-700'
-            : 'bg-amber-50 text-amber-700'
-        }`}>
+        <StatusBadge tone={erledigtPflicht === totalPflicht && totalPflicht > 0 ? 'success' : 'warning'}>
           {erledigtPflicht}/{totalPflicht} Pflicht
-        </span>
+        </StatusBadge>
       </div>
 
       {/* Pflichtdokumente */}

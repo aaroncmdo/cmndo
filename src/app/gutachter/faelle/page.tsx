@@ -7,6 +7,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import { CalendarIcon, NavigationIcon, PhoneIcon } from 'lucide-react'
 import FaelleFilterBar from './FaelleFilterBar'
 import PhoneButton from '@/components/shared/PhoneButton'
@@ -218,9 +219,7 @@ export default async function GutachterFaellePage({
                             })}{' '}
                             Uhr
                           </span>
-                          <span
-                            className={`text-xs px-2 py-0.5 rounded-full font-medium ${isHeute ? 'bg-[var(--brand-secondary)] text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}
-                          >
+                          <StatusBadge colorCls={isHeute ? 'bg-[var(--brand-secondary)] text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}>
                             {isHeute
                               ? 'HEUTE'
                               : termin.toLocaleDateString('de-DE', {
@@ -228,7 +227,7 @@ export default async function GutachterFaellePage({
                                   day: '2-digit',
                                   month: '2-digit',
                                 })}
-                          </span>
+                          </StatusBadge>
                         </div>
                         <p className="text-sm text-claimondo-navy mt-1">{name}</p>
                         <p className="text-xs text-claimondo-ondo">{adresse}</p>

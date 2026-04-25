@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { FINANCE } from '@/lib/finance/constants'
 import PageHeader from '@/components/shared/PageHeader'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import FinanceClient from './FinanceClient'
 import AbrechnungenSection from './AbrechnungenSection'
 import AusstehendeZahlungenTable from '../../_components/AusstehendeZahlungenTable'
@@ -276,9 +277,9 @@ function KanzleiProvisionSection({
             <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider">
               Kanzlei-Provision (150&euro; / Vollmacht)
             </h2>
-            <span className="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full font-medium">
+            <StatusBadge colorCls="text-purple-600 bg-purple-50">
               Nur mandatstyp: kanzlei-claimondo
-            </span>
+            </StatusBadge>
           </div>
 
           <div className="p-5">

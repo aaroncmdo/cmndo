@@ -6,6 +6,7 @@ import { SearchIcon, PhoneIcon, MailIcon, GlobeIcon, PlusIcon, XIcon } from 'luc
 import PhoneButton from '@/components/shared/PhoneButton'
 import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 type Versicherung = {
   id: string
@@ -130,9 +131,9 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
                 </td>
                 <td className="px-4 py-2.5 text-claimondo-ondo text-xs">{v.stadt ?? '—'}</td>
                 <td className="px-4 py-2.5">
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${v.ist_aktiv ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500'}`}>
+                  <StatusBadge tone={v.ist_aktiv ? 'success' : 'danger'}>
                     {v.ist_aktiv ? 'Aktiv' : 'Deaktiviert'}
-                  </span>
+                  </StatusBadge>
                 </td>
               </tr>
             ))}
