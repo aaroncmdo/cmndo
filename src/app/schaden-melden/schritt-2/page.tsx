@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server'
 import { FlowShell } from '../_components/FlowShell'
 import { Schritt2aGuard } from './Schritt2aGuard'
+import PageHeader from '@/components/shared/PageHeader'
 
 // AAR-471 C5: Schritt 2a — Fahrzeug-Skizze + Foto-Upload.
 // Server-Shell rendert FlowShell + Client-Guard. Der eigentliche Guard
@@ -12,8 +13,7 @@ export default async function Schritt2Page() {
   return (
     <FlowShell step={2}>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-claimondo-navy">{t('heading')}</h1>
-        <p className="mt-2 text-claimondo-ondo">{t('sub')}</p>
+        <PageHeader title={t('heading')} description={t('sub')} size="lg" />
       </div>
       <Schritt2aGuard />
     </FlowShell>

@@ -37,6 +37,12 @@ type Props = {
    * Detail), Back-Button (SV-Detail) oder ähnliche dekorative Elemente.
    */
   leadingSlot?: ReactNode
+  /**
+   * Ausrichtung. `start` (default) für Standard-Hub-Pages, `center` für
+   * Wizard-Steps und Auth-Pages mit zentriertem Card-Layout.
+   * Bei `center` rendert leadingSlot ÜBER dem Title (gestapelt) statt links.
+   */
+  align?: 'start' | 'center'
 }
 
 export default function PageHeader({
@@ -47,11 +53,32 @@ export default function PageHeader({
   size = 'md',
   useBranding = false,
   leadingSlot,
+  align = 'start',
 }: Props) {
   const titleSize = size === 'lg' ? 'text-2xl' : 'text-lg'
   const titleColor = useBranding
     ? 'text-[var(--brand-primary,#0D1B3E)]'
     : 'text-claimondo-navy'
+
+  if (align === 'center') {
+    return (
+      <div className="flex flex-col items-center text-center gap-2">
+        {leadingSlot}
+        <div className="flex items-center gap-2 justify-center">
+          {LucideIconRef ? (
+            <LucideIconRef className="w-5 h-5 text-claimondo-ondo shrink-0" />
+          ) : null}
+          <h1 className={`${titleSize} font-semibold ${titleColor}`}>{title}</h1>
+        </div>
+        {description ? (
+          <p className="text-sm text-claimondo-ondo max-w-prose">{description}</p>
+        ) : null}
+        {actions ? (
+          <div className="flex items-center gap-3 mt-2">{actions}</div>
+        ) : null}
+      </div>
+    )
+  }
 
   return (
     <div className="flex items-center justify-between gap-3">

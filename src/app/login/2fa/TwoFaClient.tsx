@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ShieldCheckIcon, SmartphoneIcon, MailIcon, RefreshCwIcon } from 'lucide-react'
 import { requestTwoFaCode } from '@/lib/auth/twofa/send-code'
 import { verifyTwoFaCode } from '@/lib/auth/twofa/verify-code'
+import PageHeader from '@/components/shared/PageHeader'
 import { requestEmailOtp, verifyEmailOtp } from '@/lib/auth/twofa/send-email-code'
 import { createRememberToken } from '@/lib/auth/twofa/remember-me'
 
@@ -112,16 +113,22 @@ export default function TwoFaClient({
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8f9fb] px-4">
       <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-[#0D1B3E] rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <ShieldCheckIcon className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-[#0D1B3E]">Zwei-Faktor-Authentifizierung</h1>
-          <p className="text-sm text-claimondo-ondo mt-2">
-            {versandZiel
-              ? <>Wir haben einen {versandLabel} an <strong>{versandZiel}</strong> gesendet.</>
-              : `${versandLabel} wird gesendet...`}
-          </p>
+        <div className="mb-8">
+          <PageHeader
+            title="Zwei-Faktor-Authentifizierung"
+            description={
+              versandZiel
+                ? (<>Wir haben einen {versandLabel} an <strong>{versandZiel}</strong> gesendet.</>)
+                : `${versandLabel} wird gesendet...`
+            }
+            size="lg"
+            align="center"
+            leadingSlot={
+              <div className="w-16 h-16 bg-claimondo-navy rounded-2xl flex items-center justify-center">
+                <ShieldCheckIcon className="w-8 h-8 text-white" />
+              </div>
+            }
+          />
         </div>
 
         {beideMethoden && (

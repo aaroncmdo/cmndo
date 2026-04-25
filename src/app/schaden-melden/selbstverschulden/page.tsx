@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { Shield, Phone, ChevronLeft } from 'lucide-react'
 import { ClearFlowOnMount } from './ClearFlowOnMount'
+import PageHeader from '@/components/shared/PageHeader'
 
 // AAR-469 C3: Abort-Screen bei Schuldfrage = eigenverantwortung. Freundliche
 // Sackgasse mit Kasko-Hinweis + 3 Tipps + Hotline-Verweis. FlowShell wird
@@ -23,8 +24,7 @@ export default async function SelbstverschuldenPage() {
       <ClearFlowOnMount />
       <div className="w-full max-w-2xl rounded-2xl bg-white p-10 shadow-[var(--shadow-claimondo-md)]">
         <Shield className="mb-6 h-14 w-14 text-claimondo-ondo" aria-hidden />
-        <h1 className="text-3xl font-bold text-claimondo-navy">{t('heading')}</h1>
-        <p className="mt-4 text-claimondo-navy">{t('explanation')}</p>
+        <PageHeader title={t('heading')} description={t('explanation')} size="lg" />
 
         <ul className="mt-6 space-y-3">
           {[1, 2, 3].map((n) => (

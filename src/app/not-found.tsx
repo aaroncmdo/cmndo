@@ -1,10 +1,13 @@
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import EmptyState from '@/components/shared/EmptyState'
 
 // AAR-649: Rolle-basierter Fallback-Link. Admin/Dispatch/KB/SV/Makler
 // werden auf ihr jeweiliges Dashboard geleitet statt auf /, damit ein 404
 // (z.B. gelöschter Fall-Link im Wichtige-Updates-Widget) nicht den Session-
 // Kontext verliert. Nicht-eingeloggte User landen weiter auf /.
+//
+// AAR-807: Auf shared EmptyState migriert; „404"-Hero bleibt als dekorativer
+// Block über der Card.
 
 const ROLE_HOME: Record<string, { href: string; label: string }> = {
   admin: { href: '/admin', label: 'Zum Admin-Dashboard' },
@@ -29,20 +32,13 @@ export default async function NotFound() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center px-5">
-      <div className="text-center max-w-md">
-        <div className="text-claimondo-ondo/50 text-7xl font-bold mb-4">404</div>
-        <h1 className="text-xl font-semibold text-claimondo-navy mb-2">
-          Seite nicht gefunden
-        </h1>
-        <p className="text-claimondo-ondo text-sm mb-6">
-          Die angeforderte Seite existiert nicht oder wurde verschoben.
-        </p>
-        <Link
-          href={home.href}
-          className="inline-block px-5 py-2.5 bg-[#f8f9fb] hover:bg-claimondo-border text-claimondo-navy text-sm font-medium rounded-xl transition-colors"
-        >
-          {home.label}
-        </Link>
+      <div className="max-w-md w-full">
+        <div className="text-center text-claimondo-ondo/50 text-7xl font-bold mb-4">404</div>
+        <EmptyState
+          title="Seite nicht gefunden"
+          description="Die angeforderte Seite existiert nicht oder wurde verschoben."
+          action={{ label: home.label, href: home.href, variant: 'secondary' }}
+        />
       </div>
     </div>
   )
