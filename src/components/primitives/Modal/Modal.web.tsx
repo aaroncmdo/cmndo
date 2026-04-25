@@ -14,6 +14,7 @@ export function Modal({
   hideCloseButton = false,
   noPadding = false,
   ariaLabel,
+  placement = 'center',
 }: ModalProps) {
   useEffect(() => {
     if (!open || !closeOnEsc) return
@@ -26,47 +27,38 @@ export function Modal({
 
   if (!open) return null
 
+  // Outer-Container: bottom-sheet rutscht auf Mobile von unten ein,
+  // ab md+ verhält er sich wie ein normales centered Modal.
+  // Inline-styles können keine Media-Queries — daher Tailwind-Klassen.
+  const outerClassName =
+    placement === 'bottom-sheet'
+      ? 'fixed inset-0 z-[1000] flex items-end md:items-center justify-center p-0 md:p-4'
+      : 'fixed inset-0 z-[1000] flex items-center justify-center p-4'
+
+  // Body-Radius: auf Mobile bottom-sheet rounded-top-only, ab md voller Radius
+  const bodyClassName =
+    placement === 'bottom-sheet'
+      ? 'relative w-full overflow-auto rounded-t-2xl md:rounded-2xl border border-claimondo-border bg-white shadow-ios-lg'
+      : 'relative w-full overflow-auto rounded-2xl border border-claimondo-border bg-white shadow-ios-lg'
+
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: tokens.spacing[4],
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-label={ariaLabel}
-    >
-      {/* Backdrop-Blur — blockiert Klicks auf Main */}
+    <div className={outerClassName} role="dialog" aria-modal="true" aria-label={ariaLabel}>
+      {/* Backdrop */}
       <div
         onClick={closeOnBackdrop ? onClose : undefined}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundColor: 'rgba(13, 27, 62, 0.22)',
-          backdropFilter: 'blur(4px)',
-          WebkitBackdropFilter: 'blur(4px)',
-        }}
+        className="absolute inset-0 backdrop-blur-sm"
+        style={{ backgroundColor: 'rgba(13, 27, 62, 0.22)' }}
       />
 
       {/* Dialog-Body — Glass-Light */}
       <div
+        className={bodyClassName}
         style={{
-          position: 'relative',
-          width: '100%',
           maxWidth,
-          maxHeight: 'calc(100vh - 32px)',
-          overflow: 'auto',
+          maxHeight: placement === 'bottom-sheet' ? '90vh' : 'calc(100vh - 32px)',
           backgroundColor: tokens.glass.light.bg,
           backdropFilter: `blur(${tokens.glass.light.blur}px) saturate(180%)`,
           WebkitBackdropFilter: `blur(${tokens.glass.light.blur}px) saturate(180%)`,
-          border: `1px solid ${tokens.glass.light.border}`,
-          borderRadius: tokens.radius.lg,
-          boxShadow: tokens.shadow.lg,
           padding: noPadding ? 0 : tokens.spacing[6],
         }}
       >

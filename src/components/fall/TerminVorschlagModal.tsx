@@ -13,6 +13,7 @@ import { useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { CalendarIcon, XIcon, Loader2Icon } from 'lucide-react'
+import { Modal } from '@/components/primitives/Modal'
 import { svTerminErstvorschlag } from '@/lib/actions/sv-termin-erstvorschlag'
 import { terminGegenvorschlag, terminAnnehmen } from '@/lib/actions/termin-actions'
 
@@ -136,14 +137,8 @@ export default function TerminVorschlagModal({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4"
-      onClick={onClose}
-    >
-      <div
-        className="glass-light border border-claimondo-border rounded-t-3xl md:rounded-ios-lg w-full md:max-w-lg max-h-[90vh] overflow-y-auto shadow-ios-lg"
-        onClick={e => e.stopPropagation()}
-      >
+    <Modal open onClose={onClose} placement="bottom-sheet" noPadding hideCloseButton maxWidth={512} ariaLabel={title}>
+      <div>
         <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border sticky top-0 bg-white/40 backdrop-blur-sm">
           <div className="flex items-center gap-2">
             <CalendarIcon className="w-5 h-5 text-[#4573A2]" />
@@ -234,6 +229,6 @@ export default function TerminVorschlagModal({
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   )
 }

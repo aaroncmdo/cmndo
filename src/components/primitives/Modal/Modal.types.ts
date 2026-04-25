@@ -20,4 +20,11 @@ export type ModalProps = {
   noPadding?: boolean
   /** a11y-Label für den Dialog */
   ariaLabel?: string
+  /**
+   * `center` (default) zentriert den Dialog vertikal.
+   * `bottom-sheet` rutscht auf Mobile (<md) von unten ein und ist zentriert
+   *  ab md+. Behält Backdrop-Blur. Top-Radius bleibt rund, Bottom-Radius
+   *  wird auf Mobile auf 0 gesetzt damit die Sheet-Kante sauber abschließt.
+   */
+  placement?: 'center' | 'bottom-sheet'
 }
