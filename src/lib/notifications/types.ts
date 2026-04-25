@@ -62,6 +62,12 @@ export type EventType =
   | 'mietwagen.rechnung_ausstehend'
   | 'mietwagen.abgabe_naht'
   | 'mietwagen.ueber_limit'
+  // 5.13 Airdrop / Gegner-Einladung (AAR-814)
+  | 'claim.gegner_eingeladen'
+  | 'claim.gegner_hat_geoeffnet'
+  | 'claim.gegner_hat_geantwortet'
+  | 'claim.gegner_konvertiert_zu_voll'
+  | 'claim.einladung_abgelaufen'
 
 // ── Payload-Shapes ────────────────────────────────────────────────────────
 export interface EventPayloads {
@@ -112,6 +118,12 @@ export interface EventPayloads {
   'mietwagen.rechnung_ausstehend': { fallId: string; seit_tage: number }
   'mietwagen.abgabe_naht': { fallId: string; tage_rest: number; limit_datum: string }
   'mietwagen.ueber_limit': { fallId: string; tage_ueber: number; limit_datum: string }
+  // 5.13 Airdrop (AAR-814)
+  'claim.gegner_eingeladen': { claimId: string; invitationId: string; invitedVia: string; expiresAt: string }
+  'claim.gegner_hat_geoeffnet': { claimId: string; invitationId: string; openedAt: string }
+  'claim.gegner_hat_geantwortet': { claimId: string; partyId: string; responseAt: string }
+  'claim.gegner_konvertiert_zu_voll': { claimId: string; partyId: string; userId: string; konvertiertAm: string }
+  'claim.einladung_abgelaufen': { claimId: string; invitationId: string; ablaufGrund: string }
 }
 
 // ── DB-Row-Shapes ─────────────────────────────────────────────────────────
