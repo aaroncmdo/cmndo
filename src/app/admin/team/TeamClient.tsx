@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { UserPlusIcon, UsersIcon, ShieldCheckIcon, TrophyIcon, GiftIcon, ActivityIcon, AlertTriangleIcon, PowerIcon } from 'lucide-react'
 import { createMitarbeiter, deactivateKbWithReassign } from './actions'
 import PageHeader from '@/components/shared/PageHeader'
+import { Modal } from '@/components/primitives'
 
 const ROLLE_LABELS: Record<string, string> = { admin: 'Admin', kundenbetreuer: 'Kundenbetreuer', dispatch: 'Dispatcher', kanzlei: 'Kanzlei' }
 const ROLLE_COLORS: Record<string, string> = { admin: 'bg-red-50 text-red-300', kundenbetreuer: 'bg-green-50 text-green-300', dispatch: 'bg-amber-50 text-amber-300', kanzlei: 'bg-violet-50 text-violet-300' }
@@ -143,32 +144,27 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
         </div>
       </div>
 
-      {showDialog && <>
-
-        <div className="fixed inset-0 bg-black/60 z-50" onClick={() => setShowDialog(false)} />
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-claimondo-border rounded-2xl w-full max-w-md p-6">
-            <h2 className="text-claimondo-navy font-semibold text-lg mb-4">Neuer Mitarbeiter</h2>
-            <form onSubmit={handleCreate} className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-sm text-claimondo-ondo mb-1 block">Vorname</label><input name="vorname" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" /></div>
-                <div><label className="text-sm text-claimondo-ondo mb-1 block">Nachname</label><input name="nachname" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" /></div>
-              </div>
-              <div><label className="text-sm text-claimondo-ondo mb-1 block">E-Mail</label><input name="email" type="email" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" /></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-sm text-claimondo-ondo mb-1 block">Rolle</label><select name="rolle" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"><option value="kundenbetreuer">Kundenbetreuer</option><option value="dispatch">Dispatcher</option><option value="admin">Admin</option><option value="kanzlei">Kanzlei</option></select></div>
-                <div><label className="text-sm text-claimondo-ondo mb-1 block">Kategorie</label><select name="kategorie" className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"><option value="">—</option><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="admin">Admin</option><option value="entwicklung">Entwicklung</option></select></div>
-              </div>
-              <div><label className="text-sm text-claimondo-ondo mb-1 block">Kapazitaet (max. Faelle)</label><input name="kapazitaet_max" type="number" defaultValue={100} className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" /></div>
-              {error && <p className="text-sm text-red-400 bg-red-50/50 border border-red-900 px-4 py-3 rounded-xl">{error}</p>}
-              <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setShowDialog(false)} className="flex-1 bg-[#f8f9fb] hover:bg-claimondo-border text-claimondo-navy text-sm font-medium py-2.5 rounded-xl transition-colors">Abbrechen</button>
-                <button type="submit" disabled={loading} className="flex-1 bg-[#4573A2] hover:bg-[#1E3A5F]  text-white text-sm font-medium py-2.5 rounded-xl transition-colors">{loading ? 'Erstelle...' : 'Erstellen'}</button>
-              </div>
-            </form>
+      {/* AAR-774: Custom-Dialog → shared Modal-Primitive */}
+      <Modal open={showDialog} onClose={() => setShowDialog(false)} maxWidth={480} ariaLabel="Neuer Mitarbeiter">
+        <h2 className="text-claimondo-navy font-semibold text-lg mb-4">Neuer Mitarbeiter</h2>
+        <form onSubmit={handleCreate} className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Vorname</label><input name="vorname" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Nachname</label><input name="nachname" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
           </div>
-        </div>
-      </>}
+          <div><label className="text-sm text-claimondo-ondo mb-1 block">E-Mail</label><input name="email" type="email" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Rolle</label><select name="rolle" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="kundenbetreuer">Kundenbetreuer</option><option value="dispatch">Dispatcher</option><option value="admin">Admin</option><option value="kanzlei">Kanzlei</option></select></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Kategorie</label><select name="kategorie" className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="">—</option><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="admin">Admin</option><option value="entwicklung">Entwicklung</option></select></div>
+          </div>
+          <div><label className="text-sm text-claimondo-ondo mb-1 block">Kapazitaet (max. Faelle)</label><input name="kapazitaet_max" type="number" defaultValue={100} className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+          {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-xl">{error}</p>}
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={() => setShowDialog(false)} className="flex-1 bg-[#f8f9fb] hover:bg-claimondo-border text-claimondo-navy text-sm font-medium py-2.5 rounded-xl transition-colors">Abbrechen</button>
+            <button type="submit" disabled={loading} className="flex-1 bg-claimondo-ondo hover:bg-claimondo-shield text-white text-sm font-medium py-2.5 rounded-xl transition-colors disabled:opacity-50">{loading ? 'Erstelle...' : 'Erstellen'}</button>
+          </div>
+        </form>
+      </Modal>
     </div></div>
   )
 }
