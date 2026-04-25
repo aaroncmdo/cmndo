@@ -7,6 +7,7 @@
 //    werden die URLs nach dokumente (fall-bound) übertragen.)
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { revalidatePath } from 'next/cache'
 
 export async function saveWerkstattAngaben(
   leadId: string,
@@ -24,6 +25,8 @@ export async function saveWerkstattAngaben(
     .eq('id', leadId)
 
   if (error) return { success: false, error: error.message }
+  revalidatePath(`/dispatch/leads/${leadId}`)
+  revalidatePath('/dispatch/leads')
   return { success: true }
 }
 
@@ -46,5 +49,7 @@ export async function saveSchadensfotoUrls(
     .eq('id', leadId)
 
   if (error) return { success: false, error: error.message }
+  revalidatePath(`/dispatch/leads/${leadId}`)
+  revalidatePath('/dispatch/leads')
   return { success: true }
 }
