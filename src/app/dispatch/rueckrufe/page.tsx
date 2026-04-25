@@ -87,7 +87,7 @@ export default async function DispatchRueckrufe() {
                   )}
                   <Link
                     href={`/dispatch/leads/${lead.id}`}
-                    className="text-sm font-medium text-claimondo-navy hover:text-[#4573A2]"
+                    className="text-sm font-medium text-claimondo-navy hover:text-claimondo-ondo"
                   >
                     {lead.vorname} {lead.nachname}
                   </Link>

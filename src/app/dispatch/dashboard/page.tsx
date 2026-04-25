@@ -87,7 +87,7 @@ export default async function DispatchDashboard() {
         <div className="bg-white rounded-ios-lg shadow-ios-md">
           <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
             <h2 className="text-sm font-semibold text-claimondo-navy">Neueste Leads</h2>
-            <Link href="/dispatch/leads" className="text-xs text-[#4573A2] hover:underline">Alle anzeigen</Link>
+            <Link href="/dispatch/leads" className="text-xs text-claimondo-ondo hover:underline">Alle anzeigen</Link>
           </div>
           <div className="divide-y divide-claimondo-border max-h-[400px] overflow-y-auto">
             {recentLeads.map((lead) => (
