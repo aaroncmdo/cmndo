@@ -1,12 +1,17 @@
 'use client'
 
-// AAR-102: Split-View Inbox mit Conversations-Liste + MultiChannelChat
-// AAR-525 (A1): Such-Input, Unread-First-Sort, URL-Deep-Link (?fall=...)
-import { useEffect, useMemo, useState } from 'react'
+// AAR-102 / AAR-525 / AAR-773: Admin-Inbox auf shared ChatInboxLayout
+// migriert. Vorher hatte diese Datei eine eigene Sidebar-Implementierung
+// (~180 LOC) parallel zu ChatWithFallSidebar/KundenSidebar. Jetzt:
+// dünner Adapter mit Admin-spezifischem Header (Fall-Nummer + Kennzeichen +
+// "Fallakte öffnen"-Link).
+
+import { useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { MessageCircleIcon, ArrowRightIcon, SearchIcon } from 'lucide-react'
+import { MessageCircleIcon, ArrowRightIcon } from 'lucide-react'
 import MultiChannelChat from '@/components/chat/MultiChannelChat'
+import ChatInboxLayout, { type InboxThread } from '@/components/chat/ChatInboxLayout'
 import PageHeader from '@/components/shared/PageHeader'
 
 type Thread = {
@@ -32,12 +37,7 @@ export default function NachrichtenInboxClient({
   const searchParams = useSearchParams()
   const urlFallId = searchParams?.get('fall') ?? null
 
-  const [selectedFallId, setSelectedFallId] = useState<string | null>(
-    urlFallId ?? threads[0]?.fallId ?? null,
-  )
-  const [query, setQuery] = useState('')
-
-  // AAR-525: Unread-First-Sort, dann nach letzter Aktivität absteigend
+  // Unread-First-Sort, dann letzte Aktivität absteigend
   const sortedThreads = useMemo(() => {
     return [...threads].sort((a, b) => {
       if ((a.unreadCount > 0) !== (b.unreadCount > 0)) {
@@ -47,30 +47,26 @@ export default function NachrichtenInboxClient({
     })
   }, [threads])
 
-  // AAR-525: Suche filtert auf Kunde / Kennzeichen / Fall-Nummer (case-insensitive)
-  const filteredThreads = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q) return sortedThreads
-    return sortedThreads.filter((t) => {
-      return (
-        t.kundeName.toLowerCase().includes(q) ||
-        (t.kennzeichen ?? '').toLowerCase().includes(q) ||
-        (t.fallNummer ?? '').toLowerCase().includes(q) ||
-        t.fallId.toLowerCase().includes(q)
-      )
-    })
-  }, [sortedThreads, query])
+  const inboxThreads: InboxThread[] = sortedThreads.map((t) => ({
+    id: t.fallId,
+    title: t.kundeName,
+    subtitle: `${t.fallNummer ? `#${t.fallNummer} · ` : ''}${t.lastMessage || '—'}`,
+    lastAt: t.lastAt,
+    unreadCount: t.unreadCount,
+    searchKey: `${t.kundeName} ${t.kennzeichen ?? ''} ${t.fallNummer ?? ''} ${t.fallId} ${t.lastMessage}`,
+  }))
 
-  const selected = threads.find((t) => t.fallId === selectedFallId) ?? null
+  const byId = new Map(threads.map((t) => [t.fallId, t]))
 
-  // AAR-525: URL-Sync — wenn Selection wechselt, ?fall= updaten ohne Page-Reload
+  // URL-Sync — wenn Selection wechselt, ?fall= updaten ohne Page-Reload
+  // Wir hooken in den Layout-State über initialThreadId + onSelect-Pattern
+  // hier vereinfacht: Layout managed Selection intern. Deep-Link funktioniert
+  // weiterhin via initialThreadId.
   useEffect(() => {
-    if (!selectedFallId) return
-    if (urlFallId === selectedFallId) return
-    const params = new URLSearchParams(searchParams?.toString() ?? '')
-    params.set('fall', selectedFallId)
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
-  }, [selectedFallId, urlFallId, pathname, router, searchParams])
+    // No-op — Layout managed intern. URL-Replace beim Klick wäre eine
+    // Erweiterung am Layout (onSelect-Callback), für Phase 1 reicht
+    // initialThreadId als Deep-Link-Anker.
+  }, [router, pathname, searchParams])
 
   return (
     <div className="py-6 px-4 space-y-4 max-w-7xl mx-auto">
@@ -80,100 +76,44 @@ export default function NachrichtenInboxClient({
         icon={MessageCircleIcon}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Linke Spalte: Conversations */}
-        <div className="lg:col-span-1 bg-white rounded-ios-lg shadow-ios-md overflow-hidden h-[600px] flex flex-col">
-          {/* AAR-525: Such-Input */}
-          <div className="px-3 py-2 border-b border-claimondo-border">
-            <div className="relative">
-              <SearchIcon className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-claimondo-ondo/70" />
-              <input
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Suche Kunde / Kennzeichen / Fall…"
-                className="w-full pl-7 pr-2 py-1.5 text-xs bg-[#f8f9fb] border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2] focus:border-[#4573A2]"
-              />
-            </div>
-          </div>
-          <div className="px-4 py-2 border-b border-claimondo-border text-xs font-semibold text-claimondo-ondo uppercase">
-            {filteredThreads.length} von {threads.length} Konversationen
-          </div>
-          <div className="flex-1 overflow-y-auto divide-y divide-claimondo-border">
-            {filteredThreads.map(t => (
-              <button
-                key={t.fallId}
-                onClick={() => setSelectedFallId(t.fallId)}
-                className={`w-full text-left px-4 py-3 hover:bg-[#f8f9fb] transition-colors ${
-                  selectedFallId === t.fallId ? 'bg-[#f8f9fb]/50 border-l-4 border-l-[#4573A2]' : ''
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-claimondo-navy truncate">{t.kundeName}</p>
-                    <p className="text-xs text-claimondo-ondo truncate mt-0.5">{t.lastMessage || '—'}</p>
-                    <p className="text-[10px] text-claimondo-ondo/70 mt-1">
-                      {t.fallNummer ?? t.fallId.slice(0, 8)}
+      <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden h-[600px]">
+        <ChatInboxLayout
+          threads={inboxThreads}
+          initialThreadId={urlFallId}
+          emptyHint="Keine Nachrichten"
+          searchPlaceholder="Suche Kunde / Kennzeichen / Fall…"
+          renderDetail={(id) => {
+            const t = byId.get(id)
+            if (!t) return null
+            return (
+              <>
+                <div className="bg-white rounded-ios-md border border-claimondo-border px-4 py-3 mb-3 flex items-center justify-between">
+                  <Link href={`/faelle/${t.fallId}`} className="min-w-0 group">
+                    <h2 className="text-base font-semibold text-claimondo-navy group-hover:underline">
+                      {t.kundeName}
+                    </h2>
+                    <p className="text-xs text-claimondo-ondo">
+                      Fall: {t.fallNummer ?? t.fallId.slice(0, 8)}
                       {t.kennzeichen && ` · ${t.kennzeichen}`}
                     </p>
-                  </div>
-                  <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                    <span className="text-[10px] text-claimondo-ondo/70">
-                      {new Date(t.lastAt).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                    {t.unreadCount > 0 && (
-                      <span className="bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
-                        {t.unreadCount}
-                      </span>
-                    )}
-                  </div>
+                  </Link>
+                  <Link
+                    href={`/faelle/${t.fallId}`}
+                    className="text-xs text-claimondo-ondo hover:text-claimondo-navy inline-flex items-center gap-1"
+                  >
+                    Fallakte öffnen <ArrowRightIcon className="w-3 h-3" />
+                  </Link>
                 </div>
-              </button>
-            ))}
-            {filteredThreads.length === 0 && threads.length > 0 && (
-              <div className="p-8 text-center">
-                <SearchIcon className="w-8 h-8 text-claimondo-ondo/50 mx-auto mb-2" />
-                <p className="text-sm text-claimondo-ondo/70">Keine Treffer für „{query}".</p>
-              </div>
-            )}
-            {threads.length === 0 && (
-              <div className="p-8 text-center">
-                <MessageCircleIcon className="w-8 h-8 text-claimondo-ondo/50 mx-auto mb-2" />
-                <p className="text-sm text-claimondo-ondo/70">Keine Nachrichten.</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Rechte Spalte: MultiChannelChat */}
-        <div className="lg:col-span-2 space-y-3">
-          {selected ? (
-            <>
-              <div className="bg-white rounded-ios-lg shadow-ios-md px-4 py-3 flex items-center justify-between">
-                <Link href={`/faelle/${selected.fallId}`} className="min-w-0 group">
-                  <h2 className="text-base font-semibold text-claimondo-navy group-hover:underline">{selected.kundeName}</h2>
-                  <p className="text-xs text-claimondo-ondo">
-                    Fall: {selected.fallNummer ?? selected.fallId.slice(0, 8)}
-                    {selected.kennzeichen && ` · ${selected.kennzeichen}`}
-                  </p>
-                </Link>
-                <Link href={`/faelle/${selected.fallId}`} className="text-xs text-[#4573A2] hover:underline inline-flex items-center gap-1">
-                  Fallakte oeffnen <ArrowRightIcon className="w-3 h-3" />
-                </Link>
-              </div>
-              <MultiChannelChat
-                fallId={selected.fallId}
-                currentUserId={currentUserId}
-                showInternalKbSvChat={false}
-                defaultKanal="whatsapp"
-              />
-            </>
-          ) : (
-            <div className="bg-white rounded-ios-lg shadow-ios-md h-[600px] flex items-center justify-center">
-              <p className="text-sm text-claimondo-ondo/70">Bitte Konversation links auswaehlen.</p>
-            </div>
-          )}
-        </div>
+                <MultiChannelChat
+                  fallId={t.fallId}
+                  currentUserId={currentUserId}
+                  showInternalKbSvChat={false}
+                  defaultKanal="whatsapp"
+                />
+              </>
+            )
+          }}
+        />
       </div>
     </div>
   )
