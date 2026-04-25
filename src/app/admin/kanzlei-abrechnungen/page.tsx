@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
+import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -115,11 +116,7 @@ export default async function KanzleiAbrechnungenPage() {
 
   return (
     <div className="py-6 space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-claimondo-navy">Kanzlei-Abrechnungen</h1>
-        <p className="text-claimondo-ondo text-sm mt-1">Monatsabrechnungen fuer alle aktiven Kanzleien</p>
-      </div>
+      <PageHeader title="Kanzlei-Abrechnungen" description="Monatsabrechnungen für alle aktiven Kanzleien" size="lg" />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { UsersIcon, PhoneIcon, LinkIcon, ClockIcon } from 'lucide-react'
 import { PHASE_LABELS, PHASE_BADGES } from '../leads/_components/leadPhaseConstants'
+import PageHeader from '@/components/shared/PageHeader'
 
 export default async function DispatchDashboard() {
   const supabase = await createClient()
@@ -64,7 +65,7 @@ export default async function DispatchDashboard() {
 
   return (
     <div className="py-6 space-y-6">
-      <h1 className="text-xl font-bold text-claimondo-navy">Dispatch Dashboard</h1>
+      <PageHeader title="Dispatch Dashboard" size="lg" />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
