@@ -12,6 +12,7 @@ import {
   type EntityType,
 } from '@/lib/tasks/create-adhoc'
 import { ladeEntityOptions, type EntityOption } from '@/lib/tasks/entity-loader'
+import { Modal } from '@/components/primitives/Modal'
 
 // AAR-402: „Dispatcher" (Phase-1-intern) + „Sachverständiger" (der
 // Ersteller selbst) wurden aus der Empfänger-Auswahl entfernt — sie tauchten
@@ -66,15 +67,7 @@ export function TaskAnlegenModal({
       .finally(() => setLoadingEntities(false))
   }, [entityType, fallId])
 
-  // Escape schließt Modal
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, onClose])
+  // ESC + Backdrop: durch Modal-Primitive abgedeckt
 
   function reset() {
     setTitel('')
@@ -116,17 +109,9 @@ export function TaskAnlegenModal({
     })
   }
 
-  if (!open) return null
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4 overflow-y-auto"
-      onClick={onClose}
-    >
-      <div
-        className="relative glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg w-full max-w-lg max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Modal open={open} onClose={onClose} noPadding hideCloseButton maxWidth={512} ariaLabel="Task anlegen">
+      <div className="flex flex-col max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between border-b border-claimondo-border p-4">
           <h2 className="text-base font-semibold text-claimondo-navy">Task anlegen</h2>
           <button
@@ -291,6 +276,6 @@ export function TaskAnlegenModal({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }
