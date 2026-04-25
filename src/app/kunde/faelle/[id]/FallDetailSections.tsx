@@ -14,6 +14,7 @@ import { FallIdentityHeader } from '@/components/shared/fall-header'
 // AAR-754 (Phase C): Shared Stammdaten + Kontakte.
 import { StammdatenReadSection } from '@/components/shared/stammdaten'
 import { FallKontakteCard } from '@/components/shared/fall-kontakte'
+import { Modal } from '@/components/primitives/Modal'
 // AAR-759 (Phase 1): Mietwagen-Status-Anzeige
 import { MietwagenStatusCard } from '@/components/shared/mietwagen'
 // AAR-761 Phase 2: Kunde-Upload-Card fuer Belege
@@ -449,33 +450,29 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
       </div>
 
       {/* Modal: Anderen Termin vorschlagen */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
-            <h3 className="text-lg font-semibold text-[#0D1B3E] mb-2">Anderen Termin vorschlagen</h3>
-            <p className="text-sm text-claimondo-ondo mb-4">Wählen Sie einen für Sie passenden Termin:</p>
+      <Modal open={showModal} onClose={() => setShowModal(false)} maxWidth={384} ariaLabel="Anderen Termin vorschlagen">
+        <h3 className="text-lg font-semibold text-[#0D1B3E] mb-2">Anderen Termin vorschlagen</h3>
+        <p className="text-sm text-claimondo-ondo mb-4">Wählen Sie einen für Sie passenden Termin:</p>
 
-            {/* AAR-452: text-base (16px) + min-h-[44px] für iOS-Kompatibilität */}
-            <input type="datetime-local" value={neuerTermin} onChange={e => setNeuerTermin(e.target.value)}
-              min={new Date().toISOString().slice(0, 16)}
-              className="w-full border border-claimondo-border rounded-lg px-3 min-h-[44px] text-base text-claimondo-navy mb-3 focus:outline-none focus:border-[#4573A2]" />
-            <textarea value={kundeGrund} onChange={e => setKundeGrund(e.target.value)}
-              placeholder="Begründung (optional)"
-              className="w-full border border-claimondo-border rounded-lg px-3 py-2.5 text-base text-claimondo-navy mb-4 focus:outline-none focus:border-[#4573A2] resize-none" rows={2} />
+        {/* AAR-452: text-base (16px) + min-h-[44px] für iOS-Kompatibilität */}
+        <input type="datetime-local" value={neuerTermin} onChange={e => setNeuerTermin(e.target.value)}
+          min={new Date().toISOString().slice(0, 16)}
+          className="w-full border border-claimondo-border rounded-lg px-3 min-h-[44px] text-base text-claimondo-navy mb-3 focus:outline-none focus:border-[#4573A2]" />
+        <textarea value={kundeGrund} onChange={e => setKundeGrund(e.target.value)}
+          placeholder="Begründung (optional)"
+          className="w-full border border-claimondo-border rounded-lg px-3 py-2.5 text-base text-claimondo-navy mb-4 focus:outline-none focus:border-[#4573A2] resize-none" rows={2} />
 
-            <div className="flex gap-2">
-              <button onClick={() => setShowModal(false)}
-                className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border transition-colors">
-                Abbrechen
-              </button>
-              <button onClick={handleGegenvorschlag} disabled={loading || !neuerTermin}
-                className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-white bg-[#4573A2] hover:bg-[#1E3A5F] transition-colors disabled:opacity-50">
-                {loading ? 'Wird gesendet...' : 'Vorschlag senden'}
-              </button>
-            </div>
-          </div>
+        <div className="flex gap-2">
+          <button onClick={() => setShowModal(false)}
+            className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border transition-colors">
+            Abbrechen
+          </button>
+          <button onClick={handleGegenvorschlag} disabled={loading || !neuerTermin}
+            className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-white bg-[#4573A2] hover:bg-[#1E3A5F] transition-colors disabled:opacity-50">
+            {loading ? 'Wird gesendet...' : 'Vorschlag senden'}
+          </button>
         </div>
-      )}
+      </Modal>
     </>
   )
 }

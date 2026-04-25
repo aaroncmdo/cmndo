@@ -10,6 +10,7 @@
 import { useEffect, useState, useTransition } from 'react'
 import { PhoneCallIcon, PhoneOffIcon, ClockIcon, XIcon, CheckIcon } from 'lucide-react'
 import { startGespraech, endeGespraech } from './actions'
+import { Modal } from '@/components/primitives/Modal'
 
 type Phase = {
   von: number
@@ -175,9 +176,8 @@ export default function GespraechsleitfadenTimer({
       )}
 
       {/* AAR-176 P3-F: Zusammenfassungs-Dialog vor dem echten Beenden */}
-      {showSummary && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setShowSummary(false)}>
-          <div className="bg-white rounded-2xl max-w-md w-full p-5 space-y-4" onClick={(e) => e.stopPropagation()}>
+      <Modal open={showSummary} onClose={() => setShowSummary(false)} maxWidth={448} ariaLabel="Gespräch-Zusammenfassung">
+        <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-claimondo-navy">Gespräch-Zusammenfassung</h3>
               <button type="button" onClick={() => setShowSummary(false)} className="text-claimondo-ondo/70 hover:text-claimondo-navy">
@@ -225,9 +225,8 @@ export default function GespraechsleitfadenTimer({
                 {pending ? 'Beendet ...' : summaryError ? 'Erneut versuchen' : 'Jetzt beenden'}
               </button>
             </div>
-          </div>
         </div>
-      )}
+      </Modal>
     </div>
   )
 }

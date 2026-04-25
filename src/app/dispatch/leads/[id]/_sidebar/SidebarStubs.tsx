@@ -13,6 +13,7 @@ import GespraechsleitfadenTimer from '../GespraechsleitfadenTimer'
 import RueckrufSection from '../RueckrufSection'
 import TerminListeClient from '@/components/termine/TerminListeClient'
 import { useDispatchPhase, type Phase } from '../_lib/phase-context'
+import { Modal } from '@/components/primitives/Modal'
 import { disqualifiziereLead } from '../actions'
 import {
   AlertCircleIcon,
@@ -91,12 +92,8 @@ export function DisqualifizierenButton() {
         <AlertCircleIcon className="w-4 h-4" />
         Disqualifizieren
       </button>
-      {open && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setOpen(false)}>
-          <div
-            className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg max-w-md w-full p-5 space-y-3"
-            onClick={(e) => e.stopPropagation()}
-          >
+      <Modal open={open} onClose={() => setOpen(false)} maxWidth={448} ariaLabel="Lead disqualifizieren">
+        <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-claimondo-navy">Lead disqualifizieren</h3>
               <button type="button" onClick={() => setOpen(false)} className="text-claimondo-ondo/70 hover:text-claimondo-ondo">
@@ -149,9 +146,8 @@ export function DisqualifizierenButton() {
                 {pending ? 'Speichern ...' : 'Disqualifizieren'}
               </button>
             </div>
-          </div>
         </div>
-      )}
+      </Modal>
     </>
   )
 }

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { triggerLexDriveEventManually } from '../lexdrive-actions'
 import type { LexDriveEvent } from '@/lib/lexdrive/process-event'
+import { Modal } from '@/components/primitives/Modal'
 
 type FieldId =
   | 'datum' | 'betrag' | 'grund' | 'kuerzungs_betrag' | 'anerkannt_betrag'
@@ -218,9 +219,9 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
         </p>
       )}
 
-      {activeEvent && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full space-y-4 max-h-[90vh] overflow-y-auto">
+      <Modal open={activeEvent !== null} onClose={() => setActiveEvent(null)} maxWidth={448} ariaLabel="LexDrive-Event auslösen">
+        {activeEvent && (
+          <div className="space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-[#0D1B3E]">Auslösen: {activeEvent.label}</h3>
               <button onClick={() => setActiveEvent(null)} className="text-claimondo-ondo/70 hover:text-claimondo-ondo">
@@ -326,8 +327,8 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </div>
   )
 }
