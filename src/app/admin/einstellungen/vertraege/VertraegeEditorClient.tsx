@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircle2Icon, XCircleIcon, PlusIcon, FileTextIcon } from 'lucide-react'
 import { LoadingButton } from '@/components/ui/loading-button'
+import PageHeader from '@/components/shared/PageHeader'
 import {
   createVertragsvorlage,
   updateVertragsvorlage,
@@ -62,20 +63,20 @@ export default function VertraegeEditorClient({ vorlagen }: { vorlagen: Vorlage[
     <div className="h-full overflow-y-auto py-8">
       <div>
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-xl font-semibold text-claimondo-navy">Vertragsvorlagen</h1>
-            <p className="text-claimondo-ondo text-sm mt-0.5">
-              Pro Typ darf nur eine Vorlage aktiv sein. Aktive Vorlagen koennen nicht editiert werden — neue Version anlegen + aktivieren.
-            </p>
-          </div>
-          <button
-            onClick={() => setCreateOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium rounded-xl transition-colors"
-          >
-            <PlusIcon className="w-4 h-4" />
-            Neue Vorlage
-          </button>
+        <div className="mb-6">
+          <PageHeader
+            title="Vertragsvorlagen"
+            description="Pro Typ darf nur eine Vorlage aktiv sein. Aktive Vorlagen können nicht editiert werden — neue Version anlegen + aktivieren."
+            actions={
+              <button
+                onClick={() => setCreateOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium rounded-xl transition-colors"
+              >
+                <PlusIcon className="w-4 h-4" />
+                Neue Vorlage
+              </button>
+            }
+          />
         </div>
 
         {error && (

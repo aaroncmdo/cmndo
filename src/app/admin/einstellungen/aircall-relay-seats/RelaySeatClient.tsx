@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { PlusIcon, Trash2Icon, PhoneIcon } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 type Seat = {
   id: string; aircall_user_id: number; aircall_user_email: string; aircall_number_id: number
@@ -51,15 +52,17 @@ export default function RelaySeatClient({ seats: initialSeats }: { seats: Seat[]
   return (
     <div className="h-full overflow-y-auto py-6">
       <div>
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <h1 className="text-xl font-semibold text-claimondo-navy">Aircall Relay-Seats</h1>
-            <p className="text-sm text-claimondo-ondo">Dedizierte Aircall-User für Bridge-Vermittlung (Kunde ↔ SV)</p>
-          </div>
-          <button onClick={() => setShowAdd(true)}
-            className="flex items-center gap-1.5 px-3 py-2 bg-[#4573A2] text-white text-xs font-medium rounded-lg hover:bg-[#1E3A5F] transition-colors">
-            <PlusIcon className="w-3.5 h-3.5" /> Seat hinzufügen
-          </button>
+        <div className="mb-5">
+          <PageHeader
+            title="Aircall Relay-Seats"
+            description="Dedizierte Aircall-User für Bridge-Vermittlung (Kunde ↔ SV)"
+            actions={
+              <button onClick={() => setShowAdd(true)}
+                className="flex items-center gap-1.5 px-3 py-2 bg-[#4573A2] text-white text-xs font-medium rounded-lg hover:bg-[#1E3A5F] transition-colors">
+                <PlusIcon className="w-3.5 h-3.5" /> Seat hinzufügen
+              </button>
+            }
+          />
         </div>
 
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-5">
