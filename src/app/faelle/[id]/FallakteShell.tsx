@@ -30,6 +30,8 @@ import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
 import { FallIdentityHeader } from '@/components/shared/fall-header'
 // AAR-770: Mitteilungs-Banner ganz oben in der Fallakte
 import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
+// AAR-776: Shared Tab-Bar
+import { FallakteTabs } from '@/components/shared/fall-tabs'
 
 // Mapping FallakteRolle → shared PhasenRolle.
 // Admin-Route sieht im Normalfall nur admin + kundenbetreuer; dispatch und
@@ -161,37 +163,16 @@ export default function FallakteShell({
           >
             <FallActionBar result={subphase} fallId={fall.id} compact />
           </FallIdentityHeader>
-          {/* Tab-Bar — AAR-668: visuell verstärkt, aktiver Tab mit Hintergrund */}
-          <nav className="border-b border-claimondo-border bg-white">
-            <div className="flex items-center justify-between gap-3 px-4">
-              <ul className="flex items-center gap-1 overflow-x-auto py-1.5">
-                {TABS.map((tab) => {
-                  const active = activeTab === tab.id
-                  const Icon = tab.icon
-                  return (
-                    <li key={tab.id}>
-                      <button
-                        type="button"
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center gap-2 px-3.5 py-2 text-sm rounded-lg transition-all whitespace-nowrap ${
-                          active
-                            ? 'bg-[#4573A2]/10 text-[#0D1B3E] font-semibold ring-1 ring-[#4573A2]/20'
-                            : 'text-claimondo-ondo hover:text-claimondo-navy hover:bg-[#f8f9fb] font-medium'
-                        }`}
-                      >
-                        <Icon className={`w-4 h-4 ${active ? 'text-[#4573A2]' : 'text-claimondo-ondo/70'}`} />
-                        {tab.label}
-                      </button>
-                    </li>
-                  )
-                })}
-              </ul>
-              {/* AAR-307: Ad-hoc Task-Anlegen — nur für KB/Admin (SV nutzt SV-Portal) */}
-              <div className="shrink-0 py-2">
-                <TaskAnlegenButton fallId={fall.id} rolle={userRolle} label="Task anlegen" />
-              </div>
-            </div>
-          </nav>
+          {/* AAR-776: Tab-Bar als shared Component (FallakteTabs) — gleiches
+              Component wie SV-Fallakte und Kunde-Fallakte. */}
+          <FallakteTabs
+            tabs={TABS}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            rightSlot={
+              <TaskAnlegenButton fallId={fall.id} rolle={userRolle} label="Task anlegen" />
+            }
+          />
 
           {/* Content */}
           <TabDropContent tabKey={activeTab} className="px-4 sm:px-6 py-6">
