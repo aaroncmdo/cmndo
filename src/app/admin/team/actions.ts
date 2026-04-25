@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendCommunication } from '@/lib/communications/send'
+import { revalidatePath } from 'next/cache'
 
 function generatePassword(length = 12): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
@@ -56,6 +57,7 @@ export async function createMitarbeiter(formData: FormData): Promise<{ email: st
     subject: 'Einladung zu Claimondo',
     html: `<p>Hallo ${vorname},</p><p>Sie wurden als <strong>${rolle}</strong> zu Claimondo eingeladen.</p><p>E-Mail: <strong>${email}</strong></p><p>Einmalpasswort: <strong>${password}</strong></p><p><a href="${appUrl}/login">Jetzt einloggen</a></p>`,
   })
+  revalidatePath('/admin/team')
   return { email, password }
 }
 
@@ -78,6 +80,7 @@ export async function updateMitarbeiter(formData: FormData) {
 
   const { error } = await supabase.from('profiles').update(updates).eq('id', id)
   if (error) throw new Error(error.message)
+  revalidatePath('/admin/team')
 }
 
 export async function createIncentive(formData: FormData) {
@@ -94,12 +97,14 @@ export async function createIncentive(formData: FormData) {
     gueltig_bis: (formData.get('gueltig_bis') as string) || null,
   })
   if (error) throw new Error(error.message)
+  revalidatePath('/admin/team')
 }
 
 export async function toggleIncentive(id: string, aktiv: boolean) {
   const supabase = await requireAdmin()
   const { error } = await supabase.from('incentives').update({ aktiv }).eq('id', id)
   if (error) throw new Error(error.message)
+  revalidatePath('/admin/team')
 }
 
 // AAR-343: Admin-Reset der 2FA-Telefonnummer (bei Nummern-Wechsel etc).
@@ -140,6 +145,7 @@ export async function resetTwoFaForUser(
     erstellt_von: user?.id ?? null,
   })
 
+  revalidatePath('/admin/team')
   return { success: true }
 }
 
@@ -168,6 +174,8 @@ export async function deactivateKbWithReassign(
     const { reassignAllFaelleForInactiveKbs } = await import('@/lib/faelle/kb-assignment')
     const result = await reassignAllFaelleForInactiveKbs(admin)
 
+    revalidatePath('/admin/team')
+    revalidatePath('/admin/faelle')
     return {
       success: true,
       reassigned_count: result.reassigned_count,
