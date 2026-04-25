@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { CalendarIcon, CheckIcon, XIcon, RefreshCwIcon, ClockIcon, AlertTriangleIcon } from 'lucide-react'
 import { terminAnnehmen, terminAblehnen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
 import { formatDatumMitWochentag, formatUhrzeit } from '@/lib/format'
+import PageHeader from '@/components/shared/PageHeader'
 
 // KFZ-134: Gutachter Termine-Liste mit Akzeptieren/Ablehnen/Gegenvorschlag.
 
@@ -80,21 +81,23 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
 
   return (
     <div className="px-4 py-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-claimondo-navy flex items-center gap-2">
-            <CalendarIcon className="w-6 h-6 text-[var(--brand-secondary)]" /> Meine Termine
-          </h1>
-          <p className="text-sm text-claimondo-ondo mt-1">{offene.length} offen, {termine.length} gesamt</p>
-        </div>
-        <div className="inline-flex bg-[#f8f9fb] rounded-xl p-0.5 text-xs font-medium">
-          <button onClick={() => setFilter('offen')} className={`px-3 py-1.5 rounded-lg ${filter === 'offen' ? 'bg-white text-[var(--brand-primary)] shadow' : 'text-claimondo-ondo'}`}>
-            Offen ({offene.length})
-          </button>
-          <button onClick={() => setFilter('alle')} className={`px-3 py-1.5 rounded-lg ${filter === 'alle' ? 'bg-white text-[var(--brand-primary)] shadow' : 'text-claimondo-ondo'}`}>
-            Alle ({termine.length})
-          </button>
-        </div>
+      <div className="mb-6">
+        <PageHeader
+          title="Meine Termine"
+          description={`${offene.length} offen, ${termine.length} gesamt`}
+          icon={CalendarIcon}
+          size="lg"
+          actions={
+            <div className="inline-flex bg-[#f8f9fb] rounded-xl p-0.5 text-xs font-medium">
+              <button onClick={() => setFilter('offen')} className={`px-3 py-1.5 rounded-lg ${filter === 'offen' ? 'bg-white text-[var(--brand-primary)] shadow' : 'text-claimondo-ondo'}`}>
+                Offen ({offene.length})
+              </button>
+              <button onClick={() => setFilter('alle')} className={`px-3 py-1.5 rounded-lg ${filter === 'alle' ? 'bg-white text-[var(--brand-primary)] shadow' : 'text-claimondo-ondo'}`}>
+                Alle ({termine.length})
+              </button>
+            </div>
+          }
+        />
       </div>
 
       {filtered.length === 0 ? (
