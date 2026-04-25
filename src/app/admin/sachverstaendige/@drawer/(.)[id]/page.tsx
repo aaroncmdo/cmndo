@@ -16,7 +16,7 @@ export default async function InterceptedSvDetailPage({
   searchParams?: Promise<SvSearchParams>
 }) {
   return (
-    <DrawerShell title="Sachverständigen-Profil" widthClass="sm:w-[860px]">
+    <DrawerShell title="Sachverständigen-Profil" width={860}>
       <div className="px-6 py-6">
         <SvDetailPage params={params} searchParams={searchParams} />
       </div>

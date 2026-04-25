@@ -12,6 +12,7 @@
 import { useEffect, useState } from 'react'
 import { XIcon, FileTextIcon, DownloadIcon, FileIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { Drawer } from '@/components/primitives/Drawer'
 
 type FallDokument = {
   id: string
@@ -131,17 +132,8 @@ export default function DokumenteDrawer({
   const andereDokumente = dokumente?.filter((d) => !isKanzleiPaket(d)) ?? []
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Dokumente"
-    >
-      <div
-        className="flex-1 bg-black/40"
-        onClick={onClose}
-      />
-      <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col">
+    <Drawer open onClose={onClose} width={448} noPadding hideCloseButton ariaLabel="Dokumente">
+      <div className="flex flex-col h-full">
         <header className="px-5 py-4 border-b border-claimondo-border flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70">
@@ -209,7 +201,7 @@ export default function DokumenteDrawer({
           )}
         </div>
       </div>
-    </div>
+    </Drawer>
   )
 }
 
