@@ -7,6 +7,8 @@ import { AlertCircleIcon, PlusIcon, XIcon } from 'lucide-react'
 import { createReklamation } from './actions'
 // AAR-664 (Folge): Konstante aus non-`'use server'`-Datei.
 import { REKLAMATIONS_GRUENDE } from './constants'
+import PageHeader from '@/components/shared/PageHeader'
+import { Modal } from '@/components/primitives/Modal'
 
 type Reklamation = {
   id: string
@@ -33,7 +35,7 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
     e.preventDefault()
     setError(null)
     if (!form.fallId || !form.grund || form.begruendung.trim().length < 30) {
-      setError('Alle Felder ausfuellen, Begruendung mindestens 30 Zeichen.')
+      setError('Alle Felder ausfüllen, Begründung mindestens 30 Zeichen.')
       return
     }
     startTransition(async () => {
@@ -55,10 +57,10 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
   return (
     <div className="py-6 space-y-4 max-w-5xl mx-auto px-4">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-claimondo-navy">Meine Reklamationen</h1>
-          <p className="text-sm text-claimondo-ondo mt-1">Reklamationen zu Auftraegen — z.B. Kunde war nicht da, Schaden anders, Mehraufwand.</p>
-        </div>
+        <PageHeader
+          title="Meine Reklamationen"
+          description="Reklamationen zu Aufträgen — z.B. Kunde war nicht da, Schaden anders, Mehraufwand."
+        />
         {/* AAR-259: Button deaktiviert wenn keine Fälle vorhanden — sonst
             öffnet der Dialog einen leeren Select und User denkt "Klick tut
             nichts". Mit Hover-Hint erklären. */}
@@ -121,63 +123,61 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
       </div>
 
       {/* Dialog */}
-      {showDialog && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <form onSubmit={handleSubmit} className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg max-w-lg w-full p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-claimondo-navy">Neue Reklamation</h2>
-              <button type="button" onClick={() => setShowDialog(false)} className="text-claimondo-ondo/70 hover:text-claimondo-ondo">
-                <XIcon className="w-5 h-5" />
-              </button>
-            </div>
+      <Modal open={showDialog} onClose={() => setShowDialog(false)} noPadding hideCloseButton maxWidth={512} ariaLabel="Neue Reklamation">
+        <form onSubmit={handleSubmit} className="flex flex-col p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-claimondo-navy">Neue Reklamation</h2>
+            <button type="button" onClick={() => setShowDialog(false)} className="text-claimondo-ondo/70 hover:text-claimondo-ondo">
+              <XIcon className="w-5 h-5" />
+            </button>
+          </div>
 
-            <div>
-              <label className="block text-xs font-medium text-claimondo-navy mb-1">Fall</label>
-              <select value={form.fallId} onChange={e => setForm(f => ({ ...f, fallId: e.target.value }))}
-                className="w-full px-3 py-2 border rounded-lg text-sm" required>
-                <option value="">Bitte Fall waehlen</option>
-                {faelle.map(f => (
-                  <option key={f.id} value={f.id}>
-                    {f.fall_nummer ?? f.id.slice(0, 8)}{f.kennzeichen ? ` — ${f.kennzeichen}` : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div>
+            <label className="block text-xs font-medium text-claimondo-navy mb-1">Fall</label>
+            <select value={form.fallId} onChange={e => setForm(f => ({ ...f, fallId: e.target.value }))}
+              className="w-full px-3 py-2 border rounded-lg text-sm" required>
+              <option value="">Bitte Fall wählen</option>
+              {faelle.map(f => (
+                <option key={f.id} value={f.id}>
+                  {f.fall_nummer ?? f.id.slice(0, 8)}{f.kennzeichen ? ` — ${f.kennzeichen}` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            <div>
-              <label className="block text-xs font-medium text-claimondo-navy mb-1">Grund</label>
-              <select value={form.grund} onChange={e => setForm(f => ({ ...f, grund: e.target.value }))}
-                className="w-full px-3 py-2 border rounded-lg text-sm" required>
-                <option value="">Bitte Grund waehlen</option>
-                {REKLAMATIONS_GRUENDE.map(g => (
-                  <option key={g.value} value={g.value}>{g.label}</option>
-                ))}
-              </select>
-            </div>
+          <div>
+            <label className="block text-xs font-medium text-claimondo-navy mb-1">Grund</label>
+            <select value={form.grund} onChange={e => setForm(f => ({ ...f, grund: e.target.value }))}
+              className="w-full px-3 py-2 border rounded-lg text-sm" required>
+              <option value="">Bitte Grund wählen</option>
+              {REKLAMATIONS_GRUENDE.map(g => (
+                <option key={g.value} value={g.value}>{g.label}</option>
+              ))}
+            </select>
+          </div>
 
-            <div>
-              <label className="block text-xs font-medium text-claimondo-navy mb-1">
-                Begruendung <span className="text-claimondo-ondo/70">(min. 30 Zeichen, {form.begruendung.length}/30)</span>
-              </label>
-              <textarea value={form.begruendung} onChange={e => setForm(f => ({ ...f, begruendung: e.target.value }))}
-                rows={4} className="w-full px-3 py-2 border rounded-lg text-sm" required minLength={30} />
-            </div>
+          <div>
+            <label className="block text-xs font-medium text-claimondo-navy mb-1">
+              Begründung <span className="text-claimondo-ondo/70">(min. 30 Zeichen, {form.begruendung.length}/30)</span>
+            </label>
+            <textarea value={form.begruendung} onChange={e => setForm(f => ({ ...f, begruendung: e.target.value }))}
+              rows={4} className="w-full px-3 py-2 border rounded-lg text-sm" required minLength={30} />
+          </div>
 
-            {error && <p className="text-sm text-red-500 bg-red-50 p-2 rounded">{error}</p>}
+          {error && <p className="text-sm text-red-500 bg-red-50 p-2 rounded">{error}</p>}
 
-            <div className="flex gap-2 justify-end">
-              <button type="button" onClick={() => setShowDialog(false)}
-                className="px-4 py-2 text-sm text-claimondo-ondo hover:text-claimondo-navy">
-                Abbrechen
-              </button>
-              <button type="submit" disabled={pending}
-                className="px-4 py-2 text-sm font-medium bg-[var(--brand-primary)] text-white rounded-lg hover:bg-[var(--brand-primary)] disabled:opacity-50">
-                {pending ? 'Sende...' : 'Reklamation einreichen'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+          <div className="flex gap-2 justify-end">
+            <button type="button" onClick={() => setShowDialog(false)}
+              className="px-4 py-2 text-sm text-claimondo-ondo hover:text-claimondo-navy">
+              Abbrechen
+            </button>
+            <button type="submit" disabled={pending}
+              className="px-4 py-2 text-sm font-medium bg-[var(--brand-primary)] text-white rounded-lg hover:bg-[var(--brand-primary)] disabled:opacity-50">
+              {pending ? 'Sende...' : 'Reklamation einreichen'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   )
 }
