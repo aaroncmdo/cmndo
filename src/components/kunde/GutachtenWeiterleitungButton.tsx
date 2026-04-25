@@ -6,6 +6,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { Modal } from '@/components/primitives/Modal'
 
 type Props = {
   fallId: string
@@ -67,21 +68,13 @@ export default function GutachtenWeiterleitungButton({ fallId, defaultEmail }: P
         Gutachten per E-Mail zusenden
       </button>
 
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center px-4"
-          style={{ background: 'rgba(0,0,0,0.4)' }}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Gutachten per E-Mail zusenden"
-          onClick={onClose}
-        >
-          <div
-            className="w-full max-w-md rounded-xl shadow-lg p-5"
-            style={{ background: 'var(--brand-surface, #ffffff)' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2
+      <Modal
+        open={open}
+        onClose={onClose}
+        maxWidth={448}
+        ariaLabel="Gutachten per E-Mail zusenden"
+      >
+        <h2
               className="text-base font-semibold mb-1"
               style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
             >
@@ -171,9 +164,7 @@ export default function GutachtenWeiterleitungButton({ fallId, defaultEmail }: P
                 </div>
               </form>
             )}
-          </div>
-        </div>
-      )}
+      </Modal>
     </>
   )
 }

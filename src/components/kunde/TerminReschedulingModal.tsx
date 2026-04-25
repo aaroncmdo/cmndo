@@ -5,6 +5,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { Modal } from '@/components/primitives/Modal'
 
 type Props = {
   open: boolean
@@ -25,8 +26,6 @@ export default function TerminReschedulingModal({
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [pending, startTransition] = useTransition()
-
-  if (!open) return null
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -52,18 +51,8 @@ export default function TerminReschedulingModal({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm px-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="reschedule-title"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-md glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg p-5"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2
+    <Modal open={open} onClose={onClose} maxWidth={448} ariaLabel="Termin verschieben">
+      <h2
           id="reschedule-title"
           className="text-base font-semibold"
           style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
@@ -161,7 +150,6 @@ export default function TerminReschedulingModal({
             </div>
           </div>
         )}
-      </div>
-    </div>
+    </Modal>
   )
 }

@@ -38,6 +38,7 @@ import {
   NotificationPreferencesForm,
   type NotificationPreferencesFormValue,
 } from '@/components/notifications/NotificationPreferencesForm'
+import { Modal } from '@/components/primitives/Modal'
 
 const DATE_SHORT = new Intl.DateTimeFormat('de-DE', {
   day: '2-digit',
@@ -583,15 +584,14 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
         </p>
       ) : null}
 
-      {confirmId ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-          onClick={() => setConfirmId(null)}
-        >
-          <div
-            className="bg-white rounded-ios-md shadow-2xl max-w-md w-full p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
+      <Modal
+        open={confirmId !== null}
+        onClose={() => setConfirmId(null)}
+        maxWidth={448}
+        ariaLabel="Consent widerrufen"
+      >
+        {confirmId ? (
+          <>
             <div className="flex items-start gap-3">
               <span className="shrink-0 w-10 h-10 rounded-full bg-red-100 text-red-700 flex items-center justify-center">
                 <AlertTriangleIcon width={18} height={18} />
@@ -629,9 +629,9 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
                 Jetzt widerrufen
               </button>
             </div>
-          </div>
-        </div>
-      ) : null}
+          </>
+        ) : null}
+      </Modal>
     </SectionCard>
   )
 }
