@@ -10,6 +10,7 @@ import { updateOwnProfile } from '@/lib/actions/sv/update-own-profile'
 import { ANREDE_OPTIONEN, TITEL_OPTIONEN, QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN } from '@/app/admin/sachverstaendige/anlegen/constants'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { LoadingButton } from '@/components/ui/loading-button'
+import PageHeader from '@/components/shared/PageHeader'
 import PhoneVerificationModal from '@/components/auth/PhoneVerificationModal'
 // AAR-344: 2FA-Nummer-Änderung (Self-Service, eingeloggter User)
 import { TwoFaPhoneChange } from '@/components/auth/TwoFaPhoneChange'
@@ -172,20 +173,22 @@ export default function ProfilClient({
       )}
 
       {/* BUG-91: Sticky Header — bleibt beim Scrollen oben sichtbar */}
-      <div className="flex-shrink-0 sticky top-0 z-20 bg-white border-b border-claimondo-border px-6 py-3 flex items-center justify-between">
-        <div>
-          <h1 className="text-sm font-semibold text-claimondo-navy">Mein Profil</h1>
-          <p className="text-claimondo-ondo text-xs">Stammdaten + Firma + Standort</p>
-        </div>
-        {!editing && (
-          <button
-            type="button"
-            onClick={() => { setEditing(true); setSuccess(false) }}
-            className="px-4 py-2 text-xs font-medium text-white bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] rounded-xl transition-colors"
-          >
-            Bearbeiten
-          </button>
-        )}
+      <div className="flex-shrink-0 sticky top-0 z-20 bg-white border-b border-claimondo-border px-6 py-3">
+        <PageHeader
+          title="Mein Profil"
+          description="Stammdaten + Firma + Standort"
+          actions={
+            !editing ? (
+              <button
+                type="button"
+                onClick={() => { setEditing(true); setSuccess(false) }}
+                className="px-4 py-2 text-xs font-medium text-white bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] rounded-xl transition-colors"
+              >
+                Bearbeiten
+              </button>
+            ) : null
+          }
+        />
       </div>
 
       {/* BUG-91: Scroll-Container, max-w-full Page-Content

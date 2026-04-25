@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import ChatWithFallSidebar, { type FallThread } from '@/components/chat/ChatWithFallSidebar'
+import PageHeader from '@/components/shared/PageHeader'
 
 // AAR-730: Kunde-Chat auf MultiChannelChat-Basis migriert.
 // Sichtbare Kanäle für Kunde: direkter Chat mit KB, direkter Chat mit SV,
@@ -64,7 +65,7 @@ export default async function KundeChatPage({
   if (faelle.length === 0) {
     return (
       <div className="px-5 py-8 max-w-lg mx-auto space-y-4">
-        <h1 className="text-xl font-bold text-[#0D1B3E] mb-4">Chat</h1>
+        <PageHeader title="Chat" size="lg" />
         <div className="bg-white rounded-2xl border border-claimondo-border shadow-sm p-8 text-center">
           <p className="text-claimondo-ondo text-sm">
             Noch kein Schadensfall vorhanden. Sobald Ihr Fall erstellt wurde, können Sie hier

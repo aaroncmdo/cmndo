@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { MapPinIcon, UsersIcon, FlameIcon, ArrowUpIcon, XIcon, SendIcon, EyeIcon, LayersIcon } from 'lucide-react'
 import { PAKETE, getPaket } from '@/lib/pakete'
+import PageHeader from '@/components/shared/PageHeader'
 
 const PAKET_ORDER: string[] = ['standard', 'pro', 'premium']
 const MAPS_ID = 'gebiet-maps-script'
@@ -273,24 +274,26 @@ export default function GebietPage() {
     // damit die Karte fullbleed laufen kann.
     <div className="h-full flex flex-col overflow-hidden -mx-4 sm:-mx-6 md:-mx-8 lg:-mx-16 xl:-mx-24">
       {/* Topbar */}
-      <div className="flex-shrink-0 bg-white border-b border-claimondo-border px-4 py-2 flex items-center justify-between">
-        <div>
-          <h1 className="text-sm font-semibold text-claimondo-navy">Mein Gebiet</h1>
-          <p className="text-xs text-claimondo-ondo">{currentPaket.name} · {currentPaket.radius_km}km Radius · {currentPaket.faelle} Fälle/Monat</p>
-        </div>
-        <div className="flex gap-1">
-          {([
-            ['gebiet', 'Gebiet', MapPinIcon],
-            ['nachbarn', 'Nachbarn', UsersIcon],
-            ['hotspots', 'Hotspots', FlameIcon],
-            ['vorschau', 'Vorschau', EyeIcon],
-          ] as const).map(([k, l, I]) => (
-            <button key={k} onClick={() => setLayers(p => ({ ...p, [k]: !p[k] }))}
-              className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium ${layers[k] ? 'bg-[var(--brand-secondary)]/5 text-[var(--brand-secondary)]' : 'bg-[#f8f9fb] text-claimondo-ondo/70'}`}>
-              <I className="w-3 h-3" /> {l}
-            </button>
-          ))}
-        </div>
+      <div className="flex-shrink-0 bg-white border-b border-claimondo-border px-4 py-2">
+        <PageHeader
+          title="Mein Gebiet"
+          description={`${currentPaket.name} · ${currentPaket.radius_km}km Radius · ${currentPaket.faelle} Fälle/Monat`}
+          actions={
+            <div className="flex gap-1">
+              {([
+                ['gebiet', 'Gebiet', MapPinIcon],
+                ['nachbarn', 'Nachbarn', UsersIcon],
+                ['hotspots', 'Hotspots', FlameIcon],
+                ['vorschau', 'Vorschau', EyeIcon],
+              ] as const).map(([k, l, I]) => (
+                <button key={k} onClick={() => setLayers(p => ({ ...p, [k]: !p[k] }))}
+                  className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium ${layers[k] ? 'bg-[var(--brand-secondary)]/5 text-[var(--brand-secondary)]' : 'bg-[#f8f9fb] text-claimondo-ondo/70'}`}>
+                  <I className="w-3 h-3" /> {l}
+                </button>
+              ))}
+            </div>
+          }
+        />
       </div>
 
       {/* Map + Sidebar */}
