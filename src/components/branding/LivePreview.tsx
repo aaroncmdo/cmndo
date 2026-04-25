@@ -3,6 +3,7 @@
 import type { BrandThemeV2 } from '@/lib/branding/theme'
 import type { FontPair } from '@/lib/branding/fonts'
 import { HomeIcon, UsersIcon, CalendarIcon, FileTextIcon, BellIcon } from 'lucide-react'
+import { tokens } from '@/lib/design-tokens'
 
 // AAR-422: Komplette App-Preview — Sidebar + Header + Card + Buttons. Wird
 // vom BrandingEditor in Echtzeit gerendert wenn Theme oder Font wechselt.
@@ -178,7 +179,7 @@ function StatusPill({ label, bg }: { label: string; bg: string }) {
   return (
     <span
       className="text-[10px] px-1.5 py-0.5 rounded"
-      style={{ background: bg, color: '#FFFFFF', fontWeight: 600 }}
+      style={{ background: bg, color: tokens.colors.white, fontWeight: 600 }}
     >
       {label}
     </span>
