@@ -7,7 +7,10 @@ import { sendMarketingAbrechnung, sendKanzleiMonatsAbrechnung } from '@/lib/emai
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { revalidatePath } from 'next/cache'
 
-export async function markiereAlsBezahlt(abrechnungId: string, betrag: number) {
+export async function markiereAlsBezahlt(
+  abrechnungId: string,
+  betrag: number,
+): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createClient()
   const { error } = await supabase
     .from('abrechnungen')
@@ -19,7 +22,7 @@ export async function markiereAlsBezahlt(abrechnungId: string, betrag: number) {
     })
     .eq('id', abrechnungId)
 
-  if (error) throw new Error(error.message)
+  if (error) return { ok: false, error: error.message }
 
   // KFZ-151: Auto-Resolve aller offenen Tasks zu dieser Abrechnung
   try {
@@ -27,16 +30,19 @@ export async function markiereAlsBezahlt(abrechnungId: string, betrag: number) {
   } catch (err) { console.error('[KFZ-151] resolveTasks abrechnung bezahlt:', err) }
 
   revalidatePath('/admin/finance')
+  return { ok: true }
 }
 
-export async function storniereAbrechnung(abrechnungId: string) {
+export async function storniereAbrechnung(
+  abrechnungId: string,
+): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createClient()
   const { error } = await supabase
     .from('abrechnungen')
     .update({ status: 'storniert', updated_at: new Date().toISOString() })
     .eq('id', abrechnungId)
 
-  if (error) throw new Error(error.message)
+  if (error) return { ok: false, error: error.message }
 
   // KFZ-151: Auto-Resolve aller offenen Tasks zu dieser Abrechnung
   try {
@@ -44,9 +50,12 @@ export async function storniereAbrechnung(abrechnungId: string) {
   } catch (err) { console.error('[KFZ-151] resolveTasks abrechnung storniert:', err) }
 
   revalidatePath('/admin/finance')
+  return { ok: true }
 }
 
-export async function manuellVersenden(abrechnungId: string) {
+export async function manuellVersenden(
+  abrechnungId: string,
+): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createClient()
   const { data: abr } = await supabase
     .from('abrechnungen')
@@ -54,14 +63,12 @@ export async function manuellVersenden(abrechnungId: string) {
     .eq('id', abrechnungId)
     .single()
 
-  if (!abr) throw new Error('Abrechnung nicht gefunden')
+  if (!abr) return { ok: false, error: 'Abrechnung nicht gefunden' }
 
-  // PDF generieren falls noch nicht vorhanden
   if (!abr.pdf_path) {
     await generateAbrechnungPDF(abrechnungId)
   }
 
-  // Versenden
   if (abr.empfaenger_typ === 'marketing') {
     await sendMarketingAbrechnung(abrechnungId)
   } else if (abr.empfaenger_typ === 'kanzlei') {
@@ -69,20 +76,28 @@ export async function manuellVersenden(abrechnungId: string) {
   }
 
   revalidatePath('/admin/finance')
+  return { ok: true }
 }
 
-export async function manuellGenerieren(monat: string, typ: 'marketing' | 'kanzlei') {
-  if (typ === 'marketing') {
-    const result = await generiereMarketingAbrechnung(monat)
-    if (result) {
-      await generateAbrechnungPDF(result.abrechnungId)
+export async function manuellGenerieren(
+  monat: string,
+  typ: 'marketing' | 'kanzlei',
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    if (typ === 'marketing') {
+      const result = await generiereMarketingAbrechnung(monat)
+      if (result) {
+        await generateAbrechnungPDF(result.abrechnungId)
+      }
+    } else {
+      const results = await generiereKanzleiAbrechnungen(monat)
+      for (const r of results) {
+        await generateAbrechnungPDF(r.abrechnungId)
+      }
     }
-  } else {
-    const results = await generiereKanzleiAbrechnungen(monat)
-    for (const r of results) {
-      await generateAbrechnungPDF(r.abrechnungId)
-    }
+    revalidatePath('/admin/finance')
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Generierung fehlgeschlagen' }
   }
-
-  revalidatePath('/admin/finance')
 }

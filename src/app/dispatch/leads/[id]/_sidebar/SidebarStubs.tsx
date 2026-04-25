@@ -73,11 +73,11 @@ export function DisqualifizierenButton() {
         ? `Sonstiges: ${freitext.trim()}`
         : DISQ_GRUENDE.find((g) => g.key === grundKey)?.label ?? grundKey
     startTransition(async () => {
-      try {
-        await disqualifiziereLead(lead.id, grund)
+      const result = await disqualifiziereLead(lead.id, grund)
+      if (result.ok) {
         setOpen(false)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Fehler')
+      } else {
+        setError(result.error ?? 'Fehler')
       }
     })
   }
