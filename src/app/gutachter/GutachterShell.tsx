@@ -297,11 +297,11 @@ export default function GutachterShell({
       <aside
         role="navigation"
         aria-label="Gutachter-Navigation"
-        className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto glass-branded ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         style={{
-          backgroundColor: 'color-mix(in srgb, var(--brand-sidebar-bg) 82%, transparent)',
+          backgroundColor: 'var(--brand-sidebar-bg)',
           color: 'var(--brand-text-on-primary)',
           // Transform-Transition (Sidebar-Slide) immer 200ms, Color-Transition
           // nur bei frischem Brand-Change (einmalig 2s).

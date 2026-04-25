@@ -57,19 +57,16 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   // SV verifiziert + use_custom_branding aktiv + Theme vorhanden.
   const branding = await resolveKundenTheme(user.id)
   const themeStyle = branding.useBrand ? generateCssVars(branding.theme, 'full') : undefined
-  // AAR-727: Transluzente Basis für Glass-Effekt. `color-mix` mischt 82% Farbe
-  // + 18% Transparenz — zusammen mit `.glass-branded` (blur) entsteht der
-  // iOS-Glass-Look, der Brand-Farbe bleibt dominant.
-  const sidebarBg = branding.useBrand
-    ? 'color-mix(in srgb, var(--brand-sidebar-bg, #0D1B3E) 82%, transparent)'
-    : 'color-mix(in srgb, #0D1B3E 82%, transparent)'
+  // Sidebar: solid (keine Transparenz) — konsistent mit Admin/Dispatch.
+  // Mobile Header + Bottom-Nav behalten glass-branded (Scroll-Kontext, iOS-Stil).
+  const sidebarBg = branding.useBrand ? 'var(--brand-sidebar-bg, #0D1B3E)' : '#0D1B3E'
   const accentBg = branding.useBrand ? 'var(--brand-secondary, #4573A2)' : '#4573A2'
 
   return (
     <div className="flex min-h-screen bg-[#f8f9fb]" style={themeStyle}>
       {/* Desktop Sidebar — hidden on mobile */}
       <aside
-        className="hidden md:flex md:flex-col md:w-64 md:shrink-0 fixed top-0 left-0 h-screen z-40 glass-branded"
+        className="hidden md:flex md:flex-col md:w-64 md:shrink-0 fixed top-0 left-0 h-screen z-40"
         style={{ backgroundColor: sidebarBg }}
       >
         <div className="px-5 py-5">
