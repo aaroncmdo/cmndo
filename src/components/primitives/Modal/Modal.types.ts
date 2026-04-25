@@ -16,6 +16,8 @@ export type ModalProps = {
   /** Versteckt den Standard-CloseButton oben rechts. Aufrufer kann
    *  eigenen rendern wenn er das Layout anders will. */
   hideCloseButton?: boolean
+  /** Kein internes Padding — für Modals mit eigenem Header/Body-Layout */
+  noPadding?: boolean
   /** a11y-Label für den Dialog */
   ariaLabel?: string
 }

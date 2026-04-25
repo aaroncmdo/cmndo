@@ -1,12 +1,11 @@
 'use client'
 
 // AAR-542 (C5): Admin-Debug-Modal pro Pflicht-Matrix-Slot.
-// Zeigt die JSON-Regeln + Erklärung + aktuelle Evaluation — hilft dem Admin
-// „warum ist das hier Pflicht?" in Sekunden zu beantworten.
+// AAR-781: Migriert auf Modal-Primitive (ESC-Handling durch Modal übernommen).
 
-import { useEffect } from 'react'
-import { XIcon, AlertTriangleIcon } from 'lucide-react'
+import { AlertTriangleIcon, XIcon } from 'lucide-react'
 import type { PflichtDocMatrixEntry } from '@/lib/dokumente/pflicht-evaluator'
+import { Modal } from '@/components/primitives'
 
 function pretty(obj: unknown): string {
   if (obj == null) return '(keine Regel)'
@@ -24,15 +23,6 @@ export default function RegelDebugModal({
   entry: PflichtDocMatrixEntry | null
   onClose: () => void
 }) {
-  useEffect(() => {
-    if (!entry) return
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [entry, onClose])
-
   if (!entry) return null
 
   const status = !entry.freigeschaltet
@@ -42,16 +32,8 @@ export default function RegelDebugModal({
       : { label: 'Optional', color: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border' }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-    >
-      <div
-        className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Modal open onClose={onClose} maxWidth={512} noPadding hideCloseButton ariaLabel="Regel-Debug">
+      <div className="flex flex-col overflow-hidden" style={{ maxHeight: 'calc(100vh - 64px)' }}>
         <div className="flex items-start justify-between px-5 py-4 border-b border-claimondo-border">
           <div className="min-w-0">
             <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 mb-1">
@@ -72,11 +54,9 @@ export default function RegelDebugModal({
           </button>
         </div>
 
-        <div className="px-5 py-4 space-y-4 overflow-y-auto">
+        <div className="px-5 py-4 space-y-4 overflow-y-auto flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span
-              className={`text-[11px] font-medium border rounded-full px-2.5 py-0.5 ${status.color}`}
-            >
+            <span className={`text-[11px] font-medium border rounded-full px-2.5 py-0.5 ${status.color}`}>
               {status.label}
             </span>
             <span className="text-[11px] text-claimondo-ondo">{entry.regel_erklaerung}</span>
@@ -111,33 +91,23 @@ export default function RegelDebugModal({
           </div>
           <div className="grid grid-cols-2 gap-3 text-[11px]">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">
-                Freigeschaltet?
-              </p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">Freigeschaltet?</p>
               <p className="text-claimondo-navy">{entry.freigeschaltet ? 'Ja' : 'Nein'}</p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">
-                Pflicht?
-              </p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">Pflicht?</p>
               <p className="text-claimondo-navy">{entry.pflicht ? 'Ja' : 'Nein'}</p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">
-                DB-Status
-              </p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">DB-Status</p>
               <p className="text-claimondo-navy">{entry.status}</p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">
-                DB-Row
-              </p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">DB-Row</p>
               <p className="text-claimondo-navy">
                 {entry.pflicht_row_id ? (
                   <code className="font-mono text-[10px]">{entry.pflicht_row_id}</code>
-                ) : (
-                  '—'
-                )}
+                ) : '—'}
               </p>
             </div>
           </div>
@@ -153,6 +123,6 @@ export default function RegelDebugModal({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }

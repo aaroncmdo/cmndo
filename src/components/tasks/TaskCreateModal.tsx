@@ -1,10 +1,12 @@
 'use client'
 
+// KFZ-175: Modal zum Erstellen eines manuellen Tasks.
+// AAR-781: Migriert auf Modal-Primitive.
+
 import { useState, useTransition } from 'react'
 import { XIcon, PlusIcon } from 'lucide-react'
 import { createManualTask } from '@/lib/tasks/manual-actions'
-
-// KFZ-175: Modal zum Erstellen eines manuellen Tasks.
+import { Modal } from '@/components/primitives'
 
 export default function TaskCreateModal({
   fallId,
@@ -42,13 +44,15 @@ export default function TaskCreateModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+    <Modal open onClose={onClose} maxWidth={448} noPadding hideCloseButton>
+      <div>
         <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
           <h3 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
             <PlusIcon className="w-4 h-4 text-[#4573A2]" /> Task erstellen
           </h3>
-          <button onClick={onClose} className="text-claimondo-ondo/70 hover:text-claimondo-ondo p-1"><XIcon className="w-4 h-4" /></button>
+          <button onClick={onClose} className="text-claimondo-ondo/70 hover:text-claimondo-ondo p-1">
+            <XIcon className="w-4 h-4" />
+          </button>
         </div>
         <div className="px-5 py-4 space-y-3">
           <div>
@@ -95,6 +99,6 @@ export default function TaskCreateModal({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }

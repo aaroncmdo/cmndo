@@ -12,6 +12,7 @@ export function Modal({
   closeOnBackdrop = true,
   closeOnEsc = true,
   hideCloseButton = false,
+  noPadding = false,
   ariaLabel,
 }: ModalProps) {
   useEffect(() => {
@@ -66,7 +67,7 @@ export function Modal({
           border: `1px solid ${tokens.glass.light.border}`,
           borderRadius: tokens.radius.lg,
           boxShadow: tokens.shadow.lg,
-          padding: tokens.spacing[6],
+          padding: noPadding ? 0 : tokens.spacing[6],
         }}
       >
         {!hideCloseButton && <CloseButton onPress={onClose} offset={12} />}
