@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import PageHeader from '@/components/shared/PageHeader'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 const STATUS_COLOR: Record<string, string> = {
   neu: 'bg-[#4573A2]/5 text-[#4573A2]',
@@ -64,7 +65,7 @@ export default async function SupportPage() {
                       </td>
                       <td className="px-4 py-3 text-claimondo-navy text-xs max-w-xs truncate">{p.beschreibung}</td>
                       <td className="px-4 py-3">
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${STATUS_COLOR[p.status] ?? 'bg-[#f8f9fb] text-claimondo-ondo'}`}>{p.status}</span>
+                        <StatusBadge colorCls={STATUS_COLOR[p.status] ?? 'bg-[#f8f9fb] text-claimondo-ondo'}>{p.status}</StatusBadge>
                       </td>
                       <td className="px-4 py-3 text-claimondo-ondo/70 text-[10px] max-w-32 truncate">{p.browser?.split(' ').pop() ?? '—'}</td>
                     </tr>

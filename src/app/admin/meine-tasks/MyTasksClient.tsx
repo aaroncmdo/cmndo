@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircleIcon, CircleDotIcon, ClockIcon, AlertTriangleIcon, ExternalLinkIcon, ClipboardListIcon } from 'lucide-react'
 import { updateManualTaskStatus } from '@/lib/tasks/manual-actions'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import PageHeader from '@/components/shared/PageHeader'
 
 // KFZ-175: Meine-Tasks Client — Tabs Zugewiesen/Erstellt.
@@ -104,9 +105,9 @@ export default function MyTasksClient({
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${PRIO_BADGE[t.prioritaet ?? 'normal']}`}>
+                      <StatusBadge colorCls={PRIO_BADGE[t.prioritaet ?? 'normal']}>
                         {t.prioritaet ?? 'normal'}
-                      </span>
+                      </StatusBadge>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs ${isOverdue ? 'text-red-600 font-medium' : 'text-claimondo-ondo'}`}>

@@ -13,6 +13,7 @@ import { getKalenderTermine } from '@/lib/actions/admin-kalender'
 import { createAdminTermin, updateAdminTermin, deleteAdminTermin } from '@/lib/actions/admin-termine-actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import { KundeAvatar } from '@/components/shared/KundeAvatar'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -300,7 +301,7 @@ export default function KalenderClient({
                         </div>
                         <KundeAvatar name={g.name} size={24} />
                         <span className="text-xs text-claimondo-navy flex-1 truncate">{g.name}</span>
-                        {badge && <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${badge.color}`}>{badge.label}</span>}
+                        {badge && <StatusBadge colorCls={badge.color}>{badge.label}</StatusBadge>}
                       </button>
                     )
                   })}

@@ -1,5 +1,8 @@
-// AAR-769 Phase 2: Barrel-Export für alle Primitives.
+// AAR-769 Phase 2 / AAR-806: Barrel-Export für alle Primitives.
 // Consumer: import { Box, Card, Button, Modal } from '@/components/primitives'
+//
+// AAR-806: BackButton (0 Consumer) und Sheet (0 Consumer, Use-Case durch
+// Modal placement='bottom-sheet' abgedeckt) entfernt.
 
 export { Box } from './Box'
 export type { BoxProps } from './Box'
@@ -28,17 +31,11 @@ export type { BadgeProps } from './Badge'
 export { DropletBadge } from './DropletBadge'
 export type { DropletBadgeProps } from './DropletBadge'
 
-export { BackButton } from './BackButton'
-export type { BackButtonProps } from './BackButton'
-
 export { CloseButton } from './CloseButton'
 export type { CloseButtonProps } from './CloseButton'
 
 export { Modal } from './Modal'
 export type { ModalProps } from './Modal'
-
-export { Sheet } from './Sheet'
-export type { SheetProps } from './Sheet'
 
 export { Drawer } from './Drawer'
 export type { DrawerProps } from './Drawer'

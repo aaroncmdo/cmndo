@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { AlertCircleIcon, ArrowRightIcon, EuroIcon } from 'lucide-react'
+import { StatusBadge as SharedStatusBadge } from '@/components/shared/StatusBadge'
 
 // KFZ-155: Ausstehende Zahlungen Widget — top 5 Eintraege fuer das Dashboard.
 //
@@ -131,9 +132,7 @@ export default async function AusstehendeZahlungenWidget() {
           <EuroIcon className="w-4 h-4 text-amber-600" />
           <h2 className="text-sm font-semibold text-claimondo-navy">Ausstehende Zahlungen</h2>
           {total > 0 && (
-            <span className="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-medium">
-              {total} offen
-            </span>
+            <SharedStatusBadge tone="warning">{total} offen</SharedStatusBadge>
           )}
         </div>
         <span className="text-xs text-claimondo-ondo tabular-nums font-medium">{fmtEur(gesamt)}</span>

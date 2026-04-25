@@ -13,6 +13,7 @@
 
 import { useState } from 'react'
 import { ExternalLinkIcon, FileTextIcon, InboxIcon } from 'lucide-react'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import DokumenteZuordnungsModal, {
   type UnzugeordnetDoc,
   type ZuordnungsSlot,
@@ -52,9 +53,9 @@ export default function DokumenteUnzugeordnetBox({
                   {doc.original_filename ?? 'Unbenannt'}
                 </p>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium bg-white/70 text-amber-700 border border-amber-200">
+                  <StatusBadge colorCls="bg-white/70 text-amber-700 border border-amber-200">
                     {doc.dokument_typ === 'kunde-nachreichung' ? 'Nachreichung' : 'Sonstiges'}
-                  </span>
+                  </StatusBadge>
                   <span className="text-[9px] text-claimondo-ondo">
                     {new Date(doc.hochgeladen_am).toLocaleDateString('de-DE')}
                   </span>

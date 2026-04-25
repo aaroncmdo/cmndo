@@ -8,6 +8,7 @@ import { NavigationIcon, ExternalLinkIcon } from 'lucide-react'
 import { googleMapsLink } from './googleMapsLink'
 import type { HeuteTerminFull } from './page'
 import { formatUhrzeit } from '@/lib/format'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 export interface TerminCardProps {
   termin: HeuteTerminFull
@@ -86,15 +87,11 @@ export default function TerminCard({
             <span className="text-sm font-semibold text-claimondo-navy">
               {formatUhrzeit(termin.start_zeit)}
             </span>
-            <span
-              className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${badge.className}`}
-            >
-              {badge.label}
-            </span>
+            <StatusBadge colorCls={badge.className}>{badge.label}</StatusBadge>
             {termin.schadentyp && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium bg-[color:var(--brand-primary,var(--brand-secondary))]/10 text-[color:var(--brand-primary,var(--brand-secondary))] uppercase">
+              <StatusBadge colorCls="bg-[color:var(--brand-primary,var(--brand-secondary))]/10 text-[color:var(--brand-primary,var(--brand-secondary))] uppercase">
                 {termin.schadentyp}
-              </span>
+              </StatusBadge>
             )}
           </div>
           <p className="text-sm text-claimondo-navy truncate">

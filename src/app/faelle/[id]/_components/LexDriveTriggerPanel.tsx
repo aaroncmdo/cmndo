@@ -13,6 +13,7 @@ import {
 import { triggerLexDriveEventManually } from '../lexdrive-actions'
 import type { LexDriveEvent } from '@/lib/lexdrive/process-event'
 import { Modal } from '@/components/primitives/Modal'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 type FieldId =
   | 'datum' | 'betrag' | 'grund' | 'kuerzungs_betrag' | 'anerkannt_betrag'
@@ -175,9 +176,9 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
     <div className="bg-white rounded-2xl border border-claimondo-border p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-[#0D1B3E]">Endpoint-Register</h3>
-        <span className="text-[10px] uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full font-medium">
+        <StatusBadge colorCls="text-amber-700 bg-amber-50 uppercase">
           Manueller Modus
-        </span>
+        </StatusBadge>
       </div>
 
       <p className="text-xs text-claimondo-ondo leading-relaxed">

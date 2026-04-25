@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import { EyeIcon, FileTextIcon, Loader2Icon, UploadIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { uploadAnschlussschreiben } from '../../../../app/faelle/[id]/_actions'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 export type FallAS = {
   anschlussschreiben_url: string | null
@@ -59,13 +60,9 @@ export function AnschlussschreibenUploadBlock({ fallId, fallAS }: Props) {
           <FileTextIcon className="w-4 h-4" /> Anschlussschreiben
         </h3>
         {hasAS ? (
-          <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">
-            Hochgeladen + OCR
-          </span>
+          <StatusBadge tone="success">Hochgeladen + OCR</StatusBadge>
         ) : (
-          <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
-            Ausstehend
-          </span>
+          <StatusBadge tone="warning">Ausstehend</StatusBadge>
         )}
       </div>
 

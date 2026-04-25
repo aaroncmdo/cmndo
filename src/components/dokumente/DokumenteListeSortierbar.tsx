@@ -20,6 +20,7 @@ import {
   type DropResult,
 } from '@hello-pangea/dnd'
 import { GripVerticalIcon, Loader2Icon, CheckIcon } from 'lucide-react'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { updateDokumentSortOrder } from '@/lib/dokumente/zuordnung'
@@ -151,19 +152,13 @@ export default function DokumenteListeSortierbar({
                               <GripVerticalIcon className="w-3.5 h-3.5" />
                             </span>
                             <span className="flex-1 truncate text-claimondo-navy">{it.label}</span>
-                            <span
-                              className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${
-                                it.status === 'hochgeladen' || it.status === 'geprueft'
-                                  ? 'bg-emerald-50 text-emerald-600'
-                                  : 'bg-amber-50 text-amber-600'
-                              }`}
-                            >
+                            <StatusBadge tone={it.status === 'hochgeladen' || it.status === 'geprueft' ? 'success' : 'warning'}>
                               {it.status === 'geprueft'
                                 ? 'Geprüft'
                                 : it.status === 'hochgeladen'
                                 ? 'Hochgeladen'
                                 : 'Ausstehend'}
-                            </span>
+                            </StatusBadge>
                           </div>
                         )}
                       </Draggable>
