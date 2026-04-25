@@ -265,6 +265,27 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       admin: ['in_app'],
     },
   },
+  // 5.13 Airdrop (AAR-814)
+  'claim.gegner_eingeladen': {
+    priority: 'normal',
+    channels: { kunde: ['in_app'], kundenbetreuer: ['in_app'] },
+  },
+  'claim.gegner_hat_geoeffnet': {
+    priority: 'normal',
+    channels: { kunde: ['in_app', 'web_push'], kundenbetreuer: ['in_app'] },
+  },
+  'claim.gegner_hat_geantwortet': {
+    priority: 'normal',
+    channels: { kunde: ['in_app', 'web_push'], kundenbetreuer: ['in_app', 'web_push'] },
+  },
+  'claim.gegner_konvertiert_zu_voll': {
+    priority: 'normal',
+    channels: { kunde: ['in_app'], kundenbetreuer: ['in_app'], admin: ['in_app'] },
+  },
+  'claim.einladung_abgelaufen': {
+    priority: 'low',
+    channels: { kunde: ['in_app'], kundenbetreuer: ['in_app'] },
+  },
 }
 
 export function getEventConfig(eventType: EventType): EventConfig {
