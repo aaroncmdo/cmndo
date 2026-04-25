@@ -36,7 +36,7 @@ export default async function NachbesichtigungPickerPage({
       <div className="max-w-xl mx-auto">
         <div className="mb-6">
           <p className="text-xs text-claimondo-ondo/70 mb-1">Fall {fall.fall_nummer ?? fall_id.slice(0, 8)}</p>
-          <h1 className="text-2xl font-bold text-[#0D1B3E]">Nachbesichtigungs-Termin wählen</h1>
+          <h1 className="text-2xl font-bold text-claimondo-navy">Nachbesichtigungs-Termin wählen</h1>
           <p className="text-sm text-claimondo-ondo mt-2">
             Die Versicherung hat eine Nachbesichtigung angefordert. Bitte schlagen Sie 1–3 Termine vor,
             zu denen unser Sachverständiger erneut vor Ort sein kann.

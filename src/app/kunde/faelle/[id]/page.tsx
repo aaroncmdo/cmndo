@@ -413,7 +413,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl md:max-w-none mx-auto space-y-5">
         {/* Header */}
         <div>
-          <Link href="/kunde" className="text-xs text-claimondo-ondo/70 hover:text-[#4573A2] mb-2 inline-block">&larr; Meine Fälle</Link>
+          <Link href="/kunde" className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-2 inline-block">&larr; Meine Fälle</Link>
           <PageHeader
             title={`${kennzeichen || (fall.fall_nummer as string | null) || 'Schadensfall'}${fahrzeug ? ` — ${fahrzeug}` : ''}`}
             description={adresse || undefined}
@@ -599,7 +599,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {gutachtenVerfuegbar && (
           <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-[#0D1B3E]">Gutachten erhalten?</p>
+              <p className="text-sm font-semibold text-claimondo-navy">Gutachten erhalten?</p>
               <p className="text-xs text-claimondo-ondo mt-0.5">
                 Sie können sich das Gutachten auch per E-Mail an sich selbst oder eine Vertrauensperson senden lassen (48h Magic-Link).
               </p>

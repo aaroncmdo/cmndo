@@ -62,7 +62,7 @@ export default function Phase3Schadentyp() {
           <button
             type="button"
             onClick={() => setPhase(4)}
-            className="flex-1 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 rounded-xl bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield flex items-center justify-center gap-2"
           >
             Weiter zu Phase 4 →
           </button>

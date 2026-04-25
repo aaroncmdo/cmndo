@@ -55,7 +55,7 @@ export default function KanzleiCheckoutClient({ abrechnungId, token, endbetragBr
         <button
           onClick={handleCheckout}
           disabled={loading}
-          className="px-8 py-3 bg-[#0D1B3E] text-white font-semibold rounded-xl hover:bg-[#1E3A5F] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="px-8 py-3 bg-claimondo-navy text-white font-semibold rounded-xl hover:bg-claimondo-shield transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {loading ? 'Weiterleitung...' : 'Jetzt bezahlen'}
         </button>

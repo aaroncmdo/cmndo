@@ -26,8 +26,8 @@ export default async function ProfilPage() {
     <div className="w-full px-4 py-6 max-w-xl mx-auto space-y-5">
       <PageHeader title="Mein Profil" size="lg" />
       <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-5 space-y-3">
-        <div><span className="text-sm text-claimondo-ondo">Name</span><p className="text-[#0D1B3E] font-medium">{name || '—'}</p></div>
-        <div><span className="text-sm text-claimondo-ondo">E-Mail (Login)</span><p className="text-[#0D1B3E]">{profile?.email ?? user.email ?? '—'}</p></div>
+        <div><span className="text-sm text-claimondo-ondo">Name</span><p className="text-claimondo-navy font-medium">{name || '—'}</p></div>
+        <div><span className="text-sm text-claimondo-ondo">E-Mail (Login)</span><p className="text-claimondo-navy">{profile?.email ?? user.email ?? '—'}</p></div>
       </div>
 
       {/* AAR-703: Telefon + zweit_email editierbar */}
@@ -45,18 +45,18 @@ export default async function ProfilPage() {
       {/* AAR-500 N5: Einstieg in Einstellungen (Benachrichtigungs-Präferenzen) */}
       <Link
         href="/kunde/einstellungen"
-        className="flex items-center justify-between gap-3 bg-white rounded-xl border border-claimondo-border shadow-sm p-4 hover:border-[#4573A2]"
+        className="flex items-center justify-between gap-3 bg-white rounded-xl border border-claimondo-border shadow-sm p-4 hover:border-claimondo-ondo"
       >
         <span className="flex items-center gap-3">
-          <span className="shrink-0 w-9 h-9 rounded-xl bg-[#f8f9fb] text-[#4573A2] border border-[#e4e7ef] flex items-center justify-center">
+          <span className="shrink-0 w-9 h-9 rounded-xl bg-[#f8f9fb] text-claimondo-ondo border border-[#e4e7ef] flex items-center justify-center">
             <BellIcon width={16} height={16} />
           </span>
           <span>
-            <span className="block text-sm font-semibold text-[#0D1B3E]">Benachrichtigungen</span>
-            <span className="block text-xs text-[#4573A2]">Ruhezeiten · Kanäle · Feintuning</span>
+            <span className="block text-sm font-semibold text-claimondo-navy">Benachrichtigungen</span>
+            <span className="block text-xs text-claimondo-ondo">Ruhezeiten · Kanäle · Feintuning</span>
           </span>
         </span>
-        <span className="text-xs text-[#4573A2]">Öffnen →</span>
+        <span className="text-xs text-claimondo-ondo">Öffnen →</span>
       </Link>
     </div>
   )

@@ -329,7 +329,7 @@ export default function OnboardingWizard({
     <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
       {/* Progress */}
       <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-[#f8f9fb]">
-        <div className="h-full bg-[#4573A2] transition-all duration-500" style={{ width: `${progress}%` }} />
+        <div className="h-full bg-claimondo-ondo transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
 
       {/* Step Indicator */}
@@ -339,7 +339,7 @@ export default function OnboardingWizard({
             <div key={s.id} className="flex items-center gap-2">
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
                 i < stepIndex ? 'bg-emerald-500 text-white' :
-                i === stepIndex ? 'bg-[#4573A2] text-white' :
+                i === stepIndex ? 'bg-claimondo-ondo text-white' :
                 'bg-claimondo-border text-claimondo-ondo/70'
               }`}>
                 {i < stepIndex ? <CheckIcon className="w-3.5 h-3.5" /> : i + 1}
@@ -356,7 +356,7 @@ export default function OnboardingWizard({
             {/* Welcome */}
             {currentStep.id === 'welcome' && (
               <div>
-                <div className="mb-4"><SparklesIcon className="w-10 h-10 text-[#4573A2]" /></div>
+                <div className="mb-4"><SparklesIcon className="w-10 h-10 text-claimondo-ondo" /></div>
                 <h1 className="text-2xl font-semibold text-claimondo-navy leading-snug">Willkommen bei Claimondo, {vorname}!</h1>
                 <p className="mt-3 text-sm text-claimondo-ondo leading-relaxed">
                   Wir kuemmern uns ab jetzt um die komplette Abwicklung Ihres Schadens.
@@ -364,7 +364,7 @@ export default function OnboardingWizard({
                 </p>
                 <button
                   onClick={() => setStepIndex(1)}
-                  className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
+                  className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >Los geht&apos;s</button>
               </div>
             )}
@@ -372,12 +372,12 @@ export default function OnboardingWizard({
             {/* Fall */}
             {currentStep.id === 'fall' && (
               <div>
-                <div className="mb-4"><FolderOpenIcon className="w-10 h-10 text-[#4573A2]" /></div>
+                <div className="mb-4"><FolderOpenIcon className="w-10 h-10 text-claimondo-ondo" /></div>
                 <h1 className="text-2xl font-semibold text-claimondo-navy">Ihr Fall</h1>
                 {fall ? (
-                  <div className="mt-4 bg-gradient-to-br from-[#4573A2]/10 to-[#1E3A5F]/5 border border-[#4573A2]/20 rounded-2xl p-5">
-                    <p className="text-xs uppercase tracking-wider text-[#4573A2] mb-1">Fall-Nummer</p>
-                    <p className="text-xl font-bold text-[#0D1B3E]">{fall.fall_nummer ?? fall.id.slice(0, 8)}</p>
+                  <div className="mt-4 bg-gradient-to-br from-claimondo-ondo/10 to-claimondo-shield/5 border border-claimondo-ondo/20 rounded-2xl p-5">
+                    <p className="text-xs uppercase tracking-wider text-claimondo-ondo mb-1">Fall-Nummer</p>
+                    <p className="text-xl font-bold text-claimondo-navy">{fall.fall_nummer ?? fall.id.slice(0, 8)}</p>
                     {fall.kennzeichen && <p className="text-sm text-claimondo-ondo mt-1">{fall.kennzeichen}</p>}
                     {fall.fahrzeug && <p className="text-xs text-claimondo-ondo">{fall.fahrzeug}</p>}
                   </div>
@@ -388,7 +388,7 @@ export default function OnboardingWizard({
                   <p className="text-sm font-medium text-claimondo-navy">So laeuft es weiter:</p>
                   {STATUS_PHASES.map((phase, i) => (
                     <div key={phase.key} className="flex items-start gap-3 py-2">
-                      <div className="w-6 h-6 rounded-full bg-[#4573A2]/10 text-[#4573A2] flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</div>
+                      <div className="w-6 h-6 rounded-full bg-claimondo-ondo/10 text-claimondo-ondo flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</div>
                       <div>
                         <p className="text-sm font-medium text-claimondo-navy">{phase.label}</p>
                         <p className="text-xs text-claimondo-ondo">{phase.description}</p>
@@ -398,7 +398,7 @@ export default function OnboardingWizard({
                 </div>
                 <button
                   onClick={() => setStepIndex(2)}
-                  className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
+                  className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >Weiter</button>
               </div>
             )}
@@ -406,7 +406,7 @@ export default function OnboardingWizard({
             {/* Termin + AAR-231: Vorbereitungs-Checkliste */}
             {currentStep.id === 'termin' && (
               <div>
-                <div className="mb-4"><CalendarIcon className="w-10 h-10 text-[#4573A2]" /></div>
+                <div className="mb-4"><CalendarIcon className="w-10 h-10 text-claimondo-ondo" /></div>
                 <h1 className="text-2xl font-semibold text-claimondo-navy">Ihr Termin</h1>
                 {termin ? (
                   <>
@@ -429,8 +429,8 @@ export default function OnboardingWizard({
                         Button nach unten drücken. max-h + overflow-y + Sticky-
                         Header sorgen für einen stabilen, scrollbaren Block
                         ohne die Step-Höhe zu sprengen. */}
-                    <div className="mt-5 bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-2xl p-5 space-y-3 max-h-[60vh] overflow-y-auto">
-                      <p className="sticky top-0 -mx-5 -mt-5 px-5 pt-5 pb-2 bg-[#eef2f8] text-sm font-semibold text-[#0D1B3E] z-10">
+                    <div className="mt-5 bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-2xl p-5 space-y-3 max-h-[60vh] overflow-y-auto">
+                      <p className="sticky top-0 -mx-5 -mt-5 px-5 pt-5 pb-2 bg-[#eef2f8] text-sm font-semibold text-claimondo-navy z-10">
                         Bitte vor dem Termin vorbereiten:
                       </p>
                       <CheckItem emoji="📍" text="Fahrzeug an der Besichtigungsadresse bereitstellen" done />
@@ -476,7 +476,7 @@ export default function OnboardingWizard({
                 )}
                 <button
                   onClick={() => setStepIndex(3)}
-                  className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
+                  className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >Weiter</button>
               </div>
             )}
@@ -484,7 +484,7 @@ export default function OnboardingWizard({
             {/* Dokumente — AAR-323: Katalog-driven Status-Übersicht */}
             {currentStep.id === 'dokumente' && (
               <div>
-                <div className="mb-4"><FileTextIcon className="w-10 h-10 text-[#4573A2]" /></div>
+                <div className="mb-4"><FileTextIcon className="w-10 h-10 text-claimondo-ondo" /></div>
                 <h1 className="text-2xl font-semibold text-claimondo-navy">Pflichtdokumente</h1>
                 <p className="mt-2 text-sm text-claimondo-ondo">
                   Laden Sie Ihre Unterlagen hoch. Sie können das auch später im Dashboard nachholen.
@@ -519,7 +519,7 @@ export default function OnboardingWizard({
                           type="button"
                           onClick={() => setInfoOverlay({ slotId: doc.slot_id, label })}
                           aria-label={`Info zu ${label}`}
-                          className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/80 border border-claimondo-border text-claimondo-ondo hover:text-[#0D1B3E] hover:border-[#4573A2] flex items-center justify-center transition-colors"
+                          className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/80 border border-claimondo-border text-claimondo-ondo hover:text-claimondo-navy hover:border-claimondo-ondo flex items-center justify-center transition-colors"
                         >
                           <InfoIcon className="w-4 h-4" />
                         </button>
@@ -567,7 +567,7 @@ export default function OnboardingWizard({
                         <div className="mt-3 flex gap-2">
                           {!istHochgeladen && (
                             <>
-                              <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-[#0D1B3E] text-white hover:bg-[#1E3A5F] active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
+                              <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-claimondo-navy text-white hover:bg-claimondo-shield active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
                                 {loading ? 'Lädt...' : <><span>📷</span> Foto aufnehmen</>}
                                 <input
                                   type="file"
@@ -581,7 +581,7 @@ export default function OnboardingWizard({
                                   }}
                                 />
                               </label>
-                              <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-white border-2 border-[#0D1B3E] text-[#0D1B3E] hover:bg-[#f8f9fb] active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
+                              <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-white border-2 border-claimondo-navy text-claimondo-navy hover:bg-[#f8f9fb] active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
                                 <span>📁</span> Datei wählen
                                 <input
                                   type="file"
@@ -627,7 +627,7 @@ export default function OnboardingWizard({
                                 type="button"
                                 onClick={() => handleSpaeterNachreichen(doc.id)}
                                 disabled={spaeterLoading === doc.id}
-                                className="text-[11px] text-claimondo-ondo hover:text-[#0D1B3E] underline decoration-dotted underline-offset-2 disabled:opacity-50"
+                                className="text-[11px] text-claimondo-ondo hover:text-claimondo-navy underline decoration-dotted underline-offset-2 disabled:opacity-50"
                               >
                                 {spaeterLoading === doc.id ? 'Wird gespeichert…' : 'Später nachreichen'}
                               </button>
@@ -679,7 +679,7 @@ export default function OnboardingWizard({
                 )}
                 <button
                   onClick={() => setStepIndex(4)}
-                  className="mt-4 w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
+                  className="mt-4 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >Weiter</button>
                 {/* AAR-390: Shortcut für Kunden ohne Dokumente zur Hand — markiert
                     alle offenen Pflicht-Slots als „später nachreichen" und springt
@@ -690,7 +690,7 @@ export default function OnboardingWizard({
                     type="button"
                     onClick={handleAlleSpaeterNachreichen}
                     disabled={spaeterAlleLoading}
-                    className="mt-2 w-full min-h-11 py-3 rounded-xl bg-white border border-claimondo-border text-claimondo-navy hover:border-[#4573A2] hover:text-[#0D1B3E] text-sm font-medium active:scale-[0.98] transition-all disabled:opacity-60"
+                    className="mt-2 w-full min-h-11 py-3 rounded-xl bg-white border border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo hover:text-claimondo-navy text-sm font-medium active:scale-[0.98] transition-all disabled:opacity-60"
                   >
                     {spaeterAlleLoading
                       ? 'Wird gespeichert…'
@@ -703,7 +703,7 @@ export default function OnboardingWizard({
             {/* Weitere Dokumente — AAR-324: conditional Slots aus dokument_katalog */}
             {currentStep.id === 'weitere-dokumente' && (
               <div>
-                <div className="mb-4"><FolderOpenIcon className="w-10 h-10 text-[#4573A2]" /></div>
+                <div className="mb-4"><FolderOpenIcon className="w-10 h-10 text-claimondo-ondo" /></div>
                 <h1 className="text-2xl font-semibold text-claimondo-navy">Weitere Dokumente</h1>
                 <p className="mt-2 text-sm text-claimondo-ondo">
                   Optional — laden Sie weitere Dokumente oder Fotos hoch, die zu Ihrem Fall passen.
@@ -718,7 +718,7 @@ export default function OnboardingWizard({
                     const katMeta = KATEGORIE_LABELS[kat]
                     return (
                       <div key={kat}>
-                        <p className="text-xs font-semibold text-[#0D1B3E] uppercase tracking-wider mb-2">
+                        <p className="text-xs font-semibold text-claimondo-navy uppercase tracking-wider mb-2">
                           {katMeta.emoji} {katMeta.label}
                         </p>
                         <div className="space-y-2.5">
@@ -743,7 +743,7 @@ export default function OnboardingWizard({
                                     type="button"
                                     onClick={() => setInfoOverlay({ slotId: slot.slot_id, label: slot.label })}
                                     aria-label={`Info zu ${slot.label}`}
-                                    className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/80 border border-claimondo-border text-claimondo-ondo hover:text-[#0D1B3E] hover:border-[#4573A2] flex items-center justify-center transition-colors"
+                                    className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/80 border border-claimondo-border text-claimondo-ondo hover:text-claimondo-navy hover:border-claimondo-ondo flex items-center justify-center transition-colors"
                                   >
                                     <InfoIcon className="w-3.5 h-3.5" />
                                   </button>
@@ -772,7 +772,7 @@ export default function OnboardingWizard({
                                 <div className="mt-2.5 flex gap-2">
                                   {kannMehr && (
                                     <>
-                                      <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-[#0D1B3E] text-white hover:bg-[#1E3A5F] cursor-pointer text-center">
+                                      <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-claimondo-navy text-white hover:bg-claimondo-shield cursor-pointer text-center">
                                         {loading ? 'Lädt...' : '📷 Foto aufnehmen'}
                                         <input
                                           type="file"
@@ -787,7 +787,7 @@ export default function OnboardingWizard({
                                           }}
                                         />
                                       </label>
-                                      <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-white border border-[#0D1B3E] text-[#0D1B3E] hover:bg-[#f8f9fb] cursor-pointer text-center">
+                                      <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-white border border-claimondo-navy text-claimondo-navy hover:bg-[#f8f9fb] cursor-pointer text-center">
                                         {loading ? 'Lädt...' : '📁 Datei wählen'}
                                         <input
                                           type="file"
@@ -831,7 +831,7 @@ export default function OnboardingWizard({
 
                   {/* Sonstiges — immer sichtbar, nutzt kunde-nachreichung Slot */}
                   <div>
-                    <p className="text-xs font-semibold text-[#0D1B3E] uppercase tracking-wider mb-2">
+                    <p className="text-xs font-semibold text-claimondo-navy uppercase tracking-wider mb-2">
                       📎 Sonstiges
                     </p>
                     <div className="rounded-xl border border-claimondo-border bg-white p-3">
@@ -849,7 +849,7 @@ export default function OnboardingWizard({
                           onChange={e => setSonstigesBeschreibung(e.target.value)}
                           rows={2}
                           placeholder="z.B. 'Attest vom Hausarzt, erhalten am 15.04.'"
-                          className="w-full text-xs rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-[#4573A2]"
+                          className="w-full text-xs rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-claimondo-ondo"
                           maxLength={500}
                         />
                       </div>
@@ -864,7 +864,7 @@ export default function OnboardingWizard({
                         </p>
                       )}
                       <div className="mt-2.5 flex gap-2">
-                        <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-[#0D1B3E] text-white hover:bg-[#1E3A5F] cursor-pointer text-center">
+                        <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-claimondo-navy text-white hover:bg-claimondo-shield cursor-pointer text-center">
                           {uploadingSlot === '__sonstiges__' ? 'Lädt...' : '📷 Foto aufnehmen'}
                           <input
                             type="file"
@@ -879,7 +879,7 @@ export default function OnboardingWizard({
                             }}
                           />
                         </label>
-                        <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-white border border-[#0D1B3E] text-[#0D1B3E] hover:bg-[#f8f9fb] cursor-pointer text-center">
+                        <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-white border border-claimondo-navy text-claimondo-navy hover:bg-[#f8f9fb] cursor-pointer text-center">
                           {uploadingSlot === '__sonstiges__' ? 'Lädt...' : '📁 Datei wählen'}
                           <input
                             type="file"
@@ -900,7 +900,7 @@ export default function OnboardingWizard({
 
                 <button
                   onClick={() => setStepIndex(5)}
-                  className="mt-5 w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
+                  className="mt-5 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >Weiter</button>
                 <button
                   onClick={() => setStepIndex(5)}
@@ -923,7 +923,7 @@ export default function OnboardingWizard({
                 <button
                   onClick={handleFinish}
                   disabled={pending}
-                  className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-50 active:scale-[0.98] transition-all"
+                  className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base disabled:opacity-50 active:scale-[0.98] transition-all"
                 >
                   {pending ? 'Moment...' : 'Zum Dashboard'}
                 </button>
@@ -979,10 +979,10 @@ function DokumentInfoOverlay({
       >
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-full bg-[#4573A2]/10 flex items-center justify-center">
-              <InfoIcon className="w-5 h-5 text-[#4573A2]" />
+            <div className="w-9 h-9 rounded-full bg-claimondo-ondo/10 flex items-center justify-center">
+              <InfoIcon className="w-5 h-5 text-claimondo-ondo" />
             </div>
-            <p className="text-base font-semibold text-[#0D1B3E]">{label}</p>
+            <p className="text-base font-semibold text-claimondo-navy">{label}</p>
           </div>
           <button
             type="button"
@@ -996,13 +996,13 @@ function DokumentInfoOverlay({
 
         <div className="space-y-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#4573A2] mb-1">
+            <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">
               Warum benötigen wir das?
             </p>
             <p className="text-sm text-claimondo-navy leading-relaxed">{info.warum}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#4573A2] mb-1">
+            <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">
               Wo finde ich das?
             </p>
             <p className="text-sm text-claimondo-navy leading-relaxed">{info.wo}</p>
@@ -1012,7 +1012,7 @@ function DokumentInfoOverlay({
         <button
           type="button"
           onClick={onClose}
-          className="mt-6 w-full py-3 rounded-xl bg-[#0D1B3E] hover:bg-[#1E3A5F] text-white font-semibold text-sm active:scale-[0.98] transition-all"
+          className="mt-6 w-full py-3 rounded-xl bg-claimondo-navy hover:bg-claimondo-shield text-white font-semibold text-sm active:scale-[0.98] transition-all"
         >
           Verstanden
         </button>

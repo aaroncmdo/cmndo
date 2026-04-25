@@ -135,7 +135,7 @@ export default function LiveAnsichtOverlay({
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-claimondo-border bg-[#0D1B3E] text-white flex-shrink-0">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-claimondo-border bg-claimondo-navy text-white flex-shrink-0">
         <MapPinIcon className="w-5 h-5" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold leading-tight">Live-Ansicht</p>
@@ -168,14 +168,14 @@ export default function LiveAnsichtOverlay({
       {/* ETA-Footer — zweispaltig wenn beide Positionen vorhanden */}
       <div className="flex-shrink-0 border-t border-claimondo-border bg-white px-4 py-3 grid grid-cols-2 gap-3">
         <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-full bg-[#4573A2]/10 flex items-center justify-center flex-shrink-0">
-            <CarIcon className="w-4 h-4 text-[#4573A2]" />
+          <div className="w-9 h-9 rounded-full bg-claimondo-ondo/10 flex items-center justify-center flex-shrink-0">
+            <CarIcon className="w-4 h-4 text-claimondo-ondo" />
           </div>
           <div className="min-w-0">
             <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
               {svVorname}
             </p>
-            <p className="text-sm font-semibold text-[#0D1B3E]">
+            <p className="text-sm font-semibold text-claimondo-navy">
               {svEta != null ? `ETA ${svEta} Min` : 'Position wartet…'}
             </p>
           </div>
@@ -188,7 +188,7 @@ export default function LiveAnsichtOverlay({
             <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
               Sie
             </p>
-            <p className="text-sm font-semibold text-[#0D1B3E]">
+            <p className="text-sm font-semibold text-claimondo-navy">
               {kundeEta != null
                 ? `ETA ${kundeEta} Min`
                 : kundePosition

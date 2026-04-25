@@ -142,7 +142,7 @@ export default function KundeTrackingClient({
           <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircleIcon className="w-8 h-8 text-emerald-600" />
           </div>
-          <h1 className="text-2xl font-bold text-[#0D1B3E] mb-2">{svVorname} ist da!</h1>
+          <h1 className="text-2xl font-bold text-claimondo-navy mb-2">{svVorname} ist da!</h1>
           <p className="text-claimondo-ondo">Die Besichtigung kann jetzt beginnen.</p>
         </div>
       </div>
@@ -157,7 +157,7 @@ export default function KundeTrackingClient({
       <div className="flex-1 flex items-center justify-center px-6 py-10">
         <div className="max-w-md text-center">
           <CheckCircleIcon className="w-12 h-12 text-emerald-500 mx-auto mb-4" />
-          <h1 className="text-xl font-bold text-[#0D1B3E] mb-2">{actionDone}</h1>
+          <h1 className="text-xl font-bold text-claimondo-navy mb-2">{actionDone}</h1>
         </div>
       </div>
     )
@@ -172,7 +172,7 @@ export default function KundeTrackingClient({
         <div className="max-w-md w-full">
           <div className="text-center mb-6">
             <CalendarIcon className="w-12 h-12 mx-auto mb-4" style={{ color: brandPrimary }} />
-            <h1 className="text-xl font-bold text-[#0D1B3E] mb-2">
+            <h1 className="text-xl font-bold text-claimondo-navy mb-2">
               {isSvVorschlag ? 'Terminvorschlag' : 'Termin vorbereitet'}
             </h1>
             {terminDisplay && <p className="text-sm text-claimondo-navy font-medium mb-1">{terminDisplay}</p>}
@@ -297,12 +297,12 @@ export default function KundeTrackingClient({
             </div>
           )}
           <div className="flex-1">
-            <p className="text-sm font-semibold text-[#0D1B3E]">{svAnzeigename || `${svVorname} ${svNachname}`.trim()}</p>
+            <p className="text-sm font-semibold text-claimondo-navy">{svAnzeigename || `${svVorname} ${svNachname}`.trim()}</p>
             <p className="text-xs text-claimondo-ondo">Ihr KFZ-Sachverständiger</p>
           </div>
           {etaMinutes != null && (
             <div className="text-right">
-              <p className="text-lg font-bold text-[#0D1B3E]">{etaMinutes} Min</p>
+              <p className="text-lg font-bold text-claimondo-navy">{etaMinutes} Min</p>
               <p className="text-[10px] text-claimondo-ondo/70">geschätzte Ankunft</p>
             </div>
           )}

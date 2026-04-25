@@ -74,7 +74,7 @@ export function UnfallskizzeCard({
   return (
     <div className="bg-white border border-claimondo-border rounded-2xl p-4 sm:p-5 space-y-3">
       <div className="flex items-center gap-2">
-        <SparklesIcon className="w-4 h-4 text-[#4573A2]" />
+        <SparklesIcon className="w-4 h-4 text-claimondo-ondo" />
         <h3 className="text-sm font-semibold text-claimondo-navy">Unfallskizze (KI-generiert)</h3>
         {bestaetigt && (
           <span className="ml-auto">
@@ -96,7 +96,7 @@ export function UnfallskizzeCard({
           onClick={generate}
           disabled={pending || !hatHergang}
           title={!hatHergang ? 'Erst Unfallhergang in Phase 1 eintragen' : ''}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#4573A2] text-white text-xs font-medium hover:bg-[#0D1B3E] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {pending ? (
             <LoaderIcon className="w-3.5 h-3.5 animate-spin" />

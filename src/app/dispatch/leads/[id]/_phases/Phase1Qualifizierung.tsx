@@ -444,7 +444,7 @@ export default function Phase1Qualifizierung() {
               type="button"
               onClick={() => setDraft(d => ({ ...d, schuldfrage: o.v }))}
               className={`flex-1 px-2 py-1.5 rounded-lg text-[10px] font-medium transition-colors ${
-                draft.schuldfrage === o.v ? 'bg-[#0D1B3E] text-white' : 'bg-[#f8f9fb] text-claimondo-ondo hover:bg-claimondo-border'
+                draft.schuldfrage === o.v ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo hover:bg-claimondo-border'
               }`}
             >
               {o.label}
@@ -487,8 +487,8 @@ export default function Phase1Qualifizierung() {
           <h3 className="text-xs font-semibold text-claimondo-navy">Wie sieht es mit Ihrem Auto aus — hat es was abgekriegt?</h3>
         </div>
         <div className="flex gap-2">
-          <button type="button" onClick={() => setDraft(d => ({ ...d, schaden_sichtbar: true }))} className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.schaden_sichtbar === true ? 'bg-[#0D1B3E] text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}>Ja — sichtbarer Schaden</button>
-          <button type="button" onClick={() => setDraft(d => ({ ...d, schaden_sichtbar: false }))} className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.schaden_sichtbar === false ? 'bg-[#0D1B3E] text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}>Nein / unklar</button>
+          <button type="button" onClick={() => setDraft(d => ({ ...d, schaden_sichtbar: true }))} className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.schaden_sichtbar === true ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}>Ja — sichtbarer Schaden</button>
+          <button type="button" onClick={() => setDraft(d => ({ ...d, schaden_sichtbar: false }))} className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.schaden_sichtbar === false ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}>Nein / unklar</button>
         </div>
 
         {/* Bei Ja: Fahrbereit-Toggle (Spec §3 Q2 Unterfeld) */}
@@ -591,7 +591,7 @@ export default function Phase1Qualifizierung() {
             onClick={() => setDraft((d) => ({ ...d, sachschaden_flag: true }))}
             className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
               draft.sachschaden_flag === true
-                ? 'bg-[#0D1B3E] text-white'
+                ? 'bg-claimondo-navy text-white'
                 : 'bg-[#f8f9fb] text-claimondo-ondo'
             }`}
           >
@@ -608,7 +608,7 @@ export default function Phase1Qualifizierung() {
             }
             className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
               draft.sachschaden_flag === false
-                ? 'bg-[#0D1B3E] text-white'
+                ? 'bg-claimondo-navy text-white'
                 : 'bg-[#f8f9fb] text-claimondo-ondo'
             }`}
           >
@@ -679,7 +679,7 @@ export default function Phase1Qualifizierung() {
           <button
             type="button"
             onClick={() => setDraft(d => ({ ...d, polizei_vor_ort: true }))}
-            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.polizei_vor_ort === true ? 'bg-[#0D1B3E] text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}
+            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.polizei_vor_ort === true ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}
           >
             Ja — Polizei war da
           </button>
@@ -694,7 +694,7 @@ export default function Phase1Qualifizierung() {
                 polizei_aktenzeichen: '',
               }))
             }
-            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.polizei_vor_ort === false ? 'bg-[#0D1B3E] text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}
+            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.polizei_vor_ort === false ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}
           >
             Nein
           </button>
@@ -781,7 +781,7 @@ export default function Phase1Qualifizierung() {
           type="button"
           disabled={pending}
           onClick={() => setPhase(2)}
-          className="w-full mt-2 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-claimondo-navy disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full mt-2 px-4 py-2.5 rounded-xl bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-navy disabled:opacity-50 flex items-center justify-center gap-2"
         >
           Weiter zu Phase 2 →
         </button>

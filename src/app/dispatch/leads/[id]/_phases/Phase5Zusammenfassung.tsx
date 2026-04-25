@@ -309,7 +309,7 @@ export default function Phase5Zusammenfassung() {
       {/* Summary */}
       <div className="bg-white border border-claimondo-border rounded-xl p-5">
         <div className="flex items-center gap-2 mb-4">
-          <CheckCircle2Icon className="w-4 h-4 text-[#4573A2]" />
+          <CheckCircle2Icon className="w-4 h-4 text-claimondo-ondo" />
           <h2 className="text-sm font-semibold text-claimondo-navy">Zusammenfassung — letzter Check</h2>
           <StatusBadge tone={qualification.canSendFlowLink ? 'success' : 'warning'} className="ml-auto">
             {qualification.completedCount}/8 Bedingungen
@@ -331,7 +331,7 @@ export default function Phase5Zusammenfassung() {
                 <button
                   type="button"
                   onClick={() => setPhase(r.jumpToPhase!)}
-                  className="text-[#4573A2] hover:text-[#3a6290] p-1"
+                  className="text-claimondo-ondo hover:text-[#3a6290] p-1"
                   title={`Zu Phase ${r.jumpToPhase} springen`}
                 >
                   <PencilIcon className="w-3.5 h-3.5" />
@@ -449,7 +449,7 @@ export default function Phase5Zusammenfassung() {
             disabled={pending || !qualification.canSendFlowLink || !email.trim()}
             onClick={() => send('email')}
             title={!email.trim() ? 'Bitte Email-Adresse eintragen' : !qualification.canSendFlowLink ? 'Erst alle 7/7 Bedingungen erfüllen' : undefined}
-            className="flex items-center justify-center gap-2 py-3 rounded-xl bg-[#4573A2] text-white text-sm font-bold hover:bg-[#3a6290] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 py-3 rounded-xl bg-claimondo-ondo text-white text-sm font-bold hover:bg-[#3a6290] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <MailIcon className="w-4 h-4" />
             {pending && sendStatus.kanal === 'email' ? 'Sende ...' : 'Email'}

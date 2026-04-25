@@ -89,7 +89,7 @@ function ListView({ leads }: { leads: Lead[] }) {
               return (
                 <tr key={lead.id} className="hover:bg-[#f8f9fb]/50 transition-colors">
                   <td className="px-4 py-3">
-                    <Link href={`/dispatch/leads/${lead.id}`} className="font-medium text-claimondo-navy hover:text-[#4573A2]">
+                    <Link href={`/dispatch/leads/${lead.id}`} className="font-medium text-claimondo-navy hover:text-claimondo-ondo">
                       {lead.vorname} {lead.nachname}
                     </Link>
                     {lead.schadens_fall_typ && (
@@ -118,7 +118,7 @@ function ListView({ leads }: { leads: Lead[] }) {
                     {new Date(lead.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                   </td>
                   <td className="px-4 py-3">
-                    <Link href={`/dispatch/leads/${lead.id}`} className="text-claimondo-ondo/70 hover:text-[#4573A2]">
+                    <Link href={`/dispatch/leads/${lead.id}`} className="text-claimondo-ondo/70 hover:text-claimondo-ondo">
                       <ExternalLinkIcon className="w-4 h-4" />
                     </Link>
                   </td>
@@ -177,7 +177,7 @@ function KanbanView({ leads }: { leads: Lead[] }) {
                   <Link
                     key={lead.id}
                     href={`/dispatch/leads/${lead.id}`}
-                    className="block bg-white rounded-lg border border-claimondo-border p-2.5 hover:border-[#4573A2] transition-colors"
+                    className="block bg-white rounded-lg border border-claimondo-border p-2.5 hover:border-claimondo-ondo transition-colors"
                   >
                     <p className="text-xs font-medium text-claimondo-navy truncate">
                       {lead.vorname} {lead.nachname}

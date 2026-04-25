@@ -137,7 +137,7 @@ export default function Phase1PersonenForm({ leadId }: { leadId: string }) {
         <button
           type="button"
           onClick={addRow}
-          className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-[#4573A2] text-white hover:bg-[#0D1B3E]"
+          className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-claimondo-ondo text-white hover:bg-claimondo-navy"
         >
           <PlusIcon className="w-3 h-3" />
           Weitere Person
@@ -223,7 +223,7 @@ export default function Phase1PersonenForm({ leadId }: { leadId: string }) {
             type="button"
             onClick={() => saveRow(idx)}
             disabled={pending}
-            className="w-full px-3 py-1.5 rounded-md text-[11px] font-medium bg-[#0D1B3E] text-white hover:bg-[#1E3A5F] disabled:opacity-50"
+            className="w-full px-3 py-1.5 rounded-md text-[11px] font-medium bg-claimondo-navy text-white hover:bg-claimondo-shield disabled:opacity-50"
           >
             {d.persisted ? 'Aktualisieren' : 'Speichern'}
           </button>

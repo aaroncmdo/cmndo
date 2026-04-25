@@ -117,15 +117,15 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
     <main className="min-h-screen bg-[#f8f9fb] p-4 md:p-8">
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Header */}
-        <div className="bg-[#0D1B3E] rounded-2xl p-6 text-white">
+        <div className="bg-claimondo-navy rounded-2xl p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[#7BA3CC] text-sm">Claimondo GmbH</p>
+              <p className="text-claimondo-light-blue text-sm">Claimondo GmbH</p>
               <h1 className="text-2xl font-bold mt-1">Monatsabrechnung</h1>
-              <p className="text-[#7BA3CC] text-sm mt-1">{monatName} {abrechnung.abrechnungsjahr}</p>
+              <p className="text-claimondo-light-blue text-sm mt-1">{monatName} {abrechnung.abrechnungsjahr}</p>
             </div>
             <div className="text-right">
-              <p className="text-[#7BA3CC] text-xs">Rechnungsnummer</p>
+              <p className="text-claimondo-light-blue text-xs">Rechnungsnummer</p>
               <p className="font-mono font-bold">{abrechnung.rechnungsnummer}</p>
             </div>
           </div>
