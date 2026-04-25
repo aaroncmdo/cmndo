@@ -62,7 +62,7 @@ export default function KalenderEinstellungenClient({
 
   function handleConnectGoogle() {
     window.location.href =
-      '/api/auth/google-calendar/connect?return=' +
+      '/api/auth/google/connect?return=' +
       encodeURIComponent('/gutachter/einstellungen/kalender')
   }
 
