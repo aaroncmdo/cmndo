@@ -12,6 +12,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import KanbanBoardClient, { type KanbanKarte } from './KanbanBoardClient'
+import PageHeader from '@/components/shared/PageHeader'
 
 function phaseFromAktuellePhase(aktuellePhase: string | null | undefined): number | null {
   if (!aktuellePhase) return null
@@ -62,13 +63,11 @@ export default async function KanzleiKanbanPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold text-[#0D1B3E]">Pipeline</h1>
-        <p className="text-sm text-claimondo-ondo mt-1">
-          Alle Komplett-Mandate nach den 10 Fall-Phasen. Read-only — Karten
-          verschieben sich automatisch, sobald Claimondo den Fall-Status aktualisiert.
-        </p>
-      </div>
+      <PageHeader
+        title="Pipeline"
+        description="Alle Komplett-Mandate nach den 10 Fall-Phasen. Read-only — Karten verschieben sich automatisch, sobald Claimondo den Fall-Status aktualisiert."
+        size="lg"
+      />
       {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
           Fehler beim Laden: {error.message}
