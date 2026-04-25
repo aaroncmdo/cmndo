@@ -11,6 +11,7 @@ import FallCardBadges, { NotificationDot } from '@/components/faelle/FallCardBad
 // AAR-572 (V6): Shared PhasePipeline als Hover-Overlay auf den Kanban-Karten
 import { PhasePipeline } from '@/components/shared/fall-phases'
 import { buildPhasePipelineData } from '@/lib/fall/subphase-visibility'
+import { Modal } from '@/components/primitives/Modal'
 
 type Fall = {
   id: string
@@ -402,51 +403,43 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
       )}
 
       {/* Delete Confirmation */}
-      {modal === 'delete' && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setModal(null)}>
-          <div className="glass-light border border-claimondo-border rounded-ios-lg p-6 max-w-sm w-full shadow-ios-lg" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold text-red-600 mb-2">Fall löschen?</h3>
-            <p className="text-sm text-claimondo-ondo mb-1"><strong>{label}</strong> — {fall.kunde_name ?? 'Unbekannt'}</p>
-            <p className="text-xs text-claimondo-ondo/70 mb-4">Alle Daten werden unwiderruflich entfernt.</p>
-            {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
-            <div className="flex gap-2">
-              <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border">Abbrechen</button>
-              <button disabled={processing} onClick={async () => {
-                setProcessing(true)
-                const result = await deleteFall(fall.id)
-                if (result.success) { onRefresh(); setModal(null) }
-                else { setError(result.error ?? 'Fehler'); setProcessing(false) }
-              }} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 disabled:opacity-40">
-                {processing ? 'Löscht...' : 'Endgültig löschen'}
-              </button>
-            </div>
-          </div>
+      <Modal open={modal === 'delete'} onClose={() => setModal(null)} maxWidth={384} ariaLabel="Fall löschen">
+        <h3 className="text-lg font-semibold text-red-600 mb-2">Fall löschen?</h3>
+        <p className="text-sm text-claimondo-ondo mb-1"><strong>{label}</strong> — {fall.kunde_name ?? 'Unbekannt'}</p>
+        <p className="text-xs text-claimondo-ondo/70 mb-4">Alle Daten werden unwiderruflich entfernt.</p>
+        {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
+        <div className="flex gap-2">
+          <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border">Abbrechen</button>
+          <button disabled={processing} onClick={async () => {
+            setProcessing(true)
+            const result = await deleteFall(fall.id)
+            if (result.success) { onRefresh(); setModal(null) }
+            else { setError(result.error ?? 'Fehler'); setProcessing(false) }
+          }} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 disabled:opacity-40">
+            {processing ? 'Löscht...' : 'Endgültig löschen'}
+          </button>
         </div>
-      )}
+      </Modal>
 
       {/* Deactivate Confirmation */}
-      {modal === 'deactivate' && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setModal(null)}>
-          <div className="glass-light border border-claimondo-border rounded-ios-lg p-6 max-w-sm w-full shadow-ios-lg" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold text-claimondo-navy mb-3">Fall deaktivieren</h3>
-            <select value={grund} onChange={e => setGrund(e.target.value)} className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm mb-3">
-              <option value="">— Grund —</option>
-              {['Kunde hat abgesagt', 'Kein Interesse', 'Duplikat', 'Spam', 'Sonstiges'].map(g => <option key={g} value={g}>{g}</option>)}
-            </select>
-            {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
-            <div className="flex gap-2">
-              <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border">Abbrechen</button>
-              <button disabled={processing || !grund} onClick={async () => {
-                setProcessing(true)
-                try { await deactivateFall(fall.id, grund, ''); onRefresh() } catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }
-                setProcessing(false); setModal(null)
-              }} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 disabled:opacity-40">
-                {processing ? 'Deaktiviert...' : 'Deaktivieren'}
-              </button>
-            </div>
-          </div>
+      <Modal open={modal === 'deactivate'} onClose={() => setModal(null)} maxWidth={384} ariaLabel="Fall deaktivieren">
+        <h3 className="text-lg font-semibold text-claimondo-navy mb-3">Fall deaktivieren</h3>
+        <select value={grund} onChange={e => setGrund(e.target.value)} className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm mb-3">
+          <option value="">— Grund —</option>
+          {['Kunde hat abgesagt', 'Kein Interesse', 'Duplikat', 'Spam', 'Sonstiges'].map(g => <option key={g} value={g}>{g}</option>)}
+        </select>
+        {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
+        <div className="flex gap-2">
+          <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border">Abbrechen</button>
+          <button disabled={processing || !grund} onClick={async () => {
+            setProcessing(true)
+            try { await deactivateFall(fall.id, grund, ''); onRefresh() } catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }
+            setProcessing(false); setModal(null)
+          }} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 disabled:opacity-40">
+            {processing ? 'Deaktiviert...' : 'Deaktivieren'}
+          </button>
         </div>
-      )}
+      </Modal>
     </>
   )
 }
