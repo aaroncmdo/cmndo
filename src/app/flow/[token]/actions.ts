@@ -367,8 +367,8 @@ export async function signSAandCreateFall(
   leadId: string,
   signatureUrl: string,
   flowLinkId: string | null,
-): Promise<{ fallId: string }> {
-  if (!leadId || !signatureUrl) throw new Error('Fehlende Daten für SA-Unterschrift')
+): Promise<{ ok: true; fallId: string } | { ok: false; error: string }> {
+  if (!leadId || !signatureUrl) return { ok: false, error: 'Fehlende Daten für SA-Unterschrift' }
 
   try {
   const admin = createAdminClient()
@@ -379,7 +379,7 @@ export async function signSAandCreateFall(
     .select('*')
     .eq('id', leadId)
     .single()
-  if (leadErr || !lead) throw new Error('Lead nicht gefunden')
+  if (leadErr || !lead) return { ok: false, error: 'Lead nicht gefunden' }
 
   // 2. Fallnummer generieren (CLM-YYYYMMDD-NNN)
   const today = new Date()
@@ -452,7 +452,7 @@ export async function signSAandCreateFall(
     .insert(fallInsert)
     .select('id')
     .single()
-  if (fallErr || !fall) throw new Error(`Fall-Erstellung fehlgeschlagen: ${fallErr?.message}`)
+  if (fallErr || !fall) return { ok: false, error: `Fall-Erstellung fehlgeschlagen: ${fallErr?.message}` }
 
   // 5. KFZ-192 + AAR-345: Termin-State-Machine basierend auf service_typ.
   // Guard auf aktiverTerminId statt Legacy-Feld lead.gutachter_termin —
@@ -1043,11 +1043,11 @@ export async function signSAandCreateFall(
     console.error('[AAR-kanzlei] Kanzlei-Modul-Load-Fehler:', err)
   }
 
-  return { fallId: fall.id }
+  return { ok: true, fallId: fall.id }
 
   } catch (err) {
     console.error('[signSAandCreateFall] FEHLER:', err)
-    throw err instanceof Error ? err : new Error(String(err))
+    return { ok: false, error: err instanceof Error ? err.message : String(err) }
   }
 }
 
@@ -1065,7 +1065,7 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
     .eq('id', fallId)
     .single()
 
-  if (fallErr || !fall) throw new Error('Fall nicht gefunden')
+  if (fallErr || !fall) return
 
   // Nur für 'komplett' — bei 'nur_gutachter' wurde Termin bereits bei SA bestätigt
   if ((fall.service_typ ?? 'komplett') !== 'komplett') return
