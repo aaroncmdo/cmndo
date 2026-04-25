@@ -12,6 +12,7 @@
 
 import { useState, useMemo, useTransition, useEffect } from 'react'
 import { CalendarIcon, ClockIcon, XIcon, CheckIcon, VideoIcon, PhoneIcon, ArrowRightIcon, ArrowLeftIcon, LoaderIcon } from 'lucide-react'
+import { Modal } from '@/components/primitives/Modal'
 import {
   ladeVerfuegbareBeratungSlots,
   bucheBeratungstermin,
@@ -121,17 +122,17 @@ export default function BeratungBuchenSheet({
     })
   }
 
-  if (!open) return null
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm"
-      onClick={handleClose}
+    <Modal
+      open={open}
+      onClose={handleClose}
+      placement="bottom-sheet"
+      noPadding
+      hideCloseButton
+      maxWidth={512}
+      ariaLabel="Beratungstermin buchen"
     >
-      <div
-        className="w-full md:max-w-lg bg-white rounded-t-3xl md:rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="overflow-hidden max-h-[92vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border">
           <div>
@@ -384,7 +385,7 @@ export default function BeratungBuchenSheet({
           </div>
         )}
       </div>
-    </div>
+    </Modal>
   )
 }
 
