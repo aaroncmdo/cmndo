@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { retryEinzug, markBezahlt, stornoAbrechnung, reIssueAbrechnung } from './actions'
 import PageHeader from '@/components/shared/PageHeader'
+import { Modal } from '@/components/primitives/Modal'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 
 // KFZ-149 Hund-D: Listing aller SV-Monatsabrechnungen mit Filter,
@@ -271,15 +272,9 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
       </div>
 
       {/* Detail Modal */}
-      {selected && (
-        <div
-          className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
-          onClick={() => setSelected(null)}
-        >
-          <div
-            className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg max-w-2xl w-full max-h-[85vh] overflow-y-auto"
-            onClick={e => e.stopPropagation()}
-          >
+      <Modal open={selected !== null} onClose={() => setSelected(null)} noPadding hideCloseButton maxWidth={672} ariaLabel="Abrechnung-Detail">
+        {selected && (
+          <div className="max-h-[85vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-claimondo-border flex items-start justify-between">
               <div>
                 <p className="text-[10px] uppercase tracking-wide text-claimondo-ondo/70">Abrechnung</p>
@@ -505,8 +500,8 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
               )}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </div>
   )
 }

@@ -12,6 +12,7 @@ import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon, ClipboardListIcon, Pho
 import { getKalenderTermine } from '@/lib/actions/admin-kalender'
 import { createAdminTermin, updateAdminTermin, deleteAdminTermin } from '@/lib/actions/admin-termine-actions'
 import PageHeader from '@/components/shared/PageHeader'
+import { Modal } from '@/components/primitives/Modal'
 import { KundeAvatar } from '@/components/shared/KundeAvatar'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -452,14 +453,13 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
-      <div className="glass-light border border-claimondo-border rounded-ios-lg p-6 max-w-md w-full shadow-ios-lg" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-claimondo-navy">
-            {mode === 'create' ? 'Neuer Termin' : 'Termin bearbeiten'}
-          </h3>
-          <button onClick={onClose} className="text-claimondo-ondo/70 hover:text-claimondo-ondo"><XIcon className="w-5 h-5" /></button>
-        </div>
+    <Modal open onClose={onClose} hideCloseButton maxWidth={448} ariaLabel={mode === 'create' ? 'Neuer Termin' : 'Termin bearbeiten'}>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-claimondo-navy">
+          {mode === 'create' ? 'Neuer Termin' : 'Termin bearbeiten'}
+        </h3>
+        <button onClick={onClose} className="text-claimondo-ondo/70 hover:text-claimondo-ondo"><XIcon className="w-5 h-5" /></button>
+      </div>
 
         {/* Typ-Pills */}
         <div className="flex gap-2 mb-4">
@@ -527,7 +527,6 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
             {loading ? '...' : mode === 'create' ? 'Erstellen' : 'Speichern'}
           </button>
         </div>
-      </div>
-    </div>
+    </Modal>
   )
 }

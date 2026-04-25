@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { markiereAlsBezahlt, storniereAbrechnung, manuellVersenden, manuellGenerieren } from '../abrechnungen-actions'
+import { Modal } from '@/components/primitives/Modal'
 
 type Abrechnung = {
   id: string
@@ -241,9 +242,9 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
           )}
 
           {/* Bezahlt-Modal */}
-          {bezahltModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-              <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+          <Modal open={bezahltModal !== null} onClose={() => setBezahltModal(null)} maxWidth={384} ariaLabel="Als bezahlt markieren">
+            {bezahltModal && (
+              <>
                 <h3 className="text-sm font-semibold text-claimondo-navy mb-4">Als bezahlt markieren</h3>
                 <label className="block text-xs text-claimondo-ondo mb-1">Eingegangener Betrag (EUR)</label>
                 <input
@@ -268,9 +269,9 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
                     {loading === bezahltModal.id ? 'Speichere...' : 'Bestätigen'}
                   </button>
                 </div>
-              </div>
-            </div>
-          )}
+              </>
+            )}
+          </Modal>
 
         </div>
       </div>
