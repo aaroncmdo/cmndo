@@ -26,6 +26,10 @@ export const colors = {
   warning: '#F59E0B', // amber-500
   danger: '#F43F5E', // rose-500
   info: '#4573A2', // == ondo
+  // AAR-783: Darker Text-Varianten für Lesbarkeit auf hellem Tint
+  successText: '#047857', // emerald-700
+  warningText: '#92400e', // amber-800
+  dangerText: '#9f1239', // rose-800
 } as const
 
 /**
