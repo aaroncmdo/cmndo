@@ -1,19 +1,25 @@
 'use client'
 
-// AAR-377: Shared Card für das AI-generierte SV-Briefing.
+// AAR-377 / AAR-772: Shared Card für das AI-generierte SV-Briefing.
 //
-// Wird an 2 Stellen genutzt:
-//   - Admin-Fallakte (UebersichtTab) — mit Regenerate-Button (Admin/KB)
-//   - SV-Fallakte (gutachter/fall/[id]) — read-only, kein Regenerate-Button
+// Klarer Rollen-Split nach Aaron-Feedback:
+//   - **SV-Briefing** (DIESE Card): für den Gutachter, wird automatisch
+//     beim Öffnen der Fallakte generiert. Auch im Feldmodus eingeblendet.
+//     Plain-Text-Briefing aus `faelle.sv_briefing_text`.
+//   - **Struktur-Briefing**: separat in `<StrukturBriefingCard>`, nur für
+//     internes Admin-/KB-Onboarding eines neuen Falls. Liest
+//     `faelle.sv_briefing_struktur` jsonb.
 //
-// Follow-up (Field-Modus AAR-379): Wird auch in AktiverStopCard (AAR-375,
-// Kurz-Briefing = erste 2 Sätze) und TerminCard (AAR-374, 1-2 Zeilen)
-// eingebaut — siehe dort.
+// Konsumenten:
+//   - Admin-Fallakte (UebersichtTab) — Card + Regenerate-Button
+//   - SV-Fallakte (gutachter/fall/[id]) — Card read-only
+//   - Feldmodus (AktuellerStopCard) — nur briefing-Text einblenden
+//
+// Diese Card rendert KEINE Struktur mehr (war früher in derselben Card
+// gestackt, was die zwei Funktionen vermischt hat).
 
 import { SparklesIcon } from 'lucide-react'
 import BriefingRegenerateButton from './BriefingRegenerateButton'
-import BriefingStrukturSections from './BriefingStrukturSections'
-import type { SvBriefingStruktur } from '@/lib/types/field-modus'
 
 export type BriefingCardProps = {
   fallId: string
@@ -27,10 +33,6 @@ export type BriefingCardProps = {
    * ist (UI-Gate).
    */
   canRegenerate: boolean
-  /** AAR-385: strukturierter Briefing-Blob aus `faelle.sv_briefing_struktur`. */
-  struktur?: SvBriefingStruktur | null
-  /** AAR-385: 'ai' | 'fallback' — Badge in Struktur-Section. */
-  strukturGeneratedBy?: 'ai' | 'fallback' | null
 }
 
 function formatGeneratedAt(iso: string | null): string {
@@ -53,8 +55,6 @@ export default function BriefingCard({
   model,
   version,
   canRegenerate,
-  struktur,
-  strukturGeneratedBy,
 }: BriefingCardProps) {
   const hasBriefing = Boolean(briefing && briefing.trim())
 
@@ -94,14 +94,6 @@ export default function BriefingCard({
           <BriefingRegenerateButton fallId={fallId} label="Jetzt generieren" />
         </div>
       )}
-
-      {/* AAR-385: Strukturiertes Briefing (kurzversion + hinweise + warnungen + checkliste) */}
-      <BriefingStrukturSections
-        fallId={fallId}
-        struktur={struktur ?? null}
-        generatedBy={strukturGeneratedBy ?? null}
-        canRegenerate={canRegenerate}
-      />
     </div>
   )
 }

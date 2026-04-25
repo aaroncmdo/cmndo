@@ -15,7 +15,6 @@ import {
   MapPinIcon,
   CarIcon,
 } from 'lucide-react'
-import BriefingStrukturSections from '@/components/fall/BriefingStrukturSections'
 import { formatUhrzeit } from '@/lib/format'
 import { createClient } from '@/lib/supabase/client'
 import type { FeldmodusStop } from './page'
@@ -220,20 +219,13 @@ export default function AktuellerStopCard({
         </a>
       )}
 
-      {/* BriefingCard-Slot (AAR-385) */}
-      {(stop.briefing_text || stop.briefing_struktur) && (
-        <div className="border-t border-claimondo-border pt-3 space-y-2">
-          {stop.briefing_text && (
-            <p className="text-xs leading-relaxed text-claimondo-navy whitespace-pre-wrap">
-              {stop.briefing_text}
-            </p>
-          )}
-          <BriefingStrukturSections
-            fallId={stop.fall_id}
-            struktur={stop.briefing_struktur}
-            canRegenerate={false}
-            defaultExpanded={false}
-          />
+      {/* AAR-772: SV-Briefing im Feldmodus — nur Plain-Text, kein Struktur-
+          Briefing (das ist intern für Admin/KB, nicht für den SV vor Ort). */}
+      {stop.briefing_text && (
+        <div className="border-t border-claimondo-border pt-3">
+          <p className="text-xs leading-relaxed text-claimondo-navy whitespace-pre-wrap">
+            {stop.briefing_text}
+          </p>
         </div>
       )}
 
