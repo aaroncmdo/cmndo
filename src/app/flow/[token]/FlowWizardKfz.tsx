@@ -180,6 +180,7 @@ export default function FlowWizardKfz({
 
       // 2. Server Action: Fall erstellen
       const result = await signSAandCreateFall(lead.id, publicUrl, flowLinkId ?? null)
+      if (!result.ok) throw new Error(result.error ?? 'Fehler bei der Beauftragung')
       setFallId(result.fallId)
 
       // 3. SA-PDF generieren (Background, non-blocking)
