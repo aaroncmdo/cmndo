@@ -3,6 +3,7 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import TerminDetailActions from './TerminDetailActions'
+import PageHeader from '@/components/shared/PageHeader'
 import PolizeiberichtUpload from './PolizeiberichtUpload'
 import PhoneButton from '@/components/shared/PhoneButton'
 
@@ -138,10 +139,11 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
         <Link href="/gutachter/termine" className="text-sm text-[var(--brand-secondary)] hover:underline">← Alle Termine</Link>
       </div>
 
-      <h1 className="text-xl font-bold text-claimondo-navy">
-        {datum} · {uhrzeit}
-      </h1>
-      <p className="text-sm text-claimondo-ondo -mt-3">{referenzLabel}</p>
+      <PageHeader
+        title={`${datum} · ${uhrzeit}`}
+        description={referenzLabel}
+        size="lg"
+      />
 
       {/* AAR-133: Vorreservierung-Badge wenn Pre-FlowLink (kein Fall) */}
       {istVorreservierung && (
