@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { WalletIcon, PackageIcon, FileTextIcon, DownloadIcon, InfoIcon } from 'lucide-react'
 import EmptyState from '@/components/shared/EmptyState'
+import PageHeader from '@/components/shared/PageHeader'
 
 const PAKET_LABELS: Record<string, string> = {
   standard: 'Standard (10 Fälle/Monat)', 'starter-10': 'Standard (10 Fälle/Monat)',
@@ -129,17 +130,19 @@ export default async function AbrechnungPage() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex-shrink-0 bg-white border-b border-claimondo-border px-4 py-2 flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-sm font-semibold text-claimondo-navy">Abrechnung</h1>
-          <p className="text-claimondo-ondo text-xs">Übersicht Ihrer Abrechnungen und Pakete</p>
-        </div>
-        <Link
-          href="/gutachter/leadpreise"
-          className="text-xs font-medium text-[var(--brand-secondary)] hover:text-[var(--brand-primary)] underline underline-offset-2 whitespace-nowrap"
-        >
-          Aktuelle Lead-Preis-Tabelle einsehen
-        </Link>
+      <div className="flex-shrink-0 bg-white border-b border-claimondo-border px-4 py-2">
+        <PageHeader
+          title="Abrechnung"
+          description="Übersicht Ihrer Abrechnungen und Pakete"
+          actions={
+            <Link
+              href="/gutachter/leadpreise"
+              className="text-xs font-medium text-[var(--brand-secondary)] hover:text-[var(--brand-primary)] underline underline-offset-2 whitespace-nowrap"
+            >
+              Aktuelle Lead-Preis-Tabelle einsehen
+            </Link>
+          }
+        />
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto p-4">
         {/* Einnahmen-Dashboard (KFZ-88) */}

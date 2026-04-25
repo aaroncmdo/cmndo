@@ -12,6 +12,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { FolderOpenIcon, ArrowRightIcon } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 const STATUS_PILL: Record<string, { bg: string; text: string; label: string }> = {
   ersterfassung: { bg: '#eef4fb', text: '#1E3A5F', label: 'Ersterfassung' },
@@ -80,17 +81,16 @@ export default async function KanzleiDashboardPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div>
-          <h1 className="text-2xl font-semibold text-claimondo-navy">Mandate</h1>
-          <p className="text-sm text-claimondo-ondo mt-1">
-            Alle Komplett-Pakete, bei denen Claimondo das Mandat an euch übergeben hat.
-          </p>
-        </div>
-        <span className="text-xs text-claimondo-ondo">
-          {faelle?.length ?? 0} Mandat{(faelle?.length ?? 0) === 1 ? '' : 'e'}
-        </span>
-      </div>
+      <PageHeader
+        title="Mandate"
+        description="Alle Komplett-Pakete, bei denen Claimondo das Mandat an euch übergeben hat."
+        size="lg"
+        actions={
+          <span className="text-xs text-claimondo-ondo">
+            {faelle?.length ?? 0} Mandat{(faelle?.length ?? 0) === 1 ? '' : 'e'}
+          </span>
+        }
+      />
 
       {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
