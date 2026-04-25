@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { SearchIcon, PhoneIcon, MailIcon, GlobeIcon, PlusIcon, XIcon } from 'lucide-react'
 import PhoneButton from '@/components/shared/PhoneButton'
+import PageHeader from '@/components/shared/PageHeader'
 
 type Versicherung = {
   id: string
@@ -77,22 +78,24 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-claimondo-border shrink-0">
-        <div>
-          <h1 className="text-sm font-semibold text-claimondo-navy">Versicherer</h1>
-          <p className="text-claimondo-ondo/70 text-xs">{filtered.length} von {versicherungen.length}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-claimondo-ondo/70" />
-            <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suchen..."
-              className="pl-8 pr-3 py-1.5 bg-white border border-claimondo-border rounded-lg text-xs text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#4573A2] w-48" />
-          </div>
-          <button onClick={() => { setCreating(true); setForm({}) }}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#4573A2] text-white rounded-lg text-xs font-medium hover:bg-[#1E3A5F] transition-colors">
-            <PlusIcon className="w-3.5 h-3.5" /> Neue Versicherung
-          </button>
-        </div>
+      <div className="px-4 py-3 border-b border-claimondo-border shrink-0">
+        <PageHeader
+          title="Versicherer"
+          description={`${filtered.length} von ${versicherungen.length}`}
+          actions={
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-claimondo-ondo/70" />
+                <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suchen..."
+                  className="pl-8 pr-3 py-1.5 bg-white border border-claimondo-border rounded-lg text-xs text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#4573A2] w-48" />
+              </div>
+              <button onClick={() => { setCreating(true); setForm({}) }}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#4573A2] text-white rounded-lg text-xs font-medium hover:bg-[#1E3A5F] transition-colors">
+                <PlusIcon className="w-3.5 h-3.5" /> Neue Versicherung
+              </button>
+            </div>
+          }
+        />
       </div>
 
       {/* Tabelle */}
