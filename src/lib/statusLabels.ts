@@ -43,43 +43,64 @@ export const FALL_STATUS_LABELS: Record<string, string> = {
   storniert: 'Storniert',
 }
 
-export const FALL_STATUS_COLORS: Record<string, string> = {
-  ersterfassung: 'bg-claimondo-navy text-[#7BA3CC] border-[#1E3A5F]',
-  'flow-gesendet': 'bg-violet-950 text-violet-300 border-violet-800',
-  onboarding: 'bg-pink-950 text-pink-300 border-pink-800',
-  // AAR-161: neue Subphasen — gleiche Farblogik wie bestehende Alias-Codes
-  erstgespraech: 'bg-claimondo-navy text-[#7BA3CC] border-[#1E3A5F]',
-  'sv-gesucht': 'bg-claimondo-navy text-[#7BA3CC] border-[#1E3A5F]',
-  'termin-reserviert': 'bg-yellow-950 text-yellow-300 border-yellow-800',
-  'besichtigung-laeuft': 'bg-teal-950 text-teal-300 border-teal-800',
-  'gutachten-bearbeitung': 'bg-teal-950 text-teal-300 border-teal-800',
-  'gutachten-erstellt': 'bg-orange-950 text-orange-300 border-orange-800',
-  'akte-uebergeben': 'bg-cyan-950 text-cyan-300 border-cyan-800',
-  'as-vorbereitung': 'bg-cyan-950 text-cyan-300 border-cyan-800',
-  'as-versendet': 'bg-cyan-950 text-cyan-300 border-cyan-800',
-  'warten-auf-vs': 'bg-cyan-950 text-cyan-300 border-cyan-800',
-  'vs-kuerzt': 'bg-amber-950 text-amber-300 border-amber-800',
-  'vs-reguliert': 'bg-green-950 text-green-300 border-green-800',
-  klage: 'bg-red-950 text-red-300 border-red-800',
+// ─── Status-Farb-Slots (Token-basiert) ──────────────────────────────────────
+// Alle Status-Badge-Farben werden auf diese 7 Slots gemappt statt hardkodiert.
+// Neutrale UI-Farben: Claimondo-Tokens (#f8f9fb, #0D1B3E, #4573A2).
+// Semantische Farben (success/warning/danger): emerald/amber/orange/red erlaubt.
+const STATUS_SLOT_CLASSES = {
+  neutral: 'bg-[#f8f9fb] text-claimondo-ondo',
+  active:  'bg-[#4573A2]/10 text-[#4573A2]',
+  pending: 'bg-amber-50 text-amber-700',
+  done:    'bg-[#f8f9fb] text-claimondo-navy',
+  success: 'bg-emerald-50 text-emerald-700',
+  warning: 'bg-orange-50 text-orange-700',
+  danger:  'bg-red-50 text-red-700',
+} as const
+
+type StatusSlot = keyof typeof STATUS_SLOT_CLASSES
+
+const FALL_STATUS_SLOT_MAP: Record<string, StatusSlot> = {
+  // Aktuelle Phasen
+  ersterfassung:         'neutral',
+  'flow-gesendet':       'active',
+  onboarding:            'neutral',
+  erstgespraech:         'active',
+  'sv-gesucht':          'active',
+  'termin-reserviert':   'pending',
+  'besichtigung-laeuft': 'active',
+  'gutachten-bearbeitung': 'active',
+  'gutachten-erstellt':  'done',
+  'akte-uebergeben':     'active',
+  'as-vorbereitung':     'active',
+  'as-versendet':        'active',
+  'warten-auf-vs':       'pending',
+  'vs-kuerzt':           'warning',
+  'vs-reguliert':        'success',
+  klage:                 'danger',
   // Legacy-Codes
-  'sv-zugewiesen': 'bg-claimondo-navy text-[#7BA3CC] border-[#1E3A5F]',
-  'sv-termin': 'bg-yellow-950 text-yellow-300 border-yellow-800',
-  besichtigung: 'bg-teal-950 text-teal-300 border-teal-800',
-  'begutachtung-laeuft': 'bg-teal-950 text-teal-300 border-teal-800',
-  'gutachten-eingegangen': 'bg-orange-950 text-orange-300 border-orange-800',
-  filmcheck: 'bg-purple-950 text-purple-300 border-purple-800',
-  'qc-pruefung': 'bg-purple-950 text-purple-300 border-purple-800',
-  'kanzlei-uebergeben': 'bg-cyan-950 text-cyan-300 border-cyan-800',
-  anschlussschreiben: 'bg-cyan-950 text-cyan-300 border-cyan-800',
-  regulierung: 'bg-green-950 text-green-300 border-green-800',
-  'regulierung-laeuft': 'bg-green-950 text-green-300 border-green-800',
-  'nachbesichtigung-laeuft': 'bg-violet-950 text-violet-300 border-violet-800',
-  'vs-regulierung': 'bg-green-950 text-green-300 border-green-800',
-  'vs-abgelehnt': 'bg-red-950 text-red-300 border-red-800',
-  'zahlung-eingegangen': 'bg-emerald-950 text-emerald-300 border-emerald-800',
-  abgeschlossen: 'bg-emerald-950 text-emerald-300 border-emerald-800',
-  storniert: 'bg-red-950 text-red-300 border-red-800',
+  'sv-zugewiesen':         'active',
+  'sv-termin':             'pending',
+  besichtigung:            'active',
+  'begutachtung-laeuft':   'active',
+  'gutachten-eingegangen': 'done',
+  filmcheck:               'active',
+  'qc-pruefung':           'active',
+  'kanzlei-uebergeben':    'active',
+  anschlussschreiben:      'active',
+  'as-gesendet':           'active',
+  regulierung:             'success',
+  'regulierung-laeuft':    'success',
+  'nachbesichtigung-laeuft': 'active',
+  'vs-regulierung':        'success',
+  'vs-abgelehnt':          'danger',
+  'zahlung-eingegangen':   'success',
+  abgeschlossen:           'success',
+  storniert:               'danger',
 }
+
+export const FALL_STATUS_COLORS: Record<string, string> = Object.fromEntries(
+  Object.entries(FALL_STATUS_SLOT_MAP).map(([k, slot]) => [k, STATUS_SLOT_CLASSES[slot]]),
+)
 
 // ─── Schadens-Ursache (Fallakte + Routen + Aufträge) ───────────────────────
 // AAR-410: Zentral statt pro Component hartkodiert.
