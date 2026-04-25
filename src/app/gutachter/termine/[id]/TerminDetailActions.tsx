@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { NavigationIcon, MapPinIcon, CheckCircleIcon, XCircleIcon, ClockIcon, AlertTriangleIcon, PlusIcon } from 'lucide-react'
 import { startNavigation } from '@/lib/termine/actions'
 import { svAblehneTermin, svGegenvorschlagTermin } from './actions'
+import { Modal } from '@/components/primitives/Modal'
 
 // KFZ-200: Client component for Termin-Detail action buttons.
 // AAR-134: Ablehnen + Gegenvorschlag Modals + collapsible Section.
@@ -204,12 +205,11 @@ function AblehnenModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl p-5 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-        <h3 className="text-base font-semibold text-claimondo-navy mb-1 flex items-center gap-2">
-          <XCircleIcon className="w-5 h-5 text-red-500" />
-          Termin ablehnen
-        </h3>
+    <Modal open onClose={onClose} maxWidth={448} ariaLabel="Termin ablehnen">
+      <h3 className="text-base font-semibold text-claimondo-navy mb-1 flex items-center gap-2">
+        <XCircleIcon className="w-5 h-5 text-red-500" />
+        Termin ablehnen
+      </h3>
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 my-3 flex items-start gap-2">
           <AlertTriangleIcon className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
           <p className="text-xs text-amber-800">
@@ -253,8 +253,7 @@ function AblehnenModal({
             {pending ? 'Lehne ab...' : 'Termin ablehnen'}
           </button>
         </div>
-      </div>
-    </div>
+    </Modal>
   )
 }
 
@@ -319,8 +318,8 @@ function GegenvorschlagModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl p-5 max-w-md w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+    <Modal open onClose={onClose} maxWidth={448} ariaLabel="Anderen Termin vorschlagen">
+      <div className="max-h-[90vh] overflow-y-auto">
         <h3 className="text-base font-semibold text-claimondo-navy mb-1 flex items-center gap-2">
           <ClockIcon className="w-5 h-5 text-amber-500" />
           Anderen Termin vorschlagen
@@ -404,6 +403,6 @@ function GegenvorschlagModal({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }

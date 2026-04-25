@@ -8,6 +8,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ClockIcon, XCircleIcon } from 'lucide-react'
+import { Modal } from '@/components/primitives/Modal'
 import {
   terminAblehnen,
   terminGegenvorschlag,
@@ -148,10 +149,8 @@ export function TerminActionsPanel({
       )}
 
       {/* Ablehnen Modal */}
-      {modal === 'ablehnen' && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-ios-lg p-6 max-w-sm w-full shadow-ios-lg">
-            <h3 className="text-lg font-semibold text-claimondo-navy mb-2">Termin ablehnen?</h3>
+      <Modal open={modal === 'ablehnen'} onClose={() => setModal(null)} maxWidth={384} ariaLabel="Termin ablehnen">
+        <h3 className="text-lg font-semibold text-claimondo-navy mb-2">Termin ablehnen?</h3>
             <p className="text-sm text-claimondo-ondo mb-4">
               Claimondo wird einen anderen Gutachter zuweisen.
             </p>
@@ -177,15 +176,11 @@ export function TerminActionsPanel({
                 {loading ? 'Wird abgelehnt…' : 'Ja, ablehnen'}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+      </Modal>
 
       {/* Gegenvorschlag Modal */}
-      {modal === 'gegenvorschlag' && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-ios-lg p-6 max-w-sm w-full shadow-ios-lg">
-            <h3 className="text-lg font-semibold text-claimondo-navy mb-2">Gegenvorschlag</h3>
+      <Modal open={modal === 'gegenvorschlag'} onClose={() => setModal(null)} maxWidth={384} ariaLabel="Gegenvorschlag">
+        <h3 className="text-lg font-semibold text-claimondo-navy mb-2">Gegenvorschlag</h3>
             <p className="text-sm text-claimondo-ondo mb-4">
               Schlagen Sie einen alternativen Termin vor:
             </p>
@@ -218,9 +213,7 @@ export function TerminActionsPanel({
                 {loading ? 'Wird gesendet…' : 'Gegenvorschlag senden'}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+      </Modal>
     </div>
   )
 }
