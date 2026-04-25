@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { GiftIcon, UsersIcon, TrophyIcon, PlusIcon, ToggleLeftIcon, ToggleRightIcon } from 'lucide-react'
 import { createIncentive, toggleIncentive } from '../actions'
 import PageHeader from '@/components/shared/PageHeader'
+import { Modal } from '@/components/primitives'
 
 type Incentive = {
   id: string; titel: string; beschreibung: string | null; kategorie: string; typ: string
@@ -138,34 +139,29 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
         </div>
       )}
 
-      {/* Create Dialog */}
-      {showDialog && <>
-        <div className="fixed inset-0 bg-black/60 z-50" onClick={() => setShowDialog(false)} />
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-claimondo-border rounded-2xl w-full max-w-md p-6">
-            <h2 className="text-claimondo-navy font-semibold text-lg mb-4">Neues Incentive</h2>
-            <form onSubmit={handleCreate} className="space-y-3">
-              <div><label className="text-sm text-claimondo-ondo mb-1 block">Titel</label><input name="titel" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" /></div>
-              <div><label className="text-sm text-claimondo-ondo mb-1 block">Beschreibung</label><textarea name="beschreibung" rows={2} className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" /></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-sm text-claimondo-ondo mb-1 block">Kategorie</label><select name="kategorie" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="alle">Alle</option></select></div>
-                <div><label className="text-sm text-claimondo-ondo mb-1 block">Typ</label><select name="typ" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"><option value="bonus">Bonus</option><option value="provision">Provision</option><option value="sachleistung">Sachleistung</option><option value="freizeit">Freizeit</option></select></div>
-              </div>
-              <div><label className="text-sm text-claimondo-ondo mb-1 block">Bedingung</label><input name="bedingung" required placeholder="z.B. Mehr als 50 Leads im Monat" className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" /></div>
-              <div className="grid grid-cols-3 gap-3">
-                <div><label className="text-sm text-claimondo-ondo mb-1 block">Wert (EUR)</label><input name="wert" type="number" step="0.01" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" /></div>
-                <div><label className="text-sm text-claimondo-ondo mb-1 block">Gueltig ab</label><input name="gueltig_ab" type="date" className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" /></div>
-                <div><label className="text-sm text-claimondo-ondo mb-1 block">Gueltig bis</label><input name="gueltig_bis" type="date" className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" /></div>
-              </div>
-              {error && <p className="text-sm text-red-400 bg-red-50/50 border border-red-900 px-4 py-3 rounded-xl">{error}</p>}
-              <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setShowDialog(false)} className="flex-1 bg-[#f8f9fb] hover:bg-claimondo-border text-claimondo-navy text-sm font-medium py-2.5 rounded-xl transition-colors">Abbrechen</button>
-                <button type="submit" disabled={loading} className="flex-1 bg-[#4573A2] hover:bg-[#1E3A5F]  text-white text-sm font-medium py-2.5 rounded-xl transition-colors">{loading ? 'Erstelle...' : 'Erstellen'}</button>
-              </div>
-            </form>
+      {/* AAR-774: Custom-Dialog → shared Modal-Primitive */}
+      <Modal open={showDialog} onClose={() => setShowDialog(false)} maxWidth={480} ariaLabel="Neues Incentive">
+        <h2 className="text-claimondo-navy font-semibold text-lg mb-4">Neues Incentive</h2>
+        <form onSubmit={handleCreate} className="space-y-3">
+          <div><label className="text-sm text-claimondo-ondo mb-1 block">Titel</label><input name="titel" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+          <div><label className="text-sm text-claimondo-ondo mb-1 block">Beschreibung</label><textarea name="beschreibung" rows={2} className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Kategorie</label><select name="kategorie" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="alle">Alle</option></select></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Typ</label><select name="typ" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="bonus">Bonus</option><option value="provision">Provision</option><option value="sachleistung">Sachleistung</option><option value="freizeit">Freizeit</option></select></div>
           </div>
-        </div>
-      </>}
+          <div><label className="text-sm text-claimondo-ondo mb-1 block">Bedingung</label><input name="bedingung" required placeholder="z.B. Mehr als 50 Leads im Monat" className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+          <div className="grid grid-cols-3 gap-3">
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Wert (EUR)</label><input name="wert" type="number" step="0.01" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Gueltig ab</label><input name="gueltig_ab" type="date" className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Gueltig bis</label><input name="gueltig_bis" type="date" className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+          </div>
+          {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-xl">{error}</p>}
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={() => setShowDialog(false)} className="flex-1 bg-[#f8f9fb] hover:bg-claimondo-border text-claimondo-navy text-sm font-medium py-2.5 rounded-xl transition-colors">Abbrechen</button>
+            <button type="submit" disabled={loading} className="flex-1 bg-claimondo-ondo hover:bg-claimondo-shield text-white text-sm font-medium py-2.5 rounded-xl transition-colors disabled:opacity-50">{loading ? 'Erstelle...' : 'Erstellen'}</button>
+          </div>
+        </form>
+      </Modal>
     </div></div>
   )
 }
