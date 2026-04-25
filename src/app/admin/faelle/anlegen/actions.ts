@@ -111,6 +111,18 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
     return { success: false, error: `Fall-Anlage fehlgeschlagen: ${fallErr?.message ?? 'unbekannt'}` }
   }
 
+  // AAR-811: Dual-Write claims (non-blocking)
+  try {
+    const { createClaimForFall } = await import('@/lib/claims/create-for-fall')
+    await createClaimForFall(db, fall.id, {
+      schadens_plz: data.schadens_plz,
+      schadens_adresse: data.schadens_adresse ?? null,
+      schadens_ort: data.schadens_ort ?? null,
+      schadens_ursache: data.schadensursache ?? null,
+      schadens_art: data.schadens_art ?? null,
+    }, 'manuell_admin')
+  } catch (err) { console.error('[AAR-811] createClaimForFall (admin-anlegen):', err) }
+
   revalidatePath('/admin/faelle', 'page')
   revalidatePath('/dispatch/dashboard', 'page')
   return { success: true, fall_id: fall.id, fall_nummer: fallNummer }

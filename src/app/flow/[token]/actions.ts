@@ -455,6 +455,12 @@ export async function signSAandCreateFall(
     .single()
   if (fallErr || !fall) return { ok: false, error: `Fall-Erstellung fehlgeschlagen: ${fallErr?.message}` }
 
+  // AAR-811: Dual-Write claims (non-blocking — fall ist bereits angelegt)
+  try {
+    const { createClaimForFall } = await import('@/lib/claims/create-for-fall')
+    await createClaimForFall(admin, fall.id, lead, 'lead_konvertierung')
+  } catch (err) { console.error('[AAR-811] createClaimForFall (flow):', err) }
+
   // 5. KFZ-192 + AAR-345: Termin-State-Machine basierend auf service_typ.
   // Guard auf aktiverTerminId statt Legacy-Feld lead.gutachter_termin —
   // damit auch Dispatcher-Termine ohne lead.gutachter_termin-Timestamp

@@ -155,6 +155,12 @@ export async function signupAndConvertLead(input: {
     }
   }
 
+  // AAR-811: Dual-Write claims (non-blocking)
+  try {
+    const { createClaimForFall } = await import('@/lib/claims/create-for-fall')
+    await createClaimForFall(admin, fall.id, leadRaw, 'lead_konvertierung')
+  } catch (err) { console.error('[AAR-811] createClaimForFall (signup):', err) }
+
   // 8) Lead-Status auf „umgewandelt" setzen + FK zurückschreiben
   await admin
     .from('leads')
