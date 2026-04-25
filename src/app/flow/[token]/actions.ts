@@ -6,6 +6,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { buildFallInsertFromLead, resolveFallEntityFks } from '@/lib/lead-fall-mapping'
 import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflicht'
 import { emitEvent } from '@/lib/notifications/emit'
+import { revalidatePath } from 'next/cache'
 
 /**
  * AAR-90: FIN im Flow setzen + Cardentity-Anreicherung triggern.
@@ -1042,6 +1043,12 @@ export async function signSAandCreateFall(
   } catch (err) {
     console.error('[AAR-kanzlei] Kanzlei-Modul-Load-Fehler:', err)
   }
+
+  // AAR-802: Cache-Invalidation der UIs die den neuen Fall + Lead-Update sehen
+  revalidatePath('/admin/faelle')
+  revalidatePath('/dispatch/leads')
+  revalidatePath('/dispatch/dashboard')
+  revalidatePath(`/dispatch/leads/${leadId}`)
 
   return { ok: true, fallId: fall.id }
 
