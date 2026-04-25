@@ -31,6 +31,7 @@ import { CLAIMONDO_DEFAULT_THEME, type BrandTheme } from '@/lib/branding/theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
 import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
 import SVSpotlight from './_components/SVSpotlight'
+import WeatherBanner from '@/components/shared/WeatherBanner'
 import { toInitials } from '@/components/shared/KundeAvatar'
 
 // AAR-222: Sidebar-Refactor von 18 flachen Items auf 10 in 4 Sektionen.
@@ -85,13 +86,7 @@ const NAV_SECTIONS_BASE: NavSection[] = [
   },
 ]
 
-type HourW = { hour: number; temp: number; code: number }
-type DailyW = { date: string; tempMax: number; tempMin: number; code: number }
-
-function wEmoji(c: number) { return c === 0 ? '☀️' : c <= 3 ? '☁️' : c <= 48 ? '🌫️' : c <= 67 ? '🌧️' : c <= 77 ? '❄️' : c <= 82 ? '🌦️' : '⛈️' }
-function wGrad(c: number) { return c >= 61 ? 'from-gray-700 to-gray-500' : c >= 45 ? 'from-gray-500 to-gray-400' : c <= 3 ? 'from-blue-500 to-sky-400' : 'from-gray-400 to-gray-300' }
-function wTip(c: number, t: number) { return c >= 95 ? 'Vorsicht, Gewitter!' : c >= 71 ? 'Straßen können glatt sein!' : c >= 61 ? 'Regenjacke einpacken!' : t > 30 ? 'Wasser mitnehmen!' : t < 5 ? 'Warm anziehen!' : 'Perfektes Gutachter-Wetter!' }
-function wLabel(c: number) { return c === 0 ? 'Sonnig' : c <= 3 ? 'Bewölkt' : c <= 48 ? 'Nebel' : c <= 67 ? 'Regen' : c <= 77 ? 'Schnee' : c <= 82 ? 'Schauer' : 'Gewitter' }
+// AAR-809: Wetter-Logik raus in components/shared/WeatherBanner.
 
 export default function GutachterShell({
   displayName,
@@ -127,8 +122,6 @@ export default function GutachterShell({
   const [sidebarOpen, setSidebarOpen] = useState(false)
   // AAR-245: Verwaltung nicht mehr collapsible — alle Sektionen flach +
   // direkt sichtbar, konsistent zu Tagesgeschäft/Kommunikation/Finanzen.
-  const [weather, setWeather] = useState<{ temp: number; code: number; hourly: Record<string, HourW[]>; daily: DailyW[] } | null>(null)
-
   // AAR-222: Sektions-basierte Nav. Team/Community werden conditional in
   // Verwaltung eingehängt.
   const NAV_SECTIONS: NavSection[] = NAV_SECTIONS_BASE.map(sec => {
@@ -169,31 +162,7 @@ export default function GutachterShell({
     ? { transition: 'background-color 2s ease, color 2s ease, border-color 2s ease' }
     : {}
 
-  // Fetch 7-day weather
-  useEffect(() => {
-    if (!standortLat || !standortLng) return
-    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${standortLat}&longitude=${standortLng}&current=temperature_2m,weathercode&hourly=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Europe/Berlin&forecast_days=7`)
-      .then(r => r.json()).then(d => {
-        if (!d.current) return
-        // Group hourly data by date
-        const hourlyByDate: Record<string, HourW[]> = {}
-        for (let i = 0; i < (d.hourly?.time ?? []).length; i++) {
-          const t = d.hourly.time[i]
-          const dateKey = t.split('T')[0]
-          const h: HourW = { hour: new Date(t).getHours(), temp: Math.round(d.hourly.temperature_2m[i]), code: d.hourly.weathercode[i] }
-          if (!hourlyByDate[dateKey]) hourlyByDate[dateKey] = []
-          hourlyByDate[dateKey].push(h)
-        }
-        // Daily data
-        const daily: DailyW[] = (d.daily?.time ?? []).map((t: string, i: number) => ({
-          date: t,
-          tempMax: Math.round(d.daily.temperature_2m_max[i]),
-          tempMin: Math.round(d.daily.temperature_2m_min[i]),
-          code: d.daily.weathercode[i],
-        }))
-        setWeather({ temp: Math.round(d.current.temperature_2m), code: d.current.weathercode, hourly: hourlyByDate, daily })
-      }).catch(() => {})
-  }, [standortLat, standortLng])
+  // AAR-809: Wetter-Fetch + Render → components/shared/WeatherBanner
 
   // AAR-370: Badge-Counter für Sidebar-Items.
   // - auftraege: Anzahl Fälle mit status='sv-zugewiesen' (noch nicht terminiert)
@@ -279,11 +248,6 @@ export default function GutachterShell({
     if (href === '/gutachter') return pathname === '/gutachter'
     return pathname.startsWith(href)
   }
-
-  // Get today's hourly weather for the banner
-  const todayKey = new Date().toISOString().split('T')[0]
-  const todayHourly = weather?.hourly?.[todayKey]?.filter(h => h.hour >= 8 && h.hour <= 18) ?? []
-  const tomorrowDaily = weather?.daily?.[1] ?? null
 
   return (
     <div className="h-screen flex overflow-hidden" style={{ ...themeVars, backgroundColor: 'var(--brand-surface)' }}>
@@ -468,34 +432,18 @@ export default function GutachterShell({
           <UpdatesNav variant="dark" />
         </header>
 
-        {/* Wetter-Banner (auf ALLEN Seiten sichtbar) */}
-        {weather && (
-          <div className={`flex-shrink-0 px-4 py-2.5 flex items-center gap-4 bg-gradient-to-r ${wGrad(weather.code)} text-white`} style={{ minHeight: 64 }}>
-            <div className="flex items-center gap-2.5 shrink-0">
-              <span className="text-3xl">{wEmoji(weather.code)}</span>
-              <div><p className="text-xl font-bold">{weather.temp}°C</p><p className="text-[10px] opacity-80">{wLabel(weather.code)}</p></div>
-            </div>
-            <div className="flex-1 flex items-center gap-1 overflow-x-auto min-w-0">
-              {todayHourly.filter((_, i) => i % 2 === 0).map(h => (
-                <div key={h.hour} className="text-center shrink-0 px-1"><p className="text-[9px] opacity-60">{String(h.hour).padStart(2, '0')}h</p><p className="text-[10px]">{wEmoji(h.code)}</p><p className="text-xs font-semibold">{h.temp}°</p></div>
-              ))}
-            </div>
-            {/* Mobile: Outbox + Glocke */}
-            <div className="shrink-0 sm:hidden flex items-center gap-2"><OutboxBadge /><UpdatesNav variant="dark" /></div>
-            {/* Desktop: Gute Fahrt + Glocke */}
-            <div className="shrink-0 text-right hidden sm:flex sm:items-center sm:gap-3">
-              <div>
-                <p className="text-sm font-medium">Gute Fahrt!</p>
-                <p className="text-[10px] opacity-80">{wTip(weather.code, weather.temp)}</p>
-                {tomorrowDaily && (
-                  <p className="text-[10px] opacity-70 mt-0.5">Morgen: {wEmoji(tomorrowDaily.code)} {tomorrowDaily.tempMax}°/{tomorrowDaily.tempMin}° {wLabel(tomorrowDaily.code)}</p>
-                )}
-              </div>
+        {/* AAR-809: Wetter-Banner — auf allen Gutachter-Seiten sichtbar.
+            Trailing-Slot zeigt Outbox + Notifications-Glocke (Mobile + Desktop). */}
+        <WeatherBanner
+          standortLat={standortLat ?? null}
+          standortLng={standortLng ?? null}
+          trailingSlot={
+            <>
               <OutboxBadge />
               <UpdatesNav variant="dark" />
-            </div>
-          </div>
-        )}
+            </>
+          }
+        />
 
         {/* AAR-457: overflow-y-auto (statt overflow-hidden) — sonst wird
             alles unterhalb des Viewports auf Seiten ohne eigenen Scroll-
