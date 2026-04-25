@@ -127,7 +127,7 @@ export default function KundeTermineClient({
               type="button"
               onClick={() => setView('liste')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                view === 'liste' ? 'bg-[#0D1B3E] text-white' : 'text-claimondo-ondo hover:text-claimondo-navy'
+                view === 'liste' ? 'bg-claimondo-navy text-white' : 'text-claimondo-ondo hover:text-claimondo-navy'
               }`}
             >
               <ListIcon className="w-3.5 h-3.5" />
@@ -137,7 +137,7 @@ export default function KundeTermineClient({
               type="button"
               onClick={() => setView('kalender')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                view === 'kalender' ? 'bg-[#0D1B3E] text-white' : 'text-claimondo-ondo hover:text-claimondo-navy'
+                view === 'kalender' ? 'bg-claimondo-navy text-white' : 'text-claimondo-ondo hover:text-claimondo-navy'
               }`}
             >
               <CalendarIcon className="w-3.5 h-3.5" />
@@ -167,7 +167,7 @@ export default function KundeTermineClient({
             >
               <ChevronLeftIcon className="w-4 h-4" />
             </button>
-            <span className="text-sm font-semibold text-[#0D1B3E] capitalize">
+            <span className="text-sm font-semibold text-claimondo-navy capitalize">
               {month.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}
             </span>
             <button
@@ -203,9 +203,9 @@ export default function KundeTermineClient({
                   onClick={() => setSelectedKey(isSelected ? null : cell.key)}
                   className={`relative flex flex-col items-center justify-start pt-1.5 pb-1 h-11 rounded-xl transition-colors ${
                     isSelected
-                      ? 'bg-[#0D1B3E] text-white'
+                      ? 'bg-claimondo-navy text-white'
                       : isToday
-                        ? 'bg-[#eef3f9] text-[#0D1B3E] font-bold'
+                        ? 'bg-[#eef3f9] text-claimondo-navy font-bold'
                         : 'hover:bg-[#f8f9fb] text-claimondo-navy'
                   } ${dayTermine.length > 0 ? 'cursor-pointer' : 'cursor-default'}`}
                   disabled={dayTermine.length === 0}
@@ -218,7 +218,7 @@ export default function KundeTermineClient({
                         <span
                           key={ti}
                           className={`w-1.5 h-1.5 rounded-full ${
-                            isSelected ? 'bg-white/80' : (DOT_CLS[t.status] ?? 'bg-[#4573A2]')
+                            isSelected ? 'bg-white/80' : (DOT_CLS[t.status] ?? 'bg-claimondo-ondo')
                           }`}
                         />
                       ))}
@@ -313,11 +313,11 @@ function TerminCard({
   return (
     <Link
       href={targetHref}
-      className={`block bg-white rounded-2xl border border-claimondo-border p-4 hover:border-[#4573A2]/40 hover:shadow-sm transition ${muted ? 'opacity-90' : ''}`}
+      className={`block bg-white rounded-2xl border border-claimondo-border p-4 hover:border-claimondo-ondo/40 hover:shadow-sm transition ${muted ? 'opacity-90' : ''}`}
     >
       <div className="flex items-start gap-3">
         <div className="w-9 h-9 rounded-xl bg-[#f0f4f8] flex items-center justify-center shrink-0">
-          <Icon className="w-4 h-4 text-[#4573A2]" />
+          <Icon className="w-4 h-4 text-claimondo-ondo" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -346,7 +346,7 @@ function TerminCard({
                   : <><PhoneIcon className="w-3 h-3 inline" /> Vor-Ort-Termin</>}
               </span>
             )}
-            <span className="text-[#4573A2] font-medium ml-auto">Details öffnen →</span>
+            <span className="text-claimondo-ondo font-medium ml-auto">Details öffnen →</span>
           </div>
         </div>
       </div>

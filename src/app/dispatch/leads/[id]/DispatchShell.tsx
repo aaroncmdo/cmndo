@@ -130,7 +130,7 @@ export default function DispatchShell({
                 </p>
                 <Link
                   href={`/faelle/${fallIdFuerBanner}`}
-                  className="inline-block mt-2 text-[#4573A2] hover:underline font-medium"
+                  className="inline-block mt-2 text-claimondo-ondo hover:underline font-medium"
                 >
                   Zur Fallakte →
                 </Link>

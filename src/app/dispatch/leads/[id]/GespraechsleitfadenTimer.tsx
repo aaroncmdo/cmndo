@@ -106,7 +106,7 @@ export default function GespraechsleitfadenTimer({
           </div>
         </div>
         <button type="button" disabled={pending} onClick={starte}
-          className="px-4 py-2 rounded-lg bg-[#4573A2] text-white text-sm font-medium hover:bg-[#3a6290] disabled:opacity-50">
+          className="px-4 py-2 rounded-lg bg-claimondo-ondo text-white text-sm font-medium hover:bg-[#3a6290] disabled:opacity-50">
           {pending ? '...' : 'Gespräch starten'}
         </button>
       </div>
@@ -155,7 +155,7 @@ export default function GespraechsleitfadenTimer({
 
       <div className="w-full h-1.5 bg-[#f8f9fb] rounded-full overflow-hidden">
         <div
-          className={`h-full transition-all duration-1000 ${istUeberzogen ? 'bg-red-500' : 'bg-[#4573A2]'}`}
+          className={`h-full transition-all duration-1000 ${istUeberzogen ? 'bg-red-500' : 'bg-claimondo-ondo'}`}
           style={{ width: `${progressPct}%` }}
         />
       </div>

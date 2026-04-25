@@ -209,7 +209,7 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
             onClick={() => handleTypClick(o.value)}
             disabled={pending}
             className={`px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-colors flex flex-col items-start gap-1 disabled:opacity-60 ${
-              typ === o.value ? 'bg-[#0D1B3E] text-white' : 'bg-[#f8f9fb] text-claimondo-navy hover:bg-claimondo-border'
+              typ === o.value ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-navy hover:bg-claimondo-border'
             }`}
           >
             <span className="text-lg leading-none">{o.icon}</span>

@@ -33,7 +33,7 @@ export default function KundeProfilForm({ initialTelefon, initialZweitEmail }: P
 
   return (
     <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-5 space-y-4">
-      <h2 className="text-sm font-semibold text-[#0D1B3E]">Kontakt-Daten</h2>
+      <h2 className="text-sm font-semibold text-claimondo-navy">Kontakt-Daten</h2>
 
       <div>
         <label className="block text-xs text-claimondo-ondo mb-1.5">Telefon</label>
@@ -42,7 +42,7 @@ export default function KundeProfilForm({ initialTelefon, initialZweitEmail }: P
           value={telefon}
           onChange={(e) => setTelefon(e.target.value)}
           placeholder="+49..."
-          className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
+          className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
         />
       </div>
 
@@ -55,7 +55,7 @@ export default function KundeProfilForm({ initialTelefon, initialZweitEmail }: P
           value={zweitEmail}
           onChange={(e) => setZweitEmail(e.target.value)}
           placeholder="zweite-mail@beispiel.de"
-          className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
+          className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
         />
         <p className="text-[10px] text-claimondo-ondo/70 mt-1">
           Zusätzliche Kontakt-Adresse. Login bleibt deine Haupt-Email.
@@ -67,7 +67,7 @@ export default function KundeProfilForm({ initialTelefon, initialZweitEmail }: P
           type="button"
           onClick={save}
           disabled={pending}
-          className="px-4 py-2 rounded-xl bg-[#4573A2] hover:bg-[#0D1B3E] text-white text-sm font-medium disabled:opacity-50"
+          className="px-4 py-2 rounded-xl bg-claimondo-ondo hover:bg-claimondo-navy text-white text-sm font-medium disabled:opacity-50"
         >
           {pending ? 'Speichert ...' : 'Speichern'}
         </button>

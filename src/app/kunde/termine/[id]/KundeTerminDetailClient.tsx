@@ -132,18 +132,18 @@ export default function KundeTerminDetailClient({
       <div>
         <Link
           href="/kunde/termine"
-          className="inline-flex items-center gap-1 text-xs text-claimondo-ondo hover:text-[#4573A2] mb-3"
+          className="inline-flex items-center gap-1 text-xs text-claimondo-ondo hover:text-claimondo-ondo mb-3"
         >
           <ArrowLeftIcon className="w-3 h-3" /> Meine Termine
         </Link>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#4573A2]">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo">
               Gutachter-Termin
             </p>
-            <h1 className="text-xl md:text-2xl font-bold text-[#0D1B3E] mt-1">{datum}</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-claimondo-navy mt-1">{datum}</h1>
             <p className="text-sm text-claimondo-ondo mt-0.5">
-              <CalendarIcon className="w-3.5 h-3.5 inline-block mr-1 -mt-0.5 text-[#4573A2]" />
+              <CalendarIcon className="w-3.5 h-3.5 inline-block mr-1 -mt-0.5 text-claimondo-ondo" />
               {uhrzeit}{endzeit ? ` – ${endzeit}` : ''} Uhr
             </p>
           </div>
@@ -197,7 +197,7 @@ export default function KundeTerminDetailClient({
             Ihr Sachverständiger
           </p>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-[#4573A2] text-white flex items-center justify-center shrink-0 overflow-hidden">
+            <div className="w-12 h-12 rounded-full bg-claimondo-ondo text-white flex items-center justify-center shrink-0 overflow-hidden">
               {sv.avatarUrl ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img src={sv.avatarUrl} alt={sv.name} className="w-full h-full object-cover" />
@@ -215,7 +215,7 @@ export default function KundeTerminDetailClient({
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <p className="text-base font-semibold text-[#0D1B3E] truncate">{sv.name}</p>
+                <p className="text-base font-semibold text-claimondo-navy truncate">{sv.name}</p>
                 {sv.verifiziert && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">
                     <ShieldCheckIcon className="w-2.5 h-2.5" />
@@ -226,7 +226,7 @@ export default function KundeTerminDetailClient({
               {sv.telefon && (
                 <a
                   href={`tel:${sv.telefon}`}
-                  className="text-sm text-[#4573A2] hover:underline inline-flex items-center gap-1 mt-0.5"
+                  className="text-sm text-claimondo-ondo hover:underline inline-flex items-center gap-1 mt-0.5"
                 >
                   <PhoneIcon className="w-3 h-3" />
                   {sv.telefon}
@@ -244,8 +244,8 @@ export default function KundeTerminDetailClient({
             <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-1">
               Besichtigungsort
             </p>
-            <p className="text-sm text-[#0D1B3E] flex items-start gap-2">
-              <MapPinIcon className="w-4 h-4 text-[#4573A2] mt-0.5 shrink-0" />
+            <p className="text-sm text-claimondo-navy flex items-start gap-2">
+              <MapPinIcon className="w-4 h-4 text-claimondo-ondo mt-0.5 shrink-0" />
               <span>{fall.adresse}</span>
             </p>
           </div>
@@ -268,7 +268,7 @@ export default function KundeTerminDetailClient({
                 href={mapsRouteHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex w-full items-center justify-center gap-2 min-h-[44px] rounded-xl border border-[#4573A2] text-[#4573A2] text-sm font-semibold hover:bg-[#4573A2]/5"
+                className="inline-flex w-full items-center justify-center gap-2 min-h-[44px] rounded-xl border border-claimondo-ondo text-claimondo-ondo text-sm font-semibold hover:bg-claimondo-ondo/5"
               >
                 <RouteIcon className="w-4 h-4" />
                 Route in Google Maps öffnen
@@ -295,7 +295,7 @@ export default function KundeTerminDetailClient({
       <div className="pt-1">
         <Link
           href={`/kunde/faelle/${fall.id}`}
-          className="inline-flex w-full items-center justify-center gap-2 min-h-[48px] rounded-xl bg-[#4573A2] text-white text-sm font-semibold hover:bg-[#1E3A5F] transition-colors"
+          className="inline-flex w-full items-center justify-center gap-2 min-h-[48px] rounded-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield transition-colors"
         >
           <CarIcon className="w-4 h-4" />
           Zur Fallakte

@@ -216,7 +216,7 @@ export default function Phase6StatusTracking({
 
       <div className="bg-white border border-claimondo-border rounded-xl p-5">
         <div className="flex items-center gap-2 mb-4">
-          <CheckCircle2Icon className="w-4 h-4 text-[#4573A2]" />
+          <CheckCircle2Icon className="w-4 h-4 text-claimondo-ondo" />
           <h2 className="text-sm font-semibold text-claimondo-navy">Status-Tracking</h2>
           {/* AAR-201: Auto-Refresh läuft alle 30s im Hintergrund. Manueller
               Button für Dispatcher der sofort sehen will ob Kunde gerade
@@ -224,7 +224,7 @@ export default function Phase6StatusTracking({
           <button
             type="button"
             onClick={() => router.refresh()}
-            className="ml-auto text-[10px] text-claimondo-ondo/70 hover:text-[#4573A2] flex items-center gap-1"
+            className="ml-auto text-[10px] text-claimondo-ondo/70 hover:text-claimondo-ondo flex items-center gap-1"
             title="Status neu laden (Auto-Refresh alle 30s)"
           >
             <RefreshCwIcon className="w-3 h-3" />
@@ -306,7 +306,7 @@ export default function Phase6StatusTracking({
                 type="button"
                 onClick={() => resend('email')}
                 disabled={resendPending || !l.email}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[#4573A2] text-white text-xs font-semibold hover:bg-[#3a6290] disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-claimondo-ondo text-white text-xs font-semibold hover:bg-[#3a6290] disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <MailIcon className="w-3.5 h-3.5" />
                 Email

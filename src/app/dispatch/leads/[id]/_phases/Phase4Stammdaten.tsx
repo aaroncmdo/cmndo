@@ -594,7 +594,7 @@ export default function Phase4Stammdaten() {
                 })
               }
             }}
-            className="mt-0.5 w-4 h-4 accent-[#4573A2]"
+            className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
           />
           <span className="text-xs text-claimondo-navy">
             <span className="font-medium">Kunde hat Unfallfotos</span>
@@ -823,7 +823,7 @@ export default function Phase4Stammdaten() {
                 }
                 className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
                   l.vorsteuerabzugsberechtigt === true
-                    ? 'bg-[#0D1B3E] text-white'
+                    ? 'bg-claimondo-navy text-white'
                     : 'bg-[#f8f9fb] text-claimondo-ondo'
                 }`}
                 title="Gewerblicher Halter — Netto-Regulierung, Vorsteuer wird abgezogen."
@@ -859,11 +859,11 @@ export default function Phase4Stammdaten() {
               </div>
             )}
             {l.vorsteuerabzugsberechtigt === true && (
-              <div className="mt-2 rounded-md bg-[#0D1B3E]/5 border border-claimondo-ondo/30 p-2 space-y-1">
-                <p className="text-[11px] font-semibold text-[#0D1B3E] flex items-center gap-1">
+              <div className="mt-2 rounded-md bg-claimondo-navy/5 border border-claimondo-ondo/30 p-2 space-y-1">
+                <p className="text-[11px] font-semibold text-claimondo-navy flex items-center gap-1">
                   <InfoIcon className="w-3 h-3" /> Hinweis bei Gewerblich
                 </p>
-                <ul className="text-[10px] text-[#0D1B3E] list-disc list-inside space-y-0.5">
+                <ul className="text-[10px] text-claimondo-navy list-disc list-inside space-y-0.5">
                   <li>Firma als Eigentümer → Gutachten an Firma adressieren</li>
                   <li>Regulierung NETTO (Versicherung zieht USt. ab)</li>
                   <li>Bei Gewerbenachweis-Pflicht: FlowLink zeigt Upload-Slot automatisch</li>
@@ -1135,7 +1135,7 @@ export default function Phase4Stammdaten() {
                         if (!r.success) alert(r.error ?? 'Fehler beim Setzen des Reminders')
                       })
                     }
-                    className="px-3 py-1.5 rounded-md bg-claimondo-ondo text-white text-[11px] font-medium hover:bg-[#0D1B3E]"
+                    className="px-3 py-1.5 rounded-md bg-claimondo-ondo text-white text-[11px] font-medium hover:bg-claimondo-navy"
                   >
                     Anfrage gesendet — 10-Tage-Reminder setzen
                   </button>
@@ -1321,7 +1321,7 @@ export default function Phase4Stammdaten() {
           type="button"
           onClick={() => setPhase(5)}
           disabled={!qualification.q6_gegnerKz || !qualification.q7_fahrzeug}
-          className="flex-1 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-claimondo-navy disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="flex-1 px-4 py-2.5 rounded-xl bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-navy disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           Weiter zu Phase 5 →
         </button>

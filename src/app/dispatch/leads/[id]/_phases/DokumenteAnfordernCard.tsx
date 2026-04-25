@@ -283,7 +283,7 @@ export default function DokumenteAnfordernCard({
               type="checkbox"
               checked={selectFahrzeugschein}
               onChange={(e) => setSelectFahrzeugschein(e.target.checked)}
-              className="mt-0.5 w-4 h-4 accent-[#4573A2]"
+              className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
             />
             <div className="flex-1">
               <div className="flex items-center gap-1.5">
@@ -299,7 +299,7 @@ export default function DokumenteAnfordernCard({
                     type="checkbox"
                     checked={fahrzeugscheinOcr}
                     onChange={(e) => setFahrzeugscheinOcr(e.target.checked)}
-                    className="w-3.5 h-3.5 accent-[#4573A2]"
+                    className="w-3.5 h-3.5 accent-claimondo-ondo"
                   />
                   <span className="text-[10px] text-claimondo-ondo">
                     OCR-Auswertung aktivieren (Marke, KZ, Halter automatisch befüllen)
@@ -328,7 +328,7 @@ export default function DokumenteAnfordernCard({
                 type="checkbox"
                 checked={selectPolizeibericht}
                 onChange={(e) => setSelectPolizeibericht(e.target.checked)}
-                className="mt-0.5 w-4 h-4 accent-[#4573A2]"
+                className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
               />
               <div className="flex-1">
                 <div className="flex items-center gap-1.5">
@@ -362,7 +362,7 @@ export default function DokumenteAnfordernCard({
               type="checkbox"
               checked={selectUnfallfotos}
               onChange={(e) => setSelectUnfallfotos(e.target.checked)}
-              className="mt-0.5 w-4 h-4 accent-[#4573A2]"
+              className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
             />
             <div className="flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
@@ -426,7 +426,7 @@ export default function DokumenteAnfordernCard({
                   href={url}
                   target="_blank"
                   rel="noopener"
-                  className="relative block aspect-square rounded overflow-hidden border border-claimondo-border hover:border-claimondo-ondo focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+                  className="relative block aspect-square rounded overflow-hidden border border-claimondo-border hover:border-claimondo-ondo focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
                   title={`Foto ${i + 1} — klicken zum Vergrößern`}
                 >
                   <img
@@ -450,7 +450,7 @@ export default function DokumenteAnfordernCard({
               value={s.label}
               onChange={(e) => updateSonstiges(s.id, e.target.value)}
               placeholder="z. B. Kaufvertrag, Rechnung ..."
-              className="flex-1 text-xs px-2 py-1 border border-claimondo-border rounded focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+              className="flex-1 text-xs px-2 py-1 border border-claimondo-border rounded focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
             />
             <button
               type="button"
@@ -518,7 +518,7 @@ export default function DokumenteAnfordernCard({
             type="button"
             onClick={send}
             disabled={pending || !kannAnfragen}
-            className="w-full px-3 py-2 rounded-lg bg-[#0D1B3E] text-white text-xs font-semibold hover:bg-claimondo-navy disabled:opacity-50"
+            className="w-full px-3 py-2 rounded-lg bg-claimondo-navy text-white text-xs font-semibold hover:bg-claimondo-navy disabled:opacity-50"
           >
             {pending ? 'Sende ...' : 'Anfrage senden'}
           </button>

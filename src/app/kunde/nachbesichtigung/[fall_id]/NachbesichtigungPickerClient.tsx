@@ -83,7 +83,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
     <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-5 space-y-5">
       {/* Slot-Liste */}
       <div className="space-y-3">
-        <p className="text-sm font-semibold text-[#0D1B3E]">Ihre Termin-Vorschläge</p>
+        <p className="text-sm font-semibold text-claimondo-navy">Ihre Termin-Vorschläge</p>
         {slots.map((s, idx) => (
           <div
             key={idx}
@@ -96,7 +96,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
                 min={minDatum}
                 value={s.datum}
                 onChange={(e) => updateSlot(idx, { datum: e.target.value })}
-                className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
+                className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
               />
             </div>
             <div className="flex-1 space-y-1">
@@ -105,7 +105,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
                 type="time"
                 value={s.uhrzeit}
                 onChange={(e) => updateSlot(idx, { uhrzeit: e.target.value })}
-                className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
+                className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
               />
             </div>
             {slots.length > 1 && (
@@ -125,7 +125,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
           <button
             type="button"
             onClick={addSlot}
-            className="inline-flex items-center gap-1.5 text-xs text-[#4573A2] hover:text-[#0D1B3E]"
+            className="inline-flex items-center gap-1.5 text-xs text-claimondo-ondo hover:text-claimondo-navy"
           >
             <PlusIcon className="w-3.5 h-3.5" />
             Weiteren Termin vorschlagen ({slots.length}/3)
@@ -135,7 +135,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
 
       {/* Konfrontations-Radio */}
       <div className="space-y-2 pt-3 border-t border-claimondo-border">
-        <p className="text-sm font-semibold text-[#0D1B3E]">
+        <p className="text-sm font-semibold text-claimondo-navy">
           Soll unser Sachverständiger mit vor Ort sein?
         </p>
         <p className="text-xs text-claimondo-ondo">
@@ -146,7 +146,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
           <label
             className={`flex-1 flex items-center gap-2 rounded-md border px-3 py-2 cursor-pointer transition-colors ${
               konfrontation === true
-                ? 'border-[#4573A2] bg-[#EBF1F8]'
+                ? 'border-claimondo-ondo bg-[#EBF1F8]'
                 : 'border-claimondo-border hover:border-claimondo-ondo/60'
             }`}
           >
@@ -155,14 +155,14 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
               name="konfrontation"
               checked={konfrontation === true}
               onChange={() => setKonfrontation(true)}
-              className="accent-[#4573A2]"
+              className="accent-claimondo-ondo"
             />
-            <span className="text-sm text-[#0D1B3E]">Ja, bitte mit Konfrontation</span>
+            <span className="text-sm text-claimondo-navy">Ja, bitte mit Konfrontation</span>
           </label>
           <label
             className={`flex-1 flex items-center gap-2 rounded-md border px-3 py-2 cursor-pointer transition-colors ${
               konfrontation === false
-                ? 'border-[#4573A2] bg-[#EBF1F8]'
+                ? 'border-claimondo-ondo bg-[#EBF1F8]'
                 : 'border-claimondo-border hover:border-claimondo-ondo/60'
             }`}
           >
@@ -171,9 +171,9 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
               name="konfrontation"
               checked={konfrontation === false}
               onChange={() => setKonfrontation(false)}
-              className="accent-[#4573A2]"
+              className="accent-claimondo-ondo"
             />
-            <span className="text-sm text-[#0D1B3E]">Nein, nur der VS-Gutachter</span>
+            <span className="text-sm text-claimondo-navy">Nein, nur der VS-Gutachter</span>
           </label>
         </div>
       </div>
@@ -183,7 +183,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
           type="button"
           onClick={handleSubmit}
           disabled={pending}
-          className="w-full rounded-md bg-[#0D1B3E] text-white px-3 py-2.5 text-sm font-medium hover:bg-[#162857] disabled:opacity-50 transition-colors"
+          className="w-full rounded-md bg-claimondo-navy text-white px-3 py-2.5 text-sm font-medium hover:bg-[#162857] disabled:opacity-50 transition-colors"
         >
           {pending ? 'Wird eingereicht …' : 'Termine einreichen'}
         </button>

@@ -281,7 +281,7 @@ export default function SvDispatchPanel({
           type="button"
           disabled={pending}
           onClick={handleCancel}
-          className="w-full text-xs font-medium px-3 py-2 rounded-lg bg-[#4573A2] hover:bg-[#3a6290] text-white disabled:opacity-50"
+          className="w-full text-xs font-medium px-3 py-2 rounded-lg bg-claimondo-ondo hover:bg-[#3a6290] text-white disabled:opacity-50"
         >
           Termin schließen + neuen SV wählen
         </button>
@@ -389,7 +389,7 @@ export default function SvDispatchPanel({
     <div className="bg-white border border-claimondo-border rounded-xl p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
-          <UserCheckIcon className="w-4 h-4 text-[#4573A2]" /> SV-Termin reservieren
+          <UserCheckIcon className="w-4 h-4 text-claimondo-ondo" /> SV-Termin reservieren
         </h2>
         {!hardGateOk && (
           <StatusBadge tone="warning">Hard Gate erst abschließen</StatusBadge>
@@ -436,7 +436,7 @@ export default function SvDispatchPanel({
             <button
               type="button"
               onClick={triggerSearch}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#4573A2] hover:bg-[#3a6290] text-white text-sm font-medium"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-claimondo-ondo hover:bg-[#3a6290] text-white text-sm font-medium"
             >
               <SearchIcon className="w-4 h-4" />
               {loadError ? 'Erneut suchen' : 'Gutachter suchen'}
@@ -445,7 +445,7 @@ export default function SvDispatchPanel({
 
           {topLoading && (
             <p className="text-xs text-claimondo-ondo flex items-center gap-2">
-              <span className="inline-block w-3 h-3 rounded-full bg-[#4573A2] animate-pulse" />
+              <span className="inline-block w-3 h-3 rounded-full bg-claimondo-ondo animate-pulse" />
               Suche passende Gutachter …
             </p>
           )}
@@ -480,7 +480,7 @@ export default function SvDispatchPanel({
                   type="button"
                   onClick={triggerSearch}
                   disabled={pending || topLoading}
-                  className="text-[10px] text-[#4573A2] hover:text-[#3a6290] flex items-center gap-1"
+                  className="text-[10px] text-claimondo-ondo hover:text-[#3a6290] flex items-center gap-1"
                 >
                   <RefreshCwIcon className="w-3 h-3" /> neu suchen
                 </button>
@@ -509,7 +509,7 @@ export default function SvDispatchPanel({
                     type="button"
                     onClick={loadExtraSvs}
                     disabled={extraLoading}
-                    className="text-[11px] text-[#4573A2] hover:underline flex items-center gap-1"
+                    className="text-[11px] text-claimondo-ondo hover:underline flex items-center gap-1"
                   >
                     <MapPinIcon className="w-3 h-3" />
                     {extraLoading ? 'Lade …' : '+ Weitere SVs anzeigen'}
@@ -541,8 +541,8 @@ export default function SvDispatchPanel({
                           onClick={() => setSelectedSv(s)}
                           className={`w-full text-left px-3 py-2 rounded-lg border transition-colors ${
                             isSel
-                              ? 'bg-[#0D1B3E] text-white border-[#0D1B3E]'
-                              : 'bg-white border-claimondo-border hover:border-[#4573A2] hover:bg-[#f8f9fb]'
+                              ? 'bg-claimondo-navy text-white border-claimondo-navy'
+                              : 'bg-white border-claimondo-border hover:border-claimondo-ondo hover:bg-[#f8f9fb]'
                           }`}
                         >
                           <div className="flex items-center justify-between gap-2">
@@ -581,13 +581,13 @@ export default function SvDispatchPanel({
                 <div className="flex items-center gap-2">
                   <ClockIcon className="w-4 h-4 text-claimondo-ondo/70" />
                   <p className="text-xs font-medium text-claimondo-navy">
-                    Slots bei <span className="text-[#0D1B3E]">{selectedSv.name}</span>
+                    Slots bei <span className="text-claimondo-navy">{selectedSv.name}</span>
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedSv(null)}
-                  className="text-[10px] text-[#4573A2] hover:underline"
+                  className="text-[10px] text-claimondo-ondo hover:underline"
                 >
                   Zurück
                 </button>
@@ -624,7 +624,7 @@ export default function SvDispatchPanel({
                     setShowManual(false)
                     setSelectedSv(null)
                   }}
-                  className="text-[10px] text-[#4573A2] hover:underline"
+                  className="text-[10px] text-claimondo-ondo hover:underline"
                 >
                   Zurück zu Vorschlägen
                 </button>
@@ -641,7 +641,7 @@ export default function SvDispatchPanel({
                           key={s.svId}
                           type="button"
                           onClick={() => setSelectedSv(s)}
-                          className="w-full text-left px-3 py-2 rounded-lg border bg-white border-claimondo-border hover:border-[#4573A2] hover:bg-[#f8f9fb] transition-colors"
+                          className="w-full text-left px-3 py-2 rounded-lg border bg-white border-claimondo-border hover:border-claimondo-ondo hover:bg-[#f8f9fb] transition-colors"
                         >
                           <span className="text-sm font-medium">{s.name}</span>
                           <span className="ml-2 text-[10px] text-claimondo-ondo">
@@ -712,7 +712,7 @@ export default function SvDispatchPanel({
       <Modal open={debugOpen} onClose={() => setDebugOpen(false)} noPadding hideCloseButton maxWidth={672} ariaLabel="SV-Matching Debug">
         <div className="max-h-[85vh] overflow-hidden flex flex-col">
             <div className="flex items-center justify-between px-5 py-3 border-b border-claimondo-border">
-              <h3 className="text-sm font-semibold text-[#0D1B3E]">SV-Matching Debug</h3>
+              <h3 className="text-sm font-semibold text-claimondo-navy">SV-Matching Debug</h3>
               <button
                 type="button"
                 onClick={() => setDebugOpen(false)}
@@ -749,7 +749,7 @@ export default function SvDispatchPanel({
                           }`}
                         >
                           <div className="flex items-center justify-between gap-2">
-                            <span className="font-medium text-[#0D1B3E]">{r.name}</span>
+                            <span className="font-medium text-claimondo-navy">{r.name}</span>
                             <StatusBadge tone="neutral">{r.paket}</StatusBadge>
                           </div>
                           <div className={`mt-0.5 ${ok ? 'text-emerald-800' : 'text-claimondo-navy'}`}>
@@ -814,7 +814,7 @@ function SvCard({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-sm font-medium text-[#0D1B3E] truncate">{sv.name}</p>
+            <p className="text-sm font-medium text-claimondo-navy truncate">{sv.name}</p>
             {isEmpfehlung && (
               <StatusBadge colorCls="bg-amber-500 text-white font-semibold">
                 ★ Empfehlung

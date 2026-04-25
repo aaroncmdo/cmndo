@@ -120,7 +120,7 @@ export function FaqBotCard({
   return (
     <div className="bg-white border border-claimondo-border rounded-2xl p-4 sm:p-5 space-y-3">
       <div className="flex items-center gap-2">
-        <SparklesIcon className="w-4 h-4 text-[#4573A2]" />
+        <SparklesIcon className="w-4 h-4 text-claimondo-ondo" />
         <h3 className="text-sm font-semibold text-claimondo-navy">Fragen zu Ihrem Fall</h3>
       </div>
       <p className="text-xs text-claimondo-ondo">
@@ -140,7 +140,7 @@ export function FaqBotCard({
                 type="button"
                 onClick={() => ask(f)}
                 disabled={pending}
-                className="inline-flex items-center px-3 min-h-[36px] rounded-full text-xs bg-white border border-claimondo-border text-claimondo-navy hover:bg-[#4573A2] hover:text-white hover:border-[#4573A2] disabled:opacity-50"
+                className="inline-flex items-center px-3 min-h-[36px] rounded-full text-xs bg-white border border-claimondo-border text-claimondo-navy hover:bg-claimondo-ondo hover:text-white hover:border-claimondo-ondo disabled:opacity-50"
               >
                 {f}
               </button>
@@ -157,14 +157,14 @@ export function FaqBotCard({
           {history.map((m, i) => (
             <div key={i} className={`flex gap-2 ${m.role === 'user' ? 'justify-end' : ''}`}>
               {m.role === 'assistant' && (
-                <div className="w-7 h-7 rounded-full bg-[#4573A2] text-white flex items-center justify-center shrink-0">
+                <div className="w-7 h-7 rounded-full bg-claimondo-ondo text-white flex items-center justify-center shrink-0">
                   <BotIcon className="w-4 h-4" />
                 </div>
               )}
               <div
                 className={`rounded-2xl px-3 py-2 text-sm max-w-[80%] ${
                   m.role === 'user'
-                    ? 'bg-[#4573A2] text-white rounded-tr-sm'
+                    ? 'bg-claimondo-ondo text-white rounded-tr-sm'
                     : 'bg-white border border-claimondo-border text-claimondo-navy rounded-tl-sm'
                 } whitespace-pre-wrap`}
               >
@@ -179,7 +179,7 @@ export function FaqBotCard({
           ))}
           {pending && (
             <div className="flex gap-2">
-              <div className="w-7 h-7 rounded-full bg-[#4573A2] text-white flex items-center justify-center shrink-0">
+              <div className="w-7 h-7 rounded-full bg-claimondo-ondo text-white flex items-center justify-center shrink-0">
                 {streamingText ? <BotIcon className="w-4 h-4" /> : <LoaderIcon className="w-4 h-4 animate-spin" />}
               </div>
               <div
@@ -211,12 +211,12 @@ export function FaqBotCard({
           maxLength={2000}
           placeholder="Ihre Frage …"
           // AAR-452: text-base (iOS-Zoom-Fix) + min-h-[44px]
-          className="flex-1 text-base rounded-lg border border-claimondo-border px-3 min-h-[44px] outline-none focus:border-[#4573A2] disabled:bg-[#f8f9fb]"
+          className="flex-1 text-base rounded-lg border border-claimondo-border px-3 min-h-[44px] outline-none focus:border-claimondo-ondo disabled:bg-[#f8f9fb]"
         />
         <button
           type="submit"
           disabled={pending || !frage.trim()}
-          className="inline-flex items-center gap-1 px-4 min-h-[44px] rounded-lg bg-[#4573A2] text-white text-sm font-medium hover:bg-[#0D1B3E] disabled:opacity-40 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1 px-4 min-h-[44px] rounded-lg bg-claimondo-ondo text-white text-sm font-medium hover:bg-claimondo-navy disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {pending ? <LoaderIcon className="w-4 h-4 animate-spin" /> : <SendIcon className="w-4 h-4" />}
         </button>

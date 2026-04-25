@@ -57,7 +57,7 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Lead suchen (Name, PLZ, Schadentyp)"
-              className="w-full pl-7 pr-2 py-1.5 text-xs bg-[#f8f9fb] border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+              className="w-full pl-7 pr-2 py-1.5 text-xs bg-[#f8f9fb] border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
             />
           </div>
           <p className="text-[10px] text-claimondo-ondo/70 mt-1.5">{filtered.length} / {leads.length} Leads mit Koordinaten</p>
@@ -74,7 +74,7 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
                 type="button"
                 onClick={() => pickLead(l)}
                 className={`w-full text-left px-4 py-3 transition-colors ${
-                  sel ? 'bg-[#4573A2]/10 border-l-2 border-[#4573A2]' : 'hover:bg-[#f8f9fb]'
+                  sel ? 'bg-claimondo-ondo/10 border-l-2 border-claimondo-ondo' : 'hover:bg-[#f8f9fb]'
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -119,13 +119,13 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
                   type="button"
                   disabled={pending}
                   onClick={() => pickLead(selectedLead)}
-                  className="text-[11px] text-[#4573A2] hover:text-[#3a6290] flex items-center gap-1"
+                  className="text-[11px] text-claimondo-ondo hover:text-[#3a6290] flex items-center gap-1"
                 >
                   <RefreshCwIcon className="w-3 h-3" /> neu laden
                 </button>
                 <Link
                   href={`/dispatch/leads/${selectedLead.id}`}
-                  className="text-[11px] bg-[#0D1B3E] text-white px-3 py-1.5 rounded-lg hover:bg-[#1E3A5F] flex items-center gap-1"
+                  className="text-[11px] bg-claimondo-navy text-white px-3 py-1.5 rounded-lg hover:bg-claimondo-shield flex items-center gap-1"
                 >
                   Reservieren im Lead <ArrowRightIcon className="w-3 h-3" />
                 </Link>
@@ -135,7 +135,7 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
             <div className="divide-y divide-claimondo-border">
               {pending && (
                 <div className="flex justify-center py-10">
-                  <div className="w-6 h-6 border-2 border-claimondo-border border-t-[#4573A2] rounded-full animate-spin" />
+                  <div className="w-6 h-6 border-2 border-claimondo-border border-t-claimondo-ondo rounded-full animate-spin" />
                 </div>
               )}
 
@@ -161,7 +161,7 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
                   </div>
                   {suggestions.map((s) => (
                     <div key={s.svId} className="px-5 py-3 grid grid-cols-[2fr_1fr_1fr_1fr_1fr_2fr] gap-3 items-center text-sm hover:bg-[#f8f9fb]">
-                      <Link href={`/dispatch/sachverstaendige/${s.svId}`} className="text-[#4573A2] hover:underline font-medium truncate">
+                      <Link href={`/dispatch/sachverstaendige/${s.svId}`} className="text-claimondo-ondo hover:underline font-medium truncate">
                         {s.name}
                       </Link>
                       <span className="text-xs text-claimondo-ondo">{s.paket}</span>

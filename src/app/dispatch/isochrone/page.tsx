@@ -51,7 +51,7 @@ export default async function DispatchIsochronePage() {
           <>
             Wähle einen Lead, um die besten SVs im Fahrzeit-Umkreis zu sehen.
             Die Reservierung selbst passiert im{' '}
-            <Link href="/dispatch/leads" className="text-[#4573A2] hover:underline">
+            <Link href="/dispatch/leads" className="text-claimondo-ondo hover:underline">
               Lead-Detail
             </Link>
             .

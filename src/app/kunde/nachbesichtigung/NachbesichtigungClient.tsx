@@ -55,7 +55,7 @@ export default function NachbesichtigungClient({ faelle }: { faelle: Nachbesicht
     <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-sm border border-claimondo-border p-8 max-w-md w-full space-y-6">
         <div className="text-center">
-          <CalendarIcon className="w-10 h-10 text-[#4573A2] mx-auto mb-3" />
+          <CalendarIcon className="w-10 h-10 text-claimondo-ondo mx-auto mb-3" />
           <h1 className="text-lg font-semibold text-claimondo-navy">Nachbesichtigung</h1>
           <p className="text-sm text-claimondo-ondo mt-1">
             Die Versicherung hat eine erneute Besichtigung Ihres Fahrzeugs angefordert.
@@ -71,7 +71,7 @@ export default function NachbesichtigungClient({ faelle }: { faelle: Nachbesicht
             value={selectedDate}
             onChange={e => setSelectedDate(e.target.value)}
             // AAR-452: text-base (16px) verhindert iOS-Autozoom beim Fokus
-            className="w-full px-4 py-3 border border-claimondo-border rounded-xl text-base min-h-[44px] focus:ring-2 focus:ring-[#4573A2] focus:border-transparent"
+            className="w-full px-4 py-3 border border-claimondo-border rounded-xl text-base min-h-[44px] focus:ring-2 focus:ring-claimondo-ondo focus:border-transparent"
           />
         </div>
 
@@ -80,7 +80,7 @@ export default function NachbesichtigungClient({ faelle }: { faelle: Nachbesicht
         <button
           disabled={pending || !selectedDate}
           onClick={handleSubmit}
-          className="w-full px-4 py-3 rounded-xl bg-[#4573A2] text-white font-medium text-sm hover:bg-[#3a6290] disabled:opacity-50 transition-colors"
+          className="w-full px-4 py-3 rounded-xl bg-claimondo-ondo text-white font-medium text-sm hover:bg-[#3a6290] disabled:opacity-50 transition-colors"
         >
           {pending ? 'Wird gespeichert...' : 'Termin bestätigen'}
         </button>

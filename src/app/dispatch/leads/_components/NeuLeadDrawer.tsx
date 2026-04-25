@@ -59,7 +59,7 @@ export default function NeuLeadDrawer() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-[#1E3A5F] hover:bg-[#4573A2] text-white transition-colors"
+        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-claimondo-shield hover:bg-claimondo-ondo text-white transition-colors"
       >
         <PlusIcon className="w-4 h-4" />
         Neuer Lead
@@ -67,7 +67,7 @@ export default function NeuLeadDrawer() {
 
       <Drawer open={open} onClose={() => setOpen(false)} width={448} noPadding hideCloseButton ariaLabel="Neuer Lead">
         <div className="sticky top-0 bg-white border-b border-claimondo-border px-6 py-4 flex items-center justify-between z-10">
-          <h2 className="text-lg font-semibold text-[#0D1B3E]">Neuer Lead</h2>
+          <h2 className="text-lg font-semibold text-claimondo-navy">Neuer Lead</h2>
           <button onClick={() => setOpen(false)} className="text-claimondo-ondo/70 hover:text-claimondo-navy">
             <XIcon className="w-5 h-5" />
           </button>
@@ -90,7 +90,7 @@ export default function NeuLeadDrawer() {
               defaultValue={data.kunde_adresse}
               placeholder="Strasse, PLZ, Stadt"
               onSelect={handlePlaceSelect}
-              className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
+              className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
             />
             {data.kunde_lat && data.kunde_lng && (
               <p className="text-[10px] text-claimondo-ondo/70 mt-1">
@@ -109,7 +109,7 @@ export default function NeuLeadDrawer() {
             <select
               value={data.source_channel}
               onChange={e => setData({ ...data, source_channel: e.target.value })}
-              className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
+              className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
             >
               <option value="manuell">Manuell angelegt</option>
               <option value="telefon">Telefon (kein Aircall)</option>
@@ -127,7 +127,7 @@ export default function NeuLeadDrawer() {
               value={data.notizen}
               onChange={e => setData({ ...data, notizen: e.target.value })}
               rows={3}
-              className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
+              className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
               placeholder="Optionale Notizen zum Lead..."
             />
           </div>
@@ -141,7 +141,7 @@ export default function NeuLeadDrawer() {
             <button
               onClick={handleSubmit}
               disabled={pending || !data.telefon}
-              className="flex-1 py-2.5 text-sm font-semibold bg-[#1E3A5F] hover:bg-[#4573A2] text-white rounded-xl disabled:opacity-40"
+              className="flex-1 py-2.5 text-sm font-semibold bg-claimondo-shield hover:bg-claimondo-ondo text-white rounded-xl disabled:opacity-40"
             >
               {pending ? 'Erstelle...' : 'Lead anlegen'}
             </button>
@@ -167,7 +167,7 @@ function InputField({ label, value, onChange, type = 'text', placeholder }: {
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
+        className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
       />
     </div>
   )
