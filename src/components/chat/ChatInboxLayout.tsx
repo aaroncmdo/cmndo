@@ -10,6 +10,7 @@
 
 import { useState, type ReactNode } from 'react'
 import { UserIcon, SearchIcon, MessageCircleIcon } from 'lucide-react'
+import { DropletBadge } from '@/components/primitives'
 
 export type InboxThread = {
   /** Eindeutige ID für Selection — fallId, kundeId oder threadId */
@@ -126,8 +127,8 @@ export default function ChatInboxLayout({
                           {t.subtitle || '—'}
                         </p>
                         {t.unreadCount > 0 && (
-                          <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-red-500 text-white shrink-0">
-                            {t.unreadCount > 99 ? '99+' : t.unreadCount}
+                          <span className="shrink-0">
+                            <DropletBadge count={t.unreadCount} tone="danger" />
                           </span>
                         )}
                       </div>
