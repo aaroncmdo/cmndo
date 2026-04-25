@@ -33,8 +33,11 @@ export default function KalenderConnectStep({
   const [caldavModalOpen, setCaldavModalOpen] = useState(false)
 
   function chooseGoogle() {
-    // OAuth-Redirect — nach Erfolg springt die Callback-Route zurück ins Portal.
-    window.location.href = `/api/auth/google-calendar/connect?return=${encodeURIComponent('/gutachter/willkommen?kalender_connected=1')}`
+    // AAR-777: Konsolidierter Connect-Endpoint /api/auth/google/connect
+    // (statt alter google-calendar/connect der profiles.google_* nicht
+    // gesetzt hat → kein Free/Busy-Check). Nach Erfolg springt die Callback-
+    // Route zurück ins Portal mit gesetzten Tokens.
+    window.location.href = `/api/auth/google/connect?return=${encodeURIComponent('/gutachter/willkommen?kalender_connected=1')}`
   }
 
   function chooseOptOut() {
