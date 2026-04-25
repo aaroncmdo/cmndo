@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ShieldCheckIcon, CheckCircleIcon, ClockIcon, XCircleIcon, AlertTriangleIcon, FileTextIcon, IdCardIcon } from 'lucide-react'
 import QualiSlotUpload from './QualiSlotUpload'
+import PageHeader from '@/components/shared/PageHeader'
 
 // AAR-359 W5 + AAR-515 v4.1: Verifizierungs-Übersicht für SVs.
 // Read-only — zeigt SA-Vorlage-Status und Tier-2-Frist plus die
@@ -176,15 +177,17 @@ export default async function VerifizierungPage() {
 
   return (
     <div className="max-w-3xl mx-auto py-6 px-4 space-y-6">
-      <header className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-[var(--brand-secondary)]/10 text-[var(--brand-primary)] flex items-center justify-center">
-          <ShieldCheckIcon className="w-5 h-5" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--brand-primary)]">Verifizierung</h1>
-          <p className="text-sm text-claimondo-ondo">Status Ihrer Zulassungs-Unterlagen</p>
-        </div>
-      </header>
+      <PageHeader
+        title="Verifizierung"
+        description="Status Ihrer Zulassungs-Unterlagen"
+        size="lg"
+        useBranding
+        leadingSlot={
+          <div className="w-10 h-10 rounded-full bg-[var(--brand-secondary)]/10 text-[var(--brand-primary)] flex items-center justify-center shrink-0">
+            <ShieldCheckIcon className="w-5 h-5" />
+          </div>
+        }
+      />
 
       {/* Tier 1: SA-Vorlage */}
       <section className="bg-white rounded-2xl border border-claimondo-border p-5 space-y-3">
