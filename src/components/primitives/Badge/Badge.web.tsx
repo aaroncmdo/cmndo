@@ -6,19 +6,14 @@
 import { tokens } from '@/lib/design-tokens'
 import type { BadgeProps, BadgeSize, BadgeTone } from './Badge.types'
 
-// Darker Text-Farben für semantische Tones (Lesbarkeit auf hellem Tint).
-const SUCCESS_TEXT = '#047857' // emerald-700
-const WARNING_TEXT = '#92400e' // amber-800
-const DANGER_TEXT = '#9f1239' // rose-800
-
 type ToneStyle = { bg: string; text: string }
 
 const solidToneMap: Record<BadgeTone, ToneStyle> = {
   neutral: { bg: tokens.colors.bg, text: tokens.colors.navy },
   info: { bg: 'rgba(69, 115, 162, 0.12)', text: tokens.colors.ondo },
-  success: { bg: 'rgba(16, 185, 129, 0.14)', text: SUCCESS_TEXT },
-  warning: { bg: 'rgba(245, 158, 11, 0.16)', text: WARNING_TEXT },
-  danger: { bg: 'rgba(244, 63, 94, 0.14)', text: DANGER_TEXT },
+  success: { bg: 'rgba(16, 185, 129, 0.14)', text: tokens.colors.successText },
+  warning: { bg: 'rgba(245, 158, 11, 0.16)', text: tokens.colors.warningText },
+  danger: { bg: 'rgba(244, 63, 94, 0.14)', text: tokens.colors.dangerText },
   navy: { bg: tokens.colors.navy, text: tokens.colors.white },
   ondo: { bg: tokens.colors.ondo, text: tokens.colors.white },
 }
