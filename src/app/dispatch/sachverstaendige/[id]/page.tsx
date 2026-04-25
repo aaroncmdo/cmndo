@@ -11,6 +11,7 @@ import {
 import { getSvStatus } from '@/lib/sv-status'
 import PhoneButton from '@/components/shared/PhoneButton'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
+import PageHeader from '@/components/shared/PageHeader'
 
 export default async function DispatchSvDetailPage({
   params,
@@ -59,15 +60,17 @@ export default async function DispatchSvDetailPage({
   return (
     <div className="py-6 space-y-6">
       {/* Back + Header */}
-      <div className="flex items-center gap-3">
-        <Link href="/dispatch/sachverstaendige" className="text-claimondo-ondo/70 hover:text-claimondo-ondo">
-          <ArrowLeftIcon className="w-5 h-5" />
-        </Link>
-        <div className="flex-1">
-          <h1 className="text-xl font-bold text-claimondo-navy flex items-center gap-2">
-            <UserIcon className="w-5 h-5 text-[#4573A2]" /> {name}
-          </h1>
-          <div className="flex items-center gap-2 mt-1">
+      <PageHeader
+        title={name}
+        size="lg"
+        icon={UserIcon}
+        leadingSlot={
+          <Link href="/dispatch/sachverstaendige" className="text-claimondo-ondo/70 hover:text-claimondo-ondo shrink-0">
+            <ArrowLeftIcon className="w-5 h-5" />
+          </Link>
+        }
+        description={
+          <span className="flex items-center gap-2">
             <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${status.bg} ${status.text}`}>
               {status.label}
             </span>
@@ -76,9 +79,9 @@ export default async function DispatchSvDetailPage({
                 Urlaub
               </span>
             )}
-          </div>
-        </div>
-      </div>
+          </span>
+        }
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profil + Standort + Auslastung */}

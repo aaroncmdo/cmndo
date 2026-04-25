@@ -3,6 +3,7 @@ import { CalendarIcon, UserIcon, ChevronRightIcon, SettingsIcon } from 'lucide-r
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getGutachterForUser } from '@/lib/gutachter'
+import PageHeader from '@/components/shared/PageHeader'
 
 // AAR-720: Einstellungen-Hub. Sammel-Page für alle konfigurierbaren
 // Bereiche des SV-Portals — startet mit Kalender + Profil, wird nach
@@ -68,17 +69,17 @@ export default async function EinstellungenPage() {
 
   return (
     <div className="max-w-3xl mx-auto py-6 px-4 space-y-5">
-      <header className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-[var(--brand-secondary)]/10 text-[var(--brand-primary)] flex items-center justify-center">
-          <SettingsIcon className="w-5 h-5" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--brand-primary)]">Einstellungen</h1>
-          <p className="text-sm text-claimondo-ondo">
-            Alle Konfigurations-Bereiche deines Gutachter-Kontos.
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        title="Einstellungen"
+        description="Alle Konfigurations-Bereiche deines Gutachter-Kontos."
+        size="lg"
+        useBranding
+        leadingSlot={
+          <div className="w-10 h-10 rounded-full bg-[var(--brand-secondary)]/10 text-[var(--brand-primary)] flex items-center justify-center shrink-0">
+            <SettingsIcon className="w-5 h-5" />
+          </div>
+        }
+      />
 
       <div className="space-y-3">
         {items.map((item) => {

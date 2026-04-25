@@ -7,6 +7,7 @@ import VerifizierungsToggle from './VerifizierungsToggle'
 import VerifizierungsTab, { type Tier2Slot, type PflichtdokumentSlot } from './VerifizierungsTab'
 import { getSvStatus } from '@/lib/sv-status'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
+import PageHeader from '@/components/shared/PageHeader'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 
 type SvSearchParams = { tab?: string }
@@ -246,10 +247,10 @@ export default async function SvDetailPage({
           <Link href="/admin/sachverstaendige" className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo transition-colors mb-1.5 inline-block">
             &larr; Gutachter-Übersicht
           </Link>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-lg font-semibold text-claimondo-navy">{name || 'Sachverständiger'}</h1>
-              <div className="flex items-center gap-3 mt-0.5 text-xs text-claimondo-ondo flex-wrap">
+          <PageHeader
+            title={name || 'Sachverständiger'}
+            description={
+              <span className="flex items-center gap-3 flex-wrap">
                 {profile?.email && <span>{profile.email}</span>}
                 {sv.gutachter_typ && <span className="bg-[#4573A2]/5 text-[#4573A2] px-1.5 py-0.5 rounded text-[10px] font-medium">{sv.gutachter_typ}</span>}
                 {sv.paket && <span className="bg-[#f8f9fb] px-1.5 py-0.5 rounded text-[10px] font-medium">{sv.paket}</span>}
@@ -278,40 +279,42 @@ export default async function SvDetailPage({
                     </span>
                   )
                 })()}
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <span className="text-sm font-bold text-claimondo-navy tabular-nums">{genutzt}/{maxFaelle}</span>
-                <div className="w-20 h-1.5 bg-[#f8f9fb] rounded-full overflow-hidden mt-0.5">
-                  <div className={`h-full rounded-full ${pct > 80 ? 'bg-red-500' : pct > 50 ? 'bg-amber-500' : 'bg-[#4573A2]'}`}
-                    style={{ width: `${Math.min(100, pct)}%` }} />
-                </div>
-              </div>
-              {/* ARCH-1 POLISH Befund 1: Onboarding-Status-Badge */}
-              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium ${onboardingStatus.bg} ${onboardingStatus.text}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${onboardingStatus.dot}`} />
-                {onboardingStatus.label}
               </span>
-              {/* AAR-425: Manueller Verifizierungs-Toggle (Whitelabel-Gate) */}
-              <VerifizierungsToggle
-                svId={sv.id}
-                verifiziert={sv.verifiziert ?? false}
-                verifiziertAm={sv.verifiziert_am ?? null}
-              />
-              {/* KFZ-153: Gutachten-Mängel Warnung */}
-              {(mangelCounts.formal > 0 || mangelCounts.inhaltlich > 0) && (
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-amber-50 text-amber-600" title={`${mangelCounts.formal}x formaler Mangel, ${mangelCounts.inhaltlich}x inhaltlicher Mangel`}>
-                  {mangelCounts.formal + mangelCounts.inhaltlich} Gutachten-Mängel
+            }
+            actions={
+              <>
+                <div className="text-right">
+                  <span className="text-sm font-bold text-claimondo-navy tabular-nums">{genutzt}/{maxFaelle}</span>
+                  <div className="w-20 h-1.5 bg-[#f8f9fb] rounded-full overflow-hidden mt-0.5">
+                    <div className={`h-full rounded-full ${pct > 80 ? 'bg-red-500' : pct > 50 ? 'bg-amber-500' : 'bg-[#4573A2]'}`}
+                      style={{ width: `${Math.min(100, pct)}%` }} />
+                  </div>
+                </div>
+                {/* ARCH-1 POLISH Befund 1: Onboarding-Status-Badge */}
+                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium ${onboardingStatus.bg} ${onboardingStatus.text}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${onboardingStatus.dot}`} />
+                  {onboardingStatus.label}
                 </span>
-              )}
-              {sv.ist_aktiv ? (
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-green-50 text-green-600">Aktiv</span>
-              ) : (
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-red-50 text-red-500">Inaktiv</span>
-              )}
-            </div>
-          </div>
+                {/* AAR-425: Manueller Verifizierungs-Toggle (Whitelabel-Gate) */}
+                <VerifizierungsToggle
+                  svId={sv.id}
+                  verifiziert={sv.verifiziert ?? false}
+                  verifiziertAm={sv.verifiziert_am ?? null}
+                />
+                {/* KFZ-153: Gutachten-Mängel Warnung */}
+                {(mangelCounts.formal > 0 || mangelCounts.inhaltlich > 0) && (
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-amber-50 text-amber-600" title={`${mangelCounts.formal}x formaler Mangel, ${mangelCounts.inhaltlich}x inhaltlicher Mangel`}>
+                    {mangelCounts.formal + mangelCounts.inhaltlich} Gutachten-Mängel
+                  </span>
+                )}
+                {sv.ist_aktiv ? (
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-green-50 text-green-600">Aktiv</span>
+                ) : (
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-red-50 text-red-500">Inaktiv</span>
+                )}
+              </>
+            }
+          />
         </div>
       </div>
 

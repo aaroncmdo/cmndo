@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeftIcon, SaveIcon, UserIcon, BarChart3Icon, BriefcaseIcon, ClockIcon, PhoneIcon, Trash2Icon, ShieldOffIcon } from 'lucide-react'
 import { updateMitarbeiter, provisionTwilioNummer, releaseTwilioNummer, resetTwoFaForUser } from '../actions'
+import PageHeader from '@/components/shared/PageHeader'
 
 type Perf = { monat: string; jahr: number; leads_qualifiziert: number; leads_konvertiert: number; faelle_abgeschlossen: number; aktive_faelle: number; umsatz_generiert: number }
 
@@ -39,12 +40,17 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
     <div className="py-8"><div>
       <Link href="/admin/team" className="text-claimondo-ondo hover:text-claimondo-navy text-sm transition-colors flex items-center gap-1 mb-4"><ArrowLeftIcon className="w-4 h-4" />Zurück</Link>
 
-      <div className="flex items-center gap-4 mb-6">
-        <div className="w-14 h-14 bg-[#f8f9fb] rounded-full flex items-center justify-center"><UserIcon className="w-7 h-7 text-claimondo-ondo" /></div>
-        <div>
-          <h1 className="text-xl font-semibold text-claimondo-navy">{name}</h1>
-          <p className="text-claimondo-ondo text-sm">{m.email as string} · {m.rolle as string}</p>
-        </div>
+      <div className="mb-6">
+        <PageHeader
+          title={name}
+          description={`${m.email as string} · ${m.rolle as string}`}
+          size="lg"
+          leadingSlot={
+            <div className="w-14 h-14 bg-[#f8f9fb] rounded-full flex items-center justify-center shrink-0">
+              <UserIcon className="w-7 h-7 text-claimondo-ondo" />
+            </div>
+          }
+        />
       </div>
 
       {/* KPI Cards */}

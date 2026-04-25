@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import CalDavConnectModal from '@/components/CalDavConnectModal'
 import { disconnectCaldav } from './caldav-actions'
+import PageHeader from '@/components/shared/PageHeader'
 
 type CalDavState = {
   id: string
@@ -68,17 +69,17 @@ export default function KalenderEinstellungenClient({
 
   return (
     <div className="max-w-3xl mx-auto py-6 px-4 space-y-5">
-      <header className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-[var(--brand-secondary)]/10 text-[var(--brand-primary)] flex items-center justify-center">
-          <CalendarIcon className="w-5 h-5" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--brand-primary)]">Kalender</h1>
-          <p className="text-sm text-claimondo-ondo">
-            Verbinde einen Kalender, damit wir bei Terminvorschlägen deine private Nicht-Verfügbarkeit berücksichtigen können.
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        title="Kalender"
+        description="Verbinde einen Kalender, damit wir bei Terminvorschlägen deine private Nicht-Verfügbarkeit berücksichtigen können."
+        size="lg"
+        useBranding
+        leadingSlot={
+          <div className="w-10 h-10 rounded-full bg-[var(--brand-secondary)]/10 text-[var(--brand-primary)] flex items-center justify-center shrink-0">
+            <CalendarIcon className="w-5 h-5" />
+          </div>
+        }
+      />
 
       {/* Google */}
       <section className="bg-white border border-claimondo-border rounded-2xl p-5 space-y-3">
