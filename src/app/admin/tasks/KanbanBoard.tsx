@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import { createTask, updateTaskStatus, deleteTask } from './actions'
 import TaskReassignDropdown, { type ReassignCandidate } from '@/components/shared/TaskReassignDropdown'
+import PageHeader from '@/components/shared/PageHeader'
 
 type Task = {
   id: string
@@ -260,35 +261,34 @@ export default function KanbanBoard({
   return (
     <div className="h-full overflow-y-auto px-4 py-8">
       <div className="max-w-[1400px] mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-xl font-semibold text-claimondo-navy">Tasks</h1>
-            <p className="text-claimondo-ondo text-sm mt-0.5">
-              {localTasks.length} von {tasks.length} Aufgaben
-              {tasks.length !== linked.length && (
-                <span className="ml-1 text-[10px] text-claimondo-ondo/70">
-                  ({tasks.length - linked.length} ohne Objekt-Bezug ausgeblendet)
-                </span>
-              )}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <label className="flex items-center gap-2 text-xs text-claimondo-ondo cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={showAutoResolved}
-                onChange={(e) => setShowAutoResolved(e.target.checked)}
-                className="rounded border-claimondo-border"
-              />
-              Auto-erledigte anzeigen
-            </label>
-            <button
-              onClick={() => setDialogOpen(true)}
-              className="px-4 py-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium rounded-xl transition-colors"
-            >
-              + Neuer Task
-            </button>
-          </div>
+        <div className="mb-6">
+          <PageHeader
+            title="Tasks"
+            description={`${localTasks.length} von ${tasks.length} Aufgaben${
+              tasks.length !== linked.length
+                ? ` (${tasks.length - linked.length} ohne Objekt-Bezug ausgeblendet)`
+                : ''
+            }`}
+            actions={
+              <>
+                <label className="flex items-center gap-2 text-xs text-claimondo-ondo cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={showAutoResolved}
+                    onChange={(e) => setShowAutoResolved(e.target.checked)}
+                    className="rounded border-claimondo-border"
+                  />
+                  Auto-erledigte anzeigen
+                </label>
+                <button
+                  onClick={() => setDialogOpen(true)}
+                  className="px-4 py-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium rounded-xl transition-colors"
+                >
+                  + Neuer Task
+                </button>
+              </>
+            }
+          />
         </div>
 
         {error && (
