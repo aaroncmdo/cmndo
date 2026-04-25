@@ -33,6 +33,7 @@ import {
 } from './actions'
 import type { DebugSvMatchingResponse } from '@/lib/dispatch/debugSvMatching'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { Modal } from '@/components/primitives/Modal'
 
 type SvWithSlots = SvSuggestion & { slots: SlotCandidate[] }
 
@@ -714,15 +715,8 @@ export default function SvDispatchPanel({
         </>
       )}
 
-      {debugOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
-          onClick={() => setDebugOpen(false)}
-        >
-          <div
-            className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
+      <Modal open={debugOpen} onClose={() => setDebugOpen(false)} noPadding hideCloseButton maxWidth={672} ariaLabel="SV-Matching Debug">
+        <div className="max-h-[85vh] overflow-hidden flex flex-col">
             <div className="flex items-center justify-between px-5 py-3 border-b border-claimondo-border">
               <h3 className="text-sm font-semibold text-[#0D1B3E]">SV-Matching Debug</h3>
               <button
@@ -792,9 +786,8 @@ export default function SvDispatchPanel({
                 </>
               )}
             </div>
-          </div>
         </div>
-      )}
+      </Modal>
     </div>
   )
 }

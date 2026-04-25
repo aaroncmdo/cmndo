@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { MapPinIcon, UsersIcon, FlameIcon, ArrowUpIcon, XIcon, SendIcon, EyeIcon, LayersIcon } from 'lucide-react'
 import { PAKETE, getPaket } from '@/lib/pakete'
 import PageHeader from '@/components/shared/PageHeader'
+import { Modal } from '@/components/primitives/Modal'
 
 const PAKET_ORDER: string[] = ['standard', 'pro', 'premium']
 const MAPS_ID = 'gebiet-maps-script'
@@ -492,8 +493,8 @@ function IndividuellesAngebotModal({ svId, onClose }: { svId: string; onClose: (
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+    <Modal open onClose={onClose} noPadding hideCloseButton maxWidth={448} ariaLabel="Individuelles Angebot anfragen">
+      <div className="overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-claimondo-border">
           <h3 className="text-sm font-semibold text-claimondo-navy">Individuelles Angebot anfragen</h3>
           <button onClick={onClose} className="p-1 text-claimondo-ondo/70 hover:text-claimondo-ondo"><XIcon className="w-4 h-4" /></button>
@@ -547,6 +548,6 @@ function IndividuellesAngebotModal({ svId, onClose }: { svId: string; onClose: (
           </div>
         )}
       </div>
-    </div>
+    </Modal>
   )
 }
