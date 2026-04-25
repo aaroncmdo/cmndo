@@ -9,6 +9,7 @@ import {
 } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { setTermin, ablehnTerminAction, gegenvorschlagAction } from './actions'
+import { Modal } from '@/components/primitives/Modal'
 
 type Fall = {
   id: string
@@ -316,12 +317,10 @@ export default function SVKalenderClient({
         )}
 
         {/* Set termin dialog */}
-        {dialogFall && (
-          <>
-            <div className="fixed inset-0 bg-black/60 z-50" onClick={() => setDialogFall(null)} />
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <div className="bg-white border border-claimondo-border rounded-2xl w-full max-w-sm p-5" onClick={e => e.stopPropagation()}>
-                <h2 className="text-claimondo-navy font-semibold mb-1">Termin setzen</h2>
+        <Modal open={dialogFall !== null} onClose={() => setDialogFall(null)} maxWidth={384} ariaLabel="Termin setzen">
+          {dialogFall && (
+            <>
+              <h2 className="text-claimondo-navy font-semibold mb-1">Termin setzen</h2>
                 <p className="text-claimondo-ondo text-xs mb-4">
                   Fall {dialogFall.fall_nummer ?? dialogFall.id.slice(0, 8)}
                 </p>
@@ -361,18 +360,13 @@ export default function SVKalenderClient({
                     {saving ? 'Wird gesetzt...' : 'Speichern'}
                   </button>
                 </div>
-              </div>
-            </div>
-          </>
-        )}
+            </>
+          )}
+        </Modal>
 
         {/* KFZ-192: Ablehnen Modal */}
-        {svAktionModal?.type === 'ablehnen' && (
-          <>
-            <div className="fixed inset-0 bg-black/60 z-50" onClick={() => setSvAktionModal(null)} />
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <div className="bg-white border border-claimondo-border rounded-2xl w-full max-w-sm p-5" onClick={e => e.stopPropagation()}>
-                <h2 className="text-claimondo-navy font-semibold mb-1 text-red-600">Termin ablehnen</h2>
+        <Modal open={svAktionModal?.type === 'ablehnen'} onClose={() => setSvAktionModal(null)} maxWidth={384} ariaLabel="Termin ablehnen">
+          <h2 className="text-claimondo-navy font-semibold mb-1 text-red-600">Termin ablehnen</h2>
                 <p className="text-claimondo-ondo text-xs mb-4">
                   Bitte geben Sie einen Grund an (optional). Dieser wird dem Admin mitgeteilt.
                 </p>
@@ -396,18 +390,11 @@ export default function SVKalenderClient({
                     {svAktionSaving ? 'Wird abgelehnt...' : 'Ablehnen'}
                   </button>
                 </div>
-              </div>
-            </div>
-          </>
-        )}
+        </Modal>
 
         {/* KFZ-192: Gegenvorschlag Modal */}
-        {svAktionModal?.type === 'gegenvorschlag' && (
-          <>
-            <div className="fixed inset-0 bg-black/60 z-50" onClick={() => setSvAktionModal(null)} />
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <div className="bg-white border border-claimondo-border rounded-2xl w-full max-w-sm p-5" onClick={e => e.stopPropagation()}>
-                <h2 className="text-claimondo-navy font-semibold mb-1">Alternative Termine vorschlagen</h2>
+        <Modal open={svAktionModal?.type === 'gegenvorschlag'} onClose={() => setSvAktionModal(null)} maxWidth={384} ariaLabel="Alternative Termine">
+          <h2 className="text-claimondo-navy font-semibold mb-1">Alternative Termine vorschlagen</h2>
                 <p className="text-claimondo-ondo text-xs mb-4">
                   Schlagen Sie 1–3 alternative Termine vor.
                 </p>
@@ -453,10 +440,7 @@ export default function SVKalenderClient({
                     {svAktionSaving ? 'Wird gesendet...' : 'Vorschlag senden'}
                   </button>
                 </div>
-              </div>
-            </div>
-          </>
-        )}
+        </Modal>
       </div>
     </div>
   )

@@ -7,6 +7,7 @@ import { CalendarIcon, CheckIcon, XIcon, RefreshCwIcon, ClockIcon, AlertTriangle
 import { terminAnnehmen, terminAblehnen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
 import { formatDatumMitWochentag, formatUhrzeit } from '@/lib/format'
 import PageHeader from '@/components/shared/PageHeader'
+import { Modal } from '@/components/primitives/Modal'
 
 // KFZ-134: Gutachter Termine-Liste mit Akzeptieren/Ablehnen/Gegenvorschlag.
 
@@ -172,41 +173,33 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
       )}
 
       {/* Ablehnen Modal */}
-      {modal?.type === 'ablehnen' && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setModal(null)}>
-          <div className="bg-white rounded-2xl p-5 max-w-sm w-full" onClick={e => e.stopPropagation()}>
-            <h3 className="text-sm font-semibold text-claimondo-navy mb-3 flex items-center gap-2">
-              <AlertTriangleIcon className="w-4 h-4 text-red-500" /> Termin ablehnen
-            </h3>
-            <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
-              className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm mb-3 resize-none focus:outline-none focus:border-[var(--brand-secondary)]" rows={2} />
-            <div className="flex gap-2">
-              <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-xl text-sm bg-[#f8f9fb] text-claimondo-ondo">Abbrechen</button>
-              <button onClick={handleAblehnen} disabled={pending} className="flex-1 py-2 rounded-xl text-sm font-semibold bg-red-600 text-white disabled:opacity-50">Ablehnen</button>
-            </div>
-          </div>
+      <Modal open={modal?.type === 'ablehnen'} onClose={() => setModal(null)} maxWidth={384} ariaLabel="Termin ablehnen">
+        <h3 className="text-sm font-semibold text-claimondo-navy mb-3 flex items-center gap-2">
+          <AlertTriangleIcon className="w-4 h-4 text-red-500" /> Termin ablehnen
+        </h3>
+        <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
+          className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm mb-3 resize-none focus:outline-none focus:border-[var(--brand-secondary)]" rows={2} />
+        <div className="flex gap-2">
+          <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-xl text-sm bg-[#f8f9fb] text-claimondo-ondo">Abbrechen</button>
+          <button onClick={handleAblehnen} disabled={pending} className="flex-1 py-2 rounded-xl text-sm font-semibold bg-red-600 text-white disabled:opacity-50">Ablehnen</button>
         </div>
-      )}
+      </Modal>
 
       {/* Gegenvorschlag Modal */}
-      {modal?.type === 'gegenvorschlag' && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setModal(null)}>
-          <div className="bg-white rounded-2xl p-5 max-w-sm w-full" onClick={e => e.stopPropagation()}>
-            <h3 className="text-sm font-semibold text-claimondo-navy mb-3 flex items-center gap-2">
-              <RefreshCwIcon className="w-4 h-4 text-amber-500" /> Gegenvorschlag
-            </h3>
-            <input type="datetime-local" value={neuesDatum} onChange={e => setNeuesDatum(e.target.value)}
-              min={new Date().toISOString().slice(0, 16)}
-              className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:border-[var(--brand-secondary)]" />
-            <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
-              className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm mb-3 resize-none focus:outline-none focus:border-[var(--brand-secondary)]" rows={2} />
-            <div className="flex gap-2">
-              <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-xl text-sm bg-[#f8f9fb] text-claimondo-ondo">Abbrechen</button>
-              <button onClick={handleGegenvorschlag} disabled={pending || !neuesDatum} className="flex-1 py-2 rounded-xl text-sm font-semibold bg-amber-500 text-white disabled:opacity-50">Vorschlagen</button>
-            </div>
-          </div>
+      <Modal open={modal?.type === 'gegenvorschlag'} onClose={() => setModal(null)} maxWidth={384} ariaLabel="Gegenvorschlag">
+        <h3 className="text-sm font-semibold text-claimondo-navy mb-3 flex items-center gap-2">
+          <RefreshCwIcon className="w-4 h-4 text-amber-500" /> Gegenvorschlag
+        </h3>
+        <input type="datetime-local" value={neuesDatum} onChange={e => setNeuesDatum(e.target.value)}
+          min={new Date().toISOString().slice(0, 16)}
+          className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:border-[var(--brand-secondary)]" />
+        <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
+          className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm mb-3 resize-none focus:outline-none focus:border-[var(--brand-secondary)]" rows={2} />
+        <div className="flex gap-2">
+          <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-xl text-sm bg-[#f8f9fb] text-claimondo-ondo">Abbrechen</button>
+          <button onClick={handleGegenvorschlag} disabled={pending || !neuesDatum} className="flex-1 py-2 rounded-xl text-sm font-semibold bg-amber-500 text-white disabled:opacity-50">Vorschlagen</button>
         </div>
-      )}
+      </Modal>
     </div>
   )
 }
