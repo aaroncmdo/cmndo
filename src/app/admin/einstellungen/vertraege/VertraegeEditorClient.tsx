@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { CheckCircle2Icon, XCircleIcon, PlusIcon, FileTextIcon } from 'lucide-react'
 import { LoadingButton } from '@/components/ui/loading-button'
 import PageHeader from '@/components/shared/PageHeader'
+import { Modal } from '@/components/primitives/Modal'
 import {
   createVertragsvorlage,
   updateVertragsvorlage,
@@ -305,10 +306,8 @@ function CreateDialog({ onClose, onCreated }: { onClose: () => void; onCreated: 
   }
 
   return (
-    <>
-      <div className="fixed inset-0 bg-black/60 z-50" onClick={onClose} />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-white border border-claimondo-border rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+    <Modal open onClose={onClose} noPadding hideCloseButton maxWidth={672} ariaLabel="Neue Vertragsvorlage">
+      <div className="max-h-[90vh] overflow-y-auto">
           <div className="px-5 py-4 border-b border-claimondo-border">
             <h2 className="text-claimondo-navy font-semibold">Neue Vertragsvorlage</h2>
             <p className="text-claimondo-ondo text-xs mt-1">Wird inaktiv angelegt — Aktivieren in der Liste.</p>
@@ -353,9 +352,8 @@ function CreateDialog({ onClose, onCreated }: { onClose: () => void; onCreated: 
               Erstellen
             </LoadingButton>
           </div>
-        </div>
       </div>
-    </>
+    </Modal>
   )
 }
 

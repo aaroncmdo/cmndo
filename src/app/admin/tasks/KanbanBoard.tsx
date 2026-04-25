@@ -13,6 +13,7 @@ import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-p
 import { createTask, updateTaskStatus, deleteTask } from './actions'
 import TaskReassignDropdown, { type ReassignCandidate } from '@/components/shared/TaskReassignDropdown'
 import PageHeader from '@/components/shared/PageHeader'
+import { Modal } from '@/components/primitives/Modal'
 
 type Task = {
   id: string
@@ -564,13 +565,8 @@ function NewTaskDialog({
   }
 
   return (
-    <>
-      <div className="fixed inset-0 bg-black/60 z-50" onClick={onClose} />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div
-          className="glass-light border border-claimondo-border rounded-ios-md w-full max-w-md max-h-[90vh] overflow-y-auto"
-          onClick={(e) => e.stopPropagation()}
-        >
+    <Modal open onClose={onClose} noPadding hideCloseButton maxWidth={448} ariaLabel="Neuer Task">
+      <div className="max-h-[90vh] overflow-y-auto">
           <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
             <h2 className="text-claimondo-navy font-semibold">Neuer Task</h2>
             <button
@@ -686,8 +682,7 @@ function NewTaskDialog({
               {submitting ? 'Wird erstellt...' : 'Task erstellen'}
             </button>
           </form>
-        </div>
       </div>
-    </>
+    </Modal>
   )
 }
