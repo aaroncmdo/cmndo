@@ -7,6 +7,7 @@
 import { useState, useTransition } from 'react'
 import { ShieldCheckIcon, LoaderIcon, XIcon } from 'lucide-react'
 import { initPhoneChange, confirmPhoneChange } from '@/lib/auth/twofa/change-phone'
+import { Modal } from '@/components/primitives/Modal'
 
 export function TwoFaPhoneChange({
   aktuelleTwofaTelefon,
@@ -92,15 +93,17 @@ export function TwoFaPhoneChange({
         </button>
       </div>
 
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={() => !pending && setOpen(false)}
-        >
-          <div
-            className="bg-white rounded-2xl shadow-xl w-full max-w-md"
-            onClick={(e) => e.stopPropagation()}
-          >
+      <Modal
+        open={open}
+        onClose={() => !pending && setOpen(false)}
+        closeOnBackdrop={!pending}
+        closeOnEsc={!pending}
+        noPadding
+        hideCloseButton
+        maxWidth={448}
+        ariaLabel="2FA-Nummer ändern"
+      >
+        <div>
             <div className="flex items-center justify-between border-b border-claimondo-border p-4">
               <h2 className="text-base font-semibold text-claimondo-navy">2FA-Nummer ändern</h2>
               <button
@@ -214,9 +217,8 @@ export function TwoFaPhoneChange({
                 </button>
               )}
             </div>
-          </div>
         </div>
-      )}
+      </Modal>
     </>
   )
 }

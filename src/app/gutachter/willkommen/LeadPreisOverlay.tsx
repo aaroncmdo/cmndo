@@ -7,6 +7,7 @@
 
 import { useMemo, useState } from 'react'
 import { XIcon, CalculatorIcon, InfoIcon, TrendingUpIcon } from 'lucide-react'
+import { Modal } from '@/components/primitives/Modal'
 
 export type LeadpreisRow = {
   schadenhoehe_bis_netto: number
@@ -54,20 +55,16 @@ export default function LeadPreisOverlay({
     ? (avgHonorar / leadPreisLookup.paket).toFixed(1)
     : '—'
 
-  if (!open) return null
-
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="leadpreis-overlay-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--brand-primary)]/60 backdrop-blur-sm"
-      onClick={(e) => {
-        // Klick aufs Backdrop schließt — Klicks in Content nicht.
-        if (e.target === e.currentTarget) onClose()
-      }}
+    <Modal
+      open={open}
+      onClose={onClose}
+      noPadding
+      hideCloseButton
+      maxWidth={896}
+      ariaLabel="Lead-Preis-Tabelle + ROI-Rechner"
     >
-      <div className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-claimondo-border bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-primary)] text-white shrink-0">
           <div>
@@ -212,7 +209,7 @@ export default function LeadPreisOverlay({
           </section>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }
 

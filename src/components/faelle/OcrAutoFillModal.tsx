@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { XIcon, CheckIcon, SparklesIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { Modal } from '@/components/primitives/Modal'
 
 // KFZ-172 Follow-up: Auto-Fill Modal fuer OCR-extrahierte Daten.
 // Zeigt die erkannten Felder mit Checkboxen, User kann einzeln
@@ -85,18 +86,16 @@ export default function OcrAutoFillModal({
 
   if (fields.length === 0) {
     return (
-      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
-        <div className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg p-6 max-w-sm w-full" onClick={e => e.stopPropagation()}>
-          <p className="text-sm text-claimondo-ondo">Keine Daten erkannt.</p>
-          <button onClick={onClose} className="mt-3 text-xs text-[#4573A2]">Schließen</button>
-        </div>
-      </div>
+      <Modal open onClose={onClose} maxWidth={384} ariaLabel="OCR-Auto-Fill">
+        <p className="text-sm text-claimondo-ondo">Keine Daten erkannt.</p>
+        <button onClick={onClose} className="mt-3 text-xs text-[#4573A2]">Schließen</button>
+      </Modal>
     )
   }
 
   return (
-    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg p-5 max-w-md w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+    <Modal open onClose={onClose} noPadding hideCloseButton maxWidth={448} ariaLabel="OCR-Auto-Fill">
+      <div className="p-5 max-h-[80vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
             <SparklesIcon className="w-4 h-4 text-[#4573A2]" />
@@ -150,6 +149,6 @@ export default function OcrAutoFillModal({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }

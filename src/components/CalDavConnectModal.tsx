@@ -12,6 +12,7 @@
 import { useState, useTransition } from 'react'
 import { XIcon, ExternalLinkIcon, CheckCircle2Icon, AlertCircleIcon, CalendarIcon } from 'lucide-react'
 import { LoadingButton } from '@/components/ui/loading-button'
+import { Modal } from '@/components/primitives/Modal'
 import {
   testCaldavConnection,
   saveCaldavConnection,
@@ -87,11 +88,16 @@ export default function CalDavConnectModal({
     })
   }
 
-  if (!open) return null
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-claimondo-border max-h-[90vh] overflow-y-auto">
+    <Modal
+      open={open}
+      onClose={() => { reset(); onClose() }}
+      noPadding
+      hideCloseButton
+      maxWidth={512}
+      ariaLabel="Kalender verbinden"
+    >
+      <div className="max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border">
           <h2 className="text-base font-semibold text-[#0D1B3E] flex items-center gap-2">
             <CalendarIcon className="w-4 h-4 text-[#4573A2]" />
@@ -261,6 +267,6 @@ export default function CalDavConnectModal({
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }
