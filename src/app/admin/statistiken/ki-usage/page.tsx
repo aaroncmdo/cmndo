@@ -1,7 +1,5 @@
 // AAR-436: Admin-Dashboard für Anthropic-Token-Usage und Cache-Hit-Rate.
-// Zeigt die letzten 7 Tage pro Endpoint (faq_bot_kunde, faq_bot_kb,
-// pre_call_briefing, post_call_summary, …) mit Input-, Output-, Cache-
-// Read- und Cache-Write-Tokens plus berechneter Cache-Hit-Rate.
+import PageHeader from '@/components/shared/PageHeader'
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -92,13 +90,10 @@ export default async function KiUsagePage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 space-y-6">
-      <header>
-        <h1 className="text-xl font-semibold text-[#0D1B3E]">KI-Usage & Cache-Hit-Rate</h1>
-        <p className="text-sm text-claimondo-ondo">
-          Anthropic-Token-Verbrauch der letzten 7 Tage. Cache-Hit-Rate &gt;= 80% gilt
-          als „warm" nach AAR-436.
-        </p>
-      </header>
+      <PageHeader
+        title="KI-Usage & Cache-Hit-Rate"
+        description='Anthropic-Token-Verbrauch der letzten 7 Tage. Cache-Hit-Rate >= 80% gilt als „warm" nach AAR-436.'
+      />
 
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="bg-white rounded-2xl border border-claimondo-border p-4">
