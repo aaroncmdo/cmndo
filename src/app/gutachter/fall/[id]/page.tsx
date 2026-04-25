@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect, notFound } from 'next/navigation'
 import FallDetailClient from './FallDetailClient'
@@ -27,6 +28,12 @@ export default async function GutachterFallPage({
   const fall = await getFallForSv(supabase, id, (sv as { id: string }).id)
   if (!fall) notFound()
 
+  // AAR-771: SV hat keine RLS-Erlaubnis auf `leads` (PII-geschützt). Wir
+  // benutzen den Admin-Client für die Stammdaten-Lookups, NACHDEM die
+  // SV↔Fall-Beziehung über getFallForSv geprüft ist (Defense-in-Depth).
+  // Vorher zeigte die Stammdaten-Card nur "—" weil lead = null war.
+  const admin = createAdminClient()
+
   // AAR-724: Alle ungesehenen Termine dieses Falls auf „gesehen" setzen
   // sobald der SV die Fallakte öffnet. Best-effort, Fehler nicht blockend.
   try {
@@ -52,14 +59,13 @@ export default async function GutachterFallPage({
     { data: svView },
   ] = await Promise.all([
     fall.lead_id
-      ? supabase
+      ? admin
           .from('leads')
+          // AAR-771: Admin-Client weil SV keine RLS auf leads hat.
           // Fall-Daten-Konsistenz: vorschaden_* + cardentity_abfrage_am leben
-          // auf faelle (nicht mehr auf leads). Analog AAR-626-Fix für den
-          // Admin-Pfad — SV-Pfad selectierte die 4 Legacy-Spalten weiter und
-          // crashte mit PostgREST-400 + an.map beim SV-Fall-Öffnen.
+          // auf faelle (nicht mehr auf leads).
           // AAR-545 Cluster D: eigene_versicherung + eigene_policennr für
-          // „Eigene Versicherung"-Block (früher faelle.versicherung_name).
+          // „Eigene Versicherung"-Block.
           .select('vorname, nachname, email, telefon, fin, hat_vorschaeden, zb1_status, eigene_versicherung, eigene_policennr')
           .eq('id', fall.lead_id)
           .single()
@@ -193,9 +199,7 @@ export default async function GutachterFallPage({
     .order('prioritaet', { ascending: false })
     .order('faellig_am', { ascending: true, nullsFirst: false })
 
-  // KFZ-134: Aktiven gutachter_termine Eintrag laden
-  const { createAdminClient } = await import('@/lib/supabase/admin')
-  const admin = createAdminClient()
+  // KFZ-134: Aktiven gutachter_termine Eintrag laden (admin-client bereits oben)
   const { data: aktiverTermin } = await admin
     .from('gutachter_termine')
     .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund')
