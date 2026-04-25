@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { BarChart3Icon, BriefcaseIcon, TrophyIcon, GiftIcon, ClockIcon, PhoneIcon, VideoIcon, AlertTriangleIcon, CalendarIcon } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 type Perf = { monat: string; jahr: number; leads_qualifiziert: number; leads_konvertiert: number; faelle_abgeschlossen: number; aktive_faelle: number; umsatz_generiert: number }
 type Incentive = { id: string; titel: string; beschreibung: string | null; kategorie: string; typ: string; bedingung: string; wert: number }
@@ -34,8 +35,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
   return (
     <div className="py-8"><div>
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-claimondo-navy flex items-center gap-2"><BarChart3Icon className="w-5 h-5 text-claimondo-shield" />Meine Performance</h1>
-        <p className="text-claimondo-ondo text-sm mt-0.5">{name} · {monatLabel}</p>
+        <PageHeader title="Meine Performance" description={`${name} · ${monatLabel}`} icon={BarChart3Icon} />
       </div>
 
       {/* ─── TAGES-TIMELINE (KFZ-41) ──────────────────────── */}

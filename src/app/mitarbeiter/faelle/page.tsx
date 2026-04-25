@@ -2,6 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,10 +19,7 @@ export default async function MitarbeiterFaelle() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-xl font-bold text-[#0D1B3E]">Meine Fälle</h1>
-        <p className="text-sm text-claimondo-ondo mt-1">Alle Ihnen zugewiesenen Fälle, sortiert nach Erstellung.</p>
-      </div>
+      <PageHeader title="Meine Fälle" description="Alle Ihnen zugewiesenen Fälle, sortiert nach Erstellung." size="lg" />
 
       <div className="bg-white rounded-xl border border-claimondo-border overflow-hidden">
         <table className="w-full text-sm">
