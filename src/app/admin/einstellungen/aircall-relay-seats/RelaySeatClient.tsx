@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { PlusIcon, Trash2Icon, PhoneIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 type Seat = {
   id: string; aircall_user_id: number; aircall_user_email: string; aircall_number_id: number
@@ -84,11 +85,9 @@ export default function RelaySeatClient({ seats: initialSeats }: { seats: Seat[]
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                    seat.belegt ? 'bg-red-50 text-red-600' : seat.aktiv ? 'bg-green-50 text-green-600' : 'bg-[#f8f9fb] text-claimondo-ondo'
-                  }`}>
+                  <StatusBadge tone={seat.belegt ? 'danger' : seat.aktiv ? 'success' : 'neutral'}>
                     {seat.belegt ? 'Belegt' : seat.aktiv ? 'Frei' : 'Inaktiv'}
-                  </span>
+                  </StatusBadge>
                   <button onClick={() => toggleAktiv(seat.id, seat.aktiv)}
                     className="text-xs text-[#4573A2] hover:underline">
                     {seat.aktiv ? 'Deaktivieren' : 'Aktivieren'}

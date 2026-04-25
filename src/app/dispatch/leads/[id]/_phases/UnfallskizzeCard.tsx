@@ -6,6 +6,7 @@
 
 import { useState, useTransition } from 'react'
 import { SparklesIcon, CheckCircle2Icon, RefreshCwIcon, LoaderIcon, XIcon } from 'lucide-react'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import {
   generateAndSaveUnfallskizze,
   approveUnfallskizze,
@@ -76,9 +77,11 @@ export function UnfallskizzeCard({
         <SparklesIcon className="w-4 h-4 text-[#4573A2]" />
         <h3 className="text-sm font-semibold text-claimondo-navy">Unfallskizze (KI-generiert)</h3>
         {bestaetigt && (
-          <span className="ml-auto inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium">
-            <CheckCircle2Icon className="w-3 h-3" />
-            Freigegeben
+          <span className="ml-auto">
+            <StatusBadge tone="success">
+              <CheckCircle2Icon className="w-3 h-3" />
+              Freigegeben
+            </StatusBadge>
           </span>
         )}
       </div>
