@@ -7,7 +7,7 @@ import DrawerShell from '../DrawerShell'
 
 export default async function InterceptedAnlegenPage() {
   return (
-    <DrawerShell title="Neuer Sachverständiger" widthClass="sm:w-[920px]">
+    <DrawerShell title="Neuer Sachverständiger" width={920}>
       <div className="px-6 py-6">
         <AnlegenPage />
       </div>

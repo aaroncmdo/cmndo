@@ -3,52 +3,46 @@
 // AAR-691: Drawer-Wrapper für Intercepting-Routes unter
 // /admin/sachverstaendige. Rendert ein Fixed-Positioned Overlay-Drawer
 // rechts, schließt via ESC / Backdrop / Close-Button über router.back().
+//
+// AAR-803: Auf Drawer-Primitive umgestellt. width-Prop ist jetzt numerisch
+// (statt Tailwind-Klasse) — Consumer mappen 'sm:w-[920px]' → 920 etc.
 
 import { useEffect, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { XIcon } from 'lucide-react'
+import { Drawer } from '@/components/primitives/Drawer'
 
 type Props = {
   children: ReactNode
   title?: string
-  /** px or tailwind class default is w-[720px]; Anlegen-Wizard nutzt breiter */
-  widthClass?: string
+  /** Breite in px ab md+. Default 720. */
+  width?: number
 }
 
-export default function DrawerShell({ children, title, widthClass = 'sm:w-[720px]' }: Props) {
+export default function DrawerShell({ children, title, width = 720 }: Props) {
   const router = useRouter()
 
   const close = () => router.back()
 
+  // Scroll-Lock auf Body während Drawer offen
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close()
-    }
-    window.addEventListener('keydown', handler)
-    // Scroll-Lock auf Body während Drawer offen
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
-      window.removeEventListener('keydown', handler)
       document.body.style.overflow = prev
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
-    <>
-      <div
-        className="fixed inset-0 bg-black/20 z-40 backdrop-blur-sm"
-        onClick={close}
-        aria-hidden
-      />
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label={title ?? 'Details'}
-        className={`fixed right-0 top-0 h-screen w-full ${widthClass} glass-light shadow-ios-lg z-50 flex flex-col overflow-hidden`}
-        style={{ animation: 'drawerSlideIn 200ms ease-out' }}
-      >
+    <Drawer
+      open
+      onClose={close}
+      width={width}
+      noPadding
+      hideCloseButton
+      ariaLabel={title ?? 'Details'}
+    >
+      <div className="flex flex-col h-full overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-claimondo-border shrink-0">
           <h2 className="text-sm font-semibold text-claimondo-navy truncate">
             {title ?? 'Details'}
@@ -62,17 +56,8 @@ export default function DrawerShell({ children, title, widthClass = 'sm:w-[720px
             <XIcon className="w-5 h-5" />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto">
-          {children}
-        </div>
-      </aside>
-
-      <style jsx global>{`
-        @keyframes drawerSlideIn {
-          from { transform: translateX(100%); }
-          to { transform: translateX(0); }
-        }
-      `}</style>
-    </>
+        <div className="flex-1 overflow-y-auto">{children}</div>
+      </div>
+    </Drawer>
   )
 }

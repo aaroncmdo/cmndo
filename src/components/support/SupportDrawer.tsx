@@ -7,6 +7,7 @@ import { useEffect, useRef } from 'react'
 import { XIcon, LightbulbIcon } from 'lucide-react'
 import { SupportProvider, useSupport } from './SupportContext'
 import { SupportChat } from './SupportChat'
+import { Drawer } from '@/components/primitives/Drawer'
 
 const DURCHDENKEN_ROLES = new Set(['admin', 'kundenbetreuer', 'dispatch'])
 
@@ -76,41 +77,20 @@ export function SupportDrawer({
   rolle?: string | null
 }) {
   const closeBtnRef = useRef<HTMLButtonElement | null>(null)
-  const drawerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (!open) return
     closeBtnRef.current?.focus()
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [open, onClose])
-
-  if (!open) return null
+  }, [open])
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex justify-end"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Hilfe und Support"
-    >
-      <div
-        className="absolute inset-0 bg-black/40"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      <div
-        ref={drawerRef}
-        className="relative w-full md:w-[420px] bg-white shadow-2xl flex flex-col animate-in slide-in-from-right"
-      >
+    <Drawer open={open} onClose={onClose} width={420} noPadding hideCloseButton ariaLabel="Hilfe und Support">
+      <div className="flex flex-col h-full">
         <SupportProvider>
           <DrawerHeader onClose={onClose} closeBtnRef={closeBtnRef} rolle={rolle} />
           <SupportChat userName={userName} />
         </SupportProvider>
       </div>
-    </div>
+    </Drawer>
   )
 }

@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import { PlusIcon, XIcon } from 'lucide-react'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { createManualLead, type CreateManualLeadInput } from '../actions'
+import { Drawer } from '@/components/primitives/Drawer'
 
 const INITIAL: CreateManualLeadInput = {
   vorname: '',
@@ -54,8 +55,8 @@ export default function NeuLeadDrawer() {
     }))
   }
 
-  if (!open) {
-    return (
+  return (
+    <>
       <button
         onClick={() => setOpen(true)}
         className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-[#1E3A5F] hover:bg-[#4573A2] text-white transition-colors"
@@ -63,14 +64,8 @@ export default function NeuLeadDrawer() {
         <PlusIcon className="w-4 h-4" />
         Neuer Lead
       </button>
-    )
-  }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-start justify-end">
-      <div className="fixed inset-0 bg-black/40" onClick={() => setOpen(false)} />
-
-      <div className="relative bg-white w-full max-w-md h-full overflow-y-auto shadow-2xl">
+      <Drawer open={open} onClose={() => setOpen(false)} width={448} noPadding hideCloseButton ariaLabel="Neuer Lead">
         <div className="sticky top-0 bg-white border-b border-claimondo-border px-6 py-4 flex items-center justify-between z-10">
           <h2 className="text-lg font-semibold text-[#0D1B3E]">Neuer Lead</h2>
           <button onClick={() => setOpen(false)} className="text-claimondo-ondo/70 hover:text-claimondo-navy">
@@ -152,8 +147,8 @@ export default function NeuLeadDrawer() {
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </Drawer>
+    </>
   )
 }
 

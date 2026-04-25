@@ -20,6 +20,7 @@ import {
   MailIcon,
 } from 'lucide-react'
 import PhoneButton from '@/components/shared/PhoneButton'
+import { Drawer } from '@/components/primitives/Drawer'
 
 type DocLite = {
   id?: string
@@ -128,18 +129,8 @@ export function FallakteDrawer({
         Akte
       </button>
 
-      {open && (
-        <div
-          className="fixed inset-0 z-50 bg-black/60"
-          onClick={() => setOpen(false)}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Komplette Akte"
-        >
-          <div
-            className="absolute right-0 top-0 bottom-0 w-full max-w-3xl bg-white shadow-2xl flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
+      <Drawer open={open} onClose={() => setOpen(false)} width={768} noPadding hideCloseButton ariaLabel="Komplette Akte">
+        <div className="flex flex-col h-full">
             <div className="flex items-center justify-between px-6 py-4 border-b border-claimondo-border shrink-0">
               <div>
                 <h2 className="text-lg font-semibold text-claimondo-navy">Komplette Akte</h2>
@@ -190,9 +181,8 @@ export function FallakteDrawer({
                 <ChatListe nachrichten={nachrichten} focus={chatFocus} />
               )}
             </div>
-          </div>
         </div>
-      )}
+      </Drawer>
     </>
   )
 }
