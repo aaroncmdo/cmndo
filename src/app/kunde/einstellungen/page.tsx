@@ -8,6 +8,7 @@ import { BellIcon, ArrowLeftIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getMyNotificationPreferences } from '@/lib/actions/notification-preferences'
 import { NotificationPreferencesForm } from '@/components/notifications/NotificationPreferencesForm'
+import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,7 +36,7 @@ export default async function KundeEinstellungenPage() {
           <ArrowLeftIcon width={12} height={12} /> Profil
         </Link>
       </div>
-      <h1 className="text-xl font-bold text-[#0D1B3E]">Einstellungen</h1>
+      <PageHeader title="Einstellungen" size="lg" />
 
       <section className="bg-white rounded-2xl border border-[#e4e7ef] overflow-hidden">
         <div className="flex items-start gap-3 px-5 py-4 border-b border-[#e4e7ef]">

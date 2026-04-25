@@ -6,6 +6,7 @@ import { BellIcon } from 'lucide-react'
 import { TwoFaPhoneChange } from '@/components/auth/TwoFaPhoneChange'
 // AAR-703: Edit-Form für Kontakt-Daten (Telefon + zweit_email)
 import KundeProfilForm from './KundeProfilForm'
+import PageHeader from '@/components/shared/PageHeader'
 
 export default async function ProfilPage() {
   const supabase = await createClient()
@@ -23,7 +24,7 @@ export default async function ProfilPage() {
 
   return (
     <div className="w-full px-4 py-6 max-w-xl mx-auto space-y-5">
-      <h1 className="text-xl font-bold text-[#0D1B3E]">Mein Profil</h1>
+      <PageHeader title="Mein Profil" size="lg" />
       <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-5 space-y-3">
         <div><span className="text-sm text-claimondo-ondo">Name</span><p className="text-[#0D1B3E] font-medium">{name || '—'}</p></div>
         <div><span className="text-sm text-claimondo-ondo">E-Mail (Login)</span><p className="text-[#0D1B3E]">{profile?.email ?? user.email ?? '—'}</p></div>

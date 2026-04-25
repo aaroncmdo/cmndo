@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { TrophyIcon, UsersIcon } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 // KFZ-152 Phase 3: Community-Dashboard fuer Mitglieder.
 // Zeigt das aktuelle Monats-Leaderboard mit Rang, Faelle, Umsatz, Avg-Dauer.
@@ -108,16 +109,15 @@ export default async function CommunityDashboardPage() {
 
   return (
     <div className="px-8 py-8 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-claimondo-navy flex items-center gap-3">
-            <UsersIcon className="w-6 h-6 text-[var(--brand-secondary)]" /> {org.name}
-          </h1>
-          <p className="text-sm text-claimondo-ondo mt-1">
-            Community-Dashboard · {String(monat).padStart(2, '0')}/{jahr}
-            {org.community_max_faelle_monat ? ` · max ${org.community_max_faelle_monat} Fälle/Monat` : ''}
-          </p>
-        </div>
+      <div className="mb-6">
+        <PageHeader
+          title={org.name}
+          description={`Community-Dashboard · ${String(monat).padStart(2, '0')}/${jahr}${
+            org.community_max_faelle_monat ? ` · max ${org.community_max_faelle_monat} Fälle/Monat` : ''
+          }`}
+          icon={UsersIcon}
+          size="lg"
+        />
       </div>
 
       <div className="bg-white border border-claimondo-border rounded-2xl overflow-hidden">
