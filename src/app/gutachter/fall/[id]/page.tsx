@@ -28,6 +28,17 @@ export default async function GutachterFallPage({
   const fall = await getFallForSv(supabase, id, (sv as { id: string }).id)
   if (!fall) notFound()
 
+  // AAR-772: SV-Briefing automatisch generieren wenn noch nicht vorhanden.
+  // Best-effort, blockiert nicht den Page-Render. Bei nächstem Refresh
+  // ist der Text dann da. Cache-Logik (24h) lebt in generateSvBriefing.
+  if (!fall.sv_briefing_text) {
+    void import('@/lib/ai/briefing').then(({ generateSvBriefing }) =>
+      generateSvBriefing(id).catch((err) => {
+        console.warn('[AAR-772] SV-Briefing-Auto-Generate fehlgeschlagen:', err)
+      }),
+    )
+  }
+
   // AAR-771: SV hat keine RLS-Erlaubnis auf `leads` (PII-geschützt). Wir
   // benutzen den Admin-Client für die Stammdaten-Lookups, NACHDEM die
   // SV↔Fall-Beziehung über getFallForSv geprüft ist (Defense-in-Depth).

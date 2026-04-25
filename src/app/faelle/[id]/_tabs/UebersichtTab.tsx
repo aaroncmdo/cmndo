@@ -9,8 +9,9 @@ import { VideoIcon } from 'lucide-react'
 import { FALL_STATUS_LABELS, FALL_STATUS_COLORS } from '@/lib/statusLabels'
 import { useFall } from '../FallContext'
 import { createKbVideoterminByKb } from '../_actions/termine'
-// AAR-377: Shared BriefingCard — oben in der Übersicht.
+// AAR-377 / AAR-772: Shared BriefingCard (SV-Briefing) + StrukturBriefingCard (intern).
 import BriefingCard from '@/components/fall/BriefingCard'
+import StrukturBriefingCard from '@/components/fall/StrukturBriefingCard'
 import type { StammdatenSection } from '@/lib/fall/phase-config'
 // AAR-759: Shared Mietwagen-Status-Card (read-only in Phase 1)
 import { MietwagenStatusCard } from '@/components/shared/mietwagen'
@@ -119,7 +120,7 @@ export default function UebersichtTab() {
 
   return (
     <div className="space-y-4">
-      {/* AAR-377: SV-Briefing (AI) — shared Card, oben in der Übersicht */}
+      {/* AAR-377: SV-Briefing (AI) — was der Gutachter sieht */}
       <BriefingCard
         fallId={fall.id}
         briefing={briefingText}
@@ -127,9 +128,17 @@ export default function UebersichtTab() {
         model={briefingModel}
         version={briefingVersion}
         canRegenerate={canRegenerateBriefing}
-        struktur={briefingStruktur}
-        strukturGeneratedBy={strukturGeneratedBy}
       />
+
+      {/* AAR-772: Struktur-Briefing — intern für Admin/KB */}
+      {canRegenerateBriefing && (
+        <StrukturBriefingCard
+          fallId={fall.id}
+          struktur={briefingStruktur}
+          generatedBy={strukturGeneratedBy}
+          canRegenerate={canRegenerateBriefing}
+        />
+      )}
 
       {/* Status-Header */}
       <div className="bg-white border border-claimondo-border rounded-xl p-5 flex items-start justify-between gap-3 flex-wrap">
