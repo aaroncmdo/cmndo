@@ -3,9 +3,9 @@
 
 UPDATE public.profiles
    SET account_typ = 'interner_user'
- WHERE rolle IN (
-   'admin','dispatch','kundenbetreuer','sachverstaendige','sv_admin',
-   'kanzlei_admin','kanzlei_mitarbeiter','makler','mitarbeiter'
+ WHERE rolle::text IN (
+   'admin','dispatch','kundenbetreuer','sachverstaendiger',
+   'kanzlei','leadbearbeiter','makler'
  )
    AND account_typ = 'voll';
 
