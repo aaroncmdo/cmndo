@@ -392,9 +392,7 @@ export default function SvDispatchPanel({
           <UserCheckIcon className="w-4 h-4 text-[#4573A2]" /> SV-Termin reservieren
         </h2>
         {!hardGateOk && (
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
-            Hard Gate erst abschließen
-          </span>
+          <StatusBadge tone="warning">Hard Gate erst abschließen</StatusBadge>
         )}
       </div>
 
@@ -549,13 +547,9 @@ export default function SvDispatchPanel({
                         >
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-sm font-medium">{s.name}</span>
-                            <span
-                              className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-                                isSel ? 'bg-white/20 text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'
-                              }`}
-                            >
+                            <StatusBadge colorCls={isSel ? 'bg-white/20 text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}>
                               {s.paket}
-                            </span>
+                            </StatusBadge>
                           </div>
                           <div
                             className={`flex items-center gap-3 mt-1 text-[11px] ${
@@ -756,9 +750,7 @@ export default function SvDispatchPanel({
                         >
                           <div className="flex items-center justify-between gap-2">
                             <span className="font-medium text-[#0D1B3E]">{r.name}</span>
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo">
-                              {r.paket}
-                            </span>
+                            <StatusBadge tone="neutral">{r.paket}</StatusBadge>
                           </div>
                           <div className={`mt-0.5 ${ok ? 'text-emerald-800' : 'text-claimondo-navy'}`}>
                             {ok ? '✓ ' : '✕ '}
@@ -824,9 +816,9 @@ function SvCard({
           <div className="flex items-center gap-2 flex-wrap">
             <p className="text-sm font-medium text-[#0D1B3E] truncate">{sv.name}</p>
             {isEmpfehlung && (
-              <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-500 text-white font-semibold shrink-0">
+              <StatusBadge colorCls="bg-amber-500 text-white font-semibold">
                 ★ Empfehlung
-              </span>
+              </StatusBadge>
             )}
           </div>
           <div className="flex items-center gap-3 mt-0.5 text-[11px] text-claimondo-ondo">
@@ -836,9 +828,7 @@ function SvCard({
             {sv.offeneFaelle > 0 && <span>{sv.offeneFaelle} offen</span>}
           </div>
         </div>
-        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo font-medium whitespace-nowrap shrink-0">
-          {sv.paket}
-        </span>
+        <StatusBadge tone="neutral" className="whitespace-nowrap shrink-0">{sv.paket}</StatusBadge>
       </div>
 
       {/* Wunschtermin-Indikator auf Card-Ebene */}

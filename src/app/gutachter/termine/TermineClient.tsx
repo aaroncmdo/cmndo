@@ -8,6 +8,7 @@ import { terminAnnehmen, terminAblehnen, terminGegenvorschlag } from '@/lib/acti
 import { formatDatumMitWochentag, formatUhrzeit } from '@/lib/format'
 import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 // KFZ-134: Gutachter Termine-Liste mit Akzeptieren/Ablehnen/Gegenvorschlag.
 
@@ -121,14 +122,10 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
                       <span className="text-lg font-semibold text-claimondo-navy">
                         {formatDatum(displayDatum)} · {formatZeit(displayDatum)}
                       </span>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${badge.cls}`}>{badge.label}</span>
+                      <StatusBadge colorCls={badge.cls}>{badge.label}</StatusBadge>
                       {/* AAR-133: Vorreservierung-Badge wenn fall_id null (Pre-FlowLink) */}
-                      {t.istVorreservierung && (
-                        <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full font-medium">
-                          Vorreservierung
-                        </span>
-                      )}
-                      {needsAction && !t.istVorreservierung && <span className="text-[9px] bg-[var(--brand-secondary)] text-white px-1.5 py-0.5 rounded-full font-medium">Aktion nötig</span>}
+                      {t.istVorreservierung && <StatusBadge tone="warning">Vorreservierung</StatusBadge>}
+                      {needsAction && !t.istVorreservierung && <StatusBadge colorCls="bg-[var(--brand-secondary)] text-white">Aktion nötig</StatusBadge>}
                     </div>
                     <p className="text-sm text-claimondo-navy">{t.kunde_name}</p>
                     {t.gegenvorschlag_grund && (

@@ -304,10 +304,10 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                 return (
                   <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4">
                     <p className="text-[10px] uppercase tracking-wide text-claimondo-ondo/70 mb-2">Status</p>
-                    <span className={`inline-flex items-center gap-2 text-sm px-3 py-1 rounded-full font-medium ${b.bg} ${b.text}`}>
+                    <StatusBadge colorCls={`${b.bg} ${b.text}`} size="sm">
                       <span className={`w-2 h-2 rounded-full ${b.dot}`} />
                       {b.label}
-                    </span>
+                    </StatusBadge>
                     {selected.einzug_versucht_am && (
                       <p className="text-xs text-claimondo-ondo mt-2 flex items-center gap-1.5">
                         <ClockIcon className="w-3.5 h-3.5" /> Letzter Einzugs-Versuch: {fmtDate(selected.einzug_versucht_am)}

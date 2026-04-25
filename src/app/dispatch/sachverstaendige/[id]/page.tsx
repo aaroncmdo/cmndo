@@ -11,6 +11,7 @@ import {
 import { getSvStatus } from '@/lib/sv-status'
 import PhoneButton from '@/components/shared/PhoneButton'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import PageHeader from '@/components/shared/PageHeader'
 
 export default async function DispatchSvDetailPage({
@@ -71,14 +72,8 @@ export default async function DispatchSvDetailPage({
         }
         description={
           <span className="flex items-center gap-2">
-            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${status.bg} ${status.text}`}>
-              {status.label}
-            </span>
-            {istUrlaub && (
-              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-amber-100 text-amber-700">
-                Urlaub
-              </span>
-            )}
+            <StatusBadge colorCls={`${status.bg} ${status.text}`}>{status.label}</StatusBadge>
+            {istUrlaub && <StatusBadge tone="warning">Urlaub</StatusBadge>}
           </span>
         }
       />

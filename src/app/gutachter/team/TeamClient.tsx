@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { Building2Icon, GraduationCapIcon, MailIcon, ShieldOffIcon, ShieldCheckIcon, ArrowRightIcon, InboxIcon, UsersIcon, BarChart3Icon, WalletIcon, ActivityIcon } from 'lucide-react'
 import { assignPoolLead, toggleSubSvSperre } from './actions'
 import PageHeader from '@/components/shared/PageHeader'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 export type SubSvData = {
   id: string
@@ -230,9 +231,7 @@ export default function TeamClient({
                     <td className="px-4 py-3 text-claimondo-ondo text-xs">{s.email ?? '—'}</td>
                     <td className="px-4 py-3 text-claimondo-navy capitalize">{s.paket}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full font-medium ${status.cls}`}>
-                        {status.label}
-                      </span>
+                      <StatusBadge colorCls={status.cls}>{status.label}</StatusBadge>
                     </td>
                     <td className="px-4 py-3 text-right text-claimondo-navy">
                       {s.paket_faelle_genutzt ?? 0} / {s.paket_faelle_gesamt}

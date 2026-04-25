@@ -460,11 +460,9 @@ export default function DokumenteTab({
                     <div className="min-w-0">
                       <p className="text-xs text-claimondo-navy truncate">{dok.datei_name}</p>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <span
-                          className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${katColor}`}
-                        >
+                        <StatusBadge colorCls={katColor}>
                           {dok.kategorie}
-                        </span>
+                        </StatusBadge>
                         {dok.quelle && (
                           <span className="text-[9px] text-claimondo-ondo/70">{dok.quelle}</span>
                         )}
