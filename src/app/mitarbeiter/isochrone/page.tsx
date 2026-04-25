@@ -83,7 +83,7 @@ export default async function MitarbeiterIsochronePage() {
           <>
             Wähle einen deiner betreuten Fälle, um die grundsätzlich geeigneten SVs im Fahrzeit-Umkreis zu sehen.
             Reservierung + Zuweisung erfolgen im{' '}
-            <Link href="/dispatch/isochrone" className="text-[#4573A2] hover:underline">
+            <Link href="/dispatch/isochrone" className="text-claimondo-ondo hover:underline">
               Dispatch-Portal
             </Link>
             .
