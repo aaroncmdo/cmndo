@@ -169,8 +169,8 @@ export default function Phase2TerminServiceTyp() {
   function chooseServiceTyp(typ: 'komplett' | 'nur_gutachter') {
     startTransition(async () => {
       setServiceTypLocal(typ)
-      try {
-        await setServiceTyp(lead.id, typ)
+      const result = await setServiceTyp(lead.id, typ)
+      if (result.ok) {
         // AAR-268: Auto-Advance entfernt — MA klickt explizit „Weiter zu Phase 3"
         if (!aktiverTermin) {
           setToast('Service-Typ gespeichert — bitte noch SV-Termin reservieren')
@@ -180,8 +180,8 @@ export default function Phase2TerminServiceTyp() {
           setToast('Service-Typ gespeichert')
           await router.refresh()
         }
-      } catch (err) {
-        setToast(err instanceof Error ? err.message : 'Fehler')
+      } else {
+        setToast(result.error ?? 'Fehler')
       }
       setTimeout(() => setToast(''), 3000)
     })

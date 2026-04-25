@@ -59,11 +59,8 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
   async function handleBezahlt() {
     if (!bezahltModal) return
     setLoading(bezahltModal.id)
-    try {
-      await markiereAlsBezahlt(bezahltModal.id, parseFloat(bezahltBetrag) || bezahltModal.brutto)
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Fehler')
-    }
+    const result = await markiereAlsBezahlt(bezahltModal.id, parseFloat(bezahltBetrag) || bezahltModal.brutto)
+    if (!result.ok) toast.error(result.error ?? 'Fehler')
     setBezahltModal(null)
     setBezahltBetrag('')
     setLoading(null)
@@ -72,20 +69,22 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
   async function handleStornieren(id: string) {
     if (!confirm('Abrechnung wirklich stornieren?')) return
     setLoading(id)
-    try { await storniereAbrechnung(id) } catch { /* */ }
+    await storniereAbrechnung(id)
     setLoading(null)
   }
 
   async function handleVersenden(id: string) {
     setLoading(id)
-    try { await manuellVersenden(id) } catch (err) { toast.error(err instanceof Error ? err.message : 'Fehler') }
+    const result = await manuellVersenden(id)
+    if (!result.ok) toast.error(result.error ?? 'Fehler')
     setLoading(null)
   }
 
   async function handleGenerieren() {
     if (!genMonat) return
     setLoading('gen')
-    try { await manuellGenerieren(genMonat, genTyp) } catch (err) { toast.error(err instanceof Error ? err.message : 'Fehler') }
+    const result = await manuellGenerieren(genMonat, genTyp)
+    if (!result.ok) toast.error(result.error ?? 'Fehler')
     setLoading(null)
     setGenMonat('')
   }
