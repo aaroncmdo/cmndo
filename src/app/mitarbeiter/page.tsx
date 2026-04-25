@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { FolderOpenIcon, CheckSquareIcon, MessageCircleIcon, AlertCircleIcon, CalendarIcon, PhoneCallIcon } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -87,10 +88,7 @@ export default async function MitarbeiterDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-claimondo-navy">Mitarbeiter-Dashboard</h1>
-        <p className="text-sm text-claimondo-ondo mt-1">Übersicht über Ihre Fälle, Tasks und Nachrichten.</p>
-      </div>
+      <PageHeader title="Mitarbeiter-Dashboard" description="Übersicht über Ihre Fälle, Tasks und Nachrichten." size="lg" />
 
       {/* KPI-Boxen */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">

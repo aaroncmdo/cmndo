@@ -2,6 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,10 +33,7 @@ export default async function MitarbeiterTasks({ searchParams }: {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-xl font-bold text-claimondo-navy">Meine Tasks</h1>
-        <p className="text-sm text-claimondo-ondo mt-1">Alle Ihnen zugewiesenen Aufgaben.</p>
-      </div>
+      <PageHeader title="Meine Tasks" description="Alle Ihnen zugewiesenen Aufgaben." size="lg" />
 
       <div className="flex gap-2">
         {tabs.map(t => (
