@@ -91,7 +91,7 @@ export default async function SlaMonitoringPage() {
                     {breach.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                     {!isBreached && (
                       <span className={`ml-2 text-xs ${restMin < 30 ? 'text-amber-600 font-medium' : 'text-claimondo-ondo/70'}`}>
-                        {restMin > 0 ? `noch ${restMin} Min` : 'ueberfaellig'}
+                        {restMin > 0 ? `noch ${restMin} Min` : 'überfällig'}
                       </span>
                     )}
                   </td>
