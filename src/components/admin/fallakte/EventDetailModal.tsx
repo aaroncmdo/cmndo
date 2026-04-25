@@ -1,11 +1,12 @@
 'use client'
 
 // AAR-544 (C7): Detail-Modal für einen einzelnen Timeline-Event.
-// Zeigt alle Metadaten als JSON + Actor + Timestamps + optionaler Route-Link.
+// AAR-781: Migriert auf Modal-Primitive.
 
 import { XIcon, ExternalLinkIcon } from 'lucide-react'
 import Link from 'next/link'
 import type { FallEvent } from '@/lib/fall/event-stream'
+import { Modal } from '@/components/primitives'
 
 export function EventDetailModal({
   event,
@@ -22,16 +23,8 @@ export function EventDetailModal({
     : ts.toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' })
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4"
-      onClick={onClose}
-    >
-      <div
-        className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg max-w-lg w-full max-h-[80vh] overflow-hidden flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Modal open onClose={onClose} maxWidth={512} noPadding hideCloseButton ariaLabel="Event-Details">
+      <div className="flex flex-col overflow-hidden" style={{ maxHeight: 'calc(100vh - 64px)' }}>
         <div className="flex items-start justify-between gap-3 px-5 py-4 border-b border-claimondo-border">
           <div className="min-w-0">
             <p className="text-xs text-claimondo-ondo mb-0.5">
@@ -49,6 +42,7 @@ export function EventDetailModal({
             <XIcon className="w-4 h-4" />
           </button>
         </div>
+
         <div className="px-5 py-4 overflow-y-auto space-y-3">
           {event.beschreibung && (
             <p className="text-sm text-claimondo-navy whitespace-pre-wrap">{event.beschreibung}</p>
@@ -85,6 +79,6 @@ export function EventDetailModal({
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }

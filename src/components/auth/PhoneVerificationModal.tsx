@@ -1,12 +1,14 @@
 'use client'
 
+// KFZ-184 Phase B: Phone Verification Modal (Onboarding + Profil).
+// AAR-781: Migriert auf Modal-Primitive.
+
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { SmartphoneIcon, XIcon, CheckCircleIcon } from 'lucide-react'
 import { requestPhoneVerification } from '@/lib/auth/twofa/send-code'
 import { confirmPhoneVerification } from '@/lib/auth/twofa/verify-code'
-
-// KFZ-184 Phase B: Phone Verification Modal (Onboarding + Profil).
+import { Modal } from '@/components/primitives'
 
 export default function PhoneVerificationModal({
   onClose,
@@ -50,13 +52,15 @@ export default function PhoneVerificationModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
+    <Modal open onClose={onClose} maxWidth={400} noPadding hideCloseButton ariaLabel="Telefon verifizieren">
+      <div>
         <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
           <h3 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
             <SmartphoneIcon className="w-4 h-4 text-[#4573A2]" /> Telefon verifizieren
           </h3>
-          <button onClick={onClose} className="text-claimondo-ondo/70 hover:text-claimondo-ondo p-1"><XIcon className="w-4 h-4" /></button>
+          <button onClick={onClose} className="text-claimondo-ondo/70 hover:text-claimondo-ondo p-1">
+            <XIcon className="w-4 h-4" />
+          </button>
         </div>
 
         <div className="px-5 py-4">
@@ -94,11 +98,13 @@ export default function PhoneVerificationModal({
                 {pending ? 'Wird geprüft...' : 'Verifizieren'}
               </button>
               <button onClick={() => { setStep('phone'); setCode(''); setError(null) }}
-                className="w-full text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo">Andere Nummer verwenden</button>
+                className="w-full text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo">
+                Andere Nummer verwenden
+              </button>
             </div>
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }
